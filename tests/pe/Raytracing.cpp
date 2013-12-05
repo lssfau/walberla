@@ -233,7 +233,7 @@ ShadingParameters customBodyToShadingParams(const BodyID body) {
    }
 }
 
-void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS) {
+void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS, uint8_t antiAliasFactor = 1) {
    WALBERLA_LOG_INFO("Raytracer");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
@@ -246,7 +246,7 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
                      Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
-                       real_t(49.13),
+                       real_t(49.13), antiAliasFactor,
                        Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
                        lighting,
                        Color(real_t(0.2), real_t(0.2), real_t(0.2)),
@@ -335,7 +335,7 @@ ShadingParameters customSpheresBodyToShadingParams(const BodyID body) {
    }
 }
 
-void RaytracerSpheresTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS) {
+void RaytracerSpheresTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS, uint8_t antiAliasFactor = 1) {
    WALBERLA_LOG_INFO("Raytracer Spheres Scene");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
@@ -348,7 +348,7 @@ void RaytracerSpheresTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytra
                      Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
-                       real_t(49.13),
+                       real_t(49.13), antiAliasFactor,
                        Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
                        lighting,
                        Color(real_t(0.2),real_t(0.2),real_t(0.2)),
@@ -387,7 +387,7 @@ ShadingParameters customHashGridsBodyToShadingParams(const BodyID body) {
 }
 
 
-void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm,
+void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, uint8_t antiAliasFactor,
                    size_t boxes, size_t capsules, size_t spheres, size_t numberOfViews = 1,
                    real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2), bool boxRotation = false,
                    real_t capRadiusMin = real_t(0.1), real_t capRadiusMax = real_t(0.2), real_t capLenMin = real_t(0.1), real_t capLenMax = real_t(0.3),
@@ -529,7 +529,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm,
       
       Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                            size_t(640), size_t(480),
-                           real_t(49.13),
+                           real_t(49.13), antiAliasFactor,
                            std::get<0>(vector),
                            std::get<1>(vector),
                            std::get<2>(vector),
@@ -558,7 +558,7 @@ ShadingParameters customArtifactsBodyToShadingParams(const BodyID body) {
    return defaultShadingParams(body);
 }
 
-void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm,
+void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm, uint8_t antiAliasFactor,
                              const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
                              const shared_ptr<BodyStorage> globalBodyStorage,
                              const BlockDataID ccdID,
@@ -573,7 +573,7 @@ void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm,
    
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
-                       real_t(49.13),
+                       real_t(49.13), antiAliasFactor,
                        cameraPosition,
                        lookAtPoint,
                        upVector,
@@ -593,7 +593,7 @@ void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm,
    }
 }
 
-void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm,
+void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, uint8_t antiAliasFactor,
                             size_t boxes, real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2)) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In negative Z direction");
    
@@ -628,13 +628,13 @@ void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm,
       WALBERLA_CHECK(box_ != NULL);
    }
    
-   raytraceArtifactsForest(raytracingAlgorithm,
+   raytraceArtifactsForest(raytracingAlgorithm, antiAliasFactor,
                            forest, storageID, globalBodyStorage, ccdID,
                            Vec3(2, 2, 7), Vec3(2, 2, 4), Vec3(0,1,0),
                            boxes, 3);
 }
 
-void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm,
+void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, uint8_t antiAliasFactor,
                                         size_t boxes, real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2)) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In positive Z direction");
    
@@ -673,13 +673,13 @@ void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm
       WALBERLA_CHECK(box_ != NULL);
    }
    
-   raytraceArtifactsForest(raytracingAlgorithm,
+   raytraceArtifactsForest(raytracingAlgorithm, antiAliasFactor,
                            forest, storageID, globalBodyStorage, ccdID,
                            Vec3(2, 2, -3), Vec3(2, 2, 0), Vec3(0,1,0),
                            boxes, 4);
 }
 
-void HashGridsFromNegativeXArtifactsTest(Raytracer::Algorithm raytracingAlgorithm,
+void HashGridsFromNegativeXArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, uint8_t antiAliasFactor,
                                          size_t boxes, real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2)) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In positive X direction");
    WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
@@ -716,7 +716,7 @@ void HashGridsFromNegativeXArtifactsTest(Raytracer::Algorithm raytracingAlgorith
       WALBERLA_CHECK(box_ != NULL);
    }
    
-   raytraceArtifactsForest(raytracingAlgorithm,
+   raytraceArtifactsForest(raytracingAlgorithm, antiAliasFactor,
                            forest, storageID, globalBodyStorage, ccdID,
                            Vec3(-3, 2, 2), Vec3(0, 2, 2), Vec3(0,0,1),
                            boxes, 6);
@@ -727,7 +727,7 @@ Vec3 minCornerToGpos(const Vec3& minCorner, real_t lengths) {
    return minCorner + Vec3(lengths/2, lengths/2, lengths/2);
 }
 
-void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS) {
+void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS, uint8_t antiAliasFactor = 1) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Test Scene");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
@@ -813,7 +813,7 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
    for (auto& vector: viewVectors) {
       Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                           size_t(640), size_t(480),
-                          real_t(49.13),
+                          real_t(49.13), antiAliasFactor,
                           std::get<0>(vector),
                           std::get<1>(vector),
                           std::get<2>(vector),
@@ -851,22 +851,22 @@ int main( int argc, char** argv )
    CapsuleIntersectsTest();
    
    const Raytracer::Algorithm algorithm = Raytracer::RAYTRACE_COMPARE_BOTH_STRICTLY;
-
-   RaytracerTest(algorithm);
-   //RaytracerSpheresTestScene(algorithm);
-   HashGridsTestScene(algorithm);
-   HashGridsTest(algorithm,
+   const uint8_t antiAliasFactor = 1;
+   RaytracerTest(algorithm, antiAliasFactor);
+   //RaytracerSpheresTestScene(algorithm, antiAliasFactor);
+   HashGridsTestScene(algorithm, antiAliasFactor);
+   HashGridsTest(algorithm, antiAliasFactor,
                  50, 30, 130,
                  10);
-   HashGridsTest(algorithm,
+   HashGridsTest(algorithm, antiAliasFactor,
                  60, 60, 3,
                  1,
                  real_t(0.1), real_t(0.3), true,
                  real_t(0.1), real_t(0.2), real_t(0.1), real_t(0.2),
                  real_t(0.5), real_t(0.6));
-   HashGridsArtifactsTest(algorithm, 750, real_t(0.2), real_t(0.3));
-   HashGridsFromNegativeArtifactsTest(algorithm, 750, real_t(0.2), real_t(0.3));
-   HashGridsFromNegativeXArtifactsTest(algorithm, 750, real_t(0.2), real_t(0.3));
+   HashGridsArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
+   HashGridsFromNegativeArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
+   HashGridsFromNegativeXArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
    
    return EXIT_SUCCESS;
 }

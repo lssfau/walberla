@@ -71,7 +71,7 @@ public:
                       const shared_ptr<BodyStorage> globalBodyStorage,
                       const BlockDataID ccdID,
                       uint16_t pixelsHorizontal, uint16_t pixelsVertical,
-                      real_t fov_vertical,
+                      real_t fov_vertical, uint8_t antiAliasFactor,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                       const Lighting& lighting,
                       const Color& backgroundColor = Color(real_t(0.1), real_t(0.1), real_t(0.1)),
@@ -95,6 +95,8 @@ private:
    uint16_t pixelsHorizontal_;  //!< The horizontal amount of pixels of the generated image.
    uint16_t pixelsVertical_;    //!< The vertical amount of pixels of the generated image.
    real_t fov_vertical_;      //!< The vertical field-of-view of the camera.
+   uint8_t antiAliasFactor_;  /*!< Factor used for oversampling. Should be between 1 (fast, but jagged edges)
+                               * and 4 (16 times slower, very smooth edges).*/
    Vec3 cameraPosition_;      //!< The position of the camera in the global world frame.
    Vec3 lookAtPoint_;         /*!< The point the camera looks at in the global world frame,
                                marks the center of the view plane.*/
@@ -420,7 +422,7 @@ inline bool Raytracer::isPlaneVisible(const PlaneID plane, const Ray& ray) const
  * \return Array index.
  */
 inline size_t Raytracer::coordinateToArrayIndex(size_t x, size_t y) const {
-   return y*pixelsHorizontal_ + x;
+   return y*pixelsHorizontal_*antiAliasFactor_ + x;
 }
 
 /*!\brief Traces a ray in the global body storage and finds the closest ray-body intersection.
@@ -547,7 +549,8 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    real_t inf = std::numeric_limits<real_t>::max();
    
    std::vector<BodyIntersectionInfo> intersections;
-   std::vector<BodyIntersectionInfo> intersectionsBuffer(pixelsVertical_ * pixelsHorizontal_); // contains for each pixel information about an intersection, if existent
+   // contains for each pixel information about an intersection:
+   std::vector<BodyIntersectionInfo> intersectionsBuffer(pixelsVertical_*antiAliasFactor_ * pixelsHorizontal_*antiAliasFactor_);
 
    if (raytracingAlgorithm_ == RAYTRACE_HASHGRIDS || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH
       || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
@@ -576,8 +579,8 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
 #endif
    
    if (tt != NULL) tt->start("Intersection Testing");
-   for (size_t x = 0; x < pixelsHorizontal_; x++) {
-      for (size_t y = 0; y < pixelsVertical_; y++) {
+   for (size_t x = 0; x < pixelsHorizontal_*antiAliasFactor_; x++) {
+      for (size_t y = 0; y < pixelsVertical_*antiAliasFactor_; y++) {
          Vec3 pixelLocation = viewingPlaneOrigin_ + u_*(real_c(x)+real_t(0.5))*pixelWidth_ + v_*(real_c(y)+real_t(0.5))*pixelHeight_;
          Vec3 direction = (pixelLocation - cameraPosition_).getNormalized();
          ray.setDirection(direction);

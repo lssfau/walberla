@@ -75,7 +75,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
                      const shared_ptr<BodyStorage> globalBodyStorage,
                      const BlockDataID ccdID,
                      uint16_t pixelsHorizontal, uint16_t pixelsVertical,
-                     real_t fov_vertical,
+                     real_t fov_vertical, uint8_t antiAliasFactor,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                      const Lighting& lighting,
                      const Color& backgroundColor,
@@ -83,7 +83,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage), ccdID_(ccdID),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
-   fov_vertical_(fov_vertical),
+   fov_vertical_(fov_vertical), antiAliasFactor_(antiAliasFactor),
    cameraPosition_(cameraPosition), lookAtPoint_(lookAtPoint), upVector_(upVector),
    lighting_(lighting),
    backgroundColor_(backgroundColor),
@@ -109,12 +109,13 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
  * \param storageID Storage ID of the block data storage the raytracer operates on.
  * \param config Config block for the raytracer.
  *
- * The config block has to contain image_x (int), image_y (int), fov_vertical (real, in degrees)
- * and tbuffer_output_directory (string) parameters. Additionally a vector of reals
- * for each of cameraPosition, lookAt and the upVector. Optional is blockAABBIntersectionPadding (real) and backgroundColor (Vec3).
+ * The config block has to contain image_x (int), image_y (int), fov_vertical (real, in degrees) and
+ * antiAliasFactor (uint, between 1 and 4). Additionally a vector of reals for each of cameraPosition, lookAt
+ * and the upVector. Optional is blockAABBIntersectionPadding (real) and backgroundColor (Vec3).
  * To output both process local and global tbuffers after raytracing, set tbuffer_output_directory (string).
  * For image output after raytracing, set image_output_directory (string); for local image output additionally set
- * local_image_output_enabled (bool) to true. outputFilenameTimestepZeroPadding (int) sets zero padding for timesteps of output filenames.
+ * local_image_output_enabled (bool) to true. outputFilenameTimestepZeroPadding (int) sets zero padding
+ * for timesteps of output filenames.
  * For the lighting a config block named Lighting has to be defined, information about its contents is in Lighting.h.
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
@@ -131,6 +132,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    pixelsHorizontal_ = config.getParameter<uint16_t>("image_x");
    pixelsVertical_ = config.getParameter<uint16_t>("image_y");
    fov_vertical_ = config.getParameter<real_t>("fov_vertical");
+   antiAliasFactor_ = config.getParameter<uint8_t>("antiAliasFactor", 1);
    
    if (config.isDefined("tbuffer_output_directory")) {
       setTBufferOutputEnabled(true);
@@ -196,8 +198,8 @@ void Raytracer::setupView_() {
    viewingPlaneWidth_ = viewingPlaneHeight_ * aspectRatio_;
    viewingPlaneOrigin_ = lookAtPoint_ - u_*viewingPlaneWidth_/real_t(2.) - v_*viewingPlaneHeight_/real_t(2.);
    
-   pixelWidth_ = viewingPlaneWidth_ / real_c(pixelsHorizontal_);
-   pixelHeight_ = viewingPlaneHeight_ / real_c(pixelsVertical_);
+   pixelWidth_ = viewingPlaneWidth_ / real_c(pixelsHorizontal_*antiAliasFactor_);
+   pixelHeight_ = viewingPlaneHeight_ / real_c(pixelsVertical_*antiAliasFactor_);
 }
 
 /*!\brief Utility function for initializing the attribute filenameRankWidth.
@@ -360,12 +362,22 @@ void Raytracer::writeImageToFile(const std::vector<BodyIntersectionInfo>& inters
    std::vector<u_char> lodeImageBuffer(pixelsHorizontal_*pixelsVertical_*3);
    
    uint32_t l = 0;
+   real_t patchSize = real_c(antiAliasFactor_*antiAliasFactor_);
    for (int y = pixelsVertical_-1; y >= 0; y--) {
-      for (size_t x = 0; x < pixelsHorizontal_; x++) {
-         size_t i = coordinateToArrayIndex(x, uint_c(y));
-         u_char r = (u_char)(255 * intersectionsBuffer[i].r);
-         u_char g = (u_char)(255 * intersectionsBuffer[i].g);
-         u_char b = (u_char)(255 * intersectionsBuffer[i].b);
+      for (uint x = 0; x < pixelsHorizontal_; x++) {
+         real_t r_sum = 0, g_sum = 0, b_sum = 0;
+         for (uint ay = y*antiAliasFactor_; ay < (y+1)*antiAliasFactor_; ay++) {
+            for (uint ax = x*antiAliasFactor_; ax < (x+1)*antiAliasFactor_; ax++) {
+               size_t i = coordinateToArrayIndex(ax, ay);
+               r_sum += intersectionsBuffer[i].r;
+               g_sum += intersectionsBuffer[i].g;
+               b_sum += intersectionsBuffer[i].b;
+            }
+         }
+         u_char r = (u_char)(255 * (r_sum/patchSize));
+         u_char g = (u_char)(255 * (g_sum/patchSize));
+         u_char b = (u_char)(255 * (b_sum/patchSize));
+         
          lodeImageBuffer[l] = r;
          lodeImageBuffer[l+1] = g;
          lodeImageBuffer[l+2] = b;
