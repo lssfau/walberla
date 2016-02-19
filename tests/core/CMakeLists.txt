@@ -200,3 +200,19 @@ waLBerla_execute_test( NAME UNIQUEID PROCESSES 4)
 
 waLBerla_compile_test( FILES VersionTest.cpp )
 waLBerla_execute_test( NAME VersionTest )
+
+##################
+# load_balancing #
+##################
+
+if( WALBERLA_BUILD_WITH_METIS )
+   waLBerla_compile_test( NAME MetisTest FILES load_balancing/MetisTest.cpp DEPENDS field )
+   waLBerla_execute_test( NAME MetisTest COMMAND $<TARGET_FILE:MetisTest> 64 64  4 --no-vtk )
+endif()
+
+if( WALBERLA_BUILD_WITH_PARMETIS )
+   waLBerla_compile_test( NAME ParMetisTest FILES load_balancing/ParMetisTest.cpp DEPENDS blockforest field stencil vtk  )
+   waLBerla_execute_test( NAME ParMetisTest1 COMMAND $<TARGET_FILE:ParMetisTest> 64 64  4 --no-vtk )
+   waLBerla_execute_test( NAME ParMetisTest2 COMMAND $<TARGET_FILE:ParMetisTest> 64 64  8 --no-vtk PROCESSES 2 )
+   waLBerla_execute_test( NAME ParMetisTest4 COMMAND $<TARGET_FILE:ParMetisTest> 64 64 16 --no-vtk PROCESSES 4 )
+endif()

@@ -24,12 +24,12 @@
 #include "waLBerlaDefinitions.h" // for macro WALBERLA_BUILD_WITH_METIS
 
 #include "BlockID.h"
-#include "MetisWrapper.h"
 #include "Types.h"
 
 #include "core/Abort.h"
 #include "core/debug/Debug.h"
 #include "core/logging/Logging.h"
+#include "core/load_balancing/MetisWrapper.h"
 #include "core/math/KahanSummation.h"
 
 #include <boost/function.hpp>
@@ -144,10 +144,10 @@ public:
    static void metis2( const std::vector< BLOCK* >& blocks, const uint_t numberOfProcesses, const CommFunction & commFunction );
 private:
 
-   static inline uint_t metisAdaptPartVector( std::vector< idx_t >& part, const uint_t numberOfProcesses );
+   static inline uint_t metisAdaptPartVector( std::vector< int64_t >& part, const uint_t numberOfProcesses );
 
    template< typename BLOCK >
-   static memory_t metisMaxMemory( const std::vector< BLOCK* >& blocks, const uint_t numberOfProcesses, const std::vector< idx_t >& part );
+   static memory_t metisMaxMemory( const std::vector< BLOCK* >& blocks, const uint_t numberOfProcesses, const std::vector< int64_t >& part );
 
    static inline std::ostream &  metisErrorCodeToStream( int errorCode, std::ostream & oss );
    static inline std::string     metisErrorCodeToString( int errorCode );
@@ -781,51 +781,51 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
 
    // translate block forest to metis graph structure
 
-   idx_t nvtxs = numeric_cast<idx_t>( blocks.size() ); // number of vertices in the graph
-   idx_t ncon  = 2;                                    // number of balancing constraints
+   int64_t nvtxs = numeric_cast<int64_t>( blocks.size() ); // number of vertices in the graph
+   int64_t ncon  = 2;                                    // number of balancing constraints
 
    for( uint_t i = 0; i != blocks.size(); ++i )
       blocks[i]->setIndex(i);
 
-   std::vector< idx_t > xadj;                         // adjacency structure ...
-   std::vector< idx_t > adjncy;                       // ... of the graph
-   std::vector< idx_t > vwgt( uint_c(ncon * nvtxs) ); // weights of the vertices
-   std::vector< idx_t > adjwgt;                       // weights of the edges
+   std::vector< int64_t > xadj;                         // adjacency structure ...
+   std::vector< int64_t > adjncy;                       // ... of the graph
+   std::vector< int64_t > vwgt( uint_c(ncon * nvtxs) ); // weights of the vertices
+   std::vector< int64_t > adjwgt;                       // weights of the edges
 
    xadj.push_back(0);
    for( uint_t i = 0; i != blocks.size(); ++i ) {
       const BLOCK* block = blocks[i];
 
-      idx_t next = xadj.back() + numeric_cast< idx_t >( block->getNeighborhoodSize() );
+      int64_t next = xadj.back() + numeric_cast< int64_t >( block->getNeighborhoodSize() );
       xadj.push_back( next );
 
       for( uint_t j = 0; j != block->getNeighborhoodSize(); ++j ) {
-         adjncy.push_back( numeric_cast<idx_t>( block->getNeighbor(j)->getIndex() ) );
+         adjncy.push_back( numeric_cast<int64_t>( block->getNeighbor(j)->getIndex() ) );
          adjwgt.push_back( metisConfig.communicationFunction().empty() ? 1 :
-                           ( numeric_cast<idx_t>( static_cast< memory_t >(0.5) + metisConfig.communicationFunction()( block, block->getNeighbor(j) ) ) ) );
+                           ( numeric_cast<int64_t>( static_cast< memory_t >(0.5) + metisConfig.communicationFunction()( block, block->getNeighbor(j) ) ) ) );
       }
 
-      vwgt[ i * 2 ]     = numeric_cast< idx_t >( static_cast< workload_t >(0.5) + blocks[i]->getWorkload() );
-      vwgt[ i * 2 + 1 ] = numeric_cast< idx_t >( static_cast<  memory_t  >(0.5) + blocks[i]->getMemory() );
+      vwgt[ i * 2 ]     = numeric_cast< int64_t >( static_cast< workload_t >(0.5) + blocks[i]->getWorkload() );
+      vwgt[ i * 2 + 1 ] = numeric_cast< int64_t >( static_cast<  memory_t  >(0.5) + blocks[i]->getMemory() );
    }
 
-   idx_t nparts =  numeric_cast< idx_t >( numberOfProcesses ); // number of parts to partition the graph
-   idx_t objval;
+   int64_t nparts =  numeric_cast< int64_t >( numberOfProcesses ); // number of parts to partition the graph
+   int64_t objval;
 
-   std::vector< idx_t > part( uint_c(nvtxs) );
+   std::vector< int64_t > part( uint_c(nvtxs) );
 
    real_t maxUbvec = metisConfig.maxUbvec();
    real_t ubvec[]  = { real_c(1.01), maxUbvec };
 
    // first call to METIS: always try to balance the workload as good as possible, but allow large imbalances concerning the memory (-> ubvec[1])
 
-   int ret = METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
-                                       &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
+   int ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
+                                             &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
 
    // if METIS was successful AND the memory limit of each process is not violated (which is highly unlikely due to a large value for ubvec[1])
    // then the algorithm is finished
 
-   if( ret == METIS_OK && metisMaxMemory( blocks, numberOfProcesses, part ) <= memoryLimit ) {
+   if( ret == core::METIS_OK && metisMaxMemory( blocks, numberOfProcesses, part ) <= memoryLimit ) {
 
       nProcesses = metisAdaptPartVector( part, numberOfProcesses );
 
@@ -844,16 +844,16 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
    real_t minUbvec = real_t(1);
    ubvec[1] = minUbvec;
 
-   ret = METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
-                                   &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
+   ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
+                                         &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
 
    // ... if this doesn't work OR if the memory limit is still violated then METIS is unable to find a valid partitioning
 
-   if( ret != METIS_OK ) {
+   if( ret != core::METIS_OK ) {
 
       std::string error( "METIS_ERROR" );
-      if( ret == METIS_ERROR_INPUT ) error.assign( "METIS_ERROR_INPUT" );
-      else if( ret == METIS_ERROR_MEMORY ) error.assign( "METIS_ERROR_MEMORY" );
+      if( ret == core::METIS_ERROR_INPUT ) error.assign( "METIS_ERROR_INPUT" );
+      else if( ret == core::METIS_ERROR_MEMORY ) error.assign( "METIS_ERROR_MEMORY" );
 
       // DEBUG_LOGGING_SECTION { std::cout << "ERROR: static load balancing with METIS failed (" << error << ")" << std::endl; }
       return 0;
@@ -881,10 +881,10 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
 
       ubvec[1] = ( maxUbvec + minUbvec ) / real_c(2);
 
-      ret = METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
-                                      &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
+      ret = core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj[0]), &(adjncy[0]), &(vwgt[0]), NULL, &(adjwgt[0]), &nparts, NULL,
+                                            &(ubvec[0]), NULL /*idx t *options*/, &objval, &(part[0]) );
 
-      if( ret == METIS_OK && metisMaxMemory( blocks, numberOfProcesses, part ) <= memoryLimit ) {
+      if( ret == core::METIS_OK && metisMaxMemory( blocks, numberOfProcesses, part ) <= memoryLimit ) {
 
          nProcesses = metisAdaptPartVector( part, numberOfProcesses );
 
@@ -913,8 +913,8 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    if( blocks.empty() )
       return;
   
-   idx_t nvtxs = 0; // number of vertices in the graph
-   idx_t ncon  = 1; // number of balancing constraints
+   int64_t nvtxs = 0; // number of vertices in the graph
+   int64_t ncon  = 1; // number of balancing constraints
    
    uint_t j = 0;
    for( uint_t i = 0; i != blocks.size(); ++i )
@@ -947,10 +947,10 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
 
    commFunction( blockPairs, communicationWeights );
    
-   std::vector< idx_t > xadj;   // adjacency structure ...
-   std::vector< idx_t > adjncy; // ... of the graph
-   std::vector< idx_t > vwgt;   // weights of the vertices
-   std::vector< idx_t > adjwgt; // weights of the edges
+   std::vector< int64_t > xadj;   // adjacency structure ...
+   std::vector< int64_t > adjncy; // ... of the graph
+   std::vector< int64_t > vwgt;   // weights of the vertices
+   std::vector< int64_t > adjwgt; // weights of the edges
    
    xadj.push_back( 0 );
    uint_t commIdx = 0;
@@ -963,7 +963,7 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    
       ++nvtxs;
       xadj.push_back( xadj.back() );
-      vwgt.push_back( numeric_cast<idx_t>( blocks[ i ]->getWorkload() ) );
+      vwgt.push_back( numeric_cast<int64_t>( blocks[ i ]->getWorkload() ) );
    
       for( uint_t k = 0; k != block->getNeighborhoodSize(); ++k ) 
       {
@@ -971,10 +971,10 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
          {
             if( communicationWeights[ commIdx ] > real_t(0) )
             {
-               adjncy.push_back( numeric_cast<idx_t>( block->getNeighbor( k )->getIndex() ) );
+               adjncy.push_back( numeric_cast<int64_t>( block->getNeighbor( k )->getIndex() ) );
                WALBERLA_ASSERT_LESS( commIdx, communicationWeights.size() );
-               WALBERLA_ASSERT_GREATER( numeric_cast<idx_t>( communicationWeights[ commIdx ] ), idx_t(0) );
-               adjwgt.push_back( numeric_cast<idx_t>( communicationWeights[ commIdx ] ) );
+               WALBERLA_ASSERT_GREATER( numeric_cast<int64_t>( communicationWeights[ commIdx ] ), int64_t(0) );
+               adjwgt.push_back( numeric_cast<int64_t>( communicationWeights[ commIdx ] ) );
                xadj.back() += 1;
             }
             ++commIdx;
@@ -987,21 +987,21 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
    WALBERLA_ASSERT_EQUAL( adjncy.size(), adjwgt.size() );
    WALBERLA_ASSERT_EQUAL( adjncy.size(), communicationWeights.size() );
    
-   idx_t nparts = numeric_cast<idx_t>( numberOfProcesses ); // number of parts to partition the graph
-   idx_t objval;
+   int64_t nparts = numeric_cast<int64_t>( numberOfProcesses ); // number of parts to partition the graph
+   int64_t objval;
    
-   std::vector< idx_t > part( uint_c(nvtxs) );
+   std::vector< int64_t > part( uint_c(nvtxs) );
    
-   idx_t options[ METIS_NOPTIONS ];
-   METIS_SetDefaultOptions( options );
-   options[ METIS_OPTION_NITER ] = 1000;
-   options[ METIS_OPTION_NSEPS ] = 100;
-   options[ METIS_OPTION_NCUTS ] = 100;
+   int64_t options[ METIS_NOPTIONS ];
+   core::METIS_SetDefaultOptions( options );
+   options[ core::METIS_OPTION_NITER ] = 1000;
+   options[ core::METIS_OPTION_NSEPS ] = 100;
+   options[ core::METIS_OPTION_NCUTS ] = 100;
    
-   int ret = METIS_PartGraphKway( &nvtxs, &ncon, &( xadj[ 0 ] ), &( adjncy[ 0 ] ), &( vwgt[ 0 ] ), NULL, &( adjwgt[0] ), 
+   int ret = core::METIS_PartGraphKway( &nvtxs, &ncon, &( xadj[ 0 ] ), &( adjncy[ 0 ] ), &( vwgt[ 0 ] ), NULL, &( adjwgt[0] ), 
                                   &nparts, NULL, NULL, options, &objval, &( part[ 0 ] ) );
 
-   if( ret != METIS_OK ) 
+   if( ret != core::METIS_OK ) 
    {
       WALBERLA_ABORT( "METIS partitioning failed! Error: " << metisErrorCodeToString( ret ) );
    }
@@ -1028,24 +1028,16 @@ void GlobalLoadBalancing::metis2( const std::vector< BLOCK* >& blocks, const uin
 
 std::ostream & GlobalLoadBalancing::metisErrorCodeToStream( int errorCode, std::ostream & oss )
 {
-   switch( errorCode )
-   {
-   case METIS_OK:
+   if( errorCode == core::METIS_OK)
       oss << "OK, no METIS error";
-      break;
-   case METIS_ERROR_INPUT:
+   else if( errorCode == core::METIS_ERROR_INPUT )
       oss << "Error in METIS input";
-      break;
-   case METIS_ERROR_MEMORY:
+   else if (errorCode == core::METIS_ERROR_MEMORY )
       oss << "METIS could not allocate enough memory";
-      break;
-   case METIS_ERROR:
+   else if (errorCode == core::METIS_ERROR )
       oss << "Unknown type of error";
-      break;
-   default:
+   else
       oss << "Unknown error code";
-      break;
-   }
 
    return oss;
 }
@@ -1060,7 +1052,7 @@ std::string GlobalLoadBalancing::metisErrorCodeToString( int errorCode )
 
 
 
-uint_t GlobalLoadBalancing::metisAdaptPartVector( std::vector< idx_t >& part, const uint_t numberOfProcesses )
+uint_t GlobalLoadBalancing::metisAdaptPartVector( std::vector< int64_t >& part, const uint_t numberOfProcesses )
 {
    std::vector<bool> hasBlock( numberOfProcesses, false );
    for( uint_t i = 0; i != part.size(); ++i )
@@ -1090,7 +1082,7 @@ uint_t GlobalLoadBalancing::metisAdaptPartVector( std::vector< idx_t >& part, co
 
 template< typename BLOCK >
 memory_t GlobalLoadBalancing::metisMaxMemory( const std::vector< BLOCK* >& blocks, const uint_t numberOfProcesses,
-                                              const std::vector< idx_t >& part ) {
+                                              const std::vector< int64_t >& part ) {
 
    WALBERLA_ASSERT_EQUAL( blocks.size(), part.size() );
 

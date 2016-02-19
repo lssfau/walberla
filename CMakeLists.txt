@@ -70,6 +70,7 @@ option ( WALBERLA_BUILD_TUTORIALS           "Build Tutorials"                   
 
 option ( WALBERLA_BUILD_WITH_MPI            "Build with MPI"                                  ON )
 option ( WALBERLA_BUILD_WITH_METIS          "Build with metis graph partitioner"             OFF )
+option ( WALBERLA_BUILD_WITH_PARMETIS       "Build with ParMetis graph partitioner"          OFF )                                            
 
 option ( WALBERLA_BUILD_WITH_GPROF          "Enables gprof"                                      )
 option ( WALBERLA_BUILD_WITH_GCOV           "Enables gcov"                                       )
@@ -851,6 +852,28 @@ if ( WALBERLA_BUILD_WITH_METIS )
     endif()
 else()
     set ( METIS_FOUND OFF CACHE BOOL "Metis found" FORCE )
+endif()
+
+
+if ( WALBERLA_BUILD_WITH_PARMETIS )
+   find_path(PARMETIS_INCLUDE_DIR parmetis.h
+      /usr/local/include
+      /usr/include
+      ${PARMETIS_ROOT}/include
+      $ENV{PARMETIS_ROOT}/include
+   )
+  
+  find_library(PARMETIS_LIBRARY parmetis
+    /usr/local/lib
+    /usr/lib
+    ${PARMETIS_ROOT}/lib
+    $ENV{PARMETIS_ROOT}/lib
+  )
+  
+  if( PARMETIS_INCLUDE_DIR AND PARMETIS_LIBRARY AND METIS_LIBRARY )
+    include_directories( ${PARMETIS_INCLUDE_DIR} )
+    list ( APPEND SERVICE_LIBS ${PARMETIS_LIBRARY} ${METIS_LIBRARY} )
+  endif()
 endif()
 
 ############################################################################################################################
