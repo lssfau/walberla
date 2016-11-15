@@ -33,6 +33,8 @@
 
 #include "field/FlagUID.h"
 
+#include "timeloop/ITimeloop.h"
+
 #include <limits>
 
 namespace walberla {
@@ -57,8 +59,22 @@ public:
                       const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                       const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
 
+   PerformanceLogger( const shared_ptr< StructuredBlockStorage > & blocks,
+                      const ConstBlockDataID & flagFieldId, const Set< FlagUID > & fluid,
+                      const timeloop::ITimeloop * const timeloop,
+                      const uint_t interval,
+                      const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
+                      const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
+
    void operator()();
    void logOverallResultsOnRoot() const;
+
+   void enableRefreshCellCountOnCall()  { refreshCellCountOnCall_ = true;  }
+   void disableRefreshCellCountOnCall() { refreshCellCountOnCall_ = false; }
+
+   void getBestResultsForSQLOnRoot( std::map< std::string, int > &         integerProperties,
+                                    std::map< std::string, double > &      realProperties,
+                                    std::map< std::string, std::string > & stringProperties );
 
 private:
    enum Mode { MIN, MAX, AVG, LAST };
@@ -68,6 +84,8 @@ private:
    uint_t interval_;
    uint_t timestep_;
    WcTimer timer_;
+   bool refreshCellCountOnCall_;
+   const timeloop::ITimeloop * timeloop_;
 
 }; // class PerformanceLogger
 
@@ -79,7 +97,19 @@ PerformanceLogger<FlagField_T>::PerformanceLogger( const shared_ptr< StructuredB
                    const Set<SUID> & requiredSelectors /*= Set<SUID>::emptySet()*/,
                    const Set<SUID> & incompatibleSelectors /*= Set<SUID>::emptySet()*/ )
                    : performanceEvaluation_( blocks, flagFieldId, fluid, requiredSelectors, incompatibleSelectors ),
-                     interval_(interval), timestep_(1)
+                     interval_(interval), timestep_(1), refreshCellCountOnCall_(false), timeloop_(NULL)
+{
+}
+
+template< typename FlagField_T >
+PerformanceLogger<FlagField_T>::PerformanceLogger( const shared_ptr< StructuredBlockStorage > & blocks,
+                                                   const ConstBlockDataID & flagFieldId, const Set< FlagUID > & fluid,
+                                                   const timeloop::ITimeloop * const timeloop,
+                                                   const uint_t interval,
+                                                   const Set<SUID> & requiredSelectors /*= Set<SUID>::emptySet()*/,
+                                                   const Set<SUID> & incompatibleSelectors /*= Set<SUID>::emptySet()*/ )
+   : performanceEvaluation_( blocks, flagFieldId, fluid, requiredSelectors, incompatibleSelectors ),
+     interval_( interval ), timestep_( 1 ), refreshCellCountOnCall_( false ), timeloop_( timeloop )
 {
 }
 
@@ -106,13 +136,19 @@ real_t PerformanceLogger<FlagField_T>::getTiming( Mode mode ) const
 template< typename FlagField_T >
 void PerformanceLogger<FlagField_T>::operator()()
 {
-   if( timestep_ == interval_ )
+   if( timeloop_ )
+      timestep_ = timeloop_->getCurrentTimeStep() + uint_t(1);
+
+   if( timestep_ % interval_ == 0 )
    {
       WALBERLA_MPI_BARRIER();
       timer_.end();
+      
+      if( refreshCellCountOnCall_ )
+         performanceEvaluation_.refresh();
+
       performanceEvaluation_.logResultOnRoot( interval_, getTiming( LAST ) );
       timer_.start();
-      timestep_ = 0;
    }
 
    ++timestep_;
@@ -124,6 +160,14 @@ void PerformanceLogger<FlagField_T>::logOverallResultsOnRoot() const
    WALBERLA_LOG_RESULT_ON_ROOT( "Min Performance:\n" << performanceEvaluation_.loggingString( interval_, getTiming( MIN ) ); );
    WALBERLA_LOG_RESULT_ON_ROOT( "Max Performance:\n" << performanceEvaluation_.loggingString( interval_, getTiming( MAX ) ); );
    WALBERLA_LOG_RESULT_ON_ROOT( "Avg Performance:\n" << performanceEvaluation_.loggingString( interval_, getTiming( AVG ) ); );
+}
+
+template< typename FlagField_T >
+void PerformanceLogger<FlagField_T>::getBestResultsForSQLOnRoot( std::map< std::string, int > &         integerProperties,
+                                                                 std::map< std::string, double > &      realProperties,
+                                                                 std::map< std::string, std::string > & stringProperties )
+{
+   performanceEvaluation_.getResultsForSQLOnRoot( integerProperties, realProperties, stringProperties, interval_, getTiming( MAX ) );
 }
 
 
