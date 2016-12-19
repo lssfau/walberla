@@ -896,6 +896,22 @@ endif()
 
 ############################################################################################################################
 ##
+## OpenMesh
+##
+############################################################################################################################
+if( (NOT DEFINED WALBERLA_BUILD_WITH_OPENMESH) OR WALBERLA_BUILD_WITH_OPENMESH )
+   find_package( OpenMesh )
+   if( OPENMESH_FOUND )
+      set( WALBERLA_BUILD_WITH_OPENMESH ON CACHE BOOL "Build with OpenMesh support" )
+      include_directories( SYSTEM ${OPENMESH_INCLUDE_DIRS} )
+      list( APPEND SERVICE_LIBS ${OPENMESH_LIBRARIES} )
+   else()
+      set( WALBERLA_BUILD_WITH_OPENMESH OFF CACHE BOOL "Build with OpenMesh support" FORCE )
+   endif()
+endif()
+
+############################################################################################################################
+##
 ## DebugOptimized Build Configuration for fast execution of tests with enabled asserts
 ##
 ############################################################################################################################
