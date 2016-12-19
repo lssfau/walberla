@@ -69,7 +69,7 @@ option ( WALBERLA_BUILD_TOOLS               "Build Tools"                       
 option ( WALBERLA_BUILD_TUTORIALS           "Build Tutorials"                                 ON )
                                                                                               
 option ( WALBERLA_BUILD_WITH_MPI            "Build with MPI"                                  ON )
-option ( WALBERLA_BUILD_WITH_METIS          "Build with metis graph partitioner"              ON )
+option ( WALBERLA_BUILD_WITH_METIS          "Build with metis graph partitioner"             OFF )
                                             
 option ( WALBERLA_BUILD_WITH_GPROF          "Enables gprof"                                      )
 option ( WALBERLA_BUILD_WITH_GCOV           "Enables gcov"                                       )
