@@ -17,6 +17,10 @@ qrc_*
 /.pydevproject
 /.settings
 
+# Visual Studio
+/CMakeSettings.json
+/.vs
+
 # Binary Files
 /bin/
 /lib/
