@@ -33,6 +33,9 @@
 #include "core/mpi/SendBuffer.h"
 
 #include <boost/static_assert.hpp>
+#include <boost/type_traits/is_arithmetic.hpp>
+#include <boost/utility/enable_if.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -140,13 +143,14 @@ public:
    //@{
    template< typename Other > inline Matrix3&            operator+=( const Matrix3<Other>& rhs );
    template< typename Other > inline Matrix3&            operator-=( const Matrix3<Other>& rhs );
-   template< typename Other > inline Matrix3&            operator*=( Other rhs );
    template< typename Other > inline Matrix3&            operator*=( const Matrix3<Other>& rhs );
    template< typename Other > inline const Matrix3<HIGH> operator+ ( const Matrix3<Other>& rhs ) const;
    template< typename Other > inline const Matrix3<HIGH> operator- ( const Matrix3<Other>& rhs ) const;
-   template< typename Other > inline const Matrix3<HIGH> operator* ( Other rhs )                 const;
    template< typename Other > inline const Vector3<HIGH> operator* ( const Vector3<Other>& rhs ) const;
    template< typename Other > inline const Matrix3<HIGH> operator* ( const Matrix3<Other>& rhs ) const;
+
+   template< typename Other > inline typename boost::enable_if< boost::is_arithmetic<Other>, Matrix3&            >::type operator*=( Other rhs );
+   template< typename Other > inline typename boost::enable_if< boost::is_arithmetic<Other>, const Matrix3<HIGH> >::type operator* ( Other rhs ) const;
    //@}
    //*******************************************************************************************************************
 
@@ -760,7 +764,7 @@ inline Matrix3<Type>& Matrix3<Type>::operator-=( const Matrix3<Other>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline Matrix3<Type>& Matrix3<Type>::operator*=( Other rhs )
+inline typename boost::enable_if< boost::is_arithmetic<Other>, Matrix3<Type>& >::type Matrix3<Type>::operator*=( Other rhs )
 {
    v_[0] *= rhs;
    v_[1] *= rhs;
@@ -884,7 +888,7 @@ inline const Matrix3<Type> operator-( const Matrix3<Type>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline const Matrix3<HIGH> Matrix3<Type>::operator*( Other rhs ) const
+inline typename boost::enable_if< boost::is_arithmetic<Other> ,const Matrix3<HIGH> >::type Matrix3<Type>::operator*( Other rhs ) const
 {
    return Matrix3<HIGH>( v_[0]*rhs, v_[1]*rhs, v_[2]*rhs,
                          v_[3]*rhs, v_[4]*rhs, v_[5]*rhs,
