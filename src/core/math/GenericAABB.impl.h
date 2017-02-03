@@ -1196,6 +1196,74 @@ typename GenericAABB< T >::value_type GenericAABB< T >::maxDistance( const vecto
 }
 
 
+/**
+* \brief Computes the distance between two GenericAABBs
+*
+* \param other The other AABB to which the distance to *this should be computed
+*
+* \returns The (positive) distance of the surface of other to the surface of *this. 0 if *this and other are intersecting.
+*/
+template< typename T >
+inline typename GenericAABB< T >::value_type GenericAABB< T >::sqDistance( const GenericAABB & other ) const
+{
+   value_type theSqDistance = value_type(0);
+
+   if( other.maxCorner_[0] < minCorner_[0] )
+   {
+      theSqDistance += sq( minCorner_[0] - other.maxCorner_[0] );
+   }
+   else if( other.minCorner_[0] > maxCorner_[0] )
+   {
+      theSqDistance += sq( other.minCorner_[0] - maxCorner_[0] );
+   }
+
+   if( other.maxCorner_[1] < minCorner_[1] )
+   {
+      theSqDistance += sq( minCorner_[1] - other.maxCorner_[1] );
+   }
+   else if( other.minCorner_[1] > maxCorner_[1] )
+   {
+      theSqDistance += sq( other.minCorner_[1] - maxCorner_[1] );
+   }
+
+   if( other.maxCorner_[2] < minCorner_[2] )
+   {
+      theSqDistance += sq( minCorner_[2] - other.maxCorner_[2] );
+   }
+   else if( other.minCorner_[2] > maxCorner_[2] )
+   {
+      theSqDistance += sq( other.minCorner_[2] - maxCorner_[2] );
+   }
+
+   WALBERLA_ASSERT_GREATER_EQUAL( theSqDistance, value_type(0) );
+   WALBERLA_ASSERT( !intersects( other ) || walberla::isIdentical( theSqDistance, value_type(0) ) ); // intersect => distance == 0
+
+   return theSqDistance;
+}
+
+
+/**
+* \brief Computes the maximal distance of any two points from two GenericAABBs
+*
+* \param other The other AABB to which the maximal distance to *this should be computed
+*
+* \returns The maximal (positive) distance of any point in other to any point in this.
+*/
+template< typename T >
+inline typename GenericAABB< T >::value_type GenericAABB< T >::sqMaxDistance( const GenericAABB & other ) const
+{
+   value_type theSqMaxDistance = value_type(0);
+
+   theSqMaxDistance += sq( std::max( maxCorner_[0] - other.minCorner_[0], other.maxCorner_[0] - minCorner_[0] ) );
+   theSqMaxDistance += sq( std::max( maxCorner_[1] - other.minCorner_[1], other.maxCorner_[1] - minCorner_[1] ) );
+   theSqMaxDistance += sq( std::max( maxCorner_[2] - other.minCorner_[2], other.maxCorner_[2] - minCorner_[2] ) );
+
+   WALBERLA_ASSERT_GREATER_EQUAL( theSqMaxDistance, value_type(0) );
+
+   return theSqMaxDistance;
+}
+
+
 
 /**
  * \brief Computes the eight corners of this GenericAABB

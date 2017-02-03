@@ -22,6 +22,7 @@
 #include "core/Environment.h"
 #include "core/debug/TestSubsystem.h"
 #include "core/math/GenericAABB.h"
+#include "core/math/Shims.h"
 #include "core/math/Utility.h"
 
 #include "stencil/D3CornerStencil.h"
@@ -555,6 +556,79 @@ void randomTest()
 }
 
 
+template< typename T >
+void testAABBDistancesFixed()
+{
+   GenericAABB< T > aabb0( T(-1), T(-1), T(-1), T(1), T(1), T(1) );
+   GenericAABB< T > aabb1( T(-0.5), T(-0.5), T(-0.5), T(0.5), T(0.5), T(0.5) );
+      
+   WALBERLA_CHECK_IDENTICAL( aabb0.sqDistance( aabb1 ), T(0) );
+   WALBERLA_CHECK_IDENTICAL( aabb1.sqDistance( aabb0 ), T(0) );
+
+   WALBERLA_CHECK_IDENTICAL( aabb0.sqMaxDistance( aabb1 ), T(3) * math::sq( T(1.5) ) );
+   WALBERLA_CHECK_IDENTICAL( aabb1.sqMaxDistance( aabb0 ), T(3) * math::sq( T(1.5) ) );
+
+   aabb1.init( T(1.5), T(1.5), T(1.5), T(2), T(2), T(2) );
+
+   WALBERLA_CHECK_IDENTICAL( aabb0.sqDistance( aabb1 ), T(3) * math::sq( T(0.5) ) );
+   WALBERLA_CHECK_IDENTICAL( aabb1.sqDistance( aabb0 ), T(3) * math::sq( T(0.5) ) );
+
+   WALBERLA_CHECK_IDENTICAL( aabb0.sqMaxDistance( aabb1 ), T(3) * math::sq( T(3) ) );
+   WALBERLA_CHECK_IDENTICAL( aabb1.sqMaxDistance( aabb0 ), T(3) * math::sq( T(3) ) );
+
+
+   aabb1.init( T(0), T(0), T(0), T(2), T(2), T(2) );
+
+   WALBERLA_CHECK_IDENTICAL( aabb0.sqDistance( aabb1 ), T(0) );
+   WALBERLA_CHECK_IDENTICAL( aabb1.sqDistance( aabb0 ), T(0) );
+
+   WALBERLA_CHECK_IDENTICAL( aabb0.sqMaxDistance( aabb1 ), T(3) * math::sq( T(3) ) );
+   WALBERLA_CHECK_IDENTICAL( aabb1.sqMaxDistance( aabb0 ), T(3) * math::sq( T(3) ) );
+
+   aabb1.init( T(-2), T(-2), T(-2), T(0), T(0), T(0) );
+
+   WALBERLA_CHECK_IDENTICAL( aabb0.sqDistance( aabb1 ), T(0) );
+   WALBERLA_CHECK_IDENTICAL( aabb1.sqDistance( aabb0 ), T(0) );
+
+   WALBERLA_CHECK_IDENTICAL( aabb0.sqMaxDistance( aabb1 ), T(3) * math::sq( T(3) ) );
+   WALBERLA_CHECK_IDENTICAL( aabb1.sqMaxDistance( aabb0 ), T(3) * math::sq( T(3) ) );
+}
+
+
+template< typename T >
+void testAABBDistancesRandom( const GenericAABB< T > & baseAABB )
+{
+   static const uint_t NUM_BOXES  = 100;
+   static const uint_t NUM_POINTS = 1000;
+   boost::random::mt19937 rng;  
+
+   for( uint_t i = 0; i < NUM_BOXES; ++i )
+   {
+      math::GenericAABB< T > subAabb0(  baseAABB.randomPoint( rng ), baseAABB.randomPoint( rng )  );
+      math::GenericAABB< T > subAabb1(  baseAABB.randomPoint( rng ), baseAABB.randomPoint( rng )  );
+
+      WALBERLA_CHECK_IDENTICAL( subAabb0.sqDistance( subAabb1 ), subAabb1.sqDistance( subAabb0 ) );
+      WALBERLA_CHECK_IDENTICAL( subAabb0.sqMaxDistance( subAabb1 ), subAabb1.sqMaxDistance( subAabb0 ) );
+
+      const T minSqDistance = subAabb0.sqDistance( subAabb1 );
+      const T maxSqDistance = subAabb0.sqMaxDistance( subAabb1 );
+
+      WALBERLA_CHECK_GREATER_EQUAL( maxSqDistance, minSqDistance );
+
+      for( uint_t j = 0; j < NUM_POINTS; ++j )
+      {
+         auto p0 = subAabb0.randomPoint( rng );
+         auto p1 = subAabb1.randomPoint( rng );
+
+         const auto sqPointDistance = (p0 - p1).sqrLength();
+
+         WALBERLA_CHECK_GREATER_EQUAL( sqPointDistance, minSqDistance );
+         WALBERLA_CHECK_LESS_EQUAL( sqPointDistance, maxSqDistance );
+      }
+   }
+}
+
+
 int main(int argc, char**argv)
 {
    walberla::debug::enterTestMode();
@@ -563,18 +637,24 @@ int main(int argc, char**argv)
 
    testConstructors<float>( 1.0f, 2.0f, 3.0f, -1.0f, 3.0f, 2.0f );
    testConstructors<double>( 1.0, 2.0, 3.0, -1.0, 3.0, 2.0 );
-
+   
    testFixedAABB<float>();
    testFixedAABB<double>();
-
+   
    GenericAABB< float > floatAABB( 1.0f, 1.0f, 1.0f, 2.0f, 2.0f, 2.0f );
    GenericAABB< double > doubleAABB( 1.0, 1.0, 1.0, 2.0, 2.0 ,2.0 );
-
+   
    GenericAABB< double > copiedAABB0( floatAABB );
    GenericAABB< double > copiedAABB1( doubleAABB );
-
+   
    randomTest<float>();
    randomTest<double>();
+
+   testAABBDistancesFixed<float>();
+   testAABBDistancesFixed<double>();
+
+   testAABBDistancesRandom<float>( GenericAABB<float>( -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f ) );
+   testAABBDistancesRandom<double>( GenericAABB<double>( -1.0, -1.0, -1.0, 1.0, 1.0, 1.0 ) );
 
    return 0;
 }

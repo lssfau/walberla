@@ -23,6 +23,7 @@
 
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
+#include "core/math/Shims.h"
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
@@ -143,6 +144,9 @@ public:
    inline value_type distance( const vector_type & point ) const;
    inline value_type signedDistance( const vector_type & point ) const;
    inline value_type maxDistance( const vector_type & point ) const;
+
+   inline value_type sqDistance( const GenericAABB & other ) const;
+   inline value_type sqMaxDistance( const GenericAABB & other ) const;
 
    inline boost::array< vector_type, 8 > corners() const;
 
