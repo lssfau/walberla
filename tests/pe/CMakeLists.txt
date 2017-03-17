@@ -60,6 +60,9 @@ waLBerla_execute_test( NAME   PE_RIGIDBODY )
 waLBerla_compile_test( NAME   PE_SERIALIZEDESERIALIZE FILES SerializeDeserialize.cpp DEPENDS core blockforest  )
 waLBerla_execute_test( NAME   PE_SERIALIZEDESERIALIZE PROCESSES 8 )
 
+waLBerla_compile_test( NAME   PE_SHADOWCOPY FILES ShadowCopy.cpp DEPENDS core blockforest  )
+waLBerla_execute_test( NAME   PE_SHADOWCOPY )
+
 waLBerla_compile_test( NAME   PE_SIMPLECCD FILES SimpleCCD.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_SIMPLECCD )
 
@@ -86,3 +89,6 @@ waLBerla_execute_test( NAME   PE_SYNCHRONIZATIONLARGEBODY27 COMMAND $<TARGET_FIL
 
 waLBerla_compile_test( NAME   PE_STATICTYPEIDS FILES SetBodyTypeIDs.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_STATICTYPEIDS )
+
+waLBerla_compile_test( NAME   PE_UNION FILES Union.cpp DEPENDS core  )
+waLBerla_execute_test( NAME   PE_UNION )

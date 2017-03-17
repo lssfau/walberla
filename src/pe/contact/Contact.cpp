@@ -64,8 +64,8 @@ Contact::Contact( GeomID g1, GeomID g2, const Vec3& gpos, const Vec3& normal, re
    WALBERLA_ASSERT( !( b1_->hasInfiniteMass() && b2_->hasInfiniteMass() ), "Invalid contact between two rigid bodies with infinite masses" );
 
    // Registering the contact with both attached rigid bodies
-   if( !b1_->hasInfiniteMass() ) b1_->registerContact( this );
-   if( !b2_->hasInfiniteMass() ) b2_->registerContact( this );
+//   if( !b1_->hasInfiniteMass() ) b1_->registerContact( this );
+//   if( !b2_->hasInfiniteMass() ) b2_->registerContact( this );
 
    // Merging the contact graph
 //   if( !b1_->hasInfiniteMass() && !b2_->hasInfiniteMass() )

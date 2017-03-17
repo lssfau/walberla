@@ -47,7 +47,7 @@ void marshal( mpi::SendBuffer& buffer, const MPIRigidBodyTrait& obj ) {
  * \param hasSuperBody False if body is not part of a union. Subordinate bodies in unions do not encode velocities but encode relative positions.
  * \return void
  */
-void unmarshal( mpi::RecvBuffer& buffer, MPIRigidBodyTraitParameter& objparam, bool /*hasSuperBody*/ ) {
+void unmarshal( mpi::RecvBuffer& buffer, MPIRigidBodyTraitParameter& objparam ) {
    buffer >> objparam.owner_;
 }
 
@@ -66,6 +66,7 @@ void marshal( mpi::SendBuffer& buffer, const RigidBody& obj ) {
    buffer << obj.isCommunicating();
    buffer << obj.hasInfiniteMass();
    buffer << obj.getPosition();
+   buffer << obj.hasSuperBody();
    if( obj.hasSuperBody() )
    {
       buffer <<  obj.getRelPosition();
@@ -87,23 +88,24 @@ void marshal( mpi::SendBuffer& buffer, const RigidBody& obj ) {
  * \param hasSuperBody False if body is not part of a union. Subordinate bodies in unions do not encode velocities but encode relative positions.
  * \return void
  */
-void unmarshal( mpi::RecvBuffer& buffer, RigidBodyParameters& objparam, bool hasSuperBody ) {
-   unmarshal( buffer, objparam.mpiTrait_, hasSuperBody );
+void unmarshal( mpi::RecvBuffer& buffer, RigidBodyParameters& objparam ) {
+   unmarshal( buffer, objparam.mpiTrait_ );
 
    buffer >> objparam.sid_;
    buffer >> objparam.uid_;
    buffer >> objparam.communicating_;
    buffer >> objparam.infiniteMass_;
    buffer >> objparam.gpos_;
+   buffer >> objparam.hasSuperBody_;
 
-   if( hasSuperBody )
+   if( objparam.hasSuperBody_ )
    {
       buffer >> objparam.rpos_;
    }
 
    buffer >> objparam.q_;
 
-   if( !hasSuperBody )
+   if( !objparam.hasSuperBody_ )
    {
       buffer >> objparam.v_;
       buffer >> objparam.w_;
@@ -139,8 +141,8 @@ void marshal( mpi::SendBuffer& buffer, const GeomPrimitive& obj ) {
  * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
  * \return void
  */
-void unmarshal( mpi::RecvBuffer& buffer, GeomPrimitiveParameters& objparam, bool hasSuperBody ) {
-   unmarshal( buffer, static_cast<RigidBodyParameters&>( objparam ), hasSuperBody );
+void unmarshal( mpi::RecvBuffer& buffer, GeomPrimitiveParameters& objparam ) {
+   unmarshal( buffer, static_cast<RigidBodyParameters&>( objparam ) );
    buffer >> objparam.material_;
 }
 

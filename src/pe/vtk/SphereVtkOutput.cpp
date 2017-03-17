@@ -39,6 +39,7 @@ std::vector< SphereVtkOutput::Attributes > SphereVtkOutput::getAttributes() cons
    attributes.push_back( Attributes( vtk::typeToString< float >(), "velocity", uint_c(3) ) );
    attributes.push_back( Attributes( vtk::typeToString< float >(), "orientation", uint_c(3) ) );
    attributes.push_back( Attributes( vtk::typeToString< int >(),   "rank", uint_c(1) ) );
+   attributes.push_back( Attributes( vtk::typeToString< id_t >(),   "id", uint_c(1) ) );
 
    return attributes;
 }
@@ -55,6 +56,15 @@ void SphereVtkOutput::configure()
       {
          if (it->getTypeID() == Sphere::getStaticTypeID())
             bodies_.push_back( static_cast<ConstSphereID> (*it) );
+         if (it->getTypeID() == Union<boost::tuple<Sphere> >::getStaticTypeID())
+         {
+            auto un = static_cast<Union<boost::tuple<Sphere> > const * > (*it);
+            for( auto it2 = un->begin(); it2 != un->end(); ++it2 )
+            {
+               if (it2->getTypeID() == Sphere::getStaticTypeID())
+                  bodies_.push_back( static_cast<ConstSphereID> (*it2) );
+            }
+         }
       }
    }
 }

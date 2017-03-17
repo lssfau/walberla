@@ -179,6 +179,8 @@ public:
    template< typename Engine >
    inline vector_type randomPoint( Engine & engine ) const;
 
+   bool checkInvariant() const;
+
    /**
     * \brief Deserializes an GenericAABB from a mpi::GenericRecvBuffer
     *
@@ -206,8 +208,6 @@ protected:
    inline GenericAABB( const GenericAABB & lhs, const GenericAABB & rhs );
 
 private:
-   bool checkInvariant() const;
-
    vector_type minCorner_; /// minimal values
    vector_type maxCorner_; /// maximal values
 };

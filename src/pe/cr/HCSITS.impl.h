@@ -1774,12 +1774,8 @@ inline void HardContactSemiImplicitTimesteppingSolvers::integratePositions( Body
    body->resetNode();
    body->clearContacts();
 
-   if( body->isAwake() ) {
-      if (body->getSystemID() == 6917529027641081896)
-      {
-         //WALBERLA_LOG_DEVEL("pos: " << body->getPosition() << "\nvel: " << body->getLinearVel() << "\nv: " << v);
-      }
-
+   if( body->isAwake() )
+   {
       // Calculating the translational displacement
       body->setPosition( body->getPosition() + v * dt );
 
@@ -1793,14 +1789,6 @@ inline void HardContactSemiImplicitTimesteppingSolvers::integratePositions( Body
       // Storing the velocities back in the body properties
       body->setLinearVel( v );
       body->setAngularVel( w );
-
-      //      if( body->getType() == unionType ) {
-      //         // Updating the contained bodies
-      //         UnionID u( static_cast<UnionID>( body ) );
-
-      //         for( BodyIterator subbody=u->begin(); subbody!=u->end(); ++subbody )
-      //            u->updateBody( *subbody, dq );
-      //      }
 
       // Setting the axis-aligned bounding box
       body->calcBoundingBox();

@@ -63,7 +63,7 @@ void marshal( mpi::SendBuffer& buffer, const MPIRigidBodyTrait& obj );
  * \param hasSuperBody False if body is not part of a union. Subordinate bodies in unions do not encode velocities but encode relative positions.
  * \return void
  */
-void unmarshal( mpi::RecvBuffer& buffer, MPIRigidBodyTraitParameter& objparam, bool hasSuperBody );
+void unmarshal( mpi::RecvBuffer& buffer, MPIRigidBodyTraitParameter& objparam );
 
 //*************************************************************************************************
 //*************************************************************************************************
@@ -77,6 +77,7 @@ struct RigidBodyParameters {
    bool communicating_, infiniteMass_;
    id_t sid_, uid_;
    Vec3 gpos_, rpos_, v_, w_;
+   bool hasSuperBody_;
    Quat q_;
 };
 
@@ -98,7 +99,7 @@ void marshal( mpi::SendBuffer& buffer, const RigidBody& obj );
  * \param hasSuperBody False if body is not part of a union. Subordinate bodies in unions do not encode velocities but encode relative positions.
  * \return void
  */
-void unmarshal( mpi::RecvBuffer& buffer, RigidBodyParameters& objparam, bool hasSuperBody );
+void unmarshal( mpi::RecvBuffer& buffer, RigidBodyParameters& objparam );
 
 //*************************************************************************************************
 //*************************************************************************************************
@@ -130,7 +131,7 @@ void marshal( mpi::SendBuffer& buffer, const GeomPrimitive& obj );
  * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
  * \return void
  */
-void unmarshal( mpi::RecvBuffer& buffer, GeomPrimitiveParameters& objparam, bool hasSuperBody );
+void unmarshal( mpi::RecvBuffer& buffer, GeomPrimitiveParameters& objparam );
 
 }  // namespace communication
 }  // namespace pe
