@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Materials.cpp
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Source file for materials
@@ -119,7 +118,6 @@ bool Material::activateMaterials()
 
 //*************************************************************************************************
 /*!\brief Creating a new custom material.
- * \ingroup materials
  *
  * \param name The name of the custom material.
  * \param density The density of the custom material \f$ (0..\infty) \f$.
@@ -235,7 +233,6 @@ MaterialID createMaterial( const std::string& name, real_t density, real_t cor,
 
 //*************************************************************************************************
 /*!\brief Creating a new anonymous custom material.
-// \ingroup materials
 //
 // \param density The density of the custom material \f$ (0..\infty) \f$.
 // \param cor The coefficient of restitution of the custom material \f$ [0..1] \f$.
@@ -273,7 +270,6 @@ MaterialID createMaterial( real_t density, real_t cor, real_t csf, real_t cdf, r
 
 //*************************************************************************************************
 /*!\brief Searching for a registered material.
- * \ingroup materials
  *
  * \param name The name of the material.
  * \return The MaterialID of the material if the material is found, \a invalid_material otherwise.
@@ -295,7 +291,6 @@ MaterialID Material::find( const std::string& name )
 
 //*************************************************************************************************
 /*!\brief Searching for registered materials with a prefix.
-// \ingroup materials
 //
 // \param prefix The prefix common to the names of the materials.
 // \return A std::vector object containing the MaterialIDs of all materials found.

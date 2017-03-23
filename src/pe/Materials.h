@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Materials.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for materials
@@ -46,11 +45,7 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\defgroup materials Materials
- * \ingroup pe
- */
 /*!\brief Rigid body material.
- * \ingroup materials
  *
  * A material specifies the properties of a rigid body: the density of the body, the coefficient
  * of restitution and the coefficients of static and dynamic friction.\n
@@ -413,7 +408,6 @@ inline real_t Material::getDampingT() const
 
 //*************************************************************************************************
 /*!\brief Returns the name of the given material.
- * \ingroup materials
  *
  * \param material The material to be queried.
  * \return The name of the given material.
@@ -428,7 +422,6 @@ inline const std::string& Material::getName( MaterialID material )
 
 //*************************************************************************************************
 /*!\brief Returns the density of the given material.
- * \ingroup materials
  *
  * \param material The material to be queried.
  * \return The density of the given material.
@@ -443,7 +436,6 @@ inline real_t Material::getDensity( MaterialID material )
 
 //*************************************************************************************************
 /*!\brief Returns the coefficient of restitution of the given material.
- * \ingroup materials
  *
  * \param material The material to be queried.
  * \return The coefficient of restitution of the given material.
@@ -458,7 +450,6 @@ inline real_t Material::getRestitution( MaterialID material )
 
 //*************************************************************************************************
 /*!\brief Returns the composite coefficient of restitution for a collision between two rigid bodies.
- * \ingroup materials
  *
  * \param material1 The material of the first colliding rigid body.
  * \param material2 The material of the second colliding rigid body.
@@ -475,7 +466,6 @@ inline real_t Material::getRestitution( MaterialID material1, MaterialID materia
 
 //*************************************************************************************************
 /*!\brief Returns the coefficient of static friction of the given material.
- * \ingroup materials
  *
  * \param material The material to be queried.
  * \return The coefficient of static friction of the given material.
@@ -490,7 +480,6 @@ inline real_t Material::getStaticFriction( MaterialID material )
 
 //*************************************************************************************************
 /*!\brief Returns the coefficient of static friction for a collision between two rigid bodies.
- * \ingroup materials
  *
  * \param material1 The material of the first colliding rigid body.
  * \param material2 The material of the second colliding rigid body.
@@ -507,7 +496,6 @@ inline real_t Material::getStaticFriction( MaterialID material1, MaterialID mate
 
 //*************************************************************************************************
 /*!\brief Returns the coefficient of dynamic friction of the given material.
- * \ingroup materials
  *
  * \param material The material to be queried.
  * \return The coefficient of dynamic friction of the given material.
@@ -522,7 +510,6 @@ inline real_t Material::getDynamicFriction( MaterialID material )
 
 //*************************************************************************************************
 /*!\brief Returns the coefficient of dynamic friction for a collision between two rigid bodies.
- * \ingroup materials
  *
  * \param material1 The material of the first colliding rigid body.
  * \param material2 The material of the second colliding rigid body.
@@ -539,7 +526,6 @@ inline real_t Material::getDynamicFriction( MaterialID material1, MaterialID mat
 
 //*************************************************************************************************
 /*!\brief Returns the Poisson's ratio of the given material.
- * \ingroup materials
  *
  * \param material The material to be queried.
  * \return The Poisson's ratio of the given material.
@@ -554,7 +540,6 @@ inline real_t Material::getPoissonRatio( MaterialID material )
 
 //*************************************************************************************************
 /*!\brief Returns the Young's modulus of the given material.
- * \ingroup materials
  *
  * \param material The material to be queried.
  * \return The Young's modulus of the given material.
@@ -569,7 +554,6 @@ inline real_t Material::getYoungModulus( MaterialID material )
 
 //*************************************************************************************************
 /*!\brief Returns the (effective) Young's modulus for a collision between two rigid bodies.
- * \ingroup materials
  *
  * \param material1 The material of the first colliding rigid body.
  * \param material2 The material of the second colliding rigid body.
@@ -603,7 +587,6 @@ inline real_t Material::getYoungModulus( MaterialID material1, MaterialID materi
 
 //*************************************************************************************************
 /*!\brief Returns the stiffness in normal direction of the material's contact region.
- * \ingroup materials
  *
  * \param material The material to be queried.
  * \return The stiffness in normal direction of the contact region of the given material.
@@ -618,7 +601,6 @@ inline real_t Material::getStiffness( MaterialID material )
 
 //*************************************************************************************************
 /*!\brief Returns the stiffness in normal direction of the contact between two materials.
- * \ingroup materials
  *
  * \param material1 The material of the first colliding rigid body.
  * \param material2 The material of the second colliding rigid body.
@@ -641,7 +623,6 @@ inline real_t Material::getStiffness( MaterialID material1, MaterialID material2
 
 //*************************************************************************************************
 /*!\brief Returns the damping coefficient in normal direction of the material's contact region.
- * \ingroup materials
  *
  * \param material The material to be queried.
  * \return The damping in normal direction of the contact region of the given material.
@@ -656,7 +637,6 @@ inline real_t Material::getDampingN( MaterialID material )
 
 //*************************************************************************************************
 /*!\brief Returns the damping in normal direction of the contact between two materials.
- * \ingroup materials
  *
  * \param material1 The material of the first colliding rigid body.
  * \param material2 The material of the second colliding rigid body.
@@ -679,7 +659,6 @@ inline real_t Material::getDampingN( MaterialID material1, MaterialID material2 
 
 //*************************************************************************************************
 /*!\brief Returns the damping coefficient in tangential direction of the material's contact region.
- * \ingroup materials
  *
  * \param material The material to be queried.
  * \return The damping in tangential direction of the contact region of the given material.
@@ -694,7 +673,6 @@ inline real_t Material::getDampingT( MaterialID material )
 
 //*************************************************************************************************
 /*!\brief Returns the damping in tangential direction of the contact between two materials.
- * \ingroup materials
  *
  * \param material1 The material of the first colliding rigid body.
  * \param material2 The material of the second colliding rigid body.
@@ -717,7 +695,6 @@ inline real_t Material::getDampingT( MaterialID material1, MaterialID material2 
 
 //*************************************************************************************************
 /*!\brief Setting the coefficient of restitution between material \a material1 and \a material2.
- * \ingroup materials
  *
  * \param material1 The material of the first colliding rigid body.
  * \param material2 The material of the second colliding rigid body.
@@ -735,7 +712,6 @@ inline void Material::setRestitution( MaterialID material1, MaterialID material2
 
 //*************************************************************************************************
 /*!\brief Setting the coefficient of static friction between material \a material1 and \a material2.
- * \ingroup materials
  *
  * \param material1 The material of the first colliding rigid body.
  * \param material2 The material of the second colliding rigid body.
@@ -753,7 +729,6 @@ inline void Material::setStaticFriction( MaterialID material1, MaterialID materi
 
 //*************************************************************************************************
 /*!\brief Setting the coefficient of dynamic friction between material \a material1 and \a material2.
- * \ingroup materials
  *
  * \param material1 The material of the first colliding rigid body.
  * \param material2 The material of the second colliding rigid body.
@@ -779,7 +754,6 @@ inline void Material::setDynamicFriction( MaterialID material1, MaterialID mater
 
 //*************************************************************************************************
 /*!\brief Specification of the material iron.
- * \ingroup materials
  *
  * The Iron class represents the material iron. It is implemented as a veneer class for the
  * Material base class to set the properties of iron:
@@ -841,7 +815,6 @@ inline Iron::Iron()
 
 //*************************************************************************************************
 /*!\brief Specification of the material copper.
- * \ingroup materials
  *
  * The Copper class represents the material copper. It is implemented as a veneer class for
  * the Material base class to set the properties of iron:
@@ -903,7 +876,6 @@ inline Copper::Copper()
 
 //*************************************************************************************************
 /*!\brief Specification of the material granite.
- * \ingroup materials
  *
  * The Granite class represents the material granite. It is implemented as a veneer class for
  * the Material base class to set the properties of granite:
@@ -965,7 +937,6 @@ inline Granite::Granite()
 
 //*************************************************************************************************
 /*!\brief Specification of the material oak.
- * \ingroup materials
  *
  * The Oak class represents the material oak wood. It is implemented as a veneer class for the
  * Material base class to set the properties of oak wood:
@@ -1027,7 +998,6 @@ inline Oak::Oak()
 
 //*************************************************************************************************
 /*!\brief Specification of the material fir.
- * \ingroup materials
  *
  * The Fir class represents the material fir wood. It is implemented as a veneer class for the
  * Material base class to set the properties of fir wood:
@@ -1090,7 +1060,6 @@ inline Fir::Fir()
 
 //*************************************************************************************************
 /*!\brief ID for an invalid material.
- * \ingroup materials
  *
  * This MaterialID is returned by the getMaterial() function in case no material with the
  * specified name is returned. This value should not be used to create rigid bodies or in

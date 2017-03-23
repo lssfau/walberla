@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file RigidBodyNewShadowCopyNotification.h
-//! \ingroup pe
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the RigidBodyNewShadowCopyNotification class
 //
@@ -42,7 +41,6 @@ namespace communication {
 
 //*************************************************************************************************
 /*!\brief Wrapper class for rigid body new shadow copy notifications.
- * \ingroup rigid_body
  *
  * The RigidBodyNewShadowCopyNotification class is a wrapper class for marshaling and unmarshaling
  * of rigid body new shadow copy notifications. This notification is send to the owner of a rigid

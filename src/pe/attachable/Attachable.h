@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Attachable.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the Attachable class
@@ -47,7 +46,6 @@ namespace pe {
 
 //*************************************************************************************************
 /*!\brief Attachable interface class.
- * \ingroup core
  *
  * The Attachable class is the base class for the Attachable concept of the physics engine.
  * Classes deriving from this interface class (which are simply called Attachables) can be

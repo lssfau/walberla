@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file basic.h
-//! \ingroup pe
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file which includes common pe headers!
 //

@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file RigidBody.h
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -47,6 +46,9 @@ namespace pe{
 template <typename BodyTypeTuple>
 class Union;
 
+/**
+ * \ingroup pe
+ */
 class RigidBody : public Node
                 , public ccd::HashGridsBodyTrait
                 , public cr::HCSITSBodyTrait

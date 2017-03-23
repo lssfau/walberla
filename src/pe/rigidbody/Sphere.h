@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Sphere.h
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -50,8 +49,9 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Base class for the sphere geometry.
- * \ingroup sphere
+/**
+ * \ingroup pe
+ * \brief Base class for the sphere geometry.
  *
  * The Sphere class represents the base class for the sphere geometry. It provides
  * the basic functionality of a sphere. For a full description of the sphere geometry,

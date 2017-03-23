@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file DEM.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the DEM solver
@@ -37,6 +36,9 @@ namespace walberla {
 namespace pe {
 namespace cr {
 
+/**
+ * \ingroup pe
+ */
 class DEM : public ICR
 {
 public:

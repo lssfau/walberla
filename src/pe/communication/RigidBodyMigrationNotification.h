@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file RigidBodyMigrationNotification.h
-//! \ingroup pe
 //! \author Tobias Preclik
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the RigidBodyMigrationNotification class
@@ -43,7 +42,6 @@ namespace communication {
 
 //*************************************************************************************************
 /*!\brief Wrapper class for rigid body migration notifications.
- * \ingroup rigid_body
  *
  * The RigidBodyMigrationNotification class is a wrapper class for marshaling and unmarshaling
  * rigid body migration notifications. When receiving a migration notification this indicates that

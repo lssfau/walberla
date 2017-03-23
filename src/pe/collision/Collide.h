@@ -50,7 +50,6 @@ struct DoubleDispatch;
 
 //*************************************************************************************************
 /*!\brief Contact generation between two colliding rigid bodies.
- * \ingroup contact_generation
  *
  * \param s1 The first colliding rigid body.
  * \param s2 The second colliding rigid body.
@@ -140,7 +139,6 @@ bool collide( PlaneID p, SphereID s, Container& container )
 
 //*************************************************************************************************
 /*!\brief Contact generation between a Sphere and a Box.
- * \ingroup contact_generation
  *
  * \param s The colliding sphere.
  * \param b The colliding box.
@@ -1708,7 +1706,6 @@ bool collide( PlaneID p, BoxID b, Container& container )
 
 
 /*!\brief Contact generation between two colliding Capsule primitives.
- * \ingroup contact_generation
  *
  * \param c1 The first colliding capsule.
  * \param c2 The second colliding capsule.
@@ -1822,7 +1819,6 @@ bool collide( CapsuleID c1, CapsuleID c2, Container& container )
 
 //*************************************************************************************************
 /*!\brief Contact generation between a Capsule and a Plane.
- * \ingroup contact_generation
  *
  * \param c The colliding capsule.
  * \param p The colliding plane.

@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file RigidBodyForceNotification.h
-//! \ingroup pe
 //! \author Tobias Preclik
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the RigidBodyForceNotification class
@@ -43,7 +42,6 @@ namespace communication {
 
 //*************************************************************************************************
 /*!\brief Wrapper class for rigid body force and torque contribution notifications.
- * \ingroup rigid_body
  *
  * The RigidBodyForceNotification class is a wrapper class for marshaling and unmarshaling rigid body
  * force and torque contribution notifications. They may only be sent by processes registered

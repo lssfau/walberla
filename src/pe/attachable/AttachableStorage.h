@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file AttachableStorage.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -47,7 +46,6 @@ namespace pe {
 
 //*************************************************************************************************
 /*!\brief Attachable storage of the rigid body simulation world.
- * \ingroup core
  *
  * The AttachableStorage class stores all currently existing attachables in the simulation world
  * (see class World).

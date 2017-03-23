@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file ICCD.h
-//! \ingroup CoarseCollisionDetection
 //! \author Klaus Iglberger
 //! \author Florian Schornbaum
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
@@ -57,7 +56,6 @@ namespace ccd {
 
 //*************************************************************************************************
 /*!\brief Implementation of the 'Hierarchical Hash Grids' coarse collision detection algorithm.
- * \ingroup coarse_collision_detection
  *
  * The 'Hierarchical Hash Grids' coarse collision detection algorithm is based on a spatial
  * partitioning scheme that uses a hierarchy of uniform, hash storage based grids. Uniform grids

@@ -38,8 +38,9 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Setup of a new plane.
- * \ingroup rigidbody
+/**
+ * \ingroup pe
+ * \brief Setup of a new Plane.
  *
  * \param globalStorage process local global storage
  * \param uid The user-specific ID of the plane.
@@ -51,12 +52,11 @@ namespace pe {
  * This function creates a plane primitive in the simulation system. The plane with
  * user-specific ID \a uid is placed at the global position \a gpos, oriented with \a normal
  * and consists of the material \a material
-
- * The following code example illustrates the setup of a sphere:
-
-   \code
-   PlaneID plane = createPlane( globalStorage, 1, Vec3(2,3,4), Vec3(2,3,4) );
-   \endcode
+ *
+ * The following code example illustrates the setup of a plane:
+ *
+ * \snippet PeDocumentationSnippets.cpp Create a Plane
+ *
  */
 PlaneID createPlane( BodyStorage& globalStorage,
                      id_t uid, Vec3 normal, const Vec3& gpos,

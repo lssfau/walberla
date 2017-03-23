@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Attachable.cpp
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Source file for the Attachable class
@@ -101,7 +100,6 @@ Attachable::~Attachable()
 
 //*************************************************************************************************
 /*!\brief Detaches the given attachable.
- * \ingroup core
  *
  * \param attachable The detachable to be detached.
  */

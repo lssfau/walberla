@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Capsule.h
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -51,10 +50,9 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Capsule geometry.
- * \ingroup rigidbody
- *
- * \section capsule_general General
+/**
+ * \ingroup pe
+ * \brief Capsule geometry.
  *
  * The Capsule class represents the geometric primitive capsule, which is one of the basic
  * geometric primitives of the \b pe physics module. The class is derived from the GeomPrimitive

@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file MPIRigidBodyTrait.h
-//! \ingroup pe
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -40,7 +39,6 @@ namespace pe{
 
 //*************************************************************************************************
 /*!\brief Base class for a specialization of the RigidBodyTrait class template for MPI parallel solvers.
- * \ingroup rigidbody
  *
  * This class adds functionality to track which process owns the rigid body and which processes
  * have remote copies of the body in case it is owned by this process.

@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file PackNotification.h
-//! \ingroup pe
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for packNotification
 //

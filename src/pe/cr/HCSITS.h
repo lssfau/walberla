@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file HCSITS.h
-//! \ingroup pe
 //! \author Tobias Preclik
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the hard contact solver
@@ -58,11 +57,12 @@ namespace cr {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Specialization of the collision system for the hard contact solvers.
- * \ingroup core
+/**
+ * \ingroup pe
+ * \brief Particular implementation of the collision resoution for the hard contacts.
  *
- * This specialization of the CollisionSystem class template adapts the collision system of the
- * rigid body simulation world to the requirements of the hard contact solvers.
+ * The following code example illustrates the setup of the solver:
+ * \snippet PeDocumentationSnippets.cpp Setup HCSITS
  */
 class HardContactSemiImplicitTimesteppingSolvers
    : public ICR

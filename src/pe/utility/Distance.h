@@ -45,11 +45,7 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\defgroup distance_calculation Distance calculation functions
- * \ingroup pe
- *
- * These functions can be used to calculate the distance between two rigid bodies (surface to surface).
- */
+//* These functions can be used to calculate the distance between two rigid bodies (surface to surface).
 //*************************************************************************************************
 
 
@@ -65,7 +61,6 @@ inline real_t getSurfaceDistance( ConstPlaneID p1   , ConstPlaneID p2    );
 
 //*************************************************************************************************
 /*!\brief Distance calculation between two Sphere primitives.
- * \ingroup distance_calculation
  *
  * \param s1 The first sphere.
  * \param s2 The second sphere.
@@ -84,7 +79,6 @@ inline real_t getSurfaceDistance( ConstSphereID s1, ConstSphereID s2 )
 
 //*************************************************************************************************
 /*!\brief Distance calculation between a Sphere and a Plane.
- * \ingroup distance_calculation
  *
  * \param s The sphere.
  * \param p The plane.
@@ -102,7 +96,6 @@ inline real_t getSurfaceDistance( ConstSphereID s, ConstPlaneID p )
 
 //*************************************************************************************************
 /*!\brief Distance calculation between two Plane primitives.
- * \ingroup distance_calculation
  *
  * \param p1 The first plane.
  * \param p2 The second plane.

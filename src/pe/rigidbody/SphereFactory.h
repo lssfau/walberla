@@ -38,8 +38,9 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Setup of a new sphere.
- * \ingroup rigidbody
+/**
+ * \ingroup pe
+ * \brief Setup of a new Sphere.
  *
  * \param globalStorage process local global storage
  * \param blocks storage of all the blocks on this process
@@ -60,17 +61,9 @@ namespace pe {
  * and consists of the material \a material.
  *
  * The following code example illustrates the setup of a sphere:
-
-   \code
-   // Creating the iron sphere 1 with a radius of 2.5 at the global position (2,3,4).
-   // Note that the sphere is
-   // automatically added to the simulation world and is immediately part of the entire
-   // simulation. The function returns a handle to the newly created sphere, which can
-   // be used to for instance rotate the sphere around the global y-axis.
-   SphereID sphere = createSphere( globalStorage, blocks, storageID, 1, Vec3(2,3,4), 2.5 );
-   if (SphereID != NULL)
-       sphere->rotate( 0.0, PI/3.0, 0.0 );
-   \endcode
+ *
+ * \snippet PeDocumentationSnippets.cpp Create a Sphere
+ *
  */
 SphereID createSphere( BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID storageID,
                        id_t uid, const Vec3& gpos, real_t radius,

@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Contact.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the Contact class.
@@ -47,11 +46,7 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\defgroup contact Contact
- * \ingroup core
- */
 /*!\brief Contact between rigid bodies.
- * \ingroup contact
  *
  * The Contact class is the base class for all types of contacts between rigid bodies in the
  * simulation system. Contacts between rigid bodies are classified depending on the relative
@@ -339,7 +334,6 @@ inline const Vec3 Contact::getRelVel() const
 
 //*************************************************************************************************
 /*!\brief Global output operator for contacts.
- * \ingroup contact
  *
  * \param os Reference to the output stream.
  * \param c Reference to a constant contact object.
@@ -371,7 +365,6 @@ inline std::ostream& operator<<( std::ostream& os, const Contact& c )
 
 //*************************************************************************************************
 /*!\brief Global output operator for contact handles.
- * \ingroup contact
  *
  * \param os Reference to the output stream.
  * \param c Constant contact handle.

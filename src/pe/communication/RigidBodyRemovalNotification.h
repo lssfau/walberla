@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file RigidBodyRemovalNotification.h
-//! \ingroup pe
 //! \author Tobias Preclik
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the RigidBodyRemovalNotification class
@@ -43,7 +42,6 @@ namespace communication {
 
 //*************************************************************************************************
 /*!\brief Wrapper class for rigid body removal notifications.
- * \ingroup rigid_body
  *
  * The RigidBodyRemovalNotification class is a wrapper class for marshaling and unmarshaling rigid body
  * removal notifications. When receiving a removal notification this indicates that a shadow copy

@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Config.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -35,7 +34,6 @@ namespace pe {
 
 //*************************************************************************************************
 /*!\brief Sleep mode threshold value.
- * \ingroup config
  *
  * This value specifies the threshold value for the sleep mode of a rigid body. In case the
  * motion of a rigid body drops below this threshold, the body is put to sleep and is not moved
@@ -52,7 +50,6 @@ const real_t sleepThreshold = real_c( 0 );
 
 //*************************************************************************************************
 /*!\brief Recency-weighted average bias value for the sleep mode \f$ [0..1] \f$.
- * \ingroup config
  *
  * The motion of a rigid body is calculated by a recency-weighted average. This value specifies
  * the bias value for the calculation. It controls how much significance is given to previous

@@ -106,11 +106,7 @@ enum EulerRotation {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\defgroup dense_rotation_matrix RotationMatrix
- * \ingroup math
- */
 /*!\brief Efficient, generic implementation of a 3x3 rotation matrix.
- * \ingroup math
  *
  * The RotationMatrix class is the representation of a 3x3 rotation matrix with a total of 9
  * statically allocated elements of arbitrary type. The naming convention of the elements is

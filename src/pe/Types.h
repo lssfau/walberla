@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Types.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -167,7 +166,6 @@ typedef std::vector<Material>  Materials;          //!< Vector for materials.
 
 //*************************************************************************************************
 /*!\brief Unique material ID.
- * \ingroup pe
  *
  * Every registered material has a unique MaterialID that can be used wherever the material is
  * required. The \b pe engine provides a couple of predefined materials (see the \ref materials

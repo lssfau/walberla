@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file GeomPrimitive.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the GeomPrimitive class
@@ -43,7 +42,6 @@ namespace pe {
 
 //*************************************************************************************************
 /*!\brief Base class for all primitive geometries.
- * \ingroup rigidbody
  *
  * The GeomPrimitive class is the abstract basis for all geometric primitives of the rigid body
  * physics module. The class provides the common data members and the common functionality for

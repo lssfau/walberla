@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file BodyStorage.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -54,7 +53,6 @@ namespace pe {
 
 //*************************************************************************************************
 /*!\brief Body storage of the rigid body simulation world.
- * \ingroup pe
  *
  * A BodyStorage is a data structure for storing rigid bodies. It supports efficient insertion and
  * deletion operations.

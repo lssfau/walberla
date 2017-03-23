@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file HashGridsBodyTrait.h
-//! \ingroup CoarseCollisionDetection
 //! \author Klaus Iglberger
 //! \author Florian Schornbaum
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
@@ -37,7 +36,6 @@ namespace ccd {
 
 //*************************************************************************************************
 /*!\brief Specialization of the BodyTrait class template for the 'hierarchical hash-grid' algorithm.
- * \ingroup coarse_collision_detection
  *
  * This specialization of the BodyTrait class template adapts rigid bodies to the hierarchical hash-grid
  * coarse collision detection algorithm.

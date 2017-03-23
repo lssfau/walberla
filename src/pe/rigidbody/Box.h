@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Box.h
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -49,7 +48,9 @@ namespace pe {
 //
 //=================================================================================================
 
-/*!\brief Box geometry.
+/**
+ * \ingroup pe
+ * \brief Box geometry.
  *
  * The Box class represents the geometric primitive box, which is one of the basic geometric
  * primitives of the \b pe physics module. The class is derived from the GeomPrimitive base class,

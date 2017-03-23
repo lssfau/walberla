@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file HashGrids.cpp
-//! \ingroup CoarseCollisionDetection
 //! \author Klaus Iglberger
 //! \author Florian Schornbaum
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
@@ -1149,7 +1148,6 @@ bool HashGrids::powerOfTwo( size_t number )
 
 //*************************************************************************************************
 /*!\brief The initial number of cells in x-direction of a newly created hash grid.
- * \ingroup config
  *
  * This value represents the initial number of cells of a newly created hash grid in x-direction.
  * The larger the value (i.e. the greater the number of cells of every newly created hash grid),
@@ -1167,7 +1165,6 @@ const size_t HashGrids::xCellCount = 16;
 
 //*************************************************************************************************
 /*!\brief The initial number of cells in y-direction of a newly created hash grid.
- * \ingroup config
  *
  * This value represents the initial number of cells of a newly created hash grid in y-direction.
  * The larger the value (i.e. the greater the number of cells of every newly created hash grid),
@@ -1185,7 +1182,6 @@ const size_t HashGrids::yCellCount = 16;
 
 //*************************************************************************************************
 /*!\brief The initial number of cells in z-direction of a newly created hash grid.
- * \ingroup config
  *
  * This value represents the initial number of cells of a newly created hash grid in z-direction.
  * The larger the value (i.e. the greater the number of cells of every newly created hash grid),
@@ -1203,7 +1199,6 @@ const size_t HashGrids::zCellCount = 16;
 
 //*************************************************************************************************
 /*!\brief The initial storage capaciy of a newly created grid cell body container.
- * \ingroup config
  *
  * This value specifies the initial storage capacity reserved for every grid cell body container,
  * i.e., the number of bodies that can initially be assigned to a grid cell with the need to
@@ -1220,7 +1215,6 @@ const size_t HashGrids::cellVectorSize = 16;
 
 //*************************************************************************************************
 /*!\brief The initial storage capacity of the grid-global vector.
- * \ingroup config
  *
  * This value specifies the initial storage capacity of the grid-global vector that keeps track
  * of all body-occupied cells. As long as at least one body is assigned to a certain cell, this
@@ -1234,7 +1228,6 @@ const size_t HashGrids::occupiedCellsVectorSize = 256;
 
 //*************************************************************************************************
 /*!\brief The minimal ratio of cells to bodies that must be maintained at any time.
- * \ingroup config
  *
  * This \a minimalGridDensity specifies the minimal ratio of cells to bodies that is allowed
  * before a grid grows.\n
@@ -1253,7 +1246,6 @@ const size_t HashGrids::minimalGridDensity = 8;
 
 //*************************************************************************************************
 /*!\brief Activation threshold for the hierarchical hash grids coarse collision detection algorithm.
- * \ingroup config
  *
  * If the simulation only consists of a very small number of bodies, simply checking each body
  * against each other body proves to be faster than involving the far more complex mechanisms
@@ -1272,7 +1264,6 @@ const size_t HashGrids::gridActivationThreshold = 32;
 
 //*************************************************************************************************
 /*!\brief The constant factor by which the cell size of any two successive grids differs.
- * \ingroup config
  *
  * This factor specifies the size difference of two successive grid levels of the hierarchical
  * hash grids. The grid hierarchy is constructed such that the cell size of any two successive

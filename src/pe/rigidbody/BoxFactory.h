@@ -38,8 +38,9 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Setup of a new Box.
- * \ingroup rigidbody
+/**
+ * \ingroup pe
+ * \brief Setup of a new Box.
  *
  * \param globalStorage process local global storage
  * \param blocks storage of all the blocks on this process
@@ -60,17 +61,8 @@ namespace pe {
  * and consists of the material \a material.
  *
  * The following code example illustrates the setup of a box:
-
-   \code
-   // Creating the iron box 1 with a side lengths of 2.5 at the global position (2,3,4).
-   // Note that the box is
-   // automatically added to the simulation world and is immediately part of the entire
-   // simulation. The function returns a handle to the newly created box, which can
-   // be used to for instance rotate the box around the global y-axis.
-   BoxID box = createBox( globalStorage, blocks, storageID, 1, Vec3(2,3,4), Vec3(2.5,2.5,2.5) );
-   if (box != NULL)
-       box->rotate( 0.0, PI/3.0, 0.0 );
-   \endcode
+ * \snippet PeDocumentationSnippets.cpp Create a Box
+ *
  */
 BoxID createBox(       BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID storageID,
                        id_t uid, const Vec3& gpos, const Vec3& lengths,

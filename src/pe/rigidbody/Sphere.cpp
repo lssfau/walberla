@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Sphere.cpp
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -218,7 +217,6 @@ void Sphere::print( std::ostream& os, const char* tab ) const
 
 //*************************************************************************************************
 /*!\brief Global output operator for spheres.
- * \ingroup sphere
  *
  * \param os Reference to the output stream.
  * \param s Reference to a constant sphere object.
@@ -238,7 +236,6 @@ std::ostream& operator<<( std::ostream& os, const Sphere& s )
 
 //*************************************************************************************************
 /*!\brief Global output operator for sphere handles.
- * \ingroup sphere
  *
  * \param os Reference to the output stream.
  * \param s Constant sphere handle.

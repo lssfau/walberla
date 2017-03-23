@@ -1,0 +1,78 @@
+namespace walberla {
+namespace pe {
+
+/**
+\defgroup pe pe - Rigid Body Dynamics
+
+\section gtn Good to Know
+
+\subsection CreationMethods What geometries are supported?
+   - Box created via createBox()
+   - Capsule created via createCapsule()
+   - Plane created via createPlane()
+   - Sphere created via createSphere()
+   - Union created via createUnion()
+
+\subsection SyncMethods What synchronization functions are available?
+Please check the documentation of each individual method for more information.
+   - syncNextNeighbors()
+   - syncShadowOwners()
+
+\subsection CCD What coarse collision detection functions are available?
+Please check the documentation of each individual function for more information.
+   - ccd::SimpleCCD created via createSimpleCCDDataHandling()
+   - ccd::HashGrids created via createHashGridsDataHandling()
+
+\subsection FCD What fine collision detection functions are available?
+Please check the documentation of each individual function for more information.
+   - fcd::SimpleFCD create via createSimpleFCDDataHandling() (analytic contact detection)
+
+\subsection CRSolvers What collision resolution solvers are available?
+Please check the documentation of each individual solver for more information.
+   - cr::DEM (soft contact solver)
+   - cr::HardContactSemiImplicitTimesteppingSolvers (hard contact solver)
+
+\subsection BodyFlags Global, Communicating and InfiniteMass flags
+These flags are given during the creation process of the rigid body. They can be retrieved with
+RigidBody::isGlobal(), RigidBody::isCommunicating() and RigidBody::hasInfiniteMass().
+
+The **global** flag decides if the rigid body is stored in the global body storage or in one of the
+block local body storages. If the body is stored in the global body storage it will receive a
+global system id. Infinitely large bodies like planes are always global.
+
+The **communicating** flag decides if the body takes part in the synchronization process, e.g. it spawns
+shadow copies and updates already existent shadow copies. Bodies which do not move throughout
+the simulation can be made non communicating.
+\attention There will be no shadow copies of non communicating bodies even if they overlap a
+subdomain boundary. To overcome this drawback you can set **syncNonCommunicatingBodies**
+to **true** once in your sync call (syncNextNeighbors() or syncShadowOwners()).
+
+The **infiniteMass** flag decides if the body is "considered" by the collision resolution system. It still
+influences other rigid bodies but will not be moved itself. Rigid bodies with the **infiniteMass**
+flag set can still have a static velocity and will move accordingly.
+
+\subsection BodyNotFoundError "Object with id: xxx not found in shadowStorage! Cannot transfer ownership!"
+Most likely one of your bodies got too fast. The process of migrating a rigid body to a new process is:
+   1. overlap new subdomain
+   2. sync
+   3. move center of mass into the new subdomain
+   4. sync
+
+If a rigid body gets fast enough to move its center of mass into a new subdomain without first creating
+a shadow copy you will receive that error message.
+
+\subsection UnionContacts Contacts Involving Unions
+Collision detection for unions is done by colliding each of its subbodies separately.
+The contacts generated involves the **subbodies**. With this approach you can use different
+material parameters for every subbody and the solver component can retrieve the material
+of every collision partner by retrieving the material of Contact::getBody1(), Contact::getBody2().
+
+\attention To get the correct mass and inertia of a union during collision resolution
+you should call RigidBody::getTopSuperBody() and then RigidBody::getMass()
+(RigidBody::getInertia()) using the returned rigid body.
+
+\section CommonFunctions Important Classes and Functions
+**/
+
+}
+}

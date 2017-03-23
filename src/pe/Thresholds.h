@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Types.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Numerical thresholds for the physics engine
@@ -36,7 +35,6 @@ namespace pe {
 
 //*************************************************************************************************
 /*!\brief Collection of numerical threshold values.
- * \ingroup pe
  *
  * The Thresholds class defines numerical floating point thresholds for the pe module.
  * The following thresholds can be used:
@@ -83,7 +81,6 @@ struct Thresholds
 //*************************************************************************************************
 /*! \cond internal */
 /*!\brief Thresholds<float> specialization.
- * \ingroup pe
  */
 template<>
 struct Thresholds<float>
@@ -131,7 +128,6 @@ public:
 //*************************************************************************************************
 /*! \cond internal */
 /*!\brief Thresholds<double> specialization.
- * \ingroup pe
  */
 template<>
 struct Thresholds<double>
@@ -179,7 +175,6 @@ public:
 //*************************************************************************************************
 /*! \cond internal */
 /*!\brief Thresholds<long double> specialization.
- * \ingroup pe
  */
 template<>
 struct Thresholds<long double>

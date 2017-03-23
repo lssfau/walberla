@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Node.h
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -41,7 +40,6 @@ namespace pe {
 
 //*************************************************************************************************
 /*!\brief Node for the 'Union Find' algorithm.
- * \ingroup batch_generation
  *
  * This specialization of the BodyTrait class template adapts rigid bodies to the 'Union Find'
  * batch generation algorithm. In this algorithm, rigid bodies act as nodes in a graph and
