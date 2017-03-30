@@ -1,0 +1,59 @@
+/**
+\page eclipse_setup_page Setup Eclipse
+
+\section eclipse_import Import in Eclipse
+
+\brief Instructions how to configure eclipse (project import, coding style, templates)
+
+First clone the repository, create a build folder, and configure
+your build as described in \ref setup_instructions.
+
+If you followed the suggested directory layout, you have the following folders:
+
+\verbatim
+  parent/walberla             - the source directory as obtained from git
+  parent/walberla-build       - an empty directory for building walberla
+  parent/walberla-build-debug - possibly multiple build folders with different configurations
+  ...
+\endverbatim
+
+In eclipse, import the source directory as "Makefile Project with existing Code".
+In the project settings of the newly generated project, set up the build folder to
+reference your build directory (by default, it
+is equal to the source directory). If you have multiple build directories, you can create an eclipse build configuration for each folder.
+
+\section coding_style Coding Style
+
+waLBerla comes with a file that defines the recommended coding style that should be used throughout the project.
+It describes the formatting of the source code (white spaces, indentation, etc.).
+
+To import the coding style definition file into eclipse:
+- Window → Preferences → C/C++ → Code Style → Formatter → Import
+- Select `codingStyle.xml` in "utilities/eclipse"
+
+\section code_snippets Code Snippets
+
+Available code snippets:
+- `doxyblock`:      doxygen block
+- `doxysblock`:     short doxygen block
+- `doxygroup`:      doxygen member group
+- `doxyseparator`:  named separator line
+- `walberlaHeader`: template for a new waLBerla header
+- `walberlaSource`: template for a new waLBerla source file
+
+To import these snippets:	
+- Window → Preferences → C/C++ → Editor → Templates → Import
+- Select file `editorTemplateComment.xml` in "utilities/eclipse"
+
+After that, they can be used in any source file by typing one of the keywords, followed by Ctrl+Space.
+
+\section dictionary Dictionary
+
+They dictionary file contains words that are ignored by the eclipse spell checking.
+
+To import:
+- Window → Preferences → General → Editors → Text Editors → Spelling 
+- Make sure that "C/C++ spelling engine" is active at "Select spelling engine to use"
+- Select file `eclipseDict.txt` in "utilities/eclipse" at "User defined Dictionary"
+
+*/

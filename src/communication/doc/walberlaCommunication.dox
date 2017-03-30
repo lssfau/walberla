@@ -1,0 +1,93 @@
+namespace walberla {
+/*!
+
+\page walberla_communication Distributed memory communication in waLBerla
+
+\brief Describes concept from mpi buffer to communication schemes.
+
+The communication related code in waLBerla is not at a specific position but distributed 
+among multiple modules. This page gives an overview on how MPI communication is handled in waLBerla.
+Here mainly the code architecture is described, to get a feeling on how to setup a parallel 
+simulation look at \ref tutorial_03_comm .
+
+There a two communication strategies implemented in waLBerla: "buffered" and "direct" communication.
+When using buffered communication the number of messages per communication step is minimized, i.e. only one message
+per neighboring process is sent/received. Data belonging to different block data items and different blocks are packed
+inside a buffer and sent as one big message.
+The direction communication strategy uses no intermediate buffers and sends one message per block and block data. This
+is handled using MPI data types which means that the packing is delegated to the MPI library. One possible advantage of
+this strategy is that packing and sending can be overlapped. Direct communication is currently also the only way to
+communicate from/to GPUs.
+
+
+
+\image html architecture.png "Overview of waLBerlas distributed memory communication"
+
+
+
+\section buffered_comm Buffered Communication
+
+
+\subsection arch_bufferLayer Buffer Layer ( mpi module )
+
+The first layer above the MPI library is the Buffer Layer (located in core/mpi) . 
+Important classes are walberla::mpi::SendBuffer and walberla::mpi::RecvBuffer. 
+These buffers overload the `operator>>` and `operator<<`
+to store native data types in raw format. The receive buffer has to read the values in the
+same order as they were written into the SendBuffer. For a simple example have a look at the
+unit test BufferTest.cpp .  To pack and unpack new classes, one has to implement the corresponding
+operator for the class.
+This has been done for many types in the STL and of course for most waLBerla types ( see BufferDataTypesExtension.h )
+
+
+\image html bufferLayer.png "Buffer Layer in mpi module"
+
+
+These two Buffers are used by the walberla::mpi::BufferSystem and walberla::mpi::OpenMPBufferSystem classes 
+which associate the Buffers with ranks/processes. For each communication partner, the
+BufferSystem holds a  walberla::comm::SendBuffer and a  walberla::mpi::RecvBuffer, which store the data that has to be
+sent to this process, or was received by it.
+
+
+Besides the buffer related classes, helper functions for collective MPI operations exist in 
+Gatherv.h , Reduce.h and Broadcast.h
+
+
+\subsection arch_packingLayer Packing Layer
+
+   \image html packingLayer.png "Packing Layer in comm module"
+   
+   
+   The next important part of the communication are PackInfos. There exist two interfaces, one for
+   uniform grids and one for refined grids. A PackInfo specifies how to extract data from a block and how
+   to inject this data into another block. For details have a look at walberla::communication::UniformPackInfo and, as an
+   example implementation, walberla::field::communication::PackInfo.
+   
+   
+\subsection arch_controlLayer Control Layer
+   \image html controlLayer.png "Control Layer in comm module"
+   The control layer  can now use all the functionality provided by the layers below,
+   to implement the communication logic. It consists of communication schemes, the most prominent
+   is walberla::blockforest::communication::UniformBufferedScheme . It exchanges information with all neighboring blocks, where the
+   data extraction and insertion is handled by the registered PackInfos. There are other more specialized schemes available,
+   as an example have a look at walberla::blockforest::communciation::DirectionBasedReduceScheme.
+
+
+\section direct_comm Direct Communication
+
+\subsection arch_mpidatatypes MPI Datatype layer
+   \image html mpi_datatypes.png "Datatype layer"
+
+   To communicate data using direct communication one has to specify a MPI datatype for the block data.
+   This can be done by implementing the interface walberla::communication::UniformMPIDatatypeInfo .
+   For waLBerla fields this is already implemented in walberla::field::communication::UniformMPIDatatypeInfo using
+   functions provided in field/communication/MPIDatatypes.h .
+
+\subsection arch_direct_control_layer Control Layer
+   \image html direct_scheme.png "Direct communication scheme"
+
+   The scheme class for the direct communication strategy is blockforest::communication::UniformDirectScheme .
+   Here one can registered multiple UniformMPIDatatypeInfo's instead of PackInfo's .
+
+*/
+}

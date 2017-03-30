@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><templates><template autoinsert="true" context="org.eclipse.cdt.ui.text.templates.c" deleted="false" description="" enabled="true" name="doxyblock">//**************************************************************************************************************************************************************
+/*!
+* 
+*/
+//**************************************************************************************************************************************************************
+</template><template autoinsert="true" context="org.eclipse.cdt.ui.text.templates.c" deleted="false" description="" enabled="true" name="doxygroup">//** ${name}        ********************************************************************************************************************************************
+/*! \name ${name}  */
+//@{
+
+//@}
+//**************************************************************************************************************************************************************</template><template autoinsert="true" context="org.eclipse.cdt.ui.text.templates.c" deleted="false" description="" enabled="true" name="doxysblock">/***********************************************************************************************************************************************************//**
+* 
+***************************************************************************************************************************************************************/
+</template><template autoinsert="true" context="org.eclipse.cdt.ui.text.templates.c" deleted="false" description="" enabled="true" name="doxyseparator">//==============================================================================================================================================================
+//
+//  ${name}
+//
+//==============================================================================================================================================================
+</template><template autoinsert="true" context="org.eclipse.cdt.ui.text.templates.c" deleted="false" description="Template for a waLBerla Header file" enabled="true" name="walberlaHeader">//==============================================================================================================================================================
+//
+//  This file is part of waLBerla. waLBerla is free software: you can 
+//  redistribute it and/or modify it under the terms of the GNU General Public
+//  License as published by the Free Software Foundation, either version 3 of 
+//  the License, or (at your option) any later version.
+//  
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//  for more details.
+//  
+//  You should have received a copy of the GNU General Public License along
+//  with waLBerla (see COPYING.txt). If not, see &lt;http://www.gnu.org/licenses/&gt;.
+//
+//! \file ${fileName}.h
+//! \ingroup ${moduleName}
+//! \author ${user}
+//! \brief ${briefDesc}
+//
+//==============================================================================================================================================================
+
+#pragma once
+
+
+namespace walberla {
+namespace ${moduleName} {
+
+
+
+//**************************************************************************************************************************************************************
+/*!
+* TODO Add brief description here
+* 
+* \ingroup ${moduleName}
+* 
+* TODO Add long description here
+*/
+//**************************************************************************************************************************************************************
+class ${className}
+{
+public:
+  	${className}();
+	
+protected:
+	
+};
+
+
+
+} // namespace ${moduleName}
+} // namespace walberla
+</template><template autoinsert="true" context="org.eclipse.cdt.ui.text.templates.c" deleted="false" description="Template for a waLBerla Source file" enabled="true" name="walberlaSource">//==============================================================================================================================================================
+//
+//  This file is part of waLBerla. waLBerla is free software: you can 
+//  redistribute it and/or modify it under the terms of the GNU General Public
+//  License as published by the Free Software Foundation, either version 3 of 
+//  the License, or (at your option) any later version.
+//  
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//  for more details.
+//  
+//  You should have received a copy of the GNU General Public License along
+//  with waLBerla (see COPYING.txt). If not, see &lt;http://www.gnu.org/licenses/&gt;.
+//
+//! \file ${fileName}.cpp
+//! \ingroup ${moduleName}
+//! \author ${user}
+//! \brief ${briefDescription}
+//
+//==============================================================================================================================================================
+
+#include "${fileName}.h"
+
+
+namespace walberla {
+namespace ${moduleName} {
+
+
+
+} // namespace ${moduleName}
+} // namespace walberla
+</template><template autoinsert="true" context="org.eclipse.cdt.ui.text.templates.c" deleted="false" description="Template for a waLBerla unit test" enabled="true" name="walberlaTest">//==============================================================================================================================================================
+//
+//  This file is part of waLBerla. waLBerla is free software: you can 
+//  redistribute it and/or modify it under the terms of the GNU General Public
+//  License as published by the Free Software Foundation, either version 3 of 
+//  the License, or (at your option) any later version.
+//  
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//  for more details.
+//  
+//  You should have received a copy of the GNU General Public License along
+//  with waLBerla (see COPYING.txt). If not, see &lt;http://www.gnu.org/licenses/&gt;.
+//
+//! \file ${fileName}.h
+//! \author ${user}
+//! \brief ${brief}
+//
+//==============================================================================================================================================================
+
+#include "core/debug/TestSubsystem.h"
+#include "core/Environment.h"
+
+
+using namespace walberla;
+
+
+int main( int argc, char ** argv )
+{
+   debug::enterTestMode();
+   walberla::Environment walberlaEnv( argc, argv );
+
+   // TODO
+
+   return 0;
+}
+</template></templates>

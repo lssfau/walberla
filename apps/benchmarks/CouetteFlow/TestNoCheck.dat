@@ -1,0 +1,82 @@
+
+CouetteFlow
+{
+   outputSetupForest false;
+
+   //////////////////////////////
+   // GENERAL SIMULATION SPECS //
+   //////////////////////////////
+   
+   xBlocks 1;
+   yBlocks 3;
+   zBlocks 1;
+
+   xCells  10;
+   yCells  10;
+   zCells  10;
+  
+   memoryPerCell       153; // in bytes
+   processMemoryLimit 2048; // in MiB !
+   
+   Re 10;
+   
+   initWithMeanVelocity false; // false = fluid is at rest
+   
+   ///////////////////////
+   // WHERE TO REFINE ? //
+   ///////////////////////
+   
+   refineOnBorder         true;
+   borderRefinementLevel  2;
+   
+   ////////////////////////////
+   // RUNNING THE SIMULATION //
+   ////////////////////////////
+   
+   outerTimeSteps 1; // total number of time steps = outerTimeSteps * innerTimeSteps
+   innerTimeSteps 2; // For each outer loop, performance data is logged.
+   
+   StabilityChecker
+   {
+      checkFrequency 2;
+   }
+   
+   remainingTimeLoggerFrequency 3; // in seconds
+   
+   vtkBeforeTimeStep true; // false = at the end of time step
+   
+   logToSqlDB false;
+
+   ///////////////////////////
+   // SRT - TRT - MRT setup //
+   ///////////////////////////
+   
+   omega 0.7;
+   
+   // magicNumber 0.25; // Used to setup TRT and MRT in case if and only if no additional parameters
+                        // except 'omega' are specified here in the input file. [default: 0.1875]
+   
+   // lambda_e 1.98; // If "--trt" is used AND 'lambda_e' and 'lambda_d' are both specified here
+   // lambda_d 1.95; // in the input file then these two parameters are used for setting up TRT.
+                     // Otherwise 'omega' is used to set up TRT.
+   
+   // Setting up TRT to mimic SRT: set lambda_e and lambda_d to the same value
+                  
+   // If "--mrt" is used AND 's1', 's2', 's4', 's9', 's10', and 's16' are all specified here in the input file
+   // then these parameters are used for setting up MRT. Otherwise 'omega' is used to set up MRT.
+   // s1  1.19; // s_e
+   // s2  1.4;  // s_epsilon
+   // s4  1.2;  // s_q
+   // s9  1.99; // s_nu
+   // s10 1.4;  // s_pi
+   // s16 1.98; // s_m
+   
+   // Setting up MRT to mimic SRT: set all parameters to the same value
+   // Setting up MRT to mimic TRT: set s1, s2, s9, and s10 to lambda_e and s4 and s16 to lambda_d   
+   
+   //////////////////
+   // CHECK AT END //
+   //////////////////
+   
+   check false;
+}

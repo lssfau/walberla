@@ -1,0 +1,298 @@
+namespace walberla {
+
+/**
+\page tutorial_lbm01 Tutorial - LBM 1:  Basic LBM Simulation
+
+\brief A configurable application for simple LBM simulations
+
+\section tutorial04_overview Overview
+
+In this tutorial, we finally built a fully functional lattice Boltzmann application with the following features:
+
+- make use of default LBM sweeps from the lbm module with either *SRT* or *TRT* model
+- can handle some basic boundary conditions: no slip, free slip, pressure, and velocity boundaries
+- initialize geometry of the domain using a gray scale image 
+- the boundary and geometry can be configured in a parameter file
+
+Since almost all the functionality is already included in functions and classes in the `lbm` module of waLBerla,
+there is not much code that we actually have to implement ourselves.
+
+\image html tutorial_lbm01_channel.png "airfoil (loaded from a grayscale image) in a 2D channel"
+
+\section tutorial04_paramfile Parameter File
+
+This application will be fully configurable by a parameter file so that no recompilation is necessary if 
+some parameters or the geometry has to be changed.
+waLBerla already has a mechanism for parsing configuration files in a specific format.
+When an application is started and walberla::Environment is used,
+the first parameter is interpreted as the path to a configuration file.
+This configuration file is parsed automatically and available as a config::Config object through Environment::config().
+
+Here is an excerpt of a configuration file:
+
+\code
+Parameters
+{
+   omega           1.8;
+   initialVelocity < 0.1, 0, 0 >;
+   timesteps       10000;
+}
+\endcode
+
+A configuration file consists of key-value pairs hierarchically organized in blocks, denoted by curly brackets.
+Keys have to be strings, values have to be parseable by the *istream::operator>>*. So everything that
+can be read in by *std::cin* can also be a value. Also, true/false/on/off/0/1 can all be
+interpreted as bool.
+
+The following code snippet extracts parameters from a parsed configuration file:
+
+\code
+Environment walberlaEnv( argc, argv );
+// get the "Parameters" block   
+auto parameters = walberlaEnv.config()->getOneBlock( "Parameters" );
+
+const real_t          omega           = parameters.getParameter< real_t >         ( "omega",           real_c( 1.4 ) );
+const Vector3<real_t> initialVelocity = parameters.getParameter< Vector3<real_t> >( "initialVelocity", Vector3<real_t>() );
+const uint_t          timesteps       = parameters.getParameter< uint_t >         ( "timesteps" );
+\endcode
+
+The getParameter() calls can fail if no value for the key can be found and no default value was given (see "timesteps" key).
+The call also fails if the value is not convertible to the requested type.
+
+Options from the configuration file can be used to directly create a StructuredBlockStorage. In previous
+tutorials this was done manually, here we use a helper function:
+
+\code
+auto blocks = blockforest::createUniformBlockGridFromConfig( walberlaEnv.config() );
+\endcode
+
+This function assumes that a "DomainSetup" block exists. For a detailed description of possible configuration parameters,
+see blockforest::createUniformBlockGridFromConfig().
+
+\section tutorial04_lbmdatastructures Lattice Boltzmann Data Structures
+
+\subsection tutorial04_latticemodel Lattice Model
+
+\code
+typedef lbm::D2Q9< lbm::collision_model::SRT >  LatticeModel_T;
+typedef LatticeModel_T::Stencil                 Stencil_T;
+typedef LatticeModel_T::CommunicationStencil    CommunicationStencil_T;
+\endcode
+
+A lattice model defines the basic ingredients needed for an LBM simulation:
+- **neighborhood and lattice weights** : Lattice models are built upon
+  stencils. The lbm::D2Q9 lattice model, for example, is based on stencil::D2Q9.
+  To get the corresponding stencil from the lattice model use *LatticeModel_T::Stencil*.
+  For this example application a two dimensional lattice model was chosen: lbm::D2Q9. Available alternatives
+  currently are lbm::D3Q15, lbm::D3Q19, and lbm::D3Q27. Depending on the lattice model, the stencil that is needed for
+  the communication (this stencil determines which neighbor blocks are involved during the communication)
+  might be different to the stencil that is used to define the lattice model.
+- **collision model**: The first template parameter for a lattice model is a collision model.
+  The collision or relaxation model defines which method to use in the collide step. Here, we use the single relaxation time
+  model (SRT) also called BGK model: lbm::collision_model::SRT. For other options, see the file lbm/lattice_model/CollisionModel.h
+- There are further template parameters specifing compressibility, force model, etc.
+  These arguments have default parameters which we use here.
+
+For a more detailed description of lattice models, see lbm::LatticeModelBase
+
+\subsection tutorial04_fields Fields
+
+\code
+typedef lbm::PdfField< LatticeModel_T >  PdfField_T;
+
+typedef walberla::uint8_t    flag_t;
+typedef FlagField< flag_t >  FlagField_T;
+\endcode
+
+- The lbm::PdfField is used to store particle distribution functions for each cell.
+  It is derived from field::GhostLayerField and provides additional LBM related members to
+  calculate macroscopic values like density and velocity.
+  The lbm::PdfField needs a lattice model as template parameter in order to determine the size of the f dimension
+  and calculate macroscopic quantities.
+  In this application, the PdfField has 9 components since we use a D2Q9 model.
+- The second field is a flag field which provides geometry and boundary information and is needed to set up boundary conditions.
+  This field is used to mark cells as fluid cells, boundary cells, obstacle cells, etc. One bit is used to mark a cell as being
+  a fluid cell. Another bit is used internally by the framework for LBM boundary handling. Using an eight bit data type for the flag
+  field allows to distinguish between 6 different boundary conditions. If one needs more boundary conditions, a larger data type
+  must be used for the flag field.
+
+The flag field is added to the block storage using the field::addFlagFieldToStorage function, which is similar to the field::addToStorage function
+already described in previous tutorials.
+For the lbm::PdfField, a special add function exists: lbm::addPdfFieldToStorage, since additional
+parameters like the lattice model, the initial velocity, and the initial density are required.      
+
+\code
+LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::SRT( omega ) );
+
+BlockDataID  pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel,
+                                                     initialVelocity, real_t(1) );
+BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
+\endcode
+
+\subsection tutorial04_boundary Boundary Handling
+
+waLBerla comes with a set of lattice Boltzmann boundary conditions. They can be found in folder
+lbm/boundary. All implement a common concept.
+To implement a custom boundary implement this concept which is described in detail here: boundary::Boundary.
+
+Boundary conditions are grouped together in a class called boundary::BoundaryHandling.
+This handling class uses a FlagField to store which boundary condition is applied
+in which cell. For each boundary condition, one flag (bit) is reserved. Two more bits are
+automatically added by the handler:
+- The **near boundary flag** is set in all cells that have at
+  least one boundary neighbor. In the boundary sweep, only cells where "near boundary" is set have to be
+  processed. Otherwise, in each boundary sweep all cells would have to be traversed and
+  their neighborhood would have to be tested for boundary flags.
+- The **domain flag** is set in all cells where the LBM algorithm has to be executed.
+  Typically, these are all the fluid cells.
+
+To add or remove a boundary for a certain cell, do not modify the field::FlagField directly! Instead use the methods of
+boundary::BoundaryHandling. Otherwise the `near boundary` and `domain` flags are not maintained correctly!
+
+The boundary handling is a heavily templated part of waLBerla since it contains performance critical code
+and at the same time has to be very flexible, i.e., it should be easy to write new boundary conditions.
+By using template concepts (compile-time polymorphism) instead of inheritence (runtime polymorphism) the compiler is able to
+resolve all function calls at compile time and can do optimizations like function inlining.
+To make setting up a boundary handling easier, a convenience factory class lbm::DefaultBoundaryHandlingFactory exists
+that creates a boundary::BoundaryHandling with six often used boundary conditions. Together with the `near boundary` and
+`domain` flag, exactly eight bits are used, so a uint8_t is enough for the FlagField.
+
+Now have a look at the documentation of lbm::DefaultBoundaryHandlingFactory. There you can find a table of all boundary conditions
+that are part of the created boundary::BoundaryHandling. The listed FlagUIDs
+are important later on to specify which boundary should be set in which cell.
+You might wonder why there are two velocity and two pressure boundary conditions.
+With a single lbm::SimplePressure or lbm::SimpleUBB boundary, only one pressure or velocity value can be set.
+To prescribe one velocity at one position and another velocity at a
+different position, two SimpleUBB's are needed.
+If many different velocity values are required (for example for a parabolic inflow profile), it makes sense to use lbm::UBB instead of lbm::SimpleUBB.
+
+For this tutorial, the boundary conditions provided by the framework are enough and we create a BoundaryHandling object using the
+lbm::DefaultBoundaryHandlingFactory class. The values for the two pressure and velocity boundary conditions are read from the configuration file.
+The function addBoundaryHandlingToStorage() adds a boundary handler to every block:
+
+\code
+// create and initialize boundary handling
+const FlagUID fluidFlagUID( "Fluid" );
+
+auto boundariesConfig = walberlaEnv.config()->getOneBlock( "Boundaries" );
+
+typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory;
+
+BlockDataID boundaryHandlingId = BHFactory::addBoundaryHandlingToStorage(
+                 blocks, "boundary handling", flagFieldId, pdfFieldId, fluidFlagUID,
+                 boundariesConfig.getParameter< Vector3<real_t> >( "velocity0", Vector3<real_t>() ),
+                 boundariesConfig.getParameter< Vector3<real_t> >( "velocity1", Vector3<real_t>() ),
+                 boundariesConfig.getParameter< real_t > ( "pressure0", real_c( 1.0 ) ),
+                 boundariesConfig.getParameter< real_t > ( "pressure1", real_c( 1.0 ) ) );
+\endcode
+
+\subsection tutorial04_geometry Geometry
+
+To specify where boundaries are located, we could now iterate all blocks, retrieve the boundary handler which
+was added as block data, and use its member functions like boundary::BoundaryHandling::forceFlag() to setup the domain.
+
+However, there exists a more comfortable way to setup the domain using the geometry module. This module provides
+functionality to read domain information from images, voxel files, meshes, or specify boundaries at the domain
+border. Have a look at the files called "geometry/initializer/BoundaryFrom*.h".
+Each of these so called initializers can also be setup using a config::Config::Block. For information
+which parameters are required, have a look at the documentation of these initializers.
+
+Here a convenience function is used that receives the boundary configuration block `boundariesConfig` and makes use of all
+these initializers:
+
+\code
+geometry::initBoundaryHandling<BHFactory::BoundaryHandling>( *blocks, boundaryHandlingId, boundariesConfig );
+geometry::setNonBoundaryCellsToDomain<BHFactory::BoundaryHandling> ( *blocks, boundaryHandlingId );
+\endcode
+
+In order to know what to put in the configuration file for setting boundaries via this convenience function, please
+have a look at the documentation of walberla::geometry::initBoundaryHandling(). After all boundary cells have been
+marked, the remaining cells are tagged with the "domain" flag, i.e. as cells that should be updated by the LBM kernel.
+
+
+\subsection tutorial04_timeloop Sweep and Time Loop Setup
+
+Having completed the domain setup, the next step is to add all the necessary steps/algorithms to the time loop:
+- communication to synchronize the ghost layer of the PdfField
+- boundary handling sweep to set valid pdf values in boundary cells
+- LBM stream and collide step
+
+For the communication, a communication scheme is created as already described in the previous tutorial.
+However, this time, we use lbm::PdfFieldPackInfo instead of field::FieldPackInfo:
+
+\code
+blockforest::communication::UniformBufferedScheme< CommunicationStencil_T > communication( blocks );
+communication.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldId ) );
+\endcode
+
+lbm::PdfFieldPackInfo uses the additional knowledge that the field we want to communicate is a PdfField. If you use
+lbm::PdfFieldPackInfo, not __all__ PDF values are communicated for each cell at the block border, but only those
+PDF values that are about to stream from the ghost layer into the interior part of the field. This greatly reduces
+the amount of data that needs to be transfered! For our simulation, this is okay. But be aware: If you are using
+algorithms that rely on a complete set of valid PDF values also in the ghost layers, you cannot use lbm::PdfFieldPackInfo!
+If you have to communicate all PDF values to the ghost layers of neighboring blocks, you have to use a normal
+field::FieldPackInfo. The corresponding code would look like this:
+
+\code
+communication.addPackInfo( make_shared< field::communication::FieldPackInfo< PdfField_T > >( pdfFieldId ) );
+\endcode
+
+The communication is set up to always run right before the boundary sweep. The boundary sweep can be obtained
+from the boundary handling factory:
+
+\code
+timeloop.add() << BeforeFunction( communication, "communication" )
+               << Sweep( BHFactory::BoundaryHandling::getBlockSweep( boundaryHandlingId ), "boundary handling" );
+\endcode
+
+After that, the LBM sweep is added. The right LBM algorithm is chosen by
+the lattice model which we already set up. Behind the scenes, an incompressible SRT sweep is selected via template specializations.
+Since lbm::makeCellwiseSweep returns a shared pointer, we use makeSharedSweep in order to wrap the shared pointer into an object
+that can be passed to the time loop.
+
+\code
+timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >(
+                                             pdfFieldId, flagFieldId, fluidFlagUID ) ), "LB stream & collide" );
+\endcode
+
+After every time step, we use the field::StabilityChecker in order to check if there are any NaNs stored in the field.
+If NaNs are detected, the simulation is terminated and VTK data that indicates the position of these NaNs is written to file.
+The StabilityChecker instance can be controlled via the configuration file,
+for more information see \ref docStabilityChecker.
+Since field::makeStabilityChecker returns a shared pointer, we use makeSharedFunctor in order to wrap the shared pointer into an object
+that can be passed to the time loop.
+
+\code
+timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< PdfField_T, FlagField_T >(
+                                     walberlaEnv.config(), blocks, pdfFieldId, flagFieldId, fluidFlagUID ) ),
+                               "LBM stability check" );
+\endcode
+
+Additionally, a small functor is scheduled that periodically prints the estimated remaining time of the simultion:
+
+\code
+timeloop.addFuncAfterTimeStep( timing::RemainingTimeLogger( timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency ),
+                               "remaining time logger" );
+\endcode
+
+Also, the usage of VTK output is enabled by lbm::VTKOutput. Please refer to the documentation of lbm::VTKOutput in order
+to learn the names of all VTK writers, filters, and "before" functions that are available when using this default VTK output
+for LBM. You need to know these names in order to select these writers/filters/functions via the configuration file.
+
+\code
+lbm::VTKOutput< LatticeModel_T, FlagField_T >::addToTimeloop( timeloop, blocks, walberlaEnv.config(),
+                                                              pdfFieldId, flagFieldId, fluidFlagUID );
+\endcode
+
+In order to know how to use the `VTK` block in the configuration file for setting up VTK output, please have a look
+at: \ref docVTKConfigurationFile
+
+Finally, the simulation is run by either calling the "run" function of the time loop or using the GUI.
+
+Now you can build the tutorial application, play around with the configuration file, and try loading different obstacles.
+
+\tableofcontents
+
+*/
+
+}// namespace walberla

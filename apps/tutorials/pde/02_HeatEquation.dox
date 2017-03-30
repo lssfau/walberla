@@ -1,0 +1,386 @@
+namespace walberla {
+
+
+/**
+\page tutorial_pde02 Tutorial - PDE 2: Solving the Heat Equation
+
+\brief Unsteady heat equation, implicit time stepping, VTK output and ParaView, parallelization with MPI, residual based termination. File 06_HeatEquation.cpp.
+
+In this tutorial, we will make use of the Jacobi method implemented in \ref pde01 to solve the linear system of equations 
+that arises by the implicit time discretization of the unsteady heat equation.
+The implementation is further improved by using VTK output, parallelization with MPI, and a residual based termination of the Jacobi iteration.
+
+
+\section problemdescription Problem Description
+
+The <a target="_blank" href="http://en.wikipedia.org/wiki/Heat_equation">heat equation</a> is a classical example for a parabolic partial differential equation, given by:
+\f[
+   \frac{\partial u(x,y,t)}{\partial t} = \kappa \left( \frac{\partial^2 u(x,y,t)}{\partial x^2} + \frac{\partial^2 u(x,y,t)}{\partial y^2}\right)
+\f]
+It includes the unknown \f$u(x,y,t)\f$ which can be any scalar, and often is regarded physically as the temperature, and the thermal diffusivity \f$\kappa\f$. 
+In our case, the domain is \f$\Omega=[0,1]\times[0,1]\f$, the Dirichlet boundary conditions are zero everywhere,
+and the initial distribution of \f$u\f$ inside the domain is given by the initial condition
+\f[
+   u(x,y,0) = \sin(\pi x) \sin(\pi y).
+\f]
+
+For the numerical solution, we not only have to discretize in space but also in time. 
+Latter is done via an implicit Euler method with a time step length \f$\Delta t\f$ here, resulting in the following formulation: 
+\f[
+   \frac{u^{new} - u^{old}}{\Delta t} = \kappa \left( \frac{\partial^2 u^{new}}{\partial x^2} + \frac{\partial^2 u^{new}}{\partial y^2}\right)
+\f]
+So in contrast to an explicit Euler method, where the values on the right-hand side would be of the old time step, resulting in a simple update step,
+we have to solve a system of equations in each time step.
+
+Together with the finite-difference spatial discretization, introduced in the previous tutorial, this leads to:
+\f[
+   u_{i,j}^{new} - \kappa\,\Delta t\left[\frac{1}{(\Delta x)^2} \left(u_{i+1,j}^{new} - 2u_{i,j}^{new} + u_{i-1,j}^{new}\right) + 
+   \frac{1}{(\Delta y)^2} \left(u_{i,j+1}^{new} - 2u_{i,j}^{new} + u_{i,j-1}^{new}\right)\right] = u_{i,j}^{old}
+\f]
+
+Upon closer inspection, you will notice that this equation looks very similar to the one we had obtained by discretizing the elliptic PDE in the previous tutorial.
+In fact, the overall structure is exactly the same, i.e., speaking in stencils we again have a D2Q5 stencil, only the weights of the different contributions have slightly changed.
+Thus, our Jacobi method can again be used to solve this system arising in each time step.
+The iteration formula for the Jacobi method is given as:
+
+\f[
+   u_{i,j}^{new,(n+1)} = \left(\frac{2\kappa\,\Delta t}{(\Delta x)^2} + \frac{2 \kappa\,\Delta t}{(\Delta y)^2} + 1\right)^{-1}
+   \left[\frac{\kappa\,\Delta t}{(\Delta x)^2} \left(u_{i+1,j}^{new,(n)} + u_{i-1,j}^{new,(n)}\right) + 
+   \frac{\kappa\,\Delta t}{(\Delta y)^2} \left(u_{i,j+1}^{new,(n)} + u_{i,j-1}^{new,(n)}\right) + u_{i,j}^{old}\right]
+\f]
+
+
+\section timestepping Implicit Time Stepping with the Jacobi Method
+
+Before moving on, let's take a moment to clarify the differences to the previous tutorial as they are essential to understand the next steps.
+As you can see from the superscripts of \f$ u \f$, we now have actually two loops: 
+- There is an outer loop for the time stepping, i.e., advancing from the old solution \f$u_{i,j}^{old}\f$ to the new solution \f$u_{i,j}^{new}\f$.
+- However, since we are using an implicit time stepping method, this step requires the solution of a linear system of equations.
+Here, we use the Jacobi method with the right-hand side \f$u_{i,j}^{old}\f$.
+This introduces an inner loop only for the iterative solver that gradually improves \f$u_{i,j}^{new,(n)}\f$ to get to \f$u_{i,j}^{new,(n+1)}\f$ in each step. 
+This will finally lead to the new solution \f$u_{i,j}^{new}\f$.
+
+
+The important fact is that in waLBerla it is not possible to incorporate one time loop object into another one to resemble the two loops.
+Therefore, a slight change in the program structure is necessary. 
+We will implement the entire Jacobi iteration procedure in the JacobiIteration class.
+This functor includes all the steps that were carried out before by the time loop object, 
+i.e., iterating a specified number of times, calling the communication routine to update the ghost layers of the blocks, and executing the Jacobi sweep.
+So, no new functionality has to be added but only the structure of the program is adapted.
+The private members of this class are
+\code
+private:
+   const BlockDataID srcID_;
+   const BlockDataID dstID_;
+   const BlockDataID rhsID_;
+
+   std::vector< real_t > weights_;
+   const shared_ptr< StructuredBlockStorage > blocks_;
+   blockforest::communication::UniformBufferedScheme< Stencil_T > myCommScheme_;
+
+   const uint_t maxIterations_;
+\endcode
+
+These three additional members are needed to carry out the former tasks of the time loop. The implementation reads as:
+
+\code
+void JacobiIteration::operator()()
+{
+   // Jacobi iteration
+   for( uint_t i = 0; i < maxIterations_; ++i )
+   {
+      // communicate to update ghost layer cells
+      myCommScheme_();
+
+      // iterate all blocks
+      for( auto block = blocks_->begin(); block != blocks_->end(); ++block )
+      {
+         // get the source, destination and rhs field data from the block
+         auto src = block->getData< ScalarField >( srcID_ );
+         auto dst = block->getData< ScalarField >( dstID_ );
+         auto rhs = block->getData< ScalarField >( rhsID_ );
+
+         // iterate all cells of the fields and carry out the Jacobi sweep
+         WALBERLA_FOR_ALL_CELLS_XYZ(src,
+
+            dst->get(x,y,z) =  rhs->get(x,y,z);
+
+            // iterate the neighboring cells and multiply their value with the respective weight
+            for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir )
+               dst->get(x,y,z) -= weights_[ dir.toIdx() ] * src->getNeighbor(x,y,z,*dir);
+
+            dst->get(x,y,z) /= weights_[ Stencil_T::idx[ stencil::C ] ];
+         )
+
+         // swap source and destination fields
+         src->swapDataPointers( dst );
+      }
+   }
+}
+\endcode
+
+As you can see, the innermost part is the former Jacobi sweep from the JacobiSweepStencil class.
+It is enclosed by the loop over all blocks, just like it was done in the initBC() and initRHS() functions from before.
+Before this iteration can be carried out, the ghost layer cells have to be updated, achieved by the `myCommScheme_()` call.
+The iterations, that were done by the time loop object, are now done explicitly with the loop over `i` until the maximum number of iterations is reached.
+
+This functor is now registered at the time loop object via:
+\code
+// add the complete Jacobi iteration with 10000 iterations
+// This can not be done as a sweep since it includes an interior iteration, independent of the time loop.
+timeloop.addFuncAfterTimeStep( JacobiIteration( srcID, dstID, rhsID, weights, blocks, myCommScheme, uint_c(10000) ), "JacobiIteration");
+\endcode
+
+
+The Jacobi method expects the old solution as the right-hand side function.
+This means that in each time step, before calling the Jacobi method, the old solution, which is present in the `src` field, has to be transferred to the `rhs` field.
+There are many possibilities to do this. Here, we implement a small class Reinitialize, which simply swaps the `src` and `rhs` pointers. 
+\code
+class Reinitialize
+{
+public:
+
+   Reinitialize( const BlockDataID & srcID, const BlockDataID & rhsID )
+      : srcID_( srcID ), rhsID_( rhsID ) {}
+
+   void operator()( IBlock * block );
+
+private:
+   const BlockDataID srcID_;
+   const BlockDataID rhsID_;
+};
+
+void Reinitialize::operator()( IBlock * block )
+{
+   // get the source and rhs field data from the block
+   auto src = block->getData< ScalarField >( srcID_ );
+   auto rhs = block->getData< ScalarField >( rhsID_ );
+
+   // swap source and right-hand side fields as the old solution is the right-hand side when doing implicit time stepping
+   src->swapDataPointers( rhs );
+}
+\endcode 
+
+On a side note, this means that the starting solution for the Jacobi method is the former right-hand side.
+This is advantageous to setting it always to zero (which could be done via `src->set( real_c(0) )`) as it is probably already quite close to the converged solution,
+i.e., the Jacobi method will converge faster.
+
+This functor is now registered as a sweep in the time loop in the known fashion:
+\code
+// add the routine that swaps the old solution to the right-hand side
+timeloop.add() << Sweep( Reinitialize( srcID, rhsID ), "Reinitialize" );
+\endcode
+
+It is now left to initialize the `src` field with the initial condition \f$u(x,y,0)\f$. 
+This is similar to what was done in the previous tutorial for the right-hand side function \f$f\f$.
+
+With this, all parts are present and the simulation can be started.
+
+When inspecting the results in the GUI using the color representation of the `src` field, you will see.... no changes. 
+No worries, everything we did was correct but the color gets automatically scaled in each time step. 
+Since the initial profile just shrinks over time, the results will always look the same.
+When you use the numeric representation, you will actually see changes in the values, which get smaller from one time step to the next one.
+
+This brings us to three additional points that will be covered in the remainder of this tutorial:
+- Writing VTK output allows us to inspect the results in ParaView, giving us more flexibility on how to represent the data. See \ref vtkparaview.
+- For a larger amount of cells, the simulations start taking longer.
+Using waLBerla's parallel processing abilities, the compute time can be reduced. See \ref runparallel. 
+- The number of iterations carried out in the Jacobi method is chosen arbitrarily 
+and it is not clear if the method has already converged or one could have used less iterations.
+In practice, one typically terminates the iteration when the norm of the residual is sufficiently small. See \ref residualnorm.
+
+You find all those extensions in the file 06_HeatEquation_Extensions.cpp.
+
+\section vtkparaview Writing VTK Output and Working with ParaView
+
+Making our code write VTK files as output is actually very easy thanks to already available functions. Here is what we have to add: 
+
+\code
+// write VTK output, every time step and with ghost layer
+timeloop.addFuncAfterTimeStep(field::createVTKOutput< ScalarField, float >( srcID, *blocks, "solution", uint_c(1), uint_c(1) ), "VTK");
+\endcode
+
+The `createVTKOutput` function has two templates, specifying the type of field we want to write, here `ScalarField`, and of which data type this output shall be.
+Here we explicitly state `float` as this is usually accurate enough for data analysis purposes and saves disk space/IO bandwidth.
+As arguments, the field we want to output together with the block structure and a name for the data has to be given. 
+The fourth argument specifies the write frequency where the value 1 denotes that we want to have an output after every time step.
+The number of ghost layers that are written can be specified by the fifth argument, where in our case we only have one and output it.
+
+To start the simulation without the GUI, we simply write:
+\code
+// run the simulation for the specified number of time steps
+timeloop.run();
+\endcode
+
+This creates a folder `vtk_out`, including a `solution.pvd` file and a folder `solution` that actually includes the output of the different time steps.
+
+Now we start ParaView and open the `solution.pvd` file.  
+This file manages all the files from the solution folder and makes them available in ParaView.
+Additionally, if multiple blocks were used, ParaView will automatically merge them so we can inspect the whole domain.
+Since ParaView knows the concept of ghost layers which surround the whole domain but are not displayed by default, no data can be seen at first.
+We first have to use a `Slice` filter with the normal in z-direction. 
+Apart from the surface representation of the `solution` field, it is possible to generate a three dimensional visualization of this scalar field.
+To do so, the filters `Cell Data to Point Data` and `Warp By Scalar` have to be applied consecutively.
+The image below shows an exemplary solution after the first and fifth time step.
+
+\image html tutorial_pde02_solution.png
+
+\section runparallel Running the Simulation with Multiple Processes
+
+As you may have noticed, the simulation already takes quite some time to finish. 
+For larger problems, running the simulation with multiple processes is often advantageous or even absolutely necessary.
+Since waLBerla is developed with a special focus on high performance computing, the parallelization feature is included and can easily be used.
+We have seen the implications of this functionality before:
+- We need ghost layers for synchronizing data with neighboring blocks.
+- We also need a communication scheme and a pack info object to ensure the correct updating of those ghost layers.
+
+Since we have already applied these concepts, the changes to the code boil down to one thing: 
+The first boolean flag given to the blockforest::createUniformBlockGrid function has to be set to `true`. 
+This will assign each block to exactly one process, i.e., we have to use as many blocks as we have processes.
+Suppose we want to run the program with 4 processes, we could use two blocks in x- and y-direction, respectively.
+
+Then we run the program with the command `mpirun -np 4 ./06_HeatEquation_Extensions`.
+
+To prohibit a false usage of the program, we can include an if statement at the beginning of the program.
+It checks if the number of used processes is in fact equal to the number of blocks and ends the program if not.
+
+\code
+// get the number of processes
+const uint_t processes = uint_c( MPIManager::instance()->numProcesses() );
+// check if this number is equal to the number of blocks, since there is one block per process
+if( processes != xBlocks * yBlocks * zBlocks )
+   WALBERLA_ABORT( "The number of processes must be equal the total number of blocks" );
+\endcode
+
+If you visualize the data in ParaView with the `Warp By Scalar` functionality, you will see a strange hole in the center of the domain.
+This is due to the fact that ParaView uses the information inside the ghost layers for the visualization (but does not display them explicitly).
+Those ghost layers, however, still have the value 0 right at the corner at the domain center since the D2Q5 stencil does not need those values and thus
+the communication scheme does not need to update it.
+This can be fixed by setting up an additional communication scheme with a D2Q9 stencil and calling this function right before the VTK output is written. 
+Run the program with this additional communication step and check the results.
+
+\code
+// additional communication scheme that updates all ghost layers
+// before writing the VTK output to yield correct visualization in ParaView
+blockforest::communication::UniformBufferedScheme< stencil::D2Q9 > vtkSyncScheme ( blocks );
+vtkSyncScheme.addPackInfo( make_shared< field::communication::PackInfo<ScalarField> >( srcID ) );
+timeloop.addFuncAfterTimeStep( vtkSyncScheme , "SyncVTK" );
+\endcode
+
+
+\section residualnorm Terminating the Simulation based on the Residual Norm
+
+One last very common feature is still missing. 
+Iterative solvers are usually terminated when the solution is sufficiently converged.
+One measure of convergence is the norm of the residual \f$ r = b-\textbf{A}x\f$, that has to drop below a specific threshold.
+A suitable norm is the weighted L2-norm, which accounts for the number of cells (\f$N\f$) inside the domain:
+\f[
+\| r \| = \sqrt{ \frac{1}{N} \sum_{i=0}^{N-1} r_i^2}
+\f]
+The computation of this residual might look straight-forward: We simply apply the stencil to each cell, add up these values, and subtract it from the right hand side.
+The difficulty arises because of the sum over ALL cells inside the domain. 
+With multiple blocks present, the local block-sums thus have to be shared with all other blocks (on other processes) and summed up.
+Additionally, every process has to know the total number of cells inside the domain to be able to divide by \f$N\f$.
+Only then, the square root can be calculated and the norm of the residual can be obtained.
+
+These two peculiarities are accomplished with the function `mpi::allReduceInplace` that does exactly this:
+gather the local sum values of all processes, combine them by, in our case, summing them up, and communicate the result to all processes again.
+
+Our implementation is thus extended by two additional functions, yielding the JacobiIterationResidual class.
+The one that computes the total number of cells inside the domain and stores it in the private member `cells_` is implemented as:
+
+\code
+void JacobiIterationResidual::init()
+{
+   // temporal storage
+   uint_t cells( uint_c(0) );
+
+   // iterate all blocks
+   for( auto block = blocks_->begin(); block != blocks_->end(); ++block )
+   {
+      // get the number of cells in each block and sum it up
+      auto u = block->getData< ScalarField >( srcID_ );
+      cells += u->xyzSize().numCells();
+   }
+
+   cells_ = real_c( cells );
+
+   // communicate with other processes and sum up their local cells_ values to get the global number of cells in the domain
+   mpi::allReduceInplace( cells_, mpi::SUM );
+}
+\endcode
+
+The actual computation of the residual is then:
+\code
+real_t JacobiIterationResidual::residualNorm()
+{
+   real_t norm( real_c(0) );
+
+   // iterate all blocks
+   for( auto block = blocks_->begin(); block != blocks_->end(); ++block )
+   {
+      // get the field of the unknown u and the right-hand side
+      auto u   = block->getData< ScalarField >( srcID_ );
+      auto rhs = block->getData< ScalarField >( rhsID_ );
+
+      // temporal storage
+      real_t residual( real_c(0) );
+
+      // iterate all cells inside the block
+      WALBERLA_FOR_ALL_CELLS_XYZ(u,
+
+         // calculates the residual r = rhs - A*u
+         // This means taking the right-hand side value and subtracting the stencil applied to the unknown u.
+         residual =  rhs->get(x,y,z);
+
+         // iterate the cells (including the center) and multiply their value with the respective weight
+         // This corresponds to applying the stencil to the unknown u.
+         for( auto dir = Stencil_T::begin(); dir != Stencil_T::end(); ++dir )
+            residual -= weights_[ dir.toIdx() ] * u->getNeighbor(x,y,z,*dir);
+
+         // store the squared residual value
+         norm += residual * residual;
+      )
+   }
+
+   // communicate with other processes and sum up their local squared residual values
+   // to get the global squared residual value for the entire domain
+   mpi::allReduceInplace( norm, mpi::SUM );
+
+   // divide by the number of cells and take the square root
+   // to finally arrive at the value for the weighted L2 norm of the residual
+   norm = std::sqrt( norm / cells_ );
+
+   return norm;
+}
+\endcode
+
+
+The termination of the Jacobi iteration is then accomplished by introducing a check after the Jacobi sweep, 
+which makes use of the private member `residualThreshold_` : 
+\code
+// check if residual norm is below threshold, if so stop the iteration
+if( residualNorm() < residualThreshold_ )
+{
+   // only the root process will output this, to avoid multiple output when running with more processes
+   WALBERLA_ROOT_SECTION() { std::cout << "Terminated Jacobi iteration after " << i << " iterations." << std::endl; }
+   break;
+}
+\endcode
+
+The `WALBERLA_ROOT_SECTION` is a special macro that ensures that the content is only executed by one process, namely the root process. 
+Otherwise, this output would appear multiple times when running in parallel. Feel free to test it.
+
+
+\section outlook Outlook
+
+Solving linear systems of equations is a very common task in various applications. 
+Thus, waLBerla already provides ready-to-use implementations of some iterative solvers: Jacobi method, Red-Black Gauss-Seidel method, and Conjugate gradients.
+You find the implementations in the `src/pde/` folder and how to use them is shown in the test cases under `src/tests/pde/`.
+Even the more involved CG method can be implemented with the concepts we developed until now.
+
+\tableofcontents
+
+*/
+
+}

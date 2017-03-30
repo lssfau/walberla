@@ -1,0 +1,909 @@
+###############################################################################
+##                                                                           ##
+##    Build templates                                                        ##
+##                                                                           ##
+###############################################################################
+
+.build_template: &build_definition
+   script:
+      - export NUM_CORES=$(nproc --all)
+      - export MAX_BUILD_CORES=$(( $(awk '( $1 == "MemTotal:" ) { print $2 }' /proc/meminfo) / ( 4 * 1024 * 1024  ) ))
+      - "[[ $MAX_BUILD_CORES -lt $NUM_CORES ]] && export NUM_BUILD_CORES=$MAX_BUILD_CORES || export NUM_BUILD_CORES=$NUM_CORES"
+      - export
+      - $CXX --version
+      - cmake --version
+      - ccache --version
+      - mpirun --version
+      - export CCACHE_BASEDIR=$CI_PROJECT_DIR
+      - mkdir $CI_PROJECT_DIR/build
+      - cd $CI_PROJECT_DIR/build
+      - if dpkg --compare-versions `ompi_info | head -2 | tail -1 | sed 's/[^0-9.]*\([0-9.]*\).*/\1/'` ge 1.10; then export MPIEXEC_PREFLAGS="--allow-run-as-root" ; fi
+      - cmake .. -DWALBERLA_BUFFER_DEBUG=$WALBERLA_BUFFER_DEBUG -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_DOUBLE_ACCURACY=$WALBERLA_DOUBLE_ACCURACY -DWARNING_ERROR=ON
+      - cmake . -LAH
+      - make -j $NUM_BUILD_CORES -l $NUM_CORES
+      - ctest -LE $CTEST_EXCLUDE_LABELS -C $CMAKE_BUILD_TYPE --output-on-failure -j $NUM_CORES
+   tags:
+      - docker
+
+      
+.build_serial_template: &build_serial_definition
+   <<: *build_definition
+   variables:
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      CMAKE_BUILD_TYPE: "Release"
+      WALBERLA_BUFFER_DEBUG: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+      
+.build_mpionly_template: &build_mpionly_definition
+   <<: *build_definition
+   variables:
+       CTEST_EXCLUDE_LABELS: "longrun"
+       WALBERLA_BUILD_WITH_MPI: "ON"
+       WALBERLA_BUILD_WITH_OPENMP: "OFF"
+       CMAKE_BUILD_TYPE: "Release"
+       WALBERLA_BUFFER_DEBUG: "OFF"
+       WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+      
+.build_hybrid_template: &build_hybrid_definition
+   <<: *build_definition
+   variables:
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      OMP_NUM_THREADS: "4"
+      OMP_WAIT_POLICY: "PASSIVE"
+      CMAKE_BUILD_TYPE: "Release"
+      WALBERLA_BUFFER_DEBUG: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+.build_serial_dbg_template: &build_serial_dbg_definition
+   <<: *build_definition
+   variables:
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_BUFFER_DEBUG: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+      
+.build_mpionly_dbg_template: &build_mpionly_dbg_definition
+   <<: *build_definition
+   variables:
+       CTEST_EXCLUDE_LABELS: "longrun"
+       WALBERLA_BUILD_WITH_MPI: "ON"
+       WALBERLA_BUILD_WITH_OPENMP: "OFF"
+       CMAKE_BUILD_TYPE: "DebugOptimized"
+       WALBERLA_BUFFER_DEBUG: "OFF"
+       WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+      
+.build_hybrid_dbg_template: &build_hybrid_dbg_definition
+   <<: *build_definition
+   variables:
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      OMP_NUM_THREADS: "4"
+      OMP_WAIT_POLICY: "PASSIVE"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_BUFFER_DEBUG: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+.build_hybrid_dbg_sp_template: &build_hybrid_dbg_sp_definition
+   <<: *build_definition
+   variables:
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      OMP_NUM_THREADS: "4"
+      OMP_WAIT_POLICY: "PASSIVE"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_BUFFER_DEBUG: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "OFF"
+ 
+ 
+###############################################################################
+##                                                                           ##
+##    Build jobs                                                             ##
+##                                                                           ##
+###############################################################################
+      
+## Intel
+
+intel-15_Serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+intel-15_MpiOnly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+intel-15_Hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+
+intel-15_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+intel-15_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+intel-15_Hybrid_Dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
+   tags:
+      - docker
+      - intel
+
+
+intel-16_Serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+intel-16_MpiOnly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+intel-16_Hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+   
+intel-16_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+intel-16_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+intel-16_Hybrid_Dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
+   tags:
+      - docker
+      - intel
+      
+intel-16_Hybrid_SP_Dbg:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+      
+intel-17_Serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+intel-17_MpiOnly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   only:
+      - triggers
+   tags:
+      - docker
+      - intel
+      
+intel-17_Hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   tags:
+      - docker
+      - intel
+   
+intel-17_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   tags:
+      - docker
+      - intel
+      
+intel-17_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   tags:
+      - docker
+      - intel
+      
+intel-17_Hybrid_Dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   tags:
+      - docker
+      - intel
+      
+intel-17_Hybrid_SP_Dbg:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   tags:
+      - docker
+      - intel
+
+   
+## GCC
+
+gcc-4.7_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-gcc:4.7
+   only:
+      - triggers   
+      
+gcc-4.7_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-gcc:4.7
+   only:
+      - triggers      
+      
+gcc-4.7_Hybrid:
+   <<: *build_hybrid_definition
+   image: walberla/buildenv-ubuntu-gcc:4.7
+   only:
+      - triggers
+      
+gcc-4.7_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:4.7
+   only:
+      - triggers   
+      
+gcc-4.7_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:4.7
+   only:
+      - triggers      
+      
+gcc-4.7_Hybrid_Dbg:
+   <<: *build_hybrid_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:4.7
+      
+
+gcc-4.8_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-gcc:4.8
+   only:
+      - triggers     
+      
+gcc-4.8_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-gcc:4.8
+   only:
+      - triggers      
+      
+gcc-4.8_Hybrid:
+   <<: *build_hybrid_definition
+   image: walberla/buildenv-ubuntu-gcc:4.8
+   only:
+      - triggers
+      
+gcc-4.8_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:4.8
+   only:
+      - triggers     
+      
+gcc-4.8_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:4.8
+   only:
+      - triggers      
+      
+gcc-4.8_Hybrid_Dbg:
+   <<: *build_hybrid_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:4.8
+   only:
+      - triggers
+
+
+gcc-4.9_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-gcc:4.9
+   only:
+      - triggers     
+      
+gcc-4.9_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-gcc:4.9
+   only:
+      - triggers      
+      
+gcc-4.9_Hybrid:
+   <<: *build_hybrid_definition
+   image: walberla/buildenv-ubuntu-gcc:4.9
+   only:
+      - triggers
+      
+gcc-4.9_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:4.9
+   only:
+      - triggers     
+      
+gcc-4.9_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:4.9
+   only:
+      - triggers      
+      
+gcc-4.9_Hybrid_Dbg:
+   <<: *build_hybrid_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:4.9
+   only:
+      - triggers
+      
+      
+gcc-5_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-gcc:5
+   only:
+      - triggers
+      
+gcc-5_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-gcc:5
+   only:
+      - triggers
+   
+gcc-5_Hybrid:
+   <<: *build_hybrid_definition
+   image: walberla/buildenv-ubuntu-gcc:5
+   only:
+      - triggers
+   
+gcc-5_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:5
+   only:
+      - triggers
+      
+gcc-5_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:5
+   only:
+      - triggers
+   
+gcc-5_Hybrid_Dbg:
+   <<: *build_hybrid_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:5
+   only:
+      - triggers
+
+
+gcc-6_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-gcc:6
+   only:
+      - triggers
+      
+gcc-6_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-gcc:6
+   only:
+      - triggers
+   
+gcc-6_Hybrid:
+   <<: *build_hybrid_definition
+   image: walberla/buildenv-ubuntu-gcc:6
+   
+gcc-6_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:6
+      
+gcc-6_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:6
+   
+gcc-6_Hybrid_Dbg:
+   <<: *build_hybrid_dbg_definition
+   image: walberla/buildenv-ubuntu-gcc:6
+   
+gcc-6_Hybrid_SP_Dbg:
+   <<: *build_hybrid_dbg_sp_definition
+   image: walberla/buildenv-ubuntu-gcc:6
+
+      
+## Clang
+
+clang-3.4_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-clang:3.4
+   only:
+      - triggers
+      
+clang-3.4_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-clang:3.4
+   only:
+      - triggers
+      
+clang-3.4_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.4
+   only:
+      - triggers
+      
+clang-3.4_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.4
+
+      
+clang-3.5_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-clang:3.5
+   only:
+      - triggers
+      
+clang-3.5_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-clang:3.5
+   only:
+      - triggers
+
+clang-3.5_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.5
+   only:
+      - triggers
+      
+clang-3.5_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.5
+   only:
+      - triggers
+      
+
+clang-3.6_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-clang:3.6
+   only:
+      - triggers
+      
+clang-3.6_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-clang:3.6
+   only:
+      - triggers
+
+clang-3.6_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.6
+   only:
+      - triggers
+      
+clang-3.6_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.6
+   only:
+      - triggers
+
+      
+clang-3.7_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-clang:3.7
+   only:
+      - triggers
+      
+clang-3.7_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-clang:3.7
+   only:
+      - triggers
+      
+clang-3.7_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.7
+   only:
+      - triggers
+      
+clang-3.7_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.7
+   only:
+      - triggers
+      
+clang-3.8_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-clang:3.8
+   only:
+      - triggers
+      
+clang-3.8_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-clang:3.8
+   only:
+      - triggers
+   
+clang-3.8_Hybrid:
+   <<: *build_hybrid_definition
+   image: walberla/buildenv-ubuntu-clang:3.8
+   only:
+      - triggers
+
+clang-3.8_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.8
+   only:
+      - triggers
+      
+clang-3.8_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.8
+   only:
+      - triggers
+   
+clang-3.8_Hybrid_Dbg:
+   <<: *build_hybrid_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.8
+   only:
+      - triggers
+   
+   
+clang-3.9_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-clang:3.9
+   only:
+      - triggers
+      
+clang-3.9_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-clang:3.9
+   only:
+      - triggers
+   
+clang-3.9_Hybrid:
+   <<: *build_hybrid_definition
+   image: walberla/buildenv-ubuntu-clang:3.9
+
+clang-3.9_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.9
+      
+clang-3.9_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.9
+   
+clang-3.9_Hybrid_Dbg:
+   <<: *build_hybrid_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.9
+   
+clang-3.9_Hybrid_SP_Dbg:
+   <<: *build_hybrid_dbg_sp_definition
+   image: walberla/buildenv-ubuntu-clang:3.9
+
+clang-3.9_Hybrid_Dbg_BufferDebug:
+   <<: *build_hybrid_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:3.9
+   variables:
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      OMP_NUM_THREADS: "4"
+      OMP_WAIT_POLICY: "PASSIVE"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_BUFFER_DEBUG: "ON"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   only:
+      - triggers
+
+   
+
+###############################################################################
+##                                                                           ##
+##    Documentation                                                         ##
+##                                                                           ##
+###############################################################################
+
+doc:
+   image: walberla/buildenv-ubuntu-basic:16.04
+   script:
+      - cmake --version
+      - doxygen --version
+      - mkdir $CI_PROJECT_DIR/build
+      - cd $CI_PROJECT_DIR/build
+      - cmake ..
+      - cmake . -LAH
+      - make doc
+   tags:
+      - docker
+   artifacts:
+      paths:
+        - build/doc
+      expire_in: 1 weeks
+
+
+
+###############################################################################
+##                                                                           ##
+##    Code analysis                                                          ##
+##                                                                           ##
+###############################################################################
+
+cppcheck:
+   image: walberla/cppcheck
+   script:
+      - cppcheck --version
+      - cppcheck . --max-configs=10 --enable=warning --enable=style --enable=performance --enable=portability -i src/gui/extern -i src/geometry/structured/extern -i sqlite3.c -i StackWalker.cpp -I src/ -I tests/ -I apps/ -D WALBERLA_BUILD_WITH_MPI -D WALBERLA_BUILD_WITH_METIS -D WALBERLA_BUILD_WITH_BOOST_THREAD -D WALBERLA_BUILD_WITH_PYTHON --xml 2> report.xml
+      - cppcheck-htmlreport --file=report.xml --report-dir=html_report --source-dir=.
+   artifacts:
+      untracked: true
+   only:
+      - triggers
+   tags:
+      - docker
+
+      
+coverage:
+   image: walberla/coverage
+   script:
+      - export
+      - $CXX --version
+      - cmake --version
+      - gcovr --version
+      - mkdir build
+      - cd build
+      - if dpkg --compare-versions `ompi_info | head -2 | tail -1 | sed 's/[^0-9.]*\([0-9.]*\).*/\1/'` ge 1.10; then export MPIEXEC_PREFLAGS="--allow-run-as-root" ; fi
+      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=Debug -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS
+      - cmake . -LAH
+      - make -j 8
+      - ctest -LE longrun --output-on-failure -j 8_Hybrid
+      - cd ..
+      - mkdir coverage
+      - cd coverage
+      - pwd
+      - gcovr -r $CI_PROJECT_DIR -f ".*\\/src\\/.*" -k
+      - gcovr -r $CI_PROJECT_DIR -f ".*\\/src\\/.*" --html --html-details -o coverage.html -g
+   artifacts:
+      paths:
+         - coverage/
+   only:
+      - triggers
+   tags:
+      - docker
+   variables:
+      CXXFLAGS: "-fprofile-arcs -ftest-coverage -fPIC -O0"
+      LDFLAGS: "-fprofile-arcs -ftest-coverage -fPIC -O0"
+
+      
+      
+###############################################################################
+##                                                                           ##
+##    Windows Builds                                                        ##
+##                                                                           ##
+###############################################################################       
+      
+     
+.win_build_template: &win_build_definition
+   tags:
+      - win
+   script:
+      - export PreferredToolArchitecture=x64
+      - export OMP_NUM_THREADS=4
+      - export OMP_WAIT_POLICY="PASSIVE"
+      - export MSMPI_DISABLE_SHM=1
+      - export
+      - cmake --version
+      - mkdir build
+      - cd build
+      - cmake -LAH -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DWALBERLA_DOUBLE_ACCURACY=$WALBERLA_DOUBLE_ACCURACY -DWARNING_ERROR=ON -G "$CMAKE_GENERATOR" ..
+      - MSBuild.exe walberla.sln /property:Configuration=$BUILD_CONFIGURATION /verbosity:minimal /maxcpucount:4
+      - ctest -LE $CTEST_EXCLUDE_LABELS -C $BUILD_CONFIGURATION --output-on-failure -j 4
+      
+      
+msvc-12_Hybrid_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 12 2013 Win64"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+msvc-12_Hybrid_SP_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 12 2013 Win64"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      WALBERLA_DOUBLE_ACCURACY: "OFF"
+   only:
+      - triggers
+      
+msvc-12_Hybrid:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 12 2013 Win64"
+      BUILD_CONFIGURATION: "Release"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   only:
+      - triggers   
+      
+msvc-12_Serial_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 12 2013 Win64"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   only:
+      - triggers
+      
+msvc-12_Serial:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 12 2013 Win64"
+      BUILD_CONFIGURATION: "Release"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   only:
+      - triggers
+      
+msvc-12_MpiOnly_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 12 2013 Win64"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   only:
+      - triggers
+      
+msvc-12_MpiOnly:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 12 2013 Win64"
+      BUILD_CONFIGURATION: "Release"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   only:
+      - triggers
+      
+msvc-14_Hybrid_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+msvc-14_Hybrid_SP_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      WALBERLA_DOUBLE_ACCURACY: "OFF"
+      
+msvc-14_Hybrid:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      BUILD_CONFIGURATION: "Release"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+msvc-14_Serial_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+msvc-14_Serial:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      BUILD_CONFIGURATION: "Release"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   only:
+      - triggers
+      
+msvc-14_MpiOnly_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+      
+msvc-14_MpiOnly:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 14 2015 Win64"
+      BUILD_CONFIGURATION: "Release"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   only:
+      - triggers

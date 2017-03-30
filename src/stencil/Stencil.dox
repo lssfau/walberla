@@ -1,0 +1,90 @@
+/*!
+
+\page stencilPage Stencils
+
+The stencil module consists of two parts:
+- Definition of all directions and their properties: Directions.h
+- Automatically generated stencil classes. To generate new stencils, look at generate.py,
+  to adapt how the stencil classes look like, change Stencil.in.h (which is used as input by the generate script).
+  This generation process cannot be done using C++ template mechanisms, so here the python script is used as a simple form of code generation.
+
+\section stencilPage_directions Directions
+
+In Directions.h, all possible directions are defined as an enumeration.
+Each direction has several properties. For example: the inverse direction, the offset in x,y,z direction, etc.
+These properties are stored as constant arrays which can be indexed using the direction enum value:
+
+\code
+cx[W]          // = 1
+dirToString[W] // = "W"
+inverseDir[W]  // = E
+dirToString[inverseDir[W]] // = "E"
+\endcode
+
+The only context in which direction enums should be used as integers, are above
+property arrays. Do not use them as indices to the fourth coordinate of fields!
+
+An alternative implementation would have been to store directions as classes which hold these
+properties (cx, inverseDir, ...) as members. This was not done since this prevents some
+compile-time optimizations of the compiler. For best possible performance, these compile-time
+optimizations are, however, essential!
+Above code snippets can all be evaluated at compile time, since all arrays
+are declared constant.
+
+\section stencilPage_stencilClasses Stencil Classes
+
+\subsection stencilClassGen Generation Mechanism
+
+With all possible directions and their properties defined, a stencil class now
+only has to pick a subset of these directions.
+The generation of the stencil classes are automated by the python script generate.py.
+The script uses the file Stencil.in.h as template and substitutes strings according to
+the stencil definition. Which stencils are generated is specified at the beginning of the
+script:
+
+\code
+directions = ['C','N','S','W','E','T','B',
+              'NW','NE','SW','SE','TN','TS',
+              'TW','TE','BN','BS','BW','BE',
+              'TNE','TNW','TSE','TSW','BNE','BNW','BSE','BSW'];
+
+# edit this to add new stencils
+stencils = [
+            { 'name' : 'D2Q4', 'dim' : 2, 'dirs' : directions[1: 5] },
+            { 'name' : 'D2Q5', 'dim' : 2, 'dirs' : directions[ : 5] },
+            { 'name' : 'D3Q7', 'dim' : 3, 'dirs' : directions[ : 7] },
+            { 'name' : 'D3Q19','dim' : 3, 'dirs' : directions[ :19] },
+            { 'name' : 'D3Q27','dim' : 3, 'dirs' : directions[ :27] }
+            #also possible: pick directions as you need them in arbitrary order:
+            #{ 'name' : 'CustomStencil','dim' : 3, 'dirs' : ['S','NW','N'] }
+           ]
+\endcode
+
+\subsection stencilClassesDoc Stencil Class
+
+\copydoc walberla::stencil::internal::$name
+
+\section stencilPage_useCases UseCases
+
+\subsection useCaseField Stencils and Fields
+
+In LBM simulation, one typically stores a PDF for every direction contained in a stencil.
+To write code that is independent of the stencil, the stencil type is usually passed as template parameter.
+The size of the f coordinate (= fourth dimension of the field) equals the number of directions contained in
+the stencil and can be obtained by Stencil::Size (or simply Stencil::Q).
+
+One can iterate all directions of the stencil using the Stencil::dir[] array or the Stencil::iterator obtained
+via Stencil::begin(), Stencil::beginNoCenter(), and Stencil::end().
+
+The reverse mapping is also possible: When one has a stencil::Direction enum at hand and needs to determine
+the index of this direction, the  Stencil::idx[] array has to be used. Do not use the enum directly as
+index: field( x, y, z, W ) is not correct in the general case! Typically you want field( x, y, z, Stencil::idx[W] )!
+
+There are special cases (for example D3Q19 or D3Q27) where both variants are coincidentally the same.
+
+\code
+field( x, y, z, W )               // most probably WRONG !
+field( x, y, z, Stencil::idx[W] ) // typically what you want and therefore CORRECT !
+\endcode
+
+*/

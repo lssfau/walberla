@@ -1,0 +1,56 @@
+# Qt
+moc_*
+ui_*
+qrc_*
+*~
+
+# Backup files of kate/kwrite
+
+# Generated files
+*.out
+/src/waLBerlaDefinitions.h
+/src/core/waLBerlaBuildInfo.cpp
+
+# Eclipse
+/.cproject
+/.project
+/.pydevproject
+/.settings
+
+# Binary Files
+/bin/
+/lib/
+*.a
+/build
+
+
+# Logfiles
+logfile*.txt
+*TestLog_p*.txt
+
+
+# Compiled python
+*.pyc
+
+# Blockforest saves
+*.sav
+
+
+/utilities/.idea
+/utilities/py_waLBerla/.idea
+/python/.idea
+
+/src/stencil/.idea
+
+/CMakeLists.txt.user
+
+# CMake build files
+CMakeFiles
+Makefile
+/CMakeCache.txt
+CTestTestfile.cmake
+/DartConfiguration.tcl
+cmake_install.cmake
+CMakeDefs.h
+/moduleStatistics.json
+/walberla-config.cmake

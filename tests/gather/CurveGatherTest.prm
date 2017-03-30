@@ -1,0 +1,43 @@
+Application{
+
+   Application   test;
+   Functionality default;
+   Hardware      CPU;
+}
+
+Patch{
+   xCellsBlock 'cellsPerBlock';
+   yCellsBlock 'cellsPerBlock';
+   zCellsBlock 'cellsPerBlock';
+
+   AABB{
+      LowerPoint <0,0,0>;
+      UpperPoint <1,1,1>;
+   }
+}
+
+SetupData{}
+
+SimInfo{
+   NumTimeSteps 'timesteps';
+}
+
+Logging{
+   logLevel progress;
+}
+
+Physical_Check{
+
+   Parameters{
+      DX         1/ ('cellsPerBlock' * 'numBlocks');
+      DT         1;
+      timesteps  1;
+      
+      numBlocks  11;      
+      cellsPerBlock 10;
+      
+      xNumProcs  1;
+      yNumProcs  1;
+      zNumProcs  2;
+   }
+}

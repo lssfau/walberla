@@ -1,0 +1,230 @@
+
+PoiseuilleChannel
+{
+   // 3 different modes of operation:
+   // -------------------------------
+   // NO sbffile and NO saveToFile -> domain decomposition is created on the fly and simulation is run
+   //    sbffile and NO saveToFile -> domain decomposition is loaded from file and simulation is run
+   //    sbffile and    saveToFile -> domain decomposition is created and saved to file (simulation is NOT run!)
+
+   // sbffile grid.sbf;
+   
+   // blocksPerProcess 7;
+   // saveToFile; // does not require additional arguments
+   
+   outputSetupForest true; // generates: "domain_decomposition.vtk" and "process_distribution.csv"
+
+   //////////////////////////////
+   // GENERAL SIMULATION SPECS //
+   //////////////////////////////
+   
+   xBlocks 1;
+   yBlocks 2;
+   zBlocks 2;
+
+   xCells  6;
+   yCells  16;
+   zCells  16;
+  
+   memoryPerCell       153; // in bytes
+   processMemoryLimit 2048; // in MiB !
+   
+   Re 10;
+   
+   circularProfile       true; // true = pipe flow, false = flow between parallel plates (periodic in z-direction)
+   curvedBC             false; // true = curved boundary condition, false = 1st order bounce back no-slip boundary condition
+   initWithMeanVelocity  true; // false = fluid is at rest
+   
+   ///////////////////////
+   // WHERE TO REFINE ? //
+   ///////////////////////
+   
+   refineOnBorder         false;
+   borderRefinementLevel  2;
+   borderRefinementBuffer 0; // in number of cells in the coarsest level
+
+   AABBRefinementSelection
+   {
+      /*
+      Region
+      {
+         level 2;
+         region [ <0.499,0.499,0.499>, <0.501,0.501,0.501> ];      
+      }
+      */
+      /*
+      Region
+      {
+         level 2;
+         region [ <0,0.499,0>, <1,0.501,1> ];      
+      }
+      */        
+      /*
+      Region
+      {
+         level 2;
+         region [ <0,0,0>, <1,1,1> ];      
+      }
+      */      
+   }
+   
+   ////////////////////////////
+   // RUNNING THE SIMULATION //
+   ////////////////////////////
+   
+   outerTimeSteps   10; // total number of time steps = outerTimeSteps * innerTimeSteps
+   innerTimeSteps 1000; // For each outer loop, performance data is logged.
+   
+   VolumetricFlowRateEvaluation
+   {
+      plotFrequency       10;
+      logFrequency        1000;
+      filename            FlowRate.txt;
+      axis                <true,false,false>;
+      point               <0.5,0.5,0.5>;
+   }
+   
+   AccuracyEvaluation
+   {
+      plotFrequency 10;
+      logFrequency  1000;
+      filename      Accuracy.txt;
+   }   
+   
+   AccuracyEvaluationLinePlot
+   {
+      y        true;
+      point    <0.5,0.5,0.5>;
+      domain   [<-1,-1,-1>,<1,1,1>];
+      filename linePlot.dat;
+   }
+   
+   AccuracyEvaluationLinePlotter
+   {
+      frequency 1000;
+      filename  linePlot;
+      extension dat;
+   }
+   
+   MassEvaluation
+   {
+      plotFrequency 10;
+      logFrequency  1000;
+      filename      Mass.txt;
+   }
+   
+   StabilityChecker
+   {
+      checkFrequency     10;
+      streamOutput       false;
+      vtkOutput          true;
+      vtkBaseFolder      stability_check;
+      vtkBinary          true;
+      vtkLittleEndian    true;
+      vtkMPIIO           true;
+   }
+   
+   remainingTimeLoggerFrequency 3; // in seconds
+   
+   vtkBeforeTimeStep true; // false = at the end of time step
+   
+   logToSqlDB true;
+   sqlFile simulation.sqlite; // database used for logging the performance and accuracy of the simulation
+   
+   /////////////////////
+   // SRT - TRT setup //
+   /////////////////////
+   
+   omega 1.4;
+   
+   // magicNumber 0.25; // Used to setup TRT in case if and only if no additional parameters
+                        // except 'omega' are specified here in the input file. [default: 0.1875]
+   
+   // lambda_e 1.98; // If "--trt" is used AND 'lambda_e' and 'lambda_d' are both specified here
+   // lambda_d 1.95; // in the input file then these two parameters are used for setting up TRT.
+                     // Otherwise 'omega' is used to set up TRT.
+   
+   // Setting up TRT to mimic SRT: set lambda_e and lambda_d to the same value
+   
+   relaxationParametersLevel 0;
+   
+   //////////////////
+   // CHECK AT END //
+   //////////////////
+   
+   check false;
+   
+   checkFlowRateError 1E6; // upper bound for rel. error of the flow rate
+   
+   checkErrorL1   1E6; // upper bound for L1 norm (normalized to a volume of 1x1x1 and a maximum velocity of 1)
+   checkErrorL2   1E6; // upper bound for L2 norm (normalized to a volume of 1x1x1 and a maximum velocity of 1)
+   checkErrorLmax 1E6; // upper bound for L_max norm (normalized to a maximum velocity of 1)   
+}
+
+
+
+VTK
+{
+   /*
+   fluid_field
+   {
+      baseFolder vtk;
+   
+      initialWriteCallsToSkip 10000; // = write only once at the end
+      ghostLayers                 1;
+      
+    //AABB_filter_0 {
+    //   min < 2,  0,  0 >;
+    //   max < 4, 32, 32 >;         
+    //}
+      
+      before_functions {
+         PDFGhostLayerSync;
+      }
+      
+      inclusion_filters {
+         FluidFilter;
+       //combine FluidFilter,AABB_filter_0;
+      }
+      
+      writers {
+         VelocityFromPDF;
+       //VelocityMagnitudeFromPDF;
+         DensityFromPDF;
+       //NonEquPart;
+       //PDF;
+         Error;
+      }
+   }
+   */
+   /*
+   flag_field
+   {
+      baseFolder vtk;
+   
+      initialWriteCallsToSkip 10000; // = write only once at the end
+      ghostLayers                 0;
+      
+    //AABB_filter_0 {
+    //   min < 2,  0,  0 >;
+    //   max < 4, 32, 32 >;         
+    //}
+    
+    //inclusion_filters {
+    //   AABB_filter_0;
+    //}
+      
+      writers {
+         FlagField;
+      }
+   }
+   */
+   /*
+   domain_decomposition
+   {
+      baseFolder vtk;
+      initialWriteCallsToSkip 10000; // = write only once at the end
+      outputDomainDecomposition true;
+   }
+   */
+}

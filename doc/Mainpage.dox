@@ -1,0 +1,66 @@
+/**
+\mainpage waLBerla - widely applicable lattice Boltzmann from Erlangen
+
+\image html waLBerla.png
+
+\section tutorials Tutorials
+
+\subsection basics Basics
+
+Welcome to the waLBerla Framework, a widely applicable lattice Boltzmann simulation code
+from Erlangen. The following tutorials show you how to get and build waLBerla and describe
+all the basic data strcutures and concepts of the framework.
+
+- \ref setup_instructions \n
+  This page describes how to obtain a copy of waLBerla and how to setup your environment for development.
+- \ref tutorial_basics_01 \n
+  The first tutorial explains the basic data structures of waLBerla and how to setup a simple domain.
+- \ref tutorial_basics_02 \n
+  The second tutorial shows how to write algorithms that operate on block data. 
+- \ref tutorial_basics_03 \n
+  The third tutorial deals with communication, iterating field/grid/lattice data, and geometry setup. 
+
+
+
+\subsection pdes Solving Partial Differential Equations
+
+- \ref tutorial_pde01 \n
+  Implementation of an iterative solver for the solution of a partial differential equation.
+- \ref tutorial_pde02 \n
+  Extending the previous tutorial to be able to solve the heat equation.
+
+\subsection lbm Simulations with the Lattice Boltzmann Method
+
+- \ref tutorial_lbm01 \n
+  A full LBM simulation is built.
+
+\section cite Please cite us
+
+If you use waLBerla in the preparation of a publication, please cite
+\cite godenschwager2013framework. There are separate publications for some modules,
+which you should cite in addition if you use them.
+
+- Grid refinement: \cite schornbaum2016massively
+- PE coupling: \cite rettinger2016simulations, \cite rettinger2017comparative
+- Python interface: \cite bauer2015python
+   
+\htmlonly
+<!--
+<div>
+<canvas id="viewport" width="800" height="600"></canvas>
+
+<div id="dependencies" style="visibility:hidden">
+\endhtmlonly
+	\htmlinclude moduleStatistics.json
+ \htmlonly
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js"></script>
+<script src="./arbor.js"></script>
+<script src="./arbor-graphics.js"></script>
+<script src="./module-graph.js"></script>
+</div>
+-->
+\endhtmlonly
+
+*/

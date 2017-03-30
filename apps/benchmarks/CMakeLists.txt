@@ -1,0 +1,5 @@
+add_subdirectory( CouetteFlow )
+add_subdirectory( NonUniformGrid )
+add_subdirectory( PoiseuilleChannel )
+add_subdirectory( SchaeferTurek )
+add_subdirectory( UniformGrid )

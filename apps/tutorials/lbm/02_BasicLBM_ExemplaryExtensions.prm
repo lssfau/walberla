@@ -1,0 +1,87 @@
+
+Parameters 
+{
+	omega           1.8;
+	timesteps       100000;
+	
+	remainingTimeLoggerFrequency 3; // in seconds
+	
+   // --------------
+   
+   force < 0.00001, 0, 0 >;
+   
+   forceLoggerFrequency 100; // in time steps
+
+   velDenLoggerFrequency 100; // in time steps
+   velDenIncludeImages false;	
+}
+
+DomainSetup
+{
+   blocks        <  4,  1, 1 >;
+   cellsPerBlock <  75, 60, 1 >;
+   periodic      <  1,  0, 0 >;  
+}
+
+StabilityChecker
+{
+   checkFrequency 1;
+   streamOutput   false;
+   vtkOutput      true;
+}
+
+Boundaries 
+{
+	Border { direction S,N;  walldistance -1;  NoSlip    {}  }
+		
+	// load obstacle geometry from file
+	Image  
+	{ 
+		file                 wing.png;
+		extrusionCoordinate  2;
+		rescaleToDomain	   true;
+		
+		BoundaryValueMapping {
+			NoSlip   {}
+			value    0;
+		}
+	}
+}
+
+VTK
+{
+   fluid_field
+   {
+      writeFrequency 1000;
+      ghostLayers    1;
+      
+      before_functions {
+         PDFGhostLayerSync;
+      }
+      
+      inclusion_filters {
+         DomainFilter;
+      }
+      
+      writers {
+         Velocity;
+         Density;
+      }
+   }
+   
+   flag_field
+   {
+      writeFrequency 10000000; // write only once
+   // ghostLayers    1;
+      
+      writers {
+         FlagField;
+      }
+   }
+   
+   domain_decomposition
+   {
+      writeFrequency 10000000; // write only once
+      outputDomainDecomposition true;
+   }
+}

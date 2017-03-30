@@ -1,0 +1,7 @@
+#!/bin/bash
+#PBS -N {job_name}
+#PBS -l nodes={nodes}
+#PBS -l walltime={wall_time}
+
+cd {initial_dir}
+

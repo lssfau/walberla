@@ -1,0 +1,99 @@
+
+Parameters 
+{
+	omega           1.8;
+	initialVelocity < 0.1, 0, 0 >;
+	timesteps       10000;
+
+	useGui 1;
+	remainingTimeLoggerFrequency 3; // in seconds
+}
+
+DomainSetup
+{
+   blocks        <  1,    1, 1 >;
+   cellsPerBlock <  300, 80, 1 >;
+   periodic      <  0,    0, 1 >;  
+}
+
+StabilityChecker
+{
+   checkFrequency 1;
+   streamOutput   false;
+   vtkOutput      true;
+}
+
+Boundaries 
+{
+	velocity0 < 0.1, 0, 0 >; // velocity of cells where Velocity0 boundary is set
+	velocity1 <   0, 0, 0 >; // velocity of cells where Velocity1 boundary is set
+	pressure0 1.1;		     // pressure of cells where Pressure0 boundary is set
+	pressure1 1.0;			 // pressure of cells where Pressure1 boundary is set
+    
+    /* 
+       possible sub-blocks: documentation for the subblocks can be found in src/geometry/initializers/BoundaryFrom*.h
+       	   - CellInterval	 BoundaryFromCellInterval.h
+       	   - Border          BoundaryFromDomainBorder.h
+       	   - VoxelFile	     BoundaryFromVoxelFile.h
+       	   - Body			 BoundaryFromBody.h
+       	   - GrayScaleImage  BoundaryFromImage.h
+       	   - RGBAImage	     BoundaryFromImage.h
+    */
+    
+	Border { direction W;    walldistance -1;  Velocity0 {} }
+	Border { direction E;    walldistance -1;  Pressure1 {} }
+	Border { direction S,N;  walldistance -1;  NoSlip    {} }
+		
+	// load obstacle geometry from file
+	GrayScaleImage
+	{ 
+		file                 waLBerla.png;
+		extrusionCoordinate  2;
+		rescaleToDomain	     true;
+		
+		BoundaryValueMapping {
+			NoSlip   {}
+			value    0;
+		}
+	}
+}
+
+
+VTK 
+{
+   // for parameter documentation see src/vtk/Initialization.cpp
+   fluid_field
+   {
+      writeFrequency 100;
+      ghostLayers    1;
+      
+      before_functions {
+         PDFGhostLayerSync;
+      }
+      
+      inclusion_filters {
+         DomainFilter;
+      }
+      
+      writers {
+         Velocity;
+         Density;
+      }
+   }
+   
+   flag_field
+   {
+      writeFrequency 10000000; // write only once
+   // ghostLayers    1;
+      
+      writers {
+         FlagField;
+      }
+   }
+   
+   domain_decomposition
+   {
+      writeFrequency 10000000; // write only once
+      outputDomainDecomposition true;
+   }
+}

@@ -1,0 +1,89 @@
+
+PoiseuilleChannel
+{
+   outputSetupForest false; // do not generate "domain_decomposition.vtk" and "process_distribution.csv"
+
+   //////////////////////////////
+   // GENERAL SIMULATION SPECS //
+   //////////////////////////////
+   
+   xBlocks 1;
+   yBlocks 1;
+   zBlocks 1;
+
+   xCells  10;
+   yCells  30;
+   zCells  30;
+  
+   memoryPerCell       153; // in bytes
+   processMemoryLimit 2048; // in MiB !
+   
+   Re 10;
+   
+   circularProfile      true; // true = pipe flow, false = flow between parallel plates (periodic in z-direction)
+   curvedBC             false; // true = curved boundary condition, false = 1st order bounce back no-slip boundary condition
+   initWithMeanVelocity true; // false = fluid is at rest
+   
+   ///////////////////////
+   // WHERE TO REFINE ? //
+   ///////////////////////
+   
+   refineOnBorder         false;
+   borderRefinementLevel  2;
+   
+   ////////////////////////////
+   // RUNNING THE SIMULATION //
+   ////////////////////////////
+   
+   outerTimeSteps    1; // total number of time steps = outerTimeSteps * innerTimeSteps
+   innerTimeSteps 1000; // For each outer loop, performance data is logged.
+   
+   VolumetricFlowRateEvaluation
+   {
+      plotFrequency 0;
+      logFrequency  1000;
+      axis          <true,false,false>;
+      point         <0.5,0.5,0.5>;
+   }
+   
+   AccuracyEvaluation
+   {
+      plotFrequency 0;
+      logFrequency  1000;
+   }
+   
+   StabilityChecker
+   {
+      checkFrequency 1000;
+   }
+   
+   remainingTimeLoggerFrequency 3; // in seconds
+   
+   vtkBeforeTimeStep true; // false = at the end of time step
+   
+   logToSqlDB false;
+   
+   /////////////////////
+   // SRT - TRT setup //
+   /////////////////////
+   
+   omega 0.7; // 1.9; // 1.8;
+   
+   // magicNumber 0.25; // Used to setup TRT in case if and only if no additional parameters
+                        // except 'omega' are specified here in the input file. [default: 0.1875]
+   
+   // lambda_e 1.98; // If "--trt" is used AND 'lambda_e' and 'lambda_d' are both specified here
+   // lambda_d 1.95; // in the input file then these two parameters are used for setting up TRT.
+                     // Otherwise 'omega' is used to set up TRT.
+   
+   // Setting up TRT to mimic SRT: set lambda_e and lambda_d to the same value
+   
+   //////////////////
+   // CHECK AT END //
+   //////////////////
+   
+   check true;
+   
+   checkFlowRateError 1E-2; // upper bound for rel. error of the flow rate
+   checkErrorL1       1E-2; // upper bound for L1 norm (normalized to a volume of 1x1x1 and a maximum velocity of 1)
+}

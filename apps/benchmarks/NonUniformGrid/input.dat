@@ -1,0 +1,119 @@
+
+NonUniformGrid
+{
+   // 3 different modes of operation:
+   // -------------------------------
+   // NO sbffile and NO processes -> domain decomposition is created on the fly and benchmark is run
+   //    sbffile and NO processes -> domain decomposition is loaded from file and benchmark is run
+   //    sbffile and    processes -> domain decomposition is created and saved to file (benchmark is NOT run!)
+  
+   // sbffile 128.sbf;
+   // processes 128;
+   
+   bufferProcesses 0;
+   fineBlocksPerProcess 8; // must be either 1, 2, 4, or 8
+   
+   memoryLimit 1024; // in MiB (per process)
+   
+   // number of cells per block in x-/y-/z-direction
+   xCells 10;//20;
+   yCells 10;//20;
+   zCells 10;//20;
+   
+   // timeloop
+   
+   outerTimeSteps 2; // total number of time steps = outerTimeSteps * innerTimeSteps
+   innerTimeSteps 3; // For each outer loop, performance data is logged.
+   
+   logToSqlDB  true;
+   sqlFile     performance.sqlite; // database used for logging the performance
+   
+   // dynamic structure refresh
+   
+   regridType  0; // 0 = shift finest level inwards, 1 = move finest level to bottom edges
+   regridAt    6; // 0 = no dynamic block structure changes
+   
+   checkForEarlyOutInRefresh   false;
+   checkForLateOutInRefresh    false;
+   
+   // dynamic load balancing algorithm
+   
+   dynamicLoadBalancingType 1; // 0 = space filling curve, 1 = diffusion
+   
+   curveHilbert   true;
+   curveAllGather true;
+   
+   diffusionMode                           2; // 0 = push, 1 = pull, 2 = push+pull
+   diffusionMaxIterations                 30;
+   diffusionCheckForEarlyAbort          true;
+   diffusionAbortThreshold              1.01;
+   diffusionAdaptOutflow                true;
+   diffusionAdaptInflow                 true;
+   diffusionFlowIterations                 5;
+ //diffusionFlowIterationsIncreaseStart   10;
+ //diffusionFlowIterationsIncreaseFactor 1.0;
+   diffusionRegardConnectivity          true;
+ //diffusionDisregardConnectivityStart    10;
+   diffusionOutflowExceedFactor         1.00;
+   diffusionInflowExceedFactor          1.00;
+   
+   // LBM 
+   
+   omega 1.2;
+   
+   velocity 0.005;
+   
+   // logging
+   
+   includeLoggingToFile  false;
+   progressLoggingOnRoot false;
+}
+
+VTK
+{
+   /*
+   fluid_field {
+   
+      writeFrequency 1;
+      ghostLayers    1;
+      
+      AABB_filter_0 {
+         min < 0,  4.9,  0 >;
+         max < 24, 5.1, 24 >;
+      } 
+      
+      before_functions {
+         PDFGhostLayerSync;
+      }
+      
+      inclusion_filters {
+         combine FluidFilter,AABB_filter_0;
+      }
+      
+      writers {
+         VelocityFromPDF;
+         DensityFromPDF;
+      }
+   }
+   */
+  
+   /*
+   flag_field {
+   
+      writeFrequency 1000000000;
+      ghostLayers    4;
+      
+      writers {
+         FlagField;
+      }
+   }
+   */
+   
+   /*
+   domain_decomposition {
+      //writeFrequency 1000000000;
+      writeFrequency 1;
+      outputDomainDecomposition true;
+   }
+   */
+}

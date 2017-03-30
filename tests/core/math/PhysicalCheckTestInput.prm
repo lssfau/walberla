@@ -1,0 +1,48 @@
+//GlobalState FZYX,SRTD3Q19LevelBased;
+//SRTD3Q19LevelBased, MRTD3Q19OriginalLevelBased, MRTD3Q19ExtendedLevelBased
+
+Physical_Check {
+
+   Equations {
+      eq0 parameter1 = 23;
+      eq1 parameter2 = 42;
+      eq2 parameter3 = -11;
+
+      eq3 var1 = parameter1 + sqrt(parameter2);
+      eq4 var2 = parameter2 - ln(23);
+      eq5 var3 = parameter3 * exp(var2);
+      
+      eq6 dx = 2;
+      eq7 dt = 1;
+      eq8 rho = 3;
+   }
+
+   Units {
+      parameter1 m;
+      parameter2 m^2/s;
+      parameter3 1/Akg;
+   }
+   
+   Constraints {
+      co0 var1 > 20;
+      co2 var3 <= -209;
+      co3 parameter1 >= 23;
+      co5 parameter2 < parameter1*2;
+   }
+}
+
+Geometry {
+   BoundaryConditionXYZ {
+      velocity 'parameter1';
+      pressure 'var1 * 29.9';
+
+      BoundaryConditionZYX {
+         pressureIN 'parameter3';
+         pressureOUT 'var3-var2';
+      }
+   }
+
+   BoundaryConditionABC {
+      velocity 'parameter1';
+   }
+}

@@ -1,0 +1,140 @@
+GlobalState FZYX,TRTD3Q19SPARSE;
+
+GeometryTest {
+
+   // block structure (uniform block grid)
+   
+   // number of cells per block in x-/y-/z-direction
+   xCells 20; // 50; 
+   yCells 20; // 50;
+   zCells 20; //100;
+   
+   // number of blocks in x-/y-/z-direction
+   xBlocks 1; // 2;
+   yBlocks 1; // 2;
+   zBlocks 1; // 1;
+   
+   // number of processes in x-/y-/z-direction
+   xProcesses 1; // 2;
+   yProcesses 1; // 2;
+   zProcesses 1; // 1;
+
+   dx 0.1;
+   
+   // timeloop
+   
+   timesteps 1;
+   
+   // LBM stream/collide sweep
+   
+   omega 0.95;
+}
+
+Geometry {
+
+  // // Top Face
+  // CellInterval {
+  //    CellInterval [(0,0,19)...(19,19,19)];
+  //    UBB { }
+  //    //NoSlip { }
+  // }
+  // 
+  // // Bottom Face
+  // CellInterval {
+  //    CellInterval [(0,0,0)...(19,19,0)];
+  //    NoSlip { }
+  // }
+  // 
+  //  // North Face
+  // CellInterval {
+  //    CellInterval [(0,19,0)...(19,19,19)];
+  //    NoSlip { }
+  // }
+  // 
+  // // South Face
+  // CellInterval {
+  //    CellInterval [(0,0,0)...(19,0,19)];
+  //    NoSlip { }
+  // }
+  // 
+  // // East Face
+  // CellInterval {
+  //    CellInterval [(19,0,0)...(19,19,19)];
+  //    NoSlip { }
+  // }
+  // 
+  // // West Face
+  // CellInterval {
+  //    CellInterval [(0,0,0)...(0,19,19)];
+  //    NoSlip { }
+  // }
+   
+   // Center Sphere
+  // StructuredGeometryFile {
+  //    file sphere_10x10x10.geo;
+  //    offset (5,5,5);
+  //    
+  //    Flag {
+  //       value 1;
+  //       NoSlip {}
+  //    }
+  // }
+  
+  SurfaceMesh
+  {
+      MeshFilename sphere.obj;
+  }
+}
+
+VTK { // for documentation see function "initializeVTKOutput" in module vtk (Initialization.cpp)
+
+   //fluid_field {
+   //
+   //   writeFrequency 1000;
+   //   ghostLayers    1;
+   //
+   //   inclusion_filters {
+   //      DomainFilter;
+   //   }
+   // 
+   //   writers {
+   //      VelocityFromPDF;
+   //      DensityFromPDF;
+   //      //PDFFieldDump;
+   //   }
+   //}
+  
+  
+ 
+flag_field {
+
+   writeFrequency 10;
+   ghostLayers    0;
+   
+   writers {
+      FlagField;
+      MappedFlagField;
+   }
+}
+  
+   cell_structure {
+   
+      writeFrequency 10;
+      
+      writers {
+         //Level;
+         Process;
+      }
+   }
+   
+   domain_decomposition {
+      writeFrequency 10;
+      outputDomainDecomposition true;
+   }   
+}
+
+
+
+Logging {
+   logLevel progress;
+}

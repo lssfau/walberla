@@ -1,0 +1,180 @@
+namespace walberla {
+
+/**
+\page tutorial_basics_01 Tutorial - Basics 1:  waLBerla Data Structures: Blocks and Fields
+
+\brief Introduction to block structure and field.
+
+This tutorial walks you through the process of creating a simple waLBerla application. 
+The source file of this tutorial can be found in apps/tutorials/01_BlocksAndFields.cpp.
+To compile and run this example, go to your build directory into `apps/tutorials` type `make`
+and run the generated executable.
+
+\section tut01_blockstructure   Setting up the Block Structure
+
+The basic data structure of waLBerla are so called blocks. Think of a block as the container of your actual
+simulation data, for example the lattice (or field as it is called in waLBerla).
+When writing a simple serial lattice Boltzmann code, one usually has one field representing the whole domain. 
+In waLBerla, the domain is first partitioned into blocks, where each block holds its own field. 
+This has the advantage that the domain can easily be distributed to multiple processes,
+where every process can have one or more local blocks.
+
+The following snippet shows how to create a simple domain decompositon that results in a uniform block grid: 
+
+\code
+#include "core/Environment.h"
+#include "blockforest/Initialization.h"
+
+using namespace walberla;
+
+int main( int argc, char ** argv )
+{
+   Environment env( argc, argv );
+
+   // create blocks
+   shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid(
+             uint_c( 3), uint_c(2), uint_c( 4), // number of blocks in x,y,z direction
+             uint_c(10), uint_c(8), uint_c(12), // how many cells per block (x,y,z)
+             real_c(0.5),                       // dx: length of one cell in physical coordinates
+             false,                             // one block per process? - "false" means all blocks to one process
+             false, false, false );             // no periodicity
+   return 0;
+}
+\endcode
+
+Before calling any waLBerla functions one has to create an Environment object, passing the command line arguments.
+This object takes care of initializing and destroying singletons like for example the MPIManager. This object can also read and parse an 
+input/configuration file, as we will see in a later tutorial.
+
+After initializing waLBerla, the blockforest::createUniformBlockGrid() function sets up a domain with 3×2×4 blocks in x,y,z direction, respectively.
+We are creating a _structured_ block storage here, meaning the block storage has also knowledge about how the blocks are structured. 
+Here, we specify that each block is structured in a grid consisting of 10×8×12 cells, where each cubic cell has the physical dimension of 0.5×0.5×0.5.
+With the next parameter, we can choose between assigning all blocks to a single process (which we do here) or putting only one block per process.
+In case we would only assign one block to each process, we would have to start the program with 3×2×4 processes (since we have 3×2×4 blocks).
+The last three parameters determine if the domain is periodic in x, y, or z direction.
+
+There are a lot more ways for initializing the block decomposition of the simulation space in waLBerla. For this tutorial, we just use
+a very simple form of decomposition. In later tutorials, we will see that the domain decomposition can also be controlled via a configuration
+file that is passed to the application. Also, in general, you can have an arbitrary number of blocks on each process. This can be important
+for balancing work load. For load balancning, there exist many different algorithms: some make use of METIS, others are based on space filling curves.
+It is even possible to decompose the simulation space into a set of octrees, resulting in a distributed forest of octrees data structure that
+contains blocks of different sizes. This form of decomposition can be used for simulations that require some form of grid refinement. 
+For now, however, we stick to a simple, uniform block decomposition.
+
+A few words about the (basic) data types used in waLBerla:
+
+- walberla::uint_t is used every time an unsigned integral data type is required. It is a typedef of std::size_t. Meaning: Typically, it is not
+  identical to unsigned int. Depending on your system and compiler, it may or may not be identical to long unsigned int. In other words: There
+  are no guarantees about the size.
+- If you need compile and runtime guarantees about the actual size of your integral data types, you can use either walberla::uint8_t,
+  walberla::uint16_t, walberla::uint32_t, or walberla::uint64_t if you need an unsigned data type or walberla::int8_t, walberla::int16_t,
+  walberla::int32_t, or walberla::int64_t if you need a signed data type with 8, 16, 32, or 64 bits, respectively.
+- walberla::real_t is used in many places where a floating point data type is required. At compile time, you can decide whether walberla::real_t
+  evaluates to float or double using the CMake option `WALBERLA_DOUBLE_ACCURACY` (true by default). If, for a certain algorithm, you always need
+  your floating point data type to be 32 or 64 bit, you of course have to use float or double instead of walberla::real_t.
+- There is also walberla::cell_idx_t, a signed integral data type, used for indexing cells throughout the framework.
+- For casting from one data type to another data type, waLBerla offers a set of different functions: walberla::uint_c in order to cast any data type
+  to a walberla::uint_t data type, walberla::real_c in order to cast any data type to a walberla::real_t data type, walberla::int_c in order to cast
+  any data type to int (there is no walberla::int_t, just int), walberla::uint8_c ..., walberla::uint16_c ..., walberla::uint32_c ...,
+  walberla::uint64_c ..., etc. In release mode, these are just normal static casts. In debug mode, however, all these casts include additional,
+  data type dependent range checks! In other words: If you need to cast one data type to another data type, use walberla::*_c functions.
+  
+You might wonder: Why are all these casts used in the code snippet above? Because every literal constant has a type. `3`, for example, is of type int.
+blockforest::createUniformBlockGrid(), however, expects its first argument to be of type walberla::uint_t. `0.5` is of type double, but a
+walberla::real_t (which might be a single precision float!) is expected. If you want to know more about literal constants and their types, see
+<a target="_blank" href="http://www.cplusplus.com/doc/tutorial/constants/">http://www.cplusplus.com/doc/tutorial/constants/</a>.
+In order to get rid of all type conversion warnings in every compiler, it turns out wrapping every literal constant with a walberla::*_c function
+is a good idea.
+
+\section tut01_vis Visualizing the Setup
+
+In order to visualize the domain, we can use the graphical user interface (GUI) module of waLBerla. Since this module depends on the Qt Library, one has to
+explicitly enable the module before compiling waLBerla. This is done by setting the CMake Option WALBERLA_ENABLE_GUI.
+
+We have to add two more includes to our file, one for the GUI module and one for the time loop, which is used by the GUI.
+A detailed description of the time loop follows in the next tutorial.
+
+\code
+#include "gui/Gui.h"
+#include "timeloop/SweepTimeloop.h"
+\endcode
+
+In the main function we first create a time loop object, which we pass to the GUI:
+
+\code
+// blockforest::createUniformBlockGrid(...)
+
+SweepTimeloop timeloop( blocks, uint_c(1) );
+GUI gui( timeloop, blocks, argc, argv );
+gui.run();
+\endcode
+
+When you run the program now, a window should open showing the domain consisting of blocks:
+
+\image html tutorial_basics01_blocks.jpeg
+
+If no window opens, the GUI was probably not compiled. Make sure that WALBERLA_ENABLE_GUI is enabled and Qt was found.
+
+\section tut01_fields  Storing Data on a Block
+
+So far, we have partitioned our domain into blocks. The next step is to allocate data on these blocks.
+Think of blocks as containers for your simulation data, where arbitrary data can be stored.
+
+For a lattice Boltzmann simulation, we need a lattice data structure on each block. In waLBerla, the class
+for storing lattices is called field::Field. It is a four dimensional structure, where the first three dimensions
+correspond to 3D space, whereas the fourth dimension can be used for indexing within one cell. 
+In lattice Boltzmann simulations, the fourth dimension is usually used for indexing the probability distribution functions (PDFs).
+This field has two template parameters, the first specifies the data type that is stored, the second the size of the fourth
+dimension. In our case, we want to store real numbers in the field. We could use float or double values
+here, however, we use the real_t data type of waLBerla.
+For this example, we want to create a scalar field, so the second template parameter is set to one.
+
+We want to create a field on each block. Since the blocks are managed by waLBerla (how many there are, on which process they are allocated, ...), 
+we have to tell the framework how to create this field. This is done via a callback function, which is called by waLBerla on every process
+for every process-local block.
+This function gets the current block where the data should be allocated, and a constant instance of the block storage, which can
+be used to get global domain information (for example how many cells per block there are supposed to be).
+It has to return a pointer to the created block data, which is automatically freed by the framework when the block storage is destroyed.
+So now lets write the call back function to create a scalar field:
+
+\code
+Field<real_t,1> * createFields( IBlock * const block, StructuredBlockStorage * const storage )
+{
+   return new Field<real_t,1> ( storage->getNumberOfXCells( *block ), // number of cells in x direction for this block
+                                storage->getNumberOfYCells( *block ), // number of cells in y direction for this block
+                                storage->getNumberOfZCells( *block ), // number of cells in z direction for this block
+                                real_c(0) );                          // initial value
+}
+\endcode
+
+The size of the field is determined by the number of cells provided by the StructuredBlockStorage. 
+So it is the responsibility of the user to create fields that have the same size as previously set in the StructuredBlockStorage.
+Using this setup mechanism, waLBerla does not enforce that the fields have the same size as the block storage assumes.
+
+Remember: For waLBerla, a block is just a container for arbitrary data - and a field is just an "arbitrary" data item stored on each block.
+Block data does not have to be any waLBerla data structure. It is possible to store any type of data on a block, 
+so instead of using the field class, we could, for example, have used a std::vector<std::vector<double> > to store our lattice.
+
+The callback function can now be registered at the block storage with the following piece of code:
+
+\code
+// blockforest::createUniformBlockGrid(...)
+
+// add a field to all blocks
+blocks->addStructuredBlockData< Field<real_t,1> >( &createFields, "My Field" );
+
+// time loop and GUI...
+\endcode
+
+In order to view the field in the GUI, click on "New Grid View" and drag a block into the window. The "Grid View Properties"
+dock widget can then be used to display slices of the field.
+
+\image html tutorial_basics01_field.jpeg
+
+The next tutorial contains the writing of algorithms operating on block data: \ref tutorial02
+
+\tableofcontents
+
+*/
+
+}

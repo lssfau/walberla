@@ -1,0 +1,1763 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1628.1045"
+   height="779.59375"
+   id="svg4286"
+   version="1.1"
+   inkscape:version="0.48.5 r10040"
+   sodipodi:docname="commModule.svg">
+  <defs
+     id="defs4288">
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5519"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5075"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4753"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5008"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5004"
+       is_visible="true" />
+    <linearGradient
+       id="linearGradient7176">
+      <stop
+         style="stop-color:#d2d2d2;stop-opacity:1;"
+         offset="0"
+         id="stop7178" />
+      <stop
+         style="stop-color:#dcdcdc;stop-opacity:0;"
+         offset="1"
+         id="stop7180" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient7166"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#cacaca;stop-opacity:1;"
+         offset="0"
+         id="stop7168" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient7132">
+      <stop
+         style="stop-color:#cacaca;stop-opacity:0.40828404;"
+         offset="0"
+         id="stop7134" />
+      <stop
+         id="stop7144"
+         offset="0.5"
+         style="stop-color:#cacaca;stop-opacity:0.49803922;" />
+      <stop
+         style="stop-color:#cacaca;stop-opacity:0;"
+         offset="1"
+         id="stop7136" />
+    </linearGradient>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5138"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5134"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5130"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect6039"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5526"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5334"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Mend"
+       style="overflow:visible">
+      <path
+         id="path3933"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250"
+       style="overflow:visible">
+      <path
+         id="path4252"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-2"
+       style="overflow:visible">
+      <path
+         id="path4252-8"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5526-3"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7"
+       style="overflow:visible">
+      <path
+         id="path4252-7"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5526-0"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-9"
+       style="overflow:visible">
+      <path
+         id="path4252-0"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5334-4"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-6"
+       style="overflow:visible">
+      <path
+         id="path4252-7-7"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847-3"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-1"
+       style="overflow:visible">
+      <path
+         id="path4252-7-9"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847-3-6"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-93"
+       style="overflow:visible">
+      <path
+         id="path4252-3"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5526-34"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5138-2"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5134-7"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5138-2-1"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5138-0"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-71"
+       style="overflow:visible">
+      <path
+         id="path4252-1"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5526-34-5"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-0"
+       style="overflow:visible">
+      <path
+         id="path4252-7-2"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847-3-6-8"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5286"
+       style="overflow:visible">
+      <path
+         id="path5288"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847-3-63"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect6039-0"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5292"
+       style="overflow:visible">
+      <path
+         id="path5294"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847-33"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5297"
+       style="overflow:visible">
+      <path
+         id="path5299"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5334-9"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5302"
+       style="overflow:visible">
+      <path
+         id="path5304"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5526-9"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-2"
+       style="overflow:visible">
+      <path
+         id="path4252-7-1"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847-3-63-9"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-62"
+       style="overflow:visible">
+      <path
+         id="path4252-7-8"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847-3-63-9-6"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-8"
+       style="overflow:visible">
+      <path
+         id="path4252-7-86"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847-3-63-9-6-1"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-09"
+       style="overflow:visible">
+      <path
+         id="path4252-7-94"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847-3-63-9-2"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-19"
+       style="overflow:visible">
+      <path
+         id="path4252-7-0"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5847-3-63-9-6-8"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5004-7"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5004-7-9"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-19-8"
+       style="overflow:visible">
+      <path
+         id="path4252-7-0-8"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4753-6"
+       is_visible="true" />
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect5004-7-9-0"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-19-6"
+       style="overflow:visible">
+      <path
+         id="path4252-7-0-2"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4753-0"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-19-7"
+       style="overflow:visible">
+      <path
+         id="path4252-7-0-87"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4753-69"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-19-0"
+       style="overflow:visible">
+      <path
+         id="path4252-7-0-1"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4753-69-1"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-19-3"
+       style="overflow:visible">
+      <path
+         id="path4252-7-0-0"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4753-6-8"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-19-5"
+       style="overflow:visible">
+      <path
+         id="path4252-7-0-01"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4753-6-2"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-19-65"
+       style="overflow:visible">
+      <path
+         id="path4252-7-0-9"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4753-6-2-4"
+       is_visible="true" />
+    <marker
+       inkscape:stockid="Arrow1Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4250-7-19-2"
+       style="overflow:visible">
+      <path
+         id="path4252-7-0-6"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;marker-start:none"
+         transform="matrix(-0.4,0,0,-0.4,-4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <inkscape:path-effect
+       effect="spiro"
+       id="path-effect4753-6-3"
+       is_visible="true" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="1228.5677"
+     inkscape:cy="473.46625"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="2560"
+     inkscape:window-height="1385"
+     inkscape:window-x="-3"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1"
+     fit-margin-top="50"
+     fit-margin-left="50"
+     fit-margin-right="50"
+     fit-margin-bottom="50"
+     inkscape:snap-global="false">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4371"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata4291">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(420.69275,-1546.8438)"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="576.78571"
+       y="253.06639"
+       id="text5114"
+       sodipodi:linespacing="125%"
+       transform="translate(-15,412.36218)"><tspan
+         sodipodi:role="line"
+         id="tspan5116"
+         x="576.78571"
+         y="253.06639" /></text>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4366"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       transform="translate(-15.5,326.78125)"><flowRegion
+         id="flowRegion4368"><rect
+           id="rect4370"
+           width="81.428574"
+           height="38.92857"
+           x="710.35712"
+           y="-483.67404" /></flowRegion><flowPara
+         id="flowPara4372" /></flowRoot>    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="939.5"
+       y="-317.24994"
+       id="text3310-4"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="939.5"
+         y="-317.24994"
+         id="tspan3330-9"
+         style="font-size:8px" /></text>
+    <rect
+       style="fill:#ff0000;fill-opacity:0.18505339;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect3791"
+       width="620.73877"
+       height="67.680206"
+       x="-325.74097"
+       y="2001.6781"
+       ry="31.062162"
+       rx="10.101525" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="-254.52519"
+       y="2044.1046"
+       id="text4675"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4677"
+         x="-254.52519"
+         y="2044.1046"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">MPI</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="-87.344978"
+       y="2022.8914"
+       id="text4679"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4681"
+         x="-87.344978"
+         y="2022.8914">MPI_ISend</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="-87.036301"
+       y="2041.6923"
+       id="text4679-9"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4681-1"
+         x="-87.036301"
+         y="2041.6923">MPI_IRecv</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="-87.744675"
+       y="2060.1953"
+       id="text4679-9-0"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4681-1-6"
+         x="-87.744675"
+         y="2060.1953">MPI_IProbe</tspan></text>
+    <rect
+       style="fill:#34c5d6;fill-opacity:0.18505339;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3791-5"
+       width="626.29462"
+       height="89.90358"
+       x="-325.48843"
+       y="1906.4712"
+       ry="31.062162"
+       rx="10.101525" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="69.03228"
+       y="2032.0957"
+       id="text4679-5"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4681-5"
+         x="69.03228"
+         y="2032.0957">MPI_Reduce</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="68.53714"
+       y="2050.7834"
+       id="text4679-5-9"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4681-5-2"
+         x="68.53714"
+         y="2050.7834">MPI_Gather</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="-305.16611"
+       y="1947.911"
+       id="text4675-0"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4"
+         x="-305.16611"
+         y="1947.911"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">Buffer System</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="-142.39827"
+       y="1975.9191"
+       id="text4806"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4808"
+         x="-142.39827"
+         y="1975.9191">Maps from Rank to Buffer</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="-140.37796"
+       y="1922.3811"
+       id="text4835"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4837"
+         x="-140.37796"
+         y="1922.3811">Symmetric</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="-140.10855"
+       y="1940.8439"
+       id="text4835-3"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4837-5"
+         x="-140.10855"
+         y="1940.8439">Asymmetric, <tspan
+   style="font-size:9px"
+   id="tspan4860" /></tspan><tspan
+         sodipodi:role="line"
+         x="-140.10855"
+         y="1952.8536"
+         id="tspan4862"><tspan
+           style="font-size:9px"
+           id="tspan4864">given rankList from where to recv</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="68.218529"
+       y="1921.8761"
+       id="text4866"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4868"
+         x="68.218529"
+         y="1921.8761">Reduce(MPI_Op, bool allToAll)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="67.948624"
+       y="1985.7958"
+       id="text4866-3"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4868-9"
+         x="67.948624"
+         y="1985.7958">Fixed Size Buffers of specific Type</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="68.958778"
+       y="1966.6029"
+       id="text4866-3-3"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4868-9-3"
+         x="68.958778"
+         y="1966.6029">subsetOfRanks(vector&lt;ranks&gt;&amp; )</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="68.723602"
+       y="1949.1501"
+       id="text4920"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4922"
+         x="68.723602"
+         y="1949.1501">holdsResult()</tspan></text>
+    <rect
+       style="fill:#34c52f;fill-opacity:0.18505339;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3791-5-0"
+       width="181.55774"
+       height="96.573547"
+       x="-161.95479"
+       y="1709.4518"
+       ry="31.062162"
+       rx="10.606601" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="-144.5125"
+       y="1725.9252"
+       id="text4675-0-5"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9"
+         x="-144.5125"
+         y="1725.9252"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">Step</tspan></text>
+    <rect
+       style="fill:#536ce0;fill-opacity:0.18505339;stroke:#0000d8;stroke-width:0.53135705;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3791-5-0-4"
+       width="166.41617"
+       height="96.076675"
+       x="-350.72403"
+       y="1708.2469"
+       ry="17.302048"
+       rx="5.1202836" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="-324.51846"
+       y="1735.9119"
+       id="text4675-0-5-7"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-0"
+         x="-324.51846"
+         y="1735.9119"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">Scheme</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:3.5999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m -370.69275,1843.0842 873.26922,0.5051"
+       id="path5002"
+       inkscape:path-effect="#path-effect5004"
+       inkscape:original-d="m -370.69275,1843.0842 c 722.25907,0 873.26922,0.5051 873.26922,0.5051"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:1, 1;stroke-dashoffset:0"
+       d="m 109.60155,2198.9998 0.50508,543.9672"
+       id="path5006"
+       inkscape:path-effect="#path-effect5008"
+       inkscape:original-d="m 109.60155,2198.9998 0.50508,543.9672"
+       inkscape:connector-curvature="0"
+       transform="translate(-71.6876,-591.28125)"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="-39.39595"
+       y="2487.9036"
+       id="text5010"
+       sodipodi:linespacing="125%"
+       transform="translate(-71.6876,-591.28125)"><tspan
+         sodipodi:role="line"
+         id="tspan5012"
+         x="-39.39595"
+         y="2487.9036"
+         style="font-style:italic;-inkscape-font-specification:Sans Italic">Rank To Rank</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="73.634766"
+       y="1895.0349"
+       id="text5010-7"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5012-7"
+         x="73.634766"
+         y="1895.0349"
+         style="font-style:italic;-inkscape-font-specification:Sans Italic">Collective</tspan></text>
+    <rect
+       style="fill:#536ce0;fill-opacity:0.18505339;stroke:#0000d8;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:0.62068725, 0.62068725;stroke-dashoffset:0"
+       id="rect5041"
+       width="144.84888"
+       height="63.813282"
+       x="-143.09048"
+       y="1733.1683"
+       rx="6.5458875"
+       ry="14.225936" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="-122.91946"
+       y="1751.2745"
+       id="text4675-0-5-0"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7"
+         x="-122.91946"
+         y="1751.2745"
+         style="font-size:12px;font-weight:bold;-inkscape-font-specification:Sans Bold">PackInfos</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="-109.71806"
+       y="1772.6796"
+       id="text5064"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5066"
+         x="-109.71806"
+         y="1772.6796">from Block a</tspan><tspan
+         sodipodi:role="line"
+         x="-109.71806"
+         y="1787.6796"
+         id="tspan5068">to Block b</tspan></text>
+    <rect
+       style="fill:#536ce0;fill-opacity:0.18505339;stroke:#0000d8;stroke-width:0.53135705;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3791-5-0-4-0"
+       width="187.62938"
+       height="97.591888"
+       x="58.746033"
+       y="1710.6365"
+       ry="17.302048"
+       rx="5.1202836" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="84.951599"
+       y="1738.3014"
+       id="text4675-0-5-7-5"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-0-7"
+         x="84.951599"
+         y="1738.3014"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">Collective</tspan><tspan
+         sodipodi:role="line"
+         x="84.951599"
+         y="1758.3014"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold"
+         id="tspan5121">Scheme</tspan></text>
+    <rect
+       style="fill:#afe053;fill-opacity:0.18505339;stroke:#0000d8;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:0.62068725, 0.62068725;stroke-dashoffset:0;display:inline"
+       id="rect5041-1"
+       width="157.98087"
+       height="61.792927"
+       x="266.37958"
+       y="1735.5579"
+       rx="6.5458875"
+       ry="14.225936" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="286.5506"
+       y="1753.6641"
+       id="text4675-0-5-0-8"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-8"
+         x="286.5506"
+         y="1753.6641"
+         style="font-size:12px;font-weight:bold;-inkscape-font-specification:Sans Bold">CollectivePackInfo</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="299.75201"
+       y="1775.0691"
+       id="text5064-7"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         x="299.75201"
+         y="1775.0691"
+         id="tspan5068-6">singleBlock</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="155.56349"
+       y="2372.7461"
+       id="text5125"
+       sodipodi:linespacing="125%"
+       transform="translate(-71.6876,-591.28125)"><tspan
+         sodipodi:role="line"
+         id="tspan5127"
+         x="155.56349"
+         y="2372.7461">- determine rank subset</tspan><tspan
+         sodipodi:role="line"
+         x="155.56349"
+         y="2387.7461"
+         id="tspan5133">- define which operation</tspan><tspan
+         sodipodi:role="line"
+         x="155.56349"
+         y="2402.7461"
+         id="tspan5129" /></text>
+    <rect
+       style="fill:#34c5d6;fill-opacity:0.18505339;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3791-5-2"
+       width="480.23984"
+       height="134.39853"
+       x="649.15155"
+       y="2019.64"
+       ry="31.062162"
+       rx="10.101525"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/bufferLayer.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="672.97351"
+       y="2090.8525"
+       id="text4675-0-7"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/bufferLayer.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-8"
+         x="672.97351"
+         y="2090.8525"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">Buffer Layer</tspan></text>
+    <rect
+       style="fill:#0000ff;fill-opacity:0.18505339;stroke:#000000;stroke-width:1.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect3611"
+       width="94.28569"
+       height="38.571499"
+       x="838.58545"
+       y="2101.4443"
+       rx="10.101525"
+       ry="19.285749"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/bufferLayer.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="851.08545"
+       y="2123.7654"
+       id="text3603"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/bufferLayer.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan3605"
+         x="851.08545"
+         y="2123.7654">SendBuffer</tspan></text>
+    <rect
+       style="fill:#0000ff;fill-opacity:0.18505339;stroke:#000000;stroke-width:1.5;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3611-6"
+       width="94.28569"
+       height="38.571499"
+       x="957.87115"
+       y="2100.7295"
+       rx="10.101525"
+       ry="19.285749"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/bufferLayer.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="973.58545"
+       y="2123.5869"
+       id="text3607"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/bufferLayer.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan3609"
+         x="973.58545"
+         y="2123.5869">RecvBuffer</tspan></text>
+    <rect
+       style="fill:#0000ff;fill-opacity:0.18431373;stroke:#000000;stroke-width:1.50000000000000000;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3611-5"
+       width="140.70558"
+       height="42.143066"
+       x="880.22327"
+       y="2038.8617"
+       rx="10.101525"
+       ry="18.214338"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/bufferLayer.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="911.30518"
+       y="2064.1936"
+       id="text4531"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/bufferLayer.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4533"
+         x="911.30518"
+         y="2064.1936">BufferSystem</tspan></text>
+    <rect
+       style="fill:#ff0000;fill-opacity:0.18505339;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3791-1"
+       width="479.82254"
+       height="61.619343"
+       x="646.78339"
+       y="2186.3152"
+       ry="30.809671"
+       rx="10.101525"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="681.63367"
+       y="2225.7112"
+       id="text4675-8"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-0"
+         x="681.63367"
+         y="2225.7112"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">MPI</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="899.6532"
+       y="2204.2581"
+       id="text4679-1"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4681-7"
+         x="899.6532"
+         y="2204.2581">MPI_ISend</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="899.96185"
+       y="2223.0591"
+       id="text4679-9-1"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4681-1-3"
+         x="899.96185"
+         y="2223.0591">MPI_IRecv</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="899.25348"
+       y="2241.562"
+       id="text4679-9-0-1"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4681-1-6-4"
+         x="899.25348"
+         y="2241.562">MPI_IProbe</tspan></text>
+    <rect
+       style="fill:#536ce0;fill-opacity:0.18505339;stroke:#0000d8;stroke-width:0.53135705;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3791-5-0-4-4"
+       width="473.55896"
+       height="131.79089"
+       x="654.33807"
+       y="1665.1011"
+       ry="17.302048"
+       rx="5.1202836"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="779.39056"
+       y="1693.3679"
+       id="text4675-0-5-7-2"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-0-6"
+         x="779.39056"
+         y="1693.3679"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">Control Layer (Schemes)</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:2, 2;stroke-dashoffset:0;display:inline"
+       d="m 616.48265,2169.3951 540.92905,-0.505"
+       id="path5002-1"
+       inkscape:path-effect="#path-effect5004-7"
+       inkscape:original-d="m 616.48265,2169.3951 c 540.11625,-1.0714 540.92905,-0.505 540.92905,-0.505"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:2, 2;stroke-dashoffset:0;display:inline"
+       d="m 616.41932,2004.7525 540.92908,-0.505"
+       id="path5002-1-6"
+       inkscape:path-effect="#path-effect5004-7-9"
+       inkscape:original-d="m 616.41932,2004.7525 c 540.11628,-1.0714 540.92908,-0.505 540.92908,-0.505"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <rect
+       style="fill:#2fc5aa;fill-opacity:0.60573479;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3791-5-0-9"
+       width="482.62915"
+       height="167.4664"
+       x="653.60498"
+       y="1825.8204"
+       ry="31.062162"
+       rx="10.606567"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="833.9762"
+       y="1857.6117"
+       id="text4675-0-5-4"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-8"
+         x="833.9762"
+         y="1857.6117"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">Packing Layer</tspan></text>
+    <rect
+       style="fill:#8b9bea;fill-opacity:0.46953406;stroke:#000000;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4"
+       width="185.72237"
+       height="32.741821"
+       x="690.93323"
+       y="1884.6527"
+       rx="6.5458875"
+       ry="14.225936"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="722.70215"
+       y="1905.8252"
+       id="text4675-0-5-0-89"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0"
+         x="722.70215"
+         y="1905.8252"
+         style="font-size:11px;font-weight:bold;-inkscape-font-specification:Sans Bold">UniformPackInfo</tspan></text>
+    <rect
+       style="fill:#8b9bea;fill-opacity:0.46953406;stroke:#000000;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4-3-6"
+       width="89.491829"
+       height="28.098911"
+       x="664.97144"
+       y="1948.8436"
+       rx="6.5458875"
+       ry="13.692313"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="676.91809"
+       y="1966.6793"
+       id="text4675-0-5-0-89-0-6"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0-3-0"
+         x="676.91809"
+         y="1966.6793"
+         style="font-size:9px;font-weight:bold;-inkscape-font-specification:Sans Bold">field::PackInfo</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker4250-7-19);display:inline"
+       d="m 720.3276,1949.6012 -0.28536,-30.1523"
+       id="path4751-9"
+       inkscape:path-effect="#path-effect4753-6"
+       inkscape:original-d="m 720.3276,1949.6012 -0.28536,-30.1523"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:2, 2;stroke-dashoffset:0;display:inline"
+       d="m 614.38182,1811.2562 915.92898,-0.505"
+       id="path5002-1-6-3"
+       inkscape:path-effect="#path-effect5004-7-9-0"
+       inkscape:original-d="m 614.38182,1811.2562 c 540.11618,-1.0714 915.92898,-0.505 915.92898,-0.505"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <rect
+       style="fill:#8b9bea;fill-opacity:0.46953406;stroke:#000000;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4-3-7"
+       width="175.74089"
+       height="28.93572"
+       x="686.12543"
+       y="1754.9618"
+       rx="6.5458875"
+       ry="13.71026"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="695.68988"
+       y="1773.068"
+       id="text4675-0-5-0-89-0-9"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0-3-5"
+         x="695.68988"
+         y="1773.068"
+         style="font-size:9px;font-weight:bold;-inkscape-font-specification:Sans Bold">DirectionBasedReduceScheme</tspan></text>
+    <rect
+       style="fill:#8b9bea;fill-opacity:0.46953406;stroke:#000000;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4-3-7-5"
+       width="147.96172"
+       height="28.430593"
+       x="704.5484"
+       y="1713.5172"
+       rx="6.5458875"
+       ry="13.71026"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="714.11285"
+       y="1731.6234"
+       id="text4675-0-5-0-89-0-9-0"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0-3-5-3"
+         x="714.11285"
+         y="1731.6234"
+         style="font-size:9px;font-weight:bold;-inkscape-font-specification:Sans Bold">UniformBufferedScheme</tspan></text>
+    <rect
+       style="fill:#68ff65;fill-opacity:0.47058824;stroke:#000000;stroke-width:0.62068725000000002;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4-3-7-5-7"
+       width="172.2054"
+       height="27.420389"
+       x="929.71429"
+       y="1718.1456"
+       rx="6.5458875"
+       ry="13.710195"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="939.27875"
+       y="1736.2518"
+       id="text4675-0-5-0-89-0-9-0-8"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0-3-5-3-0"
+         x="939.27875"
+         y="1736.2518"
+         style="font-size:9px;font-weight:bold;-inkscape-font-specification:Sans Bold">NonUniformBufferedScheme</tspan></text>
+    <rect
+       style="fill:#68ff65;fill-opacity:0.46953407;stroke:#000000;stroke-width:0.62068725000000002;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4-4"
+       width="197.33911"
+       height="31.731668"
+       x="922.883"
+       y="1884.2874"
+       rx="6.5458875"
+       ry="14.225936"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="948.65192"
+       y="1905.4598"
+       id="text4675-0-5-0-89-1"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0-3"
+         x="948.65192"
+         y="1905.4598"
+         style="font-size:11px;font-weight:bold;-inkscape-font-specification:Sans Bold">NonUniformPackInfo</tspan></text>
+    <rect
+       style="fill:#8b9bea;fill-opacity:0.46953406;stroke:#000000;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4-3-6-9"
+       width="98.777542"
+       height="24.527483"
+       x="865.20416"
+       y="1941.5309"
+       rx="6.5458875"
+       ry="12.263741"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="871.15082"
+       y="1955.3666"
+       id="text4675-0-5-0-89-0-6-6"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0-3-0-7"
+         x="871.15082"
+         y="1955.3666"
+         style="font-size:9px;font-weight:bold;-inkscape-font-specification:Sans Bold">HandlingPackInfo</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker4250-7-19);display:inline"
+       d="m 883.82155,1940.4601 -23.14251,-23.0095"
+       id="path4751-9-7"
+       inkscape:path-effect="#path-effect4753-6-2"
+       inkscape:original-d="m 883.82155,1940.4601 -23.14251,-23.0095"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <rect
+       style="fill:#8b9bea;fill-opacity:0.46953406;stroke:#000000;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4-3-6-7"
+       width="100.92039"
+       height="28.813162"
+       x="757.41846"
+       y="1950.9595"
+       rx="6.5458875"
+       ry="13.692296"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="769.36511"
+       y="1968.7952"
+       id="text4675-0-5-0-89-0-6-5"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0-3-0-4"
+         x="769.36511"
+         y="1968.7952"
+         style="font-size:9px;font-weight:bold;-inkscape-font-specification:Sans Bold">PdfFieldPackInfo</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker4250-7-19);display:inline"
+       d="m 798.82153,1950.4601 -0.28536,-30.1523"
+       id="path4751-9-7-9"
+       inkscape:path-effect="#path-effect4753-6-2-4"
+       inkscape:original-d="m 798.82153,1950.4601 -0.28536,-30.1523"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       x="776.45007"
+       y="1629.2947"
+       id="text3217"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan3219"
+         x="776.45007"
+         y="1629.2947">Buffered Strategy</tspan></text>
+    <rect
+       style="fill:#536ce0;fill-opacity:0.18505339;stroke:#0000d8;stroke-width:0.53135705;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3791-5-0-4-4-4"
+       width="319.98752"
+       height="121.79089"
+       x="1159.6707"
+       y="1666.9707"
+       ry="17.302048"
+       rx="5.1202836"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="1224.7231"
+       y="1690.9518"
+       id="text4675-0-5-7-2-2"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-0-6-6"
+         x="1224.7231"
+         y="1690.9518"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">Control Layer (Schemes)</tspan></text>
+    <rect
+       style="fill:#8b9bea;fill-opacity:0.46953406;stroke:#000000;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4-3-7-5-79"
+       width="147.96172"
+       height="28.430593"
+       x="1244.881"
+       y="1724.1011"
+       rx="6.5458875"
+       ry="13.71026"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="1254.4454"
+       y="1742.2073"
+       id="text4675-0-5-0-89-0-9-0-6"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0-3-5-3-07"
+         x="1254.4454"
+         y="1742.2073"
+         style="font-size:9px;font-weight:bold;-inkscape-font-specification:Sans Bold">UniformDirectScheme</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="1232.0555"
+       y="1629.8123"
+       id="text3217-4"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan3219-7"
+         x="1232.0555"
+         y="1629.8123">Direct Strategy (new)</tspan></text>
+    <rect
+       style="fill:#2fc5aa;fill-opacity:0.60573479;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect3791-5-0-9-9"
+       width="313.34344"
+       height="157.46643"
+       x="1170.1355"
+       y="1826.2758"
+       ry="31.062162"
+       rx="10.606567"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="1224.7924"
+       y="1857.3527"
+       id="text4675-0-5-4-0"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-8-9"
+         x="1224.7924"
+         y="1857.3527"
+         style="font-size:16px;font-weight:bold;-inkscape-font-specification:Sans Bold">MPI Datatypes Layer</tspan></text>
+    <rect
+       style="fill:#8b9bea;fill-opacity:0.46953406;stroke:#000000;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4-48"
+       width="198.57956"
+       height="32.027534"
+       x="1197.1604"
+       y="1883.6381"
+       rx="6.5458875"
+       ry="14.225936"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="1224.9293"
+       y="1904.8105"
+       id="text4675-0-5-0-89-9"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0-4"
+         x="1224.9293"
+         y="1904.8105"
+         style="font-size:11px;font-weight:bold;-inkscape-font-specification:Sans Bold">UniformMPIDatatypeInfo</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker4250-7-19);display:inline"
+       d="m 1243.3718,1949.2502 -0.2853,-30.1523"
+       id="path4751-9-9"
+       inkscape:path-effect="#path-effect4753-6-3"
+       inkscape:original-d="m 1243.3718,1949.2502 -0.2853,-30.1523"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <rect
+       style="fill:#8b9bea;fill-opacity:0.46953406;stroke:#000000;stroke-width:0.62068725;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       id="rect5041-4-3-6-7-3"
+       width="173.77756"
+       height="19.527395"
+       x="1192.4185"
+       y="1953.4595"
+       rx="6.5458875"
+       ry="9.7636976"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646" />
+    <text
+       xml:space="preserve"
+       style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
+       x="1199.9623"
+       y="1966.3282"
+       id="text4675-0-5-0-89-0-6-1"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/staff/bauer/code/walberla/src/communication/doc/architecture.png"
+       inkscape:export-xdpi="99.949646"
+       inkscape:export-ydpi="99.949646"><tspan
+         sodipodi:role="line"
+         id="tspan4677-4-9-7-0-3-0-6"
+         x="1199.9623"
+         y="1966.3282"
+         style="font-size:9px;font-weight:bold;-inkscape-font-specification:Sans Bold">field::UniformMPIDatatypeInfo</tspan></text>
+  </g>
+</svg>

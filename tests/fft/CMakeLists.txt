@@ -1,0 +1,8 @@
+if ( WALBERLA_BUILD_WITH_FFT )
+    waLBerla_compile_test( FILES FftTest.cpp DEPENDS field fft ) 
+    waLBerla_execute_test( NAME FftTest COMMAND $<TARGET_FILE:FftTest> PROCESSES 1 )
+    waLBerla_execute_test( NAME FftTestParallel COMMAND $<TARGET_FILE:FftTest> PROCESSES 8 )
+    waLBerla_compile_test( FILES GreensTest.cpp DEPENDS field fft ) 
+    waLBerla_execute_test( NAME GreensTest COMMAND $<TARGET_FILE:GreensTest> PROCESSES 1 )
+    waLBerla_execute_test( NAME GreensTestParallel COMMAND $<TARGET_FILE:GreensTest> PROCESSES 8 )
+endif()

@@ -1,0 +1,20 @@
+#!/bin/bash
+# DO NOT USE environment = COPY_ALL
+#@ job_name = {job_name}
+#@ job_type = parallel
+#@ class = {job_class}
+#@ node = {nodes}
+#@ tasks_per_node = {tasks_per_node}
+#@ island_count={island_count}
+#@ wall_clock_limit = {wall_time}
+#@ network.MPI = sn_all,not_shared,us
+#@ initialdir = {initial_dir}
+#@ output = {output_file}.stdout
+#@ error =  {error_file}.stderr
+#@ notification=never{energy_tag_statements}
+#@ queue
+. /etc/profile
+. /etc/profile.d/modules.sh
+
+export MP_TASK_AFFINITY={task_affinity}
+

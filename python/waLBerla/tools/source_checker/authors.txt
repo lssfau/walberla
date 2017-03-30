@@ -1,0 +1,12 @@
+Christian Feichtinger										| feichtinger
+Christian Godenschwager <christian.godenschwager@fau.de>	| godenschwager
+Daniela Anderl <daniela.anderl@lstm.uni-erlangen.de>		| anderl
+David Staubach <david.staubach@fau.de>						| staubach
+Ehsan Fattahi <ehsan.fattahi@fau.de>						| fattahi
+Florian Schornbaum <florian.schornbaum@fau.de>     			| schornbaum
+Klaus Iglberger												| iglberger
+Martin Bauer <martin.bauer@fau.de>               			| bauer
+Matthias Markl <matthias.markl@fau.de>						| markl
+Regina Ammer <regina.ammer@fau.de>							| ammer
+Simon Bogner <simon.bogner@fau.de>							| bogner
+Stefan Donath                        						| donath

@@ -1,0 +1,36 @@
+Lead developers
+---------------
+
+Christian Godenschwager
+Christoph Rettinger
+Martin Bauer
+Sebastian Eibl
+
+
+Contributors
+------------
+
+Christian Feichtinger
+Daniel Ritter
+Daniela Anderl
+David Staubach
+Dominik Bartuschat
+Ehsan Fattahi
+Felix Winterhalter
+Florian Schornbaum
+Jan Götz
+Johannes Habich
+Klaus Iglberger
+Kristina Pickl
+Lorenz Hufnagel
+Matthias Markl
+Michael Kuron
+Regina Ammer
+Sagar Dolas
+Silke Bergler
+Simon Bogner
+Stefan Donath
+Sunil Kontham
+Tobias Preclik
+Tobias Scharpff
+Tobias Schruff

@@ -1,0 +1,23 @@
+GDB Pretty Printer Usage
+------------------------
+
+
+GDB Pretty Printers are python scripts that changes the display of data structures in the debugger.
+For example a std::vector is not shown with its internal representation, but more like a native C/C++ array.
+Pretty Printers exists for most of STL's and Boost's data types.
+
+For a few waLBerla data structures (Field, GhostLayerField) pretty printers are also available.
+
+The pretty printers can be activated for all debug sessions, or only for certain executables.
+
+0) Set your python path
+	make sure the folder utilities is in your python path
+	the utilites/bashhelper/source_me.sh file takes automatically care of that
+
+1) Global Activation
+	- create file "~/.gdbinit" and add the following line to the file:
+	   source pathToWalberla/walberla/utilities/gdbPrettyPrinter/gdbinit.gdb
+
+2) Activation for single debug sessions in eclipse
+	- Run -> Debug Configurations -> <select your debug session> 
+	- select the "Debugger" tab and use the gdbinit.gdb as "GDB command file"

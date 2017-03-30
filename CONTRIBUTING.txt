@@ -1,0 +1,22 @@
+Contributing to waLBerla will require a signed copy of the Chair for System
+Simulation Contributor Agreement (LSSCA). The LSSCA is an adapted version of
+the Sun/Oracle Contributor Agreement.
+
+Signing a contributor agreement is necessary for many reasons. For an overview,
+see http://oss-watch.ac.uk/resources/cla.
+
+You can download the LSSCA at http://walberla.net/lss_contributor_agreement.pdf.
+Please send a signed copy to us via fax (+49 9131 85-28928) or mail it to
+
+Universität Erlangen-Nürnberg
+Lehrstuhl für Systemsimulation (Informatik 10)
+Cauerstraße 11
+91058 Erlangen
+Germany
+
+After we have received your agreement, we will create a GitLab account on
+https://i10git.cs.fau.de/ for you. GitLab Merge Requests are the only acceptable
+facility for code submission. Please do not use GitHub pull requests and do not
+send patches by email.
+
+Thank you for contributing!

@@ -1,0 +1,23 @@
+Initializer
+{
+   u_x 0.0;
+   u_y 0.0;
+   u_z 0.0;
+   rho 1.0;
+}
+
+Initializer
+{
+   u_x x;
+   u_y y;
+   u_z z;
+   rho x + y + z;
+}
+
+Initializer
+{
+   u_x x/n_x;
+   u_y y/n_y;
+   u_z z/n_y;
+   rho (x + y + z) / (n_x * n_y * n_z);
+}

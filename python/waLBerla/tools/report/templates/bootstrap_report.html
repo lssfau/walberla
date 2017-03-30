@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    {% block title %}
+    <title>waLBerla Report</title>
+	{% endblock %}
+	
+	
+    {% block css %}
+    <!-- Bootstrap -->
+    
+    <!-- Bootstrap Core CSS -->
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+	
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <style>
+    	svg { width:100%; height: 100%; }
+		.bs-callout {
+		margin: 20px 0;
+		padding: 15px 30px 15px 15px;
+		border-left: 5px solid #eee;
+		}
+		.bs-callout h4 {
+		margin-top: 0;
+		}
+		.bs-callout p:last-child {
+		margin-bottom: 0;
+		}
+		.bs-callout code,
+		.bs-callout .highlight {
+		background-color: #fff;
+		}
+		 
+		/* Themes for different contexts */
+		.bs-callout-danger {
+		background-color: #fcf2f2;
+		border-color: #dFb5b4;
+		}
+		.bs-callout-warning {
+		background-color: #fefbed;
+		border-color: #f1e7bc;
+		}
+		.bs-callout-info {
+		background-color: #f0f7fd;
+		border-color: #d0e3f0;
+		}
+		.bs-callout-danger h4 {
+		color: #B94A48;
+		}
+		
+		.bs-callout-warning h4 {
+		color: #C09853;
+		}
+		
+		.bs-callout-info h4 {
+		color: #3A87AD;
+		}    	
+    </style>
+    {% endblock %}
+  </head>
+  
+  
+  <body>
+		
+	{% block content %}
+	<div class="container">
+  		<div class="text-center">
+  		{% block inner_content %}
+  		{% endblock %}
+		</div>
+	</div>	
+	{% endblock %}
+
+
+	{% block js %}
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script> 
+	
+	
+	<script type="text/x-mathjax-config">
+  		MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+	</script>
+    <script type="text/javascript"
+  		src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+	</script>
+	{% endblock %}
+	
+   </body>
+   
+</html>

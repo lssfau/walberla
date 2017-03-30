@@ -1,0 +1,65 @@
+/*!	
+ \page fieldPage Overview of Field Module
+
+\brief Introduction to the field Module
+
+\section components Components of the field Module
+
+\subsection fieldClasses Field Classes
+
+The field classes are the main content of the field module:
+   - Basic four dimensional array:       walberla::field::Field
+   - Field with ghost layer information: walberla::field::GhostLayerField
+   - GhostLayerField that stores flags:  walberla::field::FlagField,
+     the basic flag operations are defined in FlagFunctions.h
+
+\subsection allocators Allocators
+
+The allocation of the memory used by fields can be controlled via allocator classes.
+One can either an own allocator class or use one of the two standard allocators:
+    - walberla::field::StdFieldAlloc which uses normal new and delete operators
+    - walberla::field::AllocateAligned which allocates the field such that the inner lines are aligned
+
+
+\subsection iterators Iterators and Field pointers
+   Iterators are returned by the various field classes. They are all some types of
+      - walberla::field::FieldIterator
+   
+   To iterate over more than one field of the same size simultaneously, helper macros are available.
+   see IteratorMacros.h
+   There is no need to include this file, it comes automatically with the Field.h header
+   
+   A common pattern is to write a function that takes a generic field iterator to calculate
+   something in this specific cell. For example
+   \code
+      template<typename FieldIter>
+      void calcDensity( const FieldIter & fieldIter)
+      {
+         //calulate density using fieldIter.getF(),  or fieldIter.getNeighbor()
+      }
+   \endcode
+
+   If one wants to call such a function but has only x,y,z coordinates instead of a iterator
+   the FieldPointer can be used. A walberla::field::FieldPointer can be constructed from coordinates and 
+   behaves just like an iterator ( but has not operator++ or operator-- ).
+  
+ 
+
+\subsection interpolators Interpolators
+
+Fields are always accessed with integer coordinates. 
+If values in between are needed, the Interpolator classes can be used:
+   - walberla::field::TrilinearInterpolator
+   - walberla::field::NearestNeighborInterpolator
+
+\subsection adaptors Adaptors
+
+Sometimes one needs cell based data that can be (easily) computed from a field. 
+For example velocity from a Lattice Boltzmann PDF field.
+Instead of creating a separate velocity field one can use a Adaptor, which behaves like
+a field but does not hold data, but computes its data from another field.
+
+For details how this mechanism works look at
+   - walberla::field::GhostLayerFieldAdaptor
+
+*/

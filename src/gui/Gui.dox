@@ -1,0 +1,90 @@
+/*! 
+ \page guiPage GUI Documentation
+   
+   \brief Page describing how to use the graphical user interface.
+
+   \image html gui/screenshot.png "waLBerla GUI"
+
+   \section usage Usage:
+
+      \subsection buildSettings Build Settings
+         When waLBerla is built with the default settings, the GUI is not included
+         due to additional dependency on the Qt Library. Use the cmake switch \c WALBERLA_ENABLE_GUI
+         to use the GUI and Qt.
+         If you disable this switch in cmake, all dependencies to Qt are removed, the GUI::run() method
+         then only executes timeloop.run()
+
+      \subsection timeloop Use GUI in your application
+         The graphical user interface needs a StructuredBlockForest and a Timeloop to work.
+         Create a gui object, pass the required arguments, and call GUI::run() instead of
+         timeloop::run()
+
+         Example:
+
+         \code
+// Create BlockForest
+auto blocks = createUniformBlockGrid(3,4,5, //blocks
+                                     6,3,2, //cells
+                                     1,     //dx
+                                     false, //one block per process
+                                     true,true,true);   //periodicity
+// Register Block Data
+BlockDataID pdfField    = addGhostLayerField<real_t,19>( blocks, 1, 0.0, field::zyxf, "PdfField" );
+BlockDataID scalarField = addGhostLayerField<real_t,1>( blocks, 1, 0.0, field::zyxf, "ScalarField" );
+BlockDataID flagField   = addFlagField<uint32_t> ( blocks, 1, "FlagField" );
+
+SweepTimeloop timeloop (blocks->getBlockStorage(), nrOfTimeSteps);
+
+GUI gui(timeloop, *blocks, argc, argv);
+gui.run();
+
+         \endcode
+
+		\warning The main purpose of the GUI is to debug and inspect internal waLBerla data structures. 
+				  It is not suited for production runs. It is also not suitable for debugging parallel
+				  simulations, since every process opens another window!
+
+
+\section design Design:
+
+   No registration of the blockdata at the GUI is required. All fields that are supported are
+   automatically shown in the GUI. To display custom blockdata look at walberla::gui::GUI::createAdaptors()
+   and the class walberla::gui::DisplayAdaptor .
+
+
+   \image html gui/componentsOverview.png "Overview over GUI Components"
+
+   In the screenshot above, the GUI components are annotated with their class names.
+   The  walberla::gui::BlockView3D shows all local blocks in a 3D view. The blocks can be dragged out, and
+   dropped on other elements. The drag&drop message contains an walberla::IBlock pointer.
+   The BlockView3D uses a walberla::gui::BlockDisplayObject to draw the single blocks, but is otherwise
+   independent of the other components.
+   The BlockView3D offers the possibility to display slice indicators (planes that cut through blocks).
+   These can be added/removed/recolored by using a public interface.
+
+
+   The most important widget is the walberla::gui::BlockSliceView.
+   Multiple such views can be opened in a QMdiArea, which is managed by the walberla::gui::MainWindow.
+   The BlockSliceView holds a pointer to the globally unique BlockView3D to display slice indicators.
+
+   Additionally it holds a pointer to a QStackedWidget (lower left in the screenshot). It adds a widget
+   to the QStackedWidget where the user can edit the display properties. When the BlockSliceView has the focus
+   it makes sure that its own property widget is displayed on top in the QStackedWidget.
+
+   To display different blockdata the walberla::gui::DisplayAdaptor is used. A display adaptor knows how
+   to get blockdata out of the block and how to draw it. Each display adaptor may also holds its own state,
+   for storing display options.
+   Each display adaptor usually adds an item ( walberla::gui::DisplayPropertiesItem ) to a tree view in the properties
+   widget.
+
+
+
+   \image html gui/collaborationDiagram.png "Collaboration of GUI Components"
+
+
+   For common blockdata DisplayAdaptors exists:
+
+
+   \image html gui/adaptors.png "Display Adaptors"
+
+*/

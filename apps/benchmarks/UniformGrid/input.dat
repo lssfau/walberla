@@ -1,0 +1,118 @@
+
+UniformGrid
+{
+   // 3 different modes of operation:
+   // -------------------------------
+   // NO sbffile and NO processes -> domain decomposition is created on the fly and benchmark is run
+   //    sbffile and NO processes -> domain decomposition is loaded from file and benchmark is run
+   //    sbffile and    processes -> domain decomposition is created and saved to file (benchmark is NOT run!)
+  
+   // sbffile 2048.sbf;
+   // processes 2048;
+   
+   // number of cells per block in x-/y-/z-direction  
+   xCells 200;
+   yCells 200;
+   zCells 200;
+ 
+   // "shape" of the domain 
+   xWeight 3.0;
+   yWeight 1.0;
+   zWeight 3.0;
+   
+   // timeloop
+ 
+   outerTimeSteps 5;  // total number of time steps = outerTimeSteps * innerTimeSteps
+   innerTimeSteps 50; // For each outer loop, performance data is logged.
+   
+   logToSqlDB  true;
+   sqlFile     performance.sqlite; // database used for logging the performance
+   
+   // LBM 
+   
+   omega 1.4;
+   
+   velocity 0.01;
+}
+
+VTK
+{
+   /*
+   fluid_field {
+   
+      writeFrequency 29;
+      ghostLayers    1;
+      
+      before_functions {
+         PDFGhostLayerSync;
+      }
+      
+      inclusion_filters {
+         FluidFilter;
+      }
+
+      exclusion_filters {
+         ObstacleFilter;
+      }
+      
+      writers {
+         VelocityFromPDF;
+         DensityFromPDF;
+      }
+   }*/
+   
+   /*
+   coarse_fluid_field {
+   
+      writeFrequency 29;
+      
+      samplingResolution 1.0;
+
+      before_functions {
+         PDFGhostLayerSync;
+      }
+
+      AABB_filter_0 {
+         min < 0,   0,  0 >;
+         max < 7.5, 5, 15 >;
+      }  
+      
+      CellBB_filter_0 {
+         min < 0,   0,  0 >;
+         max < 29, 19, 29 >;
+      }     
+      
+      inclusion_filters {
+         //CellBB_filter_0;
+         FluidFilter;
+         //combine CellBB_filter_0,FluidFilter;
+      }
+
+      exclusion_filters {
+         //CellBB_filter_0;
+         //combine AABB_filter_0,CellBB_filter_0;
+         //ObstacleFilter;
+      }
+      
+      writers {
+         VelocityFromPDF;
+         DensityFromPDF;
+      }
+   }*/
+   
+   /*
+   flag_field {
+   
+      writeFrequency 29;
+   // ghostLayers    1;
+      
+      writers {
+         FlagField;
+      }
+   }*/
+   
+   /*domain_decomposition {
+      writeFrequency 29;
+      outputDomainDecomposition true;
+   }*/
+}

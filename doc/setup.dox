@@ -1,0 +1,127 @@
+/**
+\page setup_instructions Get and Build waLBerla
+
+\brief This page describes how to obtain a copy of waLBerla and how to setup your environment for development.
+
+\section git_checkout Getting waLBerla
+
+\subsection git_clone Clone the repository
+
+As a first step, check out the waLBerla source code from our git repository:
+
+\verbatim
+  git clone https://i10git.cs.fau.de/walberla/walberla
+\endverbatim
+
+If you are not familiar with the git version control system, this 
+<a target="_blank" href="http://git-scm.com/documentation"> page </a> is a good starting point.
+
+\section setup_building_waLBerla Building waLBerla   
+
+\subsection setup_building_waLBerla_libs Libraries and CMake Options
+To compile waLBerla with all modules and features a few third-party libraries
+are required. 
+
+\subsubsection libs_boost Boost
+The boost library is the only required third-party library. It is installed on
+most Linux system by default and should be detected by cmake. 
+If boost resides at a non-standard location, you have to set the environment variable
+`BOOST_ROOT` in order to have it detected by cmake.
+
+\subsubsection libs_mpi   MPI (optional)
+The message passing interface (MPI) library is required if you want to run waLBerla
+with distributed memory parallelization. If MPI is not installed on your system,
+you still can compile a serial or even an OpenMP thread-parallel version of waLBerla.
+You can disable MPI using the CMake switch `WALBERLA_BUILD_WITH_MPI`.
+
+\subsubsection libs_qt    Qt (optional)
+waLBerla can be build with a graphical user interface, which is disabled by default.
+The GUI is mainly useful for debugging and visualizing very small scale simulations.
+To enable the GUI, set the CMake switch `WALBERLA_ENABLE_GUI` to ON and install
+Qt4 on your system.
+
+\subsection setup_building_waLBerla_commands Compiling the code
+
+\verbatim
+  # create a separate build directory
+  cd walberla
+  mkdir build
+  cd build
+  
+  # set up the build system
+  cmake ..
+
+  # modify the configuration if necessary 
+  ccmake .       # or alternatively "cmake-gui . "
+
+  # compile the code
+  make -j 4
+\endverbatim
+
+\section cmake_vars CMake Build Variables
+
+To modify the build configuration go to your build directory and type `ccmake .`  or `cmake-gui .` 
+
+Some commonly-used build variables:
+
+Build variable 				        | Default | Meaning
+-----------------------------------| ------- | -----------------------------------------------------------
+CMAKE_BUILD_TYPE                   | Release | Either Debug (non optimized, for debugging with asserts), Release (production runs), DebugOptimized (optimized, but for debugging with asserts), or RelWithDebInfo (Release with debug infos) 
+WALBERLA_ENABLE_GUI                |	OFF   | Builds the graphical user interface. Make sure you have QT development libraries installed.
+WALBERLA_BUILD_TUTORIALS           |	ON    | Builds all the tutorials located in "apps/tutorials" (= they are added to the 'all' target in the Makefile). If disabled, the tutorials can still be built by going to "apps/tutorials" in the build folder and running make.
+WALBERLA_BUILD_WITH_MPI            |   ON    | Since one main goal of waLBerla are massively parallel simulations, this is enabled by default. However, MPI can be disabled.
+WALBERLA_BUILD_WITH_OPENMP         |   OFF   | Enables/Disables OpenMP support for thread-parallel computation. Can also be combined with MPI for hybrid simulations!
+WALBERLA_BUILD_TESTS		           |	OFF   | If enabled, all tests are built when running make in the root build folder. But you can always go to a specific directory in your test folder and manually run make. 
+WALBERLA_BUILD_BENCHMARKS          |	ON    | Enables/Disables the automatic build of all benchmarks located in "apps/benchmarks".  
+WALBERLA_BUILD_WITH_PYTHON         |	OFF   | Enables Python Support inside waLBerla (embedded Python). Then you can use Python scripts as configuration files and start an embedded python interpreter that can access waLBerla data structures. 
+WALBERLA_BUILD_WITH_PYTHON_MODULE  |	OFF   | This builds a shared library (and python module) walberla.so in "apps/pythonmodule" so that you can use walberla from python.  
+
+For a list of all switches, see CMakeLists.txt in the root source folder.
+
+\section ide_setup Setup of Integrated Development Environments
+
+\subsection eclipse_setup Eclipse
+
+If you use eclipse (http://www.eclipse.org/) for development, you can use the provided files in "utilities/eclipse"
+to setup your environment. For details see \ref eclipse_setup_page
+
+\subsection visual_studio_setup Visual Studio
+
+If you use Visual Studio (https://www.visualstudio.com/) for development, add the appropriate generator flag when running CMake for the first time.
+
+\verbatim
+  # create a separate build directory
+  cd walberla
+  mkdir build
+  cd build
+  
+  # set up the build system for Visual Studio
+  cmake -G "Visual Studio 14 2015 Win64" ..
+  # find other versions at https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html#visual-studio-generators
+
+  # modify the configuration if necessary 
+  ccmake .       # or alternatively "cmake-gui . "
+\endverbatim
+
+Now you can open the file walberla.sln in Visual Studio.
+
+\subsection xcode_setup Xcode
+
+If you use Xcode (https://itunes.apple.com/app/xcode/id497799835) for development, add the appropriate generator flag when running CMake for the first time:
+
+\verbatim
+  # create a separate build directory
+  cd walberla
+  mkdir build
+  cd build
+  
+  # set up the build system for Xcode
+  cmake -G "Xcode" ..
+
+  # modify the configuration if necessary 
+  ccmake .       # or alternatively "cmake-gui . "
+\endverbatim
+
+Now you can open the file walberla.xcodeproj.
+
+*/

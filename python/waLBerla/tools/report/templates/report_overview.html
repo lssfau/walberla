@@ -1,0 +1,41 @@
+{% extends "waLBerla/bootstrap_report.html" %}
+
+{% block css %}
+	{{ super() }}
+	<style>
+		.jumbotron {
+			text-align: center;
+		}
+		.waLBerla-image {
+			padding-top: 40px;
+			padding-bottom: 40px;
+		}
+		.list-group-item {
+			font-size:25px;
+			text-transform: capitalize;
+		}
+	</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+			<div class="jumbotron">
+				<h1>Generated Reports</h1>
+					
+	  	  		   <img class="waLBerla-image" src="http://www.walberla.net/img/slides/waLBerla.png" class="img-rounded">
+			  
+				  <div class="list-group">
+				  	{% for report in reports %}
+						<a href="{{report}}" class="list-group-item">{{report}}</a>
+				  	{% endfor %}
+				  </ul>
+			</div>	
+		</div>
+	</div>
+</div>
+
+{% endblock %}	
