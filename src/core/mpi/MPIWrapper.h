@@ -198,6 +198,7 @@ inline int MPI_Cart_create( MPI_Comm, int, int*, int*, int, MPI_Comm* ) { WALBER
 inline int MPI_Dims_create( int, int, int* )                            { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Cart_coords( MPI_Comm, int, int, int* )                  { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Cart_rank  ( MPI_Comm, int*, int* )                      { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Cart_shift ( MPI_Comm, int, int, int*, int*)             { WALBERLA_MPI_FUNCTION_ERROR }
 
 inline int MPI_Irecv( void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Request* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Isend( void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Request* ) { WALBERLA_MPI_FUNCTION_ERROR }
