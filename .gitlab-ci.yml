@@ -616,26 +616,63 @@ clang-3.9_MpiOnly:
 clang-3.9_Hybrid:
    <<: *build_hybrid_definition
    image: walberla/buildenv-ubuntu-clang:3.9
+   only:
+      - triggers
 
 clang-3.9_Serial_Dbg:
    <<: *build_serial_dbg_definition
    image: walberla/buildenv-ubuntu-clang:3.9
+   only:
+      - triggers
       
 clang-3.9_MpiOnly_Dbg:
    <<: *build_mpionly_dbg_definition
    image: walberla/buildenv-ubuntu-clang:3.9
+   only:
+      - triggers
    
 clang-3.9_Hybrid_Dbg:
    <<: *build_hybrid_dbg_definition
    image: walberla/buildenv-ubuntu-clang:3.9
-   
-clang-3.9_Hybrid_SP_Dbg:
-   <<: *build_hybrid_dbg_sp_definition
-   image: walberla/buildenv-ubuntu-clang:3.9
+   only:
+      - triggers
 
-clang-3.9_Hybrid_Dbg_BufferDebug:
+
+clang-4.0_Serial:
+   <<: *build_serial_definition
+   image: walberla/buildenv-ubuntu-clang:4.0
+   only:
+      - triggers
+      
+clang-4.0_MpiOnly:
+   <<: *build_mpionly_definition
+   image: walberla/buildenv-ubuntu-clang:4.0
+   only:
+      - triggers
+   
+clang-4.0_Hybrid:
+   <<: *build_hybrid_definition
+   image: walberla/buildenv-ubuntu-clang:4.0
+
+clang-4.0_Serial_Dbg:
+   <<: *build_serial_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:4.0
+      
+clang-4.0_MpiOnly_Dbg:
+   <<: *build_mpionly_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:4.0
+   
+clang-4.0_Hybrid_Dbg:
    <<: *build_hybrid_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.9
+   image: walberla/buildenv-ubuntu-clang:4.0
+   
+clang-4.0_Hybrid_SP_Dbg:
+   <<: *build_hybrid_dbg_sp_definition
+   image: walberla/buildenv-ubuntu-clang:4.0
+
+clang-4.0_Hybrid_Dbg_BufferDebug:
+   <<: *build_hybrid_dbg_definition
+   image: walberla/buildenv-ubuntu-clang:4.0
    variables:
       CTEST_EXCLUDE_LABELS: "longrun"
       WALBERLA_BUILD_WITH_MPI: "ON"
