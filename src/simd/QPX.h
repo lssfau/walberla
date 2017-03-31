@@ -81,6 +81,9 @@ inline void loadNeighbors( const double * mem_addr, double4_t & r_left, double4_
 inline double getComponent ( const double4_t & v, int i )           { return v[i]; }
 inline double getComponent ( const double4_t & v, unsigned long i ) { return v[i]; }
 
+inline bool   getBoolComponent ( const double4_t & v, int i           ) { return (reinterpret_cast<const uint64_t*>(&v)[i]) != 0; }
+inline bool   getBoolComponent ( const double4_t & v, unsigned long i ) { return (reinterpret_cast<const uint64_t*>(&v)[i]) != 0; }
+
 inline double4_t hadd( double4_t a,  double4_t b )
 {
    //TODO is there an instruction for this?

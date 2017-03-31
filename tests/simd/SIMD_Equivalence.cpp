@@ -169,6 +169,22 @@ using namespace walberla;
 using namespace simd;
 
 
+void print0( const is0::double4_t& vec)
+{
+   WALBERLA_LOG_DEVEL( is0::getComponent(vec, 0 ) );
+   WALBERLA_LOG_DEVEL( is0::getComponent(vec, 1 ) );
+   WALBERLA_LOG_DEVEL( is0::getComponent(vec, 2 ) );
+   WALBERLA_LOG_DEVEL( is0::getComponent(vec, 3 ) );
+}
+
+void print1( const is1::double4_t& vec)
+{
+   WALBERLA_LOG_DEVEL( is1::getComponent(vec, 0 ) );
+   WALBERLA_LOG_DEVEL( is1::getComponent(vec, 1 ) );
+   WALBERLA_LOG_DEVEL( is1::getComponent(vec, 2 ) );
+   WALBERLA_LOG_DEVEL( is1::getComponent(vec, 3 ) );
+}
+
 void checkVecEqual ( is0::double4_t a, is1::double4_t b, const std::string & description = "" )
 {
    if ( description.size() > 0) 
@@ -233,6 +249,14 @@ void comparisonAndBlend()
 
   is0::double4_t maskvA = is0::compareGE( inA, is0::make_double4( 3.0)  );
   is1::double4_t maskvB = is1::compareGE( inB, is1::make_double4( 3.0)  );
+
+  WALBERLA_LOG_DEVEL("-------------------");
+  print0(maskvA);
+  print1(maskvB);
+  WALBERLA_LOG_DEVEL("-------------------");
+  print0(is0::blendv(inA, is0::make_zero(), maskvA ));
+  print1(is1::blendv(inB, is1::make_zero(), maskvB ));
+  WALBERLA_LOG_DEVEL("-------------------");
 
   checkVecEqual( is0::blendv(inA, is0::make_zero(), maskvA ),
                  is1::blendv(inB, is1::make_zero(), maskvB ), "comparisonAndBlend");

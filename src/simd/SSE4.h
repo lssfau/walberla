@@ -120,6 +120,9 @@ namespace sse4 {
    inline double getComponent ( const double4_t & v, int i )           { return reinterpret_cast<const double*>(&v)[i]; }
    inline double getComponent ( const double4_t & v, unsigned long i ) { return reinterpret_cast<const double*>(&v)[i]; }
 
+   inline bool   getBoolComponent ( const double4_t & v, int i           ) { return (reinterpret_cast<const uint64_t*>(&v)[i]) != 0; }
+   inline bool   getBoolComponent ( const double4_t & v, unsigned long i ) { return (reinterpret_cast<const uint64_t*>(&v)[i]) != 0; }
+
    inline double4_t hadd( double4_t a,  double4_t b ) {
       double4_t res;
       res.low  = _mm_hadd_pd( a.low , b.low  );

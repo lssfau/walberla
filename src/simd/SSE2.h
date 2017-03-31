@@ -120,6 +120,9 @@ namespace sse2 {
    inline double getComponent ( const double4_t & v, int i           ) { return reinterpret_cast<const double*>(&v)[i]; }
    inline double getComponent ( const double4_t & v, unsigned long i ) { return reinterpret_cast<const double*>(&v)[i]; }
 
+   inline bool   getBoolComponent ( const double4_t & v, int i           ) { return (reinterpret_cast<const uint64_t*>(&v)[i]) != 0; }
+   inline bool   getBoolComponent ( const double4_t & v, unsigned long i ) { return (reinterpret_cast<const uint64_t*>(&v)[i]) != 0; }
+
    inline double4_t hadd( double4_t a,  double4_t b ) {
       double4_t res;
       res.low  = _mm_set_pd( getComponent(b,0) + getComponent(b,1),
@@ -222,10 +225,10 @@ namespace sse2 {
    }
 
    inline double4_t blendv( double4_t a, double4_t b, double4_t mask) {
-      return make_double4 (  (uint64_t)(getComponent(mask,3)) ? getComponent(b,3) : getComponent(a,3),
-                             (uint64_t)(getComponent(mask,2)) ? getComponent(b,2) : getComponent(a,2),
-                             (uint64_t)(getComponent(mask,1)) ? getComponent(b,1) : getComponent(a,1),
-                             (uint64_t)(getComponent(mask,0)) ? getComponent(b,0) : getComponent(a,0)
+      return make_double4 (  getBoolComponent(mask,3) ? getComponent(b,3) : getComponent(a,3),
+                             getBoolComponent(mask,2) ? getComponent(b,2) : getComponent(a,2),
+                             getBoolComponent(mask,1) ? getComponent(b,1) : getComponent(a,1),
+                             getBoolComponent(mask,0) ? getComponent(b,0) : getComponent(a,0)
                            );
    }
 

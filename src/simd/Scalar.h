@@ -93,6 +93,9 @@ inline void loadNeighbors( const double * p, double4_t & r_left, double4_t & r_c
 inline double getComponent ( const double4_t & v, int i )           { return v[(unsigned int)(i)]; }
 inline double getComponent ( const double4_t & v, unsigned long i ) { return v[(unsigned int)(i)]; }
 
+inline bool   getBoolComponent ( const double4_t & v, int i           ) { return (v.asUInt((unsigned int)(i))) != 0; }
+inline bool   getBoolComponent ( const double4_t & v, unsigned long i ) { return (v.asUInt((unsigned int)(i))) != 0; }
+
 
 
 inline double4_t hadd( double4_t a,  double4_t b )

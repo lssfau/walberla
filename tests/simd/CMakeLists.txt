@@ -25,6 +25,10 @@ waLBerla_compile_test( NAME   AVX_SSE4_Equivalence  FILES SIMD_Equivalence.cpp  
 set_property         ( TARGET AVX_SSE4_Equivalence  PROPERTY COMPILE_FLAGS "${MarchNativeString} -DIS0_AVX -DIS1_SSE4" )
 waLBerla_execute_test( NAME   AVX_SSE4_Equivalence )
 
+waLBerla_compile_test( NAME   AVX_SSE2_Equivalence  FILES SIMD_Equivalence.cpp  )
+set_property         ( TARGET AVX_SSE2_Equivalence  PROPERTY COMPILE_FLAGS "${MarchNativeString} -DIS0_AVX -DIS1_SSE2" )
+waLBerla_execute_test( NAME   AVX_SSE2_Equivalence )
+
 
 waLBerla_compile_test( NAME   SSE4_SSE2_Equivalence FILES SIMD_Equivalence.cpp  )
 set_property         ( TARGET SSE4_SSE2_Equivalence PROPERTY COMPILE_FLAGS "${MarchNativeString} -DIS0_SSE2 -DIS1_SSE4" )
