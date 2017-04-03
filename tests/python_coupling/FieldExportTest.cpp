@@ -95,18 +95,18 @@ int main( int argc, char ** argv )
       auto vec3Field = blockIt->getData<GhostLayerField<Vector3<int>,1 > >( vec3FieldID );
 
       {
-         forAllCells2(scaIt, sca2Field, vecIt, vec2Field) {
+         WALBERLA_FOR_ALL_CELLS(scaIt, sca2Field, vecIt, vec2Field,
             WALBERLA_ASSERT_EQUAL(scaIt[0], (*vecIt)[0]);
             WALBERLA_ASSERT_EQUAL(scaIt[1], (*vecIt)[1]);
-         }
+			)
       }
 
       {
-         forAllCells2(scaIt, sca3Field, vecIt, vec3Field) {
+		  WALBERLA_FOR_ALL_CELLS(scaIt, sca3Field, vecIt, vec3Field,
             WALBERLA_ASSERT_EQUAL(scaIt[0], (*vecIt)[0]);
             WALBERLA_ASSERT_EQUAL(scaIt[1], (*vecIt)[1]);
             WALBERLA_ASSERT_EQUAL(scaIt[2], (*vecIt)[2]);
-         }
+			)
       }
    }
 
