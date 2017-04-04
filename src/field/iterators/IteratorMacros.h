@@ -610,6 +610,286 @@
          WALBERLA_ASSERT( it3 == (f3)->end() ); \
       } \
    } }
+
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_12( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   if( zSize__ >= ySize__ ) \
+   { \
+      const int izSize = ::walberla::int_c( zSize__ ); \
+      __pragma(omp) \
+      for( int iz = 0; iz < izSize; ++iz ) { \
+         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+      } \
+   } \
+   else \
+   { \
+      const int iySize = ::walberla::int_c( ySize__ ); \
+      __pragma(omp) \
+      for( int iy = 0; iy < iySize; ++iy ) { \
+         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+      } \
+   } }
+
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_14( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f5) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
+   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   if( zSize__ >= ySize__ ) \
+   { \
+      const int izSize = ::walberla::int_c( zSize__ ); \
+      __pragma(omp) \
+      for( int iz = 0; iz < izSize; ++iz ) { \
+         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+      } \
+   } \
+   else \
+   { \
+      const int iySize = ::walberla::int_c( ySize__ ); \
+      __pragma(omp) \
+      for( int iy = 0; iy < iySize; ++iy ) { \
+         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+      } \
+   } }
+
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_16( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f5) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f6) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f6)->xyzSize() ); \
+   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   if( zSize__ >= ySize__ ) \
+   { \
+      const int izSize = ::walberla::int_c( zSize__ ); \
+      __pragma(omp) \
+      for( int iz = 0; iz < izSize; ++iz ) { \
+         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         auto it6 = (f6)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+      } \
+   } \
+   else \
+   { \
+      const int iySize = ::walberla::int_c( ySize__ ); \
+      __pragma(omp) \
+      for( int iy = 0; iy < iySize; ++iy ) { \
+         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         auto it6 = (f6)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+      } \
+   } }
+
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_18( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, it7, f7, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f5) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f6) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f7) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f6)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f7)->xyzSize() ); \
+   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   if( zSize__ >= ySize__ ) \
+   { \
+      const int izSize = ::walberla::int_c( zSize__ ); \
+      __pragma(omp) \
+      for( int iz = 0; iz < izSize; ++iz ) { \
+         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         auto it6 = (f6)->beginSliceXYZ( interval ); \
+         auto it7 = (f7)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+         WALBERLA_ASSERT( it7 == (f7)->end() ); \
+      } \
+   } \
+   else \
+   { \
+      const int iySize = ::walberla::int_c( ySize__ ); \
+      __pragma(omp) \
+      for( int iy = 0; iy < iySize; ++iy ) { \
+         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         auto it6 = (f6)->beginSliceXYZ( interval ); \
+         auto it7 = (f7)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+         WALBERLA_ASSERT( it7 == (f7)->end() ); \
+      } \
+   } }
    
 #else // == not WALBERLA_CXX_COMPILER_IS_MSVC
 
@@ -1073,6 +1353,286 @@
       } \
    } }
 
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_12( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   if( zSize__ >= ySize__ ) \
+   { \
+      const int izSize = ::walberla::int_c( zSize__ ); \
+      _Pragma(#omp) \
+      for( int iz = 0; iz < izSize; ++iz ) { \
+         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+      } \
+   } \
+   else \
+   { \
+      const int iySize = ::walberla::int_c( ySize__ ); \
+      _Pragma(#omp) \
+      for( int iy = 0; iy < iySize; ++iy ) { \
+         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+      } \
+   } }
+
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_14( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f5) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
+   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   if( zSize__ >= ySize__ ) \
+   { \
+      const int izSize = ::walberla::int_c( zSize__ ); \
+      _Pragma(#omp) \
+      for( int iz = 0; iz < izSize; ++iz ) { \
+         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+      } \
+   } \
+   else \
+   { \
+      const int iySize = ::walberla::int_c( ySize__ ); \
+      _Pragma(#omp) \
+      for( int iy = 0; iy < iySize; ++iy ) { \
+         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+      } \
+   } }
+
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_16( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f5) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f6) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f6)->xyzSize() ); \
+   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   if( zSize__ >= ySize__ ) \
+   { \
+      const int izSize = ::walberla::int_c( zSize__ ); \
+      _Pragma(#omp) \
+      for( int iz = 0; iz < izSize; ++iz ) { \
+         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         auto it6 = (f6)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+      } \
+   } \
+   else \
+   { \
+      const int iySize = ::walberla::int_c( ySize__ ); \
+      _Pragma(#omp) \
+      for( int iy = 0; iy < iySize; ++iy ) { \
+         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         auto it6 = (f6)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+      } \
+   } }
+
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_18( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, it7, f7, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f5) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f6) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f7) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f6)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f7)->xyzSize() ); \
+   const ::walberla::cell_idx_t xSize__ = ::walberla::cell_idx_c( (f0)->xSize() ); \
+   const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (f0)->ySize() ); \
+   const ::walberla::cell_idx_t zSize__ = ::walberla::cell_idx_c( (f0)->zSize() ); \
+   if( zSize__ >= ySize__ ) \
+   { \
+      const int izSize = ::walberla::int_c( zSize__ ); \
+      _Pragma(#omp) \
+      for( int iz = 0; iz < izSize; ++iz ) { \
+         const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         auto it6 = (f6)->beginSliceXYZ( interval ); \
+         auto it7 = (f7)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+         WALBERLA_ASSERT( it7 == (f7)->end() ); \
+      } \
+   } \
+   else \
+   { \
+      const int iySize = ::walberla::int_c( ySize__ ); \
+      _Pragma(#omp) \
+      for( int iy = 0; iy < iySize; ++iy ) { \
+         const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
+         const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
+         auto it0 = (f0)->beginSliceXYZ( interval ); \
+         auto it1 = (f1)->beginSliceXYZ( interval ); \
+         auto it2 = (f2)->beginSliceXYZ( interval ); \
+         auto it3 = (f3)->beginSliceXYZ( interval ); \
+         auto it4 = (f4)->beginSliceXYZ( interval ); \
+         auto it5 = (f5)->beginSliceXYZ( interval ); \
+         auto it6 = (f6)->beginSliceXYZ( interval ); \
+         auto it7 = (f7)->beginSliceXYZ( interval ); \
+         while( it0 != (f0)->end() ) \
+         { \
+            CODE \
+            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
+         } \
+         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+         WALBERLA_ASSERT( it7 == (f7)->end() ); \
+      } \
+   } }
+
 #endif
 
 #else // == no OpenMP
@@ -1215,6 +1775,134 @@
    WALBERLA_ASSERT( it2 == (f2)->end() ); \
    WALBERLA_ASSERT( it3 == (f3)->end() ); }
  
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_12( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   auto it0 = (f0)->beginXYZ(); \
+   auto it1 = (f1)->beginXYZ(); \
+   auto it2 = (f2)->beginXYZ(); \
+   auto it3 = (f3)->beginXYZ(); \
+   auto it4 = (f4)->beginXYZ(); \
+   while( it0 != (f0)->end() ) \
+   { \
+      CODE \
+      ++it0; ++it1; ++it2; ++it3; ++it4;\
+   } \
+   WALBERLA_ASSERT( it1 == (f1)->end() ); \
+   WALBERLA_ASSERT( it2 == (f2)->end() ); \
+   WALBERLA_ASSERT( it3 == (f3)->end() ); \
+   WALBERLA_ASSERT( it4 == (f4)->end() ); }
+
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_14( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f5) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
+   auto it0 = (f0)->beginXYZ(); \
+   auto it1 = (f1)->beginXYZ(); \
+   auto it2 = (f2)->beginXYZ(); \
+   auto it3 = (f3)->beginXYZ(); \
+   auto it4 = (f4)->beginXYZ(); \
+   auto it5 = (f5)->beginXYZ(); \
+   while( it0 != (f0)->end() ) \
+   { \
+      CODE \
+      ++it0; ++it1; ++it2; ++it3; ++it4; ++it5;\
+   } \
+   WALBERLA_ASSERT( it1 == (f1)->end() ); \
+   WALBERLA_ASSERT( it2 == (f2)->end() ); \
+   WALBERLA_ASSERT( it3 == (f3)->end() ); \
+   WALBERLA_ASSERT( it4 == (f4)->end() ); \
+   WALBERLA_ASSERT( it5 == (f5)->end() ); }
+
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_16( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f5) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f6) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f6)->xyzSize() ); \
+   auto it0 = (f0)->beginXYZ(); \
+   auto it1 = (f1)->beginXYZ(); \
+   auto it2 = (f2)->beginXYZ(); \
+   auto it3 = (f3)->beginXYZ(); \
+   auto it4 = (f4)->beginXYZ(); \
+   auto it5 = (f5)->beginXYZ(); \
+   auto it6 = (f6)->beginXYZ(); \
+   while( it0 != (f0)->end() ) \
+   { \
+      CODE \
+      ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6;\
+   } \
+   WALBERLA_ASSERT( it1 == (f1)->end() ); \
+   WALBERLA_ASSERT( it2 == (f2)->end() ); \
+   WALBERLA_ASSERT( it3 == (f3)->end() ); \
+   WALBERLA_ASSERT( it4 == (f4)->end() ); \
+   WALBERLA_ASSERT( it5 == (f5)->end() ); \
+   WALBERLA_ASSERT( it6 == (f6)->end() ); }
+
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_OMP_18( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, it7, f7, omp, CODE ) \
+   { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f1) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f2) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f3) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f4) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f5) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f6) ); \
+   WALBERLA_ASSERT_NOT_NULLPTR_1( (f7) ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f2)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f3)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f4)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f5)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f6)->xyzSize() ); \
+   WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f7)->xyzSize() ); \
+   auto it0 = (f0)->beginXYZ(); \
+   auto it1 = (f1)->beginXYZ(); \
+   auto it2 = (f2)->beginXYZ(); \
+   auto it3 = (f3)->beginXYZ(); \
+   auto it4 = (f4)->beginXYZ(); \
+   auto it5 = (f5)->beginXYZ(); \
+   auto it6 = (f6)->beginXYZ(); \
+   auto it7 = (f7)->beginXYZ(); \
+   while( it0 != (f0)->end() ) \
+   { \
+      CODE \
+      ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7;\
+   } \
+   WALBERLA_ASSERT( it1 == (f1)->end() ); \
+   WALBERLA_ASSERT( it2 == (f2)->end() ); \
+   WALBERLA_ASSERT( it3 == (f3)->end() ); \
+   WALBERLA_ASSERT( it4 == (f4)->end() ); \
+   WALBERLA_ASSERT( it5 == (f5)->end() ); \
+   WALBERLA_ASSERT( it6 == (f6)->end() ); \
+   WALBERLA_ASSERT( it7 == (f7)->end() ); }
+
 #endif // OpenMP
 
 
@@ -1321,35 +2009,45 @@
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_9( it0, f0, it1, f1, it2, f2, it3, f3, CODE ) \
         WALBERLA_FOR_ALL_CELLS_OMP_10( it0, f0, it1, f1, it2, f2, it3, f3, omp parallel for schedule(static), CODE )
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_11( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, CODE ) \
+        WALBERLA_FOR_ALL_CELLS_OMP_12( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, omp parallel for schedule(static), CODE )
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_13( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, CODE ) \
+        WALBERLA_FOR_ALL_CELLS_OMP_14( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, omp parallel for schedule(static), CODE )
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_15( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, CODE ) \
+        WALBERLA_FOR_ALL_CELLS_OMP_16( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, omp parallel for schedule(static), CODE )
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS' (using the same signature) instead
+#define WALBERLA_FOR_ALL_CELLS_17( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, it7, f7, CODE ) \
+        WALBERLA_FOR_ALL_CELLS_OMP_18( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, it7, f7, omp parallel for schedule(static), CODE )
 
         
-        
-#define WALBERLA_FOR_ALL_CELLS_OMP_1(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_2(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_3(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_5(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_7(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_9(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_11(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_12(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_13(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_14(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_15(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_OMP_16(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
+#define WALBERLA_FOR_ALL_CELLS_OMP_1(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_1
+#define WALBERLA_FOR_ALL_CELLS_OMP_2(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_2
+#define WALBERLA_FOR_ALL_CELLS_OMP_3(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_3
+#define WALBERLA_FOR_ALL_CELLS_OMP_5(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_5
+#define WALBERLA_FOR_ALL_CELLS_OMP_7(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_7
+#define WALBERLA_FOR_ALL_CELLS_OMP_9(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_9
+#define WALBERLA_FOR_ALL_CELLS_OMP_11(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_11
+#define WALBERLA_FOR_ALL_CELLS_OMP_13(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_13
+#define WALBERLA_FOR_ALL_CELLS_OMP_15(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_15
+#define WALBERLA_FOR_ALL_CELLS_OMP_17(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_17
+#define WALBERLA_FOR_ALL_CELLS_OMP_19(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_19
+#define WALBERLA_FOR_ALL_CELLS_OMP_20(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_OMP_20
 
-#define WALBERLA_FOR_ALL_CELLS_1(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_2(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_4(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_6(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_8(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_10(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_11(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_12(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_13(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_14(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_15(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-#define WALBERLA_FOR_ALL_CELLS_16(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ITERATOR_MACRO
-
+#define WALBERLA_FOR_ALL_CELLS_1(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_1
+#define WALBERLA_FOR_ALL_CELLS_2(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_2
+#define WALBERLA_FOR_ALL_CELLS_4(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_4
+#define WALBERLA_FOR_ALL_CELLS_6(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_6
+#define WALBERLA_FOR_ALL_CELLS_8(...)  THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_8
+#define WALBERLA_FOR_ALL_CELLS_10(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_10
+#define WALBERLA_FOR_ALL_CELLS_12(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_12
+#define WALBERLA_FOR_ALL_CELLS_14(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_14
+#define WALBERLA_FOR_ALL_CELLS_16(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_16
+#define WALBERLA_FOR_ALL_CELLS_18(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_18
+#define WALBERLA_FOR_ALL_CELLS_19(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_19
+#define WALBERLA_FOR_ALL_CELLS_20(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_ITERATOR_MACRO___WALBERLA_FOR_ALL_CELLS_20
 
 
 #define WALBERLA_FOR_ALL_CELLS_OMP(...) \
