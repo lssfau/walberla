@@ -1,16 +1,9 @@
-Lead developers
----------------
-
-Christian Godenschwager
-Christoph Rettinger
-Martin Bauer
-Sebastian Eibl
-
-
-Contributors
-------------
+List of contributors
+====================
 
 Christian Feichtinger
+Christian Godenschwager
+Christoph Rettinger
 Daniel Ritter
 Daniela Anderl
 David Staubach
@@ -23,10 +16,12 @@ Johannes Habich
 Klaus Iglberger
 Kristina Pickl
 Lorenz Hufnagel
+Martin Bauer
 Matthias Markl
 Michael Kuron
 Regina Ammer
 Sagar Dolas
+Sebastian Eibl
 Silke Bergler
 Simon Bogner
 Stefan Donath
