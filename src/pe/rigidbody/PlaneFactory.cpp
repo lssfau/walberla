@@ -33,6 +33,8 @@ namespace pe {
 
 PlaneID createPlane( BodyStorage& globalStorage, id_t uid, Vec3 normal, const Vec3& gpos, MaterialID material)
 {
+   WALBERLA_ASSERT_UNEQUAL( Plane::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Plane TypeID not initalized!");
+
    // Checking the normal of the plane
    if( floatIsEqual(normal.sqrLength(), real_c(0) ) )
       throw std::invalid_argument( "Invalid plane normal!" );

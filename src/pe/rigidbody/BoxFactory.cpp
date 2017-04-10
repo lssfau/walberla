@@ -34,6 +34,8 @@ BoxID createBox(       BodyStorage& globalStorage, BlockStorage& blocks, BlockDa
                        MaterialID material,
                        bool global, bool communicating, bool infiniteMass )
 {
+   WALBERLA_ASSERT_UNEQUAL( Box::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Box TypeID not initalized!");
+
    // Checking the side lengths
    if( lengths[0] <= real_t(0) || lengths[1] <= real_t(0) || lengths[2] <= real_t(0) )
       throw std::invalid_argument( "Invalid side length" );
