@@ -42,6 +42,13 @@
 namespace walberla {
 namespace lbm {
 
+template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T, class Enable = void >
+class AdvectionDiffusionSweep
+{
+	static_assert(never_true<LM_AdvDiff>::value, "Instantiating 'lbm::AdvectionDiffusionSweep' failed");
+};
+
+
 
 template< typename LM_AdvDiff, typename VelocityAdapter_T, typename FlagField_T, typename VectorField_T >
 class AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, VectorField_T,
