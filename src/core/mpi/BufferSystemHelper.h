@@ -90,13 +90,14 @@ namespace internal {
       virtual MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos ) = 0;
 
 
-       virtual int getTag() const { return tag_; }
+      virtual int getTag() const { return tag_; }
+
+      virtual MPI_Comm getCommunicator() const { return communicator_; }
 
    protected:
       MPI_Comm communicator_;
       int tag_;
    };
-
 
 
 
@@ -126,7 +127,6 @@ namespace internal {
 
 
 
-
    class UnknownSizeCommunication : public AbstractCommunication
    {
    public:
@@ -138,7 +138,7 @@ namespace internal {
       virtual void send( MPIRank receiver, const SendBuffer & sendBuffer );
       virtual void waitForSends();
 
-      virtual void    scheduleReceives  ( std::map<MPIRank, ReceiveInfo> & recvInfos );
+      virtual void scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos );
 
       /// size field of recvInfos can be invalid, is filled in with the actual message size
       virtual MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos );
@@ -156,6 +156,7 @@ namespace internal {
    };
 
 
+
    class NoMPICommunication : public AbstractCommunication
    {
    public:
@@ -167,7 +168,7 @@ namespace internal {
       virtual void send( MPIRank receiver, const SendBuffer & sendBuffer );
       virtual void waitForSends();
 
-      virtual void    scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos );
+      virtual void scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos );
 
       /// size field of recvInfos can be invalid, is filled in with the actual message size
       virtual MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos );

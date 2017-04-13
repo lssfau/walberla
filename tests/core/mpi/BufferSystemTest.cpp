@@ -325,6 +325,38 @@ void selfSend()
    }
 }
 
+void copyTest()
+{
+   int rank = MPIManager::instance()->worldRank();
+
+   BufferSystem bs1( MPI_COMM_WORLD, 3 );
+   {
+      BufferSystem bs2( MPI_COMM_WORLD, 7 );
+      bs2.sendBuffer(rank) << int(42);
+      bs2.setReceiverInfoFromSendBufferState( true, false );
+      bs2.sendAll();
+
+      for ( auto i = bs2.begin(); i != bs2.end(); ++i )
+      {
+         int messageContent;
+         i.buffer() >> messageContent;
+         WALBERLA_CHECK_EQUAL(messageContent, 42);
+      }
+
+      bs1 = bs2;
+
+   }
+
+   bs1.sendBuffer(rank) << int(42);
+   bs1.sendAll();
+   for ( auto i = bs1.begin(); i != bs1.end(); ++i )
+   {
+      int messageContent;
+      i.buffer() >> messageContent;
+      WALBERLA_CHECK_EQUAL(messageContent, 42);
+   }
+
+}
 
 int main(int argc, char**argv)
 {
@@ -340,21 +372,23 @@ int main(int argc, char**argv)
       return 1;
    }
 
-   WALBERLA_ROOT_SECTION()  { WALBERLA_LOG_INFO("Testing Symmetric Communication..." ); }
+   WALBERLA_LOG_INFO_ON_ROOT("Testing Symmetric Communication...");
    symmetricCommunication();
 
-   WALBERLA_ROOT_SECTION()  { WALBERLA_LOG_INFO("Testing Asymmetric Communication..."); }
+   WALBERLA_LOG_INFO_ON_ROOT("Testing Asymmetric Communication...");
    asymmetricCommunication();
 
-   WALBERLA_ROOT_SECTION()  { WALBERLA_LOG_INFO("Testing time-varying Communication..."); }
+   WALBERLA_LOG_INFO_ON_ROOT("Testing time-varying Communication...");
    timeVaryingCommunication();
 
-   WALBERLA_ROOT_SECTION()  { WALBERLA_LOG_INFO("Testing Gather Operation..."); }
+   WALBERLA_LOG_INFO_ON_ROOT("Testing Gather Operation...");
    gatherUsingAsymmetricCommunication();
 
-   WALBERLA_ROOT_SECTION()  { WALBERLA_LOG_INFO("Testing selfsend..."); }
+   WALBERLA_LOG_INFO_ON_ROOT("Testing self-send...");
    selfSend();
+
+   WALBERLA_LOG_INFO_ON_ROOT("Testing Buffer System copy...");
+   copyTest();
 
    return EXIT_SUCCESS;
 }
-

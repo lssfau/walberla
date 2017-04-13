@@ -92,6 +92,50 @@ BufferSystem::BufferSystem( const MPI_Comm & communicator, int tag )
 {
 }
 
+
+BufferSystem::BufferSystem( const BufferSystem &other )
+   : knownSizeComm_  ( other.knownSizeComm_.getCommunicator(), other.knownSizeComm_.getTag() ),
+     unknownSizeComm_( other.knownSizeComm_.getCommunicator(), other.knownSizeComm_.getTag() ),
+     noMPIComm_      ( other.knownSizeComm_.getCommunicator(), other.knownSizeComm_.getTag() ),
+     currentComm_ ( NULL ),
+     sizeChangesEverytime_( other.sizeChangesEverytime_ ),
+     communicationRunning_( other.communicationRunning_ ),
+     recvInfos_( other.recvInfos_ ),
+     sendInfos_( other.sendInfos_ )
+{
+   WALBERLA_ASSERT( !communicationRunning_, "Can't copy BufferSystem while communication is running" );
+   if( other.currentComm_ == &other.knownSizeComm_ )
+      currentComm_ = &knownSizeComm_;
+   else if ( other.currentComm_ == &other.unknownSizeComm_ )
+      currentComm_ = &unknownSizeComm_;
+   else if ( other.currentComm_ == &other.noMPIComm_ )
+      currentComm_ = &noMPIComm_;
+   else
+      currentComm_ = NULL; // receiver information not yet set
+}
+
+
+BufferSystem & BufferSystem::operator=( const BufferSystem & other )
+{
+   WALBERLA_ASSERT( !communicationRunning_, "Can't copy BufferSystem while communication is running" );
+
+   sizeChangesEverytime_ = other.sizeChangesEverytime_;
+   communicationRunning_ = other.communicationRunning_;
+   recvInfos_ = other.recvInfos_;
+   sendInfos_ = other.sendInfos_;
+
+   if( other.currentComm_ == &other.knownSizeComm_ )
+      currentComm_ = &knownSizeComm_;
+   else if ( other.currentComm_ == &other.unknownSizeComm_ )
+      currentComm_ = &unknownSizeComm_;
+   else if ( other.currentComm_ == &other.noMPIComm_ )
+      currentComm_ = &noMPIComm_;
+   else
+      currentComm_ = NULL; // receiver information not yet set
+
+   return *this;
+}
+
 //======================================================================================================================
 //
 //  Receive Information Setup
