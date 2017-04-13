@@ -254,7 +254,7 @@ endfunction ( waLBerla_compile_test )
 #                app or test folder:
 #                waLBerla_link_files_to_builddir( "*.prm" )
 #
-# Symlinking works only under linux, when using windows nothing happens.. 
+# Symlinking works only under linux, on windows the files are copied. For in-source builds this does nothing.
 #
 #######################################################################################################################
 
