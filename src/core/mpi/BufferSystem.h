@@ -115,6 +115,8 @@ public:
    /*!\name Constructors */
    //@{
    explicit BufferSystem( const MPI_Comm & communicator, int tag = 0 );
+   BufferSystem( const BufferSystem & other );
+   BufferSystem & operator=( const BufferSystem & other );
    ~BufferSystem() {}
    //@}
    //*******************************************************************************************************************
