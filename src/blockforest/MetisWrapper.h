@@ -49,6 +49,11 @@
 #ifdef WALBERLA_BUILD_WITH_METIS
 // external software includes
 #include "metis.h"
+
+#include <boost/type_traits/is_same.hpp>
+
+static_assert( boost::is_same< ::real_t, ::walberla::real_t >::value , "The width of waLBerla's real_t data type does not match the width of METIS' real_t data type. " \
+                                                                       "Please adapt either waLBerla's CMake option WALBERLA_DOUBLE_ACCURACY or change REALTYPEWIDTH in metis.h." );													  
 #endif
 
 #ifdef _MSC_VER
