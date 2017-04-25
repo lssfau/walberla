@@ -2,6 +2,8 @@
 LBM module
 **********
 
+.. note:: This module is deprecated and about to be replaced by the native Python module *lbmpy*
+
 
 Creation Functions
 ==================

@@ -77,6 +77,8 @@ option ( WALBERLA_BUILD_WITH_LTO            "Enable link time optimizations"    
 option ( WALBERLA_BUILD_WITH_OPENMP         "Enable OpenMP support"                              )  
 option ( WALBERLA_BUILD_WITH_PYTHON         "Support for embedding Python"                       ) 
 option ( WALBERLA_BUILD_WITH_PYTHON_MODULE  "Build waLBerla python module"                       )
+option ( WALBERLA_BUILD_WITH_PYTHON_LBM     "Include LBM module into python module"          OFF )
+
 option ( WALBERLA_BUILD_WITH_LIKWID_MARKERS "Compile in markers for likwid-perfctr"              )
 
 

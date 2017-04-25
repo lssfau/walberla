@@ -11,9 +11,11 @@ if ( WALBERLA_BUILD_WITH_PYTHON_MODULE )
        set ( pythonModules "-Wl,-whole-archive" blockforest boundary domain_decomposition core field geometry lbm postprocessing python_coupling timeloop vtk  "-Wl,-no-whole-archive" )
     endif()
 
-
-    #add_library( walberla_cpp SHARED PythonModuleWithLbmModule.cpp )
-    add_library( walberla_cpp SHARED PythonModule.cpp )
+    if( WALBERLA_BUILD_WITH_PYTHON_LBM )
+        add_library( walberla_cpp SHARED PythonModuleWithLbmModule.cpp )
+    else()
+        add_library( walberla_cpp SHARED PythonModule.cpp )
+    endif()
 
     target_link_libraries( walberla_cpp ${pythonModules} ${SERVICE_LIBS}  )
     set_target_properties( walberla_cpp PROPERTIES PREFIX "")
