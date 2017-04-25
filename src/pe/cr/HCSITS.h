@@ -129,8 +129,9 @@ public:
    //**Get functions*******************************************************************************
    /*!\name Get functions */
    //@{
-   inline real_t            getMaximumPenetration() const;
-   inline size_t            getNumberOfContacts()   const;
+   virtual inline real_t            getMaximumPenetration()        const WALBERLA_OVERRIDE;
+   virtual inline size_t            getNumberOfContacts()          const WALBERLA_OVERRIDE;
+   virtual inline size_t            getNumberOfContactsTreated()   const WALBERLA_OVERRIDE;
    inline const std::map<IBlockID::IDType, ContactCache> getContactCache() const { return blockToContactCache_; }
    //@}
    //**********************************************************************************************
@@ -231,6 +232,7 @@ private:
    real_t relaxationParam_;           //!< Parameter specifying underrelaxation of velocity corrections for boundary bodies.
    real_t maximumPenetration_;
    size_t numContacts_;
+   size_t numContactsTreated_;
 
    //**********************************************************************************************
    /*! \cond WALBERLA_INTERNAL */
@@ -293,6 +295,11 @@ inline real_t HardContactSemiImplicitTimesteppingSolvers::getMaximumPenetration(
 inline size_t HardContactSemiImplicitTimesteppingSolvers::getNumberOfContacts() const
 {
    return numContacts_;
+}
+
+inline size_t HardContactSemiImplicitTimesteppingSolvers::getNumberOfContactsTreated() const
+{
+   return numContactsTreated_;
 }
 //*************************************************************************************************
 

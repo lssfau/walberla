@@ -54,13 +54,19 @@ DEM::DEM(    const shared_ptr<BodyStorage>&    globalBodyStorage
    , ccdID_(ccdID)
    , fcdID_(fcdID)
    , tt_(tt)
+   , maxPenetration_(0)
+   , numberOfContacts_(0)
+   , numberOfContactsTreated_(0)
 {
 
 }
 
 void DEM::timestep( real_t dt )
 {
-//   auto numContacts = 0;
+   maxPenetration_          = real_c(0.0);
+   numberOfContacts_        = 0;
+   numberOfContactsTreated_ = 0;
+
    for (auto it = blockStorage_->begin(); it != blockStorage_->end(); ++it){
       IBlock & currentBlock = *it;
 
@@ -71,16 +77,18 @@ void DEM::timestep( real_t dt )
       Contacts& cont = fcd->generateContacts( ccd->getPossibleContacts() );
       if (tt_ != NULL) tt_->stop("FCD");
 
-      real_t maxOverlap = real_c(0);
       for (auto cIt = cont.begin(); cIt != cont.end(); ++cIt){
          const real_t overlap( -cIt->getDistance() );
-         if( overlap > maxOverlap )
-            maxOverlap = overlap;
+         if( overlap > maxPenetration_ )
+            maxPenetration_ = overlap;
          if (shouldContactBeTreated( &(*cIt), currentBlock.getAABB() ))
+         {
+            ++numberOfContactsTreated_;
             resolveContact( &(*cIt) );
+         }
       }
 
-//      numContacts += cont.size();
+      numberOfContacts_ += cont.size();
 
       cont.clear();
    }

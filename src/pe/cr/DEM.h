@@ -52,6 +52,10 @@ public:
    void operator()(const real_t dt) { timestep(dt); }
    /// Advances the simulation dt seconds.
    void timestep( const real_t dt );
+
+   virtual inline real_t            getMaximumPenetration()        const WALBERLA_OVERRIDE { return maxPenetration_; }
+   virtual inline size_t            getNumberOfContacts()          const WALBERLA_OVERRIDE { return numberOfContacts_; }
+   virtual inline size_t            getNumberOfContactsTreated()   const WALBERLA_OVERRIDE { return numberOfContactsTreated_; }
 private:
    void resolveContact( ContactID c ) const;
    void move( BodyID id, real_t dt );
@@ -62,6 +66,10 @@ private:
    domain_decomposition::BlockDataID ccdID_;
    domain_decomposition::BlockDataID fcdID_;
    WcTimingTree*                     tt_;
+
+   real_t                            maxPenetration_;
+   size_t                            numberOfContacts_;
+   size_t                            numberOfContactsTreated_;
 };
 
 }  // namespace cr

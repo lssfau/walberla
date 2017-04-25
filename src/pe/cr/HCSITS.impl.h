@@ -102,6 +102,7 @@ inline HardContactSemiImplicitTimesteppingSolvers::HardContactSemiImplicitTimest
    , relaxationParam_  ( real_c(0.9) )
    , maximumPenetration_ ( real_c(0.0) )
    , numContacts_      ( 0 )
+   , numContactsTreated_( 0)
    , requireSync_      ( false )
 {
    // Logging the successful setup of the collision system
@@ -151,6 +152,9 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
 
    const real_t dtinv( real_c(1) / dt );
 
+   numContacts_        = 0;
+   numContactsTreated_ = 0;
+
    if (tt_ != NULL) tt_->start("Simulation Step");
 
    for (auto it = blockStorage_->begin(); it != blockStorage_->end(); ++it)
@@ -194,6 +198,9 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
             contactsMask_[i] = false;
          }
       }
+      numContacts_        += numContacts;
+      numContactsTreated_ += numContactsMasked;
+
       //      WALBERLA_LOG_DEVEL("contact filtering: " << numContactsMasked << "/" << contacts.size());
       if (tt_ != NULL) tt_->stop("Filtering");
       if (tt_ != NULL) tt_->stop("Collision Detection");
@@ -204,7 +211,6 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
 
       {
          maximumPenetration_ = 0;
-         numContacts_ = numContactsMasked;
 
          size_t j = 0;
          for( size_t i = 0; i < numContacts; ++i )

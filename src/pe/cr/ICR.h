@@ -50,10 +50,45 @@ public:
    /// This can be used for example to set a gravitational force.
    inline void        setGlobalLinearAcceleration(const Vec3& acc) { globalLinearAcceleration_ = acc; }
    inline const Vec3& getGlobalLinearAcceleration() { return globalLinearAcceleration_; }
+
+   virtual inline real_t            getMaximumPenetration()        const;
+   virtual inline size_t            getNumberOfContacts()          const;
+   virtual inline size_t            getNumberOfContactsTreated()   const;
 private:
 //   real_t globalLinearDrag_;
    Vec3   globalLinearAcceleration_;
 };
+
+inline real_t ICR::getMaximumPenetration()        const
+{
+   static bool warned = false;
+   if (!warned) {
+      WALBERLA_LOG_WARNING("getMaximumPenetration() is not implemented for this solver!");
+      warned = true;
+   }
+
+   return real_c(0);
+}
+inline size_t ICR::getNumberOfContacts()          const
+{
+   static bool warned = false;
+   if (!warned) {
+      WALBERLA_LOG_WARNING("getMaximumPenetration() is not implemented for this solver!");
+      warned = true;
+   }
+
+   return 0;
+}
+inline size_t ICR::getNumberOfContactsTreated()   const
+{
+   static bool warned = false;
+   if (!warned) {
+      WALBERLA_LOG_WARNING("getMaximumPenetration() is not implemented for this solver!");
+      warned = true;
+   }
+
+   return 0;
+}
 
 }  // namespace cr
 }  // namespace pe
