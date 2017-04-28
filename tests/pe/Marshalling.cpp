@@ -21,6 +21,8 @@
 
 #include "core/debug/TestSubsystem.h"
 
+#include "pe/rigidbody/Box.h"
+#include "pe/rigidbody/Capsule.h"
 #include "pe/rigidbody/Sphere.h"
 #include "pe/communication/DynamicMarshalling.h"
 #include "pe/rigidbody/SetBodyTypeIDs.h"
@@ -32,33 +34,86 @@ using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::pe::communication;
 
+typedef boost::tuple<Box, Capsule, Sphere> BodyTuple ;
+
+void testBox()
+{
+   MaterialID iron = Material::find("iron");
+
+   Box b1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), Vec3(1,2,3), iron, false, false, false);
+   b1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
+   b1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
+
+   mpi::SendBuffer sb;
+   MarshalDynamically<BodyTuple>::execute(sb, b1);
+   mpi::RecvBuffer rb(sb);
+
+   BoxID b2 = static_cast<BoxID> (UnmarshalDynamically<BodyTuple>::execute(rb, Box::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+
+   WALBERLA_CHECK_FLOAT_EQUAL(b1.getPosition(), b2->getPosition());
+   WALBERLA_CHECK_FLOAT_EQUAL(b1.getLinearVel(), b2->getLinearVel());
+   WALBERLA_CHECK_FLOAT_EQUAL(b1.getAngularVel(), b2->getAngularVel());
+   WALBERLA_CHECK_FLOAT_EQUAL(b1.getLengths(), b2->getLengths());
+   WALBERLA_CHECK_EQUAL(b1.getID(), b2->getID());
+   WALBERLA_CHECK_EQUAL(b1.getSystemID(), b2->getSystemID());
+}
+
+void testCapsule()
+{
+   MaterialID iron = Material::find("iron");
+
+   Capsule c1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), 5, 7, iron, false, false, false);
+   c1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
+   c1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
+
+   mpi::SendBuffer sb;
+   MarshalDynamically<BodyTuple>::execute(sb, c1);
+   mpi::RecvBuffer rb(sb);
+
+   CapsuleID c2 = static_cast<CapsuleID> (UnmarshalDynamically<BodyTuple>::execute(rb, Capsule::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+
+   WALBERLA_CHECK_FLOAT_EQUAL(c1.getPosition(), c2->getPosition());
+   WALBERLA_CHECK_FLOAT_EQUAL(c1.getLinearVel(), c2->getLinearVel());
+   WALBERLA_CHECK_FLOAT_EQUAL(c1.getAngularVel(), c2->getAngularVel());
+   WALBERLA_CHECK_FLOAT_EQUAL(c1.getRadius(), c2->getRadius());
+   WALBERLA_CHECK_FLOAT_EQUAL(c1.getLength(), c2->getLength());
+   WALBERLA_CHECK_EQUAL(c1.getID(), c2->getID());
+   WALBERLA_CHECK_EQUAL(c1.getSystemID(), c2->getSystemID());
+}
+
+void testSphere()
+{
+   MaterialID iron = Material::find("iron");
+
+   Sphere s1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), 5, iron, false, false, false);
+   s1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
+   s1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
+
+   mpi::SendBuffer sb;
+   MarshalDynamically<BodyTuple>::execute(sb, s1);
+   mpi::RecvBuffer rb(sb);
+
+   SphereID s2 = static_cast<SphereID> (UnmarshalDynamically<BodyTuple>::execute(rb, Sphere::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+
+   WALBERLA_CHECK_FLOAT_EQUAL(s1.getPosition(), s2->getPosition());
+   WALBERLA_CHECK_FLOAT_EQUAL(s1.getLinearVel(), s2->getLinearVel());
+   WALBERLA_CHECK_FLOAT_EQUAL(s1.getAngularVel(), s2->getAngularVel());
+   WALBERLA_CHECK_FLOAT_EQUAL(s1.getRadius(), s2->getRadius());
+   WALBERLA_CHECK_EQUAL(s1.getID(), s2->getID());
+   WALBERLA_CHECK_EQUAL(s1.getSystemID(), s2->getSystemID());
+}
+
 int main( int argc, char** argv )
 {
    walberla::debug::enterTestMode();
 
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
 
-   typedef boost::tuple<Sphere> BodyTuple ;
    SetBodyTypeIDs<BodyTuple>::execute();
 
-   MaterialID iron = Material::find("iron");
-
-   SphereID s1 = new Sphere(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), 5, iron, false, false, false);
-   s1->setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
-   s1->setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
-
-   mpi::SendBuffer sb;
-   MarshalDynamically<BodyTuple>::execute(sb, *s1);
-   mpi::RecvBuffer rb(sb);
-
-   SphereID s2 = static_cast<SphereID> (UnmarshalDynamically<BodyTuple>::execute(rb, Sphere::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
-
-   WALBERLA_CHECK_FLOAT_EQUAL(s1->getPosition(), s2->getPosition());
-   WALBERLA_CHECK_FLOAT_EQUAL(s1->getLinearVel(), s2->getLinearVel());
-   WALBERLA_CHECK_FLOAT_EQUAL(s1->getAngularVel(), s2->getAngularVel());
-   WALBERLA_CHECK_FLOAT_EQUAL(s1->getRadius(), s2->getRadius());
-   WALBERLA_CHECK_EQUAL(s1->getID(), s2->getID());
-   WALBERLA_CHECK_EQUAL(s1->getSystemID(), s2->getSystemID());
+   testSphere();
+   testBox();
+   testCapsule();
 
    return EXIT_SUCCESS;
 }
