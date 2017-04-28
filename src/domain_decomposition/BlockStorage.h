@@ -276,7 +276,13 @@ public:
    */
    //*******************************************************************************************************************
    virtual const IBlock* getBlock( const IBlockID& id ) const = 0;
-   inline  const IBlock* getBlock( const IBlockID::IDType& id) const { return iBlocks_.at(id); }
+   inline  const IBlock* getBlock( const IBlockID::IDType& id) const { 
+     auto it = iBlocks_.find(id);
+    
+     if( it != iBlocks_.end()) return it->second;
+
+     return NULL;
+   }
 
    //*******************************************************************************************************************
    /*!
@@ -291,7 +297,13 @@ public:
    */
    //*******************************************************************************************************************
    virtual       IBlock* getBlock( const IBlockID& id )       = 0;
-   inline        IBlock* getBlock( const IBlockID::IDType& id) { return iBlocks_.at(id); }
+   inline        IBlock* getBlock( const IBlockID::IDType& id) { 
+     auto it = iBlocks_.find(id);
+    
+     if( it != iBlocks_.end()) return it->second;
+
+     return NULL;
+   }
 
    //*******************************************************************************************************************
    /*!
