@@ -47,7 +47,7 @@ struct CapsuleParameters : public GeomPrimitiveParameters {
  * \param obj The object to be marshalled.
  * \return void
  */
-void marshal( mpi::SendBuffer& buffer, const Box& obj );
+void marshal( mpi::SendBuffer& buffer, const Capsule& obj );
 //*************************************************************************************************
 
 //*************************************************************************************************
