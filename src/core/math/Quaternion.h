@@ -1226,6 +1226,29 @@ namespace mpi {
 
 //======================================================================================================================
 //
+//  Vector Trait Specialization
+//
+//======================================================================================================================
+
+namespace walberla {
+
+using math::Quaternion;
+
+// Specialization of VectorTrait for Quaternions
+template<typename T>
+struct VectorTrait< Quaternion<T> >
+{
+   typedef T OutputType;
+
+   static const uint_t F_SIZE =  4u;
+   static T    get( const Quaternion<T> & v, uint_t f )       { return v[f]; }
+   static void set(       Quaternion<T> & v, uint_t f, T val) { v[f] = val;  }
+};
+
+} // namespace walberla
+
+//======================================================================================================================
+//
 //  comparison backend for Vector3<real_t>
 //
 //======================================================================================================================
@@ -1238,6 +1261,12 @@ template< >
 inline bool check_float_equal( const math::Quaternion<real_t> & lhs, const math::Quaternion<real_t> & rhs )
 {
    return floatIsEqual( lhs[0], rhs[0] ) && floatIsEqual( lhs[1], rhs[1] ) && floatIsEqual( lhs[2], rhs[2] ) && floatIsEqual( lhs[3], rhs[3] );
+}
+
+template< >
+inline bool check_float_equal_eps( const math::Quaternion<real_t> & lhs, const math::Quaternion<real_t> & rhs, const real_t epsilon )
+{
+   return floatIsEqual( lhs[0], rhs[0], epsilon ) && floatIsEqual( lhs[1], rhs[1], epsilon ) && floatIsEqual( lhs[2], rhs[2], epsilon ) && floatIsEqual( lhs[3], rhs[3], epsilon );
 }
 
 }

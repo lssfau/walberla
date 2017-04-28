@@ -120,6 +120,36 @@ inline bool check_float_unequal( const T & lhs, const U & rhs )
 }
 
 template< typename T, typename U >
+inline bool check_float_equal_eps( const T & lhs, const U & rhs,
+                                   const typename VectorTrait<typename math::MathTrait<T,U>::LowType>::OutputType epsilon )
+{
+   static_assert( boost::is_floating_point<T>::value,  "First operand type T is not a floating point type!");
+   static_assert( boost::is_floating_point<U>::value, "Second operand type U is not a floating point type!");
+
+   typedef typename math::MathTrait<T,U>::Low LowType;
+
+   LowType low_lhs = static_cast<LowType>( lhs );
+   LowType low_rhs = static_cast<LowType>( rhs );
+
+   return floatIsEqual( low_lhs, low_rhs, epsilon ) || floatIsEqual( ( low_lhs - low_rhs ) / low_lhs, LowType(0), epsilon );
+}
+
+template< typename T, typename U >
+inline bool check_float_unequal_eps( const T & lhs, const U & rhs,
+                                     const typename VectorTrait<typename math::MathTrait<T,U>::LowType>::OutputType epsilon )
+{
+   static_assert( boost::is_floating_point<T>::value,  "First operand type T is not a floating point type!");
+   static_assert( boost::is_floating_point<U>::value, "Second operand type U is not a floating point type!");
+
+   typedef typename math::MathTrait<T,U>::Low LowType;
+
+   LowType low_lhs = static_cast<LowType>( lhs );
+   LowType low_rhs = static_cast<LowType>( rhs );
+
+   return !floatIsEqual( low_lhs, low_rhs, epsilon ) && !floatIsEqual( ( low_lhs - low_rhs ) / low_lhs, LowType(0), epsilon );
+}
+
+template< typename T, typename U >
 inline bool check_identical( const T & lhs, const U & rhs )
 {
    typedef boost::integral_constant<bool, boost::is_arithmetic<T>::value && boost::is_arithmetic<U>::value> truth_type;
@@ -304,7 +334,8 @@ void check_unequal( const T & lhs, const U & rhs, const char * const lhsExpressi
 }
 
 template< typename T, typename U, typename V >
-void check_float_equal( const T & lhs, const U & rhs, const char * const lhsExpression, const char * const rhsExpression,
+void check_float_equal( const T & lhs, const U & rhs,
+                        const char * const lhsExpression, const char * const rhsExpression,
                         const char * const filename, int line, V failFunc )
 {
    int length = static_cast<int>( std::max( std::strlen( lhsExpression ), std::strlen( rhsExpression ) ) );
@@ -333,6 +364,53 @@ void check_float_unequal( const T & lhs, const U & rhs, const char * const lhsEx
    ss << "Assertion failed!\n"
       << "File:       " << filename << ":" << line << '\n'
       << "Expression: " << lhsExpression << " != " << rhsExpression << '\n'
+      //<< "ULP:        " << distance << '\n'
+      << "Values:     " << std::setw(length) << std::setfill(' ') << lhsExpression << " = ";
+
+   printValue( ss, lhs ) << '\n';
+
+   ss << "            " << std::setw(length) << std::setfill(' ') << rhsExpression << " = ";
+
+   printValue( ss, rhs ) << '\n';
+
+   failFunc( ss.str() );
+}
+
+template< typename T, typename U, typename V >
+void check_float_equal_eps( const T & lhs, const U & rhs,
+                        const char * const lhsExpression, const char * const rhsExpression,
+                        const char * const filename, int line, V failFunc,
+                        const typename VectorTrait<typename math::MathTrait<T,U>::LowType>::OutputType epsilon )
+{
+   int length = static_cast<int>( std::max( std::strlen( lhsExpression ), std::strlen( rhsExpression ) ) );
+   std::stringstream ss;
+   ss << "Assertion failed!\n"
+      << "File:       " << filename << ":" << line << '\n'
+      << "Expression: " << lhsExpression << " == " << rhsExpression << '\n'
+      << "Epsilon:    " << epsilon << '\n'
+      //<< "ULP:        " << distance << '\n'
+      << "Values:     " << std::setw(length) << std::setfill(' ') << lhsExpression << " = ";
+
+   printValue( ss, lhs ) << '\n';
+
+   ss << "            " << std::setw(length) << std::setfill(' ') << rhsExpression << " = ";
+
+   printValue( ss, rhs ) << '\n';
+
+   failFunc( ss.str() );
+}
+
+template< typename T, typename U, typename V >
+void check_float_unequal_eps( const T & lhs, const U & rhs, const char * const lhsExpression, const char * const rhsExpression,
+                          const char * const filename, int line, V failFunc,
+                          const typename VectorTrait<typename math::MathTrait<T,U>::LowType>::OutputType epsilon )
+{
+   int length = static_cast<int>( std::max( std::strlen( lhsExpression ), std::strlen( rhsExpression ) ) );
+   std::stringstream ss;
+   ss << "Assertion failed!\n"
+      << "File:       " << filename << ":" << line << '\n'
+      << "Expression: " << lhsExpression << " != " << rhsExpression << '\n'
+      << "Epsilon:    " << epsilon << '\n'
       //<< "ULP:        " << distance << '\n'
       << "Values:     " << std::setw(length) << std::setfill(' ') << lhsExpression << " = ";
 

@@ -1838,9 +1838,6 @@ size_t hash_value( const Vector3<T> & v )
    return seed;
 
 }
-//**********************************************************************************************************************
-
-
 } // namespace math
 
 using math::Vector3;
@@ -1951,6 +1948,12 @@ template< >
 inline bool check_float_equal( const math::Vector3<real_t> & lhs, const math::Vector3<real_t> & rhs )
 {
    return floatIsEqual( lhs[0], rhs[0] ) && floatIsEqual( lhs[1], rhs[1] ) && floatIsEqual( lhs[2], rhs[2] );
+}
+
+template< >
+inline bool check_float_equal_eps( const math::Vector3<real_t> & lhs, const math::Vector3<real_t> & rhs, const real_t epsilon )
+{
+   return floatIsEqual( lhs[0], rhs[0], epsilon ) && floatIsEqual( lhs[1], rhs[1], epsilon ) && floatIsEqual( lhs[2], rhs[2], epsilon );
 }
 
 }

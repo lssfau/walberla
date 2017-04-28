@@ -81,19 +81,24 @@
 #define WALBERLA_ASSERT_LESS_EQUAL_2(X,Y)    { if( !walberla::debug::check_functions_detail::check_less_equal   ( (X), (Y) ) ) { walberla::debug::check_functions_detail::check_less_equal   ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler() ); } }
 #define WALBERLA_ASSERT_GREATER_EQUAL_2(X,Y) { if( !walberla::debug::check_functions_detail::check_greater_equal( (X), (Y) ) ) { walberla::debug::check_functions_detail::check_greater_equal( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler() ); } }
 
-#define WALBERLA_ASSERT_2(X,MSG)                 { if( !walberla::debug::check_functions_detail::check              ( (X)      ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check              (           #X,     __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_NULLPTR_2(X,MSG)         { if( !walberla::debug::check_functions_detail::check_nullptr      ( (X)      ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_nullptr      ( (X),      #X,     __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_NOT_NULLPTR_2(X,MSG)     { if( !walberla::debug::check_functions_detail::check_not_nullptr  ( (X)      ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_not_nullptr  (           #X,     __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_EQUAL_3(X,Y,MSG)         { if( !walberla::debug::check_functions_detail::check_equal        ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_equal        ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_UNEQUAL_3(X,Y,MSG)       { if( !walberla::debug::check_functions_detail::check_unequal      ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_unequal      ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_FLOAT_EQUAL_3(X,Y,MSG)   { if( !walberla::debug::check_functions_detail::check_float_equal  ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_float_equal  ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_FLOAT_UNEQUAL_3(X,Y,MSG) { if( !walberla::debug::check_functions_detail::check_float_unequal( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_float_unequal( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_IDENTICAL_3(X,Y,MSG)     { if( !walberla::debug::check_functions_detail::check_identical    ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_identical    ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_NOT_IDENTICAL_3(X,Y,MSG) { if( !walberla::debug::check_functions_detail::check_not_identical( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_not_identical( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_LESS_3(X,Y,MSG)          { if( !walberla::debug::check_functions_detail::check_less         ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_less         ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_GREATER_3(X,Y,MSG)       { if( !walberla::debug::check_functions_detail::check_greater      ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_greater      ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_LESS_EQUAL_3(X,Y,MSG)    { if( !walberla::debug::check_functions_detail::check_less_equal   ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_less_equal   ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
-#define WALBERLA_ASSERT_GREATER_EQUAL_3(X,Y,MSG) { if( !walberla::debug::check_functions_detail::check_greater_equal( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_greater_equal( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_2(X,MSG)                         { if( !walberla::debug::check_functions_detail::check                  ( (X)      ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check              (           #X,     __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_NULLPTR_2(X,MSG)                 { if( !walberla::debug::check_functions_detail::check_nullptr          ( (X)      ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_nullptr      ( (X),      #X,     __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_NOT_NULLPTR_2(X,MSG)             { if( !walberla::debug::check_functions_detail::check_not_nullptr      ( (X)      ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_not_nullptr  (           #X,     __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_EQUAL_3(X,Y,MSG)                 { if( !walberla::debug::check_functions_detail::check_equal            ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_equal        ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_UNEQUAL_3(X,Y,MSG)               { if( !walberla::debug::check_functions_detail::check_unequal          ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_unequal      ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_FLOAT_EQUAL_3(X,Y,MSG)           { if( !walberla::debug::check_functions_detail::check_float_equal      ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_float_equal  ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_FLOAT_UNEQUAL_3(X,Y,MSG)         { if( !walberla::debug::check_functions_detail::check_float_unequal    ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_float_unequal( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_FLOAT_EQUAL_EPSILON_3(X,Y,EPS)   { if( !walberla::debug::check_functions_detail::check_float_equal_eps  ( (X), (Y), (EPS) ) ) { walberla::debug::check_functions_detail::check_float_equal_eps  ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ), (EPS) ); } }
+#define WALBERLA_ASSERT_FLOAT_UNEQUAL_EPSILON_3(X,Y,EPS) { if( !walberla::debug::check_functions_detail::check_float_unequal_eps( (X), (Y), (EPS) ) ) { walberla::debug::check_functions_detail::check_float_unequal_eps( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ), (EPS) ); } }
+#define WALBERLA_ASSERT_IDENTICAL_3(X,Y,MSG)             { if( !walberla::debug::check_functions_detail::check_identical        ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_identical    ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_NOT_IDENTICAL_3(X,Y,MSG)         { if( !walberla::debug::check_functions_detail::check_not_identical    ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_not_identical( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_LESS_3(X,Y,MSG)                  { if( !walberla::debug::check_functions_detail::check_less             ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_less         ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_GREATER_3(X,Y,MSG)               { if( !walberla::debug::check_functions_detail::check_greater          ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_greater      ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_LESS_EQUAL_3(X,Y,MSG)            { if( !walberla::debug::check_functions_detail::check_less_equal        ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_less_equal   ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+#define WALBERLA_ASSERT_GREATER_EQUAL_3(X,Y,MSG)         { if( !walberla::debug::check_functions_detail::check_greater_equal    ( (X), (Y) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_greater_equal( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ) ); } }
+
+#define WALBERLA_ASSERT_FLOAT_EQUAL_EPSILON_4(X,Y,EPS,MSG)   { if( !walberla::debug::check_functions_detail::check_float_equal_eps  ( (X), (Y), (EPS) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_float_equal_eps  ( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ), (EPS) ); } }
+#define WALBERLA_ASSERT_FLOAT_UNEQUAL_EPSILON_4(X,Y,EPS,MSG) { if( !walberla::debug::check_functions_detail::check_float_unequal_eps( (X), (Y), (EPS) ) ) { std::stringstream ss; ss << MSG; walberla::debug::check_functions_detail::check_float_unequal_eps( (X), (Y), #X, #Y, __FILE__, __LINE__, walberla::debug::check_functions_detail::ExitHandler( ss.str() ), (EPS) ); } }
 
 #define WALBERLA_ASSERT_3(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
 #define WALBERLA_ASSERT_4(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
@@ -130,6 +135,16 @@
 #define WALBERLA_ASSERT_FLOAT_UNEQUAL_5(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
 #define WALBERLA_ASSERT_FLOAT_UNEQUAL_6(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
 
+#define WALBERLA_ASSERT_FLOAT_EQUAL_EPSILON_1(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
+#define WALBERLA_ASSERT_FLOAT_EQUAL_EPSILON_2(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
+#define WALBERLA_ASSERT_FLOAT_EQUAL_EPSILON_5(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
+#define WALBERLA_ASSERT_FLOAT_EQUAL_EPSILON_6(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
+
+#define WALBERLA_ASSERT_FLOAT_UNEQUAL_EPSILON_1(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
+#define WALBERLA_ASSERT_FLOAT_UNEQUAL_EPSILON_2(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
+#define WALBERLA_ASSERT_FLOAT_UNEQUAL_EPSILON_5(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
+#define WALBERLA_ASSERT_FLOAT_UNEQUAL_EPSILON_6(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
+
 #define WALBERLA_ASSERT_IDENTICAL_1(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
 #define WALBERLA_ASSERT_IDENTICAL_4(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
 #define WALBERLA_ASSERT_IDENTICAL_5(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
@@ -160,19 +175,21 @@
 #define WALBERLA_ASSERT_GREATER_EQUAL_5(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
 #define WALBERLA_ASSERT_GREATER_EQUAL_6(...) THIS_IS_SUPPOSED_TO_FAIL___YOU_MADE_AN_ERROR_WHEN_USING_AN_ASSERT_MACRO
 
-#define WALBERLA_ASSERT(...)               WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_NULLPTR(...)       WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_NULLPTR_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_NOT_NULLPTR(...)   WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_NOT_NULLPTR_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_EQUAL(...)         WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_EQUAL_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_UNEQUAL(...)       WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_UNEQUAL_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_FLOAT_EQUAL(...)   WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_FLOAT_EQUAL_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_FLOAT_UNEQUAL(...) WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_FLOAT_UNEQUAL_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_IDENTICAL(...)     WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_IDENTICAL_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_NOT_IDENTICAL(...) WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_NOT_IDENTICAL_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_LESS(...)          WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_LESS_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_GREATER(...)       WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_GREATER_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_LESS_EQUAL(...)    WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_LESS_EQUAL_, __VA_ARGS__ )
-#define WALBERLA_ASSERT_GREATER_EQUAL(...) WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_GREATER_EQUAL_, __VA_ARGS__ )
+#define WALBERLA_ASSERT(...)                       WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_NULLPTR(...)               WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_NULLPTR_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_NOT_NULLPTR(...)           WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_NOT_NULLPTR_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_EQUAL(...)                 WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_EQUAL_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_UNEQUAL(...)               WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_UNEQUAL_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_FLOAT_EQUAL(...)           WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_FLOAT_EQUAL_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_FLOAT_UNEQUAL(...)         WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_FLOAT_UNEQUAL_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_FLOAT_EQUAL_EPSILON(...)   WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_FLOAT_EQUAL_EPSILON_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_FLOAT_UNEQUAL_EPSILON(...) WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_FLOAT_UNEQUAL_EPSILON_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_IDENTICAL(...)             WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_IDENTICAL_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_NOT_IDENTICAL(...)         WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_NOT_IDENTICAL_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_LESS(...)                  WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_LESS_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_GREATER(...)               WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_GREATER_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_LESS_EQUAL(...)            WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_LESS_EQUAL_, __VA_ARGS__ )
+#define WALBERLA_ASSERT_GREATER_EQUAL(...)         WALBERLA_MACRO_OVERLOAD( WALBERLA_ASSERT_GREATER_EQUAL_, __VA_ARGS__ )
 
 #else // NDBEUG
 
