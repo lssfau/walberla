@@ -49,8 +49,8 @@ void marshal( mpi::SendBuffer& buffer, const Sphere& obj ) {
  * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
  * \return void
  */
-void unmarshal( mpi::RecvBuffer& buffer, SphereParameters& objparam, bool hasSuperBody ) {
-   unmarshal( buffer, static_cast<GeomPrimitiveParameters&>( objparam ), hasSuperBody );
+void unmarshal( mpi::RecvBuffer& buffer, SphereParameters& objparam ) {
+   unmarshal( buffer, static_cast<GeomPrimitiveParameters&>( objparam ) );
    buffer >> objparam.radius_;
 }
 //*************************************************************************************************

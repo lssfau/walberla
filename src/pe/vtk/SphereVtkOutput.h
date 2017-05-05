@@ -22,6 +22,7 @@
 
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Union.h"
 
 #include "core/DataTypes.h"
 #include "core/Set.h"
@@ -86,6 +87,9 @@ void SphereVtkOutput::push( std::ostream& os, const uint_t data, const uint_t po
    case 4:
       vtk::toStream( os, numeric_cast< int >(bodies_.at( point )->MPITrait.getOwner().rank_) );
       break;
+   case 5:
+      vtk::toStream( os, numeric_cast< id_t >(bodies_.at( point )->getTopSuperBody()->getSystemID()) );
+      break;
    }
 
 }
@@ -113,6 +117,9 @@ void SphereVtkOutput::push( vtk::Base64Writer& b64, const uint_t data, const uin
       break;
    case 4:
       b64 << numeric_cast< int >(bodies_.at( point )->MPITrait.getOwner().rank_);
+      break;
+   case 5:
+      b64 << numeric_cast< id_t >(bodies_.at( point )->getTopSuperBody()->getSystemID());
       break;
    }
 }

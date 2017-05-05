@@ -20,11 +20,14 @@
 //
 //======================================================================================================================
 
+#pragma once
+
 #include "pe/Types.h"
 #include "pe/rigidbody/Box.h"
 #include "pe/rigidbody/Capsule.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Union.h"
 #include "pe/contact/Contact.h"
 
 #include "GJKEPAHelper.h"
@@ -34,8 +37,16 @@
 #include "core/math/Shims.h"
 #include "geometry/GeometricalFunctions.h"
 
+#include <boost/tuple/tuple.hpp>
+
 namespace walberla {
 namespace pe {
+
+namespace fcd {
+//Forward Declaration
+template < typename BodyTypeTuple, typename BaseT >
+struct DoubleDispatch;
+}
 
 //*************************************************************************************************
 /*!\brief Contact generation between two colliding rigid bodies.
@@ -73,9 +84,6 @@ inline
 bool collide( SphereID s1, SphereID s2, Container& container )
 {
    WALBERLA_ASSERT_UNEQUAL(s1->getSystemID(), s2->getSystemID(), "colliding with itself!\n" << s1 << "\n" << s2);
-
-   WALBERLA_CHECK_EQUAL(s1->getSuperBody(), s1);
-   WALBERLA_CHECK_EQUAL(s2->getSuperBody(), s2);
 
    Vec3 contactNormal = ( s1->getPosition() - s2->getPosition() );
    real_t penetrationDepth = ( contactNormal.length() - s1->getRadius() - s2->getRadius() );
@@ -1992,6 +2000,40 @@ inline
 bool collide( CapsuleID c, BoxID b, Container& container )
 {
    return collide(b, c, container);
+}
+
+template <typename BodyTypeTuple, typename BodyB, typename Container>
+inline
+bool collide( Union<BodyTypeTuple>* bd1, BodyB* bd2, Container& container )
+{
+   bool collision = false;
+   for( auto it=bd1->begin(); it!=bd1->end(); ++it )
+   {
+      collision |= fcd::DoubleDispatch< BodyTypeTuple, boost::tuple<BodyB> >::execute(*it, bd2, container);
+   }
+   return collision;
+}
+
+template <typename BodyA, typename BodyTypeTuple, typename Container>
+inline
+bool collide( BodyA* bd1, Union<BodyTypeTuple>* bd2, Container& container )
+{
+   return collide (bd2, bd1, container);
+}
+
+template <typename BodyTypeTupleA, typename BodyTypeTupleB, typename Container>
+inline
+bool collide( Union<BodyTypeTupleA>* bd1, Union<BodyTypeTupleB>* bd2, Container& container )
+{
+   bool collision = false;
+   for( auto it1=bd1->begin(); it1!=bd1->end(); ++it1 )
+   {
+      for( auto it2=bd2->begin(); it2!=bd2->end(); ++it2 )
+      {
+         collision |= fcd::DoubleDispatch< BodyTypeTupleA, BodyTypeTupleB >::execute(*it1, *it2, container);
+      }
+   }
+   return collision;
 }
 
 }

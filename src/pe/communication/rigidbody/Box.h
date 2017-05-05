@@ -58,21 +58,18 @@ void marshal( mpi::SendBuffer& buffer, const Box& obj );
  * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
  * \return void
  */
-void unmarshal( mpi::RecvBuffer& buffer, BoxParameters& objparam, bool hasSuperBody );
+void unmarshal( mpi::RecvBuffer& buffer, BoxParameters& objparam );
 //*************************************************************************************************
-
-
-template <>
-inline BodyID instantiate<Box>( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block )
+inline BoxID instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, BoxID& newBody )
 {
    BoxParameters subobjparam;
-   unmarshal( buffer, subobjparam, false );
+   unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   BoxID obj = new Box( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.lengths_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
-   obj->setLinearVel( subobjparam.v_ );
-   obj->setAngularVel( subobjparam.w_ );
-   obj->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
-   return obj;
+   newBody = new Box( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.lengths_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   newBody->setLinearVel( subobjparam.v_ );
+   newBody->setAngularVel( subobjparam.w_ );
+   newBody->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
+   return newBody;
 }
 
 }  // namespace communication

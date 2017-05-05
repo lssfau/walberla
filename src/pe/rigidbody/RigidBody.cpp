@@ -60,7 +60,6 @@ RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
    , uid_    (uid)            // User-specific body ID
    , contacts_()              // Vector of the currently attached contacts
    , typeID_(typeID)          // geometry type
-   , superBodies_()           // All superordinate bodies containing this rigid body
 {
    sb_ = this;           // The superordinate rigid body
 }

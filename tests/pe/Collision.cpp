@@ -19,19 +19,25 @@
 //
 //======================================================================================================================
 
-#include "pe/contact/Contact.h"
-#include "pe/Materials.h"
-#include "pe/rigidbody/Box.h"
-#include "pe/rigidbody/Sphere.h"
-#include "pe/rigidbody/SetBodyTypeIDs.h"
-#include "pe/Types.h"
 #include "pe/collision/Collide.h"
 #include "pe/collision/GJKEPAHelper.h"
 
-#include "core/DataTypes.h"
-#include "core/math/Vector2.h"
+#include "pe/contact/Contact.h"
+#include "pe/fcd/SimpleFCD.h"
+#include "pe/Materials.h"
+
+#include "pe/rigidbody/Box.h"
+#include "pe/rigidbody/Capsule.h"
+#include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Plane.h"
+#include "pe/rigidbody/Union.h"
+
+#include "pe/rigidbody/SetBodyTypeIDs.h"
+#include "pe/Types.h"
 
 #include "core/debug/TestSubsystem.h"
+#include "core/DataTypes.h"
+#include "core/math/Vector2.h"
 
 using namespace walberla;
 using namespace walberla::pe;
@@ -238,6 +244,26 @@ void CapsuleTest2()
 
 }
 
+void UnionTest()
+{
+   typedef Union< boost::tuple<Sphere> > UnionT;
+   MaterialID iron = Material::find("iron");
+   UnionT  un1(120, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), false, true, false);
+   UnionT  un2(121, 0, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), false, true, false);
+   SphereID sp1 = new Sphere(123, 1, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   un1.add(sp1);
+   SphereID sp2 = new Sphere(124, 2, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   un2.add(sp2);
+
+   std::vector<Contact> contacts;
+
+   // SPHERE <-> SPHERE
+   WALBERLA_LOG_INFO("UNION <-> UNION");
+   fcd::DoubleDispatch< boost::tuple<UnionT, Sphere> >::execute(&un1, &un2, contacts);
+   checkContact( contacts.at(0),
+                 Contact( sp1, sp2, Vec3(real_t(0.75), 0, 0), Vec3(-1, 0, 0), real_t(-0.5)) );
+}
+
 typedef boost::tuple<Box, Capsule, Plane, Sphere> BodyTuple ;
 
 int main( int argc, char** argv )
@@ -252,6 +278,7 @@ int main( int argc, char** argv )
     BoxTest();
     CapsuleTest();
 //    CapsuleTest2();
+    UnionTest();
 
     return EXIT_SUCCESS;
 }

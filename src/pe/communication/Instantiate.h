@@ -28,6 +28,7 @@
 // Includes
 //*************************************************************************************************
 
+#include "core/Abort.h"
 #include "core/math/AABB.h"
 #include "core/math/Vector3.h"
 
@@ -55,9 +56,9 @@ void correctBodyPosition(const math::AABB& domain, const Vec3& center, Vec3& pos
 }
 
 template < class BodyT >
-BodyID instantiate( mpi::RecvBuffer& /*buffer*/, const math::AABB& /*domain*/, const math::AABB& /*block*/ )
+BodyT* instantiate( mpi::RecvBuffer& /*buffer*/, const math::AABB& /*domain*/, const math::AABB& /*block*/, BodyT*& /*newBody*/ )
 {
-   throw std::runtime_error( "Body instantiation not implemented!" );
+   WALBERLA_ABORT( "Body instantiation not implemented! (" << demangle(typeid(BodyT).name()) << ")" );
 }
 
 }  // namespace communication

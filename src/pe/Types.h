@@ -84,6 +84,7 @@ class SliderJoint;
 class Sphere;
 class Spring;
 class TriangleMesh;
+template <typename BodyTypeTuple>
 class Union;
 
 typedef RigidBody             BodyType;            //!< Type of the rigid bodies.
@@ -116,10 +117,6 @@ typedef const Sphere*         ConstSphereID;       //!< Handle for a constant sp
 typedef TriangleMesh          MeshType;             //!< Type of the triangle mesh geometric primitive.
 typedef TriangleMesh*         MeshID;               //!< Handle for a triangle mesh primitive.
 typedef const TriangleMesh*   ConstMeshID;          //!< Handle for a constant triangle mesh primitive.
-
-typedef Union                 UnionType;           //!< Type of the union compound geometry.
-typedef Union*                UnionID;             //!< Handle for a union.
-typedef const Union*          ConstUnionID;        //!< Handle for a constant union.
 
 typedef Attachable            AttachableType;      //!< Type of the attachables.
 typedef Attachable*           AttachableID;        //!< Handle for an attachable.

@@ -33,6 +33,7 @@
 #include "pe/communication/rigidbody/Box.h"
 #include "pe/communication/rigidbody/Capsule.h"
 #include "pe/communication/rigidbody/Sphere.h"
+#include "pe/communication/rigidbody/Union.h"
 
 #include "core/Abort.h"
 
@@ -95,7 +96,8 @@ struct UnmarshalDynamically{
       if (BodyTypeTuple::head_type::getStaticTypeID() == typeID)
       {
          typedef typename BodyTypeTuple::head_type BodyT;
-         return instantiate<BodyT>( buffer, domain, block );
+         BodyT* newBody;
+         return instantiate( buffer, domain, block, newBody );
       } else
       {
          return UnmarshalDynamically<typename BodyTypeTuple::tail_type>::execute(buffer, typeID, domain, block);

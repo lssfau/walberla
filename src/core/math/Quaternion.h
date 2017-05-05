@@ -277,7 +277,8 @@ inline Quaternion<Type>::Quaternion( Vector3<Axis> axis, Type angle )
 {
    static_assert(boost::is_floating_point<Axis>::value, "Axis has to be floating point!" );
 
-   if( math::equal(std::fabs(angle), real_c(0))  ) {
+   auto axisLength = axis.length();
+   if( (floatIsEqual(axisLength, 0)) || (math::equal(std::fabs(angle), real_c(0)))  ) {
       reset();
       return;
    }
@@ -287,7 +288,8 @@ inline Quaternion<Type>::Quaternion( Vector3<Axis> axis, Type angle )
    const Type sina( std::sin( angle*Type(0.5) ) );
    const Type cosa( std::cos( angle*Type(0.5) ) );
 
-   axis = axis.getNormalized();
+   auto invAxisLength = real_c(1) / axisLength;
+   axis *= invAxisLength;
 
    v_[0] = cosa;
    v_[1] = sina * axis[0];

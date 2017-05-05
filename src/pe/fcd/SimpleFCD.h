@@ -32,51 +32,53 @@ namespace walberla{
 namespace pe{
 namespace fcd {
 
-template < typename BodyA, typename BodyTypeTuple, typename BaseT >
+template < typename TypeA, typename TypeListB >
 struct SingleDispatch{
-   static void execute(RigidBody* a, RigidBody* b, Contacts& contacts){
-      static_assert(boost::is_base_of<RigidBody, typename BodyTypeTuple::head_type>::value, "only downcasting allowed!");
-      if (BodyTypeTuple::head_type::getStaticTypeID() == b->getTypeID())
+   static bool execute(RigidBody* a, RigidBody* b, Contacts& contacts){
+      static_assert(boost::is_base_of<RigidBody, typename TypeListB::head_type>::value, "only downcasting allowed!");
+      if (TypeListB::head_type::getStaticTypeID() == b->getTypeID())
       {
-         typedef typename BodyTypeTuple::head_type BodyB;
+         typedef typename TypeListB::head_type TypeB;
 
-         auto bd1 = static_cast<BodyA *>(a);
-         auto bd2 = static_cast<BodyB *>(b);
+         auto bd1 = static_cast<TypeA *>(a);
+         auto bd2 = static_cast<TypeB *>(b);
 
-         collide(bd1, bd2, contacts);
+         return collide(bd1, bd2, contacts);
       } else
       {
-         SingleDispatch<BodyA, typename BodyTypeTuple::tail_type, BaseT>::execute(a, b, contacts);
+         return SingleDispatch<TypeA, typename TypeListB::tail_type>::execute(a, b, contacts);
       }
    }
 };
 
-template < typename BodyA, typename BaseT>
-struct SingleDispatch< BodyA, boost::tuples::null_type, BaseT>{
-   static void execute(RigidBody* /*a*/, RigidBody* b, Contacts& /*contacts*/){
+template < typename TypeA >
+struct SingleDispatch< TypeA, boost::tuples::null_type >{
+   static bool execute(RigidBody* /*a*/, RigidBody* b, Contacts& /*contacts*/){
       WALBERLA_ABORT("SingleDispatch: Type of body " << b->getSystemID() << " could not be determined (" << b->getTypeID() << ")");
+      return false;
    }
 };
 
-template < typename BodyTypeTuple, typename BaseT = BodyTypeTuple>
+template < typename TypeListA, typename TypeListB = TypeListA>
 struct DoubleDispatch{
-   static void execute(RigidBody* a, RigidBody* b, Contacts& contacts){
+   static bool execute(RigidBody* a, RigidBody* b, Contacts& contacts){
       // Force a defined order of collision detection across processes
       if( b->getSystemID() < a->getSystemID() )
          std::swap( a, b );
-      static_assert(boost::is_base_of<RigidBody, typename BodyTypeTuple::head_type>::value, "only downcasting allowed!");
-      if (BodyTypeTuple::head_type::getStaticTypeID() == a->getTypeID()) {
-         SingleDispatch<typename BodyTypeTuple::head_type, BaseT, BaseT>::execute(a, b, contacts);
+      static_assert(boost::is_base_of<RigidBody, typename TypeListA::head_type>::value, "only downcasting allowed!");
+      if (TypeListA::head_type::getStaticTypeID() == a->getTypeID()) {
+         return SingleDispatch<typename TypeListA::head_type, TypeListB>::execute(a, b, contacts);
       } else {
-         DoubleDispatch<typename BodyTypeTuple::tail_type, BaseT>::execute(a, b, contacts);
+         return DoubleDispatch<typename TypeListA::tail_type, TypeListB>::execute(a, b, contacts);
       }
    }
 };
 
-template < typename BaseT>
-struct DoubleDispatch< boost::tuples::null_type, BaseT>{
-   static void execute(RigidBody* /*a*/, RigidBody* /*b*/, Contacts& /*contacts*/){
+template < typename TypeListB>
+struct DoubleDispatch< boost::tuples::null_type, TypeListB>{
+   static bool execute(RigidBody* /*a*/, RigidBody* /*b*/, Contacts& /*contacts*/){
       WALBERLA_ABORT("DoubleDispatch: Type could not be determined");
+      return false;
    }
 };
 

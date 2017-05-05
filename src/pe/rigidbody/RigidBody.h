@@ -44,12 +44,18 @@
 namespace walberla{
 namespace pe{
 
+template <typename BodyTypeTuple>
+class Union;
+
 class RigidBody : public Node
                 , public ccd::HashGridsBodyTrait
                 , public cr::HCSITSBodyTrait
                 , private NonCopyable
 {
 private:
+   template <typename BodyTypeTuple>
+   friend class Union;
+
    //**Type definitions****************************************************************************
    typedef PtrVector<RigidBody,NoDelete>   Bodies;       //!< Vector for superordinate bodies containing this rigid body.
    typedef PtrVector<Contact,NoDelete>     Contacts;     //!< Vector for attached contacts.
@@ -153,6 +159,9 @@ public:
    //**Set functions*******************************************************************************
    /*!\name Set functions */
    //@{
+   inline  void setSB  ( BodyID body );
+   inline  void resetSB() ;
+
    inline  void setFinite     ( const bool finite );
    inline  void setMass       ( bool infinite );
    inline  void setVisible    ( bool visible );
@@ -460,12 +469,6 @@ protected:
    //**********************************************************************************************
 private:
    id_t typeID_; //< identify geometry type
-   //**Member variables****************************************************************************
-   /*!\name Member variables */
-   //@{
-   Bodies superBodies_;   //!< All superordinate bodies containing this rigid body.
-   //@}
-   //**********************************************************************************************
 };
 
 //=================================================================================================
@@ -1264,11 +1267,8 @@ inline id_t     RigidBody::getTypeID() const{
  */
 inline void RigidBody::setRelLinearVel( real_t vx, real_t vy, real_t vz )
 {
-#if MOBILE_INFINITE
-   if( !hasSuperBody() ) {
-#else
-   if( !hasSuperBody() ) {
-#endif
+   if( !hasSuperBody() )
+   {
       v_ = R_ * Vec3( vx, vy, vz );
       wake();
    }
@@ -1302,11 +1302,8 @@ inline void RigidBody::setRelLinearVel( const Vec3& lvel )
  */
 inline void RigidBody::setLinearVel( real_t vx, real_t vy, real_t vz )
 {
-#if MOBILE_INFINITE
-   if( !hasSuperBody() ) {
-#else
-   if( !hasSuperBody() ) {
-#endif
+   if( !hasSuperBody() )
+   {
       v_ = Vec3( vx, vy, vz );
       wake();
    }
@@ -1343,11 +1340,8 @@ inline void RigidBody::setLinearVel( const Vec3& lvel )
  */
 inline void RigidBody::setRelAngularVel( real_t ax, real_t ay, real_t az )
 {
-#if MOBILE_INFINITE
-   if( !hasSuperBody() ) {
-#else
-   if( !hasSuperBody() ) {
-#endif
+   if( !hasSuperBody() )
+   {
       w_ = R_ * Vec3( ax, ay, az );
       wake();
    }
@@ -1382,11 +1376,8 @@ inline void RigidBody::setRelAngularVel( const Vec3& avel )
  */
 inline void RigidBody::setAngularVel( real_t ax, real_t ay, real_t az )
 {
-#if MOBILE_INFINITE
-   if( !hasSuperBody() ) {
-#else
-   if( !hasSuperBody() ) {
-#endif
+   if( !hasSuperBody() )
+   {
       w_ = Vec3( ax, ay, az );
       wake();
    }
@@ -1467,6 +1458,26 @@ inline const Vec3& RigidBody::getTorque() const
 }
 //*************************************************************************************************
 
+//*************************************************************************************************
+/*!\brief Sets the super body for the current body.
+ *
+ *  \attention Behaviour changed compared to setSuperBody of old PE!!!
+ */
+inline  void RigidBody::setSB  ( BodyID body )
+{
+   sb_ = body;
+}
+
+//*************************************************************************************************
+/*!\brief Resets the super body for the current body.
+ *
+ *  \attention Behaviour changed compared to setSuperBody of old PE!!!
+ */
+inline  void RigidBody::resetSB()
+{
+   sb_ = this;
+}
+
 
 //*************************************************************************************************
 /*!\brief Set the force acting at the body's center of mass.
@@ -1479,11 +1490,7 @@ inline void RigidBody::setForce( const Vec3& f )
    // Increasing the force on this rigid body
    force_ = f;
 
-   if( superBodies_.isEmpty() ) {
-      // Waking this rigid body
-      WALBERLA_ASSERT( !hasSuperBody(), "Invalid superbody detected" );
-      wake();
-   }
+   wake();
 }
 //*************************************************************************************************
 
@@ -1499,11 +1506,7 @@ inline void RigidBody::setTorque( const Vec3& tau )
    // Increasing the force on this rigid body
    torque_ = tau;
 
-   if( superBodies_.isEmpty() ) {
-      // Waking this rigid body
-      WALBERLA_ASSERT( !hasSuperBody(), "Invalid superbody detected" );
-      wake();
-   }
+   wake();
 }
 //*************************************************************************************************
 
@@ -1583,20 +1586,14 @@ inline void RigidBody::addForce( real_t fx, real_t fy, real_t fz )
  */
 inline void RigidBody::addForce( const Vec3& f )
 {
-   // Increasing the force on this rigid body
-   force_ += f;
-
-   // Increasing the force and torque on the superordinate bodies
-   if( !superBodies_.isEmpty() ) {
-      for( Bodies::Iterator it=superBodies_.begin(); it!=superBodies_.end(); ++it ) {
-         it->addForceAtPos( f, gpos_ );
-      }
-   }
-
-   // Waking this rigid body
-   else {
-      WALBERLA_ASSERT( !hasSuperBody(), "Invalid superbody detected" );
+   if (sb_ == this)
+   {
+      // Increasing the force on this rigid body
+      force_ += f;
       wake();
+   } else
+   {
+      sb_->addForceAtPos( f, gpos_ );
    }
 }
 //*************************************************************************************************
@@ -1767,20 +1764,15 @@ inline void RigidBody::addForceAtPos( real_t fx, real_t fy, real_t fz, real_t px
  */
 inline void RigidBody::addForceAtPos( const Vec3& f, const Vec3& gpos )
 {
-   // Increasing the force and torque on this rigid body
-   force_  += f;
-   torque_ += ( gpos - gpos_ ) % f;
-
-   // Increasing the force and torque on the superordinate bodies
-   if( !superBodies_.isEmpty() ) {
-      for( Bodies::Iterator it=superBodies_.begin(); it!=superBodies_.end(); ++it ) {
-         it->addForceAtPos( f, gpos );
-      }
-   }
-
-   // Waking this rigid body
-   else {
+   if (sb_ == this)
+   {
+      // Increasing the force and torque on this rigid body
+      force_  += f;
+      torque_ += ( gpos - gpos_ ) % f;
       wake();
+   } else
+   {
+      sb_->addForceAtPos( f, gpos );
    }
 }
 //*************************************************************************************************
@@ -3546,7 +3538,7 @@ inline void RigidBody::deregisterAttachable( AttachableID attachable )
  */
 inline void RigidBody::handleModification()
 {
-   WALBERLA_ASSERT( false, "Invalid call of default handle function" );
+   WALBERLA_ABORT( "Invalid call of default handle function" );
 }
 //*************************************************************************************************
 
@@ -3563,7 +3555,7 @@ inline void RigidBody::handleModification()
  */
 inline void RigidBody::handleTranslation()
 {
-   WALBERLA_ASSERT( false, "Invalid call of default handle function" );
+   WALBERLA_ABORT( "Invalid call of default handle function" );
 }
 //*************************************************************************************************
 
@@ -3580,7 +3572,7 @@ inline void RigidBody::handleTranslation()
  */
 inline void RigidBody::handleRotation()
 {
-   WALBERLA_ASSERT( false, "Invalid call of default handle function" );
+   WALBERLA_ABORT( "Invalid call of default handle function" );
 }
 //*************************************************************************************************
 
@@ -3597,7 +3589,7 @@ inline void RigidBody::handleRotation()
  */
 inline void RigidBody::handleFixation()
 {
-   WALBERLA_ASSERT( false, "Invalid call of default handle function" );
+   WALBERLA_ABORT( "Invalid call of default handle function" );
 }
 //*************************************************************************************************
 

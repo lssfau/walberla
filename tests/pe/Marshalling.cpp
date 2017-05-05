@@ -24,6 +24,8 @@
 #include "pe/rigidbody/Box.h"
 #include "pe/rigidbody/Capsule.h"
 #include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/UnionFactory.h"
+#include "pe/rigidbody/Union.h"
 #include "pe/communication/DynamicMarshalling.h"
 #include "pe/rigidbody/SetBodyTypeIDs.h"
 #include "pe/Materials.h"
@@ -34,13 +36,17 @@ using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::pe::communication;
 
-typedef boost::tuple<Box, Capsule, Sphere> BodyTuple ;
+typedef boost::tuple<Sphere>       UnionTypeTuple;
+typedef Union< UnionTypeTuple >    UnionT;
+typedef UnionT*                    UnionID;
+
+typedef boost::tuple<Box, Capsule, Sphere, UnionT> BodyTuple ;
 
 void testBox()
 {
    MaterialID iron = Material::find("iron");
 
-   Box b1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), Vec3(1,2,3), iron, false, false, false);
+   Box b1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), Vec3(1,2,3), iron, false, true, false);
    b1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
    b1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
 
@@ -103,6 +109,44 @@ void testSphere()
    WALBERLA_CHECK_EQUAL(s1.getSystemID(), s2->getSystemID());
 }
 
+void testUnion()
+{
+   UnionT u1(159, 423, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), false, false, false);
+   SphereID s11 = createSphere< UnionTypeTuple >(&u1, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), 2);
+   SphereID s21 = createSphere< UnionTypeTuple >(&u1, 4567789, Vec3(real_c(3), real_c(2), real_c(3)), real_c(1.5));
+   WALBERLA_CHECK_NOT_NULLPTR( s11 );
+   WALBERLA_CHECK_NOT_NULLPTR( s21 );
+
+   mpi::SendBuffer sb;
+   MarshalDynamically<BodyTuple>::execute(sb, u1);
+   mpi::RecvBuffer rb(sb);
+
+   UnionID u2 = static_cast<UnionID> (UnmarshalDynamically<BodyTuple>::execute(rb, UnionT::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+   WALBERLA_CHECK_NOT_NULLPTR( u2 );
+
+   WALBERLA_CHECK_EQUAL(u1.size(), 2);
+   WALBERLA_CHECK_EQUAL(u1.size(), u2->size());
+
+   //getting spheres of second union
+   SphereID s12 = static_cast<SphereID> (*(u2->begin()));
+   SphereID s22 = static_cast<SphereID> (*(++(u2->begin())));
+   WALBERLA_CHECK_UNEQUAL( s12, s22 );
+
+   WALBERLA_CHECK_FLOAT_EQUAL( s11->getPosition(),    s12->getPosition());
+   WALBERLA_CHECK_FLOAT_EQUAL( s11->getLinearVel(),   s12->getLinearVel());
+   WALBERLA_CHECK_FLOAT_EQUAL( s11->getAngularVel(),  s12->getAngularVel());
+   WALBERLA_CHECK_FLOAT_EQUAL( s11->getRadius(),      s12->getRadius());
+   WALBERLA_CHECK_EQUAL(       s11->getID(),          s12->getID());
+   WALBERLA_CHECK_EQUAL(       s11->getSystemID(),    s12->getSystemID());
+
+   WALBERLA_CHECK_FLOAT_EQUAL( s21->getPosition(),    s22->getPosition());
+   WALBERLA_CHECK_FLOAT_EQUAL( s21->getLinearVel(),   s22->getLinearVel());
+   WALBERLA_CHECK_FLOAT_EQUAL( s21->getAngularVel(),  s22->getAngularVel());
+   WALBERLA_CHECK_FLOAT_EQUAL( s21->getRadius(),      s22->getRadius());
+   WALBERLA_CHECK_EQUAL(       s21->getID(),          s22->getID());
+   WALBERLA_CHECK_EQUAL(       s21->getSystemID(),    s22->getSystemID());
+}
+
 int main( int argc, char** argv )
 {
    walberla::debug::enterTestMode();
@@ -114,6 +158,7 @@ int main( int argc, char** argv )
    testSphere();
    testBox();
    testCapsule();
+   testUnion();
 
    return EXIT_SUCCESS;
 }

@@ -27,6 +27,7 @@
 #include "pe/rigidbody/Capsule.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Union.h"
 
 namespace walberla {
 namespace pe {
@@ -102,7 +103,7 @@ int main( int argc, char** argv )
    WALBERLA_CHECK_UNEQUAL(A::getStaticTypeID(), C::getStaticTypeID());
    WALBERLA_CHECK_UNEQUAL(B::getStaticTypeID(), C::getStaticTypeID());
 
-   typedef boost::tuple<Plane, Sphere, Box, Capsule> BodyTuple2 ;
+   typedef boost::tuple<Plane, Sphere, Box, Capsule, Union< boost::tuple<Sphere, Box> > > BodyTuple2 ;
    SetBodyTypeIDs<BodyTuple2>::execute();
    WALBERLA_CHECK_UNEQUAL(Plane::getStaticTypeID(), Sphere::getStaticTypeID());
    WALBERLA_CHECK_UNEQUAL(Plane::getStaticTypeID(), Box::getStaticTypeID());
