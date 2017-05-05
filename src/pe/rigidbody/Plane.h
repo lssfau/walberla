@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Plane.h
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -42,8 +41,9 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Plane geometry.
- * \ingroup rigidbody
+/**
+ * \ingroup pe
+ * \brief Plane geometry.
  *
  * The Plane class represents the geometric primitive plane, which is one of the basic geometric
  * primitives of the pe module. The class is derived from the GeomPrimitive base

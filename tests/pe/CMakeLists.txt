@@ -26,6 +26,9 @@ waLBerla_execute_test( NAME   PE_DELETEBODY_SO COMMAND $<TARGET_FILE:PE_DELETEBO
 waLBerla_compile_test( NAME   PE_DESTROYBODY FILES DestroyBody.cpp DEPENDS core blockforest  )
 waLBerla_execute_test( NAME   PE_DESTROYBODY )
 
+waLBerla_compile_test( NAME   PE_DOCUMENTATIONSNIPPETS FILES PeDocumentationSnippets.cpp DEPENDS core  )
+waLBerla_execute_test( NAME   PE_DOCUMENTATIONSNIPPETS )
+
 waLBerla_compile_test( NAME   PE_FORCESYNC FILES ForceSync.cpp DEPENDS core blockforest  )
 waLBerla_execute_test( NAME   PE_FORCESYNC )
 

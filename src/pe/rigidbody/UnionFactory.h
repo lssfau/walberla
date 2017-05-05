@@ -39,14 +39,16 @@ namespace pe {
 
 //=================================================================================================
 //
-//  BOX SETUP FUNCTIONS
+//  UNION SETUP FUNCTIONS
 //
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Setup of a new Union.
- * \ingroup rigidbody
+/**
+ * \ingroup pe
+ * \brief Setup of a new Union.
  *
+ * \tparam BodyTypeTuple boost::tuple of all geometries the Union should be able to contain
  * \param globalStorage process local global storage
  * \param blocks storage of all the blocks on this process
  * \param storageID BlockDataID of the BlockStorage block datum
@@ -56,15 +58,20 @@ namespace pe {
  * \param communicating specifies if the union should take part in synchronization (syncNextNeighbour, syncShadowOwner)
  * \param infiniteMass specifies if the union has infinite mass and will be treated as an obstacle
  * \return Handle for the new union.
- * \exception std::invalid_argument Invalid box radius.
- * \exception std::invalid_argument Invalid global box position.
+ * \exception std::runtime_error Union TypeID not initalized!
+ *
+ * The code example illustrates the setup of a Union. For convenience the following typedefs were made.
+ * You can adapt them to your needs.
+ * \snippet PeDocumentationSnippets.cpp Definition of Union Types
+ * \snippet PeDocumentationSnippets.cpp Create a Union
  */
 template <typename BodyTypeTuple>
 Union<BodyTypeTuple>* createUnion(   BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID storageID,
                                      id_t uid, const Vec3& gpos,
                                      bool global = false, bool communicating = true, bool infiniteMass = false )
 {
-   WALBERLA_ASSERT_UNEQUAL( Union<BodyTypeTuple>::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Union TypeID not initalized!");
+   if (Union<BodyTypeTuple>::getStaticTypeID() == std::numeric_limits<id_t>::max())
+      throw std::runtime_error("Union TypeID not initalized!");
 
    Union<BodyTypeTuple>* bd = NULL;
 
@@ -103,22 +110,34 @@ Union<BodyTypeTuple>* createUnion(   BodyStorage& globalStorage, BlockStorage& b
    return bd;
 }
 
+//*************************************************************************************************
+/**
+ * \ingroup pe
+ * \brief Setup of a new Box directly attached to a Union.
+ *
+ * \tparam BodyTypeTuple boost::tuple of all geometries the Union is able to contain
+ * \exception std::runtime_error    Box TypeID not initalized!
+ * \exception std::invalid_argument createBox: Union argument is NULL
+ * \exception std::logic_error      createBox: Union is remote
+ * \exception std::invalid_argument Invalid side length
+ * \see createBox for more details
+ */
 template <typename BodyTypeTuple>
 BoxID createBox( Union<BodyTypeTuple>* un,
                  id_t uid, const Vec3& gpos, const Vec3& lengths,
-                 MaterialID material,
-                 bool global, bool communicating, bool infiniteMass )
+                 MaterialID material = Material::find("iron"),
+                 bool global = false, bool communicating = true, bool infiniteMass = false )
 {
    if (Box::getStaticTypeID() == std::numeric_limits<id_t>::max())
       throw std::runtime_error("Box TypeID not initalized!");
 
    // union not on this process/block -> terminate creation
    if (un == NULL)
-      throw std::invalid_argument( "createSphere: Union argument is NULL" );
+      throw std::invalid_argument( "createBox: Union argument is NULL" );
 
    // main union not on this process/block -> terminate creation
    if ( un->isRemote() )
-      throw std::logic_error( "createSphere: Union is remote" );
+      throw std::logic_error( "createBox: Union is remote" );
 
    // Checking the side lengths
    if( lengths[0] <= real_t(0) || lengths[1] <= real_t(0) || lengths[2] <= real_t(0) )
@@ -157,22 +176,36 @@ BoxID createBox( Union<BodyTypeTuple>* un,
    return box;
 }
 
+//*************************************************************************************************
+/**
+ * \ingroup pe
+ * \brief Setup of a new Capsule directly attached to a Union.
+ *
+ * \tparam BodyTypeTuple boost::tuple of all geometries the Union is able to contain
+ * \exception std::runtime_error    Capsule TypeID not initalized!
+ * \exception std::invalid_argument createCapsule: Union argument is NULL
+ * \exception std::logic_error      createCapsule: Union is remote
+ * \exception std::invalid_argument Invalid capsule radius
+ * \exception std::invalid_argument Invalid capsule length
+ *
+ * \see createCapsule for more details
+ */
 template <typename BodyTypeTuple>
 CapsuleID createCapsule( Union<BodyTypeTuple>* un,
                          id_t uid, const Vec3& gpos, const real_t radius, const real_t length,
-                         MaterialID material,
-                         bool global, bool communicating, bool infiniteMass )
+                         MaterialID material = Material::find("iron"),
+                         bool global = false, bool communicating = true, bool infiniteMass = false )
 {
    if (Capsule::getStaticTypeID() == std::numeric_limits<id_t>::max())
       throw std::runtime_error("Capsule TypeID not initalized!");
 
    // union not on this process/block -> terminate creation
    if (un == NULL)
-      throw std::invalid_argument( "createSphere: Union argument is NULL" );
+      throw std::invalid_argument( "createCapsule: Union argument is NULL" );
 
    // main union not on this process/block -> terminate creation
    if ( un->isRemote() )
-      throw std::logic_error( "createSphere: Union is remote" );
+      throw std::logic_error( "createCapsule: Union is remote" );
 
    // Checking the radius
    if( radius <= real_c(0) )
@@ -207,6 +240,19 @@ CapsuleID createCapsule( Union<BodyTypeTuple>* un,
    return capsule;
 }
 
+//*************************************************************************************************
+/**
+ * \ingroup pe
+ * \brief Setup of a new Sphere directly attached to a Union.
+ *
+ * \tparam BodyTypeTuple boost::tuple of all geometries the Union is able to contain
+ * \exception std::runtime_error    Sphere TypeID not initalized!
+ * \exception std::invalid_argument createSphere: Union argument is NULL
+ * \exception std::logic_error      createSphere: Union is remote
+ * \exception std::invalid_argument Invalid sphere radius
+ *
+ * \see createSphere for more details
+ */
 template <typename BodyTypeTuple>
 SphereID createSphere( Union<BodyTypeTuple>* un,
                        id_t uid, const Vec3& gpos, real_t radius,

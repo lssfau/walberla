@@ -68,11 +68,7 @@ template< typename Type >       class Vector3;
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\defgroup quaternion Quaternion
- * \ingroup math
- */
 /*!\brief Efficient implementation of a quaternion.
- * \ingroup quaternion
  *
  * Quaternions are a superior way to deal with rotations and orientations. This quaternion
  * consists of 4 statically allocated elements, where the first element represents the real

@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file RigidBody.cpp
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -193,7 +192,6 @@ bool RigidBody::checkInvariants()
 
 //*************************************************************************************************
 /*!\brief Global output operator for rigid bodies.
- * \ingroup rigid_body
  *
  * \param os Reference to the output stream.
  * \param b Reference to a constant rigid body object.
@@ -213,7 +211,6 @@ std::ostream& operator<<( std::ostream& os, const RigidBody& b )
 
 //*************************************************************************************************
 /*!\brief Global output operator for rigid body handles.
- * \ingroup rigid_body
  *
  * \param os Reference to the output stream.
  * \param b Constant rigid body handle.

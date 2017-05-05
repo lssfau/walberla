@@ -50,11 +50,7 @@ namespace math {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\defgroup dense_matrix_MxN MatrixMxN
- * \ingroup core
- */
 /*!\brief Efficient implementation of a \f$ M \times N \f$ matrix.
- * \ingroup core
  *
  * The MatrixMxN class is the representation of a dynamic \f$ M \times N \f$ matrix with a total
  * of \f$ M \cdot N \f$ dynamically allocated elements. These elements can be directly accessed

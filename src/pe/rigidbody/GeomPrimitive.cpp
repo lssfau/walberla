@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file GeomPrimitive.cpp
-//! \ingroup pe
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Source file for the GeomPrimitive class

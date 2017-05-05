@@ -38,8 +38,9 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Setup of a new Capsule.
- * \ingroup rigidbody
+/**
+ * \ingroup pe
+ * \brief Setup of a new Capsule.
  *
  * \param globalStorage process local global storage
  * \param blocks storage of all the blocks on this process
@@ -54,6 +55,10 @@ namespace pe {
  * \param communicating specifies if the capsule should take part in synchronization (syncNextNeighbour, syncShadowOwner)
  * \param infiniteMass specifies if the capsule has infinite mass and will be treated as an obstacle
  * \return Handle for the new capsule.
+ *
+ * The following code example illustrates the setup of a capsule:
+
+   \snippet PeDocumentationSnippets.cpp Create a Capsule
  */
 CapsuleID createCapsule(   BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID storageID,
                            id_t uid, const Vec3& gpos, const real_t radius, const real_t length,

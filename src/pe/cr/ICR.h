@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file ICR.h
-//! \ingroup CollisionResponse
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================

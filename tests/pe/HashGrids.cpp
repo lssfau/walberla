@@ -15,7 +15,6 @@
 //
 //! \file HashGrids.cpp
 //! \brief checks equality of hash grids and simple ccd
-//! \ingroup pe_tests
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================

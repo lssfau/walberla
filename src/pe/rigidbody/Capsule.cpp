@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Capsule.cpp
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -270,7 +269,6 @@ void Capsule::print( std::ostream& os, const char* tab ) const
 
 //*************************************************************************************************
 /*!\brief Global output operator for capsules.
- * \ingroup capsule
  *
  * \param os Reference to the output stream.
  * \param c Reference to a constant capsule object.
@@ -290,7 +288,6 @@ std::ostream& operator<<( std::ostream& os, const Capsule& c )
 
 //*************************************************************************************************
 /*!\brief Global output operator for capsule handles.
- * \ingroup capsule
  *
  * \param os Reference to the output stream.
  * \param c Constant capsule handle.

@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file SimpleFCDDataHandling.h
-//! \ingroup FineCollisionDetection
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================

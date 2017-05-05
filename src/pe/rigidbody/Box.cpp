@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Box.cpp
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -345,7 +344,6 @@ void Box::calcInertia()
 
 //*************************************************************************************************
 /*!\brief Global output operator for boxes.
- * \ingroup box
  *
  * \param os Reference to the output stream.
  * \param b Reference to a constant box object.
@@ -365,7 +363,6 @@ std::ostream& operator<<( std::ostream& os, const Box& b )
 
 //*************************************************************************************************
 /*!\brief Global output operator for box handles.
- * \ingroup box
  *
  * \param os Reference to the output stream.
  * \param b Constant box handle.

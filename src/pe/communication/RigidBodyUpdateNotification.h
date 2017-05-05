@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file RigidBodyUpdateNotification.h
-//! \ingroup pe
 //! \author Tobias Preclik
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the RigidBodyUpdateNotification class
@@ -44,7 +43,6 @@ namespace communication {
 
 //*************************************************************************************************
 /*!\brief Wrapper class for rigid body updates.
- * \ingroup rigid_body
  *
  * The RigidBodyUpdateNotification class is a wrapper class for marshalling and unmarshalling rigid
  * body updates. The class template should be the

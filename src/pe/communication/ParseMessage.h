@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file ParseMessage.h
-//! \ingroup pe
 //! \author Tobias Preclik
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Parsing of messages

@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file RigidBodyVelocityCorrectionNotification.h
-//! \ingroup pe
 //! \author Tobias Preclik
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the RigidBodyVelocityCorrectionNotification class
@@ -42,7 +41,6 @@ namespace communication {
 
 //*************************************************************************************************
 /*!\brief Wrapper class for rigid body velocity corrections.
- * \ingroup rigid_body
  *
  * The RigidBodyVelocityCorrectionNotification class is a wrapper class for marshalling and unmarshalling rigid body
  * velocity correction. It includes the system ID of the body the correction applies to and the linear and angular

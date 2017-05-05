@@ -34,6 +34,11 @@ all the basic data strcutures and concepts of the framework.
 - \ref tutorial_lbm01 \n
   A full LBM simulation is built.
 
+\section TechDetails Technical Details
+
+- \ref TechDetailsPe \n
+  Technical Details about the pe physics module.
+   
 \section cite Please cite us
 
 If you use waLBerla in the preparation of a publication, please cite
@@ -43,7 +48,7 @@ which you should cite in addition if you use them.
 - Grid refinement: \cite schornbaum2016massively
 - PE coupling: \cite rettinger2016simulations, \cite rettinger2017comparative
 - Python interface: \cite bauer2015python
-   
+
 \htmlonly
 <!--
 <div>

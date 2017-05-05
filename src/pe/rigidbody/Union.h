@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Union.h
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -53,8 +52,9 @@ namespace pe {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Base class for the sphere geometry.
- * \ingroup sphere
+/**
+ * \ingroup pe
+ * \brief Base class for the sphere geometry.
  *
  * The Sphere class represents the base class for the sphere geometry. It provides
  * the basic functionality of a sphere. For a full description of the sphere geometry,
@@ -1094,7 +1094,6 @@ void Union<BodyTypeTuple>::print( std::ostream& os, const char* tab ) const
 
 //*************************************************************************************************
 /*!\brief Global output operator for unions.
- * \ingroup union
  *
  * \param os Reference to the output stream.
  * \param u Reference to a constant union object.
@@ -1115,7 +1114,6 @@ std::ostream& operator<<( std::ostream& os, const Union<BodyTypeTuple>& u )
 
 //*************************************************************************************************
 /*!\brief Global output operator for union handles.
- * \ingroup union
  *
  * \param os Reference to the output stream.
  * \param u Constant union handle.

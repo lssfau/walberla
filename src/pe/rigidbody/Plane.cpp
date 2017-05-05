@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Plane.cpp
-//! \ingroup RigidBody
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -566,7 +565,6 @@ void Plane::print( std::ostream& os, const char* tab ) const
 
 //*************************************************************************************************
 /*!\brief Global output operator for planes.
- * \ingroup plane
  *
  * \param os Reference to the output stream.
  * \param p Reference to a constant plane object.
@@ -586,7 +584,6 @@ std::ostream& operator<<( std::ostream& os, const Plane& p )
 
 //*************************************************************************************************
 /*!\brief Global output operator for plane handles.
- * \ingroup plane
  *
  * \param os Reference to the output stream.
  * \param p Constant plane handle.

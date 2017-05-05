@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file RigidBodyVelocityUpdateNotification.h
-//! \ingroup pe
 //! \author Tobias Preclik
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for the RigidBodyVelocityUpdateNotification class
@@ -42,7 +41,6 @@ namespace communication {
 
 //*************************************************************************************************
 /*!\brief Wrapper class for rigid body velocity updates.
- * \ingroup rigid_body
  *
  * The RigidBodyVelocityUpdateNotification class is a wrapper class for marshalling and unmarshalling rigid body
  * velocity updates. It includes linear and angular velocities.
