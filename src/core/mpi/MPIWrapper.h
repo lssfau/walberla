@@ -264,7 +264,7 @@ inline double MPI_Wtime() { WALBERLA_MPI_FUNCTION_ERROR }
 #undef WALBERLA_MPI_FUNCTION_ERROR
 
 } // namespace mpistubs
-using namesapce mpistubs
+using namespace mpistubs
 
 } // namespace walberla
 
