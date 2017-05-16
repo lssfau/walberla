@@ -45,7 +45,11 @@
 
 #endif
 
-
+namespace walberla {
+namespace mpistubs {
+    //empty namespace which can be used
+} // namespace mpistubs
+} // namespace walberla
 
 #ifdef WALBERLA_BUILD_WITH_MPI
 
