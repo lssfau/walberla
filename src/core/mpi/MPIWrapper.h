@@ -55,7 +55,9 @@
 #pragma warning ( push, 1 )
 #endif
 
+namespace walberla {
 #include <mpi.h>
+}
 
 #ifdef _MSC_VER
 #pragma warning ( pop )
