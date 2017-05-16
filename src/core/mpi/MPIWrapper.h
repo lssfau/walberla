@@ -55,9 +55,7 @@
 #pragma warning ( push, 1 )
 #endif
 
-namespace walberla {
 #include <mpi.h>
-}
 
 #ifdef _MSC_VER
 #pragma warning ( pop )
@@ -75,6 +73,7 @@ namespace walberla {
 
 namespace walberla {
 
+namespace mpistubs {
 
 
 typedef int MPI_Comm;
@@ -259,6 +258,9 @@ inline int MPI_Error_string ( int, char*, int* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline double MPI_Wtime() { WALBERLA_MPI_FUNCTION_ERROR }
 
 #undef WALBERLA_MPI_FUNCTION_ERROR
+
+} // namespace mpistubs
+using namesapce mpistubs
 
 } // namespace walberla
 
