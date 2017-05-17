@@ -45,7 +45,11 @@
 
 #endif
 
-
+namespace walberla {
+namespace mpistubs {
+    //empty namespace which can be used
+} // namespace mpistubs
+} // namespace walberla
 
 #ifdef WALBERLA_BUILD_WITH_MPI
 
@@ -73,6 +77,7 @@
 
 namespace walberla {
 
+namespace mpistubs {
 
 
 typedef int MPI_Comm;
@@ -257,6 +262,9 @@ inline int MPI_Error_string ( int, char*, int* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline double MPI_Wtime() { WALBERLA_MPI_FUNCTION_ERROR }
 
 #undef WALBERLA_MPI_FUNCTION_ERROR
+
+} // namespace mpistubs
+using namespace mpistubs;
 
 } // namespace walberla
 
