@@ -102,6 +102,8 @@ inline HardContactSemiImplicitTimesteppingSolvers::HardContactSemiImplicitTimest
    , maximumPenetration_ ( real_c(0.0) )
    , numContacts_      ( 0 )
    , numContactsTreated_( 0)
+   , speedLimiterActive_( false )
+   , speedLimitFactor_ ( real_c(1.0) )
    , requireSync_      ( false )
 {
    // Logging the successful setup of the collision system
@@ -364,17 +366,17 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
             delta_max = relaxApproximateInelasticCoulombContactsByDecoupling( dtinv, contactCache, bodyCache );
             break;
 
-//         case ApproximateInelasticCoulombContactByOrthogonalProjections:
-//            delta_max = relaxInelasticCoulombContactsByOrthogonalProjections( dtinv, true, contactCache, bodyCache );
-//            break;
+            //         case ApproximateInelasticCoulombContactByOrthogonalProjections:
+            //            delta_max = relaxInelasticCoulombContactsByOrthogonalProjections( dtinv, true, contactCache, bodyCache );
+            //            break;
 
          case InelasticCoulombContactByDecoupling:
             delta_max = relaxInelasticCoulombContactsByDecoupling( dtinv, contactCache, bodyCache );
             break;
 
-//         case InelasticCoulombContactByOrthogonalProjections:
-//            delta_max = relaxInelasticCoulombContactsByOrthogonalProjections( dtinv, false, contactCache, bodyCache );
-//            break;
+            //         case InelasticCoulombContactByOrthogonalProjections:
+            //            delta_max = relaxInelasticCoulombContactsByOrthogonalProjections( dtinv, false, contactCache, bodyCache );
+            //            break;
 
          case InelasticGeneralizedMaximumDissipationContact:
             delta_max = relaxInelasticGeneralizedMaximumDissipationContacts( dtinv, contactCache, bodyCache );
@@ -455,10 +457,10 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
       BodyStorage& shadowStorage = (*storage)[1];
 
       for( auto body = ConcatIterator<BodyStorage::Iterator>
-                                     (localStorage.begin(),
-                                      localStorage.end(),
-                                      shadowStorage.begin(),
-                                      shadowStorage.end()); body != ConcatIterator<BodyStorage::Iterator>(); ++body )
+           (localStorage.begin(),
+            localStorage.end(),
+            shadowStorage.begin(),
+            shadowStorage.end()); body != ConcatIterator<BodyStorage::Iterator>(); ++body )
       {
          if (!body->isCommunicating())
          {
@@ -1665,7 +1667,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
    if (tt_ != NULL) tt_->stop("Velocity Sync Update Processing");
 
    if (tt_ != NULL) tt_->start("Velocity Sync Globals");
-/*
+   /*
    {
       size_t i;
       std::vector<real_t> reductionBuffer( globalBodyStorage_->size() * 6, real_c(0) );
@@ -1775,6 +1777,17 @@ inline void HardContactSemiImplicitTimesteppingSolvers::integratePositions( Body
 
    if( body->isAwake() )
    {
+      if ( isSpeedLimiterActive() )
+      {
+         const auto speed = v.length();
+         const auto aabb  = body->getAABB();
+         const auto edge  = std::min(aabb.xSize(), std::min(aabb.ySize(), aabb.zSize()));
+         if (speed * dt > edge * getSpeedLimitFactor() )
+         {
+            v = v * (edge * getSpeedLimitFactor() / dt / speed );
+         }
+      }
+
       // Calculating the translational displacement
       body->setPosition( body->getPosition() + v * dt );
 
@@ -1821,19 +1834,19 @@ void configure( const Config::BlockHandle& config, pe::cr::HCSITS& cr )
    cr::HCSITS::RelaxationModel HCSITSRelaxationModel;
    if (HCSITSRelaxationModelStr == "InelasticFrictionlessContact")
    {
-       HCSITSRelaxationModel = cr::HCSITS::InelasticFrictionlessContact;
+      HCSITSRelaxationModel = cr::HCSITS::InelasticFrictionlessContact;
    } else if (HCSITSRelaxationModelStr == "ApproximateInelasticCoulombContactByDecoupling")
    {
-       HCSITSRelaxationModel = cr::HCSITS::ApproximateInelasticCoulombContactByDecoupling;
+      HCSITSRelaxationModel = cr::HCSITS::ApproximateInelasticCoulombContactByDecoupling;
    } else if (HCSITSRelaxationModelStr == "InelasticCoulombContactByDecoupling")
    {
-       HCSITSRelaxationModel = cr::HCSITS::InelasticCoulombContactByDecoupling;
+      HCSITSRelaxationModel = cr::HCSITS::InelasticCoulombContactByDecoupling;
    } else if (HCSITSRelaxationModelStr == "InelasticGeneralizedMaximumDissipationContact")
    {
-       HCSITSRelaxationModel = cr::HCSITS::InelasticGeneralizedMaximumDissipationContact;
+      HCSITSRelaxationModel = cr::HCSITS::InelasticGeneralizedMaximumDissipationContact;
    } else
    {
-       WALBERLA_ABORT("Unknown HCSITSRelaxationModel: " << HCSITSRelaxationModelStr);
+      WALBERLA_ABORT("Unknown HCSITSRelaxationModel: " << HCSITSRelaxationModelStr);
    }
 
    Vec3 globalLinearAcceleration = config.getParameter<Vec3>("globalLinearAcceleration", Vec3(0, 0, 0));

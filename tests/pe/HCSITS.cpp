@@ -77,6 +77,25 @@ void normalReactionTest(cr::HCSITS& cr, SphereID sp)
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0) );
 }
 
+void speedLimiterTest(cr::HCSITS& cr, SphereID sp)
+{
+   cr.setErrorReductionParameter( real_t(1.0) );
+
+   sp->setPosition(  Vec3(5,5,6) );
+   sp->setLinearVel( Vec3(0,0,0) );
+   cr.setSpeedLimiter( true, real_t(0.2) );
+   cr.timestep( real_c( real_t(1.0) ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.1)) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(0.1)) );
+
+   sp->setPosition(  Vec3(5,5,5.5) );
+   sp->setLinearVel( Vec3(0,0,0) );
+   cr.setSpeedLimiter( true, real_t(0.2) );
+   cr.timestep( real_c( real_t(1.0) ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(5.94)) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(0.44)) );
+}
+
 int main( int argc, char** argv )
 {
    walberla::debug::enterTestMode();
@@ -134,6 +153,10 @@ int main( int argc, char** argv )
    WALBERLA_LOG_PROGRESS( "Normal Reaction Test: InelasticGeneralizedMaximumDissipationContact");
    cr.setRelaxationModel( cr::HardContactSemiImplicitTimesteppingSolvers::InelasticGeneralizedMaximumDissipationContact );
    normalReactionTest(cr, sp);
+
+   WALBERLA_LOG_PROGRESS("SpeedLimiter Test: InelasticFrictionlessContact");
+   cr.setRelaxationModel( cr::HardContactSemiImplicitTimesteppingSolvers::InelasticFrictionlessContact );
+   speedLimiterTest(cr, sp);
 
    return EXIT_SUCCESS;
 }

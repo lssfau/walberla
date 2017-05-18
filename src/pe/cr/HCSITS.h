@@ -134,6 +134,7 @@ public:
    virtual inline size_t            getNumberOfContacts()          const WALBERLA_OVERRIDE;
    virtual inline size_t            getNumberOfContactsTreated()   const WALBERLA_OVERRIDE;
    inline const std::map<IBlockID::IDType, ContactCache> getContactCache() const { return blockToContactCache_; }
+   inline real_t                    getSpeedLimitFactor() const;
    //@}
    //**********************************************************************************************
 
@@ -145,6 +146,7 @@ public:
    inline void            setRelaxationModel( RelaxationModel relaxationModel );
    inline void            setErrorReductionParameter( real_t erp );
    inline void            setAbortThreshold( real_t threshold );
+   inline void            setSpeedLimiter( bool active, const real_t speedLimitFactor = real_t(0.0) );
    //@}
    //**********************************************************************************************
 
@@ -153,6 +155,7 @@ public:
    //@{
    inline bool            isSyncRequired()        const;
    inline bool            isSyncRequiredLocally() const;
+   inline bool            isSpeedLimiterActive() const;
    //@}
    //**********************************************************************************************
 
@@ -235,6 +238,9 @@ private:
    size_t numContacts_;
    size_t numContactsTreated_;
 
+   bool   speedLimiterActive_;        //!< is the speed limiter active?
+   real_t speedLimitFactor_;          //!< what multiple of boundingbox edge length is the body allowed to travel in one timestep
+
    //**********************************************************************************************
    /*! \cond WALBERLA_INTERNAL */
    /*!\brief Functor for comparing the system ID of two bodies.
@@ -298,6 +304,11 @@ inline size_t HardContactSemiImplicitTimesteppingSolvers::getNumberOfContacts() 
 inline size_t HardContactSemiImplicitTimesteppingSolvers::getNumberOfContactsTreated() const
 {
    return numContactsTreated_;
+}
+
+inline real_t HardContactSemiImplicitTimesteppingSolvers::getSpeedLimitFactor() const
+{
+   return speedLimitFactor_;
 }
 //*************************************************************************************************
 
@@ -393,6 +404,23 @@ inline void HardContactSemiImplicitTimesteppingSolvers::setAbortThreshold( real_
 
 
 
+//*************************************************************************************************
+/*!\brief Activates/Deactivates the speed limiter and sets the limit
+*
+* \param active activate/deactivate speed limtier
+* \param speedLimitFactor size of bounding box will be multiplied by this factor to get the maximal distance a body is allowed to travel within one timestep
+* \return void
+*/
+inline void HardContactSemiImplicitTimesteppingSolvers::setSpeedLimiter( bool active, const real_t speedLimitFactor )
+{
+   speedLimiterActive_ = active;
+   speedLimitFactor_   = speedLimitFactor;
+}
+//*************************************************************************************************
+
+
+
+
 //=================================================================================================
 //
 //  QUERY FUNCTIONS
@@ -452,6 +480,21 @@ inline bool HardContactSemiImplicitTimesteppingSolvers::isSyncRequiredLocally() 
    return requireSync_;
 }
 //*************************************************************************************************
+
+
+
+
+//*************************************************************************************************
+/*!\brief Returns if speed limiter is currently active and working.
+ *
+ * \return status of the speed limiter
+ */
+inline bool HardContactSemiImplicitTimesteppingSolvers::isSpeedLimiterActive() const
+{
+   return speedLimiterActive_;
+}
+//*************************************************************************************************
+
 
 } // namespace cr
 } // namespace pe
