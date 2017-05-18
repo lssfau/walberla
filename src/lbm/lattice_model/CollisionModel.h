@@ -270,6 +270,9 @@ public:
    real_t viscosity( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/ ) const { return viscosity_; }
 
    real_t omega() const { return lambda_e_; }
+   real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
+
    inline real_t omega_bulk() const { return omega(); }
 
    static real_t lambda_e( const real_t _omega ) { return _omega; }
@@ -477,6 +480,9 @@ public:
    real_t s_m()   const { return s_[16]; }
 
    real_t omega() const { return s_[9]; }
+   real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
+
    real_t omega_bulk() const { return s_[1]; }
 
    real_t viscosity() const { return viscosity_; }
@@ -637,6 +643,9 @@ public:
    real_t omega10() const { return omega_[9]; }
 
    real_t omega() const { return omega_[0]; }
+   real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
+                 const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
+
    real_t omega( uint_t idx ) const { return omega_[idx]; }
 
    inline real_t viscosity() const { return viscosity_; }
