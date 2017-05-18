@@ -32,6 +32,7 @@
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/Types.h"
 
+#include <core/config/Config.h>
 #include <core/DataTypes.h>
 #include <core/debug/Debug.h>
 #include <core/logging/Logging.h>
@@ -261,9 +262,6 @@ private:
 
 typedef HardContactSemiImplicitTimesteppingSolvers HCSITS;
 
-
-
-
 //=================================================================================================
 //
 //  GET FUNCTIONS
@@ -455,8 +453,16 @@ inline bool HardContactSemiImplicitTimesteppingSolvers::isSyncRequiredLocally() 
 }
 //*************************************************************************************************
 
-}
+} // namespace cr
 } // namespace pe
-}
+
+/**
+ * \brief configures HardContactSemiImplicitTimesteppingSolvers with parameters from config file
+ * \param config handle to config block
+ * \param cr collision resolution object to configure
+ */
+void configure( const Config::BlockHandle& config, pe::cr::HCSITS& cr);
+
+} // namespace walberla
 
 #include "HCSITS.impl.h"

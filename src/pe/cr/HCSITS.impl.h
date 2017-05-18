@@ -1798,8 +1798,53 @@ inline void HardContactSemiImplicitTimesteppingSolvers::integratePositions( Body
 }
 //*************************************************************************************************
 
-
 } // namespace cr
 } // namespace pe
+
+inline
+void configure( const Config::BlockHandle& config, pe::cr::HCSITS& cr )
+{
+   using namespace pe;
+
+   int HCSITSmaxIterations = config.getParameter<int>("HCSITSmaxIterations", 10);
+   WALBERLA_LOG_INFO_ON_ROOT("HCSITSmaxIterations: " << HCSITSmaxIterations);
+
+   real_t HCSITSRelaxationParameter = config.getParameter<real_t>("HCSITSRelaxationParameter", real_t(0.75) );
+   WALBERLA_LOG_INFO_ON_ROOT("HCSITSRelaxationParameter: " << HCSITSRelaxationParameter);
+
+   real_t HCSITSErrorReductionParameter = config.getParameter<real_t>("HCSITSErrorReductionParameter", real_t(0.8) );
+   WALBERLA_LOG_INFO_ON_ROOT("HCSITSErrorReductionParameter: " << HCSITSErrorReductionParameter);
+
+   std::string HCSITSRelaxationModelStr = config.getParameter<std::string>("HCSITSRelaxationModelStr", "ApproximateInelasticCoulombContactByDecoupling" );
+   WALBERLA_LOG_INFO_ON_ROOT("HCSITSRelaxationModelStr: " << HCSITSRelaxationModelStr);
+
+   cr::HCSITS::RelaxationModel HCSITSRelaxationModel;
+   if (HCSITSRelaxationModelStr == "InelasticFrictionlessContact")
+   {
+       HCSITSRelaxationModel = cr::HCSITS::InelasticFrictionlessContact;
+   } else if (HCSITSRelaxationModelStr == "ApproximateInelasticCoulombContactByDecoupling")
+   {
+       HCSITSRelaxationModel = cr::HCSITS::ApproximateInelasticCoulombContactByDecoupling;
+   } else if (HCSITSRelaxationModelStr == "InelasticCoulombContactByDecoupling")
+   {
+       HCSITSRelaxationModel = cr::HCSITS::InelasticCoulombContactByDecoupling;
+   } else if (HCSITSRelaxationModelStr == "InelasticGeneralizedMaximumDissipationContact")
+   {
+       HCSITSRelaxationModel = cr::HCSITS::InelasticGeneralizedMaximumDissipationContact;
+   } else
+   {
+       WALBERLA_ABORT("Unknown HCSITSRelaxationModel: " << HCSITSRelaxationModelStr);
+   }
+
+   Vec3 globalLinearAcceleration = config.getParameter<Vec3>("globalLinearAcceleration", Vec3(0, 0, 0));
+   WALBERLA_LOG_INFO_ON_ROOT("globalLinearAcceleration: " << globalLinearAcceleration);
+
+   cr.setMaxIterations( uint_c(HCSITSmaxIterations) );
+   cr.setRelaxationModel( HCSITSRelaxationModel );
+   cr.setRelaxationParameter( HCSITSRelaxationParameter );
+   cr.setErrorReductionParameter( HCSITSErrorReductionParameter );
+   cr.setGlobalLinearAcceleration( globalLinearAcceleration );
+}
+
 } // namespace walberla
 
