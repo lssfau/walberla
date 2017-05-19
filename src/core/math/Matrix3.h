@@ -26,6 +26,9 @@
 #include "FPClassify.h"
 #include "MathTrait.h"
 #include "Vector3.h"
+
+#include "core/debug/Debug.h"
+#include "core/mpi/Datatype.h"
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
@@ -1698,32 +1701,8 @@ Matrix3< typename MathTrait<T0,T1>::High > tensorProduct( Vector3<T0> v0, Vector
 }
 //**********************************************************************************************************************
 
-//======================================================================================================================
-//
-//  Send/Recv Buffer Serialization Specialization
-//
-//======================================================================================================================
 
-template< typename T,    // Element type of SendBuffer
-          typename G,    // Growth policy of SendBuffer
-          typename MT >  // Element type of matrix
-mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const Matrix3<MT> & m )
-{
-   for(unsigned int i=0; i<9; ++i)
-      buf << m[i];
 
-   return buf;
-}
-
-template< typename T,    // Element type  of RecvBuffer
-          typename MT >  // Element type of matrix
-mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Matrix3<MT> & m )
-{
-   for(unsigned int i=0; i<9; ++i)
-      buf >> m[i];
-
-   return buf;
-}
 
 } // namespace math
 
@@ -1733,28 +1712,7 @@ using math::Matrix3;
 
 //======================================================================================================================
 //
-//  Vector Trait Specialization
-//
-//======================================================================================================================
-
-namespace walberla {
-
-// Specialization of VectorTrait for Matrix3s
-template<typename T>
-struct VectorTrait< Matrix3<T> >
-{
-   typedef T OutputType;
-
-   static const uint_t F_SIZE =  9u;
-   static T    get( const Matrix3<T> & v, uint_t f )       { return v[f]; }
-   static void set(       Matrix3<T> & v, uint_t f, T val) { v[f] = val;  }
-};
-
-} // namespace walberla
-
-//======================================================================================================================
-//
-//  comparison backend for Matrix3<real_t>
+//  comparison backend for Vector3<real_t>
 //
 //======================================================================================================================
 
@@ -1770,16 +1728,45 @@ inline bool check_float_equal( const math::Matrix3<real_t> & lhs, const math::Ma
        && floatIsEqual( lhs[6], rhs[6] ) && floatIsEqual( lhs[7], rhs[7] ) && floatIsEqual( lhs[8], rhs[8] );
 }
 
-template< >
-inline bool check_float_equal_eps( const math::Matrix3<real_t> & lhs, const math::Matrix3<real_t> & rhs, const real_t epsilon )
-{
-   return floatIsEqual( lhs[0], rhs[0], epsilon ) && floatIsEqual( lhs[1], rhs[1], epsilon ) && floatIsEqual( lhs[2], rhs[2], epsilon )
-       && floatIsEqual( lhs[3], rhs[3], epsilon ) && floatIsEqual( lhs[4], rhs[4], epsilon ) && floatIsEqual( lhs[5], rhs[5], epsilon )
-       && floatIsEqual( lhs[6], rhs[6], epsilon ) && floatIsEqual( lhs[7], rhs[7], epsilon ) && floatIsEqual( lhs[8], rhs[8], epsilon );
-}
-
 }
 }
 }
 
 #undef HIGH
+
+//======================================================================================================================
+//
+//  Send/Recv Buffer Serialization Specialization
+//
+//======================================================================================================================
+
+namespace walberla {
+namespace mpi {
+      template< typename T,    // Element type of SendBuffer
+                typename G,    // Growth policy of SendBuffer
+                typename MT >  // Element type of matrix
+      mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const Matrix3<MT> & m )
+      {
+         for(unsigned int i=0; i<9; ++i)
+            buf << m[i];
+
+         return buf;
+      }
+
+      template< typename T,    // Element type  of RecvBuffer
+                typename MT >  // Element type of matrix
+      mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Matrix3<MT> & m )
+      {
+         for(unsigned int i=0; i<9; ++i)
+            buf >> m[i];
+
+         return buf;
+      }
+
+      template<typename VT>
+      struct BufferSizeTrait< walberla::math::Matrix3<VT> > {
+         static const bool constantSize = true;
+         static const uint_t size = 9 * BufferSizeTrait<VT>::size + mpi::BUFFER_DEBUG_OVERHEAD;
+      };
+}
+}
