@@ -81,6 +81,8 @@ option ( WALBERLA_BUILD_WITH_PYTHON_LBM     "Include LBM module into python modu
 
 option ( WALBERLA_BUILD_WITH_LIKWID_MARKERS "Compile in markers for likwid-perfctr"              )
 
+option ( WALBERLA_BUILD_WITH_CUDA	        "Enable CUDA support"                                )
+
 
 option ( WALBERLA_BUILD_WITH_FASTMATH       "Fast math"                                          )
 
@@ -1009,6 +1011,45 @@ else()
       add_flag ( CMAKE_CXX_FLAGS "-h noomp" )
     endif()
 endif()
+############################################################################################################################
+
+
+
+############################################################################################################################
+##
+## CUDA
+##
+############################################################################################################################
+if ( WALBERLA_BUILD_WITH_CUDA )
+    #   set ( BUILD_SHARED_LIBS                      ON )
+    set ( CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON )
+    set ( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" )
+
+    if ( (NOT DEFINED CUDA_HOST_COMPILER) AND (${CMAKE_C_COMPILER} MATCHES "ccache") )
+        string ( STRIP "${CMAKE_C_COMPILER_ARG1}" stripped_compiler_string )
+        find_program ( CUDA_HOST_COMPILER ${stripped_compiler_string} )
+    endif ()
+
+    find_package ( CUDA REQUIRED )
+
+    if ( CUDA_FOUND )
+        include_directories ( ${CUDA_INCLUDE_DIRS} )
+        list ( APPEND SERVICE_LIBS ${CUDA_LIBRARIES} )
+
+        if ( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std=" )
+            list ( APPEND CUDA_NVCC_FLAGS "-std=c++11" )
+        endif ()
+
+        # Bug with gcc5 and cuda7.5:
+        #list( APPEND CUDA_NVCC_FLAGS  "-D_MWAITXINTRIN_H_INCLUDED -D_FORCE_INLINES  -D__STRICT_ANSI__")
+
+        # NOTICE: exisiting cuda flags are overwritten
+        #set ( CUDA_NVCC_FLAGS "--compiler-bindir=/usr/bin/g++-4.3" )
+        #set ( CUDA_NVCC_FLAGS "-arch sm_20" )
+    else()
+        set ( WALBERLA_BUILD_WITH_CUDA FALSE )
+    endif ( )
+endif ( )
 ############################################################################################################################
 
 

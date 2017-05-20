@@ -26,6 +26,7 @@
 #include "core/DataTypes.h"
 #include "core/cell/Cell.h"
 #include "core/debug/Debug.h"
+#include "field/Layout.h"
 
 #include "stencil/Directions.h"
 
@@ -37,16 +38,6 @@
 
 namespace walberla {
 namespace field {
-
-
-   /**
-    * \brief Layout for field (
-    * \ingroup field
-    */
-   enum Layout {
-      fzyx     = 0,  //!< Value-sorted data layout (f should be outermost loop)
-      zyxf     = 1   //!< Cell-sorted data layout, (f should be innermost loop)
-   };
 
 
    template<typename T, uint_t fSize_> class Field; // forward for friend declaration

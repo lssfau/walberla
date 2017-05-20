@@ -28,11 +28,12 @@ namespace field {
 namespace communication {
 
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeSlice( const Field< T, fSize > & field,
+template<typename Field_T>
+MPI_Datatype mpiDatatypeSlice( const Field_T & field,
                                const cell_idx_t xBeg, const cell_idx_t yBeg, const cell_idx_t zBeg, const cell_idx_t fBeg,
                                const cell_idx_t xEnd, const cell_idx_t yEnd, const cell_idx_t zEnd, const cell_idx_t fEnd )
 {
+   typedef typename Field_T::value_type T;
    int sizes[4];
    int subsizes[4];
    int starts[4];
@@ -101,8 +102,8 @@ MPI_Datatype mpiDatatypeSlice( const Field< T, fSize > & field,
 
 
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatype( const Field< T, fSize > & field )
+template<typename Field_T>
+MPI_Datatype mpiDatatype( const Field_T & field )
 {
    return mpiDatatypeSlice( field,
                             cell_idx_t( 0 ), cell_idx_t( 0 ), cell_idx_t( 0 ), cell_idx_t( 0 ),
@@ -111,8 +112,8 @@ MPI_Datatype mpiDatatype( const Field< T, fSize > & field )
 }
 
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeSliceXYZ( const Field< T, fSize > & field, const CellInterval & interval, cell_idx_t f /*= 0*/ )
+template<typename Field_T>
+MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & interval, cell_idx_t f /*= 0*/ )
 {
    return mpiDatatypeSlice( field, 
                             interval.xMin(), interval.yMin(), interval.zMin(), f,
@@ -120,8 +121,8 @@ MPI_Datatype mpiDatatypeSliceXYZ( const Field< T, fSize > & field, const CellInt
 }
 
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeSliceXYZ( const Field< T, fSize > & field, const CellInterval & interval, const cell_idx_t fBeg, const cell_idx_t fEnd )
+template<typename Field_T>
+MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & interval, const cell_idx_t fBeg, const cell_idx_t fEnd )
 {
    return mpiDatatypeSlice( field,
                             interval.xMin(), interval.yMin(), interval.zMin(), fBeg,
@@ -129,9 +130,11 @@ MPI_Datatype mpiDatatypeSliceXYZ( const Field< T, fSize > & field, const CellInt
 }
 
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeSliceXYZ( const Field< T, fSize > & field, const CellInterval & interval, const std::set<cell_idx_t> & fs )
+template<typename Field_T>
+MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & interval, const std::set<cell_idx_t> & fs )
 {
+   typedef typename Field_T::value_type T;
+
    MPI_Datatype newType = MPI_DATATYPE_NULL;
 
    int sizes[3];
@@ -206,14 +209,14 @@ MPI_Datatype mpiDatatypeSliceXYZ( const Field< T, fSize > & field, const CellInt
 }
 
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeWithGhostLayer( const GhostLayerField< T, fSize > & field )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeWithGhostLayer( const GhostLayerField_T & field )
 {
    return mpiDatatypeWithGhostLayer( field, field.nrOfGhostLayers() );
 }
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeWithGhostLayer( const GhostLayerField< T, fSize > & field, const uint_t numGhostLayers )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeWithGhostLayer( const GhostLayerField_T & field, const uint_t numGhostLayers )
 {
    const cell_idx_t xBeg = - cell_idx_c( numGhostLayers );
    const cell_idx_t yBeg = - cell_idx_c( numGhostLayers );
@@ -231,14 +234,14 @@ MPI_Datatype mpiDatatypeWithGhostLayer( const GhostLayerField< T, fSize > & fiel
 }
 
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeGhostLayerOnly( const GhostLayerField< T, fSize > & field, const stencil::Direction dir, const bool fullSlice /*= false*/ )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeGhostLayerOnly( const GhostLayerField_T & field, const stencil::Direction dir, const bool fullSlice /*= false*/ )
 {
    return mpiDatatypeGhostLayerOnly( field, field.nrOfGhostLayers(), dir, fullSlice );
 }
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeGhostLayerOnly( const GhostLayerField< T, fSize > & field, const uint_t thickness, const stencil::Direction dir, const bool fullSlice /*= false*/ )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeGhostLayerOnly( const GhostLayerField_T & field, const uint_t thickness, const stencil::Direction dir, const bool fullSlice /*= false*/ )
 {
    CellInterval ci;
    field.getGhostRegion( dir, ci, cell_idx_c( thickness ), fullSlice );
@@ -250,8 +253,8 @@ MPI_Datatype mpiDatatypeGhostLayerOnly( const GhostLayerField< T, fSize > & fiel
 }
 
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeGhostLayerOnlyXYZ( const GhostLayerField< T, fSize > & field, const stencil::Direction dir, const bool fullSlice /*= false*/, const cell_idx_t f /*= 0*/ )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeGhostLayerOnlyXYZ( const GhostLayerField_T & field, const stencil::Direction dir, const bool fullSlice /*= false*/, const cell_idx_t f /*= 0*/ )
 {
    CellInterval ci;
    field.getGhostRegion( dir, ci, cell_idx_c( field.nrOfGhostLayers() ), fullSlice );
@@ -259,8 +262,8 @@ MPI_Datatype mpiDatatypeGhostLayerOnlyXYZ( const GhostLayerField< T, fSize > & f
    return mpiDatatypeSliceXYZ( field, ci, f );
 }
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeGhostLayerOnlyXYZ( const GhostLayerField< T, fSize > & field, const stencil::Direction dir, const bool fullSlice, const cell_idx_t fBeg, const cell_idx_t fEnd )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeGhostLayerOnlyXYZ( const GhostLayerField_T & field, const stencil::Direction dir, const bool fullSlice, const cell_idx_t fBeg, const cell_idx_t fEnd )
 {
    CellInterval ci;
    field.getGhostRegion( dir, ci, cell_idx_c( field.nrOfGhostLayers() ), fullSlice );
@@ -268,8 +271,8 @@ MPI_Datatype mpiDatatypeGhostLayerOnlyXYZ( const GhostLayerField< T, fSize > & f
    return mpiDatatypeSliceXYZ( field, ci, fBeg, fEnd );
 }
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeGhostLayerOnlyXYZ( const GhostLayerField< T, fSize > & field, const stencil::Direction dir, const bool fullSlice, const std::set<cell_idx_t> & fs )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeGhostLayerOnlyXYZ( const GhostLayerField_T & field, const stencil::Direction dir, const bool fullSlice, const std::set<cell_idx_t> & fs )
 {
    CellInterval ci;
    field.getGhostRegion( dir, ci, cell_idx_c( field.nrOfGhostLayers() ), fullSlice );
@@ -277,8 +280,8 @@ MPI_Datatype mpiDatatypeGhostLayerOnlyXYZ( const GhostLayerField< T, fSize > & f
    return mpiDatatypeSliceXYZ( field, ci, fs );
 }
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeSliceBeforeGhostlayer( const GhostLayerField< T, fSize > & field, const stencil::Direction dir, const uint_t thickness /*= 1*/, const bool fullSlice /*= false*/ )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeSliceBeforeGhostlayer( const GhostLayerField_T & field, const stencil::Direction dir, const uint_t thickness /*= 1*/, const bool fullSlice /*= false*/ )
 {
    CellInterval ci;
    field.getSliceBeforeGhostLayer( dir, ci, cell_idx_c( thickness ), fullSlice );
@@ -289,8 +292,8 @@ MPI_Datatype mpiDatatypeSliceBeforeGhostlayer( const GhostLayerField< T, fSize >
    return mpiDatatypeSliceXYZ( field, ci, fBeg, fEnd );
 }
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeSliceBeforeGhostlayerXYZ( const GhostLayerField< T, fSize > & field, const stencil::Direction dir, const uint_t thickness /*= 1*/, const cell_idx_t f /*= 0*/, const bool fullSlice /*= false*/ )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeSliceBeforeGhostlayerXYZ( const GhostLayerField_T & field, const stencil::Direction dir, const uint_t thickness /*= 1*/, const cell_idx_t f /*= 0*/, const bool fullSlice /*= false*/ )
 {
    CellInterval ci;
    field.getSliceBeforeGhostLayer( dir, ci, cell_idx_c( thickness ), fullSlice );
@@ -298,8 +301,8 @@ MPI_Datatype mpiDatatypeSliceBeforeGhostlayerXYZ( const GhostLayerField< T, fSiz
    return mpiDatatypeSliceXYZ( field, ci, f );
 }
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeSliceBeforeGhostlayerXYZ( const GhostLayerField< T, fSize > & field, const stencil::Direction dir, const uint_t thickness, const cell_idx_t fBeg, const cell_idx_t fEnd, const bool fullSlice )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeSliceBeforeGhostlayerXYZ( const GhostLayerField_T & field, const stencil::Direction dir, const uint_t thickness, const cell_idx_t fBeg, const cell_idx_t fEnd, const bool fullSlice )
 {
    CellInterval ci;
    field.getSliceBeforeGhostLayer( dir, ci, cell_idx_c( thickness ), fullSlice );
@@ -307,8 +310,8 @@ MPI_Datatype mpiDatatypeSliceBeforeGhostlayerXYZ( const GhostLayerField< T, fSiz
    return mpiDatatypeSliceXYZ( field, ci, fBeg, fEnd );
 }
 
-template<typename T, uint_t fSize>
-MPI_Datatype mpiDatatypeSliceBeforeGhostlayerXYZ( const GhostLayerField< T, fSize > & field, const stencil::Direction dir, const uint_t thickness, const std::set<cell_idx_t> & fs, const bool fullSlice )
+template<typename GhostLayerField_T>
+MPI_Datatype mpiDatatypeSliceBeforeGhostlayerXYZ( const GhostLayerField_T & field, const stencil::Direction dir, const uint_t thickness, const std::set<cell_idx_t> & fs, const bool fullSlice )
 {
    CellInterval ci;
    field.getSliceBeforeGhostLayer( dir, ci, cell_idx_c( thickness ), fullSlice );

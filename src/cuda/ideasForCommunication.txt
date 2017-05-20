@@ -1,0 +1,40 @@
+
+HybridUniformNeighborScheme scheme ( blockstorage, blockSelectorForGPU);
+
+# Add field that is communicated 
+scheme.addPackInfo( FieldPackInfo(cpuFieldID), GPUFieldPackInfo(gpuFieldID) );
+# possibly add further fields which are sent in same message
+scheme.addPackInfo( ....  )
+
+
+GPUFieldPackInfo Interface
+    + MemberVariable: the GPUField
+    - pack ( direction, device_ptr, offset ) # -> calls packing kernel that copies the slice before ghost layer to the device_ptr buffer
+    - getConstantByteSizeForDirection( d ) # returns the required buffer size to pack for a neighbor in the given direction
+    - unpack (direction, device_ptr, offset )
+
+
+# Pseudo code for scheme.startCommunication
+startCommunication:
+    1) Pack everything into buffers
+        For all blocks
+            For all neighbors of current block
+                if currentBlock=gpu:
+                    if neighbor is localcpu
+                        -> call localToCPU
+                    if neighbor is localgpu
+                        -> 
+                    if neighbor is somewhere else
+                        -> call pack on gpu
+                else currentBlock=cpu:
+                    similar to above
+            
+
+How to send on GPU?
+    - use blocking send on GPU and different streams for all blocks
+    - use ISend ... how to manage the exchange of MPI_Request and the wait?
+
+
+
+
+

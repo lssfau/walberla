@@ -5,6 +5,7 @@ include_directories( ${walberla_BINARY_DIR}/src ) # for generated headers
 add_subdirectory( blockforest )
 add_subdirectory( boundary )
 add_subdirectory( core )
+add_subdirectory( cuda )
 add_subdirectory( domain_decomposition )
 add_subdirectory( fft )
 add_subdirectory( field )

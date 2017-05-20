@@ -1137,32 +1137,6 @@ namespace field {
 
 
    //*******************************************************************************************************************
-   /*! Returns a pointer to the memory region where field data is stored
-   *
-   * For additional information about memory layout, have a look at the xOff() and xStride() functions
-   * If you store a pointer to the internal field data, you have to make sure the data is not freed by the field class.
-   * See documentation of getAllocator() for this
-   */
-   //*******************************************************************************************************************
-   template<typename T, uint_t fSize_ >
-   T * Field<T,fSize_>::data()
-   {
-      return values_;
-   }
-
-   //*******************************************************************************************************************
-   /*! Returns a pointer to the memory region where field data is stored
-    *
-   * see documentation of nonconst version
-   */
-   //*******************************************************************************************************************
-   template<typename T, uint_t fSize_ >
-   const T * Field<T,fSize_>::data() const
-   {
-      return values_;
-   }
-
-   //*******************************************************************************************************************
    /*! Returns internal data allocator
     *
     * The allocator can for example be used to prevent free() on the field data when class is deleted.

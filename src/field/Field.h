@@ -181,17 +181,6 @@ namespace field {
       //****************************************************************************************************************
 
 
-      //** Low Level Functions        **********************************************************************************
-      /*! \name Low Level Functions - only use when absolutely necessary  */
-      //@{
-            T * data();
-      const T * data() const;
-
-      shared_ptr< FieldAllocator<T> > getAllocator() const;
-      //@}
-      //****************************************************************************************************************
-
-
       //** Equality Checks *********************************************************************************************
       /*! \name Equality Checks */
       //@{
@@ -297,6 +286,17 @@ namespace field {
       //****************************************************************************************************************
 
 
+      //** Pointer to internal memory - use with care!        **********************************************************
+      /*! \name Pointer to internal memory - use with care!  */
+      //@{
+            T * data()            { return values_; }
+      const T * data() const      { return values_; }
+            T * dataInner()       { return valuesWithOffset_; }
+      const T * dataInner() const { return valuesWithOffset_; }
+
+      shared_ptr< FieldAllocator<T> > getAllocator() const;
+      //@}
+      //****************************************************************************************************************
 
 
       //** Static cached end iterators *********************************************************************************
