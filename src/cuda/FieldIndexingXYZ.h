@@ -43,8 +43,8 @@ template< typename T> class GPUField;
       //** Kernel call        ******************************************************************************************
       /*! \name Kernel call  */
       //@{
-      uint3 blockDim() const                        { return blockDim_; }
-      uint3 gridDim () const                        { return gridDim_;  }
+      dim3 blockDim() const                        { return blockDim_; }
+      dim3 gridDim () const                        { return gridDim_;  }
 
       const FieldAccessorXYZ<T> & gpuAccess() const { return gpuAccess_; }
       //@}
@@ -64,11 +64,11 @@ template< typename T> class GPUField;
       //****************************************************************************************************************
 
    protected:
-      FieldIndexingXYZ<T> ( const GPUField<T> & field, uint3 _blockDim, uint3 _gridDim, const FieldAccessorXYZ<T> _gpuAccess );
+      FieldIndexingXYZ<T> ( const GPUField<T> & field, dim3 _blockDim, dim3 _gridDim, const FieldAccessorXYZ<T> _gpuAccess );
 
       const GPUField<T> &  field_;
-      uint3 blockDim_;
-      uint3 gridDim_;
+      dim3 blockDim_;
+      dim3 gridDim_;
       FieldAccessorXYZ<T> gpuAccess_;
    };
 

@@ -22,6 +22,7 @@
 #include "cuda/HostFieldAllocator.h"
 #include "blockforest/Initialization.h"
 #include "blockforest/communication/UniformDirectScheme.h"
+#include "blockforest/communication/UniformBufferedScheme.h"
 
 #include "core/Environment.h"
 
@@ -30,6 +31,8 @@
 #include "cuda/GPUField.h"
 #include "cuda/Kernel.h"
 #include "cuda/AddGPUFieldToStorage.h"
+#include "cuda/communication/GPUPackInfo.h"
+
 
 #include "field/AddToStorage.h"
 #include "field/communication/UniformMPIDatatypeInfo.h"
@@ -113,16 +116,22 @@ int main( int argc, char ** argv )
    BlockDataID gpuFieldSrcID = cuda::addGPUFieldToStorage<ScalarField>( blocks, cpuFieldID, "GPU Field Src" );
    BlockDataID gpuFieldDstID = cuda::addGPUFieldToStorage<ScalarField>( blocks, cpuFieldID, "GPU Field Dst" );
 
-   typedef blockforest::communication::UniformDirectScheme<stencil::D2Q9 > CommScheme;
-   CommScheme communication( blocks );
-   communication.addDataToCommunicate( make_shared<field::communication::UniformMPIDatatypeInfo<GPUField> > (gpuFieldSrcID) );
+
+   typedef blockforest::communication::UniformBufferedScheme<stencil::D2Q9 > CommScheme;
+   typedef cuda::communication::GPUPackInfo<GPUField> Packing;
+   // Alternative, if CUDA enabled MPI is available
+   //blockforest::communication::UniformDirectScheme<stencil::D2Q9 >
+   //typedef field::communication::UniformMPIDatatypeInfo<GPUField> Packing
+
+   CommScheme commScheme(blocks);
+   commScheme.addDataToCommunicate( make_shared<Packing>(gpuFieldSrcID) );
 
    // Create Timeloop
    const uint_t numberOfTimesteps = uint_t(10); // number of timesteps for non-gui runs
    SweepTimeloop timeloop ( blocks, numberOfTimesteps );
 
    // Registering the sweep
-   timeloop.add() << BeforeFunction(  communication, "Communication" )
+   timeloop.add() << BeforeFunction(  commScheme, "Communication" )
                   << Sweep( GameOfLifeSweepCUDA(gpuFieldSrcID, gpuFieldDstID ), "GameOfLifeSweep" );
 
    timeloop.add() << Sweep( cuda::fieldCpyFunctor<ScalarField, GPUField >(cpuFieldID, gpuFieldDstID) );

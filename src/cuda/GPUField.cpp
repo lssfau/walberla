@@ -31,10 +31,10 @@ namespace cuda {
 
 template<typename T>
 GPUField<T>::GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSize,
-                       uint_t _nrOfGhostLayers, const Layout & _layout )
+                       uint_t _nrOfGhostLayers, const Layout & _layout, bool usePitchedMem )
    : nrOfGhostLayers_( _nrOfGhostLayers ),
      xSize_( _xSize), ySize_( _ySize ), zSize_( _zSize ), fSize_( _fSize ),
-     layout_( _layout )
+     layout_( _layout ), usePitchedMem_( usePitchedMem )
 {
    cudaExtent extent;
    if ( layout_ == zyxf )
@@ -50,7 +50,15 @@ GPUField<T>::GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSiz
       extent.depth  = (_zSize + 2 * _nrOfGhostLayers ) * _fSize;
    }
 
-   WALBERLA_CUDA_CHECK ( cudaMalloc3D ( &pitchedPtr_, extent ) );
+   if ( usePitchedMem_ )
+   {
+      WALBERLA_CUDA_CHECK ( cudaMalloc3D ( &pitchedPtr_, extent ) );
+   }
+   else
+   {
+      pitchedPtr_ = make_cudaPitchedPtr( NULL, extent.width, extent.width, extent.height );
+      WALBERLA_CUDA_CHECK ( cudaMalloc( &pitchedPtr_.ptr, extent.width * extent.height * extent.depth ) );
+   }
 }
 
 
@@ -86,23 +94,76 @@ void GPUField<T>::getGhostRegion(stencil::Direction d, CellInterval & ci,
 
 
 template<typename T>
-void GPUField<T>::getSliceBeforeGhostLayer(stencil::Direction d, CellInterval & ci,
-                                            cell_idx_t thickness, bool fullSlice ) const
+void GPUField<T>::getSlice(stencil::Direction d, CellInterval & ci,
+                           cell_idx_t distance, cell_idx_t thickness, bool fullSlice ) const
 {
    WALBERLA_ASSERT_GREATER( thickness, 0 );
 
    const cell_idx_t sizeArr [] = { cell_idx_c( xSize() ),
                                    cell_idx_c( ySize() ),
-                                   cell_idx_c( zSize() )};
+                                   cell_idx_c( zSize() ) };
 
    cell_idx_t fullSliceInc = fullSlice ? cell_idx_c(  nrOfGhostLayers() ) : 0;
    for(unsigned int dim = 0; dim< 3; ++dim)
+   {
       switch ( stencil::c[dim][d] )
       {
-         case -1: ci.min()[dim] =                      0;  ci.max()[dim] =     thickness              - 1; break;
-         case  0: ci.min()[dim] =          -fullSliceInc;  ci.max()[dim] =  sizeArr[dim] +fullSliceInc- 1; break;
-         case  1: ci.min()[dim] = sizeArr[dim]-thickness;  ci.max()[dim] =  sizeArr[dim]              - 1; break;
+         case -1:
+            ci.min()[dim] = distance;
+            ci.max()[dim] = distance + thickness - 1;
+            break;
+         case  0:
+            ci.min()[dim] = -fullSliceInc;
+            ci.max()[dim] =  sizeArr[dim] + fullSliceInc - 1;
+            break;
+         case  1:
+            ci.min()[dim] = sizeArr[dim] - distance - thickness;
+            ci.max()[dim] = sizeArr[dim] - distance - 1;
+            break;
       }
+   }
+}
+
+
+//*******************************************************************************************************************
+/*! True if sizes of all dimensions match
+ *******************************************************************************************************************/
+template<typename T>
+inline bool GPUField<T>::hasSameSize( const GPUField<T> & other ) const
+{
+   return xSize() == other.xSize() &&
+          ySize() == other.ySize() &&
+          zSize() == other.zSize();
+}
+
+//*******************************************************************************************************************
+/*! True if allocation sizes of all dimensions match
+ *******************************************************************************************************************/
+template<typename T>
+inline bool GPUField<T>::hasSameAllocSize( const GPUField<T> & other ) const
+{
+   return xAllocSize() == other.xAllocSize() &&
+          yAllocSize() == other.yAllocSize() &&
+          zAllocSize() == other.zAllocSize() &&
+          fAllocSize() == other.fAllocSize();
+}
+
+//*******************************************************************************************************************
+/*! Creates a new GPUField that has equal size, layout and memory type as this field but has uninitialized memory.
+ *
+ * \return a new FPUField that has to be freed by caller.
+ *******************************************************************************************************************/
+template <typename T>
+GPUField<T> * GPUField<T>::cloneUninitialized() const
+{
+   GPUField<T> * res = new GPUField<T>( xSize(), ySize(), zSize(), fSize(),
+                                        nrOfGhostLayers(), layout(), isPitchedMem() );
+
+   WALBERLA_ASSERT( hasSameAllocSize( *res ) );
+   WALBERLA_ASSERT( hasSameSize( *res ) );
+   WALBERLA_ASSERT( layout() == res->layout() );
+   WALBERLA_ASSERT( isPitchedMem() == res->isPitchedMem() );
+   return res;
 }
 
 //*******************************************************************************************************************
@@ -168,11 +229,10 @@ uint_t GPUField<T>::fAllocSize() const
 template<typename T>
 void GPUField<T>::swapDataPointers( GPUField<T> & other )
 {
-   WALBERLA_ASSERT_EQUAL( xAllocSize(), other.xAllocSize() );
-   WALBERLA_ASSERT_EQUAL( yAllocSize(), other.yAllocSize() );
-   WALBERLA_ASSERT_EQUAL( zAllocSize(), other.zAllocSize() );
-   WALBERLA_ASSERT_EQUAL( fAllocSize(), other.fAllocSize() );
-   WALBERLA_ASSERT_EQUAL( layout(),     other.layout()     );
+   WALBERLA_ASSERT( hasSameAllocSize( other ) );
+   WALBERLA_ASSERT( hasSameSize( other ) );
+   WALBERLA_ASSERT( layout() == other.layout() );
+   WALBERLA_ASSERT( isPitchedMem() == other.isPitchedMem() );
    std::swap( pitchedPtr_, other.pitchedPtr_ );
 }
 

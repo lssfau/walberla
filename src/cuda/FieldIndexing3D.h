@@ -13,16 +13,16 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file SimpleFieldIndexing.h
+//! \file FieldIndexing3D.h
 //! \ingroup cuda
-//! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Paulo Carvalho <prcjunior@inf.ufpr.br>
 //! \brief Indexing Scheme that executes all elements of inner coordinate within on thread block
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "FieldAccessor.h"
+#include "FieldAccessor3D.h"
 
 #include "stencil/Directions.h"
 #include <cuda_runtime.h>
@@ -35,18 +35,32 @@ namespace cuda {
    // Forward Declarations
    template< typename T> class GPUField;
 
+
+   class FieldIndexing3DBase
+   {
+   public:
+
+      static void setPreferredBlockDim( dim3 blockDim ) { preferredBlockDim_ = blockDim; }
+      static void setPreferredBlockDim( unsigned int x, unsigned int y, unsigned int z ) { preferredBlockDim_ = dim3( x, y, z ); }
+
+   protected:
+
+      static dim3 preferredBlockDim_;
+   };
+
+
    template<typename T>
-   class FieldIndexing
+   class FieldIndexing3D: public FieldIndexing3DBase
    {
    public:
 
       //** Kernel call        ******************************************************************************************
       /*! \name Kernel call  */
       //@{
-      dim3 blockDim() const                      { return blockDim_; }
-      dim3 gridDim () const                      { return gridDim_;  }
+      dim3 blockDim() const                        { return blockDim_; }
+      dim3 gridDim () const                        { return gridDim_;  }
 
-      const FieldAccessor<T> & gpuAccess() const { return gpuAccess_; }
+      const FieldAccessor3D<T> & gpuAccess() const { return gpuAccess_; }
       //@}
       //****************************************************************************************************************
 
@@ -56,35 +70,32 @@ namespace cuda {
       //** Creation        *********************************************************************************************
       /*! \name Creation  */
       //@{
-      static FieldIndexing<T> interval ( const GPUField<T> & f,
-                                               const cell::CellInterval & ci,
-                                               int fBegin=0, int fEnd=1 );
+      static FieldIndexing3D<T> interval ( const GPUField<T> & f,
+                                           const cell::CellInterval & ci );
 
 
-      static FieldIndexing<T> xyz ( const GPUField<T> & f );
-      static FieldIndexing<T> withGhostLayerXYZ       ( const GPUField<T> & f, uint_t numGhostLayers );
-      static FieldIndexing<T> ghostLayerOnlyXYZ       ( const GPUField<T> & f, uint_t thickness,
-                                                              stencil::Direction dir, bool fullSlice = false );
-      static FieldIndexing<T> sliceBeforeGhostLayerXYZ( const GPUField<T> & f, uint_t thickness,
-                                                              stencil::Direction dir, bool fullSlice = false );
-      static FieldIndexing<T> sliceXYZ                ( const GPUField<T> & f, cell_idx_t distance, uint_t thickness,
-                                                              stencil::Direction dir, bool fullSlice = false );
+      static FieldIndexing3D<T> xyz                      ( const GPUField<T> & f );
+      static FieldIndexing3D<T> withGhostLayerXYZ        ( const GPUField<T> & f, uint_t numGhostLayers );
+      static FieldIndexing3D<T> ghostLayerOnlyXYZ        ( const GPUField<T> & f, uint_t thickness,
+                                                           stencil::Direction dir, bool fullSlice = false );
+      static FieldIndexing3D<T> sliceBeforeGhostLayerXYZ ( const GPUField<T> & f, uint_t thickness,
+                                                           stencil::Direction dir, bool fullSlice = false );
+      static FieldIndexing3D<T> sliceXYZ                 ( const GPUField<T> & f, cell_idx_t distance, uint_t thickness,
+                                                        stencil::Direction dir, bool fullSlice = false );
 
-      static FieldIndexing<T> allInner          ( const GPUField<T> & f );
-      static FieldIndexing<T> allWithGhostLayer ( const GPUField<T> & f );
-      static FieldIndexing<T> all               ( const GPUField<T> & f, const cell::CellInterval & ci );
+      static FieldIndexing3D<T> intervalXYZ              ( const GPUField<T> & f, const cell::CellInterval & ci );
       //@}
       //****************************************************************************************************************
 
    protected:
-      FieldIndexing ( const GPUField<T> & field,
-                      dim3 _blockDim, dim3 _gridDim,
-                      const FieldAccessor<T> _gpuAccess );
+      FieldIndexing3D ( const GPUField<T> & field,
+                        const dim3 & _blockDim, const dim3 & _gridDim,
+                        const FieldAccessor3D<T> & _gpuAccess );
 
       const GPUField<T> &  field_;
       dim3 blockDim_;
       dim3 gridDim_;
-      FieldAccessor<T> gpuAccess_;
+      FieldAccessor3D<T> gpuAccess_;
    };
 
 

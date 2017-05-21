@@ -39,10 +39,10 @@ namespace cuda {
                             };
 
       FieldAccessor( char * ptr,
-                     uint32_t xOffset,
-                     uint32_t yOffset,
-                     uint32_t zOffset,
-                     uint32_t fOffset,
+                     uint_t xOffset,
+                     uint_t yOffset,
+                     uint_t zOffset,
+                     uint_t fOffset,
                      IndexingScheme indexingScheme )
             : ptr_(ptr), xOffset_(xOffset), yOffset_(yOffset), zOffset_(zOffset),
               fOffset_(fOffset), indexingScheme_(indexingScheme )
@@ -65,7 +65,7 @@ namespace cuda {
       }
 
 
-      __device__ unsigned int getLinearIndex( uint3 blockIdx, uint3 threadIdx, uint3 gridDim, uint3 blockDim )
+      __device__ uint_t getLinearIndex( uint3 blockIdx, uint3 threadIdx, uint3 gridDim, uint3 blockDim )
       {
          return threadIdx.x                              +
                 blockIdx.x * blockDim.x                  +
@@ -73,6 +73,8 @@ namespace cuda {
                 blockIdx.z * blockDim.x * gridDim.x * gridDim.y ;
       }
 
+      // This is always true for this specific field indexing class.
+      __device__ __forceinline__ bool isValidPosition()  { return true; }
 
       __device__ T & get()       { return * (T*)(ptr_);                }
       __device__ T & get( int f) { return * (T*)(ptr_ + f * fOffset_); }
@@ -80,26 +82,26 @@ namespace cuda {
 
       __device__ T & getNeighbor( int cx, int cy, int cz ) const
       {
-         return * (T*)( ptr_ + cx * (int)(xOffset_) +
-                               cy * (int)(yOffset_) +
-                               cz * (int)(zOffset_) );
+         return * (T*)( ptr_ + cx * xOffset_ +
+                               cy * yOffset_ +
+                               cz * zOffset_ );
       }
 
       __device__ T & getNeighbor( int cx, int cy, int cz, int cf )
       {
-         return * (T*)( ptr_ + cx * (int)(xOffset_) +
-                               cy * (int)(yOffset_) +
-                               cz * (int)(zOffset_) +
-                               cf * (int)(fOffset_) );
+         return * (T*)( ptr_ + cx * xOffset_ +
+                               cy * yOffset_ +
+                               cz * zOffset_ +
+                               cf * fOffset_ );
       }
 
 
    protected:
       char * ptr_;
-      uint32_t xOffset_;
-      uint32_t yOffset_;
-      uint32_t zOffset_;
-      uint32_t fOffset_;
+      uint_t xOffset_;
+      uint_t yOffset_;
+      uint_t zOffset_;
+      uint_t fOffset_;
       IndexingScheme indexingScheme_;
    };
 

@@ -63,11 +63,13 @@ namespace cuda {
       typedef T value_type;
 
       GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSize,
-                uint_t _nrOfGhostLayers, const Layout & _layout = zyxf );
+                uint_t _nrOfGhostLayers, const Layout & _layout = zyxf, bool usePitchedMem = true );
 
       ~GPUField();
 
       Layout layout() const { return layout_; }
+
+      bool isPitchedMem() const { return usePitchedMem_; }
 
       cudaPitchedPtr pitchedPtr() const { return pitchedPtr_; }
 
@@ -76,6 +78,7 @@ namespace cuda {
       inline uint_t  ySize() const  { return ySize_; }
       inline uint_t  zSize() const  { return zSize_; }
       inline uint_t  fSize() const  { return fSize_; }
+      inline uint_t  size()  const  { return fSize() * xSize() * ySize() * zSize(); }
 
       cell_idx_t xOff() const { return cell_idx_c( nrOfGhostLayers_ ); }
       cell_idx_t yOff() const { return cell_idx_c( nrOfGhostLayers_ ); }
@@ -86,10 +89,15 @@ namespace cuda {
       uint_t yAllocSize() const;
       uint_t zAllocSize() const;
       uint_t fAllocSize() const;
+      inline uint_t allocSize() const { return fAllocSize() * xAllocSize() * yAllocSize() * zAllocSize(); }
 
+      inline bool hasSameAllocSize( const GPUField<T> & other ) const;
+      inline bool hasSameSize( const GPUField<T> & other ) const;
+
+      GPUField<T> * cloneUninitialized() const;
 
       void swapDataPointers( GPUField<T> & other );
-      void swapDataPointers( GPUField<T> * other ) { swapDataPointers( *other); }
+      void swapDataPointers( GPUField<T> * other ) { swapDataPointers( *other ); }
 
 
       inline uint_t  nrOfGhostLayers() const { return nrOfGhostLayers_; }
@@ -99,8 +107,12 @@ namespace cuda {
       void getGhostRegion( stencil::Direction d, CellInterval & ci,
                            cell_idx_t thickness, bool fullSlice ) const;
       void getSliceBeforeGhostLayer(stencil::Direction d, CellInterval & ci,
-                                    cell_idx_t thickness, bool fullSlice ) const;
-
+                                    cell_idx_t thickness, bool fullSlice ) const
+      {
+         getSlice( d, ci, 0, thickness, fullSlice );
+      }
+      void getSlice(stencil::Direction d, CellInterval & ci,
+                    cell_idx_t distance, cell_idx_t thickness, bool fullSlice ) const;
 
             void * data()            { return pitchedPtr_.ptr; }
       const void * data() const      { return pitchedPtr_.ptr; }
@@ -113,6 +125,7 @@ namespace cuda {
       uint_t         zSize_;
       uint_t         fSize_;
       Layout         layout_;
+      bool           usePitchedMem_;
    };
 
 

@@ -45,7 +45,8 @@ namespace cuda {
                                     const std::string & identifier,
                                     uint_t fSize,
                                     const Layout layout = fzyx,
-                                    uint_t nrOfGhostLayers = 1 );
+                                    uint_t nrOfGhostLayers = 1,
+                                    bool usePitchedMem = true );
 
 
 
@@ -61,7 +62,8 @@ namespace cuda {
    template< typename Field_T>
    BlockDataID addGPUFieldToStorage( const shared_ptr< StructuredBlockStorage > & bs,
                                      ConstBlockDataID cpuFieldID,
-                                     const std::string & identifier );
+                                     const std::string & identifier,
+                                     bool usePitchedMem = true );
 
 
 

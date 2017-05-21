@@ -38,7 +38,7 @@ namespace cuda {
 
 template< typename T>
 FieldIndexing<T>::FieldIndexing ( const GPUField<T> & field,
-                                  uint3 _blockDim, uint3 _gridDim,
+                                  dim3 _blockDim, dim3 _gridDim,
                                   const FieldAccessor<T> _gpuAccess )
    : field_( field ),
      blockDim_( _blockDim ),
@@ -56,8 +56,8 @@ FieldIndexing<T>::FieldIndexing ( const GPUField<T> & field,
          threadsPerBlock = std::min( prop.maxThreadsPerBlock, threadsPerBlock );
       }
       WALBERLA_ASSERT_LESS( int_c( blockDim_.x ), threadsPerBlock,
-                           "InnerCoordThreadIndexing works only for fields where each dimension x,y,z is smaller " <<
-                           "than the maximal thread count per CUDA block." );
+                            "InnerCoordThreadIndexing works only for fields where each dimension x,y,z is smaller " <<
+                            "than the maximal thread count per CUDA block." );
    }
 }
 
@@ -93,29 +93,29 @@ void shiftCoordinatesWhileFastestCoordHasSizeOne( typename FieldAccessor<T>::Ind
 template< typename T>
 FieldIndexing<T> FieldIndexing<T>::interval ( const GPUField<T> & f, const CellInterval & ci, int fBegin, int fEnd )
 {
-   unsigned int xOffset, yOffset, zOffset, fOffset;
+   uint_t xOffset, yOffset, zOffset, fOffset;
 
    if ( f.layout() == field::zyxf )
    {
       fOffset = sizeof(T);
-      xOffset = uint32_c( f.pitchedPtr().pitch );
-      yOffset = xOffset * uint32_c( f.xAllocSize() );
-      zOffset = yOffset * uint32_c( f.yAllocSize() );
+      xOffset = f.pitchedPtr().pitch;
+      yOffset = xOffset * f.xAllocSize();
+      zOffset = yOffset * f.yAllocSize();
    }
    else
    {
       xOffset = sizeof(T);
-      yOffset = uint32_c( f.pitchedPtr().pitch );
-      zOffset = yOffset * uint32_c( f.yAllocSize() );
-      fOffset = zOffset * uint32_c( f.zAllocSize() );
+      yOffset = f.pitchedPtr().pitch;
+      zOffset = yOffset * f.yAllocSize();
+      fOffset = zOffset * f.zAllocSize();
    }
    char * data = (char*)f.pitchedPtr().ptr;
 
    // Jump over ghost cells to first inner cell
    cell_idx_t gl = cell_idx_c( f.nrOfGhostLayers() );
-   data += ( ci.xMin() + gl )* int_c(xOffset) +
-           ( ci.yMin() + gl )* int_c(yOffset) +
-           ( ci.zMin() + gl )* int_c(zOffset);
+   data += ( ci.xMin() + gl )* xOffset +
+           ( ci.yMin() + gl )* yOffset +
+           ( ci.zMin() + gl )* zOffset;
 
 
    dim3 gridDim;
@@ -181,6 +181,15 @@ FieldIndexing<T> FieldIndexing<T>::sliceBeforeGhostLayerXYZ( const GPUField<T> &
    CellInterval ci;
    f.getSliceBeforeGhostLayer( dir, ci, cell_idx_c(thickness), fullSlice );
    return interval( f, ci, 0, 1 );
+}
+
+template< typename T>
+FieldIndexing<T> FieldIndexing<T>::sliceXYZ( const GPUField<T> & f, cell_idx_t distance, uint_t thickness,
+                                             stencil::Direction dir, bool fullSlice )
+{
+   CellInterval ci;
+   f.getSlice( dir, ci, distance, cell_idx_c(thickness), fullSlice );
+   return interval( f, ci );
 }
 
 template< typename T>

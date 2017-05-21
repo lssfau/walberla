@@ -109,12 +109,14 @@ namespace cuda {
       bool canCopy = ( src.layout()     == fzyx &&
                        dst.fAllocSize() == src.fAllocSize() &&
                        dst.zAllocSize() == src.zAllocSize() &&
-                       dst.yAllocSize() == src.yAllocSize() )
+                       dst.yAllocSize() == src.yAllocSize() &&
+                       dst.xSize()      == src.xSize() )
                       ||
                       ( src.layout()     == zyxf &&
                         dst.zAllocSize() == src.zAllocSize() &&
                         dst.yAllocSize() == src.yAllocSize() &&
-                        dst.xAllocSize() == src.xAllocSize() );
+                        dst.xAllocSize() == src.xAllocSize() &&
+                        dst.fSize()      == src.fSize() );
 
       if ( !canCopy ) {
          WALBERLA_ABORT("Field have to have the same size ");
@@ -127,20 +129,20 @@ namespace cuda {
                                          src.xAllocSize(),             // inner dimension size
                                          src.yAllocSize()  );          // next outer dimension size
 
-         p.extent.width  = src.xAllocSize() * sizeof(T);
-         p.extent.height = src.yAllocSize();
-         p.extent.depth  = src.zAllocSize() * src.fAllocSize();
+         p.extent.width  = std::min( dst.xAllocSize(), src.xAllocSize() ) * sizeof(T);
+         p.extent.height = dst.yAllocSize();
+         p.extent.depth  = dst.zAllocSize() * dst.fAllocSize();
       }
       else
       {
-         p.srcPtr = make_cudaPitchedPtr( (void*)(src.data()),           // pointer
+         p.srcPtr = make_cudaPitchedPtr( (void*)(src.data()),          // pointer
                                          sizeof(T) * src.fAllocSize(), // pitch
                                          src.fAllocSize(),             // inner dimension size
                                          src.xAllocSize()  );          // next outer dimension size
 
-         p.extent.width  = src.fAllocSize() * sizeof(T);
-         p.extent.height = src.xAllocSize();
-         p.extent.depth  = src.yAllocSize() * src.zAllocSize();
+         p.extent.width  = std::min( dst.fAllocSize(), src.fAllocSize() ) * sizeof(T);
+         p.extent.height = dst.xAllocSize();
+         p.extent.depth  = dst.yAllocSize() * dst.zAllocSize();
       }
 
       p.dstPtr = dst.pitchedPtr();
@@ -163,12 +165,14 @@ namespace cuda {
       bool canCopy = ( src.layout()     == fzyx &&
                        dst.fAllocSize() == src.fAllocSize() &&
                        dst.zAllocSize() == src.zAllocSize() &&
-                       dst.yAllocSize() == src.yAllocSize() )
+                       dst.yAllocSize() == src.yAllocSize() &&
+                       dst.xSize()      == src.xSize() )
                       ||
                       ( src.layout()     == zyxf &&
                         dst.zAllocSize() == src.zAllocSize() &&
                         dst.yAllocSize() == src.yAllocSize() &&
-                        dst.xAllocSize() == src.xAllocSize() );
+                        dst.xAllocSize() == src.xAllocSize() &&
+                        dst.fSize()      == src.fSize() );
 
       if ( !canCopy ) {
          WALBERLA_ABORT("Field have to have the same size ");
@@ -181,7 +185,7 @@ namespace cuda {
                                          dst.xAllocSize(),             // inner dimension size
                                          dst.yAllocSize()  );          // next outer dimension size
 
-         p.extent.width  = dst.xAllocSize() * sizeof(T);
+         p.extent.width  = std::min( dst.xAllocSize(), src.xAllocSize() ) * sizeof(T);
          p.extent.height = dst.yAllocSize();
          p.extent.depth  = dst.zAllocSize() * dst.fAllocSize();
       }
@@ -192,7 +196,7 @@ namespace cuda {
                                          dst.fAllocSize(),             // inner dimension size
                                          dst.xAllocSize()  );          // next outer dimension size
 
-         p.extent.width  = dst.fAllocSize() * sizeof(T);
+         p.extent.width  = std::min( dst.fAllocSize(), src.fAllocSize() ) * sizeof(T);
          p.extent.height = dst.xAllocSize();
          p.extent.depth  = dst.yAllocSize() * dst.zAllocSize();
       }

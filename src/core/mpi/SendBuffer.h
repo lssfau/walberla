@@ -154,6 +154,7 @@ public:
 
    //**Repositioning ***************************************************************************************************
    /*!\name Repositioning */
+   inline T *  forward( uint_t elements );
    inline void rewind(const size_t & size);
    //@}
    //*******************************************************************************************************************
@@ -507,6 +508,35 @@ GenericSendBuffer<T,G>::operator<<( V value )
 //  REPOSITIONING
 //
 //======================================================================================================================
+
+//**********************************************************************************************************************
+/*!\brief Forward the given number of elements.
+//
+// \param elements The number of elements to be advanced.
+// \return Previous position.
+//
+// This function forwards \a element send buffer elements of type \a T and returns the previous buffer position.
+*/
+template< typename T    // Element type
+        , typename G >  // Growth policy
+T * GenericSendBuffer<T,G>::forward( uint_t elements )
+{
+   const size_t rest = numeric_cast< size_t >( end_ - cur_ );
+
+   // Checking the size of the remaining memory
+   if( rest < elements ) {
+      extendMemory( size() + elements );
+   }
+
+   // Adding the data value
+   auto previous = cur_;
+   cur_ += elements;
+
+   // Invariants check
+   WALBERLA_ASSERT_LESS_EQUAL( cur_, end_ );
+
+   return previous;
+}
 
 //**********************************************************************************************************************
 /*!\brief Rewinds the stream to a previous position

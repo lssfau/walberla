@@ -101,7 +101,7 @@ int main( int argc, char ** argv )
 
       cuda::fieldCpy( *cpuField, *gpuField );
 
-      WALBERLA_ASSERT_EQUAL( cpuField->get(0,0,0), 2 );
+      WALBERLA_ASSERT_FLOAT_EQUAL( cpuField->get(0,0,0), real_t(2) );
    }
 
 

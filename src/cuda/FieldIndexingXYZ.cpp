@@ -24,7 +24,7 @@
 #include "GPUField.h"
 
 #include "core/cell/CellInterval.h"
-#include "core/debug/Debug.h"
+
 
 namespace walberla {
 namespace cuda {
@@ -32,7 +32,7 @@ namespace cuda {
 
 template< typename T>
 FieldIndexingXYZ<T>::FieldIndexingXYZ ( const GPUField<T> & field,
-                                        uint3 _blockDim, uint3 _gridDim,
+                                        dim3 _blockDim, dim3 _gridDim,
                                         const FieldAccessorXYZ<T> _gpuAccess )
    : field_( field ),
      blockDim_( _blockDim ),

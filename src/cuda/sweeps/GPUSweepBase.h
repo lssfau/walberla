@@ -13,53 +13,64 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file FieldTransferTest.h
-//! \author Martin Bauer <martin.bauer@fau.de>
+//! \file GPUSweepBase.h
+//! \ingroup cuda
+//! \author Paulo Carvalho <prcjunior@inf.ufpr.br>
 //
 //======================================================================================================================
 
+#pragma once
 
-#include "core/debug/TestSubsystem.h"
-#include "core/Environment.h"
-
-#include "field/Field.h"
 
 #include "cuda/GPUField.h"
-#include "cuda/FieldCopy.h"
+
+#include "core/debug/Debug.h"
+
+#include "field/SwapableCompare.h"
+
+#include <set>
+
+namespace walberla {
+namespace cuda {
 
 
-using namespace walberla;
-
-void simpleTransfer()
+template < typename GPUField_T >
+class GPUSweepBase
 {
-   Field<double,4>  h_f1 ( 16, 20, 30, 42.0, field::fzyx );
-   Field<double,4>  h_f2 ( 16, 20, 30,  0.0, field::fzyx );
+public:
+   GPUSweepBase()
+   {
+   }
+   virtual ~GPUSweepBase()
+   {
+      for( auto field = dstFields_.begin(); field != dstFields_.end(); ++field )
+      {
+         delete *field;
+      }
+   }
+
+   GPUField_T * getDstField( GPUField_T * const src )
+   {
+      auto it = dstFields_.find( src );
+      if( it != dstFields_.end() )
+      {
+         return *it;
+      }
+
+      GPUField_T * dst = src->cloneUninitialized();
+      WALBERLA_ASSERT_NOT_NULLPTR( dst );
+
+      dstFields_.insert( dst );
+
+      return dst;
+   }
+
+protected:
+
+   std::set< GPUField_T *, field::SwapableCompare< GPUField_T * > > dstFields_;
+};
 
 
-   cuda::GPUField<double> d_f ( 16,20,30,4,0, field::fzyx );
+} // namespace cuda
+} // namespace walberla
 
-   WALBERLA_CHECK_EQUAL(  h_f1.xSize() ,d_f.xSize() );
-   WALBERLA_CHECK_EQUAL(  h_f1.ySize() ,d_f.ySize() );
-   WALBERLA_CHECK_EQUAL(  h_f1.zSize() ,d_f.zSize() );
-   WALBERLA_CHECK_EQUAL(  h_f1.fSize() ,d_f.fSize() );
-   WALBERLA_CHECK_EQUAL(  h_f1.layout(),d_f.layout()     );
-
-
-   cuda::fieldCpy( d_f, h_f1 );
-   cuda::fieldCpy( h_f2, d_f );
-
-   WALBERLA_CHECK_EQUAL( h_f1, h_f2 );
-}
-
-
-
-
-int main( int argc, char ** argv )
-{
-   debug::enterTestMode();
-   walberla::Environment walberlaEnv( argc, argv );
-
-   simpleTransfer();
-
-   return 0;
-}

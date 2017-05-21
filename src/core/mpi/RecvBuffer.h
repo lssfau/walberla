@@ -140,7 +140,7 @@ public:
                           inline void reserve( size_t newCapacity );
                           inline void resize ( size_t newSize     );
    template< typename V >        void peek   ( V& value ) const;
-                          inline void skip   ( size_t elements    );
+                          inline T *  skip   ( size_t elements    );
                           inline void clear  ();
                           inline void reset  ();
                           inline void readDebugMarker( const char * marker );
@@ -578,10 +578,15 @@ inline void GenericRecvBuffer<T>::peek( V& value ) const
 // This function skips \a element receive buffer elements of type \a T.
 */
 template< typename T >  // Element type
-void GenericRecvBuffer<T>::skip( size_t elements )
+T * GenericRecvBuffer<T>::skip( size_t elements )
 {
+   auto previous = cur_;
    cur_ += elements;
-   if( cur_ > end_ ) cur_ = end_;
+
+   // Invariants check
+   WALBERLA_ASSERT_LESS_EQUAL( cur_, end_ );
+
+   return previous;
 }
 //**********************************************************************************************************************
 

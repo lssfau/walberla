@@ -33,26 +33,28 @@ namespace cuda {
                                    const StructuredBlockStorage * const bs,
                                    uint_t ghostLayers,
                                    uint_t fSize,
-                                   const field::Layout & layout )
+                                   const field::Layout & layout,
+                                   bool usePitchedMem )
       {
          return new GPUField_T( bs->getNumberOfXCells( *block ),
                                 bs->getNumberOfYCells( *block ),
                                 bs->getNumberOfZCells( *block ),
-                                fSize, ghostLayers, layout );
+                                fSize, ghostLayers, layout, usePitchedMem );
       }
 
       template< typename Field_T>
       GPUField< typename Field_T::value_type> *
       createGPUFieldFromCPUField( const IBlock * const block,
                                   const StructuredBlockStorage * const,
-                                  ConstBlockDataID cpuFieldID
+                                  ConstBlockDataID cpuFieldID,
+                                  bool usePitchedMem
                                 )
       {
          typedef GPUField< typename Field_T::value_type> GPUField_T;
 
          const Field_T * f = block->getData<Field_T>( cpuFieldID );
          auto gpuField = new GPUField_T( f->xSize(), f->ySize(), f->zSize(), f->fSize(),
-                                         f->nrOfGhostLayers(), f->layout() );
+                                         f->nrOfGhostLayers(), f->layout(), usePitchedMem );
 
          cuda::fieldCpy( *gpuField, *f );
 
@@ -67,9 +69,10 @@ namespace cuda {
                                     const std::string & identifier,
                                     uint_t fSize,
                                     const Layout layout,
-                                    uint_t nrOfGhostLayers )
+                                    uint_t nrOfGhostLayers,
+                                    bool usePitchedMem )
    {
-      auto func = boost::bind ( internal::createGPUField<GPUField_T>, _1, _2, nrOfGhostLayers, fSize, layout );
+      auto func = boost::bind ( internal::createGPUField<GPUField_T>, _1, _2, nrOfGhostLayers, fSize, layout, usePitchedMem );
       return bs->addStructuredBlockData< GPUField_T >( func, identifier );
    }
 
@@ -77,9 +80,10 @@ namespace cuda {
    template< typename Field_T>
    BlockDataID addGPUFieldToStorage( const shared_ptr< StructuredBlockStorage > & bs,
                                      ConstBlockDataID cpuFieldID,
-                                     const std::string & identifier )
+                                     const std::string & identifier,
+                                     bool usePitchedMem )
    {
-      auto func = boost::bind ( internal::createGPUFieldFromCPUField<Field_T>, _1, _2, cpuFieldID );
+      auto func = boost::bind ( internal::createGPUFieldFromCPUField<Field_T>, _1, _2, cpuFieldID, usePitchedMem );
       return bs->addStructuredBlockData< GPUField<typename Field_T::value_type> >( func, identifier );
    }
 

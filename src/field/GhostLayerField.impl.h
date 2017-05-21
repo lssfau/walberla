@@ -21,6 +21,7 @@
 //======================================================================================================================
 
 #include "field/iterators/IteratorMacros.h"
+#include "field/GhostRegions.h"
 
 #include "core/debug/Debug.h"
 
@@ -348,80 +349,18 @@ namespace field {
                              xs, ys, zs, 1 );
    }
 
-
-
-
-   //*******************************************************************************************************************
-   /*!\brief Constructs CellInterval containing the ghost region in the specified direction
-    *
-    * \param d   direction of the ghost layer  For W,E,N,S,T,B   a slice is returned
-    *                                          for NW, NE, ..    an edge is returned
-    *                                          for TBE, TNW, ... a corner ( single cell ) is returned
-    * \param ci output parameter, CellInterval describing the ghost layer
-    * \param thickness how many ghost layer to return, if thickness < nrOfGhostLayers() the ghostlayers
-    *                  nearest to the domain are returned
-    * \param fullSlice  if true also the ghost cells in directions orthogonal to d are contained in the
-    *                   returned cell interval. Example (d=W ): if fullSlice then also the ghost cells in N-S and T-B
-    *                   are included.
-    *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
    void GhostLayerField<T,fSize_>::getGhostRegion(stencil::Direction d, CellInterval & ci,
                                                   cell_idx_t thickness, bool fullSlice ) const
    {
-      const cell_idx_t sizeArr [] = { cell_idx_c( Field<T,fSize_>::xSize() ),
-                                      cell_idx_c( Field<T,fSize_>::ySize() ),
-                                      cell_idx_c( Field<T,fSize_>::zSize() )};
-
-      WALBERLA_ASSERT_GREATER( thickness, 0 );
-      WALBERLA_ASSERT_LESS_EQUAL( uint_c(thickness), gl_ );
-      const cell_idx_t ghosts = cell_idx_c ( thickness );
-
-      cell_idx_t fullSliceInc = fullSlice ? cell_idx_c(gl_) : 0;
-
-      for( uint_t dim = 0; dim< 3; ++dim )
-         switch ( stencil::c[dim][d] )
-         {
-            case -1: ci.min()[dim] =     -ghosts;     ci.max()[dim] =         0                   - 1; break;
-            case  0: ci.min()[dim] = -fullSliceInc;   ci.max()[dim] =  sizeArr[dim]+fullSliceInc  - 1; break;
-            case  1: ci.min()[dim] =   sizeArr[dim];  ci.max()[dim] =  sizeArr[dim]+ghosts        - 1; break;
-         }
-
+      ci = field::getGhostRegion( *this, d, thickness, fullSlice );
    }
 
-
-   //*******************************************************************************************************************
-   /*!\brief Constructs CellInterval containing the last slice before the ghost layer begins
-    *        for a given direction.
-    *
-    * \param d   direction of the border .     For W,E,N,S,T,B   a slice is returned
-    *                                          for NW, NE, ..    an edge is returned
-    *                                          for TBE, TNW, ... a corner ( single cell ) is returned
-    * \param ci  output parameter, CellInterval describing the slice before ghost layer
-    * \param thickness  how many slices to return
-    * \param fullSlice  if true also the ghost cells in directions orthogonal to d are contained in the \
-    *                   returned cell interval. Example (d=W ): if fullSlice then also the ghost layer in N-S and T-B
-    *                   are included, otherwise only inner cells are returned
-    *
-    *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
    void GhostLayerField<T,fSize_>::getSliceBeforeGhostLayer(stencil::Direction d, CellInterval & ci,
                                                             cell_idx_t thickness, bool fullSlice ) const
    {
-      WALBERLA_ASSERT_GREATER( thickness, 0 );
-
-      const cell_idx_t sizeArr [] = { cell_idx_c( Field<T,fSize_>::xSize() ),
-                                   cell_idx_c( Field<T,fSize_>::ySize() ),
-                                   cell_idx_c( Field<T,fSize_>::zSize() )};
-
-
-      cell_idx_t fullSliceInc = fullSlice ? cell_idx_c(gl_) : 0;
-      for( uint_t dim = 0; dim< 3; ++dim )
-         switch ( stencil::c[dim][d] )
-         {
-            case -1: ci.min()[dim] =                      0;  ci.max()[dim] =     thickness              - 1; break;
-            case  0: ci.min()[dim] =          -fullSliceInc;  ci.max()[dim] =  sizeArr[dim] +fullSliceInc- 1; break;
-            case  1: ci.min()[dim] = sizeArr[dim]-thickness;  ci.max()[dim] =  sizeArr[dim]              - 1; break;
-         }
+      ci = field::getSliceBeforeGhostLayer( *this, d, thickness, fullSlice );
    }
 
    //*******************************************************************************************************************
