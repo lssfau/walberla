@@ -132,5 +132,43 @@ std::vector<uint_t> getPrimeFactors( const uint_t n )
    return primeFactors;
 }
 
+
+/*******************************************************************************************************************//**
+ * \brief   Gets all devisors of a number n.
+ *
+ * Computes all unique products of n's prime factors.
+ *
+ * \param   n  The number the devisors are computed for.
+ *
+ * \pre     n > 0
+ *
+ * \return  A set of the devisors including 1 and n
+ **********************************************************************************************************************/
+std::set<uint_t> getDevisors( const uint_t n )
+{
+   if( n == uint_t(0) )
+      return std::set<uint_t>();
+
+   std::vector<uint_t> factors = getPrimeFactors( n );
+
+   std::set<uint_t> devisors;
+   std::vector<uint_t> tmpDevisors;
+
+   devisors.insert( uint_t(1) );
+   tmpDevisors.reserve( ( size_t(1) << factors.size() ) - size_t(1) );
+
+   for( auto fIt = factors.begin(); fIt != factors.end(); ++fIt )
+   {
+      tmpDevisors.clear();
+      for(auto pIt = devisors.begin(); pIt != devisors.end(); ++pIt)
+      {
+         tmpDevisors.push_back( *pIt * *fIt );
+      }
+      devisors.insert( tmpDevisors.begin(), tmpDevisors.end() );
+   }
+
+   return devisors;
+}
+
 } // namespace math
 } // namespace walberla

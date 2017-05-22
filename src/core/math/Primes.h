@@ -24,6 +24,7 @@
 
 #include "core/DataTypes.h"
 
+#include <set>
 #include <vector>
 
 
@@ -33,6 +34,7 @@ namespace math {
 bool                isPrime        ( const uint_t n );
 std::vector<uint_t> getPrimes      ( const uint_t n );
 std::vector<uint_t> getPrimeFactors( const uint_t n );
+std::set<uint_t>    getDevisors    ( const uint_t n );
 
 } // namespace math
 } // namespace walberla

@@ -44,9 +44,20 @@ bool is_sorted( InputIterator begin, InputIterator end )
 void runTests( const uint_t n )
 {
    auto primes = math::getPrimes(n);
+   auto devisors = math::getDevisors(n);
+
    WALBERLA_CHECK( ::is_sorted( primes.begin(), primes.end() ) );
-   for(uint_t i = 0; i <= n; ++i)
+   for(uint_t i = 1; i <= n; ++i)
+   {
       WALBERLA_CHECK_EQUAL( walberla::math::isPrime(i), std::binary_search( primes.begin(), primes.end(), i ) );
+      WALBERLA_CHECK_EQUAL( n % i == 0, devisors.find( i ) != devisors.end() );
+   }
+
+   for( auto it = primes.begin(); it != primes.end(); ++it )
+      WALBERLA_CHECK( math::isPrime( *it ) );
+
+   for( auto it = devisors.begin(); it != devisors.end(); ++it )
+      WALBERLA_CHECK( n % *it == 0 );
 
    if( n != 0 )
    {
