@@ -25,6 +25,9 @@ waLBerla_execute_test( NAME FlagFieldTest )
 waLBerla_compile_test( FILES interpolators/InterpolationTest.cpp)
 waLBerla_execute_test( NAME InterpolationTest )
 
+waLBerla_compile_test( FILES interpolators/FieldInterpolationTest.cpp)
+waLBerla_execute_test( NAME FieldInterpolationTest )
+
 waLBerla_compile_test( FILES adaptors/AdaptorTest.cpp DEPENDS blockforest gui lbm )
 waLBerla_execute_test( NAME AdaptorTest )
 
