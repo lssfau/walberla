@@ -1712,7 +1712,28 @@ using math::Matrix3;
 
 //======================================================================================================================
 //
-//  comparison backend for Vector3<real_t>
+//  Vector Trait Specialization
+//
+//======================================================================================================================
+
+namespace walberla {
+
+// Specialization of VectorTrait for Matrix3s
+template<typename T>
+struct VectorTrait< Matrix3<T> >
+{
+   typedef T OutputType;
+
+   static const uint_t F_SIZE =  9u;
+   static T    get( const Matrix3<T> & v, uint_t f )       { return v[f]; }
+   static void set(       Matrix3<T> & v, uint_t f, T val) { v[f] = val;  }
+};
+
+} // namespace walberla
+
+//======================================================================================================================
+//
+//  comparison backend for Matrix3<real_t>
 //
 //======================================================================================================================
 
@@ -1728,9 +1749,18 @@ inline bool check_float_equal( const math::Matrix3<real_t> & lhs, const math::Ma
        && floatIsEqual( lhs[6], rhs[6] ) && floatIsEqual( lhs[7], rhs[7] ) && floatIsEqual( lhs[8], rhs[8] );
 }
 
+template< >
+inline bool check_float_equal_eps( const math::Matrix3<real_t> & lhs, const math::Matrix3<real_t> & rhs, const real_t epsilon )
+{
+   return floatIsEqual( lhs[0], rhs[0], epsilon ) && floatIsEqual( lhs[1], rhs[1], epsilon ) && floatIsEqual( lhs[2], rhs[2], epsilon )
+       && floatIsEqual( lhs[3], rhs[3], epsilon ) && floatIsEqual( lhs[4], rhs[4], epsilon ) && floatIsEqual( lhs[5], rhs[5], epsilon )
+       && floatIsEqual( lhs[6], rhs[6], epsilon ) && floatIsEqual( lhs[7], rhs[7], epsilon ) && floatIsEqual( lhs[8], rhs[8], epsilon );
+}
+
 }
 }
 }
+
 
 #undef HIGH
 
