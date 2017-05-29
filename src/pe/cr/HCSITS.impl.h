@@ -509,10 +509,10 @@ inline real_t HardContactSemiImplicitTimesteppingSolvers::relaxInelasticFriction
    for( size_t i = 0; i < numContactsMasked; ++i )
    {
       // Remove velocity corrections of this contact's reaction.
-      bodyCache.dv_.at(contactCache.body1_[i]->index_) -= contactCache.body1_[i]->getInvMass() * contactCache.p_[i];
-      bodyCache.dw_.at(contactCache.body1_[i]->index_) -= contactCache.body1_[i]->getInvInertia() * ( contactCache.r1_[i] % contactCache.p_[i] );
-      bodyCache.dv_.at(contactCache.body2_[i]->index_) += contactCache.body2_[i]->getInvMass() * contactCache.p_[i];
-      bodyCache.dw_.at(contactCache.body2_[i]->index_) += contactCache.body2_[i]->getInvInertia() * ( contactCache.r2_[i] % contactCache.p_[i] );
+      bodyCache.dv_[contactCache.body1_[i]->index_] -= contactCache.body1_[i]->getInvMass() * contactCache.p_[i];
+      bodyCache.dw_[contactCache.body1_[i]->index_] -= contactCache.body1_[i]->getInvInertia() * ( contactCache.r1_[i] % contactCache.p_[i] );
+      bodyCache.dv_[contactCache.body2_[i]->index_] += contactCache.body2_[i]->getInvMass() * contactCache.p_[i];
+      bodyCache.dw_[contactCache.body2_[i]->index_] += contactCache.body2_[i]->getInvInertia() * ( contactCache.r2_[i] % contactCache.p_[i] );
 
       // Calculate the relative contact VELOCITY in the global world frame (if no contact reaction is present at contact i)
       Vec3 gdot    ( ( bodyCache.v_[contactCache.body1_[i]->index_] + bodyCache.dv_[contactCache.body1_[i]->index_] ) -
