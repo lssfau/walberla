@@ -44,7 +44,7 @@ private:
 };
 
 inline
-shared_ptr<HashGridsDataHandling> createHashGridsDataHandling(shared_ptr<BodyStorage>& globalStorage,const BlockDataID& storageID)
+shared_ptr<HashGridsDataHandling> createHashGridsDataHandling(const shared_ptr<BodyStorage>& globalStorage,const BlockDataID& storageID)
 {
    return make_shared<HashGridsDataHandling>( globalStorage, storageID );
 }
