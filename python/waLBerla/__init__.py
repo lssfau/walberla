@@ -28,7 +28,10 @@ if cpp_available:
         # extend the C++ module with some python functions
         from .field_extension import extend as extend_field
         extend_field( field     )
-
+    if 'cuda' in globals():
+        sys.modules[__name__ + '.cuda'] = cuda
+        from .cuda_extension import extend as extend_cuda
+        extend_cuda( cuda )
     if 'geometry' in globals():
         sys.modules[__name__ + '.geometry'] = geometry
     if 'lbm' in globals():

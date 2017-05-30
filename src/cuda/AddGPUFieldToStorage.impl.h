@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "cuda/FieldCopy.h"
 
 namespace walberla {
 namespace cuda {

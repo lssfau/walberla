@@ -79,10 +79,26 @@ namespace cuda {
       inline uint_t  zSize() const  { return zSize_; }
       inline uint_t  fSize() const  { return fSize_; }
       inline uint_t  size()  const  { return fSize() * xSize() * ySize() * zSize(); }
+      inline uint_t  size( uint_t coord )  const;
+
+      inline uint_t       xSizeWithGhostLayer()        const  { return xSize() + uint_c(2)*nrOfGhostLayers_; }
+      inline uint_t       ySizeWithGhostLayer()        const  { return ySize() + uint_c(2)*nrOfGhostLayers_; }
+      inline uint_t       zSizeWithGhostLayer()        const  { return zSize() + uint_c(2)*nrOfGhostLayers_; }
+      inline uint_t       sizeWithGhostLayer(uint_t i) const  { return i==3 ? fSize_ :
+                                                                              size(i) + uint_c(2)*nrOfGhostLayers_; }
 
       cell_idx_t xOff() const { return cell_idx_c( nrOfGhostLayers_ ); }
       cell_idx_t yOff() const { return cell_idx_c( nrOfGhostLayers_ ); }
       cell_idx_t zOff() const { return cell_idx_c( nrOfGhostLayers_ ); }
+
+      cell_idx_t xStride() const { return (layout_ == fzyx) ? cell_idx_t(1) :
+                                                              cell_idx_c(fAllocSize()); }
+      cell_idx_t yStride() const { return (layout_ == fzyx) ? cell_idx_t(xAllocSize()) :
+                                                              cell_idx_c(fAllocSize() * xAllocSize()); }
+      cell_idx_t zStride() const { return (layout_ == fzyx) ? cell_idx_t(xAllocSize() * yAllocSize()) :
+                                                              cell_idx_c(fAllocSize() * xAllocSize() * yAllocSize()); }
+      cell_idx_t fStride() const { return (layout_ == fzyx) ? cell_idx_t(xAllocSize() * yAllocSize() * zAllocSize()) :
+                                                              cell_idx_c(1); }
 
 
       uint_t xAllocSize() const;
@@ -91,8 +107,8 @@ namespace cuda {
       uint_t fAllocSize() const;
       inline uint_t allocSize() const { return fAllocSize() * xAllocSize() * yAllocSize() * zAllocSize(); }
 
-      inline bool hasSameAllocSize( const GPUField<T> & other ) const;
-      inline bool hasSameSize( const GPUField<T> & other ) const;
+      bool hasSameAllocSize( const GPUField<T> & other ) const;
+      bool hasSameSize( const GPUField<T> & other ) const;
 
       GPUField<T> * cloneUninitialized() const;
 
@@ -133,3 +149,4 @@ namespace cuda {
 } // namespace walberla
 
 
+#include "GPUField.impl.h"

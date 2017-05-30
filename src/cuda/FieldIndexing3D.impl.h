@@ -20,7 +20,6 @@
 //======================================================================================================================
 
 #include "FieldIndexing3D.h"
-#include "GPUTypesExplicitInstantiation.h"
 #include "GPUField.h"
 
 #include "core/cell/CellInterval.h"
@@ -163,10 +162,6 @@ FieldIndexing3D<T> FieldIndexing3D<T>::intervalXYZ( const GPUField<T> & f, const
    return interval( f, ci );
 }
 
-
-
-
-GPU_CLASS_TEMPLATE_INSTANTIATION( FieldIndexing3D )
 
 
 } // namespace cuda

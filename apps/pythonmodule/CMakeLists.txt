@@ -2,13 +2,18 @@
 
 
 if ( WALBERLA_BUILD_WITH_PYTHON_MODULE )
-    
+
+    set(PYTHON_MODULE_DEPENDENCIES blockforest boundary domain_decomposition core field geometry lbm postprocessing python_coupling timeloop vtk)
+    if (WALBERLA_BUILD_WITH_CUDA)
+        set(PYTHON_MODULE_DEPENDENCIES ${PYTHON_MODULE_DEPENDENCIES} cuda)
+    endif()
+
     if( WALBERLA_CXX_COMPILER_IS_MSVC )
-       set ( pythonModules blockforest boundary domain_decomposition core field geometry lbm postprocessing python_coupling timeloop vtk)
+       set ( pythonModules ${PYTHON_MODULE_DEPENDENCIES})
     elseif( APPLE )
-       set ( pythonModules "-Wl,-force_load" blockforest boundary domain_decomposition core field geometry lbm postprocessing python_coupling timeloop vtk)
+       set ( pythonModules "-Wl,-force_load" ${PYTHON_MODULE_DEPENDENCIES})
     else()
-       set ( pythonModules "-Wl,-whole-archive" blockforest boundary domain_decomposition core field geometry lbm postprocessing python_coupling timeloop vtk  "-Wl,-no-whole-archive" )
+       set ( pythonModules "-Wl,-whole-archive" ${PYTHON_MODULE_DEPENDENCIES}  "-Wl,-no-whole-archive" )
     endif()
 
     if( WALBERLA_BUILD_WITH_PYTHON_LBM )

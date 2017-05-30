@@ -30,8 +30,13 @@
 #include "timeloop/python/Exports.h"
 #include "vtk/python/Exports.h"
 
+#ifdef WALBERLA_BUILD_WITH_CUDA
+#include "cuda/python/Exports.h"
+#endif
+
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/insert_range.hpp>
+
 
 
 namespace bmpl = boost::mpl;
@@ -110,6 +115,14 @@ struct InitObject
 
       // Timeloop
       pythonManager->addExporterFunction( timeloop::exportModuleToPython );
+
+#ifdef WALBERLA_BUILD_WITH_CUDA
+      using walberla::cuda::GPUField;
+      typedef bmpl::vector<GPUField<double>, GPUField<float>, GPUField<int>, GPUField<uint8_t>, GPUField<uint16_t> > GPUFields;
+
+      pythonManager->addExporterFunction( cuda::exportModuleToPython<GPUFields> );
+      pythonManager->addBlockDataConversion<GPUFields>();
+#endif
 
       python_coupling::initWalberlaForPythonModule();
    }

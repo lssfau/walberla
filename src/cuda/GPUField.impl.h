@@ -21,7 +21,6 @@
 
 #include "GPUField.h"
 #include "ErrorChecking.h"
-#include "GPUTypesExplicitInstantiation.h"
 
 #include "core/logging/Logging.h"
 
@@ -124,12 +123,23 @@ void GPUField<T>::getSlice(stencil::Direction d, CellInterval & ci,
    }
 }
 
+template<typename T>
+inline uint_t GPUField<T>::size( uint_t coord ) const
+{
+   switch (coord) {
+      case 0: return this->xSize();
+      case 1: return this->ySize();
+      case 2: return this->zSize();
+      case 3: return this->fSize();
+      default: WALBERLA_ASSERT(false); return 0;
+   }
+}
 
 //*******************************************************************************************************************
 /*! True if sizes of all dimensions match
  *******************************************************************************************************************/
 template<typename T>
-inline bool GPUField<T>::hasSameSize( const GPUField<T> & other ) const
+bool GPUField<T>::hasSameSize( const GPUField<T> & other ) const
 {
    return xSize() == other.xSize() &&
           ySize() == other.ySize() &&
@@ -140,7 +150,7 @@ inline bool GPUField<T>::hasSameSize( const GPUField<T> & other ) const
 /*! True if allocation sizes of all dimensions match
  *******************************************************************************************************************/
 template<typename T>
-inline bool GPUField<T>::hasSameAllocSize( const GPUField<T> & other ) const
+bool GPUField<T>::hasSameAllocSize( const GPUField<T> & other ) const
 {
    return xAllocSize() == other.xAllocSize() &&
           yAllocSize() == other.yAllocSize() &&
@@ -236,9 +246,6 @@ void GPUField<T>::swapDataPointers( GPUField<T> & other )
    std::swap( pitchedPtr_, other.pitchedPtr_ );
 }
 
-
-
-GPU_CLASS_TEMPLATE_INSTANTIATION( GPUField )
 
 
 } // namespace cuda

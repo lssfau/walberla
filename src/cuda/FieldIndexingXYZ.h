@@ -77,3 +77,4 @@ template< typename T> class GPUField;
 } // namespace walberla
 
 
+#include "FieldIndexingXYZ.impl.h"
