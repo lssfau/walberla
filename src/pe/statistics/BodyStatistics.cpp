@@ -42,7 +42,7 @@ void BodyStatistics::operator()()
    velocitySample_.clear();
    massSample_.clear();
 
-   for( auto blockIt = blockStorage_.begin(); blockIt != blockStorage_.end(); ++blockIt )
+   for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
    {
       auto storage = blockIt->getData< pe::Storage >( bodyStorageID_ );
       const pe::BodyStorage & localStorage  = (*storage)[0];

@@ -36,7 +36,7 @@ class BodyStatistics
 {
 public:
 
-   BodyStatistics( const BlockStorage & blockStorage, const BlockDataID & bodyStorageID )
+   BodyStatistics( const shared_ptr<BlockStorage>& blockStorage, const BlockDataID & bodyStorageID )
       : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID )
    { }
 
@@ -52,8 +52,8 @@ public:
    real_t totalMass() const { return massSample_.sum(); }
 
 private:
-   const BlockStorage & blockStorage_;
-   BlockDataID bodyStorageID_;
+   const shared_ptr<BlockStorage> blockStorage_;
+   const BlockDataID              bodyStorageID_;
 
    math::Sample localBodiesBlockSample_, shadowBodiesBlockSample_;
    math::Sample localBodiesProcessSample_, shadowBodiesProcessSample_;
