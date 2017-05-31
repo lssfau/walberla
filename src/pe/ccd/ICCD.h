@@ -38,7 +38,8 @@ public:
    virtual PossibleContacts& generatePossibleContacts( WcTimingTree* tt = NULL ) = 0;
    PossibleContacts& getPossibleContacts() {return contacts_;}
 
-   virtual int getObservedBodyCount() const = 0;
+   virtual void reloadBodies() {};
+   virtual int  getObservedBodyCount() const = 0;
 protected:
    PossibleContacts contacts_;
 };

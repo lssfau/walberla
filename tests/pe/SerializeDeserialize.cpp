@@ -36,7 +36,6 @@
 
 using namespace walberla;
 using namespace walberla::pe;
-using namespace walberla::blockforest;
 
 typedef boost::tuple<Sphere> BodyTuple ;
 
@@ -44,22 +43,17 @@ void createDump()
 {
    using namespace walberla::grid_generator;
 
-   BodyStorage globalStorage;
+   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
    // create blocks
-   shared_ptr< StructuredBlockForest > forest = blockforest::createUniformBlockGrid(
-            uint_c( 2), uint_c( 2), uint_c( 2), // number of blocks in x,y,z direction
-            uint_c( 1), uint_c( 1), uint_c( 1), // how many cells per block (x,y,z)
-            real_c(10),                         // dx: length of one cell in physical coordinates
-            0,                                  // max blocks per process
-            false, false,                       // include metis / force metis
-            false, false, false );                 // full periodicity
+   auto forest = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), "SerializeDeserialize.sbf", true, false ) );
 
-   BlockDataID storageID           = forest->addBlockData( createStorageDataHandling<BodyTuple>() );
+   auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+   auto ccdID               = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
 
    for (auto it = SCIterator(forest->getDomain(), Vec3(-1,-1,-1), 3); it != SCIterator(); ++it)
    {
-      createSphere( globalStorage, forest->getBlockStorage(), storageID, 0, *it, 1);
+      createSphere( *globalBodyStorage, *forest, storageID, 0, *it, 1);
    }
 
    WALBERLA_LOG_DEVEL_ON_ROOT("dumping body storage");
@@ -68,9 +62,11 @@ void createDump()
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)
    {
       BodyStorage& localStorage = (*(blockIt->getData< Storage >( storageID )))[0];
-      WALBERLA_LOG_DEVEL("DUMPING BLOCK");
-      WALBERLA_LOG_DEVEL("aabb: " << blockIt->getAABB());
+      WALBERLA_LOG_DEVEL("DUMPING BLOCK (" << blockIt->getId() << ") " << blockIt->getAABB() );
       WALBERLA_LOG_DEVEL("#bodies: " << localStorage.size());
+
+      ccd::ICCD* ccd = blockIt->getData< ccd::ICCD >( ccdID );
+      WALBERLA_CHECK_EQUAL( ccd->getObservedBodyCount(), 1000 );
    }
 }
 
@@ -78,33 +74,34 @@ void checkDump()
 {
    using namespace walberla::grid_generator;
 
-//   BodyStorage globalStorage;
+   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
    // create blocks
-   shared_ptr< StructuredBlockForest > forest = blockforest::createUniformBlockGrid(
-            uint_c( 2), uint_c( 2), uint_c( 2), // number of blocks in x,y,z direction
-            uint_c( 1), uint_c( 1), uint_c( 1), // how many cells per block (x,y,z)
-            real_c(10),                         // dx: length of one cell in physical coordinates
-            0,                                  // max blocks per process
-            false, false,                       // include metis / force metis
-            false, false, false );                 // full periodicity
+   auto forest = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), "SerializeDeserialize.sbf", true, false ) );
 
-
-
-   BlockDataID storageID = forest->loadBlockData("BodyStorageDump.dump", createStorageDataHandling<BodyTuple>());
+   auto storageID    = forest->loadBlockData("BodyStorageDump.dump", createStorageDataHandling<BodyTuple>(), "Storage");
+   auto ccdID        = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
 
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)
    {
+      ccd::ICCD* ccd = blockIt->getData< ccd::ICCD >( ccdID );
+      ccd->reloadBodies();
+   }
+
+   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)
+   {
+      ccd::ICCD* ccd = blockIt->getData< ccd::ICCD >( ccdID );
+      WALBERLA_CHECK_EQUAL( ccd->getObservedBodyCount(), 1000 );
+
       BodyStorage& localStorage = (*(blockIt->getData< Storage >( storageID )))[0];
-      WALBERLA_LOG_DEVEL("CHECKING BLOCK");
-      WALBERLA_LOG_DEVEL("aabb: " << blockIt->getAABB());
+      WALBERLA_LOG_DEVEL("CHECKING BLOCK (" << blockIt->getId() << ") " << blockIt->getAABB() );
       WALBERLA_LOG_DEVEL("#bodies: " << localStorage.size());
       auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID);
       for (auto it = SCIterator(forest->getDomain(), Vec3(-1,-1,-1), 3); it != SCIterator(); ++it)
       {
          if (blockIt->getAABB().contains(*it))
          {
-            WALBERLA_CHECK_FLOAT_EQUAL( bodyIt->getPosition(), *it);
+            WALBERLA_CHECK_FLOAT_EQUAL( bodyIt->getPosition(), *it, blockIt->getAABB());
             ++bodyIt;
          }
       }
@@ -116,10 +113,21 @@ int main( int argc, char ** argv )
    walberla::debug::enterTestMode();
 
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
+   MPIManager::instance()->useWorldComm();
 
    SetBodyTypeIDs<BodyTuple>::execute();
 
+//   save SetupBlockForest, if you want to do that run with only one process
+   createBlockForest( math::AABB(0,0,0,60,60,60),
+                      Vector3<uint_t>(2,2,2),                   // number of blocks
+                      Vector3<bool>(false, false, false),       // periodicity
+                      true,                                     // setup run?
+                      "SerializeDeserialize.sbf" );             // sbf filename
+
+   WALBERLA_LOG_DEVEL_ON_ROOT("*** DUMPING ***");
    createDump();
+   WALBERLA_MPI_BARRIER();
+   WALBERLA_LOG_DEVEL_ON_ROOT("*** CHECKING ***");
    checkDump();
 
    return EXIT_SUCCESS;

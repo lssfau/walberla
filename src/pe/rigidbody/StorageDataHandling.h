@@ -29,6 +29,7 @@
 #include "pe/communication/DynamicMarshalling.h"
 
 #include "blockforest/BlockDataHandling.h"
+#include "core/Abort.h"
 
 namespace walberla{
 namespace pe{
@@ -37,14 +38,14 @@ namespace pe{
 template<typename BodyTuple>
 class StorageDataHandling : public domain_decomposition::BlockDataHandling<Storage>{
 public:
-    Storage * initialize( IBlock * const /*block*/ ) {return new Storage();}
+   Storage * initialize( IBlock * const /*block*/ ) {return new Storage();}
 
-    /// must be thread-safe !
-    virtual inline void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer );
-    /// must be thread-safe !
-    virtual inline  Storage * deserialize( IBlock * const block );
-    /// must be thread-safe !
-    virtual inline void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer );
+   /// must be thread-safe !
+   virtual inline void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer );
+   /// must be thread-safe !
+   virtual inline  Storage * deserialize( IBlock * const block );
+   /// must be thread-safe !
+   virtual inline void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer );
 };
 
 template<typename BodyTuple>
@@ -55,6 +56,10 @@ inline void StorageDataHandling<BodyTuple>::serialize( IBlock * const block, con
    buffer << localBodyStorage.size();
    for (auto bodyIt = localBodyStorage.begin(); bodyIt != localBodyStorage.end(); ++bodyIt)
    {
+      if ( !block->getAABB().contains( bodyIt->getPosition()) )
+      {
+         WALBERLA_ABORT( "Body to be stored not contained within block!" );
+      }
       marshal( buffer, RigidBodyCopyNotification( **bodyIt ) );
       MarshalDynamically<BodyTuple>::execute( buffer, **bodyIt );
    }
@@ -84,6 +89,10 @@ inline void StorageDataHandling<BodyTuple>::deserialize( IBlock * const block, c
       BodyID bd = UnmarshalDynamically<BodyTuple>::execute(buffer, objparam.geomType_, math::AABB(-inf, -inf, -inf, inf, inf, inf), block->getAABB());
       bd->setRemote( false );
 
+      if ( !block->getAABB().contains( bd->getPosition()) )
+      {
+         WALBERLA_ABORT("Loaded body not contained within block!" );
+      }
       WALBERLA_ASSERT_EQUAL(localBodyStorage.find( bd->getSystemID() ), localBodyStorage.end());
       localBodyStorage.add(bd);
 

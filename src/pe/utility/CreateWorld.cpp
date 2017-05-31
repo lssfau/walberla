@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file CreateWorld.cpp
-//! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -34,12 +33,10 @@
 namespace walberla {
 namespace pe {
 
-shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& mainConf)
+shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
+                                          Vector3<uint_t> blocks,
+                                          const Vector3<bool> isPeriodic)
 {
-   math::AABB simulationDomain   = math::AABB( Vec3(0,0,0), mainConf.getParameter<Vec3>("simulationDomain", Vec3(10, 10, 10)));
-   Vector3<uint_t> blocks        = mainConf.getParameter<Vector3<uint_t>>("blocks", Vector3<uint_t>(3, 3, 3));
-   Vector3<bool> isPeriodic      = mainConf.getParameter<Vector3<bool>>("isPeriodic", Vector3<bool>(true, true, true));
-
    if (isPeriodic[0] && blocks[0]<2)
    {
       WALBERLA_LOG_WARNING_ON_ROOT( "To few blocks in periodic x direction (" << blocks[0] << ")! Setting to 2..." );
@@ -56,46 +53,61 @@ shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& m
       blocks[2] = 2;
    }
 
-//   const uint_t numberOfProcesses = blocks[0] * blocks[1] * blocks[2];
+   return blockforest::createBlockForest( simulationDomain,
+                                          blocks[0], blocks[1], blocks[2],
+         blocks[0], blocks[1], blocks[2],
+         isPeriodic[0],isPeriodic[1],isPeriodic[2],
+         false );
+}
 
-   if( !mainConf.isDefined( "sbfFile" ) )
+shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
+                                          Vector3<uint_t> blocks,
+                                          const Vector3<bool> isPeriodic,
+                                          const bool setupRun,
+                                          const std::string sbffile)
+{
+   if (isPeriodic[0] && blocks[0]<2)
    {
-      WALBERLA_LOG_INFO_ON_ROOT( "No setup file specified: Creation without setup file!" );
-
-      return blockforest::createBlockForest( simulationDomain,
-                                             blocks[0], blocks[1], blocks[2],
-                                             blocks[0], blocks[1], blocks[2],
-                                             isPeriodic[0],isPeriodic[1],isPeriodic[2],
-                                             false );
+      WALBERLA_LOG_WARNING_ON_ROOT( "To few blocks in periodic x direction (" << blocks[0] << ")! Setting to 2..." );
+      blocks[0] = 2;
+   }
+   if (isPeriodic[1] && blocks[1]<2)
+   {
+      WALBERLA_LOG_WARNING_ON_ROOT( "To few blocks in periodic y direction (" << blocks[1] << ")! Setting to 2..." );
+      blocks[1] = 2;
+   }
+   if (isPeriodic[2] && blocks[2]<2)
+   {
+      WALBERLA_LOG_WARNING_ON_ROOT( "To few blocks in periodic z direction (" << blocks[2] << ")! Setting to 2..." );
+      blocks[2] = 2;
    }
 
-   // sbf file given -> try to load or save domain decomposition
-   std::string sbffile = mainConf.getParameter< std::string >( "sbfFile" );
    WALBERLA_LOG_INFO_ON_ROOT( "Setup file specified: Using " << sbffile );
 
-   bool setupRun = mainConf.getParameter< bool >( "setupRun", true );
    if (setupRun)
    {
-      WALBERLA_LOG_INFO_ON_ROOT("Setup run. For production run specify 'setupRun = true'");
+      WALBERLA_LOG_INFO_ON_ROOT("Setup run. For production run specify 'setupRun = false'");
 
       if( MPIManager::instance()->numProcesses() > 1 )
-         WALBERLA_ABORT( "In this mode you need to start with just one process!" );
+         WALBERLA_LOG_WARNING_ON_ROOT( "Setup run with more than one process! Only root is doing work! I hope you know what you are doing!" );
 
-      WALBERLA_LOG_INFO_ON_ROOT( "Creating the block structure ..." );
+      WALBERLA_ROOT_SECTION()
+      {
+         WALBERLA_LOG_INFO_ON_ROOT( "Creating the block structure ..." );
 
-      SetupBlockForest sforest;
+         SetupBlockForest sforest;
 
-      sforest.addWorkloadMemorySUIDAssignmentFunction( blockforest::uniformWorkloadAndMemoryAssignment );
+         sforest.addWorkloadMemorySUIDAssignmentFunction( blockforest::uniformWorkloadAndMemoryAssignment );
 
-      sforest.init( simulationDomain, blocks[0], blocks[1], blocks[2], isPeriodic[0], isPeriodic[1], isPeriodic[2] );
+         sforest.init( simulationDomain, blocks[0], blocks[1], blocks[2], isPeriodic[0], isPeriodic[1], isPeriodic[2] );
 
-      // calculate process distribution
+         // calculate process distribution
+         sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), blocks[0] * blocks[1] * blocks[2] );
 
-      sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), blocks[0] * blocks[1] * blocks[2] );
+         sforest.saveToFile( sbffile.c_str() );
 
-      sforest.saveToFile( sbffile.c_str() );
-
-      WALBERLA_LOG_INFO_ON_ROOT( "SetupBlockForest successfully saved to file!" )
+         WALBERLA_LOG_INFO_ON_ROOT( "SetupBlockForest successfully saved to file!" );
+      }
 
       return shared_ptr<BlockForest>();
    }
@@ -106,6 +118,27 @@ shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& m
    MPIManager::instance()->useWorldComm();
 
    return shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false ) );
+}
+
+shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& mainConf)
+{
+   math::AABB simulationDomain   = math::AABB( Vec3(0,0,0), mainConf.getParameter<Vec3>("simulationDomain", Vec3(10, 10, 10)));
+   Vector3<uint_t> blocks        = mainConf.getParameter<Vector3<uint_t>>("blocks", Vector3<uint_t>(3, 3, 3));
+   Vector3<bool> isPeriodic      = mainConf.getParameter<Vector3<bool>>("isPeriodic", Vector3<bool>(true, true, true));
+
+   if( !mainConf.isDefined( "sbfFile" ) )
+   {
+      WALBERLA_LOG_INFO_ON_ROOT( "No setup file specified: Creation without setup file!" );
+
+      return createBlockForest( simulationDomain, blocks, isPeriodic);
+   }
+
+   // sbf file given -> try to load or save domain decomposition
+   std::string sbffile = mainConf.getParameter< std::string >( "sbfFile" );
+   WALBERLA_LOG_INFO_ON_ROOT( "Setup file specified: Using " << sbffile );
+
+   bool setupRun = mainConf.getParameter< bool >( "setupRun", true );
+   return createBlockForest(simulationDomain, blocks, isPeriodic, setupRun, sbffile);
 }
 
 } // namespace pe

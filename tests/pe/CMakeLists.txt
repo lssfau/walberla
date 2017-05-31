@@ -4,6 +4,9 @@
 #
 ###################################################################################################
 
+waLBerla_link_files_to_builddir( *.cfg )
+waLBerla_link_files_to_builddir( *.sbf )
+
 waLBerla_compile_test( NAME   PE_BODYFLAGS FILES BodyFlags.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_BODYFLAGS PROCESSES 8)
 

@@ -746,6 +746,30 @@ void HashGrids::clear()
 }
 //*************************************************************************************************
 
+
+//*************************************************************************************************
+/*!\brief clears all bodies from the hash grid and reloads bodies from bodystorage and shadowbodystorage
+ *
+ * \return void
+ */
+void HashGrids::reloadBodies()
+{
+   clear();
+
+   for (auto bodyIt = bodystorage_.begin(); bodyIt != bodystorage_.end(); ++bodyIt)
+   {
+      add( *bodyIt );
+   }
+   if( &bodystorage_ != &bodystorageShadowCopies_ )
+   {
+      for (auto bodyIt = bodystorageShadowCopies_.begin(); bodyIt != bodystorageShadowCopies_.end(); ++bodyIt)
+      {
+         add( *bodyIt );
+      }
+   }
+}
+//*************************************************************************************************
+
 //**Implementation of ICCD interface ********************************************************
 //*************************************************************************************************
 /*!\brief Contact generation between colliding rigid bodies.
