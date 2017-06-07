@@ -31,6 +31,14 @@
 namespace walberla {
 namespace pe {
 
+shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
+                                          Vector3<uint_t> blocks,
+                                          const Vector3<bool> isPeriodic);
+shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
+                                          Vector3<uint_t> blocks,
+                                          const Vector3<bool> isPeriodic,
+                                          const bool setupRun,
+                                          const std::string sbffile);
 shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& mainConf);
 
 } // namespace pe
