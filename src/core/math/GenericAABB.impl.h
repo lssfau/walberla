@@ -396,8 +396,8 @@ typename GenericAABB< T >::value_type GenericAABB< T >::zMax() const
 template< typename T >
 bool GenericAABB< T >::empty() const
 {
-   return walberla::isIdentical( minCorner_[0], maxCorner_[0] ) &&
-          walberla::isIdentical( minCorner_[1], maxCorner_[1] ) &&
+   return walberla::isIdentical( minCorner_[0], maxCorner_[0] ) ||
+          walberla::isIdentical( minCorner_[1], maxCorner_[1] ) ||
           walberla::isIdentical( minCorner_[2], maxCorner_[2] );
 }
 
