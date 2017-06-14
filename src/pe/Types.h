@@ -82,6 +82,7 @@ class Section;
 class SliderJoint;
 class Sphere;
 class Spring;
+class Squirmer;
 class TriangleMesh;
 template <typename BodyTypeTuple>
 class Union;
@@ -112,6 +113,10 @@ typedef const Plane*          ConstPlaneID;        //!< Handle for a constant pl
 typedef Sphere                SphereType;          //!< Type of the sphere geometric primitive.
 typedef Sphere*               SphereID;            //!< Handle for a sphere primitive.
 typedef const Sphere*         ConstSphereID;       //!< Handle for a constant sphere primitive.
+
+typedef Squirmer              SquirmerType;        //!< Type of the squirmer geometric primitive.
+typedef Squirmer*             SquirmerID;          //!< Handle for a squirmer primitive.
+typedef const Squirmer*       ConstSquirmerID;     //!< Handle for a constant squirmer primitive.
 
 typedef TriangleMesh          MeshType;             //!< Type of the triangle mesh geometric primitive.
 typedef TriangleMesh*         MeshID;               //!< Handle for a triangle mesh primitive.
