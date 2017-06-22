@@ -32,7 +32,6 @@
 #include "pe/communication/rigidbody/Box.h"
 #include "pe/communication/rigidbody/Capsule.h"
 #include "pe/communication/rigidbody/Sphere.h"
-#include "pe/communication/rigidbody/Squirmer.h"
 #include "pe/communication/rigidbody/Union.h"
 
 #include "core/Abort.h"

@@ -26,6 +26,7 @@
 #include "pe/rigidbody/Squirmer.h"
 #include "pe/rigidbody/UnionFactory.h"
 #include "pe/rigidbody/Union.h"
+#include "pe/communication/rigidbody/Squirmer.h"
 #include "pe/communication/DynamicMarshalling.h"
 #include "pe/rigidbody/SetBodyTypeIDs.h"
 #include "pe/Materials.h"
