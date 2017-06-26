@@ -299,6 +299,32 @@ void bufferTestUInt8()
 }
 
 
+void bufferOverwriteTest()
+{
+   //! [SendBuffer Overwrite Test]
+   int a = 1;
+   int b = 2;
+   int c = 3;
+   SendBuffer sb;
+   auto offset = sb.getOffset();
+   sb << a << b << c;
+   *reinterpret_cast<int*>(sb.getMemoryLocation(offset)) = c;
+   //! [SendBuffer Overwrite Test]
+
+   // Copying
+   RecvBuffer rb( sb );
+
+   int recv;
+
+   rb >> recv;
+   WALBERLA_CHECK_EQUAL(c, recv);
+   rb >> recv;
+   WALBERLA_CHECK_EQUAL(b, recv);
+   rb >> recv;
+   WALBERLA_CHECK_EQUAL(c, recv);
+}
+
+
 int main()
 {
    debug::enterTestMode();
@@ -312,6 +338,8 @@ int main()
    // This should not compile, since the containing type has be be smaller
    // than the type that is stored
    //bufferTest<double>();
+
+   bufferOverwriteTest();
 
    return 0;
 }

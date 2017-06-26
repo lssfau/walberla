@@ -140,11 +140,13 @@ public:
    //**Utility functions************************************************************************************************
    /*!\name Utility functions */
    //@{
-   inline T*   ptr    () const;
-   inline void reserve( size_t newCapacity );
-   inline void clear  ();
-   inline void reset  ();
-   inline void addDebugMarker( const char * marker );
+   inline T*             ptr    () const;
+   inline std::ptrdiff_t getOffset() const;
+   inline T*             getMemoryLocation( const std::ptrdiff_t offset);
+   inline void           reserve( size_t newCapacity );
+   inline void           clear  ();
+   inline void           reset  ();
+   inline void           addDebugMarker( const char * marker );
    //@}
    //*******************************************************************************************************************
 
@@ -489,6 +491,39 @@ inline T* GenericSendBuffer<T,G>::ptr() const
    return begin_;
 }
 //**********************************************************************************************************************
+
+/**
+ * Returns the offset from the beginning to the current position inside the buffer in bytes.
+ *
+ * Example:
+ * \snippet BufferTest.cpp SendBuffer Overwrite Test
+ * The buffer now contains 3, 2, 3
+ * \attention This is a low level function. Use with care!
+ * \see getMemoryLocation()
+ */
+template< typename T    // Element type
+        , typename G >  // Growth policy
+inline std::ptrdiff_t GenericSendBuffer<T,G>::getOffset() const
+{
+   return cur_ - begin_;
+}
+
+
+/**
+ * Returns the memory address corresponding to the offset. Offset is measured in bytes from the beginning of the buffer.
+ *
+ * Example:
+ * \snippet BufferTest.cpp SendBuffer Overwrite Test
+ * The buffer now contains 3, 2, 3
+ * \attention This is a low level function. Use with care!
+ * \see getOffset()
+ */
+template< typename T    // Element type
+        , typename G >  // Growth policy
+inline T*   GenericSendBuffer<T,G>::getMemoryLocation( const std::ptrdiff_t offset)
+{
+   return begin_ + offset;
+}
 
 
 //**********************************************************************************************************************
