@@ -36,6 +36,7 @@
 #include <boost/mpl/logical.hpp>
 #include <boost/type_traits/is_enum.hpp>
 #include <boost/type_traits/is_arithmetic.hpp>
+#include <boost/type_traits/is_fundamental.hpp>
 #include <boost/utility/enable_if.hpp>
 
 #include <algorithm>
@@ -80,10 +81,30 @@ namespace mpi {
 // also the RecvBuffer class description for the receiver side of the MPI communication.
 */
 template< typename T = unsigned char    // Element type
-        , typename G = OptimalGrowth >  // Growth policy
+          , typename G = OptimalGrowth >  // Growth policy
 class GenericSendBuffer
 {
 public:
+
+   template <typename VT>
+   class Ptr
+   {
+   public:
+      static_assert( boost::is_fundamental<VT>::value, "only fundamental data types are allowed");
+      typedef VT value_type;
+
+      Ptr(GenericSendBuffer<T, G>& buffer, const std::ptrdiff_t offset, const size_t length)
+         : buffer_(buffer), offset_(offset), length_(length) {}
+
+      inline VT& operator*();
+      inline VT* operator->();
+      inline VT& operator[](const size_t& rhs);
+   private:
+      GenericSendBuffer<T, G>& buffer_;
+      const std::ptrdiff_t     offset_;
+      const size_t             length_;
+   };
+
    //**Type definitions*************************************************************************************************
    typedef T  ElementType;  //!< Type of the receive buffer elements.
    //*******************************************************************************************************************
@@ -92,7 +113,7 @@ public:
    /*!\name Constructors */
    //@{
    explicit inline GenericSendBuffer( size_t initCapacity = 0 );
-            inline GenericSendBuffer( const GenericSendBuffer& sb );
+   inline GenericSendBuffer( const GenericSendBuffer& sb );
    //@}
    //*******************************************************************************************************************
 
@@ -125,7 +146,7 @@ public:
    //@{
    template< typename V >
    typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
-                              GenericSendBuffer&  >::type
+   GenericSendBuffer&  >::type
    operator<<( V value );
 
    //@}
@@ -140,9 +161,23 @@ public:
    //**Utility functions************************************************************************************************
    /*!\name Utility functions */
    //@{
+   /**
+    * Returns a special pointer class to modify the allocated memory location later.
+    *
+    * Example:
+    * \snippet BufferTest.cpp SendBuffer Overwrite Test
+    * The buffer now contains 1, 3, 2, 3
+    */
+   template <typename VT>
+   inline
+   Ptr<VT> allocate( const size_t length = 1, const VT& v = VT() )
+   {
+      auto tmp = typename GenericSendBuffer<T,G>::template Ptr<VT>(*this, getOffset(), length);
+      for (size_t i = 0; i < length; ++i)
+         *this << v;
+      return tmp;
+   }
    inline T*             ptr    () const;
-   inline std::ptrdiff_t getOffset() const;
-   inline T*             getMemoryLocation( const std::ptrdiff_t offset);
    inline void           reserve( size_t newCapacity );
    inline void           clear  ();
    inline void           reset  ();
@@ -158,8 +193,11 @@ private:
 
    template< typename V >
    typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
-                              GenericSendBuffer&  >::type
+   GenericSendBuffer&  >::type
    put( V value );
+
+   inline std::ptrdiff_t getOffset() const;
+   inline T*             getMemoryLocation( const std::ptrdiff_t offset);
    //@}
    //*******************************************************************************************************************
 
@@ -184,6 +222,45 @@ private:
 typedef GenericSendBuffer<> SendBuffer;
 
 
+//======================================================================================================================
+//
+//  GenericSendBuffer<T,G>::Ptr<VT>
+//
+//======================================================================================================================
+
+template< typename T    // Element type
+          , typename G >  // Growth policy
+template <typename VT>
+inline
+VT& GenericSendBuffer<T,G>::Ptr<VT>::operator*()
+{
+   return *operator->();
+}
+
+template< typename T    // Element type
+          , typename G >  // Growth policy
+template <typename VT>
+inline
+VT* GenericSendBuffer<T,G>::Ptr<VT>::operator->()
+{
+   return reinterpret_cast<value_type*>( buffer_.getMemoryLocation( offset_ + static_cast<std::ptrdiff_t>(BUFFER_DEBUG_OVERHEAD) ) );
+}
+
+template< typename T    // Element type
+          , typename G >  // Growth policy
+template <typename VT>
+inline
+VT& GenericSendBuffer<T,G>::Ptr<VT>::operator[](const size_t& rhs)
+{
+   WALBERLA_ASSERT_LESS(rhs, length_, "out of bounds access!");
+   return *reinterpret_cast<value_type*>(
+            buffer_.getMemoryLocation(
+               offset_ +
+               static_cast<std::ptrdiff_t>( rhs * ( BUFFER_DEBUG_OVERHEAD + sizeof(VT) ) )
+               )
+            );
+}
+
 
 //======================================================================================================================
 //
@@ -199,7 +276,7 @@ typedef GenericSendBuffer<> SendBuffer;
 // The default initial capacity of the send buffer is specified by the selected growth policy.
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline GenericSendBuffer<T,G>::GenericSendBuffer( size_t initCapacity )
    : begin_( new T[initCapacity] )  // Pointer to the first element
    , cur_  ( begin_ )               // Pointer to the current/last element
@@ -214,7 +291,7 @@ inline GenericSendBuffer<T,G>::GenericSendBuffer( size_t initCapacity )
 // \param sb The send buffer to be copied.
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline GenericSendBuffer<T,G>::GenericSendBuffer( const GenericSendBuffer& sb )
    : begin_( new T[sb.size()] )  // Pointer to the first element
    , cur_  ( begin_+sb.size() )  // Pointer to the current/last element
@@ -238,7 +315,7 @@ inline GenericSendBuffer<T,G>::GenericSendBuffer( const GenericSendBuffer& sb )
 /*!\brief Destructor for SendBuffer.
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline GenericSendBuffer<T,G>::~GenericSendBuffer()
 {
    delete [] begin_;
@@ -261,7 +338,7 @@ inline GenericSendBuffer<T,G>::~GenericSendBuffer()
 // \return Reference to the assigned send buffer.
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 GenericSendBuffer<T,G>& GenericSendBuffer<T,G>::operator=( const GenericSendBuffer& sb )
 {
    if( &sb == this ) return *this;
@@ -297,7 +374,7 @@ GenericSendBuffer<T,G>& GenericSendBuffer<T,G>::operator=( const GenericSendBuff
 // \return The maximum possible size.
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline size_t GenericSendBuffer<T,G>::maxSize() const
 {
    return size_t(-1) / sizeof(T);
@@ -311,7 +388,7 @@ inline size_t GenericSendBuffer<T,G>::maxSize() const
 // \return The current size.
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline size_t GenericSendBuffer<T,G>::size() const
 {
    return numeric_cast< size_t >( cur_ - begin_ );
@@ -325,7 +402,7 @@ inline size_t GenericSendBuffer<T,G>::size() const
 // \return The capacity.
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline size_t GenericSendBuffer<T,G>::capacity() const
 {
    return numeric_cast< size_t >( end_ - begin_ );
@@ -339,7 +416,7 @@ inline size_t GenericSendBuffer<T,G>::capacity() const
 // \return \a true if the send buffer is empty, \a false if it is not.
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline bool GenericSendBuffer<T,G>::isEmpty() const
 {
    return begin_ == cur_;
@@ -362,15 +439,15 @@ inline bool GenericSendBuffer<T,G>::isEmpty() const
 //
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
 typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
-                           GenericSendBuffer<T,G>& >::type
+GenericSendBuffer<T,G>& >::type
 GenericSendBuffer<T,G>::put( V value )
 {
    // Compile time check that V is built-in data type
    static_assert( boost::is_arithmetic<V>::value || boost::is_enum<V>::value,
-                            "SendBuffer accepts only built-in data types");
+                  "SendBuffer accepts only built-in data types");
 
    static_assert( sizeof(V) >= sizeof(T), "Type that is stored has to be bigger than T" );
    static_assert( sizeof(V)  % sizeof(T) == 0, "V has to be divisible by T ");
@@ -408,10 +485,10 @@ GenericSendBuffer<T,G>::put( V value )
 // a user-defined data type results in a compile time error!
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
 typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
-                           GenericSendBuffer<T,G>& >::type
+GenericSendBuffer<T,G>& >::type
 GenericSendBuffer<T,G>::operator<<( V value )
 {
    addDebugMarker( typeid(V).name() );
@@ -448,7 +525,7 @@ GenericSendBuffer<T,G>::operator<<( V value )
    \endcode
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline void GenericSendBuffer<T,G>::rewind(const size_t & s)
 {
    WALBERLA_ASSERT_LESS(s, size());
@@ -462,6 +539,7 @@ inline void GenericSendBuffer<T,G>::rewind(const size_t & s)
 //  UTILITY FUNCTIONS
 //
 //======================================================================================================================
+
 
 //**********************************************************************************************************************
 /*!\brief Returns a pointer to the first element of the send buffer.
@@ -485,7 +563,7 @@ inline void GenericSendBuffer<T,G>::rewind(const size_t & s)
    \endcode
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline T* GenericSendBuffer<T,G>::ptr() const
 {
    return begin_;
@@ -495,14 +573,11 @@ inline T* GenericSendBuffer<T,G>::ptr() const
 /**
  * Returns the offset from the beginning to the current position inside the buffer in bytes.
  *
- * Example:
- * \snippet BufferTest.cpp SendBuffer Overwrite Test
- * The buffer now contains 3, 2, 3
  * \attention This is a low level function. Use with care!
  * \see getMemoryLocation()
  */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline std::ptrdiff_t GenericSendBuffer<T,G>::getOffset() const
 {
    return cur_ - begin_;
@@ -512,14 +587,11 @@ inline std::ptrdiff_t GenericSendBuffer<T,G>::getOffset() const
 /**
  * Returns the memory address corresponding to the offset. Offset is measured in bytes from the beginning of the buffer.
  *
- * Example:
- * \snippet BufferTest.cpp SendBuffer Overwrite Test
- * The buffer now contains 3, 2, 3
  * \attention This is a low level function. Use with care!
  * \see getOffset()
  */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline T*   GenericSendBuffer<T,G>::getMemoryLocation( const std::ptrdiff_t offset)
 {
    return begin_ + offset;
@@ -536,7 +608,7 @@ inline T*   GenericSendBuffer<T,G>::getMemoryLocation( const std::ptrdiff_t offs
 // buffer.
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline void GenericSendBuffer<T,G>::reserve( size_t newCapacity )
 {
    if( newCapacity > capacity() )
@@ -552,7 +624,7 @@ inline void GenericSendBuffer<T,G>::reserve( size_t newCapacity )
 // \return void
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 void GenericSendBuffer<T,G>::extendMemory( size_t newCapacity )
 {
    // Calculating the new capacity
@@ -580,7 +652,7 @@ void GenericSendBuffer<T,G>::extendMemory( size_t newCapacity )
 // This function performs a complete reset of the send buffer.
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline void GenericSendBuffer<T,G>::clear()
 {
    cur_ = begin_;
@@ -596,7 +668,7 @@ inline void GenericSendBuffer<T,G>::clear()
 // This function performs a complete reset of the send buffer - including the deletion of allocated memory!
 */
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline void GenericSendBuffer<T,G>::reset()
 {
    delete [] begin_;
@@ -615,7 +687,7 @@ inline void GenericSendBuffer<T,G>::reset()
 #ifdef WALBERLA_BUFFER_DEBUG
 
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline void GenericSendBuffer<T,G>::addDebugMarker( const char * marker )
 {
    uint_t len = std::strlen( marker );
@@ -629,7 +701,7 @@ inline void GenericSendBuffer<T,G>::addDebugMarker( const char * marker )
 }
 #else
 template< typename T    // Element type
-        , typename G >  // Growth policy
+          , typename G >  // Growth policy
 inline void GenericSendBuffer<T,G>::addDebugMarker( const char *  )
 {}
 #endif
