@@ -306,9 +306,11 @@ void bufferOverwriteTest()
    int b = 2;
    int c = 3;
    SendBuffer sb;
-   auto offset = sb.getOffset();
-   sb << a << b << c;
-   *reinterpret_cast<int*>(sb.getMemoryLocation(offset)) = c;
+   auto ptr = sb.allocate<int>(2);
+   sb << b << c;
+   *ptr   = a;
+   ptr[1] = c;
+   //ptr[2] = c; // will fail in debug: out of bounds
    //! [SendBuffer Overwrite Test]
 
    // Copying
@@ -316,6 +318,8 @@ void bufferOverwriteTest()
 
    int recv;
 
+   rb >> recv;
+   WALBERLA_CHECK_EQUAL(a, recv);
    rb >> recv;
    WALBERLA_CHECK_EQUAL(c, recv);
    rb >> recv;
