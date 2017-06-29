@@ -256,7 +256,7 @@ VT& GenericSendBuffer<T,G>::Ptr<VT>::operator[](const size_t& rhs)
    return *reinterpret_cast<value_type*>(
             buffer_.getMemoryLocation(
                offset_ +
-               static_cast<std::ptrdiff_t>( rhs * ( BUFFER_DEBUG_OVERHEAD + sizeof(VT) ) )
+               static_cast<std::ptrdiff_t>( rhs * ( BUFFER_DEBUG_OVERHEAD + sizeof(VT) ) + BUFFER_DEBUG_OVERHEAD )
                )
             );
 }
