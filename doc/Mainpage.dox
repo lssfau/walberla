@@ -16,11 +16,13 @@ all the basic data strcutures and concepts of the framework.
 - \ref tutorial_basics_01 \n
   The first tutorial explains the basic data structures of waLBerla and how to setup a simple domain.
 - \ref tutorial_basics_02 \n
-  The second tutorial shows how to write algorithms that operate on block data. 
+  The second tutorial shows how to write algorithms that operate on block data.
 - \ref tutorial_basics_03 \n
-  The third tutorial deals with communication, iterating field/grid/lattice data, and geometry setup. 
+  The third tutorial deals with communication, iterating field/grid/lattice data, and geometry setup.
 
+\subsection pe Rigid Body Dynamics (pe)
 
+- \ref tutorial_pe_01 \n
 
 \subsection pdes Solving Partial Differential Equations
 
@@ -33,11 +35,6 @@ all the basic data strcutures and concepts of the framework.
 
 - \ref tutorial_lbm01 \n
   A full LBM simulation is built.
-
-\section TechDetails Technical Details
-
-- \ref TechDetailsPe \n
-  Technical Details about the pe physics module.
    
 \section cite Please cite us
 

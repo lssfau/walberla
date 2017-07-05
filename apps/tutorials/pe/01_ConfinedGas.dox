@@ -1,0 +1,78 @@
+namespace walberla {
+namespace pe {
+
+/**
+\page tutorial_pe_01 Tutorial - Confined Gas:  Setting up a simple pe simulation
+
+This tutorial will help you to setup up a simple pe simulation. The scenario for this tutorial a is particle
+gas (spheres) confined by solid walls.
+
+For this tutorial only a few includes are needed, namely:
+\snippet 01_ConfinedGas.cpp Includes
+
+The first important step is to define a BodyTuple. This tuple stores all body types which will be used
+during the simulation. This tuple helps to generate all the functions which need to be specialized for
+a particular body type.
+\attention If you miss a body type the behaviour of the simulation is undefined. Most probably there will be an error.
+
+\snippet 01_ConfinedGas.cpp BodyTypeTuple
+
+Next the waLBerla environment is initalized, the random number generator is seeded and some simulation parameters are set.
+\snippet 01_ConfinedGas.cpp Parameters
+
+The BlockForest is the main datastructure in the waLBerla framework. It is responsible for the domain decomposition and
+holds all the blocks with their data. For more information about the general design of the waLBerla framework please refer
+to \ref tutorial_basics_01 and the documentation of domain_decomposition::BlockStorage. For this tutorial the number of blocks
+in each direction is fixed to 1 and has to stay like that. In tutorial 2 we will talk about using more than one block and
+parallelism.
+\snippet 01_ConfinedGas.cpp BlockForest
+
+There are two types of storages to store particle information. One is the global body storage which is responsible for very
+large particles. These particles are stored on all processes.
+\snippet 01_ConfinedGas.cpp GlobalBodyStorage
+The other one is a block local storage for all bodies which are located within the subdomain of a block. You can find more
+information about this concept of data on blocks in \ref tutorial_basics_01.
+\snippet 01_ConfinedGas.cpp StorageDataHandling
+
+In addition to the block local storage also the coarse as well as the fine collision detection needs storage on each block.
+Therefore the corresponding data handling has to be registered.
+\snippet 01_ConfinedGas.cpp AdditionalBlockData
+
+Only one final component is missing for a successfull simulation - the time integrator. Currently there exists two
+integrators cr::DEM for soft contacts and cr::HCSITS for hard contacts. These have to be setup as local objects.
+\snippet 01_ConfinedGas.cpp Integrator
+
+We now have all our tools together and can start creating the simulation. First we have to specify the material parameters
+we want to use.
+\snippet 01_ConfinedGas.cpp Material
+
+And we have to initialize all body type ids.
+\snippet 01_ConfinedGas.cpp SetBodyTypeIDs
+
+Then we can set up the confining walls.
+\snippet 01_ConfinedGas.cpp Planes
+
+The gas particles are generated with the help of grid generators. These generators are iterators which facilitate the
+construction of particles on a regular grid. Currently grid_generator::SCIterator (for a simple cubic lattice) as well
+as grid_generator::HCPIterator (for a hexagonal close packing lattice) are supported. The spheres are create with createSphere
+which returns a SphereID of the created sphere. This SphereID acts like a pointer to Sphere and can be used like that.
+If for various reasons the sphere was not created the return value is NULL.
+\attention Before accessing the underlying sphere you should always check for NULL!
+
+\snippet 01_ConfinedGas.cpp Gas
+
+Since the setup is finished now we can run the simulation loop. The simulation loop is as simple as:
+\snippet 01_ConfinedGas.cpp GameLoop
+
+After the simulation is finished we can collect the results. In this case we only calculate the mean velocity of all particles.
+The particles can be easily accessed via the LocalBodyIterator. This iterator allows us to iterate through all particles and
+access their properties.
+\snippet 01_ConfinedGas.cpp PostProcessing
+
+Congratulation! You successfully created your first rigid body simulation.
+In the next tutorial we will look at possible extensions which can make your live easier as well as how to run parallel simulations.
+
+*/
+
+}
+}
