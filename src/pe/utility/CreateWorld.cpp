@@ -122,7 +122,9 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
 
 shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& mainConf)
 {
-   math::AABB simulationDomain   = math::AABB( Vec3(0,0,0), mainConf.getParameter<Vec3>("simulationDomain", Vec3(10, 10, 10)));
+   Vec3 simulationCorner         = mainConf.getParameter<Vec3>("simulationCorner", Vec3(0, 0, 0));
+   Vec3 simulationSize           = mainConf.getParameter<Vec3>("simulationDomain", Vec3(10, 10, 10));
+   math::AABB simulationDomain   = math::AABB( simulationCorner, simulationCorner + simulationSize );
    Vector3<uint_t> blocks        = mainConf.getParameter<Vector3<uint_t>>("blocks", Vector3<uint_t>(3, 3, 3));
    Vector3<bool> isPeriodic      = mainConf.getParameter<Vector3<bool>>("isPeriodic", Vector3<bool>(true, true, true));
 
