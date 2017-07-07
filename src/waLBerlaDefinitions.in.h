@@ -20,8 +20,6 @@
 
 // External libraries
 #cmakedefine WALBERLA_BUILD_WITH_MPI
-#cmakedefine WALBERLA_BUILD_WITH_PE
-#cmakedefine WALBERLA_BUILD_WITH_PE_0_2
 #cmakedefine WALBERLA_BUILD_WITH_METIS
 
 #cmakedefine WALBERLA_BUILD_WITH_BOOST_THREAD
