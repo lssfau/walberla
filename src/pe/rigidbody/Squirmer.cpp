@@ -106,7 +106,7 @@ const Vec3 Squirmer::velFromBF( real_t px, real_t py, real_t pz ) const
  */
 const Vec3 Squirmer::velFromBF( const Vec3& rpos ) const
 {
-   return Sphere::velFromBF( rpos ) + getSquirmerVelocity( rpos );
+   return Sphere::velFromBF( rpos ) + getSquirmerVelocity( R_ * rpos );
 }
 //*************************************************************************************************
 
@@ -130,6 +130,7 @@ const Vec3 Squirmer::velFromWF( real_t px, real_t py, real_t pz ) const
 //*************************************************************************************************
 /*!\brief Returns the squirmer's surface velocity at a given relative position.
  *
+ * \param rpos The relative global coordinate.
  * \return The local surface velocity of the squirmer.
  */
 const Vec3 Squirmer::getSquirmerVelocity( const Vec3& rpos ) const
@@ -153,8 +154,7 @@ const Vec3 Squirmer::getSquirmerVelocity( const Vec3& rpos ) const
  */
 const Vec3 Squirmer::velFromWF( const Vec3& gpos ) const
 {
-   const auto rpos = pointFromWFtoBF( gpos );
-   return Sphere::velFromWF( gpos ) + getSquirmerVelocity( rpos );
+   return Sphere::velFromWF( gpos ) + getSquirmerVelocity( gpos - gpos_ );
 }
 //*************************************************************************************************
 
