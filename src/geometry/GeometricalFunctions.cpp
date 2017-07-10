@@ -259,7 +259,7 @@ void getClosestLineSegmentPoints( const Vector3<real_t>& a1, const Vector3<real_
    const Vector3<real_t> a1b1( b1 - a1 );
    const real_t da1 ( a1a2 * a1b1 );
    const real_t db1 ( b1b2 * a1b1 );
-   if( da1 <= real_t(0) && db1 >= real_t(0) ) {
+   if( da1 <= +Limits<real_t>::fpuAccuracy() && db1 >= -Limits<real_t>::fpuAccuracy() ) {
       cp1 = a1;
       cp2 = b1;
       return;
@@ -268,7 +268,7 @@ void getClosestLineSegmentPoints( const Vector3<real_t>& a1, const Vector3<real_
    const Vector3<real_t> a1b2( b2 - a1 );
    const real_t da2 ( a1a2 * a1b2 );
    const real_t db2 ( b1b2 * a1b2 );
-   if( da2 <= real_t(0) && db2 <= real_t(0) ) {
+   if( da2 <= +Limits<real_t>::fpuAccuracy() && db2 <= +Limits<real_t>::fpuAccuracy() ) {
       cp1 = a1;
       cp2 = b2;
       return;
@@ -277,7 +277,7 @@ void getClosestLineSegmentPoints( const Vector3<real_t>& a1, const Vector3<real_
    const Vector3<real_t> a2b1( b1 - a2 );
    const real_t da3 ( a1a2 * a2b1 );
    const real_t db3 ( b1b2 * a2b1 );
-   if( da3 >= real_t(0) && db3 >= real_t(0) ) {
+   if( da3 >= -Limits<real_t>::fpuAccuracy() && db3 >= -Limits<real_t>::fpuAccuracy() ) {
       cp1 = a2;
       cp2 = b1;
       return;
@@ -286,7 +286,7 @@ void getClosestLineSegmentPoints( const Vector3<real_t>& a1, const Vector3<real_
    const Vector3<real_t> a2b2( b2 - a2 );
    const real_t da4 ( a1a2 * a2b2 );
    const real_t db4 ( b1b2 * a2b2 );
-   if( da4 >= real_t(0) && db4 <= real_t(0) ) {
+   if( da4 >= -Limits<real_t>::fpuAccuracy() && db4 <= +Limits<real_t>::fpuAccuracy() ) {
       cp1 = a2;
       cp2 = b2;
       return;
@@ -300,20 +300,20 @@ void getClosestLineSegmentPoints( const Vector3<real_t>& a1, const Vector3<real_
    Vector3<real_t> n, k;
 
    const real_t la( a1a2 * a1a2 );
-   if( da1 >= real_t(0) && da3 <= real_t(0) ) {
+   if( da1 >= -Limits<real_t>::fpuAccuracy() && da3 <= +Limits<real_t>::fpuAccuracy() ) {
       k = (da1 / la) * a1a2;
       n = a1b1 - k;
-      if( b1b2 * n >= real_t(0) ) {
+      if( b1b2 * n >= -Limits<real_t>::fpuAccuracy() ) {
          cp1 = a1 + k;
          cp2 = b1;
          return;
       }
    }
 
-   if( da2 >= real_t(0) && da4 <= real_t(0) ) {
+   if( da2 >= -Limits<real_t>::fpuAccuracy() && da4 <= +Limits<real_t>::fpuAccuracy() ) {
       k = (da2 / la) * a1a2;
       n = a1b2 - k;
-      if( b1b2 * n <= real_t(0) ) {
+      if( b1b2 * n <= +Limits<real_t>::fpuAccuracy() ) {
          cp1 = a1 + k;
          cp2 = b2;
          return;
@@ -321,20 +321,20 @@ void getClosestLineSegmentPoints( const Vector3<real_t>& a1, const Vector3<real_
    }
 
    const real_t lb( b1b2 * b1b2 );
-   if( db1 <= real_t(0) && db2 >= real_t(0) ) {
+   if( db1 <= +Limits<real_t>::fpuAccuracy() && db2 >= -Limits<real_t>::fpuAccuracy() ) {
       k = (-db1 / lb) * b1b2;
       n = -a1b1 - k;
-      if( a1a2 * n >= real_t(0) ) {
+      if( a1a2 * n >= -Limits<real_t>::fpuAccuracy() ) {
          cp1 = a1;
          cp2= b1 + k;
          return;
       }
    }
 
-   if( db3 <= real_t(0) && db4 >= real_t(0) ) {
+   if( db3 <= +Limits<real_t>::fpuAccuracy() && db4 >= -Limits<real_t>::fpuAccuracy() ) {
       k = (-db3 / lb) * b1b2;
       n = -a2b1 - k;
-      if( a1a2 * n <= real_t(0) ) {
+      if( a1a2 * n <= +Limits<real_t>::fpuAccuracy() ) {
          cp1 = a2;
          cp2 = b1 + k;
          return;
@@ -347,7 +347,7 @@ void getClosestLineSegmentPoints( const Vector3<real_t>& a1, const Vector3<real_
    const real_t scale( a1a2 * b1b2 );
    real_t div( la * lb - math::sq(scale) );
 
-   WALBERLA_ASSERT_GREATER( div, real_t(0), "Invalid division" );
+   WALBERLA_ASSERT_GREATER( div, real_t(0), std::setprecision(16) << "Invalid division\n" << a1 << "\n" << a2 << "\n" << b1 << "\n" << b2 );
    div = real_t(1) / div;
 
    const real_t s( ( lb    * da1 - scale * db1 ) * div );

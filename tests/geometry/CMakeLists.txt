@@ -8,6 +8,8 @@
 waLBerla_compile_test( FILES CellAABBTest.cpp )
 waLBerla_execute_test( NAME CellAABBTest COMMAND $<TARGET_FILE:CellAABBTest> )
 
+waLBerla_compile_test( FILES Functions.cpp )
+waLBerla_execute_test( NAME Functions )
 
 waLBerla_compile_test( FILES VoxelFileTest.cpp )
 waLBerla_execute_test( NAME VoxelFileTest     COMMAND $<TARGET_FILE:VoxelFileTest> )
