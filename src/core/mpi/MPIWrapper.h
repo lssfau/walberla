@@ -236,6 +236,7 @@ inline int MPI_Allgather ( void*, int, MPI_Datatype, void*, int, MPI_Datatype, M
 inline int MPI_Gather    ( void*, int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm )  { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Allgatherv( void*, int, MPI_Datatype, void*, int*, int*, MPI_Datatype, MPI_Comm ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Gatherv   ( void*, int, MPI_Datatype, void*, int*, int*, MPI_Datatype, int, MPI_Comm ) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Alltoall  ( void*, int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm ) { WALBERLA_MPI_FUNCTION_ERROR }
 
 inline int MPI_Type_contiguous( int, MPI_Datatype, MPI_Datatype* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Type_create_subarray( int, const int*, const int*, const int*, int, MPI_Datatype, MPI_Datatype* ) { WALBERLA_MPI_FUNCTION_ERROR }
