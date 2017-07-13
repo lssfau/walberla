@@ -143,14 +143,14 @@ public:
    inline const Vec3     vectorFromBFtoWF( const Vec3& v )             const;
    inline const Vec3     pointFromBFtoWF ( real_t px, real_t py, real_t pz ) const;
    inline const Vec3     pointFromBFtoWF ( const Vec3& rpos )          const;
-   inline const Vec3     velFromBF       ( real_t px, real_t py, real_t pz ) const;
-   inline const Vec3     velFromBF       ( const Vec3& rpos )          const;
+   virtual const Vec3    velFromBF       ( real_t px, real_t py, real_t pz ) const;
+   virtual const Vec3    velFromBF       ( const Vec3& rpos )          const;
    inline const Vec3     vectorFromWFtoBF( real_t vx, real_t vy, real_t vz ) const;
    inline const Vec3     vectorFromWFtoBF( const Vec3& v )             const;
    inline const Vec3     pointFromWFtoBF ( real_t px, real_t py, real_t pz ) const;
    inline const Vec3     pointFromWFtoBF ( const Vec3& gpos )          const;
-   inline const Vec3     velFromWF       ( real_t px, real_t py, real_t pz ) const;
-   inline const Vec3     velFromWF       ( const Vec3& gpos )          const;
+   virtual const Vec3    velFromWF       ( real_t px, real_t py, real_t pz ) const;
+   virtual const Vec3    velFromWF       ( const Vec3& gpos )          const;
    inline const Vec3     accFromWF       ( real_t px, real_t py, real_t pz ) const;
           const Vec3     accFromWF       ( const Vec3& gpos )          const;
 
@@ -1084,40 +1084,6 @@ inline const Vec3 RigidBody::pointFromBFtoWF( const Vec3& rpos ) const
 
 
 //*************************************************************************************************
-/*!\brief Calculation of the global velocity of a relative point.
- *
- * \param px The x-component of the relative coordinate.
- * \param py The y-component of the relative coordinate.
- * \param pz The z-component of the relative coordinate.
- * \return The global velocity.
- *
- * The function calculates the global velocity of a point relative to the body's center of mass.
- */
-inline const Vec3 RigidBody::velFromBF( real_t px, real_t py, real_t pz ) const
-{
-   return velFromBF( Vec3( px, py, pz ) );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Calculation of the global velocity of a relative point.
- *
- * \param rpos The relative coordinate.
- * \return The global velocity.
- *
- * The function calculates the global velocity of a point relative to the body's center of mass.
- */
-inline const Vec3 RigidBody::velFromBF( const Vec3& rpos ) const
-{
-   if( !hasSuperBody() )
-      return v_ + w_ % ( R_ * rpos );
-   else return sb_->velFromWF( gpos_ + R_ * rpos );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
 /*!\brief Transformation from a global to a relative vector.
  *
  * \param vx The x-component of the global vector.
@@ -1181,40 +1147,6 @@ inline const Vec3 RigidBody::pointFromWFtoBF( real_t px, real_t py, real_t pz ) 
 inline const Vec3 RigidBody::pointFromWFtoBF( const Vec3& gpos ) const
 {
    return R_.getTranspose() * ( gpos - gpos_ );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Calculation of the global velocity of a point in global coordinates.
- *
- * \param px The x-component of the global coordinate.
- * \param py The y-component of the global coordinate.
- * \param pz The z-component of the global coordinate.
- * \return The global velocity.
- *
- * The function calculates the global velocity of a point in global coordinates.
- */
-inline const Vec3 RigidBody::velFromWF( real_t px, real_t py, real_t pz ) const
-{
-   return velFromWF( Vec3( px, py, pz ) );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Calculation of the global velocity of a point in global coordinates.
- *
- * \param gpos The global coordinate.
- * \return The global velocity.
- *
- * The function calculates the global velocity of a point in global coordinates.
- */
-inline const Vec3 RigidBody::velFromWF( const Vec3& gpos ) const
-{
-   if( !hasSuperBody() )
-      return v_ + w_ % ( gpos - gpos_ );
-   else return sb_->velFromWF( gpos );
 }
 //*************************************************************************************************
 

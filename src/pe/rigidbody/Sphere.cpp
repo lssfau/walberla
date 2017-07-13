@@ -61,7 +61,12 @@ namespace pe {
 Sphere::Sphere( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
                 real_t radius, MaterialID material,
                 const bool global, const bool communicating, const bool infiniteMass )
-   : GeomPrimitive( getStaticTypeID(), sid, uid, material )  // Initialization of the parent class
+   : Sphere::Sphere( getStaticTypeID(), sid, uid, gpos, rpos, q, radius, material, global, communicating, infiniteMass )
+{}
+Sphere::Sphere( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+                real_t radius, MaterialID material,
+                const bool global, const bool communicating, const bool infiniteMass )
+   : GeomPrimitive( typeId, sid, uid, material )  // Initialization of the parent class
    , radius_(radius)
 {
    // Checking the radius

@@ -66,6 +66,9 @@ public:
    explicit Sphere( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
                     real_t radius, MaterialID material,
                     const bool global, const bool communicating, const bool infiniteMass );
+   explicit Sphere( id_t const typeID, id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+                    real_t radius, MaterialID material,
+                    const bool global, const bool communicating, const bool infiniteMass );
    //@}
    //**********************************************************************************************
 

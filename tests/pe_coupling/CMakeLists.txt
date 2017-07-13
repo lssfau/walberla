@@ -123,3 +123,6 @@ waLBerla_execute_test( NAME TorqueSphereMEMMRFuncTest      COMMAND $<TARGET_FILE
 waLBerla_execute_test( NAME TorqueSphereMEMMRSingleTest    COMMAND $<TARGET_FILE:TorqueSphereMEM> --MO_MR              PROCESSES 1 LABELS longrun     CONFIGURATIONS Release RelWithDbgInfo )
 waLBerla_execute_test( NAME TorqueSphereMEMMRParallelTest  COMMAND $<TARGET_FILE:TorqueSphereMEM> --MO_MR              PROCESSES 8 LABELS verylongrun CONFIGURATIONS Release RelWithDbgInfo )  
 
+waLBerla_compile_test( FILES momentum_exchange_method/SquirmerTest.cpp DEPENDS blockforest pe timeloop )
+waLBerla_execute_test( NAME SquirmerShortTest COMMAND $<TARGET_FILE:SquirmerTest> --shortrun PROCESSES 1 )
+waLBerla_execute_test( NAME SquirmerTest COMMAND $<TARGET_FILE:SquirmerTest> PROCESSES 1 CONFIGURATIONS Release RelWithDbgInfo  )

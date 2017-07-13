@@ -59,8 +59,6 @@ namespace pe_coupling {
 template< typename LatticeModel_T, typename FlagField_T >
 class SimpleBB : public Boundary< typename FlagField_T::flag_t >
 {
-   static_assert( LatticeModel_T::compressible == false, "Only works with incompressible models!" );
-
    typedef lbm::PdfField< LatticeModel_T >   PDFField_T;
    typedef typename LatticeModel_T::Stencil  Stencil_T;
    typedef typename FlagField_T::flag_t      flag_t;
@@ -172,9 +170,21 @@ inline void SimpleBB< LatticeModel_T, FlagField_T >::treatDirection( const cell_
    auto boundaryVelocity = body.velFromWF( boundaryPosition );
 
    // include effect of boundary velocity
-   pdf_new -= real_c(3.0) * alpha * LatticeModel_T::w[ Stencil_T::idx[dir] ] * ( real_c( stencil::cx[ dir ] ) * boundaryVelocity[0] +
-                                                                               real_c( stencil::cy[ dir ] ) * boundaryVelocity[1] +
-                                                                               real_c( stencil::cz[ dir ] ) * boundaryVelocity[2] );
+   if( LatticeModel_T::compressible )
+   {
+       const auto density  = pdfField_->getDensity(x,y,z);
+       pdf_new -= real_c(3.0) * alpha * density * LatticeModel_T::w[ Stencil_T::idx[dir] ] *
+                     ( real_c( stencil::cx[ dir ] ) * boundaryVelocity[0] +
+                       real_c( stencil::cy[ dir ] ) * boundaryVelocity[1] +
+                       real_c( stencil::cz[ dir ] ) * boundaryVelocity[2] );
+   }
+   else
+   {
+       pdf_new -= real_c(3.0) * alpha * LatticeModel_T::w[ Stencil_T::idx[dir] ] *
+                     ( real_c( stencil::cx[ dir ] ) * boundaryVelocity[0] +
+                       real_c( stencil::cy[ dir ] ) * boundaryVelocity[1] +
+                       real_c( stencil::cz[ dir ] ) * boundaryVelocity[2] );
+   }
 
    // carry out the boundary handling
    pdfField_->get( nx, ny, nz, Stencil_T::invDirIdx(dir) ) = pdf_new;

@@ -23,8 +23,10 @@
 #include "pe/rigidbody/Box.h"
 #include "pe/rigidbody/Capsule.h"
 #include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Squirmer.h"
 #include "pe/rigidbody/UnionFactory.h"
 #include "pe/rigidbody/Union.h"
+#include "pe/communication/rigidbody/Squirmer.h"
 #include "pe/communication/DynamicMarshalling.h"
 #include "pe/rigidbody/SetBodyTypeIDs.h"
 #include "pe/Materials.h"
@@ -39,7 +41,7 @@ typedef boost::tuple<Sphere>       UnionTypeTuple;
 typedef Union< UnionTypeTuple >    UnionT;
 typedef UnionT*                    UnionID;
 
-typedef boost::tuple<Box, Capsule, Sphere, UnionT> BodyTuple ;
+typedef boost::tuple<Box, Capsule, Sphere, Squirmer, UnionT> BodyTuple ;
 
 void testBox()
 {
@@ -108,6 +110,24 @@ void testSphere()
    WALBERLA_CHECK_EQUAL(s1.getSystemID(), s2->getSystemID());
 }
 
+void testSquirmer()
+{
+   MaterialID iron = Material::find("iron");
+
+   Squirmer s1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), real_c(5), real_c(0.1), real_c(4.93), iron, false, false, false);
+
+   mpi::SendBuffer sb;
+   WALBERLA_ASSERT_UNEQUAL(Sphere::getStaticTypeID(), Squirmer::getStaticTypeID(), "Squirmer did not get its own type ID");
+   WALBERLA_ASSERT_UNEQUAL(Sphere::getStaticTypeID(), s1.getStaticTypeID(), "Squirmer did not get its own type ID");
+   MarshalDynamically<BodyTuple>::execute(sb, s1);
+   mpi::RecvBuffer rb(sb);
+
+   SquirmerID s2 = static_cast<SquirmerID> (UnmarshalDynamically<BodyTuple>::execute(rb, Squirmer::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+
+   WALBERLA_CHECK_FLOAT_EQUAL(s1.getSquirmerVelocity(), s2->getSquirmerVelocity());
+   WALBERLA_CHECK_FLOAT_EQUAL(s1.getSquirmerBeta(), s2->getSquirmerBeta());
+}
+
 void testUnion()
 {
    UnionT u1(159, 423, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), false, false, false);
@@ -158,6 +178,7 @@ int main( int argc, char** argv )
    testBox();
    testCapsule();
    testUnion();
+   testSquirmer();
 
    return EXIT_SUCCESS;
 }
