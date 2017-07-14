@@ -71,7 +71,7 @@ SquirmerID createSquirmer( BodyStorage& globalStorage, BlockStorage& blocks, Blo
              << "   User-ID         = " << uid << "\n"
              << "   Global position = " << gpos << "\n"
              << "   Radius          = " << radius << "\n"
-             << "   LinVel          = " << sphere->getLinearVel() << "\n"
+             << "   LinVel          = " << squirmer->getLinearVel() << "\n"
              << "   Material        = " << Material::getName( material )
                );
    }
