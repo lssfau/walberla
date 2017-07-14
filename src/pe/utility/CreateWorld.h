@@ -33,12 +33,14 @@ namespace pe {
 
 shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
                                           Vector3<uint_t> blocks,
-                                          const Vector3<bool> isPeriodic);
+                                          const Vector3<bool> isPeriodic,
+                                          const uint_t numberOfProcesses = uint_c(mpi::MPIManager::instance()->numProcesses()));
 shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
                                           Vector3<uint_t> blocks,
                                           const Vector3<bool> isPeriodic,
                                           const bool setupRun,
-                                          const std::string sbffile);
+                                          const std::string sbffile,
+                                          const uint_t numberOfProcesses = uint_c(mpi::MPIManager::instance()->numProcesses()));
 shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& mainConf);
 
 } // namespace pe
