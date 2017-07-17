@@ -29,6 +29,7 @@
 #include "pe/communication/DynamicMarshalling.h"
 
 #include "blockforest/BlockDataHandling.h"
+#include "domain_decomposition/BlockStorage.h"
 #include "core/Abort.h"
 
 namespace walberla{
@@ -85,8 +86,7 @@ inline void StorageDataHandling<BodyTuple>::deserialize( IBlock * const block, c
       typename RigidBodyCopyNotification::Parameters objparam;
       unmarshal( buffer, objparam );
 
-      const auto inf = math::Limits<real_t>::inf();
-      BodyID bd = UnmarshalDynamically<BodyTuple>::execute(buffer, objparam.geomType_, math::AABB(-inf, -inf, -inf, inf, inf, inf), block->getAABB());
+      BodyID bd = UnmarshalDynamically<BodyTuple>::execute(buffer, objparam.geomType_, block->getBlockStorage().getDomain(), block->getAABB());
       bd->setRemote( false );
 
       if ( !block->getAABB().contains( bd->getPosition()) )
