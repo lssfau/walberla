@@ -64,7 +64,15 @@ waLBerla_compile_test( NAME   PE_RIGIDBODY FILES RigidBody.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_RIGIDBODY )
 
 waLBerla_compile_test( NAME   PE_SERIALIZEDESERIALIZE FILES SerializeDeserialize.cpp DEPENDS core blockforest  )
-waLBerla_execute_test( NAME   PE_SERIALIZEDESERIALIZE PROCESSES 8 )
+waLBerla_execute_test( NAME   PE_SERIALIZEDESERIALIZE01 COMMAND $<TARGET_FILE:PE_SERIALIZEDESERIALIZE> PROCESSES 1 )
+waLBerla_execute_test( NAME   PE_SERIALIZEDESERIALIZE02 COMMAND $<TARGET_FILE:PE_SERIALIZEDESERIALIZE> PROCESSES 2 )
+waLBerla_execute_test( NAME   PE_SERIALIZEDESERIALIZE04 COMMAND $<TARGET_FILE:PE_SERIALIZEDESERIALIZE> PROCESSES 4 )
+waLBerla_execute_test( NAME   PE_SERIALIZEDESERIALIZE08 COMMAND $<TARGET_FILE:PE_SERIALIZEDESERIALIZE> PROCESSES 8 )
+if( WALBERLA_BUILD_WITH_MPI )
+set_property( TEST PE_SERIALIZEDESERIALIZE02 PROPERTY DEPENDS PE_SERIALIZEDESERIALIZE01 ) #serialize runs of tets to avoid i/o conflicts when running ctest with -jN
+set_property( TEST PE_SERIALIZEDESERIALIZE04 PROPERTY DEPENDS PE_SERIALIZEDESERIALIZE02 ) #serialize runs of tets to avoid i/o conflicts when running ctest with -jN
+set_property( TEST PE_SERIALIZEDESERIALIZE08 PROPERTY DEPENDS PE_SERIALIZEDESERIALIZE04 ) #serialize runs of tets to avoid i/o conflicts when running ctest with -jN
+endif()
 
 waLBerla_compile_test( NAME   PE_SHADOWCOPY FILES ShadowCopy.cpp DEPENDS core blockforest  )
 waLBerla_execute_test( NAME   PE_SHADOWCOPY )

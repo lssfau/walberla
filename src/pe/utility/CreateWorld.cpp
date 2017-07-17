@@ -38,7 +38,10 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
                                           const Vector3<bool> isPeriodic,
                                           const uint_t numberOfProcesses)
 {
-   MPIManager::instance()->useWorldComm();
+   WALBERLA_MPI_SECTION()
+   {
+      MPIManager::instance()->useWorldComm();
+   }
 
    if (isPeriodic[0] && blocks[0]<2)
    {
@@ -73,7 +76,10 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
                                           const std::string sbffile,
                                           const uint_t numberOfProcesses)
 {
-   MPIManager::instance()->useWorldComm();
+   WALBERLA_MPI_SECTION()
+   {
+      MPIManager::instance()->useWorldComm();
+   }
 
    if (isPeriodic[0] && blocks[0]<2)
    {

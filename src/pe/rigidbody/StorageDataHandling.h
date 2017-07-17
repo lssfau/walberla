@@ -91,7 +91,7 @@ inline void StorageDataHandling<BodyTuple>::deserialize( IBlock * const block, c
 
       if ( !block->getAABB().contains( bd->getPosition()) )
       {
-         WALBERLA_ABORT("Loaded body not contained within block!" );
+         WALBERLA_ABORT("Loaded body not contained within block!\n" << block->getAABB() << "\n" << bd );
       }
       WALBERLA_ASSERT_EQUAL(localBodyStorage.find( bd->getSystemID() ), localBodyStorage.end());
       localBodyStorage.add(bd);

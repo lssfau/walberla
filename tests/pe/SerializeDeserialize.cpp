@@ -46,7 +46,10 @@ void createDump()
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
    // create blocks
-   auto forest = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), "SerializeDeserialize.sbf", true, false ) );
+   auto forest =    createBlockForest( math::AABB(0,0,0,60,60,60),
+                                       Vector3<uint_t>(2,2,2),                   // number of blocks
+                                       Vector3<bool>(false, false, false));      // periodicity
+   forest->saveToFile("SerializeDeserialize.sbf");
 
    auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID               = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
@@ -57,7 +60,7 @@ void createDump()
    }
 
    WALBERLA_LOG_DEVEL_ON_ROOT("dumping body storage");
-   forest->saveBlockData("BodyStorageDump.dump", storageID);
+   forest->saveBlockData("SerializeDeserialize.dump", storageID);
 
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)
    {
@@ -79,7 +82,7 @@ void checkDump()
    // create blocks
    auto forest = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), "SerializeDeserialize.sbf", true, false ) );
 
-   auto storageID    = forest->loadBlockData("BodyStorageDump.dump", createStorageDataHandling<BodyTuple>(), "Storage");
+   auto storageID    = forest->loadBlockData("SerializeDeserialize.dump", createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID        = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
 
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)
@@ -112,21 +115,19 @@ int main( int argc, char ** argv )
 {
    walberla::debug::enterTestMode();
 
-   walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
-   MPIManager::instance()->useWorldComm();
+   WALBERLA_MPI_SECTION()
+   {
+      walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
+   }
 
    SetBodyTypeIDs<BodyTuple>::execute();
 
-//   save SetupBlockForest, if you want to do that run with only one process
-   createBlockForest( math::AABB(0,0,0,60,60,60),
-                      Vector3<uint_t>(2,2,2),                   // number of blocks
-                      Vector3<bool>(false, false, false),       // periodicity
-                      true,                                     // setup run?
-                      "SerializeDeserialize.sbf" );             // sbf filename
-
    WALBERLA_LOG_DEVEL_ON_ROOT("*** DUMPING ***");
    createDump();
-   WALBERLA_MPI_BARRIER();
+   WALBERLA_MPI_SECTION()
+   {
+      WALBERLA_MPI_BARRIER();
+   }
    WALBERLA_LOG_DEVEL_ON_ROOT("*** CHECKING ***");
    checkDump();
 
