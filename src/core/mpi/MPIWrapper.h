@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -21,6 +21,8 @@
 //======================================================================================================================
 
 #pragma once
+
+#include "core/Abort.h"
 
 
 
@@ -175,7 +177,7 @@ namespace non_mpi_internal { inline void disableDefinedButNotUsedWarning() { MPI
 const int MPI_MAX_OBJECT_NAME  = 255;
 const int MPI_MAX_ERROR_STRING = 255;
 
-#define WALBERLA_MPI_FUNCTION_ERROR throw std::runtime_error( "Invalid MPI function call! In case of compiling without MPI, MPI functions are not available and shouldn't be called!" );
+#define WALBERLA_MPI_FUNCTION_ERROR WALBERLA_ABORT( "Invalid MPI function call! In case of compiling without MPI, MPI functions are not available and shouldn't be called!" );
 
 inline int MPI_Init( int*, char*** )  { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Initialized( int *)    { WALBERLA_MPI_FUNCTION_ERROR }
