@@ -34,9 +34,9 @@ int main( int argc, char ** argv )
    WALBERLA_UNUSED(env);
 
    MaterialID iron = Material::find("iron");
-   SphereID sphere = new Sphere(walberla::UniqueID<RigidBody>::create(), 0, Vec3(15, 15, 15), Vec3(0,0,0), Quat(), 3, iron, false, true, false );
-   sphere->MPITrait.setOwner( Owner(0, walberla::blockforest::BlockID().getID() ) );
-   checkVitalParameters( sphere, sphere );
+   Sphere sphere(walberla::UniqueID<RigidBody>::create(), 0, Vec3(15, 15, 15), Vec3(0,0,0), Quat(), 3, iron, false, true, false );
+   sphere.MPITrait.setOwner( Owner(0, walberla::blockforest::BlockID().getID() ) );
+   checkVitalParameters( &sphere, &sphere );
 
    return EXIT_SUCCESS;
 }
