@@ -13,6 +13,17 @@ waLBerla_execute_test( NAME SetupBlockForestTest LABELS longrun CONFIGURATIONS R
 waLBerla_compile_test( FILES BlockForestTest.cpp )
 waLBerla_execute_test( NAME BlockForestTest PROCESSES 4 )
 
+waLBerla_compile_test( NAME   SaveLoad FILES SaveLoadTest.cpp DEPENDS core blockforest  )
+waLBerla_execute_test( NAME   SaveLoad01 COMMAND $<TARGET_FILE:SaveLoad> PROCESSES 1 )
+waLBerla_execute_test( NAME   SaveLoad02 COMMAND $<TARGET_FILE:SaveLoad> PROCESSES 2 )
+waLBerla_execute_test( NAME   SaveLoad04 COMMAND $<TARGET_FILE:SaveLoad> PROCESSES 4 )
+waLBerla_execute_test( NAME   SaveLoad08 COMMAND $<TARGET_FILE:SaveLoad> PROCESSES 8 )
+if( WALBERLA_BUILD_WITH_MPI )
+set_property( TEST SaveLoad02 PROPERTY DEPENDS SaveLoad01 ) #serialize runs of tets to avoid i/o conflicts when running ctest with -jN
+set_property( TEST SaveLoad04 PROPERTY DEPENDS SaveLoad02 ) #serialize runs of tets to avoid i/o conflicts when running ctest with -jN
+set_property( TEST SaveLoad08 PROPERTY DEPENDS SaveLoad04 ) #serialize runs of tets to avoid i/o conflicts when running ctest with -jN
+endif()
+
 waLBerla_compile_test( FILES StructuredBlockForestTest.cpp )
 waLBerla_execute_test( NAME StructuredBlockForestTest )
 

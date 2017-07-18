@@ -355,7 +355,7 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
    uint_t offset = 0;
    std::vector< uint8_t > buffer;
 
-   if( broadcastFile )
+   if( broadcastFile && (mpi::MPIManager::instance()->numProcesses() > 1) )
    {
       std::ifstream file;
       uint_t length = 0;
