@@ -32,6 +32,7 @@
 #include "core/mpi/Gatherv.h"
 #include "core/mpi/MPIManager.h"
 
+#include <cmath>
 #include <map>
 #include <set>
 #include <stack>
@@ -751,9 +752,11 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::balanceWeighted( const std::
       uint_t c( uint_t(0) );
       for( uint_t p = uint_t(0); p != processes; ++p )
       {
-         const long double minWeight = totalWeight / numeric_cast< long double >( processes - p );
+         const long double pWeight = totalWeight / numeric_cast< long double >( processes - p );
          long double weight( 0 );
-         while( weight < minWeight && c < blocks.size() )
+         while( c < blocks.size() &&
+                std::abs( pWeight - weight - numeric_cast< long double >( allBlocks[ uint_c( blocks[c].first ) ][ blocks[c].second ].second ) ) <=
+                std::abs( pWeight - weight ) )
          {
             targets[ uint_c( blocks[c].first ) ][ blocks[c].second ] = pid_c(p);
             sender[p].insert( blocks[c].first );

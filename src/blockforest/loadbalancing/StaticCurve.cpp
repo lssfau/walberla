@@ -21,6 +21,8 @@
 
 #include "StaticCurve.h"
 
+#include <cmath>
+
 
 
 namespace walberla {
@@ -119,9 +121,11 @@ uint_t StaticLevelwiseCurveBalanceWeighted::operator()( SetupBlockForest & fores
       uint_t c( uint_t(0) );
       for( uint_t p = uint_t(0); p != numberOfProcesses; ++p )
       {
-         const workload_t minWeight = totalWeight / workload_c( numberOfProcesses - p );
+         const workload_t pWeight = totalWeight / workload_c( numberOfProcesses - p );
          workload_t weight( 0 );
-         while( weight < minWeight && c < blocksOnLevel.size() )
+         while( c < blocksOnLevel.size() &&
+                std::abs( pWeight - weight - blocksOnLevel[c]->getWorkload() ) <=
+                std::abs( pWeight - weight ) )
          {
             blocksOnLevel[c]->assignTargetProcess(p);
 
