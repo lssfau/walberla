@@ -20,6 +20,7 @@
 //======================================================================================================================
 
 #include "BlockForest.h"
+#include "BlockForestFile.h"
 #include "BlockNeighborhoodSection.h"
 #include "SetupBlockForest.h"
 #include "core/Abort.h"
@@ -2752,8 +2753,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 }
 
 
-
-/// ATTENTION: 'suidMap' and 'suidBytes' must be identical for every process!
+/// For a description of the file format see BlockForestFile.h
+/// \attention 'suidMap' and 'suidBytes' must be identical for every process!
+/// \see BlockForestFile.h
 void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMode,
                               const std::map< SUID, boost::dynamic_bitset<uint8_t> > & suidMap, const uint_t suidBytes ) const
 {
@@ -2764,7 +2766,7 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
    uint_t dataSize = uint_t(2) + blocks_.size() * ( blockIdBytes + suidBytes ) + uint_t(2) + neighborhood_.size() * processIdBytes_;
    if( MPIManager::instance()->rank() == 0 )
    {
-      dataSize += uint_c(89); // header
+      dataSize += internal::FILE_HEADER_SIZE; // header
       ++dataSize; // number of SUIDs
       for( auto suid = suidMap.begin(); suid != suidMap.end(); ++suid )
          dataSize += uint_t(1) + uint_c( suid->first.getIdentifier().length() );
