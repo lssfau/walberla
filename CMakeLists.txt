@@ -116,6 +116,9 @@ option ( WARNING_PEDANTIC   "Enables pedantic compiler warnings"             ON 
 option ( WARNING_ERROR      "Convert warnings to errors compiler warnings"   OFF )
 option ( WARNING_DEPRECATED "Show warning when deprecated features are used" ON  )
 
+# Sanitizer options
+option ( WALBERLA_SANITIZE_ADDRESS    "Enables address sanitizer in gcc and clang"            )
+option ( WALBERLA_SANITIZE_UNDEFINED  "Enables undefined behavior sanitizer in gcc and clang" )
 
 # Every folder that is listed here can contain modules or tests
 # this can be extended by applications to have own modules
@@ -1079,8 +1082,22 @@ if ( WALBERLA_BUILD_WITH_LTO  )
 endif ( )
 ############################################################################################################################
 
+############################################################################################################################
+##
+##  Sanitizer
+##
+############################################################################################################################
+if ( WALBERLA_SANITIZE_ADDRESS )
+    if ( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_CLANG )
+        add_flag( CMAKE_CXX_FLAGS "-fsanitize=address")
+    endif()
+endif()
 
-
+if ( WALBERLA_SANITIZE_UNDEFINED )
+    if ( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_CLANG )
+        add_flag( CMAKE_CXX_FLAGS "-fsanitize=undefined")
+    endif()
+endif()
 
 ############################################################################################################################
 # Documentation Generation
