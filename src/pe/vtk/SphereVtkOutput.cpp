@@ -23,6 +23,7 @@
 #include "core/DataTypes.h"
 #include "SphereVtkOutput.h"
 #include "pe/rigidbody/BodyStorage.h"
+#include "pe/rigidbody/Squirmer.h"
 
 #include "core/selectable/IsSetSelected.h"
 #include "core/uid/GlobalState.h"
@@ -54,7 +55,7 @@ void SphereVtkOutput::configure()
 
       for( auto it = bs[0].begin(); it != bs[0].end(); ++it )
       {
-         if (it->getTypeID() == Sphere::getStaticTypeID())
+         if (it->getTypeID() == Sphere::getStaticTypeID() || it->getTypeID() == Squirmer::getStaticTypeID())
             bodies_.push_back( static_cast<ConstSphereID> (*it) );
          if (it->getTypeID() == Union<boost::tuple<Sphere> >::getStaticTypeID())
          {
@@ -62,6 +63,33 @@ void SphereVtkOutput::configure()
             for( auto it2 = un->begin(); it2 != un->end(); ++it2 )
             {
                if (it2->getTypeID() == Sphere::getStaticTypeID())
+                  bodies_.push_back( static_cast<ConstSphereID> (*it2) );
+            }
+         }
+         if (it->getTypeID() == Union<boost::tuple<Squirmer> >::getStaticTypeID())
+         {
+            auto un = static_cast<Union<boost::tuple<Squirmer> > const * > (*it);
+            for( auto it2 = un->begin(); it2 != un->end(); ++it2 )
+            {
+               if (it2->getTypeID() == Squirmer::getStaticTypeID())
+                  bodies_.push_back( static_cast<ConstSphereID> (*it2) );
+            }
+         }
+         if (it->getTypeID() == Union<boost::tuple<Sphere,Squirmer> >::getStaticTypeID())
+         {
+            auto un = static_cast<Union<boost::tuple<Sphere,Squirmer> > const * > (*it);
+            for( auto it2 = un->begin(); it2 != un->end(); ++it2 )
+            {
+               if (it2->getTypeID() == Sphere::getStaticTypeID() || it2->getTypeID() == Squirmer::getStaticTypeID())
+                  bodies_.push_back( static_cast<ConstSphereID> (*it2) );
+            }
+         }
+         if (it->getTypeID() == Union<boost::tuple<Squirmer,Sphere> >::getStaticTypeID())
+         {
+            auto un = static_cast<Union<boost::tuple<Squirmer,Sphere> > const * > (*it);
+            for( auto it2 = un->begin(); it2 != un->end(); ++it2 )
+            {
+               if (it2->getTypeID() == Sphere::getStaticTypeID() || it2->getTypeID() == Squirmer::getStaticTypeID())
                   bodies_.push_back( static_cast<ConstSphereID> (*it2) );
             }
          }
