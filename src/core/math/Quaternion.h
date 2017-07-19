@@ -152,9 +152,6 @@ public:
    //@{
                               inline Quaternion&                set( Type r, Type i, Type j, Type k );
                               inline void                       reset();
-                              inline Type                       length()           const;
-                              inline Quaternion&                normalize();
-                              inline const Quaternion           getNormalized()    const;
                               inline Quaternion&                invert();
                               inline const Quaternion           getInverse()       const;
                               inline const Matrix3<Type>        toRotationMatrix() const;
@@ -249,7 +246,7 @@ template< typename Type >  // Data type of the quaternion
 inline Quaternion<Type>::Quaternion( Type r, Type i, Type j, Type k )
 {
    v_[0] = r; v_[1] = i; v_[2] = j; v_[3] = k;
-   WALBERLA_ASSERT_FLOAT_EQUAL( r*r + i*i + j*j + k*k, Type(1), "Invalid quaternion parameters" );
+   WALBERLA_CHECK_FLOAT_EQUAL( r*r + i*i + j*j + k*k, Type(1), "Invalid quaternion parameters" );
 }
 //*************************************************************************************************
 
@@ -279,7 +276,7 @@ inline Quaternion<Type>::Quaternion( Vector3<Axis> axis, Type angle )
       return;
    }
 
-   WALBERLA_ASSERT( axis.sqrLength() > Axis(0), "Invalid rotation axis" );
+   WALBERLA_CHECK( axis.sqrLength() > Axis(0), "Invalid rotation axis" );
 
    const Type sina( std::sin( angle*Type(0.5) ) );
    const Type cosa( std::cos( angle*Type(0.5) ) );
@@ -432,7 +429,7 @@ inline Quaternion<Type>& Quaternion<Type>::operator=( const Quaternion<Other>& r
  * \param index Access index. The index has to be in the range \f$[0..3]\f$.
  * \return Copy of the accessed element.
  *
- * In case pe_USER_ASSERT() is active, this operator performs an index check.
+ * When compiled in Debug mode, this operator performs an index check.
  */
 template< typename Type >  // Data type of the quaternion
 inline Type Quaternion<Type>::operator[]( size_t index ) const
@@ -462,7 +459,7 @@ inline Type Quaternion<Type>::operator[]( size_t index ) const
 template< typename Type >  // Data type of the quaternion
 inline Quaternion<Type>& Quaternion<Type>::set( Type r, Type i, Type j, Type k )
 {
-   WALBERLA_ASSERT_FLOAT_EQUAL( std::fabs( r*r + i*i + j*j + k*k ), Type(1), "Invalid quaternion parameters" );
+   WALBERLA_CHECK_FLOAT_EQUAL( std::fabs( r*r + i*i + j*j + k*k ), Type(1), "Invalid quaternion parameters" );
    v_[0] = r;
    v_[1] = i;
    v_[2] = j;
@@ -489,66 +486,6 @@ inline void Quaternion<Type>::reset()
 {
    v_[0] = Type(1);
    v_[1] = v_[2] = v_[3] = Type(0);
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Calculation of the quaternion length \f$|\hat{q}|\f$.
- *
- * \return The length of the quaternion.
- */
-template< typename Type >  // Data type of the quaternion
-inline Type Quaternion<Type>::length() const
-{
-   // Although the length of the quaternion should always be exactly one, the function
-   // calculates the actual length to enable length checks.
-   return std::sqrt( v_[0]*v_[0] + v_[1]*v_[1] + v_[2]*v_[2] + v_[3]*v_[3] );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Normalization of the quaternion (\f$|\hat{q}|=1\f$).
- *
- * \return Reference to the quaternion.
- */
-template< typename Type >  // Data type of the quaternion
-inline Quaternion<Type>& Quaternion<Type>::normalize()
-{
-   const Type len( std::sqrt( v_[0]*v_[0] + v_[1]*v_[1] + v_[2]*v_[2] + v_[3]*v_[3] ) );
-
-   if( len == Type(0) )
-      return *this;
-
-   const Type ilen( Type(1)/len );
-
-   v_[0] *= ilen;
-   v_[1] *= ilen;
-   v_[2] *= ilen;
-   v_[3] *= ilen;
-
-   return *this;
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Calculation of the normalized quaternion (\f$|\hat{q}|=1\f$).
- *
- * \return The normalized quaternion.
- */
-template< typename Type >  // Data type of the quaternion
-inline const Quaternion<Type> Quaternion<Type>::getNormalized() const
-{
-   const Type len( std::sqrt( v_[0]*v_[0] + v_[1]*v_[1] + v_[2]*v_[2] + v_[3]*v_[3] ) );
-
-   if( len == Type(0) )
-      return *this;
-
-   const Type ilen( Type(1)/len );
-
-   return Quaternion( ilen*v_[0], ilen*v_[1], ilen*v_[2], ilen*v_[3] );
 }
 //*************************************************************************************************
 
