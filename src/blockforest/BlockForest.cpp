@@ -2950,6 +2950,12 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
 
          file.close();
       }
+      else
+      {
+         // begin()/end() must also be called on each slave process in order to
+         // properly finalize the communication
+         WALBERLA_CHECK( bufferSystem.begin() == bufferSystem.end() );
+      }
    }
    else
    {

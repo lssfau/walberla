@@ -237,11 +237,9 @@ protected:
    };
    std::map<MPIRank, SendInfo> sendInfos_;
 
-   #ifndef NDEBUG
    //stores tags of running communications in debug mode to ensure that
    //each concurrently running communication uses different tags
    static std::set<int> activeTags_;
-   #endif
 };
 
 
