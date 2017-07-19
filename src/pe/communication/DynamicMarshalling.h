@@ -33,6 +33,7 @@
 #include "pe/communication/rigidbody/Capsule.h"
 #include "pe/communication/rigidbody/Sphere.h"
 #include "pe/communication/rigidbody/Union.h"
+#include "pe/utility/BodyCast.h"
 
 #include "core/Abort.h"
 
@@ -44,7 +45,19 @@ namespace pe {
 namespace communication {
 
 template < typename BodyTypeTuple >
-struct MarshalDynamically{
+class MarshalDynamically{
+private:
+   struct MarshalFunctor
+   {
+      mpi::SendBuffer& buffer_;
+
+      MarshalFunctor(mpi::SendBuffer& buffer) : buffer_(buffer) {}
+
+      template< typename BodyType >
+      void operator()( const BodyType* bd) { marshal( buffer_, *bd); }
+   };
+
+public:
    //*************************************************************************************************
    /*!\brief Marshalling rigid body parameters dynamically.
     *
@@ -57,29 +70,30 @@ struct MarshalDynamically{
     */
    static void execute(mpi::SendBuffer& buffer, const RigidBody& b)
    {
-      static_assert(boost::is_base_of<RigidBody, typename BodyTypeTuple::head_type>::value, "only derived types from RigidBody are allowed!");
-
-      if (BodyTypeTuple::head_type::getStaticTypeID() == b.getTypeID())
-      {
-         typedef typename BodyTypeTuple::head_type BodyT;
-         marshal( buffer, static_cast<const BodyT&>(b));
-      } else
-      {
-        MarshalDynamically<typename BodyTypeTuple::tail_type>::execute(buffer, b);
-      }
+      MarshalFunctor func(buffer);
+      return SingleCast<BodyTypeTuple, MarshalFunctor, void>::execute (&b, func);
    }
 };
 
-template < >
-struct MarshalDynamically< boost::tuples::null_type>{
-    static void execute(mpi::SendBuffer& /*buffer*/, const RigidBody& b)
-    {
-       WALBERLA_ABORT("MarshalDynamically: BodyTypeID " << b.getTypeID() << " could not be resolved!");
-    }
-};
-
 template < typename BodyTypeTuple >
-struct UnmarshalDynamically{
+class UnmarshalDynamically{
+private:
+   struct UnmarshalFunctor
+   {
+      mpi::RecvBuffer& buffer_;
+      const math::AABB& domain_;
+      const math::AABB& block_;
+
+      UnmarshalFunctor(mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block)
+         : buffer_(buffer)
+         , domain_(domain)
+         , block_(block) {}
+
+      template< typename BodyType >
+      BodyID operator()( BodyType* bd) { return instantiate( buffer_, domain_, block_, bd ); }
+   };
+
+public:
    //*************************************************************************************************
    /*!\brief Marshalling rigid body parameters dynamically.
     *
@@ -92,24 +106,9 @@ struct UnmarshalDynamically{
     */
    static BodyID execute(mpi::RecvBuffer& buffer, const id_t typeID, const math::AABB& domain, const math::AABB& block)
    {
-      if (BodyTypeTuple::head_type::getStaticTypeID() == typeID)
-      {
-         typedef typename BodyTypeTuple::head_type BodyT;
-         BodyT* newBody;
-         return instantiate( buffer, domain, block, newBody );
-      } else
-      {
-         return UnmarshalDynamically<typename BodyTypeTuple::tail_type>::execute(buffer, typeID, domain, block);
-      }
+      UnmarshalFunctor func(buffer, domain, block);
+      return SingleCast<BodyTypeTuple, UnmarshalFunctor, BodyID>::execute (typeID, func);
    }
-};
-
-template < >
-struct UnmarshalDynamically< boost::tuples::null_type>{
-    static BodyID execute(mpi::RecvBuffer& /*buffer*/, const id_t typeID, const math::AABB& /*domain*/, const math::AABB& /*block*/)
-    {
-       WALBERLA_ABORT("UnmarshalDynamically: BodyTypeID " << typeID << " could not be resolved!");
-    }
 };
 
 }  // namespace communication

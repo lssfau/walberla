@@ -37,11 +37,11 @@ namespace communication {
 
 //forward declaration
 template < typename BodyTypeTuple >
-struct MarshalDynamically;
+class MarshalDynamically;
 
 //forward declaration
 template < typename BodyTypeTuple >
-struct UnmarshalDynamically;
+class UnmarshalDynamically;
 
 struct UnionParameters : public GeomPrimitiveParameters {
    real_t         m_;

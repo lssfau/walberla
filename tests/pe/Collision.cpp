@@ -18,8 +18,9 @@
 //
 //======================================================================================================================
 
-#include "pe/collision/Collide.h"
 #include "pe/collision/GJKEPAHelper.h"
+#include "pe/fcd/AnalyticCollisionDetection.h"
+#include "pe/utility/BodyCast.h"
 
 #include "pe/contact/Contact.h"
 #include "pe/fcd/SimpleFCD.h"
@@ -40,6 +41,7 @@
 
 using namespace walberla;
 using namespace walberla::pe;
+using walberla::pe::fcd::analytic::collide;
 
 void checkContact(const Contact& c1, const Contact& c2)
 {
@@ -256,9 +258,12 @@ void UnionTest()
 
    std::vector<Contact> contacts;
 
+   using namespace walberla::pe::fcd;
    // SPHERE <-> SPHERE
    WALBERLA_LOG_INFO("UNION <-> UNION");
-   fcd::DoubleDispatch< boost::tuple<UnionT, Sphere> >::execute(&un1, &un2, contacts);
+   AnalyticCollideFunctor< std::vector<Contact> > func(contacts);
+   DoubleCast<boost::tuple<UnionT, Sphere>, boost::tuple<UnionT, Sphere>, AnalyticCollideFunctor< std::vector<Contact> >, bool>::execute(&un1, &un2, func);
+
    checkContact( contacts.at(0),
                  Contact( sp1, sp2, Vec3(real_t(0.75), 0, 0), Vec3(-1, 0, 0), real_t(-0.5)) );
 }
