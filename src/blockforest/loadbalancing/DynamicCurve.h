@@ -364,6 +364,12 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::masterWeighted( std::vector<
       
       balanceWeighted( allBlocks, blocksPerLevel, targets, sender );
    }
+   else
+   {
+      // begin()/end() must also be called on each slave process in order to
+      // properly finalize the communication
+      WALBERLA_CHECK( bufferSystem.begin() == bufferSystem.end() );
+   }
    
    masterEnd( targets, sender, targetProcess, processesToRecvFrom );   
 }
@@ -430,6 +436,12 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::masterNoWeight( std::vector<
       sender.resize( processes );
       
       balanceNoWeight( allBlocks, blocksPerLevel, targets, sender );
+   }
+   else
+   {
+      // begin()/end() must also be called on each slave process in order to
+      // properly finalize the communication
+      WALBERLA_CHECK( bufferSystem.begin() == bufferSystem.end() );
    }
    
    masterEnd( targets, sender, targetProcess, processesToRecvFrom );   
@@ -867,6 +879,12 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::masterEnd( std::vector< std:
          sender.resize(1);
          recvIt.buffer() >> targets[0] >> sender[0];
       }
+   }
+   else
+   {
+      // begin()/end() must also be called on each slave process in order to
+      // properly finalize the communication
+      WALBERLA_CHECK( resultsBufferSystem.begin() == resultsBufferSystem.end() );
    }
    
    finalAssignment( uint_t(0), targets, sender, targetProcess, processesToRecvFrom );
