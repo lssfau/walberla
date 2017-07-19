@@ -518,7 +518,7 @@ inline Quaternion<Type>& Quaternion<Type>::normalize()
 {
    const Type len( std::sqrt( v_[0]*v_[0] + v_[1]*v_[1] + v_[2]*v_[2] + v_[3]*v_[3] ) );
 
-   if( len == Type(0) )
+   if( isIdentical(len, Type(0)) )
       return *this;
 
    const Type ilen( Type(1)/len );
@@ -543,7 +543,7 @@ inline const Quaternion<Type> Quaternion<Type>::getNormalized() const
 {
    const Type len( std::sqrt( v_[0]*v_[0] + v_[1]*v_[1] + v_[2]*v_[2] + v_[3]*v_[3] ) );
 
-   if( len == Type(0) )
+   if( isIdentical(len, Type(0)) )
       return *this;
 
    const Type ilen( Type(1)/len );
