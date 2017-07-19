@@ -517,9 +517,7 @@ template< typename Type >  // Data type of the quaternion
 inline Quaternion<Type>& Quaternion<Type>::normalize()
 {
    const Type len( std::sqrt( v_[0]*v_[0] + v_[1]*v_[1] + v_[2]*v_[2] + v_[3]*v_[3] ) );
-
-   if( isIdentical(len, Type(0)) )
-      return *this;
+   WALBERLA_ASSERT_NOT_IDENTICAL( len, Type(0) );
 
    const Type ilen( Type(1)/len );
 
@@ -542,9 +540,7 @@ template< typename Type >  // Data type of the quaternion
 inline const Quaternion<Type> Quaternion<Type>::getNormalized() const
 {
    const Type len( std::sqrt( v_[0]*v_[0] + v_[1]*v_[1] + v_[2]*v_[2] + v_[3]*v_[3] ) );
-
-   if( isIdentical(len, Type(0)) )
-      return *this;
+   WALBERLA_ASSERT_NOT_IDENTICAL( len, Type(0) );
 
    const Type ilen( Type(1)/len );
 
