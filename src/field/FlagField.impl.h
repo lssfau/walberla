@@ -148,7 +148,7 @@ namespace field {
       //check that mask contains only registered bits
       WALBERLA_ASSERT( ! ( mask & (~ data_->usedMask) ));
 
-      for( auto i = this->beginInner(); i != this->end(); ++i)
+      for( auto i = this->begin(); i != this->end(); ++i)
          if(*i & mask )
             cv.push_back(Cell(i.x(),i.y(), i.z() ));
    }
