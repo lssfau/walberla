@@ -22,15 +22,15 @@
 #include "BufferSystem.h"
 #include "core/logging/Logging.h"
 #include "core/mpi/MPIManager.h"
+#include "core/debug/CheckFunctions.h"
 
 
 namespace walberla {
 namespace mpi {
 
 
-#ifndef NDEBUG
+
 std::set<int> BufferSystem::activeTags_;
-#endif
 
 //======================================================================================================================
 //
@@ -353,14 +353,12 @@ void BufferSystem::send( MPIRank rank )
 //**********************************************************************************************************************
 void BufferSystem::startCommunication()
 {
-#ifndef NDEBUG
    const auto tag = currentComm_->getTag();
-   WALBERLA_ASSERT_EQUAL(activeTags_.find(tag), activeTags_.end(),
-                         "Another communication with the same MPI tag is currently in progress.");
-  activeTags_.insert(tag);
-#endif
+   WALBERLA_CHECK_EQUAL(activeTags_.find(tag), activeTags_.end(),
+                        "Another communication with the same MPI tag is currently in progress.");
+   activeTags_.insert(tag);
 
-   WALBERLA_ASSERT( ! communicationRunning_ );
+   WALBERLA_CHECK( ! communicationRunning_ );
 
    currentComm_->scheduleReceives( recvInfos_ );
    communicationRunning_ = true;
@@ -378,7 +376,7 @@ void BufferSystem::startCommunication()
 //**********************************************************************************************************************
 void BufferSystem::endCommunication()
 {
-   WALBERLA_ASSERT( communicationRunning_ );
+   WALBERLA_CHECK( communicationRunning_ );
    currentComm_->waitForSends();
 
    // Clear send buffers
@@ -399,9 +397,7 @@ void BufferSystem::endCommunication()
 
    communicationRunning_ = false;
 
-#ifndef NDEBUG
    activeTags_.erase( activeTags_.find( currentComm_->getTag() ) );
-#endif
 }
 
 
