@@ -449,6 +449,11 @@ void exportAABB()
    void  ( AABB::*p_merge1 ) ( const Vector3<real_t> & )  = &AABB::merge;
    void  ( AABB::*p_merge2 ) ( const AABB            & )  = &AABB::merge;
 
+   real_t  ( AABB::*p_sqDistance1 ) ( const AABB & )            const = &AABB::sqDistance;
+   real_t  ( AABB::*p_sqDistance2 ) ( const Vector3<real_t> & ) const = &AABB::sqDistance;
+
+   real_t  ( AABB::*p_sqMaxDistance1 ) ( const AABB & )            const = &AABB::sqMaxDistance;
+   real_t  ( AABB::*p_sqMaxDistance2 ) ( const Vector3<real_t> & ) const = &AABB::sqMaxDistance;
 
 
    class_<AABB>("AABB")
@@ -481,9 +486,11 @@ void exportAABB()
       .def( "getIntersection", &AABB::getIntersection )
       .def( "isIdentical", &AABB::isIdentical )
       .def( "isEqual",     &AABB::isEqual )
-      .def( "sqDistance",       &AABB::sqDistance )
+      .def( "sqDistance",       p_sqDistance1 )
+      .def( "sqDistance",       p_sqDistance2 )
+      .def( "sqMaxDistance",    p_sqMaxDistance1 )
+      .def( "sqMaxDistance",    p_sqMaxDistance2 )
       .def( "sqSignedDistance", &AABB::sqSignedDistance)
-      .def( "sqMaxDistance"   , &AABB::sqMaxDistance)
       .def( "distance"        , &AABB::distance)
       .def( "signedDistance"  , &AABB::signedDistance)
       .def( "maxDistance"     , &AABB::maxDistance)
