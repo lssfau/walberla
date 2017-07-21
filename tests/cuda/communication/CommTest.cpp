@@ -228,6 +228,8 @@ int main( int argc, char ** argv )
    debug::enterTestMode();
    walberla::Environment walberlaEnv( argc, argv );
 
+	WALBERLA_CHECK_EQUAL(MPIManager::instance()->numProcesses(), 2);
+
    hostToHost();
    hostToDevice();
    deviceToHost();

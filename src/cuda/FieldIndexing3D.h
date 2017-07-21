@@ -103,4 +103,4 @@ namespace cuda {
 } // namespace walberla
 
 
-#include "FieldIndexing.impl.h"
+#include "FieldIndexing3D.impl.h"
