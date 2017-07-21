@@ -1021,6 +1021,17 @@ endif()
 ##
 ############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CUDA )
+
+    get_directory_property(COMPILE_DEFINITIONS_SAVED_STATE DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)
+    # cleanup compile definitions for CUDA (remove generator expression and empty elements which lead to warnings)
+    set(CLEANED_COMPILE_DEFINITIONS )
+    foreach( element ${COMPILE_DEFINITIONS_SAVED_STATE})
+        if(NOT ${element} MATCHES "^\\$")
+            list(APPEND CLEANED_COMPILE_DEFINITIONS ${element})
+        endif()
+    endforeach()
+    set_directory_properties(PROPERTIES COMPILE_DEFINITIONS CLEANED_COMPILE_DEFINITIONS)
+
     #   set ( BUILD_SHARED_LIBS                      ON )
     set ( CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON )
     set ( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" )
@@ -1036,6 +1047,7 @@ if ( WALBERLA_BUILD_WITH_CUDA )
         include_directories ( ${CUDA_INCLUDE_DIRS} )
         list ( APPEND SERVICE_LIBS ${CUDA_LIBRARIES} )
 
+        list( APPEND CUDA_NVCC_FLAGS "-Wno-deprecated-gpu-targets")
         if ( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std=" )
             list ( APPEND CUDA_NVCC_FLAGS "-std=c++11" )
         endif ()
@@ -1049,6 +1061,8 @@ if ( WALBERLA_BUILD_WITH_CUDA )
     else()
         set ( WALBERLA_BUILD_WITH_CUDA FALSE )
     endif ( )
+
+    set_directory_properties(PROPERTIES COMPILE_DEFINITIONS COMPILE_DEFINITIONS_SAVED_STATE)
 endif ( )
 ############################################################################################################################
 
