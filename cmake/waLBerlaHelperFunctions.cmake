@@ -8,11 +8,55 @@
 # param ARGV0: optional boolean value if the flag should be added
 #
 #######################################################################################################################
-FUNCTION ( add_flag  _VAR  _FLAG )
+function ( add_flag  _VAR  _FLAG )
    if ( ARGC EQUAL 0 OR ARGV0 )
       set ( ${_VAR} "${${_VAR}} ${_FLAG}" PARENT_SCOPE )
    endif ( )
-ENDFUNCTION ( add_flag )
+endfunction ( add_flag )
+#######################################################################################################################
+
+
+
+#######################################################################################################################
+#
+# Function to handle source files of type .gen.py and .gen.cuda.py
+#
+# files .gen.py generate a .h and a .cpp file
+# files .gen.cuda.py generate a .h and a .cu file
+# Takes a list of source files that contain .py files, and returns a list of source files
+# where the generated version are added and the .py files are removed.
+# Additionally creates a custom build rule for the code generation
+#
+#######################################################################################################################
+function( handle_python_codegen sourceFilesOut codeGenRequiredOut )
+    set(result )
+    set(codeGenRequired NO)
+    foreach( sourceFile ${ARGN} )
+        if( ${sourceFile} MATCHES ".*\\.gen\\.py$" )
+            get_filename_component(sourceFile ${sourceFile} NAME)
+            if( ${sourceFile} MATCHES ".*\\.cuda\\.gen\\.py$" )
+                string(REPLACE ".cuda.gen.py" ".h"  genHeaderFile ${sourceFile})
+                string(REPLACE ".cuda.gen.py" ".cu" genSourceFile ${sourceFile})
+            else()
+                string(REPLACE ".gen.py" ".h"  genHeaderFile ${sourceFile})
+                string(REPLACE ".gen.py" ".cpp" genSourceFile ${sourceFile})
+            endif()
+            list(APPEND result ${CMAKE_CURRENT_BINARY_DIR}/${genSourceFile}
+                               ${CMAKE_CURRENT_BINARY_DIR}/${genHeaderFile})
+            add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${genSourceFile}
+                                      ${CMAKE_CURRENT_BINARY_DIR}/${genHeaderFile}
+                               DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${sourceFile}
+                               COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${sourceFile}
+                               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+            include_directories(${CMAKE_CURRENT_BINARY_DIR})
+            set(codeGenRequired YES)
+        else()
+            list(APPEND result ${sourceFile})
+        endif()
+    endforeach()
+    set( ${sourceFilesOut} ${result} PARENT_SCOPE )
+    set( ${codeGenRequiredOut} ${codeGenRequired} PARENT_SCOPE )
+endfunction ( handle_python_codegen )
 #######################################################################################################################
 
 

@@ -89,16 +89,22 @@ function ( waLBerla_add_module )
  	   endif( ) 
  	endforeach( ) 
 
- 	if ( hasSourceFiles )
- 	    if ( CUDA_FOUND )
+    if ( hasSourceFiles )
+
+        handle_python_codegen(sourceFiles codeGenRequired ${sourceFiles})
+        if( NOT WALBERLA_BUILD_WITH_CODEGEN AND codeGenRequired)
+            message(STATUS "Skipping ${ARG_NAME} since pystencils code generation is not enabled")
+            return()
+        endif()
+
+        if ( CUDA_FOUND )
             cuda_add_library( ${moduleLibraryName} STATIC ${sourceFiles} ${otherFiles} )
         else()
             add_library( ${moduleLibraryName} STATIC ${sourceFiles} ${otherFiles} )
         endif( CUDA_FOUND )
  	else( ) 
  	   add_custom_target( ${moduleLibraryName} SOURCES ${sourceFiles} ${otherFiles} )  # dummy IDE target 
- 	endif( ) 
-
+ 	endif( )
     waLBerla_register_dependency ( ${moduleName} ${ARG_DEPENDS} )
 
     # This property is needed for visual studio to group modules together
@@ -198,14 +204,19 @@ function ( waLBerla_add_executable )
         endif ( )
     endif()
 
+    handle_python_codegen(sourceFiles codeGenRequired ${sourceFiles})
+    if( NOT WALBERLA_BUILD_WITH_CODEGEN AND codeGenRequired)
+        message(STATUS "Skipping ${ARG_NAME} since pystencils code generation is not enabled")
+        return()
+    endif()
+
     if ( CUDA_FOUND )
         cuda_add_executable( ${ARG_NAME} ${sourceFiles} )
     else()
         add_executable( ${ARG_NAME} ${sourceFiles} )
     endif()
 
-    #add_executable( ${ARG_NAME} ${sourceFiles} )
-    target_link_modules  ( ${ARG_NAME} ${ARG_DEPENDS}  )    
+    target_link_modules  ( ${ARG_NAME} ${ARG_DEPENDS}  )
     target_link_libraries( ${ARG_NAME} ${SERVICE_LIBS} )
 
     if( WALBERLA_GROUP_PROJECTS )

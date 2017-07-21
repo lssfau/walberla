@@ -78,6 +78,8 @@ option ( WALBERLA_BUILD_WITH_OPENMP         "Enable OpenMP support"             
 option ( WALBERLA_BUILD_WITH_PYTHON         "Support for embedding Python"                       )
 option ( WALBERLA_BUILD_WITH_PYTHON_MODULE  "Build waLBerla python module"                       )
 option ( WALBERLA_BUILD_WITH_PYTHON_LBM     "Include LBM module into python module"          OFF )
+option ( WALBERLA_BUILD_WITH_CODEGEN        "Enable pystencils code generation"              OFF )
+
 
 option ( WALBERLA_BUILD_WITH_LIKWID_MARKERS "Compile in markers for likwid-perfctr"              )
 
@@ -489,6 +491,24 @@ if ( WALBERLA_CXX_COMPILER_IS_MSVC )
    endif()
 
 endif ( )
+############################################################################################################################
+
+
+
+
+############################################################################################################################
+##
+## Code Generation (pystencils)
+##
+#############################################################################################################################
+if ( WALBERLA_BUILD_WITH_CODEGEN )
+    find_package( PythonInterp 3 QUIET REQUIRED)
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import pystencils_walberla" RESULT_VARIABLE PYTHON_RET_CODE)
+    if(NOT PYTHON_RET_CODE EQUAL 0)
+        message(FATAL_ERROR "WALBERLA_BUILD_WITH_CODEGEN activated and pystencils_walberla package not found")
+    endif()
+
+endif()
 ############################################################################################################################
 
 
