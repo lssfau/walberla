@@ -28,6 +28,8 @@
 //*************************************************************************************************
 
 #include "ICR.h"
+#include "Integrators.h"
+#include "ContactResolvers.h"
 #include "pe/Types.h"
 
 #include "domain_decomposition/BlockStorage.h"
@@ -39,15 +41,17 @@ namespace cr {
 /**
  * \ingroup pe
  */
-class DEM : public ICR
+template< typename Integrator, typename ContactResolver >
+class DEMSolver : public ICR
 {
 public:
-   DEM(  const shared_ptr<BodyStorage>&    globalBodyStorage
-       , const shared_ptr<BlockStorage>&   blockStorage
-       , domain_decomposition::BlockDataID storageID
-       , domain_decomposition::BlockDataID ccdID
-       , domain_decomposition::BlockDataID fcdID
-       , WcTimingTree*                     tt = NULL);
+   DEMSolver( const Integrator & integrate, const ContactResolver & resolveContact
+            , const shared_ptr<BodyStorage>&    globalBodyStorage
+            , const shared_ptr<BlockStorage>&   blockStorage
+            , domain_decomposition::BlockDataID storageID
+            , domain_decomposition::BlockDataID ccdID
+            , domain_decomposition::BlockDataID fcdID
+            , WcTimingTree*                     tt = NULL);
 
    /// forwards to timestep
    /// Convenience operator to make class a functor.
@@ -59,9 +63,8 @@ public:
    virtual inline size_t            getNumberOfContacts()          const WALBERLA_OVERRIDE { return numberOfContacts_; }
    virtual inline size_t            getNumberOfContactsTreated()   const WALBERLA_OVERRIDE { return numberOfContactsTreated_; }
 private:
-   void resolveContact( ContactID c ) const;
-   void move( BodyID id, real_t dt );
-
+   const Integrator                  integrate_;
+   const ContactResolver             resolveContact_;
    shared_ptr<BodyStorage>           globalBodyStorage_;
    shared_ptr<BlockStorage>          blockStorage_;
    domain_decomposition::BlockDataID storageID_;
@@ -74,6 +77,24 @@ private:
    size_t                            numberOfContactsTreated_;
 };
 
+class DEM : public DEMSolver<IntegrateImplictEuler, ResolveContactSpringDashpotHaffWerner>
+{
+public:
+   DEM(  const shared_ptr<BodyStorage>&    globalBodyStorage
+       , const shared_ptr<BlockStorage>&   blockStorage
+       , domain_decomposition::BlockDataID storageID
+       , domain_decomposition::BlockDataID ccdID
+       , domain_decomposition::BlockDataID fcdID
+       , WcTimingTree*                     tt = NULL)
+   : DEMSolver<IntegrateImplictEuler, ResolveContactSpringDashpotHaffWerner>(
+              IntegrateImplictEuler(), ResolveContactSpringDashpotHaffWerner(),
+              globalBodyStorage, blockStorage, storageID, ccdID, fcdID, tt )
+   {
+   }
+};
+
 }  // namespace cr
 } // namespace pe
 }  // namespace walberla
+
+#include "DEM.impl.h"
