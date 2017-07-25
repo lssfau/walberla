@@ -135,7 +135,6 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
 
 shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& mainConf)
 {
-   MPIManager::instance()->useWorldComm();
 
    bool setupRun                 = mainConf.getParameter< bool >( "setupRun", true );
    Vec3 simulationCorner         = mainConf.getParameter<Vec3>("simulationCorner", Vec3(0, 0, 0));
