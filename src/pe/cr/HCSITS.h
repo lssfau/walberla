@@ -135,6 +135,10 @@ public:
    virtual inline size_t            getNumberOfContactsTreated()   const WALBERLA_OVERRIDE;
    inline const std::map<IBlockID::IDType, ContactCache> getContactCache() const { return blockToContactCache_; }
    inline real_t                    getSpeedLimitFactor() const;
+   inline size_t                    getMaxIterations() const { return maxIterations_; }
+   inline real_t                    getRelaxationParameter() const { return relaxationParam_; }
+   inline real_t                    getErrorReductionParameter() const { return erp_; }
+   inline RelaxationModel           getRelaxationModel() const { return relaxationModel_; }
    //@}
    //**********************************************************************************************
 

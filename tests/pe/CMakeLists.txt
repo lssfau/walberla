@@ -42,6 +42,9 @@ waLBerla_execute_test( NAME   PE_HASHGRIDS_DBG COMMAND $<TARGET_FILE:PE_HASHGRID
 waLBerla_compile_test( NAME   PE_HCSITS FILES HCSITS.cpp DEPENDS core blockforest  )
 waLBerla_execute_test( NAME   PE_HCSITS )
 
+waLBerla_compile_test( NAME   PE_LOADFROMCONFIG FILES LoadFromConfig.cpp DEPENDS core blockforest  )
+waLBerla_execute_test( NAME   PE_LOADFROMCONFIG COMMAND $<TARGET_FILE:PE_LOADFROMCONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/LoadFromConfig.cfg )
+
 waLBerla_compile_test( NAME   PE_MARSHALLING FILES Marshalling.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_MARSHALLING )
 
