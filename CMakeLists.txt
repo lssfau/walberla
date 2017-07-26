@@ -506,10 +506,11 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
         # For Linux the standard find script does not work properly:
         # Python is configured here using the command "python-config" which has to be on the PATH
         if ( NOT PYTHONLIBS_VERSION_STRING )
-           find_program( PYTHON_CONFIG_EXE NAMES python3.5m-config python3.5-config
+           find_program( PYTHON_CONFIG_EXE NAMES python3-config python3m-config
+                                                 python3.5m-config python3.5-config
+                                                 python3.5m-config python3.5-config
                                                  python3.4m-config python3.4-config
                                                  python3.3m-config python3.3-config
-                                                 python3m-config python3-config
                                                  python2.7-config
                                                  python2-config python-config )
            if ( NOT PYTHON_CONFIG_EXE )
