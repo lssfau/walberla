@@ -79,6 +79,10 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const shar
              dx  0.01;  // defaults to 1.0
           }
 \endverbatim
+*          An optional config parameter 'cartesianSetup' is available. Its default, true, causes one block to be
+*          assigned to each process. Setting it to false allows multiple blocks to be assigned to each process.
+*          If the number of blocks is not divisble by the number of processes, the loadbalancer tries to assign
+*          the blocks to processes as evenly as possible.
 *    2) Using the number of global cells, #blocks = #processes, if this does not fit, extend the domain
 \verbatim
           {
@@ -87,6 +91,9 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const shar
              dx  0.01;                // defaults to 1.0
           }
 \endverbatim
+*          An optional config parameter 'oneBlockPerProcess' is available. Setting it to false forces all
+*          blocks to be assigned to a single process, which may be useful for debugging purposes. Otherwise,
+*          one block is assigned to each process.
 *          Example:  cells < 31,31,31> started using 8 processors <BR>
 *                    calculated processor distribution <2,2,2>    <BR>
 *                    real domain is then extended to <32,32,32> and every processor gets a block of <16,16,16>
@@ -135,6 +142,23 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const Conf
    }
 
    const bool oneBlockPerProcess = configBlock.getParameter<bool> ( "oneBlockPerProcess", true );
+   const bool cartesian = configBlock.getParameter<bool> ( "cartesianSetup", true );
+
+   if ( !cartesian )
+   {
+      if ( configBlock.isDefined("oneBlockPerProcess") )
+         WALBERLA_ABORT_NO_DEBUG_INFO("Config Error:  Set either 'oneBlockPerProcess' or set 'cartesianSetup' to false, not both!");
+
+      return createUniformBlockGrid(
+               blocks[0],        blocks[1],        blocks[2],         // blocks in x/y/z direction
+               cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2],  // cells per block in x/y/z direction
+               dx,                                                    // cell size
+               uint_t(0),                                             // maximum number of blocks per process
+               true, false,                                           // include but don't force Metis
+               periodic[0],      periodic[1],      periodic[2],       // periodicity
+               keepGlobalBlockInformation                             // keep global block information
+               );
+   }
 
    return createUniformBlockGrid(
             blocks[0],        blocks[1],        blocks[2],         // blocks/processes in x/y/z direction
