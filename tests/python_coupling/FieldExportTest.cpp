@@ -29,16 +29,15 @@
 #include "blockforest/Initialization.h"
 #include "blockforest/python/Exports.h"
 #include "field/python/Exports.h"
-#include "field/iterators/IteratorMacros.h"
 #include "python_coupling/Manager.h"
 #include "python_coupling/PythonCallback.h"
 #include "python_coupling/DictWrapper.h"
 #include "stencil/D2Q9.h"
 
-
 #include <boost/mpl/vector.hpp>
 
 using namespace walberla;
+
 
 
 int main( int argc, char ** argv )
@@ -86,6 +85,7 @@ int main( int argc, char ** argv )
    cb.data().exposeValue("blocks", blocks);
    cb();
 
+
    // check for equivalence
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
    {
@@ -95,20 +95,24 @@ int main( int argc, char ** argv )
       auto vec3Field = blockIt->getData<GhostLayerField<Vector3<int>,1 > >( vec3FieldID );
 
       {
-         WALBERLA_FOR_ALL_CELLS(scaIt, sca2Field, vecIt, vec2Field,
-            WALBERLA_ASSERT_EQUAL(scaIt[0], (*vecIt)[0]);
-            WALBERLA_ASSERT_EQUAL(scaIt[1], (*vecIt)[1]);
-			)
-      }
-
-      {
-		  WALBERLA_FOR_ALL_CELLS(scaIt, sca3Field, vecIt, vec3Field,
-            WALBERLA_ASSERT_EQUAL(scaIt[0], (*vecIt)[0]);
-            WALBERLA_ASSERT_EQUAL(scaIt[1], (*vecIt)[1]);
-            WALBERLA_ASSERT_EQUAL(scaIt[2], (*vecIt)[2]);
-			)
+         for(cell_idx_t z = 0; z < cell_idx_c(sca2Field->zSize()); ++z)
+            for(cell_idx_t y = 0; y < cell_idx_c(sca2Field->zSize()); ++y)
+               for(cell_idx_t x = 0; x < cell_idx_c(sca2Field->zSize()); ++x)
+               {
+                  WALBERLA_CHECK_EQUAL( sca2Field->get(x,y,z, 0), vec2Field->get(x,y,z)[0] );
+                  WALBERLA_CHECK_EQUAL( sca2Field->get(x,y,z, 1), vec2Field->get(x,y,z)[1] );
+               }
+         for(cell_idx_t z = 0; z < cell_idx_c(sca3Field->zSize()); ++z)
+            for(cell_idx_t y = 0; y < cell_idx_c(sca3Field->zSize()); ++y)
+               for(cell_idx_t x = 0; x < cell_idx_c(sca3Field->zSize()); ++x)
+               {
+                  WALBERLA_CHECK_EQUAL( sca3Field->get(x,y,z, 0), vec3Field->get(x,y,z)[0] );
+                  WALBERLA_CHECK_EQUAL( sca3Field->get(x,y,z, 1), vec3Field->get(x,y,z)[1] );
+                  WALBERLA_CHECK_EQUAL( sca3Field->get(x,y,z, 2), vec3Field->get(x,y,z)[2] );
+               }
       }
    }
+
 
    return 0;
 }
