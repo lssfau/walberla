@@ -41,6 +41,7 @@ std::vector< SphereVtkOutput::Attributes > SphereVtkOutput::getAttributes() cons
    attributes.push_back( Attributes( vtk::typeToString< float >(), "orientation", uint_c(3) ) );
    attributes.push_back( Attributes( vtk::typeToString< int >(),   "rank", uint_c(1) ) );
    attributes.push_back( Attributes( vtk::typeToString< id_t >(),   "id", uint_c(1) ) );
+   attributes.push_back( Attributes( vtk::typeToString< id_t >(),  "uid", uint_c(1) ) );
 
    return attributes;
 }
