@@ -35,6 +35,7 @@
 #   pragma GCC diagnostic ignored "-Wshorten-64-to-32"
 #   pragma GCC diagnostic ignored "-Wshadow"
 #   pragma GCC diagnostic ignored "-Wfloat-equal"
+#   pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #elif defined WALBERLA_CXX_COMPILER_IS_INTEL
 #   pragma warning push
 #   pragma warning( disable : 187  )
