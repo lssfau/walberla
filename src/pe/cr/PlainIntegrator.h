@@ -29,6 +29,7 @@
 
 #include "ICR.h"
 #include "pe/Types.h"
+#include "Integrators.h"
 
 #include "domain_decomposition/BlockStorage.h"
 
@@ -36,14 +37,16 @@ namespace walberla {
 namespace pe {
 namespace cr {
 
-class PlainIntegrator : public ICR
-                      , private NonCopyable
+template< typename Integrator >
+class PlainIntegratorSolver : public ICR
+                            , private NonCopyable
 {
 public:
-   PlainIntegrator( const shared_ptr<BodyStorage>&      globalBodyStorage,
-                    const shared_ptr<BlockStorage>&     blockStorage,
-                    domain_decomposition::BlockDataID   storageID,
-                    WcTimingTree* tt = NULL );
+   PlainIntegratorSolver( const Integrator & integrate,
+                          const shared_ptr<BodyStorage>&      globalBodyStorage,
+                          const shared_ptr<BlockStorage>&     blockStorage,
+                          domain_decomposition::BlockDataID   storageID,
+                          WcTimingTree* tt = NULL );
 
    /// forwards to timestep
    /// Convenience operator to make class a functor.
@@ -51,14 +54,28 @@ public:
    /// Advances the simulation dt seconds.
    void timestep( const real_t dt );
 private:
-   void move( BodyID id, real_t dt );
-
+   const Integrator                  integrate_;
    shared_ptr<BodyStorage>           globalBodyStorage_;
    shared_ptr<BlockStorage>          blockStorage_;
    domain_decomposition::BlockDataID storageID_;
    WcTimingTree*                     tt_;
 };
+   
+class PlainIntegrator : public PlainIntegratorSolver<IntegrateImplictEuler>
+{
+public:
+   PlainIntegrator(  const shared_ptr<BodyStorage>&    globalBodyStorage
+                   , const shared_ptr<BlockStorage>&   blockStorage
+                   , domain_decomposition::BlockDataID storageID
+                   , WcTimingTree*                     tt = NULL)
+   : PlainIntegratorSolver<IntegrateImplictEuler>( IntegrateImplictEuler(), globalBodyStorage, blockStorage,
+                                                   storageID, tt )
+   {
+   }
+};
 
 } // namespace cr
 } // namespace pe
 } // namespace walberla
+
+#include "PlainIntegrator.impl.h"
