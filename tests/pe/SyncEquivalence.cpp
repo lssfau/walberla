@@ -113,7 +113,7 @@ void createSimulation(math::AABB& simulationDomain,
     // add block data
     info.storageID           = info.forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
     info.ccdID               = info.forest->addBlockData(ccd::createHashGridsDataHandling( info.globalBodyStorage, info.storageID ), "CCD");
-    info.fcdID               = info.forest->addBlockData(fcd::createSimpleFCDDataHandling<BodyTuple>(), "FCD");
+    info.fcdID               = info.forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
 
     info.cr = shared_ptr<cr::ICR>(new cr::HCSITS(info.globalBodyStorage, info.forest->getBlockStoragePointer(), info.storageID, info.ccdID, info.fcdID) );
 

@@ -103,7 +103,7 @@ void sim(shared_ptr< StructuredBlockForest > forest, std::vector<BodyData>& res,
    {
       ccdID_                 = forest->addBlockData(ccd::createSimpleCCDDataHandling( globalStorage, storageID_ ), "CCD");
    }
-   auto fcdID_               = forest->addBlockData(fcd::createSimpleFCDDataHandling<BodyTuple>(), "FCD");
+   auto fcdID_               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
 
    cr::DEM cr( globalStorage, forest->getBlockStoragePointer(), storageID_, ccdID_, fcdID_, NULL);
 

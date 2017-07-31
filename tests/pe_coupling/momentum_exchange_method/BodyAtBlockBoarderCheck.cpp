@@ -304,7 +304,7 @@ int main( int argc, char **argv )
    shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "Storage");
    auto ccdID         = blocks->addBlockData(pe::ccd::createHashGridsDataHandling( globalBodyStorage, bodyStorageID ), "CCD");
-   auto fcdID         = blocks->addBlockData(pe::fcd::createSimpleFCDDataHandling<BodyTypeTuple>(), "FCD");
+   auto fcdID         = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
    pe::cr::HCSITS cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
 
 

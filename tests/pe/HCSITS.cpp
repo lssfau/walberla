@@ -116,7 +116,7 @@ int main( int argc, char** argv )
 
    auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto hccdID              = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "HCCD");
-   auto fcdID               = forest->addBlockData(fcd::createSimpleFCDDataHandling<BodyTuple>(), "FCD");
+   auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
    cr::HCSITS cr(globalBodyStorage, forest->getBlockStoragePointer(), storageID, hccdID, fcdID);
    cr.setMaxIterations( 10 );
    cr.setRelaxationParameter    ( real_t(0.7) );

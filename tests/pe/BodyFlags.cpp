@@ -64,7 +64,7 @@ int main( int argc, char ** argv )
 
    auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID               = forest->addBlockData(ccd::createHashGridsDataHandling( globalStorage, storageID ), "CCD");
-   auto fcdID               = forest->addBlockData(fcd::createSimpleFCDDataHandling<BodyTuple>(), "FCD");
+   auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
 
    //cr::DEM    cr(globalStorage, forest->getBlockStorage(), storageID, ccdID, fcdID, NULL );
    cr::HCSITS cr(globalStorage, forest->getBlockStoragePointer(), storageID, ccdID, fcdID, NULL );
