@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file Synchronization.cpp
+//! \file SerializeDeserialize.cpp
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -46,13 +46,17 @@ void createDump()
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
    // create blocks
-   auto forest =    createBlockForest( math::AABB(0,0,0,60,60,60),
-                                       Vector3<uint_t>(2,2,2),                   // number of blocks
-                                       Vector3<bool>(false, false, false));      // periodicity
+   //! [Dump Blockforest]
+   auto forest = createBlockForest( math::AABB(0,0,0,60,60,60),
+                                    Vector3<uint_t>(2,2,2),                   // number of blocks
+                                    Vector3<bool>(false, false, false));      // periodicity
    forest->saveToFile("SerializeDeserialize.sbf");
+   //! [Dump Blockforest]
 
-   auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
-   auto ccdID               = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
+   //! [Init Storage]
+   auto storageID       = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+   //! [Init Storage]
+   auto ccdID           = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
 
    for (auto it = SCIterator(forest->getDomain(), Vec3(-1,-1,-1), 3); it != SCIterator(); ++it)
    {
@@ -60,7 +64,9 @@ void createDump()
    }
 
    WALBERLA_LOG_DEVEL_ON_ROOT("dumping body storage");
+   //! [Save Simulation Data]
    forest->saveBlockData("SerializeDeserialize.dump", storageID);
+   //! [Save Simulation Data]
 
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)
    {
@@ -80,16 +86,22 @@ void checkDump()
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
    // create blocks
-   auto forest = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), "SerializeDeserialize.sbf", true, false ) );
+   //! [Load Blockforest]
+   auto forest = make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), "SerializeDeserialize.sbf", true, false );
+   //! [Load Blockforest]
 
+   //! [Load Storage]
    auto storageID    = forest->loadBlockData("SerializeDeserialize.dump", createStorageDataHandling<BodyTuple>(), "Storage");
+   //! [Load Storage]
    auto ccdID        = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
 
+   //! [Reload CCD]
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)
    {
       ccd::ICCD* ccd = blockIt->getData< ccd::ICCD >( ccdID );
       ccd->reloadBodies();
    }
+   //! [Reload CCD]
 
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)
    {

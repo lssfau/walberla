@@ -45,30 +45,30 @@ int main( int argc, char ** argv )
    real_t spacing          = real_c(1.0);
    real_t radius           = real_c(0.4);
    real_t vMax             = real_c(1.0);
-   int    simulationSteps  = 200;
+   int    simulationSteps  = 10;
    real_t dt               = real_c(0.01);
    //! [Parameters]
 
-   WALBERLA_LOG_INFO("*** GLOBALBODYSTORAGE ***");
+   WALBERLA_LOG_INFO_ON_ROOT("*** GLOBALBODYSTORAGE ***");
    //! [GlobalBodyStorage]
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    //! [GlobalBodyStorage]
 
-   WALBERLA_LOG_INFO("*** BLOCKFOREST ***");
+   WALBERLA_LOG_INFO_ON_ROOT("*** BLOCKFOREST ***");
    // create forest
    //! [BlockForest]
    shared_ptr< BlockForest > forest = createBlockForest( AABB(0,0,0,20,20,20), // simulation domain
-                                                         Vector3<uint_t>(1,1,1), // blocks in each direction
+                                                         Vector3<uint_t>(2,2,2), // blocks in each direction
                                                          Vector3<bool>(false, false, false) // periodicity
                                                          );
    //! [BlockForest]
    if (!forest)
    {
-      WALBERLA_LOG_INFO( "No BlockForest created ... exiting!");
+      WALBERLA_LOG_INFO_ON_ROOT( "No BlockForest created ... exiting!");
       return EXIT_SUCCESS;
    }
 
-   WALBERLA_LOG_INFO("*** STORAGEDATAHANDLING ***");
+   WALBERLA_LOG_INFO_ON_ROOT("*** STORAGEDATAHANDLING ***");
    // add block data
    //! [StorageDataHandling]
    auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTypeTuple>(), "Storage");
@@ -78,7 +78,7 @@ int main( int argc, char ** argv )
    auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTypeTuple, fcd::AnalyticCollideFunctor>(), "FCD");
    //! [AdditionalBlockData]
 
-   WALBERLA_LOG_INFO("*** INTEGRATOR ***");
+   WALBERLA_LOG_INFO_ON_ROOT("*** INTEGRATOR ***");
    //! [Integrator]
    cr::HCSITS cr(globalBodyStorage, forest, storageID, ccdID, fcdID);
    cr.setMaxIterations( 10 );
@@ -87,13 +87,13 @@ int main( int argc, char ** argv )
    cr.setGlobalLinearAcceleration( Vec3(0,0,0) );
    //! [Integrator]
 
-   WALBERLA_LOG_INFO("*** BodyTypeTuple ***");
+   WALBERLA_LOG_INFO_ON_ROOT("*** BodyTypeTuple ***");
    // initialize body type ids
    //! [SetBodyTypeIDs]
    SetBodyTypeIDs<BodyTypeTuple>::execute();
    //! [SetBodyTypeIDs]
 
-   WALBERLA_LOG_INFO("*** SETUP - START ***");
+   WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - START ***");
    //! [Material]
    const real_t   static_cof  ( real_c(0.1) / 2 );   // Coefficient of static friction. Note: pe doubles the input coefficient of friction for material-material contacts.
    const real_t   dynamic_cof ( static_cof ); // Coefficient of dynamic friction. Similar to static friction for low speed friction.
@@ -124,26 +124,28 @@ int main( int argc, char ** argv )
          if (sp != NULL) ++numParticles;
       }
    }
-   WALBERLA_LOG_INFO("#particles created: " << numParticles);
+   WALBERLA_LOG_INFO_ON_ROOT("#particles created: " << numParticles);
+   syncNextNeighbors<BodyTypeTuple>(*forest, storageID);
    //! [Gas]
 
-   WALBERLA_LOG_INFO("*** SETUP - END ***");
+   WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - END ***");
 
-   WALBERLA_LOG_INFO("*** SIMULATION - START ***");
+   WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - START ***");
    //! [GameLoop]
    for (int i=0; i < simulationSteps; ++i)
    {
       if( i % 10 == 0 )
       {
-         WALBERLA_LOG_DEVEL( "Timestep " << i << " / " << simulationSteps );
+         WALBERLA_LOG_PROGRESS_ON_ROOT( "Timestep " << i << " / " << simulationSteps );
       }
 
       cr.timestep( real_c(dt) );
+      syncNextNeighbors<BodyTypeTuple>(*forest, storageID);
    }
    //! [GameLoop]
-   WALBERLA_LOG_INFO("*** SIMULATION - END ***");
+   WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
 
-   WALBERLA_LOG_INFO("*** GETTING STATISTICAL INFORMATION ***");
+   WALBERLA_LOG_INFO_ON_ROOT("*** GETTING STATISTICAL INFORMATION ***");
    //! [PostProcessing]
    Vec3 meanVelocity(0,0,0);
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)

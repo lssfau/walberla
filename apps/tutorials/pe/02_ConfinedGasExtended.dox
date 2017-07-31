@@ -1,0 +1,97 @@
+namespace walberla {
+namespace pe {
+
+/**
+\page tutorial_pe_02 Tutorial - Useful Features
+
+This tutorial will introduce some useful features of the waLBerla framework which can make your live easier.
+
+\section tutorial_pe_02_checkpointing Checkpointing
+You can checkpoint the current state of your rigid body dynamics simulation at any point to restore it afterwards.
+First you have to store the current domain partitioning using blockforest::BlockForest::saveToFile().
+\snippet SerializeDeserialize.cpp Dump Blockforest
+Then you have to store the current simulation data using domain_decomposition::BlockStorage::saveBlockData().
+\snippet SerializeDeserialize.cpp Save Simulation Data
+This will store all non global rigid bodies to the file system.
+
+To load everything again you start by creating the blockforest::BlockForest. This time you will use a different
+constructor.
+\snippet SerializeDeserialize.cpp Load Blockforest
+Instead of initializing the Storage BlockDatum like you normally would
+\snippet SerializeDeserialize.cpp Init Storage
+you have to use domain_decomposition::BlockStorage::loadBlockData()
+\snippet SerializeDeserialize.cpp Load Storage
+
+Unfortunately due to a misorder in the loading scheme you have to reload your coarse collision detection.
+\snippet SerializeDeserialize.cpp Reload CCD
+Hopefully this gets fixed in the future. ;)
+
+\attention This method does not save global bodies nor solver settings. You have to take care to restore these
+settings on your own.
+
+A fully working example can be found in the SerializeDeserialize.cpp test of the pe module.
+
+\section tutorial_pe_02_vtk VTK Output
+For VTK Output you have to create vtk::VTKOutput objects.
+To output the domain partitioning use vtk::createVTKOutput_DomainDecomposition.
+\snippet 02_ConfinedGasExtended.cpp VTK Domain Output
+To output all sphere particles use vtk::createVTKOutput_PointData in conjunction with SphereVtkOutput:
+\snippet 02_ConfinedGasExtended.cpp VTK Sphere Output
+Currently only spheres are supported for VTK output but you can easily write your own SphereVtkOutput
+and adapt it to the body you like.
+
+To actually write something to disc call vtk::VTKOutput::write():
+\snippet 02_ConfinedGasExtended.cpp VTK Output
+You can call this every time step if you want. The files will be automatically numbered so that ParaView can
+generate an animation.
+
+\section tutorial_pe_02_config Loading from Config
+You can specify a config file as the first command line parameter. To access it you can use the
+Environment::config() function. You can access subblocks of the config with config::Config::getBlock().
+\snippet LoadFromConfig.cpp Load Config
+To get values from the config call config::Config::getParameter():
+\snippet LoadFromConfig.cpp Config Get Parameter
+Certain task already have predefined loading functions. You can for example directly create a BlockForest
+from the config file.
+\snippet LoadFromConfig.cpp Config BlockForest
+The corresponding block in the config file looks like:
+\code
+simulationCorner < -15, -15, 0 >;
+simulationDomain < 12, 23, 34 >;
+blocks < 3, 4, 5 >;
+isPeriodic < 0, 1, 0 >;
+\endcode
+Also the HardContact solver can be configured directly from the config file:
+\snippet LoadFromConfig.cpp Config HCSITS
+The config file looks like:
+\code
+HCSITSmaxIterations 123;
+HCSITSRelaxationParameter 0.123;
+HCSITSErrorReductionParameter 0.123;
+HCSITSRelaxationModelStr ApproximateInelasticCoulombContactByDecoupling;
+globalLinearAcceleration < 1, -2, 3 >;
+\endcode
+
+\section tutorial_pe_02_timing Timing
+To get additional information where you application spends its time you can use the WcTimingTree.
+It will give you a hirarchical view of the time used.
+Usage example:
+\snippet 02_ConfinedGasExtended.cpp TT Example
+Before you output the information you should collect all the information from all the processes if you are running
+in parallel.
+\snippet 02_ConfinedGasExtended.cpp TT Log
+Many build-in functions like solver or synchronization methods come with an additional parameter where you can
+specify your timing tree. They will then include detailed information in your timing tree.
+
+\section tutorial_pe_02_sqlite SQLite Output
+waLBerla also supports SQLite database for simulation data output. This can come in handy in parallel simulations
+as well as in data analysis. To store information in a SQLite database you have to fill three property maps
+depending on the type of information you want to store.
+\snippet 02_ConfinedGasExtended.cpp SQLProperties
+You can then dump the information to disc. timing::TimingPool and timing::TimingTree already have predefined save
+functions so you do not have to extract all the information yourself and save it in the property array.
+\snippet 02_ConfinedGasExtended.cpp SQL Save
+*/
+
+}
+}

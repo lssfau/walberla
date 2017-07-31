@@ -23,6 +23,7 @@ all the basic data strcutures and concepts of the framework.
 \subsection pe Rigid Body Dynamics (pe)
 
 - \ref tutorial_pe_01 \n
+- \ref tutorial_pe_02 \n
 
 \subsection pdes Solving Partial Differential Equations
 

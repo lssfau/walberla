@@ -38,12 +38,23 @@ int main( int argc, char ** argv )
    walberla::debug::enterTestMode();
 
    Environment env(argc, argv);
-   const Config::BlockHandle configBlock  = env.config()->getBlock( "LoadFromConfig" );
+   //! [Load Config]
+   auto cfg = env.config();
+   if (cfg == NULL) WALBERLA_ABORT("No config specified!");
+   const Config::BlockHandle configBlock  = cfg->getBlock( "LoadFromConfig" );
+   //! [Load Config]
+
+   //! [Config Get Parameter]
+   real_t radius = configBlock.getParameter<real_t>("radius", real_c(0.4) );
+   //! [Config Get Parameter]
+   WALBERLA_UNUSED(radius);
 
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
    // create blocks
+   //! [Config BlockForest]
    shared_ptr<BlockForest> forest = createBlockForestFromConfig( configBlock );
+   //! [Config BlockForest]
    WALBERLA_CHECK_EQUAL( forest->getXSize(), 3 );
    WALBERLA_CHECK_EQUAL( forest->getYSize(), 4 );
    WALBERLA_CHECK_EQUAL( forest->getZSize(), 5 );
@@ -53,9 +64,11 @@ int main( int argc, char ** argv )
    WALBERLA_CHECK_FLOAT_EQUAL( forest->getDomain().minCorner(), Vec3(-15, -15, 0) );
    WALBERLA_CHECK_FLOAT_EQUAL( forest->getDomain().maxCorner(), Vec3(-3, 8, 34) );
 
+   //! [Config HCSITS]
    BlockDataID blockDataID;
    cr::HCSITS hcsits( globalBodyStorage, forest, blockDataID, blockDataID, blockDataID);
    configure(configBlock, hcsits);
+   //! [Config HCSITS]
    WALBERLA_CHECK_EQUAL( hcsits.getRelaxationModel(), cr::HCSITS::RelaxationModel::ApproximateInelasticCoulombContactByDecoupling );
    WALBERLA_CHECK_EQUAL( hcsits.getMaxIterations(), 123 );
    WALBERLA_CHECK_FLOAT_EQUAL( hcsits.getRelaxationParameter(), real_t(0.123) );

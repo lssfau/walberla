@@ -25,7 +25,7 @@ Please check the documentation of each individual function for more information.
 
 \subsection FCD What fine collision detection functions are available?
 Please check the documentation of each individual function for more information.
-   - fcd::SimpleFCD create via createSimpleFCDDataHandling() (analytic contact detection)
+   - fcd::GenericFCD create via createGenericFCDDataHandling() (for analytic contact detection use fcd::AnalyticCollideFunctor)
 
 \subsection CRSolvers What collision resolution solvers are available?
 Please check the documentation of each individual solver for more information.
@@ -70,6 +70,10 @@ of every collision partner by retrieving the material of Contact::getBody1(), Co
 \attention To get the correct mass and inertia of a union during collision resolution
 you should call RigidBody::getTopSuperBody() and then RigidBody::getMass()
 (RigidBody::getInertia()) using the returned rigid body.
+
+\subsection SyncCalls How can I dynamically switch between sync calls?
+You can bind the function to a boost function and call this one.
+\snippet 02_ConfinedGasExtended.cpp Bind Sync Call
 
 \section CommonFunctions Important Classes and Functions
 **/
