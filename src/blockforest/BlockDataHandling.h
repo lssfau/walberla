@@ -69,10 +69,21 @@ public:
    T * deserialize( IBlock * const block ) { return this->initialize( block ); }
    T * deserializeCoarseToFine( Block * const block ) { return this->initialize( block ); }
    T * deserializeFineToCoarse( Block * const block ) { return this->initialize( block ); }
-   
+
    void deserialize( IBlock * const, const BlockDataID &, mpi::RecvBuffer & ) {}
    void deserializeCoarseToFine( Block * const, const BlockDataID &, mpi::RecvBuffer & ) {}
    void deserializeFineToCoarse( Block * const, const BlockDataID &, mpi::RecvBuffer &, const uint_t ) {}
+};
+
+
+
+template< typename T >
+class AlwaysCreateBlockDataHandling : public AlwaysInitializeBlockDataHandling<T>
+{
+public:
+   ~AlwaysCreateBlockDataHandling() {}
+
+   T * initialize( IBlock * const /*block*/ ) {return new T();}
 };
 
 

@@ -23,14 +23,13 @@
 #pragma once
 
 #include "pe/Types.h"
+#include "pe/contact/Contact.h"
 #include "pe/rigidbody/Box.h"
 #include "pe/rigidbody/Capsule.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Sphere.h"
 #include "pe/rigidbody/Union.h"
-#include "pe/contact/Contact.h"
-
-#include "GJKEPAHelper.h"
+#include "pe/utility/BodyCast.h"
 
 #include "core/debug/Debug.h"
 #include "core/math/RotationMatrix.h"
@@ -41,12 +40,107 @@
 
 namespace walberla {
 namespace pe {
-
 namespace fcd {
-//Forward Declaration
-template < typename BodyTypeTuple, typename BaseT >
-struct DoubleDispatch;
-}
+namespace analytic {
+
+template <typename Container>
+inline
+bool collide( GeomID bd1, GeomID bd2, Container& container );
+
+template <typename Container>
+inline
+bool collide( SphereID s1, SphereID s2, Container& container );
+
+template <typename Container>
+inline
+bool collide( SphereID s, PlaneID p, Container& container );
+
+template <typename Container>
+inline
+bool collide( PlaneID p, SphereID s, Container& container );
+template <typename Container>
+inline
+bool collide( SphereID s, BoxID b, Container& container );
+
+template <typename Container>
+inline
+bool collide( BoxID b, SphereID s, Container& container );
+template <typename Container>
+inline
+bool collide( BoxID b1, BoxID b2, Container& container );
+template <typename Container>
+inline
+bool collide( BoxID b, PlaneID p, Container& container );
+
+template <typename Container>
+inline
+bool collide( PlaneID p, BoxID b, Container& container );
+template <typename Container>
+inline
+bool collide( CapsuleID c1, CapsuleID c2, Container& container );
+template <typename Container>
+inline
+bool collide( CapsuleID c, PlaneID p, Container& container );
+
+template <typename Container>
+inline
+bool collide( PlaneID p, CapsuleID c, Container& container );
+
+template <typename Container>
+inline
+bool collide( SphereID s, CapsuleID c, Container& container );
+
+template <typename Container>
+inline
+bool collide( CapsuleID c, SphereID s, Container& container );
+
+
+template <typename Container>
+inline
+bool collide( BoxID b, CapsuleID c, Container& container );
+
+template <typename Container>
+inline
+bool collide( CapsuleID c, BoxID b, Container& container );
+
+template <typename BodyTypeTuple, typename BodyB, typename Container>
+inline
+bool collide( Union<BodyTypeTuple>* bd1, BodyB* bd2, Container& container );
+
+template <typename BodyA, typename BodyTypeTuple, typename Container>
+inline
+bool collide( BodyA* bd1, Union<BodyTypeTuple>* bd2, Container& container );
+
+template <typename BodyTypeTupleA, typename BodyTypeTupleB, typename Container>
+inline
+bool collide( Union<BodyTypeTupleA>* bd1, Union<BodyTypeTupleB>* bd2, Container& container );
+
+} //namespace analytic
+
+template <typename Container>
+struct AnalyticCollideFunctor
+{
+   Container& contacts_;
+
+   AnalyticCollideFunctor(Container& contacts) : contacts_(contacts) {}
+
+   template< typename BodyType1, typename BodyType2 >
+   bool operator()( BodyType1* bd1, BodyType2* bd2) { using namespace analytic; return collide( bd1, bd2, contacts_); }
+};
+
+template <typename BodyType1, typename Container>
+struct AnalyticSingleCollideFunctor
+{
+   BodyType1* bd1_;
+   Container& contacts_;
+
+   AnalyticSingleCollideFunctor(BodyType1* bd1, Container& contacts) : bd1_(bd1), contacts_(contacts) {}
+
+   template< typename BodyType2 >
+   bool operator()( BodyType2* bd2) { using namespace analytic; return collide( bd1_, bd2, contacts_); }
+};
+
+namespace analytic {
 
 //*************************************************************************************************
 /*!\brief Contact generation between two colliding rigid bodies.
@@ -60,21 +154,9 @@ struct DoubleDispatch;
  */
 template <typename Container>
 inline
-bool collide( GeomID bd1, GeomID bd2, Container& container )
+bool collide( GeomID /*bd1*/, GeomID /*bd2*/, Container& /*container*/ )
 {
    WALBERLA_ABORT("UNSUPPORTED COLLISION!");
-   Vec3   contactPoint;
-   Vec3   contactNormal;
-   real_t penetrationDepth;
-
-   bool collision = collideGJK(bd1, bd2, contactPoint, contactNormal, penetrationDepth);
-
-   if (collision)
-   {
-      container.push_back( Contact(bd1, bd2, contactPoint, contactNormal, penetrationDepth) );
-      return true;
-   }
-
    return false;
 }
 
@@ -2002,10 +2084,11 @@ template <typename BodyTypeTuple, typename BodyB, typename Container>
 inline
 bool collide( Union<BodyTypeTuple>* bd1, BodyB* bd2, Container& container )
 {
+   AnalyticSingleCollideFunctor<BodyB, Container> func(bd2, container);
    bool collision = false;
    for( auto it=bd1->begin(); it!=bd1->end(); ++it )
    {
-      collision |= fcd::DoubleDispatch< BodyTypeTuple, boost::tuple<BodyB> >::execute(*it, bd2, container);
+      collision |= SingleCast<BodyTypeTuple, AnalyticSingleCollideFunctor<BodyB, Container>, bool>::execute(*it, func);
    }
    return collision;
 }
@@ -2021,16 +2104,19 @@ template <typename BodyTypeTupleA, typename BodyTypeTupleB, typename Container>
 inline
 bool collide( Union<BodyTypeTupleA>* bd1, Union<BodyTypeTupleB>* bd2, Container& container )
 {
+   AnalyticCollideFunctor<Container> func(container);
    bool collision = false;
    for( auto it1=bd1->begin(); it1!=bd1->end(); ++it1 )
    {
       for( auto it2=bd2->begin(); it2!=bd2->end(); ++it2 )
       {
-         collision |= fcd::DoubleDispatch< BodyTypeTupleA, BodyTypeTupleB >::execute(*it1, *it2, container);
+         collision |= DoubleCast<BodyTypeTupleA, BodyTypeTupleB, AnalyticCollideFunctor<Container>, bool>::execute(*it1, *it2, func);
       }
    }
    return collision;
 }
 
-}
-}
+} //namespace analytic
+} //namespace fcd
+} //namespace pe
+} //namespace walberla

@@ -18,8 +18,9 @@
 //
 //======================================================================================================================
 
-#include "pe/collision/Collide.h"
 #include "pe/collision/GJKEPAHelper.h"
+#include "pe/fcd/AnalyticCollisionDetection.h"
+#include "pe/utility/BodyCast.h"
 
 #include "pe/contact/Contact.h"
 #include "pe/fcd/SimpleFCD.h"
@@ -40,6 +41,7 @@
 
 using namespace walberla;
 using namespace walberla::pe;
+using walberla::pe::fcd::analytic::collide;
 
 void checkContact(const Contact& c1, const Contact& c2)
 {
@@ -59,11 +61,12 @@ void SphereTest()
    Plane  pl1(223, 1, Vec3(0,0,0), Vec3(1,1,1).getNormalized(), 0, iron);
 
    std::vector<Contact> contacts;
+   fcd::AnalyticCollideFunctor< std::vector<Contact> > collideFunc(contacts);
 
    // SPHERE <-> SPHERE
    WALBERLA_LOG_INFO("SPHERE <-> SPHERE");
-   WALBERLA_CHECK( !collide(&sp1, &sp3, contacts) );
-   WALBERLA_CHECK(  collide(&sp1, &sp2, contacts) );
+   WALBERLA_CHECK( !collideFunc(&sp1, &sp3) );
+   WALBERLA_CHECK(  collideFunc(&sp1, &sp2) );
    checkContact( contacts.at(0),
                  Contact( &sp1, &sp2, Vec3(real_t(0.75), 0, 0), Vec3(-1, 0, 0), real_t(-0.5)) );
 
@@ -71,17 +74,17 @@ void SphereTest()
    // SPHERE <-> PLANE
    WALBERLA_LOG_INFO("SPHERE <-> PLANE");
    contacts.clear();
-   WALBERLA_CHECK(  collide(&sp1, &pl1, contacts) );
-   WALBERLA_CHECK(  collide(&sp2, &pl1, contacts) );
+   WALBERLA_CHECK(  collideFunc(&sp1, &pl1) );
+   WALBERLA_CHECK(  collideFunc(&sp2, &pl1) );
    checkContact( contacts.at(1),
                  Contact( &sp2, &pl1, Vec3(1,real_t(-0.5),real_t(-0.5)), Vec3(1, 1, 1).getNormalized(), real_t(-0.133974596215561181)) );
    // ORDER INVARIANCE
    contacts.clear();
-   WALBERLA_CHECK(  collide(&pl1, &sp2, contacts) );
+   WALBERLA_CHECK(  collideFunc(&pl1, &sp2) );
    checkContact( contacts.at(0),
                  Contact( &sp2, &pl1, Vec3(1,real_t(-0.5),real_t(-0.5)), Vec3(1, 1, 1).getNormalized(), real_t(-0.133974596215561181)) );
 
-   WALBERLA_CHECK( !collide(&sp3, &pl1, contacts) );
+   WALBERLA_CHECK( !collideFunc(&sp3, &pl1) );
 }
 
 void BoxTest()
@@ -98,6 +101,7 @@ void BoxTest()
    b5.rotate( Vec3(1,0,0), real_t(math::PI * 0.25) );
 
    std::vector<Contact> contacts;
+   fcd::AnalyticCollideFunctor< std::vector<Contact> > collideFunc(contacts);
 
    real_t penetrationDepth = real_t(0);
    Vec3   contactPoint = Vec3();
@@ -108,12 +112,12 @@ void BoxTest()
    // BOX <-> BOX
    WALBERLA_LOG_INFO("BOX <-> BOX");
    WALBERLA_CHECK( !collideGJK(&b1, &b3, contactPoint, contactNormal, penetrationDepth) );
-   WALBERLA_CHECK( !collide(&b1, &b3, contacts) );
+   WALBERLA_CHECK( !collideFunc(&b1, &b3) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contactPoint);
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contactNormal);
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << penetrationDepth);
    WALBERLA_CHECK(  collideGJK(&b1, &b2, contactPoint, contactNormal, penetrationDepth) );
-   WALBERLA_CHECK(  collide(&b1, &b2, contacts) );
+   WALBERLA_CHECK(  collideFunc(&b1, &b2) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contactPoint);
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contactNormal);
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << penetrationDepth);
@@ -121,29 +125,29 @@ void BoxTest()
 
    b4.setPosition( (Vec3(0,0,1) * real_t(sqrt(3)) + Vec3(0,0,1)) * 0.999);
    WALBERLA_CHECK( collideGJK(&b1, &b4, contactPoint, contactNormal, penetrationDepth) );
-   WALBERLA_CHECK( collide(&b1, &b4, contacts) );
+   WALBERLA_CHECK( collideFunc(&b1, &b4) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contacts.back().getPosition());
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contacts.back().getNormal());
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << contacts.back().getDistance());
 
    b4.setPosition( (Vec3(0,0,1) * real_t(sqrt(3)) + Vec3(0,0,1)) * 1.001);
    WALBERLA_CHECK( !collideGJK(&b1, &b4, contactPoint, contactNormal, penetrationDepth) );
-   WALBERLA_CHECK( !collide(&b1, &b4, contacts) );
+   WALBERLA_CHECK( !collideFunc(&b1, &b4) );
 
    b5.setPosition( (Vec3(0,0,1) * real_t(sqrt(3)) + Vec3(0,0,1)) * 0.99);
    WALBERLA_CHECK( collideGJK(&b1, &b5, contactPoint, contactNormal, penetrationDepth) );
-   WALBERLA_CHECK( collide(&b1, &b5, contacts) );
+   WALBERLA_CHECK( collideFunc(&b1, &b5) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contacts.back().getPosition());
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contacts.back().getNormal());
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << contacts.back().getDistance());
 
    b5.setPosition( (Vec3(0,0,1) * real_t(sqrt(3)) + Vec3(0,0,1)) * 1.01);
    WALBERLA_CHECK( !collideGJK(&b1, &b5, contactPoint, contactNormal, penetrationDepth) );
-   WALBERLA_CHECK( !collide(&b1, &b5, contacts) );
+   WALBERLA_CHECK( !collideFunc(&b1, &b5) );
 
    Sphere s1(126, 0, Vec3(real_t(1.5), real_t(1.5), real_t(1.5)), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
    WALBERLA_CHECK( collideGJK(&b1, &s1, contactPoint, contactNormal, penetrationDepth) );
-   WALBERLA_CHECK( collide(&b1, &s1, contacts) );
+   WALBERLA_CHECK( collideFunc(&b1, &s1) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contactPoint);
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contactNormal);
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << penetrationDepth);
@@ -156,6 +160,7 @@ void CapsuleTest()
    Sphere sp1(123, 123, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
 
    std::vector<Contact> contacts;
+   fcd::AnalyticCollideFunctor< std::vector<Contact> > collideFunc(contacts);
 
    // CAPSULE <-> SPHERE
    WALBERLA_LOG_INFO("CAPSULE <-> SPHERE");
@@ -168,30 +173,30 @@ void CapsuleTest()
    WALBERLA_CHECK( !collideGJK(&c1, &sp1, contacts) );
 
    sp1.setPosition(0, real_t(1.9), 0);
-   WALBERLA_CHECK( collide(&c1, &sp1, contacts) );
+   WALBERLA_CHECK( collideFunc(&c1, &sp1) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contacts.at(1).getPosition());
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contacts.at(1).getNormal());
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << contacts.at(1).getDistance());
    sp1.setPosition(0, real_t(2.1), 0);
-   WALBERLA_CHECK( !collide(&c1, &sp1, contacts) );
+   WALBERLA_CHECK( !collideFunc(&c1, &sp1) );
 
    // CAPSULE <-> PLANE
    WALBERLA_LOG_INFO("CAPSULE <-> PLANE");
    Plane pl1(124, 124, Vec3(0,0,real_t(-0.9)), Vec3(0,0,1), 0, iron);
-   WALBERLA_CHECK( collide(&c1, &pl1, contacts) );
+   WALBERLA_CHECK( collideFunc(&c1, &pl1) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contacts.at(2).getPosition());
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contacts.at(2).getNormal());
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << contacts.at(2).getDistance());
    pl1.setPosition(0,0, real_t(-1.1));
-   WALBERLA_CHECK( !collide(&c1, &pl1, contacts) );
+   WALBERLA_CHECK( !collideFunc(&c1, &pl1) );
 
    Plane pl2(124, 124, Vec3(real_t(1.9),0,0), Vec3(-1,0,0), 0, iron);
-   WALBERLA_CHECK( collide(&c1, &pl2, contacts) );
+   WALBERLA_CHECK( collideFunc(&c1, &pl2) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contacts.at(3).getPosition());
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contacts.at(3).getNormal());
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << contacts.at(3).getDistance());
    pl2.setPosition(real_t(2.1),0, 0);
-   WALBERLA_CHECK( !collide(&c1, &pl2, contacts) );
+   WALBERLA_CHECK( !collideFunc(&c1, &pl2) );
 
 }
 
@@ -256,9 +261,12 @@ void UnionTest()
 
    std::vector<Contact> contacts;
 
+   using namespace walberla::pe::fcd;
    // SPHERE <-> SPHERE
    WALBERLA_LOG_INFO("UNION <-> UNION");
-   fcd::DoubleDispatch< boost::tuple<UnionT, Sphere> >::execute(&un1, &un2, contacts);
+   AnalyticCollideFunctor< std::vector<Contact> > func(contacts);
+   func(&un1, &un2);
+
    checkContact( contacts.at(0),
                  Contact( sp1, sp2, Vec3(real_t(0.75), 0, 0), Vec3(-1, 0, 0), real_t(-0.5)) );
 }

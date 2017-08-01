@@ -270,7 +270,7 @@ int main( int argc, char **argv )
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
    auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
    auto ccdID         = blocks->addBlockData(pe::ccd::createHashGridsDataHandling( globalBodyStorage, bodyStorageID ), "CCD");
-   auto fcdID         = blocks->addBlockData(pe::fcd::createSimpleFCDDataHandling<BodyTypeTuple>(), "FCD");
+   auto fcdID         = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
    
    pe::cr::HCSITS cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID);
    

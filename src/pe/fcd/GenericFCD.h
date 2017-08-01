@@ -13,36 +13,45 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file SimpleFCDDataHandling.h
+//! \file GenericFCD.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "SimpleFCD.h"
+#include "IFCD.h"
+
+#include "pe/utility/BodyCast.h"
 
 #include "blockforest/BlockDataHandling.h"
-#include "core/Deprecated.h"
 
 namespace walberla{
 namespace pe{
 namespace fcd {
 
-template <typename BodyTypeTuple>
-class SimpleFCDDataHandling : public blockforest::AlwaysInitializeBlockDataHandling<SimpleFCD<BodyTypeTuple> >{
+///
+/// \brief Uses CollideFunctor to call collide function without additional namespace inclusion.
+///
+template <typename BodyTypeTuple, template <typename Container> class CollisionFunctor >
+class GenericFCD : public IFCD{
 public:
-    SimpleFCD<BodyTypeTuple> * initialize( IBlock * const /*block*/ ) {return new SimpleFCD<BodyTypeTuple>();}
+   virtual Contacts& generateContacts(PossibleContacts& possibleContacts)
+   {
+      contacts_.clear();
+      CollisionFunctor<decltype(contacts_)> func(contacts_);
+      for (auto it = possibleContacts.begin(); it != possibleContacts.end(); ++it)
+      {
+         DoubleCast<BodyTypeTuple, BodyTypeTuple, CollisionFunctor<decltype(contacts_)>, bool>::execute(it->first, it->second, func);
+      }
+      return contacts_;
+   }
 };
 
-/// \attention This function is deprecated. Use createGenericFCDDataHandling<BodyTypeTuple, AnalyticCollideFunctor>() instead!
-template <typename BodyTypeTuple>
-WALBERLA_DEPRECATED(shared_ptr<SimpleFCDDataHandling<BodyTypeTuple> > createSimpleFCDDataHandling());
-
-template <typename BodyTypeTuple>
-shared_ptr<SimpleFCDDataHandling<BodyTypeTuple> > createSimpleFCDDataHandling()
+template <typename BodyTypeTuple, template <typename Container> class CollisionFunctor>
+shared_ptr< blockforest::AlwaysCreateBlockDataHandling<GenericFCD<BodyTypeTuple, CollisionFunctor> > > createGenericFCDDataHandling()
 {
-   return make_shared<SimpleFCDDataHandling<BodyTypeTuple> >( );
+   return make_shared< blockforest::AlwaysCreateBlockDataHandling<GenericFCD<BodyTypeTuple, CollisionFunctor> > >( );
 }
 
 }

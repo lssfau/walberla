@@ -75,7 +75,7 @@ int main( int argc, char ** argv )
    //! [StorageDataHandling]
    //! [AdditionalBlockData]
    auto ccdID               = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
-   auto fcdID               = forest->addBlockData(fcd::createSimpleFCDDataHandling<BodyTypeTuple>(), "FCD");
+   auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTypeTuple, fcd::AnalyticCollideFunctor>(), "FCD");
    //! [AdditionalBlockData]
 
    WALBERLA_LOG_INFO("*** INTEGRATOR ***");

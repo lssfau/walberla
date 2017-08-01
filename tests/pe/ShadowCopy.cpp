@@ -54,7 +54,7 @@ int main( int argc, char** argv )
 
    auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
                               forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "HCCD");
-                              forest->addBlockData(fcd::createSimpleFCDDataHandling<BodyTuple>(), "FCD");
+                              forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
 
 
 //   logging::Logging::instance()->setStreamLogLevel(logging::Logging::DETAIL);

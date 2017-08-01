@@ -65,7 +65,7 @@ int main( int argc, char** argv )
     auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
     auto sccdID              = forest->addBlockData(ccd::createSimpleCCDDataHandling( globalBodyStorage, storageID ), "SCCD");
     auto hccdID              = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "HCCD");
-    auto fcdID               = forest->addBlockData(fcd::createSimpleFCDDataHandling<BodyTuple>(), "FCD");
+    auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
     cr::PlainIntegrator cr(globalBodyStorage, forest->getBlockStoragePointer(), storageID, NULL);
 
     pe::createPlane( *globalBodyStorage, 0, Vec3(0, +1, 0), Vec3(5, 0,5), iron);
