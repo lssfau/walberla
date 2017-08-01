@@ -25,7 +25,7 @@
    tags:
       - docker
 
-      
+
 .build_serial_template: &build_serial_definition
    <<: *build_definition
    variables:
@@ -35,8 +35,8 @@
       CMAKE_BUILD_TYPE: "Release"
       WALBERLA_BUFFER_DEBUG: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-      
-      
+
+
 .build_mpionly_template: &build_mpionly_definition
    <<: *build_definition
    variables:
@@ -46,8 +46,8 @@
        CMAKE_BUILD_TYPE: "Release"
        WALBERLA_BUFFER_DEBUG: "OFF"
        WALBERLA_DOUBLE_ACCURACY: "ON"
-      
-      
+
+
 .build_hybrid_template: &build_hybrid_definition
    <<: *build_definition
    variables:
@@ -59,7 +59,7 @@
       CMAKE_BUILD_TYPE: "Release"
       WALBERLA_BUFFER_DEBUG: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-      
+
 .build_serial_dbg_template: &build_serial_dbg_definition
    <<: *build_definition
    variables:
@@ -69,8 +69,8 @@
       CMAKE_BUILD_TYPE: "DebugOptimized"
       WALBERLA_BUFFER_DEBUG: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-      
-      
+
+
 .build_mpionly_dbg_template: &build_mpionly_dbg_definition
    <<: *build_definition
    variables:
@@ -80,8 +80,8 @@
        CMAKE_BUILD_TYPE: "DebugOptimized"
        WALBERLA_BUFFER_DEBUG: "OFF"
        WALBERLA_DOUBLE_ACCURACY: "ON"
-      
-      
+
+
 .build_hybrid_dbg_template: &build_hybrid_dbg_definition
    <<: *build_definition
    variables:
@@ -93,7 +93,7 @@
       CMAKE_BUILD_TYPE: "DebugOptimized"
       WALBERLA_BUFFER_DEBUG: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-      
+
 .build_hybrid_dbg_sp_template: &build_hybrid_dbg_sp_definition
    <<: *build_definition
    variables:
@@ -105,587 +105,880 @@
       CMAKE_BUILD_TYPE: "DebugOptimized"
       WALBERLA_BUFFER_DEBUG: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "OFF"
- 
- 
+
+
 ###############################################################################
 ##                                                                           ##
-##    Build jobs                                                             ##
+##    Linux builds                                                           ##
 ##                                                                           ##
 ###############################################################################
-      
-## Intel
 
-intel-15_Serial:
+
+
+intel_15_serial:
    <<: *build_serial_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
+   tags:
+      - intel
+      - docker
    only:
       - triggers
-   tags:
-      - docker
-      - intel
-      
-intel-15_MpiOnly:
+
+intel_15_mpionly:
    <<: *build_mpionly_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
+   tags:
+      - intel
+      - docker
    only:
       - triggers
-   tags:
-      - docker
-      - intel
-      
-intel-15_Hybrid:
+
+intel_15_hybrid:
    <<: *build_hybrid_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
+   tags:
+      - intel
+      - docker
    only:
       - triggers
-   tags:
-      - docker
-      - intel
 
-intel-15_Serial_Dbg:
+intel_15_serial_dbg:
    <<: *build_serial_dbg_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
+   tags:
+      - intel
+      - docker
    only:
       - triggers
-   tags:
-      - docker
-      - intel
-      
-intel-15_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
-   only:
-      - triggers
-   tags:
-      - docker
-      - intel
-      
-intel-15_Hybrid_Dbg:
-   <<: *build_hybrid_dbg_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2015
-   tags:
-      - docker
-      - intel
 
-
-intel-16_Serial:
-   <<: *build_serial_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
-   only:
-      - triggers
-   tags:
-      - docker
-      - intel
-      
-intel-16_MpiOnly:
-   <<: *build_mpionly_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
-   only:
-      - triggers
-   tags:
-      - docker
-      - intel
-      
-intel-16_Hybrid:
-   <<: *build_hybrid_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
-   only:
-      - triggers
-   tags:
-      - docker
-      - intel
-   
-intel-16_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
-   only:
-      - triggers
-   tags:
-      - docker
-      - intel
-      
-intel-16_MpiOnly_Dbg:
+intel_15_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
+   tags:
+      - intel
+      - docker
    only:
       - triggers
-   tags:
-      - docker
-      - intel
-      
-intel-16_Hybrid_Dbg:
+
+intel_15_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
    tags:
-      - docker
       - intel
-      
-intel-16_Hybrid_SP_Dbg:
+      - docker
+
+intel_15_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2016
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
+   tags:
+      - intel
+      - docker
    only:
       - triggers
-   tags:
-      - docker
-      - intel
-      
-      
-intel-17_Serial:
+
+intel_16_serial:
    <<: *build_serial_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
+   tags:
+      - cuda
+      - intel
+      - docker
    only:
       - triggers
-   tags:
-      - docker
-      - intel
-      
-intel-17_MpiOnly:
+
+intel_16_mpionly:
    <<: *build_mpionly_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
+   tags:
+      - cuda
+      - intel
+      - docker
    only:
       - triggers
-   tags:
-      - docker
-      - intel
-      
-intel-17_Hybrid:
+
+intel_16_hybrid:
    <<: *build_hybrid_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - docker
+      - cuda
       - intel
-   
-intel-17_Serial_Dbg:
+      - docker
+   only:
+      - triggers
+
+intel_16_serial_dbg:
    <<: *build_serial_dbg_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - docker
+      - cuda
       - intel
-      
-intel-17_MpiOnly_Dbg:
+      - docker
+   only:
+      - triggers
+
+intel_16_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - docker
+      - cuda
       - intel
-      
-intel-17_Hybrid_Dbg:
+      - docker
+   only:
+      - triggers
+
+intel_16_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - docker
+      - cuda
       - intel
-      
-intel-17_Hybrid_SP_Dbg:
+      - docker
+   only:
+      - triggers
+
+intel_16_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
-   image: i10git.cs.fau.de:5005/administration/buildenv-intel:2017
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
+   tags:
+      - cuda
+      - intel
+      - docker
+   only:
+      - triggers
+
+intel_17_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
+   tags:
+      - intel
+      - docker
+   only:
+      - triggers
+
+intel_17_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
+   tags:
+      - intel
+      - docker
+   only:
+      - triggers
+
+intel_17_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
+   tags:
+      - intel
+      - docker
+
+intel_17_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
+   tags:
+      - intel
+      - docker
+
+intel_17_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
+   tags:
+      - intel
+      - docker
+
+intel_17_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
+   tags:
+      - intel
+      - docker
+
+intel_17_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
+   tags:
+      - intel
+      - docker
+
+gcc_4.7_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.7
    tags:
       - docker
-      - intel
-
-   
-## GCC
-
-gcc-4.7_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-gcc:4.7
    only:
-      - triggers   
-      
-gcc-4.7_MpiOnly:
+      - triggers
+
+gcc_4.7_mpionly:
    <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-gcc:4.7
-   only:
-      - triggers      
-      
-gcc-4.7_Hybrid:
-   <<: *build_hybrid_definition
-   image: walberla/buildenv-ubuntu-gcc:4.7
-   only:
-      - triggers
-      
-gcc-4.7_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:4.7
-   only:
-      - triggers   
-      
-gcc-4.7_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:4.7
-   only:
-      - triggers      
-      
-gcc-4.7_Hybrid_Dbg:
-   <<: *build_hybrid_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:4.7
-      
-
-gcc-4.8_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-gcc:4.8
-   only:
-      - triggers     
-      
-gcc-4.8_MpiOnly:
-   <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-gcc:4.8
-   only:
-      - triggers      
-      
-gcc-4.8_Hybrid:
-   <<: *build_hybrid_definition
-   image: walberla/buildenv-ubuntu-gcc:4.8
-   only:
-      - triggers
-      
-gcc-4.8_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:4.8
-   only:
-      - triggers     
-      
-gcc-4.8_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:4.8
-   only:
-      - triggers      
-      
-gcc-4.8_Hybrid_Dbg:
-   <<: *build_hybrid_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:4.8
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.7
+   tags:
+      - docker
    only:
       - triggers
 
-
-gcc-4.9_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-gcc:4.9
-   only:
-      - triggers     
-      
-gcc-4.9_MpiOnly:
-   <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-gcc:4.9
-   only:
-      - triggers      
-      
-gcc-4.9_Hybrid:
+gcc_4.7_hybrid:
    <<: *build_hybrid_definition
-   image: walberla/buildenv-ubuntu-gcc:4.9
-   only:
-      - triggers
-      
-gcc-4.9_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:4.9
-   only:
-      - triggers     
-      
-gcc-4.9_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:4.9
-   only:
-      - triggers      
-      
-gcc-4.9_Hybrid_Dbg:
-   <<: *build_hybrid_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:4.9
-   only:
-      - triggers
-      
-      
-gcc-5_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-gcc:5
-   only:
-      - triggers
-      
-gcc-5_MpiOnly:
-   <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-gcc:5
-   only:
-      - triggers
-   
-gcc-5_Hybrid:
-   <<: *build_hybrid_definition
-   image: walberla/buildenv-ubuntu-gcc:5
-   only:
-      - triggers
-   
-gcc-5_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:5
-   only:
-      - triggers
-      
-gcc-5_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:5
-   only:
-      - triggers
-   
-gcc-5_Hybrid_Dbg:
-   <<: *build_hybrid_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:5
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.7
+   tags:
+      - docker
    only:
       - triggers
 
-
-gcc-6_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-gcc:6
-   only:
-      - triggers
-      
-gcc-6_MpiOnly:
-   <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-gcc:6
-   only:
-      - triggers
-   
-gcc-6_Hybrid:
-   <<: *build_hybrid_definition
-   image: walberla/buildenv-ubuntu-gcc:6
-   
-gcc-6_Serial_Dbg:
+gcc_4.7_serial_dbg:
    <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:6
-      
-gcc-6_MpiOnly_Dbg:
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.7
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_4.7_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:6
-   
-gcc-6_Hybrid_Dbg:
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.7
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_4.7_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
-   image: walberla/buildenv-ubuntu-gcc:6
-   
-gcc-6_Hybrid_SP_Dbg:
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.7
+   tags:
+      - docker
+
+gcc_4.7_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
-   image: walberla/buildenv-ubuntu-gcc:6
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.7
+   tags:
+      - docker
+   only:
+      - triggers
 
-      
-## Clang
-
-clang-3.4_Serial:
+gcc_4.8_serial:
    <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-clang:3.4
-   only:
-      - triggers
-      
-clang-3.4_MpiOnly:
-   <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-clang:3.4
-   only:
-      - triggers
-      
-clang-3.4_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.4
-   only:
-      - triggers
-      
-clang-3.4_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.4
-
-      
-clang-3.5_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-clang:3.5
-   only:
-      - triggers
-      
-clang-3.5_MpiOnly:
-   <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-clang:3.5
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.8
+   tags:
+      - docker
    only:
       - triggers
 
-clang-3.5_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.5
-   only:
-      - triggers
-      
-clang-3.5_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.5
-   only:
-      - triggers
-      
-
-clang-3.6_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-clang:3.6
-   only:
-      - triggers
-      
-clang-3.6_MpiOnly:
+gcc_4.8_mpionly:
    <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-clang:3.6
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.8
+   tags:
+      - docker
    only:
       - triggers
 
-clang-3.6_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.6
-   only:
-      - triggers
-      
-clang-3.6_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.6
-   only:
-      - triggers
-
-      
-clang-3.7_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-clang:3.7
-   only:
-      - triggers
-      
-clang-3.7_MpiOnly:
-   <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-clang:3.7
-   only:
-      - triggers
-      
-clang-3.7_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.7
-   only:
-      - triggers
-      
-clang-3.7_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.7
-   only:
-      - triggers
-      
-clang-3.8_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-clang:3.8
-   only:
-      - triggers
-      
-clang-3.8_MpiOnly:
-   <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-clang:3.8
-   only:
-      - triggers
-   
-clang-3.8_Hybrid:
+gcc_4.8_hybrid:
    <<: *build_hybrid_definition
-   image: walberla/buildenv-ubuntu-clang:3.8
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.8
+   tags:
+      - docker
    only:
       - triggers
 
-clang-3.8_Serial_Dbg:
+gcc_4.8_serial_dbg:
    <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.8
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.8
+   tags:
+      - docker
    only:
       - triggers
-      
-clang-3.8_MpiOnly_Dbg:
+
+gcc_4.8_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.8
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.8
+   tags:
+      - docker
    only:
       - triggers
-   
-clang-3.8_Hybrid_Dbg:
+
+gcc_4.8_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.8
-   only:
-      - triggers
-   
-   
-clang-3.9_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-clang:3.9
-   only:
-      - triggers
-      
-clang-3.9_MpiOnly:
-   <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-clang:3.9
-   only:
-      - triggers
-   
-clang-3.9_Hybrid:
-   <<: *build_hybrid_definition
-   image: walberla/buildenv-ubuntu-clang:3.9
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.8
+   tags:
+      - docker
    only:
       - triggers
 
-clang-3.9_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.9
-   only:
-      - triggers
-      
-clang-3.9_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.9
-   only:
-      - triggers
-   
-clang-3.9_Hybrid_Dbg:
-   <<: *build_hybrid_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:3.9
-   only:
-      - triggers
-
-
-clang-4.0_Serial:
-   <<: *build_serial_definition
-   image: walberla/buildenv-ubuntu-clang:4.0
-   only:
-      - triggers
-      
-clang-4.0_MpiOnly:
-   <<: *build_mpionly_definition
-   image: walberla/buildenv-ubuntu-clang:4.0
-   only:
-      - triggers
-   
-clang-4.0_Hybrid:
-   <<: *build_hybrid_definition
-   image: walberla/buildenv-ubuntu-clang:4.0
-
-clang-4.0_Serial_Dbg:
-   <<: *build_serial_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:4.0
-      
-clang-4.0_MpiOnly_Dbg:
-   <<: *build_mpionly_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:4.0
-   
-clang-4.0_Hybrid_Dbg:
-   <<: *build_hybrid_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:4.0
-   
-clang-4.0_Hybrid_SP_Dbg:
+gcc_4.8_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
-   image: walberla/buildenv-ubuntu-clang:4.0
-
-clang-4.0_Hybrid_Dbg_BufferDebug:
-   <<: *build_hybrid_dbg_definition
-   image: walberla/buildenv-ubuntu-clang:4.0
-   variables:
-      CTEST_EXCLUDE_LABELS: "longrun"
-      WALBERLA_BUILD_WITH_MPI: "ON"
-      WALBERLA_BUILD_WITH_OPENMP: "ON"
-      OMP_NUM_THREADS: "4"
-      OMP_WAIT_POLICY: "PASSIVE"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUFFER_DEBUG: "ON"
-      WALBERLA_DOUBLE_ACCURACY: "ON"
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.8
+   tags:
+      - docker
    only:
       - triggers
 
-   
+gcc_4.9_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_4.9_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_4.9_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_4.9_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_4.9_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_4.9_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_4.9_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:4.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_5_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+gcc_5_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+gcc_5_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
+   tags:
+      - cuda
+      - docker
+
+gcc_5_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
+   tags:
+      - cuda
+      - docker
+
+gcc_5_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+gcc_5_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+gcc_5_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+gcc_6_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:6
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_6_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:6
+   tags:
+      - docker
+   only:
+      - triggers
+
+gcc_6_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:6
+   tags:
+      - docker
+
+gcc_6_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:6
+   tags:
+      - docker
+
+gcc_6_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:6
+   tags:
+      - docker
+
+gcc_6_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:6
+   tags:
+      - docker
+
+gcc_6_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:6
+   tags:
+      - docker
+
+clang_3.4_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.4
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.4_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.4
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.4_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.4
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.4_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.4
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.4_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.4
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.4_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.4
+   tags:
+      - docker
+
+clang_3.4_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.4
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.5_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.5_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.5_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.5_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.5_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.5_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.5_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.6_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.6_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.6_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.6_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.6_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.6_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.6_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.7_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.7_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.7_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.7_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.7_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.7_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.7_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.8_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.8_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.8_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.8_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.8_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.8_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.8_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
+   tags:
+      - cuda
+      - docker
+   only:
+      - triggers
+
+clang_3.9_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.9_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.9_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.9_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.9_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.9_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_3.9_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.9
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_4.0_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:4.0
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_4.0_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:4.0
+   tags:
+      - docker
+   only:
+      - triggers
+
+clang_4.0_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:4.0
+   tags:
+      - docker
+
+clang_4.0_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:4.0
+   tags:
+      - docker
+
+clang_4.0_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:4.0
+   tags:
+      - docker
+
+clang_4.0_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:4.0
+   tags:
+      - docker
+
+clang_4.0_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:4.0
+   tags:
+      - docker
+
+
 
 ###############################################################################
 ##                                                                           ##
@@ -731,7 +1024,7 @@ cppcheck:
    tags:
       - docker
 
-      
+
 coverage:
    image: walberla/coverage
    script:
@@ -763,15 +1056,15 @@ coverage:
       CXXFLAGS: "-fprofile-arcs -ftest-coverage -fPIC -O0"
       LDFLAGS: "-fprofile-arcs -ftest-coverage -fPIC -O0"
 
-      
-      
+
+
 ###############################################################################
 ##                                                                           ##
 ##    Windows Builds                                                        ##
 ##                                                                           ##
-###############################################################################       
-      
-     
+###############################################################################
+
+
 .win_build_template: &win_build_definition
    tags:
       - win
@@ -787,8 +1080,8 @@ coverage:
       - cmake -LAH -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DWALBERLA_DOUBLE_ACCURACY=$WALBERLA_DOUBLE_ACCURACY -DWARNING_ERROR=ON -G "$CMAKE_GENERATOR" ..
       - MSBuild.exe walberla.sln /property:Configuration=$BUILD_CONFIGURATION /verbosity:minimal /maxcpucount:4
       - ctest -LE $CTEST_EXCLUDE_LABELS -C $BUILD_CONFIGURATION --output-on-failure -j 4
-      
-      
+
+
 msvc-12_Hybrid_Dbg:
    <<: *win_build_definition
    variables:
@@ -798,7 +1091,7 @@ msvc-12_Hybrid_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-      
+
 msvc-12_Hybrid_SP_Dbg:
    <<: *win_build_definition
    variables:
@@ -810,7 +1103,7 @@ msvc-12_Hybrid_SP_Dbg:
       WALBERLA_DOUBLE_ACCURACY: "OFF"
    only:
       - triggers
-      
+
 msvc-12_Hybrid:
    <<: *win_build_definition
    variables:
@@ -821,8 +1114,8 @@ msvc-12_Hybrid:
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
-      - triggers   
-      
+      - triggers
+
 msvc-12_Serial_Dbg:
    <<: *win_build_definition
    variables:
@@ -834,7 +1127,7 @@ msvc-12_Serial_Dbg:
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
       - triggers
-      
+
 msvc-12_Serial:
    <<: *win_build_definition
    variables:
@@ -846,7 +1139,7 @@ msvc-12_Serial:
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
       - triggers
-      
+
 msvc-12_MpiOnly_Dbg:
    <<: *win_build_definition
    variables:
@@ -858,7 +1151,7 @@ msvc-12_MpiOnly_Dbg:
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
       - triggers
-      
+
 msvc-12_MpiOnly:
    <<: *win_build_definition
    variables:
@@ -870,7 +1163,7 @@ msvc-12_MpiOnly:
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
       - triggers
-      
+
 msvc-14_Hybrid_Dbg:
    <<: *win_build_definition
    variables:
@@ -880,7 +1173,7 @@ msvc-14_Hybrid_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-      
+
 msvc-14_Hybrid_SP_Dbg:
    <<: *win_build_definition
    variables:
@@ -890,7 +1183,7 @@ msvc-14_Hybrid_SP_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "OFF"
-      
+
 msvc-14_Hybrid:
    <<: *win_build_definition
    variables:
@@ -900,7 +1193,7 @@ msvc-14_Hybrid:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-      
+
 msvc-14_Serial_Dbg:
    <<: *win_build_definition
    variables:
@@ -910,7 +1203,7 @@ msvc-14_Serial_Dbg:
       WALBERLA_BUILD_WITH_MPI: "OFF"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-      
+
 msvc-14_Serial:
    <<: *win_build_definition
    variables:
@@ -922,7 +1215,7 @@ msvc-14_Serial:
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
       - triggers
-      
+
 msvc-14_MpiOnly_Dbg:
    <<: *win_build_definition
    variables:
@@ -932,7 +1225,7 @@ msvc-14_MpiOnly_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-      
+
 msvc-14_MpiOnly:
    <<: *win_build_definition
    variables:
