@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file Types.h
+//! \file Thresholds.h
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Numerical thresholds for the physics engine
@@ -219,23 +219,17 @@ public:
 //
 //=================================================================================================
 
-// Disable false warnings in GCC 5
-#if ( defined __GNUC__ ) && ( __GNUC__ >= 5 )
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wunused-variable"
-#endif
-
 //*************************************************************************************************
 //! Threshold for the contact classification.
 /*! This threshold separates between separating, resting and colliding contacts. */
-const real_t collisionThreshold = Thresholds<real_t>::collisionThreshold();
+extern real_t collisionThreshold;
 //*************************************************************************************************
 
 
 //*************************************************************************************************
 //! Threshold for the distance between two rigid bodies.
 /*! Rigid bodies with a distance smaller than this threshold are in contact. */
-const real_t contactThreshold = Thresholds<real_t>::contactThreshold();
+extern real_t contactThreshold;
 //*************************************************************************************************
 
 
@@ -244,14 +238,14 @@ const real_t contactThreshold = Thresholds<real_t>::contactThreshold();
 /*! In case the relative velocity between two colliding rigid bodies is smaller than this
     threshold, a coefficient of restitution of 0 is used to avoid an infinite number of
     collisions during a single time step. */
-const real_t restitutionThreshold = Thresholds<real_t>::restitutionThreshold();
+extern real_t restitutionThreshold;
 //*************************************************************************************************
 
 
 //*************************************************************************************************
 //! Threshold for the separation between static and dynamic friction.
 /*! This threshold represents the boundary between static and dynamic friction. */
-const real_t frictionThreshold = Thresholds<real_t>::frictionThreshold();
+extern real_t frictionThreshold;
 //*************************************************************************************************
 
 
@@ -259,7 +253,7 @@ const real_t frictionThreshold = Thresholds<real_t>::frictionThreshold();
 //! Threshold for surface points/checks.
 /*! Only points with a distance to the surface smaller than this threshold are considered
     surface point. */
-const real_t surfaceThreshold = Thresholds<real_t>::surfaceThreshold();
+extern real_t surfaceThreshold;
 //*************************************************************************************************
 
 
