@@ -1068,6 +1068,16 @@ if ( WALBERLA_BUILD_WITH_CUDA )
         list ( APPEND SERVICE_LIBS ${CUDA_LIBRARIES} )
 
         list( APPEND CUDA_NVCC_FLAGS "-Wno-deprecated-gpu-targets")
+
+        # FindCUDA does not respect system includes i.e. there are also warnings for boost etc reported (as of cmake 3.5.1)
+        # if all includes are added to the flags manually as sytem includes they occur double on the command line
+        # but the compiler seems to note the "isystem" not the "-I"
+        # it is also not possible to get all system include directories - so as a workaround we at least add boost here
+        # as system include
+        foreach( boostInclude ${Boost_INCLUDE_DIRS} )
+            list( APPEND CUDA_NVCC_FLAGS "-isystem ${boostInclude}" )
+        endforeach()
+
         if ( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std=" )
             list ( APPEND CUDA_NVCC_FLAGS "-std=c++11" )
         endif ()
