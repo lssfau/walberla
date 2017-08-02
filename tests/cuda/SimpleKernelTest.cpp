@@ -35,12 +35,9 @@
 using namespace walberla;
 
 namespace walberla{
-void kernel_double_field( const cuda::GPUField<double> & field );
 
 void kernel_double( cuda::FieldAccessor<double> f );
 }
-
-
 
 GhostLayerField<real_t,1> * createCPUField( IBlock* const block, StructuredBlockStorage* const storage )
 {

@@ -212,6 +212,7 @@ inline int MPI_Isend( void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Request*
 
 inline int MPI_Recv( void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Status* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Send( void*, int, MPI_Datatype, int, int, MPI_Comm )              { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Sendrecv( void*, int, MPI_Datatype, int, int, void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Status *) { WALBERLA_MPI_FUNCTION_ERROR }
 
 inline int MPI_Probe    ( int, int, MPI_Comm, MPI_Status* )       { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Iprobe   ( int, int, MPI_Comm, int*, MPI_Status* ) { WALBERLA_MPI_FUNCTION_ERROR }

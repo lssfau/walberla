@@ -87,9 +87,9 @@ FieldIndexing3D<T> FieldIndexing3D<T>::interval( const GPUField<T> & f, const Ce
 
    // position data according to ci
    cell_idx_t gl = cell_idx_c( f.nrOfGhostLayers() );
-   data += ( ci.xMin() + gl ) * xOffset +
-           ( ci.yMin() + gl ) * yOffset +
-           ( ci.zMin() + gl ) * zOffset;
+   data += ( ci.xMin() + gl ) * cell_idx_c(xOffset) +
+           ( ci.yMin() + gl ) * cell_idx_c(yOffset) +
+           ( ci.zMin() + gl ) * cell_idx_c(zOffset);
 
 
    dim3 idxDim( (unsigned int)ci.xSize(), (unsigned int)ci.ySize(), (unsigned int)ci.zSize() );

@@ -91,7 +91,9 @@ void GPUPackInfo<GPUField_T>::unpackData(IBlock * receiver, stencil::Direction d
 
    copyHostToDevFZYX( f->pitchedPtr(), buf,
                       sizeof(T), f->zAllocSize(), ci.zSize(),
-                      ci.xMin() + nrOfGhostLayers, ci.yMin() + nrOfGhostLayers, ci.zMin() + nrOfGhostLayers, 0,
+                      uint_c(ci.xMin() + nrOfGhostLayers),
+                      uint_c(ci.yMin() + nrOfGhostLayers),
+                      uint_c(ci.zMin() + nrOfGhostLayers), 0,
                       0, 0, 0, 0,
                       ci.xSize(), ci.ySize(), ci.zSize(), f->fSize() );
 }
@@ -120,8 +122,8 @@ void GPUPackInfo<GPUField_T>::communicateLocal(const IBlock * sender, IBlock * r
 
    copyDevToDevFZYX( rf->pitchedPtr(), sf->pitchedPtr(),
                      sizeof(T), rf->zAllocSize(), sf->zAllocSize(),
-                     rCi.xMin() + nrOfGhostLayers, rCi.yMin() + nrOfGhostLayers, rCi.zMin() + nrOfGhostLayers, 0,
-                     sCi.xMin() + nrOfGhostLayers, sCi.yMin() + nrOfGhostLayers, sCi.zMin() + nrOfGhostLayers, 0,
+                     uint_c(rCi.xMin() + nrOfGhostLayers), uint_c(rCi.yMin() + nrOfGhostLayers), uint_c(rCi.zMin() + nrOfGhostLayers), 0,
+                     uint_c(sCi.xMin() + nrOfGhostLayers), uint_c(sCi.yMin() + nrOfGhostLayers), uint_c(sCi.zMin() + nrOfGhostLayers), 0,
                      rCi.xSize(), rCi.ySize(), rCi.zSize(), sf->fSize() );
 }
 
@@ -148,7 +150,9 @@ void GPUPackInfo<GPUField_T>::packDataImpl(const IBlock * sender, stencil::Direc
    copyDevToHostFZYX( buf, f->pitchedPtr(),
                       sizeof(T), ci.zSize(), f->zAllocSize(),
                       0, 0, 0, 0,
-                      ci.xMin() + nrOfGhostLayers, ci.yMin() + nrOfGhostLayers, ci.zMin() + nrOfGhostLayers, 0,
+                      uint_c(ci.xMin() + nrOfGhostLayers),
+                      uint_c(ci.yMin() + nrOfGhostLayers),
+                      uint_c(ci.zMin() + nrOfGhostLayers), 0,
                       ci.xSize(), ci.ySize(), ci.zSize(), f->fSize() );
 }
 

@@ -24,7 +24,6 @@
 
 #include "core/cell/CellInterval.h"
 #include "core/debug/Debug.h"
-#include "core/logging/Logging.h"
 #include "field/Layout.h"
 
 #include <cuda_runtime.h>
@@ -112,9 +111,9 @@ FieldIndexing<T> FieldIndexing<T>::interval ( const GPUField<T> & f, const CellI
 
    // Jump over ghost cells to first inner cell
    cell_idx_t gl = cell_idx_c( f.nrOfGhostLayers() );
-   data += ( ci.xMin() + gl )* xOffset +
-           ( ci.yMin() + gl )* yOffset +
-           ( ci.zMin() + gl )* zOffset;
+   data += ( ci.xMin() + gl )* cell_idx_c(xOffset) +
+           ( ci.yMin() + gl )* cell_idx_c(yOffset) +
+           ( ci.zMin() + gl )* cell_idx_c(zOffset);
 
 
    dim3 gridDim;

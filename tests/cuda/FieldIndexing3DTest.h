@@ -29,10 +29,10 @@
 #define LAYOUT    field::fzyx
 #define GL_SIZE   1
 
-#define YOFFSET               ( X_SIZE )
-#define ZOFFSET               ( ( Y_SIZE ) * ( YOFFSET ) )
-#define FOFFSET               ( ( Z_SIZE ) * ( ZOFFSET ) )
-#define IDX4D( x, y, z, f )   ( (int)( (f) * (FOFFSET) + (z) * (Z_SIZE) + (y) * (YOFFSET) + (x) ) )
+#define YOFFSET               ( int( X_SIZE ) )
+#define ZOFFSET               ( int( Y_SIZE ) * int( YOFFSET ) )
+#define FOFFSET               ( int( Z_SIZE ) * int( ZOFFSET ) )
+#define IDX4D( x, y, z, f )   ( (int)( int(f) * int(FOFFSET) + int(z) * int(Z_SIZE) + int(y) * int(YOFFSET) + int(x) ) )
 
 
 namespace walberla {

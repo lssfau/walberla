@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "cuda/FieldIndexing.h"
+#include "cuda/FieldAccessor.h"
 
 
 namespace walberla {
