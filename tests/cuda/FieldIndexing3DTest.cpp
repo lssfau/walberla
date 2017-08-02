@@ -31,9 +31,6 @@
 #include "cuda/Kernel.h"
 #include "cuda/FieldIndexing3D.h"
 
-//#define DBG_PRINT_ON
-#include "CudaTestCommon.h"
-
 #include "FieldIndexing3DTest.h"
 
 using namespace walberla;
@@ -66,8 +63,7 @@ void xyzTest()
       }
    )
 
-   DBG_PRINT_FIELD( resultField );
-   CHECK_FIELD_EQUAL( resultField, expectedField );
+   WALBERLA_ASSERT( resultField == expectedField );
 }
 
 
@@ -93,8 +89,7 @@ void sliceBeforeGhostLayerXYZTest()
          expectedField.get( x, y, z, f ) = IDX4D( x - ci.xMin(), y - ci.yMin(), z - ci.zMin(), f );
       }
    )
-   DBG_PRINT_FIELD( resultField );
-   CHECK_FIELD_EQUAL( resultField, expectedField );
+   WALBERLA_ASSERT( resultField == expectedField );
 }
 
 

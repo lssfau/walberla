@@ -32,7 +32,7 @@
 #include "cuda/Kernel.h"
 #include "cuda/AddGPUFieldToStorage.h"
 #include "cuda/communication/GPUPackInfo.h"
-
+#include "cuda/FieldIndexing.h"
 
 #include "field/AddToStorage.h"
 #include "field/communication/UniformMPIDatatypeInfo.h"

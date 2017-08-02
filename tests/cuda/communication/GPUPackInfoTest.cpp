@@ -35,9 +35,6 @@
 
 #include <cstring>
 
-//#define DBG_PRINT_ON
-#include "../CudaTestCommon.h"
-
 #define F_SIZE    19
 
 
@@ -90,8 +87,6 @@ public:
       communicate( gpuPackInfo, dir );
       cuda::fieldCpy( cpuField, gpuField );
 
-      DBG_PRINT_FIELD( cpuField );
-
       val = 0;
       for ( auto it = cpuField.beginGhostLayerOnly( stencil::inverseDir[dir] ); it != cpuField.end(); ++it )
       {
@@ -118,10 +113,6 @@ public:
 protected:
    void communicate( GPUPackInfoType& gpuPackInfo, stencil::Direction dir )
    {
-      DBG_PRINT( "REMOTE %s -> %s\n",
-                 stencil::dirToString[dir].c_str(),
-                 stencil::dirToString[stencil::inverseDir[dir]].c_str() );
-
       mpi::GenericSendBuffer<> sendBuf;
       sendBuf.addDebugMarker( "Be" );
       gpuPackInfo.packData( block_, dir, sendBuf );
@@ -148,10 +139,6 @@ public:
 protected:
    void communicate( GPUPackInfoType& gpuPackInfo, stencil::Direction dir )
    {
-      DBG_PRINT( "LOCAL %s -> %s\n",
-                 stencil::dirToString[dir].c_str(),
-                 stencil::dirToString[stencil::inverseDir[dir]].c_str() );
-
       gpuPackInfo.communicateLocal( block_, block_, dir );
    }
 };
