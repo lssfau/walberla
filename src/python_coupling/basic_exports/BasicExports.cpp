@@ -96,7 +96,14 @@ struct NumpyFloatConversion
     {
         handle<> x(borrowed(pyObj));
         object o(x);
+#ifdef WALBERLA_CXX_COMPILER_IS_GNU
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
         T value = extract<T>(o.attr("__float__")());
+#ifdef WALBERLA_CXX_COMPILER_IS_GNU
+#pragma GCC diagnostic pop
+#endif
         void* storage =( (boost::python::converter::rvalue_from_python_storage<T>*) data)->storage.bytes;
         new (storage) T(value);
         data->convertible = storage;
