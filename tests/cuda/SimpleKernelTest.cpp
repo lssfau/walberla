@@ -39,20 +39,20 @@ namespace walberla{
 void kernel_double( cuda::FieldAccessor<double> f );
 }
 
-GhostLayerField<real_t,1> * createCPUField( IBlock* const block, StructuredBlockStorage* const storage )
+GhostLayerField<double,1> * createCPUField( IBlock* const block, StructuredBlockStorage* const storage )
 {
-   return new GhostLayerField<real_t,1> (
+   return new GhostLayerField<double,1> (
             storage->getNumberOfXCells( *block ), // number of cells in x direction
             storage->getNumberOfYCells( *block ), // number of cells in y direction
             storage->getNumberOfZCells( *block ), // number of cells in z direction
             1,                                    // number of ghost layers
-            real_t(1),                            // initial value
+            double(1),                            // initial value
             field::fzyx);
 }
 
-cuda::GPUField<real_t> * createGPUField( IBlock* const block, StructuredBlockStorage* const storage )
+cuda::GPUField<double> * createGPUField( IBlock* const block, StructuredBlockStorage* const storage )
 {
-   return new cuda::GPUField<real_t> (
+   return new cuda::GPUField<double> (
             storage->getNumberOfXCells( *block ), // number of cells in x direction
             storage->getNumberOfYCells( *block ), // number of cells in y direction
             storage->getNumberOfZCells( *block ), // number of cells in z direction
@@ -76,18 +76,18 @@ int main( int argc, char ** argv )
 
 
 
-   BlockDataID cpuFieldID = blocks->addStructuredBlockData< GhostLayerField<real_t,1> > ( &createCPUField, "CPUField" );
+   BlockDataID cpuFieldID = blocks->addStructuredBlockData< GhostLayerField<double,1> > ( &createCPUField, "CPUField" );
 
 
-   BlockDataID gpuFieldID = blocks->addStructuredBlockData< cuda::GPUField<real_t>    > ( &createGPUField, "GPUField" );
+   BlockDataID gpuFieldID = blocks->addStructuredBlockData< cuda::GPUField<double>    > ( &createGPUField, "GPUField" );
 
    for ( auto blockIterator = blocks->begin(); blockIterator != blocks->end(); ++blockIterator )
    {
       IBlock & currentBlock = *blockIterator;
 
       // get the field stored on the current block
-      auto cpuField = currentBlock.getData< GhostLayerField<real_t,1> > ( cpuFieldID );
-      auto gpuField = currentBlock.getData< cuda::GPUField<real_t>    > ( gpuFieldID );
+      auto cpuField = currentBlock.getData< GhostLayerField<double,1> > ( cpuFieldID );
+      auto gpuField = currentBlock.getData< cuda::GPUField<double>    > ( gpuFieldID );
 
       cuda::fieldCpy( *gpuField, *cpuField );
 

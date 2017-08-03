@@ -119,8 +119,8 @@ intel_15_serial:
    <<: *build_serial_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
    tags:
-      - intel
       - docker
+      - intel
    only:
       - triggers
 
@@ -128,8 +128,8 @@ intel_15_mpionly:
    <<: *build_mpionly_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
    tags:
-      - intel
       - docker
+      - intel
    only:
       - triggers
 
@@ -137,8 +137,8 @@ intel_15_hybrid:
    <<: *build_hybrid_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
    tags:
-      - intel
       - docker
+      - intel
    only:
       - triggers
 
@@ -146,8 +146,8 @@ intel_15_serial_dbg:
    <<: *build_serial_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
    tags:
-      - intel
       - docker
+      - intel
    only:
       - triggers
 
@@ -155,8 +155,8 @@ intel_15_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
    tags:
-      - intel
       - docker
+      - intel
    only:
       - triggers
 
@@ -164,15 +164,15 @@ intel_15_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
    tags:
-      - intel
       - docker
+      - intel
 
 intel_15_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:15
    tags:
-      - intel
       - docker
+      - intel
    only:
       - triggers
 
@@ -180,9 +180,9 @@ intel_16_serial:
    <<: *build_serial_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - cuda
-      - intel
       - docker
+      - intel
+      - cuda
    only:
       - triggers
 
@@ -190,9 +190,9 @@ intel_16_mpionly:
    <<: *build_mpionly_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - cuda
-      - intel
       - docker
+      - intel
+      - cuda
    only:
       - triggers
 
@@ -200,9 +200,9 @@ intel_16_hybrid:
    <<: *build_hybrid_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - cuda
-      - intel
       - docker
+      - intel
+      - cuda
    only:
       - triggers
 
@@ -210,9 +210,9 @@ intel_16_serial_dbg:
    <<: *build_serial_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - cuda
-      - intel
       - docker
+      - intel
+      - cuda
    only:
       - triggers
 
@@ -220,9 +220,9 @@ intel_16_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - cuda
-      - intel
       - docker
+      - intel
+      - cuda
    only:
       - triggers
 
@@ -230,9 +230,9 @@ intel_16_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - cuda
-      - intel
       - docker
+      - intel
+      - cuda
    only:
       - triggers
 
@@ -240,9 +240,9 @@ intel_16_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:16
    tags:
-      - cuda
-      - intel
       - docker
+      - intel
+      - cuda
    only:
       - triggers
 
@@ -250,8 +250,8 @@ intel_17_serial:
    <<: *build_serial_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
    tags:
-      - intel
       - docker
+      - intel
    only:
       - triggers
 
@@ -259,8 +259,8 @@ intel_17_mpionly:
    <<: *build_mpionly_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
    tags:
-      - intel
       - docker
+      - intel
    only:
       - triggers
 
@@ -268,36 +268,36 @@ intel_17_hybrid:
    <<: *build_hybrid_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
    tags:
-      - intel
       - docker
+      - intel
 
 intel_17_serial_dbg:
    <<: *build_serial_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
    tags:
-      - intel
       - docker
+      - intel
 
 intel_17_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
    tags:
-      - intel
       - docker
+      - intel
 
 intel_17_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
    tags:
-      - intel
       - docker
+      - intel
 
 intel_17_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
    tags:
-      - intel
       - docker
+      - intel
 
 gcc_4.7_serial:
    <<: *build_serial_definition
@@ -469,8 +469,8 @@ gcc_5_serial:
    <<: *build_serial_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -478,8 +478,8 @@ gcc_5_mpionly:
    <<: *build_mpionly_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -487,22 +487,24 @@ gcc_5_hybrid:
    <<: *build_hybrid_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
    tags:
-      - cuda
       - docker
+      - cuda
+   only:
+      - triggers
 
 gcc_5_serial_dbg:
    <<: *build_serial_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
    tags:
-      - cuda
       - docker
+      - cuda
 
 gcc_5_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -510,8 +512,8 @@ gcc_5_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -519,10 +521,8 @@ gcc_5_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:5
    tags:
-      - cuda
       - docker
-   only:
-      - triggers
+      - cuda
 
 gcc_6_serial:
    <<: *build_serial_definition
@@ -628,8 +628,8 @@ clang_3.5_serial:
    <<: *build_serial_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -637,8 +637,8 @@ clang_3.5_mpionly:
    <<: *build_mpionly_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -646,8 +646,8 @@ clang_3.5_hybrid:
    <<: *build_hybrid_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -655,8 +655,8 @@ clang_3.5_serial_dbg:
    <<: *build_serial_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -664,8 +664,8 @@ clang_3.5_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -673,8 +673,8 @@ clang_3.5_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -682,8 +682,8 @@ clang_3.5_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.5
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -691,8 +691,8 @@ clang_3.6_serial:
    <<: *build_serial_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -700,8 +700,8 @@ clang_3.6_mpionly:
    <<: *build_mpionly_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -709,8 +709,8 @@ clang_3.6_hybrid:
    <<: *build_hybrid_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -718,8 +718,8 @@ clang_3.6_serial_dbg:
    <<: *build_serial_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -727,8 +727,8 @@ clang_3.6_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -736,8 +736,8 @@ clang_3.6_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -745,8 +745,8 @@ clang_3.6_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.6
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -754,8 +754,8 @@ clang_3.7_serial:
    <<: *build_serial_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -763,8 +763,8 @@ clang_3.7_mpionly:
    <<: *build_mpionly_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -772,8 +772,8 @@ clang_3.7_hybrid:
    <<: *build_hybrid_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -781,8 +781,8 @@ clang_3.7_serial_dbg:
    <<: *build_serial_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -790,8 +790,8 @@ clang_3.7_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -799,8 +799,8 @@ clang_3.7_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -808,8 +808,8 @@ clang_3.7_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.7
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -817,8 +817,8 @@ clang_3.8_serial:
    <<: *build_serial_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -826,8 +826,8 @@ clang_3.8_mpionly:
    <<: *build_mpionly_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -835,8 +835,8 @@ clang_3.8_hybrid:
    <<: *build_hybrid_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -844,8 +844,8 @@ clang_3.8_serial_dbg:
    <<: *build_serial_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -853,8 +853,8 @@ clang_3.8_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -862,8 +862,8 @@ clang_3.8_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 
@@ -871,8 +871,8 @@ clang_3.8_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.8
    tags:
-      - cuda
       - docker
+      - cuda
    only:
       - triggers
 

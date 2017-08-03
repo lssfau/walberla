@@ -112,7 +112,7 @@ void BlockView3D::paintGL(QGLPainter * painter)
                       0.5 * (bb.max(1) + bb.min(1)),
                       0.5 * (bb.max(2) + bb.min(2)));
 
-   real_t maxExtend = std::max( std::max( bbMid.x(), bbMid.y() ), bbMid.z() );
+   double maxExtend = std::max( std::max( bbMid.x(), bbMid.y() ), bbMid.z() );
 
    painter->modelViewMatrix().push();
    painter->modelViewMatrix().scale( 15.0 / maxExtend );

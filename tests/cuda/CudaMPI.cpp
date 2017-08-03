@@ -115,8 +115,8 @@ void blockStorageAndGui( int argc, char ** argv )
       auto h_f2_datatype = mpi::Datatype ( field::communication::mpiDatatypeSliceBeforeGhostlayer( *h_f2, stencil::W, 1, true ) );
       auto d_f_datatype  = mpi::Datatype ( field::communication::mpiDatatypeSliceBeforeGhostlayer( *d_f , stencil::W, 1, true ) );
 
-      MPI_Sendrecv( const_cast<double *>( h_f1->data() ), 1, h_f1_datatype, 0, 0,
-                                           d_f->data(),   1, d_f_datatype , 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE );
+      MPI_Sendrecv( h_f1->data() , 1, h_f1_datatype, 0, 0,
+                    d_f->data(),   1, d_f_datatype , 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE );
 
       MPI_Sendrecv( d_f->data(), 1, d_f_datatype, 0, 0,
                     h_f2->data(),  1, h_f2_datatype, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE );

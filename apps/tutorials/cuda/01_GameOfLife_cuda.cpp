@@ -60,7 +60,7 @@ ScalarField * createField( IBlock* const block, StructuredBlockStorage* const st
             storage->getNumberOfYCells( *block ),   // number of cells in y direction per block
             storage->getNumberOfZCells( *block ),   // number of cells in z direction per block
             1,                                      // one ghost layer
-            real_t(0),                              // initial value
+            double(0),                              // initial value
             field::fzyx,                            // layout
             make_shared<cuda::HostFieldAllocator<double> >()  // allocator for host pinned memory
             );
@@ -75,8 +75,8 @@ class GameOfLifeSweepCUDA
       }
       void operator() ( IBlock * block )
       {
-         auto srcCudaField = block->getData< cuda::GPUField<real_t> > ( gpuFieldSrcID_ );
-         auto dstCudaField = block->getData< cuda::GPUField<real_t> > ( gpuFieldDstID_ );
+         auto srcCudaField = block->getData< cuda::GPUField<double> > ( gpuFieldSrcID_ );
+         auto dstCudaField = block->getData< cuda::GPUField<double> > ( gpuFieldDstID_ );
 
          auto myKernel = cuda::make_kernel( &gameOfLifeKernel );
          myKernel.addFieldIndexingParam( cuda::FieldIndexing<double>::xyz( *srcCudaField ) );
