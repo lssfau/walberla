@@ -39,6 +39,11 @@ namespace mpi {
 template<>
 std::vector< std::string > gatherv( const std::vector< std::string > & values, int recvRank, MPI_Comm comm )
 {
+   WALBERLA_NON_MPI_SECTION()
+   {
+      return std::vector< std::string >( values );
+   }
+
    mpi::SendBuffer sb;
    mpi::RecvBuffer rb;
    sb << values;
