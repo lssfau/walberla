@@ -48,7 +48,7 @@ public:
    /// Sets the global linear acceleration.
    /// This can be used for example to set a gravitational force.
    inline void        setGlobalLinearAcceleration(const Vec3& acc) { globalLinearAcceleration_ = acc; }
-   inline const Vec3& getGlobalLinearAcceleration() { return globalLinearAcceleration_; }
+   inline const Vec3& getGlobalLinearAcceleration() const { return globalLinearAcceleration_; }
 
    virtual inline real_t            getMaximumPenetration()        const;
    virtual inline size_t            getNumberOfContacts()          const;
