@@ -22,7 +22,7 @@
 #include "TimingPool.h"
 #include "core/Abort.h"
 #include "core/logging/Logging.h"
-#include "core/mpi/Gatherv.h"
+#include "core/mpi/SetReduction.h"
 #include "core/mpi/MPIManager.h"
 
 
@@ -394,7 +394,7 @@ void TimingPool<TP>::unifyRegisteredTimersAcrossProcesses()
    for( auto timer = begin(); timer != end(); ++timer )
       names.push_back( timer->first );
 
-   auto gatheredNames = mpi::allGatherv( names );
+   auto gatheredNames = mpi::allReduceSet( names, mpi::UNION );
    for( auto name = gatheredNames.begin(); name != gatheredNames.end(); ++name )
       if( !timerExists(*name) )
          registerTimer( *name );
