@@ -535,7 +535,7 @@ namespace field {
 
       return ForwardFieldIterator<const T,fSize_>( this,
                                                    ci.xMin(),ci.yMin(), ci.zMin(), f,
-                                                   ci.xSize(), ci.ySize(), ci.zSize(), f+1 );
+                                                   ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t(1) ) );
    }
 
    //*******************************************************************************************************************
@@ -550,7 +550,7 @@ namespace field {
 
       return ForwardFieldIterator<T,fSize_>( this,
                                       ci.xMin(),ci.yMin(), ci.zMin(), f,
-                                      ci.xSize(), ci.ySize(), ci.zSize(), uint_c(f+1) );
+                                      ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t(1) ) );
    }
 
 
@@ -567,7 +567,7 @@ namespace field {
 
       return ForwardFieldIterator<const T,fSize_>( this,
                                                    ci.xMin(),ci.yMin(), ci.zMin(), f,
-                                                   ci.xSize(), ci.ySize(), ci.zSize(), f+1 );
+                                                   ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t(1) ) );
    }
 
 
@@ -616,7 +616,7 @@ namespace field {
 
       return ForwardFieldIterator<T,fSize_>( this,
                                       ci.xMin(),ci.yMin(), ci.zMin(), f,
-                                      ci.xSize(), ci.ySize(), ci.zSize(), f+1 );
+                                      ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t(1) ) );
    }
 
 
@@ -633,7 +633,7 @@ namespace field {
 
       return ForwardFieldIterator<const T,fSize_>( this,
                                             ci.xMin(),ci.yMin(), ci.zMin(), f,
-                                            ci.xSize(), ci.ySize(), ci.zSize(), uint_c(f+1) );
+                                            ci.xSize(), ci.ySize(), ci.zSize(), uint_c( f + cell_idx_t(1) ) );
    }
 
    //*******************************************************************************************************************
