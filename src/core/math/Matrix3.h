@@ -174,7 +174,7 @@ public:
                               inline bool                isZero()                                   const;
                               inline const Matrix3       getCholesky()                              const;
    template< typename Other > inline const Vector3<HIGH> solve( const Vector3<Other> &rhs )         const;
-                              inline real_t              trace()                                    const;
+                              inline Type                trace()                                    const;
    //@}
    //*******************************************************************************************************************
 
@@ -1322,13 +1322,13 @@ inline const Vector3<HIGH> Matrix3<Type>::solve( const Vector3<Other> &rhs ) con
 
 
 //**********************************************************************************************************************
-/*!\fn real_t Matrix3<Type>::trace() const
+/*!\fn Type Matrix3<Type>::trace() const
 // \brief Computes the trace of the matrix (sum of diagonal elements).
 //
 // \return The trace of the matrix.
 */
 template< typename Type >
-inline real_t Matrix3<Type>::trace() const
+inline Type Matrix3<Type>::trace() const
 {
    return v_[0] + v_[4] + v_[8];
 }
