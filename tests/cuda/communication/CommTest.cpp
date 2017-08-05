@@ -54,7 +54,7 @@ void hostToHost()
 void hostToDevice()
 {
 	Field<double, 1> hostField(SIZE_X, SIZE_Y, SIZE_Z, 4321.0, LAYOUT);
-	cuda::GPUField<double> deviceField(SIZE_X, SIZE_Y, SIZE_Z, 1, 0.0, LAYOUT);
+	cuda::GPUField<double> deviceField(SIZE_X, SIZE_Y, SIZE_Z, 1, 0, LAYOUT);
 
 	double startTime = MPI_Wtime();
 	for (int i = 0; i < NUM_ITER; ++i) {
