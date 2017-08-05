@@ -36,6 +36,7 @@
 
 #include "field/AddToStorage.h"
 #include "field/communication/UniformMPIDatatypeInfo.h"
+#include "field/vtk/VTKWriter.h"
 
 #include "geometry/initializer/ScalarFieldFromGrayScaleImage.h"
 #include "geometry/structured/GrayScaleImage.h"
@@ -127,7 +128,7 @@ int main( int argc, char ** argv )
    commScheme.addDataToCommunicate( make_shared<Packing>(gpuFieldSrcID) );
 
    // Create Timeloop
-   const uint_t numberOfTimesteps = uint_t(10); // number of timesteps for non-gui runs
+   const uint_t numberOfTimesteps = uint_t(100); // number of timesteps for non-gui runs
    SweepTimeloop timeloop ( blocks, numberOfTimesteps );
 
    // Registering the sweep
@@ -136,6 +137,10 @@ int main( int argc, char ** argv )
 
    timeloop.add() << Sweep( cuda::fieldCpyFunctor<ScalarField, GPUField >(cpuFieldID, gpuFieldDstID) );
 
+   // Register VTK output
+   timeloop.addFuncAfterTimeStep( field::createVTKOutput<ScalarField>( cpuFieldID, *blocks, "game_of_life" ) );
+   
+   // GUI output
    GUI gui ( timeloop, blocks, argc, argv );
    gui.run();
 
