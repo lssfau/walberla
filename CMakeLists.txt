@@ -1054,7 +1054,10 @@ if ( WALBERLA_BUILD_WITH_CUDA )
 
     #   set ( BUILD_SHARED_LIBS                      ON )
     set ( CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON )
-    set ( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" )
+   
+    if( NOT WALBERLA_CXX_COMPILER_IS_MSVC )
+        set ( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" )
+    endif()
 
     if ( (NOT DEFINED CUDA_HOST_COMPILER) AND (${CMAKE_C_COMPILER} MATCHES "ccache") )
         string ( STRIP "${CMAKE_C_COMPILER_ARG1}" stripped_compiler_string )
@@ -1074,11 +1077,11 @@ if ( WALBERLA_BUILD_WITH_CUDA )
         # but the compiler seems to note the "isystem" not the "-I"
         # it is also not possible to get all system include directories - so as a workaround we at least add boost here
         # as system include
-        foreach( boostInclude ${Boost_INCLUDE_DIRS} )
+        foreach( boostInclude ${Boost_INCLUDE_DIRS} AND NOT WALBERLA_CXX_COMPILER_IS_MSVC )
             list( APPEND CUDA_NVCC_FLAGS "-isystem ${boostInclude}" )
         endforeach()
 
-        if ( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std=" )
+        if ( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std=" AND NOT WALBERLA_CXX_COMPILER_IS_MSVC )
             list ( APPEND CUDA_NVCC_FLAGS "-std=c++11" )
         endif ()
 
@@ -1092,7 +1095,7 @@ if ( WALBERLA_BUILD_WITH_CUDA )
         set ( WALBERLA_BUILD_WITH_CUDA FALSE )
     endif ( )
 
-    set_directory_properties(PROPERTIES COMPILE_DEFINITIONS COMPILE_DEFINITIONS_SAVED_STATE)
+    set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${COMPILE_DEFINITIONS_SAVED_STATE}" )
 endif ( )
 ############################################################################################################################
 

@@ -44,7 +44,7 @@ void fullFieldTransfer()
    Field<double,4>  h_f1 ( 3, 4, 2, 42.0, field::fzyx );
    Field<double,4>  h_f2 ( 3, 4, 2, 27.0, field::fzyx );
 
-   cuda::GPUField<double> d_f ( 3, 4, 2, 4, 8.0, field::fzyx );
+   cuda::GPUField<double> d_f ( 3, 4, 2, 4, 0, field::fzyx );
 
 
    // Transfer h_f1 from CPU to GPU d_f
@@ -100,7 +100,7 @@ void blockStorageAndGui( int argc, char ** argv )
                return new GPUField( s->getNumberOfXCells(*block),
                                     s->getNumberOfYCells(*block),
                                     s->getNumberOfZCells(*block),
-                                    1 , 1.0);
+                                    1 , 1);
              },
              "GPU Field" );
 
