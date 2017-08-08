@@ -78,7 +78,7 @@ public:
 
 private:
    enum Mode { MIN, MAX, AVG, LAST };
-   real_t getTiming( Mode mode ) const;
+   double getTiming( Mode mode ) const;
 
    PerformanceEvaluation<FlagField_T> performanceEvaluation_;
    uint_t interval_;
@@ -115,7 +115,7 @@ PerformanceLogger<FlagField_T>::PerformanceLogger( const shared_ptr< StructuredB
 
 
 template< typename FlagField_T >
-real_t PerformanceLogger<FlagField_T>::getTiming( Mode mode ) const
+double PerformanceLogger<FlagField_T>::getTiming( Mode mode ) const
 {
    switch( mode )
    {
@@ -129,7 +129,7 @@ real_t PerformanceLogger<FlagField_T>::getTiming( Mode mode ) const
       return timer_.last();
    default:
       WALBERLA_ASSERT( false );
-      return std::numeric_limits< real_t >::signaling_NaN();
+      return std::numeric_limits< double >::signaling_NaN();
    }
 }
 
