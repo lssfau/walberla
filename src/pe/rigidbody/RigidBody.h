@@ -109,6 +109,7 @@ public:
    inline ConstBodyID    getSuperBody()      const;
    inline BodyID         getTopSuperBody();
    inline ConstBodyID    getTopSuperBody()   const;
+   virtual inline bool   hasSubBodies()      const { return false; }
    inline bool           isFinite()          const;
    inline bool           isAwake()           const;
    inline bool           isFixed()           const;

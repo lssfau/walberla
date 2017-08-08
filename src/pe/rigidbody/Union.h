@@ -124,6 +124,8 @@ public:
    //@}
    //**********************************************************************************************
 
+   virtual inline bool   hasSubBodies()      const WALBERLA_OVERRIDE { return true; }
+
    //**Simulation functions************************************************************************
    /*!\name Simulation functions */
    //@{
