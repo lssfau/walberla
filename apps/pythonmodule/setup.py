@@ -1,26 +1,41 @@
 from distutils.core import setup
 import shutil
 from os.path import exists, join
+import platform
+import sys
 
 # The following variables are configure by CMake
 walberla_source_dir  = "${walberla_SOURCE_DIR}"
 walberla_binary_dir = "${CMAKE_CURRENT_BINARY_DIR}"
 
+if platform.system() == 'Windows':
+     extension = ( 'dll', 'pyd' )
+     configuration = 'Release'
+else:
+     extension = ( 'so', 'so' )
+     configuration = ''
+     
+
 def collectFiles():
-    shared_lib = join(walberla_binary_dir, 'walberla_cpp.so' )
+    src_shared_lib = join(walberla_binary_dir, configuration, 'walberla_cpp.' + extension[0] )
+    dst_shared_lib = join(walberla_binary_dir, 'waLBerla', 'walberla_cpp.' + extension[1] )
     # copy everything inplace
-    if not exists( shared_lib ):
+    
+    print( src_shared_lib )
+    
+    if not exists( src_shared_lib ):
         print("Python Module was not built yet - run 'make walberla_cpp'")
         exit(1)
 
+    
 
     shutil.rmtree( join(walberla_binary_dir, 'waLBerla'), ignore_errors=True )
 
     shutil.copytree( join(walberla_source_dir, 'python', 'waLBerla'),
                      join(walberla_binary_dir, 'waLBerla') )
 
-    shutil.copy( shared_lib,
-                 join(walberla_binary_dir, 'waLBerla', 'walberla_cpp.so') )
+    shutil.copy( src_shared_lib,
+                 dst_shared_lib )
 
 packages = ['waLBerla',
             'waLBerla.evaluation',
@@ -39,10 +54,9 @@ setup( name='waLBerla',
        author_email='martin.bauer@fau.de',
        url='http://www.walberla.net',
        packages=packages,
-       package_data = {'' : ['walberla_cpp.so'] }
+       package_data = {'' : ['walberla_cpp.' + extension[1]] }
       )
 
-import sys
 if sys.argv[1] == 'build':
     print("\nCollected all files for waLBerla Python module.\n"
           " - to install run 'make pythonModuleInstall'\n"
