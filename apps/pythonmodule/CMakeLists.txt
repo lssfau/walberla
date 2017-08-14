@@ -31,14 +31,9 @@ if ( WALBERLA_BUILD_WITH_PYTHON_MODULE )
 
     configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/setup.py  ${CMAKE_CURRENT_BINARY_DIR}/setup.py )
 
-    set( PYTHON_EXE /usr/bin/env python)
-    if( ${PYTHON_LIBRARY} MATCHES "python3" )
-        set( PYTHON_EXE /usr/bin/env python3 )
-    endif()
-
-    add_custom_target( pythonModule        ALL ${PYTHON_EXE} setup.py build  DEPENDS walberla_cpp  )
-    add_custom_target( pythonModuleInstall     ${PYTHON_EXE} setup.py install DEPENDS walberla_cpp )
+    add_custom_target( pythonModule        ALL ${PYTHON_EXECUTABLE} setup.py build   DEPENDS walberla_cpp )
+    add_custom_target( pythonModuleInstall     ${PYTHON_EXECUTABLE} setup.py install DEPENDS walberla_cpp )
 
     add_test( NAME PythonModuleTest
-              COMMAND ${PYTHON_EXE} -m unittest discover -v -s ${walberla_SOURCE_DIR}/python/waLBerla_tests )
+              COMMAND ${PYTHON_EXECUTABLE} -m unittest discover -v -s ${walberla_SOURCE_DIR}/python/waLBerla_tests )
 endif()

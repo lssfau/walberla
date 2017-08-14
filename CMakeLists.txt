@@ -522,47 +522,11 @@ endif()
 if ( WALBERLA_BUILD_WITH_PYTHON )
 
     set ( waLBerla_REQUIRED_MIN_PYTHON_VERSION "2.7")
-    if( WALBERLA_CXX_COMPILER_IS_MSVC )
-        find_package( PythonLibs QUIET REQUIRED)
-    else()
-        # For Linux the standard find script does not work properly:
-        # Python is configured here using the command "python-config" which has to be on the PATH
-        if ( NOT PYTHONLIBS_VERSION_STRING )
-           find_program( PYTHON_CONFIG_EXE NAMES python3-config python3m-config
-                                                 python3.5m-config python3.5-config
-                                                 python3.5m-config python3.5-config
-                                                 python3.4m-config python3.4-config
-                                                 python3.3m-config python3.3-config
-                                                 python2.7-config
-                                                 python2-config python-config )
-           if ( NOT PYTHON_CONFIG_EXE )
-               message( WARNING "Found python but no python-config, python-devel package not installed?" )
-           else()
-               execute_process( COMMAND ${PYTHON_CONFIG_EXE} --includes OUTPUT_VARIABLE PYTHON_INCLUDES   )
-               separate_arguments( PYTHON_INCLUDES )
-               list(GET PYTHON_INCLUDES 0  PYTHON_INCLUDES )
-               string( REGEX REPLACE "[-][I]([^ ]+)" "\\1" PYTHON_INCLUDE_DIR ${PYTHON_INCLUDES} )
-               set ( PYTHON_INCLUDE_DIR ${PYTHON_INCLUDE_DIR} CACHE PATH "Python include directory" FORCE )
-               string( REPLACE "-config" "" PYTHON_EXE ${PYTHON_CONFIG_EXE} )
-               execute_process( COMMAND ${PYTHON_EXE} --version OUTPUT_VARIABLE PYTHONLIBS_VERSION_STRING ERROR_VARIABLE PYTHONLIBS_VERSION_STRING )
-               string( REPLACE "Python " "" PYTHONLIBS_VERSION_STRING ${PYTHONLIBS_VERSION_STRING} )
-           endif()
-        endif()
 
-        if ( NOT PYTHON_LIBRARY )
-           execute_process( COMMAND ${PYTHON_CONFIG_EXE} --libs    OUTPUT_VARIABLE PYTHON_LIB     OUTPUT_STRIP_TRAILING_WHITESPACE  )
-           execute_process( COMMAND ${PYTHON_CONFIG_EXE} --ldflags OUTPUT_VARIABLE PYTHON_LIB_DIR OUTPUT_STRIP_TRAILING_WHITESPACE  )
-           string( REGEX MATCH "(-lpython[0-9a-z.-]*)" PYTHON_LIB ${PYTHON_LIB} )
-           string( REGEX REPLACE "[-][l]([^ ]+)" "\\1" PYTHON_LIB     "${PYTHON_LIB}"     )
-           # take everything that "python-config --ldflags" gives us,  remove "-L" and give it to find_library as possible paths
-           # in this output there are also linker flags that are not paths but find_library can handle this
-           # overall this seems the most robust method
-           string( REPLACE "-L" "" PYTHON_LIB_DIR  ${PYTHON_LIB_DIR} )
-           separate_arguments( PYTHON_LIB_DIR )
-           find_library( PYTHON_LIBRARY NAMES ${PYTHON_LIB}
-                          PATHS ${PYTHON_LIB_DIR} /usr/lib /usr/lib64 PATH_SUFFIXES lib lib64 NO_DEFAULT_PATH )
-        endif()
-    endif()
+    find_package( PythonInterp 3 QUIET) # search for Python3 first
+    find_package( PythonInterp QUIET) # fallback to any Python version
+
+    find_package( PythonLibs QUIET REQUIRED)
 
     if( PYTHONLIBS_VERSION_STRING VERSION_LESS ${waLBerla_REQUIRED_MIN_PYTHON_VERSION} )
         message( FATAL_ERROR "Found old python library: ${PYTHONLIBS_VERSION_STRING} need at least ${waLBerla_REQUIRED_MIN_PYTHON_VERSION}" )
@@ -634,7 +598,7 @@ else ()
 endif ()
 
 if ( WALBERLA_BUILD_WITH_PYTHON AND WALBERLA_CXX_COMPILER_IS_MSVC )
-    list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS python )
+    list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS python3 )
 endif()
 
 # This variable is necessary, if the CMAKE version used is not aware of a more recent boost version (keep this up to date!)
