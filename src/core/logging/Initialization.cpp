@@ -23,6 +23,7 @@
 #include "Logging.h"
 
 #include <boost/algorithm/string.hpp>
+
 #include <algorithm>
 #include <sstream>
 #include <string>
@@ -139,7 +140,7 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
    if( loggingBlock.isDefined( "logLevel" ) )
    {
       std::string type = loggingBlock.getParameter< std::string >( "logLevel" );
-      std::transform( type.begin(), type.end(), type.begin(), ::tolower ); //convert to lower case
+      boost::algorithm::to_lower( type );
 
       if( type.compare("warning") == 0 ){
          logging::Logging::instance()->setLogLevel( logging::Logging::WARNING );
@@ -158,7 +159,7 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
    if( loggingBlock.isDefined( "streamLogLevel" ) )
    {
       std::string type = loggingBlock.getParameter< std::string >( "streamLogLevel" );
-      std::transform( type.begin(), type.end(), type.begin(), ::tolower ); //convert to lower case
+      boost::algorithm::to_lower( type );
 
       if( type.compare("warning") == 0 ){
          logging::Logging::instance()->setStreamLogLevel( logging::Logging::WARNING );
@@ -177,7 +178,7 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
    if( loggingBlock.isDefined( "fileLogLevel" ) )
    {
       std::string type = loggingBlock.getParameter< std::string >( "fileLogLevel" );
-      std::transform( type.begin(), type.end(), type.begin(), ::tolower ); //convert to lower case
+      boost::algorithm::to_lower( type );
 
       if( type.compare("warning") == 0 ){
          logging::Logging::instance()->setFileLogLevel( logging::Logging::WARNING );

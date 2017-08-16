@@ -243,7 +243,7 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
    WALBERLA_CHECK_EQUAL( ySize, geometryFile.ySize() );
    WALBERLA_CHECK_EQUAL( zSize, geometryFile.zSize() );
 
-   numDefaultConstructedElements = std::count( data.begin(), data.end(), 7 );
+   numDefaultConstructedElements = std::count( data.begin(), data.end(), numeric_cast<T>(7) );
    WALBERLA_CHECK_EQUAL( numCells, numDefaultConstructedElements );
 
    data.clear();
