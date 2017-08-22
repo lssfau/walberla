@@ -22,6 +22,6 @@ requirements:
   - boost
   - numpy
   - mpich2 [linux]
+  
 source:
-  git_rev: master
-  git_url: https://i10git.cs.fau.de/walberla/walberla.git
+  path: ../../..
