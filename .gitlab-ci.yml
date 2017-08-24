@@ -20,7 +20,6 @@ stages:
       - export NUM_CORES=$(nproc --all)
       - export MAX_BUILD_CORES=$(( $(awk '( $1 == "MemTotal:" ) { print $2 }' /proc/meminfo) / ( 4 * 1024 * 1024  ) ))
       - "[[ $MAX_BUILD_CORES -lt $NUM_CORES ]] && export NUM_BUILD_CORES=$MAX_BUILD_CORES || export NUM_BUILD_CORES=$NUM_CORES"
-      - export
       - $CXX --version
       - cmake --version
       - ccache --version
@@ -936,7 +935,6 @@ cppcheck:
 coverage:
    image: walberla/coverage
    script:
-      - export
       - $CXX --version
       - cmake --version
       - gcovr --version
@@ -981,7 +979,6 @@ coverage:
       - export OMP_NUM_THREADS=4
       - export OMP_WAIT_POLICY="PASSIVE"
       - export MSMPI_DISABLE_SHM=1
-      - export
       - cmake --version
       - mkdir build
       - cd build
@@ -1249,7 +1246,7 @@ msvc-14.1_MpiOnly:
       - anaconda logout
    when: manual
    only:
-      - master@walberla/walberla
+      - master@walberla/walberla   
       - tags@walberla/walberla
 
 conda-py36-win-withoutLbm:
