@@ -1244,6 +1244,7 @@ msvc-14.1_MpiOnly:
       - conda config --add channels lssfau
    after_script:
       - anaconda logout
+   dependencies: []
    when: manual
    only:
       - master@walberla/walberla   
