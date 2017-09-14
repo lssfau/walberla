@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -20,6 +20,7 @@
 
 #include "geometry/mesh/TriangleMesh.h"
 #include "geometry/mesh/TriangleMeshIO.h"
+#include "core/Regex.h"
 
 #include <fstream>
 #include <iomanip>
@@ -28,9 +29,7 @@
 
 #define BOOST_FILESYSTEM_NO_DEPRECATED
 #include <boost/filesystem.hpp>
-#include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
-
 
 namespace fs = boost::filesystem;
 
@@ -115,8 +114,8 @@ int main(int argc, char** argv)
       std::vector<fs::path> pfiles;
       for(auto tit = fs::directory_iterator(pit->path()); tit != fs::directory_iterator(); ++tit)
       {
-         static const boost::regex extensionExpression("\\.dat");
-         if( boost::regex_match( tit->path().extension().string(), extensionExpression ) )
+         static const walberla::regex extensionExpression("\\.dat");
+         if( walberla::regex_match( tit->path().extension().string(), extensionExpression ) )
             pfiles.push_back(tit->path());
       }
       if( !pfiles.empty() )

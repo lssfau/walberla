@@ -593,10 +593,15 @@ if( WALBERLA_CXX_COMPILER_IS_IBM )
 endif()
 
 if ( WALBERLA_BUILD_WITH_BOOST_THREAD )
-   list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS chrono filesystem system thread regex )
+   list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS chrono filesystem system thread )
 else ()
-   list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS chrono filesystem system regex )
+   list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS chrono filesystem system )
 endif ()
+
+if ( WALBERLA_BUILD_WITH_BOOST AND WALBERLA_CXX_COMPILER_IS_IBM )
+    list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS regex)
+endif()
+
 
 if ( WALBERLA_BUILD_WITH_PYTHON AND WALBERLA_CXX_COMPILER_IS_MSVC )
     list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS python3 )

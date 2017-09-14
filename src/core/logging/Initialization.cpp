@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -34,7 +34,7 @@ namespace logging {
 
 
 
-static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector< boost::regex > & regexes )
+static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector< walberla::regex > & regexes )
 {
    for( auto ignoreBlock = ignoreBlocks.begin(); ignoreBlock != ignoreBlocks.end(); ++ignoreBlock )
    {
@@ -45,14 +45,14 @@ static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector<
          boost::algorithm::replace_all( regexString, "/", "(\\\\|/)" );
          try
          {
-            boost::regex regex( regexString );
+            walberla::regex regex( regexString );
             regexes.push_back( regex );
          }
-         catch( const boost::bad_expression & e )
+         catch( const walberla::regex_error & e )
          {
             std::ostringstream oss;
             oss << __FILE__ << ":" << __LINE__ << " - Error parsing regular Expression \"" << regexString
-                << "\" from ignore block at position " << e.position() << ".";
+                << "\" from ignore block at position " << e.code() << ".";
             throw std::runtime_error( oss.str() );
          }
       }
@@ -213,7 +213,7 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
    Config::Blocks ignoreBlocks, ignoreWarningBlocks;
 
    loggingBlock.getBlocks( "ignore", ignoreBlocks );
-   std::vector< boost::regex > regexes;
+   std::vector< walberla::regex > regexes;
    parseIgnoreBlocks( ignoreBlocks, regexes );
    for( auto regex = regexes.begin(); regex != regexes.end(); ++regex )
       logging::Logging::instance()->addIgnoreRegex( *regex );
