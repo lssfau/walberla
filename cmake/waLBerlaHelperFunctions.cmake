@@ -33,20 +33,20 @@ function( handle_python_codegen sourceFilesOut codeGenRequiredOut )
     set(codeGenRequired NO)
     foreach( sourceFile ${ARGN} )
         if( ${sourceFile} MATCHES ".*\\.gen\\.py$" )
-            get_filename_component(sourceFile ${sourceFile} NAME)
-            if( ${sourceFile} MATCHES ".*\\.cuda\\.gen\\.py$" )
-                string(REPLACE ".cuda.gen.py" ".h"  genHeaderFile ${sourceFile})
-                string(REPLACE ".cuda.gen.py" ".cu" genSourceFile ${sourceFile})
+            get_filename_component(sourceFileName ${sourceFile} NAME)
+            if( ${sourceFileName} MATCHES ".*\\.cuda\\.gen\\.py$" )
+                string(REPLACE ".cuda.gen.py" ".h"  genHeaderFile ${sourceFileName})
+                string(REPLACE ".cuda.gen.py" ".cu" genSourceFile ${sourceFileName})
             else()
-                string(REPLACE ".gen.py" ".h"  genHeaderFile ${sourceFile})
-                string(REPLACE ".gen.py" ".cpp" genSourceFile ${sourceFile})
+                string(REPLACE ".gen.py" ".h"  genHeaderFile ${sourceFileName})
+                string(REPLACE ".gen.py" ".cpp" genSourceFile ${sourceFileName})
             endif()
             list(APPEND result ${CMAKE_CURRENT_BINARY_DIR}/${genSourceFile}
                                ${CMAKE_CURRENT_BINARY_DIR}/${genHeaderFile})
             add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${genSourceFile}
                                       ${CMAKE_CURRENT_BINARY_DIR}/${genHeaderFile}
-                               DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${sourceFile}
-                               COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${sourceFile}
+                               DEPENDS ${sourceFile}
+                               COMMAND ${PYTHON_EXECUTABLE} ${sourceFile}
                                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
             include_directories(${CMAKE_CURRENT_BINARY_DIR})
             set(codeGenRequired YES)
