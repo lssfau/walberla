@@ -133,6 +133,9 @@ namespace cuda {
             void * data()            { return pitchedPtr_.ptr; }
       const void * data() const      { return pitchedPtr_.ptr; }
 
+      T       * dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f);
+      const T * dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f) const;
+
    protected:
       cudaPitchedPtr pitchedPtr_;
       uint_t         nrOfGhostLayers_;

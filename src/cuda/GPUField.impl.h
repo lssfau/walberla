@@ -67,6 +67,26 @@ GPUField<T>::~GPUField()
    cudaFree( pitchedPtr_.ptr );
 }
 
+template<typename T>
+T * GPUField<T>::dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f)
+{
+   auto offset = (x + nrOfGhostLayers_) * xStride() +
+                 (y + nrOfGhostLayers_) * yStride() +
+                 (z + nrOfGhostLayers_) * zStride() +
+                 f * fStride();
+   return static_cast<T*>(pitchedPtr_.ptr) + offset;
+}
+
+template<typename T>
+const T * GPUField<T>::dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f) const
+{
+   auto offset = (x + nrOfGhostLayers_) * xStride() +
+                 (y + nrOfGhostLayers_) * yStride() +
+                 (z + nrOfGhostLayers_) * zStride() +
+                 f * fStride();
+   return static_cast<T*>(pitchedPtr_.ptr) + offset;
+}
+
 
 template<typename T>
 void GPUField<T>::getGhostRegion(stencil::Direction d, CellInterval & ci,

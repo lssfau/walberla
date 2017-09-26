@@ -291,6 +291,8 @@ namespace field {
       //@{
             T * data()            { return values_; }
       const T * data() const      { return values_; }
+            T * dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f)       { return &get(x,y,z,f); }
+      const T * dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f) const { return &get(x,y,z,f); }
             T * dataInner()       { return valuesWithOffset_; }
       const T * dataInner() const { return valuesWithOffset_; }
 
