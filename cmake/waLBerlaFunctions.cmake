@@ -90,21 +90,25 @@ function ( waLBerla_add_module )
  	endforeach( ) 
 
     if ( hasSourceFiles )
-
-        handle_python_codegen(sourceFiles codeGenRequired ${sourceFiles})
+        set( generatedSourceFiles )
+        set( generatorSourceFiles )
+        handle_python_codegen(sourceFiles generatedSourceFiles generatorSourceFiles codeGenRequired ${sourceFiles})
         if( NOT WALBERLA_BUILD_WITH_CODEGEN AND codeGenRequired)
             message(STATUS "Skipping ${ARG_NAME} since pystencils code generation is not enabled")
             return()
         endif()
 
         if ( CUDA_FOUND )
-            cuda_add_library( ${moduleLibraryName} STATIC ${sourceFiles} ${otherFiles} )
+            cuda_add_library( ${moduleLibraryName} STATIC ${sourceFiles} ${generatedSourceFiles} ${generatorSourceFiles} ${otherFiles} )
         else()
-            add_library( ${moduleLibraryName} STATIC ${sourceFiles} ${otherFiles} )
+            add_library( ${moduleLibraryName} STATIC ${sourceFiles} ${generatedSourceFiles} ${generatorSourceFiles} ${otherFiles} )
         endif( CUDA_FOUND )
+        
+        set_source_files_properties( ${generatedSourceFiles} PROPERTIES GENERATED TRUE )
  	else( ) 
- 	   add_custom_target( ${moduleLibraryName} SOURCES ${sourceFiles} ${otherFiles} )  # dummy IDE target 
- 	endif( )
+ 	   add_custom_target( ${moduleLibraryName} SOURCES ${sourceFiles} ${generatedSourceFiles} ${otherFiles} )  # dummy IDE target 
+ 	endif( )  
+
     waLBerla_register_dependency ( ${moduleName} ${ARG_DEPENDS} )
 
     # This property is needed for visual studio to group modules together
@@ -204,17 +208,22 @@ function ( waLBerla_add_executable )
         endif ( )
     endif()
 
-    handle_python_codegen(sourceFiles codeGenRequired ${sourceFiles})
+    set( generatedSourceFiles )
+    set( generatorSourceFiles )
+    handle_python_codegen(sourceFiles generatedSourceFiles generatorSourceFiles codeGenRequired ${sourceFiles})
     if( NOT WALBERLA_BUILD_WITH_CODEGEN AND codeGenRequired)
         message(STATUS "Skipping ${ARG_NAME} since pystencils code generation is not enabled")
         return()
     endif()
+       
 
     if ( CUDA_FOUND )
-        cuda_add_executable( ${ARG_NAME} ${sourceFiles} )
+        cuda_add_executable( ${ARG_NAME} ${sourceFiles} ${generatedSourceFiles} ${generatorSourceFiles} )
     else()
-        add_executable( ${ARG_NAME} ${sourceFiles} )
+        add_executable( ${ARG_NAME} ${sourceFiles} ${generatedSourceFiles} ${generatorSourceFiles} )
     endif()
+    
+    set_source_files_properties( ${generatedSourceFiles} PROPERTIES GENERATED TRUE )
 
     target_link_modules  ( ${ARG_NAME} ${ARG_DEPENDS}  )
     target_link_libraries( ${ARG_NAME} ${SERVICE_LIBS} )

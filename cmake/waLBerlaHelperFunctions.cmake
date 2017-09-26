@@ -28,8 +28,10 @@ endfunction ( add_flag )
 # Additionally creates a custom build rule for the code generation
 #
 #######################################################################################################################
-function( handle_python_codegen sourceFilesOut codeGenRequiredOut )
+function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generatorsOut codeGenRequiredOut )
     set(result )
+    set(generatedResult )
+    set(generatorsResult )
     set(codeGenRequired NO)
     foreach( sourceFile ${ARGN} )
         if( ${sourceFile} MATCHES ".*\\.gen\\.py$" )
@@ -41,20 +43,23 @@ function( handle_python_codegen sourceFilesOut codeGenRequiredOut )
                 string(REPLACE ".gen.py" ".h"  genHeaderFile ${sourceFileName})
                 string(REPLACE ".gen.py" ".cpp" genSourceFile ${sourceFileName})
             endif()
-            list(APPEND result ${CMAKE_CURRENT_BINARY_DIR}/${genSourceFile}
-                               ${CMAKE_CURRENT_BINARY_DIR}/${genHeaderFile})
+            list(APPEND generatedResult ${CMAKE_CURRENT_BINARY_DIR}/${genSourceFile}
+                                        ${CMAKE_CURRENT_BINARY_DIR}/${genHeaderFile})
             add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${genSourceFile}
                                       ${CMAKE_CURRENT_BINARY_DIR}/${genHeaderFile}
                                DEPENDS ${sourceFile}
                                COMMAND ${PYTHON_EXECUTABLE} ${sourceFile}
                                WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
             include_directories(${CMAKE_CURRENT_BINARY_DIR})
+            list(APPEND generatorsResult ${sourceFile} )
             set(codeGenRequired YES)
         else()
             list(APPEND result ${sourceFile})
         endif()
     endforeach()
     set( ${sourceFilesOut} ${result} PARENT_SCOPE )
+    set( ${generatedSourceFilesOut} ${generatedResult} PARENT_SCOPE )
+    set( ${generatorsOut} ${generatorsResult} PARENT_SCOPE )
     set( ${codeGenRequiredOut} ${codeGenRequired} PARENT_SCOPE )
 endfunction ( handle_python_codegen )
 #######################################################################################################################
