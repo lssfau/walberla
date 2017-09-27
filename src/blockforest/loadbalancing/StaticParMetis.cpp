@@ -92,7 +92,7 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
       vtxdist.reserve( uint_c(numRunnerProcesses) + uint_t(1) );
       for( uint_t i = 0; i < uint_c(numRunnerProcesses); ++i )
          vtxdist.push_back( int64_c( std::min( i * chunkSize, numBlocks ) ) );
-      vtxdist.push_back( int64_t( forest.getNumberOfBlocks() ) );
+      vtxdist.push_back( int64_t( forest.getNumberOfBlocks( level ) ) );
 
       std::vector<int64_t> adjncy, xadj, vwgt, adjwgt;
       std::vector<double> xyz;
