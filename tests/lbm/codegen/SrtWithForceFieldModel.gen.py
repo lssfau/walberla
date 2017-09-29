@@ -1,7 +1,7 @@
 import sympy as sp
 from lbmpy_walberla import Field, generateLatticeModelFiles, RefinementScaling
 
-forceField = Field.createGeneric('force', spatialDimensions=3, indexDimensions=1, layout='c')
+forceField = Field.createGeneric('force', spatialDimensions=3, indexDimensions=1, layout='fzyx')
 force = [forceField(0), forceField(1), forceField(2)]
 
 omega = sp.Symbol("omega")
