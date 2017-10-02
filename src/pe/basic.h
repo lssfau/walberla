@@ -40,6 +40,7 @@
 #include "pe/rigidbody/BodyIterators.h"
 #include "pe/rigidbody/BoxFactory.h"
 #include "pe/rigidbody/CapsuleFactory.h"
+#include "pe/rigidbody/CylindricalBoundaryFactory.h"
 #include "pe/rigidbody/PlaneFactory.h"
 #include "pe/rigidbody/SphereFactory.h"
 #include "pe/rigidbody/UnionFactory.h"
