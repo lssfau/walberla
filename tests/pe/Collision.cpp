@@ -58,7 +58,9 @@ void SphereTest()
    Sphere sp1(123, 1, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
    Sphere sp2(124, 2, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
    Sphere sp3(125, 3, Vec3(real_t(3.0),0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   Sphere sp4(124, 2, Vec3(0,real_t(1.5),0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
    Plane  pl1(223, 1, Vec3(0,0,0), Vec3(1,1,1).getNormalized(), 0, iron);
+   CylindricalBoundary cb1(333, 0, Vec3(-100,0,0), 2, iron);
 
    std::vector<Contact> contacts;
    fcd::AnalyticCollideFunctor< std::vector<Contact> > collideFunc(contacts);
@@ -85,6 +87,26 @@ void SphereTest()
                  Contact( &sp2, &pl1, Vec3(1,real_t(-0.5),real_t(-0.5)), Vec3(1, 1, 1).getNormalized(), real_t(-0.133974596215561181)) );
 
    WALBERLA_CHECK( !collideFunc(&sp3, &pl1) );
+
+   // SPHERE <-> CYLINDRICAL BOUNDARY
+   WALBERLA_LOG_INFO("SPHERE <-> CYLINDRICAL BOUNDARY");
+   contacts.clear();
+   WALBERLA_CHECK(  !collideFunc(&sp1, &cb1) );
+   WALBERLA_CHECK(  !collideFunc(&sp2, &cb1) );
+   WALBERLA_CHECK(  collideFunc(&sp4, &cb1) );
+   checkContact( contacts.at(0),
+                 Contact( &sp4, &cb1, Vec3(0,real_t(2),real_t(0)), Vec3(0, -1, 0).getNormalized(), real_t(-0.5)) );
+   cb1.rotateAroundOrigin( Vec3( 0,0,1), math::M_PI * real_t(0.25) );
+   WALBERLA_CHECK(  !collideFunc(&sp1, &cb1) );
+   WALBERLA_CHECK(  collideFunc(&sp2, &cb1) );
+   WALBERLA_CHECK(  collideFunc(&sp4, &cb1) );
+   const real_t xPos = real_t(3) / real_t(4) + real_t(2) / real_c(sqrt(real_t(2)));
+   const real_t yPos = xPos - real_t(4) / real_c(sqrt(real_t(2)));
+   const real_t dist = real_c(sqrt((xPos - real_t(1.5)) * (xPos - real_t(1.5)) + yPos * yPos)) - sp4.getRadius();
+   checkContact( contacts.at(1),
+                 Contact( &sp2, &cb1, Vec3(xPos, yPos, 0), Vec3(-1, +1, 0).getNormalized(), dist) );
+   checkContact( contacts.at(2),
+                 Contact( &sp4, &cb1, Vec3(yPos, xPos, 0), Vec3(+1, -1, 0).getNormalized(), dist) );
 }
 
 void BoxTest()
