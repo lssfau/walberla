@@ -181,7 +181,7 @@ void mapMovingBody( const pe::BodyID body, IBlock & block, const shared_ptr<Stru
 
    WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage->getBlockStorage()) );
 
-   if( body->isFixed() || !body->isFinite() )
+   if( body->isFixed() /*|| !body->isFinite()*/ )
       return;
 
    BoundaryHandling_T * boundaryHandling = block.getData< BoundaryHandling_T >( boundaryHandlingID );
@@ -237,6 +237,19 @@ void mapMovingBodies( const shared_ptr<StructuredBlockStorage> & blockStorage, c
    {
        for (auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt)
            mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
+   }
+}
+
+template< typename BoundaryHandling_T >
+void mapMovingGlobalBodies( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, pe::BodyStorage & globalBodyStorage,
+                            const BlockDataID & bodyFieldID, const FlagUID & obstacle )
+{
+   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
+   {
+      for( auto bodyIt = globalBodyStorage.begin(); bodyIt != globalBodyStorage.end(); ++bodyIt)
+      {
+         mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
+      }
    }
 }
 

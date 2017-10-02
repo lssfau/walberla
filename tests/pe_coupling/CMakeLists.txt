@@ -99,6 +99,9 @@ waLBerla_execute_test( NAME LubricationCorrectionMEMSphereWallTest   COMMAND $<T
 waLBerla_compile_test( FILES momentum_exchange_method/PeriodicParticleChannelMEM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME PeriodicParticleChannelMEMTest COMMAND $<TARGET_FILE:PeriodicParticleChannelMEM> --shortrun PROCESSES 4 LABELS longrun )
 
+waLBerla_compile_test( FILES momentum_exchange_method/CouetteFlowCylinder.cpp DEPENDS blockforest pe timeloop )
+waLBerla_execute_test( NAME CouetteFlowCylinder COMMAND $<TARGET_FILE:CouetteFlowCylinder> --shortrun PROCESSES 4 LABELS longrun )
+
 waLBerla_compile_test( FILES momentum_exchange_method/SegreSilberbergMEM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME SegreSilberbergMEMSyncNextNeighbor    COMMAND $<TARGET_FILE:SegreSilberbergMEM> --shortrun                    PROCESSES 9 )
 waLBerla_execute_test( NAME SegreSilberbergMEMSyncShadowOwner     COMMAND $<TARGET_FILE:SegreSilberbergMEM> --shortrun --syncShadowOwners PROCESSES 9 )

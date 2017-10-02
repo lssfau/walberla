@@ -33,8 +33,13 @@ CellInterval getCellBB( const pe::ConstBodyID body, const IBlock & block, const 
 {
    CellInterval cellBB;
 
-   const auto & aabb = body->getAABB();
-   blockStorage->getCellBBFromAABB( cellBB, aabb, blockStorage->getLevel(block) );
+   if (body->isFinite())
+   {
+      blockStorage->getCellBBFromAABB( cellBB, body->getAABB(), blockStorage->getLevel(block) );
+   } else
+   {
+      blockStorage->getCellBBFromAABB( cellBB, body->getAABB().getIntersection( blockStorage->getDomain() ), blockStorage->getLevel(block) );
+   }
 
    cellBB.xMin() -= cell_idx_c(1); cellBB.yMin() -= cell_idx_c(1); cellBB.zMin() -= cell_idx_c(1);
    cellBB.xMax() += cell_idx_c(1); cellBB.yMax() += cell_idx_c(1); cellBB.zMax() += cell_idx_c(1);
