@@ -26,6 +26,7 @@
 #include "pe/contact/Contact.h"
 #include "pe/rigidbody/Box.h"
 #include "pe/rigidbody/Capsule.h"
+#include "pe/rigidbody/CylindricalBoundary.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Sphere.h"
 #include "pe/rigidbody/Union.h"
@@ -54,34 +55,42 @@ bool collide( SphereID s1, SphereID s2, Container& container );
 template <typename Container>
 inline
 bool collide( SphereID s, PlaneID p, Container& container );
-
 template <typename Container>
 inline
 bool collide( PlaneID p, SphereID s, Container& container );
+
+template <typename Container>
+inline
+bool collide( SphereID s, CylindricalBoundaryID cb, Container& container );
+template <typename Container>
+inline
+bool collide( CylindricalBoundaryID cb, SphereID s, Container& container );
+
 template <typename Container>
 inline
 bool collide( SphereID s, BoxID b, Container& container );
-
 template <typename Container>
 inline
 bool collide( BoxID b, SphereID s, Container& container );
+
 template <typename Container>
 inline
 bool collide( BoxID b1, BoxID b2, Container& container );
+
 template <typename Container>
 inline
 bool collide( BoxID b, PlaneID p, Container& container );
-
 template <typename Container>
 inline
 bool collide( PlaneID p, BoxID b, Container& container );
+
 template <typename Container>
 inline
 bool collide( CapsuleID c1, CapsuleID c2, Container& container );
+
 template <typename Container>
 inline
 bool collide( CapsuleID c, PlaneID p, Container& container );
-
 template <typename Container>
 inline
 bool collide( PlaneID p, CapsuleID c, Container& container );
@@ -89,7 +98,6 @@ bool collide( PlaneID p, CapsuleID c, Container& container );
 template <typename Container>
 inline
 bool collide( SphereID s, CapsuleID c, Container& container );
-
 template <typename Container>
 inline
 bool collide( CapsuleID c, SphereID s, Container& container );
@@ -98,7 +106,6 @@ bool collide( CapsuleID c, SphereID s, Container& container );
 template <typename Container>
 inline
 bool collide( BoxID b, CapsuleID c, Container& container );
-
 template <typename Container>
 inline
 bool collide( CapsuleID c, BoxID b, Container& container );
@@ -217,6 +224,35 @@ inline
 bool collide( PlaneID p, SphereID s, Container& container )
 {
    return collide(s, p, container);
+}
+
+template <typename Container>
+inline
+bool collide( SphereID s, CylindricalBoundaryID cb, Container& container )
+{
+   WALBERLA_ASSERT_GREATER( cb->getRadius(), s->getRadius() );
+
+   const Vec3   dist      = (s->getPosition() - cb->getPosition()) - ((s->getPosition() - cb->getPosition()) * cb->getAxis()) * cb->getAxis();
+   const real_t effRadius = cb->getRadius() - s->getRadius();
+   if( effRadius * effRadius - dist.sqrLength() < contactThreshold ) {
+      const Vec3   contactNormal    = -dist.getNormalized();
+      const real_t penetrationDepth = effRadius - dist.length();
+      const Vec3   contactPoint     = ( s->getPosition() - ( s->getRadius() + penetrationDepth ) * contactNormal );
+
+      WALBERLA_LOG_DETAIL( "      Contact created between sphere " << s->getID()
+             << " and cylindrical boundary " << cb->getID() << " (dist=" << penetrationDepth << ")");
+
+      container.push_back( Contact(s, cb, contactPoint, contactNormal, penetrationDepth) );
+      return true;
+   }
+   return false;
+}
+
+template <typename Container>
+inline
+bool collide( CylindricalBoundaryID cb, SphereID s, Container& container )
+{
+   return collide(s, cb, container);
 }
 
 //*************************************************************************************************

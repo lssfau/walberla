@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file PeriodicParticleChannelMEMPe.cpp
+//! \file PeriodicParticleChannelMEM.cpp
 //! \ingroup pe_coupling
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
@@ -65,8 +65,9 @@
 
 #include "vtk/all.h"
 
+#include <vector>
 
-namespace periodic_particle_channel_mem_pe
+namespace periodic_particle_channel_mem
 {
 
 ///////////
@@ -423,7 +424,7 @@ int main( int argc, char **argv )
    // create pe bodies
    const auto material = pe::createMaterial( "granular", real_c(1.2), real_c(0.25), real_c(0.4), real_c(0.4), real_c(0.35), real_c(1.39e11), real_c(5.18e7), real_c(1.07e2), real_c(1.07e2) );
 
-   // global (fixed) bodies
+   // global bodies
    // bounding planes
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,1), Vector3<real_t>(0,0,0), material );
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,-1), Vector3<real_t>(0,0,real_c(width)), material );
@@ -431,14 +432,18 @@ int main( int argc, char **argv )
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,-1,0), Vector3<real_t>(0,real_c(width),0), material );
 
    // spheres as obstacles
-   pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(real_c(length) / real_t(2), real_t(50), real_t(110)), real_t(60), material, false, true, true );
-   pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(                 real_t(0), real_t(50), -real_t(60)), real_t(80), material, false, true, true );
-   pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(            real_c(length), real_t(50), -real_t(60)), real_t(80), material, false, true, true );
+   std::vector<walberla::id_t> globalBodiesToBeMapped;
+   auto globalSphere1 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(real_c(length) / real_t(2), real_t(50), real_t(110)), real_t(60), material, true, false, true );
+   globalBodiesToBeMapped.push_back(globalSphere1->getSystemID() );
+   auto globalSphere2 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(                 real_t(0), real_t(50), -real_t(60)), real_t(80), material, true, false, true );
+   globalBodiesToBeMapped.push_back(globalSphere2->getSystemID() );
+   auto globalSphere3 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(            real_c(length), real_t(50), -real_t(60)), real_t(80), material, true, false, true );
+   globalBodiesToBeMapped.push_back(globalSphere3->getSystemID() );
 
    // local bodies: moving spheres
    const real_t radius = real_t(10);
 
-   auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(50), real_t(35) ), radius, material ); //TODO change
+   auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(50), real_t(35) ), radius, material );
    if( sphere != NULL ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
 
    sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(35), real_t(50) ), radius, material );
@@ -494,7 +499,11 @@ int main( int argc, char **argv )
 
    // map pe bodies into the LBM simulation
    // global bodies act as no-slip obstacles and are not treated by the fluid-solid coupling
-   pe_coupling::mapGlobalBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, *globalBodyStorage, NoSlip_Flag );
+   // special care has to be taken here that only the global spheres (not the planes) are mapped since the planes would overwrite the already set boundary flags
+   for( auto globalBodyIt = globalBodiesToBeMapped.begin(); globalBodyIt != globalBodiesToBeMapped.end(); ++globalBodyIt )
+   {
+      pe_coupling::mapGlobalBody< BoundaryHandling_T >( *globalBodyIt, blocks, boundaryHandlingID, *globalBodyStorage, NoSlip_Flag, false );
+   }
    // moving bodies are handled by the momentum exchange method
    pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag );
 
@@ -608,8 +617,8 @@ int main( int argc, char **argv )
    return 0;
 }
 
-} //namespace periodic_particle_channel_mem_pe
+} //namespace periodic_particle_channel_mem
 
 int main( int argc, char **argv ){
-   periodic_particle_channel_mem_pe::main(argc, argv);
+   periodic_particle_channel_mem::main(argc, argv);
 }

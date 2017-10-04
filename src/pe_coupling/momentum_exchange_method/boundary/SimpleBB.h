@@ -142,7 +142,7 @@ inline void SimpleBB< LatticeModel_T, FlagField_T >::treatDirection( const cell_
    WALBERLA_ASSERT_UNEQUAL( mask & this->mask_, numeric_cast<flag_t>(0) );
    WALBERLA_ASSERT_EQUAL  ( mask & this->mask_, this->mask_ ); // only true if "this->mask_" only contains one single flag, which is the case for the
                                                                // current implementation of this boundary condition
-   WALBERLA_ASSERT_NOT_NULLPTR( bodyField_->get(nx,ny,nz) );
+   WALBERLA_ASSERT_NOT_NULLPTR( bodyField_->get(nx,ny,nz), "(" << nx << ", " << ny << ", " << nz << ")" );
 
    const real_t pdf_old = pdfField_->get( x, y, z, Stencil_T::idx[dir] );
 
