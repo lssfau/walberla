@@ -114,6 +114,21 @@ void mapGlobalBodies( const shared_ptr<StructuredBlockStorage> & blockStorage, c
    }
 }
 
+template< typename BoundaryHandling_T >
+void mapGlobalBody( const id_t globalBodySystemID,
+                    const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, pe::BodyStorage & globalBodyStorage, const FlagUID & obstacle,
+                    const bool fixedBodiesOnly = true, const bool moBodiesOnly = true )
+{
+   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
+   {
+      auto bodyIt = globalBodyStorage.find( globalBodySystemID );
+      if( bodyIt != globalBodyStorage.end() )
+      {
+         mapBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle, fixedBodiesOnly, moBodiesOnly );
+      }
+   }
+}
+
 
 } // namespace pe_coupling
 } // namespace walberla

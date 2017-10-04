@@ -253,6 +253,20 @@ void mapMovingGlobalBodies( const shared_ptr<StructuredBlockStorage> & blockStor
    }
 }
 
+template< typename BoundaryHandling_T >
+void mapMovingGlobalBody( const id_t globalBodySystemID,
+                          const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, pe::BodyStorage & globalBodyStorage,
+                          const BlockDataID & bodyFieldID, const FlagUID & obstacle )
+{
+   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
+   {
+      auto bodyIt = globalBodyStorage.find( globalBodySystemID );
+      if( bodyIt !=  globalBodyStorage.end() )
+      {
+         mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
+      }
+   }
+}
 
 
 } // namespace pe_coupling
