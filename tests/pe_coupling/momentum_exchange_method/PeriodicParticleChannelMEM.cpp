@@ -559,7 +559,7 @@ int main( int argc, char **argv )
       << Sweep( VelocityCheck< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag, real_c(0.5), uint_c(100) ), "LBM Velocity Check" );
 
    // add lubrication force correction sweep
-   timeloop.addFuncAfterTimeStep( pe_coupling::LubricationCorrection<LatticeModel_T>( blocks, globalBodyStorage, pdfFieldID, bodyStorageID ), "Lubrication Force" );
+   timeloop.addFuncAfterTimeStep( pe_coupling::LubricationCorrection( blocks, globalBodyStorage, bodyStorageID, nu_L ), "Lubrication Force" );
 
    // add pe timesteps
    timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, real_c(1.0), uint_c(10) ), "pe Time Step" );

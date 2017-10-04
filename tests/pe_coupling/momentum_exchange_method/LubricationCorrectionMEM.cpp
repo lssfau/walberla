@@ -967,7 +967,7 @@ int main( int argc, char **argv )
       timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag ) ), "LBM DEFAULT" );
 
    // add lubrication force correction sweep
-   timeloop.addFuncAfterTimeStep( pe_coupling::LubricationCorrection<LatticeModel_T>( blocks, globalBodyStorage, pdfFieldID, bodyStorageID ), "Lubrication Force" );
+   timeloop.addFuncAfterTimeStep( pe_coupling::LubricationCorrection( blocks, globalBodyStorage, bodyStorageID, nu_L ), "Lubrication Force" );
 
    // perform lubrication evaluation
    timeloop.addFuncAfterTimeStep( EvaluateLubricationForce( blocks, bodyStorageID, *globalBodyStorage, id1, id2, velocity,
