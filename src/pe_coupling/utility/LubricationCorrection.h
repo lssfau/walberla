@@ -37,19 +37,19 @@
 namespace walberla {
 namespace pe_coupling {
 
-template< typename LatticeModel_T >
 class LubricationCorrection
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T > PdfField_T;
-
    // constructor
-   LubricationCorrection ( const shared_ptr<StructuredBlockStorage> & blockStorage, shared_ptr<pe::BodyStorage> globalBodyStorage, const BlockDataID & pdfFieldID, const BlockDataID & bodyStorageID )
+   LubricationCorrection ( const shared_ptr<StructuredBlockStorage> & blockStorage, shared_ptr<pe::BodyStorage> globalBodyStorage, const BlockDataID & bodyStorageID,
+                           real_t dynamicViscosity, real_t cutOffDistance = real_t(2) / real_t(3) )
       : blockStorage_ ( blockStorage )
       , globalBodyStorage_( globalBodyStorage )
-      , pdfFieldID_ ( pdfFieldID )
-      , bodyStorageID_( bodyStorageID ) {}
+      , bodyStorageID_( bodyStorageID )
+      , dynamicViscosity_( dynamicViscosity )
+      , cutOffDistance_( cutOffDistance )
+   { }
 
    void operator()( );
 
@@ -68,25 +68,25 @@ private:
    const BlockDataID pdfFieldID_;
    const BlockDataID bodyStorageID_;
 
+   real_t dynamicViscosity_;
+   real_t cutOffDistance_;
+
 }; // class LubricationCorrection
 
 
-template< typename LatticeModel_T >
-void LubricationCorrection<LatticeModel_T>::operator ()( )
+void LubricationCorrection::operator ()( )
 {
    WALBERLA_LOG_PROGRESS( "Calculating Lubrication Force" );
 
    // cut off distance for lubrication force
-   const real_t cutOff    = real_t(2) / real_t(3);
+   const real_t cutOff = cutOffDistance_;
 
    for (auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt)
    {
       // minimal gap used to limit the lubrication force
-      const real_t minimalGap = real_t(1e-3) * blockStorage_->dx( blockStorage_->getLevel( *blockIt ) );
+      const real_t minimalGap = real_t(1e-5) * blockStorage_->dx( blockStorage_->getLevel( *blockIt ) );
 
-      // fetch the viscosity from the block (that contains body1)
-      const PdfField_T * pdfField     = blockIt->template getData< PdfField_T > (  pdfFieldID_ );
-      real_t             nu_L         = pdfField->latticeModel().collisionModel().viscosity();
+      real_t nu_L = dynamicViscosity_;
 
       // loop over all rigid bodies
       for( auto body1It = pe::BodyIterator::begin( *blockIt, bodyStorageID_ ); body1It != pe::BodyIterator::end(); ++body1It )
@@ -117,7 +117,7 @@ void LubricationCorrection<LatticeModel_T>::operator ()( )
       // lubrication correction for local bodies with global bodies (for example sphere-plane)
       for( auto body1It = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID_ ); body1It != pe::LocalBodyIterator::end(); ++body1It )
       {
-         if ( body1It->getTypeID() != pe::Sphere::getStaticTypeID() )
+         if ( body1It->getTypeID() == pe::Sphere::getStaticTypeID() )
          {
             pe::SphereID sphereI = static_cast<pe::SphereID> ( *body1It );
 
@@ -151,9 +151,8 @@ void LubricationCorrection<LatticeModel_T>::operator ()( )
 // Helper Functions //
 //////////////////////
 
-template< typename LatticeModel_T >
-void LubricationCorrection<LatticeModel_T>::treatLubricationSphrSphr( real_t nu_Lattice, real_t cutOff, real_t minimalGap,
-                                                                      const pe::SphereID sphereI, const pe::SphereID sphereJ, const math::AABB & blockAABB )
+void LubricationCorrection::treatLubricationSphrSphr( real_t nu_Lattice, real_t cutOff, real_t minimalGap,
+                                                      const pe::SphereID sphereI, const pe::SphereID sphereJ, const math::AABB & blockAABB )
 {
 
    WALBERLA_ASSERT_UNEQUAL( sphereI->getSystemID(), sphereJ->getSystemID() );
@@ -194,9 +193,8 @@ void LubricationCorrection<LatticeModel_T>::treatLubricationSphrSphr( real_t nu_
 
 }
 
-template< typename LatticeModel_T >
-void LubricationCorrection<LatticeModel_T>::treatLubricationSphrPlane( real_t nu_Lattice, real_t cutOff, real_t minimalGap,
-                                                                       const pe::SphereID sphereI, const pe::ConstPlaneID planeJ )
+void LubricationCorrection::treatLubricationSphrPlane( real_t nu_Lattice, real_t cutOff, real_t minimalGap,
+                                                       const pe::SphereID sphereI, const pe::ConstPlaneID planeJ )
 {
 
    real_t gap = pe::getSurfaceDistance( sphereI, planeJ );
@@ -233,9 +231,8 @@ void LubricationCorrection<LatticeModel_T>::treatLubricationSphrPlane( real_t nu
  * and qualitatively by considering direction of force for example setup.
  */
 //*****************************************************************************************************************************************
-template< typename LatticeModel_T >
-pe::Vec3 LubricationCorrection<LatticeModel_T>::compLubricationSphrSphr( real_t nu_Lattice, real_t gap, real_t cutOff,
-                                                                         const pe::SphereID sphereI, const pe::SphereID sphereJ) const
+pe::Vec3 LubricationCorrection::compLubricationSphrSphr( real_t nu_Lattice, real_t gap, real_t cutOff,
+                                                         const pe::SphereID sphereI, const pe::SphereID sphereJ) const
 {
    const pe::Vec3 &posSphereI = sphereI->getPosition();
    const pe::Vec3 &posSphereJ = sphereJ->getPosition();
@@ -299,15 +296,14 @@ pe::Vec3 LubricationCorrection<LatticeModel_T>::compLubricationSphrSphr( real_t 
  * and qualitatively by considering direction of force for example setup.
  */
 //*****************************************************************************************************************************************
-template< typename LatticeModel_T >
-pe::Vec3 LubricationCorrection<LatticeModel_T>::compLubricationSphrPlane( real_t nu_Lattice, real_t gap, real_t cutOff,
-                                                                          const pe::SphereID sphereI, const pe::ConstPlaneID planeJ) const
+pe::Vec3 LubricationCorrection::compLubricationSphrPlane( real_t nu_Lattice, real_t gap, real_t cutOff,
+                                                          const pe::SphereID sphereI, const pe::ConstPlaneID planeJ) const
 {
    const pe::Vec3 &posSphereI( sphereI->getPosition() );
    real_t radiusSphereI = sphereI->getRadius();
 
    const pe::Vec3 &planeNormal( planeJ->getNormal() ); // took negative of normal from sphere to plane (plane's normal) - sign cancels out anyway
-   pe::Vec3 rIJ( planeNormal.getNormalized() );       // for safety reasons, normalize normal
+   pe::Vec3 rIJ( planeNormal.getNormalized() );        // for safety reasons, normalize normal
 
    real_t length = sphereI->getLinearVel() * rIJ;
 
