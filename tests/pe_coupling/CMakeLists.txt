@@ -70,7 +70,7 @@ waLBerla_execute_test( NAME TorqueSpherePSMSC3W2SingleTest   COMMAND $<TARGET_FI
 waLBerla_compile_test( FILES momentum_exchange_method/BodyAtBlockBoarderCheck.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME BodyAtBlockBoarderCheckTest1        COMMAND $<TARGET_FILE:BodyAtBlockBoarderCheck> 1         PROCESSES 8 )
 waLBerla_execute_test( NAME BodyAtBlockBoarderCheckTest2        COMMAND $<TARGET_FILE:BodyAtBlockBoarderCheck> 2         PROCESSES 8 LABELS longrun )
-waLBerla_execute_test( NAME BodyAtBlockBoarderCheckTest3        COMMAND $<TARGET_FILE:BodyAtBlockBoarderCheck> 3         PROCESSES 8 LABELS longrun )
+waLBerla_execute_test( NAME BodyAtBlockBoarderCheckTest3        COMMAND $<TARGET_FILE:BodyAtBlockBoarderCheck> 3         PROCESSES 8 LABELS verylongrun )
 
 waLBerla_compile_test( FILES momentum_exchange_method/DragForceSphereMEM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME DragForceSphereMEMFuncTest        COMMAND $<TARGET_FILE:DragForceSphereMEM> --funcTest          PROCESSES 1 )
@@ -101,7 +101,7 @@ waLBerla_execute_test( NAME PeriodicParticleChannelMEMTest COMMAND $<TARGET_FILE
 
 waLBerla_compile_test( FILES momentum_exchange_method/TaylorCouetteFlowMEM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME TaylorCouetteFlowMEMTest COMMAND $<TARGET_FILE:TaylorCouetteFlowMEM> --shortrun )
-waLBerla_execute_test( NAME TaylorCouetteFlowMEMTest2 COMMAND $<TARGET_FILE:TaylorCouetteFlowMEM>  PROCESSES 4 LABELS longrun)
+waLBerla_execute_test( NAME TaylorCouetteFlowMEMTest2 COMMAND $<TARGET_FILE:TaylorCouetteFlowMEM>  PROCESSES 4 LABELS verylongrun)
 
 waLBerla_compile_test( FILES momentum_exchange_method/SegreSilberbergMEM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME SegreSilberbergMEMSyncNextNeighbor    COMMAND $<TARGET_FILE:SegreSilberbergMEM> --shortrun                    PROCESSES 9 )
