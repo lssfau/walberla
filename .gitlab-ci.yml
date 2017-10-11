@@ -607,8 +607,6 @@ clang_3.4_serial_dbg:
 clang_3.4_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:3.4
-   only:
-      - triggers
    tags:
       - docker
 
