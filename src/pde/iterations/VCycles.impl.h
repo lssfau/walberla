@@ -34,6 +34,8 @@
 #include "pde/iterations/CGFixedStencilIteration.h"
 #include "pde/iterations/CGIteration.h"
 
+#include <functional>
+
 namespace walberla {
 namespace pde {
 
@@ -85,9 +87,7 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
    // Set up fields for coarser levels
    for ( uint_t lvl = 1; lvl < numLvl; ++lvl )
    {
-      auto getSize = [this,lvl] ( const shared_ptr< StructuredBlockStorage > & sbs, IBlock * const b ) {
-         return VCycles<Stencil_T>::getSizeForLevel(lvl, sbs, b);
-      };
+      auto getSize = std::bind(VCycles<Stencil_T>::getSizeForLevel, lvl, std::placeholders::_1, std::placeholders::_2);
       uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
       fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
       rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
@@ -100,9 +100,7 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
    }
 
    // Set up fields for CG on coarsest level
-   auto getFineSize = [this,numLvl] ( const shared_ptr< StructuredBlockStorage > & sbs, IBlock * const b ) {
-      return VCycles<Stencil_T>::getSizeForLevel(numLvl-1, sbs, b);
-   };
+   auto getFineSize = std::bind(VCycles<Stencil_T>::getSizeForLevel, numLvl-1, std::placeholders::_1, std::placeholders::_2);
    dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::zyxf, uint_t(1) );
    zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::zyxf, uint_t(1) );
 
@@ -194,9 +192,7 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
    // Set up fields for coarser levels
    for ( uint_t lvl = 1; lvl < numLvl; ++lvl )
    {
-      auto getSize = [this,lvl] ( const shared_ptr< StructuredBlockStorage > & sbs, IBlock * const b ) {
-         return VCycles<Stencil_T>::getSizeForLevel(lvl, sbs, b);
-      };
+      auto getSize = std::bind(VCycles<Stencil_T>::getSizeForLevel, lvl, std::placeholders::_1, std::placeholders::_2);
       uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
       fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
       rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
@@ -206,9 +202,7 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
    coarsenStencilFields(); // scaling by ( 1/h^2 )^lvl
 
    // Set up fields for CG on coarsest level
-   auto getFineSize = [this,numLvl] ( const shared_ptr< StructuredBlockStorage > & sbs, IBlock * const b ) {
-      return VCycles<Stencil_T>::getSizeForLevel(numLvl-1, sbs, b);
-   };
+   auto getFineSize = std::bind(VCycles<Stencil_T>::getSizeForLevel, numLvl-1, std::placeholders::_1, std::placeholders::_2);
    dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::zyxf, uint_t(1) );
    zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::zyxf, uint_t(1) );
 
