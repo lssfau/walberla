@@ -35,6 +35,7 @@
 #include "NonCopyable.h"
 #include "NonCreateable.h"
 #include "OpenMP.h"
+#include "Regex.h"
 #include "Set.h"
 #include "SharedFunctor.h"
 #include "Sleep.h"

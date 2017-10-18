@@ -13,58 +13,34 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ParserOMP.cpp
+//! \file Regex.h
 //! \ingroup core
-//! \author Michael Kuron <mkuron@icp.uni-stuttgart.de>
+//! \author Dominik Thoennes <dominik.thoennes@fau.de>
 //
 //======================================================================================================================
 
-#include "ParserOMP.h"
-#include "core/debug/Debug.h"
-#include "core/DataTypes.h"
+#pragma once
 
-#ifdef _OPENMP
-#include <omp.h>
+
+#ifdef __IBMCPP__
+#include <boost/regex.hpp>
 #else
-#define omp_get_max_threads() 1
-#define omp_get_thread_num()  0
+#include <regex>
 #endif
 
 
 namespace walberla {
-namespace math {
 
-
-
-FunctionParserOMP::FunctionParserOMP()
-: parser_(new FunctionParser[uint_c(omp_get_max_threads())])
-#ifndef NDEBUG
-   , num_parsers_(omp_get_max_threads())
+#ifdef __IBMCPP__
+using boost::regex;
+using boost::regex_match;
+using boost::regex_error;
+using boost::regex_search;
+#else
+using std::regex;
+using std::regex_match;
+using std::regex_error;
+using std::regex_search;
 #endif
-{
+
 }
-
-void FunctionParserOMP::parse(const std::string & eq)
-{
-   WALBERLA_ASSERT_EQUAL(omp_get_max_threads(), num_parsers_);
-
-   #ifdef _OPENMP
-   #pragma omp parallel for schedule(static)
-   #endif
-   for (int t = 0; t < omp_get_max_threads(); ++t)
-   {
-      parser_[t].parse(eq);
-   }
-}
-
-double FunctionParserOMP::evaluate(const std::map<std::string,double> & symbolTable) const
-{
-   WALBERLA_ASSERT_EQUAL(omp_get_max_threads(), num_parsers_);
-
-   return parser_[omp_get_thread_num()].evaluate(symbolTable);
-}
-
-
-
-} // namespace math
-} // namespace walberla

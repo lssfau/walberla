@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -28,10 +28,10 @@
 #include "core/mpi/MPIManager.h"
 #include "core/singleton/Singleton.h"
 #include "core/timing/WcPolicy.h"
+#include "core/Regex.h"
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/function.hpp>
-#include <boost/regex.hpp>
 
 #include <cmath>
 #include <fstream>
@@ -113,12 +113,12 @@ public:
    void logCallerPath( bool log ) { logCallerPath_ = log; }
    bool logCallerPath() const { return logCallerPath_; }
 
-   void                                addIgnoreRegex( const boost::regex & regex ) { ignoreRegexes_.push_back( regex ); }
-   const std::vector< boost::regex > & getIgnoreRegexes() const { return ignoreRegexes_; }
+   void                                addIgnoreRegex( const walberla::regex & regex ) { ignoreRegexes_.push_back( regex ); }
+   const std::vector< walberla::regex > & getIgnoreRegexes() const { return ignoreRegexes_; }
    void                              clearIgnoreRegexes() { ignoreRegexes_.clear(); }
 
-   void                                addIgnoreWarningRegex( const boost::regex & regex ) { ignoreWarningRegexes_.push_back( regex ); }
-   const std::vector< boost::regex > & getIgnoreWarningRegexes() const { return ignoreWarningRegexes_; }
+   void                                addIgnoreWarningRegex( const walberla::regex & regex ) { ignoreWarningRegexes_.push_back( regex ); }
+   const std::vector< walberla::regex > & getIgnoreWarningRegexes() const { return ignoreWarningRegexes_; }
    void                              clearIgnoreWarningRegexes() { ignoreWarningRegexes_.clear(); }
 
 
@@ -140,7 +140,7 @@ private:
 
    inline Logging();
 
-   inline bool isInIgnoreCallerPaths( const std::vector< boost::regex > & regexes,
+   inline bool isInIgnoreCallerPaths( const std::vector< walberla::regex > & regexes,
                                       const std::string & callerPath, const int line ) const;
 
    inline void logError   ( const std::string & message, const std::string & callerPath, const int line );
@@ -179,8 +179,8 @@ private:
 
    bool logCallerPath_;
 
-   std::vector< boost::regex > ignoreRegexes_;
-   std::vector< boost::regex > ignoreWarningRegexes_;
+   std::vector< walberla::regex > ignoreRegexes_;
+   std::vector< walberla::regex > ignoreWarningRegexes_;
 };
 
 
@@ -306,7 +306,7 @@ inline bool Logging::logTracing( const std::string & /*callerPath*/, const int /
 
 
 
-inline bool Logging::isInIgnoreCallerPaths( const std::vector< boost::regex > & regexes,
+inline bool Logging::isInIgnoreCallerPaths( const std::vector< walberla::regex > & regexes,
                                             const std::string & callerPath, const int line ) const
 {
    if( !regexes.empty() )
@@ -315,7 +315,7 @@ inline bool Logging::isInIgnoreCallerPaths( const std::vector< boost::regex > & 
       callerPathAndLine << callerPath << ":" << line;
 
       for( auto regex = regexes.begin(); regex != regexes.end(); ++regex )
-         if( boost::regex_search( callerPathAndLine.str(), *regex ) )
+         if( walberla::regex_search( callerPathAndLine.str(), *regex ) )
             return true;
    }
 
