@@ -190,6 +190,7 @@ enum ReduceType
 template< typename TP >  // Timing policy
 void reduceInplace( TimingNode<TP>& tn, ReduceType rt = REDUCE_TOTAL, int targetRank = 0 )
 {
+   if (mpi::MPIManager::instance()->numProcesses() == 1) return;
    if (tn.tree_.empty()) return;
 
    std::vector<double> min;
