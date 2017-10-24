@@ -713,7 +713,7 @@ int main( int argc, char **argv )
    {
       pe_coupling::FlagFieldNormalExtrapolationDirectionFinder< BoundaryHandling_T > extrapolationFinder( blocks, boundaryHandlingID );
       typedef pe_coupling::ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, pe_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T> > Reconstructor_T;
-      Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder );
+      Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder, true );
       timeloop.add()
          << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
                       ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );

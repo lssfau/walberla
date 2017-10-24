@@ -45,7 +45,9 @@ namespace pe_coupling {
 *   Different variants are available:
 *
 *   - FlagFieldNormalExtrapolationDirectionFinder:
-*     Uses information from the direct (N,S,E,W,T,B) neighbors' flags to find the extrapolation direction.
+*     Uses information from the direct (N,S,E,W,T,B) neighbors' flags to find the extrapolation direction
+*     by checking for the domain (here: fluid) flag.
+*     This can lead to incorrect directions in close packing scenarios or in the vicinity of other boundaries.
 *
 *   - SphereNormalExtrapolationDirectionFinder:
 *     Calculates the local normal of the body which is in its current form only correct for spherical bodies.
@@ -138,11 +140,15 @@ void SphereNormalExtrapolationDirectionFinder
    BodyField_T * bodyField = block->getData< BodyField_T >( bodyFieldID_ );
 
    WALBERLA_ASSERT_NOT_NULLPTR( bodyField );
+   WALBERLA_ASSERT_NOT_NULLPTR( (*bodyField)(x,y,z) );
 
    real_t cx, cy, cz;
    blockStorage_->getBlockLocalCellCenter( *block, Cell(x,y,z), cx, cy, cz );
-   Vector3<real_t> bodyVelocity = (*bodyField)(x,y,z)->getPosition();
-   Vector3<real_t> bodyNormal( cx - bodyVelocity[0], cy - bodyVelocity[1], cz - bodyVelocity[2] );
+
+   Vector3<real_t> bodyCenterPosition = (*bodyField)(x,y,z)->getPosition();
+   WALBERLA_ASSERT( !std::isnan(bodyCenterPosition[0]) && !std::isnan(bodyCenterPosition[1]) && !std::isnan(bodyCenterPosition[2]) );
+
+   Vector3<real_t> bodyNormal( cx - bodyCenterPosition[0], cy - bodyCenterPosition[1], cz - bodyCenterPosition[2] );
 
    findCorrespondingLatticeDirection< stencil::D3Q27 >( bodyNormal, extrapolationDirection );
 }

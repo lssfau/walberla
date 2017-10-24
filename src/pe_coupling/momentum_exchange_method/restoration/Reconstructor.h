@@ -56,6 +56,7 @@ namespace pe_coupling {
 *
 *   - ExtrapolationReconstructor:
 *     Extrapolates the PDFs of three or two neighboring cells that lie in extrapolation direction.
+*     Optionally, a special treatment after the extrapolation can be used that sets certain moments directly (only D3Q19).
 *     Defaults to EquilibriumAndNonEquilibriumReconstructor if not enough cells in this direction are available.
 *
 *   EquilibriumAndNonEquilibriumReconstructor and ExtrapolationReconstructor need an extrapolation direction
@@ -139,7 +140,7 @@ real_t EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T >
    CellInterval localDomain = pdfField->xyzSize();
 
    uint_t nAverage = uint_t(0);
-   real_t averageDensity = real_c(0);
+   real_t averageDensity = real_t(0);
    for( auto neighborDir = stencil::D3Q27::beginNoCenter(); neighborDir != stencil::D3Q27::end(); ++neighborDir )
    {
       Cell neighbor( x + neighborDir.cx(), y + neighborDir.cy(), z + neighborDir.cz() );
@@ -179,6 +180,7 @@ public:
    { }
 
    void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block );
+   void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, const Vector3<cell_idx_t> & extrapolationDirection );
 
 private:
 
@@ -201,11 +203,24 @@ void EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling
 {
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
-   equilibriumReconstructor_( x, y, z, block );
-
    Vector3<cell_idx_t> extrapolationDirection(0);
    extrapolationDirectionFinder_.getDirection( x, y, z, block, extrapolationDirection );
-   setNonEquilibrium( x, y, z, block, extrapolationDirection);
+
+   (*this)(x, y, z, block, extrapolationDirection);
+}
+
+template< typename LatticeModel_T, typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T >
+void EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
+::operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, const Vector3<cell_idx_t> & extrapolationDirection  )
+{
+   WALBERLA_ASSERT_NOT_NULLPTR( block );
+
+   equilibriumReconstructor_( x, y, z, block );
+
+   if( extrapolationDirection != cell_idx_t(0) )
+   {
+      setNonEquilibrium( x, y, z, block, extrapolationDirection);
+   }
 }
 
 template< typename LatticeModel_T, typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T >
@@ -219,7 +234,6 @@ void EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling
 
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
    WALBERLA_ASSERT_NOT_NULLPTR( boundaryHandling );
-   WALBERLA_ASSERT( extrapolationDirection != cell_idx_t(0) );
 
    CellInterval localDomain = pdfField->xyzSize();
    Cell normalNeighbor( x + extrapolationDirection[0], y + extrapolationDirection[1], z + extrapolationDirection[2] );
@@ -246,20 +260,25 @@ class ExtrapolationReconstructor
 {
 public:
 
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Currently only works with D3Q19 stencil for enforcing the no-slip condition!" );
-
    typedef lbm::PdfField< LatticeModel_T > PdfField_T;
    typedef Field< pe::BodyID, 1 >          BodyField_T;
 
    ExtrapolationReconstructor( const shared_ptr<StructuredBlockStorage> blockStorage, const BlockDataID & boundaryHandlingID,
                                const BlockDataID & pdfFieldID, const BlockDataID & bodyFieldID,
-                               const ExtrapolationDirectionFinder_T & extrapolationDirectionFinder )
+                               const ExtrapolationDirectionFinder_T & extrapolationDirectionFinder,
+                               const bool & enforceNoSlipConstraintAfterExtrapolation = false )
    : blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ),
      pdfFieldID_( pdfFieldID ), bodyFieldID_( bodyFieldID ),
+     enforceNoSlipConstraintAfterExtrapolation_( enforceNoSlipConstraintAfterExtrapolation ),
      extrapolationDirectionFinder_( extrapolationDirectionFinder ),
      alternativeReconstructor_( EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
       ( blockStorage, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationDirectionFinder ) )
-   { }
+   {
+      if( enforceNoSlipConstraintAfterExtrapolation_ ) {
+         WALBERLA_ASSERT((boost::is_same<typename LatticeModel_T::Stencil, stencil::D3Q19>::value),
+                         "Enforcing no-slip constraint after extrapolation currently only works with D3Q19 stencil!")
+      }
+   }
 
    void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block );
 
@@ -279,6 +298,8 @@ private:
    const BlockDataID pdfFieldID_;
    const BlockDataID bodyFieldID_;
 
+   const bool enforceNoSlipConstraintAfterExtrapolation_;
+
    ExtrapolationDirectionFinder_T extrapolationDirectionFinder_;
    EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T > alternativeReconstructor_;
 
@@ -296,12 +317,17 @@ void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, Extrapolati
 
    uint_t numberOfCellsForExtrapolation = getNumberOfExtrapolationCells( x, y, z, block, extrapolationDirection );
 
-   if( numberOfCellsForExtrapolation < uint_c(2) )
+   if( numberOfCellsForExtrapolation < uint_t(2) )
    {
-      alternativeReconstructor_( x, y, z, block );
-   } else {
+      alternativeReconstructor_( x, y, z, block, extrapolationDirection );
+   }
+   else
+   {
       extrapolatePDFs( x, y, z, block, extrapolationDirection, numberOfCellsForExtrapolation );
-      enforceNoSlipConstraint( x, y, z, block );
+      if( enforceNoSlipConstraintAfterExtrapolation_ )
+      {
+         enforceNoSlipConstraint( x, y, z, block );
+      }
    }
 }
 
@@ -318,9 +344,11 @@ uint_t ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, Extrapola
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
    WALBERLA_ASSERT_NOT_NULLPTR( boundaryHandling );
 
+   if( extrapolationDirection == cell_idx_t(0) ) return uint_t(0);
+
    CellInterval localDomain = pdfField->xyzSize();
 
-   uint_t desiredCellsInExtrapolationDirection = uint_c(3);
+   uint_t desiredCellsInExtrapolationDirection = uint_t(3);
 
    for( uint_t numCells = uint_t(1); numCells <= desiredCellsInExtrapolationDirection; ++numCells )
    {
@@ -348,20 +376,20 @@ void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, Extrapolati
 
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
 
-   if( numberOfCellsForExtrapolation == uint_c(3) )
+   if( numberOfCellsForExtrapolation == uint_t(3) )
    {
       // quadratic normal extrapolation
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
-         pdfField->get( x, y, z, d.toIdx() ) = real_c(3) * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
-                                             - real_c(3) * pdfField->get( x + 2*extrapolationDirection[0], y + 2*extrapolationDirection[1], z + 2*extrapolationDirection[2], d.toIdx() )
+         pdfField->get( x, y, z, d.toIdx() ) = real_t(3) * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
+                                             - real_t(3) * pdfField->get( x + 2*extrapolationDirection[0], y + 2*extrapolationDirection[1], z + 2*extrapolationDirection[2], d.toIdx() )
                                              +             pdfField->get( x + 3*extrapolationDirection[0], y + 3*extrapolationDirection[1], z + 3*extrapolationDirection[2], d.toIdx() );
       }
    } else { // numberOfCellsForExtrapolation == 2
       // linear normal extrapolation
       for( auto d = LatticeModel_T::Stencil::begin(); d != LatticeModel_T::Stencil::end(); ++d )
       {
-         pdfField->get( x, y, z, d.toIdx() ) = real_c(2) * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
+         pdfField->get( x, y, z, d.toIdx() ) = real_t(2) * pdfField->get( x +   extrapolationDirection[0], y +   extrapolationDirection[1], z +   extrapolationDirection[2], d.toIdx() )
                                              -             pdfField->get( x + 2*extrapolationDirection[0], y + 2*extrapolationDirection[1], z + 2*extrapolationDirection[2], d.toIdx() );
       }
    }
@@ -371,6 +399,8 @@ template< typename LatticeModel_T, typename BoundaryHandling_T, typename Extrapo
 void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
 ::enforceNoSlipConstraint( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block )
 {
+   //NOTE: this currently works only for D3Q19 stencils!
+
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
    PdfField_T *  pdfField  = block->getData< PdfField_T >( pdfFieldID_ );

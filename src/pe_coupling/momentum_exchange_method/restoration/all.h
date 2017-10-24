@@ -23,5 +23,5 @@
 #pragma once
 
 #include "ExtrapolationDirectionFinder.h"
-#include "PDFRestoration.h"
+#include "PDFReconstruction.h"
 #include "Reconstructor.h"
