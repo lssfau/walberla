@@ -70,7 +70,7 @@ option ( WALBERLA_BUILD_TUTORIALS           "Build Tutorials"                   
 
 option ( WALBERLA_BUILD_WITH_MPI            "Build with MPI"                                  ON )
 option ( WALBERLA_BUILD_WITH_METIS          "Build with metis graph partitioner"             OFF )
-option ( WALBERLA_BUILD_WITH_PARMETIS       "Build with ParMetis graph partitioner"          OFF )                                            
+option ( WALBERLA_BUILD_WITH_PARMETIS       "Build with ParMetis graph partitioner"          OFF )
 
 option ( WALBERLA_BUILD_WITH_GPROF          "Enables gprof"                                      )
 option ( WALBERLA_BUILD_WITH_GCOV           "Enables gcov"                                       )
@@ -867,14 +867,14 @@ if ( WALBERLA_BUILD_WITH_PARMETIS )
       ${PARMETIS_ROOT}/include
       $ENV{PARMETIS_ROOT}/include
    )
-  
+
   find_library(PARMETIS_LIBRARY parmetis
     /usr/local/lib
     /usr/lib
     ${PARMETIS_ROOT}/lib
     $ENV{PARMETIS_ROOT}/lib
   )
-  
+
   if( PARMETIS_INCLUDE_DIR AND PARMETIS_LIBRARY AND METIS_LIBRARY )
     include_directories( ${PARMETIS_INCLUDE_DIR} )
     list ( APPEND SERVICE_LIBS ${PARMETIS_LIBRARY} ${METIS_LIBRARY} )
@@ -1046,7 +1046,7 @@ if ( WALBERLA_BUILD_WITH_CUDA )
 
     #   set ( BUILD_SHARED_LIBS                      ON )
     set ( CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON )
-   
+
     if( NOT WALBERLA_CXX_COMPILER_IS_MSVC )
         set ( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" )
     endif()
@@ -1131,12 +1131,14 @@ endif()
 
 
 if ( WALBERLA_BUILD_WITH_LIKWID_MARKERS )
-    find_library( LIKWID_LIB likwid  HINTS $ENV{LIKWID_ROOT} )
+    find_library( LIKWID_LIB likwid HINTS $ENV{LIKWID_LIBDIR} $ENV{LIKWID_ROOT}/lib )
+    find_path( LIKWID_INCLUDE_DIR likwid.h HINTS $ENV{LIKWID_INCDIR} $ENV{LIKWID_ROOT}/include )
 
-    if ( LIKWID_LIB )
+    if ( LIKWID_LIB AND LIKWID_INCLUDE_DIR)
         set( LIKWID_FOUND 1)
-        list ( APPEND SERVICE_LIBS ${LIKWID_LIB} )
+        include_directories( ${LIKWID_INCLUDE_DIR})
         add_definitions ( "-DLIKWID_PERFMON" )
+        list ( APPEND SERVICE_LIBS ${LIKWID_LIB} )
     else()
         message(WARNING "likwid marker library not found. Set environment variable LIKWID_ROOT")
         set ( WALBERLA_BUILD_WITH_LIKWID_MARKERS OFF CACHE BOOL "Compile in markers for likwid-perfctr" FORCE )
