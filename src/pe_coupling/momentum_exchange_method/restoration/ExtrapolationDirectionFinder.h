@@ -61,7 +61,7 @@ template < typename Stencil_T >
 void findCorrespondingLatticeDirection( const Vector3<real_t> & direction, Vector3<cell_idx_t> & correspondingLatticeDirection )
 {
    stencil::Direction correspondingDirection = stencil::C;
-   real_t innerProduct = real_c(0);
+   real_t innerProduct = real_t(0);
    for( auto d = Stencil_T::beginNoCenter(); d != Stencil_T::end(); ++d )
    {
       // compute inner product <dir,c_i>
@@ -146,7 +146,7 @@ void SphereNormalExtrapolationDirectionFinder
    blockStorage_->getBlockLocalCellCenter( *block, Cell(x,y,z), cx, cy, cz );
 
    Vector3<real_t> bodyCenterPosition = (*bodyField)(x,y,z)->getPosition();
-   WALBERLA_ASSERT( !std::isnan(bodyCenterPosition[0]) && !std::isnan(bodyCenterPosition[1]) && !std::isnan(bodyCenterPosition[2]) );
+   WALBERLA_ASSERT( !math::isnan(bodyCenterPosition) );
 
    Vector3<real_t> bodyNormal( cx - bodyCenterPosition[0], cy - bodyCenterPosition[1], cz - bodyCenterPosition[2] );
 

@@ -118,7 +118,7 @@ void PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructer_T >
    // reconstruct all missing PDFs (only inside the domain)
    if( optimizeForSmallObstacleFraction_ )
    {
-      const uint_t numberOfGhostLayersToInclude = uint_c(0);
+      const uint_t numberOfGhostLayersToInclude = uint_t(0);
 
       for( auto bodyIt = pe::BodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {

@@ -31,9 +31,12 @@ namespace pe_coupling {
 CellInterval getCellBB( const pe::ConstBodyID body, const IBlock & block, const shared_ptr<StructuredBlockStorage> & blockStorage,
                         const uint_t numberOfGhostLayersToInclude )
 {
+
+   WALBERLA_ASSERT_NOT_NULLPTR( body );
+
    CellInterval cellBB;
 
-   if (body->isFinite())
+   if( body->isFinite() )
    {
       blockStorage->getCellBBFromAABB( cellBB, body->getAABB(), blockStorage->getLevel(block) );
    } else
@@ -41,8 +44,8 @@ CellInterval getCellBB( const pe::ConstBodyID body, const IBlock & block, const 
       blockStorage->getCellBBFromAABB( cellBB, body->getAABB().getIntersection( blockStorage->getDomain() ), blockStorage->getLevel(block) );
    }
 
-   cellBB.xMin() -= cell_idx_c(1); cellBB.yMin() -= cell_idx_c(1); cellBB.zMin() -= cell_idx_c(1);
-   cellBB.xMax() += cell_idx_c(1); cellBB.yMax() += cell_idx_c(1); cellBB.zMax() += cell_idx_c(1);
+   cellBB.xMin() -= cell_idx_t(1); cellBB.yMin() -= cell_idx_t(1); cellBB.zMin() -= cell_idx_t(1);
+   cellBB.xMax() += cell_idx_t(1); cellBB.yMax() += cell_idx_t(1); cellBB.zMax() += cell_idx_t(1);
 
    CellInterval blockBB = blockStorage->getBlockCellBB( block );
 

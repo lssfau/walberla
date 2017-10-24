@@ -275,8 +275,8 @@ public:
       ( blockStorage, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationDirectionFinder ) )
    {
       if( enforceNoSlipConstraintAfterExtrapolation_ ) {
-         WALBERLA_ASSERT((boost::is_same<typename LatticeModel_T::Stencil, stencil::D3Q19>::value),
-                         "Enforcing no-slip constraint after extrapolation currently only works with D3Q19 stencil!")
+         WALBERLA_CHECK((boost::is_same<typename LatticeModel_T::Stencil, stencil::D3Q19>::value),
+                        "Enforcing no-slip constraint after extrapolation currently only works with D3Q19 stencil!");
       }
    }
 
@@ -373,7 +373,6 @@ void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, Extrapolati
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
    PdfField_T * pdfField = block->getData< PdfField_T >( pdfFieldID_ );
-
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
 
    if( numberOfCellsForExtrapolation == uint_t(3) )
@@ -415,6 +414,7 @@ void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, Extrapolati
 
    WALBERLA_ASSERT_NOT_NULLPTR( (*bodyField)(x,y,z) );
    Vector3<real_t> bodyVelocity = (*bodyField)(x,y,z)->velFromWF(cx,cy,cz);
+   WALBERLA_ASSERT( !math::isnan(bodyVelocity) );
 
    // transforms to moment space (see MRT collision model) to set the body's velocity in cell without affecting other moments
    const real_t _1_2  = real_t(1) / real_t(2);
