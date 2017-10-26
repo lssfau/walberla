@@ -386,7 +386,7 @@ void intersectLines( const Vector3<real_t>& o1, const Vector3<real_t>& d1, const
 
    if( floatIsEqual(sqrlen, 0) )
    {
-      s = real_t(0),
+      s = real_t(0);
       t = real_t(0);
    }
    else
