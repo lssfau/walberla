@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file DEM.cpp
+//! \file DEM.impl.h
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Source file for the DEM solver
@@ -88,7 +88,7 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
          if (shouldContactBeTreated( &(*cIt), currentBlock.getAABB() ))
          {
             ++numberOfContactsTreated_;
-            resolveContact_( &(*cIt) );
+            resolveContact_( &(*cIt), dt);
          }
       }
 

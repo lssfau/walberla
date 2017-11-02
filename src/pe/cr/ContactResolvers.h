@@ -1,3 +1,25 @@
+//======================================================================================================================
+//
+//  This file is part of waLBerla. waLBerla is free software: you can
+//  redistribute it and/or modify it under the terms of the GNU General Public
+//  License as published by the Free Software Foundation, either version 3 of
+//  the License, or (at your option) any later version.
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+//  for more details.
+//
+//  You should have received a copy of the GNU General Public License along
+//  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
+//
+//! \file ContactResolvers.h
+//! \author Klaus Iglberger
+//! \author Sebastian Eibl <sebastian.eibl@fau.de>
+//! \brief Header file for DEM contact models
+//
+//======================================================================================================================
+
 #pragma once
 
 #include "pe/Types.h"
@@ -11,7 +33,7 @@ namespace cr {
 
 class ResolveContactSpringDashpotHaffWerner {
 public:
-   void operator()( ContactID c ) const
+   void operator()( ContactID c, const real_t /*dt*/ ) const
    {
       WALBERLA_LOG_DETAIL( "resolving contact: " << c->getID() );
       BodyID b1( c->getBody1()->getTopSuperBody() );
