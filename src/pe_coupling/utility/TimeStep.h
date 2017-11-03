@@ -124,6 +124,7 @@ public:
                   for( auto bodyIt = pe::LocalBodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
                   {
                      const auto & f = forceMap[ bodyIt->getSystemID() ];
+                     WALBERLA_ASSERT( !f.empty(), "When attempting to set force/torque on local body " << bodyIt->getSystemID() << " at position " << bodyIt->getPosition() << ", body was not found in map!");
                      bodyIt->addForce ( f[0], f[1], f[2] );
                      bodyIt->addTorque( f[3], f[4], f[5] );
                   }

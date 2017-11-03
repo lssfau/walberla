@@ -61,6 +61,7 @@
 
 #include "pe_coupling/mapping/all.h"
 #include "pe_coupling/momentum_exchange_method/all.h"
+#include "pe_coupling/utility/all.h"
 
 #include "vtk/all.h"
 #include "field/vtk/all.h"
@@ -405,30 +406,6 @@ class ForceEval
 };
 
 
-class ResetForce
-{
-   public:
-      ResetForce( const shared_ptr< StructuredBlockStorage > & blocks,
-                  const BlockDataID & bodyStorageID )
-      : blocks_( blocks ), bodyStorageID_( bodyStorageID )
-      { }
-
-      void operator()()
-      {
-         for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
-         {
-            for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-            {
-                bodyIt->resetForceAndTorque();
-            }
-         }
-      }
-private:
-      shared_ptr< StructuredBlockStorage > blocks_;
-      const BlockDataID bodyStorageID_;
-};
-
-
 //////////
 // MAIN //
 //////////
@@ -596,7 +573,7 @@ int main( int argc, char **argv )
    timeloop.addFuncAfterTimeStep( makeSharedFunctor( forceEval ), "drag force evaluation" );
 
    // resetting force
-   timeloop.addFuncAfterTimeStep( ResetForce( blocks, bodyStorageID ), "reset force on sphere");
+   timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesResetter( blocks, bodyStorageID ), "reset force on sphere");
 
    if( vtkIO )
    {

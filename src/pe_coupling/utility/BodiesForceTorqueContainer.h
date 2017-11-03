@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file BodiesForceAndTorqueContainer.h
+//! \file BodiesForceTorqueContainer.h
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
@@ -32,11 +32,11 @@
 namespace walberla {
 namespace pe_coupling {
 
-class BodiesForceAndTorqueContainer
+class BodiesForceTorqueContainer
 {  
 public:
 
-   BodiesForceAndTorqueContainer( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyStorageID )
+   BodiesForceTorqueContainer( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyStorageID )
    : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID )
      { }
 
@@ -60,7 +60,7 @@ public:
       {
          for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
          {
-            auto & f = bodyForceAndTorqueMap_[ bodyIt->getSystemID() ];
+            auto & f = bodyForceTorqueMap_[ bodyIt->getSystemID() ];
 
             // only add if body has not been added already before (from another block)
             if( f.empty() )
@@ -94,7 +94,8 @@ public:
       {
          for( auto bodyIt = pe::LocalBodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
          {
-            const auto &f = bodyForceAndTorqueMap_[bodyIt->getSystemID()];
+            const auto &f = bodyForceTorqueMap_[bodyIt->getSystemID()];
+            WALBERLA_ASSERT( !f.empty(), "When attempting to set force/torque on local body " << bodyIt->getSystemID() << " at position " << bodyIt->getPosition() << ", body was not found in map!");
             bodyIt->addForce ( f[0], f[1], f[2] );
             bodyIt->addTorque( f[3], f[4], f[5] );
          }
@@ -103,14 +104,38 @@ public:
 
    void clear()
    {
-      bodyForceAndTorqueMap_.clear();
+      bodyForceTorqueMap_.clear();
+   }
+
+   void swap( BodiesForceTorqueContainer & other )
+   {
+      std::swap( this->bodyForceTorqueMap_, other.bodyForceTorqueMap_ );
    }
 
 private:
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
    const BlockDataID bodyStorageID_;
-   std::map< walberla::id_t, std::vector<real_t> > bodyForceAndTorqueMap_;
+   std::map< walberla::id_t, std::vector<real_t> > bodyForceTorqueMap_;
+};
+
+
+class BodyContainerSwapper
+{
+public:
+   BodyContainerSwapper( const shared_ptr<BodiesForceTorqueContainer> & cont1,
+                         const shared_ptr<BodiesForceTorqueContainer> & cont2 )
+   : cont1_( cont1 ), cont2_( cont2 )
+   { }
+
+   void operator()()
+   {
+      cont1_->swap( *cont2_ );
+   }
+
+private:
+   shared_ptr<BodiesForceTorqueContainer> cont1_;
+   shared_ptr<BodiesForceTorqueContainer> cont2_;
 };
 
 } // namespace pe_coupling
