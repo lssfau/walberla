@@ -22,5 +22,6 @@
 
 #pragma once
 
+#include "BodiesForceAndTorqueContainer.h"
 #include "LubricationCorrection.h"
 #include "TimeStep.h"
