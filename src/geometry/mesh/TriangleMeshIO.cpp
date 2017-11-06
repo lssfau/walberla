@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -28,9 +28,9 @@
 #include "core/logging/Logging.h"
 #include "core/math/AABB.h"
 #include "core/mpi/Broadcast.h"
+#include "core/Regex.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
 
 #include <fstream>
 #include <map>
@@ -69,7 +69,7 @@ namespace geometry {
    void writeMesh ( const std::string & meshFilename, const TriangleMesh & mesh )
    {
       WALBERLA_LOG_PROGRESS("Writing mesh " << meshFilename << "..." );
-   
+
       std::ofstream os( meshFilename.c_str() );
       if( os.fail() )
          WALBERLA_ABORT( "Error while opening file " << meshFilename << "!" );
@@ -344,8 +344,8 @@ namespace geometry {
       // replace multiline comments: /\\*.*?\\*/
       // replace single line comments //.*?\n
       // replace chars: < > , \ n \t
-      boost::regex r( "/\\*.*?\\*/|//.*?\n|<|>|,|\n|\t" );
-      std::string stripped = boost::regex_replace( source , r , " " ) ;
+      walberla::regex r( "/\\*.*?\\*/|//.*?\n|<|>|,|\n|\t" );
+      std::string stripped = walberla::regex_replace( source , r , " " ) ;
 
       TriangleMesh::index_t faceOffset = 0u;
       if( clear )
@@ -645,7 +645,7 @@ namespace geometry {
          << "      </Points>\n";
 
       os << "      <Polys>\n";
-      
+
       os << "        <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
       os << "          ";
       for( auto it = mesh.getVertexIndices().begin(); it != mesh.getVertexIndices().end(); ++it )
@@ -668,8 +668,8 @@ namespace geometry {
 
       os << "      <CellData></CellData>\n";
 
-      os << "      <PointData" << ( mesh.hasVertexColors() ? " Scalars=\"vertexColors\"" : "" ) 
-                               << ( mesh.hasVertexColors() ? " Normals=\"vertexNormals\"" : "" ) 
+      os << "      <PointData" << ( mesh.hasVertexColors() ? " Scalars=\"vertexColors\"" : "" )
+                               << ( mesh.hasVertexColors() ? " Normals=\"vertexNormals\"" : "" )
                                << ">\n";
 
       if( mesh.hasVertexColors() )
@@ -679,7 +679,7 @@ namespace geometry {
          for( auto it = mesh.getVertexColors().begin(); it != mesh.getVertexColors().end(); ++it )
          {
             os << static_cast<uint16_t>( (*it)[0] * 255.0f + 0.5f ) << ' '
-               << static_cast<uint16_t>( (*it)[1] * 255.0f + 0.5f ) << ' ' 
+               << static_cast<uint16_t>( (*it)[1] * 255.0f + 0.5f ) << ' '
                << static_cast<uint16_t>( (*it)[2] * 255.0f + 0.5f ) << ' ';
          }
          os << "        </DataArray>\n";
