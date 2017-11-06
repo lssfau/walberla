@@ -1,0 +1,274 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                                                      //
+//                                               Schaefer Turek Benchmark                                               //
+//                                                                                                                      //
+// Reference: Schaefer, M. and Turek, S. (1996) 'Benchmark computations of laminar flow around a cylinder (with support //
+//            by F. Durst, E. Krause and R. Rannacher), in E. Hirschel (Ed.): Flow Simulation with High-Performance     //
+//            Computers II. DFG Priority Research Program Results 1993-1995, No. 52 in Notes Numer, Fluid Mech.,        //
+//            pp.547-566, Vieweg, Weisbaden.                                                                            //
+//                                                                                                                      //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SchaeferTurek
+{
+   // 3 different modes of operation:
+   // -------------------------------
+   // NO sbffile and NO saveToFile -> domain decomposition is created on the fly and simulation is run
+   //    sbffile and NO saveToFile -> domain decomposition is loaded from file and simulation is run
+   //    sbffile and    saveToFile -> domain decomposition is created and saved to file (simulation is NOT run!)
+
+   // sbffile grid.sbf;
+   
+   // blocksPerProcess 4;
+   // saveToFile; // does not require additional arguments
+   
+   outputSetupForest true; // generates: "domain_decomposition.vtk" and "process_distribution.csv"
+
+   //////////////////////////////
+   // GENERAL SIMULATION SPECS //
+   //////////////////////////////
+   
+   memoryPerCell      153; // in bytes
+   processMemoryLimit 2048; // in MiB !
+   
+   yzBlocks 3; // blocks in y- and z-direction [2D: only 1 block in z-direction]
+   // The number of blocks in x-direction is calculated from: H, L, yzBlocks, xCells, and yzCells.
+   
+   xCells  32; // number of cells in x-direction for each block
+   yzCells 32; // number of cells in y- and z-direction for each block [2D: only affects y-direction]
+   
+   H 0.41; // [m]
+   L 2.20; // [m] (2.5 [3D], 2.2 [2D])
+   strictlyObeyL true; // true = outflow will be located exactly at "L", false = outflow might be slightly further away than "L"
+   
+   cylinderxPosition    0.2;  // [m] (0.5 [3D], 0.2 [2D])
+   cylinderyPosition    0.2;  // [m]
+   cylinderRadius       0.05; // [m]
+   circularCrossSection true; // true = obstacle is a true cylinder, false = obstacle is a box
+   
+   kinViscosity   0.001; // [m^2/s]
+   rho            1;     // [kg/m^3]
+   
+   inflowVelocity 0.3; // [m/s] (0.45 [3D], 2.25 [3D], 0.3 [2D], 1.5 [2D])
+   raisingTime    1;   // [s]
+   sinPeriod      0;   // [s] (0 == no sinus term)
+   
+   obstacleBoundary 0; // 0 = staircase, 1 = curved
+   outletType       3; // 0 = pressure, 1 = outlet (2/1), 2 = outlet (4/3)
+   
+   initWithVelocity false; // at the beginning of the simulation everything is set to: ( 4 * inflowVelocity ) / 9 [3D] or ( 2 * inflowVelocity ) / 3 [2D] 
+   
+   evaluateForceComponents false; // might be nice for debugging purposes - but: involves calculation of median and stdDeviation for
+                                  // potentially a lot of cells in parallel -> can severely decrease performance
+   
+   nbrOfEvaluationPointsForCoefficientExtremas 100;
+   
+   evaluatePressure true;
+   pAlpha < 0.15, 0.2, 0.205 >; // points for evaluating
+   pOmega < 0.25, 0.2, 0.205 >; // the pressure difference
+   
+   evaluateStrouhal false;
+   pStrouhal < 0.7, 0.325, 0.205 >; // point used for evaluating the vortex shedding frequency and the Strouhal number
+   
+   ///////////////////////
+   // WHERE TO REFINE ? //
+   ///////////////////////
+   
+   useCylinderForRefinement false;
+   cylinderRefinementLevel  1; // if "useCylinderForRefinement" is true, everything around the cylinder is refined to this level
+   cylinderRefinementBuffer 0.05; // [m] - additional space around the cylinder that is also guaranteed to be at level "cylinderRefinementLevel"
+   
+   AABBRefinementSelection
+   {
+      // coordinates of AABBs are in [m]
+      /*
+      AABB
+      {
+         level 2;
+         AABB [ <0,0,0>, <0.05,0.41,0.41> ];
+      }
+      */
+      /*
+      AABB
+      {
+         level 1;
+         AABB [ <0,0,0>, <0.7,0.41,0.41> ];
+      }
+      */
+      // coordinates of Regions are always in [0,1] -> the entire simulation space is mapped to [ <0,0,0>, <1,1,1> ]
+      /*
+      Region
+      {
+         level 1;
+         region [ <0,0,0>, <1,1,1> ];
+      }
+      */
+   }
+   
+   ////////////////////////////
+   // RUNNING THE SIMULATION //
+   ////////////////////////////
+   
+   outerTimeSteps     1; // total number of time steps = outerTimeSteps * innerTimeSteps
+   innerTimeSteps     1; // For each outer loop, performance data is logged.
+   
+   evaluationCheckFrequency 10;   // 1;
+   evaluationLogToStream    true; // false;
+   evaluationLogToFile      true;
+   evaluationFilename       SchaeferTurek.txt;
+   
+   MassEvaluation
+   {
+      plotFrequency 0;
+      logFrequency  0;
+      filename      Mass.txt;
+   }
+   
+   StabilityChecker
+   {
+      checkFrequency     100;
+      streamOutput       false;
+      vtkOutput          true;
+      vtkBaseFolder      stability_check;
+      vtkBinary          true;
+      vtkLittleEndian    true;
+      vtkMPIIO           true;
+   }
+   
+   remainingTimeLoggerFrequency 3; // in seconds
+   
+   vtkBeforeTimeStep true; // false = at the end of time step
+   
+   logToSqlDB true;
+   sqlFile simulation.sqlite; // database used for logging the performance and accuracy of the simulation
+                              // logging is done every "innerTimeSteps" time steps
+   
+   ///////////////////////////
+   // SRT - TRT - MRT setup //
+   ///////////////////////////
+   
+   omega 1.5;
+   
+   // magicNumber 0.25; // Used to setup TRT and MRT in case if and only if no additional parameters
+                        // except 'omega' are specified here in the input file. [default: 0.1875]
+   
+   // lambda_e 1.98; // If "--trt" is used AND 'lambda_e' and 'lambda_d' are both specified here
+   // lambda_d 1.95; // in the input file then these two parameters are used for setting up TRT.
+                     // Otherwise 'omega' is used to set up TRT.
+   
+   // Setting up TRT to mimic SRT: set lambda_e and lambda_d to the same value
+                  
+   // If "--mrt" is used AND 's1', 's2', 's4', 's9', 's10', and 's16' are all specified here in the input file
+   // then these parameters are used for setting up MRT. Otherwise 'omega' is used to set up MRT.
+   // s1  1.19; // s_e
+   // s2  1.4;  // s_epsilon
+   // s4  1.2;  // s_q
+   // s9  1.99; // s_nu
+   // s10 1.4;  // s_pi
+   // s16 1.98; // s_m
+   
+   // Setting up MRT to mimic SRT: set all parameters to the same value
+   // Setting up MRT to mimic TRT: set s1, s2, s9, and s10 to lambda_e and s4 and s16 to lambda_d
+   
+   relaxationParametersLevel 0;
+   
+   //////////////////
+   // CHECK AT END //
+   //////////////////
+   
+   check false;
+   
+   checkCDRealAreaLowerBound -1E6; // lower bound for the drag coefficient ("real" cylinder area used for evaluation)
+   checkCDRealAreaUpperBound  1E6; // upper bound for the drag coefficient ("real" cylinder area used for evaluation)
+   
+   checkCLRealAreaLowerBound -1E6; // lower bound for the lift coefficient ("real" cylinder area used for evaluation)
+   checkCLRealAreaUpperBound  1E6; // upper bound for the lift coefficient ("real" cylinder area used for evaluation)
+   
+   checkCDDiscreteAreaLowerBound -1E6; // lower bound for the drag coefficient ("discrete" cylinder area used for evaluation)
+   checkCDDiscreteAreaUpperBound  1E6; // upper bound for the drag coefficient ("discrete" cylinder area used for evaluation)
+   
+   checkCLDiscreteAreaLowerBound -1E6; // lower bound for the lift coefficient ("discrete" cylinder area used for evaluation)
+   checkCLDiscreteAreaUpperBound  1E6; // upper bound for the lift coefficient ("discrete" cylinder area used for evaluation)
+   
+   checkPressureDiffLowerBound -1E6; // lower bound for the pressure difference (only checked if "evaluatePressure" is set to true)
+   checkPressureDiffUpperBound  1E6; // upper bound for the pressure difference (only checked if "evaluatePressure" is set to true)
+   
+   checkStrouhalNbrRealDLowerBound -1E6; // lower bound for the Strouhal number (only checked if "evaluateStrouhal" is set to true - "real" cylinder diameter used for evaluation)
+   checkStrouhalNbrRealDUpperBound  1E6; // upper bound for the Strouhal number (only checked if "evaluateStrouhal" is set to true - "real" cylinder diameter used for evaluation)
+   
+   checkStrouhalNbrDiscreteDLowerBound -1E6; // lower bound for the Strouhal number (only checked if "evaluateStrouhal" is set to true - "discrete" cylinder diameter used for evaluation)
+   checkStrouhalNbrDiscreteDUpperBound  1E6; // upper bound for the Strouhal number (only checked if "evaluateStrouhal" is set to true - "discrete" cylinder diameter used for evaluation)
+}
+
+
+
+VTK
+{
+   /*
+   fluid_field
+   {
+      baseFolder vtk;
+   
+      writeFrequency 33; // -> 30 fps
+      ghostLayers     1;
+      
+      AABB_filter_0 {
+         min < 0,   0,    0.20 >;
+         max < 2.5, 0.41, 0.21 >;         
+      }
+      
+    //AABB_filter_0 {
+    //   min < 0.45, 0.15,    0 >;
+    //   max < 0.55, 0.25, 0.41 >;         
+    //}
+      
+      before_functions {
+         PDFGhostLayerSync;
+      }
+      
+      inclusion_filters {
+       //FluidFilter;
+         combine FluidFilter,AABB_filter_0;
+      }
+      
+      writers {
+         VelocityFromPDF;
+       //VelocityMagnitudeFromPDF;
+         DensityFromPDF;
+       //NonEquPart;
+       //PDF;
+      }
+   }
+   */
+   
+   /*
+   flag_field
+   {
+      baseFolder vtk;
+   
+      writeFrequency 1000000000; // = write once at the beginning
+      ghostLayers    0;
+      
+    //AABB_filter_0 {
+    //   min <   0,    0,        0 >;
+    //   max < 300, 1000, 10000000 >;
+    //}
+    //inclusion_filters {
+    //   AABB_filter_0;
+    //}
+      
+      writers {
+         FlagField;
+      }
+   }
+   */
+  
+   /*
+   domain_decomposition
+   {
+      baseFolder vtk;
+      writeFrequency 1000000000; // = write once at the beginning
+      outputDomainDecomposition true;
+   }
+   */
+}
