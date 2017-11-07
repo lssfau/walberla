@@ -237,13 +237,14 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    return handling;
 }
 
-
-class ForceEval
+/*
+ * Functionality for continuous logging of sphere properties during initial (resting) simulation
+ */
+class RestingSphereForceEvaluator
 {
 public:
-   ForceEval( SweepTimeloop* timeloop,
-              const shared_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & bodyStorageID,
-              uint_t averageFrequency, const std::string & basefolder ) :
+   RestingSphereForceEvaluator( SweepTimeloop* timeloop, const shared_ptr< StructuredBlockStorage > & blocks,
+                                const ConstBlockDataID & bodyStorageID, uint_t averageFrequency, const std::string & basefolder ) :
       timeloop_( timeloop ), blocks_( blocks ), bodyStorageID_( bodyStorageID ), averageFrequency_( averageFrequency )
    {
       // initially write header in file
@@ -325,15 +326,17 @@ private:
 
 };
 
-class SphereEval
+/*
+ * Functionality for continuous logging of sphere properties during moving simulation
+ */
+class MovingSpherePropertyEvaluator
 {
 public:
-   SphereEval( SweepTimeloop* timeloop,
-               const shared_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & bodyStorageID,
-               const std::string & basefolder,
-               const Vector3<real_t> & u_infty, const real_t Galileo, const real_t GalileoSim,
-               const real_t gravity, const real_t viscosity, const real_t diameter, const real_t densityRatio,
-               const uint_t numLBMSubCycles ) :
+   MovingSpherePropertyEvaluator( SweepTimeloop* timeloop, const shared_ptr< StructuredBlockStorage > & blocks,
+                                  const ConstBlockDataID & bodyStorageID, const std::string & basefolder,
+                                  const Vector3<real_t> & u_infty, const real_t Galileo, const real_t GalileoSim,
+                                  const real_t gravity, const real_t viscosity, const real_t diameter,
+                                  const real_t densityRatio, const uint_t numLBMSubCycles ) :
       timeloop_( timeloop ), blocks_( blocks ), bodyStorageID_( bodyStorageID ),
       u_infty_( u_infty ), gravity_( gravity ), viscosity_( viscosity ),
       diameter_( diameter ), densityRatio_( densityRatio ), numLBMSubCycles_( numLBMSubCycles )
@@ -494,95 +497,9 @@ private:
 
 };
 
-class ResetForce
-{
-   public:
-   ResetForce( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & bodyStorageID )
-      : blocks_( blocks ), bodyStorageID_( bodyStorageID ) { }
-
-      void operator()()
-      {
-
-         for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
-         {
-            for( auto bodyIt = pe::BodyIterator::begin< pe::Sphere >( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end<pe::Sphere>(); ++bodyIt )
-            {
-               bodyIt->resetForceAndTorque();
-            }
-         }
-      }
-   private:
-      const shared_ptr< StructuredBlockStorage > blocks_;
-      const BlockDataID bodyStorageID_;
-};
-
-class GravitationalForce
-{
-   public:
-   GravitationalForce( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & bodyStorageID,
-                       real_t force )
-      : blocks_( blocks ), bodyStorageID_( bodyStorageID ), force_( force ) { }
-
-      void operator()()
-      {
-
-         for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
-         {
-            for( auto bodyIt = pe::LocalBodyIterator::begin< pe::Sphere >( *blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end<pe::Sphere>(); ++bodyIt )
-            {
-               bodyIt->addForce ( real_t(0), real_t(0), force_ );
-            }
-         }
-      }
-   private:
-      const shared_ptr< StructuredBlockStorage > blocks_;
-      const BlockDataID bodyStorageID_;
-      const real_t force_;
-};
-
-
-
 /*
- * When using N LBM steps and one (larger) pe step in a single simulation step, the force applied on the pe bodies in each LBM sep has to be scaled
- * by a factor of 1/N before running the pe simulation. This corresponds to an averaging of the force and torque over the N LBM steps and is said to
- * damp oscillations. Usually, N = 2.
- * See Ladd - "Numerical simulations of particulate suspensions via a discretized Boltzmann equation. Part 1. Theoretical foundation", 1994, p. 302
- */
-class AverageForce
-{
-   public:
-      AverageForce( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & bodyStorageID,
-                    const uint_t lbmSubCycles )
-      : blocks_( blocks ), bodyStorageID_( bodyStorageID ), invLbmSubCycles_( real_t(1) / real_c( lbmSubCycles ) ) { }
-
-      void operator()()
-      {
-         Vector3<real_t> force( real_t(0) );
-         Vector3<real_t> torque( real_t(0) );
-
-         for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
-         {
-            for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-            {
-               force  = invLbmSubCycles_ * bodyIt->getForce();
-               torque = invLbmSubCycles_ * bodyIt->getTorque();
-
-               bodyIt->resetForceAndTorque();
-
-               bodyIt->setForce ( force );
-               bodyIt->setTorque( torque );
-            }
-         }
-      }
-   private:
-      const shared_ptr< StructuredBlockStorage > blocks_;
-      const BlockDataID bodyStorageID_;
-      real_t invLbmSubCycles_;
-};
-
-
-/*
- * Result evaluation
+ * Result evaluation for the written VTK files
+ *
  * input: vel (fluid velocity), u_p (particle velocity), u_infty (inflow velocity)
  *
  * needed data:
@@ -598,45 +515,37 @@ class AverageForce
  *                             vel_r_perp     = vel_r * e_p_perp
  *                             vel_r_Hz_perp  = vel_r * e_p_Hz_perp
  */
-class LogVTKInfo
+class VTKInfoLogger
 {
 public:
 
-   LogVTKInfo( SweepTimeloop* timeloop,
-               const shared_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & bodyStorageID,
-               const std::string & baseFolder,
-               const Vector3<real_t> u_infty, const real_t gravity,
-               const real_t diameter, const real_t densityRatio ) :
+   VTKInfoLogger( SweepTimeloop* timeloop, const shared_ptr< StructuredBlockStorage > & blocks,
+                  const ConstBlockDataID & bodyStorageID, const std::string & baseFolder,
+                  const Vector3<real_t> u_infty ) :
    timeloop_( timeloop ), blocks_( blocks ), bodyStorageID_( bodyStorageID ), baseFolder_( baseFolder ), u_infty_( u_infty )
-   {
-      u_p_r_sqr_mag_ = real_t(0);
-      u_ref_ = std::sqrt( std::fabs(densityRatio - real_t(1)) * gravity * diameter );
-   }
+   { }
 
    void operator()()
    {
-      Vector3<real_t> transVel( real_t(0) );
+      Vector3<real_t> u_p( real_t(0) );
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
          for( auto bodyIt = pe::LocalBodyIterator::begin<pe::Sphere>(*blockIt, bodyStorageID_ ); bodyIt != pe::LocalBodyIterator::end<pe::Sphere>(); ++bodyIt )
          {
-            transVel = bodyIt->getLinearVel();
+            u_p = bodyIt->getLinearVel();
          }
       }
 
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( transVel[0], mpi::SUM );
-         mpi::allReduceInplace( transVel[1], mpi::SUM );
-         mpi::allReduceInplace( transVel[2], mpi::SUM );
+         mpi::allReduceInplace( u_p[0], mpi::SUM );
+         mpi::allReduceInplace( u_p[1], mpi::SUM );
+         mpi::allReduceInplace( u_p[2], mpi::SUM );
 
       }
 
-      // store particle velocity
-      u_p_ = transVel;
-
-      Vector3<real_t> u_p_r = u_p_ - u_infty_;
-      u_p_r_sqr_mag_ = u_p_r.sqrLength();
+      Vector3<real_t> u_p_r = u_p - u_infty_;
+      real_t u_p_r_sqr_mag = u_p_r.sqrLength();
 
       real_t u_p_H = std::sqrt( u_p_r[0] * u_p_r[0] + u_p_r[1] * u_p_r[1]);
 
@@ -660,8 +569,8 @@ public:
          file.open( filename.c_str() );
          file.precision(8);
 
-         file << "u_p = "           << u_p_ << "\n";
-         file << "u_p_r_2 = "       << u_p_r_sqr_mag_ << "\n\n";
+         file << "u_p = "           << u_p << "\n";
+         file << "u_p_r_2 = "       << u_p_r_sqr_mag << "\n\n";
 
          file << "e_{pH} = "        << e_p_H        << "\n";
          file << "e_{pparallel} = " << e_p_parallel << "\n";
@@ -670,22 +579,6 @@ public:
 
          file.close();
       }
-
-   }
-
-   Vector3<real_t> getParticleVel() const
-   {
-      return u_p_;
-   }
-
-   real_t getURef() const
-   {
-      return u_ref_;
-   }
-
-   real_t getUPRSqrMag() const
-   {
-      return u_p_r_sqr_mag_;
    }
 
 private:
@@ -697,10 +590,6 @@ private:
 
    std::string baseFolder_;
    Vector3<real_t> u_infty_;
-
-   Vector3< real_t > u_p_;
-   real_t u_p_r_sqr_mag_;
-   real_t u_ref_;
 
 };
 
@@ -869,7 +758,7 @@ int main( int argc, char **argv )
    ///////////////////////////
    const int numProcs = MPIManager::instance()->numProcesses();
 
-   if( numProcs < 16 ) WALBERLA_ABORT("At least 16 MPI ranks have to be used due to horizontal periodicity requirements!");
+   WALBERLA_CHECK(numProcs % 16 != 0, "An integer multiple of 16 MPI ranks has to be used due to horizontal periodicity and domain decomposition requirements!");
 
    uint_t XBlocks, YBlocks, ZBlocks;
    if( numProcs >= 192 )
@@ -1130,11 +1019,11 @@ int main( int argc, char **argv )
    }
 
    // evaluate the drag force acting on the sphere...
-   shared_ptr< ForceEval > forceEval = walberla::make_shared< ForceEval >( &timeloopInit, blocks, bodyStorageID, averageFrequency, basefolder );
-   timeloopInit.addFuncAfterTimeStep( SharedFunctor< ForceEval >( forceEval ), "Evaluating drag force" );
+   shared_ptr< RestingSphereForceEvaluator > forceEval = walberla::make_shared< RestingSphereForceEvaluator >( &timeloopInit, blocks, bodyStorageID, averageFrequency, basefolder );
+   timeloopInit.addFuncAfterTimeStep( SharedFunctor< RestingSphereForceEvaluator >( forceEval ), "Evaluating drag force" );
 
    // ...then reset the force
-   timeloopInit.addFuncAfterTimeStep( ResetForce( blocks, bodyStorageID ), "Resetting force on body");
+   timeloopInit.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesResetter( blocks, bodyStorageID ), "Resetting force on body");
 
    if( vtkIOInit )
    {
@@ -1300,8 +1189,7 @@ int main( int argc, char **argv )
       }
 
       if( numLBMSubCycles != uint_t(1) )
-         timeloop.addFuncAfterTimeStep( AverageForce( blocks, bodyStorageID, numLBMSubCycles ), "Force averaging for several LBM steps" );
-
+         timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler( blocks, bodyStorageID, real_t(1) / real_c(numLBMSubCycles) ), "Force averaging for several LBM steps" );
 
    }else{
 
@@ -1341,15 +1229,16 @@ int main( int argc, char **argv )
       }
 
       if( numLBMSubCycles != uint_t(1) )
-         timeloop.addFuncAfterTimeStep( AverageForce( blocks, bodyStorageID, numLBMSubCycles ), "Force averaging for several LBM steps" );
+         timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler( blocks, bodyStorageID, real_t(1) / real_c(numLBMSubCycles) ), "Force averaging for several LBM steps" );
 
    }
 
    // add gravity
-   timeloop.addFuncAfterTimeStep( GravitationalForce( blocks, bodyStorageID, - gravity * ( densityRatio - real_t(1) ) * diameter * diameter * diameter * math::PI / real_t(6) ), "Add gravitational force" );
+   Vector3<real_t> extForcesOnSphere( real_t(0), real_t(0), - gravity * ( densityRatio - real_t(1) ) * diameter * diameter * diameter * math::PI / real_t(6));
+   timeloop.addFuncAfterTimeStep( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, extForcesOnSphere ), "Add external forces (gravity and buoyancy)" );
 
    // evaluate the sphere properties
-   timeloop.addFuncAfterTimeStep( SphereEval( &timeloop, blocks, bodyStorageID, basefolder, uInfty, Galileo, GalileoSim, gravity, viscosity, diameter, densityRatio, numLBMSubCycles ), "Evaluate sphere");
+   timeloop.addFuncAfterTimeStep( MovingSpherePropertyEvaluator( &timeloop, blocks, bodyStorageID, basefolder, uInfty, Galileo, GalileoSim, gravity, viscosity, diameter, densityRatio, numLBMSubCycles ), "Evaluate sphere");
 
    // advance pe rigid body simulation
    timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, real_c(numLBMSubCycles), numPeSubCycles ), "pe Time Step" );
@@ -1363,8 +1252,7 @@ int main( int argc, char **argv )
    pdfFieldVTK->addBeforeFunction( pdfGhostLayerSync );
 
    // function to output plane infos for vtk output
-   shared_ptr< LogVTKInfo > logVTKInfo = walberla::make_shared< LogVTKInfo >( &timeloop, blocks, bodyStorageID, basefolder, uInfty, gravity, diameter, densityRatio );
-   pdfFieldVTK->addBeforeFunction( SharedFunctor< LogVTKInfo >( logVTKInfo ) );
+   pdfFieldVTK->addBeforeFunction(VTKInfoLogger( &timeloop, blocks, bodyStorageID, basefolder, uInfty ));
 
    // create folder for log_vtk files to not pollute the basefolder
    boost::filesystem::path tpath2( basefolder+"/log_vtk" );

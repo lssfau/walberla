@@ -22,5 +22,9 @@
 
 #pragma once
 
+#include "BodiesForceTorqueContainer.h"
+#include "ForceOnBodiesAdder.h"
+#include "ForceTorqueOnBodiesResetter.h"
+#include "ForceTorqueOnBodiesScaler.h"
 #include "LubricationCorrection.h"
 #include "TimeStep.h"

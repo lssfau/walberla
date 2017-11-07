@@ -241,11 +241,11 @@ void initPDF(const shared_ptr< StructuredBlockStorage > & blocks, const BlockDat
          // obtain the physical coordinate of the center of the current cell
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
 
-         const real_t rho = real_c(1);
-         const real_t height = real_c(setup.zlength) * real_c(0.5);
+         const real_t rho = real_t(1);
+         const real_t height = real_c(setup.zlength) * real_t(0.5);
 
          // parabolic Poiseuille profile for a given external force
-         Vector3< real_t > velocity ( setup.forcing / ( real_c(2) * setup.nu) * (height * height - ( p[2] - height ) * ( p[2] - height ) ), real_c(0), real_c(0) );
+         Vector3< real_t > velocity ( setup.forcing / ( real_t(2) * setup.nu) * (height * height - ( p[2] - height ) * ( p[2] - height ) ), real_t(0), real_t(0) );
          pdf->setToEquilibrium( *cell, velocity, rho );
       }
    }
@@ -385,71 +385,7 @@ class SteadyStateCheck
       real_t posNew_;
 };
 
-// When using N LBM steps and one (larger) pe step in a single simulation step, the force applied on the pe bodies in each LBM sep has to be scaled
-// by a factor of 1/N before running the pe simulation. This corresponds to an averaging of the force and torque over the N LBM steps and is said to
-// damp oscillations. Usually, N = 2.
-// See Ladd - " Numerical simulations of particulate suspensions via a discretized Boltzmann equation. Part 1. Theoretical foundation", 1994, p. 302
-class AverageForce
-{
-   public:
-      AverageForce( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & bodyStorageID,
-                    const uint_t lbmSubCycles )
-      : blocks_( blocks ), bodyStorageID_( bodyStorageID ), invLbmSubCycles_( real_c(1) / real_c( lbmSubCycles ) ) { }
 
-      void operator()()
-      {
-         pe::Vec3 force  = pe::Vec3(0.0);
-         pe::Vec3 torque = pe::Vec3(0.0);
-
-         for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
-         {
-            for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-            {
-               force  = invLbmSubCycles_ * bodyIt->getForce();
-               torque = invLbmSubCycles_ * bodyIt->getTorque();
-
-               bodyIt->resetForceAndTorque();
-
-               bodyIt->setForce ( force );
-               bodyIt->setTorque( torque );
-            }
-         }
-      }
-   private:
-      shared_ptr< StructuredBlockStorage > blocks_;
-      const BlockDataID bodyStorageID_;
-      real_t invLbmSubCycles_;
-};
-
-
-// The flow in the channel is here driven by a body force and is periodic
-// Thus, the pressure gradient, usually encountered in a channel flow, is not present here
-// The buoyancy force on the body due to this pressure gradient has to be added 'artificially'
-// F_{buoyancy} = - V_{body} * grad ( p ) = V_{body} * \rho_{fluid} *  a
-// ( V_{body} := volume of body,  a := acceleration driving the flow )
-class BuoyancyForce
-{
-   public:
-   BuoyancyForce( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & bodyStorageID,
-                  const Vector3<real_t> pressureForce )
-      : blocks_( blocks ), bodyStorageID_( bodyStorageID ), pressureForce_( pressureForce ) { }
-
-      void operator()()
-      {
-
-         for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
-         {
-            for( auto bodyIt = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
-            {
-               bodyIt->addForce ( pressureForce_ );
-            }
-         }
-      }
-   private:
-      shared_ptr< StructuredBlockStorage > blocks_;
-      const BlockDataID bodyStorageID_;
-      const Vector3<real_t> pressureForce_;
-};
 
 class PDFFieldCopy
 {
@@ -523,6 +459,7 @@ int main( int argc, char **argv )
    bool MO_MR            = false; //use multireflection boundary condition
    bool eanReconstructor = false; //use equilibrium and non-equilibrium reconstructor
    bool extReconstructor = false; //use extrapolation reconstructor
+   bool averageForceTorqueOverTwoTimSteps = true;
 
    for( int i = 1; i < argc; ++i )
    {
@@ -535,6 +472,7 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--MO_MR"  )           == 0 ) { MO_MR            = true; continue; }
       if( std::strcmp( argv[i], "--eanReconstructor" ) == 0 ) { eanReconstructor = true; continue; }
       if( std::strcmp( argv[i], "--extReconstructor" ) == 0 ) { extReconstructor = true; continue; }
+      if( std::strcmp( argv[i], "--noForceAveraging" ) == 0 ) { averageForceTorqueOverTwoTimSteps = false; continue; }
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
    }
 
@@ -544,28 +482,26 @@ int main( int argc, char **argv )
 
    Setup setup;
 
-   setup.particleDiam =  real_c( 12 );                          // particle diameter
-   setup.rho_p = real_c( 1 );                                   // particle density
-   setup.tau = real_c( 1.4 );                                   // relaxation time
-   setup.nu = (real_c(2) * setup.tau - real_c(1) ) / real_c(6); // viscosity in lattice units
-   setup.timesteps = functest ? 1 : ( shortrun ? uint_c(200) : uint_c( 250000 ) ); // maximum number of time steps
-   setup.zlength = uint_c( 4.0 * setup.particleDiam );          // zlength in lattice cells of the channel
+   setup.particleDiam =  real_t( 12 );                          // particle diameter
+   setup.rho_p = real_t( 1 );                                   // particle density
+   setup.tau = real_t( 1.4 );                                   // relaxation time
+   setup.nu = (real_t(2) * setup.tau - real_t(1) ) / real_t(6); // viscosity in lattice units
+   setup.timesteps = functest ? 1 : ( shortrun ? uint_t(200) : uint_t( 250000 ) ); // maximum number of time steps
+   setup.zlength = uint_c( real_t(4) * setup.particleDiam );          // zlength in lattice cells of the channel
    setup.xlength = setup.zlength;                               // xlength in lattice cells of the channel
    setup.ylength = setup.zlength;                               // ylength in lattice cells of the channel
-   setup.Re = real_c( 13 );                                     // bulk Reynoldsnumber = uMean * width / nu
+   setup.Re = real_t( 13 );                                     // bulk Reynoldsnumber = uMean * width / nu
 
-   const real_t particleRadius = real_c(0.5) * setup.particleDiam; // particle radius
-   const real_t dx = real_c(1);                                    // lattice grid spacing
-   const uint_t numLbmSubCycles = uint_c(2);                       // number of LBM subcycles, i.e. number of LBM steps until one pe step is carried out
-   const real_t dt_pe       = real_c(numLbmSubCycles);             // time step size for PE (LU): here 2 times as large as for LBM
-   const uint_t pe_interval = uint_c(1);                           // subcycling interval for PE: only 1 PE step
-   const real_t omega = real_c(1) / setup.tau;                     // relaxation rate
-   const real_t convergenceLimit = real_c( 1e-5 );                 // tolerance for relative change in position
-   setup.checkFrequency = uint_c( real_c(100) / dt_pe );           // evaluate the position only every checkFrequency LBM time steps
+   const real_t particleRadius = real_t(0.5) * setup.particleDiam; // particle radius
+   const real_t dx = real_t(1);                                    // lattice grid spacing
+   const uint_t numPeSubcycles = uint_c(1);                        // number of pe subcycles per LBM step
+   const real_t omega = real_t(1) / setup.tau;                     // relaxation rate
+   const real_t convergenceLimit = real_t( 1e-5 );                 // tolerance for relative change in position
+   setup.checkFrequency = uint_t( 100 );           // evaluate the position only every checkFrequency LBM time steps
 
    const real_t uMean = setup.Re * setup.nu / real_c( setup.zlength );
-   const real_t uMax = real_c(2) * uMean;
-   setup.forcing = uMax * ( real_c(2) * setup.nu ) / real_c( real_c(3./4.) * real_c(setup.zlength) * real_c(setup.zlength) ); // forcing to drive the flow
+   const real_t uMax = real_t(2) * uMean;
+   setup.forcing = uMax * ( real_t(2) * setup.nu ) / ( real_t(3./4.) * real_c(setup.zlength) * real_c(setup.zlength) ); // forcing to drive the flow
    setup.Re_p = uMean * particleRadius * particleRadius / ( setup.nu * real_c( setup.zlength ) );  // particle Reynolds number = uMean * r * r / ( nu * width )
 
    if( fileIO || vtkIO ){
@@ -581,9 +517,9 @@ int main( int argc, char **argv )
    // BLOCK STRUCTURE SETUP //
    ///////////////////////////
 
-   setup.nBlocks[0] = uint_c(3);
-   setup.nBlocks[1] = uint_c(3);
-   setup.nBlocks[2] = (processes == 18) ? uint_c(2) : uint_c(1);
+   setup.nBlocks[0] = uint_t(3);
+   setup.nBlocks[1] = uint_t(3);
+   setup.nBlocks[2] = (processes == 18) ? uint_t(2) : uint_t(1);
    setup.cellsPerBlock[0] = setup.xlength / setup.nBlocks[0];
    setup.cellsPerBlock[1] = setup.ylength / setup.nBlocks[1];
    setup.cellsPerBlock[2] = setup.zlength / setup.nBlocks[2];
@@ -609,7 +545,7 @@ int main( int argc, char **argv )
    pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, NULL);
 
    // set up synchronization procedure
-   const real_t overlap = real_c( 1.5 ) * dx;
+   const real_t overlap = real_t( 1.5 ) * dx;
    boost::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
@@ -622,19 +558,19 @@ int main( int argc, char **argv )
    // create pe bodies
 
    // bounding planes (global)
-   const auto planeMaterial = pe::createMaterial( "myPlaneMat", real_c(8920), real_c(0), real_c(1), real_c(1), real_c(0), real_c(1), real_c(1), real_c(0), real_c(0) );
+   const auto planeMaterial = pe::createMaterial( "myPlaneMat", real_t(8920), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(0) );
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,1), Vector3<real_t>(0,0,0), planeMaterial );
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,-1), Vector3<real_t>(0,0,real_c(setup.zlength)), planeMaterial );
 
    // add the sphere
-   const auto sphereMaterial = pe::createMaterial( "mySphereMat", setup.rho_p , real_c(0.5), real_c(0.1), real_c(0.1), real_c(0.24), real_c(200), real_c(200), real_c(0), real_c(0) );
-   Vector3<real_t> position( real_c(setup.xlength) * real_c(0.5), real_c(setup.ylength) * real_c(0.5), real_c(setup.zlength) * real_c(0.5) - real_c(1) );
+   const auto sphereMaterial = pe::createMaterial( "mySphereMat", setup.rho_p , real_t(0.5), real_t(0.1), real_t(0.1), real_t(0.24), real_t(200), real_t(200), real_t(0), real_t(0) );
+   Vector3<real_t> position( real_c(setup.xlength) * real_t(0.5), real_c(setup.ylength) * real_t(0.5), real_c(setup.zlength) * real_t(0.5) - real_t(1) );
    auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, particleRadius, sphereMaterial );
    if( sphere != NULL )
    {
-      real_t height = real_c( 0.5 ) * real_c( setup.zlength );
+      real_t height = real_t( 0.5 ) * real_c( setup.zlength );
       // set sphere velocity to undisturbed fluid velocity at sphere center
-      sphere->setLinearVel( setup.forcing/( real_c(2) * setup.nu) * ( height * height - ( position[2] - height ) * ( position[2] - height ) ), real_c(0), real_c(0) );
+      sphere->setLinearVel( setup.forcing/( real_t(2) * setup.nu) * ( height * height - ( position[2] - height ) * ( position[2] - height ) ), real_t(0), real_t(0) );
    }
 
    syncCall();
@@ -644,16 +580,16 @@ int main( int argc, char **argv )
    ////////////////////////
 
    // create the lattice model
-   LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ), SimpleConstant( Vector3<real_t> ( setup.forcing, real_c(0), real_c(0) ) ) );
+   LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ), SimpleConstant( Vector3<real_t> ( setup.forcing, real_t(0), real_t(0) ) ) );
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,
-                                                                         Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_c(1),
+                                                                         Vector3< real_t >( real_t(0) ), real_t(1),
                                                                          uint_t(1), field::zyxf );
 
    // add PDF field, for MR boundary condition only
    BlockDataID pdfFieldPreColID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, " pre collision pdf field", latticeModel,
-                                                                               Vector3< real_t >( real_c(0), real_c(0), real_c(0) ), real_c(1),
+                                                                               Vector3< real_t >( real_t(0) ), real_t(1),
                                                                                uint_t(1), field::zyxf );
 
    // initialize already with the Poiseuille flow profile
@@ -733,48 +669,71 @@ int main( int argc, char **argv )
                       ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
    }
 
-   for( uint_t lbmSubCycle = uint_c(0); lbmSubCycle < numLbmSubCycles; ++lbmSubCycle )
+   shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
+   boost::function<void(void)> storeForceTorqueInCont1 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
+   shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer2 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
+   boost::function<void(void)> setForceTorqueOnBodiesFromCont2 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
+
+   bodiesFTContainer2->store();
+
+   if( MO_MR )
    {
-      if( MO_MR )
-      {
-         // copy pdfs to have the pre collision PDFs available, needed for MR boundary treatment
-         timeloop.add() << Sweep( PDFFieldCopy( pdfFieldID, pdfFieldPreColID ), "pdf field copy" );
+      // copy pdfs to have the pre collision PDFs available, needed for MR boundary treatment
+      timeloop.add() << Sweep( PDFFieldCopy( pdfFieldID, pdfFieldPreColID ), "pdf field copy" );
 
-         auto sweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
+      auto sweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
 
-         // collision sweep
-         timeloop.add() << Sweep( lbm::makeCollideSweep( sweep ), "cell-wise LB sweep (collide)" );
+      // collision sweep
+      timeloop.add() << Sweep( lbm::makeCollideSweep( sweep ), "cell-wise LB sweep (collide)" );
 
-         // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip treatment)
-         timeloop.add() << BeforeFunction( commFunction, "LBM Communication" )
-                        << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
+      // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip treatment)
+      timeloop.add() << BeforeFunction( commFunction, "LBM Communication" )
+                     << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
 
-         // streaming
-         timeloop.add() << Sweep( lbm::makeStreamSweep( sweep ), "cell-wise LB sweep (stream)" );
-      }
-      else
-      {
-         // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip treatment)
-         timeloop.add() << BeforeFunction( commFunction, "LBM Communication" )
-                        << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
+      // streaming
+      timeloop.add() << Sweep( lbm::makeStreamSweep( sweep ), "cell-wise LB sweep (stream)" );
+   }
+   else
+   {
+      // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip treatment)
+      timeloop.add() << BeforeFunction( commFunction, "LBM Communication" )
+                     << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
 
-         // stream + collide LBM step
-         timeloop.add()
-            << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag ) ), "cell-wise LB sweep" );
-      }
+      // stream + collide LBM step
+      timeloop.add()
+         << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag ) ), "cell-wise LB sweep" );
    }
 
-   // average the forces acting on the bodies over the number of LBM steps
-   timeloop.addFuncAfterTimeStep( AverageForce( blocks, bodyStorageID, numLbmSubCycles ), "Force averaging for several LBM steps" );
+   // Averaging the force/torque over two time steps is said to damp oscillations of the interaction force/torque.
+   // See Ladd - " Numerical simulations of particulate suspensions via a discretized Boltzmann equation. Part 1. Theoretical foundation", 1994, p. 302
+   if( averageForceTorqueOverTwoTimSteps ) {
+
+      // store force/torque from hydrodynamic interactions in container1
+      timeloop.addFuncAfterTimeStep(storeForceTorqueInCont1, "Force Storing");
+
+      // set force/torque from previous time step (in container2)
+      timeloop.addFuncAfterTimeStep(setForceTorqueOnBodiesFromCont2, "Force setting");
+
+      // average the force/torque by scaling it with factor 1/2
+      timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler(blocks, bodyStorageID, real_t(0.5)),  "Force averaging");
+
+      // swap containers
+      timeloop.addFuncAfterTimeStep( pe_coupling::BodyContainerSwapper( bodiesFTContainer1, bodiesFTContainer2 ), "Swap FT container" );
+
+   }
 
    // add pressure force contribution
-   timeloop.addFuncAfterTimeStep( BuoyancyForce( blocks, bodyStorageID,
-                                                 Vector3<real_t>( math::M_PI / real_c(6) * setup.forcing * setup.particleDiam * setup.particleDiam * setup.particleDiam ,
-                                                                  real_c(0), real_c(0) ) ),
-                                  "Buoyancy force" );
+   // The flow in the channel is here driven by a body force and is periodic
+   // Thus, the pressure gradient, usually encountered in a channel flow, is not present here
+   // The buoyancy force on the body due to this pressure gradient has to be added 'artificially'
+   // F_{buoyancy} = - V_{body} * grad ( p ) = V_{body} * \rho_{fluid} *  a
+   // ( V_{body} := volume of body,  a := acceleration driving the flow )
+   Vector3<real_t> buoyancyForce(math::M_PI / real_t(6) * setup.forcing * setup.particleDiam * setup.particleDiam * setup.particleDiam ,
+                                 real_t(0), real_t(0));
+   timeloop.addFuncAfterTimeStep( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, buoyancyForce ), "Buoyancy force" );
 
    // add pe timesteps
-   timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, dt_pe, pe_interval ), "pe Time Step" );
+   timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, real_t(1), numPeSubcycles ), "pe Time Step" );
 
    // check for convergence of the particle position
    shared_ptr< SteadyStateCheck > check = make_shared< SteadyStateCheck >( &timeloop, &setup, blocks, bodyStorageID,
@@ -797,7 +756,7 @@ int main( int argc, char **argv )
 
       // pdf field (ghost layers cannot be written because re-sampling/coarsening is applied)
       auto pdfFieldVTK = vtk::createVTKOutput_BlockData( blocks, "fluid_field", writeFrequency );
-      pdfFieldVTK->setSamplingResolution( real_c(1) );
+      pdfFieldVTK->setSamplingResolution( real_t(1) );
 
       blockforest::communication::UniformBufferedScheme< stencil::D3Q27 > pdfGhostLayerSync( blocks );
       pdfGhostLayerSync.addPackInfo( make_shared< field::communication::PackInfo< PdfField_T > >( pdfFieldID ) );
@@ -843,7 +802,7 @@ int main( int argc, char **argv )
    {
       // reference value from Inamuro et al. - "Flow between parallel walls containing the lines of neutrally buoyant circular cylinders" (2000), Table 2
       // note that this reference value provides only a rough estimate
-      real_t referencePos = real_c( 0.2745 ) * real_c( setup.zlength );
+      real_t referencePos = real_t( 0.2745 ) * real_c( setup.zlength );
       real_t relErr = std::fabs( referencePos - check->getPosition() ) / referencePos;
       if ( fileIO )
       {
@@ -855,7 +814,7 @@ int main( int argc, char **argv )
          }
       }
       // the relative error has to be below 10%
-      WALBERLA_CHECK_LESS( relErr, real_c(0.1) );
+      WALBERLA_CHECK_LESS( relErr, real_t(0.1) );
    }
 
    return EXIT_SUCCESS;
