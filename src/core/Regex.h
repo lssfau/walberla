@@ -26,7 +26,7 @@
 #include <boost/regex.hpp>
 #elif ( defined WALBERLA_CXX_COMPILER_IS_CLANG ) && ( ( __clang_major__ == 3 ) && ( __clang_minor__ <= 4 ) )
 #include <boost/regex.hpp>
-#elif ( defined WALBERLA_CXX_COMPILER_IS_GNU )   && ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ <= 7 ) )
+#elif ( defined WALBERLA_CXX_COMPILER_IS_GNU )   && ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ <= 8 ) )
 #include <boost/regex.hpp>
 #else
 #include <regex>
@@ -47,7 +47,7 @@ using boost::regex_match;
 using boost::regex_error;
 using boost::regex_search;
 using boost::regex_replace;
-#elif ( defined WALBERLA_CXX_COMPILER_IS_GNU )   && ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ <= 7 ) )
+#elif ( defined WALBERLA_CXX_COMPILER_IS_GNU )   && ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ <= 8 ) )
 using boost::regex;
 using boost::regex_match;
 using boost::regex_error;
