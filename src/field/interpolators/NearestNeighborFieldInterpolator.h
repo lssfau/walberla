@@ -74,6 +74,7 @@ public:
 
       WALBERLA_CHECK( !blockStorage_.expired() );
       auto blockStorage = blockStorage_.lock();
+      WALBERLA_CHECK_NOT_NULLPTR(blockStorage);
 
       Cell nearestCell = blockStorage->getBlockLocalCell( block_, x, y, z );
 

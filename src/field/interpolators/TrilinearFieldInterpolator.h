@@ -78,6 +78,7 @@ public:
 
       WALBERLA_CHECK( !blockStorage_.expired() );
       auto blockStorage = blockStorage_.lock();
+      WALBERLA_CHECK_NOT_NULLPTR(blockStorage);
 
       const real_t dx = blockStorage->dx( blockStorage->getLevel( block_ ) );
       const real_t dy = blockStorage->dy( blockStorage->getLevel( block_ ) );
