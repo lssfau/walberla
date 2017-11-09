@@ -10,6 +10,9 @@ waLBerla_execute_test( NAME AccuracyEvaluationTest4 COMMAND $<TARGET_FILE:Accura
 waLBerla_compile_test( FILES communication/FieldPackInfoTest.cpp DEPENDS blockforest )
 waLBerla_execute_test( NAME  FieldPackInfoTest )
 
+waLBerla_compile_test( FILES distributors/DistributionTest.cpp)
+waLBerla_execute_test( NAME DistributionTest )
+
 waLBerla_compile_test( FILES FieldTest.cpp )
 waLBerla_execute_test( NAME FieldTest ) 
 
@@ -24,6 +27,9 @@ waLBerla_execute_test( NAME FlagFieldTest )
 
 waLBerla_compile_test( FILES interpolators/InterpolationTest.cpp)
 waLBerla_execute_test( NAME InterpolationTest )
+
+waLBerla_compile_test( FILES interpolators/FieldInterpolationTest.cpp)
+waLBerla_execute_test( NAME FieldInterpolationTest )
 
 waLBerla_compile_test( FILES adaptors/AdaptorTest.cpp DEPENDS blockforest gui lbm )
 waLBerla_execute_test( NAME AdaptorTest )

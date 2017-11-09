@@ -27,3 +27,4 @@
 #include "MPIDatatypes.h"
 #include "ReducePackInfo.h"
 #include "UniformMPIDatatypeInfo.h"
+#include "UniformPullReductionPackInfo.h"

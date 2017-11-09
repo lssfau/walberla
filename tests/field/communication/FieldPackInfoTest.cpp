@@ -16,6 +16,7 @@
 //! \file FieldPackInfoTest.cpp
 //! \ingroup field
 //! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //! \brief Tests if a Field is correctly packed into buffers
 //
 //======================================================================================================================
@@ -23,6 +24,7 @@
 #include "field/AddToStorage.h"
 #include "field/GhostLayerField.h"
 #include "field/communication/PackInfo.h"
+#include "field/communication/UniformPullReductionPackInfo.h"
 
 #include "blockforest/Initialization.h"
 
@@ -85,9 +87,60 @@ void testScalarField( IBlock * block, BlockDataID fieldId )
    WALBERLA_CHECK_EQUAL ( field(1,1,+2), 4 );
 }
 
+void testScalarFieldPullReduction( IBlock * block, BlockDataID fieldId )
+{
+   GhostLayerField<int,1> & field = *(block->getData<GhostLayerField<int,1> > (fieldId));
+   field.setWithGhostLayer( 0 );
 
+   WALBERLA_CHECK_EQUAL(field.xSize(), 2);
+   WALBERLA_CHECK_EQUAL(field.ySize(), 2);
+   WALBERLA_CHECK_EQUAL(field.zSize(), 2);
 
+   // initialize the bottom ghost layer cells
+   field(0,0,-1) = 1;
+   field(0,1,-1) = 2;
+   field(1,0,-1) = 3;
+   field(1,1,-1) = 4;
 
+   // initialize the top interior cells
+   field(0,0,1) = 1;
+   field(0,1,1) = 1;
+   field(1,0,1) = 1;
+   field(1,1,1) = 1;
+
+   // communicate periodic from bottom to top with uniform pull scheme
+   field::communication::UniformPullReductionPackInfo<std::plus, GhostLayerField<int,1> > pi1 (fieldId);
+   pi1.communicateLocal( block, block, stencil::B );
+
+   // check values in top ghost layer
+   WALBERLA_CHECK_EQUAL ( field(0,0,2), 0 );
+   WALBERLA_CHECK_EQUAL ( field(0,1,2), 0 );
+   WALBERLA_CHECK_EQUAL ( field(1,0,2), 0 );
+   WALBERLA_CHECK_EQUAL ( field(1,1,2), 0 );
+
+   // check values in top interior cells
+   WALBERLA_CHECK_EQUAL ( field(0,0,1), 2 );
+   WALBERLA_CHECK_EQUAL ( field(0,1,1), 3 );
+   WALBERLA_CHECK_EQUAL ( field(1,0,1), 4 );
+   WALBERLA_CHECK_EQUAL ( field(1,1,1), 5 );
+
+   // communicate periodic from top to bottom with standard form to sync ghost layers
+   field::communication::PackInfo< GhostLayerField<int,1> > pi2 (fieldId);
+   pi2.communicateLocal( block, block, stencil::T );
+
+   // check values in bottom ghost layer
+   WALBERLA_CHECK_EQUAL ( field(0,0,-1), 2 );
+   WALBERLA_CHECK_EQUAL ( field(0,1,-1), 3 );
+   WALBERLA_CHECK_EQUAL ( field(1,0,-1), 4 );
+   WALBERLA_CHECK_EQUAL ( field(1,1,-1), 5 );
+
+   // check values in top interior cells
+   WALBERLA_CHECK_EQUAL ( field(0,0,1), 2 );
+   WALBERLA_CHECK_EQUAL ( field(0,1,1), 3 );
+   WALBERLA_CHECK_EQUAL ( field(1,0,1), 4 );
+   WALBERLA_CHECK_EQUAL ( field(1,1,1), 5 );
+
+}
 
 int main(int argc, char **argv)
 {
@@ -127,7 +180,8 @@ int main(int argc, char **argv)
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) // block loop
       testScalarField( &(*blockIt), scalarFieldId );
 
-
+   for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) // block loop
+      testScalarFieldPullReduction( &(*blockIt), scalarFieldId );
 
    return 0;
 }

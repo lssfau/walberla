@@ -24,3 +24,8 @@
 
 #include "NearestNeighborInterpolator.h"
 #include "TrilinearInterpolator.h"
+
+#include "FieldInterpolatorCreators.h"
+#include "KernelFieldInterpolator.h"
+#include "NearestNeighborFieldInterpolator.h"
+#include "TrilinearFieldInterpolator.h"

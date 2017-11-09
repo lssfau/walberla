@@ -15,40 +15,12 @@
 //
 //! \file all.h
 //! \ingroup field
-//! \author Florian Schornbaum <florian.schornbaum@fau.de>
-//! \brief Collective header file for module field
+//! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "AccuracyEvaluation.h"
-#include "AccuracyEvaluationLinePlot.h"
-#include "AddToStorage.h"
-#include "CellCounter.h"
-#include "EvaluationFilter.h"
-#include "Field.h"
-#include "FieldClone.h"
-#include "FileIO.h"
-#include "FlagField.h"
-#include "FlagFunctions.h"
-#include "Gather.h"
-#include "GhostLayerField.h"
-#include "MassEvaluation.h"
-#include "Printers.h"
-#include "StabilityChecker.h"
-#include "SwapableCompare.h"
-#include "SymmetryCheck.h"
-#include "VolumetricFlowRateEvaluation.h"
-
-#include "adaptors/all.h"
-#include "allocation/all.h"
-#include "blockforest/all.h"
-#include "communication/all.h"
-#include "distributors/all.h"
-#include "interpolators/all.h"
-#include "iterators/all.h"
-#include "refinement/all.h"
-#include "vtk/all.h"
-
-#include "field/CMakeDefs.h"
+#include "DistributorCreators.h"
+#include "KernelDistributor.h"
+#include "NearestNeighborDistributor.h"
