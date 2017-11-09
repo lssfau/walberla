@@ -54,7 +54,7 @@ public:
    typedef typename FlagField_T::flag_t           flag_t;
    typedef KernelDistributor<Field_T,FlagField_T> OwnType;
 
-   KernelDistributor( const shared_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block,
+   KernelDistributor( const weak_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block,
                       BaseField_T & baseField, const FlagField_T & flagField,
                       const flag_t & evaluationMask )
    : blockStorage_( blockStorage ), block_( block ), baseField_( baseField ), flagField_( flagField ), evaluationMask_( evaluationMask )
@@ -76,11 +76,14 @@ public:
       WALBERLA_ASSERT(block_.getAABB().contains(x,y,z),
                       "Distribution position <" << x << ", " << y << ", " << z << "> is not contained inside the block of this distributor with AABB " << block_.getAABB() << " !");
 
-      Cell centerCell = blockStorage_->getBlockLocalCell( block_, x, y, z );
+      WALBERLA_CHECK( !blockStorage_.expired() );
+      auto blockStorage = blockStorage_.lock();
 
-      const real_t dx = blockStorage_->dx( blockStorage_->getLevel( block_ ) );
-      const real_t dy = blockStorage_->dy( blockStorage_->getLevel( block_ ) );
-      const real_t dz = blockStorage_->dz( blockStorage_->getLevel( block_ ) );
+      Cell centerCell = blockStorage->getBlockLocalCell( block_, x, y, z );
+
+      const real_t dx = blockStorage->dx( blockStorage->getLevel( block_ ) );
+      const real_t dy = blockStorage->dy( blockStorage->getLevel( block_ ) );
+      const real_t dz = blockStorage->dz( blockStorage->getLevel( block_ ) );
       
       const uint_t neighborhoodSize = cell_idx_t(1);
 
@@ -97,7 +100,7 @@ public:
       // get distribution weights and count available cells in surrounding cells
       for( auto cellIt = cellNeighborhood.begin(); cellIt != cellNeighborhood.end(); ++cellIt )
       {
-         Vector3<real_t> curCellCenter = blockStorage_->getBlockLocalCellCenter( block_, *cellIt );
+         Vector3<real_t> curCellCenter = blockStorage->getBlockLocalCellCenter( block_, *cellIt );
          if( flagField_.isPartOfMaskSet( *cellIt, evaluationMask_ ) )
          {
             weights[counter] = kernelweights::kernelWeightFunction( x, y, z, curCellCenter[0], curCellCenter[1], curCellCenter[2], dx, dy, dz );
@@ -142,7 +145,7 @@ private:
       }
    }
 
-   shared_ptr<StructuredBlockStorage> blockStorage_;
+   weak_ptr<StructuredBlockStorage> blockStorage_;
    const IBlock & block_;
    BaseField_T & baseField_;
    const FlagField_T & flagField_;

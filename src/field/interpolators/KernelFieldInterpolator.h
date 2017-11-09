@@ -96,7 +96,7 @@ public:
    typedef typename FlagField_T::flag_t                 flag_t;
    typedef KernelFieldInterpolator<Field_T,FlagField_T> OwnType;
 
-   KernelFieldInterpolator( const shared_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block,
+   KernelFieldInterpolator( const weak_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block,
                             const BaseField_T & baseField, const FlagField_T & flagField,
                             const flag_t & evaluationMask )
    : blockStorage_( blockStorage ), block_( block ), baseField_( baseField ), flagField_( flagField ), evaluationMask_( evaluationMask )
@@ -116,14 +116,18 @@ public:
    template< typename ForwardIterator_T >
    inline void get( const real_t & x, const real_t & y, const real_t & z, ForwardIterator_T interpolationResultBegin )
    {
+
       WALBERLA_ASSERT(block_.getAABB().contains(x,y,z),
                       "Interpolation position <" << x << ", " << y << ", " << z << "> is not contained inside the block of this interpolator with AABB " << block_.getAABB() << " !");
 
-      Cell centerCell = blockStorage_->getBlockLocalCell( block_, x, y, z );
+      WALBERLA_CHECK( !blockStorage_.expired() );
+      auto blockStorage = blockStorage_.lock();
 
-      const real_t dx = blockStorage_->dx( blockStorage_->getLevel( block_ ) );
-      const real_t dy = blockStorage_->dy( blockStorage_->getLevel( block_ ) );
-      const real_t dz = blockStorage_->dz( blockStorage_->getLevel( block_ ) );
+      Cell centerCell = blockStorage->getBlockLocalCell( block_, x, y, z );
+
+      const real_t dx = blockStorage->dx( blockStorage->getLevel( block_ ) );
+      const real_t dy = blockStorage->dy( blockStorage->getLevel( block_ ) );
+      const real_t dz = blockStorage->dz( blockStorage->getLevel( block_ ) );
 
       const uint_t neighborhoodSize = uint_t(1);
 
@@ -142,7 +146,7 @@ public:
       cell_idx_t cellIdx0z = cellNeighborhood.zMin();
       uint_t nx = kernelSizeOneDirection;
       uint_t nxy = kernelSizeOneDirection * kernelSizeOneDirection;
-      Vector3<real_t> cellCenter0 = blockStorage_->getBlockLocalCellCenter( block_, Cell(cellIdx0x, cellIdx0y, cellIdx0z) ); // = cell in neighborhood with smallest x-, y-, and z-indices
+      Vector3<real_t> cellCenter0 = blockStorage->getBlockLocalCellCenter( block_, Cell(cellIdx0x, cellIdx0y, cellIdx0z) ); // = cell in neighborhood with smallest x-, y-, and z-indices
 
       // calculate kernel weights of all cells in neighborhood
       for( uint_t k = uint_t(0); k < kernelSizeOneDirection; ++k)
@@ -256,7 +260,7 @@ private:
       }
    }
 
-   shared_ptr<StructuredBlockStorage> blockStorage_;
+   weak_ptr<StructuredBlockStorage> blockStorage_;
    const IBlock & block_;
    const BaseField_T & baseField_;
    const FlagField_T & flagField_;

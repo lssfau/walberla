@@ -37,7 +37,7 @@ namespace field {
  * \ingroup field
  *
  * Interpolator_T: A field interpolator that has a constructor
- *  ( const shared_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block, const BaseField_T & baseField,
+ *  ( const weak_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block, const BaseField_T & baseField,
  *    const FlagField_T & flagField, const flag_t & evaluationMask )
  * and getter functions:
  *  template< typename ForwardIterator_T > inline void get( const Vector3<real_t> & position, ForwardIterator_T interpolationResultBegin )
@@ -57,7 +57,7 @@ class InterpolatorHandling : public blockforest::AlwaysInitializeBlockDataHandli
 {
 public:
 
-   InterpolatorHandling( const shared_ptr<StructuredBlockStorage> & blockStorage,
+   InterpolatorHandling( const weak_ptr<StructuredBlockStorage> & blockStorage,
                          const ConstBlockDataID & interpolatedFieldID,
                          const ConstBlockDataID & flagFieldID,
                          const Set< FlagUID > & cellsToEvaluate ) :
@@ -81,7 +81,7 @@ public:
 
 private:
 
-   shared_ptr<StructuredBlockStorage> blockStorage_;
+   weak_ptr<StructuredBlockStorage> blockStorage_;
    ConstBlockDataID interpolatedFieldID_;
    ConstBlockDataID flagFieldID_;
    Set< FlagUID > cellsToEvaluate_;

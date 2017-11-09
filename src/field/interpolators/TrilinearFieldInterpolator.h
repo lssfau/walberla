@@ -52,7 +52,7 @@ public:
    typedef typename FlagField_T::flag_t                    flag_t;
    typedef TrilinearFieldInterpolator<Field_T,FlagField_T> OwnType;
 
-   TrilinearFieldInterpolator( const shared_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block,
+   TrilinearFieldInterpolator( const weak_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block,
                                const BaseField_T & baseField, const FlagField_T & flagField,
                                const flag_t & evaluationMask )
    : blockStorage_( blockStorage ), block_( block ), baseField_( baseField ), flagField_( flagField ), evaluationMask_( evaluationMask ),
@@ -76,12 +76,15 @@ public:
       WALBERLA_ASSERT(block_.getAABB().contains(x,y,z),
                       "Interpolation position <" << x << ", " << y << ", " << z << "> is not contained inside the block of this interpolator with AABB " << block_.getAABB() << " !");
 
-      const real_t dx = blockStorage_->dx( blockStorage_->getLevel( block_ ) );
-      const real_t dy = blockStorage_->dy( blockStorage_->getLevel( block_ ) );
-      const real_t dz = blockStorage_->dz( blockStorage_->getLevel( block_ ) );
+      WALBERLA_CHECK( !blockStorage_.expired() );
+      auto blockStorage = blockStorage_.lock();
 
-      Cell containingCell = blockStorage_->getBlockLocalCell( block_, x, y, z );
-      Vector3<real_t> containingCellCenter = blockStorage_->getBlockLocalCellCenter( block_, containingCell );
+      const real_t dx = blockStorage->dx( blockStorage->getLevel( block_ ) );
+      const real_t dy = blockStorage->dy( blockStorage->getLevel( block_ ) );
+      const real_t dz = blockStorage->dz( blockStorage->getLevel( block_ ) );
+
+      Cell containingCell = blockStorage->getBlockLocalCell( block_, x, y, z );
+      Vector3<real_t> containingCellCenter = blockStorage->getBlockLocalCellCenter( block_, containingCell );
 
       const cell_idx_t xNeighbor1 = cell_idx_c( floor( x - containingCellCenter[0] ) );
       const cell_idx_t xNeighbor2 = xNeighbor1 + cell_idx_t(1);
@@ -114,7 +117,7 @@ public:
          // trilinear interpolation can be applied
 
          const real_t inv_totalVolume = real_t(1) / ( dx * dy * dz );
-         Vector3<real_t> cccCellCenter = blockStorage_->getBlockLocalCellCenter( block_, ccc );
+         Vector3<real_t> cccCellCenter = blockStorage->getBlockLocalCellCenter( block_, ccc );
 
          // weighting = volume of opposing volume element / total volume
          real_t weighting(0.0);
@@ -173,7 +176,7 @@ private:
       }
    }
 
-   shared_ptr<StructuredBlockStorage> blockStorage_;
+   weak_ptr<StructuredBlockStorage> blockStorage_;
    const IBlock & block_;
    const BaseField_T & baseField_;
    const FlagField_T & flagField_;

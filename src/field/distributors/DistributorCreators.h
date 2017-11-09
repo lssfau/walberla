@@ -37,7 +37,7 @@ namespace field {
  * \ingroup field
  *
  * Distributor_T: A distributor that has a constructor
- *  ( const shared_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block, const BaseField_T & baseField,
+ *  ( const weak_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block, const BaseField_T & baseField,
  *    const FlagField_T & flagField, const flag_t & evaluationMask )
  * and distribution functions:
  *  template< typename ForwardIterator_T > inline void distribute( const Vector3<real_t> & position, ForwardIterator_T distributeValueBegin )
@@ -58,7 +58,7 @@ class DistributorHandling : public blockforest::AlwaysInitializeBlockDataHandlin
 {
 public:
 
-   DistributorHandling( const shared_ptr<StructuredBlockStorage> & blockStorage,
+   DistributorHandling( const weak_ptr<StructuredBlockStorage> & blockStorage,
                         const BlockDataID & distributionDestinationFieldID,
                         const ConstBlockDataID & flagFieldID,
                         const Set< FlagUID > & cellsToEvaluate ) :
@@ -82,7 +82,7 @@ public:
 
 private:
 
-   shared_ptr<StructuredBlockStorage> blockStorage_;
+   weak_ptr<StructuredBlockStorage> blockStorage_;
    BlockDataID distributionDestinationFieldID_;
    ConstBlockDataID flagFieldID_;
    Set< FlagUID > cellsToEvaluate_;

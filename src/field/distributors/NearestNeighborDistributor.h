@@ -53,7 +53,7 @@ public:
    typedef typename FlagField_T::flag_t                    flag_t;
    typedef NearestNeighborDistributor<Field_T,FlagField_T> OwnType;
 
-   NearestNeighborDistributor( const shared_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block,
+   NearestNeighborDistributor( const weak_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block,
                                BaseField_T & baseField, const FlagField_T & flagField,
                                const flag_t & evaluationMask )
    : blockStorage_( blockStorage ), block_( block ), baseField_( baseField ), flagField_( flagField ), evaluationMask_( evaluationMask )
@@ -73,7 +73,10 @@ public:
       WALBERLA_ASSERT(block_.getAABB().contains(x,y,z),
                       "Distribution position <" << x << ", " << y << ", " << z << "> is not contained inside the block of this distributor with AABB " << block_.getAABB() << " !");
 
-      Cell nearestCell = blockStorage_->getBlockLocalCell( block_, x, y, z );
+      WALBERLA_CHECK( !blockStorage_.expired() );
+      auto blockStorage = blockStorage_.lock();
+
+      Cell nearestCell = blockStorage->getBlockLocalCell( block_, x, y, z );
 
       if( flagField_.isPartOfMaskSet( nearestCell, evaluationMask_ ) )
       {
@@ -90,7 +93,7 @@ public:
 
          CellInterval fieldXYZSize = baseField_.xyzSize();
 
-         Vector3<real_t> nearestCellCenter = blockStorage_->getBlockLocalCellCenter( block_, nearestCell );
+         Vector3<real_t> nearestCellCenter = blockStorage->getBlockLocalCellCenter( block_, nearestCell );
          const cell_idx_t xNeighbor = cell_idx_c( floor( x - nearestCellCenter[0] ) );
          const cell_idx_t yNeighbor = cell_idx_c( floor( y - nearestCellCenter[1] ) );
          const cell_idx_t zNeighbor = cell_idx_c( floor( z - nearestCellCenter[2] ) );
@@ -126,7 +129,7 @@ public:
 
 private:
 
-   shared_ptr<StructuredBlockStorage> blockStorage_;
+   weak_ptr<StructuredBlockStorage> blockStorage_;
    const IBlock & block_;
    BaseField_T & baseField_;
    const FlagField_T & flagField_;
