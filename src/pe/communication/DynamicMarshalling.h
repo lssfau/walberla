@@ -33,6 +33,7 @@
 #include "pe/communication/rigidbody/Capsule.h"
 #include "pe/communication/rigidbody/Sphere.h"
 #include "pe/communication/rigidbody/Union.h"
+#include "pe/communication/rigidbody/Ellipsoid.h"
 #include "pe/utility/BodyCast.h"
 
 #include "core/Abort.h"

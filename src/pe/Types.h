@@ -65,6 +65,7 @@ class Box;
 class Capsule;
 class Contact;
 class Cylinder;
+class Ellipsoid;
 class CylindricalBoundary;
 class FixedJoint;
 class ForceGenerator;
@@ -110,6 +111,10 @@ typedef const Cylinder*       ConstCylinderID;     //!< Handle for a constant cy
 typedef CylindricalBoundary        CylindricalBoundaryType;        //!< Type of the cylindrical boundary geometric primitive.
 typedef CylindricalBoundary*       CylindricalBoundaryID;          //!< Handle for a cylindrical boundary primitive.
 typedef const CylindricalBoundary* ConstCylindricalBoundaryID;     //!< Handle for a constant cylindrical boundary primitive.
+
+typedef Ellipsoid             EllipsoidType;       //!< Type of the ellipsoid geometric primitive.
+typedef Ellipsoid*            EllipsoidID;         //!< Handle for a ellipsoid primitive.
+typedef const Ellipsoid*      ConstEllipsoidID;    //!< Handle for a constant ellipsoid primitive.
 
 typedef Plane                 PlaneType;           //!< Type of the plane geometric primitive.
 typedef Plane*                PlaneID;             //!< Handle for a plane primitive.
