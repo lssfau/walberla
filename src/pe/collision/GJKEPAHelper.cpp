@@ -36,7 +36,7 @@ extern "C" {
 namespace walberla {
 namespace pe {
 
-Vec3       convertVec3(const ccd_vec3_t& vec) { return Vec3(vec.v[0], vec.v[1], vec.v[2]); }
+Vec3       convertVec3(const ccd_vec3_t& vec) { return Vec3(real_c(vec.v[0]), real_c(vec.v[1]), real_c(vec.v[2])); }
 ccd_vec3_t convertVec3(const Vec3& vec)       { ccd_vec3_t ret; ret.v[0] = vec[0]; ret.v[1] = vec[1]; ret.v[2] = vec[2]; return ret; }
 
 void support(const void *obj, const ccd_vec3_t *dir, ccd_vec3_t *vec)
@@ -65,7 +65,9 @@ bool collideGJK( ConstGeomID bd1,
     ccd.epa_tolerance  = epaTol;
 
     ccd_vec3_t dir, pos;
-    int intersect = ccdGJKPenetration(reinterpret_cast<const void*> (bd1), reinterpret_cast<const void*> (bd2), &ccd, &penetrationDepth, &dir, &pos);
+    ccd_real_t penetrationDepthCCD;
+    int intersect = ccdGJKPenetration(reinterpret_cast<const void*> (bd1), reinterpret_cast<const void*> (bd2), &ccd, &penetrationDepthCCD, &dir, &pos);
+    penetrationDepth = real_c(penetrationDepthCCD);
     contactPoint  = convertVec3(pos);
     contactNormal = -convertVec3(dir);
     penetrationDepth *= -1;
