@@ -26,6 +26,7 @@
 #include "pe/rigidbody/Squirmer.h"
 #include "pe/rigidbody/UnionFactory.h"
 #include "pe/rigidbody/Union.h"
+#include "pe/rigidbody/Ellipsoid.h"
 #include "pe/communication/rigidbody/Squirmer.h"
 #include "pe/communication/DynamicMarshalling.h"
 #include "pe/rigidbody/SetBodyTypeIDs.h"
@@ -41,7 +42,7 @@ typedef boost::tuple<Sphere>       UnionTypeTuple;
 typedef Union< UnionTypeTuple >    UnionT;
 typedef UnionT*                    UnionID;
 
-typedef boost::tuple<Box, Capsule, Sphere, Squirmer, UnionT> BodyTuple ;
+typedef boost::tuple<Box, Capsule, Sphere, Squirmer, UnionT, Ellipsoid> BodyTuple ;
 
 void testBox()
 {
@@ -128,6 +129,28 @@ void testSquirmer()
    WALBERLA_CHECK_FLOAT_EQUAL(s1.getSquirmerBeta(), s2->getSquirmerBeta());
 }
 
+void testEllipsoid()
+{
+   MaterialID iron = Material::find("iron");
+
+   Ellipsoid e1(759847, 1234795, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), Vec3(3,1,5), iron, false, false, false);
+   e1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
+   e1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
+
+   mpi::SendBuffer sb;
+   MarshalDynamically<BodyTuple>::execute(sb, e1);
+   mpi::RecvBuffer rb(sb);
+
+   EllipsoidID e2 = static_cast<EllipsoidID> (UnmarshalDynamically<BodyTuple>::execute(rb, Ellipsoid::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+
+   WALBERLA_CHECK_FLOAT_EQUAL(e1.getPosition(), e2->getPosition());
+   WALBERLA_CHECK_FLOAT_EQUAL(e1.getLinearVel(), e2->getLinearVel());
+   WALBERLA_CHECK_FLOAT_EQUAL(e1.getAngularVel(), e2->getAngularVel());
+   WALBERLA_CHECK_FLOAT_EQUAL(e1.getSemiAxes(), e2->getSemiAxes());
+   WALBERLA_CHECK_EQUAL(e1.getID(), e2->getID());
+   WALBERLA_CHECK_EQUAL(e1.getSystemID(), e2->getSystemID());
+}
+
 void testUnion()
 {
    UnionT u1(159, 423, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), false, false, false);
@@ -179,6 +202,7 @@ int main( int argc, char** argv )
    testCapsule();
    testUnion();
    testSquirmer();
+   testEllipsoid();
 
    return EXIT_SUCCESS;
 }

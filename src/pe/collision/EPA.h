@@ -90,6 +90,20 @@ public:
    //@}
    //**********************************************************************************************
 
+   //**Getter/Setter functions*****************************************************************************
+   /*!\name Getter and Setter functions */
+   //@{
+   inline void setMaxSupportPoints( size_t maxSupportPoints) {maxSupportPoints_ = maxSupportPoints;}
+
+   inline size_t getMaxSupportPoints() {return maxSupportPoints_;}
+
+   inline void setMaxTriangles( size_t maxTriangles) {maxTriangles_ = maxTriangles;}
+
+   inline size_t getMaxTriangles() {return maxTriangles_;}
+
+   //@}
+   //**********************************************************************************************
+
 private:
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
@@ -128,8 +142,8 @@ private:
 
 private:
    //EPA constants
-   static const size_t maxSupportPoints_ = 100;
-   static const size_t maxTriangles_     = 200;
+   size_t maxSupportPoints_ = 100;
+   size_t maxTriangles_     = 200;
 };
 //*************************************************************************************************
 

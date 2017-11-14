@@ -109,7 +109,7 @@ private:
    * \param bd1 The first body.
    * \param bd2 The second body.
    *
-   * This function is called by generateContacts() on all normal
+   * This function is called by generateContactsPair() on all normal (single)
    * body pairs and on each single bodys of the union.
    * It checks if one of the bodies is a plane and calls the corresponding
    * detection function. If collision is detected a Contact is generated and
@@ -152,6 +152,38 @@ private:
       }
    }
 
+   /* Resolve pairs with unions and call generateContacts single for each pair of non-united
+    * particles.
+    */
+   void generateContactsPair(BodyID bd1, BodyID bd2){
+      bool hasSubbodies1 = bd1->hasSubBodies();
+      if( hasSubbodies1 ){
+         UnionGenericType* u1 = nullptr;
+         u1= static_cast<UnionGenericType*>(bd1);
+         //Loop over possible subbodies of first rigid body
+         auto it1 = u1->begin();
+         while(it1 != u1->end()){
+            generateContactsPair(*it1, bd2);
+            it1++;
+         }
+      }else{
+         //bd1 is a single body
+         bool hasSubbodies2 = bd2->hasSubBodies();
+         if( hasSubbodies2 ){
+            UnionGenericType* u2 = nullptr;
+            u2= static_cast<UnionGenericType*>(bd2);
+            auto it2 = u2->begin();
+            while(it2 != u2->end()){
+               generateContactsPair(bd1, *it2);
+               it2++;
+            }
+         }else{
+            //bd1 and bd2 are single bodies
+            generateContactsSingle(bd1, bd2);
+         }
+      }
+   }
+
 public:
    /*!\brief Checks each body pair in the given vector and generates
    * a vector of contacts.
@@ -164,25 +196,7 @@ public:
       contacts_.clear();
       for (auto it = possibleContacts.begin(); it != possibleContacts.end(); ++it)
       {
-         bool hasSubbodies1 = it->first->hasSubBodies();
-         UnionGenericType* u1 = nullptr;
-         if( hasSubbodies1 ){
-            u1= static_cast<UnionGenericType*>(it->first);
-         }
-         //Loop over possible subbodies of first rigid body
-         for(size_t bodynum1 = 0; bodynum1 < (hasSubbodies1 ? u1->size() : 1); bodynum1++){
-            BodyID bd1 = (hasSubbodies1 ? u1->getBody(bodynum1) : it->first);
-            bool hasSubbodies2 = it->second->hasSubBodies();
-            UnionGenericType* u2 = nullptr;
-            if( hasSubbodies2 ){
-               u2= static_cast<UnionGenericType*>(it->second);
-            }
-            //Loop over possible subbodies of second rigid body
-            for(size_t bodynum2 = 0; bodynum2 < (hasSubbodies2 ? u2->size() : 1); bodynum2++){
-               BodyID bd2 = (hasSubbodies2 ? u2->getBody(bodynum2) : it->second);
-               generateContactsSingle(bd1, bd2);
-            }
-         }
+         generateContactsPair(it->first, it->second);
       }
       return contacts_;
    }
