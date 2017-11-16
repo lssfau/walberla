@@ -19,6 +19,8 @@
 //
 //======================================================================================================================
 
+#pragma once
+
 #include "blockforest/PhantomBlockForest.h"
 
 #include "core/DataTypes.h"

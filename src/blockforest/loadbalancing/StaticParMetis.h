@@ -19,6 +19,8 @@
 //
 //======================================================================================================================
 
+#pragma once
+
 #include "blockforest/SetupBlockForest.h"
 
 #include "core/DataTypes.h"
