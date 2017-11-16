@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file SegreSilberbergPSMPe.cpp
+//! \file SegreSilberbergPSM.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
@@ -64,7 +64,7 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
-namespace segre_silberberg_psm_pe
+namespace segre_silberberg_psm
 {
 
 ///////////
@@ -353,71 +353,6 @@ class SteadyStateCheck
       real_t posNew_;
 };
 
-// When using N LBM steps and one (larger) pe step in a single simulation step, the force applied on the pe bodies in each LBM sep has to be scaled
-// by a factor of 1/N before running the pe simulation. This corresponds to an averaging of the force and torque over the N LBM steps and is said to
-// damp oscillations. Usually, N = 2.
-// See Ladd - " Numerical simulations of particulate suspensions via a discretized Boltzmann equation. Part 1. Theoretical foundation", 1994, p. 302
-class AverageForce
-{
-   public:
-      AverageForce( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & bodyStorageID,
-                    const uint_t lbmSubCycles )
-      : blocks_( blocks ), bodyStorageID_( bodyStorageID ), invLbmSubCycles_( real_c(1) / real_c( lbmSubCycles ) ) { }
-
-      void operator()()
-      {
-         pe::Vec3 force  = pe::Vec3(0.0);
-         pe::Vec3 torque = pe::Vec3(0.0);
-
-         for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
-         {
-            for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-            {
-               force  = invLbmSubCycles_ * bodyIt->getForce();
-               torque = invLbmSubCycles_ * bodyIt->getTorque();
-
-               bodyIt->resetForceAndTorque();
-
-               bodyIt->setForce ( force );
-               bodyIt->setTorque( torque );
-            }
-         }
-      }
-   private:
-      shared_ptr< StructuredBlockStorage > blocks_;
-      const BlockDataID bodyStorageID_;
-      real_t invLbmSubCycles_;
-};
-
-
-// The flow in the channel is here driven by a body force and is periodic
-// Thus, the pressure gradient, usually encountered in a channel flow, is not present here
-// The buoyancy force on the body due to this pressure gradient has to be added 'artificially'
-// F_{buoyancy} = - V_{body} * grad ( p ) = V_{body} * \rho_{fluid} *  a
-// ( V_{body} := volume of body,  a := acceleration driving the flow )
-class BuoyancyForce
-{
-   public:
-   BuoyancyForce( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & bodyStorageID,
-                  const Vector3<real_t> pressureForce )
-      : blocks_( blocks ), bodyStorageID_( bodyStorageID ), pressureForce_( pressureForce ) { }
-
-      void operator()()
-      {
-
-         for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
-         {
-            for( auto bodyIt = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
-            {
-               bodyIt->addForce ( pressureForce_ );
-            }
-         }
-      }
-   private:
-      shared_ptr< StructuredBlockStorage > blocks_;
-      const BlockDataID bodyStorageID_;
-      const Vector3<real_t> pressureForce_;
-};
 
 //////////
 // MAIN //
@@ -621,11 +556,11 @@ int main( int argc, char **argv )
    // initialize the PDF field for PSM
    if( SC1W1 || SC2W1 || SC3W1 )
    {
-      pe_coupling::initializeDomainForPSM< LatticeModel_T, 1 >( blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
+      pe_coupling::initializeDomainForPSM< LatticeModel_T, 1 >( *blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
    }
    else
    {
-      pe_coupling::initializeDomainForPSM< LatticeModel_T, 2 >( blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
+      pe_coupling::initializeDomainForPSM< LatticeModel_T, 2 >( *blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
    }
 
    ///////////////
@@ -679,13 +614,17 @@ int main( int argc, char **argv )
    }
 
    // average the forces acting on the bodies over the number of LBM steps
-   timeloop.addFuncAfterTimeStep( AverageForce( blocks, bodyStorageID, numLbmSubCycles ), "Force averaging for several LBM steps" );
+   timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler( blocks, bodyStorageID, real_t(1)/real_c(numLbmSubCycles) ), "Force averaging for several LBM steps" );
 
    // add pressure force contribution
-   timeloop.addFuncAfterTimeStep( BuoyancyForce( blocks, bodyStorageID,
-                                                 Vector3<real_t>( math::M_PI / real_c(6) * setup.forcing * setup.particleDiam * setup.particleDiam * setup.particleDiam ,
-                                                                  real_c(0), real_c(0) ) ),
-                                  "Buoyancy force" );
+   // The flow in the channel is here driven by a body force and is periodic
+   // Thus, the pressure gradient, usually encountered in a channel flow, is not present here
+   // The buoyancy force on the body due to this pressure gradient has to be added 'artificially'
+   // F_{buoyancy} = - V_{body} * grad ( p ) = V_{body} * \rho_{fluid} *  a
+   // ( V_{body} := volume of body,  a := acceleration driving the flow )
+   Vector3<real_t> buoyancyForce(math::M_PI / real_t(6) * setup.forcing * setup.particleDiam * setup.particleDiam * setup.particleDiam ,
+                                 real_t(0), real_t(0));
+   timeloop.addFuncAfterTimeStep( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, buoyancyForce ), "Buoyancy force" );
 
    // add pe timesteps
    timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, dt_pe, pe_interval ), "pe Time Step" );
@@ -775,8 +714,8 @@ int main( int argc, char **argv )
    return EXIT_SUCCESS;
 }
 
-} // namespace segre_silberberg_psm_pe
+} // namespace segre_silberberg_psm
 
 int main( int argc, char **argv ){
-   segre_silberberg_psm_pe::main(argc, argv);
+   segre_silberberg_psm::main(argc, argv);
 }

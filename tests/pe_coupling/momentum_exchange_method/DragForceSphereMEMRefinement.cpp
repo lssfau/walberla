@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file DragForceSphereMEMPeRefinement.cpp
+//! \file DragForceSphereMEMRefinement.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
@@ -71,7 +71,7 @@
 #include <iomanip>
 #include <iostream>
 
-namespace drag_force_sphere_mem_pe_refinement
+namespace drag_force_sphere_mem_refinement
 {
 
 ///////////
@@ -549,10 +549,10 @@ int main( int argc, char **argv )
    if( MO_CLI )
    {
       // uses a higher order boundary condition (CLI)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
    }else{
       // uses standard bounce back boundary conditions
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
    }
 
 
@@ -647,8 +647,8 @@ int main( int argc, char **argv )
 
 }
 
-} //namespace drag_force_sphere_mem_pe_refinement
+} //namespace drag_force_sphere_mem_refinement
 
 int main( int argc, char **argv ){
-   drag_force_sphere_mem_pe_refinement::main(argc, argv);
+   drag_force_sphere_mem_refinement::main(argc, argv);
 }

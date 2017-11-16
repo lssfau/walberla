@@ -42,8 +42,8 @@ class LubricationCorrection
 public:
 
    // constructor
-   LubricationCorrection ( const shared_ptr<StructuredBlockStorage> & blockStorage, shared_ptr<pe::BodyStorage> globalBodyStorage, const BlockDataID & bodyStorageID,
-                           real_t dynamicViscosity, real_t cutOffDistance = real_t(2) / real_t(3) )
+   LubricationCorrection ( const shared_ptr<StructuredBlockStorage> & blockStorage, const shared_ptr<pe::BodyStorage> & globalBodyStorage,
+                           const BlockDataID & bodyStorageID, real_t dynamicViscosity, real_t cutOffDistance = real_t(2) / real_t(3) )
       : blockStorage_ ( blockStorage )
       , globalBodyStorage_( globalBodyStorage )
       , bodyStorageID_( bodyStorageID )

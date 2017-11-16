@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file DragForceSpherePSMPe.cpp
+//! \file DragForceSpherePSM.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
@@ -58,12 +58,13 @@
 #include "pe/basic.h"
 
 #include "pe_coupling/partially_saturated_cells_method/all.h"
+#include "pe_coupling/utility/all.h"
 
 #include <vector>
 #include <iomanip>
 #include <iostream>
 
-namespace drag_force_sphere_psm_pe
+namespace drag_force_sphere_psm
 {
 
 ///////////
@@ -252,12 +253,12 @@ private:
          {
             for( auto fieldIt = xyzFieldSize.begin(); fieldIt != xyzFieldSize.end(); ++fieldIt )
             {
-               velocity_sum += pe_coupling::getPSMMacroscopicVelocity<LatticeModel_T, 1>( *blockIt, pdfField, bodyAndVolumeFractionField, blocks_, *fieldIt )[0];
+               velocity_sum += pe_coupling::getPSMMacroscopicVelocity<LatticeModel_T, 1>( *blockIt, pdfField, bodyAndVolumeFractionField, *blocks_, *fieldIt )[0];
             }
          }else{
             for( auto fieldIt = xyzFieldSize.begin(); fieldIt != xyzFieldSize.end(); ++fieldIt )
             {
-               velocity_sum += pe_coupling::getPSMMacroscopicVelocity<LatticeModel_T, 2>( *blockIt, pdfField, bodyAndVolumeFractionField, blocks_, *fieldIt )[0];
+               velocity_sum += pe_coupling::getPSMMacroscopicVelocity<LatticeModel_T, 2>( *blockIt, pdfField, bodyAndVolumeFractionField, *blocks_, *fieldIt )[0];
             }
          }
       }
@@ -284,30 +285,6 @@ private:
    // drag coefficient
    real_t normalizedDragOld_;
    real_t normalizedDragNew_;
-};
-
-
-class ResetForce
-{
-public:
-   ResetForce( const shared_ptr< StructuredBlockStorage > & blocks,
-               const BlockDataID & bodyStorageID )
-   : blocks_( blocks ), bodyStorageID_( bodyStorageID )
-   { }
-
-   void operator()()
-   {
-      for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
-      {
-         for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-         {
-            bodyIt->resetForceAndTorque();
-         }
-      }
-   }
-private:
-   shared_ptr< StructuredBlockStorage > blocks_;
-   const BlockDataID bodyStorageID_;
 };
 
 
@@ -463,11 +440,11 @@ int main( int argc, char **argv )
    // initialize the PDF field for PSM
    if( method == PSMVariant::SC1W1 || method == PSMVariant::SC2W1 || method == PSMVariant::SC3W1 )
    {
-      pe_coupling::initializeDomainForPSM< LatticeModel_T, 1 >( blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
+      pe_coupling::initializeDomainForPSM< LatticeModel_T, 1 >( *blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
    }
    else
    {
-      pe_coupling::initializeDomainForPSM< LatticeModel_T, 2 >( blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
+      pe_coupling::initializeDomainForPSM< LatticeModel_T, 2 >( *blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
    }
 
    ///////////////
@@ -553,7 +530,7 @@ int main( int argc, char **argv )
    timeloop.addFuncAfterTimeStep( SharedFunctor< DragForceEvaluator >(forceEval), "drag force evaluation" );
 
    // resetting force
-   timeloop.addFuncAfterTimeStep( ResetForce( blocks, bodyStorageID ), "reset force on sphere");
+   timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesResetter( blocks, bodyStorageID ), "reset force on sphere");
 
    timeloop.addFuncAfterTimeStep( RemainingTimeLogger( timeloop.getNrOfTimeSteps() ), "Remaining Time Logger" );
 
@@ -600,8 +577,8 @@ int main( int argc, char **argv )
    return 0;
 }
 
-} //namespace drag_force_sphere_psm_pe
+} //namespace drag_force_sphere_psm
 
 int main( int argc, char **argv ){
-   drag_force_sphere_psm_pe::main(argc, argv);
+   drag_force_sphere_psm::main(argc, argv);
 }

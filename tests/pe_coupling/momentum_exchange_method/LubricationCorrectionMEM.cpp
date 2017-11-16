@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file LubricationCorrectionMEMPe.cpp
+//! \file LubricationCorrectionMEM.cpp
 //! \ingroup pe_coupling
 //! \author Kristina Pickl <kristina.pickl@fau.de>
 //! \author Dominik Bartuschat
@@ -58,7 +58,7 @@
 #include "pe_coupling/utility/all.h"
 
 
-namespace lubrication_correction_mem_pe
+namespace lubrication_correction_mem
 {
 
 ///////////
@@ -127,7 +127,7 @@ class EvaluateLubricationForce
 public:
    EvaluateLubricationForce( const shared_ptr< StructuredBlockStorage > & blocks,
                              const BlockDataID & bodyStorageID,
-                             pe::BodyStorage & globalBodyStorage,
+                             const shared_ptr<pe::BodyStorage> & globalBodyStorage,
                              uint_t id1, uint_t id2, pe::Vec3 vel, real_t nu_L, real_t radius,
                              SweepTimeloop* timeloop, bool print, bool sphSphTest, bool sphWallTest )
    : blocks_( blocks ), bodyStorageID_( bodyStorageID ), globalBodyStorage_( globalBodyStorage ),
@@ -286,7 +286,7 @@ private:
             pe::SphereID sphereI = ( *curSphereIt );
             if ( sphereI->getID() == id1_ )
             {
-               for( auto globalBodyIt = globalBodyStorage_.begin(); globalBodyIt != globalBodyStorage_.end(); ++globalBodyIt)
+               for( auto globalBodyIt = globalBodyStorage_->begin(); globalBodyIt != globalBodyStorage_->end(); ++globalBodyIt)
                {
                   if( globalBodyIt->getID() == id2_ )
                   {
@@ -368,7 +368,7 @@ private:
 
    shared_ptr< StructuredBlockStorage > blocks_;
    const BlockDataID bodyStorageID_;
-   pe::BodyStorage & globalBodyStorage_;
+   shared_ptr<pe::BodyStorage> globalBodyStorage_;
 
    uint_t         id1_;
    uint_t         id2_;
@@ -922,7 +922,7 @@ int main( int argc, char **argv )
    }
 
    // map pe bodies into the LBM simulation
-   pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag );
+   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag );
 
    ///////////////
    // TIME LOOP //
@@ -970,7 +970,7 @@ int main( int argc, char **argv )
    timeloop.addFuncAfterTimeStep( pe_coupling::LubricationCorrection( blocks, globalBodyStorage, bodyStorageID, nu_L ), "Lubrication Force" );
 
    // perform lubrication evaluation
-   timeloop.addFuncAfterTimeStep( EvaluateLubricationForce( blocks, bodyStorageID, *globalBodyStorage, id1, id2, velocity,
+   timeloop.addFuncAfterTimeStep( EvaluateLubricationForce( blocks, bodyStorageID, globalBodyStorage, id1, id2, velocity,
                                                             nu_L, radius, &timeloop, fileIO, sphSphTest, sphWallTest ), "Evaluate Lubrication Force" );
 
    // reset the forces and apply a constant velocity
@@ -992,10 +992,10 @@ int main( int argc, char **argv )
 
    return 0;
 }
-} //namespace lubrication_correction_mem_pe
+} //namespace lubrication_correction_mem
 
 int main( int argc, char **argv ){
-   lubrication_correction_mem_pe::main(argc, argv);
+   lubrication_correction_mem::main(argc, argv);
 }
 
 

@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file TorqueSpherePSMPe.cpp
+//! \file TorqueSpherePSM.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
@@ -57,12 +57,13 @@
 #include "pe/basic.h"
 
 #include "pe_coupling/partially_saturated_cells_method/all.h"
+#include "pe_coupling/utility/all.h"
 
 #include <vector>
 #include <iomanip>
 #include <iostream>
 
-namespace torque_sphere_psm_pe
+namespace torque_sphere_psm
 {
 
 
@@ -219,35 +220,9 @@ class TorqueEval
 };
 
 
-class ResetForce
-{
-   public:
-      ResetForce( const shared_ptr< StructuredBlockStorage > & blocks,
-                  const BlockDataID & bodyStorageID )
-      : blocks_( blocks ), bodyStorageID_( bodyStorageID )
-      { }
-
-      void operator()()
-      {
-         for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
-         {
-            for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-            {
-                bodyIt->resetForceAndTorque();
-            }
-         }
-      }
-
-   private:
-      shared_ptr< StructuredBlockStorage > blocks_;
-      const BlockDataID bodyStorageID_;
-};
-
-
 //////////
 // MAIN //
 //////////
-
 
 //*******************************************************************************************************************
 /*!\brief Testcase that checks the torque acting on a constantly rotating sphere in the center of a cubic domain
@@ -272,7 +247,6 @@ class ResetForce
  *
  */
 //*******************************************************************************************************************
-
 
 int main( int argc, char **argv )
 {
@@ -413,11 +387,11 @@ int main( int argc, char **argv )
    // initialize the PDF field for PSM
    if( SC1W1 || SC2W1 || SC3W1 )
    {
-      pe_coupling::initializeDomainForPSM< LatticeModel_T, 1 >( blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
+      pe_coupling::initializeDomainForPSM< LatticeModel_T, 1 >( *blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
    }
    else
    {
-      pe_coupling::initializeDomainForPSM< LatticeModel_T, 2 >( blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
+      pe_coupling::initializeDomainForPSM< LatticeModel_T, 2 >( *blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
    }
 
    ///////////////
@@ -481,7 +455,7 @@ int main( int argc, char **argv )
    }
 
    // resetting force
-   timeloop.addFuncAfterTimeStep( ResetForce( blocks, bodyStorageID ), "reset force on sphere");
+   timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesResetter( blocks, bodyStorageID ), "reset force on sphere");
 
    timeloop.addFuncAfterTimeStep( RemainingTimeLogger( timeloop.getNrOfTimeSteps() ), "Remaining Time Logger" );
 
@@ -528,8 +502,8 @@ int main( int argc, char **argv )
 
 }
 
-} //namespace torque_sphere_psm_pe
+} //namespace torque_sphere_psm
 
 int main( int argc, char **argv ){
-   torque_sphere_psm_pe::main(argc, argv);
+   torque_sphere_psm::main(argc, argv);
 }

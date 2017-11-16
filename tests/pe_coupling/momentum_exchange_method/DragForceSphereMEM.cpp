@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file DragForceSphereMEMPe.cpp
+//! \file DragForceSphereMEM.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
@@ -64,7 +64,7 @@
 #include <iomanip>
 #include <iostream>
 
-namespace drag_force_sphere_mem_pe
+namespace drag_force_sphere_mem
 {
 
 ///////////
@@ -527,13 +527,13 @@ int main( int argc, char **argv )
    if( method == MEMVariant::CLI )
    {
       // uses a higher order boundary condition (CLI)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
    }else if ( method == MEMVariant::MR ){
       // uses a higher order boundary condition (MR)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_MR_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_MR_Flag );
    }else{
       // uses standard bounce back boundary conditions
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
    }
 
    // since external forcing is applied, the evaluation of the velocity has to be carried out directly after the streaming step
@@ -608,8 +608,8 @@ int main( int argc, char **argv )
 
 }
 
-} //namespace drag_force_sphere_mem_pe
+} //namespace drag_force_sphere_mem
 
 int main( int argc, char **argv ){
-   drag_force_sphere_mem_pe::main(argc, argv);
+   drag_force_sphere_mem::main(argc, argv);
 }

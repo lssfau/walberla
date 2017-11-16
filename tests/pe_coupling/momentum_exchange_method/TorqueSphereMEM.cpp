@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file TorqueSphereMEMPe.cpp
+//! \file TorqueSphereMEM.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
@@ -64,7 +64,7 @@
 #include <iomanip>
 #include <iostream>
 
-namespace torque_sphere_mem_pe
+namespace torque_sphere_mem
 {
 
 
@@ -476,13 +476,13 @@ int main( int argc, char **argv )
    if( MO_CLI )
    {
       // uses a higher order boundary condition (CLI)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
    }else if ( MO_MR ){
       // uses a higher order boundary condition (MR)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_MR_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_MR_Flag );
    }else{
       // uses standard bounce back boundary conditions
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
    }
 
    shared_ptr< TorqueEval > torqueEval = make_shared< TorqueEval >( &timeloop, &setup, blocks, bodyStorageID, fileIO );
@@ -563,8 +563,8 @@ int main( int argc, char **argv )
 
 }
 
-} //namespace torque_sphere_mem_pe
+} //namespace torque_sphere_mem
 
 int main( int argc, char **argv ){
-   torque_sphere_mem_pe::main(argc, argv);
+   torque_sphere_mem::main(argc, argv);
 }
