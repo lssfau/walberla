@@ -24,13 +24,11 @@
 #ifdef WALBERLA_BUILD_WITH_PYTHON
 
 
-#include <string>
-
 namespace walberla {
 namespace cuda {
 
 
-   template<typename GpuFields >
+   template<typename GpuFields, typename CpuFields>
    void exportModuleToPython();
 
 

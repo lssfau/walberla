@@ -26,19 +26,16 @@
 #include "cuda/GPUField.h"
 #include "cuda/communication/GPUPackInfo.h"
 #include "cuda/AddGPUFieldToStorage.h"
-
+#include "cuda/FieldCopy.h"
+#include "cuda/GPUField.h"
 #include "field/communication/UniformMPIDatatypeInfo.h"
-
 #include "field/AddToStorage.h"
 #include "field/python/FieldExport.h"
-
 #include "python_coupling/helper/MplHelpers.h"
 #include "python_coupling/helper/BoostPythonHelpers.h"
 
 #include <boost/type_traits/is_unsigned.hpp>
-
 #include <iostream>
-#include <cuda/communication/GPUPackInfo.h>
 
 namespace walberla {
 namespace cuda {
@@ -315,13 +312,61 @@ namespace internal {
    }
 
 
+   //===================================================================================================================
+   //
+   //  fieldCopy
+   //
+   //===================================================================================================================
+
+   template<typename Field_T>
+   void copyFieldToGpuDispatch(const shared_ptr<StructuredBlockStorage> & bs,
+                               BlockDataID cpuFieldId, BlockDataID gpuFieldId, bool toGpu)
+   {
+      typedef cuda::GPUField<typename Field_T::value_type> GpuField;
+      if(toGpu)
+         cuda::fieldCpy<GpuField, Field_T>(bs, gpuFieldId, cpuFieldId);
+      else
+         cuda::fieldCpy<Field_T, GpuField>(bs, cpuFieldId, gpuFieldId);
+   }
+   FunctionExporterClass( copyFieldToGpuDispatch,
+                          void( const shared_ptr<StructuredBlockStorage> &, BlockDataID, BlockDataID, bool ) );
+
+   template< typename FieldTypes >
+   void transferFields( const shared_ptr<StructuredBlockStorage> & bs,
+                        const std::string & gpuFieldId, const std::string & cpuFieldId, bool toGpu)
+   {
+      if( bs->begin() == bs->end()) {
+         return;
+      };
+
+      auto dstBdId = python_coupling::blockDataIDFromString( *bs, gpuFieldId );
+      auto srcBdId = python_coupling::blockDataIDFromString( *bs, cpuFieldId );
+
+      IBlock * firstBlock =  & ( * bs->begin() );
+      python_coupling::Dispatcher<FieldTypes, Exporter_copyFieldToGpuDispatch> dispatcher( firstBlock );
+      dispatcher( srcBdId )( bs, srcBdId, dstBdId, toGpu );
+   }
+
+   template< typename FieldTypes>
+   void copyFieldToGpu(const shared_ptr<StructuredBlockStorage> & bs,
+                       const std::string & gpuFieldId, const std::string & cpuFieldId)
+   {
+      transferFields<FieldTypes>(bs, gpuFieldId, cpuFieldId, true);
+   }
+
+   template< typename FieldTypes>
+   void copyFieldToCpu(const shared_ptr<StructuredBlockStorage> & bs,
+                       const std::string & gpuFieldId, const std::string & cpuFieldId)
+   {
+      transferFields<FieldTypes>(bs, gpuFieldId, cpuFieldId, false);
+   }
 
 } // namespace internal
 
 
 
 
-template<typename GpuFields >
+template<typename GpuFields, typename CpuFields >
 void exportModuleToPython()
 {
    python_coupling::ModuleScope fieldModule( "cuda" );
@@ -348,6 +393,8 @@ void exportModuleToPython()
    def( "createMPIDatatypeInfo",&internal::createMPIDatatypeInfo<GpuFields>, ( arg("blocks"), arg("blockDataName"), arg("numberOfGhostLayers" ) =0 ) );
    def( "createPackInfo",       &internal::createPackInfo<GpuFields>,        ( arg("blocks"), arg("blockDataName"), arg("numberOfGhostLayers" ) =0 ) );
 
+   def( "copyFieldToGpu", &internal::copyFieldToGpu<CpuFields>, (arg("blocks"), ("gpuFieldId"), ("cpuFieldId")));
+   def( "copyFieldToCpu", &internal::copyFieldToCpu<CpuFields>, (arg("blocks"), ("gpuFieldId"), ("cpuFieldId")));
 }
 
 

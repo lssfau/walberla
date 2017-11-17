@@ -62,4 +62,4 @@ if sys.argv[1] == 'build':
           " - to install run 'make pythonModuleInstall'\n"
           " - for development usage: \n"
           "      bash: export PYTHONPATH=%s:$PYTHONPATH \n"
-          "      fish: set -x PYTHONPATH %s $PYTHONPATH \n" % ( walberla_binary_dir,walberla_binary_dir ) )
+          "      fish: set -x PYTHONPATH %s $PYTHONPATH \n" % (walberla_binary_dir, walberla_binary_dir))

@@ -120,7 +120,7 @@ struct InitObject
       using walberla::cuda::GPUField;
       typedef bmpl::vector<GPUField<double>, GPUField<float>, GPUField<int>, GPUField<uint8_t>, GPUField<uint16_t> > GPUFields;
 
-      pythonManager->addExporterFunction( cuda::exportModuleToPython<GPUFields> );
+      pythonManager->addExporterFunction( cuda::exportModuleToPython<GPUFields, FieldTypes> );
       pythonManager->addBlockDataConversion<GPUFields>();
 #endif
 
