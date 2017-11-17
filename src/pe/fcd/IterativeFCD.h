@@ -64,7 +64,7 @@ private:
    bool performIterativeDetection(GeomPrimitive &a, GeomPrimitive &b, Vec3& normal, Vec3& contactPoint, real_t& penetrationDepth){
       real_t margin = real_t(1e-4);
       GJK gjk;
-      if(gjk.doGJKcontactThreshold(a, b, margin)){
+      if(gjk.doGJKmargin(a, b, margin)){
          //2. If collision is possible perform EPA.
          EPA epa;
          return epa.doEPAmargin(a, b, gjk, normal, contactPoint, penetrationDepth, margin);

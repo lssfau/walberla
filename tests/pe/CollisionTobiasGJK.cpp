@@ -58,7 +58,7 @@ bool gjkEPAcollideHybrid(GeomPrimitive &geom1, GeomPrimitive &geom2, Vec3& norma
    //1. Run GJK with considerably enlarged objects.
    real_t margin = real_t(1e-4);
    GJK gjk;
-   if(gjk.doGJKcontactThreshold(geom1, geom2, margin)){
+   if(gjk.doGJKmargin(geom1, geom2, margin)){
       //2. If collision is possible perform EPA.
       //std::cerr << "Peforming EPA.";
       EPA epa;
