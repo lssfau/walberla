@@ -65,18 +65,62 @@ To modify the build configuration go to your build directory and type `ccmake .`
 Some commonly-used build variables:
 
 Build variable 				        | Default | Meaning
------------------------------------| ------- | -----------------------------------------------------------
-CMAKE_BUILD_TYPE                   | Release | Either Debug (non optimized, for debugging with asserts), Release (production runs), DebugOptimized (optimized, but for debugging with asserts), or RelWithDebInfo (Release with debug infos) 
+-----------------------------------| -------- | -----------------------------------------------------------
+CMAKE_BUILD_TYPE                   | Release  | Either Debug (non optimized, for debugging with asserts), Release (production runs), DebugOptimized (optimized, but for debugging with asserts), or RelWithDebInfo (Release with debug infos)
 WALBERLA_ENABLE_GUI                |	OFF   | Builds the graphical user interface. Make sure you have QT development libraries installed.
 WALBERLA_BUILD_TUTORIALS           |	ON    | Builds all the tutorials located in "apps/tutorials" (= they are added to the 'all' target in the Makefile). If disabled, the tutorials can still be built by going to "apps/tutorials" in the build folder and running make.
-WALBERLA_BUILD_WITH_MPI            |   ON    | Since one main goal of waLBerla are massively parallel simulations, this is enabled by default. However, MPI can be disabled.
-WALBERLA_BUILD_WITH_OPENMP         |   OFF   | Enables/Disables OpenMP support for thread-parallel computation. Can also be combined with MPI for hybrid simulations!
-WALBERLA_BUILD_TESTS		           |	OFF   | If enabled, all tests are built when running make in the root build folder. But you can always go to a specific directory in your test folder and manually run make. 
+WALBERLA_BUILD_WITH_MPI            |    ON    | Since one main goal of waLBerla are massively parallel simulations, this is enabled by default. However, MPI can be disabled.
+WALBERLA_BUILD_WITH_OPENMP         |    OFF   | Enables/Disables OpenMP support for thread-parallel computation. Can also be combined with MPI for hybrid simulations!
+WALBERLA_BUILD_TESTS		       |	OFF   | If enabled, all tests are built when running make in the root build folder. But you can always go to a specific directory in your test folder and manually run make.
 WALBERLA_BUILD_BENCHMARKS          |	ON    | Enables/Disables the automatic build of all benchmarks located in "apps/benchmarks".  
 WALBERLA_BUILD_WITH_PYTHON         |	OFF   | Enables Python Support inside waLBerla (embedded Python). Then you can use Python scripts as configuration files and start an embedded python interpreter that can access waLBerla data structures. 
 WALBERLA_BUILD_WITH_PYTHON_MODULE  |	OFF   | This builds a shared library (and python module) walberla.so in "apps/pythonmodule" so that you can use walberla from python.  
 
 For a list of all switches, see CMakeLists.txt in the root source folder.
+
+\section python_setup Building waLBerla with Python
+
+There are multiple ways for waLBerla to interact with Python: first a waLBerla C++ application can be
+built with Python support such that it can be scripted through the config file. In addition to the normal text-based config,
+such a C++ app can also be called with a Python script that returns configuration options and optionally installs hooks for
+e.g. geometry setup, post-processing or steering. This mode can be enabled by the CMake variable WALBERLA_BUILD_WITH_PYTHON.
+
+While in this first option the driving code is C++, the second option exports most of waLBerlas functionality as a
+Python module that can be imported from a regular Python script. Thus the application itself can be written in Python.
+To build and install the waLBerla Python module enable WALBERLA_BUILD_WITH_PYTHON and WALBERLA_BUILD_WITH_PYTHON_MODULE.
+Then run 'make pythonModule' to build and 'make pythonModuleInstall' to install the module in your current environment.
+
+The third option is code generation using 'pystencils' and 'lbmpy' and is covered later.
+
+\subsection python_boost Installing Python dependencies.
+
+Both variants described above introduce dependencies on the Python and the boost::python library. We support building
+against Python in version 3.3 and above. On Ubuntu install 'python3-dev' and 'libboost-python-dev'. Then CMake
+automatically finds the right libraries.
+
+On clusters the setup process can be more complicated. Usually boost has to be compiled manually there. One very common
+problem then is to not link boost::python against the same python lib as waLBerla is linked against. For example when boost
+python is built against Python2 and waLBerla linked against Python3, linker errors occur. You can test what your
+boost python was linked against with 'grep -rl "PyString_Type"  libbboost_python'. If something is found, it was built
+against Python2, if not, against Python3.
+
+To build boost correctly against a certain Python version do:
+\verbatim
+./bootstrap.sh --with-python=/path/to/python3 --with-python-root=/base/dir/with/lib/and/include/ --with-python-version=3.Xm
+\endverbatim
+
+To be on the safe side then edit the project-config.jam and adapt the following line (here for example python3.6m)
+by entering the location of the interpreter, include path and lib path:
+\verbatim
+using python : 3.6 : /path/to/python3 : /python/root/include/python3.6m/ : /python/root/lib/ ;
+\endverbatim
+
+Then build with
+\verbatim
+./b2 -j $NUM_PROCS toolset=$TOOLSET install --prefix=$PREFIX
+\endverbatim
+
+Don't forget to set BOOST_ROOT such that CMake finds your custom boost library.
 
 \section ide_setup Setup of Integrated Development Environments
 
