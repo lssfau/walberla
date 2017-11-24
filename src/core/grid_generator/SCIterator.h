@@ -29,8 +29,21 @@
 namespace walberla {
 namespace grid_generator {
 
-/// Helper class to generate points in a simple cubic structure within a certain domain
+/// Helper class to generate points in a simple cubic structure within a certain domain.
+/// The lattice is fixed by a point of reference (x).
+/// \code
+/// . . . . . . . .
+///        +-----+
+/// . . . .|. . .|.
+///        |     |
+/// . . . .|. . .|.
+///        +-----+
+/// . . . . . . . .
 ///
+/// . x . . . . . .
+///
+/// . . . . . . . .
+/// \endcode
 /// Usage:
 /// \code for (auto it = SCIterator::begin(...); it != SCIterator::end(); ++it) \endcode
 class SCIterator : public std::iterator< std::forward_iterator_tag, Vector3<real_t> >
