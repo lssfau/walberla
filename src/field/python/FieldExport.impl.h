@@ -561,7 +561,7 @@ namespace internal {
 
    template<typename GlField_T>
    boost::python::object field_sizeWithGhostLayer( const GlField_T & field ) {
-      return boost::python::make_tuple( field.xSizeWithGhostLayer(), field.xSizeWithGhostLayer(), field.xSizeWithGhostLayer(), field.fSize() );
+      return boost::python::make_tuple( field.xSizeWithGhostLayer(), field.ySizeWithGhostLayer(), field.zSizeWithGhostLayer(), field.fSize() );
    }
 
 
