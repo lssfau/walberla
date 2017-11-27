@@ -703,6 +703,13 @@ void Union<BodyTypeTuple>::add( BodyID body )
    if( body->isGlobal() ^ global_ )
       throw std::logic_error( "Global flags of body and union do not match" );
 
+   Vec3 oldCenterOfMass = getPosition();
+   Vec3 oldImpulse      = getLinearVel() * getMass();
+
+   Vec3 bodyCenterOfMass = body->getPosition();
+   Vec3 bodyImpulse      = body->getLinearVel() * body->getMass();
+
+
    // Registering the rigid body
    body->setSB(this);
    bodies_.pushBack( body );
@@ -722,6 +729,14 @@ void Union<BodyTypeTuple>::add( BodyID body )
 
    // Setting the moment of inertia
    calcInertia();
+
+   //moving impuls to union
+   setLinearVel( Vec3(0,0,0) );
+   setAngularVel( Vec3(0,0,0) );
+   addImpulseAtPos( oldImpulse, oldCenterOfMass);
+   addImpulseAtPos( bodyImpulse, bodyCenterOfMass);
+   body->setLinearVel( Vec3(0,0,0) );
+   body->setAngularVel( Vec3(0,0,0) );
 
    // Signaling the internal modification to the superordinate body
    signalModification();

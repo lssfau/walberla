@@ -47,12 +47,8 @@ using namespace walberla::blockforest;
 typedef Union< boost::tuple<Sphere> >          UnionType ;
 typedef boost::tuple<Sphere, Plane, UnionType> BodyTuple ;
 
-int main( int argc, char ** argv )
+void SnowManFallingOnPlane()
 {
-   walberla::debug::enterTestMode();
-
-   walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
-
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
    // create blocks
@@ -102,6 +98,36 @@ int main( int argc, char ** argv )
    WALBERLA_CHECK_FLOAT_EQUAL( (sp1->getPosition() - sp2->getPosition()).length(), real_t(sqrt(2)) );
 
    //WALBERLA_LOG_DEVEL(un);
+}
+
+void ImpulsCarryover()
+{
+   MaterialID iron = Material::find("iron");
+
+   UnionType* un   = new Union< boost::tuple<Sphere> >(12, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), false, true, false);
+   SphereID sp1    = new Sphere( 10, 0, Vec3( 1,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
+   SphereID sp2    = new Sphere( 11, 0, Vec3(-1,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
+   sp1->setLinearVel(Vec3(0,real_c(+1),0));
+   sp2->setLinearVel(Vec3(0,real_c(-1),0));
+
+   un->add(sp1);
+   un->add(sp2);
+
+   WALBERLA_CHECK_FLOAT_EQUAL( un->getPosition(),  Vec3(0,0,0) );
+   WALBERLA_CHECK_FLOAT_EQUAL( un->getLinearVel(), Vec3(0,0,0) );
+   WALBERLA_CHECK_FLOAT_EQUAL( un->getAngularVel() * Vec3(1,0,0), real_t(0) );
+   WALBERLA_CHECK_FLOAT_EQUAL( un->getAngularVel() * Vec3(0,1,0), real_t(0) );
+   WALBERLA_CHECK_GREATER( un->getAngularVel() * Vec3(0,0,1), real_t(0) );
+}
+
+int main( int argc, char ** argv )
+{
+   walberla::debug::enterTestMode();
+
+   walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
+
+   SnowManFallingOnPlane();
+   ImpulsCarryover();
 
    return EXIT_SUCCESS;
 }
