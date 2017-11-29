@@ -21,11 +21,10 @@
 
 
 #include "pe/contact/Contact.h"
-#include "pe/fcd/IFCD.h"
+//#include "pe/fcd/IFCD.h"
 #include "pe/fcd/GenericFCD.h"
-#include "pe/fcd/IterativeFCD.h"
 #include "pe/fcd/AnalyticCollisionDetection.h"
-#include "pe/fcd/IterativeCollideFunctor.h"
+#include "pe/fcd/GJKEPACollideFunctor.h"
 #include "pe/Materials.h"
 
 #include "pe/rigidbody/Box.h"
@@ -288,7 +287,7 @@ void PlaneTest()
 {
    WALBERLA_LOG_INFO("PLANE AND INTERFACE TEST");
    MaterialID iron = Material::find("iron");
-   fcd::GenericFCD<BodyTuple, fcd::IterativeCollideFunctor> testFCD;
+   fcd::GenericFCD<BodyTuple, fcd::GJKEPACollideFunctor> testFCD;
 
    Plane pl(1, 1, Vec3(0, 1, 0), Vec3(0, 1, 0), real_t(1.0), iron );
    Sphere sphere(2, 2, Vec3(0, real_t(1.9), 0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
@@ -349,7 +348,7 @@ void PlaneTest()
 void UnionTest(){
    WALBERLA_LOG_INFO("UNION AND INTERFACE TEST");
    MaterialID iron = Material::find("iron");
-   fcd::GenericFCD<BodyTuple, fcd::IterativeCollideFunctor> testFCD;
+   fcd::GenericFCD<BodyTuple, fcd::GJKEPACollideFunctor> testFCD;
 
    //A recursive union of three spheres is dropped on a box.
    Box box(179, 179, Vec3(0,0,0), Vec3(0,0,0), Quat(), Vec3(real_t(10),real_t(2), real_t(10)), iron, false, true, false);

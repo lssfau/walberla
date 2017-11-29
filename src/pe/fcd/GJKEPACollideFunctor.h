@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file IterativeCollideFunctor.h
+//! \file GJKEPACollideFunctor.h
 //! \author Tobias Leemann
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
@@ -33,7 +33,7 @@
 namespace walberla{
 namespace pe{
 namespace fcd {
-namespace iterative{
+namespace gjkepa{
 
    //function for all single rigid bodies.
    template<typename Container>
@@ -67,41 +67,41 @@ namespace iterative{
    inline bool generateContacts(Plane *a, Union<BodyTupleB> *b, Container& contacts_);
 }
 
-/* Iterative Collide Functor for contact Generation with iterative collision detection.
- * Usage: fcd::GenericFCD<BodyTuple, fcd::IterativeCollideFunctor> testFCD;
+/* Iterative Collide Functor for contact Generation with iterative collision detection (GJK and EPA algorithms).
+ * Usage: fcd::GenericFCD<BodyTuple, fcd::GJKEPACollideFunctor> testFCD;
  * testFCD.generateContacts(...);
  */
 template <typename Container>
-struct IterativeCollideFunctor
+struct GJKEPACollideFunctor
 {
    Container& contacts_;
 
-   IterativeCollideFunctor(Container& contacts) : contacts_(contacts) {}
+   GJKEPACollideFunctor(Container& contacts) : contacts_(contacts) {}
 
    template< typename BodyType1, typename BodyType2 >
    bool operator()( BodyType1* bd1, BodyType2* bd2) {
-      using namespace iterative;
+      using namespace gjkepa;
       return generateContacts(bd1, bd2, contacts_);
    }
 };
 
 template <typename BodyType1, typename Container>
-struct IterativeSingleCollideFunctor
+struct GJKEPASingleCollideFunctor
 {
    BodyType1* bd1_;
    Container& contacts_;
 
-   IterativeSingleCollideFunctor(BodyType1* bd1, Container& contacts) : bd1_(bd1), contacts_(contacts) {}
+   GJKEPASingleCollideFunctor(BodyType1* bd1, Container& contacts) : bd1_(bd1), contacts_(contacts) {}
 
    template< typename BodyType2 >
    bool operator()( BodyType2* bd2) {
-      using namespace iterative;
+      using namespace gjkepa;
       return generateContacts( bd1_, bd2, contacts_);
    }
 };
 
 
-namespace iterative{
+namespace gjkepa{
 
    //function for all single rigid bodies.
    template<typename Container>
@@ -164,11 +164,11 @@ namespace iterative{
    //Unions
    template<typename BodyTupleA, typename BodyB, typename Container>
    inline bool generateContacts(Union<BodyTupleA> *a, BodyB *b, Container& contacts_){
-      IterativeSingleCollideFunctor<BodyB, Container> func(b, contacts_);
+      GJKEPASingleCollideFunctor<BodyB, Container> func(b, contacts_);
       bool collision = false;
       for( auto it=a->begin(); it!=a->end(); ++it )
       {
-         collision |= SingleCast<BodyTupleA, IterativeSingleCollideFunctor<BodyB, Container>, bool>::execute(*it, func);
+         collision |= SingleCast<BodyTupleA, GJKEPASingleCollideFunctor<BodyB, Container>, bool>::execute(*it, func);
       }
       return collision;
    }
@@ -180,13 +180,13 @@ namespace iterative{
 
    template<typename BodyTupleA, typename BodyTupleB, typename Container>
    inline bool generateContacts(Union<BodyTupleA> *a, Union<BodyTupleB>  *b, Container& contacts_){
-      IterativeCollideFunctor<Container> func(contacts_);
+      GJKEPACollideFunctor<Container> func(contacts_);
       bool collision = false;
       for( auto it1=a->begin(); it1!=a->end(); ++it1 )
       {
          for( auto it2=b->begin(); it2!=b->end(); ++it2 )
          {
-            collision |= DoubleCast<BodyTupleA, BodyTupleB, IterativeCollideFunctor<Container>, bool>::execute(*it1, *it2, func);
+            collision |= DoubleCast<BodyTupleA, BodyTupleB, GJKEPACollideFunctor<Container>, bool>::execute(*it1, *it2, func);
          }
       }
       return collision;
@@ -195,11 +195,11 @@ namespace iterative{
    //Union and Plane (these calls are ambigous if not implemented seperatly)
    template<typename BodyTupleA, typename Container>
    inline bool generateContacts(Union<BodyTupleA> *a, Plane *b, Container& contacts_){
-      IterativeSingleCollideFunctor<Plane, Container> func(b, contacts_);
+      GJKEPASingleCollideFunctor<Plane, Container> func(b, contacts_);
       bool collision = false;
       for( auto it=a->begin(); it!=a->end(); ++it )
       {
-         collision |= SingleCast<BodyTupleA, IterativeSingleCollideFunctor<Plane, Container>, bool>::execute(*it, func);
+         collision |= SingleCast<BodyTupleA, GJKEPASingleCollideFunctor<Plane, Container>, bool>::execute(*it, func);
       }
       return collision;
    }
@@ -210,7 +210,7 @@ namespace iterative{
    }
 
 
-} //namespace iterative
+} //namespace gjkepa
 
 
 } //fcd
