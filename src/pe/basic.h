@@ -33,7 +33,6 @@
 #include "pe/rigidbody/StorageDataHandling.h"
 #include "pe/ccd/HashGridsDataHandling.h"
 #include "pe/fcd/SimpleFCDDataHandling.h"
-#include "pe/fcd/IterativeFCDDataHandling.h"
 #include "pe/bg/SimpleBGDataHandling.h"
 #include "pe/cr/DEM.h"
 #include "pe/cr/HCSITS.h"
