@@ -306,7 +306,10 @@ inline Vec3 Sphere::support( const Vec3& d ) const
    auto len = d.sqrLength();
    if (!math::equal(len, real_t(0)))
    {
-      return getPosition() + getRadius() / sqrt(len) * d;
+      //WALBERLA_ASSERT_FLOAT_EQUAL( len, real_t(1), "search direction not normalized!");
+      const Vec3 s = getPosition() + (getRadius() / sqrt(len)) * d;
+      //std::cout << "Support in direction " << d << " with center " << getPosition() << " (r=" << getRadius() << ") is " << s << std::endl;
+      return s;
    } else
    {
       return Vec3(0,0,0);
@@ -324,9 +327,17 @@ inline Vec3 Sphere::support( const Vec3& d ) const
  */
 inline Vec3 Sphere::supportContactThreshold( const Vec3& d ) const
 {
-   WALBERLA_ASSERT( d.sqrLength() <= real_c(0.0), "Zero length search direction" );
-   WALBERLA_ASSERT( 1.0-math::Limits<real_t>::fpuAccuracy() <= d.length() && d.length() <= 1.0+math::Limits<real_t>::fpuAccuracy(), "Search direction is not normalised" );
-   return gpos_ + d*(radius_ + contactThreshold);
+   auto len = d.sqrLength();
+   if (!math::equal(len, real_t(0)))
+   {
+      //WALBERLA_ASSERT_FLOAT_EQUAL( len, real_t(1), "search direction not normalized!");
+      const Vec3 s = getPosition() + (getRadius() / sqrt(len) + contactThreshold) * d;
+      //std::cout << "Support in direction " << d << " with center " << getPosition() << " (r=" << getRadius() << ") is " << s << std::endl;
+      return s;
+   } else
+   {
+      return Vec3(0,0,0);
+   }
 }
 //*************************************************************************************************
 

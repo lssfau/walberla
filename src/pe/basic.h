@@ -44,6 +44,7 @@
 #include "pe/rigidbody/PlaneFactory.h"
 #include "pe/rigidbody/SphereFactory.h"
 #include "pe/rigidbody/UnionFactory.h"
+#include "pe/rigidbody/EllipsoidFactory.h"
 
 #include "pe/synchronization/SyncNextNeighbors.h"
 #include "pe/synchronization/SyncShadowOwners.h"
