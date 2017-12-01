@@ -39,9 +39,26 @@ CellInterval getCellBB( const pe::ConstBodyID body, const IBlock & block, Struct
    if( body->isFinite() )
    {
       blockStorage.getCellBBFromAABB( cellBB, body->getAABB(), blockStorage.getLevel(block) );
-   } else
+   }
+   else
    {
-      blockStorage.getCellBBFromAABB( cellBB, body->getAABB().getIntersection( blockStorage.getDomain() ), blockStorage.getLevel(block) );
+      // if body is infinite (global), its AABB is also infinite which then requires special treatment
+
+      auto level = blockStorage.getLevel(block);
+      const real_t dx = blockStorage.dx(level);
+      const real_t dy = blockStorage.dy(level);
+      const real_t dz = blockStorage.dz(level);
+      Vector3<real_t> aabbExtensionByGhostLayers(real_c(numberOfGhostLayersToInclude) * dx,
+                                                 real_c(numberOfGhostLayersToInclude) * dy,
+                                                 real_c(numberOfGhostLayersToInclude) * dz);
+      auto extendedBlockAABB = blockStorage.getAABB(block.getId()).getExtended( aabbExtensionByGhostLayers );
+
+      // intersect the infinte (global) body with the block AABB, extended by its ghost layers
+      // then determine the cell bounding box of the intersection
+      blockStorage.getCellBBFromAABB( cellBB, body->getAABB().getIntersection( extendedBlockAABB ), level );
+
+      // if infinte body does not intersect with the extended block AABB, return an empty interval
+      if( cellBB.empty() ) return CellInterval();
    }
 
    cellBB.xMin() -= cell_idx_t(1); cellBB.yMin() -= cell_idx_t(1); cellBB.zMin() -= cell_idx_t(1);
@@ -60,8 +77,6 @@ CellInterval getCellBB( const pe::ConstBodyID body, const IBlock & block, Struct
 
    return cellBB;
 }
-
-
 
 } // namespace pe_coupling
 } // namespace walberla

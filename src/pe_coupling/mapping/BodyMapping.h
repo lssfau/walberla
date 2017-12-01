@@ -54,6 +54,8 @@ void mapBody( const pe::BodyID & body, IBlock & block, StructuredBlockStorage & 
 
    CellInterval cellBB = getCellBB( body, block, blockStorage, flagField->nrOfGhostLayers() );
 
+   if( cellBB.empty() ) return;
+
    Vector3<real_t> startCellCenter = blockStorage.getBlockLocalCellCenter( block, cellBB.min() );
    const real_t dx = blockStorage.dx( blockStorage.getLevel(block) );
    const real_t dy = blockStorage.dy( blockStorage.getLevel(block) );
