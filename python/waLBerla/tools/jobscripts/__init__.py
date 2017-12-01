@@ -3,7 +3,7 @@
 """
 
 from __future__ import print_function, absolute_import, division, unicode_literals
-
+from datetime import timedelta
 from waLBerla.tools.jobscripts.hornet          import createJobscript as _cr_hornet
 from waLBerla.tools.jobscripts.supermuc        import createJobscript as _cr_supermuc
 from waLBerla.tools.jobscripts.supermuc_phase2 import createJobscript as _cr_supermuc2
@@ -35,7 +35,10 @@ def createJobscript(*args, **kwargs):
     """
     if 'machine' not in kwargs:
         raise ValueError("Specify which machine to use with 'machine=<supermuc,juqueen,hornet>'")
-    
+
+    if 'wall_time' in kwargs and isinstance(kwargs['wall_time'], int):
+        kwargs['wall_time'] = timedelta(seconds=kwargs['wall_time'])
+
     if kwargs['machine'].lower() == 'supermuc':        return _cr_supermuc  ( *args, **kwargs )
     if kwargs['machine'].lower() == 'supermuc_phase2': return _cr_supermuc2 ( *args, **kwargs )
     if kwargs['machine'].lower() == 'juqueen' :        return _cr_juqueen   ( *args, **kwargs )

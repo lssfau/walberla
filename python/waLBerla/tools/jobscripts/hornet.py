@@ -9,7 +9,7 @@ def createJobscript( wall_time = None, nodes = None, cores = None, job_class = N
                      initial_dir = '~', job_name="waLBerla", hyperthreading = 1, 
                      exe_name = None, arguments = [], commands = [], **kwargs ):
     
-    if type(hyperthreading) == bool:
+    if type(hyperthreading) is bool:
         hyperthreading = 2 if hyperthreading else 1
 
     
