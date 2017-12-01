@@ -25,6 +25,7 @@
 #include "core/mpi/MPIManager.h"
 #include "core/math/Random.h"
 #include "core/timing/TimingPool.h"
+#include "postprocessing/sqlite/SQLite.h"
 
 #include <iostream>
 #include <sstream>
@@ -166,7 +167,7 @@ int main( int argc, char ** argv )
    using namespace std;
 
    WALBERLA_ROOT_SECTION() {
-      if ( argc != 3 ) {
+      if ( argc != 3 && argc != 4 ) {
          cerr << "Wrong number of arguments " << endl;
          cerr << "Usage ./probeVsExtraMessage <iterations> <messageSize> " << endl;
       }
@@ -185,8 +186,24 @@ int main( int argc, char ** argv )
    twoMessageVersion     ( iterations, messageSize, tp );
    maxMessageSizeVersion ( iterations, messageSize, tp );
 
+
+
    WALBERLA_ROOT_SECTION() {
       cout << tp << endl;
+   }
+   if( argc == 4) {
+
+      const auto reducedTimeloopTiming = tp.getReduced();
+      WALBERLA_ROOT_SECTION() {
+         std::string dbFile( argv[3] );
+         std::map<std::string, walberla::int64_t> integerProperties;
+         integerProperties["iterations"] = int64_c(iterations);
+         integerProperties["messageSize"] = int64_c(messageSize);
+         integerProperties["processes"] = int64_c(mpi::MPIManager::instance()->numProcesses());
+         postprocessing::SQLiteDB db( dbFile );
+         auto runid = db.storeRun( integerProperties, std::map<std::string, std::string>(), std::map<string, double>());
+         db.storeTimingPool( runid, *reducedTimeloopTiming, "timings" );
+      }
    }
 
    return 0;
