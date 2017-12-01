@@ -73,7 +73,6 @@ template< typename LatticeModel_T, typename FlagField_T >
 class CurvedQuadratic : public Boundary< typename FlagField_T::flag_t >
 {
    static_assert( (boost::is_same< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::TRT_tag >::value), "Only works with TRT!" ); // to access lambda_d
-   static_assert( LatticeModel_T::compressible == false,                                                                  "Only works with incompressible models!" );
 
    typedef lbm::PdfField< LatticeModel_T >   PDFField_T;
    typedef typename LatticeModel_T::Stencil  Stencil_T;
@@ -185,6 +184,9 @@ inline void CurvedQuadratic< LatticeModel_T, FlagField_T >::treatDirection( cons
    // depending on the implementation for the specific body, either an analytical formula (e.g. for the sphere) or a line search algorithm is used
    const real_t delta = lbm::intersectionRatio( body, cellCenter, direction, tolerance );
 
+   WALBERLA_ASSERT_LESS_EQUAL( delta, real_t(1));
+   WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t(0));
+
    bool useMR1full = false;
 
    real_t pdf_new = real_c(0);
@@ -197,7 +199,7 @@ inline void CurvedQuadratic< LatticeModel_T, FlagField_T >::treatDirection( cons
 
    auto domainWithGhostlayer = pdfField_->xyzSizeWithGhostLayer();
 
-   // check if this cell is a valid (i.e. fluid) cell
+   // check if MR can be applied, i.e. the further-away-cell has to be a valid (i.e. fluid) cell
    if( flagField_->isPartOfMaskSet( xff, yff, zff, domainMask_ ) )
    {
       // MR1 scheme can be applied
@@ -320,9 +322,21 @@ inline void CurvedQuadratic< LatticeModel_T, FlagField_T >::treatDirection( cons
    auto boundaryVelocity = body.velFromWF( boundaryPosition );
 
    // include effect of boundary velocity
-   pdf_new -= real_c(3.0) * alpha * LatticeModel_T::w[ Stencil_T::idx[dir] ] * ( real_c( stencil::cx[ dir ] ) * boundaryVelocity[0] +
-                                                                               real_c( stencil::cy[ dir ] ) * boundaryVelocity[1] +
-                                                                               real_c( stencil::cz[ dir ] ) * boundaryVelocity[2] );
+   if( LatticeModel_T::compressible )
+   {
+      const auto density  = pdfField_->getDensity(x,y,z);
+      pdf_new -= real_c(3.0) * alpha * density * LatticeModel_T::w[ Stencil_T::idx[dir] ] *
+                 ( real_c( stencil::cx[ dir ] ) * boundaryVelocity[0] +
+                   real_c( stencil::cy[ dir ] ) * boundaryVelocity[1] +
+                   real_c( stencil::cz[ dir ] ) * boundaryVelocity[2] );
+   }
+   else
+   {
+      pdf_new -= real_c(3.0) * alpha * LatticeModel_T::w[ Stencil_T::idx[dir] ] *
+                 ( real_c( stencil::cx[ dir ] ) * boundaryVelocity[0] +
+                   real_c( stencil::cy[ dir ] ) * boundaryVelocity[1] +
+                   real_c( stencil::cz[ dir ] ) * boundaryVelocity[2] );
+   }
 
    // carry out the boundary handling
    pdfField_->get( nx, ny, nz, Stencil_T::invDirIdx(dir) ) = pdf_new;
@@ -355,6 +369,7 @@ inline void CurvedQuadratic< LatticeModel_T, FlagField_T >::treatDirection( cons
    // add the force onto the body at the obstacle boundary
    body.addForceAtPos( force, boundaryPosition );
 
+   /*
    WALBERLA_LOG_DETAIL_SECTION() {
       std::stringstream ss;
       ss << "MOBoundary in cell <" << x << ", " << y << ", " << z << "> in dir <"
@@ -364,7 +379,7 @@ inline void CurvedQuadratic< LatticeModel_T, FlagField_T >::treatDirection( cons
          << ", with pdf_old=" << pdf_old << ", pdf_new=" << pdf_new;
       WALBERLA_LOG_DETAIL( ss.str() );
    }
-
+   */
 }
 
 } // namespace pe_coupling

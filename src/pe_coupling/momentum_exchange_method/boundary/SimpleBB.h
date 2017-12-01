@@ -217,7 +217,7 @@ inline void SimpleBB< LatticeModel_T, FlagField_T >::treatDirection( const cell_
    // add the force onto the body at the obstacle boundary
    body.addForceAtPos( force, boundaryPosition );
 
-
+   /*
    WALBERLA_LOG_DETAIL_SECTION() {
       std::stringstream ss;
       ss << "MOBoundary in cell <" << x << ", " << y << ", " << z << "> in dir <"
@@ -227,6 +227,7 @@ inline void SimpleBB< LatticeModel_T, FlagField_T >::treatDirection( const cell_
          << ", with pdf_old=" << pdf_old << ", pdf_new=" << pdf_new;
       WALBERLA_LOG_DETAIL( ss.str() );
    }
+   */
 }
 
 } // namespace pe_coupling
