@@ -59,12 +59,14 @@ public:
    /// Advances the simulation dt seconds.
    void timestep( const real_t dt );
 
+   inline Integrator                getIntegrator()                const { return integrate_; }
+   inline ContactResolver           getContactResolver()           const { return resolveContact_; }
    virtual inline real_t            getMaximumPenetration()        const WALBERLA_OVERRIDE { return maxPenetration_; }
    virtual inline size_t            getNumberOfContacts()          const WALBERLA_OVERRIDE { return numberOfContacts_; }
    virtual inline size_t            getNumberOfContactsTreated()   const WALBERLA_OVERRIDE { return numberOfContactsTreated_; }
 private:
-   const Integrator                  integrate_;
-   const ContactResolver             resolveContact_;
+   Integrator                        integrate_;
+   ContactResolver                   resolveContact_;
    shared_ptr<BodyStorage>           globalBodyStorage_;
    shared_ptr<BlockStorage>          blockStorage_;
    domain_decomposition::BlockDataID storageID_;
@@ -94,7 +96,7 @@ public:
 };
 
 }  // namespace cr
-} // namespace pe
+}  // namespace pe
 }  // namespace walberla
 
 #include "DEM.impl.h"
