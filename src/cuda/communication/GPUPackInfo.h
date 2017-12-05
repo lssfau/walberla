@@ -16,15 +16,31 @@
 //! \file GPUPackInfo.h
 //! \ingroup cuda
 //! \author Paulo Carvalho <prcjunior@inf.ufpr.br>
+//! \author João Victor Tozatti Risso <jvtrisso@inf.ufpr.br>
 //======================================================================================================================
 
 #pragma once
 
-#include "cuda/GPUCopy.h"
-#include "communication/UniformPackInfo.h"
 #include "core/debug/Debug.h"
-#include "field/GhostRegions.h"
+#include "core/math/Vector3.h"
+#include "core/mpi/BufferSizeTrait.h"
+
 #include "stencil/Directions.h"
+
+#include "field/GhostRegions.h"
+
+#include "communication/UniformPackInfo.h"
+
+#include "blockforest/Block.h"
+
+#include "cuda/ErrorChecking.h"
+#include "cuda/GPUCopy.h"
+#include "cuda/communication/PinnedMemoryBuffer.h"
+
+#include <cuda_runtime.h>
+#include <map>
+#include <vector>
+#include <tuple>
 
 
 namespace walberla {
@@ -42,17 +58,49 @@ template<typename GPUField_T>
 class GPUPackInfo : public walberla::communication::UniformPackInfo
 {
 public:
-   typedef typename GPUField_T::value_type T;
+   typedef typename GPUField_T::value_type FieldType;
 
-   GPUPackInfo( const BlockDataID & bdId ) : bdId_( bdId ), communicateAllGhostLayers_( true ),
-            numberOfGhostLayers_( 0 ) {}
+   GPUPackInfo( const BlockDataID & bdId, cudaStream_t stream = 0 )
+   : bdId_( bdId ), communicateAllGhostLayers_( true ), numberOfGhostLayers_( 0 )
+   {
+      streams_.push_back( stream );
+      copyAsync_ = (stream != 0);
+   }
 
-   GPUPackInfo( const BlockDataID & bdId, const uint_t numberOfGHostLayers ) : bdId_( bdId ),
-            communicateAllGhostLayers_( false ), numberOfGhostLayers_(  numberOfGHostLayers ) {}
+   GPUPackInfo( const BlockDataID & bdId, const uint_t numberOfGHostLayers, cudaStream_t stream = 0 )
+   : bdId_( bdId ), communicateAllGhostLayers_( false ), numberOfGhostLayers_(  numberOfGHostLayers )
+   {
+      streams_.push_back( stream );
+      copyAsync_ = (stream != 0);
+   }
+
+   GPUPackInfo( const BlockDataID & bdId, std::vector< cudaStream_t > & streams )
+   : bdId_( bdId ), communicateAllGhostLayers_( true ), numberOfGhostLayers_( 0 ), streams_( streams )
+   {
+      copyAsync_ = true;
+      for( auto streamIt = streams_.begin(); streamIt != streams_.end(); ++streamIt )
+         if ( *streamIt == 0 )
+         {
+            copyAsync_ = false;
+            break;
+         }
+   }
+
+   GPUPackInfo( const BlockDataID & bdId, const uint_t numberOfGHostLayers, std::vector< cudaStream_t > & streams )
+   : bdId_( bdId ), communicateAllGhostLayers_( false ), numberOfGhostLayers_(  numberOfGHostLayers ), streams_( streams )
+   {
+      copyAsync_ = true;
+      for( auto streamIt = streams_.begin(); streamIt != streams_.end(); ++streamIt )
+         if ( *streamIt == 0 )
+         {
+            copyAsync_ = false;
+            break;
+         }
+   }
 
    virtual ~GPUPackInfo() {}
 
-   bool constantDataExchange() const { return mpi::BufferSizeTrait<T>::constantSize; }
+   bool constantDataExchange() const { return mpi::BufferSizeTrait<FieldType>::constantSize; }
    bool threadsafeReceiving()  const { return true; }
 
    void unpackData(IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer);
@@ -64,38 +112,73 @@ protected:
 
    uint_t numberOfGhostLayersToCommunicate( const GPUField_T * const field ) const;
 
+   inline cudaStream_t & getStream(stencil::Direction & dir) { return streams_[dir % streams_.size()]; }
+
    const BlockDataID bdId_;
    bool   communicateAllGhostLayers_;
    uint_t numberOfGhostLayers_;
+   std::vector< cudaStream_t > streams_;
+   bool copyAsync_;
+   std::map< stencil::Direction, PinnedMemoryBuffer > pinnedRecvBuffers_;
+   mutable std::map< stencil::Direction, PinnedMemoryBuffer > pinnedSendBuffers_;
 };
 
 
 template<typename GPUField_T>
 void GPUPackInfo<GPUField_T>::unpackData(IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer)
 {
-   GPUField_T * f = receiver->getData< GPUField_T >( bdId_ );
-   WALBERLA_ASSERT_NOT_NULLPTR(f);
+   GPUField_T * fieldPtr = receiver->getData< GPUField_T >( bdId_ );
+   WALBERLA_ASSERT_NOT_NULLPTR(fieldPtr);
 
-   if ( f->layout() != fzyx )
+   cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( fieldPtr ) );
+
+   CellInterval fieldCi = field::getGhostRegion( *fieldPtr, dir, nrOfGhostLayers, false );
+
+   uint_t nrOfBytesToRead = fieldCi.numCells() * fieldPtr->fSize() * sizeof(FieldType);
+
+   unsigned char * bufPtr = buffer.skip(nrOfBytesToRead);
+
+   unsigned char * copyBufferPtr = bufPtr;
+   if ( copyAsync_ )
    {
-      WALBERLA_ABORT( "GPUPackInfo currently only supports fzyx layout" );
+      PinnedMemoryBuffer & pinnedBuffer = pinnedRecvBuffers_[dir];
+      copyBufferPtr = pinnedBuffer.resize( nrOfBytesToRead );
+      // Copy data into pinned memory buffer, in order to transfer it asynchronously to the GPU
+      std::copy( bufPtr, static_cast< unsigned char * >( bufPtr + nrOfBytesToRead ), copyBufferPtr );
    }
 
-   cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( f ) );
+   cudaStream_t & unpackStream = getStream(dir);
 
-   CellInterval ci = field::getGhostRegion( *f, dir, nrOfGhostLayers, false );
+   auto dstOffset = std::make_tuple( uint_c(fieldCi.xMin() + nrOfGhostLayers),
+                                     uint_c(fieldCi.yMin() + nrOfGhostLayers),
+                                     uint_c(fieldCi.zMin() + nrOfGhostLayers),
+                                     uint_c(0) );
+   auto srcOffset = std::make_tuple( uint_c(0), uint_c(0), uint_c(0), uint_c(0) );
 
-   uint_t nrOfBytesToRead = ci.xSize() * ci.ySize() * ci.zSize() * f->fSize() * sizeof(T);
+   auto intervalSize = std::make_tuple( fieldCi.xSize(), fieldCi.ySize(), fieldCi.zSize(),
+                                        fieldPtr->fSize() );
 
-   unsigned char * buf = buffer.skip(nrOfBytesToRead);
+   if ( fieldPtr->layout() == fzyx )
+   {
+      const uint_t dstAllocSizeZ = fieldPtr->zAllocSize();
+      const uint_t srcAllocSizeZ = fieldCi.zSize();
+      copyHostToDevFZYX( fieldPtr->pitchedPtr(), copyBufferPtr, dstOffset, srcOffset,
+                         dstAllocSizeZ, srcAllocSizeZ, sizeof(FieldType),
+                         intervalSize, unpackStream );
+   }
+   else
+   {
+      const uint_t dstAllocSizeY = fieldPtr->yAllocSize();
+      const uint_t srcAllocSizeY = fieldCi.ySize();
+      copyHostToDevZYXF( fieldPtr->pitchedPtr(), copyBufferPtr, dstOffset, srcOffset,
+                         dstAllocSizeY, srcAllocSizeY, sizeof(FieldType),
+                         intervalSize, unpackStream );
+   }
 
-   copyHostToDevFZYX( f->pitchedPtr(), buf,
-                      sizeof(T), f->zAllocSize(), ci.zSize(),
-                      uint_c(ci.xMin() + nrOfGhostLayers),
-                      uint_c(ci.yMin() + nrOfGhostLayers),
-                      uint_c(ci.zMin() + nrOfGhostLayers), 0,
-                      0, 0, 0, 0,
-                      ci.xSize(), ci.ySize(), ci.zSize(), f->fSize() );
+   if ( copyAsync_ )
+   {
+      WALBERLA_CUDA_CHECK( cudaStreamSynchronize( unpackStream ) );
+   }
 }
 
 
@@ -105,55 +188,116 @@ void GPUPackInfo<GPUField_T>::communicateLocal(const IBlock * sender, IBlock * r
    const GPUField_T * sf = sender  ->getData< GPUField_T >( bdId_ );
          GPUField_T * rf = receiver->getData< GPUField_T >( bdId_ );
 
-   if ( sf->layout() != fzyx || rf->layout() != fzyx )
-   {
-      WALBERLA_ABORT( "GPUPackInfo currently only supports fzyx layout" );
-   }
+   WALBERLA_ASSERT_NOT_NULLPTR( sf );
+   WALBERLA_ASSERT_NOT_NULLPTR( rf );
 
    WALBERLA_ASSERT_EQUAL(sf->xSize(), rf->xSize());
    WALBERLA_ASSERT_EQUAL(sf->ySize(), rf->ySize());
    WALBERLA_ASSERT_EQUAL(sf->zSize(), rf->zSize());
    WALBERLA_ASSERT_EQUAL(sf->fSize(), rf->fSize());
 
+   WALBERLA_CHECK( sf->layout() == rf->layout(), "GPUPackInfo::communicateLocal: fields must have the same layout!" );
+
    cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( sf ) );
 
    CellInterval sCi = field::getSliceBeforeGhostLayer( *sf, dir, nrOfGhostLayers, false );
    CellInterval rCi = field::getGhostRegion( *rf, stencil::inverseDir[dir], nrOfGhostLayers, false );
 
-   copyDevToDevFZYX( rf->pitchedPtr(), sf->pitchedPtr(),
-                     sizeof(T), rf->zAllocSize(), sf->zAllocSize(),
-                     uint_c(rCi.xMin() + nrOfGhostLayers), uint_c(rCi.yMin() + nrOfGhostLayers), uint_c(rCi.zMin() + nrOfGhostLayers), 0,
-                     uint_c(sCi.xMin() + nrOfGhostLayers), uint_c(sCi.yMin() + nrOfGhostLayers), uint_c(sCi.zMin() + nrOfGhostLayers), 0,
-                     rCi.xSize(), rCi.ySize(), rCi.zSize(), sf->fSize() );
+   cudaStream_t & commStream = getStream(dir);
+
+   auto dstOffset = std::make_tuple( uint_c(rCi.xMin() + nrOfGhostLayers),
+                                     uint_c(rCi.yMin() + nrOfGhostLayers),
+                                     uint_c(rCi.zMin() + nrOfGhostLayers),
+                                     uint_c(0) );
+
+   auto srcOffset = std::make_tuple( uint_c(sCi.xMin() + nrOfGhostLayers),
+                                     uint_c(sCi.yMin() + nrOfGhostLayers),
+                                     uint_c(sCi.zMin() + nrOfGhostLayers),
+                                     uint_c(0) );
+
+   auto intervalSize = std::make_tuple( rCi.xSize(), rCi.ySize(), rCi.zSize(), sf->fSize() );
+
+   if ( sf->layout() == fzyx )
+   {
+      const uint_t dstAllocSizeZ = rf->zAllocSize();
+      const uint_t srcAllocSizeZ = sf->zAllocSize();
+
+      copyDevToDevFZYX( rf->pitchedPtr(), sf->pitchedPtr(), dstOffset, srcOffset,
+                        dstAllocSizeZ, srcAllocSizeZ, sizeof(FieldType),
+                        intervalSize, commStream );
+   }
+   else
+   {
+      const uint_t dstAllocSizeY = rf->yAllocSize();
+      const uint_t srcAllocSizeY = sf->yAllocSize();
+
+      copyDevToDevZYXF( rf->pitchedPtr(), sf->pitchedPtr(), dstOffset, srcOffset,
+                        dstAllocSizeY, srcAllocSizeY, sizeof(FieldType),
+                        intervalSize, commStream );
+   }
+
+   if ( copyAsync_ )
+   {
+      WALBERLA_CUDA_CHECK( cudaStreamSynchronize( commStream ) );
+   }
 }
 
 
 template<typename GPUField_T>
 void GPUPackInfo<GPUField_T>::packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const
 {
-   const GPUField_T * f = sender->getData< GPUField_T >( bdId_ );
-   WALBERLA_ASSERT_NOT_NULLPTR(f);
+   const GPUField_T * fieldPtr = sender->getData< GPUField_T >( bdId_ );
+   WALBERLA_ASSERT_NOT_NULLPTR(fieldPtr);
 
-   if ( f->layout() != fzyx )
+   cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( fieldPtr ) );
+
+   CellInterval fieldCi = field::getSliceBeforeGhostLayer( *fieldPtr, dir, nrOfGhostLayers, false );
+
+   const std::size_t nrOfBytesToPack = fieldCi.numCells() * fieldPtr->fSize() * sizeof(FieldType);
+
+   unsigned char * outBufferPtr = outBuffer.forward( nrOfBytesToPack );
+
+   const cudaStream_t & packStream = streams_[dir % streams_.size()];
+
+   unsigned char * copyBufferPtr = outBufferPtr;
+   if ( copyAsync_ )
    {
-      WALBERLA_ABORT( "GPUPackInfo currently only supports fzyx layout" );
+      PinnedMemoryBuffer & pinnedBuffer = pinnedSendBuffers_[dir];
+      copyBufferPtr = pinnedBuffer.resize( nrOfBytesToPack );
    }
 
-   cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( f ) );
+   auto dstOffset = std::make_tuple( uint_c(0), uint_c(0), uint_c(0), uint_c(0) );
+   auto srcOffset = std::make_tuple( uint_c(fieldCi.xMin() + nrOfGhostLayers),
+                                     uint_c(fieldCi.yMin() + nrOfGhostLayers),
+                                     uint_c(fieldCi.zMin() + nrOfGhostLayers),
+                                     uint_c(0) );
 
-   CellInterval ci = field::getSliceBeforeGhostLayer( *f, dir, nrOfGhostLayers, false );
+   auto intervalSize = std::make_tuple( fieldCi.xSize(), fieldCi.ySize(), fieldCi.zSize(),
+                                        fieldPtr->fSize() );
 
-   uint_t nrOfBytesToPack = ci.xSize() * ci.ySize() * ci.zSize() * f->fSize() * sizeof(T);
+   if ( fieldPtr->layout() == fzyx )
+   {
+      const uint_t dstAllocSizeZ = fieldCi.zSize();
+      const uint_t srcAllocSizeZ = fieldPtr->zAllocSize();
+      copyDevToHostFZYX( copyBufferPtr, fieldPtr->pitchedPtr(), dstOffset, srcOffset,
+                         dstAllocSizeZ, srcAllocSizeZ, sizeof(FieldType),
+                         intervalSize, packStream );
+   }
+   else
+   {
+      const uint_t dstAllocSizeZ = fieldCi.ySize();
+      const uint_t srcAllocSizeZ = fieldPtr->yAllocSize();
+      copyDevToHostZYXF( copyBufferPtr, fieldPtr->pitchedPtr(), dstOffset, srcOffset,
+                         dstAllocSizeZ, srcAllocSizeZ, sizeof(FieldType),
+                         intervalSize, packStream );
+   }
 
-   unsigned char * buf = outBuffer.forward( nrOfBytesToPack );
+   if ( copyAsync_ )
+   {
+      WALBERLA_CUDA_CHECK( cudaStreamSynchronize( packStream ) );
 
-   copyDevToHostFZYX( buf, f->pitchedPtr(),
-                      sizeof(T), ci.zSize(), f->zAllocSize(),
-                      0, 0, 0, 0,
-                      uint_c(ci.xMin() + nrOfGhostLayers),
-                      uint_c(ci.yMin() + nrOfGhostLayers),
-                      uint_c(ci.zMin() + nrOfGhostLayers), 0,
-                      ci.xSize(), ci.ySize(), ci.zSize(), f->fSize() );
+      std::copy( copyBufferPtr, static_cast<unsigned char *>( copyBufferPtr + nrOfBytesToPack ), outBufferPtr );
+   }
 }
 
 
