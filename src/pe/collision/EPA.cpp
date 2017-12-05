@@ -826,7 +826,7 @@ inline bool EPA::searchTetrahedron(GeomPrimitive &geom1, GeomPrimitive &geom2, s
 
       }
    }
-   while(pointIndexToRemove != 0);
+   while(pointIndexToRemove != -1);
    //std::cerr << "Found Tet after " << loopCount << " searches." << std::endl;
 
    //Build final tetrahedron
