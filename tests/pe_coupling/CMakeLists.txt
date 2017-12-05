@@ -90,8 +90,7 @@ waLBerla_execute_test( NAME DragForceSphereMEMRefinementParallelTest    COMMAND 
 waLBerla_execute_test( NAME DragForceSphereMEMRefinementCLITest         COMMAND $<TARGET_FILE:DragForceSphereMEMRefinement> --MO_CLI            PROCESSES 4 LABELS verylongrun CONFIGURATIONS Release RelWithDbgInfo )
 
 waLBerla_compile_test( FILES momentum_exchange_method/GlobalBodyAsBoundaryMEMStaticRefinement.cpp DEPENDS blockforest pe timeloop )
-waLBerla_execute_test( NAME GlobalBodyAsBoundaryMEMStaticRefinementSBBTest        COMMAND $<TARGET_FILE:GlobalBodyAsBoundaryMEMStaticRefinement>          PROCESSES 1 )
-waLBerla_execute_test( NAME GlobalBodyAsBoundaryMEMStaticRefinementCLITest        COMMAND $<TARGET_FILE:GlobalBodyAsBoundaryMEMStaticRefinement>  --CLI   PROCESSES 1 )
+waLBerla_execute_test( NAME GlobalBodyAsBoundaryMEMStaticRefinementTest        COMMAND $<TARGET_FILE:GlobalBodyAsBoundaryMEMStaticRefinement>          PROCESSES 1 )
 
 waLBerla_compile_test( FILES momentum_exchange_method/LubricationCorrectionMEM.cpp DEPENDS blockforest timeloop )
 waLBerla_execute_test( NAME LubricationCorrectionMEMFuncTest         COMMAND $<TARGET_FILE:LubricationCorrectionMEM> --funcTest                   PROCESSES 3 )
