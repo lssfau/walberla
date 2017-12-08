@@ -115,7 +115,7 @@ int main( int argc, char** argv )
                      iron, true, false, true);
 
     syncShadowOwners<BodyTuple>( forest->getBlockForest(), storageID);
-    for (int i=0; i < 100; ++i){
+    for (int step=0; step < 100; ++step){
        cr( real_c(0.1) );
        syncShadowOwners<BodyTuple>( forest->getBlockForest(), storageID);
 
@@ -132,6 +132,13 @@ int main( int argc, char** argv )
           WALBERLA_LOG_DETAIL_ON_ROOT("tracked particles: " << sccd->getObservedBodyCount() << "/" << hccd->getObservedBodyCount());
           WALBERLA_CHECK_EQUAL(tmp1, tmp2);
           WALBERLA_LOG_DETAIL_ON_ROOT("contacts on root: " << cont1.size());
+
+          // check for correct ordering of bodies within contacts
+          for (size_t i = 0; i < cont1.size(); ++i)
+          {
+             WALBERLA_CHECK_LESS(cont1[i].getBody1()->getSystemID(), cont1[i].getBody2()->getSystemID());
+             WALBERLA_CHECK_LESS(cont2[i].getBody1()->getSystemID(), cont2[i].getBody2()->getSystemID());
+          }
        }
     }
 
