@@ -118,6 +118,15 @@ int ParMETIS_V3_PartGeomKway(
                                       edgecut, part, comm );
 }
 
+int ParMETIS_V3_PartGeom(
+   ::walberla::int64_t *vtxdist, ::walberla::int64_t *ndims, double *xyz, ::walberla::int64_t *part, MPI_Comm *comm )
+{
+   static_assert( boost::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!" );
+   static_assert( boost::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!" );
+
+   return ::ParMETIS_V3_PartGeom( vtxdist, ndims, xyz, part, comm );
+}
+
 int ParMETIS_V3_RefineKway(
    ::walberla::int64_t *vtxdist, ::walberla::int64_t *xadj, ::walberla::int64_t *adjncy, ::walberla::int64_t *vwgt,
    ::walberla::int64_t *adjwgt, ::walberla::int64_t *wgtflag, ::walberla::int64_t *numflag, ::walberla::int64_t *ncon, ::walberla::int64_t *nparts,
@@ -160,6 +169,12 @@ int ParMETIS_V3_PartGeomKway(
    ::walberla::int64_t *, ::walberla::int64_t *, ::walberla::int64_t *, ::walberla::int64_t *, double *,
    ::walberla::int64_t *, ::walberla::int64_t *, double *, double *, ::walberla::int64_t *,
    ::walberla::int64_t *, ::walberla::int64_t *, MPI_Comm * )
+{
+   WALBERLA_ABORT( "You are trying to use ParMetis functionality but waLBerla is not configured to use it. Set 'WALBERLA_BUILD_WITH_PARMETIS' to 'ON' in your CMake cache to build against an installed version of ParMetis!" );
+}
+
+int ParMETIS_V3_PartGeom(
+   ::walberla::int64_t *, ::walberla::int64_t *, double *, ::walberla::int64_t *, MPI_Comm * )
 {
    WALBERLA_ABORT( "You are trying to use ParMetis functionality but waLBerla is not configured to use it. Set 'WALBERLA_BUILD_WITH_PARMETIS' to 'ON' in your CMake cache to build against an installed version of ParMetis!" );
 }

@@ -47,6 +47,9 @@ int ParMETIS_V3_PartGeomKway(
    int64_t *ncon, int64_t *nparts, double *tpwgts, double *ubvec, int64_t *options,
    int64_t *edgecut, int64_t *part, MPI_Comm *comm );
 
+int ParMETIS_V3_PartGeom(
+   int64_t *vtxdist, int64_t *ndims, double *xyz, int64_t *part, MPI_Comm *comm );
+
 int ParMETIS_V3_RefineKway(
    int64_t *vtxdist, int64_t *xadj, int64_t *adjncy, int64_t *vwgt,
    int64_t *adjwgt, int64_t *wgtflag, int64_t *numflag, int64_t *ncon, int64_t *nparts,
