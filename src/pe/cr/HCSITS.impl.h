@@ -333,6 +333,29 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
       if (tt_ != NULL) tt_->stop("Collision Response Body Caching");
    }
 
+   if (blockStorage_->size() == 0)
+   {
+      // create artificial block to handle global bodies even on processes where there are no blocks
+      BodyCache&    bodyCache    = blockToBodyCache_[0];
+      ContactCache& contactCache = blockToContactCache_[0];
+
+      contactCache.resize( 0 );
+      bodyCache.resize( globalBodyStorage_->size() );
+
+      size_t j = 0;
+      // GLOBAL BODIES HAVE TO HAVE THE SAME INDEX WITHIN ALL BLOCKS!!!!
+      for( auto body = globalBodyStorage_->begin(); body != globalBodyStorage_->end(); ++body, ++j ) {
+         body->wake(); // BUGFIX: Force awaking of all bodies!
+         body->index_ = j;
+         WALBERLA_ASSERT( body->hasInfiniteMass(), "fatal" );
+
+         initializeVelocityCorrections( *body, bodyCache.dv_[j], bodyCache.dw_[j], dt ); // use applied external forces to calculate starting velocity
+
+         bodyCache.v_[j] = body->getLinearVel();
+         bodyCache.w_[j] = body->getAngularVel();
+      }
+   }
+
    if (tt_ != NULL) tt_->start("Collision Response Resolution");
    const real_t rp = relaxationParam_;
    relaxationParam_ = real_c(1); // must be set to 1.0 such that dv and dw caused by external forces and torques are not falsely altered
@@ -423,11 +446,10 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
    // added to the velocities of these bodies their positions on different
    // processes can get out of sync (some of them can get NaNs). To prevent these NaNs and
    // thus out of sync bodies, velocity corrections for bodies of infinite
-   // mass/inertia are silently ignored.
-
+   // mass/inertia are silently ignored.;
    {
       // choose arbitrary bodyChache. SHOULD BE ALL IN SYNC!
-      BodyCache&    bodyCache    = blockToBodyCache_[blockStorage_->begin()->getId().getID()];
+      BodyCache&    bodyCache    = blockToBodyCache_.begin()->second;
       size_t j = 0;
       for( auto body = globalBodyStorage_->begin(); body != globalBodyStorage_->end(); ++body, ++j )
       {
@@ -443,7 +465,6 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
          WALBERLA_LOG_DETAIL( "Result:\n" << *body << "");
       }
    }
-
    // Apply cached body properties (velocities) and time integrate positions
    for (auto it = blockStorage_->begin(); it != blockStorage_->end(); ++it)
    {
@@ -483,6 +504,9 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
    }
 
    if (tt_ != NULL) tt_->stop("Collision Response Integration");
+
+   blockToBodyCache_.clear();
+   blockToContactCache_.clear();
 
    if (tt_ != NULL) tt_->stop("Simulation Step");
 }
