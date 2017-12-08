@@ -22,6 +22,7 @@
 #pragma once
 
 #include "NoPhantomData.h"
+#include "blockforest/BlockForest.h"
 #include "blockforest/PhantomBlockForest.h"
 
 #include "core/DataTypes.h"
@@ -41,20 +42,26 @@ namespace walberla {
 namespace blockforest {
 
 
-
+/**
+ *  This class implements a diffusive algorithm for load balancing.
+ *
+ *  All algorithms are implemented to work levelwise. Load balancing with levels ignored is possible
+ *  by specifying levelwise = false in the constructor.
+**/
 template< typename PhantomData_T >
-class DynamicLevelwiseDiffusionBalance
+class DynamicDiffusionBalance
 {
 public:
 
    enum Mode { DIFFUSION_PUSH, DIFFUSION_PULL, DIFFUSION_PUSHPULL };
 
-   DynamicLevelwiseDiffusionBalance( const uint_t maxIterations, const uint_t flowIterations ) :
+   DynamicDiffusionBalance( const uint_t maxIterations, const uint_t flowIterations, const bool levelwise = true ) :
       mode_( DIFFUSION_PUSHPULL ), maxIterations_( maxIterations ),
       defineProcessWeightLimitByMultipleOfMaxBlockWeight_( true ), checkForEarlyAbort_( true ), abortThreshold_( 1.0 ),
       adaptOutflowWithGlobalInformation_( true ), adaptInflowWithGlobalInformation_( true ),
       flowIterations_( flowIterations ), flowIterationsIncreaseStart_( maxIterations ), flowIterationsIncrease_( 0.0 ),
-      regardConnectivity_( true ), disregardConnectivityStart_( maxIterations ), outflowExceedFactor_( 1.0 ), inflowExceedFactor_( 1.0 )
+      regardConnectivity_( true ), disregardConnectivityStart_( maxIterations ), outflowExceedFactor_( 1.0 ), inflowExceedFactor_( 1.0 ),
+      levelwise_(levelwise)
    {}
    
    void setMode( const Mode mode ) { mode_ = mode; }
@@ -132,12 +139,18 @@ private:
    double inflowExceedFactor_;
    
    math::IntRandom< uint_t > random_;
+
+   /// All gets for levels are wrapped like
+   /// \code levelwise_ ? getCorrectLevel() : 0
+   ///
+   /// This allows to use the same algorithm for levelwise balancing as well as for balancing without levels.
+   bool levelwise_;
 };
 
 
 
 template< typename PhantomData_T >
-bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
+bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                                                     std::set< uint_t > & processesToRecvFrom,
                                                                     const PhantomBlockForest & phantomForest,
                                                                     const uint_t iteration )
@@ -145,7 +158,7 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
    auto & blockforest = phantomForest.getBlockForest();
    auto & neighborhood = phantomForest.getNeighborhood();
    
-   const uint_t levels = phantomForest.getNumberOfLevels();
+   const uint_t levels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1);
    
    // determine process weight (for every level)
 
@@ -154,9 +167,11 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
    std::vector< double > maxBlockWeight( levels, 0.0 );
    std::vector< double > processWeightLimit( levels, 0.0 );
    
+   //fill processWeight with total weight per level
+   //find maxBlockWeight per level
    for( auto it = targetProcess.begin(); it != targetProcess.end(); ++it )
    {
-      const uint_t level = it->first->getLevel();
+      const uint_t level = levelwise_ ? it->first->getLevel() : uint_t(0);
       const auto blockWeight = weight( it->first );
       WALBERLA_ASSERT_LESS( level, levels );
       WALBERLA_CHECK_GREATER_EQUAL( blockWeight, 0.0 );
@@ -223,7 +238,7 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
    mpi::BufferSystem alphaBufferSystem( MPIManager::instance()->comm(), 1708 ); // dynamicdiffusion = 100 121 110 097 109 105 099 100 105 102 102 117 115 105 111 110
    alphaBufferSystem.setReceiverInfo( alphaRanksToRecvFrom );
 
-   std::map< uint_t, double > alpha;
+   std::map< uint_t, double > alpha; //process rank -> alpha
    for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
    {
       WALBERLA_ASSERT( alpha.find(*n) == alpha.end() );
@@ -246,7 +261,7 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
       WALBERLA_ASSERT( alpha.find( np ) != alpha.end() );
       double a( 0.0 );
       recvIt.buffer() >> a;
-      alpha[np] = std::min( alpha[np], a );
+      alpha[np] = std::min( alpha[np], a ); //find smallest alpha between neighbors
    }
 
    // calculate flow for every edge (process-process connection) for every level
@@ -258,11 +273,11 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
    mpi::BufferSystem bufferSystem( MPIManager::instance()->comm(), 1709 ); // dynamicdiffusion = 100 121 110 097 109 105 099 100 105 102 102 117 115 105 111 110 + 1
    bufferSystem.setReceiverInfo( ranksToRecvFrom );
 
-   std::map< uint_t, std::vector< double > > flow;
+   std::map< uint_t, std::vector< double > > flow; //process rank -> flow on every level
    for( auto n = neighborhood.begin(); n != neighborhood.end(); ++n )
       flow[*n].resize( levels, 0.0 );
    
-   std::vector< double > localWeight( processWeight );
+   std::vector< double > localWeight( processWeight ); //per level
    
    double flowIterations( double_c( flowIterations_ ) );
    if( iteration >= flowIterationsIncreaseStart_ )
@@ -391,7 +406,8 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
                   for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
                   {
                      const auto * block = targetProcess[i].first;
-                     if( block->getLevel() == l && targetProcess[i].second == blockforest.getProcess() )
+                     const uint_t level = levelwise_ ? block->getLevel() : uint_t(0);
+                     if( level == l && targetProcess[i].second == blockforest.getProcess() )
                      {
                         const uint_t * faces = blockforest::getFaceNeighborhoodSectionIndices();
                         for( uint_t j = uint_t(0); j != uint_t(6); ++j )
@@ -464,7 +480,8 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
                   // no distinction between different connection types (face,edge,corner)
                   for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
                   {
-                     if( targetProcess[i].first->getLevel() == l && targetProcess[i].second == blockforest.getProcess() )
+                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t(0);
+                     if( level == l && targetProcess[i].second == blockforest.getProcess() )
                      {
                         bool connectedToPickedProcess( false );
                         for( auto n = targetProcess[i].first->getNeighborhood().begin();
@@ -481,7 +498,8 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
                   // blocks of this level, not yet assigned to another process and not only connected to other blocks of this process (= no 'inner' block)
                   for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
                   {
-                     if( targetProcess[i].first->getLevel() == l && targetProcess[i].second == blockforest.getProcess() &&
+                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t(0);
+                     if( level == l && targetProcess[i].second == blockforest.getProcess() &&
                          assigned.find(i) == assigned.end() )
                      {
                         bool connectedToOtherProcesses( false );
@@ -498,7 +516,8 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
                   // all blocks of this level, not yet assigned to another process and still assigned to this process
                   for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
                   {
-                     if( targetProcess[i].first->getLevel() == l && targetProcess[i].second == blockforest.getProcess() &&
+                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t(0);
+                     if( level == l && targetProcess[i].second == blockforest.getProcess() &&
                          assigned.find(i) == assigned.end() )
                         candidates.push_back( i );
                   }
@@ -508,7 +527,8 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
                   std::vector< uint_t > blocksToPick;
                   for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
                   {
-                     if( targetProcess[i].first->getLevel() == l && targetProcess[i].second == blockforest.getProcess() )
+                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t(0);
+                     if( level == l && targetProcess[i].second == blockforest.getProcess() )
                         blocksToPick.push_back( i );
                   }
                   while( ! blocksToPick.empty() )
@@ -522,7 +542,8 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
                   /*
                   for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
                   {
-                     if( targetProcess[i].first->getLevel() == l && targetProcess[i].second == blockforest.getProcess() )
+                     const uint_t level = levelwise_ ? targetProcess[i].first->getLevel() : uint_t(0);
+                     if( level == l && targetProcess[i].second == blockforest.getProcess() )
                         candidates.push_back( i );
                   }
                   */
@@ -629,7 +650,7 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
       for( uint_t i = uint_t(0); i != targetProcess.size(); ++i )
       {
          const auto * block = targetProcess[i].first;
-         const uint_t level = block->getLevel();
+         const uint_t level = levelwise_ ? block->getLevel() : uint_t(0);
          if( processLevel[level] )
          {
             if( regardConnectivity_ && iteration < disregardConnectivityStart_ )
@@ -801,7 +822,7 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
          blocksFromNeighbors[ it->first ].resize( levels );
          for( auto pr = it->second.begin(); pr != it->second.end(); ++pr )
          {
-            const uint_t level = blockforest.getLevelFromBlockId( pr->first );
+            const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( pr->first ) : uint_t(0);
             WALBERLA_ASSERT_LESS( level, blocksFromNeighbors[ it->first ].size() );
             blocksFromNeighbors[ it->first ][ level ].push_back( *pr );
          }
@@ -920,7 +941,7 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
             ++index;
          }
          WALBERLA_ASSERT( index < targetProcess.size() && targetProcess[ index ].first->getId() == it->first );
-         const uint_t level = targetProcess[ index ].first->getLevel();
+         const uint_t level = levelwise_ ? targetProcess[ index ].first->getLevel() : uint_t(0);
          
          auto p = it->second.begin();
          uint_t pickedProcess = *p;
@@ -974,7 +995,9 @@ bool DynamicLevelwiseDiffusionBalance< PhantomData_T >::operator()( std::vector<
    return ( iteration + uint_t(1) ) < maxIterations_;
 }
 
-
+///This class is deprecated use DynamicDiffusionBalance instead.
+template< typename PhantomData_T >
+using DynamicLevelwiseDiffusionBalance = DynamicDiffusionBalance<PhantomData_T> ;
 
 } // namespace blockforest
 } // namespace walberla
