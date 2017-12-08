@@ -91,7 +91,6 @@ inline HardContactSemiImplicitTimesteppingSolvers::HardContactSemiImplicitTimest
    , ccdID_(ccdID)
    , fcdID_(fcdID)
    , tt_(tt)
-   , syncVelBS_( mpi::MPIManager::instance()->comm(),  256)
    , erp_              ( real_c(0.8) )
    , maxIterations_    ( 10 )
    , iteration_        ( 0 )
@@ -1480,6 +1479,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
    // STEP1: Send velocities of shadow copies to owner
    //==========================================================
 
+   mpi::BufferSystem syncVelBS( mpi::MPIManager::instance()->comm(),  256);
    std::set<mpi::MPIRank> recvRanks; // potential message senders
    for (auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt)
    {
@@ -1497,7 +1497,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
       {
          i = body->index_;
 
-         mpi::SendBuffer& sb = syncVelBS_.sendBuffer( body->MPITrait.getOwner().rank_ );
+         mpi::SendBuffer& sb = syncVelBS.sendBuffer( body->MPITrait.getOwner().rank_ );
          if (sb.isEmpty()) sb << walberla::uint8_c(0);
 
          if( bodyCache.dv_[i] == Vec3() && bodyCache.dw_[i] == Vec3() ) {
@@ -1532,8 +1532,8 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
    //   size_t sum = bs.size();
    //   mpi::reduceInplace(sum, mpi::SUM);
    //   WALBERLA_LOG_DEVEL_ON_ROOT("communication size: " << sum);
-   syncVelBS_.setReceiverInfo(recvRanks, true);
-   syncVelBS_.sendAll();
+   syncVelBS.setReceiverInfo(recvRanks, true);
+   syncVelBS.sendAll();
 
    if (tt_ != NULL) tt_->stop("Velocity Sync Correction Communicate");
 
@@ -1545,7 +1545,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
    // Receiving force and torque contributions
    WALBERLA_LOG_DETAIL( "Parsing of velocity correction message starts...");
 
-   for( auto it = syncVelBS_.begin(); it != syncVelBS_.end(); ++it )
+   for( auto it = syncVelBS.begin(); it != syncVelBS.end(); ++it )
    {
       //      if (tt_ != NULL) tt_->start("Inside Loop");
       walberla::uint8_t tmp;
@@ -1604,7 +1604,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
 
          for( auto shadow = body->MPITrait.beginShadowOwners(); shadow != body->MPITrait.endShadowOwners(); ++shadow ) {
 
-            mpi::SendBuffer& sb = syncVelBS_.sendBuffer( shadow->rank_ );
+            mpi::SendBuffer& sb = syncVelBS.sendBuffer( shadow->rank_ );
             if (sb.isEmpty()) sb << walberla::uint8_c(0);
             packNotificationWithoutSender(*shadow, sb, RigidBodyVelocityCorrectionNotification( *(*body), bodyCache.v_[i], bodyCache.w_[i] ));
 
@@ -1628,8 +1628,8 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
 
    WALBERLA_LOG_DETAIL( "Communication of velocity update message starts...");
 
-   syncVelBS_.setReceiverInfo(recvRanks, true);
-   syncVelBS_.sendAll();
+   syncVelBS.setReceiverInfo(recvRanks, true);
+   syncVelBS.sendAll();
 
    if (tt_ != NULL) tt_->stop("Velocity Sync Update Communincate");
 
@@ -1641,7 +1641,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
    // Receiving velocity updates
    WALBERLA_LOG_DETAIL( "Parsing of velocity update message starts...");
 
-   for( auto it = syncVelBS_.begin(); it != syncVelBS_.end(); ++it )
+   for( auto it = syncVelBS.begin(); it != syncVelBS.end(); ++it )
    {
       //      if (tt_ != NULL) tt_->start("Inside Loop");
       walberla::uint8_t tmp;
