@@ -17,8 +17,7 @@ waLBerla_compile_test( FILES FieldIndexing3DTest.cpp FieldIndexing3DTest.cu )
 waLBerla_execute_test( NAME  FieldIndexing3DTest )
 
 waLBerla_compile_test( FILES codegen/CodegenJacobiGPU.cpp
-                             codegen/JacobiKernel2D.cuda.gen.py
-                             codegen/JacobiKernel3D.cuda.gen.py
+                             codegen/CudaJacobiKernel.py
                        DEPENDS blockforest timeloop gui )
 waLBerla_execute_test( NAME CodegenJacobiGPU )
 

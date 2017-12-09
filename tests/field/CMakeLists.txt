@@ -59,7 +59,7 @@ endif( WALBERLA_BUILD_WITH_MPI )
 
 # CodeGen Tests
 
-waLBerla_compile_test( FILES codegen/CodegenJacobiCPU.cpp codegen/JacobiKernel2D.gen.py codegen/JacobiKernel3D.gen.py
+waLBerla_compile_test( FILES codegen/CodegenJacobiCPU.cpp codegen/JacobiKernel.py
                        DEPENDS gui timeloop )
 waLBerla_execute_test( NAME CodegenJacobiCPU )
 

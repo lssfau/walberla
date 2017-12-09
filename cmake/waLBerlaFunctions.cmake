@@ -211,6 +211,7 @@ function ( waLBerla_add_executable )
     set( generatedSourceFiles )
     set( generatorSourceFiles )
     handle_python_codegen(sourceFiles generatedSourceFiles generatorSourceFiles codeGenRequired ${sourceFiles})
+
     if( NOT WALBERLA_BUILD_WITH_CODEGEN AND codeGenRequired)
         message(STATUS "Skipping ${ARG_NAME} since pystencils code generation is not enabled")
         return()

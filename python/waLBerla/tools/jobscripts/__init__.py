@@ -8,6 +8,8 @@ from waLBerla.tools.jobscripts.hornet          import createJobscript as _cr_hor
 from waLBerla.tools.jobscripts.supermuc        import createJobscript as _cr_supermuc
 from waLBerla.tools.jobscripts.supermuc_phase2 import createJobscript as _cr_supermuc2
 from waLBerla.tools.jobscripts.juqueen         import createJobscript as _cr_juqueen
+from waLBerla.tools.jobscripts.pizdaint_hybrid import createJobscript as _cr_pizdainth
+
 
 def createJobscript(*args, **kwargs):
     """
@@ -43,6 +45,6 @@ def createJobscript(*args, **kwargs):
     if kwargs['machine'].lower() == 'supermuc_phase2': return _cr_supermuc2 ( *args, **kwargs )
     if kwargs['machine'].lower() == 'juqueen' :        return _cr_juqueen   ( *args, **kwargs )
     if kwargs['machine'].lower() == 'hornet'  :        return _cr_hornet    ( *args, **kwargs )
-    
-    raise ValueError( "Unknown Machine: supported machines <supermuc,supermuc_phase2,juqueen,hornet>" )
+    if kwargs['machine'].lower() == 'pizdaint_hybrid': return _cr_pizdainth ( *args, **kwargs )
+    raise ValueError( "Unknown Machine: supported machines <supermuc,supermuc_phase2,juqueen,hornet,pizdaint_hybrid>" )
     
