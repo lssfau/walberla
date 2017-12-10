@@ -104,7 +104,8 @@ BoundaryFromVoxelFile<BoundaryHandlerT>::getIntersectedCellIntervals( const std:
    CellIntervalMap cellIntervals;
    for( auto blockIt = structuredBlockStorage_.begin(); blockIt != structuredBlockStorage_.end(); ++blockIt )
    {
-      auto ci = blockIt->template getData<BoundaryHandlerT>( boundaryHandlerID_ )->getFlagField()->xyzSizeWithGhostLayer();
+      auto flagField = BoundarySetter<BoundaryHandlerT>::getFlagField(*blockIt, boundaryHandlerID_);
+      auto ci = flagField->xyzSizeWithGhostLayer();
       structuredBlockStorage_.transformBlockLocalToGlobalCellInterval( ci, *blockIt );
       ci.intersect(fileCellInterval);
       if( !ci.empty() )

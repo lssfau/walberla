@@ -102,15 +102,14 @@ namespace initializer {
          for( auto setterIt = boundarySetters.begin(); setterIt != boundarySetters.end(); ++setterIt )
             setterIt->second.configure( *blockIt, handlingID_  );
 
-         auto handling = blockIt->template getData<Handling>( handlingID_ );
-         const auto flagField = handling->getFlagField();
+         const auto flagField = BoundarySetter<Handling>::getFlagField(*blockIt, handlingID_);
 
          const cell_idx_t width  = cell_idx_c( img.width() ) ;
          const cell_idx_t height = cell_idx_c( img.height()) ;
          CellInterval imgInterval( xOffset,          yOffset,            lowerExtrusionLimit,
                                    xOffset+ width-1, yOffset + height-1, upperExtrusionLimit-1 );
 
-         const cell_idx_t ghostLayers = cell_idx_c( handling->getFlagField()->nrOfGhostLayers() );
+         const cell_idx_t ghostLayers = cell_idx_c( flagField->nrOfGhostLayers() );
 
          if ( lowerExtrusionLimit < -ghostLayers )
             lowerExtrusionLimit = -ghostLayers;
