@@ -102,8 +102,8 @@ namespace cuda {
       template<typename T>  void addFieldIndexingParam( const T & indexing );
 
 
-      void configure( dim3 gridDim, dim3 blockDim );
-      void operator() () const;
+      void configure( dim3 gridDim, dim3 blockDim, std::size_t sharedMemSize = 0 );
+      void operator() ( cudaStream_t stream = 0 ) const;
 
 
    protected:
@@ -118,6 +118,7 @@ namespace cuda {
       bool configured_;
       dim3 gridDim_;
       dim3 blockDim_;
+      std::size_t sharedMemSize_;
 
       struct ParamInfo {
          std::vector<char> data;
@@ -178,7 +179,8 @@ namespace cuda {
    template<typename FP>
    Kernel<FP>::Kernel( FP funcPtr )
       : funcPtr_ ( funcPtr ),
-        configured_( false )
+        configured_( false ),
+        sharedMemSize_( 0 )
    {}
 
    template<typename FP>
@@ -206,12 +208,13 @@ namespace cuda {
    }
 
    template<typename FP>
-   void Kernel<FP>::configure( dim3 gridDim, dim3 blockDim )
+   void Kernel<FP>::configure( dim3 gridDim, dim3 blockDim, std::size_t sharedMemSize )
    {
       if ( ! configured_ )
       {
          gridDim_ = gridDim;
          blockDim_ = blockDim;
+         sharedMemSize_ = sharedMemSize;
          configured_ = true;
       }
       else
@@ -225,7 +228,7 @@ namespace cuda {
    }
 
    template<typename FP>
-   void Kernel<FP>::operator() () const
+   void Kernel<FP>::operator() ( cudaStream_t stream ) const
    {
       // check for correct number of parameter calls
 
@@ -235,7 +238,7 @@ namespace cuda {
       }
 
       // set the number of blocks and  threads,
-      WALBERLA_CUDA_CHECK( cudaConfigureCall( gridDim_, blockDim_ ) ); //TODO extend class to support streams
+      WALBERLA_CUDA_CHECK( cudaConfigureCall( gridDim_, blockDim_, sharedMemSize_, stream ) );
 
       // register all parameters
       for( auto paramIt = params_.begin(); paramIt != params_.end(); ++paramIt )  {

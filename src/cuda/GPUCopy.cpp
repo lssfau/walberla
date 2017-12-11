@@ -1,21 +1,22 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file GPUCopy.cpp
 //! \ingroup cuda
 //! \author Paulo Carvalho <prcjunior@inf.ufpr.br>
+//! \author João Victor Tozatti Risso <jvtrisso@inf.ufpr.br>
 //! \brief Copy routines of 4D intervals involving GPU buffers.
 //
 //======================================================================================================================
@@ -29,116 +30,365 @@
 namespace walberla {
 namespace cuda {
 
-
-void copyDevToDevFZYXRestricted( const cudaPitchedPtr& dst, const cudaPitchedPtr& src,
-                                 uint_t typeSz, uint_t dstAllocZ, uint_t srcAllocZ,
-                                 uint_t dstX, uint_t dstY, uint_t dstZ, uint_t dstF,
-                                 uint_t srcX, uint_t srcY, uint_t srcZ, uint_t srcF,
-                                 uint_t Nx, uint_t Ny, uint_t Nz, uint_t Nf )
+void copyDevToDevFZYX( const cudaPitchedPtr& dst, const cudaPitchedPtr& src,
+                       std::tuple< uint_t, uint_t, uint_t, uint_t > & dstOffset,
+                       std::tuple< uint_t, uint_t, uint_t, uint_t > & srcOffset,
+                       uint_t dstAllocSizeZ, uint_t srcAllocSizeZ, uint_t typeSize,
+                       std::tuple< uint_t, uint_t, uint_t, uint_t > & intervalSize,
+                       cudaStream_t copyStream )
 {
-   WALBERLA_ASSERT( Nf == 1 || ( Nz == dstAllocZ && Nz == srcAllocZ ) );
+   const uint_t & Nx = std::get<0>(intervalSize),
+                & Ny = std::get<1>(intervalSize),
+                & Nz = std::get<2>(intervalSize),
+                & Nf = std::get<3>(intervalSize);
 
-   cudaMemcpy3DParms p;
-   memset( &p, 0, sizeof(p) );
+   const uint_t & srcX = std::get<0>(srcOffset),
+                & srcY = std::get<1>(srcOffset),
+                & srcZ = std::get<2>(srcOffset),
+                & srcF = std::get<3>(srcOffset);
 
-   p.srcPos.x = srcX * typeSz;
-   p.srcPos.y = srcY;
-   p.srcPos.z = srcF * srcAllocZ + srcZ;
-   p.srcPtr.ptr = src.ptr;
-   p.srcPtr.pitch = src.pitch;
-   p.srcPtr.xsize = src.xsize;
-   p.srcPtr.ysize = src.ysize;
+   const uint_t & dstX = std::get<0>(dstOffset),
+                & dstY = std::get<1>(dstOffset),
+                & dstZ = std::get<2>(dstOffset),
+                & dstF = std::get<3>(dstOffset);
 
-   p.dstPos.x = dstX * typeSz;
-   p.dstPos.y = dstY;
-   p.dstPos.z = dstF * dstAllocZ + dstZ;
-   p.dstPtr.ptr = dst.ptr;
-   p.dstPtr.pitch = dst.pitch;
-   p.dstPtr.xsize = dst.xsize;
-   p.dstPtr.ysize = dst.ysize;
+   auto copyFunctor = [&](uint_t dstCoordF, uint_t srcCoordF, uint_t fIntervalSize) {
+      WALBERLA_ASSERT( fIntervalSize == 1 || ( Nz == dstAllocSizeZ && Nz == srcAllocSizeZ ) );
 
-   p.extent.width = Nx * typeSz;
-   p.extent.height = Ny;
-   p.extent.depth = Nz * Nf;
+      cudaMemcpy3DParms p;
+      memset( &p, 0, sizeof(p) );
 
-   p.kind = cudaMemcpyDeviceToDevice;
+      p.srcPos = make_cudaPos( srcX * typeSize, srcY, srcCoordF * srcAllocSizeZ + srcZ );
+      p.srcPtr = make_cudaPitchedPtr( src.ptr, src.pitch, src.xsize, src.ysize );
 
-   WALBERLA_CUDA_CHECK( cudaMemcpy3D(&p) );
+      p.dstPos = make_cudaPos( dstX * typeSize, dstY, dstCoordF * dstAllocSizeZ + dstZ );
+      p.dstPtr = make_cudaPitchedPtr( dst.ptr, dst.pitch, dst.xsize, dst.ysize );
+
+      p.extent = make_cudaExtent( Nx * typeSize, Ny, Nz * fIntervalSize );
+      p.kind = cudaMemcpyDeviceToDevice;
+
+      if ( copyStream == 0 )
+      {
+         WALBERLA_CUDA_CHECK( cudaMemcpy3D(&p) );
+      }
+      else
+      {
+         WALBERLA_CUDA_CHECK( cudaMemcpy3DAsync(&p, copyStream) );
+      }
+   };
+
+   if( Nf == 1 || ( Nz == dstAllocSizeZ && Nz == srcAllocSizeZ ) )
+   {
+      copyFunctor( dstF, srcF, Nf );
+   }
+   else
+   {
+      for( uint_t f = 0; f < Nf; ++f )
+      {
+         copyFunctor( dstF + f, srcF + f, uint_c(1) );
+      }
+   }
 }
 
 
-void copyHostToDevFZYXRestricted( const cudaPitchedPtr& dst, unsigned char* src,
-                                  uint_t typeSz, uint_t dstAllocZ, uint_t srcAllocZ,
-                                  uint_t dstX, uint_t dstY, uint_t dstZ, uint_t dstF,
-                                  uint_t srcX, uint_t srcY, uint_t srcZ, uint_t srcF,
-                                  uint_t Nx, uint_t Ny, uint_t Nz, uint_t Nf )
+void copyDevToDevZYXF( const cudaPitchedPtr& dst, const cudaPitchedPtr& src,
+                       std::tuple< uint_t, uint_t, uint_t, uint_t > & dstOffset,
+                       std::tuple< uint_t, uint_t, uint_t, uint_t > & srcOffset,
+                       uint_t dstAllocSizeY, uint_t srcAllocSizeY, uint_t typeSize,
+                       std::tuple< uint_t, uint_t, uint_t, uint_t > & intervalSize,
+                       cudaStream_t copyStream )
 {
-   WALBERLA_ASSERT( Nf == 1 || ( Nz == dstAllocZ && Nz == srcAllocZ ) );
+   const uint_t & Nx = std::get<0>(intervalSize),
+                & Ny = std::get<1>(intervalSize),
+                & Nz = std::get<2>(intervalSize),
+                & Nf = std::get<3>(intervalSize);
 
-   cudaMemcpy3DParms p;
-   memset( &p, 0, sizeof(p) );
+   const uint_t & srcX = std::get<0>(srcOffset),
+                & srcY = std::get<1>(srcOffset),
+                & srcZ = std::get<2>(srcOffset),
+                & srcF = std::get<3>(srcOffset);
 
-   p.srcPos.x = srcX * typeSz;
-   p.srcPos.y = srcY;
-   p.srcPos.z = srcF * srcAllocZ + srcZ;
-   p.srcPtr.ptr = src;
-   p.srcPtr.pitch = Nx * typeSz;
-   p.srcPtr.xsize = Nx * typeSz;
-   p.srcPtr.ysize = Ny;
+   const uint_t & dstX = std::get<0>(dstOffset),
+                & dstY = std::get<1>(dstOffset),
+                & dstZ = std::get<2>(dstOffset),
+                & dstF = std::get<3>(dstOffset);
 
-   p.dstPos.x = dstX * typeSz;
-   p.dstPos.y = dstY;
-   p.dstPos.z = dstF * dstAllocZ + dstZ;
-   p.dstPtr.ptr = dst.ptr;
-   p.dstPtr.pitch = dst.pitch;
-   p.dstPtr.xsize = dst.xsize;
-   p.dstPtr.ysize = dst.ysize;
+   auto copyFunctor = [&](uint_t dstCoordZ, uint_t srcCoordZ, uint_t zIntervalSize) {
+      cudaMemcpy3DParms p;
+      memset( &p, 0, sizeof(p) );
 
-   p.extent.width = Nx * typeSz;
-   p.extent.height = Ny;
-   p.extent.depth = Nz * Nf;
+      p.srcPos = make_cudaPos( srcF * typeSize, srcX, srcCoordZ * srcAllocSizeY + srcY );
+      p.srcPtr = make_cudaPitchedPtr( src.ptr, src.pitch, src.xsize, src.ysize );
 
-   p.kind = cudaMemcpyHostToDevice;
+      p.dstPos = make_cudaPos( dstF * typeSize, dstX, dstCoordZ * dstAllocSizeY + dstY );
+      p.dstPtr = make_cudaPitchedPtr( dst.ptr, dst.pitch, dst.xsize, dst.ysize );
 
-   WALBERLA_CUDA_CHECK( cudaMemcpy3D(&p) );
+      p.extent = make_cudaExtent( Nf * typeSize, Nx, Ny * zIntervalSize );
+      p.kind = cudaMemcpyDeviceToDevice;
+
+      if ( copyStream == 0 )
+      {
+         WALBERLA_CUDA_CHECK( cudaMemcpy3D(&p) );
+      }
+      else
+      {
+         WALBERLA_CUDA_CHECK( cudaMemcpy3DAsync(&p, copyStream) );
+      }
+   };
+
+   if ( Nz == 1 || ( Ny == dstAllocSizeY && Ny == srcAllocSizeY ) )
+   {
+      copyFunctor( dstZ, srcZ, Nz );
+   }
+   else
+   {
+      for( uint_t z = 0; z < Nz; ++z )
+      {
+         copyFunctor( dstZ + z, srcZ + z, 1 );
+      }
+   }
 }
 
 
-void copyDevToHostFZYXRestricted( unsigned char* dst, const cudaPitchedPtr& src,
-                                  uint_t typeSz, uint_t dstAllocZ, uint_t srcAllocZ,
-                                  uint_t dstX, uint_t dstY, uint_t dstZ, uint_t dstF,
-                                  uint_t srcX, uint_t srcY, uint_t srcZ, uint_t srcF,
-                                  uint_t Nx, uint_t Ny, uint_t Nz, uint_t Nf )
+void copyHostToDevFZYX( const cudaPitchedPtr& dst, unsigned char* src,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & dstOffset,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & srcOffset,
+                        uint_t dstAllocSizeZ, uint_t srcAllocSizeZ, uint_t typeSize,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & intervalSize,
+                        cudaStream_t copyStream )
 {
-   cudaMemcpy3DParms p;
-   memset( &p, 0, sizeof(p) );
+   const uint_t & Nx = std::get<0>(intervalSize),
+                & Ny = std::get<1>(intervalSize),
+                & Nz = std::get<2>(intervalSize),
+                & Nf = std::get<3>(intervalSize);
 
-   p.srcPos.x = srcX * typeSz;
-   p.srcPos.y = srcY;
-   p.srcPos.z = srcF * srcAllocZ + srcZ;
-   p.srcPtr.ptr = src.ptr;
-   p.srcPtr.pitch = src.pitch;
-   p.srcPtr.xsize = src.xsize;
-   p.srcPtr.ysize = src.ysize;
+   const uint_t & srcX = std::get<0>(srcOffset),
+                & srcY = std::get<1>(srcOffset),
+                & srcZ = std::get<2>(srcOffset),
+                & srcF = std::get<3>(srcOffset);
 
-   p.dstPos.x = dstX * typeSz;
-   p.dstPos.y = dstY;
-   p.dstPos.z = dstF * dstAllocZ + dstZ;
-   p.dstPtr.ptr = dst;
-   p.dstPtr.pitch = Nx * typeSz;
-   p.dstPtr.xsize = Nx * typeSz;
-   p.dstPtr.ysize = Ny;
+   const uint_t & dstX = std::get<0>(dstOffset),
+                & dstY = std::get<1>(dstOffset),
+                & dstZ = std::get<2>(dstOffset),
+                & dstF = std::get<3>(dstOffset);
 
-   p.extent.width = Nx * typeSz;
-   p.extent.height = Ny;
-   p.extent.depth = Nz * Nf;
+   auto copyFunctor = [&](uint_t dstCoordF, uint_t srcCoordF, uint_t fIntervalSize) {
+      cudaMemcpy3DParms p;
+      memset( &p, 0, sizeof(p) );
 
-   p.kind = cudaMemcpyDeviceToHost;
+      p.srcPos = make_cudaPos( srcX * typeSize, srcY, srcCoordF * srcAllocSizeZ + srcZ );
+      p.srcPtr = make_cudaPitchedPtr( src, Nx * typeSize, Nx * typeSize, Ny );
 
-   WALBERLA_CUDA_CHECK( cudaMemcpy3D(&p) );
+      p.dstPos = make_cudaPos( dstX * typeSize, dstY, dstCoordF * dstAllocSizeZ + dstZ );
+      p.dstPtr = make_cudaPitchedPtr( dst.ptr, dst.pitch, dst.xsize, dst.ysize );
+
+      p.extent = make_cudaExtent( Nx * typeSize, Ny, Nz * fIntervalSize );
+      p.kind = cudaMemcpyHostToDevice;
+
+      if (copyStream == 0)
+      {
+         WALBERLA_CUDA_CHECK( cudaMemcpy3D(&p) );
+      }
+      else
+      {
+         // Using cudaMemcpy3DAsync requires page-locked memory on the host!
+         WALBERLA_CUDA_CHECK( cudaMemcpy3DAsync(&p, copyStream) );
+      }
+   };
+
+   if ( Nf == 1 || ( Nz == dstAllocSizeZ ) )
+   {
+      copyFunctor( dstF, srcF, Nf );
+   }
+   else
+   {
+      for( uint_t f = 0; f < Nf; ++f )
+      {
+         copyFunctor( dstF + f, srcF + f, uint_c(1) );
+      }
+   }
+}
+
+void copyHostToDevZYXF( const cudaPitchedPtr& dst, unsigned char* src,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & dstOffset,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & srcOffset,
+                        uint_t dstAllocSizeY, uint_t srcAllocSizeY, uint_t typeSize,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & intervalSize,
+                        cudaStream_t copyStream )
+{
+   const uint_t & Nx = std::get<0>(intervalSize),
+                & Ny = std::get<1>(intervalSize),
+                & Nz = std::get<2>(intervalSize),
+                & Nf = std::get<3>(intervalSize);
+
+   const uint_t & srcX = std::get<0>(srcOffset),
+                & srcY = std::get<1>(srcOffset),
+                & srcZ = std::get<2>(srcOffset),
+                & srcF = std::get<3>(srcOffset);
+
+   const uint_t & dstX = std::get<0>(dstOffset),
+                & dstY = std::get<1>(dstOffset),
+                & dstZ = std::get<2>(dstOffset),
+                & dstF = std::get<3>(dstOffset);
+
+   auto copyFunctor = [&](uint_t dstCoordZ, uint_t srcCoordZ, uint_t zIntervalSize) {
+         cudaMemcpy3DParms p;
+         memset( &p, 0, sizeof(p) );
+
+         p.srcPos = make_cudaPos( srcF * typeSize, srcX, srcCoordZ * srcAllocSizeY + srcY );
+         p.srcPtr = make_cudaPitchedPtr( src, Nf * typeSize, Nf * typeSize, Nx );
+
+         p.dstPos = make_cudaPos( dstF * typeSize, dstX, dstCoordZ * dstAllocSizeY + dstY );
+         p.dstPtr = make_cudaPitchedPtr( dst.ptr, dst.pitch, dst.xsize, dst.ysize );
+
+         p.extent = make_cudaExtent( Nf * typeSize, Nx, Ny * zIntervalSize );
+         p.kind = cudaMemcpyHostToDevice;
+
+         if ( copyStream == 0 )
+         {
+            WALBERLA_CUDA_CHECK( cudaMemcpy3D(&p) );
+         }
+         else
+         {
+            // Using cudaMemcpy3DAsync requires page-locked memory on the host!
+            WALBERLA_CUDA_CHECK( cudaMemcpy3DAsync(&p, copyStream) );
+         }
+   };
+
+   if ( Nz == 1 || ( Ny == dstAllocSizeY && Ny == srcAllocSizeY ) )
+   {
+      copyFunctor( dstZ, srcZ, Nz );
+   }
+   else
+   {
+      for( uint_t z = 0; z < Nz; ++z )
+      {
+         copyFunctor( dstZ + z, srcZ + z, 1 );
+      }
+   }
 }
 
 
+void copyDevToHostFZYX( unsigned char* dst, const cudaPitchedPtr& src,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & dstOffset,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & srcOffset,
+                        uint_t dstAllocSizeZ, uint_t srcAllocSizeZ, uint_t typeSize,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & intervalSize,
+                        cudaStream_t copyStream )
+{
+   const uint_t & Nx = std::get<0>(intervalSize),
+                & Ny = std::get<1>(intervalSize),
+                & Nz = std::get<2>(intervalSize),
+                & Nf = std::get<3>(intervalSize);
+
+   const uint_t & srcX = std::get<0>(srcOffset),
+                & srcY = std::get<1>(srcOffset),
+                & srcZ = std::get<2>(srcOffset),
+                & srcF = std::get<3>(srcOffset);
+
+   const uint_t & dstX = std::get<0>(dstOffset),
+                & dstY = std::get<1>(dstOffset),
+                & dstZ = std::get<2>(dstOffset),
+                & dstF = std::get<3>(dstOffset);
+
+   auto copyFunctor = [&](uint_t dstCoordF, uint_t srcCoordF, uint_t fIntervalSize) {
+      cudaMemcpy3DParms p;
+      memset( &p, 0, sizeof(p) );
+
+      p.srcPos = make_cudaPos( srcX * typeSize, srcY, srcCoordF * srcAllocSizeZ + srcZ );
+      p.srcPtr = make_cudaPitchedPtr( src.ptr, src.pitch, src.xsize, src.ysize );
+
+      p.dstPos = make_cudaPos( dstX * typeSize, dstY, dstCoordF * dstAllocSizeZ + dstZ );
+      p.dstPtr = make_cudaPitchedPtr( dst, Nx * typeSize, Nx * typeSize, Ny );
+
+      p.extent = make_cudaExtent( Nx * typeSize, Ny, Nz * fIntervalSize );
+      p.kind = cudaMemcpyDeviceToHost;
+
+      if ( copyStream == 0 )
+      {
+         WALBERLA_CUDA_CHECK( cudaMemcpy3D(&p) );
+      }
+      else
+      {
+         // Using cudaMemcpy3DAsync requires page-locked memory on the host!
+         WALBERLA_CUDA_CHECK( cudaMemcpy3DAsync(&p, copyStream) );
+      }
+   };
+
+   if( Nf == 1 || ( Nz == dstAllocSizeZ && Nz == srcAllocSizeZ ) )
+   {
+      copyFunctor( dstF, srcF, Nf );
+   }
+   else
+   {
+      for( uint_t f = 0; f < Nf; ++f )
+      {
+         copyFunctor( dstF + f, srcF + f, 1 );
+      }
+   }
+}
+
+
+void copyDevToHostZYXF( unsigned char* dst, const cudaPitchedPtr& src,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & dstOffset,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & srcOffset,
+                        uint_t dstAllocSizeY, uint_t srcAllocSizeY, uint_t typeSize,
+                        std::tuple< uint_t, uint_t, uint_t, uint_t > & intervalSize,
+                        cudaStream_t copyStream )
+{
+   const uint_t & Nx = std::get<0>(intervalSize),
+                & Ny = std::get<1>(intervalSize),
+                & Nz = std::get<2>(intervalSize),
+                & Nf = std::get<3>(intervalSize);
+
+   const uint_t & srcX = std::get<0>(srcOffset),
+                & srcY = std::get<1>(srcOffset),
+                & srcZ = std::get<2>(srcOffset),
+                & srcF = std::get<3>(srcOffset);
+
+   const uint_t & dstX = std::get<0>(dstOffset),
+                & dstY = std::get<1>(dstOffset),
+                & dstZ = std::get<2>(dstOffset),
+                & dstF = std::get<3>(dstOffset);
+
+   auto copyFunctor = [&](uint_t dstCoordZ, uint_t srcCoordZ, uint_t zIntervalSize) {
+      cudaMemcpy3DParms p;
+      memset( &p, 0, sizeof(p) );
+
+      p.srcPos = make_cudaPos( srcF * typeSize, srcX, srcCoordZ * srcAllocSizeY + srcY );
+      p.srcPtr = make_cudaPitchedPtr( src.ptr, src.pitch, src.xsize, src.ysize );
+
+      p.dstPos = make_cudaPos( dstF * typeSize, dstX, dstCoordZ * dstAllocSizeY + dstY );
+      p.dstPtr = make_cudaPitchedPtr( dst, Nf * typeSize, Nf * typeSize, Nx );
+
+      p.extent = make_cudaExtent( Nf * typeSize, Nx, Ny * zIntervalSize );
+
+      p.kind = cudaMemcpyDeviceToHost;
+
+      if ( copyStream == 0 )
+      {
+         WALBERLA_CUDA_CHECK( cudaMemcpy3D(&p) );
+      }
+      else
+      {
+         // Using cudaMemcpy3DAsync requires page-locked memory on the host!
+         WALBERLA_CUDA_CHECK( cudaMemcpy3DAsync(&p, copyStream) );
+      }
+   };
+
+
+   if ( Nz == 1 || ( Ny == dstAllocSizeY && Ny == srcAllocSizeY ) )
+   {
+      copyFunctor( dstZ, srcZ, Nz );
+   }
+   else
+   {
+      for( uint_t z = 0; z < Nz; ++z )
+      {
+         copyFunctor( dstZ + z, srcZ + z, 1 );
+      }
+   }
+}
 
 } // namespace cuda
 } // namespace walberla
