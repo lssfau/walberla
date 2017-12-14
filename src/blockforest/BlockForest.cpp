@@ -982,7 +982,7 @@ void BlockForest::refresh()
          for( auto phantom = phantomBlocks.begin(); phantom != phantomBlocks.end() && !performUpdate; ++phantom )
          {
             const auto & sourceProcess = phantom->second->getSourceProcess();
-            for( auto it = sourceProcess.begin(); it != sourceProcess.end(); ++it )
+            for( auto it = sourceProcess.begin(); it != sourceProcess.end() && !performUpdate; ++it )
                performUpdate = ( *it != process_ );
          }
          mpi::allReduceInplace( performUpdate, mpi::LOGICAL_OR );
