@@ -1,0 +1,59 @@
+#pragma once
+
+#include <pe/Types.h>
+#include "pe/rigidbody/Box.h"
+#include "pe/rigidbody/Capsule.h"
+#include "pe/rigidbody/CylindricalBoundary.h"
+#include "pe/rigidbody/Plane.h"
+#include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Union.h"
+#include "pe/utility/BodyCast.h"
+
+#include <pe/raytracing/Ray.h>
+
+#include <boost/tuple/tuple.hpp>
+
+namespace walberla {
+   namespace pe {
+      namespace raytracing {
+         inline bool intersects(SphereID sphere, Ray* ray, real_t &t);
+         inline bool intersects(PlaneID plane, Ray* ray, real_t &t);
+         
+         struct IntersectsFunctor
+         {
+            Ray* ray_;
+            real_t* t_;
+            
+            IntersectsFunctor(Ray* ray, real_t* t) : ray_(ray), t_(t) {}
+            
+            template< typename BodyType >
+            bool operator()( BodyType* bd1 ) { return intersects( bd1, ray_, t_); }
+         };
+         
+         inline bool intersects(SphereID sphere, Ray* ray, real_t* t) {
+            Vec3 displacement = ray->origin - sphere->getPosition();
+            real_t a = ray->direction * ray->direction;
+            real_t b = real_t(2.) * (displacement * ray->direction);
+            real_t c = (displacement * displacement) - (sphere->getRadius() * sphere->getRadius());
+            real_t radicand = b*b - real_t(4.)*c;
+            if (radicand < real_t(1e-4)) {
+               // with radicand smaller than 0, sphere is not hit by ray
+               // (no solution for quadratic equation)
+               // radicand being 0 means sphere is only touched by ray
+               *t = real_t(INFINITY);
+               return false;
+            }
+            real_t root = sqrt(radicand);
+            real_t t0 = (-b - root) / (real_t(2.) * a); // point where the ray enters the sphere
+            real_t t1 = (-b + root) / (real_t(2.) * a); // point where the ray leaves the sphere
+            *t = (t0 < t1) ? t0 : t1; //assign the closest hit point to t
+            return true;
+         }
+         
+         inline bool intersects(PlaneID plane, Ray* ray, real_t* t) {
+            // ToDo
+            return false;
+         }
+      }
+   }
+}
