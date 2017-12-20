@@ -35,15 +35,15 @@ namespace walberla {
             real_t a = ray->direction * ray->direction;
             real_t b = real_t(2.) * (displacement * ray->direction);
             real_t c = (displacement * displacement) - (sphere->getRadius() * sphere->getRadius());
-            real_t radicand = b*b - real_t(4.)*c;
-            if (radicand < real_t(1e-4)) {
-               // with radicand smaller than 0, sphere is not hit by ray
+            real_t discriminant = b*b - real_t(4.)*a*c;
+            if (discriminant < real_t(1e-4)) {
+               // with discriminant smaller than 0, sphere is not hit by ray
                // (no solution for quadratic equation)
-               // radicand being 0 means sphere is only touched by ray
+               // with discriminant being 0, sphere only tangentially hits the ray (not enough)
                *t = real_t(INFINITY);
                return false;
             }
-            real_t root = sqrt(radicand);
+            real_t root = sqrt(discriminant);
             real_t t0 = (-b - root) / (real_t(2.) * a); // point where the ray enters the sphere
             real_t t1 = (-b + root) / (real_t(2.) * a); // point where the ray leaves the sphere
             *t = (t0 < t1) ? t0 : t1; //assign the closest hit point to t
