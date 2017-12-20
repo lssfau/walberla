@@ -1,0 +1,69 @@
+//======================================================================================================================
+//
+//  This file is part of waLBerla. waLBerla is free software: you can 
+//  redistribute it and/or modify it under the terms of the GNU General Public
+//  License as published by the Free Software Foundation, either version 3 of 
+//  the License, or (at your option) any later version.
+//  
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//  for more details.
+//  
+//  You should have received a copy of the GNU General Public License along
+//  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
+//
+//! \file mesh_module.dox
+//! \ingroup mesh
+//! \author Christian Godenschwager <christian.godenschwager@fau.de>
+//
+//======================================================================================================================
+
+namespace walberla {
+namespace mesh {
+
+/**
+\defgroup mesh mesh - surface meshes in waLBerla
+
+\section meshhandling How are meshes handled in the mesh module?
+
+\subsection openmesh OpenMesh
+We use OpenMesh (https://www.openmesh.org/) for loading, storing and manipulating meshes in waLBerla.
+OpenMesh is a C++-library developed at RWTH Aachen based on the halfedge data structure.
+Details can be found at the <a href="https://www.openmesh.org/media/Documentations/OpenMesh-Doc-Latest/index.html">documentation of OpenMesh</a>.
+
+\subsection types Mesh data types
+To make things easy, we have predefined some OpenMesh types in TriangleMeshes.h. mesh::TriangleMesh is the default and should be used as first choice.
+Points and normals use walberla::real_t as the scalar type while everything else sticks to OpenMesh's defaults. FloatTriangleMesh uses float as the scalar type used 
+in points and normals. You can use mesh::FloatTriangleMesh to save some memory if you have large meshes.
+mesh::PythonTriangleMesh matches the mesh definition used by OpenMesh's python module. So if you want to fiddle with meshes from C++ and Python
+mesh::PythonTriangleMesh might be the right choice.
+
+\subsection load Loading meshes
+Meshes can be loaded from any file format supported by OpenMesh including obj, off, ply, stl and a custom om format.
+To load a mesh at large scale simulations waLBerla provides the function readAndBroadcast() which reads a file from disk on a single process and broadcasts it.
+This way the pressure on the file system is kept to a minmum.
+
+\subsection conversion Conversion between OpenMesh and waLBerla data types
+OpenMesh and waLBerla use different vector data types. The file MatrixVectorOperations.h provides the functions toWalberla() and toOpenMesh()
+to convert between both vector data types. Additionally, it provides a multiplication operator for OpenMesh's vector and waLBerla's math::Matrix3 class.
+
+Additional to the OpenMesh support, waLBerla has a geometry::TriangleMesh class in its geometry module. This class has a simple, adjacency-style
+data structure. If the use of this mesh type is still required, conversion routines convertOpenMeshToWalberla() and convertWalberlaToOpenMesh()
+can be found in MeshConversion.h.
+
+
+\section setup How can I setup my simulation using the mesh module?
+
+\subsection  distance Initilization of mesh distance data structures
+To set up the simulation using a surface mesh, waLBerla needs to compute distances to the surface and determine the location of points relative to mesh.
+The necessary data structure is called mesh::TriangleDistance and is defined in DistanceComputations.h.
+It adds the necessary information to the mesh's triangles and offers functions to compute a signed point<->triangle distance.
+It also offers to compute a asigned point<->mesh distance but this is only recommended for smaller meshes with only a few triangles.
+Larger meshes should use a \ref mesh::distance_octree::DistanceOctree "mesh::DistanceOctree" which reduces the number of evaluated point<->mesh distances significantly from \f$\mathcal O(n)\f$ to \f$\mathcal O(\log n)\f$.
+If you are only interested whether a point is contained in the mesh you can use the \ref mesh::distance_octree::DistanceOctree "mesh::DistanceOctree" with geometry::ContainmentOctree to get faster results.
+
+**/
+
+}
+}

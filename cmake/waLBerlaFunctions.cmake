@@ -336,7 +336,7 @@ function ( waLBerla_execute_test )
     
    set( options NO_MODULE_LABEL )
    set( oneValueArgs NAME PROCESSES )
-   set( multiValueArgs COMMAND LABELS CONFIGURATIONS )
+   set( multiValueArgs COMMAND LABELS CONFIGURATIONS DEPENDS_ON_TARGETS )
    cmake_parse_arguments( ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
    if( NOT ARG_NAME )
@@ -344,9 +344,16 @@ function ( waLBerla_execute_test )
    endif()
    
    if( NOT ARG_COMMAND AND NOT TARGET ${ARG_NAME} )
-      message ( STATUS "Skipping ${ARG_NAME} since the corresponding test was not built" )
+      message ( STATUS "Skipping test ${ARG_NAME} since the corresponding target is not built" )
       return()
-   endif()  
+   endif() 
+
+   foreach( dependency_target ${ARG_DEPENDS_ON_TARGETS} )
+      if( NOT TARGET ${dependency_target} )
+         message ( STATUS "Skipping test ${ARG_NAME} since the target ${dependency_target} is not built" )
+         return()
+      endif()
+   endforeach( dependency_target )
    
    if( NOT ARG_PROCESSES )
       set ( numProcesses 1 )

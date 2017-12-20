@@ -22,6 +22,7 @@
 #include "blockforest/python/Exports.h"
 #include "field/GhostLayerField.h"
 #include "field/python/Exports.h"
+#include "mesh/python/Exports.h"
 #include "geometry/python/Exports.h"
 #include "postprocessing/python/Exports.h"
 #include "python_coupling/Manager.h"
@@ -115,6 +116,10 @@ struct InitObject
 
       // Timeloop
       pythonManager->addExporterFunction( timeloop::exportModuleToPython );
+
+#ifdef WALBERLA_BUILD_WITH_OPENMESH
+      pythonManager->addExporterFunction( mesh::exportModuleToPython<FlagFieldTypes> );
+#endif
 
 #ifdef WALBERLA_BUILD_WITH_CUDA
       using walberla::cuda::GPUField;
