@@ -13,20 +13,51 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file all.h
+//! \file FieldDataSwapper.h
 //! \ingroup pe_coupling
-//! \author Florian Schornbaum <florian.schornbaum@fau.de>
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
-//! \author Sebastian Eibl <sebastian.eibl@fau.de>
-//! \brief Collective header file for module pe_coupling
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "discrete_particle_methods/all.h"
-#include "mapping/all.h"
-#include "geometry/all.h"
-#include "partially_saturated_cells_method/all.h"
-#include "momentum_exchange_method/all.h"
-#include "utility/all.h"
+#include "core/math/Vector3.h"
+
+#include "field/GhostLayerField.h"
+
+namespace walberla {
+namespace pe_coupling {
+namespace discrete_particle_methods {
+
+using math::Vector3;
+
+/*!\brief Swaps the data of two identical fields.
+ *
+ * This functionality is e.g. used to store a former version of the velocity field to calculate the time derivative
+ * of the velocity numerically.
+ */
+template< typename Field_T >
+class FieldDataSwapper
+{
+public:
+
+   FieldDataSwapper( const BlockDataID & srcFieldID, const BlockDataID & dstFieldID )
+      : srcFieldID_( srcFieldID ), dstFieldID_( dstFieldID )
+   { }
+
+   void operator()(IBlock * const block)
+   {
+      Field_T* srcField = block->getData< Field_T >( srcFieldID_ );
+      Field_T* dstField = block->getData< Field_T >( dstFieldID_ );
+      srcField->swapDataPointers(dstField);
+   }
+
+private:
+   const BlockDataID srcFieldID_;
+   const BlockDataID dstFieldID_;
+};
+
+
+} // namespace discrete_particle_methods
+} // namespace pe_coupling
+} // namespace walberla

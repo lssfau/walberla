@@ -25,3 +25,4 @@
 #include "PeBodyOverlapFunctions.h"
 #include "PeIntersectionRatio.h"
 #include "PeOverlapFraction.h"
+#include "SphereEquivalentDiameter.h"
