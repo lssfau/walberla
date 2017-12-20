@@ -45,7 +45,7 @@ namespace pe_coupling {
  * As several bodies could intersect with one cell, the pairs are stored in a vector with the size of the amount of intersecting bodies.
  *
  */
-void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, const shared_ptr<StructuredBlockStorage> & blockStorage,
+void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, StructuredBlockStorage & blockStorage,
                                   const BlockDataID bodyAndVolumeFractionFieldID )
 {
    typedef std::pair< pe::BodyID, real_t >                              BodyAndVolumeFraction_T;
@@ -63,9 +63,9 @@ void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, const s
 
       // get the cell's center
       Vector3<real_t> cellCenter;
-      cellCenter = blockStorage->getBlockLocalCellCenter( block, cell );
+      cellCenter = blockStorage.getBlockLocalCellCenter( block, cell );
 
-      const real_t fraction = overlapFractionPe( *body, cellCenter, blockStorage->dx( blockStorage->getLevel( block ) ) );
+      const real_t fraction = overlapFractionPe( *body, cellCenter, blockStorage.dx( blockStorage.getLevel( block ) ) );
 
       // if the cell intersected with the body, store a pointer to that body and the corresponding volume fraction in the field
       if( fraction > real_t(0) )
@@ -100,7 +100,7 @@ public:
    typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
 
    BodyAndVolumeFractionMapping( const shared_ptr<StructuredBlockStorage> & blockStorage,
-                                 const shared_ptr<pe::BodyStorage> globalBodyStorage,
+                                 const shared_ptr<pe::BodyStorage> & globalBodyStorage,
                                  const BlockDataID & bodyStorageID,
                                  const BlockDataID & bodyAndVolumeFractionFieldID,
                                  const bool mapFixedBodies = false,
@@ -180,7 +180,7 @@ void BodyAndVolumeFractionMapping::initialize()
          // only PSM and finite bodies (no planes, etc.) are mapped
          if( /*!isPSMBody( *bodyIt ) ||*/ ( bodyIt->isFixed() && !mapFixed_ ) )
             continue;
-         mapPSMBodyAndVolumeFraction( *bodyIt, *blockIt, blockStorage_, bodyAndVolumeFractionFieldID_ );
+         mapPSMBodyAndVolumeFraction( *bodyIt, *blockIt, *blockStorage_, bodyAndVolumeFractionFieldID_ );
          lastUpdatedPositionMap_.insert( std::pair< walberla::id_t, Vector3< real_t > >( bodyIt->getSystemID(), bodyIt->getPosition() ) );
       }
 
@@ -188,7 +188,7 @@ void BodyAndVolumeFractionMapping::initialize()
       {
          for( auto globalBodyIt = globalBodyStorage_->begin(); globalBodyIt != globalBodyStorage_->end(); ++globalBodyIt )
          {
-            mapPSMBodyAndVolumeFraction( *globalBodyIt, *blockIt, blockStorage_, bodyAndVolumeFractionFieldID_ );
+            mapPSMBodyAndVolumeFraction( *globalBodyIt, *blockIt, *blockStorage_, bodyAndVolumeFractionFieldID_ );
          }
       }
    }
@@ -252,7 +252,7 @@ void BodyAndVolumeFractionMapping::updatePSMBodyAndVolumeFraction( const pe::Bod
    }
 
    // get bounding box of body
-   CellInterval cellBB = getCellBB( body, block, blockStorage_, oldBodyAndVolumeFractionField->nrOfGhostLayers() );
+   CellInterval cellBB = getCellBB( body, block, *blockStorage_, oldBodyAndVolumeFractionField->nrOfGhostLayers() );
 
    // if body has not moved (specified by some epsilon), just reuse old fraction values
    if( body->getLinearVel().sqrLength()  < velocityUpdatingEpsilonSquared_ &&
@@ -315,7 +315,7 @@ void BodyAndVolumeFractionMapping::updateGlobalPSMBodyAndVolumeFraction( const p
    WALBERLA_ASSERT_NOT_NULLPTR( oldBodyAndVolumeFractionField );
 
    // get bounding box of body
-   CellInterval cellBB = getCellBB( body, block, blockStorage_, oldBodyAndVolumeFractionField->nrOfGhostLayers() );
+   CellInterval cellBB = getCellBB( body, block, *blockStorage_, oldBodyAndVolumeFractionField->nrOfGhostLayers() );
 
    // copy values of global body to new field
    for( auto cellIt = cellBB.begin(); cellIt != cellBB.end(); ++cellIt )

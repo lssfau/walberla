@@ -125,7 +125,7 @@ void PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructer_T >
          if( bodyIt->isFixed() )
             continue;
 
-         CellInterval cellBB = getCellBB( *bodyIt, *block, blockStorage_, numberOfGhostLayersToInclude );
+         CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, numberOfGhostLayersToInclude );
 
          for( auto cellIt = cellBB.begin(); cellIt != cellBB.end(); ++cellIt )
          {
@@ -160,7 +160,7 @@ void PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructer_T >
          if( bodyIt->isFixed() )
             continue;
 
-         CellInterval cellBB = getCellBB( *bodyIt, *block, blockStorage_, numberOfGhostLayersToInclude );
+         CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, numberOfGhostLayersToInclude );
 
          for( cell_idx_t z = cellBB.zMin(); z <= cellBB.zMax(); ++z )
          {

@@ -108,7 +108,7 @@ void BodyMapping< BoundaryHandling_T >::operator()( IBlock * const block ) const
 
       // policy: every body manages only its own flags
 
-      CellInterval cellBB = getCellBB( *bodyIt, *block, blockStorage_, flagField->nrOfGhostLayers() );
+      CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, flagField->nrOfGhostLayers() );
 
       Vector3<real_t> startCellCenter = blockStorage_->getBlockLocalCellCenter( *block, cellBB.min() );
       const real_t dx = blockStorage_->dx( blockStorage_->getLevel(*block) );
@@ -174,12 +174,12 @@ void BodyMapping< BoundaryHandling_T >::operator()( IBlock * const block ) const
 ////////////////////////////
 
 template< typename BoundaryHandling_T >
-void mapMovingBody( const pe::BodyID body, IBlock & block, const shared_ptr<StructuredBlockStorage> & blockStorage,
+void mapMovingBody( const pe::BodyID body, IBlock & block, StructuredBlockStorage & blockStorage,
                     const BlockDataID & boundaryHandlingID, const BlockDataID & bodyFieldID, const FlagUID & obstacle )
 {
    typedef Field< pe::BodyID, 1 > BodyField_T;
 
-   WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage->getBlockStorage()) );
+   WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage.getBlockStorage()) );
 
    if( body->isFixed() /*|| !body->isFinite()*/ )
       return;
@@ -198,10 +198,12 @@ void mapMovingBody( const pe::BodyID body, IBlock & block, const shared_ptr<Stru
 
    CellInterval cellBB = getCellBB( body, block, blockStorage, flagField->nrOfGhostLayers() );
 
-   Vector3<real_t> startCellCenter = blockStorage->getBlockLocalCellCenter( block, cellBB.min() );
-   const real_t dx = blockStorage->dx( blockStorage->getLevel(block) );
-   const real_t dy = blockStorage->dy( blockStorage->getLevel(block) );
-   const real_t dz = blockStorage->dz( blockStorage->getLevel(block) );
+   if( cellBB.empty() ) return;
+
+   Vector3<real_t> startCellCenter = blockStorage.getBlockLocalCellCenter( block, cellBB.min() );
+   const real_t dx = blockStorage.dx( blockStorage.getLevel(block) );
+   const real_t dy = blockStorage.dy( blockStorage.getLevel(block) );
+   const real_t dz = blockStorage.dz( blockStorage.getLevel(block) );
 
    real_t cz = startCellCenter[2];
    for( cell_idx_t z = cellBB.zMin(); z <= cellBB.zMax(); ++z )
@@ -230,10 +232,10 @@ void mapMovingBody( const pe::BodyID body, IBlock & block, const shared_ptr<Stru
 
 
 template< typename BoundaryHandling_T >
-void mapMovingBodies( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, const BlockDataID & bodyStorageID,
+void mapMovingBodies( StructuredBlockStorage & blockStorage, const BlockDataID & boundaryHandlingID, const BlockDataID & bodyStorageID,
                       const BlockDataID & bodyFieldID, const FlagUID & obstacle )
 {
-   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
+   for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )
    {
        for (auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt)
            mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
@@ -241,10 +243,10 @@ void mapMovingBodies( const shared_ptr<StructuredBlockStorage> & blockStorage, c
 }
 
 template< typename BoundaryHandling_T >
-void mapMovingGlobalBodies( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, pe::BodyStorage & globalBodyStorage,
-                            const BlockDataID & bodyFieldID, const FlagUID & obstacle )
+void mapMovingGlobalBodies( StructuredBlockStorage & blockStorage, const BlockDataID & boundaryHandlingID,
+                            pe::BodyStorage & globalBodyStorage, const BlockDataID & bodyFieldID, const FlagUID & obstacle )
 {
-   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
+   for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )
    {
       for( auto bodyIt = globalBodyStorage.begin(); bodyIt != globalBodyStorage.end(); ++bodyIt)
       {
@@ -255,13 +257,13 @@ void mapMovingGlobalBodies( const shared_ptr<StructuredBlockStorage> & blockStor
 
 template< typename BoundaryHandling_T >
 void mapMovingGlobalBody( const id_t globalBodySystemID,
-                          const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, pe::BodyStorage & globalBodyStorage,
-                          const BlockDataID & bodyFieldID, const FlagUID & obstacle )
+                          StructuredBlockStorage & blockStorage, const BlockDataID & boundaryHandlingID,
+                          pe::BodyStorage & globalBodyStorage, const BlockDataID & bodyFieldID, const FlagUID & obstacle )
 {
-   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
+   for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )
    {
       auto bodyIt = globalBodyStorage.find( globalBodySystemID );
-      if( bodyIt !=  globalBodyStorage.end() )
+      if( bodyIt != globalBodyStorage.end() )
       {
          mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
       }

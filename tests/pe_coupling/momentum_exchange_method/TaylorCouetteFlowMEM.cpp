@@ -339,7 +339,7 @@ int main( int argc, char **argv )
 
    // map pe bodies into the LBM simulation
    // moving bodies are handled by the momentum exchange method, thus act here as velocity boundary condition
-   pe_coupling::mapMovingGlobalBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, *globalBodyStorage, bodyFieldID, MO_Flag );
+   pe_coupling::mapMovingGlobalBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, *globalBodyStorage, bodyFieldID, MO_Flag );
 
    ///////////////
    // TIME LOOP //

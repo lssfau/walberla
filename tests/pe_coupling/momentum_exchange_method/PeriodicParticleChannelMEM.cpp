@@ -502,10 +502,11 @@ int main( int argc, char **argv )
    // special care has to be taken here that only the global spheres (not the planes) are mapped since the planes would overwrite the already set boundary flags
    for( auto globalBodyIt = globalBodiesToBeMapped.begin(); globalBodyIt != globalBodiesToBeMapped.end(); ++globalBodyIt )
    {
-      pe_coupling::mapGlobalBody< BoundaryHandling_T >( *globalBodyIt, blocks, boundaryHandlingID, *globalBodyStorage, NoSlip_Flag, false );
+      pe_coupling::mapGlobalBody< BoundaryHandling_T >( *globalBodyIt, *blocks, boundaryHandlingID, *globalBodyStorage, NoSlip_Flag );
    }
+
    // moving bodies are handled by the momentum exchange method
-   pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag );
+   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag );
 
    ///////////////
    // TIME LOOP //

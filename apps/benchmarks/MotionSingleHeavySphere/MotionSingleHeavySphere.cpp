@@ -900,9 +900,9 @@ int main( int argc, char **argv )
 
       //initialization of the PDFs inside the particles, important for PSM M3
       if( psmVariant == PSMVariant::SC1W1 || psmVariant == PSMVariant::SC2W1 || psmVariant == PSMVariant::SC3W1 )
-         pe_coupling::initializeDomainForPSM< LatticeModel_T, 1 >( blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
+         pe_coupling::initializeDomainForPSM< LatticeModel_T, 1 >( *blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
       else
-         pe_coupling::initializeDomainForPSM< LatticeModel_T, 2 >( blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
+         pe_coupling::initializeDomainForPSM< LatticeModel_T, 2 >( *blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
 
    }
    else
@@ -912,11 +912,11 @@ int main( int argc, char **argv )
 
       if( memVariant == MEMVariant::CLI )
       {
-         pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_CLI_Flag );
+         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_CLI_Flag );
       }else if ( memVariant == MEMVariant::MR ){
-         pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_MR_Flag );
+         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_MR_Flag );
       }else{
-         pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_BB_Flag );
+         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_BB_Flag );
       }
    }
 

@@ -1591,91 +1591,130 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::recursiveStep( con
 
    std::vector< Block * > blocks = selectedBlocks( level );
 
+   WALBERLA_LOG_DETAIL("Starting recursive step with level " << level << " and execution count " << executionCount);
+
    if( asynchronousCommunication_ && level != coarsestLevel )
    {
+      WALBERLA_LOG_DETAIL("Start communication coarse to fine, initiated by fine level " << level );
       startCommunicationCoarseToFine( level ); // [start] explosion (initiated by fine level, involves "level" and "level-1")
    }
 
+   WALBERLA_LOG_DETAIL("Colliding on level " << level);
    collide( blocks, level, executionCount1st );
 
    if( asynchronousCommunication_ )
    {
+      WALBERLA_LOG_DETAIL("Start communication equal level, initiated by level " << level );
       startCommunicationEqualLevel( level ); // [start] equal level communication
    }
 
    if( level != finestLevel )
    {
+      WALBERLA_LOG_DETAIL("Calling recursive step with level " << level + uint_t(1) << " and execution count " << executionCount1st );
       recursiveStep( level + uint_t(1), executionCount1st );
 
-      if( asynchronousCommunication_ )
-         startCommunicationFineToCoarse( level + uint_t(1) ); // [start] coalescence (initiated by coarse level)
+      if( asynchronousCommunication_ ) {
+         WALBERLA_LOG_DETAIL("Start communication fine to coarse, initiated by coarse level " << level );
+         startCommunicationFineToCoarse(level + uint_t(1)); // [start] coalescence (initiated by coarse level)
+      }
    }
 
    if( level != coarsestLevel )
    {
-      if( !asynchronousCommunication_ )
-         startCommunicationCoarseToFine( level ); // [start] explosion (initiated by fine level, involves "level" and "level-1")
+      if( !asynchronousCommunication_ ) {
+         WALBERLA_LOG_DETAIL("Start communication coarse to fine, initiated by fine level " << level );
+         startCommunicationCoarseToFine(level); // [start] explosion (initiated by fine level, involves "level" and "level-1")
+      }
+      WALBERLA_LOG_DETAIL("End communication coarse to fine, initiated by fine level " << level );
       endCommunicationCoarseToFine( level ); // [end] explosion (initiated by fine level, involves "level" and "level-1")
+      WALBERLA_LOG_DETAIL("Perform linear explosion on level " << level );
       performLinearExplosion( blocks, level );
    }
 
-   if( !asynchronousCommunication_ )
-      startCommunicationEqualLevel( level ); // [start] equal level communication
+   if( !asynchronousCommunication_ ) {
+      WALBERLA_LOG_DETAIL("Start communication equal level, initiated by level " << level );
+      startCommunicationEqualLevel(level); // [start] equal level communication
+   }
+   WALBERLA_LOG_DETAIL("End communication equal level, initiated by level " << level );
    endCommunicationEqualLevel( level ); // [end] equal level communication
 
    // performLinearExplosion( blocks, level ); // if equal level neighbor values are needed, linear explosion should be performed here
 
    if( level == finestLevel && level != coarsestLevel )
    {
+      WALBERLA_LOG_DETAIL("Stream + collide on level " << level );
       streamCollide( blocks, level, executionCount1st );
    }
    else
    {
+      WALBERLA_LOG_DETAIL("Stream on level " << level );
       stream( blocks, level, executionCount1st );
 
       if( level != finestLevel )
       {
-         if( !asynchronousCommunication_ )
-            startCommunicationFineToCoarse( level + uint_t(1) ); // [start] coalescence (initiated by coarse level)
+         if( !asynchronousCommunication_ ) {
+            WALBERLA_LOG_DETAIL("Start communication fine to coarse, initiated by coarse level " << level );
+            startCommunicationFineToCoarse(level + uint_t(1)); // [start] coalescence (initiated by coarse level)
+         }
+         WALBERLA_LOG_DETAIL("End communication fine to coarse, initiated by coarse level " << level );
          endCommunicationFineToCoarse( level + uint_t(1) ); // [end] coalescence (initiated by coarse level)
       }
-      
+
+      WALBERLA_LOG_DETAIL("Finish stream on level " << level );
       finishStream( blocks, level, executionCount1st );
 
       if( level == coarsestLevel )
+      {
+         WALBERLA_LOG_DETAIL("End recursive step on level " << level );
          return;
+      }
 
+      WALBERLA_LOG_DETAIL("Colliding on level " << level);
       collide( blocks, level, executionCount2nd );
    }
 
-   if( asynchronousCommunication_ )
-      startCommunicationEqualLevel( level ); // [start] equal level communication
+   if( asynchronousCommunication_ ) {
+      WALBERLA_LOG_DETAIL("Start communication equal level, initiated by level " << level );
+      startCommunicationEqualLevel(level); // [start] equal level communication
+   }
 
    if( level != finestLevel )
    {
+      WALBERLA_LOG_DETAIL("Calling recursive step with level " << level + uint_t(1) << " and execution count " << executionCount2nd );
       recursiveStep( level + uint_t(1), executionCount2nd );
    
-      if( asynchronousCommunication_ )
-         startCommunicationFineToCoarse( level + uint_t(1) ); // [start] coalescence (initiated by coarse level)
+      if( asynchronousCommunication_ ) {
+         WALBERLA_LOG_DETAIL("Start communication fine to coarse, initiated by coarse level " << level );
+         startCommunicationFineToCoarse(level + uint_t(1)); // [start] coalescence (initiated by coarse level)
+      }
    }
 
-   if( !asynchronousCommunication_ )
-      startCommunicationEqualLevel( level ); // [start] equal level communication
+   if( !asynchronousCommunication_ ) {
+      WALBERLA_LOG_DETAIL("Start communication equal level, initiated by level " << level );
+      startCommunicationEqualLevel(level); // [start] equal level communication
+   }
+   WALBERLA_LOG_DETAIL("End communication equal level, initiated by level " << level );
    endCommunicationEqualLevel( level ); // [end] equal level communication
 
+   WALBERLA_LOG_DETAIL("Stream on level " << level );
    stream( blocks, level, executionCount2nd );
 
    if( level != finestLevel )
    {
       if( !asynchronousCommunication_ )
+      {
+         WALBERLA_LOG_DETAIL("Start communication fine to coarse, initiated by coarse level " << level );
          startCommunicationFineToCoarse( level + uint_t(1) ); // [start] coalescence (initiated by coarse level)
+      }
+      WALBERLA_LOG_DETAIL("End communication fine to coarse, initiated by coarse level " << level );
       endCommunicationFineToCoarse( level + uint_t(1) ); // [end] coalescence (initiated by coarse level)
    }
-   
+
+   WALBERLA_LOG_DETAIL("Finish stream on level " << level );
    finishStream( blocks, level, executionCount2nd );
+
+   WALBERLA_LOG_DETAIL("End recursive step on level " << level );
 }
-
-
 
 
 

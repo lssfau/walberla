@@ -354,7 +354,7 @@ int main( int argc, char **argv )
                                     MyBoundaryHandling( flagFieldID, pdfFieldID, bodyFieldID ), "boundary handling" );
 
    // initially map pe bodies into the LBM simulation
-   pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_Flag );
+   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_Flag );
 
    ///////////////
    // TIME LOOP //
