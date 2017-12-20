@@ -1,6 +1,6 @@
 #pragma once
 
-#include <pe/basic.h>
+#include "core/math/Vector3.h"
 
 namespace walberla {
 namespace pe {
