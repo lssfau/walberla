@@ -23,6 +23,7 @@
 #pragma once
 
 #include "bodies/all.h"
+#include "containment_octree/all.h"
 #include "initializer/all.h"
 #include "mesh/all.h"
 #include "structured/all.h"

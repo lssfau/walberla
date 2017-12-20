@@ -628,8 +628,8 @@ void VTKOutput::writePointDataPieces(std::ostream& ofs)
 
    computeOutputPoints( points, outputPoint, numberOfPoints );
 
-   if( numberOfPoints == 0 )
-      return;
+   //if( numberOfPoints == 0 )
+   //   return;
 
    writePointDataPieceHelper( points, outputPoint, numberOfPoints, ofs );
 }
