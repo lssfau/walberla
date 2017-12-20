@@ -112,3 +112,6 @@ waLBerla_execute_test( NAME   PE_STATICTYPEIDS )
 
 waLBerla_compile_test( NAME   PE_UNION FILES Union.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_UNION )
+
+waLBerla_compile_test( NAME   PE_RAYTRACING FILES Raytracing.cpp DEPENDS core  )
+waLBerla_execute_test( NAME   PE_RAYTRACING )
