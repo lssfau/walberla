@@ -22,7 +22,7 @@ using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::pe::raytracing;
 
-typedef boost::tuple<Box, Capsule, Plane, Sphere> BodyTuple;
+typedef boost::tuple<Box, Capsule, Plane, Sphere> BodyTuple ;
 
 void SphereIntersectsTest()
 {
@@ -45,6 +45,30 @@ void SphereIntersectsTest()
    WALBERLA_CHECK(!intersects(&sp1, &ray2, &t));
 }
 
+void PlaneIntersectsTest() {
+   MaterialID iron = Material::find("iron");
+   // plane with center 3,3,3 and parallel to y-z plane
+   Plane pl1(1, 1, Vec3(3, 3, 3), Vec3(1, 0, 0), real_t(1.0), iron);
+   
+   Ray ray1(Vec3(-5,3,3), Vec3(1,0,0));
+   real_t t;
+   
+   WALBERLA_LOG_INFO("RAY -> PLANE");
+   WALBERLA_CHECK(intersects(&pl1, &ray1, &t), "ray through center did not hit");
+   WALBERLA_CHECK(realIsEqual(t, real_t(8)), "distance between ray and plane is incorrect");
+   
+   Ray ray2(Vec3(-5,3,3), Vec3(1,0,-1));
+   WALBERLA_CHECK(intersects(&pl1, &ray2, &t), "ray towards random point on plane didn't hit");
+   WALBERLA_CHECK(realIsEqual(t, real_t(sqrt(real_t(128)))), "distance between ray and plane is incorrect");
+
+   // plane with center 3,3,3 and parallel to x-z plane
+   Plane pl2(1, 1, Vec3(3, 3, 3), Vec3(0, 1, 0), real_t(1.0), iron);
+   WALBERLA_CHECK(!intersects(&pl2, &ray1, &t), "ray parallel to plane shouldnt hit");
+   
+   // plane with center -10,3,3 and parallel to y-z plane
+   Plane pl4(1, 1, Vec3(-10, 3, 3), Vec3(1, 0, 0), real_t(1.0), iron);
+   WALBERLA_CHECK(!intersects(&pl4, &ray1, &t), "ray hit plane behind origin");
+}
 
 int main( int argc, char** argv )
 {
@@ -54,6 +78,7 @@ int main( int argc, char** argv )
    SetBodyTypeIDs<BodyTuple>::execute();
    
    SphereIntersectsTest();
+   PlaneIntersectsTest();
    
    return EXIT_SUCCESS;
 }

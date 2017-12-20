@@ -13,6 +13,8 @@
 
 #include <boost/tuple/tuple.hpp>
 
+#define EPSILON real_t(1e-4)
+
 namespace walberla {
    namespace pe {
       namespace raytracing {
@@ -36,7 +38,7 @@ namespace walberla {
             real_t b = real_t(2.) * (displacement * ray->direction);
             real_t c = (displacement * displacement) - (sphere->getRadius() * sphere->getRadius());
             real_t discriminant = b*b - real_t(4.)*a*c;
-            if (discriminant < real_t(1e-4)) {
+            if (discriminant < EPSILON) {
                // with discriminant smaller than 0, sphere is not hit by ray
                // (no solution for quadratic equation)
                // with discriminant being 0, sphere only tangentially hits the ray (not enough)
@@ -51,7 +53,21 @@ namespace walberla {
          }
          
          inline bool intersects(PlaneID plane, Ray* ray, real_t* t) {
-            // ToDo
+            real_t denominator = plane->getNormal() * ray->direction;
+            if (std::abs(denominator) > EPSILON) {
+               real_t t_;
+               t_ = ((plane->getPosition() - ray->origin) * plane->getNormal()) / denominator;
+               
+               if (t_ > EPSILON) {
+                  Vec3 intersectionPoint = (t_*ray->direction + ray->origin);
+                  Vec3 originToIntersection = ray->origin - intersectionPoint;
+                  *t = originToIntersection.length();
+                  return true;
+               } else {
+                  *t = INFINITY;
+               }
+            }
+            *t = INFINITY;
             return false;
          }
       }
