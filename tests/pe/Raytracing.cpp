@@ -28,21 +28,28 @@ void SphereIntersectsTest()
 {
    MaterialID iron = Material::find("iron");
    Sphere sp1(123, 1, Vec3(3,3,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
-
-   // ray through the center
-   Ray ray1(Vec3(-5,3,3), Vec3(1,0,0));
-   
    real_t t;
    
-   WALBERLA_LOG_INFO("RAY -> SPHERE: through center (hitting)");
+   // ray through the center
+   Ray ray1(Vec3(-5,3,3), Vec3(1,0,0));
+   WALBERLA_LOG_INFO("RAY -> SPHERE");
+   
    WALBERLA_CHECK(intersects(&sp1, &ray1, &t));
    WALBERLA_CHECK(realIsEqual(t, real_t(6)))
 
    // ray tangential
    Ray ray2(Vec3(-5,3,3), Vec3(7.5,0,sqrt(real_t(15))/real_t(2)));
-   
-   WALBERLA_LOG_INFO("RAY -> SPHERE: tangential (not hitting)");
    WALBERLA_CHECK(!intersects(&sp1, &ray2, &t));
+   
+   // sphere behind ray origin
+   Sphere sp2(123, 1, Vec3(-8,3,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
+   WALBERLA_CHECK(!intersects(&sp2, &ray1, &t));
+   
+   // sphere around ray origin
+   Sphere sp3(123, 1, Vec3(-5,3,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
+   WALBERLA_CHECK(intersects(&sp3, &ray1, &t));
+   WALBERLA_LOG_INFO(t);
+   WALBERLA_CHECK(realIsEqual(t, real_t(2)));
 }
 
 void PlaneIntersectsTest() {

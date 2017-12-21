@@ -48,7 +48,24 @@ namespace walberla {
             real_t root = sqrt(discriminant);
             real_t t0 = (-b - root) / (real_t(2.) * a); // point where the ray enters the sphere
             real_t t1 = (-b + root) / (real_t(2.) * a); // point where the ray leaves the sphere
-            *t = (t0 < t1) ? t0 : t1; //assign the closest hit point to t
+            if (t0 < 0 && t1 < 0) {
+               *t = real_t(INFINITY);
+               return false;
+            }
+            real_t t_;
+            t_ = (t0 < t1) ? t0 : t1; // assign the closest hit point to t
+            if (t_ < 0) {
+               // at least one of the calculated hit point is behind the rays origin
+               if (t1 < 0) {
+                  // both of the points are behind the origin (ray does not hit sphere)
+                  *t = real_t(INFINITY);
+                  return false;
+               } else {
+                  // one point is hit by the ray (ray is within sphere)
+                  t_ = t1;
+               }
+            }
+            *t = t_;
             return true;
          }
          
