@@ -38,7 +38,7 @@ void SphereIntersectsTest()
    WALBERLA_CHECK(realIsEqual(t, real_t(6)))
 
    // ray tangential
-   Ray ray2(Vec3(-5,3,3), Vec3(7.5,0,sqrt(real_t(15))/real_t(2)));
+   Ray ray2(Vec3(-5,3,3), Vec3(7.5,0,real_t(std::sqrt(real_t(15))/real_t(2))));
    WALBERLA_CHECK(!intersects(&sp1, &ray2, &t));
    
    // sphere behind ray origin

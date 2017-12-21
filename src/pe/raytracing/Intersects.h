@@ -45,7 +45,7 @@ namespace walberla {
                *t = real_t(INFINITY);
                return false;
             }
-            real_t root = sqrt(discriminant);
+            real_t root = real_t(std::sqrt(discriminant));
             real_t t0 = (-b - root) / (real_t(2.) * a); // point where the ray enters the sphere
             real_t t1 = (-b + root) / (real_t(2.) * a); // point where the ray leaves the sphere
             if (t0 < 0 && t1 < 0) {
