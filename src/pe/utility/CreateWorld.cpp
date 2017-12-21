@@ -65,7 +65,7 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
 
    WALBERLA_LOG_INFO_ON_ROOT( "Balancing for " << numberOfProcesses << " processes...");
 
-   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses );
+   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, real_t(0), memory_t(0), false, true );
    return shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, false ) );
 }
 
@@ -117,7 +117,7 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
          sforest.init( simulationDomain, blocks[0], blocks[1], blocks[2], isPeriodic[0], isPeriodic[1], isPeriodic[2] );
 
          // calculate process distribution
-         sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses );
+         sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, real_t(0), memory_t(0), false, true );
 
          sforest.saveToFile( sbffile.c_str() );
 
