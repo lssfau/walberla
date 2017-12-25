@@ -19,7 +19,9 @@ namespace walberla {
    namespace pe {
       namespace raytracing {
          inline bool intersects(SphereID sphere, Ray* ray, real_t &t);
-         inline bool intersects(PlaneID plane, Ray* ray, real_t &t);
+         inline bool intersects(PlaneID plane, Ray* ray, real_t* t);
+         inline bool intersects(BoxID box, Ray* ray, real_t* t);
+         inline bool intersects(GeomPrimitive* body, Ray* ray, real_t* t);
          
          struct IntersectsFunctor
          {
@@ -55,7 +57,7 @@ namespace walberla {
             real_t t_;
             t_ = (t0 < t1) ? t0 : t1; // assign the closest hit point to t
             if (t_ < 0) {
-               // at least one of the calculated hit point is behind the rays origin
+               // at least one of the calculated hit points is behind the rays origin
                if (t1 < 0) {
                   // both of the points are behind the origin (ray does not hit sphere)
                   *t = real_t(INFINITY);
@@ -86,6 +88,74 @@ namespace walberla {
             }
             *t = INFINITY;
             return false;
+         }
+         
+         // does not work yet
+         inline bool intersects(BoxID box, Ray* ray, real_t* t) {
+            
+            return intersects((GeomPrimitive*)box, ray, t);
+         }
+         
+         // does not work yet
+         inline bool intersects(GeomPrimitive* body, Ray* ray, real_t* t) {
+            // An Efficient and Robust Ray–Box Intersection Algorithm: http://people.csail.mit.edu/amy/papers/box-jgt.pdf
+            AABB aabb = body->getAABB();
+            
+            Vec3 bounds[2] = {
+               aabb.min(),
+               aabb.max()
+            };
+            
+            real_t tmincoord = 0, tmaxcoord = 0; // x
+            real_t txmin, txmax;
+            real_t tmin = txmin = (bounds[ray->sign[0]][0] - ray->origin[0]) * ray->inv_direction[0];
+            real_t tmax = txmax = (bounds[1-ray->sign[0]][0] - ray->origin[0]) * ray->inv_direction[0];
+            real_t tymin = (bounds[ray->sign[1]][1] - ray->origin[1]) * ray->inv_direction[1];
+            real_t tymax = (bounds[1-ray->sign[1]][1] - ray->origin[1]) * ray->inv_direction[1];
+            if (tmin > tymax || tymin > tmax) {
+               *t = INFINITY;
+               return false;
+            }
+            if (tymin > tmin) {
+               tmincoord = 1; //y
+               tmin = tymin;
+            }
+            if (tymax < tmax) {
+               tmaxcoord = 1; //y
+               tmax = tymax;
+            }
+            real_t tzmin = (bounds[ray->sign[2]][2] - ray->origin[2]) * ray->inv_direction[2];
+            real_t tzmax = (bounds[1-ray->sign[2]][2] - ray->origin[2]) * ray->inv_direction[2];
+            if (tmin > tzmax || tzmin > tmax) {
+               *t = INFINITY;
+               return false;
+            }
+            if (tzmin > tmin) {
+               tmincoord = 2; //z
+               tmin = tzmin;
+            }
+            if (tzmax < tmax) {
+               tmaxcoord = 2; //z
+               tmax = tzmax;
+            }
+            
+            WALBERLA_LOG_INFO("tmax: " << tmax << "; tmin: " << tmin);
+            WALBERLA_LOG_INFO("tmincoord: " << tmincoord << "; tmaxcoord: " << tmaxcoord);
+            real_t t_;
+            if (tmin > 0) {
+               // ray hit box from outside
+               t_ = tmin;
+            } else if (tmax < 0) {
+               // tmin and tmax are smaller than 0 -> box is in rays negative direction
+               *t = INFINITY;
+               return false;
+            } else {
+               // ray origin within box
+               t_ = tmax;
+            }
+            
+            *t = t_;
+            return true;
          }
       }
    }
