@@ -57,19 +57,14 @@ def sliceToCellInterval( s ):
     return walberla_cpp.CellInterval( newMin,newMax)
     
 
-def cellIntervalToSlice( cellInterval ):
+def cellIntervalToSlice(cellInterval, collapseExtentOne=True):
     slices = []
     for i in range(3):
-        if cellInterval.min[i] == cellInterval.max[i]:
+        if collapseExtentOne and cellInterval.min[i] == cellInterval.max[i]:
             slices.append( cellInterval.min[i] )
         else:
             slices.append( slice(cellInterval.min[i], cellInterval.max[i]+1,None ) )
     return slices
-    #return makeSlice[ cellInterval.min[0]:cellInterval.max[0]+1,
-    #                  cellInterval.min[1]:cellInterval.max[1]+1,
-    #                  cellInterval.min[2]:cellInterval.max[2]+1 ]
-
-
 
 
 

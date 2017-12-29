@@ -3,9 +3,11 @@ try:
     from . import walberla_cpp
 except ImportError:
     import walberla_cpp
+
+
 # ----------------------------- Python functions to extend the C++ field module ---------------------------------
 
-def npArrayFromWaLBerlaField( field, withGhostLayers=False ):
+def npArrayFromWaLBerlaField(field, withGhostLayers=False):
     """ Creates a numpy array view on the waLBerla field data
         @field: the waLBerla field
         @withGhostLayers: Possible values: 
@@ -50,11 +52,11 @@ def npArrayFromWaLBerlaField( field, withGhostLayers=False ):
         return view
 
 
-def arrayFromWaLBerlaAdaptor( field, withGhostLayers=False ):
+def arrayFromWaLBerlaAdaptor(field, withGhostLayers=False):
     return npArrayFromWaLBerlaField( field.copyToField(), withGhostLayers )
 
 
-def copyArrayToField( dstField, srcArray, slice=[ slice(None,None,None) ]*3, withGhostLayers=False ):
+def copyArrayToField(dstField, srcArray, slice=[slice(None,None,None) ]*3, withGhostLayers=False):
     """ Copies a numpy array into (part of) a waLBerla field
     
     Usually no copying has to take place between waLBerla fields and numpy arrays, since an array view can be
@@ -69,11 +71,19 @@ def copyArrayToField( dstField, srcArray, slice=[ slice(None,None,None) ]*3, wit
     """
     dstAsArray = npArrayFromWaLBerlaField(dstField, withGhostLayers)
     numpy.copyto( dstAsArray[slice], srcArray )
-     
-    
+
+
 
 def extend(cppFieldModule):
+    def gatherGenerator(blocks, blockDataName, sliceObj, allGather=False):
+        field = cppFieldModule.gather(blocks, blockDataName, sliceObj, targetRank=-1 if allGather else 0)
+        if field is not None:
+            field = npArrayFromWaLBerlaField(field)
+            field.flags.writeable = False
+            yield field
+
+
     cppFieldModule.toArray          = npArrayFromWaLBerlaField
     cppFieldModule.adaptorToArray   = arrayFromWaLBerlaAdaptor
     cppFieldModule.copyArrayToField = copyArrayToField
-
+    cppFieldModule.gatherGenerator  = gatherGenerator
