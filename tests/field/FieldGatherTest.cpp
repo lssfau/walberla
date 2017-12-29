@@ -36,10 +36,11 @@ int main( int argc, char ** argv )
    debug::enterTestMode();
    walberla::Environment walberlaEnv( argc, argv );
 
+   bool oneBlockPerProcess = MPIManager::instance()->numProcesses() != 1;
    auto  blocks = blockforest::createUniformBlockGrid( 1, 3, 1,       // blocks in x,y,z
                                                        10u, 20u, 1u,  // nr of cells per block
                                                        1.0,           // dx
-                                                       true          // one block per process
+                                                       oneBlockPerProcess
                                                        );
    typedef GhostLayerField<cell_idx_t,3> MyField;
    BlockDataID fieldID = field::addToStorage<MyField>( blocks, "Field" );
@@ -65,9 +66,10 @@ int main( int argc, char ** argv )
    boundingBox.min()[ 1 ] = 10;
    boundingBox.max()[ 1 ] = 29;
 
-   field::gather<MyField>( gatheredField, blocks, fieldID, boundingBox,1 );
+   auto targetRank = MPIManager::instance()->numProcesses() -1;
+   field::gather<MyField>( gatheredField, blocks, fieldID, boundingBox, targetRank );
 
-   WALBERLA_EXCLUSIVE_WORLD_SECTION( 1 )
+   WALBERLA_EXCLUSIVE_WORLD_SECTION( targetRank )
    {
       for( auto cellIt = gatheredField.beginXYZ(); cellIt != gatheredField.end(); ++cellIt )
       {
