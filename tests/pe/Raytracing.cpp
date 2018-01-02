@@ -31,22 +31,22 @@ void SphereIntersectsTest()
    real_t t;
    
    // ray through the center
-   Ray ray1(Vec3(-5,3,3), Vec3(1,0,0));
+   Ray ray1(Vec3(3,-5,3), Vec3(0,1,0));
    WALBERLA_LOG_INFO("RAY -> SPHERE");
    
    WALBERLA_CHECK(intersects(&sp1, &ray1, &t));
    WALBERLA_CHECK(realIsEqual(t, real_t(6)))
 
    // ray tangential
-   Ray ray2(Vec3(-5,3,3), Vec3(7.5,0,real_t(std::sqrt(real_t(15))/real_t(2))));
+   Ray ray2(Vec3(3,-5,3), Vec3(0,7.5,real_t(std::sqrt(real_t(15))/real_t(2))));
    WALBERLA_CHECK(!intersects(&sp1, &ray2, &t));
    
    // sphere behind ray origin
-   Sphere sp2(123, 1, Vec3(-8,3,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
+   Sphere sp2(123, 1, Vec3(3,-8,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
    WALBERLA_CHECK(!intersects(&sp2, &ray1, &t));
    
    // sphere around ray origin
-   Sphere sp3(123, 1, Vec3(-5,3,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
+   Sphere sp3(123, 1, Vec3(3,-5,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
    WALBERLA_CHECK(intersects(&sp3, &ray1, &t));
    WALBERLA_CHECK(realIsEqual(t, real_t(2)));
 }
@@ -78,37 +78,35 @@ void PlaneIntersectsTest() {
 
 void BoxIntersectsTest() {
    MaterialID iron = Material::find("iron");
-   Box box1(127, 5, Vec3(-15, 0, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Box box1(127, 5, Vec3(0, -15, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    
-   Ray ray1(Vec3(-5,3,3), Vec3(1,0,0));
+   Ray ray1(Vec3(3,-5,3), Vec3(0,1,0));
    real_t t;
    
    WALBERLA_LOG_INFO("RAY -> BOX");
 
    WALBERLA_CHECK(!intersects(&box1, &ray1, &t));
    
-   Box box2(128, 5, Vec3(-2, 0, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Box box2(128, 5, Vec3(0, -2, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(intersects(&box2, &ray1, &t));
    WALBERLA_CHECK(realIsEqual(t, real_t(8), 1e-7));
    
-   Box box3(128, 5, Vec3(5, 0, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Box box3(128, 5, Vec3(0, 5, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(intersects(&box3, &ray1, &t));
    WALBERLA_CHECK(realIsEqual(t, real_t(5)));
    
+   // ray origin within box
    Ray ray2(Vec3(-2,0,0), Vec3(1,0,1));
-   WALBERLA_LOG_INFO(intersects(&box3, &ray2, &t));
-   WALBERLA_LOG_INFO(t);
+   WALBERLA_CHECK(intersects(&box3, &ray2, &t));
+   WALBERLA_CHECK(realIsEqual(t, real_t(7.0710), 1e-4));
    
-   Ray ray3(Vec3(-5,3,3), Vec3(2, -1.5, 0.5));
-   Box box4(128, 5, Vec3(8, 0, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
-   WALBERLA_LOG_INFO("-- -- -- --");
-   WALBERLA_LOG_INFO(intersects(&box4, &ray3, &t));
-   WALBERLA_LOG_INFO("t: " << t);
+   Ray ray3(Vec3(3,-5,3), Vec3(2, -1.5, 0.5));
+   Box box4(128, 5, Vec3(0, 8, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   WALBERLA_CHECK(!intersects(&box4, &ray3, &t));
    
-   Ray ray4(Vec3(-5,3,3), Vec3(2, -1, 0.5));
-   WALBERLA_LOG_INFO("-- -- -- --");
-   WALBERLA_LOG_INFO(intersects(&box4, &ray4, &t));
-   WALBERLA_LOG_INFO("t: " << t);
+   Ray ray4(Vec3(3,-5,3), Vec3(-2, 3, 0.5));
+   WALBERLA_CHECK(intersects(&box4, &ray4, &t));
+   WALBERLA_CHECK(realIsEqual(t, real_t(9.7068), 1e-4));
 }
 
 int main( int argc, char** argv )
@@ -120,7 +118,7 @@ int main( int argc, char** argv )
    
    SphereIntersectsTest();
    PlaneIntersectsTest();
-   //BoxIntersectsTest(); // does not work yet
+   BoxIntersectsTest(); // does not work yet
    
    return EXIT_SUCCESS;
 }

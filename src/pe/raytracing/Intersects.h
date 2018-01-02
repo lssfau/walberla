@@ -90,13 +90,11 @@ namespace walberla {
             return false;
          }
          
-         // does not work yet
          inline bool intersects(BoxID box, Ray* ray, real_t* t) {
             
             return intersects((GeomPrimitive*)box, ray, t);
          }
          
-         // does not work yet
          inline bool intersects(GeomPrimitive* body, Ray* ray, real_t* t) {
             // An Efficient and Robust Ray–Box Intersection Algorithm: http://people.csail.mit.edu/amy/papers/box-jgt.pdf
             AABB aabb = body->getAABB();
@@ -106,7 +104,6 @@ namespace walberla {
                aabb.max()
             };
             
-            real_t tmincoord = 0, tmaxcoord = 0; // x
             real_t txmin, txmax;
             real_t tmin = txmin = (bounds[ray->sign[0]][0] - ray->origin[0]) * ray->inv_direction[0];
             real_t tmax = txmax = (bounds[1-ray->sign[0]][0] - ray->origin[0]) * ray->inv_direction[0];
@@ -117,11 +114,9 @@ namespace walberla {
                return false;
             }
             if (tymin > tmin) {
-               tmincoord = 1; //y
                tmin = tymin;
             }
             if (tymax < tmax) {
-               tmaxcoord = 1; //y
                tmax = tymax;
             }
             real_t tzmin = (bounds[ray->sign[2]][2] - ray->origin[2]) * ray->inv_direction[2];
@@ -131,16 +126,12 @@ namespace walberla {
                return false;
             }
             if (tzmin > tmin) {
-               tmincoord = 2; //z
                tmin = tzmin;
             }
             if (tzmax < tmax) {
-               tmaxcoord = 2; //z
                tmax = tzmax;
             }
             
-            WALBERLA_LOG_INFO("tmax: " << tmax << "; tmin: " << tmin);
-            WALBERLA_LOG_INFO("tmincoord: " << tmincoord << "; tmaxcoord: " << tmaxcoord);
             real_t t_;
             if (tmin > 0) {
                // ray hit box from outside
