@@ -220,9 +220,10 @@ void RaytracerTest() {
    Raytracer raytracer(forest, storageID, globalBodyStorage,
                        size_t(640), size_t(480),
                        49.13,
-                       Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1),
-                       lighting);
-   
+                       Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
+                       lighting,
+                       Vec3(0.2,0.2,0.2));
+
    MaterialID iron = Material::find("iron");
    
    //PlaneID xNegPlane = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(5,0,0), iron);
@@ -244,21 +245,21 @@ void RaytracerTest() {
    createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(4,5.5,5), real_t(1));
    createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,8.5,5), real_t(1));
    BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,6.5,5), Vec3(2,4,3));
-   box->rotate(0,math::M_PI/4,math::M_PI/4);
+   if (box != NULL) box->rotate(0,math::M_PI/4,math::M_PI/4);
    createBox(*globalBodyStorage, *forest, storageID, 8, Vec3(5,1,8), Vec3(2,2,2));
    // Test scene v1 end
    
    // Test scene v2 additions start
    createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(9,9,5), Vec3(1,1,10));
    createCapsule(*globalBodyStorage, *forest, storageID, 9, Vec3(3, 9, 1), real_t(0.5), real_t(7), iron);
-   CapsuleID capsule2 = createCapsule(*globalBodyStorage, *forest, storageID, 9, Vec3(7, 3.5, 7.5), real_t(1), real_t(2), iron);
-   capsule2->rotate(0,math::M_PI/4,math::M_PI/4-math::M_PI/8);
+   CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, 9, Vec3(7, 3.5, 7.5), real_t(1), real_t(2), iron);
+   if (capsule != NULL) capsule->rotate(0,math::M_PI/3,math::M_PI/4-math::M_PI/8);
    // Test scene v2 end
    
-   raytracer.setTBufferOutputDirectory("tbuffer");
-   raytracer.setTBufferOutputEnabled(true);
-   raytracer.setImageOutputDirectory("image");
-   raytracer.setImageOutputEnabled(true);
+   //raytracer.setTBufferOutputDirectory("tbuffer");
+   //raytracer.setTBufferOutputEnabled(true);
+   //raytracer.setImageOutputDirectory("image");
+   //raytracer.setImageOutputEnabled(true);
    
    raytracer.rayTrace<BodyTuple>(0);
 }
@@ -270,11 +271,11 @@ int main( int argc, char** argv )
    
    SetBodyTypeIDs<BodyTuple>::execute();
    
-   SphereIntersectsTest();
-   PlaneIntersectsTest();
-   BoxIntersectsTest();
-   AABBIntersectsTest();
-   CapsuleIntersectsTest();
+   //SphereIntersectsTest();
+   //PlaneIntersectsTest();
+   //BoxIntersectsTest();
+   //AABBIntersectsTest();
+   //CapsuleIntersectsTest();
    RaytracerTest();
    
    return EXIT_SUCCESS;
