@@ -25,21 +25,111 @@
 #include <core/grid_generator/HCPIterator.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
+
+#include "gui/Gui.h"
+#include "timeloop/SweepTimeloop.h"
+
+#include <pe/vtk/SphereVtkOutput.h>
+#include "vtk/VTKOutput.h"
+
+#include <pe/raytracing/Intersects.h>
+#include <pe/raytracing/Ray.h>
+
 //! [Includes]
 
 using namespace walberla;
 using namespace walberla::pe;
+using namespace walberla::pe::raytracing;
 
 //! [BodyTypeTuple]
 typedef boost::tuple<Sphere, Plane> BodyTypeTuple ;
 //! [BodyTypeTuple]
+
+
+real_t deg2rad(real_t deg) {
+   return deg * math::M_PI / real_t(180.0);
+}
+
+void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
+   size_t width = 30;
+   size_t height = 30;
+   real_t fov = 49.13; // in degrees
+   Vec3 cameraPosition(5,-5,5);
+   Vec3 cameraLookAtPoint(5,0,5);
+   Vec3 cameraUpVector(0,0,1);
+   
+   real_t scale = tan(deg2rad(fov * 0.5));
+
+   
+   real_t t, t_closest;
+   
+   /*for (int x = 0; x < width; x++) {
+      for (int y = 0; y < height; y++) {*/
+         Ray ray(Vec3(0,5,5), Vec3(1,0,0));
+         
+         t_closest = INFINITY;
+         
+         for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
+            for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
+               // if bodyit->getTypeID() == Sphere::getStaticTypeID()
+               // bodyIt = RigidBody, kennt AABB (getAABB())
+               
+               IntersectsFunctor func(&ray, &t);
+               bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
+               
+               if (intersects) {
+                  WALBERLA_LOG_INFO("found object intersecting with ray");
+               }
+               
+               if (intersects && t < t_closest) {
+                  WALBERLA_LOG_INFO("object is closer than currently closest one");
+
+                  t_closest = t;
+               }
+               
+               /*if (intersects(ray, bodyIt, &t) && t < t_closest) {
+                  // body is shot by ray and currently closest to camera
+                  t_closest = t;
+                  // alle die sichtbar sind, push_back in vector
+                  // alternativ: speichern per map mit body -> flag setzen, falls gespeichert werden soll
+               }*/
+            }
+         }
+   /*   }
+   }*/
+}
+
+void testRayTracing () {
+   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vec3(1,1,1), Vec3(false, false, false));
+   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTypeTuple>(), "Storage");
+   SetBodyTypeIDs<BodyTypeTuple>::execute();
+   createSphere(*globalBodyStorage, *forest, storageID, 0, Vec3(5,5,5), real_t(1));
+   
+   Vec3 camera(15,5,5);
+   
+   Ray ray(Vec3(0,5,5), Vec3(1,0,0));
+   
+   /*real_t t;
+   if (intersects(&ray, sp, t)) {
+      WALBERLA_LOG_INFO("sphere intersected with ray, t = " << t);
+   } else {
+      WALBERLA_LOG_INFO("sphere did not intersect with ray");
+
+   }*/
+   
+   rayTrace(forest, storageID);
+}
 
 int main( int argc, char ** argv )
 {
    //! [Parameters]
    Environment env(argc, argv);
    WALBERLA_UNUSED(env);
-
+   
+   testRayTracing();
+   return 0;
+   
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
 
    real_t spacing          = real_c(1.0);
@@ -61,6 +151,7 @@ int main( int argc, char ** argv )
                                                          Vector3<uint_t>(2,2,2), // blocks in each direction
                                                          Vector3<bool>(false, false, false) // periodicity
                                                          );
+	
    //! [BlockForest]
    if (!forest)
    {
@@ -158,6 +249,16 @@ int main( int argc, char ** argv )
    meanVelocity /= numParticles;
    WALBERLA_LOG_INFO( "mean velocity: " << meanVelocity );
    //! [PostProcessing]
-
+   
+   rayTrace(forest, storageID);
+   
+   // für einzelne sphere vtks: -> SphereVtkOutput.cpp
+   
+   auto vtkDomainOutput = vtk::createVTKOutput_DomainDecomposition( forest, "domain_decomposition", 1, "vtk_out", "simulation_step" );
+   auto vtkSphereHelper = make_shared<SphereVtkOutput>(storageID, *forest) ;
+   auto vtkSphereOutput = vtk::createVTKOutput_PointData(vtkSphereHelper, "Bodies", 1, "vtk_out", "simulation_step", false, false);
+   vtkDomainOutput->write();
+   vtkSphereOutput->write();
+   
    return EXIT_SUCCESS;
 }
