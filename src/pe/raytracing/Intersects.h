@@ -192,15 +192,15 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
 
    real_t a = direction[2]*direction[2] + direction[1]*direction[1];
    real_t b = real_t(2)*origin[2]*direction[2] + real_t(2)*origin[1]*direction[1];
-   real_t c = origin[2]*origin[2] + origin[1]*origin[1] - capsule->getRadius();
+   real_t c = origin[2]*origin[2] + origin[1]*origin[1] - capsule->getRadius()*capsule->getRadius();
    real_t discriminant = b*b - real_t(4.)*a*c;
    if (discriminant >= EPSILON) {
       // With discriminant smaller than 0, cylinder is not hit by ray (no solution for quadratic equation).
       // Thus only enter this section if the equation is actually solvable.
       
       real_t root = real_t(std::sqrt(discriminant));
-      real_t t0 = (-b - root) / (real_t(2) * a); // point where the ray enters the cylinder
-      real_t t1 = (-b + root) / (real_t(2) * a); // point where the ray leaves the cylinder
+      real_t t0 = (-b - root) / (real_t(2) * a); // Distance to point where the ray enters the cylinder
+      real_t t1 = (-b + root) / (real_t(2) * a); // Distance to point where the ray leaves the cylinder
 
       real_t tx0 = origin[0] + direction[0]*t0;
       real_t tx1 = origin[0] + direction[0]*t1;
@@ -219,9 +219,9 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
       }
    }
    
-   // check now for end capping half spheres.
+   // Check now for end capping half spheres.
+   // Only check them if the ray didnt both enter and leave the cylinder part of the capsule already (t0hit && t1hit).
    if (!t0hit || !t1hit) {
-      // only check capping half spheres if the ray didnt both enter and leave the cylinder part of the capsule already.
       real_t t0_left, t1_left;
       Vec3 leftSpherePos(-halfLength, 0, 0);
       if (intersectsSphere(leftSpherePos, capsule->getRadius(), transformedRay, t0_left, t1_left)) {
@@ -245,7 +245,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
       real_t t0_right, t1_right;
       Vec3 rightSpherePos(halfLength, 0, 0);
       if (intersectsSphere(rightSpherePos, capsule->getRadius(), transformedRay, t0_right, t1_right)) {
-         // at least one of t0_right and t1_right are not behind the rays origin
+         // At least one of t0_right and t1_right are not behind the rays origin
          real_t t0x_right = origin[0] + direction[0]*t0_right;
          real_t t1x_right = origin[0] + direction[0]*t1_right;
          
