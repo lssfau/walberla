@@ -29,13 +29,13 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
    waLBerla_execute_test( NAME  MeshDistanceOctreeTestSphere COMMAND $<TARGET_FILE:MeshDistanceOctreeTest> sphere.obj )
    
    waLBerla_compile_test( FILES MeshDistancePlausibilityTest.cpp DEPENDS mesh )
-   waLBerla_execute_test( NAME  MeshDistancePlausibilityTestBunny     COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> bunny.obj  1      CONFIGURATIONS Release RelWithDbgInfo )
-   waLBerla_execute_test( NAME  MeshDistancePlausibilityTestBunnyLong COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> bunny.obj  0.2    CONFIGURATIONS Release RelWithDbgInfo LABELS longrun )
+   waLBerla_execute_test( NAME  MeshDistancePlausibilityTestBunny     COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> bunny.obj  1.25   CONFIGURATIONS Release RelWithDbgInfo )
+   waLBerla_execute_test( NAME  MeshDistancePlausibilityTestBunnyLong COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> bunny.obj  0.6    CONFIGURATIONS Release RelWithDbgInfo LABELS longrun )
    waLBerla_execute_test( NAME  MeshDistancePlausibilityTestW         COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> w.obj      0.005  CONFIGURATIONS Release RelWithDbgInfo )
    waLBerla_execute_test( NAME  MeshDistancePlausibilityTestWDbg      COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> w.obj      0.1 )
-   waLBerla_execute_test( NAME  MeshDistancePlausibilityTestCube      COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> cube.obj   0.0075 CONFIGURATIONS Release RelWithDbgInfo )
+   waLBerla_execute_test( NAME  MeshDistancePlausibilityTestCube      COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> cube.obj   0.01 CONFIGURATIONS Release RelWithDbgInfo )
    waLBerla_execute_test( NAME  MeshDistancePlausibilityTestCubeDbg   COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> cube.obj   0.1 )
-   waLBerla_execute_test( NAME  MeshDistancePlausibilityTestSphere    COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> sphere.obj 0.02   CONFIGURATIONS Release RelWithDbgInfo )
+   waLBerla_execute_test( NAME  MeshDistancePlausibilityTestSphere    COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> sphere.obj 0.04   CONFIGURATIONS Release RelWithDbgInfo )
    waLBerla_execute_test( NAME  MeshDistancePlausibilityTestSphereDbg COMMAND $<TARGET_FILE:MeshDistancePlausibilityTest> sphere.obj 0.1 )
    
    waLBerla_compile_test( FILES MeshContainmentOctreeTest.cpp DEPENDS mesh )
@@ -62,8 +62,8 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
    waLBerla_execute_test( NAME  MeshInitializationTestDbg2P1 COMMAND $<TARGET_FILE:MeshInitilizationTest> cube.obj 2 12             )
    waLBerla_execute_test( NAME  MeshInitializationTestDbg2P2 COMMAND $<TARGET_FILE:MeshInitilizationTest> cube.obj 2 12 PROCESSES 2 )
    
-   waLBerla_execute_test( NAME  MeshInitializationTest1P    COMMAND $<TARGET_FILE:MeshInitilizationTest> bunny.obj 100 600 CONFIGURATIONS Release RelWithDbgInfo )
-   waLBerla_execute_test( NAME  MeshInitializationTest4P    COMMAND $<TARGET_FILE:MeshInitilizationTest> bunny.obj 100 600 PROCESSES 4 CONFIGURATIONS Release RelWithDbgInfo )
+   waLBerla_execute_test( NAME  MeshInitializationTest1P    COMMAND $<TARGET_FILE:MeshInitilizationTest> bunny.obj 6 40 CONFIGURATIONS Release RelWithDbgInfo )
+   waLBerla_execute_test( NAME  MeshInitializationTest4P    COMMAND $<TARGET_FILE:MeshInitilizationTest> bunny.obj 6 40 PROCESSES 4 CONFIGURATIONS Release RelWithDbgInfo )
 
    
    waLBerla_compile_test( FILES MeshBlockExclusionTest.cpp DEPENDS mesh )
