@@ -67,6 +67,7 @@ option ( WALBERLA_BUILD_TESTS               "Build Testcases"                   
 option ( WALBERLA_BUILD_BENCHMARKS          "Build Benchmarks"                                ON )
 option ( WALBERLA_BUILD_TOOLS               "Build Tools"                                        )
 option ( WALBERLA_BUILD_TUTORIALS           "Build Tutorials"                                 ON )
+option ( WALBERLA_BUILD_SHOWCASES           "Build Showcases"                                OFF )
 
 option ( WALBERLA_BUILD_WITH_MPI            "Build with MPI"                                  ON )
 option ( WALBERLA_BUILD_WITH_METIS          "Build with metis graph partitioner"             OFF )
