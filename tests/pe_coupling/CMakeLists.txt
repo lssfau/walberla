@@ -117,6 +117,18 @@ waLBerla_execute_test( NAME SegreSilberbergMEMEanReconTest        COMMAND $<TARG
 waLBerla_execute_test( NAME SegreSilberbergMEMExtReconFuncTest    COMMAND $<TARGET_FILE:SegreSilberbergMEM> --funcTest --extReconstructor PROCESSES 9 )
 waLBerla_execute_test( NAME SegreSilberbergMEMExtReconTest        COMMAND $<TARGET_FILE:SegreSilberbergMEM> --MO_CLI --extReconstructor   PROCESSES 18 LABELS verylongrun CONFIGURATIONS Release RelWithDbgInfo )
 
+waLBerla_compile_test( FILES momentum_exchange_method/SettlingSphereMEM.cpp DEPENDS timeloop )
+waLBerla_execute_test( NAME SettlingSphereMEMFuncTestSerial      COMMAND $<TARGET_FILE:SettlingSphereMEM> --funcTest PROCESSES 1 LABELS longrun CONFIGURATIONS Release RelWithDbgInfo )
+waLBerla_execute_test( NAME SettlingSphereMEMFuncTestParallel    COMMAND $<TARGET_FILE:SettlingSphereMEM> --funcTest PROCESSES 8 CONFIGURATIONS Release RelWithDbgInfo)
+
+waLBerla_compile_test( FILES momentum_exchange_method/SettlingSphereMEMDynamicRefinement.cpp DEPENDS timeloop )
+waLBerla_execute_test( NAME SettlingSphereMEMDynamicRefinementFuncTestSerial      COMMAND $<TARGET_FILE:SettlingSphereMEMDynamicRefinement> --funcTest PROCESSES 1 LABELS longrun CONFIGURATIONS Release RelWithDbgInfo)
+waLBerla_execute_test( NAME SettlingSphereMEMDynamicRefinementFuncTestParallel    COMMAND $<TARGET_FILE:SettlingSphereMEMDynamicRefinement> --funcTest PROCESSES 8 CONFIGURATIONS Release RelWithDbgInfo)
+
+waLBerla_compile_test( FILES momentum_exchange_method/SettlingSphereMEMStaticRefinement.cpp DEPENDS timeloop )
+waLBerla_execute_test( NAME SettlingSphereMEMStaticRefinementFuncTestSerial      COMMAND $<TARGET_FILE:SettlingSphereMEMStaticRefinement> --funcTest PROCESSES 1 LABELS longrun CONFIGURATIONS Release RelWithDbgInfo)
+waLBerla_execute_test( NAME SettlingSphereMEMStaticRefinementFuncTestParallel    COMMAND $<TARGET_FILE:SettlingSphereMEMStaticRefinement> --funcTest PROCESSES 8 CONFIGURATIONS Release RelWithDbgInfo)
+
 waLBerla_compile_test( FILES momentum_exchange_method/TorqueSphereMEM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME TorqueSphereMEMFuncTest        COMMAND $<TARGET_FILE:TorqueSphereMEM> --funcTest           PROCESSES 1 )
 waLBerla_execute_test( NAME TorqueSphereMEMSingleTest      COMMAND $<TARGET_FILE:TorqueSphereMEM>                      PROCESSES 1 LABELS longrun     CONFIGURATIONS Release RelWithDbgInfo )
