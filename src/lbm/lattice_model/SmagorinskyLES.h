@@ -144,7 +144,7 @@ void SmagorinskyLES< LatticeModel_T, Filter_T >::operator()( IBlock * block, con
             {
                real_t qij = real_t(0);
                for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
-                  qij += nonEquilibrium[ d.toIdx() ] * stencil::c[alpha][*d] * stencil::c[beta][*d];
+                  qij += nonEquilibrium[ d.toIdx() ] * real_c(stencil::c[alpha][*d]) * real_c(stencil::c[beta][*d]);
                filteredMeanMomentum += qij * qij;
             }
          }
