@@ -93,9 +93,10 @@ Matrix3<real_t> inertiaTensorNumeric( const ContainmentT & body, const AABB & aa
    {
       if(body.contains( ContainmentT::toPoint( *it ) ))
       {
-         const real_t & x = (*it)[0];
-         const real_t & y = (*it)[1];
-         const real_t & z = (*it)[2];
+         const Vector3<real_t> p = *it;
+         const real_t & x = p[0];
+         const real_t & y = p[1];
+         const real_t & z = p[2];
 
          intertiaTensor[0] += y*y + z*z;
          intertiaTensor[1] += -x*y;

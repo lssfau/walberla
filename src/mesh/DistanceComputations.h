@@ -42,6 +42,14 @@ struct DistanceProperties
    typedef typename MeshType::Scalar Scalar;
    typedef math::Matrix3<Scalar> Matrix;
 
+   // Dummy constructor to suppress GCC 7 warnings
+   DistanceProperties() : e0(real_t(0)), e1(real_t(0)), e2(real_t(0)),
+                          e1_normal(real_t(0)), e2_normal(real_t(0)),
+                          e1_normalized(real_t(0)), e2_normalized(real_t(0)), e0_normalized(real_t(0)),
+                          e0l(real_t(0)), e1l(real_t(0)), e2l(real_t(0)),
+                          translation(real_t(0))
+   {}
+
    Vec2 e0, e1, e2;
    Vec2 e1_normal, e2_normal;
    Vec2 e1_normalized, e2_normalized, e0_normalized;
