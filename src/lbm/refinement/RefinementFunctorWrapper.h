@@ -31,7 +31,7 @@ namespace refinement {
 
 class FunctorWrapper {
 public:
-   FunctorWrapper(boost::function<void()> fct)
+   FunctorWrapper( const boost::function<void()> & fct)
          : fct_(fct) {
    }
 
@@ -45,7 +45,8 @@ private:
 
 class SweepAsFunctorWrapper {
 public:
-   SweepAsFunctorWrapper( boost::function<void(IBlock * )> fct, const shared_ptr <StructuredBlockStorage> &blockStorage )
+   SweepAsFunctorWrapper( const boost::function<void(IBlock * )> & fct,
+                          const shared_ptr <StructuredBlockStorage> & blockStorage )
          : fct_(fct), blockStorage_(blockStorage) {
    }
 

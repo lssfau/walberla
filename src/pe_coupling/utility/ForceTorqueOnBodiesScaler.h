@@ -60,12 +60,16 @@ public:
       }
    }
 
+   void resetScalingFactor( const real_t newScalingFactor )
+   {
+      scalingFactor_ = newScalingFactor;
+   }
 
 private:
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
    const BlockDataID bodyStorageID_;
-   const real_t scalingFactor_;
+   real_t scalingFactor_;
 };
 
 } // namespace pe_coupling
