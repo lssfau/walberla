@@ -8,6 +8,7 @@ cmake \
   -DBUILD_APPS=OFF \
   -DOPENMESH_PYTHON_VERSION=${PY_VER} \
   -DOPENMESH_BUILD_PYTHON_UNIT_TESTS=ON \
+  -DCMAKE_CXX_FLAGS="-std=c++11"\
   ..
 
 make install -j${CPU_COUNT}
