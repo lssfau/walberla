@@ -7,6 +7,25 @@ except ImportError:
 
 # ----------------------------- Python functions to extend the C++ field module ---------------------------------
 
+def normalizeGhostlayerInfo( field, withGhostLayers):
+    """Takes one ghost layer parameter and returns an integer:
+        True -> all ghost layers, False->no ghost layers"""
+
+    def normalizeComponent(gl):
+        if gl == False:
+            return 0
+        if gl == True:
+            return field.nrOfGhostLayers
+        if gl > field.nrOfGhostLayers:
+            raise ValueError("Field only has %d ghost layers (requested %d)" % ( field.nrOfGhostLayers, gl ) )
+        return gl
+
+    if hasattr( withGhostLayers, "__len__") and len(withGhostLayers) == 3:
+        ghostLayers = [ normalizeComponent(gl) for gl in withGhostLayers ]
+    else:
+        ghostLayers = [ normalizeComponent(withGhostLayers) ] * 3
+    return ghostLayers
+
 def npArrayFromWaLBerlaField(field, withGhostLayers=False):
     """ Creates a numpy array view on the waLBerla field data
         @field: the waLBerla field
@@ -19,24 +38,9 @@ def npArrayFromWaLBerlaField(field, withGhostLayers=False):
     
     if not field:
         return None
-    
-    def normalizeGhostlayerInfo( field, gl ):
-        """Takes one ghost layer parameter and returns an integer:
-            True -> all ghost layers, False->no ghost layers"""
-        if gl == False:
-            return 0
-        if gl == True:
-            return field.nrOfGhostLayers
-        if gl > field.nrOfGhostLayers:
-            raise ValueError("Field only has %d ghost layers (requested %d)" % ( field.nrOfGhostLayers, gl ) )     
-        return gl
-    
-    if hasattr( withGhostLayers, "__len__") and len(withGhostLayers) == 3:
-        ghostLayers = [ normalizeGhostlayerInfo(field, gl) for gl in withGhostLayers ]
-    else:
-        ghostLayers = [ normalizeGhostlayerInfo(field, withGhostLayers) ] * 3
-    
-    
+
+    ghostLayers = normalizeGhostlayerInfo(field, withGhostLayers)
+
     if not hasattr(field, 'buffer'): # Field adaptor -> create field with adapted values
         field = field.copyToField()
     
