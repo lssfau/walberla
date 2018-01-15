@@ -42,7 +42,7 @@ using namespace walberla::pe;
 using namespace walberla::pe::raytracing;
 
 //! [BodyTypeTuple]
-typedef boost::tuple<Sphere, Plane> BodyTypeTuple ;
+typedef boost::tuple<Sphere, Plane, Box> BodyTypeTuple ;
 //! [BodyTypeTuple]
 
 
@@ -50,74 +50,132 @@ real_t deg2rad(real_t deg) {
    return deg * math::M_PI / real_t(180.0);
 }
 
-void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
-   size_t width = 30;
-   size_t height = 30;
-   real_t fov = 49.13; // in degrees
-   Vec3 cameraPosition(5,-5,5);
-   Vec3 cameraLookAtPoint(5,0,5);
-   Vec3 cameraUpVector(0,0,1);
+void writeTBufferToFile(real_t buffer[], walberla::id_t idBuffer[], size_t width, size_t height, std::string fileName) {
+   real_t t_max = 1;
+   real_t t_min = INFINITY;
+   walberla::id_t maxId = 0;
+   for (size_t i = 0; i < width*height; i++) {
+      if (buffer[i] > t_max && buffer[i] != INFINITY) {
+         t_max = buffer[i];
+      }
+      if (buffer[i] < t_min) {
+         //t_min = buffer[i];
+      }
+      if (idBuffer[i] > maxId) {
+         maxId = idBuffer[i];
+      }
+   }
+   if (t_min == INFINITY) t_min = 0;
    
-   real_t scale = tan(deg2rad(fov * 0.5));
+   std::map<walberla::id_t, char> idToColors;
+   
+   std::ofstream ofs(fileName, std::ios::out | std::ios::binary);
+   ofs << "P6\n" << width << " " << height << "\n255\n";
+   for (size_t i = height*width-1; i > 0; i--) {
+      char r = 0, g = 0, b = 0;
+      real_t t = buffer[i];
+      walberla::id_t id = idBuffer[i];
+      if (t == INFINITY) {
+         r = g = b = (char)255;
+      } else {
+         //r = g = b = (char)(255 * (t-t_min)/t_max);
+         //b = (char)(255 * (real_t(id)/real_t(maxId)));
+         //if (b > (char)250) b = (char)250;
+         if (idToColors.count(id) == 0) {
+            idToColors.insert(std::make_pair(id, math::intRandom(0, 240)));
+         }
+         b = (char)(idToColors.at(id) * ((t-t_min)/t_max));
+         //b = (char)(200 * ((t-t_min)/t_max));
+         r = (char)(200 * ((t-t_min)/t_max));
+      }
+      ofs << r << g << b;
+   }
+   
+   ofs.close();
+}
 
+void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
+   // - settings
+   size_t pixelsHorizontal = 640;
+   size_t pixelsVertical = 480;
+   real_t fov_vertical = 49.13; // in degrees, in vertical direction
+   // camera settings
+   Vec3 cameraPosition(-5,0,0);
+   Vec3 lookAtPoint(1,0,0);
+   Vec3 upVector(0,1,0);
+   
+   //real_t scale = tan(deg2rad(fov * 0.5));
+   
+   // - viewing plane construction
+   // eye cos setup
+   Vec3 n = (cameraPosition - lookAtPoint).getNormalized(); // normal vector of viewing plane
+   Vec3 u = (upVector % n).getNormalized(); // u and ...
+   Vec3 v = n % u; // ... v span the viewing plane
+   // image plane setup
+   real_t d = (cameraPosition - lookAtPoint).length(); // distance from camera to viewing plane
+   real_t aspectRatio = real_t(pixelsHorizontal) / real_t(pixelsVertical);
+   real_t imagePlaneHeight = tan(deg2rad(fov_vertical)/real_t(2.)) * real_t(2.) * d;
+   real_t imagePlaneWidth = imagePlaneHeight * aspectRatio;
+   Vec3 imagePlaneOrigin = lookAtPoint - u*imagePlaneWidth/real_t(2.) - v*imagePlaneHeight/real_t(2.);
+   real_t pixelWidth = imagePlaneWidth / pixelsHorizontal;
+   real_t pixelHeight = imagePlaneHeight / pixelsVertical;
+   
+   // - raytracing
+   real_t frameBuffer[pixelsHorizontal*pixelsVertical];
+   walberla::id_t idBuffer[pixelsHorizontal*pixelsVertical];
+   std::map<RigidBody*, bool> visibleBodies;
    
    real_t t, t_closest;
-   
-   /*for (int x = 0; x < width; x++) {
-      for (int y = 0; y < height; y++) {*/
-         Ray ray(Vec3(0,5,5), Vec3(1,0,0));
+   walberla::id_t id_closest;
+   for (size_t x = 0; x < pixelsHorizontal; x++) {
+      for (size_t y = 0; y < pixelsVertical; y++) {
+         //WALBERLA_LOG_INFO(x << "/" << y);
+         Vec3 pixelLocation = imagePlaneOrigin + u*(x+real_t(0.5))*pixelWidth + v*(y+real_t(0.5))*pixelHeight;
+         Vec3 direction = (pixelLocation - cameraPosition).getNormalized();
+         Ray ray(cameraPosition, direction);
          
          t_closest = INFINITY;
-         
+         id_closest = 0;
+         RigidBody* body_closest;
          for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
             for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
-               // if bodyit->getTypeID() == Sphere::getStaticTypeID()
-               // bodyIt = RigidBody, kennt AABB (getAABB())
-               
                IntersectsFunctor func(&ray, &t);
                bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
                
-               if (intersects) {
-                  WALBERLA_LOG_INFO("found object intersecting with ray");
-               }
-               
                if (intersects && t < t_closest) {
-                  WALBERLA_LOG_INFO("object is closer than currently closest one");
-
-                  t_closest = t;
-               }
-               
-               /*if (intersects(ray, bodyIt, &t) && t < t_closest) {
                   // body is shot by ray and currently closest to camera
+                  //WALBERLA_LOG_INFO("object is closer than currently closest one");
+                  
                   t_closest = t;
-                  // alle die sichtbar sind, push_back in vector
-                  // alternativ: speichern per map mit body -> flag setzen, falls gespeichert werden soll
-               }*/
+                  id_closest = bodyIt->getID();
+                  body_closest = *bodyIt;
+               }
             }
          }
-   /*   }
-   }*/
+         //std::cout << (t_closest != INFINITY ? size_t(t_closest) : 0) << " ";
+         if (visibleBodies.find(body_closest) != visibleBodies.end()) {
+            visibleBodies.insert(std::make_pair(body_closest, true));
+         }
+         frameBuffer[y*pixelsHorizontal + x] = t_closest;
+         idBuffer[y*pixelsHorizontal + x] = id_closest;
+      }
+      //std::cout << std::endl;
+   }
+   
+   writeTBufferToFile(frameBuffer, idBuffer, pixelsHorizontal, pixelsVertical, "/Users/ng/Desktop/tbuffer.ppm");
 }
 
 void testRayTracing () {
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vec3(1,1,1), Vec3(false, false, false));
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,-5,-5,10,5,5), Vec3(1,1,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTypeTuple>(), "Storage");
    SetBodyTypeIDs<BodyTypeTuple>::execute();
-   createSphere(*globalBodyStorage, *forest, storageID, 0, Vec3(5,5,5), real_t(1));
-   
-   Vec3 camera(15,5,5);
-   
-   Ray ray(Vec3(0,5,5), Vec3(1,0,0));
-   
-   /*real_t t;
-   if (intersects(&ray, sp, t)) {
-      WALBERLA_LOG_INFO("sphere intersected with ray, t = " << t);
-   } else {
-      WALBERLA_LOG_INFO("sphere did not intersect with ray");
+   createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,0,0), real_t(3));
+   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(3,0,-3), real_t(1));
+   createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,2,0), real_t(1));
+   createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,4,2), Vec3(2,3,4));
+   //createSphere(*globalBodyStorage, *forest, storageID, 5, Vec3(1,0,0), real_t(0.1));
 
-   }*/
-   
    rayTrace(forest, storageID);
 }
 
