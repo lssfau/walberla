@@ -13,18 +13,19 @@ build:
 requirements:
   build:
   - {{ compiler('cxx') }}
-  - python
   - git
-  - boost
   - cmake
   - make
+  host:
+  - python
+  - boost
   - mpich2 [linux]
-  #- openmesh
+  - openmesh
   run:
   - python >=3.6
   - boost
   - numpy
   - mpich2 [linux]
-  #- openmesh
+  - openmesh
 source:
   path: ../../..

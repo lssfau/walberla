@@ -1348,12 +1348,14 @@ msvc-14.1_MpiOnly:
 .conda-deploy: &conda_deploy_definition
    stage: deploy
    before_script:
+      - conda update -y conda
+      - conda update -y python
       - conda install -y conda-build anaconda-client
-      - conda install conda-build==3.0.27  # building with conda-build version 3.2.1 leads to empty package
       - anaconda login --username $CONDA_DEPLOY_USER --password $CONDA_DEPLOY_PASSWORD --hostname $CI_JOB_ID
       - conda config --set anaconda_upload yes
       - conda config --add channels lssfau
-      - conda
+      - conda -V
+      - conda build -V
    after_script:
       - anaconda logout
    dependencies: []

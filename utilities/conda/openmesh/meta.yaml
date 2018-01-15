@@ -16,9 +16,10 @@ source:
 requirements:
   build:
     - {{ compiler('cxx') }}
-    - python
     - cmake
     - make
+  host:
+    - python
     - boost
   run:
     - python
