@@ -144,8 +144,6 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
                
                if (intersects && t < t_closest) {
                   // body is shot by ray and currently closest to camera
-                  //WALBERLA_LOG_INFO("object is closer than currently closest one");
-                  
                   t_closest = t;
                   id_closest = bodyIt->getID();
                   body_closest = *bodyIt;
@@ -153,7 +151,7 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
             }
          }
          //std::cout << (t_closest != INFINITY ? size_t(t_closest) : 0) << " ";
-         if (visibleBodies.find(body_closest) != visibleBodies.end()) {
+         if (t_closest != INFINITY && visibleBodies.find(body_closest) == visibleBodies.end()) {
             visibleBodies.insert(std::make_pair(body_closest, true));
          }
          frameBuffer[y*pixelsHorizontal + x] = t_closest;
@@ -161,6 +159,8 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
       }
       //std::cout << std::endl;
    }
+   
+   WALBERLA_LOG_INFO_ON_ROOT("#particles visible: " << visibleBodies.size());
    
    writeTBufferToFile(frameBuffer, idBuffer, pixelsHorizontal, pixelsVertical, "/Users/ng/Desktop/tbuffer.ppm");
 }
@@ -185,11 +185,11 @@ int main( int argc, char ** argv )
    Environment env(argc, argv);
    WALBERLA_UNUSED(env);
    
+   math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
+   
    testRayTracing();
    return 0;
    
-   math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
-
    real_t spacing          = real_c(1.0);
    real_t radius           = real_c(0.4);
    real_t vMax             = real_c(1.0);
@@ -308,8 +308,10 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO( "mean velocity: " << meanVelocity );
    //! [PostProcessing]
    
+   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - START ***");
    rayTrace(forest, storageID);
-   
+   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - END ***");
+
    // für einzelne sphere vtks: -> SphereVtkOutput.cpp
    
    auto vtkDomainOutput = vtk::createVTKOutput_DomainDecomposition( forest, "domain_decomposition", 1, "vtk_out", "simulation_step" );
