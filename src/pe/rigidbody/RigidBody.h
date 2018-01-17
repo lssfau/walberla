@@ -3103,7 +3103,7 @@ inline bool RigidBody::containsPoint( real_t px, real_t py, real_t pz ) const
 inline bool RigidBody::containsPoint( const Vec3& gpos ) const
 {
    const Vec3& temp = pointFromWFtoBF( gpos );
-   return isSurfaceRelPointImpl( temp[0], temp[1], temp[2] );
+   return containsRelPointImpl( temp[0], temp[1], temp[2] );
 }
 //*************************************************************************************************
 
