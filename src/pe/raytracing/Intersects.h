@@ -35,9 +35,10 @@ namespace walberla {
          };
          
          inline bool intersects(SphereID sphere, Ray* ray, real_t* t) {
+            Vec3 direction = ray->getDirection();
             Vec3 displacement = ray->origin - sphere->getPosition();
-            real_t a = ray->direction * ray->direction;
-            real_t b = real_t(2.) * (displacement * ray->direction);
+            real_t a = direction * direction;
+            real_t b = real_t(2.) * (displacement * direction);
             real_t c = (displacement * displacement) - (sphere->getRadius() * sphere->getRadius());
             real_t discriminant = b*b - real_t(4.)*a*c;
             if (discriminant < EPSILON) {
@@ -72,13 +73,14 @@ namespace walberla {
          }
          
          inline bool intersects(PlaneID plane, Ray* ray, real_t* t) {
-            real_t denominator = plane->getNormal() * ray->direction;
+            Vec3 direction = ray->getDirection();
+            real_t denominator = plane->getNormal() * direction;
             if (std::abs(denominator) > EPSILON) {
                real_t t_;
                t_ = ((plane->getPosition() - ray->origin) * plane->getNormal()) / denominator;
                
                if (t_ > EPSILON) {
-                  Vec3 intersectionPoint = (t_*ray->direction + ray->origin);
+                  Vec3 intersectionPoint = (t_*direction + ray->origin);
                   Vec3 originToIntersection = ray->origin - intersectionPoint;
                   *t = originToIntersection.length();
                   return true;
@@ -91,8 +93,7 @@ namespace walberla {
          }
          
          inline bool intersects(BoxID box, Ray* ray, real_t* t) {
-            Mat3 invRotationMatrix = box->getRotation().getInverse();
-            Ray transformedRay(invRotationMatrix * (ray->origin - box->getPosition()), invRotationMatrix * ray->direction);
+            Ray transformedRay(box->pointFromWFtoBF(ray->origin), box->vectorFromWFtoBF(ray->getDirection()));
             
             Vec3 lengths = box->getLengths();
             Vec3 lengthsHalved = lengths/real_t(2);
@@ -101,12 +102,15 @@ namespace walberla {
                -lengthsHalved,
                lengthsHalved
             };
+                               
+            int* sign = transformedRay.getInvDirectionSigns();
+            Vec3 invDirection = transformedRay.getInvDirection();
                         
             real_t txmin, txmax;
-            real_t tmin = txmin = (bounds[transformedRay.sign[0]][0] - transformedRay.origin[0]) * transformedRay.inv_direction[0];
-            real_t tmax = txmax = (bounds[1-transformedRay.sign[0]][0] - transformedRay.origin[0]) * transformedRay.inv_direction[0];
-            real_t tymin = (bounds[transformedRay.sign[1]][1] - transformedRay.origin[1]) * transformedRay.inv_direction[1];
-            real_t tymax = (bounds[1-transformedRay.sign[1]][1] - transformedRay.origin[1]) * transformedRay.inv_direction[1];
+            real_t tmin = txmin = (bounds[sign[0]][0] - transformedRay.origin[0]) * invDirection[0];
+            real_t tmax = txmax = (bounds[1-sign[0]][0] - transformedRay.origin[0]) * invDirection[0];
+            real_t tymin = (bounds[sign[1]][1] - transformedRay.origin[1]) * invDirection[1];
+            real_t tymax = (bounds[1-sign[1]][1] - transformedRay.origin[1]) * invDirection[1];
             if (tmin > tymax || tymin > tmax) {
                *t = INFINITY;
                return false;
@@ -117,8 +121,8 @@ namespace walberla {
             if (tymax < tmax) {
                tmax = tymax;
             }
-            real_t tzmin = (bounds[transformedRay.sign[2]][2] - transformedRay.origin[2]) * transformedRay.inv_direction[2];
-            real_t tzmax = (bounds[1-transformedRay.sign[2]][2] - transformedRay.origin[2]) * transformedRay.inv_direction[2];
+            real_t tzmin = (bounds[sign[2]][2] - transformedRay.origin[2]) * invDirection[2];
+            real_t tzmax = (bounds[1-sign[2]][2] - transformedRay.origin[2]) * invDirection[2];
             if (tmin > tzmax || tzmin > tmax) {
                *t = INFINITY;
                return false;
@@ -156,11 +160,14 @@ namespace walberla {
                aabb.max()
             };
             
+            int* sign = ray->getInvDirectionSigns();
+            Vec3 invDirection = ray->getInvDirection();
+            
             real_t txmin, txmax;
-            real_t tmin = txmin = (bounds[ray->sign[0]][0] - ray->origin[0]) * ray->inv_direction[0];
-            real_t tmax = txmax = (bounds[1-ray->sign[0]][0] - ray->origin[0]) * ray->inv_direction[0];
-            real_t tymin = (bounds[ray->sign[1]][1] - ray->origin[1]) * ray->inv_direction[1];
-            real_t tymax = (bounds[1-ray->sign[1]][1] - ray->origin[1]) * ray->inv_direction[1];
+            real_t tmin = txmin = (bounds[sign[0]][0] - ray->origin[0]) * invDirection[0];
+            real_t tmax = txmax = (bounds[1-sign[0]][0] - ray->origin[0]) * invDirection[0];
+            real_t tymin = (bounds[sign[1]][1] - ray->origin[1]) * invDirection[1];
+            real_t tymax = (bounds[1-sign[1]][1] - ray->origin[1]) * invDirection[1];
             if (tmin > tymax || tymin > tmax) {
                *t = INFINITY;
                return false;
@@ -171,8 +178,8 @@ namespace walberla {
             if (tymax < tmax) {
                tmax = tymax;
             }
-            real_t tzmin = (bounds[ray->sign[2]][2] - ray->origin[2]) * ray->inv_direction[2];
-            real_t tzmax = (bounds[1-ray->sign[2]][2] - ray->origin[2]) * ray->inv_direction[2];
+            real_t tzmin = (bounds[sign[2]][2] - ray->origin[2]) * invDirection[2];
+            real_t tzmax = (bounds[1-sign[2]][2] - ray->origin[2]) * invDirection[2];
             if (tmin > tzmax || tzmin > tmax) {
                *t = INFINITY;
                return false;
