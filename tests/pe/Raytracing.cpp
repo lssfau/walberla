@@ -77,14 +77,13 @@ void PlaneIntersectsTest() {
 }
 
 void BoxIntersectsTest() {
-   MaterialID iron = Material::find("iron");
-   Box box1(127, 5, Vec3(0, -15, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
-   
-   Ray ray1(Vec3(3,-5,3), Vec3(0,1,0));
-   real_t t;
-   
    WALBERLA_LOG_INFO("RAY -> BOX");
 
+   MaterialID iron = Material::find("iron");
+   real_t t;
+   
+   Box box1(127, 5, Vec3(0, -15, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Ray ray1(Vec3(3,-5,3), Vec3(0,1,0));
    WALBERLA_CHECK(!intersects(&box1, &ray1, &t));
    
    Box box2(128, 5, Vec3(0, -2, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
@@ -107,6 +106,14 @@ void BoxIntersectsTest() {
    Ray ray4(Vec3(3,-5,3), Vec3(-2, 3, 0.5));
    WALBERLA_CHECK(intersects(&box4, &ray4, &t));
    WALBERLA_CHECK(realIsEqual(t, real_t(9.7068), 1e-4));
+   
+   Box box5(128, 5, Vec3(4, 0, 0), Vec3(0, 0, 0), Quat(), Vec3(4, 4, 4), iron, false, true, false);
+   box5.rotate(0,0,math::M_PI/4);
+   Ray ray5(Vec3(0,1.5,0), Vec3(1,0,0));
+   WALBERLA_CHECK(intersects(&box5, &ray5, &t));
+   WALBERLA_CHECK(realIsEqual(t, real_t(2.67157), 1e-4));
+
+   WALBERLA_LOG_INFO("intersects: " << intersects(&box5, &ray5, &t) << ", t = " << t);
 }
 
 int main( int argc, char** argv )
@@ -116,9 +123,9 @@ int main( int argc, char** argv )
    
    SetBodyTypeIDs<BodyTuple>::execute();
    
-   SphereIntersectsTest();
-   PlaneIntersectsTest();
-   BoxIntersectsTest(); // does not work yet
+   //SphereIntersectsTest();
+   //PlaneIntersectsTest();
+   BoxIntersectsTest();
    
    return EXIT_SUCCESS;
 }

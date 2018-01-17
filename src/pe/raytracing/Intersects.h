@@ -91,8 +91,60 @@ namespace walberla {
          }
          
          inline bool intersects(BoxID box, Ray* ray, real_t* t) {
+            Mat3 invRotationMatrix = box->getRotation().getInverse();
+            Ray transformedRay(invRotationMatrix * (ray->origin - box->getPosition()), invRotationMatrix * ray->direction);
             
-            return intersects((GeomPrimitive*)box, ray, t);
+            Vec3 lengths = box->getLengths();
+            Vec3 lengthsHalved = lengths/real_t(2);
+            
+            Vec3 bounds[2] = {
+               -lengthsHalved,
+               lengthsHalved
+            };
+                        
+            real_t txmin, txmax;
+            real_t tmin = txmin = (bounds[transformedRay.sign[0]][0] - transformedRay.origin[0]) * transformedRay.inv_direction[0];
+            real_t tmax = txmax = (bounds[1-transformedRay.sign[0]][0] - transformedRay.origin[0]) * transformedRay.inv_direction[0];
+            real_t tymin = (bounds[transformedRay.sign[1]][1] - transformedRay.origin[1]) * transformedRay.inv_direction[1];
+            real_t tymax = (bounds[1-transformedRay.sign[1]][1] - transformedRay.origin[1]) * transformedRay.inv_direction[1];
+            if (tmin > tymax || tymin > tmax) {
+               *t = INFINITY;
+               return false;
+            }
+            if (tymin > tmin) {
+               tmin = tymin;
+            }
+            if (tymax < tmax) {
+               tmax = tymax;
+            }
+            real_t tzmin = (bounds[transformedRay.sign[2]][2] - transformedRay.origin[2]) * transformedRay.inv_direction[2];
+            real_t tzmax = (bounds[1-transformedRay.sign[2]][2] - transformedRay.origin[2]) * transformedRay.inv_direction[2];
+            if (tmin > tzmax || tzmin > tmax) {
+               *t = INFINITY;
+               return false;
+            }
+            if (tzmin > tmin) {
+               tmin = tzmin;
+            }
+            if (tzmax < tmax) {
+               tmax = tzmax;
+            }
+            
+            real_t t_;
+            if (tmin > 0) {
+               // ray hit box from outside
+               t_ = tmin;
+            } else if (tmax < 0) {
+               // tmin and tmax are smaller than 0 -> box is in rays negative direction
+               *t = INFINITY;
+               return false;
+            } else {
+               // ray origin within box
+               t_ = tmax;
+            }
+            
+            *t = t_;
+            return true;
          }
          
          inline bool intersects(GeomPrimitive* body, Ray* ray, real_t* t) {
