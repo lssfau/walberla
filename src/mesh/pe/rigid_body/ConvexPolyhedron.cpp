@@ -90,14 +90,15 @@ void ConvexPolyhedron::init( const Vec3& gpos, const Vec3& rpos, const Quat& q,
    q_      = q;                      // Setting the orientation
    R_      = q_.toRotationMatrix();  // Setting the rotation matrix
 
-                                     // Calculating the ConvexPolyhedron mass
-   mass_    = getVolume() * Material::getDensity( getMaterial() );
-
-   // Calculating the moment of inertia
-   calcInertia();
-
    setGlobal( global );
-   setMass( infiniteMass ); // sets inverse mass and interatio tensor
+   if (infiniteMass)
+   {
+      setMassAndInertiaToInfinity();
+   } else
+   {
+      // sets inverse mass and interatio tensor
+      setMassAndInertia( getVolume() * Material::getDensity( getMaterial() ), mesh::computeIntertiaTensor( mesh_ ) );
+   }
    setCommunicating( communicating );
    setFinite( true );
 
@@ -156,17 +157,6 @@ void ConvexPolyhedron::calcBoundingBox()
    const real_t r = boundingSphereRadius_ + contactThreshold;
    aabb_.initMinMaxCorner( pos[0] - r, pos[1] - r , pos[2] - r,
                            pos[0] + r, pos[1] + r , pos[2] + r  );
-}
-//*************************************************************************************************
-
-//*************************************************************************************************
-/*!\brief Calculation of the moment of inertia in reference to the body frame of the ConvexPolyhedron.
- *
- * \return void
- */
-void ConvexPolyhedron::calcInertia()
-{
-   I_ = mesh::computeIntertiaTensor( mesh_ );
 }
 //*************************************************************************************************
 

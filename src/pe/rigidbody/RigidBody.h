@@ -166,12 +166,12 @@ public:
    inline  void resetSB() ;
 
    inline  void setFinite     ( const bool finite );
-   inline  void setMass       ( bool infinite );
    inline  void setVisible    ( bool visible );
    inline  void setPosition   ( real_t px, real_t py, real_t pz );
    inline  void setPosition   ( const Vec3& gpos );
    inline  void setOrientation( real_t r, real_t i, real_t j, real_t k );
    inline  void setOrientation( const Quat& q );
+   inline  void setMassAndInertiaToInfinity();
 
    inline void setRelLinearVel ( real_t vx, real_t vy, real_t vz );
    inline void setRelLinearVel ( const Vec3& lvel );
@@ -357,8 +357,10 @@ protected:
    virtual void rotateImpl            ( const Quat& dq );
    virtual void rotateAroundOriginImpl( const Quat& dq );
    virtual void rotateAroundPointImpl ( const Vec3& point, const Quat& dq );
-   virtual bool containsRelPointImpl   ( real_t px, real_t py, real_t pz ) const;
-   virtual bool isSurfaceRelPointImpl  ( real_t px, real_t py, real_t pz ) const;
+   virtual bool containsRelPointImpl  ( real_t px, real_t py, real_t pz ) const;
+   virtual bool isSurfaceRelPointImpl ( real_t px, real_t py, real_t pz ) const;
+
+   inline  void setMassAndInertia     ( const real_t mass, const Mat3& inertia );
 
    inline void calcRelPosition();
    //@}
@@ -706,7 +708,7 @@ inline bool RigidBody::isFixed() const
  */
 inline bool RigidBody::hasInfiniteMass() const
 {
-   return (isIdentical(invMass_, real_t(0))) && ( Iinv_.isZero() );
+   return std::isinf(getMass());
 }
 //*************************************************************************************************
 
@@ -2313,39 +2315,30 @@ inline void RigidBody::setFinite( const bool finite )
 
 
 //*************************************************************************************************
-/*!\brief Setting the global position (the center of mass) of the rigid body fixed.
+/*!\brief Sets mass and inertia of a rigid body. Also calculates inverse values.
  *
- * \return void
- *
- * This function either fixes the global position (the center of mass) of a finite
- * rigid body. If the body is contained in a superordinate body, fixing the contained
- * body will also fix the global position of the superordinate body.
- * Fixation is permanent and a fixed body cannot be unfixed anymore.
- *
- * In case of a <b>MPI parallel simulation</b>, changing the settings of a (local) rigid body
- * on one process may invalidate the settings of the rigid body on another process. In order to
- * synchronize all rigid bodies after local changes, the simulation has to be synchronized
- * by the user. Note that any changes on remote rigid
- * bodies are neglected and overwritten by the settings of the rigid body on its local process!
+ * \param mass mass to be set (may be infinity)
+ * \param inertia inertia to be set (if mass is infinity this one will be ignored)
  */
-inline void RigidBody::setMass( bool infinite )
+inline void RigidBody::setMassAndInertia( const real_t mass, const Mat3& inertia )
 {
-   if (infinite)
+   if ( std::isinf( mass ) )
    {
       // Adjusting the inverse mass and inverse moment of inertia
+      mass_    = std::numeric_limits<real_t>::infinity();
+      I_       = Mat3::makeDiagonalMatrix(std::numeric_limits<real_t>::infinity());
       invMass_ = real_c(0);
       Iinv_    = Mat3( real_c(0) );
-
-      // Setting the linear and angular velocity to zero
-      v_ = Vec3(0);
-      w_ = Vec3(0);
    } else
    {
       // Adjusting the inverse mass and inverse moment of inertia
+      mass_    = mass;
+      I_       = inertia;
       invMass_ = real_c(1) / mass_;
       Iinv_    = I_.getInverse();
    }
 
+   if (hasSuperBody()) WALBERLA_LOG_WARNING("Changing the mass of a body contained in a Union is currently untested!!!");
    // Signaling the fixation change to the superordinate body
    signalFixation();
 }
@@ -2552,6 +2545,19 @@ inline void RigidBody::setOrientation( real_t r, real_t i, real_t j, real_t k )
 inline void RigidBody::setOrientation( const Quat& q )
 {
    setOrientationImpl( q[0], q[1], q[2], q[3] );
+}
+//*************************************************************************************************
+
+//*************************************************************************************************
+/*!\fn void RigidBody::setMassAndInertiaToInfinity( )
+ * \brief Setting the mass to infinity. This will also make the inertia tensor infinite.
+ *
+ * \attention This cannot be undone!
+ */
+//*************************************************************************************************
+inline void RigidBody::setMassAndInertiaToInfinity()
+{
+   setMassAndInertia( std::numeric_limits<real_t>::infinity(), Mat3(std::numeric_limits<real_t>::infinity()) );
 }
 //*************************************************************************************************
 
@@ -3261,7 +3267,7 @@ inline Vec3 RigidBody::supportContactThreshold(const Vec3& /*d*/) const
 inline void RigidBody::fix()
 {
    setCommunicating( false );
-   setMass( true );
+   setMassAndInertia( getMass(), getInertia() );
 
    // Signaling the fixation change to the superordinate body
    signalFixation();

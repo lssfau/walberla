@@ -41,10 +41,19 @@ inline void checkVitalParameters(SphereID bd1, SphereID bd2)
    WALBERLA_CHECK_FLOAT_EQUAL(bd1->getRotation(), bd2->getRotation());
    WALBERLA_CHECK_FLOAT_EQUAL(bd1->getAngularVel(), bd2->getAngularVel());
 
-   WALBERLA_CHECK_FLOAT_EQUAL(bd1->getMass(), bd2->getMass());
-   WALBERLA_CHECK_FLOAT_EQUAL(bd1->getInvMass(), bd2->getInvMass());
-   WALBERLA_CHECK_FLOAT_EQUAL(bd1->getInertia(), bd2->getInertia());
-   WALBERLA_CHECK_FLOAT_EQUAL(bd1->getInvInertia(), bd2->getInvInertia());
+   if (std::isinf(bd1->getMass()))
+   {
+      WALBERLA_CHECK            ( std::isinf(bd2->getMass()) );
+      WALBERLA_CHECK_FLOAT_EQUAL(bd1->getInvMass(), bd2->getInvMass());
+      WALBERLA_CHECK            ( math::isinf(bd1->getBodyInertia()) );
+      WALBERLA_CHECK            ( math::isinf(bd2->getBodyInertia()) );
+      WALBERLA_CHECK_FLOAT_EQUAL(bd1->getInvInertia(), bd2->getInvInertia());
+   } else {
+      WALBERLA_CHECK_FLOAT_EQUAL(bd1->getMass(), bd2->getMass());
+      WALBERLA_CHECK_FLOAT_EQUAL(bd1->getInvMass(), bd2->getInvMass());
+      WALBERLA_CHECK_FLOAT_EQUAL(bd1->getInertia(), bd2->getInertia());
+      WALBERLA_CHECK_FLOAT_EQUAL(bd1->getInvInertia(), bd2->getInvInertia());
+   }
 
    WALBERLA_CHECK_EQUAL(bd1->isGlobal(), bd2->isGlobal());
    WALBERLA_CHECK_EQUAL(bd1->hasInfiniteMass(), bd2->hasInfiniteMass());

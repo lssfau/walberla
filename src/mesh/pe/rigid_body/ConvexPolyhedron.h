@@ -127,7 +127,6 @@ protected:
    /*!\name Utility functions */
    //@{
    virtual void calcBoundingBox();  // Calculation of the axis-aligned bounding box
-           void calcInertia();      // Calculation of the moment of inertia
    virtual TriangleMesh::VertexHandle supportVertex( const TriangleMesh::Normal & d, const TriangleMesh::VertexHandle startVertex ) const;
    //@}
    //**********************************************************************************************

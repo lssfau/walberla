@@ -84,15 +84,15 @@ Ellipsoid::Ellipsoid( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, c
    q_      = q;                      // Setting the orientation
    R_      = q_.toRotationMatrix();  // Setting the rotation matrix
 
-   // Calculating the Ellipsoid mass
-   mass_ = calcMass(semiAxes_, Material::getDensity( material ));
-   invMass_ = real_c(1) / mass_;
-
-   // Calculating the moment of inertia
-   calcInertia();
-
    setGlobal( global );
-   setMass( infiniteMass );
+   if (infiniteMass)
+   {
+      setMassAndInertiaToInfinity();
+   } else
+   {
+      auto mass = calcMass( semiAxes, Material::getDensity( material ) );
+      setMassAndInertia( mass, calcInertia( mass, semiAxes ) );
+   }
    setCommunicating( communicating );
    setFinite( true );
 
