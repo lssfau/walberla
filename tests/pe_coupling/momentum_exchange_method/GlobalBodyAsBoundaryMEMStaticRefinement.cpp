@@ -341,6 +341,7 @@ int main( int argc, char **argv )
    // set up pe functionality
    shared_ptr<pe::BodyStorage>  globalBodyStorage = make_shared<pe::BodyStorage>();
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
+   auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
 
    // create pe bodies
 
@@ -382,7 +383,7 @@ int main( int argc, char **argv )
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >( MyBoundaryHandling( flagFieldID, pdfFieldID, bodyFieldID ), "boundary handling" );
 
    // map planes into the LBM simulation -> act as no-slip boundaries
-   pe_coupling::mapMovingGlobalBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, *globalBodyStorage, bodyFieldID, MO_SBB_Flag );
+   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_SBB_Flag );
 
 
    ///////////////

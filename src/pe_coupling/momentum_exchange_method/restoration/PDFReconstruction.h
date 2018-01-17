@@ -24,6 +24,7 @@
 
 #include "pe/rigidbody/BodyIterators.h"
 #include "pe_coupling/mapping/BodyBBMapping.h"
+#include "pe_coupling/utility/BodySelectorFunctions.h"
 
 #include "core/debug/Debug.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
@@ -32,23 +33,25 @@
 #include "field/iterators/IteratorMacros.h"
 #include "Reconstructor.h"
 
+#include <boost/function.hpp>
 
 namespace walberla {
 namespace pe_coupling {
 
 
 //**************************************************************************************************************************************
-/*!
-*   \brief Class to manage the reconstruction of PDFs that is needed when cells are becoming uncovered by moving obstacles.
+/*!\brief Class to manage the reconstruction of PDFs that is needed when cells are becoming uncovered by moving obstacles.
 *
-*   Due to the explicit mapping of bodies into the fluid domain via flags, the PDFs of cells that turned from obstacle to fluid
-*   are missing and must be reconstructed in order to continue with the simulation.
-*   This class is to be used as a sweep in a LBM simulation with moving obstacles and calls for each cell that is tagged as
-*   'formerObstacle' the specified reconstructor (see Reconstructor.h for the available variants).
-*   After the successful reconstruction of all PDFs, the flags are updated to 'fluid'.
-*   For small obstacle fractions, an optimized variant is available that only looks for 'formerObstacle' cells in the vicinity
-*   of available bodies. It is activated via the 'optimizeForSmallObstacleFraction' argument in the constructor.
+* Due to the explicit mapping of bodies into the fluid domain via flags, the PDFs of cells that turned from obstacle to fluid
+* are missing and must be reconstructed in order to continue with the simulation.
+* This class is to be used as a sweep in a LBM simulation with moving obstacles and calls for each cell that is tagged as
+* 'formerObstacle' the specified reconstructor (see Reconstructor.h for the available variants).
+* After the successful reconstruction of all PDFs, the flags are updated to 'fluid'.
+* For small obstacle fractions, an optimized variant is available that only looks for 'formerObstacle' cells in the vicinity
+* of available bodies. It is activated via the 'optimizeForSmallObstacleFraction' argument in the constructor.
 *
+* The 'movingBodySelectorFct' can be used to decide which bodies should be check for reconstruction
+* (only used when 'optimizeForSmallObstacleFraction' is chosen).
 */
 //**************************************************************************************************************************************
 
@@ -58,35 +61,73 @@ class PDFReconstruction
 public:
 
    typedef typename BoundaryHandling_T::FlagField FlagField_T;
-   typedef typename FlagField_T::iterator         FlagFieldIterator;
    typedef typename BoundaryHandling_T::flag_t    flag_t;
    typedef Field< pe::BodyID, 1 >                 BodyField_T;
 
    inline PDFReconstruction( const shared_ptr<StructuredBlockStorage> & blockStorage,
                              const BlockDataID & boundaryHandlingID,
-                             const BlockDataID & bodyStorageID, const BlockDataID & bodyFieldID,
+                             const BlockDataID & bodyStorageID,
+                             const shared_ptr<pe::BodyStorage> & globalBodyStorage,
+                             const BlockDataID & bodyFieldID,
                              const Reconstructer_T & reconstructor,
                              const FlagUID & formerObstacle, const FlagUID & fluid,
+                             const boost::function<bool(pe::BodyID)> & movingBodySelectorFct = selectRegularBodies,
                              const bool optimizeForSmallObstacleFraction = false ) :
-      blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ), bodyStorageID_(bodyStorageID), bodyFieldID_( bodyFieldID ),
+      blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ), bodyStorageID_(bodyStorageID),
+      globalBodyStorage_( globalBodyStorage ), bodyFieldID_( bodyFieldID ),
       reconstructor_ ( reconstructor ), formerObstacle_( formerObstacle ), fluid_( fluid ),
+      movingBodySelectorFct_( movingBodySelectorFct ),
       optimizeForSmallObstacleFraction_( optimizeForSmallObstacleFraction )
    {}
 
    void operator()( IBlock * const block );
 
-protected:
+private:
+
+   void reconstructPDFsInCells( const CellInterval & cells, IBlock * const block,
+                                FlagField_T * flagField, const flag_t & formerObstacle )
+   {
+      for( cell_idx_t z = cells.zMin(); z <= cells.zMax(); ++z ) {
+         for (cell_idx_t y = cells.yMin(); y <= cells.yMax(); ++y) {
+            for (cell_idx_t x = cells.xMin(); x <= cells.xMax(); ++x) {
+               if (isFlagSet(flagField->get(x,y,z), formerObstacle)) {
+                  reconstructor_(x,y,z,block);
+               }
+            }
+         }
+      }
+   }
+
+   void updateFlags( const CellInterval & cells,
+                     BoundaryHandling_T * boundaryHandling, FlagField_T * flagField, BodyField_T * bodyField,
+                     const flag_t & formerObstacle, const flag_t & fluid)
+   {
+      for( cell_idx_t z = cells.zMin(); z <= cells.zMax(); ++z ) {
+         for (cell_idx_t y = cells.yMin(); y <= cells.yMax(); ++y) {
+            for (cell_idx_t x = cells.xMin(); x <= cells.xMax(); ++x) {
+               if (isFlagSet(flagField->get(x,y,z), formerObstacle)) {
+                  boundaryHandling->setDomain( fluid, x, y, z );
+                  removeFlag( flagField->get(x,y,z), formerObstacle );
+                  (*bodyField)(x,y,z) = NULL;
+               }
+            }
+         }
+      }
+   }
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
 
    const BlockDataID boundaryHandlingID_;
    const BlockDataID bodyStorageID_;
+   shared_ptr<pe::BodyStorage> globalBodyStorage_;
    const BlockDataID bodyFieldID_;
 
    Reconstructer_T reconstructor_;
 
    const FlagUID formerObstacle_;
    const FlagUID fluid_;
+
+   boost::function<bool(pe::BodyID)> movingBodySelectorFct_;
 
    const bool optimizeForSmallObstacleFraction_;
 
@@ -115,39 +156,32 @@ void PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructer_T >
    const flag_t formerObstacle = flagField->getFlag( formerObstacle_ );
    const flag_t fluid          = flagField->getFlag( fluid_ );
 
-   // reconstruct all missing PDFs (only inside the domain)
+   // reconstruct all missing PDFs (only inside the domain, ghost layer values get communicated)
    if( optimizeForSmallObstacleFraction_ )
    {
       const uint_t numberOfGhostLayersToInclude = uint_t(0);
 
       for( auto bodyIt = pe::BodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         if( bodyIt->isFixed() )
+         if( !movingBodySelectorFct_(*bodyIt) )
             continue;
 
          CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, numberOfGhostLayersToInclude );
+         reconstructPDFsInCells(cellBB, block, flagField, formerObstacle );
+      }
+      for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt )
+      {
+         if( !movingBodySelectorFct_(*bodyIt) )
+            continue;
 
-         for( auto cellIt = cellBB.begin(); cellIt != cellBB.end(); ++cellIt )
-         {
-            Cell cell( *cellIt );
-            if( isFlagSet( flagField->get(cell), formerObstacle ) )
-            {
-               reconstructor_( cell.x(), cell.y(), cell.z(), block );
-            }
-         }
+         CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, numberOfGhostLayersToInclude );
+         reconstructPDFsInCells(cellBB, block, flagField, formerObstacle );
       }
    }
    else
    {
-      auto xyzFieldSize = flagField->xyzSize();
-      for( auto fieldIt = xyzFieldSize.begin(); fieldIt != xyzFieldSize.end(); ++fieldIt )
-      {
-         Cell cell( *fieldIt );
-         if( isFlagSet( flagField->get(cell), formerObstacle ) )
-         {
-            reconstructor_( cell.x(), cell.y(), cell.z(), block );
-         }
-      }
+      CellInterval cells = flagField->xyzSize();
+      reconstructPDFsInCells(cells, block, flagField, formerObstacle );
    }
 
    // update the flags from formerObstacle to fluid (inside domain & in ghost layers)
@@ -157,46 +191,25 @@ void PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructer_T >
 
       for( auto bodyIt = pe::BodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         if( bodyIt->isFixed() )
+         if( !movingBodySelectorFct_(*bodyIt) )
             continue;
 
          CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, numberOfGhostLayersToInclude );
+         updateFlags(cellBB, boundaryHandling, flagField, bodyField, formerObstacle, fluid);
+      }
+      for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt )
+      {
+         if( !movingBodySelectorFct_(*bodyIt) )
+            continue;
 
-         for( cell_idx_t z = cellBB.zMin(); z <= cellBB.zMax(); ++z )
-         {
-            for( cell_idx_t y = cellBB.yMin(); y <= cellBB.yMax(); ++y )
-            {
-               for( cell_idx_t x = cellBB.xMin(); x <= cellBB.xMax(); ++x )
-               {
-                  if( isFlagSet( flagField->get(x,y,z), formerObstacle ) )
-                  {
-                     boundaryHandling->setDomain( fluid, x, y, z );
-                     removeFlag( flagField->get(x,y,z), formerObstacle );
-                     (*bodyField)(x,y,z) = NULL;
-                  }
-               }
-            }
-         }
+         CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, numberOfGhostLayersToInclude );
+         updateFlags(cellBB, boundaryHandling, flagField, bodyField, formerObstacle, fluid);
       }
    }
    else
    {
       CellInterval cells = flagField->xyzSizeWithGhostLayer();
-      for( cell_idx_t z = cells.zMin(); z <= cells.zMax(); ++z )
-      {
-         for( cell_idx_t y = cells.yMin(); y <= cells.yMax(); ++y )
-         {
-            for( cell_idx_t x = cells.xMin(); x <= cells.xMax(); ++x )
-            {
-               if( isFlagSet( flagField->get(x,y,z), formerObstacle ) )
-               {
-                  boundaryHandling->setDomain( fluid, x, y, z );
-                  removeFlag( flagField->get(x,y,z), formerObstacle );
-                  (*bodyField)(x,y,z) = NULL;
-               }
-            }
-         }
-      }
+      updateFlags(cells, boundaryHandling, flagField, bodyField, formerObstacle, fluid);
    }
 }
 

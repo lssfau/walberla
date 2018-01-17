@@ -339,8 +339,8 @@ int main(int argc, char **argv) {
 
    // sweep for updating the pe body mapping into the LBM simulation
    timeloop.add()
-         << Sweep(pe_coupling::BodyMapping<BoundaryHandling_T>(blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,
-                                                               MO_BB_Flag, FormerMO_BB_Flag),
+         << Sweep(pe_coupling::BodyMapping<BoundaryHandling_T>(blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,
+                                                               MO_BB_Flag, FormerMO_BB_Flag, pe_coupling::selectRegularBodies),
                   "Body Mapping");
 
    // sweep for restoring PDFs in cells previously occupied by pe bodies
@@ -350,6 +350,7 @@ int main(int argc, char **argv) {
          << Sweep(pe_coupling::PDFReconstruction<LatticeModel_T, BoundaryHandling_T, Reconstructor_T>(blocks,
                                                                                                       boundaryHandlingID,
                                                                                                       bodyStorageID,
+                                                                                                      globalBodyStorage,
                                                                                                       bodyFieldID,
                                                                                                       reconstructor,
                                                                                                       FormerMO_BB_Flag,
@@ -364,8 +365,8 @@ int main(int argc, char **argv) {
    commFunction = scheme;
 
    // uses standard bounce back boundary conditions
-   pe_coupling::mapMovingBodies<BoundaryHandling_T>(*blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,
-                                                    MO_BB_Flag);
+   pe_coupling::mapMovingBodies<BoundaryHandling_T>(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,
+                                                    MO_BB_Flag, pe_coupling::selectRegularBodies);
 
    auto sweep = lbm::makeCellwiseSweep<LatticeModel_T, FlagField_T>(pdfFieldID, flagFieldID, Fluid_Flag);
 

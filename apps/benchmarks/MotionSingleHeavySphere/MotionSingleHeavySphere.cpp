@@ -797,7 +797,7 @@ int main( int argc, char **argv )
    /////////////////
 
    // set up pe functionality
-   shared_ptr<pe::BodyStorage>  globalBodyStorage = make_shared<pe::BodyStorage>();
+   shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
    auto bodyStorageID  = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
    auto ccdID          = blocks->addBlockData(pe::ccd::createHashGridsDataHandling( globalBodyStorage, bodyStorageID ), "CCD");
@@ -912,11 +912,11 @@ int main( int argc, char **argv )
 
       if( memVariant == MEMVariant::CLI )
       {
-         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_CLI_Flag );
+         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MEM_CLI_Flag );
       }else if ( memVariant == MEMVariant::MR ){
-         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_MR_Flag );
+         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MEM_MR_Flag );
       }else{
-         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_BB_Flag );
+         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MEM_BB_Flag );
       }
    }
 
@@ -1195,11 +1195,11 @@ int main( int argc, char **argv )
 
       // sweep for updating the pe body mapping into the LBM simulation
       if( memVariant == MEMVariant::CLI )
-         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MEM_CLI_Flag, FormerMEM_Flag ), "Body Mapping" );
+         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_CLI_Flag, FormerMEM_Flag ), "Body Mapping" );
       else if ( memVariant == MEMVariant::MR )
-         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MEM_MR_Flag, FormerMEM_Flag ), "Body Mapping" );
+         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_MR_Flag, FormerMEM_Flag ), "Body Mapping" );
       else
-         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MEM_BB_Flag, FormerMEM_Flag ), "Body Mapping" );
+         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_BB_Flag, FormerMEM_Flag ), "Body Mapping" );
 
 
       // reconstruct missing PDFs
@@ -1208,7 +1208,7 @@ int main( int argc, char **argv )
       typedef pe_coupling::ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationFinder_T > Reconstructor_T;
       Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder, true );
       timeloop.add() << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                               ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMEM_Flag, Fluid_Flag  ), "PDF Restore" );
+                               ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMEM_Flag, Fluid_Flag ), "PDF Restore" );
 
       for( uint_t lbmcycle = 0; lbmcycle < numLBMSubCycles; ++lbmcycle ){
 

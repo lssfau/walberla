@@ -681,8 +681,7 @@ int main( int argc, char **argv )
 
    if( ! ( sphSphTest || sphWallTest || funcTest ) )
    {
-      std::cerr << "Specify either --sphSphTest, --sphWallTest, or --funcTest !" << std::endl;
-      return EXIT_FAILURE;
+      WALBERLA_ABORT("Specify either --sphSphTest, --sphWallTest, or --funcTest !");
    }
 
    ///////////////////////////
@@ -778,7 +777,7 @@ int main( int argc, char **argv )
    // PE COUPLING //
    /////////////////
 
-   shared_ptr<pe::BodyStorage>  globalBodyStorage = make_shared<pe::BodyStorage>();
+   shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
 
    auto bodyStorageID  = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
@@ -922,7 +921,7 @@ int main( int argc, char **argv )
    }
 
    // map pe bodies into the LBM simulation
-   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag );
+   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag );
 
    ///////////////
    // TIME LOOP //
@@ -932,14 +931,14 @@ int main( int argc, char **argv )
 
    // sweep for updating the pe body mapping into the LBM simulation
    timeloop.add()
-      << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag, FormerMO_Flag ), "Body Mapping" );
+      << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MO_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
 
    // sweep for restoring PDFs in cells previously occupied by pe bodies
    typedef pe_coupling::EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T > Reconstructor_T;
    Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID );
    timeloop.add()
-      << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,
-                                                                                                        reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
+      << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,
+                                                                                                       reconstructor, FormerMO_Flag, Fluid_Flag ), "PDF Restore" );
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
    boost::function< void () > commFunction;
    if( fullPDFSync )

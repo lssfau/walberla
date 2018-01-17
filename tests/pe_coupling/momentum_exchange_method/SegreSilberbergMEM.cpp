@@ -534,7 +534,7 @@ int main( int argc, char **argv )
    /////////////////
 
    // set up pe functionality
-   shared_ptr<pe::BodyStorage>  globalBodyStorage = make_shared<pe::BodyStorage>();
+   shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
 
    auto bodyStorageID  = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
@@ -609,13 +609,13 @@ int main( int argc, char **argv )
    if( MO_CLI )
    {
       // uses a higher order boundary condition (CLI)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_CLI_Flag, pe_coupling::selectRegularBodies );
    }else if ( MO_MR ){
       // uses a higher order boundary condition (MR)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_MR_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,  MO_MR_Flag, pe_coupling::selectRegularBodies );
    }else{
       // uses standard bounce back boundary conditions
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,  MO_BB_Flag, pe_coupling::selectRegularBodies );
    }
 
    ///////////////
@@ -635,13 +635,13 @@ int main( int argc, char **argv )
    if( MO_CLI )
    {
       timeloop.add()
-         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag, FormerMO_Flag ), "Body Mapping" );
+         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MO_CLI_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
    }else if ( MO_MR ){
       timeloop.add()
-         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_MR_Flag, FormerMO_Flag ), "Body Mapping" );
+         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,  MO_MR_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
    }else{
       timeloop.add()
-         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag, FormerMO_Flag ), "Body Mapping" );
+         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,  MO_BB_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
    }
 
    // sweep for restoring PDFs in cells previously occupied by pe bodies
@@ -652,7 +652,7 @@ int main( int argc, char **argv )
       Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder, true );
       timeloop.add()
          << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                      ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
+                      ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
    } else if ( eanReconstructor )
    {
       pe_coupling::SphereNormalExtrapolationDirectionFinder extrapolationFinder( blocks, bodyFieldID );
@@ -660,13 +660,13 @@ int main( int argc, char **argv )
       Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder );
       timeloop.add()
          << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                      ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
+                      ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
    } else {
       typedef pe_coupling::EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T > Reconstructor_T;
       Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID );
       timeloop.add()
          << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                      ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
+                      ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
    }
 
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);

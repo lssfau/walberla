@@ -13,19 +13,37 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file all.h
+//! \file BodySelectorFunctions.h
 //! \ingroup pe_coupling
-//! \author Florian Schornbaum <florian.schornbaum@fau.de>
-//! \brief Collective header file for module pe_coupling
+//! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "BodiesForceTorqueContainer.h"
-#include "BodySelectorFunctions.h"
-#include "ForceOnBodiesAdder.h"
-#include "ForceTorqueOnBodiesResetter.h"
-#include "ForceTorqueOnBodiesScaler.h"
-#include "LubricationCorrection.h"
-#include "TimeStep.h"
+#include "pe/Types.h"
+
+namespace walberla {
+namespace pe_coupling {
+
+bool selectAllBodies(pe::BodyID /*bodyID*/)
+{
+   return true;
+}
+
+bool selectRegularBodies(pe::BodyID bodyID)
+{
+   return !bodyID->hasInfiniteMass() && !bodyID->isGlobal();
+}
+
+bool selectFixedBodies(pe::BodyID bodyID)
+{
+   return bodyID->hasInfiniteMass() && !bodyID->isGlobal();
+}
+
+bool selectGlobalBodies(pe::BodyID bodyID)
+{
+   return bodyID->isGlobal();
+}
+} // namespace pe_coupling
+} // namespace walberla

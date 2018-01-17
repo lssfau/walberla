@@ -72,6 +72,9 @@ waLBerla_execute_test( NAME BodyAtBlockBoarderCheckTest1        COMMAND $<TARGET
 waLBerla_execute_test( NAME BodyAtBlockBoarderCheckTest2        COMMAND $<TARGET_FILE:BodyAtBlockBoarderCheck> 2         PROCESSES 8 LABELS longrun )
 waLBerla_execute_test( NAME BodyAtBlockBoarderCheckTest3        COMMAND $<TARGET_FILE:BodyAtBlockBoarderCheck> 3         PROCESSES 8 LABELS verylongrun )
 
+waLBerla_compile_test( FILES momentum_exchange_method/BodyMappingTest.cpp DEPENDS blockforest pe timeloop )
+waLBerla_execute_test( NAME BodyMappingTest COMMAND $<TARGET_FILE:BodyMappingTest> PROCESSES 1 )
+
 waLBerla_compile_test( FILES momentum_exchange_method/DragForceSphereMEM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME DragForceSphereMEMFuncTest        COMMAND $<TARGET_FILE:DragForceSphereMEM> --funcTest          PROCESSES 1 )
 waLBerla_execute_test( NAME DragForceSphereMEMSingleTest      COMMAND $<TARGET_FILE:DragForceSphereMEM>                     PROCESSES 1 LABELS longrun     CONFIGURATIONS Release RelWithDbgInfo )

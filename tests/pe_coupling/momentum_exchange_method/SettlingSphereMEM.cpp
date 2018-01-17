@@ -499,10 +499,10 @@ int main( int argc, char **argv )
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >( MyBoundaryHandling( flagFieldID, pdfFieldID, bodyFieldID ), "boundary handling" );
 
    // map planes into the LBM simulation -> act as no-slip boundaries
-   pe_coupling::mapGlobalBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, *globalBodyStorage, NoSlip_Flag, false, true );
+   pe_coupling::mapBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectGlobalBodies );
 
    // map pe bodies into the LBM simulation
-   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag );
+   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectRegularBodies );
 
    ///////////////
    // TIME LOOP //
@@ -519,7 +519,7 @@ int main( int argc, char **argv )
 
    // sweep for updating the pe body mapping into the LBM simulation
    timeloop.add()
-         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag, FormerMO_Flag ), "Body Mapping" );
+         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MO_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
 
    // sweep for restoring PDFs in cells previously occupied by pe bodies
    pe_coupling::SphereNormalExtrapolationDirectionFinder extrapolationFinder( blocks, bodyFieldID );
@@ -527,7 +527,7 @@ int main( int argc, char **argv )
    Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder );
    timeloop.add()
       << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                  ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
+                  ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag ), "PDF Restore" );
 
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
    boost::function<void(void)> storeForceTorqueInCont1 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
