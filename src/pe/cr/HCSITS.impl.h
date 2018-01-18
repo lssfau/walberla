@@ -288,7 +288,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
       for( auto body = globalBodyStorage_->begin(); body != globalBodyStorage_->end(); ++body, ++j ) {
          body->wake(); // BUGFIX: Force awaking of all bodies!
          body->index_ = j;
-         WALBERLA_ASSERT( body->hasInfiniteMass(), "fatal" );
+         WALBERLA_CHECK( body->hasInfiniteMass(), "Global bodies need to have infinite mass as they are not communicated!" );
 
          initializeVelocityCorrections( *body, bodyCache.dv_[j], bodyCache.dw_[j], dt ); // use applied external forces to calculate starting velocity
 
@@ -347,7 +347,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
       for( auto body = globalBodyStorage_->begin(); body != globalBodyStorage_->end(); ++body, ++j ) {
          body->wake(); // BUGFIX: Force awaking of all bodies!
          body->index_ = j;
-         WALBERLA_ASSERT( body->hasInfiniteMass(), "fatal" );
+         WALBERLA_CHECK( body->hasInfiniteMass(), "Global bodies need to have infinite mass as they are not communicated!" );
 
          initializeVelocityCorrections( *body, bodyCache.dv_[j], bodyCache.dw_[j], dt ); // use applied external forces to calculate starting velocity
 

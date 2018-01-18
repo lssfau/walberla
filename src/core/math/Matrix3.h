@@ -1694,6 +1694,25 @@ inline const Matrix3<Type> fabs( const Matrix3<Type>& m )
 
 
 //**********************************************************************************************************************
+/*!\fn bool math::isinf( const Matrix3<Type>& m )
+// \brief Checks the given matrix for infinite elements.
+//
+// \param m The matrix to be checked for infinite elements.
+// \return \a true if at least one element of the matrix is infinite, \a false otherwise.
+*/
+template< typename Type >
+inline bool isinf( const Matrix3<Type>& m )
+{
+   if( math::isinf( m[0] ) || math::isinf( m[1] ) || math::isinf( m[2] ) ||
+       math::isinf( m[3] ) || math::isinf( m[4] ) || math::isinf( m[5] ) ||
+       math::isinf( m[6] ) || math::isinf( m[7] ) || math::isinf( m[8] ) )
+      return true;
+   else return false;
+}
+//**********************************************************************************************************************
+
+
+//**********************************************************************************************************************
 // \brief Calculates the tensor product of two vectors.
 //**********************************************************************************************************************
 template< typename T0, typename T1>

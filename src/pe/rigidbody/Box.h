@@ -96,6 +96,7 @@ public:
    static inline real_t calcMass( const Vec3& l, real_t density );
    static inline real_t calcDensity( real_t x, real_t y, real_t z, real_t mass );
    static inline real_t calcDensity( const Vec3& l, real_t mass );
+   static inline Mat3   calcInertia( const Vec3& length, const real_t mass);      // Calculation of the moment of inertia
    //@}
    //**********************************************************************************************
 
@@ -143,7 +144,6 @@ protected:
    /*!\name Utility functions */
    //@{
    virtual void calcBoundingBox();  // Calculation of the axis-aligned bounding box
-           void calcInertia();      // Calculation of the moment of inertia
    //@}
    //**********************************************************************************************
 
