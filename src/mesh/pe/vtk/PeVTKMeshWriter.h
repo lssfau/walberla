@@ -124,6 +124,9 @@ public:
    void addVertexPropertyRank() { meshWriter_.addDataSource( make_shared<RankVertexDataSource<MeshType>>() ); }
    void addFacePropertyRank() { meshWriter_.addDataSource( make_shared<RankFaceDataSource<MeshType>>() ); }
 
+   void setBodyFilter( const std::function<bool(const walberla::pe::RigidBody&)>& filter) { bodyFilter_ = filter; }
+   const std::function<bool(const walberla::pe::RigidBody&)>& getBodyFilter() const { return bodyFilter_; }
+
 protected:
 
    template< typename T >
@@ -183,6 +186,7 @@ protected:
          const walberla::pe::BodyStorage & bodyStorage = (*storage)[0];
          for(auto bodyIt = bodyStorage.begin(); bodyIt != bodyStorage.end(); ++bodyIt)
          {
+            if (!bodyFilter_(**bodyIt)) continue;
             newVertices.clear();
             newFaces.clear();
             tesselation_( **bodyIt, *mesh_, newVertices, newFaces );
@@ -204,6 +208,7 @@ protected:
    DistributedVTKMeshWriter<MeshType> meshWriter_;
    BodyPointerFPropManager faceBodyPointer_;
    BodyPointerVPropManager vertexBodyPointer_;
+   std::function<bool(const walberla::pe::RigidBody&)> bodyFilter_ = [](const walberla::pe::RigidBody&){ return true; };
 };
 
 } // namespace pe
