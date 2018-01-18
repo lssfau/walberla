@@ -163,6 +163,10 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
          id_closest = 0;
          for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
             // blockIt->getAABB();
+            /*const AABB& blockAabb = blockIt->getAABB();
+            if (!intersects(blockAabb, ray, t)) {
+               continue;
+            }*/
             for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
                bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
                
@@ -285,7 +289,7 @@ int main( int argc, char ** argv )
    //testRayTracing();
    //return 0;
    
-   real_t spacing          = real_c(1.0);
+   real_t spacing          = real_c(0.5);
    real_t radius           = real_c(0.4);
    real_t vMax             = real_c(1.0);
    int    simulationSteps  = 10;
@@ -301,7 +305,7 @@ int main( int argc, char ** argv )
    // create forest
    //! [BlockForest]
    shared_ptr< BlockForest > forest = createBlockForest( AABB(0,0,0,20,20,20), // simulation domain
-                                                         Vector3<uint_t>(2,2,2), // blocks in each direction
+                                                         Vector3<uint_t>(3,3,3), // blocks in each direction
                                                          Vector3<bool>(false, false, false) // periodicity
                                                          );
 	
