@@ -305,7 +305,7 @@ int main( int argc, char ** argv )
    // create forest
    //! [BlockForest]
    shared_ptr< BlockForest > forest = createBlockForest( AABB(0,0,0,20,20,20), // simulation domain
-                                                         Vector3<uint_t>(3,3,3), // blocks in each direction
+                                                         Vector3<uint_t>(4,4,2), // blocks in each direction
                                                          Vector3<bool>(false, false, false) // periodicity
                                                          );
 	
