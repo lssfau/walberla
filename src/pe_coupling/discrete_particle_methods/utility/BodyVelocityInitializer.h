@@ -33,9 +33,8 @@
 #include "pe/rigidbody/BodyIterators.h"
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/Types.h"
-#include "pe/Materials.h"
 
-#include "pe_coupling/geometry/SphereEquivalentDiameter.h"
+#include "pe_coupling/utility/BodySelectorFunctions.h"
 
 #include <boost/function.hpp>
 
@@ -49,6 +48,8 @@ namespace discrete_particle_methods {
  *
  * The class uses an interpolator to obtain the approximate value of the fluid velocity at the bodies' position,
  * and then sets the bodies' velocity accordingly.
+ *
+ * Whether or not a body gets treated by this initializer depends on the return value of 'dpmBodySelectorFct'.
  *
  * For more infos on interpolators, see field interpolators in src/field/interpolators.
  */
@@ -64,8 +65,10 @@ public:
 
    BodyVelocityInitializer( const shared_ptr<StructuredBlockStorage> & blockStorage,
                             const BlockDataID & bodyStorageID, const BlockDataID & flagFieldID, const Set< FlagUID > & domainFlags,
-                            const BlockDataID & velocityFieldID )
-   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID )
+                            const BlockDataID & velocityFieldID,
+                            const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
+   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ),
+     dpmBodySelectorFct_( dpmBodySelectorFct)
    {
       velocityFieldInterpolatorID_ = field::addFieldInterpolator< Vec3FieldInterpolator_T, FlagField_T >( blockStorage, velocityFieldID, flagFieldID, domainFlags );
    }
@@ -79,7 +82,7 @@ public:
 
          for( auto bodyIt = pe::LocalBodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
          {
-            //TODO check if body should be treated by DPM
+            if(!dpmBodySelectorFct_(*bodyIt)) continue;
 
             Vector3<real_t> forceOnFluid( real_t(0) );
 
@@ -102,6 +105,7 @@ private:
    shared_ptr<StructuredBlockStorage> blockStorage_;
    BlockDataID bodyStorageID_;
    BlockDataID velocityFieldInterpolatorID_;
+   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
 };
 
 
