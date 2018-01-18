@@ -550,7 +550,7 @@ int main( int argc, char **argv )
    BlockDataID bodyAndVolumeFractionFieldID = field::addToStorage< BodyAndVolumeFractionField_T >( blocks, "body and volume fraction field",
                                                                                                    std::vector<BodyAndVolumeFraction_T>(), field::zyxf, 0 );
    // map bodies and calculate solid volume fraction initially
-   pe_coupling::BodyAndVolumeFractionMapping bodyMapping( blocks, globalBodyStorage, bodyStorageID, bodyAndVolumeFractionFieldID );
+   pe_coupling::BodyAndVolumeFractionMapping bodyMapping( blocks, globalBodyStorage, bodyStorageID, bodyAndVolumeFractionFieldID, pe_coupling::selectRegularBodies );
    bodyMapping();
 
    // initialize the PDF field for PSM
