@@ -30,11 +30,15 @@
 
 #include "pe/rigidbody/BodyIterators.h"
 
+#include "pe_coupling/utility/BodySelectorFunctions.h"
+
+#include <boost/function.hpp>
+
 namespace walberla {
 namespace pe_coupling {
 namespace discrete_particle_methods {
 
-/*!\brief Evalutor of the solid volume fraction field.
+/*!\brief Evaluator of the solid volume fraction field.
  *
  * Updates the solid volume fraction field. Includes firstly removing all old entries from the field, then remapping
  * the local bodies' volumes to the cells.
@@ -49,6 +53,8 @@ namespace discrete_particle_methods {
  *       See Finn, Li, Apte - "Particle based modelling and simulation of natural sand dynamics in the wave bottom boundary layer" (2016)
  *       for the application, even though different kernel was used there.
  *
+ * Whether or not a body gets treated by the evaluator depends on the return value of 'dpmBodySelectorFct'.
+ *
  * For more infos on distributors, see src/field/distributors.
  */
 template< typename FlagField_T, template <typename,typename> class Distributor_T >
@@ -61,8 +67,10 @@ public:
 
    SolidVolumeFractionFieldEvaluator( const shared_ptr<StructuredBlockStorage> & blockStorage,
                                       const BlockDataID & solidVolumeFractionFieldID, const BlockDataID & bodyStorageID,
-                                      const BlockDataID & flagFieldID, const Set< FlagUID > & domainFlags )
-   : blockStorage_( blockStorage ), solidVolumeFractionFieldID_( solidVolumeFractionFieldID ), bodyStorageID_( bodyStorageID )
+                                      const BlockDataID & flagFieldID, const Set< FlagUID > & domainFlags,
+                                      const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
+   : blockStorage_( blockStorage ), solidVolumeFractionFieldID_( solidVolumeFractionFieldID ),
+     bodyStorageID_( bodyStorageID ), dpmBodySelectorFct_( dpmBodySelectorFct)
    {
       scalarDistributorID_ = field::addDistributor< ScalarDistributor_T, FlagField_T >( blockStorage, solidVolumeFractionFieldID, flagFieldID, domainFlags );
    }
@@ -81,6 +89,8 @@ public:
       // assign the local bodies' volume to the cell, depending on the chosen Distributor_T
       for( auto bodyIt = pe::LocalBodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
       {
+         if(!dpmBodySelectorFct_(*bodyIt)) continue;
+
          real_t bodyVolume = bodyIt->getVolume();
          const Vector3<real_t> bodyPosition = bodyIt->getPosition();
 
@@ -93,6 +103,9 @@ private:
    shared_ptr<StructuredBlockStorage> blockStorage_;
    BlockDataID solidVolumeFractionFieldID_;
    BlockDataID bodyStorageID_;
+
+   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
+
    BlockDataID scalarDistributorID_;
 };
 

@@ -28,25 +28,29 @@
 #include "core/debug/Debug.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
 #include "field/FlagField.h"
-#include "field/iterators/IteratorMacros.h"
 
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/rigidbody/BodyStorage.h"
 #include "pe/rigidbody/BodyIterators.h"
+
+#include "pe_coupling/utility/BodySelectorFunctions.h"
+
+#include <boost/function.hpp>
 
 namespace walberla {
 namespace pe_coupling {
 
 // general mapping functions for a given single body on a given single block
 template< typename BoundaryHandling_T >
-void mapBody( const pe::BodyID & body, IBlock & block, StructuredBlockStorage & blockStorage,
-              BoundaryHandling_T * boundaryHandlingPtr, const FlagUID & obstacle )
+void mapBody( pe::BodyID body, IBlock & block, StructuredBlockStorage & blockStorage,
+              const BlockDataID & boundaryHandlingID, const FlagUID & obstacle )
 {
    WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage.getBlockStorage()) );
-   WALBERLA_ASSERT_NOT_NULLPTR( boundaryHandlingPtr );
 
-   auto * flagField = boundaryHandlingPtr->getFlagField();
+   BoundaryHandling_T * boundaryHandling = block.getData< BoundaryHandling_T >( boundaryHandlingID );
+   auto * flagField = boundaryHandling->getFlagField();
 
+   WALBERLA_ASSERT_NOT_NULLPTR( boundaryHandling );
    WALBERLA_ASSERT_NOT_NULLPTR( flagField );
    WALBERLA_ASSERT( flagField->flagExists( obstacle ) );
 
@@ -71,7 +75,9 @@ void mapBody( const pe::BodyID & body, IBlock & block, StructuredBlockStorage & 
          for( cell_idx_t x = cellBB.xMin(); x <= cellBB.xMax(); ++x )
          {
             if( body->containsPoint(cx,cy,cz) )
-               boundaryHandlingPtr->forceBoundary( obstacleFlag, x, y, z );
+            {
+               boundaryHandling->forceBoundary( obstacleFlag, x, y, z );
+            }
             cx += dx;
          }
          cy += dy;
@@ -80,108 +86,36 @@ void mapBody( const pe::BodyID & body, IBlock & block, StructuredBlockStorage & 
    }
 }
 
-template< typename BoundaryHandling_T >
-void mapBody( const pe::BodyID & body, IBlock & block, StructuredBlockStorage & blockStorage,
-              const BlockDataID & boundaryHandlingID, const FlagUID & obstacle )
-{
-   WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage.getBlockStorage()) );
-
-   BoundaryHandling_T * boundaryHandling = block.getData< BoundaryHandling_T >( boundaryHandlingID );
-
-   mapBody(body, block, blockStorage, boundaryHandling, obstacle );
-}
 
 
-
-// mapping function to map all bodies from the body storage - with certain properties - onto all blocks
+/*!\brief Mapping function to map all bodies - with certain properties - onto all blocks with the 'obstacle' flag
+ *
+ * All bodies (from bodyStorage and globalBodyStorage) are iterated and mapped to all blocks.
+ * Cells that are inside the bodies are set to 'obstacle'.
+ *
+ * Whether or not a body is mapped depends on the return value of the 'mappingBodySelectorFct'.
+ */
 template< typename BoundaryHandling_T >
 void mapBodies( StructuredBlockStorage & blockStorage, const BlockDataID & boundaryHandlingID,
-                const BlockDataID & bodyStorageID, const FlagUID & obstacle,
-                const bool fixedBodiesOnly = true, const bool moBodiesOnly = true )
+                const BlockDataID & bodyStorageID, pe::BodyStorage & globalBodyStorage,
+                const FlagUID & obstacle,
+                const boost::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectAllBodies )
 {
    for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )
    {
+
       for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         WALBERLA_UNUSED(moBodiesOnly); // undo when other coupling algorithms are available
-
-         if( fixedBodiesOnly && bodyIt->isFixed() )
-            continue;
-
-         mapBody<BoundaryHandling_T>( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle );
+         if( mappingBodySelectorFct(*bodyIt))
+            mapBody<BoundaryHandling_T>( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle );
       }
-   }
-}
 
-
-// mapping function to map all global bodies - with certain properties - onto all blocks
-template< typename BoundaryHandling_T >
-void mapGlobalBodies( StructuredBlockStorage & blockStorage, const BlockDataID & boundaryHandlingID,
-                      pe::BodyStorage & globalBodyStorage, const FlagUID & obstacle,
-                      const bool fixedBodiesOnly = true, const bool moBodiesOnly = true )
-{
-   for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )
-   {
       for( auto bodyIt = globalBodyStorage.begin(); bodyIt != globalBodyStorage.end(); ++bodyIt )
       {
-         WALBERLA_UNUSED(moBodiesOnly); // undo when other coupling algorithms are available
-
-         if( fixedBodiesOnly && bodyIt->isFixed() )
-            continue;
-
-         mapBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle );
+         if( mappingBodySelectorFct(*bodyIt))
+            mapBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle );
       }
    }
-}
-
-// mapping function to map a given single global body onto all blocks
-template< typename BoundaryHandling_T >
-void mapGlobalBody( const id_t globalBodySystemID,
-                    StructuredBlockStorage & blockStorage, const BlockDataID & boundaryHandlingID,
-                    pe::BodyStorage & globalBodyStorage, const FlagUID & obstacle )
-{
-   for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )
-   {
-      auto bodyIt = globalBodyStorage.find( globalBodySystemID );
-      if( bodyIt != globalBodyStorage.end() )
-      {
-         mapBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle );
-      }
-   }
-}
-
-
-// mapping function to map all global bodies - with certain properties - onto a given single block
-template< typename BoundaryHandling_T >
-void mapGlobalBodiesOnBlock( IBlock & block,
-                             StructuredBlockStorage & blockStorage, BoundaryHandling_T * boundaryHandlingPtr,
-                             pe::BodyStorage & globalBodyStorage, const FlagUID & obstacle,
-                             const bool fixedBodiesOnly = true, const bool moBodiesOnly = true )
-{
-   for( auto bodyIt = globalBodyStorage.begin(); bodyIt != globalBodyStorage.end(); ++bodyIt)
-   {
-      WALBERLA_UNUSED(moBodiesOnly); // undo when other coupling algorithms are available
-
-      if( fixedBodiesOnly && bodyIt->isFixed() )
-         continue;
-
-      mapBody< BoundaryHandling_T >( *bodyIt, block, blockStorage, boundaryHandlingPtr, obstacle );
-   }
-}
-
-
-// mapping function to map a given single global body onto a given single block
-template< typename BoundaryHandling_T >
-void mapGlobalBodyOnBlock( const id_t globalBodySystemID, IBlock & block,
-                           StructuredBlockStorage & blockStorage, BoundaryHandling_T * boundaryHandlingPtr,
-                           pe::BodyStorage & globalBodyStorage, const FlagUID & obstacle )
-{
-   auto bodyIt = globalBodyStorage.find( globalBodySystemID );
-   if( bodyIt != globalBodyStorage.end() )
-   {
-      mapBody< BoundaryHandling_T >( *bodyIt, block, blockStorage, boundaryHandlingPtr, obstacle );
-   }
-
 }
 
 

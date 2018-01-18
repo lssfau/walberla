@@ -47,7 +47,7 @@ public:
    explicit TimeStep( const shared_ptr<StructuredBlockStorage> & blockStorage,
                       const BlockDataID & bodyStorageID,
                       pe::cr::ICR & collisionResponse,
-                      boost::function<void (void)> synchronizeFunc,
+                      const boost::function<void (void)> & synchronizeFunc,
                       const real_t timeStep = real_t(1), const uint_t intermediateSteps = uint_c(1) )
          : timeStep_( timeStep )
          , intermediateSteps_( ( intermediateSteps == 0 ) ? uint_c(1) : intermediateSteps )

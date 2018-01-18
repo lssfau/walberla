@@ -617,14 +617,14 @@ int main( int argc, char **argv )
    // map planes into the LBM simulation -> act as no-slip boundaries
    // since we have refinement boundaries along the bottom plane, we use SBB here
    // (see test/pe_coupling/momentum_exchange_method/GlobalBodyAsBoundaryMEMStaticRefinement test for more infos)
-   pe_coupling::mapMovingGlobalBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, *globalBodyStorage, bodyFieldID, MO_SBB_Flag );
+   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_SBB_Flag, pe_coupling::selectGlobalBodies );
 
    // map movable sphere into the LBM simulation
    // the whole sphere resides on the same refinement level, so we can also use CLI instead of SBB
    if( useSBB )
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_SBB_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_SBB_Flag, pe_coupling::selectRegularBodies );
    else
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_CLI_Flag, pe_coupling::selectRegularBodies );
 
 
    // initialize Couette velocity profile in whole domain

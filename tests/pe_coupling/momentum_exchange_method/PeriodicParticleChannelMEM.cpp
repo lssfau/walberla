@@ -193,9 +193,6 @@ public:
       {
          for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
          {
-            if( bodyIt->isFixed() || !bodyIt->isFinite() )
-                continue;
-
             WALBERLA_CHECK( aabb_.contains( bodyIt->getPosition()[0], bodyIt->getPosition()[1], bodyIt->getPosition()[2] ) );
          }
       }
@@ -225,9 +222,6 @@ public:
       {
          for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
          {
-            if( bodyIt->isFixed() || !bodyIt->isFinite() )
-               continue;
-
             const auto & u = bodyIt->getLinearVel();
             WALBERLA_CHECK_LESS_EQUAL( (u[0]*u[0] + u[1]*u[1] + u[2]*u[2]), uMax_ );
 
@@ -432,13 +426,13 @@ int main( int argc, char **argv )
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,-1,0), Vector3<real_t>(0,real_c(width),0), material );
 
    // spheres as obstacles
-   std::vector<walberla::id_t> globalBodiesToBeMapped;
+   std::vector<pe::BodyID> globalBodiesToBeMapped;
    auto globalSphere1 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(real_c(length) / real_t(2), real_t(50), real_t(110)), real_t(60), material, true, false, true );
-   globalBodiesToBeMapped.push_back(globalSphere1->getSystemID() );
+   globalBodiesToBeMapped.push_back(globalSphere1);
    auto globalSphere2 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(                 real_t(0), real_t(50), -real_t(60)), real_t(80), material, true, false, true );
-   globalBodiesToBeMapped.push_back(globalSphere2->getSystemID() );
+   globalBodiesToBeMapped.push_back(globalSphere2);
    auto globalSphere3 = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>(            real_c(length), real_t(50), -real_t(60)), real_t(80), material, true, false, true );
-   globalBodiesToBeMapped.push_back(globalSphere3->getSystemID() );
+   globalBodiesToBeMapped.push_back(globalSphere3);
 
    // local bodies: moving spheres
    const real_t radius = real_t(10);
@@ -500,13 +494,16 @@ int main( int argc, char **argv )
    // map pe bodies into the LBM simulation
    // global bodies act as no-slip obstacles and are not treated by the fluid-solid coupling
    // special care has to be taken here that only the global spheres (not the planes) are mapped since the planes would overwrite the already set boundary flags
-   for( auto globalBodyIt = globalBodiesToBeMapped.begin(); globalBodyIt != globalBodiesToBeMapped.end(); ++globalBodyIt )
+   for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
-      pe_coupling::mapGlobalBody< BoundaryHandling_T >( *globalBodyIt, *blocks, boundaryHandlingID, *globalBodyStorage, NoSlip_Flag );
+      for( auto globalBodyIt = globalBodiesToBeMapped.begin(); globalBodyIt != globalBodiesToBeMapped.end(); ++globalBodyIt )
+      {
+         pe_coupling::mapBody< BoundaryHandling_T >( *globalBodyIt, *blockIt, *blocks, boundaryHandlingID, NoSlip_Flag );
+      }
    }
 
    // moving bodies are handled by the momentum exchange method
-   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag );
+   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectRegularBodies );
 
    ///////////////
    // TIME LOOP //
@@ -516,15 +513,15 @@ int main( int argc, char **argv )
 
    // sweep for updating the pe body mapping into the LBM simulation
    timeloop.add()
-      << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_Flag, FormerMO_Flag ),
+      << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MO_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ),
                 "Body Mapping" );
 
    // sweep for restoring PDFs in cells previously occupied by pe bodies
    typedef pe_coupling::EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T > Reconstructor_T;
    Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID );
    timeloop.add()
-      << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,
-                                                                                                        reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
+      << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,
+                                                                                                       reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
    boost::function< void () > commFunction;

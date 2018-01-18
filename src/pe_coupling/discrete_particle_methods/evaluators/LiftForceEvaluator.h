@@ -36,6 +36,7 @@
 #include "pe/Materials.h"
 
 #include "pe_coupling/geometry/SphereEquivalentDiameter.h"
+#include "pe_coupling/utility/BodySelectorFunctions.h"
 
 #include <boost/function.hpp>
 
@@ -52,6 +53,8 @@ namespace discrete_particle_methods {
  * The corresponding reaction force is added to the fluid via the given distributor.
  *
  * Note that the fluid velocity, contained in the velocityField, has to be the fluid-phase velocity (and not the volume-averaged velocity).
+ *
+ * Whether or not a body gets treated by the evaluator depends on the return value of 'dpmBodySelectorFct'.
  *
  * For more infos on interpolators, see field interpolators in src/field/interpolators.
  * For more infos on distributors, see src/field/distributors.
@@ -70,8 +73,10 @@ public:
                        const BlockDataID & forceFieldID, const BlockDataID & bodyStorageID, const BlockDataID & flagFieldID, const Set< FlagUID > & domainFlags,
                        const BlockDataID & velocityFieldID, const BlockDataID & velocityCurlFieldID,
                        const boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )> & liftForceCorrelationFunction,
-                       real_t fluidDynamicViscosity )
-   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), liftForceCorrelationFunction_( liftForceCorrelationFunction ), fluidDynamicViscosity_( fluidDynamicViscosity )
+                       real_t fluidDynamicViscosity,
+                       const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
+   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), liftForceCorrelationFunction_( liftForceCorrelationFunction ),
+     fluidDynamicViscosity_( fluidDynamicViscosity ), dpmBodySelectorFct_( dpmBodySelectorFct)
    {
       velocityFieldInterpolatorID_     = field::addFieldInterpolator< Vec3FieldInterpolator_T, FlagField_T >( blockStorage, velocityFieldID, flagFieldID, domainFlags );
       velocityCurlFieldInterpolatorID_ = field::addFieldInterpolator< Vec3FieldInterpolator_T, FlagField_T >( blockStorage, velocityCurlFieldID, flagFieldID, domainFlags );
@@ -88,6 +93,8 @@ private:
    boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )> liftForceCorrelationFunction_;
 
    real_t fluidDynamicViscosity_;
+
+   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
 
    BlockDataID velocityFieldInterpolatorID_;
    BlockDataID velocityCurlFieldInterpolatorID_;
@@ -108,7 +115,7 @@ void LiftForceEvaluator< FlagField_T, FieldInterpolator_T, Distributor_T >
 
       for( auto bodyIt = pe::LocalBodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
       {
-         //TODO check if body should be treated by DPM
+         if(!dpmBodySelectorFct_(*bodyIt)) continue;
 
          Vector3<real_t> forceOnFluid( real_t(0) );
 

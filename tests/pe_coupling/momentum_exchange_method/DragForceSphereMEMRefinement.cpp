@@ -504,7 +504,7 @@ int main( int argc, char **argv )
    // PE //
    ////////
 
-   pe::BodyStorage globalBodyStorage;
+   shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
    auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
 
@@ -517,7 +517,7 @@ int main( int argc, char **argv )
 
    // create the sphere in the middle of the domain
    Vector3<real_t> position ( setup.length * real_c(0.5));
-   pe::createSphere(globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, setup.radius );
+   pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, setup.radius );
 
    // synchronize often enough for large bodies
    for( uint_t i = 0; i < std::max( uint_c(1), XBlocks / uint_c(2) ) * ( uint_t(1) << ( setup.levels - uint_t(1) ) ); ++i)
@@ -549,10 +549,10 @@ int main( int argc, char **argv )
    if( MO_CLI )
    {
       // uses a higher order boundary condition (CLI)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_CLI_Flag );
    }else{
       // uses standard bounce back boundary conditions
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,  MO_BB_Flag );
    }
 
 

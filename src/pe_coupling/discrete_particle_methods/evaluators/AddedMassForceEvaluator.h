@@ -39,6 +39,8 @@
 #include "pe/Types.h"
 #include "pe/Materials.h"
 
+#include "pe_coupling/utility/BodySelectorFunctions.h"
+
 #include "BodyVelocityTimeDerivativeEvaluator.h"
 
 #include "stencil/Directions.h"
@@ -56,6 +58,8 @@ namespace discrete_particle_methods {
  * The corresponding reaction force is added to the fluid via the given distributor.
  *
  * Note that the fluid velocity (and its derivatives) has to be the fluid-phase velocity (and not the volume-averaged velocity).
+ *
+ * Whether or not a body gets treated by the evaluator depends on the return value of 'dpmBodySelectorFct'.
  *
  * For more infos on interpolators, see field interpolators in src/field/interpolators.
  * For more infos on distributors, see src/field/distributors.
@@ -75,9 +79,12 @@ public:
                             const BlockDataID & flagFieldID, const Set< FlagUID > & domainFlags,
                             const BlockDataID & velocityTimeDerivativeFieldID,
                             const boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t )> & addedMassForceCorrelationFunction,
-                            const shared_ptr< BodyVelocityTimeDerivativeEvaluator > & bodyVelocityTimeDerivativeEvaluator )
+                            const shared_ptr< BodyVelocityTimeDerivativeEvaluator > & bodyVelocityTimeDerivativeEvaluator,
+                            const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
    : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ),
-     addedMassForceCorrelationFunction_( addedMassForceCorrelationFunction ), bodyVelocityTimeDerivativeEvaluator_( bodyVelocityTimeDerivativeEvaluator )
+     addedMassForceCorrelationFunction_( addedMassForceCorrelationFunction ),
+     bodyVelocityTimeDerivativeEvaluator_( bodyVelocityTimeDerivativeEvaluator ),
+     dpmBodySelectorFct_( dpmBodySelectorFct)
    {
       velocityTimeDerivativeFieldInterpolatorID_ = field::addFieldInterpolator< Vec3FieldInterpolator_T, FlagField_T >( blockStorage, velocityTimeDerivativeFieldID, flagFieldID, domainFlags );
       forceDistributorID_ = field::addDistributor< ForceDistributor_T, FlagField_T >( blockStorage, forceFieldID, flagFieldID, domainFlags );
@@ -93,6 +100,8 @@ private:
    boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t )> addedMassForceCorrelationFunction_;
 
    shared_ptr< BodyVelocityTimeDerivativeEvaluator > bodyVelocityTimeDerivativeEvaluator_;
+
+   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
 
    BlockDataID velocityTimeDerivativeFieldInterpolatorID_;
    BlockDataID forceDistributorID_;
@@ -112,7 +121,7 @@ void AddedMassForceEvaluator< FlagField_T, FieldInterpolator_T, Distributor_T >
 
       for( auto bodyIt = pe::LocalBodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
       {
-         //TODO check if body should be treated by DPM
+         if(!dpmBodySelectorFct_(*bodyIt)) continue;
 
          Vector3<real_t> forceOnFluid( real_t(0) );
 

@@ -25,6 +25,9 @@
 
 #include "pe/rigidbody/BodyIterators.h"
 
+#include "pe_coupling/utility/BodySelectorFunctions.h"
+
+#include <boost/function.hpp>
 #include <map>
 
 namespace walberla {
@@ -38,14 +41,18 @@ namespace discrete_particle_methods {
  * Calling get(..), the body's former velocity is fetched from the map and used to calculate a simple approximation of the
  * body velocity time derivative (du/dt = ( u_new - u_old ) / deltaT )
  *
+ * Whether or not a body gets treated by the evaluator depends on the return value of 'dpmBodySelectorFct'.
+ *
  */
 class BodyVelocityTimeDerivativeEvaluator
 {  
 public:
 
    BodyVelocityTimeDerivativeEvaluator( const shared_ptr<StructuredBlockStorage> & blockStorage,
-                                        const BlockDataID & bodyStorageID, const real_t & deltaT = real_t(1) )
-   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), deltaTinv_( real_t(1) / deltaT )
+                                        const BlockDataID & bodyStorageID, const real_t & deltaT = real_t(1),
+                                        const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
+   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), deltaTinv_( real_t(1) / deltaT ),
+     dpmBodySelectorFct_( dpmBodySelectorFct)
      { }
 
    void operator()()
@@ -56,6 +63,8 @@ public:
       {
          for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
          {
+            if(!dpmBodySelectorFct_(*bodyIt)) continue;
+
             bodyVelocityMap_.insert( std::pair<walberla::id_t, Vector3< real_t > >( bodyIt->getSystemID(), bodyIt->getLinearVel() ) );
          }
       }
@@ -79,7 +88,7 @@ private:
    const BlockDataID bodyStorageID_;
    std::map< walberla::id_t, Vector3< real_t > > bodyVelocityMap_;
    real_t deltaTinv_;
-
+   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
 };
 
 
