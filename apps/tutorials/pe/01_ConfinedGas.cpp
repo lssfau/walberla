@@ -35,6 +35,8 @@
 #include <pe/raytracing/Intersects.h>
 #include <pe/raytracing/Ray.h>
 
+#include <core/mpi/all.h>
+
 //! [Includes]
 
 using namespace walberla;
@@ -45,6 +47,24 @@ using namespace walberla::pe::raytracing;
 typedef boost::tuple<Sphere, Plane, Box> BodyTypeTuple ;
 //! [BodyTypeTuple]
 
+struct BodyIntersectionInfo {
+   size_t imageX; // viewing plane pixel coordinates to ...
+   size_t imageY; // ... identify ray by pixel it intersected
+   walberla::id_t bodySystemID; // body which was hit
+   real_t t; // distance from camera to intersection point on body
+};
+
+struct Coordinates {
+   size_t x;
+   size_t y;
+};
+
+struct CoordinatesComparator {
+   bool operator() (const Coordinates& lhs, const Coordinates& rhs) const {
+      // standard lexicographical ordering
+      return (lhs.x < rhs.x) || (lhs.x == rhs.x && lhs.y < rhs.y);
+   }
+};
 
 real_t deg2rad(real_t deg) {
    return deg * math::M_PI / real_t(180.0);
@@ -55,17 +75,17 @@ void writeTBufferToFile(real_t buffer[], walberla::id_t idBuffer[], size_t width
    real_t t_min = INFINITY;
    walberla::id_t maxId = 0;
    for (size_t i = 0; i < width*height; i++) {
-      if (buffer[i] > t_max && buffer[i] != INFINITY) {
+      if (buffer[i] > t_max && !realIsIdentical(buffer[i], INFINITY)) {
          t_max = buffer[i];
       }
       if (buffer[i] < t_min) {
-         //t_min = buffer[i];
+         t_min = buffer[i];
       }
       if (idBuffer[i] > maxId) {
          maxId = idBuffer[i];
       }
    }
-   if (t_min == INFINITY) t_min = 0;
+   if (realIsIdentical(t_min, INFINITY)) t_min = 0;
    
    std::map<walberla::id_t, char> idToColors;
    
@@ -74,19 +94,19 @@ void writeTBufferToFile(real_t buffer[], walberla::id_t idBuffer[], size_t width
    for (size_t i = height*width-1; i > 0; i--) {
       char r = 0, g = 0, b = 0;
       real_t t = buffer[i];
-      walberla::id_t id = idBuffer[i];
-      if (t == INFINITY) {
+      //walberla::id_t id = idBuffer[i];
+      if (realIsIdentical(t, INFINITY)) {
          r = g = b = (char)255;
       } else {
          //r = g = b = (char)(255 * (t-t_min)/t_max);
          //b = (char)(255 * (real_t(id)/real_t(maxId)));
          //if (b > (char)250) b = (char)250;
-         if (idToColors.count(id) == 0) {
-            idToColors.insert(std::make_pair(id, math::intRandom(0, 240)));
-         }
-         b = (char)(idToColors.at(id) * ((t-t_min)/t_max));
+         //if (idToColors.count(id) == 0) {
+         //   idToColors.insert(std::make_pair(id, math::intRandom(0, 240)));
+         //}
+         r = g = b = (char)(200 * ((t-t_min)/(t_max-t_min)));
          //b = (char)(200 * ((t-t_min)/t_max));
-         r = (char)(200 * ((t-t_min)/t_max));
+         //r = (char)(200 * ((t-t_min)/t_max));
       }
       ofs << r << g << b;
    }
@@ -94,17 +114,17 @@ void writeTBufferToFile(real_t buffer[], walberla::id_t idBuffer[], size_t width
    ofs.close();
 }
 
+//forest speichert alle blöcke meines prozesses
+
 void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
    // - settings
    size_t pixelsHorizontal = 640;
    size_t pixelsVertical = 480;
    real_t fov_vertical = 49.13; // in degrees, in vertical direction
    // camera settings
-   Vec3 cameraPosition(-5,0,0);
-   Vec3 lookAtPoint(1,0,0);
-   Vec3 upVector(0,1,0);
-   
-   //real_t scale = tan(deg2rad(fov * 0.5));
+   Vec3 cameraPosition(-25,10,10); // -5,0,0 for testing, -25,10,10 for simulation
+   Vec3 lookAtPoint(-5,10,10); // 1,0,0 for testing, -5,10,10 for simulation
+   Vec3 upVector(0,0,1);
    
    // - viewing plane construction
    // eye cos setup
@@ -121,48 +141,121 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
    real_t pixelHeight = imagePlaneHeight / pixelsVertical;
    
    // - raytracing
-   real_t frameBuffer[pixelsHorizontal*pixelsVertical];
-   walberla::id_t idBuffer[pixelsHorizontal*pixelsVertical];
-   std::map<RigidBody*, bool> visibleBodies;
+   real_t tBuffer[pixelsHorizontal*pixelsVertical]; // t values for each pixel
+   walberla::id_t idBuffer[pixelsHorizontal*pixelsVertical]; // ids of the intersected body for each pixel
+   std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
+   
+   std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap;
    
    real_t t, t_closest;
    walberla::id_t id_closest;
+   RigidBody* body_closest;
+   Ray ray(cameraPosition, Vec3(1,0,0));
+   IntersectsFunctor func(ray, t);
    for (size_t x = 0; x < pixelsHorizontal; x++) {
       for (size_t y = 0; y < pixelsVertical; y++) {
          //WALBERLA_LOG_INFO(x << "/" << y);
          Vec3 pixelLocation = imagePlaneOrigin + u*(x+real_t(0.5))*pixelWidth + v*(y+real_t(0.5))*pixelHeight;
          Vec3 direction = (pixelLocation - cameraPosition).getNormalized();
-         Ray ray(cameraPosition, direction);
+         ray.setDirection(direction);
          
          t_closest = INFINITY;
          id_closest = 0;
-         RigidBody* body_closest;
          for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
+            // blockIt->getAABB();
             for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
-               IntersectsFunctor func(&ray, &t);
                bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
                
                if (intersects && t < t_closest) {
-                  // body is shot by ray and currently closest to camera
+                  // body was shot by ray and currently closest to camera
                   t_closest = t;
                   id_closest = bodyIt->getID();
                   body_closest = *bodyIt;
                }
             }
          }
+         
          //std::cout << (t_closest != INFINITY ? size_t(t_closest) : 0) << " ";
-         if (t_closest != INFINITY && visibleBodies.find(body_closest) == visibleBodies.end()) {
-            visibleBodies.insert(std::make_pair(body_closest, true));
+
+         if (!realIsIdentical(t_closest, INFINITY)) {
+            BodyIntersectionInfo intersectionInfo = {
+               x,
+               y,
+               body_closest->getSystemID(),
+               t_closest
+            };
+            Coordinates c = {
+               x,
+               y
+            };
+            intersections.push_back(intersectionInfo);
+            localPixelIntersectionMap[c] = intersectionInfo;
          }
-         frameBuffer[y*pixelsHorizontal + x] = t_closest;
+         
+         tBuffer[y*pixelsHorizontal + x] = t_closest;
          idBuffer[y*pixelsHorizontal + x] = id_closest;
       }
       //std::cout << std::endl;
    }
    
-   WALBERLA_LOG_INFO_ON_ROOT("#particles visible: " << visibleBodies.size());
+   // intersections synchronisieren
+   mpi::SendBuffer sendBuffer;
+   for (auto& info: intersections) {
+      sendBuffer << info.imageX << info.imageY << info.bodySystemID << info.t;
+   }
    
-   writeTBufferToFile(frameBuffer, idBuffer, pixelsHorizontal, pixelsVertical, "/Users/ng/Desktop/tbuffer.ppm");
+   std::vector<BodyIntersectionInfo> gatheredIntersections;
+   
+   std::map<walberla::id_t, bool> visibleBodyIDs;
+   
+   //std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> pixelIntersectionMap;
+   
+   mpi::RecvBuffer recvBuffer;
+   mpi::allGathervBuffer(sendBuffer, recvBuffer);
+   while (!recvBuffer.isEmpty()) {
+      BodyIntersectionInfo info;
+      
+      recvBuffer >> info.imageX;
+      recvBuffer >> info.imageY;
+      recvBuffer >> info.bodySystemID;
+      recvBuffer >> info.t;
+      
+      Coordinates c = {
+         info.imageX,
+         info.imageY
+      };
+      
+      /*if (pixelIntersectionMap.find(c) == pixelIntersectionMap.end()) {
+         // map didnt contain coordinates
+         pixelIntersectionMap.insert(std::make_pair(c, info));
+      } else {
+         // map already contains info at coordinates, check if current info is closer
+         BodyIntersectionInfo& existingInfo = pixelIntersectionMap.at(c);
+         if (existingInfo.t < info.t) {
+            pixelIntersectionMap[c] = info;
+         }
+      }*/
+      auto it = localPixelIntersectionMap.find(c);
+      if (it != localPixelIntersectionMap.end()) {
+         // there was a local hit at coordinate c
+         BodyIntersectionInfo& localInfo = localPixelIntersectionMap.at(c);
+         if (localInfo.t < info.t) {
+            localPixelIntersectionMap.erase(it);
+         }
+      }
+      
+      //gatheredIntersections.push_back(info);
+   }
+   
+   for (auto& info: localPixelIntersectionMap) {
+      visibleBodyIDs[info.second.bodySystemID] = true;
+   }
+   
+   WALBERLA_LOG_INFO("#particles visible: " << visibleBodyIDs.size());
+   //WALBERLA_LOG_INFO_ON_ROOT("#gatheredIntersections: " << gatheredIntersections.size());
+   
+   mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
+   writeTBufferToFile(tBuffer, idBuffer, pixelsHorizontal, pixelsVertical, "/Users/ng/Desktop/walberla/tbuffer_" + std::to_string(rank) + ".ppm");
 }
 
 void testRayTracing () {
@@ -170,10 +263,12 @@ void testRayTracing () {
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,-5,-5,10,5,5), Vec3(1,1,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTypeTuple>(), "Storage");
    SetBodyTypeIDs<BodyTypeTuple>::execute();
-   createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,0,0), real_t(3));
-   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(3,0,-3), real_t(1));
-   createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,2,0), real_t(1));
-   createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,4,2), Vec3(2,3,4));
+   createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,4.5,4.5), real_t(0.5));
+   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(3.5,-2,0), real_t(1));
+   //createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,2,0), real_t(1));
+   BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,0,0), Vec3(2,4,3));
+   box->rotate(0,math::M_PI/4,math::M_PI/4);
+   createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,-4,3), Vec3(2,2,2));
    //createSphere(*globalBodyStorage, *forest, storageID, 5, Vec3(1,0,0), real_t(0.1));
 
    rayTrace(forest, storageID);
@@ -187,8 +282,8 @@ int main( int argc, char ** argv )
    
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
    
-   testRayTracing();
-   return 0;
+   //testRayTracing();
+   //return 0;
    
    real_t spacing          = real_c(1.0);
    real_t radius           = real_c(0.4);
