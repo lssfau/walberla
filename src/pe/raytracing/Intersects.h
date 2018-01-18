@@ -18,25 +18,25 @@
 namespace walberla {
    namespace pe {
       namespace raytracing {
-         inline bool intersects(SphereID sphere, Ray* ray, real_t &t);
-         inline bool intersects(PlaneID plane, Ray* ray, real_t* t);
-         inline bool intersects(BoxID box, Ray* ray, real_t* t);
-         inline bool intersects(GeomPrimitive* body, Ray* ray, real_t* t);
+         inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t);
+         inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t);
+         inline bool intersects(const BoxID box, const Ray& ray, real_t& t);
+         inline bool intersects(const GeomPrimitive* body, const Ray& ray, real_t& t);
          
          struct IntersectsFunctor
          {
-            Ray* ray_;
-            real_t* t_;
+            const Ray& ray_;
+            real_t& t_;
             
-            IntersectsFunctor(Ray* ray, real_t* t) : ray_(ray), t_(t) {}
+            IntersectsFunctor(const Ray& ray, real_t& t) : ray_(ray), t_(t) {}
             
             template< typename BodyType >
-            bool operator()( BodyType* bd1 ) { return intersects( bd1, ray_, t_); }
+            bool operator()( const BodyType* bd1 ) { return intersects( bd1, ray_, t_); }
          };
          
-         inline bool intersects(SphereID sphere, Ray* ray, real_t* t) {
-            Vec3 direction = ray->getDirection();
-            Vec3 displacement = ray->origin - sphere->getPosition();
+         inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t) {
+            const Vec3& direction = ray.getDirection();
+            Vec3 displacement = ray.getOrigin() - sphere->getPosition();
             real_t a = direction * direction;
             real_t b = real_t(2.) * (displacement * direction);
             real_t c = (displacement * displacement) - (sphere->getRadius() * sphere->getRadius());
@@ -45,74 +45,74 @@ namespace walberla {
                // with discriminant smaller than 0, sphere is not hit by ray
                // (no solution for quadratic equation)
                // with discriminant being 0, sphere only tangentially hits the ray (not enough)
-               *t = real_t(INFINITY);
+               t = real_t(INFINITY);
                return false;
             }
             real_t root = real_t(std::sqrt(discriminant));
             real_t t0 = (-b - root) / (real_t(2.) * a); // point where the ray enters the sphere
             real_t t1 = (-b + root) / (real_t(2.) * a); // point where the ray leaves the sphere
             if (t0 < 0 && t1 < 0) {
-               *t = real_t(INFINITY);
+               t = real_t(INFINITY);
                return false;
             }
-            real_t t_;
-            t_ = (t0 < t1) ? t0 : t1; // assign the closest hit point to t
-            if (t_ < 0) {
+            t = (t0 < t1) ? t0 : t1; // assign the closest hit point to t
+            if (t < 0) {
                // at least one of the calculated hit points is behind the rays origin
                if (t1 < 0) {
                   // both of the points are behind the origin (ray does not hit sphere)
-                  *t = real_t(INFINITY);
+                  t = real_t(INFINITY);
                   return false;
                } else {
                   // one point is hit by the ray (ray is within sphere)
-                  t_ = t1;
+                  t = t1;
                }
             }
-            *t = t_;
             return true;
          }
          
-         inline bool intersects(PlaneID plane, Ray* ray, real_t* t) {
-            Vec3 direction = ray->getDirection();
+         inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t) {
+            const Vec3& direction = ray.getDirection();
+            const Vec3& origin = ray.getOrigin();
             real_t denominator = plane->getNormal() * direction;
             if (std::abs(denominator) > EPSILON) {
                real_t t_;
-               t_ = ((plane->getPosition() - ray->origin) * plane->getNormal()) / denominator;
+               t_ = ((plane->getPosition() - origin) * plane->getNormal()) / denominator;
                
                if (t_ > EPSILON) {
-                  Vec3 intersectionPoint = (t_*direction + ray->origin);
-                  Vec3 originToIntersection = ray->origin - intersectionPoint;
-                  *t = originToIntersection.length();
+                  Vec3 intersectionPoint = (t_*direction + origin);
+                  Vec3 originToIntersection = origin - intersectionPoint;
+                  t = originToIntersection.length();
                   return true;
                } else {
-                  *t = INFINITY;
+                  t = INFINITY;
                }
             }
-            *t = INFINITY;
+            t = INFINITY;
             return false;
          }
          
-         inline bool intersects(BoxID box, Ray* ray, real_t* t) {
-            Ray transformedRay(box->pointFromWFtoBF(ray->origin), box->vectorFromWFtoBF(ray->getDirection()));
+         inline bool intersects(const BoxID box, const Ray& ray, real_t& t) {
+            Ray transformedRay(box->pointFromWFtoBF(ray.getOrigin()), box->vectorFromWFtoBF(ray.getDirection()));
             
-            Vec3 lengths = box->getLengths();
-            Vec3 lengthsHalved = lengths/real_t(2);
+            const Vec3& lengths = box->getLengths();
+            const Vec3 lengthsHalved = lengths/real_t(2);
             
-            Vec3 bounds[2] = {
+            const Vec3 bounds[2] = {
                -lengthsHalved,
                lengthsHalved
             };
                                
-            int* sign = transformedRay.getInvDirectionSigns();
-            Vec3 invDirection = transformedRay.getInvDirection();
+            const Vector3<int8_t>& sign = transformedRay.getInvDirectionSigns();
+            const Vec3& invDirection = transformedRay.getInvDirection();
+            const Vec3& origin = transformedRay.getOrigin();
                         
             real_t txmin, txmax;
-            real_t tmin = txmin = (bounds[sign[0]][0] - transformedRay.origin[0]) * invDirection[0];
-            real_t tmax = txmax = (bounds[1-sign[0]][0] - transformedRay.origin[0]) * invDirection[0];
-            real_t tymin = (bounds[sign[1]][1] - transformedRay.origin[1]) * invDirection[1];
-            real_t tymax = (bounds[1-sign[1]][1] - transformedRay.origin[1]) * invDirection[1];
+            real_t tmin = txmin = (bounds[sign[0]][0] - origin[0]) * invDirection[0];
+            real_t tmax = txmax = (bounds[1-sign[0]][0] - origin[0]) * invDirection[0];
+            real_t tymin = (bounds[sign[1]][1] - origin[1]) * invDirection[1];
+            real_t tymax = (bounds[1-sign[1]][1] - origin[1]) * invDirection[1];
             if (tmin > tymax || tymin > tmax) {
-               *t = INFINITY;
+               t = INFINITY;
                return false;
             }
             if (tymin > tmin) {
@@ -121,10 +121,10 @@ namespace walberla {
             if (tymax < tmax) {
                tmax = tymax;
             }
-            real_t tzmin = (bounds[sign[2]][2] - transformedRay.origin[2]) * invDirection[2];
-            real_t tzmax = (bounds[1-sign[2]][2] - transformedRay.origin[2]) * invDirection[2];
+            real_t tzmin = (bounds[sign[2]][2] - origin[2]) * invDirection[2];
+            real_t tzmax = (bounds[1-sign[2]][2] - origin[2]) * invDirection[2];
             if (tmin > tzmax || tzmin > tmax) {
-               *t = INFINITY;
+               t = INFINITY;
                return false;
             }
             if (tzmin > tmin) {
@@ -140,36 +140,37 @@ namespace walberla {
                t_ = tmin;
             } else if (tmax < 0) {
                // tmin and tmax are smaller than 0 -> box is in rays negative direction
-               *t = INFINITY;
+               t = INFINITY;
                return false;
             } else {
                // ray origin within box
                t_ = tmax;
             }
             
-            *t = t_;
+            t = t_;
             return true;
          }
          
-         inline bool intersects(GeomPrimitive* body, Ray* ray, real_t* t) {
+         inline bool intersects(const GeomPrimitive* body, const Ray& ray, real_t& t) {
             // An Efficient and Robust Ray–Box Intersection Algorithm: http://people.csail.mit.edu/amy/papers/box-jgt.pdf
-            AABB aabb = body->getAABB();
+            const AABB aabb = body->getAABB();
             
             Vec3 bounds[2] = {
                aabb.min(),
                aabb.max()
             };
             
-            int* sign = ray->getInvDirectionSigns();
-            Vec3 invDirection = ray->getInvDirection();
-            
+            const Vector3<int8_t>& sign = ray.getInvDirectionSigns();
+            const Vec3& invDirection = ray.getInvDirection();
+            const Vec3& origin = ray.getOrigin();
+
             real_t txmin, txmax;
-            real_t tmin = txmin = (bounds[sign[0]][0] - ray->origin[0]) * invDirection[0];
-            real_t tmax = txmax = (bounds[1-sign[0]][0] - ray->origin[0]) * invDirection[0];
-            real_t tymin = (bounds[sign[1]][1] - ray->origin[1]) * invDirection[1];
-            real_t tymax = (bounds[1-sign[1]][1] - ray->origin[1]) * invDirection[1];
+            real_t tmin = txmin = (bounds[sign[0]][0] - origin[0]) * invDirection[0];
+            real_t tmax = txmax = (bounds[1-sign[0]][0] - origin[0]) * invDirection[0];
+            real_t tymin = (bounds[sign[1]][1] - origin[1]) * invDirection[1];
+            real_t tymax = (bounds[1-sign[1]][1] - origin[1]) * invDirection[1];
             if (tmin > tymax || tymin > tmax) {
-               *t = INFINITY;
+               t = INFINITY;
                return false;
             }
             if (tymin > tmin) {
@@ -178,10 +179,10 @@ namespace walberla {
             if (tymax < tmax) {
                tmax = tymax;
             }
-            real_t tzmin = (bounds[sign[2]][2] - ray->origin[2]) * invDirection[2];
-            real_t tzmax = (bounds[1-sign[2]][2] - ray->origin[2]) * invDirection[2];
+            real_t tzmin = (bounds[sign[2]][2] - origin[2]) * invDirection[2];
+            real_t tzmax = (bounds[1-sign[2]][2] - origin[2]) * invDirection[2];
             if (tmin > tzmax || tzmin > tmax) {
-               *t = INFINITY;
+               t = INFINITY;
                return false;
             }
             if (tzmin > tmin) {
@@ -197,14 +198,14 @@ namespace walberla {
                t_ = tmin;
             } else if (tmax < 0) {
                // tmin and tmax are smaller than 0 -> box is in rays negative direction
-               *t = INFINITY;
+               t = INFINITY;
                return false;
             } else {
                // ray origin within box
                t_ = tmax;
             }
             
-            *t = t_;
+            t = t_;
             return true;
          }
       }
