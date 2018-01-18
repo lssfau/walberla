@@ -18,10 +18,11 @@
 namespace walberla {
    namespace pe {
       namespace raytracing {
+         inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t);
+         
          inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t);
          inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t);
          inline bool intersects(const BoxID box, const Ray& ray, real_t& t);
-         inline bool intersects(const GeomPrimitive* body, const Ray& ray, real_t& t);
          
          struct IntersectsFunctor
          {
@@ -31,7 +32,7 @@ namespace walberla {
             IntersectsFunctor(const Ray& ray, real_t& t) : ray_(ray), t_(t) {}
             
             template< typename BodyType >
-            bool operator()( const BodyType* bd1 ) { return intersects( bd1, ray_, t_); }
+            bool operator()( BodyType* bd1 ) { return intersects( bd1, ray_, t_); }
          };
          
          inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t) {
@@ -151,10 +152,8 @@ namespace walberla {
             return true;
          }
          
-         inline bool intersects(const GeomPrimitive* body, const Ray& ray, real_t& t) {
+         inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t) {
             // An Efficient and Robust Ray–Box Intersection Algorithm: http://people.csail.mit.edu/amy/papers/box-jgt.pdf
-            const AABB aabb = body->getAABB();
-            
             Vec3 bounds[2] = {
                aabb.min(),
                aabb.max()
