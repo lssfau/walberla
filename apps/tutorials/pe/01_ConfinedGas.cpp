@@ -70,7 +70,7 @@ real_t deg2rad(real_t deg) {
    return deg * math::M_PI / real_t(180.0);
 }
 
-void writeTBufferToFile(real_t buffer[], walberla::id_t idBuffer[], size_t width, size_t height, std::string fileName) {
+void writeTBufferToFile(const std::vector<real_t>& buffer, const std::vector<walberla::id_t> idBuffer, size_t width, size_t height, const std::string& fileName) {
    real_t t_max = 1;
    real_t t_min = INFINITY;
    walberla::id_t maxId = 0;
@@ -137,30 +137,31 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
    real_t imagePlaneHeight = tan(deg2rad(fov_vertical)/real_t(2.)) * real_t(2.) * d;
    real_t imagePlaneWidth = imagePlaneHeight * aspectRatio;
    Vec3 imagePlaneOrigin = lookAtPoint - u*imagePlaneWidth/real_t(2.) - v*imagePlaneHeight/real_t(2.);
-   real_t pixelWidth = imagePlaneWidth / pixelsHorizontal;
-   real_t pixelHeight = imagePlaneHeight / pixelsVertical;
+   real_t pixelWidth = imagePlaneWidth / real_c(pixelsHorizontal);
+   real_t pixelHeight = imagePlaneHeight / real_c(pixelsVertical);
    
    // - raytracing
-   real_t tBuffer[pixelsHorizontal*pixelsVertical]; // t values for each pixel
-   walberla::id_t idBuffer[pixelsHorizontal*pixelsVertical]; // ids of the intersected body for each pixel
+   std::vector<real_t> tBuffer; // t values for each pixel
+   std::vector<walberla::id_t> idBuffer; // ids of the intersected body for each pixel
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    
    std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap;
    
    real_t t, t_closest;
    walberla::id_t id_closest;
-   RigidBody* body_closest;
+   RigidBody* body_closest = NULL;
    Ray ray(cameraPosition, Vec3(1,0,0));
    IntersectsFunctor func(ray, t);
    for (size_t x = 0; x < pixelsHorizontal; x++) {
       for (size_t y = 0; y < pixelsVertical; y++) {
          //WALBERLA_LOG_INFO(x << "/" << y);
-         Vec3 pixelLocation = imagePlaneOrigin + u*(x+real_t(0.5))*pixelWidth + v*(y+real_t(0.5))*pixelHeight;
+         Vec3 pixelLocation = imagePlaneOrigin + u*(real_c(x)+real_t(0.5))*pixelWidth + v*(real_c(y)+real_t(0.5))*pixelHeight;
          Vec3 direction = (pixelLocation - cameraPosition).getNormalized();
          ray.setDirection(direction);
          
          t_closest = INFINITY;
          id_closest = 0;
+         body_closest = NULL;
          for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
             // blockIt->getAABB();
             /*const AABB& blockAabb = blockIt->getAABB();
@@ -181,7 +182,7 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
          
          //std::cout << (t_closest != INFINITY ? size_t(t_closest) : 0) << " ";
 
-         if (!realIsIdentical(t_closest, INFINITY)) {
+         if (!realIsIdentical(t_closest, INFINITY) && body_closest != NULL) {
             BodyIntersectionInfo intersectionInfo = {
                x,
                y,
