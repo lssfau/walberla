@@ -259,7 +259,9 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
    //WALBERLA_LOG_INFO_ON_ROOT("#gatheredIntersections: " << gatheredIntersections.size());
    
    mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
+#ifdef __APPLE__
    writeTBufferToFile(tBuffer, idBuffer, pixelsHorizontal, pixelsVertical, "/Users/ng/Desktop/walberla/tbuffer_" + std::to_string(rank) + ".ppm");
+#endif
 }
 
 void testRayTracing () {
