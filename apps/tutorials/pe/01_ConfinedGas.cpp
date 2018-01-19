@@ -70,45 +70,52 @@ real_t deg2rad(real_t deg) {
    return deg * math::M_PI / real_t(180.0);
 }
 
-void writeTBufferToFile(const std::vector<real_t>& buffer, const std::vector<walberla::id_t> idBuffer, size_t width, size_t height, const std::string& fileName) {
+void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& buffer, const std::map<Coordinates, walberla::id_t, CoordinatesComparator> idBuffer, const size_t width, const size_t height, const std::string& fileName) {
    real_t t_max = 1;
    real_t t_min = INFINITY;
    walberla::id_t maxId = 0;
-   for (size_t i = 0; i < width*height; i++) {
-      if (buffer[i] > t_max && !realIsIdentical(buffer[i], INFINITY)) {
-         t_max = buffer[i];
-      }
-      if (buffer[i] < t_min) {
-         t_min = buffer[i];
-      }
-      if (idBuffer[i] > maxId) {
-         maxId = idBuffer[i];
+   for (size_t x = 0; x < width; x++) {
+      for (size_t y = 0; y < height; y++) {
+         Coordinates c = {x, y};
+         real_t t = buffer.at(c);
+         if (t > t_max && !realIsIdentical(t, INFINITY)) {
+            t_max = t;
+         }
+         if (t < t_min) {
+            t_min = t;
+         }
+         if (idBuffer.at(c) > maxId) {
+            maxId = idBuffer.at(c);
+         }
       }
    }
    if (realIsIdentical(t_min, INFINITY)) t_min = 0;
    
-   std::map<walberla::id_t, char> idToColors;
+   //std::map<walberla::id_t, char> idToColors;
    
    std::ofstream ofs(fileName, std::ios::out | std::ios::binary);
    ofs << "P6\n" << width << " " << height << "\n255\n";
-   for (size_t i = height*width-1; i > 0; i--) {
-      char r = 0, g = 0, b = 0;
-      real_t t = buffer[i];
-      //walberla::id_t id = idBuffer[i];
-      if (realIsIdentical(t, INFINITY)) {
-         r = g = b = (char)255;
-      } else {
-         //r = g = b = (char)(255 * (t-t_min)/t_max);
-         //b = (char)(255 * (real_t(id)/real_t(maxId)));
-         //if (b > (char)250) b = (char)250;
-         //if (idToColors.count(id) == 0) {
-         //   idToColors.insert(std::make_pair(id, math::intRandom(0, 240)));
-         //}
-         r = g = b = (char)(200 * ((t-t_min)/(t_max-t_min)));
-         //b = (char)(200 * ((t-t_min)/t_max));
-         //r = (char)(200 * ((t-t_min)/t_max));
+   for (size_t y = height-1; y > 0; y--) {
+      for (size_t x = 0; x < width; x++) {
+         Coordinates c = {x, y};
+         char r = 0, g = 0, b = 0;
+         real_t t = buffer.at(c);
+         //walberla::id_t id = idBuffer[i];
+         if (realIsIdentical(t, INFINITY)) {
+            r = g = b = (char)255;
+         } else {
+            //r = g = b = (char)(255 * (t-t_min)/t_max);
+            //b = (char)(255 * (real_t(id)/real_t(maxId)));
+            //if (b > (char)250) b = (char)250;
+            //if (idToColors.count(id) == 0) {
+            //   idToColors.insert(std::make_pair(id, math::intRandom(0, 240)));
+            //}
+            r = g = b = (char)(200 * ((t-t_min)/(t_max-t_min)));
+            //b = (char)(200 * ((t-t_min)/t_max));
+            //r = (char)(200 * ((t-t_min)/t_max));
+         }
+         ofs << r << g << b;
       }
-      ofs << r << g << b;
    }
    
    ofs.close();
@@ -122,8 +129,8 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
    size_t pixelsVertical = 480;
    real_t fov_vertical = 49.13; // in degrees, in vertical direction
    // camera settings
-   Vec3 cameraPosition(-25,10,10); // -5,0,0 for testing, -25,10,10 for simulation
-   Vec3 lookAtPoint(-5,10,10); // 1,0,0 for testing, -5,10,10 for simulation
+   Vec3 cameraPosition(-5,0,0); // -5,0,0 for testing, -25,10,10 for simulation
+   Vec3 lookAtPoint(-1,0,0); // 1,0,0 for testing, -5,10,10 for simulation
    Vec3 upVector(0,0,1);
    
    // - viewing plane construction
@@ -141,8 +148,8 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
    real_t pixelHeight = imagePlaneHeight / real_c(pixelsVertical);
    
    // - raytracing
-   std::vector<real_t> tBuffer; // t values for each pixel
-   std::vector<walberla::id_t> idBuffer; // ids of the intersected body for each pixel
+   std::map<Coordinates, real_t, CoordinatesComparator> tBuffer; // t values for each pixel
+   std::map<Coordinates, walberla::id_t, CoordinatesComparator> idBuffer; // ids of the intersected body for each pixel
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    
    std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap;
@@ -182,6 +189,11 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
          
          //std::cout << (t_closest != INFINITY ? size_t(t_closest) : 0) << " ";
 
+         Coordinates c = {
+            x,
+            y
+         };
+         
          if (!realIsIdentical(t_closest, INFINITY) && body_closest != NULL) {
             BodyIntersectionInfo intersectionInfo = {
                x,
@@ -189,16 +201,12 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
                body_closest->getSystemID(),
                t_closest
             };
-            Coordinates c = {
-               x,
-               y
-            };
             intersections.push_back(intersectionInfo);
             localPixelIntersectionMap[c] = intersectionInfo;
          }
          
-         tBuffer[y*pixelsHorizontal + x] = t_closest;
-         idBuffer[y*pixelsHorizontal + x] = id_closest;
+         tBuffer[c] = t_closest;
+         idBuffer[c] = id_closest;
       }
       //std::cout << std::endl;
    }
@@ -289,8 +297,8 @@ int main( int argc, char ** argv )
    
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
    
-   //testRayTracing();
-   //return 0;
+   testRayTracing();
+   return 0;
    
    real_t spacing          = real_c(1.0);
    real_t radius           = real_c(0.4);
