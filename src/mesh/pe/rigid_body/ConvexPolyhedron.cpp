@@ -193,6 +193,8 @@ real_t ConvexPolyhedron::getSurfaceArea() const
  */
 Vec3 ConvexPolyhedron::support( const Vec3& d ) const
 {
+   if (math::equal(d.length(), real_t(0))) return Vec3(0,0,0);
+
    TriangleMesh::Normal d_loc = toOpenMesh( vectorFromWFtoBF(d) );
    
    TriangleMesh::VertexHandle startVertex;
