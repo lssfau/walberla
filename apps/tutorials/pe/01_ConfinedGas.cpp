@@ -297,8 +297,8 @@ int main( int argc, char ** argv )
    
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
    
-   testRayTracing();
-   return 0;
+   //testRayTracing();
+   //return 0;
    
    real_t spacing          = real_c(1.0);
    real_t radius           = real_c(0.4);
