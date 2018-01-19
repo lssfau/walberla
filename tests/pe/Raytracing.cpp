@@ -88,7 +88,7 @@ void BoxIntersectsTest() {
    
    Box box2(128, 5, Vec3(0, -2, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(intersects(&box2, ray1, t));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(8), 1e-7);
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(8), real_t(1e-7));
    
    Box box3(128, 5, Vec3(0, 5, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(intersects(&box3, ray1, t));
@@ -97,7 +97,7 @@ void BoxIntersectsTest() {
    // ray origin within box
    Ray ray2(Vec3(-2,0,0), Vec3(1,0,1).getNormalized());
    WALBERLA_CHECK(intersects(&box3, ray2, t));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(7.0710), 1e-4);
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(7.0710), real_t(1e-4));
    
    Ray ray3(Vec3(3,-5,3), Vec3(2, -1.5, 0.5).getNormalized());
    Box box4(128, 5, Vec3(0, 8, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
@@ -105,13 +105,13 @@ void BoxIntersectsTest() {
    
    Ray ray4(Vec3(3,-5,3), Vec3(-2, 3, 0.5).getNormalized());
    WALBERLA_CHECK(intersects(&box4, ray4, t));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(9.7068), 1e-4);
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(9.7068), real_t(1e-4));
    
    Box box5(128, 5, Vec3(4, 0, 0), Vec3(0, 0, 0), Quat(), Vec3(4, 4, 4), iron, false, true, false);
    box5.rotate(0,0,math::M_PI/4);
    Ray ray5(Vec3(0,1.5,0), Vec3(1,0,0));
    WALBERLA_CHECK(intersects(&box5, ray5, t));
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(2.67157), 1e-4);
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(2.67157), real_t(1e-4));
 }
 
 int main( int argc, char** argv )
