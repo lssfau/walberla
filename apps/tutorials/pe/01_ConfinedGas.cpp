@@ -300,12 +300,18 @@ int main( int argc, char ** argv )
    auto cfg = env.config();
    if (cfg != NULL) {
       const Config::BlockHandle confBlock = cfg->getBlock("gas");
+      
       spacing = confBlock.getParameter<real_t>("spacing", spacing);
       radius = confBlock.getParameter<real_t>("radius", radius);
       blocks_x = confBlock.getParameter<uint_t>("blocks_x", blocks_x);
       blocks_y = confBlock.getParameter<uint_t>("blocks_y", blocks_y);
       blocks_z = confBlock.getParameter<uint_t>("blocks_z", blocks_z);
-      WALBERLA_LOG_INFO("spacing: " << spacing);
+      
+      WALBERLA_LOG_INFO_ON_ROOT("spacing: " << spacing);
+      WALBERLA_LOG_INFO_ON_ROOT("radius: " << radius);
+      WALBERLA_LOG_INFO_ON_ROOT("blocks_x: " << blocks_x);
+      WALBERLA_LOG_INFO_ON_ROOT("blocks_y: " << blocks_y);
+      WALBERLA_LOG_INFO_ON_ROOT("blocks_z: " << blocks_z);
    }
    
    //! [Parameters]
