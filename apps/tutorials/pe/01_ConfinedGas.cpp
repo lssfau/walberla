@@ -289,11 +289,25 @@ int main( int argc, char ** argv )
    //testRayTracing();
    //return 0;
    
-   real_t spacing          = real_c(0.5);
+   real_t spacing          = real_c(1.0);
    real_t radius           = real_c(0.4);
    real_t vMax             = real_c(1.0);
    int    simulationSteps  = 10;
    real_t dt               = real_c(0.01);
+   
+   uint_t blocks_x = 2, blocks_y = 2, blocks_z = 2;
+   
+   auto cfg = env.config();
+   if (cfg != NULL) {
+      const Config::BlockHandle confBlock = cfg->getBlock("gas");
+      spacing = confBlock.getParameter<real_t>("spacing", spacing);
+      radius = confBlock.getParameter<real_t>("radius", radius);
+      blocks_x = confBlock.getParameter<uint_t>("blocks_x", blocks_x);
+      blocks_y = confBlock.getParameter<uint_t>("blocks_y", blocks_y);
+      blocks_z = confBlock.getParameter<uint_t>("blocks_z", blocks_z);
+      WALBERLA_LOG_INFO("spacing: " << spacing);
+   }
+   
    //! [Parameters]
 
    WALBERLA_LOG_INFO_ON_ROOT("*** GLOBALBODYSTORAGE ***");
@@ -305,7 +319,7 @@ int main( int argc, char ** argv )
    // create forest
    //! [BlockForest]
    shared_ptr< BlockForest > forest = createBlockForest( AABB(0,0,0,20,20,20), // simulation domain
-                                                         Vector3<uint_t>(4,4,2), // blocks in each direction
+                                                         Vector3<uint_t>(blocks_x,blocks_y,blocks_z), // blocks in each direction
                                                          Vector3<bool>(false, false, false) // periodicity
                                                          );
 	
