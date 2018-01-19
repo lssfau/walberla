@@ -129,8 +129,8 @@ void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
    size_t pixelsVertical = 480;
    real_t fov_vertical = 49.13; // in degrees, in vertical direction
    // camera settings
-   Vec3 cameraPosition(-5,0,0); // -5,0,0 for testing, -25,10,10 for simulation
-   Vec3 lookAtPoint(-1,0,0); // 1,0,0 for testing, -5,10,10 for simulation
+   Vec3 cameraPosition(-25,10,10); // -5,0,0 for testing, -25,10,10 for simulation
+   Vec3 lookAtPoint(-5,10,10); // 1,0,0 for testing, -5,10,10 for simulation
    Vec3 upVector(0,0,1);
    
    // - viewing plane construction
