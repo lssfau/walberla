@@ -64,6 +64,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage>& forest, BlockDataID storage
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> & forest, BlockDataID storageID,
                      const Config::BlockHandle& config) : forest_(forest), storageID_(storageID) {
+   WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
    pixelsHorizontal_ = config.getParameter<uint8_t>("image_x");
    pixelsVertical_ = config.getParameter<uint8_t>("image_y");
    fov_vertical_ = config.getParameter<real_t>("fov_vertical");
