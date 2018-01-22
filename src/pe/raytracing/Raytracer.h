@@ -32,25 +32,29 @@ namespace walberla {
 namespace pe {
 namespace raytracing {
 
+/*!\brief Contains information about a ray-body intersection.
+ */
 struct BodyIntersectionInfo {
-   size_t imageX; // viewing plane pixel coordinates to ...
-   size_t imageY; // ... identify ray by pixel it intersected
-   walberla::id_t bodySystemID; // body which was hit
-   real_t t; // distance from camera to intersection point on body
+   size_t imageX;                //!< viewing plane x pixel coordinate the ray belongs to.
+   size_t imageY;                //!< viewing plane y pixel coordinate the ray belongs to.
+   walberla::id_t bodySystemID;  //!< system ID of body which was hit.
+   real_t t;                     //!< distance from camera to intersection point on body.
 };
 
+/*!\brief Simple struct for coordinates.
+ */
 struct Coordinates {
    size_t x;
    size_t y;
 };
 
+/*!\brief Comparator for Coordinates struct with standard lexicographical ordering.
+ */
 struct CoordinatesComparator {
    bool operator() (const Coordinates& lhs, const Coordinates& rhs) const {
-      // standard lexicographical ordering
       return (lhs.x < rhs.x) || (lhs.x == rhs.x && lhs.y < rhs.y);
    }
 };
-
 
 class Raytracer {
 public:

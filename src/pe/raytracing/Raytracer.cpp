@@ -88,7 +88,9 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> & forest, BlockDataID storag
    
    setupView_();
 }
-   
+
+/*!\brief Utility function for setting up the view plane and calculating required variables.
+ */
 void Raytracer::setupView_() {
    // eye coordinate system setup
    n = (cameraPosition_ - lookAtPoint_).getNormalized();
