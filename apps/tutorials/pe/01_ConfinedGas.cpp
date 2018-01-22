@@ -32,8 +32,7 @@
 #include <pe/vtk/SphereVtkOutput.h>
 #include "vtk/VTKOutput.h"
 
-#include <pe/raytracing/Intersects.h>
-#include <pe/raytracing/Ray.h>
+#include <pe/raytracing/Raytracer.h>
 
 #include <core/mpi/all.h>
 
@@ -46,232 +45,6 @@ using namespace walberla::pe::raytracing;
 //! [BodyTypeTuple]
 typedef boost::tuple<Sphere, Plane, Box> BodyTypeTuple ;
 //! [BodyTypeTuple]
-
-struct BodyIntersectionInfo {
-   size_t imageX; // viewing plane pixel coordinates to ...
-   size_t imageY; // ... identify ray by pixel it intersected
-   walberla::id_t bodySystemID; // body which was hit
-   real_t t; // distance from camera to intersection point on body
-};
-
-struct Coordinates {
-   size_t x;
-   size_t y;
-};
-
-struct CoordinatesComparator {
-   bool operator() (const Coordinates& lhs, const Coordinates& rhs) const {
-      // standard lexicographical ordering
-      return (lhs.x < rhs.x) || (lhs.x == rhs.x && lhs.y < rhs.y);
-   }
-};
-
-real_t deg2rad(real_t deg) {
-   return deg * math::M_PI / real_t(180.0);
-}
-
-void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& buffer, const std::map<Coordinates, walberla::id_t, CoordinatesComparator> idBuffer, const size_t width, const size_t height, const std::string& fileName) {
-   real_t t_max = 1;
-   real_t t_min = INFINITY;
-   walberla::id_t maxId = 0;
-   for (size_t x = 0; x < width; x++) {
-      for (size_t y = 0; y < height; y++) {
-         Coordinates c = {x, y};
-         real_t t = buffer.at(c);
-         if (t > t_max && !realIsIdentical(t, INFINITY)) {
-            t_max = t;
-         }
-         if (t < t_min) {
-            t_min = t;
-         }
-         if (idBuffer.at(c) > maxId) {
-            maxId = idBuffer.at(c);
-         }
-      }
-   }
-   if (realIsIdentical(t_min, INFINITY)) t_min = 0;
-   
-   //std::map<walberla::id_t, char> idToColors;
-   
-   std::ofstream ofs(fileName, std::ios::out | std::ios::binary);
-   ofs << "P6\n" << width << " " << height << "\n255\n";
-   for (size_t y = height-1; y > 0; y--) {
-      for (size_t x = 0; x < width; x++) {
-         Coordinates c = {x, y};
-         char r = 0, g = 0, b = 0;
-         real_t t = buffer.at(c);
-         //walberla::id_t id = idBuffer[i];
-         if (realIsIdentical(t, INFINITY)) {
-            r = g = b = (char)255;
-         } else {
-            //r = g = b = (char)(255 * (t-t_min)/t_max);
-            //b = (char)(255 * (real_t(id)/real_t(maxId)));
-            //if (b > (char)250) b = (char)250;
-            //if (idToColors.count(id) == 0) {
-            //   idToColors.insert(std::make_pair(id, math::intRandom(0, 240)));
-            //}
-            r = g = b = (char)(200 * ((t-t_min)/(t_max-t_min)));
-            //b = (char)(200 * ((t-t_min)/t_max));
-            //r = (char)(200 * ((t-t_min)/t_max));
-         }
-         ofs << r << g << b;
-      }
-   }
-   
-   ofs.close();
-}
-
-//forest speichert alle blöcke meines prozesses
-
-void rayTrace (shared_ptr<BlockForest> forest, BlockDataID storageID) {
-   // - settings
-   size_t pixelsHorizontal = 640;
-   size_t pixelsVertical = 480;
-   real_t fov_vertical = 49.13; // in degrees, in vertical direction
-   // camera settings
-   Vec3 cameraPosition(-25,10,10); // -5,0,0 for testing, -25,10,10 for simulation
-   Vec3 lookAtPoint(-5,10,10); // 1,0,0 for testing, -5,10,10 for simulation
-   Vec3 upVector(0,0,1);
-   
-   // - viewing plane construction
-   // eye cos setup
-   Vec3 n = (cameraPosition - lookAtPoint).getNormalized(); // normal vector of viewing plane
-   Vec3 u = (upVector % n).getNormalized(); // u and ...
-   Vec3 v = n % u; // ... v span the viewing plane
-   // image plane setup
-   real_t d = (cameraPosition - lookAtPoint).length(); // distance from camera to viewing plane
-   real_t aspectRatio = real_t(pixelsHorizontal) / real_t(pixelsVertical);
-   real_t imagePlaneHeight = tan(deg2rad(fov_vertical)/real_t(2.)) * real_t(2.) * d;
-   real_t imagePlaneWidth = imagePlaneHeight * aspectRatio;
-   Vec3 imagePlaneOrigin = lookAtPoint - u*imagePlaneWidth/real_t(2.) - v*imagePlaneHeight/real_t(2.);
-   real_t pixelWidth = imagePlaneWidth / real_c(pixelsHorizontal);
-   real_t pixelHeight = imagePlaneHeight / real_c(pixelsVertical);
-   
-   // - raytracing
-   std::map<Coordinates, real_t, CoordinatesComparator> tBuffer; // t values for each pixel
-   std::map<Coordinates, walberla::id_t, CoordinatesComparator> idBuffer; // ids of the intersected body for each pixel
-   std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
-   
-   std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap;
-   
-   real_t t, t_closest;
-   walberla::id_t id_closest;
-   RigidBody* body_closest = NULL;
-   Ray ray(cameraPosition, Vec3(1,0,0));
-   IntersectsFunctor func(ray, t);
-   for (size_t x = 0; x < pixelsHorizontal; x++) {
-      for (size_t y = 0; y < pixelsVertical; y++) {
-         //WALBERLA_LOG_INFO(x << "/" << y);
-         Vec3 pixelLocation = imagePlaneOrigin + u*(real_c(x)+real_t(0.5))*pixelWidth + v*(real_c(y)+real_t(0.5))*pixelHeight;
-         Vec3 direction = (pixelLocation - cameraPosition).getNormalized();
-         ray.setDirection(direction);
-         
-         t_closest = INFINITY;
-         id_closest = 0;
-         body_closest = NULL;
-         for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
-            // blockIt->getAABB();
-            /*const AABB& blockAabb = blockIt->getAABB();
-            if (!intersects(blockAabb, ray, t)) {
-               continue;
-            }*/
-            for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
-               bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
-               
-               if (intersects && t < t_closest) {
-                  // body was shot by ray and currently closest to camera
-                  t_closest = t;
-                  id_closest = bodyIt->getID();
-                  body_closest = *bodyIt;
-               }
-            }
-         }
-         
-         //std::cout << (t_closest != INFINITY ? size_t(t_closest) : 0) << " ";
-
-         Coordinates c = {
-            x,
-            y
-         };
-         
-         if (!realIsIdentical(t_closest, INFINITY) && body_closest != NULL) {
-            BodyIntersectionInfo intersectionInfo = {
-               x,
-               y,
-               body_closest->getSystemID(),
-               t_closest
-            };
-            intersections.push_back(intersectionInfo);
-            localPixelIntersectionMap[c] = intersectionInfo;
-         }
-         
-         tBuffer[c] = t_closest;
-         idBuffer[c] = id_closest;
-      }
-      //std::cout << std::endl;
-   }
-   
-   // intersections synchronisieren
-   mpi::SendBuffer sendBuffer;
-   for (auto& info: intersections) {
-      sendBuffer << info.imageX << info.imageY << info.bodySystemID << info.t;
-   }
-   
-   std::vector<BodyIntersectionInfo> gatheredIntersections;
-   
-   std::map<walberla::id_t, bool> visibleBodyIDs;
-   
-   //std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> pixelIntersectionMap;
-   
-   mpi::RecvBuffer recvBuffer;
-   mpi::allGathervBuffer(sendBuffer, recvBuffer);
-   while (!recvBuffer.isEmpty()) {
-      BodyIntersectionInfo info;
-      
-      recvBuffer >> info.imageX;
-      recvBuffer >> info.imageY;
-      recvBuffer >> info.bodySystemID;
-      recvBuffer >> info.t;
-      
-      Coordinates c = {
-         info.imageX,
-         info.imageY
-      };
-      
-      /*if (pixelIntersectionMap.find(c) == pixelIntersectionMap.end()) {
-         // map didnt contain coordinates
-         pixelIntersectionMap.insert(std::make_pair(c, info));
-      } else {
-         // map already contains info at coordinates, check if current info is closer
-         BodyIntersectionInfo& existingInfo = pixelIntersectionMap.at(c);
-         if (existingInfo.t < info.t) {
-            pixelIntersectionMap[c] = info;
-         }
-      }*/
-      auto it = localPixelIntersectionMap.find(c);
-      if (it != localPixelIntersectionMap.end()) {
-         // there was a local hit at coordinate c
-         BodyIntersectionInfo& localInfo = localPixelIntersectionMap.at(c);
-         if (localInfo.t < info.t) {
-            localPixelIntersectionMap.erase(it);
-         }
-      }
-      
-      //gatheredIntersections.push_back(info);
-   }
-   
-   for (auto& info: localPixelIntersectionMap) {
-      visibleBodyIDs[info.second.bodySystemID] = true;
-   }
-   
-   WALBERLA_LOG_INFO("#particles visible: " << visibleBodyIDs.size());
-   //WALBERLA_LOG_INFO_ON_ROOT("#gatheredIntersections: " << gatheredIntersections.size());
-   
-#ifdef __APPLE__
-   mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
-   writeTBufferToFile(tBuffer, idBuffer, pixelsHorizontal, pixelsVertical, "/Users/ng/Desktop/walberla/tbuffer_" + std::to_string(rank) + ".ppm");
-#endif
-}
 
 void testRayTracing () {
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
@@ -286,7 +59,8 @@ void testRayTracing () {
    createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,-4,3), Vec3(2,2,2));
    //createSphere(*globalBodyStorage, *forest, storageID, 5, Vec3(1,0,0), real_t(0.1));
 
-   rayTrace(forest, storageID);
+   //Raytracer raytracer(forest, storageID, uint8_t(640), uint8_t(480), 49.13, Vec3(-5,0,0), Vec3(-1,0,0), Vec3(0,0,1));
+   //raytracer.rayTrace<BodyTypeTuple>(0);
 }
 
 int main( int argc, char ** argv )
@@ -356,6 +130,9 @@ int main( int argc, char ** argv )
    auto ccdID               = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
    auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTypeTuple, fcd::AnalyticCollideFunctor>(), "FCD");
    //! [AdditionalBlockData]
+   
+   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
+   Raytracer raytracer(forest, storageID, uint8_t(640), uint8_t(480), 49.13, Vec3(-25,10,10), Vec3(-1,10,10), Vec3(0,0,1));
 
    WALBERLA_LOG_INFO_ON_ROOT("*** INTEGRATOR ***");
    //! [Integrator]
@@ -439,7 +216,7 @@ int main( int argc, char ** argv )
    //! [PostProcessing]
    
    WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - START ***");
-   rayTrace(forest, storageID);
+   raytracer.rayTrace<BodyTypeTuple>(0);
    WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - END ***");
 
    // für einzelne sphere vtks: -> SphereVtkOutput.cpp
