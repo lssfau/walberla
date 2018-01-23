@@ -25,6 +25,7 @@
 #include <core/math/Vector3.h>
 #include <core/mpi/all.h>
 #include <core/config/Config.h>
+#include <boost/filesystem.hpp>
 #include "Ray.h"
 #include "Intersects.h"
 
@@ -205,10 +206,15 @@ inline void Raytracer::setTBufferOutputEnabled(const bool enabled) {
    tBufferOutputEnabled_ = enabled;
 }
 
-/*!\brief Enabled / disable outputting the tBuffer to a file in the specified directory.
+/*!\brief Enable / disable outputting the tBuffer to a file in the specified directory.
  * \param enabled Set to true / false to enable / disable tbuffer output.
  */
 inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
+   namespace fs = boost::filesystem;
+   
+   fs::path dir (path);
+   WALBERLA_CHECK(fs::exists(dir) && fs::is_directory(dir), "Tbuffer output directory is invalid.");
+   
    tBufferOutputDirectory_ = path;
 }
    

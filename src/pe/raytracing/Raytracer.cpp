@@ -19,7 +19,6 @@
 //======================================================================================================================
 
 #include "Raytracer.h"
-#include <boost/filesystem.hpp>
 
 using namespace walberla;
 
@@ -61,39 +60,27 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
  * \param config Config block for the raytracer.
  *
  * The config block has to contain image_x (int), image_y (int), fov_vertical (real, in degrees)
- * and tbuffer_output_directory (string) parameters. Additionally one block with x, y and z values (real)
- * for each of camera, lookAt and the upVector.
+ * and tbuffer_output_directory (string) parameters. Additionally a vector of reals
+ * for each of cameraPosition, lookAt and the upVector.
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                      const Config::BlockHandle& config) : forest_(forest), storageID_(storageID) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
+   
    pixelsHorizontal_ = config.getParameter<size_t>("image_x");
    pixelsVertical_ = config.getParameter<size_t>("image_y");
    fov_vertical_ = config.getParameter<real_t>("fov_vertical");
+   
    if (config.isDefined("tbuffer_output_directory")) {
       setTBufferOutputEnabled(true);
       setTBufferOutputDirectory(config.getParameter<std::string>("tbuffer_output_directory"));
       WALBERLA_LOG_INFO_ON_ROOT("t buffers will be written to " << getTBufferOutputDirectory() << ".");
    }
    
-   const Config::BlockHandle cameraConf = config.getBlock("camera");
-   WALBERLA_CHECK(cameraConf.isValid(), "No camera block found in config");
-   cameraPosition_ = Vec3(cameraConf.getParameter<real_t>("x"),
-                          cameraConf.getParameter<real_t>("y"),
-                          cameraConf.getParameter<real_t>("z"));
-   
-   const Config::BlockHandle lookAtConf = config.getBlock("lookAt");
-   WALBERLA_CHECK(lookAtConf.isValid(), "No lookAt block found in config");
-   lookAtPoint_ = Vec3(lookAtConf.getParameter<real_t>("x"),
-                       lookAtConf.getParameter<real_t>("y"),
-                       lookAtConf.getParameter<real_t>("z"));
-   
-   const Config::BlockHandle upVectorConf = config.getBlock("upVector");
-   WALBERLA_CHECK(upVectorConf.isValid(), "No upVector block found in config");
-   upVector_ = Vec3(upVectorConf.getParameter<real_t>("x"),
-                    upVectorConf.getParameter<real_t>("y"),
-                    upVectorConf.getParameter<real_t>("z"));
-   
+   cameraPosition_ = config.getParameter<Vec3>("cameraPosition");
+   lookAtPoint_ = config.getParameter<Vec3>("lookAt");
+   upVector_ = config.getParameter<Vec3>("upVector");
+
    setupView_();
 }
 
@@ -149,7 +136,6 @@ void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, Coordinat
    if (realIsIdentical(t_min, INFINITY)) t_min = 0;
    
    fs::path dir (getTBufferOutputDirectory());
-   WALBERLA_CHECK(fs::exists(dir) && fs::is_directory(dir), "Tbuffer output directory is invalid.");
    fs::path file (fileName);
    fs::path fullPath = dir / file;
    
