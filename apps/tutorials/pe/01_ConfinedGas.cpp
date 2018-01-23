@@ -78,6 +78,7 @@ int main( int argc, char ** argv )
    real_t radius           = real_c(0.4);
    real_t vMax             = real_c(1.0);
    int    simulationSteps  = 10;
+   size_t raytraceSkippedSteps = 10;
    real_t dt               = real_c(0.01);
    
    uint_t blocks_x = 2, blocks_y = 2, blocks_z = 2;
@@ -88,6 +89,8 @@ int main( int argc, char ** argv )
       
       spacing = confBlock.getParameter<real_t>("spacing", spacing);
       radius = confBlock.getParameter<real_t>("radius", radius);
+      simulationSteps = confBlock.getParameter<int>("simulationSteps", simulationSteps);
+      raytraceSkippedSteps = confBlock.getParameter<size_t>("raytraceSkippedSteps", raytraceSkippedSteps);
       blocks_x = confBlock.getParameter<uint_t>("blocks_x", blocks_x);
       blocks_y = confBlock.getParameter<uint_t>("blocks_y", blocks_y);
       blocks_z = confBlock.getParameter<uint_t>("blocks_z", blocks_z);
@@ -191,7 +194,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - START ***");
    //! [GameLoop]
-   for (int i=0; i < simulationSteps; ++i)
+   for (size_t i=0; i < simulationSteps; ++i)
    {
       if( i % 10 == 0 )
       {
@@ -200,6 +203,10 @@ int main( int argc, char ** argv )
 
       cr.timestep( real_c(dt) );
       syncNextNeighbors<BodyTypeTuple>(*forest, storageID);
+      
+      if (i%raytraceSkippedSteps == 0) {
+         raytracer.rayTrace<BodyTypeTuple>(i);
+      }
    }
    //! [GameLoop]
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
@@ -218,9 +225,9 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO( "mean velocity: " << meanVelocity );
    //! [PostProcessing]
    
-   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - START ***");
-   raytracer.rayTrace<BodyTypeTuple>(0);
-   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - END ***");
+   //WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - START ***");
+   //raytracer.rayTrace<BodyTypeTuple>(0);
+   //WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - END ***");
 
    // für einzelne sphere vtks: -> SphereVtkOutput.cpp
    

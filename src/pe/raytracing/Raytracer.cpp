@@ -106,9 +106,9 @@ void Raytracer::setupView_() {
 /*!\brief Writes the tBuffer to a file in the tBuffer output directory.
  * \param tBuffer Buffer with t values as generated in rayTrace(...).
  */
-void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer) const {
+void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const size_t timestep) const {
    mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
-   std::string fileName = "tbuffer_" + std::to_string(rank) + ".ppm";
+   std::string fileName = "tbuffer_" + std::to_string(timestep) + "+" + std::to_string(rank) + ".ppm";
    writeTBufferToFile(tBuffer, fileName);
 }
 

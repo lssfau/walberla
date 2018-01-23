@@ -26,8 +26,13 @@
 #include <core/mpi/all.h>
 #include <core/config/Config.h>
 #include <boost/filesystem.hpp>
+#include <core/timing/TimingTree.h>
 #include "Ray.h"
 #include "Intersects.h"
+
+using namespace walberla;
+using namespace walberla::pe;
+using namespace walberla::timing;
 
 namespace walberla {
 namespace pe {
@@ -123,7 +128,7 @@ public:
    void rayTrace(const size_t timestep) const;
    
 private:
-   void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer) const;
+   void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const size_t timestep) const;
    void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const std::string& fileName) const;
    //@}
 };
@@ -224,17 +229,18 @@ inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
  */
 template <typename BodyTypeTuple>
 void Raytracer::rayTrace(const size_t timestep) const {
+   WcTimingPool tp;
    std::map<Coordinates, real_t, CoordinatesComparator> tBuffer; // t values for each pixel
    std::map<Coordinates, walberla::id_t, CoordinatesComparator> idBuffer; // ids of the intersected body for each pixel
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
-   
-   std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap;
+   std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap; // contains intersection info indexed by the coordinates of the pixel which was hit
    
    real_t t, t_closest;
    walberla::id_t id_closest;
    RigidBody* body_closest = NULL;
    Ray ray(cameraPosition_, Vec3(1,0,0));
    IntersectsFunctor func(ray, t);
+   tp["Raytracing"].start();
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
          //WALBERLA_LOG_INFO(x << "/" << y);
@@ -286,6 +292,9 @@ void Raytracer::rayTrace(const size_t timestep) const {
       }
       //std::cout << std::endl;
    }
+   tp["Raytracing"].end();
+   
+   tp["Reduction"].start();
    
    // intersections synchronisieren
    mpi::SendBuffer sendBuffer;
@@ -340,11 +349,22 @@ void Raytracer::rayTrace(const size_t timestep) const {
       visibleBodyIDs[info.second.bodySystemID] = true;
    }
    
+   tp["Reduction"].end();
+   
    WALBERLA_LOG_INFO("#particles visible: " << visibleBodyIDs.size());
-   //WALBERLA_LOG_INFO_ON_ROOT("#gatheredIntersections: " << gatheredIntersections.size());
+   WALBERLA_LOG_INFO_ON_ROOT("#gatheredIntersections: " << gatheredIntersections.size());
+   
+   auto tpReducedTotal = tp.getReduced(WcTimingPool::REDUCE_TOTAL);
+   auto tpReducedMax = tp.getReduced(WcTimingPool::REDUCE_MAX);
+   WALBERLA_ROOT_SECTION() {
+      WALBERLA_LOG_INFO("Timing total:");
+      tpReducedTotal->print(std::cout);
+      WALBERLA_LOG_INFO("Timing max.:");
+      tpReducedMax->print(std::cout);
+   }
    
    if (getTBufferOutputEnabled()) {
-      writeTBufferToFile(tBuffer);
+      writeTBufferToFile(tBuffer, timestep);
    }
 }
 
