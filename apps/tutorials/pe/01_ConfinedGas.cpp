@@ -77,7 +77,7 @@ int main( int argc, char ** argv )
    real_t spacing          = real_c(1.0);
    real_t radius           = real_c(0.4);
    real_t vMax             = real_c(1.0);
-   int    simulationSteps  = 10;
+   size_t    simulationSteps  = 10;
    size_t raytraceSkippedSteps = 10;
    real_t dt               = real_c(0.01);
    
@@ -89,7 +89,7 @@ int main( int argc, char ** argv )
       
       spacing = confBlock.getParameter<real_t>("spacing", spacing);
       radius = confBlock.getParameter<real_t>("radius", radius);
-      simulationSteps = confBlock.getParameter<int>("simulationSteps", simulationSteps);
+      simulationSteps = confBlock.getParameter<size_t>("simulationSteps", simulationSteps);
       raytraceSkippedSteps = confBlock.getParameter<size_t>("raytraceSkippedSteps", raytraceSkippedSteps);
       blocks_x = confBlock.getParameter<uint_t>("blocks_x", blocks_x);
       blocks_y = confBlock.getParameter<uint_t>("blocks_y", blocks_y);

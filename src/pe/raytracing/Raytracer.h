@@ -111,7 +111,7 @@ public:
    inline const Vec3& getCameraPosition() const;
    inline const Vec3& getLookAtPoint() const;
    inline const Vec3& getUpVector() const;
-   inline const bool getTBufferOutputEnabled() const;
+   inline bool getTBufferOutputEnabled() const;
    inline const std::string& getTBufferOutputDirectory() const;
    //@}
 
@@ -192,7 +192,7 @@ inline const Vec3& Raytracer::getUpVector() const {
  *
  * \return True if tbuffer output enabled, otherwise false.
  */
-inline const bool Raytracer::getTBufferOutputEnabled() const {
+inline bool Raytracer::getTBufferOutputEnabled() const {
    return tBufferOutputEnabled_;
 }
 
