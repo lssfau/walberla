@@ -41,10 +41,33 @@ void createWithNeighborhood(const BlockForest& bf, const BlockDataID storageID, 
       BodyStorage const & localStorage  = (*storage)[StorageType::LOCAL];
       BodyStorage const & shadowStorage = (*storage)[StorageType::SHADOW];
       ic.insert( InfoCollection::value_type(block->getId(), BlockInfo(localStorage.size(), shadowStorage.size())) );
-
       for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
       {
          bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(block->getId(), BlockInfo(localStorage.size(), shadowStorage.size()));
+      }
+
+      for (uint_t branchID = 0; branchID < 8; ++branchID)
+      {
+         const auto childID   = BlockID(block->getId(), branchID);
+         const auto childAABB = bf.getAABBFromBlockId(childID);
+         uint_t local  = 0;
+         for (auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt)
+         {
+            if (childAABB.contains(bodyIt->getPosition()))
+               ++local;
+         }
+         uint_t shadow  = 0;
+         for (auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); ++bodyIt)
+         {
+            if (childAABB.contains(bodyIt->getPosition()))
+               ++shadow;
+         }
+         ic.insert( InfoCollection::value_type(childID, BlockInfo(local, shadow)) );
+
+         for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
+         {
+            bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(childID, BlockInfo(local, shadow));
+         }
       }
    }
 

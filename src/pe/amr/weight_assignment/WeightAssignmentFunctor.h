@@ -50,9 +50,9 @@ public:
 
          if (block->sourceBlockIsLarger())
          {
-            auto infoIt = ic_->find( block->getId().getFatherId() );
+            auto infoIt = ic_->find( block->getId()/*.getFatherId()*/ );
             WALBERLA_ASSERT_UNEQUAL( infoIt, ic_->end() );
-            it->second = PhantomBlockWeight( double_c(infoIt->second.numberOfLocalBodies) / double_c(8) + baseWeight );
+            it->second = PhantomBlockWeight( double_c(infoIt->second.numberOfLocalBodies) + baseWeight );
             continue;
          }
 
