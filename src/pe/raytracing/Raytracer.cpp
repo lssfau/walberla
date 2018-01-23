@@ -40,7 +40,7 @@ namespace raytracing {
  * \param lookAtPoint Point the camera looks at in the global world frame.
  * \param upVector Vector indicating the upwards direction of the camera.
  */
-Raytracer::Raytracer(const shared_ptr<BlockStorage>& forest, BlockDataID storageID,
+Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                      uint8_t pixelsHorizontal, uint8_t pixelsVertical,
                      real_t fov_vertical,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector)
@@ -62,27 +62,27 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage>& forest, BlockDataID storage
  * parameters, additionally one block with x, y and z values (real) for each of camera,
  * lookAt and the upVector.
  */
-Raytracer::Raytracer(const shared_ptr<BlockStorage> & forest, BlockDataID storageID,
+Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                      const Config::BlockHandle& config) : forest_(forest), storageID_(storageID) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
    pixelsHorizontal_ = config.getParameter<uint8_t>("image_x");
    pixelsVertical_ = config.getParameter<uint8_t>("image_y");
    fov_vertical_ = config.getParameter<real_t>("fov_vertical");
    
-   WALBERLA_CHECK(config.isDefined("camera"), "No camera block found in config");
    const Config::BlockHandle cameraConf = config.getBlock("camera");
+   WALBERLA_CHECK(cameraConf.isValid(), "No camera block found in config");
    cameraPosition_ = Vec3(cameraConf.getParameter<real_t>("x"),
                           cameraConf.getParameter<real_t>("y"),
                           cameraConf.getParameter<real_t>("z"));
    
-   WALBERLA_CHECK(config.isDefined("lookAt"), "No lookAt block found in config");
    const Config::BlockHandle lookAtConf = config.getBlock("lookAt");
+   WALBERLA_CHECK(lookAtConf.isValid(), "No lookAt block found in config");
    lookAtPoint_ = Vec3(lookAtConf.getParameter<real_t>("x"),
                        lookAtConf.getParameter<real_t>("y"),
                        lookAtConf.getParameter<real_t>("z"));
    
-   WALBERLA_CHECK(config.isDefined("upVector"), "No upVector block found in config");
    const Config::BlockHandle upVectorConf = config.getBlock("upVector");
+   WALBERLA_CHECK(upVectorConf.isValid(), "No upVector block found in config");
    upVector_ = Vec3(upVectorConf.getParameter<real_t>("x"),
                     upVectorConf.getParameter<real_t>("y"),
                     upVectorConf.getParameter<real_t>("z"));

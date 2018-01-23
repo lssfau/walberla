@@ -60,18 +60,18 @@ class Raytracer {
 public:
    /*!\name Constructors */
    //@{
-   explicit Raytracer(const shared_ptr<BlockStorage> & forest, BlockDataID storageID,
+   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                       uint8_t pixelsHorizontal, uint8_t pixelsVertical,
                       real_t fov_vertical,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector);
-   explicit Raytracer(const shared_ptr<BlockStorage> & forest, BlockDataID storageID,
+   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                       const Config::BlockHandle& config);
    //@}
 
 private:
    /*!\name Member variables */
    //@{
-   const shared_ptr<BlockStorage>& forest_; //!< The BlockForest the raytracer operates on.
+   const shared_ptr<BlockStorage> forest_; //!< The BlockForest the raytracer operates on.
    BlockDataID storageID_;    /*!< The storage ID of the block data storage the raytracer operates
                                on.*/
    uint8_t pixelsHorizontal_; //!< The horizontal amount of pixels of the generated image.
