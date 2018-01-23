@@ -61,7 +61,7 @@ public:
    /*!\name Constructors */
    //@{
    explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
-                      uint8_t pixelsHorizontal, uint8_t pixelsVertical,
+                      size_t pixelsHorizontal, size_t pixelsVertical,
                       real_t fov_vertical,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector);
    explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
@@ -74,13 +74,15 @@ private:
    const shared_ptr<BlockStorage> forest_; //!< The BlockForest the raytracer operates on.
    BlockDataID storageID_;    /*!< The storage ID of the block data storage the raytracer operates
                                on.*/
-   uint8_t pixelsHorizontal_; //!< The horizontal amount of pixels of the generated image.
-   uint8_t pixelsVertical_;   //!< The vertical amount of pixels of the generated image.
+   size_t pixelsHorizontal_;  //!< The horizontal amount of pixels of the generated image.
+   size_t pixelsVertical_;    //!< The vertical amount of pixels of the generated image.
    real_t fov_vertical_;      //!< The vertical field-of-view of the camera.
    Vec3 cameraPosition_;      //!< The position of the camera in the global world frame.
    Vec3 lookAtPoint_;         /*!< The point the camera looks at in the global world frame,
                                marks the center of the view plane.*/
    Vec3 upVector_;            //!< The vector indicating the upwards direction of the camera.
+   bool tBufferOutputEnabled_; //!< Enable / disable dumping the tbuffer to a file
+   std::string tBufferOutputDirectory_; //!< Path to the tbuffer output directory
    //@}
    
    Vec3 n; // normal vector of viewing plane
@@ -97,19 +99,31 @@ private:
 public:
    /*!\name Get functions */
    //@{
-   inline uint8_t       getPixelsHorizontal()   const;
-   inline uint8_t       getPixelsVertical()     const;
-   inline real_t        getFOVVertical()        const;
-   inline const Vec3&   getCameraPosition()     const;
-   inline const Vec3&   getLookAtPoint()        const;
-   inline const Vec3&   getUpVector()           const;
+   inline size_t getPixelsHorizontal() const;
+   inline size_t getPixelsVertical() const;
+   inline real_t getFOVVertical() const;
+   inline const Vec3& getCameraPosition() const;
+   inline const Vec3& getLookAtPoint() const;
+   inline const Vec3& getUpVector() const;
+   inline const bool getTBufferOutputEnabled() const;
+   inline const std::string& getTBufferOutputDirectory() const;
+   //@}
+
+   /*!\name Set functions */
+   //@{
+   inline void setTBufferOutputEnabled(const bool enabled);
+   inline void setTBufferOutputDirectory(const std::string& path);
    //@}
    
    /*!\name Functions */
    //@{
    void setupView_();
    template <typename BodyTypeTuple>
-   void rayTrace(const size_t timestep)   const;
+   void rayTrace(const size_t timestep) const;
+   
+private:
+   void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer) const;
+   void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const std::string& fileName) const;
    //@}
 };
    
@@ -117,7 +131,7 @@ public:
  *
  * \return The horizontal amount of pixels of the generated image.
  */
-inline uint8_t Raytracer::getPixelsHorizontal() const {
+inline size_t Raytracer::getPixelsHorizontal() const {
    return pixelsHorizontal_;
 }
 
@@ -125,7 +139,7 @@ inline uint8_t Raytracer::getPixelsHorizontal() const {
  *
  * \return The vertical amount of pixels of the generated image.
  */
-inline uint8_t Raytracer::getPixelsVertical() const {
+inline size_t Raytracer::getPixelsVertical() const {
    return pixelsVertical_;
 }
 
@@ -166,6 +180,36 @@ inline const Vec3& Raytracer::getLookAtPoint() const {
  */
 inline const Vec3& Raytracer::getUpVector() const {
    return upVector_;
+}
+   
+/*!\brief Returns true if tbuffer output to a file is enabled.
+ *
+ * \return True if tbuffer output enabled, otherwise false.
+ */
+inline const bool Raytracer::getTBufferOutputEnabled() const {
+   return tBufferOutputEnabled_;
+}
+
+/*!\brief Returns the directory where the tbuffer output file will be saved in.
+ *
+ * \return Path to the tbuffer output directory.
+ */
+inline const std::string& Raytracer::getTBufferOutputDirectory() const {
+   return tBufferOutputDirectory_;
+}
+   
+/*!\brief Enabled / disable outputting the tBuffer to a file in the specified directory.
+ * \param enabled Set to true / false to enable / disable tbuffer output.
+ */
+inline void Raytracer::setTBufferOutputEnabled(const bool enabled) {
+   tBufferOutputEnabled_ = enabled;
+}
+
+/*!\brief Enabled / disable outputting the tBuffer to a file in the specified directory.
+ * \param enabled Set to true / false to enable / disable tbuffer output.
+ */
+inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
+   tBufferOutputDirectory_ = path;
 }
    
 /*!\brief Does one raytracing step.
@@ -293,10 +337,9 @@ void Raytracer::rayTrace(const size_t timestep) const {
    WALBERLA_LOG_INFO("#particles visible: " << visibleBodyIDs.size());
    //WALBERLA_LOG_INFO_ON_ROOT("#gatheredIntersections: " << gatheredIntersections.size());
    
-#ifdef __APPLE__
-   //mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
-   //writeTBufferToFile(tBuffer, idBuffer, pixelsHorizontal_, pixelsVertical_, "/Users/ng/Desktop/walberla/tbuffer_" + std::to_string(rank) + ".ppm");
-#endif
+   if (getTBufferOutputEnabled()) {
+      writeTBufferToFile(tBuffer);
+   }
 }
 
 }

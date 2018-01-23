@@ -19,6 +19,7 @@
 //======================================================================================================================
 
 #include "Raytracer.h"
+#include <boost/filesystem.hpp>
 
 using namespace walberla;
 
@@ -41,13 +42,14 @@ namespace raytracing {
  * \param upVector Vector indicating the upwards direction of the camera.
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
-                     uint8_t pixelsHorizontal, uint8_t pixelsVertical,
+                     size_t pixelsHorizontal, size_t pixelsVertical,
                      real_t fov_vertical,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector)
    : forest_(forest), storageID_(storageID),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
    fov_vertical_(fov_vertical),
-   cameraPosition_(cameraPosition), lookAtPoint_(lookAtPoint), upVector_(upVector)
+   cameraPosition_(cameraPosition), lookAtPoint_(lookAtPoint), upVector_(upVector),
+   tBufferOutputEnabled_(false)
 {
    setupView_();
 }
@@ -58,16 +60,21 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
  * \param storageID Storage ID of the block data storage the raytracer operates on.
  * \param config Config block for the raytracer.
  *
- * The config block has to contain image_x (int), image_y (int) and fov_vertical (real, in degrees)
- * parameters, additionally one block with x, y and z values (real) for each of camera,
- * lookAt and the upVector.
+ * The config block has to contain image_x (int), image_y (int), fov_vertical (real, in degrees)
+ * and tbuffer_output_directory (string) parameters. Additionally one block with x, y and z values (real)
+ * for each of camera, lookAt and the upVector.
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                      const Config::BlockHandle& config) : forest_(forest), storageID_(storageID) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
-   pixelsHorizontal_ = config.getParameter<uint8_t>("image_x");
-   pixelsVertical_ = config.getParameter<uint8_t>("image_y");
+   pixelsHorizontal_ = config.getParameter<size_t>("image_x");
+   pixelsVertical_ = config.getParameter<size_t>("image_y");
    fov_vertical_ = config.getParameter<real_t>("fov_vertical");
+   if (config.isDefined("tbuffer_output_directory")) {
+      setTBufferOutputEnabled(true);
+      setTBufferOutputDirectory(config.getParameter<std::string>("tbuffer_output_directory"));
+      WALBERLA_LOG_INFO_ON_ROOT("t buffers will be written to " << getTBufferOutputDirectory() << ".");
+   }
    
    const Config::BlockHandle cameraConf = config.getBlock("camera");
    WALBERLA_CHECK(cameraConf.isValid(), "No camera block found in config");
@@ -107,6 +114,62 @@ void Raytracer::setupView_() {
    
    pixelWidth = viewingPlaneWidth / real_c(pixelsHorizontal_);
    pixelHeight = viewingPlaneHeight / real_c(pixelsVertical_);
+}
+
+/*!\brief Writes the tBuffer to a file in the tBuffer output directory.
+ * \param tBuffer Buffer with t values as generated in rayTrace(...).
+ */
+void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer) const {
+   mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
+   std::string fileName = "tbuffer_" + std::to_string(rank) + ".ppm";
+   writeTBufferToFile(tBuffer, fileName);
+}
+
+/*!\brief Writes the tBuffer to a file in the tBuffer output directory.
+ * \param tBuffer Buffer with t values as generated in rayTrace(...).
+ * \param fileName Name of the output file.
+ */
+void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const std::string& fileName) const {
+   namespace fs = boost::filesystem;
+   
+   real_t t_max = 1;
+   real_t t_min = INFINITY;
+   for (size_t x = 0; x < pixelsHorizontal_; x++) {
+      for (size_t y = 0; y < pixelsVertical_; y++) {
+         Coordinates c = {x, y};
+         real_t t = tBuffer.at(c);
+         if (t > t_max && !realIsIdentical(t, INFINITY)) {
+            t_max = t;
+         }
+         if (t < t_min) {
+            t_min = t;
+         }
+      }
+   }
+   if (realIsIdentical(t_min, INFINITY)) t_min = 0;
+   
+   fs::path dir (getTBufferOutputDirectory());
+   WALBERLA_CHECK(fs::exists(dir) && fs::is_directory(dir), "Tbuffer output directory is invalid.");
+   fs::path file (fileName);
+   fs::path fullPath = dir / file;
+   
+   std::ofstream ofs(fullPath.string<std::string>(), std::ios::out | std::ios::binary);
+   ofs << "P6\n" << pixelsHorizontal_ << " " << pixelsVertical_ << "\n255\n";
+   for (size_t y = pixelsVertical_-1; y > 0; y--) {
+      for (size_t x = 0; x < pixelsHorizontal_; x++) {
+         Coordinates c = {x, y};
+         char r = 0, g = 0, b = 0;
+         real_t t = tBuffer.at(c);
+         if (realIsIdentical(t, INFINITY)) {
+            r = g = b = (char)255;
+         } else {
+            r = g = b = (char)(200 * ((t-t_min)/(t_max-t_min)));
+         }
+         ofs << r << g << b;
+      }
+   }
+   
+   ofs.close();
 }
 
 }
