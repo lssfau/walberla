@@ -132,7 +132,10 @@ int main( int argc, char ** argv )
    //! [AdditionalBlockData]
    
    WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
-   Raytracer raytracer(forest, storageID, uint8_t(640), uint8_t(480), 49.13, Vec3(-25,10,10), Vec3(-1,10,10), Vec3(0,0,1));
+   if (cfg == NULL) {
+      WALBERLA_ABORT("raytracer needs a working config");
+   }
+   Raytracer raytracer(forest, storageID, cfg->getBlock("raytracing"));
 
    WALBERLA_LOG_INFO_ON_ROOT("*** INTEGRATOR ***");
    //! [Integrator]
