@@ -253,10 +253,12 @@ void Raytracer::rayTrace(const size_t timestep) const {
          body_closest = NULL;
          for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
             // blockIt->getAABB();
-            /*const AABB& blockAabb = blockIt->getAABB();
-             if (!intersects(blockAabb, ray, t)) {
-             continue;
-             }*/
+#ifndef DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK
+            const AABB& blockAabb = blockIt->getAABB();
+            if (!intersects(blockAabb, ray, t)) {
+               continue;
+            }
+#endif
             for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
                bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
                
