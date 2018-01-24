@@ -218,7 +218,7 @@ inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
    namespace fs = boost::filesystem;
    
    fs::path dir (path);
-   WALBERLA_CHECK(fs::exists(dir) && fs::is_directory(dir), "Tbuffer output directory is invalid.");
+   WALBERLA_CHECK(fs::exists(dir) && fs::is_directory(dir), "Tbuffer output directory " << path << " is invalid.");
    
    tBufferOutputDirectory_ = path;
 }
