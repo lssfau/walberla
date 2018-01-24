@@ -356,10 +356,7 @@ void Raytracer::rayTrace(const size_t timestep) const {
    }
    
    std::vector<BodyIntersectionInfo> gatheredIntersections;
-   
-   std::set<walberla::id_t> visibleBodyIDs;
-   
-   //std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> pixelIntersectionMap;
+   std::unordered_set<walberla::id_t> visibleBodyIDs;
    
    mpi::RecvBuffer recvBuffer;
    mpi::allGathervBuffer(sendBuffer, recvBuffer);
@@ -376,21 +373,11 @@ void Raytracer::rayTrace(const size_t timestep) const {
          info.imageY
       };
       
-      /*if (pixelIntersectionMap.find(c) == pixelIntersectionMap.end()) {
-       // map didnt contain coordinates
-       pixelIntersectionMap.insert(std::make_pair(c, info));
-       } else {
-       // map already contains info at coordinates, check if current info is closer
-       BodyIntersectionInfo& existingInfo = pixelIntersectionMap.at(c);
-       if (existingInfo.t < info.t) {
-       pixelIntersectionMap[c] = info;
-       }
-       }*/
       auto it = localPixelIntersectionMap.find(c);
       if (it != localPixelIntersectionMap.end()) {
          // there was a local hit at coordinate c
          BodyIntersectionInfo& localInfo = localPixelIntersectionMap.at(c);
-         if (localInfo.t < info.t) {
+         if (localInfo.t > info.t) {
             localPixelIntersectionMap.erase(it);
          }
       }
