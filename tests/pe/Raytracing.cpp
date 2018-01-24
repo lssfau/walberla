@@ -1,3 +1,4 @@
+#include <pe/basic.h>
 #include "pe/utility/BodyCast.h"
 
 #include "pe/Materials.h"
@@ -15,14 +16,13 @@
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
 
-#include <pe/raytracing/Ray.h>
-#include <pe/raytracing/Intersects.h>
+#include <pe/raytracing/Raytracer.h>
 
 using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::pe::raytracing;
 
-typedef boost::tuple<Box, Capsule, Plane, Sphere> BodyTuple ;
+typedef boost::tuple<Box, Plane, Sphere> BodyTuple ;
 
 void SphereIntersectsTest()
 {
@@ -114,6 +114,56 @@ void BoxIntersectsTest() {
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(2.67157), real_t(1e-4));
 }
 
+void RaytracerTest() {
+   WALBERLA_LOG_INFO("Raytracer");
+   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,-5,-5,10,5,5), Vec3(1,1,1), Vec3(false, false, false));
+   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+   
+   Raytracer raytracer(forest, storageID, globalBodyStorage,
+                       size_t(640), size_t(480),
+                       49.13,
+                       Vec3(-5,0,0), Vec3(-1,0,0), Vec3(0,0,1));
+   
+   MaterialID iron = Material::find("iron");
+   Plane pl1(1, 1, Vec3(2, 0, 0), Vec3(1, 0, 0), real_t(1.0), iron);
+   
+   PlaneID xNegPlane = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(5,0,0), iron);
+   // xNegPlane obstructs only the top left sphere and intersects some objects
+   WALBERLA_CHECK(xNegPlane != NULL);
+   WALBERLA_CHECK(!raytracer.isBodyInvisible(xNegPlane), "Body invisible but should be visible.");
+   raytracer.setBodyInvisible(xNegPlane);
+   WALBERLA_CHECK(raytracer.isBodyInvisible(xNegPlane), "Body visible but should be invisible.");
+   raytracer.setBodyVisible(xNegPlane);
+   WALBERLA_CHECK(!raytracer.isBodyInvisible(xNegPlane), "Body invisible but should be visible.");
+   raytracer.setBodyInvisible(xNegPlane);
+
+   PlaneID xNegPlaneClose = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(1,0,0), iron);
+   raytracer.setBodyInvisible(xNegPlaneClose); // xNegPlaneClose would obstruct all objects
+   
+   createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,5,0), iron); // left wall
+   createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,-5,0), iron); // right wall
+   createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,-5), iron); // floor
+   createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,5), iron); // ceiling
+   createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(10,0,0), iron); // back wall
+   PlaneID frontWall = createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(0,0,0), iron); // front wall
+   raytracer.setBodyInvisible(frontWall);
+   
+   createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,4.5,4.5), real_t(0.5));
+   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(3.5,-2,0), real_t(1));
+   SphereID sp1 = createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,2,0), real_t(1));
+   BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,0,0), Vec3(2,4,3));
+   box->rotate(0,math::M_PI/4,math::M_PI/4);
+   createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,-4,3), Vec3(2,2,2));
+   
+   raytracer.setBodyInvisible(sp1);
+   
+   raytracer.setTBufferOutputDirectory("/Users/ng/Desktop/walberla");
+   raytracer.setTBufferOutputEnabled(true);
+   
+   raytracer.rayTrace<BodyTuple>(0);
+}
+
 int main( int argc, char** argv )
 {
    walberla::debug::enterTestMode();
@@ -121,9 +171,10 @@ int main( int argc, char** argv )
    
    SetBodyTypeIDs<BodyTuple>::execute();
    
-   SphereIntersectsTest();
-   PlaneIntersectsTest();
-   BoxIntersectsTest();
+   //SphereIntersectsTest();
+   //PlaneIntersectsTest();
+   //BoxIntersectsTest();
+   RaytracerTest();
    
    return EXIT_SUCCESS;
 }

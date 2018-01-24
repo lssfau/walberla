@@ -138,7 +138,7 @@ int main( int argc, char ** argv )
    if (cfg == NULL) {
       WALBERLA_ABORT("raytracer needs a working config");
    }
-   Raytracer raytracer(forest, storageID, cfg->getBlock("raytracing"));
+   Raytracer raytracer(forest, storageID, globalBodyStorage, cfg->getBlock("raytracing"));
 
    WALBERLA_LOG_INFO_ON_ROOT("*** INTEGRATOR ***");
    //! [Integrator]
@@ -165,13 +165,16 @@ int main( int argc, char ** argv )
    auto simulationDomain = forest->getDomain();
    auto generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
    //! [Planes]
-   createPlane(*globalBodyStorage, 0, Vec3(1,0,0), simulationDomain.minCorner(), material );
-   createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), simulationDomain.maxCorner(), material );
+   PlaneID xPosPlane = createPlane(*globalBodyStorage, 0, Vec3(1,0,0), simulationDomain.minCorner(), material );
+   PlaneID xNegPlane = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), simulationDomain.maxCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,1,0), simulationDomain.minCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), simulationDomain.maxCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,0,1), simulationDomain.minCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), simulationDomain.maxCorner(), material );
    //! [Planes]
+   
+   raytracer.setBodyInvisible(xNegPlane);
+   raytracer.setBodyInvisible(xPosPlane);
 
    //! [Gas]
    uint_t numParticles = uint_c(0);

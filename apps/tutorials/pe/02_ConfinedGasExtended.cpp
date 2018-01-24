@@ -149,7 +149,7 @@ int main( int argc, char ** argv )
    if (cfg == NULL) {
       WALBERLA_ABORT("raytracer needs a working config");
    }
-   Raytracer raytracer(forest, storageID, cfg->getBlock("Raytracing"));
+   Raytracer raytracer(forest, storageID, globalBodyStorage, cfg->getBlock("Raytracing"));
    
    WALBERLA_LOG_INFO_ON_ROOT("*** INTEGRATOR ***");
    cr::HCSITS cr(globalBodyStorage, forest, storageID, ccdID, fcdID);

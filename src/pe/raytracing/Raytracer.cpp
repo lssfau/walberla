@@ -40,11 +40,11 @@ namespace raytracing {
  * \param lookAtPoint Point the camera looks at in the global world frame.
  * \param upVector Vector indicating the upwards direction of the camera.
  */
-Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID, const shared_ptr<BodyStorage> globalBodyStorage,
                      size_t pixelsHorizontal, size_t pixelsVertical,
                      real_t fov_vertical,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector)
-   : forest_(forest), storageID_(storageID),
+   : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
    fov_vertical_(fov_vertical),
    cameraPosition_(cameraPosition), lookAtPoint_(lookAtPoint), upVector_(upVector),
@@ -63,8 +63,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
  * and tbuffer_output_directory (string) parameters. Additionally a vector of reals
  * for each of cameraPosition, lookAt and the upVector.
  */
-Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
-                     const Config::BlockHandle& config) : forest_(forest), storageID_(storageID) {
+Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID, const shared_ptr<BodyStorage> globalBodyStorage,
+                     const Config::BlockHandle& config) : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
    
    pixelsHorizontal_ = config.getParameter<size_t>("image_x");
@@ -149,7 +149,7 @@ void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, Coordinat
          if (realIsIdentical(t, INFINITY)) {
             r = g = b = (char)255;
          } else {
-            r = g = b = (char)(200 * ((t-t_min)/(t_max-t_min)));
+            r = g = b = (char)(240 * ((t-t_min)/(t_max-t_min)));
          }
          ofs << r << g << b;
       }

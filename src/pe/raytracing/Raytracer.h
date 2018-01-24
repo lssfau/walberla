@@ -66,11 +66,11 @@ class Raytracer {
 public:
    /*!\name Constructors */
    //@{
-   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID, const shared_ptr<BodyStorage> globalBodyStorage,
                       size_t pixelsHorizontal, size_t pixelsVertical,
                       real_t fov_vertical,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector);
-   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID, const shared_ptr<BodyStorage> globalBodyStorage,
                       const Config::BlockHandle& config);
    //@}
 
@@ -80,6 +80,8 @@ private:
    const shared_ptr<BlockStorage> forest_; //!< The BlockForest the raytracer operates on.
    BlockDataID storageID_;    /*!< The storage ID of the block data storage the raytracer operates
                                on.*/
+   const shared_ptr<BodyStorage> globalBodyStorage_; //!< The global body storage the raytracer operates on.
+   
    size_t pixelsHorizontal_;  //!< The horizontal amount of pixels of the generated image.
    size_t pixelsVertical_;    //!< The vertical amount of pixels of the generated image.
    real_t fov_vertical_;      //!< The vertical field-of-view of the camera.
@@ -89,6 +91,8 @@ private:
    Vec3 upVector_;            //!< The vector indicating the upwards direction of the camera.
    bool tBufferOutputEnabled_; //!< Enable / disable dumping the tbuffer to a file
    std::string tBufferOutputDirectory_; //!< Path to the tbuffer output directory
+   std::set<walberla::id_t> invisibleBodyIDs_;  //!< The set for invisible body IDs.
+   // std::set is used here because for a small number of elements it is often faster than std::unordered_set
    //@}
    
    Vec3 n; // normal vector of viewing plane
@@ -113,12 +117,15 @@ public:
    inline const Vec3& getUpVector() const;
    inline bool getTBufferOutputEnabled() const;
    inline const std::string& getTBufferOutputDirectory() const;
+   inline bool isBodyInvisible(BodyID body) const;
    //@}
 
    /*!\name Set functions */
    //@{
    inline void setTBufferOutputEnabled(const bool enabled);
    inline void setTBufferOutputDirectory(const std::string& path);
+   inline void setBodyInvisible(BodyID body);
+   inline void setBodyVisible(BodyID body);
    //@}
    
    /*!\name Functions */
@@ -204,6 +211,14 @@ inline const std::string& Raytracer::getTBufferOutputDirectory() const {
    return tBufferOutputDirectory_;
 }
    
+/*!\brief Returns if the specified body is invisible.
+ *
+ * \return True if body invisible, false otherwise.
+ */
+inline bool Raytracer::isBodyInvisible(BodyID body) const {
+   return invisibleBodyIDs_.find(body->getSystemID()) != invisibleBodyIDs_.end();
+}
+   
 /*!\brief Enabled / disable outputting the tBuffer to a file in the specified directory.
  * \param enabled Set to true / false to enable / disable tbuffer output.
  */
@@ -221,6 +236,20 @@ inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
    WALBERLA_CHECK(fs::exists(dir) && fs::is_directory(dir), "Tbuffer output directory " << path << " is invalid.");
    
    tBufferOutputDirectory_ = path;
+}
+   
+/*!\brief Mark the specified body as invisible for the raytracing algorithm.
+ * \param body Body to set invisible.
+ */
+inline void Raytracer::setBodyInvisible(BodyID body) {
+   invisibleBodyIDs_.insert(body->getSystemID());
+}
+   
+/*!\brief Mark the specified body as visible for the raytracing algorithm.
+ * \param body Body to set invisible.
+ */
+inline void Raytracer::setBodyVisible(BodyID body) {
+   invisibleBodyIDs_.erase(body->getSystemID());
 }
    
 /*!\brief Does one raytracing step.
@@ -252,7 +281,6 @@ void Raytracer::rayTrace(const size_t timestep) const {
          id_closest = 0;
          body_closest = NULL;
          for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
-            // blockIt->getAABB();
 #ifndef DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK
             const AABB& blockAabb = blockIt->getAABB();
             if (!intersects(blockAabb, ray, t)) {
@@ -260,6 +288,29 @@ void Raytracer::rayTrace(const size_t timestep) const {
             }
 #endif
             for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
+               if (isBodyInvisible(*bodyIt)) {
+                  continue;
+               }
+               
+               bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
+               
+               if (intersects && t < t_closest) {
+                  // body was shot by ray and currently closest to camera
+                  t_closest = t;
+                  id_closest = bodyIt->getID();
+                  body_closest = *bodyIt;
+               }
+            }
+         }
+         
+         // only iterate over global body storage in one process.
+         // optimization required, e.g. split up global bodies over all processes.
+         WALBERLA_ROOT_SECTION() {
+            for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt ) {
+               if (isBodyInvisible(*bodyIt)) {
+                  continue;
+               }
+               
                bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
                
                if (intersects && t < t_closest) {
@@ -306,7 +357,7 @@ void Raytracer::rayTrace(const size_t timestep) const {
    
    std::vector<BodyIntersectionInfo> gatheredIntersections;
    
-   std::map<walberla::id_t, bool> visibleBodyIDs;
+   std::set<walberla::id_t> visibleBodyIDs;
    
    //std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> pixelIntersectionMap;
    
@@ -348,7 +399,7 @@ void Raytracer::rayTrace(const size_t timestep) const {
    }
    
    for (auto& info: localPixelIntersectionMap) {
-      visibleBodyIDs[info.second.bodySystemID] = true;
+      visibleBodyIDs.insert(info.second.bodySystemID);
    }
    
    tp["Reduction"].end();
