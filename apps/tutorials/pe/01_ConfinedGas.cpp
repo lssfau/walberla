@@ -166,14 +166,13 @@ int main( int argc, char ** argv )
    auto generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
    //! [Planes]
    PlaneID xPosPlane = createPlane(*globalBodyStorage, 0, Vec3(1,0,0), simulationDomain.minCorner(), material );
-   PlaneID xNegPlane = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), simulationDomain.maxCorner(), material );
+   createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), simulationDomain.maxCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,1,0), simulationDomain.minCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), simulationDomain.maxCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,0,1), simulationDomain.minCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), simulationDomain.maxCorner(), material );
    //! [Planes]
    
-   raytracer.setBodyInvisible(xNegPlane);
    raytracer.setBodyInvisible(xPosPlane);
 
    //! [Gas]
