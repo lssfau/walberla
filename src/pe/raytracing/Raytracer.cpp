@@ -147,9 +147,9 @@ void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, Coordinat
          char r = 0, g = 0, b = 0;
          real_t t = tBuffer.at(c);
          if (realIsIdentical(t, INFINITY)) {
-            r = g = b = (char)255;
+            r = g = b = (char)0;
          } else {
-            r = g = b = (char)(240 * ((t-t_min)/(t_max-t_min)));
+            r = g = b = (char)(240 * (1-(t-t_min)/(t_max-t_min)));
          }
          ofs << r << g << b;
       }
