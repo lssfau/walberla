@@ -66,11 +66,14 @@ class Raytracer {
 public:
    /*!\name Constructors */
    //@{
-   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID, const shared_ptr<BodyStorage> globalBodyStorage,
+   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+                      const shared_ptr<BodyStorage> globalBodyStorage,
                       size_t pixelsHorizontal, size_t pixelsVertical,
                       real_t fov_vertical,
-                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector);
-   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID, const shared_ptr<BodyStorage> globalBodyStorage,
+                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
+                     real_t blockAABBIntersectionPadding = real_t(0.0));
+   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+                      const shared_ptr<BodyStorage> globalBodyStorage,
                       const Config::BlockHandle& config);
    //@}
 
@@ -89,10 +92,15 @@ private:
    Vec3 lookAtPoint_;         /*!< The point the camera looks at in the global world frame,
                                marks the center of the view plane.*/
    Vec3 upVector_;            //!< The vector indicating the upwards direction of the camera.
+   real_t blockAABBIntersectionPadding_; /*!< The padding applied in block AABB intersection pretesting, as
+                                          some objects within a block might protrude from the block's AABB.*/
+   
    bool tBufferOutputEnabled_; //!< Enable / disable dumping the tbuffer to a file
    std::string tBufferOutputDirectory_; //!< Path to the tbuffer output directory
+   
    std::set<walberla::id_t> invisibleBodyIDs_;  //!< The set for invisible body IDs.
    // std::set is used here because for a small number of elements it is often faster than std::unordered_set
+   
    //@}
    
    Vec3 n; // normal vector of viewing plane
@@ -283,7 +291,7 @@ void Raytracer::rayTrace(const size_t timestep) const {
          for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
 #ifndef DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK
             const AABB& blockAabb = blockIt->getAABB();
-            if (!intersects(blockAabb, ray, t)) {
+            if (!intersects(blockAabb, ray, t, blockAABBIntersectionPadding_)) {
                continue;
             }
 #endif

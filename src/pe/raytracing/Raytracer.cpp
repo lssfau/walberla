@@ -39,15 +39,21 @@ namespace raytracing {
  * \param cameraPosition Position of the camera in the global world frame.
  * \param lookAtPoint Point the camera looks at in the global world frame.
  * \param upVector Vector indicating the upwards direction of the camera.
+ * \param blockAABBIntersectionPadding The padding applied in block AABB intersection pretesting. Usually not required.
+ *                                     Set it to the value of the farthest distance a object might protrude from
+ *                                     its containing block.
  */
-Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID, const shared_ptr<BodyStorage> globalBodyStorage,
+Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+                     const shared_ptr<BodyStorage> globalBodyStorage,
                      size_t pixelsHorizontal, size_t pixelsVertical,
                      real_t fov_vertical,
-                     const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector)
+                     const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
+                     real_t blockAABBIntersectionPadding)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
    fov_vertical_(fov_vertical),
    cameraPosition_(cameraPosition), lookAtPoint_(lookAtPoint), upVector_(upVector),
+   blockAABBIntersectionPadding_(blockAABBIntersectionPadding),
    tBufferOutputEnabled_(false)
 {
    setupView_();
@@ -61,10 +67,12 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
  *
  * The config block has to contain image_x (int), image_y (int), fov_vertical (real, in degrees)
  * and tbuffer_output_directory (string) parameters. Additionally a vector of reals
- * for each of cameraPosition, lookAt and the upVector.
+ * for each of cameraPosition, lookAt and the upVector. Optional is blockAABBIntersectionPadding (real).
  */
-Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID, const shared_ptr<BodyStorage> globalBodyStorage,
-                     const Config::BlockHandle& config) : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage) {
+Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+                     const shared_ptr<BodyStorage> globalBodyStorage,
+                     const Config::BlockHandle& config)
+   : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
    
    pixelsHorizontal_ = config.getParameter<size_t>("image_x");
@@ -80,6 +88,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    cameraPosition_ = config.getParameter<Vec3>("cameraPosition");
    lookAtPoint_ = config.getParameter<Vec3>("lookAt");
    upVector_ = config.getParameter<Vec3>("upVector");
+   
+   blockAABBIntersectionPadding_ = config.getParameter<real_t>("blockAABBIntersectionPadding", real_t(0.0));
 
    setupView_();
 }

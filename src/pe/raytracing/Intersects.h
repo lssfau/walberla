@@ -38,7 +38,7 @@
 namespace walberla {
 namespace pe {
 namespace raytracing {
-inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t);
+inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding = real_t(0.0));
 
 inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t);
 inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t);
@@ -172,11 +172,12 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t) {
    return true;
 }
 
-inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t) {
+inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding) {
    // An Efficient and Robust Ray–Box Intersection Algorithm: http://people.csail.mit.edu/amy/papers/box-jgt.pdf
+   const Vec3 paddingVector(padding, padding, padding);
    Vec3 bounds[2] = {
-      aabb.min(),
-      aabb.max()
+      aabb.min() - paddingVector,
+      aabb.max() + paddingVector
    };
    
    const Vector3<int8_t>& sign = ray.getInvDirectionSigns();

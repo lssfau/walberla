@@ -114,6 +114,26 @@ void BoxIntersectsTest() {
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(2.67157), real_t(1e-4));
 }
 
+void AABBIntersectsTest() {
+   WALBERLA_LOG_INFO("RAY -> AABB");
+
+   Ray ray1(Vec3(-5,5,5), Vec3(1,0,0));
+   real_t t;
+   
+   AABB aabb(0,0,0,
+             10,10,10);
+   
+   WALBERLA_CHECK(intersects(aabb, ray1, t));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(5));
+   
+   WALBERLA_CHECK(intersects(aabb, ray1, t, 1.0));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(4));
+   
+   Ray ray2(Vec3(-5,5,10.5), Vec3(1,0,0)); // ray shooting over aabb, but within padding passed to intersects
+   WALBERLA_CHECK(intersects(aabb, ray1, t, 1.0));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(4));
+}
+
 void RaytracerTest() {
    WALBERLA_LOG_INFO("Raytracer");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
@@ -171,9 +191,10 @@ int main( int argc, char** argv )
    
    SetBodyTypeIDs<BodyTuple>::execute();
    
-   //SphereIntersectsTest();
-   //PlaneIntersectsTest();
-   //BoxIntersectsTest();
+   SphereIntersectsTest();
+   PlaneIntersectsTest();
+   BoxIntersectsTest();
+   AABBIntersectsTest();
    RaytracerTest();
    
    return EXIT_SUCCESS;
