@@ -31,10 +31,12 @@
 #include <core/waLBerlaBuildInfo.h>
 #include <postprocessing/sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
+#include <pe/raytracing/Raytracer.h>
 
 using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::timing;
+using namespace walberla::pe::raytracing;
 
 typedef boost::tuple<Sphere, Plane> BodyTuple ;
 
@@ -103,6 +105,10 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO_ON_ROOT("visSpacing: " << visSpacing);
    const std::string path = mainConf.getParameter<std::string>("path",  "vtk_out" );
    WALBERLA_LOG_INFO_ON_ROOT("path: " << path);
+   
+   const int raytracerSkippedSteps = mainConf.getParameter<int>("raytracerSkippedSteps",  10 );
+   WALBERLA_LOG_INFO_ON_ROOT("raytracerSkippedSteps: " << raytracerSkippedSteps);
+   integerProperties["raytracerSkippedSteps"] = raytracerSkippedSteps;
 
    WALBERLA_LOG_INFO_ON_ROOT("syncShadowOwners: " << syncShadowOwners);
    integerProperties["syncShadowOwners"] = syncShadowOwners;
@@ -139,6 +145,12 @@ int main( int argc, char ** argv )
    auto ccdID               = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
    auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
 
+   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
+   if (cfg == NULL) {
+      WALBERLA_ABORT("raytracer needs a working config");
+   }
+   Raytracer raytracer(forest, storageID, cfg->getBlock("Raytracing"));
+   
    WALBERLA_LOG_INFO_ON_ROOT("*** INTEGRATOR ***");
    cr::HCSITS cr(globalBodyStorage, forest, storageID, ccdID, fcdID);
    cr.setMaxIterations( 10 );
@@ -242,6 +254,10 @@ int main( int argc, char ** argv )
          vtkDomainOutput->write( );
          vtkSphereOutput->write( );
          //! [VTK Output]
+      }
+      
+      if ( i % raytracerSkippedSteps == 0) {
+         raytracer.rayTrace<BodyTuple>(size_t(i));
       }
    }
    tp["Total"].end();
