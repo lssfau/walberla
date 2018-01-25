@@ -34,7 +34,7 @@
 #include "pe_coupling/mapping/BodyBBMapping.h"
 #include "pe_coupling/utility/BodySelectorFunctions.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 namespace walberla {
 namespace pe_coupling {
@@ -108,7 +108,7 @@ public:
                                  const shared_ptr<pe::BodyStorage> & globalBodyStorage,
                                  const BlockDataID & bodyStorageID,
                                  const BlockDataID & bodyAndVolumeFractionFieldID,
-                                 const boost::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectRegularBodies,
+                                 const std::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectRegularBodies,
                                  const real_t velocityUpdatingEpsilon = real_t(0),
                                  const real_t positionUpdatingEpsilon = real_t(0),
                                  const uint_t superSamplingDepth = uint_t(4) )
@@ -141,7 +141,7 @@ private:
    const BlockDataID bodyStorageID_;
    const BlockDataID bodyAndVolumeFractionFieldID_;
 
-   boost::function<bool(pe::BodyID)> mappingBodySelectorFct_;
+   std::function<bool(pe::BodyID)> mappingBodySelectorFct_;
 
    shared_ptr<BodyAndVolumeFractionField_T> updatedBodyAndVolumeFractionField_;
    std::map< walberla::id_t, Vector3< real_t > > lastUpdatedPositionMap_;

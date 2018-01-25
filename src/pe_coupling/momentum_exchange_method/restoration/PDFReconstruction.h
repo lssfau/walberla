@@ -33,7 +33,7 @@
 #include "field/iterators/IteratorMacros.h"
 #include "Reconstructor.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 namespace walberla {
 namespace pe_coupling {
@@ -71,7 +71,7 @@ public:
                              const BlockDataID & bodyFieldID,
                              const Reconstructer_T & reconstructor,
                              const FlagUID & formerObstacle, const FlagUID & fluid,
-                             const boost::function<bool(pe::BodyID)> & movingBodySelectorFct = selectRegularBodies,
+                             const std::function<bool(pe::BodyID)> & movingBodySelectorFct = selectRegularBodies,
                              const bool optimizeForSmallObstacleFraction = false ) :
       blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ), bodyStorageID_(bodyStorageID),
       globalBodyStorage_( globalBodyStorage ), bodyFieldID_( bodyFieldID ),
@@ -127,7 +127,7 @@ private:
    const FlagUID formerObstacle_;
    const FlagUID fluid_;
 
-   boost::function<bool(pe::BodyID)> movingBodySelectorFct_;
+   std::function<bool(pe::BodyID)> movingBodySelectorFct_;
 
    const bool optimizeForSmallObstacleFraction_;
 

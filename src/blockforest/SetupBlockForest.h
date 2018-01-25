@@ -31,7 +31,7 @@
 #include "core/math/AABB.h"
 #include "core/uid/SUID.h"
 
-#include <boost/function.hpp>
+#include <functional>
 #include <set>
 #include <string>
 #include <vector>
@@ -45,7 +45,7 @@ class SetupBlockForest : private NonCopyable {
 
 public:
 
-   typedef boost::function< uint_t ( SetupBlockForest & forest, const uint_t numberOfProcesses, const memory_t perProcessMemoryLimit ) >
+   typedef std::function< uint_t ( SetupBlockForest & forest, const uint_t numberOfProcesses, const memory_t perProcessMemoryLimit ) >
           TargetProcessAssignmentFunction; // returns number of processes (may be lower than numberOfProcesses)
 
 
@@ -72,14 +72,14 @@ public:
 
    // Do not use a vector of bool's! Due to the implementation of this vector in the standard library, parallel access to a
    // vector of bool's - even on different elements - is not thread-safe!
-   typedef boost::function< void ( std::vector<uint8_t>& excludeBlock, const RootBlockAABB& aabb ) > RootBlockExclusionFunction;
+   typedef std::function< void ( std::vector<uint8_t>& excludeBlock, const RootBlockAABB& aabb ) > RootBlockExclusionFunction;
 
-   typedef boost::function< void ( SetupBlockForest& forest ) > RefinementSelectionFunction;
-   typedef boost::function< void ( SetupBlockForest& forest ) > WorkloadMemorySUIDAssignmentFunction;
+   typedef std::function< void ( SetupBlockForest& forest ) > RefinementSelectionFunction;
+   typedef std::function< void ( SetupBlockForest& forest ) > WorkloadMemorySUIDAssignmentFunction;
 
    typedef std::vector< std::pair< const SetupBlock*, const SetupBlock* > >               CommunicationPairs;
    typedef std::vector< real_t >                                                          CommunicationWeights;
-   typedef boost::function< void ( const CommunicationPairs &, CommunicationWeights & ) > CommunicationWeightFunction;
+   typedef std::function< void ( const CommunicationPairs &, CommunicationWeights & ) > CommunicationWeightFunction;
 
    inline static void NullCommunicationWeightFunction( const CommunicationPairs &, CommunicationWeights & )
    {

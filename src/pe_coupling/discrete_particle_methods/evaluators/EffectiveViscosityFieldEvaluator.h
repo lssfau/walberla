@@ -66,7 +66,7 @@ public:
 
    EffectiveViscosityFieldEvaluator( const BlockDataID & omegaFieldID, const ConstBlockDataID & solidVolumeFractionFieldID,
                                      const real_t & fluidViscosity,
-                                     const boost::function<real_t (real_t, real_t)> & effectiveViscosityFunc )
+                                     const std::function<real_t (real_t, real_t)> & effectiveViscosityFunc )
       : omegaFieldID_( omegaFieldID ), solidVolumeFractionFieldID_( solidVolumeFractionFieldID ), fluidViscosity_( fluidViscosity ),
         effectiveViscosityFunc_( effectiveViscosityFunc )
    {
@@ -97,7 +97,7 @@ private:
    const BlockDataID omegaFieldID_;
    const ConstBlockDataID solidVolumeFractionFieldID_;
    real_t fluidViscosity_;
-   boost::function<real_t (real_t, real_t)> effectiveViscosityFunc_;
+   std::function<real_t (real_t, real_t)> effectiveViscosityFunc_;
 };
 
 

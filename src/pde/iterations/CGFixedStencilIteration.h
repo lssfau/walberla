@@ -31,7 +31,7 @@
 #include "field/GhostLayerField.h"
 #include "field/iterators/IteratorMacros.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 
 
@@ -50,7 +50,7 @@ public:
    CGFixedStencilIteration( BlockStorage & blocks,
                             const BlockDataID & uId, const BlockDataID & rId, const BlockDataID & dId, const BlockDataID & zId,
                             const BlockDataID & fId, const std::vector< real_t > & weights,
-                            const uint_t iterations, const boost::function< void () > & synchronizeD,
+                            const uint_t iterations, const std::function< void () > & synchronizeD,
                             const real_t residualNormThreshold = real_t(0),
                             const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
@@ -88,7 +88,7 @@ protected:
    uint_t iterations_;
    real_t residualNormThreshold_;
    
-   boost::function< void () > synchronizeD_;
+   std::function< void () > synchronizeD_;
    
    Set<SUID> requiredSelectors_;
    Set<SUID> incompatibleSelectors_;
@@ -100,7 +100,7 @@ template< typename Stencil_T >
 CGFixedStencilIteration< Stencil_T >::CGFixedStencilIteration( BlockStorage & blocks,
                                                               const BlockDataID & uId, const BlockDataID & rId, const BlockDataID & dId, const BlockDataID & zId,
                                                               const BlockDataID & fId, const std::vector< real_t > & weights,
-                                                              const uint_t iterations, const boost::function< void () > & synchronizeD,
+                                                              const uint_t iterations, const std::function< void () > & synchronizeD,
                                                               const real_t residualNormThreshold,
                                                               const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors ) :
    blocks_( blocks ), uId_( uId ), rId_( rId ), dId_( dId ), zId_( zId ), fId_( fId ),

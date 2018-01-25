@@ -405,7 +405,7 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
 
          if( packBlockData )
          {
-            WALBERLA_ASSERT( unpackBlockData );
+            WALBERLA_ASSERT( static_cast<bool>(unpackBlockData) );
             packBlockData( buffer, *pBlock );
          }
 
@@ -483,7 +483,7 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
 
          if( unpackBlockData )
          {
-            WALBERLA_ASSERT( packBlockData );
+            WALBERLA_ASSERT( static_cast<bool>(packBlockData) );
             boost::any data;
             unpackBlockData( buffer, *phantom, data );
             phantom->addData( data );

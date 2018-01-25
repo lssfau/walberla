@@ -80,7 +80,7 @@ int main( int argc, char** argv )
     }
     WALBERLA_CHECK_UNEQUAL(firstStorage, secondStorage);
 
-    boost::function<void(void)> syncCall;
+    std::function<void(void)> syncCall;
     if (!syncShadowOwners)
     {
        syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );

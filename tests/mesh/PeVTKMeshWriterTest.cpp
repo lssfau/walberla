@@ -140,7 +140,7 @@ int main( int argc, char ** argv )
    cr.setRelaxationParameter( real_t(0.7) );
    cr.setGlobalLinearAcceleration( Vec3(0,0,5) );
 
-   boost::function<void(void)> syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+   std::function<void(void)> syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
 
    typedef mesh::FloatPolyMesh OutputMeshType;
    typedef mesh::pe::DefaultTesselation<OutputMeshType> TesselationType;

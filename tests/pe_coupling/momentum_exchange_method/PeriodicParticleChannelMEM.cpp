@@ -413,7 +413,7 @@ int main( int argc, char **argv )
 
    // set up synchronization procedure
    const real_t overlap = real_c( 1.5 ) * dx;
-   boost::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
 
    // create pe bodies
    const auto material = pe::createMaterial( "granular", real_c(1.2), real_c(0.25), real_c(0.4), real_c(0.4), real_c(0.35), real_c(1.39e11), real_c(5.18e7), real_c(1.07e2), real_c(1.07e2) );
@@ -524,7 +524,7 @@ int main( int argc, char **argv )
                                                                                                        reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   boost::function< void () > commFunction;
+   std::function< void () > commFunction;
    if( fullPDFSync )
    {
       blockforest::communication::UniformBufferedScheme< stencil::D3Q27 > scheme( blocks );

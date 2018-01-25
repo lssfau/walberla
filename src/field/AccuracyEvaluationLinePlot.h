@@ -191,7 +191,7 @@ inline void accuracyEvaluationLinePlotIO( std::ofstream & file, const std::vecto
 //**********************************************************************************************************************
 
 template< typename Field_T,
-          typename SolutionFunction_T = boost::function< typename Field_T::value_type ( const Vector3< real_t > & ) >,
+          typename SolutionFunction_T = std::function< typename Field_T::value_type ( const Vector3< real_t > & ) >,
           typename Filter_T = DefaultEvaluationFilter >
 class AccuracyEvaluationLinePlot
 {

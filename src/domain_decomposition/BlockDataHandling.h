@@ -82,7 +82,7 @@ class BlockDataHandlingFunctionAdaptor : public BlockDataHandling<T>
 {
 public:
 
-   typedef boost::function< T* ( IBlock * const block ) > Function;
+   typedef std::function< T* ( IBlock * const block ) > Function;
 
    BlockDataHandlingFunctionAdaptor( const Function & function ) : function_( function ) {}
 
@@ -130,7 +130,7 @@ struct BlockDataCreator
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
    {}
 
-   BlockDataCreator( const boost::function< T* ( IBlock * const block ) > & function,
+   BlockDataCreator( const std::function< T* ( IBlock * const block ) > & function,
                      const std::string & identifier            = std::string(),
                      const Set<SUID> &   requiredSelectors     = Set<SUID>::emptySet(),
                      const Set<SUID> &   incompatibleSelectors = Set<SUID>::emptySet() ) :

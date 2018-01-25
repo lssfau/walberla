@@ -25,7 +25,7 @@
 #include "core/uid/SUID.h"
 #include "domain_decomposition/BlockStorage.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 
 
@@ -39,10 +39,10 @@ class RBGSIteration
 public:
 
    RBGSIteration( BlockStorage & blocks, const uint_t iterations,
-                  const boost::function< void () > & communication,
-                  const boost::function< void ( IBlock * ) > & redUpdate,
-                  const boost::function< void ( IBlock * ) > & blackUpdate,
-                  const boost::function< real_t () > & residualNorm,
+                  const std::function< void () > & communication,
+                  const std::function< void ( IBlock * ) > & redUpdate,
+                  const std::function< void ( IBlock * ) > & blackUpdate,
+                  const std::function< real_t () > & residualNorm,
                   const real_t residualNormThreshold = real_t(0), const uint_t residualCheckFrequency = uint_t(1),
                   const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
@@ -53,7 +53,7 @@ public:
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
    {}
 
-   void addBoundaryHandling( const boost::function< void () > & boundary ) { boundary_ = boundary; }
+   void addBoundaryHandling( const std::function< void () > & boundary ) { boundary_ = boundary; }
       
    void operator()();
    
@@ -71,11 +71,11 @@ protected:
    uint_t iterationsPerformed_;
    bool thresholdReached_;
 
-   boost::function< void () >            boundary_;
-   boost::function< void () >            communication_;
-   boost::function< void ( IBlock * ) >  redUpdate_;
-   boost::function< void ( IBlock * ) >  blackUpdate_;
-   boost::function< real_t () >          residualNorm_;
+   std::function< void () >            boundary_;
+   std::function< void () >            communication_;
+   std::function< void ( IBlock * ) >  redUpdate_;
+   std::function< void ( IBlock * ) >  blackUpdate_;
+   std::function< real_t () >          residualNorm_;
    
    Set<SUID> requiredSelectors_;
    Set<SUID> incompatibleSelectors_;

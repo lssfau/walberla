@@ -36,7 +36,7 @@
 
 #include "pe_coupling/utility/BodySelectorFunctions.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <cmath>
 
@@ -66,7 +66,7 @@ public:
    BodyVelocityInitializer( const shared_ptr<StructuredBlockStorage> & blockStorage,
                             const BlockDataID & bodyStorageID, const BlockDataID & flagFieldID, const Set< FlagUID > & domainFlags,
                             const BlockDataID & velocityFieldID,
-                            const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
+                            const std::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
    : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ),
      dpmBodySelectorFct_( dpmBodySelectorFct)
    {
@@ -105,7 +105,7 @@ private:
    shared_ptr<StructuredBlockStorage> blockStorage_;
    BlockDataID bodyStorageID_;
    BlockDataID velocityFieldInterpolatorID_;
-   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
+   std::function<bool(pe::BodyID)> dpmBodySelectorFct_;
 };
 
 

@@ -25,7 +25,7 @@
 #include "core/cell/CellSet.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 
 namespace walberla {
@@ -37,7 +37,7 @@ class ChainedFilter {
 
 public:
 
-   typedef boost::function< void ( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage, const uint_t ghostLayers ) > CellFilter;
+   typedef std::function< void ( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage, const uint_t ghostLayers ) > CellFilter;
 
    void addFilter( const CellFilter& filter ) { filters_.push_back( filter ); }
 

@@ -71,8 +71,8 @@ namespace python_coupling {
    public:
       WALBERLA_BEFRIEND_SINGLETON;
 
-      typedef boost::function<void()> ExporterFunction;
-      typedef boost::function< boost::python::object ( IBlock&, BlockDataID ) > BlockDataToObjectFunction;
+      typedef std::function<void()> ExporterFunction;
+      typedef std::function< boost::python::object ( IBlock&, BlockDataID ) > BlockDataToObjectFunction;
 
 
       ~Manager();

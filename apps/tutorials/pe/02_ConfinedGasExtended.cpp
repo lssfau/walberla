@@ -147,7 +147,7 @@ int main( int argc, char ** argv )
    cr.setGlobalLinearAcceleration( Vec3(0,0,0) );
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SYNCCALL ***");
-   boost::function<void(void)> syncCall;
+   std::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
       syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, &tt, real_c(0.0), false );
@@ -157,7 +157,7 @@ int main( int argc, char ** argv )
    }
 
    //! [Bind Sync Call]
-   boost::function<void(void)> syncCallWithoutTT;
+   std::function<void(void)> syncCallWithoutTT;
    if (!syncShadowOwners)
    {
       syncCallWithoutTT = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );

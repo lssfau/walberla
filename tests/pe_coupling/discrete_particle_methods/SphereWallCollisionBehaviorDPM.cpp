@@ -840,7 +840,7 @@ int main( int argc, char **argv )
    /////////////////////////////////
 
    // drag correlation function
-   boost::function<Vector3<real_t> ( const Vector3<real_t>&, const Vector3<real_t> &, real_t, real_t, real_t, real_t)> dragCorrelationFunction;
+   std::function<Vector3<real_t> ( const Vector3<real_t>&, const Vector3<real_t> &, real_t, real_t, real_t, real_t)> dragCorrelationFunction;
    if( dragCorr == DragCorrelation::ErgunWenYu )
    {
       dragCorrelationFunction = pe_coupling::discrete_particle_methods::dragForceErgunWenYu;
@@ -871,7 +871,7 @@ int main( int argc, char **argv )
    }
 
    // lift correlation function
-   boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )> liftCorrelationFunction;
+   std::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )> liftCorrelationFunction;
    if( liftCorr == LiftCorrelation::NoLift )
    {
       liftCorrelationFunction = pe_coupling::discrete_particle_methods::noLiftForce;
@@ -886,7 +886,7 @@ int main( int argc, char **argv )
    }
 
    // added mass correlation function
-   boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t )> addedMassCorrelationFunction;
+   std::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t )> addedMassCorrelationFunction;
    if( addedMassCorr == AddedMassCorrelation::NoAM )
    {
       addedMassCorrelationFunction = pe_coupling::discrete_particle_methods::noAddedMassForce;
@@ -901,7 +901,7 @@ int main( int argc, char **argv )
    }
 
    // set up effective viscosity calculation
-   boost::function<real_t ( real_t, real_t)> effectiveViscosityFunction;
+   std::function<real_t ( real_t, real_t)> effectiveViscosityFunction;
    if( effVisc == EffectiveViscosity::None )
    {
       effectiveViscosityFunction = pe_coupling::discrete_particle_methods::calculateUnchangedEffectiveViscosity;
@@ -933,7 +933,7 @@ int main( int argc, char **argv )
    (*bodyVelocityTimeDerivativeEvaluator)();
 
    // function used to evaluate the interaction force between fluid and particles
-   boost::function<void(void)> dragAndPressureForceEvaluationFunction;
+   std::function<void(void)> dragAndPressureForceEvaluationFunction;
    if( dpm == DPMethod::GNS ) {
       if (interpol == Interpolation::INearestNeighbor) {
          if (dist == Distribution::DNearestNeighbor) {
@@ -998,7 +998,7 @@ int main( int argc, char **argv )
 
 
    // function to evaluate the lift force contribution
-   boost::function<void(void)> liftForceEvaluationFunction;
+   std::function<void(void)> liftForceEvaluationFunction;
    if( interpol == Interpolation::INearestNeighbor )
    {
       if( dist == Distribution::DNearestNeighbor )
@@ -1059,7 +1059,7 @@ int main( int argc, char **argv )
 
 
    // function to evaluate the added mass contribution
-   boost::function<void(void)> addedMassEvaluationFunction;
+   std::function<void(void)> addedMassEvaluationFunction;
    if( interpol == Interpolation::INearestNeighbor )
    {
       if( dist == Distribution::DNearestNeighbor )
@@ -1119,7 +1119,7 @@ int main( int argc, char **argv )
    }
 
    // function to evaluate lubrication forces
-   boost::function<void(void)> lubricationEvaluationFunction;
+   std::function<void(void)> lubricationEvaluationFunction;
    if( lubricationCutOffDistance > real_t(0) )
    {
       if( useLubricationCorrection )

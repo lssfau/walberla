@@ -35,7 +35,7 @@
 
 #include "pe_coupling/utility/BodySelectorFunctions.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 namespace walberla {
 namespace pe_coupling {
@@ -99,7 +99,7 @@ template< typename BoundaryHandling_T >
 void mapBodies( StructuredBlockStorage & blockStorage, const BlockDataID & boundaryHandlingID,
                 const BlockDataID & bodyStorageID, pe::BodyStorage & globalBodyStorage,
                 const FlagUID & obstacle,
-                const boost::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectAllBodies )
+                const std::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectAllBodies )
 {
    for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )
    {

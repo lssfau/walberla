@@ -30,13 +30,13 @@
 #include "core/timing/TimingPool.h"
 #include "core/uid/SUID.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 
 namespace walberla {
 namespace timeloop {
 
-typedef boost::function<void ()> VoidFctNoArguments;
+typedef std::function<void ()> VoidFctNoArguments;
 
 
 //*******************************************************************************************************************

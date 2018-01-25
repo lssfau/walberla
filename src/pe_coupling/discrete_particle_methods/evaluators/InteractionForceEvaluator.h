@@ -45,7 +45,7 @@
 
 #include "stencil/Directions.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <vector>
 
@@ -88,9 +88,9 @@ public:
                               const BlockDataID & forceFieldID, const BlockDataID & bodyStorageID,
                               const BlockDataID & flagFieldID, const Set< FlagUID > & domainFlags,
                               const BlockDataID & velocityFieldID, const BlockDataID & solidVolumeFractionFieldID, const BlockDataID & pressureGradientFieldID,
-                              const boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t, real_t )> & dragForceCorrelationFunction,
+                              const std::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t, real_t )> & dragForceCorrelationFunction,
                               real_t fluidDynamicViscosity,
-                              const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
+                              const std::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
    : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ),
      dragForceCorrelationFunction_( dragForceCorrelationFunction ), fluidDynamicViscosity_( fluidDynamicViscosity ),
      dpmBodySelectorFct_( dpmBodySelectorFct)
@@ -109,11 +109,11 @@ private:
    const BlockDataID bodyStorageID_;
    const BlockDataID pdfFieldID_;
 
-   boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t, real_t )> dragForceCorrelationFunction_;
+   std::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t, real_t )> dragForceCorrelationFunction_;
 
    real_t fluidDynamicViscosity_;
 
-   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
+   std::function<bool(pe::BodyID)> dpmBodySelectorFct_;
 
    BlockDataID velocityFieldInterpolatorID_;
    BlockDataID solidVolumeFractionFieldInterpolatorID_;

@@ -37,7 +37,7 @@
 #include "core/uid/SUID.h"
 
 #include <boost/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 #include <map>
 #include <set>
@@ -60,8 +60,8 @@ public:
    typedef mpi::RecvBuffer RecvBuffer;
 
    typedef shared_ptr< blockforest::communication::NonUniformPackInfo > PackInfo;
-   typedef boost::function<void ()>                            VoidFunction;
-   typedef boost::function<void ( SendBuffer & buffer )> SendBufferFunction;
+   typedef std::function<void ()>                            VoidFunction;
+   typedef std::function<void ( SendBuffer & buffer )> SendBufferFunction;
 
    //**Construction & Destruction***************************************************************************************
    /*! \name Construction & Destruction */
@@ -110,7 +110,7 @@ public:
    //@{
 
    void startCommunication() { startCommunicateEqualLevel(); startCommunicateCoarseToFine(); startCommunicateFineToCoarse(); }
-   boost::function<void()>  getStartCommunicateFunctor() { return boost::bind( &NonUniformBufferedScheme::startCommunication, this ); }
+   std::function<void()>  getStartCommunicateFunctor() { return boost::bind( &NonUniformBufferedScheme::startCommunication, this ); }
 
    inline void startCommunicateEqualLevel();
    inline void startCommunicateCoarseToFine();
@@ -121,7 +121,7 @@ public:
    inline void startCommunicateFineToCoarse( const uint_t fineLevel );
    
    void wait() { waitCommunicateEqualLevel(); waitCommunicateCoarseToFine(); waitCommunicateFineToCoarse(); }
-   boost::function<void() >  getWaitFunctor() { return boost::bind( &NonUniformBufferedScheme::wait, this ); }
+   std::function<void() >  getWaitFunctor() { return boost::bind( &NonUniformBufferedScheme::wait, this ); }
 
    inline void waitCommunicateEqualLevel();
    inline void waitCommunicateCoarseToFine();

@@ -32,7 +32,7 @@
 #include "pe/rigidbody/BodyIterators.h"
 #include "pe/synchronization/SyncForces.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <map>
 
@@ -47,7 +47,7 @@ public:
    explicit TimeStep( const shared_ptr<StructuredBlockStorage> & blockStorage,
                       const BlockDataID & bodyStorageID,
                       pe::cr::ICR & collisionResponse,
-                      const boost::function<void (void)> & synchronizeFunc,
+                      const std::function<void (void)> & synchronizeFunc,
                       const real_t timeStep = real_t(1), const uint_t intermediateSteps = uint_c(1) )
          : timeStep_( timeStep )
          , intermediateSteps_( ( intermediateSteps == 0 ) ? uint_c(1) : intermediateSteps )
@@ -147,7 +147,7 @@ protected:
    const BlockDataID &  bodyStorageID_;
 
    pe::cr::ICR & collisionResponse_;
-   boost::function<void (void)> synchronizeFunc_;
+   std::function<void (void)> synchronizeFunc_;
 
 }; // class TimeStep
 

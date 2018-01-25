@@ -35,7 +35,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
-#include <boost/function.hpp>
+#include <functional>
 #include <boost/tuple/tuple.hpp>
 
 #include <fstream>
@@ -144,8 +144,8 @@ public:
                                                                      const bool continuousNumbering, const bool binary, const bool littleEndian, 
                                                                      const bool useMPIIO, const uint_t initialExecutionCount );
 
-   typedef boost::function< void () > BeforeFunction;
-   typedef boost::function< void ( CellSet& filteredCells, const IBlock& block,
+   typedef std::function< void () > BeforeFunction;
+   typedef std::function< void ( CellSet& filteredCells, const IBlock& block,
                                    const StructuredBlockStorage& storage, const uint_t ghostLayers ) >  CellFilter;
 
    ~VTKOutput();

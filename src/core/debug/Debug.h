@@ -25,7 +25,7 @@
 
 #ifndef NDEBUG
 #   include "CheckFunctions.h"
-#   include <boost/function.hpp>
+#   include <functional>
 #   include <boost/bind.hpp>
 #   include <string>
 #endif
@@ -255,12 +255,12 @@ void myAssert(const char * const file, const int line);
 class ConditionalExec
 {
 public:
-   ConditionalExec( bool cond, const boost::function<void (void)> & function ) : cond_(cond), function_(function) { }
+   ConditionalExec( bool cond, const std::function<void (void)> & function ) : cond_(cond), function_(function) { }
    ~ConditionalExec() { if(cond_) function_(); }
    operator bool() const { return cond_; }
 private:
    bool cond_;
-   boost::function<void (void)> function_;
+   std::function<void (void)> function_;
 };
 /// \endcond
 

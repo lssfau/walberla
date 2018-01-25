@@ -7,7 +7,7 @@ namespace fft {
 
 template <typename Field_T>
 FourierTransform<Field_T>::FourierTransform( shared_ptr< StructuredBlockForest > & blocks, BlockDataID fieldId,
-                                             boost::function<real_t(uint_t,uint_t,uint_t)> greens )
+                                             std::function<real_t(uint_t,uint_t,uint_t)> greens )
 : blocks_(blocks), fieldId_(fieldId), greens_()
 {
 #ifdef WALBERLA_USE_PFFT

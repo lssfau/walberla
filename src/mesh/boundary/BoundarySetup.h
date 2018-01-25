@@ -34,7 +34,7 @@
 
 #include "stencil/D3Q27.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <queue>
 
@@ -46,7 +46,7 @@ class BoundarySetup
 public:
    typedef field::GhostLayerField< uint8_t, uint_t(1) > VoxelizationField;
 
-   typedef boost::function< real_t ( const Vector3< real_t > &) > DistanceFunction;
+   typedef std::function< real_t ( const Vector3< real_t > &) > DistanceFunction;
 
    enum Location { INSIDE, OUTSIDE };
 

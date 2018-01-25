@@ -36,7 +36,7 @@
 #include "iterators/FieldIterator.h"
 #include "iterators/FieldPointer.h"
 
-#include <boost/function.hpp>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -277,7 +277,7 @@ namespace field {
       //** Monitoring  *************************************************************************************************
       /*! \name Monitoring */
       //@{
-      typedef boost::function< void ( cell_idx_t x, cell_idx_t y,
+      typedef std::function< void ( cell_idx_t x, cell_idx_t y,
                                       cell_idx_t z, cell_idx_t f, const T & value) > MonitorFunction;
 
       void addMonitoringFunction( const MonitorFunction & func );

@@ -26,7 +26,7 @@
 #include "domain_decomposition/BlockStorage.h"
 
 #include <boost/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
 #include <string>
 
 
@@ -38,7 +38,7 @@ namespace timeloop {
    template < typename FuncType >
    struct FuncCreator
    {
-      FuncCreator( boost::function< FuncType > fct,
+      FuncCreator( std::function< FuncType > fct,
                   const std::string& identifier            = std::string(),
                   const Set<SUID>&   requiredSelectors     = Set<SUID>::emptySet(),
                   const Set<SUID>&   incompatibleSelectors = Set<SUID>::emptySet() )
@@ -46,7 +46,7 @@ namespace timeloop {
          requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
       {}
 
-      boost::function< FuncType > function_;
+      std::function< FuncType > function_;
       std::string                 identifier_;
       Set<SUID>                   requiredSelectors_;
       Set<SUID>                   incompatibleSelectors_;
@@ -58,7 +58,7 @@ namespace timeloop {
    {
       SelectableFunction() {}
 
-      SelectableFunction ( boost::function< FuncType > fct,
+      SelectableFunction ( std::function< FuncType > fct,
                            const std::string& identifier            = std::string(),
                            const Set<SUID>&   requiredSelectors     = Set<SUID>::emptySet(),
                            const Set<SUID>&   incompatibleSelectors = Set<SUID>::emptySet() )
@@ -72,14 +72,14 @@ namespace timeloop {
          return *this;
       }
 
-      selectable::SetSelectableObject< boost::function<FuncType>, SUID > selectableFunc_;
+      selectable::SetSelectableObject< std::function<FuncType>, SUID > selectableFunc_;
    };
 
 
    struct BeforeFunction : public SelectableFunction< void () >
    {
       BeforeFunction() {}
-      BeforeFunction(boost::function< void () > fct,
+      BeforeFunction(std::function< void () > fct,
                      const std::string& id      = std::string(),
                      const Set<SUID>&   req    = Set<SUID>::emptySet(),
                      const Set<SUID>&   incomp = Set<SUID>::emptySet())
@@ -97,7 +97,7 @@ namespace timeloop {
    struct AfterFunction : public SelectableFunction< void () >
    {
        AfterFunction() {}
-       AfterFunction(boost::function< void () > fct,
+       AfterFunction(std::function< void () > fct,
                      const std::string& id      = std::string(),
                      const Set<SUID>&   req    = Set<SUID>::emptySet(),
                      const Set<SUID>&   incomp = Set<SUID>::emptySet())
@@ -115,14 +115,14 @@ namespace timeloop {
    template< typename T >
    struct SweepOnBlock
    {
-      SweepOnBlock( boost::function< T* ( IBlock* const block ) > function,
+      SweepOnBlock( std::function< T* ( IBlock* const block ) > function,
                      const std::string& identifier            = std::string(),
                      const Set<SUID>&   required     = Set<SUID>::emptySet(),
                      const Set<SUID>&   incompatible = Set<SUID>::emptySet() ) :
       function_( function ), identifier_( identifier ),
       requiredSelectors_( required ), incompatibleSelectors_( incompatible ) {}
 
-      boost::function< T* ( IBlock* const block ) > function_;
+      std::function< T* ( IBlock* const block ) > function_;
 
       std::string                                   identifier_;
       Set<SUID>                                     requiredSelectors_;

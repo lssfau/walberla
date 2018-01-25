@@ -40,14 +40,14 @@ void RBGSIteration::operator()()
    uint_t i( uint_t(0) );
    while( i < iterations_ )
    {
-      if( !boundary_.empty() )
+      if( boundary_ )
          boundary_();
       communication_();
 
       for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
          redUpdate_( block.get() );
 
-      if( !boundary_.empty() )
+      if( boundary_ )
          boundary_();
       communication_();
 
@@ -58,7 +58,7 @@ void RBGSIteration::operator()()
       {
          if( (i % residualCheckFrequency_) == uint_t(0) )
          {
-            if( !boundary_.empty() )
+            if( boundary_ )
                boundary_();
             const real_t residualNorm = residualNorm_();
             WALBERLA_CHECK( math::finite(residualNorm), "Non-finite residual norm detected during the red-black Gauss-Seidel iteration, "

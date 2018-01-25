@@ -809,7 +809,7 @@ int main( int argc, char **argv )
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
-   boost::function<void(void)> syncCall;
+   std::function<void(void)> syncCall;
    if( XBlocks <= uint_t(4) )
       syncCall = boost::bind( pe::syncNextNeighbors<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
    else
@@ -949,7 +949,7 @@ int main( int argc, char **argv )
       boost::filesystem::create_directory( tpath );
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   boost::function< void () > commFunction;
+   std::function< void () > commFunction;
 
    blockforest::communication::UniformBufferedScheme< Stencil_T > scheme( blocks );
    scheme.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldID ) );

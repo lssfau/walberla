@@ -289,7 +289,7 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
    }
 
-   boost::function<void(void)> syncCall = boost::bind(pe::syncShadowOwners<BodyTypeTuple>,
+   std::function<void(void)> syncCall = boost::bind(pe::syncShadowOwners<BodyTypeTuple>,
                                                       boost::ref(blocks->getBlockForest()), bodyStorageID,
                                                       static_cast<WcTimingTree *>(NULL), overlap, false);
 
@@ -358,7 +358,7 @@ int main(int argc, char **argv) {
                   "PDF Restore");
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   boost::function<void()> commFunction;
+   std::function<void()> commFunction;
 
    blockforest::communication::UniformBufferedScheme<stencil::D3Q27> scheme(blocks);
    scheme.addPackInfo(make_shared<field::communication::PackInfo<PdfField_T> >(pdfFieldID));

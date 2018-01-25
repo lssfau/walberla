@@ -303,7 +303,7 @@ int main( int argc, char **argv )
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
-   boost::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
 
    // create pe bodies
    const auto material = pe::createMaterial( "granular", real_t(1.2), real_t(0.25), real_t(0.4), real_t(0.4), real_t(0.35), real_t(1.39e11), real_t(5.18e7), real_t(1.07e2), real_t(1.07e2) );
@@ -348,7 +348,7 @@ int main( int argc, char **argv )
    SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   boost::function< void () > commFunction;
+   std::function< void () > commFunction;
    blockforest::communication::UniformBufferedScheme< Stencil_T > scheme( blocks );
    scheme.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldID ) );
    commFunction = scheme;
