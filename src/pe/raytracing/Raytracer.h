@@ -247,6 +247,7 @@ void Raytracer::rayTrace(const size_t timestep) const {
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap; // contains intersection info indexed by the coordinates of the pixel which was hit
    
+   real_t inf = std::numeric_limits<real_t>::max();
    real_t t, t_closest;
    walberla::id_t id_closest;
    RigidBody* body_closest = NULL;
@@ -260,7 +261,7 @@ void Raytracer::rayTrace(const size_t timestep) const {
          Vec3 direction = (pixelLocation - cameraPosition_).getNormalized();
          ray.setDirection(direction);
          
-         t_closest = INFINITY;
+         t_closest = inf;
          id_closest = 0;
          body_closest = NULL;
          for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
@@ -311,14 +312,14 @@ void Raytracer::rayTrace(const size_t timestep) const {
             }
          }
          
-         //std::cout << (t_closest != INFINITY ? size_t(t_closest) : 0) << " ";
+         //std::cout << (t_closest != inf ? size_t(t_closest) : 0) << " ";
          
          Coordinates c = {
             x,
             y
          };
          
-         if (!realIsIdentical(t_closest, INFINITY) && body_closest != NULL) {
+         if (!realIsIdentical(t_closest, inf) && body_closest != NULL) {
             BodyIntersectionInfo intersectionInfo = {
                x,
                y,

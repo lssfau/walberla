@@ -129,13 +129,15 @@ void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, Coordinat
 void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const std::string& fileName) const {
    namespace fs = boost::filesystem;
    
+   real_t inf = std::numeric_limits<real_t>::max();
+   
    real_t t_max = 1;
-   real_t t_min = INFINITY;
+   real_t t_min = inf;
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
          Coordinates c = {x, y};
          real_t t = tBuffer.at(c);
-         if (t > t_max && !realIsIdentical(t, INFINITY)) {
+         if (t > t_max && !realIsIdentical(t, inf)) {
             t_max = t;
          }
          if (t < t_min) {
@@ -143,7 +145,7 @@ void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, Coordinat
          }
       }
    }
-   if (realIsIdentical(t_min, INFINITY)) t_min = 0;
+   if (realIsIdentical(t_min, inf)) t_min = 0;
    
    fs::path dir (getTBufferOutputDirectory());
    fs::path file (fileName);
@@ -156,7 +158,7 @@ void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, Coordinat
          Coordinates c = {x, y};
          char r = 0, g = 0, b = 0;
          real_t t = tBuffer.at(c);
-         if (realIsIdentical(t, INFINITY)) {
+         if (realIsIdentical(t, inf)) {
             r = g = b = (char)0;
          } else {
             r = g = b = (char)(240 * (1-(t-t_min)/(t_max-t_min)));
