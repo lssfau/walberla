@@ -98,19 +98,19 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
  */
 void Raytracer::setupView_() {
    // eye coordinate system setup
-   n = (cameraPosition_ - lookAtPoint_).getNormalized();
-   u = (upVector_ % n).getNormalized();
-   v = n % u;
+   n_ = (cameraPosition_ - lookAtPoint_).getNormalized();
+   u_ = (upVector_ % n_).getNormalized();
+   v_ = n_ % u_;
    
    // viewing plane setup
-   d = (cameraPosition_ - lookAtPoint_).length();
-   aspectRatio = real_t(pixelsHorizontal_) / real_t(pixelsVertical_);
-   viewingPlaneHeight = tan(deg2rad(fov_vertical_)/real_t(2.)) * real_t(2.) * d;
-   viewingPlaneWidth = viewingPlaneHeight * aspectRatio;
-   viewingPlaneOrigin = lookAtPoint_ - u*viewingPlaneWidth/real_t(2.) - v*viewingPlaneHeight/real_t(2.);
+   d_ = (cameraPosition_ - lookAtPoint_).length();
+   aspectRatio_ = real_t(pixelsHorizontal_) / real_t(pixelsVertical_);
+   viewingPlaneHeight_ = tan(deg2rad(fov_vertical_)/real_t(2.)) * real_t(2.) * d_;
+   viewingPlaneWidth_ = viewingPlaneHeight_ * aspectRatio_;
+   viewingPlaneOrigin_ = lookAtPoint_ - u_*viewingPlaneWidth_/real_t(2.) - v_*viewingPlaneHeight_/real_t(2.);
    
-   pixelWidth = viewingPlaneWidth / real_c(pixelsHorizontal_);
-   pixelHeight = viewingPlaneHeight / real_c(pixelsVertical_);
+   pixelWidth_ = viewingPlaneWidth_ / real_c(pixelsHorizontal_);
+   pixelHeight_ = viewingPlaneHeight_ / real_c(pixelsVertical_);
 }
 
 /*!\brief Writes the tBuffer to a file in the tBuffer output directory.

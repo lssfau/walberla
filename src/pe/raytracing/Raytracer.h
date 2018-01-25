@@ -99,16 +99,16 @@ private:
    std::string tBufferOutputDirectory_; //!< Path to the tbuffer output directory
    //@}
    
-   Vec3 n; // normal vector of viewing plane
-   Vec3 u; // u and ...
-   Vec3 v; // ... v span the viewing plane
-   real_t d; // distance from camera to viewing plane
-   real_t aspectRatio; // aspect ratio of the generated image and viewing plane
-   real_t viewingPlaneHeight; // viewing plane height
-   real_t viewingPlaneWidth; // viewing plane width
-   Vec3 viewingPlaneOrigin; // origin of the viewing plane
-   real_t pixelWidth; // width of a pixel of the generated image in the viewing plane
-   real_t pixelHeight; // height of a pixel of the generated image in the viewing plane
+   Vec3 n_;                   //!< The normal vector of viewing plane.
+   Vec3 u_;                   //!< The vector spanning the viewing plane in the "right direction".
+   Vec3 v_;                   //!< The vector spanning the viewing plane in the "up direction".
+   real_t d_;                 //!< The the distance from camera to viewing plane.
+   real_t aspectRatio_;       //!< The aspect ratio of the generated image and viewing plane.
+   real_t viewingPlaneHeight_; //!< The viewing plane height in the world frame.
+   real_t viewingPlaneWidth_; //!< The viewing plane width in the world frame.
+   Vec3 viewingPlaneOrigin_;  //!< The origin of the viewing plane.
+   real_t pixelWidth_;        //!< The width of a pixel of the generated image in the viewing plane.
+   real_t pixelHeight_;       //!< The height of a pixel of the generated image in the viewing plane.
 
 public:
    /*!\name Get functions */
@@ -256,7 +256,7 @@ void Raytracer::rayTrace(const size_t timestep) const {
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
          //WALBERLA_LOG_INFO(x << "/" << y);
-         Vec3 pixelLocation = viewingPlaneOrigin + u*(real_c(x)+real_t(0.5))*pixelWidth + v*(real_c(y)+real_t(0.5))*pixelHeight;
+         Vec3 pixelLocation = viewingPlaneOrigin_ + u_*(real_c(x)+real_t(0.5))*pixelWidth_ + v_*(real_c(y)+real_t(0.5))*pixelHeight_;
          Vec3 direction = (pixelLocation - cameraPosition_).getNormalized();
          ray.setDirection(direction);
          
