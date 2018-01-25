@@ -207,8 +207,8 @@ int main( int argc, char * argv[] )
 
       auto vtkOutput = vtk::createVTKOutput_BlockData( blocks, "plausibility test" );
 
-      vtkOutput->addCellDataWriter( boost::make_shared< field::VTKWriter< DistanceField, float  > >( distanceFieldId   , "distance field" ) );
-      vtkOutput->addCellDataWriter( boost::make_shared< field::VTKWriter< ErrorMarkerField      > >( errorMarkerFieldId, "error marker"   ) );
+      vtkOutput->addCellDataWriter( make_shared< field::VTKWriter< DistanceField, float  > >( distanceFieldId   , "distance field" ) );
+      vtkOutput->addCellDataWriter( make_shared< field::VTKWriter< ErrorMarkerField      > >( errorMarkerFieldId, "error marker"   ) );
 
       writeFiles( vtkOutput, true )();
    }

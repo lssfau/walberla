@@ -149,11 +149,11 @@ int main( int argc, char ** argv )
 
       // Setup communication schemes for synchronous GPUPackInfo
       CommSchemeType syncCommScheme(blocks);
-      syncCommScheme.addPackInfo( boost::make_shared< GPUPackInfoType >( syncGPUFieldId ) );
+      syncCommScheme.addPackInfo( make_shared< GPUPackInfoType >( syncGPUFieldId ) );
 
       // Setup communication scheme for asynchronous GPUPackInfo, which uses CUDA streams
       CommSchemeType asyncCommScheme(blocks);
-      asyncCommScheme.addPackInfo( boost::make_shared< GPUPackInfoType >( asyncGPUFieldId, streams ) );
+      asyncCommScheme.addPackInfo( make_shared< GPUPackInfoType >( asyncGPUFieldId, streams ) );
 
       // Perform one communication step for each scheme
       syncCommScheme();

@@ -856,7 +856,7 @@ inline BlockDataID BlockForest::addBlockData( const shared_ptr< T > & dataHandli
 {
    //static_assert( boost::is_base_of< BlockDataHandling<typename T::value_type>, T >::value );
 
-   auto downcast = boost::dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
+   auto downcast = dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
 
    if( downcast )
    {
@@ -880,7 +880,7 @@ template< typename T >
 inline BlockDataID BlockForest::loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling, const std::string & identifier,
                                                const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
-   auto downcast = boost::dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
+   auto downcast = dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
 
    if( downcast )
    {

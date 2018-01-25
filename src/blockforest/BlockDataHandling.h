@@ -214,7 +214,7 @@ public:
    template< typename T >
    BlockDataHandlingAdder & operator<<( const domain_decomposition::BlockDataCreator<T> & bdc )
    {
-      auto downcast = boost::dynamic_pointer_cast< blockforest::BlockDataHandling<T> >( bdc.dataHandling_ );
+      auto downcast = dynamic_pointer_cast< blockforest::BlockDataHandling<T> >( bdc.dataHandling_ );
       if( downcast )
       {
          dataHandling_.add( make_shared< blockforest::internal::BlockDataHandlingHelper<T> >( downcast ), bdc.requiredSelectors_,

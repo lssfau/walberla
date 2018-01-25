@@ -37,7 +37,6 @@
 #include "iterators/FieldPointer.h"
 
 #include <boost/function.hpp>
-#include <boost/static_assert.hpp>
 #include <memory>
 #include <vector>
 

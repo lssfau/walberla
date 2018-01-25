@@ -663,7 +663,7 @@ inline void Quaternion<Type>::swap( Quaternion& q ) /* throw() */
 template< typename Type >
 inline const Vector3<Type> Quaternion<Type>::getEulerAnglesXYZ() const
 {
-   BOOST_STATIC_ASSERT(!std::numeric_limits<Type>::is_integer);
+   WALBERLA_STATIC_ASSERT(!std::numeric_limits<Type>::is_integer);
 
    Vector3<Type> eulerAngles;
    

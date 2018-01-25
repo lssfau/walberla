@@ -32,7 +32,6 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include <boost/static_assert.hpp>
 #include <boost/type_traits/is_arithmetic.hpp>
 #include <boost/utility/enable_if.hpp>
 
@@ -370,9 +369,9 @@ template< typename Type >
 template< typename Axis, typename Angle >
 Matrix3<Type>::Matrix3( Vector3<Axis> axis, Angle angle )
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer  );
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Axis>::is_integer  );
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Angle>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer  );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Axis>::is_integer  );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Angle>::is_integer );
 
    const Angle sina( std::sin(angle) );
    const Angle cosa( std::cos(angle) );
@@ -1007,9 +1006,9 @@ inline const Matrix3<Type> Matrix3<Type>::getTranspose() const
 template< typename Type >
 inline Matrix3<Type>& Matrix3<Type>::invert()
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
    Type det = v_[0] * ( ( v_[4] * v_[8] ) - ( v_[7] * v_[5] ) ) +
               v_[1] * ( ( v_[5] * v_[6] ) - ( v_[8] * v_[3] ) ) +
@@ -1046,7 +1045,7 @@ inline Matrix3<Type>& Matrix3<Type>::invert()
 template< typename Type >
 inline const Matrix3<Type> Matrix3<Type>::getInverse() const
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
    Type det = v_[0] * ( ( v_[4] * v_[8] ) - ( v_[7] * v_[5] ) ) +
               v_[1] * ( ( v_[5] * v_[6] ) - ( v_[8] * v_[3] ) ) +
@@ -1101,8 +1100,8 @@ template< typename Type >
 template< typename Other >
 inline const Matrix3<HIGH> Matrix3<Type>::rotate( const Matrix3<Other>& m ) const
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer  );
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Other>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer  );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Other>::is_integer );
 
    //--Multiplication in two steps (number of FLOP = 90, 1 additional temporary matrix)------------
 
@@ -1160,8 +1159,8 @@ template< typename Type >
 template< typename Other >
 inline const Matrix3<HIGH> Matrix3<Type>::diagRotate( const Matrix3<Other>& m ) const
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer  );
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Other>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer  );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Other>::is_integer );
 
    // Precalculating tmp = m * R(-1)
    const Matrix3<HIGH> tmp( m.v_[0]*v_[0], m.v_[0]*v_[3], m.v_[0]*v_[6],
@@ -1249,7 +1248,7 @@ inline bool Matrix3<Type>::isZero() const
 template< typename Type >
 inline const Matrix3<Type> Matrix3<Type>::getCholesky() const
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
    Matrix3 tmp( Type(0) );
 
@@ -1292,8 +1291,8 @@ template< typename Type >
 template< typename Other >
 inline const Vector3<HIGH> Matrix3<Type>::solve( const Vector3<Other> &rhs ) const
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer  );
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Other>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer  );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Other>::is_integer );
 
    Vector3<HIGH> tmp1, tmp2;
    HIGH sum;
@@ -1355,7 +1354,7 @@ inline Type Matrix3<Type>::trace() const
 template< typename Type >
 inline const Vector3<Type> Matrix3<Type>::getEulerAnglesXYZ() const
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
    const Type cy( std::sqrt( v_[0]*v_[0] + v_[3]*v_[3] ) );
 
@@ -1382,7 +1381,7 @@ inline const Vector3<Type> Matrix3<Type>::getEulerAnglesXYZ() const
 template< typename Type >
 const Vector3<Type> Matrix3<Type>::getEulerAngles( EulerRotation order ) const
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
    static const uint_t eulSafe[4] = { 0, 1, 2, 0 };
    static const uint_t eulNext[4] = { 1, 2, 0, 1 };
@@ -1663,7 +1662,7 @@ inline bool isnan( const Matrix3<Type>& m )
 template< typename Type >
 inline const Matrix3<Type> abs( const Matrix3<Type>& m )
 {
-   BOOST_STATIC_ASSERT( std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( std::numeric_limits<Type>::is_integer );
    return Matrix3<Type>( std::abs(m[0]), std::abs(m[1]), std::abs(m[2]),
                          std::abs(m[3]), std::abs(m[4]), std::abs(m[5]),
                          std::abs(m[6]), std::abs(m[7]), std::abs(m[8]) );
@@ -1685,7 +1684,7 @@ inline const Matrix3<Type> abs( const Matrix3<Type>& m )
 template< typename Type >
 inline const Matrix3<Type> fabs( const Matrix3<Type>& m )
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
    return Matrix3<Type>( std::fabs(m[0]), std::fabs(m[1]), std::fabs(m[2]),
                          std::fabs(m[3]), std::fabs(m[4]), std::fabs(m[5]),
                          std::fabs(m[6]), std::fabs(m[7]), std::fabs(m[8]) );

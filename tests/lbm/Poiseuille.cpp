@@ -118,7 +118,7 @@ public:
         lastMeanError_( 0 ), lastMaxError_( 0 )
    {
       if ( filename.size() > 0 )
-         graphWriter_ = boost::make_shared<gather::GnuPlotGraphWriter>( filename );
+         graphWriter_ = make_shared<gather::GnuPlotGraphWriter>( filename );
    }
 
    virtual ~PoiseuilleVelocityDataProcessor() {}
