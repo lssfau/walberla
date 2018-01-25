@@ -370,14 +370,11 @@ void Raytracer::rayTrace(const size_t timestep) {
    
    //WALBERLA_LOG_INFO("#particles visible: " << visibleBodyIDs.size());
    WALBERLA_LOG_INFO_ON_ROOT("#gathered intersections: " << gatheredIntersectionCount);
-
-   auto tpReducedTotal = tp_.getReduced(WcTimingPool::REDUCE_TOTAL);
-   auto tpReducedMax = tp_.getReduced(WcTimingPool::REDUCE_MAX);
+   
+   auto tpReduced = tp_.getReduced();
    WALBERLA_ROOT_SECTION() {
-      WALBERLA_LOG_INFO("Timing total:");
-      tpReducedTotal->print(std::cout);
-      WALBERLA_LOG_INFO("Timing max.:");
-      tpReducedMax->print(std::cout);
+      WALBERLA_LOG_INFO("Raytracing timing:");
+      tpReduced->print(std::cout);
    }
    
    if (getTBufferOutputEnabled()) {
