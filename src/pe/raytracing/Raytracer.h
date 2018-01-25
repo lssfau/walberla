@@ -137,8 +137,8 @@ public:
    void rayTrace(const size_t timestep);
    
 private:
-   void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const size_t timestep) const;
-   void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const std::string& fileName) const;
+   void writeTBufferToFile(const std::vector<real_t>& tBuffer, const size_t timestep) const;
+   void writeTBufferToFile(const std::vector<real_t>& tBuffer, const std::string& fileName) const;
    bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
    size_t coordinateToArrayIndex(size_t x, size_t y) const;
    //@}
@@ -243,11 +243,13 @@ inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
  */
 template <typename BodyTypeTuple>
 void Raytracer::rayTrace(const size_t timestep) {
+   real_t inf = std::numeric_limits<real_t>::max();
+
+   std::vector<real_t> tBuffer_vector(pixelsVertical_ * pixelsHorizontal_, inf);
    std::map<Coordinates, real_t, CoordinatesComparator> tBuffer; // t values for each pixel
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    //std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap; // contains intersection info indexed by the coordinate of the pixel which was hit
    
-   real_t inf = std::numeric_limits<real_t>::max();
    real_t t, t_closest;
    walberla::id_t id_closest;
    RigidBody* body_closest = NULL;
@@ -330,7 +332,9 @@ void Raytracer::rayTrace(const size_t timestep) {
             //localPixelIntersectionMap[c] = intersectionInfo;
          }
          
-         tBuffer[c] = t_closest;
+         tBuffer_vector[coordinateToArrayIndex(x, y)] = t_closest;
+         
+         //tBuffer[c] = t_closest;
       }
       //std::cout << std::endl;
    }
@@ -378,7 +382,7 @@ void Raytracer::rayTrace(const size_t timestep) {
    }
    
    if (getTBufferOutputEnabled()) {
-      writeTBufferToFile(tBuffer, timestep);
+      writeTBufferToFile(tBuffer_vector, timestep);
    }
 }
 

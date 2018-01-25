@@ -116,7 +116,7 @@ void Raytracer::setupView_() {
 /*!\brief Writes the tBuffer to a file in the tBuffer output directory.
  * \param tBuffer Buffer with t values as generated in rayTrace(...).
  */
-void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const size_t timestep) const {
+void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const size_t timestep) const {
    mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
    std::string fileName = "tbuffer_" + std::to_string(timestep) + "+" + std::to_string(rank) + ".ppm";
    writeTBufferToFile(tBuffer, fileName);
@@ -126,7 +126,7 @@ void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, Coordinat
  * \param tBuffer Buffer with t values as generated in rayTrace(...).
  * \param fileName Name of the output file.
  */
-void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const std::string& fileName) const {
+void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std::string& fileName) const {
    namespace fs = boost::filesystem;
    
    real_t inf = std::numeric_limits<real_t>::max();
@@ -135,8 +135,8 @@ void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, Coordinat
    real_t t_min = inf;
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
-         Coordinates c = {x, y};
-         real_t t = tBuffer.at(c);
+         size_t i = coordinateToArrayIndex(x, y);
+         real_t t = tBuffer[i];
          if (t > t_max && !realIsIdentical(t, inf)) {
             t_max = t;
          }
@@ -155,9 +155,9 @@ void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, Coordinat
    ofs << "P6\n" << pixelsHorizontal_ << " " << pixelsVertical_ << "\n255\n";
    for (size_t y = pixelsVertical_-1; y > 0; y--) {
       for (size_t x = 0; x < pixelsHorizontal_; x++) {
-         Coordinates c = {x, y};
+         size_t i = coordinateToArrayIndex(x, y);
          char r = 0, g = 0, b = 0;
-         real_t t = tBuffer.at(c);
+         real_t t = tBuffer[i];
          if (realIsIdentical(t, inf)) {
             r = g = b = (char)0;
          } else {
