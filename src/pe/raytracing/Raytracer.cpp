@@ -187,7 +187,7 @@ bool Raytracer::isPlaneVisible(const PlaneID plane, const Ray& ray) const {
  * \return Array index.
  */
 size_t Raytracer::coordinateToArrayIndex(size_t x, size_t y) const {
-   return y*pixelsVertical_ + x;
+   return y*pixelsHorizontal_ + x;
 }
 }
 }
