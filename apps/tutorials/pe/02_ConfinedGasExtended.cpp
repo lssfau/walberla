@@ -257,7 +257,9 @@ int main( int argc, char ** argv )
       }
       
       if ( i % raytracerSkippedSteps == 0) {
+         tp["Raytracing"].start();
          raytracer.rayTrace<BodyTuple>(size_t(i));
+         tp["Raytracing"].end();
       }
    }
    tp["Total"].end();
