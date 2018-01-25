@@ -71,7 +71,7 @@ public:
                       size_t pixelsHorizontal, size_t pixelsVertical,
                       real_t fov_vertical,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
-                     real_t blockAABBIntersectionPadding = real_t(0.0));
+                      real_t blockAABBIntersectionPadding = real_t(0.0));
    explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                       const shared_ptr<BodyStorage> globalBodyStorage,
                       const Config::BlockHandle& config);
@@ -109,6 +109,7 @@ private:
    Vec3 viewingPlaneOrigin_;  //!< The origin of the viewing plane.
    real_t pixelWidth_;        //!< The width of a pixel of the generated image in the viewing plane.
    real_t pixelHeight_;       //!< The height of a pixel of the generated image in the viewing plane.
+   WcTimingPool tp_;
 
 public:
    /*!\name Get functions */
@@ -133,12 +134,13 @@ public:
    //@{
    void setupView_();
    template <typename BodyTypeTuple>
-   void rayTrace(const size_t timestep) const;
+   void rayTrace(const size_t timestep);
    
 private:
    void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const size_t timestep) const;
    void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const std::string& fileName) const;
-   bool isPlaneVisible(const PlaneID plane, const Ray& ray) const ;
+   bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
+   size_t coordinateToArrayIndex(size_t x, size_t y) const;
    //@}
 };
    
@@ -240,12 +242,10 @@ inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
  * same direction. See Raytracer::isPlaneVisible() for further information.
  */
 template <typename BodyTypeTuple>
-void Raytracer::rayTrace(const size_t timestep) const {
-   WcTimingPool tp;
+void Raytracer::rayTrace(const size_t timestep) {
    std::map<Coordinates, real_t, CoordinatesComparator> tBuffer; // t values for each pixel
-   std::map<Coordinates, walberla::id_t, CoordinatesComparator> idBuffer; // ids of the intersected body for each pixel
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
-   std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap; // contains intersection info indexed by the coordinates of the pixel which was hit
+   //std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap; // contains intersection info indexed by the coordinate of the pixel which was hit
    
    real_t inf = std::numeric_limits<real_t>::max();
    real_t t, t_closest;
@@ -253,7 +253,7 @@ void Raytracer::rayTrace(const size_t timestep) const {
    RigidBody* body_closest = NULL;
    Ray ray(cameraPosition_, Vec3(1,0,0));
    IntersectsFunctor func(ray, t);
-   tp["Raytracing"].start();
+   tp_["Raytracing"].start();
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
          //WALBERLA_LOG_INFO(x << "/" << y);
@@ -327,17 +327,16 @@ void Raytracer::rayTrace(const size_t timestep) const {
                t_closest
             };
             intersections.push_back(intersectionInfo);
-            localPixelIntersectionMap[c] = intersectionInfo;
+            //localPixelIntersectionMap[c] = intersectionInfo;
          }
          
          tBuffer[c] = t_closest;
-         idBuffer[c] = id_closest;
       }
       //std::cout << std::endl;
    }
-   tp["Raytracing"].end();
+   tp_["Raytracing"].end();
    
-   tp["Reduction"].start();
+   tp_["Reduction"].start();
    
    // intersections synchronisieren
    mpi::SendBuffer sendBuffer;
@@ -345,47 +344,35 @@ void Raytracer::rayTrace(const size_t timestep) const {
       sendBuffer << info.imageX << info.imageY << info.bodySystemID << info.t;
    }
    
-   std::vector<BodyIntersectionInfo> gatheredIntersections;
-   std::unordered_set<walberla::id_t> visibleBodyIDs;
+   int gatheredIntersectionCount = 0;
+   
+   std::vector<real_t> fullImage(pixelsHorizontal_ * pixelsVertical_, inf);
    
    mpi::RecvBuffer recvBuffer;
    mpi::allGathervBuffer(sendBuffer, recvBuffer);
+   BodyIntersectionInfo info;
    while (!recvBuffer.isEmpty()) {
-      BodyIntersectionInfo info;
-      
       recvBuffer >> info.imageX;
       recvBuffer >> info.imageY;
       recvBuffer >> info.bodySystemID;
       recvBuffer >> info.t;
       
-      Coordinates c = {
-         info.imageX,
-         info.imageY
-      };
-      
-      auto it = localPixelIntersectionMap.find(c);
-      if (it != localPixelIntersectionMap.end()) {
-         // there was a local hit at coordinate c
-         BodyIntersectionInfo& localInfo = localPixelIntersectionMap.at(c);
-         if (localInfo.t > info.t) {
-            localPixelIntersectionMap.erase(it);
-         }
+      size_t i = coordinateToArrayIndex(info.imageX, info.imageY);
+      real_t currentFullImageT = fullImage[i];
+      if (currentFullImageT > info.t) {
+         fullImage[i] = info.t;
       }
       
-      //gatheredIntersections.push_back(info);
+      gatheredIntersectionCount++;
    }
    
-   for (auto& info: localPixelIntersectionMap) {
-      visibleBodyIDs.insert(info.second.bodySystemID);
-   }
+   tp_["Reduction"].end();
    
-   tp["Reduction"].end();
-   
-   WALBERLA_LOG_INFO("#particles visible: " << visibleBodyIDs.size());
-   WALBERLA_LOG_INFO_ON_ROOT("#gatheredIntersections: " << gatheredIntersections.size());
-   
-   auto tpReducedTotal = tp.getReduced(WcTimingPool::REDUCE_TOTAL);
-   auto tpReducedMax = tp.getReduced(WcTimingPool::REDUCE_MAX);
+   //WALBERLA_LOG_INFO("#particles visible: " << visibleBodyIDs.size());
+   WALBERLA_LOG_INFO_ON_ROOT("#gathered intersections: " << gatheredIntersectionCount);
+
+   auto tpReducedTotal = tp_.getReduced(WcTimingPool::REDUCE_TOTAL);
+   auto tpReducedMax = tp_.getReduced(WcTimingPool::REDUCE_MAX);
    WALBERLA_ROOT_SECTION() {
       WALBERLA_LOG_INFO("Timing total:");
       tpReducedTotal->print(std::cout);

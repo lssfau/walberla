@@ -183,10 +183,10 @@ int main( int argc, char** argv )
    
    SetBodyTypeIDs<BodyTuple>::execute();
    
-   //SphereIntersectsTest();
-   //PlaneIntersectsTest();
-   //BoxIntersectsTest();
-   //AABBIntersectsTest();
+   SphereIntersectsTest();
+   PlaneIntersectsTest();
+   BoxIntersectsTest();
+   AABBIntersectsTest();
    RaytracerTest();
    
    return EXIT_SUCCESS;

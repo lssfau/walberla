@@ -181,6 +181,14 @@ bool Raytracer::isPlaneVisible(const PlaneID plane, const Ray& ray) const {
    return plane->getNormal() * ray.getDirection() < 0;
 }
 
+/*!\brief Converts a coordinate to an array index.
+ * \param x X component of the coordinate.
+ * \param y Y component of the coordinate.
+ * \return Array index.
+ */
+size_t Raytracer::coordinateToArrayIndex(size_t x, size_t y) const {
+   return y*pixelsVertical_ + x;
+}
 }
 }
 }
