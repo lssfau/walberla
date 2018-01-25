@@ -245,8 +245,7 @@ template <typename BodyTypeTuple>
 void Raytracer::rayTrace(const size_t timestep) {
    real_t inf = std::numeric_limits<real_t>::max();
 
-   std::vector<real_t> tBuffer_vector(pixelsVertical_ * pixelsHorizontal_, inf);
-   std::map<Coordinates, real_t, CoordinatesComparator> tBuffer; // t values for each pixel
+   std::vector<real_t> tBuffer(pixelsVertical_ * pixelsHorizontal_, inf);
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    //std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap; // contains intersection info indexed by the coordinate of the pixel which was hit
    
@@ -332,7 +331,7 @@ void Raytracer::rayTrace(const size_t timestep) {
             //localPixelIntersectionMap[c] = intersectionInfo;
          }
          
-         tBuffer_vector[coordinateToArrayIndex(x, y)] = t_closest;
+         tBuffer[coordinateToArrayIndex(x, y)] = t_closest;
          
          //tBuffer[c] = t_closest;
       }
@@ -382,7 +381,7 @@ void Raytracer::rayTrace(const size_t timestep) {
    }
    
    if (getTBufferOutputEnabled()) {
-      writeTBufferToFile(tBuffer_vector, timestep);
+      writeTBufferToFile(tBuffer, timestep);
    }
 }
 
