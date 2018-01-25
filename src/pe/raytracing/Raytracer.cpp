@@ -171,6 +171,9 @@ void Raytracer::writeTBufferToFile(const std::map<Coordinates, real_t, Coordinat
 /*!\brief Checks if a plane should get rendered.
  * \param plane Plane to check for visibility.
  * \param ray Ray which is intersected with plane.
+ *
+ * Checks if a plane should get rendered by comparing the planes normal and the ray direction.
+ * If the rays direction vectors projection on the planes normal is positive, the plane is considered invisible.
  */
 bool Raytracer::isPlaneVisible(const PlaneID plane, const Ray& ray) const {
    return plane->getNormal() * ray.getDirection() < 0;

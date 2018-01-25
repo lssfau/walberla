@@ -235,6 +235,9 @@ inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
 /*!\brief Does one raytracing step.
  *
  * \param timestep The timestep after which the raytracing starts.
+ *
+ * \attention Planes will not get rendered if their normal and the rays direction point in the approximately
+ * same direction. See Raytracer::isPlaneVisible() for further information.
  */
 template <typename BodyTypeTuple>
 void Raytracer::rayTrace(const size_t timestep) const {
