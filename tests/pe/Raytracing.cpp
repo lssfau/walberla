@@ -146,37 +146,29 @@ void RaytracerTest() {
                        Vec3(-5,0,0), Vec3(-1,0,0), Vec3(0,0,1));
    
    MaterialID iron = Material::find("iron");
-   Plane pl1(1, 1, Vec3(2, 0, 0), Vec3(1, 0, 0), real_t(1.0), iron);
    
-   PlaneID xNegPlane = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(5,0,0), iron);
+   //PlaneID xNegPlane = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(5,0,0), iron);
    // xNegPlane obstructs only the top left sphere and intersects some objects
-   WALBERLA_CHECK(xNegPlane != NULL);
-   WALBERLA_CHECK(!raytracer.isBodyInvisible(xNegPlane), "Body invisible but should be visible.");
-   raytracer.setBodyInvisible(xNegPlane);
-   WALBERLA_CHECK(raytracer.isBodyInvisible(xNegPlane), "Body visible but should be invisible.");
-   raytracer.setBodyVisible(xNegPlane);
-   WALBERLA_CHECK(!raytracer.isBodyInvisible(xNegPlane), "Body invisible but should be visible.");
-   raytracer.setBodyInvisible(xNegPlane);
 
-   PlaneID xNegPlaneClose = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(1,0,0), iron);
-   raytracer.setBodyInvisible(xNegPlaneClose); // xNegPlaneClose would obstruct all objects
+   //PlaneID xNegPlaneClose = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(1,0,0), iron);
    
-   createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,5,0), iron); // left wall
+   // Test Scene v1 - Spheres, (rotated) boxes, confining walls, tilted plane in right bottom back corner
+   createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), Vec3(0,5,0), iron); // left wall
    createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,-5,0), iron); // right wall
    createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,-5), iron); // floor
-   createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,5), iron); // ceiling
-   createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(10,0,0), iron); // back wall
-   PlaneID frontWall = createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(0,0,0), iron); // front wall
-   raytracer.setBodyInvisible(frontWall);
+   createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), Vec3(0,0,5), iron); // ceiling
+   createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(10,0,0), iron); // back wall
+   createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(0,0,0), iron); // front wall, should not get rendered
+
+   createPlane(*globalBodyStorage, 0, Vec3(-1,1,1), Vec3(8,-3,-3), iron); // tilted plane in right bottom back corner
    
    createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,4.5,4.5), real_t(0.5));
-   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(3.5,-2,0), real_t(1));
-   SphereID sp1 = createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,2,0), real_t(1));
-   BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,0,0), Vec3(2,4,3));
+   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(4,0.5,0), real_t(1));
+   createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,3.5,0), real_t(1));
+   BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,1.5,0), Vec3(2,4,3));
    box->rotate(0,math::M_PI/4,math::M_PI/4);
-   createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,-4,3), Vec3(2,2,2));
-   
-   raytracer.setBodyInvisible(sp1);
+   createBox(*globalBodyStorage, *forest, storageID, 8, Vec3(5,-4,3), Vec3(2,2,2));
+   // Test scene v1 end
    
    raytracer.setTBufferOutputDirectory("/Users/ng/Desktop/walberla");
    raytracer.setTBufferOutputEnabled(true);
@@ -191,10 +183,10 @@ int main( int argc, char** argv )
    
    SetBodyTypeIDs<BodyTuple>::execute();
    
-   SphereIntersectsTest();
-   PlaneIntersectsTest();
-   BoxIntersectsTest();
-   AABBIntersectsTest();
+   //SphereIntersectsTest();
+   //PlaneIntersectsTest();
+   //BoxIntersectsTest();
+   //AABBIntersectsTest();
    RaytracerTest();
    
    return EXIT_SUCCESS;

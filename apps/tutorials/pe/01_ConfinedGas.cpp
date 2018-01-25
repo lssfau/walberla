@@ -165,7 +165,7 @@ int main( int argc, char ** argv )
    auto simulationDomain = forest->getDomain();
    auto generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
    //! [Planes]
-   PlaneID xPosPlane = createPlane(*globalBodyStorage, 0, Vec3(1,0,0), simulationDomain.minCorner(), material );
+   createPlane(*globalBodyStorage, 0, Vec3(1,0,0), simulationDomain.minCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), simulationDomain.maxCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,1,0), simulationDomain.minCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), simulationDomain.maxCorner(), material );
@@ -173,8 +173,6 @@ int main( int argc, char ** argv )
    createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), simulationDomain.maxCorner(), material );
    //! [Planes]
    
-   raytracer.setBodyInvisible(xPosPlane);
-
    //! [Gas]
    uint_t numParticles = uint_c(0);
    for (auto blkIt = forest->begin(); blkIt != forest->end(); ++blkIt)

@@ -97,10 +97,6 @@ private:
    
    bool tBufferOutputEnabled_; //!< Enable / disable dumping the tbuffer to a file
    std::string tBufferOutputDirectory_; //!< Path to the tbuffer output directory
-   
-   std::set<walberla::id_t> invisibleBodyIDs_;  //!< The set for invisible body IDs.
-   // std::set is used here because for a small number of elements it is often faster than std::unordered_set
-   
    //@}
    
    Vec3 n; // normal vector of viewing plane
@@ -125,15 +121,12 @@ public:
    inline const Vec3& getUpVector() const;
    inline bool getTBufferOutputEnabled() const;
    inline const std::string& getTBufferOutputDirectory() const;
-   inline bool isBodyInvisible(BodyID body) const;
    //@}
 
    /*!\name Set functions */
    //@{
    inline void setTBufferOutputEnabled(const bool enabled);
    inline void setTBufferOutputDirectory(const std::string& path);
-   inline void setBodyInvisible(BodyID body);
-   inline void setBodyVisible(BodyID body);
    //@}
    
    /*!\name Functions */
@@ -145,6 +138,7 @@ public:
 private:
    void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const size_t timestep) const;
    void writeTBufferToFile(const std::map<Coordinates, real_t, CoordinatesComparator>& tBuffer, const std::string& fileName) const;
+   bool isPlaneVisible(const PlaneID plane, const Ray& ray) const ;
    //@}
 };
    
@@ -219,14 +213,6 @@ inline const std::string& Raytracer::getTBufferOutputDirectory() const {
    return tBufferOutputDirectory_;
 }
    
-/*!\brief Returns if the specified body is invisible.
- *
- * \return True if body invisible, false otherwise.
- */
-inline bool Raytracer::isBodyInvisible(BodyID body) const {
-   return invisibleBodyIDs_.find(body->getSystemID()) != invisibleBodyIDs_.end();
-}
-   
 /*!\brief Enabled / disable outputting the tBuffer to a file in the specified directory.
  * \param enabled Set to true / false to enable / disable tbuffer output.
  */
@@ -245,21 +231,7 @@ inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
    
    tBufferOutputDirectory_ = path;
 }
-   
-/*!\brief Mark the specified body as invisible for the raytracing algorithm.
- * \param body Body to set invisible.
- */
-inline void Raytracer::setBodyInvisible(BodyID body) {
-   invisibleBodyIDs_.insert(body->getSystemID());
-}
-   
-/*!\brief Mark the specified body as visible for the raytracing algorithm.
- * \param body Body to set invisible.
- */
-inline void Raytracer::setBodyVisible(BodyID body) {
-   invisibleBodyIDs_.erase(body->getSystemID());
-}
-   
+
 /*!\brief Does one raytracing step.
  *
  * \param timestep The timestep after which the raytracing starts.
@@ -296,8 +268,11 @@ void Raytracer::rayTrace(const size_t timestep) const {
             }
 #endif
             for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
-               if (isBodyInvisible(*bodyIt)) {
-                  continue;
+               if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
+                  PlaneID plane = (Plane*)(*bodyIt);
+                  if (!isPlaneVisible(plane, ray)) {
+                     continue;
+                  }
                }
                
                bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
@@ -315,8 +290,11 @@ void Raytracer::rayTrace(const size_t timestep) const {
          // optimization required, e.g. split up global bodies over all processes.
          WALBERLA_ROOT_SECTION() {
             for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt ) {
-               if (isBodyInvisible(*bodyIt)) {
-                  continue;
+               if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
+                  PlaneID plane = (Plane*)(*bodyIt);
+                  if (!isPlaneVisible(plane, ray)) {
+                     continue;
+                  }
                }
                
                bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
