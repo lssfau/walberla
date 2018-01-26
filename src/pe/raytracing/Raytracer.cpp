@@ -115,10 +115,12 @@ void Raytracer::setupView_() {
 
 /*!\brief Writes the tBuffer to a file in the tBuffer output directory.
  * \param tBuffer Buffer with t values as generated in rayTrace(...).
+ * \param timestep Timestep this image is from.
+ * \param isGlobalImage Whether this image is the fully stitched together one.
  */
-void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const size_t timestep) const {
+void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t timestep, bool isGlobalImage) const {
    mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
-   std::string fileName = "tbuffer_" + std::to_string(timestep) + "+" + std::to_string(rank) + ".ppm";
+   std::string fileName = "tbuffer_" + std::to_string(timestep) + "+" + (isGlobalImage ? "global" : std::to_string(rank)) + ".ppm";
    writeTBufferToFile(tBuffer, fileName);
 }
 

@@ -47,21 +47,6 @@ struct BodyIntersectionInfo {
    real_t t;                     //!< distance from camera to intersection point on body.
 };
 
-/*!\brief Simple struct for coordinates.
- */
-struct Coordinates {
-   size_t x;
-   size_t y;
-};
-
-/*!\brief Comparator for Coordinates struct with standard lexicographical ordering.
- */
-struct CoordinatesComparator {
-   bool operator() (const Coordinates& lhs, const Coordinates& rhs) const {
-      return (lhs.x < rhs.x) || (lhs.x == rhs.x && lhs.y < rhs.y);
-   }
-};
-
 class Raytracer {
 public:
    /*!\name Constructors */
@@ -137,7 +122,7 @@ public:
    void rayTrace(const size_t timestep);
    
 private:
-   void writeTBufferToFile(const std::vector<real_t>& tBuffer, const size_t timestep) const;
+   void writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t timestep, bool isGlobalImage = false) const;
    void writeTBufferToFile(const std::vector<real_t>& tBuffer, const std::string& fileName) const;
    bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
    size_t coordinateToArrayIndex(size_t x, size_t y) const;
@@ -247,7 +232,6 @@ void Raytracer::rayTrace(const size_t timestep) {
 
    std::vector<real_t> tBuffer(pixelsVertical_ * pixelsHorizontal_, inf);
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
-   //std::map<Coordinates, BodyIntersectionInfo, CoordinatesComparator> localPixelIntersectionMap; // contains intersection info indexed by the coordinate of the pixel which was hit
    
    real_t t, t_closest;
    walberla::id_t id_closest;
@@ -257,7 +241,6 @@ void Raytracer::rayTrace(const size_t timestep) {
    tp_["Raytracing"].start();
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
-         //WALBERLA_LOG_INFO(x << "/" << y);
          Vec3 pixelLocation = viewingPlaneOrigin_ + u_*(real_c(x)+real_t(0.5))*pixelWidth_ + v_*(real_c(y)+real_t(0.5))*pixelHeight_;
          Vec3 direction = (pixelLocation - cameraPosition_).getNormalized();
          ray.setDirection(direction);
@@ -313,13 +296,6 @@ void Raytracer::rayTrace(const size_t timestep) {
             }
          }
          
-         //std::cout << (t_closest != inf ? size_t(t_closest) : 0) << " ";
-         
-         Coordinates c = {
-            x,
-            y
-         };
-         
          if (!realIsIdentical(t_closest, inf) && body_closest != NULL) {
             BodyIntersectionInfo intersectionInfo = {
                x,
@@ -328,14 +304,10 @@ void Raytracer::rayTrace(const size_t timestep) {
                t_closest
             };
             intersections.push_back(intersectionInfo);
-            //localPixelIntersectionMap[c] = intersectionInfo;
          }
          
          tBuffer[coordinateToArrayIndex(x, y)] = t_closest;
-         
-         //tBuffer[c] = t_closest;
       }
-      //std::cout << std::endl;
    }
    tp_["Raytracing"].end();
    
@@ -382,6 +354,9 @@ void Raytracer::rayTrace(const size_t timestep) {
    
    if (getTBufferOutputEnabled()) {
       writeTBufferToFile(tBuffer, timestep);
+      WALBERLA_ROOT_SECTION() {
+         writeTBufferToFile(fullImage, timestep, true);
+      }
    }
 }
 
