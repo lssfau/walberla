@@ -58,13 +58,16 @@ def sliceToCellInterval( s ):
     
 
 def cellIntervalToSlice(cellInterval, collapseExtentOne=True):
+    if not hasattr(collapseExtentOne, '__len__'):
+        collapseExtentOne = (collapseExtentOne, collapseExtentOne, collapseExtentOne)
+
     slices = []
-    for i in range(3):
-        if collapseExtentOne and cellInterval.min[i] == cellInterval.max[i]:
+    for i, collapseInfo in enumerate(collapseExtentOne):
+        if collapseInfo and cellInterval.min[i] == cellInterval.max[i]:
             slices.append( cellInterval.min[i] )
         else:
             slices.append( slice(cellInterval.min[i], cellInterval.max[i]+1,None ) )
-    return slices
+    return tuple(slices)
 
 
 

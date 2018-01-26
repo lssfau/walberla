@@ -10,6 +10,9 @@ def toGpuArray(f, withGhostLayers=True):
     dtype = np.dtype(f.dtypeStr)
     strides = [dtype.itemsize*a for a in f.strides]
     res = GPUArray(f.sizeWithGhostLayers, dtype, gpudata=f.ptr, strides=strides)
+    if withGhostLayers is True:
+        return res
+
     ghostLayers = normalizeGhostlayerInfo(f, withGhostLayers)
     glCutoff = [ f.nrOfGhostLayers - gl for gl in ghostLayers ]
     res = res[ glCutoff[0]:-glCutoff[0] if glCutoff[0] > 0 else None,
