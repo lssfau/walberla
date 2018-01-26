@@ -114,6 +114,9 @@ public:
                     const PhantomBlockForest & phantomForest,
                     const uint_t iteration ) const;
 
+   void setMaxBlocksPerProcess(const int maxBlocks) {maxBlocksPerProcess_ = maxBlocks;}
+   int  getMaxBlocksPerProcess() const {return maxBlocksPerProcess_;}
+
 private:
 
    void allGatherWeighted( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
@@ -191,6 +194,8 @@ private:
    ///
    /// This allows to use the same algorithm for levelwise balancing as well as for balancing without levels.
    bool levelwise_;
+
+   int  maxBlocksPerProcess_ = std::numeric_limits<int>::max(); //!< limits the maximum number of blocks per process
 };
 
 
@@ -785,9 +790,11 @@ void DynamicCurveBalance< PhantomData_T >::balanceWeighted( const std::vector< s
       {
          const long double pWeight = totalWeight / numeric_cast< long double >( processes - p );
          long double weight( 0 );
+         int numBlocks( 0 );
          while( c < blocks.size() &&
                 std::abs( pWeight - weight - numeric_cast< long double >( allBlocks[ uint_c( blocks[c].first ) ][ blocks[c].second ].second ) ) <=
-                std::abs( pWeight - weight ) )
+                std::abs( pWeight - weight ) &&
+                numBlocks < maxBlocksPerProcess_ )
          {
             targets[ uint_c( blocks[c].first ) ][ blocks[c].second ] = pid_c(p);
             sender[p].insert( blocks[c].first );
@@ -795,6 +802,7 @@ void DynamicCurveBalance< PhantomData_T >::balanceWeighted( const std::vector< s
             weight += addedWeight;
             totalWeight -= addedWeight;
             ++c;
+            ++numBlocks;
          }
       }
       while( c < blocks.size() )
