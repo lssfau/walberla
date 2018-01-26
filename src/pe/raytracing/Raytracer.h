@@ -338,27 +338,29 @@ void Raytracer::rayTrace(const size_t timestep) {
    for (auto& info: intersections) {
       sendBuffer << info.imageX << info.imageY << info.bodySystemID << info.t;
    }
-   
    int gatheredIntersectionCount = 0;
-   
    std::vector<real_t> fullImage(pixelsHorizontal_ * pixelsVertical_, inf);
-   
    mpi::RecvBuffer recvBuffer;
-   mpi::allGathervBuffer(sendBuffer, recvBuffer);
-   BodyIntersectionInfo info;
-   while (!recvBuffer.isEmpty()) {
-      recvBuffer >> info.imageX;
-      recvBuffer >> info.imageY;
-      recvBuffer >> info.bodySystemID;
-      recvBuffer >> info.t;
-      
-      size_t i = coordinateToArrayIndex(info.imageX, info.imageY);
-      real_t currentFullImageT = fullImage[i];
-      if (currentFullImageT > info.t) {
-         fullImage[i] = info.t;
+   
+   mpi::gathervBuffer(sendBuffer, recvBuffer, 0);
+   //mpi::allGathervBuffer(sendBuffer, recvBuffer);
+   
+   WALBERLA_ROOT_SECTION() {
+      BodyIntersectionInfo info;
+      while (!recvBuffer.isEmpty()) {
+         recvBuffer >> info.imageX;
+         recvBuffer >> info.imageY;
+         recvBuffer >> info.bodySystemID;
+         recvBuffer >> info.t;
+         
+         size_t i = coordinateToArrayIndex(info.imageX, info.imageY);
+         real_t currentFullImageT = fullImage[i];
+         if (currentFullImageT > info.t) {
+            fullImage[i] = info.t;
+         }
+         
+         gatheredIntersectionCount++;
       }
-      
-      gatheredIntersectionCount++;
    }
    
    tp_["Reduction"].end();
