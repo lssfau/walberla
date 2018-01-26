@@ -124,8 +124,8 @@ public:
 private:
    void writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t timestep, bool isGlobalImage = false) const;
    void writeTBufferToFile(const std::vector<real_t>& tBuffer, const std::string& fileName) const;
-   bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
-   size_t coordinateToArrayIndex(size_t x, size_t y) const;
+   inline bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
+   inline size_t coordinateToArrayIndex(size_t x, size_t y) const;
    //@}
 };
    
