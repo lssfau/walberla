@@ -218,6 +218,26 @@ inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
    
    tBufferOutputDirectory_ = path;
 }
+   
+/*!\brief Checks if a plane should get rendered.
+ * \param plane Plane to check for visibility.
+ * \param ray Ray which is intersected with plane.
+ *
+ * Checks if a plane should get rendered by comparing the planes normal and the ray direction.
+ * If the rays direction vectors projection on the planes normal is positive, the plane is considered invisible.
+ */
+inline bool Raytracer::isPlaneVisible(const PlaneID plane, const Ray& ray) const {
+   return plane->getNormal() * ray.getDirection() < 0;
+}
+
+/*!\brief Converts a coordinate to an array index.
+ * \param x X component of the coordinate.
+ * \param y Y component of the coordinate.
+ * \return Array index.
+ */
+inline size_t Raytracer::coordinateToArrayIndex(size_t x, size_t y) const {
+   return y*pixelsHorizontal_ + x;
+}
 
 /*!\brief Does one raytracing step.
  *
@@ -359,7 +379,7 @@ void Raytracer::rayTrace(const size_t timestep) {
       }
    }
 }
-
+   
 }
 }
 }
