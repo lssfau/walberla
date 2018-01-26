@@ -119,8 +119,14 @@ void Raytracer::setupView_() {
  * \param isGlobalImage Whether this image is the fully stitched together one.
  */
 void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t timestep, bool isGlobalImage) const {
+   WALBERLA_CHECK(timestep < 100000, "Raytracer only supports outputting 99 999 timesteps.");
    mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
-   std::string fileName = "tbuffer_" + std::to_string(timestep) + "+" + (isGlobalImage ? "global" : std::to_string(rank)) + ".ppm";
+   uint8_t padding = (timestep < 10 ? 4 :
+                      (timestep < 100 ? 3 :
+                       (timestep < 1000 ? 2 :
+                        (timestep < 10000 ? 1 :
+                         0))));
+   std::string fileName = "tbuffer_" + std::string(padding, '0') + std::to_string(timestep) + "+" + (isGlobalImage ? "global" : std::to_string(rank)) + ".ppm";
    writeTBufferToFile(tBuffer, fileName);
 }
 
