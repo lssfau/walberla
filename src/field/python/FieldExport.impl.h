@@ -34,6 +34,7 @@
 #include "field/AddToStorage.h"
 #include "field/python/GatherExport.h"
 #include "field/vtk/VTKWriter.h"
+#include "field/vtk/FlagFieldMapping.h"
 
 #include "python_coupling/helper/MplHelpers.h"
 #include "python_coupling/helper/BoostPythonHelpers.h"
@@ -749,8 +750,8 @@ namespace internal {
             .add_property("allocSize", &field_allocSize       < Field_T > )
             .add_property("strides",   &field_strides         < Field_T > )
             .add_property("offsets",   &field_offsets         < Field_T > )
-            .def("clone",              &Field_T::clone                    , return_value_policy<manage_new_object>())
-            .def("cloneUninitialized", &Field_T::cloneUninitialized       , return_value_policy<manage_new_object>())
+            .def("clone",              &Field_T::clone             , return_value_policy<manage_new_object>())
+            .def("cloneUninitialized", &Field_T::cloneUninitialized, return_value_policy<manage_new_object>())
             .def("swapDataPointers",   &field_swapDataPointers< Field_T > )
             .def("__getitem__",        &field_getCellXYZ      < Field_T > )
             .def("__setitem__",        &field_setCellXYZ      < Field_T > )
@@ -1087,6 +1088,150 @@ namespace internal {
          return exporter.getCreatedWriter();
       }
    }
+
+   //===================================================================================================================
+   //
+   //  createFlagFieldVTKWriter
+   //
+   //===================================================================================================================
+
+   class CreateFlagFieldVTKWriterExporter
+   {
+   public:
+      CreateFlagFieldVTKWriterExporter( const shared_ptr<StructuredBlockStorage> & blocks,
+                                        ConstBlockDataID fieldId, const std::string & vtkName,
+                                        boost::python::dict flagMapping)
+         : blocks_( blocks ), fieldId_(fieldId), vtkName_( vtkName ), flagMapping_( flagMapping )
+      {}
+
+      template< typename FieldType>
+      void operator() ( python_coupling::NonCopyableWrap<FieldType> )
+      {
+         using namespace boost::python;
+
+         IBlock * firstBlock =  & ( * blocks_->begin() );
+         if( firstBlock->isDataClassOrSubclassOf<FieldType>(fieldId_) )
+         {
+            typedef typename FieldType::flag_t flag_t;
+            typedef field::FlagFieldMapping<FieldType, flag_t> FFMapping;
+            auto uncastedWriter = shared_ptr<FFMapping >( new FFMapping(fieldId_, vtkName_));
+            writer_ = uncastedWriter;
+            auto keys = flagMapping_.keys();
+
+            for( int i=0; i < len(keys); ++i ) {
+               uncastedWriter->addMapping(FlagUID(extract<std::string>(keys[i])),
+                                          extract<flag_t>(flagMapping_[keys[i]]) );
+            }
+         }
+
+      }
+
+      shared_ptr< vtk::BlockCellDataWriterInterface > getCreatedWriter() {
+         return writer_;
+      }
+
+   private:
+      shared_ptr< vtk::BlockCellDataWriterInterface > writer_;
+      shared_ptr< StructuredBlockStorage > blocks_;
+      ConstBlockDataID fieldId_;
+      std::string vtkName_;
+      boost::python::dict flagMapping_;
+   };
+
+
+   template<typename FieldTypes>
+   inline shared_ptr<vtk::BlockCellDataWriterInterface> createFlagFieldVTKWriter(const shared_ptr<StructuredBlockStorage> & blocks,
+                                                                                 const std::string & name,
+                                                                                 boost::python::dict flagMapping,
+                                                                                 const std::string & nameInVtkOutput = "" )
+   {
+      std::string vtkName = nameInVtkOutput;
+      if( vtkName.size() == 0)
+         vtkName = name;
+
+      if ( blocks->begin() == blocks->end() )
+         return shared_ptr<vtk::BlockCellDataWriterInterface>();
+      auto fieldID = python_coupling::blockDataIDFromString( *blocks, name );
+
+      CreateFlagFieldVTKWriterExporter exporter(blocks, fieldID, vtkName, flagMapping);
+      python_coupling::for_each_noncopyable_type< FieldTypes >  ( boost::ref(exporter) );
+      if ( ! exporter.getCreatedWriter() ) {
+         PyErr_SetString( PyExc_ValueError, "Failed to create writer");
+         throw boost::python::error_already_set();
+      }
+      else {
+         return exporter.getCreatedWriter();
+      }
+   }
+
+
+   //===================================================================================================================
+   //
+   //  createBinarizationFieldWriter
+   //
+   //===================================================================================================================
+
+   class CreateBinarizationVTKWriterExporter
+   {
+   public:
+      CreateBinarizationVTKWriterExporter( const shared_ptr<StructuredBlockStorage> & blocks,
+                                           ConstBlockDataID fieldId, const std::string & vtkName, uint_t mask )
+         : blocks_( blocks ), fieldId_(fieldId), vtkName_( vtkName ), mask_(mask)
+      {}
+
+      template< typename FieldType>
+      void operator() ( python_coupling::NonCopyableWrap<FieldType> )
+      {
+         using namespace boost::python;
+
+         IBlock * firstBlock =  & ( * blocks_->begin() );
+         if( firstBlock->isDataClassOrSubclassOf<FieldType>(fieldId_) )
+         {
+            typedef field::BinarizationFieldWriter<FieldType> Writer;
+            writer_ = shared_ptr<Writer>( new Writer(fieldId_, vtkName_,
+                                                     static_cast<typename FieldType::value_type>(mask_) ));
+         }
+      }
+
+      shared_ptr< vtk::BlockCellDataWriterInterface > getCreatedWriter() {
+         return writer_;
+      }
+
+   private:
+      shared_ptr< vtk::BlockCellDataWriterInterface > writer_;
+      shared_ptr< StructuredBlockStorage > blocks_;
+      ConstBlockDataID fieldId_;
+      std::string vtkName_;
+      uint_t mask_;
+   };
+
+
+   template<typename FieldTypes>
+   inline shared_ptr<vtk::BlockCellDataWriterInterface> createBinarizationVTKWriter(const shared_ptr<StructuredBlockStorage> & blocks,
+                                                                                    const std::string & name,
+                                                                                    uint_t mask,
+                                                                                    const std::string & nameInVtkOutput = "" )
+   {
+      std::string vtkName = nameInVtkOutput;
+      if( vtkName.size() == 0)
+         vtkName = name;
+
+      if ( blocks->begin() == blocks->end() )
+         return shared_ptr<vtk::BlockCellDataWriterInterface>();
+      auto fieldID = python_coupling::blockDataIDFromString( *blocks, name );
+
+      CreateBinarizationVTKWriterExporter exporter(blocks, fieldID, vtkName, mask);
+      python_coupling::for_each_noncopyable_type< FieldTypes >  ( boost::ref(exporter) );
+      if ( ! exporter.getCreatedWriter() ) {
+         PyErr_SetString( PyExc_ValueError, "Failed to create writer");
+         throw boost::python::error_already_set();
+      }
+      else {
+         return exporter.getCreatedWriter();
+      }
+   }
+
+
 } // namespace internal
 
 
@@ -1127,6 +1272,26 @@ void exportFields()
                                                                     ( arg("ghostLayers") = uint_t(1) ) ) );
 
    def( "createVTKWriter", &internal::createVTKWriter<FieldTypes>, ( arg("blocks"), arg("name"), arg("vtkName")="" ));
+
+
+   typedef boost::mpl::vector<
+           FlagField<uint8_t>,
+           FlagField<uint16_t>,
+           FlagField<uint32_t>,
+           FlagField<uint64_t> > FlagFields;
+
+   def( "createFlagFieldVTKWriter", &internal::createFlagFieldVTKWriter<FlagFields>,
+                                   ( arg("blocks"), arg("name"), arg("flagMapping"), arg("vtkName")="" ));
+
+
+   typedef boost::mpl::vector<
+           Field<uint8_t,1 >,
+           Field<uint16_t, 1>,
+           Field<uint32_t, 1>,
+           Field<uint64_t, 1> > UintFields;
+
+   def( "createBinarizationVTKWriter", &internal::createBinarizationVTKWriter<UintFields>,
+        ( arg("blocks"), arg("name"), arg("mask"), arg("vtkName")="" ));
 }
 
 
