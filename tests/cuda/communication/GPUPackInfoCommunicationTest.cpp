@@ -131,7 +131,7 @@ int main( int argc, char ** argv )
       BlockDataID asyncGPUFieldId = blocks->addStructuredBlockData< GPUFieldType >( &createGPUField,
                                                                                     "asyncGPUField" );
 
-      math::seedRandomGenerator( numeric_cast<boost::mt19937::result_type>( MPIManager::instance()->rank() ) );
+      math::seedRandomGenerator( numeric_cast<std::mt19937::result_type>( MPIManager::instance()->rank() ) );
       // Initialize CPU field with random values
       initFields( blocks, sourceFieldId );
 

@@ -23,6 +23,7 @@
 #include "core/logging/Logging.h"
 #include "core/mpi/Environment.h"
 #include "core/timing/Timer.h"
+#include "core/math/Utility.h"
 
 #include "mesh/TriangleMeshes.h"
 #include "mesh/QHull.h"
@@ -32,7 +33,7 @@
 #include "vtk/VTKOutput.h"
 #include "vtk/PointDataSource.h"
 
-#include <boost/random.hpp>
+#include <random>
 
 #include <vector>
 #include <string>
@@ -190,7 +191,7 @@ std::vector<Vector3<real_t>> generatePointCloudDodecahedron()
 
 std::vector<Vector3<real_t>> generatePointCloudInAABB( const math::AABB & aabb, const uint_t numPoints )
 {
-   boost::random::mt19937 rng(42);
+   std::mt19937 rng(42);
    
    std::vector<Vector3<real_t>> pointCloud( numPoints );
    for( auto & p : pointCloud )
@@ -202,16 +203,17 @@ std::vector<Vector3<real_t>> generatePointCloudInAABB( const math::AABB & aabb, 
 
 std::vector<Vector3<real_t>> generatPointCloudOnSphere( const real_t radius, const uint_t numPoints )
 {
-   boost::random::mt19937 rng(42);
-   boost::uniform_on_sphere<real_t> distribution(3);
+   std::mt19937 rng(42);
+   std::uniform_real_distribution<real_t> distribution;
 
    std::vector<Vector3<real_t>> pointCloud( numPoints );
    for( auto & p : pointCloud )
    {
-      auto v = distribution(rng);
-      p[0] = v[0] * radius;
-      p[1] = v[1] * radius;
-      p[2] = v[2] * radius;
+      real_t theta = 2 * math::PI * distribution(rng);
+      real_t phi = std::acos( real_t(1.0) - real_t(2.0) * distribution(rng) );
+      p[0] = std::sin(phi) * std::cos(theta) * radius;
+      p[1] = std::sin(phi) * std::sin(theta) * radius;
+      p[2] = std::cos(phi) * radius;
    }
 
    return pointCloud;

@@ -31,7 +31,7 @@
 #include "mesh/MeshIO.h"
 #include "mesh/MeshOperations.h"
 
-#include <boost/random.hpp>
+#include <random>
 #include <boost/lexical_cast.hpp>
 
 #include <algorithm>
@@ -61,7 +61,7 @@ int main( int argc, char * argv[] )
 
    auto aabb = computeAABB( *mesh );
 
-   boost::random::mt19937 rng;  
+   std::mt19937 rng;
 
    for( uint_t i = 0; i < numBoxes; ++i )
    {

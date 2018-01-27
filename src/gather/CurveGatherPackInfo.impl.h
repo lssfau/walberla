@@ -20,7 +20,6 @@
 //
 //======================================================================================================================
 
-#include "boost/lambda/bind.hpp"
 #include "core/debug/Debug.h"
 #include "core/logging/Logging.h"
 #include "core/math/Parser.h"

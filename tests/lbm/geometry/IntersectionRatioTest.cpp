@@ -26,7 +26,7 @@
 #include "geometry/bodies/Sphere.h"
 #include "geometry/bodies/AABBBody.h"
 
-#include <boost/random/mersenne_twister.hpp>
+#include <random>
 
 
 namespace walberla {
@@ -77,7 +77,7 @@ void testAABB()
    static const math::Vector3<real_t> UNIT( real_t( 1 ), real_t( 1 ), real_t( 1 ) );
    static const real_t EPSILON = real_t(1e-4);
 
-   boost::random::mt19937 randomEngine;
+   std::mt19937 randomEngine;
 
    std::vector<math::AABB> testAABBs;
    testAABBs.push_back( math::AABB( -UNIT, UNIT ) );

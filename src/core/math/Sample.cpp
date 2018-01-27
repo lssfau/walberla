@@ -26,7 +26,6 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/math/special_functions/pow.hpp>
 
 #include <functional>
 #include <iterator>
@@ -128,7 +127,10 @@ real_t Sample::variance( real_t theMean ) const
 
    KahanAccumulator< real_t > acc;
    for(auto it = begin(); it != end(); ++it)
-      acc += boost::math::pow<2>(*it - theMean);
+   {
+      real_t val = *it - theMean;
+      acc += val*val;
+   }
       
    return acc.get() / real_c(size());
 }

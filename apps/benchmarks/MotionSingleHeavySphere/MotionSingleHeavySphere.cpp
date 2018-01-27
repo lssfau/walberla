@@ -831,7 +831,7 @@ int main( int argc, char **argv )
       else if( int(Galileo) == 250 )
       {
          // add random perturbance for chaotic regime
-         walberla::math::seedRandomGenerator( boost::mt19937::result_type(std::time(0)) );
+         walberla::math::seedRandomGenerator( std::mt19937::result_type(std::time(0)) );
          xParticle = real_c( xlength ) * real_t(0.5) + walberla::math::realRandom( real_t(-0.5), real_t(0.5) );
          yParticle = real_c( ylength ) * real_t(0.5) + walberla::math::realRandom( real_t(-0.5), real_t(0.5) );
 

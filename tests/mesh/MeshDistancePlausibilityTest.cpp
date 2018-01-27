@@ -45,7 +45,6 @@
 #include "stencil/D3Q27.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/random.hpp>
 
 #include <vector>
 #include <string>

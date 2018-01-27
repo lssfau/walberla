@@ -54,8 +54,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
+#include <random>
 
 #ifdef _MSC_VER
 #  pragma warning(push)
@@ -69,15 +68,17 @@
 #  pragma warning(pop)
 #endif //_MSC_VER
 
+typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
+
 
 /// randomize the memory underlying the vector up the maximal size (== capacity)
 template<typename T>
 void randomizeVector( std::vector<T> & v )
 {
-   //boost::random::mt11213b rng;
-   boost::mt11213b rng;
-   //boost::random::uniform_int_distribution<T> dist( std::numeric_limits<T>::min(), std::numeric_limits<T>::max() );
-   boost::uniform_int<T> dist( std::numeric_limits<T>::min(), std::numeric_limits<T>::max() );
+   static_assert(sizeof(T) > sizeof(char), "cannot use char");
+
+   mt11213b rng;
+   std::uniform_int_distribution<T> dist( std::numeric_limits<T>::min(), std::numeric_limits<T>::max() );
 
    size_t oldSize = v.size();
    v.resize( v.capacity() );
@@ -86,16 +87,62 @@ void randomizeVector( std::vector<T> & v )
    v.resize(oldSize);
 }
 
+template<>
+void randomizeVector( std::vector<unsigned char> & v )
+{
+   mt11213b rng;
+   std::uniform_int_distribution<walberla::int16_t> dist( std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max() );
+
+   size_t oldSize = v.size();
+   v.resize( v.capacity() );
+   for(typename std::vector<unsigned char>::iterator it = v.begin(); it != v.end(); ++it)
+      *it = static_cast<unsigned char>( dist(rng) );
+   v.resize(oldSize);
+}
+
+template<>
+void randomizeVector( std::vector<char> & v )
+{
+   mt11213b rng;
+   std::uniform_int_distribution<int16_t> dist( std::numeric_limits<char>::min(), std::numeric_limits<char>::max() );
+
+   size_t oldSize = v.size();
+   v.resize( v.capacity() );
+   for(typename std::vector<char>::iterator it = v.begin(); it != v.end(); ++it)
+      *it = static_cast<char>( dist(rng) );
+   v.resize(oldSize);
+}
+
 template<typename T>
 void makeRandomMultiArray( boost::multi_array<T, 3> & ma)
 {
-   //boost::random::mt11213b rng;
-   boost::mt11213b rng;
-   //boost::random::uniform_int_distribution<T> dist( std::numeric_limits<T>::min(), std::numeric_limits<T>::max() );
-   boost::uniform_int<T> dist( std::numeric_limits<T>::min(), std::numeric_limits<T>::max() );
+   static_assert(sizeof(T) > sizeof(char), "cannot use char");
+
+   mt11213b rng;
+   std::uniform_int_distribution<T> dist( std::numeric_limits<T>::min(), std::numeric_limits<T>::max() );
 
    for(T* it = ma.data(); it != ma.data() + ma.num_elements(); ++it)
       *it = dist(rng);
+}
+
+template<>
+void makeRandomMultiArray( boost::multi_array<unsigned char, 3> & ma)
+{
+   mt11213b rng;
+   std::uniform_int_distribution<walberla::int16_t> dist( std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max() );
+
+   for(unsigned char* it = ma.data(); it != ma.data() + ma.num_elements(); ++it)
+      *it = static_cast<unsigned char>( dist(rng) );
+}
+
+template<>
+void makeRandomMultiArray( boost::multi_array<char, 3> & ma)
+{
+   mt11213b rng;
+   std::uniform_int_distribution<int16_t> dist( std::numeric_limits<char>::min(), std::numeric_limits<char>::max() );
+
+   for(char* it = ma.data(); it != ma.data() + ma.num_elements(); ++it)
+      *it = static_cast<char>( dist(rng) );
 }
 
 template<typename T>

@@ -27,8 +27,7 @@
 #include "core/math/Primes.h"
 #include "core/mpi/MPIManager.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
+#include <random>
 #include <algorithm>
 #include <numeric>
 
@@ -85,8 +84,9 @@ int main(int argc, char * argv[])
       runTests( n );
    }
 
-   boost::mt11213b rng;
-   boost::uniform_int<uint_t> dist( 100, 10000 );
+   typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
+   mt11213b rng;
+   std::uniform_int_distribution<uint_t> dist( 100, 10000 );
    for(int i = 0; i < 100; ++i)
    {
       const uint_t n = dist(rng);

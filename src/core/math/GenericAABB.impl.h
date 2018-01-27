@@ -1717,7 +1717,7 @@ void GenericAABB< T >::intersect( const GenericAABB & other )
  * The point is in ( [ xMin(), xMax() ), [ yMin(), yMax() ), [ zMin(), zMax() ) )
  *
  * \pre !empty()
- * \param engine  An Uniform Random Number Generator (e.g. boost::random::mt19937)
+ * \param engine  An Uniform Random Number Generator (e.g. std::mt19937)
  * \returns Random point within *this
  */
 template< typename T >
@@ -1725,9 +1725,9 @@ template< typename Engine >
 typename GenericAABB< T >::vector_type GenericAABB< T >::randomPoint( Engine & engine ) const
 {
    WALBERLA_ASSERT( !empty() );
-   boost::random::uniform_real_distribution< T > randX( xMin(), xMax() );
-   boost::random::uniform_real_distribution< T > randY( yMin(), yMax() );
-   boost::random::uniform_real_distribution< T > randZ( zMin(), zMax() );
+   std::uniform_real_distribution< T > randX( xMin(), xMax() );
+   std::uniform_real_distribution< T > randY( yMin(), yMax() );
+   std::uniform_real_distribution< T > randZ( zMin(), zMax() );
 
    return vector_type( randX( engine ), randY( engine ), randZ( engine ) );
 }

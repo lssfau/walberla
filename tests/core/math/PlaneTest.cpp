@@ -25,9 +25,7 @@
 #include "core/math/Vector3.h"
 #include "core/mpi/Environment.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/variate_generator.hpp>
+#include <random>
 #include <cmath>
 #include <vector>
 
@@ -39,9 +37,9 @@ template < typename scalar_t >
 struct RandomPointGenerator
 {
    typedef walberla::Vector3<scalar_t> vector_t;
-   typedef boost::mt11213b RandomNumberEngine;
-   typedef boost::normal_distribution<scalar_t> NormalDistribution;
-   typedef boost::variate_generator< RandomNumberEngine, NormalDistribution > Generator;
+   typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
+   typedef mt11213b RandomNumberEngine;
+   typedef std::normal_distribution<scalar_t> NormalDistribution;
 
    RandomPointGenerator( const vector_t & mu, const vector_t & sigma )
    {
@@ -49,17 +47,19 @@ struct RandomPointGenerator
       {
          RandomNumberEngine rne;
          rne.seed( numeric_cast< RandomNumberEngine::result_type >( i * 642573 ) );
-         normalDistributions.push_back( Generator( rne, NormalDistribution( mu[i], sigma[i] ) ) );
+         engines.push_back( rne );
+         normalDistributions.push_back( NormalDistribution( mu[i], sigma[i] ) );
       }
    }
 
    vector_t operator()()
    {
-      return vector_t( normalDistributions[0](), normalDistributions[1](), normalDistributions[2]() );
+      return vector_t( normalDistributions[0](engines[0]), normalDistributions[1](engines[1]), normalDistributions[2](engines[2]) );
    }
 
 private:
-   std::vector< Generator > normalDistributions;
+   std::vector< RandomNumberEngine > engines;
+   std::vector< NormalDistribution > normalDistributions;
 };
 
 void testIOStream( const Plane & p )

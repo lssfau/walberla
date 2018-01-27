@@ -23,7 +23,8 @@
 #include "Operator.h"
 #include "Variable.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
+#include <algorithm>
 
 
 namespace walberla {
@@ -128,10 +129,10 @@ namespace math {
       double left  = root_->left_->compute();
       double right = root_->right_->compute();
 
-      if ( boost::math::isnan(left) && boost::math::isnan(right) ){
+      if ( std::isnan(left) && std::isnan(right) ){
          //WALBERLA_LOG_WARNING( "WARNING: Both values are NAN -> return true" );
          return true;
-      } else if ( boost::math::isinf(left) && boost::math::isinf(right) ){
+      } else if ( std::isinf(left) && std::isinf(right) ){
     	 //WALBERLA_LOG_WARNING( "WARNING: Both values are INF -> return true" );
          return true;
       }

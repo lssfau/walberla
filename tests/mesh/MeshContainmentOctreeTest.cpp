@@ -35,7 +35,7 @@
 #include "mesh/vtk/VTKMeshWriter.h"
 #include "mesh/vtk/CommonDataSources.h"
 
-#include <boost/random.hpp>
+#include <random>
 
 #include <vector>
 #include <string>
@@ -104,7 +104,7 @@ int main( int argc, char * argv[] )
   if( writeVtk )
      containmentOctree.writeVTKOutput( "containment_octree" );
   
-  boost::random::mt19937 rng;  
+  std::mt19937 rng;
   
   for( int i = 0; i < 10000; ++i )
   {

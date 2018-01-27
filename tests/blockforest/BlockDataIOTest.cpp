@@ -91,7 +91,7 @@ int main( int argc, char* argv[] )
    auto dataHandling = make_shared< field::DefaultBlockDataHandling< FieldType > >( sbf, uint_t(3), 0.0, field::zyxf );
    auto originalFieldId = sbf->addBlockData( dataHandling, "OriginalField", None, Empty );
    
-   math::seedRandomGenerator( numeric_cast<boost::mt19937::result_type>( MPIManager::instance()->rank() ) );
+   math::seedRandomGenerator( numeric_cast<std::mt19937::result_type>( MPIManager::instance()->rank() ) );
 
    for( auto it = sbf->begin( None, Empty ); it != sbf->end(); ++it )
    {
