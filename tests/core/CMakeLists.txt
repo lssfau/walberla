@@ -106,10 +106,8 @@ waLBerla_execute_test( NAME EquationSolverTest )
 waLBerla_compile_test( FILES mpi/BufferTest.cpp )
 waLBerla_execute_test( NAME BufferTest )
 
-if( WALBERLA_BUILD_WITH_BOOST_THREAD )
-   waLBerla_compile_test( FILES mpi/BufferSystemTest.cpp )
-   waLBerla_execute_test( NAME BufferSystemTest PROCESSES 4 )
-endif()
+waLBerla_compile_test( FILES mpi/BufferSystemTest.cpp )
+waLBerla_execute_test( NAME BufferSystemTest PROCESSES 4 )
 
 waLBerla_compile_test( FILES mpi/BroadcastTest.cpp )
 waLBerla_execute_test( NAME BroadcastTest1 COMMAND $<TARGET_FILE:BroadcastTest> )

@@ -26,6 +26,8 @@
 #include "GPUCopy.h"
 #include "ErrorChecking.h"
 
+#include <cstring>
+
 
 namespace walberla {
 namespace cuda {
@@ -56,7 +58,7 @@ void copyDevToDevFZYX( const cudaPitchedPtr& dst, const cudaPitchedPtr& src,
       WALBERLA_ASSERT( fIntervalSize == 1 || ( Nz == dstAllocSizeZ && Nz == srcAllocSizeZ ) );
 
       cudaMemcpy3DParms p;
-      memset( &p, 0, sizeof(p) );
+      std::memset( &p, 0, sizeof(p) );
 
       p.srcPos = make_cudaPos( srcX * typeSize, srcY, srcCoordF * srcAllocSizeZ + srcZ );
       p.srcPtr = make_cudaPitchedPtr( src.ptr, src.pitch, src.xsize, src.ysize );
@@ -115,7 +117,7 @@ void copyDevToDevZYXF( const cudaPitchedPtr& dst, const cudaPitchedPtr& src,
 
    auto copyFunctor = [&](uint_t dstCoordZ, uint_t srcCoordZ, uint_t zIntervalSize) {
       cudaMemcpy3DParms p;
-      memset( &p, 0, sizeof(p) );
+      std::memset( &p, 0, sizeof(p) );
 
       p.srcPos = make_cudaPos( srcF * typeSize, srcX, srcCoordZ * srcAllocSizeY + srcY );
       p.srcPtr = make_cudaPitchedPtr( src.ptr, src.pitch, src.xsize, src.ysize );
@@ -174,7 +176,7 @@ void copyHostToDevFZYX( const cudaPitchedPtr& dst, unsigned char* src,
 
    auto copyFunctor = [&](uint_t dstCoordF, uint_t srcCoordF, uint_t fIntervalSize) {
       cudaMemcpy3DParms p;
-      memset( &p, 0, sizeof(p) );
+      std::memset( &p, 0, sizeof(p) );
 
       p.srcPos = make_cudaPos( srcX * typeSize, srcY, srcCoordF * srcAllocSizeZ + srcZ );
       p.srcPtr = make_cudaPitchedPtr( src, Nx * typeSize, Nx * typeSize, Ny );
@@ -233,7 +235,7 @@ void copyHostToDevZYXF( const cudaPitchedPtr& dst, unsigned char* src,
 
    auto copyFunctor = [&](uint_t dstCoordZ, uint_t srcCoordZ, uint_t zIntervalSize) {
          cudaMemcpy3DParms p;
-         memset( &p, 0, sizeof(p) );
+         std::memset( &p, 0, sizeof(p) );
 
          p.srcPos = make_cudaPos( srcF * typeSize, srcX, srcCoordZ * srcAllocSizeY + srcY );
          p.srcPtr = make_cudaPitchedPtr( src, Nf * typeSize, Nf * typeSize, Nx );
@@ -293,7 +295,7 @@ void copyDevToHostFZYX( unsigned char* dst, const cudaPitchedPtr& src,
 
    auto copyFunctor = [&](uint_t dstCoordF, uint_t srcCoordF, uint_t fIntervalSize) {
       cudaMemcpy3DParms p;
-      memset( &p, 0, sizeof(p) );
+      std::memset( &p, 0, sizeof(p) );
 
       p.srcPos = make_cudaPos( srcX * typeSize, srcY, srcCoordF * srcAllocSizeZ + srcZ );
       p.srcPtr = make_cudaPitchedPtr( src.ptr, src.pitch, src.xsize, src.ysize );
@@ -353,7 +355,7 @@ void copyDevToHostZYXF( unsigned char* dst, const cudaPitchedPtr& src,
 
    auto copyFunctor = [&](uint_t dstCoordZ, uint_t srcCoordZ, uint_t zIntervalSize) {
       cudaMemcpy3DParms p;
-      memset( &p, 0, sizeof(p) );
+      std::memset( &p, 0, sizeof(p) );
 
       p.srcPos = make_cudaPos( srcF * typeSize, srcX, srcCoordZ * srcAllocSizeY + srcY );
       p.srcPtr = make_cudaPitchedPtr( src.ptr, src.pitch, src.xsize, src.ysize );

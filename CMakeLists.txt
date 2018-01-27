@@ -574,23 +574,7 @@ endif()
 #############################################################################################################################
 set ( waLBerla_REQUIRED_MIN_BOOST_VERSION "1.48")
 
-option ( WALBERLA_BUILD_WITH_BOOST_THREAD "Build with boost thread library support" ON )
-# There have been problems with the IBM compiler and boost thread, so WALBERLA_BUILD_WITH_BOOST_THREAD is disabled by default for this compiler
-if( WALBERLA_CXX_COMPILER_IS_IBM )
-   set ( WALBERLA_BUILD_WITH_BOOST_THREAD OFF CACHE BOOL "Build with boost thread library support" FORCE )
-endif()
-
-if ( WALBERLA_BUILD_WITH_BOOST_THREAD )
-   list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS chrono filesystem system thread )
-else ()
-   list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS chrono filesystem system )
-endif ()
-
-if (( WALBERLA_CXX_COMPILER_IS_IBM ) OR
-    ( WALBERLA_CXX_COMPILER_IS_GNU   AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 ) OR
-    ( WALBERLA_CXX_COMPILER_IS_CLANG AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5 ) )
-      list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS regex)
-    endif()
+list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS filesystem system )
 
 if ( WALBERLA_BUILD_WITH_PYTHON AND WALBERLA_CXX_COMPILER_IS_MSVC )
     list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS python3 )
@@ -699,11 +683,11 @@ endif()
 
 ############################################################################################################################
 ##
-## PThread is required in Linux environments by boost::thread
+## PThread is required in Linux environments by std::thread
 ##
 ############################################################################################################################
 
-if ( NOT WIN32 AND WALBERLA_BUILD_WITH_BOOST_THREAD )
+if ( NOT WIN32 )
    add_flag( CMAKE_CXX_FLAGS "-pthread" )
 endif()
 

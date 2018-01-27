@@ -31,7 +31,7 @@
 #include <sstream>
 #include <string>
 
-#include <boost/chrono/chrono.hpp>
+#include <chrono>
 
 #if defined(_MSC_VER)
 #  ifndef NOMINMAX
@@ -75,18 +75,7 @@ inline double      getCpuTime();
 */
 inline double getWcTime()
 {
-#ifdef WIN32
-   LARGE_INTEGER perfCounter, perfFrequency;
-   QueryPerformanceCounter( &perfCounter );
-   QueryPerformanceFrequency( &perfFrequency );
-   return static_cast<double>(perfCounter.QuadPart) / static_cast<double>(perfFrequency.QuadPart);
-#elif defined __bg__ // boost::chrono seems broken on BG/Q
-   struct timeval tp;
-   gettimeofday( &tp, NULL );
-   return ( static_cast<double>( tp.tv_sec ) + static_cast<double>( tp.tv_usec )/1E6 );
-#else
-   return static_cast<double>(boost::chrono::duration_cast<boost::chrono::nanoseconds>(boost::chrono::high_resolution_clock::now().time_since_epoch()).count()) * 1e-9;
-#endif
+   return static_cast<double>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count()) * 1e-9;
 }
 //**********************************************************************************************************************
 

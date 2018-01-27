@@ -29,15 +29,17 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/variate_generator.hpp>
-#include <boost/thread/thread.hpp>
 
 #include <cmath>
 #include <iostream>
 #include <set>
+#include <thread>
+#include <chrono>
 
 
 using namespace walberla;
 using mpi::BufferSystem;
+using namespace std::literals::chrono_literals;
 
 
 
@@ -62,7 +64,7 @@ void randomSleep( int maxTimeInMs = 20 )
    boost::variate_generator<base_generator_type&, boost::uniform_int<> > uni(generator, uni_dist);
 
    int sleepTime = uni();
-   boost::this_thread::sleep( boost::posix_time::milliseconds( sleepTime ) );
+   std::this_thread::sleep_for( sleepTime * 1ms );
 }
 
 
