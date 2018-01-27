@@ -254,10 +254,10 @@ void Raytracer::rayTrace(const size_t timestep) {
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    
    real_t t, t_closest;
-   walberla::id_t id_closest;
+   Vec3 n;
    RigidBody* body_closest = NULL;
    Ray ray(cameraPosition_, Vec3(1,0,0));
-   IntersectsFunctor func(ray, t);
+   IntersectsFunctor func(ray, t, n);
    tp_["Raytracing"].start();
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
@@ -265,8 +265,8 @@ void Raytracer::rayTrace(const size_t timestep) {
          Vec3 direction = (pixelLocation - cameraPosition_).getNormalized();
          ray.setDirection(direction);
          
+         n[0] = n[1] = n[2] = real_t(0);
          t_closest = inf;
-         id_closest = 0;
          body_closest = NULL;
          for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
 #ifndef DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK
@@ -288,7 +288,6 @@ void Raytracer::rayTrace(const size_t timestep) {
                if (intersects && t < t_closest) {
                   // body was shot by ray and currently closest to camera
                   t_closest = t;
-                  id_closest = bodyIt->getID();
                   body_closest = *bodyIt;
                }
             }
@@ -310,7 +309,6 @@ void Raytracer::rayTrace(const size_t timestep) {
                if (intersects && t < t_closest) {
                   // body was shot by ray and currently closest to camera
                   t_closest = t;
-                  id_closest = bodyIt->getID();
                   body_closest = *bodyIt;
                }
             }

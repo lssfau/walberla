@@ -16,6 +16,8 @@
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
 
+#include <pe/raytracing/Ray.h>
+#include <pe/raytracing/Intersects.h>
 #include <pe/raytracing/Raytracer.h>
 
 using namespace walberla;
@@ -29,25 +31,29 @@ void SphereIntersectsTest()
    MaterialID iron = Material::find("iron");
    Sphere sp1(123, 1, Vec3(3,3,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
    real_t t;
+   Vec3 n;
    
    // ray through the center
    Ray ray1(Vec3(3,-5,3), Vec3(0,1,0));
    WALBERLA_LOG_INFO("RAY -> SPHERE");
    
-   WALBERLA_CHECK(intersects(&sp1, ray1, t));
+   WALBERLA_CHECK(intersects(&sp1, ray1, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(6));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(-1));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
 
    // ray tangential
    Ray ray2(Vec3(3,-5,3), Vec3(0,7.5,real_t(std::sqrt(real_t(15))/real_t(2))).getNormalized());
-   WALBERLA_CHECK(!intersects(&sp1, ray2, t));
+   WALBERLA_CHECK(!intersects(&sp1, ray2, t, n));
    
    // sphere behind ray origin
    Sphere sp2(123, 1, Vec3(3,-8,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
-   WALBERLA_CHECK(!intersects(&sp2, ray1, t));
+   WALBERLA_CHECK(!intersects(&sp2, ray1, t, n));
    
    // sphere around ray origin
    Sphere sp3(123, 1, Vec3(3,-5,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
-   WALBERLA_CHECK(intersects(&sp3, ray1, t));
+   WALBERLA_CHECK(intersects(&sp3, ray1, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(2));
 }
 
@@ -58,22 +64,40 @@ void PlaneIntersectsTest() {
    
    Ray ray1(Vec3(-5,3,3), Vec3(1,0,0));
    real_t t;
+   Vec3 n;
    
    WALBERLA_LOG_INFO("RAY -> PLANE");
-   WALBERLA_CHECK(intersects(&pl1, ray1, t), "ray through center did not hit");
+   WALBERLA_CHECK(intersects(&pl1, ray1, t, n), "ray through center did not hit");
    WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(8), "distance between ray and plane is incorrect");
    
    Ray ray2(Vec3(-5,3,3), Vec3(1,0,-1).getNormalized());
-   WALBERLA_CHECK(intersects(&pl1, ray2, t), "ray towards random point on plane didn't hit");
+   WALBERLA_CHECK(intersects(&pl1, ray2, t, n), "ray towards random point on plane didn't hit");
    WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(sqrt(real_t(128))), "distance between ray and plane is incorrect");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+   
+   Plane pl1neg(1, 1, Vec3(3, 3, 3), Vec3(-1, 0, 0), real_t(1.0), iron);
+   WALBERLA_CHECK(intersects(&pl1neg, ray2, t, n), "ray towards random point on plane didn't hit");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+   
+   Ray ray3(Vec3(-5,3,3), Vec3(-1,0,0).getNormalized());
+   Plane pl5(1, 1, Vec3(-7, 3, 3), Vec3(1, 0, 0), real_t(1.0), iron);
+   WALBERLA_CHECK(intersects(&pl5, ray3, t, n), "ray towards random point on plane didn't hit");
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(2), "distance between ray and plane is incorrect");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(1), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
 
    // plane with center 3,3,3 and parallel to x-z plane
    Plane pl2(1, 1, Vec3(3, 3, 3), Vec3(0, 1, 0), real_t(1.0), iron);
-   WALBERLA_CHECK(!intersects(&pl2, ray1, t), "ray parallel to plane shouldnt hit");
+   WALBERLA_CHECK(!intersects(&pl2, ray1, t, n), "ray parallel to plane shouldnt hit");
    
    // plane with center -10,3,3 and parallel to y-z plane
    Plane pl4(1, 1, Vec3(-10, 3, 3), Vec3(1, 0, 0), real_t(1.0), iron);
-   WALBERLA_CHECK(!intersects(&pl4, ray1, t), "ray hit plane behind origin");
+   WALBERLA_CHECK(!intersects(&pl4, ray1, t, n), "ray hit plane behind origin");
 }
 
 void BoxIntersectsTest() {
@@ -81,37 +105,55 @@ void BoxIntersectsTest() {
 
    MaterialID iron = Material::find("iron");
    real_t t;
+   Vec3 n;
    
    Box box1(127, 5, Vec3(0, -15, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    Ray ray1(Vec3(3,-5,3), Vec3(0,1,0));
-   WALBERLA_CHECK(!intersects(&box1, ray1, t));
+   WALBERLA_CHECK(!intersects(&box1, ray1, t, n));
    
    Box box2(128, 5, Vec3(0, -2, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
-   WALBERLA_CHECK(intersects(&box2, ray1, t));
+   WALBERLA_CHECK(intersects(&box2, ray1, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(8), real_t(1e-7));
    
    Box box3(128, 5, Vec3(0, 5, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
-   WALBERLA_CHECK(intersects(&box3, ray1, t));
+   WALBERLA_CHECK(intersects(&box3, ray1, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(5));
    
+   Ray ray6(Vec3(-8,5,0), Vec3(1,0,0));
+   WALBERLA_CHECK(intersects(&box3, ray6, t, n));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(3));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+   
+   Ray ray7(Vec3(8,5,0), Vec3(-1,0,0));
+   WALBERLA_CHECK(intersects(&box3, ray7, t, n));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(3));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(1), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
+
    // ray origin within box
    Ray ray2(Vec3(-2,0,0), Vec3(1,0,1).getNormalized());
-   WALBERLA_CHECK(intersects(&box3, ray2, t));
+   WALBERLA_CHECK(intersects(&box3, ray2, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(7.0710), real_t(1e-4));
    
    Ray ray3(Vec3(3,-5,3), Vec3(2, -1.5, 0.5).getNormalized());
    Box box4(128, 5, Vec3(0, 8, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
-   WALBERLA_CHECK(!intersects(&box4, ray3, t));
+   WALBERLA_CHECK(!intersects(&box4, ray3, t, n));
    
    Ray ray4(Vec3(3,-5,3), Vec3(-2, 3, 0.5).getNormalized());
-   WALBERLA_CHECK(intersects(&box4, ray4, t));
+   WALBERLA_CHECK(intersects(&box4, ray4, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(9.7068), real_t(1e-4));
    
    Box box5(128, 5, Vec3(4, 0, 0), Vec3(0, 0, 0), Quat(), Vec3(4, 4, 4), iron, false, true, false);
    box5.rotate(0,0,math::M_PI/4);
    Ray ray5(Vec3(0,1.5,0), Vec3(1,0,0));
-   WALBERLA_CHECK(intersects(&box5, ray5, t));
+   WALBERLA_CHECK(intersects(&box5, ray5, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(2.67157), real_t(1e-4));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[0], real_t(-0.707107), real_t(1e-5), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[1], real_t(0.707107), real_t(1e-5), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
 }
 
 void AABBIntersectsTest() {

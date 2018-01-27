@@ -28,34 +28,39 @@
 #include "pe/rigidbody/Sphere.h"
 #include "pe/rigidbody/Union.h"
 #include "pe/utility/BodyCast.h"
+#include <boost/math/special_functions/sign.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <pe/raytracing/Ray.h>
 
-#include <boost/tuple/tuple.hpp>
-
 #define EPSILON real_t(1e-4)
+
+using namespace boost::math;
 
 namespace walberla {
 namespace pe {
 namespace raytracing {
 inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding = real_t(0.0));
 
-inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t);
-inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t);
-inline bool intersects(const BoxID box, const Ray& ray, real_t& t);
+inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n);
+inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n);
+inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n);
 
 struct IntersectsFunctor
 {
    const Ray& ray_;
    real_t& t_;
+   Vec3& n_;
    
-   IntersectsFunctor(const Ray& ray, real_t& t) : ray_(ray), t_(t) {}
+   IntersectsFunctor(const Ray& ray, real_t& t, Vec3& n) : ray_(ray), t_(t), n_(n) {}
    
    template< typename BodyType >
-   bool operator()( BodyType* bd1 ) { return intersects( bd1, ray_, t_); }
+   bool operator()( BodyType* bd1 ) {
+      return intersects( bd1, ray_, t_, n_);
+   }
 };
 
-inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t) {
+inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n) {
    real_t inf = std::numeric_limits<real_t>::max();
    const Vec3& direction = ray.getDirection();
    Vec3 displacement = ray.getOrigin() - sphere->getPosition();
@@ -89,22 +94,24 @@ inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t) {
          t = t1;
       }
    }
+   Vec3 intersectionPoint = ray.getOrigin() + direction*t;
+   n = (intersectionPoint - sphere->getPosition()).getNormalized();
+
    return true;
 }
 
-inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t) {
+inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n) {
    real_t inf = std::numeric_limits<real_t>::max();
    const Vec3& direction = ray.getDirection();
    const Vec3& origin = ray.getOrigin();
-   real_t denominator = plane->getNormal() * direction;
+   const Vec3& planeNormal = plane->getNormal();
+   real_t denominator = planeNormal * direction;
    if (std::abs(denominator) > EPSILON) {
       real_t t_;
-      t_ = ((plane->getPosition() - origin) * plane->getNormal()) / denominator;
-      
+      t_ = ((plane->getPosition() - origin) * planeNormal) / denominator;
       if (t_ > EPSILON) {
-         Vec3 intersectionPoint = (t_*direction + origin);
-         Vec3 originToIntersection = origin - intersectionPoint;
-         t = originToIntersection.length();
+         t = t_;
+         n = planeNormal * sign(-denominator);
          return true;
       } else {
          t = inf;
@@ -114,7 +121,7 @@ inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t) {
    return false;
 }
 
-inline bool intersects(const BoxID box, const Ray& ray, real_t& t) {
+inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
    Ray transformedRay(box->pointFromWFtoBF(ray.getOrigin()), box->vectorFromWFtoBF(ray.getDirection()));
    
    const Vec3& lengths = box->getLengths();
@@ -131,6 +138,7 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t) {
    
    real_t inf = std::numeric_limits<real_t>::max();
    
+   size_t tminAxis = 0, tmaxAxis = 0;
    real_t txmin, txmax;
    real_t tmin = txmin = (bounds[sign[0]][0] - origin[0]) * invDirection[0];
    real_t tmax = txmax = (bounds[1-sign[0]][0] - origin[0]) * invDirection[0];
@@ -141,9 +149,11 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t) {
       return false;
    }
    if (tymin > tmin) {
+      tminAxis = 1;
       tmin = tymin;
    }
    if (tymax < tmax) {
+      tmaxAxis = 1;
       tmax = tymax;
    }
    real_t tzmin = (bounds[sign[2]][2] - origin[2]) * invDirection[2];
@@ -153,16 +163,20 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t) {
       return false;
    }
    if (tzmin > tmin) {
+      tminAxis = 2;
       tmin = tzmin;
    }
    if (tzmax < tmax) {
+      tmaxAxis = 2;
       tmax = tzmax;
    }
    
+   n[0] = n[1] = n[2] = real_t(0);
    real_t t_;
    if (tmin > 0) {
       // ray hit box from outside
       t_ = tmin;
+      n[tminAxis] = real_t(1);
    } else if (tmax < 0) {
       // tmin and tmax are smaller than 0 -> box is in rays negative direction
       t = inf;
@@ -170,7 +184,15 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t) {
    } else {
       // ray origin within box
       t_ = tmax;
+      n[tmaxAxis] = real_t(1);
    }
+   
+   if (transformedRay.getDirection() * n > 0) {
+      n = -n;
+   }
+   
+   n = box->vectorFromBFtoWF(n);
+   WALBERLA_LOG_INFO("t_: " << t_ << ", n: " << n);
    
    t = t_;
    return true;
