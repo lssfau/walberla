@@ -84,7 +84,7 @@ private:
    std::string tBufferOutputDirectory_; //!< Path to the tbuffer output directory
    //@}
    
-   Vec3 n_;                   //!< The normal vector of viewing plane.
+   Vec3 n_;                   //!< The normal vector of the viewing plane.
    Vec3 u_;                   //!< The vector spanning the viewing plane in the "right direction".
    Vec3 v_;                   //!< The vector spanning the viewing plane in the "up direction".
    real_t d_;                 //!< The the distance from camera to viewing plane.
