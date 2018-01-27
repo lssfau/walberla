@@ -145,15 +145,17 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std
       for (size_t y = 0; y < pixelsVertical_; y++) {
          size_t i = coordinateToArrayIndex(x, y);
          real_t t = tBuffer[i];
-         if (t > t_max && !realIsIdentical(t, inf)) {
-            t_max = t;
-         }
+         //if (t > t_max && !realIsIdentical(t, inf)) {
+         //   t_max = t;
+         //}
          if (t < t_min) {
             t_min = t;
          }
       }
    }
    if (realIsIdentical(t_min, inf)) t_min = 0;
+   
+   t_max = forest_->getDomain().maxDistance(cameraPosition_);
    
    fs::path dir (getTBufferOutputDirectory());
    fs::path file (fileName);
@@ -169,7 +171,7 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std
          if (realIsIdentical(t, inf)) {
             r = g = b = (char)0;
          } else {
-            r = g = b = (char)(240 * (1-(t-t_min)/(t_max-t_min)));
+            r = g = b = (char)(255 * (1-(t-t_min)/(t_max-t_min)));
          }
          ofs << r << g << b;
       }
