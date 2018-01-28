@@ -188,9 +188,10 @@ void RaytracerTest() {
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,-5,-5,10,5,5), Vec3(1,1,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
-   Lighting lighting(Vec3(0, 3, 3), Vec3(0.1, 0.1, 0.1),
-                     Vec3(0.1, 0.1, 0.1), real_t(2),
-                     Vec3(0.4, 0.4, 0.4), real_t(4));
+   Lighting lighting(Vec3(0, 3, 3),
+                     Vec3(1, 1, 1), //diffuse
+                     Vec3(1, 1, 1), //specular
+                     Vec3(0.4, 0.4, 0.4)); //ambient
    Raytracer raytracer(forest, storageID, globalBodyStorage,
                        size_t(640), size_t(480),
                        49.13,
@@ -237,10 +238,10 @@ int main( int argc, char** argv )
    
    SetBodyTypeIDs<BodyTuple>::execute();
    
-   SphereIntersectsTest();
-   PlaneIntersectsTest();
-   BoxIntersectsTest();
-   AABBIntersectsTest();
+   //SphereIntersectsTest();
+   //PlaneIntersectsTest();
+   //BoxIntersectsTest();
+   //AABBIntersectsTest();
    RaytracerTest();
    
    return EXIT_SUCCESS;

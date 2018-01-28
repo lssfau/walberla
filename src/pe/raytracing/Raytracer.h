@@ -143,6 +143,7 @@ private:
    
    inline bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
    inline size_t coordinateToArrayIndex(size_t x, size_t y) const;
+   inline Vec3 multiplyColors(const Vec3& a, const Vec3& b) const;
    
    inline Vec3 getColor(const BodyID body, const Ray& ray, real_t t, const Vec3& n) const;
    //@}
@@ -456,7 +457,9 @@ void Raytracer::rayTrace(const size_t timestep) {
    }
    
    if (getImageOutputEnabled()) {
-      writeImageBufferToFile(imageBuffer, timestep);
+      if (getLocalImageOutputEnabled()) {
+         writeImageBufferToFile(imageBuffer, timestep);
+      }
       WALBERLA_ROOT_SECTION() {
          writeImageBufferToFile(fullImageBuffer, timestep, true);
       }
@@ -470,25 +473,72 @@ void Raytracer::rayTrace(const size_t timestep) {
    }
 }
 
+/*!\brief Multiplies same-index components of two vectors.
+ *
+ * \param a Vector to multiply.
+ * \param b Vector to multiply.
+ *
+ * \return Vec3 with components a[i] * b[i]
+ */
+inline Vec3 Raytracer::multiplyColors(const Vec3& a, const Vec3& b) const {
+   return Vec3(a[0]*b[0], a[1]*b[1], a[2]*b[2]);
+}
+
+/*!\brief Computes the color for a certain intersection.
+ *
+ * \param body Intersected body.
+ * \param Ray Ray which intersected the body.
+ * \param t Distance from eye to intersection point.
+ * \param n Intersection normal at the intersection point.
+ *
+ * \return Vector with RGB color components.
+ */
 inline Vec3 Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, const Vec3& n) const {
-   Vec3 objectColor(real_t(0.6), real_t(0), real_t(0.9));
-   
+   //----
+   Vec3 diffuseColor(0.6, 0, 0.9);
+   Vec3 specularColor(0.8, 0.8, 0.8);
+   Vec3 ambientColor(0.5, 0, 0.8);
+   real_t shininess = 100;
+
    if (body->getTypeID() == Plane::getStaticTypeID()) {
-      objectColor = Vec3(real_t(0.7), real_t(0.7), real_t(0.7));
+      diffuseColor = Vec3(real_t(0.55), real_t(0.55), real_t(0.55));
+      ambientColor.set(real_t(0.5), real_t(0.5), real_t(0.5));
+      specularColor.set(real_t(0), real_t(0), real_t(0));
+      shininess = real_t(0);
    }
    if (body->getTypeID() == Sphere::getStaticTypeID()) {
-      objectColor = Vec3(real_t(1), real_t(0.1), real_t(0.1));
+      diffuseColor = Vec3(real_t(0.5), real_t(0.5), real_t(0.5));
+      ambientColor.set(real_t(0.4), real_t(0.4), real_t(0.4));
+      specularColor.set(real_t(0.774597), real_t(0.774597), real_t(0.774597));
+      shininess = real_t(30);
    }
+   //----
    
    const Vec3 intersectionPoint = ray.getOrigin() + ray.getDirection() * t;
    Vec3 lightDirection = lighting_.pointLightOrigin - intersectionPoint;
    lightDirection = lightDirection.getNormalized();
+   
    real_t lambertian = std::max(real_t(0), lightDirection * n);
    
-   Vec3 color = objectColor * lambertian + lighting_.ambientLight;
+   real_t specular = real_t(0);
    
-   for (size_t c = 0; c < 2; c++) {
-      color[c] = std::min(color[c], real_t(1));
+   if (lambertian > 0) {
+      // Blinn-Phong
+      Vec3 viewDirection = -ray.getDirection();
+      Vec3 halfDirection = (lightDirection + viewDirection).getNormalized();
+      real_t specularAngle = std::max(halfDirection * n, real_t(0));
+      specular = real_c(pow(specularAngle, shininess));
+   }
+   
+   Vec3 color = multiplyColors(lighting_.ambientColor, ambientColor)
+      + multiplyColors(lighting_.diffuseColor, diffuseColor)*lambertian
+      + multiplyColors(lighting_.specularColor, specularColor)*specular;
+   
+   real_t colorMax = color.max();
+   if (colorMax > real_t(1)) {
+      color.set(color[0] / colorMax,
+                color[1] / colorMax,
+                color[2] / colorMax);
    }
    
    return color;

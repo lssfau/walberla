@@ -222,11 +222,11 @@ void Raytracer::writeImageBufferToFile(const std::vector<Vec3>& imageBuffer, siz
  */
 void Raytracer::writeImageBufferToFile(const std::vector<Vec3>& imageBuffer, const std::string& fileName) const {
    namespace fs = boost::filesystem;
-   
+
    fs::path dir (getImageOutputDirectory());
    fs::path file (fileName);
    fs::path fullPath = dir / file;
-   
+      
    std::ofstream ofs(fullPath.string<std::string>(), std::ios::out | std::ios::binary);
    ofs << "P6\n" << pixelsHorizontal_ << " " << pixelsVertical_ << "\n255\n";
    for (size_t y = pixelsVertical_-1; y > 0; y--) {
