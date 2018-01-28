@@ -48,13 +48,17 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
                      size_t pixelsHorizontal, size_t pixelsVertical,
                      real_t fov_vertical,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
+                     const Lighting& lighting,
                      real_t blockAABBIntersectionPadding)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
    fov_vertical_(fov_vertical),
    cameraPosition_(cameraPosition), lookAtPoint_(lookAtPoint), upVector_(upVector),
+   lighting_(lighting),
    blockAABBIntersectionPadding_(blockAABBIntersectionPadding),
-   tBufferOutputEnabled_(false)
+   tBufferOutputEnabled_(false),
+   imageOutputEnabled_(false),
+   localImageOutputEnabled_(false)
 {
    setupView_();
 }
@@ -68,6 +72,10 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
  * The config block has to contain image_x (int), image_y (int), fov_vertical (real, in degrees)
  * and tbuffer_output_directory (string) parameters. Additionally a vector of reals
  * for each of cameraPosition, lookAt and the upVector. Optional is blockAABBIntersectionPadding (real).
+ * To output both process local and global tbuffers after raytracing, set tbuffer_output_directory (string).
+ * For image output after raytracing, set image_output_directory (string); for local image output additionally set
+ * local_image_output_enabled (bool) to true.
+ * For the lighting a config block named Lighting has to be defined, information about its contents is in Lighting.h.
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                      const shared_ptr<BodyStorage> globalBodyStorage,
@@ -85,9 +93,20 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
       WALBERLA_LOG_INFO_ON_ROOT("t buffers will be written to " << getTBufferOutputDirectory() << ".");
    }
    
+   setLocalImageOutputEnabled(config.getParameter<bool>("local_image_output_enabled", false));
+      
+   if (config.isDefined("image_output_directory")) {
+      setImageOutputEnabled(true);
+      setImageOutputDirectory(config.getParameter<std::string>("image_output_directory"));
+      WALBERLA_LOG_INFO_ON_ROOT("Images will be written to " << getImageOutputDirectory() << ".");
+   } else if (getLocalImageOutputEnabled()) {
+      WALBERLA_ABORT("Cannot enable local image output without image_output_directory parameter being set.");
+   }
+   
    cameraPosition_ = config.getParameter<Vec3>("cameraPosition");
    lookAtPoint_ = config.getParameter<Vec3>("lookAt");
    upVector_ = config.getParameter<Vec3>("upVector");
+   lighting_ = Lighting(config.getBlock("Lighting"));
    
    blockAABBIntersectionPadding_ = config.getParameter<real_t>("blockAABBIntersectionPadding", real_t(0.0));
 
@@ -180,6 +199,49 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std
    ofs.close();
 }
 
+/*!\brief Writes a image buffer to a file in the image output directory.
+ * \param imageBuffer Buffer with color vectors.
+ * \param timestep Timestep this image is from.
+ * \param isGlobalImage Whether this image is the fully stitched together one.
+ */
+void Raytracer::writeImageBufferToFile(const std::vector<Vec3>& imageBuffer, size_t timestep, bool isGlobalImage) const {
+   WALBERLA_CHECK(timestep < 100000, "Raytracer only supports outputting 99 999 timesteps.");
+   mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
+   uint8_t padding = (timestep < 10 ? 4 :
+                      (timestep < 100 ? 3 :
+                       (timestep < 1000 ? 2 :
+                        (timestep < 10000 ? 1 :
+                         0))));
+   std::string fileName = "image_" + std::string(padding, '0') + std::to_string(timestep) + "+" + (isGlobalImage ? "global" : std::to_string(rank)) + ".ppm";
+   writeImageBufferToFile(imageBuffer, fileName);
+}
+
+/*!\brief Writes the image buffer to a file in the image output directory.
+ * \param imageBuffer Buffer with color vectors.
+ * \param fileName Name of the output file.
+ */
+void Raytracer::writeImageBufferToFile(const std::vector<Vec3>& imageBuffer, const std::string& fileName) const {
+   namespace fs = boost::filesystem;
+   
+   fs::path dir (getImageOutputDirectory());
+   fs::path file (fileName);
+   fs::path fullPath = dir / file;
+   
+   std::ofstream ofs(fullPath.string<std::string>(), std::ios::out | std::ios::binary);
+   ofs << "P6\n" << pixelsHorizontal_ << " " << pixelsVertical_ << "\n255\n";
+   for (size_t y = pixelsVertical_-1; y > 0; y--) {
+      for (size_t x = 0; x < pixelsHorizontal_; x++) {
+         size_t i = coordinateToArrayIndex(x, y);
+         const Vec3& color = imageBuffer[i];
+         char r = (char)(255 * color[0]);
+         char g = (char)(255 * color[1]);
+         char b = (char)(255 * color[2]);
+         ofs << r << g << b;
+      }
+   }
+   
+   ofs.close();
+}
 }
 }
 }

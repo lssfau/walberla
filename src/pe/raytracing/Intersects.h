@@ -189,7 +189,7 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
    
    if (transformedRay.getDirection() * n > 0) {
       n = -n;
-   }   
+   }
    n = box->vectorFromBFtoWF(n);
    
    t = t_;

@@ -38,7 +38,7 @@ public:
    }
    
    /*!\brief Instantiation constructor for the Raytracer class.
-    * \param origin Origin of the ray.
+    * \param origin Origin of the ray. ()
     * \param direction Normalized direction of the ray.
     */
    Ray (Vec3 origin, Vec3 direction) {

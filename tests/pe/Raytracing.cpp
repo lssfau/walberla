@@ -98,6 +98,13 @@ void PlaneIntersectsTest() {
    // plane with center -10,3,3 and parallel to y-z plane
    Plane pl4(1, 1, Vec3(-10, 3, 3), Vec3(1, 0, 0), real_t(1.0), iron);
    WALBERLA_CHECK(!intersects(&pl4, ray1, t, n), "ray hit plane behind origin");
+   
+   Plane pl6(1, 1, Vec3(3, 3, 0), Vec3(-1, 0, 0), real_t(1.0), iron);
+   Ray ray4(Vec3(0,0,5), Vec3(1, 0, -1).getNormalized());
+   WALBERLA_CHECK(intersects(&pl6, ray4, t, n), "ray didnt hit");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
 }
 
 void BoxIntersectsTest() {
@@ -181,11 +188,14 @@ void RaytracerTest() {
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,-5,-5,10,5,5), Vec3(1,1,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
-   
+   Lighting lighting(Vec3(0, 3, 3), Vec3(0.1, 0.1, 0.1),
+                     Vec3(0.1, 0.1, 0.1), real_t(2),
+                     Vec3(0.4, 0.4, 0.4), real_t(4));
    Raytracer raytracer(forest, storageID, globalBodyStorage,
                        size_t(640), size_t(480),
                        49.13,
-                       Vec3(-5,0,0), Vec3(-1,0,0), Vec3(0,0,1));
+                       Vec3(-5,0,0), Vec3(-1,0,0), Vec3(0,0,1),
+                       lighting);
    
    MaterialID iron = Material::find("iron");
    
@@ -214,6 +224,8 @@ void RaytracerTest() {
    
    raytracer.setTBufferOutputDirectory("/Users/ng/Desktop/walberla");
    raytracer.setTBufferOutputEnabled(true);
+   raytracer.setImageOutputDirectory("/Users/ng/Desktop/walberla");
+   raytracer.setImageOutputEnabled(true);
    
    raytracer.rayTrace<BodyTuple>(0);
 }
