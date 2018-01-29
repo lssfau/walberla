@@ -815,7 +815,7 @@ endif ( )
 # OpenMPI 3.0 and higher checks the number of processes against the number of CPUs
 execute_process(COMMAND ${MPIEXEC} --version RESULT_VARIABLE mpi_version_result OUTPUT_VARIABLE mpi_version_output)
 if (mpi_version_result EQUAL 0 AND mpi_version_output MATCHES "\\(Open(RTE| MPI)\\) ([3-9]\\.|1[0-9])")
-   list ( APPEND MPIEXEC_PREFLAGS "-oversubscribe" )
+    set ( MPIEXEC_PREFLAGS "${MPIEXEC_PREFLAGS}" "-oversubscribe" CACHE STRING "" FORCE)
 endif()
 ############################################################################################################################
 
