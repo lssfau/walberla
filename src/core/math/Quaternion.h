@@ -271,17 +271,15 @@ inline Quaternion<Type>::Quaternion( Vector3<Axis> axis, Type angle )
    static_assert(boost::is_floating_point<Axis>::value, "Axis has to be floating point!" );
 
    auto axisLength = axis.length();
-   if( (floatIsEqual(axisLength, 0)) || (math::equal(std::fabs(angle), real_c(0)))  ) {
+   if( (floatIsEqual(axisLength, 0)) || (math::equal(std::fabs(angle), real_t(0)))  ) {
       reset();
       return;
    }
 
-   WALBERLA_CHECK( axis.sqrLength() > Axis(0), "Invalid rotation axis" );
-
    const Type sina( std::sin( angle*Type(0.5) ) );
    const Type cosa( std::cos( angle*Type(0.5) ) );
 
-   auto invAxisLength = real_c(1) / axisLength;
+   auto invAxisLength = real_t(1) / axisLength;
    axis *= invAxisLength;
 
    v_[0] = cosa;
@@ -548,7 +546,7 @@ inline const Matrix3<Type> Quaternion<Type>::toRotationMatrix() const
 template< typename Type >
 inline Type Quaternion<Type>::getAngle() const
 {
-   return 2*std::acos(v_[0]);
+   return Type(2)*std::acos(v_[0]);
 }
 //*************************************************************************************************
 
