@@ -49,8 +49,25 @@ void seedRandomGenerator( const std::mt19937::result_type & seed ); // std::mt19
 */
 //**********************************************************************************************************************
 template< typename INT >
-INT intRandom( const INT min = std::numeric_limits<INT>::min(), const INT max = std::numeric_limits<INT>::max(),
-               std::mt19937 & generator = internal::getGenerator() )
+INT intRandom()
+{
+   return intRandom( std::numeric_limits<INT>::min(), std::numeric_limits<INT>::max() );
+}
+
+template< typename INT >
+INT intRandom( const INT min )
+{
+   return intRandom( min, std::numeric_limits<INT>::max(), internal::getGenerator() );
+}
+
+template< typename INT >
+INT intRandom( const INT min, const INT max )
+{
+   return intRandom( min, max, internal::getGenerator() );
+}
+
+template< typename INT >
+INT intRandom( const INT min, const INT max, std::mt19937 & generator )
 {
    static_assert_int_t< INT >();
    static_assert(sizeof(INT) > sizeof(char), "cannot use char");
