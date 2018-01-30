@@ -73,15 +73,7 @@ inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n
    
    t = (t0 < t1) ? t0 : t1; // assign the closest hit point to t
    if (t < 0) {
-      // at least one of the calculated hit points is behind the rays origin
-      if (t1 < 0) {
-         // both of the points are behind the origin (ray does not hit sphere)
-         t = inf;
-         return false;
-      } else {
-         // one point is hit by the ray (ray is within sphere)
-         t = t1;
-      }
+      t = t1; // if t0 < 0, t1 is > 0 (else intersectsSphere would have returned false)
    }
    
    Vec3 intersectionPoint = ray.getOrigin() + ray.getDirection()*t;
