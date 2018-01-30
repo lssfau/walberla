@@ -24,7 +24,7 @@ using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::pe::raytracing;
 
-typedef boost::tuple<Box, Plane, Sphere> BodyTuple ;
+typedef boost::tuple<Box, Plane, Sphere, Capsule> BodyTuple ;
 
 void SphereIntersectsTest()
 {
@@ -183,19 +183,44 @@ void AABBIntersectsTest() {
    WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(4));
 }
 
+void CapsuleIntersectsTest() {
+   MaterialID iron = Material::find("iron");
+   real_t t;
+   Vec3 n;
+   
+   Capsule cp1(0, 0, Vec3(2,3,3), Vec3(0,0,0), Quat(), real_t(2), real_t(2), iron, false, true, false);
+   
+   // ray through the center
+   Ray ray1(Vec3(3,-5,3), Vec3(0,1,0));
+   WALBERLA_LOG_INFO("RAY -> CAPSULE");
+   
+   WALBERLA_CHECK(intersects(&cp1, ray1, t, n));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(6));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(-1));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
+   
+   Ray ray2(Vec3(-5,3,3), Vec3(1,0,0));
+   WALBERLA_CHECK(intersects(&cp1, ray2, t, n));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(4));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
+}
+
 void RaytracerTest() {
    WALBERLA_LOG_INFO("Raytracer");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,-5,-5,10,5,5), Vec3(1,1,1), Vec3(false, false, false));
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vec3(1,1,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
-   Lighting lighting(Vec3(0, 3, 3),
+   Lighting lighting(Vec3(0, 5, 8), // 8, 5, 9.5 gut für ebenen, 0,5,8
                      Vec3(1, 1, 1), //diffuse
                      Vec3(1, 1, 1), //specular
                      Vec3(0.4, 0.4, 0.4)); //ambient
    Raytracer raytracer(forest, storageID, globalBodyStorage,
                        size_t(640), size_t(480),
                        49.13,
-                       Vec3(-5,0,0), Vec3(-1,0,0), Vec3(0,0,1),
+                       Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1),
                        lighting);
    
    MaterialID iron = Material::find("iron");
@@ -206,26 +231,33 @@ void RaytracerTest() {
    //PlaneID xNegPlaneClose = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(1,0,0), iron);
    
    // Test Scene v1 - Spheres, (rotated) boxes, confining walls, tilted plane in right bottom back corner
-   createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), Vec3(0,5,0), iron); // left wall
-   createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,-5,0), iron); // right wall
-   createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,-5), iron); // floor
-   createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), Vec3(0,0,5), iron); // ceiling
+   createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), Vec3(0,10,0), iron); // left wall
+   createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,0,0), iron); // right wall
+   createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,0), iron); // floor
+   createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), Vec3(0,0,10), iron); // ceiling
    createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(10,0,0), iron); // back wall
    createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(0,0,0), iron); // front wall, should not get rendered
 
-   createPlane(*globalBodyStorage, 0, Vec3(-1,1,1), Vec3(8,-3,-3), iron); // tilted plane in right bottom back corner
+   createPlane(*globalBodyStorage, 0, Vec3(-1,1,1), Vec3(8,2,2), iron); // tilted plane in right bottom back corner
    
-   createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,4.5,4.5), real_t(0.5));
-   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(4,0.5,0), real_t(1));
-   createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,3.5,0), real_t(1));
-   BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,1.5,0), Vec3(2,4,3));
+   createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,9.5,9.5), real_t(0.5));
+   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(4,5.5,5), real_t(1));
+   createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,8.5,5), real_t(1));
+   BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,6.5,5), Vec3(2,4,3));
    box->rotate(0,math::M_PI/4,math::M_PI/4);
-   createBox(*globalBodyStorage, *forest, storageID, 8, Vec3(5,-4,3), Vec3(2,2,2));
+   createBox(*globalBodyStorage, *forest, storageID, 8, Vec3(5,1,8), Vec3(2,2,2));
    // Test scene v1 end
    
-   raytracer.setTBufferOutputDirectory("/Users/ng/Desktop/walberla");
+   // Test scene v2 additions start
+   createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(9,9,5), Vec3(1,1,10));
+   createCapsule(*globalBodyStorage, *forest, storageID, 9, Vec3(3, 9, 1), real_t(0.5), real_t(7), iron);
+   CapsuleID capsule2 = createCapsule(*globalBodyStorage, *forest, storageID, 9, Vec3(7, 3.5, 7.5), real_t(1), real_t(2), iron);
+   capsule2->rotate(0,math::M_PI/4,math::M_PI/4-math::M_PI/8);
+   // Test scene v2 end
+   
+   raytracer.setTBufferOutputDirectory("tbuffer");
    raytracer.setTBufferOutputEnabled(true);
-   raytracer.setImageOutputDirectory("/Users/ng/Desktop/walberla");
+   raytracer.setImageOutputDirectory("image");
    raytracer.setImageOutputEnabled(true);
    
    raytracer.rayTrace<BodyTuple>(0);
@@ -238,10 +270,11 @@ int main( int argc, char** argv )
    
    SetBodyTypeIDs<BodyTuple>::execute();
    
-   //SphereIntersectsTest();
-   //PlaneIntersectsTest();
-   //BoxIntersectsTest();
-   //AABBIntersectsTest();
+   SphereIntersectsTest();
+   PlaneIntersectsTest();
+   BoxIntersectsTest();
+   AABBIntersectsTest();
+   CapsuleIntersectsTest();
    RaytracerTest();
    
    return EXIT_SUCCESS;

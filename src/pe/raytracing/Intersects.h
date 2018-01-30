@@ -40,13 +40,14 @@ using namespace boost::math;
 namespace walberla {
 namespace pe {
 namespace raytracing {
-inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding = real_t(0.0));
-
 inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3& n);
 
+inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding = real_t(0.0));
+inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, real_t& t0, real_t& t1);
+   
 struct IntersectsFunctor
 {
    const Ray& ray_;
@@ -63,26 +64,13 @@ struct IntersectsFunctor
 
 inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n) {
    real_t inf = std::numeric_limits<real_t>::max();
-   const Vec3& direction = ray.getDirection();
-   Vec3 displacement = ray.getOrigin() - sphere->getPosition();
-   real_t a = direction * direction;
-   real_t b = real_t(2.) * (displacement * direction);
-   real_t c = (displacement * displacement) - (sphere->getRadius() * sphere->getRadius());
-   real_t discriminant = b*b - real_t(4.)*a*c;
-   if (discriminant < EPSILON) {
-      // with discriminant smaller than 0, sphere is not hit by ray
-      // (no solution for quadratic equation)
-      // with discriminant being 0, sphere only tangentially hits the ray (not enough)
+   
+   real_t t0, t1;
+   if (!intersectsSphere(sphere->getPosition(), sphere->getRadius(), ray, t0, t1)) {
       t = inf;
       return false;
    }
-   real_t root = real_t(std::sqrt(discriminant));
-   real_t t0 = (-b - root) / (real_t(2.) * a); // point where the ray enters the sphere
-   real_t t1 = (-b + root) / (real_t(2.) * a); // point where the ray leaves the sphere
-   if (t0 < 0 && t1 < 0) {
-      t = inf;
-      return false;
-   }
+   
    t = (t0 < t1) ? t0 : t1; // assign the closest hit point to t
    if (t < 0) {
       // at least one of the calculated hit points is behind the rays origin
@@ -95,7 +83,8 @@ inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n
          t = t1;
       }
    }
-   Vec3 intersectionPoint = ray.getOrigin() + direction*t;
+   
+   Vec3 intersectionPoint = ray.getOrigin() + ray.getDirection()*t;
    n = (intersectionPoint - sphere->getPosition()).getNormalized();
 
    return true;
@@ -194,6 +183,153 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
    n = box->vectorFromBFtoWF(n);
    
    t = t_;
+   return true;
+}
+   
+inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3& n) {
+   Ray transformedRay = ray.transformedToBF(capsule);
+   Vec3 direction = transformedRay.getDirection();
+   Vec3 origin = transformedRay.getOrigin();
+   real_t halfLength = capsule->getLength()/real_t(2);
+
+   real_t inf = std::numeric_limits<real_t>::max();
+   t = inf;
+   
+   bool t0hit = false, t1hit = false;
+   size_t intersectedPrimitive = 0; // 1 for capsule, 2 for left half sphere, 3 for right half sphere
+
+   real_t a = direction[2]*direction[2] + direction[1]*direction[1];
+   real_t b = real_t(2)*origin[2]*direction[2] + real_t(2)*origin[1]*direction[1];
+   real_t c = origin[2]*origin[2] + origin[1]*origin[1] - capsule->getRadius();
+   real_t discriminant = b*b - real_t(4.)*a*c;
+   if (discriminant >= EPSILON) {
+      // With discriminant smaller than 0, cylinder is not hit by ray (no solution for quadratic equation).
+      // Thus only enter this section if the equation is actually solvable.
+      
+      real_t root = real_t(std::sqrt(discriminant));
+      real_t t0 = (-b - root) / (real_t(2) * a); // point where the ray enters the cylinder
+      real_t t1 = (-b + root) / (real_t(2) * a); // point where the ray leaves the cylinder
+
+      real_t tx0 = origin[0] + direction[0]*t0;
+      real_t tx1 = origin[0] + direction[0]*t1;
+      
+      if (t0 > 0 && tx0 >= -halfLength && tx0 <= halfLength) {
+         t0hit = true;
+         intersectedPrimitive = 1;
+         t = t0;
+      }
+      if (t1 > 0 && tx1 >= -halfLength && tx1 <= halfLength && t1 < t) {
+         t1hit = true;
+         if (t1 < t) {
+            intersectedPrimitive = 1;
+            t = t1;
+         }
+      }
+   }
+   
+   // check now for end capping half spheres.
+   if (!t0hit || !t1hit) {
+      // only check capping half spheres if the ray didnt both enter and leave the cylinder part of the capsule already.
+      real_t t0_left, t1_left;
+      Vec3 leftSpherePos(-halfLength, 0, 0);
+      if (intersectsSphere(leftSpherePos, capsule->getRadius(), transformedRay, t0_left, t1_left)) {
+         // at least one of t0_left and t1_left are not behind the rays origin
+         real_t t0x_left = origin[0] + direction[0]*t0_left;
+         real_t t1x_left = origin[0] + direction[0]*t1_left;
+         
+         real_t t_left;
+         if (t0_left > 0 && t0x_left < -halfLength) {
+            t_left = t0_left;
+         }
+         if (t1_left > 0 && t1x_left < -halfLength && t1_left < t_left) {
+            t_left = t1_left;
+         }
+         if (t_left < t) {
+            intersectedPrimitive = 2;
+            t = t_left;
+         }
+      }
+      
+      real_t t0_right, t1_right;
+      Vec3 rightSpherePos(halfLength, 0, 0);
+      if (intersectsSphere(rightSpherePos, capsule->getRadius(), transformedRay, t0_right, t1_right)) {
+         // at least one of t0_right and t1_right are not behind the rays origin
+         real_t t0x_right = origin[0] + direction[0]*t0_right;
+         real_t t1x_right = origin[0] + direction[0]*t1_right;
+         
+         real_t t_right;
+         if (t0_right > 0 && t0x_right > halfLength) {
+            t_right = t0_right;
+         }
+         if (t1_right > 0 && t1x_right > halfLength && t1_right < t_right) {
+            t_right = t1_right;
+         }
+         if (t_right < t) {
+            intersectedPrimitive = 3;
+            t = t_right;
+         }
+      }
+      
+      if (realIsIdentical(t, inf)) {
+         return false;
+      }
+      
+      Vec3 intersectionPoint = origin + direction*t;
+      if (intersectedPrimitive == 2) {
+         n = (intersectionPoint - leftSpherePos).getNormalized();
+      } else if (intersectedPrimitive == 3) {
+         n = (intersectionPoint - rightSpherePos).getNormalized();
+      }
+   }
+   
+   WALBERLA_ASSERT(intersectedPrimitive != 0);
+   
+   if (intersectedPrimitive == 1) {
+      Vec3 intersectionPoint = origin + direction*t;
+      Vec3 intersectionPointOnXAxis(intersectionPoint[0], real_t(0), real_t(0));
+      n = (intersectionPoint - intersectionPointOnXAxis).getNormalized();
+   }
+   
+   n = capsule->vectorFromBFtoWF(n);
+   
+   return true;
+}
+   
+inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, real_t& t0, real_t& t1) {
+   real_t inf = std::numeric_limits<real_t>::max();
+   
+   const Vec3& direction = ray.getDirection();
+   Vec3 displacement = ray.getOrigin() - gpos;
+   
+   real_t a = direction * direction;
+   real_t b = real_t(2.) * (displacement * direction);
+   real_t c = (displacement * displacement) - (radius * radius);
+   real_t discriminant = b*b - real_t(4.)*a*c;
+   if (discriminant < 0) {
+      // with discriminant smaller than 0, sphere is not hit by ray
+      // (no solution for quadratic equation)
+      // with discriminant being 0, sphere only tangentially hits the ray (not enough)
+      t0 = inf;
+      t1 = inf;
+      return false;
+   }
+   
+   real_t root = real_t(std::sqrt(discriminant));
+   t0 = (-b - root) / (real_t(2.) * a); // distance to point where the ray enters the sphere
+   t1 = (-b + root) / (real_t(2.) * a); // distance to point where the ray leaves the sphere
+   
+   if (t0 < 0 && t1 < 0) {
+      return false;
+   }
+   real_t t = (t0 < t1) ? t0 : t1; // assign the closest distance to t
+   if (t < 0) {
+      // at least one of the calculated distances is behind the rays origin
+      if (t1 < 0) {
+         // both of the points are behind the origin (ray does not hit sphere)
+         return false;
+      }
+   }
+   
    return true;
 }
 
