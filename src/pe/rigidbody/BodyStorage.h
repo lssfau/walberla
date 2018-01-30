@@ -133,12 +133,12 @@ public:
    //**Callbacks************************************************************************
    /*!\name Callbacks */
    //@{
-   inline void          registerAddCallback     ( const std::string name, const std::function<void (BodyID)>& func );
-   inline void          deregisterAddCallback   ( const std::string name );
+   inline void          registerAddCallback     ( const std::string& name, const std::function<void (BodyID)>& func );
+   inline void          deregisterAddCallback   ( const std::string& name );
    inline void          clearAddCallbacks       ( );
 
-   inline void          registerRemoveCallback     ( const std::string name, const std::function<void (BodyID)>& func );
-   inline void          deregisterRemoveCallback   ( const std::string name );
+   inline void          registerRemoveCallback     ( const std::string& name, const std::function<void (BodyID)>& func );
+   inline void          deregisterRemoveCallback   ( const std::string& name );
    inline void          clearRemoveCallbacks       ( );
    //@}
    //**********************************************************************************************
@@ -713,13 +713,13 @@ inline void BodyStorage::clear()
 }
 //*************************************************************************************************
 
-inline void          BodyStorage::registerAddCallback     ( const std::string name, const std::function<void (BodyID)>& func )
+inline void          BodyStorage::registerAddCallback     ( const std::string& name, const std::function<void (BodyID)>& func )
 {
    WALBERLA_ASSERT_EQUAL(addCallbacks_.find(name), addCallbacks_.end(), "Callback '" << name << "' already exists!");
    addCallbacks_.insert( std::make_pair(name, func) );
 }
 
-inline void          BodyStorage::deregisterAddCallback   ( const std::string name )
+inline void          BodyStorage::deregisterAddCallback   ( const std::string& name )
 {
    auto res = addCallbacks_.find( name );
    if (res != addCallbacks_.end() )
@@ -733,13 +733,13 @@ inline void          BodyStorage::clearAddCallbacks       ( )
    addCallbacks_.clear();
 }
 
-inline void          BodyStorage::registerRemoveCallback     ( const std::string name, const std::function<void (BodyID)>& func )
+inline void          BodyStorage::registerRemoveCallback     ( const std::string& name, const std::function<void (BodyID)>& func )
 {
    WALBERLA_ASSERT_EQUAL(removeCallbacks_.find(name), removeCallbacks_.end(), "Callback '" << name << "' already exists!");
    removeCallbacks_.insert( std::make_pair(name, func) );
 }
 
-inline void          BodyStorage::deregisterRemoveCallback   ( const std::string name )
+inline void          BodyStorage::deregisterRemoveCallback   ( const std::string& name )
 {
    auto res = removeCallbacks_.find( name );
    if (res != removeCallbacks_.end() )
