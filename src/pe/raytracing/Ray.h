@@ -117,6 +117,14 @@ public:
       sign_[1] = int8_c(inv_direction_[1] < 0);
       sign_[2] = int8_c(inv_direction_[2] < 0);
    }
+   
+   /*!\brief Transforms the ray to the body frame.
+    *
+    * \return Ray transformed to the body frame.
+    */
+   Ray transformedToBF(const BodyID body) const {
+      return Ray(body->pointFromWFtoBF(getOrigin()), body->vectorFromWFtoBF(getDirection()));
+   }
    //@}
 };
 

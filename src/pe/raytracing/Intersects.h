@@ -45,6 +45,7 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
 inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n);
+inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3& n);
 
 struct IntersectsFunctor
 {
@@ -122,7 +123,7 @@ inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n) 
 }
 
 inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
-   Ray transformedRay(box->pointFromWFtoBF(ray.getOrigin()), box->vectorFromWFtoBF(ray.getDirection()));
+   Ray transformedRay = ray.transformedToBF(box);
    
    const Vec3& lengths = box->getLengths();
    const Vec3 lengthsHalved = lengths/real_t(2);
