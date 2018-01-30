@@ -79,15 +79,17 @@ def copyArrayToField(dstField, srcArray, slice=[slice(None,None,None) ]*3, withG
 
 
 def extend(cppFieldModule):
-    def gatherGenerator(blocks, blockDataName, sliceObj, allGather=False):
+    def gatherField(blocks, blockDataName, sliceObj, allGather=False):
         field = cppFieldModule.gather(blocks, blockDataName, sliceObj, targetRank=-1 if allGather else 0)
         if field is not None:
             field = npArrayFromWaLBerlaField(field)
             field.flags.writeable = False
-            yield field
+            return field
+        else:
+            return None
 
 
     cppFieldModule.toArray          = npArrayFromWaLBerlaField
     cppFieldModule.adaptorToArray   = arrayFromWaLBerlaAdaptor
     cppFieldModule.copyArrayToField = copyArrayToField
-    cppFieldModule.gatherGenerator  = gatherGenerator
+    cppFieldModule.gatherField      = gatherField
