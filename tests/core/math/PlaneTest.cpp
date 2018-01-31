@@ -135,20 +135,22 @@ int main(int argc, char * argv[])
       Vec3Real p1 = rpg();
       Vec3Real p2 = rpg();
 
-      if( (p0 - p1).sqrLength() < 1e-6 || (p0 - p2).sqrLength() < 1e-6 || (p2 - p1).sqrLength() < 1e-6 )
+      real_t angle = std::acos( (p1-p0) * (p2-p0) / std::sqrt( (p1-p0).sqrLength() * (p2-p0).sqrLength() ) );
+
+      if( (p0 - p1).sqrLength() < 1e-6 || (p0 - p2).sqrLength() < 1e-6 || (p2 - p1).sqrLength() < 1e-6 || angle < math::PI / real_t(180) )
       {
          --i;
          continue;
       }
 
-      Plane plane( p0, (p0 - p1) % (p0 - p2) );
+      Plane plane( p0, (p0 - p1).getNormalized() % (p0 - p2).getNormalized() );
 
-      WALBERLA_CHECK              ( realIsEqual( plane.signedDistance( p0 ), real_t(0) ) );
-      WALBERLA_CHECK              ( realIsEqual( plane.distance      ( p0 ), real_t(0) ) );
-      WALBERLA_CHECK              ( realIsEqual( plane.signedDistance( p1 ), real_t(0) ) );
-      WALBERLA_CHECK              ( realIsEqual( plane.distance      ( p1 ), real_t(0) ) );
-      WALBERLA_CHECK              ( realIsEqual( plane.signedDistance( p2 ), real_t(0) ) );
-      WALBERLA_CHECK              ( realIsEqual( plane.distance      ( p2 ), real_t(0) ) );
+      WALBERLA_CHECK_FLOAT_EQUAL( plane.signedDistance( p0 ), real_t(0) );
+      WALBERLA_CHECK_FLOAT_EQUAL( plane.distance      ( p0 ), real_t(0) );
+      WALBERLA_CHECK_FLOAT_EQUAL( plane.signedDistance( p1 ), real_t(0) );
+      WALBERLA_CHECK_FLOAT_EQUAL( plane.distance      ( p1 ), real_t(0) );
+      WALBERLA_CHECK_FLOAT_EQUAL( plane.signedDistance( p2 ), real_t(0) );
+      WALBERLA_CHECK_FLOAT_EQUAL( plane.distance      ( p2 ), real_t(0) );
       WALBERLA_CHECK_GREATER_EQUAL( plane.distance( p0 ), real_t(0) );
       WALBERLA_CHECK_GREATER_EQUAL( plane.distance( p1 ), real_t(0) );
       WALBERLA_CHECK_GREATER_EQUAL( plane.distance( p2 ), real_t(0) );
