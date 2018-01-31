@@ -13,54 +13,36 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file PODPhantomData.h
-//! \ingroup blockforest
-//! \author Sebastian Eibl <sebastian.eibl@fau.de>
+//! \file Any.h
+//! \ingroup core
+//! \author Michael Kuron <mkuron@icp.uni-stuttgart.de>
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "blockforest/PhantomBlock.h"
-#include "core/DataTypes.h"
-#include "core/mpi/RecvBuffer.h"
-#include "core/mpi/SendBuffer.h"
+
+#if defined(WALBERLA_USE_STD_ANY)
+#include <any>
+#elif defined(WALBERLA_USE_STD_EXPERIMENTAL_ANY)
+#include <experimental/any>
+#else
+#include <boost/any.hpp>
+#endif
+
 
 
 namespace walberla {
-namespace blockforest {
 
-template <typename T>
-class PODPhantomWeight
-{
-public:
+#if defined(WALBERLA_USE_STD_ANY)
+using std::any;
+using std::any_cast;
+#elif defined(WALBERLA_USE_STD_EXPERIMENTAL_ANY)
+using std::experimental::any;
+using std::experimental::any_cast;
+#else
+using boost::any;
+using boost::any_cast;
+#endif
 
-   typedef T weight_t;
-
-   PODPhantomWeight( const T _weight ) : weight_( _weight ) {}
-
-   T weight() const { return weight_; }
-
-private:
-   T weight_;
-};
-
-template <typename T>
-struct PODPhantomWeightPackUnpack
-{
-   void operator()( mpi::SendBuffer & buffer, const PhantomBlock & block )
-   {
-      buffer << block.getData< PODPhantomWeight<T> >().weight();
-   }
-
-   void operator()( mpi::RecvBuffer & buffer, const PhantomBlock &, walberla::any & data )
-   {
-      typename PODPhantomWeight<T>::weight_t w;
-      buffer >> w;
-      data = PODPhantomWeight<T>( w );
-   }
-};
-
-
-} // namespace blockforest
-} // namespace walberla
+}

@@ -38,7 +38,7 @@ public:
    MetisAssignmentFunctor( const shared_ptr<InfoCollection>& ic ) : ic_( ic )
    {}
 
-   void operator()( std::vector< std::pair< const PhantomBlock *, boost::any > > & blockData, const PhantomBlockForest & )
+   void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
    {
       for( auto it = blockData.begin(); it != blockData.end(); ++it )
       {

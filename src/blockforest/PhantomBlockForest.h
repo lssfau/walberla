@@ -45,7 +45,7 @@ public:
    typedef std::function< Set<SUID> ( const std::vector< std::pair< BlockID, Set<SUID> > > & source, const BlockID & destintation ) >
            BlockStateDeterminationFunction;
 
-   typedef std::function< void ( std::vector< std::pair< const PhantomBlock *, boost::any > > & blockData,
+   typedef std::function< void ( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData,
                                    const PhantomBlockForest & phantomForest ) >
            PhantomBlockDataAssignmentFunction;
 
@@ -58,7 +58,7 @@ public:
            MigrationPreparationFunction; // = load balancing
 
    typedef std::function< void ( mpi::SendBuffer & buffer, const PhantomBlock & block ) >                    PhantomBlockDataPackFunction;
-   typedef std::function< void ( mpi::RecvBuffer & buffer, const PhantomBlock & block, boost::any & data ) > PhantomBlockDataUnpackFunction;
+   typedef std::function< void ( mpi::RecvBuffer & buffer, const PhantomBlock & block, walberla::any & data ) > PhantomBlockDataUnpackFunction;
 
 
 

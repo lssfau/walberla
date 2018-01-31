@@ -474,6 +474,30 @@ else()
    endif()
 endif()
 
+try_compile( WALBERLA_USE_STD_ANY "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdAny.cpp"
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_ANY -std=c++14 )
+if( WALBERLA_USE_STD_ANY )
+   message( STATUS "Found std::any")
+else()
+   try_compile( WALBERLA_USE_STD_EXPERIMENTAL_ANY "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdAny.cpp"
+                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_ANY -std=c++14 )
+   if( WALBERLA_USE_STD_EXPERIMENTAL_ANY )
+      message( STATUS "Found std::experimental::any")
+   endif()
+endif()
+
+try_compile( WALBERLA_USE_STD_OPTIONAL "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdOptional.cpp"
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_OPTIONAL -std=c++14 )
+if( WALBERLA_USE_STD_OPTIONAL )
+   message( STATUS "Found std::optional")
+else()
+   try_compile( WALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdOptional.cpp"
+                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL -std=c++14 )
+   if( WALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL )
+      message( STATUS "Found std::experimental::optional")
+   endif()
+endif()
+
 
 
 ############################################################################################################################
