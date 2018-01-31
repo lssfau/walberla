@@ -39,6 +39,7 @@ namespace raytracing {
  * \param cameraPosition Position of the camera in the global world frame.
  * \param lookAtPoint Point the camera looks at in the global world frame.
  * \param upVector Vector indicating the upwards direction of the camera.
+ * \param backgroundColor Background color of the scene.
  * \param blockAABBIntersectionPadding The padding applied in block AABB intersection pretesting. Usually not required.
  *                                     Set it to the value of the farthest distance a object might protrude from
  *                                     its containing block.
@@ -49,12 +50,14 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
                      real_t fov_vertical,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                      const Lighting& lighting,
+                     const Vec3& backgroundColor,
                      real_t blockAABBIntersectionPadding)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
    fov_vertical_(fov_vertical),
    cameraPosition_(cameraPosition), lookAtPoint_(lookAtPoint), upVector_(upVector),
    lighting_(lighting),
+   backgroundColor_(backgroundColor),
    blockAABBIntersectionPadding_(blockAABBIntersectionPadding),
    tBufferOutputEnabled_(false),
    imageOutputEnabled_(false),
@@ -71,7 +74,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
  *
  * The config block has to contain image_x (int), image_y (int), fov_vertical (real, in degrees)
  * and tbuffer_output_directory (string) parameters. Additionally a vector of reals
- * for each of cameraPosition, lookAt and the upVector. Optional is blockAABBIntersectionPadding (real).
+ * for each of cameraPosition, lookAt and the upVector. Optional is blockAABBIntersectionPadding (real) and backgroundColor (Vec3).
  * To output both process local and global tbuffers after raytracing, set tbuffer_output_directory (string).
  * For image output after raytracing, set image_output_directory (string); for local image output additionally set
  * local_image_output_enabled (bool) to true.
@@ -107,7 +110,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    lookAtPoint_ = config.getParameter<Vec3>("lookAt");
    upVector_ = config.getParameter<Vec3>("upVector");
    lighting_ = Lighting(config.getBlock("Lighting"));
-   
+   backgroundColor_ = config.getParameter<Vec3>("backgroundColor", Vec3(0.1, 0.1, 0.1));
+
    blockAABBIntersectionPadding_ = config.getParameter<real_t>("blockAABBIntersectionPadding", real_t(0.0));
 
    setupView_();

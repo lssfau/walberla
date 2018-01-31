@@ -59,6 +59,7 @@ public:
                       real_t fov_vertical,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                       const Lighting& lighting,
+                      const Vec3& backgroundColor = Vec3(0.1, 0.1, 0.1),
                       real_t blockAABBIntersectionPadding = real_t(0.0));
    explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                       const shared_ptr<BodyStorage> globalBodyStorage,
@@ -81,6 +82,7 @@ private:
                                marks the center of the view plane.*/
    Vec3 upVector_;            //!< The vector indicating the upwards direction of the camera.
    Lighting lighting_;        //!< The lighting of the scene.
+   Vec3 backgroundColor_;     //!< Background color of the scene.
    real_t blockAABBIntersectionPadding_; /*!< The padding applied in block AABB intersection pretesting, as
                                           some objects within a block might protrude from the block's AABB.*/
    
@@ -113,6 +115,7 @@ public:
    inline const Vec3& getCameraPosition() const;
    inline const Vec3& getLookAtPoint() const;
    inline const Vec3& getUpVector() const;
+   inline const Vec3& getBackgroundColor() const;
    inline bool getTBufferOutputEnabled() const;
    inline const std::string& getTBufferOutputDirectory() const;
    inline bool getImageOutputEnabled() const;
@@ -122,6 +125,7 @@ public:
 
    /*!\name Set functions */
    //@{
+   inline void setBackgroundColor(const Vec3& color);
    inline void setTBufferOutputEnabled(const bool enabled);
    inline void setTBufferOutputDirectory(const std::string& path);
    inline void setImageOutputEnabled(const bool enabled);
@@ -203,7 +207,17 @@ inline const Vec3& Raytracer::getLookAtPoint() const {
 inline const Vec3& Raytracer::getUpVector() const {
    return upVector_;
 }
-   
+
+/*!\brief Returns the background color of the scene.
+ *
+ * \return Color.
+ *
+ * Returns the background color of the scene.
+ */
+inline const Vec3& Raytracer::getBackgroundColor() const {
+   return backgroundColor_;
+}
+
 /*!\brief Returns true if tbuffer output to a file is enabled.
  *
  * \return True if tbuffer output enabled, otherwise false.
@@ -242,6 +256,14 @@ inline bool Raytracer::getLocalImageOutputEnabled() const {
  */
 inline const std::string& Raytracer::getImageOutputDirectory() const {
    return imageOutputDirectory_;
+}
+
+/*!\brief Set the background color of the scene.
+ *
+ * \param color New background color.
+ */
+inline void Raytracer::setBackgroundColor(const Vec3& color) {
+   backgroundColor_ = color;
 }
    
 /*!\brief Enable / disable outputting the tBuffer to a file in the specified directory.
@@ -507,15 +529,15 @@ inline Vec3 Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, con
    real_t shininess = 100;
 
    if (body->getTypeID() == Plane::getStaticTypeID()) {
-      diffuseColor = Vec3(real_t(0.55), real_t(0.55), real_t(0.55));
+      diffuseColor = Vec3(real_t(0.7), real_t(0.7), real_t(0.7));
       ambientColor.set(real_t(0.5), real_t(0.5), real_t(0.5));
       specularColor.set(real_t(0), real_t(0), real_t(0));
       shininess = real_t(0);
    }
    if (body->getTypeID() == Sphere::getStaticTypeID()) {
-      diffuseColor = Vec3(real_t(0.5), real_t(0.5), real_t(0.5));
-      ambientColor.set(real_t(0.4), real_t(0.4), real_t(0.4));
-      specularColor.set(real_t(0.774597), real_t(0.774597), real_t(0.774597));
+      diffuseColor = Vec3(real_t(0.98), real_t(0.1), real_t(0.1));
+      ambientColor.set(real_t(0.6), real_t(0.05), real_t(0.05));
+      specularColor.set(real_t(1), real_t(1), real_t(1));
       shininess = real_t(30);
    }
    //----
@@ -537,7 +559,7 @@ inline Vec3 Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, con
    }
    
    Vec3 color = multiplyColors(lighting_.ambientColor, ambientColor)
-      + multiplyColors(lighting_.diffuseColor, diffuseColor)*lambertian
+      + multiplyColors(lighting_.diffuseColor, diffuseColor)*lambertian//*real_c(pow(lambertian, real_t(4)))
       + multiplyColors(lighting_.specularColor, specularColor)*specular;
    
    real_t colorMax = color.max();
