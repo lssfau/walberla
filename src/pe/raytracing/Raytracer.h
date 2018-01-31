@@ -320,6 +320,9 @@ template <typename BodyTypeTuple>
 void Raytracer::rayTrace(const size_t timestep) {
    real_t inf = std::numeric_limits<real_t>::max();
 
+   int numProcesses = mpi::MPIManager::instance()->numProcesses();
+   int rank = mpi::MPIManager::instance()->rank();
+   
    std::vector<real_t> tBuffer(pixelsVertical_ * pixelsHorizontal_, inf);
    std::vector<Vec3> imageBuffer(pixelsVertical_ * pixelsHorizontal_);
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
@@ -366,25 +369,28 @@ void Raytracer::rayTrace(const size_t timestep) {
             }
          }
          
-         // only iterate over global body storage in one process.
-         // optimization required, e.g. split up global bodies over all processes.
-         WALBERLA_ROOT_SECTION() {
-            for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt ) {
-               if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
-                  PlaneID plane = (Plane*)(*bodyIt);
-                  if (!isPlaneVisible(plane, ray)) {
-                     continue;
-                  }
+         int i = 0;
+         for(auto bodyIt: *globalBodyStorage_) {
+            i++;
+            // distribute global objects more or less evenly on all processes
+            if (((i-1)%numProcesses) != rank) {
+               continue;
+            }
+            
+            if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
+               PlaneID plane = (PlaneID)bodyIt;
+               if (!isPlaneVisible(plane, ray)) {
+                  continue;
                }
-               
-               bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
-               
-               if (intersects && t < t_closest) {
-                  // body was shot by ray and currently closest to camera
-                  t_closest = t;
-                  body_closest = *bodyIt;
-                  n_closest = n;
-               }
+            }
+            
+            bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(bodyIt, func);
+            
+            if (intersects && t < t_closest) {
+               // body was shot by ray and currently closest to camera
+               t_closest = t;
+               body_closest = bodyIt;
+               n_closest = n;
             }
          }
          
