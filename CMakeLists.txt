@@ -438,6 +438,46 @@ endif()
 
 ############################################################################################################################
 ##
+##  Find optional C++ libraries
+##
+############################################################################################################################
+
+try_compile( WALBERLA_USE_STD_FILESYSTEM "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_FILESYSTEM -std=c++14 )
+if( WALBERLA_USE_STD_FILESYSTEM )
+   message( STATUS "Found std::filesystem")
+else()
+   try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
+                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM -std=c++14 )
+   if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+      message( STATUS "Found std::experimental::filesystem")
+   endif()
+   if( NOT WALBERLA_CXX_COMPILER_IS_MSVC AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+      unset( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM CACHE )
+      try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
+                   COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM -std=c++14
+                   LINK_LIBRARIES stdc++fs )
+      if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+         message( STATUS "Found std::experimental::filesystem in libstdc++fs")
+      list ( APPEND SERVICE_LIBS -lstdc++fs )
+      endif()
+   endif()
+   if( NOT WALBERLA_CXX_COMPILER_IS_MSVC AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+      unset( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM CACHE )
+      try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
+                   COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM -std=c++14
+                   LINK_LIBRARIES c++experimental )
+      if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+         message( STATUS "Found std::experimental::filesystem in libc++experimental")
+         list ( APPEND SERVICE_LIBS -lc++experimental )
+      endif()
+   endif()
+endif()
+
+
+
+############################################################################################################################
+##
 ##  Visual Studio Setup
 ##
 ############################################################################################################################
@@ -574,7 +614,9 @@ endif()
 #############################################################################################################################
 set ( waLBerla_REQUIRED_MIN_BOOST_VERSION "1.48")
 
-list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS filesystem system )
+if ( NOT WALBERLA_USE_STD_FILESYSTEM AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+  list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS filesystem system )
+endif()
 
 if ( WALBERLA_BUILD_WITH_PYTHON AND WALBERLA_CXX_COMPILER_IS_MSVC )
     list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS python3 )

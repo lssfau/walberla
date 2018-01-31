@@ -138,20 +138,20 @@ void VTKOutput::init( const std::string & identifier )
 
    WALBERLA_ROOT_SECTION()
    {
-      boost::filesystem::path path( baseFolder_ + "/" + identifier_ );
-      if( boost::filesystem::exists( path ) && executionCounter_ == 0 )
-         boost::filesystem::remove_all( path );
+      filesystem::path path( baseFolder_ + "/" + identifier_ );
+      if( filesystem::exists( path ) && executionCounter_ == 0 )
+         filesystem::remove_all( path );
 
-      boost::filesystem::path pvd( baseFolder_ + "/" + identifier_ + ".pvd" );
-      if( boost::filesystem::exists( pvd ) && executionCounter_ == 0 )
+      filesystem::path pvd( baseFolder_ + "/" + identifier_ + ".pvd" );
+      if( filesystem::exists( pvd ) && executionCounter_ == 0 )
          std::remove( pvd.string().c_str() );
 
-      boost::filesystem::path basePath( baseFolder_ );
-      if( !boost::filesystem::exists( basePath ) )
-         boost::filesystem::create_directories( basePath );
+      filesystem::path basePath( baseFolder_ );
+      if( !filesystem::exists( basePath ) )
+         filesystem::create_directories( basePath );
 
-      if ( !boost::filesystem::exists( path ) )
-         boost::filesystem::create_directories( path );
+      if ( !filesystem::exists( path ) )
+         filesystem::create_directories( path );
    }
 
    WALBERLA_MPI_WORLD_BARRIER();
@@ -181,9 +181,9 @@ void VTKOutput::forceWrite( uint_t number, const bool immediatelyWriteCollectors
    {
       if( !useMPIIO_ )
       {
-         boost::filesystem::path tpath( path.str() );
-         if( !boost::filesystem::exists( tpath ) )
-            boost::filesystem::create_directory( tpath );
+         filesystem::path tpath( path.str() );
+         if( !filesystem::exists( tpath ) )
+            filesystem::create_directory( tpath );
       }
    }
    WALBERLA_MPI_WORLD_BARRIER();
@@ -1730,7 +1730,7 @@ void VTKOutput::writePVTI( const uint_t collector ) const
 
    ofs << "  </PCellData>\n";
 
-   std::vector< boost::filesystem::path > files;
+   std::vector< filesystem::path > files;
    getFilenames( files, collector );
 
    for( auto file = files.begin(); file != files.end(); ++file )
@@ -1780,7 +1780,7 @@ void VTKOutput::writePVTI_sampled( const uint_t collector ) const
 
    ofs << "  </PCellData>\n";
 
-   std::vector< boost::filesystem::path > files;
+   std::vector< filesystem::path > files;
    getFilenames( files, collector );
 
    for( auto file = files.begin(); file != files.end(); ++file )
@@ -1928,7 +1928,7 @@ void VTKOutput::writePVTU( const uint_t collector ) const
 
    ofs << "  </PCellData>\n";
 
-   std::vector< boost::filesystem::path > files;
+   std::vector< filesystem::path > files;
    getFilenames( files, collector );
 
    for( auto file = files.begin(); file != files.end(); ++file )
@@ -1980,17 +1980,17 @@ bool VTKOutput::writeCombinedVTU( std::string localPart, const uint_t collector 
 
 
 
-void VTKOutput::getFilenames( std::vector< boost::filesystem::path >& files, const uint_t collector ) const
+void VTKOutput::getFilenames( std::vector< filesystem::path >& files, const uint_t collector ) const
 {
    std::ostringstream path;
    path << baseFolder_ << "/" << identifier_ << "/" << executionFolder_ << "_" << collector;
-   boost::filesystem::path directory( path.str() );
+   filesystem::path directory( path.str() );
 
-   WALBERLA_ASSERT( boost::filesystem::exists( directory ) );
+   WALBERLA_ASSERT( filesystem::exists( directory ) );
 
-   for( boost::filesystem::directory_iterator file( directory ); file != boost::filesystem::directory_iterator(); ++file )
+   for( filesystem::directory_iterator file( directory ); file != filesystem::directory_iterator(); ++file )
    {
-      WALBERLA_ASSERT( boost::filesystem::is_regular_file( file->path() ) && !boost::filesystem::is_directory( file->path() ) );
+      WALBERLA_ASSERT( filesystem::is_regular_file( file->path() ) && !filesystem::is_directory( file->path() ) );
       files.push_back( file->path() );
    }
 }

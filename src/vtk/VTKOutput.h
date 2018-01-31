@@ -33,8 +33,7 @@
 
 #include "domain_decomposition/StructuredBlockStorage.h"
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
+#include "core/Filesystem.h"
 #include <functional>
 #include <boost/tuple/tuple.hpp>
 
@@ -271,7 +270,7 @@ private:
    bool writeCombinedVTI_sampled( std::string localPart, const uint_t collector ) const;
    bool writeCombinedVTU(std::string localPart, const uint_t collector) const;
 
-   void getFilenames( std::vector< boost::filesystem::path >& blocks, const uint_t collector ) const;
+   void getFilenames( std::vector< filesystem::path >& blocks, const uint_t collector ) const;
    void writePPointData( std::ofstream& ofs ) const;
    void writePCellData( std::ofstream& ofs ) const;
 

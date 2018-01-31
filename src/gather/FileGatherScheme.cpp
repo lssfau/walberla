@@ -27,7 +27,7 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include <boost/filesystem.hpp>
+#include "core/Filesystem.h"
 #include <boost/lexical_cast.hpp>
 
 
@@ -56,7 +56,7 @@ FileGatherScheme::~FileGatherScheme()
 
 void FileGatherScheme::deleteTemporaryFiles()
 {
-   using namespace boost::filesystem;
+   using namespace filesystem;
    using std::string;
 
    for(int rank=0; rank < MPIManager::instance()->numProcesses(); ++rank)
@@ -108,7 +108,7 @@ void FileGatherScheme::writeToFile()
 
 void FileGatherScheme::collectFromFiles()
 {
-   using namespace boost::filesystem;
+   using namespace filesystem;
    using namespace std;
 
    if ( fileStream_.is_open() )

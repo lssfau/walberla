@@ -37,11 +37,7 @@
 
 // boost includes
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem/path.hpp>
-
-#ifndef BOOST_FILESYSTEM_VERSION
-#define BOOST_FILESYSTEM_VERSION 1
-#endif
+#include "core/Filesystem.h"
 
 
 
@@ -687,13 +683,8 @@ inline void Config::convertToLowerCase( std::string& s )
  */
 inline std::string Config::getDirectory( const std::string& path )
 {
-   boost::filesystem::path p( path );
-#        if BOOST_FILESYSTEM_VERSION>2
-   return p.branch_path().string();
-#        else
-#        warning BOOST FILESYSTEM VERSION IS RATHER OLD! PLEASE USE BOOST VERSION 1.46 OR HIGHER
+   filesystem::path p( path );
    return p.parent_path().string();
-#        endif
 }
 //**********************************************************************************************************************
 
@@ -707,12 +698,8 @@ inline std::string Config::getDirectory( const std::string& path )
  */
 inline std::string Config::getFilename( const std::string& path )
 {
-   boost::filesystem::path p( path );
-#        if BOOST_FILESYSTEM_VERSION>2
-   return p.leaf().string();
-#        else
-   return p.filename();
-#        endif
+   filesystem::path p( path );
+   return p.filename().string();
 }
 //**********************************************************************************************************************
 

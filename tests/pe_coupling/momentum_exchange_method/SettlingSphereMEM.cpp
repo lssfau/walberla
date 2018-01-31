@@ -312,9 +312,9 @@ int main( int argc, char **argv )
    if( fileIO )
    {
       // create base directory if it does not yet exist
-      boost::filesystem::path tpath( baseFolder );
-      if( !boost::filesystem::exists( tpath ) )
-         boost::filesystem::create_directory( tpath );
+      filesystem::path tpath( baseFolder );
+      if( !filesystem::exists( tpath ) )
+         filesystem::create_directory( tpath );
    }
 
    //////////////////////////////////////

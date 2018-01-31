@@ -31,7 +31,7 @@
 #include "helper/ExceptionHandling.h"
 
 
-#include <boost/filesystem.hpp>
+#include "core/Filesystem.h"
 
 namespace walberla {
 namespace python_coupling {
@@ -53,15 +53,15 @@ namespace python_coupling {
       code << "] \n";
 
 
-      boost::filesystem::path path ( fileOrModuleName );
-      path = boost::filesystem::absolute( path );
+      filesystem::path path ( fileOrModuleName );
+      path = filesystem::absolute( path );
       if ( path.extension() == ".py" )
       {
          moduleName = path.stem().string();
 
 
          if ( ! path.parent_path().empty() )  {
-            std::string p = boost::filesystem::canonical(path.parent_path()).string();
+            std::string p = filesystem::canonical(path.parent_path()).string();
             code << "sys.path.append( r'" << p << "')" << "\n";
          }
       }

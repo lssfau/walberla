@@ -28,7 +28,7 @@
 #include <fstream>
 #include <string>
 
-#include <boost/filesystem.hpp>
+#include "core/Filesystem.h"
 
 #ifdef _MSC_VER
 #  pragma warning(push)
@@ -57,10 +57,10 @@ namespace mesh {
 template< typename MeshType >
 void readAndBroadcast( const std::string & filename, MeshType & mesh )
 {
-   if( !boost::filesystem::exists( filename ) )
+   if( !filesystem::exists( filename ) )
       WALBERLA_ABORT( "The mesh file \"" << filename << "\" does not exist!" );
 
-   std::string extension = boost::filesystem::extension( filename );
+   std::string extension = filesystem::path( filename ).extension().string();
 
    std::string str;
 

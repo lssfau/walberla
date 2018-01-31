@@ -740,9 +740,9 @@ int main( int argc, char **argv ) {
    if( !funcTest )
    {
       // create base directory if it does not yet exist
-      boost::filesystem::path tpath( vtkBaseFolder );
-      if( !boost::filesystem::exists( tpath ) )
-         boost::filesystem::create_directory( tpath );
+      filesystem::path tpath( vtkBaseFolder );
+      if( !filesystem::exists( tpath ) )
+         filesystem::create_directory( tpath );
    }
 
 
