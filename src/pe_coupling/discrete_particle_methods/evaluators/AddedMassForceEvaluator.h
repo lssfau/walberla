@@ -45,7 +45,7 @@
 
 #include "stencil/Directions.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 namespace walberla {
 namespace pe_coupling {
@@ -78,9 +78,9 @@ public:
                             const BlockDataID & forceFieldID, const BlockDataID & bodyStorageID,
                             const BlockDataID & flagFieldID, const Set< FlagUID > & domainFlags,
                             const BlockDataID & velocityTimeDerivativeFieldID,
-                            const boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t )> & addedMassForceCorrelationFunction,
+                            const std::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t )> & addedMassForceCorrelationFunction,
                             const shared_ptr< BodyVelocityTimeDerivativeEvaluator > & bodyVelocityTimeDerivativeEvaluator,
-                            const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
+                            const std::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
    : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ),
      addedMassForceCorrelationFunction_( addedMassForceCorrelationFunction ),
      bodyVelocityTimeDerivativeEvaluator_( bodyVelocityTimeDerivativeEvaluator ),
@@ -97,11 +97,11 @@ private:
    shared_ptr<StructuredBlockStorage> blockStorage_;
    const BlockDataID bodyStorageID_;
 
-   boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t )> addedMassForceCorrelationFunction_;
+   std::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t )> addedMassForceCorrelationFunction_;
 
    shared_ptr< BodyVelocityTimeDerivativeEvaluator > bodyVelocityTimeDerivativeEvaluator_;
 
-   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
+   std::function<bool(pe::BodyID)> dpmBodySelectorFct_;
 
    BlockDataID velocityTimeDerivativeFieldInterpolatorID_;
    BlockDataID forceDistributorID_;

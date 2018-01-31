@@ -27,9 +27,7 @@
 #include "core/DataTypes.h"
 #include "core/NonCopyable.h"
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-#include <boost/thread/mutex.hpp>
-#endif
+#include <mutex>
 
 
 /// \cond internal
@@ -41,14 +39,11 @@ namespace singleton {
 
 #ifdef WALBERLA_CXX_COMPILER_IS_GNU
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif
 
 #ifdef WALBERLA_CXX_COMPILER_IS_CLANG
 #pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunknown-pragmas"
 #pragma clang diagnostic ignored "-Wunused-local-typedefs"
 #endif
 
@@ -495,9 +490,7 @@ public:
    //@{
    static const shared_ptr<T>& instance()
    {
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::mutex::scoped_lock lock( instanceMutex_ );
-#endif
+      std::lock_guard<std::mutex> lock( instanceMutex_ );
       static shared_ptr<T> object( new T() );
       isInstantiated_ = true;
       return object;
@@ -520,9 +513,7 @@ private:
    shared_ptr<D7> dependency7_;  //!< Handle to the seventh lifetime dependency.
    shared_ptr<D8> dependency8_;  //!< Handle to the eighth lifetime dependency.
    
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   static boost::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
-#endif
+   static std::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
    
    static bool isInstantiated_;
    //@}
@@ -592,9 +583,7 @@ public:
    //@{
    static const shared_ptr<T>& instance()
    {
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::mutex::scoped_lock lock( instanceMutex_ );
-#endif
+      std::lock_guard<std::mutex> lock( instanceMutex_ );
       static shared_ptr<T> object( new T() );
       isInstantiated_ = true;
       return object;
@@ -616,9 +605,7 @@ private:
    shared_ptr<D6> dependency6_;  //!< Handle to the sixth lifetime dependency.
    shared_ptr<D7> dependency7_;  //!< Handle to the seventh lifetime dependency.
    
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   static boost::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
-#endif
+   static std::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
    
    static bool isInstantiated_;
    //@}
@@ -686,9 +673,7 @@ public:
    //@{
    static const shared_ptr<T>& instance()
    {
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::mutex::scoped_lock lock( instanceMutex_ );
-#endif
+      std::lock_guard<std::mutex> lock( instanceMutex_ );
       static shared_ptr<T> object( new T() );
       isInstantiated_ = true;
       return object;
@@ -709,9 +694,7 @@ private:
    shared_ptr<D5> dependency5_;  //!< Handle to the fifth lifetime dependency.
    shared_ptr<D6> dependency6_;  //!< Handle to the sixth lifetime dependency.
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   static boost::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
-#endif
+   static std::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
 
    static bool isInstantiated_;
    //@}
@@ -776,9 +759,7 @@ public:
    //@{
    static const shared_ptr<T>& instance()
    {
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::mutex::scoped_lock lock( instanceMutex_ );
-#endif
+      std::lock_guard<std::mutex> lock( instanceMutex_ );
       static shared_ptr<T> object( new T() );
       isInstantiated_ = true;
       return object;
@@ -798,9 +779,7 @@ private:
    shared_ptr<D4> dependency4_;  //!< Handle to the fourth lifetime dependency.
    shared_ptr<D5> dependency5_;  //!< Handle to the fifth lifetime dependency.
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   static boost::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
-#endif
+   static std::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
 
    static bool isInstantiated_;
    //@}
@@ -862,9 +841,7 @@ public:
    //@{
    static const shared_ptr<T>& instance()
    {
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::mutex::scoped_lock lock( instanceMutex_ );
-#endif
+      std::lock_guard<std::mutex> lock( instanceMutex_ );
       static shared_ptr<T> object( new T() );
       isInstantiated_ = true;
       return object;
@@ -883,9 +860,7 @@ private:
    shared_ptr<D3> dependency3_;  //!< Handle to the third lifetime dependency.
    shared_ptr<D4> dependency4_;  //!< Handle to the fourth lifetime dependency.
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   static boost::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
-#endif
+   static std::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
 
    static bool isInstantiated_;
    //@}
@@ -944,9 +919,7 @@ public:
    //@{
    static const shared_ptr<T>& instance()
    {
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::mutex::scoped_lock lock( instanceMutex_ );
-#endif
+      std::lock_guard<std::mutex> lock( instanceMutex_ );
       static shared_ptr<T> object( new T() );
       isInstantiated_ = true;
       return object;
@@ -964,9 +937,7 @@ private:
    shared_ptr<D2> dependency2_;  //!< Handle to the second lifetime dependency.
    shared_ptr<D3> dependency3_;  //!< Handle to the third lifetime dependency.
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   static boost::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
-#endif
+   static std::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
 
    static bool isInstantiated_;
    //@}
@@ -1022,9 +993,7 @@ public:
    //@{
    static const shared_ptr<T>& instance()
    {
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::mutex::scoped_lock lock( instanceMutex_ );
-#endif
+      std::lock_guard<std::mutex> lock( instanceMutex_ );
       static shared_ptr<T> object( new T() );
       isInstantiated_ = true;
       return object;
@@ -1041,9 +1010,7 @@ private:
    shared_ptr<D1> dependency1_;  //!< Handle to the first lifetime dependency.
    shared_ptr<D2> dependency2_;  //!< Handle to the second lifetime dependency.
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   static boost::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
-#endif
+   static std::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
 
    static bool isInstantiated_;
    //@}
@@ -1096,9 +1063,7 @@ public:
    //@{
    static const shared_ptr<T>& instance()
    {
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::mutex::scoped_lock lock( instanceMutex_ );
-#endif
+      std::lock_guard<std::mutex> lock( instanceMutex_ );
       static shared_ptr<T> object( new T() );
       isInstantiated_ = true;
       return object;
@@ -1114,9 +1079,7 @@ private:
    //@{
    shared_ptr<D1> dependency1_;  //!< Handle to the lifetime dependency.
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   static boost::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
-#endif
+   static std::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
 
    static bool isInstantiated_;
    //@}
@@ -1165,9 +1128,7 @@ public:
    //@{
    static const shared_ptr<T>& instance()
    {
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::mutex::scoped_lock lock( instanceMutex_ );
-#endif
+      std::lock_guard<std::mutex> lock( instanceMutex_ );
       static shared_ptr<T> object( new T() );
       isInstantiated_ = true;
       return object;
@@ -1181,9 +1142,7 @@ private:
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   static boost::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
-#endif
+   static std::mutex instanceMutex_;  //!< Synchronization mutex for access to the singleton.
 
    static bool isInstantiated_;
    //@}
@@ -1199,82 +1158,56 @@ private:
 //
 //======================================================================================================================
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
 template< typename T, typename A, typename B, typename C, typename D, typename E, typename F, typename G, typename H >
-boost::mutex Singleton<T,A,B,C,D,E,F,G,H>::instanceMutex_;
-#endif
+std::mutex Singleton<T,A,B,C,D,E,F,G,H>::instanceMutex_;
 
 template< typename T, typename A, typename B, typename C, typename D, typename E, typename F, typename G, typename H >
 bool Singleton<T,A,B,C,D,E,F,G,H>::isInstantiated_ = false;
 
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
 template< typename T, typename A, typename B, typename C, typename D, typename E, typename F, typename G >
-boost::mutex Singleton<T,A,B,C,D,E,F,G,NullType>::instanceMutex_;
-#endif
+std::mutex Singleton<T,A,B,C,D,E,F,G,NullType>::instanceMutex_;
 
 template< typename T, typename A, typename B, typename C, typename D, typename E, typename F, typename G >
 bool Singleton<T,A,B,C,D,E,F,G,NullType>::isInstantiated_ = false;
 
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
 template< typename T, typename A, typename B, typename C, typename D, typename E, typename F >
-boost::mutex Singleton<T,A,B,C,D,E,F,NullType,NullType>::instanceMutex_;
-#endif
+std::mutex Singleton<T,A,B,C,D,E,F,NullType,NullType>::instanceMutex_;
 
 template< typename T, typename A, typename B, typename C, typename D, typename E, typename F >
 bool Singleton<T,A,B,C,D,E,F,NullType,NullType>::isInstantiated_ = false;
 
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
 template< typename T, typename A, typename B, typename C, typename D, typename E >
-boost::mutex Singleton<T,A,B,C,D,E,NullType,NullType,NullType>::instanceMutex_;
-#endif
+std::mutex Singleton<T,A,B,C,D,E,NullType,NullType,NullType>::instanceMutex_;
 
 template< typename T, typename A, typename B, typename C, typename D, typename E >
 bool Singleton<T,A,B,C,D,E,NullType,NullType,NullType>::isInstantiated_ = false;
 
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
 template< typename T, typename A, typename B, typename C, typename D >
-boost::mutex Singleton<T,A,B,C,D,NullType,NullType,NullType,NullType>::instanceMutex_;
-#endif
+std::mutex Singleton<T,A,B,C,D,NullType,NullType,NullType,NullType>::instanceMutex_;
 
 template< typename T, typename A, typename B, typename C, typename D >
 bool Singleton<T,A,B,C,D,NullType,NullType,NullType,NullType>::isInstantiated_ = false;
 
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
 template< typename T, typename A, typename B, typename C >
-boost::mutex Singleton<T,A,B,C,NullType,NullType,NullType,NullType,NullType>::instanceMutex_;
-#endif
+std::mutex Singleton<T,A,B,C,NullType,NullType,NullType,NullType,NullType>::instanceMutex_;
 
 template< typename T, typename A, typename B, typename C >
 bool Singleton<T,A,B,C,NullType,NullType,NullType,NullType,NullType>::isInstantiated_ = false;
 
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
 template< typename T, typename A, typename B >
-boost::mutex Singleton<T,A,B,NullType,NullType,NullType,NullType,NullType,NullType>::instanceMutex_;
-#endif
+std::mutex Singleton<T,A,B,NullType,NullType,NullType,NullType,NullType,NullType>::instanceMutex_;
 
 template< typename T, typename A, typename B >
 bool Singleton<T,A,B,NullType,NullType,NullType,NullType,NullType,NullType>::isInstantiated_ = false;
 
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
 template< typename T, typename A >
-boost::mutex Singleton<T,A,NullType,NullType,NullType,NullType,NullType,NullType,NullType>::instanceMutex_;
-#endif
+std::mutex Singleton<T,A,NullType,NullType,NullType,NullType,NullType,NullType,NullType>::instanceMutex_;
 
 template< typename T, typename A >
 bool Singleton<T,A,NullType,NullType,NullType,NullType,NullType,NullType,NullType>::isInstantiated_ = false;
 
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
 template< typename T >
-boost::mutex Singleton<T,NullType,NullType,NullType,NullType,NullType,NullType,NullType,NullType>::instanceMutex_;
-#endif
+std::mutex Singleton<T,NullType,NullType,NullType,NullType,NullType,NullType,NullType,NullType>::instanceMutex_;
 
 template< typename T >
 bool Singleton<T,NullType,NullType,NullType,NullType,NullType,NullType,NullType,NullType>::isInstantiated_ = false;

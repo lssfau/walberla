@@ -38,7 +38,7 @@
 #include "pe_coupling/geometry/SphereEquivalentDiameter.h"
 #include "pe_coupling/utility/BodySelectorFunctions.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <cmath>
 
@@ -72,9 +72,9 @@ public:
    LiftForceEvaluator( const shared_ptr<StructuredBlockStorage> & blockStorage,
                        const BlockDataID & forceFieldID, const BlockDataID & bodyStorageID, const BlockDataID & flagFieldID, const Set< FlagUID > & domainFlags,
                        const BlockDataID & velocityFieldID, const BlockDataID & velocityCurlFieldID,
-                       const boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )> & liftForceCorrelationFunction,
+                       const std::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )> & liftForceCorrelationFunction,
                        real_t fluidDynamicViscosity,
-                       const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
+                       const std::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
    : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), liftForceCorrelationFunction_( liftForceCorrelationFunction ),
      fluidDynamicViscosity_( fluidDynamicViscosity ), dpmBodySelectorFct_( dpmBodySelectorFct)
    {
@@ -90,11 +90,11 @@ private:
    shared_ptr<StructuredBlockStorage> blockStorage_;
    BlockDataID bodyStorageID_;
 
-   boost::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )> liftForceCorrelationFunction_;
+   std::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t )> liftForceCorrelationFunction_;
 
    real_t fluidDynamicViscosity_;
 
-   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
+   std::function<bool(pe::BodyID)> dpmBodySelectorFct_;
 
    BlockDataID velocityFieldInterpolatorID_;
    BlockDataID velocityCurlFieldInterpolatorID_;

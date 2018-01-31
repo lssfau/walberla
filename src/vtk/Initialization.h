@@ -26,7 +26,7 @@
 #include "core/config/Config.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
 
-#include <boost/function.hpp>
+#include <functional>
 #include <string>
 
 
@@ -37,7 +37,7 @@ namespace vtk {
 // For documentation see the documentation of function "initializeVTKOutput" in Initialization.cpp
 
 
-typedef boost::function< void () > OutputFunction;
+typedef std::function< void () > OutputFunction;
 
 struct SelectableOutputFunction {
 
@@ -76,7 +76,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
                           const std::map< std::string, VTKOutput::CellFilter > & filters,
                           const std::map< std::string, VTKOutput::BeforeFunction > & beforeFunctions );
 
-typedef boost::function< void ( std::vector< shared_ptr< BlockCellDataWriterInterface > > & writers,
+typedef std::function< void ( std::vector< shared_ptr< BlockCellDataWriterInterface > > & writers,
                                 std::map< std::string, VTKOutput::CellFilter > &            filters,
                                 std::map< std::string, VTKOutput::BeforeFunction > &        beforeFunctions ) > RegisterVTKOutputFunction;
 

@@ -29,7 +29,6 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include <boost/static_assert.hpp>
 #include <algorithm>
 #include <iterator>
 

@@ -32,7 +32,7 @@
 
 #include "pe_coupling/utility/BodySelectorFunctions.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 namespace walberla {
 namespace pe_coupling {
@@ -68,7 +68,7 @@ public:
    SolidVolumeFractionFieldEvaluator( const shared_ptr<StructuredBlockStorage> & blockStorage,
                                       const BlockDataID & solidVolumeFractionFieldID, const BlockDataID & bodyStorageID,
                                       const BlockDataID & flagFieldID, const Set< FlagUID > & domainFlags,
-                                      const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
+                                      const std::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
    : blockStorage_( blockStorage ), solidVolumeFractionFieldID_( solidVolumeFractionFieldID ),
      bodyStorageID_( bodyStorageID ), dpmBodySelectorFct_( dpmBodySelectorFct)
    {
@@ -104,7 +104,7 @@ private:
    BlockDataID solidVolumeFractionFieldID_;
    BlockDataID bodyStorageID_;
 
-   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
+   std::function<bool(pe::BodyID)> dpmBodySelectorFct_;
 
    BlockDataID scalarDistributorID_;
 };

@@ -23,7 +23,7 @@
 
 #include "core/singleton/Singleton.h"
 
-#include <boost/function.hpp>
+#include <functional>
 #include <cstdlib>
 #include <sstream>
 #include <stdexcept>
@@ -40,7 +40,7 @@ class Abort : public singleton::Singleton<Abort>
 
 public:
 
-   typedef boost::function<void ( const std::string & message, const std::string & callerPath, const int line, bool withDebugInfo  )> AbortFunction;
+   typedef std::function<void ( const std::string & message, const std::string & callerPath, const int line, bool withDebugInfo  )> AbortFunction;
 
    void resetAbortFunction( const AbortFunction & function = AbortFunction() ) { abortFunction_ = function; }
 

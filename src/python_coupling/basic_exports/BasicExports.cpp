@@ -41,6 +41,7 @@
 #include "python_coupling/helper/BlockStorageExportHelpers.h"
 #include "stencil/Directions.h"
 
+#include <boost/version.hpp>
 
 using namespace boost::python;
 
@@ -110,6 +111,47 @@ struct NumpyFloatConversion
     }
 };
 
+
+#if BOOST_VERSION < 106300
+// taken from https://github.com/boostorg/python/commit/97e4b34a15978ca9d7c296da2de89b78bba4e0d5
+template <class T>
+struct exportSharedPtr
+{
+   exportSharedPtr()
+   {
+   converter::registry::insert( &convertible, &construct, boost::python::type_id<std::shared_ptr<T> >()
+#ifndef BOOST_PYTHON_NO_PY_SIGNATURES
+                                , &converter::expected_from_python_type_direct<T>::get_pytype
+#endif
+                              );
+   }
+
+private:
+   static void* convertible( PyObject* p )
+   {
+      if ( p == Py_None )
+         return p;
+
+      return converter::get_lvalue_from_python( p, converter::registered<T>::converters );
+   }
+
+   static void construct( PyObject* source, converter::rvalue_from_python_stage1_data* data )
+   {
+      void* const storage = ( (converter::rvalue_from_python_storage< std::shared_ptr<T> >*) data )->storage.bytes;
+      // Deal with the "None" case.
+      if ( data->convertible == source )
+         new (storage) std::shared_ptr<T>();
+      else
+      {
+         std::shared_ptr<void> hold_convertible_ref_count( (void*)0, converter::shared_ptr_deleter( handle<>( borrowed( source ) ) ) );
+         // use aliasing constructor
+         new (storage) std::shared_ptr<T>( hold_convertible_ref_count, static_cast<T*>(data->convertible) );
+      }
+
+      data->convertible = storage;
+   }
+};
+#endif
 
 //======================================================================================================================
 //
@@ -609,6 +651,10 @@ void exportTiming()
          .def( self_ns::str(self) )
     ;
 
+#if BOOST_VERSION < 106300
+   exportSharedPtr<WcTimingTree>();
+#endif
+
 }
 
 
@@ -996,6 +1042,10 @@ void exportStructuredBlockStorage()
        .add_property( "periodic",                       &SbS_periodic )
 
        ;
+
+#if BOOST_VERSION < 106300
+   exportSharedPtr<StructuredBlockStorage>();
+#endif
 }
 
 //======================================================================================================================
@@ -1013,6 +1063,11 @@ void exportCommunication()
    using communication::UniformMPIDatatypeInfo;
    class_< UniformMPIDatatypeInfo, shared_ptr<UniformMPIDatatypeInfo>, boost::noncopyable>
       ( "UniformMPIDatatypeInfo", no_init );
+
+#if BOOST_VERSION < 106300
+   exportSharedPtr<UniformPackInfo>();
+   exportSharedPtr<UniformMPIDatatypeInfo>();
+#endif
 }
 
 //======================================================================================================================

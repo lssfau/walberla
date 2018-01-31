@@ -391,7 +391,7 @@ int main( int argc, char **argv )
    ///////////////
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   boost::function< void () > commFunction;
+   std::function< void () > commFunction;
    blockforest::communication::UniformBufferedScheme< Stencil_T > scheme( blocks );
    scheme.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldID ) );
    commFunction = scheme;

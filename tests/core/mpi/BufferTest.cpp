@@ -36,8 +36,7 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>  // #include <boost/random/uniform_int_distribution.hpp>
+#include <random>
 #include <cstring>
 #include <iostream>
 
@@ -48,9 +47,9 @@ using namespace mpi;
 template<typename T>
 void initIntegerContainer( T & container )
 {
-   static boost::mt19937 rng;
-   boost::uniform_int<typename T::value_type> dist;
-   boost::uniform_int<size_t> size_dist(10,1000);
+   static std::mt19937 rng;
+   std::uniform_int_distribution<typename T::value_type> dist;
+   std::uniform_int_distribution<size_t> size_dist(10,1000);
 
    size_t size = size_dist(rng);
    container.clear();
@@ -61,9 +60,9 @@ void initIntegerContainer( T & container )
 template<typename T>
 void initIntegerAssocContainer( T & container )
 {
-   static boost::mt19937 rng;
-   boost::uniform_int<typename T::value_type> dist;
-   boost::uniform_int<size_t> size_dist(10,1000);
+   static std::mt19937 rng;
+   std::uniform_int_distribution<typename T::value_type> dist;
+   std::uniform_int_distribution<size_t> size_dist(10,1000);
 
    size_t size = size_dist(rng);
    container.clear();
@@ -74,9 +73,9 @@ void initIntegerAssocContainer( T & container )
 
 void initVecBool( std::vector<bool> & vecBool )
 {
-   static boost::mt19937 rng;
-   boost::uniform_int<walberla::uint32_t> dist;
-   boost::uniform_int<size_t> size_dist(10,1000);
+   static std::mt19937 rng;
+   std::uniform_int_distribution<walberla::uint32_t> dist;
+   std::uniform_int_distribution<size_t> size_dist(10,1000);
 
    size_t size = size_dist(rng);
    vecBool.clear();
@@ -88,10 +87,10 @@ void initVecBool( std::vector<bool> & vecBool )
 template<typename T>
 void initIntegerMap( T & container )
 {
-   static boost::mt19937 rng;
-   boost::uniform_int<typename T::mapped_type> mapped_dist;
-   boost::uniform_int<typename T::key_type> key_dist;
-   boost::uniform_int<size_t> size_dist(10,1000);
+   static std::mt19937 rng;
+   std::uniform_int_distribution<typename T::mapped_type> mapped_dist;
+   std::uniform_int_distribution<typename T::key_type> key_dist;
+   std::uniform_int_distribution<size_t> size_dist(10,1000);
 
    size_t size = size_dist(rng);
    container.clear();
@@ -103,9 +102,9 @@ void initIntegerMap( T & container )
 template<typename T>
 void initCellContainer( T & container )
 {
-   static boost::mt19937 rng;
-   boost::uniform_int<cell_idx_t> dist;
-   boost::uniform_int<size_t> size_dist(10,1000);
+   static std::mt19937 rng;
+   std::uniform_int_distribution<cell_idx_t> dist;
+   std::uniform_int_distribution<size_t> size_dist(10,1000);
 
    size_t size = size_dist(rng);
    container.clear();
@@ -116,8 +115,8 @@ void initCellContainer( T & container )
 template<typename T, std::size_t N>
 void initBoostArray( boost::array< T, N > & array )
 {
-   static boost::mt19937 rng;
-   boost::uniform_int<T> dist;
+   static std::mt19937 rng;
+   std::uniform_int_distribution<T> dist;
 
    for( auto it = array.begin(); it != array.end(); ++it )
       *it = dist( rng );

@@ -38,10 +38,11 @@
 #include <core/logging/Logging.h>
 #include <core/timing/TimingTree.h>
 #include <core/waLBerlaBuildInfo.h>
+#include <core/math/Utility.h>
 #include <postprocessing/sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
 
-#include <boost/random.hpp>
+#include <random>
 
 using namespace walberla;
 using namespace walberla::pe;
@@ -86,15 +87,16 @@ std::vector<Vector3<real_t>> generatePointCloudDodecahedron()
 template< typename RNG >
 std::vector<Vector3<real_t>> generatPointCloudOnSphere( const real_t radius, const uint_t numPoints, RNG & rng )
 {
-   boost::uniform_on_sphere<real_t> distribution(3);
+   std::uniform_real_distribution<real_t> distribution;
 
    std::vector<Vector3<real_t>> pointCloud( numPoints );
    for( auto & p : pointCloud )
    {
-      auto v = distribution(rng);
-      p[0] = v[0] * radius;
-      p[1] = v[1] * radius;
-      p[2] = v[2] * radius;
+      real_t theta = 2 * math::PI * distribution(rng);
+      real_t phi = std::acos( real_t(1.0) - real_t(2.0) * distribution(rng) );
+      p[0] = std::sin(phi) * std::cos(theta) * radius;
+      p[1] = std::sin(phi) * std::sin(theta) * radius;
+      p[2] = std::cos(phi) * radius;
    }
 
    return pointCloud;
@@ -140,7 +142,7 @@ int main( int argc, char ** argv )
    cr.setRelaxationParameter( real_t(0.7) );
    cr.setGlobalLinearAcceleration( Vec3(0,0,5) );
 
-   boost::function<void(void)> syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+   std::function<void(void)> syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
 
    typedef mesh::FloatPolyMesh OutputMeshType;
    typedef mesh::pe::DefaultTesselation<OutputMeshType> TesselationType;
@@ -177,7 +179,7 @@ int main( int argc, char ** argv )
    //for( auto & p: pointCloud)
    //   p = p.getNormalized() * radius;
 
-   boost::random::mt19937 rng(42);
+   std::mt19937 rng(42);
    for (auto blkIt = forest->begin(); blkIt != forest->end(); ++blkIt)
    {
       IBlock & currentBlock = *blkIt;

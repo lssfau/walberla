@@ -138,7 +138,7 @@ public:
    { return blockForest_->addBlockData( dataHandling, identifier, requiredSelectors, incompatibleSelectors ); }
    
    template< typename T >
-   inline BlockDataID addBlockData( boost::function< T* ( IBlock* const block ) > function,
+   inline BlockDataID addBlockData( std::function< T* ( IBlock* const block ) > function,
                                     const std::string& identifier = std::string(),
                                     const Set<SUID>& requiredSelectors     = Set<SUID>::emptySet(),
                                     const Set<SUID>& incompatibleSelectors = Set<SUID>::emptySet() )

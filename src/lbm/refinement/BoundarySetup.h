@@ -74,16 +74,16 @@ inline shared_ptr< BoundaryConfiguration > defaultBoundaryConfiguration( const C
 //**********************************************************************************************************************
 template< typename BoundaryHandling_T, bool ForceBoundary >
 void consistentlySetBoundary( StructuredBlockStorage & blocks, Block & block, const BlockDataID & boundaryHandlingId, const FlagUID & flag,
-                              const boost::function< bool ( const Vector3< real_t > & ) > & isBoundary,
-                              const boost::function< shared_ptr< BoundaryConfiguration > ( const Cell &, const Vector3< real_t > & ) > & parameter = internal::defaultBoundaryConfiguration );
+                              const std::function< bool ( const Vector3< real_t > & ) > & isBoundary,
+                              const std::function< shared_ptr< BoundaryConfiguration > ( const Cell &, const Vector3< real_t > & ) > & parameter = internal::defaultBoundaryConfiguration );
 
 
 
 /// For documentation see function "template< typename BoundaryHandling_T, bool ForceBoundary > void consistentlySetBoundary(...)"
 template< typename BoundaryHandling_T >
 void consistentlySetBoundary( StructuredBlockStorage & blocks, Block & block, const BlockDataID & boundaryHandlingId, const FlagUID & flag,
-                              const boost::function< bool ( const Vector3< real_t > & ) > & isBoundary,
-                              const boost::function< shared_ptr< BoundaryConfiguration > ( const Cell &, const Vector3< real_t > & ) > & parameter = internal::defaultBoundaryConfiguration )
+                              const std::function< bool ( const Vector3< real_t > & ) > & isBoundary,
+                              const std::function< shared_ptr< BoundaryConfiguration > ( const Cell &, const Vector3< real_t > & ) > & parameter = internal::defaultBoundaryConfiguration )
 {
    consistentlySetBoundary< BoundaryHandling_T, false >( blocks, block, boundaryHandlingId, flag, isBoundary, parameter );
 }
@@ -93,8 +93,8 @@ void consistentlySetBoundary( StructuredBlockStorage & blocks, Block & block, co
 /// For documentation see function "template< typename BoundaryHandling_T, bool ForceBoundary > void consistentlySetBoundary(...)"
 template< typename BoundaryHandling_T >
 void consistentlyForceBoundary( StructuredBlockStorage & blocks, Block & block, const BlockDataID & boundaryHandlingId, const FlagUID & flag,
-                                const boost::function< bool ( const Vector3< real_t > & ) > & isBoundary,
-                                const boost::function< shared_ptr< BoundaryConfiguration > ( const Cell &, const Vector3< real_t > & ) > & parameter = internal::defaultBoundaryConfiguration )
+                                const std::function< bool ( const Vector3< real_t > & ) > & isBoundary,
+                                const std::function< shared_ptr< BoundaryConfiguration > ( const Cell &, const Vector3< real_t > & ) > & parameter = internal::defaultBoundaryConfiguration )
 {
    consistentlySetBoundary< BoundaryHandling_T, true >( blocks, block, boundaryHandlingId, flag, isBoundary, parameter );
 }
@@ -103,8 +103,8 @@ void consistentlyForceBoundary( StructuredBlockStorage & blocks, Block & block, 
 
 template< typename BoundaryHandling_T, bool ForceBoundary >
 void consistentlySetBoundary( StructuredBlockStorage & blocks, Block & block, const BlockDataID & boundaryHandlingId, const FlagUID & flag,
-                              const boost::function< bool ( const Vector3< real_t > & ) > & isBoundary,
-                              const boost::function< shared_ptr< BoundaryConfiguration > ( const Cell &, const Vector3< real_t > & ) > & parameter )
+                              const std::function< bool ( const Vector3< real_t > & ) > & isBoundary,
+                              const std::function< shared_ptr< BoundaryConfiguration > ( const Cell &, const Vector3< real_t > & ) > & parameter )
 {
    const uint_t level = blocks.getLevel(block);
 

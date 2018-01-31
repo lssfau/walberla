@@ -32,7 +32,7 @@
 #include "pe/rigidbody/BodyIterators.h"
 #include "pe/synchronization/SyncForces.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <map>
 
@@ -63,8 +63,8 @@ public:
    explicit SubgridTimeStep( const shared_ptr<StructuredBlockStorage> & blockStorage,
                              const BlockDataID & bodyStorageID,
                              pe::cr::ICR & collisionResponse,
-                             const boost::function<void (void)> & synchronizeFunc,
-                             const boost::function<void ()> & forceEvaluationFunc,
+                             const std::function<void (void)> & synchronizeFunc,
+                             const std::function<void ()> & forceEvaluationFunc,
                              const real_t timeStepSize = real_t(1), const uint_t intermediateSteps = uint_t(1) )
    : timeStepSize_( timeStepSize )
    , intermediateSteps_( ( intermediateSteps == 0 ) ? uint_t(1) : intermediateSteps )
@@ -153,8 +153,8 @@ protected:
    const BlockDataID &  bodyStorageID_;
 
    pe::cr::ICR & collisionResponse_;
-   boost::function<void (void)> synchronizeFunc_;
-   boost::function<void ()> forceEvaluationFunc_;
+   std::function<void (void)> synchronizeFunc_;
+   std::function<void ()> forceEvaluationFunc_;
 
 };
 

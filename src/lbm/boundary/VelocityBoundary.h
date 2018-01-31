@@ -112,7 +112,7 @@ public:
    inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
                                const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t mask );
 
-   inline const std::vector<real_t> & getValue( const cell_idx_t x, cell_idx_t y, cell_idx_t z ) const { return vel_->get(x,y,z); }
+   inline const std::vector<real_t> & getValue( const cell_idx_t x, cell_idx_t y, cell_idx_t z ) const { return *(vel_->get(x,y,z)); }
 
 private:
 

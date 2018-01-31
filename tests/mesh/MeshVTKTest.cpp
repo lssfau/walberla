@@ -30,8 +30,6 @@
 #include "mesh/vtk/CommonDataSources.h"
 #include "mesh/vtk/CommonFilters.h"
 
-#include <boost/random.hpp>
-
 #include <vector>
 #include <string>
 

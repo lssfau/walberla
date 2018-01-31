@@ -281,7 +281,7 @@ int main( int argc, char **argv )
 
    // connect to pe
    const real_t overlap = real_c( 1.5 ) * dx;
-   boost::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
 
    auto sphereMaterialID = pe::createMaterial( "sphereMat", real_c(1) , real_c(0.3), real_c(0.2), real_c(0.2), real_c(0.24), real_c(200), real_c(200), real_c(0), real_c(0) );
    // create two spheres: one which overlaps with a block boundary and one inside the block

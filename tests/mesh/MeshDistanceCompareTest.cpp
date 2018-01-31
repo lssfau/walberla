@@ -32,7 +32,7 @@
 #include "mesh/DistanceComputations.h"
 #include "mesh/MeshIO.h"
 
-#include <boost/random.hpp>
+#include <random>
 
 #include <vector>
 #include <string>
@@ -54,7 +54,7 @@ void testAABBDistance( const Vector3<real_t> & translationVector = Vector3<real_
 
    TriangleDistance<MeshType> triDist( mesh );
 
-   boost::random::mt19937 rng;
+   std::mt19937 rng;
 
    for( int i = 0; i < 10000; ++i )
    {

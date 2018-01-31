@@ -121,7 +121,7 @@ namespace math {
 
    };
 
-   typedef boost::shared_ptr< EquationSystem > EquationSystemPtr;
+   typedef shared_ptr< EquationSystem > EquationSystemPtr;
 
 } // namespace math
 } // namespace walberla

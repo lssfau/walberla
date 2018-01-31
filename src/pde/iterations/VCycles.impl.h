@@ -44,7 +44,7 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
         const Weight_T weights,
         const uint_t iterations, const uint_t numLvl,
         const uint_t preSmoothingIters, const uint_t postSmoothingIters,
-        const uint_t coarseIters, const boost::function< real_t () > & residualNorm,
+        const uint_t coarseIters, const std::function< real_t () > & residualNorm,
         const real_t residualNormThreshold, const uint_t residualCheckFrequency,
         const Set<SUID> & requiredSelectors,
         const Set<SUID> & incompatibleSelectors ) :
@@ -150,7 +150,7 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
         const BlockDataID & stencilFieldId,
         const uint_t iterations, const uint_t numLvl,
         const uint_t preSmoothingIters, const uint_t postSmoothingIters,
-        const uint_t coarseIters, const boost::function< real_t () > & residualNorm,
+        const uint_t coarseIters, const std::function< real_t () > & residualNorm,
         const real_t residualNormThreshold, const uint_t residualCheckFrequency,
         const Set<SUID> & requiredSelectors,
         const Set<SUID> & incompatibleSelectors ) :

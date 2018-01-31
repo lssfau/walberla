@@ -23,7 +23,7 @@
 
 #include "domain_decomposition/BlockStorage.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 namespace walberla {
 namespace lbm {
@@ -31,7 +31,7 @@ namespace refinement {
 
 class FunctorWrapper {
 public:
-   FunctorWrapper( const boost::function<void()> & fct)
+   FunctorWrapper( const std::function<void()> & fct)
          : fct_(fct) {
    }
 
@@ -40,12 +40,12 @@ public:
    }
 
 private:
-   boost::function<void(void)> fct_;
+   std::function<void(void)> fct_;
 };
 
 class SweepAsFunctorWrapper {
 public:
-   SweepAsFunctorWrapper( const boost::function<void(IBlock * )> & fct,
+   SweepAsFunctorWrapper( const std::function<void(IBlock * )> & fct,
                           const shared_ptr <StructuredBlockStorage> & blockStorage )
          : fct_(fct), blockStorage_(blockStorage) {
    }
@@ -58,7 +58,7 @@ public:
    }
 
 private:
-   boost::function<void(IBlock * )> fct_;
+   std::function<void(IBlock * )> fct_;
    shared_ptr <StructuredBlockStorage> blockStorage_;
 };
 

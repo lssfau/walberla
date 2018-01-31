@@ -388,7 +388,7 @@ namespace internal
         SweepWrapper()
         {}
 
-        SweepWrapper( const boost::function<void(IBlock*) > & sweepToWrap )
+        SweepWrapper( const std::function<void(IBlock*) > & sweepToWrap )
                 : sweepToWrap_( sweepToWrap ) {}
 
         void operator() ( IBlock * block )
@@ -397,7 +397,7 @@ namespace internal
               sweepToWrap_( block );
         }
     protected:
-        boost::function<void(IBlock*) > sweepToWrap_;
+        std::function<void(IBlock*) > sweepToWrap_;
     };
 
 

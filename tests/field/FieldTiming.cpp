@@ -196,7 +196,7 @@ double initFieldRandom(DoubleField & field)
    return sum;
 }
 
-typedef boost::function<double (const DoubleField & field)> Func;
+typedef std::function<double (const DoubleField & field)> Func;
 void timeFunction( WcTimer & timer,  Func f, const DoubleField & field, double sum, double epsilon, int nrExecutions=30 )
 {
    for(int i=0 ; i < nrExecutions; ++i)

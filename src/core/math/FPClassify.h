@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 
 
 namespace walberla {
@@ -39,7 +39,7 @@ namespace math {
 template<typename T>
 inline bool isnan(T x)
 {
-   return (boost::math::isnan)(x);
+   return (std::isnan)(x);
 }
 
 
@@ -53,7 +53,7 @@ inline bool isnan(T x)
 template<typename T>
 inline bool isinf(T x)
 {
-   return (boost::math::isinf)(x);
+   return (std::isinf)(x);
 }
 
 
@@ -67,7 +67,7 @@ inline bool isinf(T x)
 template<typename T>
 bool finite(T x)
 {
-    return (boost::math::isfinite)(x);
+    return (std::isfinite)(x);
 }
 
 

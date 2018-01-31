@@ -51,12 +51,12 @@ public:
 
    void update( IBlock * const block, const bool rb );
 
-   boost::function< void ( IBlock * const ) > getRedSweep()
+   std::function< void ( IBlock * const ) > getRedSweep()
    {
       return boost::bind( &SOR::update, this, _1, true );
    }
 
-   boost::function< void ( IBlock * const ) > getBlackSweep()
+   std::function< void ( IBlock * const ) > getBlackSweep()
    {
       return boost::bind( &SOR::update, this, _1, false );
    }

@@ -23,7 +23,6 @@
 
 #include "core/DataTypes.h"
 
-#include <boost/static_assert.hpp>
 #include <limits>
 
 
@@ -37,8 +36,8 @@ namespace blockforest {
 typedef real_t workload_t;
 typedef real_t memory_t;
 
-BOOST_STATIC_ASSERT( sizeof( workload_t ) == 4 || sizeof( workload_t ) == 8 );
-BOOST_STATIC_ASSERT( sizeof( memory_t   ) == 4 || sizeof( memory_t   ) == 8 );
+WALBERLA_STATIC_ASSERT( sizeof( workload_t ) == 4 || sizeof( workload_t ) == 8 );
+WALBERLA_STATIC_ASSERT( sizeof( memory_t   ) == 4 || sizeof( memory_t   ) == 8 );
 
 template< typename T > inline workload_t workload_c( T t ) { return numeric_cast< workload_t >(t); } ///< cast to type workload_t using "workload_c(x)"
 template< typename T > inline memory_t   memory_c  ( T t ) { return numeric_cast< memory_t >(t); }   ///< cast to type memory_t   using "memory_c(x)"

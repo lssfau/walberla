@@ -55,8 +55,8 @@ public:
    
    typedef typename NeighborsStencil<LatticeModel_T>::type CommunicationStencil_T;
 
-   typedef boost::function< void ( const uint_t, const uint_t ) >            VoidFunction;  // parameters: level, execution count
-   typedef boost::function< void ( IBlock *, const uint_t, const uint_t ) >  BlockFunction; // parameters: block, level, execution count
+   typedef std::function< void ( const uint_t, const uint_t ) >            VoidFunction;  // parameters: level, execution count
+   typedef std::function< void ( IBlock *, const uint_t, const uint_t ) >  BlockFunction; // parameters: block, level, execution count
    
 private:
 

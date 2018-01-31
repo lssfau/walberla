@@ -95,9 +95,9 @@ void createSimulation(math::AABB& simulationDomain,
                       real_t vMax,
                       SimInfo& info)
 {
-    boost::mt19937 generator;
+    std::mt19937 generator;
     generator.seed(1337);
-    //math::seedRandomGenerator( 1337 ); //static_cast<boost::mt19937::result_type>(1337 * mpi::MPIManager::instance()->worldRank()) );
+    //math::seedRandomGenerator( 1337 ); //static_cast<std::mt19937::result_type>(1337 * mpi::MPIManager::instance()->worldRank()) );
 
     info.globalBodyStorage = make_shared<BodyStorage>();
 

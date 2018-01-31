@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <map>
 #include <string>
 
@@ -33,7 +33,7 @@ namespace math {
 
    class Var;
 
-   typedef boost::shared_ptr<Var> VarPtr;
+   typedef std::shared_ptr<Var> VarPtr;
 
    typedef std::map<std::string, VarPtr>                 VarMap;
    typedef std::map<std::string, VarPtr>::const_iterator VarMapIt;

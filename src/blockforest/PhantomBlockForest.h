@@ -42,23 +42,23 @@ class PhantomBlockForest
 {
 public:
 
-   typedef boost::function< Set<SUID> ( const std::vector< std::pair< BlockID, Set<SUID> > > & source, const BlockID & destintation ) >
+   typedef std::function< Set<SUID> ( const std::vector< std::pair< BlockID, Set<SUID> > > & source, const BlockID & destintation ) >
            BlockStateDeterminationFunction;
 
-   typedef boost::function< void ( std::vector< std::pair< const PhantomBlock *, boost::any > > & blockData,
+   typedef std::function< void ( std::vector< std::pair< const PhantomBlock *, boost::any > > & blockData,
                                    const PhantomBlockForest & phantomForest ) >
            PhantomBlockDataAssignmentFunction;
 
    /// \param iteration execution counter of this callback
    /// \return should the callback rerun after phantom block migration?
-   typedef boost::function< bool ( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
+   typedef std::function< bool ( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                    std::set< uint_t > & processesToRecvFrom,
                                    const PhantomBlockForest & phantomForest,
                                    const uint_t iteration ) >
            MigrationPreparationFunction; // = load balancing
 
-   typedef boost::function< void ( mpi::SendBuffer & buffer, const PhantomBlock & block ) >                    PhantomBlockDataPackFunction;
-   typedef boost::function< void ( mpi::RecvBuffer & buffer, const PhantomBlock & block, boost::any & data ) > PhantomBlockDataUnpackFunction;
+   typedef std::function< void ( mpi::SendBuffer & buffer, const PhantomBlock & block ) >                    PhantomBlockDataPackFunction;
+   typedef std::function< void ( mpi::RecvBuffer & buffer, const PhantomBlock & block, boost::any & data ) > PhantomBlockDataUnpackFunction;
 
 
 

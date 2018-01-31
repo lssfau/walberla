@@ -34,7 +34,7 @@
 #include "core/uid/GlobalState.h"
 #include "core/uid/SUID.h"
 
-#include <boost/function.hpp>
+#include <functional>
 //#include <boost/type_traits/is_base_of.hpp>
 #include <string>
 #include <vector>
@@ -472,7 +472,7 @@ public:
                                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
 
    template< typename T >
-   inline BlockDataID addBlockData( boost::function< T* ( IBlock* const block ) > function,
+   inline BlockDataID addBlockData( std::function< T* ( IBlock* const block ) > function,
                                     const std::string & identifier          = std::string(),
                                     const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
@@ -676,7 +676,7 @@ inline BlockDataID BlockStorage::addBlockData( const shared_ptr< T > & dataHandl
 */
 //**********************************************************************************************************************
 template< typename T >
-inline BlockDataID BlockStorage::addBlockData( boost::function< T* ( IBlock* const block ) > function, const std::string & identifier,
+inline BlockDataID BlockStorage::addBlockData( std::function< T* ( IBlock* const block ) > function, const std::string & identifier,
                                                const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
    internal::SelectableBlockDataHandlingWrapper dataHandling(

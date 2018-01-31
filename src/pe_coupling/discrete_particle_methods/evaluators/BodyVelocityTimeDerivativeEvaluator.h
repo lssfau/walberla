@@ -27,7 +27,7 @@
 
 #include "pe_coupling/utility/BodySelectorFunctions.h"
 
-#include <boost/function.hpp>
+#include <functional>
 #include <map>
 
 namespace walberla {
@@ -50,7 +50,7 @@ public:
 
    BodyVelocityTimeDerivativeEvaluator( const shared_ptr<StructuredBlockStorage> & blockStorage,
                                         const BlockDataID & bodyStorageID, const real_t & deltaT = real_t(1),
-                                        const boost::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
+                                        const std::function<bool(pe::BodyID)> & dpmBodySelectorFct = selectRegularBodies )
    : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), deltaTinv_( real_t(1) / deltaT ),
      dpmBodySelectorFct_( dpmBodySelectorFct)
      { }
@@ -88,7 +88,7 @@ private:
    const BlockDataID bodyStorageID_;
    std::map< walberla::id_t, Vector3< real_t > > bodyVelocityMap_;
    real_t deltaTinv_;
-   boost::function<bool(pe::BodyID)> dpmBodySelectorFct_;
+   std::function<bool(pe::BodyID)> dpmBodySelectorFct_;
 };
 
 

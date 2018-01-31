@@ -30,7 +30,6 @@
 #include "core/math/AABB.h"
 #include "core/uid/SUID.h"
 
-#include <boost/cast.hpp>
 #include <typeinfo>
 #include <vector>
 

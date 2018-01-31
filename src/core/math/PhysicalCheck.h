@@ -94,7 +94,7 @@ namespace math {
       void addEquations              ( const std::vector<std::string>& equations );
       void addUnitParameterRelations ( const std::map< std::string, std::string >& unitParameterRelations );
       void addConstraints            ( const std::vector<std::string>& constraints );
-      void completeConfig            ( const boost::shared_ptr<Config>& config );
+      void completeConfig            ( const shared_ptr<Config>& config );
       //@}
       //****************************************************************************************************************
 

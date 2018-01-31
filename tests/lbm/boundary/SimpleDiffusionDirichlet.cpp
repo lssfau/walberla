@@ -75,6 +75,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <stdexcept>
+#include <array>
 
 #include "gather/GnuPlotGraphWriter.h"
 #include "field/vtk/FlagFieldCellFilter.h"
@@ -240,6 +241,7 @@ public:
          piInv_(real_t(1)/math::PI),
          valid_(uint_c(std::ceil(omega*omega*omega*real_t(10)))),
          time_( time ),
+         expArray(),
          timestep_( uint_t(0u) ),
          E_max_(maxValue-minValue),
          E_mean_(maxValue-minValue)
@@ -265,7 +267,7 @@ private:
    const uint_t valid_;
    const uint_t time_;
 
-   real_t expArray[1000];
+   std::array<real_t,1000> expArray;
 
    uint_t timestep_;
    real_t E_max_;

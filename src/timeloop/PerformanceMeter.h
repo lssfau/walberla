@@ -24,7 +24,7 @@
 #include "domain_decomposition/StructuredBlockStorage.h"
 
 #include <boost/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 #include <iostream>
 #include <map>
@@ -72,7 +72,7 @@ namespace timeloop {
    class PerformanceMeter
    {
    public:
-      typedef boost::function< uint_t(const IBlock &) > CountFunction;
+      typedef std::function< uint_t(const IBlock &) > CountFunction;
 
 
       PerformanceMeter( StructuredBlockStorage & blockStorage );
@@ -86,8 +86,8 @@ namespace timeloop {
       void timingStart();
       void timingEnd();
 
-      boost::function<void () > getBeforeFunction();
-      boost::function<void () > getAfterFunction();
+      std::function<void () > getBeforeFunction();
+      std::function<void () > getAfterFunction();
 
       void clear();
       //@}

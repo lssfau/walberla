@@ -2277,7 +2277,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
             auto blockDataHandlingWrapper = dataItem->getDataHandling( block, targetState[0] );
             if( blockDataHandlingWrapper )
             {
-               auto downcastBlockDataHandlingWrapper = boost::dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
+               auto downcastBlockDataHandlingWrapper = dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
                if( !downcastBlockDataHandlingWrapper )
                {
                   WALBERLA_ABORT( "Dynamic data structure refresh failed!\n"
@@ -2305,7 +2305,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                auto blockDataHandlingWrapper = dataItem->getDataHandling( block, targetState[c] );
                if( blockDataHandlingWrapper )
                {
-                  auto downcastBlockDataHandlingWrapper = boost::dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
+                  auto downcastBlockDataHandlingWrapper = dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
                   if( !downcastBlockDataHandlingWrapper )
                   {
                      WALBERLA_ABORT( "Dynamic data structure refresh failed!\n"
@@ -2651,7 +2651,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                auto blockDataHandlingWrapper = dataItem->getDataHandling( block );
                if( blockDataHandlingWrapper )
                {
-                  auto downcastBlockDataHandlingWrapper = boost::dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
+                  auto downcastBlockDataHandlingWrapper = dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
                   if( !downcastBlockDataHandlingWrapper )
                   {
                      WALBERLA_ABORT( "Dynamic data structure refresh failed!\n"
@@ -2671,7 +2671,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                auto blockDataHandlingWrapper = dataItem->getDataHandling( block, buffers[0].first );
                if( blockDataHandlingWrapper )
                {
-                  auto downcastBlockDataHandlingWrapper = boost::dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
+                  auto downcastBlockDataHandlingWrapper = dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
                   if( !downcastBlockDataHandlingWrapper )
                   {
                      WALBERLA_ABORT( "Dynamic data structure refresh failed!\n"
@@ -2699,7 +2699,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                auto blockDataHandlingWrapper = dataItem->getDataHandling( block );
                if( blockDataHandlingWrapper )
                {
-                  auto downcastBlockDataHandlingWrapper = boost::dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
+                  auto downcastBlockDataHandlingWrapper = dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
                   if( !downcastBlockDataHandlingWrapper )
                   {
                      WALBERLA_ABORT( "Dynamic data structure refresh failed!\n"
@@ -2720,7 +2720,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                auto blockDataHandlingWrapper = dataItem->getDataHandling( block, buffers[c].first );
                if( blockDataHandlingWrapper )
                {
-                  auto downcastBlockDataHandlingWrapper = boost::dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
+                  auto downcastBlockDataHandlingWrapper = dynamic_pointer_cast< blockforest::internal::BlockDataHandlingWrapper >( blockDataHandlingWrapper );
                   if( !downcastBlockDataHandlingWrapper )
                   {
                      WALBERLA_ABORT( "Dynamic data structure refresh failed!\n"

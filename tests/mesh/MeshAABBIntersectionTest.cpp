@@ -29,7 +29,7 @@
 #include "mesh/DistanceComputations.h"
 #include "mesh/TriangleMeshes.h"
 
-#include <boost/random.hpp>
+#include <random>
 #include <boost/lexical_cast.hpp>
 
 #include <vector>
@@ -53,7 +53,7 @@ void runTests( const uint_t numAABBs )
 
    WALBERLA_CHECK( isIntersecting( triDist, meshAABB, real_t(0) ) );
 
-   boost::random::mt19937 rng( uint32_t(42) );
+   std::mt19937 rng( uint32_t(42) );
 
    for(uint_t i = 0; i < numAABBs; ++i)
    {

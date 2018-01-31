@@ -42,7 +42,7 @@ namespace mesh {
 template< typename MeshType >
 class VTKMeshWriter {
 public:
-   typedef boost::function<bool ( const MeshType &, const typename MeshType::FaceHandle & )> FaceFilterFunction;
+   typedef std::function<bool ( const MeshType &, const typename MeshType::FaceHandle & )> FaceFilterFunction;
 
    typedef std::vector< typename MeshType::FaceHandle >   Faces;
    typedef std::vector< typename MeshType::VertexHandle > Vertices;
@@ -98,7 +98,7 @@ public:
 
    inline void setFaceFilter  ( const FaceFilterFunction & f ) { faceFilter_ = f;                    }
    inline void clearFaceFilter()                               { faceFilter_ = FaceFilterFunction(); }
-   inline bool isFaceFilterSet()                         const { return !faceFilter_.empty();        }
+   inline bool isFaceFilterSet()                         const { return static_cast<bool>(faceFilter_);        }
 
    void incrementTimeStep()      { ++timestep_; }
    bool isWriteScheduled() const { return timestep_ % writeFrequency_ == 0; }

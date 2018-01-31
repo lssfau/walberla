@@ -37,7 +37,7 @@
 #include <pe/rigidbody/RigidBody.h>
 #include <pe/Types.h>
 
-#include <boost/function.hpp>
+#include <functional>
 
 namespace walberla {
 namespace pe {
@@ -133,11 +133,11 @@ public:
    //**Callbacks************************************************************************
    /*!\name Callbacks */
    //@{
-   inline void          registerAddCallback     ( const std::string name, const boost::function<void (BodyID)>& func );
+   inline void          registerAddCallback     ( const std::string name, const std::function<void (BodyID)>& func );
    inline void          deregisterAddCallback   ( const std::string name );
    inline void          clearAddCallbacks       ( );
 
-   inline void          registerRemoveCallback     ( const std::string name, const boost::function<void (BodyID)>& func );
+   inline void          registerRemoveCallback     ( const std::string name, const std::function<void (BodyID)>& func );
    inline void          deregisterRemoveCallback   ( const std::string name );
    inline void          clearRemoveCallbacks       ( );
    //@}
@@ -150,8 +150,8 @@ private:
    Bodies bodies_;  //!< The rigid bodies contained in the simulation world.
    std::map<id_t, SizeType> bodyIDs_;   //!< The association of system IDs to rigid bodies.
 
-   std::map< std::string, boost::function<void (BodyID)> > addCallbacks_;
-   std::map< std::string, boost::function<void (BodyID)> > removeCallbacks_;
+   std::map< std::string, std::function<void (BodyID)> > addCallbacks_;
+   std::map< std::string, std::function<void (BodyID)> > removeCallbacks_;
    //@}
    //**********************************************************************************************
 };
@@ -713,7 +713,7 @@ inline void BodyStorage::clear()
 }
 //*************************************************************************************************
 
-inline void          BodyStorage::registerAddCallback     ( const std::string name, const boost::function<void (BodyID)>& func )
+inline void          BodyStorage::registerAddCallback     ( const std::string name, const std::function<void (BodyID)>& func )
 {
    WALBERLA_ASSERT_EQUAL(addCallbacks_.find(name), addCallbacks_.end(), "Callback '" << name << "' already exists!");
    addCallbacks_.insert( std::make_pair(name, func) );
@@ -733,7 +733,7 @@ inline void          BodyStorage::clearAddCallbacks       ( )
    addCallbacks_.clear();
 }
 
-inline void          BodyStorage::registerRemoveCallback     ( const std::string name, const boost::function<void (BodyID)>& func )
+inline void          BodyStorage::registerRemoveCallback     ( const std::string name, const std::function<void (BodyID)>& func )
 {
    WALBERLA_ASSERT_EQUAL(removeCallbacks_.find(name), removeCallbacks_.end(), "Callback '" << name << "' already exists!");
    removeCallbacks_.insert( std::make_pair(name, func) );

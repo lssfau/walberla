@@ -131,7 +131,7 @@ int main( int argc, char ** argv )
       BlockDataID asyncGPUFieldId = blocks->addStructuredBlockData< GPUFieldType >( &createGPUField,
                                                                                     "asyncGPUField" );
 
-      math::seedRandomGenerator( numeric_cast<boost::mt19937::result_type>( MPIManager::instance()->rank() ) );
+      math::seedRandomGenerator( numeric_cast<std::mt19937::result_type>( MPIManager::instance()->rank() ) );
       // Initialize CPU field with random values
       initFields( blocks, sourceFieldId );
 
@@ -149,11 +149,11 @@ int main( int argc, char ** argv )
 
       // Setup communication schemes for synchronous GPUPackInfo
       CommSchemeType syncCommScheme(blocks);
-      syncCommScheme.addPackInfo( boost::make_shared< GPUPackInfoType >( syncGPUFieldId ) );
+      syncCommScheme.addPackInfo( make_shared< GPUPackInfoType >( syncGPUFieldId ) );
 
       // Setup communication scheme for asynchronous GPUPackInfo, which uses CUDA streams
       CommSchemeType asyncCommScheme(blocks);
-      asyncCommScheme.addPackInfo( boost::make_shared< GPUPackInfoType >( asyncGPUFieldId, streams ) );
+      asyncCommScheme.addPackInfo( make_shared< GPUPackInfoType >( asyncGPUFieldId, streams ) );
 
       // Perform one communication step for each scheme
       syncCommScheme();

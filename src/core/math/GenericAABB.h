@@ -30,7 +30,7 @@
 #include <boost/array.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
 
-#include <boost/random/uniform_real_distribution.hpp>
+#include <random>
 
 
 namespace walberla {

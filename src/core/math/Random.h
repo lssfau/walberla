@@ -24,9 +24,7 @@
 #include "core/DataTypes.h"
 #include "core/debug/Debug.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>  // #include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/uniform_real.hpp> // #include <boost/random/uniform_real_distribution.hpp>
+#include <random>
 #include <limits>
 
 
@@ -36,12 +34,12 @@ namespace math {
 
 
 namespace internal {
-boost::mt19937 & getGenerator(); // boost::random::mt19937_64
+std::mt19937 & getGenerator(); // std::mt19937_64
 }
 
 
 
-void seedRandomGenerator( const boost::mt19937::result_type & seed ); // boost::random::mt19937_64
+void seedRandomGenerator( const std::mt19937::result_type & seed ); // std::mt19937_64
 
 
 
@@ -51,13 +49,13 @@ void seedRandomGenerator( const boost::mt19937::result_type & seed ); // boost::
 */
 //**********************************************************************************************************************
 template< typename INT >
-INT intRandom( const INT min = std::numeric_limits<INT>::min(), const INT max = std::numeric_limits<INT>::max(),
-               boost::mt19937 & generator = internal::getGenerator() )
+INT intRandom( const INT min, const INT max, std::mt19937 & generator )
 {
    static_assert_int_t< INT >();
+   static_assert(sizeof(INT) > sizeof(char), "cannot use char");
    WALBERLA_ASSERT_LESS_EQUAL( min, max );
 
-   boost::uniform_int< INT > distribution( min, max ); // boost::random::uniform_int_distribution< INT > distribution;
+   std::uniform_int_distribution< INT > distribution( min, max );
 
    INT value;
 #ifdef _OPENMP
@@ -68,19 +66,89 @@ INT intRandom( const INT min = std::numeric_limits<INT>::min(), const INT max = 
    return value;
 }
 
+template<>
+inline char intRandom<char>( const char min, const char max, std::mt19937 & generator )
+{
+   static_assert_int_t< char >();
+   WALBERLA_ASSERT_LESS_EQUAL( min, max );
+
+   std::uniform_int_distribution< int16_t > distribution( min, max );
+
+   char value;
+#ifdef _OPENMP
+   #pragma omp critical (random)
+#endif
+   { value = static_cast<char>( distribution( generator ) ); }
+
+   return value;
+}
+
+template<>
+inline unsigned char intRandom<unsigned char>( const unsigned char min, const unsigned char max, std::mt19937 & generator )
+{
+   static_assert_int_t< unsigned char >();
+   WALBERLA_ASSERT_LESS_EQUAL( min, max );
+
+   std::uniform_int_distribution< int16_t > distribution( min, max );
+
+   unsigned char value;
+#ifdef _OPENMP
+   #pragma omp critical (random)
+#endif
+   { value = static_cast<unsigned char>( distribution( generator ) ); }
+
+   return value;
+}
+
+template<>
+inline signed char intRandom<signed char>( const signed char min, const signed char max, std::mt19937 & generator )
+{
+   static_assert_int_t< signed char >();
+   WALBERLA_ASSERT_LESS_EQUAL( min, max );
+
+   std::uniform_int_distribution< int16_t > distribution( min, max );
+
+   signed char value;
+#ifdef _OPENMP
+   #pragma omp critical (random)
+#endif
+   { value = static_cast<signed char>( distribution( generator ) ); }
+
+   return value;
+}
+
+
+template< typename INT >
+INT intRandom( const INT min )
+{
+   return intRandom( min, std::numeric_limits<INT>::max(), internal::getGenerator() );
+}
+
+template< typename INT >
+INT intRandom( const INT min, const INT max )
+{
+   return intRandom( min, max, internal::getGenerator() );
+}
+
+template< typename INT >
+INT intRandom()
+{
+   return intRandom( std::numeric_limits<INT>::min(), std::numeric_limits<INT>::max() );
+}
+
 
 
 template< typename INT >
 class IntRandom
 {
 public:
-   IntRandom( const boost::mt19937::result_type & seed = boost::mt19937::result_type() ) { generator_.seed( seed ); }
+   IntRandom( const std::mt19937::result_type & seed = std::mt19937::result_type() ) { generator_.seed( seed ); }
    INT operator()( const INT min = std::numeric_limits<INT>::min(), const INT max = std::numeric_limits<INT>::max() )
    {
       return intRandom( min, max, generator_ );
    }
 private:
-   boost::mt19937 generator_;
+   std::mt19937 generator_;
 };
 
 
@@ -91,12 +159,12 @@ private:
 */
 //**********************************************************************************************************************
 template< typename REAL >
-REAL realRandom( const REAL min = REAL(0), const REAL max = REAL(1), boost::mt19937 & generator = internal::getGenerator() )
+REAL realRandom( const REAL min = REAL(0), const REAL max = REAL(1), std::mt19937 & generator = internal::getGenerator() )
 {
    static_assert( std::numeric_limits<REAL>::is_specialized && !std::numeric_limits<REAL>::is_integer, "Floating point type required/expected!" );
    WALBERLA_ASSERT_LESS( min, max );
 
-   boost::uniform_real< REAL > distribution( min, max ); // boost::uniform_real_distribution< REAL > distribution( min, max );
+   std::uniform_real_distribution< REAL > distribution( min, max );
 
    REAL value;
 #ifdef _OPENMP
@@ -113,13 +181,13 @@ template< typename REAL >
 class RealRandom
 {
 public:
-   RealRandom( const boost::mt19937::result_type & seed = boost::mt19937::result_type() ) { generator_.seed( seed ); }
+   RealRandom( const std::mt19937::result_type & seed = std::mt19937::result_type() ) { generator_.seed( seed ); }
    REAL operator()( const REAL min = REAL(0), const REAL max = REAL(1) )
    {
       return realRandom( min, max, generator_ );
    }
 private:
-   boost::mt19937 generator_;
+   std::mt19937 generator_;
 };
 
 
@@ -133,10 +201,10 @@ inline bool boolRandom() { ///< Randomly returns 'true' or 'false'
 class BoolRandom
 {
 public:
-   BoolRandom( const boost::mt19937::result_type & seed = boost::mt19937::result_type() ) { generator_.seed( seed ); }
+   BoolRandom( const std::mt19937::result_type & seed = std::mt19937::result_type() ) { generator_.seed( seed ); }
    bool operator()() { return boolRandom(); }
 private:
-   boost::mt19937 generator_;
+   std::mt19937 generator_;
 };
 
 

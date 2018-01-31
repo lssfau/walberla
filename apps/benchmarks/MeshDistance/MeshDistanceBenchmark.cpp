@@ -34,7 +34,7 @@
 #include "mesh/distance_octree/DistanceOctree.h"
 #include "mesh/MeshIO.h"
 
-#include <boost/random.hpp>
+#include <random>
 
 #include <algorithm>
 #include <vector>
@@ -64,7 +64,7 @@ void runBenchmark( const std::string & meshFile, const uint_t numPoints, const u
    timer.end();
    WALBERLA_LOG_INFO( "Mesh preparation took " << timer.last() << "s" );
 
-   boost::random::mt19937 rng;  
+   std::mt19937 rng;
 
    std::vector< typename MeshType::Point > points( numPoints );
    for(auto it = points.begin(); it != points.end(); ++it)

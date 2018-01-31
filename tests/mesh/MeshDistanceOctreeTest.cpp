@@ -32,7 +32,7 @@
 #include "mesh/distance_octree/DistanceOctree.h"
 #include "mesh/MeshIO.h"
 
-#include <boost/random.hpp>
+#include <random>
 
 #include <vector>
 #include <string>
@@ -55,7 +55,7 @@ void test( const std::string & meshFile )
 
    //distanceOctree.writeVTKOutput( "distance_octree" );
 
-   boost::random::mt19937 rng;
+   std::mt19937 rng;
 
    for( int i = 0; i < 1000; ++i )
    {
