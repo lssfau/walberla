@@ -163,7 +163,8 @@ if( CMAKE_CXX_COMPILER MATCHES "icpc" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "icpc" 
     ENDIF(XILD)
     MARK_AS_ADVANCED(XILD)
     if( CMAKE_VERSION VERSION_LESS 3.6.0 )
-      add_flag ( CMAKE_CXX_FLAGS "-std=c++14" )
+      set( CMAKE_CXX14_STANDARD_COMPILE_OPTION "-std=c++14" )
+      add_flag ( CMAKE_CXX_FLAGS ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
     endif()
 else()
     option ( WALBERLA_CXX_COMPILER_IS_INTEL "Use Intel compiler" OFF  )
@@ -278,9 +279,10 @@ if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL )
    add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow" )
 endif()
 
-# C++11 language features for NEC compiler
+# C++ language features for NEC compiler
 if( WALBERLA_CXX_COMPILER_IS_NEC )
-   add_flag ( CMAKE_CXX_FLAGS "-Kcpp14 -Krtti -Kexceptions -size_t64 -Kgcc" )
+   set( CMAKE_CXX14_STANDARD_COMPILE_OPTION "-Kcpp14" )
+   add_flag ( CMAKE_CXX_FLAGS "${CMAKE_CXX14_STANDARD_COMPILE_OPTION} -Krtti -Kexceptions -size_t64 -Kgcc" )
    add_flag ( CMAKE_CXX_FLAGS "-D__BIG_ENDIAN -D__BYTE_ORDER=__BIG_ENDIAN" )
    add_flag ( CMAKE_CXX_FLAGS "-Tnoauto,used" )
    add_flag ( CMAKE_EXE_LINKER_FLAGS "-Wl,-h,muldefs" )
@@ -443,19 +445,19 @@ endif()
 ############################################################################################################################
 
 try_compile( WALBERLA_USE_STD_FILESYSTEM "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
-             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_FILESYSTEM -std=c++14 )
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_FILESYSTEM ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
 if( WALBERLA_USE_STD_FILESYSTEM )
    message( STATUS "Found std::filesystem")
 else()
    try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
-                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM -std=c++14 )
+                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
    if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
       message( STATUS "Found std::experimental::filesystem")
    endif()
    if( NOT WALBERLA_CXX_COMPILER_IS_MSVC AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
       unset( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM CACHE )
       try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
-                   COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM -std=c++14
+                   COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM ${CMAKE_CXX14_STANDARD_COMPILE_OPTION}
                    LINK_LIBRARIES stdc++fs )
       if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
          message( STATUS "Found std::experimental::filesystem in libstdc++fs")
@@ -465,7 +467,7 @@ else()
    if( NOT WALBERLA_CXX_COMPILER_IS_MSVC AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
       unset( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM CACHE )
       try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
-                   COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM -std=c++14
+                   COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM ${CMAKE_CXX14_STANDARD_COMPILE_OPTION}
                    LINK_LIBRARIES c++experimental )
       if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
          message( STATUS "Found std::experimental::filesystem in libc++experimental")
@@ -475,24 +477,24 @@ else()
 endif()
 
 try_compile( WALBERLA_USE_STD_ANY "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdAny.cpp"
-             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_ANY -std=c++14 )
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_ANY ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
 if( WALBERLA_USE_STD_ANY )
    message( STATUS "Found std::any")
 else()
    try_compile( WALBERLA_USE_STD_EXPERIMENTAL_ANY "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdAny.cpp"
-                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_ANY -std=c++14 )
+                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_ANY ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
    if( WALBERLA_USE_STD_EXPERIMENTAL_ANY )
       message( STATUS "Found std::experimental::any")
    endif()
 endif()
 
 try_compile( WALBERLA_USE_STD_OPTIONAL "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdOptional.cpp"
-             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_OPTIONAL -std=c++14 )
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_OPTIONAL ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
 if( WALBERLA_USE_STD_OPTIONAL )
    message( STATUS "Found std::optional")
 else()
    try_compile( WALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL "${CMAKE_BINARY_DIR}" "${CMAKE_SOURCE_DIR}/cmake/TestStdOptional.cpp"
-                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL -std=c++14 )
+                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
    if( WALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL )
       message( STATUS "Found std::experimental::optional")
    endif()
@@ -667,14 +669,14 @@ if ( NOT BOOST_ROOT )
    endforeach ( )
 endif ( )
 
-find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} QUIET )
+find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS "system" QUIET )
 
 if( NOT Boost_FOUND )
    message ( WARNING
       "The specified configuration of the BOOST libraries was not found on your system! Now trying some other configuration..." )
    foreach ( Boost_USE_STATIC_LIBS ON OFF )
       foreach ( Boost_USE_MULTITHREADED ON OFF )
-         find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} QUIET )
+         find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS "system" QUIET )
          if ( Boost_FOUND )
             set ( Boost_USE_STATIC_LIBS   ${Boost_USE_STATIC_LIBS}   CACHE BOOL "Use boost static libraries"        FORCE )
             set ( Boost_USE_MULTITHREADED ${Boost_USE_MULTITHREADED} CACHE BOOL "Use boost multithreaded libraries" FORCE )
@@ -715,7 +717,7 @@ if ( Boost_FOUND )
 
 else( Boost_FOUND )
    # Search again, this time with the REQUIRED option. This will give a CMAKE error and a detailed error message for the user
-   find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} REQUIRED ${waLBerla_REQUIRED_BOOST_COMPONENTS} )
+   find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} REQUIRED ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS "system" )
 endif( Boost_FOUND )
 
 
