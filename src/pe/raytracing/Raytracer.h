@@ -562,13 +562,12 @@ inline Vec3 Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, con
       + multiplyColors(lighting_.diffuseColor, diffuseColor)*lambertian//*real_c(pow(lambertian, real_t(4)))
       + multiplyColors(lighting_.specularColor, specularColor)*specular;
    
-   real_t colorMax = color.max();
-   if (colorMax > real_t(1)) {
-      color.set(color[0] / colorMax,
-                color[1] / colorMax,
-                color[2] / colorMax);
-   }
-   
+   // Capping of color channels to 1.
+   // Capping instead of scaling will make specular highlights stronger.
+   color[0] = std::min(real_t(1), color[0]);
+   color[1] = std::min(real_t(1), color[1]);
+   color[2] = std::min(real_t(1), color[2]);
+
    return color;
 }
 }
