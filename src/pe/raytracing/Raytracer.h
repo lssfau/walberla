@@ -445,7 +445,7 @@ void Raytracer::rayTrace(const size_t timestep) {
    }
    int gatheredIntersectionCount = 0;
    std::vector<real_t> fullTBuffer(pixelsHorizontal_ * pixelsVertical_, inf);
-   std::vector<Vec3> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_);
+   std::vector<Vec3> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
    mpi::RecvBuffer recvBuffer;
    
    mpi::gathervBuffer(sendBuffer, recvBuffer, 0);
@@ -540,6 +540,12 @@ inline Vec3 Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, con
       specularColor.set(real_t(1), real_t(1), real_t(1));
       shininess = real_t(30);
    }
+   if (body->getTypeID() == Capsule::getStaticTypeID()) {
+      diffuseColor = Vec3(real_t(0.15), real_t(0.44), real_t(0.91));
+      ambientColor.set(real_t(0), real_t(0), real_t(0.3));
+      specularColor.set(real_t(1), real_t(1), real_t(1));
+      shininess = real_t(20);
+   }
    //----
    
    const Vec3 intersectionPoint = ray.getOrigin() + ray.getDirection() * t;
@@ -559,7 +565,7 @@ inline Vec3 Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, con
    }
    
    Vec3 color = multiplyColors(lighting_.ambientColor, ambientColor)
-      + multiplyColors(lighting_.diffuseColor, diffuseColor)*lambertian//*real_c(pow(lambertian, real_t(4)))
+      + multiplyColors(lighting_.diffuseColor, diffuseColor)*lambertian
       + multiplyColors(lighting_.specularColor, specularColor)*specular;
    
    // Capping of color channels to 1.
