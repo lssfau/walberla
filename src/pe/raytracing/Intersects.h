@@ -45,6 +45,8 @@ inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3& n);
 
+inline bool intersects(const BodyID body, const Ray& ray, real_t& t, Vec3& n);
+   
 inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding = real_t(0.0));
 inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, real_t& t0, real_t& t1);
    
@@ -287,6 +289,11 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
    return true;
 }
    
+inline bool intersects(const BodyID body, const Ray& ray, real_t& t, Vec3& n) {
+   WALBERLA_ABORT("This ray - body intersection test is not implemented yet!");
+   return false;
+}
+   
 inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, real_t& t0, real_t& t1) {
    real_t inf = std::numeric_limits<real_t>::max();
    
@@ -300,7 +307,6 @@ inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, re
    if (discriminant < 0) {
       // with discriminant smaller than 0, sphere is not hit by ray
       // (no solution for quadratic equation)
-      // with discriminant being 0, sphere only tangentially hits the ray (not enough)
       t0 = inf;
       t1 = inf;
       return false;
