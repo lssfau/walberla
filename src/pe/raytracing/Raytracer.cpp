@@ -50,7 +50,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
                      real_t fov_vertical,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                      const Lighting& lighting,
-                     const Vec3& backgroundColor,
+                     const Color& backgroundColor,
                      real_t blockAABBIntersectionPadding)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
@@ -110,7 +110,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    lookAtPoint_ = config.getParameter<Vec3>("lookAt");
    upVector_ = config.getParameter<Vec3>("upVector");
    lighting_ = Lighting(config.getBlock("Lighting"));
-   backgroundColor_ = config.getParameter<Vec3>("backgroundColor", Vec3(0.1, 0.1, 0.1));
+   backgroundColor_ = config.getParameter<Color>("backgroundColor", Vec3(0.1, 0.1, 0.1));
 
    blockAABBIntersectionPadding_ = config.getParameter<real_t>("blockAABBIntersectionPadding", real_t(0.0));
 
@@ -208,7 +208,7 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std
  * \param timestep Timestep this image is from.
  * \param isGlobalImage Whether this image is the fully stitched together one.
  */
-void Raytracer::writeImageBufferToFile(const std::vector<Vec3>& imageBuffer, size_t timestep, bool isGlobalImage) const {
+void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, size_t timestep, bool isGlobalImage) const {
    WALBERLA_CHECK(timestep < 100000, "Raytracer only supports outputting 99 999 timesteps.");
    mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
    uint8_t padding = (timestep < 10 ? 4 :
@@ -224,7 +224,7 @@ void Raytracer::writeImageBufferToFile(const std::vector<Vec3>& imageBuffer, siz
  * \param imageBuffer Buffer with color vectors.
  * \param fileName Name of the output file.
  */
-void Raytracer::writeImageBufferToFile(const std::vector<Vec3>& imageBuffer, const std::string& fileName) const {
+void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, const std::string& fileName) const {
    namespace fs = boost::filesystem;
 
    fs::path dir (getImageOutputDirectory());
@@ -236,7 +236,7 @@ void Raytracer::writeImageBufferToFile(const std::vector<Vec3>& imageBuffer, con
    for (size_t y = pixelsVertical_-1; y > 0; y--) {
       for (size_t x = 0; x < pixelsHorizontal_; x++) {
          size_t i = coordinateToArrayIndex(x, y);
-         const Vec3& color = imageBuffer[i];
+         const Color& color = imageBuffer[i];
          char r = (char)(255 * color[0]);
          char g = (char)(255 * color[1]);
          char b = (char)(255 * color[2]);

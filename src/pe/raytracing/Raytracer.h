@@ -59,7 +59,7 @@ public:
                       real_t fov_vertical,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                       const Lighting& lighting,
-                      const Vec3& backgroundColor = Vec3(0.1, 0.1, 0.1),
+                      const Color& backgroundColor = Color(0.1, 0.1, 0.1),
                       real_t blockAABBIntersectionPadding = real_t(0.0));
    explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                       const shared_ptr<BodyStorage> globalBodyStorage,
@@ -82,7 +82,7 @@ private:
                                marks the center of the view plane.*/
    Vec3 upVector_;            //!< The vector indicating the upwards direction of the camera.
    Lighting lighting_;        //!< The lighting of the scene.
-   Vec3 backgroundColor_;     //!< Background color of the scene.
+   Color backgroundColor_;     //!< Background color of the scene.
    real_t blockAABBIntersectionPadding_; /*!< The padding applied in block AABB intersection pretesting, as
                                           some objects within a block might protrude from the block's AABB.*/
    
@@ -115,7 +115,7 @@ public:
    inline const Vec3& getCameraPosition() const;
    inline const Vec3& getLookAtPoint() const;
    inline const Vec3& getUpVector() const;
-   inline const Vec3& getBackgroundColor() const;
+   inline const Color& getBackgroundColor() const;
    inline bool getTBufferOutputEnabled() const;
    inline const std::string& getTBufferOutputDirectory() const;
    inline bool getImageOutputEnabled() const;
@@ -125,7 +125,7 @@ public:
 
    /*!\name Set functions */
    //@{
-   inline void setBackgroundColor(const Vec3& color);
+   inline void setBackgroundColor(const Color& color);
    inline void setTBufferOutputEnabled(const bool enabled);
    inline void setTBufferOutputDirectory(const std::string& path);
    inline void setImageOutputEnabled(const bool enabled);
@@ -142,14 +142,13 @@ public:
 private:
    void writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t timestep, bool isGlobalImage = false) const;
    void writeTBufferToFile(const std::vector<real_t>& tBuffer, const std::string& fileName) const;
-   void writeImageBufferToFile(const std::vector<Vec3>& imageBuffer, size_t timestep, bool isGlobalImage = false) const;
-   void writeImageBufferToFile(const std::vector<Vec3>& imageBuffer, const std::string& fileName) const;
+   void writeImageBufferToFile(const std::vector<Color>& imageBuffer, size_t timestep, bool isGlobalImage = false) const;
+   void writeImageBufferToFile(const std::vector<Color>& imageBuffer, const std::string& fileName) const;
    
    inline bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
    inline size_t coordinateToArrayIndex(size_t x, size_t y) const;
-   inline Vec3 multiplyColors(const Vec3& a, const Vec3& b) const;
    
-   inline Vec3 getColor(const BodyID body, const Ray& ray, real_t t, const Vec3& n) const;
+   inline Color getColor(const BodyID body, const Ray& ray, real_t t, const Vec3& n) const;
    //@}
 };
    
@@ -214,7 +213,7 @@ inline const Vec3& Raytracer::getUpVector() const {
  *
  * Returns the background color of the scene.
  */
-inline const Vec3& Raytracer::getBackgroundColor() const {
+inline const Color& Raytracer::getBackgroundColor() const {
    return backgroundColor_;
 }
 
@@ -262,7 +261,7 @@ inline const std::string& Raytracer::getImageOutputDirectory() const {
  *
  * \param color New background color.
  */
-inline void Raytracer::setBackgroundColor(const Vec3& color) {
+inline void Raytracer::setBackgroundColor(const Color& color) {
    backgroundColor_ = color;
 }
    
@@ -346,7 +345,7 @@ void Raytracer::rayTrace(const size_t timestep) {
    int rank = mpi::MPIManager::instance()->rank();
    
    std::vector<real_t> tBuffer(pixelsVertical_ * pixelsHorizontal_, inf);
-   std::vector<Vec3> imageBuffer(pixelsVertical_ * pixelsHorizontal_);
+   std::vector<Color> imageBuffer(pixelsVertical_ * pixelsHorizontal_);
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    
    real_t t, t_closest;
@@ -417,7 +416,7 @@ void Raytracer::rayTrace(const size_t timestep) {
          }
          
          if (!realIsIdentical(t_closest, inf) && body_closest != NULL) {
-            Vec3 color = getColor(body_closest, ray, t_closest, n_closest);
+            Color color = getColor(body_closest, ray, t_closest, n_closest);
             imageBuffer[coordinateToArrayIndex(x, y)] = color;
             BodyIntersectionInfo intersectionInfo = {
                x,
@@ -445,7 +444,7 @@ void Raytracer::rayTrace(const size_t timestep) {
    }
    int gatheredIntersectionCount = 0;
    std::vector<real_t> fullTBuffer(pixelsHorizontal_ * pixelsVertical_, inf);
-   std::vector<Vec3> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
+   std::vector<Color> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
    mpi::RecvBuffer recvBuffer;
    
    mpi::gathervBuffer(sendBuffer, recvBuffer, 0);
@@ -501,17 +500,6 @@ void Raytracer::rayTrace(const size_t timestep) {
    }
 }
 
-/*!\brief Multiplies same-index components of two vectors.
- *
- * \param a Vector to multiply.
- * \param b Vector to multiply.
- *
- * \return Vec3 with components a[i] * b[i]
- */
-inline Vec3 Raytracer::multiplyColors(const Vec3& a, const Vec3& b) const {
-   return Vec3(a[0]*b[0], a[1]*b[1], a[2]*b[2]);
-}
-
 /*!\brief Computes the color for a certain intersection.
  *
  * \param body Intersected body.
@@ -519,29 +507,29 @@ inline Vec3 Raytracer::multiplyColors(const Vec3& a, const Vec3& b) const {
  * \param t Distance from eye to intersection point.
  * \param n Intersection normal at the intersection point.
  *
- * \return Vector with RGB color components.
+ * \return Computed color.
  */
-inline Vec3 Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, const Vec3& n) const {
+inline Color Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, const Vec3& n) const {
    //----
-   Vec3 diffuseColor(0.6, 0, 0.9);
-   Vec3 specularColor(0.8, 0.8, 0.8);
-   Vec3 ambientColor(0.5, 0, 0.8);
+   Color diffuseColor(0.6, 0, 0.9);
+   Color specularColor(0.8, 0.8, 0.8);
+   Color ambientColor(0.5, 0, 0.8);
    real_t shininess = 100;
 
    if (body->getTypeID() == Plane::getStaticTypeID()) {
-      diffuseColor = Vec3(real_t(0.7), real_t(0.7), real_t(0.7));
+      diffuseColor = Color(real_t(0.7), real_t(0.7), real_t(0.7));
       ambientColor.set(real_t(0.5), real_t(0.5), real_t(0.5));
       specularColor.set(real_t(0), real_t(0), real_t(0));
       shininess = real_t(0);
    }
    if (body->getTypeID() == Sphere::getStaticTypeID()) {
-      diffuseColor = Vec3(real_t(0.98), real_t(0.1), real_t(0.1));
+      diffuseColor = Color(real_t(0.98), real_t(0.1), real_t(0.1));
       ambientColor.set(real_t(0.6), real_t(0.05), real_t(0.05));
       specularColor.set(real_t(1), real_t(1), real_t(1));
       shininess = real_t(30);
    }
    if (body->getTypeID() == Capsule::getStaticTypeID()) {
-      diffuseColor = Vec3(real_t(0.15), real_t(0.44), real_t(0.91));
+      diffuseColor = Color(real_t(0.15), real_t(0.44), real_t(0.91));
       ambientColor.set(real_t(0), real_t(0), real_t(0.3));
       specularColor.set(real_t(1), real_t(1), real_t(1));
       shininess = real_t(20);
@@ -564,15 +552,13 @@ inline Vec3 Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, con
       specular = real_c(pow(specularAngle, shininess));
    }
    
-   Vec3 color = multiplyColors(lighting_.ambientColor, ambientColor)
-      + multiplyColors(lighting_.diffuseColor, diffuseColor)*lambertian
-      + multiplyColors(lighting_.specularColor, specularColor)*specular;
+   Color color = lighting_.ambientColor.mulComponentWise(ambientColor)
+      + lighting_.diffuseColor.mulComponentWise(diffuseColor)*lambertian
+      + lighting_.specularColor.mulComponentWise(specularColor)*specular;
    
    // Capping of color channels to 1.
    // Capping instead of scaling will make specular highlights stronger.
-   color[0] = std::min(real_t(1), color[0]);
-   color[1] = std::min(real_t(1), color[1]);
-   color[2] = std::min(real_t(1), color[2]);
+   color.clamp();
 
    return color;
 }

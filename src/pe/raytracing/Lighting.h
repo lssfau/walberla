@@ -23,15 +23,16 @@
 #include <pe/basic.h>
 #include <pe/Types.h>
 #include <core/math/Vector3.h>
+#include <pe/raytracing/Color.h>
 
 namespace walberla {
 namespace pe {
 namespace raytracing {
 struct Lighting {
    Vec3 pointLightOrigin;
-   Vec3 diffuseColor;
-   Vec3 specularColor;
-   Vec3 ambientColor;
+   Color diffuseColor;
+   Color specularColor;
+   Color ambientColor;
    
    /*!\brief Instantiation constructor for the Lighting struct.
     */
@@ -46,7 +47,7 @@ struct Lighting {
     * \param ambientColor Color of the ambient light.
     */
    Lighting (const Vec3& _pointLightOrigin,
-             const Vec3& _diffuseColor, const Vec3& _specularColor, const Vec3& _ambientColor)
+             const Color& _diffuseColor, const Color& _specularColor, const Color& _ambientColor)
    : pointLightOrigin(_pointLightOrigin),
    diffuseColor(_diffuseColor), specularColor(_specularColor), ambientColor(_ambientColor) {
       
@@ -63,9 +64,9 @@ struct Lighting {
       WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer lighting.");
 
       pointLightOrigin = config.getParameter<Vec3>("pointLightOrigin");
-      diffuseColor = config.getParameter<Vec3>("diffuseColor", Vec3(1,1,1));
-      specularColor = config.getParameter<Vec3>("specularColor", Vec3(1,1,1));
-      ambientColor = config.getParameter<Vec3>("ambientColor", Vec3(0.5,0.5,0.5));
+      diffuseColor = config.getParameter<Color>("diffuseColor", Color(1,1,1));
+      specularColor = config.getParameter<Color>("specularColor", Color(1,1,1));
+      ambientColor = config.getParameter<Color>("ambientColor", Color(0.5,0.5,0.5));
    }
 };
 }

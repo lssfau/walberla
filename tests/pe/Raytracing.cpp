@@ -19,6 +19,7 @@
 #include <pe/raytracing/Ray.h>
 #include <pe/raytracing/Intersects.h>
 #include <pe/raytracing/Raytracer.h>
+#include <pe/raytracing/Color.h>
 
 using namespace walberla;
 using namespace walberla::pe;
@@ -214,15 +215,15 @@ void RaytracerTest() {
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vec3(1,1,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    Lighting lighting(Vec3(0, 5, 8), // 8, 5, 9.5 gut für ebenen, 0,5,8
-                     Vec3(1, 1, 1), //diffuse
-                     Vec3(1, 1, 1), //specular
-                     Vec3(0.4, 0.4, 0.4)); //ambient
+                     Color(1, 1, 1), //diffuse
+                     Color(1, 1, 1), //specular
+                     Color(0.4, 0.4, 0.4)); //ambient
    Raytracer raytracer(forest, storageID, globalBodyStorage,
                        size_t(640), size_t(480),
                        49.13,
                        Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
                        lighting,
-                       Vec3(0.2,0.2,0.2));
+                       Color(0.2,0.2,0.2));
 
    MaterialID iron = Material::find("iron");
    
