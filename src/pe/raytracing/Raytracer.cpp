@@ -46,7 +46,7 @@ namespace raytracing {
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                      const shared_ptr<BodyStorage> globalBodyStorage,
-                     size_t pixelsHorizontal, size_t pixelsVertical,
+                     uint16_t pixelsHorizontal, uint16_t pixelsVertical,
                      real_t fov_vertical,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                      const Lighting& lighting,
@@ -61,7 +61,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    blockAABBIntersectionPadding_(blockAABBIntersectionPadding),
    tBufferOutputEnabled_(false),
    imageOutputEnabled_(false),
-   localImageOutputEnabled_(false)
+   localImageOutputEnabled_(false),
+   outputFilenameTimestepZeroPadding_(4)
 {
    setupView_();
 }
@@ -77,7 +78,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
  * for each of cameraPosition, lookAt and the upVector. Optional is blockAABBIntersectionPadding (real) and backgroundColor (Vec3).
  * To output both process local and global tbuffers after raytracing, set tbuffer_output_directory (string).
  * For image output after raytracing, set image_output_directory (string); for local image output additionally set
- * local_image_output_enabled (bool) to true.
+ * local_image_output_enabled (bool) to true. outputFilenameTimestepZeroPadding (int) sets zero padding for timesteps of output filenames.
  * For the lighting a config block named Lighting has to be defined, information about its contents is in Lighting.h.
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
@@ -86,8 +87,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
    
-   pixelsHorizontal_ = config.getParameter<size_t>("image_x");
-   pixelsVertical_ = config.getParameter<size_t>("image_y");
+   pixelsHorizontal_ = config.getParameter<uint16_t>("image_x");
+   pixelsVertical_ = config.getParameter<uint16_t>("image_y");
    fov_vertical_ = config.getParameter<real_t>("fov_vertical");
    
    if (config.isDefined("tbuffer_output_directory")) {
@@ -105,6 +106,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    } else if (getLocalImageOutputEnabled()) {
       WALBERLA_ABORT("Cannot enable local image output without image_output_directory parameter being set.");
    }
+      
+   outputFilenameTimestepZeroPadding_ = config.getParameter<int8_t>("outputFilenameTimestepZeroPadding", int8_t(4));
    
    cameraPosition_ = config.getParameter<Vec3>("cameraPosition");
    lookAtPoint_ = config.getParameter<Vec3>("lookAt");
@@ -113,7 +116,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    backgroundColor_ = config.getParameter<Color>("backgroundColor", Vec3(0.1, 0.1, 0.1));
 
    blockAABBIntersectionPadding_ = config.getParameter<real_t>("blockAABBIntersectionPadding", real_t(0.0));
-
+      
    setupView_();
 }
 
@@ -142,15 +145,15 @@ void Raytracer::setupView_() {
  * \param isGlobalImage Whether this image is the fully stitched together one.
  */
 void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t timestep, bool isGlobalImage) const {
-   WALBERLA_CHECK(timestep < 100000, "Raytracer only supports outputting 99 999 timesteps.");
+   uint_t maxTimestep = uint_c(pow(10, outputFilenameTimestepZeroPadding_+1));
+   WALBERLA_CHECK(timestep < maxTimestep, "Raytracer only supports outputting " << (maxTimestep-1) << " timesteps for the configured output filename zero padding.");
    mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
-   uint8_t padding = (timestep < 10 ? 4 :
-                      (timestep < 100 ? 3 :
-                       (timestep < 1000 ? 2 :
-                        (timestep < 10000 ? 1 :
-                         0))));
-   std::string fileName = "tbuffer_" + std::string(padding, '0') + std::to_string(timestep) + "+" + (isGlobalImage ? "global" : std::to_string(rank)) + ".ppm";
-   writeTBufferToFile(tBuffer, fileName);
+   std::stringstream fileNameStream;
+   fileNameStream << "tbuffer_";
+   fileNameStream << std::setfill('0') << std::setw(int_c(outputFilenameTimestepZeroPadding_)) << timestep; // add timestep
+   fileNameStream << "+" << (isGlobalImage ? "global" : std::to_string(rank)); // add rank
+   fileNameStream << ".ppm"; // add extension
+   writeTBufferToFile(tBuffer, fileNameStream.str());
 }
 
 /*!\brief Writes the tBuffer to a file in the tBuffer output directory.
@@ -209,15 +212,15 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std
  * \param isGlobalImage Whether this image is the fully stitched together one.
  */
 void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, size_t timestep, bool isGlobalImage) const {
-   WALBERLA_CHECK(timestep < 100000, "Raytracer only supports outputting 99 999 timesteps.");
+   uint_t maxTimestep = uint_c(pow(10, outputFilenameTimestepZeroPadding_+1));
+   WALBERLA_CHECK(timestep < maxTimestep, "Raytracer only supports outputting " << (maxTimestep-1) << " timesteps for the configured output filename zero padding.");
    mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
-   uint8_t padding = (timestep < 10 ? 4 :
-                      (timestep < 100 ? 3 :
-                       (timestep < 1000 ? 2 :
-                        (timestep < 10000 ? 1 :
-                         0))));
-   std::string fileName = "image_" + std::string(padding, '0') + std::to_string(timestep) + "+" + (isGlobalImage ? "global" : std::to_string(rank)) + ".ppm";
-   writeImageBufferToFile(imageBuffer, fileName);
+   std::stringstream fileNameStream;
+   fileNameStream << "image_";
+   fileNameStream << std::setfill('0') << std::setw(int_c(outputFilenameTimestepZeroPadding_)) << timestep; // add timestep
+   fileNameStream << "+" << (isGlobalImage ? "global" : std::to_string(rank)); // add rank
+   fileNameStream << ".ppm"; // add extension
+   writeImageBufferToFile(imageBuffer, fileNameStream.str());
 }
 
 /*!\brief Writes the image buffer to a file in the image output directory.

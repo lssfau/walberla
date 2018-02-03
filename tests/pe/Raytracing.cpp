@@ -259,8 +259,9 @@ void RaytracerTest() {
    
    //raytracer.setTBufferOutputDirectory("tbuffer");
    //raytracer.setTBufferOutputEnabled(true);
-   //raytracer.setImageOutputDirectory("image");
-   //raytracer.setImageOutputEnabled(true);
+   raytracer.setImageOutputDirectory("image");
+   raytracer.setImageOutputEnabled(true);
+   //raytracer.setLocalImageOutputEnabled(true);
    
    raytracer.rayTrace<BodyTuple>(0);
 }

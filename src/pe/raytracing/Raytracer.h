@@ -55,7 +55,7 @@ public:
    //@{
    explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                       const shared_ptr<BodyStorage> globalBodyStorage,
-                      size_t pixelsHorizontal, size_t pixelsVertical,
+                      uint16_t pixelsHorizontal, uint16_t pixelsVertical,
                       real_t fov_vertical,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                       const Lighting& lighting,
@@ -70,19 +70,18 @@ private:
    /*!\name Member variables */
    //@{
    const shared_ptr<BlockStorage> forest_; //!< The BlockForest the raytracer operates on.
-   BlockDataID storageID_;    /*!< The storage ID of the block data storage the raytracer operates
-                               on.*/
+   BlockDataID storageID_;    //!< The storage ID of the block data storage the raytracer operates on.
    const shared_ptr<BodyStorage> globalBodyStorage_; //!< The global body storage the raytracer operates on.
    
-   size_t pixelsHorizontal_;  //!< The horizontal amount of pixels of the generated image.
-   size_t pixelsVertical_;    //!< The vertical amount of pixels of the generated image.
+   uint16_t pixelsHorizontal_;  //!< The horizontal amount of pixels of the generated image.
+   uint16_t pixelsVertical_;    //!< The vertical amount of pixels of the generated image.
    real_t fov_vertical_;      //!< The vertical field-of-view of the camera.
    Vec3 cameraPosition_;      //!< The position of the camera in the global world frame.
    Vec3 lookAtPoint_;         /*!< The point the camera looks at in the global world frame,
                                marks the center of the view plane.*/
    Vec3 upVector_;            //!< The vector indicating the upwards direction of the camera.
    Lighting lighting_;        //!< The lighting of the scene.
-   Color backgroundColor_;     //!< Background color of the scene.
+   Color backgroundColor_;    //!< Background color of the scene.
    real_t blockAABBIntersectionPadding_; /*!< The padding applied in block AABB intersection pretesting, as
                                           some objects within a block might protrude from the block's AABB.*/
    
@@ -92,6 +91,10 @@ private:
    bool imageOutputEnabled_;  //!< Enable / disable writing images to file.
    bool localImageOutputEnabled_; //!< Enable / disable writing images of the local process to file.
    std::string imageOutputDirectory_; //!< Path to the image output directory.
+   
+   int8_t outputFilenameTimestepZeroPadding_; /*!< Zero padding for timesteps of output filenames.
+                                               * Use e.g. 4 for ranges from 1 to 100000: Will result in
+                                               * filenames like image_00001.png up to image_99999.png. */
    //@}
    
    Vec3 n_;                   //!< The normal vector of the viewing plane.
@@ -109,8 +112,8 @@ private:
 public:
    /*!\name Get functions */
    //@{
-   inline size_t getPixelsHorizontal() const;
-   inline size_t getPixelsVertical() const;
+   inline uint16_t getPixelsHorizontal() const;
+   inline uint16_t getPixelsVertical() const;
    inline real_t getFOVVertical() const;
    inline const Vec3& getCameraPosition() const;
    inline const Vec3& getLookAtPoint() const;
@@ -121,6 +124,7 @@ public:
    inline bool getImageOutputEnabled() const;
    inline bool getLocalImageOutputEnabled() const;
    inline const std::string& getImageOutputDirectory() const;
+   inline int8_t getOutputFilenameTimestepZeroPadding() const;
    //@}
 
    /*!\name Set functions */
@@ -131,6 +135,7 @@ public:
    inline void setImageOutputEnabled(const bool enabled);
    inline void setLocalImageOutputEnabled(const bool enabled);
    inline void setImageOutputDirectory(const std::string& path);
+   inline void setOutputFilenameTimestepZeroPadding(int8_t padding);
    //@}
    
    /*!\name Functions */
@@ -156,7 +161,7 @@ private:
  *
  * \return The horizontal amount of pixels of the generated image.
  */
-inline size_t Raytracer::getPixelsHorizontal() const {
+inline uint16_t Raytracer::getPixelsHorizontal() const {
    return pixelsHorizontal_;
 }
 
@@ -164,7 +169,7 @@ inline size_t Raytracer::getPixelsHorizontal() const {
  *
  * \return The vertical amount of pixels of the generated image.
  */
-inline size_t Raytracer::getPixelsVertical() const {
+inline uint16_t Raytracer::getPixelsVertical() const {
    return pixelsVertical_;
 }
 
@@ -257,6 +262,13 @@ inline const std::string& Raytracer::getImageOutputDirectory() const {
    return imageOutputDirectory_;
 }
 
+/*!\brief Returns the zero padding for timesteps in output filenames.
+ * \return Zero padding amount.
+ */
+inline int8_t Raytracer::getOutputFilenameTimestepZeroPadding() const {
+   return outputFilenameTimestepZeroPadding_;
+}
+
 /*!\brief Set the background color of the scene.
  *
  * \param color New background color.
@@ -308,6 +320,13 @@ inline void Raytracer::setImageOutputDirectory(const std::string& path) {
    WALBERLA_CHECK(fs::exists(dir) && fs::is_directory(dir), "Image output directory " << path << " is invalid.");
    
    imageOutputDirectory_ = path;
+}
+
+/*!\brief Set zero padding for timesteps of output filenames.
+ * \param padding Set to true / false to enable / disable image output.
+ */
+inline void Raytracer::setOutputFilenameTimestepZeroPadding(int8_t padding) {
+   outputFilenameTimestepZeroPadding_ = padding;
 }
    
 /*!\brief Checks if a plane should get rendered.
