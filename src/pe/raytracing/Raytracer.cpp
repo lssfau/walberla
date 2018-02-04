@@ -147,7 +147,6 @@ void Raytracer::setupView_() {
 void Raytracer::setupFilenameRankWidth_() {
    int numProcesses = mpi::MPIManager::instance()->numProcesses();
    filenameRankWidth_ = int8_c(log10(numProcesses))+1;
-   WALBERLA_LOG_INFO("filenameRankWidth_: " << int_c(filenameRankWidth_));
 }
 
 /*!\brief Generates the filename for output files.
