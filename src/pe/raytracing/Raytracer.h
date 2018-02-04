@@ -92,11 +92,14 @@ private:
    bool localImageOutputEnabled_; //!< Enable / disable writing images of the local process to file.
    std::string imageOutputDirectory_; //!< Path to the image output directory.
    
-   int8_t outputFilenameTimestepZeroPadding_; /*!< Zero padding for timesteps of output filenames.
-                                               * Use e.g. 4 for ranges from 1 to 100000: Will result in
-                                               * filenames like image_00001.png up to image_99999.png. */
+   int8_t filenameTimestepWidth_; /*!< Width of the timestep number in output filenames.
+                                  * Use e.g. 5 for ranges from 1 to 99 999: Will result in
+                                  * filenames like image_00001.png up to image_99999.png. */
+   int8_t filenameRankWidth_;  //!< Width of the mpi rank part in a filename.
    //@}
    
+   /*!\name Member variables for raytracing geometry */
+   //@{
    Vec3 n_;                   //!< The normal vector of the viewing plane.
    Vec3 u_;                   //!< The vector spanning the viewing plane in the "right direction".
    Vec3 v_;                   //!< The vector spanning the viewing plane in the "up direction".
@@ -107,6 +110,8 @@ private:
    Vec3 viewingPlaneOrigin_;  //!< The origin of the viewing plane.
    real_t pixelWidth_;        //!< The width of a pixel of the generated image in the viewing plane.
    real_t pixelHeight_;       //!< The height of a pixel of the generated image in the viewing plane.
+   //@}
+   
    WcTimingPool tp_;
 
 public:
@@ -124,7 +129,7 @@ public:
    inline bool getImageOutputEnabled() const;
    inline bool getLocalImageOutputEnabled() const;
    inline const std::string& getImageOutputDirectory() const;
-   inline int8_t getOutputFilenameTimestepZeroPadding() const;
+   inline int8_t getFilenameTimestepWidth() const;
    //@}
 
    /*!\name Set functions */
@@ -135,16 +140,18 @@ public:
    inline void setImageOutputEnabled(const bool enabled);
    inline void setLocalImageOutputEnabled(const bool enabled);
    inline void setImageOutputDirectory(const std::string& path);
-   inline void setOutputFilenameTimestepZeroPadding(int8_t padding);
+   inline void setFilenameTimestepWidth(int8_t width);
    //@}
    
    /*!\name Functions */
    //@{
    void setupView_();
+   void setupFilenameRankWidth_();
    template <typename BodyTypeTuple>
    void rayTrace(const size_t timestep);
    
 private:
+   std::string getOutputFilename(const std::string& base, size_t timestep, bool isGlobalImage) const;
    void writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t timestep, bool isGlobalImage = false) const;
    void writeTBufferToFile(const std::vector<real_t>& tBuffer, const std::string& fileName) const;
    void writeImageBufferToFile(const std::vector<Color>& imageBuffer, size_t timestep, bool isGlobalImage = false) const;
@@ -262,11 +269,11 @@ inline const std::string& Raytracer::getImageOutputDirectory() const {
    return imageOutputDirectory_;
 }
 
-/*!\brief Returns the zero padding for timesteps in output filenames.
- * \return Zero padding amount.
+/*!\brief Returns width of the timestep number in output filenames.
+ * \return Width of the timestep part in filenames.
  */
-inline int8_t Raytracer::getOutputFilenameTimestepZeroPadding() const {
-   return outputFilenameTimestepZeroPadding_;
+inline int8_t Raytracer::getFilenameTimestepWidth() const {
+   return filenameTimestepWidth_;
 }
 
 /*!\brief Set the background color of the scene.
@@ -322,11 +329,11 @@ inline void Raytracer::setImageOutputDirectory(const std::string& path) {
    imageOutputDirectory_ = path;
 }
 
-/*!\brief Set zero padding for timesteps of output filenames.
- * \param padding Set to true / false to enable / disable image output.
+/*!\brief Set width of timestep number in output filenames.
+ * \param width Width of timestep part in a filename.
  */
-inline void Raytracer::setOutputFilenameTimestepZeroPadding(int8_t padding) {
-   outputFilenameTimestepZeroPadding_ = padding;
+inline void Raytracer::setFilenameTimestepWidth(int8_t width) {
+   filenameTimestepWidth_ = width;
 }
    
 /*!\brief Checks if a plane should get rendered.

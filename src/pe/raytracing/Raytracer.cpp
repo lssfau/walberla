@@ -63,9 +63,10 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    tBufferOutputEnabled_(false),
    imageOutputEnabled_(false),
    localImageOutputEnabled_(false),
-   outputFilenameTimestepZeroPadding_(4)
+   filenameTimestepWidth_(5)
 {
    setupView_();
+   setupFilenameRankWidth_();
 }
 
 /*!\brief Instantiation constructor for the Raytracer class using a config object for view setup.
@@ -108,7 +109,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
       WALBERLA_ABORT("Cannot enable local image output without image_output_directory parameter being set.");
    }
       
-   outputFilenameTimestepZeroPadding_ = config.getParameter<int8_t>("outputFilenameTimestepZeroPadding", int8_t(4));
+   filenameTimestepWidth_ = config.getParameter<int8_t>("filenameTimestepWidth", int8_t(5));
    
    cameraPosition_ = config.getParameter<Vec3>("cameraPosition");
    lookAtPoint_ = config.getParameter<Vec3>("lookAt");
@@ -119,6 +120,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    blockAABBIntersectionPadding_ = config.getParameter<real_t>("blockAABBIntersectionPadding", real_t(0.0));
       
    setupView_();
+   setupFilenameRankWidth_();
 }
 
 /*!\brief Utility function for setting up the view plane and calculating required variables.
@@ -140,21 +142,43 @@ void Raytracer::setupView_() {
    pixelHeight_ = viewingPlaneHeight_ / real_c(pixelsVertical_);
 }
 
+/*!\brief Utility function for initializing the attribute filenameRankWidth.
+ */
+void Raytracer::setupFilenameRankWidth_() {
+   int numProcesses = mpi::MPIManager::instance()->numProcesses();
+   filenameRankWidth_ = int8_c(log10(numProcesses))+1;
+   WALBERLA_LOG_INFO("filenameRankWidth_: " << int_c(filenameRankWidth_));
+}
+
+/*!\brief Generates the filename for output files.
+ * \param base String that precedes the timestap and rank info.
+ * \param timestep Timestep this image is from.
+ * \param isGlobalImage Whether this image is the fully stitched together one.
+ */
+std::string Raytracer::getOutputFilename(const std::string& base, size_t timestep, bool isGlobalImage) const {
+   uint_t maxTimestep = uint_c(pow(10, filenameTimestepWidth_));
+   WALBERLA_CHECK(timestep < maxTimestep, "Raytracer only supports outputting " << (maxTimestep-1) << " timesteps for the configured filename timestep width.");
+   mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
+   std::stringstream fileNameStream;
+   fileNameStream << base << "_";
+   fileNameStream << std::setfill('0') << std::setw(int_c(filenameTimestepWidth_)) << timestep; // add timestep
+   fileNameStream << "+";
+   if (isGlobalImage) {
+      fileNameStream << "global";
+   } else {
+      fileNameStream << std::setfill('0') << std::setw(int_c(filenameRankWidth_)) << std::to_string(rank); // add rank
+   }
+   fileNameStream << ".png"; // add extension
+   return fileNameStream.str();
+}
+
 /*!\brief Writes the tBuffer to a file in the tBuffer output directory.
  * \param tBuffer Buffer with t values as generated in rayTrace(...).
  * \param timestep Timestep this image is from.
  * \param isGlobalImage Whether this image is the fully stitched together one.
  */
 void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t timestep, bool isGlobalImage) const {
-   uint_t maxTimestep = uint_c(pow(10, outputFilenameTimestepZeroPadding_+1));
-   WALBERLA_CHECK(timestep < maxTimestep, "Raytracer only supports outputting " << (maxTimestep-1) << " timesteps for the configured output filename zero padding.");
-   mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
-   std::stringstream fileNameStream;
-   fileNameStream << "tbuffer_";
-   fileNameStream << std::setfill('0') << std::setw(int_c(outputFilenameTimestepZeroPadding_)) << timestep; // add timestep
-   fileNameStream << "+" << (isGlobalImage ? "global" : std::to_string(rank)); // add rank
-   fileNameStream << ".png"; // add extension
-   writeTBufferToFile(tBuffer, fileNameStream.str());
+   writeTBufferToFile(tBuffer, getOutputFilename("tbuffer", timestep, isGlobalImage));
 }
 
 /*!\brief Writes the tBuffer to a file in the tBuffer output directory.
@@ -219,15 +243,7 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std
  * \param isGlobalImage Whether this image is the fully stitched together one.
  */
 void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, size_t timestep, bool isGlobalImage) const {
-   uint_t maxTimestep = uint_c(pow(10, outputFilenameTimestepZeroPadding_+1));
-   WALBERLA_CHECK(timestep < maxTimestep, "Raytracer only supports outputting " << (maxTimestep-1) << " timesteps for the configured output filename zero padding.");
-   mpi::MPIRank rank = mpi::MPIManager::instance()->rank();
-   std::stringstream fileNameStream;
-   fileNameStream << "image_";
-   fileNameStream << std::setfill('0') << std::setw(int_c(outputFilenameTimestepZeroPadding_)) << timestep; // add timestep
-   fileNameStream << "+" << (isGlobalImage ? "global" : std::to_string(rank)); // add rank
-   fileNameStream << ".png"; // add extension
-   writeImageBufferToFile(imageBuffer, fileNameStream.str());
+   writeImageBufferToFile(imageBuffer, getOutputFilename("image", timestep, isGlobalImage));
 }
 
 /*!\brief Writes the image buffer to a file in the image output directory.
