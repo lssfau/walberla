@@ -19,6 +19,7 @@
 //======================================================================================================================
 
 #include "Raytracer.h"
+#include "geometry/structured/extern/lodepng.h"
 
 using namespace walberla;
 
@@ -152,7 +153,7 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t ti
    fileNameStream << "tbuffer_";
    fileNameStream << std::setfill('0') << std::setw(int_c(outputFilenameTimestepZeroPadding_)) << timestep; // add timestep
    fileNameStream << "+" << (isGlobalImage ? "global" : std::to_string(rank)); // add rank
-   fileNameStream << ".ppm"; // add extension
+   fileNameStream << ".png"; // add extension
    writeTBufferToFile(tBuffer, fileNameStream.str());
 }
 
@@ -187,23 +188,29 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std
    fs::path file (fileName);
    fs::path fullPath = dir / file;
    
-   std::ofstream ofs(fullPath.string<std::string>(), std::ios::out | std::ios::binary);
-   ofs << "P6\n" << pixelsHorizontal_ << " " << pixelsVertical_ << "\n255\n";
+   std::vector<u_char> lodeTBuffer(pixelsHorizontal_*pixelsVertical_);
+   
+   uint32_t l = 0;
    for (size_t y = pixelsVertical_-1; y > 0; y--) {
       for (size_t x = 0; x < pixelsHorizontal_; x++) {
          size_t i = coordinateToArrayIndex(x, y);
-         char r = 0, g = 0, b = 0;
+         u_char g = 0;
          real_t t = tBuffer[i];
          if (realIsIdentical(t, inf)) {
-            r = g = b = (char)0;
+            g = (u_char)0;
          } else {
-            r = g = b = (char)(255 * (1-(t-t_min)/(t_max-t_min)));
+            real_t t_scaled = (1-(t-t_min)/(t_max-t_min));
+            g = (u_char)(255 * std::max(std::min(t_scaled, real_t(1)), real_t(0)));
          }
-         ofs << r << g << b;
+         lodeTBuffer[l] = g;
+         l++;
       }
    }
    
-   ofs.close();
+   uint32_t error = lodepng::encode(fullPath.string(), lodeTBuffer, getPixelsHorizontal(), getPixelsVertical(), LCT_GREY);
+   if(error) {
+      WALBERLA_LOG_WARNING("lodePNG error " << error << " when trying to save tbuffer file to " << fullPath.string() << ": " << lodepng_error_text(error));
+   }
 }
 
 /*!\brief Writes a image buffer to a file in the image output directory.
@@ -219,7 +226,7 @@ void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, si
    fileNameStream << "image_";
    fileNameStream << std::setfill('0') << std::setw(int_c(outputFilenameTimestepZeroPadding_)) << timestep; // add timestep
    fileNameStream << "+" << (isGlobalImage ? "global" : std::to_string(rank)); // add rank
-   fileNameStream << ".ppm"; // add extension
+   fileNameStream << ".png"; // add extension
    writeImageBufferToFile(imageBuffer, fileNameStream.str());
 }
 
@@ -233,21 +240,28 @@ void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, co
    fs::path dir (getImageOutputDirectory());
    fs::path file (fileName);
    fs::path fullPath = dir / file;
-      
-   std::ofstream ofs(fullPath.string<std::string>(), std::ios::out | std::ios::binary);
-   ofs << "P6\n" << pixelsHorizontal_ << " " << pixelsVertical_ << "\n255\n";
+   
+   std::vector<u_char> lodeImageBuffer(pixelsHorizontal_*pixelsVertical_*3);
+   
+   uint32_t l = 0;
    for (size_t y = pixelsVertical_-1; y > 0; y--) {
       for (size_t x = 0; x < pixelsHorizontal_; x++) {
          size_t i = coordinateToArrayIndex(x, y);
          const Color& color = imageBuffer[i];
-         char r = (char)(255 * color[0]);
-         char g = (char)(255 * color[1]);
-         char b = (char)(255 * color[2]);
-         ofs << r << g << b;
+         u_char r = (u_char)(255 * color[0]);
+         u_char g = (u_char)(255 * color[1]);
+         u_char b = (u_char)(255 * color[2]);
+         lodeImageBuffer[l] = r;
+         lodeImageBuffer[l+1] = g;
+         lodeImageBuffer[l+2] = b;
+         l+=3;
       }
    }
    
-   ofs.close();
+   uint32_t error = lodepng::encode(fullPath.string(), lodeImageBuffer, getPixelsHorizontal(), getPixelsVertical(), LCT_RGB);
+   if(error) {
+      WALBERLA_LOG_WARNING("lodePNG error " << error << " when trying to save image file to " << fullPath.string() << ": " << lodepng_error_text(error));
+   }
 }
 }
 }
