@@ -1810,6 +1810,13 @@ inline void HardContactSemiImplicitTimesteppingSolvers::integratePositions( Body
          {
             v = v * (edge * getSpeedLimitFactor() / dt / speed );
          }
+
+         const real_t maxPhi = real_t(2) * math::PI * getSpeedLimitFactor();
+         const real_t phi    = w.length() * dt;
+         if (phi > maxPhi)
+         {
+            w = w / phi * maxPhi;
+         }
       }
 
       // Calculating the translational displacement
@@ -1820,6 +1827,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::integratePositions( Body
 
       // Calculating the new orientation
       const Quat dq( phi, phi.length() );
+      WALBERLA_ASSERT(!math::isnan(dq), "dq: " << dq << " phi: " << phi << " w: " << w << " dt: " << dt << " angVel: " << body->getAngularVel());
       body->setOrientation( dq * body->getQuaternion() );
 
       // Storing the velocities back in the body properties
