@@ -801,7 +801,7 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
 
       for( uint_t j = 0; j != block->getNeighborhoodSize(); ++j ) {
          adjncy.push_back( numeric_cast<int64_t>( block->getNeighbor(j)->getIndex() ) );
-         adjwgt.push_back( metisConfig.communicationFunction().empty() ? 1 :
+         adjwgt.push_back( !metisConfig.communicationFunction() ? 1 :
                            ( numeric_cast<int64_t>( static_cast< memory_t >(0.5) + metisConfig.communicationFunction()( block, block->getNeighbor(j) ) ) ) );
       }
 
