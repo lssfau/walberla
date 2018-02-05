@@ -27,9 +27,11 @@
 #include <core/config/Config.h>
 #include <boost/filesystem.hpp>
 #include <core/timing/TimingTree.h>
+#include <functional>
 #include "Ray.h"
 #include "Intersects.h"
 #include "Lighting.h"
+#include "ShadingFunctions.h"
 
 using namespace walberla;
 using namespace walberla::pe;
@@ -60,10 +62,12 @@ public:
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                       const Lighting& lighting,
                       const Color& backgroundColor = Color(0.1, 0.1, 0.1),
-                      real_t blockAABBIntersectionPadding = real_t(0.0));
+                      real_t blockAABBIntersectionPadding = real_t(0.0),
+                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction = defaultBodyTypeDependentShadingParams);
    explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                       const shared_ptr<BodyStorage> globalBodyStorage,
-                      const Config::BlockHandle& config);
+                      const Config::BlockHandle& config,
+                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction = defaultBodyTypeDependentShadingParams);
    //@}
 
 private:
@@ -96,6 +100,9 @@ private:
                                   * Use e.g. 5 for ranges from 1 to 99 999: Will result in
                                   * filenames like image_00001.png up to image_99999.png. */
    int8_t filenameRankWidth_;  //!< Width of the mpi rank part in a filename.
+   std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction_; /*!< Function which returns a 
+                                                                                  * ShadingParameters struct
+                                                                                  * given the specified body. */
    //@}
    
    /*!\name Member variables for raytracing geometry */
@@ -536,31 +543,7 @@ void Raytracer::rayTrace(const size_t timestep) {
  * \return Computed color.
  */
 inline Color Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, const Vec3& n) const {
-   //----
-   Color diffuseColor(0.6, 0, 0.9);
-   Color specularColor(0.8, 0.8, 0.8);
-   Color ambientColor(0.5, 0, 0.8);
-   real_t shininess = 100;
-
-   if (body->getTypeID() == Plane::getStaticTypeID()) {
-      diffuseColor = Color(real_t(0.7), real_t(0.7), real_t(0.7));
-      ambientColor.set(real_t(0.5), real_t(0.5), real_t(0.5));
-      specularColor.set(real_t(0), real_t(0), real_t(0));
-      shininess = real_t(0);
-   }
-   if (body->getTypeID() == Sphere::getStaticTypeID()) {
-      diffuseColor = Color(real_t(0.98), real_t(0.1), real_t(0.1));
-      ambientColor.set(real_t(0.6), real_t(0.05), real_t(0.05));
-      specularColor.set(real_t(1), real_t(1), real_t(1));
-      shininess = real_t(30);
-   }
-   if (body->getTypeID() == Capsule::getStaticTypeID()) {
-      diffuseColor = Color(real_t(0.15), real_t(0.44), real_t(0.91));
-      ambientColor.set(real_t(0), real_t(0), real_t(0.3));
-      specularColor.set(real_t(1), real_t(1), real_t(1));
-      shininess = real_t(20);
-   }
-   //----
+   const ShadingParameters shadingParams = bodyToShadingParamsFunction_(body);
    
    const Vec3 intersectionPoint = ray.getOrigin() + ray.getDirection() * t;
    Vec3 lightDirection = lighting_.pointLightOrigin - intersectionPoint;
@@ -575,12 +558,12 @@ inline Color Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, co
       Vec3 viewDirection = -ray.getDirection();
       Vec3 halfDirection = (lightDirection + viewDirection).getNormalized();
       real_t specularAngle = std::max(halfDirection * n, real_t(0));
-      specular = real_c(pow(specularAngle, shininess));
+      specular = real_c(pow(specularAngle, shadingParams.shininess));
    }
    
-   Color color = lighting_.ambientColor.mulComponentWise(ambientColor)
-      + lighting_.diffuseColor.mulComponentWise(diffuseColor)*lambertian
-      + lighting_.specularColor.mulComponentWise(specularColor)*specular;
+   Color color = lighting_.ambientColor.mulComponentWise(shadingParams.ambientColor)
+      + lighting_.diffuseColor.mulComponentWise(shadingParams.diffuseColor)*lambertian
+      + lighting_.specularColor.mulComponentWise(shadingParams.specularColor)*specular;
    
    // Capping of color channels to 1.
    // Capping instead of scaling will make specular highlights stronger.

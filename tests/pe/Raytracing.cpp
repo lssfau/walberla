@@ -20,6 +20,7 @@
 #include <pe/raytracing/Intersects.h>
 #include <pe/raytracing/Raytracer.h>
 #include <pe/raytracing/Color.h>
+#include <pe/raytracing/ShadingFunctions.h>
 
 using namespace walberla;
 using namespace walberla::pe;
@@ -209,6 +210,20 @@ void CapsuleIntersectsTest() {
    WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
 }
 
+ShadingParameters customBodyToShadingParams(const BodyID body) {
+   if (body->getID() == 10) {
+      return greenShadingParams(body).makeGlossy(30);
+   } else if (body->getID() == 7) {
+      return greenShadingParams(body).makeGlossy(10);
+   } else if (body->getID() == 9) {
+      return darkGreyShadingParams(body).makeGlossy(50);
+   } else if (body->getID() == 3) {
+      return redShadingParams(body).makeGlossy(200);
+   } else {
+      return defaultBodyTypeDependentShadingParams(body);
+   }
+}
+
 void RaytracerTest() {
    WALBERLA_LOG_INFO("Raytracer");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
@@ -223,7 +238,9 @@ void RaytracerTest() {
                        49.13,
                        Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
                        lighting,
-                       Color(0.2,0.2,0.2));
+                       Color(0.2,0.2,0.2),
+                       real_t(2),
+                       customBodyToShadingParams);
 
    MaterialID iron = Material::find("iron");
    
@@ -251,9 +268,9 @@ void RaytracerTest() {
    // Test scene v1 end
    
    // Test scene v2 additions start
-   createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(9,9,5), Vec3(1,1,10));
-   createCapsule(*globalBodyStorage, *forest, storageID, 9, Vec3(3, 9, 1), real_t(0.5), real_t(7), iron);
-   CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, 9, Vec3(7, 3.5, 7.5), real_t(1), real_t(2), iron);
+   createBox(*globalBodyStorage, *forest, storageID, 9, Vec3(9,9,5), Vec3(1,1,10));
+   createCapsule(*globalBodyStorage, *forest, storageID, 10, Vec3(3, 9, 1), real_t(0.5), real_t(7), iron);
+   CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, 11, Vec3(7, 3.5, 7.5), real_t(1), real_t(2), iron);
    if (capsule != NULL) capsule->rotate(0,math::M_PI/3,math::M_PI/4-math::M_PI/8);
    // Test scene v2 end
    
@@ -262,6 +279,95 @@ void RaytracerTest() {
    raytracer.setImageOutputDirectory("image");
    raytracer.setImageOutputEnabled(true);
    //raytracer.setLocalImageOutputEnabled(true);
+   
+   raytracer.rayTrace<BodyTuple>(0);
+}
+
+ShadingParameters customSpheresBodyToShadingParams(const BodyID body) {
+   if (body->getTypeID() == Plane::getStaticTypeID()) {
+      return greyShadingParams(body);
+   }
+   
+   switch (body->getID()) {
+      case 0:
+         return blueShadingParams(body).makeGlossy(1);
+      case 1:
+         return blueShadingParams(body).makeGlossy(10);
+      case 2:
+         return blueShadingParams(body).makeGlossy(30);
+      case 3:
+         return blueShadingParams(body).makeGlossy(80);
+      case 4:
+         return whiteShadingParams(body);
+      case 5:
+         return lightGreyShadingParams(body);
+      case 6:
+         return greyShadingParams(body);
+      case 7:
+         return darkGreyShadingParams(body);
+      case 8:
+         return blackShadingParams(body).makeGlossy(100);
+      case 9:
+         return redShadingParams(body);
+      case 10:
+         return blueShadingParams(body);
+      case 11:
+         return violetShadingParams(body);
+      case 12:
+         return greenShadingParams(body);
+      case 13:
+         return greenShadingParams(body).makeGlossy(30);
+      case 14:
+         return blueShadingParams(body).makeGlossy(1000);
+      default:
+         return lightGreyShadingParams(body);
+   }
+}
+
+void RaytracerSpheresTest() {
+   WALBERLA_LOG_INFO("Raytracer");
+   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vec3(1,1,1), Vec3(false, false, false));
+   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+   Lighting lighting(Vec3(0, 5, 8), // 8, 5, 9.5 gut für ebenen, 0,5,8
+                     Color(1, 1, 1), //diffuse
+                     Color(1, 1, 1), //specular
+                     Color(0.4, 0.4, 0.4)); //ambient
+   Raytracer raytracer(forest, storageID, globalBodyStorage,
+                       size_t(640), size_t(480),
+                       49.13,
+                       Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
+                       lighting,
+                       Color(0.2,0.2,0.2),
+                       real_t(2),
+                       customSpheresBodyToShadingParams);
+   
+   MaterialID iron = Material::find("iron");
+   
+   //PlaneID xNegPlane = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(5,0,0), iron);
+   // xNegPlane obstructs only the top left sphere and intersects some objects
+   
+   //PlaneID xNegPlaneClose = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(1,0,0), iron);
+   
+   // Test Scene v1 - Spheres, (rotated) boxes, confining walls, tilted plane in right bottom back corner
+   createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), Vec3(0,10,0), iron); // left wall
+   createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,0,0), iron); // right wall
+   createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,0), iron); // floor
+   createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), Vec3(0,0,10), iron); // ceiling
+   createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(10,0,0), iron); // back wall
+   createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(0,0,0), iron); // front wall, should not get rendered
+   
+   walberla::id_t id=0;
+   for (int j=0; j<4; j++) {
+      for (int i=0; i<4; i++) {
+         createSphere(*globalBodyStorage, *forest, storageID, id, Vec3(6,real_c(i+1)*real_t(2),real_c(j+1)*real_t(2)), real_t(0.9));
+         id++;
+      }
+   }
+   
+   
+   raytracer.setImageOutputDirectory("image");
+   raytracer.setImageOutputEnabled(true);
    
    raytracer.rayTrace<BodyTuple>(0);
 }
@@ -279,6 +385,7 @@ int main( int argc, char** argv )
    //AABBIntersectsTest();
    //CapsuleIntersectsTest();
    RaytracerTest();
-   
+   //RaytracerSpheresTest();
+
    return EXIT_SUCCESS;
 }

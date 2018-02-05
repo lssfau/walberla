@@ -52,7 +52,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                      const Lighting& lighting,
                      const Color& backgroundColor,
-                     real_t blockAABBIntersectionPadding)
+                     real_t blockAABBIntersectionPadding,
+                     std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
    fov_vertical_(fov_vertical),
@@ -63,8 +64,9 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    tBufferOutputEnabled_(false),
    imageOutputEnabled_(false),
    localImageOutputEnabled_(false),
-   filenameTimestepWidth_(5)
-{
+   filenameTimestepWidth_(5),
+   bodyToShadingParamsFunction_(bodyToShadingParamsFunction) {
+   
    setupView_();
    setupFilenameRankWidth_();
 }
@@ -85,8 +87,10 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
                      const shared_ptr<BodyStorage> globalBodyStorage,
-                     const Config::BlockHandle& config)
-   : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage) {
+                     const Config::BlockHandle& config,
+                     std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction)
+   : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage),
+   bodyToShadingParamsFunction_(bodyToShadingParamsFunction) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
    
    pixelsHorizontal_ = config.getParameter<uint16_t>("image_x");
