@@ -25,6 +25,9 @@ waLBerla_execute_test( NAME   PE_COLLISION )
 waLBerla_compile_test( NAME   PE_COLLISIONTOBIASGJK FILES CollisionTobiasGJK.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_COLLISIONTOBIASGJK )
 
+waLBerla_compile_test( NAME   PE_CREATEWORLD FILES CreateWorld.cpp DEPENDS core  )
+waLBerla_execute_test( NAME   PE_CREATEWORLD )
+
 waLBerla_compile_test( NAME   PE_DELETEBODY FILES DeleteBody.cpp DEPENDS core blockforest  )
 waLBerla_execute_test( NAME   PE_DELETEBODY_NN COMMAND $<TARGET_FILE:PE_DELETEBODY> )
 waLBerla_execute_test( NAME   PE_DELETEBODY_SO COMMAND $<TARGET_FILE:PE_DELETEBODY> --syncShadowOwners )
