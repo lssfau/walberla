@@ -111,6 +111,8 @@ function ( waLBerla_add_module )
 
     waLBerla_register_dependency ( ${moduleName} ${ARG_DEPENDS} )
 
+    set_property( TARGET ${moduleName} PROPERTY CXX_STANDARD 14 )
+
     # This property is needed for visual studio to group modules together
     if( WALBERLA_GROUP_PROJECTS )
        set_property( TARGET  ${moduleLibraryName}  PROPERTY  FOLDER  "SRC" )
@@ -228,6 +230,7 @@ function ( waLBerla_add_executable )
 
     target_link_modules  ( ${ARG_NAME} ${ARG_DEPENDS}  )
     target_link_libraries( ${ARG_NAME} ${SERVICE_LIBS} )
+    set_property( TARGET ${ARG_NAME} PROPERTY CXX_STANDARD 14 )
 
     if( WALBERLA_GROUP_PROJECTS )
         if( NOT ARG_GROUP )
