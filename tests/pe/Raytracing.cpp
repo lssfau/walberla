@@ -22,6 +22,8 @@
 #include <pe/raytracing/Color.h>
 #include <pe/raytracing/ShadingFunctions.h>
 
+#include <pe/ccd/HashGrids.h>
+
 using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::pe::raytracing;
@@ -372,6 +374,153 @@ void RaytracerSpheresTest() {
    raytracer.rayTrace<BodyTuple>(0);
 }
 
+void playground() {
+   AABB gridAABB(0,0,0,3,3,3);
+   AABB blockAABB(-1,-1,-1,2,2,2);
+   real_t c = 1; // cell width / height
+   real_t c_inv = real_t(1) / c;
+   size_t n_x = 3;
+   size_t n_y = 3;
+   size_t n_z = 3;
+   
+   Ray ray(Vec3(-1, -2, 0), Vec3(2, 9, 0).getNormalized());
+   
+   for (int i = 0; i < n_x; i++) {
+      real_t xValue = blockAABB.minCorner()[0] + i*c;
+      real_t lambda = (xValue - ray.getOrigin()[0]) * ray.getInvDirection()[0];
+      real_t yValue = ray.getOrigin()[1] + lambda * ray.getDirection()[1];
+      real_t zValue = ray.getOrigin()[2] + lambda * ray.getDirection()[2];
+      if (yValue > blockAABB.maxCorner()[1] || yValue < blockAABB.minCorner()[1] ||
+          zValue > blockAABB.maxCorner()[2] || zValue < blockAABB.minCorner()[2] ||
+          lambda != lambda) {
+         WALBERLA_LOG_INFO("P_x" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
+      } else {
+         size_t xIndex = size_t(xValue * c_inv) % n_x;
+         size_t yIndex = size_t(yValue * c_inv) % n_y;
+         size_t zIndex = size_t(zValue * c_inv) % n_z;
+         if (xValue < 0) {
+            xIndex = n_x - 1 - (size_t(-xValue * c_inv) % n_x);
+         }
+         if (yValue < 0) {
+            yIndex = n_y - 1 - (size_t(-yValue * c_inv) % n_y);
+         }
+         if (zValue < 0) {
+            zIndex = n_z - 1 - (size_t(-zValue * c_inv) % n_z);
+         }
+         size_t arrayIndex = xIndex + yIndex*n_x + zIndex*n_x*n_y;
+         WALBERLA_LOG_INFO("P_x" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
+         WALBERLA_LOG_INFO("\t xIndex = " << xIndex << "; yIndex = " << yIndex << "; zIndex = " << zIndex);
+      }
+   }
+   
+   for (int i = 0; i < n_y; i++) {
+      real_t yValue = blockAABB.minCorner()[1] + i*c;
+      real_t lambda = (yValue - ray.getOrigin()[1]) * ray.getInvDirection()[1];
+      real_t xValue = ray.getOrigin()[0] + lambda * ray.getDirection()[0];
+      real_t zValue = ray.getOrigin()[2] + lambda * ray.getDirection()[2];
+      if (xValue > blockAABB.maxCorner()[0] || xValue < blockAABB.minCorner()[0] ||
+          zValue > blockAABB.maxCorner()[2] || zValue < blockAABB.minCorner()[2] ||
+          lambda != lambda) {
+         WALBERLA_LOG_INFO("P_y" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
+      } else {
+         size_t xIndex = size_t(xValue * c_inv) % n_x;
+         size_t yIndex = size_t(yValue * c_inv) % n_y;
+         size_t zIndex = size_t(zValue * c_inv) % n_z;
+         if (xValue < 0) {
+            xIndex = n_x - 1 - (size_t(-xValue * c_inv) % n_x);
+         }
+         if (yValue < 0) {
+            yIndex = n_y - 1 - (size_t(-yValue * c_inv) % n_y);
+         }
+         if (zValue < 0) {
+            zIndex = n_z - 1 - (size_t(-zValue * c_inv) % n_z);
+         }
+         size_t arrayIndex = xIndex + yIndex*n_x + zIndex*n_x*n_y;
+         WALBERLA_LOG_INFO("P_y" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
+         WALBERLA_LOG_INFO("\t xIndex = " << xIndex << "; yIndex = " << yIndex << "; zIndex = " << zIndex);
+      }
+   }
+   
+   for (int i = 0; i < n_z; i++) {
+      real_t zValue = blockAABB.minCorner()[2] + i*c;
+      real_t lambda = (zValue - ray.getOrigin()[2]) * ray.getInvDirection()[2];
+      real_t xValue = ray.getOrigin()[0] + lambda * ray.getDirection()[0];
+      real_t yValue = ray.getOrigin()[1] + lambda * ray.getDirection()[1];
+      if (xValue > blockAABB.maxCorner()[0] || xValue < blockAABB.minCorner()[0] ||
+          yValue > blockAABB.maxCorner()[1] || yValue < blockAABB.minCorner()[1] ||
+          lambda != lambda) {
+         WALBERLA_LOG_INFO("P_z" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
+      } else {
+         size_t xIndex = size_t(xValue * c_inv) % n_x;
+         size_t yIndex = size_t(yValue * c_inv) % n_y;
+         size_t zIndex = size_t(zValue * c_inv) % n_z;
+         if (xValue < 0) {
+            xIndex = n_x - 1 - (size_t(-xValue * c_inv) % n_x);
+         }
+         if (yValue < 0) {
+            yIndex = n_y - 1 - (size_t(-yValue * c_inv) % n_y);
+         }
+         if (zValue < 0) {
+            zIndex = n_z - 1 - (size_t(-zValue * c_inv) % n_z);
+         }
+         size_t arrayIndex = xIndex + yIndex*n_x + zIndex*n_x*n_y;
+         WALBERLA_LOG_INFO("P_z" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
+         WALBERLA_LOG_INFO("\t xIndex = " << xIndex << "; yIndex = " << yIndex << "; zIndex = " << zIndex);
+      }
+   }
+}
+
+void hashgridsPlayground() {
+   using namespace walberla::pe::ccd;
+   
+   /*shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(-8,-8,-8,8,8,8), Vec3(1,1,1), Vec3(false, false, false));
+   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+
+   HashGrids::HashGrid hashgrid(1.0); // initialize a 16x16x16 hashgrid with cellspan 1.0 (can hold a block with 16x16x16 in size.)
+   
+   std::vector<Vec3> minCorners;
+   minCorners.push_back(Vec3(0,0,0));
+   minCorners.push_back(Vec3(0.1,0.1,0.1));
+   minCorners.push_back(Vec3(0.2,0.2,0.2));
+   minCorners.push_back(Vec3(0.3,0.3,0.3));
+   minCorners.push_back(Vec3(0.9,0.9,0.9));
+   minCorners.push_back(Vec3(1,1,1));
+   minCorners.push_back(Vec3(1.1,1.1,1.1));
+   minCorners.push_back(Vec3(1.4,1.4,1.4));
+   minCorners.push_back(Vec3(1.6,1.6,1.6));
+
+   minCorners.push_back(Vec3(-8+1e-5,-8+1e-5,-8+1e-5));
+   
+
+   Vec3 lengths(0.5,0.5,0.5);
+   for (auto minCorner: minCorners) {
+      BoxID box = createBox(*globalBodyStorage, *forest, storageID, 9, minCorner+lengths/2, lengths);
+      if (box == NULL) {
+         WALBERLA_LOG_INFO("could not create box at " << minCorner);
+         continue;
+      }
+      hashgrid.add(box);
+      WALBERLA_LOG_INFO("hash of box at " << minCorner << " (" << box->getAABB().minCorner() << "): " << box->getHash());
+   }*/
+   
+   HashGrids::HashGrid hashgrid(1.0); // initialize a 4x4x4 hashgrid with cellspan 1.0 (can hold a block with 4x4x4 in size.)
+   
+   const AABB blockAABB(-2,-2,-2,2,2,2);
+   
+   Ray ray(Vec3(-3, -1.6, 0), Vec3(4, 1, 0).getNormalized());
+   
+   hashgrid.possibleRayIntersectingBodies(ray, blockAABB);
+   
+   Ray ray2(Vec3(-2.1, -2.1, 0), Vec3(1, 1, 0).getNormalized());
+   hashgrid.possibleRayIntersectingBodies(ray2, blockAABB);
+   
+   WALBERLA_LOG_INFO(hashgrid.hashPoint(-0.5, -0.5, 0));
+   WALBERLA_LOG_INFO(hashgrid.hashPoint(-1.5, -1.5, 0));
+   WALBERLA_LOG_INFO(hashgrid.hashPoint(-1.5, 1.5, 0));
+   WALBERLA_LOG_INFO(hashgrid.hashPoint(1.5, -1.5, 0));
+}
+
 int main( int argc, char** argv )
 {
    walberla::debug::enterTestMode();
@@ -384,8 +533,10 @@ int main( int argc, char** argv )
    //BoxIntersectsTest();
    //AABBIntersectsTest();
    //CapsuleIntersectsTest();
-   RaytracerTest();
+   //RaytracerTest();
    //RaytracerSpheresTest();
+   
+   hashgridsPlayground();
 
    return EXIT_SUCCESS;
 }

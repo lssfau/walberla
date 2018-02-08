@@ -40,6 +40,7 @@
 #include <sstream>
 #include <vector>
 
+#include <pe/raytracing/Ray.h>
 
 namespace walberla{
 namespace pe{
@@ -94,7 +95,7 @@ public:
    static const real_t hierarchyFactor;
    //**********************************************************************************************
 
-private:
+public: //ToDo fix to private again
    //**Type definitions****************************************************************************
    //! Vector for storing (handles to) rigid bodies.
    typedef std::vector<BodyID>  BodyVector;
@@ -180,6 +181,10 @@ private:
       void clear();
       //@}
       //*******************************************************************************************
+
+      
+      void possibleRayIntersectingBodies(const raytracing::Ray& ray, const AABB& blockAABB) const;
+      size_t hashPoint(real_t x, real_t y, real_t z) const;
 
     private:
       //**Utility functions************************************************************************

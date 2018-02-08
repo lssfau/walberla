@@ -326,14 +326,16 @@ void HashGrids::HashGrid::initializeNeighborOffsets()
  */
 size_t HashGrids::HashGrid::hash( BodyID body ) const
 {
-   real_t x = body->getAABB().xMin();
-   real_t y = body->getAABB().yMin();
-   real_t z = body->getAABB().zMin();
+   const AABB bodyAABB = body->getAABB();
+   return hashPoint(bodyAABB.xMin(), bodyAABB.yMin(), bodyAABB.zMin());
+}
+//*************************************************************************************************
 
+size_t HashGrids::HashGrid::hashPoint(real_t x, real_t y, real_t z) const {
    size_t xHash;
    size_t yHash;
    size_t zHash;
-
+   
    if( x < 0 ) {
       real_t i = ( -x ) * inverseCellSpan_;
       xHash  = xCellCount_ - 1 - ( static_cast<size_t>( i ) & xHashMask_ );
@@ -342,7 +344,7 @@ size_t HashGrids::HashGrid::hash( BodyID body ) const
       real_t i = x * inverseCellSpan_;
       xHash  = static_cast<size_t>( i ) & xHashMask_;
    }
-
+   
    if( y < 0 ) {
       real_t i = ( -y ) * inverseCellSpan_;
       yHash  = yCellCount_ - 1 - ( static_cast<size_t>( i ) & yHashMask_ );
@@ -351,7 +353,7 @@ size_t HashGrids::HashGrid::hash( BodyID body ) const
       real_t i = y * inverseCellSpan_;
       yHash  = static_cast<size_t>( i ) & yHashMask_;
    }
-
+   
    if( z < 0 ) {
       real_t i = ( -z ) * inverseCellSpan_;
       zHash  = zCellCount_ - 1 - ( static_cast<size_t>( i ) & zHashMask_ );
@@ -360,12 +362,60 @@ size_t HashGrids::HashGrid::hash( BodyID body ) const
       real_t i = z * inverseCellSpan_;
       zHash  = static_cast<size_t>( i ) & zHashMask_;
    }
-
+   
    return xHash + yHash * xCellCount_ + zHash * xyCellCount_;
 }
-//*************************************************************************************************
+   
+void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& ray, const AABB& blockAABB) const {
+   real_t halfCellSpan = getCellSpan() / real_t(2);
+      
+   for (int i = 0; i <= xCellCount_; i++) {
+      real_t xValue = blockAABB.minCorner()[0] + i*cellSpan_;
+      real_t lambda = (xValue - ray.getOrigin()[0]) * ray.getInvDirection()[0];
+      real_t yValue = ray.getOrigin()[1] + lambda * ray.getDirection()[1];
+      real_t zValue = ray.getOrigin()[2] + lambda * ray.getDirection()[2];
+      if (yValue > blockAABB.maxCorner()[1] || yValue < blockAABB.minCorner()[1] ||
+          zValue > blockAABB.maxCorner()[2] || zValue < blockAABB.minCorner()[2] ||
+          lambda != lambda) {
+         WALBERLA_LOG_INFO("P_x" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
+      } else {
+         size_t arrayIndex = hashPoint(xValue + halfCellSpan, yValue, zValue);
+         WALBERLA_LOG_INFO("P_x" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
+      }
+   }
+   
+   for (int i = 0; i < yCellCount_; i++) {
+      real_t yValue = blockAABB.minCorner()[1] + i*cellSpan_;
+      real_t lambda = (yValue - ray.getOrigin()[1]) * ray.getInvDirection()[1];
+      real_t xValue = ray.getOrigin()[0] + lambda * ray.getDirection()[0];
+      real_t zValue = ray.getOrigin()[2] + lambda * ray.getDirection()[2];
+      if (xValue > blockAABB.maxCorner()[0] || xValue < blockAABB.minCorner()[0] ||
+          zValue > blockAABB.maxCorner()[2] || zValue < blockAABB.minCorner()[2] ||
+          lambda != lambda) {
+         WALBERLA_LOG_INFO("P_y" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
+      } else {
+         size_t arrayIndex = hashPoint(xValue, yValue + halfCellSpan, zValue);
+         WALBERLA_LOG_INFO("P_y" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
+      }
+   }
+   
+   for (int i = 0; i < zCellCount_; i++) {
+      real_t zValue = blockAABB.minCorner()[2] + i*cellSpan_;
+      real_t lambda = (zValue - ray.getOrigin()[2]) * ray.getInvDirection()[2];
+      real_t xValue = ray.getOrigin()[0] + lambda * ray.getDirection()[0];
+      real_t yValue = ray.getOrigin()[1] + lambda * ray.getDirection()[1];
+      if (xValue > blockAABB.maxCorner()[0] || xValue < blockAABB.minCorner()[0] ||
+          yValue > blockAABB.maxCorner()[1] || yValue < blockAABB.minCorner()[1] ||
+          lambda != lambda) {
+         WALBERLA_LOG_INFO("P_z" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
+      } else {
+         size_t arrayIndex = hashPoint(xValue, yValue, zValue + halfCellSpan);
+         WALBERLA_LOG_INFO("P_z" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
+      }
+   }
+}
 
-
+   
 //*************************************************************************************************
 /*!\brief Adds a body to a specific cell in this hash grid.
  *
@@ -1183,7 +1233,7 @@ bool HashGrids::powerOfTwo( size_t number )
  * note that the initial number of cells does not necessarily have to be equal for all three
  * coordinate directions.
  */
-const size_t HashGrids::xCellCount = 16;
+const size_t HashGrids::xCellCount = 4;
 //*************************************************************************************************
 
 
@@ -1200,7 +1250,7 @@ const size_t HashGrids::xCellCount = 16;
  * note that the initial number of cells does not necessarily have to be equal for all three
  * coordinate directions.
  */
-const size_t HashGrids::yCellCount = 16;
+const size_t HashGrids::yCellCount = 4;
 //*************************************************************************************************
 
 
@@ -1217,7 +1267,7 @@ const size_t HashGrids::yCellCount = 16;
  * note that the initial number of cells does not necessarily have to be equal for all three
  * coordinate directions.
  */
-const size_t HashGrids::zCellCount = 16;
+const size_t HashGrids::zCellCount = 4;
 //*************************************************************************************************
 
 
