@@ -30,6 +30,33 @@ real_t deg2rad(real_t deg) {
 namespace walberla {
 namespace pe {
 namespace raytracing {
+   
+void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo_MPI *in, BodyIntersectionInfo_MPI *inout, int *len, MPI_Datatype *dptr) {
+   for (int i = 0; i < *len; i++) {
+      if (in->bodySystemID != 0 && inout->bodySystemID != 0) {
+         /*if (in->imageX != inout->imageX || in->imageY != inout->imageY) {
+            WALBERLA_LOG_INFO("coordinates of infos do not match: " << in->imageX << "/" << in->imageY << " and " << inout->imageX << "/" << inout->imageY << ", bodyIDs: " << in->bodySystemID << ", " << inout->bodySystemID << ", i: " << i);
+         }*/
+         WALBERLA_ASSERT(in->imageX == inout->imageX, "coordinates of infos do not match: " << in->imageX << "/" << in->imageY << " and " << inout->imageX << "/" << inout->imageY << ", bodyIDs: " << in->bodySystemID << ", " << inout->bodySystemID << ", i: " << i);
+         WALBERLA_ASSERT(in->imageY == inout->imageY, "coordinates of infos do not match: " << in->imageX << "/" << in->imageY << " and " << inout->imageX << "/" << inout->imageY << ", bodyIDs: " << in->bodySystemID << ", " << inout->bodySystemID << ", i: " << i);
+      }
+      
+      if ((in->t < inout->t && in->bodySystemID != 0) || (inout->bodySystemID == 0 && in->bodySystemID != 0)) {
+         // info in "in" is closer than the one in "inout" -> update inout to values of in
+         inout->imageX = in->imageX;
+         inout->imageY = in->imageY;
+         inout->bodySystemID = in->bodySystemID;
+         inout->t = in->t;
+         inout->r = in->r;
+         inout->g = in->g;
+         inout->b = in->b;
+      }
+      
+      in++;
+      inout++;
+   }
+}
+   
 /*!\brief Instantiation constructor for the Raytracer class.
  *
  * \param forest BlockForest the raytracer operates on.
@@ -69,6 +96,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    
    setupView_();
    setupFilenameRankWidth_();
+   setupMPI_();
 }
 
 /*!\brief Instantiation constructor for the Raytracer class using a config object for view setup.
@@ -125,6 +153,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
       
    setupView_();
    setupFilenameRankWidth_();
+   setupMPI_();
 }
 
 /*!\brief Utility function for setting up the view plane and calculating required variables.
@@ -153,6 +182,10 @@ void Raytracer::setupFilenameRankWidth_() {
    filenameRankWidth_ = int8_c(log10(numProcesses))+1;
 }
 
+void Raytracer::setupMPI_() {
+   MPI_Op_create((MPI_User_function *)BodyIntersectionInfo_Comparator_MPI_OP, true, &bodyIntersectionInfo_reduction_op);
+}
+   
 /*!\brief Generates the filename for output files.
  * \param base String that precedes the timestap and rank info.
  * \param timestep Timestep this image is from.

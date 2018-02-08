@@ -33,6 +33,11 @@
 #include "Lighting.h"
 #include "ShadingFunctions.h"
 
+#include "core/mpi/MPIManager.h"
+#include "core/mpi/MPIWrapper.h"
+#include "core/mpi/all.h"
+#include <stddef.h>
+
 using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::timing;
@@ -44,13 +49,23 @@ namespace raytracing {
 /*!\brief Contains information about a ray-body intersection.
  */
 struct BodyIntersectionInfo {
-   size_t imageX;                //!< viewing plane x pixel coordinate the ray belongs to.
-   size_t imageY;                //!< viewing plane y pixel coordinate the ray belongs to.
-   walberla::id_t bodySystemID;  //!< system ID of body which was hit.
-   real_t t;                     //!< distance from camera to intersection point on body.
-   Vec3 color;                   //!< color computed for the pixel.
+   size_t imageX;                //!< Viewing plane x pixel coordinate the ray belongs to.
+   size_t imageY;                //!< Viewing plane y pixel coordinate the ray belongs to.
+   walberla::id_t bodySystemID;  //!< System ID of body which was hit.
+   real_t t;                     //!< Distance from camera to intersection point on body.
+   Vec3 color;                   //!< Color computed for the pixel.
 };
 
+struct BodyIntersectionInfo_MPI {
+   unsigned int imageX;          //!< Viewing plane x pixel coordinate the ray belongs to.   -> MPI_UNSIGNED
+   unsigned int imageY;          //!< Viewing plane y pixel coordinate the ray belongs to.   -> MPI_UNSIGNED
+   walberla::id_t bodySystemID;  //!< System ID of body which was hit.                       -> MPI_UNSIGNED_LONG_LONG
+   double t;                     //!< Distance from camera to intersection point on body.    -> MPI_DOUBLE
+   double r;                     //!< Red value for the pixel.                               -> MPI_DOUBLE
+   double g;                     //!< Green value for the pixel.                             -> MPI_DOUBLE
+   double b;                     //!< Blue value for the pixel.                              -> MPI_DOUBLE
+};
+   
 class Raytracer {
 public:
    /*!\name Constructors */
@@ -119,6 +134,8 @@ private:
    real_t pixelHeight_;       //!< The height of a pixel of the generated image in the viewing plane.
    //@}
    
+   MPI_Op bodyIntersectionInfo_reduction_op;
+   
 public:
    /*!\name Get functions */
    //@{
@@ -155,6 +172,7 @@ public:
    
    void setupView_();
    void setupFilenameRankWidth_();
+   void setupMPI_();
    
 private:
    std::string getOutputFilename(const std::string& base, size_t timestep, bool isGlobalImage) const;
@@ -382,6 +400,9 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    std::vector<Color> imageBuffer(pixelsVertical_ * pixelsHorizontal_);
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    
+   std::vector<BodyIntersectionInfo_MPI> intersectionsBuffer(pixelsVertical_ * pixelsHorizontal_);
+
+   
    real_t t, t_closest;
    Vec3 n;
    Vec3 n_closest;
@@ -460,7 +481,19 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
                t_closest,
                color
             };
+            
+            BodyIntersectionInfo_MPI mpi_intersectionInfo = {
+               static_cast<unsigned int>(x),
+               static_cast<unsigned int>(y),
+               body_closest->getSystemID(),
+               t_closest,
+               color[0],
+               color[1],
+               color[2]
+            };
+            
             intersections.push_back(intersectionInfo);
+            intersectionsBuffer[coordinateToArrayIndex(x, y)] = mpi_intersectionInfo;
          }
          
          tBuffer[coordinateToArrayIndex(x, y)] = t_closest;
@@ -470,7 +503,83 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
 
    if (tt != NULL) tt->start("Reduction");
    // intersections synchronisieren
-   mpi::SendBuffer sendBuffer;
+   
+   
+   const int recvRank = 0;
+   int myRank;
+   MPI_Comm_rank( MPI_COMM_WORLD, &myRank );
+   
+   const int nblocks = 7;
+   const int blocklengths[nblocks] = {1,1,1,1,1,1,1};
+   MPI_Datatype types[nblocks] = {
+      MPI_UNSIGNED, // for coordinate
+      MPI_UNSIGNED, // for coordinate
+      MPI_UNSIGNED_LONG_LONG, // for id
+      MPI_DOUBLE, // for distance
+      MPI_DOUBLE, // for color
+      MPI_DOUBLE, // for color
+      MPI_DOUBLE // for color
+   };
+   MPI_Aint displacements[nblocks];
+   displacements[0] = offsetof(BodyIntersectionInfo_MPI, imageX);
+   displacements[1] = offsetof(BodyIntersectionInfo_MPI, imageY);
+   displacements[2] = offsetof(BodyIntersectionInfo_MPI, bodySystemID);
+   displacements[3] = offsetof(BodyIntersectionInfo_MPI, t);
+   displacements[4] = offsetof(BodyIntersectionInfo_MPI, r);
+   displacements[5] = offsetof(BodyIntersectionInfo_MPI, g);
+   displacements[6] = offsetof(BodyIntersectionInfo_MPI, b);
+
+   MPI_Datatype tmp_type;
+   MPI_Type_create_struct(nblocks, blocklengths, displacements, types, &tmp_type);
+   
+   MPI_Aint lb, extent;
+   MPI_Type_get_extent( tmp_type, &lb, &extent );
+   MPI_Datatype mpi_bodyintersection_type;
+   MPI_Type_create_resized( tmp_type, lb, extent, &mpi_bodyintersection_type );
+   
+   MPI_Type_commit(&mpi_bodyintersection_type);
+   
+   /*BodyIntersectionInfo_MPI testInfo = {
+      500, 500,
+      12,
+      real_t(14.323),
+      real_t(14.323),
+      real_t(14.323),
+      real_t(14.323)
+   };
+   
+   if (myRank == recvRank) {
+      BodyIntersectionInfo_MPI testRecInfo;
+      MPI_Recv(&testRecInfo, 1, mpi_bodyintersection_type, 2, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      WALBERLA_LOG_INFO("Received info: " << testRecInfo.imageX << ", " << testRecInfo.bodySystemID << ", " << testRecInfo.t);
+   } else if (myRank == 2) {
+      MPI_Send(&testInfo, 1, mpi_bodyintersection_type, recvRank, 0, MPI_COMM_WORLD);
+      WALBERLA_LOG_INFO("Sent info.");
+   }*/
+   
+   if( myRank == recvRank ) {
+      MPI_Reduce(MPI_IN_PLACE,
+                 &intersectionsBuffer[0], int_c(intersectionsBuffer.size()),
+                 mpi_bodyintersection_type, bodyIntersectionInfo_reduction_op,
+                 recvRank, MPI_COMM_WORLD);
+   } else {
+      MPI_Reduce(&intersectionsBuffer[0], 0, int_c(intersectionsBuffer.size()),
+                 mpi_bodyintersection_type, bodyIntersectionInfo_reduction_op,
+                 recvRank, MPI_COMM_WORLD);
+   }
+   
+   if (tt != NULL) tt->stop("Reduction");
+
+   
+   WALBERLA_ROOT_SECTION() {
+      std::vector<Color> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
+      for (auto& info: intersectionsBuffer) {
+         fullImageBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = Color(info.r, info.g, info.b);
+      }
+      writeImageBufferToFile(fullImageBuffer, timestep, true);
+   }
+   
+   /*mpi::SendBuffer sendBuffer;
    for (auto& info: intersections) {
       sendBuffer << info.imageX << info.imageY
       << info.bodySystemID << info.t
@@ -526,7 +635,7 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
          writeTBufferToFile(fullTBuffer, timestep, true);
       }
    }
-   if (tt != NULL) tt->stop("Output");
+   if (tt != NULL) tt->stop("Output");*/
    if (tt != NULL) tt->stop("Raytracing");
 }
 
