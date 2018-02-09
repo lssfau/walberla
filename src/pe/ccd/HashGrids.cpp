@@ -363,12 +363,12 @@ size_t HashGrids::HashGrid::hashPoint(real_t x, real_t y, real_t z) const {
       zHash  = static_cast<size_t>( i ) & zHashMask_;
    }
    
+   WALBERLA_LOG_INFO("\t xH: " << xHash << ", yH: " << yHash << ", zH: " << zHash);
+   
    return xHash + yHash * xCellCount_ + zHash * xyCellCount_;
 }
    
-void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& ray, const AABB& blockAABB) const {
-   real_t halfCellSpan = getCellSpan() / real_t(2);
-      
+void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& ray, const AABB& blockAABB) const {      
    for (int i = 0; i <= xCellCount_; i++) {
       real_t xValue = blockAABB.minCorner()[0] + i*cellSpan_;
       real_t lambda = (xValue - ray.getOrigin()[0]) * ray.getInvDirection()[0];
@@ -379,7 +379,7 @@ void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& r
           lambda != lambda) {
          WALBERLA_LOG_INFO("P_x" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
       } else {
-         size_t arrayIndex = hashPoint(xValue + halfCellSpan, yValue, zValue);
+         size_t arrayIndex = hashPoint(xValue, yValue, zValue);
          WALBERLA_LOG_INFO("P_x" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
       }
    }
@@ -394,7 +394,7 @@ void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& r
           lambda != lambda) {
          WALBERLA_LOG_INFO("P_y" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
       } else {
-         size_t arrayIndex = hashPoint(xValue, yValue + halfCellSpan, zValue);
+         size_t arrayIndex = hashPoint(xValue, yValue, zValue);
          WALBERLA_LOG_INFO("P_y" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
       }
    }
@@ -409,7 +409,7 @@ void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& r
           lambda != lambda) {
          WALBERLA_LOG_INFO("P_z" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
       } else {
-         size_t arrayIndex = hashPoint(xValue, yValue, zValue + halfCellSpan);
+         size_t arrayIndex = hashPoint(xValue, yValue, zValue);
          WALBERLA_LOG_INFO("P_z" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
       }
    }

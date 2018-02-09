@@ -508,13 +508,15 @@ void hashgridsPlayground() {
    
    const AABB blockAABB(-2,-2,-2,2,2,2);
    
+   WALBERLA_LOG_INFO("ray:");
    Ray ray(Vec3(-3, -1.6, 0), Vec3(4, 1, 0).getNormalized());
-   
    hashgrid.possibleRayIntersectingBodies(ray, blockAABB);
    
+   WALBERLA_LOG_INFO("ray2:");
    Ray ray2(Vec3(-2.1, -2.1, 0), Vec3(1, 1, 0).getNormalized());
    hashgrid.possibleRayIntersectingBodies(ray2, blockAABB);
    
+   WALBERLA_LOG_INFO("");
    WALBERLA_LOG_INFO(hashgrid.hashPoint(-0.5, -0.5, 0));
    WALBERLA_LOG_INFO(hashgrid.hashPoint(-1.5, -1.5, 0));
    WALBERLA_LOG_INFO(hashgrid.hashPoint(-1.5, 1.5, 0));
