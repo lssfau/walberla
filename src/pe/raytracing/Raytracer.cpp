@@ -34,11 +34,7 @@ namespace raytracing {
 void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo_MPI *in, BodyIntersectionInfo_MPI *inout, int *len, MPI_Datatype *dptr) {
    for (int i = 0; i < *len; i++) {
       if (in->bodySystemID != 0 && inout->bodySystemID != 0) {
-         /*if (in->imageX != inout->imageX || in->imageY != inout->imageY) {
-            WALBERLA_LOG_INFO("coordinates of infos do not match: " << in->imageX << "/" << in->imageY << " and " << inout->imageX << "/" << inout->imageY << ", bodyIDs: " << in->bodySystemID << ", " << inout->bodySystemID << ", i: " << i);
-         }*/
-         WALBERLA_ASSERT(in->imageX == inout->imageX, "coordinates of infos do not match: " << in->imageX << "/" << in->imageY << " and " << inout->imageX << "/" << inout->imageY << ", bodyIDs: " << in->bodySystemID << ", " << inout->bodySystemID << ", i: " << i);
-         WALBERLA_ASSERT(in->imageY == inout->imageY, "coordinates of infos do not match: " << in->imageX << "/" << in->imageY << " and " << inout->imageX << "/" << inout->imageY << ", bodyIDs: " << in->bodySystemID << ", " << inout->bodySystemID << ", i: " << i);
+         WALBERLA_ASSERT(in->imageX == inout->imageX && in->imageY == inout->imageY, "coordinates of infos do not match: " << in->imageX << "/" << in->imageY << " and " << inout->imageX << "/" << inout->imageY);
       }
       
       if ((in->t < inout->t && in->bodySystemID != 0) || (inout->bodySystemID == 0 && in->bodySystemID != 0)) {
@@ -184,6 +180,35 @@ void Raytracer::setupFilenameRankWidth_() {
 
 void Raytracer::setupMPI_() {
    MPI_Op_create((MPI_User_function *)BodyIntersectionInfo_Comparator_MPI_OP, true, &bodyIntersectionInfo_reduction_op);
+   
+   const int nblocks = 7;
+   const int blocklengths[nblocks] = {1,1,1,1,1,1,1};
+   MPI_Datatype types[nblocks] = {
+      MPI_UNSIGNED, // for coordinate
+      MPI_UNSIGNED, // for coordinate
+      MPI_UNSIGNED_LONG_LONG, // for id
+      MPI_DOUBLE, // for distance
+      MPI_DOUBLE, // for color
+      MPI_DOUBLE, // for color
+      MPI_DOUBLE // for color
+   };
+   MPI_Aint displacements[nblocks];
+   displacements[0] = offsetof(BodyIntersectionInfo_MPI, imageX);
+   displacements[1] = offsetof(BodyIntersectionInfo_MPI, imageY);
+   displacements[2] = offsetof(BodyIntersectionInfo_MPI, bodySystemID);
+   displacements[3] = offsetof(BodyIntersectionInfo_MPI, t);
+   displacements[4] = offsetof(BodyIntersectionInfo_MPI, r);
+   displacements[5] = offsetof(BodyIntersectionInfo_MPI, g);
+   displacements[6] = offsetof(BodyIntersectionInfo_MPI, b);
+   
+   MPI_Datatype tmp_type;
+   MPI_Type_create_struct(nblocks, blocklengths, displacements, types, &tmp_type);
+   
+   MPI_Aint lb, extent;
+   MPI_Type_get_extent( tmp_type, &lb, &extent );
+   MPI_Type_create_resized( tmp_type, lb, extent, &bodyIntersectionInfo_mpi_type );
+   
+   MPI_Type_commit(&bodyIntersectionInfo_mpi_type);
 }
    
 /*!\brief Generates the filename for output files.

@@ -135,6 +135,7 @@ private:
    //@}
    
    MPI_Op bodyIntersectionInfo_reduction_op;
+   MPI_Datatype bodyIntersectionInfo_mpi_type;
    
 public:
    /*!\name Get functions */
@@ -500,71 +501,17 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
       }
    }
    if (tt != NULL) tt->stop("Intersection Testing");
-
    if (tt != NULL) tt->start("Reduction");
-   // intersections synchronisieren
-   
    
    const int recvRank = 0;
-   int myRank;
-   MPI_Comm_rank( MPI_COMM_WORLD, &myRank );
-   
-   const int nblocks = 7;
-   const int blocklengths[nblocks] = {1,1,1,1,1,1,1};
-   MPI_Datatype types[nblocks] = {
-      MPI_UNSIGNED, // for coordinate
-      MPI_UNSIGNED, // for coordinate
-      MPI_UNSIGNED_LONG_LONG, // for id
-      MPI_DOUBLE, // for distance
-      MPI_DOUBLE, // for color
-      MPI_DOUBLE, // for color
-      MPI_DOUBLE // for color
-   };
-   MPI_Aint displacements[nblocks];
-   displacements[0] = offsetof(BodyIntersectionInfo_MPI, imageX);
-   displacements[1] = offsetof(BodyIntersectionInfo_MPI, imageY);
-   displacements[2] = offsetof(BodyIntersectionInfo_MPI, bodySystemID);
-   displacements[3] = offsetof(BodyIntersectionInfo_MPI, t);
-   displacements[4] = offsetof(BodyIntersectionInfo_MPI, r);
-   displacements[5] = offsetof(BodyIntersectionInfo_MPI, g);
-   displacements[6] = offsetof(BodyIntersectionInfo_MPI, b);
-
-   MPI_Datatype tmp_type;
-   MPI_Type_create_struct(nblocks, blocklengths, displacements, types, &tmp_type);
-   
-   MPI_Aint lb, extent;
-   MPI_Type_get_extent( tmp_type, &lb, &extent );
-   MPI_Datatype mpi_bodyintersection_type;
-   MPI_Type_create_resized( tmp_type, lb, extent, &mpi_bodyintersection_type );
-   
-   MPI_Type_commit(&mpi_bodyintersection_type);
-   
-   /*BodyIntersectionInfo_MPI testInfo = {
-      500, 500,
-      12,
-      real_t(14.323),
-      real_t(14.323),
-      real_t(14.323),
-      real_t(14.323)
-   };
-   
-   if (myRank == recvRank) {
-      BodyIntersectionInfo_MPI testRecInfo;
-      MPI_Recv(&testRecInfo, 1, mpi_bodyintersection_type, 2, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      WALBERLA_LOG_INFO("Received info: " << testRecInfo.imageX << ", " << testRecInfo.bodySystemID << ", " << testRecInfo.t);
-   } else if (myRank == 2) {
-      MPI_Send(&testInfo, 1, mpi_bodyintersection_type, recvRank, 0, MPI_COMM_WORLD);
-      WALBERLA_LOG_INFO("Sent info.");
-   }*/
-   
-   if( myRank == recvRank ) {
+   if( rank == recvRank ) {
       MPI_Reduce(MPI_IN_PLACE,
                  &intersectionsBuffer[0], int_c(intersectionsBuffer.size()),
-                 mpi_bodyintersection_type, bodyIntersectionInfo_reduction_op,
+                 bodyIntersectionInfo_mpi_type, bodyIntersectionInfo_reduction_op,
                  recvRank, MPI_COMM_WORLD);
    } else {
       MPI_Reduce(&intersectionsBuffer[0], 0, int_c(intersectionsBuffer.size()),
-                 mpi_bodyintersection_type, bodyIntersectionInfo_reduction_op,
+                 bodyIntersectionInfo_mpi_type, bodyIntersectionInfo_reduction_op,
                  recvRank, MPI_COMM_WORLD);
    }
    
