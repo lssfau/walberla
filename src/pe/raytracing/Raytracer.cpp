@@ -340,6 +340,27 @@ void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, co
       WALBERLA_LOG_WARNING("lodePNG error " << error << " when trying to save image file to " << fullPath.string() << ": " << lodepng_error_text(error));
    }
 }
+   
+void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo_MPI>& intersectionsBuffer, WcTimingTree* tt) {
+   WALBERLA_MPI_BARRIER();
+   if (tt != NULL) tt->start("Reduction");
+   int rank = mpi::MPIManager::instance()->rank();
+
+   const int recvRank = 0;
+   if( rank == recvRank ) {
+      MPI_Reduce(MPI_IN_PLACE,
+                 &intersectionsBuffer[0], int_c(intersectionsBuffer.size()),
+                 bodyIntersectionInfo_mpi_type, bodyIntersectionInfo_reduction_op,
+                 recvRank, MPI_COMM_WORLD);
+   } else {
+      MPI_Reduce(&intersectionsBuffer[0], 0, int_c(intersectionsBuffer.size()),
+                 bodyIntersectionInfo_mpi_type, bodyIntersectionInfo_reduction_op,
+                 recvRank, MPI_COMM_WORLD);
+   }
+   
+   WALBERLA_MPI_BARRIER();
+   if (tt != NULL) tt->stop("Reduction");
+}
 }
 }
 }
