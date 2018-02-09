@@ -32,7 +32,7 @@ namespace pe {
 namespace raytracing {
    
 void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo_MPI *in, BodyIntersectionInfo_MPI *inout, int *len, MPI_Datatype *dptr) {
-   for (int i = 0; i < *len; i++) {
+   for (int i = 0; i < *len; ++i) {
       if (in->bodySystemID != 0 && inout->bodySystemID != 0) {
          WALBERLA_ASSERT(in->imageX == inout->imageX && in->imageY == inout->imageY, "coordinates of infos do not match: " << in->imageX << "/" << in->imageY << " and " << inout->imageX << "/" << inout->imageY);
       }
