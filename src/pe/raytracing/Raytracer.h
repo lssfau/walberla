@@ -393,7 +393,8 @@ inline size_t Raytracer::coordinateToArrayIndex(size_t x, size_t y) const {
 template <typename BodyTypeTuple>
 void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    if (tt != NULL) tt->start("Raytracing");
-   
+   if (tt != NULL) tt->start("Init");
+
    bool useMPIReduce = true;
 
    real_t inf = std::numeric_limits<real_t>::max();
@@ -414,7 +415,8 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    BodyID body_closest = NULL;
    Ray ray(cameraPosition_, Vec3(1,0,0));
    IntersectsFunctor func(ray, t, n);
-   
+   if (tt != NULL) tt->stop("Init");
+
    if (tt != NULL) tt->start("Intersection Testing");
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
