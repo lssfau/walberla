@@ -125,6 +125,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
       setTBufferOutputEnabled(true);
       setTBufferOutputDirectory(config.getParameter<std::string>("tbuffer_output_directory"));
       WALBERLA_LOG_INFO_ON_ROOT("t buffers will be written to " << getTBufferOutputDirectory() << ".");
+   } else {
+      setTBufferOutputEnabled(false);
    }
    
    setLocalImageOutputEnabled(config.getParameter<bool>("local_image_output_enabled", false));
