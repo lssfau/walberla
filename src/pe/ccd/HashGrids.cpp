@@ -363,12 +363,39 @@ size_t HashGrids::HashGrid::hashPoint(real_t x, real_t y, real_t z) const {
       zHash  = static_cast<size_t>( i ) & zHashMask_;
    }
    
-   WALBERLA_LOG_INFO("\t xH: " << xHash << ", yH: " << yHash << ", zH: " << zHash);
-   
    return xHash + yHash * xCellCount_ + zHash * xyCellCount_;
 }
    
-void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& ray, const AABB& blockAABB) const {      
+   
+void HashGrids::HashGrid::insertRelatedCellIndicesForCenter(real_t x, real_t y, real_t z, std::unordered_set<size_t>& cellIndices, const AABB& blockAABB) const {
+   // cellIndices.insert(hashPoint(x, y, z)); // <- happens already in the loop down there -v
+   
+   const Vec3& minCorner = blockAABB.minCorner();
+   const Vec3& maxCorner = blockAABB.maxCorner();
+   for (int i = -1; i <= 0; ++i) {
+      for (int j = -1; j <= 0; ++j) {
+         for (int k = -1; k <= 0; ++k) {
+            real_t x_shifted = x + i*cellSpan_;
+            real_t y_shifted = y + j*cellSpan_;
+            real_t z_shifted = z + k*cellSpan_;
+            if (x_shifted > minCorner[0] && y_shifted > minCorner[1] && z_shifted > minCorner[2] &&
+               x_shifted < maxCorner[0] && y_shifted < maxCorner[1] && z_shifted < maxCorner[2]) {
+               cellIndices.insert(hashPoint(x_shifted, y_shifted, z_shifted));
+            }
+         }
+      }
+   }
+}
+      
+void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& ray, const AABB& blockAABB) const {
+   std::unordered_set<size_t> cellIndices;
+   
+   const Vec3& direction = ray.getDirection();
+   
+   real_t xCenterOffsetFactor = direction[0] < 0 ? -0.5 : 0.5;
+   real_t yCenterOffsetFactor = direction[1] < 0 ? -0.5 : 0.5;
+   real_t zCenterOffsetFactor = direction[2] < 0 ? -0.5 : 0.5;
+
    for (int i = 0; i <= xCellCount_; i++) {
       real_t xValue = blockAABB.minCorner()[0] + i*cellSpan_;
       real_t lambda = (xValue - ray.getOrigin()[0]) * ray.getInvDirection()[0];
@@ -379,8 +406,15 @@ void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& r
           lambda != lambda) {
          WALBERLA_LOG_INFO("P_x" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
       } else {
-         size_t arrayIndex = hashPoint(xValue, yValue, zValue);
-         WALBERLA_LOG_INFO("P_x" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
+         real_t centeredXValue = xValue + cellSpan_*xCenterOffsetFactor;
+         if (centeredXValue > blockAABB.xMax() || centeredXValue < blockAABB.xMin()) {
+            continue;
+         }
+         real_t centeredYValue = (size_t((yValue - blockAABB.yMin())*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + blockAABB.yMin();
+         real_t centeredZValue = (size_t((zValue - blockAABB.zMin())*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + blockAABB.zMin();
+         size_t arrayIndex = hashPoint(centeredXValue, centeredYValue, centeredZValue);
+         WALBERLA_LOG_INFO("P_x" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to box center (" << centeredXValue << "/" << centeredYValue << "/" << centeredZValue << ") and cell " << arrayIndex);
+         insertRelatedCellIndicesForCenter(centeredXValue, centeredYValue, centeredZValue, cellIndices, blockAABB);
       }
    }
    
@@ -389,13 +423,20 @@ void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& r
       real_t lambda = (yValue - ray.getOrigin()[1]) * ray.getInvDirection()[1];
       real_t xValue = ray.getOrigin()[0] + lambda * ray.getDirection()[0];
       real_t zValue = ray.getOrigin()[2] + lambda * ray.getDirection()[2];
-      if (xValue > blockAABB.maxCorner()[0] || xValue < blockAABB.minCorner()[0] ||
-          zValue > blockAABB.maxCorner()[2] || zValue < blockAABB.minCorner()[2] ||
+      if (xValue >= blockAABB.maxCorner()[0] || xValue < blockAABB.minCorner()[0] ||
+          zValue >= blockAABB.maxCorner()[2] || zValue < blockAABB.minCorner()[2] ||
           lambda != lambda) {
          WALBERLA_LOG_INFO("P_y" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
       } else {
-         size_t arrayIndex = hashPoint(xValue, yValue, zValue);
-         WALBERLA_LOG_INFO("P_y" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
+         real_t centeredXValue = (size_t((xValue - blockAABB.xMin())*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + blockAABB.xMin();
+         real_t centeredYValue = yValue + cellSpan_*yCenterOffsetFactor;
+         if (centeredYValue > blockAABB.yMax() || centeredYValue < blockAABB.yMin()) {
+            continue;
+         }
+         real_t centeredZValue = (size_t((zValue - blockAABB.zMin())*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + blockAABB.zMin();
+         size_t arrayIndex = hashPoint(centeredXValue, centeredYValue, centeredZValue);
+         WALBERLA_LOG_INFO("P_y" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to box center (" << centeredXValue << "/" << centeredYValue << "/" << centeredZValue << ") and cell " << arrayIndex);
+         insertRelatedCellIndicesForCenter(centeredXValue, centeredYValue, centeredZValue, cellIndices, blockAABB);
       }
    }
    
@@ -409,10 +450,23 @@ void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& r
           lambda != lambda) {
          WALBERLA_LOG_INFO("P_z" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") invalid");
       } else {
-         size_t arrayIndex = hashPoint(xValue, yValue, zValue);
-         WALBERLA_LOG_INFO("P_z" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to cell " << arrayIndex);
+         real_t centeredXValue = (size_t((xValue - blockAABB.xMin())*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + blockAABB.xMin();
+         real_t centeredYValue = (size_t((yValue - blockAABB.yMin())*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + blockAABB.yMin();
+         real_t centeredZValue = zValue + cellSpan_*zCenterOffsetFactor;
+         if (centeredZValue > blockAABB.zMax() || centeredZValue < blockAABB.zMin()) {
+            continue;
+         }
+         size_t arrayIndex = hashPoint(centeredXValue, centeredYValue, centeredZValue);
+         WALBERLA_LOG_INFO("P_z" << i << " = (" << xValue << "/" << yValue << "/" << zValue << ") maps to box center (" << centeredXValue << "/" << centeredYValue << "/" << centeredZValue << ") and cell " << arrayIndex);
+         insertRelatedCellIndicesForCenter(centeredXValue, centeredYValue, centeredZValue, cellIndices, blockAABB);
       }
    }
+   
+   WALBERLA_LOG_INFO("Resulting indices:");
+   for (size_t const& index : cellIndices) {
+      std::cout << index << " ";
+   }
+   std::cout << std::endl;
 }
 
    

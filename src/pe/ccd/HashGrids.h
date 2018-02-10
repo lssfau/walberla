@@ -40,6 +40,7 @@
 #include <sstream>
 #include <vector>
 
+#include <unordered_set>
 #include <pe/raytracing/Ray.h>
 
 namespace walberla{
@@ -182,7 +183,7 @@ public: //ToDo fix to private again
       //@}
       //*******************************************************************************************
 
-      
+      void insertRelatedCellIndicesForCenter(real_t x, real_t y, real_t z, std::unordered_set<size_t>& cellIndices, const AABB& blockAABB) const;
       void possibleRayIntersectingBodies(const raytracing::Ray& ray, const AABB& blockAABB) const;
       size_t hashPoint(real_t x, real_t y, real_t z) const;
 
