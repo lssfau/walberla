@@ -96,7 +96,7 @@ public:
    static const real_t hierarchyFactor;
    //**********************************************************************************************
 
-public: //ToDo fix to private again
+private:
    //**Type definitions****************************************************************************
    //! Vector for storing (handles to) rigid bodies.
    typedef std::vector<BodyID>  BodyVector;
@@ -179,13 +179,12 @@ public: //ToDo fix to private again
       template< typename Contacts >
       void   processBodies( BodyID* bodies, size_t bodyCount, Contacts& contacts ) const;
 
+      void possibleRayIntersectingBodies(const raytracing::Ray& ray, const AABB& blockAABB, std::vector<BodyID>& bodiesContainer) const;
+      
       void clear();
       //@}
       //*******************************************************************************************
 
-      void insertRelatedCellIndicesForCenter(real_t x, real_t y, real_t z, std::unordered_set<size_t>& cellIndices, const AABB& blockAABB) const;
-      void possibleRayIntersectingBodies(const raytracing::Ray& ray, const AABB& blockAABB) const;
-      size_t hashPoint(real_t x, real_t y, real_t z) const;
 
     private:
       //**Utility functions************************************************************************
@@ -194,11 +193,16 @@ public: //ToDo fix to private again
       void initializeNeighborOffsets();
 
       size_t hash( BodyID body ) const;
+      size_t hashPoint(real_t x, real_t y, real_t z) const;
 
       void add   ( BodyID body, Cell* cell );
       void remove( BodyID body, Cell* cell );
 
       void enlarge();
+      
+      void insertRelatedCellIndicesForCenter(real_t x, real_t y, real_t z, const AABB& blockAABB,
+                                             std::unordered_set<size_t>& cellIndices,
+                                             std::vector<BodyID>& bodiesContainer) const;
       //@}
       //*******************************************************************************************
 
