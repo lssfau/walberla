@@ -1611,6 +1611,23 @@ inline const Matrix3<Type> skewSymCrossProduct( const Vector3<Type>& vec, const 
 //*************************************************************************************************
 
 
+//*************************************************************************************************
+/*!\brief Dyadic product of two vectors (\f$ M = u \otimes v \f$).
+ *
+ * \param vec1 The first vector argument.
+ * \param vec2 The second vector argument.
+ * \return The matrix \f$ u \otimes v \f$.
+ */
+template< typename Type >
+inline const Matrix3<Type> dyadicProduct( const Vector3<Type>& vec1, const Vector3<Type>& vec2 )
+{
+   return Matrix3<Type>( vec1[0] * vec2[0], vec1[0] * vec2[1], vec1[0] * vec2[2],
+                         vec1[1] * vec2[0], vec1[1] * vec2[1], vec1[1] * vec2[2],
+                         vec1[2] * vec2[0], vec1[2] * vec2[1], vec1[2] * vec2[2]);
+}
+//*************************************************************************************************
+
+
 //**********************************************************************************************************************
 /*!\fn std::ostream& operator<<( std::ostream& os, const Matrix3<Type>& m )
 // \brief Global output operator for 3x3 matrices.
