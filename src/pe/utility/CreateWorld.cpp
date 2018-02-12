@@ -59,7 +59,8 @@ std::unique_ptr<SetupBlockForest> createSetupBlockForest(const math::AABB simula
 {
    WALBERLA_MPI_SECTION()
    {
-      MPIManager::instance()->useWorldComm();
+      if (!MPIManager::instance()->rankValid())
+         MPIManager::instance()->useWorldComm();
    }
 
    if (isPeriodic[0] && blocks[0]<2)
@@ -95,6 +96,12 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
                                           const uint_t numberOfProcesses,
                                           const uint_t initialRefinementLevel)
 {
+   WALBERLA_MPI_SECTION()
+   {
+      if (!MPIManager::instance()->rankValid())
+         MPIManager::instance()->useWorldComm();
+   }
+
    std::unique_ptr<SetupBlockForest> sforest( createSetupBlockForest( simulationDomain, blocks, isPeriodic, numberOfProcesses, initialRefinementLevel ));
    return shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), *sforest, false ) );
 }
@@ -125,6 +132,12 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
       }
 
       return shared_ptr<BlockForest>();
+   }
+
+   WALBERLA_MPI_SECTION()
+   {
+      if (!MPIManager::instance()->rankValid())
+         MPIManager::instance()->useWorldComm();
    }
 
    WALBERLA_LOG_INFO_ON_ROOT( "Production Run!" );
