@@ -276,6 +276,7 @@ public:
    //@}
    //**********************************************************************************************
 
+   void    update(WcTimingTree* tt);
    //**Implementation of ICCD interface ********************************************************
    virtual PossibleContacts& generatePossibleContacts( WcTimingTree* tt = NULL );
 
