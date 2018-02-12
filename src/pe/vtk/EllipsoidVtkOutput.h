@@ -34,8 +34,7 @@
 #include "vtk/UtilityFunctions.h"
 
 #include <vector>
-
-#include <boost/array.hpp>
+#include <array>
 
 namespace walberla {
 namespace pe {
@@ -61,14 +60,14 @@ private:
    ConstBlockDataID storageID_;
    const BlockStorage & blockStorage_;
    std::vector< ConstEllipsoidID > bodies_;
-   std::vector< Mat3 > tensorGlyphs_;
+   std::vector< std::array<real_t,6> > tensorGlyphs_;
 };
 
 
 void EllipsoidVtkOutput::push( std::ostream& os, const uint_t data, const uint_t point, const uint_t component )
 {
    WALBERLA_ASSERT_LESS( point, bodies_.size() );
-   WALBERLA_ASSERT_LESS( component, 9u );
+   WALBERLA_ASSERT_LESS( component, 6u );
 
    switch( data )
    {
@@ -99,7 +98,7 @@ void EllipsoidVtkOutput::push( std::ostream& os, const uint_t data, const uint_t
 void EllipsoidVtkOutput::push( vtk::Base64Writer& b64, const uint_t data, const uint_t point, const uint_t component )
 {
    WALBERLA_ASSERT_LESS( point, bodies_.size() );
-   WALBERLA_ASSERT_LESS( component, 9u );
+   WALBERLA_ASSERT_LESS( component, 6u );
 
    switch( data )
    {

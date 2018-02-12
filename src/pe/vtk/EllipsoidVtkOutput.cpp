@@ -33,7 +33,7 @@ std::vector< EllipsoidVtkOutput::Attributes > EllipsoidVtkOutput::getAttributes(
 {
    std::vector< Attributes > attributes;
    attributes.push_back( Attributes( vtk::typeToString< float >(), "mass", uint_c(1) ) );
-   attributes.push_back( Attributes( vtk::typeToString< float >(), "tensorGlyph", uint_c(9) ) );
+   attributes.push_back( Attributes( vtk::typeToString< float >(), "tensorGlyph", uint_c(6) ) );
    attributes.push_back( Attributes( vtk::typeToString< float >(), "velocity", uint_c(3) ) );
    attributes.push_back( Attributes( vtk::typeToString< int >(),   "rank", uint_c(1) ) );
    attributes.push_back( Attributes( vtk::typeToString< id_t >(),  "id", uint_c(1) ) );
@@ -69,7 +69,9 @@ void EllipsoidVtkOutput::configure()
             Mat3 bxb = math::dyadicProduct(directionVectorY, directionVectorY);
             Mat3 cxc = math::dyadicProduct(directionVectorZ, directionVectorZ);
             Mat3 tensor = axa * semiAxes[0] + bxb * semiAxes[1] + cxc * semiAxes[2];
-            tensorGlyphs_.push_back(tensor);
+            // use symmetry to only write 6 of the 9 elements: XX YY ZZ XY YZ XZ
+            tensorGlyphs_.push_back({tensor(0,0), tensor(1,1), tensor(2,2),
+                                     tensor(0,1), tensor(1,2), tensor(0,2)});
          }
       }
    }
