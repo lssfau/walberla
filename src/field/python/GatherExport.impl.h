@@ -76,7 +76,7 @@ namespace internal {
       IBlock * firstBlock =  & ( * blocks->begin() );
       python_coupling::Dispatcher<FieldTypes, Exporter_gatherToObject > dispatcher( firstBlock );
       auto func = dispatcher( fieldID );
-      if ( func.empty() )
+      if ( !func )
       {
          PyErr_SetString( PyExc_RuntimeError, "This function cannot handle this type of block data.");
          throw error_already_set();

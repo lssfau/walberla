@@ -228,8 +228,6 @@ private:
    domain_decomposition::BlockDataID fcdID_;
    WcTimingTree*                     tt_;
 
-   mpi::BufferSystem                 syncVelBS_;
-
 
    real_t erp_;                       //!< The error reduction parameter (0 <= erp_ <= 1).
    size_t maxIterations_;             //!< Maximum number of iterations.
@@ -263,7 +261,6 @@ private:
    };
    /*! \endcond */
    //**********************************************************************************************
-   std::vector<real_t> reductionBuffer_;                    //!< Buffer for the reduction of forces and torques acting on global non-fixed bodies.
    bool requireSync_;         //!< Flag indicating whether this process requires a synchronization prior to the next time step.
    //@}
    //**********************************************************************************************

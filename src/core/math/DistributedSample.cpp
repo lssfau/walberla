@@ -26,7 +26,6 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/math/special_functions/pow.hpp>
 
 
 
@@ -64,7 +63,10 @@ void DistributedSample::mpiAllGather()
    variance_ = real_t(0);
 
    for( auto it = data_.begin(); it != data_.end(); ++it )
-      variance_ += boost::math::pow<2>( *it - mean_ );
+   {
+      real_t val = *it - mean_;
+      variance_ += val*val;
+   }
 
    WALBERLA_MPI_SECTION()
    {
@@ -120,7 +122,10 @@ void DistributedSample::mpiGather( int rank )
    variance_ = real_t(0);
 
    for( auto it = data_.begin(); it != data_.end(); ++it )
-      variance_ += boost::math::pow<2>( *it - mean_ );
+   {
+      real_t val = *it - mean_;
+      variance_ += val*val;
+   }
 
    WALBERLA_MPI_SECTION()
    {

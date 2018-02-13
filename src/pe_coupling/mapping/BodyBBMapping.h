@@ -32,7 +32,7 @@ namespace walberla {
 namespace pe_coupling {
 
 
-CellInterval getCellBB( const pe::ConstBodyID body, const IBlock & block, const shared_ptr<StructuredBlockStorage> & blockStorage,
+CellInterval getCellBB( const pe::ConstBodyID body, const IBlock & block, StructuredBlockStorage & blockStorage,
                         const uint_t numberOfGhostLayersToInclude );
 
 

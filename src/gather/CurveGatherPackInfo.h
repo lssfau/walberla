@@ -28,7 +28,7 @@
 #include "domain_decomposition/StructuredBlockStorage.h"
 #include "field/interpolators/TrilinearInterpolatorFwd.h"
 
-#include <boost/function.hpp>
+#include <functional>
 #include <functional>
 #include <map>
 #include <vector>
@@ -52,7 +52,7 @@ class CurveGatherPackInfo : public GatherPackInfo
 {
    public:
       typedef Vector3<real_t>  RealVec3;
-      typedef boost::function<RealVec3 (real_t t) > CurveCallback;
+      typedef std::function<RealVec3 (real_t t) > CurveCallback;
 
 
       //**Construction & Destruction*************************************************************************

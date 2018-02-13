@@ -57,14 +57,26 @@ PossibleContacts& SimpleCCD::generatePossibleContacts( WcTimingTree* tt ){
 
    if (tt != NULL) tt->start("SimpleCCD");
    for (auto it1 = bodies_.begin(); it1 != bodies_.end(); ++it1){
-      for (auto it2 = it1 + 1; it2 !=bodies_.end(); ++it2){
+      for (auto it2 = it1 + 1; it2 !=bodies_.end(); ++it2)
+      {
          if (!((*it1)->hasInfiniteMass() && (*it2)->hasInfiniteMass()))
-            contacts_.push_back(std::make_pair(*it1, *it2));
+         {
+            if ( (*it1)->getSystemID() > (*it2)->getSystemID() )
+               contacts_.push_back(std::make_pair(*it2, *it1));
+            else
+               contacts_.push_back(std::make_pair(*it1, *it2));
+         }
       }
 
-      for (auto it2 = globalStorage_.begin(); it2 != globalStorage_.end(); ++it2){
+      for (auto it2 = globalStorage_.begin(); it2 != globalStorage_.end(); ++it2)
+      {
          if (!((*it1)->hasInfiniteMass() && (*it2)->hasInfiniteMass()))
-            contacts_.push_back(std::make_pair(*it1, *it2));
+         {
+            if ( (*it1)->getSystemID() > (*it2)->getSystemID() )
+               contacts_.push_back(std::make_pair(*it2, *it1));
+            else
+               contacts_.push_back(std::make_pair(*it1, *it2));
+         }
       }
    }
    if (tt != NULL) tt->stop("SimpleCCD");

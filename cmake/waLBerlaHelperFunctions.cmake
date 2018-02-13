@@ -19,14 +19,17 @@ endfunction ( add_flag )
 
 #######################################################################################################################
 #
-# Function to handle source files of type .gen.py and .gen.cuda.py
+# Function to handle python code generation files
 #
-# files .gen.py generate a .h and a .cpp file
-# files .gen.cuda.py generate a .h and a .cu file
-# Takes a list of source files that contain .py files, and returns a list of source files
-# where the generated version are added and the .py files are removed.
-# Additionally creates a custom build rule for the code generation
+# parameters:
+#  sourceFilesOut:  variable where source files without python files are written to
+#  generatedSourceFilesOut: variable where generated source files (with custom command) are written to
+#  generatorsOut: only the python files that have been passed
+#  codeGenRequired: true if at least one python file was part of the sources
 #
+# The list of generated files is determined via the pystencils_walberla package mechanism.
+# The python script, when called with -l, should return a semicolon-separated list of generated files
+# if this list changes, CMake has to be run manually again.
 #######################################################################################################################
 function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generatorsOut codeGenRequiredOut )
     set(result )
@@ -34,25 +37,27 @@ function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generator
     set(generatorsResult )
     set(codeGenRequired NO)
     foreach( sourceFile ${ARGN} )
-        if( ${sourceFile} MATCHES ".*\\.gen\\.py$" )
-            get_filename_component(sourceFileName ${sourceFile} NAME)
-            if( ${sourceFileName} MATCHES ".*\\.cuda\\.gen\\.py$" )
-                string(REPLACE ".cuda.gen.py" ".h"  genHeaderFile ${sourceFileName})
-                string(REPLACE ".cuda.gen.py" ".cu" genSourceFile ${sourceFileName})
-            else()
-                string(REPLACE ".gen.py" ".h"  genHeaderFile ${sourceFileName})
-                string(REPLACE ".gen.py" ".cpp" genSourceFile ${sourceFileName})
-            endif()
-            list(APPEND generatedResult ${CMAKE_CURRENT_BINARY_DIR}/${genSourceFile}
-                                        ${CMAKE_CURRENT_BINARY_DIR}/${genHeaderFile})
-            add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${genSourceFile}
-                                      ${CMAKE_CURRENT_BINARY_DIR}/${genHeaderFile}
-                               DEPENDS ${sourceFile}
-                               COMMAND ${PYTHON_EXECUTABLE} ${sourceFile}
-                               WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-            include_directories(${CMAKE_CURRENT_BINARY_DIR})
-            list(APPEND generatorsResult ${sourceFile} )
+        if( ${sourceFile} MATCHES ".*\\.py$" )
             set(codeGenRequired YES)
+            if( WALBERLA_BUILD_WITH_CODEGEN)
+                execute_process(COMMAND ${PYTHON_EXECUTABLE} ${sourceFile} -l
+                            OUTPUT_VARIABLE generatedSourceFiles)
+                string(REGEX REPLACE "\n$" "" generatedSourceFiles "${generatedSourceFiles}")
+
+                set(generatedWithAbsolutePath )
+                foreach( filename ${generatedSourceFiles} )
+                    list(APPEND generatedWithAbsolutePath ${CMAKE_CURRENT_BINARY_DIR}/${filename})
+                endforeach()
+
+                list(APPEND generatedResult  ${generatedWithAbsolutePath} )
+                list(APPEND generatorsResult ${sourceFile} )
+
+                add_custom_command(OUTPUT ${generatedWithAbsolutePath}
+                                   DEPENDS ${sourceFile}
+                                   COMMAND ${PYTHON_EXECUTABLE} ${sourceFile} -g
+                                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+                include_directories(${CMAKE_CURRENT_BINARY_DIR})
+            endif()
         else()
             list(APPEND result ${sourceFile})
         endif()

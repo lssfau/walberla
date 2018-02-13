@@ -49,16 +49,16 @@ class BlockForest : public BlockStorage
 {
 public:
 
-   typedef boost::function< void ( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
+   typedef std::function< void ( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
                                    std::vector< const Block * > & blocksAlreadyMarkedForRefinement,
                                    const BlockForest & forest ) >
            RefreshMinTargetLevelDeterminationFunction;
 
-   typedef boost::function< void ( BlockForest & forest, const PhantomBlockForest & phantomForest ) >  RefreshCallbackFunction;
+   typedef std::function< void ( BlockForest & forest, const PhantomBlockForest & phantomForest ) >  RefreshCallbackFunction;
 
-   typedef boost::function< void ( std::vector<uint_t> & sendTo, std::vector<uint_t> & recvFrom ) > SnapshotCreationFunction;
-   typedef boost::function< uint_t ( const uint_t ) > SnapshotRestorenFunction;
-   typedef boost::function< void () > SnapshotRestoreCallbackFunction;
+   typedef std::function< void ( std::vector<uint_t> & sendTo, std::vector<uint_t> & recvFrom ) > SnapshotCreationFunction;
+   typedef std::function< uint_t ( const uint_t ) > SnapshotRestorenFunction;
+   typedef std::function< void () > SnapshotRestoreCallbackFunction;
 
    enum FileIOMode { MPI_PARALLEL, MASTER_SLAVE, SERIALIZED_DISTRIBUTED };
 
@@ -87,7 +87,7 @@ public:
    class RefreshCallbackWrappper
    {
    public:
-      typedef boost::function< void () >  Functor_T;
+      typedef std::function< void () >  Functor_T;
       RefreshCallbackWrappper( const Functor_T & functor ) : functor_( functor ) {}
       void operator()( BlockForest &, const PhantomBlockForest & ) { functor_(); }
    private:
@@ -354,7 +354,7 @@ public:
                                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
                                     
    template< typename T >
-   inline BlockDataID addBlockData( boost::function< T* ( IBlock* const block ) > function,
+   inline BlockDataID addBlockData( std::function< T* ( IBlock* const block ) > function,
                                     const std::string & identifier          = std::string(),
                                     const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
                                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
@@ -452,7 +452,7 @@ public:
    void setRefreshPhantomBlockDataPackFunction( const PhantomBlockForest::PhantomBlockDataPackFunction & f ) { refreshPhantomBlockDataPackFunction_ = f; }
    void setRefreshPhantomBlockDataUnpackFunction( const PhantomBlockForest::PhantomBlockDataUnpackFunction & f ) { refreshPhantomBlockDataUnpackFunction_ = f; }
 
-   inline bool loadBalancingFunctionRegistered() const { return !refreshPhantomBlockMigrationPreparationFunction_.empty(); }
+   inline bool loadBalancingFunctionRegistered() const { return static_cast<bool>(refreshPhantomBlockMigrationPreparationFunction_); }
    /// get number of "setRefreshPhantomBlockMigrationPreparationFunction" calls
    inline uint_t phantomBlockMigrationIterations() const { return phantomBlockMigrationIterations_; }
 
@@ -856,7 +856,7 @@ inline BlockDataID BlockForest::addBlockData( const shared_ptr< T > & dataHandli
 {
    //static_assert( boost::is_base_of< BlockDataHandling<typename T::value_type>, T >::value );
 
-   auto downcast = boost::dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
+   auto downcast = dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
 
    if( downcast )
    {
@@ -880,7 +880,7 @@ template< typename T >
 inline BlockDataID BlockForest::loadBlockData( const std::string & file, const shared_ptr< T > & dataHandling, const std::string & identifier,
                                                const Set<SUID> & requiredSelectors, const Set<SUID> & incompatibleSelectors )
 {
-   auto downcast = boost::dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
+   auto downcast = dynamic_pointer_cast< blockforest::BlockDataHandling<typename T::value_type> >( dataHandling );
 
    if( downcast )
    {

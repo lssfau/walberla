@@ -3,9 +3,30 @@ try:
     from . import walberla_cpp
 except ImportError:
     import walberla_cpp
+
+
 # ----------------------------- Python functions to extend the C++ field module ---------------------------------
 
-def npArrayFromWaLBerlaField( field, withGhostLayers=False ):
+def normalizeGhostlayerInfo( field, withGhostLayers):
+    """Takes one ghost layer parameter and returns an integer:
+        True -> all ghost layers, False->no ghost layers"""
+
+    def normalizeComponent(gl):
+        if gl == False:
+            return 0
+        if gl == True:
+            return field.nrOfGhostLayers
+        if gl > field.nrOfGhostLayers:
+            raise ValueError("Field only has %d ghost layers (requested %d)" % ( field.nrOfGhostLayers, gl ) )
+        return gl
+
+    if hasattr( withGhostLayers, "__len__") and len(withGhostLayers) == 3:
+        ghostLayers = [ normalizeComponent(gl) for gl in withGhostLayers ]
+    else:
+        ghostLayers = [ normalizeComponent(withGhostLayers) ] * 3
+    return ghostLayers
+
+def npArrayFromWaLBerlaField(field, withGhostLayers=False):
     """ Creates a numpy array view on the waLBerla field data
         @field: the waLBerla field
         @withGhostLayers: Possible values: 
@@ -17,24 +38,9 @@ def npArrayFromWaLBerlaField( field, withGhostLayers=False ):
     
     if not field:
         return None
-    
-    def normalizeGhostlayerInfo( field, gl ):
-        """Takes one ghost layer parameter and returns an integer:
-            True -> all ghost layers, False->no ghost layers"""
-        if gl == False:
-            return 0
-        if gl == True:
-            return field.nrOfGhostLayers
-        if gl > field.nrOfGhostLayers:
-            raise ValueError("Field only has %d ghost layers (requested %d)" % ( field.nrOfGhostLayers, gl ) )     
-        return gl
-    
-    if hasattr( withGhostLayers, "__len__") and len(withGhostLayers) == 3:
-        ghostLayers = [ normalizeGhostlayerInfo(field, gl) for gl in withGhostLayers ]
-    else:
-        ghostLayers = [ normalizeGhostlayerInfo(field, withGhostLayers) ] * 3
-    
-    
+
+    ghostLayers = normalizeGhostlayerInfo(field, withGhostLayers)
+
     if not hasattr(field, 'buffer'): # Field adaptor -> create field with adapted values
         field = field.copyToField()
     
@@ -50,11 +56,11 @@ def npArrayFromWaLBerlaField( field, withGhostLayers=False ):
         return view
 
 
-def arrayFromWaLBerlaAdaptor( field, withGhostLayers=False ):
+def arrayFromWaLBerlaAdaptor(field, withGhostLayers=False):
     return npArrayFromWaLBerlaField( field.copyToField(), withGhostLayers )
 
 
-def copyArrayToField( dstField, srcArray, slice=[ slice(None,None,None) ]*3, withGhostLayers=False ):
+def copyArrayToField(dstField, srcArray, slice=[slice(None,None,None) ]*3, withGhostLayers=False):
     """ Copies a numpy array into (part of) a waLBerla field
     
     Usually no copying has to take place between waLBerla fields and numpy arrays, since an array view can be
@@ -69,11 +75,21 @@ def copyArrayToField( dstField, srcArray, slice=[ slice(None,None,None) ]*3, wit
     """
     dstAsArray = npArrayFromWaLBerlaField(dstField, withGhostLayers)
     numpy.copyto( dstAsArray[slice], srcArray )
-     
-    
+
+
 
 def extend(cppFieldModule):
+    def gatherField(blocks, blockDataName, sliceObj, allGather=False):
+        field = cppFieldModule.gather(blocks, blockDataName, sliceObj, targetRank=-1 if allGather else 0)
+        if field is not None:
+            field = npArrayFromWaLBerlaField(field)
+            field.flags.writeable = False
+            return field
+        else:
+            return None
+
+
     cppFieldModule.toArray          = npArrayFromWaLBerlaField
     cppFieldModule.adaptorToArray   = arrayFromWaLBerlaAdaptor
     cppFieldModule.copyArrayToField = copyArrayToField
-
+    cppFieldModule.gatherField      = gatherField

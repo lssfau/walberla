@@ -22,6 +22,12 @@ else ()
     add_subdirectory ( tutorials EXCLUDE_FROM_ALL )
 endif()
 
+# Showcases
+if ( WALBERLA_BUILD_SHOWCASES )
+    add_subdirectory ( showcases )
+else ()
+    add_subdirectory ( showcases EXCLUDE_FROM_ALL )
+endif()
 
 # Python module
 if ( WALBERLA_BUILD_WITH_PYTHON )

@@ -23,8 +23,7 @@
 #include "core/cell/Cell.h"
 #include "core/debug/TestSubsystem.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
+#include <random>
 
 
 using namespace walberla;
@@ -135,8 +134,9 @@ int main( int /*argc*/, char** /*argv*/ ) {
 
    debug::enterTestMode();
 
-   boost::mt11213b rng;
-   boost::uniform_int<cell_idx_t> dist( std::numeric_limits<cell_idx_t>::min(), std::numeric_limits<cell_idx_t>::max() );
+   typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
+   mt11213b rng;
+   std::uniform_int_distribution<cell_idx_t> dist( std::numeric_limits<cell_idx_t>::min(), std::numeric_limits<cell_idx_t>::max() );
 
    for(int i = 0; i < 100000; ++i)
    {

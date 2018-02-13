@@ -106,6 +106,7 @@ public:
    static inline real_t  calcVolume( real_t  radius, real_t  length );
    static inline real_t  calcMass( real_t  radius, real_t  length, real_t  density );
    static inline real_t  calcDensity( real_t  radius, real_t  length, real_t  mass );
+   static        Mat3    calcInertia( const real_t radius, const real_t length, const real_t density);
    //@}
    //**********************************************************************************************
 
@@ -139,7 +140,6 @@ protected:
    /*!\name Utility functions */
    //@{
    virtual void calcBoundingBox();  // Calculation of the axis-aligned bounding box
-   void calcInertia();      // Calculation of the moment of inertia
    //@}
    //**********************************************************************************************
 

@@ -18,8 +18,8 @@
 //
 //======================================================================================================================
 
-#include "JacobiKernel2D.h"
-#include "JacobiKernel3D.h"
+#include "CudaJacobiKernel2D.h"
+#include "CudaJacobiKernel3D.h"
 
 #include "cuda/HostFieldAllocator.h"
 #include "blockforest/Initialization.h"
@@ -110,7 +110,7 @@ void testJacobi2D()
 
    // Registering the sweep
    timeloop.add() << BeforeFunction(  commScheme, "Communication" )
-                  << Sweep( pystencils::JacobiKernel2D(gpuField, 1.0), "Jacobi Kernel" );
+                  << Sweep( pystencils::CudaJacobiKernel2D(gpuField, 1.0), "Jacobi Kernel" );
 
 
    cuda::fieldCpy<GPUField, ScalarField>( blocks, gpuField, cpuFieldID );
@@ -165,7 +165,7 @@ void testJacobi3D()
 
    // Registering the sweep
    timeloop.add() << BeforeFunction(  commScheme, "Communication" )
-                  << Sweep( pystencils::JacobiKernel3D(gpuField, 1.0), "Jacobi Kernel" );
+                  << Sweep( pystencils::CudaJacobiKernel3D(gpuField, 1.0), "Jacobi Kernel" );
 
 
    cuda::fieldCpy<GPUField, ScalarField>( blocks, gpuField, cpuFieldID );

@@ -40,7 +40,8 @@ namespace field {
    *  \param blocks         the block storage where the field is stored
    *  \param fieldID        the block data id of the field
    *  \param boundingBox    cell bounding box in global coordinates of the interval which is gathered
-   *  \param targetRank     rank of the process where field is gathered
+   *  \param targetRank     rank of the process where field is gathered, if negative rank is passed, field is gathered
+    *                       on all processes
    *  \param comm           MPI communicator
    *
    *  \tparam Field_T       the type of field which is stored in the given fieldID
@@ -88,7 +89,10 @@ namespace field {
 
       // -- Gather message sizes --
       mpi::RecvBuffer recvBuffer;
-      mpi::gathervBuffer( sendBuffer, recvBuffer, targetRank, comm );
+      if ( targetRank >= 0 )
+         mpi::gathervBuffer( sendBuffer, recvBuffer, targetRank, comm );
+      else
+         mpi::allGathervBuffer( sendBuffer, recvBuffer, comm );
 
       // -- Unpacking --
       if ( recvBuffer.size() > 0 )
@@ -105,7 +109,6 @@ namespace field {
                   recvBuffer >> it.getF(f);
          }
       }
-
    }
 
 

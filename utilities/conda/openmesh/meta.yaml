@@ -1,0 +1,36 @@
+{% set version = "6.3" %}
+
+package:
+  name: openmesh
+  version: {{ version }}
+
+source:
+  fn: OpenMesh-{{ version }}.tar.gz
+  url: https://graphics.rwth-aachen.de:9000/OpenMesh/OpenMesh/repository/archive.tar.gz?ref=OpenMesh-{{ version }}
+  sha256: 60a0f6bc3a6c7f6a4bb2089538c8e65f11767cacdd0d961116b1fd577cc26462
+  patches:
+    # https://graphics.rwth-aachen.de:9000/OpenMesh/OpenMesh/merge_requests/81
+    # https://graphics.rwth-aachen.de:9000/OpenMesh/OpenMesh/commit/c8ebba7492358059aad10d0eb3ec64feec470055
+    - updated-output-directories.patch 
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - cmake
+    - make
+  host:
+    - python
+    - boost
+  run:
+    - python
+    - boost
+
+test:
+  imports:
+    - openmesh
+
+about:
+  home: http://www.openmesh.org/
+  license: BSD 3-Clause
+  license_file: LICENSE
+  summary: OpenMesh is a generic and efficient data structure for representing and manipulating polygonal meshes.

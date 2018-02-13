@@ -24,8 +24,7 @@
 
 #include "core/debug/Debug.h"
 
-#include <boost/cstdint.hpp>
-#include <boost/static_assert.hpp>
+#include <cstdint>
 
 #include <limits>
 
@@ -106,7 +105,7 @@ public:
 
    static const char* getType() { static const char* const type = "index generator"; return type; }
 
-   BOOST_STATIC_ASSERT( std::numeric_limits<UINT>::is_specialized && std::numeric_limits<UINT>::is_integer &&
+   WALBERLA_STATIC_ASSERT( std::numeric_limits<UINT>::is_specialized && std::numeric_limits<UINT>::is_integer &&
                        !std::numeric_limits<UINT>::is_signed );
 };
 
@@ -142,7 +141,7 @@ public:
 
    static const char* getType() { static const char* const type = "standard generator"; return type; }
 
-   BOOST_STATIC_ASSERT( std::numeric_limits<UINT>::is_specialized && std::numeric_limits<UINT>::is_integer &&
+   WALBERLA_STATIC_ASSERT( std::numeric_limits<UINT>::is_specialized && std::numeric_limits<UINT>::is_integer &&
                        !std::numeric_limits<UINT>::is_signed );
 };
 
@@ -242,7 +241,7 @@ public:
 
    static const char* getType() { static const char* const type = "bit generator"; return type; }
 
-   BOOST_STATIC_ASSERT( std::numeric_limits<UINT>::is_specialized && std::numeric_limits<UINT>::is_integer &&
+   WALBERLA_STATIC_ASSERT( std::numeric_limits<UINT>::is_specialized && std::numeric_limits<UINT>::is_integer &&
                        !std::numeric_limits<UINT>::is_signed );
 };
 
@@ -281,7 +280,7 @@ public:
 
    static const char* getType() { static const char* const type = "singleton generator"; return type; }
 
-   BOOST_STATIC_ASSERT( std::numeric_limits<UINT>::is_specialized && std::numeric_limits<UINT>::is_integer &&
+   WALBERLA_STATIC_ASSERT( std::numeric_limits<UINT>::is_specialized && std::numeric_limits<UINT>::is_integer &&
                        !std::numeric_limits<UINT>::is_signed );
 };
 

@@ -26,7 +26,6 @@
 #include "core/debug/Debug.h"
 #include "field/CMakeDefs.h"
 
-#include <boost/static_assert.hpp>
 #include <map>
 #include <new>
 
@@ -289,8 +288,8 @@ namespace field {
             aligned_free(values);
          }
 
-         BOOST_STATIC_ASSERT_MSG(alignment > 0, "Use StdFieldAlloc");
-         BOOST_STATIC_ASSERT_MSG(!(alignment & (alignment - 1)) , "Alignment has to be power of 2");
+         static_assert(alignment > 0, "Use StdFieldAlloc");
+         static_assert(!(alignment & (alignment - 1)) , "Alignment has to be power of 2");
 
       private:
          /// Nr of elements per allocated pointer has to be stored to call the destructor on each element

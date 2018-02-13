@@ -43,14 +43,14 @@ template< typename T >
 struct StructuredBlockDataCreator {
 
    StructuredBlockDataCreator(
-         const boost::function< T * ( IBlock * const block, StructuredBlockStorage * const storage ) > & function,
+         const std::function< T * ( IBlock * const block, StructuredBlockStorage * const storage ) > & function,
          const std::string & identifier            = std::string(),
          const Set<SUID> &   requiredSelectors     = Set<SUID>::emptySet(),
          const Set<SUID> &   incompatibleSelectors = Set<SUID>::emptySet() ) :
       function_( function ), identifier_( identifier ),
       requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors ) {}
 
-   boost::function< T * ( IBlock * const block, StructuredBlockStorage * const storage ) > function_;
+   std::function< T * ( IBlock * const block, StructuredBlockStorage * const storage ) > function_;
 
    std::string identifier_;
    Set<SUID>   requiredSelectors_;
@@ -243,7 +243,7 @@ public:
    { return blockStorage_->addBlockData( dataHandling, identifier, requiredSelectors, incompatibleSelectors ); }
 
    template< typename T >
-   inline BlockDataID addBlockData( boost::function< T* ( IBlock* const block ) > function,
+   inline BlockDataID addBlockData( std::function< T* ( IBlock* const block ) > function,
                                     const std::string& identifier = std::string(),
                                     const Set<SUID>& requiredSelectors     = Set<SUID>::emptySet(),
                                     const Set<SUID>& incompatibleSelectors = Set<SUID>::emptySet() )
@@ -413,7 +413,7 @@ public:
                                                                                { return StructuredBlockDataAdder( *this, identifier ); }
 
    template< typename T >
-   inline BlockDataID addStructuredBlockData( boost::function< T* ( IBlock* const block, StructuredBlockStorage* const storage ) > function,
+   inline BlockDataID addStructuredBlockData( std::function< T* ( IBlock* const block, StructuredBlockStorage* const storage ) > function,
                                               const std::string& identifier          = std::string(),
                                               const Set<SUID>& requiredSelectors     = Set<SUID>::emptySet(),
                                               const Set<SUID>& incompatibleSelectors = Set<SUID>::emptySet() );
@@ -1072,7 +1072,7 @@ inline void StructuredBlockStorage::transformBlockLocalToGlobalCellInterval( Cel
 //**********************************************************************************************************************
 template< typename T >
 inline BlockDataID StructuredBlockStorage::addStructuredBlockData(
-      boost::function< T* ( IBlock* const block, StructuredBlockStorage* const storage ) > function,
+      std::function< T* ( IBlock* const block, StructuredBlockStorage* const storage ) > function,
       const std::string& identifier, const Set<SUID>& requiredSelectors, const Set<SUID>& incompatibleSelectors )
 {
    internal::SelectableBlockDataHandlingWrapper dataHandling(

@@ -26,9 +26,16 @@
 #include "field/all.h"
 #include "geometry/all.h"
 #include "gui/all.h"
-#include "lbm/all.h"
 #include "timeloop/all.h"
 
+#include "lbm/field/PdfField.h"
+#include "lbm/field/AddToStorage.h"
+#include "lbm/communication/PdfFieldPackInfo.h"
+#include "lbm/gui/Connection.h"
+#include "lbm/vtk/VTKOutput.h"
+
+#include "MyUBB.h"
+#include "MyNoSlip.h"
 
 
 using namespace walberla;
@@ -60,8 +67,6 @@ int main( int argc, char ** argv )
 
    const double remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 ); // in seconds
 
-   // create force field
-
    // create fields
    BlockDataID forceFieldId = field::addToStorage<ForceField_T>(blocks, "Force", real_t(0.0) );
 
@@ -72,18 +77,17 @@ int main( int argc, char ** argv )
    // create and initialize boundary handling
    const FlagUID fluidFlagUID( "Fluid" );
 
+
    auto boundariesConfig = walberlaEnv.config()->getOneBlock( "Boundaries" );
 
-   typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory;
+   lbm::MyUBB ubb(blocks, pdfFieldId);
+   lbm::MyNoSlip noSlip(blocks, pdfFieldId);
 
-   BlockDataID boundaryHandlingId = BHFactory::addBoundaryHandlingToStorage( blocks, "boundary handling", flagFieldId, pdfFieldId, fluidFlagUID,
-                                                                             boundariesConfig.getParameter< Vector3<real_t> >( "velocity0", Vector3<real_t>() ),
-                                                                             boundariesConfig.getParameter< Vector3<real_t> >( "velocity1", Vector3<real_t>() ),
-                                                                             boundariesConfig.getParameter< real_t > ( "pressure0", real_c( 1.0 ) ),
-                                                                             boundariesConfig.getParameter< real_t > ( "pressure1", real_c( 1.0 ) ) );
+   geometry::initBoundaryHandling<FlagField_T>(*blocks, flagFieldId, boundariesConfig);
+   geometry::setNonBoundaryCellsToDomain<FlagField_T>(*blocks, flagFieldId, fluidFlagUID);
 
-   geometry::initBoundaryHandling<BHFactory::BoundaryHandling>( *blocks, boundaryHandlingId, boundariesConfig );
-   geometry::setNonBoundaryCellsToDomain<BHFactory::BoundaryHandling> ( *blocks, boundaryHandlingId );
+   ubb.fillFromFlagField<FlagField_T>( blocks, flagFieldId, FlagUID("UBB"), fluidFlagUID );
+   noSlip.fillFromFlagField<FlagField_T>( blocks, flagFieldId, FlagUID("NoSlip"), fluidFlagUID );
 
    // create time loop
    SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
@@ -94,7 +98,8 @@ int main( int argc, char ** argv )
 
    // add LBM sweep and communication to time loop
    timeloop.add() << BeforeFunction( communication, "communication" )
-                  << Sweep( BHFactory::BoundaryHandling::getBlockSweep( boundaryHandlingId ), "boundary handling" );
+                  << Sweep( noSlip, "noSlip boundary" );
+   timeloop.add() << Sweep( ubb, "ubb boundary" );
    timeloop.add() << Sweep( LatticeModel_T::Sweep( pdfFieldId ), "LB stream & collide" );
 
    // LBM stability check

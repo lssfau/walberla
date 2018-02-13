@@ -31,7 +31,7 @@
 #include "core/Regex.h"
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 #include <cmath>
 #include <fstream>

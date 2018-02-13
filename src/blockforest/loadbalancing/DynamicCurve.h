@@ -22,6 +22,7 @@
 #pragma once
 
 #include "NoPhantomData.h"
+#include "blockforest/BlockForest.h"
 #include "blockforest/HilbertCurveConstruction.h"
 #include "blockforest/PhantomBlockForest.h"
 
@@ -88,9 +89,14 @@ struct Node
 } // namespace internal
 
 
-
+/**
+ *  This class implements Hilber and Morton space filling curves for load balancing.
+ *
+ *  All algorithms are implemented to work levelwise. Load balancing with levels ignored is possible
+ *  by specifying levelwise = false in the constructor.
+**/
 template< typename PhantomData_T >
-class DynamicLevelwiseCurveBalance
+class DynamicCurveBalance
 {
 public:
 
@@ -99,14 +105,17 @@ public:
    typedef uint16_t idx_t; // limits the maximum number of blocks per process to 65536
    typedef internal::Node< pid_t, idx_t > Node;
 
-   DynamicLevelwiseCurveBalance( const bool hilbert = true, const bool allGather = true ) :
-      hilbert_( hilbert ), allGather_( allGather )
+   DynamicCurveBalance( const bool hilbert = true, const bool allGather = true, const bool levelwise = true ) :
+      hilbert_( hilbert ), allGather_( allGather ), levelwise_(levelwise)
    {}
 
    bool operator()( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                     std::set< uint_t > & processesToRecvFrom,
                     const PhantomBlockForest & phantomForest,
                     const uint_t iteration ) const;
+
+   void setMaxBlocksPerProcess(const int maxBlocks) {maxBlocksPerProcess_ = maxBlocks;}
+   int  getMaxBlocksPerProcess() const {return maxBlocksPerProcess_;}
 
 private:
 
@@ -180,12 +189,19 @@ private:
 
    bool hilbert_;
    bool allGather_;
+   /// All gets for levels are wrapped like
+   /// \code levelwise_ ? getCorrectLevel() : 0
+   ///
+   /// This allows to use the same algorithm for levelwise balancing as well as for balancing without levels.
+   bool levelwise_;
+
+   int  maxBlocksPerProcess_ = std::numeric_limits<int>::max(); //!< limits the maximum number of blocks per process
 };
 
 
 
 template< typename PhantomData_T >
-bool DynamicLevelwiseCurveBalance< PhantomData_T >::operator()( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
+bool DynamicCurveBalance< PhantomData_T >::operator()( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                                                 std::set< uint_t > & processesToRecvFrom,
                                                                 const PhantomBlockForest & phantomForest, const uint_t ) const
 {
@@ -214,7 +230,7 @@ bool DynamicLevelwiseCurveBalance< PhantomData_T >::operator()( std::vector< std
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::allGatherWeighted( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
+void DynamicCurveBalance< PhantomData_T >::allGatherWeighted( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                                                        std::set< uint_t > & processesToRecvFrom,
                                                                        const PhantomBlockForest & phantomForest ) const
 {  
@@ -241,7 +257,8 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::allGatherWeighted( std::vect
       recvBuffer >> allBlocks[p];
    recvBuffer.reset();
    
-   std::vector< std::vector< std::pair< pid_t, idx_t > > > blocksPerLevel( phantomForest.getNumberOfLevels() ); // for every level one vector of pair(source process ID, index in 'allBlocks')
+   const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1);
+   std::vector< std::vector< std::pair< pid_t, idx_t > > > blocksPerLevel( numLevels ); // for every level one vector of pair(source process ID, index in 'allBlocks')
 
    if( hilbert_ )
       hilbertOrderWeighted( allBlocks, blocksPerLevel, phantomForest );
@@ -259,7 +276,7 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::allGatherWeighted( std::vect
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::allGatherNoWeight( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
+void DynamicCurveBalance< PhantomData_T >::allGatherNoWeight( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                                                        std::set< uint_t > & processesToRecvFrom,
                                                                        const PhantomBlockForest & phantomForest ) const
 {
@@ -283,7 +300,8 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::allGatherNoWeight( std::vect
       recvBuffer >> allBlocks[p];
    recvBuffer.reset();
 
-   std::vector< std::vector< std::pair< pid_t, idx_t > > > blocksPerLevel( phantomForest.getNumberOfLevels() ); // for every level one vector of pair(source process ID, index in 'allBlocks')
+   const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1);
+   std::vector< std::vector< std::pair< pid_t, idx_t > > > blocksPerLevel( numLevels ); // for every level one vector of pair(source process ID, index in 'allBlocks')
 
    if( hilbert_ )
       hilbertOrderNoWeight( allBlocks, blocksPerLevel, phantomForest );
@@ -301,7 +319,7 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::allGatherNoWeight( std::vect
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::masterWeighted( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
+void DynamicCurveBalance< PhantomData_T >::masterWeighted( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                                                     std::set< uint_t > & processesToRecvFrom,
                                                                     const PhantomBlockForest & phantomForest ) const
 {
@@ -352,7 +370,8 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::masterWeighted( std::vector<
       WALBERLA_ASSERT( allBlocks[0].empty() );
       allBlocks[0] = localBlocks;
 
-      blocksPerLevel.resize( phantomForest.getNumberOfLevels() );
+      const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1);
+      blocksPerLevel.resize( numLevels );
 
       if( hilbert_ )
          hilbertOrderWeighted( allBlocks, blocksPerLevel, phantomForest );
@@ -377,7 +396,7 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::masterWeighted( std::vector<
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::masterNoWeight( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
+void DynamicCurveBalance< PhantomData_T >::masterNoWeight( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                                                     std::set< uint_t > & processesToRecvFrom,
                                                                     const PhantomBlockForest & phantomForest ) const
 {
@@ -425,7 +444,8 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::masterNoWeight( std::vector<
       WALBERLA_ASSERT( allBlocks[0].empty() );
       allBlocks[0] = localBlocks;
 
-      blocksPerLevel.resize( phantomForest.getNumberOfLevels() );
+      const uint_t numLevels = levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1);
+      blocksPerLevel.resize( numLevels );
 
       if( hilbert_ )
          hilbertOrderNoWeight( allBlocks, blocksPerLevel, phantomForest );
@@ -450,9 +470,9 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::masterNoWeight( std::vector<
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::hilbertOrderWeighted( const std::vector< std::vector< std::pair< BlockID, typename PhantomData_T::weight_t > > > & allBlocks,
+void DynamicCurveBalance< PhantomData_T >::hilbertOrderWeighted( const std::vector< std::vector< std::pair< BlockID, typename PhantomData_T::weight_t > > > & allBlocks,
                                                                           std::vector< std::vector< std::pair< pid_t, idx_t > > > & blocksPerLevel,
-                                                                          const PhantomBlockForest & phantomForest ) const
+                                                                          const PhantomBlockForest & phantomForest) const
 {
    // construct forest of octrees
 
@@ -519,8 +539,9 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::hilbertOrderWeighted( const 
                   else
                   {
                      auto & index = node->index_;
-                     WALBERLA_ASSERT_LESS( blockforest.getLevelFromBlockId( allBlocks[ uint_c(index.first) ][ index.second ].first ), phantomForest.getNumberOfLevels() );
-                     blocksPerLevel[ blockforest.getLevelFromBlockId( allBlocks[ uint_c(index.first) ][ index.second ].first ) ].push_back( index );
+                     const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( allBlocks[ uint_c(index.first) ][ index.second ].first ) : uint_t(0);
+                     WALBERLA_ASSERT_LESS( level, levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1) );
+                     blocksPerLevel[ level ].push_back( index );
                   }
                }
             }
@@ -539,9 +560,9 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::hilbertOrderWeighted( const 
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::hilbertOrderNoWeight( const std::vector< std::vector< BlockID > > & allBlocks,
+void DynamicCurveBalance< PhantomData_T >::hilbertOrderNoWeight( const std::vector< std::vector< BlockID > > & allBlocks,
                                                                           std::vector< std::vector< std::pair< pid_t, idx_t > > > & blocksPerLevel,
-                                                                          const PhantomBlockForest & phantomForest ) const
+                                                                          const PhantomBlockForest & phantomForest) const
 {
    // construct forest of octrees
 
@@ -608,8 +629,9 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::hilbertOrderNoWeight( const 
                   else
                   {
                      auto & index = node->index_;
-                     WALBERLA_ASSERT_LESS( blockforest.getLevelFromBlockId( allBlocks[ uint_c(index.first) ][ index.second ] ), phantomForest.getNumberOfLevels() );
-                     blocksPerLevel[ blockforest.getLevelFromBlockId( allBlocks[ uint_c(index.first) ][ index.second ] ) ].push_back( index );
+                     const uint_t level = levelwise_ ? blockforest.getLevelFromBlockId( allBlocks[ uint_c(index.first) ][ index.second ] ) : uint_t(0);
+                     WALBERLA_ASSERT_LESS( level , levelwise_ ? phantomForest.getNumberOfLevels() : uint_t(1) );
+                     blocksPerLevel[ level ].push_back( index );
                   }
                }
             }
@@ -628,7 +650,7 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::hilbertOrderNoWeight( const 
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::addBlockToForest( std::vector< shared_ptr< Node > > & forest,
+void DynamicCurveBalance< PhantomData_T >::addBlockToForest( std::vector< shared_ptr< Node > > & forest,
                                                                       const std::pair< pid_t, idx_t > & index, BlockID & id, const uint_t level ) const
 {
    std::stack< uint_t > path;
@@ -681,9 +703,9 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::addBlockToForest( std::vecto
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::mortonOrderWeighted( const std::vector< std::vector< std::pair< BlockID, typename PhantomData_T::weight_t > > > & allBlocks,
+void DynamicCurveBalance< PhantomData_T >::mortonOrderWeighted( const std::vector< std::vector< std::pair< BlockID, typename PhantomData_T::weight_t > > > & allBlocks,
                                                                          std::vector< std::vector< std::pair< pid_t, idx_t > > > & blocksPerLevel,
-                                                                         const PhantomBlockForest & phantomForest ) const
+                                                                         const PhantomBlockForest & phantomForest) const
 {
    const uint_t processes = uint_c( mpi::MPIManager::instance()->numProcesses() );
    
@@ -691,8 +713,9 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::mortonOrderWeighted( const s
    {
       for( uint_t i = uint_t(0); i != allBlocks[p].size(); ++i )
       {
-         WALBERLA_ASSERT_LESS( phantomForest.getBlockForest().getLevelFromBlockId( allBlocks[p][i].first ), blocksPerLevel.size() );
-         blocksPerLevel[ phantomForest.getBlockForest().getLevelFromBlockId( allBlocks[p][i].first ) ].push_back( std::make_pair( pid_c(p), idx_c(i) ) );
+         uint_t level = levelwise_ ? phantomForest.getBlockForest().getLevelFromBlockId( allBlocks[p][i].first ) : uint_t(0);
+         WALBERLA_ASSERT_LESS( level, blocksPerLevel.size() );
+         blocksPerLevel[ level ].push_back( std::make_pair( pid_c(p), idx_c(i) ) );
       }
    }
       
@@ -710,9 +733,9 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::mortonOrderWeighted( const s
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::mortonOrderNoWeight( const std::vector< std::vector< BlockID > > & allBlocks,
+void DynamicCurveBalance< PhantomData_T >::mortonOrderNoWeight( const std::vector< std::vector< BlockID > > & allBlocks,
                                                                          std::vector< std::vector< std::pair< pid_t, idx_t > > > & blocksPerLevel,
-                                                                         const PhantomBlockForest & phantomForest ) const
+                                                                         const PhantomBlockForest & phantomForest) const
 {
    const uint_t processes = uint_c( mpi::MPIManager::instance()->numProcesses() );
    
@@ -720,8 +743,9 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::mortonOrderNoWeight( const s
    {
       for( uint_t i = uint_t(0); i != allBlocks[p].size(); ++i )
       {
-         WALBERLA_ASSERT_LESS( phantomForest.getBlockForest().getLevelFromBlockId( allBlocks[p][i] ), blocksPerLevel.size() );
-         blocksPerLevel[ phantomForest.getBlockForest().getLevelFromBlockId( allBlocks[p][i] ) ].push_back( std::make_pair( pid_c(p), idx_c(i) ) );
+         uint_t level = levelwise_ ? phantomForest.getBlockForest().getLevelFromBlockId( allBlocks[p][i] ) : uint_t(0);
+         WALBERLA_ASSERT_LESS( level, blocksPerLevel.size() );
+         blocksPerLevel[ level ].push_back( std::make_pair( pid_c(p), idx_c(i) ) );
       }
    }
    
@@ -739,7 +763,7 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::mortonOrderNoWeight( const s
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::balanceWeighted( const std::vector< std::vector< std::pair< BlockID, typename PhantomData_T::weight_t > > > & allBlocks,
+void DynamicCurveBalance< PhantomData_T >::balanceWeighted( const std::vector< std::vector< std::pair< BlockID, typename PhantomData_T::weight_t > > > & allBlocks,
                                                                      const std::vector< std::vector< std::pair< pid_t, idx_t > > > & blocksPerLevel,
                                                                      std::vector< std::vector<pid_t> > & targets,
                                                                      std::vector< std::set<pid_t> > & sender ) const
@@ -766,9 +790,11 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::balanceWeighted( const std::
       {
          const long double pWeight = totalWeight / numeric_cast< long double >( processes - p );
          long double weight( 0 );
+         int numBlocks( 0 );
          while( c < blocks.size() &&
                 std::abs( pWeight - weight - numeric_cast< long double >( allBlocks[ uint_c( blocks[c].first ) ][ blocks[c].second ].second ) ) <=
-                std::abs( pWeight - weight ) )
+                std::abs( pWeight - weight ) &&
+                numBlocks < maxBlocksPerProcess_ )
          {
             targets[ uint_c( blocks[c].first ) ][ blocks[c].second ] = pid_c(p);
             sender[p].insert( blocks[c].first );
@@ -776,6 +802,7 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::balanceWeighted( const std::
             weight += addedWeight;
             totalWeight -= addedWeight;
             ++c;
+            ++numBlocks;
          }
       }
       while( c < blocks.size() )
@@ -790,7 +817,7 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::balanceWeighted( const std::
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::balanceNoWeight( const std::vector< std::vector< BlockID > > & allBlocks,
+void DynamicCurveBalance< PhantomData_T >::balanceNoWeight( const std::vector< std::vector< BlockID > > & allBlocks,
                                                                      const std::vector< std::vector< std::pair< pid_t, idx_t > > > & blocksPerLevel,
                                                                      std::vector< std::vector<pid_t> > & targets,
                                                                      std::vector< std::set<pid_t> > & sender ) const
@@ -825,7 +852,7 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::balanceNoWeight( const std::
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::masterEnd( std::vector< std::vector<pid_t> > & targets,
+void DynamicCurveBalance< PhantomData_T >::masterEnd( std::vector< std::vector<pid_t> > & targets,
                                                                std::vector< std::set<pid_t> > & sender,
                                                                std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                                                std::set< uint_t > & processesToRecvFrom ) const
@@ -893,7 +920,7 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::masterEnd( std::vector< std:
 
 
 template< typename PhantomData_T >
-void DynamicLevelwiseCurveBalance< PhantomData_T >::finalAssignment( const uint_t index, const std::vector< std::vector<pid_t> > & targets,
+void DynamicCurveBalance< PhantomData_T >::finalAssignment( const uint_t index, const std::vector< std::vector<pid_t> > & targets,
                                                                      const std::vector< std::set<pid_t> > & sender,
                                                                      std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                                                      std::set< uint_t > & processesToRecvFrom ) const
@@ -907,7 +934,9 @@ void DynamicLevelwiseCurveBalance< PhantomData_T >::finalAssignment( const uint_
       processesToRecvFrom.insert( uint_c(*s) ) ;
 }
 
-
+///This class is deprecated use DynamicCurveBalance instead.
+template< typename PhantomData_T >
+using DynamicLevelwiseCurveBalance = DynamicCurveBalance<PhantomData_T> ;
 
 } // namespace blockforest
 } // namespace walberla

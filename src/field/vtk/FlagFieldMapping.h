@@ -30,7 +30,6 @@ namespace walberla {
 namespace field {
 
 
-
 template< typename FlagField_T, typename T >
 class FlagFieldMapping : public vtk::BlockCellDataWriter<T,1>
 {
@@ -82,6 +81,38 @@ protected:
    std::map< flag_t , T > flagMap_;
 
 }; // FlagFieldMapping
+
+
+template<typename FieldType, typename TargetType=uint8_t>
+class BinarizationFieldWriter : public vtk::BlockCellDataWriter<TargetType,1>
+{
+   typedef typename FieldType::value_type SrcType;
+
+public:
+   BinarizationFieldWriter( const ConstBlockDataID fieldID, const std::string& id, SrcType mask) :
+           vtk::BlockCellDataWriter<TargetType,1>( id ), fieldID_( fieldID ), field_( NULL ), mask_( mask ) {}
+
+protected:
+
+   void configure()  {
+      WALBERLA_ASSERT_NOT_NULLPTR( this->block_ );
+      field_ = this->block_->template getData< FieldType >( fieldID_ );
+   }
+
+   TargetType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t /*f*/ )
+   {
+      WALBERLA_ASSERT_NOT_NULLPTR( field_ );
+      if (field_->get(x,y,z) & mask_) {
+         return TargetType(1);
+      } else {
+         return TargetType(0);
+      }
+   }
+   const ConstBlockDataID fieldID_;
+   const FieldType*       field_;
+
+   SrcType mask_;
+}; // BinaryFieldWriter
 
 
 

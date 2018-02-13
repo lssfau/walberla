@@ -25,7 +25,7 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/mpi/Environment.h"
 
-#include <boost/random/mersenne_twister.hpp>
+#include <random>
 
 namespace walberla {
 namespace blockforest {
@@ -418,7 +418,7 @@ static void test() {
    bb = *( block->getData< CellInterval >( bid ) );
    WALBERLA_CHECK_EQUAL( bb, CellInterval(Cell(150,180,210),Cell(199,239,279)) );
 
-   boost::random::mt19937 eng( 23 );
+   std::mt19937 eng( 23 );
    for( int i = 0; i < 23; ++i )
    {
       const Vector3<real_t> globalPoint = forest.getDomain().getScaled( real_t(1.25) ).randomPoint( eng );

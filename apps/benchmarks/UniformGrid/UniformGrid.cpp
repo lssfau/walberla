@@ -495,7 +495,7 @@ struct AddLB
    {
       // setup of the LB communication for synchronizing the pdf field between neighboring blocks
 
-      boost::function< void () > commFunction;
+      std::function< void () > commFunction;
       if( directComm )
       {
          if( fullComm )
@@ -599,7 +599,7 @@ struct AddLB< LatticeModel_T, typename boost::enable_if_c< boost::mpl::or_<
    {
       // setup of the LB communication for synchronizing the pdf field between neighboring blocks
 
-      boost::function< void () > commFunction;
+      std::function< void () > commFunction;
       if( directComm )
       {
          

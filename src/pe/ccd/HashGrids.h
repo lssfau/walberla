@@ -276,6 +276,7 @@ public:
    //@}
    //**********************************************************************************************
 
+   void    update(WcTimingTree* tt);
    //**Implementation of ICCD interface ********************************************************
    virtual PossibleContacts& generatePossibleContacts( WcTimingTree* tt = NULL );
 
@@ -492,6 +493,10 @@ void HashGrids::HashGrid::processBodies( BodyID* bodies, size_t bodyCount, Conta
 template< typename Contacts >  // Contact container type
 void HashGrids::collide( BodyID a, BodyID b, Contacts& contacts )
 {
+   //make sure to always check in the correct order (a<b)
+   if (a->getSystemID() > b->getSystemID())
+      std::swap(a, b);
+
    if( ( !a->hasInfiniteMass() || !b->hasInfiniteMass() ) &&        // Ignoring contacts between two fixed bodies
        ( a->getAABB().intersects( b->getAABB() ) ) )  // Testing for overlapping bounding boxes
    {

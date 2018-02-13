@@ -75,15 +75,15 @@ Box::Box( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
    q_      = q;                      // Setting the orientation
    R_      = q_.toRotationMatrix();  // Setting the rotation matrix
 
-   // Calculating the sphere mass
-   mass_ = calcMass( lengths, Material::getDensity( material ) );
-   invMass_ = real_c(1) / mass_;
-
-   // Calculating the moment of inertia
-   calcInertia();
-
    setGlobal( global );
-   setMass( infiniteMass );
+   if (infiniteMass)
+   {
+      setMassAndInertiaToInfinity();
+   } else
+   {
+      auto mass = calcMass( lengths, Material::getDensity( material ) );
+      setMassAndInertia( mass, calcInertia( lengths, mass ) );
+   }
    setCommunicating( communicating );
    setFinite( true );
 
@@ -130,8 +130,8 @@ Box::~Box()
 bool Box::containsRelPointImpl( real_t px, real_t py, real_t pz ) const
 {
    return std::fabs(px) <= real_t(0.5)*lengths_[0] &&
-          std::fabs(py) <= real_t(0.5)*lengths_[1] &&
-          std::fabs(pz) <= real_t(0.5)*lengths_[2];
+         std::fabs(py) <= real_t(0.5)*lengths_[1] &&
+         std::fabs(pz) <= real_t(0.5)*lengths_[2];
 }
 //*************************************************************************************************
 
@@ -307,7 +307,7 @@ void Box::calcBoundingBox()
    const real_t ylength( real_t(0.5) * ( fabs(R_[3]*lengths_[0]) + fabs(R_[4]*lengths_[1]) + fabs(R_[5]*lengths_[2]) ) + contactThreshold );
    const real_t zlength( real_t(0.5) * ( fabs(R_[6]*lengths_[0]) + fabs(R_[7]*lengths_[1]) + fabs(R_[8]*lengths_[2]) ) + contactThreshold );
    aabb_ = math::AABB(
-         gpos_[0] - xlength,
+            gpos_[0] - xlength,
          gpos_[1] - ylength,
          gpos_[2] - zlength,
          gpos_[0] + xlength,
@@ -326,12 +326,12 @@ void Box::calcBoundingBox()
  *
  * \return void
  */
-void Box::calcInertia()
+Mat3 Box::calcInertia(const Vec3& length, const real_t mass)
 {
-   I_[0] = mass_/static_cast<real_t>( 12 ) * ( lengths_[1]*lengths_[1] + lengths_[2]*lengths_[2] );
-   I_[4] = mass_/static_cast<real_t>( 12 ) * ( lengths_[0]*lengths_[0] + lengths_[2]*lengths_[2] );
-   I_[8] = mass_/static_cast<real_t>( 12 ) * ( lengths_[0]*lengths_[0] + lengths_[1]*lengths_[1] );
-   Iinv_ = I_.getInverse();
+   return Mat3::makeDiagonalMatrix(
+            mass/static_cast<real_t>( 12 ) * ( length[1]*length[1] + length[2]*length[2] ),
+         mass/static_cast<real_t>( 12 ) * ( length[0]*length[0] + length[2]*length[2] ),
+         mass/static_cast<real_t>( 12 ) * ( length[0]*length[0] + length[1]*length[1] ));
 }
 //*************************************************************************************************
 

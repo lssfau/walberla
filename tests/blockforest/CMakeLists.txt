@@ -13,6 +13,9 @@ waLBerla_execute_test( NAME SetupBlockForestTest LABELS longrun CONFIGURATIONS R
 waLBerla_compile_test( FILES BlockForestTest.cpp )
 waLBerla_execute_test( NAME BlockForestTest PROCESSES 4 )
 
+waLBerla_compile_test( FILES DeterministicCreation.cpp )
+waLBerla_execute_test( NAME DeterministicCreation PROCESSES 8 )
+
 waLBerla_compile_test( NAME   SaveLoad FILES SaveLoadTest.cpp DEPENDS core blockforest  )
 waLBerla_execute_test( NAME   SaveLoad01 COMMAND $<TARGET_FILE:SaveLoad> PROCESSES 1 )
 waLBerla_execute_test( NAME   SaveLoad02 COMMAND $<TARGET_FILE:SaveLoad> PROCESSES 2 )

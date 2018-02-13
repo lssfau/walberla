@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file DragForceSphereMEMPe.cpp
+//! \file DragForceSphereMEM.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
@@ -64,7 +64,7 @@
 #include <iomanip>
 #include <iostream>
 
-namespace drag_force_sphere_mem_pe
+namespace drag_force_sphere_mem
 {
 
 ///////////
@@ -457,7 +457,7 @@ int main( int argc, char **argv )
    // PE //
    ////////
 
-   pe::BodyStorage globalBodyStorage;
+   shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
    auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
 
@@ -476,7 +476,7 @@ int main( int argc, char **argv )
 
    // create the sphere in the middle of the domain
    Vector3<real_t> position (real_c(setup.length) * real_c(0.5));
-   pe::createSphere(globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, setup.radius );
+   pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, setup.radius );
 
    // synchronize often enough for large bodies
    for( uint_t i = 0; i < XBlocks / 2; ++i)
@@ -516,7 +516,7 @@ int main( int argc, char **argv )
    SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   boost::function< void () > commFunction;
+   std::function< void () > commFunction;
 
    blockforest::communication::UniformBufferedScheme< stencil::D3Q27 > scheme( blocks );
    scheme.addPackInfo( make_shared< field::communication::PackInfo< PdfField_T > >( pdfFieldID ) );
@@ -527,13 +527,13 @@ int main( int argc, char **argv )
    if( method == MEMVariant::CLI )
    {
       // uses a higher order boundary condition (CLI)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_CLI_Flag );
    }else if ( method == MEMVariant::MR ){
       // uses a higher order boundary condition (MR)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_MR_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,  MO_MR_Flag );
    }else{
       // uses standard bounce back boundary conditions
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,  MO_BB_Flag );
    }
 
    // since external forcing is applied, the evaluation of the velocity has to be carried out directly after the streaming step
@@ -608,8 +608,8 @@ int main( int argc, char **argv )
 
 }
 
-} //namespace drag_force_sphere_mem_pe
+} //namespace drag_force_sphere_mem
 
 int main( int argc, char **argv ){
-   drag_force_sphere_mem_pe::main(argc, argv);
+   drag_force_sphere_mem::main(argc, argv);
 }

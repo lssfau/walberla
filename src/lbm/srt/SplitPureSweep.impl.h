@@ -133,11 +133,11 @@ void SplitPureSweep< LatticeModel_T, typename boost::enable_if< boost::mpl::and_
 #endif
    // temporaries, calculated by the first innermost loop
 
-   real_t * WALBERLA_RESTRICT velX = new real_t[ xSize ];
-   real_t * WALBERLA_RESTRICT velY = new real_t[ xSize ];
-   real_t * WALBERLA_RESTRICT velZ = new real_t[ xSize ];
+   real_t * WALBERLA_RESTRICT velX = new real_t[ uint_c( xSize ) ];
+   real_t * WALBERLA_RESTRICT velY = new real_t[ uint_c( xSize ) ];
+   real_t * WALBERLA_RESTRICT velZ = new real_t[ uint_c( xSize ) ];
 
-   real_t * WALBERLA_RESTRICT dir_indep_trm = new real_t[ xSize ];
+   real_t * WALBERLA_RESTRICT dir_indep_trm = new real_t[ uint_c( xSize ) ];
 
    if( src->layout() == field::fzyx && dst->layout() == field::fzyx )
    {
@@ -489,11 +489,11 @@ void SplitPureSweep< LatticeModel_T, typename boost::enable_if< boost::mpl::and_
 #endif
    // temporaries, calculated by the first innermost loop
 
-   real_t * WALBERLA_RESTRICT velX = new real_t[ xSize ];
-   real_t * WALBERLA_RESTRICT velY = new real_t[ xSize ];
-   real_t * WALBERLA_RESTRICT velZ = new real_t[ xSize ];
+   real_t * WALBERLA_RESTRICT velX = new real_t[ uint_c( xSize ) ];
+   real_t * WALBERLA_RESTRICT velY = new real_t[ uint_c( xSize ) ];
+   real_t * WALBERLA_RESTRICT velZ = new real_t[ uint_c( xSize ) ];
 
-   real_t * WALBERLA_RESTRICT dir_indep_trm = new real_t[ xSize ];
+   real_t * WALBERLA_RESTRICT dir_indep_trm = new real_t[ uint_c( xSize ) ];
 
    if( src->layout() == field::fzyx )
    {
@@ -833,13 +833,13 @@ void SplitPureSweep< LatticeModel_T, typename boost::enable_if< boost::mpl::and_
 #endif
    // temporaries, calculated by the first innermost loop
 
-   real_t * WALBERLA_RESTRICT velX = new real_t[ xSize ];
-   real_t * WALBERLA_RESTRICT velY = new real_t[ xSize ];
-   real_t * WALBERLA_RESTRICT velZ = new real_t[ xSize ];
+   real_t * WALBERLA_RESTRICT velX = new real_t[ uint_c( xSize ) ];
+   real_t * WALBERLA_RESTRICT velY = new real_t[ uint_c( xSize ) ];
+   real_t * WALBERLA_RESTRICT velZ = new real_t[ uint_c( xSize ) ];
 
-   real_t * WALBERLA_RESTRICT rho = new real_t[ xSize ];
+   real_t * WALBERLA_RESTRICT rho = new real_t[ uint_c( xSize ) ];
 
-   real_t * WALBERLA_RESTRICT dir_indep_trm = new real_t[ xSize ];
+   real_t * WALBERLA_RESTRICT dir_indep_trm = new real_t[ uint_c( xSize ) ];
 
    if( src->layout() == field::fzyx && dst->layout() == field::fzyx )
    {
@@ -1191,13 +1191,13 @@ void SplitPureSweep< LatticeModel_T, typename boost::enable_if< boost::mpl::and_
 #endif
    // temporaries, calculated by the first innermost loop
 
-   real_t * WALBERLA_RESTRICT velX = new real_t[ xSize ];
-   real_t * WALBERLA_RESTRICT velY = new real_t[ xSize ];
-   real_t * WALBERLA_RESTRICT velZ = new real_t[ xSize ];
+   real_t * WALBERLA_RESTRICT velX = new real_t[ uint_c( xSize ) ];
+   real_t * WALBERLA_RESTRICT velY = new real_t[ uint_c( xSize ) ];
+   real_t * WALBERLA_RESTRICT velZ = new real_t[ uint_c( xSize ) ];
 
-   real_t * WALBERLA_RESTRICT rho = new real_t[ xSize ];
+   real_t * WALBERLA_RESTRICT rho = new real_t[ uint_c( xSize ) ];
 
-   real_t * WALBERLA_RESTRICT dir_indep_trm = new real_t[ xSize ];
+   real_t * WALBERLA_RESTRICT dir_indep_trm = new real_t[ uint_c( xSize ) ];
 
    if( src->layout() == field::fzyx )
    {

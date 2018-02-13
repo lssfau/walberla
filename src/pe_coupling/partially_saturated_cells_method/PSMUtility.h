@@ -46,7 +46,7 @@ template < typename LatticeModel_T, int Weighting_T >
 Vector3<real_t> getPSMMacroscopicVelocity( const IBlock & block,
                                            lbm::PdfField< LatticeModel_T > * pdfField,
                                            GhostLayerField< std::vector< std::pair< pe::BodyID, real_t > >, 1 > * bodyAndVolumeFractionField,
-                                           const shared_ptr<StructuredBlockStorage> & blockStorage,
+                                           StructuredBlockStorage & blockStorage,
                                            const Cell & cell )
 {
    static_assert( LatticeModel_T::compressible == false, "Only works with incompressible models!" );
@@ -60,7 +60,7 @@ Vector3<real_t> getPSMMacroscopicVelocity( const IBlock & block,
 
    for( auto bodyFracIt = bodyAndVolumeFractionField->get( cell ).begin(); bodyFracIt != bodyAndVolumeFractionField->get( cell ).end(); ++bodyFracIt )
    {
-      const Vector3< real_t > coordsCellCenter = blockStorage->getBlockLocalCellCenter( block, cell );
+      const Vector3< real_t > coordsCellCenter = blockStorage.getBlockLocalCellCenter( block, cell );
 
       const real_t eps = (*bodyFracIt).second;
 
@@ -89,7 +89,7 @@ Vector3<real_t> getPSMMacroscopicVelocity( const IBlock & block,
  * Only the velocity of cells intersecting with bodies is set, pure fluid cells remain unchanged.
  */
 template < typename LatticeModel_T, int Weighting_T >
-void initializeDomainForPSM( const shared_ptr<StructuredBlockStorage> & blockStorage,
+void initializeDomainForPSM( StructuredBlockStorage & blockStorage,
                              const BlockDataID & pdfFieldID, const BlockDataID & bodyAndVolumeFractionFieldID )
 {
    typedef lbm::PdfField< LatticeModel_T >                              PdfField_T;
@@ -97,7 +97,7 @@ void initializeDomainForPSM( const shared_ptr<StructuredBlockStorage> & blockSto
    typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
 
    // iterate all blocks with an iterator 'block'
-   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
+   for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )
    {
       // get the field data out of the block
       PdfField_T* pdfField = blockIt->getData< PdfField_T > ( pdfFieldID );
@@ -115,7 +115,7 @@ void initializeDomainForPSM( const shared_ptr<StructuredBlockStorage> & blockSto
 
          for( auto bodyFracIt = bodyAndVolumeFractionField->get(cell).begin(); bodyFracIt != bodyAndVolumeFractionField->get(cell).end(); ++bodyFracIt )
          {
-            const Vector3< real_t > coordsCellCenter = blockStorage->getBlockLocalCellCenter( *blockIt, cell );
+            const Vector3< real_t > coordsCellCenter = blockStorage.getBlockLocalCellCenter( *blockIt, cell );
 
             const real_t eps = (*bodyFracIt).second;
 

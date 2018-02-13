@@ -28,31 +28,27 @@
 #include "core/debug/Debug.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
 #include "field/FlagField.h"
-#include "field/iterators/IteratorMacros.h"
 
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/rigidbody/BodyStorage.h"
 #include "pe/rigidbody/BodyIterators.h"
 
+#include "pe_coupling/utility/BodySelectorFunctions.h"
+
+#include <functional>
+
 namespace walberla {
 namespace pe_coupling {
 
-
-
+// general mapping functions for a given single body on a given single block
 template< typename BoundaryHandling_T >
-void mapBody( const pe::BodyID & body, IBlock & block, const shared_ptr<StructuredBlockStorage> & blockStorage,
-              const BlockDataID & boundaryHandlingID, const FlagUID & obstacle,
-              const bool fixedBodiesOnly = true, const bool moBodiesOnly = true )
+void mapBody( pe::BodyID body, IBlock & block, StructuredBlockStorage & blockStorage,
+              const BlockDataID & boundaryHandlingID, const FlagUID & obstacle )
 {
-   WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage->getBlockStorage()) );
-
-   WALBERLA_UNUSED(moBodiesOnly); // undo when other coupling algorithms are available
-
-   if( ( fixedBodiesOnly && !body->isFixed() ) /*|| ( moBodiesOnly && !isMOBody( body ) )*/ )
-      return;
+   WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage.getBlockStorage()) );
 
    BoundaryHandling_T * boundaryHandling = block.getData< BoundaryHandling_T >( boundaryHandlingID );
-   auto *               flagField        = boundaryHandling->getFlagField();
+   auto * flagField = boundaryHandling->getFlagField();
 
    WALBERLA_ASSERT_NOT_NULLPTR( boundaryHandling );
    WALBERLA_ASSERT_NOT_NULLPTR( flagField );
@@ -62,10 +58,12 @@ void mapBody( const pe::BodyID & body, IBlock & block, const shared_ptr<Structur
 
    CellInterval cellBB = getCellBB( body, block, blockStorage, flagField->nrOfGhostLayers() );
 
-   Vector3<real_t> startCellCenter = blockStorage->getBlockLocalCellCenter( block, cellBB.min() );
-   const real_t dx = blockStorage->dx( blockStorage->getLevel(block) );
-   const real_t dy = blockStorage->dy( blockStorage->getLevel(block) );
-   const real_t dz = blockStorage->dz( blockStorage->getLevel(block) );
+   if( cellBB.empty() ) return;
+
+   Vector3<real_t> startCellCenter = blockStorage.getBlockLocalCellCenter( block, cellBB.min() );
+   const real_t dx = blockStorage.dx( blockStorage.getLevel(block) );
+   const real_t dy = blockStorage.dy( blockStorage.getLevel(block) );
+   const real_t dz = blockStorage.dz( blockStorage.getLevel(block) );
 
    real_t cz = startCellCenter[2];
    for( cell_idx_t z = cellBB.zMin(); z <= cellBB.zMax(); ++z )
@@ -77,54 +75,45 @@ void mapBody( const pe::BodyID & body, IBlock & block, const shared_ptr<Structur
          for( cell_idx_t x = cellBB.xMin(); x <= cellBB.xMax(); ++x )
          {
             if( body->containsPoint(cx,cy,cz) )
+            {
                boundaryHandling->forceBoundary( obstacleFlag, x, y, z );
+            }
             cx += dx;
          }
          cy += dy;
       }
       cz += dz;
    }
-
-
 }
 
 
 
+/*!\brief Mapping function to map all bodies - with certain properties - onto all blocks with the 'obstacle' flag
+ *
+ * All bodies (from bodyStorage and globalBodyStorage) are iterated and mapped to all blocks.
+ * Cells that are inside the bodies are set to 'obstacle'.
+ *
+ * Whether or not a body is mapped depends on the return value of the 'mappingBodySelectorFct'.
+ */
 template< typename BoundaryHandling_T >
-void mapBodies( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, const BlockDataID & bodyStorageID, const FlagUID & obstacle,
-                const bool fixedBodiesOnly = true, const bool moBodiesOnly = true )
+void mapBodies( StructuredBlockStorage & blockStorage, const BlockDataID & boundaryHandlingID,
+                const BlockDataID & bodyStorageID, pe::BodyStorage & globalBodyStorage,
+                const FlagUID & obstacle,
+                const std::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectAllBodies )
 {
-   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
+   for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )
    {
+
       for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-         mapBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle, fixedBodiesOnly, moBodiesOnly );
-   }
-}
-
-template< typename BoundaryHandling_T >
-void mapGlobalBodies( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, pe::BodyStorage & globalBodyStorage, const FlagUID & obstacle,
-                      const bool fixedBodiesOnly = true, const bool moBodiesOnly = true )
-{
-   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
-   {
-      for( auto bodyIt = globalBodyStorage.begin(); bodyIt != globalBodyStorage.end(); ++bodyIt)
       {
-         mapBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle, fixedBodiesOnly, moBodiesOnly );
+         if( mappingBodySelectorFct(*bodyIt))
+            mapBody<BoundaryHandling_T>( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle );
       }
-   }
-}
 
-template< typename BoundaryHandling_T >
-void mapGlobalBody( const id_t globalBodySystemID,
-                    const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, pe::BodyStorage & globalBodyStorage, const FlagUID & obstacle,
-                    const bool fixedBodiesOnly = true, const bool moBodiesOnly = true )
-{
-   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
-   {
-      auto bodyIt = globalBodyStorage.find( globalBodySystemID );
-      if( bodyIt != globalBodyStorage.end() )
+      for( auto bodyIt = globalBodyStorage.begin(); bodyIt != globalBodyStorage.end(); ++bodyIt )
       {
-         mapBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle, fixedBodiesOnly, moBodiesOnly );
+         if( mappingBodySelectorFct(*bodyIt))
+            mapBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle );
       }
    }
 }

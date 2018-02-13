@@ -28,7 +28,6 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include <boost/static_assert.hpp>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -725,9 +724,9 @@ inline const Matrix2<Type> Matrix2<Type>::getTranspose() const
 template< typename Type >
 inline Matrix2<Type>& Matrix2<Type>::invert()
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
    Type det = getDeterminant();
 
@@ -754,9 +753,9 @@ inline Matrix2<Type>& Matrix2<Type>::invert()
 template< typename Type >
 inline const Matrix2<Type> Matrix2<Type>::getInverse() const
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
 
    Type det = getDeterminant();
 
@@ -898,7 +897,7 @@ inline bool isnan( const Matrix2<Type>& m )
 template< typename Type >
 inline const Matrix2<Type> abs( const Matrix2<Type>& m )
 {
-   BOOST_STATIC_ASSERT( std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( std::numeric_limits<Type>::is_integer );
    return Matrix2<Type>( std::abs(m[0]), std::abs(m[1]),
                          std::abs(m[2]), std::abs(m[3]) );
 }
@@ -919,7 +918,7 @@ inline const Matrix2<Type> abs( const Matrix2<Type>& m )
 template< typename Type >
 inline const Matrix2<Type> fabs( const Matrix2<Type>& m )
 {
-   BOOST_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
+   WALBERLA_STATIC_ASSERT( !std::numeric_limits<Type>::is_integer );
    return Matrix2<Type>( std::fabs(m[0]), std::fabs(m[1]),
                          std::fabs(m[2]), std::fabs(m[3]) );
 }

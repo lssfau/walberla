@@ -133,7 +133,7 @@ inline real_t accuracyEvaluationAbsError( const Vector3<real_t> & error ) { retu
 //**********************************************************************************************************************
 
 template< typename Field_T,
-          typename SolutionFunction_T = boost::function< typename Field_T::value_type ( const Vector3< real_t > & ) >,
+          typename SolutionFunction_T = std::function< typename Field_T::value_type ( const Vector3< real_t > & ) >,
           typename Filter_T = DefaultEvaluationFilter >
 class AccuracyEvaluation
 {

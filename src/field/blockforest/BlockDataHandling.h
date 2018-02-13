@@ -40,7 +40,7 @@ class BlockDataHandling : public blockforest::BlockDataHandling< Field_T >
 public:
 
    typedef typename Field_T::value_type Value_T;
-   typedef boost::function< void ( Field_T * field, IBlock * const block ) > InitializationFunction_T;
+   typedef std::function< void ( Field_T * field, IBlock * const block ) > InitializationFunction_T;
 
    virtual ~BlockDataHandling() {}
 
@@ -395,18 +395,18 @@ public:
    typedef typename GhostLayerField_T::value_type Value_T;
 
    DefaultBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks,
-                             const boost::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
+                             const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
       blocks_( blocks ), nrOfGhostLayers_( uint_t(1) ), initValue_(), layout_( zyxf ), calculateSize_( calculateSize )
    {}
 
    DefaultBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t nrOfGhostLayers,
-                             const boost::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
+                             const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
       blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_(), layout_( zyxf ), calculateSize_( calculateSize )
    {}
 
    DefaultBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t nrOfGhostLayers,
                              const Value_T & initValue, const Layout layout = zyxf,
-                             const boost::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
+                             const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
       blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_( initValue ), layout_( layout ), calculateSize_( calculateSize )
    {
       static_assert( !boost::is_same< GhostLayerField_T, FlagField< Value_T > >::value,
@@ -440,7 +440,7 @@ private:
    uint_t  nrOfGhostLayers_;
    Value_T initValue_;
    Layout  layout_;
-   const boost::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize_;
+   const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize_;
 
 }; // class DefaultBlockDataHandling
 
@@ -455,21 +455,21 @@ class AlwaysInitializeBlockDataHandling : public blockforest::AlwaysInitializeBl
 public:
 
    typedef typename GhostLayerField_T::value_type Value_T;
-   typedef boost::function< void ( GhostLayerField_T * field, IBlock * const block ) > InitializationFunction_T;
+   typedef std::function< void ( GhostLayerField_T * field, IBlock * const block ) > InitializationFunction_T;
 
    AlwaysInitializeBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks,
-                                      const boost::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
+                                      const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
       blocks_( blocks ), nrOfGhostLayers_( uint_t(1) ), initValue_(), layout_( zyxf ), calculateSize_( calculateSize )
    {}
 
    AlwaysInitializeBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t nrOfGhostLayers,
-                                      const boost::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
+                                      const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
       blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_(), layout_( zyxf ), calculateSize_( calculateSize )
    {}
 
    AlwaysInitializeBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t nrOfGhostLayers,
                                       const Value_T & initValue, const Layout layout,
-                                      const boost::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
+                                      const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
       blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_( initValue ), layout_( layout ), calculateSize_( calculateSize )
    {
       static_assert( !boost::is_same< GhostLayerField_T, FlagField< Value_T > >::value,
@@ -498,7 +498,7 @@ private:
    uint_t  nrOfGhostLayers_;
    Value_T initValue_;
    Layout  layout_;
-   const boost::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize_;
+   const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize_;
 
    InitializationFunction_T initFunction_;
 

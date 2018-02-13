@@ -22,6 +22,7 @@
 #include "blockforest/python/Exports.h"
 #include "field/GhostLayerField.h"
 #include "field/python/Exports.h"
+#include "mesh/python/Exports.h"
 #include "geometry/python/Exports.h"
 #include "postprocessing/python/Exports.h"
 #include "python_coupling/Manager.h"
@@ -49,6 +50,7 @@ typedef bmpl::vector<
             Field<walberla::real_t,4>,
             Field<walberla::real_t,5>,
             Field<walberla::real_t,9>,
+            Field<walberla::real_t,15>,
             Field<walberla::real_t,19>,
             Field<walberla::real_t,27>,
 
@@ -116,9 +118,15 @@ struct InitObject
       // Timeloop
       pythonManager->addExporterFunction( timeloop::exportModuleToPython );
 
+#ifdef WALBERLA_BUILD_WITH_OPENMESH
+      pythonManager->addExporterFunction( mesh::exportModuleToPython<FlagFieldTypes> );
+#endif
+
 #ifdef WALBERLA_BUILD_WITH_CUDA
       using walberla::cuda::GPUField;
-      typedef bmpl::vector<GPUField<double>, GPUField<float>, GPUField<int>, GPUField<uint8_t>, GPUField<uint16_t> > GPUFields;
+      typedef bmpl::vector<GPUField<double>, GPUField<float>,
+                           GPUField<int8_t>,  GPUField<int16_t>,  GPUField<int32_t>, GPUField<int64_t>,
+                           GPUField<uint8_t>, GPUField<uint16_t>, GPUField<uint32_t>,GPUField<uint64_t> > GPUFields;
 
       pythonManager->addExporterFunction( cuda::exportModuleToPython<GPUFields, FieldTypes> );
       pythonManager->addBlockDataConversion<GPUFields>();

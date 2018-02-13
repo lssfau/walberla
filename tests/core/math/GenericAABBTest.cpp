@@ -27,8 +27,7 @@
 
 #include "stencil/D3CornerStencil.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
+#include <random>
 
 
 using namespace walberla;
@@ -112,7 +111,7 @@ void testNonEmptyAABB( const GenericAABB< T > & aabb )
    WALBERLA_CHECK_FLOAT_EQUAL( tmpAABB.volume(), T(0) );
    WALBERLA_CHECK_IDENTICAL( tmpAABB.volume(), aabb.intersectionVolume( intersectingBox ) );
 
-   boost::random::mt19937 urng;
+   std::mt19937 urng;
    for( int i = 0; i < 100; ++i )
    {
       auto p = aabb.randomPoint( urng );
@@ -530,9 +529,10 @@ void testConstructors( const T x0, const T y0, const T z0, const T x1, const T y
 template< typename T >
 void randomTest()
 {
-   boost::mt11213b rng;
+   typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
+   mt11213b rng;
 
-   boost::uniform_real<T> dist( -T(10), T(10) );
+   std::uniform_real_distribution<T> dist( -T(10), T(10) );
 
    for( int i = 0; i < 1000; ++i )
    {
@@ -600,7 +600,7 @@ void testAABBDistancesRandom( const GenericAABB< T > & baseAABB )
 {
    static const uint_t NUM_BOXES  = 100;
    static const uint_t NUM_POINTS = 1000;
-   boost::random::mt19937 rng;  
+   std::mt19937 rng;
 
    for( uint_t i = 0; i < NUM_BOXES; ++i )
    {

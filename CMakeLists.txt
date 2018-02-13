@@ -25,7 +25,7 @@
 ##
 ############################################################################################################################
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.1)
 
 
 PROJECT ( walberla )
@@ -36,11 +36,7 @@ include ( waLBerlaFunctions )
 
 set_version( 4 0 )
 
-if( CMAKE_VERSION VERSION_LESS 2.8.3 )
-   include( CMakeParseArgumentsCompat )
-else()
-   include( CMakeParseArguments )
-endif()
+include( CMakeParseArguments )
 
 # Enable CTest
 enable_testing()
@@ -67,6 +63,7 @@ option ( WALBERLA_BUILD_TESTS               "Build Testcases"                   
 option ( WALBERLA_BUILD_BENCHMARKS          "Build Benchmarks"                                ON )
 option ( WALBERLA_BUILD_TOOLS               "Build Tools"                                        )
 option ( WALBERLA_BUILD_TUTORIALS           "Build Tutorials"                                 ON )
+option ( WALBERLA_BUILD_SHOWCASES           "Build Showcases"                                OFF )
 
 option ( WALBERLA_BUILD_WITH_MPI            "Build with MPI"                                  ON )
 option ( WALBERLA_BUILD_WITH_METIS          "Build with metis graph partitioner"             OFF )
@@ -165,6 +162,9 @@ if( CMAKE_CXX_COMPILER MATCHES "icpc" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "icpc" 
        SET(CMAKE_LINKER "${XILD}")
     ENDIF(XILD)
     MARK_AS_ADVANCED(XILD)
+    if( CMAKE_VERSION VERSION_LESS 3.6.0 )
+      add_flag ( CMAKE_CXX_FLAGS "-std=c++14" )
+    endif()
 else()
     option ( WALBERLA_CXX_COMPILER_IS_INTEL "Use Intel compiler" OFF  )
 endif()
@@ -203,7 +203,7 @@ endif()
 mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_NEC )
 
 # Check for Clang compiler
-if( CMAKE_CXX_COMPILER MATCHES "clang" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
+if( CMAKE_CXX_COMPILER MATCHES "clang" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" )
     option ( WALBERLA_CXX_COMPILER_IS_CLANG "Use clang compiler" ON  )
 else()
     option ( WALBERLA_CXX_COMPILER_IS_CLANG "Use clang compiler" OFF  )
@@ -269,30 +269,18 @@ if ( WALBERLA_PROFILE_USE )
     endif()
 endif()
 
+set( CMAKE_CXX_STANDARD 14 )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set( CMAKE_CXX_EXTENSIONS OFF )
+
 # common flags for intel and g++
 if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL )
-   if( CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7 )
-      add_flag ( CMAKE_CXX_FLAGS "-std=c++0x" )
-   else()
-      add_flag ( CMAKE_CXX_FLAGS "-std=c++11" )
-   endif()
-   #add_flag ( CMAKE_C_FLAGS   "-std=c99" )
    add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow" )
-endif()
-
-# C++11 language features for IBM compiler
-if( WALBERLA_CXX_COMPILER_IS_IBM )
-   add_flag ( CMAKE_CXX_FLAGS "-qlanglvl=autotypededuction -qlanglvl=decltype -qlanglvl=static_assert -qlanglvl=rightanglebracket -qlanglvl=c99longlong" )
-endif()
-
-# C++11 language features for Cray compiler
-if( WALBERLA_CXX_COMPILER_IS_CRAY )
-   add_flag ( CMAKE_CXX_FLAGS "-hstd=c++11" )
 endif()
 
 # C++11 language features for NEC compiler
 if( WALBERLA_CXX_COMPILER_IS_NEC )
-   add_flag ( CMAKE_CXX_FLAGS "-Kcpp11 -Krtti -Kexceptions -size_t64 -Kgcc" )
+   add_flag ( CMAKE_CXX_FLAGS "-Kcpp14 -Krtti -Kexceptions -size_t64 -Kgcc" )
    add_flag ( CMAKE_CXX_FLAGS "-D__BIG_ENDIAN -D__BYTE_ORDER=__BIG_ENDIAN" )
    add_flag ( CMAKE_CXX_FLAGS "-Tnoauto,used" )
    add_flag ( CMAKE_EXE_LINKER_FLAGS "-Wl,-h,muldefs" )
@@ -383,7 +371,7 @@ endif ( )
 
 
 if ( WALBERLA_CXX_COMPILER_IS_CLANG )
-    add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow -Wno-c++11-extensions -std=c++11 -Qunused-arguments" )
+    add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow -Wno-c++11-extensions -Qunused-arguments" )
     add_flag ( CMAKE_CXX_FLAGS "-D'_LIBCPP_EXTERN_TEMPLATE(...)='")
 endif ( )
 
@@ -586,23 +574,7 @@ endif()
 #############################################################################################################################
 set ( waLBerla_REQUIRED_MIN_BOOST_VERSION "1.48")
 
-option ( WALBERLA_BUILD_WITH_BOOST_THREAD "Build with boost thread library support" ON )
-# There have been problems with the IBM compiler and boost thread, so WALBERLA_BUILD_WITH_BOOST_THREAD is disabled by default for this compiler
-if( WALBERLA_CXX_COMPILER_IS_IBM )
-   set ( WALBERLA_BUILD_WITH_BOOST_THREAD OFF CACHE BOOL "Build with boost thread library support" FORCE )
-endif()
-
-if ( WALBERLA_BUILD_WITH_BOOST_THREAD )
-   list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS chrono filesystem system thread )
-else ()
-   list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS chrono filesystem system )
-endif ()
-
-if (( WALBERLA_CXX_COMPILER_IS_IBM ) OR
-    ( WALBERLA_CXX_COMPILER_IS_GNU   AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 ) OR
-    ( WALBERLA_CXX_COMPILER_IS_CLANG AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.5 ) )
-      list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS regex)
-    endif()
+list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS filesystem system )
 
 if ( WALBERLA_BUILD_WITH_PYTHON AND WALBERLA_CXX_COMPILER_IS_MSVC )
     list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS python3 )
@@ -711,11 +683,11 @@ endif()
 
 ############################################################################################################################
 ##
-## PThread is required in Linux environments by boost::thread
+## PThread is required in Linux environments by std::thread
 ##
 ############################################################################################################################
 
-if ( NOT WIN32 AND WALBERLA_BUILD_WITH_BOOST_THREAD )
+if ( NOT WIN32 )
    add_flag( CMAKE_CXX_FLAGS "-pthread" )
 endif()
 
@@ -814,7 +786,7 @@ endif ( )
 # OpenMPI 3.0 and higher checks the number of processes against the number of CPUs
 execute_process(COMMAND ${MPIEXEC} --version RESULT_VARIABLE mpi_version_result OUTPUT_VARIABLE mpi_version_output)
 if (mpi_version_result EQUAL 0 AND mpi_version_output MATCHES "\\(Open(RTE| MPI)\\) ([3-9]\\.|1[0-9])")
-   set ( MPIEXEC_PREFLAGS "${MPIEXEC_PREFLAGS} -oversubscribe" )
+    set ( MPIEXEC_PREFLAGS "${MPIEXEC_PREFLAGS}" "-oversubscribe" CACHE STRING "" FORCE)
 endif()
 ############################################################################################################################
 
@@ -930,6 +902,9 @@ if( (NOT DEFINED WALBERLA_BUILD_WITH_OPENMESH) OR WALBERLA_BUILD_WITH_OPENMESH )
       set( WALBERLA_BUILD_WITH_OPENMESH ON CACHE BOOL "Build with OpenMesh support" )
       include_directories( SYSTEM ${OPENMESH_INCLUDE_DIRS} )
       list( APPEND SERVICE_LIBS ${OPENMESH_LIBRARIES} )
+      if( WALBERLA_CXX_COMPILER_IS_MSVC )
+         add_definitions(-D_USE_MATH_DEFINES )
+      endif()
    else()
       set( WALBERLA_BUILD_WITH_OPENMESH OFF CACHE BOOL "Build with OpenMesh support" FORCE )
    endif()

@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file SegreSilberbergMEMPe.cpp
+//! \file SegreSilberbergMEM.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
@@ -65,7 +65,7 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
-namespace segre_silberberg_mem_pe
+namespace segre_silberberg_mem
 {
 
 ///////////
@@ -534,7 +534,7 @@ int main( int argc, char **argv )
    /////////////////
 
    // set up pe functionality
-   shared_ptr<pe::BodyStorage>  globalBodyStorage = make_shared<pe::BodyStorage>();
+   shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
 
    auto bodyStorageID  = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
@@ -546,7 +546,7 @@ int main( int argc, char **argv )
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
-   boost::function<void(void)> syncCall;
+   std::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
       syncCall = boost::bind( pe::syncNextNeighbors<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
@@ -609,13 +609,13 @@ int main( int argc, char **argv )
    if( MO_CLI )
    {
       // uses a higher order boundary condition (CLI)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_CLI_Flag, pe_coupling::selectRegularBodies );
    }else if ( MO_MR ){
       // uses a higher order boundary condition (MR)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_MR_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,  MO_MR_Flag, pe_coupling::selectRegularBodies );
    }else{
       // uses standard bounce back boundary conditions
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,  MO_BB_Flag, pe_coupling::selectRegularBodies );
    }
 
    ///////////////
@@ -623,7 +623,7 @@ int main( int argc, char **argv )
    ///////////////
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   boost::function< void () > commFunction;
+   std::function< void () > commFunction;
    blockforest::communication::UniformBufferedScheme< Stencil_T > scheme( blocks );
    scheme.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldID ) );
    commFunction = scheme;
@@ -635,13 +635,13 @@ int main( int argc, char **argv )
    if( MO_CLI )
    {
       timeloop.add()
-         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag, FormerMO_Flag ), "Body Mapping" );
+         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MO_CLI_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
    }else if ( MO_MR ){
       timeloop.add()
-         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_MR_Flag, FormerMO_Flag ), "Body Mapping" );
+         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,  MO_MR_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
    }else{
       timeloop.add()
-         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag, FormerMO_Flag ), "Body Mapping" );
+         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,  MO_BB_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
    }
 
    // sweep for restoring PDFs in cells previously occupied by pe bodies
@@ -652,7 +652,7 @@ int main( int argc, char **argv )
       Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder, true );
       timeloop.add()
          << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                      ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
+                      ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
    } else if ( eanReconstructor )
    {
       pe_coupling::SphereNormalExtrapolationDirectionFinder extrapolationFinder( blocks, bodyFieldID );
@@ -660,19 +660,19 @@ int main( int argc, char **argv )
       Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder );
       timeloop.add()
          << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                      ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
+                      ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
    } else {
       typedef pe_coupling::EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T > Reconstructor_T;
       Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID );
       timeloop.add()
          << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                      ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
+                      ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
    }
 
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   boost::function<void(void)> storeForceTorqueInCont1 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
+   std::function<void(void)> storeForceTorqueInCont1 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer2 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   boost::function<void(void)> setForceTorqueOnBodiesFromCont2 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
+   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
 
    bodiesFTContainer2->store();
 
@@ -820,8 +820,8 @@ int main( int argc, char **argv )
    return EXIT_SUCCESS;
 }
 
-} // namespace segre_silberberg_mem_pe
+} // namespace segre_silberberg_mem
 
 int main( int argc, char **argv ){
-   segre_silberberg_mem_pe::main(argc, argv);
+   segre_silberberg_mem::main(argc, argv);
 }

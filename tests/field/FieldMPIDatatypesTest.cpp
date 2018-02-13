@@ -33,9 +33,7 @@
 
 #include "stencil/D3Q27.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
-#include <boost/random/uniform_real_distribution.hpp>
+#include <random>
 
 namespace mpi_datatypes_test {
 
@@ -51,7 +49,7 @@ public:
    template< typename T, uint_t fSize >
    void operator()( Field< T, fSize > & field )
    {
-      boost::random::uniform_real_distribution< T > distribution;
+      std::uniform_real_distribution< T > distribution;
 
       for( auto it = field.begin(); it != field.end(); ++it )
       {
@@ -62,7 +60,7 @@ public:
    template< typename T, uint_t fSize >
    void operator()( GhostLayerField< T, fSize > & field )
    {
-      boost::random::uniform_real_distribution< T > distribution;
+      std::uniform_real_distribution< T > distribution;
 
       for( auto it = field.beginWithGhostLayer(); it != field.end(); ++it )
       {
@@ -71,7 +69,7 @@ public:
    }
 
 private:
-   boost::random::mt19937 generator_;
+   std::mt19937 generator_;
 };
 
 

@@ -111,6 +111,8 @@ function ( waLBerla_add_module )
 
     waLBerla_register_dependency ( ${moduleName} ${ARG_DEPENDS} )
 
+    set_property( TARGET ${moduleName} PROPERTY CXX_STANDARD 14 )
+
     # This property is needed for visual studio to group modules together
     if( WALBERLA_GROUP_PROJECTS )
        set_property( TARGET  ${moduleLibraryName}  PROPERTY  FOLDER  "SRC" )
@@ -211,6 +213,7 @@ function ( waLBerla_add_executable )
     set( generatedSourceFiles )
     set( generatorSourceFiles )
     handle_python_codegen(sourceFiles generatedSourceFiles generatorSourceFiles codeGenRequired ${sourceFiles})
+
     if( NOT WALBERLA_BUILD_WITH_CODEGEN AND codeGenRequired)
         message(STATUS "Skipping ${ARG_NAME} since pystencils code generation is not enabled")
         return()
@@ -227,6 +230,7 @@ function ( waLBerla_add_executable )
 
     target_link_modules  ( ${ARG_NAME} ${ARG_DEPENDS}  )
     target_link_libraries( ${ARG_NAME} ${SERVICE_LIBS} )
+    set_property( TARGET ${ARG_NAME} PROPERTY CXX_STANDARD 14 )
 
     if( WALBERLA_GROUP_PROJECTS )
         if( NOT ARG_GROUP )
@@ -335,7 +339,7 @@ function ( waLBerla_execute_test )
     
    set( options NO_MODULE_LABEL )
    set( oneValueArgs NAME PROCESSES )
-   set( multiValueArgs COMMAND LABELS CONFIGURATIONS )
+   set( multiValueArgs COMMAND LABELS CONFIGURATIONS DEPENDS_ON_TARGETS )
    cmake_parse_arguments( ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
    if( NOT ARG_NAME )
@@ -343,9 +347,16 @@ function ( waLBerla_execute_test )
    endif()
    
    if( NOT ARG_COMMAND AND NOT TARGET ${ARG_NAME} )
-      message ( STATUS "Skipping ${ARG_NAME} since the corresponding test was not built" )
+      message ( STATUS "Skipping test ${ARG_NAME} since the corresponding target is not built" )
       return()
-   endif()  
+   endif() 
+
+   foreach( dependency_target ${ARG_DEPENDS_ON_TARGETS} )
+      if( NOT TARGET ${dependency_target} )
+         message ( STATUS "Skipping test ${ARG_NAME} since the target ${dependency_target} is not built" )
+         return()
+      endif()
+   endforeach( dependency_target )
    
    if( NOT ARG_PROCESSES )
       set ( numProcesses 1 )

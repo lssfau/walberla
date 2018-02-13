@@ -46,9 +46,6 @@ PlaneID createPlane( BodyStorage& globalStorage, id_t uid, Vec3 normal, const Ve
 
    PlaneID plane = new Plane( sid, uid, gpos, normal, normal*gpos, material );
 
-   plane->setCommunicating( false );
-   plane->setMass( true );
-
    globalStorage.add(plane);
 
    // Logging the successful creation of the plane

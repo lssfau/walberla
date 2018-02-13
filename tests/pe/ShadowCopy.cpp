@@ -62,7 +62,7 @@ int main( int argc, char** argv )
 //   logging::Logging::instance()->includeLoggingToFile("ShadowCopy");
 
    bool syncShadowOwners = false;
-   boost::function<void(void)> syncCall;
+   std::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
       syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );

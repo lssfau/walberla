@@ -21,7 +21,7 @@
 
 #include "Variable.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
+#include <cmath>
 #include <sstream>
 
 
@@ -36,7 +36,7 @@ namespace math {
 
    void Var::setValue( const double value ){
       value_ = value;
-      valid_ = !boost::math::isnan( value );
+      valid_ = !std::isnan( value );
    }
 
    bool Var::operator==( const Var& var) const {

@@ -26,7 +26,7 @@
 #include "Timeloop.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <map>
 

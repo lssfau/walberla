@@ -39,7 +39,6 @@
 #include "core/debug/CheckFunctions.h"
 
 #include <boost/functional/hash.hpp>
-#include <boost/static_assert.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
 #include <boost/type_traits/is_fundamental.hpp>

@@ -25,6 +25,9 @@ waLBerla_execute_test( NAME   PE_COLLISION )
 waLBerla_compile_test( NAME   PE_COLLISIONTOBIASGJK FILES CollisionTobiasGJK.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_COLLISIONTOBIASGJK )
 
+waLBerla_compile_test( NAME   PE_CREATEWORLD FILES CreateWorld.cpp DEPENDS core  )
+waLBerla_execute_test( NAME   PE_CREATEWORLD )
+
 waLBerla_compile_test( NAME   PE_DELETEBODY FILES DeleteBody.cpp DEPENDS core blockforest  )
 waLBerla_execute_test( NAME   PE_DELETEBODY_NN COMMAND $<TARGET_FILE:PE_DELETEBODY> )
 waLBerla_execute_test( NAME   PE_DELETEBODY_SO COMMAND $<TARGET_FILE:PE_DELETEBODY> --syncShadowOwners )
@@ -34,6 +37,9 @@ waLBerla_execute_test( NAME   PE_DESTROYBODY )
 
 waLBerla_compile_test( NAME   PE_DOCUMENTATIONSNIPPETS FILES PeDocumentationSnippets.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_DOCUMENTATIONSNIPPETS )
+
+waLBerla_compile_test( NAME   PE_DYNAMICREFINEMENT FILES DynamicRefinement.cpp DEPENDS core blockforest  )
+waLBerla_execute_test( NAME   PE_DYNAMICREFINEMENT )
 
 waLBerla_compile_test( NAME   PE_FORCESYNC FILES ForceSync.cpp DEPENDS core blockforest  )
 waLBerla_execute_test( NAME   PE_FORCESYNC )
@@ -53,6 +59,9 @@ waLBerla_execute_test( NAME   PE_MARSHALLING )
 
 waLBerla_compile_test( NAME   PE_MATERIAL FILES Material.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_MATERIAL )
+
+waLBerla_compile_test( NAME   PE_MINMAXREFINEMENT FILES MinMaxRefinement.cpp DEPENDS core blockforest  )
+waLBerla_execute_test( NAME   PE_MINMAXREFINEMENT PROCESSES 8 )
 
 waLBerla_compile_test( NAME   PE_OVERLAP FILES Overlap.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_OVERLAP )

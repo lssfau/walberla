@@ -39,7 +39,7 @@
 #include "core/uid/SUID.h"
 
 #include <boost/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 #include <map>
 #include <vector>
@@ -89,8 +89,8 @@ public:
 
    typedef shared_ptr< walberla::communication::UniformPackInfo >  PackInfo;
 
-   typedef boost::function<void ()>                            VoidFunction;
-   typedef boost::function<void ( SendBuffer & buffer )> SendBufferFunction;
+   typedef std::function<void ()>                            VoidFunction;
+   typedef std::function<void ( SendBuffer & buffer )> SendBufferFunction;
 
    typedef walberla::communication::UniformPackInfo CommunicationItemInfo;
 
@@ -161,8 +161,8 @@ public:
    void startCommunication();
    void wait();
 
-   boost::function<void()> getStartCommunicateFunctor();
-   boost::function<void()> getWaitFunctor();
+   std::function<void()> getStartCommunicateFunctor();
+   std::function<void()> getWaitFunctor();
    //@}
    //*******************************************************************************************************************
 
@@ -537,13 +537,13 @@ void UniformBufferedScheme<Stencil>::localBufferUnpacking( const uint_t index, c
 }
 
 template< typename Stencil >
-boost::function<void()> UniformBufferedScheme<Stencil>::getStartCommunicateFunctor()
+std::function<void()> UniformBufferedScheme<Stencil>::getStartCommunicateFunctor()
 {
    return boost::bind( &UniformBufferedScheme::startCommunication, this );
 }
 
 template< typename Stencil >
-boost::function<void()> UniformBufferedScheme<Stencil>::getWaitFunctor()
+std::function<void()> UniformBufferedScheme<Stencil>::getWaitFunctor()
 {
    return boost::bind( &UniformBufferedScheme::wait, this );
 }

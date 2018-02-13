@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include "core/ConcatIterator.h"
 #include "core/debug/Debug.h"
 #include "core/cell/Cell.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
@@ -32,88 +33,97 @@
 #include "pe/rigidbody/BodyIterators.h"
 
 #include "pe_coupling/mapping/BodyBBMapping.h"
+#include "pe_coupling/utility/BodySelectorFunctions.h"
+
+#include <functional>
 
 namespace walberla {
 namespace pe_coupling {
 
+/*!\brief Maps the moving bodies into the simulation domain and updates the mapping
+ *
+ * Cells that are inside a body, will be marked with the 'obstacle' flag.
+ * 'Inside' means that the cell center is contained in the body.
+ * Thus, the body has to provide a valid containsPoint(x,y,z) function.
+ *
+ * Cells that in the last time step were inside the body but are now outside of it, i.e. the body has moved,
+ * will be marked with the 'formerObstacle' flag.
+ * The 'formerObstacle' flag is used in a second step by the PDFReconstruction class (see PDFReconstruction.h) to
+ * re-initialize the missing PDFs. Afterwards, the 'formerObstacle' flag is removed and the 'fluid' flag is set.
+ *
+ * It is not required that the mapping has been initialized with one of the free functions from below.
+ *
+ * The 'mappingBodySelectorFct' can be used to decide which bodies should be mapped or not.
+ */
 template< typename BoundaryHandling_T >
 class BodyMapping
 {
 public:
 
    typedef typename BoundaryHandling_T::FlagField FlagField_T;
-   typedef typename FlagField_T::iterator         FlagFieldIterator;
    typedef typename BoundaryHandling_T::flag_t    flag_t;
    typedef Field< pe::BodyID, 1 >                 BodyField_T;
 
-   inline BodyMapping( const shared_ptr<StructuredBlockStorage> & blockStorage,
-                       const BlockDataID & boundaryHandlingID,
-                       const BlockDataID & bodyStorageID, const BlockDataID & bodyFieldID,
-                       const FlagUID & obstacle, const FlagUID & formerObstacle );
+   BodyMapping( const shared_ptr<StructuredBlockStorage> & blockStorage,
+                const BlockDataID & boundaryHandlingID,
+                const BlockDataID & bodyStorageID,
+                const shared_ptr<pe::BodyStorage> & globalBodyStorage,
+                const BlockDataID & bodyFieldID,
+                const FlagUID & obstacle, const FlagUID & formerObstacle,
+                const std::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectRegularBodies )
+   : blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ),
+     bodyStorageID_(bodyStorageID), globalBodyStorage_( globalBodyStorage ), bodyFieldID_( bodyFieldID ),
+     obstacle_( obstacle ), formerObstacle_( formerObstacle ), mappingBodySelectorFct_( mappingBodySelectorFct )
+   {}
 
-   void operator()( IBlock * const block ) const;
-
-protected:
-
-   shared_ptr<StructuredBlockStorage> blockStorage_;
-
-   const BlockDataID boundaryHandlingID_;
-   const BlockDataID bodyStorageID_;
-   const BlockDataID bodyFieldID_;
-
-   const FlagUID obstacle_;
-   const FlagUID formerObstacle_;
-
-}; // class BodyMapping
-
-
-
-template< typename BoundaryHandling_T >
-inline BodyMapping< BoundaryHandling_T >::BodyMapping( const shared_ptr<StructuredBlockStorage> & blockStorage,
-                                                       const BlockDataID & boundaryHandlingID,
-                                                       const BlockDataID & bodyStorageID, const BlockDataID & bodyFieldID,
-                                                       const FlagUID & obstacle, const FlagUID & formerObstacle ) :
-
-   blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ), bodyStorageID_(bodyStorageID), bodyFieldID_( bodyFieldID ),
-   obstacle_( obstacle ), formerObstacle_( formerObstacle )
-{}
-
-
-
-template< typename BoundaryHandling_T >
-void BodyMapping< BoundaryHandling_T >::operator()( IBlock * const block ) const
-{
-   WALBERLA_ASSERT_NOT_NULLPTR( block );
-
-   BoundaryHandling_T * boundaryHandling = block->getData< BoundaryHandling_T >( boundaryHandlingID_ );
-   FlagField_T *        flagField        = boundaryHandling->getFlagField();
-   BodyField_T *        bodyField        = block->getData< BodyField_T >( bodyFieldID_ );
-
-   WALBERLA_ASSERT_NOT_NULLPTR( boundaryHandling );
-   WALBERLA_ASSERT_NOT_NULLPTR( flagField );
-   WALBERLA_ASSERT_NOT_NULLPTR( bodyField );
-
-   WALBERLA_ASSERT_EQUAL( flagField->xyzSize(), bodyField->xyzSize() );
-
-   WALBERLA_ASSERT( flagField->flagExists( obstacle_ ) );
-
-   const flag_t       obstacle = flagField->getFlag( obstacle_ );
-   const flag_t formerObstacle = flagField->flagExists( formerObstacle_ ) ? flagField->getFlag( formerObstacle_ ) :
-                                                                            flagField->registerFlag( formerObstacle_ );
-
-   for( auto bodyIt = pe::BodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
+   void operator()( IBlock * const block )
    {
-      if( bodyIt->isFixed() /*|| !isMOBody( *bodyIt )*/ )
-         continue;
+      WALBERLA_ASSERT_NOT_NULLPTR( block );
 
-      // policy: every body manages only its own flags
+      BoundaryHandling_T * boundaryHandling = block->getData< BoundaryHandling_T >( boundaryHandlingID_ );
+      FlagField_T *        flagField        = boundaryHandling->getFlagField();
+      BodyField_T *        bodyField        = block->getData< BodyField_T >( bodyFieldID_ );
 
-      CellInterval cellBB = getCellBB( *bodyIt, *block, blockStorage_, flagField->nrOfGhostLayers() );
+      WALBERLA_ASSERT_NOT_NULLPTR( boundaryHandling );
+      WALBERLA_ASSERT_NOT_NULLPTR( flagField );
+      WALBERLA_ASSERT_NOT_NULLPTR( bodyField );
 
-      Vector3<real_t> startCellCenter = blockStorage_->getBlockLocalCellCenter( *block, cellBB.min() );
+      WALBERLA_ASSERT_EQUAL( flagField->xyzSize(), bodyField->xyzSize() );
+
+      WALBERLA_ASSERT( flagField->flagExists( obstacle_ ) );
+
+      const flag_t       obstacle = flagField->getFlag( obstacle_ );
+      const flag_t formerObstacle = flagField->flagExists( formerObstacle_ ) ? flagField->getFlag( formerObstacle_ ) :
+                                    flagField->registerFlag( formerObstacle_ );
+
       const real_t dx = blockStorage_->dx( blockStorage_->getLevel(*block) );
       const real_t dy = blockStorage_->dy( blockStorage_->getLevel(*block) );
       const real_t dz = blockStorage_->dz( blockStorage_->getLevel(*block) );
+
+      for( auto bodyIt = pe::BodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
+      {
+         if( mappingBodySelectorFct_(*bodyIt) )
+            mapBodyAndUpdateMapping(*bodyIt, block, boundaryHandling, flagField , bodyField, obstacle, formerObstacle, dx, dy, dz);
+      }
+      for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt)
+      {
+         if( mappingBodySelectorFct_(*bodyIt))
+            mapBodyAndUpdateMapping(*bodyIt, block, boundaryHandling, flagField , bodyField, obstacle, formerObstacle, dx, dy, dz);
+      }
+   }
+
+private:
+
+   void mapBodyAndUpdateMapping(pe::BodyID body, IBlock * const block,
+                                BoundaryHandling_T * boundaryHandling, FlagField_T * flagField, BodyField_T * bodyField,
+                                const flag_t & obstacle, const flag_t & formerObstacle,
+                                real_t dx, real_t dy, real_t dz)
+   {
+      // policy: every body manages only its own flags
+
+      CellInterval cellBB = getCellBB( body, *block, *blockStorage_, flagField->nrOfGhostLayers() );
+
+      Vector3<real_t> startCellCenter = blockStorage_->getBlockLocalCellCenter( *block, cellBB.min() );
 
       real_t cz = startCellCenter[2];
       for( cell_idx_t z = cellBB.zMin(); z <= cellBB.zMax(); ++z )
@@ -127,34 +137,40 @@ void BodyMapping< BoundaryHandling_T >::operator()( IBlock * const block ) const
 
                flag_t & cellFlagPtr = flagField->get(x,y,z);
 
-               if( bodyIt->containsPoint(cx,cy,cz) )
+               if( body->containsPoint(cx,cy,cz) )
                {
+                  // cell is inside body
                   if( !isFlagSet( cellFlagPtr, obstacle ) )
                   {
-
+                     // cell is not yet an obstacle cell
                      if( isFlagSet( cellFlagPtr, formerObstacle ) )
                      {
+                        // cell was marked as former obstacle, e.g. by another body that has moved away
                         boundaryHandling->setBoundary( obstacle, x, y, z );
                         removeFlag( cellFlagPtr, formerObstacle );
                      }
                      else
                      {
+                        // set obstacle flag
                         boundaryHandling->forceBoundary( obstacle, x, y, z );
                      }
                   }
-
-                  (*bodyField)(x,y,z) = *bodyIt;
+                  // let pointer from body field point to this body
+                  (*bodyField)(x,y,z) = body;
                }
                else
                {
-                  if( isFlagSet( cellFlagPtr, obstacle ) && ((*bodyField)(x, y, z) == *bodyIt) )
+                  // cell is outside body
+                  if( isFlagSet( cellFlagPtr, obstacle ) && ((*bodyField)(x, y, z) == body) )
                   {
+                     // cell was previously occupied by this body
                      boundaryHandling->removeBoundary( obstacle, x, y, z );
                      addFlag( cellFlagPtr, formerObstacle );
                      // entry at (*bodyField)(x,y,z) should still point to the previous body.
                      // If during initialization the overlap between neighboring blocks
                      // was chosen correctly/large enough, the body should still be on this block.
                      // The body information is needed in the PDF restoration step.
+                     // There, the flag will be removed and replaced by a domain flag after restoration.
                   }
                }
 
@@ -165,24 +181,35 @@ void BodyMapping< BoundaryHandling_T >::operator()( IBlock * const block ) const
          cz += dz;
       }
    }
-}
 
+   shared_ptr<StructuredBlockStorage> blockStorage_;
+
+   const BlockDataID boundaryHandlingID_;
+   const BlockDataID bodyStorageID_;
+   shared_ptr<pe::BodyStorage> globalBodyStorage_;
+   const BlockDataID bodyFieldID_;
+
+   const FlagUID obstacle_;
+   const FlagUID formerObstacle_;
+
+   std::function<bool(pe::BodyID)> mappingBodySelectorFct_;
+
+}; // class BodyMapping
 
 
 ////////////////////////////
 // FREE MAPPING FUNCTIONS //
 ////////////////////////////
 
+
+// general mapping functions for a given single (moving) body on a given single block
 template< typename BoundaryHandling_T >
-void mapMovingBody( const pe::BodyID body, IBlock & block, const shared_ptr<StructuredBlockStorage> & blockStorage,
+void mapMovingBody( pe::BodyID body, IBlock & block, StructuredBlockStorage & blockStorage,
                     const BlockDataID & boundaryHandlingID, const BlockDataID & bodyFieldID, const FlagUID & obstacle )
 {
    typedef Field< pe::BodyID, 1 > BodyField_T;
 
-   WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage->getBlockStorage()) );
-
-   if( body->isFixed() /*|| !body->isFinite()*/ )
-      return;
+   WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage.getBlockStorage()) );
 
    BoundaryHandling_T * boundaryHandling = block.getData< BoundaryHandling_T >( boundaryHandlingID );
    auto *               flagField        = boundaryHandling->getFlagField();
@@ -198,10 +225,12 @@ void mapMovingBody( const pe::BodyID body, IBlock & block, const shared_ptr<Stru
 
    CellInterval cellBB = getCellBB( body, block, blockStorage, flagField->nrOfGhostLayers() );
 
-   Vector3<real_t> startCellCenter = blockStorage->getBlockLocalCellCenter( block, cellBB.min() );
-   const real_t dx = blockStorage->dx( blockStorage->getLevel(block) );
-   const real_t dy = blockStorage->dy( blockStorage->getLevel(block) );
-   const real_t dz = blockStorage->dz( blockStorage->getLevel(block) );
+   if( cellBB.empty() ) return;
+
+   Vector3<real_t> startCellCenter = blockStorage.getBlockLocalCellCenter( block, cellBB.min() );
+   const real_t dx = blockStorage.dx( blockStorage.getLevel(block) );
+   const real_t dy = blockStorage.dy( blockStorage.getLevel(block) );
+   const real_t dz = blockStorage.dz( blockStorage.getLevel(block) );
 
    real_t cz = startCellCenter[2];
    for( cell_idx_t z = cellBB.zMin(); z <= cellBB.zMax(); ++z )
@@ -227,43 +256,30 @@ void mapMovingBody( const pe::BodyID body, IBlock & block, const shared_ptr<Stru
    }
 }
 
-
-
+/*!\brief Mapping function to map all bodies - with certain properties - onto all blocks to the "moving obstacle" boundary condition, that requires the additional bodyField
+ *
+ * All bodies (from bodyStorage and globalBodyStorage) are iterated and mapped to all blocks.
+ * Cells that are inside the bodies are set to 'obstacle' and a pointer to the body is stored in the bodyField.
+ *
+ * Whether or not a body is mapped depends on the return value of the 'mappingBodySelectorFct'.
+ */
 template< typename BoundaryHandling_T >
-void mapMovingBodies( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, const BlockDataID & bodyStorageID,
-                      const BlockDataID & bodyFieldID, const FlagUID & obstacle )
+void mapMovingBodies( StructuredBlockStorage & blockStorage, const BlockDataID & boundaryHandlingID,
+                      const BlockDataID & bodyStorageID, pe::BodyStorage & globalBodyStorage,
+                      const BlockDataID & bodyFieldID, const FlagUID & obstacle,
+                      const std::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectAllBodies )
 {
-   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
+   for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )
    {
-       for (auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt)
-           mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
-   }
-}
-
-template< typename BoundaryHandling_T >
-void mapMovingGlobalBodies( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, pe::BodyStorage & globalBodyStorage,
-                            const BlockDataID & bodyFieldID, const FlagUID & obstacle )
-{
-   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
-   {
+      for (auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt)
+      {
+         if( mappingBodySelectorFct(*bodyIt))
+            mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
+      }
       for( auto bodyIt = globalBodyStorage.begin(); bodyIt != globalBodyStorage.end(); ++bodyIt)
       {
-         mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
-      }
-   }
-}
-
-template< typename BoundaryHandling_T >
-void mapMovingGlobalBody( const id_t globalBodySystemID,
-                          const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID, pe::BodyStorage & globalBodyStorage,
-                          const BlockDataID & bodyFieldID, const FlagUID & obstacle )
-{
-   for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
-   {
-      auto bodyIt = globalBodyStorage.find( globalBodySystemID );
-      if( bodyIt !=  globalBodyStorage.end() )
-      {
-         mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
+         if( mappingBodySelectorFct(*bodyIt))
+            mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
       }
    }
 }

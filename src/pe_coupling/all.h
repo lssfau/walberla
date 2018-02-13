@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "discrete_particle_methods/all.h"
 #include "mapping/all.h"
 #include "geometry/all.h"
 #include "partially_saturated_cells_method/all.h"

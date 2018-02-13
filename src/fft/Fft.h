@@ -22,7 +22,7 @@ class FourierTransform
 {
    public:
       FourierTransform( shared_ptr< StructuredBlockForest > & blocks, BlockDataID fieldId,
-                        boost::function<real_t(uint_t,uint_t,uint_t)> greens = boost::function<real_t(uint_t,uint_t,uint_t)>() );
+                        std::function<real_t(uint_t,uint_t,uint_t)> greens = std::function<real_t(uint_t,uint_t,uint_t)>() );
       void operator() ();
       
    private:

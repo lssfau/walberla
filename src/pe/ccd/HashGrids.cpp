@@ -770,23 +770,12 @@ void HashGrids::reloadBodies()
 }
 //*************************************************************************************************
 
-//**Implementation of ICCD interface ********************************************************
+
 //*************************************************************************************************
-/*!\brief Contact generation between colliding rigid bodies.
- *
- * \return Vector of possible contacts.
- *
- * This function generates all contacts between all registered rigid bodies. The contacts are
- * added to the contact container which can be retrieved via getPossibleContacts().
+/*!\brief Updates all hash grids and reassigns bodies.
  */
-PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
+void HashGrids::update(WcTimingTree* tt)
 {
-   if (tt != NULL) tt->start("CCD");
-
-   contacts_.clear();
-
-   WALBERLA_LOG_DETAIL( "   Finding the contacts via the hierarchical hash grids algorithm...");
-
    // ----- UPDATE PHASE ----- //
 
    if (tt != NULL) tt->start("AddNewBodies");
@@ -921,6 +910,26 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
       }
    }
    if (tt != NULL) tt->stop("Update");
+}
+
+//**Implementation of ICCD interface ********************************************************
+//*************************************************************************************************
+/*!\brief Contact generation between colliding rigid bodies.
+ *
+ * \return Vector of possible contacts.
+ *
+ * This function generates all contacts between all registered rigid bodies. The contacts are
+ * added to the contact container which can be retrieved via getPossibleContacts().
+ */
+PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
+{
+   if (tt != NULL) tt->start("CCD");
+
+   contacts_.clear();
+
+   WALBERLA_LOG_DETAIL( "   Finding the contacts via the hierarchical hash grids algorithm...");
+
+   update(tt);
 
    if (tt != NULL) tt->start("Detection");
    // ----- DETECTION STEP ----- //

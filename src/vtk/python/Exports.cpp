@@ -40,9 +40,10 @@ namespace internal {
 
    shared_ptr<VTKOutput> VTKOutput_create(const shared_ptr<StructuredBlockStorage> & sbs, const std::string & identifier,
                                           const std::string & baseFolder, const std::string & executionFolder,
-                                          const bool binary, const bool littleEndian, const bool useMPIIO )
+                                          const bool binary, const bool littleEndian, const bool useMPIIO,
+                                          uint_t ghostLayers=0)
    {
-      return createVTKOutput_BlockData(*sbs, identifier, 1, 0, false, baseFolder, executionFolder,
+      return createVTKOutput_BlockData(*sbs, identifier, 1, ghostLayers, false, baseFolder, executionFolder,
                                        true, binary, littleEndian, useMPIIO, 0);
    }
 
@@ -72,15 +73,18 @@ void exportModuleToPython()
        ;
 
    def("makeOutput", internal::VTKOutput_create, (arg("blocks"), arg("name"), arg("baseFolder")=".",
-                                                  arg("executionFolder")="vtk", arg("binary")=true, arg("littleEndian")=true, arg("useMPIIO")=true));
+                                                  arg("executionFolder")="vtk", arg("binary")=true,
+                                                  arg("littleEndian")=true, arg("useMPIIO")=true,
+                                                  arg("ghostLayers")=0));
 
    class_<VTKOutput, shared_ptr<VTKOutput>, boost::noncopyable > ("VTKOutput", no_init)
-      .def( "addCellDataWriter", &VTKOutput::addCellDataWriter )
-      .def( "write"           , &internal::VTKOutput_write  )
+      .def( "addCellDataWriter"     , &VTKOutput::addCellDataWriter )
+      .def( "write"                 , &internal::VTKOutput_write )
+      .def( "__call__"              , &internal::VTKOutput_write )
       .def( "addAABBInclusionFilter", &VTKOutput::addAABBInclusionFilter )
       .def( "addAABBExclusionFilter", &VTKOutput::addAABBExclusionFilter )
-      .def( "setSamplingResolution", p_setSamplingResolution1 )
-      .def( "setSamplingResolution", p_setSamplingResolution2 )
+      .def( "setSamplingResolution" , p_setSamplingResolution1 )
+      .def( "setSamplingResolution" , p_setSamplingResolution2 )
       ;
 }
 

@@ -114,7 +114,7 @@ int main( int argc, char* argv[] )
    auto originalFieldId = field::addToStorage< FieldType >( sbf, "OriginalField" );
    auto readFieldId     = field::addToStorage< FieldType >( sbf, "ReadField" );
 
-   math::seedRandomGenerator( numeric_cast<boost::mt19937::result_type>( MPIManager::instance()->rank() ) );
+   math::seedRandomGenerator( numeric_cast<std::mt19937::result_type>( MPIManager::instance()->rank() ) );
 
    for( auto it = sbf->begin(); it != sbf->end(); ++it )
    {

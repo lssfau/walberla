@@ -29,9 +29,9 @@ namespace math {
 
 namespace internal {
 
-static boost::mt19937 generator; // static boost::random::mt19937_64 generator;
+static std::mt19937 generator; // static std::mt19937_64 generator;
 
-boost::mt19937 & getGenerator() // boost::random::mt19937_64
+std::mt19937 & getGenerator() // std::mt19937_64
 {
    return generator;
 }
@@ -40,7 +40,7 @@ boost::mt19937 & getGenerator() // boost::random::mt19937_64
 
 
 
-void seedRandomGenerator( const boost::mt19937::result_type & seed )
+void seedRandomGenerator( const std::mt19937::result_type & seed )
 {
 #ifdef _OPENMP
    #pragma omp critical (random)

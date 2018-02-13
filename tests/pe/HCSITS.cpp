@@ -34,6 +34,9 @@ typedef boost::tuple<Sphere, Plane> BodyTuple ;
 
 void normalReactionTest(cr::HCSITS& cr, SphereID sp)
 {
+   contactThreshold = Thresholds<real_t>::contactThreshold();
+   // plane at 5,5,5
+   // radius 1.1
    sp->setPosition(  Vec3(5,5,6) );
    sp->setLinearVel( Vec3(0,0,0) );
    cr.setErrorReductionParameter( real_t(1.0) );
@@ -75,6 +78,22 @@ void normalReactionTest(cr::HCSITS& cr, SphereID sp)
    cr.timestep( real_c( real_t(1.0) ) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,6) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,0) );
+
+   sp->setPosition(  Vec3(5,5,real_t(6.2)) );
+   sp->setLinearVel( Vec3(0,0,real_t(-0.2)) );
+   cr.setErrorReductionParameter( real_t(1.0) );
+   cr.timestep( real_c( real_t(1.0) ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.0)) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(-0.2)) );
+
+   contactThreshold = real_t(1.0);
+   sp->setPosition(  Vec3(5,5,real_t(6.2)) );
+   sp->setLinearVel( Vec3(0,0,real_t(-0.2)) );
+   cr.setErrorReductionParameter( real_t(1.0) );
+   cr.timestep( real_c( real_t(1.0) ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.1)) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(-0.1)) );
+   contactThreshold = Thresholds<real_t>::contactThreshold();
 }
 
 void speedLimiterTest(cr::HCSITS& cr, SphereID sp)

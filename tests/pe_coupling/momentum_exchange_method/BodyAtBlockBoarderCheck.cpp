@@ -223,39 +223,6 @@ private:
       const pe::Vec3 referenceVelocity_;
 };
 
-class RefinementFunctorWrapper
-{
-public:
-   RefinementFunctorWrapper( boost::function< void () > fct )
-   : fct_( fct )
-   {
-   }
-
-   void operator()(const uint_t /*level*/, const uint_t /*executionCounter*/ )
-   {
-      fct_();
-   }
-
-private:
-   boost::function< void () > fct_;
-};
-
-class RefinementSweepWrapper
-{
-public:
-   RefinementSweepWrapper( boost::function< void ( IBlock * ) > fct )
-   : fct_( fct )
-   {
-   }
-
-   void operator()( IBlock * block, const uint_t /*level*/, const uint_t /*executionCounter*/ )
-   {
-      fct_( block );
-   }
-
-private:
-   boost::function< void ( IBlock * ) > fct_;
-};
 
 /*
  * This test case evaluates the correctness of the pe and the pe-coupling at the boundary between two blocks.
@@ -314,7 +281,7 @@ int main( int argc, char **argv )
 
    // connect to pe
    const real_t overlap = real_c( 1.5 ) * dx;
-   boost::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
 
    auto sphereMaterialID = pe::createMaterial( "sphereMat", real_c(1) , real_c(0.3), real_c(0.2), real_c(0.2), real_c(0.24), real_c(200), real_c(200), real_c(0), real_c(0) );
    // create two spheres: one which overlaps with a block boundary and one inside the block
@@ -354,7 +321,7 @@ int main( int argc, char **argv )
                                     MyBoundaryHandling( flagFieldID, pdfFieldID, bodyFieldID ), "boundary handling" );
 
    // initially map pe bodies into the LBM simulation
-   pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_Flag );
+   pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,  MO_Flag );
 
    ///////////////
    // TIME LOOP //
@@ -372,25 +339,25 @@ int main( int argc, char **argv )
    BodyEvaluator evalBodies( blocks, bodyStorageID, referenceVelocity );
 
    // add body evaluator
-   refinementTimestep->addPostCollideVoidFunction( RefinementFunctorWrapper( evalBodies ), "Body Evaluation", finestLevel );
+   refinementTimestep->addPostStreamVoidFunction( lbm::refinement::FunctorWrapper( evalBodies ), "Body Evaluation", finestLevel );
 
    // add pe timestep
    const real_t dtPE = real_c(1) / real_c( uint_c(1) << finestLevel );
-   //refinementTimestep->addPostCollideVoidFunction( RefinementFunctorWrapper( pe_coupling::TimeStep( blocks->getBlockStorage(), bodyStorageID, HCSITSWrapper( cr ), syncCall, dtPE, 1 ) ),
-   //                                                "pe Time Step", finestLevel );
 
-   refinementTimestep->addPostCollideVoidFunction( RefinementFunctorWrapper( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, dtPE, 1 ) ),
-                                                   "pe Time Step", finestLevel );
+   refinementTimestep->addPostStreamVoidFunction( lbm::refinement::FunctorWrapper( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, dtPE, 1 ) ),
+                                                  "pe Time Step", finestLevel );
 
    // add sweep for updating the pe body mapping into the LBM simulation
-   refinementTimestep->addPostCollideBlockFunction( RefinementSweepWrapper( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_Flag, FormerMO_Flag ) ),
-                                                    "Body Mapping", finestLevel );
+   refinementTimestep->addPostStreamVoidFunction( lbm::refinement::SweepAsFunctorWrapper( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID,
+                                                  bodyStorageID, globalBodyStorage, bodyFieldID, MO_Flag, FormerMO_Flag ), blocks ),
+                                                  "Body Mapping", finestLevel );
 
    // add sweep for restoring PDFs in cells previously occupied by pe bodies
    typedef pe_coupling::EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T > Reconstructor_T;
    Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID );
-   refinementTimestep->addPostCollideBlockFunction( RefinementSweepWrapper( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T > ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ) ),
-                                                    "PDF Restore", finestLevel );
+   refinementTimestep->addPostStreamVoidFunction( lbm::refinement::SweepAsFunctorWrapper( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T > ( blocks,
+                                                  boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), blocks ),
+                                                  "PDF Restore", finestLevel );
 
    timeloop.addFuncBeforeTimeStep( makeSharedFunctor( refinementTimestep ), "LBM refinement time step" );
 

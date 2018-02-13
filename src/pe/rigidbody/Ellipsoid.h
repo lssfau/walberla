@@ -55,8 +55,8 @@ namespace pe {
  * \brief Base class for the Ellipsoid geometry.
  *
  * The Ellipsoid class represents the base class for the Ellipsoid geometry. It provides
- * the basic functionality of a Ellipsoid. An Ellipsoid is obtained from a sphere by deforming it by means 
- * of directional scalings. Its three semi-axes corresponding to the x, y, z direction are labeled 
+ * the basic functionality of a Ellipsoid. An Ellipsoid is obtained from a sphere by deforming it by means
+ * of directional scalings. Its three semi-axes corresponding to the x, y, z direction are labeled
  * a, b, c.
  */
 class Ellipsoid : public GeomPrimitive
@@ -66,11 +66,11 @@ public:
    /*!\name Constructors */
    //@{
    explicit Ellipsoid( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
-                    const Vec3& semiAxes, MaterialID material,
-                    const bool global, const bool communicating, const bool infiniteMass );
+                       const Vec3& semiAxes, MaterialID material,
+                       const bool global, const bool communicating, const bool infiniteMass );
    explicit Ellipsoid( id_t const typeID, id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
-                    const Vec3& semiAxes, MaterialID material,
-                    const bool global, const bool communicating, const bool infiniteMass );
+                       const Vec3& semiAxes, MaterialID material,
+                       const bool global, const bool communicating, const bool infiniteMass );
    //@}
    //**********************************************************************************************
 
@@ -116,6 +116,7 @@ public:
    static inline real_t calcVolume( const Vec3& semiAxes );
    static inline real_t calcMass( const Vec3& semiAxes, real_t density );
    static inline real_t calcDensity( const Vec3& semiAxes, real_t mass );
+   static inline Mat3   calcInertia( const real_t mass, const Vec3& semiAxes );
    //@}
    //**********************************************************************************************
 
@@ -132,7 +133,6 @@ protected:
    /*!\name Utility functions */
    //@{
    inline virtual void calcBoundingBox();  // Calculation of the axis-aligned bounding box
-   inline         void calcInertia();      // Calculation of the moment of inertia
    //@}
    //**********************************************************************************************
 
@@ -140,7 +140,7 @@ protected:
    /*!\name Member variables */
    //@{
    Vec3 semiAxes_;  //!< Semi-axes of the Ellipsoid.
-                  /*!< The radius is constrained to values larger than 0.0. */
+   /*!< The radius is constrained to values larger than 0.0. */
    //@}
    //**********************************************************************************************
 private:
@@ -264,14 +264,14 @@ inline void Ellipsoid::calcBoundingBox()
    const real_t ylength( fabs(R_[3]*semiAxes_[0]) + fabs(R_[4]*semiAxes_[1]) + fabs(R_[5]*semiAxes_[2])  + contactThreshold );
    const real_t zlength( fabs(R_[6]*semiAxes_[0]) + fabs(R_[7]*semiAxes_[1]) + fabs(R_[8]*semiAxes_[2])  + contactThreshold );
    aabb_ = math::AABB(
-         gpos_[0] - xlength,
+            gpos_[0] - xlength,
          gpos_[1] - ylength,
          gpos_[2] - zlength,
          gpos_[0] + xlength,
          gpos_[1] + ylength,
          gpos_[2] + zlength
          );
-	//   WALBERLA_ASSERT( aabb_.isValid()        , "Invalid bounding box detected" );
+   //   WALBERLA_ASSERT( aabb_.isValid()        , "Invalid bounding box detected" );
    WALBERLA_ASSERT( aabb_.contains( gpos_ ), "Invalid bounding box detected("<< getSystemID() <<")\n" << "pos: " << gpos_ << "\nlengths: " << xlength << "," << ylength << ", " << zlength<< "\nvel: " << getLinearVel() << "\nbox: " << aabb_ );
 }
 //*************************************************************************************************
@@ -282,12 +282,12 @@ inline void Ellipsoid::calcBoundingBox()
  *
  * \return void
  */
-inline void Ellipsoid::calcInertia()
+inline Mat3 Ellipsoid::calcInertia( const real_t mass, const Vec3& semiAxes )
 {
-   I_[0] = real_c(0.2) * mass_ * (semiAxes_[1] * semiAxes_[1] + semiAxes_[2] * semiAxes_[2]);
-   I_[4] = real_c(0.2) * mass_ * (semiAxes_[2] * semiAxes_[2] + semiAxes_[0] * semiAxes_[0]);
-   I_[8] = real_c(0.2) * mass_ * (semiAxes_[0] * semiAxes_[0] + semiAxes_[1] * semiAxes_[1]);
-   Iinv_ = I_.getInverse();
+   return Mat3::makeDiagonalMatrix(
+            real_c(0.2) * mass * (semiAxes[1] * semiAxes[1] + semiAxes[2] * semiAxes[2]),
+            real_c(0.2) * mass * (semiAxes[2] * semiAxes[2] + semiAxes[0] * semiAxes[0]),
+            real_c(0.2) * mass * (semiAxes[0] * semiAxes[0] + semiAxes[1] * semiAxes[1]));
 }
 //*************************************************************************************************
 
@@ -303,11 +303,11 @@ inline Vec3 Ellipsoid::support( const Vec3& d ) const
    auto len = d.sqrLength();
    if (!math::equal(len, real_t(0)))
    {
-	  Vec3 d_loc = vectorFromWFtoBF(d);
-	  Vec3 norm_vec(d_loc[0] * semiAxes_[0], d_loc[1] * semiAxes_[1], d_loc[2] * semiAxes_[2]);
-	  real_t norm_length = norm_vec.length();
-	  Vec3 local_support = (real_t(1.0) / norm_length) * Vec3(semiAxes_[0] * semiAxes_[0] * d_loc[0], 
-			semiAxes_[1] * semiAxes_[1] * d_loc[1], semiAxes_[2] * semiAxes_[2] * d_loc[2]);
+      Vec3 d_loc = vectorFromWFtoBF(d);
+      Vec3 norm_vec(d_loc[0] * semiAxes_[0], d_loc[1] * semiAxes_[1], d_loc[2] * semiAxes_[2]);
+      real_t norm_length = norm_vec.length();
+      Vec3 local_support = (real_t(1.0) / norm_length) * Vec3(semiAxes_[0] * semiAxes_[0] * d_loc[0],
+            semiAxes_[1] * semiAxes_[1] * d_loc[1], semiAxes_[2] * semiAxes_[2] * d_loc[2]);
       return pointFromBFtoWF(local_support);
    } else
    {
