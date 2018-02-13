@@ -23,6 +23,8 @@
 #include <pe/raytracing/ShadingFunctions.h>
 
 #include <pe/ccd/HashGrids.h>
+#include "pe/rigidbody/BodyStorage.h"
+#include <core/timing/TimingTree.h>
 
 using namespace walberla;
 using namespace walberla::pe;
@@ -382,56 +384,267 @@ void hashgridsPlayground() {
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    HashGrids::HashGrid hashgrid(1.0); // initialize a 4x4x4 hashgrid with cellspan 1.0 (can hold a block with 4x4x4 in size.)
    
-   Vec3 lengths(0.5, 0.5, 0.5);
+   std::vector<Vec3> centers = {
+      Vec3(-0.25, -0.75, 0.5),
+      Vec3(0.5, -0.5, 0.5),
+      Vec3(-0.25, -0.75, 0.5),
+      Vec3(1.25, -0.25, 0.5),
+      Vec3(-1.25, 0.25, 0.5)
+   };
+   std::vector<Vec3> lengths = {
+      Vec3(1, 1, 1),
+      Vec3(0.5, 0.5, 0.5),
+      Vec3(0.5, 0.5, 0.5),
+      Vec3(1, 1, 1),
+      Vec3(1, 1, 1)
+   };
+
+   for (size_t i = 0; i < centers.size(); i++) {
+      BoxID box = createBox(*globalBodyStorage, *forest, storageID, walberla::id_t(i), centers[i], lengths[i]);
+      hashgrid.add(box);
+      WALBERLA_LOG_INFO("Box " << box->getID() << " at " << centers[i] << " hashed with " << box->getHash());
+   }
+
+   WALBERLA_LOG_INFO("domain: " << forest->getDomain());
+
+   real_t inf = std::numeric_limits<real_t>::max();
+
+   BodyID closestBody = NULL;
+   real_t t_closest = inf;
+   real_t t;
+   Vec3 n;
    
-   for (int i = 0; i<=3; i++) {
-      for (int j = 0; j<=3; j++) {
-         BoxID box = createBox(*globalBodyStorage, *forest, storageID, walberla::id_t(i*4+j), Vec3(-1.5+i,-1.5+j,0.5), lengths);
-         hashgrid.add(box);
-         WALBERLA_LOG_INFO("Box " << box->getID() << " at " << Vec3(-1.5+i,-1.5+j,0.5) << " hashed with " << box->getHash());
+   std::vector<Ray> rays = {
+      Ray(Vec3(-2.5, -1.25, 0.5), Vec3(20, 7, 0).getNormalized()),
+      Ray(Vec3(1.5, -0.5, 0.5), Vec3(-20, -7, 0).getNormalized()),
+      Ray(Vec3(-2.25, 1.75, 0.5), Vec3(1, -1, 0).getNormalized())
+   };
+
+   int i = 0;
+   for (const Ray& ray: rays) {
+      closestBody = NULL;
+      t_closest = inf;
+      
+      WALBERLA_LOG_INFO("--- ray " << i << ": " << ray.getOrigin() << ", " << ray.getDirection());
+      
+      std::vector<BodyID> bodiesContainer;
+      hashgrid.possibleRayIntersectingBodies(ray, forest->getDomain(), bodiesContainer);
+      
+      WALBERLA_LOG_INFO("Resulting bodies:");
+      IntersectsFunctor intersectsFunc(ray, t, n);
+      for (BodyID const& body : bodiesContainer) {
+         bool intersects = SingleCast<BodyTuple, IntersectsFunctor, bool>::execute(body, intersectsFunc);
+         if (intersects && t < t_closest) {
+            closestBody = body;
+            t_closest = t;
+         }
+         std::cout << body->getID() << " ";
+      }
+      std::cout << std::endl;
+      
+      if (closestBody != NULL) {
+         WALBERLA_LOG_INFO("closest: " << closestBody->getID() << " with t = " << t_closest);
+      } else {
+         WALBERLA_LOG_INFO("could not find closest body");
+      }
+      
+      closestBody = NULL;
+      t_closest = inf;
+      
+      closestBody = hashgrid.getRayIntersectingBody<BodyTuple>(ray, forest->getDomain(), t, n);
+      if (closestBody == NULL) {
+         WALBERLA_LOG_INFO("couldnt find closest body with direct resolution");
+      } else {
+         WALBERLA_LOG_INFO("closest with direct resolution: " << closestBody->getID() << " with t = " << t);
+      }
+      i++;
+   }*/
+}
+
+void HashGridsTest() {
+   using namespace walberla::pe::ccd;
+
+   math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
+
+   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(-4,-4,-4,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
+   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+   //HashGrids::HashGrid hashgrid(2.0); // initialize a 4x4x4 hashgrid with cellspan 2.0 (can hold a block with 8x8x8 in size.)
+   
+   //auto hccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "HCCD");
+   
+   std::vector<IBlock*> blocks;
+   forest->getBlocks(blocks);
+   WALBERLA_LOG_INFO(blocks.size());
+   
+   Storage* storage = blocks[0]->getData<Storage>(storageID);
+   HashGrids hashGrids(*globalBodyStorage, (*storage)[0], (*storage)[1]);
+   
+   const AABB& blockAABB = forest->getDomain();
+   real_t inf = std::numeric_limits<real_t>::max();
+   
+   size_t boxCount = 10000;
+   size_t capsuleCount = 5000;
+   
+   // generate bodies for test
+   std::vector<BodyID> bodies;
+   for (size_t i = 0; i < boxCount; i++) {
+      real_t x = math::realRandom(blockAABB.xMin()+0.5, blockAABB.xMax());
+      real_t y = math::realRandom(blockAABB.yMin()+0.5, blockAABB.yMax());
+      real_t z = math::realRandom(blockAABB.zMin()+0.5, blockAABB.zMax());
+      real_t len = math::realRandom(real_t(0.2), real_t(0.5));
+      BoxID box = createBox(*globalBodyStorage, *forest, storageID, walberla::id_t(i), Vec3(x, y, z), Vec3(len, len, len));
+      //hashgrid.add(box);
+      hashGrids.add(box);
+      bodies.push_back(box);
+   }
+   for (size_t i = 0; i < capsuleCount; i++) {
+      real_t x = math::realRandom(blockAABB.xMin()+0.5, blockAABB.xMax());
+      real_t y = math::realRandom(blockAABB.yMin()+0.5, blockAABB.yMax());
+      real_t z = math::realRandom(blockAABB.zMin()+0.5, blockAABB.zMax());
+      real_t len = math::realRandom(real_t(0.2), real_t(0.5));
+      real_t radius = real_t(0.1);
+      CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, walberla::id_t(boxCount+i), Vec3(x, y, z), radius, len);
+      //hashgrid.add(capsule);
+      hashGrids.add(capsule);
+      bodies.push_back(capsule);
+   }
+   hashGrids.generatePossibleContacts();
+   
+   // rays used for testing
+   std::vector<Ray> rays = {
+      Ray(Vec3(-5, 0.2, 0.2), Vec3(1, 0, 0).getNormalized()),
+      Ray(Vec3(5, 0.2, 0.2), Vec3(-1, 0, 0).getNormalized()),
+      Ray(Vec3(5, -5, -5), Vec3(-20, -7, 2).getNormalized()),
+      Ray(Vec3(-4.5, 3.5, 0.5), Vec3(1, -1, 0).getNormalized()),
+      Ray(Vec3(4.5, 5, 0.5), Vec3(-1, -1, 1).getNormalized()),
+      Ray(Vec3(0, 2, 6), Vec3(0, -0.1, -1).getNormalized()),
+      Ray(Vec3(-5, -5, -5), Vec3(1, 1, 1).getNormalized())
+   };
+   
+   real_t t;
+   Vec3 n;
+   
+   BodyID closestBody_naive = NULL;
+   real_t t_closest_naive = inf;
+   
+   BodyID closestBody_allpossible = NULL;
+   real_t t_closest_allpossible = inf;
+   
+   BodyID closestBody_first = NULL;
+   real_t t_closest_first = inf;
+   
+   BodyID closestBody_hashgrids_first = NULL;
+   real_t t_closest_hashgrids_first = inf;
+   
+   int i = 0;
+   for (const Ray& ray: rays) {
+      WALBERLA_LOG_INFO("RAY " << i << ": " << ray.getOrigin() << ", " << ray.getDirection() << " ----");
+
+      // reset variables for new ray
+      closestBody_naive = NULL;
+      t_closest_naive = inf;
+      closestBody_allpossible = NULL;
+      t_closest_allpossible = inf;
+      closestBody_first = NULL;
+      t_closest_first = inf;
+      
+      // -- naive method
+      IntersectsFunctor naiveIntersectsFunc(ray, t, n);
+      for (const BodyID& body: bodies) {
+         bool intersects = SingleCast<BodyTuple, IntersectsFunctor, bool>::execute(body, naiveIntersectsFunc);
+         if (intersects && t < t_closest_naive && t > 0) {
+            closestBody_naive = body;
+            t_closest_naive = t;
+         }
+      }
+      WALBERLA_LOG_INFO(" Naive closest: \t\t\t" << (closestBody_naive != NULL ? std::to_string(closestBody_naive->getID()) : "none")
+                        << " and t = " << t_closest_naive);
+      if (closestBody_naive != NULL) {
+         WALBERLA_LOG_INFO("  gpos: " << closestBody_naive->getPosition() << ", aabb: " << closestBody_naive->getAABB());
+      }
+      /*
+      // -- hashgrid and collecting all possible bodies
+      std::vector<BodyID> bodiesContainer;
+      hashgrid.possibleRayIntersectingBodies(ray, forest->getDomain(), bodiesContainer);
+      
+      IntersectsFunctor intersectsFunc(ray, t, n);
+      for (BodyID const& body : bodiesContainer) {
+         bool intersects = SingleCast<BodyTuple, IntersectsFunctor, bool>::execute(body, intersectsFunc);
+         if (intersects && t < t_closest_allpossible) {
+            closestBody_allpossible = body;
+            t_closest_allpossible = t;
+         }
+      }
+      WALBERLA_LOG_INFO("All possible closest: \t" << (closestBody_allpossible != NULL ? std::to_string(closestBody_allpossible->getID()) : "none")
+                        << " and t = " << t_closest_allpossible);
+      
+      // -- hashgrid and only until closest body found
+      closestBody_first = hashgrid.getRayIntersectingBody<BodyTuple>(ray, forest->getDomain(), t_closest_first, n);
+      WALBERLA_LOG_INFO("First closest: \t\t\t" << (closestBody_first != NULL ? std::to_string(closestBody_first->getID()) : "none")
+                        << " and t = " << t_closest_first);
+      
+      //WALBERLA_CHECK(closestBody_naive == closestBody_allpossible && closestBody_naive == closestBody_first,
+      //               "Different intersection methods dont match");
+      */
+      
+      // -- using hashgrids and only until closest body found
+      
+      WALBERLA_LOG_INFO(" Hashgrids");
+      closestBody_hashgrids_first = hashGrids.getClosestBodyIntersectingWithRay<BodyTuple>(ray, blockAABB, t_closest_hashgrids_first, n);
+      
+      WALBERLA_LOG_INFO(" Hashgrids closest: \t\t" << (closestBody_hashgrids_first != NULL ? std::to_string(closestBody_hashgrids_first->getID()) : "none")
+                        << " and t = " << t_closest_hashgrids_first);
+      if (closestBody_hashgrids_first != NULL) {
+         WALBERLA_LOG_INFO("  gpos: " << closestBody_hashgrids_first->getPosition() << ", aabb: " << closestBody_hashgrids_first->getAABB());
+      }
+      
+      if (closestBody_naive == closestBody_hashgrids_first) {
+         WALBERLA_LOG_INFO("-> SAME")
+      } else {
+         WALBERLA_LOG_INFO("-> FAIL");
+      }
+      
+      WALBERLA_CHECK(closestBody_naive == closestBody_hashgrids_first);
+
+      WALBERLA_LOG_INFO("RAY " << i << " end. ----");
+      i++;
+   }
+
+   WcTimingTree tt;
+   tt.start("Hashgrids Loop");
+   Ray ray(Vec3(0, 0, -7), Vec3(1, 0, 0));
+
+   int rays_x = 1000;
+   int rays_y = 1000;
+
+   for (int x = 0; x < rays_x; ++x) {
+      for (int y = 0; y < rays_y; ++y) {
+         Vec3 dir = (Vec3(-4+8*real_t(x)/real_t(rays_x), -4+8*real_t(y)/real_t(rays_y), 4) - ray.getOrigin()).getNormalized();
+         ray.setDirection(dir);
+         closestBody_hashgrids_first = hashGrids.getClosestBodyIntersectingWithRay<BodyTuple>(ray, blockAABB, t_closest_hashgrids_first, n);
       }
    }
-   
-   
-   std::vector<BodyID> bodiesContainer;
-   
-   WALBERLA_LOG_INFO("domain: " << forest->getDomain());
-   
-   WALBERLA_LOG_INFO("ray:");
-   Ray ray(Vec3(-3, -1.6, 0), Vec3(4, 1, 0).getNormalized());
-   hashgrid.possibleRayIntersectingBodies(ray, forest->getDomain(), bodiesContainer);
-   WALBERLA_LOG_INFO("Resulting bodies:");
-   for (BodyID const& body : bodiesContainer) {
-      std::cout << body->getID() << " ";
-   }
-   std::cout << std::endl;
+   tt.stop("Hashgrids Loop");
 
-   WALBERLA_LOG_INFO("ray2:");
-   bodiesContainer.clear();
-   Ray ray2(Vec3(-2.1, -2.1, 0), Vec3(1, 1, 0).getNormalized());
-   hashgrid.possibleRayIntersectingBodies(ray2, forest->getDomain(), bodiesContainer);
-   WALBERLA_LOG_INFO("Resulting bodies:");
-   for (BodyID const& body : bodiesContainer) {
-      std::cout << body->getID() << " ";
+   /*tt.start("Naive Loop");
+   IntersectsFunctor naiveIntersectsFunc(ray, t, n);
+   for (int x = 0; x < rays_x; ++x) {
+      for (int y = 0; y < rays_y; ++y) {
+         Vec3 dir = (Vec3(-4+8*real_t(x)/real_t(rays_x), -4+8*real_t(y)/real_t(rays_y), 4) - ray.getOrigin()).getNormalized();
+         ray.setDirection(dir);
+         for (const BodyID& body: bodies) {
+            SingleCast<BodyTuple, IntersectsFunctor, bool>::execute(body, naiveIntersectsFunc);
+         }
+      }
    }
-   std::cout << std::endl;
+   tt.stop("Naive Loop");*/
    
-   WALBERLA_LOG_INFO("ray3:");
-   bodiesContainer.clear();
-   Ray ray3(Vec3(3, -1, 0), Vec3(-7, 2, 0).getNormalized());
-   hashgrid.possibleRayIntersectingBodies(ray3, forest->getDomain(), bodiesContainer);
-   WALBERLA_LOG_INFO("Resulting bodies: ");
-   for (BodyID const& body : bodiesContainer) {
-      std::cout << body->getID() << " ";
+   auto temp = tt.getReduced( );
+   WALBERLA_ROOT_SECTION()
+   {
+      std::cout << temp;
    }
-   std::cout << std::endl;
-
-   /*WALBERLA_LOG_INFO("");
-   WALBERLA_LOG_INFO(hashgrid.hashPoint(-0.5, -0.5, 0));
-   WALBERLA_LOG_INFO(hashgrid.hashPoint(-1.5, -1.5, 0));
-   WALBERLA_LOG_INFO(hashgrid.hashPoint(-1.5, 1.5, 0));
-   WALBERLA_LOG_INFO(hashgrid.hashPoint(1.5, -1.5, 0));
-   WALBERLA_LOG_INFO(hashgrid.hashPoint(2.5, 3.5, 0));*/
 }
 
 int main( int argc, char** argv )
@@ -449,7 +662,9 @@ int main( int argc, char** argv )
    //RaytracerTest();
    //RaytracerSpheresTest();
    
-   hashgridsPlayground();
+   HashGridsTest();
+   
+   //hashgridsPlayground();
 
    return EXIT_SUCCESS;
 }

@@ -313,6 +313,21 @@ void HashGrids::HashGrid::initializeNeighborOffsets()
  *
  * \param body The body whose hash value is about to be calculated.
  * \return The hash value (=cell association) of the body.
+ */
+size_t HashGrids::HashGrid::hash( BodyID body ) const
+{
+   const AABB bodyAABB = body->getAABB();
+   return hashPoint(bodyAABB.xMin(), bodyAABB.yMin(), bodyAABB.zMin());
+}
+//*************************************************************************************************
+
+   
+/*!\brief Computes the hash for a given point.
+ *
+ * \param x X value of the point.
+ * \param y Y value of the point.
+ * \param y Z value of the point.
+ * \return The hash value (=cell association) of the point.
  *
  * The hash calculation uses modulo operations in order to spatially map entire blocks of connected
  * cells to the origin of the coordinate system. This block of cells at the origin of the coordinate
@@ -324,13 +339,6 @@ void HashGrids::HashGrid::initializeNeighborOffsets()
  * Note that the modulo calculations are replaced with fast bitwise AND operations - hence, the
  * spatial dimensions of the hash grid must be restricted to powers of two!
  */
-size_t HashGrids::HashGrid::hash( BodyID body ) const
-{
-   const AABB bodyAABB = body->getAABB();
-   return hashPoint(bodyAABB.xMin(), bodyAABB.yMin(), bodyAABB.zMin());
-}
-//*************************************************************************************************
-
 size_t HashGrids::HashGrid::hashPoint(real_t x, real_t y, real_t z) const {
    size_t xHash;
    size_t yHash;
@@ -365,135 +373,7 @@ size_t HashGrids::HashGrid::hashPoint(real_t x, real_t y, real_t z) const {
    
    return xHash + yHash * xCellCount_ + zHash * xyCellCount_;
 }
-   
-/*!\brief Adds bodies of cell at x/y/z and neighboring ones to the container.
- *
- * \param x x value of center of cell to be processed.
- * \param y y value of center of cell to be processed.
- * \param z z value of center of cell to be processed.
- * \param blockAABB AABB of the block this grid corresponds to.
- * \param cellIndices Container for already processed cell indices.
- * \param bodiesContainer Vector the bodies will be gathered in.
- *
- * Inserts bodies of specified cell into bodiesContainer and additionally considers bodies in neighboring cells
- * in all negative coordinate direction to take bodies in consideration, which protrude from their
- * cell into the intersected cell (and thus, possibly intersect with the ray as well).
- */
-void HashGrids::HashGrid::insertRelatedCellIndicesForCenter(real_t x, real_t y, real_t z, const AABB& blockAABB,
-                                                            std::unordered_set<size_t>& cellIndices,
-                                                            std::vector<BodyID>& bodiesContainer) const {
-   const Vec3& minCorner = blockAABB.minCorner();
-   const Vec3& maxCorner = blockAABB.maxCorner();
-   for (int i = -1; i <= 0; ++i) {
-      for (int j = -1; j <= 0; ++j) {
-         for (int k = -1; k <= 0; ++k) {
-            real_t x_shifted = x + i*cellSpan_;
-            real_t y_shifted = y + j*cellSpan_;
-            real_t z_shifted = z + k*cellSpan_;
-            if (x_shifted > minCorner[0] && y_shifted > minCorner[1] && z_shifted > minCorner[2] &&
-               x_shifted < maxCorner[0] && y_shifted < maxCorner[1] && z_shifted < maxCorner[2]) {
-               size_t hash = hashPoint(x_shifted, y_shifted, z_shifted);
-               if (cellIndices.find(hash) == cellIndices.end()) {
-                  cellIndices.insert(hash);
-                  Cell cell = cell_[hash];
-                  if (cell.bodies_ != NULL) {
-                     bodiesContainer.insert(bodiesContainer.end(), cell.bodies_->begin(), cell.bodies_->end());
-                  }
-               }
-            }
-         }
-      }
-   }
-}
 
-/*!\brief Calculates ray-cell intersections and gathers the bodies of the intersected cells.
- *
- * \param ray Ray getting shot through this grid.
- * \param blockAABB AABB of the block this grid corresponds to.
- * \param bodiesContainer Vector the bodies will be gathered in.
- *
- * This function calculates all ray-cell intersections and then fills the bodiesContainer vector with the
- * bodies of the intersected cells. Additionally, neighboring cells in all negative coordinate direction are
- * regarded to take bodies in consideration, which protrude from their cell into the intersected cell (and thus,
- * possibly intersect with the ray as well).
- */
-void HashGrids::HashGrid::possibleRayIntersectingBodies(const raytracing::Ray& ray, const AABB& blockAABB,
-                                                        std::vector<BodyID>& bodiesContainer) const {
-   std::unordered_set<size_t> cellIndices;
-   
-   const Vec3& rayDirection = ray.getDirection();
-   const Vec3& minCorner = blockAABB.minCorner();
-   const Vec3& maxCorner = blockAABB.maxCorner();
-   const Vec3& rayOrigin = ray.getOrigin();
-   const Vec3& rayInvDirection = ray.getInvDirection();
-
-   real_t xCenterOffsetFactor = rayDirection[0] < 0 ? -0.5 : 0.5;
-   real_t yCenterOffsetFactor = rayDirection[1] < 0 ? -0.5 : 0.5;
-   real_t zCenterOffsetFactor = rayDirection[2] < 0 ? -0.5 : 0.5;
-   
-   for (int i = 0; i <= xCellCount_; i++) {
-      real_t xValue = minCorner[0] + i*cellSpan_; // calculate x value
-      // get lambda in ray equation for which ray intersects with yz plane with this x value
-      real_t lambda = (xValue - rayOrigin[0]) * rayInvDirection[0];
-      real_t yValue = rayOrigin[1] + lambda * rayDirection[1]; // get y and z values for this intersection
-      real_t zValue = rayOrigin[2] + lambda * rayDirection[2];
-      if (yValue > maxCorner[1] || yValue < minCorner[1] ||
-          zValue > maxCorner[2] || zValue < minCorner[2] ||
-          lambda != lambda) {
-         // calculated intersection with yz plane is out of the blocks bounds
-         continue;
-      }
-      real_t centeredXValue = xValue + cellSpan_*xCenterOffsetFactor;
-      if (centeredXValue > maxCorner[0] || centeredXValue < minCorner[0]) {
-         // intersection was with one of the outer bounds of the block and in this direction no more cells exist
-         continue;
-      }
-      // calculate the y and z values of the center of the cell
-      real_t centeredYValue = (size_t((yValue - minCorner[1])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[1];
-      real_t centeredZValue = (size_t((zValue - minCorner[2])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[2];
-      insertRelatedCellIndicesForCenter(centeredXValue, centeredYValue, centeredZValue, blockAABB, cellIndices, bodiesContainer);
-   }
-   
-   for (int i = 0; i < yCellCount_; i++) {
-      real_t yValue = minCorner[1] + i*cellSpan_;
-      real_t lambda = (yValue - rayOrigin[1]) * rayInvDirection[1];
-      real_t xValue = rayOrigin[0] + lambda * rayDirection[0];
-      real_t zValue = rayOrigin[2] + lambda * rayDirection[2];
-      if (xValue >= maxCorner[0] || xValue < minCorner[0] ||
-          zValue >= maxCorner[2] || zValue < minCorner[2] ||
-          lambda != lambda) {
-         continue;
-      }
-      real_t centeredXValue = (size_t((xValue - minCorner[0])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[0];
-      real_t centeredYValue = yValue + cellSpan_*yCenterOffsetFactor;
-      if (centeredYValue > maxCorner[1] || centeredYValue < minCorner[1]) {
-         continue;
-      }
-      real_t centeredZValue = (size_t((zValue - minCorner[2])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[2];
-      insertRelatedCellIndicesForCenter(centeredXValue, centeredYValue, centeredZValue, blockAABB, cellIndices, bodiesContainer);
-   }
-   
-   for (int i = 0; i < zCellCount_; i++) {
-      real_t zValue = minCorner[2] + i*cellSpan_;
-      real_t lambda = (zValue - rayOrigin[2]) * rayInvDirection[2];
-      real_t xValue = rayOrigin[0] + lambda * rayDirection[0];
-      real_t yValue = rayOrigin[1] + lambda * rayDirection[1];
-      if (xValue > maxCorner[0] || xValue < minCorner[0] ||
-          yValue > maxCorner[1] || yValue < minCorner[1] ||
-          lambda != lambda) {
-         continue;
-      }
-      real_t centeredXValue = (size_t((xValue - minCorner[0])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[0];
-      real_t centeredYValue = (size_t((yValue - minCorner[1])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[1];
-      real_t centeredZValue = zValue + cellSpan_*zCenterOffsetFactor;
-      if (centeredZValue > maxCorner[2] || centeredZValue < minCorner[2]) {
-         continue;
-      }
-      insertRelatedCellIndicesForCenter(centeredXValue, centeredYValue, centeredZValue, blockAABB, cellIndices, bodiesContainer);
-   }
-}
-
-   
 //*************************************************************************************************
 /*!\brief Adds a body to a specific cell in this hash grid.
  *
@@ -1311,7 +1191,7 @@ bool HashGrids::powerOfTwo( size_t number )
  * note that the initial number of cells does not necessarily have to be equal for all three
  * coordinate directions.
  */
-const size_t HashGrids::xCellCount = 4;
+const size_t HashGrids::xCellCount = 16;
 //*************************************************************************************************
 
 
@@ -1328,7 +1208,7 @@ const size_t HashGrids::xCellCount = 4;
  * note that the initial number of cells does not necessarily have to be equal for all three
  * coordinate directions.
  */
-const size_t HashGrids::yCellCount = 4;
+const size_t HashGrids::yCellCount = 16;
 //*************************************************************************************************
 
 
@@ -1345,7 +1225,7 @@ const size_t HashGrids::yCellCount = 4;
  * note that the initial number of cells does not necessarily have to be equal for all three
  * coordinate directions.
  */
-const size_t HashGrids::zCellCount = 4;
+const size_t HashGrids::zCellCount = 16;
 //*************************************************************************************************
 
 

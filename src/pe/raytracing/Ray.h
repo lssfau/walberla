@@ -22,6 +22,7 @@
 
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
+#include <pe/rigidbody/RigidBody.h>
 
 namespace walberla {
 namespace pe {
