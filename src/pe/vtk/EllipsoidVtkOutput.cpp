@@ -70,8 +70,8 @@ void EllipsoidVtkOutput::configure()
             Mat3 cxc = math::dyadicProduct(directionVectorZ, directionVectorZ);
             Mat3 tensor = axa * semiAxes[0] + bxb * semiAxes[1] + cxc * semiAxes[2];
             // use symmetry to only write 6 of the 9 elements: XX YY ZZ XY YZ XZ
-            tensorGlyphs_.push_back({tensor(0,0), tensor(1,1), tensor(2,2),
-                                     tensor(0,1), tensor(1,2), tensor(0,2)});
+            tensorGlyphs_.push_back({{tensor(0,0), tensor(1,1), tensor(2,2),
+                                      tensor(0,1), tensor(1,2), tensor(0,2)}});
          }
       }
    }
