@@ -289,7 +289,7 @@ public:
    //@}
    //**********************************************************************************************
 
-   void    update(WcTimingTree* tt);
+   void    update(WcTimingTree* tt = NULL);
    //**Implementation of ICCD interface ********************************************************
    virtual PossibleContacts& generatePossibleContacts( WcTimingTree* tt = NULL );
 
