@@ -23,6 +23,7 @@
 #pragma once
 
 #include "BodiesForceTorqueContainer.h"
+#include "BodySelectorFunctions.h"
 #include "ForceOnBodiesAdder.h"
 #include "ForceTorqueOnBodiesResetter.h"
 #include "ForceTorqueOnBodiesScaler.h"

@@ -277,7 +277,6 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
       current = entryHeap.back();
       entryHeap.pop_back();
       if(!current->isObsolete()) {
-         WALBERLA_ASSERT_GREATER(current->getSqrDist(), real_t(0.0), "EPA_Trianalge distance is negative.");
          lowerBoundSqr = current->getSqrDist();
 
          if(epaVolume.size() == maxSupportPoints_) {
@@ -289,6 +288,10 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
          // if origin is contained in plane, use out-facing normal.
          Vec3 normal;
          if(current->getSqrDist() < real_comparison::Epsilon<real_t>::value*real_comparison::Epsilon<real_t>::value){
+            if(current->getNormal().sqrLength() < real_comparison::Epsilon<real_t>::value*real_comparison::Epsilon<real_t>::value){
+               break;
+            }
+
             normal = current->getNormal().getNormalized();
          }else{
             normal = current->getClosest().getNormalized();
@@ -826,7 +829,7 @@ inline bool EPA::searchTetrahedron(GeomPrimitive &geom1, GeomPrimitive &geom2, s
 
       }
    }
-   while(pointIndexToRemove != 0);
+   while(pointIndexToRemove != -1);
    //std::cerr << "Found Tet after " << loopCount << " searches." << std::endl;
 
    //Build final tetrahedron

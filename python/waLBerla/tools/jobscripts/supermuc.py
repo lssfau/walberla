@@ -49,11 +49,9 @@ def createJobscript( wall_time = None, nodes = None, cores = None, job_class = N
                 job_class='micro' 
         elif nodes <= 512:
             job_class= 'general'
-        elif nodes <= 2048:
-            job_class = 'large'
         else:
-            job_class = 'special'
-    
+            job_class = 'large'
+
     tasks_per_node = min( CORES_PER_NODE, cores )
     
     task_affinity = "core" if hyperthreading==1 else "cpu"

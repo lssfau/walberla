@@ -47,8 +47,8 @@ namespace field {
 
 namespace internal {
 
-typedef boost::function< real_t () >  FlowRateSolution_T;
-typedef boost::function< Vector3< real_t > ( const Vector3< real_t > & ) >  FlowRateVelocitySolution_T;
+typedef std::function< real_t () >  FlowRateSolution_T;
+typedef std::function< Vector3< real_t > ( const Vector3< real_t > & ) >  FlowRateVelocitySolution_T;
 
 const std::string     volumetricFlowRateEvaluationFilename("flowrate.dat");
 const real_t          volumetricFlowRateEvaluationNormalization( real_t(1) );
@@ -205,7 +205,7 @@ public:
 
    real_t solution() const
    {
-      if( solution_.empty() )
+      if( !solution_ )
          return real_t(0);
 
       auto blocks = blocks_.lock();
@@ -305,7 +305,7 @@ void VolumetricFlowRateEvaluation< VelocityField_T, Filter_T >::operator()()
       if( axis_[0] )
       {
          const auto factor = normalizationFactor_ * normalizedDy * normalizedDz;
-         if( velocitySolution_.empty() )
+         if( !velocitySolution_ )
          {
             WALBERLA_FOR_ALL_CELLS_XYZ_OMP( field, omp parallel for schedule(static) reduction(+:_flowRate),
 
@@ -338,7 +338,7 @@ void VolumetricFlowRateEvaluation< VelocityField_T, Filter_T >::operator()()
       else if( axis_[1] )
       {
          const auto factor = normalizationFactor_ * normalizedDx * normalizedDz;
-         if( velocitySolution_.empty() )
+         if( !velocitySolution_ )
          {
             WALBERLA_FOR_ALL_CELLS_XYZ_OMP( field, omp parallel for schedule(static) reduction(+:_flowRate),
 
@@ -371,7 +371,7 @@ void VolumetricFlowRateEvaluation< VelocityField_T, Filter_T >::operator()()
       else
       {
          const auto factor = normalizationFactor_ * normalizedDx * normalizedDy;
-         if( velocitySolution_.empty() )
+         if( !velocitySolution_ )
          {
             WALBERLA_FOR_ALL_CELLS_XYZ_OMP( field, omp parallel for schedule(static) reduction(+:_flowRate),
 
@@ -420,16 +420,16 @@ void VolumetricFlowRateEvaluation< VelocityField_T, Filter_T >::operator()()
          file << "# volumetric flow rate evaluation of data '" << id <<  "'\n"
               << "# step [1], flow rate (simulation) [2], flow rate (\"discrete\" solution) [3], flow rate (exact solution) [4]"
                  ", rel. error (base = \"discrete\" solution) [5], rel. error (base = exact solution) [6]" << std::endl;
-         if( velocitySolution_.empty() )
+         if( !velocitySolution_ )
             file << "ATTENTION: \"discrete\" solution values not available and thus not valid!" << std::endl;
-         if( solution_.empty() )
+         if( !solution_ )
             file << "ATTENTION: exact solution values not available and thus not valid!" << std::endl;
          file.close();
       }
 
       if( log )
       {
-         if( !velocitySolution_.empty() && !solution_.empty() )
+         if( velocitySolution_ && solution_ )
          {
             WALBERLA_LOG_INFO( "Evaluation of the volumetric flow rate [data = '" << id << "']:" <<
                                "\n- exact solution:      " << _solution <<
@@ -439,18 +439,18 @@ void VolumetricFlowRateEvaluation< VelocityField_T, Filter_T >::operator()()
                                "\n   + " << ( std::abs( ( flowRate_ - velocitySolutionFlowRate_ ) / velocitySolutionFlowRate_ ) ) << " (base = \"discrete\" solution)" <<
                                "\n   + " << ( std::abs( ( flowRate_ - _solution ) / _solution ) ) << " (base = exact solution)" );
          }
-         else if( !velocitySolution_.empty() )
+         else if( velocitySolution_ )
          {
-            WALBERLA_ASSERT( solution_.empty() );
+            WALBERLA_ASSERT( !solution_ );
             WALBERLA_LOG_INFO( "Evaluation of the volumetric flow rate [data = '" << id << "']:" <<
                                "\n- \"discrete\" solution: " <<  velocitySolutionFlowRate_ << " (using reference velocities evaluated at cell centers)" <<
                                "\n- simulation:          " <<  flowRate_ <<  " (using computed velocities evaluated at cell centers)" <<
                                "\n- rel. error (of the simulation): " << ( std::abs( flowRate_ - velocitySolutionFlowRate_ ) / velocitySolutionFlowRate_ ) );
 
          }
-         else if( !solution_.empty() )
+         else if( solution_ )
          {
-            WALBERLA_ASSERT( velocitySolution_.empty() );
+            WALBERLA_ASSERT( !velocitySolution_ );
             WALBERLA_LOG_INFO( "Evaluation of the volumetric flow rate [data = '" << id << "']:" <<
                                "\n- exact solution: " << _solution <<
                                "\n- simulation:     " <<  flowRate_ <<
@@ -459,7 +459,7 @@ void VolumetricFlowRateEvaluation< VelocityField_T, Filter_T >::operator()()
          }
          else
          {
-            WALBERLA_ASSERT( solution_.empty() && velocitySolution_.empty() );
+            WALBERLA_ASSERT( !solution_ && !velocitySolution_ );
             WALBERLA_LOG_INFO( "Evaluation of the volumetric flow rate [data = '" << id << "']: " << flowRate_ );
          }
       }
@@ -467,7 +467,7 @@ void VolumetricFlowRateEvaluation< VelocityField_T, Filter_T >::operator()()
       if( plot )
       {
          std::ofstream file( filename_.c_str(), std::ofstream::out | std::ofstream::app );
-         file << ( executionCounter_ - uint_t(1) ) << " " << flowRate_ << " " << velocitySolutionFlowRate_ << " " << solution_ << " "
+         file << ( executionCounter_ - uint_t(1) ) << " " << flowRate_ << " " << velocitySolutionFlowRate_ << " " << _solution << " "
               << ( isIdentical( velocitySolutionFlowRate_, real_t(0) ) ? real_t(0) : std::abs( ( flowRate_ - velocitySolutionFlowRate_ ) / velocitySolutionFlowRate_ ) ) << " "
               << ( isIdentical( _solution, real_t(0) ) ? real_t(0) : std::abs( ( flowRate_ - _solution ) / _solution ) ) << std::endl;
          file.close();

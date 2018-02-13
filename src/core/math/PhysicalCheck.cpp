@@ -231,7 +231,7 @@ namespace math {
          constraints_.push_back( *i );
    }
 
-   void PhysicalCheck::completeConfig( const boost::shared_ptr<Config>& config )
+   void PhysicalCheck::completeConfig( const shared_ptr<Config>& config )
    {
       auto globalBlock = config->getWritableGlobalBlock();
 

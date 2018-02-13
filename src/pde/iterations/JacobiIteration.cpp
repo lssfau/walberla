@@ -37,7 +37,7 @@ void JacobiIteration::operator()()
    uint_t i( uint_t(0) );
    while( i < iterations_ )
    {
-      if( !boundary_.empty() )
+      if( boundary_ )
          boundary_();
       communication_();
 
@@ -48,7 +48,7 @@ void JacobiIteration::operator()()
       {
          if( (i % residualCheckFrequency_) == uint_t(0) )
          {
-            if( !boundary_.empty() )
+            if( boundary_ )
                boundary_();
             const real_t residualNorm = residualNorm_();
             WALBERLA_CHECK( math::finite(residualNorm), "Non-finite residual norm detected during the Jacobi iteration, "

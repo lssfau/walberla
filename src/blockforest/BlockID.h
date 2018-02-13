@@ -93,8 +93,8 @@ private:
 
    static const uint_t SHIFT = UINT_BITS - 3;
 
-   BOOST_STATIC_ASSERT( UINT_BITS > 31 );
-   BOOST_STATIC_ASSERT( !(UINT_BITS & (UINT_BITS - 1)) ); // power of two
+   WALBERLA_STATIC_ASSERT( UINT_BITS > 31 );
+   WALBERLA_STATIC_ASSERT( !(UINT_BITS & (UINT_BITS - 1)) ); // power of two
 
 }; // class BlockID
 

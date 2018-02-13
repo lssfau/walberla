@@ -32,7 +32,7 @@
 #include "core/load_balancing/MetisWrapper.h"
 #include "core/math/KahanSummation.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <algorithm>
 #include <list>
@@ -55,7 +55,7 @@ public:
    class MetisConfiguration {
 
    public:
-      typedef boost::function< memory_t ( const BLOCK* const, const BLOCK* const ) > CommunicationFunction;
+      typedef std::function< memory_t ( const BLOCK* const, const BLOCK* const ) > CommunicationFunction;
 
       MetisConfiguration( const bool _includeMetis = false, const bool _forceMetis = false, CommunicationFunction _communicationFunction = 0,
                           const real_t _maxUbvec = real_c(1.5), const uint_t _iterations = uint_c(10) ) :
@@ -801,7 +801,7 @@ uint_t GlobalLoadBalancing::metis( const std::vector< BLOCK* >& blocks, const me
 
       for( uint_t j = 0; j != block->getNeighborhoodSize(); ++j ) {
          adjncy.push_back( numeric_cast<int64_t>( block->getNeighbor(j)->getIndex() ) );
-         adjwgt.push_back( metisConfig.communicationFunction().empty() ? 1 :
+         adjwgt.push_back( !metisConfig.communicationFunction() ? 1 :
                            ( numeric_cast<int64_t>( static_cast< memory_t >(0.5) + metisConfig.communicationFunction()( block, block->getNeighbor(j) ) ) ) );
       }
 

@@ -35,7 +35,8 @@ waLBerla_compile_test( FILES adaptors/AdaptorTest.cpp DEPENDS blockforest gui lb
 waLBerla_execute_test( NAME AdaptorTest )
 
 waLBerla_compile_test( FILES FieldGatherTest.cpp DEPENDS blockforest gui )
-waLBerla_execute_test( NAME FieldGatherTest PROCESSES 3 )
+waLBerla_execute_test( NAME FieldGatherTest3 COMMAND $<TARGET_FILE:FieldGatherTest>  PROCESSES 3 )
+waLBerla_execute_test( NAME FieldGatherTest1 COMMAND $<TARGET_FILE:FieldGatherTest>  PROCESSES 1 )
 
 waLBerla_compile_test( FILES FieldFileIOTest.cpp DEPENDS blockforest )
 waLBerla_execute_test( NAME FieldFileIOTest1Proc  COMMAND $<TARGET_FILE:FieldFileIOTest> PROCESSES 1  )
@@ -59,7 +60,7 @@ endif( WALBERLA_BUILD_WITH_MPI )
 
 # CodeGen Tests
 
-waLBerla_compile_test( FILES codegen/CodegenJacobiCPU.cpp codegen/JacobiKernel2D.gen.py codegen/JacobiKernel3D.gen.py
+waLBerla_compile_test( FILES codegen/CodegenJacobiCPU.cpp codegen/JacobiKernel.py
                        DEPENDS gui timeloop )
 waLBerla_execute_test( NAME CodegenJacobiCPU )
 

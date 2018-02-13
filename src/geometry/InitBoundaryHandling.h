@@ -127,7 +127,19 @@ void setNonBoundaryCellsToDomain( StructuredBlockStorage & blocks, BlockDataID b
    }
 }
 
-
+template<typename FlagField_T>
+void setNonBoundaryCellsToDomain( StructuredBlockStorage & blocks, BlockDataID flagFieldID,
+                                  field::FlagUID fluidFlagID)
+{
+   for( auto blockIt = blocks.begin(); blockIt != blocks.end(); ++blockIt )
+   {
+      auto flagField = blockIt->template getData<FlagField_T>( flagFieldID );
+      auto fluidFlag = flagField->getOrRegisterFlag(fluidFlagID);
+      for( auto it = flagField->beginWithGhostLayerXYZ(); it != flagField->end(); ++it )
+         if ( *it == 0 )
+            addFlag(it, fluidFlag);
+   }
+}
 
 
 } // namespace geometry

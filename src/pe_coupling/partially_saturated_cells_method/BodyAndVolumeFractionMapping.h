@@ -32,6 +32,9 @@
 
 #include "pe_coupling/geometry/PeOverlapFraction.h"
 #include "pe_coupling/mapping/BodyBBMapping.h"
+#include "pe_coupling/utility/BodySelectorFunctions.h"
+
+#include <functional>
 
 namespace walberla {
 namespace pe_coupling {
@@ -45,7 +48,7 @@ namespace pe_coupling {
  * As several bodies could intersect with one cell, the pairs are stored in a vector with the size of the amount of intersecting bodies.
  *
  */
-void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, const shared_ptr<StructuredBlockStorage> & blockStorage,
+void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, StructuredBlockStorage & blockStorage,
                                   const BlockDataID bodyAndVolumeFractionFieldID )
 {
    typedef std::pair< pe::BodyID, real_t >                              BodyAndVolumeFraction_T;
@@ -63,9 +66,9 @@ void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, const s
 
       // get the cell's center
       Vector3<real_t> cellCenter;
-      cellCenter = blockStorage->getBlockLocalCellCenter( block, cell );
+      cellCenter = blockStorage.getBlockLocalCellCenter( block, cell );
 
-      const real_t fraction = overlapFractionPe( *body, cellCenter, blockStorage->dx( blockStorage->getLevel( block ) ) );
+      const real_t fraction = overlapFractionPe( *body, cellCenter, blockStorage.dx( blockStorage.getLevel( block ) ) );
 
       // if the cell intersected with the body, store a pointer to that body and the corresponding volume fraction in the field
       if( fraction > real_t(0) )
@@ -78,6 +81,8 @@ void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, const s
 /*!\brief Mapping class that can be used inside the timeloop to update the volume fractions and body mappings
  *
  * Upon construction, it uses the free mapping function to initialize the fraction and body mapping field.
+ *
+ * Whether or not a body is considered by this mapping depends on the return value of 'mappingBodySelectorFct'.
  *
  * Successive calls try to update this field instead of completely recalculating all volume fractions which is expensive.
  * To do so, the update functionality determines whether bodies have very small velocities, both translational and rotational,
@@ -100,16 +105,15 @@ public:
    typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
 
    BodyAndVolumeFractionMapping( const shared_ptr<StructuredBlockStorage> & blockStorage,
-                                 const shared_ptr<pe::BodyStorage> globalBodyStorage,
+                                 const shared_ptr<pe::BodyStorage> & globalBodyStorage,
                                  const BlockDataID & bodyStorageID,
                                  const BlockDataID & bodyAndVolumeFractionFieldID,
-                                 const bool mapFixedBodies = false,
-                                 const bool mapGlobalBodies = false,
+                                 const std::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectRegularBodies,
                                  const real_t velocityUpdatingEpsilon = real_t(0),
                                  const real_t positionUpdatingEpsilon = real_t(0),
                                  const uint_t superSamplingDepth = uint_t(4) )
    : blockStorage_( blockStorage), globalBodyStorage_( globalBodyStorage ), bodyStorageID_( bodyStorageID ),
-     bodyAndVolumeFractionFieldID_( bodyAndVolumeFractionFieldID ), mapFixed_( mapFixedBodies ), mapGlobal_( mapGlobalBodies ),
+     bodyAndVolumeFractionFieldID_( bodyAndVolumeFractionFieldID ), mappingBodySelectorFct_( mappingBodySelectorFct ),
      velocityUpdatingEpsilonSquared_( velocityUpdatingEpsilon * velocityUpdatingEpsilon ),
      positionUpdatingEpsilonSquared_( positionUpdatingEpsilon * positionUpdatingEpsilon ),
      superSamplingDepth_( superSamplingDepth )
@@ -127,11 +131,9 @@ public:
 
 private:
 
-   void updatePSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block,
+   void updatePSMBodyAndVolumeFraction( pe::BodyID body, IBlock & block,
                                         BodyAndVolumeFractionField_T * oldBodyAndVolumeFractionField,
                                         std::map< walberla::id_t, Vector3< real_t > > & tempLastUpdatedPositionMap );
-   void updateGlobalPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block,
-                                              BodyAndVolumeFractionField_T * oldBodyAndVolumeFractionField);
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
    shared_ptr<pe::BodyStorage> globalBodyStorage_;
@@ -139,8 +141,7 @@ private:
    const BlockDataID bodyStorageID_;
    const BlockDataID bodyAndVolumeFractionFieldID_;
 
-   const bool        mapFixed_;
-   const bool        mapGlobal_;
+   std::function<bool(pe::BodyID)> mappingBodySelectorFct_;
 
    shared_ptr<BodyAndVolumeFractionField_T> updatedBodyAndVolumeFractionField_;
    std::map< walberla::id_t, Vector3< real_t > > lastUpdatedPositionMap_;
@@ -177,20 +178,22 @@ void BodyAndVolumeFractionMapping::initialize()
 
       for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         // only PSM and finite bodies (no planes, etc.) are mapped
-         if( /*!isPSMBody( *bodyIt ) ||*/ ( bodyIt->isFixed() && !mapFixed_ ) )
-            continue;
-         mapPSMBodyAndVolumeFraction( *bodyIt, *blockIt, blockStorage_, bodyAndVolumeFractionFieldID_ );
-         lastUpdatedPositionMap_.insert( std::pair< walberla::id_t, Vector3< real_t > >( bodyIt->getSystemID(), bodyIt->getPosition() ) );
-      }
-
-      if( mapGlobal_ )
-      {
-         for( auto globalBodyIt = globalBodyStorage_->begin(); globalBodyIt != globalBodyStorage_->end(); ++globalBodyIt )
+         if( mappingBodySelectorFct_(*bodyIt) )
          {
-            mapPSMBodyAndVolumeFraction( *globalBodyIt, *blockIt, blockStorage_, bodyAndVolumeFractionFieldID_ );
+            mapPSMBodyAndVolumeFraction( *bodyIt, *blockIt, *blockStorage_, bodyAndVolumeFractionFieldID_ );
+            lastUpdatedPositionMap_.insert( std::pair< walberla::id_t, Vector3< real_t > >( bodyIt->getSystemID(), bodyIt->getPosition() ) );
          }
       }
+
+      for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt )
+      {
+         if( mappingBodySelectorFct_(*bodyIt) )
+         {
+            mapPSMBodyAndVolumeFraction(*bodyIt, *blockIt, *blockStorage_, bodyAndVolumeFractionFieldID_);
+            lastUpdatedPositionMap_.insert( std::pair< walberla::id_t, Vector3< real_t > >( bodyIt->getSystemID(), bodyIt->getPosition() ) );
+         }
+      }
+
    }
 }
 
@@ -204,17 +207,17 @@ void BodyAndVolumeFractionMapping::update()
 
       for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         // only PSM and finite bodies (no planes, etc.) are mapped
-         if( /*!isPSMBody( *bodyIt ) ||*/ ( bodyIt->isFixed() && !mapFixed_ ) )
-            continue;
-         updatePSMBodyAndVolumeFraction( *bodyIt, *blockIt, bodyAndVolumeFractionField, tempLastUpdatedPositionMap );
+         if( mappingBodySelectorFct_(*bodyIt) )
+         {
+            updatePSMBodyAndVolumeFraction(*bodyIt, *blockIt, bodyAndVolumeFractionField, tempLastUpdatedPositionMap);
+         }
       }
 
-      if( mapGlobal_ )
+      for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt )
       {
-         for( auto globalBodyIt = globalBodyStorage_->begin(); globalBodyIt != globalBodyStorage_->end(); ++globalBodyIt )
+         if( mappingBodySelectorFct_(*bodyIt) )
          {
-            updateGlobalPSMBodyAndVolumeFraction( *globalBodyIt, *blockIt, bodyAndVolumeFractionField );;
+            updatePSMBodyAndVolumeFraction(*bodyIt, *blockIt, bodyAndVolumeFractionField, tempLastUpdatedPositionMap);
          }
       }
 
@@ -230,7 +233,7 @@ void BodyAndVolumeFractionMapping::update()
    lastUpdatedPositionMap_ = tempLastUpdatedPositionMap;
 }
 
-void BodyAndVolumeFractionMapping::updatePSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block,
+void BodyAndVolumeFractionMapping::updatePSMBodyAndVolumeFraction( pe::BodyID body, IBlock & block,
                                                                    BodyAndVolumeFractionField_T * oldBodyAndVolumeFractionField,
                                                                    std::map< walberla::id_t, Vector3< real_t > > & tempLastUpdatedPositionMap )
 {
@@ -252,7 +255,7 @@ void BodyAndVolumeFractionMapping::updatePSMBodyAndVolumeFraction( const pe::Bod
    }
 
    // get bounding box of body
-   CellInterval cellBB = getCellBB( body, block, blockStorage_, oldBodyAndVolumeFractionField->nrOfGhostLayers() );
+   CellInterval cellBB = getCellBB( body, block, *blockStorage_, oldBodyAndVolumeFractionField->nrOfGhostLayers() );
 
    // if body has not moved (specified by some epsilon), just reuse old fraction values
    if( body->getLinearVel().sqrLength()  < velocityUpdatingEpsilonSquared_ &&
@@ -308,30 +311,6 @@ void BodyAndVolumeFractionMapping::updatePSMBodyAndVolumeFraction( const pe::Bod
    }
 }
 
-void BodyAndVolumeFractionMapping::updateGlobalPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block,
-                                                                         BodyAndVolumeFractionField_T * oldBodyAndVolumeFractionField )
-{
-
-   WALBERLA_ASSERT_NOT_NULLPTR( oldBodyAndVolumeFractionField );
-
-   // get bounding box of body
-   CellInterval cellBB = getCellBB( body, block, blockStorage_, oldBodyAndVolumeFractionField->nrOfGhostLayers() );
-
-   // copy values of global body to new field
-   for( auto cellIt = cellBB.begin(); cellIt != cellBB.end(); ++cellIt )
-   {
-      Cell cell( *cellIt );
-      auto oldVec = oldBodyAndVolumeFractionField->get(cell);
-      for( auto pairIt = oldVec.begin(); pairIt != oldVec.end(); ++pairIt )
-      {
-         if( pairIt->first == body )
-         {
-            updatedBodyAndVolumeFractionField_->get(cell).push_back(*pairIt);
-            break;
-         }
-      }
-   }
-}
 
 } // namespace pe_coupling
 } // namespace walberla

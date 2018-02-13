@@ -87,7 +87,7 @@ object python_createUniformBlockGrid(tuple args, dict kw)
            *it != "dx" &&
            *it != "oneBlockPerProcess"  )
       {
-         PyErr_SetString( PyExc_ValueError, (std::string("Unknown Parameter") + (*it) ).c_str() );
+         PyErr_SetString( PyExc_ValueError, (std::string("Unknown Parameter: ") + (*it) ).c_str() );
          throw boost::python::error_already_set();
       }
    }

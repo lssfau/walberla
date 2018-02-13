@@ -78,24 +78,26 @@ void SnowManFallingOnPlane()
    MaterialID iron = Material::find("iron");
    UnionType* un   = createUnion< boost::tuple<Sphere> >( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(5,5,5) );
    SphereID sp1 = new Sphere( 10, 0, Vec3(5,5,1), Vec3(0,0,0), Quat(), real_t(1)  , iron, false, true, false );
-   SphereID sp2 = new Sphere( 11, 0, Vec3(6,5,2), Vec3(0,0,0), Quat(), real_t(1.5), iron, false, true, false );
+   SphereID sp2 = new Sphere( 11, 0, Vec3(real_t(6.7),5,real_t(1.2)), Vec3(0,0,0), Quat(), real_t(1.1), iron, false, true, false );
    un->add(sp1);
    un->add(sp2);
 
-   auto vtkOutput   = make_shared<SphereVtkOutput>(storageID, forest->getBlockStorage()) ;
-   auto vtkWriter   = vtk::createVTKOutput_PointData(vtkOutput, "Bodies", 1, "vtk_out", "simulation_step", false, false);
+   auto distance = (sp1->getPosition() - sp2->getPosition()).length();
 
-   for (unsigned int i = 0; i < 10000; ++i)
+   //auto vtkOutput   = make_shared<SphereVtkOutput>(storageID, forest->getBlockStorage()) ;
+   //auto vtkWriter   = vtk::createVTKOutput_PointData(vtkOutput, "Bodies", 1, "vtk_out", "simulation_step", false, false);
+
+   for (unsigned int i = 0; i < 1000; ++i)
    {
-      vtkWriter->write( true );
-      cr.timestep( real_t(0.001) );
+      //vtkWriter->write( true );
+      cr.timestep( real_t(0.1) );
    }
 
    //WALBERLA_CHECK_FLOAT_EQUAL( sp1->getLinearVel().length(), real_t(0) );
    //WALBERLA_CHECK_FLOAT_EQUAL( sp2->getLinearVel().length(), real_t(0) );
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON( sp1->getPosition()[2], real_t(1)  , real_t(0.001) );
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON( sp2->getPosition()[2], real_t(1.5), real_t(0.001) );
-   WALBERLA_CHECK_FLOAT_EQUAL( (sp1->getPosition() - sp2->getPosition()).length(), real_t(sqrt(2)) );
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON( sp2->getPosition()[2], real_t(1.1), real_t(0.001) );
+   WALBERLA_CHECK_FLOAT_EQUAL( (sp1->getPosition() - sp2->getPosition()).length(), distance );
 
    //WALBERLA_LOG_DEVEL(un);
 }

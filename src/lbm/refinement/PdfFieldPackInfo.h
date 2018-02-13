@@ -658,7 +658,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalCoa
 
 #ifndef NDEBUG
                if( boundaryHandling->isDomain(sx,sy,sz) )
-                  WALBERLA_ASSERT( !math::isnan( sf->get( sx, sy, sz, idx ) ) );
+                  WALBERLA_ASSERT( !math::isnan( sf->get( sx, sy, sz, idx ) ), sx << ", " << sy << ", " << sz << ", " << idx << " coarse sender block = " << coarseSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
 #endif
                }
                rx += cell_idx_t(2);
@@ -697,7 +697,7 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalCoa
 
 #ifndef NDEBUG
                if( boundaryHandling->isDomain(sx,sy,sz) )
-                  WALBERLA_ASSERT( !math::isnan( value ) );
+                  WALBERLA_ASSERT( !math::isnan( value ), "value at " << sx << ", " << sy << ", " << sz << ", " << idx << " coarse sender block = " << coarseSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
 #endif
 
                   rf->get( rx,                 ry,                 rz,                 idx ) = value;
@@ -779,16 +779,16 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::packDataFineToCoars
 #ifndef NDEBUG
                if( boundaryHandling->isDomain(x,y,z) )
                {
-                  WALBERLA_ASSERT( !math::isnan( field->get( x,                 y,                 z,                 idx ) ) );
-                  WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y,                 z,                 idx ) ) );
-                  WALBERLA_ASSERT( !math::isnan( field->get( x,                 y + cell_idx_t(1), z,                 idx ) ) );
-                  WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y + cell_idx_t(1), z,                 idx ) ) );
+                  WALBERLA_ASSERT( !math::isnan( field->get( x,                 y,                 z,                 idx ) ), x << ", " << y << ", " << z << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                  WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y,                 z,                 idx ) ), x + cell_idx_t(1) << ", " << y << ", " << z << ", " << idx <<" fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
+                  WALBERLA_ASSERT( !math::isnan( field->get( x,                 y + cell_idx_t(1), z,                 idx ) ), x << ", " << y + cell_idx_t(1) << ", " << z << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
+                  WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y + cell_idx_t(1), z,                 idx ) ), x + cell_idx_t(1) << ", " << y + cell_idx_t(1) << ", " << z << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
                   if( Stencil::D == uint_t(3) )
                   {
-                     WALBERLA_ASSERT( !math::isnan( field->get( x,                 y,                 z + cell_idx_t(1), idx ) ) );
-                     WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y,                 z + cell_idx_t(1), idx ) ) );
-                     WALBERLA_ASSERT( !math::isnan( field->get( x,                 y + cell_idx_t(1), z + cell_idx_t(1), idx ) ) );
-                     WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y + cell_idx_t(1), z + cell_idx_t(1), idx ) ) );
+                     WALBERLA_ASSERT( !math::isnan( field->get( x,                 y,                 z + cell_idx_t(1), idx ) ), x << ", " << y << ", " << z + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> "  );
+                     WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y,                 z + cell_idx_t(1), idx ) ), x + cell_idx_t(1) << ", " << y << ", " << z + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
+                     WALBERLA_ASSERT( !math::isnan( field->get( x,                 y + cell_idx_t(1), z + cell_idx_t(1), idx ) ), x << ", " << y + cell_idx_t(1) << ", " << z + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
+                     WALBERLA_ASSERT( !math::isnan( field->get( x + cell_idx_t(1), y + cell_idx_t(1), z + cell_idx_t(1), idx ) ), x + cell_idx_t(1) << ", " << y + cell_idx_t(1) << ", " << z + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> " );
                   }
                }
 #endif
@@ -925,16 +925,16 @@ void PdfFieldPackInfo< LatticeModel_T, BoundaryHandling_T >::communicateLocalFin
 #ifndef NDEBUG
                if( boundaryHandling->isDomain(sx,sy,sz) )
                {
-                  WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy,                 sz,                 idx ) ) );
-                  WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy,                 sz,                 idx ) ) );
-                  WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy + cell_idx_t(1), sz,                 idx ) ) );
-                  WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy + cell_idx_t(1), sz,                 idx ) ) );
+                  WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy,                 sz,                 idx ) ), sx << ", " << sy << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                  WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy,                 sz,                 idx ) ), sx + cell_idx_t(1) << ", " << sy << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                  WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy + cell_idx_t(1), sz,                 idx ) ), sx << ", " << sy + cell_idx_t(1) << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                  WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy + cell_idx_t(1), sz,                 idx ) ), sx + cell_idx_t(1) << ", " << sy + cell_idx_t(1) << ", " << sz << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
                   if( Stencil::D == uint_t(3) )
                   {
-                     WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy,                 sz + cell_idx_t(1), idx ) ) );
-                     WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy,                 sz + cell_idx_t(1), idx ) ) );
-                     WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy + cell_idx_t(1), sz + cell_idx_t(1), idx ) ) );
-                     WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy + cell_idx_t(1), sz + cell_idx_t(1), idx ) ) );
+                     WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy,                 sz + cell_idx_t(1), idx ) ), sx << ", " << sy << ", " << sz + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                     WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy,                 sz + cell_idx_t(1), idx ) ), sx + cell_idx_t(1) << ", " << sy << ", " << sz + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                     WALBERLA_ASSERT( !math::isnan( sf->get( sx,                 sy + cell_idx_t(1), sz + cell_idx_t(1), idx ) ), sx << ", " << sy + cell_idx_t(1) << ", " << sz + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
+                     WALBERLA_ASSERT( !math::isnan( sf->get( sx + cell_idx_t(1), sy + cell_idx_t(1), sz + cell_idx_t(1), idx ) ), sx + cell_idx_t(1) << ", " << sy + cell_idx_t(1) << ", " << sz + cell_idx_t(1) << ", " << idx << " fine sender block = " << fineSender->getId() << " in dir <" << stencil::cx[dir] << "," << stencil::cy[dir] << "," << stencil::cz[dir] << "> ");
                   }
                }
 #endif

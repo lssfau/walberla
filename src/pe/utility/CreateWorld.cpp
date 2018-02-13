@@ -30,17 +30,37 @@
 #include <core/logging/Logging.h>
 #include <core/math/AABB.h>
 
+#include <memory>
+
 namespace walberla {
 namespace pe {
 
-shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
-                                          Vector3<uint_t> blocks,
-                                          const Vector3<bool> isPeriodic,
-                                          const uint_t numberOfProcesses)
+class FixedRefinementLevelSelector
+{
+public:
+   FixedRefinementLevelSelector( const uint_t level ) : level_(level) {}
+   void operator()( SetupBlockForest& forest )
+   {
+      for( auto block = forest.begin(); block != forest.end(); ++block )
+      {
+         if( block->getLevel() < level_ )
+            block->setMarker( true );
+      }
+   }
+private:
+   uint_t level_;
+};
+
+std::unique_ptr<SetupBlockForest> createSetupBlockForest(const math::AABB simulationDomain,
+                                                         Vector3<uint_t> blocks,
+                                                         const Vector3<bool> isPeriodic,
+                                                         const uint_t numberOfProcesses,
+                                                         const uint_t initialRefinementLevel)
 {
    WALBERLA_MPI_SECTION()
    {
-      MPIManager::instance()->useWorldComm();
+      if (!MPIManager::instance()->rankValid())
+         MPIManager::instance()->useWorldComm();
    }
 
    if (isPeriodic[0] && blocks[0]<2)
@@ -59,14 +79,31 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
       blocks[2] = 2;
    }
 
-   SetupBlockForest sforest;
-   sforest.addWorkloadMemorySUIDAssignmentFunction( blockforest::uniformWorkloadAndMemoryAssignment );
-   sforest.init( simulationDomain, blocks[0], blocks[1], blocks[2], isPeriodic[0], isPeriodic[1], isPeriodic[2] );
+   auto sforest = std::unique_ptr<SetupBlockForest>( new SetupBlockForest() );
+   sforest->addWorkloadMemorySUIDAssignmentFunction( blockforest::uniformWorkloadAndMemoryAssignment );
+   sforest->addRefinementSelectionFunction( FixedRefinementLevelSelector(initialRefinementLevel) );
+   sforest->init( simulationDomain, blocks[0], blocks[1], blocks[2], isPeriodic[0], isPeriodic[1], isPeriodic[2] );
 
-   WALBERLA_LOG_INFO_ON_ROOT( "Balancing for " << numberOfProcesses << " processes...");
+   WALBERLA_LOG_INFO_ON_ROOT( "Balancing " << sforest->getNumberOfBlocks() << " blocks for " << numberOfProcesses << " processes...");
 
-   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses );
-   return shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, false ) );
+   sforest->balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, real_t(0), memory_t(0), false, true );
+   return sforest;
+}
+
+shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
+                                          Vector3<uint_t> blocks,
+                                          const Vector3<bool> isPeriodic,
+                                          const uint_t numberOfProcesses,
+                                          const uint_t initialRefinementLevel)
+{
+   WALBERLA_MPI_SECTION()
+   {
+      if (!MPIManager::instance()->rankValid())
+         MPIManager::instance()->useWorldComm();
+   }
+
+   std::unique_ptr<SetupBlockForest> sforest( createSetupBlockForest( simulationDomain, blocks, isPeriodic, numberOfProcesses, initialRefinementLevel ));
+   return shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), *sforest, false ) );
 }
 
 shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
@@ -74,31 +111,9 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
                                           const Vector3<bool> isPeriodic,
                                           const bool setupRun,
                                           const std::string sbffile,
-                                          const uint_t numberOfProcesses)
+                                          const uint_t numberOfProcesses,
+                                          const uint_t initialRefinementLevel)
 {
-   WALBERLA_MPI_SECTION()
-   {
-      MPIManager::instance()->useWorldComm();
-   }
-
-   if (isPeriodic[0] && blocks[0]<2)
-   {
-      WALBERLA_LOG_WARNING_ON_ROOT( "To few blocks in periodic x direction (" << blocks[0] << ")! Setting to 2..." );
-      blocks[0] = 2;
-   }
-   if (isPeriodic[1] && blocks[1]<2)
-   {
-      WALBERLA_LOG_WARNING_ON_ROOT( "To few blocks in periodic y direction (" << blocks[1] << ")! Setting to 2..." );
-      blocks[1] = 2;
-   }
-   if (isPeriodic[2] && blocks[2]<2)
-   {
-      WALBERLA_LOG_WARNING_ON_ROOT( "To few blocks in periodic z direction (" << blocks[2] << ")! Setting to 2..." );
-      blocks[2] = 2;
-   }
-
-   WALBERLA_LOG_INFO_ON_ROOT( "Setup file specified: Using " << sbffile );
-
    if (setupRun)
    {
       WALBERLA_LOG_INFO_ON_ROOT("Setup run. For production run specify 'setupRun = false'");
@@ -110,16 +125,8 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
       {
          WALBERLA_LOG_INFO_ON_ROOT( "Creating the block structure ..." );
 
-         SetupBlockForest sforest;
-
-         sforest.addWorkloadMemorySUIDAssignmentFunction( blockforest::uniformWorkloadAndMemoryAssignment );
-
-         sforest.init( simulationDomain, blocks[0], blocks[1], blocks[2], isPeriodic[0], isPeriodic[1], isPeriodic[2] );
-
-         // calculate process distribution
-         sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses );
-
-         sforest.saveToFile( sbffile.c_str() );
+         std::unique_ptr<SetupBlockForest> sforest( createSetupBlockForest(simulationDomain, blocks, isPeriodic, numberOfProcesses, initialRefinementLevel) );
+         sforest->saveToFile( sbffile.c_str() );
 
          WALBERLA_LOG_INFO_ON_ROOT( "SetupBlockForest successfully saved to file!" );
       }
@@ -127,15 +134,20 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
       return shared_ptr<BlockForest>();
    }
 
+   WALBERLA_MPI_SECTION()
+   {
+      if (!MPIManager::instance()->rankValid())
+         MPIManager::instance()->useWorldComm();
+   }
+
    WALBERLA_LOG_INFO_ON_ROOT( "Production Run!" );
    WALBERLA_LOG_INFO_ON_ROOT( "Creating the block structure: loading from file \'" << sbffile << "\' ..." );
-
    return shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false ) );
 }
 
+
 shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& mainConf)
 {
-
    bool setupRun                 = mainConf.getParameter< bool >( "setupRun", true );
    Vec3 simulationCorner         = mainConf.getParameter<Vec3>("simulationCorner", Vec3(0, 0, 0));
    Vec3 simulationSize           = mainConf.getParameter<Vec3>("simulationDomain", Vec3(10, 10, 10));
@@ -144,19 +156,18 @@ shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& m
    Vector3<bool> isPeriodic      = mainConf.getParameter<Vector3<bool>>("isPeriodic", Vector3<bool>(true, true, true));
    uint_t numberOfProcesses      = mainConf.getParameter<uint_t>( "numberOfProcesses",
                                                                   setupRun ? blocks[0] * blocks[1] * blocks[2] : uint_c(mpi::MPIManager::instance()->numProcesses()) );
+   uint_t initialRefinementLevel = mainConf.getParameter<uint_t>( "initialRefinementLevel", uint_t(0) );
 
    if( !mainConf.isDefined( "sbfFile" ) )
    {
       WALBERLA_LOG_INFO_ON_ROOT( "No setup file specified: Creation without setup file!" );
-
-      return createBlockForest( simulationDomain, blocks, isPeriodic, numberOfProcesses);
+      return createBlockForest(simulationDomain, blocks, isPeriodic, numberOfProcesses, initialRefinementLevel);
    }
 
    // sbf file given -> try to load or save domain decomposition
    std::string sbffile = mainConf.getParameter< std::string >( "sbfFile" );
    WALBERLA_LOG_INFO_ON_ROOT( "Setup file specified: Using " << sbffile );
-
-   return createBlockForest(simulationDomain, blocks, isPeriodic, setupRun, sbffile, numberOfProcesses);
+   return createBlockForest(simulationDomain, blocks, isPeriodic, setupRun, sbffile, numberOfProcesses, initialRefinementLevel);
 }
 
 } // namespace pe

@@ -61,7 +61,7 @@ struct NonCopyableWrap {};
 #define FunctionExporterClass( functionName, functionSignature ) \
    struct Exporter_##functionName \
    { \
-      typedef boost::function<  functionSignature > FunctionType;\
+      typedef std::function<  functionSignature > FunctionType;\
       Exporter_##functionName( const IBlock * block, ConstBlockDataID id )\
          : block_( block ), blockDataID_( id )\
       {}\

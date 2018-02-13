@@ -25,6 +25,7 @@
 #include "BoundarySetup.h"
 #include "PdfFieldPackInfo.h"
 #include "PdfFieldSyncPackInfo.h"
+#include "RefinementFunctorWrapper.h"
 #include "TimeStep.h"
 #include "TimeStepPdfPackInfo.h"
 #include "TimeTracker.h"

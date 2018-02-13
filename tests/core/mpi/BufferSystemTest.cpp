@@ -26,22 +26,22 @@
 #include "core/mpi/BufferSystem.h"
 #include "core/mpi/Environment.h"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/variate_generator.hpp>
-#include <boost/thread/thread.hpp>
+#include <random>
 
 #include <cmath>
 #include <iostream>
 #include <set>
+#include <thread>
+#include <chrono>
 
 
 using namespace walberla;
 using mpi::BufferSystem;
+using namespace std::literals::chrono_literals;
 
 
 
-typedef boost::mt19937 base_generator_type;
+typedef std::mt19937 base_generator_type;
 
 /**
  * Utility function for sleeping a random time
@@ -58,11 +58,10 @@ void randomSleep( int maxTimeInMs = 20 )
    unsigned int seed = static_cast<unsigned int>(std::time(0)) + static_cast<unsigned int>(rank*1000) + counter;
    generator.seed(seed);
 
-   boost::uniform_int<> uni_dist(0,maxTimeInMs);
-   boost::variate_generator<base_generator_type&, boost::uniform_int<> > uni(generator, uni_dist);
+   std::uniform_int_distribution<> uni_dist(0,maxTimeInMs);
 
-   int sleepTime = uni();
-   boost::this_thread::sleep( boost::posix_time::milliseconds( sleepTime ) );
+   int sleepTime = uni_dist(generator);
+   std::this_thread::sleep_for( sleepTime * 1ms );
 }
 
 

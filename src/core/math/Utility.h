@@ -26,7 +26,6 @@
 #include "core/DataTypes.h"
 
 #include <boost/math/constants/constants.hpp>
-#include <boost/static_assert.hpp>
 #include <cmath>
 #include <cstddef>
 #include <limits>
@@ -100,7 +99,7 @@ inline real_t round( real_t a );
 template< typename T >
 inline const T sign( T a )
 {
-   BOOST_STATIC_ASSERT( std::numeric_limits<T>::is_signed );
+   WALBERLA_STATIC_ASSERT( std::numeric_limits<T>::is_signed );
    return ( a < T(0) )?( T(-1) ):( T(1) );
 }
 //**********************************************************************************************************************

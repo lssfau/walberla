@@ -263,7 +263,7 @@ public:
    typedef lbm::PdfField< LatticeModel_T > PdfField_T;
    typedef Field< pe::BodyID, 1 >          BodyField_T;
 
-   ExtrapolationReconstructor( const shared_ptr<StructuredBlockStorage> blockStorage, const BlockDataID & boundaryHandlingID,
+   ExtrapolationReconstructor( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID,
                                const BlockDataID & pdfFieldID, const BlockDataID & bodyFieldID,
                                const ExtrapolationDirectionFinder_T & extrapolationDirectionFinder,
                                const bool & enforceNoSlipConstraintAfterExtrapolation = false )

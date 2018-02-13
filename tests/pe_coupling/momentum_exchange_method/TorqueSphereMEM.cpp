@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file TorqueSphereMEMPe.cpp
+//! \file TorqueSphereMEM.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
@@ -64,7 +64,7 @@
 #include <iomanip>
 #include <iostream>
 
-namespace torque_sphere_mem_pe
+namespace torque_sphere_mem
 {
 
 
@@ -401,7 +401,7 @@ int main( int argc, char **argv )
    // PE //
    ////////
 
-   pe::BodyStorage globalBodyStorage;
+   shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
    auto bodyStorageID = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
 
@@ -420,7 +420,7 @@ int main( int argc, char **argv )
 
    // create the sphere in the middle of the domain
    Vector3<real_t> position (real_c(setup.length) * real_c(0.5));
-   auto sphere = pe::createSphere( globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, setup.radius );
+   auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, setup.radius );
    if ( sphere != NULL )
    {
       sphere->setAngularVel( real_c(0), setup.angularVel, real_c(0) );
@@ -466,7 +466,7 @@ int main( int argc, char **argv )
    SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   boost::function< void () > commFunction;
+   std::function< void () > commFunction;
 
    blockforest::communication::UniformBufferedScheme< stencil::D3Q27 > scheme( blocks );
    scheme.addPackInfo( make_shared< field::communication::PackInfo< PdfField_T > >( pdfFieldID ) );
@@ -476,13 +476,13 @@ int main( int argc, char **argv )
    if( MO_CLI )
    {
       // uses a higher order boundary condition (CLI)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MO_CLI_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_CLI_Flag );
    }else if ( MO_MR ){
       // uses a higher order boundary condition (MR)
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_MR_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,  MO_MR_Flag );
    }else{
       // uses standard bounce back boundary conditions
-      pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MO_BB_Flag );
+      pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID,  MO_BB_Flag );
    }
 
    shared_ptr< TorqueEval > torqueEval = make_shared< TorqueEval >( &timeloop, &setup, blocks, bodyStorageID, fileIO );
@@ -563,8 +563,8 @@ int main( int argc, char **argv )
 
 }
 
-} //namespace torque_sphere_mem_pe
+} //namespace torque_sphere_mem
 
 int main( int argc, char **argv ){
-   torque_sphere_mem_pe::main(argc, argv);
+   torque_sphere_mem::main(argc, argv);
 }

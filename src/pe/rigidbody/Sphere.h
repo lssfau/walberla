@@ -125,6 +125,7 @@ public:
    static inline real_t calcVolume( real_t radius );
    static inline real_t calcMass( real_t radius, real_t density );
    static inline real_t calcDensity( real_t radius, real_t mass );
+   static inline Mat3   calcInertia( const real_t mass, const real_t radius );
    //@}
    //**********************************************************************************************
 
@@ -141,7 +142,6 @@ protected:
    /*!\name Utility functions */
    //@{
    inline virtual void calcBoundingBox();  // Calculation of the axis-aligned bounding box
-   inline         void calcInertia();      // Calculation of the moment of inertia
    //@}
    //**********************************************************************************************
 
@@ -287,10 +287,9 @@ inline void Sphere::calcBoundingBox()
  *
  * \return void
  */
-inline void Sphere::calcInertia()
+inline Mat3 Sphere::calcInertia( const real_t mass, const real_t radius )
 {
-   I_[0] = I_[4] = I_[8] = real_c(0.4) * mass_ * radius_ * radius_;
-   Iinv_ = I_.getInverse();
+   return Mat3::makeDiagonalMatrix( real_c(0.4) * mass * radius * radius );
 }
 //*************************************************************************************************
 

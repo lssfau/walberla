@@ -23,7 +23,7 @@
 
 #include "BufferSystem.h"
 
-#include <boost/function.hpp>
+#include <functional>
 #include <map>
 
 
@@ -60,8 +60,8 @@ public:
 
    bool isSizeCommunicatedInNextStep() const          { return bs_.isSizeCommunicatedInNextStep(); }
 
-   void addReceivingFunction( MPIRank rank, boost::function<void ( RecvBuffer & buf ) > recvFunction );
-   void addSendingFunction  ( MPIRank rank, boost::function<void ( SendBuffer & buf ) > sendFunction );
+   void addReceivingFunction( MPIRank rank, std::function<void ( RecvBuffer & buf ) > recvFunction );
+   void addSendingFunction  ( MPIRank rank, std::function<void ( SendBuffer & buf ) > sendFunction );
 
    void clearReceivingFunctions() { dirty_ = true; recvFunctions_.clear(); }
    void clearSendingFunctions()   { dirty_ = true; sendFunctions_.clear(); sendRanks_.clear(); }
@@ -86,11 +86,11 @@ private:
 
    bool sizeChangesEverytime_;
 
-   std::map<MPIRank, boost::function<void ( RecvBuffer & )> > recvFunctions_;
+   std::map<MPIRank, std::function<void ( RecvBuffer & )> > recvFunctions_;
 
 
    std::vector<MPIRank> sendRanks_;
-   std::vector< boost::function<void ( SendBuffer & )> > sendFunctions_;
+   std::vector< std::function<void ( SendBuffer & )> > sendFunctions_;
 
    void startCommunicationOpenMP();
    void startCommunicationSerial();

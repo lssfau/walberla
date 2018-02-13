@@ -23,13 +23,10 @@
 
 #include "waLBerlaDefinitions.h"
 
-#include <boost/cstdint.hpp>
-#include <boost/make_shared.hpp>
+#include <cstdint>
 #include <boost/numeric/conversion/cast.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/static_assert.hpp>
-#include "boost/type_traits/integral_constant.hpp"
+#include <memory>
+#include <type_traits>
 #include <boost/units/detail/utility.hpp>
 
 #include <cmath>
@@ -39,17 +36,19 @@
 namespace walberla {
 
 
+#define WALBERLA_STATIC_ASSERT(x) static_assert(x, "Assertion failed")
 
-template <typename> struct never_true : boost::false_type {};
+
+template <typename> struct never_true : std::false_type {};
 
 
 
 // shared ptr
 
-using boost::shared_ptr;
-using boost::weak_ptr;
-using boost::make_shared;
-using boost::dynamic_pointer_cast;
+using std::shared_ptr;
+using std::weak_ptr;
+using std::make_shared;
+using std::dynamic_pointer_cast;
 
 // functions, use this when "function" namespace is no longer needed
 //using std::function;
@@ -69,10 +68,10 @@ inline S numeric_cast( T t ) {
 
 
 // fixed size signed integral types
-typedef boost::int8_t   int8_t;  ///<  8 bit signed integer
-typedef boost::int16_t  int16_t; ///< 16 bit signed integer
-typedef boost::int32_t  int32_t; ///< 32 bit signed integer
-typedef boost::int64_t  int64_t; ///< 64 bit signed integer
+typedef std::int8_t   int8_t;    ///<  8 bit signed integer
+typedef std::int16_t  int16_t;   ///< 16 bit signed integer
+typedef std::int32_t  int32_t;   ///< 32 bit signed integer
+typedef std::int64_t  int64_t;   ///< 64 bit signed integer
 
 template< typename T > inline int8_t   int8_c( T t ) { return numeric_cast< int8_t  >(t); } ///< cast to type int8_t  using "int8_c(x)"
 template< typename T > inline int16_t int16_c( T t ) { return numeric_cast< int16_t >(t); } ///< cast to type int16_t using "int16_c(x)"
@@ -83,10 +82,10 @@ template< typename T > inline int64_t int64_c( T t ) { return numeric_cast< int6
 
 // fixed size unsigned integral types
 
-typedef boost::uint8_t  uint8_t;  ///<  8 bit unsigned integer
-typedef boost::uint16_t uint16_t; ///< 16 bit unsigned integer
-typedef boost::uint32_t uint32_t; ///< 32 bit unsigned integer
-typedef boost::uint64_t uint64_t; ///< 64 bit unsigned integer
+typedef std::uint8_t  uint8_t;    ///<  8 bit unsigned integer
+typedef std::uint16_t uint16_t;   ///< 16 bit unsigned integer
+typedef std::uint32_t uint32_t;   ///< 32 bit unsigned integer
+typedef std::uint64_t uint64_t;   ///< 64 bit unsigned integer
 typedef uint8_t byte_t;
 typedef uint64_t id_t;            //sid datatype for pe
 
@@ -156,7 +155,7 @@ static const uint_t UINT_BITS_LD = int_ld< std::numeric_limits< uint_t >::digits
 typedef int cell_idx_t;
 //typedef int64_t cell_idx_t;
 
-BOOST_STATIC_ASSERT( std::numeric_limits<cell_idx_t>::is_specialized &&
+WALBERLA_STATIC_ASSERT( std::numeric_limits<cell_idx_t>::is_specialized &&
                      std::numeric_limits<cell_idx_t>::is_integer &&
                      std::numeric_limits<cell_idx_t>::is_signed );
 

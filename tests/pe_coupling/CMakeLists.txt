@@ -72,6 +72,9 @@ waLBerla_execute_test( NAME BodyAtBlockBoarderCheckTest1        COMMAND $<TARGET
 waLBerla_execute_test( NAME BodyAtBlockBoarderCheckTest2        COMMAND $<TARGET_FILE:BodyAtBlockBoarderCheck> 2         PROCESSES 8 LABELS longrun )
 waLBerla_execute_test( NAME BodyAtBlockBoarderCheckTest3        COMMAND $<TARGET_FILE:BodyAtBlockBoarderCheck> 3         PROCESSES 8 LABELS verylongrun )
 
+waLBerla_compile_test( FILES momentum_exchange_method/BodyMappingTest.cpp DEPENDS blockforest pe timeloop )
+waLBerla_execute_test( NAME BodyMappingTest COMMAND $<TARGET_FILE:BodyMappingTest> PROCESSES 1 )
+
 waLBerla_compile_test( FILES momentum_exchange_method/DragForceSphereMEM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME DragForceSphereMEMFuncTest        COMMAND $<TARGET_FILE:DragForceSphereMEM> --funcTest          PROCESSES 1 )
 waLBerla_execute_test( NAME DragForceSphereMEMSingleTest      COMMAND $<TARGET_FILE:DragForceSphereMEM>                     PROCESSES 1 LABELS longrun     CONFIGURATIONS Release RelWithDbgInfo )
@@ -89,12 +92,13 @@ waLBerla_execute_test( NAME DragForceSphereMEMRefinementSingleTest      COMMAND 
 waLBerla_execute_test( NAME DragForceSphereMEMRefinementParallelTest    COMMAND $<TARGET_FILE:DragForceSphereMEMRefinement>                     PROCESSES 5 LABELS verylongrun CONFIGURATIONS Release RelWithDbgInfo )
 waLBerla_execute_test( NAME DragForceSphereMEMRefinementCLITest         COMMAND $<TARGET_FILE:DragForceSphereMEMRefinement> --MO_CLI            PROCESSES 4 LABELS verylongrun CONFIGURATIONS Release RelWithDbgInfo )
 
+waLBerla_compile_test( FILES momentum_exchange_method/GlobalBodyAsBoundaryMEMStaticRefinement.cpp DEPENDS blockforest pe timeloop )
+waLBerla_execute_test( NAME GlobalBodyAsBoundaryMEMStaticRefinementTest        COMMAND $<TARGET_FILE:GlobalBodyAsBoundaryMEMStaticRefinement>          PROCESSES 1 )
 
 waLBerla_compile_test( FILES momentum_exchange_method/LubricationCorrectionMEM.cpp DEPENDS blockforest timeloop )
 waLBerla_execute_test( NAME LubricationCorrectionMEMFuncTest         COMMAND $<TARGET_FILE:LubricationCorrectionMEM> --funcTest                   PROCESSES 3 )
 waLBerla_execute_test( NAME LubricationCorrectionMEMSphereSphereTest COMMAND $<TARGET_FILE:LubricationCorrectionMEM> --split --fzyx --sphSphTest  PROCESSES 6 LABELS longrun             CONFIGURATIONS Release RelWithDbgInfo )
 waLBerla_execute_test( NAME LubricationCorrectionMEMSphereWallTest   COMMAND $<TARGET_FILE:LubricationCorrectionMEM> --split --fzyx --sphWallTest PROCESSES 3 LABELS longrun verylongrun CONFIGURATIONS Release RelWithDbgInfo )
-  
   
 waLBerla_compile_test( FILES momentum_exchange_method/PeriodicParticleChannelMEM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME PeriodicParticleChannelMEMTest COMMAND $<TARGET_FILE:PeriodicParticleChannelMEM> --shortrun PROCESSES 4 LABELS longrun )
@@ -115,7 +119,19 @@ waLBerla_execute_test( NAME SegreSilberbergMEMEanReconFuncTest    COMMAND $<TARG
 waLBerla_execute_test( NAME SegreSilberbergMEMEanReconTest        COMMAND $<TARGET_FILE:SegreSilberbergMEM> --MO_CLI --eanReconstructor   PROCESSES 18 LABELS verylongrun CONFIGURATIONS Release RelWithDbgInfo )
 waLBerla_execute_test( NAME SegreSilberbergMEMExtReconFuncTest    COMMAND $<TARGET_FILE:SegreSilberbergMEM> --funcTest --extReconstructor PROCESSES 9 )
 waLBerla_execute_test( NAME SegreSilberbergMEMExtReconTest        COMMAND $<TARGET_FILE:SegreSilberbergMEM> --MO_CLI --extReconstructor   PROCESSES 18 LABELS verylongrun CONFIGURATIONS Release RelWithDbgInfo )
-   
+
+waLBerla_compile_test( FILES momentum_exchange_method/SettlingSphereMEM.cpp DEPENDS timeloop )
+waLBerla_execute_test( NAME SettlingSphereMEMFuncTestSerial      COMMAND $<TARGET_FILE:SettlingSphereMEM> --funcTest PROCESSES 1 LABELS longrun CONFIGURATIONS Release RelWithDbgInfo )
+waLBerla_execute_test( NAME SettlingSphereMEMFuncTestParallel    COMMAND $<TARGET_FILE:SettlingSphereMEM> --funcTest PROCESSES 8 CONFIGURATIONS Release RelWithDbgInfo)
+
+waLBerla_compile_test( FILES momentum_exchange_method/SettlingSphereMEMDynamicRefinement.cpp DEPENDS timeloop )
+waLBerla_execute_test( NAME SettlingSphereMEMDynamicRefinementFuncTestSerial      COMMAND $<TARGET_FILE:SettlingSphereMEMDynamicRefinement> --funcTest PROCESSES 1 LABELS longrun CONFIGURATIONS Release RelWithDbgInfo)
+waLBerla_execute_test( NAME SettlingSphereMEMDynamicRefinementFuncTestParallel    COMMAND $<TARGET_FILE:SettlingSphereMEMDynamicRefinement> --funcTest PROCESSES 8 CONFIGURATIONS Release RelWithDbgInfo)
+
+waLBerla_compile_test( FILES momentum_exchange_method/SettlingSphereMEMStaticRefinement.cpp DEPENDS timeloop )
+waLBerla_execute_test( NAME SettlingSphereMEMStaticRefinementFuncTestSerial      COMMAND $<TARGET_FILE:SettlingSphereMEMStaticRefinement> --funcTest PROCESSES 1 LABELS longrun CONFIGURATIONS Release RelWithDbgInfo)
+waLBerla_execute_test( NAME SettlingSphereMEMStaticRefinementFuncTestParallel    COMMAND $<TARGET_FILE:SettlingSphereMEMStaticRefinement> --funcTest PROCESSES 8 CONFIGURATIONS Release RelWithDbgInfo)
+
 waLBerla_compile_test( FILES momentum_exchange_method/TorqueSphereMEM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME TorqueSphereMEMFuncTest        COMMAND $<TARGET_FILE:TorqueSphereMEM> --funcTest           PROCESSES 1 )
 waLBerla_execute_test( NAME TorqueSphereMEMSingleTest      COMMAND $<TARGET_FILE:TorqueSphereMEM>                      PROCESSES 1 LABELS longrun     CONFIGURATIONS Release RelWithDbgInfo )
@@ -130,3 +146,13 @@ waLBerla_execute_test( NAME TorqueSphereMEMMRParallelTest  COMMAND $<TARGET_FILE
 waLBerla_compile_test( FILES momentum_exchange_method/SquirmerTest.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME SquirmerShortTest COMMAND $<TARGET_FILE:SquirmerTest> --shortrun PROCESSES 1 )
 waLBerla_execute_test( NAME SquirmerTest COMMAND $<TARGET_FILE:SquirmerTest> PROCESSES 1 CONFIGURATIONS Release RelWithDbgInfo  )
+
+###################################################################################################
+# Discrete particle methods tests
+###################################################################################################
+
+waLBerla_compile_test( FILES discrete_particle_methods/SphereWallCollisionBehaviorDPM.cpp DEPENDS blockforest pe timeloop )
+waLBerla_execute_test( NAME SphereWallCollisionBehaviorDPMFuncTest COMMAND $<TARGET_FILE:SphereWallCollisionBehaviorDPM> --funcTest PROCESSES 1 )
+
+waLBerla_compile_test( FILES discrete_particle_methods/HinderedSettlingDynamicsDPM.cpp DEPENDS blockforest pe timeloop )
+waLBerla_execute_test( NAME HinderedSettlingDynamicsDPMFuncTest COMMAND $<TARGET_FILE:HinderedSettlingDynamicsDPM> --funcTest PROCESSES 4 LABELS longrun CONFIGURATIONS RelWithDbgInfo )

@@ -33,7 +33,7 @@
 #include "pde/sweeps/RBGSFixedStencil.h"
 #include "pde/sweeps/RBGS.h"
 
-#include <boost/function.hpp>
+#include <functional>
 
 #include <vector>
 
@@ -54,7 +54,7 @@ public:
             const Weight_T weights,
             const uint_t iterations, const uint_t numLvl,
             const uint_t preSmoothingIters, const uint_t postSmoothingIters,
-            const uint_t coarseIters, const boost::function< real_t () > & residualNorm,
+            const uint_t coarseIters, const std::function< real_t () > & residualNorm,
             const real_t residualNormThreshold = real_t(0), const uint_t residualCheckFrequency = uint_t(1),
             const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
@@ -63,7 +63,7 @@ public:
             const BlockDataID & stencilFieldId,
             const uint_t iterations, const uint_t numLvl,
             const uint_t preSmoothingIters, const uint_t postSmoothingIters,
-            const uint_t coarseIters, const boost::function< real_t () > & residualNorm,
+            const uint_t coarseIters, const std::function< real_t () > & residualNorm,
             const real_t residualNormThreshold = real_t(0), const uint_t residualCheckFrequency = uint_t(1),
             const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
@@ -94,7 +94,7 @@ protected:
    uint_t iterationsPerformed_;
    bool thresholdReached_;
 
-   boost::function< real_t() > residualNorm_;
+   std::function< real_t() > residualNorm_;
    std::vector<real_t> convergenceRate_;
 
    std::vector<BlockDataID> uId_;
@@ -105,9 +105,9 @@ protected:
 
    std::vector< shared_ptr<pde::RBGSFixedStencil< Stencil_T > > > RBGSFixedSweeps_;
    std::vector< shared_ptr<pde::RBGS< Stencil_T > > >             RBGSSweeps_;
-   std::vector< boost::function< void() > > RBGSIteration_;
-   boost::function< void() > CGIteration_;
-   std::vector<boost::function< void(IBlock *) > > computeResidual_, restrict_, zeroize_, prolongateAndCorrect_;
+   std::vector< std::function< void() > > RBGSIteration_;
+   std::function< void() > CGIteration_;
+   std::vector<std::function< void(IBlock *) > > computeResidual_, restrict_, zeroize_, prolongateAndCorrect_;
 
    std::vector< blockforest::communication::UniformBufferedScheme< Stencil_T > > communication_;
 

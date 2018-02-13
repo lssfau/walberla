@@ -112,8 +112,8 @@ public:
    void startCommunication();
    void wait();
 
-   boost::function<void()> getStartCommunicateFunctor() { return boost::bind( &UniformDirectScheme::startCommunication, this ); }
-   boost::function<void()> getWaitFunctor()             { return boost::bind( &UniformDirectScheme::wait,               this ); }
+   std::function<void()> getStartCommunicateFunctor() { return boost::bind( &UniformDirectScheme::startCommunication, this ); }
+   std::function<void()> getWaitFunctor()             { return boost::bind( &UniformDirectScheme::wait,               this ); }
    //@}
    //*******************************************************************************************************************
 

@@ -67,8 +67,8 @@ int main( int argc, char* argv[] )
                                                       real_t(1), // dx
                                                       uint_t( 2), uint_t( 1), uint_t( 2) ); // number of processes
 
-   //math::seedRandomGenerator( numeric_cast<boost::mt19937::result_type>( std::time(0) ) );
-   math::seedRandomGenerator( numeric_cast<boost::mt19937::result_type>( MPIManager::instance()->rank() ) );
+   //math::seedRandomGenerator( numeric_cast<std::mt19937::result_type>( std::time(0) ) );
+   math::seedRandomGenerator( numeric_cast<std::mt19937::result_type>( MPIManager::instance()->rank() ) );
 
    auto sId = field::addToStorage< ScalarField_T >( blocks, "scalar field" );
    auto vId = field::addToStorage< VectorField_T >( blocks, "vector field" );

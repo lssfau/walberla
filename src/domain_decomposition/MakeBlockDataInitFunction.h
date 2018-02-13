@@ -24,7 +24,7 @@
 #include "IBlock.h"
 
 #include <boost/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 
 namespace walberla {
@@ -91,61 +91,61 @@ namespace internal
 
 
 template<class T>
-boost::function< T* ( const IBlock* const block ) >
+std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction() {
    return boost::bind( internal::newFunc<T>, _1);
 }
 
 template<class T, class P1>
-boost::function< T* ( const IBlock* const block ) >
+std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction(const P1 & p1) {
    return boost::bind( internal::newFunc<T,P1>, _1,p1);
 }
 
 template<class T, class P1, class P2>
-boost::function< T* ( const IBlock* const block ) >
+std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction(const P1 & p1, const P2 & p2) {
    return boost::bind( internal::newFunc<T,P1,P2>, _1,p1,p2);
 }
 
 template<class T, class P1, class P2, class P3>
-boost::function< T* ( const IBlock* const block ) >
+std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction(const P1 & p1, const P2 & p2, const P3 & p3) {
    return boost::bind( internal::newFunc<T,P1,P2,P3>, _1,p1,p2,p3);
 }
 
 template<class T, class P1, class P2, class P3, class P4>
-boost::function< T* ( const IBlock* const block ) >
+std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction(const P1 & p1, const P2 & p2, const P3 & p3, const P4 & p4) {
    return boost::bind( internal::newFunc<T,P1,P2,P3,P4>, _1,p1,p2,p3,p4);
 }
 
 template<class T, class P1, class P2, class P3, class P4, class P5>
-boost::function< T* ( const IBlock* const block ) >
+std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction(const P1 & p1, const P2 & p2, const P3 & p3, const P4 & p4, const P5 & p5) {
    return boost::bind( internal::newFunc<T,P1,P2,P3,P4,P5>, _1,p1,p2,p3,p4,p5);
 }
 
 template<class T, class P1, class P2, class P3, class P4, class P5, class P6>
-boost::function< T* ( const IBlock* const block ) >
+std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction(const P1 & p1, const P2 & p2, const P3 & p3, const P4 & p4, const P5 & p5, const P6 & p6) {
    return boost::bind( internal::newFunc<T,P1,P2,P3,P4,P5,P6>, _1,p1,p2,p3,p4,p5,p6);
 }
 
 template<class T, class P1, class P2, class P3, class P4, class P5, class P6, class P7>
-boost::function< T* ( const IBlock* const block ) >
+std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction(const P1 & p1, const P2 & p2, const P3 & p3, const P4 & p4, const P5 & p5, const P6 & p6, const P7 & p7) {
    return boost::bind( internal::newFunc<T,P1,P2,P3,P4,P5,P6,P7>, _1,p1,p2,p3,p4,p5,p6,p7);
 }
 
 template<class T, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8>
-boost::function< T* ( const IBlock* const block ) >
+std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction(const P1 & p1, const P2 & p2, const P3 & p3, const P4 & p4, const P5 & p5, const P6 & p6, const P7 & p7, const P8 & p8) {
    return boost::bind( internal::newFunc<T,P1,P2,P3,P4,P5,P6,P7,P8>, _1,p1,p2,p3,p4,p5,p6,p7,p8);
 }
 
 template<class T, class P1, class P2, class P3, class P4, class P5, class P6, class P7, class P8, class P9>
-boost::function< T* ( const IBlock* const block ) >
+std::function< T* ( const IBlock* const block ) >
 makeBlockDataInitFunction(const P1 & p1, const P2 & p2, const P3 & p3, const P4 & p4, const P5 & p5, const P6 & p6, const P7 & p7, const P8 & p8, const P9 & p9) {
    return boost::bind( internal::newFunc<T,P1,P2,P3,P4,P5,P6,P7,P8,P9>, _1,p1,p2,p3,p4,p5,p6,p7,p8,p9);
 }

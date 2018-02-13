@@ -42,7 +42,7 @@
 
 #include <algorithm>
 #include <typeinfo>
-
+#include <cstring>
 
 namespace walberla {
 namespace mpi {
@@ -443,7 +443,6 @@ inline bool GenericSendBuffer<T,G>::isEmpty() const
 template< typename T    // Element type
           , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
-ATTRIBUTE_NO_SANITIZE_UNDEFINED
 typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
 GenericSendBuffer<T,G>& >::type
 GenericSendBuffer<T,G>::put( V value )
@@ -464,8 +463,7 @@ GenericSendBuffer<T,G>::put( V value )
    }
 
    // Adding the data value
-   V* const tmp( reinterpret_cast<V*>( cur_ ) );
-   *tmp  = value;
+   std::memcpy( cur_, &value, sizeof(V) );
    cur_ += count;
 
    // Invariants check

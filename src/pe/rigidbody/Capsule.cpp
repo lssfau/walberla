@@ -75,15 +75,15 @@ Capsule::Capsule( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const 
    q_      = q;                      // Setting the orientation
    R_      = q_.toRotationMatrix();  // Setting the rotation matrix
 
-   // Calculating the capsule mass
-   mass_ = radius*radius * math::M_PI * ( real_t(4)/real_t(3) * radius + length ) * Material::getDensity( material );
-   invMass_ = real_t(1) / mass_;
-
-   // Calculating the moment of inertia
-   calcInertia();
-
    setGlobal( global );
-   setMass( infiniteMass );
+   if (infiniteMass)
+   {
+      setMassAndInertiaToInfinity();
+   } else
+   {
+      auto mass = calcMass( radius, length, Material::getDensity( material ) );
+      setMassAndInertia( mass, calcInertia( radius, length, Material::getDensity( material )  ) );
+   }
    setCommunicating( communicating );
    setFinite( true );
 
@@ -192,29 +192,25 @@ void Capsule::calcBoundingBox()
  *
  * \return void
  */
-void Capsule::calcInertia()
+Mat3 Capsule::calcInertia( const real_t radius, const real_t length, const real_t density)
 {
-   const real_t  density( calcDensity( radius_, length_, mass_ ) );
-   const real_t  sphereMass( real_t (4)/real_t (3) * math::M_PI * radius_*radius_*radius_ * density );
-   const real_t  cylinderMass( math::M_PI * radius_*radius_ * length_ * density );
+   const real_t  sphereMass( real_t (4)/real_t (3) * math::M_PI * radius*radius*radius * density );
+   const real_t  cylinderMass( math::M_PI * radius*radius * length * density );
 
    // 'Ia' represent the moment of inertia along the x-axis. 'Ia' contains the following two parts:
    //  - cylinder :  I = (1/2)*mass*radius^2
    //  - sphere   :  I = (2/5)*mass*radius^2
-   const real_t  Ia( radius_*radius_ * ( real_t (0.5)*cylinderMass + real_t (0.4)*sphereMass ) );
+   const real_t  Ia( radius*radius * ( real_t (0.5)*cylinderMass + real_t (0.4)*sphereMass ) );
 
    // 'Ib' represent the moment of inertia along the y- and z-axis. 'Ib' contains the following two parts,
    // where full_length is the full length of the cylinder part and half_length is (1/2)*full_length:
    //  - cylinder :  I = mass*( (1/4)*radius^2 + (1/12)*full_length^2 )
    //  - sphere   :  I = mass*( (2/5)*radius^2 + half_length^2 + (3/4)*half_length*radius )
-   const real_t  Ib( cylinderMass*( real_t (0.25)*radius_*radius_ + real_t (1)/real_t (12)*length_*length_ ) +
-                     sphereMass*( real_t (0.4)*radius_*radius_ + real_t (0.375)*radius_*length_ + real_t (0.25)*length_*length_ ) );
+   const real_t  Ib( cylinderMass*( real_t (0.25)*radius*radius + real_t (1)/real_t (12)*length*length ) +
+                     sphereMass*( real_t (0.4)*radius*radius + real_t (0.375)*radius*length + real_t (0.25)*length*length ) );
 
    // Setting the moment of inertia (capsule is aligned along the x-axis)
-   I_[0] = Ia;
-   I_[4] = Ib;
-   I_[8] = Ib;
-   Iinv_ = I_.getInverse();
+   return Mat3::makeDiagonalMatrix(Ia, Ib, Ib);
 }
 //*************************************************************************************************
 

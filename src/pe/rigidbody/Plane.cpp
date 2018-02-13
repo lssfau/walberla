@@ -71,14 +71,14 @@ Plane::Plane( id_t sid, id_t uid,
    //planes are always considered locally and have infinite mass
    setGlobal( true );
    setCommunicating( false );
-   setMass( true );
+   setMassAndInertiaToInfinity();
    setFinite( false );
 
    // Checking the mass properties of the plane
-   WALBERLA_ASSERT_FLOAT_EQUAL( mass_    , real_c(0), "Mass of plane is not 0" );
+   WALBERLA_ASSERT            ( std::isinf(mass_), "Mass of plane is not infinity" );
    WALBERLA_ASSERT_FLOAT_EQUAL( invMass_ , real_c(0), "Inverse mass of plane is not 0" );
-   WALBERLA_ASSERT( I_       == Mat3(real_c(0)), "Moment of inertia of plane is not 0\n" << I_ );
-   WALBERLA_ASSERT( Iinv_    == Mat3(real_c(0)), "Inverse moment of inertia of plane is not 0" );
+   WALBERLA_ASSERT            ( isinf(I_), "Moment of inertia of plane is not infinity\n" << I_ );
+   WALBERLA_ASSERT_FLOAT_EQUAL( Iinv_    , Mat3(real_c(0)), "Inverse moment of inertia of plane is not 0" );
 
    // Checking the plane normal
    // Since the plane constructor is never directly called but only used in a small number

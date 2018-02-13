@@ -1,4 +1,7 @@
+add_subdirectory( ComplexGeometry )
+add_subdirectory( MeshDistance )
 add_subdirectory( CouetteFlow )
+add_subdirectory( ForcesOnSphereNearPlaneInShearFlow )
 add_subdirectory( NonUniformGrid )
 add_subdirectory( MotionSingleHeavySphere )
 add_subdirectory( PoiseuilleChannel )

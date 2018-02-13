@@ -25,7 +25,7 @@
 #include "blockforest/StructuredBlockForest.h"
 #include "timeloop/ITimeloop.h"
 
-#include <boost/function.hpp>
+#include <functional>
 #include <vector>
 
 
@@ -52,7 +52,7 @@ namespace gui {
 
       void registerPropertyTree( const shared_ptr<PropertyTree> propertyTree );
 
-      typedef boost::function< DisplayAdaptor * ( const IBlock &, ConstBlockDataID ) > DisplayAdaptorCreatorFunc;
+      typedef std::function< DisplayAdaptor * ( const IBlock &, ConstBlockDataID ) > DisplayAdaptorCreatorFunc;
       void registerDisplayAdaptorCreator( const DisplayAdaptorCreatorFunc & creatorFunc );
 
       static void breakpoint( const std::string & comment, const std::string & file, int line );

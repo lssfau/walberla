@@ -42,8 +42,8 @@ class LubricationCorrection
 public:
 
    // constructor
-   LubricationCorrection ( const shared_ptr<StructuredBlockStorage> & blockStorage, shared_ptr<pe::BodyStorage> globalBodyStorage, const BlockDataID & bodyStorageID,
-                           real_t dynamicViscosity, real_t cutOffDistance = real_t(2) / real_t(3) )
+   LubricationCorrection ( const shared_ptr<StructuredBlockStorage> & blockStorage, const shared_ptr<pe::BodyStorage> & globalBodyStorage,
+                           const BlockDataID & bodyStorageID, real_t dynamicViscosity, real_t cutOffDistance = real_t(2) / real_t(3) )
       : blockStorage_ ( blockStorage )
       , globalBodyStorage_( globalBodyStorage )
       , bodyStorageID_( bodyStorageID )
@@ -96,10 +96,6 @@ void LubricationCorrection::operator ()( )
          {
             pe::SphereID sphereI = static_cast<pe::SphereID> ( *body1It );
 
-            // only moving spheres are considered
-            if ( sphereI->isFixed() )
-               continue;
-
             auto copyBody1It = body1It;
             // loop over all rigid bodies after current body1 to avoid double forces
             for( auto body2It = (++copyBody1It); body2It != pe::BodyIterator::end(); ++body2It )
@@ -120,10 +116,6 @@ void LubricationCorrection::operator ()( )
          if ( body1It->getTypeID() == pe::Sphere::getStaticTypeID() )
          {
             pe::SphereID sphereI = static_cast<pe::SphereID> ( *body1It );
-
-            // only moving spheres are considered
-            if ( sphereI->isFixed() )
-               continue;
 
             for (auto body2It = globalBodyStorage_->begin(); body2It != globalBodyStorage_->end(); ++body2It)
             {
@@ -183,9 +175,8 @@ void LubricationCorrection::treatLubricationSphrSphr( real_t nu_Lattice, real_t 
    if ( blockAABB.contains(midPoint) || sphereJ->isGlobal() )
    {
       fLub = compLubricationSphrSphr(nu_Lattice, gap, cutOff, sphereI, sphereJ);
-      sphereI->addForce(fLub);
-      if( !sphereJ->isFixed() ) //TODO needed?
-         sphereJ->addForce( -fLub);
+      sphereI->addForce( fLub);
+      sphereJ->addForce(-fLub);
 
       WALBERLA_LOG_DETAIL( "Lubrication force on sphere " << sphereI->getID() << " from sphere " << sphereJ->getID() << " is:" << fLub);
       WALBERLA_LOG_DETAIL( "Lubrication force on sphere " << sphereJ->getID() << " from sphere " << sphereI->getID() << " is:" << -fLub << "\n");

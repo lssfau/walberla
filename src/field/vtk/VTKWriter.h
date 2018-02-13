@@ -169,7 +169,7 @@ inline vtk::VTKOutput::Write createVTKOutput  ( const ConstBlockDataID & fieldId
    auto vtkOutput = vtk::createVTKOutput_BlockData( blocks, identifier, writeFrequency, ghostLayers, forcePVTU, baseFolder, executionFolder,
                                                     continuousNumbering, binary, littleEndian, useMPIIO, initialExecutionCount );
 
-   vtkOutput->addCellDataWriter( boost::make_shared< VTKWriter< Field_T,OutputType > >( fieldId, identifier ) );
+   vtkOutput->addCellDataWriter( make_shared< VTKWriter< Field_T,OutputType > >( fieldId, identifier ) );
 
    return writeFiles( vtkOutput, true, simultaneousIOOperations, requiredStates, incompatibleStates );
 }
@@ -222,7 +222,7 @@ inline vtk::VTKOutput::Write createScalingVTKOutput( const ConstBlockDataID & fi
    auto vtkOutput = vtk::createVTKOutput_BlockData( blocks, identifier, writeFrequency, ghostLayers, forcePVTU, baseFolder, executionFolder,
                                                     continuousNumbering, binary, littleEndian, useMPIIO, initialExecutionCount );
 
-   auto writer = boost::make_shared< VTKWriter< Field_T,OutputType > >( fieldId, identifier );
+   auto writer = make_shared< VTKWriter< Field_T,OutputType > >( fieldId, identifier );
    vtkOutput->addCellDataWriter( vtk::makeBlockCellDataWriterScalingAdapter(identifier, writer, factor) );
 
    return writeFiles( vtkOutput, true, simultaneousIOOperations, requiredStates, incompatibleStates );

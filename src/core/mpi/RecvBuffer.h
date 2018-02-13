@@ -38,7 +38,7 @@
 #include <boost/utility/enable_if.hpp>
 
 #include <algorithm>
-
+#include <cstring>
 
 namespace walberla {
 namespace mpi {
@@ -389,7 +389,6 @@ inline bool GenericRecvBuffer<T>::isEmpty() const
 */
 template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
-ATTRIBUTE_NO_SANITIZE_UNDEFINED
 typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
                            GenericRecvBuffer<T> & >::type
 GenericRecvBuffer<T>::get( V& value )
@@ -408,9 +407,8 @@ GenericRecvBuffer<T>::get( V& value )
    WALBERLA_ASSERT_LESS_EQUAL( cur_ + (sizeof(V) / sizeof(T)), end_ );
 
    // Extracting the data value
-   V* tmp = reinterpret_cast<V*>( cur_ );
-   value = *tmp;
-   cur_  = reinterpret_cast<T*>( ++tmp );
+   std::memcpy( &value, cur_, sizeof(V) );
+   cur_ += sizeof(V) / sizeof(T);
 
    // Invariants check
    WALBERLA_ASSERT_LESS_EQUAL( cur_, end_);
@@ -556,10 +554,10 @@ template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
 inline void GenericRecvBuffer<T>::peek( V& value ) const
 {
-   BOOST_STATIC_ASSERT( boost::is_arithmetic<V>::value );
+   WALBERLA_STATIC_ASSERT( boost::is_arithmetic<V>::value );
 
-   BOOST_STATIC_ASSERT( sizeof(V) > sizeof(T) );
-   BOOST_STATIC_ASSERT( sizeof(V) % sizeof(T) == 0);
+   WALBERLA_STATIC_ASSERT( sizeof(V) > sizeof(T) );
+   WALBERLA_STATIC_ASSERT( sizeof(V) % sizeof(T) == 0);
 
    // Checking the validity of the read operation
    WALBERLA_ASSERT_LESS_EQUAL( cur_ + BUFFER_DEBUG_OVERHEAD + sizeof(V)/sizeof(T), end_);

@@ -40,7 +40,6 @@
 #include "vtk/BlockCellDataWriter.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/random.hpp>
 
 int main( int argc, char * argv[] )
 {

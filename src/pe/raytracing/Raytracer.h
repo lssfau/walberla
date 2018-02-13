@@ -119,8 +119,6 @@ private:
    real_t pixelHeight_;       //!< The height of a pixel of the generated image in the viewing plane.
    //@}
    
-   WcTimingPool tp_;
-
 public:
    /*!\name Get functions */
    //@{
@@ -152,10 +150,11 @@ public:
    
    /*!\name Functions */
    //@{
+   template <typename BodyTypeTuple>
+   void rayTrace(const size_t timestep, WcTimingTree* tt = NULL );
+   
    void setupView_();
    void setupFilenameRankWidth_();
-   template <typename BodyTypeTuple>
-   void rayTrace(const size_t timestep);
    
 private:
    std::string getOutputFilename(const std::string& base, size_t timestep, bool isGlobalImage) const;
@@ -371,7 +370,9 @@ inline size_t Raytracer::coordinateToArrayIndex(size_t x, size_t y) const {
  * same direction. See Raytracer::isPlaneVisible() for further information.
  */
 template <typename BodyTypeTuple>
-void Raytracer::rayTrace(const size_t timestep) {
+void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
+   if (tt != NULL) tt->start("Raytracing");
+
    real_t inf = std::numeric_limits<real_t>::max();
 
    int numProcesses = mpi::MPIManager::instance()->numProcesses();
@@ -387,7 +388,8 @@ void Raytracer::rayTrace(const size_t timestep) {
    BodyID body_closest = NULL;
    Ray ray(cameraPosition_, Vec3(1,0,0));
    IntersectsFunctor func(ray, t, n);
-   tp_["Raytracing"].start();
+   
+   if (tt != NULL) tt->start("Intersection Testing");
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
          Vec3 pixelLocation = viewingPlaneOrigin_ + u_*(real_c(x)+real_t(0.5))*pixelWidth_ + v_*(real_c(y)+real_t(0.5))*pixelHeight_;
@@ -464,10 +466,9 @@ void Raytracer::rayTrace(const size_t timestep) {
          tBuffer[coordinateToArrayIndex(x, y)] = t_closest;
       }
    }
-   tp_["Raytracing"].end();
-   
-   tp_["Reduction"].start();
-   
+   if (tt != NULL) tt->stop("Intersection Testing");
+
+   if (tt != NULL) tt->start("Reduction");
    // intersections synchronisieren
    mpi::SendBuffer sendBuffer;
    for (auto& info: intersections) {
@@ -504,18 +505,12 @@ void Raytracer::rayTrace(const size_t timestep) {
          gatheredIntersectionCount++;
       }
    }
-   
-   tp_["Reduction"].end();
-   
+   if (tt != NULL) tt->stop("Reduction");
+
    //WALBERLA_LOG_INFO("#particles visible: " << visibleBodyIDs.size());
    WALBERLA_LOG_INFO_ON_ROOT("#gathered intersections: " << gatheredIntersectionCount);
    
-   auto tpReduced = tp_.getReduced();
-   WALBERLA_ROOT_SECTION() {
-      WALBERLA_LOG_INFO("Raytracing timing:");
-      tpReduced->print(std::cout);
-   }
-   
+   if (tt != NULL) tt->start("Output");
    if (getImageOutputEnabled()) {
       if (getLocalImageOutputEnabled()) {
          writeImageBufferToFile(imageBuffer, timestep);
@@ -531,6 +526,8 @@ void Raytracer::rayTrace(const size_t timestep) {
          writeTBufferToFile(fullTBuffer, timestep, true);
       }
    }
+   if (tt != NULL) tt->stop("Output");
+   if (tt != NULL) tt->stop("Raytracing");
 }
 
 /*!\brief Computes the color for a certain intersection.

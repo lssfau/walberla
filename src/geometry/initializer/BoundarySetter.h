@@ -91,6 +91,10 @@ namespace initializer {
       //@}
       //****************************************************************************************************************
 
+
+       static const typename BoundaryHandling_T::FlagField * getFlagField(const IBlock & block, ConstBlockDataID bdId) {
+          return block.getData<BoundaryHandling_T >(bdId)->getFlagField();
+       }
    private:
        bool flagOrBoundaryCondition_;
 
@@ -241,3 +245,4 @@ namespace initializer {
 } // namespace walberla
 
 
+#include "BoundarySetterFlagFieldSpecialization.h"

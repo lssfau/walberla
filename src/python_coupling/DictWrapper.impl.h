@@ -102,7 +102,7 @@ inline bool DictWrapper::has<DictWrapper >( const std::string & name )
 
 //===================================================================================================================
 //
-//  Getting boost::functions
+//  Getting std::functions
 //
 //===================================================================================================================
 
@@ -111,13 +111,13 @@ inline void runPythonObject( boost::python::object obj ) {
    obj();
 }
 template<>
-inline boost::function<void()> DictWrapper::get( const std::string & name ) {
+inline std::function<void()> DictWrapper::get( const std::string & name ) {
    boost::python::object obj ( d_[name] );
    return boost::bind( &runPythonObject, obj );
 }
 
 template<>
-inline bool DictWrapper::has<boost::function<void()> >( const std::string & name )
+inline bool DictWrapper::has<std::function<void()> >( const std::string & name )
 {
    if(! d_.has_key(name) )
       return false;

@@ -83,15 +83,15 @@ Sphere::Sphere( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, const V
    q_      = q;                      // Setting the orientation
    R_      = q_.toRotationMatrix();  // Setting the rotation matrix
 
-   // Calculating the sphere mass
-   mass_ = calcMass( radius, Material::getDensity( material ) );
-   invMass_ = real_c(1) / mass_;
-
-   // Calculating the moment of inertia
-   calcInertia();
-
    setGlobal( global );
-   setMass( infiniteMass );
+   if (infiniteMass)
+   {
+      setMassAndInertia( std::numeric_limits<real_t>::infinity(), Mat3(real_t(0)) );
+   } else
+   {
+      auto mass = calcMass( radius, Material::getDensity( material ) );
+      setMassAndInertia( mass, calcInertia( radius, mass ) );
+   }
    setCommunicating( communicating );
    setFinite( true );
 
@@ -194,20 +194,20 @@ void Sphere::print( std::ostream& os, const char* tab ) const
       << tab << "   Linear velocity   = " << getLinearVel() << "\n"
       << tab << "   Angular velocity  = " << getAngularVel() << "\n";
 
-//   if( verboseMode )
-//   {
-      os << tab << "   Bounding box      = " << getAABB() << "\n"
-         << tab << "   Quaternion        = " << getQuaternion() << "\n"
-         << tab << "   Rotation matrix   = ( " << setw(9) << R_[0] << " , " << setw(9) << R_[1] << " , " << setw(9) << R_[2] << " )\n"
-         << tab << "                       ( " << setw(9) << R_[3] << " , " << setw(9) << R_[4] << " , " << setw(9) << R_[5] << " )\n"
-         << tab << "                       ( " << setw(9) << R_[6] << " , " << setw(9) << R_[7] << " , " << setw(9) << R_[8] << " )\n";
+   //   if( verboseMode )
+   //   {
+   os << tab << "   Bounding box      = " << getAABB() << "\n"
+      << tab << "   Quaternion        = " << getQuaternion() << "\n"
+      << tab << "   Rotation matrix   = ( " << setw(9) << R_[0] << " , " << setw(9) << R_[1] << " , " << setw(9) << R_[2] << " )\n"
+      << tab << "                       ( " << setw(9) << R_[3] << " , " << setw(9) << R_[4] << " , " << setw(9) << R_[5] << " )\n"
+      << tab << "                       ( " << setw(9) << R_[6] << " , " << setw(9) << R_[7] << " , " << setw(9) << R_[8] << " )\n";
 
-      os << std::setiosflags(std::ios::right)
-         << tab << "   Moment of inertia = ( " << setw(9) << I_[0] << " , " << setw(9) << I_[1] << " , " << setw(9) << I_[2] << " )\n"
-         << tab << "                       ( " << setw(9) << I_[3] << " , " << setw(9) << I_[4] << " , " << setw(9) << I_[5] << " )\n"
-         << tab << "                       ( " << setw(9) << I_[6] << " , " << setw(9) << I_[7] << " , " << setw(9) << I_[8] << " )\n"
-         << std::resetiosflags(std::ios::right);
-//   }
+   os << std::setiosflags(std::ios::right)
+      << tab << "   Moment of inertia = ( " << setw(9) << I_[0] << " , " << setw(9) << I_[1] << " , " << setw(9) << I_[2] << " )\n"
+      << tab << "                       ( " << setw(9) << I_[3] << " , " << setw(9) << I_[4] << " , " << setw(9) << I_[5] << " )\n"
+      << tab << "                       ( " << setw(9) << I_[6] << " , " << setw(9) << I_[7] << " , " << setw(9) << I_[8] << " )\n"
+      << std::resetiosflags(std::ios::right);
+   //   }
 }
 //*************************************************************************************************
 

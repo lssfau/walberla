@@ -78,6 +78,7 @@ namespace internal {
             .add_property("offsets",             &field::internal::field_offsets           < GpuField_T > )
             .add_property("ptr",                 &gpufield_ptr                             < GpuField_T > )
             .add_property("dtypeStr",            &gpufield_dtypeStr                        < GpuField_T > )
+            .add_property("isPitchedMem",        &GpuField_T::isPitchedMem )
             .def("swapDataPointers",             &field::internal::field_swapDataPointers  < GpuField_T > )
             .add_property("nrOfGhostLayers",     &GpuField_T::nrOfGhostLayers )
             .def("cloneUninitialized", &GpuField_T::cloneUninitialized, return_value_policy<manage_new_object>())
@@ -90,7 +91,6 @@ namespace internal {
                  shared_ptr< GPUPackInfo<GpuField_T> >,
                  bases<walberla::communication::UniformPackInfo>,
                  boost::noncopyable >( "GpuFieldPackInfo", no_init );
-
 
          using field::communication::UniformMPIDatatypeInfo;
          class_< UniformMPIDatatypeInfo<GpuField_T>,

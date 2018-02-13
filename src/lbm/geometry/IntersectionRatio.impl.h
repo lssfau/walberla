@@ -30,8 +30,8 @@ real_t intersectionRatioBisection( const Body & body,
                                    const Vector3<real_t> & direction,
                                    const real_t epsilon )
 {
-   WALBERLA_ASSERT( !geometry::contains( body, fluidPoint ) );
-   WALBERLA_ASSERT(  geometry::contains( body, fluidPoint + direction ) );
+   WALBERLA_ASSERT( !geometry::contains( body, fluidPoint ), "fluid point: " << fluidPoint );
+   WALBERLA_ASSERT(  geometry::contains( body, fluidPoint + direction ), "fluidPoint + direction: " << fluidPoint + direction );
    
    const real_t sqEpsilon         = epsilon * epsilon;
    const real_t sqDirectionLength = direction.sqrLength();

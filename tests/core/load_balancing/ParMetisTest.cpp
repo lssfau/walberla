@@ -42,7 +42,6 @@
 #include "vtk/BlockCellDataWriter.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/random.hpp>
 
 int main( int argc, char * argv[] )
 {
@@ -131,7 +130,7 @@ int main( int argc, char * argv[] )
    int64_t numflag = 0;
    int64_t nparts = int64_c( partitions );
    std::vector< double > tpwgts( partitions, 1.0 / numeric_cast<double>( partitions ) );
-   std::vector< double > ubvec( ncon, 1.05 );
+   std::vector< double > ubvec( numeric_cast<size_t>(ncon), 1.05 );
    int64_t options[] = {0,0,0};
    int64_t edgecut;
    std::vector< int64_t > part( fieldSize[0] * fieldSize[1] );

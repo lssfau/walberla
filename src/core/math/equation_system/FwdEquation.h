@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 namespace walberla {
@@ -41,13 +41,13 @@ namespace math {
    };
 
    class Node;
-   typedef boost::shared_ptr<Node> NodePtr;
+   typedef std::shared_ptr<Node> NodePtr;
 
    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // EQUATION
    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    class Equation;
-   typedef boost::shared_ptr< Equation > EquationPtr;
+   typedef std::shared_ptr< Equation > EquationPtr;
 
 } // namespace math
 } // namespace walberla

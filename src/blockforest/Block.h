@@ -77,7 +77,7 @@ public:
           const std::vector< BlockReconstruction::NeighborhoodReconstructionBlock > & neighbors );
    Block( BlockForest & forest, const PhantomBlock & phantom );
    Block( BlockForest & forest, const BlockID & id, const AABB & aabb, const uint_t level, mpi::RecvBuffer & buffer,
-          const boost::function< uint_t ( const uint_t ) > & processMapping = boost::function< uint_t ( const uint_t ) >() );
+          const std::function< uint_t ( const uint_t ) > & processMapping = std::function< uint_t ( const uint_t ) >() );
 
    virtual ~Block() {}
 

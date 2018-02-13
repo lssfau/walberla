@@ -61,7 +61,7 @@ CylindricalBoundary::CylindricalBoundary( id_t sid, id_t uid, const Vec3& gpos, 
    //boundaries are always considered locally and have infinite mass
    setGlobal( true );
    setCommunicating( false );
-   setMass( true );
+   setMassAndInertiaToInfinity();
    setFinite( false );
 
    // Checking the radius

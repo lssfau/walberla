@@ -797,7 +797,7 @@ int main( int argc, char **argv )
    /////////////////
 
    // set up pe functionality
-   shared_ptr<pe::BodyStorage>  globalBodyStorage = make_shared<pe::BodyStorage>();
+   shared_ptr<pe::BodyStorage> globalBodyStorage = make_shared<pe::BodyStorage>();
    pe::SetBodyTypeIDs<BodyTypeTuple>::execute();
    auto bodyStorageID  = blocks->addBlockData(pe::createStorageDataHandling<BodyTypeTuple>(), "pe Body Storage");
    auto ccdID          = blocks->addBlockData(pe::ccd::createHashGridsDataHandling( globalBodyStorage, bodyStorageID ), "CCD");
@@ -809,7 +809,7 @@ int main( int argc, char **argv )
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
-   boost::function<void(void)> syncCall;
+   std::function<void(void)> syncCall;
    if( XBlocks <= uint_t(4) )
       syncCall = boost::bind( pe::syncNextNeighbors<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
    else
@@ -831,7 +831,7 @@ int main( int argc, char **argv )
       else if( int(Galileo) == 250 )
       {
          // add random perturbance for chaotic regime
-         walberla::math::seedRandomGenerator( boost::mt19937::result_type(std::time(0)) );
+         walberla::math::seedRandomGenerator( std::mt19937::result_type(std::time(0)) );
          xParticle = real_c( xlength ) * real_t(0.5) + walberla::math::realRandom( real_t(-0.5), real_t(0.5) );
          yParticle = real_c( ylength ) * real_t(0.5) + walberla::math::realRandom( real_t(-0.5), real_t(0.5) );
 
@@ -900,9 +900,9 @@ int main( int argc, char **argv )
 
       //initialization of the PDFs inside the particles, important for PSM M3
       if( psmVariant == PSMVariant::SC1W1 || psmVariant == PSMVariant::SC2W1 || psmVariant == PSMVariant::SC3W1 )
-         pe_coupling::initializeDomainForPSM< LatticeModel_T, 1 >( blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
+         pe_coupling::initializeDomainForPSM< LatticeModel_T, 1 >( *blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
       else
-         pe_coupling::initializeDomainForPSM< LatticeModel_T, 2 >( blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
+         pe_coupling::initializeDomainForPSM< LatticeModel_T, 2 >( *blocks, pdfFieldID, bodyAndVolumeFractionFieldID );
 
    }
    else
@@ -912,11 +912,11 @@ int main( int argc, char **argv )
 
       if( memVariant == MEMVariant::CLI )
       {
-         pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_CLI_Flag );
+         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MEM_CLI_Flag );
       }else if ( memVariant == MEMVariant::MR ){
-         pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_MR_Flag );
+         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MEM_MR_Flag );
       }else{
-         pe_coupling::mapMovingBodies< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, MEM_BB_Flag );
+         pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MEM_BB_Flag );
       }
    }
 
@@ -949,7 +949,7 @@ int main( int argc, char **argv )
       boost::filesystem::create_directory( tpath );
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
-   boost::function< void () > commFunction;
+   std::function< void () > commFunction;
 
    blockforest::communication::UniformBufferedScheme< Stencil_T > scheme( blocks );
    scheme.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldID ) );
@@ -1195,11 +1195,11 @@ int main( int argc, char **argv )
 
       // sweep for updating the pe body mapping into the LBM simulation
       if( memVariant == MEMVariant::CLI )
-         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MEM_CLI_Flag, FormerMEM_Flag ), "Body Mapping" );
+         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_CLI_Flag, FormerMEM_Flag ), "Body Mapping" );
       else if ( memVariant == MEMVariant::MR )
-         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MEM_MR_Flag, FormerMEM_Flag ), "Body Mapping" );
+         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_MR_Flag, FormerMEM_Flag ), "Body Mapping" );
       else
-         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID,  MEM_BB_Flag, FormerMEM_Flag ), "Body Mapping" );
+         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_BB_Flag, FormerMEM_Flag ), "Body Mapping" );
 
 
       // reconstruct missing PDFs
@@ -1208,7 +1208,7 @@ int main( int argc, char **argv )
       typedef pe_coupling::ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationFinder_T > Reconstructor_T;
       Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder, true );
       timeloop.add() << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                               ( blocks, boundaryHandlingID, bodyStorageID, bodyFieldID, reconstructor, FormerMEM_Flag, Fluid_Flag  ), "PDF Restore" );
+                               ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMEM_Flag, Fluid_Flag ), "PDF Restore" );
 
       for( uint_t lbmcycle = 0; lbmcycle < numLBMSubCycles; ++lbmcycle ){
 

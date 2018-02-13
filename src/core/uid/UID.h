@@ -34,9 +34,8 @@
 #include <sstream>
 #include <string>
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-#include <boost/thread.hpp>
-#endif
+#include <mutex>
+#include <shared_mutex>
 
 
 namespace walberla {
@@ -69,8 +68,7 @@ namespace uid {
 *   translates the numerical UID representations into a bit mask. For further information see the documentation of the
 *   two member functions "toIndex()" and "toBitMask()" of this class.
 *
-*   If 'WALBERLA_BUILD_WITH_BOOST_THREAD' is defined, the class UID is thread safe and follows
-*   a multiple-readers / single-writer pattern.
+*   The class UID is thread safe and follows a multiple-readers / single-writer pattern.
 */
 //**********************************************************************************************************************
 
@@ -129,10 +127,8 @@ private:
    static std::map< uint_type, std::string >& uidToString() { static std::map< uint_type, std::string > map; return map; }
    static std::map< std::string, uint_type >& stringToUid() { static std::map< std::string, uint_type > map; return map; }
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   static boost::shared_mutex& uidToStringMutex() { static boost::shared_mutex mutex; return mutex; }
-   static boost::shared_mutex& stringToUidMutex() { static boost::shared_mutex mutex; return mutex; }
-#endif
+   static std::shared_timed_mutex& uidToStringMutex() { static std::shared_timed_mutex mutex; return mutex; }
+   static std::shared_timed_mutex& stringToUidMutex() { static std::shared_timed_mutex mutex; return mutex; }
 
    uint_type uid_;
 
@@ -197,9 +193,7 @@ inline UID<T>::UID( const std::string& identifier, const bool newUid, const bool
 template< typename T >
 void UID<T>::init( const std::string& identifier, const bool newUid, const bool appendUIDtoIdentifier ) {
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   boost::unique_lock< boost::shared_mutex > stringToUid_lock( stringToUidMutex() );
-#endif
+   std::unique_lock< std::shared_timed_mutex > stringToUid_lock( stringToUidMutex() );
 
    WALBERLA_ASSERT( !identifier.empty() );
 
@@ -211,9 +205,7 @@ void UID<T>::init( const std::string& identifier, const bool newUid, const bool 
 
       WALBERLA_ASSERT( stringToUid().find( idString ) == stringToUid().end() ); // 'idString' must not exist
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::unique_lock< boost::shared_mutex > uidToString_lock( uidToStringMutex() );
-#endif
+      std::unique_lock< std::shared_timed_mutex > uidToString_lock( uidToStringMutex() );
 
       uidToString()[ uid_ ] = idString;
       stringToUid()[ idString ] = uid_;
@@ -226,9 +218,7 @@ void UID<T>::init( const std::string& identifier, const bool newUid, const bool 
 
          uid_ = T::generateUID();
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-         boost::unique_lock< boost::shared_mutex > uidToString_lock( uidToStringMutex() );
-#endif
+         std::unique_lock< std::shared_timed_mutex > uidToString_lock( uidToStringMutex() );
          uidToString()[ uid_ ] = identifier;
          stringToUid()[ identifier ] = uid_;
       }
@@ -256,10 +246,7 @@ UID<T>::UID( const bool createAnonymousUID ) : uid_( 0 ) {
 #endif
    }
    else {
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::unique_lock< boost::shared_mutex > stringToUid_lock( stringToUidMutex() );
-#endif
+      std::unique_lock< std::shared_timed_mutex > stringToUid_lock( stringToUidMutex() );
 
       uid_ = T::generateUID();
 
@@ -267,9 +254,7 @@ UID<T>::UID( const bool createAnonymousUID ) : uid_( 0 ) {
 
       WALBERLA_ASSERT( stringToUid().find( identifier ) == stringToUid().end() ); // 'identifier' must not exist
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::unique_lock< boost::shared_mutex > uidToString_lock( uidToStringMutex() );
-#endif
+      std::unique_lock< std::shared_timed_mutex > uidToString_lock( uidToStringMutex() );
 
       uidToString()[ uid_ ] = identifier;
       stringToUid()[ identifier ] = uid_;
@@ -304,10 +289,7 @@ inline UID<T>::UID( const uint_type uid ) : uid_( uid )
 //**********************************************************************************************************************
 template< typename T >
 UID<T> UID<T>::getOrConstruct( const std::string& identifier ) {
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   boost::unique_lock< boost::shared_mutex > stringToUid_lock( stringToUidMutex() );
-#endif
+   std::unique_lock< std::shared_timed_mutex > stringToUid_lock( stringToUidMutex() );
 
    WALBERLA_ASSERT( !identifier.empty() );
 
@@ -317,9 +299,7 @@ UID<T> UID<T>::getOrConstruct( const std::string& identifier ) {
 
       uint_type uid = T::generateUID();
 
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-      boost::unique_lock< boost::shared_mutex > uidToString_lock( uidToStringMutex() );
-#endif
+      std::unique_lock< std::shared_timed_mutex > uidToString_lock( uidToStringMutex() );
 
       uidToString()[ uid ] = identifier;
       stringToUid()[ identifier ] = uid;
@@ -340,10 +320,7 @@ UID<T> UID<T>::getOrConstruct( const std::string& identifier ) {
 //**********************************************************************************************************************
 template< typename T >
 inline UID<T> UID<T>::get( const std::string& identifier ) {
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   boost::shared_lock< boost::shared_mutex > lock( stringToUidMutex() );
-#endif
+   std::shared_lock< std::shared_timed_mutex > lock( stringToUidMutex() );
 
    WALBERLA_ASSERT( stringToUid().find( identifier ) != stringToUid().end() ); // 'identifier' must exist
 
@@ -354,10 +331,7 @@ inline UID<T> UID<T>::get( const std::string& identifier ) {
 
 template< typename T >
 inline const std::string& UID<T>::getIdentifier() const {
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
-   boost::shared_lock< boost::shared_mutex > lock( uidToStringMutex() );
-#endif
+   std::shared_lock< std::shared_timed_mutex > lock( uidToStringMutex() );
 
    WALBERLA_ASSERT( valid_ );
    WALBERLA_ASSERT( uidToString().find( uid_ ) != uidToString().end() );

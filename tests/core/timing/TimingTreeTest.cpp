@@ -25,9 +25,6 @@
 #include "core/timing/StaticPolicy.h"
 #include "core/timing/TimingTree.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread/thread.hpp>
-
 #include <iostream>
 
 using namespace walberla;
@@ -40,8 +37,6 @@ void mssleep(unsigned int ms)
 int main( int argc, char ** argv )
 {
    debug::enterTestMode();
-
-#ifdef WALBERLA_BUILD_WITH_BOOST_THREAD
 
    mpi::Environment mpiEnv(argc, argv);
    WALBERLA_UNUSED( mpiEnv );
@@ -123,7 +118,6 @@ int main( int argc, char ** argv )
 //      std::cout << tt2;
 //      std::cout << tt3;
    }
-#endif
 
    return 0;
 }

@@ -106,10 +106,8 @@ waLBerla_execute_test( NAME EquationSolverTest )
 waLBerla_compile_test( FILES mpi/BufferTest.cpp )
 waLBerla_execute_test( NAME BufferTest )
 
-if( WALBERLA_BUILD_WITH_BOOST_THREAD )
-   waLBerla_compile_test( FILES mpi/BufferSystemTest.cpp )
-   waLBerla_execute_test( NAME BufferSystemTest PROCESSES 4 )
-endif()
+waLBerla_compile_test( FILES mpi/BufferSystemTest.cpp )
+waLBerla_execute_test( NAME BufferSystemTest PROCESSES 4 )
 
 waLBerla_compile_test( FILES mpi/BroadcastTest.cpp )
 waLBerla_execute_test( NAME BroadcastTest1 COMMAND $<TARGET_FILE:BroadcastTest> )
@@ -142,7 +140,7 @@ waLBerla_execute_test( NAME SetReductionTest27 COMMAND $<TARGET_FILE:SetReductio
 
 
 
-waLBerla_compile_test( FILES mpi/ProbeVsExtraMessage.cpp )
+waLBerla_compile_test( FILES mpi/ProbeVsExtraMessage.cpp DEPENDS postprocessing)
 
 
 ##############
@@ -215,4 +213,7 @@ if( WALBERLA_BUILD_WITH_PARMETIS )
    waLBerla_execute_test( NAME ParMetisTest1 COMMAND $<TARGET_FILE:ParMetisTest> 64 64  4 --no-vtk )
    waLBerla_execute_test( NAME ParMetisTest2 COMMAND $<TARGET_FILE:ParMetisTest> 64 64  8 --no-vtk PROCESSES 2 )
    waLBerla_execute_test( NAME ParMetisTest4 COMMAND $<TARGET_FILE:ParMetisTest> 64 64 16 --no-vtk PROCESSES 4 )
+
+   waLBerla_compile_test( NAME PlainParMetisTest FILES load_balancing/PlainParMetisTest.cpp )
+   waLBerla_execute_test( NAME PlainParMetisTest PROCESSES 3 )
 endif()
