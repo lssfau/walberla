@@ -32,6 +32,8 @@
 #include "Intersects.h"
 #include "Lighting.h"
 #include "ShadingFunctions.h"
+#include "pe/ccd/ICCD.h"
+#include <pe/ccd/HashGrids.h>
 
 using namespace walberla;
 using namespace walberla::pe;
@@ -55,8 +57,9 @@ class Raytracer {
 public:
    /*!\name Constructors */
    //@{
-   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+   explicit Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
                       const shared_ptr<BodyStorage> globalBodyStorage,
+                      const BlockDataID ccdID,
                       uint16_t pixelsHorizontal, uint16_t pixelsVertical,
                       real_t fov_vertical,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
@@ -64,8 +67,9 @@ public:
                       const Color& backgroundColor = Color(0.1, 0.1, 0.1),
                       real_t blockAABBIntersectionPadding = real_t(0.0),
                       std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction = defaultBodyTypeDependentShadingParams);
-   explicit Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+   explicit Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
                       const shared_ptr<BodyStorage> globalBodyStorage,
+                      const BlockDataID ccdID,
                       const Config::BlockHandle& config,
                       std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction = defaultBodyTypeDependentShadingParams);
    //@}
@@ -74,8 +78,9 @@ private:
    /*!\name Member variables */
    //@{
    const shared_ptr<BlockStorage> forest_; //!< The BlockForest the raytracer operates on.
-   BlockDataID storageID_;    //!< The storage ID of the block data storage the raytracer operates on.
+   const BlockDataID storageID_;    //!< The storage ID of the block data storage the raytracer operates on.
    const shared_ptr<BodyStorage> globalBodyStorage_; //!< The global body storage the raytracer operates on.
+   const BlockDataID ccdID_;  //!< The ID of the hash grids block data.
    
    uint16_t pixelsHorizontal_;  //!< The horizontal amount of pixels of the generated image.
    uint16_t pixelsVertical_;    //!< The vertical amount of pixels of the generated image.
@@ -382,6 +387,11 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    std::vector<Color> imageBuffer(pixelsVertical_ * pixelsHorizontal_);
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    
+   for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
+      ccd::HashGrids* ccd = blockIt->getData<ccd::HashGrids>(ccdID_);
+      ccd->update();
+   }
+   
    real_t t, t_closest;
    Vec3 n;
    Vec3 n_closest;
@@ -406,6 +416,16 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
                continue;
             }
 #endif
+#ifndef DISABLE_RAYTRACING_USING_HASHGRIDS
+            ccd::HashGrids* ccd = blockIt->getData<ccd::HashGrids>(ccdID_);
+            BodyID body = ccd->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAabb, t, n);
+            
+            if (body != NULL) {
+               t_closest = t;
+               body_closest = body;
+               n_closest = n;
+            }
+#else
             for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
                if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
                   PlaneID plane = (Plane*)(*bodyIt);
@@ -423,6 +443,7 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
                   n_closest = n;
                }
             }
+#endif
          }
          
          int i = 0;

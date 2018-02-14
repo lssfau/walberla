@@ -45,8 +45,9 @@ namespace raytracing {
  *                                     Set it to the value of the farthest distance a object might protrude from
  *                                     its containing block.
  */
-Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
                      const shared_ptr<BodyStorage> globalBodyStorage,
+                     const BlockDataID ccdID,
                      uint16_t pixelsHorizontal, uint16_t pixelsVertical,
                      real_t fov_vertical,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
@@ -54,7 +55,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
                      const Color& backgroundColor,
                      real_t blockAABBIntersectionPadding,
                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction)
-   : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage),
+   : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage), ccdID_(ccdID),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
    fov_vertical_(fov_vertical),
    cameraPosition_(cameraPosition), lookAtPoint_(lookAtPoint), upVector_(upVector),
@@ -85,11 +86,12 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
  * local_image_output_enabled (bool) to true. outputFilenameTimestepZeroPadding (int) sets zero padding for timesteps of output filenames.
  * For the lighting a config block named Lighting has to be defined, information about its contents is in Lighting.h.
  */
-Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageID,
+Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
                      const shared_ptr<BodyStorage> globalBodyStorage,
+                     const BlockDataID ccdID,
                      const Config::BlockHandle& config,
                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction)
-   : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage),
+   : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage), ccdID_(ccdID),
    bodyToShadingParamsFunction_(bodyToShadingParamsFunction) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
    
