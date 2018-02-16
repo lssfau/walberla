@@ -35,10 +35,7 @@ public:
    typedef walberla::blockforest::PODPhantomWeight<double>           PhantomBlockWeight;
    typedef walberla::blockforest::PODPhantomWeightPackUnpack<double> PhantomBlockWeightPackUnpackFunctor;
 
-   ///Base weight due to allocated data structures. A weight of zero for blocks is dangerous as empty blocks might accumulate on one process!
-   static const double baseWeight;
-
-   WeightAssignmentFunctor( shared_ptr<InfoCollection>& ic ) : ic_(ic) {}
+   WeightAssignmentFunctor( shared_ptr<InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
 
    void operator()( std::vector< std::pair< const PhantomBlock *, boost::any > > & blockData, const PhantomBlockForest & )
    {
@@ -52,7 +49,7 @@ public:
          {
             auto infoIt = ic_->find( block->getId()/*.getFatherId()*/ );
             WALBERLA_ASSERT_UNEQUAL( infoIt, ic_->end() );
-            it->second = PhantomBlockWeight( double_c(infoIt->second.numberOfLocalBodies) + baseWeight );
+            it->second = PhantomBlockWeight( double_c(infoIt->second.numberOfLocalBodies) + baseWeight_ );
             continue;
          }
 
@@ -60,7 +57,7 @@ public:
          {
             auto infoIt = ic_->find( block->getId() );
             WALBERLA_ASSERT_UNEQUAL( infoIt, ic_->end() );
-            it->second = PhantomBlockWeight( double_c(infoIt->second.numberOfLocalBodies) + baseWeight );
+            it->second = PhantomBlockWeight( double_c(infoIt->second.numberOfLocalBodies) + baseWeight_ );
             continue;
          }
 
@@ -74,14 +71,20 @@ public:
                WALBERLA_ASSERT_UNEQUAL( childIt, ic_->end() );
                weight += double_c(childIt->second.numberOfLocalBodies);
             }
-            it->second = PhantomBlockWeight( weight + baseWeight );
+            it->second = PhantomBlockWeight( weight + baseWeight_ );
             continue;
          }
       }
    }
 
+   inline void setBaseWeight( const real_t weight) { baseWeight_ = weight;}
+   inline real_t getBaseWeight() const { return baseWeight_; }
+
 private:
    shared_ptr<InfoCollection> ic_;
+
+   ///Base weight due to allocated data structures. A weight of zero for blocks is dangerous as empty blocks might accumulate on one process!
+   double baseWeight_ = real_t(10.0);
 };
 
 }
