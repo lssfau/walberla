@@ -311,5 +311,21 @@ std::vector<MaterialID> Material::findPrefix( const std::string& prefix )
 }
 //*************************************************************************************************
 
+std::string Material::toString( const MaterialID& v )
+{
+   std::stringstream ss;
+   ss << "Material "             << Material::getName(v) << "\n"
+      << "   density         = " << Material::getDensity(v) << "\n"
+      << "   cor             = " << Material::getRestitution(v) << "\n"
+      << "   csf             = " << Material::getStaticFriction(v) << "\n"
+      << "   cdf             = " << Material::getDynamicFriction(v) << "\n"
+      << "   poisson         = " << Material::getPoissonRatio(v) << "\n"
+      << "   young           = " << Material::getYoungModulus(v) << "\n"
+      << "   stiffness       = " << Material::getStiffness(v) << "\n"
+      << "   dampingN        = " << Material::getDampingN(v) << "\n"
+      << "   dampingT        = " << Material::getDampingT(v);
+   return ss.str();
+}
+
 } // namespace pe
 }  // namespace walberla
