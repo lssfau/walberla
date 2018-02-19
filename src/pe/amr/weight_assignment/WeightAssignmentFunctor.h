@@ -77,8 +77,8 @@ public:
       }
    }
 
-   inline void setBaseWeight( const real_t weight) { baseWeight_ = weight;}
-   inline real_t getBaseWeight() const { return baseWeight_; }
+   inline void   setBaseWeight( const double weight) { baseWeight_ = weight;}
+   inline double getBaseWeight() const { return baseWeight_; }
 
 private:
    shared_ptr<InfoCollection> ic_;
