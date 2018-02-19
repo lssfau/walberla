@@ -90,11 +90,13 @@ public:
    inline void addDataSource( const shared_ptr< VertexDataSource<double>  > & dataSource ) { doubleVertexDataSources_.push_back( dataSource ); }
    inline void addDataSource( const shared_ptr< VertexDataSource<int32_t> > & dataSource ) { int32VertexDataSources_.push_back( dataSource );  }
    inline void addDataSource( const shared_ptr< VertexDataSource<uint8_t> > & dataSource ) { uint8VertexDataSources_.push_back( dataSource );  }
+   inline void addDataSource( const shared_ptr< VertexDataSource<uint64_t> > & dataSource ) { uint64VertexDataSources_.push_back( dataSource );  }
 
    inline void addDataSource( const shared_ptr< FaceDataSource<float>   > & dataSource ) { floatFaceDataSources_.push_back( dataSource );  }
    inline void addDataSource( const shared_ptr< FaceDataSource<double>  > & dataSource ) { doubleFaceDataSources_.push_back( dataSource ); }
    inline void addDataSource( const shared_ptr< FaceDataSource<int32_t> > & dataSource ) { int32FaceDataSources_.push_back( dataSource );  }
    inline void addDataSource( const shared_ptr< FaceDataSource<uint8_t> > & dataSource ) { uint8FaceDataSources_.push_back( dataSource );  }
+   inline void addDataSource( const shared_ptr< FaceDataSource<uint64_t> > & dataSource ) { uint64FaceDataSources_.push_back( dataSource );  }
 
    inline void setFaceFilter  ( const FaceFilterFunction & f ) { faceFilter_ = f;                    }
    inline void clearFaceFilter()                               { faceFilter_ = FaceFilterFunction(); }
@@ -127,15 +129,17 @@ protected:
 
    FaceFilterFunction faceFilter_;
 
-   std::vector< shared_ptr< VertexDataSource<float  > > > floatVertexDataSources_;
-   std::vector< shared_ptr< VertexDataSource<double > > > doubleVertexDataSources_;
-   std::vector< shared_ptr< VertexDataSource<int32_t> > > int32VertexDataSources_;
-   std::vector< shared_ptr< VertexDataSource<uint8_t> > > uint8VertexDataSources_;
+   std::vector< shared_ptr< VertexDataSource<float  > > >  floatVertexDataSources_;
+   std::vector< shared_ptr< VertexDataSource<double > > >  doubleVertexDataSources_;
+   std::vector< shared_ptr< VertexDataSource<int32_t> > >  int32VertexDataSources_;
+   std::vector< shared_ptr< VertexDataSource<uint8_t> > >  uint8VertexDataSources_;
+   std::vector< shared_ptr< VertexDataSource<uint64_t> > > uint64VertexDataSources_;
 
-   std::vector< shared_ptr< FaceDataSource<float  > > > floatFaceDataSources_;
-   std::vector< shared_ptr< FaceDataSource<double > > > doubleFaceDataSources_;
-   std::vector< shared_ptr< FaceDataSource<int32_t> > > int32FaceDataSources_;
-   std::vector< shared_ptr< FaceDataSource<uint8_t> > > uint8FaceDataSources_;
+   std::vector< shared_ptr< FaceDataSource<float  > > >  floatFaceDataSources_;
+   std::vector< shared_ptr< FaceDataSource<double > > >  doubleFaceDataSources_;
+   std::vector< shared_ptr< FaceDataSource<int32_t> > >  int32FaceDataSources_;
+   std::vector< shared_ptr< FaceDataSource<uint8_t> > >  uint8FaceDataSources_;
+   std::vector< shared_ptr< FaceDataSource<uint64_t> > > uint64FaceDataSources_;
 };
 
 
@@ -303,19 +307,21 @@ void VTKMeshWriter<MeshType>::writePiece( std::ostream & os ) const
 
    os << "      <CellData>\n";
 
-   writeFaceData( floatFaceDataSources_ , faces, os, b64 );
-   writeFaceData( doubleFaceDataSources_, faces, os, b64 );
-   writeFaceData( int32FaceDataSources_ , faces, os, b64 );
-   writeFaceData( uint8FaceDataSources_ , faces, os, b64 );
+   writeFaceData( floatFaceDataSources_ ,  faces, os, b64 );
+   writeFaceData( doubleFaceDataSources_,  faces, os, b64 );
+   writeFaceData( int32FaceDataSources_ ,  faces, os, b64 );
+   writeFaceData( uint8FaceDataSources_ ,  faces, os, b64 );
+   writeFaceData( uint64FaceDataSources_ , faces, os, b64 );
 
    os << "      </CellData>\n";
 
    os << "      <PointData>\n";
 
-   writeVertexData( floatVertexDataSources_ , vertices, os, b64 );
-   writeVertexData( doubleVertexDataSources_, vertices, os, b64 );
-   writeVertexData( int32VertexDataSources_ , vertices, os, b64 );
-   writeVertexData( uint8VertexDataSources_ , vertices, os, b64 );
+   writeVertexData( floatVertexDataSources_ ,  vertices, os, b64 );
+   writeVertexData( doubleVertexDataSources_,  vertices, os, b64 );
+   writeVertexData( int32VertexDataSources_ ,  vertices, os, b64 );
+   writeVertexData( uint8VertexDataSources_ ,  vertices, os, b64 );
+   writeVertexData( uint64VertexDataSources_ , vertices, os, b64 );
 
    os << "      </PointData>\n";
 
