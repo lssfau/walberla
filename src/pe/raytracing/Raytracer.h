@@ -387,10 +387,24 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    std::vector<Color> imageBuffer(pixelsVertical_ * pixelsHorizontal_);
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    
+   if (tt != NULL) tt->start("HashGrids Update");
    for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
-      ccd::HashGrids* ccd = blockIt->getData<ccd::HashGrids>(ccdID_);
-      ccd->update();
+      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID_);
+      hashgrids->update();
    }
+   if (tt != NULL) tt->stop("HashGrids Update");
+   
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   real_t t_naive_closest; BodyID body_naive_closest;
+   real_t t_hashgrids_closest; BodyID body_hashgrids_closest;
+   int errors = 0;
+   std::unordered_set<BodyID> problematicBodies;
+   std::unordered_set<BodyID> problematicHashgridsFoundBodies;
+#endif
+   
+#if defined(USE_NAIVE_INTERSECTION_FINDING) || defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   uint naiveIntersectionTests = 0;
+#endif
    
    real_t t, t_closest;
    Vec3 n;
@@ -402,6 +416,10 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    if (tt != NULL) tt->start("Intersection Testing");
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+         bool isProblematicPixel = false;
+#endif
+         
          Vec3 pixelLocation = viewingPlaneOrigin_ + u_*(real_c(x)+real_t(0.5))*pixelWidth_ + v_*(real_c(y)+real_t(0.5))*pixelHeight_;
          Vec3 direction = (pixelLocation - cameraPosition_).getNormalized();
          ray.setDirection(direction);
@@ -409,23 +427,50 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
          n.reset();
          t_closest = inf;
          body_closest = NULL;
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+         t_naive_closest = t_hashgrids_closest = inf;
+         body_naive_closest = body_hashgrids_closest = NULL;
+#endif
+
+#if !defined(USE_NAIVE_INTERSECTION_FINDING) || defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
          for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
-#ifndef DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK
             const AABB& blockAabb = blockIt->getAABB();
+#if !defined(DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK)
             if (!intersects(blockAabb, ray, t, blockAABBIntersectionPadding_)) {
                continue;
             }
 #endif
-#ifndef DISABLE_RAYTRACING_USING_HASHGRIDS
-            ccd::HashGrids* ccd = blockIt->getData<ccd::HashGrids>(ccdID_);
-            BodyID body = ccd->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAabb, t, n);
+            ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID_);
+            BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAabb, t, n);
             
-            if (body != NULL) {
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+            if (body != NULL && t < t_hashgrids_closest) {
+#ifdef ignore_this_just_for_correct_indentation
+            }
+#endif
+#else
+            if (body != NULL && t < t_closest) {
+#endif
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+               t_hashgrids_closest = t;
+               body_hashgrids_closest = body;
+#else
                t_closest = t;
                body_closest = body;
+#endif
                n_closest = n;
             }
-#else
+         }
+#endif
+         
+#if defined(USE_NAIVE_INTERSECTION_FINDING) || defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+         for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
+            const AABB& blockAabb = blockIt->getAABB();
+#if !defined(DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK)
+            if (!intersects(blockAabb, ray, t, blockAABBIntersectionPadding_)) {
+               continue;
+            }
+#endif
             for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
                if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
                   PlaneID plane = (Plane*)(*bodyIt);
@@ -435,16 +480,42 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
                }
                
                bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
-               
+               naiveIntersectionTests++;
+
                if (intersects && t < t_closest) {
                   // body was shot by ray and currently closest to camera
                   t_closest = t;
                   body_closest = *bodyIt;
                   n_closest = n;
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+                  t_naive_closest = t;
+                  body_naive_closest = *bodyIt;
+#endif
                }
             }
-#endif
          }
+#endif
+            
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+         if (body_naive_closest != body_hashgrids_closest && !realIsEqual(t_naive_closest, t_hashgrids_closest)) {
+            //WALBERLA_LOG_INFO("bodies at " << x << "/" << y << " dont match up: " << t_naive_closest << " <-> " << t_hashgrids_closest);
+            /*if (body_naive_closest != NULL) {
+             WALBERLA_LOG_INFO(" naive:     " << body_naive_closest->getID() << " @ " << body_naive_closest->getAABB().minCorner());
+             } else {
+             WALBERLA_LOG_INFO(" naive:     none");
+             }
+             if (body_hashgrids_closest) {
+             WALBERLA_LOG_INFO(" hashgrids: " << body_hashgrids_closest->getID() << " @ " << body_hashgrids_closest->getAABB().minCorner());
+             } else {
+             WALBERLA_LOG_INFO(" hashgrids: none");
+             }
+             WALBERLA_LOG_INFO(" ray dir: " << ray.getDirection());*/
+            problematicBodies.insert(body_naive_closest);
+            problematicHashgridsFoundBodies.insert(body_hashgrids_closest);
+            errors++;
+            isProblematicPixel = true;
+         }
+#endif
          
          int i = 0;
          for(auto bodyIt: *globalBodyStorage_) {
@@ -473,6 +544,21 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
          
          if (!realIsIdentical(t_closest, inf) && body_closest != NULL) {
             Color color = getColor(body_closest, ray, t_closest, n_closest);
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+            if (isProblematicPixel) {
+               color = Color(1,1,0);
+            }
+            if (body_naive_closest != body_hashgrids_closest && !realIsEqual(t_naive_closest, t_hashgrids_closest)) {
+               if (body_hashgrids_closest == NULL) {
+                  color = Color(0, 1, 0);
+                  //WALBERLA_LOG_INFO("made pixel green");
+               } else {
+                  color = Color(1, 0, 0);
+                  //WALBERLA_LOG_INFO("made pixel red");
+               }
+            }
+#endif
+            
             imageBuffer[coordinateToArrayIndex(x, y)] = color;
             BodyIntersectionInfo intersectionInfo = {
                x,
@@ -488,6 +574,31 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
       }
    }
    if (tt != NULL) tt->stop("Intersection Testing");
+
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   std::stringstream ss;
+   for (auto body: problematicBodies) {
+      if (body != NULL) {
+         ss << body->getID() << " ";
+      } else {
+         ss << "NULL" << " ";
+      }
+   };
+   ss << "(";
+   for (auto body: problematicHashgridsFoundBodies) {
+      if (body != NULL) {
+         ss << body->getID() << " ";
+      } else {
+         ss << "NULL" << " ";
+      }
+   };
+   ss << ")";
+   WALBERLA_LOG_INFO(errors << " pixel errors found, problematic bodies: " << ss.str());
+#endif
+
+#if defined(USE_NAIVE_INTERSECTION_FINDING) || defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO("Performed " << naiveIntersectionTests << " naive intersection tests");
+#endif
 
    if (tt != NULL) tt->start("Reduction");
    // intersections synchronisieren

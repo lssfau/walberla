@@ -97,8 +97,10 @@ public:
    static const size_t gridActivationThreshold;
    static const real_t hierarchyFactor;
    //**********************************************************************************************
+   
+   static size_t intersectionTestCount; // ToDo remove again
 
-private:
+//private: // toDo uncomment to change to private again
    //**Type definitions****************************************************************************
    //! Vector for storing (handles to) rigid bodies.
    typedef std::vector<BodyID>  BodyVector;
@@ -189,7 +191,7 @@ private:
       //*******************************************************************************************
 
 
-    private:
+    //private: // ToDo uncomment to change to public again
       //**Utility functions************************************************************************
       /*!\name Utility functions */
       //@{
@@ -205,7 +207,8 @@ private:
       
       template<typename BodyTuple>
       bool getBodyIntersectionForCellCenter(real_t x, real_t y, real_t z, const AABB& blockAABB,
-                                            const raytracing::Ray& ray, real_t& t, Vec3& n, BodyID& body) const;
+                                            const raytracing::Ray& ray, size_t c,
+                                            real_t& t, Vec3& n, BodyID& body) const;
       //@}
       //*******************************************************************************************
 
@@ -289,14 +292,15 @@ public:
    //@}
    //**********************************************************************************************
 
-   void    update(WcTimingTree* tt = NULL);
    //**Implementation of ICCD interface ********************************************************
    virtual PossibleContacts& generatePossibleContacts( WcTimingTree* tt = NULL );
-
+   void update(WcTimingTree* tt = NULL);
+   
    bool active() const { return gridActive_; }
    
    template<typename BodyTuple>
-   BodyID getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, const AABB& blockAABB, real_t& t, Vec3& n);
+   BodyID getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, const AABB& blockAABB,
+                                            real_t& t, Vec3& n);
    
 protected:
    //**Utility functions***************************************************************************
@@ -505,7 +509,7 @@ void HashGrids::HashGrid::processBodies( BodyID* bodies, size_t bodyCount, Conta
  */
 template<typename BodyTuple>
 bool HashGrids::HashGrid::getBodyIntersectionForCellCenter(real_t x, real_t y, real_t z, const AABB& blockAABB,
-                                                           const raytracing::Ray& ray,
+                                                           const raytracing::Ray& ray, size_t c,
                                                            real_t& t, Vec3& n, BodyID& body) const {
    const Vec3& minCorner = blockAABB.minCorner();
    const Vec3& maxCorner = blockAABB.maxCorner();
@@ -516,21 +520,37 @@ bool HashGrids::HashGrid::getBodyIntersectionForCellCenter(real_t x, real_t y, r
    
    raytracing::IntersectsFunctor intersectsFunc(ray, t_local, n_local);
    
-   for (int i = -1; i <= 0; ++i) {
-      for (int j = -1; j <= 0; ++j) {
-         for (int k = -1; k <= 0; ++k) {
+   const Vec3& dir = ray.getDirection();
+   
+   Vector3<int> min(-1, -1, -1);
+   Vector3<int> max(1, 1, 1);
+
+   //if (dir[c] > 0) {
+      min[c] = -2;
+   max[c] = 1;
+   /*} else {
+      min[c] = -1;
+      max[c] = 1;
+   }*/
+
+   for (int i = min[0]; i <= max[0]; ++i) {
+      for (int j = min[1]; j <= max[1]; ++j) {
+         for (int k = min[2]; k <= max[2]; ++k) {
             real_t x_shifted = x + i*cellSpan_;
             real_t y_shifted = y + j*cellSpan_;
             real_t z_shifted = z + k*cellSpan_;
-            if (x_shifted > minCorner[0] && y_shifted > minCorner[1] && z_shifted > minCorner[2] &&
-                x_shifted < maxCorner[0] && y_shifted < maxCorner[1] && z_shifted < maxCorner[2]) {
+            // commenting upper line of condition fixes a bug where objects with their minCorner
+            // out of the blocks bounds would not get considered for intersections.
+            if (/*x_shifted > minCorner[0] && y_shifted > minCorner[1] && z_shifted > minCorner[2] &&*/
+                /*x_shifted < maxCorner[0] && y_shifted < maxCorner[1] && z_shifted < maxCorner[2]*/ true) {
                size_t hash = hashPoint(x_shifted, y_shifted, z_shifted);
                
                Cell cell = cell_[hash];
                if (cell.bodies_ != NULL) {
                   for (const BodyID& cellBody: *cell.bodies_) {
+                     HashGrids::intersectionTestCount++;
                      bool intersects = SingleCast<BodyTuple, raytracing::IntersectsFunctor, bool>::execute(cellBody, intersectsFunc);
-                     if (intersects && t_local < t && t_local >= 0) {
+                     if (intersects && t_local < t) {
                         body = cellBody;
                         t = t_local;
                         n = n_local;
@@ -576,6 +596,7 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
    Vec3 n_closest;
    BodyID body_closest = NULL;
    
+   int i_first_intersection = -1;
    for (size_t i = 0; i <= xCellCount_; i++) {
       size_t i_dir = i;
       if (rayDirection[0] < 0) {
@@ -599,27 +620,35 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
       }
       real_t yValue = rayOrigin[1] + lambda * rayDirection[1]; // get y and z values for this intersection
       real_t zValue = rayOrigin[2] + lambda * rayDirection[2];
-      if (yValue > maxCorner[1] || yValue < minCorner[1] ||
-          zValue > maxCorner[2] || zValue < minCorner[2] ||
+      if (yValue > maxCorner[1]+cellSpan_ || yValue < minCorner[1]-cellSpan_ ||
+          zValue > maxCorner[2]+cellSpan_ || zValue < minCorner[2]-cellSpan_ ||
           lambda != lambda) {
          // calculated intersection with yz plane is out of the blocks bounds
          continue;
       }
       real_t centeredXValue = xValue + cellSpan_*xCenterOffsetFactor;
-      /*if (centeredXValue > maxCorner[0] || centeredXValue < minCorner[0]) {
+      if (centeredXValue > maxCorner[0] || centeredXValue < minCorner[0]) {
          // intersection was with one of the outer bounds of the block and in this direction no more cells exist
          continue;
-      }*/
+      }
       // calculate the y and z values of the center of the cell
       real_t centeredYValue = (size_t((yValue - minCorner[1])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[1];
       real_t centeredZValue = (size_t((zValue - minCorner[2])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[2];
       bool intersected = getBodyIntersectionForCellCenter<BodyTuple>(centeredXValue, centeredYValue, centeredZValue, blockAABB,
-                                                                     ray, t_closest, n_closest, body_closest);
-      if (intersected) {
+                                                                     ray, 0,
+                                                                     t_closest, n_closest, body_closest);
+      if (intersected && i_first_intersection == -1) {
+         i_first_intersection = int(i);
+      }
+      if (i_first_intersection != -1 && i_first_intersection == i-2) {
          break;
       }
+      /*if (intersected) {
+         break;
+      }*/
    }
    
+   i_first_intersection = -1;
    for (size_t i = 0; i < yCellCount_; i++) {
       size_t i_dir = i;
       if (rayDirection[1] < 0) {
@@ -638,24 +667,32 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
       }
       real_t xValue = rayOrigin[0] + lambda * rayDirection[0];
       real_t zValue = rayOrigin[2] + lambda * rayDirection[2];
-      if (xValue >= maxCorner[0] || xValue < minCorner[0] ||
-          zValue >= maxCorner[2] || zValue < minCorner[2] ||
+      if (xValue >= maxCorner[0]+cellSpan_ || xValue < minCorner[0]-cellSpan_ ||
+          zValue >= maxCorner[2]+cellSpan_ || zValue < minCorner[2]-cellSpan_ ||
           lambda != lambda) {
          continue;
       }
       real_t centeredXValue = (size_t((xValue - minCorner[0])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[0];
       real_t centeredYValue = yValue + cellSpan_*yCenterOffsetFactor;
-      /*if (centeredYValue > maxCorner[1] || centeredYValue < minCorner[1]) {
+      if (centeredYValue > maxCorner[1] || centeredYValue < minCorner[1]) {
          continue;
-      }*/
+      }
       real_t centeredZValue = (size_t((zValue - minCorner[2])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[2];
       bool intersected = getBodyIntersectionForCellCenter<BodyTuple>(centeredXValue, centeredYValue, centeredZValue, blockAABB,
-                                                                     ray, t_closest, n_closest, body_closest);
-      if (intersected) {
+                                                                     ray, 1,
+                                                                     t_closest, n_closest, body_closest);
+      if (intersected && i_first_intersection == -1) {
+         i_first_intersection = int(i);
+      }
+      if (i_first_intersection != -1 && i_first_intersection == i-2) {
          break;
       }
+      /*if (intersected) {
+         break;
+      }*/
    }
    
+   i_first_intersection = -1;
    for (size_t i = 0; i < zCellCount_; i++) {
       size_t i_dir = i;
       if (rayDirection[2] < 0) {
@@ -674,22 +711,29 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
       }
       real_t xValue = rayOrigin[0] + lambda * rayDirection[0];
       real_t yValue = rayOrigin[1] + lambda * rayDirection[1];
-      if (xValue > maxCorner[0] || xValue < minCorner[0] ||
-          yValue > maxCorner[1] || yValue < minCorner[1] ||
+      if (xValue > maxCorner[0]+cellSpan_ || xValue < minCorner[0]-cellSpan_ ||
+          yValue > maxCorner[1]+cellSpan_ || yValue < minCorner[1]-cellSpan_ ||
           lambda != lambda) {
          continue;
       }
       real_t centeredXValue = (size_t((xValue - minCorner[0])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[0];
       real_t centeredYValue = (size_t((yValue - minCorner[1])*inverseCellSpan_) + real_t(0.5)) * cellSpan_ + minCorner[1];
       real_t centeredZValue = zValue + cellSpan_*zCenterOffsetFactor;
-      /*if (centeredZValue > maxCorner[2] || centeredZValue < minCorner[2]) {
+      if (centeredZValue > maxCorner[2] || centeredZValue < minCorner[2]) {
          continue;
-      }*/
+      }
       bool intersected = getBodyIntersectionForCellCenter<BodyTuple>(centeredXValue, centeredYValue, centeredZValue, blockAABB,
-                                                                     ray, t_closest, n_closest, body_closest);
-      if (intersected) {
+                                                                     ray, 2,
+                                                                     t_closest, n_closest, body_closest);
+      if (intersected && i_first_intersection == -1) {
+         i_first_intersection = int(i);
+      }
+      if (i_first_intersection != -1 && i_first_intersection == i-2) {
          break;
       }
+      /*if (intersected) {
+         break;
+      }*/
    }
    
    n = n_closest;
@@ -707,7 +751,8 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
  * \return BodyID of closest body, NULL if none found.
  */
 template<typename BodyTuple>
-BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, const AABB& blockAABB, real_t& t, Vec3& n) {
+BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, const AABB& blockAABB, 
+                                                    real_t& t, Vec3& n) {
    real_t inf = std::numeric_limits<real_t>::max();
 
    real_t t_closest = inf;
@@ -717,7 +762,6 @@ BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, 
    real_t t_local;
    Vec3 n_local;
    
-   int i = 0;
    for(auto grid: gridList_) {
       BodyID body = grid->getRayIntersectingBody<BodyTuple>(ray, blockAABB, t_local, n_local);
       if (body != NULL && t_local < t_closest) {
@@ -725,13 +769,12 @@ BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, 
          t_closest = t_local;
          n_closest = n_local;
       }
-      i++;
    }
    
    raytracing::IntersectsFunctor intersectsFunc(ray, t_local, n_local);
    for(auto body: nonGridBodies_) {
       bool intersects = SingleCast<BodyTuple, raytracing::IntersectsFunctor, bool>::execute(body, intersectsFunc);
-      if (intersects && t_local < t_closest && t_local >= 0) {
+      if (intersects && t_local < t_closest) {
          body_closest = body;
          t_closest = t_local;
          n_closest = n_local;
