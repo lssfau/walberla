@@ -90,7 +90,7 @@ Sphere::Sphere( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, const V
    } else
    {
       auto mass = calcMass( radius, Material::getDensity( material ) );
-      setMassAndInertia( mass, calcInertia( radius, mass ) );
+      setMassAndInertia( mass, calcInertia( mass, radius ) );
    }
    setCommunicating( communicating );
    setFinite( true );
