@@ -11,6 +11,6 @@ int main() {
 #elif defined(WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM)
    std::experimental::filesystem::path p("/tmp/test.txt");
 #endif
-   std::cout << p << std::endl;
+   std::cout << p.extension().string() << std::endl;
    return 0;
 }

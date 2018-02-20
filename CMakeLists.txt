@@ -642,6 +642,8 @@ set ( waLBerla_REQUIRED_MIN_BOOST_VERSION "1.48")
 
 if ( NOT WALBERLA_USE_STD_FILESYSTEM AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
   list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS filesystem system )
+else()
+  list ( APPEND waLBerla_OPTIONAL_BOOST_COMPONENTS system )
 endif()
 
 if ( WALBERLA_BUILD_WITH_PYTHON AND WALBERLA_CXX_COMPILER_IS_MSVC )
@@ -669,14 +671,14 @@ if ( NOT BOOST_ROOT )
    endforeach ( )
 endif ( )
 
-find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS "system" QUIET )
+find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${waLBerla_OPTIONAL_BOOST_COMPONENTS} QUIET )
 
 if( NOT Boost_FOUND )
    message ( WARNING
       "The specified configuration of the BOOST libraries was not found on your system! Now trying some other configuration..." )
    foreach ( Boost_USE_STATIC_LIBS ON OFF )
       foreach ( Boost_USE_MULTITHREADED ON OFF )
-         find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS "system" QUIET )
+         find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${waLBerla_OPTIONAL_BOOST_COMPONENTS} QUIET )
          if ( Boost_FOUND )
             set ( Boost_USE_STATIC_LIBS   ${Boost_USE_STATIC_LIBS}   CACHE BOOL "Use boost static libraries"        FORCE )
             set ( Boost_USE_MULTITHREADED ${Boost_USE_MULTITHREADED} CACHE BOOL "Use boost multithreaded libraries" FORCE )
@@ -717,7 +719,7 @@ if ( Boost_FOUND )
 
 else( Boost_FOUND )
    # Search again, this time with the REQUIRED option. This will give a CMAKE error and a detailed error message for the user
-   find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} REQUIRED ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS "system" )
+   find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} REQUIRED ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${waLBerla_OPTIONAL_BOOST_COMPONENTS} )
 endif( Boost_FOUND )
 
 
