@@ -701,8 +701,10 @@ if ( Boost_FOUND )
    else()
       include_directories ( SYSTEM ${Boost_INCLUDE_DIRS} )
    endif()
-   link_directories ( ${Boost_LIBRARY_DIRS} )
-   list ( APPEND SERVICE_LIBS ${Boost_LIBRARIES} )
+   if( waLBerla_REQUIRED_BOOST_COMPONENTS )
+      link_directories ( ${Boost_LIBRARY_DIRS} )
+      list ( APPEND SERVICE_LIBS ${Boost_LIBRARIES} )
+   endif()
    add_definitions ( -DBOOST_ALL_NO_LIB ) # Disable Boost auto-linking (CMAKE does that for us...)
 
    #fix for static lib usage: http://stackoverflow.com/questions/11812463/boost-python-link-errors-under-windows-msvc10
