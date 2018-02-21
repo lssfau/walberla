@@ -28,5 +28,4 @@
 #include "CombinedReductionFieldCommunication.h"
 #include "ExternalForceToForceFieldAdder.h"
 #include "ForceFieldResetter.h"
-#include "SubgridTimeStep.h"
 #include "FieldDataSwapper.h"

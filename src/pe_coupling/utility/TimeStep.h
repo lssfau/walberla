@@ -40,6 +40,18 @@
 namespace walberla {
 namespace pe_coupling {
 
+/*!\brief Carries out the the PE time steps, including sub iteration functionality.
+ *
+ * It executes 'numberOfSubIterations' PE steps within one timestep of size 'timeStepSize'.
+ *
+ * These PE sub iterations require, that the current external (e.g. hydrodynamic, gravitational,..) forces and torques
+ * acting on each particle remains unchanged. Thus, a map is set up internally that stores and re-sets these forces
+ * and torques in each PE sub iteration
+ * .
+ * Additionally, a function 'forceEvaluationFunc' can be given that allows to evaluate different forces before the PE
+ * step is carried out. An example are particle-particle lubrication forces that have to be updated in each sub iteration.
+ *
+ */
 class TimeStep
 {
 public:
@@ -48,21 +60,26 @@ public:
                       const BlockDataID & bodyStorageID,
                       pe::cr::ICR & collisionResponse,
                       const std::function<void (void)> & synchronizeFunc,
-                      const real_t timeStep = real_t(1), const uint_t intermediateSteps = uint_c(1) )
-         : timeStep_( timeStep )
-         , intermediateSteps_( ( intermediateSteps == 0 ) ? uint_c(1) : intermediateSteps )
+                      const real_t timeStepSize = real_t(1),
+                      const uint_t numberOfSubIterations = uint_t(1),
+                      const std::function<void (void)> & forceEvaluationFunc = [](){})
+         : timeStepSize_( timeStepSize )
+         , numberOfSubIterations_( ( numberOfSubIterations == 0 ) ? uint_t(1) : numberOfSubIterations )
          , blockStorage_( blockStorage )
-         , bodyStorageID_(bodyStorageID)
-         , collisionResponse_(collisionResponse)
-         , synchronizeFunc_(synchronizeFunc)
+         , bodyStorageID_( bodyStorageID )
+         , collisionResponse_( collisionResponse )
+         , synchronizeFunc_( synchronizeFunc )
+         , forceEvaluationFunc_( forceEvaluationFunc )
    {}
 
    void operator()()
    {
-      if( intermediateSteps_ == 1 )
+      if( numberOfSubIterations_ == 1 )
       {
-         collisionResponse_.timestep( timeStep_ );
-         synchronizeFunc_( );
+         forceEvaluationFunc_();
+
+         collisionResponse_.timestep( timeStepSize_ );
+         synchronizeFunc_();
       }
       else
       {
@@ -76,14 +93,14 @@ public:
          // send total forces/torques to shadow owners
          pe::distributeForces( blockStorage_->getBlockStorage(), bodyStorageID_ );
 
-         // generate map from all known bodies (process local) to total forces
+         // generate map from all known bodies (process local) to total forces/torques
          std::map< walberla::id_t, std::vector< real_t > > forceMap;
          for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
          {
             // iterate over local and remote bodies and store force/torque in map
             // Remote bodies are required since during the then following collision response time steps,
-            // bodies can change owner ship (i.e. a now remote body could become a local body ).
-            // Since only the owning process re-sets the force/torque later, remote body values have to be stores as well.
+            // bodies can change ownership (i.e. a now remote body could become a local body ).
+            // Since only the owning process re-sets the force/torque later, remote body values have to be stored as well.
             for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
             {
                auto & f = forceMap[ bodyIt->getSystemID() ];
@@ -112,10 +129,11 @@ public:
          }
 
          // perform pe time steps
-         const real_t subTimestep = timeStep_ / real_c( intermediateSteps_ );
-         for( uint_t i = 0; i != intermediateSteps_; ++i )
+         const real_t subTimeStepSize = timeStepSize_ / real_c( numberOfSubIterations_ );
+         for( uint_t i = 0; i != numberOfSubIterations_; ++i )
          {
-            // in the first set forces on local bodies are already set by force synchronization
+
+            // in the first iteration, forces on local bodies are already set by force synchronization
             if( i != 0 )
             {
                for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
@@ -131,23 +149,26 @@ public:
                }
             }
 
-            collisionResponse_.timestep( subTimestep );
-            synchronizeFunc_( );
+            // evaluate forces (e.g. lubrication forces)
+            forceEvaluationFunc_();
+
+            collisionResponse_.timestep( subTimeStepSize );
+            synchronizeFunc_();
          }
       }
    }
 
 protected:
 
-   const real_t timeStep_;
-
-   const uint_t intermediateSteps_;
+   const real_t timeStepSize_;
+   const uint_t numberOfSubIterations_;
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
    const BlockDataID &  bodyStorageID_;
 
    pe::cr::ICR & collisionResponse_;
    std::function<void (void)> synchronizeFunc_;
+   std::function<void (void)> forceEvaluationFunc_;
 
 }; // class TimeStep
 

@@ -1568,7 +1568,7 @@ int main( int argc, char **argv ) {
       timeloop.add() << Sweep( DummySweep(), "Dummy Sweep ")
                      << AfterFunction( BodiesQuantityEvaluator(&timeloop, blocks, bodyStorageID, vtkBaseFolder+"/quantityLogging.txt", numSpheres, real_t(numSpheres) * particleMass ), "Body Quantity Evaluator")
                      << AfterFunction( ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,- gravitationalAcc * ( densityRatio - real_t(1) ) )  ), "Gravitational and Buoyancy Force Add" )
-                     << AfterFunction( pe_coupling::discrete_particle_methods::SubgridTimeStep( blocks, bodyStorageID, *cr, syncCall, lubricationEvaluationFunction, dtInteractionSubCycle, peSubSteps ), "Pe Time Step" );
+                     << AfterFunction( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, dtInteractionSubCycle, peSubSteps, lubricationEvaluationFunction ), "Pe Time Step" );
 
       // update solid volume fraction field
       timeloop.add() << Sweep( pe_coupling::discrete_particle_methods::SolidVolumeFractionFieldEvaluator<FlagField_T, field::KernelDistributor> ( blocks, svfFieldID, bodyStorageID, flagFieldID, Fluid_Flag ), "Solid Volume Fraction Field Evaluation" )
