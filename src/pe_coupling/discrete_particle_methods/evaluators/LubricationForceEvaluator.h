@@ -54,24 +54,26 @@ public:
 
    LubricationForceEvaluator ( const shared_ptr<StructuredBlockStorage> & blockStorage,
                                const shared_ptr<pe::BodyStorage> & globalBodyStorage, const BlockDataID & bodyStorageID,
-                               real_t dynamicViscosity, real_t cutOffDistance = real_t(2) / real_t(3) )
+                               real_t dynamicViscosity,
+                               real_t cutOffDistance = real_t(2) / real_t(3), real_t minimalGapSize = real_t(1e-5) )
       : blockStorage_ ( blockStorage )
       , globalBodyStorage_( globalBodyStorage )
       , bodyStorageID_( bodyStorageID )
       , dynamicViscosity_( dynamicViscosity )
       , cutOffDistance_( cutOffDistance )
+      , minimalGapSize_( minimalGapSize )
    { }
 
-   void operator()( );
+   void operator()();
 
 private:
 
    // helper functions
-   void treatLubricationSphrSphr ( real_t nu_Lattice, real_t cutOff, real_t minimalGap, const pe::SphereID sphereI, const pe::SphereID sphereJ, const math::AABB & blockAABB );
-   void treatLubricationSphrPlane( real_t nu_Lattice, real_t cutOff, real_t minimalGap, const pe::SphereID sphereI, const pe::ConstPlaneID planeJ );
+   void treatLubricationSphrSphr ( const pe::SphereID sphereI, const pe::SphereID sphereJ, const math::AABB & blockAABB );
+   void treatLubricationSphrPlane( const pe::SphereID sphereI, const pe::ConstPlaneID planeJ );
 
-   pe::Vec3 compLubricationSphrSphr ( real_t nu_Lattice, real_t gap, real_t cutOff, const pe::SphereID sphereI, const pe::SphereID sphereJ ) const;
-   pe::Vec3 compLubricationSphrPlane( real_t nu_Lattice, real_t gap, real_t cutOff, const pe::SphereID sphereI, const pe::ConstPlaneID planeJ) const;
+   pe::Vec3 compLubricationSphrSphr ( real_t gap, const pe::SphereID sphereI, const pe::SphereID sphereJ ) const;
+   pe::Vec3 compLubricationSphrPlane( real_t gap, const pe::SphereID sphereI, const pe::ConstPlaneID planeJ ) const;
 
    // member variables
    shared_ptr<StructuredBlockStorage> blockStorage_;
@@ -81,24 +83,17 @@ private:
 
    real_t dynamicViscosity_;
    real_t cutOffDistance_;
+   real_t minimalGapSize_;
 
 }; // class LubricationForceEvaluator
 
 
-void LubricationForceEvaluator::operator ()( )
+void LubricationForceEvaluator::operator ()()
 {
    WALBERLA_LOG_PROGRESS( "Calculating Lubrication Force" );
 
-   // cut off distance for lubrication force
-   const real_t cutOff = cutOffDistance_;
-
    for (auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt)
    {
-      // minimal gap used to limit the lubrication force
-      const real_t minimalGap = real_t(1e-5) * blockStorage_->dx( blockStorage_->getLevel( *blockIt ) );
-
-      real_t nu_L = dynamicViscosity_;
-
       // loop over all rigid bodies
       for( auto body1It = pe::BodyIterator::begin( *blockIt, bodyStorageID_ ); body1It != pe::BodyIterator::end(); ++body1It )
       {
@@ -115,7 +110,7 @@ void LubricationForceEvaluator::operator ()( )
                if ( body2It->getTypeID() == pe::Sphere::getStaticTypeID() )
                {
                   pe::SphereID sphereJ = static_cast<pe::SphereID>( *body2It );
-                  treatLubricationSphrSphr( nu_L, cutOff, minimalGap, sphereI, sphereJ, blockIt->getAABB() );
+                  treatLubricationSphrSphr( sphereI, sphereJ, blockIt->getAABB() );
                }
             }
          }
@@ -134,12 +129,12 @@ void LubricationForceEvaluator::operator ()( )
                {
                   // sphere-plane lubrication
                   pe::PlaneID planeJ = static_cast<pe::PlaneID>( *body2It );
-                  treatLubricationSphrPlane( nu_L, cutOff, minimalGap, sphereI, planeJ );
+                  treatLubricationSphrPlane( sphereI, planeJ );
                } else if ( body2It->getTypeID() == pe::Sphere::getStaticTypeID() )
                {
                   // sphere-sphere lubrication
                   pe::SphereID sphereJ = static_cast<pe::SphereID>( *body2It );
-                  treatLubricationSphrSphr( nu_L, cutOff, minimalGap, sphereI, sphereJ, blockIt->getAABB() );
+                  treatLubricationSphrSphr( sphereI, sphereJ, blockIt->getAABB() );
                }
             }
          }
@@ -147,24 +142,23 @@ void LubricationForceEvaluator::operator ()( )
    }
 }
 
-void LubricationForceEvaluator::treatLubricationSphrSphr( real_t nu_Lattice, real_t cutOff, real_t minimalGap,
-                                                          const pe::SphereID sphereI, const pe::SphereID sphereJ, const math::AABB & blockAABB )
+void LubricationForceEvaluator::treatLubricationSphrSphr( const pe::SphereID sphereI, const pe::SphereID sphereJ, const math::AABB & blockAABB )
 {
 
    WALBERLA_ASSERT_UNEQUAL( sphereI->getSystemID(), sphereJ->getSystemID() );
 
    real_t gap = pe::getSurfaceDistance( sphereI, sphereJ );
 
-   if ( gap > cutOff || gap < real_t(0) )
+   if ( gap > cutOffDistance_ || gap < real_t(0) )
    {
-      WALBERLA_LOG_DETAIL("gap " << gap << " larger than cutOff - continue");
+      WALBERLA_LOG_DETAIL("gap " << gap << " larger than cutOff " << cutOffDistance_ << " - ignoring pair");
       return;
    }
 
-   if ( gap < minimalGap )
+   if ( gap < minimalGapSize_ )
    {
-      WALBERLA_LOG_DETAIL("gap " << gap << " smaller than minimal gap " << minimalGap << " - using minimal gap");
-      gap = minimalGap;
+      WALBERLA_LOG_DETAIL("gap " << gap << " smaller than minimal gap " << minimalGapSize_ << " - using minimal gap");
+      gap = minimalGapSize_;
    }
 
    const pe::Vec3 &posSphereI = sphereI->getPosition();
@@ -172,13 +166,13 @@ void LubricationForceEvaluator::treatLubricationSphrSphr( real_t nu_Lattice, rea
    pe::Vec3 fLub(0);
 
    // compute (global) coordinate between spheres' centers of gravity
-   pe::Vec3 midPoint( (posSphereI + posSphereJ ) * real_c(0.5) );
+   pe::Vec3 midPoint( (posSphereI + posSphereJ ) * real_t(0.5) );
 
    // Let process on which midPoint lies do the lubrication correction
    // or the local process of sphereI if sphereJ is global
    if ( blockAABB.contains(midPoint) || sphereJ->isGlobal() )
    {
-      fLub = compLubricationSphrSphr(nu_Lattice, gap, cutOff, sphereI, sphereJ);
+      fLub = compLubricationSphrSphr(gap, sphereI, sphereJ);
       sphereI->addForce( fLub);
       sphereJ->addForce(-fLub);
 
@@ -188,25 +182,24 @@ void LubricationForceEvaluator::treatLubricationSphrSphr( real_t nu_Lattice, rea
 
 }
 
-void LubricationForceEvaluator::treatLubricationSphrPlane( real_t nu_Lattice, real_t cutOff, real_t minimalGap,
-                                                           const pe::SphereID sphereI, const pe::ConstPlaneID planeJ )
+void LubricationForceEvaluator::treatLubricationSphrPlane( const pe::SphereID sphereI, const pe::ConstPlaneID planeJ )
 {
 
    real_t gap = pe::getSurfaceDistance( sphereI, planeJ );
 
-   if ( gap > cutOff || gap < real_t(0) )
+   if ( gap > cutOffDistance_ || gap < real_t(0) )
    {
-      WALBERLA_LOG_DETAIL("gap " << gap << " larger than cutOff - continue");
+      WALBERLA_LOG_DETAIL("gap " << gap << " larger than cutOff " << cutOffDistance_ << " - ignoring pair");
       return;
    }
 
-   if ( gap < minimalGap )
+   if ( gap < minimalGapSize_ )
    {
-      WALBERLA_LOG_DETAIL("gap " << gap << " smaller than minimal gap " << minimalGap << " - using minimal gap");
-      gap = minimalGap;
+      WALBERLA_LOG_DETAIL("gap " << gap << " smaller than minimal gap " << minimalGapSize_ << " - using minimal gap");
+      gap = minimalGapSize_;
    }
 
-   pe::Vec3 fLub = compLubricationSphrPlane( nu_Lattice, gap, cutOff, sphereI, planeJ);
+   pe::Vec3 fLub = compLubricationSphrPlane( gap, sphereI, planeJ);
 
    WALBERLA_LOG_DETAIL( "Lubrication force on sphere " << sphereI->getID() << " to plane with id " << planeJ->getID() << " is:" << fLub << std::endl );
    sphereI->addForce( fLub );
@@ -214,8 +207,7 @@ void LubricationForceEvaluator::treatLubricationSphrPlane( real_t nu_Lattice, re
 }
 
 
-pe::Vec3 LubricationForceEvaluator::compLubricationSphrSphr( real_t nu_Lattice, real_t gap, real_t cutOff,
-                                                             const pe::SphereID sphereI, const pe::SphereID sphereJ) const
+pe::Vec3 LubricationForceEvaluator::compLubricationSphrSphr( real_t gap, const pe::SphereID sphereI, const pe::SphereID sphereJ) const
 {
    const pe::Vec3 &posSphereI = sphereI->getPosition();
    const pe::Vec3 &posSphereJ = sphereJ->getPosition();
@@ -233,9 +225,9 @@ pe::Vec3 LubricationForceEvaluator::compLubricationSphrSphr( real_t nu_Lattice, 
    real_t d = real_t(2) * diameterSphereI * diameterSphereJ / ( diameterSphereI + diameterSphereJ );
    real_t h = gap;
    real_t r = d + h;
-   real_t a_sq = ( real_t(3) * nu_Lattice * walberla::math::PI * d / real_t(2) ) * ( d / ( real_t(4) * h ) + ( real_t(18) / real_t(40) ) * std::log( d / ( real_t(2) * h ) ) +
-                                                                                     ( real_t(9)/real_t(84) ) * ( h / d ) * std::log( d/( real_t(2)*h ) ) );
-   real_t a_sh = ( nu_Lattice * walberla::math::PI * d / real_t(2) ) * std::log( d / ( real_t(2) * h ) ) * ( d + h ) * ( d + h ) / real_t(4);
+   real_t a_sq = ( real_t(3) * dynamicViscosity_ * walberla::math::PI * d / real_t(2) ) * ( d / ( real_t(4) * h ) + ( real_t(18) / real_t(40) ) * std::log( d / ( real_t(2) * h ) ) +
+                                                                                            ( real_t(9)/real_t(84) ) * ( h / d ) * std::log( d/( real_t(2)*h ) ) );
+   real_t a_sh = ( dynamicViscosity_ * walberla::math::PI * d / real_t(2) ) * std::log( d / ( real_t(2) * h ) ) * ( d + h ) * ( d + h ) / real_t(4);
    pe::Vec3 fLub( - a_sq * length * rIJ - a_sh * ( real_t(2) / r ) * ( real_t(2) / r ) * ( velDiff - length * rIJ ) );
 
    WALBERLA_LOG_DETAIL_SECTION()
@@ -252,11 +244,11 @@ pe::Vec3 LubricationForceEvaluator::compLubricationSphrSphr( real_t nu_Lattice, 
       ss << "pos: "  << posSphereJ << "\n\n";
 
       real_t distance = gap + diameterSphereI * real_t(0.5) + diameterSphereJ * real_t(0.5);
-      ss << "distance: " << distance << "\n";
-      ss << "nu: "     << nu_Lattice << "\n";
+      ss << "distance: "  << distance << "\n";
+      ss << "viscosity: " << dynamicViscosity_ << "\n";
 
       ss << "gap: "     << gap << "\n";
-      ss << "cutOff: "  << cutOff << "\n";
+      ss << "cutOff: "  << cutOffDistance_ << "\n";
       ss << "velDiff "  << velDiff << "\n";
       ss << "rIJ "      << rIJ << "\n\n";
 
@@ -268,8 +260,7 @@ pe::Vec3 LubricationForceEvaluator::compLubricationSphrSphr( real_t nu_Lattice, 
    return fLub;
 }
 
-pe::Vec3 LubricationForceEvaluator::compLubricationSphrPlane( real_t nu_Lattice, real_t gap, real_t cutOff,
-                                                              const pe::SphereID sphereI, const pe::ConstPlaneID planeJ) const
+pe::Vec3 LubricationForceEvaluator::compLubricationSphrPlane( real_t gap, const pe::SphereID sphereI, const pe::ConstPlaneID planeJ) const
 {
    const pe::Vec3 &posSphereI( sphereI->getPosition() );
    real_t radiusSphereI = sphereI->getRadius();
@@ -283,9 +274,9 @@ pe::Vec3 LubricationForceEvaluator::compLubricationSphrPlane( real_t nu_Lattice,
    real_t d = real_t(4) * radiusSphereI;
    real_t h = gap;
    real_t r = d + h;
-   real_t a_sq = ( real_t(3) * nu_Lattice * walberla::math::PI * d / real_t(2) ) * ( d / ( real_t(4) * h ) + ( real_t(18) / real_t(40) ) * std::log( d / ( real_t(2) * h ) ) +
-                                                                                     ( real_t(9)/real_t(84) ) * ( h / d ) * std::log( d/( real_t(2)*h ) ) );
-   real_t a_sh = ( nu_Lattice * walberla::math::PI * d / real_t(2) ) * std::log( d / ( real_t(2) * h ) ) * ( d + h ) * ( d + h ) / real_t(4);
+   real_t a_sq = ( real_t(3) * dynamicViscosity_ * walberla::math::PI * d / real_t(2) ) * ( d / ( real_t(4) * h ) + ( real_t(18) / real_t(40) ) * std::log( d / ( real_t(2) * h ) ) +
+                                                                                            ( real_t(9)/real_t(84) ) * ( h / d ) * std::log( d/( real_t(2)*h ) ) );
+   real_t a_sh = ( dynamicViscosity_ * walberla::math::PI * d / real_t(2) ) * std::log( d / ( real_t(2) * h ) ) * ( d + h ) * ( d + h ) / real_t(4);
    pe::Vec3 fLub( - a_sq * length * rIJ - a_sh * ( real_t(2) / r ) * ( real_t(2) / r ) * ( v1 - length * rIJ ) );
 
    WALBERLA_LOG_DETAIL_SECTION() {
@@ -296,11 +287,11 @@ pe::Vec3 LubricationForceEvaluator::compLubricationSphrPlane( real_t nu_Lattice,
       ss << "pos: "  << posSphereI << "\n\n";
 
       real_t distance = gap + radiusSphereI;
-      ss << "distance: " << distance << "\n";
-      ss << "nu: "       << nu_Lattice << "\n";
+      ss << "distance: "  << distance << "\n";
+      ss << "viscosity: " << dynamicViscosity_ << "\n";
 
       ss << "gap: "     << gap << "\n";
-      ss << "cutOff: "  << cutOff << "\n";
+      ss << "cutOff: "  << cutOffDistance_ << "\n";
       ss << "velDiff "  << sphereI->getLinearVel() << "\n";
       ss << "rIJ "      << -rIJ << "\n\n";
 
