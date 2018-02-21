@@ -440,7 +440,8 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
                continue;
             }
 #endif
-            ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID_);
+            ccd::HashGrids* hashgrids = blockIt->uncheckedFastGetData<ccd::HashGrids>(ccdID_);
+            // ^- nut getData ist ineffizient, braucht insges. 1.66s für 640x480 px. ->uncheckedFastGetData
             BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAabb, t, n);
             
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
@@ -593,11 +594,15 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
       }
    };
    ss << ")";
+   
    WALBERLA_LOG_INFO(errors << " pixel errors found, problematic bodies: " << ss.str());
 #endif
 
 #if defined(USE_NAIVE_INTERSECTION_FINDING) || defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
    WALBERLA_LOG_INFO("Performed " << naiveIntersectionTests << " naive intersection tests");
+#endif
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO("Performed " << HashGrids::inter << " naive intersection tests");
 #endif
 
    if (tt != NULL) tt->start("Reduction");

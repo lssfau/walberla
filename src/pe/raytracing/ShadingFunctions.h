@@ -123,6 +123,14 @@ inline ShadingParameters blueShadingParams (const BodyID body) {
              0);
    return s;
 }
+   
+inline ShadingParameters yellowShadingParams (const BodyID body) {
+   ShadingParameters s(Color(1, 0.96, 0),
+                       Color(0.5, 0.48, 0),
+                       Color(0, 0, 0),
+                       0);
+   return s;
+}
 
 inline ShadingParameters violetShadingParams (const BodyID body) {
    ShadingParameters s(Color(0.6, 0, 0.9),

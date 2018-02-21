@@ -471,20 +471,32 @@ ShadingParameters customHashgridsBodyToShadingParams(const BodyID body) {
    switch (body->getID()) {
       case 96:
          return blueShadingParams(body);
-      case 203:
-         return redShadingParams(body);
+      /*case 203:
+         return redShadingParams(body);*/
       case 140:
          return whiteShadingParams(body);
       case 50:
          return greyShadingParams(body);
-      default:
-         return defaultBodyTypeDependentShadingParams(body);
+   }
+   if (body->getTypeID() == Sphere::getStaticTypeID()) {
+      return yellowShadingParams(body).makeGlossy();
    }
    return defaultBodyTypeDependentShadingParams(body);
 
 }
 
-void HashGridsTest(size_t bodyCount) {
+void HashGridsTest(size_t boxes, size_t capsules, size_t spheres) {
+#if defined(USE_NAIVE_INTERSECTION_FINDING)
+   WALBERLA_LOG_INFO("Using naive method for intersection testing");
+#endif
+#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO("Using hashgrids for intersection testing");
+#endif
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO("Comparing hashgrids and naive method for intersection testing");
+#endif
+   WALBERLA_LOG_INFO("Generating " << boxes << " boxes, " << capsules << " capsules and " << spheres << " spheres");
+   
    using namespace walberla::pe::ccd;
    WcTimingTree tt;
    tt.start("Setup");
@@ -503,11 +515,8 @@ void HashGridsTest(size_t bodyCount) {
    const AABB& forestAABB = forest->getDomain();
    
    bool removeUnproblematic = false;
-   std::vector<walberla::id_t> problematicBodyIDs = {96, 203, 140}; //{50, 44, 66, 155, 170, 51};
+   std::vector<walberla::id_t> problematicBodyIDs = {165, 5, 31}; //{50, 44, 66, 155, 170, 51};
    std::vector<walberla::id_t> bodySIDs;
-   
-   size_t boxCount = bodyCount/2; //180
-   size_t capsuleCount = bodyCount/2;
    
    //WALBERLA_LOG_INFO("boxCount: " << boxCount);
    //WALBERLA_LOG_INFO("capsuleCount: " << capsuleCount);
@@ -516,7 +525,7 @@ void HashGridsTest(size_t bodyCount) {
    
    // generate bodies for test
    std::vector<BodyID> bodies;
-   for (size_t i = 0; i < boxCount; i++) {
+   for (size_t i = 0; i < boxes; i++) {
       real_t len = math::realRandom(real_t(0.2), real_t(0.5));
       real_t x_min = math::realRandom(forestAABB.xMin()+len, forestAABB.xMax()-len);
       real_t y_min = math::realRandom(forestAABB.yMin()+len, forestAABB.yMax()-len);
@@ -530,19 +539,32 @@ void HashGridsTest(size_t bodyCount) {
       bodySIDs.push_back(box_->getSystemID());
    }
    
-   for (size_t i = 0; i < capsuleCount; i++) {
+   for (size_t i = 0; i < capsules; i++) {
       real_t len = math::realRandom(real_t(0.2), real_t(0.5));
       real_t radius = real_t(0.1);
       real_t maxlen = len + 2*radius;
       real_t x = math::realRandom(forestAABB.xMin()+maxlen, forestAABB.xMax()-maxlen);
       real_t y = math::realRandom(forestAABB.yMin()+maxlen, forestAABB.yMax()-maxlen);
       real_t z = math::realRandom(forestAABB.zMin()+maxlen, forestAABB.zMax()-maxlen);
-      walberla::id_t id = walberla::id_t(boxCount+i);
+      walberla::id_t id = walberla::id_t(boxes+i);
       CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), radius, len);
       WALBERLA_CHECK(capsule != NULL);
       capsule->rotate(0, math::realRandom(real_t(0), real_t(1))*math::M_PI, math::realRandom(real_t(0), real_t(1))*math::M_PI);
       bodies.push_back(capsule);
       bodySIDs.push_back(capsule->getSystemID());
+   }
+   
+   for (size_t i = 0; i < spheres; i++) {
+      real_t radius = math::realRandom(real_t(0.2), real_t(0.3));
+      // forestAABB.xMax()-radius gerechtfertigt?
+      real_t x = math::realRandom(forestAABB.xMin()+radius, forestAABB.xMax()-radius);
+      real_t y = math::realRandom(forestAABB.yMin()+radius, forestAABB.yMax()-radius);
+      real_t z = math::realRandom(forestAABB.zMin()+radius, forestAABB.zMax()-radius);
+      walberla::id_t id = walberla::id_t(boxes+capsules+i);
+      SphereID sphere = createSphere(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), radius);
+      WALBERLA_CHECK(sphere != NULL);
+      bodies.push_back(sphere);
+      bodySIDs.push_back(sphere->getSystemID());
    }
    
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
@@ -587,8 +609,10 @@ void HashGridsTest(size_t bodyCount) {
                        customHashgridsBodyToShadingParams);
    raytracer.setImageOutputDirectory("image");
    raytracer.setImageOutputEnabled(true);
+   raytracer.setFilenameTimestepWidth(9);
    tt.stop("Setup");
-   raytracer.rayTrace<BodyTuple>(0, &tt);
+   WALBERLA_LOG_INFO("output to: " << (boxes*1000000 + capsules*1000 + spheres));
+   raytracer.rayTrace<BodyTuple>(boxes*1000000 + capsules*1000 + spheres, &tt);
    
    /*HashGrids::HashGrid* grid;
    for (auto bodyId: problematicBodyIDs) {
@@ -629,13 +653,16 @@ int main( int argc, char** argv )
    
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
 
-   //for (int i = 0; i < 20; i++) {
-   //   real_t u = math::intRandom(150, 300);
-   //   WALBERLA_LOG_INFO(u << " bodies");
-   //   HashGridsTest(uint_c(u));
+   std::vector<size_t> boxes = {127, 70, 20, 150};
+   std::vector<size_t> capsules = {127, 60, 140, 100};
+   std::vector<size_t> spheres = {0, 50, 40, 120};
+   
+   //for (size_t i = 0; i < boxes.size(); ++i) {
+   //   HashGridsTest(boxes[i], capsules[i], spheres[i]);
    //}
-   HashGridsTest(900); //255
+   HashGridsTest(boxes[2], capsules[2], spheres[2]);
 
+   
    //HashGridsTest();
    
    //hashgridsPlayground();
