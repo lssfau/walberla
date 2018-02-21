@@ -89,6 +89,7 @@ public:
    //@{
    inline real_t  getRadius() const;
    inline real_t  getLength() const;
+   inline real_t  getVolume() const;
    //@}
    //**********************************************************************************************
 
@@ -190,6 +191,18 @@ inline real_t  Capsule::getRadius() const
 inline real_t  Capsule::getLength() const
 {
    return length_;
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Returns the volume of the capsule.
+ *
+ * \return The volume of the capsule.
+ */
+inline real_t  Capsule::getVolume() const
+{
+   return Capsule::calcVolume( getRadius(), getLength() );
 }
 //*************************************************************************************************
 

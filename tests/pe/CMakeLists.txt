@@ -121,3 +121,6 @@ waLBerla_execute_test( NAME   PE_STATICTYPEIDS )
 
 waLBerla_compile_test( NAME   PE_UNION FILES Union.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_UNION )
+
+waLBerla_compile_test( NAME   PE_VOLUMEINERTIA FILES VolumeInertia.cpp DEPENDS core  )
+waLBerla_execute_test( NAME   PE_VOLUMEINERTIA CONFIGURATIONS Release RelWithDbgInfo)
