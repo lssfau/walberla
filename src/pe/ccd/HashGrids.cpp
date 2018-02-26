@@ -503,7 +503,6 @@ void HashGrids::HashGrid::remove( BodyID body, Cell* cell )
  */
 void HashGrids::HashGrid::enlarge()
 {
-   WALBERLA_LOG_INFO("enlarging grid"); // ToDo remove again
    BodyID* bodies = new BodyID[ bodyCount_ ];
    BodyID* body   = bodies;
 

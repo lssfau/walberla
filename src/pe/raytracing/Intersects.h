@@ -47,7 +47,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
 
 inline bool intersects(const BodyID body, const Ray& ray, real_t& t, Vec3& n);
    
-inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding = real_t(0.0));
+inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding = real_t(0.0), Vec3* n = NULL);
 inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, real_t& t0, real_t& t1);
    
 struct IntersectsFunctor
@@ -331,7 +331,7 @@ inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, re
    return true;
 }
 
-inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding) {
+inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding, Vec3* n) {
    // An Efficient and Robust Ray–Box Intersection Algorithm: http://people.csail.mit.edu/amy/papers/box-jgt.pdf
    const Vec3 paddingVector(padding, padding, padding);
    Vec3 bounds[2] = {
@@ -345,6 +345,7 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
 
    real_t inf = std::numeric_limits<real_t>::max();
    
+   size_t tminAxis = 0, tmaxAxis = 0;
    real_t txmin, txmax;
    real_t tmin = txmin = (bounds[sign[0]][0] - origin[0]) * invDirection[0];
    real_t tmax = txmax = (bounds[1-sign[0]][0] - origin[0]) * invDirection[0];
@@ -355,9 +356,11 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
       return false;
    }
    if (tymin > tmin) {
+      tminAxis = 1;
       tmin = tymin;
    }
    if (tymax < tmax) {
+      tmaxAxis = 1;
       tmax = tymax;
    }
    real_t tzmin = (bounds[sign[2]][2] - origin[2]) * invDirection[2];
@@ -367,16 +370,24 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
       return false;
    }
    if (tzmin > tmin) {
+      tminAxis = 2;
       tmin = tzmin;
    }
    if (tzmax < tmax) {
+      tmaxAxis = 2;
       tmax = tzmax;
    }
    
+   if (n != NULL) {
+      (*n)[0] = (*n)[1] = (*n)[2] = real_t(0);
+   }
    real_t t_;
    if (tmin > 0) {
       // ray hit box from outside
       t_ = tmin;
+      if (n != NULL) {
+         (*n)[tminAxis] = real_t(1);
+      }
    } else if (tmax < 0) {
       // tmin and tmax are smaller than 0 -> box is in rays negative direction
       t = inf;
@@ -384,6 +395,15 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
    } else {
       // ray origin within box
       t_ = tmax;
+      if (n != NULL) {
+         (*n)[tmaxAxis] = real_t(1);
+      }
+   }
+   
+   if (n != NULL) {
+      if (ray.getDirection() * (*n) > 0) {
+         *n = -(*n);
+      }
    }
    
    t = t_;

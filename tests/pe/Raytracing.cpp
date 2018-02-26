@@ -267,16 +267,16 @@ void RaytracerTest() {
 
    createPlane(*globalBodyStorage, 0, Vec3(-1,1,1), Vec3(8,2,2), iron); // tilted plane in right bottom back corner
    
-   //createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,9.5,9.5), real_t(0.5));
+   SphereID upperLeftSmallSphere = createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,9.5,9.5), real_t(0.5));
    createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(4,5.5,5), real_t(1));
-   //createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,8.5,5), real_t(1));
+   SphereID leftSphere = createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,8.5,5), real_t(1));
    BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,6.5,5), Vec3(2,4,3));
    if (box != NULL) box->rotate(0,math::M_PI/4,math::M_PI/4);
-   //createBox(*globalBodyStorage, *forest, storageID, 8, Vec3(5,1,8), Vec3(2,2,2));
+   BoxID upperRightBox = createBox(*globalBodyStorage, *forest, storageID, 8, Vec3(5,1,8), Vec3(2,2,2));
    // Test scene v1 end
    
    // Test scene v2 additions start
-   //createBox(*globalBodyStorage, *forest, storageID, 9, Vec3(9,9,5), Vec3(1,1,10));
+   createBox(*globalBodyStorage, *forest, storageID, 9, Vec3(9,9,5), Vec3(1,1,10));
    createCapsule(*globalBodyStorage, *forest, storageID, 10, Vec3(3, 9, 1), real_t(0.5), real_t(7), iron);
    CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, 11, Vec3(7, 3.5, 7.5), real_t(1), real_t(2), iron);
    if (capsule != NULL) capsule->rotate(0,math::M_PI/3,math::M_PI/4-math::M_PI/8);
@@ -287,19 +287,23 @@ void RaytracerTest() {
       hashgrids->update();
    }
 
-   WALBERLA_LOG_INFO("--- CAPSULE");
-   WALBERLA_LOG_INFO(" hash: " << capsule->getHash());
-   WALBERLA_LOG_INFO(" grid: " << capsule->getGrid());
-   WALBERLA_LOG_INFO(" AABB: " << capsule->getAABB());
-   WALBERLA_LOG_INFO("--- ROTATED BOX");
-   WALBERLA_LOG_INFO(" hash: " << box->getHash());
-   WALBERLA_LOG_INFO(" grid: " << box->getGrid());
-   WALBERLA_LOG_INFO(" AABB: " << box->getAABB());
+   WALBERLA_LOG_INFO("--- UPPER LEFT SMALL SPHERE");
+   WALBERLA_LOG_INFO(" hash: " << upperLeftSmallSphere->getHash());
+   WALBERLA_LOG_INFO(" grid: " << upperLeftSmallSphere->getGrid());
+   WALBERLA_LOG_INFO(" AABB: " << upperLeftSmallSphere->getAABB());
+   WALBERLA_LOG_INFO("--- LEFT SPHERE");
+   WALBERLA_LOG_INFO(" hash: " << leftSphere->getHash());
+   WALBERLA_LOG_INFO(" grid: " << leftSphere->getGrid());
+   WALBERLA_LOG_INFO(" AABB: " << leftSphere->getAABB());
+   WALBERLA_LOG_INFO("--- UPPER RIGHT BOX");
+   WALBERLA_LOG_INFO(" hash: " << upperRightBox->getHash());
+   WALBERLA_LOG_INFO(" grid: " << upperRightBox->getGrid());
+   WALBERLA_LOG_INFO(" AABB: " << upperRightBox->getAABB());
    
-   Ray ray(Vec3(-5, 6.5, 5), Vec3(1, 0, 0));
+   /*Ray ray(Vec3(-5, 6.5, 5), Vec3(1, 0, 0));
    real_t t = INFINITY;
    Vec3 n;
-   BodyID body = NULL;
+   BodyID body = NULL;*/
    
    // output info about grids
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
@@ -311,14 +315,14 @@ void RaytracerTest() {
          WALBERLA_LOG_INFO(" items:    " << grid->bodyCount_);
          WALBERLA_LOG_INFO(" enlargement threshold: " << grid->enlargementThreshold_);
       }
-      body = hashgrids->getClosestBodyIntersectingWithRay<BodyTuple>(ray, blockIt->getAABB(), t, n);
+      /*body = hashgrids->getClosestBodyIntersectingWithRay<BodyTuple>(ray, blockIt->getAABB(), t, n);
       if (body != NULL) {
          WALBERLA_LOG_INFO("body found");
       } else {
          WALBERLA_LOG_INFO("body not found");
-      }
+      }*/
    }
-      
+   
    //raytracer.setTBufferOutputDirectory("tbuffer");
    //raytracer.setTBufferOutputEnabled(true);
    raytracer.setImageOutputDirectory("image");
@@ -539,7 +543,7 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres) {
    tt.start("Setup");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(-1,-1,-1,4,4,4), Vec3(2,2,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
    
@@ -592,7 +596,7 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres) {
    }
    
    for (size_t i = 0; i < spheres; i++) {
-      real_t radius = math::realRandom(real_t(0.1), real_t(0.2)); // 0.2 0.3
+      real_t radius = math::realRandom(real_t(0.2), real_t(1.5)); // 0.2 0.3
       // forestAABB.xMax()-radius gerechtfertigt?
       real_t x = math::realRandom(forestAABB.xMin()+radius, forestAABB.xMax());
       real_t y = math::realRandom(forestAABB.yMin()+radius, forestAABB.yMax());
@@ -810,106 +814,6 @@ void HashGridsTestScene() {
    raytracer.rayTrace<BodyTuple>(1, &tt);
 }
 
-void GridCellIntersectionPlayground() {
-   real_t cellSpan = 2;
-   
-   AABB blockAABB(Vec3(-2.5,-2.5,0), Vec3(3.5,5.5,12));
-   
-   size_t blockXCellCount = uint_c(std::ceil(blockAABB.xSize() / cellSpan));
-   size_t blockYCellCount = uint_c(std::ceil(blockAABB.ySize() / cellSpan));
-   size_t blockZCellCount = uint_c(std::ceil(blockAABB.zSize() / cellSpan));
-
-   //Ray ray(Vec3(2,-0.5,0), Vec3(2,13,0).getNormalized());
-   //Ray ray(Vec3(1.5,6,0), Vec3(-4,-9,0).getNormalized());
-   //Ray ray(Vec3(2,-2,0), Vec3(5,8,0).getNormalized());
-   //Ray ray(Vec3(2,-2,0), Vec3(-5,8,0).getNormalized());
-   Ray ray(Vec3(0.5,-3,0), Vec3(-4,7,0).getNormalized());
-
-   const real_t inf = std::numeric_limits<real_t>::max();
-
-   real_t invCellSpan = real_t(1)/cellSpan;
-
-   std::vector<Vec3> intersectionPoints;
-   std::vector<real_t> distances;
-   std::vector<size_t> axii;
-   
-   Vec3 firstPoint;
-   if (blockAABB.contains(ray.getOrigin())) {
-      firstPoint = ray.getOrigin();
-   } else {
-      real_t t_start;
-      if (intersects(blockAABB, ray, t_start)) {
-         firstPoint = ray.getOrigin() + ray.getDirection()*t_start;
-      } else {
-         WALBERLA_LOG_INFO("Ray does not intersect block.");
-         return;
-      }
-   }
-   
-   Vector3<int32_t> firstCell(int32_c(std::floor(std::max(firstPoint[0]-blockAABB.xMin()*invCellSpan, real_t(0)))),
-                              int32_c(std::floor(std::max(firstPoint[1]-blockAABB.yMin()*invCellSpan, real_t(0)))),
-                              int32_c(std::floor(std::max(firstPoint[2]-blockAABB.zMin()*invCellSpan, real_t(0)))));
-
-   const int8_t stepX = ray.xDir() >= 0 ? 1 : -1;
-   const int8_t stepY = ray.yDir() >= 0 ? 1 : -1;
-   const int8_t stepZ = ray.zDir() >= 0 ? 1 : -1;
-   
-   Vec3 near((stepX >= 0) ? (firstCell[0]+1)*cellSpan-firstPoint[0] : firstPoint[0]-firstCell[0]*cellSpan,
-             (stepY >= 0) ? (firstCell[1]+1)*cellSpan-firstPoint[1] : firstPoint[1]-firstCell[1]*cellSpan,
-             (stepZ >= 0) ? (firstCell[2]+1)*cellSpan-firstPoint[2] : firstPoint[2]-firstCell[2]*cellSpan);
-   
-   real_t tMaxX = (ray.xDir() != 0) ? std::abs(near[0]*ray.xInvDir()) : inf;
-   real_t tMaxY = (ray.yDir() != 0) ? std::abs(near[1]*ray.yInvDir()) : inf;
-   real_t tMaxZ = (ray.zDir() != 0) ? std::abs(near[2]*ray.zInvDir()) : inf;
-   
-   real_t tDeltaX = (ray.xDir() != 0) ? std::abs(cellSpan*ray.xInvDir()) : inf;
-   real_t tDeltaY = (ray.yDir() != 0) ? std::abs(cellSpan*ray.yInvDir()) : inf;
-   real_t tDeltaZ = (ray.zDir() != 0) ? std::abs(cellSpan*ray.zInvDir()) : inf;
-   
-   Vector3<int32_t> currentCell = firstCell;
-
-   // First cell needs extra treatment, as it might lay out of the blocks upper bounds
-   // due to the nature of how it is calculated: If the first point lies on a upper border
-   // it maps to the cell "above" the grid.
-   if (currentCell[0] < blockXCellCount && currentCell[1] < blockYCellCount && currentCell[2] < blockZCellCount) {
-      WALBERLA_LOG_INFO("found valid cell at " << currentCell);
-   }
-   
-   while (true) {
-      if (tMaxX < tMaxY) {
-         if (tMaxX < tMaxZ) {
-            tMaxX += tDeltaX;
-            currentCell[0] += stepX;
-            if (currentCell[0] == blockXCellCount || currentCell[0] == -1) {
-               break;
-            }
-         } else {
-            tMaxZ += tDeltaZ;
-            currentCell[2] += stepZ;
-            if (currentCell[2] == blockZCellCount || currentCell[2] == -1) {
-               break;
-            }
-         }
-      } else {
-         if (tMaxY < tMaxZ) {
-            tMaxY += tDeltaY;
-            currentCell[1] += stepY;
-            if (currentCell[1] == blockYCellCount || currentCell[1] == -1) {
-               break;
-            }
-         } else {
-            tMaxZ += tDeltaZ;
-            currentCell[2] += stepZ;
-            if (currentCell[2] == blockZCellCount || currentCell[2] == -1) {
-               break;
-            }
-         }
-      }
-      
-      WALBERLA_LOG_INFO("found cell at " << currentCell);
-   }
-}
-
 int main( int argc, char** argv )
 {
    walberla::debug::enterTestMode();
@@ -923,21 +827,18 @@ int main( int argc, char** argv )
    //AABBIntersectsTest();
    //CapsuleIntersectsTest();
    RaytracerTest();
-   //RaytracerSpheresTest();
+   RaytracerSpheresTest();
    
 
    std::vector<size_t> boxes = {127, 70, 20, 150};
    std::vector<size_t> capsules = {127, 60, 140, 100};
    std::vector<size_t> spheres = {0, 50, 40, 120};
    
-   //for (size_t i = 0; i < boxes.size(); ++i) {
-   //   HashGridsTest(boxes[i], capsules[i], spheres[i]);
-   //}
-   //HashGridsTest(boxes[1], boxes[1], boxes[1]);
+   for (size_t i = 0; i < boxes.size(); ++i) {
+      HashGridsTest(boxes[i], capsules[i], spheres[i]);
+   }
    
    //HashGridsTestScene();
-   
-   //GridCellIntersectionPlayground();
    
    //HashGridsTest();
    
