@@ -73,10 +73,60 @@ public:
       return direction_;
    }
    
+   /*!\brief Returns the normalized direction vector of the ray for a given axis.
+    */
+   inline real_t getDirection (size_t axis) const {
+      WALBERLA_ASSERT(axis >= 0 && axis <= 2, "No valid axis index passed.");
+      return direction_[axis];
+   }
+   
+   /*!\brief Returns the x component of the ray direction.
+    */
+   inline real_t xDir () const {
+      return direction_[0];
+   }
+   
+   /*!\brief Returns the y component of the ray direction.
+    */
+   inline real_t yDir () const {
+      return direction_[1];
+   }
+   
+   /*!\brief Returns the z component of the ray direction.
+    */
+   inline real_t zDir () const {
+      return direction_[2];
+   }
+   
    /*!\brief Returns the inverse of the direction vector of the ray.
     */
    inline const Vec3& getInvDirection () const {
       return inv_direction_;
+   }
+
+   /*!\brief Returns the inverse of the direction vector of the ray for a given axis.
+    */
+   inline const real_t getInvDirection (size_t axis) const {
+      WALBERLA_ASSERT(axis >= 0 && axis <= 2, "No valid axis index passed.");
+      return inv_direction_[axis];
+   }
+   
+   /*!\brief Returns the x component of the inverse ray direction.
+    */
+   inline real_t xInvDir () const {
+      return inv_direction_[0];
+   }
+   
+   /*!\brief Returns the y component of the inverse ray direction.
+    */
+   inline real_t yInvDir () const {
+      return inv_direction_[1];
+   }
+   
+   /*!\brief Returns the z component of the inverse ray direction.
+    */
+   inline real_t zInvDir () const {
+      return inv_direction_[2];
    }
    
    /*!\brief Returns the signs of the inverted direction vector of the ray.

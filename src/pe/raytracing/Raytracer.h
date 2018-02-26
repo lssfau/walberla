@@ -445,13 +445,11 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
             BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAabb, t, n);
             
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-            if (body != NULL && t < t_hashgrids_closest) {
-#ifdef ignore_this_just_for_correct_indentation
-            }
-#endif
+            if (body != NULL && t < t_hashgrids_closest)
 #else
-            if (body != NULL && t < t_closest) {
+            if (body != NULL && t < t_closest)
 #endif
+            {
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
                t_hashgrids_closest = t;
                body_hashgrids_closest = body;
@@ -602,7 +600,8 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    WALBERLA_LOG_INFO("Performed " << naiveIntersectionTests << " naive intersection tests");
 #endif
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Performed " << HashGrids::inter << " naive intersection tests");
+   WALBERLA_LOG_INFO("Performed " << ccd::HashGrids::intersectionTestCount << " intersection tests in hashgrids");
+   WALBERLA_LOG_INFO("Saved " << (int(naiveIntersectionTests)-int(ccd::HashGrids::intersectionTestCount)) << " tests (" << ((real_t(1)-real_c(ccd::HashGrids::intersectionTestCount)/real_c(naiveIntersectionTests))*100) << "%).")
 #endif
 
    if (tt != NULL) tt->start("Reduction");

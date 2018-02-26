@@ -120,7 +120,7 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
    const Vec3& invDirection = transformedRay.getInvDirection();
    const Vec3& origin = transformedRay.getOrigin();
    
-   real_t inf = std::numeric_limits<real_t>::max();
+   const real_t inf = std::numeric_limits<real_t>::max();
    
    size_t tminAxis = 0, tmaxAxis = 0;
    real_t txmin, txmax;
@@ -181,9 +181,9 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
 }
    
 inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3& n) {
-   Ray transformedRay = ray.transformedToBF(capsule);
-   Vec3 direction = transformedRay.getDirection();
-   Vec3 origin = transformedRay.getOrigin();
+   const Ray transformedRay = ray.transformedToBF(capsule);
+   const Vec3& direction = transformedRay.getDirection();
+   const Vec3& origin = transformedRay.getOrigin();
    real_t halfLength = capsule->getLength()/real_t(2);
 
    real_t inf = std::numeric_limits<real_t>::max();
