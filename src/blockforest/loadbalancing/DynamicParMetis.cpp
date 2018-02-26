@@ -272,7 +272,7 @@ DynamicParMetis::Algorithm DynamicParMetis::stringToAlgorithm( std::string s )
    else if( s == "REFINE_KWAY" )
       return PARMETIS_REFINE_KWAY;
    else
-      WALBERLA_ABORT( "Illegal ParMetis algorithm specified! Valid choices are: \"PART_GEOM_KWAY\", \"PART_KWAY\", \"PART_ADAPTIVE_REPART\", or \"REFINE_KWAY\"." );
+      WALBERLA_ABORT( "Illegal ParMetis algorithm specified (" << s << ")! Valid choices are: \"PART_GEOM_KWAY\", \"PART_KWAY\", \"PART_ADAPTIVE_REPART\", or \"REFINE_KWAY\"." );
 }
 
 
@@ -290,7 +290,7 @@ DynamicParMetis::WeightsToUse DynamicParMetis::stringToWeightsToUse( std::string
    else if( s == "BOTH_WEIGHTS" )
       return PARMETIS_BOTH_WEIGHTS;
    else
-      WALBERLA_ABORT( "Illegal ParMetis weights usage specified! Valid choices are: \"NO_WEIGHTS\", \"EDGE_WEIGHTS\", \"VERTEX_WEIGHTS\", or \"BOTH_WEIGHTS\"." );
+      WALBERLA_ABORT( "Illegal ParMetis weights usage specified (" << s << ")! Valid choices are: \"NO_WEIGHTS\", \"EDGE_WEIGHTS\", \"VERTEX_WEIGHTS\", or \"BOTH_WEIGHTS\"." );
 }
 
 
@@ -304,7 +304,54 @@ DynamicParMetis::EdgeSource DynamicParMetis::stringToEdgeSource( std::string s )
    else if( s == "EDGES_FROM_EDGE_WEIGHTS" )
       return PARMETIS_EDGES_FROM_EDGE_WEIGHTS;
    else
-      WALBERLA_ABORT( "Illegal ParMetis weights usage specified! Valid choices are: \"EDGES_FROM_FOREST\" or \"EDGES_FROM_EDGE_WEIGHTS\"" );
+      WALBERLA_ABORT( "Illegal ParMetis weights usage specified (" << s << ")! Valid choices are: \"EDGES_FROM_FOREST\" or \"EDGES_FROM_EDGE_WEIGHTS\"" );
+}
+
+
+std::string DynamicParMetis::algorithmToString( ) const
+{
+   switch (algorithm_)
+   {
+   case walberla::blockforest::DynamicParMetis::PARMETIS_PART_GEOM_KWAY:
+      return "PART_GEOM_KWAY";
+   case walberla::blockforest::DynamicParMetis::PARMETIS_PART_KWAY:
+      return "PART_KWAY";
+   case walberla::blockforest::DynamicParMetis::PARMETIS_ADAPTIVE_REPART:
+      return "PART_ADAPTIVE_REPART";
+   case walberla::blockforest::DynamicParMetis::PARMETIS_REFINE_KWAY:
+      return "PARMETIS_REFINE_KWAY";
+   }
+   return "Unknown";
+}
+
+
+std::string DynamicParMetis::weightsToUseToString( ) const
+{
+   switch (weightsToUse_)
+   {
+   case walberla::blockforest::DynamicParMetis::PARMETIS_NO_WEIGHTS:
+      return "NO_WEIGHTS";
+   case walberla::blockforest::DynamicParMetis::PARMETIS_EDGE_WEIGHTS:
+      return "EDGE_WEIGHTS";
+   case walberla::blockforest::DynamicParMetis::PARMETIS_VERTEX_WEIGHTS:
+      return "VERTEX_WEIGHTS";
+   case walberla::blockforest::DynamicParMetis::PARMETIS_BOTH_WEIGHTS:
+      return "BOTH_WEIGHTS";
+   }
+   return "Unknown";
+}
+
+
+std::string DynamicParMetis::edgeSourceToString( ) const
+{
+   switch (edgeSource_)
+   {
+   case walberla::blockforest::DynamicParMetis::PARMETIS_EDGES_FROM_FOREST:
+      return "EDGES_FROM_FOREST";
+   case walberla::blockforest::DynamicParMetis::PARMETIS_EDGES_FROM_EDGE_WEIGHTS:
+      return "EDGES_FROM_EDGE_WEIGHTS";
+   }
+   return "Unknown";
 }
 
 

@@ -62,6 +62,10 @@ public:
    static WeightsToUse stringToWeightsToUse( std::string s );
    static EdgeSource   stringToEdgeSource( std::string s );
 
+   std::string algorithmToString() const;
+   std::string weightsToUseToString() const;
+   std::string edgeSourceToString() const;
+
 protected:
    Algorithm algorithm_;
    WeightsToUse weightsToUse_;

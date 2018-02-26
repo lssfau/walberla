@@ -35,14 +35,13 @@ public:
    typedef blockforest::DynamicParMetisBlockInfo           PhantomBlockWeight;
    typedef blockforest::DynamicParMetisBlockInfoPackUnpack PhantomBlockWeightPackUnpackFunctor;
 
-   MetisAssignmentFunctor( const shared_ptr<InfoCollection>& ic ) : ic_( ic )
-   {}
+   MetisAssignmentFunctor( shared_ptr<InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
 
    void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
    {
       for( auto it = blockData.begin(); it != blockData.end(); ++it )
       {
-         const uint_t& weight = ic_->find( it->first->getId() )->second.numberOfLocalBodies;
+         const uint_t& weight = ic_->find( it->first->getId() )->second.numberOfLocalBodies + uint_c(baseWeight_);
          blockforest::DynamicParMetisBlockInfo info( int64_c(weight) );
          info.setVertexSize(int64_c( weight ));
          for( uint_t nb = uint_t(0); nb < it->first->getNeighborhoodSize(); ++nb )
@@ -53,8 +52,14 @@ public:
       }
    }
 
+   inline void   setBaseWeight( const double weight) { baseWeight_ = weight;}
+   inline double getBaseWeight() const { return baseWeight_; }
+
 private:
    shared_ptr< InfoCollection > ic_;
+
+   ///Base weight due to allocated data structures. A weight of zero for blocks is dangerous as empty blocks might accumulate on one process!
+   double baseWeight_ = real_t(10.0);
 };
 
 }
