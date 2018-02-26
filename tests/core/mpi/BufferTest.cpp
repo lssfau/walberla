@@ -263,7 +263,7 @@ void bufferTestUInt8()
 {
    std::string stdString("Hello World!"), stdStringEmpty;
 
-   boost::optional<int> optional0, optional1, optional2, optional3;
+   walberla::optional<int> optional0, optional1, optional2, optional3;
    optional2 = 23;
    optional3 = 42;
 
@@ -277,7 +277,7 @@ void bufferTestUInt8()
 
    std::string recvStdString, recvStdStringEmpty;
 
-   boost::optional<int> recvOptional0, recvOptional1, recvOptional2, recvOptional3;
+   walberla::optional<int> recvOptional0, recvOptional1, recvOptional2, recvOptional3;
 
    recvOptional0 = 123;
    recvOptional1 = 123;

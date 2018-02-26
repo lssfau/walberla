@@ -119,7 +119,7 @@ struct DynamicParMetisBlockInfoPackUnpack
       block.getData< DynamicParMetisBlockInfo >().toBuffer( buffer );
    }
 
-   void operator()( mpi::RecvBuffer & buffer, const PhantomBlock &, boost::any & data )
+   void operator()( mpi::RecvBuffer & buffer, const PhantomBlock &, walberla::any & data )
    {
       data = DynamicParMetisBlockInfo( buffer );
    }

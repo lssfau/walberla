@@ -27,7 +27,7 @@
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/MPITextFile.h"
 
-#include <boost/filesystem.hpp>
+#include "core/Filesystem.h"
 
 #include <vector>
 #include <sstream>
@@ -61,8 +61,8 @@ void testSameSizeFile( const std::string & filename, const size_t chunkSize )
    WALBERLA_MPI_BARRIER();
    WALBERLA_ROOT_SECTION()
    {
-      if( boost::filesystem::exists( filename ) )
-         boost::filesystem::remove( filename );
+      if( filesystem::exists( filename ) )
+         filesystem::remove( filename );
    }
    WALBERLA_MPI_BARRIER();
 }
@@ -98,8 +98,8 @@ void testDifferentSizeFile( const std::string & filename, const size_t minChunkS
    WALBERLA_MPI_BARRIER();
    WALBERLA_ROOT_SECTION()
    {
-      if( boost::filesystem::exists( filename ) )
-         boost::filesystem::remove( filename );
+      if( filesystem::exists( filename ) )
+         filesystem::remove( filename );
    }
    WALBERLA_MPI_BARRIER();
 }

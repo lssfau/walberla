@@ -29,9 +29,13 @@
 #include "core/Abort.h"
 #include "core/logging/Logging.h"
 #include "helper/ExceptionHandling.h"
+#include "core/Filesystem.h"
 
-
-#include <boost/filesystem.hpp>
+#if defined(__GLIBCXX__) && __GLIBCXX__ <= 20160609
+#define CURRENT_PATH_WORKAROUND
+#include <unistd.h>
+#include <errno.h>
+#endif
 
 namespace walberla {
 namespace python_coupling {
@@ -52,16 +56,38 @@ namespace python_coupling {
          code << "'" << *argStrIt  << "',";
       code << "] \n";
 
+      filesystem::path path ( fileOrModuleName );
+#ifdef CURRENT_PATH_WORKAROUND
+      // workaround for double free in filesystem::current_path in libstdc++ 5.4 and lower
+      size_t cwd_size = 16;
+      char * cwd_buf = (char*) std::malloc(cwd_size * sizeof(char));
 
-      boost::filesystem::path path ( fileOrModuleName );
-      path = boost::filesystem::absolute( path );
+      while( getcwd( cwd_buf, cwd_size ) == NULL )
+      {
+         if (errno == ERANGE)
+         {
+            cwd_size *= 2;
+            cwd_buf = (char*) std::realloc( cwd_buf, cwd_size * sizeof(char) );
+         }
+         else
+         {
+            python_coupling::terminateOnPythonException( std::string("Could not determine working directory") );
+         }
+      }
+
+      std::string cwd(cwd_buf);
+      std::free(cwd_buf);
+#else
+      filesystem::path cwd = filesystem::current_path();
+#endif
+      path = filesystem::absolute( path, cwd );
       if ( path.extension() == ".py" )
       {
          moduleName = path.stem().string();
 
 
          if ( ! path.parent_path().empty() )  {
-            std::string p = boost::filesystem::canonical(path.parent_path()).string();
+            std::string p = filesystem::canonical(path.parent_path(), cwd).string();
             code << "sys.path.append( r'" << p << "')" << "\n";
          }
       }

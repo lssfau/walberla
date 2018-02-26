@@ -1285,7 +1285,7 @@ public:
       markEmptyBlocks_( markEmptyBlocks ), state_( state )
    {}
    
-   void operator()( std::vector< std::pair< const PhantomBlock *, boost::any > > & blockData, const PhantomBlockForest & )
+   void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
    {
       for( auto it = blockData.begin(); it != blockData.end(); ++it )
       {
@@ -1309,7 +1309,7 @@ struct Pseudo2DPhantomWeightPackUnpack
       buffer << block.getData< Pseudo2DPhantomWeight >().weight();
    }
 
-   void operator()( mpi::RecvBuffer & buffer, const PhantomBlock &, boost::any & data )
+   void operator()( mpi::RecvBuffer & buffer, const PhantomBlock &, walberla::any & data )
    {
       Pseudo2DPhantomWeight::weight_t w;
       buffer >> w;

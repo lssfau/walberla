@@ -52,7 +52,7 @@
 #include "core/logging/Logging.h"
 #include "core/mpi/MPIManager.h"
 
-#include <boost/filesystem.hpp>
+#include "core/Filesystem.h"
 #include <boost/foreach.hpp>
 #include <random>
 
@@ -209,14 +209,12 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
    using namespace walberla;
    using geometry::VoxelFileReader;
 
-   namespace fs = boost::filesystem;
-
    WALBERLA_LOG_INFO( "Running Test with size " << xSize << "x" << ySize << "x" << zSize << " T = " << typeid(T).name() );
 
-   fs::path path(filename);
+   filesystem::path path(filename);
 
-   if( fs::exists( path ) )
-      fs::remove( path );
+   if( filesystem::exists( path ) )
+      filesystem::remove( path );
 
    CellInterval aabb(0, 0, 0, cell_idx_c(xSize - 1), cell_idx_c(ySize - 1), cell_idx_c(zSize - 1));
    uint_t numCells = aabb.numCells();
@@ -249,8 +247,8 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
 
    data.clear();
 
-   WALBERLA_CHECK( fs::exists( path ) );
-   WALBERLA_CHECK( fs::is_regular_file( path ) );
+   WALBERLA_CHECK( filesystem::exists( path ) );
+   WALBERLA_CHECK( filesystem::is_regular_file( path ) );
 
    geometryFile.open(filename);
    WALBERLA_CHECK( geometryFile.isOpen() );
@@ -396,8 +394,8 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
    geometryFile.close();
    WALBERLA_CHECK( !geometryFile.isOpen() );
 
-   if( fs::exists( path ) )
-      fs::remove( path );
+   if( filesystem::exists( path ) )
+      filesystem::remove( path );
 
    geometryFile.create(filename, xSize, ySize, zSize);
 
@@ -465,8 +463,8 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
    }
    WALBERLA_CHECK( runtimeErrorThrown );
    geometryFile.close();
-   if( fs::exists( fs::path(filename + "0") ) )
-      fs::remove( fs::path(filename + "0") );
+   if( filesystem::exists( filesystem::path(filename + "0") ) )
+      filesystem::remove( filesystem::path(filename + "0") );
 
    if(xSize > 0)
    {
@@ -487,12 +485,12 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
       }
       WALBERLA_CHECK( runtimeErrorThrown );
       geometryFile.close();
-      if( fs::exists( fs::path(filename + "1") ) )
-         fs::remove( fs::path(filename + "1") );
+      if( filesystem::exists( filesystem::path(filename + "1") ) )
+         filesystem::remove( filesystem::path(filename + "1") );
    }
 
-   if( fs::exists( path ) )
-      fs::remove( path );
+   if( filesystem::exists( path ) )
+      filesystem::remove( path );
 
 }
 

@@ -28,10 +28,9 @@
 #include "core/debug/Debug.h"
 #include "core/math/AABB.h"
 #include "core/uid/SUID.h"
+#include "core/Any.h"
 
 #include <vector>
-
-#include <boost/any.hpp>
 
 
 
@@ -86,7 +85,7 @@ public:
    void addData( const T & data ) { data_ = data; }
    
    template< typename T >
-   T getData() const { return boost::any_cast<T>( data_ ); }
+   T getData() const { return walberla::any_cast<T>( data_ ); }
    
    bool hasData() const { return !(data_.empty()); }
    
@@ -143,7 +142,7 @@ private:
    uint_t level_;
 
    // set by the user/application via callback
-   boost::any data_;
+   walberla::any data_;
 
    std::vector< NeighborBlock* > neighborhoodSection_[26]; // the 26 neighborhood sections (can be restored from 'neighborhood_')
    std::vector< NeighborBlock  > neighborhood_;            // all neighbor blocks

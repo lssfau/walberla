@@ -37,7 +37,7 @@ public:
 
    WeightAssignmentFunctor( shared_ptr<InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
 
-   void operator()( std::vector< std::pair< const PhantomBlock *, boost::any > > & blockData, const PhantomBlockForest & )
+   void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
    {
       for( auto it = blockData.begin(); it != blockData.end(); ++it )
       {

@@ -262,7 +262,7 @@ void Config::parseFromFile( const char* filename, Block& block, unsigned int lev
             }
             else {
                removeTrailingWhiteSpaces( value );
-               std::string file( (boost::filesystem::path( getDirectory( filename ) ) / value).string() );
+               std::string file( (filesystem::path( getDirectory( filename ) ) / value).string() );
                parseFromFile( file.c_str(), block, level+1 );
             }
          }
@@ -395,7 +395,7 @@ void Config::extractBlock( const char* filename, std::stringstream& input, Block
             }
             else {
                removeTrailingWhiteSpaces( value );
-               std::string file( (boost::filesystem::path( getDirectory( filename ) ) / value).string() );
+               std::string file( (filesystem::path( getDirectory( filename ) ) / value).string() );
                parseFromFile( file.c_str(), block, level+1 );
             }
          }
