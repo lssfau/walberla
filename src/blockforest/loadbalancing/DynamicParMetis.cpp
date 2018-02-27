@@ -30,6 +30,7 @@
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Gather.h"
 #include "core/mpi/Gatherv.h"
+#include "core/mpi/Reduce.h"
 
 #include "core/timing/Timer.h"
 
@@ -42,6 +43,12 @@ namespace blockforest {
 std::pair<uint_t, uint_t> getBlockSequenceRange( const PhantomBlockForest & phantomForest, MPI_Comm comm )
 {
    const uint_t rank = uint_c(mpi::translateRank(mpi::MPIManager::instance()->comm(), comm, MPIManager::instance()->rank()));
+   WALBERLA_DEBUG_SECTION()
+   {
+      int rankRaw;
+      MPI_Comm_rank(comm, &rankRaw);
+      WALBERLA_ASSERT_EQUAL(rank, rankRaw);
+   }
 
    uint_t numLocalBlocks = phantomForest.getNumberOfBlocks();
 
@@ -68,7 +75,11 @@ std::map< blockforest::BlockID, uint_t > getBlockIdToSequenceMapping( const Phan
    mpi::BufferSystem bs( comm );
 
    for( auto it = neighborProcesses.begin(); it != neighborProcesses.end(); ++it )
-      bs.sendBuffer( mpi::translateRank(mpi::MPIManager::instance()->comm(), comm, int_c(*it)) ) << mapping;
+   {
+      auto destRank = mpi::translateRank(mpi::MPIManager::instance()->comm(), comm, int_c(*it));
+      if (destRank != -1)
+         bs.sendBuffer( destRank ) << mapping;
+   }
 
    bs.setReceiverInfoFromSendBufferState( false, true );
 
@@ -100,6 +111,8 @@ T * ptr( std::vector<T> & v )
 }
 
 typedef uint_t idx_t;
+
+
 
 bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                   std::set< uint_t > & processesToRecvFrom,
@@ -177,14 +190,15 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
       WALBERLA_ASSERT_EQUAL( vwgt.size(), phantomForest.getNumberOfBlocks() );
       WALBERLA_ASSERT_EQUAL( vsize.size(), phantomForest.getNumberOfBlocks() );
       WALBERLA_ASSERT_EQUAL( adjncy.size(), adjwgt.size() );
+      WALBERLA_ASSERT_EQUAL( adjwgt.size(), xadj.back() );
 
       int64_t wgtflag = weightsToUse_;
       int64_t numflag = 0; // C-style ordering
       int64_t ncon = 1; // Number of constraints
       int64_t ndims = 3; // Number of dimensions
-      double ubvec[] = { real_t( 1.05 ) }; // imbalance tolerance
+      double  ubvec[] = { real_t( 1.05 ) }; // imbalance tolerance
       int64_t nparts = int64_c( MPIManager::instance()->numProcesses() ); // number of subdomains
-      double ipc2redist = real_t( 1000000.0 ); // compute repartitioning with low edge cut (set lower (down to 0.000001) to get minimal repartitioning )
+      auto    ipc2redist = ipc2redist_;
       MPI_Comm comm = subComm; //MPIManager::instance()->comm();
       std::vector<double> tpwgts( uint_c(nparts * ncon), 1.0 / double_c( nparts ) ); // vertex weight fraction that is stored in a subdomain
       int64_t options[] = { int64_t( 1 ), int64_t( 0 ), int64_t( 23 ), int64_t( 1 ) };

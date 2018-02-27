@@ -54,6 +54,10 @@ public:
                     const PhantomBlockForest & phantomForest,
                     const uint_t iteration ) const;
 
+
+   void   setipc2redist(double val) {ipc2redist_ = val;}
+   double getipc2redist() const {return ipc2redist_;}
+
    bool edgeWeightsUsed()   const { return ( weightsToUse_ == PARMETIS_EDGE_WEIGHTS   ) || ( weightsToUse_ == PARMETIS_BOTH_WEIGHTS ); }
    bool vertexWeightsUsed() const { return ( weightsToUse_ == PARMETIS_VERTEX_WEIGHTS ) || ( weightsToUse_ == PARMETIS_BOTH_WEIGHTS ); }
    bool vertexSizeUsed()    const { return algorithm_ == PARMETIS_ADAPTIVE_REPART; }
@@ -70,6 +74,8 @@ protected:
    Algorithm algorithm_;
    WeightsToUse weightsToUse_;
    EdgeSource edgeSource_;
+
+   double ipc2redist_ = real_t( 1000.0 ); ///< compute repartitioning with low edge cut (set lower (down to 0.000001) to get minimal repartitioning )
 };
 
 class DynamicParMetisBlockInfo
