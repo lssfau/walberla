@@ -23,10 +23,12 @@
 
 #include "blockforest/PhantomBlockForest.h"
 
+#include "core/debug/Debug.h"
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
 #include "core/mpi/MPIWrapper.h"
 
+#include <cmath>
 #include <map>
 
 namespace walberla {
@@ -100,7 +102,7 @@ public:
    vsize_t getVertexSize() const { return vertexSize_; }
    void setVertexSize( const vsize_t size ) { vertexSize_ = size; }
 
-   const Vector3<double> & getVertexCoords() const { return vertexCoords_; }
+   const Vector3<double> & getVertexCoords() const { WALBERLA_ASSERT( !std::isnan(vertexCoords_[0]) && !std::isnan(vertexCoords_[1]) && !std::isnan(vertexCoords_[2]) ); return vertexCoords_; }
    void setVertexCoords( const Vector3<double> & p ) { vertexCoords_ = p; }
 
    void setEdgeWeight( const blockforest::BlockID & blockId, const weight_t edgeWeight ) { edgeWeights_[blockId] = edgeWeight; }
@@ -117,7 +119,7 @@ private:
 
    weight_t vertexWeight_; /// Defines the weight of a block
    vsize_t vertexSize_;    /// Defines the cost of rebalancing a block
-   Vector3<double> vertexCoords_; /// Defines where the block is located in space. Needed by some ParMetis algorithms
+   Vector3<double> vertexCoords_ = Vector3<double>(std::numeric_limits<double>::signaling_NaN()); /// Defines where the block is located in space. Needed by some ParMetis algorithms
    std::map< blockforest::BlockID, weight_t > edgeWeights_; /// Defines the cost of communication with other blocks
 };
 

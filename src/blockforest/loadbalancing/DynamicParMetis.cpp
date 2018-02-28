@@ -124,7 +124,7 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
    globalTimer.start();
 
    //create new communicator which excludes processes which do not have blocks
-   MPI_Comm subComm;
+   MPI_Comm subComm = MPIManager::instance()->comm();
    MPI_Group allGroup, subGroup;
    MPI_Comm_group( MPIManager::instance()->comm(), &allGroup );
    std::vector<int> ranks;
@@ -142,7 +142,7 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
    if (subComm != MPI_COMM_NULL)
    {
       const std::pair<uint_t, uint_t> blockSequenceRange = getBlockSequenceRange( phantomForest, subComm );
-      const std::map< blockforest::BlockID, uint_t > mapping = getBlockIdToSequenceMapping( phantomForest, blockSequenceRange, subComm );
+      const std::map< blockforest::BlockID, uint_t > mapping = getBlockIdToSequenceMapping( phantomForest, blockSequenceRange, subComm ); //blockid to vertex id
 
       std::vector<int64_t> vtxdist = mpi::allGather( int64_c( blockSequenceRange.second ), subComm );
       vtxdist.insert( vtxdist.begin(), uint_t( 0 ) );
