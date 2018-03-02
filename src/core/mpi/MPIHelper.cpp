@@ -34,6 +34,11 @@ namespace mpi {
 //!
 int translateRank(const MPI_Comm srcComm, const MPI_Comm destComm, const int srcRank)
 {
+   if (srcComm == destComm)
+   {
+      return srcRank;
+   }
+
    int destRank = -1;
    MPI_Group srcGroup, destGroup;
    MPI_Comm_group(srcComm, &srcGroup);
@@ -41,11 +46,9 @@ int translateRank(const MPI_Comm srcComm, const MPI_Comm destComm, const int src
    MPI_Group_translate_ranks(srcGroup, 1, const_cast<int*>(&srcRank), destGroup, &destRank);
    int size;
    MPI_Comm_size(destComm, &size);
-   if (destRank < 0 || destRank >= size)
-   {
-      WALBERLA_CHECK_EQUAL( destRank,  MPI_UNDEFINED );
-      destRank = -1;
-   }
+   if (destRank == MPI_UNDEFINED) destRank = -1;
+   WALBERLA_CHECK_GREATER_EQUAL(destRank, -1);
+   WALBERLA_CHECK_LESS(destRank, size);
    MPI_Group_free(&srcGroup);
    MPI_Group_free(&destGroup);
    return destRank;
@@ -60,6 +63,11 @@ int translateRank(const MPI_Comm srcComm, const MPI_Comm destComm, const int src
 //!
 std::vector<int> translateRank(const MPI_Comm srcComm, const MPI_Comm destComm, const std::vector<int>& srcRank)
 {
+   if (srcComm == destComm)
+   {
+      return srcRank;
+   }
+
    std::vector<int> destRank(srcRank.size(), -1);
    MPI_Group srcGroup, destGroup;
    MPI_Comm_group(srcComm, &srcGroup);
@@ -69,11 +77,9 @@ std::vector<int> translateRank(const MPI_Comm srcComm, const MPI_Comm destComm, 
    MPI_Comm_size(destComm, &size);
    for (auto& dstRnk : destRank)
    {
-      if (dstRnk < 0 || dstRnk >= size)
-      {
-         WALBERLA_CHECK_EQUAL( dstRnk,  MPI_UNDEFINED );
-         dstRnk = -1;
-      }
+      if (dstRnk == MPI_UNDEFINED) dstRnk = -1;
+      WALBERLA_CHECK_GREATER_EQUAL(dstRnk, -1);
+      WALBERLA_CHECK_LESS(dstRnk, size);
    }
    MPI_Group_free(&srcGroup);
    MPI_Group_free(&destGroup);
