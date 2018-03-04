@@ -56,6 +56,8 @@ private:
    Vec3 inv_direction_; //!< The inverted direction of the ray.
    Vector3<int8_t> sign_; /*!< The signs of the inverted direction of the ray.
                            (Required for Ray-Box intersection code.)*/
+   size_t imageX_; //!< Y value of the pixel coordinate this ray intersects.
+   size_t imageY_; //!< X value of the pixel coordinate this ray intersects.
    //@}
 
 public:
@@ -136,6 +138,22 @@ public:
    inline const Vector3<int8_t>& getInvDirectionSigns () const {
       return sign_;
    }
+   
+   /*!\brief Returns the X value of the pixel coordinate this ray intersects.
+    *
+    * \return X value of pixel coordinate.
+    */
+   inline size_t getImageX () const {
+      return imageX_;
+   }
+   
+   /*!\brief Returns the Y value of the pixel coordinate this ray intersects.
+    *
+    * \return Y value of pixel coordinate.
+    */
+   inline size_t getImageY () const {
+      return imageY_;
+   }
    //@}
 
    /*!\name Set functions */
@@ -155,6 +173,29 @@ public:
       WALBERLA_CHECK_FLOAT_EQUAL(direction.length(), real_t(1));
       direction_ = direction;
       calcInvDirection();
+   }
+   
+   /*!\brief Sets the X and Y values of the image pixel coordinate this ray intersects.
+    * \param x X value of the pixel coordinate
+    * \param y Y value of the pixel coordinate
+    */
+   inline void setImageCoordinate (size_t x, size_t y) {
+      imageX_ = x;
+      imageY_ = y;
+   }
+   
+   /*!\brief Sets the X value of the image pixel coordinate this ray intersects.
+    * \param x X value of the pixel coordinate
+    */
+   inline void setImageX (size_t x) {
+      imageX_ = x;
+   }
+   
+   /*!\brief Sets the Y value of the image pixel coordinate this ray intersects.
+    * \param y Y value of the pixel coordinate
+    */
+   inline void setImageY (size_t y) {
+      imageY_ = y;
    }
    //@}
 

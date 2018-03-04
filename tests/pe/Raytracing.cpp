@@ -28,6 +28,9 @@
 
 #include <pe/utility/GetBody.h>
 
+#include <sstream>
+#include <tuple>
+
 using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::pe::raytracing;
@@ -50,7 +53,7 @@ void SphereIntersectsTest()
    WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(0));
    WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(-1));
    WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
-
+   
    // ray tangential
    Ray ray2(Vec3(3,-5,3), Vec3(0,7.5,real_t(std::sqrt(real_t(15))/real_t(2))).getNormalized());
    WALBERLA_CHECK(intersects(&sp1, ray2, t, n));
@@ -98,7 +101,7 @@ void PlaneIntersectsTest() {
    WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(1), "incorrect normal calculated");
    WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
    WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
-
+   
    // plane with center 3,3,3 and parallel to x-z plane
    Plane pl2(1, 1, Vec3(3, 3, 3), Vec3(0, 1, 0), real_t(1.0), iron);
    WALBERLA_CHECK(!intersects(&pl2, ray1, t, n), "ray parallel to plane shouldnt hit");
@@ -117,7 +120,7 @@ void PlaneIntersectsTest() {
 
 void BoxIntersectsTest() {
    WALBERLA_LOG_INFO("RAY -> BOX");
-
+   
    MaterialID iron = Material::find("iron");
    real_t t;
    Vec3 n;
@@ -147,7 +150,7 @@ void BoxIntersectsTest() {
    WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(1), "incorrect normal calculated");
    WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
    WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");
-
+   
    // ray origin within box
    Ray ray2(Vec3(-2,0,0), Vec3(1,0,1).getNormalized());
    WALBERLA_CHECK(intersects(&box3, ray2, t, n));
@@ -173,7 +176,7 @@ void BoxIntersectsTest() {
 
 void AABBIntersectsTest() {
    WALBERLA_LOG_INFO("RAY -> AABB");
-
+   
    Ray ray1(Vec3(-5,5,5), Vec3(1,0,0));
    real_t t;
    
@@ -236,7 +239,7 @@ void RaytracerTest() {
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vec3(1,1,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
-
+   
    Lighting lighting(Vec3(0, 5, 8), // 8, 5, 9.5 gut für ebenen, 0,5,8
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
@@ -249,12 +252,12 @@ void RaytracerTest() {
                        Color(0.2,0.2,0.2),
                        real_t(2),
                        customBodyToShadingParams);
-
+   
    MaterialID iron = Material::find("iron");
    
    //PlaneID xNegPlane = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(5,0,0), iron);
    // xNegPlane obstructs only the top left sphere and intersects some objects
-
+   
    //PlaneID xNegPlaneClose = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(1,0,0), iron);
    
    // Test Scene v1 - Spheres, (rotated) boxes, confining walls, tilted plane in right bottom back corner
@@ -264,7 +267,7 @@ void RaytracerTest() {
    createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), Vec3(0,0,10), iron); // ceiling
    createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(10,0,0), iron); // back wall
    createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(0,0,0), iron); // front wall, should not get rendered
-
+   
    createPlane(*globalBodyStorage, 0, Vec3(-1,1,1), Vec3(8,2,2), iron); // tilted plane in right bottom back corner
    
    SphereID upperLeftSmallSphere = createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,9.5,9.5), real_t(0.5));
@@ -286,7 +289,7 @@ void RaytracerTest() {
       ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
       hashgrids->update();
    }
-
+   
    WALBERLA_LOG_INFO("--- UPPER LEFT SMALL SPHERE");
    WALBERLA_LOG_INFO(" hash: " << upperLeftSmallSphere->getHash());
    WALBERLA_LOG_INFO(" grid: " << upperLeftSmallSphere->getGrid());
@@ -301,9 +304,9 @@ void RaytracerTest() {
    WALBERLA_LOG_INFO(" AABB: " << upperRightBox->getAABB());
    
    /*Ray ray(Vec3(-5, 6.5, 5), Vec3(1, 0, 0));
-   real_t t = INFINITY;
-   Vec3 n;
-   BodyID body = NULL;*/
+    real_t t = INFINITY;
+    Vec3 n;
+    BodyID body = NULL;*/
    
    // output info about grids
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
@@ -314,13 +317,17 @@ void RaytracerTest() {
          WALBERLA_LOG_INFO(" dims:     " << grid->xCellCount_ << "/" << grid->yCellCount_ << "/" << grid->zCellCount_);
          WALBERLA_LOG_INFO(" items:    " << grid->bodyCount_);
          WALBERLA_LOG_INFO(" enlargement threshold: " << grid->enlargementThreshold_);
+         //WALBERLA_LOG_INFO(" offsets: ")
+         //for (int i = 0; i < 27; i++) {
+         //   WALBERLA_LOG_INFO("  " << i << ": " << grid->stdNeighborOffset_[i]);
+         //}
       }
       /*body = hashgrids->getClosestBodyIntersectingWithRay<BodyTuple>(ray, blockIt->getAABB(), t, n);
-      if (body != NULL) {
-         WALBERLA_LOG_INFO("body found");
-      } else {
-         WALBERLA_LOG_INFO("body not found");
-      }*/
+       if (body != NULL) {
+       WALBERLA_LOG_INFO("body found");
+       } else {
+       WALBERLA_LOG_INFO("body not found");
+       }*/
    }
    
    //raytracer.setTBufferOutputDirectory("tbuffer");
@@ -379,7 +386,7 @@ void RaytracerSpheresTest() {
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vec3(1,1,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
-
+   
    Lighting lighting(Vec3(0, 5, 8), // 8, 5, 9.5 gut für ebenen, 0,5,8
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
@@ -425,95 +432,95 @@ void RaytracerSpheresTest() {
 
 void hashgridsPlayground() {
    /*using namespace walberla::pe::ccd;
-   
-   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(-2,-2,-2,2,2,2), Vec3(1,1,1), Vec3(false, false, false));
-   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
-   HashGrids::HashGrid hashgrid(1.0); // initialize a 4x4x4 hashgrid with cellspan 1.0 (can hold a block with 4x4x4 in size.)
-   
-   std::vector<Vec3> centers = {
-      Vec3(-0.25, -0.75, 0.5),
-      Vec3(0.5, -0.5, 0.5),
-      Vec3(-0.25, -0.75, 0.5),
-      Vec3(1.25, -0.25, 0.5),
-      Vec3(-1.25, 0.25, 0.5)
-   };
-   std::vector<Vec3> lengths = {
-      Vec3(1, 1, 1),
-      Vec3(0.5, 0.5, 0.5),
-      Vec3(0.5, 0.5, 0.5),
-      Vec3(1, 1, 1),
-      Vec3(1, 1, 1)
-   };
-
-   for (size_t i = 0; i < centers.size(); i++) {
-      BoxID box = createBox(*globalBodyStorage, *forest, storageID, walberla::id_t(i), centers[i], lengths[i]);
-      hashgrid.add(box);
-      WALBERLA_LOG_INFO("Box " << box->getID() << " at " << centers[i] << " hashed with " << box->getHash());
-   }
-
-   WALBERLA_LOG_INFO("domain: " << forest->getDomain());
-
-   real_t inf = std::numeric_limits<real_t>::max();
-
-   BodyID closestBody = NULL;
-   real_t t_closest = inf;
-   real_t t;
-   Vec3 n;
-   
-   std::vector<Ray> rays = {
-      Ray(Vec3(-2.5, -1.25, 0.5), Vec3(20, 7, 0).getNormalized()),
-      Ray(Vec3(1.5, -0.5, 0.5), Vec3(-20, -7, 0).getNormalized()),
-      Ray(Vec3(-2.25, 1.75, 0.5), Vec3(1, -1, 0).getNormalized())
-   };
-
-   int i = 0;
-   for (const Ray& ray: rays) {
-      closestBody = NULL;
-      t_closest = inf;
-      
-      WALBERLA_LOG_INFO("--- ray " << i << ": " << ray.getOrigin() << ", " << ray.getDirection());
-      
-      std::vector<BodyID> bodiesContainer;
-      hashgrid.possibleRayIntersectingBodies(ray, forest->getDomain(), bodiesContainer);
-      
-      WALBERLA_LOG_INFO("Resulting bodies:");
-      IntersectsFunctor intersectsFunc(ray, t, n);
-      for (BodyID const& body : bodiesContainer) {
-         bool intersects = SingleCast<BodyTuple, IntersectsFunctor, bool>::execute(body, intersectsFunc);
-         if (intersects && t < t_closest) {
-            closestBody = body;
-            t_closest = t;
-         }
-         std::cout << body->getID() << " ";
-      }
-      std::cout << std::endl;
-      
-      if (closestBody != NULL) {
-         WALBERLA_LOG_INFO("closest: " << closestBody->getID() << " with t = " << t_closest);
-      } else {
-         WALBERLA_LOG_INFO("could not find closest body");
-      }
-      
-      closestBody = NULL;
-      t_closest = inf;
-      
-      closestBody = hashgrid.getRayIntersectingBody<BodyTuple>(ray, forest->getDomain(), t, n);
-      if (closestBody == NULL) {
-         WALBERLA_LOG_INFO("couldnt find closest body with direct resolution");
-      } else {
-         WALBERLA_LOG_INFO("closest with direct resolution: " << closestBody->getID() << " with t = " << t);
-      }
-      i++;
-   }*/
+    
+    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
+    shared_ptr<BlockForest> forest = createBlockForest(AABB(-2,-2,-2,2,2,2), Vec3(1,1,1), Vec3(false, false, false));
+    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+    HashGrids::HashGrid hashgrid(1.0); // initialize a 4x4x4 hashgrid with cellspan 1.0 (can hold a block with 4x4x4 in size.)
+    
+    std::vector<Vec3> centers = {
+    Vec3(-0.25, -0.75, 0.5),
+    Vec3(0.5, -0.5, 0.5),
+    Vec3(-0.25, -0.75, 0.5),
+    Vec3(1.25, -0.25, 0.5),
+    Vec3(-1.25, 0.25, 0.5)
+    };
+    std::vector<Vec3> lengths = {
+    Vec3(1, 1, 1),
+    Vec3(0.5, 0.5, 0.5),
+    Vec3(0.5, 0.5, 0.5),
+    Vec3(1, 1, 1),
+    Vec3(1, 1, 1)
+    };
+    
+    for (size_t i = 0; i < centers.size(); i++) {
+    BoxID box = createBox(*globalBodyStorage, *forest, storageID, walberla::id_t(i), centers[i], lengths[i]);
+    hashgrid.add(box);
+    WALBERLA_LOG_INFO("Box " << box->getID() << " at " << centers[i] << " hashed with " << box->getHash());
+    }
+    
+    WALBERLA_LOG_INFO("domain: " << forest->getDomain());
+    
+    real_t inf = std::numeric_limits<real_t>::max();
+    
+    BodyID closestBody = NULL;
+    real_t t_closest = inf;
+    real_t t;
+    Vec3 n;
+    
+    std::vector<Ray> rays = {
+    Ray(Vec3(-2.5, -1.25, 0.5), Vec3(20, 7, 0).getNormalized()),
+    Ray(Vec3(1.5, -0.5, 0.5), Vec3(-20, -7, 0).getNormalized()),
+    Ray(Vec3(-2.25, 1.75, 0.5), Vec3(1, -1, 0).getNormalized())
+    };
+    
+    int i = 0;
+    for (const Ray& ray: rays) {
+    closestBody = NULL;
+    t_closest = inf;
+    
+    WALBERLA_LOG_INFO("--- ray " << i << ": " << ray.getOrigin() << ", " << ray.getDirection());
+    
+    std::vector<BodyID> bodiesContainer;
+    hashgrid.possibleRayIntersectingBodies(ray, forest->getDomain(), bodiesContainer);
+    
+    WALBERLA_LOG_INFO("Resulting bodies:");
+    IntersectsFunctor intersectsFunc(ray, t, n);
+    for (BodyID const& body : bodiesContainer) {
+    bool intersects = SingleCast<BodyTuple, IntersectsFunctor, bool>::execute(body, intersectsFunc);
+    if (intersects && t < t_closest) {
+    closestBody = body;
+    t_closest = t;
+    }
+    std::cout << body->getID() << " ";
+    }
+    std::cout << std::endl;
+    
+    if (closestBody != NULL) {
+    WALBERLA_LOG_INFO("closest: " << closestBody->getID() << " with t = " << t_closest);
+    } else {
+    WALBERLA_LOG_INFO("could not find closest body");
+    }
+    
+    closestBody = NULL;
+    t_closest = inf;
+    
+    closestBody = hashgrid.getRayIntersectingBody<BodyTuple>(ray, forest->getDomain(), t, n);
+    if (closestBody == NULL) {
+    WALBERLA_LOG_INFO("couldnt find closest body with direct resolution");
+    } else {
+    WALBERLA_LOG_INFO("closest with direct resolution: " << closestBody->getID() << " with t = " << t);
+    }
+    i++;
+    }*/
 }
 
 ShadingParameters customHashgridsBodyToShadingParams(const BodyID body) {
    switch (body->getID()) {
       case 96:
          return blueShadingParams(body);
-      /*case 203:
-         return redShadingParams(body);*/
+         /*case 203:
+          return redShadingParams(body);*/
       case 140:
          return whiteShadingParams(body);
       case 50:
@@ -523,10 +530,13 @@ ShadingParameters customHashgridsBodyToShadingParams(const BodyID body) {
       return yellowShadingParams(body).makeGlossy();
    }
    return defaultBodyTypeDependentShadingParams(body);
-
+   
 }
 
-void HashGridsTest(size_t boxes, size_t capsules, size_t spheres) {
+void HashGridsTest(size_t boxes, size_t capsules, size_t spheres,
+                   real_t boxLenMin = 0.1, real_t boxLenMax = 0.2, bool boxRotation = false,
+                   real_t capRadiusMin = 0.1, real_t capRadiusMax = 0.2, real_t capLenMin = 0.1, real_t capLenMax = 0.3,
+                   real_t sphereRadiusMin = 0.1, real_t sphereRadiusMax = 0.3) {
 #if defined(USE_NAIVE_INTERSECTION_FINDING)
    WALBERLA_LOG_INFO("Using naive method for intersection testing");
 #endif
@@ -543,7 +553,7 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres) {
    tt.start("Setup");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(-1,-1,-1,4,4,4), Vec3(2,2,1), Vec3(false, false, false));
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
    
@@ -567,22 +577,24 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres) {
    // generate bodies for test
    std::vector<BodyID> bodies;
    for (size_t i = 0; i < boxes; i++) {
-      real_t len = math::realRandom(real_t(0.1), real_t(0.2)); //0.2 0.5
-      real_t x_min = math::realRandom(forestAABB.xMin()+len, forestAABB.xMax());
-      real_t y_min = math::realRandom(forestAABB.yMin()+len, forestAABB.yMax());
-      real_t z_min = math::realRandom(forestAABB.zMin()+len, forestAABB.zMax());
+      real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
+      real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
+      real_t y_min = math::realRandom(forestAABB.yMin()+len/real_t(2), forestAABB.yMax());
+      real_t z_min = math::realRandom(forestAABB.zMin()+len/real_t(2), forestAABB.zMax());
       //real_t z_min = len+0.1;
       walberla::id_t id = walberla::id_t(i);
       BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
       WALBERLA_CHECK(box_ != NULL);
-      //box->rotate(0, math::realRandom(real_t(0), real_t(1))*math::M_PI, math::realRandom(real_t(0), real_t(1))*math::M_PI);
+      if (boxRotation) {
+         box_->rotate(0, math::realRandom(real_t(0), real_t(1))*math::M_PI, math::realRandom(real_t(0), real_t(1))*math::M_PI);
+      }
       bodies.push_back(box_);
       bodySIDs.push_back(box_->getSystemID());
    }
    
    for (size_t i = 0; i < capsules; i++) {
-      real_t len = math::realRandom(real_t(0.1), real_t(0.3)); // 0.2 0.5
-      real_t radius = real_t(0.1);
+      real_t len = math::realRandom(capLenMin, capLenMax); // 0.2 0.5
+      real_t radius = math::realRandom(capRadiusMin, capRadiusMax);
       real_t maxlen = len + 2*radius;
       real_t x = math::realRandom(forestAABB.xMin()+maxlen, forestAABB.xMax());
       real_t y = math::realRandom(forestAABB.yMin()+maxlen, forestAABB.yMax());
@@ -596,7 +608,7 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres) {
    }
    
    for (size_t i = 0; i < spheres; i++) {
-      real_t radius = math::realRandom(real_t(0.2), real_t(1.5)); // 0.2 0.3
+      real_t radius = math::realRandom(sphereRadiusMin, sphereRadiusMax); // 0.2 0.3
       // forestAABB.xMax()-radius gerechtfertigt?
       real_t x = math::realRandom(forestAABB.xMin()+radius, forestAABB.xMax());
       real_t y = math::realRandom(forestAABB.yMin()+radius, forestAABB.yMax());
@@ -629,6 +641,223 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres) {
    
    //createBox(*globalBodyStorage, *forest, storageID, boxCount+capsuleCount+1, Vec3(2, 2, 2), Vec3(1, 1, 1));
    
+   std::vector<std::tuple<Vec3, Vec3, Vec3>> vectors;
+   
+   // y up, in negative z direction
+   vectors.push_back(std::make_tuple(Vec3(2, 2.1, 7),
+                                     Vec3(2.1, 2, 4),
+                                     Vec3(0,1,0)));
+   // y up, in positive z direction
+   vectors.push_back(std::make_tuple(Vec3(2, 2, -3),
+                                     Vec3(2, 2.1, 0.1),
+                                     Vec3(0,1,0)));
+   // x up, in positive z direction
+   vectors.push_back(std::make_tuple(Vec3(2, 2, -3),
+                                     Vec3(2, 2.1, 0.1),
+                                     Vec3(1,0,0)));
+   // y and x up, in positive z direction
+   vectors.push_back(std::make_tuple(Vec3(2, 2, -3),
+                                     Vec3(2, 2.1, 0.1),
+                                     Vec3(1,1,0)));
+   // y and x up, in negative z direction
+   vectors.push_back(std::make_tuple(Vec3(2, 2, 6.5),
+                                     Vec3(2.1, 2.1, 4),
+                                     Vec3(0.5,1,0)));
+   // z up, in positive x direction
+   vectors.push_back(std::make_tuple(Vec3(-3, 2, 1.9),
+                                     Vec3(0, 2.1, 2),
+                                     Vec3(0,0,1)));
+   // z up, in negative x direction
+   vectors.push_back(std::make_tuple(Vec3(7, 2, 1.9),
+                                     Vec3(4, 2.1, 2),
+                                     Vec3(0,0,1)));
+   // z and y up, in negative x direction
+   vectors.push_back(std::make_tuple(Vec3(7, 2, 1.9),
+                                     Vec3(4, 2.1, 2),
+                                     Vec3(0,1,1)));
+   // z and x up, in negative y direction
+   vectors.push_back(std::make_tuple(Vec3(2, 6, 1.9),
+                                     Vec3(2.3, 4, 2),
+                                     Vec3(1,0,1)));
+   // z up, in positive y direction
+   vectors.push_back(std::make_tuple(Vec3(2, -3.6, 1.9),
+                                     Vec3(2.3, 0, 2.1),
+                                     Vec3(0,0,1)));
+   
+   Lighting lighting0(Vec3(forestAABB.xSize()/real_t(2)+1, forestAABB.ySize()/real_t(2),
+                           real_t(2)*forestAABB.zMax()+2), // 8, 5, 9.5 gut für ebenen, 0,5,8
+                      Color(1, 1, 1), //diffuse
+                      Color(1, 1, 1), //specular
+                      Color(0.4, 0.4, 0.4)); //ambient
+   tt.stop("Setup");
+
+   int i = 0;
+   for (auto& vector: vectors) {
+      Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
+                           size_t(640), size_t(480),
+                           49.13,
+                           std::get<0>(vector),
+                           std::get<1>(vector),
+                           std::get<2>(vector),
+                           lighting0,
+                           Color(0.2,0.2,0.2),
+                           real_t(2),
+                           customHashgridsBodyToShadingParams);
+#if defined(USE_NAIVE_INTERSECTION_FINDING)
+      raytracer.setImageOutputDirectory("image/naive");
+#endif
+#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+      raytracer.setImageOutputDirectory("image/hashgrids");
+#endif
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+      raytracer.setImageOutputDirectory("image/comparison");
+#endif
+      raytracer.setImageOutputEnabled(true);
+      raytracer.setFilenameTimestepWidth(12);
+      WALBERLA_LOG_INFO("output #" << i << " to: " << (boxes*100000000 + capsules*10000 + spheres));
+      raytracer.rayTrace<BodyTuple>(boxes*100000000 + capsules*10000 + spheres, &tt);
+      i++;
+   }
+   
+   /*HashGrids::HashGrid* grid;
+    for (auto bodyId: problematicBodyIDs) {
+    BodyID body = getBody(*globalBodyStorage, *forest, storageID, bodySIDs[bodyId]);
+    //WALBERLA_LOG_INFO(box);
+    WALBERLA_LOG_INFO("--- BODY " << bodyId << " ---");
+    WALBERLA_LOG_INFO("minCorner " << bodyId << ": " << body->getAABB().minCorner());
+    WALBERLA_LOG_INFO("hash " << bodyId << ": " << body->getHash());
+    WALBERLA_LOG_INFO("cell " << bodyId << ": " << body->getCellId());
+    WALBERLA_LOG_INFO("grid " << bodyId << ": " << body->getGrid());
+    grid = (HashGrids::HashGrid*)body->getGrid();
+    }
+    WALBERLA_CHECK(grid != NULL);
+    WALBERLA_LOG_INFO("grid dims: " << grid->xCellCount_ << "/" << grid->yCellCount_ << "/" << grid->zCellCount_);*/
+   
+   auto temp = tt.getReduced();
+   WALBERLA_ROOT_SECTION() {
+      //std::cout << temp;
+   }
+}
+
+ShadingParameters customArtifactsBodyToShadingParams(const BodyID body) {
+   if (body->getTypeID() == Box::getStaticTypeID()) {
+      return lightGreyShadingParams(body);
+   }
+   return defaultShadingParams(body);
+}
+
+void printHashgridsRaySignsCellNeighborMap(){
+   std::stringstream text;
+   for (auto it: walberla::pe::ccd::HashGrids::raySignsCellNeighborMap) {
+      text << it.first << ": ";
+      int lastn = -1;
+      for (size_t n: it.second) {
+         if (n >= 10 && lastn < 10 && n-1 != lastn) {
+            text << " ";
+         }
+         while (int(n)-1 > lastn) {
+            if (lastn < 10) {
+               text << "  ";
+            } else {
+               text << "   ";
+            }
+            lastn++;
+         }
+         lastn = int(n);
+         text << n << " ";
+      }
+      text << std::endl;
+   }
+   WALBERLA_LOG_INFO(text.str());
+}
+
+void HashGridsArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+#if defined(USE_NAIVE_INTERSECTION_FINDING)
+   WALBERLA_LOG_INFO("Using naive method for intersection testing");
+#endif
+#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO("Using hashgrids for intersection testing");
+#endif
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO("Comparing hashgrids and naive method for intersection testing");
+#endif
+   WALBERLA_LOG_INFO("Generating " << boxes << " boxes");
+   
+   using namespace walberla::pe::ccd;
+   WcTimingTree tt;
+   tt.start("Setup");
+   
+   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
+   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+   auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
+   
+   std::vector<IBlock*> blocks;
+   forest->getBlocks(blocks);
+   //for (auto block: blocks) {
+   //   WALBERLA_LOG_INFO("block AABB: " << block->getAABB());
+   //}
+   
+   const AABB& forestAABB = forest->getDomain();
+   
+   bool removeUnproblematic = false;
+   std::vector<walberla::id_t> problematicBodyIDs = {165, 5, 31}; //{50, 44, 66, 155, 170, 51};
+   std::vector<walberla::id_t> bodySIDs;
+   
+   //WALBERLA_LOG_INFO("boxCount: " << boxCount);
+   //WALBERLA_LOG_INFO("capsuleCount: " << capsuleCount);
+   
+   //BoxID box = createBox(*globalBodyStorage, *forest, storageID, 1000, Vec3(2.1, 0.5, 0.5), Vec3(0.25, 0.25, 0.25));
+   
+   // generate bodies for test
+   std::vector<BodyID> bodies;
+   for (size_t i = 0; i < boxes; i++) {
+      real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
+      real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
+      real_t y_min = math::realRandom(forestAABB.yMin()+len/real_t(2), forestAABB.yMax());
+      real_t z_min = math::realRandom(forestAABB.zMin()+len/real_t(2), forestAABB.zMax());
+      
+      if (i%5 == 0) {
+         x_min = forestAABB.xMax() - math::realRandom(len/real_t(2), len);
+      } else if (i%5 == 1){
+         x_min = forestAABB.xMin() + math::realRandom(real_t(0), len/real_t(2));
+      } else if (i%5 == 2){
+         y_min = forestAABB.yMax() - math::realRandom(len/real_t(2), len);
+      } else if (i%5 == 3){
+         y_min = forestAABB.yMin() + math::realRandom(real_t(0), len/real_t(2));
+      } else if (i%5 == 4){
+         z_min = forestAABB.zMin() + math::realRandom(real_t(0), len/real_t(2));
+      }
+      
+      //real_t z_min = len+0.1;
+      walberla::id_t id = walberla::id_t(i);
+      BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
+      WALBERLA_CHECK(box_ != NULL);
+      bodies.push_back(box_);
+      bodySIDs.push_back(box_->getSystemID());
+   }
+   
+   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
+      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
+      hashgrids->update();
+      for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
+         if (removeUnproblematic && std::find(problematicBodyIDs.begin(), problematicBodyIDs.end(), bodyIt->getID()) == problematicBodyIDs.end()) {
+            bodyIt->setPosition(-100, -100, -100);
+         }
+      }
+   }
+   
+   /*MaterialID iron = Material::find("iron");
+    createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), Vec3(0,forestAABB.yMax(),0), iron); // left wall
+    createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,forestAABB.yMin(),0), iron); // right wall
+    createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,forestAABB.zMin()), iron); // floor
+    createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), Vec3(0,0,forestAABB.zMax()), iron); // ceiling
+    createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(forestAABB.xMax(),0,0), iron); // back wall
+    createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(forestAABB.xMin(),0,0), iron); // front wall, should not get rendered
+    */
+   
+   //createBox(*globalBodyStorage, *forest, storageID, boxCount+capsuleCount+1, Vec3(2, 2, 2), Vec3(1, 1, 1));
+   
    
    
    Lighting lighting(Vec3(forestAABB.xSize()/real_t(2)+1, forestAABB.ySize()/real_t(2),
@@ -639,49 +868,317 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres) {
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
                        49.13,
-                       Vec3(forestAABB.xSize()/real_t(2), forestAABB.ySize()/real_t(2),
-                            real_t(2)*forestAABB.zMax()),
-                       Vec3(forestAABB.xSize()/real_t(2), forestAABB.ySize()/real_t(2),
-                            0),
+                       Vec3(2, 2, 7),
+                       Vec3(2, 2, 4),
                        Vec3(0,1,0), //-5,5,5; -1,5,5
                        lighting,
                        Color(0.2,0.2,0.2),
                        real_t(2),
-                       customHashgridsBodyToShadingParams);
+                       customArtifactsBodyToShadingParams);
 #if defined(USE_NAIVE_INTERSECTION_FINDING)
-   raytracer.setImageOutputDirectory("image/naive");
+   raytracer.setImageOutputDirectory("image/artifacts/naive");
 #endif
 #if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   raytracer.setImageOutputDirectory("image/hashgrids");
+   raytracer.setImageOutputDirectory("image/artifacts/hashgrids");
 #endif
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   raytracer.setImageOutputDirectory("image/comparison");
+   raytracer.setImageOutputDirectory("image/artifacts/comparison");
 #endif
    raytracer.setImageOutputEnabled(true);
-   raytracer.setFilenameTimestepWidth(12);
+   raytracer.setFilenameTimestepWidth(4);
    tt.stop("Setup");
-   WALBERLA_LOG_INFO("output to: " << (boxes*100000000 + capsules*10000 + spheres));
-   raytracer.rayTrace<BodyTuple>(boxes*100000000 + capsules*10000 + spheres, &tt);
+   WALBERLA_LOG_INFO("output to: " << boxes);
+   raytracer.rayTrace<BodyTuple>(boxes, &tt);
+   
+   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
+      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
+      for (auto grid: hashgrids->gridList_) {
+         WALBERLA_LOG_INFO("--- GRID " << grid << " ---");
+         WALBERLA_LOG_INFO(" cellSpan: " << grid->getCellSpan());
+         WALBERLA_LOG_INFO(" dims:     " << grid->xCellCount_ << "/" << grid->yCellCount_ << "/" << grid->zCellCount_);
+         WALBERLA_LOG_INFO(" items:    " << grid->bodyCount_);
+         WALBERLA_LOG_INFO(" enlargement threshold: " << grid->enlargementThreshold_);
+         WALBERLA_LOG_INFO(" xCellCount:   " << grid->xCellCount_);
+         WALBERLA_LOG_INFO(" xyCellCount:  " << grid->xyCellCount_);
+         WALBERLA_LOG_INFO(" xyzCellCount: " << grid->xyzCellCount_);
+         //WALBERLA_LOG_INFO(" offsets: ")
+         //for (int i = 0; i < 27; i++) {
+         //   WALBERLA_LOG_INFO("  " << i << ": " << grid->stdNeighborOffset_[i]);
+         //}
+      }
+   }
    
    /*HashGrids::HashGrid* grid;
-   for (auto bodyId: problematicBodyIDs) {
-      BodyID body = getBody(*globalBodyStorage, *forest, storageID, bodySIDs[bodyId]);
-      //WALBERLA_LOG_INFO(box);
-      WALBERLA_LOG_INFO("--- BODY " << bodyId << " ---");
-      WALBERLA_LOG_INFO("minCorner " << bodyId << ": " << body->getAABB().minCorner());
-      WALBERLA_LOG_INFO("hash " << bodyId << ": " << body->getHash());
-      WALBERLA_LOG_INFO("cell " << bodyId << ": " << body->getCellId());
-      WALBERLA_LOG_INFO("grid " << bodyId << ": " << body->getGrid());
-      grid = (HashGrids::HashGrid*)body->getGrid();
-   }
-   WALBERLA_CHECK(grid != NULL);
-   WALBERLA_LOG_INFO("grid dims: " << grid->xCellCount_ << "/" << grid->yCellCount_ << "/" << grid->zCellCount_);*/
+    for (auto bodyId: problematicBodyIDs) {
+    BodyID body = getBody(*globalBodyStorage, *forest, storageID, bodySIDs[bodyId]);
+    //WALBERLA_LOG_INFO(box);
+    WALBERLA_LOG_INFO("--- BODY " << bodyId << " ---");
+    WALBERLA_LOG_INFO("minCorner " << bodyId << ": " << body->getAABB().minCorner());
+    WALBERLA_LOG_INFO("hash " << bodyId << ": " << body->getHash());
+    WALBERLA_LOG_INFO("cell " << bodyId << ": " << body->getCellId());
+    WALBERLA_LOG_INFO("grid " << bodyId << ": " << body->getGrid());
+    grid = (HashGrids::HashGrid*)body->getGrid();
+    }
+    WALBERLA_CHECK(grid != NULL);
+    WALBERLA_LOG_INFO("grid dims: " << grid->xCellCount_ << "/" << grid->yCellCount_ << "/" << grid->zCellCount_);*/
    
    auto temp = tt.getReduced();
    WALBERLA_ROOT_SECTION() {
-      std::cout << temp;
+      //std::cout << temp;
    }
 }
+
+void HashGridsFromNegativeArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+#if defined(USE_NAIVE_INTERSECTION_FINDING)
+   WALBERLA_LOG_INFO("Using naive method for intersection testing");
+#endif
+#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO("Using hashgrids for intersection testing");
+#endif
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO("Comparing hashgrids and naive method for intersection testing");
+#endif
+   WALBERLA_LOG_INFO("Generating " << boxes << " boxes");
+   
+   using namespace walberla::pe::ccd;
+   WcTimingTree tt;
+   tt.start("Setup");
+   
+   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
+   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+   auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
+   
+   std::vector<IBlock*> blocks;
+   forest->getBlocks(blocks);
+   //for (auto block: blocks) {
+   //   WALBERLA_LOG_INFO("block AABB: " << block->getAABB());
+   //}
+   
+   const AABB& forestAABB = forest->getDomain();
+   
+   bool removeUnproblematic = false;
+   std::vector<walberla::id_t> problematicBodyIDs = {165, 5, 31}; //{50, 44, 66, 155, 170, 51};
+   std::vector<walberla::id_t> bodySIDs;
+   
+   //WALBERLA_LOG_INFO("boxCount: " << boxCount);
+   //WALBERLA_LOG_INFO("capsuleCount: " << capsuleCount);
+   
+   //BoxID box = createBox(*globalBodyStorage, *forest, storageID, 1000, Vec3(2.1, 0.5, 0.5), Vec3(0.25, 0.25, 0.25));
+   
+   // generate bodies for test
+   std::vector<BodyID> bodies;
+   for (size_t i = 0; i < boxes; i++) {
+      real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
+      real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
+      real_t y_min = math::realRandom(forestAABB.yMin()+len/real_t(2), forestAABB.yMax());
+      real_t z_min = math::realRandom(forestAABB.zMin()+len/real_t(2), forestAABB.zMax());
+      
+      if (i%5 == 0) {
+         x_min = forestAABB.xMax() - math::realRandom(len/real_t(2), len);
+      } else if (i%5 == 1){
+         x_min = forestAABB.xMin() + math::realRandom(real_t(0), len/real_t(2));
+      } else if (i%5 == 2){
+         y_min = forestAABB.yMax() - math::realRandom(len/real_t(2), len);
+      } else if (i%5 == 3){
+         y_min = forestAABB.yMin() + math::realRandom(real_t(0), len/real_t(2));
+      } else if (i%5 == 4){
+         z_min = forestAABB.zMax() - math::realRandom(len/real_t(2), len);
+      }
+      
+      //real_t z_min = len+0.1;
+      walberla::id_t id = walberla::id_t(i);
+      BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
+      WALBERLA_CHECK(box_ != NULL);
+      bodies.push_back(box_);
+      bodySIDs.push_back(box_->getSystemID());
+   }
+   
+   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
+      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
+      hashgrids->update();
+      for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
+         if (removeUnproblematic && std::find(problematicBodyIDs.begin(), problematicBodyIDs.end(), bodyIt->getID()) == problematicBodyIDs.end()) {
+            bodyIt->setPosition(-100, -100, -100);
+         }
+      }
+   }
+   
+   /*MaterialID iron = Material::find("iron");
+    createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), Vec3(0,forestAABB.yMax(),0), iron); // left wall
+    createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,forestAABB.yMin(),0), iron); // right wall
+    createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,forestAABB.zMin()), iron); // floor
+    createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), Vec3(0,0,forestAABB.zMax()), iron); // ceiling
+    createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(forestAABB.xMax(),0,0), iron); // back wall
+    createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(forestAABB.xMin(),0,0), iron); // front wall, should not get rendered
+    */
+   
+   //createBox(*globalBodyStorage, *forest, storageID, boxCount+capsuleCount+1, Vec3(2, 2, 2), Vec3(1, 1, 1));
+   
+   
+   
+   Lighting lighting(Vec3(3, 2, -4), // 8, 5, 9.5 gut für ebenen, 0,5,8
+                     Color(1, 1, 1), //diffuse
+                     Color(1, 1, 1), //specular
+                     Color(0.4, 0.4, 0.4)); //ambient
+   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
+                       size_t(640), size_t(480),
+                       49.13,
+                       Vec3(2, 2, -3),
+                       Vec3(2, 2, 0),
+                       Vec3(0,1,0), //-5,5,5; -1,5,5
+                       lighting,
+                       Color(0.2,0.2,0.2),
+                       real_t(2),
+                       customArtifactsBodyToShadingParams);
+#if defined(USE_NAIVE_INTERSECTION_FINDING)
+   raytracer.setImageOutputDirectory("image/artifacts/naive");
+#endif
+#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   raytracer.setImageOutputDirectory("image/artifacts/hashgrids");
+#endif
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   raytracer.setImageOutputDirectory("image/artifacts/comparison");
+#endif
+   raytracer.setImageOutputEnabled(true);
+   raytracer.setFilenameTimestepWidth(5);
+   tt.stop("Setup");
+   WALBERLA_LOG_INFO("output to: " << boxes);
+   raytracer.rayTrace<BodyTuple>(boxes, &tt);
+   
+   
+   /*HashGrids::HashGrid* grid;
+    for (auto bodyId: problematicBodyIDs) {
+    BodyID body = getBody(*globalBodyStorage, *forest, storageID, bodySIDs[bodyId]);
+    //WALBERLA_LOG_INFO(box);
+    WALBERLA_LOG_INFO("--- BODY " << bodyId << " ---");
+    WALBERLA_LOG_INFO("minCorner " << bodyId << ": " << body->getAABB().minCorner());
+    WALBERLA_LOG_INFO("hash " << bodyId << ": " << body->getHash());
+    WALBERLA_LOG_INFO("cell " << bodyId << ": " << body->getCellId());
+    WALBERLA_LOG_INFO("grid " << bodyId << ": " << body->getGrid());
+    grid = (HashGrids::HashGrid*)body->getGrid();
+    }
+    WALBERLA_CHECK(grid != NULL);
+    WALBERLA_LOG_INFO("grid dims: " << grid->xCellCount_ << "/" << grid->yCellCount_ << "/" << grid->zCellCount_);*/
+   
+   auto temp = tt.getReduced();
+   WALBERLA_ROOT_SECTION() {
+      //std::cout << temp;
+   }
+}
+
+
+void HashGridsFromNegativeXArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+#if defined(USE_NAIVE_INTERSECTION_FINDING)
+   WALBERLA_LOG_INFO("Using naive method for intersection testing");
+#endif
+#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO("Using hashgrids for intersection testing");
+#endif
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO("Comparing hashgrids and naive method for intersection testing");
+#endif
+   WALBERLA_LOG_INFO("Generating " << boxes << " boxes");
+   
+   using namespace walberla::pe::ccd;
+   WcTimingTree tt;
+   tt.start("Setup");
+   
+   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
+   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+   auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
+   
+   std::vector<IBlock*> blocks;
+   forest->getBlocks(blocks);
+   //for (auto block: blocks) {
+   //   WALBERLA_LOG_INFO("block AABB: " << block->getAABB());
+   //}
+   
+   const AABB& forestAABB = forest->getDomain();
+   
+   bool removeUnproblematic = false;
+   std::vector<walberla::id_t> problematicBodyIDs = {165, 5, 31}; //{50, 44, 66, 155, 170, 51};
+   std::vector<walberla::id_t> bodySIDs;
+   
+   //WALBERLA_LOG_INFO("boxCount: " << boxCount);
+   //WALBERLA_LOG_INFO("capsuleCount: " << capsuleCount);
+   
+   //BoxID box = createBox(*globalBodyStorage, *forest, storageID, 1000, Vec3(2.1, 0.5, 0.5), Vec3(0.25, 0.25, 0.25));
+   
+   // generate bodies for test
+   std::vector<BodyID> bodies;
+   for (size_t i = 0; i < boxes; i++) {
+      real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
+      real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
+      real_t y_min = math::realRandom(forestAABB.yMin()+len/real_t(2), forestAABB.yMax());
+      real_t z_min = math::realRandom(forestAABB.zMin()+len/real_t(2), forestAABB.zMax());
+      
+      if (i%5 == 0) {
+         z_min = forestAABB.zMax() - math::realRandom(len/real_t(2), len);
+      } else if (i%5 == 1){
+         z_min = forestAABB.zMin() + math::realRandom(real_t(0), len/real_t(2));
+      } else if (i%5 == 2){
+         y_min = forestAABB.yMax() - math::realRandom(len/real_t(2), len);
+      } else if (i%5 == 3){
+         y_min = forestAABB.yMin() + math::realRandom(real_t(0), len/real_t(2));
+      } else if (i%5 == 4){
+         x_min = forestAABB.xMax() - math::realRandom(len/real_t(2), len);
+      }
+      
+      //real_t z_min = len+0.1;
+      walberla::id_t id = walberla::id_t(i);
+      BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
+      WALBERLA_CHECK(box_ != NULL);
+      bodies.push_back(box_);
+      bodySIDs.push_back(box_->getSystemID());
+   }
+   
+   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
+      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
+      hashgrids->update();
+      for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
+         if (removeUnproblematic && std::find(problematicBodyIDs.begin(), problematicBodyIDs.end(), bodyIt->getID()) == problematicBodyIDs.end()) {
+            bodyIt->setPosition(-100, -100, -100);
+         }
+      }
+   }
+   
+   Lighting lighting(Vec3(-4, 2, 3), // 8, 5, 9.5 gut für ebenen, 0,5,8
+                     Color(1, 1, 1), //diffuse
+                     Color(1, 1, 1), //specular
+                     Color(0.4, 0.4, 0.4)); //ambient
+   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
+                       size_t(640), size_t(480),
+                       49.13,
+                       Vec3(-3, 2, 2),
+                       Vec3(0, 2, 2),
+                       Vec3(0,0,1), //-5,5,5; -1,5,5
+                       lighting,
+                       Color(0.2,0.2,0.2),
+                       real_t(2),
+                       customArtifactsBodyToShadingParams);
+#if defined(USE_NAIVE_INTERSECTION_FINDING)
+   raytracer.setImageOutputDirectory("image/artifacts/naive");
+#endif
+#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   raytracer.setImageOutputDirectory("image/artifacts/hashgrids");
+#endif
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   raytracer.setImageOutputDirectory("image/artifacts/comparison");
+#endif
+   raytracer.setImageOutputEnabled(true);
+   raytracer.setFilenameTimestepWidth(6);
+   tt.stop("Setup");
+   WALBERLA_LOG_INFO("output to: " << boxes);
+   raytracer.rayTrace<BodyTuple>(boxes, &tt);
+   
+   auto temp = tt.getReduced();
+   WALBERLA_ROOT_SECTION() {
+      //std::cout << temp;
+   }
+}
+
 
 Vec3 minCornerToGpos(const Vec3& minCorner, real_t lengths) {
    return minCorner + Vec3(lengths/2, lengths/2, lengths/2);
@@ -723,6 +1220,8 @@ void HashGridsTestScene() {
    real_t x_min = 0, y_min = 0;
    len = 1.2;
    real_t gap = 0.4;
+   
+   // cubes on z = 0 plane
    for (int i = 0; ; ++i) {
       x_min = forestAABB.xMin() + i*(gap+len);
       if (x_min > forestAABB.max(0)) {
@@ -738,6 +1237,22 @@ void HashGridsTestScene() {
       }
    }
    
+   //cubes on z = max plane
+   for (int i = 0; ; ++i) {
+      x_min = forestAABB.xMin() + i*(gap+len);
+      if (x_min > forestAABB.max(0)) {
+         break;
+      }
+      for (int j = 0; ; ++j) {
+         y_min = forestAABB.yMin() + j*(gap+len);
+         if (y_min > forestAABB.max(1)) {
+            break;
+         }
+         
+         bodies.push_back(createBox(*globalBodyStorage, *forest, storageID, ++id, minCornerToGpos(Vec3(x_min, y_min, forestAABB.zMax()-len), len), Vec3(len, len, len)));
+      }
+   }
+   
    // update hashgrids
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
       ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
@@ -746,12 +1261,12 @@ void HashGridsTestScene() {
    
    // output info about bodies
    /*for (auto body: bodies) {
-      WALBERLA_LOG_INFO("--- BODY " << body->getID() << " ---");
-      WALBERLA_LOG_INFO(" corners: " << body->getAABB().minCorner() << ", " << body->getAABB().maxCorner());
-      WALBERLA_LOG_INFO(" hash: " << body->getHash());
-      //WALBERLA_LOG_INFO(" body index: " << body->getCellId());
-      WALBERLA_LOG_INFO(" grid: " << body->getGrid());
-   }*/
+    WALBERLA_LOG_INFO("--- BODY " << body->getID() << " ---");
+    WALBERLA_LOG_INFO(" corners: " << body->getAABB().minCorner() << ", " << body->getAABB().maxCorner());
+    WALBERLA_LOG_INFO(" hash: " << body->getHash());
+    //WALBERLA_LOG_INFO(" body index: " << body->getCellId());
+    WALBERLA_LOG_INFO(" grid: " << body->getGrid());
+    }*/
    
    // output info about grids
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
@@ -767,51 +1282,128 @@ void HashGridsTestScene() {
    
    
    /*Ray ray(Vec3(4,4,10), Vec3(0,0,-1));
-   real_t t;
-   Vec3 n;
+    real_t t;
+    Vec3 n;
+    
+    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
+    ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
+    BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTuple>(ray, blockIt->getAABB(), t, n);
+    if (body != NULL) {
+    WALBERLA_LOG_INFO("found body " << body->getID() << ", t = " << t);
+    WALBERLA_LOG_INFO(" hash: " << body->getHash());
+    WALBERLA_LOG_INFO(" grid: " << body->getGrid());
+    } else {
+    WALBERLA_LOG_INFO("did not find body");
+    }
+    }*/
    
-   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
-      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
-      BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTuple>(ray, blockIt->getAABB(), t, n);
-      if (body != NULL) {
-         WALBERLA_LOG_INFO("found body " << body->getID() << ", t = " << t);
-         WALBERLA_LOG_INFO(" hash: " << body->getHash());
-         WALBERLA_LOG_INFO(" grid: " << body->getGrid());
-      } else {
-         WALBERLA_LOG_INFO("did not find body");
-      }
-   }*/
-   
+   std::vector<Raytracer> raytracers;
    
    // setup raytracer
-   Lighting lighting(Vec3(1,2,15),
-                     Color(1, 1, 1), //diffuse
-                     Color(1, 1, 1), //specular
-                     Color(0.4, 0.4, 0.4)); //ambient
-   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
-                       size_t(480), size_t(480),
-                       49.13,
-                       Vec3(4,4,18), //6,6,8
-                       Vec3(4,4,10), //6,6,4
-                       Vec3(0,1,0),
-                       lighting,
-                       Color(0.2,0.2,0.2),
-                       real_t(2));
    
+   // in negative x direction -> cubes to the right
+   Lighting lighting1(Vec3(1,2,15),
+                      Color(1, 1, 1), //diffuse
+                      Color(1, 1, 1), //specular
+                      Color(0.4, 0.4, 0.4)); //ambient
+   Raytracer raytracer1(forest, storageID, globalBodyStorage, ccdID,
+                        size_t(480), size_t(480),
+                        49.13,
+                        Vec3(15,4,4), //6,6,8
+                        Vec3(8,4,4), //6,6,4
+                        Vec3(0,1,0),
+                        lighting1,
+                        Color(0.2,0.2,0.2),
+                        real_t(2));
+   raytracers.push_back(raytracer1);
+
+   // in negative x direction and negative z direction, up vector in y direction -> cubes from the right tilted
+   Lighting lighting2(Vec3(1,2,15),
+                      Color(1, 1, 1), //diffuse
+                      Color(1, 1, 1), //specular
+                      Color(0.4, 0.4, 0.4)); //ambient
+   Raytracer raytracer2(forest, storageID, globalBodyStorage, ccdID,
+                        size_t(480), size_t(480),
+                        49.13,
+                        Vec3(12,4,8), //6,6,8
+                        Vec3(6,4,2), //6,6,4
+                        Vec3(0,1,0),
+                        lighting2,
+                        Color(0.2,0.2,0.2),
+                        real_t(2));
+   raytracers.push_back(raytracer2);
+   
+   // in negative x direction and negative z direction, up vector in negative y direction
+   Lighting lighting3(Vec3(1,2,15),
+                      Color(1, 1, 1), //diffuse
+                      Color(1, 1, 1), //specular
+                      Color(0.4, 0.4, 0.4)); //ambient
+   Raytracer raytracer3(forest, storageID, globalBodyStorage, ccdID,
+                        size_t(480), size_t(480),
+                        49.13,
+                        Vec3(12,4,8), //6,6,8
+                        Vec3(6,4,2), //6,6,4
+                        Vec3(0,-1,0),
+                        lighting3,
+                        Color(0.2,0.2,0.2),
+                        real_t(2));
+   raytracers.push_back(raytracer3);
+   
+   // in positive x direction
+   Lighting lighting4(Vec3(1,2,15),
+                      Color(1, 1, 1), //diffuse
+                      Color(1, 1, 1), //specular
+                      Color(0.4, 0.4, 0.4)); //ambient
+   Raytracer raytracer4(forest, storageID, globalBodyStorage, ccdID,
+                        size_t(480), size_t(480),
+                        49.13,
+                        Vec3(-7,4,4), //6,6,8
+                        Vec3(0,4,4), //6,6,4
+                        Vec3(0,1,0),
+                        lighting4,
+                        Color(0.2,0.2,0.2),
+                        real_t(2));
+   raytracers.push_back(raytracer4);
+   
+   // in negative x direction
+   Lighting lighting5(Vec3(1,2,15),
+                      Color(1, 1, 1), //diffuse
+                      Color(1, 1, 1), //specular
+                      Color(0.4, 0.4, 0.4)); //ambient
+   Raytracer raytracer5(forest, storageID, globalBodyStorage, ccdID,
+                        size_t(480), size_t(480),
+                        49.13,
+                        Vec3(4,4,15), //6,6,8
+                        Vec3(4,4,8), //6,6,4
+                        Vec3(0,1,0),
+                        lighting5,
+                        Color(0.2,0.2,0.2),
+                        real_t(2));
+   raytracers.push_back(raytracer5);
+   
+   
+   tt.stop("Setup");
+
+   int i = 0;
+   for (Raytracer& raytracer: raytracers) {
 #if defined(USE_NAIVE_INTERSECTION_FINDING)
-   raytracer.setImageOutputDirectory("image/naive");
+      raytracer.setImageOutputDirectory("image/naive");
 #endif
 #if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   raytracer.setImageOutputDirectory("image/hashgrids");
+      raytracer.setImageOutputDirectory("image/hashgrids");
 #endif
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   raytracer.setImageOutputDirectory("image/comparison");
+      raytracer.setImageOutputDirectory("image/comparison");
 #endif
-   raytracer.setImageOutputEnabled(true);
-   raytracer.setFilenameTimestepWidth(12);
-   tt.stop("Setup");
-   WALBERLA_LOG_INFO("output to: 1");
-   raytracer.rayTrace<BodyTuple>(1, &tt);
+      raytracer.setImageOutputEnabled(true);
+      raytracer.setFilenameTimestepWidth(3);
+      
+      WALBERLA_LOG_INFO("output to: " << i);
+      
+      raytracer.rayTrace<BodyTuple>(size_t(i), &tt);
+      
+      i++;
+   }
 }
 
 int main( int argc, char** argv )
@@ -826,23 +1418,46 @@ int main( int argc, char** argv )
    //BoxIntersectsTest();
    //AABBIntersectsTest();
    //CapsuleIntersectsTest();
-   RaytracerTest();
-   RaytracerSpheresTest();
+   //RaytracerTest();
+   //RaytracerSpheresTest();
    
+   HashGridsTestScene();
 
    std::vector<size_t> boxes = {127, 70, 20, 150};
    std::vector<size_t> capsules = {127, 60, 140, 100};
    std::vector<size_t> spheres = {0, 50, 40, 120};
    
    for (size_t i = 0; i < boxes.size(); ++i) {
-      HashGridsTest(boxes[i], capsules[i], spheres[i]);
+      //HashGridsTest(boxes[i], capsules[i], spheres[i]);
    }
    
-   //HashGridsTestScene();
+   //HashGridsTest(boxes[0], capsules[0], spheres[0]);
+   
+   HashGridsTest(60, 60, 3,
+                 0.1, 0.3, true,
+                 0.1, 0.2, 0.1, 0.2,
+                 0.5, 0.6);
+   
+   HashGridsTest(400, 0, 0,
+                0.2, 0.4);
+   
+   HashGridsTest(750, 0, 0,
+                 0.2, 0.3);
+   
+   HashGridsTest(400, 0, 0,
+                 0.1, 0.3);
+   HashGridsArtifactsTest(750, 0.2, 0.3);
+   
+   HashGridsFromNegativeArtifactsTest(750, 0.2, 0.3);
+   
+   HashGridsFromNegativeXArtifactsTest(750, 0.2, 0.3);
+   
+   printHashgridsRaySignsCellNeighborMap();
    
    //HashGridsTest();
    
    //hashgridsPlayground();
-
+   
    return EXIT_SUCCESS;
 }
+

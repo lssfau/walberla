@@ -416,13 +416,14 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    if (tt != NULL) tt->start("Intersection Testing");
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-         bool isProblematicPixel = false;
-#endif
          
+         //if (!((std::abs(int(x)-345) == 0 && std::abs(int(y)-77) == 0))) continue;
+
          Vec3 pixelLocation = viewingPlaneOrigin_ + u_*(real_c(x)+real_t(0.5))*pixelWidth_ + v_*(real_c(y)+real_t(0.5))*pixelHeight_;
          Vec3 direction = (pixelLocation - cameraPosition_).getNormalized();
          ray.setDirection(direction);
+         
+         ray.setImageCoordinate(x, y);
          
          n.reset();
          t_closest = inf;
@@ -471,13 +472,6 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
             }
 #endif
             for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
-               if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
-                  PlaneID plane = (Plane*)(*bodyIt);
-                  if (!isPlaneVisible(plane, ray)) {
-                     continue;
-                  }
-               }
-               
                bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
                naiveIntersectionTests++;
 
@@ -512,7 +506,6 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
             problematicBodies.insert(body_naive_closest);
             problematicHashgridsFoundBodies.insert(body_hashgrids_closest);
             errors++;
-            isProblematicPixel = true;
          }
 #endif
          
@@ -544,9 +537,6 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
          if (!realIsIdentical(t_closest, inf) && body_closest != NULL) {
             Color color = getColor(body_closest, ray, t_closest, n_closest);
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-            if (isProblematicPixel) {
-               color = Color(1,1,0);
-            }
             if (body_naive_closest != body_hashgrids_closest && !realIsEqual(t_naive_closest, t_hashgrids_closest)) {
                if (body_hashgrids_closest == NULL) {
                   color = Color(0, 1, 0);
@@ -578,7 +568,7 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    std::stringstream ss;
    for (auto body: problematicBodies) {
       if (body != NULL) {
-         ss << body->getID() << " ";
+         ss << body->getID() << "(" << body->getHash() << ") ";
       } else {
          ss << "NULL" << " ";
       }
@@ -586,7 +576,7 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    ss << "(";
    for (auto body: problematicHashgridsFoundBodies) {
       if (body != NULL) {
-         ss << body->getID() << " ";
+         ss << body->getID() << "(" << body->getHash() << ") ";
       } else {
          ss << "NULL" << " ";
       }

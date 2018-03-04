@@ -1181,6 +1181,7 @@ bool HashGrids::powerOfTwo( size_t number )
 
 
 size_t HashGrids::intersectionTestCount = 0; //ToDo remove again
+std::map<std::string, std::set<size_t>> HashGrids::raySignsCellNeighborMap; // ToDo remove again
    
 //=================================================================================================
 //
