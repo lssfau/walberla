@@ -45,11 +45,6 @@
 #include <pe/utility/BodyCast.h>
 #include <pe/raytracing/Intersects.h>
 
-#include <sstream>      // ToDo remove again
-
-
-#define BLOCKCELL_NORMAL_INDETERMINATE 3
-
 namespace walberla{
 namespace pe{
 
@@ -104,10 +99,8 @@ public:
    //**********************************************************************************************
    
    static size_t intersectionTestCount; // ToDo remove again
-
-   static std::map<std::string, std::set<size_t>> raySignsCellNeighborMap; // ToDo remove again
    
-//private: // toDo uncomment to change to private again
+private:
    //**Type definitions****************************************************************************
    //! Vector for storing (handles to) rigid bodies.
    typedef std::vector<BodyID>  BodyVector;
@@ -191,21 +184,20 @@ public:
       void   processBodies( BodyID* bodies, size_t bodyCount, Contacts& contacts ) const;
       
       template<typename BodyTuple>
-      BodyID getRayIntersectingBody(const raytracing::Ray& ray, const AABB& blockAABB, real_t& t, Vec3& n); // todo const
+      BodyID getRayIntersectingBody(const raytracing::Ray& ray, const AABB& blockAABB, real_t& t, Vec3& n) const;
       
       template<typename BodyTuple>
       const BodyID getBodyIntersectionForBlockCell(const Vector3<int32_t>& blockCell,
-                                                   const int8_t cellNormalAxis, const int8_t cellNormalDir,
                                                    const AABB& blockAABB,
                                                    const raytracing::Ray& ray,
-                                                   real_t& t_closest, Vec3& n_closest); // todo const
+                                                   real_t& t_closest, Vec3& n_closest) const;
       
       void clear();
       //@}
       //*******************************************************************************************
 
 
-    //private: // ToDo uncomment to change to private again
+    private:
       //**Utility functions************************************************************************
       /*!\name Utility functions */
       //@{
@@ -312,7 +304,7 @@ public:
    BodyID getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, const AABB& blockAABB,
                                             real_t& t, Vec3& n);
    
-//protected: // ToDo uncomment to change to protected again
+protected:
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
@@ -321,7 +313,7 @@ public:
    //@}
    //**********************************************************************************************
 
-//private: // ToDo uncomment to change to private again
+private:
    //**Add functions*******************************************************************************
    /*!\name Add functions */
    //@{
@@ -518,10 +510,9 @@ void HashGrids::HashGrid::processBodies( BodyID* bodies, size_t bodyCount, Conta
  */
 template<typename BodyTuple>
 const BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_t>& blockCell,
-                                                                  const int8_t cellNormalAxis, const int8_t cellNormalDir,
                                                                   const AABB& blockAABB,
                                                                   const raytracing::Ray& ray,
-                                                                  real_t& t_closest, Vec3& n_closest) {
+                                                                  real_t& t_closest, Vec3& n_closest) const {
    real_t t_local;
    Vec3 n_local;
    BodyID body = NULL;
@@ -534,179 +525,9 @@ const BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<
    real_t z = (real_c(blockCell[2]) + real_t(0.5)) * cellSpan_;
 
    const Cell& centerCell = cell_[hashPoint(x, y, z)];
-   
-   //std::vector<uint> relevantNeighborIndices = {13, 9,10,12, 22,21, 25};
-   
-   std::vector<uint> relevantNeighborIndices = {13}; //{13, 9,10,12, 11,14,15,16,17};
 
-   if (cellNormalAxis == BLOCKCELL_NORMAL_INDETERMINATE) {
-      relevantNeighborIndices = {
-         0, 1, 2, 3, 4, 5, 6, 7, 8,
-         9, 10, 11, 12, 13, 14, 15, 16, 17,
-         18, 19, 20, 21, 22, 23, 24, 25, 26
-      };
-   } else {
-      /*if (ray.zDir() < 0) {
-         if (cellNormalAxis == 0 && cellNormalDir == -1) {
-            relevantNeighborIndices.push_back(22);
-         } else if (cellNormalAxis == 2 && cellNormalDir == 1) {
-            relevantNeighborIndices.push_back(25);
-            relevantNeighborIndices.push_back(19);
-            if (ray.yDir() > 0) {
-               relevantNeighborIndices.push_back(25);
-            } else {
-               relevantNeighborIndices.push_back(19);
-            }
-         }
-      } else {
-         relevantNeighborIndices = {13,0,1,3,4};
-      }*/
-      /*if (cellNormalAxis == 2 && cellNormalDir == 1) {
-         relevantNeighborIndices.push_back(9);
-         relevantNeighborIndices.push_back(10);
-         relevantNeighborIndices.push_back(12);
-      } else if (cellNormalAxis == 0 && cellNormalDir == 1) {
-         relevantNeighborIndices.push_back(1);
-         relevantNeighborIndices.push_back(10);
-         relevantNeighborIndices.push_back(4);
-      }*/
-      
-      /*if (ray.zDir() < 0) {
-         relevantNeighborIndices.push_back(9);
-         relevantNeighborIndices.push_back(10);
-         relevantNeighborIndices.push_back(12);
-      }
-      if (ray.xDir() < 0) {
-         relevantNeighborIndices.push_back(1);
-         relevantNeighborIndices.push_back(4);
-      } else {
-         relevantNeighborIndices.push_back(0);
-         relevantNeighborIndices.push_back(1);
-         relevantNeighborIndices.push_back(3);
-      }
-      if (ray.yDir() < 0) {
-         //relevantNeighborIndices.push_back(1);
-
-      }*/
-      
-      if (ray.xDir() > 0 && ray.yDir() < 0 && ray.zDir() < 0) {
-         // +x, -y, -z
-         relevantNeighborIndices.push_back(0);
-         relevantNeighborIndices.push_back(1);
-         relevantNeighborIndices.push_back(3);
-      } else if (ray.xDir() > 0 && ray.yDir() > 0 && ray.zDir() < 0) {
-         // +x, +y, -z
-         relevantNeighborIndices.push_back(0);
-         relevantNeighborIndices.push_back(1);
-         relevantNeighborIndices.push_back(3);
-      } else if (ray.xDir() < 0 && ray.yDir() < 0 && ray.zDir() < 0) {
-         // -x, -y, -z
-         relevantNeighborIndices.push_back(0);
-         relevantNeighborIndices.push_back(1);
-         relevantNeighborIndices.push_back(3);
-         relevantNeighborIndices.push_back(4);
-      } else if (ray.xDir() < 0 && ray.yDir() > 0 && ray.zDir() < 0) {
-         // -x, +y, -z
-         relevantNeighborIndices.push_back(0);
-         relevantNeighborIndices.push_back(1);
-         relevantNeighborIndices.push_back(3);
-         relevantNeighborIndices.push_back(4);
-      } else if (ray.xDir() < 0 && ray.yDir() < 0 && ray.zDir() > 0) {
-         // -x, -y, +z
-         relevantNeighborIndices.push_back(18);
-         relevantNeighborIndices.push_back(9);
-      } else if (ray.xDir() < 0 && ray.yDir() > 0 && ray.zDir() > 0) {
-         // -x, +y, +z
-         relevantNeighborIndices.push_back(18);
-         relevantNeighborIndices.push_back(21);
-
-      }
-   }
-   
-   /*size_t dirAbsoluteMaxIndex = ray.getDirection().indexOfMax();
-   if (dirAbsoluteMaxIndex == 2) {
-      if (ray.zDir() < 0) {
-         if (ray.xDir() > 0) {
-            relevantNeighborIndices = {13, 0, 1, 2, 3, 4, 5, 6, 7, 8};
-         } else {
-            relevantNeighborIndices = {9, 10, 11, 12, 13, 14, 15, 16, 17};
-         }
-      } else {
-         relevantNeighborIndices = {13, 0, 1, 2, 3, 4, 5, 6, 7, 8};
-      }
-   } else if (dirAbsoluteMaxIndex == 1) {
-      relevantNeighborIndices = {0, 1, 2, 9, 10, 11, 18, 19, 20};
-   } else if (dirAbsoluteMaxIndex == 0) {
-      relevantNeighborIndices = {0, 3, 6, 9, 12, 15, 18, 21, 24};
-   }*/
-   
-   /*if (ray.zDir() > 0) {
-      relevantNeighborIndices = {13, 0, 1, 2, 3, 4, 5, 6, 7, 8};
-   } else {
-      if (ray.xDir() > 0) {
-         if (ray.yDir() > 0) {
-            relevantNeighborIndices = {13, 0, 1, 2, 3, 4, 5, 6, 7, 8};
-         } else {
-            relevantNeighborIndices = {9, 10, 11, 12, 13, 14, 15, 16, 17};
-         }
-      } else {
-         relevantNeighborIndices = {9, 10, 11, 12, 13, 14, 15, 16, 17};
-      }
-   }
-   
-   if (ray.getImageX() == 464 && ray.getImageY() == 24) {
-      int n = -1;
-      for (uint i = 0; i < 27; ++i) {
-         const Cell* nbCell = &centerCell + centerCell.neighborOffset_[i];
-         const BodyVector* nbBodies = nbCell->bodies_;
-         
-         if (nbBodies != NULL) {
-            for (const BodyID& cellBody: *nbBodies) {
-               HashGrids::intersectionTestCount++;
-               bool intersects = SingleCast<BodyTuple, raytracing::IntersectsFunctor, bool>::execute(cellBody, intersectsFunc);
-               if (intersects && t_local < t_closest) {
-                  body = cellBody;
-                  t_closest = t_local;
-                  n_closest = n_local;
-                  n = int(i);
-               }
-            }
-         }
-      }
-      if (n != -1) {
-         WALBERLA_LOG_INFO(ray.getDirection());
-         WALBERLA_LOG_INFO(" -> " << n);
-      }
-   }*/
-   
-   //relevantNeighborIndices = {0,1,3,4, 9,10,12,13, 18,19,21,22};
-   
-   relevantNeighborIndices = {
-      0, 1, 2, 3, 4, 5, 6, 7, 8,
-      9, 10, 11, 12, 13, 14, 15, 16, 17,
-      18, 19, 20, 21, 22, 23, 24, 25, 26
-   };
-   
-   std::stringstream raySignsStream;
-   if (ray.xDir() < 0) {
-      raySignsStream << "-";
-   } else {
-      raySignsStream << "+";
-   }
-   if (ray.yDir() < 0) {
-      raySignsStream << "-";
-   } else {
-      raySignsStream << "+";
-   }
-   if (ray.zDir() < 0) {
-      raySignsStream << "-";
-   } else {
-      raySignsStream << "+";
-   }
-   
-   int n = -1;
-   for (uint i = 0; i < relevantNeighborIndices.size(); ++i) {
-      const Cell* nbCell = &centerCell + centerCell.neighborOffset_[relevantNeighborIndices[i]];
+   for (uint i = 0; i < 27; ++i) {
+      const Cell* nbCell = &centerCell + centerCell.neighborOffset_[i];
       const BodyVector* nbBodies = nbCell->bodies_;
       
       if (nbBodies != NULL) {
@@ -717,83 +538,10 @@ const BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<
                body = cellBody;
                t_closest = t_local;
                n_closest = n_local;
-               n = relevantNeighborIndices[size_t(i)];
             }
          }
       }
    }
-   
-   if (n != -1) {
-      HashGrids::raySignsCellNeighborMap[raySignsStream.str()].insert(n);
-   }
-   
-/*#ifndef HASHGRIDS_RAYTRACING_CHECK_ALL_NEIGHBORS
-   // neighbors whose objects might protrude into center cell:
-   std::vector<uint> relevantNeighborIndices = {0, 1, 3, 4, 9, 10, 12, 13};
-#else
-   std::vector<uint> relevantNeighborIndices = {
-      0, 1, 2, 3, 4, 5, 6, 7, 8,
-      9, 10, 11, 12, 13, 14, 15, 16, 17,
-      18, 19, 20, 21, 22, 23, 24, 25, 26
-   };
-#endif
-   
-   if (ray.xDir() > 0 && ray.yDir() < 0 && ray.zDir() < 0) {
-      // x pos, y neg, z neg
-      relevantNeighborIndices.push_back(2); //  1/-1/-1
-      relevantNeighborIndices.push_back(5); //  1/ 0/-1
-   } else if (ray.xDir() > 0 && ray.yDir() > 0 && ray.zDir() < 0) {
-      // x pos, y pos, z neg
-      relevantNeighborIndices.push_back(2); //  1/-1/-1
-      relevantNeighborIndices.push_back(8); //  1/ 1/-1
-      relevantNeighborIndices.push_back(5); //  1/ 0/-1
-      relevantNeighborIndices.push_back(7); //  0/ 1/-1
-      relevantNeighborIndices.push_back(6); // -1/ 1/-1
-   } else if (ray.xDir() < 0 && ray.yDir() > 0 && ray.zDir() < 0) {
-      // x neg, y pos, z neg
-      relevantNeighborIndices.push_back(7); //  0/ 1/-1
-      relevantNeighborIndices.push_back(6); // -1/ 1/-1
-      relevantNeighborIndices.push_back(15);// -1/ 1/ 0
-   } else if (ray.xDir() < 0 && ray.yDir() > 0 && ray.zDir() > 0) {
-      // x neg, y pos, z pos
-      relevantNeighborIndices.push_back(15);
-      relevantNeighborIndices.push_back(21);
-      relevantNeighborIndices.push_back(24);
-      relevantNeighborIndices.push_back(25);
-   } else if (ray.xDir() > 0 && ray.yDir() > 0 && ray.zDir() > 0) {
-      // x pos, y pos, z pos
-      relevantNeighborIndices.push_back(25);
-      relevantNeighborIndices.push_back(23);
-      relevantNeighborIndices.push_back(20);
-   } else if (ray.xDir() > 0 && ray.yDir() < 0 && ray.zDir() > 0) {
-      // x pos, y neg, z pos
-      relevantNeighborIndices.push_back(20);
-      relevantNeighborIndices.push_back(23);
-   } else if (ray.xDir() < 0 && ray.yDir() < 0 && ray.zDir() > 0) {
-      // x neg, y neg, z pos
-      relevantNeighborIndices.push_back(18);
-   }
-   
-   int n = -1;
-   for (uint i = 0; i < relevantNeighborIndices.size(); ++i) {
-      const Cell* nbCell = &centerCell + centerCell.neighborOffset_[relevantNeighborIndices[i]];
-      const BodyVector* nbBodies = nbCell->bodies_;
-      
-      if (nbBodies != NULL) {
-         for (const BodyID& cellBody: *nbBodies) {
-            HashGrids::intersectionTestCount++;
-            bool intersects = SingleCast<BodyTuple, raytracing::IntersectsFunctor, bool>::execute(cellBody, intersectsFunc);
-            if (intersects && t_local < t_closest) {
-               body = cellBody;
-               t_closest = t_local;
-               n_closest = n_local;
-               n = int(relevantNeighborIndices[i]);
-            }
-         }
-      }
-   }
-   */
-   //if (n != -1) WALBERLA_LOG_INFO("raydir: " << ray.getDirection() << ", cell for intersection: " << n << ", body: " << body->getID());
    
    return body;
 }
@@ -812,7 +560,7 @@ const BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<
  */
 template<typename BodyTuple>
 BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, const AABB& blockAABB,
-                                                   real_t& t_closest, Vec3& n_closest) {
+                                                   real_t& t_closest, Vec3& n_closest) const {
    const real_t inf = std::numeric_limits<real_t>::max();
 
    BodyID body_local = NULL;
@@ -827,9 +575,6 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
 
    //WALBERLA_LOG_INFO("cellspan: " << cellSpan_ << " lims: " << blockXCellCountMin << " " << blockXCellCountMax);
    
-   int8_t blockCellNormalAxis = BLOCKCELL_NORMAL_INDETERMINATE;
-   int8_t blockCellNormalDir = 0;
-   
    Vec3 firstPoint;
    if (blockAABB.contains(ray.getOrigin(), cellSpan_)) {
       firstPoint = ray.getOrigin();
@@ -839,14 +584,6 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
       if (intersects(blockAABB, ray, t_start, cellSpan_, &firstPointNormal)) {
          firstPoint = ray.getOrigin() + ray.getDirection()*t_start;
          firstPoint -= firstPointNormal * (cellSpan_/real_t(2));
-         
-         if (realIsEqual(firstPointNormal.max(), real_t(0))) {
-            blockCellNormalAxis = int8_t(firstPointNormal.indexOfMin());
-            blockCellNormalDir = -1;
-         } else {
-            blockCellNormalAxis = int8_t(firstPointNormal.indexOfMax());
-            blockCellNormalDir = 1;
-         }
       } else {
          //WALBERLA_LOG_INFO("ray does not intersect block")
          return NULL;
@@ -875,7 +612,6 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
    
    Vector3<int32_t> currentCell = firstCell;
    
-   
    // First cell needs extra treatment, as it might lay out of the blocks upper bounds
    // due to the nature of how it is calculated: If the first point lies on a upper border
    // it maps to the cell "above" the grid.
@@ -883,7 +619,7 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
        currentCell[1] < blockYCellCountMax &&
        currentCell[2] < blockZCellCountMax) {
       //WALBERLA_LOG_INFO("found block cell at " << currentCell);
-      body_local = getBodyIntersectionForBlockCell<BodyTuple>(currentCell, blockCellNormalAxis, blockCellNormalDir,
+      body_local = getBodyIntersectionForBlockCell<BodyTuple>(currentCell,
                                                               blockAABB, ray,
                                                               t_closest, n_closest);
       if (body_local != NULL) {
@@ -896,16 +632,12 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
          if (tMaxX < tMaxZ) {
             tMaxX += tDeltaX;
             currentCell[0] += stepX;
-            blockCellNormalAxis = 0;
-            blockCellNormalDir = -stepX;
             if (currentCell[0] >= blockXCellCountMax || currentCell[0] < blockXCellCountMin) {
                break;
             }
          } else {
             tMaxZ += tDeltaZ;
             currentCell[2] += stepZ;
-            blockCellNormalAxis = 2;
-            blockCellNormalDir = -stepZ;
             if (currentCell[2] >= blockZCellCountMax || currentCell[2] < blockZCellCountMin) {
                break;
             }
@@ -914,16 +646,12 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
          if (tMaxY < tMaxZ) {
             tMaxY += tDeltaY;
             currentCell[1] += stepY;
-            blockCellNormalAxis = 1;
-            blockCellNormalDir = -stepY;
             if (currentCell[1] >= blockYCellCountMax || currentCell[1] < blockYCellCountMin) {
                break;
             }
          } else {
             tMaxZ += tDeltaZ;
             currentCell[2] += stepZ;
-            blockCellNormalAxis = 2;
-            blockCellNormalDir = -stepZ;
             if (currentCell[2] >= blockZCellCountMax || currentCell[2] < blockZCellCountMin) {
                break;
             }
@@ -932,7 +660,7 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
       
       //WALBERLA_LOG_INFO("found block cell at " << currentCell);
       
-      body_local = getBodyIntersectionForBlockCell<BodyTuple>(currentCell, blockCellNormalAxis, blockCellNormalDir,
+      body_local = getBodyIntersectionForBlockCell<BodyTuple>(currentCell,
                                                               blockAABB, ray,
                                                               t_closest, n_closest);
       if (body_local != NULL) {

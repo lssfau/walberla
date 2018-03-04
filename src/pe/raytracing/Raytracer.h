@@ -416,14 +416,9 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    if (tt != NULL) tt->start("Intersection Testing");
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
-         
-         //if (!((std::abs(int(x)-345) == 0 && std::abs(int(y)-77) == 0))) continue;
-
          Vec3 pixelLocation = viewingPlaneOrigin_ + u_*(real_c(x)+real_t(0.5))*pixelWidth_ + v_*(real_c(y)+real_t(0.5))*pixelHeight_;
          Vec3 direction = (pixelLocation - cameraPosition_).getNormalized();
          ray.setDirection(direction);
-         
-         ray.setImageCoordinate(x, y);
          
          n.reset();
          t_closest = inf;
@@ -491,18 +486,6 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
             
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
          if (body_naive_closest != body_hashgrids_closest && !realIsEqual(t_naive_closest, t_hashgrids_closest)) {
-            //WALBERLA_LOG_INFO("bodies at " << x << "/" << y << " dont match up: " << t_naive_closest << " <-> " << t_hashgrids_closest);
-            /*if (body_naive_closest != NULL) {
-             WALBERLA_LOG_INFO(" naive:     " << body_naive_closest->getID() << " @ " << body_naive_closest->getAABB().minCorner());
-             } else {
-             WALBERLA_LOG_INFO(" naive:     none");
-             }
-             if (body_hashgrids_closest) {
-             WALBERLA_LOG_INFO(" hashgrids: " << body_hashgrids_closest->getID() << " @ " << body_hashgrids_closest->getAABB().minCorner());
-             } else {
-             WALBERLA_LOG_INFO(" hashgrids: none");
-             }
-             WALBERLA_LOG_INFO(" ray dir: " << ray.getDirection());*/
             problematicBodies.insert(body_naive_closest);
             problematicHashgridsFoundBodies.insert(body_hashgrids_closest);
             errors++;
@@ -591,7 +574,8 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
 #endif
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
    WALBERLA_LOG_INFO("Performed " << ccd::HashGrids::intersectionTestCount << " intersection tests in hashgrids");
-   WALBERLA_LOG_INFO("Saved " << (int(naiveIntersectionTests)-int(ccd::HashGrids::intersectionTestCount)) << " tests (" << ((real_t(1)-real_c(ccd::HashGrids::intersectionTestCount)/real_c(naiveIntersectionTests))*100) << "%).")
+   WALBERLA_LOG_INFO("Saved " << (int(naiveIntersectionTests)-int(ccd::HashGrids::intersectionTestCount)) << " tests (" << ((real_t(1)-real_c(ccd::HashGrids::intersectionTestCount)/real_c(naiveIntersectionTests))*100) << "%).");
+   ccd::HashGrids::intersectionTestCount = 0;
 #endif
 
    if (tt != NULL) tt->start("Reduction");
