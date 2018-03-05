@@ -316,7 +316,7 @@ void HashGrids::HashGrid::initializeNeighborOffsets()
  */
 size_t HashGrids::HashGrid::hash( BodyID body ) const
 {
-   const AABB bodyAABB = body->getAABB();
+   const AABB& bodyAABB = body->getAABB();
    return hashPoint(bodyAABB.xMin(), bodyAABB.yMin(), bodyAABB.zMin());
 }
 //*************************************************************************************************
