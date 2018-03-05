@@ -1202,7 +1202,7 @@ uint64_t HashGrids::intersectionTestCount = 0; //ToDo remove again
  * note that the initial number of cells does not necessarily have to be equal for all three
  * coordinate directions.
  */
-const size_t HashGrids::xCellCount = 4; //ToDo change to 16 again
+const size_t HashGrids::xCellCount = 16;
 //*************************************************************************************************
 
 
@@ -1219,7 +1219,7 @@ const size_t HashGrids::xCellCount = 4; //ToDo change to 16 again
  * note that the initial number of cells does not necessarily have to be equal for all three
  * coordinate directions.
  */
-const size_t HashGrids::yCellCount = 4; //ToDo change to 16 again
+const size_t HashGrids::yCellCount = 16;
 //*************************************************************************************************
 
 
@@ -1236,7 +1236,7 @@ const size_t HashGrids::yCellCount = 4; //ToDo change to 16 again
  * note that the initial number of cells does not necessarily have to be equal for all three
  * coordinate directions.
  */
-const size_t HashGrids::zCellCount = 4; //ToDo change to 16 again
+const size_t HashGrids::zCellCount = 16;
 //*************************************************************************************************
 
 
@@ -1301,7 +1301,7 @@ const size_t HashGrids::minimalGridDensity = 8;
  *
  * Possible settings: any integral value greater-or-equal to 0.
  */
-const size_t HashGrids::gridActivationThreshold = 0; // ToDo change to 32 again
+const size_t HashGrids::gridActivationThreshold = 32;
 //*************************************************************************************************
 
 
