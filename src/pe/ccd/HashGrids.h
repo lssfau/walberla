@@ -100,7 +100,7 @@ public:
    static const real_t hierarchyFactor;
    //**********************************************************************************************
    
-   static size_t intersectionTestCount; // ToDo remove again
+   static uint64_t intersectionTestCount; // ToDo remove again
    
 private:
    //**Type definitions****************************************************************************

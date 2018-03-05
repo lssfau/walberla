@@ -400,10 +400,11 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    int errors = 0;
    std::unordered_set<BodyID> problematicBodies;
    std::unordered_set<BodyID> problematicHashgridsFoundBodies;
+   ccd::HashGrids::intersectionTestCount = 0;
 #endif
    
 #if defined(USE_NAIVE_INTERSECTION_FINDING) || defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   uint naiveIntersectionTests = 0;
+   uint64_t naiveIntersectionTests = 0;
 #endif
    
    real_t t, t_closest;
@@ -574,8 +575,7 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
 #endif
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
    WALBERLA_LOG_INFO("Performed " << ccd::HashGrids::intersectionTestCount << " intersection tests in hashgrids");
-   WALBERLA_LOG_INFO("Saved " << (int(naiveIntersectionTests)-int(ccd::HashGrids::intersectionTestCount)) << " tests (" << ((real_t(1)-real_c(ccd::HashGrids::intersectionTestCount)/real_c(naiveIntersectionTests))*100) << "%).");
-   ccd::HashGrids::intersectionTestCount = 0;
+   WALBERLA_LOG_INFO("Saved " << (int64_t(naiveIntersectionTests)-int64_t(ccd::HashGrids::intersectionTestCount)) << " tests (" << ((real_t(1)-real_c(ccd::HashGrids::intersectionTestCount)/real_c(naiveIntersectionTests))*100) << "%).");
 #endif
 
    if (tt != NULL) tt->start("Reduction");

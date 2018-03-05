@@ -1180,7 +1180,7 @@ bool HashGrids::powerOfTwo( size_t number )
 //*************************************************************************************************
 
 
-size_t HashGrids::intersectionTestCount = 0; //ToDo remove again
+uint64_t HashGrids::intersectionTestCount = 0; //ToDo remove again
    
 //=================================================================================================
 //
