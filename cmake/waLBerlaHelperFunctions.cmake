@@ -156,6 +156,11 @@ function ( waLBerla_export )
     
     # Export link paths
     set ( WALBERLA_LINK_DIRS ${LINK_DIRS} CACHE INTERNAL "waLBerla link directories" )
+
+    set( WALBERLA_CXX_STANDARD ${CMAKE_CXX_STANDARD} CACHE INTERNAL "CXX standard")
+    set( WALBERLA_CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED} CACHE INTERNAL "CXX Standard Required")
+    set( WALBERLA_CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS} CACHE INTERNAL "CXX Extensions")
+
 endfunction( waLBerla_export)
 
 #######################################################################################################################
@@ -210,7 +215,11 @@ function ( waLBerla_import )
     endif()
     
     set( SERVICE_LIBS ${WALBERLA_SERVICE_LIBS} PARENT_SCOPE )
-    
+
+    set( CMAKE_CXX_STANDARD ${WALBERLA_CXX_STANDARD}  PARENT_SCOPE)
+    set( CMAKE_CXX_STANDARD_REQUIRED ${WALBERLA_STANDARD_REQUIRED} PARENT_SCOPE)
+    set( CMAKE_CXX_EXTENSIONS ${WALBERLA_EXTENSIONS} PARENT_SCOPE)
+
     link_directories( ${WALBERLA_LINK_DIRS} )
 endfunction( waLBerla_import)
 #######################################################################################################################
