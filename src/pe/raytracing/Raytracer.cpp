@@ -115,7 +115,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
       WALBERLA_ABORT("Cannot enable local image output without image_output_directory parameter being set.");
    }
       
-   filenameTimestepWidth_ = config.getParameter<int8_t>("filenameTimestepWidth", int8_t(5));
+   filenameTimestepWidth_ = config.getParameter<uint8_t>("filenameTimestepWidth", uint8_t(5));
    
    cameraPosition_ = config.getParameter<Vec3>("cameraPosition");
    lookAtPoint_ = config.getParameter<Vec3>("lookAt");
@@ -152,7 +152,7 @@ void Raytracer::setupView_() {
  */
 void Raytracer::setupFilenameRankWidth_() {
    int numProcesses = mpi::MPIManager::instance()->numProcesses();
-   filenameRankWidth_ = int8_c(log10(numProcesses))+1;
+   filenameRankWidth_ = uint8_c(log10(numProcesses))+1;
 }
 
 /*!\brief Generates the filename for output files.

@@ -101,10 +101,10 @@ private:
    bool localImageOutputEnabled_; //!< Enable / disable writing images of the local process to file.
    std::string imageOutputDirectory_; //!< Path to the image output directory.
    
-   int8_t filenameTimestepWidth_; /*!< Width of the timestep number in output filenames.
-                                  * Use e.g. 5 for ranges from 1 to 99 999: Will result in
-                                  * filenames like image_00001.png up to image_99999.png. */
-   int8_t filenameRankWidth_;  //!< Width of the mpi rank part in a filename.
+   uint8_t filenameTimestepWidth_; /*!< Width of the timestep number in output filenames.
+                                   * Use e.g. 5 for ranges from 1 to 99 999: Will result in
+                                   * filenames like image_00001.png up to image_99999.png. */
+   uint8_t filenameRankWidth_;  //!< Width of the mpi rank part in a filename.
    std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction_; /*!< Function which returns a 
                                                                                   * ShadingParameters struct
                                                                                   * given the specified body. */
@@ -139,7 +139,7 @@ public:
    inline bool getImageOutputEnabled() const;
    inline bool getLocalImageOutputEnabled() const;
    inline const std::string& getImageOutputDirectory() const;
-   inline int8_t getFilenameTimestepWidth() const;
+   inline uint8_t getFilenameTimestepWidth() const;
    //@}
 
    /*!\name Set functions */
@@ -150,7 +150,7 @@ public:
    inline void setImageOutputEnabled(const bool enabled);
    inline void setLocalImageOutputEnabled(const bool enabled);
    inline void setImageOutputDirectory(const std::string& path);
-   inline void setFilenameTimestepWidth(int8_t width);
+   inline void setFilenameTimestepWidth(uint8_t width);
    //@}
    
    /*!\name Functions */
@@ -283,7 +283,7 @@ inline const std::string& Raytracer::getImageOutputDirectory() const {
 /*!\brief Returns width of the timestep number in output filenames.
  * \return Width of the timestep part in filenames.
  */
-inline int8_t Raytracer::getFilenameTimestepWidth() const {
+inline uint8_t Raytracer::getFilenameTimestepWidth() const {
    return filenameTimestepWidth_;
 }
 
@@ -343,7 +343,7 @@ inline void Raytracer::setImageOutputDirectory(const std::string& path) {
 /*!\brief Set width of timestep number in output filenames.
  * \param width Width of timestep part in a filename.
  */
-inline void Raytracer::setFilenameTimestepWidth(int8_t width) {
+inline void Raytracer::setFilenameTimestepWidth(uint8_t width) {
    filenameTimestepWidth_ = width;
 }
    
