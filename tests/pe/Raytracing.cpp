@@ -336,7 +336,7 @@ ShadingParameters customSpheresBodyToShadingParams(const BodyID body) {
 }
 
 void RaytracerSpheresTest() {
-   WALBERLA_LOG_INFO("Raytracer");
+   WALBERLA_LOG_INFO("Raytracer Spheres Scene");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vec3(1,1,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
@@ -357,12 +357,6 @@ void RaytracerSpheresTest() {
    
    MaterialID iron = Material::find("iron");
    
-   //PlaneID xNegPlane = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(5,0,0), iron);
-   // xNegPlane obstructs only the top left sphere and intersects some objects
-   
-   //PlaneID xNegPlaneClose = createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(1,0,0), iron);
-   
-   // Test Scene v1 - Spheres, (rotated) boxes, confining walls, tilted plane in right bottom back corner
    createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), Vec3(0,10,0), iron); // left wall
    createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,0,0), iron); // right wall
    createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,0), iron); // floor
@@ -378,30 +372,20 @@ void RaytracerSpheresTest() {
       }
    }
    
-   
    raytracer.setImageOutputDirectory("image");
    raytracer.setImageOutputEnabled(true);
    
    raytracer.rayTrace<BodyTuple>(1);
 }
 
-ShadingParameters customHashgridsBodyToShadingParams(const BodyID body) {
-   switch (body->getID()) {
-      case 96:
-         return blueShadingParams(body);
-         /*case 203:
-          return redShadingParams(body);*/
-      case 140:
-         return whiteShadingParams(body);
-      case 50:
-         return greyShadingParams(body);
-   }
+ShadingParameters customHashGridsBodyToShadingParams(const BodyID body) {
    if (body->getTypeID() == Sphere::getStaticTypeID()) {
-      return yellowShadingParams(body).makeGlossy();
+      return yellowShadingParams(body);
    }
-   return defaultBodyTypeDependentShadingParams(body);
    
+   return defaultBodyTypeDependentShadingParams(body);
 }
+
 
 void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberOfViews = 1,
                    real_t boxLenMin = 0.1, real_t boxLenMax = 0.2, bool boxRotation = false,
@@ -423,7 +407,7 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberO
    tt.start("Setup");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(2,3,1), Vec3(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
    
@@ -437,12 +421,11 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberO
    std::vector<BodyID> bodies;
    for (size_t i = 0; i < boxes; i++) {
       real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
-      real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
-      real_t y_min = math::realRandom(forestAABB.yMin()+len/real_t(2), forestAABB.yMax());
-      real_t z_min = math::realRandom(forestAABB.zMin()+len/real_t(2), forestAABB.zMax());
-      //real_t z_min = len+0.1;
+      real_t x = math::realRandom(forestAABB.xMin(), forestAABB.xMax());
+      real_t y = math::realRandom(forestAABB.yMin(), forestAABB.yMax());
+      real_t z = math::realRandom(forestAABB.zMin(), forestAABB.zMax());
       walberla::id_t id = walberla::id_t(i);
-      BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
+      BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), Vec3(len, len, len));
       WALBERLA_CHECK(box_ != NULL);
       if (boxRotation) {
          box_->rotate(0, math::realRandom(real_t(0), real_t(1))*math::M_PI, math::realRandom(real_t(0), real_t(1))*math::M_PI);
@@ -455,9 +438,9 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberO
       real_t len = math::realRandom(capLenMin, capLenMax); // 0.2 0.5
       real_t radius = math::realRandom(capRadiusMin, capRadiusMax);
       real_t maxlen = len + 2*radius;
-      real_t x = math::realRandom(forestAABB.xMin()+maxlen, forestAABB.xMax());
-      real_t y = math::realRandom(forestAABB.yMin()+maxlen, forestAABB.yMax());
-      real_t z = math::realRandom(forestAABB.zMin()+maxlen, forestAABB.zMax());
+      real_t x = math::realRandom(forestAABB.xMin(), forestAABB.xMax());
+      real_t y = math::realRandom(forestAABB.yMin(), forestAABB.yMax());
+      real_t z = math::realRandom(forestAABB.zMin(), forestAABB.zMax());
       walberla::id_t id = walberla::id_t(boxes+i);
       CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), radius, len);
       WALBERLA_CHECK(capsule != NULL);
@@ -468,10 +451,9 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberO
    
    for (size_t i = 0; i < spheres; i++) {
       real_t radius = math::realRandom(sphereRadiusMin, sphereRadiusMax); // 0.2 0.3
-      // forestAABB.xMax()-radius gerechtfertigt?
-      real_t x = math::realRandom(forestAABB.xMin()+radius, forestAABB.xMax());
-      real_t y = math::realRandom(forestAABB.yMin()+radius, forestAABB.yMax());
-      real_t z = math::realRandom(forestAABB.zMin()+radius, forestAABB.zMax());
+      real_t x = math::realRandom(forestAABB.xMin(), forestAABB.xMax());
+      real_t y = math::realRandom(forestAABB.yMin(), forestAABB.yMax());
+      real_t z = math::realRandom(forestAABB.zMin(), forestAABB.zMax());
       walberla::id_t id = walberla::id_t(boxes+capsules+i);
       SphereID sphere = createSphere(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), radius);
       WALBERLA_CHECK(sphere != NULL);
@@ -498,46 +480,46 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberO
    createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(forestAABB.xMin(),0,0), iron); // front wall, should not get rendered
    
    
-   std::vector<std::tuple<Vec3, Vec3, Vec3>> vectors;
+   std::vector<std::tuple<Vec3, Vec3, Vec3>> viewVectors;
    
    // y up, in negative z direction
-   vectors.push_back(std::make_tuple(Vec3(2, 2.1, 7),
+   viewVectors.push_back(std::make_tuple(Vec3(2, 2.1, 7),
                                      Vec3(2.1, 2, 4),
                                      Vec3(0,1,0)));
    // y up, in positive z direction
-   vectors.push_back(std::make_tuple(Vec3(2, 2, -3),
+   viewVectors.push_back(std::make_tuple(Vec3(2, 2, -3),
                                      Vec3(2, 2.1, 0.1),
                                      Vec3(0,1,0)));
    // x up, in positive z direction
-   vectors.push_back(std::make_tuple(Vec3(2, 2, -3),
+   viewVectors.push_back(std::make_tuple(Vec3(2, 2, -3),
                                      Vec3(2, 2.1, 0.1),
                                      Vec3(1,0,0)));
    // y and x up, in positive z direction
-   vectors.push_back(std::make_tuple(Vec3(2, 2, -3),
+   viewVectors.push_back(std::make_tuple(Vec3(2, 2, -3),
                                      Vec3(2, 2.1, 0.1),
                                      Vec3(1,1,0)));
    // y and x up, in negative z direction
-   vectors.push_back(std::make_tuple(Vec3(2, 2, 6.5),
+   viewVectors.push_back(std::make_tuple(Vec3(2, 2, 6.5),
                                      Vec3(2.1, 2.1, 4),
                                      Vec3(0.5,1,0)));
    // z up, in positive x direction
-   vectors.push_back(std::make_tuple(Vec3(-3, 2, 1.9),
+   viewVectors.push_back(std::make_tuple(Vec3(-3, 2, 1.9),
                                      Vec3(0, 2.1, 2),
                                      Vec3(0,0,1)));
    // z up, in negative x direction
-   vectors.push_back(std::make_tuple(Vec3(7, 2, 1.9),
+   viewVectors.push_back(std::make_tuple(Vec3(7, 2, 1.9),
                                      Vec3(4, 2.1, 2),
                                      Vec3(0,0,1)));
    // z and y up, in negative x direction
-   vectors.push_back(std::make_tuple(Vec3(7, 2, 1.9),
+   viewVectors.push_back(std::make_tuple(Vec3(7, 2, 1.9),
                                      Vec3(4, 2.1, 2),
                                      Vec3(0,1,1)));
    // z and x up, in negative y direction
-   vectors.push_back(std::make_tuple(Vec3(2, 6, 1.9),
+   viewVectors.push_back(std::make_tuple(Vec3(2, 6, 1.9),
                                      Vec3(2.3, 4, 2),
                                      Vec3(1,0,1)));
    // z up, in positive y direction
-   vectors.push_back(std::make_tuple(Vec3(2, -3.6, 1.9),
+   viewVectors.push_back(std::make_tuple(Vec3(2, -3.6, 1.9),
                                      Vec3(2.3, 0, 2.1),
                                      Vec3(0,0,1)));
    
@@ -549,7 +531,7 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberO
    tt.stop("Setup");
 
    int i = 0;
-   for (auto& vector: vectors) {
+   for (auto& vector: viewVectors) {
       if (i == numberOfViews) {
          break;
       }
@@ -563,7 +545,7 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberO
                            lighting0,
                            Color(0.2,0.2,0.2),
                            real_t(2),
-                           customHashgridsBodyToShadingParams);
+                           customHashGridsBodyToShadingParams);
 #if defined(USE_NAIVE_INTERSECTION_FINDING)
       raytracer.setImageOutputDirectory("image/naive");
 #endif
@@ -593,76 +575,24 @@ ShadingParameters customArtifactsBodyToShadingParams(const BodyID body) {
    return defaultShadingParams(body);
 }
 
-void HashGridsArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-   WALBERLA_LOG_INFO("Using naive method for intersection testing");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Using hashgrids for intersection testing");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Comparing hashgrids and naive method for intersection testing");
-#endif
-   WALBERLA_LOG_INFO("Generating " << boxes << " boxes");
-   
-   using namespace walberla::pe::ccd;
+void raytraceArtifactsForest(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
+                             const shared_ptr<BodyStorage> globalBodyStorage,
+                             const BlockDataID ccdID,
+                             const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
+                             size_t numberOfBoxes, uint8_t timestepWidth) {
    WcTimingTree tt;
-   tt.start("Setup");
-   
-   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
-   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
-   auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
-   
-   const AABB& forestAABB = forest->getDomain();
-   
-   // generate bodies for test
-   std::vector<BodyID> bodies;
-   for (size_t i = 0; i < boxes; i++) {
-      real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
-      real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
-      real_t y_min = math::realRandom(forestAABB.yMin()+len/real_t(2), forestAABB.yMax());
-      real_t z_min = math::realRandom(forestAABB.zMin()+len/real_t(2), forestAABB.zMax());
-      
-      if (i%5 == 0) {
-         x_min = forestAABB.xMax() - math::realRandom(len/real_t(2), len);
-      } else if (i%5 == 1){
-         x_min = forestAABB.xMin() + math::realRandom(real_t(0), len/real_t(2));
-      } else if (i%5 == 2){
-         y_min = forestAABB.yMax() - math::realRandom(len/real_t(2), len);
-      } else if (i%5 == 3){
-         y_min = forestAABB.yMin() + math::realRandom(real_t(0), len/real_t(2));
-      } else if (i%5 == 4){
-         z_min = forestAABB.zMin() + math::realRandom(real_t(0), len/real_t(2));
-      }
-      
-      //real_t z_min = len+0.1;
-      walberla::id_t id = walberla::id_t(i);
-      BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
-      WALBERLA_CHECK(box_ != NULL);
-      bodies.push_back(box_);
-   }
-   
-   /*MaterialID iron = Material::find("iron");
-    createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), Vec3(0,forestAABB.yMax(),0), iron); // left wall
-    createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,forestAABB.yMin(),0), iron); // right wall
-    createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,forestAABB.zMin()), iron); // floor
-    createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), Vec3(0,0,forestAABB.zMax()), iron); // ceiling
-    createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(forestAABB.xMax(),0,0), iron); // back wall
-    createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(forestAABB.xMin(),0,0), iron); // front wall, should not get rendered
-    */
-   
-   Lighting lighting(Vec3(forestAABB.xSize()/real_t(2)+1, forestAABB.ySize()/real_t(2),
-                          real_t(2)*forestAABB.zMax()+2), // 8, 5, 9.5 gut für ebenen, 0,5,8
+
+   Lighting lighting(Vec3(3, 2, -4),
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
                      Color(0.4, 0.4, 0.4)); //ambient
+   
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
                        49.13,
-                       Vec3(2, 2, 7),
-                       Vec3(2, 2, 4),
-                       Vec3(0,1,0), //-5,5,5; -1,5,5
+                       cameraPosition,
+                       lookAtPoint,
+                       upVector,
                        lighting,
                        Color(0.2,0.2,0.2),
                        real_t(2),
@@ -677,32 +607,77 @@ void HashGridsArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenM
    raytracer.setImageOutputDirectory("image/artifacts/comparison");
 #endif
    raytracer.setImageOutputEnabled(true);
-   raytracer.setFilenameTimestepWidth(4);
-   tt.stop("Setup");
-   WALBERLA_LOG_INFO("output to: " << boxes << " in " << raytracer.getImageOutputDirectory());
-   raytracer.rayTrace<BodyTuple>(boxes, &tt);
+   raytracer.setFilenameTimestepWidth(timestepWidth);
+   WALBERLA_LOG_INFO("output to: " << numberOfBoxes << " in " << raytracer.getImageOutputDirectory());
+   raytracer.rayTrace<BodyTuple>(numberOfBoxes, &tt);
    
    auto temp = tt.getReduced();
    WALBERLA_ROOT_SECTION() {
       std::cout << temp;
    }
+}
+
+void HashGridsArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+   WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In negative Z direction");
+   
+#if defined(USE_NAIVE_INTERSECTION_FINDING)
+   WALBERLA_LOG_INFO(" Using naive method for intersection testing");
+#endif
+#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO(" Using hashgrids for intersection testing");
+#endif
+#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
+   WALBERLA_LOG_INFO(" Comparing hashgrids and naive method for intersection testing");
+#endif
+   WALBERLA_LOG_INFO(" Generating " << boxes << " boxes");
+   
+   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
+   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
+   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
+   auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
+   
+   const AABB& forestAABB = forest->getDomain();
+   
+   // generate bodies for test
+   for (size_t i = 0; i < boxes; i++) {
+      real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
+      real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
+      real_t y_min = math::realRandom(forestAABB.yMin()+len/real_t(2), forestAABB.yMax());
+      real_t z_min = math::realRandom(forestAABB.zMin()+len/real_t(2), forestAABB.zMax());
+      if (i%5 == 0) {
+         x_min = forestAABB.xMax() - math::realRandom(len/real_t(2), len);
+      } else if (i%5 == 1){
+         x_min = forestAABB.xMin() + math::realRandom(real_t(0), len/real_t(2));
+      } else if (i%5 == 2){
+         y_min = forestAABB.yMax() - math::realRandom(len/real_t(2), len);
+      } else if (i%5 == 3){
+         y_min = forestAABB.yMin() + math::realRandom(real_t(0), len/real_t(2));
+      } else if (i%5 == 4){
+         z_min = forestAABB.zMin() + math::realRandom(real_t(0), len/real_t(2));
+      }
+      walberla::id_t id = walberla::id_t(i);
+      BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
+      WALBERLA_CHECK(box_ != NULL);
+   }
+   
+   raytraceArtifactsForest(forest, storageID, globalBodyStorage, ccdID,
+                           Vec3(2, 2, 7), Vec3(2, 2, 4), Vec3(0,1,0),
+                           boxes, 3);
 }
 
 void HashGridsFromNegativeArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+   WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In positive Z direction");
+   
 #if defined(USE_NAIVE_INTERSECTION_FINDING)
-   WALBERLA_LOG_INFO("Using naive method for intersection testing");
+   WALBERLA_LOG_INFO_ON_ROOT(" Using naive method for intersection testing");
 #endif
 #if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Using hashgrids for intersection testing");
+   WALBERLA_LOG_INFO_ON_ROOT(" Using hashgrids for intersection testing");
 #endif
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Comparing hashgrids and naive method for intersection testing");
+   WALBERLA_LOG_INFO_ON_ROOT(" Comparing hashgrids and naive method for intersection testing");
 #endif
-   WALBERLA_LOG_INFO("Generating " << boxes << " boxes");
-   
-   using namespace walberla::pe::ccd;
-   WcTimingTree tt;
-   tt.start("Setup");
+   WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
@@ -710,10 +685,6 @@ void HashGridsFromNegativeArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, re
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
    
    const AABB& forestAABB = forest->getDomain();
-   
-   bool removeUnproblematic = false;
-   std::vector<walberla::id_t> problematicBodyIDs = {165, 5, 31}; //{50, 44, 66, 155, 170, 51};
-   std::vector<walberla::id_t> bodySIDs;
 
    // generate bodies for test
    std::vector<BodyID> bodies;
@@ -739,79 +710,26 @@ void HashGridsFromNegativeArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, re
       walberla::id_t id = walberla::id_t(i);
       BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
       WALBERLA_CHECK(box_ != NULL);
-      bodies.push_back(box_);
-      bodySIDs.push_back(box_->getSystemID());
    }
    
-   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
-      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
-      hashgrids->update();
-      for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
-         if (removeUnproblematic && std::find(problematicBodyIDs.begin(), problematicBodyIDs.end(), bodyIt->getID()) == problematicBodyIDs.end()) {
-            bodyIt->setPosition(-100, -100, -100);
-         }
-      }
-   }
-   
-   /*MaterialID iron = Material::find("iron");
-    createPlane(*globalBodyStorage, 0, Vec3(0,-1,0), Vec3(0,forestAABB.yMax(),0), iron); // left wall
-    createPlane(*globalBodyStorage, 0, Vec3(0,1,0), Vec3(0,forestAABB.yMin(),0), iron); // right wall
-    createPlane(*globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,forestAABB.zMin()), iron); // floor
-    createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), Vec3(0,0,forestAABB.zMax()), iron); // ceiling
-    createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), Vec3(forestAABB.xMax(),0,0), iron); // back wall
-    createPlane(*globalBodyStorage, 0, Vec3(1,0,0), Vec3(forestAABB.xMin(),0,0), iron); // front wall, should not get rendered
-    */
-   
-   Lighting lighting(Vec3(3, 2, -4), // 8, 5, 9.5 gut für ebenen, 0,5,8
-                     Color(1, 1, 1), //diffuse
-                     Color(1, 1, 1), //specular
-                     Color(0.4, 0.4, 0.4)); //ambient
-   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
-                       size_t(640), size_t(480),
-                       49.13,
-                       Vec3(2, 2, -3),
-                       Vec3(2, 2, 0),
-                       Vec3(0,1,0), //-5,5,5; -1,5,5
-                       lighting,
-                       Color(0.2,0.2,0.2),
-                       real_t(2),
-                       customArtifactsBodyToShadingParams);
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-   raytracer.setImageOutputDirectory("image/artifacts/naive");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   raytracer.setImageOutputDirectory("image/artifacts/hashgrids");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   raytracer.setImageOutputDirectory("image/artifacts/comparison");
-#endif
-   raytracer.setImageOutputEnabled(true);
-   raytracer.setFilenameTimestepWidth(5);
-   tt.stop("Setup");
-   WALBERLA_LOG_INFO("output to: " << boxes << " in " << raytracer.getImageOutputDirectory());
-   raytracer.rayTrace<BodyTuple>(boxes, &tt);
-   
-   auto temp = tt.getReduced();
-   WALBERLA_ROOT_SECTION() {
-      std::cout << temp;
-   }
+   raytraceArtifactsForest(forest, storageID, globalBodyStorage, ccdID,
+                           Vec3(2, 2, -3), Vec3(2, 2, 0), Vec3(0,1,0),
+                           boxes, 4);
 }
 
 void HashGridsFromNegativeXArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+   WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In positive X direction");
+
 #if defined(USE_NAIVE_INTERSECTION_FINDING)
-   WALBERLA_LOG_INFO("Using naive method for intersection testing");
+   WALBERLA_LOG_INFO_ON_ROOT(" Using naive method for intersection testing");
 #endif
 #if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Using hashgrids for intersection testing");
+   WALBERLA_LOG_INFO_ON_ROOT(" Using hashgrids for intersection testing");
 #endif
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Comparing hashgrids and naive method for intersection testing");
+   WALBERLA_LOG_INFO_ON_ROOT(" Comparing hashgrids and naive method for intersection testing");
 #endif
-   WALBERLA_LOG_INFO("Generating " << boxes << " boxes");
-   
-   using namespace walberla::pe::ccd;
-   WcTimingTree tt;
-   tt.start("Setup");
+   WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vec3(1,1,1), Vec3(false, false, false));
@@ -820,12 +738,7 @@ void HashGridsFromNegativeXArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, r
    
    const AABB& forestAABB = forest->getDomain();
    
-   bool removeUnproblematic = false;
-   std::vector<walberla::id_t> problematicBodyIDs = {165, 5, 31}; //{50, 44, 66, 155, 170, 51};
-   std::vector<walberla::id_t> bodySIDs;
-   
    // generate bodies for test
-   std::vector<BodyID> bodies;
    for (size_t i = 0; i < boxes; i++) {
       real_t len = math::realRandom(boxLenMin, boxLenMax); //0.2 0.5
       real_t x_min = math::realRandom(forestAABB.xMin()+len/real_t(2), forestAABB.xMax());
@@ -848,53 +761,11 @@ void HashGridsFromNegativeXArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, r
       walberla::id_t id = walberla::id_t(i);
       BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
       WALBERLA_CHECK(box_ != NULL);
-      bodies.push_back(box_);
-      bodySIDs.push_back(box_->getSystemID());
    }
    
-   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
-      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
-      hashgrids->update();
-      for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
-         if (removeUnproblematic && std::find(problematicBodyIDs.begin(), problematicBodyIDs.end(), bodyIt->getID()) == problematicBodyIDs.end()) {
-            bodyIt->setPosition(-100, -100, -100);
-         }
-      }
-   }
-   
-   Lighting lighting(Vec3(-4, 2, 3), // 8, 5, 9.5 gut für ebenen, 0,5,8
-                     Color(1, 1, 1), //diffuse
-                     Color(1, 1, 1), //specular
-                     Color(0.4, 0.4, 0.4)); //ambient
-   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
-                       size_t(640), size_t(480),
-                       49.13,
-                       Vec3(-3, 2, 2),
-                       Vec3(0, 2, 2),
-                       Vec3(0,0,1), //-5,5,5; -1,5,5
-                       lighting,
-                       Color(0.2,0.2,0.2),
-                       real_t(2),
-                       customArtifactsBodyToShadingParams);
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-   raytracer.setImageOutputDirectory("image/artifacts/naive");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   raytracer.setImageOutputDirectory("image/artifacts/hashgrids");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   raytracer.setImageOutputDirectory("image/artifacts/comparison");
-#endif
-   raytracer.setImageOutputEnabled(true);
-   raytracer.setFilenameTimestepWidth(6);
-   tt.stop("Setup");
-   WALBERLA_LOG_INFO("output to: " << boxes  << " in " << raytracer.getImageOutputDirectory());
-   raytracer.rayTrace<BodyTuple>(boxes, &tt);
-   
-   auto temp = tt.getReduced();
-   WALBERLA_ROOT_SECTION() {
-      std::cout << temp;
-   }
+   raytraceArtifactsForest(forest, storageID, globalBodyStorage, ccdID,
+                           Vec3(-3, 2, 2), Vec3(0, 2, 2), Vec3(0,0,1),
+                           boxes, 6);
 }
 
 
@@ -903,18 +774,17 @@ Vec3 minCornerToGpos(const Vec3& minCorner, real_t lengths) {
 }
 
 void HashGridsTestScene() {
+   WALBERLA_LOG_INFO_ON_ROOT("HashGrid Test Scene");
+   
 #if defined(USE_NAIVE_INTERSECTION_FINDING)
-   WALBERLA_LOG_INFO("Using naive method for intersection testing");
+   WALBERLA_LOG_INFO_ON_ROOT(" Using naive method for intersection testing");
 #endif
 #if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Using hashgrids for intersection testing");
+   WALBERLA_LOG_INFO_ON_ROOT(" Using hashgrids for intersection testing");
 #endif
 #if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Comparing hashgrids and naive method for intersection testing");
+   WALBERLA_LOG_INFO_ON_ROOT(" Comparing hashgrids and naive method for intersection testing");
 #endif
-   using namespace walberla::pe::ccd;
-   WcTimingTree tt;
-   tt.start("Setup");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,8,8,8), Vec3(1,1,1), Vec3(false, false, false));
@@ -965,113 +835,48 @@ void HashGridsTestScene() {
       }
    }
    
-   /*// update hashgrids
-   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
-      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
-      hashgrids->update();
-   }
-   
-   // output info about grids
-   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt) {
-      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID);
-      for (auto grid: hashgrids->gridList_) {
-         WALBERLA_LOG_INFO("--- GRID " << grid << " ---");
-         WALBERLA_LOG_INFO(" cellSpan: " << grid->getCellSpan());
-         WALBERLA_LOG_INFO(" dims:     " << grid->xCellCount_ << "/" << grid->yCellCount_ << "/" << grid->zCellCount_);
-         WALBERLA_LOG_INFO(" items:    " << grid->bodyCount_);
-         WALBERLA_LOG_INFO(" enlargement threshold: " << grid->enlargementThreshold_);
-      }
-   }*/
-   
-   std::vector<Raytracer> raytracers;
-   
-   // setup raytracer
+   std::vector<std::tuple<Vec3, Vec3, Vec3>> viewVectors;
    
    // in negative x direction -> cubes to the right
-   Lighting lighting1(Vec3(1,2,15),
-                      Color(1, 1, 1), //diffuse
-                      Color(1, 1, 1), //specular
-                      Color(0.4, 0.4, 0.4)); //ambient
-   Raytracer raytracer1(forest, storageID, globalBodyStorage, ccdID,
-                        size_t(480), size_t(480),
-                        49.13,
-                        Vec3(15,4,4), //6,6,8
-                        Vec3(8,4,4), //6,6,4
-                        Vec3(0,1,0),
-                        lighting1,
-                        Color(0.2,0.2,0.2),
-                        real_t(2));
-   raytracers.push_back(raytracer1);
-
+   viewVectors.push_back(std::make_tuple(Vec3(15,4,4),
+                                     Vec3(8,4,4),
+                                     Vec3(0,1,0)));
    // in negative x direction and negative z direction, up vector in y direction -> cubes from the right tilted
-   Lighting lighting2(Vec3(1,2,15),
-                      Color(1, 1, 1), //diffuse
-                      Color(1, 1, 1), //specular
-                      Color(0.4, 0.4, 0.4)); //ambient
-   Raytracer raytracer2(forest, storageID, globalBodyStorage, ccdID,
-                        size_t(480), size_t(480),
-                        49.13,
-                        Vec3(12,4,8), //6,6,8
-                        Vec3(6,4,2), //6,6,4
-                        Vec3(0,1,0),
-                        lighting2,
-                        Color(0.2,0.2,0.2),
-                        real_t(2));
-   raytracers.push_back(raytracer2);
-   
+   viewVectors.push_back(std::make_tuple(Vec3(12,4,8),
+                                     Vec3(6,4,2),
+                                     Vec3(0,1,0)));
    // in negative x direction and negative z direction, up vector in negative y direction
-   Lighting lighting3(Vec3(1,2,15),
-                      Color(1, 1, 1), //diffuse
-                      Color(1, 1, 1), //specular
-                      Color(0.4, 0.4, 0.4)); //ambient
-   Raytracer raytracer3(forest, storageID, globalBodyStorage, ccdID,
-                        size_t(480), size_t(480),
-                        49.13,
-                        Vec3(12,4,8), //6,6,8
-                        Vec3(6,4,2), //6,6,4
-                        Vec3(0,-1,0),
-                        lighting3,
-                        Color(0.2,0.2,0.2),
-                        real_t(2));
-   raytracers.push_back(raytracer3);
-   
+   viewVectors.push_back(std::make_tuple(Vec3(12,4,8),
+                                     Vec3(6,4,2),
+                                     Vec3(0,-1,0)));
    // in positive x direction
-   Lighting lighting4(Vec3(1,2,15),
-                      Color(1, 1, 1), //diffuse
-                      Color(1, 1, 1), //specular
-                      Color(0.4, 0.4, 0.4)); //ambient
-   Raytracer raytracer4(forest, storageID, globalBodyStorage, ccdID,
-                        size_t(480), size_t(480),
-                        49.13,
-                        Vec3(-7,4,4), //6,6,8
-                        Vec3(0,4,4), //6,6,4
-                        Vec3(0,1,0),
-                        lighting4,
-                        Color(0.2,0.2,0.2),
-                        real_t(2));
-   raytracers.push_back(raytracer4);
-   
+   viewVectors.push_back(std::make_tuple(Vec3(-7,4,4),
+                                     Vec3(0,4,4),
+                                     Vec3(0,1,0)));
    // in negative x direction
-   Lighting lighting5(Vec3(1,2,15),
-                      Color(1, 1, 1), //diffuse
-                      Color(1, 1, 1), //specular
-                      Color(0.4, 0.4, 0.4)); //ambient
-   Raytracer raytracer5(forest, storageID, globalBodyStorage, ccdID,
-                        size_t(480), size_t(480),
-                        49.13,
-                        Vec3(4,4,15), //6,6,8
-                        Vec3(4,4,8), //6,6,4
-                        Vec3(0,1,0),
-                        lighting5,
-                        Color(0.2,0.2,0.2),
-                        real_t(2));
-   raytracers.push_back(raytracer5);
+   viewVectors.push_back(std::make_tuple(Vec3(4,4,15),
+                                     Vec3(4,4,8),
+                                     Vec3(0,1,0)));
    
+   WcTimingTree tt;
    
-   tt.stop("Setup");
-
+   Lighting lighting(Vec3(1,2,15),
+                     Color(1, 1, 1), //diffuse
+                     Color(1, 1, 1), //specular
+                     Color(0.4, 0.4, 0.4)); //ambient
+   
    int i = 0;
-   for (Raytracer& raytracer: raytracers) {
+   for (auto& vector: viewVectors) {
+      Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
+                          size_t(640), size_t(480),
+                          49.13,
+                          std::get<0>(vector),
+                          std::get<1>(vector),
+                          std::get<2>(vector),
+                          lighting,
+                          Color(0.2,0.2,0.2),
+                          real_t(2));
+      
 #if defined(USE_NAIVE_INTERSECTION_FINDING)
       raytracer.setImageOutputDirectory("image/naive");
 #endif
@@ -1082,11 +887,15 @@ void HashGridsTestScene() {
       raytracer.setImageOutputDirectory("image/comparison");
 #endif
       raytracer.setImageOutputEnabled(true);
-      raytracer.setFilenameTimestepWidth(3);
-      
+      raytracer.setFilenameTimestepWidth(1);
       WALBERLA_LOG_INFO("output to: " << i << " in " << raytracer.getImageOutputDirectory());
       
       raytracer.rayTrace<BodyTuple>(size_t(i), &tt);
+      
+      auto temp = tt.getReduced();
+      WALBERLA_ROOT_SECTION() {
+         std::cout << temp;
+      }
       
       i++;
    }
@@ -1114,32 +923,26 @@ int main( int argc, char** argv )
    std::vector<size_t> spheres = {0, 50, 40, 120};
    
    for (size_t i = 0; i < boxes.size(); ++i) {
-      HashGridsTest(boxes[i], capsules[i], spheres[i], 3);
+      HashGridsTest(boxes[i], capsules[i], spheres[i], 1);
    }
-   
-   //HashGridsTest(boxes[0], capsules[0], spheres[0]);
    
    //HashGridsTest(60, 60, 3, 1,
    //              0.1, 0.3, true,
    //              0.1, 0.2, 0.1, 0.2,
    //              0.5, 0.6);
    
-   //HashGridsTest(400, 0, 0, 1,
-   //             0.2, 0.4);
-   
    //HashGridsTest(750, 0, 0, 1,
    //              0.2, 0.3);
    
    //HashGridsTest(400, 0, 0, 1,
    //              0.1, 0.3);
-   HashGridsArtifactsTest(750, 0.2, 0.3);
    
+   //HashGridsArtifactsTest(750, 0.2, 0.3);
    //HashGridsFromNegativeArtifactsTest(750, 0.2, 0.3);
+   //HashGridsFromNegativeXArtifactsTest(750, 0.2, 0.3);
    
-   HashGridsFromNegativeXArtifactsTest(750, 0.2, 0.3);
-   
-   HashGridsTest(9999, 0, 4000, 1,
-                 0.1, 0.2);
+   //HashGridsTest(9999, 0, 4000, 1,
+   //              0.1, 0.2);
    
    return EXIT_SUCCESS;
 }
