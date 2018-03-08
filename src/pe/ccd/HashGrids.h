@@ -527,13 +527,10 @@ const BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<
    real_t x = (real_c(blockCell[0]) + real_t(0.5)) * cellSpan_;
    real_t y = (real_c(blockCell[1]) + real_t(0.5)) * cellSpan_;
    real_t z = (real_c(blockCell[2]) + real_t(0.5)) * cellSpan_;
-
+   
    // hash of cell in the hashgrid
    size_t cellHash = hashPoint(x, y, z);
    
-   //WALBERLA_LOG_INFO("cell " << cellHash);
-   //WALBERLA_LOG_INFO(" normal axis: " << int(cellNormalAxis) << ", dir: " << int(cellNormalDir));
-
    const Cell& centerCell = cell_[cellHash];
    
    std::vector<offset_t> relevantNeighborIndices;
@@ -582,7 +579,6 @@ const BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<
                body = cellBody;
                t_closest = t_local;
                n_closest = n_local;
-               //WALBERLA_LOG_INFO(" found body " << body->getID() << " in " << neighborIndex << " (" << (int(cellHash)+centerCell.neighborOffset_[neighborIndex]) << ")");
             }
          }
       }
@@ -617,10 +613,9 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
    int32_t blockYCellCountMax = int32_c(std::ceil(blockAABB.yMax() * inverseCellSpan_)) + 1;
    int32_t blockZCellCountMin = int32_c(blockAABB.zMin() * inverseCellSpan_) - 1;
    int32_t blockZCellCountMax = int32_c(std::ceil(blockAABB.zMax() * inverseCellSpan_)) + 1;
-
-   //WALBERLA_LOG_INFO("cellspan: " << cellSpan_ << " lims: " << blockXCellCountMin << " " << blockXCellCountMax);
    
    Vec3 firstPoint;
+   real_t tRayOriginToGrid = 0;
    if (blockAABB.contains(ray.getOrigin(), cellSpan_)) {
       firstPoint = ray.getOrigin();
    } else {
@@ -629,8 +624,8 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
       if (intersects(blockAABB, ray, t_start, cellSpan_, &firstPointNormal)) {
          firstPoint = ray.getOrigin() + ray.getDirection()*t_start;
          firstPoint -= firstPointNormal * (cellSpan_/real_t(2));
+         tRayOriginToGrid = (ray.getOrigin() - firstPoint).length();
       } else {
-         //WALBERLA_LOG_INFO("ray does not intersect block")
          return NULL;
       }
    }
@@ -647,10 +642,12 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
              (stepY >= 0) ? (firstCell[1]+1)*cellSpan_-firstPoint[1] : firstPoint[1]-firstCell[1]*cellSpan_,
              (stepZ >= 0) ? (firstCell[2]+1)*cellSpan_-firstPoint[2] : firstPoint[2]-firstCell[2]*cellSpan_);
    
+   // tMax: distance along the ray to the next cell change in the axis direction
    real_t tMaxX = (ray.xDir() != 0) ? std::abs(near[0]*ray.xInvDir()) : inf;
    real_t tMaxY = (ray.yDir() != 0) ? std::abs(near[1]*ray.yInvDir()) : inf;
    real_t tMaxZ = (ray.zDir() != 0) ? std::abs(near[2]*ray.zInvDir()) : inf;
    
+   // tDelta: how far along the ray must be moved to encounter a new cell in the specified axis direction
    real_t tDeltaX = (ray.xDir() != 0) ? std::abs(cellSpan_*ray.xInvDir()) : inf;
    real_t tDeltaY = (ray.yDir() != 0) ? std::abs(cellSpan_*ray.yInvDir()) : inf;
    real_t tDeltaZ = (ray.zDir() != 0) ? std::abs(cellSpan_*ray.zInvDir()) : inf;
@@ -674,9 +671,17 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
    int8_t blockCellNormalAxis;
    int8_t blockCellNormalDir;
    
+   static int earlyCutoffs = 0;
+   
    while (true) {
       if (tMaxX < tMaxY) {
          if (tMaxX < tMaxZ) {
+#if !defined(HASHGRIDS_DISABLE_EARLY_CUTOFF)
+            if (tRayOriginToGrid+tMaxX-tDeltaX > t_closest) {
+               earlyCutoffs++;
+               break;
+            }
+#endif
             tMaxX += tDeltaX;
             currentCell[0] += stepX;
             blockCellNormalAxis = 0;
@@ -685,6 +690,12 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
                break;
             }
          } else {
+#if !defined(HASHGRIDS_DISABLE_EARLY_CUTOFF)
+            if (tRayOriginToGrid+tMaxZ-tDeltaZ > t_closest) {
+               earlyCutoffs++;
+               break;
+            }
+#endif
             tMaxZ += tDeltaZ;
             currentCell[2] += stepZ;
             blockCellNormalAxis = 2;
@@ -695,6 +706,12 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
          }
       } else {
          if (tMaxY < tMaxZ) {
+#if !defined(HASHGRIDS_DISABLE_EARLY_CUTOFF)
+            if (tRayOriginToGrid+tMaxY-tDeltaY > t_closest) {
+               earlyCutoffs++;
+               break;
+            }
+#endif
             tMaxY += tDeltaY;
             currentCell[1] += stepY;
             blockCellNormalAxis = 1;
@@ -703,6 +720,12 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
                break;
             }
          } else {
+#if !defined(HASHGRIDS_DISABLE_EARLY_CUTOFF)
+            if (tRayOriginToGrid+tMaxZ-tDeltaZ > t_closest) {
+               earlyCutoffs++;
+               break;
+            }
+#endif
             tMaxZ += tDeltaZ;
             currentCell[2] += stepZ;
             blockCellNormalAxis = 2;
@@ -745,13 +768,6 @@ BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, 
    real_t t_local = inf;
    Vec3 n_local;
    
-   for(auto grid: gridList_) {
-      body_local = grid->getRayIntersectingBody<BodyTuple>(ray, blockAABB, t_closest, n_closest);
-      if (body_local != NULL){
-         body_closest = body_local;
-      }
-   }
-   
    raytracing::IntersectsFunctor intersectsFunc(ray, t_local, n_local);
    for(auto body: nonGridBodies_) {
       bool intersects = SingleCast<BodyTuple, raytracing::IntersectsFunctor, bool>::execute(body, intersectsFunc);
@@ -761,6 +777,20 @@ BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, 
          n_closest = n_local;
       }
    }
+   
+   for (auto gridIt = gridList_.rbegin(); gridIt != gridList_.rend(); ++gridIt) {
+      body_local = (*gridIt)->getRayIntersectingBody<BodyTuple>(ray, blockAABB, t_closest, n_closest);
+      if (body_local != NULL){
+         body_closest = body_local;
+      }
+   }
+
+   /*for(auto grid: gridList_) {
+      body_local = grid->getRayIntersectingBody<BodyTuple>(ray, blockAABB, t_closest, n_closest);
+      if (body_local != NULL){
+         body_closest = body_local;
+      }
+   }*/
    
    t = t_closest;
    n = n_closest;
