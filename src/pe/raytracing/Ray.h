@@ -214,12 +214,11 @@ public:
     *
     * \return Ray transformed to the body frame.
     */
-   Ray transformedToBF(const BodyID body) const {
+   inline Ray transformedToBF(const BodyID body) const {
       return Ray(body->pointFromWFtoBF(getOrigin()), body->vectorFromWFtoBF(getDirection()));
    }
    //@}
 };
-
 }
 }
 }
