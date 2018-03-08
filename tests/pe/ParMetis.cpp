@@ -36,7 +36,7 @@ public:
    {
       std::for_each( minTargetLevels.begin(),
                      minTargetLevels.end(),
-                     [](auto& pair){pair.second = 1;} );
+                     [](auto& pair){pair.second = pair.first->getLevel() + 1;} );
    }
 
 };
@@ -60,7 +60,7 @@ public:
          info.setVertexCoords( it->first->getAABB().center() );
          for( uint_t nb = uint_t(0); nb < it->first->getNeighborhoodSize(); ++nb )
          {
-            info.setEdgeWeight(it->first->getNeighborId(nb), int64_c(10) );
+            info.setEdgeWeight(it->first->getNeighborId(nb), int64_c(weight) );
          }
          it->second = info;
       }
@@ -72,6 +72,7 @@ int parmetisTest(const std::string& algorithm,
                  const std::string& edgeSource)
 {
    walberla::MPIManager::instance()->resetMPI();
+   walberla::MPIManager::instance()->useWorldComm();
 
    WALBERLA_LOG_INFO_ON_ROOT("****** " << algorithm << " | " << weightsToUse << " | " << edgeSource);
 
@@ -126,8 +127,9 @@ int main( int argc, char ** argv )
 {
    walberla::debug::enterTestMode();
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
+   walberla::MPIManager::instance()->useWorldComm();
 
-   std::vector<std::string> algs = {"PART_GEOM_KWAY", "PART_KWAY", "PART_ADAPTIVE_REPART", "REFINE_KWAY"};
+   std::vector<std::string> algs = {"PART_GEOM", "PART_GEOM_KWAY", "PART_KWAY", "PART_ADAPTIVE_REPART", "REFINE_KWAY"};
    std::vector<std::string> wtu  = {"NO_WEIGHTS", "EDGE_WEIGHTS", "VERTEX_WEIGHTS", "BOTH_WEIGHTS"};
    std::vector<std::string> es   = {"EDGES_FROM_FOREST", "EDGES_FROM_EDGE_WEIGHTS"};
 
