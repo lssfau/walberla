@@ -534,10 +534,6 @@ const BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<
    const Cell& centerCell = cell_[cellHash];
    
    std::vector<offset_t> relevantNeighborIndices;
-
-#ifdef HASHGRIDS_RAYTRACING_CHECK_ALL_NEIGHBORS
-   cellNormalAxis = BLOCKCELL_NORMAL_INDETERMINATE;
-#endif
    
    if (cellNormalAxis == 0) {
       if (cellNormalDir == -1) {
@@ -565,6 +561,14 @@ const BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<
          18, 19, 20, 21, 22, 23, 24, 25, 26
       };
    }
+   
+#ifdef HASHGRIDS_RAYTRACING_CHECK_ALL_NEIGHBORS
+   relevantNeighborIndices = {
+      0, 1, 2, 3, 4, 5, 6, 7, 8,
+      9, 10, 11, 12, 13, 14, 15, 16, 17,
+      18, 19, 20, 21, 22, 23, 24, 25, 26
+   };
+#endif
    
    for (uint i = 0; i < relevantNeighborIndices.size(); ++i) {
       const offset_t neighborIndex = relevantNeighborIndices[i];
