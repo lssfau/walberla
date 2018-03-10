@@ -579,7 +579,7 @@ void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm,
                              size_t numberOfBoxes, uint8_t timestepWidth) {
    WcTimingTree tt;
 
-   Lighting lighting(Vec3(3, 2, -4),
+   Lighting lighting(cameraPosition,
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
                      Color(0.4, 0.4, 0.4)); //ambient
