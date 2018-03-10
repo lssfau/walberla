@@ -55,6 +55,8 @@ struct BodyIntersectionInfo {
 
 class Raytracer {
 public:
+   enum Algorithm { RAYTRACE_HASHGRIDS, RAYTRACE_NAIVE, RAYTRACE_COMPARE_BOTH };
+   
    /*!\name Constructors */
    //@{
    explicit Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
@@ -108,6 +110,7 @@ private:
    std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction_; /*!< Function which returns a 
                                                                                   * ShadingParameters struct
                                                                                   * given the specified body. */
+   Algorithm raytracingAlgorithm_;    //!< Algorithm to use while intersection testing.
    //@}
    
    /*!\name Member variables for raytracing geometry */
@@ -151,6 +154,7 @@ public:
    inline void setLocalImageOutputEnabled(const bool enabled);
    inline void setImageOutputDirectory(const std::string& path);
    inline void setFilenameTimestepWidth(uint8_t width);
+   inline void setRaytracingAlgorithm(Algorithm algorithm);
    //@}
    
    /*!\name Functions */
@@ -171,6 +175,13 @@ private:
    inline bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
    inline size_t coordinateToArrayIndex(size_t x, size_t y) const;
    
+   template <typename BodyTypeTuple>
+   inline void traceRayInGlobalBodyStorage(const Ray& ray, BodyID& body_closest, real_t& t_closest, Vec3& n_closest) const;
+   template <typename BodyTypeTuple>
+   inline void traceRayNaively(const Ray& ray, BodyID& body_closest, real_t& t_closest, Vec3& n_closest) const;
+   template <typename BodyTypeTuple>
+   inline void traceRayInHashGrids(const Ray& ray, BodyID& body_closest, real_t& t_closest, Vec3& n_closest) const;
+
    inline Color getColor(const BodyID body, const Ray& ray, real_t t, const Vec3& n) const;
    //@}
 };
@@ -346,6 +357,13 @@ inline void Raytracer::setImageOutputDirectory(const std::string& path) {
 inline void Raytracer::setFilenameTimestepWidth(uint8_t width) {
    filenameTimestepWidth_ = width;
 }
+
+/*!\brief Set the algorithm to use while ray tracing.
+ * \param algorithm One of RAYTRACE_HASHGRIDS, RAYTRACE_NAIVE, RAYTRACE_COMPARE_BOTH.
+ */
+inline void Raytracer::setRaytracingAlgorithm(Algorithm algorithm) {
+   raytracingAlgorithm_ = algorithm;
+}
    
 /*!\brief Checks if a plane should get rendered.
  * \param plane Plane to check for visibility.
@@ -367,6 +385,96 @@ inline size_t Raytracer::coordinateToArrayIndex(size_t x, size_t y) const {
    return y*pixelsHorizontal_ + x;
 }
 
+   
+template <typename BodyTypeTuple>
+inline void Raytracer::traceRayInGlobalBodyStorage(const Ray& ray, BodyID& body_closest, real_t& t_closest, Vec3& n_closest) const {
+   int numProcesses = mpi::MPIManager::instance()->numProcesses();
+   int rank = mpi::MPIManager::instance()->rank();
+   
+   real_t t = std::numeric_limits<real_t>::max();
+   Vec3 n;
+   
+   IntersectsFunctor func(ray, t, n);
+   
+   int i = 0;
+   for(auto bodyIt: *globalBodyStorage_) {
+      ++i;
+      // distribute global objects more or less evenly over all processes
+      if (((i-1)%numProcesses) != rank) {
+         continue;
+      }
+      
+      if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
+         PlaneID plane = (PlaneID)bodyIt;
+         if (!isPlaneVisible(plane, ray)) {
+            continue;
+         }
+      }
+      
+      bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(bodyIt, func);
+      
+      if (intersects && t < t_closest) {
+         // body was shot by ray and is currently closest to camera
+         t_closest = t;
+         body_closest = bodyIt;
+         n_closest = n;
+      }
+   }
+}
+
+template <typename BodyTypeTuple>
+inline void Raytracer::traceRayNaively(const Ray& ray, BodyID& body_closest, real_t& t_closest, Vec3& n_closest) const {
+   real_t t = std::numeric_limits<real_t>::max();
+   Vec3 n;
+   
+   IntersectsFunctor func(ray, t, n);
+   
+   for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
+      const AABB& blockAabb = blockIt->getAABB();
+      
+#if !defined(DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK)
+      if (!intersects(blockAabb, ray, t, blockAABBIntersectionPadding_)) {
+         continue;
+      }
+#endif
+      
+      for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
+         bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
+         
+         if (intersects && t < t_closest) {
+            // body was shot by ray and is currently closest to camera
+            t_closest = t;
+            body_closest = *bodyIt;
+            n_closest = n;
+         }
+      }
+   }
+}
+   
+template <typename BodyTypeTuple>
+inline void Raytracer::traceRayInHashGrids(const Ray& ray, BodyID& body_closest, real_t& t_closest, Vec3& n_closest) const {
+   real_t t = std::numeric_limits<real_t>::max();
+   Vec3 n;
+   
+   for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
+      const AABB& blockAabb = blockIt->getAABB();
+      
+#if !defined(DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK)
+      if (!intersects(blockAabb, ray, t, blockAABBIntersectionPadding_)) {
+         continue;
+      }
+#endif
+      
+      ccd::HashGrids* hashgrids = blockIt->uncheckedFastGetData<ccd::HashGrids>(ccdID_);
+      BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAabb, t, n);
+      if (body != NULL && t < t_closest) {
+         t_closest = t;
+         body_closest = body;
+         n_closest = n;
+      }
+   }
+}
+   
 /*!\brief Does one raytracing step.
  *
  * \param timestep The timestep after which the raytracing starts.
@@ -377,35 +485,20 @@ inline size_t Raytracer::coordinateToArrayIndex(size_t x, size_t y) const {
 template <typename BodyTypeTuple>
 void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    if (tt != NULL) tt->start("Raytracing");
-
    real_t inf = std::numeric_limits<real_t>::max();
-
-   int numProcesses = mpi::MPIManager::instance()->numProcesses();
-   int rank = mpi::MPIManager::instance()->rank();
    
    std::vector<real_t> tBuffer(pixelsVertical_ * pixelsHorizontal_, inf);
    std::vector<Color> imageBuffer(pixelsVertical_ * pixelsHorizontal_);
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    
-   if (tt != NULL) tt->start("HashGrids Update");
-   for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
-      ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID_);
-      hashgrids->update();
+   if (raytracingAlgorithm_ == RAYTRACE_HASHGRIDS || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH) {
+      if (tt != NULL) tt->start("HashGrids Update");
+      for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
+         ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID_);
+         hashgrids->update();
+      }
+      if (tt != NULL) tt->stop("HashGrids Update");
    }
-   if (tt != NULL) tt->stop("HashGrids Update");
-   
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   real_t t_naive_closest; BodyID body_naive_closest;
-   real_t t_hashgrids_closest; BodyID body_hashgrids_closest;
-   int errors = 0;
-   std::unordered_set<BodyID> problematicBodies;
-   std::unordered_set<BodyID> problematicHashgridsFoundBodies;
-   ccd::HashGrids::intersectionTestCount = 0;
-#endif
-   
-#if defined(USE_NAIVE_INTERSECTION_FINDING) || defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   uint64_t naiveIntersectionTests = 0;
-#endif
    
    real_t t, t_closest;
    Vec3 n;
@@ -413,6 +506,8 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    BodyID body_closest = NULL;
    Ray ray(cameraPosition_, Vec3(1,0,0));
    IntersectsFunctor func(ray, t, n);
+   bool isErrorneousPixel = false;
+   uint_t pixelErrors = 0;
    
    if (tt != NULL) tt->start("Intersection Testing");
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
@@ -424,113 +519,33 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
          n.reset();
          t_closest = inf;
          body_closest = NULL;
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-         t_naive_closest = t_hashgrids_closest = inf;
-         body_naive_closest = body_hashgrids_closest = NULL;
-#endif
-
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) || defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-         for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
-            const AABB& blockAabb = blockIt->getAABB();
-#if !defined(DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK)
-            if (!intersects(blockAabb, ray, t, blockAABBIntersectionPadding_)) {
-               continue;
-            }
-#endif
-            ccd::HashGrids* hashgrids = blockIt->uncheckedFastGetData<ccd::HashGrids>(ccdID_);
-            // ^- nut getData ist ineffizient, braucht insges. 1.66s für 640x480 px. ->uncheckedFastGetData
-            BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAabb, t, n);
-            
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-            if (body != NULL && t < t_hashgrids_closest)
-#else
-            if (body != NULL && t < t_closest)
-#endif
-            {
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-               t_hashgrids_closest = t;
-               body_hashgrids_closest = body;
-#else
-               t_closest = t;
-               body_closest = body;
-#endif
-               n_closest = n;
-            }
-         }
-#endif
          
-#if defined(USE_NAIVE_INTERSECTION_FINDING) || defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-         for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
-            const AABB& blockAabb = blockIt->getAABB();
-#if !defined(DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK)
-            if (!intersects(blockAabb, ray, t, blockAABBIntersectionPadding_)) {
-               continue;
-            }
-#endif
-            for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
-               bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
-               naiveIntersectionTests++;
-
-               if (intersects && t < t_closest) {
-                  // body was shot by ray and currently closest to camera
-                  t_closest = t;
-                  body_closest = *bodyIt;
-                  n_closest = n;
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-                  t_naive_closest = t;
-                  body_naive_closest = *bodyIt;
-#endif
-               }
-            }
-         }
-#endif
+         if (raytracingAlgorithm_ == RAYTRACE_HASHGRIDS) {
+            traceRayInHashGrids<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
+         } else if (raytracingAlgorithm_ == RAYTRACE_NAIVE) {
+            traceRayNaively<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
+         } else {
+            traceRayInHashGrids<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
+            BodyID hashgrids_body_closest = body_closest;
             
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-         if (body_naive_closest != body_hashgrids_closest && !realIsEqual(t_naive_closest, t_hashgrids_closest)) {
-            problematicBodies.insert(body_naive_closest);
-            problematicHashgridsFoundBodies.insert(body_hashgrids_closest);
-            errors++;
+            t_closest = inf;
+            body_closest = NULL;
+            traceRayNaively<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
+            
+            if (body_closest != hashgrids_body_closest) {
+               isErrorneousPixel = true;
+               ++pixelErrors;
+            }
          }
-#endif
          
-         int i = 0;
-         for(auto bodyIt: *globalBodyStorage_) {
-            i++;
-            // distribute global objects more or less evenly on all processes
-            if (((i-1)%numProcesses) != rank) {
-               continue;
-            }
-            
-            if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
-               PlaneID plane = (PlaneID)bodyIt;
-               if (!isPlaneVisible(plane, ray)) {
-                  continue;
-               }
-            }
-            
-            bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(bodyIt, func);
-            
-            if (intersects && t < t_closest) {
-               // body was shot by ray and currently closest to camera
-               t_closest = t;
-               body_closest = bodyIt;
-               n_closest = n;
-            }
-         }
+         traceRayInGlobalBodyStorage<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
          
          if (!realIsIdentical(t_closest, inf) && body_closest != NULL) {
             Color color = getColor(body_closest, ray, t_closest, n_closest);
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-            if (body_naive_closest != body_hashgrids_closest && !realIsEqual(t_naive_closest, t_hashgrids_closest)) {
-               if (body_hashgrids_closest == NULL) {
-                  color = Color(0, 1, 0);
-                  //WALBERLA_LOG_INFO("made pixel green");
-               } else {
-                  color = Color(1, 0, 0);
-                  //WALBERLA_LOG_INFO("made pixel red");
-               }
+            if (isErrorneousPixel) {
+               color = Color(1,0,0);
+               isErrorneousPixel = false;
             }
-#endif
             
             imageBuffer[coordinateToArrayIndex(x, y)] = color;
             BodyIntersectionInfo intersectionInfo = {
@@ -548,35 +563,9 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    }
    if (tt != NULL) tt->stop("Intersection Testing");
 
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   std::stringstream ss;
-   for (auto body: problematicBodies) {
-      if (body != NULL) {
-         ss << body->getID() << "(" << body->getHash() << ") ";
-      } else {
-         ss << "NULL" << " ";
-      }
-   };
-   ss << "(";
-   for (auto body: problematicHashgridsFoundBodies) {
-      if (body != NULL) {
-         ss << body->getID() << "(" << body->getHash() << ") ";
-      } else {
-         ss << "NULL" << " ";
-      }
-   };
-   ss << ")";
-   
-   WALBERLA_LOG_INFO(errors << " pixel errors found, problematic bodies: " << ss.str());
-#endif
-
-#if defined(USE_NAIVE_INTERSECTION_FINDING) || defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Performed " << naiveIntersectionTests << " naive intersection tests");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Performed " << ccd::HashGrids::intersectionTestCount << " intersection tests in hashgrids");
-   WALBERLA_LOG_INFO("Saved " << (int64_t(naiveIntersectionTests)-int64_t(ccd::HashGrids::intersectionTestCount)) << " tests (" << ((real_t(1)-real_c(ccd::HashGrids::intersectionTestCount)/real_c(naiveIntersectionTests))*100) << "%).");
-#endif
+   if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH && pixelErrors > 0) {
+      WALBERLA_LOG_WARNING(pixelErrors << " pixel errors found!");
+   }
 
    if (tt != NULL) tt->start("Reduction");
    // intersections synchronisieren

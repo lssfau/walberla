@@ -233,7 +233,7 @@ ShadingParameters customBodyToShadingParams(const BodyID body) {
    }
 }
 
-void RaytracerTest() {
+void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS) {
    WALBERLA_LOG_INFO("Raytracer");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vec3(1,1,1), Vec3(false, false, false));
@@ -291,6 +291,7 @@ void RaytracerTest() {
    raytracer.setImageOutputEnabled(true);
    //raytracer.setLocalImageOutputEnabled(true);
    
+   raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
    raytracer.rayTrace<BodyTuple>(0);
 }
 
@@ -335,7 +336,7 @@ ShadingParameters customSpheresBodyToShadingParams(const BodyID body) {
    }
 }
 
-void RaytracerSpheresTest() {
+void RaytracerSpheresTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS) {
    WALBERLA_LOG_INFO("Raytracer Spheres Scene");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vec3(1,1,1), Vec3(false, false, false));
@@ -375,6 +376,7 @@ void RaytracerSpheresTest() {
    raytracer.setImageOutputDirectory("image");
    raytracer.setImageOutputEnabled(true);
    
+   raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
    raytracer.rayTrace<BodyTuple>(1);
 }
 
@@ -387,19 +389,11 @@ ShadingParameters customHashGridsBodyToShadingParams(const BodyID body) {
 }
 
 
-void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberOfViews = 1,
+void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm,
+                   size_t boxes, size_t capsules, size_t spheres, size_t numberOfViews = 1,
                    real_t boxLenMin = 0.1, real_t boxLenMax = 0.2, bool boxRotation = false,
                    real_t capRadiusMin = 0.1, real_t capRadiusMax = 0.2, real_t capLenMin = 0.1, real_t capLenMax = 0.3,
                    real_t sphereRadiusMin = 0.1, real_t sphereRadiusMax = 0.3) {
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-   WALBERLA_LOG_INFO("Using naive method for intersection testing");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Using hashgrids for intersection testing");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO("Comparing hashgrids and naive method for intersection testing");
-#endif
    WALBERLA_LOG_INFO("Generating " << boxes << " boxes, " << capsules << " capsules and " << spheres << " spheres");
    
    using namespace walberla::pe::ccd;
@@ -437,7 +431,6 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberO
    for (size_t i = 0; i < capsules; i++) {
       real_t len = math::realRandom(capLenMin, capLenMax); // 0.2 0.5
       real_t radius = math::realRandom(capRadiusMin, capRadiusMax);
-      real_t maxlen = len + 2*radius;
       real_t x = math::realRandom(forestAABB.xMin(), forestAABB.xMax());
       real_t y = math::realRandom(forestAABB.yMin(), forestAABB.yMax());
       real_t z = math::realRandom(forestAABB.zMin(), forestAABB.zMax());
@@ -546,18 +539,21 @@ void HashGridsTest(size_t boxes, size_t capsules, size_t spheres, size_t numberO
                            Color(0.2,0.2,0.2),
                            real_t(2),
                            customHashGridsBodyToShadingParams);
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-      raytracer.setImageOutputDirectory("image/naive");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-      raytracer.setImageOutputDirectory("image/hashgrids");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-      raytracer.setImageOutputDirectory("image/comparison");
-#endif
+      switch (raytracingAlgorithm) {
+         case Raytracer::RAYTRACE_NAIVE:
+            raytracer.setImageOutputDirectory("image/naive");
+            break;
+         case Raytracer::RAYTRACE_HASHGRIDS:
+            raytracer.setImageOutputDirectory("image/hashgrids");
+            break;
+         case Raytracer::RAYTRACE_COMPARE_BOTH:
+            raytracer.setImageOutputDirectory("image/comparison");
+            break;
+      }
       raytracer.setImageOutputEnabled(true);
       raytracer.setFilenameTimestepWidth(12);
       WALBERLA_LOG_INFO("output #" << i << " to: " << (boxes*100000000 + capsules*10000 + spheres) << " in " << raytracer.getImageOutputDirectory());
+      raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
       raytracer.rayTrace<BodyTuple>(boxes*100000000 + capsules*10000 + spheres, &tt);
       i++;
    }
@@ -575,7 +571,8 @@ ShadingParameters customArtifactsBodyToShadingParams(const BodyID body) {
    return defaultShadingParams(body);
 }
 
-void raytraceArtifactsForest(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
+void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm,
+                             const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
                              const shared_ptr<BodyStorage> globalBodyStorage,
                              const BlockDataID ccdID,
                              const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
@@ -597,17 +594,20 @@ void raytraceArtifactsForest(const shared_ptr<BlockStorage> forest, const BlockD
                        Color(0.2,0.2,0.2),
                        real_t(2),
                        customArtifactsBodyToShadingParams);
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-   raytracer.setImageOutputDirectory("image/artifacts/naive");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   raytracer.setImageOutputDirectory("image/artifacts/hashgrids");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   raytracer.setImageOutputDirectory("image/artifacts/comparison");
-#endif
+   switch (raytracingAlgorithm) {
+      case Raytracer::RAYTRACE_NAIVE:
+         raytracer.setImageOutputDirectory("image/naive");
+         break;
+      case Raytracer::RAYTRACE_HASHGRIDS:
+         raytracer.setImageOutputDirectory("image/hashgrids");
+         break;
+      case Raytracer::RAYTRACE_COMPARE_BOTH:
+         raytracer.setImageOutputDirectory("image/comparison");
+         break;
+   }
    raytracer.setImageOutputEnabled(true);
    raytracer.setFilenameTimestepWidth(timestepWidth);
+   raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
    WALBERLA_LOG_INFO("output to: " << numberOfBoxes << " in " << raytracer.getImageOutputDirectory());
    raytracer.rayTrace<BodyTuple>(numberOfBoxes, &tt);
    
@@ -617,18 +617,9 @@ void raytraceArtifactsForest(const shared_ptr<BlockStorage> forest, const BlockD
    }
 }
 
-void HashGridsArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In negative Z direction");
    
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-   WALBERLA_LOG_INFO(" Using naive method for intersection testing");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO(" Using hashgrids for intersection testing");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO(" Comparing hashgrids and naive method for intersection testing");
-#endif
    WALBERLA_LOG_INFO(" Generating " << boxes << " boxes");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
@@ -660,23 +651,15 @@ void HashGridsArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenM
       WALBERLA_CHECK(box_ != NULL);
    }
    
-   raytraceArtifactsForest(forest, storageID, globalBodyStorage, ccdID,
+   raytraceArtifactsForest(raytracingAlgorithm,
+                           forest, storageID, globalBodyStorage, ccdID,
                            Vec3(2, 2, 7), Vec3(2, 2, 4), Vec3(0,1,0),
                            boxes, 3);
 }
 
-void HashGridsFromNegativeArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In positive Z direction");
    
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-   WALBERLA_LOG_INFO_ON_ROOT(" Using naive method for intersection testing");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO_ON_ROOT(" Using hashgrids for intersection testing");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO_ON_ROOT(" Comparing hashgrids and naive method for intersection testing");
-#endif
    WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
@@ -712,23 +695,14 @@ void HashGridsFromNegativeArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, re
       WALBERLA_CHECK(box_ != NULL);
    }
    
-   raytraceArtifactsForest(forest, storageID, globalBodyStorage, ccdID,
+   raytraceArtifactsForest(raytracingAlgorithm,
+                           forest, storageID, globalBodyStorage, ccdID,
                            Vec3(2, 2, -3), Vec3(2, 2, 0), Vec3(0,1,0),
                            boxes, 4);
 }
 
-void HashGridsFromNegativeXArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+void HashGridsFromNegativeXArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In positive X direction");
-
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-   WALBERLA_LOG_INFO_ON_ROOT(" Using naive method for intersection testing");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO_ON_ROOT(" Using hashgrids for intersection testing");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO_ON_ROOT(" Comparing hashgrids and naive method for intersection testing");
-#endif
    WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
@@ -763,7 +737,8 @@ void HashGridsFromNegativeXArtifactsTest(size_t boxes, real_t boxLenMin = 0.1, r
       WALBERLA_CHECK(box_ != NULL);
    }
    
-   raytraceArtifactsForest(forest, storageID, globalBodyStorage, ccdID,
+   raytraceArtifactsForest(raytracingAlgorithm,
+                           forest, storageID, globalBodyStorage, ccdID,
                            Vec3(-3, 2, 2), Vec3(0, 2, 2), Vec3(0,0,1),
                            boxes, 6);
 }
@@ -773,18 +748,8 @@ Vec3 minCornerToGpos(const Vec3& minCorner, real_t lengths) {
    return minCorner + Vec3(lengths/2, lengths/2, lengths/2);
 }
 
-void HashGridsTestScene() {
-   WALBERLA_LOG_INFO_ON_ROOT("HashGrid Test Scene");
-   
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-   WALBERLA_LOG_INFO_ON_ROOT(" Using naive method for intersection testing");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO_ON_ROOT(" Using hashgrids for intersection testing");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-   WALBERLA_LOG_INFO_ON_ROOT(" Comparing hashgrids and naive method for intersection testing");
-#endif
+void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS) {
+   WALBERLA_LOG_INFO_ON_ROOT("HashGrids Test Scene");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,8,8,8), Vec3(1,1,1), Vec3(false, false, false));
@@ -839,24 +804,24 @@ void HashGridsTestScene() {
    
    // in negative x direction -> cubes to the right
    viewVectors.push_back(std::make_tuple(Vec3(15,4,4),
-                                     Vec3(8,4,4),
-                                     Vec3(0,1,0)));
+                                         Vec3(8,4,4),
+                                         Vec3(0,1,0)));
    // in negative x direction and negative z direction, up vector in y direction -> cubes from the right tilted
    viewVectors.push_back(std::make_tuple(Vec3(12,4,8),
-                                     Vec3(6,4,2),
-                                     Vec3(0,1,0)));
+                                         Vec3(6,4,2),
+                                         Vec3(0,1,0)));
    // in negative x direction and negative z direction, up vector in negative y direction
    viewVectors.push_back(std::make_tuple(Vec3(12,4,8),
-                                     Vec3(6,4,2),
-                                     Vec3(0,-1,0)));
+                                         Vec3(6,4,2),
+                                         Vec3(0,-1,0)));
    // in positive x direction
    viewVectors.push_back(std::make_tuple(Vec3(-7,4,4),
-                                     Vec3(0,4,4),
-                                     Vec3(0,1,0)));
+                                         Vec3(0,4,4),
+                                         Vec3(0,1,0)));
    // in negative x direction
    viewVectors.push_back(std::make_tuple(Vec3(4,4,15),
-                                     Vec3(4,4,8),
-                                     Vec3(0,1,0)));
+                                         Vec3(4,4,8),
+                                         Vec3(0,1,0)));
    
    WcTimingTree tt;
    
@@ -877,19 +842,23 @@ void HashGridsTestScene() {
                           Color(0.2,0.2,0.2),
                           real_t(2));
       
-#if defined(USE_NAIVE_INTERSECTION_FINDING)
-      raytracer.setImageOutputDirectory("image/naive");
-#endif
-#if !defined(USE_NAIVE_INTERSECTION_FINDING) && !defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-      raytracer.setImageOutputDirectory("image/hashgrids");
-#endif
-#if defined(COMPARE_NAIVE_AND_HASHGRIDS_RAYTRACING)
-      raytracer.setImageOutputDirectory("image/comparison");
-#endif
+      switch (raytracingAlgorithm) {
+         case Raytracer::RAYTRACE_NAIVE:
+            raytracer.setImageOutputDirectory("image/naive");
+            break;
+         case Raytracer::RAYTRACE_HASHGRIDS:
+            raytracer.setImageOutputDirectory("image/hashgrids");
+            break;
+         case Raytracer::RAYTRACE_COMPARE_BOTH:
+            raytracer.setImageOutputDirectory("image/comparison");
+            break;
+      }
+      
+      raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
       raytracer.setImageOutputEnabled(true);
       raytracer.setFilenameTimestepWidth(1);
       WALBERLA_LOG_INFO("output to: " << i << " in " << raytracer.getImageOutputDirectory());
-      
+      raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
       raytracer.rayTrace<BodyTuple>(size_t(i), &tt);
       
       auto temp = tt.getReduced();
@@ -908,40 +877,45 @@ int main( int argc, char** argv )
    SetBodyTypeIDs<BodyTuple>::execute();
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
    
+   Raytracer::Algorithm algorithm = Raytracer::RAYTRACE_COMPARE_BOTH;
+   
    //SphereIntersectsTest();
    //PlaneIntersectsTest();
    //BoxIntersectsTest();
    //AABBIntersectsTest();
    //CapsuleIntersectsTest();
-   //RaytracerTest();
-   //RaytracerSpheresTest();
+   //RaytracerTest(algorithm);
+   //RaytracerSpheresTest(algorithm);
    
-   HashGridsTestScene();
+   HashGridsTestScene(algorithm);
 
    std::vector<size_t> boxes = {127, 70, 20, 150};
    std::vector<size_t> capsules = {127, 60, 140, 100};
    std::vector<size_t> spheres = {0, 50, 40, 120};
    
    for (size_t i = 0; i < boxes.size(); ++i) {
-      HashGridsTest(boxes[i], capsules[i], spheres[i], 1);
+      HashGridsTest(algorithm, boxes[i], capsules[i], spheres[i], 1);
    }
    
-   //HashGridsTest(60, 60, 3, 1,
+   //HashGridsTest(algorithm,
+   //              60, 60, 3, 1,
    //              0.1, 0.3, true,
    //              0.1, 0.2, 0.1, 0.2,
    //              0.5, 0.6);
    
-   //HashGridsTest(750, 0, 0, 1,
+   //HashGridsTest(algorithm,
+   //              750, 0, 0, 1,
    //              0.2, 0.3);
    
-   //HashGridsTest(400, 0, 0, 1,
+   //HashGridsTest(algorithm,
+   //              400, 0, 0, 1,
    //              0.1, 0.3);
    
-   //HashGridsArtifactsTest(750, 0.2, 0.3);
-   //HashGridsFromNegativeArtifactsTest(750, 0.2, 0.3);
-   //HashGridsFromNegativeXArtifactsTest(750, 0.2, 0.3);
+   HashGridsArtifactsTest(algorithm, 750, 0.2, 0.3);
+   HashGridsFromNegativeArtifactsTest(algorithm, 750, 0.2, 0.3);
+   HashGridsFromNegativeXArtifactsTest(algorithm, 750, 0.2, 0.3);
    
-   //HashGridsTest(9999, 0, 4000, 1,
+   //HashGridsTest(algorithm, 9999, 0, 4000, 1,
    //              0.1, 0.2);
    
    return EXIT_SUCCESS;
