@@ -508,6 +508,10 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    IntersectsFunctor func(ray, t, n);
    bool isErrorneousPixel = false;
    uint_t pixelErrors = 0;
+#if defined(RAYTRACER_VERBOSE_COMPARISONS)
+   std::unordered_set<BodyID> incorrectHashgridsBodyIDs;
+   std::unordered_set<BodyID> correctBodyIDs;
+#endif
    
    if (tt != NULL) tt->start("Intersection Testing");
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
@@ -533,6 +537,10 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
             traceRayNaively<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
             
             if (body_closest != hashgrids_body_closest) {
+#if defined(RAYTRACER_VERBOSE_COMPARISONS)
+               correctBodyIDs.insert(body_closest);
+               incorrectHashgridsBodyIDs.insert(hashgrids_body_closest);
+#endif
                isErrorneousPixel = true;
                ++pixelErrors;
             }
@@ -565,6 +573,28 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
 
    if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH && pixelErrors > 0) {
       WALBERLA_LOG_WARNING(pixelErrors << " pixel errors found!");
+      
+#if defined(RAYTRACER_VERBOSE_COMPARISONS)
+      std::stringstream ss;
+      for (auto body: correctBodyIDs) {
+         if (body != NULL) {
+            ss << body->getID() << "(" << body->getHash() << ") ";
+         } else {
+            ss << "NULL" << " ";
+         }
+      };
+      ss << "(";
+      for (auto body: incorrectHashgridsBodyIDs) {
+         if (body != NULL) {
+            ss << body->getID() << "(" << body->getHash() << ") ";
+         } else {
+            ss << "NULL" << " ";
+         }
+      };
+      ss << ")";
+      
+      WALBERLA_LOG_WARNING(" problematic bodies: " << ss.str());
+#endif
    }
 
    if (tt != NULL) tt->start("Reduction");
