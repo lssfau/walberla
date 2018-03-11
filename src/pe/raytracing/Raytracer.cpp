@@ -90,7 +90,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    localImageOutputEnabled_(false),
    filenameTimestepWidth_(5),
    bodyToShadingParamsFunction_(bodyToShadingParamsFunction),
-   raytracingAlgorithm_(RAYTRACE_HASHGRIDS) {
+   raytracingAlgorithm_(RAYTRACE_HASHGRIDS),
+   reductionMethod_(MPI_REDUCE) {
    
    setupView_();
    setupFilenameRankWidth_();
@@ -118,7 +119,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage), ccdID_(ccdID),
    bodyToShadingParamsFunction_(bodyToShadingParamsFunction),
-   raytracingAlgorithm_(RAYTRACE_HASHGRIDS) {
+   raytracingAlgorithm_(RAYTRACE_HASHGRIDS),
+   reductionMethod_(MPI_REDUCE) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
    
    pixelsHorizontal_ = config.getParameter<uint16_t>("image_x");

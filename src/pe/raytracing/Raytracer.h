@@ -60,10 +60,9 @@ struct BodyIntersectionInfo {
    double b;                     //!< Blue value for the pixel.                              -> MPI_DOUBLE
 };
    
-class Raytracer {
-   enum ReductionMethod { MPI_REDUCE, MPI_GATHER };
-   
+class Raytracer {   
 public:
+   enum ReductionMethod { MPI_REDUCE, MPI_GATHER };
    enum Algorithm { RAYTRACE_HASHGRIDS, RAYTRACE_NAIVE, RAYTRACE_COMPARE_BOTH };
    
    /*!\name Constructors */
@@ -120,6 +119,7 @@ private:
                                                                                   * ShadingParameters struct
                                                                                   * given the specified body. */
    Algorithm raytracingAlgorithm_;    //!< Algorithm to use while intersection testing.
+   ReductionMethod reductionMethod_; //!< Reduction method used for assembling the image from all processes.
    //@}
    
    /*!\name Member variables for raytracing geometry */
@@ -167,6 +167,7 @@ public:
    inline void setImageOutputDirectory(const std::string& path);
    inline void setFilenameTimestepWidth(uint8_t width);
    inline void setRaytracingAlgorithm(Algorithm algorithm);
+   inline void setReductionMethod(ReductionMethod reductionMethod);
    //@}
    
    /*!\name Functions */
@@ -381,6 +382,10 @@ inline void Raytracer::setRaytracingAlgorithm(Algorithm algorithm) {
    raytracingAlgorithm_ = algorithm;
 }
    
+inline void Raytracer::setReductionMethod(ReductionMethod reductionMethod) {
+   reductionMethod_ = reductionMethod;
+}
+   
 /*!\brief Checks if a plane should get rendered.
  * \param plane Plane to check for visibility.
  * \param ray Ray which is intersected with plane.
@@ -505,8 +510,10 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    
    std::vector<real_t> tBuffer(pixelsVertical_ * pixelsHorizontal_, inf);
    std::vector<Color> imageBuffer(pixelsVertical_ * pixelsHorizontal_);
-   std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
-   
+
+   std::vector<BodyIntersectionInfo> intersections;
+   std::vector<BodyIntersectionInfo> intersectionsBuffer(pixelsVertical_ * pixelsHorizontal_); // contains for each pixel information about an intersection, if existent
+
    if (raytracingAlgorithm_ == RAYTRACE_HASHGRIDS || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH) {
       if (tt != NULL) tt->start("HashGrids Update");
       for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
@@ -616,43 +623,14 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
       WALBERLA_LOG_WARNING(" problematic bodies: " << ss.str());
 #endif
    }
-
-   if (tt != NULL) tt->start("Reduction");
-   // intersections synchronisieren
-   mpi::SendBuffer sendBuffer;
-   for (auto& info: intersections) {
-      sendBuffer << info.imageX << info.imageY
-      << info.bodySystemID << info.t
-      << info.color[0] << info.color[1] << info.color[2];
-   }
-   int gatheredIntersectionCount = 0;
-   std::vector<real_t> fullTBuffer(pixelsHorizontal_ * pixelsVertical_, inf);
-   std::vector<Color> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
-   mpi::RecvBuffer recvBuffer;
    
-   mpi::gathervBuffer(sendBuffer, recvBuffer, 0);
-   //mpi::allGathervBuffer(sendBuffer, recvBuffer);
-   
-   WALBERLA_ROOT_SECTION() {
-      BodyIntersectionInfo info;
-      while (!recvBuffer.isEmpty()) {
-         recvBuffer >> info.imageX;
-         recvBuffer >> info.imageY;
-         recvBuffer >> info.bodySystemID;
-         recvBuffer >> info.t;
-         recvBuffer >> info.color[0];
-         recvBuffer >> info.color[1];
-         recvBuffer >> info.color[2];
-         
-         size_t i = coordinateToArrayIndex(info.imageX, info.imageY);
-         real_t currentFullTBufferT = fullTBuffer[i];
-         if (currentFullTBufferT > info.t) {
-            fullTBuffer[i] = info.t;
-            fullImageBuffer[i] = info.color;
-         }
-         
-         gatheredIntersectionCount++;
-      }
+   switch(reductionMethod_) {
+      case MPI_REDUCE:
+         syncImageUsingMPIReduce(intersectionsBuffer, tt);
+         break;
+      case MPI_GATHER:
+         syncImageUsingMPIGather(intersections, intersectionsBuffer, tt);
+         break;
    }
    
    if (tt != NULL) tt->start("Output");
