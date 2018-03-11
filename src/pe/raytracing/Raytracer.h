@@ -49,14 +49,6 @@ namespace raytracing {
 /*!\brief Contains information about a ray-body intersection.
  */
 struct BodyIntersectionInfo {
-   size_t imageX;                //!< Viewing plane x pixel coordinate the ray belongs to.
-   size_t imageY;                //!< Viewing plane y pixel coordinate the ray belongs to.
-   walberla::id_t bodySystemID;  //!< System ID of body which was hit.
-   real_t t;                     //!< Distance from camera to intersection point on body.
-   Vec3 color;                   //!< Color computed for the pixel.
-};
-
-struct BodyIntersectionInfo_MPI {
    unsigned int imageX;          //!< Viewing plane x pixel coordinate the ray belongs to.   -> MPI_UNSIGNED
    unsigned int imageY;          //!< Viewing plane y pixel coordinate the ray belongs to.   -> MPI_UNSIGNED
    walberla::id_t bodySystemID;  //!< System ID of body which was hit.                       -> MPI_UNSIGNED_LONG_LONG
@@ -67,6 +59,8 @@ struct BodyIntersectionInfo_MPI {
 };
    
 class Raytracer {
+   enum ReductionMethod { MPI_REDUCE, MPI_GATHER };
+   
 public:
    /*!\name Constructors */
    //@{
@@ -118,6 +112,7 @@ private:
    std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction_; /*!< Function which returns a 
                                                                                   * ShadingParameters struct
                                                                                   * given the specified body. */
+   ReductionMethod reductionMethod_; //!< Reduction method used for assembling the image from all processes.
    //@}
    
    /*!\name Member variables for raytracing geometry */
@@ -164,6 +159,7 @@ public:
    inline void setLocalImageOutputEnabled(const bool enabled);
    inline void setImageOutputDirectory(const std::string& path);
    inline void setFilenameTimestepWidth(int8_t width);
+   inline void setReductionMethod(ReductionMethod reductionMethod);
    //@}
    
    /*!\name Functions */
@@ -182,7 +178,8 @@ private:
    void writeImageBufferToFile(const std::vector<Color>& imageBuffer, size_t timestep, bool isGlobalImage = false) const;
    void writeImageBufferToFile(const std::vector<Color>& imageBuffer, const std::string& fileName) const;
    
-   void syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo_MPI>& intersectionsBuffer, WcTimingTree* tt = NULL);
+   void syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt = NULL);
+   void syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& intersections, std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt);
    
    inline bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
    inline size_t coordinateToArrayIndex(size_t x, size_t y) const;
@@ -362,7 +359,11 @@ inline void Raytracer::setImageOutputDirectory(const std::string& path) {
 inline void Raytracer::setFilenameTimestepWidth(int8_t width) {
    filenameTimestepWidth_ = width;
 }
-   
+
+inline void Raytracer::setReductionMethod(ReductionMethod reductionMethod) {
+   reductionMethod_ = reductionMethod;
+}
+
 /*!\brief Checks if a plane should get rendered.
  * \param plane Plane to check for visibility.
  * \param ray Ray which is intersected with plane.
@@ -395,8 +396,6 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    if (tt != NULL) tt->start("Raytracing");
    if (tt != NULL) tt->start("Init");
 
-   bool useMPIReduce = true;
-
    real_t inf = std::numeric_limits<real_t>::max();
 
    int numProcesses = mpi::MPIManager::instance()->numProcesses();
@@ -406,7 +405,7 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    std::vector<Color> imageBuffer(pixelsVertical_ * pixelsHorizontal_);
    std::vector<BodyIntersectionInfo> intersections; // contains for each pixel information about an intersection, if existent
    
-   std::vector<BodyIntersectionInfo_MPI> intersectionsBuffer(pixelsVertical_ * pixelsHorizontal_);
+   std::vector<BodyIntersectionInfo> intersectionsBuffer(pixelsVertical_ * pixelsHorizontal_);
 
    
    real_t t, t_closest;
@@ -482,26 +481,16 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
             Color color = getColor(body_closest, ray, t_closest, n_closest);
             imageBuffer[coordinateToArrayIndex(x, y)] = color;
             BodyIntersectionInfo intersectionInfo = {
-               x,
-               y,
+               uint32_t(x),
+               uint32_t(y),
                body_closest->getSystemID(),
                t_closest,
-               color
+               color[0],
+               color[1],
+               color[2]
             };
             
-            if (useMPIReduce) {
-               BodyIntersectionInfo_MPI mpi_intersectionInfo = {
-                  static_cast<unsigned int>(x),
-                  static_cast<unsigned int>(y),
-                  body_closest->getSystemID(),
-                  t_closest,
-                  color[0],
-                  color[1],
-                  color[2]
-               };
-               intersectionsBuffer[coordinateToArrayIndex(x, y)] = mpi_intersectionInfo;
-            }
-            
+            intersectionsBuffer[coordinateToArrayIndex(x, y)] = intersectionInfo;
             intersections.push_back(intersectionInfo);
          }
          
@@ -510,50 +499,14 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
    }
    if (tt != NULL) tt->stop("Intersection Testing");
    
-   if (useMPIReduce) {
-      syncImageUsingMPIReduce(intersectionsBuffer, tt);
+   switch(reductionMethod_) {
+      case MPI_REDUCE:
+         syncImageUsingMPIReduce(intersectionsBuffer, tt);
+         break;
+      case MPI_GATHER:
+         syncImageUsingMPIGather(intersections, intersectionsBuffer, tt);
+         break;
    }
-   
-   /*mpi::SendBuffer sendBuffer;
-   for (auto& info: intersections) {
-      sendBuffer << info.imageX << info.imageY
-      << info.bodySystemID << info.t
-      << info.color[0] << info.color[1] << info.color[2];
-   }
-   int gatheredIntersectionCount = 0;
-   std::vector<real_t> fullTBuffer(pixelsHorizontal_ * pixelsVertical_, inf);
-   std::vector<Color> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
-   mpi::RecvBuffer recvBuffer;
-   
-   mpi::gathervBuffer(sendBuffer, recvBuffer, 0);
-   //mpi::allGathervBuffer(sendBuffer, recvBuffer);
-   
-   WALBERLA_ROOT_SECTION() {
-      BodyIntersectionInfo info;
-      while (!recvBuffer.isEmpty()) {
-         recvBuffer >> info.imageX;
-         recvBuffer >> info.imageY;
-         recvBuffer >> info.bodySystemID;
-         recvBuffer >> info.t;
-         recvBuffer >> info.color[0];
-         recvBuffer >> info.color[1];
-         recvBuffer >> info.color[2];
-         
-         size_t i = coordinateToArrayIndex(info.imageX, info.imageY);
-         real_t currentFullTBufferT = fullTBuffer[i];
-         if (currentFullTBufferT > info.t) {
-            fullTBuffer[i] = info.t;
-            fullImageBuffer[i] = info.color;
-         }
-         
-         gatheredIntersectionCount++;
-      }
-   }
-   if (tt != NULL) tt->stop("Reduction");
-
-   //WALBERLA_LOG_INFO("#particles visible: " << visibleBodyIDs.size());
-   WALBERLA_LOG_INFO_ON_ROOT("#gathered intersections: " << gatheredIntersectionCount);
-   */
    
    if (tt != NULL) tt->start("Output");
    if (getImageOutputEnabled()) {
@@ -563,10 +516,8 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
       WALBERLA_ROOT_SECTION() {
          std::vector<Color> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
 
-         if (useMPIReduce) {
-            for (auto& info: intersectionsBuffer) {
-               fullImageBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = Color(info.r, info.g, info.b);
-            }
+         for (auto& info: intersectionsBuffer) {
+            fullImageBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = Color(info.r, info.g, info.b);
          }
          
          writeImageBufferToFile(fullImageBuffer, timestep, true);
@@ -578,10 +529,8 @@ void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
       WALBERLA_ROOT_SECTION() {
          std::vector<real_t> fullTBuffer(pixelsHorizontal_ * pixelsVertical_, inf);
 
-         if (useMPIReduce) {
-            for (auto& info: intersectionsBuffer) {
-               fullTBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = info.t;
-            }
+         for (auto& info: intersectionsBuffer) {
+            fullTBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = info.t;
          }
          
          writeTBufferToFile(fullTBuffer, timestep, true);

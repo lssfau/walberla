@@ -31,7 +31,7 @@ namespace walberla {
 namespace pe {
 namespace raytracing {
    
-void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo_MPI *in, BodyIntersectionInfo_MPI *inout, int *len, MPI_Datatype *dptr) {
+void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyIntersectionInfo *inout, int *len, MPI_Datatype *dptr) {
    for (int i = 0; i < *len; ++i) {
       if (in->bodySystemID != 0 && inout->bodySystemID != 0) {
          WALBERLA_ASSERT(in->imageX == inout->imageX && in->imageY == inout->imageY, "coordinates of infos do not match: " << in->imageX << "/" << in->imageY << " and " << inout->imageX << "/" << inout->imageY);
@@ -88,7 +88,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    imageOutputEnabled_(false),
    localImageOutputEnabled_(false),
    filenameTimestepWidth_(5),
-   bodyToShadingParamsFunction_(bodyToShadingParamsFunction) {
+   bodyToShadingParamsFunction_(bodyToShadingParamsFunction),
+   reductionMethod_(MPI_REDUCE) {
    
    setupView_();
    setupFilenameRankWidth_();
@@ -114,7 +115,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
                      const Config::BlockHandle& config,
                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage),
-   bodyToShadingParamsFunction_(bodyToShadingParamsFunction) {
+   bodyToShadingParamsFunction_(bodyToShadingParamsFunction),
+   reductionMethod_(MPI_REDUCE) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");
    
    pixelsHorizontal_ = config.getParameter<uint16_t>("image_x");
@@ -148,6 +150,13 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, BlockDataID storageI
    backgroundColor_ = config.getParameter<Color>("backgroundColor", Vec3(0.1, 0.1, 0.1));
 
    blockAABBIntersectionPadding_ = config.getParameter<real_t>("blockAABBIntersectionPadding", real_t(0.0));
+
+   std::string reductionMethod = config.getParameter<std::string>("reductionMethod", "MPI_REDUCE");
+   if (reductionMethod == "MPI_REDUCE") {
+      reductionMethod_ = MPI_REDUCE;
+   } else if (reductionMethod == "MPI_GATHER") {
+      reductionMethod_ = MPI_GATHER;
+   }
       
    setupView_();
    setupFilenameRankWidth_();
@@ -195,13 +204,13 @@ void Raytracer::setupMPI_() {
       MPI_DOUBLE // for color
    };
    MPI_Aint displacements[nblocks];
-   displacements[0] = offsetof(BodyIntersectionInfo_MPI, imageX);
-   displacements[1] = offsetof(BodyIntersectionInfo_MPI, imageY);
-   displacements[2] = offsetof(BodyIntersectionInfo_MPI, bodySystemID);
-   displacements[3] = offsetof(BodyIntersectionInfo_MPI, t);
-   displacements[4] = offsetof(BodyIntersectionInfo_MPI, r);
-   displacements[5] = offsetof(BodyIntersectionInfo_MPI, g);
-   displacements[6] = offsetof(BodyIntersectionInfo_MPI, b);
+   displacements[0] = offsetof(BodyIntersectionInfo, imageX);
+   displacements[1] = offsetof(BodyIntersectionInfo, imageY);
+   displacements[2] = offsetof(BodyIntersectionInfo, bodySystemID);
+   displacements[3] = offsetof(BodyIntersectionInfo, t);
+   displacements[4] = offsetof(BodyIntersectionInfo, r);
+   displacements[5] = offsetof(BodyIntersectionInfo, g);
+   displacements[6] = offsetof(BodyIntersectionInfo, b);
    
    MPI_Datatype tmp_type;
    MPI_Type_create_struct(nblocks, blocklengths, displacements, types, &tmp_type);
@@ -343,7 +352,7 @@ void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, co
    }
 }
    
-void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo_MPI>& intersectionsBuffer, WcTimingTree* tt) {
+void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt) {
    WALBERLA_MPI_BARRIER();
    if (tt != NULL) tt->start("Reduction");
    int rank = mpi::MPIManager::instance()->rank();
@@ -358,6 +367,43 @@ void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo_MPI>& i
       MPI_Reduce(&intersectionsBuffer[0], 0, int_c(intersectionsBuffer.size()),
                  bodyIntersectionInfo_mpi_type, bodyIntersectionInfo_reduction_op,
                  recvRank, MPI_COMM_WORLD);
+   }
+   
+   WALBERLA_MPI_BARRIER();
+   if (tt != NULL) tt->stop("Reduction");
+}
+   
+void Raytracer::syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& intersections, std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt) {
+   WALBERLA_MPI_BARRIER();
+   if (tt != NULL) tt->start("Reduction");
+   
+   mpi::SendBuffer sendBuffer;
+   for (auto& info: intersections) {
+      sendBuffer << info.imageX << info.imageY
+      << info.bodySystemID << info.t
+      << info.r << info.g << info.b;
+   }
+
+   mpi::RecvBuffer recvBuffer;
+   mpi::gathervBuffer(sendBuffer, recvBuffer, 0);
+   
+   WALBERLA_ROOT_SECTION() {
+      BodyIntersectionInfo info;
+      while (!recvBuffer.isEmpty()) {
+         recvBuffer >> info.imageX;
+         recvBuffer >> info.imageY;
+         recvBuffer >> info.bodySystemID;
+         recvBuffer >> info.t;
+         recvBuffer >> info.r;
+         recvBuffer >> info.g;
+         recvBuffer >> info.b;
+         
+         size_t i = coordinateToArrayIndex(info.imageX, info.imageY);
+         
+         if (intersectionsBuffer[i].bodySystemID == 0 || info.t < intersectionsBuffer[i].t) {
+            intersectionsBuffer[i] = info;
+         }
+      }
    }
    
    WALBERLA_MPI_BARRIER();
