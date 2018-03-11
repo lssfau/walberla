@@ -35,6 +35,11 @@
 #include "pe/ccd/ICCD.h"
 #include <pe/ccd/HashGrids.h>
 
+#include "core/mpi/MPIManager.h"
+#include "core/mpi/MPIWrapper.h"
+#include "core/mpi/all.h"
+#include <stddef.h>
+
 using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::timing;
@@ -46,14 +51,18 @@ namespace raytracing {
 /*!\brief Contains information about a ray-body intersection.
  */
 struct BodyIntersectionInfo {
-   size_t imageX;                //!< viewing plane x pixel coordinate the ray belongs to.
-   size_t imageY;                //!< viewing plane y pixel coordinate the ray belongs to.
-   walberla::id_t bodySystemID;  //!< system ID of body which was hit.
-   real_t t;                     //!< distance from camera to intersection point on body.
-   Vec3 color;                   //!< color computed for the pixel.
+   unsigned int imageX;          //!< Viewing plane x pixel coordinate the ray belongs to.   -> MPI_UNSIGNED
+   unsigned int imageY;          //!< Viewing plane y pixel coordinate the ray belongs to.   -> MPI_UNSIGNED
+   walberla::id_t bodySystemID;  //!< System ID of body which was hit.                       -> MPI_UNSIGNED_LONG_LONG
+   double t;                     //!< Distance from camera to intersection point on body.    -> MPI_DOUBLE
+   double r;                     //!< Red value for the pixel.                               -> MPI_DOUBLE
+   double g;                     //!< Green value for the pixel.                             -> MPI_DOUBLE
+   double b;                     //!< Blue value for the pixel.                              -> MPI_DOUBLE
 };
-
+   
 class Raytracer {
+   enum ReductionMethod { MPI_REDUCE, MPI_GATHER };
+   
 public:
    enum Algorithm { RAYTRACE_HASHGRIDS, RAYTRACE_NAIVE, RAYTRACE_COMPARE_BOTH };
    
@@ -127,6 +136,9 @@ private:
    real_t pixelHeight_;       //!< The height of a pixel of the generated image in the viewing plane.
    //@}
    
+   MPI_Op bodyIntersectionInfo_reduction_op;
+   MPI_Datatype bodyIntersectionInfo_mpi_type;
+   
 public:
    /*!\name Get functions */
    //@{
@@ -164,6 +176,7 @@ public:
    
    void setupView_();
    void setupFilenameRankWidth_();
+   void setupMPI_();
    
 private:
    std::string getOutputFilename(const std::string& base, size_t timestep, bool isGlobalImage) const;
@@ -171,6 +184,9 @@ private:
    void writeTBufferToFile(const std::vector<real_t>& tBuffer, const std::string& fileName) const;
    void writeImageBufferToFile(const std::vector<Color>& imageBuffer, size_t timestep, bool isGlobalImage = false) const;
    void writeImageBufferToFile(const std::vector<Color>& imageBuffer, const std::string& fileName) const;
+   
+   void syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt = NULL);
+   void syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& intersections, std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt);
    
    inline bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
    inline size_t coordinateToArrayIndex(size_t x, size_t y) const;
@@ -557,12 +573,16 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
             
             imageBuffer[coordinateToArrayIndex(x, y)] = color;
             BodyIntersectionInfo intersectionInfo = {
-               x,
-               y,
+               uint32_t(x),
+               uint32_t(y),
                body_closest->getSystemID(),
                t_closest,
-               color
+               color[0],
+               color[1],
+               color[2]
             };
+            
+            intersectionsBuffer[coordinateToArrayIndex(x, y)] = intersectionInfo;
             intersections.push_back(intersectionInfo);
          }
          
@@ -634,10 +654,6 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          gatheredIntersectionCount++;
       }
    }
-   if (tt != NULL) tt->stop("Reduction");
-
-   //WALBERLA_LOG_INFO("#particles visible: " << visibleBodyIDs.size());
-   WALBERLA_LOG_INFO_ON_ROOT("#gathered intersections: " << gatheredIntersectionCount);
    
    if (tt != NULL) tt->start("Output");
    if (getImageOutputEnabled()) {
@@ -645,6 +661,12 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          writeImageBufferToFile(imageBuffer, timestep);
       }
       WALBERLA_ROOT_SECTION() {
+         std::vector<Color> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
+
+         for (auto& info: intersectionsBuffer) {
+            fullImageBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = Color(info.r, info.g, info.b);
+         }
+         
          writeImageBufferToFile(fullImageBuffer, timestep, true);
       }
    }
@@ -652,9 +674,16 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    if (getTBufferOutputEnabled()) {
       writeTBufferToFile(tBuffer, timestep);
       WALBERLA_ROOT_SECTION() {
+         std::vector<real_t> fullTBuffer(pixelsHorizontal_ * pixelsVertical_, inf);
+
+         for (auto& info: intersectionsBuffer) {
+            fullTBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = info.t;
+         }
+         
          writeTBufferToFile(fullTBuffer, timestep, true);
       }
    }
+   
    if (tt != NULL) tt->stop("Output");
    if (tt != NULL) tt->stop("Raytracing");
 }
