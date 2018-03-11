@@ -180,7 +180,7 @@ std::string Raytracer::getOutputFilename(const std::string& base, size_t timeste
 }
 
 /*!\brief Writes the tBuffer to a file in the tBuffer output directory.
- * \param tBuffer Buffer with t values as generated in rayTrace(...).
+ * \param tBuffer Buffer with t values as generated in generateImage(...).
  * \param timestep Timestep this image is from.
  * \param isGlobalImage Whether this image is the fully stitched together one.
  */
@@ -189,7 +189,7 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t ti
 }
 
 /*!\brief Writes the tBuffer to a file in the tBuffer output directory.
- * \param tBuffer Buffer with t values as generated in rayTrace(...).
+ * \param tBuffer Buffer with t values as generated in generateImage(...).
  * \param fileName Name of the output file.
  */
 void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std::string& fileName) const {

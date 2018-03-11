@@ -60,7 +60,7 @@ void testRayTracing () {
    //createSphere(*globalBodyStorage, *forest, storageID, 5, Vec3(1,0,0), real_t(0.1));
 
    //Raytracer raytracer(forest, storageID, uint8_t(640), uint8_t(480), 49.13, Vec3(-5,0,0), Vec3(-1,0,0), Vec3(0,0,1));
-   //raytracer.rayTrace<BodyTypeTuple>(0);
+   //raytracer.generateImage<BodyTypeTuple>(0);
 }
 
 int main( int argc, char ** argv )
@@ -205,7 +205,7 @@ int main( int argc, char ** argv )
       syncNextNeighbors<BodyTypeTuple>(*forest, storageID);
       
       if (i%raytraceSkippedSteps == 0) {
-         raytracer.rayTrace<BodyTypeTuple>(i);
+         raytracer.generateImage<BodyTypeTuple>(i);
       }
    }
    //! [GameLoop]
@@ -226,7 +226,7 @@ int main( int argc, char ** argv )
    //! [PostProcessing]
    
    //WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - START ***");
-   //raytracer.rayTrace<BodyTypeTuple>(0);
+   //raytracer.generateImage<BodyTypeTuple>(0);
    //WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - END ***");
 
    // für einzelne sphere vtks: -> SphereVtkOutput.cpp

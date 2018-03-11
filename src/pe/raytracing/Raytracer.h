@@ -160,7 +160,7 @@ public:
    /*!\name Functions */
    //@{
    template <typename BodyTypeTuple>
-   void rayTrace(const size_t timestep, WcTimingTree* tt = NULL );
+   void generateImage(const size_t timestep, WcTimingTree* tt = NULL );
    
    void setupView_();
    void setupFilenameRankWidth_();
@@ -483,7 +483,7 @@ inline void Raytracer::traceRayInHashGrids(const Ray& ray, BodyID& body_closest,
  * same direction. See Raytracer::isPlaneVisible() for further information.
  */
 template <typename BodyTypeTuple>
-void Raytracer::rayTrace(const size_t timestep, WcTimingTree* tt) {
+void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    if (tt != NULL) tt->start("Raytracing");
    real_t inf = std::numeric_limits<real_t>::max();
    

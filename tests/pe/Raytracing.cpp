@@ -292,7 +292,7 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
    //raytracer.setLocalImageOutputEnabled(true);
    
    raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
-   raytracer.rayTrace<BodyTuple>(0);
+   raytracer.generateImage<BodyTuple>(0);
 }
 
 ShadingParameters customSpheresBodyToShadingParams(const BodyID body) {
@@ -377,7 +377,7 @@ void RaytracerSpheresTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::
    raytracer.setImageOutputEnabled(true);
    
    raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
-   raytracer.rayTrace<BodyTuple>(1);
+   raytracer.generateImage<BodyTuple>(1);
 }
 
 ShadingParameters customHashGridsBodyToShadingParams(const BodyID body) {
@@ -554,7 +554,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm,
       raytracer.setFilenameTimestepWidth(12);
       WALBERLA_LOG_INFO("output #" << i << " to: " << (boxes*100000000 + capsules*10000 + spheres) << " in " << raytracer.getImageOutputDirectory());
       raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
-      raytracer.rayTrace<BodyTuple>(boxes*100000000 + capsules*10000 + spheres, &tt);
+      raytracer.generateImage<BodyTuple>(boxes*100000000 + capsules*10000 + spheres, &tt);
       i++;
    }
    
@@ -609,7 +609,7 @@ void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm,
    raytracer.setFilenameTimestepWidth(timestepWidth);
    raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
    WALBERLA_LOG_INFO("output to: " << numberOfBoxes << " in " << raytracer.getImageOutputDirectory());
-   raytracer.rayTrace<BodyTuple>(numberOfBoxes, &tt);
+   raytracer.generateImage<BodyTuple>(numberOfBoxes, &tt);
    
    auto temp = tt.getReduced();
    WALBERLA_ROOT_SECTION() {
@@ -859,7 +859,7 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
       raytracer.setFilenameTimestepWidth(1);
       WALBERLA_LOG_INFO("output to: " << i << " in " << raytracer.getImageOutputDirectory());
       raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
-      raytracer.rayTrace<BodyTuple>(size_t(i), &tt);
+      raytracer.generateImage<BodyTuple>(size_t(i), &tt);
       
       auto temp = tt.getReduced();
       WALBERLA_ROOT_SECTION() {
