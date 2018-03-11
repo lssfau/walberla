@@ -782,19 +782,12 @@ BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, 
       }
    }
    
-   for (auto gridIt = gridList_.rbegin(); gridIt != gridList_.rend(); ++gridIt) {
-      body_local = (*gridIt)->getRayIntersectingBody<BodyTuple>(ray, blockAABB, t_closest, n_closest);
-      if (body_local != NULL){
-         body_closest = body_local;
-      }
-   }
-
-   /*for(auto grid: gridList_) {
+   for(auto grid: gridList_) {
       body_local = grid->getRayIntersectingBody<BodyTuple>(ray, blockAABB, t_closest, n_closest);
       if (body_local != NULL){
          body_closest = body_local;
       }
-   }*/
+   }
    
    t = t_closest;
    n = n_closest;
