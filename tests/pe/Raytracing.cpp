@@ -873,7 +873,6 @@ int main( int argc, char** argv )
    //AABBIntersectsTest();
    //CapsuleIntersectsTest();
    RaytracerTest(algorithm, outputFolder);
-   return;
    RaytracerSpheresTest(algorithm, outputFolder);
    
    HashGridsTestScene(algorithm, outputFolder);
