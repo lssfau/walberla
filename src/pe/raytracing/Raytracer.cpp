@@ -199,7 +199,7 @@ void Raytracer::setupView_() {
  */
 void Raytracer::setupFilenameRankWidth_() {
    int numProcesses = mpi::MPIManager::instance()->numProcesses();
-   filenameRankWidth_ = uint8_c(log10(numProcesses))+1;
+   filenameRankWidth_ = uint8_c(log10(numProcesses)+1);
 }
 
 void Raytracer::setupMPI_() {

@@ -78,7 +78,7 @@ public:
    /*!\brief Returns the normalized direction vector of the ray for a given axis.
     */
    inline real_t getDirection (size_t axis) const {
-      WALBERLA_ASSERT(axis >= 0 && axis <= 2, "No valid axis index passed.");
+      WALBERLA_ASSERT(axis <= 2, "No valid axis index passed.");
       return direction_[axis];
    }
    
@@ -108,7 +108,7 @@ public:
 
    /*!\brief Returns the inverse of the direction vector of the ray for a given axis.
     */
-   inline const real_t getInvDirection (size_t axis) const {
+   inline real_t getInvDirection (size_t axis) const {
       WALBERLA_ASSERT(axis >= 0 && axis <= 2, "No valid axis index passed.");
       return inv_direction_[axis];
    }

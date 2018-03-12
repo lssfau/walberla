@@ -189,11 +189,11 @@ private:
       BodyID getRayIntersectingBody(const raytracing::Ray& ray, const AABB& blockAABB, real_t& t, Vec3& n) const;
       
       template<typename BodyTuple>
-      const BodyID getBodyIntersectionForBlockCell(const Vector3<int32_t>& blockCell,
-                                                   const int8_t cellNormalAxis, const int8_t cellNormalDir,
-                                                   const AABB& blockAABB,
-                                                   const raytracing::Ray& ray,
-                                                   real_t& t_closest, Vec3& n_closest) const;
+      BodyID getBodyIntersectionForBlockCell(const Vector3<int32_t>& blockCell,
+                                             const int8_t cellNormalAxis, const int8_t cellNormalDir,
+                                             const AABB& blockAABB,
+                                             const raytracing::Ray& ray,
+                                             real_t& t_closest, Vec3& n_closest) const;
       
       void clear();
       //@}
@@ -512,11 +512,11 @@ void HashGrids::HashGrid::processBodies( BodyID* bodies, size_t bodyCount, Conta
  * cell into the intersected cell (and thus, possibly intersect with the ray as well).
  */
 template<typename BodyTuple>
-const BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_t>& blockCell,
-                                                                  const int8_t cellNormalAxis, const int8_t cellNormalDir,
-                                                                  const AABB& blockAABB,
-                                                                  const raytracing::Ray& ray,
-                                                                  real_t& t_closest, Vec3& n_closest) const {
+BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_t>& blockCell,
+                                                            const int8_t cellNormalAxis, const int8_t cellNormalDir,
+                                                            const AABB& blockAABB,
+                                                            const raytracing::Ray& ray,
+                                                            real_t& t_closest, Vec3& n_closest) const {
    real_t t_local;
    Vec3 n_local;
    BodyID body = NULL;
@@ -647,14 +647,14 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
              (stepZ >= 0) ? (firstCell[2]+1)*cellSpan_-firstPoint[2] : firstPoint[2]-firstCell[2]*cellSpan_);
    
    // tMax: distance along the ray to the next cell change in the axis direction
-   real_t tMaxX = (ray.xDir() != 0) ? std::abs(near[0]*ray.xInvDir()) : inf;
-   real_t tMaxY = (ray.yDir() != 0) ? std::abs(near[1]*ray.yInvDir()) : inf;
-   real_t tMaxZ = (ray.zDir() != 0) ? std::abs(near[2]*ray.zInvDir()) : inf;
+   real_t tMaxX = (!realIsEqual(ray.xDir(), 0)) ? std::abs(near[0]*ray.xInvDir()) : inf;
+   real_t tMaxY = (!realIsEqual(ray.yDir(), 0)) ? std::abs(near[1]*ray.yInvDir()) : inf;
+   real_t tMaxZ = (!realIsEqual(ray.zDir(), 0)) ? std::abs(near[2]*ray.zInvDir()) : inf;
    
    // tDelta: how far along the ray must be moved to encounter a new cell in the specified axis direction
-   real_t tDeltaX = (ray.xDir() != 0) ? std::abs(cellSpan_*ray.xInvDir()) : inf;
-   real_t tDeltaY = (ray.yDir() != 0) ? std::abs(cellSpan_*ray.yInvDir()) : inf;
-   real_t tDeltaZ = (ray.zDir() != 0) ? std::abs(cellSpan_*ray.zInvDir()) : inf;
+   real_t tDeltaX = (!realIsEqual(ray.xDir(), 0)) ? std::abs(cellSpan_*ray.xInvDir()) : inf;
+   real_t tDeltaY = (!realIsEqual(ray.yDir(), 0)) ? std::abs(cellSpan_*ray.yInvDir()) : inf;
+   real_t tDeltaZ = (!realIsEqual(ray.zDir(), 0)) ? std::abs(cellSpan_*ray.zInvDir()) : inf;
    
    Vector3<int32_t> currentCell = firstCell;
    
@@ -675,14 +675,11 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
    int8_t blockCellNormalAxis;
    int8_t blockCellNormalDir;
    
-   static int earlyCutoffs = 0;
-   
    while (true) {
       if (tMaxX < tMaxY) {
          if (tMaxX < tMaxZ) {
 #if !defined(HASHGRIDS_DISABLE_EARLY_CUTOFF)
             if (tRayOriginToGrid+tMaxX-tDeltaX > t_closest) {
-               earlyCutoffs++;
                break;
             }
 #endif
@@ -696,7 +693,6 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
          } else {
 #if !defined(HASHGRIDS_DISABLE_EARLY_CUTOFF)
             if (tRayOriginToGrid+tMaxZ-tDeltaZ > t_closest) {
-               earlyCutoffs++;
                break;
             }
 #endif
@@ -712,7 +708,6 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
          if (tMaxY < tMaxZ) {
 #if !defined(HASHGRIDS_DISABLE_EARLY_CUTOFF)
             if (tRayOriginToGrid+tMaxY-tDeltaY > t_closest) {
-               earlyCutoffs++;
                break;
             }
 #endif
@@ -726,7 +721,6 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
          } else {
 #if !defined(HASHGRIDS_DISABLE_EARLY_CUTOFF)
             if (tRayOriginToGrid+tMaxZ-tDeltaZ > t_closest) {
-               earlyCutoffs++;
                break;
             }
 #endif
@@ -760,7 +754,7 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
  * \return BodyID of closest body, NULL if none found.
  */
 template<typename BodyTuple>
-BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, const AABB& blockAABB, 
+BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, const AABB& blockAABB,
                                                     real_t& t, Vec3& n) {
    real_t inf = std::numeric_limits<real_t>::max();
 

@@ -290,6 +290,10 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
 }
    
 inline bool intersects(const BodyID body, const Ray& ray, real_t& t, Vec3& n) {
+   WALBERLA_UNUSED(body);
+   WALBERLA_UNUSED(ray);
+   WALBERLA_UNUSED(t);
+   WALBERLA_UNUSED(n);
    WALBERLA_ABORT("This ray - body intersection test is not implemented yet!");
    return false;
 }
