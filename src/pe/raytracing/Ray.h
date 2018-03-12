@@ -109,7 +109,7 @@ public:
    /*!\brief Returns the inverse of the direction vector of the ray for a given axis.
     */
    inline real_t getInvDirection (size_t axis) const {
-      WALBERLA_ASSERT(axis >= 0 && axis <= 2, "No valid axis index passed.");
+      WALBERLA_ASSERT(axis <= 2, "No valid axis index passed.");
       return inv_direction_[axis];
    }
    

@@ -26,16 +26,7 @@
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
 
-#include "gui/Gui.h"
-#include "timeloop/SweepTimeloop.h"
-
-#include <pe/vtk/SphereVtkOutput.h>
-#include "vtk/VTKOutput.h"
-
 #include <pe/raytracing/Raytracer.h>
-
-#include <core/mpi/all.h>
-
 //! [Includes]
 
 using namespace walberla;
@@ -43,65 +34,23 @@ using namespace walberla::pe;
 using namespace walberla::pe::raytracing;
 
 //! [BodyTypeTuple]
-typedef boost::tuple<Sphere, Plane, Box> BodyTypeTuple ;
+typedef boost::tuple<Sphere, Plane> BodyTypeTuple ;
 //! [BodyTypeTuple]
-
-void testRayTracing () {
-   shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,-5,-5,10,5,5), Vec3(1,1,1), Vec3(false, false, false));
-   auto storageID = forest->addBlockData(createStorageDataHandling<BodyTypeTuple>(), "Storage");
-   SetBodyTypeIDs<BodyTypeTuple>::execute();
-   createSphere(*globalBodyStorage, *forest, storageID, 2, Vec3(6,4.5,4.5), real_t(0.5));
-   createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(3.5,-2,0), real_t(1));
-   //createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,2,0), real_t(1));
-   BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,0,0), Vec3(2,4,3));
-   box->rotate(0,math::M_PI/4,math::M_PI/4);
-   createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,-4,3), Vec3(2,2,2));
-   //createSphere(*globalBodyStorage, *forest, storageID, 5, Vec3(1,0,0), real_t(0.1));
-
-   //Raytracer raytracer(forest, storageID, uint8_t(640), uint8_t(480), 49.13, Vec3(-5,0,0), Vec3(-1,0,0), Vec3(0,0,1));
-   //raytracer.generateImage<BodyTypeTuple>(0);
-}
 
 int main( int argc, char ** argv )
 {
    //! [Parameters]
    Environment env(argc, argv);
    WALBERLA_UNUSED(env);
-   
+
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
-   
-   //testRayTracing();
-   //return 0;
-   
+
    real_t spacing          = real_c(1.0);
    real_t radius           = real_c(0.4);
    real_t vMax             = real_c(1.0);
-   size_t    simulationSteps  = 10;
-   size_t raytraceSkippedSteps = 10;
+   int    simulationSteps  = 100;
+   int    raytracerSkippedSteps = 5;
    real_t dt               = real_c(0.01);
-   
-   uint_t blocks_x = 2, blocks_y = 2, blocks_z = 2;
-   
-   auto cfg = env.config();
-   if (cfg != NULL) {
-      const Config::BlockHandle confBlock = cfg->getBlock("gas");
-      
-      spacing = confBlock.getParameter<real_t>("spacing", spacing);
-      radius = confBlock.getParameter<real_t>("radius", radius);
-      simulationSteps = confBlock.getParameter<size_t>("simulationSteps", simulationSteps);
-      raytraceSkippedSteps = confBlock.getParameter<size_t>("raytraceSkippedSteps", raytraceSkippedSteps);
-      blocks_x = confBlock.getParameter<uint_t>("blocks_x", blocks_x);
-      blocks_y = confBlock.getParameter<uint_t>("blocks_y", blocks_y);
-      blocks_z = confBlock.getParameter<uint_t>("blocks_z", blocks_z);
-      
-      WALBERLA_LOG_INFO_ON_ROOT("spacing: " << spacing);
-      WALBERLA_LOG_INFO_ON_ROOT("radius: " << radius);
-      WALBERLA_LOG_INFO_ON_ROOT("blocks_x: " << blocks_x);
-      WALBERLA_LOG_INFO_ON_ROOT("blocks_y: " << blocks_y);
-      WALBERLA_LOG_INFO_ON_ROOT("blocks_z: " << blocks_z);
-   }
-   
    //! [Parameters]
 
    WALBERLA_LOG_INFO_ON_ROOT("*** GLOBALBODYSTORAGE ***");
@@ -113,10 +62,9 @@ int main( int argc, char ** argv )
    // create forest
    //! [BlockForest]
    shared_ptr< BlockForest > forest = createBlockForest( AABB(0,0,0,20,20,20), // simulation domain
-                                                         Vector3<uint_t>(blocks_x,blocks_y,blocks_z), // blocks in each direction
+                                                         Vector3<uint_t>(2,2,2), // blocks in each direction
                                                          Vector3<bool>(false, false, false) // periodicity
                                                          );
-	
    //! [BlockForest]
    if (!forest)
    {
@@ -133,12 +81,6 @@ int main( int argc, char ** argv )
    auto ccdID               = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
    auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTypeTuple, fcd::AnalyticCollideFunctor>(), "FCD");
    //! [AdditionalBlockData]
-   
-   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
-   if (cfg == NULL) {
-      WALBERLA_ABORT("raytracer needs a working config");
-   }
-   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID, cfg->getBlock("raytracing"));
 
    WALBERLA_LOG_INFO_ON_ROOT("*** INTEGRATOR ***");
    //! [Integrator]
@@ -154,6 +96,19 @@ int main( int argc, char ** argv )
    //! [SetBodyTypeIDs]
    SetBodyTypeIDs<BodyTypeTuple>::execute();
    //! [SetBodyTypeIDs]
+   
+   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
+   Lighting lighting(Vec3(-12, 12, 12),
+                     Color(1, 1, 1),
+                     Color(1, 1, 1),
+                     Color(0.4, 0.4, 0.4));
+   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
+                       640, 480,
+                       real_t(49.13),
+                       Vec3(-25, 10, 10), Vec3(-5, 10, 10), Vec3(0, 0, 1),
+                       lighting,
+                       Color(0.1, 0.1, 0.1),
+                       radius);
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - START ***");
    //! [Material]
@@ -172,7 +127,7 @@ int main( int argc, char ** argv )
    createPlane(*globalBodyStorage, 0, Vec3(0,0,1), simulationDomain.minCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,0,-1), simulationDomain.maxCorner(), material );
    //! [Planes]
-   
+
    //! [Gas]
    uint_t numParticles = uint_c(0);
    for (auto blkIt = forest->begin(); blkIt != forest->end(); ++blkIt)
@@ -194,7 +149,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - START ***");
    //! [GameLoop]
-   for (size_t i=0; i < simulationSteps; ++i)
+   for (int i=0; i < simulationSteps; ++i)
    {
       if( i % 10 == 0 )
       {
@@ -202,12 +157,13 @@ int main( int argc, char ** argv )
       }
 
       cr.timestep( real_c(dt) );
-      syncNextNeighbors<BodyTypeTuple>(*forest, storageID);
-      
-      if (i%raytraceSkippedSteps == 0) {
-         raytracer.generateImage<BodyTypeTuple>(i);
+      if (i % raytracerSkippedSteps == 0) {
+         raytracer.generateImage<BodyTypeTuple>(uint_c(i));
       }
+      syncNextNeighbors<BodyTypeTuple>(*forest, storageID);
+   
    }
+
    //! [GameLoop]
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
 
@@ -224,18 +180,6 @@ int main( int argc, char ** argv )
    meanVelocity /= numParticles;
    WALBERLA_LOG_INFO( "mean velocity: " << meanVelocity );
    //! [PostProcessing]
-   
-   //WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - START ***");
-   //raytracer.generateImage<BodyTypeTuple>(0);
-   //WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACING - END ***");
 
-   // für einzelne sphere vtks: -> SphereVtkOutput.cpp
-   
-   auto vtkDomainOutput = vtk::createVTKOutput_DomainDecomposition( forest, "domain_decomposition", 1, "vtk_out", "simulation_step" );
-   auto vtkSphereHelper = make_shared<SphereVtkOutput>(storageID, *forest) ;
-   auto vtkSphereOutput = vtk::createVTKOutput_PointData(vtkSphereHelper, "Bodies", 1, "vtk_out", "simulation_step", false, false);
-   vtkDomainOutput->write();
-   vtkSphereOutput->write();
-   
    return EXIT_SUCCESS;
 }

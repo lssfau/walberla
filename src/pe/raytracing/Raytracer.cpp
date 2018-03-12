@@ -32,6 +32,7 @@ namespace pe {
 namespace raytracing {
    
 void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyIntersectionInfo *inout, int *len, MPI_Datatype *dptr) {
+   WALBERLA_UNUSED(dptr);
    for (int i = 0; i < *len; ++i) {
       if (in->bodySystemID != 0 && inout->bodySystemID != 0) {
          WALBERLA_ASSERT(in->imageX == inout->imageX && in->imageY == inout->imageY, "coordinates of infos do not match: " << in->imageX << "/" << in->imageY << " and " << inout->imageX << "/" << inout->imageY);
@@ -86,8 +87,10 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    backgroundColor_(backgroundColor),
    blockAABBIntersectionPadding_(blockAABBIntersectionPadding),
    tBufferOutputEnabled_(false),
-   imageOutputEnabled_(false),
+   tBufferOutputDirectory_("."),
+   imageOutputEnabled_(true),
    localImageOutputEnabled_(false),
+   imageOutputDirectory_("."),
    filenameTimestepWidth_(5),
    bodyToShadingParamsFunction_(bodyToShadingParamsFunction),
    raytracingAlgorithm_(RAYTRACE_HASHGRIDS),
@@ -129,7 +132,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    
    if (config.isDefined("tbuffer_output_directory")) {
       setTBufferOutputEnabled(true);
-      setTBufferOutputDirectory(config.getParameter<std::string>("tbuffer_output_directory"));
+      setTBufferOutputDirectory(config.getParameter<std::string>("tbuffer_output_directory", "."));
       WALBERLA_LOG_INFO_ON_ROOT("t buffers will be written to " << getTBufferOutputDirectory() << ".");
    } else {
       setTBufferOutputEnabled(false);
@@ -139,7 +142,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
       
    if (config.isDefined("image_output_directory")) {
       setImageOutputEnabled(true);
-      setImageOutputDirectory(config.getParameter<std::string>("image_output_directory"));
+      setImageOutputDirectory(config.getParameter<std::string>("image_output_directory", "."));
       WALBERLA_LOG_INFO_ON_ROOT("Images will be written to " << getImageOutputDirectory() << ".");
    } else if (getLocalImageOutputEnabled()) {
       WALBERLA_ABORT("Cannot enable local image output without image_output_directory parameter being set.");

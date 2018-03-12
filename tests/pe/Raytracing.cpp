@@ -850,7 +850,7 @@ int main( int argc, char** argv )
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
    
    Raytracer::Algorithm algorithm = Raytracer::RAYTRACE_COMPARE_BOTH;
-   bool outputToFoldersEnabled = false;
+   bool outputToFoldersEnabled = true;
    
    std::string outputFolder = ".";
    if (outputToFoldersEnabled) {
@@ -872,8 +872,9 @@ int main( int argc, char** argv )
    //BoxIntersectsTest();
    //AABBIntersectsTest();
    //CapsuleIntersectsTest();
-   //RaytracerTest(algorithm, outputFolder);
-   //RaytracerSpheresTest(algorithm, outputFolder);
+   RaytracerTest(algorithm, outputFolder);
+   return;
+   RaytracerSpheresTest(algorithm, outputFolder);
    
    HashGridsTestScene(algorithm, outputFolder);
 

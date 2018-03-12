@@ -60,7 +60,7 @@ struct BodyIntersectionInfo {
    double b;                     //!< Blue value for the pixel.                              -> MPI_DOUBLE
 };
    
-class Raytracer {   
+class Raytracer {
 public:
    enum ReductionMethod { MPI_REDUCE, MPI_GATHER };
    enum Algorithm { RAYTRACE_HASHGRIDS, RAYTRACE_NAIVE, RAYTRACE_COMPARE_BOTH };
@@ -532,8 +532,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    bool isErrorneousPixel = false;
    uint_t pixelErrors = 0;
 #if defined(RAYTRACER_VERBOSE_COMPARISONS)
-   std::unordered_set<BodyID> incorrectHashgridsBodyIDs;
-   std::unordered_set<BodyID> correctBodyIDs;
+   std::map<BodyID, std::unordered_set<BodyID>> correctToIncorrectBodyIDsMap;
 #endif
    
    if (tt != NULL) tt->start("Intersection Testing");
@@ -542,6 +541,9 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          Vec3 pixelLocation = viewingPlaneOrigin_ + u_*(real_c(x)+real_t(0.5))*pixelWidth_ + v_*(real_c(y)+real_t(0.5))*pixelHeight_;
          Vec3 direction = (pixelLocation - cameraPosition_).getNormalized();
          ray.setDirection(direction);
+         
+         //if (x != 110) continue;
+         //if (y != 80 && y != 150) continue;
          
          n.reset();
          t_closest = inf;
@@ -561,8 +563,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
             
             if (body_closest != hashgrids_body_closest) {
 #if defined(RAYTRACER_VERBOSE_COMPARISONS)
-               correctBodyIDs.insert(body_closest);
-               incorrectHashgridsBodyIDs.insert(hashgrids_body_closest);
+               correctToIncorrectBodyIDsMap[body_closest].insert(hashgrids_body_closest);
 #endif
                isErrorneousPixel = true;
                ++pixelErrors;
@@ -603,24 +604,28 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
       
 #if defined(RAYTRACER_VERBOSE_COMPARISONS)
       std::stringstream ss;
-      for (auto body: correctBodyIDs) {
-         if (body != NULL) {
-            ss << body->getID() << "(" << body->getHash() << ") ";
+      for (auto it: correctToIncorrectBodyIDsMap) {
+         const BodyID correctBody = it.first;
+         if (it.first != NULL) {
+            ss << " correct body: " << correctBody->getID() << "(" << correctBody->getHash() << ")";
          } else {
-            ss << "NULL" << " ";
+            ss << " no body naively found";
          }
-      };
-      ss << "(";
-      for (auto body: incorrectHashgridsBodyIDs) {
-         if (body != NULL) {
-            ss << body->getID() << "(" << body->getHash() << ") ";
-         } else {
-            ss << "NULL" << " ";
+         ss << ", hashgrids found:";
+         for (auto incorrectBody: it.second) {
+            ss << " ";
+            if (incorrectBody != NULL) {
+               ss << incorrectBody->getID() << "(" << incorrectBody->getHash();
+            } else {
+               ss << "NULL";
+            }
          }
-      };
-      ss << ")";
+         ss << std::endl;
+         ss << "  minCorner: " << correctBody->getAABB().minCorner() << ", maxCorner: " << correctBody->getAABB().maxCorner();
+         ss << std::endl;
+      }
       
-      WALBERLA_LOG_WARNING(" problematic bodies: " << ss.str());
+      WALBERLA_LOG_WARNING("Problematic bodies: " << std::endl << ss.str());
 #endif
    }
    
@@ -686,7 +691,7 @@ inline Color Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, co
    
    real_t specular = real_t(0);
    
-   if (lambertian > 0) {
+   if (lambertian > 0 || realIsEqual(lambertian, real_t(0))) {
       // Blinn-Phong
       Vec3 viewDirection = -ray.getDirection();
       Vec3 halfDirection = (lightDirection + viewDirection).getNormalized();
