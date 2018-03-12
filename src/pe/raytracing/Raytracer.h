@@ -136,8 +136,10 @@ private:
    real_t pixelHeight_;       //!< The height of a pixel of the generated image in the viewing plane.
    //@}
    
+#ifdef WALBERLA_BUILD_WITH_MPI
    MPI_Op bodyIntersectionInfo_reduction_op;
    MPI_Datatype bodyIntersectionInfo_mpi_type;
+#endif
    
 public:
    /*!\name Get functions */
@@ -542,9 +544,6 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          Vec3 direction = (pixelLocation - cameraPosition_).getNormalized();
          ray.setDirection(direction);
          
-         //if (x != 110) continue;
-         //if (y != 80 && y != 150) continue;
-         
          n.reset();
          t_closest = inf;
          body_closest = NULL;
@@ -629,13 +628,20 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
 #endif
    }
    
-   switch(reductionMethod_) {
-      case MPI_REDUCE:
-         syncImageUsingMPIReduce(intersectionsBuffer, tt);
-         break;
-      case MPI_GATHER:
-         syncImageUsingMPIGather(intersections, intersectionsBuffer, tt);
-         break;
+   // Reduction with different methods only makes sense if actually using MPI.
+   // Besides that, the MPI reduce routine does not compile without MPI.
+   WALBERLA_MPI_SECTION() {
+      switch(reductionMethod_) {
+         case MPI_REDUCE:
+            syncImageUsingMPIReduce(intersectionsBuffer, tt);
+            break;
+         case MPI_GATHER:
+            syncImageUsingMPIGather(intersections, intersectionsBuffer, tt);
+            break;
+      }
+   }
+   WALBERLA_NON_MPI_SECTION() {
+      syncImageUsingMPIGather(intersections, intersectionsBuffer, tt);
    }
    
    if (tt != NULL) tt->start("Output");

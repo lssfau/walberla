@@ -31,6 +31,7 @@ namespace walberla {
 namespace pe {
 namespace raytracing {
    
+#ifdef WALBERLA_BUILD_WITH_MPI
 void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyIntersectionInfo *inout, int *len, MPI_Datatype *dptr) {
    WALBERLA_UNUSED(dptr);
    for (int i = 0; i < *len; ++i) {
@@ -53,7 +54,8 @@ void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyInter
       inout++;
    }
 }
-   
+#endif
+
 /*!\brief Instantiation constructor for the Raytracer class.
  *
  * \param forest BlockForest the raytracer operates on.
@@ -201,11 +203,14 @@ void Raytracer::setupView_() {
 /*!\brief Utility function for initializing the attribute filenameRankWidth.
  */
 void Raytracer::setupFilenameRankWidth_() {
-   int numProcesses = mpi::MPIManager::instance()->numProcesses();
-   filenameRankWidth_ = uint8_c(log10(numProcesses)+1);
+   WALBERLA_MPI_SECTION() {
+      int numProcesses = mpi::MPIManager::instance()->numProcesses();
+      filenameRankWidth_ = uint8_c(log10(numProcesses)+1);
+   }
 }
 
 void Raytracer::setupMPI_() {
+#ifdef WALBERLA_BUILD_WITH_MPI
    MPI_Op_create((MPI_User_function *)BodyIntersectionInfo_Comparator_MPI_OP, true, &bodyIntersectionInfo_reduction_op);
    
    const int nblocks = 7;
@@ -236,6 +241,7 @@ void Raytracer::setupMPI_() {
    MPI_Type_create_resized( tmp_type, lb, extent, &bodyIntersectionInfo_mpi_type );
    
    MPI_Type_commit(&bodyIntersectionInfo_mpi_type);
+#endif
 }
    
 /*!\brief Generates the filename for output files.
@@ -250,11 +256,14 @@ std::string Raytracer::getOutputFilename(const std::string& base, size_t timeste
    std::stringstream fileNameStream;
    fileNameStream << base << "_";
    fileNameStream << std::setfill('0') << std::setw(int_c(filenameTimestepWidth_)) << timestep; // add timestep
-   fileNameStream << "+";
-   if (isGlobalImage) {
-      fileNameStream << "global";
-   } else {
-      fileNameStream << std::setfill('0') << std::setw(int_c(filenameRankWidth_)) << std::to_string(rank); // add rank
+   WALBERLA_MPI_SECTION() {
+      // Appending the rank to the filename only makes sense if actually using MPI.
+      fileNameStream << "+";
+      if (isGlobalImage) {
+         fileNameStream << "global";
+      } else {
+         fileNameStream << std::setfill('0') << std::setw(int_c(filenameRankWidth_)) << std::to_string(rank); // add rank
+      }
    }
    fileNameStream << ".png"; // add extension
    return fileNameStream.str();
@@ -369,6 +378,7 @@ void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, co
 }
    
 void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt) {
+#ifdef WALBERLA_BUILD_WITH_MPI
    WALBERLA_MPI_BARRIER();
    if (tt != NULL) tt->start("Reduction");
    int rank = mpi::MPIManager::instance()->rank();
@@ -387,6 +397,7 @@ void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& inter
    
    WALBERLA_MPI_BARRIER();
    if (tt != NULL) tt->stop("Reduction");
+#endif
 }
    
 void Raytracer::syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& intersections, std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt) {
