@@ -155,11 +155,20 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
 
    blockAABBIntersectionPadding_ = config.getParameter<real_t>("blockAABBIntersectionPadding", real_t(0.0));
 
+   std::string raytracingAlgorithm = config.getParameter<std::string>("raytracingAlgorithm", "RAYTRACE_HASHGRIDS");
+   if (raytracingAlgorithm == "RAYTRACE_HASHGRIDS") {
+      setRaytracingAlgorithm(RAYTRACE_HASHGRIDS);
+   } else if (raytracingAlgorithm == "RAYTRACE_NAIVE") {
+      setRaytracingAlgorithm(RAYTRACE_NAIVE);
+   } else if (raytracingAlgorithm == "RAYTRACE_COMPARE_BOTH") {
+      setRaytracingAlgorithm(RAYTRACE_COMPARE_BOTH);
+   }
+      
    std::string reductionMethod = config.getParameter<std::string>("reductionMethod", "MPI_REDUCE");
    if (reductionMethod == "MPI_REDUCE") {
-      reductionMethod_ = MPI_REDUCE;
+      setReductionMethod(MPI_REDUCE);
    } else if (reductionMethod == "MPI_GATHER") {
-      reductionMethod_ = MPI_GATHER;
+      setReductionMethod(MPI_GATHER);
    }
       
    setupView_();
