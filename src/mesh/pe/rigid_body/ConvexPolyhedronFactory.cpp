@@ -103,8 +103,6 @@ ConvexPolyhedronID createConvexPolyhedron( BodyStorage& globalStorage, BlockStor
                 "Created ConvexPolyhedron " << poly->getSystemID() << "\n"
              << "   User-ID         = " << uid << "\n"
              << "   Global position = " << gpos << "\n"
-             << "   side length     = " << lengths << "\n"
-             << "   LinVel          = " << box->getLinearVel() << "\n"
              << "   Material        = " << Material::getName( material )
                );
    }

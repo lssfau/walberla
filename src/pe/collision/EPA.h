@@ -86,6 +86,8 @@ public:
    bool doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec3& normal,
                       Vec3& contactPoint, real_t& penetrationDepth, real_t margin, real_t eps_rel );
 
+
+
    //@}
    //**********************************************************************************************
 
@@ -99,6 +101,11 @@ public:
    inline void setMaxTriangles( size_t maxTriangles) {maxTriangles_ = maxTriangles;}
 
    inline size_t getMaxTriangles() {return maxTriangles_;}
+
+   inline int getNumIterations() const {return numIterations_; }
+
+   inline bool useSphereOptimization() const {return bUseSphereOptimization_; }
+   inline void useSphereOptimization(const bool useIt) {bUseSphereOptimization_ = useIt;}
 
    //@}
    //**********************************************************************************************
@@ -143,6 +150,9 @@ private:
    //EPA constants
    size_t maxSupportPoints_ = 100;
    size_t maxTriangles_     = 200;
+
+   int numIterations_ = 0;
+   bool bUseSphereOptimization_ = false;
 };
 //*************************************************************************************************
 

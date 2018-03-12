@@ -115,6 +115,7 @@ namespace gjkepa{
       if(gjk.doGJKmargin(*a, *b, margin)){
          //2. If collision is possible perform EPA.
          EPA epa;
+         epa.useSphereOptimization(true);
          if(epa.doEPAmargin(*a, *b, gjk, normal, contactPoint, penetrationDepth, margin)){
             contacts_.push_back( Contact(a, b, contactPoint, normal, penetrationDepth) );
             return true;

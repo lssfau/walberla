@@ -119,7 +119,7 @@ inline bool EPA::EPA_Triangle::link( size_t edge0, EPA_Triangle* tria, size_t ed
    tria->adjEdges_[edge1] = edge0;
 
    bool b = indices_[edge0]       == tria->indices_[(edge1+1)%3] &&
-         indices_[(edge0+1)%3] == tria->indices_[edge1];
+            indices_[(edge0+1)%3] == tria->indices_[edge1];
    return b;
 }
 //*************************************************************************************************
@@ -145,7 +145,7 @@ inline void EPA::EPA_Triangle::silhouette( const Vec3& w, EPA_EdgeBuffer& edgeBu
 /*! \brief Recursive silhuette finding method.
  */
 void EPA::EPA_Triangle::silhouette( size_t index, const Vec3& w,
-                                           EPA_EdgeBuffer& edgeBuffer )
+                                    EPA_EdgeBuffer& edgeBuffer )
 {
    if (!obsolete_) {
       real_t test = (closest_ * w);
@@ -184,7 +184,7 @@ const long double EpsilonRelEPA< long double >::value = static_cast< long double
 /*! \brief Does an EPA computation with contactthreshold added. Use Default relative Error.
  */
 bool EPA::doEPAcontactThreshold( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec3& retNormal,
-                                        Vec3& contactPoint, real_t& penetrationDepth){
+                                 Vec3& contactPoint, real_t& penetrationDepth){
 
    //Default relative epsilon
    return doEPA(geom1, geom2, gjk, retNormal, contactPoint, penetrationDepth, contactThreshold, EpsilonRelEPA<real_t>::value);
@@ -196,7 +196,7 @@ bool EPA::doEPAcontactThreshold( GeomPrimitive &geom1, GeomPrimitive &geom2, con
 /*! \brief Does an EPA computation with contactThreshold added. Relative Error can be specified.
  */
 bool EPA::doEPAcontactThreshold( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec3& retNormal,
-                                        Vec3& contactPoint, real_t& penetrationDepth, real_t eps_rel){
+                                 Vec3& contactPoint, real_t& penetrationDepth, real_t eps_rel){
 
    return doEPA(geom1, geom2, gjk, retNormal, contactPoint, penetrationDepth, contactThreshold, eps_rel);
 }
@@ -207,7 +207,7 @@ bool EPA::doEPAcontactThreshold( GeomPrimitive &geom1, GeomPrimitive &geom2, con
 /*! \brief Does an EPA computation with margin added. Use Default relative Error.
  */
 bool EPA::doEPAmargin( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec3& retNormal,
-                              Vec3& contactPoint, real_t& penetrationDepth, real_t margin){
+                       Vec3& contactPoint, real_t& penetrationDepth, real_t margin){
    //Default relative epsilon
    return doEPA(geom1, geom2, gjk, retNormal, contactPoint, penetrationDepth, margin, EpsilonRelEPA<real_t>::value);
 }
@@ -218,7 +218,7 @@ bool EPA::doEPAmargin( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gj
 /*! \brief Does an epa computation with contact margin added and specified realtive error.
  */
 bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec3& retNormal,
-                        Vec3& contactPoint, real_t& penetrationDepth, real_t margin, real_t eps_rel )
+                 Vec3& contactPoint, real_t& penetrationDepth, real_t margin, real_t eps_rel )
 {
    //have in mind that we use a support mapping which blows up the objects a wee bit so
    //zero penetraion aka toching contact means that the original bodies have a distance of 2*margin between them
@@ -271,8 +271,10 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
    std::make_heap(entryHeap.begin(), entryHeap.end(), EPA::EPA_TriangleComp());
    EPA_Triangle* current = NULL;
 
+   numIterations_ = 0;
    //EPA Main-Loop
    do {
+      ++numIterations_;
       std::pop_heap(entryHeap.begin(), entryHeap.end(), EPA::EPA_TriangleComp());
       current = entryHeap.back();
       entryHeap.pop_back();
@@ -310,38 +312,43 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
          //std::cerr << "New upper bound: " <<  farDist*farDist << std::endl;
          upperBoundSqr = std::min(upperBoundSqr, farDist*farDist);
 
+
+
          //Try to approximate the new surface with a sphere
-         Vec3 ctr;
-         real_t radius2 = calculateCircle(support, epaVolume[(*current)[0]],
-               epaVolume[(*current)[1]], epaVolume[(*current)[2]], ctr);
-         if(radius2 > real_t(0.0)){ //if a Sphere exists
-            //std::cerr << "Circle created with center at " << ctr << ". r2=" << radius2 << std::endl;
-            real_t center_len = ctr.length();
-            real_t circle_dist = (std::sqrt(radius2) - center_len); //Distance from center to the spheres surface
-            //Check if the circle matches the bounds given by EPA and limit max error to ca. 5%
-            if(circle_dist*circle_dist <= upperBoundSqr && circle_dist*circle_dist >= lowerBoundSqr &&
-                  (circle_dist*circle_dist)/lowerBoundSqr < real_t(1.10) && !floatIsEqual(center_len, real_t(0.0))) {
+         if (bUseSphereOptimization_)
+         {
+            Vec3 ctr;
+            real_t radius2 = calculateCircle(support, epaVolume[(*current)[0]],
+                  epaVolume[(*current)[1]], epaVolume[(*current)[2]], ctr);
+            if(radius2 > real_t(0.0)){ //if a Sphere exists
+               //std::cerr << "Circle created with center at " << ctr << ". r2=" << radius2 << std::endl;
+               real_t center_len = ctr.length();
+               real_t circle_dist = (std::sqrt(radius2) - center_len); //Distance from center to the spheres surface
+               //Check if the circle matches the bounds given by EPA and limit max error to ca. 5%
+               if(circle_dist*circle_dist <= upperBoundSqr && circle_dist*circle_dist >= lowerBoundSqr &&
+                     (circle_dist*circle_dist)/lowerBoundSqr < real_t(1.10) && !floatIsEqual(center_len, real_t(0.0))) {
 
-               ctr = -1*ctr.getNormalized();
-               //std::cerr << "New support direction: " <<  ctr << std::endl;
-               pushSupportMargin(geom1, geom2, ctr, margin, epaVolume, supportA, supportB);
-               support = epaVolume.back();
-               // Check if support is in expected direction
-
-               if(floatIsEqual((support % ctr).sqrLength()/support.sqrLength(), real_t(0.0))){ //Accept sphere
-
-                  contactPoint = real_t(0.5) * (supportA.back() + supportB.back());
-                  penetrationDepth = -support.length()+ real_t(2.0) * margin;
-                  retNormal = -ctr;
-                  //std::cerr << "Found penetration depth " << penetrationDepth << " with CurvedEPA!" << std::endl;
-                  if(penetrationDepth < contactThreshold){
-                     return true;
-                  }else{
-                     return false;
-                  }
-               } else { //Reject sphere
-                  removeSupportMargin(epaVolume, supportA, supportB);
+                  ctr = -1*ctr.getNormalized();
+                  //std::cerr << "New support direction: " <<  ctr << std::endl;
+                  pushSupportMargin(geom1, geom2, ctr, margin, epaVolume, supportA, supportB);
                   support = epaVolume.back();
+                  // Check if support is in expected direction
+
+                  if(floatIsEqual((support % ctr).sqrLength()/support.sqrLength(), real_t(0.0))){ //Accept sphere
+
+                     contactPoint = real_t(0.5) * (supportA.back() + supportB.back());
+                     penetrationDepth = -support.length()+ real_t(2.0) * margin;
+                     retNormal = -ctr;
+                     //std::cerr << "Found penetration depth " << penetrationDepth << " with CurvedEPA!" << std::endl;
+                     if(penetrationDepth < contactThreshold){
+                        return true;
+                     }else{
+                        return false;
+                     }
+                  } else { //Reject sphere
+                     removeSupportMargin(epaVolume, supportA, supportB);
+                     support = epaVolume.back();
+                  }
                }
             }
          }
@@ -853,15 +860,15 @@ inline bool EPA::searchTetrahedron(GeomPrimitive &geom1, GeomPrimitive &geom2, s
  */
 inline real_t EPA::calculateCircle(const Vec3& A, const Vec3& B, const Vec3& C,
                                    const Vec3& D, Vec3& center ){
-   real_t l1, l2, l3, d1, d2, d3;
-   l1 = (A-B).length(); /* These three sqrt evaluations are necessary */
-   l2 = (A-C).length();
-   l3 = (A-D).length();
+   real_t il1, il2, il3, d1, d2, d3;
+   il1 = real_t(1.0)/(A-B).length(); /* inverse These three sqrt evaluations are necessary */
+   il2 = real_t(1.0)/(A-C).length();
+   il3 = real_t(1.0)/(A-D).length();
 
    Vec3 n1, n2, n3;
-   n1 = (real_t(1.0)/l1)*(A-B);
-   n2 = (real_t(1.0)/l2)*(A-C);
-   n3 = (real_t(1.0)/l3)*(A-D);
+   n1 = il1*(A-B);
+   n2 = il2*(A-C);
+   n3 = il3*(A-D);
 
    // Here we already see if such circle exists.
    real_t det = n1 * (n2 % n3);
@@ -870,9 +877,9 @@ inline real_t EPA::calculateCircle(const Vec3& A, const Vec3& B, const Vec3& C,
       return real_t(-1.0);
    }
    real_t Alen = A.sqrLength();
-   d1 = (Alen - B.sqrLength())/(real_t(2.0)*l1);
-   d2 = (Alen - C.sqrLength())/(real_t(2.0)*l2);
-   d3 = (Alen - D.sqrLength())/(real_t(2.0)*l3);
+   d1 = (Alen - B.sqrLength())*real_t(0.5)*il1;
+   d2 = (Alen - C.sqrLength())*real_t(0.5)*il2;
+   d3 = (Alen - D.sqrLength())*real_t(0.5)*il3;
 
    //Apply solution formula
    center = (real_t(1.0)/det)*(d1 * (n2 % n3) + d2 * (n3 % n1) + d3 * (n1 % n2));
