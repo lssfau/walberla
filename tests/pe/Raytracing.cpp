@@ -523,7 +523,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, const std::string& 
                       Color(0.4, 0.4, 0.4)); //ambient
    tt.stop("Setup");
 
-   int i = 0;
+   size_t i = 0;
    for (auto& vector: viewVectors) {
       if (i == numberOfViews) {
          break;
@@ -849,6 +849,12 @@ int main( int argc, char** argv )
    SetBodyTypeIDs<BodyTuple>::execute();
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
    
+   SphereIntersectsTest();
+   PlaneIntersectsTest();
+   BoxIntersectsTest();
+   AABBIntersectsTest();
+   CapsuleIntersectsTest();
+   
    Raytracer::Algorithm algorithm = Raytracer::RAYTRACE_COMPARE_BOTH;
    bool outputToFoldersEnabled = false;
    
@@ -867,14 +873,9 @@ int main( int argc, char** argv )
       }
    }
    
-   //SphereIntersectsTest();
-   //PlaneIntersectsTest();
-   //BoxIntersectsTest();
-   //AABBIntersectsTest();
-   //CapsuleIntersectsTest();
    RaytracerTest(algorithm, outputFolder);
    RaytracerSpheresTest(algorithm, outputFolder);
-   
+
    HashGridsTestScene(algorithm, outputFolder);
 
    std::vector<size_t> boxes = {127, 70, 20, 150};

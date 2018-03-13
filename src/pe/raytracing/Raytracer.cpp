@@ -397,6 +397,10 @@ void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& inter
    
    WALBERLA_MPI_BARRIER();
    if (tt != NULL) tt->stop("Reduction");
+#else
+   WALBERLA_UNUSED(intersectionsBuffer);
+   WALBERLA_UNUSED(tt);
+   WALBERLA_ABORT("Cannot call MPI reduce with MPI-specific code on a non-MPI build.");
 #endif
 }
    
