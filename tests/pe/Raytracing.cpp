@@ -850,7 +850,7 @@ int main( int argc, char** argv )
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * mpi::MPIManager::instance()->worldRank()) );
    
    Raytracer::Algorithm algorithm = Raytracer::RAYTRACE_COMPARE_BOTH;
-   bool outputToFoldersEnabled = true;
+   bool outputToFoldersEnabled = false;
    
    std::string outputFolder = ".";
    if (outputToFoldersEnabled) {
