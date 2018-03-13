@@ -231,7 +231,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
          real_t t0x_left = origin[0] + direction[0]*t0_left;
          real_t t1x_left = origin[0] + direction[0]*t1_left;
          
-         real_t t_left;
+         real_t t_left = inf;
          if (t0_left > 0 && t0x_left < -halfLength) {
             t_left = t0_left;
          }
@@ -251,7 +251,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
          real_t t0x_right = origin[0] + direction[0]*t0_right;
          real_t t1x_right = origin[0] + direction[0]*t1_right;
          
-         real_t t_right;
+         real_t t_right = inf;
          if (t0_right > 0 && t0x_right > halfLength) {
             t_right = t0_right;
          }
