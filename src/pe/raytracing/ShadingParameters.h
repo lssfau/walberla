@@ -65,13 +65,13 @@ struct ShadingParameters {
    
    ShadingParameters& makeGlossy(real_t _shininess = 30) {
       shininess = _shininess;
-      specularColor.set(1, 1, 1);
+      specularColor.set(real_t(1), real_t(1), real_t(1));
       return *this;
    }
    
    ShadingParameters& makeMatte() {
       shininess = 0;
-      specularColor.set(0.1, 0.1, 0.1);
+      specularColor.set(real_t(0.1), real_t(0.1), real_t(0.1));
       return *this;
    }
 };

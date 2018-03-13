@@ -101,13 +101,13 @@ int main( int argc, char ** argv )
    Lighting lighting(Vec3(-12, 12, 12),
                      Color(1, 1, 1),
                      Color(1, 1, 1),
-                     Color(0.4, 0.4, 0.4));
+                     Color(real_t(0.4), real_t(0.4), real_t(0.4)));
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        640, 480,
                        real_t(49.13),
                        Vec3(-25, 10, 10), Vec3(-5, 10, 10), Vec3(0, 0, 1),
                        lighting,
-                       Color(0.1, 0.1, 0.1),
+                       Color(real_t(0.1), real_t(0.1), real_t(0.1)),
                        radius);
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - START ***");
