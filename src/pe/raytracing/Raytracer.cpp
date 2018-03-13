@@ -156,7 +156,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    lookAtPoint_ = config.getParameter<Vec3>("lookAt");
    upVector_ = config.getParameter<Vec3>("upVector");
    lighting_ = Lighting(config.getBlock("Lighting"));
-   backgroundColor_ = config.getParameter<Color>("backgroundColor", Vec3(0.1, 0.1, 0.1));
+   backgroundColor_ = config.getParameter<Color>("backgroundColor", Vec3(real_t(0.1), real_t(0.1), real_t(0.1)));
 
    blockAABBIntersectionPadding_ = config.getParameter<real_t>("blockAABBIntersectionPadding", real_t(0.0));
 
@@ -192,7 +192,7 @@ void Raytracer::setupView_() {
    // viewing plane setup
    d_ = (cameraPosition_ - lookAtPoint_).length();
    aspectRatio_ = real_t(pixelsHorizontal_) / real_t(pixelsVertical_);
-   viewingPlaneHeight_ = tan(deg2rad(fov_vertical_)/real_t(2.)) * real_t(2.) * d_;
+   viewingPlaneHeight_ = real_c(tan(deg2rad(fov_vertical_)/real_t(2.))) * real_t(2.) * d_;
    viewingPlaneWidth_ = viewingPlaneHeight_ * aspectRatio_;
    viewingPlaneOrigin_ = lookAtPoint_ - u_*viewingPlaneWidth_/real_t(2.) - v_*viewingPlaneHeight_/real_t(2.);
    

@@ -74,7 +74,7 @@ public:
                       real_t fov_vertical,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                       const Lighting& lighting,
-                      const Color& backgroundColor = Color(0.1, 0.1, 0.1),
+                      const Color& backgroundColor = Color(real_t(0.1), real_t(0.1), real_t(0.1)),
                       real_t blockAABBIntersectionPadding = real_t(0.0),
                       std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction = defaultBodyTypeDependentShadingParams);
    explicit Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
@@ -653,7 +653,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          std::vector<Color> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
 
          for (auto& info: intersectionsBuffer) {
-            fullImageBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = Color(info.r, info.g, info.b);
+            fullImageBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = Color(double_c(info.r), double_c(info.g), double_c(info.b));
          }
          
          writeImageBufferToFile(fullImageBuffer, timestep, true);
@@ -666,7 +666,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          std::vector<real_t> fullTBuffer(pixelsHorizontal_ * pixelsVertical_, inf);
 
          for (auto& info: intersectionsBuffer) {
-            fullTBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = info.t;
+            fullTBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = double_c(info.t);
          }
          
          writeTBufferToFile(fullTBuffer, timestep, true);

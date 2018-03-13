@@ -107,10 +107,10 @@ inline ShadingParameters darkGreyShadingParams (const BodyID body) {
    
 inline ShadingParameters redShadingParams (const BodyID body) {
    WALBERLA_UNUSED(body);
-   ShadingParameters s(Color(1, real_t(0), real_t(0)),
+   ShadingParameters s(Color(real_t(1), real_t(0), real_t(0)),
                        Color(real_t(0.5), real_t(0), real_t(0)),
                        Color(real_t(0.1), real_t(0.1), 0.1),
-                       0);
+                       real_t(0));
    return s;
 }
 
@@ -125,7 +125,7 @@ inline ShadingParameters greenShadingParams (const BodyID body) {
 
 inline ShadingParameters blueShadingParams (const BodyID body) {
    WALBERLA_UNUSED(body);
-   ShadingParameters s(Color(0.15, 0.44, 0.91),
+   ShadingParameters s(Color(real_t(0.15), real_t(0.44), real_t(0.91)),
                        Color(real_t(0), real_t(0), 0.4),
                        Color(real_t(0.1), real_t(0.1), real_t(0.1)),
                        real_t(0));
@@ -143,8 +143,8 @@ inline ShadingParameters yellowShadingParams (const BodyID body) {
 
 inline ShadingParameters violetShadingParams (const BodyID body) {
    WALBERLA_UNUSED(body);
-   ShadingParameters s(Color(0.6, real_t(0), real_t(0.9)),
-                       Color(0.5, real_t(0), real_t(0.8)),
+   ShadingParameters s(Color(real_t(0.6), real_t(0), real_t(0.9)),
+                       Color(real_t(0.5), real_t(0), real_t(0.8)),
                        Color(real_t(0), real_t(0), real_t(0)),
                        real_t(0));
    return s;
