@@ -156,11 +156,11 @@ void BoxIntersectsTest() {
    WALBERLA_CHECK(intersects(&box3, ray2, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(7.0710), real_t(1e-4));
    
-   Ray ray3(Vec3(3,-5,3), Vec3(2, -1.5, 0.5).getNormalized());
+   Ray ray3(Vec3(3,-5,3), Vec3(2, real_t(-1.5), real_t(0.5)).getNormalized());
    Box box4(128, 5, Vec3(0, 8, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(!intersects(&box4, ray3, t, n));
    
-   Ray ray4(Vec3(3,-5,3), Vec3(-2, 3, 0.5).getNormalized());
+   Ray ray4(Vec3(3,-5,3), Vec3(-2, 3, real_t(0.5)).getNormalized());
    WALBERLA_CHECK(intersects(&box4, ray4, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(9.7068), real_t(1e-4));
    
@@ -243,13 +243,13 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
    Lighting lighting(Vec3(0, 5, 8), // 8, 5, 9.5 gut für ebenen, 0,5,8
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
-                     Color(0.4, 0.4, 0.4)); //ambient
+                     Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
-                       49.13,
+                       real_t(49.13),
                        Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
                        lighting,
-                       Color(0.2,0.2,0.2),
+                       Color(real_t(0.2), real_t(0.2), real_t(0.2)),
                        real_t(2),
                        customBodyToShadingParams);
    
@@ -346,13 +346,13 @@ void RaytracerSpheresTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::
    Lighting lighting(Vec3(0, 5, 8), // 8, 5, 9.5 gut für ebenen, 0,5,8
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
-                     Color(0.4, 0.4, 0.4)); //ambient
+                     Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
-                       49.13,
+                       real_t(49.13),
                        Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
                        lighting,
-                       Color(0.2,0.2,0.2),
+                       Color(real_t(0.2),real_t(0.2),real_t(0.2)),
                        real_t(2),
                        customSpheresBodyToShadingParams);
    
@@ -391,9 +391,9 @@ ShadingParameters customHashGridsBodyToShadingParams(const BodyID body) {
 
 void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, const std::string& outputFolder,
                    size_t boxes, size_t capsules, size_t spheres, size_t numberOfViews = 1,
-                   real_t boxLenMin = 0.1, real_t boxLenMax = 0.2, bool boxRotation = false,
-                   real_t capRadiusMin = 0.1, real_t capRadiusMax = 0.2, real_t capLenMin = 0.1, real_t capLenMax = 0.3,
-                   real_t sphereRadiusMin = 0.1, real_t sphereRadiusMax = 0.3) {
+                   real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2), bool boxRotation = false,
+                   real_t capRadiusMin = real_t(0.1), real_t capRadiusMax = real_t(0.2), real_t capLenMin = real_t(0.1), real_t capLenMax = real_t(0.3),
+                   real_t sphereRadiusMin = real_t(0.1), real_t sphereRadiusMax = real_t(0.3)) {
    WALBERLA_LOG_INFO("Generating " << boxes << " boxes, " << capsules << " capsules and " << spheres << " spheres");
    
    using namespace walberla::pe::ccd;
@@ -476,51 +476,51 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, const std::string& 
    std::vector<std::tuple<Vec3, Vec3, Vec3>> viewVectors;
    
    // y up, in negative z direction
-   viewVectors.push_back(std::make_tuple(Vec3(2, 2.1, 7),
-                                     Vec3(2.1, 2, 4),
+   viewVectors.push_back(std::make_tuple(Vec3(2, real_t(2.1), 7),
+                                     Vec3(real_t(2.1), 2, 4),
                                      Vec3(0,1,0)));
    // y up, in positive z direction
    viewVectors.push_back(std::make_tuple(Vec3(2, 2, -3),
-                                     Vec3(2, 2.1, 0.1),
+                                     Vec3(2, real_t(2.1), real_t(0.1)),
                                      Vec3(0,1,0)));
    // x up, in positive z direction
    viewVectors.push_back(std::make_tuple(Vec3(2, 2, -3),
-                                     Vec3(2, 2.1, 0.1),
+                                     Vec3(2, real_t(2.1), real_t(0.1)),
                                      Vec3(1,0,0)));
    // y and x up, in positive z direction
    viewVectors.push_back(std::make_tuple(Vec3(2, 2, -3),
-                                     Vec3(2, 2.1, 0.1),
+                                     Vec3(2, real_t(2.1), real_t(0.1)),
                                      Vec3(1,1,0)));
    // y and x up, in negative z direction
    viewVectors.push_back(std::make_tuple(Vec3(2, 2, 6.5),
-                                     Vec3(2.1, 2.1, 4),
-                                     Vec3(0.5,1,0)));
+                                     Vec3(real_t(2.1), real_t(2.1), 4),
+                                     Vec3(real_t(0.5),1,0)));
    // z up, in positive x direction
-   viewVectors.push_back(std::make_tuple(Vec3(-3, 2, 1.9),
-                                     Vec3(0, 2.1, 2),
+   viewVectors.push_back(std::make_tuple(Vec3(-3, 2, real_t(1.9)),
+                                     Vec3(0, real_t(2.1), 2),
                                      Vec3(0,0,1)));
    // z up, in negative x direction
-   viewVectors.push_back(std::make_tuple(Vec3(7, 2, 1.9),
-                                     Vec3(4, 2.1, 2),
+   viewVectors.push_back(std::make_tuple(Vec3(7, 2, real_t(1.9)),
+                                     Vec3(4, real_t(2.1), 2),
                                      Vec3(0,0,1)));
    // z and y up, in negative x direction
-   viewVectors.push_back(std::make_tuple(Vec3(7, 2, 1.9),
-                                     Vec3(4, 2.1, 2),
+   viewVectors.push_back(std::make_tuple(Vec3(7, 2, real_t(1.9)),
+                                     Vec3(4, real_t(2.1), 2),
                                      Vec3(0,1,1)));
    // z and x up, in negative y direction
-   viewVectors.push_back(std::make_tuple(Vec3(2, 6, 1.9),
-                                     Vec3(2.3, 4, 2),
+   viewVectors.push_back(std::make_tuple(Vec3(2, 6, real_t(1.9)),
+                                     Vec3(real_t(2.3), 4, 2),
                                      Vec3(1,0,1)));
    // z up, in positive y direction
-   viewVectors.push_back(std::make_tuple(Vec3(2, -3.6, 1.9),
-                                     Vec3(2.3, 0, 2.1),
+   viewVectors.push_back(std::make_tuple(Vec3(2, real_t(-3.6), real_t(1.9)),
+                                     Vec3(real_t(2.3), 0, real_t(2.1)),
                                      Vec3(0,0,1)));
    
    Lighting lighting0(Vec3(forestAABB.xSize()/real_t(2)+1, forestAABB.ySize()/real_t(2),
                            real_t(2)*forestAABB.zMax()+2), // 8, 5, 9.5 gut für ebenen, 0,5,8
                       Color(1, 1, 1), //diffuse
                       Color(1, 1, 1), //specular
-                      Color(0.4, 0.4, 0.4)); //ambient
+                      Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
    tt.stop("Setup");
 
    size_t i = 0;
@@ -531,12 +531,12 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, const std::string& 
       
       Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                            size_t(640), size_t(480),
-                           49.13,
+                           real_t(49.13),
                            std::get<0>(vector),
                            std::get<1>(vector),
                            std::get<2>(vector),
                            lighting0,
-                           Color(0.2,0.2,0.2),
+                           Color(real_t(0.2),real_t(0.2),real_t(0.2)),
                            real_t(2),
                            customHashGridsBodyToShadingParams);
       raytracer.setImageOutputDirectory(outputFolder);
@@ -572,16 +572,16 @@ void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm, const std
    Lighting lighting(cameraPosition,
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
-                     Color(0.4, 0.4, 0.4)); //ambient
+                     Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
    
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        size_t(640), size_t(480),
-                       49.13,
+                       real_t(49.13),
                        cameraPosition,
                        lookAtPoint,
                        upVector,
                        lighting,
-                       Color(0.2,0.2,0.2),
+                       Color(real_t(0.2),real_t(0.2),real_t(0.2)),
                        real_t(2),
                        customArtifactsBodyToShadingParams);
    raytracer.setImageOutputDirectory(outputFolder);
@@ -598,7 +598,7 @@ void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm, const std
 }
 
 void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, const std::string& outputFolder,
-                            size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+                            size_t boxes, real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2)) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In negative Z direction");
    
    WALBERLA_LOG_INFO(" Generating " << boxes << " boxes");
@@ -639,7 +639,7 @@ void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, const std:
 }
 
 void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, const std::string& outputFolder,
-                                        size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+                                        size_t boxes, real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2)) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In positive Z direction");
    
    WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
@@ -684,7 +684,7 @@ void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm
 }
 
 void HashGridsFromNegativeXArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, const std::string& outputFolder,
-                                         size_t boxes, real_t boxLenMin = 0.1, real_t boxLenMax = 0.2) {
+                                         size_t boxes, real_t boxLenMin = real_t(0.1), real_t boxLenMax = real_t(0.2)) {
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Artifacts Test - In positive X direction");
    WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
    
@@ -745,11 +745,11 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
    
    // create bodies
    size_t id = 0;
-   real_t len = 0.6;
+   real_t len = real_t(0.6);
    
    real_t x_min = 0, y_min = 0;
-   len = 1.2;
-   real_t gap = 0.4;
+   len = real_t(1.2);
+   real_t gap = real_t(0.4);
    
    // cubes on z = 0 plane
    for (int i = 0; ; ++i) {
@@ -811,18 +811,18 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
    Lighting lighting(Vec3(1,2,15),
                      Color(1, 1, 1), //diffuse
                      Color(1, 1, 1), //specular
-                     Color(0.4, 0.4, 0.4)); //ambient
+                     Color(real_t(0.4), real_t(0.4), real_t(0.4))); //ambient
    
    int i = 0;
    for (auto& vector: viewVectors) {
       Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                           size_t(640), size_t(480),
-                          49.13,
+                          real_t(49.13),
                           std::get<0>(vector),
                           std::get<1>(vector),
                           std::get<2>(vector),
                           lighting,
-                          Color(0.2,0.2,0.2),
+                          Color(real_t(0.2),real_t(0.2),real_t(0.2)),
                           real_t(2));
       
       raytracer.setImageOutputDirectory(outputFolder);
@@ -888,21 +888,21 @@ int main( int argc, char** argv )
    
    //HashGridsTest(algorithm, outputFolder,
    //              60, 60, 3, 1,
-   //              0.1, 0.3, true,
-   //              0.1, 0.2, 0.1, 0.2,
-   //              0.5, 0.6);
+   //              real_t(0.1), real_t(0.3), true,
+   //              real_t(0.1), real_t(0.2), real_t(0.1), real_t(0.2),
+   //              real_t(0.5), real_t(0.6));
    
    //HashGridsTest(algorithm, outputFolder,
    //              750, 0, 0, 1,
-   //              0.2, 0.3);
+   //              real_t(0.2), real_t(0.3));
    
    //HashGridsTest(algorithm, outputFolder,
    //              400, 0, 0, 1,
-   //              0.1, 0.3);
+   //              real_t(0.1), real_t(0.3));
    
-   HashGridsArtifactsTest(algorithm, outputFolder, 750, 0.2, 0.3);
-   HashGridsFromNegativeArtifactsTest(algorithm, outputFolder, 750, 0.2, 0.3);
-   HashGridsFromNegativeXArtifactsTest(algorithm, outputFolder, 750, 0.2, 0.3);
+   HashGridsArtifactsTest(algorithm, outputFolder, 750, real_t(0.2), real_t(0.3));
+   HashGridsFromNegativeArtifactsTest(algorithm, outputFolder, 750, real_t(0.2), real_t(0.3));
+   HashGridsFromNegativeXArtifactsTest(algorithm, outputFolder, 750, real_t(0.2), real_t(0.3));
    
    //HashGridsTest(algorithm, outputFolder,
    //              9999, 0, 4000, 1,

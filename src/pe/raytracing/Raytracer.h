@@ -653,7 +653,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          std::vector<Color> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
 
          for (auto& info: intersectionsBuffer) {
-            fullImageBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = Color(double_c(info.r), double_c(info.g), double_c(info.b));
+            fullImageBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = Color(real_c(info.r), real_c(info.g), real_c(info.b));
          }
          
          writeImageBufferToFile(fullImageBuffer, timestep, true);
@@ -666,7 +666,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          std::vector<real_t> fullTBuffer(pixelsHorizontal_ * pixelsVertical_, inf);
 
          for (auto& info: intersectionsBuffer) {
-            fullTBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = double_c(info.t);
+            fullTBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = real_c(info.t);
          }
          
          writeTBufferToFile(fullTBuffer, timestep, true);
