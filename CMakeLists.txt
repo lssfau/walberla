@@ -360,17 +360,6 @@ if( NOT WARNING_DEPRECATED)
    endif()
 endif()
 
-# Treat warnings as errors
-if ( WARNING_ERROR )
-   if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG )
-      add_flag ( CMAKE_CXX_FLAGS "-pedantic-errors -Werror" )
-   elseif( WALBERLA_CXX_COMPILER_IS_MSVC )
-      add_flag ( CMAKE_CXX_FLAGS "/WX" )
-   elseif ( WALBERLA_CXX_COMPILER_IS_CRAY )
-      add_flag ( CMAKE_CXX_FLAGS "-h error_on_warning" )
-   endif()
-endif ( )
-
 
 if ( WALBERLA_CXX_COMPILER_IS_CLANG )
     add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow -Wno-c++11-extensions -Qunused-arguments" )
@@ -1233,7 +1222,23 @@ if ( WALBERLA_BUILD_WITH_LTO  )
    endif( )
 
 endif ( )
+
 ############################################################################################################################
+##
+##  Some more compiler flags that need to happen after any try_compile (e.g. inside FindMPI)
+##
+############################################################################################################################
+
+# Treat warnings as errors
+if ( WARNING_ERROR )
+   if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG )
+      add_flag ( CMAKE_CXX_FLAGS "-pedantic-errors -Werror" )
+   elseif( WALBERLA_CXX_COMPILER_IS_MSVC )
+      add_flag ( CMAKE_CXX_FLAGS "/WX" )
+   elseif ( WALBERLA_CXX_COMPILER_IS_CRAY )
+      add_flag ( CMAKE_CXX_FLAGS "-h error_on_warning" )
+   endif()
+endif ( )
 
 ############################################################################################################################
 ##
