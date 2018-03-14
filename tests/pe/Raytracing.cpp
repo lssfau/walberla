@@ -753,12 +753,12 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
    
    // cubes on z = 0 plane
    for (int i = 0; ; ++i) {
-      x_min = forestAABB.xMin() + i*(gap+len);
+      x_min = forestAABB.xMin() + real_c(i)*(gap+len);
       if (x_min > forestAABB.max(0)) {
          break;
       }
       for (int j = 0; ; ++j) {
-         y_min = forestAABB.yMin() + j*(gap+len);
+         y_min = forestAABB.yMin() + real_c(j)*(gap+len);
          if (y_min > forestAABB.max(1)) {
             break;
          }
@@ -769,12 +769,12 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
    
    //cubes on z = max plane
    for (int i = 0; ; ++i) {
-      x_min = forestAABB.xMin() + i*(gap+len);
+      x_min = forestAABB.xMin() + real_c(i)*(gap+len);
       if (x_min > forestAABB.max(0)) {
          break;
       }
       for (int j = 0; ; ++j) {
-         y_min = forestAABB.yMin() + j*(gap+len);
+         y_min = forestAABB.yMin() + real_c(j)*(gap+len);
          if (y_min > forestAABB.max(1)) {
             break;
          }

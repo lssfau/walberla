@@ -640,9 +640,9 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
    const int8_t stepY = ray.yDir() >= 0 ? 1 : -1;
    const int8_t stepZ = ray.zDir() >= 0 ? 1 : -1;
    
-   Vec3 near((stepX >= 0) ? (firstCell[0]+1)*cellSpan_-firstPoint[0] : firstPoint[0]-firstCell[0]*cellSpan_,
-             (stepY >= 0) ? (firstCell[1]+1)*cellSpan_-firstPoint[1] : firstPoint[1]-firstCell[1]*cellSpan_,
-             (stepZ >= 0) ? (firstCell[2]+1)*cellSpan_-firstPoint[2] : firstPoint[2]-firstCell[2]*cellSpan_);
+   Vec3 near((stepX >= 0) ? real_c(firstCell[0]+1)*cellSpan_-firstPoint[0] : firstPoint[0]-real_c(firstCell[0])*cellSpan_,
+             (stepY >= 0) ? real_c(firstCell[1]+1)*cellSpan_-firstPoint[1] : firstPoint[1]-real_c(firstCell[1])*cellSpan_,
+             (stepZ >= 0) ? real_c(firstCell[2]+1)*cellSpan_-firstPoint[2] : firstPoint[2]-real_c(firstCell[2])*cellSpan_);
    
    // tMax: distance along the ray to the next cell change in the axis direction
    real_t tMaxX = (!realIsEqual(ray.xDir(), 0)) ? std::abs(near[0]*ray.xInvDir()) : inf;
