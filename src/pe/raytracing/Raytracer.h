@@ -385,7 +385,10 @@ inline void Raytracer::setFilenameTimestepWidth(uint8_t width) {
 inline void Raytracer::setRaytracingAlgorithm(Algorithm algorithm) {
    raytracingAlgorithm_ = algorithm;
 }
-   
+
+/*!\brief Set the algorithm to use while reducing.
+ * \param reductionMethod One of MPI_GATHER or MPI_REDUCE (latter one only works on MPI builds).
+ */
 inline void Raytracer::setReductionMethod(ReductionMethod reductionMethod) {
    reductionMethod_ = reductionMethod;
 }
@@ -410,7 +413,13 @@ inline size_t Raytracer::coordinateToArrayIndex(size_t x, size_t y) const {
    return y*pixelsHorizontal_ + x;
 }
 
-   
+/*!\brief Traces a ray in the global body storage and finds the closest ray-body intersection.
+ * \param ray Ray which is shot.
+ * \param body_closest Reference where the closest body will be stored in.
+ * \param t_closest Reference where the distance of the currently closest body is stored in,
+                    will get updated if closer intersection found.
+ * \param n_closest Reference where the intersection normal will be stored in.
+ */
 template <typename BodyTypeTuple>
 inline void Raytracer::traceRayInGlobalBodyStorage(const Ray& ray, BodyID& body_closest, real_t& t_closest, Vec3& n_closest) const {
    int numProcesses = mpi::MPIManager::instance()->numProcesses();
@@ -447,6 +456,13 @@ inline void Raytracer::traceRayInGlobalBodyStorage(const Ray& ray, BodyID& body_
    }
 }
 
+/*!\brief Traces a ray naively and finds the closest ray-body intersection.
+ * \param ray Ray which is shot.
+ * \param body_closest Reference where the closest body will be stored in.
+ * \param t_closest Reference where the distance of the currently closest body is stored in,
+                    will get updated if closer intersection found.
+ * \param n_closest Reference where the intersection normal will be stored in.
+ */
 template <typename BodyTypeTuple>
 inline void Raytracer::traceRayNaively(const Ray& ray, BodyID& body_closest, real_t& t_closest, Vec3& n_closest) const {
    real_t t = std::numeric_limits<real_t>::max();
@@ -476,7 +492,14 @@ inline void Raytracer::traceRayNaively(const Ray& ray, BodyID& body_closest, rea
       }
    }
 }
-   
+
+/*!\brief Traces a ray in the global body storage and finds the closest ray-body intersection.
+ * \param ray Ray which is shot.
+ * \param body_closest Reference where the closest body will be stored in.
+ * \param t_closest Reference where the distance of the currently closest body is stored in,
+                    will get updated if closer intersection found.
+ * \param n_closest Reference where the intersection normal will be stored in.
+ */
 template <typename BodyTypeTuple>
 inline void Raytracer::traceRayInHashGrids(const Ray& ray, BodyID& body_closest, real_t& t_closest, Vec3& n_closest) const {
    real_t t = std::numeric_limits<real_t>::max();
