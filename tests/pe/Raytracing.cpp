@@ -855,58 +855,21 @@ int main( int argc, char** argv )
    AABBIntersectsTest();
    CapsuleIntersectsTest();
    
-   Raytracer::Algorithm algorithm = Raytracer::RAYTRACE_COMPARE_BOTH;
-   bool outputToFoldersEnabled = false;
-   
-   std::string outputFolder = ".";
-   if (outputToFoldersEnabled) {
-      switch (algorithm) {
-         case Raytracer::RAYTRACE_NAIVE:
-            outputFolder= "image/naive";
-            break;
-         case Raytracer::RAYTRACE_HASHGRIDS:
-            outputFolder = "image/hashgrids";
-            break;
-         case Raytracer::RAYTRACE_COMPARE_BOTH:
-            outputFolder = "image/comparison";
-            break;
-      }
-   }
-   
+   const Raytracer::Algorithm algorithm = Raytracer::RAYTRACE_COMPARE_BOTH_STRICTLY;
+
    RaytracerTest(algorithm, outputFolder);
    RaytracerSpheresTest(algorithm, outputFolder);
-
    HashGridsTestScene(algorithm, outputFolder);
-
-   std::vector<size_t> boxes = {127, 70, 20, 150};
-   std::vector<size_t> capsules = {127, 60, 140, 100};
-   std::vector<size_t> spheres = {0, 50, 40, 120};
-   
-   for (size_t i = 0; i < boxes.size(); ++i) {
-      HashGridsTest(algorithm, outputFolder, boxes[i], capsules[i], spheres[i], 1);
-   }
-   
-   //HashGridsTest(algorithm, outputFolder,
-   //              60, 60, 3, 1,
-   //              real_t(0.1), real_t(0.3), true,
-   //              real_t(0.1), real_t(0.2), real_t(0.1), real_t(0.2),
-   //              real_t(0.5), real_t(0.6));
-   
-   //HashGridsTest(algorithm, outputFolder,
-   //              750, 0, 0, 1,
-   //              real_t(0.2), real_t(0.3));
-   
-   //HashGridsTest(algorithm, outputFolder,
-   //              400, 0, 0, 1,
-   //              real_t(0.1), real_t(0.3));
-   
+   HashGridsTest(algorithm, outputFolder, 50, 30, 130, 10);
+   HashGridsTest(algorithm, outputFolder,
+                 60, 60, 3,
+                 1,
+                 real_t(0.1), real_t(0.3), true,
+                 real_t(0.1), real_t(0.2), real_t(0.1), real_t(0.2),
+                 real_t(0.5), real_t(0.6));
    HashGridsArtifactsTest(algorithm, outputFolder, 750, real_t(0.2), real_t(0.3));
    HashGridsFromNegativeArtifactsTest(algorithm, outputFolder, 750, real_t(0.2), real_t(0.3));
    HashGridsFromNegativeXArtifactsTest(algorithm, outputFolder, 750, real_t(0.2), real_t(0.3));
-   
-   //HashGridsTest(algorithm, outputFolder,
-   //              9999, 0, 4000, 1,
-   //              0.1, 0.2);
    
    return EXIT_SUCCESS;
 }

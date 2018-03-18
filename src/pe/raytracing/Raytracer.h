@@ -63,7 +63,7 @@ struct BodyIntersectionInfo {
 class Raytracer {
 public:
    enum ReductionMethod { MPI_REDUCE, MPI_GATHER };
-   enum Algorithm { RAYTRACE_HASHGRIDS, RAYTRACE_NAIVE, RAYTRACE_COMPARE_BOTH };
+   enum Algorithm { RAYTRACE_HASHGRIDS, RAYTRACE_NAIVE, RAYTRACE_COMPARE_BOTH, RAYTRACE_COMPARE_BOTH_STRICTLY };
    
    /*!\name Constructors */
    //@{
@@ -378,7 +378,7 @@ inline void Raytracer::setFilenameTimestepWidth(uint8_t width) {
 }
 
 /*!\brief Set the algorithm to use while ray tracing.
- * \param algorithm One of RAYTRACE_HASHGRIDS, RAYTRACE_NAIVE, RAYTRACE_COMPARE_BOTH.
+ * \param algorithm One of RAYTRACE_HASHGRIDS, RAYTRACE_NAIVE, RAYTRACE_COMPARE_BOTH, RAYTRACE_COMPARE_BOTH_STRICTLY (abort on errors).
  */
 inline void Raytracer::setRaytracingAlgorithm(Algorithm algorithm) {
    raytracingAlgorithm_ = algorithm;
@@ -516,7 +516,8 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    std::vector<BodyIntersectionInfo> intersections;
    std::vector<BodyIntersectionInfo> intersectionsBuffer(pixelsVertical_ * pixelsHorizontal_); // contains for each pixel information about an intersection, if existent
 
-   if (raytracingAlgorithm_ == RAYTRACE_HASHGRIDS || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH) {
+   if (raytracingAlgorithm_ == RAYTRACE_HASHGRIDS || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH
+      || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
       if (tt != NULL) tt->start("HashGrids Update");
       for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
          ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID_);
@@ -598,7 +599,8 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    }
    if (tt != NULL) tt->stop("Intersection Testing");
 
-   if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH && pixelErrors > 0) {
+   if ((raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY)
+       && pixelErrors > 0) {
       WALBERLA_LOG_WARNING(pixelErrors << " pixel errors found!");
       
 #if defined(RAYTRACER_VERBOSE_COMPARISONS)
@@ -626,6 +628,11 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
       
       WALBERLA_LOG_WARNING("Problematic bodies: " << std::endl << ss.str());
 #endif
+      
+      if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
+         WALBERLA_ABORT("Pixel errors found, aborting due to strict comparison option. Compile with "
+                        << "RAYTRACER_VERBOSE_COMPARISONS to see which bodies caused the raytracer to fail.");
+      }
    }
    
    // Reduction with different methods only makes sense if actually using MPI.
