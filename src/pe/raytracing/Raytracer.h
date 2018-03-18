@@ -546,9 +546,6 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    if (tt != NULL) tt->start("Raytracing");
    real_t inf = std::numeric_limits<real_t>::max();
    
-   std::vector<real_t> tBuffer(pixelsVertical_ * pixelsHorizontal_, inf);
-   std::vector<Color> imageBuffer(pixelsVertical_ * pixelsHorizontal_);
-
    std::vector<BodyIntersectionInfo> intersections;
    std::vector<BodyIntersectionInfo> intersectionsBuffer(pixelsVertical_ * pixelsHorizontal_); // contains for each pixel information about an intersection, if existent
 
@@ -619,7 +616,6 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
                isErrorneousPixel = false;
             }
             
-            imageBuffer[coordinateToArrayIndex(x, y)] = color;
             BodyIntersectionInfo intersectionInfo = {
                uint32_t(x),
                uint32_t(y),
@@ -633,8 +629,6 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
             intersectionsBuffer[coordinateToArrayIndex(x, y)] = intersectionInfo;
             intersections.push_back(intersectionInfo);
          }
-         
-         tBuffer[coordinateToArrayIndex(x, y)] = t_closest;
       }
    }
    if (tt != NULL) tt->stop("Intersection Testing");
