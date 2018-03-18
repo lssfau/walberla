@@ -271,20 +271,22 @@ std::string Raytracer::getOutputFilename(const std::string& base, size_t timeste
    return fileNameStream.str();
 }
 
-/*!\brief Writes the tBuffer to a file in the tBuffer output directory.
- * \param tBuffer Buffer with t values as generated in generateImage(...).
+/*!\brief Writes the depth values of the intersections buffer to an image file in the tBuffer output directory.
+ * \param intersectionsBuffer Buffer with intersection info for each pixel.
  * \param timestep Timestep this image is from.
  * \param isGlobalImage Whether this image is the fully stitched together one.
  */
-void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t timestep, bool isGlobalImage) const {
-   writeTBufferToFile(tBuffer, getOutputFilename("tbuffer", timestep, isGlobalImage));
+void Raytracer::writeDepthsToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
+                                   size_t timestep, bool isGlobalImage) const {
+   writeDepthsToFile(intersectionsBuffer, getOutputFilename("tbuffer", timestep, isGlobalImage));
 }
 
-/*!\brief Writes the tBuffer to a file in the tBuffer output directory.
- * \param tBuffer Buffer with t values as generated in generateImage(...).
+/*!\brief Writes the depth values of the intersections buffer to an image file in the tBuffer output directory.
+ * \param intersectionsBuffer Buffer with intersection info for each pixel.
  * \param fileName Name of the output file.
  */
-void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std::string& fileName) const {
+void Raytracer::writeDepthsToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
+                                  const std::string& fileName) const {
    namespace fs = boost::filesystem;
    
    real_t inf = std::numeric_limits<real_t>::max();
@@ -294,10 +296,7 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
          size_t i = coordinateToArrayIndex(x, y);
-         real_t t = tBuffer[i];
-         //if (t > t_max && !realIsIdentical(t, inf)) {
-         //   t_max = t;
-         //}
+         real_t t = intersectionsBuffer[i].t;
          if (t < t_min) {
             t_min = t;
          }
@@ -318,7 +317,7 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std
       for (size_t x = 0; x < pixelsHorizontal_; x++) {
          size_t i = coordinateToArrayIndex(x, y);
          u_char g = 0;
-         real_t t = tBuffer[i];
+         real_t t = intersectionsBuffer[i].t;
          if (realIsIdentical(t, inf)) {
             g = (u_char)0;
          } else {
@@ -336,36 +335,37 @@ void Raytracer::writeTBufferToFile(const std::vector<real_t>& tBuffer, const std
    }
 }
 
-/*!\brief Writes a image buffer to a file in the image output directory.
- * \param imageBuffer Buffer with color vectors.
+/*!\brief Writes the image of the current intersection buffer to a file in the image output directory.
+ * \param intersectionsBuffer Buffer with intersection info for each pixel.
  * \param timestep Timestep this image is from.
  * \param isGlobalImage Whether this image is the fully stitched together one.
  */
-void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, size_t timestep, bool isGlobalImage) const {
-   writeImageBufferToFile(imageBuffer, getOutputFilename("image", timestep, isGlobalImage));
+void Raytracer::writeImageToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep,
+                                 bool isGlobalImage) const {
+   writeImageToFile(intersectionsBuffer, getOutputFilename("image", timestep, isGlobalImage));
 }
 
-/*!\brief Writes the image buffer to a file in the image output directory.
- * \param imageBuffer Buffer with color vectors.
+/*!\brief Writes the image of the current intersection buffer to a file in the image output directory.
+ * \param intersectionsBuffer Buffer with intersection info for each pixel.
  * \param fileName Name of the output file.
  */
-void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, const std::string& fileName) const {
+void Raytracer::writeImageToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
+                                 const std::string& fileName) const {
    namespace fs = boost::filesystem;
-
-   fs::path dir (getImageOutputDirectory());
+   
+   fs::path dir = getImageOutputDirectory();
    fs::path file (fileName);
    fs::path fullPath = dir / file;
    
    std::vector<u_char> lodeImageBuffer(pixelsHorizontal_*pixelsVertical_*3);
    
    uint32_t l = 0;
-   for (size_t y = pixelsVertical_-1; y > 0; y--) {
+   for (int y = pixelsVertical_-1; y >= 0; y--) {
       for (size_t x = 0; x < pixelsHorizontal_; x++) {
-         size_t i = coordinateToArrayIndex(x, y);
-         const Color& color = imageBuffer[i];
-         u_char r = (u_char)(255 * color[0]);
-         u_char g = (u_char)(255 * color[1]);
-         u_char b = (u_char)(255 * color[2]);
+         size_t i = coordinateToArrayIndex(x, uint_c(y));
+         u_char r = (u_char)(255 * intersectionsBuffer[i].r);
+         u_char g = (u_char)(255 * intersectionsBuffer[i].g);
+         u_char b = (u_char)(255 * intersectionsBuffer[i].b);
          lodeImageBuffer[l] = r;
          lodeImageBuffer[l+1] = g;
          lodeImageBuffer[l+2] = b;
@@ -458,6 +458,35 @@ void Raytracer::syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& inter
    
    WALBERLA_MPI_BARRIER();
    if (tt != NULL) tt->stop("Reduction");
+}
+
+void Raytracer::localOutput(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep, WcTimingTree* tt) {
+   if (getImageOutputEnabled()) {
+      if (getLocalImageOutputEnabled()) {
+         if (tt != NULL) tt->start("Local Output");
+         writeImageToFile(intersectionsBuffer, timestep);
+         if (tt != NULL) tt->stop("Local Output");
+      }
+   }
+   
+   if (getTBufferOutputEnabled()) {
+      if (tt != NULL) tt->start("Local Output");
+      writeDepthsToFile(intersectionsBuffer, timestep);
+      if (tt != NULL) tt->stop("Local Output");
+   }
+}
+
+void Raytracer::output(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep, WcTimingTree* tt) {
+   WALBERLA_ROOT_SECTION() {
+      if (tt != NULL) tt->start("Output");
+      if (getImageOutputEnabled()) {
+         writeImageToFile(intersectionsBuffer, timestep, true);
+      }
+      if (getTBufferOutputEnabled()) {
+         writeDepthsToFile(intersectionsBuffer, timestep, true);
+      }
+      if (tt != NULL) tt->stop("Output");
+   }
 }
 
 uint64_t Raytracer::naiveIntersectionTestCount = 0;

@@ -102,7 +102,7 @@ private:
    Lighting lighting_;        //!< The lighting of the scene.
    Color backgroundColor_;    //!< Background color of the scene.
    real_t blockAABBIntersectionPadding_; /*!< The padding applied in block AABB intersection pretesting, as
-                                          some objects within a block might protrude from the block's AABB.*/
+                                          * some objects within a block might protrude from the block's AABB.*/
    
    bool tBufferOutputEnabled_; //!< Enable / disable dumping the tbuffer to file.
    std::string tBufferOutputDirectory_; //!< Path to the tbuffer output directory.
@@ -184,14 +184,24 @@ public:
    void setupMPI_();
    
 private:
+   void localOutput(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep,
+                    WcTimingTree* tt = NULL);
+   void output(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep,
+               WcTimingTree* tt = NULL);
+
    std::string getOutputFilename(const std::string& base, size_t timestep, bool isGlobalImage) const;
-   void writeTBufferToFile(const std::vector<real_t>& tBuffer, size_t timestep, bool isGlobalImage = false) const;
-   void writeTBufferToFile(const std::vector<real_t>& tBuffer, const std::string& fileName) const;
-   void writeImageBufferToFile(const std::vector<Color>& imageBuffer, size_t timestep, bool isGlobalImage = false) const;
-   void writeImageBufferToFile(const std::vector<Color>& imageBuffer, const std::string& fileName) const;
+   void writeDepthsToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
+                          size_t timestep, bool isGlobalImage = false) const;
+   void writeDepthsToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
+                          const std::string& fileName) const;
+   void writeImageToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
+                         size_t timestep, bool isGlobalImage = false) const;
+   void writeImageToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
+                         const std::string& fileName) const;
    
    void syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt = NULL);
-   void syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& intersections, std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt);
+   void syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& intersections,
+                                std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt);
    
    inline bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
    inline size_t coordinateToArrayIndex(size_t x, size_t y) const;
@@ -679,6 +689,8 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
       }
    }
    
+   localOutput(intersectionsBuffer, timestep, tt);
+   
    // Reduction with different methods only makes sense if actually using MPI.
    // Besides that, the MPI reduce routine does not compile without MPI.
    WALBERLA_MPI_SECTION() {
@@ -695,36 +707,8 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
       syncImageUsingMPIGather(intersections, intersectionsBuffer, tt);
    }
    
-   if (tt != NULL) tt->start("Output");
-   if (getImageOutputEnabled()) {
-      if (getLocalImageOutputEnabled()) {
-         writeImageBufferToFile(imageBuffer, timestep);
-      }
-      WALBERLA_ROOT_SECTION() {
-         std::vector<Color> fullImageBuffer(pixelsHorizontal_ * pixelsVertical_, backgroundColor_);
-
-         for (auto& info: intersectionsBuffer) {
-            fullImageBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = Color(real_c(info.r), real_c(info.g), real_c(info.b));
-         }
-         
-         writeImageBufferToFile(fullImageBuffer, timestep, true);
-      }
-   }
+   output(intersectionsBuffer, timestep, tt);
    
-   if (getTBufferOutputEnabled()) {
-      writeTBufferToFile(tBuffer, timestep);
-      WALBERLA_ROOT_SECTION() {
-         std::vector<real_t> fullTBuffer(pixelsHorizontal_ * pixelsVertical_, inf);
-
-         for (auto& info: intersectionsBuffer) {
-            fullTBuffer[coordinateToArrayIndex(info.imageX, info.imageY)] = real_c(info.t);
-         }
-         
-         writeTBufferToFile(fullTBuffer, timestep, true);
-      }
-   }
-   
-   if (tt != NULL) tt->stop("Output");
    if (tt != NULL) tt->stop("Raytracing");
 }
 
