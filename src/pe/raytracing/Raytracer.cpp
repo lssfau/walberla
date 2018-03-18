@@ -440,6 +440,9 @@ void Raytracer::syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& inter
    WALBERLA_MPI_BARRIER();
    if (tt != NULL) tt->stop("Reduction");
 }
+
+uint64_t Raytracer::naiveIntersectionTestCount = 0;
+
 }
 }
 }

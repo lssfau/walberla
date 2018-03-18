@@ -120,6 +120,8 @@ private:
                                                                                   * given the specified body. */
    Algorithm raytracingAlgorithm_;    //!< Algorithm to use while intersection testing.
    ReductionMethod reductionMethod_; //!< Reduction method used for assembling the image from all processes.
+   
+   static uint64_t naiveIntersectionTestCount;
    //@}
    
    /*!\name Member variables for raytracing geometry */
@@ -463,6 +465,7 @@ inline void Raytracer::traceRayNaively(const Ray& ray, BodyID& body_closest, rea
       
       for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
          bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
+         Raytracer::naiveIntersectionTestCount++;
          
          if (intersects && t < t_closest) {
             // body was shot by ray and is currently closest to camera
@@ -524,7 +527,11 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          hashgrids->update();
       }
       if (tt != NULL) tt->stop("HashGrids Update");
+      
+      ccd::HashGrids::intersectionTestCount = 0;
    }
+   
+   Raytracer::naiveIntersectionTestCount = 0;
    
    real_t t, t_closest;
    Vec3 n;
@@ -599,6 +606,20 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    }
    if (tt != NULL) tt->stop("Intersection Testing");
 
+   if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
+      uint64_t naiveTests = Raytracer::naiveIntersectionTestCount;
+      uint64_t hashgridsTests = ccd::HashGrids::intersectionTestCount;
+      mpi::reduceInplace(naiveTests, mpi::SUM, 0);
+      mpi::reduceInplace(hashgridsTests, mpi::SUM, 0);
+      WALBERLA_ROOT_SECTION() {
+         uint64_t savedIntersections = naiveTests-hashgridsTests;
+         real_t savedIntersectionsPercentage = (real_t(1)-real_c(hashgridsTests)/real_c(naiveTests))*100;
+         WALBERLA_LOG_INFO("Intersection statistics (processes: " << mpi::MPIManager::instance()->numProcesses() << "):");
+         WALBERLA_LOG_INFO(" Naive tests:     " << std::setw(10) << naiveTests);
+         WALBERLA_LOG_INFO(" HashGrids tests: " << std::setw(10) << hashgridsTests);
+         WALBERLA_LOG_INFO(" Saved tests:     " << std::setw(10) << savedIntersections << " (" << std::setprecision(4) << savedIntersectionsPercentage << "%)");
+      }
+   }
    if ((raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY)
        && pixelErrors > 0) {
       WALBERLA_LOG_WARNING(pixelErrors << " pixel errors found!");
