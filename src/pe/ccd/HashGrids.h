@@ -605,7 +605,7 @@ template<typename BodyTuple>
 BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, const AABB& blockAABB,
                                                    real_t& t_closest, Vec3& n_closest) const {
    const real_t inf = std::numeric_limits<real_t>::max();
-
+   
    BodyID body_local = NULL;
    BodyID body_closest = NULL;
    
@@ -617,24 +617,26 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
    int32_t blockZCellCountMax = int32_c(std::ceil(blockAABB.zMax() * inverseCellSpan_)) + 1;
    
    Vec3 firstPoint;
+   Vec3 firstPointCenteredInCell;
    real_t tRayOriginToGrid = 0;
    if (blockAABB.contains(ray.getOrigin(), cellSpan_)) {
       firstPoint = ray.getOrigin();
+      firstPointCenteredInCell = firstPoint;
    } else {
       real_t t_start;
       Vec3 firstPointNormal;
       if (intersects(blockAABB, ray, t_start, cellSpan_, &firstPointNormal)) {
          firstPoint = ray.getOrigin() + ray.getDirection()*t_start;
-         firstPoint -= firstPointNormal * (cellSpan_/real_t(2));
+         firstPointCenteredInCell = firstPoint - firstPointNormal * (cellSpan_/real_t(2));
          tRayOriginToGrid = (ray.getOrigin() - firstPoint).length();
       } else {
          return NULL;
       }
    }
    
-   Vector3<int32_t> firstCell(int32_c(std::floor(firstPoint[0]*inverseCellSpan_)),
-                              int32_c(std::floor(firstPoint[1]*inverseCellSpan_)),
-                              int32_c(std::floor(firstPoint[2]*inverseCellSpan_)));
+   Vector3<int32_t> firstCell(int32_c(std::floor(firstPointCenteredInCell[0]*inverseCellSpan_)),
+                              int32_c(std::floor(firstPointCenteredInCell[1]*inverseCellSpan_)),
+                              int32_c(std::floor(firstPointCenteredInCell[2]*inverseCellSpan_)));
    
    const int8_t stepX = ray.xDir() >= 0 ? 1 : -1;
    const int8_t stepY = ray.yDir() >= 0 ? 1 : -1;
