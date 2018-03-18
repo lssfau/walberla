@@ -209,6 +209,8 @@ void Raytracer::setupFilenameRankWidth_() {
    }
 }
 
+/*!\brief Utility function for setting up the MPI datatype and operation.
+ */
 void Raytracer::setupMPI_() {
 #ifdef WALBERLA_BUILD_WITH_MPI
    MPI_Op_create((MPI_User_function *)BodyIntersectionInfo_Comparator_MPI_OP, true, &bodyIntersectionInfo_reduction_op);
@@ -376,7 +378,17 @@ void Raytracer::writeImageBufferToFile(const std::vector<Color>& imageBuffer, co
       WALBERLA_LOG_WARNING("lodePNG error " << error << " when trying to save image file to " << fullPath.string() << ": " << lodepng_error_text(error));
    }
 }
-   
+
+
+/*!\brief Conflate the intersectionsBuffer of each process onto the root process using MPI_Reduce.
+ * \param intersectionsBuffer Buffer containing all intersections for entire image (including non-hits).
+ * \param tt Optional TimingTree.
+ *
+ * This function conflates the intersectionsBuffer of each process onto the root process using the MPI_Reduce
+ * routine. It requires sending intersection info structs for the entire image instead of only the ones of the hits.
+ *
+ * \attention This function only works on MPI builds due to the explicit usage of MPI routines.
+ */
 void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt) {
 #ifdef WALBERLA_BUILD_WITH_MPI
    WALBERLA_MPI_BARRIER();
@@ -400,10 +412,17 @@ void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& inter
 #else
    WALBERLA_UNUSED(intersectionsBuffer);
    WALBERLA_UNUSED(tt);
-   WALBERLA_ABORT("Cannot call MPI reduce with MPI-specific code on a non-MPI build.");
+   WALBERLA_ABORT("Cannot call MPI reduce on a non-MPI build due to usage of MPI-specific code.");
 #endif
 }
-   
+  
+/*!\brief Conflate the intersectionsBuffer of each process onto the root process using MPI_Gather.
+ * \param intersectionsBuffer Buffer containing intersections.
+ * \param tt Optional TimingTree.
+ *
+ * This function conflates the intersectionsBuffer of each process onto the root process using the MPI_Gather
+ * routine. It only sends information for hits.
+ */
 void Raytracer::syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& intersections, std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt) {
    WALBERLA_MPI_BARRIER();
    if (tt != NULL) tt->start("Reduction");
