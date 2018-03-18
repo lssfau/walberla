@@ -336,7 +336,7 @@ ShadingParameters customSpheresBodyToShadingParams(const BodyID body) {
    }
 }
 
-void RaytracerSpheresTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS, const std::string& outputFolder = ".") {
+void RaytracerSpheresTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS, const std::string& outputFolder = ".") {
    WALBERLA_LOG_INFO("Raytracer Spheres Scene");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
    shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
@@ -858,7 +858,7 @@ int main( int argc, char** argv )
    const Raytracer::Algorithm algorithm = Raytracer::RAYTRACE_COMPARE_BOTH_STRICTLY;
 
    RaytracerTest(algorithm, outputFolder);
-   RaytracerSpheresTest(algorithm, outputFolder);
+   //RaytracerSpheresTestScene(algorithm, outputFolder);
    HashGridsTestScene(algorithm, outputFolder);
    HashGridsTest(algorithm, outputFolder, 50, 30, 130, 10);
    HashGridsTest(algorithm, outputFolder,
