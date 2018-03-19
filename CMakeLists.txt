@@ -360,17 +360,6 @@ if( NOT WARNING_DEPRECATED)
    endif()
 endif()
 
-# Treat warnings as errors
-if ( WARNING_ERROR )
-   if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG )
-      add_flag ( CMAKE_CXX_FLAGS "-pedantic-errors -Werror" )
-   elseif( WALBERLA_CXX_COMPILER_IS_MSVC )
-      add_flag ( CMAKE_CXX_FLAGS "/WX" )
-   elseif ( WALBERLA_CXX_COMPILER_IS_CRAY )
-      add_flag ( CMAKE_CXX_FLAGS "-h error_on_warning" )
-   endif()
-endif ( )
-
 
 if ( WALBERLA_CXX_COMPILER_IS_CLANG )
     add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow -Wno-c++11-extensions -Qunused-arguments" )
@@ -784,18 +773,16 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
       if ( WIN32 )
          message ( STATUS "Enter Workaround Routine for Windows and OpenMPI: PRESS CONFIGURE ONE MORE TIME!" )
          string ( REGEX REPLACE "(.*)/bin/.*" "\\1" MPI_PATH ${MPI_CXX_COMPILER} )
-         find_path ( MPI_INCLUDE_PATH mpi.h
+         find_path ( MPI_C_INCLUDE_PATH mpi.h
             HINTS ${MPI_PATH}
             PATH_SUFFIXES include Inc)
-         set ( MPI_CXX_INCLUDE_PATH ${MPI_INCLUDE_PATH} CACHE FILEPATH "" FORCE )
-         set ( MPI_C_INCLUDE_PATH   ${MPI_INCLUDE_PATH} CACHE FILEPATH "" FORCE )
+         set ( MPI_CXX_INCLUDE_PATH ${MPI_C_INCLUDE_PATH} CACHE FILEPATH "" FORCE )
 
          set ( MPI_CXX_LIBRARIES "MPI_CXX_LIBRARIES-NOTFOUND" CACHE FILEPATH "Cleared" FORCE )
          find_library ( MPI_CXX_LIBRARIES
             NAMES         mpi++ mpicxx cxx mpi_cxx libmpi++ libmpicxx libcxx libmpi_cxx
             HINTS         ${MPI_PATH}
             PATH_SUFFIXES lib )
-         set ( MPI_LIBRARY "MPI_CXX_LIBRARIES" CACHE FILEPATH "" FORCE )
 
          if ( NOT MPI_CXX_LIBRARIES STREQUAL "MPI_CXX_LIBRARIES-NOTFOUND" )
             set ( MPI_CXX_FOUND ON FORCE )
@@ -806,7 +793,6 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
            NAMES         mpi mpich mpich2 msmpi libmpi libmpich libmpich2 libmsmpi
            HINTS         ${MPI_PATH}
            PATH_SUFFIXES lib )
-         set ( MPI_EXTRA_LIBRARY "MPI_C_LIBRARIES" CACHE FILEPATH "" FORCE )
 
          if ( NOT MPI_C_LIBRARIES STREQUAL "MPI_C_LIBRARIES-NOTFOUND" )
             set ( MPI_C_FOUND ON FORCE )
@@ -823,23 +809,14 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
    endif ( )
 
    if ( MPI_FOUND )
-       if ( MPI_CXX_FOUND )
-         include_directories ( SYSTEM ${MPI_CXX_INCLUDE_PATH} ${MPI_C_INCLUDE_PATH} )
-         foreach( LIB ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} )
-           if ( LIB )
-              list ( APPEND SERVICE_LIBS ${LIB} )
-           endif ( )
-         endforeach ( )
-         add_flag ( CMAKE_CXX_FLAGS "${MPI_CXX_COMPILE_FLAGS}" )
-         add_flag ( CMAKE_C_FLAGS   "${MPI_C_COMPILE_FLAGS}" )
-      else ( ) # For older CMake versions
-         include_directories ( SYSTEM ${MPI_INCLUDE_PATH} )
-         list ( APPEND SERVICE_LIBS ${MPI_LIBRARY} )
-         if ( MPI_EXTRA_LIBRARY )
-            list ( APPEND SERVICE_LIBS ${MPI_EXTRA_LIBRARY} )
+     include_directories ( SYSTEM ${MPI_CXX_INCLUDE_PATH} ${MPI_C_INCLUDE_PATH} )
+     foreach( LIB ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} )
+         if ( LIB )
+            list ( APPEND SERVICE_LIBS ${LIB} )
          endif ( )
-         add_flag ( CMAKE_C_FLAGS "${MPI_COMPILE_FLAGS}" )
-      endif ( )
+     endforeach ( )
+     add_flag ( CMAKE_CXX_FLAGS "${MPI_CXX_COMPILE_FLAGS}" )
+     add_flag ( CMAKE_C_FLAGS   "${MPI_C_COMPILE_FLAGS}" )
 
      add_flag ( CMAKE_MODULE_LINKER_FLAGS "${MPI_CXX_LINK_FLAGS}" )
      add_flag ( CMAKE_EXE_LINKER_FLAGS    "${MPI_CXX_LINK_FLAGS}" )
@@ -847,7 +824,7 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
 
      # When using Intel MPI, mpi.h has to be included before including the standard library
      # therefore we use the -include flag to enforce this.
-     if ( MPI_INCLUDE_PATH MATCHES "intel" )
+     if ( MPI_C_INCLUDE_PATH MATCHES "intel" )
          message (STATUS "Activating IntelMPI include workaround for mpi.h" )
          add_flag ( CMAKE_CXX_FLAGS "-include mpi.h" )
          add_flag ( CMAKE_C_FLAGS   "-include mpi.h" )
@@ -1233,7 +1210,23 @@ if ( WALBERLA_BUILD_WITH_LTO  )
    endif( )
 
 endif ( )
+
 ############################################################################################################################
+##
+##  Some more compiler flags that need to happen after any try_compile (e.g. inside FindMPI)
+##
+############################################################################################################################
+
+# Treat warnings as errors
+if ( WARNING_ERROR )
+   if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG )
+      add_flag ( CMAKE_CXX_FLAGS "-pedantic-errors -Werror" )
+   elseif( WALBERLA_CXX_COMPILER_IS_MSVC )
+      add_flag ( CMAKE_CXX_FLAGS "/WX" )
+   elseif ( WALBERLA_CXX_COMPILER_IS_CRAY )
+      add_flag ( CMAKE_CXX_FLAGS "-h error_on_warning" )
+   endif()
+endif ( )
 
 ############################################################################################################################
 ##
