@@ -62,8 +62,20 @@ struct BodyIntersectionInfo {
    
 class Raytracer {
 public:
-   enum ReductionMethod { MPI_REDUCE, MPI_GATHER };
-   enum Algorithm { RAYTRACE_HASHGRIDS, RAYTRACE_NAIVE, RAYTRACE_COMPARE_BOTH, RAYTRACE_COMPARE_BOTH_STRICTLY };
+   /*!\brief Which method to use when reducing the process-local image to a global one.
+    */
+   enum ReductionMethod {
+      MPI_REDUCE,    //!< Reduce info from all processes onto root (assembling happens during reduction).
+      MPI_GATHER     //!< Gather info from all processes onto root process and assemble global image there.
+   };
+   /*!\brief Which algorithm to use when doing ray-object intersection finding.
+    */
+   enum Algorithm {
+      RAYTRACE_HASHGRIDS,              //!< Use hashgrids to find ray-body intersections.
+      RAYTRACE_NAIVE,                  //!< Use the brute force approach of checking all objects for intersection testing.
+      RAYTRACE_COMPARE_BOTH,           //!< Compare both methods and check for pixel errors.
+      RAYTRACE_COMPARE_BOTH_STRICTLY   //!< Same as RAYTRACE_COMPARE_BOTH but abort if errors found.
+   };
    
    /*!\name Constructors */
    //@{
@@ -574,9 +586,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    IntersectsFunctor func(ray, t, n);
    bool isErrorneousPixel = false;
    uint_t pixelErrors = 0;
-#if defined(RAYTRACER_VERBOSE_COMPARISONS)
    std::map<BodyID, std::unordered_set<BodyID>> correctToIncorrectBodyIDsMap;
-#endif
    
    if (tt != NULL) tt->start("Intersection Testing");
    for (size_t x = 0; x < pixelsHorizontal_*antiAliasFactor_; x++) {
@@ -602,9 +612,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
             traceRayNaively<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
             
             if (body_closest != hashgrids_body_closest) {
-#if defined(RAYTRACER_VERBOSE_COMPARISONS)
                correctToIncorrectBodyIDsMap[body_closest].insert(hashgrids_body_closest);
-#endif
                isErrorneousPixel = true;
                ++pixelErrors;
             }
@@ -650,39 +658,38 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          WALBERLA_LOG_INFO(" Saved tests:     " << std::setw(10) << savedIntersections << " (" << std::setprecision(4) << savedIntersectionsPercentage << "%)");
       }
    }
-   if ((raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY)
-       && pixelErrors > 0) {
-      WALBERLA_LOG_WARNING(pixelErrors << " pixel errors found!");
-      
-#if defined(RAYTRACER_VERBOSE_COMPARISONS)
-      std::stringstream ss;
-      for (auto it: correctToIncorrectBodyIDsMap) {
-         const BodyID correctBody = it.first;
-         if (it.first != NULL) {
-            ss << " correct body: " << correctBody->getID() << "(" << correctBody->getHash() << ")";
-         } else {
-            ss << " no body naively found";
-         }
-         ss << ", hashgrids found:";
-         for (auto incorrectBody: it.second) {
-            ss << " ";
-            if (incorrectBody != NULL) {
-               ss << incorrectBody->getID() << "(" << incorrectBody->getHash();
+   if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
+      if (pixelErrors > 0) {
+         WALBERLA_LOG_WARNING(pixelErrors << " pixel errors found!");
+         
+         std::stringstream ss;
+         for (auto it: correctToIncorrectBodyIDsMap) {
+            const BodyID correctBody = it.first;
+            if (it.first != NULL) {
+               ss << " correct body: " << correctBody->getID() << "(" << correctBody->getHash() << ")";
             } else {
-               ss << "NULL";
+               ss << " no body naively found";
             }
+            ss << ", hashgrids found:";
+            for (auto incorrectBody: it.second) {
+               ss << " ";
+               if (incorrectBody != NULL) {
+                  ss << incorrectBody->getID() << "(" << incorrectBody->getHash();
+               } else {
+                  ss << "NULL";
+               }
+            }
+            ss << std::endl;
+            ss << "  minCorner: " << correctBody->getAABB().minCorner() << ", maxCorner: " << correctBody->getAABB().maxCorner();
+            ss << std::endl;
          }
-         ss << std::endl;
-         ss << "  minCorner: " << correctBody->getAABB().minCorner() << ", maxCorner: " << correctBody->getAABB().maxCorner();
-         ss << std::endl;
-      }
-      
-      WALBERLA_LOG_WARNING("Problematic bodies: " << std::endl << ss.str());
-#endif
-      
-      if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
-         WALBERLA_ABORT("Pixel errors found, aborting due to strict comparison option. Compile with "
-                        << "RAYTRACER_VERBOSE_COMPARISONS to see which bodies caused the raytracer to fail.");
+         WALBERLA_LOG_WARNING("Problematic bodies: " << std::endl << ss.str());
+         
+         if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
+            WALBERLA_ABORT("Pixel errors found, aborting due to strict comparison option.");
+         }
+      } else {
+         WALBERLA_LOG_INFO("No pixel errors found.");
       }
    }
    
