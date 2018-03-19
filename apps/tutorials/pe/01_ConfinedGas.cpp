@@ -104,7 +104,7 @@ int main( int argc, char ** argv )
                      Color(real_t(0.4), real_t(0.4), real_t(0.4)));
    Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                        640, 480,
-                       real_t(49.13),
+                       real_t(49.13), 2,
                        Vec3(-25, 10, 10), Vec3(-5, 10, 10), Vec3(0, 0, 1),
                        lighting,
                        Color(real_t(0.1), real_t(0.1), real_t(0.1)),
