@@ -298,7 +298,7 @@ void Raytracer::writeDepthsToFile(const std::vector<BodyIntersectionInfo>& inter
    for (size_t x = 0; x < pixelsHorizontal_; x++) {
       for (size_t y = 0; y < pixelsVertical_; y++) {
          size_t i = coordinateToArrayIndex(x, y);
-         real_t t = intersectionsBuffer[i].t;
+         real_t t = real_c(intersectionsBuffer[i].t);
          if (t < t_min) {
             t_min = t;
          }
@@ -319,7 +319,7 @@ void Raytracer::writeDepthsToFile(const std::vector<BodyIntersectionInfo>& inter
       for (size_t x = 0; x < pixelsHorizontal_; x++) {
          size_t i = coordinateToArrayIndex(x, y);
          u_char g = 0;
-         real_t t = intersectionsBuffer[i].t;
+         real_t t = real_c(intersectionsBuffer[i].t);
          if (realIsIdentical(t, inf)) {
             g = (u_char)0;
          } else {
@@ -364,14 +364,14 @@ void Raytracer::writeImageToFile(const std::vector<BodyIntersectionInfo>& inters
    uint32_t l = 0;
    real_t patchSize = real_c(antiAliasFactor_*antiAliasFactor_);
    for (int y = pixelsVertical_-1; y >= 0; y--) {
-      for (uint x = 0; x < pixelsHorizontal_; x++) {
+      for (uint32_t x = 0; x < pixelsHorizontal_; x++) {
          real_t r_sum = 0, g_sum = 0, b_sum = 0;
-         for (uint ay = y*antiAliasFactor_; ay < (y+1)*antiAliasFactor_; ay++) {
+         for (uint32_t ay = uint32_c(y)*antiAliasFactor_; ay < (uint32_c(y)+1)*antiAliasFactor_; ay++) {
             for (uint ax = x*antiAliasFactor_; ax < (x+1)*antiAliasFactor_; ax++) {
                size_t i = coordinateToArrayIndex(ax, ay);
-               r_sum += intersectionsBuffer[i].r;
-               g_sum += intersectionsBuffer[i].g;
-               b_sum += intersectionsBuffer[i].b;
+               r_sum += real_c(intersectionsBuffer[i].r);
+               g_sum += real_c(intersectionsBuffer[i].g);
+               b_sum += real_c(intersectionsBuffer[i].b);
             }
          }
          u_char r = (u_char)(255 * (r_sum/patchSize));
