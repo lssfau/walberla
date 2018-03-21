@@ -848,21 +848,23 @@ int main( int argc, char** argv )
    const Raytracer::Algorithm algorithm = Raytracer::RAYTRACE_COMPARE_BOTH_STRICTLY;
    const uint8_t antiAliasFactor = 1;
    RaytracerTest(algorithm, antiAliasFactor);
-   //RaytracerSpheresTestScene(algorithm, antiAliasFactor);
+   RaytracerSpheresTestScene(algorithm, antiAliasFactor);
    HashGridsTestScene(algorithm, antiAliasFactor);
    
-   HashGridsTest(algorithm, antiAliasFactor,
-                 50, 30, 130,
-                 10);
-   HashGridsTest(algorithm, antiAliasFactor,
-                 60, 60, 3,
-                 1,
-                 real_t(0.1), real_t(0.3), true,
-                 real_t(0.1), real_t(0.2), real_t(0.1), real_t(0.2),
-                 real_t(0.5), real_t(0.6));
-   HashGridsArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
-   HashGridsFromNegativeArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
-   HashGridsFromNegativeXArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
+   if (argc >= 2 && strcmp(argv[1], "--longrun") == 0) {
+      HashGridsTest(algorithm, antiAliasFactor,
+                    50, 30, 130,
+                    10);
+      HashGridsTest(algorithm, antiAliasFactor,
+                    60, 60, 3,
+                    1,
+                    real_t(0.1), real_t(0.3), true,
+                    real_t(0.1), real_t(0.2), real_t(0.1), real_t(0.2),
+                    real_t(0.5), real_t(0.6));
+      HashGridsArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
+      HashGridsFromNegativeArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
+      HashGridsFromNegativeXArtifactsTest(algorithm, antiAliasFactor, 750, real_t(0.2), real_t(0.3));
+   }
    
    return EXIT_SUCCESS;
 }
