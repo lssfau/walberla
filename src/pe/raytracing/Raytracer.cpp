@@ -289,8 +289,6 @@ void Raytracer::writeDepthsToFile(const std::vector<BodyIntersectionInfo>& inter
  */
 void Raytracer::writeDepthsToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
                                   const std::string& fileName) const {
-   namespace fs = boost::filesystem;
-   
    real_t inf = std::numeric_limits<real_t>::max();
    
    real_t t_max = 1;
@@ -308,9 +306,9 @@ void Raytracer::writeDepthsToFile(const std::vector<BodyIntersectionInfo>& inter
    
    t_max = forest_->getDomain().maxDistance(cameraPosition_);
    
-   fs::path dir (getTBufferOutputDirectory());
-   fs::path file (fileName);
-   fs::path fullPath = dir / file;
+   filesystem::path dir (getTBufferOutputDirectory());
+   filesystem::path file (fileName);
+   filesystem::path fullPath = dir / file;
    
    std::vector<u_char> lodeTBuffer(pixelsHorizontal_*pixelsVertical_);
    
@@ -353,11 +351,9 @@ void Raytracer::writeImageToFile(const std::vector<BodyIntersectionInfo>& inters
  */
 void Raytracer::writeImageToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
                                  const std::string& fileName) const {
-   namespace fs = boost::filesystem;
-   
-   fs::path dir = getImageOutputDirectory();
-   fs::path file (fileName);
-   fs::path fullPath = dir / file;
+   filesystem::path dir = getImageOutputDirectory();
+   filesystem::path file (fileName);
+   filesystem::path fullPath = dir / file;
    
    std::vector<u_char> lodeImageBuffer(pixelsHorizontal_*pixelsVertical_*3);
    

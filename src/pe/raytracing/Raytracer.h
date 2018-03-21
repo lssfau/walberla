@@ -25,7 +25,7 @@
 #include <core/math/Vector3.h>
 #include <core/mpi/all.h>
 #include <core/config/Config.h>
-#include <boost/filesystem.hpp>
+#include <core/Filesystem.h>
 #include <core/timing/TimingTree.h>
 #include <functional>
 #include "Ray.h"
@@ -40,7 +40,6 @@
 #include "core/mpi/all.h"
 #include <stddef.h>
 
-using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::timing;
 
@@ -362,10 +361,8 @@ inline void Raytracer::setTBufferOutputEnabled(const bool enabled) {
  * \param enabled Set to true / false to enable / disable tbuffer output.
  */
 inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
-   namespace fs = boost::filesystem;
-   
-   fs::path dir (path);
-   WALBERLA_CHECK(fs::exists(dir) && fs::is_directory(dir), "Tbuffer output directory " << path << " is invalid.");
+   filesystem::path dir (path);
+   WALBERLA_CHECK(filesystem::exists(dir) && filesystem::is_directory(dir), "Tbuffer output directory " << path << " is invalid.");
    
    tBufferOutputDirectory_ = path;
 }
@@ -388,10 +385,8 @@ inline void Raytracer::setLocalImageOutputEnabled(const bool enabled) {
  * \param enabled Set to true / false to enable / disable image output.
  */
 inline void Raytracer::setImageOutputDirectory(const std::string& path) {
-   namespace fs = boost::filesystem;
-   
-   fs::path dir (path);
-   WALBERLA_CHECK(fs::exists(dir) && fs::is_directory(dir), "Image output directory " << path << " is invalid.");
+   filesystem::path dir (path);
+   WALBERLA_CHECK(filesystem::exists(dir) && filesystem::is_directory(dir), "Image output directory " << path << " is invalid.");
    
    imageOutputDirectory_ = path;
 }
