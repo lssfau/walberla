@@ -352,7 +352,6 @@ void RaytracerSpheresTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytra
                        Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
                        lighting,
                        Color(real_t(0.2),real_t(0.2),real_t(0.2)),
-                       real_t(2),
                        customSpheresBodyToShadingParams);
    
    MaterialID iron = Material::find("iron");
@@ -535,7 +534,6 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, uint8_t antiAliasFa
                            std::get<2>(vector),
                            lighting0,
                            Color(real_t(0.2),real_t(0.2),real_t(0.2)),
-                           real_t(2),
                            customHashGridsBodyToShadingParams);
       raytracer.setImageOutputEnabled(true);
       raytracer.setFilenameTimestepWidth(12);
@@ -579,7 +577,6 @@ void raytraceArtifactsForest(Raytracer::Algorithm raytracingAlgorithm, uint8_t a
                        upVector,
                        lighting,
                        Color(real_t(0.2),real_t(0.2),real_t(0.2)),
-                       real_t(2),
                        customArtifactsBodyToShadingParams);
    raytracer.setImageOutputEnabled(true);
    raytracer.setFilenameTimestepWidth(timestepWidth);
@@ -818,8 +815,7 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
                           std::get<1>(vector),
                           std::get<2>(vector),
                           lighting,
-                          Color(real_t(0.2),real_t(0.2),real_t(0.2)),
-                          real_t(2));
+                          Color(real_t(0.2),real_t(0.2),real_t(0.2)));
       
       raytracer.setRaytracingAlgorithm(raytracingAlgorithm);
       raytracer.setImageOutputEnabled(true);
@@ -855,6 +851,7 @@ int main( int argc, char** argv )
    RaytracerTest(algorithm, antiAliasFactor);
    //RaytracerSpheresTestScene(algorithm, antiAliasFactor);
    HashGridsTestScene(algorithm, antiAliasFactor);
+   
    HashGridsTest(algorithm, antiAliasFactor,
                  50, 30, 130,
                  10);

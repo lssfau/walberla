@@ -35,9 +35,6 @@
 #include "pe/ccd/ICCD.h"
 #include <pe/ccd/HashGrids.h>
 
-#include "core/mpi/MPIManager.h"
-#include "core/mpi/MPIWrapper.h"
-#include "core/mpi/all.h"
 #include <stddef.h>
 
 using namespace walberla::pe;
@@ -156,10 +153,8 @@ private:
    real_t pixelHeight_;       //!< The height of a pixel of the generated image in the viewing plane.
    //@}
    
-#ifdef WALBERLA_BUILD_WITH_MPI
    MPI_Op bodyIntersectionInfo_reduction_op;
    MPI_Datatype bodyIntersectionInfo_mpi_type;
-#endif
    
 public:
    /*!\name Get functions */
@@ -647,8 +642,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
             syncImageUsingMPIGather(intersections, intersectionsBuffer, tt);
             break;
       }
-   }
-   WALBERLA_NON_MPI_SECTION() {
+   } else {
       syncImageUsingMPIGather(intersections, intersectionsBuffer, tt);
    }
    
