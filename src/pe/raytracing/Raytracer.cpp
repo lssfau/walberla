@@ -53,7 +53,9 @@ void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyInter
 /*!\brief Instantiation constructor for the Raytracer class.
  *
  * \param forest BlockForest the raytracer operates on.
- * \param storageID Storage ID of the block data storage the raytracer operates on.
+ * \param storageID Block data ID for the storage the raytracer operates on.
+ * \param globalBodyStorage Pointer to the global body storage.
+ * \param ccdID Block data ID for HashGrids.
  * \param pixelsHorizontal Horizontal amount of pixels of the generated image.
  * \param pixelsVertical Vertical amount of pixels of the generated image.
  * \param fov_vertical Vertical field-of-view of the camera.
@@ -61,9 +63,11 @@ void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyInter
  * \param lookAtPoint Point the camera looks at in the global world frame.
  * \param upVector Vector indicating the upwards direction of the camera.
  * \param backgroundColor Background color of the scene.
- * \param blockAABBIntersectionPadding The padding applied in block AABB intersection pretesting. Usually not required.
+ * \param blockAABBIntersectionPadding The padding applied in block AABB intersection pretesting.
  *                                     Set it to the value of the farthest distance a object might protrude from
  *                                     its containing block.
+ * \param bodyToShadingParamsFunction A function mapping a BodyID to ShadingParameters for this body.
+ *                                    This can be used to customize the color and shading of bodies.
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
                      const shared_ptr<BodyStorage> globalBodyStorage,
@@ -101,16 +105,19 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
  *
  * \param forest BlockForest the raytracer operates on.
  * \param storageID Storage ID of the block data storage the raytracer operates on.
+ * \param globalBodyStorage Pointer to the global body storage.
+ * \param ccdID Block data ID for HashGrids.
  * \param config Config block for the raytracer.
  *
- * The config block has to contain image_x (int), image_y (int), fov_vertical (real, in degrees) and
- * antiAliasFactor (uint, between 1 and 4). Additionally a vector of reals for each of cameraPosition, lookAt
- * and the upVector. Optional is blockAABBIntersectionPadding (real) and backgroundColor (Vec3).
- * To output both process local and global tbuffers after raytracing, set tbuffer_output_directory (string).
+ * The config block has to contain image_x (int), image_y (int) and fov_vertical (real, in degrees).
+ * Additionally a vector of reals for each of cameraPosition, lookAt and the upVector for the view setup are required.
+ * Optional is antiAliasFactor (uint, usually between 1 and 4) for supersampling, blockAABBIntersectionPadding (real)
+ * and backgroundColor (Vec3).
  * For image output after raytracing, set image_output_directory (string); for local image output additionally set
- * local_image_output_enabled (bool) to true. outputFilenameTimestepZeroPadding (int) sets zero padding
- * for timesteps of output filenames.
- * For the lighting a config block named Lighting has to be defined, information about its contents is in Lighting.h.
+ * local_image_output_enabled (bool) to true. outputFilenameTimestepZeroPadding (int) sets the zero padding
+ * for timesteps in output filenames.
+ * For the lighting a config block within the Raytracer config block named Lighting has to be defined,
+ * information about its contents is in the Lighting class.
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
                      const shared_ptr<BodyStorage> globalBodyStorage,
