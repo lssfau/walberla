@@ -29,7 +29,6 @@
 #include "pe/rigidbody/Union.h"
 #include "pe/utility/BodyCast.h"
 #include <core/math/Utility.h>
-#include <boost/math/special_functions/sign.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <pe/raytracing/Ray.h>
