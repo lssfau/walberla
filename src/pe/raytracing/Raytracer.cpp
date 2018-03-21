@@ -357,7 +357,7 @@ void Raytracer::writeImageToFile(const std::vector<BodyIntersectionInfo>& inters
    for (int y = pixelsVertical_-1; y >= 0; y--) {
       for (uint32_t x = 0; x < pixelsHorizontal_; x++) {
          real_t r_sum = 0, g_sum = 0, b_sum = 0;
-         for (uint32_t ay = uint32_c(y)*antiAliasFactor_; ay < (uint32_c(y)+1)*antiAliasFactor_; ay++) {
+         for (uint32_t ay = uint32_c(y)*antiAliasFactor_; ay < (uint32_c(y+1))*antiAliasFactor_; ay++) {
             for (uint ax = x*antiAliasFactor_; ax < (x+1)*antiAliasFactor_; ax++) {
                size_t i = coordinateToArrayIndex(ax, ay);
                r_sum += real_c(intersectionsBuffer[i].r);
