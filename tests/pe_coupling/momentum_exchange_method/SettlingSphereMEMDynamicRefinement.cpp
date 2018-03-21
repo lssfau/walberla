@@ -869,9 +869,18 @@ int main( int argc, char **argv )
       {
          auto & forest = blocks->getBlockForest();
          pe::createWithNeighborhood(forest, bodyStorageID, *peInfoCollection);
-         pe::clearSynchronization( blockforest, bodyStorageID);
 
+         uint_t stampBefore = blocks->getBlockForest().getModificationStamp();
          blocks->refresh();
+         uint_t stampAfter = blocks->getBlockForest().getModificationStamp();
+
+         if(stampBefore == stampAfter)
+         {
+            // nothing has changed
+            continue;
+         }
+
+         pe::clearSynchronization( blockforest, bodyStorageID);
 
          for( uint_t syncStep = 0; syncStep < uint_c(diameter / real_c(minBlockSizeInCells)) + 1; ++syncStep)
             syncCall();
