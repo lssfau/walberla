@@ -25,13 +25,10 @@
 #include <core/grid_generator/HCPIterator.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
-
-#include <pe/raytracing/Raytracer.h>
 //! [Includes]
 
 using namespace walberla;
 using namespace walberla::pe;
-using namespace walberla::pe::raytracing;
 
 //! [BodyTypeTuple]
 typedef boost::tuple<Sphere, Plane> BodyTypeTuple ;
@@ -48,8 +45,7 @@ int main( int argc, char ** argv )
    real_t spacing          = real_c(1.0);
    real_t radius           = real_c(0.4);
    real_t vMax             = real_c(1.0);
-   int    simulationSteps  = 100;
-   int    raytracerSkippedSteps = 5;
+   int    simulationSteps  = 10;
    real_t dt               = real_c(0.01);
    //! [Parameters]
 
@@ -96,19 +92,6 @@ int main( int argc, char ** argv )
    //! [SetBodyTypeIDs]
    SetBodyTypeIDs<BodyTypeTuple>::execute();
    //! [SetBodyTypeIDs]
-   
-   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
-   Lighting lighting(Vec3(-12, 12, 12),
-                     Color(1, 1, 1),
-                     Color(1, 1, 1),
-                     Color(real_t(0.4), real_t(0.4), real_t(0.4)));
-   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
-                       640, 480,
-                       real_t(49.13), 2,
-                       Vec3(-25, 10, 10), Vec3(-5, 10, 10), Vec3(0, 0, 1),
-                       lighting,
-                       Color(real_t(0.1), real_t(0.1), real_t(0.1)),
-                       radius);
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - START ***");
    //! [Material]
@@ -157,13 +140,8 @@ int main( int argc, char ** argv )
       }
 
       cr.timestep( real_c(dt) );
-      if (i % raytracerSkippedSteps == 0) {
-         raytracer.generateImage<BodyTypeTuple>(uint_c(i));
-      }
       syncNextNeighbors<BodyTypeTuple>(*forest, storageID);
-   
    }
-
    //! [GameLoop]
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
 
