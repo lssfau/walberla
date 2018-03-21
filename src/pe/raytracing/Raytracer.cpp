@@ -69,7 +69,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
                      const shared_ptr<BodyStorage> globalBodyStorage,
                      const BlockDataID ccdID,
                      uint16_t pixelsHorizontal, uint16_t pixelsVertical,
-                     real_t fov_vertical, uint8_t antiAliasFactor,
+                     real_t fov_vertical, uint16_t antiAliasFactor,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                      const Lighting& lighting,
                      const Color& backgroundColor,
@@ -126,7 +126,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    pixelsHorizontal_ = config.getParameter<uint16_t>("image_x");
    pixelsVertical_ = config.getParameter<uint16_t>("image_y");
    fov_vertical_ = config.getParameter<real_t>("fov_vertical");
-   antiAliasFactor_ = config.getParameter<uint8_t>("antiAliasFactor", 1);
+   antiAliasFactor_ = config.getParameter<uint16_t>("antiAliasFactor", 1);
    
    if (config.isDefined("tbuffer_output_directory")) {
       setTBufferOutputEnabled(true);

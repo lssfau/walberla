@@ -82,7 +82,7 @@ public:
                       const shared_ptr<BodyStorage> globalBodyStorage,
                       const BlockDataID ccdID,
                       uint16_t pixelsHorizontal, uint16_t pixelsVertical,
-                      real_t fov_vertical, uint8_t antiAliasFactor,
+                      real_t fov_vertical, uint16_t antiAliasFactor,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                       const Lighting& lighting,
                       const Color& backgroundColor = Color(real_t(0.1), real_t(0.1), real_t(0.1)),
@@ -106,7 +106,7 @@ private:
    uint16_t pixelsHorizontal_;  //!< The horizontal amount of pixels of the generated image.
    uint16_t pixelsVertical_;    //!< The vertical amount of pixels of the generated image.
    real_t fov_vertical_;      //!< The vertical field-of-view of the camera.
-   uint8_t antiAliasFactor_;  /*!< Factor used for oversampling. Should be between 1 (fast, but jagged edges)
+   uint16_t antiAliasFactor_; /*!< Factor used for oversampling. Should be between 1 (fast, but jagged edges)
                                * and 4 (16 times slower, very smooth edges).*/
    Vec3 cameraPosition_;      //!< The position of the camera in the global world frame.
    Vec3 lookAtPoint_;         /*!< The point the camera looks at in the global world frame,
@@ -557,7 +557,8 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    
    std::vector<BodyIntersectionInfo> intersections;
    // contains for each pixel information about an intersection:
-   std::vector<BodyIntersectionInfo> intersectionsBuffer(pixelsVertical_*antiAliasFactor_ * pixelsHorizontal_*antiAliasFactor_);
+   size_t bufferSize = (pixelsVertical_*antiAliasFactor_)*(pixelsHorizontal_*antiAliasFactor_);
+   std::vector<BodyIntersectionInfo> intersectionsBuffer(bufferSize);
 
    if (raytracingAlgorithm_ == RAYTRACE_HASHGRIDS || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH
       || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
