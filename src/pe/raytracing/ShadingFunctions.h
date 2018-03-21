@@ -24,12 +24,14 @@
 #include <pe/Types.h>
 #include <pe/raytracing/Color.h>
 #include <pe/raytracing/ShadingParameters.h>
-
+#include <core/mpi/MPIWrapper.h>
+#include <core/mpi/MPIManager.h>
 
 namespace walberla {
 namespace pe {
 namespace raytracing {
 inline ShadingParameters defaultBodyTypeDependentShadingParams (const BodyID body);
+inline ShadingParameters processRankDependentShadingParams (const BodyID body);
 inline ShadingParameters defaultShadingParams (const BodyID body);
 inline ShadingParameters blackShadingParams (const BodyID body);
 inline ShadingParameters whiteShadingParams (const BodyID body);
@@ -56,6 +58,20 @@ inline ShadingParameters defaultBodyTypeDependentShadingParams (const BodyID bod
    }
 }
 
+inline ShadingParameters processRankDependentShadingParams (const BodyID body) {
+   WALBERLA_UNUSED(body);
+   int numProcesses = mpi::MPIManager::instance()->numProcesses();
+   int rank = mpi::MPIManager::instance()->rank();
+   
+   real_t hue = real_t(360) * real_t(rank)/real_t(numProcesses);
+   Color color = Color::colorFromHSV(hue, real_t(1), real_t(0.9));
+   
+   return ShadingParameters(color,
+                            color*real_t(0.5),
+                            Color(0,0,0),
+                            real_t(0));
+}
+   
 inline ShadingParameters defaultShadingParams (const BodyID body) {
    return greyShadingParams(body);
 }

@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <pe/Types.h>
 #include "core/math/Vector3.h"
 
 namespace walberla {
@@ -43,7 +44,6 @@ public:
    Color (real_t r, real_t g, real_t b) : Vector3<real_t>(r, g, b) {
       
    }
-   //@}
    
    /*!\brief Instantiation constructor for the Color class.
     * \param r Red component
@@ -72,6 +72,8 @@ public:
       (*this)[1] = std::min(std::max((*this)[1], real_t(0)), real_t(1));
       (*this)[2] = std::min(std::max((*this)[2], real_t(0)), real_t(1));
    }
+   
+   static Color colorFromHSV(real_t hue, real_t saturation, real_t value);
 };
 }
 }
