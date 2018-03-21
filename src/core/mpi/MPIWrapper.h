@@ -91,6 +91,7 @@ typedef int MPI_File;
 typedef int MPI_Offset;
 typedef int MPI_Info;
 typedef int MPI_Aint;
+typedef void (MPI_User_function) (void* a, void* b, int* len, MPI_Datatype*);
 
 struct MPI_Status
 {
@@ -107,7 +108,6 @@ struct MPI_Status
    int MPI_ERROR;
 };
 
-typedef void (MPI_User_function) (void * a, void * b, int * len, MPI_Datatype * );
 
 
 const int MPI_COMM_NULL  = 0;
@@ -246,6 +246,10 @@ inline int MPI_Type_commit( MPI_Datatype* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Type_free( MPI_Datatype* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Type_create_resized( MPI_Datatype, MPI_Aint, MPI_Aint, MPI_Datatype* ) { WALBERLA_MPI_FUNCTION_ERROR }
 inline int MPI_Type_size( MPI_Datatype, int * ) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Type_get_extent(MPI_Datatype, MPI_Aint*, MPI_Aint*) { WALBERLA_MPI_FUNCTION_ERROR }
+inline int MPI_Type_create_struct(int, const int[], const MPI_Aint[], const MPI_Datatype[], MPI_Datatype*) { WALBERLA_MPI_FUNCTION_ERROR }
+
+inline int MPI_Op_create(MPI_User_function*, int, MPI_Op*) { WALBERLA_MPI_FUNCTION_ERROR }
 
 inline int MPI_Get_processor_name( char*, int* ) { WALBERLA_MPI_FUNCTION_ERROR }
 
@@ -265,11 +269,6 @@ inline int MPI_File_set_view    ( MPI_File, MPI_Offset, MPI_Datatype , MPI_Datat
 inline int MPI_Error_string ( int, char*, int* ) { WALBERLA_MPI_FUNCTION_ERROR }
 
 inline double MPI_Wtime() { WALBERLA_MPI_FUNCTION_ERROR }
-
-inline int MPI_Op_create(MPI_User_function*, int, MPI_Op*) { WALBERLA_MPI_FUNCTION_ERROR };
-inline int MPI_Type_create_struct(int, const int[], MPI_Aint[], MPI_Datatype[], MPI_Datatype*) { WALBERLA_MPI_FUNCTION_ERROR };
-inline int MPI_Type_create_resized(MPI_Datatype, MPI_Aint, MPI_Aint, MPI_Datatype*) { WALBERLA_MPI_FUNCTION_ERROR };
-int MPI_Type_commit(MPI_Datatype*) { WALBERLA_MPI_FUNCTION_ERROR };
 
 #undef WALBERLA_MPI_FUNCTION_ERROR
 
