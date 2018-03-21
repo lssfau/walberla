@@ -72,7 +72,7 @@ public:
       // Setting the axis-aligned bounding box
       id->calcBoundingBox();
 
-      // Calculating the current motion of the capsule
+      // Calculating the current motion of the body
       id->calcMotion();
    }
 };
@@ -120,7 +120,7 @@ public:
       // Setting the axis-aligned bounding box
       id->calcBoundingBox();
 
-      // Calculating the current motion of the capsule
+      // Calculating the current motion of the body
       id->calcMotion();
    }
 };

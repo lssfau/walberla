@@ -128,7 +128,7 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
          WALBERLA_ASSERT( bodyIt->checkInvariants(), "Invalid body state detected" );
          WALBERLA_ASSERT( !bodyIt->hasSuperBody(), "Invalid superordinate body detected" );
          
-         // Moving the capsule according to the acting forces (don't move a sleeping capsule)
+         // Moving the body according to the acting forces (don't move a sleeping body)
          if( bodyIt->isAwake() && !bodyIt->hasInfiniteMass() )
          {
             integrate_( *bodyIt, dt, *this );
@@ -138,7 +138,7 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
          bodyIt->resetForceAndTorque();
          
          // Checking the state of the rigid body
-         WALBERLA_ASSERT( bodyIt->checkInvariants(), "Invalid capsule state detected" );
+         WALBERLA_ASSERT( bodyIt->checkInvariants(), "Invalid body state detected" );
 
          // Resetting the acting forces
          bodyIt->resetForceAndTorque();

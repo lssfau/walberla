@@ -56,7 +56,7 @@ namespace pe {
 CylindricalBoundary::CylindricalBoundary( id_t sid, id_t uid, const Vec3& gpos, const real_t radius,
                                           MaterialID material )
    : GeomPrimitive( getStaticTypeID(), sid, uid, material )           // Initializing the base object
-   , radius_(radius)                                                  // Radius of the cylinder                                                // Length of the capsule
+   , radius_(radius)                                                  // Radius of the cylinder
 {
    //boundaries are always considered locally and have infinite mass
    setGlobal( true );
@@ -66,11 +66,11 @@ CylindricalBoundary::CylindricalBoundary( id_t sid, id_t uid, const Vec3& gpos, 
 
    // Checking the radius
    // Since the constructor is never directly called but only used in a small number
-   // of functions that already check the capsule arguments, only asserts are used here to
+   // of functions that already check the cylinder arguments, only asserts are used here to
    // double check the arguments.
-   WALBERLA_ASSERT_GREATER( radius, real_t(0), "Invalid capsule radius"  );
+   WALBERLA_ASSERT_GREATER( radius, real_t(0), "Invalid cylinder radius"  );
 
-   // Initializing the instantiated capsule
+   // Initializing the instantiated cylinder
    gpos_   = gpos;
    q_      = Quat();                 // Setting the orientation
    R_      = q_.toRotationMatrix();  // Setting the rotation matrix
