@@ -307,7 +307,7 @@ public:
    template<typename BodyTuple>
    BodyID getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, const AABB& blockAABB,
                                             real_t& t, Vec3& n,
-                                            std::function<bool (const BodyID body)> isBodyVisibleFunc);
+                                            std::function<bool (const BodyID body)> isBodyVisibleFunc) const;
    
 protected:
    //**Utility functions***************************************************************************
@@ -765,7 +765,7 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
 template<typename BodyTuple>
 BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, const AABB& blockAABB,
                                                     real_t& t, Vec3& n,
-                                                    std::function<bool (const BodyID body)> isBodyVisibleFunc) {
+                                                    std::function<bool (const BodyID body)> isBodyVisibleFunc) const {
    real_t inf = std::numeric_limits<real_t>::max();
 
    BodyID body_closest = NULL;
