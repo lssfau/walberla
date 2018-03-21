@@ -250,7 +250,6 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
                        Vec3(-5,5,5), Vec3(-1,5,5), Vec3(0,0,1), //-5,5,5; -1,5,5
                        lighting,
                        Color(real_t(0.2), real_t(0.2), real_t(0.2)),
-                       real_t(2),
                        customBodyToShadingParams);
    
    MaterialID iron = Material::find("iron");

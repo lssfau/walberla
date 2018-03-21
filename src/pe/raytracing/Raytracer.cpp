@@ -62,9 +62,6 @@ void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyInter
  * \param lookAtPoint Point the camera looks at in the global world frame.
  * \param upVector Vector indicating the upwards direction of the camera.
  * \param backgroundColor Background color of the scene.
- * \param blockAABBIntersectionPadding The padding applied in block AABB intersection pretesting.
- *                                     Set it to the value of the farthest distance a object might protrude from
- *                                     its containing block.
  * \param bodyToShadingParamsFunc A function mapping a BodyID to ShadingParameters for this body.
  *                                This can be used to customize the color and shading of bodies.
  * \param isBodyVisibleFunc A function which returns a boolean indicating if a given body should be visible
@@ -78,7 +75,6 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                      const Lighting& lighting,
                      const Color& backgroundColor,
-                     real_t blockAABBIntersectionPadding,
                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunc,
                      std::function<bool (const BodyID)> isBodyVisibleFunc)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage), ccdID_(ccdID),
@@ -87,7 +83,6 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    cameraPosition_(cameraPosition), lookAtPoint_(lookAtPoint), upVector_(upVector),
    lighting_(lighting),
    backgroundColor_(backgroundColor),
-   blockAABBIntersectionPadding_(blockAABBIntersectionPadding),
    imageOutputEnabled_(true),
    localImageOutputEnabled_(false),
    imageOutputDirectory_("."),
@@ -118,8 +113,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
  *
  * The config block has to contain image_x (int), image_y (int) and fov_vertical (real, in degrees).
  * Additionally a vector of reals for each of cameraPosition, lookAt and the upVector for the view setup are required.
- * Optional is antiAliasFactor (uint, usually between 1 and 4) for supersampling, blockAABBIntersectionPadding (real)
- * and backgroundColor (Vec3).
+ * Optional is antiAliasFactor (uint, usually between 1 and 4) for supersampling and backgroundColor (Vec3).
  * For image output after raytracing, set image_output_directory (string); for local image output additionally set
  * local_image_output_enabled (bool) to true. outputFilenameTimestepZeroPadding (int) sets the zero padding
  * for timesteps in output filenames.
@@ -161,8 +155,6 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    upVector_ = config.getParameter<Vec3>("upVector");
    lighting_ = Lighting(config.getBlock("Lighting"));
    backgroundColor_ = config.getParameter<Color>("backgroundColor", Vec3(real_t(0.1), real_t(0.1), real_t(0.1)));
-
-   blockAABBIntersectionPadding_ = config.getParameter<real_t>("blockAABBIntersectionPadding", real_t(0.0));
 
    std::string raytracingAlgorithm = config.getParameter<std::string>("raytracingAlgorithm", "RAYTRACE_HASHGRIDS");
    if (raytracingAlgorithm == "RAYTRACE_HASHGRIDS") {
