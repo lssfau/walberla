@@ -91,6 +91,34 @@ depending on the type of information you want to store.
 You can then dump the information to disc. timing::TimingPool and timing::TimingTree already have predefined save
 functions so you do not have to extract all the information yourself and save it in the property array.
 \snippet 02_ConfinedGasExtended.cpp SQL Save
+
+\section tutorial_pe_02_raytracing Image Output
+Using a raytracer snapshots of the simulation can be generated each timestep and output as PNG files.
+Setting up the Raytracer can be done by reading a config object, as it is done in the tutorial:
+\snippet 02_ConfinedGasExtended.cpp Raytracer Init
+Alternatively it can also be entirely setup in code:
+\code
+Lighting lighting(Vec3(-12, 12, 12),
+                  Color(1, 1, 1),
+                  Color(1, 1, 1),
+                  Color(real_t(0.4), real_t(0.4), real_t(0.4)));
+Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
+                  640, 480,
+                  real_t(49.13), 2,
+                  Vec3(-25, 10, 10), Vec3(-5, 10, 10), Vec3(0, 0, 1),
+                  lighting,
+                  Color(real_t(0.1), real_t(0.1), real_t(0.1)),
+                  radius,
+                  customShadingFunction);
+\endcode
+To apply custom coloring to bodies, you can supply a user defined function which returns a ShadingParameters struct for
+a given BodyID. For an overview over predefined shading functions, visit the file ShadingFunctions.h.
+After the configuration is done, images can be generated each timestep by calling Raytracer::generateImage<BodyTuple>()
+which will be output to the specified directory.
+\snippet 02_ConfinedGasExtended.cpp Image Output
+For further information see the documentation for the classes Raytracer and Lighting, the ShadingParameters class and
+ShadingFunctions.h file may also be useful.
+
 */
 
 }

@@ -21,6 +21,7 @@
 #include <pe/basic.h>
 #include <pe/statistics/BodyStatistics.h>
 #include <pe/vtk/SphereVtkOutput.h>
+#include <pe/raytracing/Raytracer.h>
 
 #include <core/Abort.h>
 #include <core/Environment.h>
@@ -31,7 +32,6 @@
 #include <core/waLBerlaBuildInfo.h>
 #include <postprocessing/sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
-#include <pe/raytracing/Raytracer.h>
 
 using namespace walberla;
 using namespace walberla::pe;
@@ -105,10 +105,6 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO_ON_ROOT("visSpacing: " << visSpacing);
    const std::string path = mainConf.getParameter<std::string>("path",  "vtk_out" );
    WALBERLA_LOG_INFO_ON_ROOT("path: " << path);
-   
-   const int raytracerSkippedSteps = mainConf.getParameter<int>("raytracerSkippedSteps",  10 );
-   WALBERLA_LOG_INFO_ON_ROOT("raytracerSkippedSteps: " << raytracerSkippedSteps);
-   integerProperties["raytracerSkippedSteps"] = raytracerSkippedSteps;
 
    WALBERLA_LOG_INFO_ON_ROOT("syncShadowOwners: " << syncShadowOwners);
    integerProperties["syncShadowOwners"] = syncShadowOwners;
@@ -145,24 +141,6 @@ int main( int argc, char ** argv )
    auto ccdID               = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
    auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
 
-   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
-   //if (cfg == NULL) {
-   //   WALBERLA_ABORT("raytracer needs a working config");
-   //}
-   //Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
-   //                    cfg->getBlock("Raytracing"));
-   Lighting lighting(Vec3(-12, 12, 12),
-                     Color(1, 1, 1),
-                     Color(1, 1, 1),
-                     Color(real_t(0.4), real_t(0.4), real_t(0.4)));
-   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
-                       640, 480,
-                       real_t(49.13), 2,
-                       Vec3(-25, 10, 10), Vec3(-5, 10, 10), Vec3(0, 0, 1),
-                       lighting,
-                       Color(real_t(0.1), real_t(0.1), real_t(0.1)),
-                       radius);
-   
    WALBERLA_LOG_INFO_ON_ROOT("*** INTEGRATOR ***");
    cr::HCSITS cr(globalBodyStorage, forest, storageID, ccdID, fcdID);
    cr.setMaxIterations( 10 );
@@ -190,6 +168,19 @@ int main( int argc, char ** argv )
       syncCallWithoutTT = boost::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
    }
    //! [Bind Sync Call]
+   
+   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
+   //! [Raytracer Init]
+   std::function<ShadingParameters(const BodyID body)> customShadingFunction = [](const BodyID body) {
+      if (body->getTypeID() == Sphere::getStaticTypeID()) {
+         return processRankDependentShadingParams(body).makeGlossy();
+      }
+      return defaultBodyTypeDependentShadingParams(body);
+   };
+   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
+                       cfg->getBlock("Raytracing"),
+                       customShadingFunction);
+   //! [Raytracer Init]
 
    WALBERLA_LOG_INFO_ON_ROOT("*** VTK ***");
    //! [VTK Domain Output]
@@ -266,12 +257,9 @@ int main( int argc, char ** argv )
          vtkDomainOutput->write( );
          vtkSphereOutput->write( );
          //! [VTK Output]
-      }
-      
-      if ( i % raytracerSkippedSteps == 0) {
-         tp["Raytracing"].start();
+         //! [Image Output]
          raytracer.generateImage<BodyTuple>(size_t(i), &tt);
-         tp["Raytracing"].end();
+         //! [Image Output]
       }
    }
    tp["Total"].end();
