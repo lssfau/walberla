@@ -23,10 +23,12 @@
 
 #include "blockforest/PhantomBlockForest.h"
 
+#include "core/debug/Debug.h"
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
 #include "core/mpi/MPIWrapper.h"
 
+#include <cmath>
 #include <map>
 
 namespace walberla {
@@ -40,7 +42,7 @@ std::map< blockforest::BlockID, uint_t > getBlockIdToSequenceMapping( const Phan
 class DynamicParMetis
 {
 public:
-   enum Algorithm    { PARMETIS_PART_GEOM_KWAY, PARMETIS_PART_KWAY, PARMETIS_ADAPTIVE_REPART, PARMETIS_REFINE_KWAY };
+   enum Algorithm    { PARMETIS_PART_GEOM, PARMETIS_PART_GEOM_KWAY, PARMETIS_PART_KWAY, PARMETIS_ADAPTIVE_REPART, PARMETIS_REFINE_KWAY };
    enum WeightsToUse { PARMETIS_NO_WEIGHTS = 0, PARMETIS_EDGE_WEIGHTS = 1, PARMETIS_VERTEX_WEIGHTS = 2, PARMETIS_BOTH_WEIGHTS = 3 };
    enum EdgeSource   { PARMETIS_EDGES_FROM_FOREST, PARMETIS_EDGES_FROM_EDGE_WEIGHTS };
 
@@ -54,6 +56,10 @@ public:
                     const PhantomBlockForest & phantomForest,
                     const uint_t iteration ) const;
 
+
+   void   setipc2redist(double val) {ipc2redist_ = val;}
+   double getipc2redist() const {return ipc2redist_;}
+
    bool edgeWeightsUsed()   const { return ( weightsToUse_ == PARMETIS_EDGE_WEIGHTS   ) || ( weightsToUse_ == PARMETIS_BOTH_WEIGHTS ); }
    bool vertexWeightsUsed() const { return ( weightsToUse_ == PARMETIS_VERTEX_WEIGHTS ) || ( weightsToUse_ == PARMETIS_BOTH_WEIGHTS ); }
    bool vertexSizeUsed()    const { return algorithm_ == PARMETIS_ADAPTIVE_REPART; }
@@ -62,10 +68,16 @@ public:
    static WeightsToUse stringToWeightsToUse( std::string s );
    static EdgeSource   stringToEdgeSource( std::string s );
 
+   std::string algorithmToString() const;
+   std::string weightsToUseToString() const;
+   std::string edgeSourceToString() const;
+
 protected:
    Algorithm algorithm_;
    WeightsToUse weightsToUse_;
    EdgeSource edgeSource_;
+
+   double ipc2redist_ = real_t( 1000.0 ); ///< compute repartitioning with low edge cut (set lower (down to 0.000001) to get minimal repartitioning )
 };
 
 class DynamicParMetisBlockInfo
@@ -90,7 +102,7 @@ public:
    vsize_t getVertexSize() const { return vertexSize_; }
    void setVertexSize( const vsize_t size ) { vertexSize_ = size; }
 
-   const Vector3<double> & getVertexCoords() const { return vertexCoords_; }
+   const Vector3<double> & getVertexCoords() const { WALBERLA_ASSERT( !std::isnan(vertexCoords_[0]) && !std::isnan(vertexCoords_[1]) && !std::isnan(vertexCoords_[2]) ); return vertexCoords_; }
    void setVertexCoords( const Vector3<double> & p ) { vertexCoords_ = p; }
 
    void setEdgeWeight( const blockforest::BlockID & blockId, const weight_t edgeWeight ) { edgeWeights_[blockId] = edgeWeight; }
@@ -107,7 +119,7 @@ private:
 
    weight_t vertexWeight_; /// Defines the weight of a block
    vsize_t vertexSize_;    /// Defines the cost of rebalancing a block
-   Vector3<double> vertexCoords_; /// Defines where the block is located in space. Needed by some ParMetis algorithms
+   Vector3<double> vertexCoords_ = Vector3<double>(std::numeric_limits<double>::signaling_NaN()); /// Defines where the block is located in space. Needed by some ParMetis algorithms
    std::map< blockforest::BlockID, weight_t > edgeWeights_; /// Defines the cost of communication with other blocks
 };
 
@@ -119,7 +131,7 @@ struct DynamicParMetisBlockInfoPackUnpack
       block.getData< DynamicParMetisBlockInfo >().toBuffer( buffer );
    }
 
-   void operator()( mpi::RecvBuffer & buffer, const PhantomBlock &, boost::any & data )
+   void operator()( mpi::RecvBuffer & buffer, const PhantomBlock &, walberla::any & data )
    {
       data = DynamicParMetisBlockInfo( buffer );
    }

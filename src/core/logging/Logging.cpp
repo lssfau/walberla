@@ -21,8 +21,7 @@
 
 #include "Logging.h"
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
+#include "core/Filesystem.h"
 #include <ctime>
 
 
@@ -105,9 +104,9 @@ void Logging::includeLoggingToFile( const std::string & file, bool append )
    std::ostringstream filename;
    if( file.empty() )
    {
-      boost::filesystem::path logDir( "logging" );
-      if( !boost::filesystem::exists( logDir ) )
-         boost::filesystem::create_directory( logDir );
+      filesystem::path logDir( "logging" );
+      if( !filesystem::exists( logDir ) )
+         filesystem::create_directory( logDir );
 
       if( numberOfProcesses_ == 1 )
          filename << "logging/logfile.txt";
@@ -120,7 +119,7 @@ void Logging::includeLoggingToFile( const std::string & file, bool append )
          filename << file;
       else
       {
-         boost::filesystem::path filePath( file );
+         filesystem::path filePath( file );
          const std::string stem      = filePath.stem().string();
          const std::string extension = filePath.extension().string();
          const std::string modifiedFilename = stem + std::string("_") + rank.str() + extension;

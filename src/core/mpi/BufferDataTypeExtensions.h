@@ -27,10 +27,10 @@
 #include "SendBuffer.h"
 #include "core/Conversion.h"
 #include "core/DataTypes.h"
+#include "core/Optional.h"
 
 #include <boost/array.hpp>
 #include <boost/integer.hpp>
-#include <boost/optional.hpp>
 #include <boost/uuid/uuid.hpp>
 
 #include <deque>
@@ -465,18 +465,18 @@ struct BufferSizeTrait< std::multimap<K,T,C,A> > { static const bool constantSiz
 
 
 // ---------------------------------------------------------------------------------------------------------------------
-// ------------------------------------- Boost optional Support --------------------------------------------------------
+// ------------------------------------------- optional Support --------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------
 
 template< typename T,    // Element type of SendBuffer
           typename G,    // Growth policy of SendBuffer
           typename OT>   // Optional type
-GenericSendBuffer<T,G>& operator<<( GenericSendBuffer<T,G> & buf, const boost::optional<OT> & o )
+GenericSendBuffer<T,G>& operator<<( GenericSendBuffer<T,G> & buf, const walberla::optional<OT> & o )
 {
    buf.addDebugMarker( "op" );
 
    bool hasContent = true;
-   if (o == boost::none)
+   if (o == walberla::nullopt)
       hasContent = false;
 
    buf << hasContent;
@@ -489,7 +489,7 @@ GenericSendBuffer<T,G>& operator<<( GenericSendBuffer<T,G> & buf, const boost::o
 
 template< typename T,    // Element type of RecvBuffer
           typename OT>   // Optional type
-GenericRecvBuffer<T>& operator>>( GenericRecvBuffer<T> & buf, boost::optional<OT> & o )
+GenericRecvBuffer<T>& operator>>( GenericRecvBuffer<T> & buf, walberla::optional<OT> & o )
 {
    buf.readDebugMarker( "op" );
 
@@ -509,7 +509,7 @@ GenericRecvBuffer<T>& operator>>( GenericRecvBuffer<T> & buf, boost::optional<OT
    }
    else
    {
-      o = boost::none;
+      o = walberla::nullopt;
    }
 
    return buf;

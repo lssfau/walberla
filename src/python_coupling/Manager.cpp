@@ -75,11 +75,9 @@ void Manager::addPath( const std::string & path )
 {
    WALBERLA_ASSERT( initialized_ );
 
-   object main_module  = import("__main__");
-   dict globals = extract<dict>( main_module.attr( "__dict__" ) );
-   exec( "import sys", globals );
-   std::string pathCommand = std::string ( "sys.path.append( \"") + path + "\" ) ";
-   exec( str(pathCommand), globals );
+   object sys = import("sys");
+   list sys_path = extract<list>( sys.attr("path") );
+   sys_path.append(path);
 }
 
 void Manager::triggerInitialization()
@@ -116,10 +114,24 @@ void Manager::triggerInitialization()
 
    }
    catch ( boost::python::error_already_set & ) {
-      PyErr_Print();
+      PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;
+      PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
+
+      if( type_ptr )
+      {
+         extract<std::string> type_str(( str( handle<>( type_ptr ) ) ));
+         if( type_str.check() )
+            WALBERLA_LOG_DEVEL( type_str() );
+      }
+      if(value_ptr)
+      {
+         extract<std::string> value_str(( str( handle<>( value_ptr ) ) ));
+         if ( value_str.check() )
+            WALBERLA_LOG_DEVEL( value_str() );
+      }
+
       WALBERLA_ABORT( "Error while initializing Python" );
    }
-
 }
 
 
@@ -156,7 +168,6 @@ boost::python::object Manager::pythonObjectFromBlockData( IBlock & block, BlockD
 int someSymbolSoThatLinkerDoesNotComplain=0;
 
 #endif
-
 
 
 

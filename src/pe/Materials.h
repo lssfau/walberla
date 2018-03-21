@@ -15,7 +15,6 @@
 //
 //! \file Materials.h
 //! \author Klaus Iglberger
-//! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for materials
 //
 //======================================================================================================================
@@ -27,6 +26,7 @@
 // Includes
 //*************************************************************************************************
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <pe/Types.h>
@@ -150,6 +150,7 @@ public:
    static inline real_t               getDampingN( MaterialID material1, MaterialID material2 );
    static inline real_t               getDampingT( MaterialID material );
    static inline real_t               getDampingT( MaterialID material1, MaterialID material2 );
+   static std::string                 toString( const MaterialID& v );
    //@}
    //**********************************************************************************************
 

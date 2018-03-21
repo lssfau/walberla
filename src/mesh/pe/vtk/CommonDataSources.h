@@ -38,6 +38,115 @@ namespace walberla {
 namespace mesh {
 namespace pe {
 
+template< typename MeshType, typename Tesselation, typename OutputType = uint64_t >
+class SIDVertexDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType >
+{
+public:
+   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType > Base;
+   typedef typename Base::Vertices Vertices;
+   typedef typename Base::value_type value_type;
+   typedef typename Base::BodyPointerVPropManager BodyPointerVPropManager;
+
+   SIDVertexDataSource( const std::string & _name = "sid" )
+      : Base( _name ) { }
+
+   virtual uint_t numComponents() { return uint_t(1); }
+
+   virtual void getData( const MeshType & /*mesh*/, const Vertices & vertices, std::vector<value_type> & data, const BodyPointerVPropManager & bodyPointer )
+   {
+      data.reserve( vertices.size() );
+
+      for( auto it = vertices.begin(); it != vertices.end(); ++it )
+      {
+         const auto & v = bodyPointer[*it]->getSystemID();
+         data.push_back( numeric_cast<OutputType>( v ) );
+      }
+   }
+};
+
+
+template< typename MeshType, typename Tesselation, typename OutputType = uint64_t >
+class SIDFaceDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType >
+{
+public:
+   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType > Base;
+   typedef typename Base::Faces Faces;
+   typedef typename Base::value_type value_type;
+   typedef typename Base::BodyPointerFPropManager BodyPointerFPropManager;
+
+   SIDFaceDataSource( const std::string & _name = "sid" )
+      : Base( _name ) { }
+
+   virtual uint_t numComponents() { return uint_t(1); }
+
+   virtual void getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data, const BodyPointerFPropManager & bodyPointer )
+   {
+      data.reserve( faces.size() );
+
+      for( auto it = faces.begin(); it != faces.end(); ++it )
+      {
+         const auto & v = bodyPointer[*it]->getSystemID();
+
+         data.push_back( numeric_cast<OutputType>( v ) );
+      }
+   }
+};
+
+template< typename MeshType, typename Tesselation, typename OutputType = uint64_t >
+class UIDVertexDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType >
+{
+public:
+   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType > Base;
+   typedef typename Base::Vertices Vertices;
+   typedef typename Base::value_type value_type;
+   typedef typename Base::BodyPointerVPropManager BodyPointerVPropManager;
+
+   UIDVertexDataSource( const std::string & _name = "uid" )
+      : Base( _name ) { }
+
+   virtual uint_t numComponents() { return uint_t(1); }
+
+   virtual void getData( const MeshType & /*mesh*/, const Vertices & vertices, std::vector<value_type> & data, const BodyPointerVPropManager & bodyPointer )
+   {
+      data.reserve( vertices.size() );
+
+      for( auto it = vertices.begin(); it != vertices.end(); ++it )
+      {
+         const auto & v = bodyPointer[*it]->getID();
+         data.push_back( numeric_cast<OutputType>( v ) );
+      }
+   }
+};
+
+
+template< typename MeshType, typename Tesselation, typename OutputType = uint64_t >
+class UIDFaceDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType >
+{
+public:
+   typedef typename PeVTKMeshWriter<MeshType, Tesselation>::template FaceDataSource< OutputType > Base;
+   typedef typename Base::Faces Faces;
+   typedef typename Base::value_type value_type;
+   typedef typename Base::BodyPointerFPropManager BodyPointerFPropManager;
+
+   UIDFaceDataSource( const std::string & _name = "uid" )
+      : Base( _name ) { }
+
+   virtual uint_t numComponents() { return uint_t(1); }
+
+   virtual void getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data, const BodyPointerFPropManager & bodyPointer )
+   {
+      data.reserve( faces.size() );
+
+      for( auto it = faces.begin(); it != faces.end(); ++it )
+      {
+         const auto & v = bodyPointer[*it]->getID();
+
+         data.push_back( numeric_cast<OutputType>( v ) );
+      }
+   }
+};
+
+
 template< typename MeshType, typename Tesselation, typename OutputType = real_t >
 class LinearVelocityVertexDataSource : public PeVTKMeshWriter<MeshType, Tesselation>::template VertexDataSource< OutputType >
 {

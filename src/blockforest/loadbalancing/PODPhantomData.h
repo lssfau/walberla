@@ -53,7 +53,7 @@ struct PODPhantomWeightPackUnpack
       buffer << block.getData< PODPhantomWeight<T> >().weight();
    }
 
-   void operator()( mpi::RecvBuffer & buffer, const PhantomBlock &, boost::any & data )
+   void operator()( mpi::RecvBuffer & buffer, const PhantomBlock &, walberla::any & data )
    {
       typename PODPhantomWeight<T>::weight_t w;
       buffer >> w;

@@ -69,6 +69,11 @@ waLBerla_execute_test( NAME   PE_OVERLAP )
 waLBerla_compile_test( NAME   PE_PARALLELEQUIVALENCE FILES ParallelEquivalence.cpp DEPENDS core blockforest  )
 waLBerla_execute_test( NAME   PE_PARALLELEQUIVALENCE PROCESSES 4 )
 
+if( WALBERLA_BUILD_WITH_PARMETIS )
+   waLBerla_compile_test( NAME   PE_PARMETIS FILES ParMetis.cpp DEPENDS core blockforest  )
+   waLBerla_execute_test( NAME   PE_PARMETIS PROCESSES 64 )
+endif()
+
 waLBerla_compile_test( NAME   PE_PARSEMESSAGE FILES ParseMessage.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_PARSEMESSAGE )
 
@@ -124,3 +129,6 @@ waLBerla_execute_test( NAME   PE_UNION )
 
 waLBerla_compile_test( NAME   PE_RAYTRACING FILES Raytracing.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_RAYTRACING )
+
+waLBerla_compile_test( NAME   PE_VOLUMEINERTIA FILES VolumeInertia.cpp DEPENDS core  )
+waLBerla_execute_test( NAME   PE_VOLUMEINERTIA CONFIGURATIONS Release RelWithDbgInfo)

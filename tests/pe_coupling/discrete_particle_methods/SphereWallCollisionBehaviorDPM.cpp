@@ -595,9 +595,9 @@ int main( int argc, char **argv )
    if( fileIO )
    {
       // create base directory if it does not yet exist
-      boost::filesystem::path tpath( baseFolder );
-      if( !boost::filesystem::exists( tpath ) )
-         boost::filesystem::create_directory( tpath );
+      filesystem::path tpath( baseFolder );
+      if( !filesystem::exists( tpath ) )
+         filesystem::create_directory( tpath );
    }
 
    ///////////////////////////////
@@ -1234,7 +1234,7 @@ int main( int argc, char **argv )
                      << AfterFunction( dragAndPressureForceEvaluationFunction, "Fluid-Particle Interaction Force Evaluation" )
                      << AfterFunction( dragForceComm, "Drag Force Field Communication" )
                      << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, -gravitationalForce  ), "Gravitational and buoyancy force" )
-                     << AfterFunction( pe_coupling::discrete_particle_methods::SubgridTimeStep( blocks, bodyStorageID, *cr, syncCall, lubricationEvaluationFunction, dtInteractionSubCycle, peSubSteps ), "Pe Time Step" )
+                     << AfterFunction( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, dtInteractionSubCycle, peSubSteps, lubricationEvaluationFunction ), "Pe Time Step" )
                      << AfterFunction( SharedFunctor<CollisionPropertiesEvaluator>( collisionPropertiesEvaluator ), "Collision properties evaluator");
 
       if( dist == Distribution::DNearestNeighbor )

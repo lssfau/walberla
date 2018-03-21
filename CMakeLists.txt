@@ -163,7 +163,8 @@ if( CMAKE_CXX_COMPILER MATCHES "icpc" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "icpc" 
     ENDIF(XILD)
     MARK_AS_ADVANCED(XILD)
     if( CMAKE_VERSION VERSION_LESS 3.6.0 )
-      add_flag ( CMAKE_CXX_FLAGS "-std=c++14" )
+      set( CMAKE_CXX14_STANDARD_COMPILE_OPTION "-std=c++14" )
+      add_flag ( CMAKE_CXX_FLAGS ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
     endif()
 else()
     option ( WALBERLA_CXX_COMPILER_IS_INTEL "Use Intel compiler" OFF  )
@@ -278,9 +279,10 @@ if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL )
    add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow" )
 endif()
 
-# C++11 language features for NEC compiler
+# C++ language features for NEC compiler
 if( WALBERLA_CXX_COMPILER_IS_NEC )
-   add_flag ( CMAKE_CXX_FLAGS "-Kcpp14 -Krtti -Kexceptions -size_t64 -Kgcc" )
+   set( CMAKE_CXX14_STANDARD_COMPILE_OPTION "-Kcpp14" )
+   add_flag ( CMAKE_CXX_FLAGS "${CMAKE_CXX14_STANDARD_COMPILE_OPTION} -Krtti -Kexceptions -size_t64 -Kgcc" )
    add_flag ( CMAKE_CXX_FLAGS "-D__BIG_ENDIAN -D__BYTE_ORDER=__BIG_ENDIAN" )
    add_flag ( CMAKE_CXX_FLAGS "-Tnoauto,used" )
    add_flag ( CMAKE_EXE_LINKER_FLAGS "-Wl,-h,muldefs" )
@@ -358,17 +360,6 @@ if( NOT WARNING_DEPRECATED)
    endif()
 endif()
 
-# Treat warnings as errors
-if ( WARNING_ERROR )
-   if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG )
-      add_flag ( CMAKE_CXX_FLAGS "-pedantic-errors -Werror" )
-   elseif( WALBERLA_CXX_COMPILER_IS_MSVC )
-      add_flag ( CMAKE_CXX_FLAGS "/WX" )
-   elseif ( WALBERLA_CXX_COMPILER_IS_CRAY )
-      add_flag ( CMAKE_CXX_FLAGS "-h error_on_warning" )
-   endif()
-endif ( )
-
 
 if ( WALBERLA_CXX_COMPILER_IS_CLANG )
     add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow -Wno-c++11-extensions -Qunused-arguments" )
@@ -433,6 +424,70 @@ endif()
 
 
 ############################################################################################################################
+
+
+
+############################################################################################################################
+##
+##  Find optional C++ libraries
+##
+############################################################################################################################
+
+try_compile( WALBERLA_USE_STD_FILESYSTEM "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_FILESYSTEM ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
+if( WALBERLA_USE_STD_FILESYSTEM )
+   message( STATUS "Found std::filesystem")
+else()
+   try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
+                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
+   if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+      message( STATUS "Found std::experimental::filesystem")
+   endif()
+   if( NOT WALBERLA_CXX_COMPILER_IS_MSVC AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+      unset( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM CACHE )
+      try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
+                   COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM ${CMAKE_CXX14_STANDARD_COMPILE_OPTION}
+                   LINK_LIBRARIES stdc++fs )
+      if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+         message( STATUS "Found std::experimental::filesystem in libstdc++fs")
+      list ( APPEND SERVICE_LIBS -lstdc++fs )
+      endif()
+   endif()
+   if( NOT WALBERLA_CXX_COMPILER_IS_MSVC AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+      unset( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM CACHE )
+      try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
+                   COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM ${CMAKE_CXX14_STANDARD_COMPILE_OPTION}
+                   LINK_LIBRARIES c++experimental )
+      if( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+         message( STATUS "Found std::experimental::filesystem in libc++experimental")
+         list ( APPEND SERVICE_LIBS -lc++experimental )
+      endif()
+   endif()
+endif()
+
+try_compile( WALBERLA_USE_STD_ANY "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdAny.cpp"
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_ANY ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
+if( WALBERLA_USE_STD_ANY )
+   message( STATUS "Found std::any")
+else()
+   try_compile( WALBERLA_USE_STD_EXPERIMENTAL_ANY "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdAny.cpp"
+                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_ANY ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
+   if( WALBERLA_USE_STD_EXPERIMENTAL_ANY )
+      message( STATUS "Found std::experimental::any")
+   endif()
+endif()
+
+try_compile( WALBERLA_USE_STD_OPTIONAL "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdOptional.cpp"
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_OPTIONAL ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
+if( WALBERLA_USE_STD_OPTIONAL )
+   message( STATUS "Found std::optional")
+else()
+   try_compile( WALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdOptional.cpp"
+                COMPILE_DEFINITIONS -DWALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
+   if( WALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL )
+      message( STATUS "Found std::experimental::optional")
+   endif()
+endif()
 
 
 
@@ -574,7 +629,11 @@ endif()
 #############################################################################################################################
 set ( waLBerla_REQUIRED_MIN_BOOST_VERSION "1.48")
 
-list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS filesystem system )
+if ( NOT WALBERLA_USE_STD_FILESYSTEM AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+  list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS filesystem system )
+else()
+  list ( APPEND waLBerla_OPTIONAL_BOOST_COMPONENTS system )
+endif()
 
 if ( WALBERLA_BUILD_WITH_PYTHON AND WALBERLA_CXX_COMPILER_IS_MSVC )
     list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS python3 )
@@ -601,14 +660,14 @@ if ( NOT BOOST_ROOT )
    endforeach ( )
 endif ( )
 
-find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} QUIET )
+find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${waLBerla_OPTIONAL_BOOST_COMPONENTS} QUIET )
 
 if( NOT Boost_FOUND )
    message ( WARNING
       "The specified configuration of the BOOST libraries was not found on your system! Now trying some other configuration..." )
    foreach ( Boost_USE_STATIC_LIBS ON OFF )
       foreach ( Boost_USE_MULTITHREADED ON OFF )
-         find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} QUIET )
+         find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} COMPONENTS ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${waLBerla_OPTIONAL_BOOST_COMPONENTS} QUIET )
          if ( Boost_FOUND )
             set ( Boost_USE_STATIC_LIBS   ${Boost_USE_STATIC_LIBS}   CACHE BOOL "Use boost static libraries"        FORCE )
             set ( Boost_USE_MULTITHREADED ${Boost_USE_MULTITHREADED} CACHE BOOL "Use boost multithreaded libraries" FORCE )
@@ -631,8 +690,10 @@ if ( Boost_FOUND )
    else()
       include_directories ( SYSTEM ${Boost_INCLUDE_DIRS} )
    endif()
-   link_directories ( ${Boost_LIBRARY_DIRS} )
-   list ( APPEND SERVICE_LIBS ${Boost_LIBRARIES} )
+   if( waLBerla_REQUIRED_BOOST_COMPONENTS )
+      link_directories ( ${Boost_LIBRARY_DIRS} )
+      list ( APPEND SERVICE_LIBS ${Boost_LIBRARIES} )
+   endif()
    add_definitions ( -DBOOST_ALL_NO_LIB ) # Disable Boost auto-linking (CMAKE does that for us...)
 
    #fix for static lib usage: http://stackoverflow.com/questions/11812463/boost-python-link-errors-under-windows-msvc10
@@ -649,7 +710,7 @@ if ( Boost_FOUND )
 
 else( Boost_FOUND )
    # Search again, this time with the REQUIRED option. This will give a CMAKE error and a detailed error message for the user
-   find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} REQUIRED ${waLBerla_REQUIRED_BOOST_COMPONENTS} )
+   find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} REQUIRED ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${waLBerla_OPTIONAL_BOOST_COMPONENTS} )
 endif( Boost_FOUND )
 
 
@@ -712,18 +773,16 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
       if ( WIN32 )
          message ( STATUS "Enter Workaround Routine for Windows and OpenMPI: PRESS CONFIGURE ONE MORE TIME!" )
          string ( REGEX REPLACE "(.*)/bin/.*" "\\1" MPI_PATH ${MPI_CXX_COMPILER} )
-         find_path ( MPI_INCLUDE_PATH mpi.h
+         find_path ( MPI_C_INCLUDE_PATH mpi.h
             HINTS ${MPI_PATH}
             PATH_SUFFIXES include Inc)
-         set ( MPI_CXX_INCLUDE_PATH ${MPI_INCLUDE_PATH} CACHE FILEPATH "" FORCE )
-         set ( MPI_C_INCLUDE_PATH   ${MPI_INCLUDE_PATH} CACHE FILEPATH "" FORCE )
+         set ( MPI_CXX_INCLUDE_PATH ${MPI_C_INCLUDE_PATH} CACHE FILEPATH "" FORCE )
 
          set ( MPI_CXX_LIBRARIES "MPI_CXX_LIBRARIES-NOTFOUND" CACHE FILEPATH "Cleared" FORCE )
          find_library ( MPI_CXX_LIBRARIES
             NAMES         mpi++ mpicxx cxx mpi_cxx libmpi++ libmpicxx libcxx libmpi_cxx
             HINTS         ${MPI_PATH}
             PATH_SUFFIXES lib )
-         set ( MPI_LIBRARY "MPI_CXX_LIBRARIES" CACHE FILEPATH "" FORCE )
 
          if ( NOT MPI_CXX_LIBRARIES STREQUAL "MPI_CXX_LIBRARIES-NOTFOUND" )
             set ( MPI_CXX_FOUND ON FORCE )
@@ -734,7 +793,6 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
            NAMES         mpi mpich mpich2 msmpi libmpi libmpich libmpich2 libmsmpi
            HINTS         ${MPI_PATH}
            PATH_SUFFIXES lib )
-         set ( MPI_EXTRA_LIBRARY "MPI_C_LIBRARIES" CACHE FILEPATH "" FORCE )
 
          if ( NOT MPI_C_LIBRARIES STREQUAL "MPI_C_LIBRARIES-NOTFOUND" )
             set ( MPI_C_FOUND ON FORCE )
@@ -751,23 +809,14 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
    endif ( )
 
    if ( MPI_FOUND )
-       if ( MPI_CXX_FOUND )
-         include_directories ( SYSTEM ${MPI_CXX_INCLUDE_PATH} ${MPI_C_INCLUDE_PATH} )
-         foreach( LIB ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} )
-           if ( LIB )
-              list ( APPEND SERVICE_LIBS ${LIB} )
-           endif ( )
-         endforeach ( )
-         add_flag ( CMAKE_CXX_FLAGS "${MPI_CXX_COMPILE_FLAGS}" )
-         add_flag ( CMAKE_C_FLAGS   "${MPI_C_COMPILE_FLAGS}" )
-      else ( ) # For older CMake versions
-         include_directories ( SYSTEM ${MPI_INCLUDE_PATH} )
-         list ( APPEND SERVICE_LIBS ${MPI_LIBRARY} )
-         if ( MPI_EXTRA_LIBRARY )
-            list ( APPEND SERVICE_LIBS ${MPI_EXTRA_LIBRARY} )
+     include_directories ( SYSTEM ${MPI_CXX_INCLUDE_PATH} ${MPI_C_INCLUDE_PATH} )
+     foreach( LIB ${MPI_C_LIBRARIES} ${MPI_CXX_LIBRARIES} )
+         if ( LIB )
+            list ( APPEND SERVICE_LIBS ${LIB} )
          endif ( )
-         add_flag ( CMAKE_C_FLAGS "${MPI_COMPILE_FLAGS}" )
-      endif ( )
+     endforeach ( )
+     add_flag ( CMAKE_CXX_FLAGS "${MPI_CXX_COMPILE_FLAGS}" )
+     add_flag ( CMAKE_C_FLAGS   "${MPI_C_COMPILE_FLAGS}" )
 
      add_flag ( CMAKE_MODULE_LINKER_FLAGS "${MPI_CXX_LINK_FLAGS}" )
      add_flag ( CMAKE_EXE_LINKER_FLAGS    "${MPI_CXX_LINK_FLAGS}" )
@@ -775,7 +824,7 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
 
      # When using Intel MPI, mpi.h has to be included before including the standard library
      # therefore we use the -include flag to enforce this.
-     if ( MPI_INCLUDE_PATH MATCHES "intel" )
+     if ( MPI_C_INCLUDE_PATH MATCHES "intel" )
          message (STATUS "Activating IntelMPI include workaround for mpi.h" )
          add_flag ( CMAKE_CXX_FLAGS "-include mpi.h" )
          add_flag ( CMAKE_C_FLAGS   "-include mpi.h" )
@@ -1161,7 +1210,23 @@ if ( WALBERLA_BUILD_WITH_LTO  )
    endif( )
 
 endif ( )
+
 ############################################################################################################################
+##
+##  Some more compiler flags that need to happen after any try_compile (e.g. inside FindMPI)
+##
+############################################################################################################################
+
+# Treat warnings as errors
+if ( WARNING_ERROR )
+   if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG )
+      add_flag ( CMAKE_CXX_FLAGS "-pedantic-errors -Werror" )
+   elseif( WALBERLA_CXX_COMPILER_IS_MSVC )
+      add_flag ( CMAKE_CXX_FLAGS "/WX" )
+   elseif ( WALBERLA_CXX_COMPILER_IS_CRAY )
+      add_flag ( CMAKE_CXX_FLAGS "-h error_on_warning" )
+   endif()
+endif ( )
 
 ############################################################################################################################
 ##

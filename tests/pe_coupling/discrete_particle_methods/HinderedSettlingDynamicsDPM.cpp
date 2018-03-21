@@ -703,9 +703,9 @@ int main( int argc, char **argv )
    if( fileIO )
    {
       // create base directory if it does not yet exist
-      boost::filesystem::path tpath( baseFolder );
-      if( !boost::filesystem::exists( tpath ) )
-         boost::filesystem::create_directory( tpath );
+      filesystem::path tpath( baseFolder );
+      if( !filesystem::exists( tpath ) )
+         filesystem::create_directory( tpath );
    }
 
    ///////////////////////////////
@@ -1643,7 +1643,7 @@ int main( int argc, char **argv )
                      << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,- gravity * densityRatio * diameter * diameter * diameter * math::PI / real_t(6) )  ), "Gravitational Force Add" )
                      << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,gravity * real_t(1) * diameter * diameter * diameter * math::PI / real_t(6) ) ), "Buoyancy Force (due to gravity) Add" )
                      << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,extForce[2] * real_t(1) * diameter * diameter * diameter * math::PI / real_t(6) ) ), "Buoyancy Force (due to external fluid force) Add" )
-                     << AfterFunction( pe_coupling::discrete_particle_methods::SubgridTimeStep( blocks, bodyStorageID, *cr, syncCall, lubricationEvaluationFunction, dtInteractionSubCycle, peSubSteps ), "Pe Time Step" );
+                     << AfterFunction( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, dtInteractionSubCycle, peSubSteps, lubricationEvaluationFunction ), "Pe Time Step" );
 
       timeloop.add() << Sweep( DummySweep(), "Dummy Sweep ")
                      << AfterFunction( SharedFunctor<CollisionPropertiesEvaluator>( collisionPropertiesEvaluator ), "Collision properties evaluator");

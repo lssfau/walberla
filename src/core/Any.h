@@ -13,19 +13,36 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file WeightAssignmentFunctor.cpp
-//! \author Sebastian Eibl <sebastian.eibl@fau.de>
+//! \file Any.h
+//! \ingroup core
+//! \author Michael Kuron <mkuron@icp.uni-stuttgart.de>
 //
 //======================================================================================================================
 
-#include "WeightAssignmentFunctor.h"
+#pragma once
+
+
+#if defined(WALBERLA_USE_STD_ANY)
+#include <any>
+#elif defined(WALBERLA_USE_STD_EXPERIMENTAL_ANY)
+#include <experimental/any>
+#else
+#include <boost/any.hpp>
+#endif
+
+
 
 namespace walberla {
-namespace pe {
-namespace amr {
 
-const double WeightAssignmentFunctor::baseWeight = real_t(10.0);
+#if defined(WALBERLA_USE_STD_ANY)
+using std::any;
+using std::any_cast;
+#elif defined(WALBERLA_USE_STD_EXPERIMENTAL_ANY)
+using std::experimental::any;
+using std::experimental::any_cast;
+#else
+using boost::any;
+using boost::any_cast;
+#endif
 
-}
-}
 }

@@ -120,6 +120,8 @@ void EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T >
 
    real_t cx, cy, cz;
    blockStorage_->getBlockLocalCellCenter( *block, Cell(x,y,z), cx, cy, cz );
+
+   WALBERLA_ASSERT_NOT_NULLPTR( (*bodyField)(x,y,z) );
    const auto velocity = (*bodyField)(x,y,z)->velFromWF(cx,cy,cz);
 
    pdfField->setToEquilibrium( x, y, z, Vector3< real_t >( velocity[0], velocity[1], velocity[2] ), averageDensity );

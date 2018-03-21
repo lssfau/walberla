@@ -944,9 +944,9 @@ int main( int argc, char **argv )
    WALBERLA_LOG_INFO_ON_ROOT("Basefolder for simulation results: " << basefolder);
 
    // create base directory if it does not yet exist
-   boost::filesystem::path tpath( basefolder );
-   if( !boost::filesystem::exists( tpath ) )
-      boost::filesystem::create_directory( tpath );
+   filesystem::path tpath( basefolder );
+   if( !filesystem::exists( tpath ) )
+      filesystem::create_directory( tpath );
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
    std::function< void () > commFunction;
@@ -1255,9 +1255,9 @@ int main( int argc, char **argv )
    pdfFieldVTK->addBeforeFunction(VTKInfoLogger( &timeloop, blocks, bodyStorageID, basefolder, uInfty ));
 
    // create folder for log_vtk files to not pollute the basefolder
-   boost::filesystem::path tpath2( basefolder+"/log_vtk" );
-   if( !boost::filesystem::exists( tpath2 ) )
-      boost::filesystem::create_directory( tpath2 );
+   filesystem::path tpath2( basefolder+"/log_vtk" );
+   if( !filesystem::exists( tpath2 ) )
+      filesystem::create_directory( tpath2 );
 
 
    field::FlagFieldCellFilter< FlagField_T > fluidFilter( flagFieldID );
