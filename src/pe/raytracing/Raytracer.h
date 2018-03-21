@@ -125,9 +125,6 @@ private:
    real_t blockAABBIntersectionPadding_; /*!< The padding applied in block AABB intersection pretesting, as
                                           * some objects within a block might protrude from the block's AABB.*/
    
-   bool tBufferOutputEnabled_; //!< Enable / disable dumping the tbuffer to file.
-   std::string tBufferOutputDirectory_; //!< Path to the tbuffer output directory.
-   
    bool imageOutputEnabled_;  //!< Enable / disable writing images to file.
    bool localImageOutputEnabled_; //!< Enable / disable writing images of the local process to file.
    std::string imageOutputDirectory_; //!< Path to the image output directory.
@@ -143,8 +140,6 @@ private:
                                                            * a given body should be visible in the final image. */
    Algorithm raytracingAlgorithm_;    //!< Algorithm to use while intersection testing.
    ReductionMethod reductionMethod_; //!< Reduction method used for assembling the image from all processes.
-   
-   static uint64_t naiveIntersectionTestCount;
    //@}
    
    /*!\name Member variables for raytracing geometry */
@@ -176,8 +171,6 @@ public:
    inline const Vec3& getLookAtPoint() const;
    inline const Vec3& getUpVector() const;
    inline const Color& getBackgroundColor() const;
-   inline bool getTBufferOutputEnabled() const;
-   inline const std::string& getTBufferOutputDirectory() const;
    inline bool getImageOutputEnabled() const;
    inline bool getLocalImageOutputEnabled() const;
    inline const std::string& getImageOutputDirectory() const;
@@ -187,8 +180,6 @@ public:
    /*!\name Set functions */
    //@{
    inline void setBackgroundColor(const Color& color);
-   inline void setTBufferOutputEnabled(const bool enabled);
-   inline void setTBufferOutputDirectory(const std::string& path);
    inline void setImageOutputEnabled(const bool enabled);
    inline void setLocalImageOutputEnabled(const bool enabled);
    inline void setImageOutputDirectory(const std::string& path);
@@ -213,10 +204,6 @@ private:
                WcTimingTree* tt = NULL);
 
    std::string getOutputFilename(const std::string& base, size_t timestep, bool isGlobalImage) const;
-   void writeDepthsToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
-                          size_t timestep, bool isGlobalImage = false) const;
-   void writeDepthsToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
-                          const std::string& fileName) const;
    void writeImageToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
                          size_t timestep, bool isGlobalImage = false) const;
    void writeImageToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
@@ -305,22 +292,6 @@ inline const Color& Raytracer::getBackgroundColor() const {
    return backgroundColor_;
 }
 
-/*!\brief Returns true if tbuffer output to a file is enabled.
- *
- * \return True if tbuffer output enabled, otherwise false.
- */
-inline bool Raytracer::getTBufferOutputEnabled() const {
-   return tBufferOutputEnabled_;
-}
-
-/*!\brief Returns the directory where the tbuffer output file will be saved in.
- *
- * \return Path to the tbuffer output directory.
- */
-inline const std::string& Raytracer::getTBufferOutputDirectory() const {
-   return tBufferOutputDirectory_;
-}
-   
 /*!\brief Returns true if image output to a file is enabled.
  *
  * \return True if image output enabled, otherwise false.
@@ -358,23 +329,6 @@ inline uint8_t Raytracer::getFilenameTimestepWidth() const {
  */
 inline void Raytracer::setBackgroundColor(const Color& color) {
    backgroundColor_ = color;
-}
-   
-/*!\brief Enable / disable outputting the tBuffer to a file in the specified directory.
- * \param enabled Set to true / false to enable / disable tbuffer output.
- */
-inline void Raytracer::setTBufferOutputEnabled(const bool enabled) {
-   tBufferOutputEnabled_ = enabled;
-}
-
-/*!\brief Enable / disable outputting the tBuffer to a file in the specified directory.
- * \param enabled Set to true / false to enable / disable tbuffer output.
- */
-inline void Raytracer::setTBufferOutputDirectory(const std::string& path) {
-   filesystem::path dir (path);
-   WALBERLA_CHECK(filesystem::exists(dir) && filesystem::is_directory(dir), "Tbuffer output directory " << path << " is invalid.");
-   
-   tBufferOutputDirectory_ = path;
 }
    
 /*!\brief Enable / disable outputting images in the specified directory.
@@ -510,8 +464,6 @@ inline void Raytracer::traceRayNaively(const Ray& ray, BodyID& body_closest, rea
          }
          
          bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
-         Raytracer::naiveIntersectionTestCount++;
-         
          if (intersects && t < t_closest) {
             // body was shot by ray and is currently closest to camera
             t_closest = t;
@@ -579,11 +531,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          hashgrids->update();
       }
       if (tt != NULL) tt->stop("HashGrids Update");
-      
-      ccd::HashGrids::intersectionTestCount = 0;
    }
-   
-   Raytracer::naiveIntersectionTestCount = 0;
    
    real_t t, t_closest;
    Vec3 n;
@@ -651,20 +599,6 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    }
    if (tt != NULL) tt->stop("Intersection Testing");
 
-   if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
-      uint64_t naiveTests = Raytracer::naiveIntersectionTestCount;
-      uint64_t hashgridsTests = ccd::HashGrids::intersectionTestCount;
-      mpi::reduceInplace(naiveTests, mpi::SUM, 0);
-      mpi::reduceInplace(hashgridsTests, mpi::SUM, 0);
-      WALBERLA_ROOT_SECTION() {
-         uint64_t savedIntersections = naiveTests-hashgridsTests;
-         real_t savedIntersectionsPercentage = (real_t(1)-real_c(hashgridsTests)/real_c(naiveTests))*100;
-         WALBERLA_LOG_INFO("Intersection statistics (processes: " << mpi::MPIManager::instance()->numProcesses() << "):");
-         WALBERLA_LOG_INFO(" Naive tests:     " << std::setw(10) << naiveTests);
-         WALBERLA_LOG_INFO(" HashGrids tests: " << std::setw(10) << hashgridsTests);
-         WALBERLA_LOG_INFO(" Saved tests:     " << std::setw(10) << savedIntersections << " (" << std::setprecision(4) << savedIntersectionsPercentage << "%)");
-      }
-   }
    if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
       if (pixelErrors > 0) {
          WALBERLA_LOG_WARNING(pixelErrors << " pixel errors found!");

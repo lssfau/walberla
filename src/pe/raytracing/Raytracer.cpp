@@ -89,8 +89,6 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    lighting_(lighting),
    backgroundColor_(backgroundColor),
    blockAABBIntersectionPadding_(blockAABBIntersectionPadding),
-   tBufferOutputEnabled_(false),
-   tBufferOutputDirectory_("."),
    imageOutputEnabled_(true),
    localImageOutputEnabled_(false),
    imageOutputDirectory_("."),
@@ -144,14 +142,6 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    pixelsVertical_ = config.getParameter<uint16_t>("image_y");
    fov_vertical_ = config.getParameter<real_t>("fov_vertical");
    antiAliasFactor_ = config.getParameter<uint16_t>("antiAliasFactor", 1);
-   
-   if (config.isDefined("tbuffer_output_directory")) {
-      setTBufferOutputEnabled(true);
-      setTBufferOutputDirectory(config.getParameter<std::string>("tbuffer_output_directory", "."));
-      WALBERLA_LOG_INFO_ON_ROOT("t buffers will be written to " << getTBufferOutputDirectory() << ".");
-   } else {
-      setTBufferOutputEnabled(false);
-   }
    
    setLocalImageOutputEnabled(config.getParameter<bool>("local_image_output_enabled", false));
       
@@ -283,68 +273,6 @@ std::string Raytracer::getOutputFilename(const std::string& base, size_t timeste
    }
    fileNameStream << ".png"; // add extension
    return fileNameStream.str();
-}
-
-/*!\brief Writes the depth values of the intersections buffer to an image file in the tBuffer output directory.
- * \param intersectionsBuffer Buffer with intersection info for each pixel.
- * \param timestep Timestep this image is from.
- * \param isGlobalImage Whether this image is the fully stitched together one.
- */
-void Raytracer::writeDepthsToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
-                                   size_t timestep, bool isGlobalImage) const {
-   writeDepthsToFile(intersectionsBuffer, getOutputFilename("tbuffer", timestep, isGlobalImage));
-}
-
-/*!\brief Writes the depth values of the intersections buffer to an image file in the tBuffer output directory.
- * \param intersectionsBuffer Buffer with intersection info for each pixel.
- * \param fileName Name of the output file.
- */
-void Raytracer::writeDepthsToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
-                                  const std::string& fileName) const {
-   real_t inf = std::numeric_limits<real_t>::max();
-   
-   real_t t_max = 1;
-   real_t t_min = inf;
-   for (size_t x = 0; x < pixelsHorizontal_; x++) {
-      for (size_t y = 0; y < pixelsVertical_; y++) {
-         size_t i = coordinateToArrayIndex(x, y);
-         real_t t = real_c(intersectionsBuffer[i].t);
-         if (t < t_min) {
-            t_min = t;
-         }
-      }
-   }
-   if (realIsIdentical(t_min, inf)) t_min = 0;
-   
-   t_max = forest_->getDomain().maxDistance(cameraPosition_);
-   
-   filesystem::path dir (getTBufferOutputDirectory());
-   filesystem::path file (fileName);
-   filesystem::path fullPath = dir / file;
-   
-   std::vector<u_char> lodeTBuffer(pixelsHorizontal_*pixelsVertical_);
-   
-   uint32_t l = 0;
-   for (size_t y = pixelsVertical_-1; y > 0; y--) {
-      for (size_t x = 0; x < pixelsHorizontal_; x++) {
-         size_t i = coordinateToArrayIndex(x, y);
-         u_char g = 0;
-         real_t t = real_c(intersectionsBuffer[i].t);
-         if (realIsIdentical(t, inf)) {
-            g = (u_char)0;
-         } else {
-            real_t t_scaled = (1-(t-t_min)/(t_max-t_min));
-            g = (u_char)(255 * std::max(std::min(t_scaled, real_t(1)), real_t(0)));
-         }
-         lodeTBuffer[l] = g;
-         l++;
-      }
-   }
-   
-   uint32_t error = lodepng::encode(fullPath.string(), lodeTBuffer, getPixelsHorizontal(), getPixelsVertical(), LCT_GREY);
-   if(error) {
-      WALBERLA_LOG_WARNING("lodePNG error " << error << " when trying to save tbuffer file to " << fullPath.string() << ": " << lodepng_error_text(error));
-   }
 }
 
 /*!\brief Writes the image of the current intersection buffer to a file in the image output directory.
@@ -488,12 +416,6 @@ void Raytracer::localOutput(const std::vector<BodyIntersectionInfo>& intersectio
          if (tt != NULL) tt->stop("Local Output");
       }
    }
-   
-   if (getTBufferOutputEnabled()) {
-      if (tt != NULL) tt->start("Local Output");
-      writeDepthsToFile(intersectionsBuffer, timestep);
-      if (tt != NULL) tt->stop("Local Output");
-   }
 }
 
 void Raytracer::output(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep, WcTimingTree* tt) {
@@ -502,14 +424,9 @@ void Raytracer::output(const std::vector<BodyIntersectionInfo>& intersectionsBuf
       if (getImageOutputEnabled()) {
          writeImageToFile(intersectionsBuffer, timestep, true);
       }
-      if (getTBufferOutputEnabled()) {
-         writeDepthsToFile(intersectionsBuffer, timestep, true);
-      }
       if (tt != NULL) tt->stop("Output");
    }
 }
-
-uint64_t Raytracer::naiveIntersectionTestCount = 0;
 
 }
 }
