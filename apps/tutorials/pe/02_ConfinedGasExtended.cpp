@@ -171,7 +171,7 @@ int main( int argc, char ** argv )
    
    WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
    //! [Raytracer Init]
-   std::function<ShadingParameters(const BodyID body)> customShadingFunction = [](const BodyID body) {
+   std::function<ShadingParameters (const BodyID body)> customShadingFunction = [](const BodyID body) {
       if (body->getTypeID() == Sphere::getStaticTypeID()) {
          return processRankDependentShadingParams(body).makeGlossy();
       }
