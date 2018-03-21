@@ -66,8 +66,10 @@ void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyInter
  * \param blockAABBIntersectionPadding The padding applied in block AABB intersection pretesting.
  *                                     Set it to the value of the farthest distance a object might protrude from
  *                                     its containing block.
- * \param bodyToShadingParamsFunction A function mapping a BodyID to ShadingParameters for this body.
- *                                    This can be used to customize the color and shading of bodies.
+ * \param bodyToShadingParamsFunc A function mapping a BodyID to ShadingParameters for this body.
+ *                                This can be used to customize the color and shading of bodies.
+ * \param isBodyVisibleFunc A function which returns a boolean indicating if a given body should be visible
+ *                          in the final image.
  */
 Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
                      const shared_ptr<BodyStorage> globalBodyStorage,
@@ -78,7 +80,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
                      const Lighting& lighting,
                      const Color& backgroundColor,
                      real_t blockAABBIntersectionPadding,
-                     std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction)
+                     std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunc,
+                     std::function<bool (const BodyID)> isBodyVisibleFunc)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage), ccdID_(ccdID),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
    fov_vertical_(fov_vertical), antiAliasFactor_(antiAliasFactor),
@@ -92,7 +95,8 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    localImageOutputEnabled_(false),
    imageOutputDirectory_("."),
    filenameTimestepWidth_(5),
-   bodyToShadingParamsFunction_(bodyToShadingParamsFunction),
+   bodyToShadingParamsFunc_(bodyToShadingParamsFunc),
+   isBodyVisibleFunc_(isBodyVisibleFunc),
    raytracingAlgorithm_(RAYTRACE_HASHGRIDS),
    reductionMethod_(MPI_REDUCE) {
    
@@ -108,6 +112,10 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
  * \param globalBodyStorage Pointer to the global body storage.
  * \param ccdID Block data ID for HashGrids.
  * \param config Config block for the raytracer.
+ * \param bodyToShadingParamsFunc A function mapping a BodyID to ShadingParameters for this body.
+ *                                This can be used to customize the color and shading of bodies.
+ * \param isBodyVisibleFunc A function which returns a boolean indicating if a given body should be visible
+ *                          in the final image.
  *
  * The config block has to contain image_x (int), image_y (int) and fov_vertical (real, in degrees).
  * Additionally a vector of reals for each of cameraPosition, lookAt and the upVector for the view setup are required.
@@ -123,9 +131,11 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
                      const shared_ptr<BodyStorage> globalBodyStorage,
                      const BlockDataID ccdID,
                      const Config::BlockHandle& config,
-                     std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction)
+                     std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunc,
+                     std::function<bool (const BodyID)> isBodyVisibleFunc)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage), ccdID_(ccdID),
-   bodyToShadingParamsFunction_(bodyToShadingParamsFunction),
+   bodyToShadingParamsFunc_(bodyToShadingParamsFunc),
+   isBodyVisibleFunc_(isBodyVisibleFunc),
    raytracingAlgorithm_(RAYTRACE_HASHGRIDS),
    reductionMethod_(MPI_REDUCE) {
    WALBERLA_CHECK(config.isValid(), "No valid config passed to raytracer");

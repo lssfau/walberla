@@ -58,7 +58,12 @@ struct BodyIntersectionInfo {
    double g;                     //!< Green value for the pixel.                             -> MPI_DOUBLE
    double b;                     //!< Blue value for the pixel.                              -> MPI_DOUBLE
 };
-   
+
+inline bool defaultIsBodyVisible(const BodyID body) {
+   WALBERLA_UNUSED(body);
+   return true;
+}
+
 class Raytracer {
 public:
    /*!\brief Which method to use when reducing the process-local image to a global one.
@@ -87,12 +92,15 @@ public:
                       const Lighting& lighting,
                       const Color& backgroundColor = Color(real_t(0.1), real_t(0.1), real_t(0.1)),
                       real_t blockAABBIntersectionPadding = real_t(0.0),
-                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction = defaultBodyTypeDependentShadingParams);
+                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunc = defaultBodyTypeDependentShadingParams,
+                      std::function<bool (const BodyID)> isBodyVisibleFunc = defaultIsBodyVisible);
+
    explicit Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
                       const shared_ptr<BodyStorage> globalBodyStorage,
                       const BlockDataID ccdID,
                       const Config::BlockHandle& config,
-                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction = defaultBodyTypeDependentShadingParams);
+                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction = defaultBodyTypeDependentShadingParams,
+                      std::function<bool (const BodyID)> isBodyVisibleFunc = defaultIsBodyVisible);
    //@}
 
 private:
@@ -128,9 +136,11 @@ private:
                                    * Use e.g. 5 for ranges from 1 to 99 999: Will result in
                                    * filenames like image_00001.png up to image_99999.png. */
    uint8_t filenameRankWidth_;  //!< Width of the mpi rank part in a filename.
-   std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction_; /*!< Function which returns a 
-                                                                                  * ShadingParameters struct
-                                                                                  * given the specified body. */
+   std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunc_; /*!< Function which returns a
+                                                                              * ShadingParameters struct for the
+                                                                              * specified body. */
+   std::function<bool (const BodyID)> isBodyVisibleFunc_; /*!< Function which returns a boolean indicating if
+                                                           * a given body should be visible in the final image. */
    Algorithm raytracingAlgorithm_;    //!< Algorithm to use while intersection testing.
    ReductionMethod reductionMethod_; //!< Reduction method used for assembling the image from all processes.
    
@@ -441,36 +451,32 @@ inline size_t Raytracer::coordinateToArrayIndex(size_t x, size_t y) const {
  */
 template <typename BodyTypeTuple>
 inline void Raytracer::traceRayInGlobalBodyStorage(const Ray& ray, BodyID& body_closest, real_t& t_closest, Vec3& n_closest) const {
-   int numProcesses = mpi::MPIManager::instance()->numProcesses();
-   int rank = mpi::MPIManager::instance()->rank();
-   
-   real_t t = std::numeric_limits<real_t>::max();
-   Vec3 n;
-   
-   IntersectsFunctor func(ray, t, n);
-   
-   int i = 0;
-   for(auto bodyIt: *globalBodyStorage_) {
-      ++i;
-      // distribute global objects more or less evenly over all processes
-      if (((i-1)%numProcesses) != rank) {
-         continue;
-      }
+   WALBERLA_ROOT_SECTION(){
+      real_t t = std::numeric_limits<real_t>::max();
+      Vec3 n;
       
-      if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
-         PlaneID plane = (PlaneID)bodyIt;
-         if (!isPlaneVisible(plane, ray)) {
+      IntersectsFunctor func(ray, t, n);
+      
+      for(auto bodyIt: *globalBodyStorage_) {
+         if (!isBodyVisibleFunc_(bodyIt)) {
             continue;
          }
-      }
-      
-      bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(bodyIt, func);
-      
-      if (intersects && t < t_closest) {
-         // body was shot by ray and is currently closest to camera
-         t_closest = t;
-         body_closest = bodyIt;
-         n_closest = n;
+         
+         if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
+            PlaneID plane = (PlaneID)bodyIt;
+            if (!isPlaneVisible(plane, ray)) {
+               continue;
+            }
+         }
+         
+         bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(bodyIt, func);
+         
+         if (intersects && t < t_closest) {
+            // body was shot by ray and is currently closest to camera
+            t_closest = t;
+            body_closest = bodyIt;
+            n_closest = n;
+         }
       }
    }
 }
@@ -499,6 +505,10 @@ inline void Raytracer::traceRayNaively(const Ray& ray, BodyID& body_closest, rea
 #endif
       
       for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
+         if (!isBodyVisibleFunc_(*bodyIt)) {
+            continue;
+         }
+         
          bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
          Raytracer::naiveIntersectionTestCount++;
          
@@ -534,7 +544,8 @@ inline void Raytracer::traceRayInHashGrids(const Ray& ray, BodyID& body_closest,
 #endif
       
       ccd::HashGrids* hashgrids = blockIt->uncheckedFastGetData<ccd::HashGrids>(ccdID_);
-      BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAabb, t, n);
+      BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAabb, t, n,
+                                                                                isBodyVisibleFunc_);
       if (body != NULL && t < t_closest) {
          t_closest = t;
          body_closest = body;
@@ -722,7 +733,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
  * \return Computed color.
  */
 inline Color Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, const Vec3& n) const {
-   const ShadingParameters shadingParams = bodyToShadingParamsFunction_(body);
+   const ShadingParameters shadingParams = bodyToShadingParamsFunc_(body);
    
    const Vec3 intersectionPoint = ray.getOrigin() + ray.getDirection() * t;
    Vec3 lightDirection = lighting_.pointLightOrigin - intersectionPoint;
