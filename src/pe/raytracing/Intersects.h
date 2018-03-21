@@ -28,14 +28,11 @@
 #include "pe/rigidbody/Sphere.h"
 #include "pe/rigidbody/Union.h"
 #include "pe/utility/BodyCast.h"
+#include <core/math/Utility.h>
 #include <boost/math/special_functions/sign.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include <pe/raytracing/Ray.h>
-
-#define EPSILON real_t(1e-4)
-
-using namespace boost::math;
 
 namespace walberla {
 namespace pe {
@@ -49,7 +46,7 @@ inline bool intersects(const BodyID body, const Ray& ray, real_t& t, Vec3& n);
    
 inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t padding = real_t(0.0), Vec3* n = NULL);
 inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, real_t& t0, real_t& t1);
-   
+
 struct IntersectsFunctor
 {
    const Ray& ray_;
@@ -64,6 +61,8 @@ struct IntersectsFunctor
    }
 };
 
+const real_t discriminantEps = real_t(1e-4);
+   
 inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n) {
    real_t inf = std::numeric_limits<real_t>::max();
    
@@ -90,12 +89,12 @@ inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n) 
    const Vec3& origin = ray.getOrigin();
    const Vec3& planeNormal = plane->getNormal();
    real_t denominator = planeNormal * direction;
-   if (std::abs(denominator) > EPSILON) {
+   if (std::abs(denominator) > discriminantEps) {
       real_t t_;
       t_ = ((plane->getPosition() - origin) * planeNormal) / denominator;
-      if (t_ > EPSILON) {
+      if (t_ > 0) {
          t = t_;
-         n = planeNormal * sign(-denominator);
+         n = planeNormal * walberla::math::sign(-denominator);
          return true;
       } else {
          t = inf;
@@ -196,7 +195,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
    real_t b = real_t(2)*origin[2]*direction[2] + real_t(2)*origin[1]*direction[1];
    real_t c = origin[2]*origin[2] + origin[1]*origin[1] - capsule->getRadius()*capsule->getRadius();
    real_t discriminant = b*b - real_t(4.)*a*c;
-   if (discriminant >= EPSILON) {
+   if (std::abs(discriminant) >= discriminantEps) {
       // With discriminant smaller than 0, cylinder is not hit by ray (no solution for quadratic equation).
       // Thus only enter this section if the equation is actually solvable.
       
