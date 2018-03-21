@@ -20,12 +20,12 @@
 
 #include "Raytracer.h"
 #include "geometry/structured/extern/lodepng.h"
+#include "core/mpi/all.h"
 
 namespace walberla {
 namespace pe {
 namespace raytracing {
    
-#ifdef WALBERLA_BUILD_WITH_MPI
 void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyIntersectionInfo *inout, int *len, MPI_Datatype *dptr) {
    WALBERLA_UNUSED(dptr);
    for (int i = 0; i < *len; ++i) {
@@ -48,7 +48,6 @@ void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyInter
       inout++;
    }
 }
-#endif
 
 /*!\brief Instantiation constructor for the Raytracer class.
  *
@@ -102,7 +101,9 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    
    setupView_();
    setupFilenameRankWidth_();
-   setupMPI_();
+   WALBERLA_MPI_SECTION() {
+      setupMPI_();
+   }
 }
 
 /*!\brief Instantiation constructor for the Raytracer class using a config object for view setup.
@@ -191,7 +192,9 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
       
    setupView_();
    setupFilenameRankWidth_();
-   setupMPI_();
+   WALBERLA_MPI_SECTION() {
+      setupMPI_();
+   }
 }
 
 /*!\brief Utility function for setting up the view plane and calculating required variables.
@@ -217,16 +220,13 @@ void Raytracer::setupView_() {
 /*!\brief Utility function for initializing the attribute filenameRankWidth.
  */
 void Raytracer::setupFilenameRankWidth_() {
-   WALBERLA_MPI_SECTION() {
-      int numProcesses = mpi::MPIManager::instance()->numProcesses();
-      filenameRankWidth_ = uint8_c(log10(numProcesses)+1);
-   }
+   int numProcesses = mpi::MPIManager::instance()->numProcesses();
+   filenameRankWidth_ = uint8_c(log10(numProcesses)+1);
 }
 
 /*!\brief Utility function for setting up the MPI datatype and operation.
  */
 void Raytracer::setupMPI_() {
-#ifdef WALBERLA_BUILD_WITH_MPI
    MPI_Op_create((MPI_User_function *)BodyIntersectionInfo_Comparator_MPI_OP, true, &bodyIntersectionInfo_reduction_op);
    
    const int nblocks = 7;
@@ -257,7 +257,6 @@ void Raytracer::setupMPI_() {
    MPI_Type_create_resized( tmp_type, lb, extent, &bodyIntersectionInfo_mpi_type );
    
    MPI_Type_commit(&bodyIntersectionInfo_mpi_type);
-#endif
 }
    
 /*!\brief Generates the filename for output files.
@@ -410,7 +409,12 @@ void Raytracer::writeImageToFile(const std::vector<BodyIntersectionInfo>& inters
  * \attention This function only works on MPI builds due to the explicit usage of MPI routines.
  */
 void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt) {
-#ifdef WALBERLA_BUILD_WITH_MPI
+   WALBERLA_NON_MPI_SECTION() {
+      WALBERLA_UNUSED(intersectionsBuffer);
+      WALBERLA_UNUSED(tt);
+      WALBERLA_ABORT("Cannot call MPI reduce on a non-MPI build due to usage of MPI-specific code.");
+   }
+   
    WALBERLA_MPI_BARRIER();
    if (tt != NULL) tt->start("Reduction");
    int rank = mpi::MPIManager::instance()->rank();
@@ -429,11 +433,6 @@ void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& inter
    
    WALBERLA_MPI_BARRIER();
    if (tt != NULL) tt->stop("Reduction");
-#else
-   WALBERLA_UNUSED(intersectionsBuffer);
-   WALBERLA_UNUSED(tt);
-   WALBERLA_ABORT("Cannot call MPI reduce on a non-MPI build due to usage of MPI-specific code.");
-#endif
 }
   
 /*!\brief Conflate the intersectionsBuffer of each process onto the root process using MPI_Gather.
