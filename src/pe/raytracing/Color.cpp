@@ -36,7 +36,7 @@ Color Color::colorFromHSV(real_t hue, real_t saturation, real_t value) {
    } else {
       hue /= real_t(60);
    }
-   real_t fract = hue - floor(hue);
+   real_t fract = hue - std::floor(hue);
    
    real_t P = value*(real_t(1) - saturation);
    real_t Q = value*(real_t(1) - saturation*fract);
