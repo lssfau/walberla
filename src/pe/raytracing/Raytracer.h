@@ -88,7 +88,6 @@ public:
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                       const Lighting& lighting,
                       const Color& backgroundColor = Color(real_t(0.1), real_t(0.1), real_t(0.1)),
-                      real_t blockAABBIntersectionPadding = real_t(0.0),
                       std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunc = defaultBodyTypeDependentShadingParams,
                       std::function<bool (const BodyID)> isBodyVisibleFunc = defaultIsBodyVisible);
 
@@ -119,8 +118,6 @@ private:
    Vec3 upVector_;            //!< The vector indicating the upwards direction of the camera.
    Lighting lighting_;        //!< The lighting of the scene.
    Color backgroundColor_;    //!< Background color of the scene.
-   real_t blockAABBIntersectionPadding_; /*!< The padding applied in block AABB intersection pretesting, as
-                                          * some objects within a block might protrude from the block's AABB.*/
    
    bool tBufferOutputEnabled_; //!< Enable / disable dumping the tbuffer to file.
    std::string tBufferOutputDirectory_; //!< Path to the tbuffer output directory.
@@ -491,14 +488,6 @@ inline void Raytracer::traceRayNaively(const Ray& ray, BodyID& body_closest, rea
    IntersectsFunctor func(ray, t, n);
    
    for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
-      const AABB& blockAabb = blockIt->getAABB();
-      
-#if !defined(DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK)
-      if (!intersects(blockAabb, ray, t, blockAABBIntersectionPadding_)) {
-         continue;
-      }
-#endif
-      
       for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
          if (!isBodyVisibleFunc_(*bodyIt)) {
             continue;
@@ -530,16 +519,9 @@ inline void Raytracer::traceRayInHashGrids(const Ray& ray, BodyID& body_closest,
    Vec3 n;
    
    for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
-      const AABB& blockAabb = blockIt->getAABB();
-      
-#if !defined(DISABLE_BLOCK_AABB_INTERSECTION_PRECHECK)
-      if (!intersects(blockAabb, ray, t, blockAABBIntersectionPadding_)) {
-         continue;
-      }
-#endif
-      
-      ccd::HashGrids* hashgrids = blockIt->uncheckedFastGetData<ccd::HashGrids>(ccdID_);
-      BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAabb, t, n,
+      const AABB& blockAABB = blockIt->getAABB();
+      const ccd::HashGrids* hashgrids = blockIt->uncheckedFastGetData<ccd::HashGrids>(ccdID_);
+      BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAABB, t, n,
                                                                                 isBodyVisibleFunc_);
       if (body != NULL && t < t_closest) {
          t_closest = t;
