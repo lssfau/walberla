@@ -99,7 +99,9 @@ public:
    static const size_t gridActivationThreshold;
    static const real_t hierarchyFactor;
    //**********************************************************************************************
-      
+   
+   static uint64_t intersectionTestCount; // ToDo remove again
+   
 private:
    //**Type definitions****************************************************************************
    //! Vector for storing (handles to) rigid bodies.
@@ -581,6 +583,7 @@ BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_
                continue;
             }
                
+            HashGrids::intersectionTestCount++;
             bool intersects = SingleCast<BodyTuple, raytracing::IntersectsFunctor, bool>::execute(cellBody, intersectsFunc);
             if (intersects && t_local < t_closest) {
                body = cellBody;
