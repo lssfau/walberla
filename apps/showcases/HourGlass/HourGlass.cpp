@@ -42,12 +42,14 @@
 #include <core/waLBerlaBuildInfo.h>
 #include <postprocessing/sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
+#include <pe/raytracing/Raytracer.h>
 
 #include <fstream>
 #include <iomanip>
 
 using namespace walberla;
 using namespace walberla::pe;
+using namespace walberla::pe::raytracing;
 using namespace walberla::timing;
 
 typedef boost::tuple<Box, Capsule, Sphere, Plane> BodyTuple ;
@@ -113,9 +115,12 @@ int main( int argc, char ** argv )
    const uint_t vtkInterval                      = cfg.getParameter<uint_t>( "vtkInterval", uint_t(10000) );
    WALBERLA_LOG_INFO_ON_ROOT("vtkInterval: " << vtkInterval);
    integerProperties["vtkInterval"] = int64_c(vtkInterval);
-   const std::string vtkPath                        = cfg.getParameter<std::string>("vtkPath",  "vtk_out" );
+   const std::string vtkPath                     = cfg.getParameter<std::string>("vtkPath",  "vtk_out" );
    WALBERLA_LOG_INFO_ON_ROOT("vtkPath: " << vtkPath);
-
+   const uint_t raytracingInterval               = cfg.getParameter<uint_t>( "raytracingInterval", uint_t(10) );
+   WALBERLA_LOG_INFO_ON_ROOT("raytracingInterval: " << raytracingInterval);
+   integerProperties["raytracingInterval"] = int64_c(raytracingInterval);
+   
    const std::string outputFilename              = cfg.getParameter<std::string>( "outputFilename", "balancing.txt" );
    WALBERLA_LOG_INFO_ON_ROOT("outputFilename: " << outputFilename);
 
@@ -159,6 +164,23 @@ int main( int argc, char ** argv )
    auto vtkOutput       = make_shared<SphereVtkOutput>(storageID, *forest) ;
    auto vtkWriter       = vtk::createVTKOutput_PointData(vtkOutput, "Bodies", 1, vtkPath, "simulation_step", false, false);
 
+   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
+   std::function<ShadingParameters (const BodyID body)> customShadingFunction = [](const BodyID body) {
+      if (body->getTypeID() == Sphere::getStaticTypeID()) {
+         return processRankDependentShadingParams(body).makeGlossy();
+      }
+      return defaultBodyTypeDependentShadingParams(body);
+   };
+   std::function<bool (const BodyID body)> customVisibilityFunction = [](const BodyID body) {
+      if (body->getTypeID() == Box::getStaticTypeID()) {
+         return false;
+      }
+      return true;
+   };
+   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
+                       env.config()->getBlock("Raytracing"),
+                       customShadingFunction, customVisibilityFunction);
+   
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - START ***");
 
 
@@ -257,6 +279,13 @@ int main( int argc, char ** argv )
          vtkDomainOutput->write( true );
       }
       tp["VTKOutput"].end();
+      
+      if( i % raytracingInterval == 0 )
+      {
+         tp["Raytracer"].start();
+         raytracer.generateImage<BodyTuple>(i, &tt);
+         tp["VTKOutput"].end();
+      }
 
       tp["Solver"].start();
       cr.timestep( real_c(dt) );
