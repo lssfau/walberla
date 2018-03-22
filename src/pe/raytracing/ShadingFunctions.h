@@ -39,6 +39,7 @@ inline ShadingParameters lightGreyShadingParams (const BodyID body);
 inline ShadingParameters greyShadingParams (const BodyID body);
 inline ShadingParameters darkGreyShadingParams (const BodyID body);
 inline ShadingParameters redShadingParams (const BodyID body);
+inline ShadingParameters greenShadingParams (const BodyID body);
 inline ShadingParameters blueShadingParams (const BodyID body);
 inline ShadingParameters violetShadingParams (const BodyID body);
 

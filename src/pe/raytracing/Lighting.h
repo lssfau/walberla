@@ -28,6 +28,8 @@
 namespace walberla {
 namespace pe {
 namespace raytracing {
+/*!\brief The Lighting struct defines the properties of a point light in the scene.
+ */
 struct Lighting {
    Vec3 pointLightOrigin;
    Color diffuseColor;
@@ -42,9 +44,9 @@ struct Lighting {
    
    /*!\brief Instantiation constructor for the Lighting struct.
     * \param pointLightOrigin Origin of the point light.
-    * \param diffuseColor Diffuse color.
-    * \param specularColor Specular color.
-    * \param ambientColor Color of the ambient light.
+    * \param diffuseColor Diffuse color (base color of the light).
+    * \param specularColor Specular color (color of light refractions on an objects surface).
+    * \param ambientColor Color of the ambient light in the scene.
     */
    Lighting (const Vec3& _pointLightOrigin,
              const Color& _diffuseColor, const Color& _specularColor, const Color& _ambientColor)

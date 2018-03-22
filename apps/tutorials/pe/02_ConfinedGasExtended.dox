@@ -111,7 +111,7 @@ Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
                     lighting,
                     Color(real_t(0.1), real_t(0.1), real_t(0.1)),
                     radius,
-                    customShadingFunction;
+                    customShadingFunction);
 \endcode
 After the configuration is done, images can be generated each timestep by calling Raytracer::generateImage<BodyTuple>()
 which will be output to the specified directory.
