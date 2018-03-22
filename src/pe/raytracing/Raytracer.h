@@ -127,12 +127,13 @@ private:
                                    * Use e.g. 5 for ranges from 1 to 99 999: Will result in
                                    * filenames like image_00001.png up to image_99999.png. */
    uint8_t filenameRankWidth_;  //!< Width of the mpi rank part in a filename.
+   bool confinePlanesToDomain_; //!< Enable to render only the parts of planes within the simulation domain.
    std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunc_; /*!< Function which returns a
                                                                               * ShadingParameters struct for the
                                                                               * specified body. */
    std::function<bool (const BodyID)> isBodyVisibleFunc_; /*!< Function which returns a boolean indicating if
                                                            * a given body should be visible in the final image. */
-   Algorithm raytracingAlgorithm_;    //!< Algorithm to use while intersection testing.
+   Algorithm raytracingAlgorithm_;  //!< Algorithm to use while intersection testing.
    ReductionMethod reductionMethod_; //!< Reduction method used for assembling the image from all processes.
    //@}
    
@@ -167,6 +168,7 @@ public:
    inline bool getLocalImageOutputEnabled() const;
    inline const std::string& getImageOutputDirectory() const;
    inline uint8_t getFilenameTimestepWidth() const;
+   inline bool getConfinePlanesToDomain() const;
    //@}
 
    /*!\name Set functions */
@@ -178,6 +180,7 @@ public:
    inline void setFilenameTimestepWidth(uint8_t width);
    inline void setRaytracingAlgorithm(Algorithm algorithm);
    inline void setReductionMethod(ReductionMethod reductionMethod);
+   inline void setConfinePlanesToDomain(bool confinePlanesToOrigin);
    //@}
    
    /*!\name Functions */
@@ -315,6 +318,13 @@ inline uint8_t Raytracer::getFilenameTimestepWidth() const {
    return filenameTimestepWidth_;
 }
 
+/*!\brief Returns whether the rendering of planes gets confined in the simulation domain.
+ * \return True if the rendering of planes gets confined in the simulation domain.
+ */
+inline bool Raytracer::getConfinePlanesToDomain() const {
+   return confinePlanesToDomain_;
+}
+
 /*!\brief Set the background color of the scene.
  *
  * \param color New background color.
@@ -367,7 +377,14 @@ inline void Raytracer::setRaytracingAlgorithm(Algorithm algorithm) {
 inline void Raytracer::setReductionMethod(ReductionMethod reductionMethod) {
    reductionMethod_ = reductionMethod;
 }
-   
+
+/*!\brief Set if the rendering of planes should get confined to the simulation domain.
+ * \param confinePlanesToOrigin True if the rendering of planes should get confined to the simulation domain.
+ */
+inline void Raytracer::setConfinePlanesToDomain(bool confinePlanesToDomain) {
+   confinePlanesToDomain_ = confinePlanesToDomain;
+}
+
 /*!\brief Checks if a plane should get rendered.
  * \param plane Plane to check for visibility.
  * \param ray Ray which is intersected with plane.
@@ -408,7 +425,8 @@ inline void Raytracer::traceRayInGlobalBodyStorage(const Ray& ray, BodyID& body_
             continue;
          }
          
-         if (bodyIt->getTypeID() == Plane::getStaticTypeID()) {
+         bool isPlane = (bodyIt->getTypeID() == Plane::getStaticTypeID());
+         if (isPlane) {
             PlaneID plane = (PlaneID)bodyIt;
             if (!isPlaneVisible(plane, ray)) {
                continue;
@@ -416,8 +434,11 @@ inline void Raytracer::traceRayInGlobalBodyStorage(const Ray& ray, BodyID& body_
          }
          
          bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(bodyIt, func);
-         
          if (intersects && t < t_closest) {
+            Vec3 intersectionPoint = ray.getOrigin()+ray.getDirection()*t;
+            if (!forest_->getDomain().contains(intersectionPoint, 1e-8)) {
+               continue;
+            }
             // body was shot by ray and is currently closest to camera
             t_closest = t;
             body_closest = bodyIt;

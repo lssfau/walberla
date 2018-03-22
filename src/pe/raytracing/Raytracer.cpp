@@ -87,6 +87,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    localImageOutputEnabled_(false),
    imageOutputDirectory_("."),
    filenameTimestepWidth_(5),
+   confinePlanesToDomain_(true),
    bodyToShadingParamsFunc_(bodyToShadingParamsFunc),
    isBodyVisibleFunc_(isBodyVisibleFunc),
    raytracingAlgorithm_(RAYTRACE_HASHGRIDS),
@@ -149,6 +150,7 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
    }
       
    filenameTimestepWidth_ = config.getParameter<uint8_t>("filenameTimestepWidth", uint8_t(5));
+   confinePlanesToDomain_ = config.getParameter<bool>("confinePlanesToDomain", true);
    
    cameraPosition_ = config.getParameter<Vec3>("cameraPosition");
    lookAtPoint_ = config.getParameter<Vec3>("lookAt");
