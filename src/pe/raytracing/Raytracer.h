@@ -625,6 +625,10 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          
          traceRayInGlobalBodyStorage<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
          
+         BodyIntersectionInfo& intersectionInfo = intersectionsBuffer[coordinateToArrayIndex(x, y)];
+         intersectionInfo.imageX = uint32_t(x);
+         intersectionInfo.imageY = uint32_t(y);
+         
          if (!realIsIdentical(t_closest, inf) && body_closest != NULL) {
             Color color = getColor(body_closest, ray, t_closest, n_closest);
             if (isErrorneousPixel) {
@@ -632,18 +636,19 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
                isErrorneousPixel = false;
             }
             
-            BodyIntersectionInfo intersectionInfo = {
-               uint32_t(x),
-               uint32_t(y),
-               body_closest->getSystemID(),
-               t_closest,
-               color[0],
-               color[1],
-               color[2]
-            };
+            intersectionInfo.bodySystemID = body_closest->getSystemID();
+            intersectionInfo.t = t_closest;
+            intersectionInfo.r = color[0];
+            intersectionInfo.g = color[1];
+            intersectionInfo.b = color[2];
             
-            intersectionsBuffer[coordinateToArrayIndex(x, y)] = intersectionInfo;
             intersections.push_back(intersectionInfo);
+         } else {
+            intersectionInfo.bodySystemID = 0;
+            intersectionInfo.t = inf;
+            intersectionInfo.r = backgroundColor_[0];
+            intersectionInfo.g = backgroundColor_[1];
+            intersectionInfo.b = backgroundColor_[2];
          }
       }
    }
