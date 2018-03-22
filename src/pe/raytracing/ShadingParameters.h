@@ -63,12 +63,17 @@ struct ShadingParameters {
       shininess = config.getParameter<real_t>("shininess");
    }
    
+   /*!\brief Makes a rendered object shiny by setting the shininess and adjusting the specularColor.
+    * \param _shininess Shininess
+    */
    ShadingParameters& makeGlossy(real_t _shininess = 30) {
       shininess = _shininess;
       specularColor.set(real_t(1), real_t(1), real_t(1));
       return *this;
    }
    
+   /*!\brief Makes the rendered object matte by setting the shininess attribute to zero and adjusting the specularColor.
+    */
    ShadingParameters& makeMatte() {
       shininess = 0;
       specularColor.set(real_t(0.1), real_t(0.1), real_t(0.1));
