@@ -579,6 +579,9 @@ BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_
       
       if (nbBodies != NULL) {
          for (const BodyID& cellBody: *nbBodies) {
+            if (cellBody->isRemote()) {
+               continue;
+            }
             if (!isBodyVisibleFunc(cellBody)) {
                continue;
             }
