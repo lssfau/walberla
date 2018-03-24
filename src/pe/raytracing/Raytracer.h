@@ -435,9 +435,11 @@ inline void Raytracer::traceRayInGlobalBodyStorage(const Ray& ray, BodyID& body_
          
          bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(bodyIt, func);
          if (intersects && t < t_closest) {
-            Vec3 intersectionPoint = ray.getOrigin()+ray.getDirection()*t;
-            if (!forest_->getDomain().contains(intersectionPoint, 1e-8)) {
-               continue;
+            if (isPlane && confinePlanesToDomain_) {
+               Vec3 intersectionPoint = ray.getOrigin()+ray.getDirection()*t;
+               if (!forest_->getDomain().contains(intersectionPoint, real_t(1e-8))) {
+                  continue;
+               }
             }
             // body was shot by ray and is currently closest to camera
             t_closest = t;
