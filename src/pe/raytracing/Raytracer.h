@@ -206,7 +206,7 @@ private:
    
    void syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt = NULL);
    void syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& intersections,
-                                std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt);
+                                std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt = NULL);
    
    inline bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
    inline size_t coordinateToArrayIndex(size_t x, size_t y) const;
