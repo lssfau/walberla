@@ -148,7 +148,7 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
 
 shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& mainConf)
 {
-   bool setupRun                 = mainConf.getParameter< bool >( "setupRun", true );
+   bool setupRun                 = mainConf.getParameter< bool >( "setupRun", false );
    Vec3 simulationCorner         = mainConf.getParameter<Vec3>("simulationCorner", Vec3(0, 0, 0));
    Vec3 simulationSize           = mainConf.getParameter<Vec3>("simulationDomain", Vec3(10, 10, 10));
    math::AABB simulationDomain   = math::AABB( simulationCorner, simulationCorner + simulationSize );
