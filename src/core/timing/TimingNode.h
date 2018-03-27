@@ -26,6 +26,7 @@
 
 #include "core/debug/Debug.h"
 #include "core/logging/Logging.h"
+#include "core/mpi/Gatherv.h"
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
 #include "core/mpi/SetReduction.h"
@@ -251,6 +252,20 @@ void reduceInplace( TimingNode<TP>& tn, ReduceType rt = REDUCE_TOTAL, int target
       default:
          WALBERLA_ABORT( "Unknown reduce type" );
          break;
+   }
+
+   WALBERLA_ASSERT_EQUAL(vals.size(), valsSq.size());
+   WALBERLA_ASSERT_EQUAL(vals.size(), min.size());
+   WALBERLA_ASSERT_EQUAL(vals.size(), max.size());
+   WALBERLA_ASSERT_EQUAL(vals.size(), count.size());
+
+   WALBERLA_DEBUG_SECTION()
+   {
+      //checking if all timing trees contain the same number of elements
+      std::vector<uint32_t> lens;
+      lens.push_back(uint32_c(vals.size()));
+      lens = mpi::allGatherv(lens);
+      std::for_each(lens.begin(), lens.end(), [&](const uint32_t& v){WALBERLA_UNUSED(v); WALBERLA_ASSERT_EQUAL( v, vals.size(), "Different number of TimingTree nodes detected! All TimingTrees need to have the same timers for reduction!");});
    }
 
    // Target vectors where reduced values are stored
