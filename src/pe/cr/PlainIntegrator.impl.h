@@ -65,14 +65,14 @@ void PlainIntegratorSolver<Integrator>::timestep( const real_t dt )
       BodyStorage& localStorage = (*storage)[0];
       for (auto bd = localStorage.begin(); bd != localStorage.end(); ++bd){
          // Checking the state of the body
-         WALBERLA_ASSERT( bd->checkInvariants(), "Invalid capsule state detected" );
+         WALBERLA_ASSERT( bd->checkInvariants(), "Invalid body state detected" );
          WALBERLA_ASSERT( !bd->hasSuperBody(), "Invalid superordinate body detected" );
 
          // Resetting the contact node and removing all attached contacts
       //      bd->resetNode();
          bd->clearContacts();
 
-         // Moving the capsule according to the acting forces (don't move a sleeping capsule)
+         // Moving the body according to the acting forces (don't move a sleeping body)
          if( bd->isAwake() && !bd->hasInfiniteMass() ) {
             integrate_( *bd, dt, *this );
          }
@@ -80,8 +80,8 @@ void PlainIntegratorSolver<Integrator>::timestep( const real_t dt )
          // Resetting the acting forces
          bd->resetForceAndTorque();
 
-         // Checking the state of the capsule
-         WALBERLA_ASSERT( bd->checkInvariants(), "Invalid capsule state detected" );
+         // Checking the state of the body
+         WALBERLA_ASSERT( bd->checkInvariants(), "Invalid body state detected" );
       }
    }
    if (tt_!=NULL) tt_->stop("Integrate Bodies");

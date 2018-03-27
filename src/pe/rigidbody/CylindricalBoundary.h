@@ -175,7 +175,7 @@ inline id_t CylindricalBoundary::getStaticTypeID()
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\name Capsule operators */
+/*!\name Cylinder operators */
 //@{
 std::ostream& operator<<( std::ostream& os, const CylindricalBoundary& cb );
 std::ostream& operator<<( std::ostream& os, CylindricalBoundaryID cb );

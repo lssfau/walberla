@@ -79,7 +79,7 @@ private:
    size_t                            numberOfContactsTreated_;
 };
 
-class DEM : public DEMSolver<IntegrateImplictEuler, ResolveContactSpringDashpotHaffWerner>
+class DEM : public DEMSolver<IntegrateImplicitEuler, ResolveContactSpringDashpotHaffWerner>
 {
 public:
    DEM(  const shared_ptr<BodyStorage>&    globalBodyStorage
@@ -88,8 +88,8 @@ public:
        , domain_decomposition::BlockDataID ccdID
        , domain_decomposition::BlockDataID fcdID
        , WcTimingTree*                     tt = NULL)
-   : DEMSolver<IntegrateImplictEuler, ResolveContactSpringDashpotHaffWerner>(
-              IntegrateImplictEuler(), ResolveContactSpringDashpotHaffWerner(),
+   : DEMSolver<IntegrateImplicitEuler, ResolveContactSpringDashpotHaffWerner>(
+              IntegrateImplicitEuler(), ResolveContactSpringDashpotHaffWerner(),
               globalBodyStorage, blockStorage, storageID, ccdID, fcdID, tt )
    {
    }

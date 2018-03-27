@@ -30,7 +30,7 @@ namespace pe {
 namespace cr {
 
 //*************************************************************************************************
-/*!\brief Integrate the trajectory of one body using implict Euler.
+/*!\brief Integrate the trajectory of one body using implicit Euler.
 *
 * \param id Body ID.
 * \param dt Time step size.
@@ -40,7 +40,7 @@ namespace cr {
 * The implicit Euler algorithm, also known as backward Euler, is used. It is a first-order
 * integrator that does conserves energy (i.e. it is symplectic.)
 */
-class IntegrateImplictEuler {
+class IntegrateImplicitEuler {
 public:
    void operator()( BodyID id, real_t dt, ICR & solver ) const
    {
@@ -72,7 +72,7 @@ public:
       // Setting the axis-aligned bounding box
       id->calcBoundingBox();
 
-      // Calculating the current motion of the capsule
+      // Calculating the current motion of the body
       id->calcMotion();
    }
 };
@@ -88,7 +88,7 @@ public:
 * The explicit Euler algorithm, also known as forward Euler, is used. It is a first-order
 * integrator that does not conserve energy (i.e. it is not symplectic.)
 */
-class IntegrateExplictEuler {
+class IntegrateExplicitEuler {
 public:
    void operator()( BodyID id, real_t dt, ICR & solver ) const
    {
@@ -120,7 +120,7 @@ public:
       // Setting the axis-aligned bounding box
       id->calcBoundingBox();
 
-      // Calculating the current motion of the capsule
+      // Calculating the current motion of the body
       id->calcMotion();
    }
 };

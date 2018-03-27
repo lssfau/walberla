@@ -61,14 +61,14 @@ private:
    WcTimingTree*                     tt_;
 };
    
-class PlainIntegrator : public PlainIntegratorSolver<IntegrateImplictEuler>
+class PlainIntegrator : public PlainIntegratorSolver<IntegrateImplicitEuler>
 {
 public:
    PlainIntegrator(  const shared_ptr<BodyStorage>&    globalBodyStorage
                    , const shared_ptr<BlockStorage>&   blockStorage
                    , domain_decomposition::BlockDataID storageID
                    , WcTimingTree*                     tt = NULL)
-   : PlainIntegratorSolver<IntegrateImplictEuler>( IntegrateImplictEuler(), globalBodyStorage, blockStorage,
+   : PlainIntegratorSolver<IntegrateImplicitEuler>( IntegrateImplicitEuler(), globalBodyStorage, blockStorage,
                                                    storageID, tt )
    {
    }
