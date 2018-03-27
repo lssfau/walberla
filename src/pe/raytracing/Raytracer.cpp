@@ -412,13 +412,13 @@ void Raytracer::localOutput(const std::vector<BodyIntersectionInfo>& intersectio
 }
 
 void Raytracer::output(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep, WcTimingTree* tt) {
+   if (tt != NULL) tt->start("Output");
    WALBERLA_ROOT_SECTION() {
-      if (tt != NULL) tt->start("Output");
       if (getImageOutputEnabled()) {
          writeImageToFile(intersectionsBuffer, timestep, true);
       }
-      if (tt != NULL) tt->stop("Output");
    }
+   if (tt != NULL) tt->stop("Output");
 }
 
 }
