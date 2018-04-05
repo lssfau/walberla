@@ -61,12 +61,15 @@ public:
    {
    public:
       inline Parser( const Config::BlockHandle & config );
+      inline Parser( std::array< std::string, 3 > & equations );
       Vector3< real_t > operator()( const Vector3< real_t > & x, const real_t t ) const;
       Vector3< real_t > operator()( const Vector3< real_t > & x ) const;
       bool isTimeDependent() const { return timeDependent_; }
+      const std::array< std::string, 3 > & equations() const { return equations_; }
 
    private:
       std::array< math::FunctionParserOMP, 3 > parsers_;
+      std::array< std::string, 3 > equations_;
       bool timeDependent_;
    }; // class Parser
 
@@ -96,17 +99,17 @@ public:
    void  afterBoundaryTreatment() const {}
 
    template< typename Buffer_T >
-   void packCell( Buffer_T &, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
+   inline void packCell( Buffer_T &, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const;
 
    template< typename Buffer_T >
-   void registerCell( Buffer_T &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) {}
+   inline void registerCell( Buffer_T &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t );
 
    inline void registerCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const BoundaryConfiguration & parser );
    inline void registerCells( const flag_t, const CellInterval & cells, const BoundaryConfiguration & parser );
    template< typename CellIterator >
    inline void registerCells( const flag_t, const CellIterator & begin, const CellIterator & end, const BoundaryConfiguration & parser );
 
-   void unregisterCell( const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const {}
+   inline void unregisterCell( const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) const;
 
 #ifndef NDEBUG
    inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
@@ -137,26 +140,53 @@ private:
 
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce>
 inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::Parser::Parser( const Config::BlockHandle & config )
-: parsers_(), timeDependent_( false )
+: parsers_(), equations_(), timeDependent_( false )
 {
    if( !config )
       return;
 
    if( config.isDefined( "x" ) )
    {
-      parsers_[0].parse( config.getParameter<std::string>( "x" ) );
+      equations_[0] = config.getParameter<std::string>( "x" );
+      parsers_[0].parse( equations_[0] );
       if( parsers_[0].symbolExists( "t" ) )
          timeDependent_ = true;
    }
    if( config.isDefined( "y" ) )
    {
-      parsers_[1].parse( config.getParameter<std::string>( "y" ) );
+      equations_[1] = config.getParameter<std::string>( "y" );
+      parsers_[1].parse( equations_[1] );
       if( parsers_[1].symbolExists( "t" ) )
          timeDependent_ = true;
    }
    if( config.isDefined( "z" ) )
    {
-      parsers_[2].parse( config.getParameter<std::string>( "z" ) );
+      equations_[2] = config.getParameter<std::string>( "z" );
+      parsers_[2].parse( equations_[2] );
+      if( parsers_[2].symbolExists( "t" ) )
+         timeDependent_ = true;
+   }
+}
+
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce>
+inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::Parser::Parser( std::array< std::string, 3 > & equations )
+: parsers_(), equations_( equations ), timeDependent_( false )
+{
+   if( equations_[0].length() > 0 )
+   {
+      parsers_[0].parse( equations_[0] );
+      if( parsers_[0].symbolExists( "t" ) )
+         timeDependent_ = true;
+   }
+   if( equations_[1].length() > 0 )
+   {
+      parsers_[1].parse( equations_[1] );
+      if( parsers_[1].symbolExists( "t" ) )
+         timeDependent_ = true;
+   }
+   if( equations_[2].length() > 0 )
+   {
+      parsers_[2].parse( equations_[2] );
       if( parsers_[2].symbolExists( "t" ) )
          timeDependent_ = true;
    }
@@ -198,9 +228,9 @@ Vector3< real_t > ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce
 
 
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce>
-inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::ParserUBB::ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
-                                                                                           FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
-                                                                                           const uint_t level, const AABB & aabb )
+inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
+                                                                                   FlagField<flag_t> * const flagField, const shared_ptr< TimeTracker > & timeTracker,
+                                                                                   const uint_t level, const AABB & aabb )
    : Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), timeTracker_( timeTracker ), time_( real_t(0) ), level_( level )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
@@ -225,9 +255,49 @@ inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::ParserUB
 
 
 
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
+template< typename Buffer_T >
+inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::packCell( Buffer_T & buffer, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
+{
+   if( parserField_->get( x, y, z ) )
+   {
+      auto & eqs = parserField_->get( x, y, z )->equations();
+      buffer << true << eqs[0] << eqs[1] << eqs[2];
+   }
+   else
+   {
+      buffer << false << velocityField_->get( x, y, z );
+   }
+}
+
+
+
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
+template< typename Buffer_T >
+inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::registerCell( Buffer_T & buffer, const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+{
+   bool isparser;
+   buffer >> isparser;
+   if( isparser )
+   {
+      std::array< std::string, 3> eqs;
+      buffer >> eqs[0] >> eqs[1] >> eqs[2];
+
+      auto p = make_shared<Parser>(eqs);
+      parserField_->get( x, y, z ) = p;
+   }
+   else
+   {
+      buffer >> velocityField_->get( x, y, z );
+      parserField_->get( x, y, z ) = nullptr;
+   }
+}
+
+
+
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce>
-inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::ParserUBB::ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
-                                                                                           FlagField<flag_t> * const flagField, const uint_t level, const AABB & aabb )
+inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::ParserUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
+                                                                                   FlagField<flag_t> * const flagField, const uint_t level, const AABB & aabb )
    : ParserUBB( boundaryUID, uid, pdfField, flagField, nullptr, level, aabb )
 {}
 
@@ -320,6 +390,14 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::r
 
 
 
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
+inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::unregisterCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
+{
+   parserField_->get(x,y,z) = nullptr;
+}
+
+
+
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce>
 #ifndef NDEBUG
    inline void ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::ParserUBB::treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
@@ -343,7 +421,7 @@ template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternal
       Vector3<real_t> velocity;
       if( parserField_->get(nx,ny,nz) )
       {
-         WALBERLA_ASSERT_NOT_NULLPTR( getTimeTracker() );
+         WALBERLA_ASSERT_NOT_NULLPTR( getTimeTracker(), "A TimeTracker is needed for time-dependent equations" );
          velocity = (*parserField_->get(nx,ny,nz))( pos, time_ );
       }
       else

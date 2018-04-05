@@ -24,7 +24,7 @@
 #include "lbm/boundary/FreeSlip.h"
 #include "lbm/boundary/NoSlip.h"
 #include "lbm/boundary/Pressure.h"
-#include "lbm/boundary/UBB.h"
+#include "lbm/boundary/ParserUBB.h"
 #include "lbm/boundary/Outlet.h"
 #include "lbm/boundary/Curved.h"
 
@@ -82,7 +82,7 @@ public:
    typedef NoSlip< LatticeModel, flag_t >         BcNoSlip;
    typedef FreeSlip< LatticeModel, FlagFieldT >   BcFreeSlip;
    typedef Pressure< LatticeModel, flag_t >       BcPressure;
-   typedef UBB<LatticeModel, flag_t>              BcUBB;
+   typedef ParserUBB<LatticeModel, flag_t>        BcUBB;
    typedef Outlet<LatticeModel, FlagFieldT >      BcOutlet;
    typedef Curved<LatticeModel, FlagFieldT >      BcCurved;
 
@@ -144,7 +144,7 @@ ExtendedBoundaryHandlingFactory<LatticeModel, FlagFieldT>::ExtendedBoundaryHandl
 template <typename LatticeModel, typename FlagFieldT >
 typename ExtendedBoundaryHandlingFactory<LatticeModel, FlagFieldT>::BoundaryHandling *
 ExtendedBoundaryHandlingFactory<LatticeModel, FlagFieldT>::operator()( IBlock * const block,
-                                                                      const walberla::StructuredBlockStorage * const /*storage*/ ) const
+                                                                      const walberla::StructuredBlockStorage * const storage ) const
 {
    PdfFieldLM * const pdfField  = block->getData< PdfFieldLM >( pdfField_  );
    FlagFieldT * const flagField = block->getData< FlagFieldT >( flagField_ );
@@ -160,7 +160,7 @@ ExtendedBoundaryHandlingFactory<LatticeModel, FlagFieldT>::operator()( IBlock * 
         BcNoSlip    ( getNoSlipBoundaryUID(),   getNoSlip(),   pdfField ),
         BcFreeSlip  ( getFreeSlipBoundaryUID(), getFreeSlip(), pdfField, flagField, mask ),
         BcPressure  ( getPressureBoundaryUID(), getPressure(), pdfField ),
-        BcUBB       ( getUBBBoundaryUID(),      getUBB(),      pdfField ),
+        BcUBB       ( getUBBBoundaryUID(),      getUBB(),      pdfField, flagField, storage->getLevel(*block), block->getAABB() ),
         BcOutlet    ( getOutletBoundaryUID(),   getOutlet(),   pdfField, flagField, mask ),
         BcCurved    ( getCurvedBoundaryUID(),   getCurved(),   pdfField, flagField, mask )
       )
