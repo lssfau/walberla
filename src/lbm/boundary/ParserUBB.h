@@ -63,11 +63,11 @@ public:
       inline Parser( const Config::BlockHandle & config );
       Vector3< real_t > operator()( const Vector3< real_t > & x, const real_t t ) const;
       Vector3< real_t > operator()( const Vector3< real_t > & x ) const;
-      bool isTimeDependent() const { return timedependent_; }
+      bool isTimeDependent() const { return timeDependent_; }
 
    private:
       std::array< math::FunctionParserOMP, 3 > parsers_;
-      bool timedependent_;
+      bool timeDependent_;
    }; // class Parser
 
    typedef GhostLayerField< shared_ptr<Parser>, 1 > ParserField;
@@ -137,6 +137,7 @@ private:
 
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce>
 inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::Parser::Parser( const Config::BlockHandle & config )
+: parsers_(), timeDependent_( false )
 {
    if( !config )
       return;
@@ -145,19 +146,19 @@ inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::Parser::
    {
       parsers_[0].parse( config.getParameter<std::string>( "x" ) );
       if( parsers_[0].symbolExists( "t" ) )
-         timedependent_ = true;
+         timeDependent_ = true;
    }
    if( config.isDefined( "y" ) )
    {
       parsers_[1].parse( config.getParameter<std::string>( "y" ) );
       if( parsers_[1].symbolExists( "t" ) )
-         timedependent_ = true;
+         timeDependent_ = true;
    }
    if( config.isDefined( "z" ) )
    {
       parsers_[2].parse( config.getParameter<std::string>( "z" ) );
       if( parsers_[2].symbolExists( "t" ) )
-         timedependent_ = true;
+         timeDependent_ = true;
    }
 }
 
@@ -180,7 +181,7 @@ Vector3< real_t > ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce>
 Vector3< real_t > ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce>::Parser::operator()( const Vector3< real_t > & x ) const
 {
-   WALBERLA_ASSERT( !timedependent_ );
+   WALBERLA_ASSERT( !timeDependent_ );
 
    std::map< std::string, double > symbols;
    symbols["x"] = x[0];
