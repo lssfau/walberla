@@ -31,6 +31,7 @@
 #include "NoDiffusion.h"
 #include "NoSlip.h"
 #include "Outlet.h"
+#include "ParserUBB.h"
 #include "Pressure.h"
 #include "SimpleDiffusionDirichlet.h"
 #include "SimplePAB.h"
