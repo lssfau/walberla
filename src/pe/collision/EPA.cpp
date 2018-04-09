@@ -318,26 +318,32 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
          if (bUseSphereOptimization_)
          {
             Vec3 ctr;
-            real_t radius2 = calculateCircle(support, epaVolume[(*current)[0]],
-                  epaVolume[(*current)[1]], epaVolume[(*current)[2]], ctr);
+            real_t radius2 = calculateCircle(support,
+                                             epaVolume[(*current)[0]],
+                  epaVolume[(*current)[1]],
+                  epaVolume[(*current)[2]],
+                  ctr);
             if(radius2 > real_t(0.0)){ //if a Sphere exists
                //std::cerr << "Circle created with center at " << ctr << ". r2=" << radius2 << std::endl;
                real_t center_len = ctr.length();
                real_t circle_dist = (std::sqrt(radius2) - center_len); //Distance from center to the spheres surface
                //Check if the circle matches the bounds given by EPA and limit max error to ca. 5%
-               if(circle_dist*circle_dist <= upperBoundSqr && circle_dist*circle_dist >= lowerBoundSqr &&
-                     (circle_dist*circle_dist)/lowerBoundSqr < real_t(1.10) && !floatIsEqual(center_len, real_t(0.0))) {
-
-                  ctr = -1*ctr.getNormalized();
+               if (circle_dist*circle_dist <= upperBoundSqr &&
+                   circle_dist*circle_dist >= lowerBoundSqr &&
+                   (circle_dist*circle_dist) < real_t(1.10) * lowerBoundSqr &&
+                   !floatIsEqual(center_len, real_t(0.0)))
+               {
+                  const auto ilen = real_t(1.0) / center_len;
+                  ctr *= -ilen;
                   //std::cerr << "New support direction: " <<  ctr << std::endl;
                   pushSupportMargin(geom1, geom2, ctr, margin, epaVolume, supportA, supportB);
                   support = epaVolume.back();
                   // Check if support is in expected direction
 
-                  if(floatIsEqual((support % ctr).sqrLength()/support.sqrLength(), real_t(0.0))){ //Accept sphere
-
+                  if(floatIsEqual((support % ctr).sqrLength()/support.sqrLength(), real_t(0.0)))
+                  { //Accept sphere
                      contactPoint = real_t(0.5) * (supportA.back() + supportB.back());
-                     penetrationDepth = -support.length()+ real_t(2.0) * margin;
+                     penetrationDepth = -support.length() + real_t(2.0) * margin;
                      retNormal = -ctr;
                      //std::cerr << "Found penetration depth " << penetrationDepth << " with CurvedEPA!" << std::endl;
                      if(penetrationDepth < contactThreshold){
@@ -860,26 +866,20 @@ inline bool EPA::searchTetrahedron(GeomPrimitive &geom1, GeomPrimitive &geom2, s
  */
 inline real_t EPA::calculateCircle(const Vec3& A, const Vec3& B, const Vec3& C,
                                    const Vec3& D, Vec3& center ){
-   real_t il1, il2, il3, d1, d2, d3;
-   il1 = real_t(1.0)/(A-B).length(); /* inverse These three sqrt evaluations are necessary */
-   il2 = real_t(1.0)/(A-C).length();
-   il3 = real_t(1.0)/(A-D).length();
-
-   Vec3 n1, n2, n3;
-   n1 = il1*(A-B);
-   n2 = il2*(A-C);
-   n3 = il3*(A-D);
+   const Vec3 n1(A-B);
+   const Vec3 n2(A-C);
+   const Vec3 n3(A-D);
 
    // Here we already see if such circle exists.
-   real_t det = n1 * (n2 % n3);
+   const real_t det = n1 * (n2 % n3);
    if(std::fabs(det) < math::Limits<real_t>::fpuAccuracy()){
       //no circle exists. Leave center untouched, and return -1.0
       return real_t(-1.0);
    }
-   real_t Alen = A.sqrLength();
-   d1 = (Alen - B.sqrLength())*real_t(0.5)*il1;
-   d2 = (Alen - C.sqrLength())*real_t(0.5)*il2;
-   d3 = (Alen - D.sqrLength())*real_t(0.5)*il3;
+   const real_t Alen = A.sqrLength();
+   const real_t d1 = (Alen - B.sqrLength())*real_t(0.5);
+   const real_t d2 = (Alen - C.sqrLength())*real_t(0.5);
+   const real_t d3 = (Alen - D.sqrLength())*real_t(0.5);
 
    //Apply solution formula
    center = (real_t(1.0)/det)*(d1 * (n2 % n3) + d2 * (n3 % n1) + d3 * (n1 % n2));
