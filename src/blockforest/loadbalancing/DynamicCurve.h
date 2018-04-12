@@ -792,8 +792,9 @@ void DynamicCurveBalance< PhantomData_T >::balanceWeighted( const std::vector< s
          long double weight( 0 );
          int numBlocks( 0 );
          while( c < blocks.size() &&
-                std::abs( pWeight - weight - numeric_cast< long double >( allBlocks[ uint_c( blocks[c].first ) ][ blocks[c].second ].second ) ) <=
-                std::abs( pWeight - weight ) &&
+                ( isIdentical(weight, 0.0l) || 
+                  std::abs( pWeight - weight - numeric_cast< long double >( allBlocks[ uint_c( blocks[c].first ) ][ blocks[c].second ].second ) ) <=
+                  std::abs( pWeight - weight ) ) &&
                 numBlocks < maxBlocksPerProcess_ )
          {
             targets[ uint_c( blocks[c].first ) ][ blocks[c].second ] = pid_c(p);

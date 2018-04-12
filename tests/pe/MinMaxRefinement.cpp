@@ -144,7 +144,7 @@ int main( int argc, char ** argv )
       ccd->reloadBodies();
    }
 
-   WALBERLA_CHECK_EQUAL( blockforest.size(), mpi::MPIManager::instance()->worldRank() == 6 ? 1 : 0);
+   WALBERLA_CHECK_EQUAL( blockforest.size(), mpi::MPIManager::instance()->worldRank() == 0 ? 1 : 0);
    WALBERLA_LOG_DEVEL( infoCollection->size() );
 
    for (unsigned int i = 0; i < 30; ++i)
