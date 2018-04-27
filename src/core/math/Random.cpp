@@ -43,7 +43,7 @@ std::mt19937 & getGenerator() // std::mt19937_64
 void seedRandomGenerator( const std::mt19937::result_type & seed )
 {
 #ifdef _OPENMP
-   #pragma omp critical (random)
+   #pragma omp critical (Random_random)
 #endif
    internal::getGenerator().seed( seed );
 }
