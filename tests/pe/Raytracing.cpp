@@ -8,6 +8,7 @@
 #include "pe/rigidbody/Sphere.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Union.h"
+#include "pe/rigidbody/Ellipsoid.h"
 
 #include "pe/rigidbody/SetBodyTypeIDs.h"
 #include "pe/Types.h"
@@ -35,7 +36,7 @@ using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::pe::raytracing;
 
-typedef boost::tuple<Box, Plane, Sphere, Capsule> BodyTuple ;
+typedef boost::tuple<Box, Plane, Sphere, Capsule, Ellipsoid> BodyTuple ;
 
 void SphereIntersectsTest()
 {
@@ -219,6 +220,40 @@ void CapsuleIntersectsTest() {
    WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
 }
 
+void EllipsoidTest() {
+   WALBERLA_LOG_INFO("RAY -> ELLIPSOID");
+   
+   MaterialID iron = Material::find("iron");
+   real_t t;
+   Vec3 n;
+   
+   Ellipsoid el1(0,0, Vec3(2,3,3), Vec3(0,0,0), Quat(), Vec3(2,3,1), iron, false, true, false);
+   
+   Ray ray1(Vec3(-2,3,3), Vec3(1,0,0).getNormalized());
+   WALBERLA_CHECK(intersects(&el1, ray1, t, n));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(2));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0));
+
+   Ray ray2(Vec3(2,3,0), Vec3(0,0,-1).getNormalized());
+   WALBERLA_CHECK(!intersects(&el1, ray2, t, n));
+   
+   Ray ray3(Vec3(2,3,5), Vec3(0,0,-1).getNormalized());
+   WALBERLA_CHECK(intersects(&el1, ray3, t, n));
+   WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(1));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(1));
+
+   Ray ray4(Vec3(-2,real_t(2),real_t(2)), Vec3(1,real_t(0),real_t(0.5)).getNormalized());
+   WALBERLA_CHECK(intersects(&el1, ray4, t, n));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(2.36809), real_t(1e-5));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[0], real_t(-0.78193), real_t(1e-5));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[1], real_t(-0.62324), real_t(1e-5));
+   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(n[2], real_t(0.012265), real_t(1e-5));
+}
+
 ShadingParameters customBodyToShadingParams(const BodyID body) {
    if (body->getID() == 10) {
       return greenShadingParams(body).makeGlossy(30);
@@ -283,6 +318,11 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
    CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, 11, Vec3(7, 3.5, 7.5), real_t(1), real_t(2), iron);
    if (capsule != NULL) capsule->rotate(0,math::M_PI/3,math::M_PI/4-math::M_PI/8);
    // Test scene v2 end
+   
+   // Test scene v3 additions start
+   EllipsoidID ellipsoid = createEllipsoid(*globalBodyStorage, *forest, storageID, 12, Vec3(6,2,2.5), Vec3(3,2,1.2));
+   ellipsoid->rotate(0, math::M_PI/real_t(6), 0);
+   // Test scene v3 end
    
    //raytracer.setTBufferOutputDirectory("tbuffer");
    //raytracer.setTBufferOutputEnabled(true);
@@ -844,7 +884,8 @@ int main( int argc, char** argv )
    BoxIntersectsTest();
    AABBIntersectsTest();
    CapsuleIntersectsTest();
-   
+   EllipsoidTest();
+
    const Raytracer::Algorithm algorithm = Raytracer::RAYTRACE_COMPARE_BOTH_STRICTLY;
    const uint8_t antiAliasFactor = 1;
    RaytracerTest(algorithm, antiAliasFactor);
