@@ -42,6 +42,7 @@ inline ShadingParameters redShadingParams (const BodyID body);
 inline ShadingParameters greenShadingParams (const BodyID body);
 inline ShadingParameters blueShadingParams (const BodyID body);
 inline ShadingParameters violetShadingParams (const BodyID body);
+inline ShadingParameters yellowShadingParams (const BodyID body);
 
 inline ShadingParameters defaultBodyTypeDependentShadingParams (const BodyID body) {
    auto bodyTypeID = body->getTypeID();
@@ -54,6 +55,8 @@ inline ShadingParameters defaultBodyTypeDependentShadingParams (const BodyID bod
       return blueShadingParams(body).makeGlossy();
    } else if (bodyTypeID == Box::getStaticTypeID()) {
       return violetShadingParams(body);
+   } else if (bodyTypeID == Ellipsoid::getStaticTypeID()) {
+      return yellowShadingParams(body).makeGlossy(60);
    } else {
       return defaultShadingParams(body);
    }

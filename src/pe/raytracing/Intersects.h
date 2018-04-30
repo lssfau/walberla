@@ -26,6 +26,7 @@
 #include "pe/rigidbody/CylindricalBoundary.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Ellipsoid.h"
 #include "pe/rigidbody/Union.h"
 #include "pe/utility/BodyCast.h"
 #include <core/math/Utility.h>
@@ -40,6 +41,7 @@ inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n
 inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3& n);
+inline bool intersects(const EllipsoidID ellipsoid, const Ray& ray, real_t& t, Vec3& n);
 
 inline bool intersects(const BodyID body, const Ray& ray, real_t& t, Vec3& n);
    
@@ -283,6 +285,54 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
    }
    
    n = capsule->vectorFromBFtoWF(n);
+   
+   return true;
+}
+   
+inline bool intersects(const EllipsoidID ellipsoid, const Ray& ray, real_t& t, Vec3& n) {
+   const real_t inf = std::numeric_limits<real_t>::max();
+
+   const Ray transformedRay = ray.transformedToBF(ellipsoid);
+   const Vec3& semiAxes = ellipsoid->getSemiAxes();
+   
+   const Mat3 M = Mat3::makeDiagonalMatrix(real_t(1)/semiAxes[0], real_t(1)/semiAxes[1], real_t(1)/semiAxes[2]);
+   
+   const Vec3 d_M = M*transformedRay.getDirection();
+   const Vec3 P_M = M*transformedRay.getOrigin();
+   
+   const real_t a = d_M*d_M;
+   const real_t b = real_t(2)*P_M*d_M;
+   const real_t c = P_M*P_M - 1;
+   
+   const real_t discriminant = b*b - real_t(4.)*a*c;
+   if (discriminant < 0) {
+      // with discriminant smaller than 0, sphere is not hit by ray
+      // (no solution for quadratic equation)
+      t = inf;
+      return false;
+   }
+   
+   const real_t root = real_t(std::sqrt(discriminant));
+   const real_t t0 = (-b - root) / (real_t(2.) * a); // distance to point where the ray enters the sphere
+   const real_t t1 = (-b + root) / (real_t(2.) * a); // distance to point where the ray leaves the sphere
+   
+   if (t0 < 0 && t1 < 0) {
+      return false;
+   }
+   t = (t0 < t1) ? t0 : t1; // assign the closest distance to t
+   if (t < 0) {
+      // at least one of the calculated distances is behind the rays origin
+      if (t1 < 0) {
+         // both of the points are behind the origin (ray does not hit sphere)
+         return false;
+      } else {
+         t = t1;
+      }
+   }
+   
+   const Vec3 transformedN = transformedRay.getOrigin() + t*transformedRay.getDirection();
+   const Mat3 M_inv = M.getInverse();
+   n = ellipsoid->vectorFromBFtoWF((M_inv*transformedN).getNormalized());
    
    return true;
 }
