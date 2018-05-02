@@ -20,7 +20,9 @@
 
 #include "Color.h"
 
-using namespace walberla::pe::raytracing;
+namespace walberla {
+namespace pe {
+namespace raytracing {
 
 /*!\brief Create a Color object from HSV values.
  * \param hue Hue value in degrees from 0-360
@@ -71,4 +73,8 @@ Color Color::colorFromHSV(real_t hue, real_t saturation, real_t value) {
    }
    
    return Color(r, g, b);
+}
+
+}
+}
 }
