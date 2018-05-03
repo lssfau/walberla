@@ -43,37 +43,11 @@ public:
       {
          const PhantomBlock * block = it->first;
          //only change of one level is supported!
-         WALBERLA_ASSERT_LESS( int_c(block->getLevel()) - int_c(block->getSourceLevel()), 2 );
+         WALBERLA_CHECK_LESS( abs(int_c(block->getLevel()) - int_c(block->getSourceLevel())), 2 );
 
-         if (block->sourceBlockIsLarger())
-         {
-            auto infoIt = ic_->find( block->getId()/*.getFatherId()*/ );
-            WALBERLA_ASSERT_UNEQUAL( infoIt, ic_->end() );
-            it->second = PhantomBlockWeight( double_c(infoIt->second.numberOfLocalBodies) + baseWeight_ );
-            continue;
-         }
-
-         if (block->sourceBlockHasTheSameSize())
-         {
-            auto infoIt = ic_->find( block->getId() );
-            WALBERLA_ASSERT_UNEQUAL( infoIt, ic_->end() );
-            it->second = PhantomBlockWeight( double_c(infoIt->second.numberOfLocalBodies) + baseWeight_ );
-            continue;
-         }
-
-         if (block->sourceBlockIsSmaller())
-         {
-            double weight = 0;
-            for (uint_t child = 0; child < 8; ++child)
-            {
-               blockforest::BlockID childId(block->getId(), child);
-               auto childIt = ic_->find( childId );
-               WALBERLA_ASSERT_UNEQUAL( childIt, ic_->end() );
-               weight += double_c(childIt->second.numberOfLocalBodies);
-            }
-            it->second = PhantomBlockWeight( weight + baseWeight_ );
-            continue;
-         }
+         auto infoIt = ic_->find( block->getId()/*.getFatherId()*/ );
+         WALBERLA_CHECK_UNEQUAL( infoIt, ic_->end() );
+         it->second = PhantomBlockWeight( double_c(infoIt->second.numberOfLocalBodies) + baseWeight_ );
       }
    }
 
