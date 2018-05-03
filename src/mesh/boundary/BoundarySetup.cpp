@@ -66,9 +66,9 @@ void BoundarySetup::allocateOrResetVoxelizationField()
 {
    if( voxelizationFieldId_ )
    {
-      for( auto blockIt = structuredBlockStorage_->begin(); blockIt != structuredBlockStorage_->end(); ++blockIt )
+      for( auto & block : *structuredBlockStorage_ )
       {
-         VoxelizationField * voxelizationField = blockIt->getData< VoxelizationField >( *voxelizationFieldId_ );
+         VoxelizationField * voxelizationField = block.getData< VoxelizationField >( *voxelizationFieldId_ );
          voxelizationField->setWithGhostLayer( uint8_t(0) );
       }
    }
@@ -93,15 +93,15 @@ void BoundarySetup::voxelize()
 {
    allocateOrResetVoxelizationField();
 
-   for( auto blockIt = structuredBlockStorage_->begin(); blockIt != structuredBlockStorage_->end(); ++blockIt )
+   for( auto & block : *structuredBlockStorage_ )
    {
-      VoxelizationField * voxelizationField = blockIt->getData< VoxelizationField >( *voxelizationFieldId_ );
+      VoxelizationField * voxelizationField = block.getData< VoxelizationField >( *voxelizationFieldId_ );
 
       WALBERLA_ASSERT_NOT_NULLPTR( voxelizationField );
       WALBERLA_ASSERT_EQUAL( numGhostLayers_, voxelizationField->nrOfGhostLayers() );
 
       CellInterval blockCi = voxelizationField->xyzSizeWithGhostLayer();
-      structuredBlockStorage_->transformBlockLocalToGlobalCellInterval( blockCi, *blockIt );
+      structuredBlockStorage_->transformBlockLocalToGlobalCellInterval( blockCi, block );
 
       std::queue< CellInterval > ciQueue;
       ciQueue.push( blockCi );
@@ -112,7 +112,7 @@ void BoundarySetup::voxelize()
 
          WALBERLA_ASSERT( !curCi.empty(), "Cell Interval: " << curCi );
 
-         AABB curAABB = structuredBlockStorage_->getAABBFromCellBB( curCi, structuredBlockStorage_->getLevel( *blockIt ) );
+         AABB curAABB = structuredBlockStorage_->getAABBFromCellBB( curCi, structuredBlockStorage_->getLevel( block ) );
 
          WALBERLA_ASSERT( !curAABB.empty(), "AABB: " << curAABB );
 
@@ -125,7 +125,7 @@ void BoundarySetup::voxelize()
             if( ( sqSignedDistance < real_t(0) ) )
             {
                Cell localCell;
-               structuredBlockStorage_->transformGlobalToBlockLocalCell( localCell, *blockIt, curCi.min() );
+               structuredBlockStorage_->transformGlobalToBlockLocalCell( localCell, block, curCi.min() );
                voxelizationField->get( localCell ) = uint8_t(1);
             }
 
@@ -140,7 +140,7 @@ void BoundarySetup::voxelize()
          {
             // clearly the cell interval is fully covered by the mesh
             CellInterval localCi;
-            structuredBlockStorage_->transformGlobalToBlockLocalCellInterval( localCi, *blockIt, curCi );
+            structuredBlockStorage_->transformGlobalToBlockLocalCellInterval( localCi, block, curCi );
             std::fill( voxelizationField->beginSliceXYZ( localCi ), voxelizationField->end(), uint8_t(1) );
 
             ciQueue.pop();

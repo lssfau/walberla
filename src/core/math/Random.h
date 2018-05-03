@@ -59,7 +59,7 @@ INT intRandom( const INT min, const INT max, std::mt19937 & generator )
 
    INT value;
 #ifdef _OPENMP
-   #pragma omp critical (random)
+   #pragma omp critical (Random_random)
 #endif
    { value = distribution( generator ); }
 
@@ -76,7 +76,7 @@ inline char intRandom<char>( const char min, const char max, std::mt19937 & gene
 
    char value;
 #ifdef _OPENMP
-   #pragma omp critical (random)
+   #pragma omp critical (Random_random)
 #endif
    { value = static_cast<char>( distribution( generator ) ); }
 
@@ -93,7 +93,7 @@ inline unsigned char intRandom<unsigned char>( const unsigned char min, const un
 
    unsigned char value;
 #ifdef _OPENMP
-   #pragma omp critical (random)
+   #pragma omp critical (Random_random)
 #endif
    { value = static_cast<unsigned char>( distribution( generator ) ); }
 
@@ -110,7 +110,7 @@ inline signed char intRandom<signed char>( const signed char min, const signed c
 
    signed char value;
 #ifdef _OPENMP
-   #pragma omp critical (random)
+   #pragma omp critical (Random_random)
 #endif
    { value = static_cast<signed char>( distribution( generator ) ); }
 
@@ -168,7 +168,7 @@ REAL realRandom( const REAL min = REAL(0), const REAL max = REAL(1), std::mt1993
 
    REAL value;
 #ifdef _OPENMP
-   #pragma omp critical (random)
+   #pragma omp critical (Random_random)
 #endif
    { value = distribution( generator ); }
 

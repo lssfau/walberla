@@ -123,9 +123,9 @@ uint_t StaticLevelwiseCurveBalanceWeighted::operator()( SetupBlockForest & fores
       {
          const workload_t pWeight = totalWeight / workload_c( numberOfProcesses - p );
          workload_t weight( 0 );
-         while( c < blocksOnLevel.size() &&
+         while( c < blocksOnLevel.size() && ( isIdentical(weight, workload_t(0)) ||
                 std::abs( pWeight - weight - blocksOnLevel[c]->getWorkload() ) <=
-                std::abs( pWeight - weight ) )
+                std::abs( pWeight - weight ) ) )
          {
             blocksOnLevel[c]->assignTargetProcess(p);
 
