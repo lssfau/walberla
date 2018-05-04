@@ -19,18 +19,19 @@
 //======================================================================================================================
 
 #include "pe/Materials.h"
-#include "pe/rigidbody/Sphere.h"
 #include "pe/Types.h"
 #include "pe/rigidbody/BodyStorage.h"
+#include "pe/rigidbody/SetBodyTypeIDs.h"
+#include "pe/rigidbody/Sphere.h"
 #include "pe/ccd/SimpleCCD.h"
 #include "pe/ccd/HashGrids.h"
 #include "pe/fcd/SimpleFCD.h"
-#include "core/DataTypes.h"
 
+#include "core/DataTypes.h"
+#include "core/UniqueID.h"
 #include "core/timing/TimingPool.h"
 #include "core/debug/TestSubsystem.h"
 #include "core/math/Random.h"
-#include "core/UniqueID.h"
 
 using namespace walberla;
 using namespace walberla::pe;
@@ -42,6 +43,8 @@ int main( int argc, char** argv )
     walberla::debug::enterTestMode();
 
     walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
+
+    SetBodyTypeIDs<BodyTuple>::execute();
 
     MaterialID iron = Material::find("iron");
 

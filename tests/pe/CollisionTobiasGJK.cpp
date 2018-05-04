@@ -48,7 +48,7 @@
 using namespace walberla;
 using namespace walberla::pe;
 
-typedef boost::tuple<Box, Capsule, Plane, Sphere, Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>>, Ellipsoid> BodyTuple ;
+typedef boost::tuple<Box, Capsule, Plane, Sphere, Union<boost::tuple<Sphere>>, Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>>, Ellipsoid> BodyTuple ;
 
 bool gjkEPAcollideHybrid(GeomPrimitive &geom1, GeomPrimitive &geom2, Vec3& normal, Vec3& contactPoint, real_t& penetrationDepth)
 {
