@@ -409,8 +409,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                      const uint_t level = levelwise_ ? block->getLevel() : uint_t(0);
                      if( level == l && targetProcess[i].second == blockforest.getProcess() )
                      {
-                        const uint_t * faces = blockforest::getFaceNeighborhoodSectionIndices();
-                        for( uint_t j = uint_t(0); j != uint_t(6); ++j )
+                        auto faces = blockforest::getFaceNeighborhoodSectionIndices();
+                        for( uint_t j = uint_t(0); j != faces.size(); ++j )
                         {
                            const uint_t sectionIndex = faces[j];
                            const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
@@ -427,8 +427,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                               }
                            }
                         }
-                        const uint_t * edges = blockforest::getEdgeNeighborhoodSectionIndices();
-                        for( uint_t j = uint_t(0); j != uint_t(12); ++j )
+                        auto edges = blockforest::getEdgeNeighborhoodSectionIndices();
+                        for( uint_t j = uint_t(0); j != edges.size(); ++j )
                         {
                            const uint_t sectionIndex = edges[j];
                            const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
@@ -445,8 +445,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                               }
                            }
                         }
-                        const uint_t * corners = blockforest::getCornerNeighborhoodSectionIndices();
-                        for( uint_t j = uint_t(0); j != uint_t(8); ++j )
+                        auto corners = blockforest::getCornerNeighborhoodSectionIndices();
+                        for( uint_t j = uint_t(0); j != corners.size(); ++j )
                         {
                            const uint_t sectionIndex = corners[j];
                            const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
@@ -655,8 +655,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
          {
             if( regardConnectivity_ && iteration < disregardConnectivityStart_ )
             {
-               const uint_t * faces = blockforest::getFaceNeighborhoodSectionIndices();
-               for( uint_t j = uint_t(0); j != uint_t(6); ++j )
+               auto faces = blockforest::getFaceNeighborhoodSectionIndices();
+               for( uint_t j = uint_t(0); j != faces.size(); ++j )
                {
                   const uint_t sectionIndex = faces[j];
                   const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
@@ -675,8 +675,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                      }
                   }
                }
-               const uint_t * edges = blockforest::getEdgeNeighborhoodSectionIndices();
-               for( uint_t j = uint_t(0); j != uint_t(12); ++j )
+               auto edges = blockforest::getEdgeNeighborhoodSectionIndices();
+               for( uint_t j = uint_t(0); j != edges.size(); ++j )
                {
                   const uint_t sectionIndex = edges[j];
                   const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
@@ -695,8 +695,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
                      }
                   }
                }
-               const uint_t * corners = blockforest::getCornerNeighborhoodSectionIndices();
-               for( uint_t j = uint_t(0); j != uint_t(8); ++j )
+               auto corners = blockforest::getCornerNeighborhoodSectionIndices();
+               for( uint_t j = uint_t(0); j != corners.size(); ++j )
                {
                   const uint_t sectionIndex = corners[j];
                   const uint_t sectionSize = block->getNeighborhoodSectionSize( sectionIndex );
