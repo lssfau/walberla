@@ -572,7 +572,7 @@ BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_
    };
 #endif
    
-   for (uint i = 0; i < relevantNeighborIndices.size(); ++i) {
+   for (uint_t i = 0; i < relevantNeighborIndices.size(); ++i) {
       const offset_t neighborIndex = relevantNeighborIndices[i];
       const Cell* nbCell = &centerCell + centerCell.neighborOffset_[neighborIndex];
       const BodyVector* nbBodies = nbCell->bodies_;
