@@ -1170,7 +1170,11 @@ const Vec3 RigidBody::accFromWF( real_t px, real_t py, real_t pz ) const
 }
 //*************************************************************************************************
 
-inline id_t     RigidBody::getTypeID() const{
+inline id_t RigidBody::getTypeID() const
+{
+   WALBERLA_ASSERT_LESS( typeID_, std::numeric_limits<id_t>::max(), "You are requesting the type " \
+                         " id of a body, but the static type id for the body has not yet been " \
+                         " initialized! Call SetBodyTypeIDs<BodyTypeTuple>::execute to initialize!" );
    return typeID_;
 }
 
