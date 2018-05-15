@@ -205,9 +205,9 @@ public:
     */
    inline void calcInvDirection () {
       inv_direction_ = Vec3(1/direction_[0], 1/direction_[1], 1/direction_[2]);
-      sign_[0] = int8_c(inv_direction_[0] < 0);
-      sign_[1] = int8_c(inv_direction_[1] < 0);
-      sign_[2] = int8_c(inv_direction_[2] < 0);
+      sign_[0] = (inv_direction_[0] < 0) ? int8_t(1) : int8_t(0);
+      sign_[1] = (inv_direction_[1] < 0) ? int8_t(1) : int8_t(0);
+      sign_[2] = (inv_direction_[2] < 0) ? int8_t(1) : int8_t(0);
    }
    
    /*!\brief Transforms the ray to the body frame.
