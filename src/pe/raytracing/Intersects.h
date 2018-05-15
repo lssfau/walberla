@@ -65,11 +65,11 @@ struct IntersectsFunctor
 const real_t discriminantEps = real_t(1e-4);
    
 inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n) {
-   real_t inf = std::numeric_limits<real_t>::max();
+   const real_t realMax = std::numeric_limits<real_t>::max();
    
    real_t t0, t1;
    if (!intersectsSphere(sphere->getPosition(), sphere->getRadius(), ray, t0, t1)) {
-      t = inf;
+      t = realMax;
       return false;
    }
    
@@ -85,7 +85,7 @@ inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n
 }
 
 inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n) {
-   real_t inf = std::numeric_limits<real_t>::max();
+   const real_t realMax = std::numeric_limits<real_t>::max();
    const Vec3& direction = ray.getDirection();
    const Vec3& origin = ray.getOrigin();
    const Vec3& planeNormal = plane->getNormal();
@@ -98,10 +98,10 @@ inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n) 
          n = planeNormal * walberla::math::sign(-denominator);
          return true;
       } else {
-         t = inf;
+         t = realMax;
       }
    }
-   t = inf;
+   t = realMax;
    return false;
 }
 
@@ -120,7 +120,7 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
    const Vec3& invDirection = transformedRay.getInvDirection();
    const Vec3& origin = transformedRay.getOrigin();
    
-   const real_t inf = std::numeric_limits<real_t>::max();
+   const real_t realMax = std::numeric_limits<real_t>::max();
    
    size_t tminAxis = 0, tmaxAxis = 0;
    real_t txmin, txmax;
@@ -129,7 +129,7 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
    real_t tymin = (bounds[sign[1]][1] - origin[1]) * invDirection[1];
    real_t tymax = (bounds[1-sign[1]][1] - origin[1]) * invDirection[1];
    if (tmin > tymax || tymin > tmax) {
-      t = inf;
+      t = realMax;
       return false;
    }
    if (tymin > tmin) {
@@ -143,7 +143,7 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
    real_t tzmin = (bounds[sign[2]][2] - origin[2]) * invDirection[2];
    real_t tzmax = (bounds[1-sign[2]][2] - origin[2]) * invDirection[2];
    if (tmin > tzmax || tzmin > tmax) {
-      t = inf;
+      t = realMax;
       return false;
    }
    if (tzmin > tmin) {
@@ -163,7 +163,7 @@ inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n) {
       n[tminAxis] = real_t(1);
    } else if (tmax < 0) {
       // tmin and tmax are smaller than 0 -> box is in rays negative direction
-      t = inf;
+      t = realMax;
       return false;
    } else {
       // ray origin within box
@@ -186,8 +186,8 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
    const Vec3& origin = transformedRay.getOrigin();
    real_t halfLength = capsule->getLength()/real_t(2);
 
-   real_t inf = std::numeric_limits<real_t>::max();
-   t = inf;
+   const real_t realMax = std::numeric_limits<real_t>::max();
+   t = realMax;
    
    bool t0hit = false, t1hit = false;
    size_t intersectedPrimitive = 0; // 1 for capsule, 2 for left half sphere, 3 for right half sphere
@@ -231,7 +231,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
          real_t t0x_left = origin[0] + direction[0]*t0_left;
          real_t t1x_left = origin[0] + direction[0]*t1_left;
          
-         real_t t_left = inf;
+         real_t t_left = realMax;
          if (t0_left > 0 && t0x_left < -halfLength) {
             t_left = t0_left;
          }
@@ -251,7 +251,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
          real_t t0x_right = origin[0] + direction[0]*t0_right;
          real_t t1x_right = origin[0] + direction[0]*t1_right;
          
-         real_t t_right = inf;
+         real_t t_right = realMax;
          if (t0_right > 0 && t0x_right > halfLength) {
             t_right = t0_right;
          }
@@ -264,7 +264,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
          }
       }
       
-      if (realIsIdentical(t, inf)) {
+      if (realIsIdentical(t, realMax)) {
          return false;
       }
       
@@ -290,7 +290,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
 }
    
 inline bool intersects(const EllipsoidID ellipsoid, const Ray& ray, real_t& t, Vec3& n) {
-   const real_t inf = std::numeric_limits<real_t>::max();
+   const real_t realMax = std::numeric_limits<real_t>::max();
 
    const Ray transformedRay = ray.transformedToBF(ellipsoid);
    const Vec3& semiAxes = ellipsoid->getSemiAxes();
@@ -308,7 +308,7 @@ inline bool intersects(const EllipsoidID ellipsoid, const Ray& ray, real_t& t, V
    if (discriminant < 0) {
       // with discriminant smaller than 0, sphere is not hit by ray
       // (no solution for quadratic equation)
-      t = inf;
+      t = realMax;
       return false;
    }
    
@@ -347,7 +347,7 @@ inline bool intersects(const BodyID body, const Ray& ray, real_t& t, Vec3& n) {
 }
    
 inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, real_t& t0, real_t& t1) {
-   real_t inf = std::numeric_limits<real_t>::max();
+   const real_t realMax = std::numeric_limits<real_t>::max();
    
    const Vec3& direction = ray.getDirection();
    Vec3 displacement = ray.getOrigin() - gpos;
@@ -359,8 +359,8 @@ inline bool intersectsSphere(const Vec3& gpos, real_t radius, const Ray& ray, re
    if (discriminant < 0) {
       // with discriminant smaller than 0, sphere is not hit by ray
       // (no solution for quadratic equation)
-      t0 = inf;
-      t1 = inf;
+      t0 = realMax;
+      t1 = realMax;
       return false;
    }
    
@@ -395,7 +395,7 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
    const Vec3& invDirection = ray.getInvDirection();
    const Vec3& origin = ray.getOrigin();
 
-   real_t inf = std::numeric_limits<real_t>::max();
+   const real_t realMax = std::numeric_limits<real_t>::max();
    
    size_t tminAxis = 0, tmaxAxis = 0;
    real_t txmin, txmax;
@@ -404,7 +404,7 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
    real_t tymin = (bounds[sign[1]][1] - origin[1]) * invDirection[1];
    real_t tymax = (bounds[1-sign[1]][1] - origin[1]) * invDirection[1];
    if (tmin > tymax || tymin > tmax) {
-      t = inf;
+      t = realMax;
       return false;
    }
    if (tymin > tmin) {
@@ -418,7 +418,7 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
    real_t tzmin = (bounds[sign[2]][2] - origin[2]) * invDirection[2];
    real_t tzmax = (bounds[1-sign[2]][2] - origin[2]) * invDirection[2];
    if (tmin > tzmax || tzmin > tmax) {
-      t = inf;
+      t = realMax;
       return false;
    }
    if (tzmin > tmin) {
@@ -442,7 +442,7 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
       }
    } else if (tmax < 0) {
       // tmin and tmax are smaller than 0 -> box is in rays negative direction
-      t = inf;
+      t = realMax;
       return false;
    } else {
       // ray origin within box

@@ -516,7 +516,7 @@ inline void Raytracer::traceRayInHashGrids(const Ray& ray, BodyID& body_closest,
 template <typename BodyTypeTuple>
 void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    if (tt != NULL) tt->start("Raytracing");
-   real_t inf = std::numeric_limits<real_t>::max();
+   const real_t realMax = std::numeric_limits<real_t>::max();
    
    std::vector<BodyIntersectionInfo> intersections;
    // contains for each pixel information about an intersection:
@@ -551,7 +551,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          ray.setDirection(direction);
          
          n.reset();
-         t_closest = inf;
+         t_closest = realMax;
          body_closest = NULL;
          
          if (raytracingAlgorithm_ == RAYTRACE_HASHGRIDS) {
@@ -562,7 +562,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
             traceRayInHashGrids<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
             BodyID hashgrids_body_closest = body_closest;
             
-            t_closest = inf;
+            t_closest = realMax;
             body_closest = NULL;
             traceRayNaively<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
             
@@ -579,7 +579,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          intersectionInfo.imageX = uint32_t(x);
          intersectionInfo.imageY = uint32_t(y);
          
-         if (!realIsIdentical(t_closest, inf) && body_closest != NULL) {
+         if (!realIsIdentical(t_closest, realMax) && body_closest != NULL) {
             Color color = getColor(body_closest, ray, t_closest, n_closest);
             if (isErrorneousPixel) {
                color = Color(1,0,0);
@@ -595,7 +595,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
             intersections.push_back(intersectionInfo);
          } else {
             intersectionInfo.bodySystemID = 0;
-            intersectionInfo.t = inf;
+            intersectionInfo.t = realMax;
             intersectionInfo.r = backgroundColor_[0];
             intersectionInfo.g = backgroundColor_[1];
             intersectionInfo.b = backgroundColor_[2];

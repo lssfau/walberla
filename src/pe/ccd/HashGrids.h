@@ -616,7 +616,7 @@ template<typename BodyTuple>
 BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, const AABB& blockAABB,
                                                    real_t& t_closest, Vec3& n_closest,
                                                    std::function<bool (const BodyID body)> isBodyVisibleFunc) const {
-   const real_t inf = std::numeric_limits<real_t>::max();
+   const real_t realMax = std::numeric_limits<real_t>::max();
    
    BodyID body_local = NULL;
    BodyID body_closest = NULL;
@@ -659,14 +659,14 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
                   (stepZ >= 0) ? real_c(firstCell[2]+1)*cellSpan_-firstPoint[2] : firstPoint[2]-real_c(firstCell[2])*cellSpan_);
    
    // tMax: distance along the ray to the next cell change in the axis direction
-   real_t tMaxX = (!realIsEqual(ray.xDir(), 0)) ? std::abs(nearPoint[0]*ray.xInvDir()) : inf;
-   real_t tMaxY = (!realIsEqual(ray.yDir(), 0)) ? std::abs(nearPoint[1]*ray.yInvDir()) : inf;
-   real_t tMaxZ = (!realIsEqual(ray.zDir(), 0)) ? std::abs(nearPoint[2]*ray.zInvDir()) : inf;
+   real_t tMaxX = (!realIsEqual(ray.xDir(), 0)) ? std::abs(nearPoint[0]*ray.xInvDir()) : realMax;
+   real_t tMaxY = (!realIsEqual(ray.yDir(), 0)) ? std::abs(nearPoint[1]*ray.yInvDir()) : realMax;
+   real_t tMaxZ = (!realIsEqual(ray.zDir(), 0)) ? std::abs(nearPoint[2]*ray.zInvDir()) : realMax;
    
    // tDelta: how far along the ray must be moved to encounter a new cell in the specified axis direction
-   real_t tDeltaX = (!realIsEqual(ray.xDir(), 0)) ? std::abs(cellSpan_*ray.xInvDir()) : inf;
-   real_t tDeltaY = (!realIsEqual(ray.yDir(), 0)) ? std::abs(cellSpan_*ray.yInvDir()) : inf;
-   real_t tDeltaZ = (!realIsEqual(ray.zDir(), 0)) ? std::abs(cellSpan_*ray.zInvDir()) : inf;
+   real_t tDeltaX = (!realIsEqual(ray.xDir(), 0)) ? std::abs(cellSpan_*ray.xInvDir()) : realMax;
+   real_t tDeltaY = (!realIsEqual(ray.yDir(), 0)) ? std::abs(cellSpan_*ray.yInvDir()) : realMax;
+   real_t tDeltaZ = (!realIsEqual(ray.zDir(), 0)) ? std::abs(cellSpan_*ray.zInvDir()) : realMax;
    
    Vector3<int32_t> currentCell = firstCell;
    
@@ -769,14 +769,14 @@ template<typename BodyTuple>
 BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, const AABB& blockAABB,
                                                     real_t& t, Vec3& n,
                                                     std::function<bool (const BodyID body)> isBodyVisibleFunc) const {
-   real_t inf = std::numeric_limits<real_t>::max();
+   const real_t realMax = std::numeric_limits<real_t>::max();
 
    BodyID body_closest = NULL;
-   real_t t_closest = inf;
+   real_t t_closest = realMax;
    Vec3 n_closest;
    
    BodyID body_local;
-   real_t t_local = inf;
+   real_t t_local = realMax;
    Vec3 n_local;
    
    raytracing::IntersectsFunctor intersectsFunc(ray, t_local, n_local);
