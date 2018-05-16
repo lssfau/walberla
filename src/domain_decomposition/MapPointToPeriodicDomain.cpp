@@ -29,7 +29,7 @@ namespace domain_decomposition {
 
 
 
-void mapPointToPeriodicDomain( const boost::array< bool, 3 > & periodic, const AABB & domain, real_t & x, real_t & y, real_t & z )
+void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AABB & domain, real_t & x, real_t & y, real_t & z )
 {
    if( periodic[0] )
    {

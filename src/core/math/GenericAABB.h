@@ -167,6 +167,7 @@ public:
    inline void extend( const value_type e );
    inline void extend( const vector_type & e );
 
+   inline void setCenter( const vector_type & center );
    inline void translate( const vector_type & translation );
 
    inline void scale( const value_type factor );

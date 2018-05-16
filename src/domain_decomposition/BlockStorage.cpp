@@ -46,7 +46,7 @@ namespace domain_decomposition {
 //**********************************************************************************************************************
 void BlockStorage::mapToPeriodicDomain( real_t & x, real_t & y, real_t & z ) const
 {
-   boost::array< bool, 3 > periodic;
+   std::array< bool, 3 > periodic;
    periodic[0] = periodic_[0];
    periodic[1] = periodic_[1];
    periodic[2] = periodic_[2];
@@ -62,7 +62,7 @@ void BlockStorage::mapToPeriodicDomain( real_t & x, real_t & y, real_t & z ) con
 //**********************************************************************************************************************
 bool BlockStorage::periodicIntersect( const math::AABB & box1, const math::AABB & box2 ) const
 {
-   boost::array< bool, 3 > periodic;
+   std::array< bool, 3 > periodic;
    periodic[0] = periodic_[0];
    periodic[1] = periodic_[1];
    periodic[2] = periodic_[2];
@@ -73,12 +73,12 @@ bool BlockStorage::periodicIntersect( const math::AABB & box1, const math::AABB 
 //**********************************************************************************************************************
 /*!
 *   For documentation, see documentation of free function
-*   'bool periodicIntersect( const boost::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB & box1, const math::AABB & box2 )'
+*   'bool periodicIntersect( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB & box1, const math::AABB & box2 )'
 */
 //**********************************************************************************************************************
 bool BlockStorage::periodicIntersect( const math::AABB & box1, const math::AABB & box2, const real_t dx ) const
 {
-   boost::array< bool, 3 > periodic;
+   std::array< bool, 3 > periodic;
    periodic[0] = periodic_[0];
    periodic[1] = periodic_[1];
    periodic[2] = periodic_[2];

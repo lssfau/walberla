@@ -491,7 +491,6 @@ template< typename T >
 typename GenericAABB< T >::value_type GenericAABB< T >::volume() const
 {
    WALBERLA_ASSERT( checkInvariant() );
-
    return ( maxCorner_[0] - minCorner_[0] ) * ( maxCorner_[1] - minCorner_[1] ) * ( maxCorner_[2] - minCorner_[2] );
 }
 
@@ -1559,6 +1558,21 @@ void GenericAABB< T >::extend( const vector_type & e )
          maxCorner_[i] = minCorner_[i];
 
    WALBERLA_ASSERT( checkInvariant() );
+}
+
+
+
+/**
+ * \brief Sets center of this GenericAABB
+ *
+ * AABB gets translated such that its center matches the given center.
+ *
+ * \param new center location
+ */
+template< typename T >
+void GenericAABB< T >::setCenter( const vector_type & center )
+{
+   translate(center - this->center());
 }
 
 
