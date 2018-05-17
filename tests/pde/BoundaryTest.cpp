@@ -37,6 +37,7 @@
 #include "pde/iterations/CGFixedStencilIteration.h"
 #include "pde/iterations/CGIteration.h"
 #include "pde/boundary/Dirichlet.h"
+#include "pde/boundary/Neumann.h"
 
 #include "stencil/D2Q5.h"
 
@@ -57,14 +58,16 @@ typedef pde::CGIteration<Stencil_T>::StencilField_T  StencilField_T;
 typedef walberla::uint8_t      flag_t;
 typedef FlagField < flag_t >   FlagField_T;
 typedef pde::Dirichlet< Stencil_T, flag_t >  Dirichlet_T;
+typedef pde::Neumann< Stencil_T, flag_t >  Neumann_T;
 
-typedef boost::tuples::tuple< Dirichlet_T >  BoundaryConditions_T;
+typedef boost::tuples::tuple< Dirichlet_T, Neumann_T >  BoundaryConditions_T;
 
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
 
 const FlagUID  Domain_Flag( "domain" );
 const FlagUID  Dirichlet_Flag( "dirichlet" );
+const FlagUID  Neumann_Flag( "neumann" );
 
 
 
@@ -112,7 +115,10 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
    // A new boundary handling instance that uses the just fetched flag field is created:
    // Additional, internal flags used by the boundary handling will be stored in this flag field.
    return new BoundaryHandling_T( "boundary handling", flagField, domain,
-         boost::tuples::make_tuple( Dirichlet_T( "dirichlet", Dirichlet_Flag, rhsField, stencilField, adaptStencilField, flagField ) ) );
+         boost::tuples::make_tuple( Dirichlet_T( "dirichlet", Dirichlet_Flag, rhsField, stencilField, adaptStencilField, flagField ) ,
+                                    Neumann_T( "neumann", Neumann_Flag, rhsField, stencilField, adaptStencilField, flagField )
+         )
+   );
 }
 
 
@@ -268,8 +274,6 @@ int main( int argc, char** argv )
    BlockDataID stencilId = field::addToStorage< StencilField_T >( blocks, "w" );
    BlockDataID stencilBCadaptedId = field::addToStorage< StencilField_T >( blocks, "w" );
 
-   BoundaryUID boundaryUID("Dirichlet");
-   FlagUID flagUID("Dirichlet");
    BlockDataID flagId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flagField" );
 
    copyWeightsToStencilField( blocks, weights, stencilId );

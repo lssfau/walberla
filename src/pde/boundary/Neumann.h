@@ -21,9 +21,26 @@
 
 #pragma once
 
+
+#include "field/Field.h"
+
+#include "boundary/Boundary.h"
+
+#include "core/DataTypes.h"
 #include "core/cell/CellInterval.h"
+#include "core/config/Config.h"
+#include "core/debug/Debug.h"
+#include "core/logging/Logging.h"
+
 #include "domain_decomposition/StructuredBlockStorage.h"
+
+#include "field/FlagUID.h"
+
+#include "stencil/Directions.h"
 #include "stencil/D3Q6.h"
+
+#include <vector>
+#include <limits>
 
 
 
@@ -205,6 +222,253 @@ void NeumannDomainBoundary< PdeField >::apply( PdeField * p, const CellInterval 
    }
 }
 
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+template< typename Stencil_T, typename flag_t >
+class Neumann : public Boundary< flag_t >
+{
+
+   typedef GhostLayerField< real_t, 1 > Field_T;
+   typedef GhostLayerField< real_t, Stencil_T::Size >  StencilField_T;
+
+public:
+
+   static const bool threadsafe = false;
+
+   class NeumannBC : public BoundaryConfiguration {
+   public:
+             NeumannBC( const real_t & _neumannBC ) : neumannBC_( _neumannBC ) {}
+      inline NeumannBC( const Config::BlockHandle & config );
+
+      const real_t & neumannBC() const { return neumannBC_; }
+      real_t & neumannBC() { return neumannBC_; }
+
+   private:
+
+      real_t neumannBC_;
+   };
+
+   static shared_ptr<NeumannBC> createConfiguration( const Config::BlockHandle & config ) { return make_shared<NeumannBC>( config ); }
+
+
+
+   inline Neumann( const BoundaryUID & boundaryUID, const FlagUID & uid, Field_T* const rhsField, const StencilField_T* const stencilField,
+                     StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField );
+
+   void pushFlags( std::vector< FlagUID > & uids ) const { uids.push_back( uid_ ); }
+
+   void beforeBoundaryTreatment() const {}
+   void afterBoundaryTreatment();
+
+   template< typename Buffer_T >
+   inline void packCell( Buffer_T & buffer, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
+
+   template< typename Buffer_T >
+   inline void registerCell( Buffer_T & buffer, const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
+
+   inline void registerCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const BoundaryConfiguration & neumannBC );
+   inline void registerCells( const flag_t, const CellInterval & cells, const BoundaryConfiguration & neumannBC );
+   template< typename CellIterator >
+   inline void registerCells( const flag_t, const CellIterator & begin, const CellIterator & end, const BoundaryConfiguration & neumannBC );
+
+   void unregisterCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
+
+   inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
+                               const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t mask );
+
+   inline const real_t & getValue( const cell_idx_t x, cell_idx_t y, cell_idx_t z ) const { return neumannBC_->get(x,y,z); }
+
+private:
+
+   const FlagUID uid_;
+   const flag_t formerNeumann_;
+   uint_t numDirtyCells_;
+
+   Field_T* const                rhsField_;
+   shared_ptr< Field_T >         neumannBC_;
+   const StencilField_T * const  stencilField_;
+   StencilField_T * const        adaptBCStencilField_;
+   FlagField<flag_t> * const     flagField_;
+
+}; // class Neumann
+
+
+
+template< typename Stencil_T, typename flag_t >
+inline Neumann< Stencil_T, flag_t >::NeumannBC::NeumannBC( const Config::BlockHandle & config  )
+{
+   neumannBC_ = ( config && config.isDefined( "val" ) ) ? config.getParameter<real_t>( "val" ) : real_c(0.0);
+}
+
+
+
+template< typename Stencil_T, typename flag_t >
+inline Neumann< Stencil_T, flag_t >::Neumann( const BoundaryUID & boundaryUID, const FlagUID & uid, Field_T* const rhsField, const StencilField_T* const stencilField, StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField ) :
+   Boundary<flag_t>( boundaryUID ), uid_( uid ), formerNeumann_ (flagField->getOrRegisterFlag("FormerNeumann")), numDirtyCells_(std::numeric_limits<uint_t>::max()), rhsField_( rhsField ), stencilField_ ( stencilField ), adaptBCStencilField_ ( adaptBCStencilField ), flagField_ (flagField)
+{
+   WALBERLA_ASSERT_NOT_NULLPTR( rhsField_ );
+   WALBERLA_ASSERT_NOT_NULLPTR( stencilField_ );
+
+   WALBERLA_ASSERT_EQUAL( rhsField_->xyzSize(), stencilField_->xyzSize() );
+
+   neumannBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::zyxf );
+
+}
+
+
+template< typename Stencil_T, typename flag_t >
+void Neumann< Stencil_T, flag_t >::afterBoundaryTreatment() {
+
+   if (numDirtyCells_>0 && numDirtyCells_ != std::numeric_limits<uint_t>::max()) {
+      WALBERLA_LOG_WARNING("De-registering cells requires re-running Galerkin coarsening " << numDirtyCells_);
+   }
+
+   numDirtyCells_=0;
+}
+
+template< typename Stencil_T, typename flag_t >
+template< typename Buffer_T >
+inline void Neumann< Stencil_T, flag_t >::packCell( Buffer_T & buffer, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
+{
+   buffer << neumannBC_->get( x, y, z );
+}
+
+
+
+template< typename Stencil_T, typename flag_t >
+template< typename Buffer_T >
+inline void Neumann< Stencil_T, flag_t >::registerCell( Buffer_T & buffer, const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+{
+   buffer >> neumannBC_->get( x, y, z );
+   if( flagField_->isFlagSet( x, y, z, formerNeumann_ ) )
+   {
+      flagField_->removeFlag( x, y, z, formerNeumann_ );
+      --numDirtyCells_;
+   }
+}
+
+
+
+template< typename Stencil_T, typename flag_t >
+inline void Neumann< Stencil_T, flag_t >::registerCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+                                                                                       const BoundaryConfiguration & neumannBC )
+{
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const NeumannBC * >( &neumannBC ), &neumannBC );
+   WALBERLA_ASSERT_NOT_NULLPTR( neumannBC_ );
+
+   const NeumannBC & val = dynamic_cast< const NeumannBC & >( neumannBC );
+
+   neumannBC_->get( x, y, z ) = val.neumannBC();
+
+   if( flagField_->isFlagSet( x, y, z, formerNeumann_ ) )
+   {
+      flagField_->removeFlag( x, y, z, formerNeumann_ );
+      --numDirtyCells_;
+   }
+
+}
+
+
+
+template< typename Stencil_T, typename flag_t >
+inline void Neumann< Stencil_T, flag_t >::registerCells( const flag_t, const CellInterval & cells, const BoundaryConfiguration & neumannBC )
+{
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const NeumannBC * >( &neumannBC ), &neumannBC );
+   WALBERLA_ASSERT_NOT_NULLPTR( neumannBC_ );
+
+   const NeumannBC & val = dynamic_cast< const NeumannBC & >( neumannBC );
+
+   for( auto cell = neumannBC_->beginSliceXYZ( cells ); cell != neumannBC_->end(); ++cell ) {
+      *cell = val.neumannBC();
+
+      if( flagField_->isFlagSet( cell.cell(), formerNeumann_ ) )
+      {
+         flagField_->removeFlag( cell.cell(), formerNeumann_ );
+         --numDirtyCells_;
+      }
+   }
+}
+
+
+
+template< typename Stencil_T, typename flag_t >
+template< typename CellIterator >
+inline void Neumann< Stencil_T, flag_t >::registerCells( const flag_t, const CellIterator & begin, const CellIterator & end,
+                                                                                        const BoundaryConfiguration & neumannBC )
+{
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const NeumannBC * >( &neumannBC ), &neumannBC );
+   WALBERLA_ASSERT_NOT_NULLPTR( neumannBC_ );
+
+   const NeumannBC & val = dynamic_cast< const NeumannBC & >( neumannBC );
+
+   for( auto cell = begin; cell != end; ++cell )
+   {
+      neumannBC_->get( cell->x(), cell->y(), cell->z() ) = val.neumannBC();
+
+      if( flagField_->isFlagSet( cell->cell(), formerNeumann_ ) )
+      {
+         flagField_->removeFlag( cell->cell(), formerNeumann_ );
+         --numDirtyCells_;
+      }
+   }
+
+}
+
+
+template< typename Stencil_T, typename flag_t >
+void Neumann< Stencil_T, flag_t >::unregisterCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+{
+   flagField_->addFlag( x,y,z, formerNeumann_ );
+   ++numDirtyCells_;
+
+   // Set stencil adapted to BCs back to unadapted state
+   for(auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d ){
+      adaptBCStencilField_->get(x,y,z,d.toIdx()) = stencilField_->get(x,y,z,d.toIdx());
+   }
+
+}
+
+
+//*************************************************************************************************
+/*! \brief Treat one direction by adapting RHS according to Neumann boundary value.
+ *
+ */
+
+template< typename Stencil_T, typename flag_t >
+#ifndef NDEBUG
+inline void Neumann< Stencil_T, flag_t >::treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
+                                                                                         const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t mask )
+#else
+inline void Neumann< Stencil_T, flag_t >::treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
+                                                                                         const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t /*mask*/ )
+#endif
+{
+
+   WALBERLA_ASSERT_EQUAL( nx, x + cell_idx_c( stencil::cx[ dir ] ) );
+   WALBERLA_ASSERT_EQUAL( ny, y + cell_idx_c( stencil::cy[ dir ] ) );
+   WALBERLA_ASSERT_EQUAL( nz, z + cell_idx_c( stencil::cz[ dir ] ) );
+   WALBERLA_ASSERT_UNEQUAL( mask & this->mask_, numeric_cast<flag_t>(0) );
+   WALBERLA_ASSERT_EQUAL( mask & this->mask_, this->mask_ ); // only true if "this->mask_" only contains one single flag, which is the case for the
+                                                             // current implementation of this boundary condition (Neumann)
+
+   // Adapt RHS to Neumann BC //
+   rhsField_->get( x, y, z ) -= stencilField_->get( x, y, z, Stencil_T::idx[dir] ) * neumannBC_->get( nx, ny, nz ); // possibly utilize that off-diagonal entries -1 anyway
+
+   // Adapt Stencils to BCs (former adaptStencilsBC) //
+   // Only required if any new BC cell was added or the BC type of any former BC cell has been changed
+   if (numDirtyCells_>0) {
+
+      // here not thread-safe! (workaround: mutex when adapting central entry)
+      adaptBCStencilField_->get( x, y, z, Stencil_T::idx[stencil::C] ) += adaptBCStencilField_->get( x, y, z, Stencil_T::idx[dir] );
+      adaptBCStencilField_->get( x, y, z, Stencil_T::idx[dir] ) = 0;
+
+   }
+
+}
 
 
 } // namespace pde

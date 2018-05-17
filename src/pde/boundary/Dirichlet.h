@@ -37,7 +37,6 @@
 #include "stencil/Directions.h"
 
 #include <vector>
-#include <array>
 #include <limits>
 
 namespace walberla {
