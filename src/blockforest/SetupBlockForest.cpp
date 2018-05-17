@@ -546,7 +546,7 @@ void SetupBlockForest::getBlocks( std::vector< SetupBlock* >& blocks, const uint
 
 void SetupBlockForest::mapPointToPeriodicDomain( real_t & px, real_t & py, real_t & pz ) const
 {
-   boost::array< bool, 3 > periodic;
+   std::array< bool, 3 > periodic;
    periodic[0] = periodic_[0];
    periodic[1] = periodic_[1];
    periodic[2] = periodic_[2];

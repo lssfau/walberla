@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file PeriodicIntersect.h
+//! \file PeriodicIntersectionVolume.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -29,8 +29,8 @@
 namespace walberla {
 namespace domain_decomposition {
 
-bool periodicIntersect( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB & box1, const math::AABB & box2 );
-bool periodicIntersect( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB& box1, const math::AABB & box2, const real_t dx );
+real_t periodicIntersectionVolume( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB & box1, const math::AABB & box2 );
+real_t periodicIntersectionVolume( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB& box1, const math::AABB & box2, const real_t dx );
 
 } // namespace domain_decomposition
 } // namespace walberla
