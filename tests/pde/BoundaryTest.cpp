@@ -13,9 +13,10 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file RBGSTest.cpp
+//! \file BoundaryTest.cpp
 //! \ingroup pde
-//! \author Florian Schornbaum <florian.schornbaum@fau.de>
+//! \author Dominik Bartuschat <dominik.bartuschat@fau.de>
+//! \author Michael Kuron <mkuron@icp.uni-stuttgart.de>
 //
 //======================================================================================================================
 
@@ -123,21 +124,21 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
 
 
 
-void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & fId )
+void initRHS( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & rhsId )
 {
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
    {
-      Field_T * f = block->getData< Field_T >( fId );
-      CellInterval xyz = f->xyzSize();
+      Field_T * rhs = block->getData< Field_T >( rhsId );
+      CellInterval xyz = rhs->xyzSize();
       for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
       {
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-         f->get( *cell ) = real_t(4) * math::PI * math::PI * std::sin( real_t(2) * math::PI * p[0] ) * std::sinh( real_t(2) * math::PI * p[1] );
+         rhs->get( *cell ) = real_t(4) * math::PI * math::PI * std::sin( real_t(2) * math::PI * p[0] ) * std::sinh( real_t(2) * math::PI * p[1] );
       }
    }
 }
 
-void setBoundaryConditions( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID & boundaryHandlingId )
+void setBoundaryConditionsDirichl( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID & boundaryHandlingId )
 {
    CellInterval domainBBInGlobalCellCoordinates = blocks->getDomainCellBB();
    domainBBInGlobalCellCoordinates.expand(Cell(1,1,0));
@@ -227,14 +228,14 @@ int main( int argc, char** argv )
                                                       true,
                                                       false, false, false );
 
-   BlockDataID uId = field::addToStorage< Field_T >( blocks, "u", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID solId = field::addToStorage< Field_T >( blocks, "sol", real_t(0), field::zyxf, uint_t(1) );
    BlockDataID rId = field::addToStorage< Field_T >( blocks, "r", real_t(0), field::zyxf, uint_t(1) );
    BlockDataID dId = field::addToStorage< Field_T >( blocks, "d", real_t(0), field::zyxf, uint_t(1) );
    BlockDataID zId = field::addToStorage< Field_T >( blocks, "z", real_t(0), field::zyxf, uint_t(1) );
 
-   BlockDataID fId = field::addToStorage< Field_T >( blocks, "f", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID rhsId = field::addToStorage< Field_T >( blocks, "rhs", real_t(0), field::zyxf, uint_t(1) );
 
-   initF( blocks, fId );
+   initRHS( blocks, rhsId );
 
    blockforest::communication::UniformBufferedScheme< Stencil_T > synchronizeD( blocks );
    synchronizeD.addPackInfo( make_shared< field::communication::PackInfo< Field_T > >( dId ) );
@@ -255,10 +256,10 @@ int main( int argc, char** argv )
    copyWeightsToStencilField( blocks, weights, stencilId );
    copyWeightsToStencilField( blocks, weights, stencilBCadaptedId );
 
-   BlockDataID boundaryHandlingId = blocks->addBlockData< BoundaryHandling_T >( MyBoundaryHandling( fId, stencilId, stencilBCadaptedId, flagId ),
+   BlockDataID boundaryHandlingId = blocks->addBlockData< BoundaryHandling_T >( MyBoundaryHandling( rhsId, stencilId, stencilBCadaptedId, flagId ),
                                                                                 "boundary handling" );
 
-   setBoundaryConditions( blocks, boundaryHandlingId );
+   setBoundaryConditionsDirichl( blocks, boundaryHandlingId );
 
    
    SweepTimeloop timeloop( blocks, uint_t(1) );
@@ -266,7 +267,7 @@ int main( int argc, char** argv )
    timeloop.add()
             << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingId ), "boundary handling" )
             << AfterFunction(
-                     pde::CGIteration< Stencil_T >( blocks->getBlockStorage(), uId, rId, dId, zId, fId, stencilBCadaptedId,
+                     pde::CGIteration< Stencil_T >( blocks->getBlockStorage(), solId, rId, dId, zId, rhsId, stencilBCadaptedId,
                                                     shortrun ? uint_t( 10 ) : uint_t( 10000 ), synchronizeD, real_c( 1e-6 ) ), "CG iteration" );
 
    timeloop.run();
@@ -274,7 +275,7 @@ int main( int argc, char** argv )
    if( !shortrun )
    {
       vtk::writeDomainDecomposition( blocks );
-      field::createVTKOutput< Field_T >( uId, *blocks, "solution_D" )();
+      field::createVTKOutput< Field_T >( solId, *blocks, "solution_D" )();
    }
 
    logging::Logging::printFooterOnStream();
