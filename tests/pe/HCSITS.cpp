@@ -93,6 +93,10 @@ void normalReactionTest(cr::HCSITS& cr, SphereID sp)
    cr.timestep( real_c( real_t(1.0) ) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.1)) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(-0.1)) );
+
+   cr.timestep( real_c( real_t(1.0) ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getPosition() , Vec3(5,5,real_t(6.1)) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(0,0,real_t(0)) );
    contactThreshold = Thresholds<real_t>::contactThreshold();
 }
 
