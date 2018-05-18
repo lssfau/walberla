@@ -33,7 +33,7 @@ template< typename T >
 GenericAABB< T >::GenericAABB() : minCorner_( value_type(0), value_type(0), value_type(0) ),
                                   maxCorner_( value_type(0), value_type(0), value_type(0) )
 {
-   WALBERLA_ASSERT( checkInvariant() );
+   WALBERLA_ASSERT( checkInvariant(), *this );
    WALBERLA_ASSERT( empty() );
 }
 
@@ -51,7 +51,7 @@ inline GenericAABB< T >::GenericAABB( const GenericAABB< U > & other )
    : minCorner_( other.minCorner() ),
      maxCorner_( other.maxCorner() )
 {
-   WALBERLA_ASSERT( checkInvariant() );
+   WALBERLA_ASSERT( checkInvariant(), *this );
 }
 
 
@@ -78,7 +78,7 @@ GenericAABB< T >::GenericAABB( const vector_type & corner0, const vector_type & 
       }
    }
 
-   WALBERLA_ASSERT( checkInvariant() );
+   WALBERLA_ASSERT( checkInvariant(), *this );
 }
 
 
@@ -130,7 +130,7 @@ GenericAABB< T >::GenericAABB( const value_type x0, const value_type y0, const v
       maxCorner_[2] = z0;
    }
 
-   WALBERLA_ASSERT( checkInvariant() );
+   WALBERLA_ASSERT( checkInvariant(), *this );
 }
 
 
@@ -160,7 +160,7 @@ GenericAABB< T >::GenericAABB( InputIterator first, InputIterator last )
       init();
    }
 
-   WALBERLA_ASSERT( checkInvariant() );
+   WALBERLA_ASSERT( checkInvariant(), *this );
 }
 
 
@@ -177,7 +177,7 @@ template< typename T >
 GenericAABB< T >::GenericAABB( const vector_type & theMinCorner, const vector_type & theMaxCorner, MinMaxCornerGivenT )
     : minCorner_( theMinCorner ), maxCorner_( theMaxCorner )
 {
-   WALBERLA_ASSERT( checkInvariant() );
+   WALBERLA_ASSERT( checkInvariant(), *this );
 }
 
 
@@ -200,7 +200,7 @@ GenericAABB< T >::GenericAABB( const GenericAABB & lhs, const GenericAABB & rhs 
                  std::max( minCorner_[1], std::min( lhs.maxCorner_[1], rhs.maxCorner_[1] ) ),
                  std::max( minCorner_[2], std::min( lhs.maxCorner_[2], rhs.maxCorner_[2] ) ) )
 {
-   WALBERLA_ASSERT( checkInvariant() );
+   WALBERLA_ASSERT( checkInvariant(), *this );
 }
 
 
@@ -222,7 +222,7 @@ GenericAABB< T >::GenericAABB( const value_type minX, const value_type minY, con
                                const value_type maxX, const value_type maxY, const value_type maxZ, MinMaxCornerGivenT )
    : minCorner_( minX, minY, minZ ), maxCorner_( maxX, maxY, maxZ )
 {
-   WALBERLA_ASSERT( checkInvariant() );
+   WALBERLA_ASSERT( checkInvariant(), *this );
 }
 
 
