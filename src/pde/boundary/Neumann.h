@@ -334,12 +334,14 @@ inline Neumann< Stencil_T, flag_t >::Neumann( const BoundaryUID & boundaryUID, c
    WALBERLA_ASSERT_NOT_NULLPTR( flagField_ );
 
    WALBERLA_ASSERT_EQUAL( rhsField_->xyzSize(), stencilField_->xyzSize() );
+#ifndef NDEBUG
    WALBERLA_FOR_ALL_CELLS_XYZ( stencilField_,
       for( auto dir = Stencil_T::begin(); dir != Stencil_T::end(); ++dir )
       {
-         WALBERLA_ASSERT_EQUAL(stencilField_->get(x,y,z, dir.toIdx()), adaptBCStencilField_->get(x,y,z, dir.toIdx()));
+         WALBERLA_ASSERT_IDENTICAL(stencilField_->get(x,y,z, dir.toIdx()), adaptBCStencilField_->get(x,y,z, dir.toIdx()));
       }
    )
+#endif
 
    neumannBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::zyxf );
 }
