@@ -37,7 +37,7 @@
 #include "stencil/Directions.h"
 
 #include <vector>
-#include <limits>
+#include <array>
 
 
 namespace walberla {
@@ -45,19 +45,6 @@ namespace pde {
 
 
 
-//**********************************************************************************************************************
-/*!
-*   \brief Dirichlet boundary handling for PDEs
-*
-*   This boundary condition imposes a Dirichlet condition with arbitrary values on a PDE.
-*   It does so by modifying the right-hand side and the stencil field.
-*   Anything that has internal copies of the stencil field (e.g. the multigrid V-cycle's coarsened stencils) is
-*   responsible for updating its copies when boundary conditions are changed.
-*
-*   \tparam Stencil_T The stencil used for the discrete operator
-*   \tparam flag_t The integer type used by the flag field
-*/
-//**********************************************************************************************************************
 template< typename Stencil_T, typename flag_t >
 class Dirichlet : public Boundary< flag_t >
 {
@@ -86,20 +73,8 @@ public:
 
 
 
-  //*******************************************************************************************************************
-  /*! Creates a Dirichlet boundary
-   * \param boundaryUID the UID of the boundary condition
-   * \param uid the UID of the flag that marks cells with this boundary condition
-   * \param rhsField pointer to the right-hand side field, which will be adapted by this boundary condition
-   * \param stencilField pointer to the operator stencil field. It should contain the stencil weights that don't take
-   *                     into account the boundary conditions.
-   * \param adaptBCStencilField pointer to the operator stencil field that will be adapted by this boundary condition. 
-   *                            Initially, this field needs to contain the same values as \p stencilField.
-   *                            This is the stencil field that should be passed to the actual PDE solver.
-   * \param flagField pointer to the flag field
-   *******************************************************************************************************************/
    inline Dirichlet( const BoundaryUID & boundaryUID, const FlagUID & uid, Field_T* const rhsField, const StencilField_T* const stencilField,
-                     StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField );
+                     StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField, const StructuredBlockStorage& blocks );
 
    void pushFlags( std::vector< FlagUID > & uids ) const { uids.push_back( uid_ ); }
 
@@ -117,7 +92,7 @@ public:
    template< typename CellIterator >
    inline void registerCells( const flag_t, const CellIterator & begin, const CellIterator & end, const BoundaryConfiguration & dirichletBC );
 
-   void unregisterCell( const flag_t, const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz );
+   void unregisterCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
 
    inline void treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
                                const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t mask );
@@ -130,6 +105,7 @@ private:
    const flag_t formerDirichlet_;
    uint_t numDirtyCells_;
 
+   std::array<real_t, Stencil_T::Q> dx_;
    Field_T* const                rhsField_;
    shared_ptr< Field_T >         dirichletBC_;
    const StencilField_T * const  stencilField_;
@@ -149,25 +125,21 @@ inline Dirichlet< Stencil_T, flag_t >::DirichletBC::DirichletBC( const Config::B
 
 
 template< typename Stencil_T, typename flag_t >
-inline Dirichlet< Stencil_T, flag_t >::Dirichlet( const BoundaryUID & boundaryUID, const FlagUID & uid, Field_T* const rhsField, const StencilField_T* const stencilField, StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField ) :
-   Boundary<flag_t>( boundaryUID ), uid_( uid ), formerDirichlet_ (flagField->getOrRegisterFlag("FormerDirichlet")), numDirtyCells_(std::numeric_limits<uint_t>::max()), rhsField_( rhsField ), stencilField_ ( stencilField ), adaptBCStencilField_ ( adaptBCStencilField ), flagField_ (flagField)
+inline Dirichlet< Stencil_T, flag_t >::Dirichlet( const BoundaryUID & boundaryUID, const FlagUID & uid, Field_T* const rhsField, const StencilField_T* const stencilField, StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField, const StructuredBlockStorage& blocks ) :
+   Boundary<flag_t>( boundaryUID ), uid_( uid ), formerDirichlet_ (flagField->getOrRegisterFlag("FormerDirichlet")), numDirtyCells_(0), rhsField_( rhsField ), stencilField_ ( stencilField ), adaptBCStencilField_ ( adaptBCStencilField ), flagField_ (flagField)
 {
    WALBERLA_ASSERT_NOT_NULLPTR( rhsField_ );
    WALBERLA_ASSERT_NOT_NULLPTR( stencilField_ );
-   WALBERLA_ASSERT_NOT_NULLPTR( adaptBCStencilField_ );
-   WALBERLA_ASSERT_NOT_NULLPTR( flagField_ );
 
    WALBERLA_ASSERT_EQUAL( rhsField_->xyzSize(), stencilField_->xyzSize() );
-#ifndef NDEBUG
-   WALBERLA_FOR_ALL_CELLS_XYZ( stencilField_,
-      for( auto dir = Stencil_T::begin(); dir != Stencil_T::end(); ++dir )
-      {
-         WALBERLA_ASSERT_IDENTICAL(stencilField_->get(x,y,z, dir.toIdx()), adaptBCStencilField_->get(x,y,z, dir.toIdx()));
-      }
-   )
-#endif
 
    dirichletBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::zyxf );
+
+   for(auto d = Stencil_T::beginNoCenter(); d != Stencil_T::end(); ++d ){
+      dx_[d.toIdx()] = Vector3<real_t>(stencil::cx[d.toIdx()]*blocks.dx(), stencil::cy[d.toIdx()]*blocks.dy(), stencil::cz[d.toIdx()]*blocks.dz() ).sqrLength();
+      WALBERLA_LOG_DEVEL("dx in direction " << d.dirString() << ":" << dx_[d.toIdx()]);
+   }
+
 
 }
 
@@ -175,7 +147,7 @@ inline Dirichlet< Stencil_T, flag_t >::Dirichlet( const BoundaryUID & boundaryUI
 template< typename Stencil_T, typename flag_t >
 void Dirichlet< Stencil_T, flag_t >::afterBoundaryTreatment() {
 
-   if (numDirtyCells_>0 && numDirtyCells_ != std::numeric_limits<uint_t>::max()) {
+   if (numDirtyCells_>0) {
       WALBERLA_LOG_WARNING("De-registering cells requires re-running Galerkin coarsening");
    }
 
@@ -270,30 +242,18 @@ inline void Dirichlet< Stencil_T, flag_t >::registerCells( const flag_t, const C
 
 }
 
-// Remark: This unregister function works only properly for D3Q7 stencils and convex domains!
+
 template< typename Stencil_T, typename flag_t >
-void Dirichlet< Stencil_T, flag_t >::unregisterCell( const flag_t, const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz )
+void Dirichlet< Stencil_T, flag_t >::unregisterCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
-   flagField_->addFlag( nx,ny,nz, formerDirichlet_ );
+   flagField_->addFlag( x,y,z, formerDirichlet_ );
    ++numDirtyCells_;
 
-   Cell boundaryCell( nx, ny, nz );
-
-   // Set stencil previously adapted to Dirichlet BC back to un-adapted state
-   for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
-   {
-      Cell domainCell = boundaryCell - *d;
-      if( adaptBCStencilField_->isInInnerPart( domainCell ) )
-      {
-//         WALBERLA_LOG_DEVEL("Undo Dirichlet treatment at: " << domainCell );
-
-         // restore original non-center stencil entry of neighboring non-boundary cell
-         adaptBCStencilField_->get( domainCell, d.toIdx() ) = stencilField_->get( domainCell, d.toIdx() );
-
-         // restore original center stencil entry of neighboring non-boundary cell
-         adaptBCStencilField_->get( domainCell, Stencil_T::idx[stencil::C] ) += adaptBCStencilField_->get( domainCell, d.toIdx() );
-      }
+   // Set stencil adapted to BCs back to unadapted state
+   for(auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d ){
+      adaptBCStencilField_->get(x,y,z,d.toIdx()) = stencilField_->get(x,y,z,d.toIdx());
    }
+
 }
 
 
@@ -320,7 +280,9 @@ inline void Dirichlet< Stencil_T, flag_t >::treatDirection( const cell_idx_t  x,
                                                              // current implementation of this boundary condition (Dirichlet)
 
    // Adapt RHS to Dirichlet BC //
-   rhsField_->get( x, y, z ) -= stencilField_->get( x, y, z, Stencil_T::idx[dir] ) * real_t(2) * dirichletBC_->get( nx, ny, nz ); // possibly utilize that off-diagonal entries -1 anyway
+   rhsField_->get( x, y, z ) -= stencilField_->get( x, y, z, Stencil_T::idx[dir] ) * real_t(2) * dx_[ Stencil_T::idx[dir] ] * dirichletBC_->get( nx, ny, nz ); // possibly utilize that off-diagonal entries -1 anyway
+
+   // WALBERLA_LOG_DEVEL("Adapt RHS to Dirichlet value " << dirichletBC_->get( nx, ny, nz ) << " on cell " << Cell(x,y,z) << " for stencil entry " << stencilField_->get( x, y, z, Stencil_T::idx[dir] ) );
 
    // Adapt Stencils to BCs (former adaptStencilsBC) //
    // Only required if any new BC cell was added or the BC type of any former BC cell has been changed
@@ -333,6 +295,7 @@ inline void Dirichlet< Stencil_T, flag_t >::treatDirection( const cell_idx_t  x,
    }
 
 }
+
 
 
 } // namespace pde

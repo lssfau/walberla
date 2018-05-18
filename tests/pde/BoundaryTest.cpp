@@ -138,6 +138,23 @@ void initRHS( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDa
    }
 }
 
+
+
+void setRHSConstValue( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & rhsId, const real_t value )
+{
+   for( auto block = blocks->begin(); block != blocks->end(); ++block )
+   {
+      Field_T * rhs = block->getData< Field_T >( rhsId );
+      CellInterval xyz = rhs->xyzSize();
+      for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
+      {
+         rhs->get( *cell ) = value;
+      }
+   }
+}
+
+
+
 void setBoundaryConditionsDirichl( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID & boundaryHandlingId )
 {
    CellInterval domainBBInGlobalCellCoordinates = blocks->getDomainCellBB();
@@ -178,6 +195,57 @@ void setBoundaryConditionsDirichl( shared_ptr< StructuredBlockForest > & blocks,
       boundaryHandling->fillWithDomain( domainBB );
    }
 }
+
+
+
+void setBoundaryConditionsMixed( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID & boundaryHandlingId )
+{
+   CellInterval domainBBInGlobalCellCoordinates = blocks->getDomainCellBB();
+   domainBBInGlobalCellCoordinates.expand(Cell(1,1,0));
+
+   // Iterate through all blocks that are allocated on this process and part of the block structure 'blocks'
+   for( auto block = blocks->begin(); block != blocks->end(); ++block )
+   {
+
+      BoundaryHandling_T * boundaryHandling = block->getData< BoundaryHandling_T >( boundaryHandlingId );
+
+      CellInterval domainBB( domainBBInGlobalCellCoordinates );
+      blocks->transformGlobalToBlockLocalCellInterval( domainBB, *block );
+
+      CellInterval west( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMin(), domainBB.yMax(), domainBB.zMax() );
+      CellInterval east( domainBB.xMax(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
+      CellInterval south( domainBB.xMin(), domainBB.yMin(), domainBB.zMin(), domainBB.xMax(), domainBB.yMin(), domainBB.zMax() );
+      CellInterval north( domainBB.xMin(), domainBB.yMax(), domainBB.zMin(), domainBB.xMax(), domainBB.yMax(), domainBB.zMax() );
+
+      // Set north boundary to large value
+      for( auto cell = north.begin(); cell != north.end(); ++cell )
+      {
+
+         const real_t val = real_t(2);
+         boundaryHandling->forceBoundary( Dirichlet_Flag, cell->x(), cell->y(), cell->z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
+
+      }
+
+      // Set south boundary to large value
+      for( auto cell = south.begin(); cell != south.end(); ++cell )
+      {
+
+         const real_t val = real_t(-2);
+         boundaryHandling->forceBoundary( Dirichlet_Flag, cell->x(), cell->y(), cell->z(), pde::Dirichlet< Stencil_T, flag_t >::DirichletBC( val ) );
+
+      }
+
+      // Set all other boundaries to homogeneous Neumann BCs
+      for( auto & ci : { west, east} )
+      {
+         boundaryHandling->forceBoundary( Neumann_Flag, ci, pde::Neumann< Stencil_T, flag_t >::NeumannBC( real_t( 0 ) ) );
+      }
+
+      // All the remaining cells need to be marked as being fluid. The 'fillWithDomain' call does just that.
+      boundaryHandling->fillWithDomain( domainBB );
+   }
+}
+
 
 
 void copyWeightsToStencilField( const shared_ptr< StructuredBlockStorage > & blocks, const std::vector<real_t> & weights, const BlockDataID & stencilId )
@@ -259,10 +327,11 @@ int main( int argc, char** argv )
    BlockDataID boundaryHandlingId = blocks->addBlockData< BoundaryHandling_T >( MyBoundaryHandling( rhsId, stencilId, stencilBCadaptedId, flagId ),
                                                                                 "boundary handling" );
 
+   // Test Dirichlet BCs //
    setBoundaryConditionsDirichl( blocks, boundaryHandlingId );
 
    
-   SweepTimeloop timeloop( blocks, uint_t(1) );
+   SweepTimeloop timeloop( blocks, uint_t(2) );
 
    timeloop.add()
             << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingId ), "boundary handling" )
@@ -270,12 +339,58 @@ int main( int argc, char** argv )
                      pde::CGIteration< Stencil_T >( blocks->getBlockStorage(), solId, rId, dId, zId, rhsId, stencilBCadaptedId,
                                                     shortrun ? uint_t( 10 ) : uint_t( 10000 ), synchronizeD, real_c( 1e-6 ) ), "CG iteration" );
 
-   timeloop.run();
+   timeloop.singleStep();
+
+
+   // Check values for Dirichlet BCs //
+
+   Cell cellNearBdry(75,2,0);
+   real_t solNearBdry(-0.16347);
+   Cell cellNearBdryLrg(24,95,0);
+   real_t solNearBdryLrg(201.47);
+   Cell cellDomCentr(100,50,0);
+   real_t solDomCentr(0.37587);
+
+   for( auto block = blocks->begin(); block != blocks->end(); ++block )
+   {
+      Field_T * sol = block->getData< Field_T >( solId );
+      if( blocks->getBlockCellBB( *block ).contains( cellNearBdry ) )
+      {
+         // WALBERLA_LOG_DEVEL( "Solution value at cell " << cellNearBdry << ": " << sol->get(cellNearBdry) );
+         WALBERLA_CHECK_LESS( std::fabs(solNearBdry - sol->get(cellNearBdry))/solNearBdry, 0.0001, "Invalid value in cell (75,2,0)" );
+      }
+      if( blocks->getBlockCellBB( *block ).contains( cellNearBdryLrg ) )
+      {
+         // WALBERLA_LOG_DEVEL( "Solution value at cell " << cellNearBdryLrg << ": " << sol->get(cellNearBdryLrg) );
+         WALBERLA_CHECK_LESS( std::fabs(solNearBdryLrg - sol->get(cellNearBdryLrg))/solNearBdryLrg, 0.0001, "Invalid value in cell (24,95,0)" );
+      }
+      if( blocks->getBlockCellBB( *block ).contains( cellDomCentr ) )
+      {
+         // WALBERLA_LOG_DEVEL( "Solution value at cell " << cellDomCentr << ": " << sol->get(cellDomCentr) );
+         WALBERLA_CHECK_LESS( std::fabs(solDomCentr - sol->get(cellDomCentr))/solDomCentr, 0.0001, "Invalid value in cell (100,50,0)" );
+      }
+   }
 
    if( !shortrun )
    {
       vtk::writeDomainDecomposition( blocks );
-      field::createVTKOutput< Field_T >( solId, *blocks, "solution_D" )();
+      field::createVTKOutput< Field_T >( solId, *blocks, "solution_Dirich" )();
+   }
+
+
+   // Test Mixed BCs and re-setting BCs //
+   setBoundaryConditionsMixed( blocks, boundaryHandlingId );
+   // set RHS to zero to get 'ramp' as solution
+   setRHSConstValue( blocks, rhsId, real_t(0));
+
+   timeloop.singleStep();
+
+   if( !shortrun )
+   {
+      field::createVTKOutput< Field_T >( solId, *blocks, "solution_Mixed" )();
+      field::createVTKOutput< Field_T >( rhsId, *blocks, "rhs_Mixed" )();
+      field::createVTKOutput< StencilField_T >( stencilId, *blocks, "originalStencils_Mixed" )();
+      field::createVTKOutput< StencilField_T >( stencilBCadaptedId, *blocks, "adaptedStencils_Mixed" )();
    }
 
    logging::Logging::printFooterOnStream();

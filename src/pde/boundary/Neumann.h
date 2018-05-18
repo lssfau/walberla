@@ -15,6 +15,8 @@
 //
 //! \file Neumann.h
 //! \ingroup pde
+//! \author Dominik Bartuschat <dominik.bartuschat@fau.de>
+//! \author Michael Kuron <mkuron@icp.uni-stuttgart.de>
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>
 //
 //======================================================================================================================
@@ -351,7 +353,7 @@ template< typename Stencil_T, typename flag_t >
 void Neumann< Stencil_T, flag_t >::afterBoundaryTreatment() {
 
    if (numDirtyCells_>0 && numDirtyCells_ != std::numeric_limits<uint_t>::max()) {
-      WALBERLA_LOG_WARNING("De-registering cells requires re-running Galerkin coarsening " << numDirtyCells_);
+      WALBERLA_LOG_WARNING("De-registering cells requires re-running Galerkin coarsening");
    }
 
    numDirtyCells_=0;
@@ -445,16 +447,28 @@ inline void Neumann< Stencil_T, flag_t >::registerCells( const flag_t, const Cel
 
 }
 
-
+// Remark: This unregister function works only properly for D3Q7 stencils and convex domains!
 template< typename Stencil_T, typename flag_t >
-void Neumann< Stencil_T, flag_t >::unregisterCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+void Neumann< Stencil_T, flag_t >::unregisterCell( const flag_t, const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz )
 {
-   flagField_->addFlag( x,y,z, formerNeumann_ );
+   flagField_->addFlag( nx, ny, nz, formerNeumann_ );
    ++numDirtyCells_;
 
-   // Set stencil adapted to BCs back to unadapted state
-   for(auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d ){
-      adaptBCStencilField_->get(x,y,z,d.toIdx()) = stencilField_->get(x,y,z,d.toIdx());
+   Cell boundaryCell( nx, ny, nz );
+
+   // Set stencil previously adapted to Neumann BC back to un-adapted state
+   for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
+   {
+      Cell domainCell = boundaryCell - *d;
+      if( adaptBCStencilField_->isInInnerPart( domainCell ) )
+      {
+         // restore original non-center stencil entry of neighboring non-boundary cell
+         adaptBCStencilField_->get( domainCell, d.toIdx() ) = stencilField_->get( domainCell, d.toIdx() );
+
+         // restore original center stencil entry of neighboring non-boundary cell
+         adaptBCStencilField_->get( domainCell, Stencil_T::idx[stencil::C] ) -=  adaptBCStencilField_->get( domainCell, d.toIdx() );
+
+      }
    }
 
 }
@@ -481,6 +495,8 @@ inline void Neumann< Stencil_T, flag_t >::treatDirection( const cell_idx_t  x, c
    WALBERLA_ASSERT_UNEQUAL( mask & this->mask_, numeric_cast<flag_t>(0) );
    WALBERLA_ASSERT_EQUAL( mask & this->mask_, this->mask_ ); // only true if "this->mask_" only contains one single flag, which is the case for the
                                                              // current implementation of this boundary condition (Neumann)
+
+   // WALBERLA_LOG_DEVEL("Neumann treatment at: " << Cell(x,y,z));
 
    // Adapt RHS to Neumann BC //
    rhsField_->get( x, y, z ) -= stencilField_->get( x, y, z, Stencil_T::idx[dir] ) * neumannBC_->get( nx, ny, nz ); // possibly utilize that off-diagonal entries -1 anyway
