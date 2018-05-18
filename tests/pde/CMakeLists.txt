@@ -25,3 +25,5 @@ waLBerla_compile_test( FILES MGConvergenceTest.cpp DEPENDS blockforest timeloop 
 waLBerla_execute_test( NAME MGConvergenceTest COMMAND $<TARGET_FILE:MGConvergenceTest> PROCESSES 8 CONFIGURATIONS Release RelWithDbgInfo )
 
 waLBerla_compile_test( FILES BoundaryTest.cpp DEPENDS blockforest timeloop vtk boundary )
+waLBerla_execute_test( NAME BoundaryShortTest COMMAND $<TARGET_FILE:BoundaryTest> --shortrun PROCESSES 8 )
+waLBerla_execute_test( NAME BoundaryTest COMMAND $<TARGET_FILE:BoundaryTest> PROCESSES 8 CONFIGURATIONS Release RelWithDbgInfo )

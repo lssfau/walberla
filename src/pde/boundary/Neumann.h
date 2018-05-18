@@ -21,7 +21,6 @@
 
 #pragma once
 
-
 #include "field/Field.h"
 
 #include "boundary/Boundary.h"
@@ -41,7 +40,6 @@
 
 #include <vector>
 #include <limits>
-
 
 
 namespace walberla {
@@ -224,10 +222,19 @@ void NeumannDomainBoundary< PdeField >::apply( PdeField * p, const CellInterval 
 
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
+//**********************************************************************************************************************
+/*!
+*   \brief Neumann boundary handling for PDEs
+*
+*   This boundary condition imposes a Neumann condition with arbitrary values on a PDE.
+*   It does so by modifying the right-hand side and the stencil field.
+*   Anything that has internal copies of the stencil field (e.g. the multigrid V-cycle's coarsened stencils) is
+*   responsible for updating its copies when boundary conditions are changed.
+*
+*   \tparam Stencil_T The stencil used for the discrete operator
+*   \tparam flag_t The integer type used by the flag field
+*/
+//**********************************************************************************************************************
 template< typename Stencil_T, typename flag_t >
 class Neumann : public Boundary< flag_t >
 {
@@ -255,7 +262,18 @@ public:
    static shared_ptr<NeumannBC> createConfiguration( const Config::BlockHandle & config ) { return make_shared<NeumannBC>( config ); }
 
 
-
+  //*******************************************************************************************************************
+  /*! Creates a Neumann boundary
+   * \param boundaryUID the UID of the boundary condition
+   * \param uid the UID of the flag that marks cells with this boundary condition
+   * \param rhsField pointer to the right-hand side field, which will be adapted by this boundary condition
+   * \param stencilField pointer to the operator stencil field. It should contain the stencil weights that don't take
+   *                     into account the boundary conditions.
+   * \param adaptBCStencilField pointer to the operator stencil field that will be adapted by this boundary condition. 
+   *                            Initially, this field needs to contain the same values as \p stencilField.
+   *                            This is the stencil field that should be passed to the actual PDE solver.
+   * \param flagField pointer to the flag field
+   *******************************************************************************************************************/
    inline Neumann( const BoundaryUID & boundaryUID, const FlagUID & uid, Field_T* const rhsField, const StencilField_T* const stencilField,
                      StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField );
 
@@ -312,11 +330,18 @@ inline Neumann< Stencil_T, flag_t >::Neumann( const BoundaryUID & boundaryUID, c
 {
    WALBERLA_ASSERT_NOT_NULLPTR( rhsField_ );
    WALBERLA_ASSERT_NOT_NULLPTR( stencilField_ );
+   WALBERLA_ASSERT_NOT_NULLPTR( adaptBCStencilField_ );
+   WALBERLA_ASSERT_NOT_NULLPTR( flagField_ );
 
    WALBERLA_ASSERT_EQUAL( rhsField_->xyzSize(), stencilField_->xyzSize() );
+   WALBERLA_FOR_ALL_CELLS_XYZ( stencilField_,
+      for( auto dir = Stencil_T::begin(); dir != Stencil_T::end(); ++dir )
+      {
+         WALBERLA_ASSERT_EQUAL(stencilField_->get(x,y,z, dir.toIdx()), adaptBCStencilField_->get(x,y,z, dir.toIdx()));
+      }
+   )
 
    neumannBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::zyxf );
-
 }
 
 

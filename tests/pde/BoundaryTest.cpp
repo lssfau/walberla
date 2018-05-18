@@ -123,27 +123,6 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
 
 
 
-void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & uId )
-{
-   for( auto block = blocks->begin(); block != blocks->end(); ++block )
-   {
-      if( blocks->atDomainYMaxBorder( *block ) )
-      {
-         Field_T * u = block->getData< Field_T >( uId );
-         CellInterval xyz = u->xyzSizeWithGhostLayer();
-         xyz.yMin() = xyz.yMax();
-         for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
-         {
-//            const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-            // u->get( *cell ) = std::sin( real_t(2) * math::PI * p[0] ) * std::sinh( real_t(2) * math::PI * p[1] );
-            u->get( *cell ) = 0;
-         }
-      }
-   }
-}
-
-
-
 void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & fId )
 {
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
@@ -195,7 +174,6 @@ void setBoundaryConditions( shared_ptr< StructuredBlockForest > & blocks, const 
       }
 
       // All the remaining cells need to be marked as being fluid. The 'fillWithDomain' call does just that.
-
       boundaryHandling->fillWithDomain( domainBB );
    }
 }
@@ -253,8 +231,6 @@ int main( int argc, char** argv )
    BlockDataID rId = field::addToStorage< Field_T >( blocks, "r", real_t(0), field::zyxf, uint_t(1) );
    BlockDataID dId = field::addToStorage< Field_T >( blocks, "d", real_t(0), field::zyxf, uint_t(1) );
    BlockDataID zId = field::addToStorage< Field_T >( blocks, "z", real_t(0), field::zyxf, uint_t(1) );
-
-   initU( blocks, uId );
 
    BlockDataID fId = field::addToStorage< Field_T >( blocks, "f", real_t(0), field::zyxf, uint_t(1) );
 
