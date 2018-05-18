@@ -250,12 +250,12 @@ int main( int argc, char** argv )
                                                       true,
                                                       false, false, false );
 
-   BlockDataID uId = field::addToStorage< Field_T >( blocks, "u", real_t(0), field::zyxf, uint_t(1) );
+   BlockDataID solId = field::addToStorage< Field_T >( blocks, "sol", real_t(0), field::zyxf, uint_t(1) );
    BlockDataID rId = field::addToStorage< Field_T >( blocks, "r", real_t(0), field::zyxf, uint_t(1) );
    BlockDataID dId = field::addToStorage< Field_T >( blocks, "d", real_t(0), field::zyxf, uint_t(1) );
    BlockDataID zId = field::addToStorage< Field_T >( blocks, "z", real_t(0), field::zyxf, uint_t(1) );
 
-   initU( blocks, uId );
+   initU( blocks, solId );
 
    BlockDataID rhsId = field::addToStorage< Field_T >( blocks, "rhs", real_t(0), field::zyxf, uint_t(1) );
 
@@ -291,7 +291,7 @@ int main( int argc, char** argv )
    timeloop.add()
             << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingId ), "boundary handling" )
             << AfterFunction(
-                     pde::CGIteration< Stencil_T >( blocks->getBlockStorage(), uId, rId, dId, zId, rhsId, stencilBCadaptedId,
+                     pde::CGIteration< Stencil_T >( blocks->getBlockStorage(), solId, rId, dId, zId, rhsId, stencilBCadaptedId,
                                                     shortrun ? uint_t( 10 ) : uint_t( 10000 ), synchronizeD, real_c( 1e-6 ) ), "CG iteration" );
 
    timeloop.run();
@@ -299,7 +299,7 @@ int main( int argc, char** argv )
    if( !shortrun )
    {
       vtk::writeDomainDecomposition( blocks );
-      field::createVTKOutput< Field_T >( uId, *blocks, "solution_D" )();
+      field::createVTKOutput< Field_T >( solId, *blocks, "solution_D" )();
    }
 
    logging::Logging::printFooterOnStream();
