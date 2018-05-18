@@ -89,8 +89,8 @@ class MyBoundaryHandling
 {
 public:
 
-   MyBoundaryHandling( const BlockDataID & rhsFieldId, const BlockDataID & stencilFieldId, const BlockDataID & adaptBCStencilFieldId, const BlockDataID & flagFieldId ) :
-      rhsFieldId_( rhsFieldId ), stencilFieldId_ ( stencilFieldId ), adaptBCStencilFieldId_ ( adaptBCStencilFieldId ), flagFieldId_ (flagFieldId) {}
+   MyBoundaryHandling( const BlockDataID & rhsFieldId, const BlockDataID & stencilFieldId, const BlockDataID & adaptBCStencilFieldId, const BlockDataID & flagFieldId, const StructuredBlockStorage& blocks ) :
+      rhsFieldId_( rhsFieldId ), stencilFieldId_ ( stencilFieldId ), adaptBCStencilFieldId_ ( adaptBCStencilFieldId ), flagFieldId_ (flagFieldId), blockStorage_(blocks) {}
 
    BoundaryHandling_T * operator()( IBlock* const block ) const;
 
@@ -100,6 +100,7 @@ private:
    const BlockDataID stencilFieldId_;
    const BlockDataID adaptBCStencilFieldId_;
    const BlockDataID flagFieldId_;
+   const StructuredBlockStorage & blockStorage_;
 
 }; // class MyBoundaryHandling
 
@@ -117,7 +118,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
    // Additional, internal flags used by the boundary handling will be stored in this flag field.
    return new BoundaryHandling_T( "boundary handling", flagField, domain,
          boost::tuples::make_tuple( Dirichlet_T( "dirichlet", Dirichlet_Flag, rhsField, stencilField, adaptStencilField, flagField ) ,
-                                    Neumann_T( "neumann", Neumann_Flag, rhsField, stencilField, adaptStencilField, flagField )
+                                    Neumann_T( "neumann", Neumann_Flag, rhsField, stencilField, adaptStencilField, flagField, blockStorage_ )
          )
    );
 }
@@ -324,7 +325,7 @@ int main( int argc, char** argv )
    copyWeightsToStencilField( blocks, weights, stencilId );
    copyWeightsToStencilField( blocks, weights, stencilBCadaptedId );
 
-   BlockDataID boundaryHandlingId = blocks->addBlockData< BoundaryHandling_T >( MyBoundaryHandling( rhsId, stencilId, stencilBCadaptedId, flagId ),
+   BlockDataID boundaryHandlingId = blocks->addBlockData< BoundaryHandling_T >( MyBoundaryHandling( rhsId, stencilId, stencilBCadaptedId, flagId, *blocks ),
                                                                                 "boundary handling" );
 
    // Test Dirichlet BCs //
@@ -343,7 +344,6 @@ int main( int argc, char** argv )
 
 
    // Check values for Dirichlet BCs //
-
    Cell cellNearBdry(75,2,0);
    real_t solNearBdry(-0.16347);
    Cell cellNearBdryLrg(24,95,0);
@@ -385,12 +385,15 @@ int main( int argc, char** argv )
 
    timeloop.singleStep();
 
+   // Check values for mixed  BCs //
+   // TODO
+
    if( !shortrun )
    {
       field::createVTKOutput< Field_T >( solId, *blocks, "solution_Mixed" )();
-      field::createVTKOutput< Field_T >( rhsId, *blocks, "rhs_Mixed" )();
-      field::createVTKOutput< StencilField_T >( stencilId, *blocks, "originalStencils_Mixed" )();
-      field::createVTKOutput< StencilField_T >( stencilBCadaptedId, *blocks, "adaptedStencils_Mixed" )();
+//      field::createVTKOutput< Field_T >( rhsId, *blocks, "rhs_Mixed" )();
+//      field::createVTKOutput< StencilField_T >( stencilId, *blocks, "originalStencils_Mixed" )();
+//      field::createVTKOutput< StencilField_T >( stencilBCadaptedId, *blocks, "adaptedStencils_Mixed" )();
    }
 
    logging::Logging::printFooterOnStream();

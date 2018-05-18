@@ -42,6 +42,7 @@
 
 #include <vector>
 #include <limits>
+#include <array>
 
 
 namespace walberla {
@@ -275,9 +276,10 @@ public:
    *                            Initially, this field needs to contain the same values as \p stencilField.
    *                            This is the stencil field that should be passed to the actual PDE solver.
    * \param flagField pointer to the flag field
+   * \param blocks
    *******************************************************************************************************************/
    inline Neumann( const BoundaryUID & boundaryUID, const FlagUID & uid, Field_T* const rhsField, const StencilField_T* const stencilField,
-                     StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField );
+                     StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField, const StructuredBlockStorage& blocks );
 
    void pushFlags( std::vector< FlagUID > & uids ) const { uids.push_back( uid_ ); }
 
@@ -308,6 +310,7 @@ private:
    const flag_t formerNeumann_;
    uint_t numDirtyCells_;
 
+   std::array<real_t, Stencil_T::Q> dx_;
    Field_T* const                rhsField_;
    shared_ptr< Field_T >         neumannBC_;
    const StencilField_T * const  stencilField_;
@@ -327,8 +330,10 @@ inline Neumann< Stencil_T, flag_t >::NeumannBC::NeumannBC( const Config::BlockHa
 
 
 template< typename Stencil_T, typename flag_t >
-inline Neumann< Stencil_T, flag_t >::Neumann( const BoundaryUID & boundaryUID, const FlagUID & uid, Field_T* const rhsField, const StencilField_T* const stencilField, StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField ) :
-   Boundary<flag_t>( boundaryUID ), uid_( uid ), formerNeumann_ (flagField->getOrRegisterFlag("FormerNeumann")), numDirtyCells_(std::numeric_limits<uint_t>::max()), rhsField_( rhsField ), stencilField_ ( stencilField ), adaptBCStencilField_ ( adaptBCStencilField ), flagField_ (flagField)
+inline Neumann< Stencil_T, flag_t >::Neumann( const BoundaryUID & boundaryUID, const FlagUID & uid, Field_T* const rhsField, const StencilField_T* const stencilField,
+                                              StencilField_T* const adaptBCStencilField, FlagField<flag_t> * const flagField, const StructuredBlockStorage& blocks  )
+                                              : Boundary<flag_t>( boundaryUID ), uid_( uid ), formerNeumann_ (flagField->getOrRegisterFlag("FormerNeumann")), numDirtyCells_(std::numeric_limits<uint_t>::max()),
+                                                rhsField_( rhsField ), stencilField_ ( stencilField ), adaptBCStencilField_ ( adaptBCStencilField ), flagField_ (flagField)
 {
    WALBERLA_ASSERT_NOT_NULLPTR( rhsField_ );
    WALBERLA_ASSERT_NOT_NULLPTR( stencilField_ );
@@ -346,6 +351,12 @@ inline Neumann< Stencil_T, flag_t >::Neumann( const BoundaryUID & boundaryUID, c
 #endif
 
    neumannBC_ = make_shared< Field_T >( rhsField_->xSize(), rhsField_->ySize(), rhsField_->zSize(), uint_t(1), field::zyxf );
+
+   for(auto d = Stencil_T::beginNoCenter(); d != Stencil_T::end(); ++d ){
+      dx_[d.toIdx()] = Vector3<real_t>(stencil::cx[d.toIdx()]*blocks.dx(), stencil::cy[d.toIdx()]*blocks.dy(), stencil::cz[d.toIdx()]*blocks.dz() ).sqrLength();
+      WALBERLA_LOG_DEVEL("dx in direction " << d.dirString() << ":" << dx_[d.toIdx()]);
+   }
+
 }
 
 
@@ -499,7 +510,7 @@ inline void Neumann< Stencil_T, flag_t >::treatDirection( const cell_idx_t  x, c
    // WALBERLA_LOG_DEVEL("Neumann treatment at: " << Cell(x,y,z));
 
    // Adapt RHS to Neumann BC //
-   rhsField_->get( x, y, z ) -= stencilField_->get( x, y, z, Stencil_T::idx[dir] ) * neumannBC_->get( nx, ny, nz ); // possibly utilize that off-diagonal entries -1 anyway
+   rhsField_->get( x, y, z ) -= stencilField_->get( x, y, z, Stencil_T::idx[dir] ) * dx_[ Stencil_T::idx[dir] ] * neumannBC_->get( nx, ny, nz ); // possibly utilize that off-diagonal entries -1 anyway
 
    // Adapt Stencils to BCs (former adaptStencilsBC) //
    // Only required if any new BC cell was added or the BC type of any former BC cell has been changed
