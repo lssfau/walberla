@@ -23,6 +23,7 @@
 #include "pe/amr/InfoCollection.h"
 
 #include "blockforest/loadbalancing/DynamicParMetis.h"
+#include "domain_decomposition/PeriodicIntersectionVolume.h"
 
 namespace walberla {
 namespace pe {
@@ -37,8 +38,13 @@ public:
 
    MetisAssignmentFunctor( shared_ptr<InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
 
-   void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
+   void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & forest )
    {
+      const std::array< bool, 3 > periodic {{forest.getBlockForest().isPeriodic(0),
+                  forest.getBlockForest().isPeriodic(1),
+                  forest.getBlockForest().isPeriodic(2)}};
+      const math::AABB domain     = forest.getBlockForest().getDomain();
+
       for( auto it = blockData.begin(); it != blockData.end(); ++it )
       {
          const PhantomBlock * block = it->first;
@@ -56,8 +62,11 @@ public:
          for( uint_t nb = uint_t(0); nb < it->first->getNeighborhoodSize(); ++nb )
          {
             const double dx(1.0);
-            info.setEdgeWeight(it->first->getNeighborId(nb),
-                               int64_c(it->first->getAABB().intersectionVolume( it->first->getNeighborAABB(nb).getExtended(dx) )) );
+            info.setEdgeWeight( it->first->getNeighborId(nb),
+                                domain_decomposition::periodicIntersectionVolume( periodic,
+                                                                                  domain,
+                                                                                  it->first->getAABB(),
+                                                                                  it->first->getNeighborAABB(nb).getExtended(dx)) );
          }
          it->second = info;
          continue;
