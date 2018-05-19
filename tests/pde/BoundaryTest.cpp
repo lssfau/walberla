@@ -342,36 +342,68 @@ int main( int argc, char** argv )
 
    timeloop.singleStep();
 
-
    // Check values for Dirichlet BCs //
-   Cell cellNearBdry(75,2,0);
-   real_t solNearBdry(-0.16347);
-   Cell cellNearBdryLrg(24,95,0);
-   real_t solNearBdryLrg(201.47);
-   Cell cellDomCentr(100,50,0);
-   real_t solDomCentr(0.37587);
-
-   for( auto block = blocks->begin(); block != blocks->end(); ++block )
+   if( !shortrun )
    {
-      Field_T * sol = block->getData< Field_T >( solId );
-      if( blocks->getBlockCellBB( *block ).contains( cellNearBdry ) )
+      Cell cellNearBdry( 75, 2, 0 );
+      real_t solNearBdry( -0.16347 );
+      Cell cellNearBdryLrg( 24, 95, 0 );
+      real_t solNearBdryLrg( 201.47 );
+      Cell cellDomCentr( 99, 49, 0 );
+      real_t solDomCentr( 0.37587 );
+
+      for( auto block = blocks->begin(); block != blocks->end(); ++block )
       {
-         // WALBERLA_LOG_DEVEL( "Solution value at cell " << cellNearBdry << ": " << sol->get(cellNearBdry) );
-         WALBERLA_CHECK_LESS( std::fabs(solNearBdry - sol->get(cellNearBdry))/solNearBdry, 0.0001, "Invalid value in cell (75,2,0)" );
-      }
-      if( blocks->getBlockCellBB( *block ).contains( cellNearBdryLrg ) )
-      {
-         // WALBERLA_LOG_DEVEL( "Solution value at cell " << cellNearBdryLrg << ": " << sol->get(cellNearBdryLrg) );
-         WALBERLA_CHECK_LESS( std::fabs(solNearBdryLrg - sol->get(cellNearBdryLrg))/solNearBdryLrg, 0.0001, "Invalid value in cell (24,95,0)" );
-      }
-      if( blocks->getBlockCellBB( *block ).contains( cellDomCentr ) )
-      {
-         // WALBERLA_LOG_DEVEL( "Solution value at cell " << cellDomCentr << ": " << sol->get(cellDomCentr) );
-         WALBERLA_CHECK_LESS( std::fabs(solDomCentr - sol->get(cellDomCentr))/solDomCentr, 0.0001, "Invalid value in cell (100,50,0)" );
+         Field_T * sol = block->getData < Field_T > ( solId );
+         if( blocks->getBlockCellBB( *block ).contains( cellNearBdry ) )
+         {
+             WALBERLA_LOG_DEVEL( "Solution value at cell " << cellNearBdry << ": " << sol->get(cellNearBdry) );
+            WALBERLA_CHECK_LESS( std::fabs( solNearBdry - sol->get( cellNearBdry ) ) / solNearBdry, 0.0001, "Invalid value in cell " << cellNearBdry );
+         }
+         if( blocks->getBlockCellBB( *block ).contains( cellNearBdryLrg ) )
+         {
+             WALBERLA_LOG_DEVEL( "Solution value at cell " << cellNearBdryLrg << ": " << sol->get(cellNearBdryLrg) );
+            WALBERLA_CHECK_LESS( std::fabs( solNearBdryLrg - sol->get( cellNearBdryLrg ) ) / solNearBdryLrg, 0.0001, "Invalid value in cell " << cellNearBdryLrg );
+         }
+         if( blocks->getBlockCellBB( *block ).contains( cellDomCentr ) )
+         {
+            WALBERLA_LOG_DEVEL( "Solution value at cell " << cellDomCentr << ": " << sol->get(cellDomCentr) );
+            WALBERLA_CHECK_LESS( std::fabs( solDomCentr - sol->get( cellDomCentr ) ) / solDomCentr, 0.0001, "Invalid value in cell " << cellDomCentr );
+         }
       }
    }
+   else
+   {
+      Cell cellNearBdry( 75, 2, 0 );
+      real_t solNearBdry( -0.008355 );
+      Cell cellNearBdryLrg( 24, 95, 0 );
+      real_t solNearBdryLrg( 132.188 );
+      Cell cellDomCentr( 99, 49, 0 );
+      real_t solDomCentr( 0.017603 );
 
-   if( !shortrun )
+      for( auto block = blocks->begin(); block != blocks->end(); ++block )
+      {
+         Field_T * sol = block->getData < Field_T > ( solId );
+         if( blocks->getBlockCellBB( *block ).contains( cellNearBdry ) )
+         {
+             WALBERLA_LOG_DEVEL( "Solution value at cell " << cellNearBdry << ": " << sol->get(cellNearBdry) );
+             WALBERLA_CHECK_LESS( std::fabs( solNearBdry - sol->get( cellNearBdry ) ) / solNearBdry, 0.0001, "Invalid value in cell " << cellNearBdry );
+         }
+         if( blocks->getBlockCellBB( *block ).contains( cellNearBdryLrg ) )
+         {
+             WALBERLA_LOG_DEVEL( "Solution value at cell " << cellNearBdryLrg << ": " << sol->get(cellNearBdryLrg) );
+             WALBERLA_CHECK_LESS( std::fabs( solNearBdryLrg - sol->get( cellNearBdryLrg ) ) / solNearBdryLrg, 0.0001, "Invalid value in cell " << cellNearBdryLrg );
+         }
+         if( blocks->getBlockCellBB( *block ).contains( cellDomCentr ) )
+         {
+             WALBERLA_LOG_DEVEL( "Solution value at cell " << cellDomCentr << ": " << sol->get(cellDomCentr) );
+             WALBERLA_CHECK_LESS( std::fabs( solDomCentr - sol->get( cellDomCentr ) ) / solDomCentr, 0.0001, "Invalid value in cell " << cellDomCentr );
+         }
+      }
+
+   }
+
+//   if( !shortrun )
    {
       vtk::writeDomainDecomposition( blocks );
       field::createVTKOutput< Field_T >( solId, *blocks, "solution_Dirich" )();

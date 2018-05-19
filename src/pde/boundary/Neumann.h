@@ -354,7 +354,7 @@ inline Neumann< Stencil_T, flag_t >::Neumann( const BoundaryUID & boundaryUID, c
 
    for(auto d = Stencil_T::beginNoCenter(); d != Stencil_T::end(); ++d ){
       dx_[d.toIdx()] = Vector3<real_t>(stencil::cx[d.toIdx()]*blocks.dx(), stencil::cy[d.toIdx()]*blocks.dy(), stencil::cz[d.toIdx()]*blocks.dz() ).sqrLength();
-      WALBERLA_LOG_DEVEL("dx in direction " << d.dirString() << ":" << dx_[d.toIdx()]);
+      // WALBERLA_LOG_DEVEL("dx in direction " << d.dirString() << ":" << dx_[d.toIdx()]);
    }
 
 }
