@@ -32,6 +32,7 @@
 
 #include "pde/sweeps/RBGSFixedStencil.h"
 #include "pde/sweeps/RBGS.h"
+#include "pde/sweeps/Multigrid.h"
 
 #include <functional>
 
@@ -41,7 +42,21 @@
 namespace walberla {
 namespace pde {
 
-template< typename Stencil_T >
+//**********************************************************************************************************************
+/*!
+ *   \brief Class for multigrid V-cycle
+ *
+ *   \tparam Stencil_T The stencil used for the discrete operator
+ *   \tparam OperatorCoarsening_T The coarsening operator to use, defaults to direct coarsening
+ *   \tparam Restrict_T The restriction operator to use
+ *   \tparam ProlongateAndCorrect_T The prolongation and correction operator to use
+ */
+//**********************************************************************************************************************
+template< typename Stencil_T,
+          typename OperatorCoarsening_T = CoarsenStencilFieldsDCA<Stencil_T>,
+          typename Restrict_T = Restrict<Stencil_T>,
+          typename ProlongateAndCorrect_T = ProlongateAndCorrect<Stencil_T>
+        >
 class VCycles
 {
 public:
@@ -50,6 +65,21 @@ public:
    typedef std::vector< real_t  > Weight_T;
    typedef GhostLayerField< real_t, Stencil_T::Size >  StencilField_T;
 
+   //*******************************************************************************************************************
+   /*! Creates a multigrid V-cycle with a fixed stencil
+    * \param blocks the block storage where the fields are stored
+    * \param uFieldId the block data id of the solution field on the finest level
+    * \param fFieldId the block data id of the right-hand side field on the finest level
+    * \param weights vector of stencil weights for the discrete operator
+    * \param iterations maximum number of V-cycles to perform
+    * \param numLvl number of grid levels to use (including the finest level)
+    * \param preSmoothingIters number of Gauss-Seidel iterations before restriction
+    * \param postSmoothingIters number of Gauss-Seidel iterations after prolongation
+    * \param coarseIters number of Conjugate Gradient iterations on coarsest grid
+    * \param residualNorm function that returns the norm of the current residuum
+    * \param residualNormThreshold norm threshold below which the iteration is terminated
+    * \param residualCheckFrequency how often to check whether the threshold has been reached
+    *******************************************************************************************************************/
    VCycles( shared_ptr< StructuredBlockForest > blocks, const BlockDataID & uFieldId, const BlockDataID & fFieldId,
             const Weight_T weights,
             const uint_t iterations, const uint_t numLvl,
@@ -59,8 +89,25 @@ public:
             const Set<SUID> & requiredSelectors     = Set<SUID>::emptySet(),
             const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() );
 
+   //*******************************************************************************************************************
+   /*! Creates a multigrid V-cycle with a stencil field
+    * \param blocks the block storage where the fields are stored
+    * \param uFieldId the block data id of the solution field on the finest level
+    * \param fFieldId the block data id of the right-hand side field on the finest level
+    * \param stencilFieldId the block data id of the stencil field for the finest level.
+    *                       The values stored in the field must not change after this class has been constructed.
+    * \param operatorCoarsening function that performs the stencil coarsening
+    * \param iterations maximum number of V-cycles to perform
+    * \param numLvl number of grid levels to use (including the finest level)
+    * \param preSmoothingIters number of Gauss-Seidel iterations before restriction
+    * \param postSmoothingIters number of Gauss-Seidel iterations after prolongation
+    * \param coarseIters number of Conjugate Gradient iterations on coarsest grid
+    * \param residualNorm function that returns the norm of the current residuum
+    * \param residualNormThreshold norm threshold below which the iteration is terminated
+    * \param residualCheckFrequency how often to check whether the threshold has been reached
+    *******************************************************************************************************************/
    VCycles( shared_ptr< StructuredBlockForest > blocks, const BlockDataID & uFieldId, const BlockDataID & fFieldId,
-            const BlockDataID & stencilFieldId,
+            const BlockDataID & stencilFieldId, const OperatorCoarsening_T & operatorCoarsening,
             const uint_t iterations, const uint_t numLvl,
             const uint_t preSmoothingIters, const uint_t postSmoothingIters,
             const uint_t coarseIters, const std::function< real_t () > & residualNorm,
@@ -76,9 +123,7 @@ public:
    const std::vector<real_t> & convergenceRate() { return convergenceRate_; }
    static Vector3<uint_t> getSizeForLevel( const uint_t level, const shared_ptr< StructuredBlockStorage > & blocks, IBlock * const block );
 
-protected:
-
-   void coarsenStencilFields();
+private:
 
    StructuredBlockForest & blocks_;
    std::vector< Weight_T  > weights_;
