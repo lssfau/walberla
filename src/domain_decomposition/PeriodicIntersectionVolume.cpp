@@ -13,24 +13,41 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file PeriodicIntersect.h
+//! \file PeriodicIntersectionVolume.cpp
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
-#pragma once
-
-#include "core/DataTypes.h"
-#include "core/math/AABB.h"
-#include "core/math/Vector3.h"
-
-#include <array>
+#include "core/logging/Logging.h"
+#include "MapPointToPeriodicDomain.h"
 
 namespace walberla {
 namespace domain_decomposition {
 
-bool periodicIntersect( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB & box1, const math::AABB & box2 );
-bool periodicIntersect( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB& box1, const math::AABB & box2, const real_t dx );
+real_t periodicIntersectionVolume( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB & box1, const math::AABB & box2 )
+{
+   const auto diagonal = (domain.maxCorner() - domain.minCorner());
+   const auto halfDiagonal = real_t(0.5) * diagonal;
+   const auto center1 = box1.center();
+   auto center2 = box2.center();
+
+   for (size_t dim = 0; dim < 3; ++dim)
+   {
+      if (periodic[dim])
+      {
+         while ((center2[dim]-center1[dim])>halfDiagonal[dim]) center2[dim] -= diagonal[dim];
+         while ((center2[dim]-center1[dim])<-halfDiagonal[dim]) center2[dim] += diagonal[dim];
+      }
+   }
+
+   return box1.intersectionVolume(box2.getTranslated(center2 - box2.center()));
+}
+
+real_t periodicIntersectionVolume( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB& box1, const math::AABB & box2, const real_t dx )
+{
+   return periodicIntersectionVolume(periodic, domain, box1.getExtended( dx ), box2);
+}
+
 
 } // namespace domain_decomposition
 } // namespace walberla
