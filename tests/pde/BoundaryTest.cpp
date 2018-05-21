@@ -346,11 +346,11 @@ int main( int argc, char** argv )
    if( !shortrun )
    {
       Cell cellNearBdry( 75, 2, 0 );
-      real_t solNearBdry( -0.16347 );
+      real_t solNearBdry( real_c(-0.16347) );
       Cell cellNearBdryLrg( 24, 95, 0 );
-      real_t solNearBdryLrg( 201.47 );
+      real_t solNearBdryLrg( real_c(201.47) );
       Cell cellDomCentr( 100, 50, 0 );
-      real_t solDomCentr( 0.37587 );
+      real_t solDomCentr( real_c(0.37587) );
 
       for( auto block = blocks->begin(); block != blocks->end(); ++block )
       {
@@ -378,11 +378,11 @@ int main( int argc, char** argv )
    else
    {
       Cell cellNearBdry( 75, 2, 0 );
-      real_t solNearBdry( -0.008355 );
+      real_t solNearBdry( real_c(-0.008355) );
       Cell cellNearBdryLrg( 24, 95, 0 );
-      real_t solNearBdryLrg( 132.188 );
+      real_t solNearBdryLrg( real_c(132.188) );
       Cell cellDomCentr( 100, 50, 0 );
-      real_t solDomCentr( 0.017603 );
+      real_t solDomCentr( 0.017603f );
 
       for( auto block = blocks->begin(); block != blocks->end(); ++block )
       {
