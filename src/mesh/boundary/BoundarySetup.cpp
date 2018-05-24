@@ -27,6 +27,21 @@
 namespace walberla {
 namespace mesh {
 
+
+BoundarySetup::BoundarySetup( const shared_ptr< StructuredBlockStorage > & structuredBlockStorage, const DistanceFunction & distanceFunction, const uint_t numGhostLayers )
+   : structuredBlockStorage_( structuredBlockStorage ), distanceFunction_( distanceFunction ), numGhostLayers_( numGhostLayers ), cellVectorChunkSize_( size_t(1000) )
+{
+   voxelize();
+
+   try {
+      auto & blockForest = dynamic_cast< StructuredBlockForest & >( *structuredBlockStorage_ );
+      if( !blockForest.storesUniformBlockGrid() )
+         refinementCorrection( blockForest );
+   }
+   catch( const std::bad_cast &  ) {} // If it's not a BlockForest no refinement correction is done
+}
+
+
 void BoundarySetup::divideAndPushCellInterval( const CellInterval & ci, std::queue< CellInterval > & outputQueue )
 {
    WALBERLA_ASSERT( !ci.empty() );
@@ -74,7 +89,7 @@ void BoundarySetup::allocateOrResetVoxelizationField()
    }
    else
    {
-      voxelizationFieldId_ = make_shared< BlockDataID >( field::addToStorage< VoxelizationField >( structuredBlockStorage_, "flag field", uint8_t(0), field::zyxf, numGhostLayers_ ) );
+      voxelizationFieldId_ = make_shared< BlockDataID >( field::addToStorage< VoxelizationField >( structuredBlockStorage_, "voxelization field", uint8_t(0), field::zyxf, numGhostLayers_ ) );
    }
 
    WALBERLA_ASSERT_NOT_NULLPTR( voxelizationFieldId_ );
@@ -160,6 +175,78 @@ void BoundarySetup::voxelize()
 
          ciQueue.pop();
       }
+   }
+}
+
+void BoundarySetup::refinementCorrection( StructuredBlockForest & blockForest )
+{
+   if(    blockForest.getNumberOfXCellsPerBlock() < uint_t( 16 )
+       || blockForest.getNumberOfYCellsPerBlock() < uint_t( 16 )
+       || blockForest.getNumberOfZCellsPerBlock() < uint_t( 16 ) )
+   {
+      WALBERLA_ABORT( "The mesh boundary setup requires a block size of at least 16 in each dimension, when refinement is used!" );
+   }
+
+   for( auto & iBlock : blockForest )
+   {
+      auto & block = dynamic_cast< blockforest::Block & >( iBlock );
+
+      const uint_t level = block.getLevel();
+
+      VoxelizationField * voxelizationField = block.getData< VoxelizationField >( *voxelizationFieldId_ );
+      const CellInterval cells = voxelizationField->xyzSize();
+
+      std::vector< CellInterval > coarseRegions;
+      for( auto dir = stencil::D3Q27::beginNoCenter(); dir != stencil::D3Q27::end(); ++dir )
+      {
+         const auto index = blockforest::getBlockNeighborhoodSectionIndex( dir.cx(), dir.cy(), dir.cz() );
+         if( block.neighborhoodSectionHasLargerBlock( index ) )
+         {
+            CellInterval coarseRegion( cells );
+            for( uint_t i = 0; i != 3; ++i )
+            {
+               const auto c = stencil::c[i][*dir];
+
+               if( c == -1 ) 
+               {
+                  coarseRegion.min()[i] -= cell_idx_c( numGhostLayers_ );
+                  coarseRegion.max()[i] = cells.min()[i] + cell_idx_c( 2 * numGhostLayers_ - 1 );
+               }
+               else if( c == 1 )
+               {
+                  coarseRegion.min()[i] = cells.max()[i] - cell_idx_c( 2 * numGhostLayers_ - 1 );
+                  coarseRegion.max()[i] += cell_idx_c( numGhostLayers_ );
+               }
+            }
+            coarseRegions.push_back( coarseRegion );
+         }
+      }
+
+      for( const CellInterval & coarseRegion : coarseRegions)
+         for( const Cell & cell : coarseRegion )
+         {
+            Cell globalCell( cell );
+            structuredBlockStorage_->transformBlockLocalToGlobalCell( globalCell, block );
+
+            Cell coarseCell( globalCell );
+            for( uint_t i = 0; i < 3; ++i )
+            {
+               if( coarseCell[i] < cell_idx_t(0) )
+               {
+                  coarseCell[i] = -( ( cell_idx_t(1) - coarseCell[i] ) >> 1 );
+               }
+               else
+               {
+                  coarseCell[i] >>= 1;
+               }
+            }
+
+            Vector3< real_t > coarseCenter;
+            structuredBlockStorage_->getCellCenter( coarseCenter, coarseCell, level - uint_t(1) );
+            structuredBlockStorage_->mapToPeriodicDomain( coarseCenter );
+
+            voxelizationField->get( cell ) =  distanceFunction_( coarseCenter ) < real_t(0) ? uint8_t(1) : uint8_t(0);
+         }
    }
 }
 

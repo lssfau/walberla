@@ -23,6 +23,8 @@
 
 #include "BoundaryInfo.h"
 
+#include "blockforest/StructuredBlockForest.h"
+
 #include "core/DataTypes.h"
 #include "core/cell/CellInterval.h"
 
@@ -50,11 +52,7 @@ public:
 
    enum Location { INSIDE, OUTSIDE };
 
-   BoundarySetup( const shared_ptr< StructuredBlockStorage > & structuredBlockStorage, const DistanceFunction & distanceFunction, const uint_t numGhostLayers )
-      : structuredBlockStorage_( structuredBlockStorage ), distanceFunction_( distanceFunction ), numGhostLayers_( numGhostLayers ), cellVectorChunkSize_( size_t(1000) )
-   {
-      voxelize();
-   }
+   BoundarySetup( const shared_ptr< StructuredBlockStorage > & structuredBlockStorage, const DistanceFunction & distanceFunction, const uint_t numGhostLayers );
 
    ~BoundarySetup() { deallocateVoxelizationField(); }
 
@@ -79,6 +77,7 @@ private:
    void deallocateVoxelizationField();
 
    void voxelize();
+   void refinementCorrection( StructuredBlockForest & blockForest );
 
    shared_ptr< StructuredBlockStorage >       structuredBlockStorage_;
    shared_ptr< BlockDataID >                  voxelizationFieldId_;
