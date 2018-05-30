@@ -31,6 +31,8 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/math/Random.h"
 
+#include <functional>
+
 using namespace walberla;
 using namespace walberla::pe;
 
@@ -83,10 +85,10 @@ int main( int argc, char** argv )
     std::function<void(void)> syncCall;
     if (!syncShadowOwners)
     {
-       syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+       syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
     } else
     {
-       syncCall = boost::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+       syncCall = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
     }
 
     pe::createSphere(*globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(5,5,5), 2);

@@ -57,6 +57,8 @@
 #include "pe_coupling/momentum_exchange_method/all.h"
 #include "pe_coupling/utility/all.h"
 
+#include <functional>
+
 
 namespace lubrication_correction_mem
 {
@@ -789,7 +791,7 @@ int main( int argc, char **argv )
 
    // set up synchronization procedure
    const real_t overlap = real_c( 1.5 ) * dx;
-   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
 
    // create the material
    const auto myMat = pe::createMaterial( "myMat", real_c(1.4), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(0) );

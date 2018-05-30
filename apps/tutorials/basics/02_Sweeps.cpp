@@ -24,7 +24,7 @@
 #include "gui/Gui.h"
 #include "timeloop/SweepTimeloop.h"
 
-#include <boost/bind.hpp>
+#include <functional>
 
 
 using namespace walberla;
@@ -125,7 +125,7 @@ int main( int argc, char ** argv )
 
    // registering the function sweep
    auto pointerToTwoArgFunction = & simpleSweep;
-   auto pointerToOneArgFunction = boost::bind( pointerToTwoArgFunction, _1, fieldID );
+   auto pointerToOneArgFunction = std::bind( pointerToTwoArgFunction, std::placeholders::_1, fieldID );
    timeloop.add() << Sweep( pointerToOneArgFunction, "BogusAlgorithm" );
 
    // registering the class sweep

@@ -106,7 +106,7 @@ namespace internal
                                                       const int tag )
    {
       UniformBufferedSchemeCreator creator( bf, stencil, tag );
-      python_coupling::for_each_noncopyable_type< Stencils >  ( boost::ref(creator) );
+      python_coupling::for_each_noncopyable_type< Stencils >  ( std::ref(creator) );
 
       if ( creator.getResult() == boost::python::object() )
       {
@@ -185,7 +185,7 @@ namespace internal
                                                     const std::string & stencil, const int tag )
    {
       UniformDirectSchemeCreator creator( bf, stencil, tag );
-      python_coupling::for_each_noncopyable_type< Stencils >  ( boost::ref(creator) );
+      python_coupling::for_each_noncopyable_type< Stencils >  ( std::ref(creator) );
 
       if ( creator.getResult() == boost::python::object() )
       {

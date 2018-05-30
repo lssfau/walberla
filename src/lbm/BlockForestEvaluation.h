@@ -38,8 +38,8 @@
 #include "field/CellCounter.h"
 #include "field/FlagUID.h"
 
-#include <boost/bind.hpp>
 
+#include <functional>
 #include <map>
 #include <string>
 #include <sstream>

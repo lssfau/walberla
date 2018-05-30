@@ -88,12 +88,11 @@
 #include "vtk/Initialization.h"
 #include "vtk/VTKOutput.h"
 
-#include <boost/bind.hpp>
-
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -303,7 +302,7 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
                                                              ( setup.zCells + uint_t(2) * FieldGhostLayers ) ) * memoryPerCell;
 
    forest->addRefinementSelectionFunction( refinementSelectionFunctions );
-   forest->addWorkloadMemorySUIDAssignmentFunction( boost::bind( workloadAndMemoryAssignment, _1, memoryPerBlock ) );
+   forest->addWorkloadMemorySUIDAssignmentFunction( std::bind( workloadAndMemoryAssignment, std::placeholders::_1, memoryPerBlock ) );
 
    forest->init( AABB( real_c(0), real_c(0), real_c(0), real_c( setup.xBlocks * setup.xCells ),
                                                         real_c( setup.yBlocks * setup.yCells ),
@@ -847,12 +846,12 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                                                  
    // evaluation 
    
-   const auto exactSolutionFunction = setup.circularProfile ? boost::bind( exactPipeVelocity, _1, blocks, setup ) :
-                                                              boost::bind( exactPlatesVelocity, _1, blocks, setup );
+   const auto exactSolutionFunction = setup.circularProfile ? std::bind( exactPipeVelocity, std::placeholders::_1, blocks, setup ) :
+                                                              std::bind( exactPlatesVelocity, std::placeholders::_1, blocks, setup );
 
    auto volumetricFlowRate = field::makeVolumetricFlowRateEvaluation< VelocityAdaptor_T, FlagField_T >( configBlock, blocks, velocityAdaptorId,
                                                                                                         flagFieldId, Fluid_Flag,
-                                                                                                        boost::bind( exactFlowRate, setup.flowRate_L ),
+                                                                                                        std::bind( exactFlowRate, setup.flowRate_L ),
                                                                                                         exactSolutionFunction );
    volumetricFlowRate->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
    volumetricFlowRate->setDomainNormalization( Vector3<real_t>( real_t(1) ) );

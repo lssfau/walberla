@@ -23,9 +23,7 @@
 #include "core/timing/Timer.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
 
-#include <boost/bind.hpp>
 #include <functional>
-
 #include <iostream>
 #include <map>
 #include <string>
@@ -180,7 +178,7 @@ namespace timeloop {
                                                           typename FField::flag_t activeMask,
                                                           uint_t countFreq , real_t scaling )
    {
-      this->addMeasurement( name, boost::bind( flagFieldCountFunction<FField>, _1, flagFieldID, activeMask ),
+      this->addMeasurement( name, std::bind( flagFieldCountFunction<FField>,  std::placeholders::_1, flagFieldID, activeMask ),
                            countFreq, scaling );
    }
 

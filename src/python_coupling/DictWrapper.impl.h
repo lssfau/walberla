@@ -19,6 +19,8 @@
 //
 //======================================================================================================================
 
+#include <functional>
+
 namespace walberla {
 namespace python_coupling {
 
@@ -113,7 +115,7 @@ inline void runPythonObject( boost::python::object obj ) {
 template<>
 inline std::function<void()> DictWrapper::get( const std::string & name ) {
    boost::python::object obj ( d_[name] );
-   return boost::bind( &runPythonObject, obj );
+   return std::bind( &runPythonObject, obj );
 }
 
 template<>

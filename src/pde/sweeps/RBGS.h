@@ -26,7 +26,7 @@
 #include "stencil/Directions.h"
 
 #include <map>
-
+#include <functional>
 
 
 namespace walberla {
@@ -53,12 +53,12 @@ public:
    
    std::function< void ( IBlock * const ) > getRedSweep()
    {
-      return boost::bind( &RBGS::update, this, _1, true );
+      return std::bind( &RBGS::update, this, std::placeholders::_1, true );
    }
 
    std::function< void ( IBlock * const ) > getBlackSweep()
    {
-      return boost::bind( &RBGS::update, this, _1, false );
+      return std::bind( &RBGS::update, this, std::placeholders::_1, false );
    }
 
 private:

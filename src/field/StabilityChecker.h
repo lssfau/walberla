@@ -394,7 +394,7 @@ void StabilityChecker< Field_T, Filter_T >::operator()()
 
          vtkWriter->addCellDataWriter( walberla::make_shared< vtk::DumpBlockStructureProcess >( "process" ) );
          vtkWriter->addCellDataWriter( walberla::make_shared< vtk::DumpBlockStructureLevel >( "level" ) );
-         vtkWriter->addCellDataWriter( walberla::make_shared< FValueVTKWriter >( boost::ref( failedCells_ ), "F" ) );
+         vtkWriter->addCellDataWriter( walberla::make_shared< FValueVTKWriter >( std::ref( failedCells_ ), "F" ) );
          vtkWriter->addCellDataWriter( walberla::make_shared< LocalCoordVTKWriter >( "blockLocalCoordinate" ) );
          vtkWriter->addCellDataWriter( walberla::make_shared< GlobalCoordVTKWriter >( "globalCoordinate" ) );
 

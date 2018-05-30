@@ -28,8 +28,8 @@
 #include <boost/mpl/pair.hpp>
 #include <boost/mpl/transform.hpp>
 
-#include <boost/bind.hpp>
 
+#include <functional>
 #include <map>
 
 
@@ -102,7 +102,7 @@ public:
          return map_[ blockDataID ];
 
       Exporter exporter( block_, blockDataID );
-      for_each_noncopyable_type< FieldTypeList>  ( boost::ref(exporter) );
+      for_each_noncopyable_type< FieldTypeList>  ( std::ref(exporter) );
       map_[ blockDataID ] = exporter.result;
       return exporter.result;
    }

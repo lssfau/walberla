@@ -889,7 +889,7 @@ int main( int argc, char **argv ) {
 
    // connect to pe
    const real_t overlap = real_t(1.5) * dx;
-   auto syncCall = boost::bind(pe::syncNextNeighbors<BodyTypeTuple>, boost::ref(blocks->getBlockForest()),
+   auto syncCall = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()),
                                bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
    shared_ptr<CollisionPropertiesEvaluator> collisionPropertiesEvaluator = walberla::make_shared<CollisionPropertiesEvaluator>(*cr);
 
@@ -1196,7 +1196,7 @@ int main( int argc, char **argv ) {
                                                                      velocityFieldID, svfFieldID,
                                                                      pressureGradientFieldID, dragCorrelationFunction,
                                                                      viscosity);
-            dragAndPressureForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+            dragAndPressureForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
          } else if (dist == Distribution::DKernel) {
             typedef pe_coupling::discrete_particle_methods::InteractionForceEvaluator<FlagField_T, field::NearestNeighborFieldInterpolator, field::KernelDistributor> IFE_T;
             shared_ptr<IFE_T> forceEvaluatorPtr = make_shared<IFE_T>(blocks, dragForceFieldID, bodyStorageID,
@@ -1204,7 +1204,7 @@ int main( int argc, char **argv ) {
                                                                      velocityFieldID, svfFieldID,
                                                                      pressureGradientFieldID, dragCorrelationFunction,
                                                                      viscosity);
-            dragAndPressureForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+            dragAndPressureForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
          }
       } else if (interpol == Interpolation::IKernel) {
          if (dist == Distribution::DNearestNeighbor) {
@@ -1214,7 +1214,7 @@ int main( int argc, char **argv ) {
                                                                      velocityFieldID, svfFieldID,
                                                                      pressureGradientFieldID, dragCorrelationFunction,
                                                                      viscosity);
-            dragAndPressureForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+            dragAndPressureForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
          } else if (dist == Distribution::DKernel) {
             typedef pe_coupling::discrete_particle_methods::InteractionForceEvaluator<FlagField_T, field::KernelFieldInterpolator, field::KernelDistributor> IFE_T;
             shared_ptr<IFE_T> forceEvaluatorPtr = make_shared<IFE_T>(blocks, dragForceFieldID, bodyStorageID,
@@ -1222,7 +1222,7 @@ int main( int argc, char **argv ) {
                                                                      velocityFieldID, svfFieldID,
                                                                      pressureGradientFieldID, dragCorrelationFunction,
                                                                      viscosity);
-            dragAndPressureForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+            dragAndPressureForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
          }
       } else if (interpol == Interpolation::ITrilinear) {
          if (dist == Distribution::DNearestNeighbor) {
@@ -1232,7 +1232,7 @@ int main( int argc, char **argv ) {
                                                                      velocityFieldID, svfFieldID,
                                                                      pressureGradientFieldID, dragCorrelationFunction,
                                                                      viscosity);
-            dragAndPressureForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+            dragAndPressureForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
          } else if (dist == Distribution::DKernel) {
             typedef pe_coupling::discrete_particle_methods::InteractionForceEvaluator<FlagField_T, field::TrilinearFieldInterpolator, field::KernelDistributor> IFE_T;
             shared_ptr<IFE_T> forceEvaluatorPtr = make_shared<IFE_T>(blocks, dragForceFieldID, bodyStorageID,
@@ -1240,7 +1240,7 @@ int main( int argc, char **argv ) {
                                                                      velocityFieldID, svfFieldID,
                                                                      pressureGradientFieldID, dragCorrelationFunction,
                                                                      viscosity);
-            dragAndPressureForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+            dragAndPressureForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
          }
       }
    }
@@ -1260,7 +1260,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, liftForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         velocityFieldID, velocityCurlFieldID, liftCorrelationFunction,
                                                                         viscosity );
-         liftForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         liftForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
       else if( dist == Distribution::DKernel )
       {
@@ -1268,7 +1268,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, liftForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         velocityFieldID, velocityCurlFieldID, liftCorrelationFunction,
                                                                         viscosity );
-         liftForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         liftForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
    }
    else if( interpol == Interpolation::IKernel )
@@ -1279,7 +1279,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, liftForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         velocityFieldID, velocityCurlFieldID, liftCorrelationFunction,
                                                                         viscosity );
-         liftForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         liftForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
       else if( dist == Distribution::DKernel )
       {
@@ -1287,7 +1287,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, liftForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         velocityFieldID, velocityCurlFieldID, liftCorrelationFunction,
                                                                         viscosity );
-         liftForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         liftForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
    }
    else if( interpol == Interpolation::ITrilinear )
@@ -1298,7 +1298,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, liftForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         velocityFieldID, velocityCurlFieldID, liftCorrelationFunction,
                                                                         viscosity );
-         liftForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         liftForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
       else if( dist == Distribution::DKernel )
       {
@@ -1306,7 +1306,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, liftForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         velocityFieldID, velocityCurlFieldID, liftCorrelationFunction,
                                                                         viscosity );
-         liftForceEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         liftForceEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
    }
 
@@ -1320,7 +1320,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, amForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         timeDerivativeVelocityFieldID, addedMassCorrelationFunction,
                                                                         bodyVelocityTimeDerivativeEvaluator );
-         addedMassEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         addedMassEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
       else if( dist == Distribution::DKernel )
       {
@@ -1328,7 +1328,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, amForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         timeDerivativeVelocityFieldID, addedMassCorrelationFunction,
                                                                         bodyVelocityTimeDerivativeEvaluator );
-         addedMassEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         addedMassEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
    }
    else if( interpol == Interpolation::IKernel )
@@ -1339,7 +1339,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, amForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         timeDerivativeVelocityFieldID, addedMassCorrelationFunction,
                                                                         bodyVelocityTimeDerivativeEvaluator );
-         addedMassEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         addedMassEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
       else if( dist == Distribution::DKernel )
       {
@@ -1347,7 +1347,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, amForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         timeDerivativeVelocityFieldID, addedMassCorrelationFunction,
                                                                         bodyVelocityTimeDerivativeEvaluator );
-         addedMassEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         addedMassEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
    }
    else if( interpol == Interpolation::ITrilinear )
@@ -1358,7 +1358,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, amForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         timeDerivativeVelocityFieldID, addedMassCorrelationFunction,
                                                                         bodyVelocityTimeDerivativeEvaluator );
-         addedMassEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         addedMassEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
       else if( dist == Distribution::DKernel )
       {
@@ -1366,7 +1366,7 @@ int main( int argc, char **argv ) {
          shared_ptr< IFE_T > forceEvaluatorPtr = make_shared< IFE_T > ( blocks, amForceFieldID, bodyStorageID, flagFieldID, Fluid_Flag,
                                                                         timeDerivativeVelocityFieldID, addedMassCorrelationFunction,
                                                                         bodyVelocityTimeDerivativeEvaluator );
-         addedMassEvaluationFunction = boost::bind(&IFE_T::operator(), forceEvaluatorPtr);
+         addedMassEvaluationFunction = std::bind(&IFE_T::operator(), forceEvaluatorPtr);
       }
    }
 
@@ -1376,7 +1376,7 @@ int main( int argc, char **argv ) {
    {
       typedef pe_coupling::discrete_particle_methods::LubricationForceEvaluator LE_T;
       shared_ptr<LE_T> lubEval = make_shared<LE_T>( blocks, globalBodyStorage, bodyStorageID, viscosity, lubricationCutOffDistance );
-      lubricationEvaluationFunction = boost::bind(&LE_T::operator(), lubEval);
+      lubricationEvaluationFunction = std::bind(&LE_T::operator(), lubEval);
    }
    else
    {
