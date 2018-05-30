@@ -227,7 +227,7 @@ int main( int argc, char ** argv )
                   WALBERLA_CHECK_EQUAL(shadowOwnersIt1->blockID_, shadowOwnersIt2->blockID_);
                }
 
-               checkVitalParameters( static_cast<SphereID>(*bodyIt1), static_cast<SphereID>(*bodyIt2) );
+               checkVitalParameters( static_cast<SphereID>(bodyIt1.getBodyID()), static_cast<SphereID>(bodyIt2.getBodyID()) );
 
             }
         }

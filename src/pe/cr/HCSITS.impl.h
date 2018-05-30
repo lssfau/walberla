@@ -290,7 +290,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
          body->index_ = j;
          WALBERLA_CHECK( body->hasInfiniteMass(), "Global bodies need to have infinite mass as they are not communicated!" );
 
-         initializeVelocityCorrections( *body, bodyCache.dv_[j], bodyCache.dw_[j], dt ); // use applied external forces to calculate starting velocity
+         initializeVelocityCorrections( body.getBodyID(), bodyCache.dv_[j], bodyCache.dw_[j], dt ); // use applied external forces to calculate starting velocity
 
          bodyCache.v_[j] = body->getLinearVel();
          bodyCache.w_[j] = body->getAngularVel();
@@ -300,7 +300,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
          body->wake(); // BUGFIX: Force awaking of all bodies!
          body->index_ = j;
 
-         initializeVelocityCorrections( *body, bodyCache.dv_[j], bodyCache.dw_[j], dt ); // use applied external forces to calculate starting velocity
+         initializeVelocityCorrections( body.getBodyID(), bodyCache.dv_[j], bodyCache.dw_[j], dt ); // use applied external forces to calculate starting velocity
 
          if( body->isAwake() && !body->hasInfiniteMass() ) {
             bodyCache.v_[j] = body->getLinearVel() + getGlobalLinearAcceleration() * dt;
@@ -317,7 +317,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
          body->wake(); // BUGFIX: Force awaking of all bodies!
          body->index_ = j;
 
-         initializeVelocityCorrections( *body, bodyCache.dv_[j], bodyCache.dw_[j], dt );
+         initializeVelocityCorrections( body.getBodyID(), bodyCache.dv_[j], bodyCache.dw_[j], dt );
 
          // Velocities of shadow copies will be initialized by velocity synchronization.
 #ifndef NDEBUG
@@ -349,7 +349,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
          body->index_ = j;
          WALBERLA_CHECK( body->hasInfiniteMass(), "Global bodies need to have infinite mass as they are not communicated!" );
 
-         initializeVelocityCorrections( *body, bodyCache.dv_[j], bodyCache.dw_[j], dt ); // use applied external forces to calculate starting velocity
+         initializeVelocityCorrections( body.getBodyID(), bodyCache.dv_[j], bodyCache.dw_[j], dt ); // use applied external forces to calculate starting velocity
 
          bodyCache.v_[j] = body->getLinearVel();
          bodyCache.w_[j] = body->getAngularVel();
@@ -457,10 +457,10 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
          WALBERLA_LOG_DETAIL( "Integrating position of global body " << *body << " with velocity " << body->getLinearVel() << "" );
          if (body->hasInfiniteMass())
          {
-            integratePositions( *body, bodyCache.v_[j], bodyCache.w_[j], dt );
+            integratePositions( body.getBodyID(), bodyCache.v_[j], bodyCache.w_[j], dt );
          } else
          {
-            integratePositions( *body, bodyCache.v_[j] + bodyCache.dv_[j], bodyCache.w_[j] + bodyCache.dw_[j], dt );
+            integratePositions( body.getBodyID(), bodyCache.v_[j] + bodyCache.dv_[j], bodyCache.w_[j] + bodyCache.dw_[j], dt );
          }
          WALBERLA_LOG_DETAIL( "Result:\n" << *body << "");
       }
@@ -476,11 +476,11 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
       BodyStorage& localStorage = (*storage)[0];
       BodyStorage& shadowStorage = (*storage)[1];
 
-      for( auto body = ConcatIterator<BodyStorage::Iterator>
+      for( auto body = ConcatIterator<BodyStorage::iterator>
            (localStorage.begin(),
             localStorage.end(),
             shadowStorage.begin(),
-            shadowStorage.end()); body != ConcatIterator<BodyStorage::Iterator>(); ++body )
+            shadowStorage.end()); body != ConcatIterator<BodyStorage::iterator>(); ++body )
       {
          if (!body->isCommunicating())
          {
@@ -492,10 +492,10 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
          WALBERLA_LOG_DETAIL( "Integrating position of body with infinite mass " << *body << " with velocity " << bodyCache.v_[j] << "" );
          if( body->hasInfiniteMass() )
          {
-            integratePositions( *body, bodyCache.v_[j], bodyCache.w_[j], dt );
+            integratePositions( &(*body), bodyCache.v_[j], bodyCache.w_[j], dt );
          } else
          {
-            integratePositions( *body, bodyCache.v_[j] + bodyCache.dv_[j], bodyCache.w_[j] + bodyCache.dw_[j], dt );
+            integratePositions( &(*body), bodyCache.v_[j] + bodyCache.dv_[j], bodyCache.w_[j] + bodyCache.dw_[j], dt );
          }
          WALBERLA_LOG_DETAIL( "Result:\n" << *body << "" );
       }
@@ -1433,7 +1433,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::parseVelocityCorrection(
 
       auto bodyIt = bodyStorage.find( objparam.sid_ );
       WALBERLA_ASSERT(bodyIt != bodyStorage.end(), "Body not found!");
-      BodyID b( *bodyIt );
+      BodyID b( bodyIt.getBodyID() );
       bodyCache.v_[b->index_] += relaxationParam_*objparam.dv_;
       bodyCache.w_[b->index_] += relaxationParam_*objparam.dw_;
 
@@ -1462,7 +1462,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::parseVelocityCorrectionS
 
       auto bodyIt = bodyStorage.find( objparam.sid_ );
       WALBERLA_ASSERT(bodyIt != bodyStorage.end(), "Body not found!");
-      BodyID b( *bodyIt );
+      BodyID b( bodyIt.getBodyID() );
       WALBERLA_ASSERT( b->isRemote(), "Update notification must only concern shadow copies." );
 
       bodyCache.v_[b->index_] = objparam.dv_;
@@ -1531,12 +1531,12 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
 
          WALBERLA_LOG_DETAIL( "Sending velocity correction " << bodyCache.dv_[i] << ", " << bodyCache.dw_[i] << " of body " << body->getSystemID() << " to owner process " << body->MPITrait.getOwner() << ".");
 
-         packNotificationWithoutSender(body->MPITrait.getOwner(), sb, RigidBodyVelocityCorrectionNotification( *(*body), bodyCache.dv_[i], bodyCache.dw_[i] ));
+         packNotificationWithoutSender(body->MPITrait.getOwner(), sb, RigidBodyVelocityCorrectionNotification( *body, bodyCache.dv_[i], bodyCache.dw_[i] ));
       }
 
       for( auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt )
       {
-         BodyID b(*bodyIt);
+         BodyID b(bodyIt.getBodyID());
          for (auto shadows = b->MPITrait.beginShadowOwners(); shadows != b->MPITrait.endShadowOwners(); ++shadows )
          {
             recvRanks.insert(shadows->rank_);
@@ -1630,7 +1630,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
 
             mpi::SendBuffer& sb = syncVelBS.sendBuffer( shadow->rank_ );
             if (sb.isEmpty()) sb << walberla::uint8_c(0);
-            packNotificationWithoutSender(*shadow, sb, RigidBodyVelocityCorrectionNotification( *(*body), bodyCache.v_[i], bodyCache.w_[i] ));
+            packNotificationWithoutSender(*shadow, sb, RigidBodyVelocityCorrectionNotification( *body, bodyCache.v_[i], bodyCache.w_[i] ));
 
             WALBERLA_LOG_DETAIL( "Sending velocity update " << bodyCache.v_[i] << ", " << bodyCache.w_[i] << " of body " << body->getSystemID() << " to process " << *shadow << " having a shadow copy.");
          }
@@ -1638,7 +1638,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
 
       for( auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); ++bodyIt )
       {
-         BodyID b(*bodyIt);
+         BodyID b(bodyIt.getBodyID());
          recvRanks.insert(b->MPITrait.getOwner().rank_);
       }
    }

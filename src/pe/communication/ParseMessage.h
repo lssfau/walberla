@@ -88,7 +88,7 @@ void parseMessage(Owner sender, mpi::RecvBuffer& rb, const domain_decomposition:
 
             auto bodyIt = shadowStorage.find( objparam.sid_ );
             WALBERLA_ASSERT_UNEQUAL( bodyIt, shadowStorage.end() );
-            BodyID b( *bodyIt );
+            BodyID b( bodyIt.getBodyID() );
 
             WALBERLA_ASSERT( b->MPITrait.getOwner().blockID_ == sender.blockID_, "Update notifications must be sent by owner.\n" << b->MPITrait.getOwner().blockID_ << " != "<< sender.blockID_ );
             WALBERLA_ASSERT( b->isRemote(), "Update notification must only concern shadow copies." );
@@ -112,10 +112,9 @@ void parseMessage(Owner sender, mpi::RecvBuffer& rb, const domain_decomposition:
 
             auto bodyIt = shadowStorage.find( objparam.sid_ );
             if ( bodyIt == shadowStorage.end() ) WALBERLA_ABORT( "Object with id: " << objparam.sid_ << " not found in shadowStorage! Cannot transfer ownership! \nlocal domain: " << block.getAABB() );
-            BodyID b( *bodyIt );
+            BodyID b( bodyIt.getBodyID() );
 
-            shadowStorage.release( b );
-            localStorage.add( b );
+            localStorage.add( shadowStorage.release( b ) );
 
             WALBERLA_ASSERT( sender.blockID_ == b->MPITrait.getOwner().blockID_, "Migration notifications must be sent by previous owner.\n" << b->MPITrait.getOwner().blockID_ << " != "<< sender.blockID_ );
             WALBERLA_ASSERT( b->isRemote(), "Bodies in migration notifications must be available as shadow copies in local process." );
@@ -143,7 +142,7 @@ void parseMessage(Owner sender, mpi::RecvBuffer& rb, const domain_decomposition:
 
             auto bodyIt = shadowStorage.find( objparam.sid_ );
             WALBERLA_ASSERT_UNEQUAL( bodyIt, shadowStorage.end() );
-            BodyID b( *bodyIt );
+            BodyID b( bodyIt.getBodyID() );
 
             WALBERLA_ASSERT( sender.blockID_ == b->MPITrait.getOwner().blockID_, "Remote migration notifications must be sent by previous owner.\n" << sender.blockID_ << " != " << b->MPITrait.getOwner().blockID_  );
             WALBERLA_ASSERT( b->isRemote(), "Bodies in remote migration notifications must be available as shadow copies in local process." );
@@ -164,7 +163,7 @@ void parseMessage(Owner sender, mpi::RecvBuffer& rb, const domain_decomposition:
             // Remove shadow copy as prompted.
             auto bodyIt = shadowStorage.find( objparam.sid_ );
             WALBERLA_ASSERT_UNEQUAL( bodyIt, shadowStorage.end() );
-            BodyID b( *bodyIt );
+            BodyID b( bodyIt.getBodyID() );
 
             // TODO assert that we indeed do not need the shadow copy anymore
             WALBERLA_ASSERT( b->MPITrait.getOwner().blockID_ == sender.blockID_, "Only owner is allowed to send removal notifications.\n" << b->MPITrait.getOwner().blockID_ << " != "<< sender.blockID_ );
@@ -184,7 +183,7 @@ void parseMessage(Owner sender, mpi::RecvBuffer& rb, const domain_decomposition:
          // Remove invalid shadow copy.
          auto bodyIt = shadowStorage.find( objparam.sid_ );
          WALBERLA_ASSERT_UNEQUAL( bodyIt, shadowStorage.end() );
-         BodyID b( *bodyIt );
+         BodyID b( bodyIt.getBodyID() );
 
          WALBERLA_ASSERT( b->MPITrait.getOwner().blockID_ == sender.blockID_, "Only owner is allowed to send deletion notifications.\n" << b->MPITrait.getOwner().blockID_ << " != "<< sender.blockID_ );
 
@@ -203,7 +202,7 @@ void parseMessage(Owner sender, mpi::RecvBuffer& rb, const domain_decomposition:
          // Remove invalid shadow copy.
          auto bodyIt = localStorage.find( objparam.sid_ );
          WALBERLA_ASSERT_UNEQUAL( bodyIt, localStorage.end() );
-         BodyID b( *bodyIt );
+         BodyID b( bodyIt.getBodyID() );
 
          b->MPITrait.registerShadowOwner( objparam.newOwner_ );
 
@@ -221,7 +220,7 @@ void parseMessage(Owner sender, mpi::RecvBuffer& rb, const domain_decomposition:
          {
             auto bodyIt = localStorage.find( objparam.sid_ );
             WALBERLA_ASSERT_UNEQUAL( bodyIt, localStorage.end() );
-            BodyID b( *bodyIt );
+            BodyID b( bodyIt.getBodyID() );
             b->MPITrait.deregisterShadowOwner( sender );
             b->MPITrait.unsetBlockState( sender.blockID_ );
          } else
@@ -229,7 +228,7 @@ void parseMessage(Owner sender, mpi::RecvBuffer& rb, const domain_decomposition:
             auto bodyIt = shadowStorage.find( objparam.sid_ );
             if (bodyIt != shadowStorage.end() )
             {
-               BodyID b( *bodyIt );
+               BodyID b( bodyIt.getBodyID() );
                b->MPITrait.unsetBlockState( sender.blockID_ );
             }
          }
@@ -260,7 +259,7 @@ void parseForceReduceMessage(Owner sender, mpi::RecvBuffer& rb, const domain_dec
 
       auto bodyIt = localStorage.find( objparam.sid_ );
       WALBERLA_ASSERT_UNEQUAL( bodyIt, localStorage.end() );
-      BodyID b( *bodyIt );
+      BodyID b( bodyIt.getBodyID() );
 
       WALBERLA_ASSERT( !b->isRemote(), "Update notification must only concern local bodies." );
 
@@ -292,7 +291,7 @@ void parseForceDistributeMessage(Owner sender, mpi::RecvBuffer& rb, const domain
 
       auto bodyIt = shadowStorage.find( objparam.sid_ );
       WALBERLA_ASSERT_UNEQUAL( bodyIt, shadowStorage.end() );
-      BodyID b( *bodyIt );
+      BodyID b( bodyIt.getBodyID() );
 
       WALBERLA_ASSERT( b->isRemote(), "Update notification must only concern shadow bodies." );
 

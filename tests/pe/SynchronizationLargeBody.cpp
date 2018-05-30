@@ -51,7 +51,7 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       {
          WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 1 );
          WALBERLA_CHECK_EQUAL( shadowStorage.size(), 0 );
-         SphereID bd = static_cast<SphereID> (*(storage[0].find( sid )));
+         SphereID bd = static_cast<SphereID> (storage[0].find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
          checkVitalParameters(bd, ref);
          bd->setPosition( newPos );
@@ -59,7 +59,7 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       {
          WALBERLA_CHECK_EQUAL( storage[0].size(), 0 );
          WALBERLA_CHECK_EQUAL( shadowStorage.size(), 1 );
-         SphereID bd = static_cast<SphereID> (*(shadowStorage.find( sid )));
+         SphereID bd = static_cast<SphereID> (shadowStorage.find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
          auto backupPos =ref->getPosition();
          auto correctedPos = ref->getPosition();
@@ -92,7 +92,7 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       {
          WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 1 );
          WALBERLA_CHECK_EQUAL( shadowStorage.size(), 0 );
-         SphereID bd = static_cast<SphereID> (*(storage[0].find( sid )));
+         SphereID bd = static_cast<SphereID> (storage[0].find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
          checkVitalParameters(bd, ref);
          bd->setPosition( newPos );
@@ -100,7 +100,7 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       {
          WALBERLA_CHECK_EQUAL( storage[0].size(), 0 );
          WALBERLA_CHECK_EQUAL( shadowStorage.size(), 1, "ref_sphere: " << ref << "\n" << block.getAABB() );
-         SphereID bd = static_cast<SphereID> (*(shadowStorage.find( sid )));
+         SphereID bd = static_cast<SphereID> (shadowStorage.find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
          auto backupPos =ref->getPosition();
          auto correctedPos = ref->getPosition();

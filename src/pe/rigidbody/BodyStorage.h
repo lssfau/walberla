@@ -26,24 +26,21 @@
 // Includes
 //*************************************************************************************************
 
+#include <core/NonCopyable.h>
+#include <core/debug/Debug.h>
+#include <pe/rigidbody/RigidBody.h>
+#include <pe/rigidbody/RigidBodyCastIterator.h>
+#include <pe/rigidbody/RigidBodyIterator.h>
+#include <pe/Types.h>
+
 #include <algorithm>
 #include <functional>
 #include <map>
+#include <memory>
 #include <vector>
-#include <core/NonCopyable.h>
-#include <core/debug/Debug.h>
-#include <core/ptrvector/policies/PtrDelete.h>
-#include <core/ptrvector/PtrVector.h>
-#include <pe/rigidbody/RigidBody.h>
-#include <pe/Types.h>
-
-#include <functional>
 
 namespace walberla {
 namespace pe {
-
-
-
 
 //=================================================================================================
 //
@@ -62,13 +59,18 @@ class BodyStorage : private NonCopyable
 public:
    //**Type definitions****************************************************************************
    //! Container for the bodies contained in the simulation world.
-   typedef PtrVector<BodyType, PtrDelete>  Bodies;
+   using VectorContainer = std::vector< std::unique_ptr<RigidBody> >;
+   using ConstVectorContainer = std::vector< std::unique_ptr<const RigidBody> >;
    //**********************************************************************************************
 
    //**Type definitions****************************************************************************
-   typedef Bodies::SizeType       SizeType;       //!< Size type of the body storage.
-   typedef Bodies::Iterator       Iterator;       //!< Iterator over non-const bodies.
-   typedef Bodies::ConstIterator  ConstIterator;  //!< Iterator over constant bodies.
+   using size_type             = VectorContainer::size_type;           //!< Size type of the body storage.
+   using iterator              = RigidBodyIterator;                    //!< Iterator over non-const bodies.
+   using const_iterator        = ConstRigidBodyIterator;               //!< Iterator over constant bodies.
+   template <typename C> //cast type
+   using cast_iterator         = RigidBodyCastIterator<C>;
+   template <typename C> //cast type
+   using const_cast_iterator   = ConstRigidBodyCastIterator<C>;
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
@@ -88,45 +90,58 @@ public:
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline bool          isEmpty () const;
-   inline SizeType      size    () const;
-   template< typename T >
-   inline SizeType      size    () const;
-   inline Iterator      begin   ();
-   inline ConstIterator begin   () const;
-   template< typename T >
-   inline typename Bodies::template CastIterator<T> begin();
-   template< typename T >
-   inline typename Bodies::template ConstCastIterator<T> begin() const;
-   inline Iterator      end     ();
-   inline ConstIterator end     () const;
-   template< typename T >
-   inline typename Bodies::template CastIterator<T> end();
-   template< typename T >
-   inline typename Bodies::template ConstCastIterator<T> end() const;
-   inline BodyID        at      ( SizeType index );
-   inline ConstBodyID   at      ( SizeType index ) const;
-   inline Iterator      find    ( id_t sid );
-   inline ConstIterator find    ( id_t sid ) const;
-   inline Iterator      find    ( ConstBodyID body );
-   inline ConstIterator find    ( ConstBodyID body ) const;
-   inline void          validate();
+   inline bool           isEmpty () const;
+   inline size_type      size    () const;
+
+   inline iterator       begin   ();
+   inline const_iterator begin   () const;
+   inline const_iterator cbegin  () const;
+   inline iterator       end     ();
+   inline const_iterator end     () const;
+   inline const_iterator cend    () const;
+
+   template< typename C >
+   inline cast_iterator<C> begin();
+   template< typename C >
+   inline const_cast_iterator<C> begin() const;
+   template< typename C >
+   inline const_cast_iterator<C> cbegin() const;
+   template< typename C >
+   inline cast_iterator<C> end();
+   template< typename C >
+   inline const_cast_iterator<C> end() const;
+   template< typename C >
+   inline const_cast_iterator<C> cend() const;
+
+   inline RigidBody&         front();
+   inline const RigidBody&   front() const;
+   inline RigidBody&         back();
+   inline const RigidBody&   back() const;
+
+   inline BodyID         at      ( size_type index );
+   inline ConstBodyID    at      ( size_type index ) const;
+   inline iterator       find    ( id_t sid );
+   inline const_iterator find    ( id_t sid ) const;
+   inline iterator       find    ( ConstBodyID body );
+   inline const_iterator find    ( ConstBodyID body ) const;
+   inline void           validate();
    //@}
    //**********************************************************************************************
 
    //**Add/Remove functions************************************************************************
    /*!\name Add/Remove functions */
    //@{
-   inline void          add     ( BodyID body );
-   inline void          remove  ( const id_t sid );
-   inline void          remove  ( BodyID body );
-   inline ConstIterator remove  ( ConstIterator pos );
-   inline Iterator      remove  ( Iterator pos );
-   inline void          release ( const id_t sid );
-   inline void          release ( BodyID body );
-   inline ConstIterator release  ( ConstIterator pos );
-   inline Iterator      release  ( Iterator pos );
-   inline void          clear   ();
+   inline RigidBody&     add     ( BodyID body );
+   inline RigidBody&     add     ( std::unique_ptr<RigidBody>&& body );
+   inline iterator       remove  ( const id_t sid );
+   inline iterator       remove  ( BodyID body );
+   inline const_iterator remove  ( const_iterator pos );
+   inline iterator       remove  ( iterator pos );
+   inline std::unique_ptr<RigidBody> release ( const id_t sid );
+   inline std::unique_ptr<RigidBody> release ( BodyID body );
+   inline std::unique_ptr<RigidBody> release ( const_iterator& pos );
+   inline std::unique_ptr<RigidBody> release ( iterator& pos );
+   inline void           clear   ();
    //@}
    //**********************************************************************************************
 
@@ -147,8 +162,8 @@ private:
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{
-   Bodies bodies_;  //!< The rigid bodies contained in the simulation world.
-   std::map<id_t, SizeType> bodyIDs_;   //!< The association of system IDs to rigid bodies.
+   VectorContainer           bodies_;    //!< The rigid bodies contained in the simulation world.
+   std::map<id_t, size_type> bodyIDs_;   //!< The association of system IDs to rigid bodies.
 
    std::map< std::string, std::function<void (BodyID)> > addCallbacks_;
    std::map< std::string, std::function<void (BodyID)> > removeCallbacks_;
@@ -170,9 +185,9 @@ private:
 /*!\brief The standard constructor.
  */
 inline BodyStorage::BodyStorage()
-	: bodies_( 1000 )
-	, bodyIDs_()
+   : bodyIDs_()
 {
+   bodies_.reserve(1000);
 }
 //*************************************************************************************************
 
@@ -195,7 +210,7 @@ inline BodyStorage::~BodyStorage()
 {
    WALBERLA_ASSERT_EQUAL(addCallbacks_.size(), 0, "Still add callbacks registered!");
    WALBERLA_ASSERT_EQUAL(removeCallbacks_.size(), 0, "Still remove callbacks registered!");
-	clear();
+   clear();
 }
 //*************************************************************************************************
 
@@ -216,7 +231,7 @@ inline BodyStorage::~BodyStorage()
 
 inline bool BodyStorage::isEmpty() const
 {
-   return bodies_.isEmpty();
+   return bodies_.empty();
 }
 //*************************************************************************************************
 
@@ -227,7 +242,7 @@ inline bool BodyStorage::isEmpty() const
  * \return The number of rigid bodies.
  */
 
-inline BodyStorage::SizeType BodyStorage::size() const
+inline BodyStorage::size_type BodyStorage::size() const
 {
    return bodies_.size();
 }
@@ -235,33 +250,14 @@ inline BodyStorage::SizeType BodyStorage::size() const
 
 
 //*************************************************************************************************
-/*!\brief Returns the number of rigid bodies of type \a T contained in the body storage.
- *
- * \return The number of rigid bodies of type \a T.
- *
- * \b Note: The total number of objects of type \a T is not cached but recalculated each time the
- * function is called. Using the templated version of size() to calculate the total number objects
- * of type \a T is therefore more expensive than using the non-template version of size() to get
- * the total number of pointers in the vector!
- */
-
-template< typename T >  // Cast type
-inline BodyStorage::SizeType BodyStorage::size() const
-{
-   return bodies_.template size<T>();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
 /*!\brief Returns an iterator to the first contained rigid body.
  *
  * \return Iterator to the first contained rigid body.
  */
 
-inline BodyStorage::Iterator BodyStorage::begin()
+inline BodyStorage::iterator BodyStorage::begin()
 {
-   return bodies_.begin();
+   return BodyStorage::iterator(bodies_.begin());
 }
 //*************************************************************************************************
 
@@ -272,23 +268,9 @@ inline BodyStorage::Iterator BodyStorage::begin()
  * \return Constant iterator to the first contained rigid body.
  */
 
-inline BodyStorage::ConstIterator BodyStorage::begin() const
+inline BodyStorage::const_iterator BodyStorage::begin() const
 {
-   return bodies_.begin();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator to the first contained rigid body.
- *
- * \return Iterator to the first contained rigid body.
- */
-
-template< typename T >  // Cast Type
-inline BodyStorage::Bodies::template CastIterator<T> BodyStorage::begin()
-{
-   return bodies_.template begin<T>();
+   return cbegin();
 }
 //*************************************************************************************************
 
@@ -299,10 +281,9 @@ inline BodyStorage::Bodies::template CastIterator<T> BodyStorage::begin()
  * \return Constant iterator to the first contained rigid body.
  */
 
-template< typename T >  // Cast Type
-inline BodyStorage::Bodies::template ConstCastIterator<T> BodyStorage::begin() const
+inline BodyStorage::const_iterator BodyStorage::cbegin() const
 {
-   return bodies_.template begin<T>();
+   return BodyStorage::const_iterator(bodies_.cbegin());
 }
 //*************************************************************************************************
 
@@ -313,9 +294,9 @@ inline BodyStorage::Bodies::template ConstCastIterator<T> BodyStorage::begin() c
  * \return Iterator just past the last contained rigid body.
  */
 
-inline BodyStorage::Iterator BodyStorage::end()
+inline BodyStorage::iterator BodyStorage::end()
 {
-   return bodies_.end();
+   return BodyStorage::iterator(bodies_.end());
 }
 //*************************************************************************************************
 
@@ -326,9 +307,64 @@ inline BodyStorage::Iterator BodyStorage::end()
  * \return Constant iterator just past the last contained rigid body.
  */
 
-inline BodyStorage::ConstIterator BodyStorage::end() const
+inline BodyStorage::const_iterator BodyStorage::end() const
 {
-   return bodies_.end();
+   return cend();
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Returns a constant iterator just past the last contained rigid body.
+ *
+ * \return Constant iterator just past the last contained rigid body.
+ */
+
+inline BodyStorage::const_iterator BodyStorage::cend() const
+{
+   return BodyStorage::const_iterator(bodies_.cend());
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Returns an iterator to the first contained rigid body.
+ *
+ * \return Iterator to the first contained rigid body.
+ */
+
+template< typename C >  // Cast Type
+inline BodyStorage::cast_iterator<C> BodyStorage::begin()
+{
+   return BodyStorage::cast_iterator<C>(bodies_.begin(), bodies_.end());
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Returns a constant iterator to the first contained rigid body.
+ *
+ * \return Constant iterator to the first contained rigid body.
+ */
+
+template< typename C >  // Cast Type
+inline BodyStorage::const_cast_iterator<C> BodyStorage::begin() const
+{
+   return cbegin();
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Returns a constant iterator to the first contained rigid body.
+ *
+ * \return Constant iterator to the first contained rigid body.
+ */
+
+template< typename C >  // Cast Type
+inline BodyStorage::const_cast_iterator<C> BodyStorage::cbegin() const
+{
+   return BodyStorage::const_cast_iterator<C>(bodies_.begin(), bodies_.end());
 }
 //*************************************************************************************************
 
@@ -339,10 +375,10 @@ inline BodyStorage::ConstIterator BodyStorage::end() const
  * \return Iterator just past the last contained rigid body.
  */
 
-template< typename T >  // Cast Type
-inline BodyStorage::Bodies::template CastIterator<T> BodyStorage::end()
+template< typename C >  // Cast Type
+inline BodyStorage::cast_iterator<C> BodyStorage::end()
 {
-   return bodies_.template end<T>();
+   return BodyStorage::cast_iterator<C>(bodies_.end(), bodies_.end());
 }
 //*************************************************************************************************
 
@@ -353,12 +389,43 @@ inline BodyStorage::Bodies::template CastIterator<T> BodyStorage::end()
  * \return Constant iterator just past the last contained rigid body.
  */
 
-template< typename T >  // Cast Type
-inline BodyStorage::Bodies::template ConstCastIterator<T> BodyStorage::end() const
+template< typename C >  // Cast Type
+inline BodyStorage::const_cast_iterator<C> BodyStorage::end() const
 {
-   return bodies_.template end<T>();
+   return cend();
 }
 //*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Returns a constant iterator just past the last contained rigid body.
+ *
+ * \return Constant iterator just past the last contained rigid body.
+ */
+
+template< typename C >  // Cast Type
+inline BodyStorage::const_cast_iterator<C> BodyStorage::cend() const
+{
+   return BodyStorage::const_cast_iterator<C>(bodies_.end(), bodies_.end());
+}
+//*************************************************************************************************
+
+inline RigidBody&         BodyStorage::front()
+{
+   return *bodies_.front();
+}
+inline const RigidBody&   BodyStorage::front() const
+{
+   return *bodies_.front();
+}
+inline RigidBody&         BodyStorage::back()
+{
+   return *bodies_.back();
+}
+inline const RigidBody&   BodyStorage::back() const
+{
+   return *bodies_.back();
+}
 
 
 //*************************************************************************************************
@@ -370,10 +437,10 @@ inline BodyStorage::Bodies::template ConstCastIterator<T> BodyStorage::end() con
  * \b Note: No runtime check is performed to ensure the validity of the access index.
  */
 
-inline BodyID BodyStorage::at( SizeType index )
+inline BodyID BodyStorage::at( size_type index )
 {
    WALBERLA_ASSERT( index < size(), "Invalid body index" );
-   return bodies_[index];
+   return bodies_[index].get();
 }
 //*************************************************************************************************
 
@@ -387,10 +454,10 @@ inline BodyID BodyStorage::at( SizeType index )
  * \b Note: No runtime check is performed to ensure the validity of the access index.
  */
 
-inline ConstBodyID BodyStorage::at( SizeType index ) const
+inline ConstBodyID BodyStorage::at( size_type index ) const
 {
    WALBERLA_ASSERT( index < size(), "Invalid body index" );
-   return bodies_[index];
+   return bodies_[index].get();
 }
 //*************************************************************************************************
 
@@ -406,13 +473,13 @@ inline ConstBodyID BodyStorage::at( SizeType index ) const
  * iterator just past the end of the last body contained in the body storage.
  */
 
-inline BodyStorage::Iterator BodyStorage::find( id_t sid )
+inline BodyStorage::iterator BodyStorage::find( id_t sid )
 {
-   std::map<id_t, SizeType>::const_iterator pos = bodyIDs_.find( sid );
+   std::map<id_t, size_type>::const_iterator pos = bodyIDs_.find( sid );
    if( pos == bodyIDs_.end() )
-      return bodies_.end();
+      return BodyStorage::iterator(bodies_.end());
 
-   return bodies_.begin() + static_cast<Bodies::Iterator::difference_type>(pos->second);
+   return BodyStorage::iterator(bodies_.begin() + static_cast<VectorContainer::iterator::difference_type>(pos->second));
 }
 //*************************************************************************************************
 
@@ -428,13 +495,13 @@ inline BodyStorage::Iterator BodyStorage::find( id_t sid )
  * a constant iterator just past the end of the last body contained in the body storage.
  */
 
-inline BodyStorage::ConstIterator BodyStorage::find( id_t sid ) const
+inline BodyStorage::const_iterator BodyStorage::find( id_t sid ) const
 {
-   std::map<id_t, SizeType>::const_iterator pos = bodyIDs_.find( sid );
+   std::map<id_t, size_type>::const_iterator pos = bodyIDs_.find( sid );
    if( pos == bodyIDs_.end() )
-      return bodies_.end();
+      return BodyStorage::const_iterator(bodies_.end());
 
-   return bodies_.begin() + static_cast<Bodies::Iterator::difference_type>(pos->second);
+   return BodyStorage::const_iterator(bodies_.begin() + static_cast<VectorContainer::iterator::difference_type>(pos->second));
 }
 //*************************************************************************************************
 
@@ -450,9 +517,9 @@ inline BodyStorage::ConstIterator BodyStorage::find( id_t sid ) const
  * just past the end of the last body contained in the body storage.
  */
 
-inline BodyStorage::Iterator BodyStorage::find( ConstBodyID body )
+inline BodyStorage::iterator BodyStorage::find( ConstBodyID body )
 {
-   return find( body->getSystemID() );
+   return BodyStorage::iterator(find( body->getSystemID() ));
 }
 //*************************************************************************************************
 
@@ -468,9 +535,9 @@ inline BodyStorage::Iterator BodyStorage::find( ConstBodyID body )
  * constant iterator just past the end of the last body contained in the body storage.
  */
 
-inline BodyStorage::ConstIterator BodyStorage::find( ConstBodyID body ) const
+inline BodyStorage::const_iterator BodyStorage::find( ConstBodyID body ) const
 {
-   return find( body->getSystemID() );
+   return BodyStorage::const_iterator(find( body->getSystemID() ));
 }
 //*************************************************************************************************
 
@@ -494,16 +561,45 @@ inline BodyStorage::ConstIterator BodyStorage::find( ConstBodyID body ) const
  * logarithmic unless reallocation occurs.
  */
 
-inline void BodyStorage::add( BodyID body )
+inline RigidBody& BodyStorage::add( BodyID body )
 {
    WALBERLA_ASSERT( bodyIDs_.find( body->getSystemID() ) == bodyIDs_.end(), "Body with same system ID already added." );
    bodyIDs_[ body->getSystemID() ] = bodies_.size();
-   bodies_.pushBack( body );
+   bodies_.push_back( std::unique_ptr<RigidBody>(body) );
 
    for (auto it = addCallbacks_.begin(); it != addCallbacks_.end(); ++it)
    {
-      it->second(body);
+      it->second(bodies_.back().get());
    }
+
+   return *bodies_.back();
+}
+//*************************************************************************************************
+
+
+//*************************************************************************************************
+/*!\brief Adding a rigid body to the body storage.
+ *
+ * \param body The new rigid body to be added to the body storage.
+ * \return void
+ *
+ * This function adds a rigid body to the body storage. Adding bodies with non-unique system ID or
+ * adding the same body multiple times results in undefined behaviour. The time complexity is
+ * logarithmic unless reallocation occurs.
+ */
+
+inline RigidBody& BodyStorage::add( std::unique_ptr<RigidBody>&& body )
+{
+   WALBERLA_ASSERT( bodyIDs_.find( body->getSystemID() ) == bodyIDs_.end(), "Body with same system ID already added." );
+   bodyIDs_[ body->getSystemID() ] = bodies_.size();
+   bodies_.push_back( std::move(body) );
+
+   for (auto it = addCallbacks_.begin(); it != addCallbacks_.end(); ++it)
+   {
+      it->second(bodies_.back().get());
+   }
+
+   return *bodies_.back();
 }
 //*************************************************************************************************
 
@@ -520,23 +616,25 @@ inline void BodyStorage::add( BodyID body )
  * The last element is swapped to the actual position and the length is reduced by one.
  */
 
-inline void BodyStorage::remove( const id_t sid )
+inline
+BodyStorage::iterator BodyStorage::remove( const id_t sid )
 {
-   std::map<id_t, SizeType>::iterator it = bodyIDs_.find( sid );
+   std::map<id_t, size_type>::iterator it = bodyIDs_.find( sid );
    WALBERLA_ASSERT( it != bodyIDs_.end(), "The body's system ID was not registered." );
 
    // Move last element to deleted place and update the system ID to index mapping.
-   SizeType i = it->second;
+   size_type i = it->second;
 
    for (auto cb = removeCallbacks_.begin(); cb != removeCallbacks_.end(); ++cb)
    {
-      cb->second( bodies_[i] );
+      cb->second( bodies_[i].get() );
    }
 
    bodyIDs_[ bodies_.back()->getSystemID() ] = i;
    std::swap( bodies_[i], bodies_.back() );
    bodyIDs_.erase( it );
-   bodies_.popBack();
+   bodies_.pop_back();
+   return iterator(bodies_.begin() + int_c(i));
 }
 //*************************************************************************************************
 
@@ -552,10 +650,9 @@ inline void BodyStorage::remove( const id_t sid )
  * the element to be removed. The time complexity is logarithmic unless reallocation occurs.
  */
 
-inline BodyStorage::ConstIterator BodyStorage::remove( ConstIterator pos )
+inline BodyStorage::const_iterator BodyStorage::remove( const_iterator pos )
 {
-   remove( (*pos)->getSystemID() );
-   return pos;
+   return remove( pos->getSystemID() );
 }
 //*************************************************************************************************
 
@@ -571,10 +668,9 @@ inline BodyStorage::ConstIterator BodyStorage::remove( ConstIterator pos )
  * the element to be removed. The time complexity is logarithmic unless reallocation occurs.
  */
 
-inline BodyStorage::Iterator BodyStorage::remove( Iterator pos )
+inline BodyStorage::iterator BodyStorage::remove( iterator pos )
 {
-   remove( (*pos)->getSystemID() );
-   return pos;
+   return remove( pos->getSystemID() );
 }
 //*************************************************************************************************
 
@@ -590,9 +686,10 @@ inline BodyStorage::Iterator BodyStorage::remove( Iterator pos )
  * the element to be removed. The time complexity is logarithmic unless reallocation occurs.
  */
 
-inline void BodyStorage::remove( BodyID body )
+inline
+BodyStorage::iterator BodyStorage::remove( BodyID body )
 {
-   remove( body->getSystemID() );
+   return remove( body->getSystemID() );
 }
 //*************************************************************************************************
 
@@ -609,23 +706,22 @@ inline void BodyStorage::remove( BodyID body )
  * Last element is swapped to the actual position and length is reduced by 1.
  */
 
-inline void BodyStorage::release( const id_t sid )
+inline std::unique_ptr<RigidBody> BodyStorage::release( const id_t sid )
 {
-   std::map<id_t, SizeType>::iterator it = bodyIDs_.find( sid );
+   std::map<id_t, size_type>::iterator it = bodyIDs_.find( sid );
    WALBERLA_ASSERT( it != bodyIDs_.end(), "The body's system ID was not registered." );
 
    // Move last element to deleted place and update the system ID to index mapping.
-   SizeType i = it->second;
+   size_type i = it->second;
 
-   for (auto cb = removeCallbacks_.begin(); cb != removeCallbacks_.end(); ++cb)
-   {
-      cb->second( bodies_[i] );
-   }
+   std::for_each(removeCallbacks_.begin(), removeCallbacks_.end(), [&](auto& cb){cb.second( bodies_[i].get() );});
 
    bodyIDs_[ bodies_.back()->getSystemID() ] = i;
    std::swap( bodies_[i], bodies_.back() );
    bodyIDs_.erase( it );
-   bodies_.releaseBack();
+   auto tmp = std::move(bodies_.back());
+   bodies_.pop_back();
+   return tmp;
 }
 //*************************************************************************************************
 
@@ -641,10 +737,12 @@ inline void BodyStorage::release( const id_t sid )
  * the element to be released. The time complexity is logarithmic unless reallocation occurs.
  */
 
-inline BodyStorage::ConstIterator BodyStorage::release( ConstIterator pos )
+inline std::unique_ptr<RigidBody> BodyStorage::release( const_iterator& pos )
 {
-   release( (*pos)->getSystemID() );
-   return pos;
+   auto diff = std::distance(bodies_.cbegin(), pos.get());
+   auto tmp = release( pos->getSystemID() );
+   pos = const_iterator(bodies_.begin() + diff);
+   return tmp;
 }
 //*************************************************************************************************
 
@@ -661,10 +759,12 @@ inline BodyStorage::ConstIterator BodyStorage::release( ConstIterator pos )
  * the element to be released. The time complexity is logarithmic unless reallocation occurs.
  */
 
-inline BodyStorage::Iterator BodyStorage::release( Iterator pos )
+inline std::unique_ptr<RigidBody> BodyStorage::release( iterator& pos )
 {
-   release( (*pos)->getSystemID() );
-   return pos;
+   auto diff = std::distance(bodies_.begin(), pos.get());
+   auto tmp = release( pos->getSystemID() );
+   pos = iterator(bodies_.begin() + diff);
+   return tmp;
 }
 //*************************************************************************************************
 
@@ -681,9 +781,9 @@ inline BodyStorage::Iterator BodyStorage::release( Iterator pos )
  * the element to be released. The time complexity is logarithmic unless reallocation occurs.
  */
 
-inline void BodyStorage::release( BodyID body )
+inline std::unique_ptr<RigidBody> BodyStorage::release( BodyID body )
 {
-   release( body->getSystemID() );
+   return release( body->getSystemID() );
 }
 //*************************************************************************************************
 
@@ -704,7 +804,7 @@ inline void BodyStorage::clear()
    {
       for (auto cb = removeCallbacks_.begin(); cb != removeCallbacks_.end(); ++cb)
       {
-         cb->second( *bodyIt );
+         cb->second( bodyIt->get() );
       }
    }
 
@@ -766,7 +866,7 @@ inline void          BodyStorage::clearRemoveCallbacks       ( )
 inline void BodyStorage::validate()
 {
    std::vector<bool> tmp(bodies_.size());
-   std::map<id_t, SizeType>::iterator it = bodyIDs_.begin();
+   std::map<id_t, size_type>::iterator it = bodyIDs_.begin();
    while( it != bodyIDs_.end() ) {
       WALBERLA_ASSERT(tmp[it->second] == false, "Two system IDs point to the same storage index.");
       tmp[it->second] = true;

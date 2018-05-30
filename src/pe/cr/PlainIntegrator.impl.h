@@ -74,7 +74,7 @@ void PlainIntegratorSolver<Integrator>::timestep( const real_t dt )
 
          // Moving the body according to the acting forces (don't move a sleeping body)
          if( bd->isAwake() && !bd->hasInfiniteMass() ) {
-            integrate_( *bd, dt, *this );
+            integrate_( bd.getBodyID(), dt, *this );
          }
 
          // Resetting the acting forces

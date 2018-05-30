@@ -89,7 +89,7 @@ void LubricationCorrection::operator ()()
          // lubrication forces for spheres
          if ( body1It->getTypeID() == pe::Sphere::getStaticTypeID() )
          {
-            pe::SphereID sphereI = static_cast<pe::SphereID> ( *body1It );
+            pe::SphereID sphereI = static_cast<pe::SphereID> ( body1It.getBodyID() );
 
             auto copyBody1It = body1It;
             // loop over all rigid bodies after current body1 to avoid double forces
@@ -98,7 +98,7 @@ void LubricationCorrection::operator ()()
                // sphere-sphere lubrication
                if ( body2It->getTypeID() == pe::Sphere::getStaticTypeID() )
                {
-                  pe::SphereID sphereJ = static_cast<pe::SphereID>( *body2It );
+                  pe::SphereID sphereJ = static_cast<pe::SphereID>( body2It.getBodyID() );
                   treatLubricationSphrSphr( sphereI, sphereJ, blockIt->getAABB() );
                }
             }
@@ -110,19 +110,19 @@ void LubricationCorrection::operator ()()
       {
          if ( body1It->getTypeID() == pe::Sphere::getStaticTypeID() )
          {
-            pe::SphereID sphereI = static_cast<pe::SphereID> ( *body1It );
+            pe::SphereID sphereI = static_cast<pe::SphereID> ( body1It.getBodyID() );
 
             for (auto body2It = globalBodyStorage_->begin(); body2It != globalBodyStorage_->end(); ++body2It)
             {
                if ( body2It->getTypeID() == pe::Plane::getStaticTypeID() )
                {
                   // sphere-plane lubrication
-                  pe::PlaneID planeJ = static_cast<pe::PlaneID>( *body2It );
+                  pe::PlaneID planeJ = static_cast<pe::PlaneID>( body2It.getBodyID() );
                   treatLubricationSphrPlane( sphereI, planeJ );
                } else if ( body2It->getTypeID() == pe::Sphere::getStaticTypeID() )
                {
                   // sphere-sphere lubrication
-                  pe::SphereID sphereJ = static_cast<pe::SphereID>( *body2It );
+                  pe::SphereID sphereJ = static_cast<pe::SphereID>( body2It.getBodyID() );
                   treatLubricationSphrSphr( sphereI, sphereJ, blockIt->getAABB() );
                }
             }

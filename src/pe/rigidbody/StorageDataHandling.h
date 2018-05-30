@@ -88,8 +88,8 @@ void StorageDataHandling<BodyTuple>::serialize( IBlock * const block, const Bloc
       {
          WALBERLA_ABORT( "Body to be stored not contained within block!" );
       }
-      marshal( buffer, RigidBodyCopyNotification( **bodyIt ) );
-      MarshalDynamically<BodyTuple>::execute( buffer, **bodyIt );
+      marshal( buffer, RigidBodyCopyNotification( *bodyIt ) );
+      MarshalDynamically<BodyTuple>::execute( buffer, *bodyIt );
    }
 }
 
@@ -146,8 +146,8 @@ void StorageDataHandling<BodyTuple>::serializeCoarseToFine( Block * const block,
       }
       if( childAABB.contains( bodyIt->getPosition()) )
       {
-         marshal( buffer, RigidBodyCopyNotification( **bodyIt ) );
-         MarshalDynamically<BodyTuple>::execute( buffer, **bodyIt );
+         marshal( buffer, RigidBodyCopyNotification( *bodyIt ) );
+         MarshalDynamically<BodyTuple>::execute( buffer, *bodyIt );
          ++numOfParticles;
       }
    }
@@ -166,8 +166,8 @@ void StorageDataHandling<BodyTuple>::serializeFineToCoarse( Block * const block,
       {
          WALBERLA_ABORT( "Body to be stored not contained within block!" );
       }
-      marshal( buffer, RigidBodyCopyNotification( **bodyIt ) );
-      MarshalDynamically<BodyTuple>::execute( buffer, **bodyIt );
+      marshal( buffer, RigidBodyCopyNotification( *bodyIt ) );
+      MarshalDynamically<BodyTuple>::execute( buffer, *bodyIt );
    }
 }
 

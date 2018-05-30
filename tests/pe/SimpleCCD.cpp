@@ -70,7 +70,7 @@ int main( int argc, char** argv )
 
     WALBERLA_LOG_DEVEL( s_fcd.getContacts().size() );
 
-    BodyID bd = *(storage[0].begin() + 5);
+    BodyID bd = (storage[0].begin() + 5).getBodyID();
     storage[0].remove( bd );
 
     sccd.generatePossibleContacts();

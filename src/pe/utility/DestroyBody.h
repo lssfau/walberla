@@ -49,7 +49,7 @@ void destroyBody(BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID s
    {
       for (auto bodyIt = globalStorage.begin(); bodyIt != globalStorage.end(); )
       {
-         if ( p(*bodyIt) )
+         if ( p(bodyIt.getBodyID()) )
          {
             bodyIt = globalStorage.remove( bodyIt );
          } else
@@ -68,7 +68,7 @@ void destroyBody(BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID s
          BodyStorage& localStorage = storage[StorageType::LOCAL];
          for (auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); )
          {
-            if ( p(*bodyIt) )
+            if ( p(bodyIt.getBodyID()) )
             {
                bodyIt = localStorage.remove( bodyIt );
             } else
@@ -82,7 +82,7 @@ void destroyBody(BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID s
          BodyStorage& shadowStorage = storage[StorageType::SHADOW];
          for (auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); )
          {
-            if ( p(*bodyIt) )
+            if ( p(bodyIt.getBodyID()) )
             {
                bodyIt = shadowStorage.remove( bodyIt );
             } else

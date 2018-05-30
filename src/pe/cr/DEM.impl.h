@@ -131,7 +131,7 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
          // Moving the body according to the acting forces (don't move a sleeping body)
          if( bodyIt->isAwake() && !bodyIt->hasInfiniteMass() )
          {
-            integrate_( *bodyIt, dt, *this );
+            integrate_( bodyIt.getBodyID(), dt, *this );
          }
          
          // Resetting the acting forces

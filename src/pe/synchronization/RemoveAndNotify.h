@@ -44,7 +44,7 @@ namespace pe {
  * This function removes the rigid body from the body storage and generates deletion notifications.
  */
 inline
-BodyStorage::Iterator removeAndNotify( Owner me, mpi::BufferSystem& bs, BodyStorage& localStorage, BodyStorage::Iterator body )
+BodyStorage::iterator removeAndNotify( Owner me, mpi::BufferSystem& bs, BodyStorage& localStorage, BodyStorage::iterator body )
 {
    using namespace walberla::pe::communication;
 
@@ -57,7 +57,7 @@ BodyStorage::Iterator removeAndNotify( Owner me, mpi::BufferSystem& bs, BodyStor
          WALBERLA_LOG_DETAIL( "__Notify registered process " << (*it) << " of deletion of body " << body->getSystemID() );
          mpi::SendBuffer& sb = bs.sendBuffer(it->rank_);
          if (sb.isEmpty()) sb << walberla::uint8_c(0);
-         packNotification(me, *it, sb, RigidBodyDeletionNotification( **body ));
+         packNotification(me, *it, sb, RigidBodyDeletionNotification( *body ));
       }
    }
 

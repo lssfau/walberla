@@ -51,7 +51,7 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       {
          WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 1, "pos: " <<  ref->getPosition() << "\nradius: " << ref->getRadius() <<  "\ndomain: " << block.getAABB() );
          WALBERLA_CHECK_EQUAL( shadowStorage.size(), 0, "pos: " << ref->getPosition() << "\nradius: " << ref->getRadius() <<  "\ndomain: " << block.getAABB() );
-         SphereID bd = static_cast<SphereID> (*(storage[StorageType::LOCAL].find( sid )));
+         SphereID bd = static_cast<SphereID> (storage[StorageType::LOCAL].find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
          checkVitalParameters(bd, ref);
          WALBERLA_LOG_DEVEL("#shadows: " << bd->MPITrait.sizeShadowOwners() << " #block states set: " << bd->MPITrait.getBlockStateSize() << "\nowner domain: " << block.getAABB() << "\nowner: " << bd->MPITrait.getOwner());
@@ -60,7 +60,7 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       {
          WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 0, "pos: " << ref->getPosition() << "\nradius: " << ref->getRadius() <<  "\ndomain: " << block.getAABB() );
          WALBERLA_CHECK_EQUAL( shadowStorage.size(), 1, "pos: " << ref->getPosition() << "\nradius: " << ref->getRadius() <<  "\ndomain: " << block.getAABB() );
-         SphereID bd = static_cast<SphereID> (*(shadowStorage.find( sid )));
+         SphereID bd = static_cast<SphereID> (shadowStorage.find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
          auto backupPos =ref->getPosition();
          auto correctedPos = ref->getPosition();
