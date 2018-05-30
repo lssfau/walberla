@@ -227,7 +227,7 @@ namespace internal
       }
 
       ExtendedBoundaryHandlingCreator creator( bs, name, pdfFieldID, flagFieldID );
-      python_coupling::for_each_noncopyable_type<LatticeModels>( boost::ref( creator ) );
+      python_coupling::for_each_noncopyable_type<LatticeModels>( std::ref( creator ) );
 
       if ( ! creator.successful() )
       {

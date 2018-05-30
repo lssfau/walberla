@@ -42,7 +42,6 @@ namespace walberla {
 template <typename> struct never_true : std::false_type {};
 
 
-
 // shared ptr
 
 using std::shared_ptr;
@@ -50,9 +49,6 @@ using std::weak_ptr;
 using std::make_shared;
 using std::dynamic_pointer_cast;
 
-// functions, use this when "function" namespace is no longer needed
-//using std::function;
-//using std::bind;
 
 // numeric cast (performs range checks in debug mode)
 

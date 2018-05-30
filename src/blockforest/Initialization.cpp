@@ -31,6 +31,8 @@
 
 #include "stencil/D3Q19.h"
 
+#include <functional>
+
 namespace walberla {
 namespace blockforest {
 
@@ -500,7 +502,7 @@ createUniformBlockGrid( const AABB& domainAABB,
                                                                numeric_cast< memory_t >( maxBlocksPerProcess );
 
    GlobalLoadBalancing::MetisConfiguration< SetupBlock > metisConfig( includeMetis, forceMetis,
-                                                                      boost::bind( cellWeightedCommunicationCost,_1,_2,
+                                                                      std::bind( cellWeightedCommunicationCost, std::placeholders::_1, std::placeholders::_2,
                                                                                    numberOfXCellsPerBlock,
                                                                                    numberOfYCellsPerBlock,
                                                                                    numberOfZCellsPerBlock ) );

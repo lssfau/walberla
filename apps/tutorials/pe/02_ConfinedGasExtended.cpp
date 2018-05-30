@@ -32,6 +32,8 @@
 #include <postprocessing/sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
 
+#include <functional>
+
 using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::timing;
@@ -150,20 +152,20 @@ int main( int argc, char ** argv )
    std::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
-      syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, &tt, real_c(0.0), false );
+      syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, &tt, real_c(0.0), false );
    } else
    {
-      syncCall = boost::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(*forest), storageID, &tt, real_c(0.0), false );
+      syncCall = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(*forest), storageID, &tt, real_c(0.0), false );
    }
 
    //! [Bind Sync Call]
    std::function<void(void)> syncCallWithoutTT;
    if (!syncShadowOwners)
    {
-      syncCallWithoutTT = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCallWithoutTT = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
    } else
    {
-      syncCallWithoutTT = boost::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
    }
    //! [Bind Sync Call]
 

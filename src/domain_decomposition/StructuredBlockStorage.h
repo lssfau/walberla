@@ -29,7 +29,7 @@
 #include "core/cell/CellInterval.h"
 #include "core/debug/Debug.h"
 
-#include <boost/bind.hpp>
+#include <functional>
 
 
 namespace walberla {
@@ -112,7 +112,7 @@ public:
                             bdc.incompatibleSelectors_, bdc.identifier_ ); return *this; }
       template< typename T >
       StructuredBlockDataAdder & operator<<( const StructuredBlockDataCreator<T> & sbdc ) {
-         dataHandling_.add( walberla::make_shared< internal::BlockDataHandlingHelper<T> >( walberla::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >( boost::bind( sbdc.function_, _1, &storage_ ) ) ),
+         dataHandling_.add( walberla::make_shared< internal::BlockDataHandlingHelper<T> >( walberla::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >( std::bind( sbdc.function_,  std::placeholders::_1, &storage_ ) ) ),
                             sbdc.requiredSelectors_, sbdc.incompatibleSelectors_, sbdc.identifier_ ); return *this; }
       operator BlockDataID() { return storage_.getBlockStorage().addBlockData( dataHandling_, identifier_ ); }
    private:
@@ -1076,7 +1076,7 @@ inline BlockDataID StructuredBlockStorage::addStructuredBlockData(
       const std::string& identifier, const Set<SUID>& requiredSelectors, const Set<SUID>& incompatibleSelectors )
 {
    internal::SelectableBlockDataHandlingWrapper dataHandling(
-            walberla::make_shared< internal::BlockDataHandlingHelper<T> >( walberla::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >( boost::bind( function, _1, this ) ) ),
+            walberla::make_shared< internal::BlockDataHandlingHelper<T> >( walberla::make_shared< internal::BlockDataHandlingFunctionAdaptor<T> >( std::bind( function,  std::placeholders::_1, this ) ) ),
             requiredSelectors, incompatibleSelectors, identifier );
 
 

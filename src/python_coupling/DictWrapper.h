@@ -28,7 +28,9 @@
 #include "PythonWrapper.h"
 #include "core/DataTypes.h"
 #include "core/Abort.h"
-#include <boost/bind.hpp>
+
+#include <functional>
+
 
 namespace walberla {
 namespace python_coupling {

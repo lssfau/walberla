@@ -73,7 +73,7 @@ namespace cuda {
                                     uint_t nrOfGhostLayers,
                                     bool usePitchedMem )
    {
-      auto func = boost::bind ( internal::createGPUField<GPUField_T>, _1, _2, nrOfGhostLayers, fSize, layout, usePitchedMem );
+      auto func = std::bind ( internal::createGPUField<GPUField_T>, std::placeholders::_1, std::placeholders::_2, nrOfGhostLayers, fSize, layout, usePitchedMem );
       return bs->addStructuredBlockData< GPUField_T >( func, identifier );
    }
 
@@ -84,7 +84,7 @@ namespace cuda {
                                      const std::string & identifier,
                                      bool usePitchedMem )
    {
-      auto func = boost::bind ( internal::createGPUFieldFromCPUField<Field_T>, _1, _2, cpuFieldID, usePitchedMem );
+      auto func = std::bind ( internal::createGPUFieldFromCPUField<Field_T>, std::placeholders::_1, std::placeholders::_2, cpuFieldID, usePitchedMem );
       return bs->addStructuredBlockData< GPUField<typename Field_T::value_type> >( func, identifier );
    }
 

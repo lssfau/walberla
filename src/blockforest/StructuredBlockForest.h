@@ -24,6 +24,7 @@
 #include "BlockForest.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
 
+#include <functional>
 
 namespace walberla {
 namespace blockforest {
@@ -205,7 +206,7 @@ inline StructuredBlockForest::StructuredBlockForest( const shared_ptr< BlockFore
    blockForest_( blockForest ) {
 
    blockForest_->addRefreshCallbackFunctionBeforeBlockDataIsUnpacked(
-            BlockForest::RefreshCallbackWrappper( boost::bind( resetCellDecompositionInStorage, boost::ref(*this) ) ) );
+            BlockForest::RefreshCallbackWrappper( std::bind( resetCellDecompositionInStorage, std::ref(*this) ) ) );
 
    blockCells_[0] = blockXCells;
    blockCells_[1] = blockYCells;

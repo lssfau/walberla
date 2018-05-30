@@ -52,7 +52,7 @@ namespace cuda {
    std::function<void()> fieldCpyFunctor( const shared_ptr< StructuredBlockStorage > & blocks,
                                             BlockDataID dstID, ConstBlockDataID srcID )
    {
-      return boost::bind( fieldCpy<DstType,SrcType>, blocks, dstID, srcID );
+      return std::bind( fieldCpy<DstType,SrcType>, blocks, dstID, srcID );
    }
 
 
@@ -68,7 +68,7 @@ namespace cuda {
    template<typename DstType, typename SrcType>
    std::function<void(IBlock*)> fieldCpyFunctor( BlockDataID dstID, ConstBlockDataID srcID )
    {
-      return boost::bind( fieldCpySweepFunction<DstType,SrcType>, dstID, srcID, _1 );
+      return std::bind( fieldCpySweepFunction<DstType,SrcType>, dstID, srcID, std::placeholders::_1 );
    }
 
 

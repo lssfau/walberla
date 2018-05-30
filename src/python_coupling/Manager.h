@@ -61,7 +61,7 @@ namespace python_coupling {
    boost::python::object testBlockData( IBlock & block, BlockDataID blockDataID )
    {
       BlockDataToObjectTester tester( &block, blockDataID );
-      for_each_noncopyable_type< TypeList > ( boost::ref(tester) );
+      for_each_noncopyable_type< TypeList > ( std::ref(tester) );
       return tester.getResult();
    }
 

@@ -76,6 +76,7 @@
 
 #include <stdexcept>
 #include <array>
+#include <functional>
 
 #include "gather/GnuPlotGraphWriter.h"
 #include "field/vtk/FlagFieldCellFilter.h"
@@ -83,7 +84,6 @@
 #include "lbm/vtk/Density.h"
 #include "lbm/vtk/Velocity.h"
 #include "vtk/VTKOutput.h"
-
 
 
 namespace walberla {
@@ -138,7 +138,7 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
 
     uint_t cells[]  = { length, width, width  };
     uint_t blocks[] = { uint_t(1u), uint_t(1u), uint_t(1u) };
-    sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, refinement ) );
+    sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, refinement ) );
     sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
     sforest.init(

@@ -66,6 +66,7 @@
 #include "lbm/vtk/Velocity.h"
 #include "vtk/VTKOutput.h"
 
+#include <functional>
 
 namespace squirmer
 {
@@ -289,8 +290,8 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
    }
 
-   std::function<void(void)> syncCall = boost::bind(pe::syncShadowOwners<BodyTypeTuple>,
-                                                      boost::ref(blocks->getBlockForest()), bodyStorageID,
+   std::function<void(void)> syncCall = std::bind(pe::syncShadowOwners<BodyTypeTuple>,
+                                                      std::ref(blocks->getBlockForest()), bodyStorageID,
                                                       static_cast<WcTimingTree *>(NULL), overlap, false);
 
    const auto myMat = pe::createMaterial("myMat", real_c(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1),

@@ -28,6 +28,8 @@
 
 #include "core/debug/TestSubsystem.h"
 
+#include <functional>
+
 using namespace walberla;
 using namespace walberla::pe;
 
@@ -65,10 +67,10 @@ int main( int argc, char** argv )
    std::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
-      syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
    } else
    {
-      syncCall = boost::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCall = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
    }
 
    WALBERLA_LOG_PROGRESS_ON_ROOT( " *** SPHERE *** ");
