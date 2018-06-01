@@ -31,7 +31,6 @@
 #include "core/uid/SUID.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
 
 #include <algorithm>
 #include <functional>
