@@ -27,6 +27,7 @@
 #   include "CheckFunctions.h"
 #   include <functional>
 #   include <string>
+#   include "core/Macros.h"
 #endif
 
 
