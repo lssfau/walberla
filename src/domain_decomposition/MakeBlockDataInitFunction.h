@@ -34,19 +34,19 @@ namespace domain_decomposition {
 /// \cond internal
 namespace internal
 {
-   template<class T, class ... P>
-   T * newFunc( const IBlock* const, const P & ... p ) {
-      return new T(p...);
+   template<class T, typename... Args>
+   T * newFunc( const IBlock* const, Args&... args ) {
+      return new T(args...);
    }
 } // namespace internal
 /// \endcond
 
 
 
-template<class T, class ... P>
+template<class T, typename... Args>
 std::function< T* ( const IBlock* const block ) >
-makeBlockDataInitFunction(const P & ... p) {
-   return std::bind( internal::newFunc<T,P...>, std::placeholders::_1, p... );
+makeBlockDataInitFunction(Args&&... args) {
+   return std::bind( internal::newFunc<T,Args...>, std::placeholders::_1, std::forward<Args>(args)... );
 }
 
 
