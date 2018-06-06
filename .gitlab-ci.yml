@@ -683,30 +683,86 @@ clang_5.0_mpionly:
 clang_5.0_hybrid:
    <<: *build_hybrid_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:5.0
+   only:
+      - triggers
    tags:
       - docker
 
 clang_5.0_serial_dbg:
    <<: *build_serial_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:5.0
+   only:
+      - triggers
    tags:
       - docker
 
 clang_5.0_mpionly_dbg:
    <<: *build_mpionly_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:5.0
+   only:
+      - triggers
    tags:
       - docker
 
 clang_5.0_hybrid_dbg:
    <<: *build_hybrid_dbg_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:5.0
+   only:
+      - triggers
    tags:
       - docker
 
 clang_5.0_hybrid_dbg_sp:
    <<: *build_hybrid_dbg_sp_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:5.0
+   only:
+      - triggers
+   tags:
+      - docker
+
+clang_6.0_serial:
+   <<: *build_serial_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   only:
+      - triggers
+   tags:
+      - docker
+
+clang_6.0_mpionly:
+   <<: *build_mpionly_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   only:
+      - triggers
+   tags:
+      - docker
+
+clang_6.0_hybrid:
+   <<: *build_hybrid_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   tags:
+      - docker
+
+clang_6.0_serial_dbg:
+   <<: *build_serial_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   tags:
+      - docker
+
+clang_6.0_mpionly_dbg:
+   <<: *build_mpionly_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   tags:
+      - docker
+
+clang_6.0_hybrid_dbg:
+   <<: *build_hybrid_dbg_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   tags:
+      - docker
+
+clang_6.0_hybrid_dbg_sp:
+   <<: *build_hybrid_dbg_sp_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    tags:
       - docker
 
