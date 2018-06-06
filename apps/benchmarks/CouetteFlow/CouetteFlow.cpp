@@ -241,7 +241,7 @@ class BorderRefinementSelection
 public:
 
    BorderRefinementSelection( const Setup & setup, const uint_t level, const real_t bufferDistance ) :
-      setup_( setup ), level_( level ), bufferDistance_( bufferDistance ) {}
+      setup_( setup ), level_( level ), bufferDistance_( bufferDistance ) { WALBERLA_UNUSED(setup_); }
 
    void operator()( SetupBlockForest & forest )
    {

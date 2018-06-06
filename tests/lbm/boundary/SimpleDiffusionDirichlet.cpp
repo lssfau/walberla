@@ -249,6 +249,7 @@ public:
 #ifdef TEST_USES_VTK_OUTPUT
         error_.resize(time_);
 #endif
+        WALBERLA_UNUSED(maxValue_);
 }
 
    void operator()();

@@ -43,6 +43,8 @@ class DataProcessor
 {
    public:
 
+      virtual ~DataProcessor() = default;
+
       /*
        * Process "graph like" data
        * every entry in the outer vector is a data-point.
