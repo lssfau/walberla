@@ -1528,3 +1528,64 @@ conda-py35-linux:
       - apt-get update
       - apt-get install -y build-essential
       - conda build --python=3.5 --user=lssfau utilities/conda/walberla
+
+
+###############################################################################
+##                                                                           ##
+##    Benchmarks                                                             ##
+##                                                                           ##
+###############################################################################
+
+.benchmark_template: &benchmark_definition
+   script:
+      - apt-get update --fix-missing
+      - apt-get install -y python3-influxdb python3-git
+      - $CXX --version
+      - cmake --version
+      - ccache --version
+      - mpirun --version
+      - export CCACHE_BASEDIR=$CI_PROJECT_DIR
+      - mkdir $CI_PROJECT_DIR/build
+      - cd $CI_PROJECT_DIR/build
+      - cmake .. -DWALBERLA_BUFFER_DEBUG=OFF -DWALBERLA_BUILD_TESTS=OFF -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=OFF -DWALBERLA_BUILD_TOOLS=OFF -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_CUDA=OFF -DWALBERLA_BUILD_WITH_PYTHON=OFF -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=RELEASE -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_DOUBLE_ACCURACY=ON -DWARNING_ERROR=ON -DWALBERLA_BUILD_WITH_METIS=OFF -DWALBERLA_BUILD_WITH_PARMETIS=OFF -DWALBERLA_OPTIMIZE_FOR_LOCALHOST=ON -DWALBERLA_BUILD_WITH_FASTMATH=ON -DWALBERLA_BUILD_WITH_LTO=ON
+      - cmake . -LAH
+      - cd apps/benchmarks/PeriodicGranularGas
+      - make -j 20
+      - export PATH=$PATH:/usr/local/likwid/bin
+      - likwid-setFrequencies -t 0
+      - likwid-setFrequencies -g performance
+      - likwid-setFrequencies -x 3.3 -y 3.3 # set frequency to 3.3
+      - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PeriodicGranularGas PeriodicGranularGas.cfg --DEM --syncNextNeighbor | tee PeriodicGranularGas_DEM_NN.txt
+      - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PeriodicGranularGas PeriodicGranularGas.cfg --DEM --syncShadowOwners | tee PeriodicGranularGas_DEM_SO.txt
+      - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PeriodicGranularGas PeriodicGranularGas.cfg --HCSITS --syncNextNeighbor --InelasticFrictionlessContact | tee PeriodicGranularGas_HCSITS_NN_IFC.txt
+      - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PeriodicGranularGas PeriodicGranularGas.cfg --HCSITS --syncNextNeighbor --ApproximateInelasticCoulombContactByDecoupling | tee PeriodicGranularGas_HCSITS_NN_AICCBD.txt
+      - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PeriodicGranularGas PeriodicGranularGas.cfg --HCSITS --syncNextNeighbor --InelasticCoulombContactByDecoupling | tee PeriodicGranularGas_HCSITS_NN_ICCBD.txt
+      - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PeriodicGranularGas PeriodicGranularGas.cfg --HCSITS --syncNextNeighbor --InelasticGeneralizedMaximumDissipationContact | tee PeriodicGranularGas_HCSITS_NN_IGMDC.txt
+      - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PeriodicGranularGas PeriodicGranularGas.cfg --HCSITS --syncShadowOwners --InelasticFrictionlessContact | tee PeriodicGranularGas_HCSITS_SO_IFC.txt
+      - python3 upload.py
+   only:
+      variables:
+         - $ENABLE_BENCHMARKS
+   tags:
+      - docker-benchmark
+   artifacts:
+      paths:
+         - $CI_PROJECT_DIR/build/apps/benchmarks/PeriodicGranularGas/PeriodicGranularGas_DEM_NN.txt
+         - $CI_PROJECT_DIR/build/apps/benchmarks/PeriodicGranularGas/PeriodicGranularGas_DEM_SO.txt
+         - $CI_PROJECT_DIR/build/apps/benchmarks/PeriodicGranularGas/PeriodicGranularGas_HCSITS_NN_IFC.txt
+         - $CI_PROJECT_DIR/build/apps/benchmarks/PeriodicGranularGas/PeriodicGranularGas_HCSITS_NN_AICCBD.txt
+         - $CI_PROJECT_DIR/build/apps/benchmarks/PeriodicGranularGas/PeriodicGranularGas_HCSITS_NN_ICCBD.txt
+         - $CI_PROJECT_DIR/build/apps/benchmarks/PeriodicGranularGas/PeriodicGranularGas_HCSITS_NN_IGMDC.txt
+         - $CI_PROJECT_DIR/build/apps/benchmarks/PeriodicGranularGas/PeriodicGranularGas_HCSITS_SO_IFC.txt
+
+benchmark_intel17:
+   <<: *benchmark_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
+
+benchmark_gcc7:
+   <<: *benchmark_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
+
+benchmark_clang6:
+   <<: *benchmark_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
