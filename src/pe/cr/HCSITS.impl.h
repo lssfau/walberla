@@ -1795,10 +1795,6 @@ inline void HardContactSemiImplicitTimesteppingSolvers::integratePositions( Body
    if ( body->isFixed() )
       return;
 
-   // Resetting the contact node and removing all attached contacts
-   body->resetNode();
-   body->clearContacts();
-
    if( body->isAwake() )
    {
       if ( isSpeedLimiterActive() )

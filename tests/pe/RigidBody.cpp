@@ -39,10 +39,6 @@ void move( BodyStorage& storage, real_t dt )
       WALBERLA_ASSERT( it->checkInvariants(), "Invalid capsule state detected" );
       WALBERLA_ASSERT( !it->hasSuperBody(), "Invalid superordinate body detected" );
 
-      // Resetting the contact node and removing all attached contacts
-//      it->resetNode();
-      it->clearContacts();
-
       // Moving the capsule according to the acting forces (don't move a sleeping body)
       if( it->isAwake() ) {
          if( !it->hasInfiniteMass() ) {

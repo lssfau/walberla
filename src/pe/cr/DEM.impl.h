@@ -120,10 +120,6 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
       {
          WALBERLA_LOG_DETAIL( "Time integration of body with system id " << bodyIt->getSystemID());// << "\n" << *bodyIt );
 
-         // Resetting the contact node and removing all attached contacts
-      //      bodyIt->resetNode();
-         bodyIt->clearContacts();
-
          // Checking the state of the body
          WALBERLA_ASSERT( bodyIt->checkInvariants(), "Invalid body state detected" );
          WALBERLA_ASSERT( !bodyIt->hasSuperBody(), "Invalid superordinate body detected" );
@@ -147,9 +143,8 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
       if (tt_ != NULL) tt_->stop("Integration");
 
       // Reset forces of shadow copies
-      for( auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); ++bodyIt ) {
-         bodyIt->clearContacts();
-         bodyIt->resetForceAndTorque();
+      for( auto& body : shadowStorage ) {
+         body.resetForceAndTorque();
       }
 
    }

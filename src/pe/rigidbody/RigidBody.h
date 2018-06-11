@@ -57,15 +57,6 @@ private:
    template <typename BodyTypeTuple>
    friend class Union;
 
-   //**Type definitions****************************************************************************
-   typedef PtrVector<Contact,NoDelete>     Contacts;     //!< Vector for attached contacts.
-   //**********************************************************************************************
-
-public:
-   //**Type definitions****************************************************************************
-   typedef Contacts::Iterator          ContactIterator;            //!< Iterator over the currently attached contacts.
-   typedef Contacts::ConstIterator     ConstContactIterator;       //!< ConstIterator over the currently attached contacts.
-   //**********************************************************************************************
 protected:
    //**Constructor*********************************************************************************
    /*!\name Constructor */
@@ -268,20 +259,6 @@ public:
    //@}
    //**********************************************************************************************
 
-   //**Contact functions***************************************************************************
-   /*!\name Contact functions */
-   //@{
-   inline void                 registerContact( ContactID contact );
-   inline bool                 hasContacts  () const;
-   inline void                 clearContacts();
-   inline size_t               countContacts() const;
-   inline ContactIterator      beginContacts();
-   inline ConstContactIterator beginContacts() const;
-   inline ContactIterator      endContacts  ();
-   inline ConstContactIterator endContacts  () const;
-   //@}
-   //**********************************************************************************************
-
    //**MPI functions*******************************************************************************
    /*!\name MPI functions */
    //@{
@@ -435,7 +412,6 @@ protected:
    bool toBeDeleted_;         //!< This flag marks the body for deletion during the next synchronization (only works on local bodies)
    id_t sid_;                 //!< The unique system-specific body ID.
    id_t uid_;                 //!< The user-specific body ID.
-   Contacts contacts_;        //!< Vector for the currently attached contacts.
    //@}
    //**********************************************************************************************
 
@@ -1910,112 +1886,6 @@ inline void RigidBody::signalRotation()
 inline void RigidBody::signalFixation()
 {
    //if( hasSuperBody() && sb_->isFixed() != isFixed() ) sb_->handleFixation();
-}
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  CONTACT FUNCTIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*!\brief Registering a single attached contact with the rigid body.
- *
- * \param contact The contact to be registered with the rigid body.
- * \return void
- */
-inline void RigidBody::registerContact( ContactID contact )
-{
-   WALBERLA_ASSERT( !hasSuperBody(), "Invalid contact on subordinate body detected" );
-   contacts_.pushBack( contact );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Clears all contacts registered with the rigid body.
- *
- * \return void
- */
-inline void RigidBody::clearContacts()
-{
-   contacts_.clear();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns whether any contacts are registered with the rigid body.
- *
- * \return \a true if at least one contact is registered with the rigid body, \a false if not.
- */
-inline bool RigidBody::hasContacts() const
-{
-   return !contacts_.isEmpty();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns the number of currently registered contacts.
- *
- * \return The number of registered contacts.
- */
-inline size_t RigidBody::countContacts() const
-{
-   return contacts_.size();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator to the first attached contact.
- *
- * \return Iterator to the first attached contact.
- */
-inline RigidBody::ContactIterator RigidBody::beginContacts()
-{
-   return contacts_.begin();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator to the first attached contact.
- *
- * \return Iterator to the first attached contact.
- */
-inline RigidBody::ConstContactIterator RigidBody::beginContacts() const
-{
-   return contacts_.begin();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator just past the last attached contact.
- *
- * \return Iterator just past the last attached contact.
- */
-inline RigidBody::ContactIterator RigidBody::endContacts()
-{
-   return contacts_.end();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator just past the last attached contact.
- *
- * \return Iterator just past the last attached contact.
- */
-inline RigidBody::ConstContactIterator RigidBody::endContacts() const
-{
-   return contacts_.end();
 }
 //*************************************************************************************************
 
