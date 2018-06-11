@@ -134,7 +134,8 @@ intel_16_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -147,7 +148,8 @@ intel_16_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -160,7 +162,8 @@ intel_16_hybrid:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -173,7 +176,8 @@ intel_16_serial_dbg:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -186,7 +190,8 @@ intel_16_mpionly_dbg:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -198,6 +203,9 @@ intel_16_hybrid_dbg:
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - cuda
       - docker
@@ -210,7 +218,8 @@ intel_16_hybrid_dbg_sp:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -223,7 +232,8 @@ intel_17_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
       - intel
@@ -235,7 +245,8 @@ intel_17_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
       - intel
@@ -246,6 +257,9 @@ intel_17_hybrid:
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
       - intel
@@ -256,6 +270,9 @@ intel_17_serial_dbg:
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
       - intel
@@ -266,6 +283,9 @@ intel_17_mpionly_dbg:
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
       - intel
@@ -276,6 +296,9 @@ intel_17_hybrid_dbg:
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
       - intel
@@ -286,6 +309,9 @@ intel_17_hybrid_dbg_sp:
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
       - intel
@@ -297,7 +323,8 @@ gcc_5_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -309,7 +336,8 @@ gcc_5_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -320,6 +348,9 @@ gcc_5_hybrid:
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - cuda
       - docker
@@ -330,6 +361,9 @@ gcc_5_serial_dbg:
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - cuda
       - docker
@@ -341,7 +375,8 @@ gcc_5_mpionly_dbg:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -352,6 +387,9 @@ gcc_5_hybrid_dbg:
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - cuda
       - docker
@@ -363,7 +401,8 @@ gcc_5_hybrid_dbg_sp:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -375,7 +414,8 @@ gcc_6_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -386,7 +426,8 @@ gcc_6_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -397,7 +438,8 @@ gcc_6_hybrid:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -408,7 +450,8 @@ gcc_6_serial_dbg:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -419,7 +462,8 @@ gcc_6_mpionly_dbg:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -430,7 +474,8 @@ gcc_6_hybrid_dbg:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -441,7 +486,8 @@ gcc_6_hybrid_dbg_sp:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -452,7 +498,8 @@ gcc_7_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -463,7 +510,8 @@ gcc_7_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -473,6 +521,9 @@ gcc_7_hybrid:
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
 
@@ -482,6 +533,9 @@ gcc_7_serial_dbg:
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
 
@@ -491,6 +545,9 @@ gcc_7_mpionly_dbg:
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
 
@@ -500,6 +557,9 @@ gcc_7_hybrid_dbg:
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
 
@@ -509,6 +569,9 @@ gcc_7_hybrid_dbg_sp:
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
 
@@ -519,7 +582,8 @@ clang_3.6_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -531,7 +595,8 @@ clang_3.6_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -543,7 +608,8 @@ clang_3.6_serial_dbg:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -554,6 +620,9 @@ clang_3.6_mpionly_dbg:
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - cuda
       - docker
@@ -565,7 +634,8 @@ clang_3.7_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -577,7 +647,8 @@ clang_3.7_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -589,7 +660,8 @@ clang_3.7_serial_dbg:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -601,7 +673,8 @@ clang_3.7_mpionly_dbg:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -613,7 +686,8 @@ clang_3.8_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -625,7 +699,8 @@ clang_3.8_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -637,7 +712,8 @@ clang_3.8_hybrid:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -649,7 +725,8 @@ clang_3.8_serial_dbg:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -661,7 +738,8 @@ clang_3.8_mpionly_dbg:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -673,7 +751,8 @@ clang_3.8_hybrid_dbg:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -685,7 +764,8 @@ clang_3.8_hybrid_dbg_sp:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -697,7 +777,8 @@ clang_3.9_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -708,7 +789,8 @@ clang_3.9_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -719,7 +801,8 @@ clang_3.9_hybrid:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -730,7 +813,8 @@ clang_3.9_serial_dbg:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -741,7 +825,8 @@ clang_3.9_mpionly_dbg:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -752,7 +837,8 @@ clang_3.9_hybrid_dbg:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -763,7 +849,8 @@ clang_3.9_hybrid_dbg_sp:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -774,7 +861,8 @@ clang_4.0_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -785,7 +873,8 @@ clang_4.0_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -796,7 +885,8 @@ clang_4.0_hybrid:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -807,7 +897,8 @@ clang_4.0_serial_dbg:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -818,7 +909,8 @@ clang_4.0_mpionly_dbg:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -829,7 +921,8 @@ clang_4.0_hybrid_dbg:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -840,7 +933,8 @@ clang_4.0_hybrid_dbg_sp:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -851,7 +945,8 @@ clang_5.0_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -862,7 +957,8 @@ clang_5.0_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -873,7 +969,8 @@ clang_5.0_hybrid:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -884,7 +981,8 @@ clang_5.0_serial_dbg:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -895,7 +993,8 @@ clang_5.0_mpionly_dbg:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -906,7 +1005,8 @@ clang_5.0_hybrid_dbg:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -917,7 +1017,8 @@ clang_5.0_hybrid_dbg_sp:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -928,7 +1029,8 @@ clang_6.0_serial:
       <<: *build_serial_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -939,7 +1041,8 @@ clang_6.0_mpionly:
       <<: *build_mpionly_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -949,6 +1052,9 @@ clang_6.0_hybrid:
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
 
@@ -958,6 +1064,9 @@ clang_6.0_serial_dbg:
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
 
@@ -967,6 +1076,9 @@ clang_6.0_mpionly_dbg:
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
 
@@ -976,6 +1088,9 @@ clang_6.0_hybrid_dbg:
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
 
@@ -985,6 +1100,9 @@ clang_6.0_hybrid_dbg_sp:
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
 
@@ -1006,6 +1124,9 @@ doc:
       - cmake ..
       - cmake . -LAH
       - make doc
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    tags:
       - docker
    artifacts:
@@ -1030,7 +1151,8 @@ cppcheck:
    artifacts:
       untracked: true
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -1058,7 +1180,8 @@ coverage:
       paths:
          - coverage/
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
    variables:
@@ -1099,6 +1222,9 @@ msvc-14_Hybrid_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
       
 msvc-14_Hybrid_SP_Dbg:
    <<: *win_build_definition
@@ -1110,7 +1236,8 @@ msvc-14_Hybrid_SP_Dbg:
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "OFF"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14_Hybrid:
    <<: *win_build_definition
@@ -1122,7 +1249,8 @@ msvc-14_Hybrid:
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14_Serial_Dbg:
    <<: *win_build_definition
@@ -1134,7 +1262,8 @@ msvc-14_Serial_Dbg:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14_Serial:
    <<: *win_build_definition
@@ -1146,7 +1275,8 @@ msvc-14_Serial:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14_MpiOnly_Dbg:
    <<: *win_build_definition
@@ -1158,7 +1288,8 @@ msvc-14_MpiOnly_Dbg:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14_MpiOnly:
    <<: *win_build_definition
@@ -1170,7 +1301,8 @@ msvc-14_MpiOnly:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
       
       
 msvc-14.1_Hybrid_Dbg:
@@ -1182,6 +1314,9 @@ msvc-14.1_Hybrid_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
       
 msvc-14.1_Hybrid_SP_Dbg:
    <<: *win_build_definition
@@ -1192,6 +1327,9 @@ msvc-14.1_Hybrid_SP_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
       
 msvc-14.1_Hybrid:
    <<: *win_build_definition
@@ -1202,6 +1340,9 @@ msvc-14.1_Hybrid:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
       
 msvc-14.1_Serial_Dbg:
    <<: *win_build_definition
@@ -1212,6 +1353,9 @@ msvc-14.1_Serial_Dbg:
       WALBERLA_BUILD_WITH_MPI: "OFF"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
       
 msvc-14.1_Serial:
    <<: *win_build_definition
@@ -1223,7 +1367,8 @@ msvc-14.1_Serial:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14.1_MpiOnly_Dbg:
    <<: *win_build_definition
@@ -1234,6 +1379,9 @@ msvc-14.1_MpiOnly_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
       
 msvc-14.1_MpiOnly:
    <<: *win_build_definition
@@ -1245,7 +1393,8 @@ msvc-14.1_MpiOnly:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
    only:
-      - triggers
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
 
 
 ###############################################################################
@@ -1281,6 +1430,9 @@ mac_Serial_Dbg:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       WALBERLA_BUILD_WITH_CUDA: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
 
 mac_Serial:
    <<: *mac_build_definition
@@ -1291,6 +1443,9 @@ mac_Serial:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       WALBERLA_BUILD_WITH_CUDA: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
 
 mac_MpiOnly_Dbg:
    <<: *mac_build_definition
@@ -1301,6 +1456,9 @@ mac_MpiOnly_Dbg:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       WALBERLA_BUILD_WITH_CUDA: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
 
 mac_MpiOnly:
    <<: *mac_build_definition
@@ -1311,6 +1469,9 @@ mac_MpiOnly:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
       WALBERLA_BUILD_WITH_CUDA: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
 
 
 ###############################################################################
