@@ -58,7 +58,6 @@ private:
    friend class Union;
 
    //**Type definitions****************************************************************************
-   typedef PtrVector<RigidBody,NoDelete>   Bodies;       //!< Vector for superordinate bodies containing this rigid body.
    typedef PtrVector<Contact,NoDelete>     Contacts;     //!< Vector for attached contacts.
    //**********************************************************************************************
 
@@ -66,8 +65,6 @@ public:
    //**Type definitions****************************************************************************
    typedef Contacts::Iterator          ContactIterator;            //!< Iterator over the currently attached contacts.
    typedef Contacts::ConstIterator     ConstContactIterator;       //!< ConstIterator over the currently attached contacts.
-   typedef Bodies::Iterator            AttachedBodyIterator;       //!< Iterator over the currently attached rigid bodies.
-   typedef Bodies::ConstIterator       ConstAttachedBodyIterator;  //!< ConstIterator over the currently attached rigid bodies.
    //**********************************************************************************************
 protected:
    //**Constructor*********************************************************************************
@@ -285,16 +282,6 @@ public:
    //@}
    //**********************************************************************************************
 
-   //**Attachable functions************************************************************************
-   /*!\name Attachable functions */
-   //@{
-   inline AttachedBodyIterator      beginAttachedBodies ();
-   inline ConstAttachedBodyIterator beginAttachedBodies () const;
-   inline AttachedBodyIterator      endAttachedBodies   ();
-   inline ConstAttachedBodyIterator endAttachedBodies   () const;
-   //@}
-   //**********************************************************************************************
-
    //**MPI functions*******************************************************************************
    /*!\name MPI functions */
    //@{
@@ -449,7 +436,6 @@ protected:
    id_t sid_;                 //!< The unique system-specific body ID.
    id_t uid_;                 //!< The user-specific body ID.
    Contacts contacts_;        //!< Vector for the currently attached contacts.
-   Bodies attachedBodies_;    //!< Vector for the currently attached rigid bodies.
    //@}
    //**********************************************************************************************
 
@@ -2030,54 +2016,6 @@ inline RigidBody::ContactIterator RigidBody::endContacts()
 inline RigidBody::ConstContactIterator RigidBody::endContacts() const
 {
    return contacts_.end();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator to the first attached rigid body.
- *
- * \return Iterator to the first attached rigid body.
- */
-inline RigidBody::AttachedBodyIterator RigidBody::beginAttachedBodies()
-{
-   return attachedBodies_.begin();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator to the first attached rigid body.
- *
- * \return Iterator to the first attached rigid body.
- */
-inline RigidBody::ConstAttachedBodyIterator RigidBody::beginAttachedBodies() const
-{
-   return attachedBodies_.begin();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator just past the last attached rigid body.
- *
- * \return Iterator just past the last attached rigid body.
- */
-inline RigidBody::AttachedBodyIterator RigidBody::endAttachedBodies()
-{
-   return attachedBodies_.end();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator just past the last attached rigid body.
- *
- * \return Iterator just past the last attached rigid body.
- */
-inline RigidBody::ConstAttachedBodyIterator RigidBody::endAttachedBodies() const
-{
-   return attachedBodies_.end();
 }
 //*************************************************************************************************
 
