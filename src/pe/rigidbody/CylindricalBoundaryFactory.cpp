@@ -24,7 +24,8 @@
 #include "pe/rigidbody/BodyStorage.h"
 #include "pe/rigidbody/CylindricalBoundary.h"
 
-#include "core/logging/Logging.h"
+#include <core/logging/Logging.h>
+#include <core/UniqueID.h>
 
 namespace walberla {
 namespace pe {

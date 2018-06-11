@@ -37,7 +37,6 @@
 #include "core/debug/Debug.h"
 #include "core/logging/Logging.h"
 #include "core/math/AABB.h"
-#include "pe/attachable/Attachable.h"
 #include "pe/rigidbody/MPIRigidBodyTrait.h"
 
 namespace walberla{
@@ -61,15 +60,12 @@ private:
    //**Type definitions****************************************************************************
    typedef PtrVector<RigidBody,NoDelete>   Bodies;       //!< Vector for superordinate bodies containing this rigid body.
    typedef PtrVector<Contact,NoDelete>     Contacts;     //!< Vector for attached contacts.
-   typedef PtrVector<Attachable,NoDelete>  Attachables;  //!< Vector for attachables.
    //**********************************************************************************************
 
 public:
    //**Type definitions****************************************************************************
    typedef Contacts::Iterator          ContactIterator;            //!< Iterator over the currently attached contacts.
    typedef Contacts::ConstIterator     ConstContactIterator;       //!< ConstIterator over the currently attached contacts.
-   typedef Attachables::Iterator       AttachableIterator;         //!< Iterator over the currently attached attachables.
-   typedef Attachables::ConstIterator  ConstAttachableIterator;    //!< ConstIterator over the currently attached attachables.
    typedef Bodies::Iterator            AttachedBodyIterator;       //!< Iterator over the currently attached rigid bodies.
    typedef Bodies::ConstIterator       ConstAttachedBodyIterator;  //!< ConstIterator over the currently attached rigid bodies.
    //**********************************************************************************************
@@ -292,14 +288,6 @@ public:
    //**Attachable functions************************************************************************
    /*!\name Attachable functions */
    //@{
-          void                      registerAttachable  ( AttachableID attachable );
-          void                      deregisterAttachable( AttachableID attachable );
-   inline bool                      isAttached          () const;
-   inline size_t                    countAttachables    () const;
-   inline AttachableIterator        beginAttachables    ();
-   inline ConstAttachableIterator   beginAttachables    () const;
-   inline AttachableIterator        endAttachables      ();
-   inline ConstAttachableIterator   endAttachables      () const;
    inline AttachedBodyIterator      beginAttachedBodies ();
    inline ConstAttachedBodyIterator beginAttachedBodies () const;
    inline AttachedBodyIterator      endAttachedBodies   ();
@@ -461,7 +449,6 @@ protected:
    id_t sid_;                 //!< The unique system-specific body ID.
    id_t uid_;                 //!< The user-specific body ID.
    Contacts contacts_;        //!< Vector for the currently attached contacts.
-   Attachables attachables_;  //!< Vector for the currently attached attachables.
    Bodies attachedBodies_;    //!< Vector for the currently attached rigid bodies.
    //@}
    //**********************************************************************************************
@@ -2047,86 +2034,6 @@ inline RigidBody::ConstContactIterator RigidBody::endContacts() const
 //*************************************************************************************************
 
 
-
-
-//=================================================================================================
-//
-//  ATTACHABLE FUNCTIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*!\brief Returns whether any attachable is registered with the rigid body.
- *
- * \return \a true in case at least one attachable is registered with the rigid body, \a false otherwise.
- */
-inline bool RigidBody::isAttached() const
-{
-   return !attachables_.isEmpty();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns the number of currently registered attachables.
- *
- * \return The number of registered attachables.
- */
-inline size_t RigidBody::countAttachables() const
-{
-   return attachables_.size();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator to the first registered attachable.
- *
- * \return Iterator to the first registered attachable.
- */
-inline RigidBody::AttachableIterator RigidBody::beginAttachables()
-{
-   return attachables_.begin();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator to the first registered attachable.
- *
- * \return Iterator to the first registered attachable.
- */
-inline RigidBody::ConstAttachableIterator RigidBody::beginAttachables() const
-{
-   return attachables_.begin();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator just past the last registered attachable.
- *
- * \return Iterator just past the last registered attachable.
- */
-inline RigidBody::AttachableIterator RigidBody::endAttachables()
-{
-   return attachables_.end();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns an iterator just past the last registered attachable.
- *
- * \return Iterator just past the last registered attachable.
- */
-inline RigidBody::ConstAttachableIterator RigidBody::endAttachables() const
-{
-   return attachables_.end();
-}
-//*************************************************************************************************
-
-
 //*************************************************************************************************
 /*!\brief Returns an iterator to the first attached rigid body.
  *
@@ -3341,73 +3248,6 @@ inline void RigidBody::update( const Quat& dq )
 
    // Checking the state of the sphere
    WALBERLA_ASSERT( checkInvariants(), "Invalid sphere state detected" );
-}
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  ATTACHABLE FUNCTIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*!\brief Registering a single attachable with the rigid body.
- *
- * \param attachable The attachable to be registered with the rigid body.
- * \return void
- *
- * This function must NOT be called explicitly, but is reserved for internal use only!
- * Attachables are automatically registered during their construction process.
- */
-inline void RigidBody::registerAttachable( AttachableID attachable )
-{
-   // Registering the attachable
-   attachables_.pushBack( attachable );
-
-   // Registering all newly attached rigid bodies
-   const Attachable::Iterator end( attachable->end() );
-   for( Attachable::Iterator body=attachable->begin(); body!=end; ++body ) {
-      const AttachedBodyIterator bbegin( attachedBodies_.begin() );
-      const AttachedBodyIterator bend  ( attachedBodies_.end()   );
-      if( *body != this && std::find( bbegin, bend, *body ) == bend )
-         attachedBodies_.pushBack( *body );
-   }
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Deregistering a single attachable from the rigid body.
- *
- * \param attachable The attachable to be deregistered from the rigid body.
- * \return void
- *
- * This function must NOT be called explicitly, but is reserved for internal use only!
- * Attachables are automatically deregistered during their destruction process.
- */
-inline void RigidBody::deregisterAttachable( AttachableID attachable )
-{
-   // Deregistering the attachable
-   Attachables::Iterator pos( std::find( attachables_.begin(), attachables_.end(), attachable ) );
-   WALBERLA_ASSERT( pos != attachables_.end(), "Attachable is not registered" );
-   attachables_.erase( pos );
-
-   // Deregistering all attached rigid bodies
-   attachedBodies_.clear();
-
-   // Recreating the vector of attached rigid bodies
-   for( Attachables::Iterator it=attachables_.begin(); it!=attachables_.end(); ++it ) {
-      const Attachable::Iterator end( it->end() );
-      for( Attachable::Iterator body=it->begin(); body!=end; ++body ) {
-         const AttachedBodyIterator bbegin( attachedBodies_.begin() );
-         const AttachedBodyIterator bend  ( attachedBodies_.end()   );
-         if( *body != this && std::find( bbegin, bend, *body ) == bend )
-            attachedBodies_.pushBack( *body );
-      }
-   }
 }
 //*************************************************************************************************
 

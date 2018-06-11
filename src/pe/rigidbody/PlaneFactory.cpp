@@ -26,7 +26,8 @@
 #include "pe/rigidbody/BodyStorage.h"
 #include "pe/rigidbody/Plane.h"
 
-#include "core/logging/Logging.h"
+#include <core/logging/Logging.h>
+#include <core/UniqueID.h>
 
 namespace walberla {
 namespace pe {

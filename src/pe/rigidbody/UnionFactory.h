@@ -31,8 +31,10 @@
 #include "pe/rigidbody/Union.h"
 #include "pe/Types.h"
 
-#include "blockforest/BlockForest.h"
-#include "core/debug/Debug.h"
+#include <blockforest/BlockForest.h>
+#include <core/debug/Debug.h>
+#include <core/logging/Logging.h>
+#include <core/UniqueID.h>
 
 namespace walberla {
 namespace pe {
