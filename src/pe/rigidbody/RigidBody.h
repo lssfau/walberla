@@ -28,7 +28,6 @@
 #include "core/math/Matrix3.h"
 #include "core/math/Quaternion.h"
 #include "core/math/Vector3.h"
-#include <pe/rigidbody/Node.h>
 
 #include "core/NonCopyable.h"
 #include "core/DataTypes.h"
@@ -48,8 +47,7 @@ class Union;
 /**
  * \ingroup pe
  */
-class RigidBody : public Node
-                , public ccd::HashGridsBodyTrait
+class RigidBody : public ccd::HashGridsBodyTrait
                 , public cr::HCSITSBodyTrait
                 , private NonCopyable
 {

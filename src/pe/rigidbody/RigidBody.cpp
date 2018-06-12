@@ -33,8 +33,7 @@ namespace pe{
  * \param uid The user-specific ID of the rigid body.
  */
 RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
-   : Node()
-   , awake_( true )           // Sleep mode flag
+   : awake_( true )           // Sleep mode flag
    , mass_( 0 )               // Total mass of the rigid body
    , invMass_( 0 )            // Inverse total mass of the rigid body
    , motion_(sleepThreshold)  // The current motion of the rigid body
