@@ -145,7 +145,6 @@ BoxID createBox( Union<BodyTypeTuple>* un,
    if( lengths[0] <= real_t(0) || lengths[1] <= real_t(0) || lengths[2] <= real_t(0) )
       throw std::invalid_argument( "Invalid side length" );
 
-   BoxID box = NULL;
    id_t  sid = 0;
 
    if (global)
@@ -158,9 +157,8 @@ BoxID createBox( Union<BodyTypeTuple>* un,
       sid = UniqueID<RigidBody>::create();
    }
 
-   box = new Box(sid, uid, gpos, Vec3(0,0,0), Quat(), lengths, material, global, communicating, infiniteMass);
+   std::unique_ptr<Box> box = std::make_unique<Box>(sid, uid, gpos, Vec3(0,0,0), Quat(), lengths, material, global, communicating, infiniteMass);
    box->MPITrait.setOwner( un->MPITrait.getOwner() );
-   un->add(box);
 
    if (box != NULL)
    {
@@ -175,7 +173,7 @@ BoxID createBox( Union<BodyTypeTuple>* un,
                );
    }
 
-   return box;
+   return static_cast<BoxID> (&(un->add(std::move(box))));
 }
 
 //*************************************************************************************************
@@ -217,7 +215,6 @@ CapsuleID createCapsule( Union<BodyTypeTuple>* un,
    if( length <= real_c(0) )
       throw std::invalid_argument( "Invalid capsule length" );
 
-   CapsuleID capsule = NULL;
    id_t      sid     = 0;
 
    if (global)
@@ -230,16 +227,15 @@ CapsuleID createCapsule( Union<BodyTypeTuple>* un,
       sid = UniqueID<RigidBody>::create();
    }
 
-   capsule = new Capsule(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, length, material, global, communicating, infiniteMass);
+   std::unique_ptr<Capsule> capsule = std::make_unique<Capsule>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, length, material, global, communicating, infiniteMass);
    capsule->MPITrait.setOwner( un->MPITrait.getOwner() );
-   un->add(capsule);
 
    if (capsule != NULL)
    {
-      WALBERLA_LOG_DETAIL("Created capsule " << capsule->getSystemID() << "\n" << capsule);
+      WALBERLA_LOG_DETAIL("Created capsule " << capsule->getSystemID() << "\n" << *capsule);
    }
 
-   return capsule;
+   return static_cast<CapsuleID>(&(un->add(std::move(capsule))));
 }
 
 //*************************************************************************************************
@@ -277,7 +273,6 @@ SphereID createSphere( Union<BodyTypeTuple>* un,
       throw std::invalid_argument( "Invalid sphere radius" );
 
    id_t sid(0);
-   SphereID sphere = NULL;
 
    if (global)
    {
@@ -290,9 +285,8 @@ SphereID createSphere( Union<BodyTypeTuple>* un,
       sid = UniqueID<RigidBody>::create();
    }
 
-   sphere = new Sphere(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, material, global, communicating, infiniteMass);
+   std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, material, global, communicating, infiniteMass);
    sphere->MPITrait.setOwner( un->MPITrait.getOwner() );
-   un->add( sphere );
 
    if (sphere != NULL)
    {
@@ -307,7 +301,7 @@ SphereID createSphere( Union<BodyTypeTuple>* un,
                );
    }
 
-   return sphere;
+   return static_cast<SphereID>(&(un->add( std::move(sphere) )));
 }
 
 }  // namespace pe

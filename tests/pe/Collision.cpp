@@ -31,6 +31,7 @@
 #include "pe/rigidbody/Sphere.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Union.h"
+#include "pe/rigidbody/UnionFactory.h"
 
 #include "pe/rigidbody/SetBodyTypeIDs.h"
 #include "pe/Types.h"
@@ -273,13 +274,10 @@ void CapsuleTest2()
 void UnionTest()
 {
    typedef Union< boost::tuple<Sphere> > UnionT;
-   MaterialID iron = Material::find("iron");
    UnionT  un1(120, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), false, true, false);
    UnionT  un2(121, 0, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), false, true, false);
-   SphereID sp1 = new Sphere(123, 1, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   un1.add(sp1);
-   SphereID sp2 = new Sphere(124, 2, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   un2.add(sp2);
+   auto sp1 = createSphere(&un1, 123, Vec3(0,0,0), 1);
+   auto sp2 = createSphere(&un2, 124, Vec3(real_t(1.5),0,0), 1);
 
    std::vector<Contact> contacts;
 

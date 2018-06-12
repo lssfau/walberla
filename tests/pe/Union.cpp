@@ -25,6 +25,7 @@
 
 #include "pe/basic.h"
 #include "pe/rigidbody/Union.h"
+#include "pe/rigidbody/UnionFactory.h"
 #include "pe/ccd/SimpleCCDDataHandling.h"
 #include "pe/synchronization/SyncNextNeighbors.h"
 #include "pe/vtk/BodyVtkOutput.h"
@@ -75,12 +76,9 @@ void SnowManFallingOnPlane()
 
    createPlane( *globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,0) );
 
-   MaterialID iron = Material::find("iron");
-   UnionType* un   = createUnion< boost::tuple<Sphere> >( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(5,5,5) );
-   SphereID sp1 = new Sphere( 10, 0, Vec3(5,5,1), Vec3(0,0,0), Quat(), real_t(1)  , iron, false, true, false );
-   SphereID sp2 = new Sphere( 11, 0, Vec3(real_t(6.7),5,real_t(1.2)), Vec3(0,0,0), Quat(), real_t(1.1), iron, false, true, false );
-   un->add(sp1);
-   un->add(sp2);
+   UnionType* un  = createUnion< boost::tuple<Sphere> >( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(5,5,5) );
+   auto sp1       = createSphere(un, 10, Vec3(5,5,1), real_t(1));
+   auto sp2       = createSphere(un, 11, Vec3(real_t(6.7),5,real_t(1.2)), real_t(1.1));
 
    auto distance = (sp1->getPosition() - sp2->getPosition()).length();
 
@@ -106,14 +104,15 @@ void ImpulsCarryover()
 {
    MaterialID iron = Material::find("iron");
 
-   UnionType* un   = new Union< boost::tuple<Sphere> >(12, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), false, true, false);
-   SphereID sp1    = new Sphere( 10, 0, Vec3( 1,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
-   SphereID sp2    = new Sphere( 11, 0, Vec3(-1,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
+   auto un  = std::make_unique<UnionType>(12, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), false, true, false);
+   auto sp1 = std::make_unique<Sphere>( 10, 0, Vec3( 1,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
+   auto sp2 = std::make_unique<Sphere>( 11, 0, Vec3(-1,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
+
    sp1->setLinearVel(Vec3(0,real_c(+1),0));
    sp2->setLinearVel(Vec3(0,real_c(-1),0));
 
-   un->add(sp1);
-   un->add(sp2);
+   un->add( std::move(sp1) );
+   un->add( std::move(sp2) );
 
    WALBERLA_CHECK_FLOAT_EQUAL( un->getPosition(),  Vec3(0,0,0) );
    WALBERLA_CHECK_FLOAT_EQUAL( un->getLinearVel(), Vec3(0,0,0) );

@@ -72,12 +72,12 @@ void marshal( mpi::SendBuffer& buffer, const Union<BodyTypeTuple>& obj )
    buffer << static_cast<size_t> (obj.size());                  // Encoding the number of contained bodies
 
    // Encoding the contained primitives
-   const typename Union<BodyTypeTuple>::ConstIterator begin( obj.begin() );
-   const typename Union<BodyTypeTuple>::ConstIterator end  ( obj.end()   );
-   for(  typename Union<BodyTypeTuple>::ConstIterator body=begin; body!=end; ++body )
+   const typename Union<BodyTypeTuple>::const_iterator begin( obj.begin() );
+   const typename Union<BodyTypeTuple>::const_iterator end  ( obj.end()   );
+   for(  typename Union<BodyTypeTuple>::const_iterator body=begin; body!=end; ++body )
    {
       buffer << body->getTypeID();
-      MarshalDynamically<BodyTypeTuple>::execute( buffer, **body );
+      MarshalDynamically<BodyTypeTuple>::execute( buffer, *body );
    }
 }
 
@@ -132,9 +132,9 @@ inline Union<BodyTypeTuple>* instantiate( mpi::RecvBuffer& buffer, const math::A
    {
       decltype ( static_cast<BodyID>(nullptr)->getTypeID() ) type;
       buffer >> type;
-      BodyID obj = UnmarshalDynamically<BodyTypeTuple>::execute(buffer, type, domain, block);
+      BodyPtr obj( UnmarshalDynamically<BodyTypeTuple>::execute(buffer, type, domain, block) );
       obj->setRemote( true );
-      newBody->add(obj);
+      newBody->add(std::move(obj));
    }
 
    return newBody;

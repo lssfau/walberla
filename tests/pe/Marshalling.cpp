@@ -170,8 +170,8 @@ void testUnion()
    WALBERLA_CHECK_EQUAL(u1.size(), u2->size());
 
    //getting spheres of second union
-   SphereID s12 = static_cast<SphereID> (*(u2->begin()));
-   SphereID s22 = static_cast<SphereID> (*(++(u2->begin())));
+   SphereID s12 = static_cast<SphereID> (u2->begin().getBodyID());
+   SphereID s22 = static_cast<SphereID> ((++(u2->begin())).getBodyID());
    WALBERLA_CHECK_UNEQUAL( s12, s22 );
 
    WALBERLA_CHECK_FLOAT_EQUAL( s11->getPosition(),    s12->getPosition());
