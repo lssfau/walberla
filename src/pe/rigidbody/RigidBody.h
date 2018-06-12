@@ -31,8 +31,6 @@
 
 #include "core/NonCopyable.h"
 #include "core/DataTypes.h"
-#include "core/ptrvector/PtrVector.h"
-#include "core/ptrvector/policies/NoDelete.h"
 #include "core/debug/Debug.h"
 #include "core/logging/Logging.h"
 #include "core/math/AABB.h"

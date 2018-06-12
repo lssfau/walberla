@@ -32,26 +32,9 @@ namespace pe {
 
 //*************************************************************************************************
 /*!\brief Dynamic cast iterator for polymorphic pointer vectors.
- * \ingroup util
  *
- * The CastIterator class is part of the PtrVector class and represent a forward iterator
- * over all elements of type \a C contained in a range of elements of type \a T, where \a C
- * is a type derived from \a T.
-
-   \code
-   class A { ... };
-   class B : public class A { ... };
-
-   PtrVector<A>::CastIterator<B> begin;
-   PtrVector<A>::CastIterator<B> end;
-
-   // Loop over all elements of type B within the range [begin..end)
-   for( ; begin!=end; ++begin )
-      ...
-   \endcode
-
- * \b Note: Using a CastIterator is computationally more expensive than using a standard
- * iterator over all elements contained in the vector.
+ * The RigidBodyCastIterator is a forward iterator which only selects elements of type C.
+ * Dereferencing this iterator will implicitly cast to C.
  */
 template <typename C>
 class RigidBodyCastIterator

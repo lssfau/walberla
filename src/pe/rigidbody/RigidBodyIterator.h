@@ -32,55 +32,9 @@ namespace pe {
 
 //*************************************************************************************************
 /*!\brief Implementation of an iterator for pointer vectors.
- * \ingroup util
  *
- * The PtrIterator class follows the example of the random-access iterator classes of the STL.
- * However, the focus of this iterator implementation is the use with (polymorphic) pointers.
- * Since the physics engine makes heavy use of polymorphic pointers, this implementation eases
- * the use of iterators over a range of pointers and improves the semantics on these pointers.\n
- *
- * In contrast to the STL iterators, the PtrIterator class slightly changes the meaning of the
- * access operators. Consider the following example:
-
-   \code
-   // Definition of class A
-   class A
-   {
-    public:
-      A( int i=0 ):i_(i) {}
-
-      void set( int i )       { i_ = i; }
-      int  get()        const { return i_; }
-
-    private:
-      int i_;
-   };
-
-   // Definition of a pointer vector for class A
-   typedef PtrVector<A>  AVector;
-
-   AVector vector;
-   AVector::Iterator it = vector.begin();
-
-   // The subscript operator returns a handle to the underlying object
-   A* a1 = it[0];
-
-   // The dereference operator returns a handle to the underlying object
-   A* a2 = *it;
-
-   // The member access operator offers direct access to the underlying object
-   it->set( 2 );
-   \endcode
-
- * The constant iterators (iterator over constant objects) prohibit the access to non-const
- * member functions. Therefore the following operation results in a compile-time error:
-
-   \code
-   AVector vector;
-   AVector::ConstIterator it = vector.begin();
-
-   it->set( 2 );  // Compile-time error!
-   \endcode
+ * This iterator implementation will automatically dereference twice at dereference calls!
+ * Therefore the return types are not unique_ptrs but RigidBodys.
  */
 class RigidBodyIterator
 {
