@@ -131,7 +131,7 @@ public:
    //**Add/Remove functions************************************************************************
    /*!\name Add/Remove functions */
    //@{
-   inline RigidBody&     add     ( BodyID body );
+   [[deprecated]] inline RigidBody&     add     ( BodyID body );
    inline RigidBody&     add     ( std::unique_ptr<RigidBody>&& body );
    inline iterator       remove  ( const id_t sid );
    inline iterator       remove  ( BodyID body );

@@ -148,8 +148,8 @@ int main( int argc, char** argv )
 
    MaterialID iron = Material::find("iron");
    BodyStorage storage;
-   SphereID sphere = new Sphere(0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   storage.add(sphere);
+   SpherePtr spPtr = std::make_unique<Sphere>(0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   SphereID sphere = static_cast<SphereID>(&storage.add(std::move(spPtr)));
 
    Vec3 x0 = Vec3(-2,2,0);
    Vec3 v0 = Vec3(-1,-1,1);
