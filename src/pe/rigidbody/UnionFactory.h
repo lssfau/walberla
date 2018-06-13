@@ -75,32 +75,31 @@ Union<BodyTypeTuple>* createUnion(   BodyStorage& globalStorage, BlockStorage& b
    if (Union<BodyTypeTuple>::getStaticTypeID() == std::numeric_limits<id_t>::max())
       throw std::runtime_error("Union TypeID not initalized!");
 
-   Union<BodyTypeTuple>* bd = NULL;
+   Union<BodyTypeTuple>* bd = nullptr;
 
    if (global)
    {
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      bd = new Union<BodyTypeTuple>(sid, uid, gpos, Vec3(0,0,0), Quat(), global, false, true);
-      globalStorage.add(bd);
+      auto un = std::make_unique<Union<BodyTypeTuple>>(sid, uid, gpos, Vec3(0,0,0), Quat(), global, false, true);
+      bd = static_cast<Union<BodyTypeTuple>*>(&globalStorage.add(std::move(un)));
    } else
    {
-      for (auto it = blocks.begin(); it != blocks.end(); ++it){
-         IBlock* block = (&(*it));
-         if (block->getAABB().contains(gpos))
+      for (auto& block : blocks){
+         if (block.getAABB().contains(gpos))
          {
             const id_t sid( UniqueID<RigidBody>::create() );
 
-            Storage* bs = block->getData<Storage>(storageID);
-            bd = new Union<BodyTypeTuple>(sid, uid, gpos, Vec3(0,0,0), Quat(), global, communicating, infiniteMass);
-            bd->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block->getId().getID()));
-            (*bs)[0].add(bd);
+            BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
+            auto un = std::make_unique<Union<BodyTypeTuple>>(sid, uid, gpos, Vec3(0,0,0), Quat(), global, communicating, infiniteMass);
+            un->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
+            bd = static_cast<Union<BodyTypeTuple>*>(&bs.add(std::move(un)));
          }
       }
    }
 
-   if (bd != NULL)
+   if (bd != nullptr)
    {
       // Logging the successful creation of the box
       WALBERLA_LOG_DETAIL(

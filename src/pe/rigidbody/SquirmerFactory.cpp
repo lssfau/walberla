@@ -41,32 +41,31 @@ SquirmerID createSquirmer( BodyStorage& globalStorage, BlockStorage& blocks, Blo
    if( radius <= real_c(0) )
       throw std::invalid_argument( "Invalid squirmer radius" );
 
-   SquirmerID squirmer = NULL;
+   SquirmerID squirmer = nullptr;
 
    if (global)
    {
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      squirmer = new Squirmer(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, squirmerVelocity, squirmerBeta, material, global, false, true);
-      globalStorage.add(squirmer);
+      SquirmerPtr sq = std::make_unique<Squirmer>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, squirmerVelocity, squirmerBeta, material, global, false, true);
+      squirmer = static_cast<SquirmerID>(&globalStorage.add(std::move(sq)));
    } else
    {
-      for (auto it = blocks.begin(); it != blocks.end(); ++it){
-         IBlock* block = (&(*it));
-         if (block->getAABB().contains(gpos))
+      for (auto& block : blocks){
+         if (block.getAABB().contains(gpos))
          {
             const id_t sid( UniqueID<RigidBody>::create() );
 
-            Storage* bs = block->getData<Storage>(storageID);
-            squirmer = new Squirmer(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, squirmerVelocity, squirmerBeta, material, global, communicating, infiniteMass);
-            squirmer->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block->getId().getID()));
-            (*bs)[0].add(squirmer);
+            BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
+            SquirmerPtr sq = std::make_unique<Squirmer>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, squirmerVelocity, squirmerBeta, material, global, communicating, infiniteMass);
+            sq->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
+            squirmer = static_cast<SquirmerID>(&bs.add( std::move(sq) ));
          }
       }
    }
 
-   if (squirmer != NULL)
+   if (squirmer != nullptr)
    {
       // Logging the successful creation of the squirmer
       WALBERLA_LOG_DETAIL(

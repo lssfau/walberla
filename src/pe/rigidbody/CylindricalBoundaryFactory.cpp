@@ -38,9 +38,9 @@ CylindricalBoundaryID createCylindricalBoundary( BodyStorage& globalStorage,
 
    const id_t sid( UniqueID<RigidBody>::createGlobal() );
 
-   CylindricalBoundaryID cb = new CylindricalBoundary( sid, uid, gpos, radius, material );
+   CylindricalBoundaryPtr cbPtr = std::make_unique<CylindricalBoundary>( sid, uid, gpos, radius, material );
 
-   globalStorage.add(cb);
+   CylindricalBoundaryID cb = static_cast<CylindricalBoundaryID>(&globalStorage.add(std::move(cbPtr)));
 
    // Logging the successful creation of the plane
    WALBERLA_LOG_DETAIL( "Created cylindrical boundary " << sid << "\n" << cb);

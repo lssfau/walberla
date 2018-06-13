@@ -45,9 +45,8 @@ PlaneID createPlane( BodyStorage& globalStorage, id_t uid, Vec3 normal, const Ve
 
    const id_t sid( UniqueID<RigidBody>::createGlobal() );
 
-   PlaneID plane = new Plane( sid, uid, gpos, normal, normal*gpos, material );
-
-   globalStorage.add(plane);
+   PlanePtr pl = std::make_unique<Plane>( sid, uid, gpos, normal, normal*gpos, material );
+   PlaneID plane = static_cast<PlaneID>(&globalStorage.add(std::move(pl)));
 
    // Logging the successful creation of the plane
    WALBERLA_LOG_DETAIL( "Created plane " << sid << "\n"

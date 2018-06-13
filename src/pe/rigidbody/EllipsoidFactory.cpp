@@ -32,36 +32,35 @@ namespace walberla {
 namespace pe {
 
 EllipsoidID createEllipsoid( BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID storageID,
-                       id_t uid, const Vec3& gpos, const Vec3& semiAxes,
-                       MaterialID material,
-                       bool global, bool communicating, bool infiniteMass )
+                             id_t uid, const Vec3& gpos, const Vec3& semiAxes,
+                             MaterialID material,
+                             bool global, bool communicating, bool infiniteMass )
 {
    WALBERLA_ASSERT_UNEQUAL( Ellipsoid::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Ellipsoid TypeID not initalized!");
    // Checking the semiAxes
    if( semiAxes[0] <= real_c(0) || semiAxes[1] <= real_c(0) || semiAxes[2] <= real_c(0) )
       throw std::invalid_argument( "Invalid Ellipsoid semi-axes" );
 
-   EllipsoidID ellipsoid = NULL;
+   EllipsoidID ellipsoid = nullptr;
 
    if (global)
    {
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      ellipsoid = new Ellipsoid(sid, uid, gpos, Vec3(0,0,0), Quat(), semiAxes, material, global, false, true);
-      globalStorage.add(ellipsoid);
+      EllipsoidPtr el = std::make_unique<Ellipsoid>(sid, uid, gpos, Vec3(0,0,0), Quat(), semiAxes, material, global, false, true);
+      ellipsoid = static_cast<EllipsoidID>(&globalStorage.add(std::move(el)));
    } else
    {
-      for (auto it = blocks.begin(); it != blocks.end(); ++it){
-         IBlock* block = (&(*it));
-         if (block->getAABB().contains(gpos))
+      for (auto& block : blocks){
+         if (block.getAABB().contains(gpos))
          {
             const id_t sid( UniqueID<RigidBody>::create() );
 
-            Storage* bs = block->getData<Storage>(storageID);
-            ellipsoid = new Ellipsoid(sid, uid, gpos, Vec3(0,0,0), Quat(), semiAxes, material, global, communicating, infiniteMass);
-            ellipsoid->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block->getId().getID()));
-            (*bs)[0].add(ellipsoid);
+            BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
+            EllipsoidPtr el = std::make_unique<Ellipsoid>(sid, uid, gpos, Vec3(0,0,0), Quat(), semiAxes, material, global, communicating, infiniteMass);
+            el->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
+            ellipsoid = static_cast<EllipsoidID>(&bs.add(std::move(el)));
          }
       }
    }
@@ -70,12 +69,12 @@ EllipsoidID createEllipsoid( BodyStorage& globalStorage, BlockStorage& blocks, B
    {
       // Logging the successful creation of the Ellipsoid
       WALBERLA_LOG_DETAIL(
-                "Created Ellipsoid " << ellipsoid->getSystemID() << "\n"
-             << "   User-ID         = " << uid << "\n"
-             << "   Global position = " << gpos << "\n"
-             << "   Semi-axes       = " << semiAxes << "\n"
-             << "   LinVel          = " << ellipsoid->getLinearVel() << "\n"
-             << "   Material        = " << Material::getName( material )
+               "Created Ellipsoid " << ellipsoid->getSystemID() << "\n"
+               << "   User-ID         = " << uid << "\n"
+               << "   Global position = " << gpos << "\n"
+               << "   Semi-axes       = " << semiAxes << "\n"
+               << "   LinVel          = " << ellipsoid->getLinearVel() << "\n"
+               << "   Material        = " << Material::getName( material )
                );
    }
 
