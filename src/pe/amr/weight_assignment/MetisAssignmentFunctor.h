@@ -63,10 +63,11 @@ public:
          {
             const double dx(1.0);
             info.setEdgeWeight( it->first->getNeighborId(nb),
+                                static_cast<blockforest::DynamicParMetisBlockInfo::weight_t>(
                                 domain_decomposition::periodicIntersectionVolume( periodic,
                                                                                   domain,
                                                                                   it->first->getAABB(),
-                                                                                  it->first->getNeighborAABB(nb).getExtended(dx)) );
+                                                                                  it->first->getNeighborAABB(nb).getExtended(dx))) );
          }
          it->second = info;
          continue;
