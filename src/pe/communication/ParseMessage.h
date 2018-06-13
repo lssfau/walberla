@@ -64,17 +64,18 @@ void parseMessage(Owner sender, mpi::RecvBuffer& rb, const domain_decomposition:
 
             WALBERLA_LOG_DETAIL( "Received " << objparam.geomType_ << " copy notification from neighboring process with rank " << sender );
 
-            BodyID obj = UnmarshalDynamically<BodyTypeTuple>::execute(rb, objparam.geomType_, blockStorage.getDomain(), block.getAABB());
+            BodyPtr obj = UnmarshalDynamically<BodyTypeTuple>::execute(rb, objparam.geomType_, blockStorage.getDomain(), block.getAABB());
             obj->setRemote( true );
+            obj->MPITrait.setBlockState( sender.blockID_ );
+
             if (shadowStorage.find( obj->getSystemID() ) == shadowStorage.end())
             {
-               WALBERLA_LOG_DETAIL( "Adding new shadow copy with id " << obj->getSystemID() << " to domain " << block.getAABB() << ".\n" << obj);
-               shadowStorage.add( obj );
+               WALBERLA_LOG_DETAIL( "Adding new shadow copy with id " << obj->getSystemID() << " to domain " << block.getAABB() << ".\n" << *obj);
+               shadowStorage.add( std::move(obj) );
             } else
             {
                WALBERLA_LOG_DETAIL( "Shadow copy with id " << obj->getSystemID() << " already existend.");
             }
-            obj->MPITrait.setBlockState( sender.blockID_ );
 
             WALBERLA_LOG_DETAIL( "Processed " << objparam.geomType_ << " copy notification."  );
 

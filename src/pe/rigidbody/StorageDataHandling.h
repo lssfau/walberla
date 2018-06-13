@@ -214,16 +214,16 @@ void StorageDataHandling<BodyTuple>::deserializeImpl( IBlock * const block, cons
       typename RigidBodyCopyNotification::Parameters objparam;
       unmarshal( buffer, objparam );
 
-      BodyID bd = UnmarshalDynamically<BodyTuple>::execute(buffer, objparam.geomType_, block->getBlockStorage().getDomain(), block->getAABB());
+      auto bd = UnmarshalDynamically<BodyTuple>::execute(buffer, objparam.geomType_, block->getBlockStorage().getDomain(), block->getAABB());
       bd->setRemote( false );
       bd->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block->getId().getID()));
 
       if ( !block->getAABB().contains( bd->getPosition()) )
       {
-         WALBERLA_ABORT("Loaded body not contained within block!\n" << "aabb: " << block->getAABB() << "\nparticle:" << bd );
+         WALBERLA_ABORT("Loaded body not contained within block!\n" << "aabb: " << block->getAABB() << "\nparticle:" << *bd );
       }
       WALBERLA_ASSERT_EQUAL(localBodyStorage.find( bd->getSystemID() ), localBodyStorage.end());
-      localBodyStorage.add(bd);
+      localBodyStorage.add(std::move(bd));
 
       --numBodies;
    }

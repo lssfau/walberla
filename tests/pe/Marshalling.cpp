@@ -41,11 +41,14 @@ using namespace walberla::pe::communication;
 typedef boost::tuple<Sphere>       UnionTypeTuple;
 typedef Union< UnionTypeTuple >    UnionT;
 typedef UnionT*                    UnionID;
+typedef std::unique_ptr<UnionT>    UnionPtr;
 
 typedef boost::tuple<Box, Capsule, Sphere, Squirmer, UnionT, Ellipsoid> BodyTuple ;
 
 void testBox()
 {
+   WALBERLA_LOG_INFO_ON_ROOT("*** testBox ***");
+
    MaterialID iron = Material::find("iron");
 
    Box b1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), Vec3(1,2,3), iron, false, true, false);
@@ -56,7 +59,8 @@ void testBox()
    MarshalDynamically<BodyTuple>::execute(sb, b1);
    mpi::RecvBuffer rb(sb);
 
-   BoxID b2 = static_cast<BoxID> (UnmarshalDynamically<BodyTuple>::execute(rb, Box::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+   auto bPtr = UnmarshalDynamically<BodyTuple>::execute(rb, Box::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)));
+   BoxID b2 = static_cast<BoxID>(bPtr.get());
 
    WALBERLA_CHECK_FLOAT_EQUAL(b1.getPosition(), b2->getPosition());
    WALBERLA_CHECK_FLOAT_EQUAL(b1.getLinearVel(), b2->getLinearVel());
@@ -68,6 +72,8 @@ void testBox()
 
 void testCapsule()
 {
+   WALBERLA_LOG_INFO_ON_ROOT("*** testCapsule ***");
+
    MaterialID iron = Material::find("iron");
 
    Capsule c1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), 5, 7, iron, false, false, false);
@@ -78,7 +84,8 @@ void testCapsule()
    MarshalDynamically<BodyTuple>::execute(sb, c1);
    mpi::RecvBuffer rb(sb);
 
-   CapsuleID c2 = static_cast<CapsuleID> (UnmarshalDynamically<BodyTuple>::execute(rb, Capsule::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+   auto cPtr = UnmarshalDynamically<BodyTuple>::execute(rb, Capsule::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)));
+   CapsuleID c2 = static_cast<CapsuleID> (cPtr.get());
 
    WALBERLA_CHECK_FLOAT_EQUAL(c1.getPosition(), c2->getPosition());
    WALBERLA_CHECK_FLOAT_EQUAL(c1.getLinearVel(), c2->getLinearVel());
@@ -91,6 +98,8 @@ void testCapsule()
 
 void testSphere()
 {
+   WALBERLA_LOG_INFO_ON_ROOT("*** testSphere ***");
+
    MaterialID iron = Material::find("iron");
 
    Sphere s1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), 5, iron, false, false, false);
@@ -101,7 +110,8 @@ void testSphere()
    MarshalDynamically<BodyTuple>::execute(sb, s1);
    mpi::RecvBuffer rb(sb);
 
-   SphereID s2 = static_cast<SphereID> (UnmarshalDynamically<BodyTuple>::execute(rb, Sphere::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+   auto sPtr = UnmarshalDynamically<BodyTuple>::execute(rb, Sphere::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)));
+   SphereID s2 = static_cast<SphereID> (sPtr.get());
 
    WALBERLA_CHECK_FLOAT_EQUAL(s1.getPosition(), s2->getPosition());
    WALBERLA_CHECK_FLOAT_EQUAL(s1.getLinearVel(), s2->getLinearVel());
@@ -113,6 +123,8 @@ void testSphere()
 
 void testSquirmer()
 {
+   WALBERLA_LOG_INFO_ON_ROOT("*** testSquirmer ***");
+
    MaterialID iron = Material::find("iron");
 
    Squirmer s1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), real_c(5), real_c(0.1), real_c(4.93), iron, false, false, false);
@@ -123,7 +135,8 @@ void testSquirmer()
    MarshalDynamically<BodyTuple>::execute(sb, s1);
    mpi::RecvBuffer rb(sb);
 
-   SquirmerID s2 = static_cast<SquirmerID> (UnmarshalDynamically<BodyTuple>::execute(rb, Squirmer::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+   auto sPtr = UnmarshalDynamically<BodyTuple>::execute(rb, Squirmer::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)));
+   SquirmerID s2 = static_cast<SquirmerID> (sPtr.get());
 
    WALBERLA_CHECK_FLOAT_EQUAL(s1.getSquirmerVelocity(), s2->getSquirmerVelocity());
    WALBERLA_CHECK_FLOAT_EQUAL(s1.getSquirmerBeta(), s2->getSquirmerBeta());
@@ -131,6 +144,8 @@ void testSquirmer()
 
 void testEllipsoid()
 {
+   WALBERLA_LOG_INFO_ON_ROOT("*** testEllipsoid ***");
+
    MaterialID iron = Material::find("iron");
 
    Ellipsoid e1(759847, 1234795, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), Vec3(3,1,5), iron, false, false, false);
@@ -141,7 +156,8 @@ void testEllipsoid()
    MarshalDynamically<BodyTuple>::execute(sb, e1);
    mpi::RecvBuffer rb(sb);
 
-   EllipsoidID e2 = static_cast<EllipsoidID> (UnmarshalDynamically<BodyTuple>::execute(rb, Ellipsoid::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+   auto ePtr = UnmarshalDynamically<BodyTuple>::execute(rb, Ellipsoid::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)));
+   EllipsoidID e2 = static_cast<EllipsoidID>(ePtr.get());
 
    WALBERLA_CHECK_FLOAT_EQUAL(e1.getPosition(), e2->getPosition());
    WALBERLA_CHECK_FLOAT_EQUAL(e1.getLinearVel(), e2->getLinearVel());
@@ -153,6 +169,7 @@ void testEllipsoid()
 
 void testUnion()
 {
+   WALBERLA_LOG_INFO_ON_ROOT("*** testUnion ***");
    UnionT u1(159, 423, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), false, false, false);
    SphereID s11 = createSphere< UnionTypeTuple >(&u1, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), 2);
    SphereID s21 = createSphere< UnionTypeTuple >(&u1, 4567789, Vec3(real_c(3), real_c(2), real_c(3)), real_c(1.5));
@@ -163,7 +180,8 @@ void testUnion()
    MarshalDynamically<BodyTuple>::execute(sb, u1);
    mpi::RecvBuffer rb(sb);
 
-   UnionID u2 = static_cast<UnionID> (UnmarshalDynamically<BodyTuple>::execute(rb, UnionT::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100))));
+   auto uPtr = UnmarshalDynamically<BodyTuple>::execute(rb, UnionT::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)));
+   UnionID u2 = static_cast<UnionID>(uPtr.get());
    WALBERLA_CHECK_NOT_NULLPTR( u2 );
 
    WALBERLA_CHECK_EQUAL(u1.size(), 2);

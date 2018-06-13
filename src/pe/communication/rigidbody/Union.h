@@ -110,22 +110,22 @@ void unmarshal( mpi::RecvBuffer& buffer, UnionParameters& objparam )
 
 
 template <typename BodyTypeTuple>
-inline Union<BodyTypeTuple>* instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, Union<BodyTypeTuple>*& newBody )
+inline std::unique_ptr<Union<BodyTypeTuple>> instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, Union<BodyTypeTuple>*& newBody )
 {
    UnionParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   newBody = new Union<BodyTypeTuple>( subobjparam.sid_,
-                                       subobjparam.uid_,
-                                       subobjparam.gpos_,
-                                       subobjparam.rpos_,
-                                       subobjparam.q_,
-                                       false,
-                                       subobjparam.communicating_,
-                                       subobjparam.infiniteMass_ );
-   newBody->setLinearVel( subobjparam.v_ );
-   newBody->setAngularVel( subobjparam.w_ );
-   newBody->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
+   auto un = std::make_unique<Union<BodyTypeTuple>>( subobjparam.sid_,
+                                                     subobjparam.uid_,
+                                                     subobjparam.gpos_,
+                                                     subobjparam.rpos_,
+                                                     subobjparam.q_,
+                                                     false,
+                                                     subobjparam.communicating_,
+                                                     subobjparam.infiniteMass_ );
+   un->setLinearVel( subobjparam.v_ );
+   un->setAngularVel( subobjparam.w_ );
+   un->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
 
    // Decoding the contained primitives
    for( size_t i = 0; i < subobjparam.size_; ++i )
@@ -134,10 +134,11 @@ inline Union<BodyTypeTuple>* instantiate( mpi::RecvBuffer& buffer, const math::A
       buffer >> type;
       BodyPtr obj( UnmarshalDynamically<BodyTypeTuple>::execute(buffer, type, domain, block) );
       obj->setRemote( true );
-      newBody->add(std::move(obj));
+      un->add(std::move(obj));
    }
 
-   return newBody;
+   newBody = un.get();
+   return un;
 }
 
 }  // namespace communication

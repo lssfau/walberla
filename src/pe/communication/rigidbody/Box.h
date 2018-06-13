@@ -59,16 +59,17 @@ void marshal( mpi::SendBuffer& buffer, const Box& obj );
  */
 void unmarshal( mpi::RecvBuffer& buffer, BoxParameters& objparam );
 //*************************************************************************************************
-inline BoxID instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, BoxID& newBody )
+inline BoxPtr instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, BoxID& newBody )
 {
    BoxParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   newBody = new Box( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.lengths_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
-   newBody->setLinearVel( subobjparam.v_ );
-   newBody->setAngularVel( subobjparam.w_ );
-   newBody->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
-   return newBody;
+   auto bx = std::make_unique<Box>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.lengths_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   bx->setLinearVel( subobjparam.v_ );
+   bx->setAngularVel( subobjparam.w_ );
+   bx->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
+   newBody = bx.get();
+   return bx;
 }
 
 }  // namespace communication
