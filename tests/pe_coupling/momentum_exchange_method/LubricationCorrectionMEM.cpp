@@ -165,14 +165,14 @@ private:
       {
          for( auto curSphereIt = pe::BodyIterator::begin<pe::Sphere>( *blockIt, bodyStorageID_); curSphereIt != pe::BodyIterator::end<pe::Sphere>(); ++curSphereIt )
          {
-            pe::SphereID sphereI = ( *curSphereIt );
+            pe::SphereID sphereI = ( curSphereIt.getBodyID() );
             if ( sphereI->getID() == id1_ )
             {
                for( auto blockIt2 = blocks_->begin(); blockIt2 != blocks_->end(); ++blockIt2 )
                {
                   for( auto oSphereIt = pe::BodyIterator::begin<pe::Sphere>( *blockIt2, bodyStorageID_); oSphereIt != pe::BodyIterator::end<pe::Sphere>(); ++oSphereIt )
                   {
-                     pe::SphereID sphereJ = ( *oSphereIt );
+                     pe::SphereID sphereJ = ( oSphereIt.getBodyID() );
                      if ( sphereJ->getID() == id2_ )
                      {
                         gap = pe::getSurfaceDistance( sphereI, sphereJ );
@@ -285,14 +285,14 @@ private:
       {
          for( auto curSphereIt = pe::BodyIterator::begin<pe::Sphere>( *blockIt, bodyStorageID_); curSphereIt != pe::BodyIterator::end<pe::Sphere>(); ++curSphereIt )
          {
-            pe::SphereID sphereI = ( *curSphereIt );
+            pe::SphereID sphereI = ( curSphereIt.getBodyID() );
             if ( sphereI->getID() == id1_ )
             {
                for( auto globalBodyIt = globalBodyStorage_->begin(); globalBodyIt != globalBodyStorage_->end(); ++globalBodyIt)
                {
                   if( globalBodyIt->getID() == id2_ )
                   {
-                     pe::PlaneID planeJ = static_cast<pe::PlaneID>( *globalBodyIt );
+                     pe::PlaneID planeJ = static_cast<pe::PlaneID>( globalBodyIt.getBodyID() );
                      gap = pe::getSurfaceDistance(sphereI, planeJ);
                      break;
                   }

@@ -74,7 +74,7 @@ void reduceForces( BlockStorage& blocks, BlockDataID storageID )
 
          WALBERLA_LOG_DETAIL( "__Sending force contribution " << bodyIt->getForce() << ", " << bodyIt->getTorque() << " of body " <<
                               bodyIt->getSystemID() << " to owner block " << bodyIt->MPITrait.getOwner().blockID_ << ".\n");
-         packNotification(me, bodyIt->MPITrait.getOwner(), sb, RigidBodyForceNotification( *(*bodyIt) ) );
+         packNotification(me, bodyIt->MPITrait.getOwner(), sb, RigidBodyForceNotification( *bodyIt ) );
 
       }
 
@@ -135,7 +135,7 @@ void reduceForces( BlockStorage& blocks, BlockDataID storageID, BodyStorage& glo
       {
          if (it->hasInfiniteMass()) continue;
 
-         const Vec3 f( (*it)->getForce() ), tau( (*it)->getTorque() );
+         const Vec3 f( it->getForce() ), tau( it->getTorque() );
          reductionBuffer[i++] = f[0];
          reductionBuffer[i++] = f[1];
          reductionBuffer[i++] = f[2];
@@ -150,8 +150,8 @@ void reduceForces( BlockStorage& blocks, BlockDataID storageID, BodyStorage& glo
       for( auto it = globalBodyStorage.begin(); it != globalBodyStorage.end(); ++it )
       {
          if (it->hasInfiniteMass()) continue;
-         (*it)->setForce ( Vec3( reductionBuffer[i], reductionBuffer[i + 1], reductionBuffer[i + 2] ) );
-         (*it)->setTorque( Vec3( reductionBuffer[i + 3], reductionBuffer[i + 4], reductionBuffer[i + 5] ) );
+         it->setForce ( Vec3( reductionBuffer[i], reductionBuffer[i + 1], reductionBuffer[i + 2] ) );
+         it->setTorque( Vec3( reductionBuffer[i + 3], reductionBuffer[i + 4], reductionBuffer[i + 5] ) );
       }
    }
    WALBERLA_LOG_DETAIL( "Sync force on global bodies finished." );
@@ -198,7 +198,7 @@ void distributeForces( BlockStorage& blocks, BlockDataID storageID )
 
             WALBERLA_LOG_DETAIL( "__Sending force contribution " << bodyIt->getForce() << ", " << bodyIt->getTorque() << " of body " <<
                                  bodyIt->getSystemID() << " to shadow owner " << sownerIt->blockID_ << ".\n");
-            packNotification(me, *sownerIt, sb, RigidBodyForceNotification( *(*bodyIt) ) );
+            packNotification(me, *sownerIt, sb, RigidBodyForceNotification( *bodyIt ) );
          }
       }
 

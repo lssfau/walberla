@@ -2124,7 +2124,7 @@ bool collide( Union<BodyTypeTuple>* bd1, BodyB* bd2, Container& container )
    bool collision = false;
    for( auto it=bd1->begin(); it!=bd1->end(); ++it )
    {
-      collision |= SingleCast<BodyTypeTuple, AnalyticSingleCollideFunctor<BodyB, Container>, bool>::execute(*it, func);
+      collision |= SingleCast<BodyTypeTuple, AnalyticSingleCollideFunctor<BodyB, Container>, bool>::execute(it.getBodyID(), func);
    }
    return collision;
 }
@@ -2146,7 +2146,7 @@ bool collide( Union<BodyTypeTupleA>* bd1, Union<BodyTypeTupleB>* bd2, Container&
    {
       for( auto it2=bd2->begin(); it2!=bd2->end(); ++it2 )
       {
-         collision |= DoubleCast<BodyTypeTupleA, BodyTypeTupleB, AnalyticCollideFunctor<Container>, bool>::execute(*it1, *it2, func);
+         collision |= DoubleCast<BodyTypeTupleA, BodyTypeTupleB, AnalyticCollideFunctor<Container>, bool>::execute(it1.getBodyID(), it2.getBodyID(), func);
       }
    }
    return collision;

@@ -169,7 +169,7 @@ namespace gjkepa{
       bool collision = false;
       for( auto it=a->begin(); it!=a->end(); ++it )
       {
-         collision |= SingleCast<BodyTupleA, GJKEPASingleCollideFunctor<BodyB, Container>, bool>::execute(*it, func);
+         collision |= SingleCast<BodyTupleA, GJKEPASingleCollideFunctor<BodyB, Container>, bool>::execute(it.getBodyID(), func);
       }
       return collision;
    }
@@ -187,7 +187,7 @@ namespace gjkepa{
       {
          for( auto it2=b->begin(); it2!=b->end(); ++it2 )
          {
-            collision |= DoubleCast<BodyTupleA, BodyTupleB, GJKEPACollideFunctor<Container>, bool>::execute(*it1, *it2, func);
+            collision |= DoubleCast<BodyTupleA, BodyTupleB, GJKEPACollideFunctor<Container>, bool>::execute(it1.getBodyID(), it2.getBodyID(), func);
          }
       }
       return collision;
@@ -200,7 +200,7 @@ namespace gjkepa{
       bool collision = false;
       for( auto it=a->begin(); it!=a->end(); ++it )
       {
-         collision |= SingleCast<BodyTupleA, GJKEPASingleCollideFunctor<Plane, Container>, bool>::execute(*it, func);
+         collision |= SingleCast<BodyTupleA, GJKEPASingleCollideFunctor<Plane, Container>, bool>::execute(it.getBodyID(), func);
       }
       return collision;
    }

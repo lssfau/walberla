@@ -71,12 +71,12 @@ int main( int argc, char ** argv )
 
    MaterialID iron = Material::find("iron");
 
-   SphereID refGlobalSphere = new Sphere(1, 0, Vec3(9, 9, 9), Vec3(0,0,0), Quat(), 3, iron, true, false, true);
-   refGlobalSphere->setLinearVel(Vec3(2,2,2));
+   Sphere refGlobalSphere(1, 0, Vec3(9, 9, 9), Vec3(0,0,0), Quat(), 3, iron, true, false, true);
+   refGlobalSphere.setLinearVel(Vec3(2,2,2));
    SphereID globalSphere = createSphere( *globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(9,9,9), 3, iron, true, false, true);
    globalSphere->setLinearVel(Vec3(2,2,2));
 
-   SphereID refFixedSphere = new Sphere(2, 0, Vec3(9,9,14), Vec3(0,0,0), Quat(), 3, iron, false, false, true);
+   Sphere refFixedSphere(2, 0, Vec3(9,9,14), Vec3(0,0,0), Quat(), 3, iron, false, false, true);
    SphereID fixedSphere = createSphere( *globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(9,9,14), 3, iron, false, false, true);
    walberla::id_t fixedSphereID = 0;
    if (fixedSphere != NULL) fixedSphereID = fixedSphere->getSystemID();
@@ -87,16 +87,16 @@ int main( int argc, char ** argv )
 
    cr.setGlobalLinearAcceleration(Vec3(0, 0, real_c(-9.81)));
 
-   checkVitalParameters(refGlobalSphere, globalSphere);
+   checkVitalParameters(&refGlobalSphere, globalSphere);
    for (auto it = forest->begin(); it != forest->end(); ++it)
    {
       blockforest::Block& block = *(dynamic_cast<blockforest::Block*>(&(*it)));
-      if (block.getAABB().intersects(refFixedSphere->getAABB()))
+      if (block.getAABB().intersects(refFixedSphere.getAABB()))
       {
          SphereID fixed = static_cast<SphereID> (getBody(*globalStorage, forest->getBlockStorage(), storageID, fixedSphereID));
          WALBERLA_ASSERT_NOT_NULLPTR(fixed);
-         checkVitalParameters(refFixedSphere,fixed);
-         if (!block.getAABB().contains(refFixedSphere->getPosition()))
+         checkVitalParameters(&refFixedSphere,fixed);
+         if (!block.getAABB().contains(refFixedSphere.getPosition()))
          {
             WALBERLA_ASSERT(fixed->isRemote());
          }
@@ -108,17 +108,17 @@ int main( int argc, char ** argv )
    syncShadowOwners<BodyTuple>( forest->getBlockForest(), storageID, NULL, real_c(0.0), false);
    WALBERLA_LOG_PROGRESS_ON_ROOT("*** SIMULATION - END ***");
 
-   refGlobalSphere->setPosition(Vec3(11,11,11));
-   checkVitalParameters(refGlobalSphere, globalSphere);
+   refGlobalSphere.setPosition(Vec3(11,11,11));
+   checkVitalParameters(&refGlobalSphere, globalSphere);
    for (auto it = forest->begin(); it != forest->end(); ++it)
    {
       blockforest::Block& block = *(dynamic_cast<blockforest::Block*>(&(*it)));
-      if (block.getAABB().intersects(refFixedSphere->getAABB()))
+      if (block.getAABB().intersects(refFixedSphere.getAABB()))
       {
          SphereID fixed = static_cast<SphereID> (getBody(*globalStorage, forest->getBlockStorage(), storageID, fixedSphereID));
          WALBERLA_ASSERT_NOT_NULLPTR(fixed);
-         checkVitalParameters(refFixedSphere, fixed);
-         if (!block.getAABB().contains(refFixedSphere->getPosition()))
+         checkVitalParameters(&refFixedSphere, fixed);
+         if (!block.getAABB().contains(refFixedSphere.getPosition()))
          {
             WALBERLA_ASSERT(fixed->isRemote());
          }

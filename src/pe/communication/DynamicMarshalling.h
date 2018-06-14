@@ -91,7 +91,7 @@ private:
          , block_(block) {}
 
       template< typename BodyType >
-      BodyID operator()( BodyType* bd) { return instantiate( buffer_, domain_, block_, bd ); }
+      BodyPtr operator()( BodyType* bd) { return instantiate( buffer_, domain_, block_, bd ); }
    };
 
 public:
@@ -105,10 +105,10 @@ public:
     * The rigid body is casted dynamically to its original type and then marshalled. For recognition
     * an identifying tag is prepended.
     */
-   static BodyID execute(mpi::RecvBuffer& buffer, const id_t typeID, const math::AABB& domain, const math::AABB& block)
+   static BodyPtr execute(mpi::RecvBuffer& buffer, const id_t typeID, const math::AABB& domain, const math::AABB& block)
    {
       UnmarshalFunctor func(buffer, domain, block);
-      return SingleCast<BodyTypeTuple, UnmarshalFunctor, BodyID>::execute (typeID, func);
+      return SingleCast<BodyTypeTuple, UnmarshalFunctor, BodyPtr>::execute (typeID, func);
    }
 };
 

@@ -26,6 +26,9 @@
 #include "pe/rigidbody/BodyStorage.h"
 #include "pe/rigidbody/Capsule.h"
 
+#include <core/logging/Logging.h>
+#include <core/UniqueID.h>
+
 namespace walberla {
 namespace pe {
 
@@ -40,32 +43,31 @@ CapsuleID createCapsule(   BodyStorage& globalStorage, BlockStorage& blocks, Blo
    WALBERLA_ASSERT_GREATER( radius, real_t(0), "Invalid capsule radius" );
    WALBERLA_ASSERT_GREATER( length, real_t(0), "Invalid capsule length" );
 
-   CapsuleID capsule = NULL;
+   CapsuleID capsule = nullptr;
 
    if (global)
    {
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      capsule = new Capsule(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, length, material, global, false, true);
-      globalStorage.add(capsule);
+      CapsulePtr cp = std::make_unique<Capsule>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, length, material, global, false, true);
+      capsule = static_cast<CapsuleID>(&globalStorage.add(std::move(cp)));
    } else
    {
-      for (auto it = blocks.begin(); it != blocks.end(); ++it){
-         IBlock* block = (&(*it));
-         if (block->getAABB().contains(gpos))
+      for (auto& block : blocks){
+         if (block.getAABB().contains(gpos))
          {
             const id_t sid( UniqueID<RigidBody>::create() );
 
-            Storage* bs = block->getData<Storage>(storageID);
-            capsule = new Capsule(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, length, material, global, communicating, infiniteMass);
-            capsule->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block->getId().getID()));
-            (*bs)[0].add(capsule);
+            BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
+            CapsulePtr cp = std::make_unique<Capsule>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, length, material, global, communicating, infiniteMass);
+            cp->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
+            capsule = static_cast<CapsuleID>(&bs.add( std::move(cp) ));
          }
       }
    }
 
-   if (capsule != NULL)
+   if (capsule != nullptr)
    {
       // Logging the successful creation of the box
       WALBERLA_LOG_DETAIL(

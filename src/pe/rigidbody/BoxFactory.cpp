@@ -26,6 +26,9 @@
 #include "pe/rigidbody/BodyStorage.h"
 #include "pe/rigidbody/Box.h"
 
+#include <core/logging/Logging.h>
+#include <core/UniqueID.h>
+
 namespace walberla {
 namespace pe {
 
@@ -40,32 +43,31 @@ BoxID createBox(       BodyStorage& globalStorage, BlockStorage& blocks, BlockDa
    if( lengths[0] <= real_t(0) || lengths[1] <= real_t(0) || lengths[2] <= real_t(0) )
       throw std::invalid_argument( "Invalid side length" );
 
-   BoxID box = NULL;
+   BoxID box = nullptr;
 
    if (global)
    {
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      box = new Box(sid, uid, gpos, Vec3(0,0,0), Quat(), lengths, material, global, false, true);
-      globalStorage.add(box);
+      BoxPtr bx = std::make_unique<Box>(sid, uid, gpos, Vec3(0,0,0), Quat(), lengths, material, global, false, true);
+      box = static_cast<BoxID>(&globalStorage.add(std::move(bx)));
    } else
    {
-      for (auto it = blocks.begin(); it != blocks.end(); ++it){
-         IBlock* block = (&(*it));
-         if (block->getAABB().contains(gpos))
+      for (auto& block : blocks){
+         if (block.getAABB().contains(gpos))
          {
             const id_t sid( UniqueID<RigidBody>::create() );
 
-            Storage* bs = block->getData<Storage>(storageID);
-            box = new Box(sid, uid, gpos, Vec3(0,0,0), Quat(), lengths, material, global, communicating, infiniteMass);
-            box->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block->getId().getID()));
-            (*bs)[0].add(box);
+            BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
+            BoxPtr bx = std::make_unique<Box>(sid, uid, gpos, Vec3(0,0,0), Quat(), lengths, material, global, communicating, infiniteMass);
+            bx->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
+            box = static_cast<BoxID>(&bs.add(std::move(bx)));
          }
       }
    }
 
-   if (box != NULL)
+   if (box != nullptr)
    {
       // Logging the successful creation of the box
       WALBERLA_LOG_DETAIL(

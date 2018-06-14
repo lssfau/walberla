@@ -32,6 +32,7 @@
 #include "pe/rigidbody/Sphere.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Union.h"
+#include "pe/rigidbody/UnionFactory.h"
 #include "pe/rigidbody/Ellipsoid.h"
 
 #include "pe/rigidbody/SetBodyTypeIDs.h"
@@ -355,32 +356,29 @@ void UnionTest(){
    Box box(179, 179, Vec3(0,0,0), Vec3(0,0,0), Quat(), Vec3(real_t(10),real_t(2), real_t(10)), iron, false, true, false);
 
 
-   Union<boost::tuple<Sphere>> *unsub = new Union<boost::tuple<Sphere>>(192, 192, Vec3(0,real_t(3.8),0), Vec3(0,0,0), Quat(), false, true, false);
+   using UnionT = Union<boost::tuple<Sphere>>;
+   auto unsub = std::make_unique<UnionT>(192, 192, Vec3(0,real_t(3.8),0), Vec3(0,0,0), Quat(), false, true, false);
 
-   Sphere sp1( 180, 180, Vec3(-3,real_t(3.8),0), Vec3(0,0,0), Quat(), real_t(3.0)  , iron, false, true, false );
-   Sphere sp2( 181, 181, Vec3(3,real_t(3.8),0), Vec3(0,0,0), Quat(), real_t(3.0), iron, false, true, false );
-
-   Sphere sp3( 182, 182, Vec3(0,real_t(6),0), Vec3(0,0,0), Quat(), real_t(3.0), iron, false, true, false );
-   unsub->add(&sp1);
-   unsub->add(&sp2);
+   auto sp1 = createSphere(unsub.get(), 180, Vec3(-3,real_t(3.8),0), real_t(3.0));
+   auto sp2 = createSphere(unsub.get(), 181, Vec3(3,real_t(3.8),0), real_t(3.0));
 
    //Create another union, and add sub union
-   Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>> *un = new Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>>(193, 193, Vec3(0, 0, 0), Vec3(0,0,0), Quat(), false, true, false);
-   un->add(&sp3);
-   un->add(unsub);
+   Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>> un(193, 193, Vec3(0, 0, 0), Vec3(0,0,0), Quat(), false, true, false);
+   createSphere(&un, 182, Vec3(0,real_t(6),0), real_t(3.0));
+   un.add(std::move(unsub));
 
 
    PossibleContacts pcs;
-   pcs.push_back(std::pair<Union<boost::tuple<Sphere,Union<boost::tuple<Sphere>>>>*, Box*>(un, &box));
+   pcs.push_back(std::pair<Union<boost::tuple<Sphere,Union<boost::tuple<Sphere>>>>*, Box*>(&un, &box));
    Contacts& container = testFCD.generateContacts(pcs);
    WALBERLA_CHECK(container.size() == 2);
 
    Contact &c = container.back();
    WALBERLA_LOG_DEVEL( c.getDistance() << " " << c.getNormal() << " " << c.getPosition() );
    if(c.getBody1()->getID() == 181) {
-      checkContact( c, Contact(&sp2, &box,  Vec3(real_t(3), real_t(0.9), 0), Vec3(0, 1, 0), real_t(-0.2)), Vec3(0,0,0));
+      checkContact( c, Contact(sp2, &box,  Vec3(real_t(3), real_t(0.9), 0), Vec3(0, 1, 0), real_t(-0.2)), Vec3(0,0,0));
    } else if (c.getBody1()->getID() == 179) {
-      checkContact( c, Contact(&box, &sp2,  Vec3(real_t(3), real_t(0.9), 0), Vec3(0, -1, 0), real_t(-0.2)), Vec3(0,0,0));
+      checkContact( c, Contact(&box, sp2,  Vec3(real_t(3), real_t(0.9), 0), Vec3(0, -1, 0), real_t(-0.2)), Vec3(0,0,0));
    } else {
       WALBERLA_ABORT("Unknown ID!");
    }
@@ -390,25 +388,25 @@ void UnionTest(){
    c = container.back();
    WALBERLA_LOG_DEVEL( c.getDistance() << " " << c.getNormal() << " " << c.getPosition() );
    if(c.getBody1()->getID() == 180) {
-      checkContact( c, Contact(&sp1, &box,  Vec3(real_t(-3), real_t(0.9), 0), Vec3(0, 1, 0), real_t(-0.2)), Vec3(0,0,0));
+      checkContact( c, Contact(sp1, &box,  Vec3(real_t(-3), real_t(0.9), 0), Vec3(0, 1, 0), real_t(-0.2)), Vec3(0,0,0));
    } else if (c.getBody1()->getID() == 179) {
-      checkContact( c, Contact(&box, &sp1,  Vec3(real_t(-3), real_t(0.9), 0), Vec3(0, -1, 0), real_t(-0.2)), Vec3(0,0,0));
+      checkContact( c, Contact(&box, sp1,  Vec3(real_t(-3), real_t(0.9), 0), Vec3(0, -1, 0), real_t(-0.2)), Vec3(0,0,0));
    } else {
       WALBERLA_ABORT("Unknown ID!");
    }
    pcs.clear();
 
    //Vice Versa
-   pcs.push_back(std::pair<Box*, Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>>* >(&box, un));
+   pcs.push_back(std::pair<Box*, Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>>* >(&box, &un));
    container = testFCD.generateContacts(pcs);
    WALBERLA_CHECK(container.size() == 2);
 
    c = container.back();
    WALBERLA_LOG_DEVEL( c.getDistance() << " " << c.getNormal() << " " << c.getPosition() );
    if(c.getBody1()->getID() == 181) {
-      checkContact( c, Contact(&sp2, &box,  Vec3(real_t(3), real_t(0.9), 0), Vec3(0, 1, 0), real_t(-0.2)), Vec3(0,0,0));
+      checkContact( c, Contact(sp2, &box,  Vec3(real_t(3), real_t(0.9), 0), Vec3(0, 1, 0), real_t(-0.2)), Vec3(0,0,0));
    } else if (c.getBody1()->getID() == 179) {
-      checkContact( c, Contact(&box, &sp2,  Vec3(real_t(3), real_t(0.9), 0), Vec3(0, -1, 0), real_t(-0.2)), Vec3(0,0,0));
+      checkContact( c, Contact(&box, sp2,  Vec3(real_t(3), real_t(0.9), 0), Vec3(0, -1, 0), real_t(-0.2)), Vec3(0,0,0));
    } else {
       WALBERLA_ABORT("Unknown ID!");
    }
@@ -417,9 +415,9 @@ void UnionTest(){
    c = container.back();
    WALBERLA_LOG_DEVEL( c.getDistance() << " " << c.getNormal() << " " << c.getPosition() );
    if(c.getBody1()->getID() == 180) {
-      checkContact( c, Contact(&sp1, &box,  Vec3(real_t(-3), real_t(0.9), 0), Vec3(0, 1, 0), real_t(-0.2)), Vec3(0,0,0));
+      checkContact( c, Contact(sp1, &box,  Vec3(real_t(-3), real_t(0.9), 0), Vec3(0, 1, 0), real_t(-0.2)), Vec3(0,0,0));
    } else if (c.getBody1()->getID() == 179) {
-      checkContact( c, Contact(&box, &sp1,  Vec3(real_t(-3), real_t(0.9), 0), Vec3(0, -1, 0), real_t(-0.2)), Vec3(0,0,0));
+      checkContact( c, Contact(&box, sp1,  Vec3(real_t(-3), real_t(0.9), 0), Vec3(0, -1, 0), real_t(-0.2)), Vec3(0,0,0));
    } else {
       WALBERLA_ABORT("Unknown ID!");
    }
