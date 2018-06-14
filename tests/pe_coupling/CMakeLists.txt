@@ -156,3 +156,10 @@ waLBerla_execute_test( NAME SphereWallCollisionBehaviorDPMFuncTest COMMAND $<TAR
 
 waLBerla_compile_test( FILES discrete_particle_methods/HinderedSettlingDynamicsDPM.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME HinderedSettlingDynamicsDPMFuncTest COMMAND $<TARGET_FILE:HinderedSettlingDynamicsDPM> --funcTest PROCESSES 4 LABELS longrun CONFIGURATIONS RelWithDbgInfo )
+
+###################################################################################################
+# Geometry tests
+###################################################################################################
+
+waLBerla_compile_test( FILES geometry/PeIntersectionRatioTest.cpp DEPENDS pe )
+waLBerla_execute_test( NAME PeIntersectionRatioTest COMMAND $<TARGET_FILE:PeIntersectionRatioTest> PROCESSES 1 )
