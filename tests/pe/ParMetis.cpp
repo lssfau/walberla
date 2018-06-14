@@ -129,7 +129,7 @@ int main( int argc, char ** argv )
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
    walberla::MPIManager::instance()->useWorldComm();
 
-   std::vector<std::string> algs = {"PART_GEOM", "PART_GEOM_KWAY", "PART_KWAY", "PART_ADAPTIVE_REPART", "REFINE_KWAY"};
+   std::vector<std::string> algs = {"PART_GEOM", "PART_GEOM_KWAY", "PART_KWAY", "ADAPTIVE_REPART", "REFINE_KWAY"};
    std::vector<std::string> wtu  = {"NO_WEIGHTS", "EDGE_WEIGHTS", "VERTEX_WEIGHTS", "BOTH_WEIGHTS"};
    std::vector<std::string> es   = {"EDGES_FROM_FOREST", "EDGES_FROM_EDGE_WEIGHTS"};
 

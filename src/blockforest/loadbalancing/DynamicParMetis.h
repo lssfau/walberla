@@ -30,6 +30,7 @@
 
 #include <cmath>
 #include <map>
+#include <vector>
 
 namespace walberla {
 namespace blockforest {
@@ -48,8 +49,9 @@ public:
 
    DynamicParMetis( const Algorithm algorithm = PARMETIS_PART_GEOM_KWAY,
                     const WeightsToUse weightsToUse = PARMETIS_BOTH_WEIGHTS,
-                    const EdgeSource edgeSource = PARMETIS_EDGES_FROM_EDGE_WEIGHTS )
-      : algorithm_( algorithm ), weightsToUse_( weightsToUse ), edgeSource_( edgeSource ) {}
+                    const EdgeSource edgeSource = PARMETIS_EDGES_FROM_EDGE_WEIGHTS,
+                    const uint_t ncon = uint_t(1))
+      : algorithm_( algorithm ), weightsToUse_( weightsToUse ), edgeSource_( edgeSource ), ncon_( ncon ), ubvec_( ncon, real_t(1.05) ) {}
 
    bool operator()( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                     std::set< uint_t > & processesToRecvFrom,
@@ -59,6 +61,10 @@ public:
 
    void   setipc2redist(double val) {ipc2redist_ = val;}
    double getipc2redist() const {return ipc2redist_;}
+
+   void setImbalanceTolerances(const std::vector<double> & tolerances){ WALBERLA_ASSERT_EQUAL(tolerances.size(), ncon_-uint_t(1)); ubvec_ = tolerances; }
+   void setImbalanceTolerance(double tolerance, const uint_t con = 0){ WALBERLA_ASSERT_LESS(con, ncon_); ubvec_[con] = tolerance; }
+   double getImbalanceTolerance(const uint_t con = 0) const { WALBERLA_ASSERT_LESS(con, ncon_); return ubvec_[con]; }
 
    bool edgeWeightsUsed()   const { return ( weightsToUse_ == PARMETIS_EDGE_WEIGHTS   ) || ( weightsToUse_ == PARMETIS_BOTH_WEIGHTS ); }
    bool vertexWeightsUsed() const { return ( weightsToUse_ == PARMETIS_VERTEX_WEIGHTS ) || ( weightsToUse_ == PARMETIS_BOTH_WEIGHTS ); }
@@ -77,6 +83,8 @@ protected:
    WeightsToUse weightsToUse_;
    EdgeSource edgeSource_;
 
+   uint_t ncon_ = uint_t(1); ///< number of constraints
+   std::vector<double> ubvec_; ///< imbalance tolerance for each constraint, value between 1 (perfect balance) and number of subdomains (= number of processes, perfect imbalance)
    double ipc2redist_ = real_t( 1000.0 ); ///< compute repartitioning with low edge cut (set lower (down to 0.000001) to get minimal repartitioning )
 };
 
@@ -87,8 +95,8 @@ public:
    typedef int64_t weight_t;
    typedef int64_t vsize_t;
 
-   DynamicParMetisBlockInfo( const weight_t vertexWeight )
-      : vertexWeight_(vertexWeight), vertexSize_(1)
+   DynamicParMetisBlockInfo( const weight_t vertexWeight, const uint_t ncon = 1 )
+      : vertexWeight_(ncon, vertexWeight), vertexSize_(1)
    { }
 
    DynamicParMetisBlockInfo( mpi::RecvBuffer & buffer )
@@ -96,13 +104,35 @@ public:
       buffer >> vertexWeight_ >> vertexSize_ >> vertexCoords_ >> edgeWeights_;
    }
 
-   weight_t getVertexWeight() const { return vertexWeight_; }
-   void     setVertexWeight( const weight_t vertexWeight ) { vertexWeight_ = vertexWeight; }
+   DynamicParMetisBlockInfo( const std::vector<weight_t> & vertexWeight )
+      : vertexWeight_(vertexWeight), vertexSize_(1)
+   { }
 
-   vsize_t getVertexSize() const { return vertexSize_; }
-   void setVertexSize( const vsize_t size ) { vertexSize_ = size; }
+   // get number of constraints ( = number of vertex weights), default: 1, > 1 for multi physics problems
+   uint_t getNcon() const
+   {
+      return vertexWeight_.size();
+   }
 
-   const Vector3<double> & getVertexCoords() const { WALBERLA_ASSERT( !std::isnan(vertexCoords_[0]) && !std::isnan(vertexCoords_[1]) && !std::isnan(vertexCoords_[2]) ); return vertexCoords_; }
+   weight_t getVertexWeight( const uint_t con = 0 ) const
+   {
+      WALBERLA_ASSERT_LESS(con, getNcon());
+      return vertexWeight_[con];
+   }
+   void setVertexWeight( const weight_t vertexWeight, const uint_t con = 0 )
+   {
+      WALBERLA_ASSERT_LESS(con, getNcon());
+      vertexWeight_[con] = vertexWeight;
+   }
+
+   vsize_t getVertexSize( ) const { return vertexSize_; }
+   void setVertexSize( const vsize_t size) { vertexSize_ = size; }
+
+   const Vector3<double> & getVertexCoords() const
+   {
+      WALBERLA_ASSERT( !std::isnan(vertexCoords_[0]) && !std::isnan(vertexCoords_[1]) && !std::isnan(vertexCoords_[2]) );
+      return vertexCoords_;
+   }
    void setVertexCoords( const Vector3<double> & p ) { vertexCoords_ = p; }
 
    void setEdgeWeight( const blockforest::BlockID & blockId, const weight_t edgeWeight ) { edgeWeights_[blockId] = edgeWeight; }
@@ -117,8 +147,8 @@ public:
 
 private:
 
-   weight_t vertexWeight_; /// Defines the weight of a block
-   vsize_t vertexSize_;    /// Defines the cost of rebalancing a block
+   std::vector<weight_t> vertexWeight_; /// Defines the ncon weights of a block
+   vsize_t vertexSize_;    /// Defines the cost of rebalancing a block. Needed by some ParMetis algorithms
    Vector3<double> vertexCoords_ = Vector3<double>(std::numeric_limits<double>::signaling_NaN()); /// Defines where the block is located in space. Needed by some ParMetis algorithms
    std::map< blockforest::BlockID, weight_t > edgeWeights_; /// Defines the cost of communication with other blocks
 };
