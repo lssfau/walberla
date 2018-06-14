@@ -26,6 +26,8 @@
 #include "pe_coupling/geometry/PeBodyOverlapFunctions.h"
 
 #include "pe/rigidbody/RigidBody.h"
+#include "pe/rigidbody/Ellipsoid.h"
+#include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Sphere.h"
 #include "pe/Types.h"
 
@@ -37,6 +39,13 @@ real_t intersectionRatioSpherePe( const pe::Sphere & sphere,
                                   const Vector3<real_t> & fluidPoint,
                                   const Vector3<real_t> & direction );
 
+real_t intersectionRatioPlanePe( const pe::Plane & plane,
+                                 const Vector3<real_t> & fluidPoint,
+                                 const Vector3<real_t> & direction );
+
+real_t intersectionRatioEllipsoidPe( const pe::Ellipsoid & ellipsoid,
+                                     const Vector3<real_t> & fluidPoint,
+                                     const Vector3<real_t> & direction );
 
 inline real_t intersectionRatio( const pe::RigidBody & peRigidBody,
                                  const Vector3<real_t> & fluidPoint,
@@ -48,6 +57,19 @@ inline real_t intersectionRatio( const pe::RigidBody & peRigidBody,
       const pe::Sphere & sphere = static_cast< const pe::Sphere & >( peRigidBody );
       const real_t ratio = intersectionRatioSpherePe( sphere, fluidPoint, direction );
       WALBERLA_ASSERT_LESS_EQUAL( std::fabs( ( fluidPoint + ratio * direction - sphere.getPosition() ).length() - sphere.getRadius() ), epsilon );
+      return ratio;
+   }
+   else if ( peRigidBody.getTypeID() == pe::Plane::getStaticTypeID() )
+   {
+      const pe::Plane & plane = static_cast< const pe::Plane & >( peRigidBody );
+      const real_t ratio = intersectionRatioPlanePe( plane, fluidPoint, direction );
+      WALBERLA_ASSERT_FLOAT_EQUAL( ( fluidPoint + ratio * direction - plane.getPosition() ) * plane.getNormal(), real_t(0) );
+      return ratio;
+   }
+   else if ( peRigidBody.getTypeID() == pe::Ellipsoid::getStaticTypeID() )
+   {
+      const pe::Ellipsoid & ellipsoid = static_cast< const pe::Ellipsoid & >( peRigidBody );
+      const real_t ratio = intersectionRatioEllipsoidPe( ellipsoid, fluidPoint, direction );
       return ratio;
    }
    // Add more pe bodies here if specific intersectionRatio(...) function is available
