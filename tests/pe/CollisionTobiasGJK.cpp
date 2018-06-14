@@ -363,13 +363,13 @@ void UnionTest(){
    auto sp2 = createSphere(unsub.get(), 181, Vec3(3,real_t(3.8),0), real_t(3.0));
 
    //Create another union, and add sub union
-   Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>> *un = new Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>>(193, 193, Vec3(0, 0, 0), Vec3(0,0,0), Quat(), false, true, false);
-   createSphere(un, 182, Vec3(0,real_t(6),0), real_t(3.0));
-   un->add(std::move(unsub));
+   Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>> un(193, 193, Vec3(0, 0, 0), Vec3(0,0,0), Quat(), false, true, false);
+   createSphere(&un, 182, Vec3(0,real_t(6),0), real_t(3.0));
+   un.add(std::move(unsub));
 
 
    PossibleContacts pcs;
-   pcs.push_back(std::pair<Union<boost::tuple<Sphere,Union<boost::tuple<Sphere>>>>*, Box*>(un, &box));
+   pcs.push_back(std::pair<Union<boost::tuple<Sphere,Union<boost::tuple<Sphere>>>>*, Box*>(&un, &box));
    Contacts& container = testFCD.generateContacts(pcs);
    WALBERLA_CHECK(container.size() == 2);
 
@@ -397,7 +397,7 @@ void UnionTest(){
    pcs.clear();
 
    //Vice Versa
-   pcs.push_back(std::pair<Box*, Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>>* >(&box, un));
+   pcs.push_back(std::pair<Box*, Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>>* >(&box, &un));
    container = testFCD.generateContacts(pcs);
    WALBERLA_CHECK(container.size() == 2);
 

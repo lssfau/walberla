@@ -115,7 +115,7 @@ void createSimulation(math::AABB& simulationDomain,
     info.ccdID               = info.forest->addBlockData(ccd::createHashGridsDataHandling( info.globalBodyStorage, info.storageID ), "CCD");
     info.fcdID               = info.forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
 
-    info.cr = shared_ptr<cr::ICR>(new cr::HCSITS(info.globalBodyStorage, info.forest->getBlockStoragePointer(), info.storageID, info.ccdID, info.fcdID) );
+    info.cr = std::make_shared<cr::HCSITS>(info.globalBodyStorage, info.forest->getBlockStoragePointer(), info.storageID, info.ccdID, info.fcdID );
 
     int numParticles = int_c(0);
 
