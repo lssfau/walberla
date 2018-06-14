@@ -29,6 +29,7 @@
 #include "pe/communication/DynamicMarshalling.h"
 
 #include "blockforest/BlockDataHandling.h"
+#include "blockforest/BlockForest.h"
 #include "domain_decomposition/BlockStorage.h"
 #include "core/Abort.h"
 
@@ -114,21 +115,8 @@ template<typename BodyTuple>
 void StorageDataHandling<BodyTuple>::serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child )
 {
    // get child aabb
-   const math::AABB aabb = block->getAABB();
-   const real_t xMid = (aabb.xMax() + aabb.xMin()) * real_t(0.5);
-   const real_t yMid = (aabb.yMax() + aabb.yMin()) * real_t(0.5);
-   const real_t zMid = (aabb.zMax() + aabb.zMin()) * real_t(0.5);
-
-   const real_t xMin = (child & uint_t(1)) ? xMid : aabb.xMin();
-   const real_t xMax = (child & uint_t(1)) ? aabb.xMax() : xMid;
-
-   const real_t yMin = (child & uint_t(2)) ? yMid : aabb.yMin();
-   const real_t yMax = (child & uint_t(2)) ? aabb.yMax() : yMid;
-
-   const real_t zMin = (child & uint_t(4)) ? zMid : aabb.zMin();
-   const real_t zMax = (child & uint_t(4)) ? aabb.zMax() : zMid;
-
-   const math::AABB childAABB(xMin, yMin, zMin, xMax, yMax, zMax);
+   const auto childID   = BlockID(block->getId(), child);
+   const auto childAABB = block->getForest().getAABBFromBlockId(childID);
    //WALBERLA_LOG_DEVEL( (child & uint_t(1)) << (child & uint_t(2)) << (child & uint_t(4)) << "\naabb: " << aabb << "\nchild: " << childAABB );
 
    using namespace walberla::pe::communication;
