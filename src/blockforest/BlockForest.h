@@ -989,6 +989,62 @@ private:
 
 
 
+class CombinedMinTargetLevelDeterminationFunctions
+{
+public:
+
+   typedef blockforest::BlockForest::RefreshMinTargetLevelDeterminationFunction MinTargetLevelDeterminationFunction;
+
+   CombinedMinTargetLevelDeterminationFunctions(const std::function<uint_t(const std::vector<uint_t> &)> & targetLevelReductionFct = [](const std::vector<uint_t> & t){ return *std::max_element(t.begin(), t.end());})
+   : targetLevelReductionFct_( targetLevelReductionFct )
+   {
+
+   }
+
+   void add( const MinTargetLevelDeterminationFunction & function )
+   {
+      functions_.push_back( function );
+   }
+
+   void operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
+                    std::vector< const Block * > & blocksAlreadyMarkedForRefinement,
+                    const blockforest::BlockForest & forest )
+   {
+      const uint_t numberOfBlocks = minTargetLevels.size();
+
+      std::vector< std::vector< std::pair< const Block *, uint_t > > > minTargetLevelsPerFunction(functions_.size(), minTargetLevels);
+
+      // evaluate the different determination functions
+      auto iter = minTargetLevelsPerFunction.begin();
+      for( auto function = functions_.begin(); function != functions_.end(); ++function, ++iter )
+      {
+         (*function)( *iter, blocksAlreadyMarkedForRefinement, forest );
+         WALBERLA_ASSERT_EQUAL(iter->size(), numberOfBlocks, "Number of blocks has changed during min target level determination!");
+      }
+
+      // combine the outcome of the different functions into a single target level
+      std::vector<uint_t> targetLevels(functions_.size());
+      for( uint_t block = 0; block < numberOfBlocks; ++block )
+      {
+         for( uint_t fct = 0; fct < functions_.size(); ++fct)
+         {
+            WALBERLA_ASSERT_EQUAL(minTargetLevelsPerFunction[fct][block].first->getId(), minTargetLevels[block].first->getId());
+            targetLevels[fct] = minTargetLevelsPerFunction[fct][block].second;
+         }
+         minTargetLevels[block].second = targetLevelReductionFct_(targetLevels);
+      }
+
+   }
+
+private:
+
+   std::vector< MinTargetLevelDeterminationFunction > functions_;
+   std::function<uint_t(const std::vector<uint_t> &)> targetLevelReductionFct_;
+
+}; // class CombinedMinTargetLevelDeterminationFunctions
+
+
+
 } // namespace blockforest
 
 using blockforest::BlockForest;
