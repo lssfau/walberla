@@ -154,6 +154,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
 
    numContacts_        = 0;
    numContactsTreated_ = 0;
+   maximumPenetration_ = 0;
 
    if (tt_ != NULL) tt_->start("Simulation Step");
 
@@ -210,7 +211,6 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
       contactCache.resize( numContactsMasked );
 
       {
-         maximumPenetration_ = 0;
 
          size_t j = 0;
          for( size_t i = 0; i < numContacts; ++i )
