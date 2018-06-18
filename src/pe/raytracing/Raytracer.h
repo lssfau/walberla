@@ -37,9 +37,6 @@
 
 #include <stddef.h>
 
-using namespace walberla::pe;
-using namespace walberla::timing;
-
 namespace walberla {
 namespace pe {
 namespace raytracing {
@@ -706,6 +703,7 @@ inline Color Raytracer::getColor(const BodyID body, const Ray& ray, real_t t, co
 
    return color;
 }
-}
-}
-}
+
+} //namespace raytracing
+} //namespace pe
+} //namespace walberla

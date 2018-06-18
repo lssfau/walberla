@@ -421,6 +421,6 @@ void Raytracer::output(const std::vector<BodyIntersectionInfo>& intersectionsBuf
    if (tt != NULL) tt->stop("Output");
 }
 
-}
-}
-}
+} //namespace raytracing
+} //namespace pe
+} //namespace walberla

@@ -30,6 +30,7 @@
 namespace walberla {
 namespace pe {
 namespace raytracing {
+
 inline ShadingParameters defaultBodyTypeDependentShadingParams (const BodyID body);
 inline ShadingParameters processRankDependentShadingParams (const BodyID body);
 inline ShadingParameters defaultShadingParams (const BodyID body);
@@ -169,6 +170,7 @@ inline ShadingParameters violetShadingParams (const BodyID body) {
                        real_t(0));
    return s;
 }
-}
-}
-}
+
+} //namespace raytracing
+} //namespace pe
+} //namespace walberla

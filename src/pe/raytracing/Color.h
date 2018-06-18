@@ -13,6 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
+//! \file   Color.h
 //! \author Lukas Werner
 //
 //======================================================================================================================
@@ -25,6 +26,7 @@
 namespace walberla {
 namespace pe {
 namespace raytracing {
+
 class Color: public Vector3<real_t> {
 public:
    /*!\name Constructors */
@@ -75,6 +77,7 @@ public:
    
    static Color colorFromHSV(real_t hue, real_t saturation, real_t value);
 };
-}
-}
-}
+
+} //namespace raytracing
+} //namespace pe
+} //namespace walberla

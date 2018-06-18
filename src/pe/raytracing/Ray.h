@@ -219,6 +219,7 @@ public:
    }
    //@}
 };
-}
-}
-}
+
+} //namespace raytracing
+} //namespace pe
+} //namespace walberla

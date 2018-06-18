@@ -27,6 +27,7 @@
 namespace walberla {
 namespace pe {
 namespace raytracing {
+
 struct ShadingParameters {
    Color diffuseColor;  //!< Primary color of the material.
    Color ambientColor;  //!< Color the material has even when its not directly lit.
@@ -80,7 +81,8 @@ struct ShadingParameters {
       return *this;
    }
 };
-}
-}
-}
+
+} //namespace raytracing
+} //namespace pe
+} //namespace walberla
 
