@@ -121,7 +121,7 @@ public:
                            *interpolationResultBegin = baseField_(curCell, f);
                            ++interpolationResultBegin;
                         }
-                        break;
+                        return;
                      }
                   }
                }

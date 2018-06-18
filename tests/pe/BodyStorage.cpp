@@ -54,18 +54,21 @@ int main( int argc, char** argv )
     MaterialID iron = Material::find("iron");
     {
         BodyStorage storage;
-        auto bd1 = new Body1(1, iron);
-        auto bd2 = new Body2(2, iron);
-        auto bd3 = new Body2(3, iron);
-        auto bd4 = new Body2(4, iron);
+        auto bd1Ptr = std::make_unique<Body1>(1, iron);
+        auto bd2Ptr = std::make_unique<Body2>(2, iron);
+        auto bd3Ptr = std::make_unique<Body2>(3, iron);
+        auto bd4Ptr = std::make_unique<Body2>(4, iron);
+
+        auto bd2 = bd2Ptr.get();
+        auto bd3 = bd3Ptr.get();
 
         WALBERLA_CHECK_EQUAL(Body1::refCount, 1);
         WALBERLA_CHECK_EQUAL(Body2::refCount, 3);
 
-        storage.add(bd1);
-        storage.add(bd2);
-        storage.add(bd3);
-        storage.add(bd4);
+        storage.add(std::move(bd1Ptr));
+        storage.add(std::move(bd2Ptr));
+        storage.add(std::move(bd3Ptr));
+        storage.add(std::move(bd4Ptr));
 
         WALBERLA_CHECK_EQUAL(storage.size(), 4);
         WALBERLA_CHECK_EQUAL(Body1::refCount, 1);

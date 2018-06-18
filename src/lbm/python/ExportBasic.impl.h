@@ -165,7 +165,7 @@ namespace internal
       using namespace boost::python;
 
       LatticeModelCreator creator( compressible, equilibriumAccuracyOrder, stencil, collisionModel, forceModel );
-      python_coupling::for_each_noncopyable_type<LatticeModels>( boost::ref(creator) );
+      python_coupling::for_each_noncopyable_type<LatticeModels>( std::ref(creator) );
 
       if ( creator.getResult() == object() )
       {
@@ -346,7 +346,7 @@ namespace internal
 
       internal::AddPdfFieldToStorageExporter exporter( blocks, identifier, latticeModel, initialVelocity,
                                                        initialDensity, gl, layout, densityAdaptor, velocityAdaptor, shearRateAdaptor );
-      python_coupling::for_each_noncopyable_type< LatticeModels >  ( boost::ref(exporter) );
+      python_coupling::for_each_noncopyable_type< LatticeModels >  ( std::ref(exporter) );
       if ( ! exporter.successful() ) {
          PyErr_SetString( PyExc_ValueError, "Adding Pdf Field failed.");
          throw error_already_set();

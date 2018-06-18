@@ -64,6 +64,7 @@
 #include <vector>
 #include <iomanip>
 #include <iostream>
+#include <functional>
 
 namespace body_at_block_boarder_check
 {
@@ -132,7 +133,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( AABB domainAABB
                                                      uint_c(domainAABB.zMax()) / blockSizeInCells[2] );
 
    AABB refinementBox( domainAABB.xMin(), domainAABB.yMin(), domainAABB.zMin(), domainAABB.xMax() * real_c(0.5), domainAABB.yMax(), domainAABB.zMax() );
-   sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, numberOfLevels, refinementBox ) );
+   sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, numberOfLevels, refinementBox ) );
    sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
    sforest.init( domainAABB, numberOfCoarseBlocksPerDirection[0], numberOfCoarseBlocksPerDirection[1], numberOfCoarseBlocksPerDirection[2], true, true, true );
@@ -281,7 +282,7 @@ int main( int argc, char **argv )
 
    // connect to pe
    const real_t overlap = real_c( 1.5 ) * dx;
-   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
 
    auto sphereMaterialID = pe::createMaterial( "sphereMat", real_c(1) , real_c(0.3), real_c(0.2), real_c(0.2), real_c(0.24), real_c(200), real_c(200), real_c(0), real_c(0) );
    // create two spheres: one which overlaps with a block boundary and one inside the block

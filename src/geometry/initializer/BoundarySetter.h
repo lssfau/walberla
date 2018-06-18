@@ -194,7 +194,10 @@ namespace initializer {
          }
 
          if ( boundaryConfigBlock_ )
+         {
             bcConfig_ = boundaryHandling_->createBoundaryConfiguration( boundaryUID_, boundaryConfigBlock_ );
+            boundaryConfigBlock_ = Config::BlockHandle(); // discard the config block so we don't unnecessarily run createBoundaryConfiguration more than once with the same arguments
+         }
 
          flag_ = boundaryHandling_->getBoundaryMask( boundaryUID_ );
          if ( ! field::isFlag( flag_ ) )

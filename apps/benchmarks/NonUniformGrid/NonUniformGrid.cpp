@@ -76,6 +76,7 @@
 #include "vtk/VTKOutput.h"
 
 #include <cstdlib>
+#include <functional>
 #include <iostream>
 
 
@@ -279,7 +280,7 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
                                                              uint_c( 19 * sizeof(real_t) ) ) / numeric_cast< memory_t >( 1024 * 1024 );
 
    sforest.addRefinementSelectionFunction( refinementSelection );
-   sforest.addWorkloadMemorySUIDAssignmentFunction( boost::bind( workloadAndMemoryAssignment, _1, memoryPerBlock ) );
+   sforest.addWorkloadMemorySUIDAssignmentFunction( std::bind( workloadAndMemoryAssignment, std::placeholders::_1, memoryPerBlock ) );
 
    sforest.init( AABB( real_t(0), real_t(0), real_t(0), real_c( numberOfXBlocks * numberOfXCellsPerBlock ),
                                                         real_c( numberOfYBlocks * numberOfYCellsPerBlock ),

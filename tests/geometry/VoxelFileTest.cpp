@@ -53,7 +53,7 @@
 #include "core/mpi/MPIManager.h"
 
 #include "core/Filesystem.h"
-#include <boost/foreach.hpp>
+
 #include <random>
 
 #ifdef _MSC_VER

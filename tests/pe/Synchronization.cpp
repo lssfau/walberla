@@ -39,7 +39,7 @@ using namespace walberla::blockforest;
 
 typedef boost::tuple<Sphere> BodyTuple ;
 
-void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla::id_t sid, SphereID ref, const Vec3& newPos)
+void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla::id_t sid, Sphere& ref, const Vec3& newPos)
 {
    for (auto it = forest.begin(); it != forest.end(); ++it)
    {
@@ -47,37 +47,37 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       Storage& storage  = *(block.getData<Storage>(storageID));
       BodyStorage& shadowStorage = storage[1];
 
-      if (block.getAABB().contains( ref->getPosition() ))
+      if (block.getAABB().contains( ref.getPosition() ))
       {
-         WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 1, "pos: " <<  ref->getPosition() << "\nradius: " << ref->getRadius() <<  "\ndomain: " << block.getAABB() );
-         WALBERLA_CHECK_EQUAL( shadowStorage.size(), 0, "pos: " << ref->getPosition() << "\nradius: " << ref->getRadius() <<  "\ndomain: " << block.getAABB() );
-         SphereID bd = static_cast<SphereID> (*(storage[StorageType::LOCAL].find( sid )));
+         WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 1, "pos: " <<  ref.getPosition() << "\nradius: " << ref.getRadius() <<  "\ndomain: " << block.getAABB() );
+         WALBERLA_CHECK_EQUAL( shadowStorage.size(), 0, "pos: " << ref.getPosition() << "\nradius: " << ref.getRadius() <<  "\ndomain: " << block.getAABB() );
+         SphereID bd = static_cast<SphereID> (storage[StorageType::LOCAL].find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
-         checkVitalParameters(bd, ref);
+         checkVitalParameters(bd, &ref);
          WALBERLA_LOG_DEVEL("#shadows: " << bd->MPITrait.sizeShadowOwners() << " #block states set: " << bd->MPITrait.getBlockStateSize() << "\nowner domain: " << block.getAABB() << "\nowner: " << bd->MPITrait.getOwner());
          bd->setPosition( newPos );
-      } else if (forest.periodicIntersect(block.getAABB(), ref->getAABB()) )
+      } else if (forest.periodicIntersect(block.getAABB(), ref.getAABB()) )
       {
-         WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 0, "pos: " << ref->getPosition() << "\nradius: " << ref->getRadius() <<  "\ndomain: " << block.getAABB() );
-         WALBERLA_CHECK_EQUAL( shadowStorage.size(), 1, "pos: " << ref->getPosition() << "\nradius: " << ref->getRadius() <<  "\ndomain: " << block.getAABB() );
-         SphereID bd = static_cast<SphereID> (*(shadowStorage.find( sid )));
+         WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 0, "pos: " << ref.getPosition() << "\nradius: " << ref.getRadius() <<  "\ndomain: " << block.getAABB() );
+         WALBERLA_CHECK_EQUAL( shadowStorage.size(), 1, "pos: " << ref.getPosition() << "\nradius: " << ref.getRadius() <<  "\ndomain: " << block.getAABB() );
+         SphereID bd = static_cast<SphereID> (shadowStorage.find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
-         auto backupPos =ref->getPosition();
-         auto correctedPos = ref->getPosition();
+         auto backupPos =ref.getPosition();
+         auto correctedPos = ref.getPosition();
          pe::communication::correctBodyPosition(forest.getDomain(), block.getAABB().center(), correctedPos);
-         ref->setPosition(correctedPos);
-         checkVitalParameters(bd, ref);
-         ref->setPosition(backupPos);
+         ref.setPosition(correctedPos);
+         checkVitalParameters(bd, &ref);
+         ref.setPosition(backupPos);
       } else
       {
-         WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 0, "pos: " << ref->getPosition() << "\nradius: " << ref->getRadius() <<  "\ndomain: " << block.getAABB() );
-         WALBERLA_CHECK_EQUAL( shadowStorage.size(), 0, "pos: " << ref->getPosition() << "\nradius: " << ref->getRadius() <<  "\ndomain: " << block.getAABB() );
+         WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 0, "pos: " << ref.getPosition() << "\nradius: " << ref.getRadius() <<  "\ndomain: " << block.getAABB() );
+         WALBERLA_CHECK_EQUAL( shadowStorage.size(), 0, "pos: " << ref.getPosition() << "\nradius: " << ref.getRadius() <<  "\ndomain: " << block.getAABB() );
       }
    }
-   WALBERLA_LOG_PROGRESS("checked pos: " << ref->getPosition() << " | new pos: " << newPos);
+   WALBERLA_LOG_PROGRESS("checked pos: " << ref.getPosition() << " | new pos: " << newPos);
    auto temp = newPos;
    forest.mapToPeriodicDomain(temp);
-   ref->setPosition(temp);
+   ref.setPosition(temp);
 }
 
 int main( int argc, char ** argv )
@@ -117,9 +117,9 @@ int main( int argc, char ** argv )
 
    MaterialID iron = Material::find("iron");
    walberla::id_t sid = 123;
-   SphereID refSphere = new Sphere(1, 0, Vec3(15, 15, 15), Vec3(0,0,0), Quat(), 3, iron, false, true, false);
-   refSphere->setLinearVel(4, 5, 6);
-   refSphere->setAngularVel( 1, 2, 3);
+   Sphere refSphere(1, 0, Vec3(15, 15, 15), Vec3(0,0,0), Quat(), 3, iron, false, true, false);
+   refSphere.setLinearVel(4, 5, 6);
+   refSphere.setAngularVel( 1, 2, 3);
    Vec3 gpos = Vec3(15, 15, 15);
 
    SphereID sphere = createSphere( globalStorage, forest->getBlockStorage(), storageID, 0, gpos, 3);

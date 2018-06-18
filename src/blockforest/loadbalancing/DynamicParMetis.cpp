@@ -136,21 +136,6 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
    MPI_Group_incl(allGroup, int_c(ranks.size()), &ranks[0], &subGroup);
    MPI_Comm_create( MPIManager::instance()->comm(), subGroup, &subComm);
 
-   if ( targetProcess.size() != 0)
-   {
-      int subRank;
-      int subSize;
-      MPI_Comm_rank(subComm, &subRank);
-      MPI_Comm_size(subComm, &subSize);
-      WALBERLA_CHECK_GREATER_EQUAL(subRank, 0);
-      WALBERLA_CHECK_LESS(subRank, subSize);
-   } else
-   {
-      int subRank;
-      MPI_Comm_rank(subComm, &subRank);
-      WALBERLA_CHECK_EQUAL(subRank, MPI_UNDEFINED);
-   }
-
    int64_t edgecut = 0;
    WALBERLA_CHECK_EQUAL( phantomForest.getNumberOfBlocks(), targetProcess.size() );
    std::vector<int64_t> part( targetProcess.size(), int64_c( MPIManager::instance()->rank() ) );

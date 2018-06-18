@@ -160,6 +160,8 @@ int main( int argc, char** argv )
    for( int i = 1; i < argc; ++i )
       if( std::strcmp( argv[i], "--shortrun" ) == 0 ) shortrun = true;
 
+   const uint_t numLvl = shortrun ? uint_t(3) : uint_t(5);
+
    const uint_t xBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
    const uint_t yBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
    const uint_t zBlocks = ( processes == uint_t(1) ) ? uint_t(1) : uint_t(2);
@@ -201,19 +203,19 @@ int main( int argc, char** argv )
    weights[ Stencil_T::idx[ stencil::T ] ] = real_t(-1) / ( blocks->dx() * blocks->dz() );
    weights[ Stencil_T::idx[ stencil::B ] ] = real_t(-1) / ( blocks->dx() * blocks->dz() );
 
-   auto solver = walberla::make_shared<pde::VCycles< Stencil_T > >( blocks, uId, fId, weights,
-                                                                    shortrun ? uint_t(1) : uint_t(20),                                              // iterations
-                                                                    shortrun ? uint_t(3) : uint_t(5),                                               // levels
-                                                                    3, 3, 10,                                                                       // pre-smoothing, post-smoothing, coarse-grid iterations
-                                                                    pde::ResidualNorm< Stencil_T >( blocks->getBlockStorage(), uId, fId, weights ), // residual norm functor
-                                                                    real_c(1e-12) );                                                                // target precision
-   timeloop.addFuncBeforeTimeStep( makeSharedFunctor(solver), "Cell-centered multigrid V-cycles" );
+   auto solverDCA = walberla::make_shared<pde::VCycles< Stencil_T > >( blocks, uId, fId, weights,
+                                                                       shortrun ? uint_t(1) : uint_t(20),                                              // iterations
+                                                                       numLvl,                                               							// levels
+                                                                       3, 3, 10,                                                                       // pre-smoothing, post-smoothing, coarse-grid iterations
+                                                                       pde::ResidualNorm< Stencil_T >( blocks->getBlockStorage(), uId, fId, weights ), // residual norm functor
+                                                                       real_c(1e-12) );                                                                // target precision
+   timeloop.addFuncBeforeTimeStep( makeSharedFunctor(solverDCA), "Cell-centered multigrid V-cycles with uniformly constant stencil" );
 
    timeloop.run();
 
    if( !shortrun )
    {
-      auto & convrate = solver->convergenceRate();
+      auto & convrate = solverDCA->convergenceRate();
       for (uint_t i = 1; i < convrate.size(); ++i)
       {
          WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);
@@ -224,7 +226,7 @@ int main( int argc, char** argv )
       field::createVTKOutput< PdeField_T >( uId, *blocks, "solution" )();
    }
 
-   // rerun the test with a stencil field
+   // rerun the test with a stencil field and DCA
 
    clearField<PdeField_T>( blocks, uId);
    initU( blocks, uId );
@@ -235,19 +237,52 @@ int main( int argc, char** argv )
 
    copyWeightsToStencilField( blocks, weights, stencilId );
 
-   solver = walberla::make_shared<pde::VCycles< Stencil_T > >( blocks, uId, fId, stencilId,
-                                                              shortrun ? uint_t(1) : uint_t(20),                                              // iterations
-                                                              shortrun ? uint_t(3) : uint_t(5),                                               // levels
-                                                              3, 3, 10,                                                                       // pre-smoothing, post-smoothing, coarse-grid iterations
+   pde::CoarsenStencilFieldsDCA<Stencil_T>  coarsenWithDCA( blocks, numLvl, uint_t(2));		// Set up DCA object with operator order 2 (Laplace)
+
+   solverDCA = walberla::make_shared<pde::VCycles< Stencil_T, decltype(coarsenWithDCA) > >(
+		   	   	   	   	   	   	   	   	   	   	   	   	   	  blocks, uId, fId, stencilId, coarsenWithDCA,
+                                                              shortrun ? uint_t(1) : uint_t(20),                                              	// iterations
+                                                              numLvl,                                               							// levels
+                                                              3, 3, 10,                                                                       	// pre-smoothing, post-smoothing, coarse-grid iterations
                                                               pde::ResidualNormStencilField< Stencil_T >( blocks->getBlockStorage(), uId, fId, stencilId ), // residual norm functor
-                                                              real_c(1e-12) );                                                                // target precision
-   timeloop2.addFuncBeforeTimeStep( makeSharedFunctor(solver), "Cell-centered multigrid V-cycles" );
+                                                              real_c(1e-12) );                                                                	// target precision
+   timeloop2.addFuncBeforeTimeStep( makeSharedFunctor(solverDCA), "Cell-centered multigrid V-cycles with stencil field and direct coarsening " );
 
    timeloop2.run();
 
    if( !shortrun )
    {
-      auto & convrate = solver->convergenceRate();
+      auto & convrate = solverDCA->convergenceRate();
+      for (uint_t i = 1; i < convrate.size(); ++i)
+      {
+         WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);
+         WALBERLA_CHECK_LESS(convrate[i], real_t(0.1));
+      }
+   }
+
+   // rerun the test with a stencil field and GCA
+
+   clearField<PdeField_T>( blocks, uId);
+   initU( blocks, uId );
+
+   SweepTimeloop timeloop3( blocks, uint_t(1) );
+
+   pde::CoarsenStencilFieldsGCA<Stencil_T>  coarsenWithGCA( blocks, numLvl, real_t(2));		// Set up GCA object with overrelaxation factor 2 (only valid for Poisson equation)
+
+   auto solverGCA = walberla::make_shared<pde::VCycles< Stencil_T, decltype(coarsenWithGCA) > >(
+		                                                      blocks, uId, fId, stencilId, coarsenWithGCA,
+                                                              shortrun ? uint_t(1) : uint_t(20),                                            // iterations
+                                                              numLvl,                                               						// levels
+                                                              3, 3, 10,                                                                       // pre-smoothing, post-smoothing, coarse-grid iterations
+                                                              pde::ResidualNormStencilField< Stencil_T >( blocks->getBlockStorage(), uId, fId, stencilId ), // residual norm functor
+                                                              real_c(1e-12) );                                                                // target precision
+   timeloop3.addFuncBeforeTimeStep( makeSharedFunctor(solverGCA), "Cell-centered multigrid V-cycles with stencil field and Galerkin coarsening " );
+
+   timeloop3.run();
+
+   if( !shortrun )
+   {
+      auto & convrate = solverGCA->convergenceRate();
       for (uint_t i = 1; i < convrate.size(); ++i)
       {
          WALBERLA_LOG_RESULT_ON_ROOT("Convergence rate in iteration " << i << ": " << convrate[i]);

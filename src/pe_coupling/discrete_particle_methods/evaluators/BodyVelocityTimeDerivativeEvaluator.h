@@ -63,7 +63,7 @@ public:
       {
          for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
          {
-            if(!dpmBodySelectorFct_(*bodyIt)) continue;
+            if(!dpmBodySelectorFct_(bodyIt.getBodyID())) continue;
 
             bodyVelocityMap_.insert( std::pair<walberla::id_t, Vector3< real_t > >( bodyIt->getSystemID(), bodyIt->getLinearVel() ) );
          }

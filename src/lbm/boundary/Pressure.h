@@ -211,7 +211,7 @@ inline void Pressure< LatticeModel_T, flag_t >::treatDirection( const cell_idx_t
 
    WALBERLA_ASSERT_UNEQUAL( ( mask & this->mask_ ), numeric_cast<flag_t>(0) );
    WALBERLA_ASSERT_EQUAL( ( mask & this->mask_ ), this->mask_ ); // only true if "this->mask_" only contains one single flag, which is the case for the
-                                                                 // current implementation of this boundary condition (SimplePressure)
+                                                                 // current implementation of this boundary condition (Pressure)
    Vector3<real_t> u = pdfField_->getVelocity(x,y,z);
 
    // result will be streamed to (x,y,z, stencil::inverseDir[d]) during sweep

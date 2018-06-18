@@ -221,7 +221,7 @@ namespace internal
       auto flagUidSet = python_coupling::uidSetFromStringContainer< FlagUID >( flagList );
 
       CellwiseSweepCreator creator( bs, pdfFieldID, flagFieldStringID, velocityFieldStringID, flagUidSet );
-      python_coupling::for_each_noncopyable_type<LatticeModel_FlagField_Pairs>( boost::ref( creator ) );
+      python_coupling::for_each_noncopyable_type<LatticeModel_FlagField_Pairs>( std::ref( creator ) );
 
       if ( creator.getResult() == object() )
       {

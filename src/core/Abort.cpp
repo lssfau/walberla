@@ -63,7 +63,7 @@ void Abort::defaultAbort( const std::string & logMessage, const std::string & ca
 
 
 #ifdef _OPENMP
-   #pragma omp critical (abort)
+   #pragma omp critical (Abort_abort)
    {
 #endif
 

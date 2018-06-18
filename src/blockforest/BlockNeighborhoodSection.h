@@ -25,7 +25,7 @@
 #include "core/debug/Debug.h"
 #include "stencil/Directions.h"
 
-
+#include <array>
 
 namespace walberla {
 namespace blockforest {
@@ -94,30 +94,27 @@ inline uint_t getBlockMaxNeighborhoodSectionSize( const uint_t sectionIndex )
 
 
 
-inline const uint_t * getFaceNeighborhoodSectionIndices()
+inline const std::array<uint_t, 6> & getFaceNeighborhoodSectionIndices()
 {
-   static const uint_t faces[] = { uint_t(4), uint_t(10), uint_t(12), uint_t(13), uint_t(15), uint_t(21) };
+   static std::array<uint_t, 6> faces{ { uint_t(4), uint_t(10), uint_t(12), uint_t(13), uint_t(15), uint_t(21) } };
    return faces;
 }
 
 
-
-inline const uint_t * getEdgeNeighborhoodSectionIndices()
+inline const std::array<uint_t,12> & getEdgeNeighborhoodSectionIndices()
 {
-   static const uint_t edges[] = { uint_t( 1), uint_t( 3), uint_t( 5), uint_t( 7), uint_t( 9), uint_t(11),
-                                   uint_t(14), uint_t(16), uint_t(18), uint_t(20), uint_t(22), uint_t(24) };
+   static std::array<uint_t,12> edges{{ uint_t( 1), uint_t( 3), uint_t( 5), uint_t( 7), uint_t( 9), uint_t(11),
+                                        uint_t(14), uint_t(16), uint_t(18), uint_t(20), uint_t(22), uint_t(24) }};
    return edges;
 }
 
 
-
-inline const uint_t * getCornerNeighborhoodSectionIndices()
+inline const std::array<uint_t, 8> & getCornerNeighborhoodSectionIndices()
 {
-   static const uint_t corners[] = { uint_t( 0), uint_t( 2), uint_t( 6), uint_t( 8),
-                                     uint_t(17), uint_t(19), uint_t(23), uint_t(25) };
+   static std::array<uint_t, 8> corners {{ uint_t( 0), uint_t( 2), uint_t( 6), uint_t( 8),
+                                           uint_t(17), uint_t(19), uint_t(23), uint_t(25) }};
    return corners;
 }
-
 
 
 } // namespace blockforest

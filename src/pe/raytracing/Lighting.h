@@ -28,6 +28,7 @@
 namespace walberla {
 namespace pe {
 namespace raytracing {
+
 /*!\brief The Lighting struct defines the properties of a point light in the scene.
  */
 struct Lighting {
@@ -71,6 +72,7 @@ struct Lighting {
       ambientColor = config.getParameter<Color>("ambientColor", Color(0.5,0.5,0.5));
    }
 };
-}
-}
-}
+
+} //namespace raytracing
+} //namespace pe
+} //namespace walberla

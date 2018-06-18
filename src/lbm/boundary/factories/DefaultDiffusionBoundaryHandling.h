@@ -36,6 +36,8 @@
 
 #include <boost/tuple/tuple.hpp>
 
+#include <functional>
+
 
 namespace walberla {
 namespace lbm{
@@ -136,7 +138,7 @@ public:
    static BlockDataID addDefaultDiffusionBoundaryHandlingToStorage(
       const shared_ptr< StructuredBlockStorage >& bs, const std::string & identifier, const BlockDataID& flagFieldID, const Set<FlagUID>& domainFlagUIDs, const BlockDataID& pdfFieldID, const Set<FlagUID>& initFlagUIDs )
    {
-      auto func = boost::bind( createDefaultDiffusionBoundaryHandlingFactory, _1, _2, flagFieldID, domainFlagUIDs, pdfFieldID, initFlagUIDs );
+      auto func = std::bind( createDefaultDiffusionBoundaryHandlingFactory, std::placeholders::_1, std::placeholders::_2, flagFieldID, domainFlagUIDs, pdfFieldID, initFlagUIDs );
       return bs->addStructuredBlockData< BoundaryHandling_T >( func, identifier );
    }
 

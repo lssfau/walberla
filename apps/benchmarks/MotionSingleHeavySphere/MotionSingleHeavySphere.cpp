@@ -58,6 +58,7 @@
 #include "vtk/Initialization.h"
 #include "vtk/VTKOutput.h"
 
+#include <functional>
 #include <memory>
 
 
@@ -811,9 +812,9 @@ int main( int argc, char **argv )
    const real_t overlap = real_t( 1.5 ) * dx;
    std::function<void(void)> syncCall;
    if( XBlocks <= uint_t(4) )
-      syncCall = boost::bind( pe::syncNextNeighbors<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+      syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
    else
-      syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+      syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
 
 
    real_t xParticle = real_t(0);

@@ -82,7 +82,7 @@ public:
 
          for( auto bodyIt = pe::LocalBodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
          {
-            if(!dpmBodySelectorFct_(*bodyIt)) continue;
+            if(!dpmBodySelectorFct_(bodyIt.getBodyID())) continue;
 
             Vector3<real_t> forceOnFluid( real_t(0) );
 

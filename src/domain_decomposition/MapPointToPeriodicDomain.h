@@ -25,7 +25,7 @@
 #include "core/math/AABB.h"
 #include "core/math/Vector3.h"
 
-#include <boost/array.hpp>
+#include <array>
 
 
 
@@ -42,12 +42,12 @@ namespace domain_decomposition {
 *   The min points of the domain are included in the simulation space, the max points are excluded!
 */
 //**********************************************************************************************************************
-void mapPointToPeriodicDomain( const boost::array< bool, 3 > & periodic, const AABB & domain, real_t & x, real_t & y, real_t & z );
+void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AABB & domain, real_t & x, real_t & y, real_t & z );
 
 
 
 /// see documetation of 'void mapPointToPeriodicDomain( const boost::array< bool, 3 > & periodic, const AABB & domain, real_t & x, real_t & y, real_t & z )'
-inline void mapPointToPeriodicDomain( const boost::array< bool, 3 > & periodic, const AABB & domain, Vector3< real_t > & p )
+inline void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AABB & domain, Vector3< real_t > & p )
 {
    mapPointToPeriodicDomain( periodic, domain, p[0], p[1], p[2] );
 }
@@ -55,7 +55,7 @@ inline void mapPointToPeriodicDomain( const boost::array< bool, 3 > & periodic, 
 
 
 /// see documetation of 'void mapPointToPeriodicDomain( const boost::array< bool, 3 > & periodic, const AABB & domain, real_t & x, real_t & y, real_t & z )'
-inline Vector3< real_t > mapPointToPeriodicDomain( const boost::array< bool, 3 > & periodic, const AABB & domain, const Vector3< real_t > & p )
+inline Vector3< real_t > mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AABB & domain, const Vector3< real_t > & p )
 {
    Vector3< real_t > point( p );
    mapPointToPeriodicDomain( periodic, domain, point[0], point[1], point[2] );

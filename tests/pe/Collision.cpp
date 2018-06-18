@@ -18,7 +18,6 @@
 //
 //======================================================================================================================
 
-#include "pe/collision/GJKEPAHelper.h"
 #include "pe/fcd/AnalyticCollisionDetection.h"
 #include "pe/utility/BodyCast.h"
 
@@ -31,6 +30,7 @@
 #include "pe/rigidbody/Sphere.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Union.h"
+#include "pe/rigidbody/UnionFactory.h"
 
 #include "pe/rigidbody/SetBodyTypeIDs.h"
 #include "pe/Types.h"
@@ -125,20 +125,14 @@ void BoxTest()
    std::vector<Contact> contacts;
    fcd::AnalyticCollideFunctor< std::vector<Contact> > collideFunc(contacts);
 
-   real_t penetrationDepth = real_t(0);
-   Vec3   contactPoint = Vec3();
-   Vec3   contactNormal = Vec3();
-
 //   std::vector<Contact> contacts;
 
    // BOX <-> BOX
    WALBERLA_LOG_INFO("BOX <-> BOX");
-   WALBERLA_CHECK( !collideGJK(&b1, &b3, contactPoint, contactNormal, penetrationDepth) );
    WALBERLA_CHECK( !collideFunc(&b1, &b3) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contactPoint);
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contactNormal);
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << penetrationDepth);
-   WALBERLA_CHECK(  collideGJK(&b1, &b2, contactPoint, contactNormal, penetrationDepth) );
    WALBERLA_CHECK(  collideFunc(&b1, &b2) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contactPoint);
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contactNormal);
@@ -146,29 +140,24 @@ void BoxTest()
 
 
    b4.setPosition( (Vec3(0,0,1) * real_t(sqrt(3)) + Vec3(0,0,1)) * 0.999);
-   WALBERLA_CHECK( collideGJK(&b1, &b4, contactPoint, contactNormal, penetrationDepth) );
    WALBERLA_CHECK( collideFunc(&b1, &b4) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contacts.back().getPosition());
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contacts.back().getNormal());
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << contacts.back().getDistance());
 
    b4.setPosition( (Vec3(0,0,1) * real_t(sqrt(3)) + Vec3(0,0,1)) * 1.001);
-   WALBERLA_CHECK( !collideGJK(&b1, &b4, contactPoint, contactNormal, penetrationDepth) );
    WALBERLA_CHECK( !collideFunc(&b1, &b4) );
 
    b5.setPosition( (Vec3(0,0,1) * real_t(sqrt(3)) + Vec3(0,0,1)) * 0.99);
-   WALBERLA_CHECK( collideGJK(&b1, &b5, contactPoint, contactNormal, penetrationDepth) );
    WALBERLA_CHECK( collideFunc(&b1, &b5) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contacts.back().getPosition());
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contacts.back().getNormal());
 //   WALBERLA_LOG_WARNING("penetrationDepth: " << contacts.back().getDistance());
 
    b5.setPosition( (Vec3(0,0,1) * real_t(sqrt(3)) + Vec3(0,0,1)) * 1.01);
-   WALBERLA_CHECK( !collideGJK(&b1, &b5, contactPoint, contactNormal, penetrationDepth) );
    WALBERLA_CHECK( !collideFunc(&b1, &b5) );
 
    Sphere s1(126, 0, Vec3(real_t(1.5), real_t(1.5), real_t(1.5)), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   WALBERLA_CHECK( collideGJK(&b1, &s1, contactPoint, contactNormal, penetrationDepth) );
    WALBERLA_CHECK( collideFunc(&b1, &s1) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contactPoint);
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contactNormal);
@@ -186,13 +175,6 @@ void CapsuleTest()
 
    // CAPSULE <-> SPHERE
    WALBERLA_LOG_INFO("CAPSULE <-> SPHERE");
-   sp1.setPosition(real_t(2.9), 0, 0);
-   WALBERLA_CHECK( collideGJK(&c1, &sp1, contacts) );
-//   WALBERLA_LOG_WARNING("contactPoint    : " << contacts.at(0).getPosition());
-//   WALBERLA_LOG_WARNING("contactNormal   : " << contacts.at(0).getNormal());
-//   WALBERLA_LOG_WARNING("penetrationDepth: " << contacts.at(0).getDistance());
-   sp1.setPosition(real_t(3.1), 0, 0);
-   WALBERLA_CHECK( !collideGJK(&c1, &sp1, contacts) );
 
    sp1.setPosition(0, real_t(1.9), 0);
    WALBERLA_CHECK( collideFunc(&c1, &sp1) );
@@ -224,8 +206,6 @@ void CapsuleTest()
 
 void CapsuleTest2()
 {
-   setMaxGJKIterations(10000);
-   setEPATolerance(real_t(0.00000001));
    const real_t   static_cof  ( real_t(0.1) / 2 );   // Coefficient of static friction. Roughly 0.85 with high variation depending on surface roughness for low stresses. Note: pe doubles the input coefficient of friction for material-material contacts.
    const real_t   dynamic_cof ( static_cof ); // Coefficient of dynamic friction. Similar to static friction for low speed friction.
    MaterialID     material = createMaterial( "granular", real_t( 1.0 ), 0, static_cof, dynamic_cof, real_t( 0.5 ), 1, 1, 0, 0 );
@@ -239,10 +219,6 @@ void CapsuleTest2()
    WALBERLA_LOG_DEVEL( c1 );
    WALBERLA_LOG_DEVEL( sp1 );
 
-   real_t penetrationDepth = real_t(0);
-   Vec3   contactPoint = Vec3();
-   Vec3   contactNormal = Vec3();
-
    WALBERLA_LOG_INFO("CAPSULE TEST");
    Vec2 distance;
    distance[0] = (sp1.getPosition() - c1.getPosition())[0];
@@ -250,36 +226,20 @@ void CapsuleTest2()
 
    std::cout << std::setprecision(10);
    WALBERLA_LOG_DEVEL("DISTANCE: " << distance.length());
-   WALBERLA_LOG_DEVEL("GJK: " << getMaxGJKIterations());
-   WALBERLA_LOG_DEVEL("EPA: " << getEPATolerance() );
-   WALBERLA_LOG_DEVEL(" CAPSULE <-> SPHERE (GJK) ");
-   WALBERLA_LOG_DEVEL( collideGJK(&c1, &sp1, contactPoint, contactNormal, penetrationDepth) );
-   WALBERLA_LOG_WARNING("contactPoint    : " << contactPoint);
-   WALBERLA_LOG_WARNING("contactNormal   : " << contactNormal);
-   WALBERLA_LOG_WARNING("penetrationDepth: " << penetrationDepth);
-   WALBERLA_LOG_DEVEL(" SPHERE <-> CAPSULE (GJK) ");
-   WALBERLA_LOG_DEVEL( collideGJK(&sp1, &c1, contactPoint, contactNormal, penetrationDepth) );
-   WALBERLA_LOG_WARNING("contactPoint    : " << contactPoint);
-   WALBERLA_LOG_WARNING("contactNormal   : " << contactNormal);
-   WALBERLA_LOG_WARNING("penetrationDepth: " << penetrationDepth);
    WALBERLA_LOG_DEVEL(" SPHERE <-> CAPSULE (ANALYTICAL) ");
    WALBERLA_LOG_DEVEL( collide(&sp1, &c1, contacts) );
    WALBERLA_LOG_WARNING("contactPoint    : " << contacts.at(0).getPosition());
    WALBERLA_LOG_WARNING("contactNormal   : " << contacts.at(0).getNormal());
    WALBERLA_LOG_WARNING("penetrationDepth: " << contacts.at(0).getDistance());
-
 }
 
 void UnionTest()
 {
    typedef Union< boost::tuple<Sphere> > UnionT;
-   MaterialID iron = Material::find("iron");
    UnionT  un1(120, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), false, true, false);
    UnionT  un2(121, 0, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), false, true, false);
-   SphereID sp1 = new Sphere(123, 1, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   un1.add(sp1);
-   SphereID sp2 = new Sphere(124, 2, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   un2.add(sp2);
+   auto sp1 = createSphere(&un1, 123, Vec3(0,0,0), 1);
+   auto sp2 = createSphere(&un2, 124, Vec3(real_t(1.5),0,0), 1);
 
    std::vector<Contact> contacts;
 

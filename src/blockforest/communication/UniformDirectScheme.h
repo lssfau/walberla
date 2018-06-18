@@ -32,6 +32,8 @@
 
 #include <vector>
 #include <map>
+#include <functional>
+
 #include "communication/UniformMPIDatatypeInfo.h"
 
 namespace walberla {
@@ -112,8 +114,8 @@ public:
    void startCommunication();
    void wait();
 
-   std::function<void()> getStartCommunicateFunctor() { return boost::bind( &UniformDirectScheme::startCommunication, this ); }
-   std::function<void()> getWaitFunctor()             { return boost::bind( &UniformDirectScheme::wait,               this ); }
+   std::function<void()> getStartCommunicateFunctor() { return std::bind( &UniformDirectScheme::startCommunication, this ); }
+   std::function<void()> getWaitFunctor()             { return std::bind( &UniformDirectScheme::wait,               this ); }
    //@}
    //*******************************************************************************************************************
 

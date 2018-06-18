@@ -53,7 +53,7 @@ namespace timeloop {
     *******************************************************************************************************************/
    std::function<void () > PerformanceMeter::getBeforeFunction()
    {
-      return boost::bind ( &PerformanceMeter::timingStart, this );
+      return std::bind ( &PerformanceMeter::timingStart, this );
    }
 
 
@@ -66,7 +66,7 @@ namespace timeloop {
     *******************************************************************************************************************/
    std::function<void () > PerformanceMeter::getAfterFunction()
    {
-      return boost::bind ( &PerformanceMeter::timingEnd, this );
+      return std::bind ( &PerformanceMeter::timingEnd, this );
    }
 
 

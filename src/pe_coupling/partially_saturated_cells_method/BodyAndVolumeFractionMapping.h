@@ -178,18 +178,18 @@ void BodyAndVolumeFractionMapping::initialize()
 
       for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         if( mappingBodySelectorFct_(*bodyIt) )
+         if( mappingBodySelectorFct_(bodyIt.getBodyID()) )
          {
-            mapPSMBodyAndVolumeFraction( *bodyIt, *blockIt, *blockStorage_, bodyAndVolumeFractionFieldID_ );
+            mapPSMBodyAndVolumeFraction( bodyIt.getBodyID(), *blockIt, *blockStorage_, bodyAndVolumeFractionFieldID_ );
             lastUpdatedPositionMap_.insert( std::pair< walberla::id_t, Vector3< real_t > >( bodyIt->getSystemID(), bodyIt->getPosition() ) );
          }
       }
 
       for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt )
       {
-         if( mappingBodySelectorFct_(*bodyIt) )
+         if( mappingBodySelectorFct_(bodyIt.getBodyID()) )
          {
-            mapPSMBodyAndVolumeFraction(*bodyIt, *blockIt, *blockStorage_, bodyAndVolumeFractionFieldID_);
+            mapPSMBodyAndVolumeFraction(bodyIt.getBodyID(), *blockIt, *blockStorage_, bodyAndVolumeFractionFieldID_);
             lastUpdatedPositionMap_.insert( std::pair< walberla::id_t, Vector3< real_t > >( bodyIt->getSystemID(), bodyIt->getPosition() ) );
          }
       }
@@ -207,17 +207,17 @@ void BodyAndVolumeFractionMapping::update()
 
       for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         if( mappingBodySelectorFct_(*bodyIt) )
+         if( mappingBodySelectorFct_(bodyIt.getBodyID()) )
          {
-            updatePSMBodyAndVolumeFraction(*bodyIt, *blockIt, bodyAndVolumeFractionField, tempLastUpdatedPositionMap);
+            updatePSMBodyAndVolumeFraction(bodyIt.getBodyID(), *blockIt, bodyAndVolumeFractionField, tempLastUpdatedPositionMap);
          }
       }
 
       for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt )
       {
-         if( mappingBodySelectorFct_(*bodyIt) )
+         if( mappingBodySelectorFct_(bodyIt.getBodyID()) )
          {
-            updatePSMBodyAndVolumeFraction(*bodyIt, *blockIt, bodyAndVolumeFractionField, tempLastUpdatedPositionMap);
+            updatePSMBodyAndVolumeFraction(bodyIt.getBodyID(), *blockIt, bodyAndVolumeFractionField, tempLastUpdatedPositionMap);
          }
       }
 

@@ -21,6 +21,10 @@
 
 #pragma once
 
+#include "BlockExclusion.h"
+#include "mesh/MeshOperations.h"
+#include "mesh/distance_octree/DistanceOctree.h"
+
 #include "blockforest/StructuredBlockForest.h"
 #include "blockforest/SetupBlockForest.h"
 #include "blockforest/loadbalancing/StaticCurve.h"
@@ -108,6 +112,38 @@ private:
    blockforest::SetupBlockForest::TargetProcessAssignmentFunction      targetProcessAssignmentFunction_;
    blockforest::SetupBlockForest::RefinementSelectionFunction          refinementSelectionFunction_;
 };
+
+
+template< typename MeshType >
+shared_ptr<StructuredBlockForest> createStructuredBlockStorageInsideMesh( const shared_ptr< mesh::DistanceOctree< MeshType > > & distanceOctree, const real_t dx, const Vector3<uint_t> & blockSize )
+{
+   ComplexGeometryStructuredBlockforestCreator creator( distanceOctree->getAABB(), Vector3<real_t>(dx), makeExcludeMeshExterior( distanceOctree, dx ) );
+   return creator.createStructuredBlockForest( blockSize );
+}
+
+
+template< typename MeshType >
+shared_ptr<StructuredBlockForest> createStructuredBlockStorageOutsideMesh( const AABB & aabb, const shared_ptr< mesh::DistanceOctree< MeshType > > & distanceOctree, const real_t dx, const Vector3<uint_t> & blockSize )
+{
+   ComplexGeometryStructuredBlockforestCreator creator( aabb, Vector3<real_t>(dx), makeExcludeMeshInterior( distanceOctree, dx ) );
+   return creator.createStructuredBlockForest( blockSize );
+}
+
+
+template< typename MeshType >
+shared_ptr<StructuredBlockForest> createStructuredBlockStorageInsideMesh( const shared_ptr< mesh::DistanceOctree< MeshType > > & distanceOctree, const real_t dx, const uint_t targetNumRootBlocks )
+{
+   ComplexGeometryStructuredBlockforestCreator creator( distanceOctree->getAABB(), Vector3<real_t>(dx), makeExcludeMeshExterior( distanceOctree, dx ) );
+   return creator.createStructuredBlockForest( targetNumRootBlocks );
+}
+
+
+template< typename MeshType >
+shared_ptr<StructuredBlockForest> createStructuredBlockStorageOutsideMesh( const AABB & aabb, const shared_ptr< mesh::DistanceOctree< MeshType > > & distanceOctree, const real_t dx, const uint_t targetNumRootBlocks )
+{
+   ComplexGeometryStructuredBlockforestCreator creator( aabb, Vector3<real_t>(dx), makeExcludeMeshInterior( distanceOctree, dx ) );
+   return creator.createStructuredBlockForest( targetNumRootBlocks );
+}
 
 
 } // namespace mesh

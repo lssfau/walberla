@@ -98,12 +98,12 @@ int main( int argc, char ** argv )
 
       for (auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt)
       {
-         BodyID b = *bodyIt;
+         BodyID b = bodyIt.getBodyID();
          b->addForce( Vec3(1,0,0) );
       }
       for (auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); ++bodyIt)
       {
-         BodyID b = *bodyIt;
+         BodyID b = bodyIt.getBodyID();
          b->addForce( Vec3(0,1,0) );
       }
    }
@@ -127,12 +127,12 @@ int main( int argc, char ** argv )
 
 //      for (auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt)
 //      {
-//         BodyID b = *bodyIt;
+//         BodyID b = bodyIt.getBodyID();
 //         WALBERLA_LOG_DEVEL("LOCAL\n" << b << "\nForce: " << b->getForce());
 //      }
 //      for (auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); ++bodyIt)
 //      {
-//         BodyID b = *bodyIt;
+//         BodyID b = bodyIt.getBodyID();
 //         WALBERLA_LOG_DEVEL("SHADOW\n" << b << "\nForce: " << b->getForce());
 //      }
 //   }

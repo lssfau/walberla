@@ -486,7 +486,7 @@
             CODE \
             ++it0; ++it1; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
       } \
    } \
    else \
@@ -503,7 +503,7 @@
             CODE \
             ++it0; ++it1; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
       } \
    } }
    
@@ -532,8 +532,8 @@
             CODE \
             ++it0; ++it1; ++it2; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
       } \
    } \
    else \
@@ -551,11 +551,11 @@
             CODE \
             ++it0; ++it1; ++it2; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
       } \
    } }
-   
+
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_10( it0, f0, it1, f1, it2, f2, it3, f3, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
@@ -584,9 +584,9 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
       } \
    } \
    else \
@@ -605,9 +605,9 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
       } \
    } }
 
@@ -642,10 +642,10 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
       } \
    } \
    else \
@@ -665,10 +665,10 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
       } \
    } }
 
@@ -706,11 +706,11 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
       } \
    } \
    else \
@@ -731,11 +731,11 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
       } \
    } }
 
@@ -776,12 +776,12 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
-         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it6, (f6)->end() ); \
       } \
    } \
    else \
@@ -803,12 +803,12 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
-         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it6, (f6)->end() ); \
       } \
    } }
 
@@ -852,13 +852,13 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
-         WALBERLA_ASSERT( it6 == (f6)->end() ); \
-         WALBERLA_ASSERT( it7 == (f7)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it6, (f6)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it7, (f7)->end() ); \
       } \
    } \
    else \
@@ -881,16 +881,16 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
-         WALBERLA_ASSERT( it6 == (f6)->end() ); \
-         WALBERLA_ASSERT( it7 == (f7)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it6, (f6)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it7, (f7)->end() ); \
       } \
    } }
-   
+
 #else // == not WALBERLA_CXX_COMPILER_IS_MSVC
 
 #define WALBERLA_FOR_ALL_CELLS_XYZ_OMP( field, omp, CODE ) \
@@ -956,7 +956,7 @@
          } \
       } \
    } }
-   
+
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ_OMP_4( field, gl, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
@@ -1041,7 +1041,7 @@
          } \
       } \
    } }
-   
+
 #define WALBERLA_FOR_ALL_CELLS_YZ_OMP( field, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
    const ::walberla::cell_idx_t ySize__ = ::walberla::cell_idx_c( (field)->ySize() ); \
@@ -1096,7 +1096,7 @@
          } \
       } \
    } }
-   
+
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ_OMP_4( field, gl, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
@@ -1168,7 +1168,7 @@
          } \
       } \
    } }
-   
+
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_4( it0, f0, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
@@ -1228,7 +1228,7 @@
             CODE \
             ++it0; ++it1; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
       } \
    } \
    else \
@@ -1245,10 +1245,10 @@
             CODE \
             ++it0; ++it1; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
       } \
    } }
-   
+
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_8( it0, f0, it1, f1, it2, f2, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
@@ -1274,8 +1274,8 @@
             CODE \
             ++it0; ++it1; ++it2; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
       } \
    } \
    else \
@@ -1293,11 +1293,11 @@
             CODE \
             ++it0; ++it1; ++it2; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
       } \
    } }
-   
+
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_10( it0, f0, it1, f1, it2, f2, it3, f3, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
@@ -1326,9 +1326,9 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
       } \
    } \
    else \
@@ -1347,9 +1347,9 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
       } \
    } }
 
@@ -1384,10 +1384,10 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
       } \
    } \
    else \
@@ -1407,10 +1407,10 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
       } \
    } }
 
@@ -1448,11 +1448,11 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
       } \
    } \
    else \
@@ -1473,11 +1473,11 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
       } \
    } }
 
@@ -1518,12 +1518,12 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
-         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it6, (f6)->end() ); \
       } \
    } \
    else \
@@ -1545,12 +1545,12 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
-         WALBERLA_ASSERT( it6 == (f6)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it6, (f6)->end() ); \
       } \
    } }
 
@@ -1594,13 +1594,13 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
-         WALBERLA_ASSERT( it6 == (f6)->end() ); \
-         WALBERLA_ASSERT( it7 == (f7)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it6, (f6)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it7, (f7)->end() ); \
       } \
    } \
    else \
@@ -1623,13 +1623,13 @@
             CODE \
             ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
          } \
-         WALBERLA_ASSERT( it1 == (f1)->end() ); \
-         WALBERLA_ASSERT( it2 == (f2)->end() ); \
-         WALBERLA_ASSERT( it3 == (f3)->end() ); \
-         WALBERLA_ASSERT( it4 == (f4)->end() ); \
-         WALBERLA_ASSERT( it5 == (f5)->end() ); \
-         WALBERLA_ASSERT( it6 == (f6)->end() ); \
-         WALBERLA_ASSERT( it7 == (f7)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it6, (f6)->end() ); \
+         WALBERLA_ASSERT_EQUAL_2( it7, (f7)->end() ); \
       } \
    } }
 
@@ -1650,7 +1650,7 @@
          } \
       } \
    } }
-   
+
 #define WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ_OMP( interval, omp, CODE ) \
    { for( ::walberla::cell_idx_t z = interval.zMin(); z <= interval.zMax(); ++z ) { \
       for( ::walberla::cell_idx_t y = interval.yMin(); y <= interval.yMax(); ++y ) { \
@@ -1688,7 +1688,7 @@
          CODE \
       } \
    } }
-   
+
 #define WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_YZ_OMP( interval, omp, CODE ) \
    { for( ::walberla::cell_idx_t z = interval.zMin(); z <= interval.zMax(); ++z ) { \
       for( ::walberla::cell_idx_t y = interval.yMin(); y <= interval.yMax(); ++y ) \
@@ -1697,7 +1697,7 @@
       } \
    } }
 
-// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ_OMP' (using the same signature) instead   
+// Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_YZ_OMP_4( field, gl, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
    WALBERLA_ASSERT_GREATER_EQUAL_2( (field)->nrOfGhostLayers(), gl ); \
@@ -1710,7 +1710,7 @@
          CODE \
       } \
    } }
-   
+
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_4( it0, f0, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
@@ -1733,8 +1733,8 @@
       CODE \
       ++it0; ++it1; \
    } \
-   WALBERLA_ASSERT( it1 == (f1)->end() ); }
-   
+   WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); }
+
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_8( it0, f0, it1, f1, it2, f2, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
@@ -1750,9 +1750,9 @@
       CODE \
       ++it0; ++it1; ++it2; \
    } \
-   WALBERLA_ASSERT( it1 == (f1)->end() ); \
-   WALBERLA_ASSERT( it2 == (f2)->end() ); }
-   
+   WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); }
+
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_10( it0, f0, it1, f1, it2, f2, it3, f3, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
@@ -1771,10 +1771,10 @@
       CODE \
       ++it0; ++it1; ++it2; ++it3; \
    } \
-   WALBERLA_ASSERT( it1 == (f1)->end() ); \
-   WALBERLA_ASSERT( it2 == (f2)->end() ); \
-   WALBERLA_ASSERT( it3 == (f3)->end() ); }
- 
+   WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); }
+
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_12( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
@@ -1796,10 +1796,10 @@
       CODE \
       ++it0; ++it1; ++it2; ++it3; ++it4;\
    } \
-   WALBERLA_ASSERT( it1 == (f1)->end() ); \
-   WALBERLA_ASSERT( it2 == (f2)->end() ); \
-   WALBERLA_ASSERT( it3 == (f3)->end() ); \
-   WALBERLA_ASSERT( it4 == (f4)->end() ); }
+   WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); }
 
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_14( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, omp, CODE ) \
@@ -1825,11 +1825,11 @@
       CODE \
       ++it0; ++it1; ++it2; ++it3; ++it4; ++it5;\
    } \
-   WALBERLA_ASSERT( it1 == (f1)->end() ); \
-   WALBERLA_ASSERT( it2 == (f2)->end() ); \
-   WALBERLA_ASSERT( it3 == (f3)->end() ); \
-   WALBERLA_ASSERT( it4 == (f4)->end() ); \
-   WALBERLA_ASSERT( it5 == (f5)->end() ); }
+   WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); }
 
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_16( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, omp, CODE ) \
@@ -1858,12 +1858,12 @@
       CODE \
       ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6;\
    } \
-   WALBERLA_ASSERT( it1 == (f1)->end() ); \
-   WALBERLA_ASSERT( it2 == (f2)->end() ); \
-   WALBERLA_ASSERT( it3 == (f3)->end() ); \
-   WALBERLA_ASSERT( it4 == (f4)->end() ); \
-   WALBERLA_ASSERT( it5 == (f5)->end() ); \
-   WALBERLA_ASSERT( it6 == (f6)->end() ); }
+   WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it6, (f6)->end() ); }
 
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_18( it0, f0, it1, f1, it2, f2, it3, f3, it4, f4, it5, f5, it6, f6, it7, f7, omp, CODE ) \
@@ -1895,13 +1895,13 @@
       CODE \
       ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7;\
    } \
-   WALBERLA_ASSERT( it1 == (f1)->end() ); \
-   WALBERLA_ASSERT( it2 == (f2)->end() ); \
-   WALBERLA_ASSERT( it3 == (f3)->end() ); \
-   WALBERLA_ASSERT( it4 == (f4)->end() ); \
-   WALBERLA_ASSERT( it5 == (f5)->end() ); \
-   WALBERLA_ASSERT( it6 == (f6)->end() ); \
-   WALBERLA_ASSERT( it7 == (f7)->end() ); }
+   WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it3, (f3)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it4, (f4)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it5, (f5)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it6, (f6)->end() ); \
+   WALBERLA_ASSERT_EQUAL_2( it7, (f7)->end() ); }
 
 #endif // OpenMP
 

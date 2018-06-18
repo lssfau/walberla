@@ -33,6 +33,7 @@
 #include <boost/integer.hpp>
 #include <boost/uuid/uuid.hpp>
 
+#include <array>
 #include <deque>
 #include <limits>
 #include <list>
@@ -81,6 +82,51 @@ struct BufferSizeTrait< std::pair<T1,T2> > {
 // ---------------------------------------------------------------------------------------------------------------------
 // ----------------------------- Standard Container Support  -----------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------
+
+template< typename T,     // Element type of SendBuffer
+          typename G,     // Growth policy of SendBuffer
+          typename Cont > // Container
+void sendNonResizableContainer( GenericSendBuffer<T,G> & buf, const Cont & container )
+{
+  buf.addDebugMarker( "ar" );
+  for( const auto & it : container )
+    buf << it;
+}
+
+template< typename T,     // Element type of RecvBuffer
+          typename Cont > // Container
+void recvNonResizableContainer( GenericRecvBuffer<T> & buf, Cont & container )
+{
+  buf.readDebugMarker( "ar" );
+  for( auto & it : container )
+    buf >> it;
+}
+
+template< typename T,     // Element type of SendBuffer
+          typename G,     // Growth policy of SendBuffer
+          typename CT,    // Element type
+          std::size_t N > // Array size
+GenericSendBuffer<T,G>& operator<<( GenericSendBuffer<T,G> & buf, const std::array<CT, N> & array )
+{
+  sendNonResizableContainer(buf, array);
+  return buf;
+}
+
+template< typename T,     // Element type of RecvBuffer
+          typename CT,    // Element type
+          std::size_t N > // Array size
+GenericRecvBuffer<T>& operator>>( GenericRecvBuffer<T> & buf, std::array<CT, N> & array )
+{
+  recvNonResizableContainer(buf, array);
+  return buf;
+}
+
+template<typename T, std::size_t N>
+struct BufferSizeTrait< std::array< T, N > > {
+    static const bool constantSize = true;
+    static const uint_t size = N * sizeof(T) + BUFFER_DEBUG_OVERHEAD;
+};
+
 
 template< typename T,    // Element type of SendBuffer
           typename G,    // Growth policy of SendBuffer

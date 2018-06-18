@@ -79,7 +79,7 @@ void updateAndMigrate( BlockForest& forest, BlockDataID storageID, const bool sy
 
       for( auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); )
       {
-         BodyID b (*bodyIt);
+         BodyID b (bodyIt.getBodyID());
 
          if( !b->isCommunicating() && !syncNonCommunicatingBodies ) {
             ++bodyIt;
@@ -131,8 +131,7 @@ void updateAndMigrate( BlockForest& forest, BlockDataID storageID, const bool sy
                b->setRemote( true );
 
                // Move body to shadow copy storage.
-               bodyIt = localStorage.release( bodyIt );
-               shadowStorage.add( b );
+               shadowStorage.add( localStorage.release( bodyIt ) );
 
                b->MPITrait.deregisterShadowOwner( owner );
 
@@ -220,7 +219,7 @@ void checkAndResolveOverlap( BlockForest& forest, BlockDataID storageID, const r
 
       for( auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt)
       {
-         BodyID b (*bodyIt);
+         BodyID b (bodyIt.getBodyID());
 
          if( !b->isCommunicating() && !syncNonCommunicatingBodies ) continue;
 
@@ -256,7 +255,7 @@ void checkAndResolveOverlap( BlockForest& forest, BlockDataID storageID, const r
       }
       for( auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); )
       {
-         BodyID b (*bodyIt);
+         BodyID b (bodyIt.getBodyID());
          WALBERLA_ASSERT(!b->isGlobal(), "Global body in ShadowStorage!");
          bool isInsideDomain = forest.getDomain().contains( b->getAABB(), -dx );
 

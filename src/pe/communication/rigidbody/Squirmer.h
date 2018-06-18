@@ -61,16 +61,17 @@ void unmarshal( mpi::RecvBuffer& buffer, SquirmerParameters& objparam );
 //*************************************************************************************************
 
 
-inline SquirmerID instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, SquirmerID& newBody )
+inline SquirmerPtr instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, SquirmerID& newBody )
 {
    SquirmerParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   newBody = new Squirmer( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.radius_, subobjparam.squirmerVelocity_, subobjparam.squirmerBeta_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
-   newBody->setLinearVel( subobjparam.v_ );
-   newBody->setAngularVel( subobjparam.w_ );
-   newBody->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
-   return newBody;
+   auto sq = std::make_unique<Squirmer>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.radius_, subobjparam.squirmerVelocity_, subobjparam.squirmerBeta_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   sq->setLinearVel( subobjparam.v_ );
+   sq->setAngularVel( subobjparam.w_ );
+   sq->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
+   newBody = sq.get();
+   return sq;
 }
 
 }  // namespace communication

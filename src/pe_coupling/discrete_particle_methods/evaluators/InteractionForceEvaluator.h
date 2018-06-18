@@ -136,7 +136,7 @@ void InteractionForceEvaluator< FlagField_T, FieldInterpolator_T, Distributor_T 
 
       for( auto bodyIt = pe::LocalBodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
       {
-         if(!dpmBodySelectorFct_(*bodyIt)) continue;
+         if(!dpmBodySelectorFct_(bodyIt.getBodyID())) continue;
 
          Vector3<real_t> forceOnFluid( real_t(0) );
 
@@ -154,7 +154,7 @@ void InteractionForceEvaluator< FlagField_T, FieldInterpolator_T, Distributor_T 
 
          // evaluate drag force
          Vector3<real_t> bodyVelocity = bodyIt->getLinearVel();
-         real_t bodyDiameter = getSphereEquivalentDiameter( *(*bodyIt) );
+         real_t bodyDiameter = getSphereEquivalentDiameter( *bodyIt );
          real_t bodyVolume = bodyIt->getVolume();
          real_t fluidDensity( real_t(1) );
 

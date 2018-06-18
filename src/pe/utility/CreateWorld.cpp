@@ -79,7 +79,7 @@ std::unique_ptr<SetupBlockForest> createSetupBlockForest(const math::AABB simula
       blocks[2] = 2;
    }
 
-   auto sforest = std::unique_ptr<SetupBlockForest>( new SetupBlockForest() );
+   auto sforest = std::make_unique<SetupBlockForest>( );
    sforest->addWorkloadMemorySUIDAssignmentFunction( blockforest::uniformWorkloadAndMemoryAssignment );
    sforest->addRefinementSelectionFunction( FixedRefinementLevelSelector(initialRefinementLevel) );
    sforest->init( simulationDomain, blocks[0], blocks[1], blocks[2], isPeriodic[0], isPeriodic[1], isPeriodic[2] );
@@ -103,7 +103,7 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
    }
 
    std::unique_ptr<SetupBlockForest> sforest( createSetupBlockForest( simulationDomain, blocks, isPeriodic, numberOfProcesses, initialRefinementLevel ));
-   return shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), *sforest, false ) );
+   return std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), *sforest, false );
 }
 
 shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
@@ -142,13 +142,13 @@ shared_ptr<BlockForest> createBlockForest(const math::AABB simulationDomain,
 
    WALBERLA_LOG_INFO_ON_ROOT( "Production Run!" );
    WALBERLA_LOG_INFO_ON_ROOT( "Creating the block structure: loading from file \'" << sbffile << "\' ..." );
-   return shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false ) );
+   return std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false );
 }
 
 
 shared_ptr<BlockForest> createBlockForestFromConfig(const Config::BlockHandle& mainConf)
 {
-   bool setupRun                 = mainConf.getParameter< bool >( "setupRun", true );
+   bool setupRun                 = mainConf.getParameter< bool >( "setupRun", false );
    Vec3 simulationCorner         = mainConf.getParameter<Vec3>("simulationCorner", Vec3(0, 0, 0));
    Vec3 simulationSize           = mainConf.getParameter<Vec3>("simulationDomain", Vec3(10, 10, 10));
    math::AABB simulationDomain   = math::AABB( simulationCorner, simulationCorner + simulationSize );

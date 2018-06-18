@@ -79,6 +79,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <functional>
+
 
 namespace walberla {
 
@@ -280,16 +282,16 @@ int run( int argc, char **argv )
    scheme.addPackInfo( make_shared< field::communication::PackInfo<  AdvDiffPDFField > >( srcFieldID ) );
    timeloop.addFuncBeforeTimeStep( scheme, "Communication" );
 
-   using boost::ref;
+   using std::ref;
 
-   timeloop.add() << Sweep( boost::bind( hydroFunc, _1, velFieldID, u, tperiod, ref(timestep) ), "Hydro Func" );
+   timeloop.add() << Sweep( std::bind( hydroFunc, std::placeholders::_1, velFieldID, u, tperiod, ref(timestep) ), "Hydro Func" );
    
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseAdvectionDiffusionSweep< AdvDiffLatticeModel, VectorField, MyFlagField >(
                                                 srcFieldID, velFieldID, flagFieldID, getFluidFlag() ) ), "LBM_SRT" );
   
-   timeloop.add() << BeforeFunction( boost::bind( prepFunc, u[dim], dv, D, cperiod, tperiod, ref(timestep), ref(cosi), ref(sisi), ref(sexp) ), "prepare test" )
-                  << Sweep         ( boost::bind( testFunc<AdvDiffPDFField>, _1, srcFieldID, dim, v, cperiod, ref(cosi), ref(sisi), ref(sexp), ref(E_mean_) ), "Test Func" ) 
-                  << AfterFunction ( boost::bind( incTimeFunc, ref(timestep) ), "increment time" );
+   timeloop.add() << BeforeFunction( std::bind( prepFunc, u[dim], dv, D, cperiod, tperiod, ref(timestep), ref(cosi), ref(sisi), ref(sexp) ), "prepare test" )
+                  << Sweep         ( std::bind( testFunc<AdvDiffPDFField>, std::placeholders::_1, srcFieldID, dim, v, cperiod, ref(cosi), ref(sisi), ref(sexp), ref(E_mean_) ), "Test Func" ) 
+                  << AfterFunction ( std::bind( incTimeFunc, ref(timestep) ), "increment time" );
 
    // --- run timeloop --- //
 

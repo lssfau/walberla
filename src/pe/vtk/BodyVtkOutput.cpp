@@ -44,14 +44,14 @@ std::vector< DefaultBodyVTKOutput::Attributes > DefaultBodyVTKOutput::getAttribu
 void DefaultBodyVTKOutput::configure()
 {
    bodies_.clear();
-   for( auto blockIt = blockStorage_.begin(); blockIt != blockStorage_.end(); ++blockIt )
+   for( const auto& block : blockStorage_ )
    {
 
-      const Storage& bs = *(blockIt->getData<const Storage>( storageID_ ));
+      const BodyStorage& bs = (*(block.getData<const Storage>( storageID_ )))[0];
 
-      for( auto it = bs[0].begin(); it != bs[0].end(); ++it )
+      for( const auto& body : bs )
       {
-         bodies_.push_back( *it );
+         bodies_.push_back( &body );
       }
    }
 }

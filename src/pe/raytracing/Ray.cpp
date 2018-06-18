@@ -23,6 +23,7 @@
 namespace walberla {
 namespace pe {
 namespace raytracing {
+
 /*!\brief Global output operator for rays.
  *
  * \param os Reference to the output stream.
@@ -35,6 +36,6 @@ std::ostream& operator<<(std::ostream& os, const Ray& ray) {
    << ", c: (" << ray.getImageX() << "/" << ray.getImageY() << ")>";
 }
 
-}
-}
-}
+} //namespace raytracing
+} //namespace pe
+} //namespace walberla

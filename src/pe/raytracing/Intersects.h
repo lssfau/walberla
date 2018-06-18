@@ -37,6 +37,7 @@
 namespace walberla {
 namespace pe {
 namespace raytracing {
+
 inline bool intersects(const SphereID sphere, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const PlaneID plane, const Ray& ray, real_t& t, Vec3& n);
 inline bool intersects(const BoxID box, const Ray& ray, real_t& t, Vec3& n);
@@ -461,6 +462,7 @@ inline bool intersects(const AABB& aabb, const Ray& ray, real_t& t, real_t paddi
    t = t_;
    return true;
 }
-}
-}
-}
+
+} //namespace raytracing
+} //namespace pe
+} //namespace walberla
