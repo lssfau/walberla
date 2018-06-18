@@ -27,7 +27,10 @@
 //*************************************************************************************************
 
 #include <pe/Config.h>
+#include <pe/rigidbody/BodyStorage.h>
 #include <pe/rigidbody/RigidBody.h>
+#include <pe/rigidbody/RigidBodyCastIterator.h>
+#include <pe/rigidbody/RigidBodyIterator.h>
 #include <pe/Types.h>
 
 #include <core/debug/Debug.h>
@@ -65,23 +68,24 @@ class Union : public RigidBody
 {
 public:
    //**Type definitions****************************************************************************
-   typedef BodyTypeTuple                     BodyTypeTupleT;
+   using BodyTypeTupleT        = BodyTypeTuple;
 
-   typedef PtrVector<RigidBody, PtrDelete>   Bodies;             //!< Iterator over the contained rigid bodies.
-   typedef Bodies::Iterator                  Iterator;           //!< Iterator over the contained rigid bodies.
-   typedef Bodies::ConstIterator             ConstIterator;      //!< Constant iterator over the contained rigid bodies.
-   //**++++++++++++++++****************************************************************************
+   //**********************************************************************************************
 
-   //**Forward declarations for nested classes*****************************************************
-//   template< typename C > class CastIterator;
-//   template< typename C > class ConstCastIterator;
+   using size_type             = BodyStorage::size_type;           //!< Size type of the body storage.
+   using iterator              = BodyStorage::iterator;            //!< Iterator over non-const bodies.
+   using const_iterator        = BodyStorage::const_iterator;      //!< Iterator over constant bodies.
+   template <typename C> //cast type
+   using cast_iterator         = BodyStorage::cast_iterator<C>;
+   template <typename C> //cast type
+   using const_cast_iterator   = BodyStorage::const_cast_iterator<C>;
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
    explicit Union( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
-                    const bool global, const bool communicating, const bool infiniteMass );
+                   const bool global, const bool communicating, const bool infiniteMass );
    //@}
    //**********************************************************************************************
 
@@ -95,27 +99,34 @@ public:
 
 public:
    //**Get functions*******************************************************************************
-   /*!\name Get functions */
+   /*!\name BodyStorage functions */
    //@{
-                          inline bool                 isEmpty() const;
-                          inline size_t               size()    const;
-   template< typename C > inline size_t               size()    const {return bodies_.size<C>();}
-                          inline BodyID               getBody( size_t index );
-                          inline ConstBodyID          getBody( size_t index ) const;
+   inline bool                 isEmpty() const {return bodies_.isEmpty();}
+   inline size_t               size()    const {return bodies_.size();}
 
-                          inline Iterator                     begin()       {return bodies_.begin();}
-                          inline ConstIterator                begin() const {return bodies_.begin();}
-   template< typename C > inline Bodies::CastIterator<C>      begin()       {return bodies_.begin<C>();}
-   template< typename C > inline Bodies::ConstCastIterator<C> begin() const {return bodies_.begin<C>();}
+   inline iterator       begin   ()       {return bodies_.begin();}
+   inline const_iterator begin   () const {return bodies_.begin();}
+   inline const_iterator cbegin  () const {return bodies_.cbegin();}
+   inline iterator       end     ()       {return bodies_.end();}
+   inline const_iterator end     () const {return bodies_.end();}
+   inline const_iterator cend    () const {return bodies_.cend();}
 
-                          inline Iterator                     end()         {return bodies_.end();}
-                          inline ConstIterator                end() const   {return bodies_.end();}
-   template< typename C > inline Bodies::CastIterator<C>      end()         {return bodies_.end<C>();}
-   template< typename C > inline Bodies::ConstCastIterator<C> end() const   {return bodies_.end<C>();}
-
-   virtual inline real_t getVolume()         const;
+   template< typename C >
+   inline cast_iterator<C> begin()              {return bodies_.begin<C>();}
+   template< typename C >
+   inline const_cast_iterator<C> begin() const  {return bodies_.begin<C>();}
+   template< typename C >
+   inline const_cast_iterator<C> cbegin() const {return bodies_.cbegin<C>();}
+   template< typename C >
+   inline cast_iterator<C> end()                {return bodies_.end<C>();}
+   template< typename C >
+   inline const_cast_iterator<C> end() const    {return bodies_.end<C>();}
+   template< typename C >
+   inline const_cast_iterator<C> cend() const   {return bodies_.cend<C>();}
    //@}
    //**********************************************************************************************
+
+   virtual inline real_t getVolume()         const;
 
    //**Set functions*******************************************************************************
    /*!\name Set functions */
@@ -146,7 +157,7 @@ public:
    //**Rigid body manager functions****************************************************************
    /*!\name Rigid body manager functions */
    //@{
-   void add   ( BodyID body );
+   inline RigidBody& add( std::unique_ptr<RigidBody>&& body );
    //@}
    //**********************************************************************************************
 
@@ -183,18 +194,13 @@ protected:
    /*!\name Utility functions */
    //@{
    inline virtual void calcBoundingBox() WALBERLA_OVERRIDE;  // Calculation of the axis-aligned bounding box
-                  void calcCenterOfMass(); ///< updates the center of mass (gpos)
+   void calcCenterOfMass(); ///< updates the center of mass (gpos)
    inline         void calcInertia();      // Calculation of the moment of inertia
    //@}
    //**********************************************************************************************
 
-   //**Member variables****************************************************************************
-   /*!\name Member variables */
-   //@{
-   PtrVector<RigidBody, PtrDelete> bodies_;  //!< Rigid bodies contained in the union.
-   //@}
-   //**********************************************************************************************
 private:
+   BodyStorage bodies_;  //!< Rigid bodies contained in the union.
    std::vector<id_t> containedTypeIDs_;
 
    static id_t staticTypeID_;  //< type id of sphere, will be set by SetBodyTypeIDs
@@ -228,7 +234,7 @@ private:
  */
 template <typename BodyTypeTuple>
 Union<BodyTypeTuple>::Union( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
-                const bool global, const bool communicating, const bool /*infiniteMass*/ )
+                             const bool global, const bool communicating, const bool /*infiniteMass*/ )
    : RigidBody( getStaticTypeID(), sid, uid )  // Initialization of the parent class
 {
    // Initializing the instantiated union
@@ -241,7 +247,7 @@ Union<BodyTypeTuple>::Union( id_t sid, id_t uid, const Vec3& gpos, const Vec3& r
    calcInertia();
 
    setGlobal( global );
-//   setMass( infiniteMass );
+   //   setMass( infiniteMass );
    setCommunicating( communicating );
    setFinite( true );
 }
@@ -322,7 +328,7 @@ void Union<BodyTypeTuple>::calcBoundingBox()
    // Setting the bounding box of an empty union
    if( bodies_.isEmpty() ) {
       aabb_ = math::AABB(
-            gpos_[0] - real_t(0.01),
+                 gpos_[0] - real_t(0.01),
             gpos_[1] - real_t(0.01),
             gpos_[2] - real_t(0.01),
             gpos_[0] + real_t(0.01),
@@ -334,7 +340,7 @@ void Union<BodyTypeTuple>::calcBoundingBox()
    // Using the bounding box of the first contained bodies as initial bounding box
    // and merging it with the bounding boxes of all other bodies
    else {
-      aabb_ = bodies_[0]->getAABB();
+      aabb_ = bodies_.begin()->getAABB();
       for( auto b=bodies_.begin()+1; b!=bodies_.end(); ++b )
          aabb_.merge( b->getAABB() );
    }
@@ -366,7 +372,7 @@ void Union<BodyTypeTuple>::calcCenterOfMass()
    // Calculating the center of mass of a single body
    if( bodies_.size() == 1 )
    {
-      const BodyID body( bodies_[0] );
+      const BodyID body( bodies_.begin().getBodyID() );
       gpos_ = body->getPosition();
       mass_ = body->getMass();
       if( !isFixed() && mass_ > real_t(0) )
@@ -512,8 +518,8 @@ void Union<BodyTypeTuple>::setPositionImpl( real_t px, real_t py, real_t pz )
    gpos_ = gpos;
 
    // Updating the contained bodies
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      (*b)->update( dp );
+   for( auto& b : bodies_ )
+      b.update( dp );
 
    Union<BodyTypeTuple>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
@@ -548,8 +554,8 @@ void Union<BodyTypeTuple>::setOrientationImpl( real_t r, real_t i, real_t j, rea
    R_ = q_.toRotationMatrix();
 
    // Updating the contained bodies
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      (*b)->update( dq );
+   for( auto& b : bodies_ )
+      b.update( dq );
 
    Union<BodyTypeTuple>::calcBoundingBox();  // Setting the axis-aligned bounding box
    wake();             // Waking the union from sleep mode
@@ -586,8 +592,8 @@ void Union<BodyTypeTuple>::update( const Vec3& dp )
    gpos_ += dp;
 
    // Updating the contained bodies
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      (*b)->update( dp );
+   for( auto& b : bodies_ )
+      b.update( dp );
 
    // Setting the axis-aligned bounding box
    Union<BodyTypeTuple>::calcBoundingBox();
@@ -623,8 +629,8 @@ void Union<BodyTypeTuple>::update( const Quat& dq )
    R_ = q_.toRotationMatrix();
 
    // Updating the contained bodies
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      (*b)->update( dq );
+   for( auto& b : bodies_ )
+      b.update( dq );
 
    // Setting the axis-aligned bounding box
    Union<BodyTypeTuple>::calcBoundingBox();
@@ -694,38 +700,38 @@ void Union<BodyTypeTuple>::update( const Quat& dq )
  *    union (to make the entire union (in-)visible.
  */
 template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::add( BodyID body )
+RigidBody& Union<BodyTypeTuple>::add( std::unique_ptr<RigidBody>&& body )
 {
    // Checking for "self-assignment"
-   if( body == BodyID( this ) ) return;
+   if( body.get() == BodyID( this ) ) return *this;
 
    // Checking the global flags of the body and the union in MPI parallel simulations
    if( body->isGlobal() ^ global_ )
       throw std::logic_error( "Global flags of body and union do not match" );
 
+   // Registering the rigid body
+   auto& bd = bodies_.add( std::move(body) );
+
    Vec3 oldCenterOfMass = getPosition();
    Vec3 oldImpulse      = getLinearVel() * getMass();
 
-   Vec3 bodyCenterOfMass = body->getPosition();
-   Vec3 bodyImpulse      = body->getLinearVel() * body->getMass();
+   Vec3 bodyCenterOfMass = bd.getPosition();
+   Vec3 bodyImpulse      = bd.getLinearVel() * bd.getMass();
 
-
-   // Registering the rigid body
-   body->setSB(this);
-   bodies_.pushBack( body );
+   bd.setSB(this); //having a superbody will forward all getVel calls to superbody!!!
 
    // Updating the axis-aligned bounding box
    if( bodies_.size() == 1 )
-      aabb_ = body->getAABB();
+      aabb_ = bd.getAABB();
    else
-      aabb_.merge( body->getAABB() );
+      aabb_.merge( bd.getAABB() );
 
    // Setting the union's total mass and center of mass
    calcCenterOfMass();
 
    // Setting the contained primitives' relative position in reference to the center of mass
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      ( *b )->calcRelPosition();
+   for( auto& b : bodies_ )
+      b.calcRelPosition();
 
    // Setting the moment of inertia
    calcInertia();
@@ -735,11 +741,13 @@ void Union<BodyTypeTuple>::add( BodyID body )
    setAngularVel( Vec3(0,0,0) );
    addImpulseAtPos( oldImpulse, oldCenterOfMass);
    addImpulseAtPos( bodyImpulse, bodyCenterOfMass);
-   body->setLinearVel( Vec3(0,0,0) );
-   body->setAngularVel( Vec3(0,0,0) );
+   bd.setLinearVel( Vec3(0,0,0) );
+   bd.setAngularVel( Vec3(0,0,0) );
 
    // Signaling the internal modification to the superordinate body
    signalModification();
+
+   return bodies_.back();
 }
 //*************************************************************************************************
 
@@ -771,8 +779,8 @@ void Union<BodyTypeTuple>::translateImpl( real_t dx, real_t dy, real_t dz )
    gpos_ += dp;
 
    // Updating the contained bodies
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      (*b)->update( dp );
+   for( auto& b : bodies_ )
+      b.update( dp );
 
    Union<BodyTypeTuple>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
@@ -811,8 +819,8 @@ void Union<BodyTypeTuple>::rotateImpl( const Quat& dq )
    R_ = q_.toRotationMatrix();  // Updating the rotation of the union
 
    // Updating the contained bodies
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      (*b)->update( dq );
+   for( auto& b : bodies_ )
+      b.update( dq );
 
    Union<BodyTypeTuple>::calcBoundingBox();  // Setting the axis-aligned bounding box
    wake();             // Waking the union from sleep mode
@@ -843,8 +851,8 @@ void Union<BodyTypeTuple>::rotateAroundOriginImpl( const Quat& dq )
    gpos_ = dq.rotate( gpos_ );     // Updating the global position of the union
 
    // Updating the contained bodies
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      (*b)->update( dq );
+   for( auto& b : bodies_ )
+      b.update( dq );
 
    Union<BodyTypeTuple>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
@@ -876,8 +884,8 @@ void Union<BodyTypeTuple>::rotateAroundPointImpl( const Vec3& point, const Quat 
    gpos_ = point + dq.rotate( dp );  // Updating the global position of the union
 
    // Updating the contained bodies
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      (*b)->update( dq );
+   for( auto& b : bodies_ )
+      b.update( dq );
 
    Union<BodyTypeTuple>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
@@ -906,8 +914,8 @@ template <typename BodyTypeTuple>
 bool Union<BodyTypeTuple>::containsRelPointImpl( real_t px, real_t py, real_t pz ) const
 {
    const Vec3 gpos( pointFromBFtoWF( px, py, pz ) );
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      if( b->containsPoint( gpos ) ) return true;
+   for( auto& b : bodies_ )
+      if( b.containsPoint( gpos ) ) return true;
    return false;
 }
 //*************************************************************************************************
@@ -929,9 +937,10 @@ bool Union<BodyTypeTuple>::isSurfaceRelPointImpl( real_t px, real_t py, real_t p
    bool surface( false );
    const Vec3 gpos( pointFromBFtoWF( px, py, pz ) );
 
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b ) {
-      if( b->containsPoint( gpos ) ) return false;
-      else if( b->isSurfacePoint( gpos ) ) surface = true;
+   for( auto& b : bodies_ )
+   {
+      if( b.containsPoint( gpos ) ) return false;
+      else if( b.isSurfacePoint( gpos ) ) surface = true;
    }
 
    return surface;
@@ -974,8 +983,8 @@ void Union<BodyTypeTuple>::handleModification()
    calcCenterOfMass();
 
    // Setting the contained primitives' relative position in reference to the center of mass
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      ( *b )->calcRelPosition();
+   for( auto& b : bodies_ )
+      b.calcRelPosition();
 
    // Setting the moment of inertia
    calcInertia();
@@ -1004,8 +1013,8 @@ void Union<BodyTypeTuple>::handleTranslation()
    calcCenterOfMass();
 
    // Setting the contained bodies' relative position in reference to the center of mass
-   for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
-      ( *b )->calcRelPosition();
+   for( auto& b : bodies_ )
+      b.calcRelPosition();
 
    // Setting the moment of inertia
    calcInertia();
@@ -1154,65 +1163,6 @@ std::ostream& operator<<( std::ostream& os, Union<BodyTypeTuple> const * u )
 //  GET FUNCTIONS
 //
 //=================================================================================================
-
-//*************************************************************************************************
-/*!\brief Returns whether the union contains any bodies or not.
- *
- * \return \a true if the union is empty, \a false if it not.
- */
-template <typename BodyTypeTuple>
-inline bool Union<BodyTypeTuple>::isEmpty() const
-{
-   return bodies_.size() == 0;
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns the number of rigid bodies contained in the union.
- *
- * \return The number of rigid bodies.
- */
-template <typename BodyTypeTuple>
-inline size_t Union<BodyTypeTuple>::size() const
-{
-   return bodies_.size();
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns a handle to the indexed rigid body.
- *
- * \param index Access index. The index has to be in the range \f$[0..size-1]\f$.
- * \return Handle to the accessed body.
- *
- * \b Note: No runtime check is performed to insure the validity of the access index.
- */
-template <typename BodyTypeTuple>
-inline BodyID Union<BodyTypeTuple>::getBody( size_t index )
-{
-   WALBERLA_ASSERT_LESS( index, bodies_.size(), "Invalid access index" );
-   return bodies_[index];
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Returns a constant handle to the indexed rigid body.
- *
- * \param index Access index. The index has to be in the range \f$[0..size-1]\f$.
- * \return Constant handle to the accessed body.
- *
- * \b Note: No runtime check is performed to insure the validity of the access index.
- */
-template <typename BodyTypeTuple>
-inline ConstBodyID Union<BodyTypeTuple>::getBody( size_t index ) const
-{
-   WALBERLA_ASSERT_LESS( index, bodies_.size(), "Invalid access index" );
-   return bodies_[index];
-}
-//*************************************************************************************************
 
 
 //*************************************************************************************************

@@ -115,7 +115,8 @@ int main( int argc, char** argv )
                      iron, true, false, true);
 
     syncShadowOwners<BodyTuple>( forest->getBlockForest(), storageID);
-    for (int step=0; step < 100; ++step){
+    for (int step=0; step < 100; ++step)
+    {
        cr( real_c(0.1) );
        syncShadowOwners<BodyTuple>( forest->getBlockForest(), storageID);
 

@@ -59,7 +59,7 @@ private:
 
    ConstBlockDataID storageID_;
    const BlockStorage & blockStorage_;
-   std::vector< ConstEllipsoidID > bodies_;
+   std::vector< Ellipsoid const * > bodies_;
    std::vector< std::array<real_t,6> > tensorGlyphs_;
 };
 

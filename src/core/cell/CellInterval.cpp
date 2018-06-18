@@ -23,8 +23,6 @@
 #include "CellSet.h"
 #include "CellVector.h"
 
-#include <boost/foreach.hpp>
-
 
 namespace walberla {
 namespace cell {
@@ -51,7 +49,7 @@ bool CellInterval::overlaps( const CellVector& cellVector ) const
    if( empty() )
       return false;
 
-   BOOST_FOREACH( const Cell & cell, cellVector )
+   for( const Cell & cell : cellVector )
    {
       if( this->contains( cell ) )
          return true;

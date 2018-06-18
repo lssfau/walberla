@@ -157,7 +157,7 @@ void sim(shared_ptr< StructuredBlockForest > forest, std::vector<BodyData>& res,
       BodyStorage& localStorage = (*storage)[0];
       for (auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt)
       {
-         BodyID b = *bodyIt;
+         BodyID b = bodyIt.getBodyID();
          res.push_back(BodyData(b->getID(), b->getPosition(), b->getLinearVel()));
       }
    }

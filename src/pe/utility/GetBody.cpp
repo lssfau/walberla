@@ -30,7 +30,7 @@ BodyID getBody(BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID sto
       auto bodyIt = globalStorage.find(sid);
       if (bodyIt != globalStorage.end())
       {
-         return *bodyIt;
+         return bodyIt.getBodyID();
       }
    }
 
@@ -44,7 +44,7 @@ BodyID getBody(BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID sto
          auto bodyIt = localStorage.find(sid);
          if (bodyIt != localStorage.end())
          {
-            return *bodyIt;
+            return bodyIt.getBodyID();
          }
       }
       if (storageSelect & StorageSelect::SHADOW)
@@ -53,7 +53,7 @@ BodyID getBody(BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID sto
          auto bodyIt = shadowStorage.find(sid);
          if (bodyIt != shadowStorage.end())
          {
-            return *bodyIt;
+            return bodyIt.getBodyID();
          }
       }
    }

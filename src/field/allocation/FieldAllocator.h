@@ -48,6 +48,8 @@ namespace field {
    {
       public:
 
+         virtual ~FieldAllocator() = default;
+
          /**
           * \brief Allocate memory for a field of given sizes and initializes reference counter with one
           *

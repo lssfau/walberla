@@ -102,13 +102,13 @@ public:
 
       for( auto bodyIt = pe::BodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         if( mappingBodySelectorFct_(*bodyIt) )
-            mapBodyAndUpdateMapping(*bodyIt, block, boundaryHandling, flagField , bodyField, obstacle, formerObstacle, dx, dy, dz);
+         if( mappingBodySelectorFct_(bodyIt.getBodyID()) )
+            mapBodyAndUpdateMapping(bodyIt.getBodyID(), block, boundaryHandling, flagField , bodyField, obstacle, formerObstacle, dx, dy, dz);
       }
       for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt)
       {
-         if( mappingBodySelectorFct_(*bodyIt))
-            mapBodyAndUpdateMapping(*bodyIt, block, boundaryHandling, flagField , bodyField, obstacle, formerObstacle, dx, dy, dz);
+         if( mappingBodySelectorFct_(bodyIt.getBodyID()))
+            mapBodyAndUpdateMapping(bodyIt.getBodyID(), block, boundaryHandling, flagField , bodyField, obstacle, formerObstacle, dx, dy, dz);
       }
    }
 
@@ -273,13 +273,13 @@ void mapMovingBodies( StructuredBlockStorage & blockStorage, const BlockDataID &
    {
       for (auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt)
       {
-         if( mappingBodySelectorFct(*bodyIt))
-            mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
+         if( mappingBodySelectorFct(bodyIt.getBodyID()))
+            mapMovingBody< BoundaryHandling_T >( bodyIt.getBodyID(), *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
       }
       for( auto bodyIt = globalBodyStorage.begin(); bodyIt != globalBodyStorage.end(); ++bodyIt)
       {
-         if( mappingBodySelectorFct(*bodyIt))
-            mapMovingBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
+         if( mappingBodySelectorFct(bodyIt.getBodyID()))
+            mapMovingBody< BoundaryHandling_T >( bodyIt.getBodyID(), *blockIt, blockStorage, boundaryHandlingID, bodyFieldID, obstacle );
       }
    }
 }

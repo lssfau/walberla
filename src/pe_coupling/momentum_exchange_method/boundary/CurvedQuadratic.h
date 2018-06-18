@@ -81,6 +81,12 @@ class CurvedQuadratic : public Boundary< typename FlagField_T::flag_t >
 
 public:
 
+   static shared_ptr<BoundaryConfiguration> createConfiguration( const Config::BlockHandle& )
+   {
+      WALBERLA_ABORT( "A CurvedQuadratic boundary cannot be created from a config file" );
+      return make_shared<BoundaryConfiguration>();
+   }
+
    inline CurvedQuadratic( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField_T * const pdfField, const FlagField_T * const flagField,
                            BodyField_T * const bodyField,  const flag_t domain, const StructuredBlockStorage & blockStorage, const IBlock & block,
                            PDFField_T * const pdfFieldPreCollision );

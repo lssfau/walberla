@@ -1839,3 +1839,30 @@ namespace mpi {
       };
 }
 }
+
+//======================================================================================================================
+//
+//  MPI Datatype
+//
+//======================================================================================================================
+
+namespace walberla {
+
+   template< typename T>
+   struct MPITrait< Matrix3<T> >
+   {
+      static inline MPI_Datatype type()
+      {
+         // cannot use mpi::Datatype here because its destructor calls MPI_Type_free and static variables are destroyed after the MPI_Finalize
+         static MPI_Datatype datatype;
+         static bool initialized = false;
+
+         if( ! initialized ) {
+            MPI_Type_contiguous(9, MPITrait<T>::type(), &datatype );
+            MPI_Type_commit( &datatype );
+            initialized = true;
+         }
+         return datatype;
+      }
+   };
+} // namespace walberla

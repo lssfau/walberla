@@ -69,16 +69,17 @@ namespace pe {
 namespace communication {
 
 template<>
-inline mesh::pe::ConvexPolyhedronID instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, mesh::pe::ConvexPolyhedronID& newBody )
+inline mesh::pe::ConvexPolyhedronPtr instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, mesh::pe::ConvexPolyhedronID& newBody )
 {
    mesh::pe::ConvexPolyhedronParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   newBody = new mesh::pe::ConvexPolyhedron( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.mesh_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
-   newBody->setLinearVel( subobjparam.v_ );
-   newBody->setAngularVel( subobjparam.w_ );
-   newBody->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
-   return newBody;
+   auto cp = std::make_unique<mesh::pe::ConvexPolyhedron>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.mesh_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   cp->setLinearVel( subobjparam.v_ );
+   cp->setAngularVel( subobjparam.w_ );
+   cp->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
+   newBody = static_cast<mesh::pe::ConvexPolyhedronID>(cp.get());
+   return cp;
 }
 
 }  // namespace communication

@@ -30,6 +30,7 @@ namespace geometry {
 
 class AbstractBody {
 public:
+   virtual ~AbstractBody() = default;
    virtual bool contains (const Vector3<real_t> & point ) const = 0;
    virtual FastOverlapResult fastOverlapCheck ( const Vector3<real_t> & cellMidpoint, real_t dx ) const = 0;
    virtual FastOverlapResult fastOverlapCheck ( const AABB & box ) const = 0;

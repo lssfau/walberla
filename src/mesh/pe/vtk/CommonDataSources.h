@@ -189,6 +189,8 @@ public:
    LinearVelocityFaceDataSource( const std::string & _name = "linearVelocity" )
       : Base( _name ) { }
 
+   virtual ~LinearVelocityFaceDataSource() = default;
+
    virtual uint_t numComponents() { return uint_t(3); }
 
    virtual void getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data, const BodyPointerFPropManager & bodyPointer )
@@ -249,6 +251,8 @@ public:
    AngularVelocityFaceDataSource( const std::string & _name = "angularVelocity" )
       : Base( _name ) { }
 
+   virtual ~AngularVelocityFaceDataSource() = default;
+
    virtual uint_t numComponents() { return uint_t(3); }
 
    virtual void getData( const MeshType & /*mesh*/, const Faces & faces, std::vector<value_type> & data, const BodyPointerFPropManager & bodyPointer )
@@ -278,6 +282,8 @@ public:
 
    SurfaceVelocityVertexDataSource( const std::string & _name = "surfaceVelocity" )
       : Base( _name ) { }
+
+   virtual ~SurfaceVelocityVertexDataSource() = default;
 
    virtual uint_t numComponents() { return uint_t(3); }
 

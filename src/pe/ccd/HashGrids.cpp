@@ -764,15 +764,15 @@ void HashGrids::reloadBodies()
 {
    clear();
 
-   for (auto bodyIt = bodystorage_.begin(); bodyIt != bodystorage_.end(); ++bodyIt)
+   for (auto& body : bodystorage_)
    {
-      add( *bodyIt );
+      add( &body );
    }
    if( &bodystorage_ != &bodystorageShadowCopies_ )
    {
-      for (auto bodyIt = bodystorageShadowCopies_.begin(); bodyIt != bodystorageShadowCopies_.end(); ++bodyIt)
+      for (auto& body : bodystorageShadowCopies_)
       {
-         add( *bodyIt );
+         add( &body );
       }
    }
 }
@@ -872,46 +872,42 @@ void HashGrids::update(WcTimingTree* tt)
       //                        suitably sized cells (=> "addGrid()").
 
       {
-         const auto end( bodystorage_.end() );
-         for( auto bIt = bodystorage_.begin(); bIt != end; ++bIt )
+         for( auto& body : bodystorage_ )
          {
-            BodyID body = *bIt;
-            HashGrid* grid = static_cast<HashGrid*>( body->getGrid() );
+            HashGrid* grid = static_cast<HashGrid*>( body.getGrid() );
 
             if( grid != NULL )
             {
-               real_t size     = body->getAABBSize();
+               real_t size     = body.getAABBSize();
                real_t cellSpan = grid->getCellSpan();
 
                if( size >= cellSpan || size < ( cellSpan / hierarchyFactor ) ) {
-                  grid->remove( body );
-                  addGrid( body );
+                  grid->remove( &body );
+                  addGrid( &body );
                }
                else {
-                  grid->update( body );
+                  grid->update( &body );
                }
             }
          }
       }
 
       if( &bodystorage_ != &bodystorageShadowCopies_ ) {
-         const auto end( bodystorageShadowCopies_.end() );
-         for( auto bIt = bodystorageShadowCopies_.begin(); bIt != end; ++bIt )
+         for( auto& body : bodystorageShadowCopies_ )
          {
-            BodyID body = *bIt;
-            HashGrid* grid = static_cast<HashGrid*>( body->getGrid() );
+            HashGrid* grid = static_cast<HashGrid*>( body.getGrid() );
 
             if( grid != NULL )
             {
-               real_t size     = body->getAABBSize();
+               real_t size     = body.getAABBSize();
                real_t cellSpan = grid->getCellSpan();
 
                if( size >= cellSpan || size < ( cellSpan / hierarchyFactor ) ) {
-                  grid->remove( body );
-                  addGrid( body );
+                  grid->remove( &body );
+                  addGrid( &body );
                }
                else {
-                  grid->update( body );
+                  grid->update( &body );
                }
             }
          }
@@ -966,7 +962,7 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
             }
             // Test all bodies stored in 'grid' against all bodies stored in 'globalStorage_'.
             for( auto bIt = globalStorage_.begin(); bIt < globalStorage_.end(); ++bIt ) {
-               collide( *a, *bIt, contacts_ );
+               collide( *a, &(*bIt), contacts_ );
             }
          }
       }
@@ -982,7 +978,7 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
 
       // Pairwise test (=> contact generation) for all bodies that are stored in 'nonGridBodies_' with global bodies.
       for( auto bIt = globalStorage_.begin(); bIt < globalStorage_.end(); ++bIt ) {
-         collide( *aIt, *bIt, contacts_ );
+         collide( *aIt, &(*bIt), contacts_ );
       }
    }
    if (tt != NULL) tt->stop("Detection");

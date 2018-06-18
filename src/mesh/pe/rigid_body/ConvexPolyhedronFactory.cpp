@@ -65,7 +65,7 @@ ConvexPolyhedronID createConvexPolyhedron( BodyStorage& globalStorage, BlockStor
 {
    WALBERLA_ASSERT_UNEQUAL( ConvexPolyhedron::getStaticTypeID(), std::numeric_limits<id_t>::max(), "ConvexPolyhedron TypeID not initalized!");
 
-   ConvexPolyhedronID poly = NULL;
+   ConvexPolyhedronID poly = nullptr;
 
    Vec3 centroid = toWalberla( computeCentroid( mesh ) );
    translate( mesh, -centroid );
@@ -78,33 +78,30 @@ ConvexPolyhedronID createConvexPolyhedron( BodyStorage& globalStorage, BlockStor
       WALBERLA_CHECK_EQUAL(communicating, false, "Global bodies can not be communicating!" );
       WALBERLA_CHECK_EQUAL(infiniteMass, true, "Global bodies must have infinite mass!" );
 
-      poly = new ConvexPolyhedron(sid, uid, gpos, Vec3(0,0,0), Quat(), mesh, material, global, false, true);
-      globalStorage.add(poly);
+      auto cp = std::make_unique<ConvexPolyhedron>(sid, uid, gpos, Vec3(0,0,0), Quat(), mesh, material, global, false, true);
+      poly = static_cast<ConvexPolyhedronID>(&globalStorage.add(std::move(cp)));
    } else
    {
-      for (auto it = blocks.begin(); it != blocks.end(); ++it){
-         IBlock* block = (&(*it));
-         if (block->getAABB().contains(gpos))
+      for (auto& block : blocks){
+         if (block.getAABB().contains(gpos))
          {
             const id_t sid( UniqueID<RigidBody>::create() );
 
-            Storage* bs = block->getData<Storage>(storageID);
-            poly = new ConvexPolyhedron(sid, uid, gpos, Vec3(0,0,0), Quat(), mesh, material, global, communicating, infiniteMass);
-            poly->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block->getId().getID()));
-            (*bs)[0].add(poly);
+            BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
+            auto cp = std::make_unique<ConvexPolyhedron>(sid, uid, gpos, Vec3(0,0,0), Quat(), mesh, material, global, communicating, infiniteMass);
+            cp->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
+            poly = static_cast<ConvexPolyhedronID>(&bs.add( std::move(cp) ) );
          }
       }
    }
 
-   if (poly != NULL)
+   if (poly != nullptr)
    {
       // Logging the successful creation of the box
       WALBERLA_LOG_DETAIL(
                 "Created ConvexPolyhedron " << poly->getSystemID() << "\n"
              << "   User-ID         = " << uid << "\n"
              << "   Global position = " << gpos << "\n"
-             << "   side length     = " << lengths << "\n"
-             << "   LinVel          = " << box->getLinearVel() << "\n"
              << "   Material        = " << Material::getName( material )
                );
    }

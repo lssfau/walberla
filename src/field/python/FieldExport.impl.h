@@ -1006,7 +1006,7 @@ namespace internal {
 
       auto result = make_shared<boost::python::object>();
       AddToStorageExporter exporter( blocks, name, fs, gl, layout, type, initValue );
-      python_coupling::for_each_noncopyable_type< FieldTypes >  ( boost::ref(exporter) );
+      python_coupling::for_each_noncopyable_type< FieldTypes >  ( std::ref(exporter) );
 
       if ( ! exporter.successful() ) {
          PyErr_SetString( PyExc_ValueError, "Adding Field failed.");
@@ -1079,7 +1079,7 @@ namespace internal {
       auto fieldID = python_coupling::blockDataIDFromString( *blocks, name );
 
       CreateVTKWriterExporter exporter(blocks, fieldID, vtkName);
-      python_coupling::for_each_noncopyable_type< FieldTypes >  ( boost::ref(exporter) );
+      python_coupling::for_each_noncopyable_type< FieldTypes >  ( std::ref(exporter) );
       if ( ! exporter.getCreatedWriter() ) {
          PyErr_SetString( PyExc_ValueError, "Failed to create writer");
          throw boost::python::error_already_set();
@@ -1154,7 +1154,7 @@ namespace internal {
       auto fieldID = python_coupling::blockDataIDFromString( *blocks, name );
 
       CreateFlagFieldVTKWriterExporter exporter(blocks, fieldID, vtkName, flagMapping);
-      python_coupling::for_each_noncopyable_type< FieldTypes >  ( boost::ref(exporter) );
+      python_coupling::for_each_noncopyable_type< FieldTypes >  ( std::ref(exporter) );
       if ( ! exporter.getCreatedWriter() ) {
          PyErr_SetString( PyExc_ValueError, "Failed to create writer");
          throw boost::python::error_already_set();
@@ -1221,7 +1221,7 @@ namespace internal {
       auto fieldID = python_coupling::blockDataIDFromString( *blocks, name );
 
       CreateBinarizationVTKWriterExporter exporter(blocks, fieldID, vtkName, mask);
-      python_coupling::for_each_noncopyable_type< FieldTypes >  ( boost::ref(exporter) );
+      python_coupling::for_each_noncopyable_type< FieldTypes >  ( std::ref(exporter) );
       if ( ! exporter.getCreatedWriter() ) {
          PyErr_SetString( PyExc_ValueError, "Failed to create writer");
          throw boost::python::error_already_set();

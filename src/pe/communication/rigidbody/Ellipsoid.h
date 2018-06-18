@@ -61,16 +61,17 @@ void unmarshal( mpi::RecvBuffer& buffer, EllipsoidParameters& objparam );
 //*************************************************************************************************
 
 
-inline EllipsoidID instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, EllipsoidID& newBody )
+inline EllipsoidPtr instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, EllipsoidID& newBody )
 {
    EllipsoidParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   newBody = new Ellipsoid( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.semiAxes_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
-   newBody->setLinearVel( subobjparam.v_ );
-   newBody->setAngularVel( subobjparam.w_ );
-   newBody->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
-   return newBody;
+   auto el = std::make_unique<Ellipsoid>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.semiAxes_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   el->setLinearVel( subobjparam.v_ );
+   el->setAngularVel( subobjparam.w_ );
+   el->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
+   newBody = el.get();
+   return el;
 }
 
 }  // namespace communication

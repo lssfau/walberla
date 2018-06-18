@@ -120,25 +120,21 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
       {
          WALBERLA_LOG_DETAIL( "Time integration of body with system id " << bodyIt->getSystemID());// << "\n" << *bodyIt );
 
-         // Resetting the contact node and removing all attached contacts
-      //      bodyIt->resetNode();
-         bodyIt->clearContacts();
-
          // Checking the state of the body
          WALBERLA_ASSERT( bodyIt->checkInvariants(), "Invalid body state detected" );
          WALBERLA_ASSERT( !bodyIt->hasSuperBody(), "Invalid superordinate body detected" );
          
-         // Moving the capsule according to the acting forces (don't move a sleeping capsule)
+         // Moving the body according to the acting forces (don't move a sleeping body)
          if( bodyIt->isAwake() && !bodyIt->hasInfiniteMass() )
          {
-            integrate_( *bodyIt, dt, *this );
+            integrate_( bodyIt.getBodyID(), dt, *this );
          }
          
          // Resetting the acting forces
          bodyIt->resetForceAndTorque();
          
          // Checking the state of the rigid body
-         WALBERLA_ASSERT( bodyIt->checkInvariants(), "Invalid capsule state detected" );
+         WALBERLA_ASSERT( bodyIt->checkInvariants(), "Invalid body state detected" );
 
          // Resetting the acting forces
          bodyIt->resetForceAndTorque();
@@ -147,9 +143,8 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
       if (tt_ != NULL) tt_->stop("Integration");
 
       // Reset forces of shadow copies
-      for( auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); ++bodyIt ) {
-         bodyIt->clearContacts();
-         bodyIt->resetForceAndTorque();
+      for( auto& body : shadowStorage ) {
+         body.resetForceAndTorque();
       }
 
    }

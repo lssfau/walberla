@@ -22,7 +22,7 @@ waLBerla_execute_test( NAME   PE_CHECKVITALPARAMETERS )
 waLBerla_compile_test( NAME   PE_COLLISION FILES Collision.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_COLLISION )
 
-waLBerla_compile_test( NAME   PE_COLLISIONTOBIASGJK FILES CollisionTobiasGJK.cpp DEPENDS core  )
+waLBerla_compile_test( NAME   PE_COLLISIONTOBIASGJK FILES CollisionTobiasGJK.cpp DEPENDS core )
 waLBerla_execute_test( NAME   PE_COLLISIONTOBIASGJK )
 
 waLBerla_compile_test( NAME   PE_CREATEWORLD FILES CreateWorld.cpp DEPENDS core  )

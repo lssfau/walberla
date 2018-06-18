@@ -106,12 +106,12 @@
 #include <boost/mpl/equal_to.hpp>
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/or.hpp>
-#include <boost/bind.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -656,7 +656,7 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
                                                              ( setup.xCells + uint_t(2) * FieldGhostLayers ) ) * memoryPerCell;
 
    forest->addRefinementSelectionFunction( refinementSelectionFunctions );
-   forest->addWorkloadMemorySUIDAssignmentFunction( boost::bind( workloadMemoryAndSUIDAssignment, _1, memoryPerBlock, boost::cref( setup ) ) );
+   forest->addWorkloadMemorySUIDAssignmentFunction( std::bind( workloadMemoryAndSUIDAssignment, std::placeholders::_1, memoryPerBlock, std::cref( setup ) ) );
 
    forest->init( AABB( real_c(0), real_c(0), real_c(0),
                        setup.H * ( real_c(setup.xBlocks) * real_c(setup.xCells) ) / ( real_c(setup.yzBlocks) * real_c(setup.yzCells) ), setup.H, setup.H ),
@@ -2602,7 +2602,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
          adaptiveRefinementLog = oss.str();
       }
 
-      minTargetLevelDeterminationFunctions.add( boost::bind( keepInflowOutflowAtTheSameLevel, _1, _2, _3, boost::cref(setup) ) );
+      minTargetLevelDeterminationFunctions.add( std::bind( keepInflowOutflowAtTheSameLevel, std::placeholders::_1, std::placeholders::_2, 
+                                                           std::placeholders::_3, std::cref(setup) ) );
 
       if( Is2D< LatticeModel_T >::value )
          minTargetLevelDeterminationFunctions.add( pseudo2DTargetLevelCorrection );
@@ -3171,7 +3172,7 @@ int main( int argc, char **argv )
       refinementSelectionFunctions.add( cylinderRefinementSelection );
    }
 
-   refinementSelectionFunctions.add( boost::bind( setInflowOutflowToSameLevel, _1, setup ) );
+   refinementSelectionFunctions.add( std::bind( setInflowOutflowToSameLevel, std::placeholders::_1, setup ) );
 
    if( setup.pseudo2D )
       refinementSelectionFunctions.add( Pseudo2DRefinementSelectionCorrection );

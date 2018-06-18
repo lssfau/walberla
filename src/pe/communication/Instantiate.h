@@ -55,7 +55,7 @@ void correctBodyPosition(const math::AABB& domain, const Vec3& center, Vec3& pos
 }
 
 template < class BodyT >
-BodyT* instantiate( mpi::RecvBuffer& /*buffer*/, const math::AABB& /*domain*/, const math::AABB& /*block*/, BodyT*& /*newBody*/ )
+std::unique_ptr<BodyT> instantiate( mpi::RecvBuffer& /*buffer*/, const math::AABB& /*domain*/, const math::AABB& /*block*/, BodyT*& /*newBody*/ )
 {
    WALBERLA_ABORT( "Body instantiation not implemented! (" << demangle(typeid(BodyT).name()) << ")" );
 }

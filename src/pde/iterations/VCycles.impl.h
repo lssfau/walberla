@@ -39,10 +39,10 @@
 namespace walberla {
 namespace pde {
 
-template< typename Stencil_T >
-VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const BlockDataID & uFieldId, const BlockDataID & fFieldId,
-        const Weight_T weights,
-        const uint_t iterations, const uint_t numLvl,
+template< typename Stencil_T, typename OperatorCoarsening_T, typename Restrict_T, typename ProlongateAndCorrect_T >
+VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::VCycles(
+		shared_ptr< StructuredBlockForest > blocks, const BlockDataID & uFieldId, const BlockDataID & fFieldId,
+        const Weight_T weights, const uint_t iterations, const uint_t numLvl,
         const uint_t preSmoothingIters, const uint_t postSmoothingIters,
         const uint_t coarseIters, const std::function< real_t () > & residualNorm,
         const real_t residualNormThreshold, const uint_t residualCheckFrequency,
@@ -54,6 +54,9 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
    iterationsPerformed_( uint_t(0) ), thresholdReached_( false ), residualNorm_( residualNorm ), convergenceRate_(), stencilId_(),
    requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
 {
+
+   static_assert(std::is_same<OperatorCoarsening_T, CoarsenStencilFieldsDCA<Stencil_T>>::value, "Use of weight requires DCA, use constructor with stencil field if you want to employ GCA");
+
    // Set up fields for finest level
    uId_.push_back( uFieldId );
    fId_.push_back( fFieldId );
@@ -87,7 +90,7 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
    // Set up fields for coarser levels
    for ( uint_t lvl = 1; lvl < numLvl; ++lvl )
    {
-      auto getSize = std::bind(VCycles<Stencil_T>::getSizeForLevel, lvl, std::placeholders::_1, std::placeholders::_2);
+      auto getSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, lvl, std::placeholders::_1, std::placeholders::_2);
       uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
       fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
       rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
@@ -100,7 +103,7 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
    }
 
    // Set up fields for CG on coarsest level
-   auto getFineSize = std::bind(VCycles<Stencil_T>::getSizeForLevel, numLvl-1, std::placeholders::_1, std::placeholders::_2);
+   auto getFineSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, numLvl-1, std::placeholders::_1, std::placeholders::_2);
    dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::zyxf, uint_t(1) );
    zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::zyxf, uint_t(1) );
 
@@ -132,9 +135,9 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
    for (uint_t lvl = 0; lvl < numLvl-1; ++lvl)
    {
       computeResidual_.push_back( ComputeResidualFixedStencil< Stencil_T >( blocks, uId_[lvl], fId_[lvl], weights_[lvl], rId_[lvl] ) );
-      restrict_.push_back( Restrict< Stencil_T >(blocks, rId_[lvl], fId_[lvl+1] ) );
+      restrict_.push_back( Restrict_T(blocks, rId_[lvl], fId_[lvl+1] ) );
       zeroize_.push_back( Zeroize(blocks, uId_[lvl+1]) );
-      prolongateAndCorrect_.push_back( ProlongateAndCorrect< Stencil_T >(blocks, uId_[lvl+1], uId_[lvl]) );
+      prolongateAndCorrect_.push_back( ProlongateAndCorrect_T(blocks, uId_[lvl+1], uId_[lvl]) );
    }
 
    // Set up CG coarse-grid iteration
@@ -145,9 +148,10 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
 
 
 
-template< typename Stencil_T >
-VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const BlockDataID & uFieldId, const BlockDataID & fFieldId,
-        const BlockDataID & stencilFieldId,
+template< typename Stencil_T, typename OperatorCoarsening_T, typename Restrict_T, typename ProlongateAndCorrect_T >
+VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::VCycles(
+		shared_ptr< StructuredBlockForest > blocks, const BlockDataID & uFieldId, const BlockDataID & fFieldId,
+        const BlockDataID & stencilFieldId, const OperatorCoarsening_T & operatorCoarsening,
         const uint_t iterations, const uint_t numLvl,
         const uint_t preSmoothingIters, const uint_t postSmoothingIters,
         const uint_t coarseIters, const std::function< real_t () > & residualNorm,
@@ -192,17 +196,19 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
    // Set up fields for coarser levels
    for ( uint_t lvl = 1; lvl < numLvl; ++lvl )
    {
-      auto getSize = std::bind(VCycles<Stencil_T>::getSizeForLevel, lvl, std::placeholders::_1, std::placeholders::_2);
+      auto getSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, lvl, std::placeholders::_1, std::placeholders::_2);
       uId_.push_back( field::addToStorage< PdeField_T >( blocks, "u_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
       fId_.push_back( field::addToStorage< PdeField_T >( blocks, "f_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
       rId_.push_back( field::addToStorage< PdeField_T >( blocks, "r_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
       stencilId_.push_back( field::addToStorage< StencilField_T >( blocks, "w_"+boost::lexical_cast<std::string>(lvl), getSize, real_t(0), field::zyxf, uint_t(1) ) );
    }
 
-   coarsenStencilFields(); // scaling by ( 1/h^2 )^lvl
+   // CoarsenStencilFieldsDCA<Stencil_T>( blocks, stencilId_, numLvl, uint_t(2)) ();  // scaling by ( 1/h^2 )^lvl
+   // CoarsenStencilFieldsGCA<Stencil_T>( blocks, stencilId_, numLvl, real_t(2)) ();
+   operatorCoarsening(stencilId_);
 
    // Set up fields for CG on coarsest level
-   auto getFineSize = std::bind(VCycles<Stencil_T>::getSizeForLevel, numLvl-1, std::placeholders::_1, std::placeholders::_2);
+   auto getFineSize = std::bind(VCycles<Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T>::getSizeForLevel, numLvl-1, std::placeholders::_1, std::placeholders::_2);
    dId_ = field::addToStorage< PdeField_T >( blocks, "d", getFineSize, real_t(0), field::zyxf, uint_t(1) );
    zId_ = field::addToStorage< PdeField_T >( blocks, "z", getFineSize, real_t(0), field::zyxf, uint_t(1) );
 
@@ -234,9 +240,9 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
    for (uint_t lvl = 0; lvl < numLvl-1; ++lvl)
    {
       computeResidual_.push_back( ComputeResidual< Stencil_T >( blocks, uId_[lvl], fId_[lvl], stencilId_[lvl], rId_[lvl] ) );
-      restrict_.push_back( Restrict< Stencil_T >(blocks, rId_[lvl], fId_[lvl+1] ) );
+      restrict_.push_back( Restrict_T(blocks, rId_[lvl], fId_[lvl+1] ) );
       zeroize_.push_back( Zeroize(blocks, uId_[lvl+1]) );
-      prolongateAndCorrect_.push_back( ProlongateAndCorrect< Stencil_T >(blocks, uId_[lvl+1], uId_[lvl]) );
+      prolongateAndCorrect_.push_back( ProlongateAndCorrect_T(blocks, uId_[lvl+1], uId_[lvl]) );
    }
 
    // Set up CG coarse-grid iteration
@@ -247,8 +253,8 @@ VCycles< Stencil_T >::VCycles( shared_ptr< StructuredBlockForest > blocks, const
 
 
 
-template< typename Stencil_T >
-void VCycles< Stencil_T >::operator()()
+template< typename Stencil_T, typename OperatorCoarsening_T, typename Restrict_T, typename ProlongateAndCorrect_T >
+void VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::operator()()
 {
    WALBERLA_LOG_PROGRESS_ON_ROOT( "Starting VCycle iteration with a maximum number of " << iterations_ << " cycles and " << numLvl_ << " levels" );
    thresholdReached_ = false;
@@ -300,32 +306,8 @@ void VCycles< Stencil_T >::operator()()
 
 
 
-template< typename Stencil_T >
-void VCycles< Stencil_T >::coarsenStencilFields()
-{
-   const real_t scalingFactor = real_t(0.25); // scaling by ( 1/h^2 )^lvl
-
-   WALBERLA_ASSERT_EQUAL(numLvl_, stencilId_.size(), "This function can only be called when operating with stencil fields!");
-
-   for ( uint_t lvl = 1; lvl < numLvl_; ++lvl )
-   {
-      for( auto block = blocks_.begin( requiredSelectors_, incompatibleSelectors_ ); block != blocks_.end(); ++block )
-      {
-         StencilField_T * fine   = block->template getData< StencilField_T >( stencilId_[lvl-1] );
-         StencilField_T * coarse = block->template getData< StencilField_T >( stencilId_[lvl] );
-         
-         WALBERLA_FOR_ALL_CELLS_XYZ(coarse,
-            for( auto dir = Stencil_T::begin(); dir != Stencil_T::end(); ++dir )
-               coarse->get(x,y,z, dir.toIdx()) = scalingFactor * fine->get(x,y,z, dir.toIdx());
-         )
-      }
-   }
-}
-
-
-
-template< typename Stencil_T >
-void VCycles< Stencil_T >::VCycle()
+template< typename Stencil_T, typename OperatorCoarsening_T, typename Restrict_T, typename ProlongateAndCorrect_T >
+void VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::VCycle()
 {
    // pre-smoothen -- go from fine to coarse
    for (uint_t l = 0; l < numLvl_-1; ++l)
@@ -376,8 +358,8 @@ void VCycles< Stencil_T >::VCycle()
 
 
 
-template< typename Stencil_T >
-Vector3<uint_t> VCycles< Stencil_T >::getSizeForLevel( const uint_t level, const shared_ptr< StructuredBlockStorage > & blocks, IBlock * const block )
+template< typename Stencil_T, typename OperatorCoarsening_T, typename Restrict_T, typename ProlongateAndCorrect_T >
+Vector3<uint_t> VCycles< Stencil_T, OperatorCoarsening_T, Restrict_T, ProlongateAndCorrect_T >::getSizeForLevel( const uint_t level, const shared_ptr< StructuredBlockStorage > & blocks, IBlock * const block )
 {
    Vector3<uint_t> cells( blocks->getNumberOfXCells( *block ), blocks->getNumberOfYCells( *block ), blocks->getNumberOfZCells( *block ) );
 

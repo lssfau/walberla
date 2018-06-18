@@ -67,6 +67,7 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
+#include <functional>
 #include <vector>
 #include <iomanip>
 #include <iostream>
@@ -165,7 +166,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const Setup & s
    // initialize SetupBlockForest = determine domain decomposition
    SetupBlockForest sforest;
 
-   sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, setup.levels, setup.radius * real_c(2), setup.length ) );
+   sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, setup.levels, setup.radius * real_c(2), setup.length ) );
    sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
    sforest.init( AABB( real_c(0), real_c(0), real_c(0), setup.length, setup.length, setup.length ),

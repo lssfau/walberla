@@ -47,16 +47,16 @@ void EllipsoidVtkOutput::configure()
    bodies_.clear();
    tensorGlyphs_.clear();
 
-   for( auto blockIt = blockStorage_.begin(); blockIt != blockStorage_.end(); ++blockIt )
+   for( auto& block : blockStorage_ )
    {
 
-      const Storage& bs = *(blockIt->getData<const Storage>( storageID_ ));
+      const BodyStorage& localStorage = (*(block.getData<const Storage>( storageID_ )))[0];
 
-      for( auto it = bs[0].begin(); it != bs[0].end(); ++it )
+      for( auto& body : localStorage )
       {
-         if (it->getTypeID() == Ellipsoid::getStaticTypeID())
+         if (body.getTypeID() == Ellipsoid::getStaticTypeID())
          {
-            auto ellipsoid = static_cast<ConstEllipsoidID> (*it);
+            auto ellipsoid = static_cast<ConstEllipsoidID> (&body);
             bodies_.push_back(ellipsoid);
 
             // compute tensor glyph for visualization with ParaView (tensorGlyph)

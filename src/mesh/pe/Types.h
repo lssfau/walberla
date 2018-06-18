@@ -19,6 +19,8 @@
 //
 //======================================================================================================================
 
+#include <memory>
+
 namespace walberla {
 namespace mesh {
 namespace pe {
@@ -28,6 +30,7 @@ class ConvexPolyhedron;
 typedef ConvexPolyhedron        ConvexPolyhedronType;    //!< Type of the convex polyhedron geometric primitive.
 typedef ConvexPolyhedron*       ConvexPolyhedronID;      //!< Handle for a convexpolyhedron primitive.
 typedef const ConvexPolyhedron* ConstConvexPolyhedronID; //!< Handle for a constant convex polyhedron primitive.
+using   ConvexPolyhedronPtr   = std::unique_ptr<ConvexPolyhedron>;
 
 } // namespace pe
 } // namespace mesh

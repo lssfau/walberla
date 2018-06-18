@@ -50,11 +50,10 @@
 
 #include "timeloop/SweepTimeloop.h"
 
-#include <boost/bind.hpp>
-
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
+#include <functional>
 
 //#define TEST_USES_VTK_OUTPUT
 #ifdef TEST_USES_VTK_OUTPUT
@@ -190,7 +189,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const uint_t le
    // initialize SetupBlockForest = determine domain decomposition
    SetupBlockForest sforest;
 
-   sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, levels ) );
+   sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, levels ) );
    sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
    sforest.init( AABB( real_c(0), real_c(0), real_c(0), real_c( numberOfXBlocks * numberOfXCellsPerBlock ),

@@ -51,7 +51,7 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       {
          WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 1 );
          WALBERLA_CHECK_EQUAL( shadowStorage.size(), 0 );
-         SphereID bd = static_cast<SphereID> (*(storage[0].find( sid )));
+         SphereID bd = static_cast<SphereID> (storage[0].find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
          checkVitalParameters(bd, ref);
          bd->setPosition( newPos );
@@ -59,7 +59,7 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       {
          WALBERLA_CHECK_EQUAL( storage[0].size(), 0 );
          WALBERLA_CHECK_EQUAL( shadowStorage.size(), 1 );
-         SphereID bd = static_cast<SphereID> (*(shadowStorage.find( sid )));
+         SphereID bd = static_cast<SphereID> (shadowStorage.find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
          auto backupPos =ref->getPosition();
          auto correctedPos = ref->getPosition();
@@ -92,7 +92,7 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       {
          WALBERLA_CHECK_EQUAL( storage[StorageType::LOCAL].size(), 1 );
          WALBERLA_CHECK_EQUAL( shadowStorage.size(), 0 );
-         SphereID bd = static_cast<SphereID> (*(storage[0].find( sid )));
+         SphereID bd = static_cast<SphereID> (storage[0].find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
          checkVitalParameters(bd, ref);
          bd->setPosition( newPos );
@@ -100,7 +100,7 @@ void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla:
       {
          WALBERLA_CHECK_EQUAL( storage[0].size(), 0 );
          WALBERLA_CHECK_EQUAL( shadowStorage.size(), 1, "ref_sphere: " << ref << "\n" << block.getAABB() );
-         SphereID bd = static_cast<SphereID> (*(shadowStorage.find( sid )));
+         SphereID bd = static_cast<SphereID> (shadowStorage.find( sid ).getBodyID());
          WALBERLA_CHECK_NOT_NULLPTR(bd);
          auto backupPos =ref->getPosition();
          auto correctedPos = ref->getPosition();
@@ -161,9 +161,9 @@ int main( int argc, char ** argv )
    walberla::id_t sid = 123;
    Vec3 gpos = Vec3(3.5, 3.5, 3.5);
    const real_t r = real_c(1.6);
-   SphereID refSphere = new Sphere(1, 0, gpos, Vec3(0,0,0), Quat(), r, iron, false, true, false);
-   refSphere->setLinearVel(4, 5, 6);
-   refSphere->setAngularVel( 1, 2, 3);
+   Sphere refSphere(1, 0, gpos, Vec3(0,0,0), Quat(), r, iron, false, true, false);
+   refSphere.setLinearVel(4, 5, 6);
+   refSphere.setAngularVel( 1, 2, 3);
 
 
    SphereID sphere = createSphere( *globalStorage, forest->getBlockStorage(), storageID, 0, gpos, r);
@@ -203,10 +203,10 @@ int main( int argc, char ** argv )
       for (int i = 0; i < 21; ++i)
       {
          syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID);
-         Vec3 pos = refSphere->getPosition() + delta;
+         Vec3 pos = refSphere.getPosition() + delta;
          if (!forest->getDomain().contains( pos, real_c(0.5) ))
             forest->mapToPeriodicDomain(pos);
-         checkSphere(*forest, storageID, sid, refSphere, pos);
+         checkSphere(*forest, storageID, sid, &refSphere, pos);
       }
    }
    WALBERLA_LOG_PROGRESS("TEST WITHOUT DX ... finished");
@@ -225,10 +225,10 @@ int main( int argc, char ** argv )
       for (int i = 0; i < 21; ++i)
       {
          syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, NULL, dx);
-         Vec3 pos = refSphere->getPosition() + delta;
+         Vec3 pos = refSphere.getPosition() + delta;
          if (!forest->getDomain().contains( pos, real_c(0.5) ))
             forest->mapToPeriodicDomain(pos);
-         checkSphere(*forest, storageID, sid, refSphere, pos, dx);
+         checkSphere(*forest, storageID, sid, &refSphere, pos, dx);
       }
    }
    syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, NULL, dx);

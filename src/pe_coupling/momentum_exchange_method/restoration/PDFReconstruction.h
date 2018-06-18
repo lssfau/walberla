@@ -163,18 +163,18 @@ void PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructer_T >
 
       for( auto bodyIt = pe::BodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         if( !movingBodySelectorFct_(*bodyIt) )
+         if( !movingBodySelectorFct_(bodyIt.getBodyID()) )
             continue;
 
-         CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, numberOfGhostLayersToInclude );
+         CellInterval cellBB = getCellBB( bodyIt.getBodyID(), *block, *blockStorage_, numberOfGhostLayersToInclude );
          reconstructPDFsInCells(cellBB, block, flagField, formerObstacle );
       }
       for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt )
       {
-         if( !movingBodySelectorFct_(*bodyIt) )
+         if( !movingBodySelectorFct_(bodyIt.getBodyID()) )
             continue;
 
-         CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, numberOfGhostLayersToInclude );
+         CellInterval cellBB = getCellBB( bodyIt.getBodyID(), *block, *blockStorage_, numberOfGhostLayersToInclude );
          reconstructPDFsInCells(cellBB, block, flagField, formerObstacle );
       }
    }
@@ -191,18 +191,18 @@ void PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructer_T >
 
       for( auto bodyIt = pe::BodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         if( !movingBodySelectorFct_(*bodyIt) )
+         if( !movingBodySelectorFct_(bodyIt.getBodyID()) )
             continue;
 
-         CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, numberOfGhostLayersToInclude );
+         CellInterval cellBB = getCellBB( bodyIt.getBodyID(), *block, *blockStorage_, numberOfGhostLayersToInclude );
          updateFlags(cellBB, boundaryHandling, flagField, bodyField, formerObstacle, fluid);
       }
       for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt )
       {
-         if( !movingBodySelectorFct_(*bodyIt) )
+         if( !movingBodySelectorFct_(bodyIt.getBodyID()) )
             continue;
 
-         CellInterval cellBB = getCellBB( *bodyIt, *block, *blockStorage_, numberOfGhostLayersToInclude );
+         CellInterval cellBB = getCellBB( bodyIt.getBodyID(), *block, *blockStorage_, numberOfGhostLayersToInclude );
          updateFlags(cellBB, boundaryHandling, flagField, bodyField, formerObstacle, fluid);
       }
    }

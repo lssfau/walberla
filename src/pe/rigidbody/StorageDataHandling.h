@@ -88,8 +88,8 @@ void StorageDataHandling<BodyTuple>::serialize( IBlock * const block, const Bloc
       {
          WALBERLA_ABORT( "Body to be stored not contained within block!" );
       }
-      marshal( buffer, RigidBodyCopyNotification( **bodyIt ) );
-      MarshalDynamically<BodyTuple>::execute( buffer, **bodyIt );
+      marshal( buffer, RigidBodyCopyNotification( *bodyIt ) );
+      MarshalDynamically<BodyTuple>::execute( buffer, *bodyIt );
    }
 }
 
@@ -146,8 +146,8 @@ void StorageDataHandling<BodyTuple>::serializeCoarseToFine( Block * const block,
       }
       if( childAABB.contains( bodyIt->getPosition()) )
       {
-         marshal( buffer, RigidBodyCopyNotification( **bodyIt ) );
-         MarshalDynamically<BodyTuple>::execute( buffer, **bodyIt );
+         marshal( buffer, RigidBodyCopyNotification( *bodyIt ) );
+         MarshalDynamically<BodyTuple>::execute( buffer, *bodyIt );
          ++numOfParticles;
       }
    }
@@ -166,8 +166,8 @@ void StorageDataHandling<BodyTuple>::serializeFineToCoarse( Block * const block,
       {
          WALBERLA_ABORT( "Body to be stored not contained within block!" );
       }
-      marshal( buffer, RigidBodyCopyNotification( **bodyIt ) );
-      MarshalDynamically<BodyTuple>::execute( buffer, **bodyIt );
+      marshal( buffer, RigidBodyCopyNotification( *bodyIt ) );
+      MarshalDynamically<BodyTuple>::execute( buffer, *bodyIt );
    }
 }
 
@@ -214,16 +214,16 @@ void StorageDataHandling<BodyTuple>::deserializeImpl( IBlock * const block, cons
       typename RigidBodyCopyNotification::Parameters objparam;
       unmarshal( buffer, objparam );
 
-      BodyID bd = UnmarshalDynamically<BodyTuple>::execute(buffer, objparam.geomType_, block->getBlockStorage().getDomain(), block->getAABB());
+      auto bd = UnmarshalDynamically<BodyTuple>::execute(buffer, objparam.geomType_, block->getBlockStorage().getDomain(), block->getAABB());
       bd->setRemote( false );
       bd->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block->getId().getID()));
 
       if ( !block->getAABB().contains( bd->getPosition()) )
       {
-         WALBERLA_ABORT("Loaded body not contained within block!\n" << "aabb: " << block->getAABB() << "\nparticle:" << bd );
+         WALBERLA_ABORT("Loaded body not contained within block!\n" << "aabb: " << block->getAABB() << "\nparticle:" << *bd );
       }
       WALBERLA_ASSERT_EQUAL(localBodyStorage.find( bd->getSystemID() ), localBodyStorage.end());
-      localBodyStorage.add(bd);
+      localBodyStorage.add(std::move(bd));
 
       --numBodies;
    }

@@ -89,7 +89,7 @@ public:
       // assign the local bodies' volume to the cell, depending on the chosen Distributor_T
       for( auto bodyIt = pe::LocalBodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
       {
-         if(!dpmBodySelectorFct_(*bodyIt)) continue;
+         if(!dpmBodySelectorFct_(bodyIt.getBodyID())) continue;
 
          real_t bodyVolume = bodyIt->getVolume();
          const Vector3<real_t> bodyPosition = bodyIt->getPosition();

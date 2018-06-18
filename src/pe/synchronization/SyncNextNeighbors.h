@@ -67,7 +67,7 @@ void generateSynchonizationMessages(mpi::BufferSystem& bs, const Block& block, B
       }
 
       const Vec3 gpos( body->getPosition() );
-      BodyID     b   ( *body );
+      BodyID     b   ( body.getBodyID() );
 
       if (body->isMarkedForDeletion())
       {
@@ -155,7 +155,7 @@ void generateSynchonizationMessages(mpi::BufferSystem& bs, const Block& block, B
             WALBERLA_LOG_DETAIL( "Sending deletion notifications for body " << body->getSystemID() << " due to outflow." );
 
             // Registered processes receive removal notification in the remove() routine.
-            //todelete.push_back( *body );
+            //todelete.push_back( body.getBodyID() );
             body = removeAndNotify( me, bs, localStorage, body );
 
             // Note: Attached shadow copies are not deleted here. Instead we rely on the deferred deletion since we no
@@ -189,8 +189,7 @@ void generateSynchonizationMessages(mpi::BufferSystem& bs, const Block& block, B
             b->setRemote( true );
 
             // Move body to shadow copy storage.
-            body = localStorage.release( body );
-            shadowStorage.add( b );
+            shadowStorage.add( localStorage.release( body ) );
 
             // Note: We cannot determine here whether we require the body since we do not have up to date shadow copies.
             // However, we will most likely have to keep the body since it typically still intersects the process subdomain.

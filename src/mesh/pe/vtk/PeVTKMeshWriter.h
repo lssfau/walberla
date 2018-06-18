@@ -186,16 +186,16 @@ protected:
          const walberla::pe::BodyStorage & bodyStorage = (*storage)[0];
          for(auto bodyIt = bodyStorage.begin(); bodyIt != bodyStorage.end(); ++bodyIt)
          {
-            if (!bodyFilter_(**bodyIt)) continue;
+            if (!bodyFilter_(*bodyIt)) continue;
             newVertices.clear();
             newFaces.clear();
-            tesselation_( **bodyIt, *mesh_, newVertices, newFaces );
+            tesselation_( *bodyIt, *mesh_, newVertices, newFaces );
 
             for( const auto & fh: newFaces )
-               faceBodyPointer_[fh] = *bodyIt;
+               faceBodyPointer_[fh] = bodyIt.getBodyID();
 
             for( const auto & vh: newVertices )
-               vertexBodyPointer_[vh] = *bodyIt;
+               vertexBodyPointer_[vh] = bodyIt.getBodyID();
 
          }
       }

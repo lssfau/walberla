@@ -106,7 +106,7 @@ void BoundaryFromDomainBorder<Handling>::init( stencil::Direction direction,
 
       const cell_idx_t wd = wallDistance;
 
-      CellInterval dBB = blocks_.getDomainCellBB();
+      CellInterval dBB = blocks_.getDomainCellBB( blocks_.getLevel(*blockIt) );
 
       for( uint_t dim = 0; dim< 3; ++dim )
          switch ( stencil::c[dim][direction] )

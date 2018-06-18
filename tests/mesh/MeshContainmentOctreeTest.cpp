@@ -69,9 +69,9 @@ int main( int argc, char * argv[] )
 
    auto aabb = computeAABB( *mesh );
 
-  static const mesh::TriangleMesh::Point xAxis( 1, 0, 0 );
-  static const mesh::TriangleMesh::Point yAxis( 0, 1, 0 );
-  static const mesh::TriangleMesh::Point zAxis( 0, 0, 1 );
+  //static const mesh::TriangleMesh::Point xAxis( 1, 0, 0 );
+  //static const mesh::TriangleMesh::Point yAxis( 0, 1, 0 );
+  //static const mesh::TriangleMesh::Point zAxis( 0, 0, 1 );
   
   mesh::TriangleMesh::Point r = mesh::toOpenMesh( ( aabb.minCorner() - aabb.maxCorner() ).getNormalized() );
   

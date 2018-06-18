@@ -63,6 +63,8 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
+#include <functional>
+
 namespace settling_sphere_mem_static_refinement
 {
 
@@ -170,7 +172,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & do
 
    WALBERLA_LOG_INFO_ON_ROOT(" - refinement box: " << refinementBox);
 
-   sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, numberOfLevels, refinementBox ) );
+   sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, numberOfLevels, refinementBox ) );
    sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
    sforest.init( domainAABB, numberOfCoarseBlocksPerDirection[0], numberOfCoarseBlocksPerDirection[1], numberOfCoarseBlocksPerDirection[2], false, false, false );
@@ -544,7 +546,7 @@ int main( int argc, char **argv )
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
-   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
 
 
    // create pe bodies
@@ -595,11 +597,11 @@ int main( int argc, char **argv )
 
    // force averaging functionality
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> storeForceTorqueInCont1 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
+   std::function<void(void)> storeForceTorqueInCont1 = std::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer2 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
+   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = std::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
    shared_ptr<pe_coupling::ForceTorqueOnBodiesScaler> forceScaler = make_shared<pe_coupling::ForceTorqueOnBodiesScaler>(blocks, bodyStorageID, real_t(1));
-   std::function<void(void)> setForceScalingFactorToHalf = boost::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(0.5));
+   std::function<void(void)> setForceScalingFactorToHalf = std::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(0.5));
 
    if( averageForceTorqueOverTwoTimSteps ) {
       bodiesFTContainer2->store();

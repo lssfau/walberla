@@ -78,13 +78,29 @@ public:
       origin_[0] = aabb.xMin() + real_c(0.5) * dx_[0];
       origin_[1] = aabb.yMin() + real_c(0.5) * dx_[1];
       origin_[2] = aabb.zMin() + real_c(0.5) * dx_[2];
+
+      if( !timeTracker_ )
+      {
+         velocity_( time_ );
+      }
    }
+   DynamicUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
+               const uint_t level, const VelocityFunctor_T & velocity, const AABB & aabb ) :
+      DynamicUBB( boundaryUID, uid, pdfField, nullptr, level, velocity, aabb )
+   {}
 
    shared_ptr< TimeTracker > getTimeTracker() { return timeTracker_; }
 
    void pushFlags( std::vector< FlagUID > & uids ) const { uids.push_back( uid_ ); }
 
-   void beforeBoundaryTreatment() { time_ = timeTracker_->getTime( level_ ); velocity_( time_ ); }
+   void beforeBoundaryTreatment()
+   {
+     if( timeTracker_ )
+     {
+        time_ = timeTracker_->getTime( level_ );
+        velocity_( time_ );
+     }
+   }
    void  afterBoundaryTreatment() const {}
 
    template< typename Buffer_T >
@@ -113,7 +129,7 @@ public:
       WALBERLA_ASSERT_EQUAL( nz, z + cell_idx_c( stencil::cz[ dir ] ) );
       WALBERLA_ASSERT_UNEQUAL( mask & this->mask_, numeric_cast<flag_t>(0) );
       WALBERLA_ASSERT_EQUAL( mask & this->mask_, this->mask_ ); // only true if "this->mask_" only contains one single flag, which is the case for the
-                                                                // current implementation of this boundary condition (SimpleUBB)
+                                                                // current implementation of this boundary condition (DynamicUBB)
 
       const Vector3< real_t > pos( origin_[0] + real_c(nx) * dx_[0],
                                    origin_[1] + real_c(ny) * dx_[1],

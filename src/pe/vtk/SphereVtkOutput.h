@@ -61,7 +61,7 @@ private:
 
    ConstBlockDataID storageID_;
    const BlockStorage & blockStorage_;
-   std::vector< ConstSphereID > bodies_;
+   std::vector< Sphere const * > bodies_;
 };
 
 

@@ -43,6 +43,8 @@
 
 #include <boost/version.hpp>
 
+#include <functional>
+
 using namespace boost::python;
 
 
@@ -842,7 +844,7 @@ object * blockDataCreationHelper( IBlock * block, StructuredBlockStorage * bs,  
 uint_t StructuredBlockStorage_addBlockData( StructuredBlockStorage & s, const std::string & name, object functionPtr )
 {
    BlockDataID res = s.addStructuredBlockData(name)
-               << StructuredBlockDataCreator<object>( boost::bind( &blockDataCreationHelper, _1,_2, functionPtr ) );
+               << StructuredBlockDataCreator<object>( std::bind( &blockDataCreationHelper, std::placeholders::_1, std::placeholders::_2, functionPtr ) );
    //TODO extend this for moving block data ( packing und unpacking with pickle )
    return res;
 }

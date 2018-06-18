@@ -31,10 +31,9 @@
 #include "core/uid/SUID.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
-#include <boost/foreach.hpp>
 
 #include <algorithm>
+#include <functional>
 #include <sstream>
 #include <string>
 
@@ -85,7 +84,7 @@ void configureGlobalState( const shared_ptr<Config> & config ) {
 
       std::vector< std::string > states;
       boost::split( states, suids, boost::is_any_of(", \t") );
-      states.erase( std::remove_if( states.begin(), states.end(), boost::bind( &std::string::empty, _1 ) ), states.end() );
+      states.erase( std::remove_if( states.begin(), states.end(), std::bind( &std::string::empty, std::placeholders::_1 ) ), states.end() );
 
       Set<SUID> state;
       for( auto it = states.begin(); it != states.end(); ++it )

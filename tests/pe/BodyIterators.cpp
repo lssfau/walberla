@@ -14,7 +14,7 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file BodyIterators.cpp
-//! \author Florian Schornbaum <florian.schornbaum@fau.de>
+//! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 

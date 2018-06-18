@@ -26,6 +26,8 @@
 #include "lbm/boundary/factories/DefaultBoundaryHandling.h"
 #include "lbm/boundary/factories/DefaultDiffusionBoundaryHandling.h"
 
+#include <functional>
+
 namespace walberla {
 namespace lbm{
 
@@ -67,7 +69,7 @@ public:
    static BlockDataID addDefaultBoundaryHandlingCollectionToStorage(
       const shared_ptr< StructuredBlockStorage >& bs, const std::string & identifier, const BlockDataID& flagFieldID, const BlockDataID& handlingID, const BlockDataID& diffusionHandlingID )
    {
-      auto func = boost::bind( createDefaultBoundaryHandlingCollectionFactory, _1, _2, flagFieldID, handlingID, diffusionHandlingID );
+      auto func = std::bind( createDefaultBoundaryHandlingCollectionFactory, std::placeholders::_1, std::placeholders::_2, flagFieldID, handlingID, diffusionHandlingID );
       return bs->addStructuredBlockData< BoundaryHandlingCollection_T >( func, identifier );
    }
 

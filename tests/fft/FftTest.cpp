@@ -41,7 +41,7 @@ int main (int argc, char** argv)
    {
       Field_T *data_in = block->getData< Field_T >( originalFieldId );
       Field_T *data_out = block->getData< Field_T >( fftFieldId );
-      WALBERLA_FOR_ALL_CELLS_XYZ(data_in, {
+      WALBERLA_FOR_ALL_CELLS_XYZ_OMP(data_in, omp critical, {
          Vector3<real_t> point( real_c(x), real_c(y), real_c(z) );
          blocks->transformBlockLocalToGlobal(point, *block);
          data_in->get(x,y,z) = real_c(std::ranlux48_base(uint_c(point[0])+(uint_c(point[1])*L+uint_c(point[2]))*L)())*real_c(std::pow(2,-48));

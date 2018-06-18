@@ -1696,13 +1696,13 @@ namespace walberla {
    {
       static inline MPI_Datatype type()
       {
-         static mpi::Datatype datatype;
+         // cannot use mpi::Datatype here because its destructor calls MPI_Type_free and static variables are destroyed after the MPI_Finalize
+         static MPI_Datatype datatype;
          static bool initialized = false;
 
          if( ! initialized ) {
-            MPI_Datatype newDatatype;
-            MPI_Type_contiguous(2, MPITrait<T>::type(), &newDatatype );
-            datatype.init( newDatatype );
+            MPI_Type_contiguous(2, MPITrait<T>::type(), &datatype );
+            MPI_Type_commit( &datatype );
             initialized = true;
          }
          return datatype;

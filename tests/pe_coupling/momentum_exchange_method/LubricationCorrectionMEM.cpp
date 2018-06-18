@@ -57,6 +57,8 @@
 #include "pe_coupling/momentum_exchange_method/all.h"
 #include "pe_coupling/utility/all.h"
 
+#include <functional>
+
 
 namespace lubrication_correction_mem
 {
@@ -163,14 +165,14 @@ private:
       {
          for( auto curSphereIt = pe::BodyIterator::begin<pe::Sphere>( *blockIt, bodyStorageID_); curSphereIt != pe::BodyIterator::end<pe::Sphere>(); ++curSphereIt )
          {
-            pe::SphereID sphereI = ( *curSphereIt );
+            pe::SphereID sphereI = ( curSphereIt.getBodyID() );
             if ( sphereI->getID() == id1_ )
             {
                for( auto blockIt2 = blocks_->begin(); blockIt2 != blocks_->end(); ++blockIt2 )
                {
                   for( auto oSphereIt = pe::BodyIterator::begin<pe::Sphere>( *blockIt2, bodyStorageID_); oSphereIt != pe::BodyIterator::end<pe::Sphere>(); ++oSphereIt )
                   {
-                     pe::SphereID sphereJ = ( *oSphereIt );
+                     pe::SphereID sphereJ = ( oSphereIt.getBodyID() );
                      if ( sphereJ->getID() == id2_ )
                      {
                         gap = pe::getSurfaceDistance( sphereI, sphereJ );
@@ -283,14 +285,14 @@ private:
       {
          for( auto curSphereIt = pe::BodyIterator::begin<pe::Sphere>( *blockIt, bodyStorageID_); curSphereIt != pe::BodyIterator::end<pe::Sphere>(); ++curSphereIt )
          {
-            pe::SphereID sphereI = ( *curSphereIt );
+            pe::SphereID sphereI = ( curSphereIt.getBodyID() );
             if ( sphereI->getID() == id1_ )
             {
                for( auto globalBodyIt = globalBodyStorage_->begin(); globalBodyIt != globalBodyStorage_->end(); ++globalBodyIt)
                {
                   if( globalBodyIt->getID() == id2_ )
                   {
-                     pe::PlaneID planeJ = static_cast<pe::PlaneID>( *globalBodyIt );
+                     pe::PlaneID planeJ = static_cast<pe::PlaneID>( globalBodyIt.getBodyID() );
                      gap = pe::getSurfaceDistance(sphereI, planeJ);
                      break;
                   }
@@ -789,7 +791,7 @@ int main( int argc, char **argv )
 
    // set up synchronization procedure
    const real_t overlap = real_c( 1.5 ) * dx;
-   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
 
    // create the material
    const auto myMat = pe::createMaterial( "myMat", real_c(1.4), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(0) );

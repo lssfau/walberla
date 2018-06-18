@@ -23,7 +23,9 @@
 #pragma once
 
 #include "blockforest/BlockDataHandling.h"
-#include <boost/bind.hpp>
+
+#include <functional>
+
 
 
 namespace walberla {

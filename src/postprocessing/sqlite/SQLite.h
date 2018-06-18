@@ -37,74 +37,86 @@ struct sqlite3;
 namespace walberla {
 namespace postprocessing {
 
-   using std::string;
-   using std::map;
+using std::string;
+using std::map;
 
 
-   // Time in seconds the process waits if database is locked
-   const int BUSY_TIMEOUT = 30;
+// Time in seconds the process waits if database is locked
+const int BUSY_TIMEOUT = 30;
 
 
 
-   class SQLiteDB
-   {
-   private:
+class SQLiteDB
+{
+private:
 
-   public:
-      SQLiteDB ( const string & dbFile, const int busyTimeout = BUSY_TIMEOUT );
-      ~SQLiteDB();
+public:
+   SQLiteDB ( const string & dbFile, const int busyTimeout = BUSY_TIMEOUT );
+   ~SQLiteDB();
 
-      uint_t storeRun ( const map<string, int>     & integerProperties,
-                        const map<string, string > & stringProperties ,
-                        const map<string, double > & realProperties);
+   uint_t storeRun ( const map<string, int>     & integerProperties,
+                     const map<string, string > & stringProperties ,
+                     const map<string, double > & realProperties);
 
-      uint_t storeRun ( const map<string, int64_t> & integerProperties,
-                        const map<string, string > & stringProperties ,
-                        const map<string, double > & realProperties);
+   uint_t storeRun ( const map<string, int64_t> & integerProperties,
+                     const map<string, string > & stringProperties ,
+                     const map<string, double > & realProperties);
 
-      void storeAdditionalRunInfo( uint_t runId, const std::string & tableName,
-                                   const map<string, int>     & integerProperties,
-                                   const map<string, string > & stringProperties ,
-                                   const map<string, double > & realProperties );
+   void storeAdditionalRunInfo( uint_t runId, const std::string & tableName,
+                                const map<string, int>     & integerProperties,
+                                const map<string, string > & stringProperties ,
+                                const map<string, double > & realProperties );
 
-      void storeAdditionalRunInfo( uint_t runId, const std::string & tableName,
-                                   const map<string, int64_t> & integerProperties,
-                                   const map<string, string > & stringProperties ,
-                                   const map<string, double > & realProperties );
+   void storeAdditionalRunInfo( uint_t runId, const std::string & tableName,
+                                const map<string, int64_t> & integerProperties,
+                                const map<string, string > & stringProperties ,
+                                const map<string, double > & realProperties );
 
-      void storeTimingPool ( uint_t runId, const WcTimingPool & tp, const std::string & name  );
-      void storeTimingTree ( uint_t runId, const WcTimingTree & tt, const std::string & timingTreeName  );
+   void storeTimingPool ( uint_t runId, const WcTimingPool & tp, const std::string & name  );
+   void storeTimingTree ( uint_t runId, const WcTimingTree & tt, const std::string & timingTreeName  );
 
-   private:
-      void storeTimingNode ( const uint_t runId,
-                             const int    parentId,
-                             const WcTimingNode & tn,
-                             const std::string & timingTreeName,
-                             const std::string & sweep,
-                             const double totalTime );
+private:
+   void storeTimingNode ( const uint_t runId,
+                          const int    parentId,
+                          const WcTimingNode & tn,
+                          const std::string & timingTreeName,
+                          const std::string & sweep,
+                          const double totalTime );
 
-      bool valid_;
-      sqlite3 * dbHandle_;
-      std::string file_;
-   };
+   bool valid_;
+   sqlite3 * dbHandle_;
+   std::string file_;
+};
 
-   uint_t storeRunInSqliteDB( const string               & dbFile,
-                              const map<string, int>     & integerProperties= map<string,int>(),
-                              const map<string, string > & stringProperties = map<string,string>(),
-                              const map<string, double > & realProperties   = map<string,double>(),
-                              const int                    busyTimeout      = BUSY_TIMEOUT );
+uint_t storeRunInSqliteDB( const string               & dbFile,
+                           const map<string, int>     & integerProperties= map<string,int>(),
+                           const map<string, string > & stringProperties = map<string,string>(),
+                           const map<string, double > & realProperties   = map<string,double>(),
+                           const int                    busyTimeout      = BUSY_TIMEOUT );
 
-   uint_t storeRunInSqliteDB( const string               & dbFile,
-                              const map<string, int64_t> & integerProperties= map<string,int64_t>(),
-                              const map<string, string > & stringProperties = map<string,string>(),
-                              const map<string, double > & realProperties   = map<string,double>(),
-                              const int                    busyTimeout      = BUSY_TIMEOUT );
+uint_t storeRunInSqliteDB( const string               & dbFile,
+                           const map<string, int64_t> & integerProperties= map<string,int64_t>(),
+                           const map<string, string > & stringProperties = map<string,string>(),
+                           const map<string, double > & realProperties   = map<string,double>(),
+                           const int                    busyTimeout      = BUSY_TIMEOUT );
 
-   void storeTimingPoolInSqliteDB( const string & dbFile, uint_t runId, const WcTimingPool & tp,
-                                   const std::string & name, const int busyTimeout = BUSY_TIMEOUT );
+void storeAdditionalRunInfoInSqliteDB( const string               & dbFile,
+                                       const map<string, int>     & integerProperties= map<string,int>(),
+                                       const map<string, string > & stringProperties = map<string,string>(),
+                                       const map<string, double > & realProperties   = map<string,double>(),
+                                       const int                    busyTimeout      = BUSY_TIMEOUT );
 
-   void storeTimingTreeInSqliteDB( const string & dbFile, uint_t runId, const WcTimingTree & tt,
-                                   const std::string & name, const int busyTimeout = BUSY_TIMEOUT );
+void storeAdditionalRunInfoInSqliteDB( const string               & dbFile,
+                                       const map<string, int64_t> & integerProperties= map<string,int64_t>(),
+                                       const map<string, string > & stringProperties = map<string,string>(),
+                                       const map<string, double > & realProperties   = map<string,double>(),
+                                       const int                    busyTimeout      = BUSY_TIMEOUT );
+
+void storeTimingPoolInSqliteDB( const string & dbFile, uint_t runId, const WcTimingPool & tp,
+                                const std::string & name, const int busyTimeout = BUSY_TIMEOUT );
+
+void storeTimingTreeInSqliteDB( const string & dbFile, uint_t runId, const WcTimingTree & tt,
+                                const std::string & name, const int busyTimeout = BUSY_TIMEOUT );
 
 
 

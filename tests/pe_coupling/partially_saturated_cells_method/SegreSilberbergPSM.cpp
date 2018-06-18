@@ -64,6 +64,8 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
+#include <functional>
+
 namespace segre_silberberg_psm
 {
 
@@ -502,7 +504,7 @@ int main( int argc, char **argv )
 
    // set up synchronization procedure
    const real_t overlap = real_c( 1.5 ) * dx;
-   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
 
    // create pe bodies
 
