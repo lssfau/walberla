@@ -101,19 +101,6 @@ std::map< blockforest::BlockID, uint_t > getBlockIdToSequenceMapping( const Phan
    return mapping;
 }
 
-template< typename T >
-T * ptr( std::vector<T> & v )
-{
-   if( v.empty() )
-      return NULL;
-   else
-      return &( v.front() );
-}
-
-typedef uint_t idx_t;
-
-
-
 bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
                                   std::set< uint_t > & processesToRecvFrom,
                                   const PhantomBlockForest & phantomForest,
@@ -163,6 +150,7 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
       std::vector<double> xyz;
 
       uint_t blockIndex = 0;
+      int64_t ncon = int64_c(ncon_);
       for( auto it = targetProcess.begin(); it != targetProcess.end(); ++it, ++blockIndex )
       {
          WALBERLA_CHECK_EQUAL(blockIndex, mapping.find(it->first->getId())->second - blockSequenceRange.first);
@@ -181,7 +169,7 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
                WALBERLA_CHECK_LESS( mapIt->second, vtxdist.back() );
                adjncy.push_back( int64_c( mapIt->second ) );
                auto edgeWeightIt = bi.getEdgeWeights().find( nit->getId() );
-               //WALBERLA_CHECK_UNEQUAL( edgeWeightIt->second, 0 ); // perhaps WARNING
+               WALBERLA_CHECK_GREATER_EQUAL( edgeWeightIt->second, 0 );
                adjwgt.push_back( edgeWeightIt == bi.getEdgeWeights().end() ? int64_t( 1 ) : edgeWeightIt->second );
             }
             break;
@@ -193,14 +181,22 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
                WALBERLA_CHECK_GREATER_EQUAL( mapIt->second, 0 );
                WALBERLA_CHECK_LESS( mapIt->second, vtxdist.back() );
                adjncy.push_back( int64_c( mapIt->second ) );
-               //WALBERLA_CHECK_UNEQUAL( edgeIt->second, 0 ); // perhaps WARNING
+               WALBERLA_CHECK_GREATER_EQUAL( edgeIt->second, 0 );
                adjwgt.push_back( edgeIt->second );
             }
             break;
          }
-         WALBERLA_CHECK_UNEQUAL( bi.getVertexWeight(), 0 );
-         vwgt.push_back( bi.getVertexWeight() );
+
+         WALBERLA_CHECK_EQUAL(ncon, int64_c(bi.getNcon()), "Number of constraints on block does not fit to specified number of constraints in ParMetis setup!");
+
+         for( uint_t con = uint_t(0); con < bi.getNcon(); ++con )
+         {
+            WALBERLA_CHECK_GREATER_EQUAL( bi.getVertexWeight(con), 0 );
+            vwgt.push_back( bi.getVertexWeight(con) );
+         }
+
          vsize.push_back( bi.getVertexSize() );
+
          xyz.push_back( bi.getVertexCoords()[0] );
          xyz.push_back( bi.getVertexCoords()[1] );
          xyz.push_back( bi.getVertexCoords()[2] );
@@ -215,20 +211,19 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
       {
          WALBERLA_ASSERT_LESS( xadj[i-1], xadj[i] );
       }
-      WALBERLA_CHECK_EQUAL( vwgt.size(), targetProcess.size() );
+      WALBERLA_CHECK_EQUAL( int64_c(vwgt.size()), int64_c(targetProcess.size()) * ncon);
       WALBERLA_CHECK_EQUAL( vsize.size(), targetProcess.size() );
       WALBERLA_CHECK_EQUAL( xyz.size(), targetProcess.size() * 3 );
       WALBERLA_CHECK_EQUAL( adjncy.size(), adjwgt.size() );
       WALBERLA_CHECK_EQUAL( adjwgt.size(), xadj.back() );
 
-      int64_t wgtflag         = weightsToUse_;
-      int64_t numflag         = 0; // C-style ordering
-      int64_t ncon            = 1; // Number of constraints
-      int64_t ndims           = 3; // Number of dimensions
-      std::vector<double>  ubvec( uint_c(ncon), double_c( 1.05 ) ); // imbalance tolerance
-      int64_t nparts          = int64_c( MPIManager::instance()->numProcesses() ); // number of subdomains
-      double    ipc2redist    = double_c(ipc2redist_);
-      MPI_Comm comm           = subComm; //MPIManager::instance()->comm();
+      int64_t wgtflag           = weightsToUse_;
+      int64_t numflag           = 0; // C-style ordering
+      int64_t ndims             = 3; // Number of dimensions
+      std::vector<double> ubvec = ubvec_; // imbalance tolerance
+      int64_t nparts            = int64_c( MPIManager::instance()->numProcesses() ); // number of subdomains
+      double ipc2redist         = double_c(ipc2redist_);
+      MPI_Comm comm             = subComm; //MPIManager::instance()->comm();
       std::vector<double> tpwgts( uint_c(nparts * ncon), 1.0 / double_c( nparts ) ); // vertex weight fraction that is stored in a subdomain
       std::vector<int64_t> options = { int64_t( 1 ), int64_t( 0 ), int64_t( 23 ), int64_t( 1 ) };
 
@@ -237,34 +232,36 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
       switch( algorithm_ )
       {
       case PARMETIS_PART_GEOM:
+         WALBERLA_ASSERT_EQUAL(ncon, int64_t(1), "Chosen algorithm can only work with single constraints!");
          parmetisTimer.start();
-         metisResult = core::ParMETIS_V3_PartGeom( ptr( vtxdist ), &ndims, ptr( xyz ), ptr( part ), &comm );
+         metisResult = core::ParMETIS_V3_PartGeom( vtxdist.data(), &ndims, xyz.data(), part.data(), &comm );
          parmetisTimer.end();
          break;
       case PARMETIS_PART_GEOM_KWAY:
          parmetisTimer.start();
-         metisResult = core::ParMETIS_V3_PartGeomKway( ptr( vtxdist ), ptr( xadj ), ptr( adjncy ), ptr( vwgt ), ptr( adjwgt ), &wgtflag, &numflag, &ndims, ptr( xyz ), &ncon, &nparts, ptr( tpwgts ), ptr( ubvec ), ptr( options ), &edgecut, ptr( part ), &comm );
+         metisResult = core::ParMETIS_V3_PartGeomKway( vtxdist.data(), xadj.data(), adjncy.data(), vwgt.data(), adjwgt.data(), &wgtflag, &numflag, &ndims, xyz.data(), &ncon, &nparts, tpwgts.data(), ubvec.data(), options.data(), &edgecut, part.data(), &comm );
          parmetisTimer.end();
          break;
       case PARMETIS_PART_KWAY:
          parmetisTimer.start();
-         metisResult = core::ParMETIS_V3_PartKway( ptr( vtxdist ), ptr( xadj ), ptr( adjncy ), ptr( vwgt ), ptr( adjwgt ), &wgtflag, &numflag, &ncon, &nparts, ptr( tpwgts ), ptr(ubvec), ptr(options), &edgecut, ptr( part ), &comm );
+         metisResult = core::ParMETIS_V3_PartKway( vtxdist.data(), xadj.data(), adjncy.data(), vwgt.data(), adjwgt.data(), &wgtflag, &numflag, &ncon, &nparts, tpwgts.data(), ubvec.data(), options.data(), &edgecut, part.data(), &comm );
          parmetisTimer.end();
          break;
       case PARMETIS_ADAPTIVE_REPART:
          parmetisTimer.start();
-         metisResult = core::ParMETIS_V3_AdaptiveRepart( ptr( vtxdist ), ptr( xadj ), ptr( adjncy ), ptr( vwgt ), ptr( vsize ), ptr( adjwgt ), &wgtflag, &numflag, &ncon, &nparts, ptr( tpwgts ), ptr(ubvec), &ipc2redist, ptr(options), &edgecut, ptr( part ), &comm );
+         metisResult = core::ParMETIS_V3_AdaptiveRepart( vtxdist.data(), xadj.data(), adjncy.data(), vwgt.data(), vsize.data(), adjwgt.data(), &wgtflag, &numflag, &ncon, &nparts, tpwgts.data(), ubvec.data(), &ipc2redist, options.data(), &edgecut, part.data(), &comm );
          parmetisTimer.end();
          break;
       case PARMETIS_REFINE_KWAY:
          parmetisTimer.start();
-         metisResult = core::ParMETIS_V3_RefineKway( ptr( vtxdist ), ptr( xadj ), ptr( adjncy ), ptr( vwgt ), ptr( adjwgt ), &wgtflag, &numflag, &ncon, &nparts, ptr( tpwgts ), ptr(ubvec), ptr(options), &edgecut, ptr( part ), &comm );
+         metisResult = core::ParMETIS_V3_RefineKway( vtxdist.data(), xadj.data(), adjncy.data(), vwgt.data(), adjwgt.data(), &wgtflag, &numflag, &ncon, &nparts, tpwgts.data(), ubvec.data(), options.data(), &edgecut, part.data(), &comm );
          parmetisTimer.end();
          break;
       }
 
       if( metisResult != core::METIS_OK )
          WALBERLA_ABORT("ParMetis failed!");
+
    }
 
    // Determine which processes will receive a block from this process
@@ -278,7 +275,7 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
    isSendingBlockToProcess[uint_c(MPIManager::instance()->rank())] = uint8_t( 0 );
 
    std::vector<uint8_t> isReceivingBlockFromProcess( uint_c(MPIManager::instance()->numProcesses()), uint8_t( 0 ) );
-   MPI_Alltoall( ptr( isSendingBlockToProcess ), 1, MPITrait<uint8_t>::type(), ptr( isReceivingBlockFromProcess ), 1, MPITrait<uint8_t>::type(), MPIManager::instance()->comm() );
+   MPI_Alltoall( isSendingBlockToProcess.data(), 1, MPITrait<uint8_t>::type(), isReceivingBlockFromProcess.data(), 1, MPITrait<uint8_t>::type(), MPIManager::instance()->comm() );
    for( uint_t i = 0; i < isReceivingBlockFromProcess.size(); ++i )
       if( isReceivingBlockFromProcess[i] == uint8_t( 1 ) )
          processesToRecvFrom.insert( i );
@@ -317,12 +314,12 @@ DynamicParMetis::Algorithm DynamicParMetis::stringToAlgorithm( std::string s )
       return PARMETIS_PART_GEOM;
    else if( s == "PART_KWAY" )
       return PARMETIS_PART_KWAY;
-   else if( s == "PART_ADAPTIVE_REPART" )
+   else if( s == "ADAPTIVE_REPART" )
       return PARMETIS_ADAPTIVE_REPART;
    else if( s == "REFINE_KWAY" )
       return PARMETIS_REFINE_KWAY;
    else
-      WALBERLA_ABORT( "Illegal ParMetis algorithm specified (" << s << ")! Valid choices are: \"PART_GEOM_KWAY\", \"PART_KWAY\", \"PART_ADAPTIVE_REPART\", or \"REFINE_KWAY\"." );
+      WALBERLA_ABORT( "Illegal ParMetis algorithm specified (" << s << ")! Valid choices are: \"PART_GEOM_KWAY\", \"PART_GEOM\", \"PART_KWAY\", \"ADAPTIVE_REPART\", or \"REFINE_KWAY\"." );
 }
 
 
@@ -369,7 +366,7 @@ std::string DynamicParMetis::algorithmToString( ) const
    case walberla::blockforest::DynamicParMetis::PARMETIS_PART_KWAY:
       return "PART_KWAY";
    case walberla::blockforest::DynamicParMetis::PARMETIS_ADAPTIVE_REPART:
-      return "PART_ADAPTIVE_REPART";
+      return "ADAPTIVE_REPART";
    case walberla::blockforest::DynamicParMetis::PARMETIS_REFINE_KWAY:
       return "PARMETIS_REFINE_KWAY";
    }
