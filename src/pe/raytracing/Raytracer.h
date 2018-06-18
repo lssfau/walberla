@@ -420,30 +420,37 @@ inline void Raytracer::traceRayInGlobalBodyStorage(const Ray& ray, BodyID& body_
       
       IntersectsFunctor func(ray, t, n);
       
-      for(auto bodyIt: *globalBodyStorage_) {
-         if (!isBodyVisibleFunc_(bodyIt)) {
+      for(auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt)
+      {
+         if (!isBodyVisibleFunc_(bodyIt.getBodyID()))
+         {
             continue;
          }
          
          bool isPlane = (bodyIt->getTypeID() == Plane::getStaticTypeID());
-         if (isPlane) {
-            PlaneID plane = (PlaneID)bodyIt;
-            if (!isPlaneVisible(plane, ray)) {
+         if (isPlane)
+         {
+            PlaneID plane = (PlaneID)bodyIt.getBodyID();
+            if (!isPlaneVisible(plane, ray))
+            {
                continue;
             }
          }
          
-         bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(bodyIt, func);
-         if (intersects && t < t_closest) {
-            if (isPlane && confinePlanesToDomain_) {
+         bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(bodyIt.getBodyID(), func);
+         if (intersects && t < t_closest)
+         {
+            if (isPlane && confinePlanesToDomain_)
+            {
                Vec3 intersectionPoint = ray.getOrigin()+ray.getDirection()*t;
-               if (!forest_->getDomain().contains(intersectionPoint, real_t(1e-8))) {
+               if (!forest_->getDomain().contains(intersectionPoint, real_t(1e-8)))
+               {
                   continue;
                }
             }
             // body was shot by ray and is currently closest to camera
             t_closest = t;
-            body_closest = bodyIt;
+            body_closest = bodyIt.getBodyID();
             n_closest = n;
          }
       }
@@ -466,15 +473,15 @@ inline void Raytracer::traceRayNaively(const Ray& ray, BodyID& body_closest, rea
    
    for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
       for (auto bodyIt = LocalBodyIterator::begin(*blockIt, storageID_); bodyIt != LocalBodyIterator::end(); ++bodyIt) {
-         if (!isBodyVisibleFunc_(*bodyIt)) {
+         if (!isBodyVisibleFunc_(bodyIt.getBodyID())) {
             continue;
          }
          
-         bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(*bodyIt, func);
+         bool intersects = SingleCast<BodyTypeTuple, IntersectsFunctor, bool>::execute(bodyIt.getBodyID(), func);
          if (intersects && t < t_closest) {
             // body was shot by ray and is currently closest to camera
             t_closest = t;
-            body_closest = *bodyIt;
+            body_closest = bodyIt.getBodyID();
             n_closest = n;
          }
       }
