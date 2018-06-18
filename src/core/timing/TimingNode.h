@@ -111,7 +111,7 @@ void TimingNode<TP>::swap(TimingNode<TP>& tt)
     }
 }
 
-/// Finds the spezified timer in the timing hierarchy
+/// Finds the specified timer in the timing hierarchy
 /// \param name timer name which may include more than one hierarchy separated by "."
 /// \code findTimer(tn, "firstLevel.secondLevel.thirdLevel.timerName"); \endcode
 /// \relates TimingNode
@@ -127,6 +127,31 @@ const Timer<TP>& findTimer( const TimingNode<TP>& tn, const std::string& name)
    {
       WALBERLA_ASSERT_UNEQUAL( tn.tree_.find(name), tn.tree_.end(), "Could not find timer: " << name );
       return tn.tree_.at(name).timer_;
+   }
+}
+
+/// Checks if the specified timer exists in the timing hierarchy
+/// \param name timer name which may include more than one hierarchy separated by "."
+/// \code timerExists(tn, "firstLevel.secondLevel.thirdLevel.timerName"); \endcode
+/// \relates TimingNode
+template< typename TP >  // Timing policy
+bool timerExists( const TimingNode<TP>& tn, const std::string& name )
+{
+   auto pos = name.find_first_of(".");
+   if (pos != std::string::npos)
+   {
+      if( tn.tree_.find(name.substr(0, pos)) != tn.tree_.end() )
+      {
+         return timerExists( tn.tree_.at(name.substr(0, pos)), name.substr(pos+1, std::string::npos));
+      }
+      else
+      {
+         return false;
+      }
+   }
+   else
+   {
+      return tn.tree_.find(name) != tn.tree_.end();
    }
 }
 
