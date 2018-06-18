@@ -490,6 +490,65 @@ namespace internal {
    }
 
 
+   //===================================================================================================================
+   //
+   //  Aligned Allocation
+   //
+   //===================================================================================================================
+
+   template<typename T>
+   shared_ptr<field::FieldAllocator<T> > getAllocator(uint_t alignment)
+   {
+      if( alignment == 0 )
+         return shared_ptr<field::FieldAllocator<T> >(); // leave to default - auto-detection of alignment
+      else if ( alignment == 16 )
+         return make_shared< field::AllocateAligned<T, 16> >();
+      else if ( alignment == 32 )
+         return make_shared< field::AllocateAligned<T, 32> >();
+      else if ( alignment == 64 )
+         return make_shared< field::AllocateAligned<T, 64> >();
+      else if ( alignment == 128 )
+         return make_shared< field::AllocateAligned<T, 128> >();
+      else {
+         PyErr_SetString( PyExc_ValueError, "Alignment parameter has to be one of 0, 16, 32, 64, 128." );
+         throw boost::python::error_already_set();
+         return shared_ptr<field::FieldAllocator<T> >();
+      }
+   }
+
+   template< typename GhostLayerField_T >
+   class GhostLayerFieldDataHandling : public blockforest::AlwaysInitializeBlockDataHandling< GhostLayerField_T >
+   {
+   public:
+      typedef typename GhostLayerField_T::value_type Value_T;
+
+      GhostLayerFieldDataHandling( const weak_ptr<StructuredBlockStorage> &blocks, const uint_t nrOfGhostLayers,
+                                   const Value_T &initValue, const Layout layout, uint_t alignment = 0 ) :
+              blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_( initValue ), layout_( layout ),
+              alignment_( alignment ) {}
+
+      GhostLayerField_T * initialize( IBlock * const block )
+      {
+         auto blocks = blocks_.lock();
+         WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'AlwaysInitializeBlockDataHandling' for a block "
+                                             "storage object that doesn't exist anymore" );
+         GhostLayerField_T * field = new GhostLayerField_T ( blocks->getNumberOfXCells( *block ),
+                                                             blocks->getNumberOfYCells( *block ),
+                                                             blocks->getNumberOfZCells( *block ),
+                                                             nrOfGhostLayers_, initValue_, layout_,
+                                                             getAllocator<Value_T>(alignment_) );
+         return field;
+      }
+
+   private:
+      weak_ptr< StructuredBlockStorage > blocks_;
+
+      uint_t  nrOfGhostLayers_;
+      Value_T initValue_;
+      Layout  layout_;
+      uint_t alignment_;
+   };
+
 
    //===================================================================================================================
    //
@@ -843,10 +902,10 @@ namespace internal {
    {
    public:
       CreateFieldExporter( uint_t xs, uint_t ys, uint_t zs, uint_t fs, uint_t gl,
-                           Layout layout, const boost::python::object & type,
-                           const shared_ptr<boost::python::object> & resultPointer )
+                           Layout layout, const boost::python::object & type, uint_t alignment,
+                           const shared_ptr<boost::python::object> & resultPointer  )
          : xs_( xs ), ys_(ys), zs_(zs), fs_(fs), gl_(gl),
-           layout_( layout),  type_( type ), resultPointer_( resultPointer )
+           layout_( layout),  type_( type ), alignment_(alignment), resultPointer_( resultPointer )
       {}
 
       template< typename FieldType>
@@ -862,7 +921,8 @@ namespace internal {
          if( python_coupling::isCppEqualToPythonType<T>( (PyTypeObject *)type_.ptr() )  )
          {
             T initVal = T(); //extract<T> ( initValue_ );
-            *resultPointer_ = object( make_shared< GhostLayerField<T,F_SIZE> >( xs_,ys_,zs_, gl_, initVal, layout_ )  );
+            *resultPointer_ = object( make_shared< GhostLayerField<T,F_SIZE> >( xs_,ys_,zs_, gl_, initVal, layout_,
+                                                                                getAllocator<T>(alignment_)));
          }
       }
 
@@ -874,6 +934,7 @@ namespace internal {
       uint_t gl_;
       Layout layout_;
       boost::python::object type_;
+      uint_t alignment_;
       shared_ptr<boost::python::object> resultPointer_;
    };
 
@@ -881,7 +942,8 @@ namespace internal {
    boost::python::object createPythonField( boost::python::list size,
                                             boost::python::object type,
                                             uint_t ghostLayers,
-                                            Layout layout)
+                                            Layout layout,
+                                            uint_t alignment)
    {
       using namespace boost::python;
       uint_t xSize = extract<uint_t> ( size[0] );
@@ -898,7 +960,7 @@ namespace internal {
       }
 
       auto result = make_shared<boost::python::object>();
-      CreateFieldExporter exporter( xSize,ySize, zSize, fSize, ghostLayers, layout, type, result );
+      CreateFieldExporter exporter( xSize,ySize, zSize, fSize, ghostLayers, layout, type, alignment, result );
       python_coupling::for_each_noncopyable_type< FieldTypes >  ( exporter );
 
       if ( *result == object()  )
@@ -952,12 +1014,13 @@ namespace internal {
    class AddToStorageExporter
    {
    public:
-      AddToStorageExporter( const shared_ptr<StructuredBlockStorage> & blocks,
+      AddToStorageExporter(const shared_ptr<StructuredBlockStorage> & blocks,
                            const std::string & name, uint_t fs, uint_t gl, Layout layout,
                            const boost::python::object & type,
-                           const boost::python::object & initObj )
+                           const boost::python::object & initObj,
+                           uint_t alignment )
          : blocks_( blocks ), name_( name ), fs_( fs ),
-           gl_(gl),layout_( layout),  type_( type ), initObj_( initObj), found_(false)
+           gl_(gl),layout_( layout),  type_( type ), initObj_( initObj), alignment_(alignment), found_(false)
       {}
 
       template< typename FieldType>
@@ -972,11 +1035,15 @@ namespace internal {
 
          if( !found_ && python_coupling::isCppEqualToPythonType<T>( (PyTypeObject *)type_.ptr() )  )
          {
-            if ( initObj_ == object() )
-               field::addToStorage< GhostLayerField<T,F_SIZE> >( blocks_, name_, T(), layout_, gl_ );
-            else
-               field::addToStorage< GhostLayerField<T,F_SIZE> >( blocks_, name_, extract<T>(initObj_), layout_, gl_ );
-
+            typedef internal::GhostLayerFieldDataHandling< GhostLayerField<T,F_SIZE > > DataHandling;
+            if ( initObj_ == object() ) {
+               auto dataHandling = walberla::make_shared< DataHandling >( blocks_, gl_, T(), layout_, alignment_ );
+               blocks_->addBlockData( dataHandling, name_ );
+            }
+            else {
+               auto dataHandling = walberla::make_shared< DataHandling >( blocks_, gl_, extract<T>(initObj_), layout_, alignment_ );
+               blocks_->addBlockData( dataHandling, name_ );
+            }
             found_ = true;
          }
       }
@@ -990,12 +1057,14 @@ namespace internal {
       Layout layout_;
       boost::python::object type_;
       boost::python::object initObj_;
+      uint_t alignment_;
       bool found_;
    };
 
    template<typename FieldTypes>
    void addToStorage( const shared_ptr<StructuredBlockStorage> & blocks, const std::string & name,
-                      boost::python::object type, uint_t fs, uint_t gl, Layout layout, boost::python::object initValue )
+                      boost::python::object type, uint_t fs, uint_t gl, Layout layout, boost::python::object initValue,
+                      uint_t alignment)
    {
       using namespace boost::python;
 
@@ -1005,7 +1074,7 @@ namespace internal {
       }
 
       auto result = make_shared<boost::python::object>();
-      AddToStorageExporter exporter( blocks, name, fs, gl, layout, type, initValue );
+      AddToStorageExporter exporter( blocks, name, fs, gl, layout, type, initValue, alignment );
       python_coupling::for_each_noncopyable_type< FieldTypes >  ( std::ref(exporter) );
 
       if ( ! exporter.successful() ) {
@@ -1252,7 +1321,8 @@ void exportFields()
    def( "createField", &internal::createPythonField<FieldTypes>, ( ( arg("size")                    ),
                                                                    ( arg("type")                    ),
                                                                    ( arg("ghostLayers") = uint_t(1) ),
-                                                                   ( arg("layout")      = zyxf      )   ) );
+                                                                   ( arg("layout")      = zyxf      ),
+                                                                   ( arg("alignment")   = 0         )) );
 
    def( "createFlagField", &internal::createPythonFlagField, ( ( arg("size")                      ),
                                                                ( arg("nrOfBits")    = uint_t(32)  ),
@@ -1264,7 +1334,8 @@ void exportFields()
                                                                   ( arg("fSize")       = 1         ),
                                                                   ( arg("ghostLayers") = uint_t(1) ),
                                                                   ( arg("layout")      = zyxf      ),
-                                                                  ( arg("initValue")   = object()  ) ) );
+                                                                  ( arg("initValue")   = object()  ),
+                                                                  ( arg("alignment")   = 0         ) ) );
 
    def( "addFlagFieldToStorage",&internal::addFlagFieldToStorage, ( ( arg("blocks")                  ),
                                                                     ( arg("name")                    ),

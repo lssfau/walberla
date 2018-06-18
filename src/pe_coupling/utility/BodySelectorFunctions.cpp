@@ -13,26 +13,38 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file BodySelectorFunctions.h
+//! \file BodySelectorFunctions.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
 //======================================================================================================================
 
-#pragma once
+#include "BodySelectorFunctions.h"
 
 #include "pe/rigidbody/RigidBody.h"
 
 namespace walberla {
 namespace pe_coupling {
 
-bool selectAllBodies(pe::BodyID /*bodyID*/);
+bool selectAllBodies(pe::BodyID /*bodyID*/)
+{
+   return true;
+}
 
-bool selectRegularBodies(pe::BodyID bodyID);
+bool selectRegularBodies(pe::BodyID bodyID)
+{
+   return !bodyID->hasInfiniteMass() && !bodyID->isGlobal();
+}
 
-bool selectFixedBodies(pe::BodyID bodyID);
+bool selectFixedBodies(pe::BodyID bodyID)
+{
+   return bodyID->hasInfiniteMass() && !bodyID->isGlobal();
+}
 
-bool selectGlobalBodies(pe::BodyID bodyID);
+bool selectGlobalBodies(pe::BodyID bodyID)
+{
+   return bodyID->isGlobal();
+}
 
 } // namespace pe_coupling
 } // namespace walberla
