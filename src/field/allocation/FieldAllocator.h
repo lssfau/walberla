@@ -242,7 +242,7 @@ namespace field {
 
          virtual T * allocateMemory (  uint_t size )
          {
-            void * ptr = aligned_malloc_with_offset(size * sizeof(T), alignment, offset_ % alignment );
+            void * ptr = aligned_malloc_with_offset(size * sizeof(T) + alignment, alignment, offset_ % alignment );
             if(!ptr)
                throw std::bad_alloc();
 
