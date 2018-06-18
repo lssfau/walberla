@@ -82,10 +82,10 @@ void move( BodyStorage& storage, real_t dt )
 void checkRotationFunctions()
 {
    MaterialID iron = Material::find("iron");
-   auto sp1 = std::make_shared<Sphere>( 0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false );
-   auto sp2 = std::make_shared<Sphere>( 0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false );
-   auto sp3 = std::make_shared<Sphere>( 0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false );
-   auto sp4 = std::make_shared<Sphere>( 0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false );
+   auto sp1 = std::make_shared<Sphere>( 0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
+   auto sp2 = std::make_shared<Sphere>( 0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
+   auto sp3 = std::make_shared<Sphere>( 0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
+   auto sp4 = std::make_shared<Sphere>( 0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
 
    sp1->rotate( 1, 0, 0, math::M_PI * real_t(0.5));
    sp1->rotate( 0, 1, 0, math::M_PI * real_t(0.5));
@@ -121,7 +121,7 @@ void checkRotationFunctions()
 void checkPointFunctions()
 {
    MaterialID iron = Material::find("iron");
-   auto sp1 = std::make_shared<Sphere>( 0, 0, Vec3(10,10,10), Vec3(0,0,0), Quat(), 1, iron, false, true, false );
+   auto sp1 = std::make_shared<Sphere>( 0, 0, Vec3(10,10,10), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
 
    WALBERLA_CHECK( sp1->containsPoint( 10, 10, 10 ) );
    WALBERLA_CHECK( sp1->containsPoint( real_c(10.9), 10, 10 ) );
@@ -148,7 +148,7 @@ int main( int argc, char** argv )
 
    MaterialID iron = Material::find("iron");
    BodyStorage storage;
-   SpherePtr spPtr = std::make_unique<Sphere>(0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   SpherePtr spPtr = std::make_unique<Sphere>(0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false);
    SphereID sphere = static_cast<SphereID>(&storage.add(std::move(spPtr)));
 
    Vec3 x0 = Vec3(-2,2,0);
