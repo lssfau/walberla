@@ -1554,7 +1554,7 @@ conda-py35-linux:
       - export PATH=$PATH:/usr/local/likwid/bin
       - likwid-setFrequencies -t 0
       - likwid-setFrequencies -g performance
-      - likwid-setFrequencies -x 3.3 -y 3.3 # set frequency to 3.3
+      - likwid-setFrequencies -f 3.3 # set frequency to 3.3
       - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PeriodicGranularGas PeriodicGranularGas.cfg --DEM --syncNextNeighbor | tee PeriodicGranularGas_DEM_NN.txt
       - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PeriodicGranularGas PeriodicGranularGas.cfg --DEM --syncShadowOwners | tee PeriodicGranularGas_DEM_SO.txt
       - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PeriodicGranularGas PeriodicGranularGas.cfg --HCSITS --syncNextNeighbor --InelasticFrictionlessContact | tee PeriodicGranularGas_HCSITS_NN_IFC.txt

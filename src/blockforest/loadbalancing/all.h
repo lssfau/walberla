@@ -25,5 +25,8 @@
 #include "Cartesian.h"
 #include "DynamicCurve.h"
 #include "DynamicDiffusive.h"
+#include "DynamicParMetis.h"
 #include "NoPhantomData.h"
+#include "PODPhantomData.h"
 #include "StaticCurve.h"
+#include "StaticParMetis.h"
