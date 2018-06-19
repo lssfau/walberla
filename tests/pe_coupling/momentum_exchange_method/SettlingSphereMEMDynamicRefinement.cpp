@@ -58,6 +58,7 @@
 #include "pe/Types.h"
 #include "pe/synchronization/ClearSynchronization.h"
 
+#include "pe_coupling/amr/all.h"
 #include "pe_coupling/mapping/all.h"
 #include "pe_coupling/momentum_exchange_method/all.h"
 #include "pe_coupling/utility/all.h"
@@ -115,80 +116,6 @@ const FlagUID MO_Flag( "moving obstacle" );
 const FlagUID FormerMO_Flag( "former moving obstacle" );
 
 
-//////////////////////////////////////
-// DYNAMIC REFINEMENT FUNCTIONALITY //
-//////////////////////////////////////
-
-/*
- * Class to determine the minimum level a block can be.
- * For coupled LBM-PE simulations the following rules apply:
- *  - a moving body will always remain on the finest block
- *  - a moving body is not allowed to extend into an area with a coarser block
- *  - if no moving body is present, the level can be as coarse as possible (restricted by the 2:1 rule)
- * Therefore, if a body, local or remote (due to bodies that are larger than a block), is present on any of the
- * neighboring blocks of a certain block, this block's target level is the finest level.
- * This, together with a refinement checking frequency that depends on the maximum translational body velocity,
- * ensures the above given requirements.
- */
-class LevelDeterminator
-{
-public:
-
-   LevelDeterminator( const shared_ptr<pe::InfoCollection> & infoCollection, uint_t finestLevel) :
-         infoCollection_( infoCollection ), finestLevel_( finestLevel)
-   {}
-
-   void operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                    std::vector< const Block * > &, const BlockForest & /*forest*/ )
-   {
-      for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
-      {
-         const uint_t numberOfParticlesInDirectNeighborhood = getNumberOfLocalAndShadowBodiesInNeighborhood(it->first);
-
-         uint_t currentLevelOfBlock = it->first->getLevel();
-
-         uint_t targetLevelOfBlock = currentLevelOfBlock; //keep everything as it is
-         if ( numberOfParticlesInDirectNeighborhood > uint_t(0) )
-         {
-            // set block to finest level if there are bodies nearby
-            targetLevelOfBlock = finestLevel_;
-            //WALBERLA_LOG_DEVEL(currentLevelOfBlock << " -> " << targetLevelOfBlock << " (" << numberOfParticlesInDirectNeighborhood << ")" );
-         }
-         else
-         {
-            // block could coarsen sicne there are no bodies nearby
-            if( currentLevelOfBlock > uint_t(0) )
-               targetLevelOfBlock = currentLevelOfBlock - uint_t(1);
-            //WALBERLA_LOG_DEVEL(currentLevelOfBlock << " -> " << targetLevelOfBlock << " (" << numberOfParticlesInDirectNeighborhood << ")" );
-         }
-         it->second = targetLevelOfBlock;
-      }
-   }
-
-private:
-   uint_t getNumberOfLocalAndShadowBodiesInNeighborhood(const Block * block)
-   {
-      uint_t numBodies = uint_t(0);
-
-      // add bodies of current block
-      const auto infoIt = infoCollection_->find(block->getId());
-      numBodies += infoIt->second.numberOfLocalBodies;
-      numBodies += infoIt->second.numberOfShadowBodies;
-
-      // add bodies of all neighboring blocks
-      for(uint_t i = 0; i < block->getNeighborhoodSize(); ++i)
-      {
-         const BlockID& neighborBlockID = block->getNeighborId(i);
-         const auto infoItNeighbor = infoCollection_->find(neighborBlockID);
-         numBodies += infoItNeighbor->second.numberOfLocalBodies;
-         numBodies += infoItNeighbor->second.numberOfShadowBodies;
-      }
-      return numBodies;
-   }
-
-   shared_ptr<pe::InfoCollection> infoCollection_;
-   uint_t finestLevel_;
-};
 
 /////////////////////
 // BLOCK STRUCTURE //
@@ -655,11 +582,10 @@ int main( int argc, char **argv )
    blockforest.reevaluateMinTargetLevelsAfterForcedRefinement( false );
    blockforest.allowRefreshChangingDepth( false );
 
-   shared_ptr<pe::InfoCollection> peInfoCollection = walberla::make_shared<pe::InfoCollection>();
+   shared_ptr<pe_coupling::InfoCollection> couplingInfoCollection = walberla::make_shared<pe_coupling::InfoCollection>();
+   pe_coupling::amr::BodyPresenceLevelDetermination particlePresenceRefinement( couplingInfoCollection, finestLevel );
 
-   LevelDeterminator levelDet( peInfoCollection, finestLevel );
-
-   blockforest.setRefreshMinTargetLevelDeterminationFunction( levelDet );
+   blockforest.setRefreshMinTargetLevelDeterminationFunction( particlePresenceRefinement );
 
    bool curveHilbert = false;
    bool curveAllGather = true;
@@ -873,7 +799,7 @@ int main( int argc, char **argv )
       if( i % refinementCheckFrequency == 0)
       {
          auto & forest = blocks->getBlockForest();
-         pe::createWithNeighborhood(forest, bodyStorageID, *peInfoCollection);
+         pe_coupling::createWithNeighborhood<BoundaryHandling_T>(forest, boundaryHandlingID, bodyStorageID, ccdID, fcdID, numPeSubCycles, *couplingInfoCollection);
 
          uint_t stampBefore = blocks->getBlockForest().getModificationStamp();
          blocks->refresh();
