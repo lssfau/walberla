@@ -13,35 +13,37 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ForceTorqueOnBodiesResetter.h
+//! \file ForceOnBodiesAdder.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
 //======================================================================================================================
 
-#pragma once
+#include "ForceOnBodiesAdder.h"
 
+#include "core/math/Vector3.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
+#include "pe/rigidbody/BodyIterators.h"
+
 
 namespace walberla {
 namespace pe_coupling {
 
-class ForceTorqueOnBodiesResetter
-{  
-public:
+void ForceOnBodiesAdder::operator()()
+{
+   for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
+   {
+      for( auto bodyIt = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
+      {
+         bodyIt->addForce ( force_ );
+      }
+   }
+}
 
-   ForceTorqueOnBodiesResetter( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyStorageID )
-   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID )
-     { }
-
-   // resets forces and torques on all (local and remote) bodies
-   void operator()();
-
-private:
-
-   shared_ptr<StructuredBlockStorage> blockStorage_;
-   const BlockDataID bodyStorageID_;
-};
+void ForceOnBodiesAdder::updateForce( const Vector3<real_t> & newForce )
+{
+   force_ = newForce;
+}
 
 } // namespace pe_coupling
 } // namespace walberla

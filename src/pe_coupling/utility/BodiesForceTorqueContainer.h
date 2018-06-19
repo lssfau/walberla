@@ -22,9 +22,6 @@
 #pragma once
 
 #include "blockforest/StructuredBlockForest.h"
-#include "core/math/Vector3.h"
-#include "pe/rigidbody/BodyIterators.h"
-#include "pe/synchronization/SyncForces.h"
 
 #include <map>
 #include <array>
@@ -50,63 +47,13 @@ public:
       store();
    }
 
-   void store()
-   {
-      // clear map
-      clear();
+   void store();
 
-      // (re-)build map
-      for( auto blockIt = blockForest_->begin(); blockIt != blockForest_->end(); ++blockIt )
-      {
-         auto bodyForceTorqueStorage = blockIt->getData<ForceTorqueStorage_T>(bodyForceTorqueStorageID_);
+   void setOnBodies();
 
-         for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-         {
-            auto & f = (*bodyForceTorqueStorage)[ bodyIt->getSystemID() ];
+   void clear();
 
-            const auto & force = bodyIt->getForce();
-            const auto & torque = bodyIt->getTorque();
-            f = {{force[0], force[1], force[2], torque[0], torque[1], torque[2] }};
-         }
-      }
-
-   }
-
-   void setOnBodies()
-   {
-      // set the force/torque stored in the block-local map onto all bodies
-      for( auto blockIt = blockForest_->begin(); blockIt != blockForest_->end(); ++blockIt )
-      {
-         auto bodyForceTorqueStorage = blockIt->getData<ForceTorqueStorage_T>(bodyForceTorqueStorageID_);
-
-         for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-         {
-            const auto f = bodyForceTorqueStorage->find( bodyIt->getSystemID() );
-
-            if( f != bodyForceTorqueStorage->end() )
-            {
-               const auto & ftValues = f->second;
-               bodyIt->addForce ( ftValues[0], ftValues[1], ftValues[2] );
-               bodyIt->addTorque( ftValues[3], ftValues[4], ftValues[5] );
-            }
-            // else: new body has arrived that was not known before
-         }
-      }
-   }
-
-   void clear()
-   {
-      for( auto blockIt = blockForest_->begin(); blockIt != blockForest_->end(); ++blockIt )
-      {
-         auto bodyForceTorqueStorage = blockIt->getData<ForceTorqueStorage_T>(bodyForceTorqueStorageID_);
-         bodyForceTorqueStorage->clear();
-      }
-   }
-
-   void swap( BodiesForceTorqueContainer & other )
-   {
-      std::swap( bodyForceTorqueStorageID_, other.bodyForceTorqueStorageID_);
-   }
+   void swap( BodiesForceTorqueContainer & other );
 
 private:
 

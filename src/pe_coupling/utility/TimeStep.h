@@ -23,19 +23,11 @@
 
 #pragma once
 
-#include "core/debug/Debug.h"
 #include "core/timing/TimingTree.h"
-
-#include "domain_decomposition/BlockStorage.h"
-
+#include "domain_decomposition/StructuredBlockStorage.h"
 #include "pe/cr/ICR.h"
-#include "pe/rigidbody/BodyIterators.h"
-#include "pe/synchronization/SyncForces.h"
 
 #include <functional>
-
-#include <map>
-#include <array>
 
 namespace walberla {
 namespace pe_coupling {
@@ -72,83 +64,9 @@ public:
          , forceEvaluationFunc_( forceEvaluationFunc )
    {}
 
-   void operator()()
-   {
-      if( numberOfSubIterations_ == 1 )
-      {
-         forceEvaluationFunc_();
+   void operator()();
 
-         collisionResponse_.timestep( timeStepSize_ );
-         synchronizeFunc_();
-      }
-      else
-      {
-         // during the intermediate time steps of the collision response, the currently acting forces
-         // (interaction forces, gravitational force, ...) have to remain constant.
-         // Since they are reset after the call to collision response, they have to be stored explicitly before.
-         // Then they are set again after each intermediate step.
-
-         // generate map from all known bodies (process local) to total forces/torques
-         // this has to be done on a block-local basis, since the same body could reside on several blocks from this process
-         typedef domain_decomposition::IBlockID::IDType BlockID_T;
-         std::map< BlockID_T, std::map< walberla::id_t, std::array< real_t, 6 > > > forceTorqueMap;
-
-         for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
-         {
-            BlockID_T blockID = blockIt->getId().getID();
-            auto& blockLocalForceTorqueMap = forceTorqueMap[blockID];
-
-            // iterate over local and remote bodies and store force/torque in map
-            for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-            {
-               auto & f = blockLocalForceTorqueMap[ bodyIt->getSystemID() ];
-
-               const auto & force = bodyIt->getForce();
-               const auto & torque = bodyIt->getTorque();
-
-               f = {{force[0], force[1], force[2], torque[0], torque[1], torque[2] }};
-            }
-         }
-
-         // perform pe time steps
-         const real_t subTimeStepSize = timeStepSize_ / real_c( numberOfSubIterations_ );
-         for( uint_t i = 0; i != numberOfSubIterations_; ++i )
-         {
-
-            // in the first iteration, forces are already set
-            if( i != 0 )
-            {
-               for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
-               {
-                  BlockID_T blockID = blockIt->getId().getID();
-                  auto& blockLocalForceTorqueMap = forceTorqueMap[blockID];
-
-                  // re-set stored force/torque on bodies
-                  for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-                  {
-
-                     const auto f = blockLocalForceTorqueMap.find( bodyIt->getSystemID() );
-
-                     if( f != blockLocalForceTorqueMap.end() )
-                     {
-                        const auto & ftValues = f->second;
-                        bodyIt->addForce ( ftValues[0], ftValues[1], ftValues[2] );
-                        bodyIt->addTorque( ftValues[3], ftValues[4], ftValues[5] );
-                     }
-                  }
-               }
-            }
-
-            // evaluate forces (e.g. lubrication forces)
-            forceEvaluationFunc_();
-
-            collisionResponse_.timestep( subTimeStepSize );
-            synchronizeFunc_();
-         }
-      }
-   }
-
-protected:
+private:
 
    const real_t timeStepSize_;
    const uint_t numberOfSubIterations_;
