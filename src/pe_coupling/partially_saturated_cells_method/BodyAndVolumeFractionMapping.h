@@ -60,6 +60,9 @@ void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, Structu
    // get bounding box of body
    CellInterval cellBB = getCellBB( body, block, blockStorage, bodyAndVolumeFractionField->nrOfGhostLayers() );
 
+   uint_t level = blockStorage.getLevel( block );
+   Vector3<real_t> dxVec(blockStorage.dx(level), blockStorage.dy(level), blockStorage.dz(level));
+
    for( auto cellIt = cellBB.begin(); cellIt != cellBB.end(); ++cellIt )
    {
       Cell cell( *cellIt );
@@ -68,7 +71,7 @@ void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, Structu
       Vector3<real_t> cellCenter;
       cellCenter = blockStorage.getBlockLocalCellCenter( block, cell );
 
-      const real_t fraction = overlapFractionPe( *body, cellCenter, blockStorage.dx( blockStorage.getLevel( block ) ) );
+      const real_t fraction = overlapFractionPe( *body, cellCenter, dxVec );
 
       // if the cell intersected with the body, store a pointer to that body and the corresponding volume fraction in the field
       if( fraction > real_t(0) )
@@ -180,7 +183,7 @@ void BodyAndVolumeFractionMapping::initialize()
       {
          if( mappingBodySelectorFct_(bodyIt.getBodyID()) )
          {
-            mapPSMBodyAndVolumeFraction( bodyIt.getBodyID(), *blockIt, *blockStorage_, bodyAndVolumeFractionFieldID_ );
+            mapPSMBodyAndVolumeFraction(bodyIt.getBodyID(), *blockIt, *blockStorage_, bodyAndVolumeFractionFieldID_ );
             lastUpdatedPositionMap_.insert( std::pair< walberla::id_t, Vector3< real_t > >( bodyIt->getSystemID(), bodyIt->getPosition() ) );
          }
       }
@@ -257,6 +260,9 @@ void BodyAndVolumeFractionMapping::updatePSMBodyAndVolumeFraction( pe::BodyID bo
    // get bounding box of body
    CellInterval cellBB = getCellBB( body, block, *blockStorage_, oldBodyAndVolumeFractionField->nrOfGhostLayers() );
 
+   uint_t level = blockStorage_->getLevel( block );
+   Vector3<real_t> dxVec(blockStorage_->dx(level), blockStorage_->dy(level), blockStorage_->dz(level));
+
    // if body has not moved (specified by some epsilon), just reuse old fraction values
    if( body->getLinearVel().sqrLength()  < velocityUpdatingEpsilonSquared_ &&
        body->getAngularVel().sqrLength() < velocityUpdatingEpsilonSquared_ &&
@@ -296,7 +302,7 @@ void BodyAndVolumeFractionMapping::updatePSMBodyAndVolumeFraction( pe::BodyID bo
                Vector3<real_t> cellCenter;
                cellCenter = blockStorage_->getBlockLocalCellCenter( block, Cell(x,y,z) );
 
-               const real_t fraction = overlapFractionPe( *body, cellCenter, blockStorage_->dx( blockStorage_->getLevel( block ) ), superSamplingDepth_ );
+               const real_t fraction = overlapFractionPe( *body, cellCenter, dxVec, superSamplingDepth_ );
 
                // if the cell intersected with the body, store a pointer to that body and the corresponding volume fraction in the field
                if( fraction > real_t(0) )

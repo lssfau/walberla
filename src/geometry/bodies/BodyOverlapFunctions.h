@@ -61,16 +61,17 @@ namespace geometry {
    *
    * \param body          the body object
    * \param cellMidpoint  midpoint of the cell in global coordinates
-   * \param dx            the edge length of the cell, cell is assumed to be cubic
+   * \param dx            the edge length(s) of the cell, dx or (dx, dy, dz)
    * \param maxDepth      sub sampling depth: the cell edge is divided in half \p maxDepth+1 times.
    *                      Values less than zero result in no subdivisions, making this function behave like contains().
    ********************************************************************************************************************/
    template <typename Body> real_t overlapFraction ( const Body & body, const Vector3<real_t> & cellMidpoint,
-                                                     real_t dx,  uint_t maxDepth=4 );
+                                                     real_t dx, uint_t maxDepth=4 );
    template <typename Body> real_t overlapFraction ( const Body & body, const Vector3<real_t> & cellMidpoint,
-                                                     real_t dx,  int maxDepth );
+                                                     real_t dx, int maxDepth );
 
-
+   template <typename Body> real_t overlapFraction ( const Body & body, const Vector3<real_t> & cellMidpoint,
+                                                     const Vector3<real_t> & dx, uint_t maxDepth=4 );
 
 
    /****************************************************************************************************************//**
@@ -99,8 +100,7 @@ namespace geometry {
    * Determines in a fast way (bounding box etc) if a body and a block overlap
    * when no fast computation is possible return DONT_KNOW
    ********************************************************************************************************************/
-   template <typename Body> FastOverlapResult fastOverlapCheck ( const Body & body,
-                                                                 const Vector3<real_t> & cellMidpoint, real_t dx );
+   template <typename Body> FastOverlapResult fastOverlapCheck ( const Body & body, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx );
 
 
 

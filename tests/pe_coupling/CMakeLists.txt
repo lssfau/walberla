@@ -158,6 +158,13 @@ waLBerla_compile_test( FILES discrete_particle_methods/HinderedSettlingDynamicsD
 waLBerla_execute_test( NAME HinderedSettlingDynamicsDPMFuncTest COMMAND $<TARGET_FILE:HinderedSettlingDynamicsDPM> --funcTest PROCESSES 4 LABELS longrun CONFIGURATIONS RelWithDbgInfo )
 
 ###################################################################################################
+# Geometry tests
+###################################################################################################
+
+waLBerla_compile_test( FILES geometry/PeIntersectionRatioTest.cpp DEPENDS pe )
+waLBerla_execute_test( NAME PeIntersectionRatioTest COMMAND $<TARGET_FILE:PeIntersectionRatioTest> PROCESSES 1 )
+
+###################################################################################################
 # Utility tests
 ###################################################################################################
 
@@ -168,3 +175,4 @@ waLBerla_execute_test( NAME BodiesForceTorqueContainerParallelTest COMMAND $<TAR
 waLBerla_compile_test( FILES utility/PeSubCyclingTest.cpp DEPENDS blockforest pe timeloop )
 waLBerla_execute_test( NAME PeSubCyclingTest COMMAND $<TARGET_FILE:PeSubCyclingTest> PROCESSES 1 )
 waLBerla_execute_test( NAME PeSubCyclingParallelTest COMMAND $<TARGET_FILE:PeSubCyclingTest> PROCESSES 3 )
+

@@ -99,10 +99,10 @@ namespace geometry {
    }
 
    template<>
-   FastOverlapResult fastOverlapCheck ( const Ellipsoid & ellipsoid, const Vector3<real_t> & cellMidpoint, real_t dx )
+   FastOverlapResult fastOverlapCheck ( const Ellipsoid & ellipsoid, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx )
    {
-      AABB box = AABB::createFromMinMaxCorner( cellMidpoint[0] - real_t(0.5)*dx, cellMidpoint[1] - real_t(0.5)*dx, cellMidpoint[2] - real_t(0.5)*dx,
-                                               cellMidpoint[0] + real_t(0.5)*dx, cellMidpoint[1] + real_t(0.5)*dx, cellMidpoint[2] + real_t(0.5)*dx);
+      AABB box = AABB::createFromMinMaxCorner( cellMidpoint[0] - real_t(0.5)*dx[0], cellMidpoint[1] - real_t(0.5)*dx[1], cellMidpoint[2] - real_t(0.5)*dx[2],
+                                               cellMidpoint[0] + real_t(0.5)*dx[0], cellMidpoint[1] + real_t(0.5)*dx[1], cellMidpoint[2] + real_t(0.5)*dx[2]);
 
       if ( ! ellipsoid.boundingBox().intersects( box ) )
          return COMPLETELY_OUTSIDE;
@@ -114,7 +114,8 @@ namespace geometry {
       const real_t midPointDistSq = (ellipsoid.midpoint() - cellMidpoint).sqrLength();
 
       // Check against inner circle of box
-      const real_t dist2 = ellipsoid.minRadius() - sqrt3half * dx;
+      const real_t dxMax = dx.max();
+      const real_t dist2 = ellipsoid.minRadius() - sqrt3half * dxMax;
       if ( midPointDistSq < dist2 * dist2 )
          return CONTAINED_INSIDE_BODY;
 

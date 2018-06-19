@@ -91,7 +91,7 @@ namespace geometry {
 
    // Body concept
    template<> FastOverlapResult fastOverlapCheck ( const Ellipsoid & e, const AABB & box );
-   template<> FastOverlapResult fastOverlapCheck ( const Ellipsoid & e, const Vector3<real_t> & cellMidpoint, real_t dx );
+   template<> FastOverlapResult fastOverlapCheck ( const Ellipsoid & e, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx );
    template<> bool contains ( const Ellipsoid & ellipsoid, const Vector3<real_t> & point );
 
 

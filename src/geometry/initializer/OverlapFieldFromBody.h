@@ -140,6 +140,7 @@ namespace initializer {
       const real_t dx = structuredBlockStorage_.dx();
       const real_t dy = structuredBlockStorage_.dy();
       const real_t dz = structuredBlockStorage_.dz();
+      const Vector3<real_t> dxVec(dx, dy, dz);
 
       for( auto blockIt = structuredBlockStorage_.begin(); blockIt != structuredBlockStorage_.end(); ++blockIt )
       {
@@ -170,7 +171,7 @@ namespace initializer {
                currentMidpoint[0] = firstCellMidpoint[0];
                for( cell_idx_t x = -gl; x < cell_idx_c(ff->xSize())+gl; ++x, currentMidpoint[0] += dx )
                {
-                  real_t overlap = overlapFraction( body, currentMidpoint, dx, superSamplingDepth );
+                  real_t overlap = overlapFraction( body, currentMidpoint, dxVec, superSamplingDepth );
                   real_t & val = ff->get(x,y,z);
                   WALBERLA_ASSERT( val >=0 && val <= 1);
 
