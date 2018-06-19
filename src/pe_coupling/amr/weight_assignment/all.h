@@ -15,19 +15,13 @@
 //
 //! \file all.h
 //! \ingroup pe_coupling
-//! \author Florian Schornbaum <florian.schornbaum@fau.de>
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
-//! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Collective header file for module pe_coupling
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "amr/all.h"
-#include "discrete_particle_methods/all.h"
-#include "mapping/all.h"
-#include "geometry/all.h"
-#include "partially_saturated_cells_method/all.h"
-#include "momentum_exchange_method/all.h"
-#include "utility/all.h"
+#include "MetisAssignmentFunctor.h"
+#include "WeightAssignmentFunctor.h"
+#include "WeightEvaluationFunctions.h"
