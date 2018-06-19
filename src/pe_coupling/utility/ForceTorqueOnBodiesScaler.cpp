@@ -13,35 +13,43 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ForceTorqueOnBodiesResetter.h
+//! \file ForceTorqueOnBodiesScaler.cpp
 //! \ingroup pe_coupling
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
 //======================================================================================================================
 
-#pragma once
+#include "ForceTorqueOnBodiesScaler.h"
 
-#include "domain_decomposition/StructuredBlockStorage.h"
+#include "core/math/Vector3.h"
+#include "pe/rigidbody/BodyIterators.h"
 
 namespace walberla {
 namespace pe_coupling {
 
-class ForceTorqueOnBodiesResetter
-{  
-public:
+void ForceTorqueOnBodiesScaler::operator()()
+{
+   Vector3<real_t> force(real_t(0));
+   Vector3<real_t> torque(real_t(0));
+   for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
+   {
+      for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
+      {
+         force  = scalingFactor_ * bodyIt->getForce();
+         torque = scalingFactor_ * bodyIt->getTorque();
 
-   ForceTorqueOnBodiesResetter( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyStorageID )
-   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID )
-     { }
+         bodyIt->resetForceAndTorque();
 
-   // resets forces and torques on all (local and remote) bodies
-   void operator()();
+         bodyIt->setForce ( force );
+         bodyIt->setTorque( torque );
+      }
+   }
+}
 
-private:
-
-   shared_ptr<StructuredBlockStorage> blockStorage_;
-   const BlockDataID bodyStorageID_;
-};
+void ForceTorqueOnBodiesScaler::resetScalingFactor( const real_t newScalingFactor )
+{
+   scalingFactor_ = newScalingFactor;
+}
 
 } // namespace pe_coupling
 } // namespace walberla
