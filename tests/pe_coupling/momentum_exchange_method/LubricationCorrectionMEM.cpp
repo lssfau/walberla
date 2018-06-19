@@ -52,6 +52,7 @@
 #include "timeloop/SweepTimeloop.h"
 
 #include "pe/basic.h"
+#include "pe/utility/Distance.h"
 
 #include "pe_coupling/mapping/all.h"
 #include "pe_coupling/momentum_exchange_method/all.h"
