@@ -313,6 +313,21 @@ void HashGrids::HashGrid::initializeNeighborOffsets()
  *
  * \param body The body whose hash value is about to be calculated.
  * \return The hash value (=cell association) of the body.
+ */
+size_t HashGrids::HashGrid::hash( BodyID body ) const
+{
+   const AABB& bodyAABB = body->getAABB();
+   return hashPoint(bodyAABB.xMin(), bodyAABB.yMin(), bodyAABB.zMin());
+}
+//*************************************************************************************************
+
+   
+/*!\brief Computes the hash for a given point.
+ *
+ * \param x X value of the point.
+ * \param y Y value of the point.
+ * \param y Z value of the point.
+ * \return The hash value (=cell association) of the point.
  *
  * The hash calculation uses modulo operations in order to spatially map entire blocks of connected
  * cells to the origin of the coordinate system. This block of cells at the origin of the coordinate
@@ -324,16 +339,11 @@ void HashGrids::HashGrid::initializeNeighborOffsets()
  * Note that the modulo calculations are replaced with fast bitwise AND operations - hence, the
  * spatial dimensions of the hash grid must be restricted to powers of two!
  */
-size_t HashGrids::HashGrid::hash( BodyID body ) const
-{
-   real_t x = body->getAABB().xMin();
-   real_t y = body->getAABB().yMin();
-   real_t z = body->getAABB().zMin();
-
+size_t HashGrids::HashGrid::hashPoint(real_t x, real_t y, real_t z) const {
    size_t xHash;
    size_t yHash;
    size_t zHash;
-
+   
    if( x < 0 ) {
       real_t i = ( -x ) * inverseCellSpan_;
       xHash  = xCellCount_ - 1 - ( static_cast<size_t>( i ) & xHashMask_ );
@@ -342,7 +352,7 @@ size_t HashGrids::HashGrid::hash( BodyID body ) const
       real_t i = x * inverseCellSpan_;
       xHash  = static_cast<size_t>( i ) & xHashMask_;
    }
-
+   
    if( y < 0 ) {
       real_t i = ( -y ) * inverseCellSpan_;
       yHash  = yCellCount_ - 1 - ( static_cast<size_t>( i ) & yHashMask_ );
@@ -351,7 +361,7 @@ size_t HashGrids::HashGrid::hash( BodyID body ) const
       real_t i = y * inverseCellSpan_;
       yHash  = static_cast<size_t>( i ) & yHashMask_;
    }
-
+   
    if( z < 0 ) {
       real_t i = ( -z ) * inverseCellSpan_;
       zHash  = zCellCount_ - 1 - ( static_cast<size_t>( i ) & zHashMask_ );
@@ -360,11 +370,9 @@ size_t HashGrids::HashGrid::hash( BodyID body ) const
       real_t i = z * inverseCellSpan_;
       zHash  = static_cast<size_t>( i ) & zHashMask_;
    }
-
+   
    return xHash + yHash * xCellCount_ + zHash * xyCellCount_;
 }
-//*************************************************************************************************
-
 
 //*************************************************************************************************
 /*!\brief Adds a body to a specific cell in this hash grid.
@@ -1168,6 +1176,8 @@ bool HashGrids::powerOfTwo( size_t number )
 //*************************************************************************************************
 
 
+uint64_t HashGrids::intersectionTestCount = 0; //ToDo remove again
+   
 //=================================================================================================
 //
 //  CONSTANTS

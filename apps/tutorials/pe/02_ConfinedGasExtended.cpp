@@ -21,6 +21,7 @@
 #include <pe/basic.h>
 #include <pe/statistics/BodyStatistics.h>
 #include <pe/vtk/SphereVtkOutput.h>
+#include <pe/raytracing/Raytracer.h>
 
 #include <core/Abort.h>
 #include <core/Environment.h>
@@ -37,6 +38,7 @@
 using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::timing;
+using namespace walberla::pe::raytracing;
 
 typedef boost::tuple<Sphere, Plane> BodyTuple ;
 
@@ -168,6 +170,19 @@ int main( int argc, char ** argv )
       syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
    }
    //! [Bind Sync Call]
+   
+   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
+   //! [Raytracer Init]
+   std::function<ShadingParameters (const BodyID body)> customShadingFunction = [](const BodyID body) {
+      if (body->getTypeID() == Sphere::getStaticTypeID()) {
+         return processRankDependentShadingParams(body).makeGlossy();
+      }
+      return defaultBodyTypeDependentShadingParams(body);
+   };
+   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
+                       cfg->getBlock("Raytracing"),
+                       customShadingFunction);
+   //! [Raytracer Init]
 
    WALBERLA_LOG_INFO_ON_ROOT("*** VTK ***");
    //! [VTK Domain Output]
@@ -244,6 +259,9 @@ int main( int argc, char ** argv )
          vtkDomainOutput->write( );
          vtkSphereOutput->write( );
          //! [VTK Output]
+         //! [Image Output]
+         raytracer.generateImage<BodyTuple>(size_t(i), &tt);
+         //! [Image Output]
       }
    }
    tp["Total"].end();
