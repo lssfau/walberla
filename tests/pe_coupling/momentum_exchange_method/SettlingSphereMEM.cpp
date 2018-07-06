@@ -561,7 +561,7 @@ int main( int argc, char **argv )
       timeloop.addFuncAfterTimeStep(setForceTorqueOnBodiesFromCont2, "Force setting");
 
       // average the force/torque by scaling it with factor 1/2 (except in first timestep, there it is 1, which it is initially)
-      timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler(blocks, bodyStorageID, real_t(0.5)),  "Force averaging");
+      timeloop.addFuncAfterTimeStep( SharedFunctor<pe_coupling::ForceTorqueOnBodiesScaler>(forceScaler),  "Force averaging");
       timeloop.addFuncAfterTimeStep( setForceScalingFactorToHalf, "Force scaling adjustment" );
 
       // swap containers

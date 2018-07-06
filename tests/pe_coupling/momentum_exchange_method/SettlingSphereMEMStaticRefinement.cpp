@@ -634,7 +634,7 @@ int main( int argc, char **argv )
       refinementTimestep->addPostStreamVoidFunction(lbm::refinement::FunctorWrapper(setForceTorqueOnBodiesFromCont2), "Force setting", finestLevel);
 
       // average the force/torque by scaling it with factor 1/2 (except in first timestep, there it is 1, which it is initially)
-      refinementTimestep->addPostStreamVoidFunction(lbm::refinement::FunctorWrapper(pe_coupling::ForceTorqueOnBodiesScaler(blocks, bodyStorageID, real_t(0.5))), "Force averaging", finestLevel);
+      refinementTimestep->addPostStreamVoidFunction(lbm::refinement::FunctorWrapper(SharedFunctor<pe_coupling::ForceTorqueOnBodiesScaler>(forceScaler)), "Force averaging", finestLevel);
       refinementTimestep->addPostStreamVoidFunction(lbm::refinement::FunctorWrapper(setForceScalingFactorToHalf), "Force scaling adjustment", finestLevel);
 
       // swap containers
