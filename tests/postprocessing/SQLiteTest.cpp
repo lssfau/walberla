@@ -24,13 +24,11 @@
 
 #include "postprocessing/sqlite/SQLite.h"
 
-using namespace walberla;
-
 
 int main( int argc, char ** argv )
 {
-   debug::enterTestMode();
-   mpi::Environment walberlaEnv( argc, argv );
+   walberla::debug::enterTestMode();
+   walberla::mpi::Environment walberlaEnv( argc, argv );
 
    std::map<std::string, std::string>       strColumns;
    std::map<std::string, int>               intColumns;
@@ -42,7 +40,7 @@ int main( int argc, char ** argv )
       strColumns["property2"] = "value2";
       strColumns["property3"] = "value3";
       intColumns["i"] = int(i);
-      postprocessing::storeRunInSqliteDB( "dbFile.sqlite", intColumns, strColumns );
+      walberla::postprocessing::storeRunInSqliteDB( "dbFile.sqlite", intColumns, strColumns );
    }
 
    for( int i=0; i< 100; ++i )
@@ -51,7 +49,7 @@ int main( int argc, char ** argv )
       strColumns["property2"] = "value2";
       strColumns["property3"] = "value3";
       largeColumns["i"] = 4294967297 + i;
-      postprocessing::storeRunInSqliteDB( "dbFile.sqlite", largeColumns, strColumns );
+      walberla::postprocessing::storeRunInSqliteDB( "dbFile.sqlite", largeColumns, strColumns );
    }
 
    return 0;

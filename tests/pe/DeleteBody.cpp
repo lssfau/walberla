@@ -33,7 +33,7 @@
 
 #include <functional>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 typedef boost::tuple<Sphere> BodyTuple ;
@@ -121,4 +121,10 @@ int main( int argc, char** argv )
     WALBERLA_CHECK_EQUAL( secondStorage->at(1).size(), 0 );
 
     return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

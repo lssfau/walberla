@@ -27,7 +27,7 @@
 #include <core/logging/Logging.h>
 //! [Includes]
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 //! [BodyTypeTuple]
@@ -160,4 +160,10 @@ int main( int argc, char ** argv )
    //! [PostProcessing]
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

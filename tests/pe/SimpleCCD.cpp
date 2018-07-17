@@ -33,7 +33,7 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/math/Random.h"
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 typedef boost::tuple<Sphere> BodyTuple ;
@@ -107,4 +107,12 @@ int main( int argc, char** argv )
        WALBERLA_LOG_DEVEL_ON_ROOT(bs.size() << "\t" << pool["SCCD"].last() << "\t" << pool["HG"].last() << "\t" << sccd.getPossibleContacts().size() << "\t" << hg.getPossibleContacts().size() << "\t" << hg.active());
        //std::cout << pool << std::endl;
     }
+
+    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

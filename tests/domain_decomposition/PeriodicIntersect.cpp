@@ -31,7 +31,7 @@
 #include "stencil/D3Q27.h"
 
 
-using namespace walberla;
+namespace walberla {
 
 bool periodicCheck( StructuredBlockForest& forest, const math::AABB& box1, const math::AABB& box2)
 {
@@ -193,4 +193,10 @@ int main( int argc, char** argv )
    }
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

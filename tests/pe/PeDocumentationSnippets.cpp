@@ -43,7 +43,7 @@
 #include <algorithm>
 #include <vector>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 //! [Definition of Union Types]
@@ -133,4 +133,10 @@ int main( int argc, char ** argv )
    //! [Create a Union]
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

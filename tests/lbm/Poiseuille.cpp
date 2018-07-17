@@ -86,9 +86,7 @@
 #include <iostream>
 #include <vector>
 
-
-using namespace walberla;
-
+namespace walberla {
 
 typedef walberla::uint8_t                   flag_t;
 
@@ -390,6 +388,9 @@ int main( int argc, char** argv )
    */
    return 0;
 }
+} // namespace walberla
 
-
-
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
+}

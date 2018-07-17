@@ -35,12 +35,9 @@
 
 #include <random>
 
-namespace mpi_datatypes_test {
+namespace walberla {
 
-using namespace walberla;
 using namespace field::communication;
-using walberla::real_t;
-using walberla::uint_t;
 
 class FieldRandomizer
 {
@@ -549,16 +546,10 @@ int main( int argc, char* argv[] )
 
    return EXIT_SUCCESS;
 }
-
-
-
-
-
-} // namespace mpi_datatypes_test
-
+} // namespace walberla
 
 
 int main( int argc, char* argv[] )
 {
-   return mpi_datatypes_test::main( argc, argv );
+   return walberla::main( argc, argv );
 }

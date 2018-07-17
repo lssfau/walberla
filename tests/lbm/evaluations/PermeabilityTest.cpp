@@ -28,7 +28,7 @@
 #include "timeloop/all.h"
 
 
-using namespace walberla;
+namespace walberla {
 
 typedef walberla::uint8_t   flag_t;
 typedef FlagField< flag_t > FlagField_T;
@@ -300,4 +300,10 @@ int main( int argc, char ** argv )
    } catch( const std::exception & e ) {
       WALBERLA_ABORT( "Unexpected error: " << e.what() << "! Aborting ..." );
    }
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

@@ -30,7 +30,7 @@
 
 
 
-using namespace walberla;
+namespace walberla {
 
 typedef lbm::D2Q9< lbm::collision_model::SRT, false, lbm::force_model::SimpleConstant >  LatticeModel_T;
 
@@ -640,4 +640,10 @@ int main( int argc, char ** argv )
       timeloop.run();
 
    return EXIT_SUCCESS;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   return walberla::main(argc, argv);
 }

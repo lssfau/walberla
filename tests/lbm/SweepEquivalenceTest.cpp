@@ -70,8 +70,7 @@
 
 
 
-using namespace walberla;
-using walberla::uint_t;
+namespace walberla {
 
 typedef walberla::uint64_t   flag_t;
 typedef FlagField< flag_t >  FlagField_T;
@@ -863,4 +862,10 @@ int main( int argc, char ** argv )
    check< D2Q9_SRT_INCOMP, D2Q9_TRT_INCOMP >( blocks, fieldIds[5][0], fieldIds[5][7] );
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

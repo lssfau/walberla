@@ -30,7 +30,7 @@
 
 #include <boost/tuple/tuple.hpp>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 int main( int argc, char ** argv )
@@ -76,4 +76,10 @@ int main( int argc, char ** argv )
    WALBERLA_CHECK_FLOAT_EQUAL( hcsits.getGlobalLinearAcceleration(), Vec3(1,-2,3) );
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

@@ -36,7 +36,7 @@
 #include <iostream>
 
 
-using namespace walberla;
+namespace walberla {
 
 typedef GhostLayerField<cell_idx_t, 1> ScalarField;
 
@@ -189,4 +189,10 @@ int main(int argc, char ** argv )
       throw e;
    }
    return 0;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

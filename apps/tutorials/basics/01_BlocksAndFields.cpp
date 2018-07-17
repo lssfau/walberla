@@ -24,7 +24,7 @@
 #include "gui/Gui.h"
 #include "timeloop/SweepTimeloop.h"
 
-using namespace walberla;
+namespace walberla {
 
 Field<real_t, 1>* createFields(IBlock* const block, StructuredBlockStorage * const storage) {
    return new Field<real_t,1>(storage->getNumberOfXCells(*block),
@@ -52,4 +52,10 @@ int main( int argc, char ** argv )
    gui.run();
 
    return EXIT_SUCCESS;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   return walberla::main(argc, argv);
 }

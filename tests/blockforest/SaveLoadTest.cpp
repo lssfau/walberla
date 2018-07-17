@@ -26,7 +26,7 @@
 
 #include "core/debug/TestSubsystem.h"
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::blockforest;
 
 void blockForestSaveLoadTest(const BlockForest::FileIOMode ioMode, const bool broadcast)
@@ -119,4 +119,11 @@ int main( int argc, char ** argv )
    blockForestSaveLoadTest(BlockForest::SERIALIZED_DISTRIBUTED, false);
 
    return EXIT_SUCCESS;
+}
+}
+
+
+int main( int argc, char ** argv )
+{
+   return walberla::main(argc,argv);
 }

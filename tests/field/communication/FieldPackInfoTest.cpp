@@ -34,7 +34,7 @@
 #include <cstring>
 
 
-using namespace walberla;
+namespace walberla {
 
 
 void testScalarField( IBlock * block, BlockDataID fieldId )
@@ -184,4 +184,10 @@ int main(int argc, char **argv)
       testScalarFieldPullReduction( &(*blockIt), scalarFieldId );
 
    return 0;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

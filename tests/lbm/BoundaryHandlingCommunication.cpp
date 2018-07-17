@@ -63,8 +63,7 @@
 #endif
 
 
-using namespace walberla;
-using walberla::uint_t;
+namespace walberla{
 
 typedef walberla::uint8_t   flag_t;
 typedef FlagField< flag_t > FlagField_T;
@@ -398,4 +397,10 @@ int main( int argc, char ** argv )
    check<27>( blocks, flagFieldId3, pdfFieldId3, pdfFieldId4 );
 
    return EXIT_SUCCESS;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   return walberla::main(argc, argv);
 }

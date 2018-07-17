@@ -37,9 +37,8 @@
 #include <fstream>
 
 
-using namespace walberla;
+namespace walberla {
 using namespace geometry;
-using walberla::uint8_t;
 
 const uint_t confBlockCount []      = { 1, 1, 1 };
 const uint_t confCells []           = { 30, 30, 30 };
@@ -97,4 +96,10 @@ int main( int argc, char ** argv )
       gui.run();
    }
 
+   return EXIT_SUCCESS;
+}
+}
+
+int main( int argc, char ** argv ){
+   return walberla::main(argc, argv);
 }

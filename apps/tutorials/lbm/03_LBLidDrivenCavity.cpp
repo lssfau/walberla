@@ -57,8 +57,7 @@
 // USING //
 ///////////
 
-using namespace walberla;
-using walberla::uint_t;
+namespace walberla {
 
 //////////////
 // TYPEDEFS //
@@ -415,4 +414,10 @@ int main( int argc, char ** argv )
    timeloop.run();
 
    return EXIT_SUCCESS;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   return walberla::main(argc, argv);
 }

@@ -32,9 +32,9 @@
 
 #include <vector>
 
-using namespace walberla;
-
 namespace distribution_tests {
+
+using namespace walberla;
 
 const uint_t FieldGhostLayers( 1 );
 

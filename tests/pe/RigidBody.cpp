@@ -28,7 +28,7 @@
 
 #include "core/debug/TestSubsystem.h"
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 void move( BodyStorage& storage, real_t dt )
@@ -170,4 +170,12 @@ int main( int argc, char** argv )
 
    checkRotationFunctions();
    checkPointFunctions();
+
+   return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

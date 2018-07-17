@@ -39,7 +39,7 @@
 #include "core/DataTypes.h"
 #include "core/math/Vector2.h"
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 using walberla::pe::fcd::analytic::collide;
 
@@ -270,4 +270,10 @@ int main( int argc, char** argv )
     UnionTest();
 
     return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

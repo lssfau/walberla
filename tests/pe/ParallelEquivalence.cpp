@@ -36,9 +36,8 @@
 #include <algorithm>
 #include <vector>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
-using namespace walberla::blockforest;
 
 int runs = 1000;
 
@@ -320,4 +319,10 @@ int main( int argc, char ** argv )
    }
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

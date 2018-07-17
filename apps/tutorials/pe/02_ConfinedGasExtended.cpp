@@ -35,7 +35,7 @@
 
 #include <functional>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::timing;
 using namespace walberla::pe::raytracing;
@@ -293,4 +293,10 @@ int main( int argc, char ** argv )
    //! [SQL Save]
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

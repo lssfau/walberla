@@ -30,7 +30,7 @@
 #include <sstream>
 
 
-using namespace walberla;
+namespace walberla {
 
 
 typedef lbm::D3Q19< lbm::collision_model::SRT >                 LatticeModel_T;
@@ -249,4 +249,10 @@ int main( int argc, char ** argv )
    testDensityAndVelocityInitFromConfig( pdfFieldId, blocks, env.config(), false );
 
    return 0;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   return walberla::main(argc, argv);
 }

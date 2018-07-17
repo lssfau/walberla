@@ -28,7 +28,7 @@
 #include <iostream>
 
 
-using namespace walberla;
+namespace walberla {
 
 using std::cout;
 using std::endl;
@@ -178,17 +178,18 @@ void merging()
    pool1.merge( pool2, true );
    WALBERLA_CHECK_EQUAL ( pool1["test"].getCounter(), 6 );
 }
+}// namespace walberla
 
 
 int main( int argc, char ** argv )
 {
-   debug::enterTestMode();
-   MPIManager::instance()->initializeMPI( &argc, &argv );
+   walberla::debug::enterTestMode();
+   walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
 
-   simpleTiming();
-   scopedTimer();
-   reduction();
-   merging();
+   walberla::simpleTiming();
+   walberla::scopedTimer();
+   walberla::reduction();
+   walberla::merging();
 
    return 0;
 }

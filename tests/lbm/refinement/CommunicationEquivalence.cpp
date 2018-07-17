@@ -63,14 +63,7 @@
 enum TestMode { ENTIRE_TOP, TOP, MIDDLE, ENTIRE_BOTTOM };
 static const TestMode testMode = TOP;
 
-
-
-///////////
-// USING //
-///////////
-
-using namespace walberla;
-using walberla::uint_t;
+namespace walberla{
 
 //////////////
 // TYPEDEFS //
@@ -493,4 +486,10 @@ int main( int argc, char ** argv )
    logging::Logging::printFooterOnStream();
    
    return EXIT_SUCCESS;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   return walberla::main(argc, argv);
 }

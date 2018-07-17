@@ -46,7 +46,7 @@
 #include "pe/collision/EPA.h"
 #include "pe/collision/GJK.h"
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 typedef boost::tuple<Box, Capsule, Plane, Sphere, Union<boost::tuple<Sphere>>, Union<boost::tuple<Sphere, Union<boost::tuple<Sphere>>>>, Ellipsoid> BodyTuple ;
@@ -436,4 +436,10 @@ int main( int argc, char** argv )
    PlaneTest();
    UnionTest();
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

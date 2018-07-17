@@ -27,7 +27,7 @@
 #include <functional>
 
 
-using namespace walberla;
+namespace walberla {
 
 // some arbitrary value for our bogus algorithm
 const int ARBITRARY_VALUE = 424242;
@@ -137,4 +137,10 @@ int main( int argc, char ** argv )
    gui.run();
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

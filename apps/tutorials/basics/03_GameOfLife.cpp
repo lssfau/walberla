@@ -37,7 +37,7 @@
 #include "timeloop/SweepTimeloop.h"
 
 
-using namespace walberla;
+namespace walberla {
 
 
 class GameOfLifeSweep
@@ -216,4 +216,10 @@ int main( int argc, char ** argv )
    gui.run();
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

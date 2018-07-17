@@ -34,8 +34,7 @@
 #include "timeloop/SweepTimeloop.h"
 
 
-using namespace walberla;
-using namespace blockforest;
+namespace walberla {
 
 
 typedef GhostLayerField<real_t,19> PdfField;
@@ -53,11 +52,11 @@ int main(int argc, char **argv)
    const uint_t nrOfTimeSteps = 20;
 
    // Create BlockForest
-   auto blocks = createUniformBlockGrid(blockCount[0],blockCount[1],blockCount[2],  //blocks
-                                        cells[0],cells[1],cells[2], //cells
-                                        1,                          //dx
-                                        false,                      //one block per process
-                                        true,true,true);            //periodicity
+   auto blocks = blockforest::createUniformBlockGrid(blockCount[0],blockCount[1],blockCount[2],  //blocks
+                                                     cells[0],cells[1],cells[2], //cells
+                                                     1,                          //dx
+                                                     false,                      //one block per process
+                                                     true,true,true);            //periodicity
 
 
    // In addition to the normal GhostLayerField's  we allocated additionally a field containing the whole global simulation domain for each block
@@ -83,10 +82,11 @@ int main(int argc, char **argv)
    GUI gui (timeloop, blocks, argc, argv);
    gui.run();
    //timeloop.singleStep();
+   return EXIT_SUCCESS;
 }
+} // namespace walberla
 
-
-
-
-
-
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
+}
