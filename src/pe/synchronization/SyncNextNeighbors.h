@@ -41,6 +41,7 @@
 #include "blockforest/BlockForest.h"
 #include "core/mpi/BufferSystem.h"
 #include "core/timing/TimingTree.h"
+#include "domain_decomposition/MapPointToPeriodicDomain.h"
 
 namespace walberla {
 namespace pe {
@@ -56,7 +57,16 @@ void generateSynchonizationMessages(mpi::BufferSystem& bs, const Block& block, B
    WALBERLA_LOG_DETAIL( "Assembling of body synchronization message starts..." );
 
    // position update
-   for( auto body = localStorage.begin(); body != localStorage.end(); ) {
+   for( auto body = localStorage.begin(); body != localStorage.end(); )
+   {
+      //correct position to make sure body is always inside the domain!
+      if (!body->isFixed())
+      {
+         auto pos = body->getPosition();
+         block.getBlockStorage().mapToPeriodicDomain(pos);
+         body->setPosition(pos);
+      }
+
       bool isInsideDomain = domain.contains( body->getAABB(), -dx );
 
       WALBERLA_ASSERT( !body->isRemote(), "Central body storage contains remote bodies." );
@@ -146,7 +156,7 @@ void generateSynchonizationMessages(mpi::BufferSystem& bs, const Block& block, B
       {
          // Body is no longer locally owned (body is about to be migrated).
          Owner owner( findContainingProcess( block, gpos ) );
-         WALBERLA_ASSERT_UNEQUAL( owner.blockID_, me.blockID_, "Position is " << gpos );
+         WALBERLA_ASSERT_UNEQUAL( owner.blockID_, me.blockID_, "Position is " << gpos << "\nlocal Block is: " << block.getAABB() );
 
          WALBERLA_LOG_DETAIL( "Local body " << b->getSystemID() << " is no longer on process " << body->MPITrait.getOwner() << " but on process " << owner );
 
@@ -189,6 +199,11 @@ void generateSynchonizationMessages(mpi::BufferSystem& bs, const Block& block, B
             b->setRemote( true );
 
             // Move body to shadow copy storage.
+            {
+               auto pos = b->getPosition();
+               correctBodyPosition(domain, block.getAABB().center(), pos);
+               b->setPosition(pos);
+            }
             shadowStorage.add( localStorage.release( body ) );
 
             // Note: We cannot determine here whether we require the body since we do not have up to date shadow copies.

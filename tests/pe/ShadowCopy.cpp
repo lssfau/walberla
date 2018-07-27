@@ -42,6 +42,19 @@ int main( int argc, char** argv )
    walberla::debug::enterTestMode();
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
 
+   bool syncShadowOwners = false;
+   for( int i = 1; i < argc; ++i )
+   {
+      if( std::strcmp( argv[i], "--syncShadowOwners" ) == 0 ) syncShadowOwners = true;
+   }
+   if (syncShadowOwners)
+   {
+      WALBERLA_LOG_DEVEL("running with syncShadowOwners");
+   } else
+   {
+      WALBERLA_LOG_DEVEL("running with syncNextNeighbour");
+   }
+
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
    // create blocks
@@ -64,7 +77,7 @@ int main( int argc, char** argv )
 //   logging::Logging::instance()->setFileLogLevel(logging::Logging::DETAIL);
 //   logging::Logging::instance()->includeLoggingToFile("ShadowCopy");
 
-   bool syncShadowOwners = false;
+
    std::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
@@ -93,6 +106,23 @@ int main( int argc, char** argv )
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getLinearVel(), Vec3(1,2,3) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getAngularVel(), Vec3(1,2,3) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getRadius(), real_t(1.2) );
+   destroyBodyBySID( *globalBodyStorage, forest->getBlockStorage(), storageID, sid );
+
+   WALBERLA_LOG_PROGRESS_ON_ROOT( " *** SPHERE AT BLOCK EDGE *** ");
+   sp = pe::createSphere(
+            *globalBodyStorage,
+            forest->getBlockStorage(),
+            storageID,
+            999999999,
+            Vec3(0,2,2),
+            real_c(1.2));
+   sid = sp->getSystemID();
+   syncCall();
+   sp = static_cast<SphereID> (getBody( *globalBodyStorage, forest->getBlockStorage(), storageID, sid, StorageSelect::LOCAL ));
+   sp->setPosition(real_c(-1)*std::numeric_limits<real_t>::epsilon(),2,2);
+   syncCall();
+   sp = static_cast<SphereID> (getBody( *globalBodyStorage, forest->getBlockStorage(), storageID, sid, StorageSelect::LOCAL ));
+   WALBERLA_CHECK_NOT_NULLPTR(sp);
    destroyBodyBySID( *globalBodyStorage, forest->getBlockStorage(), storageID, sid );
 
    WALBERLA_LOG_PROGRESS_ON_ROOT( " *** UNION *** ");

@@ -94,8 +94,9 @@ set_property( TEST PE_SERIALIZEDESERIALIZE04 PROPERTY DEPENDS PE_SERIALIZEDESERI
 set_property( TEST PE_SERIALIZEDESERIALIZE08 PROPERTY DEPENDS PE_SERIALIZEDESERIALIZE04 ) #serialize runs of tets to avoid i/o conflicts when running ctest with -jN
 endif()
 
-waLBerla_compile_test( NAME   PE_SHADOWCOPY FILES ShadowCopy.cpp DEPENDS core blockforest  )
-waLBerla_execute_test( NAME   PE_SHADOWCOPY )
+waLBerla_compile_test( NAME   PE_SHADOWCOPY FILES ShadowCopy.cpp DEPENDS core blockforest domain_decomposition  )
+waLBerla_execute_test( NAME   PE_SHADOWCOPY_NN COMMAND $<TARGET_FILE:PE_SHADOWCOPY> )
+waLBerla_execute_test( NAME   PE_SHADOWCOPY_SO COMMAND $<TARGET_FILE:PE_SHADOWCOPY> --syncShadowOwners )
 
 waLBerla_compile_test( NAME   PE_SIMPLECCD FILES SimpleCCD.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_SIMPLECCD )
