@@ -25,6 +25,7 @@
 
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Squirmer.h"
 #include "pe/rigidbody/Plane.h"
 
 #include "PeBodyOverlapFunctions.h"
@@ -36,7 +37,7 @@ namespace pe_coupling{
 real_t overlapFractionPe( const pe::RigidBody & peRigidBody, const Vector3<real_t> & cellMidpoint,
                           const Vector3<real_t> & dx, uint_t maxDepth=4 )
 {
-   if( peRigidBody.getTypeID() == pe::Sphere::getStaticTypeID() )
+   if( peRigidBody.getTypeID() == pe::Sphere::getStaticTypeID() || peRigidBody.getTypeID() == pe::Squirmer::getStaticTypeID() )
    {
       const pe::Sphere & sphere = static_cast< const pe::Sphere & >( peRigidBody );
       return geometry::overlapFraction( sphere, cellMidpoint, dx, maxDepth );

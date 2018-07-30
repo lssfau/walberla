@@ -27,6 +27,7 @@
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/rigidbody/Sphere.h"
 #include "pe/rigidbody/Plane.h"
+#include "pe/rigidbody/Squirmer.h"
 
 namespace walberla {
 namespace geometry {
@@ -81,6 +82,21 @@ template<> inline FastOverlapResult fastOverlapCheck( const pe::Sphere & peSpher
 template<> inline bool contains( const pe::Sphere & peSphere, const Vector3<real_t> & point )
 {
    return peSphere.containsPoint( point[0], point[1], point[2] );
+}
+
+template<> inline FastOverlapResult fastOverlapCheck( const pe::Squirmer & peSquirmer, const AABB & box )
+{
+   return fastOverlapCheck( static_cast<const pe::Sphere &>(peSquirmer), box );
+}
+
+template<> inline FastOverlapResult fastOverlapCheck( const pe::Squirmer & peSquirmer, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx )
+{
+   return fastOverlapCheck( static_cast<const pe::Sphere &>(peSquirmer), cellMidpoint, dx );
+}
+
+template<> inline bool contains( const pe::Squirmer & peSquirmer, const Vector3<real_t> & point )
+{
+   return contains( static_cast<const pe::Sphere &>(peSquirmer), point );
 }
 
 /////////////////////////////////////////////////

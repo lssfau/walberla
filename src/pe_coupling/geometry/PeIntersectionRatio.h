@@ -29,6 +29,7 @@
 #include "pe/rigidbody/Ellipsoid.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Squirmer.h"
 #include "pe/Types.h"
 
 
@@ -52,7 +53,7 @@ inline real_t intersectionRatio( const pe::RigidBody & peRigidBody,
                                  const Vector3<real_t> & direction,
                                  const real_t epsilon )
 {
-   if( peRigidBody.getTypeID() == pe::Sphere::getStaticTypeID() )
+   if( peRigidBody.getTypeID() == pe::Sphere::getStaticTypeID() || peRigidBody.getTypeID() == pe::Squirmer::getStaticTypeID() )
    {
       const pe::Sphere & sphere = static_cast< const pe::Sphere & >( peRigidBody );
       const real_t ratio = intersectionRatioSpherePe( sphere, fluidPoint, direction );
