@@ -41,7 +41,7 @@ namespace pe_sub_cycling_test
 
 using namespace walberla;
 
-typedef boost::tuple<pe::Sphere> BodyTypeTuple ;
+using BodyTypeTuple = boost::tuple<pe::Sphere> ;
 
 /*!\brief test case to check functionality of sub cycling in the pe time step provided by the coupling module
  *

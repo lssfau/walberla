@@ -119,7 +119,7 @@ void shallowCopyTest()
 {
 
    // Test shallow copy
-   typedef FlagField<wlb::uint8_t> FField;
+   using FField = FlagField<wlb::uint8_t>;
    FField ff ( 3,3,3,1 );
    ff.registerFlag("FirstFlag");
 
@@ -152,7 +152,7 @@ void shallowCopyTest()
 
 void printingTest()
 {
-   typedef FlagField<wlb::uint8_t> FField;
+   using FField = FlagField<wlb::uint8_t>;
    FField ff ( 3,3,3,1 );
    auto ns = ff.registerFlag("NoSlip");
    auto fs = ff.registerFlag("FreeSlip");
@@ -172,7 +172,7 @@ void printingTest()
 
 void neighborhoodTest()
 {
-   typedef FlagField<wlb::uint8_t> FField;
+   using FField = FlagField<wlb::uint8_t>;
    FField ff ( 3,3,3,1 );
    auto i = ff.registerFlag("Interface");
    auto l = ff.registerFlag("Liquid");

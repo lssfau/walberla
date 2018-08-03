@@ -43,9 +43,9 @@
 
 namespace walberla {
 
-typedef lbm::D3Q19< lbm::collision_model::SRT >  LatticeModel_T;
+using LatticeModel_T = lbm::D3Q19<lbm::collision_model::SRT>;
 
-typedef lbm::PdfField< LatticeModel_T >     PdfField;
+using PdfField = lbm::PdfField<LatticeModel_T>;
 typedef GhostLayerField<real_t,1 >          ScalarField;
 typedef GhostLayerField<Vector3<real_t>,1 > VectorField;
 
@@ -54,9 +54,9 @@ template<typename Field_T>
 class DoubledValueOfField
 {
 public:
-   typedef Field_T                                 basefield_t;
-   typedef typename Field_T::const_base_iterator   basefield_iterator;
-   typedef typename Field_T::value_type            value_type;
+   using basefield_t = Field_T;
+   using basefield_iterator = typename Field_T::const_base_iterator;
+   using value_type = typename Field_T::value_type;
 
    static_assert( basefield_t::F_SIZE >= 2, "Only for fields with F_SIZE >=2 " );
 
@@ -84,7 +84,7 @@ void iteratorTest()
    GhostLayerField<real_t, 2> field ( 4, 4, 3, 2, MAGIC_SRC    );
 
    // adapter reduces field to have only one f and one ghost layer
-   typedef DoubledValueOfField< decltype(field) > Functor;
+   using Functor = DoubledValueOfField<decltype(field)>;
    field::GhostLayerFieldAdaptor<Functor, 1 > adaptor ( field );
 
    uint_t ctr = 0;

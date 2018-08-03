@@ -77,16 +77,16 @@ using walberla::uint_t;
 // PDF field, flag field & body field
 typedef lbm::D3Q19< lbm::collision_model::SRT, false, lbm::force_model::None, 1>  LatticeModel_T;
 
-typedef LatticeModel_T::Stencil                         Stencil_T;
-typedef lbm::PdfField< LatticeModel_T >                 PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 typedef std::pair< pe::BodyID, real_t >                              BodyAndVolumeFraction_T;
 typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
 
-typedef boost::tuple<pe::Sphere> BodyTypeTuple ;
+using BodyTypeTuple = boost::tuple<pe::Sphere> ;
 
 ///////////
 // FLAGS //

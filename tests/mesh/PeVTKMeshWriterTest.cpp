@@ -145,8 +145,8 @@ int main( int argc, char ** argv )
 
    std::function<void(void)> syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
 
-   typedef mesh::FloatPolyMesh OutputMeshType;
-   typedef mesh::pe::DefaultTesselation<OutputMeshType> TesselationType;
+   using OutputMeshType = mesh::FloatPolyMesh;
+   using TesselationType = mesh::pe::DefaultTesselation<OutputMeshType>;
    TesselationType tesselation;
    mesh::pe::PeVTKMeshWriter<OutputMeshType, TesselationType> writer( forest, storageID, tesselation, "MeshOutput", uint_c(visSpacing) );
 

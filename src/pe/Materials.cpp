@@ -162,7 +162,7 @@ MaterialID createMaterial( const std::string& name, real_t density, real_t cor,
                            real_t csf, real_t cdf, real_t poisson, real_t young,
                            real_t stiffness, real_t dampingN, real_t dampingT )
 {
-   typedef Material M;
+   using M = Material;
 
    // Checking the material name
    Materials::const_iterator begin( M::materials_.begin() );

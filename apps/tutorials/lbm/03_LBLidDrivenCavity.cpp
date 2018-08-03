@@ -63,15 +63,15 @@ namespace walberla {
 // TYPEDEFS //
 //////////////
 
-typedef lbm::D3Q19< lbm::collision_model::SRT >  LatticeModel_T;         // the LB lattice model - here: D3Q19, SRT, incompressible, no additional forces
-typedef LatticeModel_T::Stencil                  Stencil_T;              // just the D3Q19 stencil without LB specific information
-typedef LatticeModel_T::CommunicationStencil     CommunicationStencil_T; // the stencil that is needed for the communication: This stencil determines which
+using LatticeModel_T = lbm::D3Q19<lbm::collision_model::SRT>;         // the LB lattice model - here: D3Q19, SRT, incompressible, no additional forces
+using Stencil_T = LatticeModel_T::Stencil;              // just the D3Q19 stencil without LB specific information
+using CommunicationStencil_T = LatticeModel_T::CommunicationStencil; // the stencil that is needed for the communication: This stencil determines which
                                                                          // neighbor blocks are involved during the communication.
 
-typedef lbm::PdfField< LatticeModel_T >  PdfField_T; // type of the PDF field that stores the 19 distribution functions
+using PdfField_T = lbm::PdfField<LatticeModel_T>; // type of the PDF field that stores the 19 distribution functions
 
-typedef walberla::uint8_t    flag_t;      // each flag consists of an 8 bit value and therefore can distinguish between 8 different markers/flags
-typedef FlagField< flag_t >  FlagField_T; // the flag field: used for marking cells as fluid or obstacle cells
+using flag_t = walberla::uint8_t;      // each flag consists of an 8 bit value and therefore can distinguish between 8 different markers/flags
+using FlagField_T = FlagField<flag_t>; // the flag field: used for marking cells as fluid or obstacle cells
                                           // (also used for distinguishing between different boundary conditions
                                           //  -> every boundary condition possesses its own, unique flag)
 

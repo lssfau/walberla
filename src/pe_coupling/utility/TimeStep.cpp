@@ -49,7 +49,7 @@ void TimeStep::operator()()
 
       // generate map from all known bodies (process local) to total forces/torques
       // this has to be done on a block-local basis, since the same body could reside on several blocks from this process
-      typedef domain_decomposition::IBlockID::IDType BlockID_T;
+      using BlockID_T = domain_decomposition::IBlockID::IDType;
       std::map< BlockID_T, std::map< walberla::id_t, std::array< real_t, 6 > > > forceTorqueMap;
 
       for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )

@@ -48,8 +48,8 @@ using namespace walberla::pe;
 
 //! [Definition of Union Types]
 typedef boost::tuple<Box, Capsule, Sphere>  UnionTypeTuple;
-typedef Union< UnionTypeTuple >             UnionT;
-typedef UnionT*                             UnionID;
+using UnionT = Union<UnionTypeTuple>;
+using UnionID = UnionT *;
 //! [Definition of Union Types]
 
 //! [Definition BodyTypeTuple]

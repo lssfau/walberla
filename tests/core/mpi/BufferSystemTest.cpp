@@ -41,7 +41,7 @@ using namespace std::literals::chrono_literals;
 
 
 
-typedef std::mt19937 base_generator_type;
+using base_generator_type = std::mt19937;
 
 /**
  * Utility function for sleeping a random time

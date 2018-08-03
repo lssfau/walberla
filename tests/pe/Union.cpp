@@ -44,7 +44,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef Union< boost::tuple<Sphere> >          UnionType ;
+using UnionType = Union<boost::tuple<Sphere> > ;
 typedef boost::tuple<Sphere, Plane, UnionType> BodyTuple ;
 
 void SnowManFallingOnPlane()

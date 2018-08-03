@@ -40,7 +40,7 @@ namespace force_torque_container_test
 
 using namespace walberla;
 
-typedef boost::tuple<pe::Sphere> BodyTypeTuple ;
+using BodyTypeTuple = boost::tuple<pe::Sphere> ;
 
 
 /*!\brief Test cases for the force torque container provided by the coupling module

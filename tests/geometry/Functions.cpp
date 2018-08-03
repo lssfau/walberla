@@ -27,7 +27,7 @@
 using namespace walberla;
 using namespace walberla::geometry;
 
-typedef math::Vector3<real_t> Vec3;
+using Vec3 = math::Vector3<real_t>;
 
 int main( int argc, char** argv )
 {

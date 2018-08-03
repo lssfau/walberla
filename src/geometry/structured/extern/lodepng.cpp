@@ -2921,7 +2921,7 @@ static void addColorBits(unsigned char* out, size_t index, unsigned bits, unsign
   else out[index * bits / 8] |= in;
 }
 
-typedef struct ColorTree ColorTree;
+using ColorTree = struct ColorTree;
 
 /*
 One node of a color tree

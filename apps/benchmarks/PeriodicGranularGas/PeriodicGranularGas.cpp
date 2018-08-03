@@ -35,7 +35,7 @@ namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::timing;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 int main( int argc, char ** argv )
 {

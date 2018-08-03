@@ -48,8 +48,8 @@ namespace walberla {
 
 
 typedef GhostLayerField< real_t, 1 > PdeField_T;
-typedef stencil::D2Q5                Stencil_T;
-typedef pde::CGIteration<Stencil_T>::StencilField_T  StencilField_T;
+using Stencil_T = stencil::D2Q5;
+using StencilField_T = pde::CGIteration<Stencil_T>::StencilField_T;
 
 
 

@@ -158,12 +158,12 @@ typedef lbm::D3Q27< lbm::collision_model::TRT,      true  > D3Q27_TRT_COMP;
 template< typename LatticeModel_T >
 struct Types
 {
-   typedef typename LatticeModel_T::Stencil Stencil_T;
-   typedef lbm::PdfField< LatticeModel_T >  PdfField_T;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using PdfField_T = lbm::PdfField< LatticeModel_T >;
 };
 
-typedef walberla::uint16_t  flag_t;
-typedef FlagField< flag_t > FlagField_T;
+using flag_t = walberla::uint16_t;
+using FlagField_T = FlagField<flag_t>;
 
 const uint_t FieldGhostLayers  = uint_t(4);
 
@@ -799,17 +799,17 @@ class MyBoundaryHandling : public blockforest::AlwaysInitializeBlockDataHandling
 {
 public:
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::NoSlip_T          NoSlip_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::Obstacle_T        Obstacle_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::Curved_T          Curved_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::DynamicUBB_T      DynamicUBB_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::Outlet21_T        Outlet21_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::Outlet43_T        Outlet43_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::PressureOutlet_T  PressureOutlet_T;
+   using NoSlip_T = typename MyBoundaryTypes<LatticeModel_T>::NoSlip_T;
+   using Obstacle_T = typename MyBoundaryTypes<LatticeModel_T>::Obstacle_T;
+   using Curved_T = typename MyBoundaryTypes<LatticeModel_T>::Curved_T;
+   using DynamicUBB_T = typename MyBoundaryTypes<LatticeModel_T>::DynamicUBB_T;
+   using Outlet21_T = typename MyBoundaryTypes<LatticeModel_T>::Outlet21_T;
+   using Outlet43_T = typename MyBoundaryTypes<LatticeModel_T>::Outlet43_T;
+   using PressureOutlet_T = typename MyBoundaryTypes<LatticeModel_T>::PressureOutlet_T;
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::BoundaryConditions_T BoundaryConditions_T;
+   using BoundaryConditions_T = typename MyBoundaryTypes<LatticeModel_T>::BoundaryConditions_T;
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::BoundaryHandling_T BoundaryHandling_T;
+   using BoundaryHandling_T = typename MyBoundaryTypes<LatticeModel_T>::BoundaryHandling_T;
 
 
 
@@ -837,7 +837,7 @@ template< typename LatticeModel_T >
 typename MyBoundaryHandling<LatticeModel_T>::BoundaryHandling_T *
 MyBoundaryHandling<LatticeModel_T>::initialize( IBlock * const block )
 {
-   typedef typename Types<LatticeModel_T>::PdfField_T PdfField_T;
+   using PdfField_T = typename Types< LatticeModel_T >::PdfField_T;
 
    FlagField_T * flagField = block->getData< FlagField_T >( flagFieldId_ );
    PdfField_T *   pdfField = block->getData< PdfField_T > (  pdfFieldId_ );
@@ -866,7 +866,7 @@ class CurvedDeltaValueCalculation
 {
 public:
 
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
    
    CurvedDeltaValueCalculation( const shared_ptr< StructuredBlockForest > & blocks, const IBlock & block, const Cylinder & cylinder ) :
       blocks_( blocks ), block_( block ), cylinder_( cylinder ) {}
@@ -909,7 +909,7 @@ class BoundarySetter
 {
 public:
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::BoundaryHandling_T BoundaryHandling_T;
+   using BoundaryHandling_T = typename MyBoundaryTypes< LatticeModel_T >::BoundaryHandling_T;
 
    BoundarySetter( const weak_ptr<StructuredBlockForest> & blockForest, const BlockDataID & boundaryHandlingId, const Setup & setup,
                    const int obstacleBoundary, const int outletType,
@@ -1267,7 +1267,7 @@ class Pseudo2DPhantomWeight // used as a 'PhantomBlockForest::PhantomBlockDataAs
 {
 public:
 
-   typedef uint8_t weight_t;
+   using weight_t = uint8_t;
 
    Pseudo2DPhantomWeight( const weight_t _weight ) : weight_( _weight ) {}
 
@@ -1399,8 +1399,8 @@ class Evaluation
 {
 public:
 
-   typedef typename Types<LatticeModel_T>::PdfField_T PdfField_T;
-   typedef typename LatticeModel_T::Stencil           Stencil_T;
+   using PdfField_T = typename Types< LatticeModel_T >::PdfField_T;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    Evaluation( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t checkFrequency,
                const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const FlagUID & fluid, const FlagUID & obstacle,
@@ -2357,7 +2357,7 @@ void addRefinementTimeStep( SweepTimeloop & timeloop, shared_ptr< blockforest::S
                             const shared_ptr< Evaluation< LatticeModel_T > > & evaluation,
                             const shared_ptr< lbm::TimeTracker > & timeTracker )
 {
-   typedef typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T BH_T;
+   using BH_T = typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T;
 
    auto ts = lbm::refinement::makeTimeStep< LatticeModel_T, BH_T >( blocks, sweep, pdfFieldId, boundaryHandlingId, None, Empty );
    ts->asynchronousCommunication( !syncComm );
@@ -2386,7 +2386,7 @@ struct AddRefinementTimeStep
       {
          if( pure )
          {
-            typedef lbm::SplitPureSweep< LatticeModel_T > Sweep_T;
+            using Sweep_T = lbm::SplitPureSweep< LatticeModel_T >;
             auto mySweep = make_shared< Sweep_T >( pdfFieldId );
 
             addRefinementTimeStep< LatticeModel_T, Sweep_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,
@@ -2470,7 +2470,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // add density adaptor
 
-   typedef typename lbm::Adaptor<LatticeModel_T>::Density DensityAdaptor_T;
+   using DensityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::Density;
    BlockDataID densityAdaptorId = field::addFieldAdaptor< DensityAdaptor_T >( blocks, pdfFieldId, "density adaptor", None, Empty );
    
    // add velocity field + initialize velocity field writer (only used for simulations with an adaptive block structure)

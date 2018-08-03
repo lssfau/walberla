@@ -84,11 +84,11 @@ using lbm::force_model::SimpleConstant;
 
 // PDF field, flag field & body field
 typedef lbm::D3Q19< lbm::collision_model::SRT, false, SimpleConstant >  LatticeModel_T;
-typedef LatticeModel_T::Stencil          Stencil_T;
-typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 const uint_t FieldGhostLayers = 1;
@@ -98,7 +98,7 @@ typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolu
 
 // boundary handling
 typedef lbm::NoSlip< LatticeModel_T, flag_t > NoSlip_T;
-typedef boost::tuples::tuple< NoSlip_T >     BoundaryConditions_T;
+using BoundaryConditions_T = boost::tuples::tuple<NoSlip_T>;
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
 typedef boost::tuple< pe::Sphere, pe::Plane > BodyTypeTuple;

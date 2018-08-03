@@ -86,11 +86,11 @@ using walberla::uint_t;
 
 // pdf field & flag field
 typedef lbm::D3Q19< lbm::collision_model::TRT, false >  LatticeModel_T;
-typedef LatticeModel_T::Stencil                         Stencil_T;
-typedef lbm::PdfField< LatticeModel_T >                 PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t   flag_t;
-typedef FlagField< flag_t > FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 const uint_t FieldGhostLayers = 1;
@@ -125,7 +125,7 @@ class VelocityCheck
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T > PdfField;
+   using PdfField = lbm::PdfField<LatticeModel_T>;
 
    VelocityCheck( const ConstBlockDataID & pdfFieldID, const ConstBlockDataID & flagFieldID, const Set< FlagUID > & cellsToCheck,
                   const real_t uMax, const uint_t checkFrequency ) :

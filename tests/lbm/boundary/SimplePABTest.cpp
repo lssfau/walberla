@@ -62,12 +62,12 @@
 
 namespace walberla {
 
-   typedef uint8_t                                        flag_t;
+   using flag_t = uint8_t;
    typedef lbm::D3Q19< lbm::collision_model::SRT, false > LatticeModel;
-   typedef LatticeModel::Stencil                          Stencil;
-   typedef LatticeModel::CommunicationStencil             CommunicationStencil;
-   typedef lbm::PdfField< LatticeModel  >                 PDFField;
-   typedef FlagField< flag_t >                            MyFlagField;
+   using Stencil = LatticeModel::Stencil;
+   using CommunicationStencil = LatticeModel::CommunicationStencil;
+   using PDFField = lbm::PdfField<LatticeModel>;
+   using MyFlagField = FlagField<flag_t>;
 
 
 shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t channelWidth, uint_t channelLength )

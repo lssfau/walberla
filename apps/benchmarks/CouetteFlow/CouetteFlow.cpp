@@ -139,12 +139,12 @@ typedef lbm::D3Q27< lbm::collision_model::TRT,      true  > D3Q27_TRT_COMP;
 template< typename LatticeModel_T >
 struct Types
 {
-   typedef typename LatticeModel_T::Stencil Stencil_T;
-   typedef lbm::PdfField< LatticeModel_T >  PdfField_T;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
 };
 
-typedef walberla::uint16_t  flag_t;
-typedef FlagField< flag_t > FlagField_T;
+using flag_t = walberla::uint16_t;
+using FlagField_T = FlagField<flag_t>;
 
 const uint_t FieldGhostLayers  = uint_t(4);
 
@@ -399,7 +399,7 @@ template< typename LatticeModel_T >
 typename MyBoundaryHandling<LatticeModel_T>::BoundaryHandling_T *
 MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block ) const
 {
-   typedef typename Types<LatticeModel_T>::PdfField_T PdfField_T;
+   using PdfField_T = typename Types< LatticeModel_T >::PdfField_T;
 
    FlagField_T * flagField = block->getData< FlagField_T >( flagFieldId_ );
    PdfField_T *   pdfField = block->getData< PdfField_T > (  pdfFieldId_ );
@@ -457,7 +457,7 @@ class ErrorVTKWriter : public vtk::BlockCellDataWriter< OutputType, 3 >
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = lbm::PdfField< LatticeModel_T >;
 
    ErrorVTKWriter( const ConstBlockDataID & pdfFieldId, const std::string & id, const Setup & setup ) :
       vtk::BlockCellDataWriter< OutputType, 3 >( id ), bdid_( pdfFieldId ), pdf_( nullptr ), setup_( setup ) {}
@@ -589,7 +589,7 @@ void addRefinementTimeStep( SweepTimeloop & timeloop, shared_ptr< blockforest::S
                             const bool syncComm, const bool fullComm, const bool linearExplosion,
                             shared_ptr< Sweep_T > & sweep, const std::string & info )
 {
-   typedef typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T BH_T;
+   using BH_T = typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T;
 
    auto ts = lbm::refinement::makeTimeStep< LatticeModel_T, BH_T >( blocks, sweep, pdfFieldId, boundaryHandlingId );
    ts->asynchronousCommunication( !syncComm );
@@ -612,7 +612,7 @@ struct AddRefinementTimeStep
       {
          if( pure )
          {
-            typedef lbm::SplitPureSweep< LatticeModel_T > Sweep_T;
+            using Sweep_T = lbm::SplitPureSweep< LatticeModel_T >;
             auto mySweep = make_shared< Sweep_T >( pdfFieldId );
 
             addRefinementTimeStep< LatticeModel_T, Sweep_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,
@@ -685,8 +685,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                                                               Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t(1),
                                                               FieldGhostLayers, field::zyxf );
 
-   typedef typename lbm::Adaptor<LatticeModel_T>::VelocityVector  VelocityAdaptor_T;
-   typedef typename lbm::Adaptor<LatticeModel_T>::Density          DensityAdaptor_T;
+   using VelocityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::VelocityVector;
+   using DensityAdaptor_T  = typename lbm::Adaptor< LatticeModel_T >::Density;
    BlockDataID velocityAdaptorId = field::addFieldAdaptor< VelocityAdaptor_T >( blocks, pdfFieldId, "velocity adaptor" );
    BlockDataID  densityAdaptorId = field::addFieldAdaptor<  DensityAdaptor_T >( blocks, pdfFieldId, "density adaptor" );
 

@@ -46,9 +46,9 @@ namespace walberla {
 typedef GhostLayerField<real_t,19> PdfField;
 typedef GhostLayerField<real_t,1>  ScalarField;
 typedef GhostLayerField<Vector3<real_t>,1 > VectorField;
-typedef FlagField<walberla::uint32_t > FField;
+using FField = FlagField<walberla::uint32_t>;
 
-typedef lbm::D3Q19<lbm::collision_model::SRT> LatticeModel;
+using LatticeModel = lbm::D3Q19<lbm::collision_model::SRT>;
 
 
 int main(int argc, char **argv )

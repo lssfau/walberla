@@ -60,15 +60,15 @@ using namespace walberla;
 using walberla::uint_t;
 
 // PDF field, flag field & body field
-typedef lbm::D3Q19< lbm::collision_model::SRT >  LatticeModel_T;
+using LatticeModel_T = lbm::D3Q19<lbm::collision_model::SRT>;
 
-typedef LatticeModel_T::Stencil                         Stencil_T;
-typedef lbm::PdfField< LatticeModel_T >                 PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
 const uint_t FieldGhostLayers = 1;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 // boundary handling
@@ -77,7 +77,7 @@ typedef pe_coupling::SimpleBB< LatticeModel_T, FlagField_T >  MO_T;
 typedef boost::tuples::tuple< NoSlip_T, MO_T > BoundaryConditions_T;
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
-typedef boost::tuple<pe::Sphere> BodyTypeTuple ;
+using BodyTypeTuple = boost::tuple<pe::Sphere> ;
 
 ///////////
 // FLAGS //

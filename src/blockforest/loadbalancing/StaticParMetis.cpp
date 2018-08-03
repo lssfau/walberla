@@ -48,7 +48,7 @@ T * ptr( std::vector<T> & v )
       return &( v.front() );
 }
 
-typedef uint_t idx_t;
+using idx_t = uint_t;
 
 
 uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uint_t numberOfProcesses, const memory_t /*perProcessMemoryLimit*/ ) const

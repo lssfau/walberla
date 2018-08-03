@@ -58,7 +58,7 @@ struct PointInAABB
 
 struct AnyPointInAABB
 {
-   typedef std::vector< Vector3<real_t> > Points;
+   using Points = std::vector<Vector3<real_t> >;
 
    AnyPointInAABB( const Points & points ) : points_(points) {}
 

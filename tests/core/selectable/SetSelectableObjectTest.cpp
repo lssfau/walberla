@@ -41,7 +41,7 @@ int main( int /*argc*/, char** /*argv*/ ) {
 
    debug::enterTestMode();
 
-   typedef Set<size_t> A;
+   using A = Set<size_t>;
 
    selectable::SetSelectableObject< std::string, size_t > container;
 

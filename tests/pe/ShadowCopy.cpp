@@ -34,7 +34,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef Union< boost::tuple<Sphere> > UnionT;
+using UnionT = Union<boost::tuple<Sphere> >;
 typedef boost::tuple<Sphere, UnionT> BodyTuple ;
 
 int main( int argc, char** argv )

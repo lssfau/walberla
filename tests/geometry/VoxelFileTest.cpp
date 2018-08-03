@@ -293,7 +293,7 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
 
    data.clear();
 
-   typedef boost::multi_array_types::index bindex;
+   using bindex = boost::multi_array_types::index;
 
    boost::multi_array<T, 3> reference(boost::extents[walberla::numeric_cast<bindex>(zSize)][walberla::numeric_cast<bindex>(ySize)][walberla::numeric_cast<bindex>(xSize)]);
    makeRandomMultiArray(reference);

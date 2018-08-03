@@ -36,7 +36,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla::id_t sid, Sphere& ref, const Vec3& newPos)
 {

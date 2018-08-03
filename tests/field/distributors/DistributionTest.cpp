@@ -38,8 +38,8 @@ using namespace walberla;
 
 const uint_t FieldGhostLayers( 1 );
 
-typedef walberla::uint8_t                    flag_t;
-typedef FlagField< flag_t >                  FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 typedef GhostLayerField< real_t, 1>          ScalarField_T;
 typedef GhostLayerField< Vector3<real_t>, 1> Vec3Field_T;

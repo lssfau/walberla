@@ -104,7 +104,7 @@ void test( const std::string & testName, const std::vector<Vector3<real_t>> & po
       const typename MeshType::Point    pointOnFace = mesh.point( *mesh.cfv_begin(fh) );
       for(const auto & p : pointCloud)
       {
-         typedef typename MeshType::Scalar Scalar;
+         using Scalar = typename MeshType::Scalar;
          WALBERLA_CHECK_LESS( (toOpenMeshNumericCast<Scalar>(p) - pointOnFace) | n, real_comparison::Epsilon<Scalar>::value,
                                  "Point: " << p << " Face normal: " << n << " v: " << toOpenMeshNumericCast<Scalar>(p) - pointOnFace );
       }
