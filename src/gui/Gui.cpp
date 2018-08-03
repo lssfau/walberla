@@ -220,7 +220,7 @@ GUI::GUI(timeloop::ITimeloop & timeloop, const shared_ptr<StructuredBlockForest>
 {
 }
 
-GUI::~GUI() {}
+GUI::~GUI() = default;
 
 void GUI::run() {
    timeloop_.run();

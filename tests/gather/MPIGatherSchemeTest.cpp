@@ -39,8 +39,8 @@ namespace walberla {
 class TestGatherPackInfo : public gather::GatherPackInfo
 {
 public:
-   TestGatherPackInfo() {}
-   virtual ~TestGatherPackInfo() {}
+   TestGatherPackInfo() = default;
+   virtual ~TestGatherPackInfo() = default;
 
 
    virtual void packData  ( const IBlock *, mpi::GenericSendBuffer<unsigned char> & outBuffer )

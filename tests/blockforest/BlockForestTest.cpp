@@ -139,7 +139,7 @@ static uint_t* blockdata5( const IBlock* const /*block*/ ) {
 class Base
 {
 public:
-   virtual ~Base() {}
+   virtual ~Base() = default;
    bool operator==( const Base& /*rhs*/ ) const { return true; }
            uint_t override() const { return 1; }
    virtual uint_t func()     const { return 2; }
@@ -169,7 +169,7 @@ static Derived* blockdataDerived( const IBlock* const /*block*/ )
 class SecondBase
 {
 public:
-   virtual ~SecondBase() {}
+   virtual ~SecondBase() = default;
    bool operator==( const SecondBase& /*rhs*/ ) const { return true; }
    uint_t override() const { return 100; }
 };

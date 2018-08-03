@@ -75,8 +75,7 @@ RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
 /*!\brief Destructor for the RigidBody class.
  */
 RigidBody::~RigidBody()
-{
-}
+= default;
 //*************************************************************************************************
 
 

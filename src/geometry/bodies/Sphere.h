@@ -48,7 +48,7 @@ namespace geometry {
    public:
 
       explicit Sphere( const Vector3<real_t> & midp, real_t rad );
-      Sphere( const Sphere & o );
+      Sphere( const Sphere & o ) = default;
 
       void setMidpoint( const Vector3<real_t> & point ) { midpoint_ = point;         updateBoxes(); }
       void setMidpoint( real_t newVal, uint_t coord )   { midpoint_[coord] = newVal; updateBoxes(); }

@@ -77,7 +77,7 @@ Contact::Contact( GeomID g1, GeomID g2, const Vec3& gpos, const Vec3& normal, re
 /*!\brief Destructor for the Contact class.
  */
 Contact::~Contact()
-{}
+= default;
 //*************************************************************************************************
 
 //=================================================================================================

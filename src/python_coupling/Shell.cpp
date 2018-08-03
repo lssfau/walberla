@@ -238,7 +238,7 @@ namespace walberla {
 namespace python_coupling {
 
    Shell::Shell( const std::string & )  {}
-   Shell::~Shell() {}
+   Shell::~Shell() = default;
    void Shell::operator()() {}
 
 } // namespace python_coupling

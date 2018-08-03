@@ -33,7 +33,7 @@ class MyStamp : public logging::Logging::CustomStamp
 {
 public:
    MyStamp() : step_(uint_c(0)) {}
-   ~MyStamp() {}
+   ~MyStamp() = default;
    void step( uint_t s ) { step_ = s; }
    std::string stamp()
    {

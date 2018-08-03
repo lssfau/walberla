@@ -558,7 +558,7 @@ class DummySweep
 {
 public:
    DummySweep( )
-   {}
+   = default;
 
    void operator()(IBlock * const /*block*/)
    {}

@@ -123,7 +123,7 @@ namespace gui {
 
 
    PropertyTree::~PropertyTree()
-   {}
+   = default;
 
 
    void PropertyTree::setBlock( IBlock * a)
