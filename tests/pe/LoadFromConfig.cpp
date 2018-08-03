@@ -40,7 +40,7 @@ int main( int argc, char ** argv )
    Environment env(argc, argv);
    //! [Load Config]
    auto cfg = env.config();
-   if (cfg == NULL) WALBERLA_ABORT("No config specified!");
+   if (cfg == nullptr) WALBERLA_ABORT("No config specified!");
    const Config::BlockHandle configBlock  = cfg->getBlock( "LoadFromConfig" );
    //! [Load Config]
 

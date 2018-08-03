@@ -163,11 +163,11 @@ void TimingPool<TP>::mpiReduce( std::vector<double> & min,
 
    if( targetRank >= 0 )
    {
-      void * minTarget = targetRank == rank ? &minRed.front() : NULL;
-      void * maxTarget = targetRank == rank ? &maxRed.front() : NULL;
-      void * sumTarget = targetRank == rank ? &sumRed.front() : NULL;
-      void * sumSqTarget = targetRank == rank ? &sumSqRed.front() : NULL;
-      void * countTarget = targetRank == rank ? &countRed.front() : NULL;
+      void * minTarget = targetRank == rank ? &minRed.front() : nullptr;
+      void * maxTarget = targetRank == rank ? &maxRed.front() : nullptr;
+      void * sumTarget = targetRank == rank ? &sumRed.front() : nullptr;
+      void * sumSqTarget = targetRank == rank ? &sumSqRed.front() : nullptr;
+      void * countTarget = targetRank == rank ? &countRed.front() : nullptr;
 
       MPI_Reduce( &min.front(), minTarget,
                   int_c(min.size()), MPITrait<double>::type(), MPI_MIN, targetRank,MPI_COMM_WORLD );

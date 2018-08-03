@@ -120,8 +120,8 @@ int main( int argc, char ** argv )
       {
          SphereID sp = createSphere( *globalBodyStorage, *forest, storageID, 0, *it, radius, material);
          Vec3 rndVel(math::realRandom<real_t>(-vMax, vMax), math::realRandom<real_t>(-vMax, vMax), math::realRandom<real_t>(-vMax, vMax));
-         if (sp != NULL) sp->setLinearVel(rndVel);
-         if (sp != NULL) ++numParticles;
+         if (sp != nullptr) sp->setLinearVel(rndVel);
+         if (sp != nullptr) ++numParticles;
       }
    }
    WALBERLA_LOG_INFO_ON_ROOT("#particles created: " << numParticles);

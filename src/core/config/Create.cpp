@@ -154,7 +154,7 @@ namespace config {
 
             if ( blockName.empty() )
             {
-               currentBlock = NULL;
+               currentBlock = nullptr;
                WALBERLA_LOG_WARNING("Ignoring Parameter '" << *param << "' empty block name");
                break;
             }
@@ -162,7 +162,7 @@ namespace config {
             currentBlock->getWritableBlocks( blockName, possibleBlocks );
             if ( possibleBlocks.size() > 1 )
             {
-               currentBlock = NULL;
+               currentBlock = nullptr;
                WALBERLA_LOG_WARNING("Ignoring Parameter '" << *param << "' since block is ambiguous: " << blockName );
                break;
             }

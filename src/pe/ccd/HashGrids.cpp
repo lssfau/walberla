@@ -65,7 +65,7 @@ HashGrids::HashGrid::HashGrid( real_t cellSpan )
    // Initialization of each cell - i.e., initially setting the pointer to the body container to
    // NULL (=> no bodies are assigned to this hash grid yet!) and ...
    for( Cell* c  = cell_; c < cell_ + xyzCellCount_; ++c ) {
-      c->bodies_ = NULL;
+      c->bodies_ = nullptr;
    }
    // ... setting up the neighborhood relationship (using the offset array).
    initializeNeighborOffsets();
@@ -215,7 +215,7 @@ void HashGrids::HashGrid::clear()
 {
    for( auto cellIt = occupiedCells_.begin(); cellIt < occupiedCells_.end(); ++cellIt ) {
       delete (*cellIt)->bodies_;
-      (*cellIt)->bodies_ = NULL;
+      (*cellIt)->bodies_ = nullptr;
    }
    occupiedCells_.clear();
    bodyCount_ = 0;
@@ -392,7 +392,7 @@ void HashGrids::HashGrid::add( BodyID body, Cell* cell )
    // (i.e., allocated) and properly initialized (i.e., sufficient initial storage capacity must be
    // reserved). Furthermore, the cell must be inserted into the grid-global vector 'occupiedCells_'
    // in which all cells that are currently occupied by bodies are recorded.
-   if( cell->bodies_ == NULL )
+   if( cell->bodies_ == nullptr )
    {
       cell->bodies_ = new BodyVector;
       cell->bodies_->reserve( cellVectorSize );
@@ -436,7 +436,7 @@ void HashGrids::HashGrid::remove( BodyID body, Cell* cell )
 
       // ... the cell's body container is destroyed and ...
       delete cell->bodies_;
-      cell->bodies_ = NULL;
+      cell->bodies_ = nullptr;
       cell->lastNonFixedBody_ = -1;
 
       // ... the cell is removed from the grid-global vector 'occupiedCells_' that records all
@@ -542,7 +542,7 @@ void HashGrids::HashGrid::enlarge()
 
    // ... initialized, and finally ...
    for( Cell* c  = cell_; c < cell_ + xyzCellCount_; ++c ) {
-      c->bodies_ = NULL;
+      c->bodies_ = nullptr;
       c->lastNonFixedBody_ = -1;
    }
    initializeNeighborOffsets();
@@ -673,7 +673,7 @@ void HashGrids::add( BodyID body )
    // The body is marked as being added to 'bodiesToAdd_' by setting the grid pointer to NULL and
    // setting the cell-ID to '0'. Additionally, the hash value is used to memorize the body's
    // index position in the 'bodiesToAdd_' vector.
-   body->setGrid  ( NULL );
+   body->setGrid  ( nullptr );
    body->setHash  ( bodiesToAdd_.size() );
    body->setCellId( 0 );
 
@@ -700,7 +700,7 @@ void HashGrids::remove( BodyID body )
    HashGrid* grid = static_cast<HashGrid*>( body->getGrid() );
 
    // The body is stored in a hash grid from which it must be removed.
-   if( grid != NULL ) {
+   if( grid != nullptr ) {
       grid->remove( body );
    }
    // The body's grid pointer is equal to NULL.
@@ -786,7 +786,7 @@ void HashGrids::update(WcTimingTree* tt)
 {
    // ----- UPDATE PHASE ----- //
 
-   if (tt != NULL) tt->start("AddNewBodies");
+   if (tt != nullptr) tt->start("AddNewBodies");
    // Finally add all bodies that were temporarily stored in 'bodiesToAdd_' to the data structure.
    if( bodiesToAdd_.size() > 0 )
    {
@@ -797,9 +797,9 @@ void HashGrids::update(WcTimingTree* tt)
       }
       bodiesToAdd_.clear();
    }
-   if (tt != NULL) tt->stop("AddNewBodies");
+   if (tt != nullptr) tt->stop("AddNewBodies");
 
-   if (tt != NULL) tt->start("Update");
+   if (tt != nullptr) tt->start("Update");
    // Update the data structure (=> adapt to the current body distribution) by taking care of
    // moved, rotated and/or deformed bodies.
    if( gridActive_ )
@@ -876,7 +876,7 @@ void HashGrids::update(WcTimingTree* tt)
          {
             HashGrid* grid = static_cast<HashGrid*>( body.getGrid() );
 
-            if( grid != NULL )
+            if( grid != nullptr )
             {
                real_t size     = body.getAABBSize();
                real_t cellSpan = grid->getCellSpan();
@@ -897,7 +897,7 @@ void HashGrids::update(WcTimingTree* tt)
          {
             HashGrid* grid = static_cast<HashGrid*>( body.getGrid() );
 
-            if( grid != NULL )
+            if( grid != nullptr )
             {
                real_t size     = body.getAABBSize();
                real_t cellSpan = grid->getCellSpan();
@@ -913,7 +913,7 @@ void HashGrids::update(WcTimingTree* tt)
          }
       }
    }
-   if (tt != NULL) tt->stop("Update");
+   if (tt != nullptr) tt->stop("Update");
 }
 
 //**Implementation of ICCD interface ********************************************************
@@ -927,7 +927,7 @@ void HashGrids::update(WcTimingTree* tt)
  */
 PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
 {
-   if (tt != NULL) tt->start("CCD");
+   if (tt != nullptr) tt->start("CCD");
 
    contacts_.clear();
 
@@ -935,7 +935,7 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
 
    update(tt);
 
-   if (tt != NULL) tt->start("Detection");
+   if (tt != nullptr) tt->start("Detection");
    // ----- DETECTION STEP ----- //
 
    // Contact generation by traversing through all hash grids (which are sorted in ascending order
@@ -943,7 +943,7 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
    for( auto gridIt = gridList_.begin(); gridIt != gridList_.end(); ++gridIt ) {
 
       // Contact generation for all bodies stored in the currently processed grid 'grid'.
-      BodyID* bodies     = NULL;
+      BodyID* bodies     = nullptr;
       size_t  bodyCount = (*gridIt)->process( &bodies, contacts_ );
 
       if( bodyCount > 0 ) {
@@ -981,7 +981,7 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
          collide( *aIt, &(*bIt), contacts_ );
       }
    }
-   if (tt != NULL) tt->stop("Detection");
+   if (tt != nullptr) tt->stop("Detection");
 
    WALBERLA_LOG_DETAIL_SECTION()
    {
@@ -997,7 +997,7 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
       WALBERLA_LOG_DETAIL( log.str() );
    }
 
-   if (tt != NULL) tt->stop("CCD");
+   if (tt != nullptr) tt->stop("CCD");
 
    return contacts_;
 }
@@ -1025,7 +1025,7 @@ void HashGrids::addGrid( BodyID body )
    // If the body is finite in size, it must be assigned to a grid with suitably sized cells.
    if( size > 0 )
    {
-      HashGrid* grid = NULL;
+      HashGrid* grid = nullptr;
 
       if( gridList_.empty() )
       {
@@ -1077,7 +1077,7 @@ void HashGrids::addGrid( BodyID body )
    // the grid pointer to NULL and setting the cell-ID to '1'. Additionally, the hash value is used
    // to memorize the body's index position in the 'nonGridBodies_' vector.
 
-   body->setGrid  ( NULL );
+   body->setGrid  ( nullptr );
    body->setHash  ( nonGridBodies_.size() );
    body->setCellId( 1 );
 
@@ -1142,7 +1142,7 @@ void HashGrids::addList( BodyID body )
    // setting the cell-ID to '1'. Additionally, the hash value is used to memorize the body's index
    // position in the 'nonGridBodies_' vector.
 
-   body->setGrid  ( NULL );
+   body->setGrid  ( nullptr );
    body->setHash  ( nonGridBodies_.size() );
    body->setCellId( 1 );
 

@@ -118,7 +118,7 @@ namespace gui {
 namespace walberla {
 namespace gui {
    PropertyTree::PropertyTree()
-      : model_(0), lastBlock_(0)
+      : model_(nullptr), lastBlock_(nullptr)
    {}
 
 
@@ -138,7 +138,7 @@ namespace gui {
 
    PropertyTree::ItemID PropertyTree::addItem(const std::string & , ItemID )
    {
-      return 0;
+      return nullptr;
    }
 } // namespace gui
 } // namespace walberla

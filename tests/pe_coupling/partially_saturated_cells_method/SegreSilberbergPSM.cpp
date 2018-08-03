@@ -500,11 +500,11 @@ int main( int argc, char **argv )
    auto fcdID          = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
 
    // set up collision response, here DEM solver
-   pe::cr::DEM cr( globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, NULL );
+   pe::cr::DEM cr( globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, nullptr );
 
    // set up synchronization procedure
    const real_t overlap = real_c( 1.5 ) * dx;
-   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    // create pe bodies
 
@@ -517,7 +517,7 @@ int main( int argc, char **argv )
    const auto sphereMaterial = pe::createMaterial( "mySphereMat", setup.rho_p , real_c(0.5), real_c(0.1), real_c(0.1), real_c(0.24), real_c(200), real_c(200), real_c(0), real_c(0) );
    Vector3<real_t> position( real_c(setup.xlength) * real_c(0.5), real_c(setup.ylength) * real_c(0.5), real_c(setup.zlength) * real_c(0.5) - real_c(1) );
    auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, particleRadius, sphereMaterial );
-   if( sphere != NULL )
+   if( sphere != nullptr )
    {
       real_t height = real_c( 0.5 ) * real_c( setup.zlength );
       // set sphere velocity to undisturbed fluid velocity at sphere center

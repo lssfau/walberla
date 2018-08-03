@@ -72,7 +72,7 @@ void BodyAndVolumeFractionMapping::initialize()
    {
       BodyAndVolumeFractionField_T * bodyAndVolumeFractionField = blockIt->getData< BodyAndVolumeFractionField_T >( bodyAndVolumeFractionFieldID_ );
 
-      if( updatedBodyAndVolumeFractionField_ == NULL )
+      if( updatedBodyAndVolumeFractionField_ == nullptr )
       {
          // hold internally an identical field for swapping
          updatedBodyAndVolumeFractionField_ = shared_ptr<BodyAndVolumeFractionField_T>( bodyAndVolumeFractionField->cloneUninitialized() );

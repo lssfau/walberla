@@ -457,7 +457,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf, FieldGhostLayers );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf, FieldGhostLayers );
 
    // add boundary handling
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(MyBoundaryHandling( flagFieldID, pdfFieldID, bodyFieldID ), "boundary handling" );
@@ -504,7 +504,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionInsideBlock, radius, sphereMaterialID, false, true, false);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectRegularBodies );
 
@@ -517,7 +517,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    /////////////////////
@@ -529,7 +529,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionInsideBlock, radius, sphereMaterialID, true, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectGlobalBodies );
 
@@ -542,7 +542,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////
@@ -554,7 +554,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionInsideBlock, radius, sphereMaterialID, false, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
 
       pe_coupling::mapBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectFixedBodies );
 
@@ -567,7 +567,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
    }
 
    //////////////////////////////////
@@ -583,7 +583,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtBlockBoarder, radius, sphereMaterialID, false, true, false);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectRegularBodies );
 
@@ -596,7 +596,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    /////////////////////
@@ -608,7 +608,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtBlockBoarder, radius, sphereMaterialID, true, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectGlobalBodies );
 
@@ -621,7 +621,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////
@@ -633,7 +633,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtBlockBoarder, radius, sphereMaterialID, false, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
 
       pe_coupling::mapBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectFixedBodies );
 
@@ -646,7 +646,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
    }
 
    /////////////////////////////////////
@@ -662,7 +662,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtPeriodicBoarder, radius, sphereMaterialID, false, true, false);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectRegularBodies );
 
@@ -675,7 +675,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    /////////////////////
@@ -693,7 +693,7 @@ int main( int argc, char **argv )
       pe::SphereID sp2 = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                           positionAtPeriodicBoarderCopy, radius, sphereMaterialID, true, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectGlobalBodies );
 
@@ -707,7 +707,7 @@ int main( int argc, char **argv )
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp2->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////
@@ -719,7 +719,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtPeriodicBoarder, radius, sphereMaterialID, false, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
 
       pe_coupling::mapBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectFixedBodies );
 
@@ -732,7 +732,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
    }
 
    //////////////////////////
@@ -752,7 +752,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionInsideBlock, radius, sphereMaterialID, false, true, false);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapMovingBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectRegularBodies );
 
@@ -766,7 +766,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////////
@@ -778,7 +778,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionInsideBlock, radius, sphereMaterialID, false, true, false);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) regularBodyMapper(&(*blockIt));
 
@@ -792,7 +792,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    /////////////////////
@@ -804,7 +804,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionInsideBlock, radius, sphereMaterialID, true, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapMovingBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectGlobalBodies );
 
@@ -818,7 +818,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////////
@@ -830,7 +830,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionInsideBlock, radius, sphereMaterialID, true, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) globalBodyMapper(&(*blockIt));
 
@@ -844,7 +844,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////
@@ -856,7 +856,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionInsideBlock, radius, sphereMaterialID, false, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
 
       pe_coupling::mapMovingBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectFixedBodies );
 
@@ -870,7 +870,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
    }
 
    //////////////////////////////////
@@ -886,7 +886,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtBlockBoarder, radius, sphereMaterialID, false, true, false);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapMovingBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectRegularBodies );
 
@@ -900,7 +900,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////////
@@ -912,7 +912,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtBlockBoarder, radius, sphereMaterialID, false, true, false);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) regularBodyMapper(&(*blockIt));
 
@@ -926,7 +926,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    /////////////////////
@@ -938,7 +938,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtBlockBoarder, radius, sphereMaterialID, true, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapMovingBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectGlobalBodies );
 
@@ -952,7 +952,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////////
@@ -964,7 +964,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtBlockBoarder, radius, sphereMaterialID, true, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) globalBodyMapper(&(*blockIt));
 
@@ -978,7 +978,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////
@@ -990,7 +990,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtBlockBoarder, radius, sphereMaterialID, false, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
 
       pe_coupling::mapMovingBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectFixedBodies );
 
@@ -1004,7 +1004,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
    }
 
    /////////////////////////////////////
@@ -1020,7 +1020,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtPeriodicBoarder, radius, sphereMaterialID, false, true, false);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapMovingBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectRegularBodies );
 
@@ -1034,7 +1034,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////////
@@ -1046,7 +1046,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtPeriodicBoarder, radius, sphereMaterialID, false, true, false);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) regularBodyMapper(&(*blockIt));
 
@@ -1060,7 +1060,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    /////////////////////
@@ -1078,7 +1078,7 @@ int main( int argc, char **argv )
       pe::SphereID sp2 = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                           positionAtPeriodicBoarderCopy, radius, sphereMaterialID, true, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
 
       pe_coupling::mapMovingBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectGlobalBodies );
 
@@ -1093,7 +1093,7 @@ int main( int argc, char **argv )
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp2->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    }
 
    //////////////////
@@ -1105,7 +1105,7 @@ int main( int argc, char **argv )
       pe::SphereID sp = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                                          positionAtPeriodicBoarder, radius, sphereMaterialID, false, false, true);
 
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
 
       pe_coupling::mapMovingBodies< BoundaryHandling_T >(*blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectFixedBodies );
 
@@ -1119,7 +1119,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_DEVEL(testIdentifier << " - ended");
 
       pe::destroyBodyBySID(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, sp->getSystemID());
-      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, true);
+      pe::syncNextNeighbors<BodyTypeTuple>(blocks->getBlockForest(), bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, true);
    }
 
 

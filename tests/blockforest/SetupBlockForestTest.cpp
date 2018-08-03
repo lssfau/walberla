@@ -173,7 +173,7 @@ static void checkNeighborhoodConsistency( const SetupBlockForest& forest ) {
 
             // either one neighbor must be hit OR the block is located at the border of the (non-periodic) simulation domain
             if( noHit )
-               WALBERLA_CHECK( forest.getBlock(x,y,z) == NULL );
+               WALBERLA_CHECK( forest.getBlock(x,y,z) == nullptr );
          }
 
          // every neighbor must be hit by at least one point

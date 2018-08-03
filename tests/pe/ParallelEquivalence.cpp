@@ -104,7 +104,7 @@ void sim(shared_ptr< StructuredBlockForest > forest, std::vector<BodyData>& res,
    }
    auto fcdID_               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
 
-   cr::DEM cr( globalStorage, forest->getBlockStoragePointer(), storageID_, ccdID_, fcdID_, NULL);
+   cr::DEM cr( globalStorage, forest->getBlockStoragePointer(), storageID_, ccdID_, fcdID_, nullptr);
 
 //   auto vtkOutput_   = make_shared<DefaultBodyVTKOutput>(storageID_, *forest) ;
 //   auto vtkWriter_   = vtk::createVTKOutput_PointData(vtkOutput_, "Bodies", 1);
@@ -132,7 +132,7 @@ void sim(shared_ptr< StructuredBlockForest > forest, std::vector<BodyData>& res,
             SphereID sp = pe::createSphere( *globalStorage, forest->getBlockStorage(), storageID_,
                               ++counter, Vec3(real_c(x) + real_c(0.5), real_c(y) + real_c(0.5), real_c(z) + real_c(0.5)), real_c(0.3));
             Vec3 randVel = Vec3(math::realRandom<real_t>(-dv, dv), math::realRandom<real_t>(-dv, dv), math::realRandom<real_t>(-dv, dv));
-            if (sp != NULL) sp->setLinearVel(randVel);
+            if (sp != nullptr) sp->setLinearVel(randVel);
          }
 
    WALBERLA_CHECK_EQUAL(globalStorage->size(), 6);

@@ -890,7 +890,7 @@ int main( int argc, char **argv ) {
    // connect to pe
    const real_t overlap = real_t(1.5) * dx;
    auto syncCall = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()),
-                               bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+                               bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    shared_ptr<CollisionPropertiesEvaluator> collisionPropertiesEvaluator = walberla::make_shared<CollisionPropertiesEvaluator>(*cr);
 
    // create the spheres

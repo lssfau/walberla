@@ -220,7 +220,7 @@ createBlockForest(      const AABB& domainAABB,
 
    // if possible, create Cartesian MPI communicator
 
-   std::vector< uint_t >* processIdMap = NULL;
+   std::vector< uint_t >* processIdMap = nullptr;
 
    WALBERLA_MPI_SECTION()
    {
@@ -249,7 +249,7 @@ createBlockForest(      const AABB& domainAABB,
    sforest.balanceLoad( blockforest::CartesianDistribution( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, processIdMap ),
                         numberOfXProcesses * numberOfYProcesses * numberOfZProcesses );
 
-   if( processIdMap != NULL ) delete processIdMap;
+   if( processIdMap != nullptr ) delete processIdMap;
 
    // create StructuredBlockForest (encapsulates a newly created BlockForest)
 

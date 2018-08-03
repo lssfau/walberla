@@ -41,7 +41,7 @@ std::set<int> BufferSystem::activeTags_;
 
 
 BufferSystem::iterator::iterator( BufferSystem & bufferSystem, bool begin )
-    : bufferSystem_( bufferSystem), currentRecvBuffer_( NULL ), currentSenderRank_( -1 )
+    : bufferSystem_( bufferSystem), currentRecvBuffer_( nullptr ), currentSenderRank_( -1 )
 {
    if ( begin ) // init iterator
       ++(*this);
@@ -86,7 +86,7 @@ BufferSystem::BufferSystem( const MPI_Comm & communicator, int tag )
    : knownSizeComm_  ( communicator, tag ),
      unknownSizeComm_( communicator, tag ),
      noMPIComm_( communicator, tag ),
-     currentComm_    ( NULL ),
+     currentComm_    ( nullptr ),
      sizeChangesEverytime_( true ),
      communicationRunning_( false )
 {
@@ -97,7 +97,7 @@ BufferSystem::BufferSystem( const BufferSystem &other )
    : knownSizeComm_  ( other.knownSizeComm_.getCommunicator(), other.knownSizeComm_.getTag() ),
      unknownSizeComm_( other.knownSizeComm_.getCommunicator(), other.knownSizeComm_.getTag() ),
      noMPIComm_      ( other.knownSizeComm_.getCommunicator(), other.knownSizeComm_.getTag() ),
-     currentComm_ ( NULL ),
+     currentComm_ ( nullptr ),
      sizeChangesEverytime_( other.sizeChangesEverytime_ ),
      communicationRunning_( other.communicationRunning_ ),
      recvInfos_( other.recvInfos_ ),
@@ -111,7 +111,7 @@ BufferSystem::BufferSystem( const BufferSystem &other )
    else if ( other.currentComm_ == &other.noMPIComm_ )
       currentComm_ = &noMPIComm_;
    else
-      currentComm_ = NULL; // receiver information not yet set
+      currentComm_ = nullptr; // receiver information not yet set
 }
 
 
@@ -131,7 +131,7 @@ BufferSystem & BufferSystem::operator=( const BufferSystem & other )
    else if ( other.currentComm_ == &other.noMPIComm_ )
       currentComm_ = &noMPIComm_;
    else
-      currentComm_ = NULL; // receiver information not yet set
+      currentComm_ = nullptr; // receiver information not yet set
 
    return *this;
 }
@@ -419,7 +419,7 @@ RecvBuffer * BufferSystem::waitForNext( MPIRank & fromRank )
    else
    {
       endCommunication();
-      return NULL;
+      return nullptr;
    }
 
 }

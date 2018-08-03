@@ -522,7 +522,7 @@ int main( int argc, char **argv )
 
    // synchronize often enough for large bodies
    for( uint_t i = 0; i < std::max( uint_c(1), XBlocks / uint_c(2) ) * ( uint_t(1) << ( setup.levels - uint_t(1) ) ); ++i)
-      pe::syncShadowOwners<BodyTypeTuple>( blocks->getBlockForest(), bodyStorageID, NULL, overlap);
+      pe::syncShadowOwners<BodyTypeTuple>( blocks->getBlockForest(), bodyStorageID, nullptr, overlap);
 
    ///////////////////////
    // ADD DATA TO BLOCKS //
@@ -540,7 +540,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf, FieldGhostLayers );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf, FieldGhostLayers );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

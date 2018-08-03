@@ -273,7 +273,7 @@ uint_t createSpheresRandomly( StructuredBlockForest & forest, pe::BodyStorage & 
 
 
       pe::SphereID sp = pe::createSphere( globalBodyStorage, forest.getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( xParticle, yParticle, zParticle ), diameter * real_t(0.5), material );
-      if( sp != NULL )
+      if( sp != nullptr )
       {
          sp->setLinearVel(Vector3<real_t>(real_t(0),real_t(0),initialZVelocity));
       }
@@ -302,7 +302,7 @@ uint_t createSphereLattice( StructuredBlockForest & forest, pe::BodyStorage & gl
    {
       pe::SphereID sp = pe::createSphere( globalBodyStorage, forest.getBlockStorage(), bodyStorageID, 0, *it, diameter * real_t(0.5), material );
 
-      if( sp != NULL )
+      if( sp != nullptr )
       {
          sp->setLinearVel(Vector3<real_t>(real_t(0),real_t(0),initialZVelocity));
          ++numSpheres;
@@ -852,7 +852,7 @@ int main( int argc, char **argv )
 
    // connect to pe
    const real_t overlap = real_t( 1.5 ) * dx;
-   auto syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   auto syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
    shared_ptr<CollisionPropertiesEvaluator> collisionPropertiesEvaluator = walberla::make_shared<CollisionPropertiesEvaluator>( *cr );
 
    // create the spheres

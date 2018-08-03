@@ -415,7 +415,7 @@ int main( int argc, char **argv )
 
    // synchronize often enough for large bodies
    for( uint_t i = 0; i < XBlocks / 2; ++i)
-      pe::syncShadowOwners<BodyTypeTuple>( blocks->getBlockForest(), bodyStorageID, NULL, overlap);
+      pe::syncShadowOwners<BodyTypeTuple>( blocks->getBlockForest(), bodyStorageID, nullptr, overlap);
 
    ///////////////////////
    // ADD DATA TO BLOCKS //

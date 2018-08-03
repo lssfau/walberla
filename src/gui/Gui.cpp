@@ -212,7 +212,7 @@ void GUI::breakpoint( const std::string & comment, const std::string & file, int
 namespace walberla {
 namespace gui {
 
-GUI * GUI::lastInstance_ = NULL;
+GUI * GUI::lastInstance_ = nullptr;
 
 GUI::GUI(timeloop::ITimeloop & timeloop, const shared_ptr<StructuredBlockForest> & blockForest, int& , char ** )
    :  timeloop_(timeloop),

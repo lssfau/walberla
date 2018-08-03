@@ -66,7 +66,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("*** READING CONFIG FILE ***");
    auto cfg = env.config();
-   if (cfg == NULL) WALBERLA_ABORT("No config specified!");
+   if (cfg == nullptr) WALBERLA_ABORT("No config specified!");
    const Config::BlockHandle mainConf  = cfg->getBlock( "ConfinedGasExtended" );
 
    const std::string sqlFile = mainConf.getParameter< std::string >( "sqlFile", "ConfinedGas.sqlite" );
@@ -164,10 +164,10 @@ int main( int argc, char ** argv )
    std::function<void(void)> syncCallWithoutTT;
    if (!syncShadowOwners)
    {
-      syncCallWithoutTT = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCallWithoutTT = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
    } else
    {
-      syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
    }
    //! [Bind Sync Call]
    
@@ -216,8 +216,8 @@ int main( int argc, char ** argv )
       {
          SphereID sp = pe::createSphere( *globalBodyStorage, *forest, storageID, 0, *it, radius, material);
          Vec3 rndVel(math::realRandom<real_t>(-vMax, vMax), math::realRandom<real_t>(-vMax, vMax), math::realRandom<real_t>(-vMax, vMax));
-         if (sp != NULL) sp->setLinearVel(rndVel);
-         if (sp != NULL) ++numParticles;
+         if (sp != nullptr) sp->setLinearVel(rndVel);
+         if (sp != nullptr) ++numParticles;
       }
    }
    mpi::reduceInplace(numParticles, mpi::SUM);

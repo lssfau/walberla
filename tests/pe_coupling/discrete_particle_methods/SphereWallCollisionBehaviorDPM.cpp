@@ -699,7 +699,7 @@ int main( int argc, char **argv )
 
    // connect to pe
    const real_t overlap = real_t( 1.5 ) * dx;
-   auto syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   auto syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    // create the sphere
    const real_t restitutionCoeff = real_t(0.97);

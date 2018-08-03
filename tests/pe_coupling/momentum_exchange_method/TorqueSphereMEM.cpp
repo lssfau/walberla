@@ -421,14 +421,14 @@ int main( int argc, char **argv )
    // create the sphere in the middle of the domain
    Vector3<real_t> position (real_c(setup.length) * real_c(0.5));
    auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, setup.radius );
-   if ( sphere != NULL )
+   if ( sphere != nullptr )
    {
       sphere->setAngularVel( real_c(0), setup.angularVel, real_c(0) );
    }
 
    // synchronize often enough for large bodies
    for( uint_t i = 0; i < XBlocks / 2; ++i)
-      pe::syncShadowOwners<BodyTypeTuple>( blocks->getBlockForest(), bodyStorageID, NULL, overlap);
+      pe::syncShadowOwners<BodyTypeTuple>( blocks->getBlockForest(), bodyStorageID, nullptr, overlap);
 
 
    ///////////////////////
@@ -452,7 +452,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

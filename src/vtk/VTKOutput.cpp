@@ -45,7 +45,7 @@ VTKOutput::VTKOutput( const BlockStorage & bs, const std::string & identifier, c
                       const uint_t initialExecutionCount ) :
 
    unstructuredBlockStorage_( &bs ),
-   blockStorage_( NULL ),
+   blockStorage_( nullptr ),
    baseFolder_( baseFolder ), executionFolder_( executionFolder ),
    executionCounter_(initialExecutionCount), initialWriteCallsToSkip_(0), writeFrequency_( writeFrequency ), continuousNumbering_( continuousNumbering ),
    pvdEnd_(-2), binary_( binary ), format_( binary ? std::string("binary") : std::string("ascii") ),
@@ -86,7 +86,7 @@ VTKOutput::VTKOutput( const shared_ptr< PointDataSource > pds, const std::string
                       const bool continuousNumbering, const bool binary, const bool littleEndian, const bool useMPIIO,
                       const uint_t initialExecutionCount ) :
 
-   unstructuredBlockStorage_(NULL), blockStorage_( NULL ), pointDataSource_( pds ),
+   unstructuredBlockStorage_(nullptr), blockStorage_( nullptr ), pointDataSource_( pds ),
    baseFolder_( baseFolder ), executionFolder_( executionFolder ),
    executionCounter_(initialExecutionCount), initialWriteCallsToSkip_(0), writeFrequency_( writeFrequency ), continuousNumbering_( continuousNumbering ),
    pvdEnd_(-2), binary_( binary ), format_( binary ? std::string("binary") : std::string("ascii") ),
@@ -107,7 +107,7 @@ VTKOutput::VTKOutput( const shared_ptr< PolylineDataSource > pds, const std::str
                       const bool continuousNumbering, const bool binary, const bool littleEndian, const bool useMPIIO,
                       const uint_t initialExecutionCount ) :
 
-   unstructuredBlockStorage_(NULL), blockStorage_( NULL ), polylineDataSource_( pds ),
+   unstructuredBlockStorage_(nullptr), blockStorage_( nullptr ), polylineDataSource_( pds ),
    baseFolder_( baseFolder ), executionFolder_( executionFolder ),
    executionCounter_(initialExecutionCount), initialWriteCallsToSkip_(0), writeFrequency_( writeFrequency ), continuousNumbering_( continuousNumbering ),
    pvdEnd_(-2), binary_( binary ), format_( binary ? std::string("binary") : std::string("ascii") ),

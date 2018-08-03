@@ -43,7 +43,7 @@ bool StructuredBlockForest::blockExists( const Cell& cell, const uint_t level ) 
    }
 
    const IBlock* block = getBlock(x,y,z);
-   if( block == NULL )
+   if( block == nullptr )
       return false;
 
    WALBERLA_ASSERT_EQUAL( dynamic_cast< const Block* >( block ), block );
@@ -68,7 +68,7 @@ void StructuredBlockForest::getBlockID( IBlockID& id, const Cell& cell, const ui
    }
    else {
       const IBlock* const block = getBlock(x,y,z);
-      if( block == NULL ) {
+      if( block == nullptr ) {
          WALBERLA_ABORT( "Getting block ID failed: Locally, there exists no block at global cell " << cell << " on level " << level << "!\n"
                          "                         (for simulation global information you have to explicitly construct the block forest to "
                          "contain global knowledge)");

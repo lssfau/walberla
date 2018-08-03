@@ -286,7 +286,7 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
    {
       MPIManager::instance()->useWorldComm();
 
-      sforest.balanceLoad( blockforest::CartesianDistribution( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, NULL ),
+      sforest.balanceLoad( blockforest::CartesianDistribution( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, nullptr ),
                            numberOfXProcesses * numberOfYProcesses * numberOfZProcesses, real_t(0), 0, true );
    }
 
@@ -847,7 +847,7 @@ int main( int argc, char **argv )
    //WALBERLA_ROOT_SECTION() { logging::Logging::instance()->setLogLevel( logging::Logging::PROGRESS ); }
 
 #ifdef _OPENMP
-   if( std::getenv( "OMP_NUM_THREADS" ) == NULL )
+   if( std::getenv( "OMP_NUM_THREADS" ) == nullptr )
       WALBERLA_ABORT( "If you are using a version of the benchmark that was compiled with OpenMP you have to "
                       "specify the environment variable \'OMP_NUM_THREADS\' accordingly!" );
 #endif

@@ -410,11 +410,11 @@ int main( int argc, char **argv )
    auto fcdID          = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
 
    // set up collision response, here DEM solver
-   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, NULL);
+   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, nullptr);
 
    // set up synchronization procedure
    const real_t overlap = real_c( 1.5 ) * dx;
-   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    // create pe bodies
    const auto material = pe::createMaterial( "granular", real_c(1.2), real_c(0.25), real_c(0.4), real_c(0.4), real_c(0.35), real_c(1.39e11), real_c(5.18e7), real_c(1.07e2), real_c(1.07e2) );
@@ -439,31 +439,31 @@ int main( int argc, char **argv )
    const real_t radius = real_t(10);
 
    auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(50), real_t(35) ), radius, material );
-   if( sphere != NULL ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
 
    sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(35), real_t(50) ), radius, material );
-   if( sphere != NULL ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
 
    sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(65), real_t(50) ), radius, material );
-   if( sphere != NULL ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
 
    sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(15), real_t(50), real_t(65) ), radius, material );
-   if( sphere != NULL ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
 
    sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(35), real_t(35), real_t(35) ), radius, material );
-   if( sphere != NULL ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
 
    sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(35), real_t(65), real_t(35) ), radius, material );
-   if( sphere != NULL ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
 
    sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(35), real_t(35), real_t(65) ), radius, material );
-   if( sphere != NULL ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
 
    sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(35), real_t(65), real_t(65) ), radius, material );
-   if( sphere != NULL ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
 
    sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_t(50), real_t(50), real_t(50) ), radius, material );
-   if( sphere != NULL ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
+   if( sphere != nullptr ) sphere->setLinearVel( velocity, real_t(0), real_t(0) );
 
    //synchronize the pe set up on all processes
    syncCall();
@@ -486,7 +486,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
 
    // add boundary handling & initialize outer domain boundaries (moving walls on the front, back, top, and bottom plane)
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

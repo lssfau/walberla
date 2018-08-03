@@ -77,7 +77,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("*** READING CONFIG FILE ***");
    auto cfg = env.config();
-   if (cfg == NULL) WALBERLA_ABORT("No config specified!");
+   if (cfg == nullptr) WALBERLA_ABORT("No config specified!");
    const Config::BlockHandle mainConf  = cfg->getBlock( "PeriodicGranularGas" );
 
    int simulationSteps = mainConf.getParameter<int>("simulationSteps", 10 );
@@ -160,11 +160,11 @@ int main( int argc, char ** argv )
    std::function<void(void)> syncCallWithoutTT;
    if (bNN)
    {
-      syncCallWithoutTT = std::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.1), false );
+      syncCallWithoutTT = std::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.1), false );
       WALBERLA_LOG_INFO_ON_ROOT("Using NextNeighbor sync!");
    } else if (bSO)
    {
-      syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.1), false );
+      syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.1), false );
       WALBERLA_LOG_INFO_ON_ROOT("Using ShadowOwner sync!");
    } else
    {
@@ -193,7 +193,7 @@ int main( int argc, char ** argv )
       for (auto it = grid_generator::SCIterator(currentBlock.getAABB().getIntersection(generationDomain), Vector3<real_t>(spacing, spacing, spacing) * real_c(0.5), spacing); it != grid_generator::SCIterator(); ++it)
       {
          SphereID sp = pe::createSphere( *globalBodyStorage, *forest, storageID, 0, *it, radius, material);
-         if (sp != NULL) ++numParticles;
+         if (sp != nullptr) ++numParticles;
       }
    }
    mpi::reduceInplace(numParticles, mpi::SUM);

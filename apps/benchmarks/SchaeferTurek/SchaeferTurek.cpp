@@ -1101,7 +1101,7 @@ void VorticityRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::
       const Block * const block = it->first;
       const VectorField_T * u = block->template getData< VectorField_T >( fieldId_ );
 
-      if( u == NULL )
+      if( u == nullptr )
       {
          it->second = uint_t(0);
          continue;
@@ -1532,7 +1532,7 @@ void Evaluation< LatticeModel_T >::operator()()
    if( setup_.evaluateStrouhal )
    {
       auto block = blocks->getBlock( setup_.pStrouhal );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const PdfField_T * const pdfField = block->template getData< PdfField_T >( pdfFieldId_ );
          const auto cell = blocks->getBlockLocalCell( *block, setup_.pStrouhal );
@@ -2012,7 +2012,7 @@ void Evaluation< LatticeModel_T >::refresh()
       int omega( 0 );
 
       auto block = blocks->getBlock( setup_.pAlpha );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const FlagField_T * const flagField = block->template getData< FlagField_T >( flagFieldId_ );
 
@@ -2036,7 +2036,7 @@ void Evaluation< LatticeModel_T >::refresh()
       }
 
       block = blocks->getBlock( setup_.pOmega );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const FlagField_T * const flagField = block->template getData< FlagField_T >( flagFieldId_ );
 
@@ -2065,7 +2065,7 @@ void Evaluation< LatticeModel_T >::refresh()
       if( alpha == 0 )
       {
          block = blocks->getBlock( setup_.pAlpha );
-         if( block != NULL )
+         if( block != nullptr )
          {
             const FlagField_T * const flagField = block->template getData< FlagField_T >( flagFieldId_ );
 
@@ -2085,7 +2085,7 @@ void Evaluation< LatticeModel_T >::refresh()
       if( omega == 0 )
       {
          block = blocks->getBlock( setup_.pOmega );
-         if( block != NULL )
+         if( block != nullptr )
          {
             const FlagField_T * const flagField = block->template getData< FlagField_T >( flagFieldId_ );
 
@@ -2121,7 +2121,7 @@ void Evaluation< LatticeModel_T >::refresh()
       int strouhal( 0 );
 
       auto block = blocks->getBlock( setup_.pStrouhal );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const FlagField_T * const flagField = block->template getData< FlagField_T >( flagFieldId_ );
 
@@ -2181,7 +2181,7 @@ void Evaluation< LatticeModel_T >::evaluate( real_t & cDRealArea, real_t & cLRea
    if( setup_.evaluatePressure )
    {
       auto block = blocks->getBlock( setup_.pAlpha );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const PdfField_T * const pdfField = block->template getData< PdfField_T >( pdfFieldId_ );
          const auto cell = blocks->getBlockLocalCell( *block, setup_.pAlpha );
@@ -2190,7 +2190,7 @@ void Evaluation< LatticeModel_T >::evaluate( real_t & cDRealArea, real_t & cLRea
       }
 
       block = blocks->getBlock( setup_.pOmega );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const PdfField_T * const pdfField = block->template getData< PdfField_T >( pdfFieldId_ );
          const auto cell = blocks->getBlockLocalCell( *block, setup_.pOmega );
@@ -3007,7 +3007,7 @@ int main( int argc, char **argv )
    //WALBERLA_ROOT_SECTION() { logging::Logging::instance()->setLogLevel( logging::Logging::PROGRESS ); }
 
 #ifdef _OPENMP
-   if( std::getenv( "OMP_NUM_THREADS" ) == NULL )
+   if( std::getenv( "OMP_NUM_THREADS" ) == nullptr )
       WALBERLA_ABORT( "If you are using a version of the program that was compiled with OpenMP you have to "
                       "specify the environment variable \'OMP_NUM_THREADS\' accordingly!" );
 #endif

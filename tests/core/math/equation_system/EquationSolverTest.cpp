@@ -171,7 +171,7 @@ int unitTest(double v)
 }
 
 int unitTests(unsigned int count){
-   srand( static_cast<unsigned int>(time(NULL)) );
+   srand( static_cast<unsigned int>(time(nullptr)) );
 
    double values[] = {0.0, 1.0, 1e-15, 1e+15};
    unsigned int size = 4;

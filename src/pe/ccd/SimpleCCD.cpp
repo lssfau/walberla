@@ -55,7 +55,7 @@ SimpleCCD::~SimpleCCD()
 PossibleContacts& SimpleCCD::generatePossibleContacts( WcTimingTree* tt ){
    contacts_.clear();
 
-   if (tt != NULL) tt->start("SimpleCCD");
+   if (tt != nullptr) tt->start("SimpleCCD");
    for (auto it1 = bodies_.begin(); it1 != bodies_.end(); ++it1){
       for (auto it2 = it1 + 1; it2 !=bodies_.end(); ++it2)
       {
@@ -79,7 +79,7 @@ PossibleContacts& SimpleCCD::generatePossibleContacts( WcTimingTree* tt ){
          }
       }
    }
-   if (tt != NULL) tt->stop("SimpleCCD");
+   if (tt != nullptr) tt->stop("SimpleCCD");
 
    return contacts_;
 }

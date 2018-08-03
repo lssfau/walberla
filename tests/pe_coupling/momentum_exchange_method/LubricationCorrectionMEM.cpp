@@ -788,11 +788,11 @@ int main( int argc, char **argv )
    auto fcdID          = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
 
    // set up collision response, here DEM solver
-   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, NULL);
+   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, nullptr);
 
    // set up synchronization procedure
    const real_t overlap = real_c( 1.5 ) * dx;
-   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    // create the material
    const auto myMat = pe::createMaterial( "myMat", real_c(1.4), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(0) );
@@ -808,9 +808,9 @@ int main( int argc, char **argv )
 
       // create two approaching spheres
       auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, id1, Vector3<real_t> (real_c(50.0), real_c(64.0), real_c(64.0)), radius, myMat );
-      if ( sphere != NULL ) sphere->setLinearVel( velocity);
+      if ( sphere != nullptr ) sphere->setLinearVel( velocity);
       sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, id2, Vector3<real_t> (real_c(78.0), real_c(64.0), real_c(64.0)), radius, myMat );
-      if ( sphere != NULL ) sphere->setLinearVel(-velocity);
+      if ( sphere != nullptr ) sphere->setLinearVel(-velocity);
    }
 
    // sphere-wall test
@@ -828,7 +828,7 @@ int main( int argc, char **argv )
       // <19.2,64,64> // <25.6,64,64> // <28.8,64,64>  // <38.4,64,64>    //1st: <41.765,64,64> // <27.205,64,64> // <20.88,64,64> (chosen s.th. last gap: 0.05 and initial s=1.1 ) // like Ding: <17,64,64>
       //  6           // 8            // 9             // 12              //1st  // 13.05       // 8.5            // 6.525                                                          // like Ding: 4.25
       auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, id1, Vector3<real_t> (real_c(38.4), real_c(64.0), real_c(64.0)), radius, myMat );
-      if ( sphere != NULL ) sphere->setLinearVel( velocity);
+      if ( sphere != nullptr ) sphere->setLinearVel( velocity);
    }
 
    if ( funcTest )
@@ -841,9 +841,9 @@ int main( int argc, char **argv )
 
       // create two approaching spheres
       auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, id1, Vector3<real_t> (real_c( 6.0) , real_c(6.0), real_c(6.0)), radius, myMat );
-      if ( sphere != NULL ) sphere->setLinearVel( velocity);
+      if ( sphere != nullptr ) sphere->setLinearVel( velocity);
       sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, id2, Vector3<real_t> (real_c(12.0) , real_c(6.0), real_c(6.0)), radius, myMat );
-      if ( sphere != NULL ) sphere->setLinearVel( -velocity);
+      if ( sphere != nullptr ) sphere->setLinearVel( -velocity);
 
       // set the same boundary handling as for the sphere-sphereTest
       sphSphTest = true;
@@ -908,7 +908,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
 
    // add boundary handling & initialize outer domain boundaries (moving walls on the front, back, top, and bottom plane)
    BlockDataID boundaryHandlingID;

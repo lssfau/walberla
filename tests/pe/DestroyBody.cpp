@@ -56,7 +56,7 @@ int main( int argc, char** argv )
     SetBodyTypeIDs<BodyTuple>::execute();
 
     auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
-    Storage* firstStorage = NULL, *secondStorage = NULL;
+    Storage* firstStorage = nullptr, *secondStorage = nullptr;
     for (auto it = forest->begin(); it != forest->end(); ++it)
     {
        IBlock & currentBlock = *it;

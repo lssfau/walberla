@@ -167,10 +167,10 @@ int main( int argc, char ** argv )
 
    SphereID sphere = createSphere( *globalStorage, forest->getBlockStorage(), storageID, 0, gpos, r);
    walberla::id_t sphereID = 789456123;
-   if (sphere != NULL) sphereID = sphere->getSystemID();
+   if (sphere != nullptr) sphereID = sphere->getSystemID();
    int sphereRank = -1;
 
-   if (sphere != NULL)
+   if (sphere != nullptr)
    {
       sphere->setLinearVel(4, 5, 6);
       sphere->setAngularVel( 1, 2, 3);
@@ -212,10 +212,10 @@ int main( int argc, char ** argv )
 
    //test with dx
    real_t dx = real_c(0.5);
-   syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, NULL, dx);
-   syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, NULL, dx);
-   syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, NULL, dx);
-   syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, NULL, dx);
+   syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, nullptr, dx);
+   syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, nullptr, dx);
+   syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, nullptr, dx);
+   syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, nullptr, dx);
 
    for (auto dir = stencil::D3Q27::beginNoCenter(); dir != stencil::D3Q27::end(); ++dir)
    {
@@ -223,19 +223,19 @@ int main( int argc, char ** argv )
       Vec3 delta = Vec3( real_c(dir.cx()), real_c(dir.cy()), real_c(dir.cz()) ) / real_c(3.0);
       for (int i = 0; i < 21; ++i)
       {
-         syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, NULL, dx);
+         syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, nullptr, dx);
          Vec3 pos = refSphere.getPosition() + delta;
          if (!forest->getDomain().contains( pos, real_c(0.5) ))
             forest->mapToPeriodicDomain(pos);
          checkSphere(*forest, storageID, sid, &refSphere, pos, dx);
       }
    }
-   syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, NULL, dx);
+   syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID, nullptr, dx);
    WALBERLA_LOG_PROGRESS("TEST WITH DX ... finished");
 
    sphere = static_cast<SphereID> (getBody(*globalStorage, forest->getBlockStorage(), storageID, sphereID));
 
-   if (sphere != NULL)
+   if (sphere != nullptr)
    {
       //      WALBERLA_LOG_DEVEL("pos: " << sphere->getPosition());
       //      WALBERLA_LOG_DEVEL("aabb: " << sphere->getAABB());

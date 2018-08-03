@@ -806,15 +806,15 @@ int main( int argc, char **argv )
 
    // set up collision response, here DEM solver
    // in this test case, it is only used for the time integration
-   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, NULL);
+   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, nullptr);
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
    std::function<void(void)> syncCall;
    if( XBlocks <= uint_t(4) )
-      syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+      syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
    else
-      syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+      syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
 
    real_t xParticle = real_t(0);
@@ -832,7 +832,7 @@ int main( int argc, char **argv )
       else if( int(Galileo) == 250 )
       {
          // add random perturbance for chaotic regime
-         walberla::math::seedRandomGenerator( std::mt19937::result_type(std::time(0)) );
+         walberla::math::seedRandomGenerator( std::mt19937::result_type(std::time(nullptr)) );
          xParticle = real_c( xlength ) * real_t(0.5) + walberla::math::realRandom( real_t(-0.5), real_t(0.5) );
          yParticle = real_c( ylength ) * real_t(0.5) + walberla::math::realRandom( real_t(-0.5), real_t(0.5) );
 
@@ -883,7 +883,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
 
    // add body and volume fraction field
    BlockDataID bodyAndVolumeFractionFieldID = field::addToStorage< BodyAndVolumeFractionField_T >( blocks, "body and volume fraction field",

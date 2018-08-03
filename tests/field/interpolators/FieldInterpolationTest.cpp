@@ -129,7 +129,7 @@ void testNearestNeighborFieldInterpolator( const shared_ptr<StructuredBlockStora
    {
       Vector3<real_t> interpolationPoint(real_t(1.9), real_t(2.1), real_t(2.1));
       auto containingBlockID = blocks->getBlock(interpolationPoint);
-      if( containingBlockID != NULL )
+      if( containingBlockID != nullptr )
       {
          real_t interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<ScalarFieldInterpolator_T>(scalarFieldInterpolatorID);
@@ -142,7 +142,7 @@ void testNearestNeighborFieldInterpolator( const shared_ptr<StructuredBlockStora
    {
       Vector3<real_t> interpolationPoint(real_t(5.4),real_t(2.1),real_t(3.2));
       auto containingBlockID = blocks->getBlock( interpolationPoint );
-      if( containingBlockID != NULL ) {
+      if( containingBlockID != nullptr ) {
          Vector3<real_t> interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<Vec3FieldInterpolator_T>(vectorFieldInterpolatorID);
          interPtr->get(interpolationPoint, &interpolatedValue);
@@ -156,7 +156,7 @@ void testNearestNeighborFieldInterpolator( const shared_ptr<StructuredBlockStora
    {
       Vector3<real_t> interpolationPoint(real_t(4.4),real_t(2.1),real_t(3.2));
       auto containingBlockID = blocks->getBlock( interpolationPoint );
-      if( containingBlockID != NULL ) {
+      if( containingBlockID != nullptr ) {
          std::vector<real_t> interpolatedValue(3, real_t(0));
          auto interPtr = containingBlockID->getData<MultiComponentFieldInterpolator_T>(multiComponentFieldInterpolatorID);
          interPtr->get(interpolationPoint, interpolatedValue.begin());
@@ -182,7 +182,7 @@ void testTrilinearFieldInterpolator( const shared_ptr<StructuredBlockStorage> & 
    {
       Vector3<real_t> interpolationPoint(real_t(1.9), real_t(2.1), real_t(2.1));
       auto containingBlockID = blocks->getBlock(interpolationPoint);
-      if( containingBlockID != NULL )
+      if( containingBlockID != nullptr )
       {
          real_t interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<ScalarFieldInterpolator_T>(scalarFieldInterpolatorID);
@@ -195,7 +195,7 @@ void testTrilinearFieldInterpolator( const shared_ptr<StructuredBlockStorage> & 
    {
       Vector3<real_t> interpolationPoint(real_t(5.4),real_t(2.1),real_t(3.2));
       auto containingBlockID = blocks->getBlock( interpolationPoint );
-      if( containingBlockID != NULL ) {
+      if( containingBlockID != nullptr ) {
          Vector3<real_t> interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<Vec3FieldInterpolator_T>(vectorFieldInterpolatorID);
          interPtr->get(interpolationPoint, &interpolatedValue);
@@ -209,7 +209,7 @@ void testTrilinearFieldInterpolator( const shared_ptr<StructuredBlockStorage> & 
    {
       Vector3<real_t> interpolationPoint(real_t(4.4),real_t(2.1),real_t(3.2));
       auto containingBlockID = blocks->getBlock( interpolationPoint );
-      if( containingBlockID != NULL ) {
+      if( containingBlockID != nullptr ) {
          std::vector<real_t> interpolatedValue(3, real_t(0));
          auto interPtr = containingBlockID->getData<MultiComponentFieldInterpolator_T>(multiComponentFieldInterpolatorID);
          interPtr->get(interpolationPoint, interpolatedValue.begin());
@@ -235,7 +235,7 @@ void testKernelFieldInterpolator( const shared_ptr<StructuredBlockStorage> & blo
    {
       Vector3<real_t> interpolationPoint(real_t(1.9), real_t(2.1), real_t(2.1));
       auto containingBlockID = blocks->getBlock(interpolationPoint);
-      if( containingBlockID != NULL )
+      if( containingBlockID != nullptr )
       {
          real_t interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<ScalarFieldInterpolator_T>(scalarFieldInterpolatorID);
@@ -248,7 +248,7 @@ void testKernelFieldInterpolator( const shared_ptr<StructuredBlockStorage> & blo
    {
       Vector3<real_t> interpolationPoint(real_t(5.4),real_t(2.1),real_t(3.2));
       auto containingBlockID = blocks->getBlock( interpolationPoint );
-      if( containingBlockID != NULL ) {
+      if( containingBlockID != nullptr ) {
          Vector3<real_t> interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<Vec3FieldInterpolator_T>(vectorFieldInterpolatorID);
          interPtr->get(interpolationPoint, &interpolatedValue);
@@ -262,7 +262,7 @@ void testKernelFieldInterpolator( const shared_ptr<StructuredBlockStorage> & blo
    {
       Vector3<real_t> interpolationPoint(real_t(4.4),real_t(2.1),real_t(3.2));
       auto containingBlockID = blocks->getBlock( interpolationPoint );
-      if( containingBlockID != NULL ) {
+      if( containingBlockID != nullptr ) {
          std::vector<real_t> interpolatedValue(3, real_t(0));
          auto interPtr = containingBlockID->getData<MultiComponentFieldInterpolator_T>(multiComponentFieldInterpolatorID);
          interPtr->get(interpolationPoint, interpolatedValue.begin());
@@ -284,7 +284,7 @@ void testNearestNeighborFieldInterpolatorAtBoundary( const shared_ptr<Structured
    {
       Vector3<real_t> interpolationPoint(real_t(1.9), real_t(2.1), real_t(2.1));
       auto containingBlockID = blocks->getBlock(interpolationPoint);
-      if (containingBlockID != NULL) {
+      if (containingBlockID != nullptr) {
          real_t interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<ScalarFieldInterpolator_T>(scalarFieldInterpolatorID);
          interPtr->get(interpolationPoint, &interpolatedValue);
@@ -297,7 +297,7 @@ void testNearestNeighborFieldInterpolatorAtBoundary( const shared_ptr<Structured
    {
       Vector3<real_t> interpolationPoint(real_t(2.7), real_t(2.1), real_t(1.1));
       auto containingBlockID = blocks->getBlock(interpolationPoint);
-      if (containingBlockID != NULL) {
+      if (containingBlockID != nullptr) {
          real_t interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<ScalarFieldInterpolator_T>(scalarFieldInterpolatorID);
          interPtr->get(interpolationPoint, &interpolatedValue);
@@ -317,7 +317,7 @@ void testTrilinearFieldInterpolatorAtBoundary( const shared_ptr<StructuredBlockS
    {
       Vector3<real_t> interpolationPoint(real_t(1.9), real_t(2.1), real_t(2.1));
       auto containingBlockID = blocks->getBlock(interpolationPoint);
-      if (containingBlockID != NULL) {
+      if (containingBlockID != nullptr) {
          real_t interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<ScalarFieldInterpolator_T>(scalarFieldInterpolatorID);
          interPtr->get(interpolationPoint, &interpolatedValue);
@@ -330,7 +330,7 @@ void testTrilinearFieldInterpolatorAtBoundary( const shared_ptr<StructuredBlockS
    {
       Vector3<real_t> interpolationPoint(real_t(2.7), real_t(2.1), real_t(1.1));
       auto containingBlockID = blocks->getBlock(interpolationPoint);
-      if (containingBlockID != NULL) {
+      if (containingBlockID != nullptr) {
          real_t interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<ScalarFieldInterpolator_T>(scalarFieldInterpolatorID);
          interPtr->get(interpolationPoint, &interpolatedValue);
@@ -350,7 +350,7 @@ void testKernelFieldInterpolatorAtBoundary( const shared_ptr<StructuredBlockStor
    {
       Vector3<real_t> interpolationPoint(real_t(1.9), real_t(2.1), real_t(2.1));
       auto containingBlockID = blocks->getBlock(interpolationPoint);
-      if (containingBlockID != NULL) {
+      if (containingBlockID != nullptr) {
          real_t interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<ScalarFieldInterpolator_T>(scalarFieldInterpolatorID);
          interPtr->get(interpolationPoint, &interpolatedValue);
@@ -367,7 +367,7 @@ void testKernelFieldInterpolatorAtBoundary( const shared_ptr<StructuredBlockStor
    {
       Vector3<real_t> interpolationPoint(real_t(2.7), real_t(2.1), real_t(1.1));
       auto containingBlockID = blocks->getBlock(interpolationPoint);
-      if (containingBlockID != NULL) {
+      if (containingBlockID != nullptr) {
          real_t interpolatedValue(real_t(0));
          auto interPtr = containingBlockID->getData<ScalarFieldInterpolator_T>(scalarFieldInterpolatorID);
          interPtr->get(interpolationPoint, &interpolatedValue);

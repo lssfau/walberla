@@ -1152,7 +1152,7 @@ int main( int argc, char **argv )
    logging::Logging::printHeaderOnStream();
 
 #ifdef _OPENMP
-   if( std::getenv( "OMP_NUM_THREADS" ) == NULL )
+   if( std::getenv( "OMP_NUM_THREADS" ) == nullptr )
       WALBERLA_ABORT( "If you are using a version of the benchmark that was compiled with OpenMP you have to "
                       "specify the environment variable \'OMP_NUM_THREADS\' accordingly!" );
 #endif

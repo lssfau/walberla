@@ -179,7 +179,7 @@ void Timeloop::executeSelectable( const selectable::SetSelectableObject<VoidFctN
 {
    std::string objectName;
    const VoidFctNoArguments * exe = selectable.getUnique( selector,objectName );
-   if( exe == NULL )
+   if( exe == nullptr )
       WALBERLA_ABORT( "Trying to selecting " << what << ": "
                       << "Multiple Matches found! Check your selector " << selector << std::endl
                       << "All registered objects: " << std::endl << selectable << std::endl );

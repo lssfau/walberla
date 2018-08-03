@@ -116,8 +116,8 @@ int main( int argc, char * argv[] )
    int64_t edgecut;
    std::vector< int64_t > part( numeric_cast<size_t>( nvtxs ) );
 
-   int result =  core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj.front()), &(adjncy.front()), NULL, NULL, NULL,
-                                                 &nparts, NULL, NULL, NULL, &edgecut, &(part.front()) );
+   int result =  core::METIS_PartGraphRecursive( &nvtxs, &ncon, &(xadj.front()), &(adjncy.front()), nullptr, nullptr, nullptr,
+                                                 &nparts, nullptr, nullptr, nullptr, &edgecut, &(part.front()) );
 
    WALBERLA_CHECK_EQUAL( result, core::METIS_OK );  
 

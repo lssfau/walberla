@@ -338,7 +338,7 @@ void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& inter
    }
    
    WALBERLA_MPI_BARRIER();
-   if (tt != NULL) tt->start("Reduction");
+   if (tt != nullptr) tt->start("Reduction");
    int rank = mpi::MPIManager::instance()->rank();
 
    const int recvRank = 0;
@@ -348,13 +348,13 @@ void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& inter
                  bodyIntersectionInfo_mpi_type, bodyIntersectionInfo_reduction_op,
                  recvRank, MPI_COMM_WORLD);
    } else {
-      MPI_Reduce(&intersectionsBuffer[0], 0, int_c(intersectionsBuffer.size()),
+      MPI_Reduce(&intersectionsBuffer[0], nullptr, int_c(intersectionsBuffer.size()),
                  bodyIntersectionInfo_mpi_type, bodyIntersectionInfo_reduction_op,
                  recvRank, MPI_COMM_WORLD);
    }
    
    WALBERLA_MPI_BARRIER();
-   if (tt != NULL) tt->stop("Reduction");
+   if (tt != nullptr) tt->stop("Reduction");
 }
   
 /*!\brief Conflate the intersectionsBuffer of each process onto the root process using MPI_Gather.
@@ -366,7 +366,7 @@ void Raytracer::syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& inter
  */
 void Raytracer::syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& intersections, std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt) {
    WALBERLA_MPI_BARRIER();
-   if (tt != NULL) tt->start("Reduction");
+   if (tt != nullptr) tt->start("Reduction");
    
    mpi::SendBuffer sendBuffer;
    for (auto& info: intersections) {
@@ -398,27 +398,27 @@ void Raytracer::syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& inter
    }
    
    WALBERLA_MPI_BARRIER();
-   if (tt != NULL) tt->stop("Reduction");
+   if (tt != nullptr) tt->stop("Reduction");
 }
 
 void Raytracer::localOutput(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep, WcTimingTree* tt) {
    if (getImageOutputEnabled()) {
       if (getLocalImageOutputEnabled()) {
-         if (tt != NULL) tt->start("Local Output");
+         if (tt != nullptr) tt->start("Local Output");
          writeImageToFile(intersectionsBuffer, timestep);
-         if (tt != NULL) tt->stop("Local Output");
+         if (tt != nullptr) tt->stop("Local Output");
       }
    }
 }
 
 void Raytracer::output(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep, WcTimingTree* tt) {
-   if (tt != NULL) tt->start("Output");
+   if (tt != nullptr) tt->start("Output");
    WALBERLA_ROOT_SECTION() {
       if (getImageOutputEnabled()) {
          writeImageToFile(intersectionsBuffer, timestep, true);
       }
    }
-   if (tt != NULL) tt->stop("Output");
+   if (tt != nullptr) tt->stop("Output");
 }
 
 } //namespace raytracing

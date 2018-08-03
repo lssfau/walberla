@@ -65,7 +65,7 @@ EllipsoidID createEllipsoid( BodyStorage& globalStorage, BlockStorage& blocks, B
       }
    }
 
-   if (ellipsoid != NULL)
+   if (ellipsoid != nullptr)
    {
       // Logging the successful creation of the Ellipsoid
       WALBERLA_LOG_DETAIL(

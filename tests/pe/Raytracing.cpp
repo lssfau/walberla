@@ -308,7 +308,7 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
    createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(4,real_t(5.5),5), real_t(1));
    createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,real_t(8.5),5), real_t(1));
    BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,real_t(6.5),5), Vec3(2,4,3));
-   if (box != NULL) box->rotate(0,math::M_PI/4,math::M_PI/4);
+   if (box != nullptr) box->rotate(0,math::M_PI/4,math::M_PI/4);
    createBox(*globalBodyStorage, *forest, storageID, 8, Vec3(5,1,8), Vec3(2,2,2));
    // Test scene v1 end
    
@@ -316,7 +316,7 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
    createBox(*globalBodyStorage, *forest, storageID, 9, Vec3(9,9,5), Vec3(1,1,10));
    createCapsule(*globalBodyStorage, *forest, storageID, 10, Vec3(3, 9, 1), real_t(0.5), real_t(7), iron);
    CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, 11, Vec3(7, real_t(3.5), real_t(7.5)), real_t(1), real_t(2), iron);
-   if (capsule != NULL) capsule->rotate(0,math::M_PI/3,math::M_PI/4-math::M_PI/8);
+   if (capsule != nullptr) capsule->rotate(0,math::M_PI/3,math::M_PI/4-math::M_PI/8);
    // Test scene v2 end
    
    // Test scene v3 additions start
@@ -456,7 +456,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
       real_t z = math::realRandom(forestAABB.zMin(), forestAABB.zMax());
       walberla::id_t id = walberla::id_t(i);
       BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), Vec3(len, len, len));
-      WALBERLA_CHECK(box_ != NULL);
+      WALBERLA_CHECK(box_ != nullptr);
       if (boxRotation) {
          box_->rotate(0, math::realRandom(real_t(0), real_t(1))*math::M_PI, math::realRandom(real_t(0), real_t(1))*math::M_PI);
       }
@@ -472,7 +472,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
       real_t z = math::realRandom(forestAABB.zMin(), forestAABB.zMax());
       walberla::id_t id = walberla::id_t(boxes+i);
       CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), radius, len);
-      WALBERLA_CHECK(capsule != NULL);
+      WALBERLA_CHECK(capsule != nullptr);
       capsule->rotate(0, math::realRandom(real_t(0), real_t(1))*math::M_PI, math::realRandom(real_t(0), real_t(1))*math::M_PI);
       bodies.push_back(capsule);
       bodySIDs.push_back(capsule->getSystemID());
@@ -485,7 +485,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
       real_t z = math::realRandom(forestAABB.zMin(), forestAABB.zMax());
       walberla::id_t id = walberla::id_t(boxes+capsules+i);
       SphereID sphere = createSphere(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), radius);
-      WALBERLA_CHECK(sphere != NULL);
+      WALBERLA_CHECK(sphere != nullptr);
       bodies.push_back(sphere);
       bodySIDs.push_back(sphere->getSystemID());
    }
@@ -661,7 +661,7 @@ void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::
       }
       walberla::id_t id = walberla::id_t(i);
       BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
-      WALBERLA_CHECK(box_ != NULL);
+      WALBERLA_CHECK(box_ != nullptr);
    }
    
    raytraceArtifactsForest(raytracingAlgorithm, antiAliasFactor,
@@ -706,7 +706,7 @@ void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm
       //real_t z_min = len+0.1;
       walberla::id_t id = walberla::id_t(i);
       BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
-      WALBERLA_CHECK(box_ != NULL);
+      WALBERLA_CHECK(box_ != nullptr);
    }
    
    raytraceArtifactsForest(raytracingAlgorithm, antiAliasFactor,
@@ -749,7 +749,7 @@ void HashGridsFromNegativeXArtifactsTest(Raytracer::Algorithm raytracingAlgorith
       //real_t z_min = len+0.1;
       walberla::id_t id = walberla::id_t(i);
       BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x_min, y_min, z_min), Vec3(len, len, len));
-      WALBERLA_CHECK(box_ != NULL);
+      WALBERLA_CHECK(box_ != nullptr);
    }
    
    raytraceArtifactsForest(raytracingAlgorithm, antiAliasFactor,

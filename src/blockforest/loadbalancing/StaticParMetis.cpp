@@ -43,7 +43,7 @@ template< typename T >
 T * ptr( std::vector<T> & v )
 {
    if( v.empty() )
-      return NULL;
+      return nullptr;
    else
       return &( v.front() );
 }

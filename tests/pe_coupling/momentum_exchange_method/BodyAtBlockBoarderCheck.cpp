@@ -282,18 +282,18 @@ int main( int argc, char **argv )
 
    // connect to pe
    const real_t overlap = real_c( 1.5 ) * dx;
-   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    auto sphereMaterialID = pe::createMaterial( "sphereMat", real_c(1) , real_c(0.3), real_c(0.2), real_c(0.2), real_c(0.24), real_c(200), real_c(200), real_c(0), real_c(0) );
    // create two spheres: one which overlaps with a block boundary and one inside the block
    pe::Vec3 referenceVelocity( real_c(0.1), real_c(0), real_c(0) );
    auto sphereAtBorder = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_c(31), real_c(31), real_c(31) ), radius, sphereMaterialID );
-   if( sphereAtBorder != NULL )
+   if( sphereAtBorder != nullptr )
    {
       sphereAtBorder->setLinearVel( referenceVelocity );
    }
    auto sphereInInner = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_c(7), real_c(7), real_c(7) ), radius, sphereMaterialID );
-   if( sphereInInner != NULL )
+   if( sphereInInner != nullptr )
    {
       sphereInInner->setLinearVel( referenceVelocity );
    }
@@ -315,7 +315,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf, FieldGhostLayers );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf, FieldGhostLayers );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

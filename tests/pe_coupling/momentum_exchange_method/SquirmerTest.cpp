@@ -292,7 +292,7 @@ int main(int argc, char **argv) {
 
    std::function<void(void)> syncCall = std::bind(pe::syncShadowOwners<BodyTypeTuple>,
                                                       std::ref(blocks->getBlockForest()), bodyStorageID,
-                                                      static_cast<WcTimingTree *>(NULL), overlap, false);
+                                                      static_cast<WcTimingTree *>(nullptr), overlap, false);
 
    const auto myMat = pe::createMaterial("myMat", real_c(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1),
                                          real_t(1), real_t(0), real_t(0));
@@ -325,7 +325,7 @@ int main(int argc, char **argv) {
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>(blocks, "flag field");
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<PeBodyField_T>(blocks, "body field", NULL, field::zyxf);
+   BlockDataID bodyFieldID = field::addToStorage<PeBodyField_T>(blocks, "body field", nullptr, field::zyxf);
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData<BoundaryHandling_T>(

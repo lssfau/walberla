@@ -459,7 +459,7 @@ public:
    typedef lbm::PdfField< LatticeModel_T > PdfField_T;
 
    ErrorVTKWriter( const ConstBlockDataID & pdfFieldId, const std::string & id, const Setup & setup ) :
-      vtk::BlockCellDataWriter< OutputType, 3 >( id ), bdid_( pdfFieldId ), pdf_( NULL ), setup_( setup ) {}
+      vtk::BlockCellDataWriter< OutputType, 3 >( id ), bdid_( pdfFieldId ), pdf_( nullptr ), setup_( setup ) {}
 
 protected:
 
@@ -994,7 +994,7 @@ int main( int argc, char **argv )
    //WALBERLA_ROOT_SECTION() { logging::Logging::instance()->setLogLevel( logging::Logging::PROGRESS ); }
 
 #ifdef _OPENMP
-   if( std::getenv( "OMP_NUM_THREADS" ) == NULL )
+   if( std::getenv( "OMP_NUM_THREADS" ) == nullptr )
       WALBERLA_ABORT( "If you are using a version of the program that was compiled with OpenMP you have to "
                       "specify the environment variable \'OMP_NUM_THREADS\' accordingly!" );
 #endif
