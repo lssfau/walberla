@@ -65,6 +65,7 @@
 #include "lbm/vtk/all.h"
 
 #include <functional>
+#include <memory>
 
 namespace segre_silberberg_psm
 {
@@ -632,8 +633,8 @@ int main( int argc, char **argv )
    timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, dt_pe, pe_interval ), "pe Time Step" );
 
    // check for convergence of the particle position
-   shared_ptr< SteadyStateCheck > check = shared_ptr< SteadyStateCheck >( new SteadyStateCheck( &timeloop, &setup, blocks, bodyStorageID,
-                                                                                                fileIO, SC1W1, SC2W1, SC3W1, SC1W2, SC2W2, SC3W2 ) );
+   shared_ptr< SteadyStateCheck > check = std::make_shared< SteadyStateCheck >( &timeloop, &setup, blocks, bodyStorageID,
+                                                                                                fileIO, SC1W1, SC2W1, SC3W1, SC1W2, SC2W2, SC3W2 );
    timeloop.addFuncAfterTimeStep( SharedFunctor< SteadyStateCheck >( check ), "steady state check" );
 
    if( vtkIO )

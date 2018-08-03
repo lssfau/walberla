@@ -31,6 +31,7 @@
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
 
+#include <memory>
 #include <set>
 
 
@@ -77,8 +78,8 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
       {
          auto cstate = function ? function( std::vector< std::pair< BlockID, Set<SUID> > >( 1, std::make_pair( id, state ) ), id ) : state;
 
-         auto phantom = shared_ptr< PhantomBlock >( new PhantomBlock( *this, id, cstate, aabb, targetLevel, level,
-                                                                      std::vector< uint_t >( uint_t(1), process ), process ) );
+         auto phantom = std::make_shared< PhantomBlock >( *this, id, cstate, aabb, targetLevel, level,
+                                                                      std::vector< uint_t >( uint_t(1), process ), process );
          blocks_[ phantom->getId() ] = phantom;
 
          block->addTargetProcess( process );
@@ -106,8 +107,8 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
                         ( ( c & 2 ) ? aabb.yMax() : yMid ),
                         ( ( c & 4 ) ? aabb.zMax() : zMid ) );
 
-            auto phantom = shared_ptr< PhantomBlock >( new PhantomBlock( *this, cid, cstate, caabb, targetLevel, level,
-                                                                         std::vector< uint_t >( uint_t(1), process ), process ) );
+            auto phantom = std::make_shared< PhantomBlock >( *this, cid, cstate, caabb, targetLevel, level,
+                                                                         std::vector< uint_t >( uint_t(1), process ), process );
             blocks_[ phantom->getId() ] = phantom;
 
             block->addTargetProcess( process );
@@ -146,7 +147,7 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
                                                                        sourceStates[3].second + sourceStates[4].second + sourceStates[5].second +
                                                                        sourceStates[6].second + sourceStates[7].second );
 
-            auto phantom = shared_ptr< PhantomBlock >( new PhantomBlock( *this, fid, cstate, faabb, targetLevel, level, sourceProcesses, process ) );
+            auto phantom = std::make_shared< PhantomBlock >( *this, fid, cstate, faabb, targetLevel, level, sourceProcesses, process );
             blocks_[ phantom->getId() ] = phantom;
 
             block->addTargetProcess( process );
@@ -465,7 +466,7 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
             ++sourceLevel;
          }
 
-         auto phantom = shared_ptr< PhantomBlock >( new PhantomBlock( *this, id, state, aabb, level, sourceLevel, sp, process ) );
+         auto phantom = std::make_shared< PhantomBlock >( *this, id, state, aabb, level, sourceLevel, sp, process );
          blocks_[ id ] = phantom;
 
          phantom->clearNeighborhood();

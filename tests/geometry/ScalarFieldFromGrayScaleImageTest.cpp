@@ -35,6 +35,7 @@
 #include "timeloop/SweepTimeloop.h"
 
 #include <fstream>
+#include <memory>
 
 
 namespace walberla {
@@ -66,8 +67,8 @@ int main( int argc, char ** argv )
    // Geometry Initialization from config file
    using namespace geometry::initializer;
 
-   auto geometryInitializationManager = shared_ptr<InitializationManager> ( new InitializationManager( blocks->getBlockStorage() ) );
-   auto freeSurfaceInitializer        = shared_ptr<ScalarFieldFromGrayScaleImage> ( new ScalarFieldFromGrayScaleImage( *blocks, scalarFieldID ) );
+   auto geometryInitializationManager = std::make_shared<InitializationManager> ( blocks->getBlockStorage() );
+   auto freeSurfaceInitializer        = std::make_shared<ScalarFieldFromGrayScaleImage> ( *blocks, scalarFieldID );
 
    geometryInitializationManager->registerInitializer( "FreeSurfaceImage", freeSurfaceInitializer );
 

@@ -100,6 +100,7 @@
 #include <cstring>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -334,9 +335,9 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
 
       MPIManager::instance()->useWorldComm();
 
-      auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false ) );
+      auto bf = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false );
 
-      auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, setup.xCells, setup.yCells, setup.zCells ) );
+      auto sbf = std::make_shared< StructuredBlockForest >( bf, setup.xCells, setup.yCells, setup.zCells );
       sbf->createCellBoundingBoxes();
 
       return sbf;
@@ -349,9 +350,9 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
                                                                     memoryPerCell, processMemoryLimit,
                                                                     configBlock.getParameter< bool >( "outputSetupForest", false ) );
 
-   auto bf = shared_ptr< blockforest::BlockForest >( new blockforest::BlockForest( uint_c( MPIManager::instance()->rank() ), *sforest, false ) );
+   auto bf = std::make_shared< blockforest::BlockForest >( uint_c( MPIManager::instance()->rank() ), *sforest, false );
 
-   auto sbf = shared_ptr< blockforest::StructuredBlockForest >( new blockforest::StructuredBlockForest( bf, setup.xCells, setup.yCells, setup.zCells ) );
+   auto sbf = std::make_shared< blockforest::StructuredBlockForest >( bf, setup.xCells, setup.yCells, setup.zCells );
    sbf->createCellBoundingBoxes();
    
    return sbf;

@@ -32,6 +32,7 @@
 #include "stencil/D3Q19.h"
 
 #include <functional>
+#include <memory>
 
 namespace walberla {
 namespace blockforest {
@@ -253,7 +254,7 @@ createBlockForest(      const AABB& domainAABB,
 
    // create StructuredBlockForest (encapsulates a newly created BlockForest)
 
-   return shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, keepGlobalBlockInformation ) );
+   return std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sforest, keepGlobalBlockInformation );
 }
 
 
@@ -306,7 +307,7 @@ createUniformBlockGrid( const AABB& domainAABB,
             zPeriodic,
             keepGlobalBlockInformation);
 
-   auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock ) );
+   auto sbf = std::make_shared< StructuredBlockForest >( bf, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock );
    sbf->createCellBoundingBoxes();
 
    return sbf;
@@ -514,9 +515,9 @@ createUniformBlockGrid( const AABB& domainAABB,
 
    // create StructuredBlockForest (encapsulates a newly created BlockForest)
 
-   auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, keepGlobalBlockInformation ) );
+   auto bf = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sforest, keepGlobalBlockInformation );
 
-   auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock ) );
+   auto sbf = std::make_shared< StructuredBlockForest >( bf, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock );
    sbf->createCellBoundingBoxes();
 
    return sbf;
@@ -600,12 +601,12 @@ createUniformBlockGrid( const std::string& filename,
    if( !MPIManager::instance()->rankValid() )
       MPIManager::instance()->useWorldComm();
 
-   auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), filename.c_str(), true, keepGlobalBlockInformation ) );
+   auto bf = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), filename.c_str(), true, keepGlobalBlockInformation );
 
    if( !bf->storesUniformBlockGrid() )
       WALBERLA_ABORT( "The block forest loaded from file \'" << filename << "\' does not contain a uniform block grid!" );
 
-   auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock ) );
+   auto sbf = std::make_shared< StructuredBlockForest >( bf, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock );
    sbf->createCellBoundingBoxes();
 
    return sbf;

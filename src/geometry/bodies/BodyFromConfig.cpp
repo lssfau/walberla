@@ -20,6 +20,8 @@
 //======================================================================================================================
 
 #include "BodyFromConfig.h"
+
+#include <memory>
 #include "core/Abort.h"
 
 
@@ -107,8 +109,8 @@ BodyLogicalAND<Sphere,AABB> sphereSliceFromConfig ( const Config::BlockHandle & 
 {
    Sphere sphere = sphereFromConfig(block.getOneBlock("Sphere"));
    AABB box = AABBFromConfig  (block.getOneBlock("Box"));
-   auto spherePtr = shared_ptr<Sphere>( new Sphere(sphere) );
-   auto boxPtr    = shared_ptr<AABB>  ( new AABB(box) );
+   auto spherePtr = std::make_shared<Sphere>( sphere );
+   auto boxPtr    = std::make_shared<AABB>  ( box );
    
    return BodyLogicalAND<Sphere,AABB>(spherePtr, boxPtr);
 }
@@ -122,10 +124,10 @@ BodyLogicalAND<Sphere,BodyLogicalNOT<Sphere> > hollowSphereFromConfig ( const Co
    if ( ! block.isDefined( "outer_radius" ) )
       WALBERLA_ABORT( "Missing parameter 'outer_radius' for sphere defined in block " << block.getKey() );
 
-   auto inner     = shared_ptr<Sphere>(  new Sphere( block.getParameter<Vector3<real_t> > ( "midpoint" ),
-                  							              block.getParameter<real_t          > ( "inner_radius"   ) ) );
-   auto outer     = shared_ptr<Sphere>(  new Sphere ( block.getParameter<Vector3<real_t> > ( "midpoint" ),
-                  			                           block.getParameter<real_t          > ( "outer_radius"   ) ) );
+   auto inner     = std::make_shared<Sphere>(  block.getParameter<Vector3<real_t> > ( "midpoint" ),
+                  							              block.getParameter<real_t          > ( "inner_radius"   ) );
+   auto outer     = std::make_shared<Sphere>(  block.getParameter<Vector3<real_t> > ( "midpoint" ),
+                  			                           block.getParameter<real_t          > ( "outer_radius"   ) );
 
    auto not_inner = make_shared<BodyLogicalNOT<Sphere> >(inner);
 	

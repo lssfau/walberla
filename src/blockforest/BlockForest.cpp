@@ -33,6 +33,7 @@
 #include "core/mpi/MPIManager.h"
 
 #include <fstream>
+#include <memory>
 #include <set>
 #include <stack>
 #include <utility>
@@ -296,7 +297,7 @@ BlockForest::BlockForest( const uint_t process, const SetupBlockForest& forest, 
 
          WALBERLA_ASSERT( blocks_.find( blocks[i]->getId() ) == blocks_.end() );
 
-         blocks_[ blocks[i]->getId() ] = shared_ptr< Block >( new Block( *this, blocks[i] ) );
+         blocks_[ blocks[i]->getId() ] = std::make_shared< Block >( *this, blocks[i] );
 
          for( uint_t j = 0; j != blocks[i]->getNeighborhoodSize(); ++j )
             if( blocks[i]->getNeighbor(j)->getProcess() != process )
@@ -595,7 +596,7 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
          AABB aabb;
          const uint_t level = aabbReconstruction( aabb, id );
 
-         auto block = shared_ptr< Block >( new Block( *this, id, aabb, state, level, neighborhoodReconstruction, neighbors ) );
+         auto block = std::make_shared< Block >( *this, id, aabb, state, level, neighborhoodReconstruction, neighbors );
 
          blocks_[ id ] = block;
       }
@@ -1195,7 +1196,7 @@ void BlockForest::restoreSnapshot( const SnapshotRestorenFunction & processMappi
             const uint_t level = getAABBFromBlockId( aabb, id );
 
             WALBERLA_ASSERT( blocks_.find( id ) == blocks_.end() );
-            blocks_[ id ] = shared_ptr< Block >( new Block( *this, id, aabb, level, buffer, processMapping ) );
+            blocks_[ id ] = std::make_shared< Block >( *this, id, aabb, level, buffer, processMapping );
 
             Block * block = blocks_[ id ].get();
             for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
@@ -2390,7 +2391,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       if( pBlock->getSourceLevel() != pBlock->getLevel() || pBlock->getSourceProcess()[0] != process_ )
       {
          WALBERLA_ASSERT( blocks_.find( pBlock->getId() ) == blocks_.end() );
-         blocks_[ pBlock->getId() ] = shared_ptr< Block >( new Block( *this, *pBlock ) );
+         blocks_[ pBlock->getId() ] = std::make_shared< Block >( *this, *pBlock );
       }
       else // update neighborhood of existing blocks
       {

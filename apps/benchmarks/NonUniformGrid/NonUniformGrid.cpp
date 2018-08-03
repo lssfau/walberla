@@ -78,6 +78,7 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <memory>
 
 
 
@@ -322,11 +323,11 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
 
       MPIManager::instance()->useWorldComm();
 
-      auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false ) );
+      auto bf = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false );
 
-      auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, numberOfXCellsPerBlock,
+      auto sbf = std::make_shared< StructuredBlockForest >( bf, numberOfXCellsPerBlock,
                                                                                      numberOfYCellsPerBlock,
-                                                                                     numberOfZCellsPerBlock ) );
+                                                                                     numberOfZCellsPerBlock );
       sbf->createCellBoundingBoxes();
 
       return sbf;
@@ -337,11 +338,11 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
    blockforest::SetupBlockForest sforest;
    createSetupBlockForest( sforest, configBlock, uint_c( MPIManager::instance()->numProcesses() ) );
 
-   auto bf = shared_ptr< blockforest::BlockForest >( new blockforest::BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, false ) );
+   auto bf = std::make_shared< blockforest::BlockForest >( uint_c( MPIManager::instance()->rank() ), sforest, false );
 
-   auto sbf = shared_ptr< blockforest::StructuredBlockForest >( new blockforest::StructuredBlockForest( bf, numberOfXCellsPerBlock,
+   auto sbf = std::make_shared< blockforest::StructuredBlockForest >( bf, numberOfXCellsPerBlock,
                                                                                                             numberOfYCellsPerBlock,
-                                                                                                            numberOfZCellsPerBlock ) );
+                                                                                                            numberOfZCellsPerBlock );
    sbf->createCellBoundingBoxes();
 
    return sbf;
