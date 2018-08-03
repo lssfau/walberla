@@ -512,45 +512,45 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
    std::vector<std::tuple<Vec3, Vec3, Vec3>> viewVectors;
    
    // y up, in negative z direction
-   viewVectors.push_back(std::make_tuple(Vec3(2, real_t(2.1), 7),
+   viewVectors.emplace_back(Vec3(2, real_t(2.1), 7),
                                      Vec3(real_t(2.1), 2, 4),
-                                     Vec3(0,1,0)));
+                                     Vec3(0,1,0));
    // y up, in positive z direction
-   viewVectors.push_back(std::make_tuple(Vec3(2, 2, -3),
+   viewVectors.emplace_back(Vec3(2, 2, -3),
                                      Vec3(2, real_t(2.1), real_t(0.1)),
-                                     Vec3(0,1,0)));
+                                     Vec3(0,1,0));
    // x up, in positive z direction
-   viewVectors.push_back(std::make_tuple(Vec3(2, 2, -3),
+   viewVectors.emplace_back(Vec3(2, 2, -3),
                                      Vec3(2, real_t(2.1), real_t(0.1)),
-                                     Vec3(1,0,0)));
+                                     Vec3(1,0,0));
    // y and x up, in positive z direction
-   viewVectors.push_back(std::make_tuple(Vec3(2, 2, -3),
+   viewVectors.emplace_back(Vec3(2, 2, -3),
                                      Vec3(2, real_t(2.1), real_t(0.1)),
-                                     Vec3(1,1,0)));
+                                     Vec3(1,1,0));
    // y and x up, in negative z direction
-   viewVectors.push_back(std::make_tuple(Vec3(2, 2, 6.5),
+   viewVectors.emplace_back(Vec3(2, 2, 6.5),
                                      Vec3(real_t(2.1), real_t(2.1), 4),
-                                     Vec3(real_t(0.5),1,0)));
+                                     Vec3(real_t(0.5),1,0));
    // z up, in positive x direction
-   viewVectors.push_back(std::make_tuple(Vec3(-3, 2, real_t(1.9)),
+   viewVectors.emplace_back(Vec3(-3, 2, real_t(1.9)),
                                      Vec3(0, real_t(2.1), 2),
-                                     Vec3(0,0,1)));
+                                     Vec3(0,0,1));
    // z up, in negative x direction
-   viewVectors.push_back(std::make_tuple(Vec3(7, 2, real_t(1.9)),
+   viewVectors.emplace_back(Vec3(7, 2, real_t(1.9)),
                                      Vec3(4, real_t(2.1), 2),
-                                     Vec3(0,0,1)));
+                                     Vec3(0,0,1));
    // z and y up, in negative x direction
-   viewVectors.push_back(std::make_tuple(Vec3(7, 2, real_t(1.9)),
+   viewVectors.emplace_back(Vec3(7, 2, real_t(1.9)),
                                      Vec3(4, real_t(2.1), 2),
-                                     Vec3(0,1,1)));
+                                     Vec3(0,1,1));
    // z and x up, in negative y direction
-   viewVectors.push_back(std::make_tuple(Vec3(2, 6, real_t(1.9)),
+   viewVectors.emplace_back(Vec3(2, 6, real_t(1.9)),
                                      Vec3(real_t(2.3), 4, 2),
-                                     Vec3(1,0,1)));
+                                     Vec3(1,0,1));
    // z up, in positive y direction
-   viewVectors.push_back(std::make_tuple(Vec3(2, real_t(-3.6), real_t(1.9)),
+   viewVectors.emplace_back(Vec3(2, real_t(-3.6), real_t(1.9)),
                                      Vec3(real_t(2.3), 0, real_t(2.1)),
-                                     Vec3(0,0,1)));
+                                     Vec3(0,0,1));
    
    Lighting lighting0(Vec3(forestAABB.xSize()/real_t(2)+1, forestAABB.ySize()/real_t(2),
                            real_t(2)*forestAABB.zMax()+2), // 8, 5, 9.5 gut für ebenen, 0,5,8
@@ -818,25 +818,25 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
    std::vector<std::tuple<Vec3, Vec3, Vec3>> viewVectors;
    
    // in negative x direction -> cubes to the right
-   viewVectors.push_back(std::make_tuple(Vec3(15,4,4),
+   viewVectors.emplace_back(Vec3(15,4,4),
                                          Vec3(8,4,4),
-                                         Vec3(0,1,0)));
+                                         Vec3(0,1,0));
    // in negative x direction and negative z direction, up vector in y direction -> cubes from the right tilted
-   viewVectors.push_back(std::make_tuple(Vec3(12,4,8),
+   viewVectors.emplace_back(Vec3(12,4,8),
                                          Vec3(6,4,2),
-                                         Vec3(0,1,0)));
+                                         Vec3(0,1,0));
    // in negative x direction and negative z direction, up vector in negative y direction
-   viewVectors.push_back(std::make_tuple(Vec3(12,4,8),
+   viewVectors.emplace_back(Vec3(12,4,8),
                                          Vec3(6,4,2),
-                                         Vec3(0,-1,0)));
+                                         Vec3(0,-1,0));
    // in positive x direction
-   viewVectors.push_back(std::make_tuple(Vec3(-7,4,4),
+   viewVectors.emplace_back(Vec3(-7,4,4),
                                          Vec3(0,4,4),
-                                         Vec3(0,1,0)));
+                                         Vec3(0,1,0));
    // in negative x direction
-   viewVectors.push_back(std::make_tuple(Vec3(4,4,15),
+   viewVectors.emplace_back(Vec3(4,4,15),
                                          Vec3(4,4,8),
-                                         Vec3(0,1,0)));
+                                         Vec3(0,1,0));
    
    WcTimingTree tt;
    

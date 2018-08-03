@@ -43,14 +43,14 @@ int CpRayIntersectionTest(const int resolution = 10)
    using namespace walberla::pe::raytracing;
 
    std::vector<Vector3<real_t>> points;
-   points.push_back( Vector3<real_t>( real_t(-1), real_t(-1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t(-1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t( 1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t( 1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t(-1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t(-1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t( 1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t( 1), real_t( 1) ) );
+   points.emplace_back( real_t(-1), real_t(-1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t(-1), real_t( 1) );
+   points.emplace_back( real_t(-1), real_t( 1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t( 1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t(-1), real_t(-1) );
+   points.emplace_back( real_t( 1), real_t(-1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t( 1), real_t(-1) );
+   points.emplace_back( real_t( 1), real_t( 1), real_t( 1) );
 
    shared_ptr< TriangleMesh > mesh = make_shared<TriangleMesh>();
    mesh::QHull<TriangleMesh> qhull( points, mesh );

@@ -32,12 +32,12 @@ namespace pe {
 std::vector< EllipsoidVtkOutput::Attributes > EllipsoidVtkOutput::getAttributes() const
 {
    std::vector< Attributes > attributes;
-   attributes.push_back( Attributes( vtk::typeToString< float >(), "mass", uint_c(1) ) );
-   attributes.push_back( Attributes( vtk::typeToString< float >(), "tensorGlyph", uint_c(6) ) );
-   attributes.push_back( Attributes( vtk::typeToString< float >(), "velocity", uint_c(3) ) );
-   attributes.push_back( Attributes( vtk::typeToString< int >(),   "rank", uint_c(1) ) );
-   attributes.push_back( Attributes( vtk::typeToString< id_t >(),  "id", uint_c(1) ) );
-   attributes.push_back( Attributes( vtk::typeToString< id_t >(),  "uid", uint_c(1) ) );
+   attributes.emplace_back( vtk::typeToString< float >(), "mass", uint_c(1) );
+   attributes.emplace_back( vtk::typeToString< float >(), "tensorGlyph", uint_c(6) );
+   attributes.emplace_back( vtk::typeToString< float >(), "velocity", uint_c(3) );
+   attributes.emplace_back( vtk::typeToString< int >(),   "rank", uint_c(1) );
+   attributes.emplace_back( vtk::typeToString< id_t >(),  "id", uint_c(1) );
+   attributes.emplace_back( vtk::typeToString< id_t >(),  "uid", uint_c(1) );
 
    return attributes;
 }

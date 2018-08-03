@@ -194,7 +194,7 @@ void StructuredBlockStorage::resetCellDecomposition( const std::vector< uint_t >
       WALBERLA_ASSERT_GREATER( yCells[i], 0 );
       WALBERLA_ASSERT_GREATER( zCells[i], 0 );
 
-      domainCellBB_.push_back( CellInterval( 0, 0, 0, cell_idx_c( xCells[i]-1 ), cell_idx_c( yCells[i]-1 ), cell_idx_c( zCells[i]-1 ) ) );
+      domainCellBB_.emplace_back( 0, 0, 0, cell_idx_c( xCells[i]-1 ), cell_idx_c( yCells[i]-1 ), cell_idx_c( zCells[i]-1 ) );
 
       dx_.push_back( xWidth / real_c( xCells[i] ) );
       dy_.push_back( yWidth / real_c( yCells[i] ) );

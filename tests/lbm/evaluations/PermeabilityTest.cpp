@@ -172,16 +172,16 @@ BlockDataID initBoundaryHandling( shared_ptr<StructuredBlockForest> & blocks, co
       const real_t r = real_c(std::sqrt(real_c(3))) / real_c(4) * L * setup.kappa;
 
       // spheres in all eight corners of the domain
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( 0, 0, 0 ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( L, 0, 0 ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( 0, L, 0 ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( 0, 0, L ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( L, L, 0 ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( L, 0, L ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( 0, L, L ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( L, L, L ), r ) );
+      spheres.emplace_back( Vector3<real_t>( 0, 0, 0 ), r );
+      spheres.emplace_back( Vector3<real_t>( L, 0, 0 ), r );
+      spheres.emplace_back( Vector3<real_t>( 0, L, 0 ), r );
+      spheres.emplace_back( Vector3<real_t>( 0, 0, L ), r );
+      spheres.emplace_back( Vector3<real_t>( L, L, 0 ), r );
+      spheres.emplace_back( Vector3<real_t>( L, 0, L ), r );
+      spheres.emplace_back( Vector3<real_t>( 0, L, L ), r );
+      spheres.emplace_back( Vector3<real_t>( L, L, L ), r );
       // and one sphere in the middle
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( L / real_c(2), L / real_c(2), L / real_c(2) ), r ) );
+      spheres.emplace_back( Vector3<real_t>( L / real_c(2), L / real_c(2), L / real_c(2) ), r );
 
       break;
    }

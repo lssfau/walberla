@@ -1240,9 +1240,9 @@ void VTKOutput::writeVTUPiece( std::ostream& ofs, const IBlock& block, const Cel
                {
                   vimap[v] = numeric_cast< Index >(vc.size());
                   ci.push_back(numeric_cast< Index >(vc.size()));
-                  vc.push_back(VertexCoord((x == 0) ? aabb.xMin() : aabb.xMax(),
+                  vc.emplace_back((x == 0) ? aabb.xMin() : aabb.xMax(),
                      (y == 0) ? aabb.yMin() : aabb.yMax(),
-                     (z == 0) ? aabb.zMin() : aabb.zMax()));
+                     (z == 0) ? aabb.zMin() : aabb.zMax());
                }
             }
          }
@@ -1329,9 +1329,9 @@ void VTKOutput::writeVTUPiece_sampling(std::ostream& ofs, const IBlock& block, c
                {
                   vimap[v] = numeric_cast< Index >(vc.size());
                   ci.push_back(numeric_cast< Index >(vc.size()));
-                  vc.push_back(VertexCoord((x == 0) ? cell->aabb_.xMin() : cell->aabb_.xMax(),
+                  vc.emplace_back((x == 0) ? cell->aabb_.xMin() : cell->aabb_.xMax(),
                      (y == 0) ? cell->aabb_.yMin() : cell->aabb_.yMax(),
-                     (z == 0) ? cell->aabb_.zMin() : cell->aabb_.zMax()));
+                     (z == 0) ? cell->aabb_.zMin() : cell->aabb_.zMax());
                }
             }
          }

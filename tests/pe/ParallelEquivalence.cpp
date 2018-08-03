@@ -157,7 +157,7 @@ void sim(shared_ptr< StructuredBlockForest > forest, std::vector<BodyData>& res,
       for (auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt)
       {
          BodyID b = bodyIt.getBodyID();
-         res.push_back(BodyData(b->getID(), b->getPosition(), b->getLinearVel()));
+         res.emplace_back(b->getID(), b->getPosition(), b->getLinearVel());
       }
    }
    mpi::SendBuffer sendBuf;
@@ -172,7 +172,7 @@ void sim(shared_ptr< StructuredBlockForest > forest, std::vector<BodyData>& res,
    res.clear();
    while (!recvBuf.isEmpty())
    {
-      res.push_back( BodyData(recvBuf) );
+      res.emplace_back(recvBuf );
    }
 
    forest.reset();

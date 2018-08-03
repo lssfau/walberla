@@ -116,14 +116,14 @@ void test( const std::string & testName, const std::vector<Vector3<real_t>> & po
 std::vector<Vector3<real_t>> generatePointCloudCube()
 {
    std::vector<Vector3<real_t>> points;
-   points.push_back( Vector3<real_t>( real_t(-1), real_t(-1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t(-1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t( 1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t( 1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t(-1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t(-1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t( 1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t( 1), real_t( 1) ) );
+   points.emplace_back( real_t(-1), real_t(-1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t(-1), real_t( 1) );
+   points.emplace_back( real_t(-1), real_t( 1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t( 1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t(-1), real_t(-1) );
+   points.emplace_back( real_t( 1), real_t(-1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t( 1), real_t(-1) );
+   points.emplace_back( real_t( 1), real_t( 1), real_t( 1) );
 
    return points;
 }
@@ -132,10 +132,10 @@ std::vector<Vector3<real_t>> generatePointCloudCube()
 std::vector<Vector3<real_t>> generatePointCloudTetrahedron()
 {
    std::vector<Vector3<real_t>> points;
-   points.push_back( Vector3<real_t>( real_t( 1), real_t( 1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t(-1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t( 1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t(-1), real_t( 1) ) );
+   points.emplace_back( real_t( 1), real_t( 1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t(-1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t( 1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t(-1), real_t( 1) );
 
    return points;
 }
@@ -146,9 +146,9 @@ std::vector<Vector3<real_t>> generatePointCloudOctahedron()
 
    for( auto one : {real_t(-1), real_t(1)} )
    {
-      points.push_back( Vector3<real_t>( one,   0,   0 ) );
-      points.push_back( Vector3<real_t>(   0, one,   0 ) );
-      points.push_back( Vector3<real_t>(   0,   0, one ) );
+      points.emplace_back( one,   0,   0 );
+      points.emplace_back(   0, one,   0 );
+      points.emplace_back(   0,   0, one );
    }
 
    return points;
@@ -163,9 +163,9 @@ std::vector<Vector3<real_t>> generatePointCloudIcosahedron()
    for( auto one : {real_t(-1), real_t(1)} )
       for( auto phi : {-PHI, PHI} )
       {
-         points.push_back( Vector3<real_t>( real_t(  0), real_t(one), real_t(phi) ) );
-         points.push_back( Vector3<real_t>( real_t(one), real_t(phi), real_t(  0) ) );
-         points.push_back( Vector3<real_t>( real_t(phi), real_t(  0), real_t(one) ) );
+         points.emplace_back( real_t(  0), real_t(one), real_t(phi) );
+         points.emplace_back( real_t(one), real_t(phi), real_t(  0) );
+         points.emplace_back( real_t(phi), real_t(  0), real_t(one) );
       }
 
    return points;
@@ -181,9 +181,9 @@ std::vector<Vector3<real_t>> generatePointCloudDodecahedron()
    for( auto phi : {-PHI, PHI} )
       for( auto piv : {-PHI_INV, PHI_INV} )
       {
-         points.push_back( Vector3<real_t>( real_t(  0), real_t(piv), real_t(phi) ) );
-         points.push_back( Vector3<real_t>( real_t(piv), real_t(phi), real_t(  0) ) );
-         points.push_back( Vector3<real_t>( real_t(phi), real_t(  0), real_t(piv) ) );
+         points.emplace_back( real_t(  0), real_t(piv), real_t(phi) );
+         points.emplace_back( real_t(piv), real_t(phi), real_t(  0) );
+         points.emplace_back( real_t(phi), real_t(  0), real_t(piv) );
       }
 
    return points;

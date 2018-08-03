@@ -114,7 +114,7 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
 
             if(weightsToUse_ == PARMETIS_EDGE_WEIGHTS || weightsToUse_ == PARMETIS_BOTH_WEIGHTS)
             {
-               blockPairs.push_back( BlockPair( blocks[i], *nit ) );
+               blockPairs.emplace_back( blocks[i], *nit );
             }
          }
 

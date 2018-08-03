@@ -34,9 +34,9 @@ namespace pe {
 std::vector< DefaultBodyVTKOutput::Attributes > DefaultBodyVTKOutput::getAttributes() const
 {
    std::vector< Attributes > attributes;
-   attributes.push_back( Attributes( vtk::typeToString< float >(), "Velocity", uint_c(3) ) );
-   attributes.push_back( Attributes( vtk::typeToString< int >(), "rank", uint_c(1) ) );
-   attributes.push_back( Attributes( vtk::typeToString< int >(), "shadow", uint_c(1) ) );
+   attributes.emplace_back( vtk::typeToString< float >(), "Velocity", uint_c(3) );
+   attributes.emplace_back( vtk::typeToString< int >(), "rank", uint_c(1) );
+   attributes.emplace_back( vtk::typeToString< int >(), "shadow", uint_c(1) );
 
    return attributes;
 }

@@ -363,7 +363,7 @@ int main( int argc, char ** argv )
    // D3Q19, incompressible //
    ///////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // SRT
 
@@ -490,7 +490,7 @@ int main( int argc, char ** argv )
    // D3Q19, compressible //
    /////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // SRT
 
@@ -553,7 +553,7 @@ int main( int argc, char ** argv )
    // D3Q27, incompressible //
    ///////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // SRT
 
@@ -616,7 +616,7 @@ int main( int argc, char ** argv )
    // D3Q27, compressible //
    /////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // SRT
 
@@ -651,7 +651,7 @@ int main( int argc, char ** argv )
    // TRT <-> MRT COMPARISON //
    ////////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // TRT
 
@@ -703,7 +703,7 @@ int main( int argc, char ** argv )
    // D2Q9, incompressible //
    //////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // SRT
 

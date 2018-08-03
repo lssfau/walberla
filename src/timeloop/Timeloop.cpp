@@ -138,7 +138,7 @@ Timeloop::FctHandle
 Timeloop::addFuncBeforeTimeStep(const VoidFctNoArguments& f, const std::string & id,
                                 const Set<SUID> & r, const Set<SUID> & e )
 {
-    beforeFunctions_.push_back( SelectableFunc(f,r,e,id) );
+    beforeFunctions_.emplace_back(f,r,e,id );
     return beforeFunctions_.size() - 1;
 }
 
@@ -157,7 +157,7 @@ Timeloop::FctHandle
 Timeloop::addFuncAfterTimeStep(const VoidFctNoArguments& f, const std::string & id,
                                       const Set<SUID> & r, const Set<SUID> & e )
 {
-    afterFunctions_.push_back( SelectableFunc(f,r,e,id) );
+    afterFunctions_.emplace_back(f,r,e,id );
     return afterFunctions_.size() - 1;
 }
 

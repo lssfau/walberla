@@ -545,7 +545,7 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
                state += suidMap[j];
          }
 
-         neighbors.push_back( BlockReconstruction::NeighborhoodReconstructionBlock( id, process_, state, aabbReconstruction ) );
+         neighbors.emplace_back( id, process_, state, aabbReconstruction );
       }
 
       for( uint_t i = 0; i != numberOfNeighbors; ++i ) {
@@ -567,7 +567,7 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
                   state += suidMap[k];
             }
 
-            neighbors.push_back( BlockReconstruction::NeighborhoodReconstructionBlock( id, neighborProcess, state, aabbReconstruction ) );
+            neighbors.emplace_back( id, neighborProcess, state, aabbReconstruction );
          }
       }
 
@@ -615,7 +615,7 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
 
             offset = offsetBlocks[ i ] + 2 + j * ( blockIdBytes + suidBytes );
 
-            ids.push_back( BlockID( buffer, offset, blockIdBytes ) );
+            ids.emplace_back( buffer, offset, blockIdBytes );
 
             Set<SUID> state;
             boost::dynamic_bitset< uint8_t > suidBitset = byteArrayToBitset( buffer, offset + blockIdBytes, suidBytes );
@@ -1495,7 +1495,7 @@ void BlockForest::constructBlockInformation()
    std::vector< std::pair< BlockID, std::pair< uint_t, Set<SUID> > > > data;
    for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
    {
-      data.push_back( std::make_pair( it->first, std::make_pair( process_, it->second->getState() ) ) );
+      data.emplace_back( it->first, std::make_pair( process_, it->second->getState() ) );
    }
 
    mpi::SendBuffer sBuffer;
@@ -1571,7 +1571,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
       {
          WALBERLA_ASSERT( it->second->getTargetLevel() == it->second->getLevel() ||
                           ( it->second->getTargetLevel() + uint_t(1) ) == it->second->getLevel() );
-         minTargetLevelsCallback.push_back( std::make_pair( it->second.get(), it->second->getTargetLevel() ) );
+         minTargetLevelsCallback.emplace_back( it->second.get(), it->second->getTargetLevel() );
          mapping.push_back(0);
       }
    }
@@ -1600,7 +1600,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
          WALBERLA_CHECK( it1 != blocksAlreadyMarkedForRefinement.end() );
          WALBERLA_CHECK_NOT_NULLPTR( *it1 );
          WALBERLA_CHECK_EQUAL( (*it1)->getTargetLevel(), (*it1)->getLevel() + uint_t(1) );
-         minTargetLevelsAllBlocks.push_back( std::make_pair( *it1, (*it1)->getTargetLevel() ) );
+         minTargetLevelsAllBlocks.emplace_back( *it1, (*it1)->getTargetLevel() );
          it1++;
       }
    }
@@ -2165,7 +2165,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       if( block->getTargetLevel() != block->getLevel() || targetProcesses[0] != process_ )
       {
          WALBERLA_ASSERT( targetProcesses.size() == uint_t(1) || targetProcesses.size() == uint_t(8) );
-         blocksToPack.push_back( std::make_pair( block.get(), std::vector< mpi::SendBuffer >( targetProcesses.size() ) ) );
+         blocksToPack.emplace_back( block.get(), std::vector< mpi::SendBuffer >( targetProcesses.size() ) );
       }
    }
 
@@ -2470,7 +2470,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - perform local data transfer" );
 
    for( auto buffer = localBlocks.begin(); buffer != localBlocks.end(); ++buffer )
-      recvLocalBlocks.push_back( mpi::RecvBuffer( **buffer ) );
+      recvLocalBlocks.emplace_back( **buffer );
 
    ////////////////////////////////////
    // WAIT FOR RECV's FOR BLOCK DATA //
@@ -2601,7 +2601,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    std::vector< std::pair< Block *, std::vector< std::pair< Set<SUID>, mpi::RecvBuffer * > > > > dataToUnpack;
 
    for( auto it = blocksToUnpack.begin(); it != blocksToUnpack.end(); ++it )
-      dataToUnpack.push_back( std::make_pair( it->first, it->second ) );
+      dataToUnpack.emplace_back( it->first, it->second );
 
    //#ifdef _OPENMP
    //#pragma omp parallel for schedule(dynamic)

@@ -65,14 +65,14 @@ void registerTest()
    WALBERLA_CHECK(overFlow);
 
    vector<string> names;
-   names.push_back("Flag1");
-   names.push_back("Flag2");
-   names.push_back("Flag3");
-   names.push_back("Flag4");
-   names.push_back("Flag5");
-   names.push_back("Flag6");
-   names.push_back("Flag7");
-   names.push_back("Flag8");
+   names.emplace_back("Flag1");
+   names.emplace_back("Flag2");
+   names.emplace_back("Flag3");
+   names.emplace_back("Flag4");
+   names.emplace_back("Flag5");
+   names.emplace_back("Flag6");
+   names.emplace_back("Flag7");
+   names.emplace_back("Flag8");
 
    for(size_t i=0; i<names.size(); ++i)
    {

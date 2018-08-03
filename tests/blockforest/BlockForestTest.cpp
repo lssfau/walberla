@@ -86,7 +86,7 @@ static void workloadMemorySUIDAssignmentFunction( SetupBlockForest& forest ) {
    for( uint_t i = 0; i != forest.getNumberOfLevels(); ++i ) {
       std::ostringstream oss;
       oss << "Level_" << i;
-      suids.push_back( SUID( oss.str(), false ) );
+      suids.emplace_back( oss.str(), false );
    }
 
    for( uint_t i = 0; i != blocks.size(); ++i ) {

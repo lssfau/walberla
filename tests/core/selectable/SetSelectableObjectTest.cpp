@@ -64,21 +64,21 @@ int main( int /*argc*/, char** /*argv*/ ) {
    container.get( functions, A(1)+A(2)+A(3) );
 
    expected.clear();
-   expected.push_back("function_1");
-   expected.push_back("function_5");
+   expected.emplace_back("function_1");
+   expected.emplace_back("function_5");
 
    WALBERLA_CHECK_EQUAL( functions, expected );
 
    WALBERLA_CHECK_EQUAL( container.get( function, A(1)+A(2)+A(3)+A(4) ), static_cast< size_t >(1) );
 
    expected.clear();
-   expected.push_back("function_4");
+   expected.emplace_back("function_4");
    WALBERLA_CHECK_EQUAL( function, expected[0] );
 
    WALBERLA_CHECK_EQUAL( container.get( function, A(1)+A(2) ), static_cast< size_t >(1) );
 
    expected.clear();
-   expected.push_back("function_3");
+   expected.emplace_back("function_3");
    WALBERLA_CHECK_EQUAL( function, expected[0] );
 
    WALBERLA_CHECK_EQUAL( container.get( function, A(1)+A(2)+A(3)+A(5)+A(6)+A(7) ), static_cast< size_t >(3) );
@@ -87,16 +87,16 @@ int main( int /*argc*/, char** /*argv*/ ) {
    container.get( functions, A(1)+A(2)+A(3)+A(5)+A(6)+A(7) );
 
    expected.clear();
-   expected.push_back("function_1");
-   expected.push_back("function_2");
-   expected.push_back("function_5");
+   expected.emplace_back("function_1");
+   expected.emplace_back("function_2");
+   expected.emplace_back("function_5");
 
    WALBERLA_CHECK_EQUAL( functions, expected );
 
    WALBERLA_CHECK_EQUAL( container.get( function, A(1)+A(2)+A(3)+A(4)+A(5)+A(6)+A(7) ), static_cast< size_t >(1) );
 
    expected.clear();
-   expected.push_back("function_4");
+   expected.emplace_back("function_4");
    WALBERLA_CHECK_EQUAL( function, expected[0] );
 
    WALBERLA_CHECK_EQUAL( container.get( function, A(3)+A(5)+A(6) ), static_cast< size_t >(2) );
@@ -105,27 +105,27 @@ int main( int /*argc*/, char** /*argv*/ ) {
    container.get( functions, A(3)+A(5)+A(6) );
 
    expected.clear();
-   expected.push_back("function_6");
-   expected.push_back("function_7");
+   expected.emplace_back("function_6");
+   expected.emplace_back("function_7");
 
    WALBERLA_CHECK_EQUAL( functions, expected );
 
    WALBERLA_CHECK_EQUAL( container.get( function, A(1)+A(5)+A(6) ), static_cast< size_t >(1) );
 
    expected.clear();
-   expected.push_back("function_7");
+   expected.emplace_back("function_7");
    WALBERLA_CHECK_EQUAL( function, expected[0] );
 
    WALBERLA_CHECK_EQUAL( container.get( function, A(4)+A(5)+A(6) ), static_cast< size_t >(1) );
 
    expected.clear();
-   expected.push_back("function_6");
+   expected.emplace_back("function_6");
    WALBERLA_CHECK_EQUAL( function, expected[0] );
 
    WALBERLA_CHECK_EQUAL( container.get( function, A(7)+A(5)+A(6) ), static_cast< size_t >(1) );
 
    expected.clear();
-   expected.push_back("function_2");
+   expected.emplace_back("function_2");
    WALBERLA_CHECK_EQUAL( function, expected[0] );
 
    functions.clear();
@@ -133,13 +133,13 @@ int main( int /*argc*/, char** /*argv*/ ) {
       functions.push_back( *it );
 
    expected.clear();
-   expected.push_back("function_1");
-   expected.push_back("function_2");
-   expected.push_back("function_3");
-   expected.push_back("function_4");
-   expected.push_back("function_5");
-   expected.push_back("function_6");
-   expected.push_back("function_7");
+   expected.emplace_back("function_1");
+   expected.emplace_back("function_2");
+   expected.emplace_back("function_3");
+   expected.emplace_back("function_4");
+   expected.emplace_back("function_5");
+   expected.emplace_back("function_6");
+   expected.emplace_back("function_7");
 
    WALBERLA_CHECK_EQUAL( functions, expected );
 
