@@ -350,7 +350,7 @@ inline BodyStorage::cast_iterator<C> BodyStorage::begin()
 template< typename C >  // Cast Type
 inline BodyStorage::const_cast_iterator<C> BodyStorage::begin() const
 {
-   return cbegin();
+   return cbegin<C>();
 }
 //*************************************************************************************************
 
@@ -392,7 +392,7 @@ inline BodyStorage::cast_iterator<C> BodyStorage::end()
 template< typename C >  // Cast Type
 inline BodyStorage::const_cast_iterator<C> BodyStorage::end() const
 {
-   return cend();
+   return cend<C>();
 }
 //*************************************************************************************************
 
