@@ -61,7 +61,7 @@ template< typename MeshType >
 typename MeshType::Point computeCentroid( const MeshType & mesh );
 
 template< typename MeshType >
-Matrix3<typename MeshType::Scalar> computeIntertiaTensor( const MeshType & mesh );
+Matrix3<typename MeshType::Scalar> computeInertiaTensor( const MeshType & mesh );
 
 template< typename MeshType >
 typename MeshType::Point computeCentroid( const MeshType & mesh, const typename MeshType::FaceHandle fh );
@@ -253,9 +253,9 @@ typename MeshType::Point computeCentroid( const MeshType & mesh )
 
 
 template< typename MeshType >
-Matrix3<typename MeshType::Scalar> computeIntertiaTensor( const MeshType & mesh )
+Matrix3<typename MeshType::Scalar> computeInertiaTensor( const MeshType & mesh )
 {
-   static_assert( MeshType::IsTriMesh == 1, "computeIntertiaTensor only works with triangular meshes!" );
+   static_assert( MeshType::IsTriMesh == 1, "computeInertiaTensor only works with triangular meshes!" );
 
    typedef typename MeshType::Point  Point;
    typedef typename MeshType::Scalar Scalar;
