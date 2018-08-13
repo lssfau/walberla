@@ -819,7 +819,7 @@ public:
       flagFieldId_( flagFieldId ), pdfFieldId_( pdfFieldId ), blocks_( blocks ), setup_( setup ), timeTracker_( timeTracker )
    {}
 
-   BoundaryHandling_T * initialize( IBlock * const block );
+   BoundaryHandling_T * initialize( IBlock * const block ) override;
 
 private:
 

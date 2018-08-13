@@ -196,7 +196,7 @@ class CosBoundaryConfiguration : public MyBoundaryHandling::DiffusionDirichlet_T
 public:
    CosBoundaryConfiguration( real_t period ) : period_( period ){}
 
-   virtual void val( real_t& _val, cell_idx_t x, cell_idx_t, cell_idx_t ) const { _val = real_c( cos( period_*( real_c(x) + real_c(0.5) ) ) ); }
+   void val( real_t& _val, cell_idx_t x, cell_idx_t, cell_idx_t ) const override { _val = real_c( cos( period_*( real_c(x) + real_c(0.5) ) ) ); }
 
 private:
    const real_t period_;

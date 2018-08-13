@@ -33,15 +33,15 @@ class MyStamp : public logging::Logging::CustomStamp
 {
 public:
    MyStamp() : step_(uint_c(0)) {}
-   ~MyStamp() = default;
+   ~MyStamp() override = default;
    void step( uint_t s ) { step_ = s; }
-   std::string stamp()
+   std::string stamp() override
    {
       std::ostringstream oss;
       oss << "[" << step_ << "]";
       return oss.str();
    }
-   uint_t maxStampWidth() { return 5; }
+   uint_t maxStampWidth() override { return 5; }
 private:
    uint_t step_;
 };

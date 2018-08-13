@@ -149,7 +149,7 @@ class Derived : public Base
 {
 public:
    uint_t override() const { return 10; }
-   uint_t func()     const { return 20; }
+   uint_t func()     const override { return 20; }
 };
 
 
@@ -179,7 +179,7 @@ class Multi : public Base, public SecondBase
 public:
    bool operator==( const Multi& /*rhs*/ ) const { return true; }
    uint_t override() const { return 1000; }
-   uint_t func()     const { return 2000; }
+   uint_t func()     const override { return 2000; }
 };
 
 

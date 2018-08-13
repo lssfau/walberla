@@ -46,12 +46,12 @@ class PointCloudDataSource : public vtk::PointDataSource
 public:
    PointCloudDataSource( const std::vector<Vector3<real_t>> & pointCloud ) : pointCloud_( pointCloud ) {}
 
-   virtual std::vector< Attributes > getAttributes() const { return std::vector< Attributes >(); }
-   virtual std::vector< Vector3< real_t > > getPoints() { return pointCloud_; }
-   virtual void configure() {};
+   std::vector< Attributes > getAttributes() const override { return std::vector< Attributes >(); }
+   std::vector< Vector3< real_t > > getPoints() override { return pointCloud_; }
+   void configure() override {};
 
-   virtual void push( std::ostream& /*os*/,  const uint_t /*data*/, const uint_t /*point*/, const uint_t /*component*/ ) {};
-   virtual void push( vtk::Base64Writer& /*b64*/, const uint_t /*data*/, const uint_t /*point*/, const uint_t /*component*/ ) {};
+   void push( std::ostream& /*os*/,  const uint_t /*data*/, const uint_t /*point*/, const uint_t /*component*/ ) override {};
+   void push( vtk::Base64Writer& /*b64*/, const uint_t /*data*/, const uint_t /*point*/, const uint_t /*component*/ ) override {};
 
 private:
    std::vector<Vector3<real_t>> pointCloud_;

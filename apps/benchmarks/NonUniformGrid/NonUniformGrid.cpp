@@ -456,7 +456,7 @@ public:
                        const BlockDataID & flagField, const BlockDataID & pdfField, const real_t velocity ) :
       forest_( forest ), flagField_( flagField ), pdfField_( pdfField ), velocity_( velocity ) {}
 
-   BoundaryHandling_T * initialize( IBlock * const block );
+   BoundaryHandling_T * initialize( IBlock * const block ) override;
 
 private:
 

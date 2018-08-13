@@ -205,7 +205,7 @@ namespace config {
    public:
       SingleConfigGenerator( const shared_ptr<Config> & config ): config_ ( config ) {}
 
-      virtual shared_ptr<Config> next()
+      shared_ptr<Config> next() override
       {
          auto res = config_;
          config_.reset();
@@ -223,7 +223,7 @@ namespace config {
       MultipleConfigGenerator( const std::string & baseName, const std::string & extension, int numberOfDigits )
          : baseName_( baseName ), extension_( extension ), numberOfDigits_( numberOfDigits), counter_(-1) {}
 
-      virtual shared_ptr<Config> next()
+      shared_ptr<Config> next() override
       {
          ++counter_;
          std::stringstream ss;
