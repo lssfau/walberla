@@ -156,7 +156,6 @@ void generateSynchonizationMessages(mpi::BufferSystem& bs, const Block& block, B
       {
          // Body is no longer locally owned (body is about to be migrated).
          Owner owner( findContainingProcess( block, gpos ) );
-         WALBERLA_ASSERT_UNEQUAL( owner.blockID_, me.blockID_, "Position is " << gpos << "\nlocal Block is: " << block.getAABB() );
 
          WALBERLA_LOG_DETAIL( "Local body " << b->getSystemID() << " is no longer on process " << body->MPITrait.getOwner() << " but on process " << owner );
 
@@ -174,9 +173,10 @@ void generateSynchonizationMessages(mpi::BufferSystem& bs, const Block& block, B
             // of which we own a shadow copy in the next position update since (probably) we no longer require the body but
             // are still part of its registration list.
             continue;
-         }
-         else
+         } else
          {
+            WALBERLA_ASSERT_UNEQUAL( owner.blockID_, me.blockID_, "Position is " << gpos << "\nlocal Block is: " << block.getAABB() );
+
             // New owner found among neighbors.
             WALBERLA_ASSERT_UNEQUAL( owner.blockID_, block.getId().getID(), "Migration is restricted to neighboring blocks." );
 

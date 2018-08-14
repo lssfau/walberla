@@ -61,6 +61,19 @@ int main( int argc, char ** argv )
 //   logging::Logging::instance()->setFileLogLevel( logging::Logging::DETAIL );
 //   logging::Logging::instance()->includeLoggingToFile("SyncLog");
 
+   bool syncShadowOwners = false;
+   for( int i = 1; i < argc; ++i )
+   {
+      if( std::strcmp( argv[i], "--syncShadowOwners" ) == 0 ) syncShadowOwners = true;
+   }
+   if (syncShadowOwners)
+   {
+      WALBERLA_LOG_DEVEL("running with syncShadowOwners");
+   } else
+   {
+      WALBERLA_LOG_DEVEL("running with syncNextNeighbour");
+   }
+
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage> ();
 
    // create blocks
@@ -109,8 +122,17 @@ int main( int argc, char ** argv )
       }
    }
 
+   std::function<void(void)> syncCall;
+   if (!syncShadowOwners)
+   {
+      syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
+   } else
+   {
+      syncCall = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
+   }
+
    for (int i = 0; i < 500; ++i){
-      syncNextNeighbors<BodyTuple>(forest->getBlockForest(), storageID);
+      syncCall();
       integrate(*forest, storageID, real_c(0.1));
    }
 
