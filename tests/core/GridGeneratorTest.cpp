@@ -90,6 +90,23 @@ void referencePointTest()
    WALBERLA_CHECK_EQUAL( higherIt, endIt);
 }
 
+template <class Grid>
+void rangeBasedTest()
+{
+   math::AABB domain(0,0,0,10,10,10);
+   real_t spacing = real_c(1);
+   auto dx = Vector3<real_t>( Grid::iterator::getUnitCellX(spacing), Grid::iterator::getUnitCellY(spacing), Grid::iterator::getUnitCellZ(spacing) );
+   auto lowerIt  = typename Grid::iterator(domain, Vector3<real_t>(5,5,5) - dx * 30, spacing);
+   auto endIt = typename Grid::iterator();
+   for ( const auto& pt : Grid(domain, Vector3<real_t>(5,5,5) - dx * 30, spacing) )
+   {
+      WALBERLA_CHECK( lowerIt != endIt );
+      WALBERLA_CHECK_FLOAT_EQUAL( *lowerIt, pt);
+      ++lowerIt;
+   }
+   WALBERLA_CHECK( lowerIt == endIt );
+}
+
 int main( int argc, char** argv )
 {
    walberla::Environment env(argc, argv);
@@ -138,6 +155,9 @@ int main( int argc, char** argv )
    unitCellTest();
    referencePointTest<SCIterator>();
    referencePointTest<HCPIterator>();
+
+   rangeBasedTest<SCGrid>();
+   rangeBasedTest<HCPGrid>();
 
    return EXIT_SUCCESS;
 }
