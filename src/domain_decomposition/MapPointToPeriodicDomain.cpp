@@ -40,7 +40,7 @@ void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AAB
          shift = std::max( shift, real_t(0) );
          x = domain.xMax() - shift;
          if( isIdentical( x, domain.xMax() ) || x < domain.xMin() )
-            x = domain.xMin();
+            x = std::nextafter(domain.xMax(), domain.xMin());
       }
       else if( x >= domain.xMax() )
       {
@@ -61,7 +61,7 @@ void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AAB
          shift = std::max( shift, real_t(0) );
          y = domain.yMax() - shift;
          if( isIdentical( y, domain.yMax() ) || y < domain.yMin() )
-            y = domain.yMin();
+            y = std::nextafter(domain.yMax(), domain.yMin());
       }
       else if( y >= domain.yMax() )
       {
@@ -82,7 +82,7 @@ void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AAB
          shift = std::max( shift, real_t(0) );
          z = domain.zMax() - shift;
          if( isIdentical( z, domain.zMax() ) || z < domain.zMin() )
-            z = domain.zMin();
+            z = std::nextafter(domain.zMax(), domain.zMin());
       }
       else if( z >= domain.zMax() )
       {

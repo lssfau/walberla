@@ -40,7 +40,7 @@ struct Owner
    int                  rank_;     //< rank of the owner of the shadow copy
    IBlockID::IDType     blockID_;  //< block id of the block the shadow copy is located in
 
-   Owner(): rank_(-1) {}
+   Owner(): rank_(-1), blockID_(0) {}
    Owner(const int rank, const IBlockID::IDType blockID) : rank_(rank), blockID_(blockID) {}
 };
 //*************************************************************************************************
