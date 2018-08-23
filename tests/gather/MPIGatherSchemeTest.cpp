@@ -34,8 +34,7 @@
 #include "core/mpi/MPIManager.h"
 
 
-using namespace walberla;
-
+namespace walberla {
 
 class TestGatherPackInfo : public gather::GatherPackInfo
 {
@@ -87,7 +86,7 @@ public:
 private:
    std::set<int> receivedRanks_;
 };
-
+}// namespace walberla
 
 
 
@@ -95,12 +94,12 @@ int main( int argc, char ** argv )
 {
    walberla::Environment env( argc, argv );
 
-   debug::enterTestMode();
+   walberla::debug::enterTestMode();
 
-   uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() );
+   walberla::uint_t numProcesses = walberla::uint_c( walberla::MPIManager::instance()->numProcesses() );
    WALBERLA_CHECK( numProcesses >= 2 );
 
-   using blockforest::createUniformBlockGrid;
+   using walberla::blockforest::createUniformBlockGrid;
    auto blocks = createUniformBlockGrid( numProcesses, 1, 1,
                                          1, 1, 1,
                                          1,
@@ -108,8 +107,8 @@ int main( int argc, char ** argv )
                                          false, false, false, // periodicity
                                          false );             // do NOT keep global information
 
-   gather::MPIGatherScheme gatherScheme( blocks->getBlockStorage(), 0 );
-   gatherScheme.addPackInfo( make_shared<TestGatherPackInfo>() );
+   walberla::gather::MPIGatherScheme gatherScheme( blocks->getBlockStorage(), 0 );
+   gatherScheme.addPackInfo( walberla::make_shared<walberla::TestGatherPackInfo>() );
 
    for(int i=0; i<3; ++i )
       gatherScheme();

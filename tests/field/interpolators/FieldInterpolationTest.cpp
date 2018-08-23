@@ -32,7 +32,7 @@
 
 #include <vector>
 
-using namespace walberla;
+namespace walberla {
 
 namespace field_interpolation_tests {
 
@@ -424,7 +424,8 @@ int main(int argc, char **argv) {
 }
 
 } // namespace field_interpolation_tests
+}
 
 int main( int argc, char **argv ){
-   field_interpolation_tests::main(argc, argv);
+   walberla::field_interpolation_tests::main(argc, argv);
 }

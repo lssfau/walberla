@@ -36,45 +36,42 @@
 #include "timeloop/SweepTimeloop.h"
 
 
-using namespace walberla;
-
-
-void dummySweep ( IBlock * block )
+void dummySweep ( walberla::IBlock * block )
 {
    WALBERLA_LOG_DEVEL("DummySweep on block " << block );
 }
 
 int main( int argc, char ** argv )
 {
-   debug::enterTestMode();
+   walberla::debug::enterTestMode();
    walberla::Environment walberlaEnv( argc, argv );
 
    // 9 processes and 8 blocks:   one process does not have a block
-   WALBERLA_CHECK_EQUAL( MPIManager::instance()->numProcesses(), 9 );
+   WALBERLA_CHECK_EQUAL( walberla::MPIManager::instance()->numProcesses(), 9 );
 
-   using namespace blockforest;
+   using namespace walberla::blockforest;
 
    SetupBlockForest sforest;
    sforest.addWorkloadMemorySUIDAssignmentFunction( uniformWorkloadAndMemoryAssignment );
-   sforest.init( AABB(0,0,0, 2,2,2), 2, 2, 2, false, false, false );
+   sforest.init( walberla::AABB(0,0,0, 2,2,2), 2, 2, 2, false, false, false );
 
    // calculate process distribution
    const memory_t memoryLimit = 1;
 
    GlobalLoadBalancing::MetisConfiguration< SetupBlock > metisConfig( false, false, uniformFacesDominantCommunication );
-   sforest.calculateProcessDistribution_Default( uint_c( MPIManager::instance()->numProcesses() ), memoryLimit, "hilbert", 10, false, metisConfig );
-   MPIManager::instance()->useWorldComm();
+   sforest.calculateProcessDistribution_Default( walberla::uint_c( walberla::MPIManager::instance()->numProcesses() ), memoryLimit, "hilbert", 10, false, metisConfig );
+   walberla::MPIManager::instance()->useWorldComm();
 
    // create StructuredBlockForest (encapsulates a newly created BlockForest)
-   auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, true ) );
-   auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, 10, 10, 10 ) );
+   auto bf = walberla::shared_ptr< BlockForest >( new BlockForest( walberla::uint_c( walberla::MPIManager::instance()->rank() ), sforest, true ) );
+   auto sbf = walberla::shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, 10, 10, 10 ) );
    sbf->createCellBoundingBoxes();
 
 
-   SweepTimeloop tl( sbf, 1 );
-   tl.add() << Sweep( dummySweep, "DummySweep" );
+   walberla::SweepTimeloop tl( sbf, 1 );
+   tl.add() << walberla::Sweep( dummySweep, "DummySweep" );
 
-   WcTimingPool timingPool;
+   walberla::WcTimingPool timingPool;
    tl.run( timingPool );
 
    timingPool.logResultOnRoot();

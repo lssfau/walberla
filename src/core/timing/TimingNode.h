@@ -30,6 +30,8 @@
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
 #include "core/mpi/SetReduction.h"
+#include "core/extern/json.hpp"
+
 
 #include <algorithm>
 #include <iomanip>
@@ -481,6 +483,43 @@ std::ostream& operator<<(std::ostream& os, const TimingNode<TP>& tn)
    return os;
 }
 
+/// convertes a TimingNode to json. The signature is required by the json library
+/// \relates TimingNode
+template < typename TP > // Timing policy
+void to_json( nlohmann::json& j, const TimingNode< TP >& tn )
+{
+   /// ignore the first timer in the timing node since it is empty
+   if( tn.last_ == nullptr )
+   {
+      j = nlohmann::json( tn.tree_ );
+   } else
+   {
+      j           = nlohmann::json( tn.timer_ );
+      j["childs"] = nlohmann::json( tn.tree_ );
+   }
+}
+
+namespace internal {
+/// adds a sub timer containing the remainder of all other subtimers on the same hierarchy level
+/// \relates TimingNode
+template< typename TP >
+// Timing policy
+void addRemainderNodes(timing::TimingNode<TP> &tn) {
+   if (tn.tree_.empty()) {
+      return;
+   }
+   double remainder = tn.timer_.total();
+   for (auto i = tn.tree_.begin(); i != tn.tree_.end(); ++i) {
+      remainder -= i->second.timer_.total();
+      addRemainderNodes(i->second);
+   }
+   if (tn.last_ != nullptr) {
+      WALBERLA_ASSERT( tn.tree_.find("Remainder") == tn.tree_.end());
+      tn.tree_["Remainder"].timer_ = timing::Timer<TP>(1, 0, 0, remainder, 0);
+      tn.tree_["Remainder"].last_ = &tn;
+   }
+}
+} /// namespace internal
 }
 
 typedef timing::TimingNode<timing::WcPolicy>  WcTimingNode;

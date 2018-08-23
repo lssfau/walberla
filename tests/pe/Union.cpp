@@ -41,9 +41,8 @@
 #include <algorithm>
 #include <vector>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
-using namespace walberla::blockforest;
 
 typedef Union< boost::tuple<Sphere> >          UnionType ;
 typedef boost::tuple<Sphere, Plane, UnionType> BodyTuple ;
@@ -131,4 +130,10 @@ int main( int argc, char ** argv )
    ImpulsCarryover();
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

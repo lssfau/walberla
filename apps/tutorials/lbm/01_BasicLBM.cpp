@@ -31,7 +31,7 @@
 
 
 
-using namespace walberla;
+namespace walberla {
 
 typedef lbm::D2Q9< lbm::collision_model::SRT >  LatticeModel_T;
 typedef LatticeModel_T::Stencil                 Stencil_T;
@@ -119,4 +119,10 @@ int main( int argc, char ** argv )
       timeloop.run();
 
    return EXIT_SUCCESS;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   walberla::main(argc, argv);
 }

@@ -37,7 +37,7 @@
 #include "timeloop/SweepTimeloop.h"
 
 
-using namespace walberla;
+namespace walberla {
 
 typedef GhostLayerField<real_t,1> GlField;
 
@@ -102,4 +102,10 @@ int main( int argc, char ** argv )
    //gui.run();
 
    return 0;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

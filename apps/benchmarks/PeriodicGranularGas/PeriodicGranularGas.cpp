@@ -31,7 +31,7 @@
 #include <functional>
 #include <memory>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::timing;
 
@@ -247,4 +247,10 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO_ON_ROOT("*** CHECKING RESULT - END ***");
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

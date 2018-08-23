@@ -28,7 +28,7 @@
 #include "field/AddToStorage.h"
 
 
-using namespace walberla;
+namespace walberla {
 
 
 int main( int argc, char ** argv )
@@ -81,4 +81,10 @@ int main( int argc, char ** argv )
 
 
    return 0;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   return walberla::main(argc,argv);
 }

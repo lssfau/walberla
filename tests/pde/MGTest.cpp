@@ -45,7 +45,7 @@
 
 #include <cmath>
 
-using namespace walberla;
+namespace walberla {
 
 
 
@@ -293,4 +293,9 @@ int main( int argc, char** argv )
    logging::Logging::printFooterOnStream();
    return EXIT_SUCCESS;
 }
+} // namespace walberla
 
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
+}

@@ -28,6 +28,7 @@
 #include "core/logging/Logging.h"
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
+#include "core/extern/json.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -88,6 +89,10 @@ public:
    /// Returns the name of the currently running timer
    /// Might be expensive due to value search.
    std::string getCurrentTimerName() const;
+
+   /// Returns a copy of the timing tree containing the remaining time as a subnode
+   TimingTree< TP > getCopyWithRemainder() const;
+
 private:
    /// Tree data structure
    TimingNode<TP>  root_;
@@ -239,6 +244,21 @@ std::string TimingTree<TP>::getCurrentTimerName() const
    return "No timer found!";
 }
 
+template < typename TP > // Timing policy
+TimingTree< TP > TimingTree< TP >::getCopyWithRemainder() const
+{
+   TimingTree< TP > tt( *this );
+   timing::internal::addRemainderNodes< TP >( tt.root_ );
+   return tt;
+}
+
+/// convertes a TimingTree to json. The signature is required by the json library
+/// \relates TimingTree
+template < typename TP > // Timing policy
+void to_json( nlohmann::json& j, const TimingTree< TP >& tt )
+{
+   j = nlohmann::json( tt.getRawData() );
+}
 }
 
 typedef timing::TimingTree<timing::WcPolicy>  WcTimingTree;

@@ -31,7 +31,7 @@
 
 #include <functional>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 typedef Union< boost::tuple<Sphere> > UnionT;
@@ -202,4 +202,10 @@ int main( int argc, char** argv )
    }
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

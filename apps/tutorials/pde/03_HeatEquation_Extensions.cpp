@@ -40,7 +40,7 @@
 #include <cmath>
 
 
-using namespace walberla;
+namespace walberla {
 
 
 typedef GhostLayerField<real_t,1> ScalarField;
@@ -346,4 +346,10 @@ int main( int argc, char ** argv )
    timeloop.run();
 
    return 0;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

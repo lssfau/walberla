@@ -27,24 +27,22 @@
 
 #include <iostream>
 
-using namespace walberla;
-
 void mssleep(unsigned int ms)
 {
-   timing::StaticPolicy::addTime( ms * 1e-3);
+   walberla::timing::StaticPolicy::addTime( ms * 1e-3);
 }
 
 int main( int argc, char ** argv )
 {
-   debug::enterTestMode();
+   walberla::debug::enterTestMode();
 
-   mpi::Environment mpiEnv(argc, argv);
+   walberla::mpi::Environment mpiEnv(argc, argv);
    WALBERLA_UNUSED( mpiEnv );
 
-   const unsigned int rank = static_cast<unsigned int> ( MPIManager::instance()->worldRank() );
+   const unsigned int rank = static_cast<unsigned int> ( walberla::MPIManager::instance()->worldRank() );
 
-   timing::TimingTree<timing::StaticPolicy> tt;
-   timing::StaticPolicy::setTime(0);
+   walberla::timing::TimingTree<walberla::timing::StaticPolicy> tt;
+   walberla::timing::StaticPolicy::setTime(0);
 
    tt.start("A");
    mssleep(100 * rank);
@@ -76,9 +74,9 @@ int main( int argc, char ** argv )
    WALBERLA_ASSERT(!tt.timerExists("A.AA.C"));
 
    // check copy constructor
-   timing::TimingTree<timing::StaticPolicy> tt2(tt);
+   walberla::timing::TimingTree<walberla::timing::StaticPolicy> tt2(tt);
    // check assignment operator
-   timing::TimingTree<timing::StaticPolicy> tt3;
+   walberla::timing::TimingTree<walberla::timing::StaticPolicy> tt3;
    tt3 = tt;
 
    WALBERLA_ASSERT(tt2.timerExists("A"));
@@ -97,10 +95,10 @@ int main( int argc, char ** argv )
    WALBERLA_ASSERT(!tt3.timerExists("AAC"));
    WALBERLA_ASSERT(!tt3.timerExists("A.AA.C"));
 
-   tt2 = tt.getReduced( timing::REDUCE_TOTAL, 0 );
-   tt2 = tt.getReduced( timing::REDUCE_TOTAL, 1 );
+   tt2 = tt.getReduced( walberla::timing::REDUCE_TOTAL, 0 );
+   tt2 = tt.getReduced( walberla::timing::REDUCE_TOTAL, 1 );
 
-   tt2 = tt.getReduced( timing::REDUCE_MIN, -1 );
+   tt2 = tt.getReduced( walberla::timing::REDUCE_MIN, -1 );
    {
    const auto& data = tt2.getRawData();
    WALBERLA_CHECK_FLOAT_EQUAL( data.tree_.at("A").timer_.total(), (1.8) );
@@ -109,7 +107,7 @@ int main( int argc, char ** argv )
    WALBERLA_CHECK_FLOAT_EQUAL( tt["A.AB.ABB"].total(), (0.100 * rank), "total time: " << tt["A.AB.ABB"].total() );
    }
 
-   tt2 = tt.getReduced( timing::REDUCE_MAX, -1 );
+   tt2 = tt.getReduced( walberla::timing::REDUCE_MAX, -1 );
    {
    const auto& data = tt2.getRawData();
    WALBERLA_CHECK_FLOAT_EQUAL( data.tree_.at("A").timer_.total(), (1.8) );
@@ -118,7 +116,7 @@ int main( int argc, char ** argv )
    WALBERLA_CHECK_FLOAT_EQUAL( tt["A.AB.ABB"].total(), (0.100 * rank), "total time: " << tt["A.AB.ABB"].total() );
    }
 
-   tt2 = tt.getReduced( timing::REDUCE_AVG, -1 );
+   tt2 = tt.getReduced( walberla::timing::REDUCE_AVG, -1 );
    {
    const auto& data = tt2.getRawData();
    WALBERLA_CHECK_FLOAT_EQUAL( data.tree_.at("A").timer_.total(), (1.8) );
@@ -127,7 +125,7 @@ int main( int argc, char ** argv )
    WALBERLA_CHECK_FLOAT_EQUAL( tt["A.AB.ABB"].total(), (0.100 * rank), "total time: " << tt["A.AB.ABB"].total() );
    }
 
-   tt2 = tt.getReduced( timing::REDUCE_TOTAL, -1 );
+   tt2 = tt.getReduced( walberla::timing::REDUCE_TOTAL, -1 );
    {
    const auto& data = tt2.getRawData();
    WALBERLA_CHECK_FLOAT_EQUAL( data.tree_.at("A").timer_.total(), (1.8) );

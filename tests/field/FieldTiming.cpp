@@ -30,7 +30,8 @@
 #include <sstream>
 
 
-using namespace walberla;
+namespace walberla {
+
 using namespace field;
 
 using std::cout;
@@ -263,4 +264,11 @@ int main(int argc, char ** argv)
    ofstream of ( fileName.str().c_str() );
    of << "size = [ " << xs << "," << ys << "," << zs <<"];" << endl;
    tp.printMatlab( of );
+
+   return EXIT_SUCCESS;
+}
+}
+
+int main(int argc, char** argv){
+   return walberla::main(argc, argv);
 }

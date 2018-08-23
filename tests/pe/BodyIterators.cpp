@@ -33,7 +33,7 @@
 #include <iostream>
 
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 typedef boost::tuple<Sphere> BodyTuple ;
@@ -149,4 +149,10 @@ int main( int argc, char **argv )
     WALBERLA_CHECK_EQUAL( counter, 6 );
 
     return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }
