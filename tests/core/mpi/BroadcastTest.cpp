@@ -26,7 +26,7 @@
 #include "core/mpi/MPIManager.h"
 
 #include <limits>
-#include <stdlib.h>
+#include <cstdlib>
 #include <vector>
 
 

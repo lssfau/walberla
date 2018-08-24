@@ -1335,4 +1335,4 @@ waLBerla_export()
 ############################################################################################################################
 
 waLBerla_link_files_to_builddir( .clang-tidy )
-waLBerla_link_files_to_builddir( run-clang-tidy.py )
+add_subdirectory( utilities )
