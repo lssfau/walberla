@@ -32,13 +32,6 @@ namespace geometry {
       updateBoxes();
    }
 
-   Sphere::Sphere( const Sphere & o )
-      : midpoint_( o.midpoint_ ),
-        radius_( o.radius_ ),
-        boundingBox_ ( o.boundingBox_ ),
-        innerBox_ ( o.innerBox_ )
-   {}
-
    void Sphere::updateBoxes()
    {
       static const real_t oneOverSqrt3 = real_t(1) / std::sqrt( real_t(3) );

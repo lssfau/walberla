@@ -78,11 +78,11 @@ using walberla::uint_t;
 // PDF field, flag field & body field
 typedef lbm::D3Q19< lbm::collision_model::TRT, false >  LatticeModel_T;
 
-typedef LatticeModel_T::Stencil                         Stencil_T;
-typedef lbm::PdfField< LatticeModel_T >                 PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 typedef std::pair< pe::BodyID, real_t >                              BodyAndVolumeFraction_T;
@@ -101,7 +101,7 @@ typedef pe_coupling::CurvedQuadratic< LatticeModel_T, FlagField_T > MEM_MR_T;
 typedef boost::tuples::tuple< UBB_T, Outlet_T, MEM_BB_T, MEM_CLI_T, MEM_MR_T > BoundaryConditions_T;
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
-typedef boost::tuple<pe::Sphere> BodyTypeTuple;
+using BodyTypeTuple = boost::tuple<pe::Sphere>;
 
 ///////////
 // FLAGS //
@@ -806,15 +806,15 @@ int main( int argc, char **argv )
 
    // set up collision response, here DEM solver
    // in this test case, it is only used for the time integration
-   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, NULL);
+   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, nullptr);
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
    std::function<void(void)> syncCall;
    if( XBlocks <= uint_t(4) )
-      syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+      syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
    else
-      syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+      syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
 
    real_t xParticle = real_t(0);
@@ -832,7 +832,7 @@ int main( int argc, char **argv )
       else if( int(Galileo) == 250 )
       {
          // add random perturbance for chaotic regime
-         walberla::math::seedRandomGenerator( std::mt19937::result_type(std::time(0)) );
+         walberla::math::seedRandomGenerator( std::mt19937::result_type(std::time(nullptr)) );
          xParticle = real_c( xlength ) * real_t(0.5) + walberla::math::realRandom( real_t(-0.5), real_t(0.5) );
          yParticle = real_c( ylength ) * real_t(0.5) + walberla::math::realRandom( real_t(-0.5), real_t(0.5) );
 
@@ -883,7 +883,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
 
    // add body and volume fraction field
    BlockDataID bodyAndVolumeFractionFieldID = field::addToStorage< BodyAndVolumeFractionField_T >( blocks, "body and volume fraction field",
@@ -1204,7 +1204,7 @@ int main( int argc, char **argv )
 
 
       // reconstruct missing PDFs
-      typedef pe_coupling::SphereNormalExtrapolationDirectionFinder ExtrapolationFinder_T;
+      using ExtrapolationFinder_T = pe_coupling::SphereNormalExtrapolationDirectionFinder;
       ExtrapolationFinder_T extrapolationFinder( blocks, bodyFieldID );
       typedef pe_coupling::ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationFinder_T > Reconstructor_T;
       Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder, true );

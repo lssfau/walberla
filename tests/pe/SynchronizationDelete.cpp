@@ -36,7 +36,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 void integrate(StructuredBlockForest& forest, BlockDataID storageID, const real_t dt)
 {
@@ -104,7 +104,7 @@ int main( int argc, char ** argv )
             if ((fabs(x) > 0.1) || (fabs(y) > 0.1) || (fabs(z) > 0.1))
             {
                SphereID sp = createSphere( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(15,15,15), 3);
-               if (sp != NULL) sp->setLinearVel(Vec3(x, y, z));
+               if (sp != nullptr) sp->setLinearVel(Vec3(x, y, z));
             }
          }
 

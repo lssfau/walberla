@@ -32,14 +32,14 @@ class Body1 : public Sphere {
 public:
     static int refCount;
     Body1(walberla::id_t id, MaterialID matID) : Sphere(id, id, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, matID, false, true, false) {++refCount;}
-    ~Body1() {--refCount;}
+    ~Body1() override {--refCount;}
 };
 
 class Body2 : public Sphere {
 public:
     static int refCount;
     Body2(walberla::id_t id, MaterialID matID) : Sphere(id, id, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, matID, false, true, false) {++refCount;}
-    ~Body2() {--refCount;}
+    ~Body2() override {--refCount;}
 };
 
 int Body1::refCount = 0;

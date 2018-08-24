@@ -1142,6 +1142,23 @@ doc:
 ##                                                                           ##
 ###############################################################################
 
+clang-tidy:
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   script:
+      - $CXX --version
+      - cmake --version
+      - mkdir $CI_PROJECT_DIR/build
+      - cd $CI_PROJECT_DIR/build
+      - cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DWALBERLA_BUFFER_DEBUG=ON -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_TOOLS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=ON -DCMAKE_BUILD_TYPE=Debug -DWALBERLA_DOUBLE_ACCURACY=ON
+      - cmake . -LAH
+      - run-clang-tidy.py -quiet | tee clang-tidy-output.txt
+   artifacts:
+      paths:
+         - $CI_PROJECT_DIR/build/clang-tidy-output.txt
+   tags:
+      - docker
+
+
 cppcheck:
    image: walberla/cppcheck
    script:

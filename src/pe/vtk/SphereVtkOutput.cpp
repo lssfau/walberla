@@ -35,13 +35,13 @@ namespace pe {
 std::vector< SphereVtkOutput::Attributes > SphereVtkOutput::getAttributes() const
 {
    std::vector< Attributes > attributes;
-   attributes.push_back( Attributes( vtk::typeToString< float >(), "mass", uint_c(1) ) );
-   attributes.push_back( Attributes( vtk::typeToString< float >(), "radius", uint_c(1) ) );
-   attributes.push_back( Attributes( vtk::typeToString< float >(), "velocity", uint_c(3) ) );
-   attributes.push_back( Attributes( vtk::typeToString< float >(), "orientation", uint_c(3) ) );
-   attributes.push_back( Attributes( vtk::typeToString< int >(),   "rank", uint_c(1) ) );
-   attributes.push_back( Attributes( vtk::typeToString< id_t >(),   "id", uint_c(1) ) );
-   attributes.push_back( Attributes( vtk::typeToString< id_t >(),  "uid", uint_c(1) ) );
+   attributes.emplace_back( vtk::typeToString< float >(), "mass", uint_c(1) );
+   attributes.emplace_back( vtk::typeToString< float >(), "radius", uint_c(1) );
+   attributes.emplace_back( vtk::typeToString< float >(), "velocity", uint_c(3) );
+   attributes.emplace_back( vtk::typeToString< float >(), "orientation", uint_c(3) );
+   attributes.emplace_back( vtk::typeToString< int >(),   "rank", uint_c(1) );
+   attributes.emplace_back( vtk::typeToString< id_t >(),   "id", uint_c(1) );
+   attributes.emplace_back( vtk::typeToString< id_t >(),  "uid", uint_c(1) );
 
    return attributes;
 }

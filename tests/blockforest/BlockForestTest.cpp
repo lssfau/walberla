@@ -86,7 +86,7 @@ static void workloadMemorySUIDAssignmentFunction( SetupBlockForest& forest ) {
    for( uint_t i = 0; i != forest.getNumberOfLevels(); ++i ) {
       std::ostringstream oss;
       oss << "Level_" << i;
-      suids.push_back( SUID( oss.str(), false ) );
+      suids.emplace_back( oss.str(), false );
    }
 
    for( uint_t i = 0; i != blocks.size(); ++i ) {
@@ -139,7 +139,7 @@ static uint_t* blockdata5( const IBlock* const /*block*/ ) {
 class Base
 {
 public:
-   virtual ~Base() {}
+   virtual ~Base() = default;
    bool operator==( const Base& /*rhs*/ ) const { return true; }
            uint_t override() const { return 1; }
    virtual uint_t func()     const { return 2; }
@@ -149,7 +149,7 @@ class Derived : public Base
 {
 public:
    uint_t override() const { return 10; }
-   uint_t func()     const { return 20; }
+   uint_t func()     const override { return 20; }
 };
 
 
@@ -169,7 +169,7 @@ static Derived* blockdataDerived( const IBlock* const /*block*/ )
 class SecondBase
 {
 public:
-   virtual ~SecondBase() {}
+   virtual ~SecondBase() = default;
    bool operator==( const SecondBase& /*rhs*/ ) const { return true; }
    uint_t override() const { return 100; }
 };
@@ -179,7 +179,7 @@ class Multi : public Base, public SecondBase
 public:
    bool operator==( const Multi& /*rhs*/ ) const { return true; }
    uint_t override() const { return 1000; }
-   uint_t func()     const { return 2000; }
+   uint_t func()     const override { return 2000; }
 };
 
 

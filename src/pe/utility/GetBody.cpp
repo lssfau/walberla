@@ -58,7 +58,7 @@ BodyID getBody(BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID sto
       }
    }
 
-   return NULL;
+   return nullptr;
 }
 
 }  // namespace pe

@@ -42,9 +42,9 @@ namespace walberla {
 
 
 
-typedef uint8_t flag_t;
+using flag_t = uint8_t;
 
-typedef FlagField< flag_t >                             FlagField_T;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< uint_t, stencil::D3Q27::Size > WorkField_T;
 typedef GhostLayerField< uint_t, 1 >                    FactorField_T;
 

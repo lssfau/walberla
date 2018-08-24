@@ -78,18 +78,18 @@ using walberla::uint_t;
 typedef lbm::D3Q19< lbm::collision_model::SRT,      false > LatticeModel_T;
 //typedef lbm::D3Q19< lbm::collision_model::TRT,      false > LatticeModel_T;
 //typedef lbm::D3Q19< lbm::collision_model::D3Q19MRT, false > LatticeModel_T;
-typedef LatticeModel_T::Stencil                             Stencil_T;
+using Stencil_T = LatticeModel_T::Stencil;
 
-typedef lbm::PdfField< LatticeModel_T >  PdfField_T;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t    flag_t;
-typedef FlagField< flag_t >  FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 const uint_t FieldGhostLayers = 4;
 
 // dummy boundary handling
 typedef lbm::NoSlip< LatticeModel_T, flag_t > NoSlip_T;
-typedef boost::tuples::tuple< NoSlip_T >  BoundaryConditions_T;
+using BoundaryConditions_T = boost::tuples::tuple<NoSlip_T>;
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
 ///////////

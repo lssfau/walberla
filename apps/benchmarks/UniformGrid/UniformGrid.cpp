@@ -83,6 +83,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 
 
 
@@ -111,13 +112,13 @@ typedef lbm::D3Q27< lbm::collision_model::D3Q27Cumulant, true  > D3Q27_CUMULANT_
 template< typename LatticeModel_T >
 struct Types
 {
-   typedef typename LatticeModel_T::Stencil              Stencil_T;
-   typedef typename LatticeModel_T::CommunicationStencil CommunicationStencil_T;
-   typedef lbm::PdfField< LatticeModel_T >               PdfField_T;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using CommunicationStencil_T = typename LatticeModel_T::CommunicationStencil;
+   using PdfField_T = lbm::PdfField< LatticeModel_T >;
 };
 
-typedef walberla::uint8_t   flag_t;
-typedef FlagField< flag_t > FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 const uint_t FieldGhostLayers = 1;
 
@@ -286,7 +287,7 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
    {
       MPIManager::instance()->useWorldComm();
 
-      sforest.balanceLoad( blockforest::CartesianDistribution( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, NULL ),
+      sforest.balanceLoad( blockforest::CartesianDistribution( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, nullptr ),
                            numberOfXProcesses * numberOfYProcesses * numberOfZProcesses, real_t(0), 0, true );
    }
 
@@ -316,11 +317,11 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
    blockforest::SetupBlockForest sforest;
    createSetupBlockForest( sforest, configBlock, uint_c( MPIManager::instance()->numProcesses() ), blocksPerProcess );
 
-   auto bf = shared_ptr< blockforest::BlockForest >( new blockforest::BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, false ) );
+   auto bf = std::make_shared< blockforest::BlockForest >( uint_c( MPIManager::instance()->rank() ), sforest, false );
 
-   auto sbf = shared_ptr< blockforest::StructuredBlockForest >( new blockforest::StructuredBlockForest( bf, numberOfXCellsPerBlock,
+   auto sbf = std::make_shared< blockforest::StructuredBlockForest >( bf, numberOfXCellsPerBlock,
                                                                                                             numberOfYCellsPerBlock,
-                                                                                                            numberOfZCellsPerBlock ) );
+                                                                                                            numberOfZCellsPerBlock );
    sbf->createCellBoundingBoxes();
 
    return sbf;
@@ -367,7 +368,7 @@ template< typename LatticeModel_T >
 typename MyBoundaryHandling<LatticeModel_T>::BoundaryHandling_T *
 MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block, const StructuredBlockStorage * const storage ) const
 {
-   typedef typename Types<LatticeModel_T>::PdfField_T PdfField_T;
+   using PdfField_T = typename Types< LatticeModel_T >::PdfField_T;
 
    WALBERLA_ASSERT_NOT_NULLPTR( block );
    WALBERLA_ASSERT_NOT_NULLPTR( storage );
@@ -486,8 +487,8 @@ void MyVTKOutput<LatticeModel_T>::operator()( std::vector< shared_ptr<vtk::Block
 template< typename LatticeModel_T, class Enable = void >
 struct AddLB
 {
-   typedef typename Types<LatticeModel_T>::PdfField_T              PdfField;
-   typedef typename Types<LatticeModel_T>::CommunicationStencil_T  CommunicationStencil;
+   using PdfField = typename Types< LatticeModel_T >::PdfField_T;
+   using CommunicationStencil = typename Types< LatticeModel_T >::CommunicationStencil_T;
 
    static void add( shared_ptr< blockforest::StructuredBlockForest > & blocks, SweepTimeloop & timeloop,
                     const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const BlockDataID & boundaryHandlingId,
@@ -550,7 +551,7 @@ struct AddLB
          {
             if( pure )
             {
-               typedef lbm::SplitPureSweep< LatticeModel_T > Sweep_T;
+               using Sweep_T = lbm::SplitPureSweep< LatticeModel_T >;
                auto sweep = make_shared< Sweep_T >( pdfFieldId );
 
                timeloop.add() << Sweep( lbm::CollideSweep< Sweep_T >( sweep ), "split pure LB sweep (collide)" );
@@ -590,8 +591,8 @@ struct AddLB< LatticeModel_T, typename boost::enable_if_c< boost::mpl::or_<
                                                                                            lbm::collision_model::Cumulant_tag >
                                                                           >::value >::type >
 {
-   typedef typename Types<LatticeModel_T>::PdfField_T              PdfField;
-   typedef typename Types<LatticeModel_T>::CommunicationStencil_T  CommunicationStencil;
+   using PdfField = typename Types< LatticeModel_T >::PdfField_T;
+   using CommunicationStencil = typename Types< LatticeModel_T >::CommunicationStencil_T;
 
    static void add( shared_ptr< blockforest::StructuredBlockForest > & blocks, SweepTimeloop & timeloop,
                     const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const BlockDataID & boundaryHandlingId,
@@ -658,7 +659,7 @@ template< typename LatticeModel_T >
 void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeModel,
           const bool split, const bool pure, const bool fzyx, const bool fullComm, const bool fused, const bool directComm )
 {
-   typedef typename Types<LatticeModel_T>::PdfField_T  PdfField;
+   using PdfField = typename Types<LatticeModel_T>::PdfField_T;
 
    Config::BlockHandle configBlock = config->getBlock( "UniformGrid" );
 
@@ -847,7 +848,7 @@ int main( int argc, char **argv )
    //WALBERLA_ROOT_SECTION() { logging::Logging::instance()->setLogLevel( logging::Logging::PROGRESS ); }
 
 #ifdef _OPENMP
-   if( std::getenv( "OMP_NUM_THREADS" ) == NULL )
+   if( std::getenv( "OMP_NUM_THREADS" ) == nullptr )
       WALBERLA_ABORT( "If you are using a version of the benchmark that was compiled with OpenMP you have to "
                       "specify the environment variable \'OMP_NUM_THREADS\' accordingly!" );
 #endif

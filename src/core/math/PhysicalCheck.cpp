@@ -318,7 +318,7 @@ namespace math {
       if( !isDefined(varName) )
       {
          WALBERLA_ABORT( "Error in PhysicalCheck::getVarUnit(). Variable not found: " << varName );
-         return 0;
+         return nullptr;
       }
 
       std::stringstream num, denom;

@@ -65,8 +65,8 @@
 
 namespace walberla{
 
-typedef walberla::uint8_t   flag_t;
-typedef FlagField< flag_t > FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 const FlagUID  Fluid_Flag( "fluid" );
 const FlagUID    UBB_Flag( "velocity bounce back" );
@@ -108,7 +108,7 @@ template< typename LatticeModel_T >
 typename MyBoundaryHandling<LatticeModel_T>::BoundaryHandling_T *
 MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block, const StructuredBlockStorage * const storage ) const
 {
-   typedef lbm::PdfField<LatticeModel_T>  PdfField_T;
+   using PdfField_T = lbm::PdfField< LatticeModel_T >;
 
    WALBERLA_ASSERT_NOT_NULLPTR( block );
    WALBERLA_ASSERT_NOT_NULLPTR( storage );
@@ -267,7 +267,7 @@ int main( int argc, char ** argv )
    // D3Q19 //
    ///////////
 
-   typedef lbm::D3Q19< lbm::collision_model::TRT > D3Q19_TRT_COMP;
+   using D3Q19_TRT_COMP = lbm::D3Q19<lbm::collision_model::TRT>;
    D3Q19_TRT_COMP d3q19comp = D3Q19_TRT_COMP( lbm::collision_model::TRT::constructWithMagicNumber( GlobalOmega ) );
 
    BlockDataID pdfFieldId1  = lbm::addPdfFieldToStorage( blocks, "pdf field (D3Q19 with ghosts set)", d3q19comp );
@@ -315,7 +315,7 @@ int main( int argc, char ** argv )
    // D3Q27 //
    ///////////
 
-   typedef lbm::D3Q27< lbm::collision_model::TRT > D3Q27_TRT_COMP;
+   using D3Q27_TRT_COMP = lbm::D3Q27<lbm::collision_model::TRT>;
    D3Q27_TRT_COMP d3q27comp = D3Q27_TRT_COMP( lbm::collision_model::TRT::constructWithMagicNumber( GlobalOmega ) );
 
    BlockDataID pdfFieldId3  = lbm::addPdfFieldToStorage( blocks, "pdf field (D3Q27 with ghosts set)", d3q27comp );

@@ -171,22 +171,22 @@ int main( int argc, char * argv[] )
    MPI_Comm comm = MPI_COMM_WORLD;
 
    std::cout << "ParMETIS_V3_PartKway" << std::endl;
-   WALBERLA_CHECK_EQUAL( ParMETIS_V3_PartKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), NULL, NULL, &wgtflag, &numflag, &ncon, &nparts,
+   WALBERLA_CHECK_EQUAL( ParMETIS_V3_PartKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), nullptr, nullptr, &wgtflag, &numflag, &ncon, &nparts,
                                 &(tpwgts.front()), &(ubvec.front()), options, &edgecut, &(part.front()), &comm ),
                          METIS_OK );
    std::cout << "ParMETIS_V3_PartGeomKway" << std::endl;
-   WALBERLA_CHECK_EQUAL( ParMETIS_V3_PartGeomKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), NULL, NULL, &wgtflag, &numflag, &ndims, &(xyz.front()), &ncon, &nparts,
+   WALBERLA_CHECK_EQUAL( ParMETIS_V3_PartGeomKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), nullptr, nullptr, &wgtflag, &numflag, &ndims, &(xyz.front()), &ncon, &nparts,
                                 &(tpwgts.front()), &(ubvec.front()), options, &edgecut, &(part.front()), &comm ),
                          METIS_OK );
    std::cout << "ParMETIS_V3_PartGeom" << std::endl;
    WALBERLA_CHECK_EQUAL( ParMETIS_V3_PartGeom( &(vtxdist.front()), &ndims, &(xyz.front()), &(part.front()), &comm ),
                          METIS_OK );
    std::cout << "ParMETIS_V3_AdaptiveRepart" << std::endl;
-   WALBERLA_CHECK_EQUAL( ParMETIS_V3_AdaptiveRepart( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), NULL, NULL, NULL, &wgtflag, &numflag, &ncon, &nparts,
+   WALBERLA_CHECK_EQUAL( ParMETIS_V3_AdaptiveRepart( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), nullptr, nullptr, nullptr, &wgtflag, &numflag, &ncon, &nparts,
                                 &(tpwgts.front()), &(ubvec.front()), &ipc2redist, options, &edgecut, &(part.front()), &comm ),
                          METIS_OK );
    std::cout << "ParMETIS_V3_RefineKway" << std::endl;
-   WALBERLA_CHECK_EQUAL( ParMETIS_V3_RefineKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), NULL, NULL, &wgtflag, &numflag, &ncon, &nparts,
+   WALBERLA_CHECK_EQUAL( ParMETIS_V3_RefineKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), nullptr, nullptr, &wgtflag, &numflag, &ncon, &nparts,
                                 &(tpwgts.front()), &(ubvec.front()), options, &edgecut, &(part.front()), &comm ),
                          METIS_OK );
 

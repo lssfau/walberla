@@ -43,7 +43,7 @@ namespace field {
 
       pa=std::malloc((size+alignment-1)+sizeof(void *));
       if(!pa)
-         return 0;
+         return nullptr;
 
       // Find next aligned position, starting at pa+sizeof(void*)-1
       ptr=(void*)( ((size_t)pa+sizeof(void *)+alignment-1) & ~(alignment-1));
@@ -75,7 +75,7 @@ namespace field {
 
       pa=std::malloc( (size+2*alignment-1 )+sizeof(void *));
       if(!pa)
-         return 0;
+         return nullptr;
 
       // Find next aligned position, starting at pa+sizeof(void*)-1
       ptr=(void*)( ((size_t)pa+sizeof(void *)+alignment-1) & ~(alignment-1));

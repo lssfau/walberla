@@ -66,7 +66,7 @@ int main( int argc, char** argv )
     auto sccdID              = forest->addBlockData(ccd::createSimpleCCDDataHandling( globalBodyStorage, storageID ), "SCCD");
     auto hccdID              = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "HCCD");
     auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
-    cr::PlainIntegrator cr(globalBodyStorage, forest->getBlockStoragePointer(), storageID, NULL);
+    cr::PlainIntegrator cr(globalBodyStorage, forest->getBlockStoragePointer(), storageID, nullptr);
 
     pe::createPlane( *globalBodyStorage, 0, Vec3(0, +1, 0), Vec3(5, 0,5), iron);
     pe::createPlane( *globalBodyStorage, 0, Vec3(0, -1, 0), Vec3(5,30,5), iron);
@@ -107,7 +107,7 @@ int main( int argc, char** argv )
     {
        SphereID sp = pe::createSphere(*globalBodyStorage, forest->getBlockStorage(), storageID, i,
                         Vec3(math::realRandom<real_t>(real_c(0), real_c(30)), math::realRandom<real_t>(real_c(0), real_c(30)), math::realRandom<real_t>(real_c(0), real_c(30))), real_c(0.4));
-      if (sp != NULL) sp->setLinearVel(Vec3(math::realRandom<real_t>(-dv, dv), math::realRandom<real_t>(-dv, dv), math::realRandom<real_t>(-dv, dv)));
+      if (sp != nullptr) sp->setLinearVel(Vec3(math::realRandom<real_t>(-dv, dv), math::realRandom<real_t>(-dv, dv), math::realRandom<real_t>(-dv, dv)));
     }
 
     pe::createSphere(*globalBodyStorage, forest->getBlockStorage(), storageID, 999999999,

@@ -36,7 +36,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 void checkSphere(StructuredBlockForest& forest, BlockDataID storageID, walberla::id_t sid, Sphere& ref, const Vec3& newPos)
 {
@@ -124,7 +124,7 @@ int main( int argc, char ** argv )
    SphereID sphere = createSphere( globalStorage, forest->getBlockStorage(), storageID, 0, gpos, 3);
    int sphereRank = -1;
 
-   if (sphere != NULL)
+   if (sphere != nullptr)
    {
       sphere->setLinearVel(4, 5, 6);
       sphere->setAngularVel( 1, 2, 3);

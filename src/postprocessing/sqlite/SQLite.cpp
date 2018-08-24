@@ -35,7 +35,7 @@ namespace postprocessing {
 
 
 SQLiteDB::SQLiteDB( const string & dbFile, const int busyTimeout )
-   : valid_(true), dbHandle_(NULL), file_( dbFile )
+   : valid_(true), dbHandle_(nullptr), file_( dbFile )
 {
    static const char * CREATE_RUN_TABLE =
          "CREATE TABLE IF NOT EXISTS runs ("
@@ -52,11 +52,11 @@ SQLiteDB::SQLiteDB( const string & dbFile, const int busyTimeout )
    }
 
    sqlite3_busy_timeout( dbHandle_, busyTimeout*1000 );
-   sqlite3_exec( dbHandle_, "PRAGMA foreign_keys = ON;",0,0,0 );
-   sqlite3_exec( dbHandle_, CREATE_RUN_TABLE, 0,0,0);
+   sqlite3_exec( dbHandle_, "PRAGMA foreign_keys = ON;",nullptr,nullptr,nullptr );
+   sqlite3_exec( dbHandle_, CREATE_RUN_TABLE, nullptr,nullptr,nullptr);
 
    static const char* UPDATE_RUN_TABLE_CMD = "ALTER TABLE runs ADD COLUMN uuid STRING;";
-   sqlite3_exec( dbHandle_, UPDATE_RUN_TABLE_CMD, 0, 0, 0 );
+   sqlite3_exec( dbHandle_, UPDATE_RUN_TABLE_CMD, nullptr, nullptr, nullptr );
 
 }
 
@@ -89,7 +89,7 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
 {
    WALBERLA_ASSERT_NOT_NULLPTR( dbHandle );
 
-   sqlite3_exec( dbHandle, "BEGIN;",0,0,0 );
+   sqlite3_exec( dbHandle, "BEGIN;",nullptr,nullptr,nullptr );
 
    string insertRunCommand = "INSERT INTO runs (timestamp, uuid ";
    std::stringstream values;
@@ -101,7 +101,7 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
       insertRunCommand += "," + i->first;
       values  << ", " << i->second;
       string command = "ALTER TABLE runs ADD COLUMN " + i->first + " INTEGER ";
-      sqlite3_exec ( dbHandle, command.c_str(), 0,0,0 ); // ignore errors (column can exist already)
+      sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
    }
 
    // Add columns for string properties
@@ -110,7 +110,7 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
       insertRunCommand += "," + i->first;
       values << ", " << "\"" << i->second << "\"";
       string command = "ALTER TABLE runs ADD COLUMN " + i->first + " TEXT ";
-      sqlite3_exec ( dbHandle, command.c_str(), 0,0,0 ); // ignore errors (column can exist already)
+      sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
 
    }
 
@@ -122,7 +122,7 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
          insertRunCommand += "," + i->first;
          values << ", " << i->second;
          string command = "ALTER TABLE runs ADD COLUMN " + i->first + " DOUBLE ";
-         sqlite3_exec( dbHandle, command.c_str(), 0, 0, 0 ); // ignore errors (column can exist already)
+         sqlite3_exec( dbHandle, command.c_str(), nullptr, nullptr, nullptr ); // ignore errors (column can exist already)
       }
       else
       {
@@ -138,20 +138,20 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
       values << " ,1";
       // no boolean in sqlite3, use integer instead
       string command = "ALTER TABLE runs ADD COLUMN " + i->getIdentifier() + " INTEGER ";
-      sqlite3_exec ( dbHandle, command.c_str(), 0,0,0 ); // ignore errors (column can exist already)
+      sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
    }
 
    insertRunCommand += " )  ";
    values << "); ";
    insertRunCommand += values.str();
 
-   int ret = sqlite3_exec ( dbHandle, insertRunCommand.c_str(), 0, 0, 0 );
+   int ret = sqlite3_exec ( dbHandle, insertRunCommand.c_str(), nullptr, nullptr, nullptr );
    if ( ret != SQLITE_OK) {
       WALBERLA_LOG_WARNING( "Failed to insert a row into run table of sqlite3 database: " << sqlite3_errmsg(dbHandle) << "\n sql command: " << insertRunCommand.c_str() );
    }
    uint_t generatedPrimaryKey = uint_c ( sqlite3_last_insert_rowid( dbHandle ) );
 
-   sqlite3_exec( dbHandle, "END TRANSACTION;",0,0,0 );
+   sqlite3_exec( dbHandle, "END TRANSACTION;",nullptr,nullptr,nullptr );
 
    return generatedPrimaryKey;
 }
@@ -172,14 +172,14 @@ void storeAdditionalRunInfoImpl( sqlite3 * dbHandle,
                                  const map<string, string > & stringProperties ,
                                  const map<string, double > & realProperties )
 {
-   sqlite3_exec( dbHandle, "BEGIN;",0,0,0 );
+   sqlite3_exec( dbHandle, "BEGIN;",nullptr,nullptr,nullptr );
    std::string CREATE_TABLE =
          "CREATE TABLE IF NOT EXISTS " + tableName +
          " (runId     INTEGER, "
          " FOREIGN KEY (runId) REFERENCES runs(runId) "
          " );" ;
 
-   sqlite3_exec( dbHandle, CREATE_TABLE.c_str(), 0,0,0);
+   sqlite3_exec( dbHandle, CREATE_TABLE.c_str(), nullptr,nullptr,nullptr);
 
    string insertRunCommand = "INSERT INTO " + tableName + "( runId";
    std::stringstream values;
@@ -190,7 +190,7 @@ void storeAdditionalRunInfoImpl( sqlite3 * dbHandle,
       insertRunCommand += "," + i->first;
       values  << ", " << i->second;
       string command = "ALTER TABLE " + tableName + " ADD COLUMN " + i->first + " INTEGER ";
-      sqlite3_exec ( dbHandle, command.c_str(), 0,0,0 ); // ignore errors (column can exist already)
+      sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
    }
 
    // Add columns for string properties
@@ -199,7 +199,7 @@ void storeAdditionalRunInfoImpl( sqlite3 * dbHandle,
       insertRunCommand += "," + i->first;
       values << ", " << "\"" << i->second << "\"";
       string command = "ALTER TABLE " + tableName + " ADD COLUMN " + i->first + " TEXT ";
-      sqlite3_exec ( dbHandle, command.c_str(), 0,0,0 ); // ignore errors (column can exist already)
+      sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
 
    }
 
@@ -209,18 +209,18 @@ void storeAdditionalRunInfoImpl( sqlite3 * dbHandle,
       insertRunCommand += "," + i->first;
       values << ", " << i->second ;
       string command = "ALTER TABLE " + tableName + " ADD COLUMN " + i->first + " DOUBLE ";
-      sqlite3_exec ( dbHandle, command.c_str(), 0,0,0 ); // ignore errors (column can exist already)
+      sqlite3_exec ( dbHandle, command.c_str(), nullptr,nullptr,nullptr ); // ignore errors (column can exist already)
    }
 
    insertRunCommand += " )  ";
    values << "); ";
    insertRunCommand += values.str();
 
-   int ret = sqlite3_exec ( dbHandle, insertRunCommand.c_str(), 0, 0, 0 );
+   int ret = sqlite3_exec ( dbHandle, insertRunCommand.c_str(), nullptr, nullptr, nullptr );
    if ( ret != SQLITE_OK) {
       WALBERLA_LOG_WARNING( "Failed to insert a row into run table of sqlite3 database: " << sqlite3_errmsg(dbHandle) << "\n sql command: " << insertRunCommand.c_str() );
    }
-   sqlite3_exec( dbHandle, "END TRANSACTION;",0,0,0 );
+   sqlite3_exec( dbHandle, "END TRANSACTION;",nullptr,nullptr,nullptr );
 }
 
 
@@ -293,7 +293,7 @@ void SQLiteDB::storeTimingPool ( uint_t runId,
                                  const WcTimingPool & tp,
                                  const std::string & timingPoolName )
 {
-   sqlite3_exec( dbHandle_, "BEGIN;",0,0,0 );
+   sqlite3_exec( dbHandle_, "BEGIN;",nullptr,nullptr,nullptr );
 
    assert ( timingPoolName.length() > 0 && timingPoolName.length() < 255 );
 
@@ -316,10 +316,10 @@ void SQLiteDB::storeTimingPool ( uint_t runId,
          " INSERT INTO timingPool (runId,name,sweep,average,min,max,count,variance,percentage) "
          " VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 
-   sqlite3_exec( dbHandle_, CREATE_TIMINGPOOL_TABLE, 0,0,0 );
+   sqlite3_exec( dbHandle_, CREATE_TIMINGPOOL_TABLE, nullptr,nullptr,nullptr );
 
-   sqlite3_stmt *stmt = NULL;
-   auto retVal = sqlite3_prepare_v2(dbHandle_, INSERT_STATEMENT, -1, &stmt, 0 );
+   sqlite3_stmt *stmt = nullptr;
+   auto retVal = sqlite3_prepare_v2(dbHandle_, INSERT_STATEMENT, -1, &stmt, nullptr );
    if ( retVal != SQLITE_OK ) {
       WALBERLA_LOG_WARNING( "Failed to prepare SQL Insert statement." << file_ );
       return;
@@ -346,7 +346,7 @@ void SQLiteDB::storeTimingPool ( uint_t runId,
       sqlite3_step ( stmt );  // execute statement
       sqlite3_reset ( stmt ); // undo binding
    }
-   sqlite3_exec( dbHandle_, "END TRANSACTION;",0,0,0 );
+   sqlite3_exec( dbHandle_, "END TRANSACTION;",nullptr,nullptr,nullptr );
 
    sqlite3_finalize( stmt ); // free prepared statement
 }
@@ -365,7 +365,7 @@ void SQLiteDB::storeTimingTree ( uint_t runId,
                                  const WcTimingTree & tt,
                                  const std::string & timingTreeName )
 {
-   sqlite3_exec( dbHandle_, "BEGIN;",0,0,0 );
+   sqlite3_exec( dbHandle_, "BEGIN;",nullptr,nullptr,nullptr );
 
    assert ( timingTreeName.length() > 0 && timingTreeName.length() < 255 );
 
@@ -385,7 +385,7 @@ void SQLiteDB::storeTimingTree ( uint_t runId,
          " FOREIGN KEY (runId) REFERENCES runs(runId)  "
          " );" ;
 
-   sqlite3_exec( dbHandle_, CREATE_TIMINGTREE_TABLE, 0,0,0 );
+   sqlite3_exec( dbHandle_, CREATE_TIMINGTREE_TABLE, nullptr,nullptr,nullptr );
 
    double totalTime = 0.0;
    for (auto it = tt.getRawData().tree_.begin(); it != tt.getRawData().tree_.end(); ++it)
@@ -395,7 +395,7 @@ void SQLiteDB::storeTimingTree ( uint_t runId,
 
    storeTimingNode(runId, std::numeric_limits<int>::max(), tt.getRawData(), timingTreeName, "Total", totalTime);
 
-   sqlite3_exec( dbHandle_, "END TRANSACTION;",0,0,0 );
+   sqlite3_exec( dbHandle_, "END TRANSACTION;",nullptr,nullptr,nullptr );
 }
 
 //*******************************************************************************************************************
@@ -418,8 +418,8 @@ void SQLiteDB::storeTimingNode ( const uint_t runId,
          " INSERT INTO timingTree (runId,name,parentId,sweep,average,min,max,count,variance,percentage) "
          " VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 
-   sqlite3_stmt *stmt = NULL;
-   auto retVal = sqlite3_prepare_v2(dbHandle_, INSERT_STATEMENT, -1, &stmt, 0 );
+   sqlite3_stmt *stmt = nullptr;
+   auto retVal = sqlite3_prepare_v2(dbHandle_, INSERT_STATEMENT, -1, &stmt, nullptr );
    if ( retVal != SQLITE_OK ) {
       WALBERLA_LOG_WARNING( "Failed to prepare SQL Insert statement (" << retVal << ")." );
       return;

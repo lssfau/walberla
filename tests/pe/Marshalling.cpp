@@ -38,10 +38,10 @@ namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::pe::communication;
 
-typedef boost::tuple<Sphere>       UnionTypeTuple;
-typedef Union< UnionTypeTuple >    UnionT;
-typedef UnionT*                    UnionID;
-typedef std::unique_ptr<UnionT>    UnionPtr;
+using UnionTypeTuple = boost::tuple<Sphere>;
+using UnionT = Union<UnionTypeTuple>;
+using UnionID = UnionT *;
+using UnionPtr = std::unique_ptr<UnionT>;
 
 typedef boost::tuple<Box, Capsule, Sphere, Squirmer, UnionT, Ellipsoid> BodyTuple ;
 

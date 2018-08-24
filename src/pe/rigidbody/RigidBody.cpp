@@ -47,7 +47,7 @@ RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
    , Iinv_( real_c(0) )       // Inverse moment of inertia
    , q_()                     // Orientation of the body frame
    , R_()                     // Rigid body rotation
-   , manager_(0)              // The rigid body manager responsible for the rigid body
+   , manager_(nullptr)              // The rigid body manager responsible for the rigid body
    , finite_ (true)           // Finiteness flag
    , visible_(true)           // Visibility flag
    , remote_ (false)          // Remote flag
@@ -75,8 +75,7 @@ RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
 /*!\brief Destructor for the RigidBody class.
  */
 RigidBody::~RigidBody()
-{
-}
+= default;
 //*************************************************************************************************
 
 

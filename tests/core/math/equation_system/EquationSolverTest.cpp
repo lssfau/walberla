@@ -81,23 +81,23 @@ int equationInput(){
    std::vector<std::string> eqStringList;
 
    //// Parameters
-   eqStringList.push_back( "dt = 2e-7");
-   eqStringList.push_back( "dx = 5e-6");
-   eqStringList.push_back( "eta = 0.0001");
-   eqStringList.push_back( "omega = 1.95");
-   eqStringList.push_back( "rho = 1000");
+   eqStringList.emplace_back("dt = 2e-7");
+   eqStringList.emplace_back("dx = 5e-6");
+   eqStringList.emplace_back("eta = 0.0001");
+   eqStringList.emplace_back("omega = 1.95");
+   eqStringList.emplace_back("rho = 1000");
 
    //// LBM Equations
-   eqStringList.push_back( "'rho_L' = 1.0");
-   eqStringList.push_back( "'dt_L'  = 1.0");
-   eqStringList.push_back( "'dx_L'  = 1.0");
-   eqStringList.push_back( "'c'     = 'dx_L' / 'dt_L'");
-   eqStringList.push_back( "'nu'    = 'eta' / 'rho'");
-   eqStringList.push_back( "'nu_L'  = 'eta_L' / 'rho_L'");
-   eqStringList.push_back( "'dt'    = ( 0.1 * 'dx' ) / 'maxOcurringPhysVel'");
-   eqStringList.push_back( "'cs'    = ( 1.0 / ( 3.0 ^ 0.5 ) ) * 'c'");
-   eqStringList.push_back( "'omega' = 1.0 / 'tau'");
-   eqStringList.push_back( "'nu_L'  = ( 'cs' ^ 2.0 ) * ( 'tau' - ( 0.5 * 'dt_L' ) )");
+   eqStringList.emplace_back("'rho_L' = 1.0");
+   eqStringList.emplace_back("'dt_L'  = 1.0");
+   eqStringList.emplace_back("'dx_L'  = 1.0");
+   eqStringList.emplace_back("'c'     = 'dx_L' / 'dt_L'");
+   eqStringList.emplace_back("'nu'    = 'eta' / 'rho'");
+   eqStringList.emplace_back("'nu_L'  = 'eta_L' / 'rho_L'");
+   eqStringList.emplace_back("'dt'    = ( 0.1 * 'dx' ) / 'maxOcurringPhysVel'");
+   eqStringList.emplace_back("'cs'    = ( 1.0 / ( 3.0 ^ 0.5 ) ) * 'c'");
+   eqStringList.emplace_back("'omega' = 1.0 / 'tau'");
+   eqStringList.emplace_back("'nu_L'  = ( 'cs' ^ 2.0 ) * ( 'tau' - ( 0.5 * 'dt_L' ) )");
    /*
    // Unsolvable:
    // Parameters
@@ -171,7 +171,7 @@ int unitTest(double v)
 }
 
 int unitTests(unsigned int count){
-   srand( static_cast<unsigned int>(time(NULL)) );
+   srand( static_cast<unsigned int>(time(nullptr)) );
 
    double values[] = {0.0, 1.0, 1e-15, 1e+15};
    unsigned int size = 4;

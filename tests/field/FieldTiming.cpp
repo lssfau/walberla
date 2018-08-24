@@ -85,7 +85,7 @@ double sumHandWrittenPlusIf(const DoubleField & field)
             const double* end   = &field.get(cell_idx_c(field.xSize())-1,y,z,f)+1;
             for(; begin!=end; ++begin) {
                sum += *begin;
-               if(begin == 0) // Artificial if condition to simulate iterators
+               if(begin == nullptr) // Artificial if condition to simulate iterators
                   cout << "Should not happen" << endl;
             }
          }
@@ -197,7 +197,7 @@ double initFieldRandom(DoubleField & field)
    return sum;
 }
 
-typedef std::function<double (const DoubleField & field)> Func;
+using Func = std::function<double (const DoubleField &)>;
 void timeFunction( WcTimer & timer,  Func f, const DoubleField & field, double sum, double epsilon, int nrExecutions=30 )
 {
    for(int i=0 ; i < nrExecutions; ++i)

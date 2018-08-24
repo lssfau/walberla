@@ -54,14 +54,14 @@ typedef boost::tuple<ConvexPolyhedron, Plane> BodyTuple ;
 std::vector<Vector3<real_t>> generatePointCloudCube()
 {
    std::vector<Vector3<real_t>> points;
-   points.push_back( Vector3<real_t>( real_t(-1), real_t(-1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t(-1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t( 1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t( 1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t(-1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t(-1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t( 1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t( 1), real_t( 1) ) );
+   points.emplace_back( real_t(-1), real_t(-1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t(-1), real_t( 1) );
+   points.emplace_back( real_t(-1), real_t( 1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t( 1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t(-1), real_t(-1) );
+   points.emplace_back( real_t( 1), real_t(-1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t( 1), real_t(-1) );
+   points.emplace_back( real_t( 1), real_t( 1), real_t( 1) );
 
    return points;
 }
@@ -76,9 +76,9 @@ std::vector<Vector3<real_t>> generatePointCloudDodecahedron()
    for( auto phi : {-PHI, PHI} )
       for( auto piv : {-PHI_INV, PHI_INV} )
       {
-         points.push_back( Vector3<real_t>( real_t(  0), real_t(piv), real_t(phi) ) );
-         points.push_back( Vector3<real_t>( real_t(piv), real_t(phi), real_t(  0) ) );
-         points.push_back( Vector3<real_t>( real_t(phi), real_t(  0), real_t(piv) ) );
+         points.emplace_back( real_t(  0), real_t(piv), real_t(phi) );
+         points.emplace_back( real_t(piv), real_t(phi), real_t(  0) );
+         points.emplace_back( real_t(phi), real_t(  0), real_t(piv) );
       }
 
    return points;
@@ -143,10 +143,10 @@ int main( int argc, char ** argv )
    cr.setRelaxationParameter( real_t(0.7) );
    cr.setGlobalLinearAcceleration( Vec3(0,0,5) );
 
-   std::function<void(void)> syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+   std::function<void(void)> syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
 
-   typedef mesh::FloatPolyMesh OutputMeshType;
-   typedef mesh::pe::DefaultTesselation<OutputMeshType> TesselationType;
+   using OutputMeshType = mesh::FloatPolyMesh;
+   using TesselationType = mesh::pe::DefaultTesselation<OutputMeshType>;
    TesselationType tesselation;
    mesh::pe::PeVTKMeshWriter<OutputMeshType, TesselationType> writer( forest, storageID, tesselation, "MeshOutput", uint_c(visSpacing) );
 
@@ -191,8 +191,8 @@ int main( int argc, char ** argv )
          //BoxID sp = pe::createBox(  *globalBodyStorage, *forest, storageID, 0, *it, Vec3(radius), material );
          mesh::pe::ConvexPolyhedronID sp = mesh::pe::createConvexPolyhedron(  *globalBodyStorage, *forest, storageID, 0, *it, pointCloud, material );
          Vec3 rndVel(math::realRandom<real_t>(-vMax, vMax), math::realRandom<real_t>(-vMax, vMax), math::realRandom<real_t>(-vMax, vMax));
-         if (sp != NULL) sp->setLinearVel(rndVel);
-         if (sp != NULL) ++numParticles;
+         if (sp != nullptr) sp->setLinearVel(rndVel);
+         if (sp != nullptr) ++numParticles;
       }
    }
    mpi::reduceInplace(numParticles, mpi::SUM);

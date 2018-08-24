@@ -63,8 +63,8 @@ int main( int argc, char ** argv )
    walberla::MPIManager::instance()->useWorldComm();
 
    // create StructuredBlockForest (encapsulates a newly created BlockForest)
-   auto bf = walberla::shared_ptr< BlockForest >( new BlockForest( walberla::uint_c( walberla::MPIManager::instance()->rank() ), sforest, true ) );
-   auto sbf = walberla::shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, 10, 10, 10 ) );
+   auto bf = std::make_shared< BlockForest >( walberla::uint_c( walberla::MPIManager::instance()->rank() ), sforest, true );
+   auto sbf = std::make_shared< StructuredBlockForest >( bf, 10, 10, 10 );
    sbf->createCellBoundingBoxes();
 
 

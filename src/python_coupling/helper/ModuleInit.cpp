@@ -54,7 +54,7 @@ void initWalberlaForPythonModule()
 
    Abort::instance()->resetAbortFunction( Abort::exceptionAbort );
 
-   mpi::MPIManager::instance()->initializeMPI( 0,0 );
+   mpi::MPIManager::instance()->initializeMPI( nullptr,nullptr );
    mpi::MPIManager::instance()->useWorldComm();
 }
 

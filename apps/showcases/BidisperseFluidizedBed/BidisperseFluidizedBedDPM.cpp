@@ -77,14 +77,14 @@ const uint_t FieldGhostLayers( 1 );
 typedef GhostLayerField< Matrix3<real_t>, 1 >                          TensorField_T;
 typedef GhostLayerField< Vector3<real_t>, 1 >                          Vec3Field_T;
 typedef GhostLayerField< real_t, 1 >                                   ScalarField_T;
-typedef lbm::force_model::GuoField< Vec3Field_T >                      ForceModel_T;
+using ForceModel_T = lbm::force_model::GuoField<Vec3Field_T>;
 
 typedef lbm::D3Q19< lbm::collision_model::SRTField<ScalarField_T>, false, ForceModel_T >   LatticeModel_T;
-typedef LatticeModel_T::Stencil                                        Stencil_T;
-typedef lbm::PdfField< LatticeModel_T >                                PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                                              flag_t;
-typedef FlagField< flag_t >                                            FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 // boundary handling
 typedef lbm::NoSlip< LatticeModel_T, flag_t >                          NoSlip_T;
@@ -610,7 +610,7 @@ class DummySweep
 {
 public:
    DummySweep( )
-   {}
+   = default;
 
    void operator()(IBlock * const /*block*/)
    {}
@@ -890,7 +890,7 @@ int main( int argc, char **argv ) {
    // connect to pe
    const real_t overlap = real_t(1.5) * dx;
    auto syncCall = std::bind(pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()),
-                               bodyStorageID, static_cast<WcTimingTree *>(NULL), overlap, false);
+                               bodyStorageID, static_cast<WcTimingTree *>(nullptr), overlap, false);
    shared_ptr<CollisionPropertiesEvaluator> collisionPropertiesEvaluator = walberla::make_shared<CollisionPropertiesEvaluator>(*cr);
 
    // create the spheres
@@ -1374,7 +1374,7 @@ int main( int argc, char **argv ) {
    std::function<void(void)> lubricationEvaluationFunction;
    if( lubricationCutOffDistance > real_t(0) )
    {
-      typedef pe_coupling::discrete_particle_methods::LubricationForceEvaluator LE_T;
+      using LE_T = pe_coupling::discrete_particle_methods::LubricationForceEvaluator;
       shared_ptr<LE_T> lubEval = make_shared<LE_T>( blocks, globalBodyStorage, bodyStorageID, viscosity, lubricationCutOffDistance );
       lubricationEvaluationFunction = std::bind(&LE_T::operator(), lubEval);
    }

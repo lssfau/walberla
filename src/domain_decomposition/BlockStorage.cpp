@@ -109,7 +109,7 @@ BlockDataID BlockStorage::addBlockData( const internal::SelectableBlockDataHandl
       if( dh )
          block->addData( id, dh->initialize( block.get() ) );
       else
-         block->addData( id, NULL );
+         block->addData( id, nullptr );
    }
 
    return id;
@@ -229,7 +229,7 @@ BlockDataID BlockStorage::loadBlockData( const std::string & file, const interna
          dh->deserialize( block, id, buffer );
       }
       else
-         block->addData( id, NULL );
+         block->addData( id, nullptr );
    }
 
    return id;   

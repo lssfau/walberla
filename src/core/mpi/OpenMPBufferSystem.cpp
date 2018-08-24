@@ -184,7 +184,7 @@ void OpenMPBufferSystem::waitOpenMP()
    for( int i = 0; i < numReceives; ++i )
    {
       MPIRank recvRank = INVALID_RANK;
-      RecvBuffer * recvBuffer = NULL;
+      RecvBuffer * recvBuffer = nullptr;
 
       #ifdef _OPENMP
       #pragma omp critical

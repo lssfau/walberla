@@ -103,7 +103,7 @@ void testStrings()
 
    std::vector< std::string > reducedValuesUnion = mpi::allReduceSet( values, mpi::UNION );
 
-   values.push_back( "GRAPES" );
+   values.emplace_back("GRAPES" );
    std::vector< std::string > reducedValuesIntersection = mpi::allReduceSet( values, mpi::INTERSECTION );
 
    if( numProcesses == 1 )

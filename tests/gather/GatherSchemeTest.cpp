@@ -95,7 +95,7 @@ public:
         : cellInterval_ ( ci )
     {}
 
-   virtual void process(const std::vector<std::vector<real_t> > & data)
+   void process(const std::vector<std::vector<real_t> > & data) override
    {
       uint_t counter =0;
       for( auto it = cellInterval_.begin(); it != cellInterval_.end(); ++it )

@@ -46,12 +46,12 @@ class PointCloudDataSource : public vtk::PointDataSource
 public:
    PointCloudDataSource( const std::vector<Vector3<real_t>> & pointCloud ) : pointCloud_( pointCloud ) {}
 
-   virtual std::vector< Attributes > getAttributes() const { return std::vector< Attributes >(); }
-   virtual std::vector< Vector3< real_t > > getPoints() { return pointCloud_; }
-   virtual void configure() {};
+   std::vector< Attributes > getAttributes() const override { return std::vector< Attributes >(); }
+   std::vector< Vector3< real_t > > getPoints() override { return pointCloud_; }
+   void configure() override {};
 
-   virtual void push( std::ostream& /*os*/,  const uint_t /*data*/, const uint_t /*point*/, const uint_t /*component*/ ) {};
-   virtual void push( vtk::Base64Writer& /*b64*/, const uint_t /*data*/, const uint_t /*point*/, const uint_t /*component*/ ) {};
+   void push( std::ostream& /*os*/,  const uint_t /*data*/, const uint_t /*point*/, const uint_t /*component*/ ) override {};
+   void push( vtk::Base64Writer& /*b64*/, const uint_t /*data*/, const uint_t /*point*/, const uint_t /*component*/ ) override {};
 
 private:
    std::vector<Vector3<real_t>> pointCloud_;
@@ -104,7 +104,7 @@ void test( const std::string & testName, const std::vector<Vector3<real_t>> & po
       const typename MeshType::Point    pointOnFace = mesh.point( *mesh.cfv_begin(fh) );
       for(const auto & p : pointCloud)
       {
-         typedef typename MeshType::Scalar Scalar;
+         using Scalar = typename MeshType::Scalar;
          WALBERLA_CHECK_LESS( (toOpenMeshNumericCast<Scalar>(p) - pointOnFace) | n, real_comparison::Epsilon<Scalar>::value,
                                  "Point: " << p << " Face normal: " << n << " v: " << toOpenMeshNumericCast<Scalar>(p) - pointOnFace );
       }
@@ -116,14 +116,14 @@ void test( const std::string & testName, const std::vector<Vector3<real_t>> & po
 std::vector<Vector3<real_t>> generatePointCloudCube()
 {
    std::vector<Vector3<real_t>> points;
-   points.push_back( Vector3<real_t>( real_t(-1), real_t(-1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t(-1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t( 1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t( 1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t(-1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t(-1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t( 1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t( 1), real_t( 1) ) );
+   points.emplace_back( real_t(-1), real_t(-1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t(-1), real_t( 1) );
+   points.emplace_back( real_t(-1), real_t( 1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t( 1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t(-1), real_t(-1) );
+   points.emplace_back( real_t( 1), real_t(-1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t( 1), real_t(-1) );
+   points.emplace_back( real_t( 1), real_t( 1), real_t( 1) );
 
    return points;
 }
@@ -132,10 +132,10 @@ std::vector<Vector3<real_t>> generatePointCloudCube()
 std::vector<Vector3<real_t>> generatePointCloudTetrahedron()
 {
    std::vector<Vector3<real_t>> points;
-   points.push_back( Vector3<real_t>( real_t( 1), real_t( 1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t(-1), real_t(-1) ) );
-   points.push_back( Vector3<real_t>( real_t(-1), real_t( 1), real_t( 1) ) );
-   points.push_back( Vector3<real_t>( real_t( 1), real_t(-1), real_t( 1) ) );
+   points.emplace_back( real_t( 1), real_t( 1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t(-1), real_t(-1) );
+   points.emplace_back( real_t(-1), real_t( 1), real_t( 1) );
+   points.emplace_back( real_t( 1), real_t(-1), real_t( 1) );
 
    return points;
 }
@@ -146,9 +146,9 @@ std::vector<Vector3<real_t>> generatePointCloudOctahedron()
 
    for( auto one : {real_t(-1), real_t(1)} )
    {
-      points.push_back( Vector3<real_t>( one,   0,   0 ) );
-      points.push_back( Vector3<real_t>(   0, one,   0 ) );
-      points.push_back( Vector3<real_t>(   0,   0, one ) );
+      points.emplace_back( one,   0,   0 );
+      points.emplace_back(   0, one,   0 );
+      points.emplace_back(   0,   0, one );
    }
 
    return points;
@@ -163,9 +163,9 @@ std::vector<Vector3<real_t>> generatePointCloudIcosahedron()
    for( auto one : {real_t(-1), real_t(1)} )
       for( auto phi : {-PHI, PHI} )
       {
-         points.push_back( Vector3<real_t>( real_t(  0), real_t(one), real_t(phi) ) );
-         points.push_back( Vector3<real_t>( real_t(one), real_t(phi), real_t(  0) ) );
-         points.push_back( Vector3<real_t>( real_t(phi), real_t(  0), real_t(one) ) );
+         points.emplace_back( real_t(  0), real_t(one), real_t(phi) );
+         points.emplace_back( real_t(one), real_t(phi), real_t(  0) );
+         points.emplace_back( real_t(phi), real_t(  0), real_t(one) );
       }
 
    return points;
@@ -181,9 +181,9 @@ std::vector<Vector3<real_t>> generatePointCloudDodecahedron()
    for( auto phi : {-PHI, PHI} )
       for( auto piv : {-PHI_INV, PHI_INV} )
       {
-         points.push_back( Vector3<real_t>( real_t(  0), real_t(piv), real_t(phi) ) );
-         points.push_back( Vector3<real_t>( real_t(piv), real_t(phi), real_t(  0) ) );
-         points.push_back( Vector3<real_t>( real_t(phi), real_t(  0), real_t(piv) ) );
+         points.emplace_back( real_t(  0), real_t(piv), real_t(phi) );
+         points.emplace_back( real_t(piv), real_t(phi), real_t(  0) );
+         points.emplace_back( real_t(phi), real_t(  0), real_t(piv) );
       }
 
    return points;

@@ -136,7 +136,7 @@ int main( int argc, char * argv[] )
    std::vector< int64_t > part( fieldSize[0] * fieldSize[1] );
    MPI_Comm comm = MPIManager::instance()->comm();
 
-   int result = core::ParMETIS_V3_PartKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), NULL, NULL, &wgtflag, &numflag, &ncon, &nparts,
+   int result = core::ParMETIS_V3_PartKway( &(vtxdist.front()), &(xadj.front()), &(adjncy.front()), nullptr, nullptr, &wgtflag, &numflag, &ncon, &nparts,
                                             &(tpwgts.front()), &(ubvec.front()), options, &edgecut, &(part.front()), &comm );
 
 

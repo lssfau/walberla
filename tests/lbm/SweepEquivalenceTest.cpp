@@ -72,8 +72,8 @@
 
 namespace walberla {
 
-typedef walberla::uint64_t   flag_t;
-typedef FlagField< flag_t >  FlagField_T;
+using flag_t = walberla::uint64_t;
+using FlagField_T = FlagField<flag_t>;
 
 const FlagUID  Fluid_Flag( "fluid" );
 const FlagUID    UBB_Flag( "velocity bounce back" );
@@ -119,7 +119,7 @@ template< typename LatticeModel_T >
 typename MyBoundaryHandling<LatticeModel_T>::BoundaryHandling_T *
 MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block, const StructuredBlockStorage * const storage ) const
 {
-   typedef lbm::PdfField<LatticeModel_T>  PdfField_T;
+   using PdfField_T = lbm::PdfField< LatticeModel_T >;
 
    WALBERLA_ASSERT_NOT_NULLPTR( block );
    WALBERLA_ASSERT_NOT_NULLPTR( storage );
@@ -256,8 +256,8 @@ struct AddTRTTest< LatticeModel_T, typename boost::enable_if_c< boost::is_same< 
 template< typename LatticeModel1_T, typename LatticeModel2_T >
 void check( const shared_ptr< StructuredBlockForest > & blocks, const BlockDataID & fieldId1, const BlockDataID & fieldId2 )
 {
-   typedef lbm::PdfField< LatticeModel1_T > PdfField1_T;
-   typedef lbm::PdfField< LatticeModel2_T > PdfField2_T;
+   using PdfField1_T = lbm::PdfField< LatticeModel1_T >;
+   using PdfField2_T = lbm::PdfField< LatticeModel2_T >;
 
    for( auto block = blocks->begin(); block != blocks->end(); ++block )
    {
@@ -363,7 +363,7 @@ int main( int argc, char ** argv )
    // D3Q19, incompressible //
    ///////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // SRT
 
@@ -490,7 +490,7 @@ int main( int argc, char ** argv )
    // D3Q19, compressible //
    /////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // SRT
 
@@ -553,7 +553,7 @@ int main( int argc, char ** argv )
    // D3Q27, incompressible //
    ///////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // SRT
 
@@ -616,7 +616,7 @@ int main( int argc, char ** argv )
    // D3Q27, compressible //
    /////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // SRT
 
@@ -651,7 +651,7 @@ int main( int argc, char ** argv )
    // TRT <-> MRT COMPARISON //
    ////////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // TRT
 
@@ -703,7 +703,7 @@ int main( int argc, char ** argv )
    // D2Q9, incompressible //
    //////////////////////////
 
-   fieldIds.push_back( std::vector< BlockDataID >() );
+   fieldIds.emplace_back( );
 
    // SRT
 

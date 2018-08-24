@@ -84,17 +84,17 @@
 
 namespace walberla {
 
-typedef uint8_t            flag_t;
-typedef Vector3< real_t >  vec3_t;
+using flag_t = uint8_t;
+using vec3_t = Vector3<real_t>;
 
 typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None, 1 >  LM;
 
-typedef LM::CommunicationStencil  CommunicationStencil;
+using CommunicationStencil = LM::CommunicationStencil;
 
-typedef lbm::PdfField  < LM                >   MyPdfField;
+using MyPdfField = lbm::PdfField<LM>;
 typedef GhostLayerField< real_t, 1         >   ScalarField;
 typedef GhostLayerField< Vector3<real_t>, 1>   VectorField;
-typedef FlagField      < flag_t            >   MyFlagField;
+using MyFlagField = FlagField<flag_t>;
 
 typedef lbm::DefaultDiffusionBoundaryHandlingFactory< LM, MyFlagField >  MyBoundaryHandling;
 
@@ -104,7 +104,7 @@ const FlagUID& getFluidFlag(){ static FlagUID uid( "Fluid" ); return uid; }
 class PlugFlow
 {
 public:
-   typedef std::complex<real_t> cplx_t;
+   using cplx_t = std::complex<real_t>;
 
    PlugFlow( real_t L, real_t H, real_t u, real_t k ) :
       period_( real_t(2)*math::PI/L ),
@@ -196,7 +196,7 @@ class CosBoundaryConfiguration : public MyBoundaryHandling::DiffusionDirichlet_T
 public:
    CosBoundaryConfiguration( real_t period ) : period_( period ){}
 
-   virtual void val( real_t& _val, cell_idx_t x, cell_idx_t, cell_idx_t ) const { _val = real_c( cos( period_*( real_c(x) + real_c(0.5) ) ) ); }
+   void val( real_t& _val, cell_idx_t x, cell_idx_t, cell_idx_t ) const override { _val = real_c( cos( period_*( real_c(x) + real_c(0.5) ) ) ); }
 
 private:
    const real_t period_;

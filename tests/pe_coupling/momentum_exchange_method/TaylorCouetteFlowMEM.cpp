@@ -77,18 +77,18 @@ using walberla::uint_t;
 
 // pdf field & flag field
 typedef lbm::D3Q19< lbm::collision_model::TRT, false >  LatticeModel_T;
-typedef LatticeModel_T::Stencil                         Stencil_T;
-typedef lbm::PdfField< LatticeModel_T >                 PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t   flag_t;
-typedef FlagField< flag_t > FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 const uint_t FieldGhostLayers = 1;
 
 typedef pe_coupling::CurvedLinear< LatticeModel_T, FlagField_T > MO_T;
 
-typedef boost::tuples::tuple< MO_T > BoundaryConditions_T;
+using BoundaryConditions_T = boost::tuples::tuple<MO_T>;
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
 typedef boost::tuple< pe::Capsule, pe::CylindricalBoundary > BodyTypeTuple;
@@ -305,7 +305,7 @@ int main( int argc, char **argv )
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
-   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    // create pe bodies
    const auto material = pe::createMaterial( "granular", real_t(1.2), real_t(0.25), real_t(0.4), real_t(0.4), real_t(0.35), real_t(1.39e11), real_t(5.18e7), real_t(1.07e2), real_t(1.07e2) );
@@ -333,7 +333,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
 
    // add boundary handling & initialize outer domain boundaries (moving walls on the front, back, top, and bottom plane)
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(

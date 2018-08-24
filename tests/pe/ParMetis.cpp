@@ -45,8 +45,8 @@ class MetisAssignmentFunctor
 {
 public:
 
-   typedef blockforest::DynamicParMetisBlockInfo           PhantomBlockWeight;
-   typedef blockforest::DynamicParMetisBlockInfoPackUnpack PhantomBlockWeightPackUnpackFunctor;
+   using PhantomBlockWeight = blockforest::DynamicParMetisBlockInfo;
+   using PhantomBlockWeightPackUnpackFunctor = blockforest::DynamicParMetisBlockInfoPackUnpack;
 
    void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
    {

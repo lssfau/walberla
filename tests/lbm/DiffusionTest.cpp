@@ -84,12 +84,12 @@
 
 namespace walberla {
 
-typedef uint8_t            flag_t;
-typedef Vector3< real_t >  vec3_t;
+using flag_t = uint8_t;
+using vec3_t = Vector3<real_t>;
 
 typedef GhostLayerField< real_t, 1         >  ScalarField;
 typedef GhostLayerField< vec3_t, 1         >  VectorField;
-typedef FlagField      < flag_t            >  MyFlagField;
+using MyFlagField = FlagField<flag_t>;
 
 typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::Correction<VectorField>, 1 > AdvDiffLatticeModel_Corr;
 typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None,                    1 > AdvDiffLatticeModel_None;
@@ -170,8 +170,8 @@ template< typename AdvDiffLatticeModel >
 int run( int argc, char **argv )
 {
    // typedefs
-   typedef typename AdvDiffLatticeModel::Stencil    AdvDiffStencil;
-   typedef lbm::PdfField< AdvDiffLatticeModel >     AdvDiffPDFField;
+   using AdvDiffStencil = typename AdvDiffLatticeModel::Stencil;
+   using AdvDiffPDFField = lbm::PdfField<AdvDiffLatticeModel>;
 
 #ifdef _OPENMP
    omp_set_num_threads( std::max( omp_get_num_threads()>>1, 4 ) );

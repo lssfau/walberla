@@ -34,7 +34,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef Union< boost::tuple<Sphere> > UnionT;
+using UnionT = Union<boost::tuple<Sphere> >;
 typedef boost::tuple<Sphere, UnionT> BodyTuple ;
 
 int main( int argc, char** argv )
@@ -81,10 +81,10 @@ int main( int argc, char** argv )
    std::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
-      syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
    } else
    {
-      syncCall = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCall = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
    }
 
    WALBERLA_LOG_PROGRESS_ON_ROOT( " *** SPHERE *** ");

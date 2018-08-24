@@ -33,9 +33,9 @@
 namespace walberla {
 
 
-typedef lbm::D3Q19< lbm::collision_model::SRT >                 LatticeModel_T;
-typedef lbm::PdfField< LatticeModel_T >                         PdfField_T;
-typedef lbm::initializer::PdfFieldInitializer< LatticeModel_T > PdfFieldInitializer_T;
+using LatticeModel_T = lbm::D3Q19<lbm::collision_model::SRT>;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
+using PdfFieldInitializer_T = lbm::initializer::PdfFieldInitializer<LatticeModel_T>;
 
 
 struct DensityInit

@@ -42,7 +42,7 @@ void test( const std::string & meshFile )
 
    auto aabb = computeAABB( *mesh );
 
-   typedef typename MeshType::Scalar Scalar;
+   using Scalar = typename MeshType::Scalar;
 
    Vector3<Scalar> translation( numeric_cast<Scalar>( aabb.xSize() ) * Scalar(2) * Scalar( MPIManager::instance()->rank() ), Scalar(0), Scalar(0) );
    translate( *mesh, translation );

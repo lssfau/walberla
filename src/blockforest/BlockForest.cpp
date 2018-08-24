@@ -33,6 +33,7 @@
 #include "core/mpi/MPIManager.h"
 
 #include <fstream>
+#include <memory>
 #include <set>
 #include <stack>
 #include <utility>
@@ -164,7 +165,7 @@ bool BlockForest::BlockInformation::getId( BlockID & id, const real_t x, const r
 const BlockForest::BlockInformation::Node * BlockForest::BlockInformation::getNode( const BlockID & id ) const
 {
    if( nodes_.empty() )
-      return NULL;
+      return nullptr;
 
    const uint_t treeIdDigits = forest_.getTreeIdDigits();
 
@@ -185,13 +186,13 @@ const BlockForest::BlockInformation::Node * BlockForest::BlockInformation::getNo
    const uint_t index = blockId.getTreeIndex();
 
    if( index >= nodes_.size() || !(nodes_[index]) )
-      return NULL;
+      return nullptr;
 
    auto node = nodes_[index];
 
    for( uint_t i = 0; i != levels; ++i ) {
       if( node->children_.empty() )
-         return NULL;
+         return nullptr;
       WALBERLA_ASSERT_NOT_NULLPTR( node->children_[ branchId[i] ] );
       node = node->children_[ branchId[i] ];
    }
@@ -206,7 +207,7 @@ const BlockForest::BlockInformation::Node * BlockForest::BlockInformation::getNo
    const AABB & domain = forest_.getDomain();
 
    if( nodes_.empty() || !domain.contains(x,y,z) )
-      return NULL;
+      return nullptr;
 
    const real_t rootBlockXSize =  forest_.getRootBlockXSize();
    const real_t rootBlockYSize =  forest_.getRootBlockYSize();
@@ -225,7 +226,7 @@ const BlockForest::BlockInformation::Node * BlockForest::BlockInformation::getNo
    auto node = nodes_[index];
 
    if( !node )
-      return NULL;
+      return nullptr;
 
    AABB aabb = AABB::createFromMinMaxCorner( domain.xMin() + static_cast< real_t >( xi ) * rootBlockXSize,
                                              domain.yMin() + static_cast< real_t >( yi ) * rootBlockYSize,
@@ -296,7 +297,7 @@ BlockForest::BlockForest( const uint_t process, const SetupBlockForest& forest, 
 
          WALBERLA_ASSERT( blocks_.find( blocks[i]->getId() ) == blocks_.end() );
 
-         blocks_[ blocks[i]->getId() ] = shared_ptr< Block >( new Block( *this, blocks[i] ) );
+         blocks_[ blocks[i]->getId() ] = std::make_shared< Block >( *this, blocks[i] );
 
          for( uint_t j = 0; j != blocks[i]->getNeighborhoodSize(); ++j )
             if( blocks[i]->getNeighbor(j)->getProcess() != process )
@@ -544,7 +545,7 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
                state += suidMap[j];
          }
 
-         neighbors.push_back( BlockReconstruction::NeighborhoodReconstructionBlock( id, process_, state, aabbReconstruction ) );
+         neighbors.emplace_back( id, process_, state, aabbReconstruction );
       }
 
       for( uint_t i = 0; i != numberOfNeighbors; ++i ) {
@@ -566,7 +567,7 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
                   state += suidMap[k];
             }
 
-            neighbors.push_back( BlockReconstruction::NeighborhoodReconstructionBlock( id, neighborProcess, state, aabbReconstruction ) );
+            neighbors.emplace_back( id, neighborProcess, state, aabbReconstruction );
          }
       }
 
@@ -595,7 +596,7 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
          AABB aabb;
          const uint_t level = aabbReconstruction( aabb, id );
 
-         auto block = shared_ptr< Block >( new Block( *this, id, aabb, state, level, neighborhoodReconstruction, neighbors ) );
+         auto block = std::make_shared< Block >( *this, id, aabb, state, level, neighborhoodReconstruction, neighbors );
 
          blocks_[ id ] = block;
       }
@@ -614,7 +615,7 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
 
             offset = offsetBlocks[ i ] + 2 + j * ( blockIdBytes + suidBytes );
 
-            ids.push_back( BlockID( buffer, offset, blockIdBytes ) );
+            ids.emplace_back( buffer, offset, blockIdBytes );
 
             Set<SUID> state;
             boost::dynamic_bitset< uint8_t > suidBitset = byteArrayToBitset( buffer, offset + blockIdBytes, suidBytes );
@@ -647,7 +648,7 @@ void BlockForest::getBlockID( IBlockID& id, const real_t x, const real_t y, cons
    }
    else {
       const Block* const block = getBlock(x,y,z);
-      if( block == NULL ) {
+      if( block == nullptr ) {
          WALBERLA_ABORT( "Getting block ID failed: Locally, there exists no block at global location (" << x << "," << y << "," << z <<")!\n"
                          "                         (for simulation global information you have to explicitly construct the block forest to "
                          "contain global knowledge)");
@@ -671,7 +672,7 @@ void BlockForest::getAABB( AABB& aabb, const IBlockID& id ) const {
    }
    else {
       const Block* const block = getBlock( id );
-      if( block == NULL ) 
+      if( block == nullptr ) 
       {
          const BlockID& bid = *static_cast< const BlockID* >( &id );
          aabb = getAABBFromBlockId( bid );
@@ -696,7 +697,7 @@ void BlockForest::getState( Set<SUID>& state, const IBlockID& id ) const {
    }
    else {
       const Block* const block = getBlock( id );
-      if( block == NULL ) {
+      if( block == nullptr ) {
          WALBERLA_ABORT( "Getting block state failed: Locally, there exists no block with block ID \'" << id << "\'\n"
                          "                            (for simulation global information you have to explicitly construct "
                          "the block forest to contain global knowledge)" );
@@ -718,7 +719,7 @@ void BlockForest::getProcessRank( uint_t& rank, const IBlockID& id ) const {
    }
    else {
       const Block* const block = getBlock( id );
-      if( block == NULL ) {
+      if( block == nullptr ) {
          WALBERLA_ABORT( "Getting block process rank failed: Locally, there exists no block with block ID \'" << id << "\'\n"
                          "                                   (for simulation global information you have to explicitly construct "
                          "the block forest to contain global knowledge)" );
@@ -750,7 +751,7 @@ void BlockForest::getRootBlockAABB( AABB& aabb, const uint_t x, const uint_t y, 
    }
    else {
       const Block* const block = getRootBlock(x,y,z);
-      if( block == NULL ) {
+      if( block == nullptr ) {
          WALBERLA_ABORT( "Getting root block AABB failed: Locally, there exists no root block [" << x << "," << y << "," << z <<"]!\n"
                          "                                (for simulation global information you have to explicitly construct "
                          "the block forest to contain global knowledge)" );
@@ -770,7 +771,7 @@ void BlockForest::getRootBlockState( Set<SUID>& state, const uint_t x, const uin
    }
    else {
       const Block* const block = getRootBlock(x,y,z);
-      if( block == NULL ) {
+      if( block == nullptr ) {
          WALBERLA_ABORT( "Getting root block state failed: Locally, there exists no root block [" << x << "," << y << "," << z <<"]!\n"
                          "                                 (for simulation global information you have to explicitly construct "
                          "the block forest to contain global knowledge)" );
@@ -790,7 +791,7 @@ void BlockForest::getRootBlockProcessRank( uint_t& rank, const uint_t x, const u
    }
    else {
       const Block* const block = getRootBlock(x,y,z);
-      if( block == NULL ) {
+      if( block == nullptr ) {
          WALBERLA_ABORT( "Getting root block process rank failed: Locally, there exists no root block [" << x << "," << y << "," << z <<"]!\n"
                          "                                        (for simulation global information you have to explicitly construct "
                          "the block forest to contain global knowledge)" );
@@ -1195,7 +1196,7 @@ void BlockForest::restoreSnapshot( const SnapshotRestorenFunction & processMappi
             const uint_t level = getAABBFromBlockId( aabb, id );
 
             WALBERLA_ASSERT( blocks_.find( id ) == blocks_.end() );
-            blocks_[ id ] = shared_ptr< Block >( new Block( *this, id, aabb, level, buffer, processMapping ) );
+            blocks_[ id ] = std::make_shared< Block >( *this, id, aabb, level, buffer, processMapping );
 
             Block * block = blocks_[ id ].get();
             for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
@@ -1208,7 +1209,7 @@ void BlockForest::restoreSnapshot( const SnapshotRestorenFunction & processMappi
                }
                else
                {
-                  addBlockData( block, dataItem->getId(), NULL );
+                  addBlockData( block, dataItem->getId(), nullptr );
                }
             }
          }
@@ -1419,7 +1420,7 @@ void BlockForest::constructBlockInformation( const SetupBlockForest & forest )
          if( index.size() == 1 ) {
             node->setChild( index.top(), make_shared< BlockInformation::Node >( block->getProcess(), block->getState() ) );
          }
-         else if( index.top() >= node->children_.size() || node->children_[ index.top() ] == NULL ) {
+         else if( index.top() >= node->children_.size() || node->children_[ index.top() ] == nullptr ) {
             node->setChild( index.top(), make_shared< BlockInformation::Node >() );
          }
 
@@ -1475,7 +1476,7 @@ void BlockForest::constructBlockInformation( const std::vector< BlockID > & ids,
          if( index.size() == 1 ) {
             node->setChild( index.top(), nodes[i] );
          }
-         else if( index.top() >= node->children_.size() || node->children_[ index.top() ] == NULL ) {
+         else if( index.top() >= node->children_.size() || node->children_[ index.top() ] == nullptr ) {
             node->setChild( index.top(), make_shared< BlockInformation::Node >() );
          }
 
@@ -1494,7 +1495,7 @@ void BlockForest::constructBlockInformation()
    std::vector< std::pair< BlockID, std::pair< uint_t, Set<SUID> > > > data;
    for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
    {
-      data.push_back( std::make_pair( it->first, std::make_pair( process_, it->second->getState() ) ) );
+      data.emplace_back( it->first, std::make_pair( process_, it->second->getState() ) );
    }
 
    mpi::SendBuffer sBuffer;
@@ -1570,7 +1571,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
       {
          WALBERLA_ASSERT( it->second->getTargetLevel() == it->second->getLevel() ||
                           ( it->second->getTargetLevel() + uint_t(1) ) == it->second->getLevel() );
-         minTargetLevelsCallback.push_back( std::make_pair( it->second.get(), it->second->getTargetLevel() ) );
+         minTargetLevelsCallback.emplace_back( it->second.get(), it->second->getTargetLevel() );
          mapping.push_back(0);
       }
    }
@@ -1599,7 +1600,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
          WALBERLA_CHECK( it1 != blocksAlreadyMarkedForRefinement.end() );
          WALBERLA_CHECK_NOT_NULLPTR( *it1 );
          WALBERLA_CHECK_EQUAL( (*it1)->getTargetLevel(), (*it1)->getLevel() + uint_t(1) );
-         minTargetLevelsAllBlocks.push_back( std::make_pair( *it1, (*it1)->getTargetLevel() ) );
+         minTargetLevelsAllBlocks.emplace_back( *it1, (*it1)->getTargetLevel() );
          it1++;
       }
    }
@@ -2164,7 +2165,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       if( block->getTargetLevel() != block->getLevel() || targetProcesses[0] != process_ )
       {
          WALBERLA_ASSERT( targetProcesses.size() == uint_t(1) || targetProcesses.size() == uint_t(8) );
-         blocksToPack.push_back( std::make_pair( block.get(), std::vector< mpi::SendBuffer >( targetProcesses.size() ) ) );
+         blocksToPack.emplace_back( block.get(), std::vector< mpi::SendBuffer >( targetProcesses.size() ) );
       }
    }
 
@@ -2390,7 +2391,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       if( pBlock->getSourceLevel() != pBlock->getLevel() || pBlock->getSourceProcess()[0] != process_ )
       {
          WALBERLA_ASSERT( blocks_.find( pBlock->getId() ) == blocks_.end() );
-         blocks_[ pBlock->getId() ] = shared_ptr< Block >( new Block( *this, *pBlock ) );
+         blocks_[ pBlock->getId() ] = std::make_shared< Block >( *this, *pBlock );
       }
       else // update neighborhood of existing blocks
       {
@@ -2469,7 +2470,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - perform local data transfer" );
 
    for( auto buffer = localBlocks.begin(); buffer != localBlocks.end(); ++buffer )
-      recvLocalBlocks.push_back( mpi::RecvBuffer( **buffer ) );
+      recvLocalBlocks.emplace_back( **buffer );
 
    ////////////////////////////////////
    // WAIT FOR RECV's FOR BLOCK DATA //
@@ -2545,7 +2546,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
          {
             auto & bufferPtrs = blocksToUnpack[ block ];
             if( bufferPtrs.empty() )
-               bufferPtrs.resize( uint_t(8), std::make_pair( Set<SUID>::emptySet(), static_cast< mpi::RecvBuffer * >(NULL) ) );
+               bufferPtrs.resize( uint_t(8), std::make_pair( Set<SUID>::emptySet(), static_cast< mpi::RecvBuffer * >(nullptr) ) );
             WALBERLA_ASSERT_EQUAL( sId.getUsedBits(), rId.getUsedBits() + uint_t(3) );
             bufferPtrs[ sId.getBranchId() ] = std::make_pair( state, &(*buffer) );
          }
@@ -2600,7 +2601,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    std::vector< std::pair< Block *, std::vector< std::pair< Set<SUID>, mpi::RecvBuffer * > > > > dataToUnpack;
 
    for( auto it = blocksToUnpack.begin(); it != blocksToUnpack.end(); ++it )
-      dataToUnpack.push_back( std::make_pair( it->first, it->second ) );
+      dataToUnpack.emplace_back( it->first, it->second );
 
    //#ifdef _OPENMP
    //#pragma omp parallel for schedule(dynamic)
@@ -2627,7 +2628,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                if( blockDataHandlingWrapper )
                   addBlockData( block, dataItem->getId(), blockDataHandlingWrapper->deserialize( block ) );
                else
-                  addBlockData( block, dataItem->getId(), NULL );
+                  addBlockData( block, dataItem->getId(), nullptr );
             }
             // fill with sent data
             {
@@ -2664,7 +2665,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                   addBlockData( block, dataItem->getId(), downcastBlockDataHandlingWrapper->deserializeCoarseToFine( block ) );
                }
                else
-                  addBlockData( block, dataItem->getId(), NULL );
+                  addBlockData( block, dataItem->getId(), nullptr );
             }
             // fill with sent data
             {
@@ -2712,7 +2713,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                   addBlockData( block, dataItem->getId(), downcastBlockDataHandlingWrapper->deserializeFineToCoarse( block ) );
                }
                else
-                  addBlockData( block, dataItem->getId(), NULL );
+                  addBlockData( block, dataItem->getId(), nullptr );
             }
             // fill with sent data
             for( uint_t c = uint_t(0); c != uint_t(8); ++c )

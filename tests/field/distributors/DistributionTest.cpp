@@ -38,8 +38,8 @@ using namespace walberla;
 
 const uint_t FieldGhostLayers( 1 );
 
-typedef walberla::uint8_t                    flag_t;
-typedef FlagField< flag_t >                  FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 typedef GhostLayerField< real_t, 1>          ScalarField_T;
 typedef GhostLayerField< Vector3<real_t>, 1> Vec3Field_T;
@@ -249,7 +249,7 @@ void testNearestNeighborDistributor( const shared_ptr<StructuredBlockStorage> & 
       Vector3<real_t> distributionPoint(real_t(1.9), real_t(2.1), real_t(2.1));
       real_t distributionValue(real_t(100));
       auto containingBlockID = blocks->getBlock(distributionPoint);
-      if( containingBlockID != NULL )
+      if( containingBlockID != nullptr )
       {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
@@ -268,7 +268,7 @@ void testNearestNeighborDistributor( const shared_ptr<StructuredBlockStorage> & 
       Vector3<real_t> distributionPoint(real_t(5.4),real_t(2.1),real_t(3.2));
       Vector3<real_t> distributionValue(real_t(100), real_t(-10), real_t(1));
       auto containingBlockID = blocks->getBlock(distributionPoint);
-      if( containingBlockID != NULL )
+      if( containingBlockID != nullptr )
       {
          auto distPtr = containingBlockID->getData<Vec3Distributor_T>(vectorDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
@@ -296,7 +296,7 @@ void testNearestNeighborDistributor( const shared_ptr<StructuredBlockStorage> & 
       distributionValue[1] = real_t(-10);
       distributionValue[2] = real_t(1);
       auto containingBlockID = blocks->getBlock(distributionPoint);
-      if( containingBlockID != NULL )
+      if( containingBlockID != nullptr )
       {
          auto distPtr = containingBlockID->getData<MultiComponentDistributor_T>(multiComponentDistributorID);
          distPtr->distribute(distributionPoint, distributionValue.begin());
@@ -334,7 +334,7 @@ void testKernelDistributor( const shared_ptr<StructuredBlockStorage> & blocks, c
       Vector3<real_t> distributionPoint(real_t(1.9), real_t(2.1), real_t(2.1));
       real_t distributionValue(real_t(100));
       auto containingBlockID = blocks->getBlock(distributionPoint);
-      if( containingBlockID != NULL )
+      if( containingBlockID != nullptr )
       {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
@@ -353,7 +353,7 @@ void testKernelDistributor( const shared_ptr<StructuredBlockStorage> & blocks, c
       Vector3<real_t> distributionPoint(real_t(5.4),real_t(2.1),real_t(3.2));
       Vector3<real_t> distributionValue(real_t(100), real_t(-10), real_t(1));
       auto containingBlockID = blocks->getBlock(distributionPoint);
-      if( containingBlockID != NULL )
+      if( containingBlockID != nullptr )
       {
          auto distPtr = containingBlockID->getData<Vec3Distributor_T>(vectorDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
@@ -381,7 +381,7 @@ void testKernelDistributor( const shared_ptr<StructuredBlockStorage> & blocks, c
       distributionValue[1] = real_t(-10);
       distributionValue[2] = real_t(1);
       auto containingBlockID = blocks->getBlock(distributionPoint);
-      if( containingBlockID != NULL )
+      if( containingBlockID != nullptr )
       {
          auto distPtr = containingBlockID->getData<MultiComponentDistributor_T>(multiComponentDistributorID);
          distPtr->distribute(distributionPoint, distributionValue.begin());
@@ -415,7 +415,7 @@ void testNearestNeighborDistributorAtBoundary( const shared_ptr<StructuredBlockS
       Vector3<real_t> distributionPoint(real_t(1.9), real_t(2.1), real_t(2.1));
       real_t distributionValue(real_t(100));
       auto containingBlockID = blocks->getBlock(distributionPoint);
-      if (containingBlockID != NULL) {
+      if (containingBlockID != nullptr) {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
@@ -433,7 +433,7 @@ void testNearestNeighborDistributorAtBoundary( const shared_ptr<StructuredBlockS
       Vector3<real_t> distributionPoint(real_t(2.7), real_t(2.1), real_t(1.1));
       real_t distributionValue(real_t(100));
       auto containingBlockID = blocks->getBlock(distributionPoint);
-      if (containingBlockID != NULL) {
+      if (containingBlockID != nullptr) {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
@@ -459,7 +459,7 @@ void testKernelDistributorAtBoundary( const shared_ptr<StructuredBlockStorage> &
       Vector3<real_t> distributionPoint(real_t(1.9), real_t(2.1), real_t(2.1));
       real_t distributionValue(real_t(100));
       auto containingBlockID = blocks->getBlock(distributionPoint);
-      if (containingBlockID != NULL) {
+      if (containingBlockID != nullptr) {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }
@@ -477,7 +477,7 @@ void testKernelDistributorAtBoundary( const shared_ptr<StructuredBlockStorage> &
       Vector3<real_t> distributionPoint(real_t(2.7), real_t(2.1), real_t(1.1));
       real_t distributionValue(real_t(100));
       auto containingBlockID = blocks->getBlock(distributionPoint);
-      if (containingBlockID != NULL) {
+      if (containingBlockID != nullptr) {
          auto distPtr = containingBlockID->getData<ScalarDistributor_T>(scalarDistributorID);
          distPtr->distribute(distributionPoint, &distributionValue);
       }

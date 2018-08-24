@@ -38,6 +38,7 @@
 #include "timeloop/SweepTimeloop.h"
 
 #include <fstream>
+#include <memory>
 
 
 namespace walberla {
@@ -269,8 +270,8 @@ int main( int argc, char ** argv )
 
    using namespace geometry::initializer;
 
-   auto geometryInitializationManager = shared_ptr<InitializationManager> ( new InitializationManager( blocks->getBlockStorage() ) );
-   auto freeSurfaceInitializer        = shared_ptr<OverlapFieldFromBody> ( new OverlapFieldFromBody( *blocks, scalarFieldID, "drop", "bubble" ) );
+   auto geometryInitializationManager = std::make_shared<InitializationManager> ( blocks->getBlockStorage() );
+   auto freeSurfaceInitializer        = std::make_shared<OverlapFieldFromBody> ( *blocks, scalarFieldID, "drop", "bubble" );
 
    geometryInitializationManager->registerInitializer( "FreeSurface", freeSurfaceInitializer );
 

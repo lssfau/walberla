@@ -44,7 +44,7 @@ namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::timing;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 struct BodyData
 {
@@ -126,8 +126,8 @@ void createSimulation(math::AABB& simulationDomain,
         {
             SphereID sp = pe::createSphere( *(info.globalBodyStorage.get()), info.forest->getBlockStorage(), info.storageID, static_cast<walberla::id_t>(mpi::MPIManager::instance()->worldRank() * 1000000 + numParticles), *it, radius);
             Vec3 rndVel(math::realRandom<real_t>(-vMax, vMax, generator), math::realRandom<real_t>(-vMax, vMax, generator), math::realRandom<real_t>(-vMax, vMax, generator));
-            if (sp != NULL) sp->setLinearVel(rndVel);
-            if (sp != NULL) ++numParticles;
+            if (sp != nullptr) sp->setLinearVel(rndVel);
+            if (sp != nullptr) ++numParticles;
         }
     }
     WALBERLA_LOG_INFO_ON_ROOT(numParticles << " particles created on root");

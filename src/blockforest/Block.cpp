@@ -52,7 +52,7 @@ Block::Block( BlockForest & forest, const SetupBlock * const block ) :
 
    for( uint_t i = 0; i != block->getNeighborhoodSize(); ++i )
    {
-      neighborhood_.push_back( Block::NeighborBlock( forest, block->getNeighborId(i), block->getNeighborProcess(i), block->getNeighborState(i) ) );
+      neighborhood_.emplace_back( forest, block->getNeighborId(i), block->getNeighborProcess(i), block->getNeighborState(i) );
       neighborhoodMapping[ block->getNeighborId(i) ] = i;
    }
 
@@ -222,7 +222,7 @@ void Block::resetNeighborhood( const PhantomBlock & phantom )
    neighborhood_.clear();
    for( uint_t i = 0; i != phantom.getNeighborhoodSize(); ++i )
    {
-      neighborhood_.push_back( Block::NeighborBlock( forest_, phantom.getNeighborId(i), phantom.getNeighborProcess(i), phantom.getNeighborState(i) ) );
+      neighborhood_.emplace_back( forest_, phantom.getNeighborId(i), phantom.getNeighborProcess(i), phantom.getNeighborState(i) );
       neighborhoodMapping[ phantom.getNeighborId(i) ] = i;
    }
 

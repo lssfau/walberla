@@ -36,7 +36,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 int main( int argc, char **argv )
 {
@@ -73,13 +73,13 @@ int main( int argc, char **argv )
 
     uint_t sphereCount = 0;
 
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(25), real_t(25), real_t(50) ), 1) != NULL)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(25), real_t(25), real_t(50) ), 1) != nullptr)
         ++sphereCount;
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(99), real_t(25), real_t(50) ), 2) != NULL)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(99), real_t(25), real_t(50) ), 2) != nullptr)
         ++sphereCount;
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(101), real_t(25), real_t(50) ), 2) != NULL)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(101), real_t(25), real_t(50) ), 2) != nullptr)
         ++sphereCount;
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(125), real_t(25), real_t(50) ), 1) != NULL)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(125), real_t(25), real_t(50) ), 1) != nullptr)
         ++sphereCount;
 
     syncShadowOwners<BodyTuple>( blocks->getBlockForest(), storageID);

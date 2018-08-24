@@ -93,11 +93,11 @@ typedef GhostLayerField< Vector3<real_t>, 1 > VectorField;
 
 typedef lbm::D3Q19< lbm::collision_model::SRTField<ScalarField>, true, lbm::force_model::None, 1 >  LM;
 
-typedef LM::Stencil             Stencil;
-typedef lbm::PdfField< LM >     MyPdfField;
+using Stencil = LM::Stencil;
+using MyPdfField = lbm::PdfField<LM>;
 
-typedef uint8_t                 flag_t;
-typedef FlagField< flag_t >     MyFlagField;
+using flag_t = uint8_t;
+using MyFlagField = FlagField<flag_t>;
 
 typedef lbm::DefaultDiffusionBoundaryHandlingFactory< LM, MyFlagField > MyBoundaryHandling;
 

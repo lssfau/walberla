@@ -85,7 +85,7 @@ namespace timeloop {
    void PerformanceMeter::addMeasurement ( const std::string & name, CountFunction countFunction,
                                            uint_t countFreq, real_t scaling  )
    {
-      measurements_.push_back( Measurement( countFunction, name, scaling, countFreq ) );
+      measurements_.emplace_back( countFunction, name, scaling, countFreq );
       uint_t cells = 0;
       for( auto block = blockStorage_.begin(); block != blockStorage_.end(); ++block )
          cells += countFunction( *block );
@@ -105,7 +105,7 @@ namespace timeloop {
     *******************************************************************************************************************/
    void PerformanceMeter::addMeasurement ( const std::string & name, real_t scaling )
    {
-      measurements_.push_back( Measurement( CountFunction(), name, scaling, uint_t(0) ) );
+      measurements_.emplace_back( CountFunction(), name, scaling, uint_t(0) );
 
       uint_t cellsOnProcess = 0;
       for( auto block = blockStorage_.begin(); block != blockStorage_.end(); ++block )

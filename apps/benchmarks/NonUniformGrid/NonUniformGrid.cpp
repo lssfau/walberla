@@ -78,6 +78,7 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <memory>
 
 
 
@@ -104,12 +105,12 @@ typedef lbm::D3Q19< lbm::collision_model::D3Q19MRT, false > D3Q19_MRT_INCOMP;
 template< typename LatticeModel_T >
 struct Types
 {
-   typedef typename LatticeModel_T::Stencil Stencil_T;
-   typedef lbm::PdfField< LatticeModel_T >  PdfField_T;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using PdfField_T = lbm::PdfField< LatticeModel_T >;
 };
 
-typedef walberla::uint8_t   flag_t;
-typedef FlagField< flag_t > FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 const uint_t FieldGhostLayers  = uint_t(4);
 const uint_t BlockForestLevels = uint_t(4);
@@ -322,11 +323,11 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
 
       MPIManager::instance()->useWorldComm();
 
-      auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false ) );
+      auto bf = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false );
 
-      auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, numberOfXCellsPerBlock,
+      auto sbf = std::make_shared< StructuredBlockForest >( bf, numberOfXCellsPerBlock,
                                                                                      numberOfYCellsPerBlock,
-                                                                                     numberOfZCellsPerBlock ) );
+                                                                                     numberOfZCellsPerBlock );
       sbf->createCellBoundingBoxes();
 
       return sbf;
@@ -337,11 +338,11 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
    blockforest::SetupBlockForest sforest;
    createSetupBlockForest( sforest, configBlock, uint_c( MPIManager::instance()->numProcesses() ) );
 
-   auto bf = shared_ptr< blockforest::BlockForest >( new blockforest::BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, false ) );
+   auto bf = std::make_shared< blockforest::BlockForest >( uint_c( MPIManager::instance()->rank() ), sforest, false );
 
-   auto sbf = shared_ptr< blockforest::StructuredBlockForest >( new blockforest::StructuredBlockForest( bf, numberOfXCellsPerBlock,
+   auto sbf = std::make_shared< blockforest::StructuredBlockForest >( bf, numberOfXCellsPerBlock,
                                                                                                             numberOfYCellsPerBlock,
-                                                                                                            numberOfZCellsPerBlock ) );
+                                                                                                            numberOfZCellsPerBlock );
    sbf->createCellBoundingBoxes();
 
    return sbf;
@@ -442,12 +443,12 @@ class MyBoundaryHandling : public blockforest::AlwaysInitializeBlockDataHandling
 {
 public:
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::NoSlip_T NoSlip_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::UBB_T UBB_T;
+   using NoSlip_T = typename MyBoundaryTypes< LatticeModel_T >::NoSlip_T;
+   using UBB_T = typename MyBoundaryTypes< LatticeModel_T >::UBB_T;
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::BoundaryConditions_T BoundaryConditions_T;
+   using BoundaryConditions_T = typename MyBoundaryTypes< LatticeModel_T >::BoundaryConditions_T;
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::BoundaryHandling_T BoundaryHandling_T;
+   using BoundaryHandling_T = typename MyBoundaryTypes< LatticeModel_T >::BoundaryHandling_T;
 
 
 
@@ -455,7 +456,7 @@ public:
                        const BlockDataID & flagField, const BlockDataID & pdfField, const real_t velocity ) :
       forest_( forest ), flagField_( flagField ), pdfField_( pdfField ), velocity_( velocity ) {}
 
-   BoundaryHandling_T * initialize( IBlock * const block );
+   BoundaryHandling_T * initialize( IBlock * const block ) override;
 
 private:
 
@@ -472,7 +473,7 @@ template< typename LatticeModel_T >
 typename MyBoundaryHandling<LatticeModel_T>::BoundaryHandling_T *
 MyBoundaryHandling<LatticeModel_T>::initialize( IBlock * const block )
 {
-   typedef typename Types<LatticeModel_T>::PdfField_T PdfField_T;
+   using PdfField_T = typename Types<LatticeModel_T>::PdfField_T;
 
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
@@ -597,7 +598,7 @@ void addRefinementTimeStep( SweepTimeloop & timeloop, shared_ptr< blockforest::S
                             const bool syncComm, const bool fullComm, const bool linearExplosion,
                             shared_ptr< Sweep_T > & sweep, const std::string & info )
 {
-   typedef typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T BH_T;
+   using BH_T = typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T;
 
    auto ts = lbm::refinement::makeTimeStep< LatticeModel_T, BH_T >( blocks, sweep, pdfFieldId, boundaryHandlingId );
    ts->asynchronousCommunication( !syncComm );
@@ -620,7 +621,7 @@ struct AddRefinementTimeStep
       {
          if( pure )
          {
-            typedef lbm::SplitPureSweep< LatticeModel_T > Sweep_T;
+            using Sweep_T = lbm::SplitPureSweep< LatticeModel_T >;
             auto mySweep = make_shared< Sweep_T >( pdfFieldId );
 
             addRefinementTimeStep< LatticeModel_T, Sweep_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,
@@ -783,7 +784,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
       }
       else
       {
-         typedef blockforest::DynamicLevelwiseDiffusionBalance< blockforest::NoPhantomData > DLDB;
+         using DLDB = blockforest::DynamicLevelwiseDiffusionBalance<blockforest::NoPhantomData>;
          DLDB balancer( diffusionMaxIterations, diffusionFlowIterations );
          if( diffusionMode == 0 )
             balancer.setMode( DLDB::DIFFUSION_PUSH );
@@ -1152,7 +1153,7 @@ int main( int argc, char **argv )
    logging::Logging::printHeaderOnStream();
 
 #ifdef _OPENMP
-   if( std::getenv( "OMP_NUM_THREADS" ) == NULL )
+   if( std::getenv( "OMP_NUM_THREADS" ) == nullptr )
       WALBERLA_ABORT( "If you are using a version of the benchmark that was compiled with OpenMP you have to "
                       "specify the environment variable \'OMP_NUM_THREADS\' accordingly!" );
 #endif

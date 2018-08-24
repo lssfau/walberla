@@ -47,7 +47,7 @@ void testCube()
 {
    MeshType mesh;
 
-   typedef typename MeshType::Scalar Scalar;
+   using Scalar = typename MeshType::Scalar;
 
    readAndBroadcast("cube.obj", mesh);
 

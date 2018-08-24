@@ -39,11 +39,11 @@ namespace walberla {
 class TestGatherPackInfo : public gather::GatherPackInfo
 {
 public:
-   TestGatherPackInfo() {}
-   virtual ~TestGatherPackInfo() {}
+   TestGatherPackInfo() = default;
+   ~TestGatherPackInfo() override = default;
 
 
-   virtual void packData  ( const IBlock *, mpi::GenericSendBuffer<unsigned char> & outBuffer )
+   void packData  ( const IBlock *, mpi::GenericSendBuffer<unsigned char> & outBuffer ) override
    {
       auto mpi = MPIManager::instance();
 
@@ -56,7 +56,7 @@ public:
    }
 
 
-   virtual void unpackData( mpi::GenericRecvBuffer<unsigned char> & buffer )
+   void unpackData( mpi::GenericRecvBuffer<unsigned char> & buffer ) override
    {
       int nrOfItems;
       buffer >> nrOfItems;
@@ -68,7 +68,7 @@ public:
       receivedRanks_.insert( nrOfItems );
    }
 
-   virtual void gatherFinished()
+   void gatherFinished() override
    {
       auto mpi = MPIManager::instance();
 

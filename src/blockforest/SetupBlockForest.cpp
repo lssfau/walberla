@@ -73,7 +73,7 @@ uint_t SetupBlockForest::getNumberOfBlocks( const uint_t level ) const
 
    for( uint_t i = 0; i != forest_.size(); ++i ) {
 
-      if( forest_[i] == NULL )
+      if( forest_[i] == nullptr )
          continue;
 
       std::stack< SetupBlock* > stack;
@@ -103,12 +103,12 @@ uint_t SetupBlockForest::getNumberOfBlocks( const uint_t level ) const
 
 const SetupBlock* SetupBlockForest::getFirstBlock() const {
 
-   SetupBlock* block = NULL;
-   for( uint_t i = 0; i != forest_.size() && block == NULL; ++i )
+   SetupBlock* block = nullptr;
+   for( uint_t i = 0; i != forest_.size() && block == nullptr; ++i )
       block = forest_[i];
 
-   if( block == NULL )
-      return NULL;
+   if( block == nullptr )
+      return nullptr;
 
    while( block->hasChildren() )
       block = block->getChild(0);
@@ -120,12 +120,12 @@ const SetupBlock* SetupBlockForest::getFirstBlock() const {
 
 SetupBlock* SetupBlockForest::getFirstBlock() {
 
-   SetupBlock* block = NULL;
-   for( uint_t i = 0; i != forest_.size() && block == NULL; ++i )
+   SetupBlock* block = nullptr;
+   for( uint_t i = 0; i != forest_.size() && block == nullptr; ++i )
       block = forest_[i];
 
-   if( block == NULL )
-      return NULL;
+   if( block == nullptr )
+      return nullptr;
 
    while( block->hasChildren() )
       block = block->getChild(0);
@@ -137,8 +137,8 @@ SetupBlock* SetupBlockForest::getFirstBlock() {
 
 const SetupBlock* SetupBlockForest::getNextBlock( const SetupBlock* block ) const {
 
-   if( block == NULL )
-      return NULL;
+   if( block == nullptr )
+      return nullptr;
 
    // ASCEND
 
@@ -162,10 +162,10 @@ const SetupBlock* SetupBlockForest::getNextBlock( const SetupBlock* block ) cons
       WALBERLA_ASSERT_LESS( treeIndex-1 ,forest_.size() );
       WALBERLA_ASSERT_EQUAL( block, forest_[ treeIndex-1 ] );
 
-      while( treeIndex < forest_.size() && forest_[ treeIndex ] == NULL ) ++treeIndex;
+      while( treeIndex < forest_.size() && forest_[ treeIndex ] == nullptr ) ++treeIndex;
 
       if( treeIndex == forest_.size() )
-         return NULL;
+         return nullptr;
 
       block = forest_[ treeIndex ];
    }
@@ -184,8 +184,8 @@ const SetupBlock* SetupBlockForest::getNextBlock( const SetupBlock* block ) cons
 
 SetupBlock* SetupBlockForest::getNextBlock( const SetupBlock* block ) {
 
-   if( block == NULL )
-      return NULL;
+   if( block == nullptr )
+      return nullptr;
 
    // ASCEND
 
@@ -209,10 +209,10 @@ SetupBlock* SetupBlockForest::getNextBlock( const SetupBlock* block ) {
       WALBERLA_ASSERT_LESS( treeIndex-1, forest_.size() );
       WALBERLA_ASSERT_EQUAL( block, forest_[ treeIndex-1 ] );
 
-      while( treeIndex < forest_.size() && forest_[ treeIndex ] == NULL ) ++treeIndex;
+      while( treeIndex < forest_.size() && forest_[ treeIndex ] == nullptr ) ++treeIndex;
 
       if( treeIndex == forest_.size() )
-         return NULL;
+         return nullptr;
 
       block = forest_[ treeIndex ];
    }
@@ -269,7 +269,7 @@ void SetupBlockForest::getBlocks( std::vector< const SetupBlock* >& blocks ) con
 
    for( uint_t i = 0; i != forest_.size(); ++i ) {
 
-      if( forest_[i] == NULL )
+      if( forest_[i] == nullptr )
          continue;
 
       // depth-first search
@@ -302,7 +302,7 @@ void SetupBlockForest::getBlocks( std::vector< SetupBlock* >& blocks ) {
 
    for( uint_t i = 0; i != forest_.size(); ++i ) {
 
-      if( forest_[i] == NULL )
+      if( forest_[i] == nullptr )
          continue;
 
       // depth-first search
@@ -335,7 +335,7 @@ void SetupBlockForest::getBlocks( std::vector< const SetupBlock* >& blocks, cons
 
    for( uint_t i = 0; i != forest_.size(); ++i ) {
 
-      if( forest_[i] == NULL )
+      if( forest_[i] == nullptr )
          continue;
 
       std::stack< SetupBlock* > stack;
@@ -367,7 +367,7 @@ void SetupBlockForest::getBlocks( std::vector< SetupBlock* >& blocks, const uint
 
    for( uint_t i = 0; i != forest_.size(); ++i ) {
 
-      if( forest_[i] == NULL )
+      if( forest_[i] == nullptr )
          continue;
 
       std::stack< SetupBlock* > stack;
@@ -413,7 +413,7 @@ void SetupBlockForest::getHilbertOrder( std::vector< SetupBlock* >& blocks ) {
 
             SetupBlock* root = forest_[ z*size_[0]*size_[1] + y*size_[0] + x ];
 
-            if( root != NULL ) {
+            if( root != nullptr ) {
 
                std::stack< SetupBlock* > stack;
                std::stack< uint_t > orientation;
@@ -486,7 +486,7 @@ void SetupBlockForest::getBlocksOverlappedByAABB( std::vector< SetupBlock* >& bl
       for( uint_t y = max[1]; y-- != min[1]; ) {
          for( uint_t x = max[0]; x-- != min[0]; ) {
             SetupBlock* const block = forest_[ mapForestCoordinatesToTreeIndex(x,y,z) ];
-            if( block != NULL && block->getAABB().intersects( aabb ) )
+            if( block != nullptr && block->getAABB().intersects( aabb ) )
                stack.push( block );
          }
       }
@@ -524,7 +524,7 @@ void SetupBlockForest::getBlocks( std::vector< SetupBlock* >& blocks, const uint
       for( uint_t y = ymax; y-- != ymin; ) {
          for( uint_t x = xmax; x-- != xmin; ) {
             SetupBlock* const block = forest_[ mapForestCoordinatesToTreeIndex(x,y,z) ];
-            if( block != NULL ) stack.push( block );
+            if( block != nullptr ) stack.push( block );
          }
       }
    }
@@ -596,7 +596,7 @@ void SetupBlockForest::mapAABBToBoundingForestCoordinates( const AABB& aabb, uin
 
          // shouldn't happen, but might happen due to floating point inaccuracy?
          SetupBlock* block = forest_[ mapForestCoordinatesToTreeIndex( min[0], min[1], min[2] ) ];
-         if( block != NULL ) {
+         if( block != nullptr ) {
             const AABB& tree = block->getAABB();
             if( aabb.min(i) < tree.min(i) ) --min[i];
             else if( aabb.min(i) >= tree.max(i) ) ++min[i];
@@ -611,7 +611,7 @@ void SetupBlockForest::mapAABBToBoundingForestCoordinates( const AABB& aabb, uin
 
          // shouldn't happen, but might happen due to floating point inaccuracy?
          SetupBlock* block = forest_[ mapForestCoordinatesToTreeIndex( max[0], max[1], max[2] ) ];
-         if( block != NULL ) {
+         if( block != nullptr ) {
             const AABB& tree = block->getAABB();
             if( aabb.max(i) <= tree.min(i) ) --max[i];
             else if( aabb.max(i) > tree.max(i) ) ++max[i];
@@ -673,7 +673,7 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
 
    if( !forest_.empty() ) {
       for( uint_t i = 0; i != forest_.size(); ++i ) {
-         if( forest_[i] != NULL ) delete forest_[i];
+         if( forest_[i] != nullptr ) delete forest_[i];
       }
       forest_.clear();
    }
@@ -725,7 +725,7 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
 
    WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Allocating root blocks ..." );
 
-   forest_.resize( size, NULL );
+   forest_.resize( size, nullptr );
    numberOfRootBlocks_ = uint_c(0);
 
    AABB aabb;
@@ -740,7 +740,7 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
             {
                getRootBlockAABB( aabb, x, y, z );
 
-               forest_[ treeIndex ] = new SetupBlock( NULL, BlockID( treeIndex, treeIdMarker ),
+               forest_[ treeIndex ] = new SetupBlock( nullptr, BlockID( treeIndex, treeIdMarker ),
                                                       aabb.xMin(), aabb.yMin(), aabb.zMin(), aabb.xMax(), aabb.yMax(), aabb.zMax(), 0 );
                ++numberOfRootBlocks_;
             }
@@ -769,7 +769,7 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
 
             WALBERLA_ASSERT_LESS( treeIndex, forest_.size() );
 
-            if( forest_[ treeIndex ] != NULL ) {
+            if( forest_[ treeIndex ] != nullptr ) {
 
                for( uint_t w = 0; w != 3; ++w ) {
                   for( uint_t v = 0; v != 3; ++v ) {
@@ -797,7 +797,7 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
                         WALBERLA_ASSERT_LESS( n, 26 );
                         WALBERLA_ASSERT_LESS( nIndex, forest_.size() );
 
-                        if( forest_[ nIndex ] != NULL )
+                        if( forest_[ nIndex ] != nullptr )
                            forest_[ treeIndex ]->addNeighbor( n, forest_[ nIndex ] );
                      }
                   }
@@ -987,13 +987,13 @@ void SetupBlockForest::updateNeighborhood( std::vector< SetupBlock* >& blocks ) 
             if( z <  domain_.zMin() && periodic_[2] ) z = domain_.zMax() - domain_.zMin() + z;
             if( z >= domain_.zMax() && periodic_[2] ) z = domain_.zMin() - domain_.zMax() + z;
 
-            SetupBlock* neighbor = NULL;
+            SetupBlock* neighbor = nullptr;
 
-            for( uint_t j = 0; j != neighborhood.size() && neighbor == NULL; ++j ) {
+            for( uint_t j = 0; j != neighborhood.size() && neighbor == nullptr; ++j ) {
                if( neighborhood[j]->getAABB().contains( x, y, z ) )
                   neighbor = mapPointToBlock( neighborhood[j], x, y, z );
             }
-            if( neighbor == NULL && block->hasFather() && block->getFather()->getAABB().contains( x, y, z ) )
+            if( neighbor == nullptr && block->hasFather() && block->getFather()->getAABB().contains( x, y, z ) )
                neighbor = mapPointToBlock( block->getFather(), x, y, z );
 
             if( neighborhoodSectionBlocks.empty() || neighborhoodSectionBlocks.back() != neighbor )
@@ -1008,7 +1008,7 @@ void SetupBlockForest::updateNeighborhood( std::vector< SetupBlock* >& blocks ) 
 #endif
 
          block->clearNeighborhoodSection(n);
-         if( neighborhoodSectionBlocks.back() != NULL ) {
+         if( neighborhoodSectionBlocks.back() != nullptr ) {
 
 #ifndef NDEBUG
             if( neighborhoodSectionBlocks.back()->getLevel() > block->getLevel() )
@@ -1082,7 +1082,7 @@ void SetupBlockForest::createNeighborhood() {
 #endif
 
          block->clearNeighborhoodSection(n);
-         if( neighborhoodSectionBlocks.back() != NULL ) {
+         if( neighborhoodSectionBlocks.back() != nullptr ) {
 
 #ifndef NDEBUG
             if( neighborhoodSectionBlocks.back()->getLevel() > block->getLevel() )

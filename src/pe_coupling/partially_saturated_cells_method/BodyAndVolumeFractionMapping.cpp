@@ -60,7 +60,7 @@ void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, Structu
       // if the cell intersected with the body, store a pointer to that body and the corresponding volume fraction in the field
       if( fraction > real_t(0) )
       {
-         bodyAndVolumeFractionField->get(cell).push_back( BodyAndVolumeFraction_T( body, fraction ) );
+         bodyAndVolumeFractionField->get(cell).emplace_back( body, fraction );
       }
    }
 }
@@ -72,7 +72,7 @@ void BodyAndVolumeFractionMapping::initialize()
    {
       BodyAndVolumeFractionField_T * bodyAndVolumeFractionField = blockIt->getData< BodyAndVolumeFractionField_T >( bodyAndVolumeFractionFieldID_ );
 
-      if( updatedBodyAndVolumeFractionField_ == NULL )
+      if( updatedBodyAndVolumeFractionField_ == nullptr )
       {
          // hold internally an identical field for swapping
          updatedBodyAndVolumeFractionField_ = shared_ptr<BodyAndVolumeFractionField_T>( bodyAndVolumeFractionField->cloneUninitialized() );
@@ -219,7 +219,7 @@ void BodyAndVolumeFractionMapping::updatePSMBodyAndVolumeFraction( pe::BodyID bo
                // if the cell intersected with the body, store a pointer to that body and the corresponding volume fraction in the field
                if( fraction > real_t(0) )
                {
-                  updatedBodyAndVolumeFractionField_->get(x,y,z).push_back( BodyAndVolumeFraction_T( body, fraction ) );
+                  updatedBodyAndVolumeFractionField_->get(x,y,z).emplace_back( body, fraction );
                }
             }
          }

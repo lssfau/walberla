@@ -38,7 +38,7 @@ namespace pe {
 class Base{
 public:
     Base(id_t const typeID) : typeID_(typeID) {}
-    virtual ~Base() {}
+    virtual ~Base() = default;
     id_t getTypeID() const { return typeID_;}
 private:
     id_t typeID_;

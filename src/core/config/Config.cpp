@@ -64,7 +64,7 @@ Config::Config()
 // \brief Destructor for the Config class.
  */
 Config::~Config()
-{}
+= default;
 //**********************************************************************************************************************
 
 
@@ -474,16 +474,6 @@ Config::Block::Block( const std::string& key )
 
 
 //**********************************************************************************************************************
-/*!\fn Config::Block::Block( const Block& b )
-// \brief The copy constructor for the Block class.
- */
-Config::Block::Block( const Block& b )
-   :key_(b.key_),blocks_(b.blocks_),params_(b.params_)
-{}
-//**********************************************************************************************************************
-
-
-//**********************************************************************************************************************
 /*!\fn Config::Block& Config::Block::operator=( const Block& b )
 // \brief The copy assignment operator for the Block class.
 //
@@ -508,7 +498,7 @@ Config::Block& Config::Block::operator=( const Block& b )
 // \brief Default destructor of the Block class.
  */
 Config::Block::~Block()
-{}
+= default;
 //**********************************************************************************************************************
 
 
