@@ -148,21 +148,21 @@ NodePtr EquationParser::parseVariable( const std::string& str, size_t& index ) c
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool EquationParser::checkFunction( const std::string& str, size_t& index ) const
 {
-   return (str.substr(index, 4).compare("exp("  ) == 0) ||
-         (str.substr(index, 3).compare("ln("   ) == 0) ||
-         (str.substr(index, 5).compare("sqrt(" ) == 0);
+   return (str.substr(index, 4) == "exp(") ||
+         (str.substr(index, 3) == "ln(") ||
+         (str.substr(index, 5) == "sqrt(");
 }
 
 NodePtr EquationParser::parseFunction( const std::string& str, size_t& index ) const
 {
    OpFunction opFunc;
-   if ( str.substr(index, 4).compare("exp(") == 0 ){
+   if ( str.substr(index, 4) == "exp(" ){
       opFunc = OP_FUNC_EXP;
       index += 4;
-   } else if ( str.substr(index, 3).compare("ln(") == 0 ){
+   } else if ( str.substr(index, 3) == "ln(" ){
       opFunc = OP_FUNC_LN;
       index += 3;
-   } else if ( str.substr(index, 5).compare("sqrt(") == 0 ){
+   } else if ( str.substr(index, 5) == "sqrt(" ){
       opFunc = OP_FUNC_SQRT;
       index += 5;
    } else {

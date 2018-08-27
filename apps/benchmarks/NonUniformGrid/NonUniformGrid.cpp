@@ -913,7 +913,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
             double refreshTime( 0.0 );
             for( auto it = reducedTimeloopTiming->begin(); it != reducedTimeloopTiming->end(); ++it )
             {
-               if( it->first.compare( refreshFunctorName ) == 0 )
+               if( it->first == refreshFunctorName )
                   refreshTime += it->second.total();
                else
                   restTime += it->second.total();
@@ -927,15 +927,15 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
             
             for( auto it = reducedRefreshTiming->begin(); it != reducedRefreshTiming->end(); ++it )
             {
-               if( it->first.compare( "block level determination" ) == 0 )
+               if( it->first == "block level determination" )
                   blockLevelDeterminationTime += it->second.total();
-               else if( it->first.compare( "block level determination (callback function)" ) == 0 )
+               else if( it->first == "block level determination (callback function)" )
                   blockLevelDeterminationTime += it->second.total();
-               else if( it->first.compare( "block structure update (includes data migration)" ) == 0 )
+               else if( it->first == "block structure update (includes data migration)" )
                   dataMigrationTime += it->second.total();
-               else if( it->first.compare( "phantom block redistribution (= load balancing)" ) == 0 )
+               else if( it->first == "phantom block redistribution (= load balancing)" )
                   loadBalanceTime += it->second.total();
-               else if( it->first.compare( "phantom forest creation" ) == 0 )
+               else if( it->first == "phantom forest creation" )
                   phantomForestCreationTime += it->second.total();
             }
             

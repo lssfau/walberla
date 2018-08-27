@@ -363,11 +363,11 @@ namespace geometry {
       for( size_t i=1; i<splitVec.size(); ++i )
       {
          boost::trim(splitVec[i]);
-         if( splitVec[i].compare("vertex_vectors") == 0 ) {
+         if( splitVec[i] == "vertex_vectors" ) {
             state = VERTEX;
-         } else if ( splitVec[i].compare("normal_vectors") == 0 ) {
+         } else if ( splitVec[i] == "normal_vectors" ) {
             state = NORMAL;
-         } else if ( splitVec[i].compare("face_indices") == 0 ) {
+         } else if ( splitVec[i] == "face_indices" ) {
             state = FACE;
          } else {
             //std::cerr << "Unknown section in povray file: " << splitVec[i] << "\n";

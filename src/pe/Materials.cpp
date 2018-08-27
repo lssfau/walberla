@@ -168,7 +168,7 @@ MaterialID createMaterial( const std::string& name, real_t density, real_t cor,
    Materials::const_iterator begin( M::materials_.begin() );
    Materials::const_iterator end  ( M::materials_.end()   );
    for( ; begin!=end; ++begin ) {
-      if( begin->getName().compare( name ) == 0 )
+      if( begin->getName() == name )
          throw std::invalid_argument( "Material of that name already exists!" );
    }
 
@@ -280,7 +280,7 @@ MaterialID createMaterial( real_t density, real_t cor, real_t csf, real_t cdf, r
 MaterialID Material::find( const std::string& name )
 {
    for( Material::SizeType i=0; i<Material::materials_.size(); ++i ) {
-      if( Material::materials_[i].getName().compare( name ) == 0 ) {
+      if( Material::materials_[i].getName() == name ) {
          return i;
       }
    }

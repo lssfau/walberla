@@ -295,7 +295,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
       {
          for( auto inclusionFilterId = inclusionFiltersBlock.begin(); inclusionFilterId != inclusionFiltersBlock.end(); ++inclusionFilterId )
          {
-            if( inclusionFilterId->first.compare( "combine" ) == 0 )
+            if( inclusionFilterId->first == "combine" )
             {
                std::vector< std::string > filterList = splitList( inclusionFilterId->second );
                ChainedFilter combine;
@@ -323,7 +323,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
       {
          for( auto exclusionFilterId = exclusionFiltersBlock.begin(); exclusionFilterId != exclusionFiltersBlock.end(); ++exclusionFilterId )
          {
-            if( exclusionFilterId->first.compare( "combine" ) == 0 )
+            if( exclusionFilterId->first == "combine" )
             {
                std::vector< std::string > filterList = splitList( exclusionFilterId->second );
                ChainedFilter combine;

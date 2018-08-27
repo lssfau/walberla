@@ -1248,7 +1248,7 @@ void SetupBlockForest::calculateProcessDistribution_Default( const uint_t       
       WALBERLA_ABORT( "Load balancing failed: You must provide a per process memory limit greater than 0!\n"
                       "                       (The memory limit you provided was \'" << memoryLimit << "\')"      );
 
-   if( sfcMethod.compare( "hilbert" ) != 0 && sfcMethod.compare( "morton" ) != 0 )
+   if( sfcMethod != "hilbert" && sfcMethod != "morton" )
       WALBERLA_ABORT( "Load balancing failed: SFC method \"" << sfcMethod << "\" unavailable "
                       "(the only available methods are \"hilbert\" and \"morton\")" )
 
@@ -1262,7 +1262,7 @@ void SetupBlockForest::calculateProcessDistribution_Default( const uint_t       
 
    std::vector< SetupBlock* > blocks;
 
-   if( sfcMethod.compare( "hilbert" ) == 0 )
+   if( sfcMethod == "hilbert" )
       getHilbertOrder( blocks );
    else
       getMortonOrder( blocks );
