@@ -261,7 +261,7 @@ namespace config {
           throw std::runtime_error( usageString(argv[0]) );
 
 
-      auto dotPosition = filename.find_last_of(".");
+      auto dotPosition = filename.find_last_of('.');
 
       int numberOfZeros=0;
       if ( dotPosition != std::string::npos )
