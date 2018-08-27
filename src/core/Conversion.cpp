@@ -47,7 +47,7 @@ void convert(const std::vector<bool> & from, std::vector<uint8_t> & to)
 void convert(const std::vector<uint8_t> & from, std::vector<bool> & to)
 {
    to.clear();
-   to.resize(from.size() * sizeof(8));
+   to.resize(from.size() * sizeof(uint8_t) * 8);
 
    auto unpackIt = from.begin();
    auto it = to.begin();

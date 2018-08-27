@@ -364,7 +364,7 @@ void testConstructors( const T x0, const T y0, const T z0, const T x1, const T y
 
    {
       GenericAABB< T > toBeCopied( x0, y0, z0, x1, y1, z1 );
-      const GenericAABB< T > refAABB( toBeCopied );
+      const GenericAABB< T > refAABB( toBeCopied ); // NOLINT
       WALBERLA_CHECK_IDENTICAL( refAABB.minCorner()[0], std::min( x0, x1 ) );
       WALBERLA_CHECK_IDENTICAL( refAABB.minCorner()[1], std::min( y0, y1 ) );
       WALBERLA_CHECK_IDENTICAL( refAABB.minCorner()[2], std::min( z0, z1 ) );
