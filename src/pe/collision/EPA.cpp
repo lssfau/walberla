@@ -715,7 +715,7 @@ inline bool EPA::originInTetrahedron( const Vec3& p0, const Vec3& p1, const Vec3
 inline bool EPA::originInTetrahedronVolumeMethod( const Vec3& A, const Vec3& B, const Vec3& C,
                                                   const Vec3& D )
 {
-   Vec3 aoT = A;
+   const Vec3& aoT = A;
    if((aoT * (B % C)) <= real_t(0.0)) {
       //if volume of ABC and Origin <0.0 than the origin is on the wrong side of ABC
       //http://mathworld.wolfram.com/Tetrahedron.html volume formula

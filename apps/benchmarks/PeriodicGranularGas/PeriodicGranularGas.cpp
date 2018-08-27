@@ -182,7 +182,7 @@ int main( int argc, char ** argv )
    MaterialID     material = createMaterial( "granular", real_t( 1.0 ), 0, static_cof, dynamic_cof, real_t( 0.5 ), 1, 1, 0, 0 );
 
    auto simulationDomain = forest->getDomain();
-   auto generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
+   const auto& generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
 
    const real_t spacing(1.0);
    const real_t radius(0.5);

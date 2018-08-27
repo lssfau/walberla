@@ -341,7 +341,7 @@ inline real_t GJK::calcDistance( Vec3& normal, Vec3& contactPoint )
       //Vec3 ac= C - A;
       //Vec3 bc= C - B;
       Vec3& n = d_; //we already know the normal
-      Vec3  nT = n;
+      const Vec3&  nT = n;
 
       real_t vc = nT * (A % B);
       real_t va = nT * (B % C);
@@ -395,7 +395,7 @@ bool GJK::simplex2(Vec3& d)
    const Vec3& A = simplex_[1];  //The Point last added to the simplex
    const Vec3& B = simplex_[0];  //The Point that was already in the simplex
    const Vec3  AO  = -A;         //The vector A->O with 0 the origin
-   const Vec3  AOt = AO;         //The transposed vector A->O with O the origin
+   const Vec3&  AOt = AO;         //The transposed vector A->O with O the origin
    const Vec3  AB  = B-A;        //The vector A->B
 
    if( sameDirection(AOt, AB) ) {
@@ -437,7 +437,7 @@ bool GJK::simplex3(Vec3& d)
    //ABC is a conterclockwise triangle
 
    const Vec3  AO  = -A;        //The vector A->O with 0 the origin
-   const Vec3  AOt = AO;        //The transposed vector A->O with O the origin
+   const Vec3&  AOt = AO;        //The transposed vector A->O with O the origin
    const Vec3  AB  = B-A;       //The vector A->B
    const Vec3  AC  = C-A;       //The vector A->C
    const Vec3  ABC = AB%AC;     //The the normal pointing towards the viewer if he sees a CCW triangle ABC
@@ -566,7 +566,7 @@ bool GJK::simplex4(Vec3& d)
    //BCD is a clockwise triangle wenn seen from A
 
    const Vec3  AO  = -A;      //The vector A->O with 0 the origin
-   const Vec3  AOt = AO;      //The transposed vector A->O with O the origin
+   const Vec3&  AOt = AO;      //The transposed vector A->O with O the origin
    const Vec3  AB  = B-A;     //The vector A->B
    const Vec3  AC  = C-A;     //The vector A->C
    const Vec3  AD  = D-A;     //The vector A-D

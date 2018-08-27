@@ -1125,12 +1125,12 @@ void VorticityRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::
          if( filter_(x,y,z) && filter_(x+one,y,z) && filter_(x-one,y,z) && filter_(x,y+one,z) && filter_(x,y-one,z) &&
                   ( Pseudo2D || (filter_(x,y,z+one) && filter_(x,y,z-one)) ) )
          {
-            const Vector3< real_t > xa = u->get(x+one,y,z);
-            const Vector3< real_t > xb = u->get(x-one,y,z);
-            const Vector3< real_t > ya = u->get(x,y+one,z);
-            const Vector3< real_t > yb = u->get(x,y-one,z);
-            const Vector3< real_t > za = Pseudo2D ? Vector3< real_t >(0) : u->get(x,y,z+one);
-            const Vector3< real_t > zb = Pseudo2D ? Vector3< real_t >(0) : u->get(x,y,z-one);
+            const Vector3< real_t >& xa = u->get(x+one,y,z);
+            const Vector3< real_t >& xb = u->get(x-one,y,z);
+            const Vector3< real_t >& ya = u->get(x,y+one,z);
+            const Vector3< real_t >& yb = u->get(x,y-one,z);
+            const Vector3< real_t >  za = Pseudo2D ? Vector3< real_t >(0) : u->get(x,y,z+one);
+            const Vector3< real_t >  zb = Pseudo2D ? Vector3< real_t >(0) : u->get(x,y,z-one);
 
             // ATTENTION: dx/y/z is assumed to be equal to '1'!
             const real_t duzdy = half * ( ya[2] - yb[2] );

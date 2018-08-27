@@ -101,7 +101,7 @@ int main( int argc, char ** argv )
    //! [Material]
 
    auto simulationDomain = forest->getDomain();
-   auto generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
+   const auto& generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
    //! [Planes]
    createPlane(*globalBodyStorage, 0, Vec3(1,0,0), simulationDomain.minCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), simulationDomain.maxCorner(), material );

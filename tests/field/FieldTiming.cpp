@@ -111,7 +111,7 @@ double sumIteratorCachedEnd(const DoubleField & field)
    //WALBERLA_CHECK_EQUAL(field.layout() == fzyx );
    double sum = 0;
 
-   const DoubleField::const_iterator myEnd = field.end();
+   const DoubleField::const_iterator& myEnd = field.end();
    for(DoubleField::const_iterator i = field.begin(); i != myEnd; ++i)
       sum += *i;
 
@@ -173,7 +173,7 @@ double xyzfTest ( const DoubleField & field )
 {
    double sum = 0;
    double sum2 = 0;
-   const DoubleField::const_iterator myEnd = field.end();
+   const DoubleField::const_iterator& myEnd = field.end();
    for(DoubleField::const_iterator i = field.begin(); i != myEnd; ++i)
    {
       sum += *i;

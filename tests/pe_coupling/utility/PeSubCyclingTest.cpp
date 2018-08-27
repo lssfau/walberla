@@ -124,7 +124,7 @@ int main( int argc, char **argv )
    Vector3<real_t> expectedAngularVel(real_t(0));
    {
 
-      Vector3<real_t> startPos = positionInsideBlock;
+      const Vector3<real_t>& startPos = positionInsideBlock;
 
       pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                        startPos, radius, sphereMaterialID, false, true, false);
@@ -185,7 +185,7 @@ int main( int argc, char **argv )
       std::string testIdentifier("Test: sphere inside block");
       WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - started");
 
-      Vector3<real_t> startPos = positionInsideBlock;
+      const Vector3<real_t>& startPos = positionInsideBlock;
 
       pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                        startPos, radius, sphereMaterialID, false, true, false);
@@ -252,7 +252,7 @@ int main( int argc, char **argv )
       std::string testIdentifier("Test: sphere at block border 1");
       WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - started");
 
-      Vector3<real_t> startPos = positionAtBlockBorder;
+      const Vector3<real_t>& startPos = positionAtBlockBorder;
 
       pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                        startPos, radius, sphereMaterialID, false, true, false);
@@ -318,7 +318,7 @@ int main( int argc, char **argv )
       std::string testIdentifier("Test: sphere at block border 1 mod");
       WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - started");
 
-      Vector3<real_t> startPos = positionAtBlockBorder;
+      const Vector3<real_t>& startPos = positionAtBlockBorder;
 
       pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                        startPos, radius, sphereMaterialID, false, true, false);
@@ -385,7 +385,7 @@ int main( int argc, char **argv )
       std::string testIdentifier("Test: sphere at block border 2");
       WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - started");
 
-      Vector3<real_t> startPos = positionAtBlockBorder2;
+      const Vector3<real_t>& startPos = positionAtBlockBorder2;
 
       pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0,
                        startPos, radius, sphereMaterialID, false, true, false);

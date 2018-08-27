@@ -70,7 +70,7 @@ std::map< blockforest::BlockID, uint_t > getBlockIdToSequenceMapping( const Phan
       mapping.insert( std::make_pair( it->first->getId(), sequenceId++ ) );
    WALBERLA_ASSERT_EQUAL( sequenceId, blockSequenceRange.second );
 
-   const std::vector<uint_t> neighborProcesses = phantomForest.getNeighboringProcesses();
+   const std::vector<uint_t>& neighborProcesses = phantomForest.getNeighboringProcesses();
    
    mpi::BufferSystem bs( comm );
 

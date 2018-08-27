@@ -175,7 +175,7 @@ private:
       // add bodies of all neighboring blocks
       for(uint_t i = 0; i < block->getNeighborhoodSize(); ++i)
       {
-         BlockID neighborBlockID = block->getNeighborId(i);
+         const BlockID& neighborBlockID = block->getNeighborId(i);
          const auto infoItNeighbor = infoCollection_->find(neighborBlockID);
          numBodies += infoItNeighbor->second.numberOfLocalBodies;
          numBodies += infoItNeighbor->second.numberOfShadowBodies;

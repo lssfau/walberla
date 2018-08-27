@@ -420,7 +420,7 @@ int main(int argc, char **argv) {
    auto b2 = beta * b1;
    auto e = q.rotate(up).getNormalized();
    auto radius = R;
-   auto squirmer_pos = position;
+   const auto& squirmer_pos = position;
 
    real_t abs_tolerance = real_c(0.0026);
    real_t rel_tolerance = real_c(0.10);

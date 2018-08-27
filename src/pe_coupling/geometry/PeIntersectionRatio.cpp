@@ -35,7 +35,7 @@ real_t intersectionRatioSpherePe( const pe::Sphere & sphere,
    WALBERLA_ASSERT(  walberla::geometry::contains( sphere, fluidPoint + direction ), "fluidPoint + direction: " << fluidPoint + direction );
 
    // get the physical sphere center
-   Vector3< real_t > sphereCenter( sphere.getPosition() );
+   const Vector3< real_t >& sphereCenter( sphere.getPosition() );
 
    real_t dirLength = direction.length();
    Vector3< real_t > l = sphereCenter - fluidPoint;
@@ -62,8 +62,8 @@ real_t intersectionRatioPlanePe( const pe::Plane & plane,
    WALBERLA_ASSERT(  walberla::geometry::contains<pe::RigidBody>( plane, fluidPoint + direction ), "fluidPoint + direction: " << fluidPoint + direction );
 
 
-   Vector3<real_t> planeCenter( plane.getPosition() );
-   Vector3<real_t> planeNormal( plane.getNormal() );
+   const Vector3<real_t>& planeCenter( plane.getPosition() );
+   const Vector3<real_t>& planeNormal( plane.getNormal() );
 
    real_t denom = planeNormal * direction;
 
