@@ -73,7 +73,7 @@ int CpRayIntersectionTest(const int resolution = 10)
       {
          const real_t rand2 = real_c(y) * dx;
          real_t theta = real_t(2) * M_PI * rand1;
-         real_t phi = acos(real_t(1) - real_t(2) * rand2);
+         real_t phi = std::acos(real_t(1) - real_t(2) * rand2);
          Vec3 dir(std::sin(phi) * std::cos(theta), std::sin(phi) * std::sin(theta), std::cos(phi));
 
          Ray ray( center + dir*real_t(5), -dir);
@@ -95,7 +95,7 @@ int CpRayIntersectionTest(const int resolution = 10)
       {
          const real_t rand2 = real_c(y) * dx;
          real_t theta = real_t(2) * M_PI * rand1;
-         real_t phi = acos(real_t(1) - real_t(2) * rand2);
+         real_t phi = std::acos(real_t(1) - real_t(2) * rand2);
          Vec3 dir(std::sin(phi) * std::cos(theta), std::sin(phi) * std::sin(theta), std::cos(phi));
 
          Ray ray( Vec3(real_t(5),real_t(5),real_t(5)), -dir);
