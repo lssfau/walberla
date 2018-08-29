@@ -1161,7 +1161,7 @@ clang-tidy:
 
 
 cppcheck:
-   image: walberla/cppcheck
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/cppcheck
    script:
       - cppcheck --version
       - cppcheck . --max-configs=10 --enable=warning --enable=style --enable=performance --enable=portability -i src/gui/extern -i src/geometry/structured/extern -i sqlite3.c -i StackWalker.cpp -I src/ -I tests/ -I apps/ -D WALBERLA_BUILD_WITH_MPI -D WALBERLA_BUILD_WITH_METIS -D WALBERLA_BUILD_WITH_BOOST_THREAD -D WALBERLA_BUILD_WITH_PYTHON --xml 2> report.xml
