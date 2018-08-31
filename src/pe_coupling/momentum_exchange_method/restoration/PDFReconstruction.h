@@ -108,7 +108,7 @@ private:
                if (isFlagSet(flagField->get(x,y,z), formerObstacle)) {
                   boundaryHandling->setDomain( fluid, x, y, z );
                   removeFlag( flagField->get(x,y,z), formerObstacle );
-                  (*bodyField)(x,y,z) = NULL;
+                  (*bodyField)(x,y,z) = nullptr;
                }
             }
          }

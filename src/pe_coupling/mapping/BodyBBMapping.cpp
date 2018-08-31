@@ -57,7 +57,7 @@ CellInterval getCellBB( const pe::ConstBodyID body, const IBlock & block, Struct
       // then determine the cell bounding box of the intersection
       blockStorage.getCellBBFromAABB( cellBB, body->getAABB().getIntersection( extendedBlockAABB ), level );
 
-      // if infinte body does not intersect with the extended block AABB, return an empty interval
+      // if infinite body does not intersect with the extended block AABB, return an empty interval
       if( cellBB.empty() ) return CellInterval();
    }
 
