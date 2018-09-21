@@ -4,6 +4,7 @@ List of contributors
 Christian Feichtinger
 Christian Godenschwager
 Christoph Rettinger
+Christoph Schwarzmeier
 Daniel Ritter
 Daniela Anderl
 David Staubach
