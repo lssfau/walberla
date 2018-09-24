@@ -1052,9 +1052,9 @@ clang_6.0_hybrid:
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -1064,9 +1064,9 @@ clang_6.0_serial_dbg:
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -1076,9 +1076,9 @@ clang_6.0_mpionly_dbg:
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -1088,15 +1088,99 @@ clang_6.0_hybrid_dbg:
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
 clang_6.0_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   variables:
+      <<: *build_hybrid_dbg_sp_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+clang_7.0_serial:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
+   variables:
+      <<: *build_serial_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+clang_7.0_mpionly:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
+   variables:
+      <<: *build_mpionly_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+clang_7.0_hybrid:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
+   variables:
+      <<: *build_hybrid_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
+clang_7.0_serial_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
+   variables:
+      <<: *build_serial_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
+clang_7.0_mpionly_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
+   variables:
+      <<: *build_mpionly_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
+clang_7.0_hybrid_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
+   variables:
+      <<: *build_hybrid_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
+clang_7.0_hybrid_dbg_sp:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
