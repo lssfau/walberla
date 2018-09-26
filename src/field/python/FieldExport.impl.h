@@ -686,7 +686,8 @@ namespace internal {
 
       for( auto i = flags.begin(); i != flags.end(); ++i )
          result.append( i->toString() );
-      return result;
+      boost::python::object objectResult = result;
+      return objectResult;
    }
 
 
@@ -699,7 +700,8 @@ namespace internal {
 
       for( auto i = flags.begin(); i != flags.end(); ++i )
          result[ i->toString() ] = ff.getFlag( *i );
-      return result;
+      boost::python::object objectResult = result;
+      return objectResult;
    }
 
    template<typename T>
