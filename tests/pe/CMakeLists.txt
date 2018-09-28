@@ -16,6 +16,9 @@ waLBerla_execute_test( NAME   PE_BODYITERATORS PROCESSES 2 )
 waLBerla_compile_test( NAME   PE_BODYSTORAGE FILES BodyStorage.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_BODYSTORAGE )
 
+waLBerla_compile_test( NAME   PE_CALLBACK FILES Callback.cpp DEPENDS blockforest core domain_decomposition  )
+waLBerla_execute_test( NAME   PE_CALLBACK PROCESSES 2 )
+
 waLBerla_compile_test( NAME   PE_CHECKVITALPARAMETERS FILES CheckVitalParameters.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_CHECKVITALPARAMETERS )
 
