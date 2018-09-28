@@ -35,10 +35,10 @@ namespace filesystem = walberla::filesystem;
 bool verbose;
 bool quiet;
 
-#define PRINT_DEF(msg)  if(!quiet)  std::cout << msg;
-#define PRINT_VER(msg)  if(verbose) std::cout << msg;
-#define PRINT_ERR(msg) {            std::cerr << msg; return EXIT_FAILURE; }
-#define PRINT_WAR(msg)              std::cerr << msg;
+#define PRINT_DEF(msg)  if(!quiet)  std::cout << msg; //NOLINT
+#define PRINT_VER(msg)  if(verbose) std::cout << msg; //NOLINT
+#define PRINT_ERR(msg) {            std::cerr << msg; return EXIT_FAILURE; } //NOLINT
+#define PRINT_WAR(msg)              std::cerr << msg;  //NOLINT
 
 namespace walberla{
    namespace geometry{
