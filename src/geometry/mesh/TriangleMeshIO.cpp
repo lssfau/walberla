@@ -32,6 +32,7 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include <cmath>
 #include <fstream>
 #include <map>
 #include <sstream>
@@ -678,9 +679,9 @@ namespace geometry {
          os << "          ";
          for( auto it = mesh.getVertexColors().begin(); it != mesh.getVertexColors().end(); ++it )
          {
-            os << static_cast<uint16_t>( (*it)[0] * 255.0f + 0.5f ) << ' '
-               << static_cast<uint16_t>( (*it)[1] * 255.0f + 0.5f ) << ' '
-               << static_cast<uint16_t>( (*it)[2] * 255.0f + 0.5f ) << ' ';
+            os << std::lround( (*it)[0] * 255.0f ) << ' '
+               << std::lround( (*it)[1] * 255.0f ) << ' '
+               << std::lround( (*it)[2] * 255.0f ) << ' ';
          }
          os << "        </DataArray>\n";
       }
