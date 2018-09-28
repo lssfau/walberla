@@ -93,10 +93,10 @@ protected:
 
 
 
-   const BlockDataID src_;
+   const BlockDataID src_ {};
 
    const bool dstFromBlockData_;
-   const BlockDataID dst_;
+   const BlockDataID dst_ {};
    std::set< PdfField_T *, field::SwapableCompare< PdfField_T * > > dstFields_;
 
    Filter_T filter_;

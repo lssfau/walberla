@@ -64,11 +64,11 @@ protected:
 
 
 
-   const BlockDataID src_; // "u"
-   const BlockDataID f_;
+   const BlockDataID src_ {}; // "u"
+   const BlockDataID f_ {};
 
    const bool dstFromBlockData_;
-   const BlockDataID dst_;
+   const BlockDataID dst_ {};
    std::set< Field_T *, field::SwapableCompare< Field_T * > > dstFields_;
 };
 
