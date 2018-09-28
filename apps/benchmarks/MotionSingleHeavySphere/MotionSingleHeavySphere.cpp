@@ -522,7 +522,7 @@ public:
 
    VTKInfoLogger( SweepTimeloop* timeloop, const shared_ptr< StructuredBlockStorage > & blocks,
                   const ConstBlockDataID & bodyStorageID, const std::string & baseFolder,
-                  const Vector3<real_t> u_infty ) :
+                  const Vector3<real_t>& u_infty ) :
    timeloop_( timeloop ), blocks_( blocks ), bodyStorageID_( bodyStorageID ), baseFolder_( baseFolder ), u_infty_( u_infty )
    { }
 

@@ -81,7 +81,7 @@ VTKOutput::VTKOutput( const StructuredBlockStorage & sbs, const std::string & id
 
 
 
-VTKOutput::VTKOutput( const shared_ptr< PointDataSource > pds, const std::string & identifier, const uint_t writeFrequency,
+VTKOutput::VTKOutput( const shared_ptr< PointDataSource >& pds, const std::string & identifier, const uint_t writeFrequency,
                       const std::string & baseFolder, const std::string & executionFolder,
                       const bool continuousNumbering, const bool binary, const bool littleEndian, const bool useMPIIO,
                       const uint_t initialExecutionCount ) :
@@ -102,7 +102,7 @@ VTKOutput::VTKOutput( const shared_ptr< PointDataSource > pds, const std::string
 
 
 
-VTKOutput::VTKOutput( const shared_ptr< PolylineDataSource > pds, const std::string & identifier, const uint_t writeFrequency,
+VTKOutput::VTKOutput( const shared_ptr< PolylineDataSource >& pds, const std::string & identifier, const uint_t writeFrequency,
                       const std::string & baseFolder, const std::string & executionFolder,
                       const bool continuousNumbering, const bool binary, const bool littleEndian, const bool useMPIIO,
                       const uint_t initialExecutionCount ) :

@@ -77,23 +77,23 @@ public:
    
    /*!\name Constructors */
    //@{
-   explicit Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
-                      const shared_ptr<BodyStorage> globalBodyStorage,
+   explicit Raytracer(const shared_ptr<BlockStorage>& forest, const BlockDataID storageID,
+                      const shared_ptr<BodyStorage>& globalBodyStorage,
                       const BlockDataID ccdID,
                       uint16_t pixelsHorizontal, uint16_t pixelsVertical,
                       real_t fov_vertical, uint16_t antiAliasFactor,
                       const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                       const Lighting& lighting,
                       const Color& backgroundColor = Color(real_t(0.1), real_t(0.1), real_t(0.1)),
-                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunc = defaultBodyTypeDependentShadingParams,
-                      std::function<bool (const BodyID)> isBodyVisibleFunc = defaultIsBodyVisible);
+                      const std::function<ShadingParameters (const BodyID)>& bodyToShadingParamsFunc = defaultBodyTypeDependentShadingParams,
+                      const std::function<bool (const BodyID)>& isBodyVisibleFunc = defaultIsBodyVisible);
 
-   explicit Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
-                      const shared_ptr<BodyStorage> globalBodyStorage,
+   explicit Raytracer(const shared_ptr<BlockStorage>& forest, const BlockDataID storageID,
+                      const shared_ptr<BodyStorage>& globalBodyStorage,
                       const BlockDataID ccdID,
                       const Config::BlockHandle& config,
-                      std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunction = defaultBodyTypeDependentShadingParams,
-                      std::function<bool (const BodyID)> isBodyVisibleFunc = defaultIsBodyVisible);
+                      const std::function<ShadingParameters (const BodyID)>& bodyToShadingParamsFunction = defaultBodyTypeDependentShadingParams,
+                      const std::function<bool (const BodyID)>& isBodyVisibleFunc = defaultIsBodyVisible);
    //@}
 
 private:

@@ -19,8 +19,9 @@
 //======================================================================================================================
 
 #include "Raytracer.h"
-#include "geometry/structured/extern/lodepng.h"
+
 #include "core/mpi/all.h"
+#include "geometry/structured/extern/lodepng.h"
 
 namespace walberla {
 namespace pe {
@@ -67,16 +68,16 @@ void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyInter
  * \param isBodyVisibleFunc A function which returns a boolean indicating if a given body should be visible
  *                          in the final image.
  */
-Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
-                     const shared_ptr<BodyStorage> globalBodyStorage,
+Raytracer::Raytracer(const shared_ptr<BlockStorage>& forest, const BlockDataID storageID,
+                     const shared_ptr<BodyStorage>& globalBodyStorage,
                      const BlockDataID ccdID,
                      uint16_t pixelsHorizontal, uint16_t pixelsVertical,
                      real_t fov_vertical, uint16_t antiAliasFactor,
                      const Vec3& cameraPosition, const Vec3& lookAtPoint, const Vec3& upVector,
                      const Lighting& lighting,
                      const Color& backgroundColor,
-                     std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunc,
-                     std::function<bool (const BodyID)> isBodyVisibleFunc)
+                     const std::function<ShadingParameters (const BodyID)>& bodyToShadingParamsFunc,
+                     const std::function<bool (const BodyID)>& isBodyVisibleFunc)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage), ccdID_(ccdID),
    pixelsHorizontal_(pixelsHorizontal), pixelsVertical_(pixelsVertical),
    fov_vertical_(fov_vertical), antiAliasFactor_(antiAliasFactor),
@@ -121,12 +122,12 @@ Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID st
  * For the lighting a config block within the Raytracer config block named Lighting has to be defined,
  * information about its contents is in the Lighting class.
  */
-Raytracer::Raytracer(const shared_ptr<BlockStorage> forest, const BlockDataID storageID,
-                     const shared_ptr<BodyStorage> globalBodyStorage,
+Raytracer::Raytracer(const shared_ptr<BlockStorage>& forest, const BlockDataID storageID,
+                     const shared_ptr<BodyStorage>& globalBodyStorage,
                      const BlockDataID ccdID,
                      const Config::BlockHandle& config,
-                     std::function<ShadingParameters (const BodyID)> bodyToShadingParamsFunc,
-                     std::function<bool (const BodyID)> isBodyVisibleFunc)
+                     const std::function<ShadingParameters (const BodyID)>& bodyToShadingParamsFunc,
+                     const std::function<bool (const BodyID)>& isBodyVisibleFunc)
    : forest_(forest), storageID_(storageID), globalBodyStorage_(globalBodyStorage), ccdID_(ccdID),
    bodyToShadingParamsFunc_(bodyToShadingParamsFunc),
    isBodyVisibleFunc_(isBodyVisibleFunc),

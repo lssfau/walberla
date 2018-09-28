@@ -672,7 +672,7 @@ bool Config::Block::addParameter( std::string key, const std::string& value )
 // \param key The key of the new block.
 // \return Reference to the new block.
  */
-Config::Block& Config::Block::createBlock( std::string key )
+Config::Block& Config::Block::createBlock( const std::string& key )
 {
    blocks_.push_back( Block( key ) );
    return *blocks_.rbegin();

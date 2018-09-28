@@ -594,7 +594,7 @@ private:
    uint_t numSpheres_;
 };
 
-void setBodyVelocities(const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyStorageID, Vector3<real_t> velocity )
+void setBodyVelocities(const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyStorageID, const Vector3<real_t>& velocity )
 {
    for( auto blockIt = blockStorage->begin(); blockIt != blockStorage->end(); ++blockIt )
    {

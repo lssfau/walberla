@@ -80,11 +80,11 @@ typedef std::function< void ( std::vector< shared_ptr< BlockCellDataWriterInterf
                                 std::map< std::string, VTKOutput::CellFilter > &            filters,
                                 std::map< std::string, VTKOutput::BeforeFunction > &        beforeFunctions ) > RegisterVTKOutputFunction;
 
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, RegisterVTKOutputFunction registerVTKOutputFunction,
+void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, const RegisterVTKOutputFunction& registerVTKOutputFunction,
                           const shared_ptr< const StructuredBlockStorage > & storage, const shared_ptr< Config > & config,
                           const std::string & configBlockName = std::string("VTK") );
 
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, RegisterVTKOutputFunction registerVTKOutputFunction,
+void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, const RegisterVTKOutputFunction& registerVTKOutputFunction,
                           const shared_ptr< const StructuredBlockStorage > & storage, const Config::BlockHandle & parentBlockHandle,
                           const std::string & configBlockName = std::string("VTK") );
 

@@ -28,7 +28,7 @@ namespace geometry {
    Ellipsoid::Ellipsoid( const Vector3<real_t> & midp,
             Vector3<real_t> axis1,
             Vector3<real_t> axis2,
-            Vector3<real_t> radii )
+            const Vector3<real_t>& radii )
       : midpoint_( midp ), radii_( radii )
    {
       normalize( axis1 );

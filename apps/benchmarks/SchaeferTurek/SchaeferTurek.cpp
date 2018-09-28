@@ -1333,7 +1333,7 @@ class MyVTKOutput {
 public:
 
    MyVTKOutput( const ConstBlockDataID & pdfField, const ConstBlockDataID & flagField,
-                vtk::VTKOutput::BeforeFunction pdfGhostLayerSync ) :
+                const vtk::VTKOutput::BeforeFunction& pdfGhostLayerSync ) :
       pdfField_( pdfField ), flagField_( flagField ), pdfGhostLayerSync_( pdfGhostLayerSync ) {}
 
    void operator()( std::vector< shared_ptr<vtk::BlockCellDataWriterInterface> > & writers,
@@ -1405,7 +1405,7 @@ public:
    Evaluation( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t checkFrequency,
                const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const FlagUID & fluid, const FlagUID & obstacle,
                const Setup & setup,
-               const bool logToStream = true, const bool logToFile = true, const std::string filename = std::string("SchaeferTurek.txt"),
+               const bool logToStream = true, const bool logToFile = true, const std::string& filename = std::string("SchaeferTurek.txt"),
                const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       initialized_( false ), blocks_( blocks ),

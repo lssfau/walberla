@@ -23,8 +23,8 @@
 #include "Operator.h"
 #include "Variable.h"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <memory>
 
 
@@ -118,7 +118,7 @@ namespace math {
    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // EQUATION
    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   Equation::Equation( NodePtr root) : root_ (root)
+   Equation::Equation( const NodePtr& root) : root_ (root)
    {
       root_->collectVariables( varMap_ );
    }

@@ -28,7 +28,7 @@
 namespace walberla {
 namespace math {
 
-   Var::Var ( std::string name ) :
+   Var::Var ( const std::string& name ) :
       name_ (name),
       valid_ (false),
       value_ (FP_NAN)
