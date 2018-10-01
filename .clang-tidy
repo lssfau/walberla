@@ -1,5 +1,5 @@
 ---
-Checks:          '-*,bugprone-*,-bugprone-exception-escape,misc-string-compare,modernize-*,-modernize-use-auto,-modernize-loop-convert,-modernize-pass-by-value,-modernize-raw-string-literal,-modernize-use-using,-modernize-avoid-bind,-modernize-return-braced-init-list,-modernize-use-transparent-functors,-modernize-redundant-void-arg,performance-*'
+Checks:          '-*,bugprone-*,-bugprone-exception-escape,misc-*,-misc-misplaced-const,modernize-*,-modernize-use-auto,-modernize-loop-convert,-modernize-pass-by-value,-modernize-raw-string-literal,-modernize-use-using,-modernize-avoid-bind,-modernize-return-braced-init-list,-modernize-use-transparent-functors,-modernize-redundant-void-arg,performance-*'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
