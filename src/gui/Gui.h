@@ -50,7 +50,7 @@ namespace gui {
 
       void run();
 
-      void registerPropertyTree( const shared_ptr<PropertyTree> propertyTree );
+      void registerPropertyTree( const shared_ptr<PropertyTree>& propertyTree );
 
       typedef std::function< DisplayAdaptor * ( const IBlock &, ConstBlockDataID ) > DisplayAdaptorCreatorFunc;
       void registerDisplayAdaptorCreator( const DisplayAdaptorCreatorFunc & creatorFunc );

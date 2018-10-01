@@ -504,7 +504,7 @@ class MyVTKOutput {
 public:
 
    MyVTKOutput( const ConstBlockDataID & pdfField, const ConstBlockDataID & flagField,
-                vtk::VTKOutput::BeforeFunction pdfGhostLayerSync, const Setup & setup ) :
+                const vtk::VTKOutput::BeforeFunction& pdfGhostLayerSync, const Setup & setup ) :
       setup_( setup ), pdfField_( pdfField ), flagField_( flagField ), pdfGhostLayerSync_( pdfGhostLayerSync ) {}
 
    void operator()( std::vector< shared_ptr<vtk::BlockCellDataWriterInterface> > & writers,

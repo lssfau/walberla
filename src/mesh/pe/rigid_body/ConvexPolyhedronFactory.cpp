@@ -39,7 +39,7 @@ namespace mesh {
 namespace pe {
 
 ConvexPolyhedronID createConvexPolyhedron( BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID storageID,
-                                           id_t uid, Vec3 gpos, const std::vector< Vec3 > & pointCloud,
+                                           id_t uid, const Vec3& gpos, const std::vector< Vec3 > & pointCloud,
                                            MaterialID material,
                                            bool global, bool communicating, bool infiniteMass )
 {

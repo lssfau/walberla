@@ -78,8 +78,8 @@ private:
    // member variables
    shared_ptr<StructuredBlockStorage> blockStorage_;
    shared_ptr<pe::BodyStorage> globalBodyStorage_;
-   const BlockDataID pdfFieldID_;
-   const BlockDataID bodyStorageID_;
+   const BlockDataID pdfFieldID_ {};
+   const BlockDataID bodyStorageID_ {};
 
    real_t dynamicViscosity_;
    real_t cutOffDistance_;

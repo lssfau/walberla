@@ -26,6 +26,8 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
+#include <type_traits>
+
 
 namespace walberla {
 namespace domain_decomposition {
@@ -42,14 +44,14 @@ class BlockDataID
 
 public:
 
-            BlockDataID()                          : id_( 0 ) {}
+            BlockDataID()                          = default;
    explicit BlockDataID( const uint_t id )         : id_( id ) {}
-            BlockDataID( const BlockDataID& bdid ) : id_( bdid.id_ ) {}
+            BlockDataID( const BlockDataID& bdid ) = default;
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << id_; }
    void unpack( mpi::RecvBuffer & buffer ) { buffer >> id_; }
 
-   BlockDataID& operator=( const BlockDataID& bdid ) { id_ = bdid.id_; return *this; }
+   BlockDataID& operator=( const BlockDataID& bdid ) = default;
 
    bool operator==( const BlockDataID& bdid ) const { return id_ == bdid.id_; }
    bool operator!=( const BlockDataID& bdid ) const { return id_ != bdid.id_; }
@@ -59,26 +61,26 @@ public:
 
 private:
 
-   uint_t id_;
+   uint_t id_ = 0;
 
 }; // class BlockDataID
-
+static_assert( std::is_trivially_copyable<BlockDataID>::value, "BlockDataID has to be trivially copyable!");
 
 
 class ConstBlockDataID
 {
 public:
 
-            ConstBlockDataID()                               : id_( 0 ) {}
+            ConstBlockDataID()                               = default;
    explicit ConstBlockDataID( const uint_t id )              : id_( id ) {}
             ConstBlockDataID( const BlockDataID&      bdid ) : id_( bdid.id_ ) {}
-            ConstBlockDataID( const ConstBlockDataID& bdid ) : id_( bdid.id_ ) {}
+            ConstBlockDataID( const ConstBlockDataID& bdid ) = default;
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << id_; }
    void unpack( mpi::RecvBuffer & buffer ) { buffer >> id_; }
 
    ConstBlockDataID& operator=( const BlockDataID&      bdid ) { id_ = bdid.id_; return *this; }
-   ConstBlockDataID& operator=( const ConstBlockDataID& bdid ) { id_ = bdid.id_; return *this; }
+   ConstBlockDataID& operator=( const ConstBlockDataID& bdid ) = default;
 
    bool operator==( const ConstBlockDataID& bdid ) const { return id_ == bdid.id_; }
    bool operator!=( const ConstBlockDataID& bdid ) const { return id_ != bdid.id_; }
@@ -88,10 +90,10 @@ public:
 
 private:
 
-   uint_t id_;
+   uint_t id_ = 0;
 
 }; // class ConstBlockDataID
-
+static_assert( std::is_trivially_copyable<ConstBlockDataID>::value, "ConstBlockDataID has to be trivially copyable!");
 
 
 } // namespace domain_decomposition

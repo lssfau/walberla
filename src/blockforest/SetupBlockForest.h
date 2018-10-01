@@ -290,7 +290,7 @@ public:
                                               const std::string&  sfcMethod               = std::string( "hilbert" ),
                                               const uint_t        sfcIterations           = 10,
                                               const bool          sortByLevel             = false,
-                                              GlobalLoadBalancing::MetisConfiguration< SetupBlock > metisConfig =
+                                              const GlobalLoadBalancing::MetisConfiguration< SetupBlock >& metisConfig =
                                                  GlobalLoadBalancing::MetisConfiguration< SetupBlock >(),
                                               const bool          reorderProcessesByBFS   = false,
                                               const bool          insertBufferProcesses   = false,

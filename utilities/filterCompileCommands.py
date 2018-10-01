@@ -4,7 +4,7 @@ import json
 import sys
 
 def compileCommandSelector(x):
-   return not ("extern" in x["file"])
+   return not (("extern" in x["file"]) or ("tests" in x["file"]))
 
 if __name__ == "__main__":
    if (len(sys.argv) != 2):

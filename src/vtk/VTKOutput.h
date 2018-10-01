@@ -198,13 +198,13 @@ private:
               const uint_t ghostLayers, const bool forcePVTU, const uint_t initialExecutionCount = 0 );
 
    /// creates a VTKOutput object that is supposed to output arbitrary point data
-   VTKOutput( const shared_ptr< PointDataSource > pds, const std::string & identifier, const uint_t writeFrequency,
+   VTKOutput( const shared_ptr< PointDataSource >& pds, const std::string & identifier, const uint_t writeFrequency,
               const std::string & baseFolder, const std::string & executionFolder,
               const bool continuousNumbering, const bool binary, const bool littleEndian, const bool useMPIIO,
               const uint_t initialExecutionCount = 0 );
 
    /// creates a VTKOutput object that is supposed to output arbitrary polyline data
-   VTKOutput( const shared_ptr< PolylineDataSource > pds, const std::string & identifier, const uint_t writeFrequency,
+   VTKOutput( const shared_ptr< PolylineDataSource >& pds, const std::string & identifier, const uint_t writeFrequency,
               const std::string & baseFolder, const std::string & executionFolder,
               const bool continuousNumbering, const bool binary, const bool littleEndian, const bool useMPIIO,
               const uint_t initialExecutionCount = 0 );

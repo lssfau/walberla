@@ -59,7 +59,7 @@ namespace geometry {
       *  \param radii       the length of the semi axes
       *****************************************************************************************************************/
       explicit Ellipsoid( const Vector3<real_t> & midpoint,
-               Vector3<real_t> axis1, Vector3<real_t> axis2, Vector3<real_t> radii );
+               Vector3<real_t> axis1, Vector3<real_t> axis2, const Vector3<real_t>& radii );
 
 
       const AABB & boundingBox() const { return boundingBox_; }

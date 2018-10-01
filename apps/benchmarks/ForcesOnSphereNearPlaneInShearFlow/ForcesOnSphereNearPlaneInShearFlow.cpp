@@ -111,7 +111,7 @@ const FlagUID MO_CLI_Flag( "moving obstacle CLI" );
 // BLOCK STRUCTURE //
 /////////////////////
 
-static void refinementSelection( SetupBlockForest& forest, uint_t levels, AABB refinementBox )
+static void refinementSelection( SetupBlockForest& forest, uint_t levels, const AABB& refinementBox )
 {
    real_t dx = real_t(1); // dx on finest level
    for( auto block = forest.begin(); block != forest.end(); ++block )

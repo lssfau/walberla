@@ -1227,7 +1227,7 @@ doc:
 ###############################################################################
 
 clang-tidy:
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    script:
       - $CXX --version
       - cmake --version

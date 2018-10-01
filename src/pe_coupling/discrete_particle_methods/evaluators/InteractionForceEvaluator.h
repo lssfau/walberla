@@ -106,8 +106,8 @@ public:
 private:
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
-   const BlockDataID bodyStorageID_;
-   const BlockDataID pdfFieldID_;
+   const BlockDataID bodyStorageID_ {};
+   const BlockDataID pdfFieldID_ {};
 
    std::function<Vector3<real_t> ( const Vector3<real_t> &, const Vector3<real_t> &, real_t, real_t, real_t, real_t )> dragForceCorrelationFunction_;
 

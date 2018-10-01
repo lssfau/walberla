@@ -226,7 +226,7 @@ void GUI::run() {
    timeloop_.run();
 }
 
-void GUI::registerPropertyTree( const shared_ptr<PropertyTree>  ) {}
+void GUI::registerPropertyTree( const shared_ptr<PropertyTree>&  ) {}
 
 const std::vector<shared_ptr<PropertyTree> > & GUI::getPropertyTrees() const  {
    throw( "Should not happen!" );

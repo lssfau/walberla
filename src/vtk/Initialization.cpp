@@ -565,7 +565,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
 *   \param configBlockName           Name of the block in the configuration that is used to setup the VTK output
 */
 //**********************************************************************************************************************
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, RegisterVTKOutputFunction registerVTKOutputFunction,
+void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, const RegisterVTKOutputFunction& registerVTKOutputFunction,
                           const shared_ptr< const StructuredBlockStorage > & storage, const shared_ptr< Config > & config,
                           const std::string & configBlockName )
 {
@@ -575,7 +575,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
 
 
 
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, RegisterVTKOutputFunction registerVTKOutputFunction,
+void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, const RegisterVTKOutputFunction& registerVTKOutputFunction,
                           const shared_ptr< const StructuredBlockStorage > & storage, const Config::BlockHandle & parentBlockHandle,
                           const std::string & configBlockName )
 {

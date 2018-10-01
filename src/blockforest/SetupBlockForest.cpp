@@ -1232,7 +1232,7 @@ void SetupBlockForest::calculateProcessDistribution_Default( const uint_t       
                                                              const std::string&  sfcMethod               /* = std::string( "hilbert" ) */,
                                                              const uint_t        sfcIterations           /* = 10 */,
                                                              const bool          sortByLevel             /* = false */,
-                                                             GlobalLoadBalancing::MetisConfiguration< SetupBlock > metisConfig,
+                                                             const GlobalLoadBalancing::MetisConfiguration< SetupBlock >& metisConfig,
                                                              const bool          reorderProcessesByBFS   /* = false */,
                                                              const bool          insertBufferProcesses   /* = false */,
                                                              const real_t        bufferProcessesFraction /* = real_c(0) */ )
