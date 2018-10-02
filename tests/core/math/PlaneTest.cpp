@@ -115,7 +115,7 @@ int main(int argc, char * argv[])
 
    for( real_t x(-10); x < real_t(11); x += real_t(0.25) )
    {
-      static const Vector3<real_t> ZERO_VECTOR;
+      static const Vector3<real_t> ZERO_VECTOR {};
       Plane pShifted( p );
       pShifted.shift( x );
       WALBERLA_CHECK_FLOAT_EQUAL( pShifted.signedDistance( ZERO_VECTOR ), -x );

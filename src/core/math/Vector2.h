@@ -107,12 +107,12 @@ public:
    //*******************************************************************************************************************
 
    //**Constructors*****************************************************************************************************
-                              explicit inline Vector2();
+                              explicit inline Vector2() = default;
                               explicit inline Vector2( Type init );
    template< typename Other > explicit inline Vector2( Other init );
                               explicit inline Vector2( Type x, Type y );
                               explicit inline Vector2( const Type* init );
-                                       inline Vector2( const Vector2& v );
+                                       inline Vector2( const Vector2& v ) = default;
 
    template< typename Other >
    inline Vector2( const Vector2<Other>& v );
@@ -125,7 +125,7 @@ public:
    //**Operators********************************************************************************************************
    /*!\name Operators */
    //@{
-   inline Vector2&                              operator= ( const Vector2& v );
+   inline Vector2&                              operator= ( const Vector2& v ) = default;
    template< typename Other > inline Vector2&   operator= ( const Vector2<Other>& v );
    template< typename Other > inline bool       operator==( Other rhs )                 const;
    template< typename Other > inline bool       operator==( const Vector2<Other>& rhs ) const;
@@ -172,15 +172,20 @@ public:
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{
-   Type v_[2];  //!< The two statically allocated vector elements.
-                /*!< Access to the vector values is gained via the subscript operator.
-                     The order of the elements is
-                     \f[\left(\begin{array}{*{2}{c}}
-                     0 & 1 \\
-                     \end{array}\right)\f] */
+   /**
+    * The two statically allocated vector elements.
+    *
+    * Access to the vector values is gained via the subscript operator.
+    * The order of the elements is
+    * \f[\left(\begin{array}{*{2}{c}}
+    * 0 & 1 \\
+    * \end{array}\right)\f]
+   **/
+   Type v_[2] = {Type(), Type()};
    //@}
    //*******************************************************************************************************************
 };
+static_assert( std::is_trivially_copyable<Vector2<real_t>>::value, "Vector2<real_t> has to be trivially copyable!");
 //**********************************************************************************************************************
 
 template<typename T>
@@ -192,19 +197,6 @@ Vector2<T> & normalize( Vector2<T> & v );
 //  CONSTRUCTORS
 //
 //======================================================================================================================
-
-//**********************************************************************************************************************
-/*!\fn Vector2<Type>::Vector2()
-// \brief The default constructor for Vector2.
-//
-// All vector elements are initialized to the default value (i.e. 0 for integral data types).
-*/
-template< typename Type >
-inline Vector2<Type>::Vector2()
-{
-   v_[0] = v_[1] = Type();
-}
-//**********************************************************************************************************************
 
 
 //**********************************************************************************************************************
@@ -272,23 +264,6 @@ inline Vector2<Type>::Vector2( const Type* init )
 
 
 //**********************************************************************************************************************
-/*!\fn Vector2<Type>::Vector2( const Vector2& v )
-// \brief The copy constructor for Vector2.
-//
-// \param v Vector to be copied.
-//
-// The copy constructor is explicitly defined in order to enable/facilitate NRV optimization.
-*/
-template< typename Type >
-inline Vector2<Type>::Vector2( const Vector2& v )
-{
-   v_[0] = v.v_[0];
-   v_[1] = v.v_[1];
-}
-//**********************************************************************************************************************
-
-
-//**********************************************************************************************************************
 /*!\fn Vector2<Type>::Vector2( const Vector2<Other>& v )
 // \brief Conversion constructor from different Vector2 instances.
 //
@@ -311,28 +286,6 @@ inline Vector2<Type>::Vector2( const Vector2<Other>& v )
 //  OPERATORS
 //
 //======================================================================================================================
-
-//**********************************************************************************************************************
-/*!\fn Vector2<Type>& Vector2<Type>::operator=( const Vector2& v )
-// \brief Copy assignment operator for Vector2.
-//
-// \param v Vector to be copied.
-// \return Reference to the assigned vector.
-//
-// Explicit definition of a copy assignment operator for performance reasons.
-*/
-template< typename Type >
-inline Vector2<Type>& Vector2<Type>::operator=( const Vector2& v )
-{
-   // This implementation is faster than the synthesized default copy assignment operator and
-   // faster than an implementation with the C library function 'memcpy' in combination with a
-   // protection against self-assignment. Additionally, this version goes without a protection
-   // against self-assignment.
-   v_[0] = v.v_[0];
-   v_[1] = v.v_[1];
-   return *this;
-}
-//**********************************************************************************************************************
 
 
 //**********************************************************************************************************************

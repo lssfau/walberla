@@ -216,6 +216,7 @@ private:
    vector_type minCorner_; /// minimal values
    vector_type maxCorner_; /// maximal values
 };
+static_assert( std::is_trivially_copyable<GenericAABB<real_t>>::value, "GenericAABB<real_t> has to be trivially copyable!");
 
 
 

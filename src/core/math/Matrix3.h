@@ -95,7 +95,7 @@ private:
 
 public:
    //**Constructors*****************************************************************************************************
-   explicit inline Matrix3();
+   explicit inline Matrix3() = default;
    explicit inline Matrix3( Type init );
    explicit inline Matrix3( const Vector3<Type>& a, const Vector3<Type>& b, const Vector3<Type>& c );
    explicit inline Matrix3( Type xx, Type xy, Type xz, Type yx, Type yy, Type yz, Type zx, Type zy, Type zz );
@@ -104,7 +104,7 @@ public:
    template< typename Axis, typename Angle >
    explicit Matrix3( Vector3<Axis> axis, Angle angle );
 
-   inline Matrix3( const Matrix3& m );
+   inline Matrix3( const Matrix3& m ) = default;
 
    template< typename Other >
    inline Matrix3( const Matrix3<Other>& m );
@@ -122,7 +122,7 @@ public:
    /*!\name Operators */
    //@{
                               inline Matrix3&    operator= ( Type set );
-                              inline Matrix3&    operator= ( const Matrix3& set );
+                              inline Matrix3&    operator= ( const Matrix3& set ) = default;
    template< typename Other > inline Matrix3&    operator= ( const Matrix3<Other>& set );
    template< typename Other > inline bool        operator==( const Matrix3<Other>& rhs )   const;
    template< typename Other > inline bool        operator!=( const Matrix3<Other>& rhs )   const;
@@ -236,17 +236,23 @@ private:
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{
-   Type v_[9];  //!< The nine statically allocated matrix elements.
-                /*!< Access to the matrix elements is gained via the subscript or function call
-                     operator. The order of the elements is
-                     \f[\left(\begin{array}{*{3}{c}}
-                     0 & 1 & 2 \\
-                     3 & 4 & 5 \\
-                     6 & 7 & 8 \\
-                     \end{array}\right)\f] */
+   /**
+    * The nine statically allocated matrix elements.
+    * Access to the matrix elements is gained via the subscript or function call
+    * operator. The order of the elements is
+    * \f[\left(\begin{array}{*{3}{c}}
+    * 0 & 1 & 2 \\
+    * 3 & 4 & 5 \\
+    * 6 & 7 & 8 \\
+    * \end{array}\right)\f]
+   **/
+   Type v_[9] = {Type(1), Type(0), Type(0),
+                 Type(0), Type(1), Type(0),
+                 Type(0), Type(0), Type(1)};
    //@}
    //*******************************************************************************************************************
 };
+static_assert( std::is_trivially_copyable<Matrix3<real_t>>::value, "Matrix3<real_t> has to be trivially copyable!");
 //**********************************************************************************************************************
 
 
@@ -257,21 +263,6 @@ private:
 //  CONSTRUCTORS
 //
 //======================================================================================================================
-
-//**********************************************************************************************************************
-/*!\fn Matrix3<Type>::Matrix3()
-// \brief The default constructor for Matrix3.
-//
-// The diagonal matrix elements are initialized with 1, all other elements are initialized
-// with 0.
-*/
-template< typename Type >
-inline Matrix3<Type>::Matrix3()
-{
-   v_[0] = v_[4] = v_[8] = Type(1);
-   v_[1] = v_[2] = v_[3] = v_[5] = v_[6] = v_[7] = Type(0);
-}
-//**********************************************************************************************************************
 
 
 //**********************************************************************************************************************
@@ -393,30 +384,6 @@ Matrix3<Type>::Matrix3( Vector3<Axis> axis, Angle angle )
 
 
 //**********************************************************************************************************************
-/*!\fn Matrix3<Type>::Matrix3( const Matrix3& m )
-// \brief The copy constructor for Matrix3.
-//
-// \param m Matrix to be copied.
-//
-// The copy constructor is explicitly defined in order to enable/facilitate NRV optimization.
-*/
-template< typename Type >
-inline Matrix3<Type>::Matrix3( const Matrix3& m )
-{
-   v_[0] = m.v_[0];
-   v_[1] = m.v_[1];
-   v_[2] = m.v_[2];
-   v_[3] = m.v_[3];
-   v_[4] = m.v_[4];
-   v_[5] = m.v_[5];
-   v_[6] = m.v_[6];
-   v_[7] = m.v_[7];
-   v_[8] = m.v_[8];
-}
-//**********************************************************************************************************************
-
-
-//**********************************************************************************************************************
 /*!\fn Matrix3<Type>::Matrix3( const Matrix3<Other>& m )
 // \brief Conversion constructor from different Matrix3 instances.
 //
@@ -509,36 +476,6 @@ inline Matrix3<Type>& Matrix3<Type>::operator=( Type set )
    v_[6] = set;
    v_[7] = set;
    v_[8] = set;
-   return *this;
-}
-//**********************************************************************************************************************
-
-
-//**********************************************************************************************************************
-/*!\fn Matrix3<Type>& Matrix3<Type>::operator=( const Matrix3& set )
-// \brief Copy assignment operator for Matrix3.
-//
-// \param set Matrix to be copied.
-// \return Reference to the assigned matrix.
-//
-// Explicit definition of a copy assignment operator for performance reasons.
-*/
-template< typename Type >
-inline Matrix3<Type>& Matrix3<Type>::operator=( const Matrix3& set )
-{
-   // This implementation is faster than the synthesized default copy assignment operator and
-   // faster than an implementation with the C library function 'memcpy' in combination with a
-   // protection against self-assignment. Additionally, this version goes without a protection
-   // against self-assignment.
-   v_[0] = set.v_[0];
-   v_[1] = set.v_[1];
-   v_[2] = set.v_[2];
-   v_[3] = set.v_[3];
-   v_[4] = set.v_[4];
-   v_[5] = set.v_[5];
-   v_[6] = set.v_[6];
-   v_[7] = set.v_[7];
-   v_[8] = set.v_[8];
    return *this;
 }
 //**********************************************************************************************************************

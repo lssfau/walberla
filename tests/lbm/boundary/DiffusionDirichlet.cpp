@@ -199,8 +199,8 @@ public:
    void val( real_t& _val, cell_idx_t x, cell_idx_t, cell_idx_t ) const override { _val = real_c( cos( period_*( real_c(x) + real_c(0.5) ) ) ); }
 
 private:
-   const real_t period_;
-   const vec3_t vel_;
+   const real_t period_ {};
+   const vec3_t vel_ {};
 };
 
 

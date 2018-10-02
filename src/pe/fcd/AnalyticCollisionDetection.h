@@ -818,7 +818,9 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       for( unsigned int i=0; i<3; ++i ) {
          sign[i] = ( sign[i]>0 ) ? ( hl1[i] ) : ( -hl1[i] );
       }
+      #ifdef WALBERLA_LOGLEVEL_DETAIL
       const Vec3 tmp1( sign );
+      #endif
       pB1 += R1 * sign;
 
       Vec3 pB2 = b2->getPosition();
@@ -826,7 +828,9 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       for( size_t i=0; i<3; ++i ) {
          sign[i] = ( sign[i]>0 ) ? ( -hl2[i] ) : ( hl2[i] );
       }
+      #ifdef WALBERLA_LOGLEVEL_DETAIL
       const Vec3 tmp2( sign );
+      #endif
       pB2 += R2 * sign;
 
       Vec3 ua, ub;
