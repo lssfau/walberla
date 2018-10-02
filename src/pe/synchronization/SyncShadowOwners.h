@@ -20,9 +20,12 @@
 
 #pragma once
 
-#include "blockforest/all.h"
-#include "core/all.h"
-#include "domain_decomposition/all.h"
+#include <blockforest/BlockForest.h>
+#include <core/DataTypes.h>
+#include <core/mpi/BufferSystem.h>
+#include <core/mpi/RecvBuffer.h>
+#include <core/mpi/Reduce.h>
+#include <core/mpi/SendBuffer.h>
 
 #include "pe/BlockFunctions.h"
 #include "pe/rigidbody/BodyStorage.h"

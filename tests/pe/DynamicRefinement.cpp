@@ -24,6 +24,7 @@
 #include "pe/utility/DestroyBody.h"
 
 #include "blockforest/Initialization.h"
+#include <blockforest/loadbalancing/DynamicCurve.h>
 #include "core/all.h"
 #include "domain_decomposition/all.h"
 

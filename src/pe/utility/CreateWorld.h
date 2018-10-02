@@ -24,9 +24,10 @@
 // Includes
 //*************************************************************************************************
 
-#include "blockforest/all.h"
-#include "core/all.h"
-#include "domain_decomposition/all.h"
+#include "blockforest/BlockForest.h"
+#include "core/config/Config.h"
+#include "core/DataTypes.h"
+#include <core/mpi/MPIManager.h>
 
 namespace walberla {
 namespace pe {

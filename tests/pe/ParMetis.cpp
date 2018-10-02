@@ -21,6 +21,7 @@
 #include "pe/utility/CreateWorld.h"
 
 #include <blockforest/loadbalancing/DynamicParMetis.h>
+#include <core/debug/TestSubsystem.h>
 #include <core/Environment.h>
 #include <core/logging/Logging.h>
 #include <core/math/Sample.h>

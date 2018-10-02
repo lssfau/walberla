@@ -21,6 +21,9 @@
 
 #include "blockforest/Initialization.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
+#include <blockforest/loadbalancing/DynamicCurve.h>
+#include <blockforest/loadbalancing/StaticCurve.h>
+#include <blockforest/SetupBlockForest.h>
 
 #include "boundary/all.h"
 

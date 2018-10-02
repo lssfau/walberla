@@ -15,6 +15,7 @@
 
 #include "core/debug/TestSubsystem.h"
 #include "core/DataTypes.h"
+#include <core/math/Random.h>
 #include "core/math/Vector3.h"
 
 #include <pe/raytracing/Ray.h>

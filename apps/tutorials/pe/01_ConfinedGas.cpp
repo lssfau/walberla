@@ -25,6 +25,7 @@
 #include <core/grid_generator/HCPIterator.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
+#include <core/math/Random.h>
 //! [Includes]
 
 namespace walberla {

@@ -23,6 +23,7 @@
 
 #include <core/Abort.h>
 #include <core/Environment.h>
+#include <core/math/Random.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
 #include <core/waLBerlaBuildInfo.h>

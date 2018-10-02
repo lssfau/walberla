@@ -20,22 +20,22 @@
 
 #pragma once
 
-#include <pe/basic.h>
-#include <pe/Types.h>
-#include <core/math/Vector3.h>
-#include <core/mpi/all.h>
 #include <core/config/Config.h>
 #include <core/Filesystem.h>
+#include <core/math/Vector3.h>
+#include <core/mpi/Datatype.h>
 #include <core/timing/TimingTree.h>
-#include <functional>
-#include "Ray.h"
-#include "Intersects.h"
-#include "Lighting.h"
-#include "ShadingFunctions.h"
-#include "pe/ccd/ICCD.h"
-#include <pe/ccd/HashGrids.h>
 
-#include <stddef.h>
+#include <pe/ccd/ICCD.h>
+#include <pe/ccd/HashGrids.h>
+#include <pe/raytracing/Ray.h>
+#include <pe/raytracing/Intersects.h>
+#include <pe/raytracing/Lighting.h>
+#include <pe/raytracing/ShadingFunctions.h>
+#include <pe/Types.h>
+
+#include <cstddef>
+#include <functional>
 
 namespace walberla {
 namespace pe {

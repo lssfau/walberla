@@ -29,6 +29,8 @@
 #include "core/grid_generator/SCIterator.h"
 #include "core/logging/all.h"
 
+#include <domain_decomposition/SharedSweep.h>
+
 #include "field/AddToStorage.h"
 #include "field/communication/PackInfo.h"
 #include "field/distributors/all.h"

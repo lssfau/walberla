@@ -28,6 +28,7 @@
 #include <core/grid_generator/HCPIterator.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
+#include <core/math/Random.h>
 #include <core/timing/TimingTree.h>
 #include <core/waLBerlaBuildInfo.h>
 #include <postprocessing/sqlite/SQLite.h>

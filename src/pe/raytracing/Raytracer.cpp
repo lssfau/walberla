@@ -20,7 +20,11 @@
 
 #include "Raytracer.h"
 
-#include "core/mpi/all.h"
+#include <core/mpi/Gatherv.h>
+#include <core/mpi/MPIManager.h>
+#include <core/mpi/RecvBuffer.h>
+#include <core/mpi/SendBuffer.h>
+
 #include "geometry/structured/extern/lodepng.h"
 
 namespace walberla {

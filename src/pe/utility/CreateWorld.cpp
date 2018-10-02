@@ -26,7 +26,9 @@
 
 #include <pe/Types.h>
 
-#include <core/DataTypes.h>
+#include <blockforest/Initialization.h>
+#include <blockforest/loadbalancing/StaticCurve.h>
+#include <blockforest/SetupBlockForest.h>
 #include <core/logging/Logging.h>
 #include <core/math/AABB.h>
 
