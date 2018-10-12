@@ -719,7 +719,7 @@ void DynamicCurveBalance< PhantomData_T >::mortonOrderWeighted( const std::vecto
       }
    }
       
-#if defined(_OPENMP) && (__INTEL_COMPILER != 1800) // Disable OpenMP for Intel 2018 due to a bug
+#if defined(_OPENMP) && ((__INTEL_COMPILER < 1800) || (__INTEL_COMPILER > 1900)) // Disable OpenMP for Intel 2018/2019 due to a bug
    #pragma omp parallel for schedule(static)
 #endif
    for( int i = 0; i < int_c( blocksPerLevel.size() ); ++i )
