@@ -158,7 +158,7 @@ DisplayAdaptor * GUI::findDisplayAdaptorForBlockID ( ConstBlockDataID bdId ) con
 }
 
 
-void GUI::registerPropertyTree( const shared_ptr<PropertyTree> propertyTree ) {
+void GUI::registerPropertyTree( const shared_ptr<PropertyTree>& propertyTree ) {
    pImpl->propertyTrees_.push_back( propertyTree );
 }
 
