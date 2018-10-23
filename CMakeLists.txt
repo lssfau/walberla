@@ -1096,7 +1096,7 @@ if ( WALBERLA_BUILD_WITH_CUDA )
         endforeach()
 
         if ( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std=" AND NOT WALBERLA_CXX_COMPILER_IS_MSVC )
-            list ( APPEND CUDA_NVCC_FLAGS "-std=c++11" )
+            list ( APPEND CUDA_NVCC_FLAGS "-std=c++14" )
         endif ()
 
         # Bug with gcc5 and cuda7.5:
