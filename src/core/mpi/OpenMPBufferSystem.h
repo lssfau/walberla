@@ -44,12 +44,13 @@ namespace mpi {
 * for the systems: the tag can be passed in the constructor.
 */
 //**********************************************************************************************************************
-class OpenMPBufferSystem
+template< typename RecvBuffer_T, typename SendBuffer_T>
+class GenericOpenMPBufferSystem
 {
 public:
 
-   OpenMPBufferSystem( const MPI_Comm & communicator, int tag = 0,
-                       bool _serialSends = false, bool _serialRecvs = false );
+   GenericOpenMPBufferSystem( const MPI_Comm & communicator, int tag = 0,
+                              bool _serialSends = false, bool _serialRecvs = false );
 
 
    void enforceSerialSends( bool val ) { serialSends_ = val; }
@@ -60,8 +61,8 @@ public:
 
    bool isSizeCommunicatedInNextStep() const          { return bs_.isSizeCommunicatedInNextStep(); }
 
-   void addReceivingFunction( MPIRank rank, const std::function<void ( RecvBuffer & buf ) >& recvFunction );
-   void addSendingFunction  ( MPIRank rank, const std::function<void ( SendBuffer & buf ) >& sendFunction );
+   void addReceivingFunction( MPIRank rank, const std::function<void ( RecvBuffer_T & buf ) >& recvFunction );
+   void addSendingFunction  ( MPIRank rank, const std::function<void ( SendBuffer_T & buf ) >& sendFunction );
 
    void clearReceivingFunctions() { dirty_ = true; recvFunctions_.clear(); }
    void clearSendingFunctions()   { dirty_ = true; sendFunctions_.clear(); sendRanks_.clear(); }
@@ -75,7 +76,7 @@ public:
 
 
 private:
-   BufferSystem bs_;
+   GenericBufferSystem<RecvBuffer_T, SendBuffer_T> bs_;
 
    bool dirty_;
 
@@ -86,11 +87,11 @@ private:
 
    bool sizeChangesEverytime_;
 
-   std::map<MPIRank, std::function<void ( RecvBuffer & )> > recvFunctions_;
+   std::map<MPIRank, std::function<void ( RecvBuffer_T & )> > recvFunctions_;
 
 
    std::vector<MPIRank> sendRanks_;
-   std::vector< std::function<void ( SendBuffer & )> > sendFunctions_;
+   std::vector< std::function<void ( SendBuffer_T & )> > sendFunctions_;
 
    void startCommunicationOpenMP();
    void startCommunicationSerial();
@@ -99,7 +100,10 @@ private:
    void waitSerial();
 };
 
+typedef GenericOpenMPBufferSystem<RecvBuffer, SendBuffer> OpenMPBufferSystem;
 
 
 } // namespace mpi
 } // namespace walberla
+
+#include "OpenMPBufferSystem.impl.h"

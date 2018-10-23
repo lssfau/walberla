@@ -210,7 +210,7 @@ protected:
 template< typename Stencil >
 inline void UniformBufferedScheme<Stencil>::addPackInfo( const PackInfo & packInfo )
 {
-   WALBERLA_ASSERT( !communicationInProgress_ ); // You cannot add PackInfo's while the communication is in progress!
+   WALBERLA_ASSERT( !communicationInProgress_, "Cannot add pack info while communication is in progress");
 
    packInfos_.push_back( packInfo );
    setupBeforeNextCommunication_ = true;

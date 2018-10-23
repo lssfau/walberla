@@ -37,8 +37,8 @@ namespace internal {
 //
 //======================================================================================================================
 
-
-void KnownSizeCommunication::send( MPIRank receiver, const SendBuffer & sendBuffer )
+template< typename Rb, typename Sb>
+void KnownSizeCommunication<Rb, Sb>::send( MPIRank receiver, const Sb & sendBuffer )
 {
    WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
 
@@ -51,15 +51,15 @@ void KnownSizeCommunication::send( MPIRank receiver, const SendBuffer & sendBuff
               int_c(sendBuffer.size() ), // send one size
               MPI_BYTE,                  // type
               receiver,                  // receiver rank
-              tag_,                      // message tag
-              communicator_,             // communicator
+              this->tag_,                // message tag
+              this->communicator_,       // communicator
               &request                   // request needed for wait
               );
 }
 
 
-
-void KnownSizeCommunication::waitForSends( )
+template< typename Rb, typename Sb>
+void KnownSizeCommunication<Rb, Sb>::waitForSends( )
 {
    WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
 
@@ -76,8 +76,8 @@ void KnownSizeCommunication::waitForSends( )
 }
 
 
-
-void KnownSizeCommunication::scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos )
+template< typename Rb, typename Sb>
+void KnownSizeCommunication<Rb, Sb>::scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos )
 {
    WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
 
@@ -101,8 +101,8 @@ void KnownSizeCommunication::scheduleReceives( std::map<MPIRank, ReceiveInfo> & 
                  recvInfo.size,             // size of expected message
                  MPI_BYTE,                  // type
                  senderRank,                // rank of sender process
-                 tag_,                      // message tag
-                 communicator_,             // communicator
+                 this->tag_,                // message tag
+                 this->communicator_,       // communicator
                  & recvRequests_[recvCount] // request, needed for wait
                  );
 
@@ -115,7 +115,8 @@ void KnownSizeCommunication::scheduleReceives( std::map<MPIRank, ReceiveInfo> & 
 }
 
 
-MPIRank KnownSizeCommunication::waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos )
+template< typename Rb, typename Sb>
+MPIRank KnownSizeCommunication<Rb, Sb>::waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos )
 {
    WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
 
@@ -170,8 +171,8 @@ MPIRank KnownSizeCommunication::waitForNextReceive( std::map<MPIRank, ReceiveInf
 //
 //======================================================================================================================
 
-
-void UnknownSizeCommunication::send( MPIRank receiver, const SendBuffer & sendBuffer )
+template< typename Rb, typename Sb>
+void UnknownSizeCommunication<Rb, Sb>::send( MPIRank receiver, const Sb & sendBuffer )
 {
    WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
 
@@ -190,8 +191,8 @@ void UnknownSizeCommunication::send( MPIRank receiver, const SendBuffer & sendBu
              1,                         // one integer is sent
              MPITrait<MPISize>::type(), // type
              receiver,                  // receiver rank
-             tag_,                      // message tag
-             communicator_,             // communicator
+             this->tag_,                // message tag
+             this->communicator_,       // communicator
              & sizeMsgReq               // request needed for wait
              );
 
@@ -205,13 +206,14 @@ void UnknownSizeCommunication::send( MPIRank receiver, const SendBuffer & sendBu
              int_c( sendBuffer.size() ), // send one size
              MPI_BYTE,                   // type
              receiver,                   // receiver rank
-             tag_,                       // message tag
-             communicator_,              // communicator
+             this->tag_,                 // message tag
+             this->communicator_,        // communicator
              & contentMsgReq             // request needed for wait
              );
 }
 
-void UnknownSizeCommunication::waitForSends()
+template< typename Rb, typename Sb>
+void UnknownSizeCommunication<Rb, Sb>::waitForSends()
 {
    WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
 
@@ -228,7 +230,8 @@ void UnknownSizeCommunication::waitForSends()
    outgoingBufferForSizes_.clear();
 }
 
-void UnknownSizeCommunication::scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos )
+template< typename Rb, typename Sb>
+void UnknownSizeCommunication<Rb, Sb>::scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos )
 {
    WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
 
@@ -250,8 +253,8 @@ void UnknownSizeCommunication::scheduleReceives( std::map<MPIRank, ReceiveInfo> 
                  1,                          // size of expected message
                  MPITrait<MPISize>::type(),  // type
                  sender,                     // rank of sender process
-                 tag_,                       // message tag
-                 communicator_,              // communicator
+                 this->tag_,                 // message tag
+                 this->communicator_,        // communicator
                  & recvRequests_[recvCount]  // request, needed for wait
                  );
 
@@ -261,7 +264,8 @@ void UnknownSizeCommunication::scheduleReceives( std::map<MPIRank, ReceiveInfo> 
 }
 
 
-MPIRank UnknownSizeCommunication::waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos )
+template< typename Rb, typename Sb>
+MPIRank UnknownSizeCommunication<Rb, Sb>::waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos )
 {
    WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
 
@@ -322,8 +326,8 @@ MPIRank UnknownSizeCommunication::waitForNextReceive( std::map<MPIRank, ReceiveI
                     recvInfo.size,                // size of expected message
                     MPI_BYTE,                     // type
                     senderRank,                   // rank of sender process
-                    tag_,                         // message tag
-                    communicator_,                // communicator
+                    this->tag_,                   // message tag
+                    this->communicator_,          // communicator
                     & recvRequests_[ uint_c( requestIndex ) ] // request, needed for wait
                     );
 
@@ -351,8 +355,8 @@ MPIRank UnknownSizeCommunication::waitForNextReceive( std::map<MPIRank, ReceiveI
 //
 //======================================================================================================================
 
-
-void NoMPICommunication::send( MPIRank receiver, const SendBuffer & sendBuffer )
+template< typename Rb, typename Sb>
+void NoMPICommunication<Rb, Sb>::send( MPIRank receiver, const Sb & sendBuffer )
 {
    WALBERLA_UNUSED( receiver);
 
@@ -361,12 +365,14 @@ void NoMPICommunication::send( MPIRank receiver, const SendBuffer & sendBuffer )
    received_ = false;
 }
 
-void NoMPICommunication::waitForSends()
+template< typename Rb, typename Sb>
+void NoMPICommunication<Rb, Sb>::waitForSends()
 {
    return;
 }
 
-void NoMPICommunication::scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos )
+template< typename Rb, typename Sb>
+void NoMPICommunication<Rb, Sb>::scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos )
 {
    WALBERLA_DEBUG_SECTION()
    {
@@ -380,7 +386,8 @@ void NoMPICommunication::scheduleReceives( std::map<MPIRank, ReceiveInfo> & recv
 }
 
 
-MPIRank NoMPICommunication::waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos )
+template< typename Rb, typename Sb>
+MPIRank NoMPICommunication<Rb, Sb>::waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos )
 {
    if( recvInfos.empty() )
    {

@@ -19,8 +19,6 @@
 //
 //======================================================================================================================
 
-#include "OpenMPBufferSystem.h"
-
 #include <boost/range/adaptor/map.hpp>
 
 
@@ -35,9 +33,9 @@ namespace mpi {
 //
 //======================================================================================================================
 
-
-OpenMPBufferSystem::OpenMPBufferSystem( const MPI_Comm & communicator, int tag,
-                                        bool _serialSends, bool _serialRecvs  )
+template<typename Rb, typename Sb>
+GenericOpenMPBufferSystem<Rb, Sb>::GenericOpenMPBufferSystem( const MPI_Comm & communicator, int tag,
+                                                              bool _serialSends, bool _serialRecvs  )
    : bs_( communicator, tag),
      dirty_( true ),
      serialSends_( _serialSends ),
@@ -47,14 +45,16 @@ OpenMPBufferSystem::OpenMPBufferSystem( const MPI_Comm & communicator, int tag,
 }
 
 
-void OpenMPBufferSystem::addReceivingFunction( MPIRank rank, const std::function<void ( RecvBuffer & buf ) >& recvFunction )
+template<typename Rb, typename Sb>
+void GenericOpenMPBufferSystem<Rb, Sb>::addReceivingFunction( MPIRank rank, const std::function<void ( Rb & buf ) >& recvFunction )
 {
    dirty_ = true;
    recvFunctions_[rank] = recvFunction;
 }
 
 
-void OpenMPBufferSystem::addSendingFunction  ( MPIRank rank, const std::function<void ( SendBuffer & buf ) >& sendFunction )
+template<typename Rb, typename Sb>
+void GenericOpenMPBufferSystem<Rb, Sb>::addSendingFunction( MPIRank rank, const std::function<void ( Sb & buf ) >& sendFunction )
 {
    dirty_ = true;
    sendRanks_.push_back( rank );
@@ -63,7 +63,8 @@ void OpenMPBufferSystem::addSendingFunction  ( MPIRank rank, const std::function
 }
 
 
-void OpenMPBufferSystem::setupBufferSystem()
+template<typename Rb, typename Sb>
+void GenericOpenMPBufferSystem<Rb, Sb>::setupBufferSystem()
 {
    if ( ! dirty_ )
       return;
@@ -85,7 +86,8 @@ void OpenMPBufferSystem::setupBufferSystem()
 //======================================================================================================================
 
 
-void OpenMPBufferSystem::startCommunication()
+template<typename Rb, typename Sb>
+void GenericOpenMPBufferSystem<Rb, Sb>::startCommunication()
 {
    setupBufferSystem();
    if( serialSends_ )
@@ -94,7 +96,8 @@ void OpenMPBufferSystem::startCommunication()
       startCommunicationOpenMP();
 }
 
-void OpenMPBufferSystem::startCommunicationSerial()
+template<typename Rb, typename Sb>
+void GenericOpenMPBufferSystem<Rb, Sb>::startCommunicationSerial()
 {
    bs_.scheduleReceives();
 
@@ -114,7 +117,8 @@ void OpenMPBufferSystem::startCommunicationSerial()
    bs_.sendAll(); // for the case where sendFunctions_ is empty
 }
 
-void OpenMPBufferSystem::startCommunicationOpenMP()
+template<typename Rb, typename Sb>
+void GenericOpenMPBufferSystem<Rb, Sb>::startCommunicationOpenMP()
 {
    bs_.scheduleReceives();
 
@@ -150,8 +154,8 @@ void OpenMPBufferSystem::startCommunicationOpenMP()
 //
 //======================================================================================================================
 
-
-void OpenMPBufferSystem::wait()
+template<typename Rb, typename Sb>
+void GenericOpenMPBufferSystem<Rb, Sb>::wait()
 {
    if ( serialRecvs_ )
       waitSerial();
@@ -160,7 +164,8 @@ void OpenMPBufferSystem::wait()
 }
 
 
-void OpenMPBufferSystem::waitSerial()
+template<typename Rb, typename Sb>
+void GenericOpenMPBufferSystem<Rb, Sb>::waitSerial()
 {
    for( auto recvIt = bs_.begin(); recvIt != bs_.end(); ++recvIt )
    {
@@ -174,7 +179,8 @@ void OpenMPBufferSystem::waitSerial()
 }
 
 
-void OpenMPBufferSystem::waitOpenMP()
+template<typename Rb, typename Sb>
+void GenericOpenMPBufferSystem<Rb, Sb>::waitOpenMP()
 {
    const int numReceives = int_c( bs_.recvInfos_.size() );
 
