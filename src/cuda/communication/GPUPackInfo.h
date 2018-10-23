@@ -21,21 +21,18 @@
 
 #pragma once
 
+#include "blockforest/Block.h"
+#include "communication/UniformPackInfo.h"
 #include "core/debug/Debug.h"
 #include "core/math/Vector3.h"
 #include "core/mpi/BufferSizeTrait.h"
-
-#include "stencil/Directions.h"
-
 #include "field/GhostRegions.h"
-
-#include "communication/UniformPackInfo.h"
-
-#include "blockforest/Block.h"
+#include "field/Layout.h"
+#include "stencil/Directions.h"
 
 #include "cuda/ErrorChecking.h"
 #include "cuda/GPUCopy.h"
-#include "cuda/communication/PinnedMemoryBuffer.h"
+#include "cuda/communication/CustomMemoryBuffer.h"
 
 #include <cuda_runtime.h>
 #include <map>
@@ -142,7 +139,8 @@ void GPUPackInfo<GPUField_T>::unpackData(IBlock * receiver, stencil::Direction d
    if ( copyAsync_ )
    {
       PinnedMemoryBuffer & pinnedBuffer = pinnedRecvBuffers_[dir];
-      copyBufferPtr = pinnedBuffer.resize( nrOfBytesToRead );
+      pinnedBuffer.clear();
+      copyBufferPtr = pinnedBuffer.advance( nrOfBytesToRead );
       // Copy data into pinned memory buffer, in order to transfer it asynchronously to the GPU
       std::copy( bufPtr, static_cast< unsigned char * >( bufPtr + nrOfBytesToRead ), copyBufferPtr );
    }
@@ -158,7 +156,7 @@ void GPUPackInfo<GPUField_T>::unpackData(IBlock * receiver, stencil::Direction d
    auto intervalSize = std::make_tuple( fieldCi.xSize(), fieldCi.ySize(), fieldCi.zSize(),
                                         fieldPtr->fSize() );
 
-   if ( fieldPtr->layout() == fzyx )
+   if ( fieldPtr->layout() == field::fzyx )
    {
       const uint_t dstAllocSizeZ = fieldPtr->zAllocSize();
       const uint_t srcAllocSizeZ = fieldCi.zSize();
@@ -217,7 +215,7 @@ void GPUPackInfo<GPUField_T>::communicateLocal(const IBlock * sender, IBlock * r
 
    auto intervalSize = std::make_tuple( rCi.xSize(), rCi.ySize(), rCi.zSize(), sf->fSize() );
 
-   if ( sf->layout() == fzyx )
+   if ( sf->layout() == field::fzyx )
    {
       const uint_t dstAllocSizeZ = rf->zAllocSize();
       const uint_t srcAllocSizeZ = sf->zAllocSize();
@@ -263,7 +261,8 @@ void GPUPackInfo<GPUField_T>::packDataImpl(const IBlock * sender, stencil::Direc
    if ( copyAsync_ )
    {
       PinnedMemoryBuffer & pinnedBuffer = pinnedSendBuffers_[dir];
-      copyBufferPtr = pinnedBuffer.resize( nrOfBytesToPack );
+      pinnedBuffer.clear();
+      copyBufferPtr = pinnedBuffer.advance( nrOfBytesToPack );
    }
 
    auto dstOffset = std::make_tuple( uint_c(0), uint_c(0), uint_c(0), uint_c(0) );
@@ -275,7 +274,7 @@ void GPUPackInfo<GPUField_T>::packDataImpl(const IBlock * sender, stencil::Direc
    auto intervalSize = std::make_tuple( fieldCi.xSize(), fieldCi.ySize(), fieldCi.zSize(),
                                         fieldPtr->fSize() );
 
-   if ( fieldPtr->layout() == fzyx )
+   if ( fieldPtr->layout() == field::fzyx )
    {
       const uint_t dstAllocSizeZ = fieldCi.zSize();
       const uint_t srcAllocSizeZ = fieldPtr->zAllocSize();

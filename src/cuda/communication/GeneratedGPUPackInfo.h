@@ -13,17 +13,16 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ErrorChecking.h
-//! \ingroup cuda
+//! \file GeneratedGPUPackInfo.h
+//! \ingroup core
 //! \author Martin Bauer <martin.bauer@fau.de>
 //
 //======================================================================================================================
 
+
 #pragma once
-
-#include "core/Abort.h"
-
-#include <sstream>
+#include "stencil/Directions.h"
+#include "domain_decomposition/IBlock.h"
 #include <cuda_runtime.h>
 
 
@@ -31,23 +30,15 @@ namespace walberla {
 namespace cuda {
 
 
-#define WALBERLA_CUDA_CHECK(ans) { ::walberla::cuda::checkForError((ans), __FILE__, __LINE__); }
-
-
-
-inline void checkForError( cudaError_t code, const std::string & callerPath, const int line )
+class GeneratedGPUPackInfo
 {
-  if(code != cudaSuccess)
-  {
-    std::stringstream ss;
-    ss << "CUDA Error: " << code << " " << cudaGetErrorName(code) << ": " << cudaGetErrorString( code );
-    Abort::instance()->abort( ss.str(), callerPath, line );
-  }
-}
+public:
+   virtual void pack  ( stencil::Direction dir, unsigned char *buffer, IBlock *block, cudaStream_t stream ) = 0;
+   virtual void unpack( stencil::Direction dir, unsigned char *buffer, IBlock *block, cudaStream_t stream ) = 0;
+   virtual uint_t size( stencil::Direction dir, IBlock *block ) = 0;
+};
 
 
 
-} // namespace cuda
-} // namespace walberla
-
-
+} //namespace cuda
+} //namespace walberla

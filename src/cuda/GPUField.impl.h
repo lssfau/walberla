@@ -113,6 +113,26 @@ void GPUField<T>::getGhostRegion(stencil::Direction d, CellInterval & ci,
 
 
 template<typename T>
+inline CellInterval GPUField<T>::xyzSize() const
+{
+   return CellInterval (0,0,0,
+                        cell_idx_c( xSize() )-1,
+                        cell_idx_c( ySize() )-1,
+                        cell_idx_c( zSize() )-1 );
+}
+
+template<typename T>
+inline CellInterval GPUField<T>::xyzSizeWithGhostLayer() const
+{
+   CellInterval ci = GPUField<T>::xyzSize();
+   for( uint_t i=0; i < 3; ++i ) {
+      ci.min()[i] -= cell_idx_c( nrOfGhostLayers_ );
+      ci.max()[i] += cell_idx_c( nrOfGhostLayers_ );
+   }
+   return ci;
+}
+
+template<typename T>
 void GPUField<T>::getSlice(stencil::Direction d, CellInterval & ci,
                            cell_idx_t distance, cell_idx_t thickness, bool fullSlice ) const
 {

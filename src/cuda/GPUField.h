@@ -118,6 +118,9 @@ namespace cuda {
 
       inline uint_t  nrOfGhostLayers() const { return nrOfGhostLayers_; }
 
+      inline CellInterval xyzSize()               const;
+      inline CellInterval xyzSizeWithGhostLayer() const;
+
       bool operator==( const GPUField & other ) const;
 
       void getGhostRegion( stencil::Direction d, CellInterval & ci,
