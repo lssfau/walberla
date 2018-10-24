@@ -32,6 +32,10 @@ waLBerla_compile_test( FILES communication/CommTest )
 waLBerla_compile_test( FILES CudaMPI DEPENDS blockforest timeloop gui )
 #waLBerla_execute_test( NAME  CudaMPI )
 
+waLBerla_compile_test( FILES AlignmentTest.cpp DEPENDS blockforest timeloop )
+
+waLBerla_compile_test( FILES codegen/MicroBenchmarkGpuLbm.cpp codegen/MicroBenchmarkGpuLbm.py)
+
 waLBerla_add_executable ( NAME CpuGpuGeneratedEquivalenceTest
                           FILES codegen/EquivalenceTest.cpp codegen/EquivalenceTest.gen.py
                           DEPENDS blockforest boundary core cuda field stencil timeloop vtk gui )

@@ -21,7 +21,7 @@
 
 #include "GPUField.h"
 #include "ErrorChecking.h"
-
+#include "AlignedAllocation.h"
 #include "core/logging/Logging.h"
 
 namespace walberla {
@@ -51,7 +51,12 @@ GPUField<T>::GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSiz
 
    if ( usePitchedMem_ )
    {
-      WALBERLA_CUDA_CHECK ( cudaMalloc3D ( &pitchedPtr_, extent ) );
+      size_t pitch;
+      const size_t alignment = 256;
+      void * mem = allocate_pitched_with_offset( pitch, extent.width, extent.height * extent.depth, alignment,
+                                                 sizeof(T) * nrOfGhostLayers_ );
+      WALBERLA_ASSERT_EQUAL( size_t((char*)(mem) + sizeof(T) * nrOfGhostLayers_ ) % alignment, 0 );
+      pitchedPtr_ = make_cudaPitchedPtr( mem, pitch, extent.width, extent.height );
    }
    else
    {
@@ -79,8 +84,14 @@ GPUField<T>::GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSiz
 template<typename T>
 GPUField<T>::~GPUField()
 {
-   cudaFree( pitchedPtr_.ptr );
+   if( usePitchedMem_ )
+      free_aligned_with_offset(pitchedPtr_.ptr );
+   else
+   {
+      WALBERLA_CUDA_CHECK( cudaFree( pitchedPtr_.ptr ) );
+   }
 }
+
 
 template<typename T>
 T * GPUField<T>::dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f)

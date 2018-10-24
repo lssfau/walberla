@@ -41,7 +41,7 @@ namespace field {
       void *pa;  // pointer to allocated memory
       void *ptr; // pointer to usable aligned memory
 
-      pa=std::malloc((size+alignment-1)+sizeof(void *));
+      pa = std::malloc((size + alignment - 1) + sizeof( void * ));
       if(!pa)
          return nullptr;
 

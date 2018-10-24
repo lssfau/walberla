@@ -13,55 +13,38 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file FieldTransferTest.h
+//! \file AlignmentTest.h
 //! \author Martin Bauer <martin.bauer@fau.de>
 //
 //======================================================================================================================
 
-
+#include "cuda/AlignedAllocation.h"
+#include "core/mpi/Environment.h"
 #include "core/debug/TestSubsystem.h"
-#include "core/Environment.h"
-
-#include "field/Field.h"
-
-#include "cuda/GPUField.h"
-#include "cuda/FieldCopy.h"
-#include "core/math/Random.h"
+#include "core/logging/Logging.h"
 
 
 using namespace walberla;
-
-void simpleTransfer()
-{
-   Field<double, 4> h_f1( 16, 20, 30, 42.0, field::fzyx );
-   Field<double, 4> h_f2( 16, 20, 30, 0.0, field::fzyx );
-
-   WALBERLA_FOR_ALL_CELLS_XYZ(&h_f1,
-      h_f1(x, y, z, 0) = math::realRandom<double>();
-   )
-
-   cuda::GPUField<double> d_f( 16, 20, 30, 4, 0, field::fzyx );
-
-   WALBERLA_CHECK_EQUAL( h_f1.xSize(), d_f.xSize());
-   WALBERLA_CHECK_EQUAL( h_f1.ySize(), d_f.ySize());
-   WALBERLA_CHECK_EQUAL( h_f1.zSize(), d_f.zSize());
-   WALBERLA_CHECK_EQUAL( h_f1.fSize(), d_f.fSize());
-   WALBERLA_CHECK_EQUAL( h_f1.layout(), d_f.layout());
+using namespace cuda;
 
 
-   cuda::fieldCpy( d_f, h_f1 );
-   cuda::fieldCpy( h_f2, d_f );
-
-   WALBERLA_CHECK_EQUAL( h_f1, h_f2 );
-}
-
-
-int main( int argc, char **argv )
+int main( int argc, char ** argv )
 {
    debug::enterTestMode();
-   walberla::Environment walberlaEnv( argc, argv );
+   mpi::Environment env( argc, argv );
 
-   simpleTransfer();
+   size_t pitch = 0;
+   size_t width = 7;
+   size_t height = 20;
+   size_t alignment = 512;
+   size_t offset = 16;
+   void *ptr = allocate_pitched_with_offset( pitch, width, height, alignment, offset );
+   WALBERLA_LOG_INFO("Pitch " << pitch);
+
+   char * cptr = reinterpret_cast<char*>( ptr );
+   WALBERLA_CHECK_EQUAL( size_t(cptr + offset) % alignment, 0 );
+
+   free_aligned_with_offset( ptr );
 
    return 0;
 }
