@@ -58,6 +58,21 @@ GPUField<T>::GPUField( uint_t _xSize, uint_t _ySize, uint_t _zSize, uint_t _fSiz
       pitchedPtr_ = make_cudaPitchedPtr( NULL, extent.width, extent.width, extent.height );
       WALBERLA_CUDA_CHECK ( cudaMalloc( &pitchedPtr_.ptr, extent.width * extent.height * extent.depth ) );
    }
+
+   // allocation size is stored in pitched pointer
+   // pitched pointer stores the amount of padded region in bytes
+   // but we keep track of the size in #elements
+   WALBERLA_ASSERT_EQUAL( pitchedPtr_.pitch % sizeof(T), 0 );
+   if ( layout_ == field::fzyx )
+   {
+      xAllocSize_ = pitchedPtr_.pitch / sizeof(T);
+      fAllocSize_ = fSize_;
+   }
+   else
+   {
+      fAllocSize_ = pitchedPtr_.pitch / sizeof(T);
+      xAllocSize_ = xSize_ + 2 * nrOfGhostLayers_;
+   }
 }
 
 
@@ -242,15 +257,7 @@ bool GPUField<T>::operator==( const GPUField & o ) const
 template<typename T>
 uint_t  GPUField<T>::xAllocSize() const
 {
-   if ( layout_ == field::fzyx )
-   {
-      // allocation size is stored in pitched pointer
-      // pitched pointer stores the amount of padded region in bytes
-      // but we have to return the size in #elements
-      WALBERLA_ASSERT_EQUAL( pitchedPtr_.pitch % sizeof(T), 0 );
-      return pitchedPtr_.pitch / sizeof(T);
-   }
-   return xSize_ + 2 * nrOfGhostLayers_;
+   return xAllocSize_;
 }
 
 template<typename T>
@@ -268,12 +275,7 @@ uint_t  GPUField<T>::zAllocSize() const
 template<typename T>
 uint_t GPUField<T>::fAllocSize() const
 {
-   if ( layout_ == field::zyxf )
-   {
-      WALBERLA_ASSERT_EQUAL( pitchedPtr_.pitch % sizeof(T), 0 );
-      return pitchedPtr_.pitch / sizeof(T);
-   }
-   return fSize_;
+   return fAllocSize_;
 }
 
 template<typename T>

@@ -146,6 +146,9 @@ namespace cuda {
       uint_t         ySize_;
       uint_t         zSize_;
       uint_t         fSize_;
+
+      uint_t         xAllocSize_;
+      uint_t         fAllocSize_;
       Layout         layout_;
       bool           usePitchedMem_;
    };
