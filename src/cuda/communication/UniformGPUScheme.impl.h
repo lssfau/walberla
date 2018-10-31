@@ -19,6 +19,7 @@
 //
 //======================================================================================================================
 
+#include "cuda/ParallelStreams.h"
 
 namespace walberla {
 namespace cuda {
@@ -27,26 +28,26 @@ namespace communication {
 
 template<typename Stencil>
 UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr_wrapper <StructuredBlockForest> bf,
-                                             const shared_ptr <cuda::EventRAII> &startWaitEvent,
                                              bool sendDirectlyFromGPU,
                                              const int tag )
         : blockForest_( bf ),
-          startWaitEvent_( startWaitEvent ),
           setupBeforeNextCommunication_( true ),
           communicationInProgress_( false ),
           sendFromGPU_( sendDirectlyFromGPU ),
           bufferSystemCPU_( mpi::MPIManager::instance()->comm(), tag ),
-          bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag ) {}
+          bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag ),
+          parallelSectionManager_( -1 )
+   {}
 
 
    template<typename Stencil>
-   void UniformGPUScheme<Stencil>::startCommunication()
+   void UniformGPUScheme<Stencil>::startCommunication( cudaStream_t stream )
    {
       WALBERLA_ASSERT( !communicationInProgress_ );
       auto forest = blockForest_.lock();
 
-      if( setupBeforeNextCommunication_ ||
-          forest->getBlockForest().getModificationStamp() != forestModificationStamp_ )
+      auto currentBlockForestStamp = forest->getBlockForest().getModificationStamp();
+      if( setupBeforeNextCommunication_ || currentBlockForestStamp != forestModificationStamp_ )
          setupCommunication();
 
       // Schedule Receives
@@ -61,44 +62,40 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr_wrapper <StructuredBlockFo
             bufferSystemGPU_.sendBuffer( it.first ).clear();
 
       // Start filling send buffers
-      for( auto &iBlock : *forest )
       {
-         auto block = dynamic_cast< Block * >( &iBlock );
-         for( auto dir = Stencil::beginNoCenter(); dir != Stencil::end(); ++dir )
+         auto parallelSection = parallelSectionManager_.parallelSection( stream );
+         for( auto &iBlock : *forest )
          {
-            const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
-            if( block->getNeighborhoodSectionSize( neighborIdx ) == uint_t( 0 ))
-               continue;
-            auto nProcess = mpi::MPIRank( block->getNeighborProcess( neighborIdx, uint_t( 0 )));
-
-            if( streams_.find( *dir ) == streams_.end() )
+            auto block = dynamic_cast< Block * >( &iBlock );
+            for( auto dir = Stencil::beginNoCenter(); dir != Stencil::end(); ++dir )
             {
-               streams_.emplace( *dir, StreamRAII::newPriorityStream( -1 ));
-            }
+               const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
+               if( block->getNeighborhoodSectionSize( neighborIdx ) == uint_t( 0 ))
+                  continue;
+               auto nProcess = mpi::MPIRank( block->getNeighborProcess( neighborIdx, uint_t( 0 )));
 
-            auto &ci = streams_.at( *dir );
-
-            for( auto &pi : packInfos_ )
-            {
-               auto size = pi->size( *dir, block );
-               auto gpuDataPtr = bufferSystemGPU_.sendBuffer( nProcess ).advanceNoResize( size );
-               WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr );
-               WALBERLA_CUDA_CHECK( cudaStreamWaitEvent( ci, *startWaitEvent_, 0 ));
-               pi->pack( *dir, gpuDataPtr, block, ci );
-
-               if( !sendFromGPU_ )
+               for( auto &pi : packInfos_ )
                {
-                  auto cpuDataPtr = bufferSystemCPU_.sendBuffer( nProcess ).advanceNoResize( size );
-                  WALBERLA_ASSERT_NOT_NULLPTR( cpuDataPtr );
-                  WALBERLA_CUDA_CHECK(
-                          cudaMemcpyAsync( cpuDataPtr, gpuDataPtr, size, cudaMemcpyDeviceToHost, ci ));
+                  parallelSection.run([&](auto s) {
+                     auto size = pi->size( *dir, block );
+                     auto gpuDataPtr = bufferSystemGPU_.sendBuffer( nProcess ).advanceNoResize( size );
+                     WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr );
+                     pi->pack( *dir, gpuDataPtr, block, s );
+
+                     if( !sendFromGPU_ )
+                     {
+                        auto cpuDataPtr = bufferSystemCPU_.sendBuffer( nProcess ).advanceNoResize( size );
+                        WALBERLA_ASSERT_NOT_NULLPTR( cpuDataPtr );
+                        WALBERLA_CUDA_CHECK( cudaMemcpyAsync( cpuDataPtr, gpuDataPtr, size, cudaMemcpyDeviceToHost, s ));
+                     }
+                  });
                }
             }
          }
       }
 
-      // Busy waiting for packing to finish - then send
-      for( auto &ci : streams_ ) WALBERLA_CUDA_CHECK( cudaStreamSynchronize( ci.second ));
+      // wait for packing to finish
+      cudaStreamSynchronize( stream );
 
       if( sendFromGPU_ )
          bufferSystemGPU_.sendAll();
@@ -110,7 +107,7 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr_wrapper <StructuredBlockFo
 
 
    template<typename Stencil>
-   void UniformGPUScheme<Stencil>::wait()
+   void UniformGPUScheme<Stencil>::wait( cudaStream_t stream )
    {
       WALBERLA_ASSERT( communicationInProgress_ );
 
@@ -118,11 +115,11 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr_wrapper <StructuredBlockFo
 
       if( sendFromGPU_ )
       {
+         auto parallelSection = parallelSectionManager_.parallelSection( stream );
          for( auto recvInfo = bufferSystemGPU_.begin(); recvInfo != bufferSystemGPU_.end(); ++recvInfo )
          {
             for( auto &header : headers_[recvInfo.rank()] )
             {
-               auto &ci = streams_.at( header.dir );
                auto block = dynamic_cast< Block * >( forest->getBlock( header.blockId ));
 
                for( auto &pi : packInfos_ )
@@ -130,13 +127,16 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr_wrapper <StructuredBlockFo
                   auto size = pi->size( header.dir, block );
                   auto gpuDataPtr = recvInfo.buffer().advanceNoResize( size );
                   WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr );
-                  pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, ci );
+                  parallelSection.run([&](auto s) {
+                     pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, s );
+                  });
                }
             }
          }
       }
       else
       {
+         auto parallelSection = parallelSectionManager_.parallelSection( stream );
          for( auto recvInfo = bufferSystemCPU_.begin(); recvInfo != bufferSystemCPU_.end(); ++recvInfo )
          {
             using namespace std::chrono_literals;
@@ -145,7 +145,6 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr_wrapper <StructuredBlockFo
 
             gpuBuffer.clear();
             for( auto &header : headers_[recvInfo.rank()] ) {
-               auto &ci = streams_.at( header.dir );
                auto block = dynamic_cast< Block * >( forest->getBlock( header.blockId ));
 
                for( auto &pi : packInfos_ )
@@ -156,16 +155,15 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr_wrapper <StructuredBlockFo
                   WALBERLA_ASSERT_NOT_NULLPTR( cpuDataPtr );
                   WALBERLA_ASSERT_NOT_NULLPTR( gpuDataPtr );
 
-                  WALBERLA_CUDA_CHECK( cudaMemcpyAsync( gpuDataPtr, cpuDataPtr, size,
-                                                        cudaMemcpyHostToDevice, ci ));
-                  pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, ci );
+                  parallelSection.run([&](auto s) {
+                     WALBERLA_CUDA_CHECK( cudaMemcpyAsync( gpuDataPtr, cpuDataPtr, size,
+                                                           cudaMemcpyHostToDevice, s ));
+                     pi->unpack( stencil::inverseDir[header.dir], gpuDataPtr, block, s );
+                  });
                }
             }
          }
       }
-
-      for( auto &ci : streams_ )
-         WALBERLA_CUDA_CHECK( cudaStreamSynchronize( ci.second ));
 
       communicationInProgress_ = false;
    }

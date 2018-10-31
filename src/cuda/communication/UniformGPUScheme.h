@@ -31,6 +31,7 @@
 #include "cuda/CudaRAII.h"
 #include "cuda/communication/GeneratedGPUPackInfo.h"
 #include "cuda/communication/CustomMemoryBuffer.h"
+#include "cuda/ParallelStreams.h"
 
 #include <chrono>
 #include <thread>
@@ -46,23 +47,21 @@ namespace communication {
    {
    public:
        explicit UniformGPUScheme( weak_ptr_wrapper<StructuredBlockForest> bf,
-                                  const shared_ptr<cuda::EventRAII> & startWaitEvent,
                                   bool sendDirectlyFromGPU = false,
                                   const int tag = 5432 );
 
        void addPackInfo( const shared_ptr<GeneratedGPUPackInfo> &pi );
 
-       void startCommunication();
-       void wait();
+       void startCommunication( cudaStream_t stream = 0);
+       void wait( cudaStream_t stream = 0);
 
-      void operator()()         { communicate(); }
-      inline void communicate() { startCommunication(); wait(); }
+      void operator()( cudaStream_t stream = 0 )         { communicate( stream ); }
+      inline void communicate( cudaStream_t stream = 0 ) { startCommunication(stream); wait(stream); }
 
    private:
        void setupCommunication();
 
        weak_ptr_wrapper<StructuredBlockForest> blockForest_;
-       shared_ptr<cuda::EventRAII> startWaitEvent_;
        uint_t forestModificationStamp_;
 
        bool setupBeforeNextCommunication_;
@@ -76,7 +75,8 @@ namespace communication {
        mpi::GenericBufferSystem<GpuBuffer_T, GpuBuffer_T> bufferSystemGPU_;
 
        std::vector<shared_ptr<GeneratedGPUPackInfo> > packInfos_;
-       std::map<stencil::Direction, cuda::StreamRAII> streams_;
+
+       ParallelStreams parallelSectionManager_;
 
        struct Header
        {

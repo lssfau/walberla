@@ -18,67 +18,97 @@
 //! \author Martin Bauer <martin.bauer@fau.de>
 //
 //======================================================================================================================
+#pragma once
 
 #include "ErrorChecking.h"
-
 
 namespace walberla {
 namespace cuda {
 
 
-class StreamRAII
-{
-public:
-   ~StreamRAII() {
-       if( stream_ != 0 ) {
-           WALBERLA_CUDA_CHECK( cudaStreamDestroy( stream_ ));
-       }
-   }
+   class StreamRAII
+   {
+   public:
+      ~StreamRAII()
+      {
+         if( stream_ != 0 ) {
+            WALBERLA_CUDA_CHECK( cudaStreamDestroy( stream_ ));
+         }
+      }
 
-   StreamRAII( StreamRAII && other) {
-      stream_ = other.stream_;
-      other.stream_ = 0;
-   }
+      StreamRAII( StreamRAII &&other )
+      {
+         stream_ = other.stream_;
+         other.stream_ = 0;
+      }
 
-   StreamRAII(const StreamRAII&) = delete;
-   void operator=( const StreamRAII &) = delete;
-   operator cudaStream_t() const { return stream_; }
+      StreamRAII( const StreamRAII & ) = delete;
 
+      void operator=( const StreamRAII & ) = delete;
 
-   static StreamRAII defaultStream() {
-      StreamRAII result;
-      result.stream_ = 0;
-      return result;
-   }
-
-   static StreamRAII newPriorityStream(int priority) {
-      StreamRAII result;
-      WALBERLA_CUDA_CHECK( cudaStreamCreateWithPriority( &result.stream_, cudaStreamDefault, priority ));
-      return result;
-   }
-
-   static StreamRAII newStream() {
-      StreamRAII result;
-      WALBERLA_CUDA_CHECK( cudaStreamCreate( &result.stream_));
-      return result;
-   }
-
-private:
-   StreamRAII() {}
-   cudaStream_t stream_;
-};
+      operator cudaStream_t() const { return stream_; }
 
 
-struct EventRAII
-{
-    explicit EventRAII() { WALBERLA_CUDA_CHECK( cudaEventCreate(&event) ); }
-    ~EventRAII()         { WALBERLA_CUDA_CHECK( cudaEventDestroy(event) ); }
-    EventRAII(const EventRAII &)   = delete;
-    void operator=( const EventRAII &) = delete;
-    operator cudaEvent_t() const { return event; }
+      static StreamRAII defaultStream()
+      {
+         StreamRAII result;
+         result.stream_ = 0;
+         return result;
+      }
 
-    cudaEvent_t event;
-};
+      static StreamRAII newPriorityStream( int priority )
+      {
+         StreamRAII result;
+         WALBERLA_CUDA_CHECK( cudaStreamCreateWithPriority( &result.stream_, cudaStreamDefault, priority ));
+         return result;
+      }
+
+      static StreamRAII newStream()
+      {
+         StreamRAII result;
+         WALBERLA_CUDA_CHECK( cudaStreamCreate( &result.stream_ ));
+         return result;
+      }
+
+   private:
+      StreamRAII() {}
+
+      cudaStream_t stream_;
+   };
+
+
+   class EventRAII
+   {
+   public:
+      explicit EventRAII()
+      {
+         event = cudaEvent_t();
+         WALBERLA_CUDA_CHECK( cudaEventCreate( &event ));
+      }
+
+      ~EventRAII()
+      {
+         if( event != cudaEvent_t() )
+         {
+            WALBERLA_CUDA_CHECK( cudaEventDestroy( event ));
+         }
+      }
+
+      EventRAII( const EventRAII & ) = delete;
+
+      void operator=( const EventRAII & ) = delete;
+
+      EventRAII( EventRAII &&other )
+      {
+         event = other.event;
+         other.event = cudaEvent_t();
+      }
+
+      operator cudaEvent_t() const { return event; }
+
+   private:
+      cudaEvent_t event;
+   };
 
 
 } // namespace cuda
