@@ -30,7 +30,6 @@
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
 #include "core/mpi/SetReduction.h"
-#include "core/extern/json.hpp"
 
 
 #include <algorithm>
@@ -483,21 +482,6 @@ std::ostream& operator<<(std::ostream& os, const TimingNode<TP>& tn)
    return os;
 }
 
-/// convertes a TimingNode to json. The signature is required by the json library
-/// \relates TimingNode
-template < typename TP > // Timing policy
-void to_json( nlohmann::json& j, const TimingNode< TP >& tn )
-{
-   /// ignore the first timer in the timing node since it is empty
-   if( tn.last_ == nullptr )
-   {
-      j = nlohmann::json( tn.tree_ );
-   } else
-   {
-      j           = nlohmann::json( tn.timer_ );
-      j["childs"] = nlohmann::json( tn.tree_ );
-   }
-}
 
 namespace internal {
 /// adds a sub timer containing the remainder of all other subtimers on the same hierarchy level

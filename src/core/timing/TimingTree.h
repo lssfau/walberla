@@ -28,7 +28,6 @@
 #include "core/logging/Logging.h"
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
-#include "core/extern/json.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -252,13 +251,6 @@ TimingTree< TP > TimingTree< TP >::getCopyWithRemainder() const
    return tt;
 }
 
-/// convertes a TimingTree to json. The signature is required by the json library
-/// \relates TimingTree
-template < typename TP > // Timing policy
-void to_json( nlohmann::json& j, const TimingTree< TP >& tt )
-{
-   j = nlohmann::json( tt.getRawData() );
-}
 }
 
 typedef timing::TimingTree<timing::WcPolicy>  WcTimingTree;

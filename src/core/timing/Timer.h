@@ -27,7 +27,6 @@
 #include "CpuPolicy.h"
 #include "WcPolicy.h"
 #include "core/DataTypes.h"
-#include "core/extern/json.hpp"
 
 #include <limits>
 
@@ -442,21 +441,6 @@ inline void Timer<TP>::merge( const Timer<TP> & other )
 }
 //**********************************************************************************************************************
 
-//**********************************************************************************************************************
-/*!\brief Converts timer to json The signature is required by the json library
-// \relates Timer
-*/
-template < typename TP > // Timing policy
-void to_json( nlohmann::json& j, const Timer< TP >& timer )
-{
-   j = nlohmann::json{{"total", timer.total()},
-                      {"average", timer.average()},
-                      {"count", timer.getCounter()},
-                      {"min", timer.min()},
-                      {"max", timer.max()},
-                      {"variance", timer.variance()}};
-}
-//**********************************************************************************************************************
 
 } // namespace timing
 
