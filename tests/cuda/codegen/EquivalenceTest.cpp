@@ -6,7 +6,6 @@
 #include "field/FlagField.h"
 #include "field/AddToStorage.h"
 #include "lbm/communication/PdfFieldPackInfo.h"
-#include "lbm/vtk/VTKOutput.h"
 #include "lbm/PerformanceLogger.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
 #include "timeloop/all.h"
@@ -58,7 +57,8 @@ void initPdfField( const shared_ptr<StructuredBlockForest> &blocks, BlockDataID 
          auto globalZ = real_c( offset[2] + z );
          auto xArg = real_c(std::sin(real_c(globalX) / real_t(4) * real_c(domainBB.size(0)) ));
          auto zArg = real_c(std::sin(real_c(globalZ) / real_t(4) * real_c(domainBB.size(2)) ));
-         pdfField->setToEquilibrium( x, y, z, Vector3<real_t>( 0.05 * std::sin(xArg), 0, 0.05 * std::cos(zArg)));
+         pdfField->setToEquilibrium( x, y, z, Vector3<real_t>( real_t(0.05) * std::sin(xArg), 0,
+                                                               real_t(0.05) * std::cos(zArg)));
       );
    }
 }
@@ -82,6 +82,7 @@ int main( int argc, char **argv )
       BlockDataID flagFieldId = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
       const FlagUID fluidFlagUID( "Fluid" );
       geometry::setNonBoundaryCellsToDomain<FlagField_T>( *blocks, flagFieldId, fluidFlagUID );
+      GeneratedLatticeModel_T generatedLatticeModel = GeneratedLatticeModel_T( omega );
 
 
       // Part 1 : Native walberla
@@ -99,7 +100,6 @@ int main( int argc, char **argv )
 
 
       // Part 2: Generated CPU Version
-      GeneratedLatticeModel_T generatedLatticeModel = GeneratedLatticeModel_T( omega );
       BlockDataID pdfFieldGeneratedId = lbm::addPdfFieldToStorage( blocks, "pdfGenerated", generatedLatticeModel, field::fzyx );
       initPdfField<GeneratedPdfField_T >( blocks, pdfFieldGeneratedId );
       CpuCommScheme_T cpuComm( blocks );
@@ -113,6 +113,7 @@ int main( int argc, char **argv )
       // Part 3: Generated GPU Version
       bool overlapCommunication = parameters.getParameter<bool>( "overlapCommunication", true );
       bool cudaEnabledMPI = parameters.getParameter<bool>( "cudaEnabledMPI", false );
+      bool oldCommunication = parameters.getParameter<bool>( "oldCommunication", false );
 
       BlockDataID pdfShadowCPU = lbm::addPdfFieldToStorage( blocks, "cpu shadow field", generatedLatticeModel, field::fzyx );
       initPdfField<GeneratedPdfField_T >( blocks, pdfShadowCPU );
@@ -126,10 +127,23 @@ int main( int argc, char **argv )
       gpuComm.addPackInfo( make_shared<pystencils::EquivalenceTest_GPUPackInfo>( pdfGpuFieldId ));
       auto runCommunication = [&]() { gpuComm(); };
 
+      CpuCommScheme_T oldGpuScheme( blocks );
+
+      std::vector<cudaStream_t > streams;
+      for(uint_t i=0; i < Stencil_T::Size; ++i ) {
+         cudaStream_t s;
+         cudaStreamCreate(&s);
+         streams.push_back(s);
+      }
+      using OldPackInfo = cuda::communication::GPUPackInfo<cuda::GPUField<real_t> >;
+      oldGpuScheme.addPackInfo( make_shared<OldPackInfo>(pdfGpuFieldId, streams) );
+
+
       SweepTimeloop gpuTimeLoop( blocks->getBlockStorage(), timesteps );
       if( !overlapCommunication )
       {
-         gpuTimeLoop.add() << BeforeFunction( runCommunication, "gpu communication" )
+         gpuTimeLoop.add() << (oldCommunication ? BeforeFunction(oldGpuScheme) :
+                                                  BeforeFunction( runCommunication, "gpu communication" ))
                            << Sweep( cudaLbKernel, "LB stream & collide gpu" );
       }
       else

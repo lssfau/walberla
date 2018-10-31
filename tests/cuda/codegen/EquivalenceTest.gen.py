@@ -3,6 +3,8 @@ from lbmpy_walberla import generate_lattice_model_files
 from lbmpy.creationfunctions import create_lb_update_rule
 from pystencils_walberla.sweep import Sweep
 
+dtype = 'float64'
+
 # LB options
 options = {
     'method': 'srt',
@@ -12,14 +14,14 @@ options = {
     'compressible': False,
     'maxwellian_moments': False,
     'temporary_field_name': 'pdfs_tmp',
-    'optimization': {'cse_global': False,
-                     'cse_pdfs': False,
-                     'double_precision': True}
+    'optimization': {'cse_global': True,
+                     'cse_pdfs': True,
+                     'double_precision': dtype == 'float64'}
 }
 
 # GPU optimization options
-opt =       {'gpu_indexing_params': {'block_size': (128, 2, 1)},  'data_type': 'float64'}
-outer_opt = {'gpu_indexing_params': {'block_size': (32, 32, 32)}, 'data_type': 'float64'}
+opt =       {'gpu_indexing_params': {'block_size': (128, 1, 1)},  'data_type': dtype}
+outer_opt = {'gpu_indexing_params': {'block_size': (32, 32, 32)}, 'data_type': dtype}
 
 
 def lb_assignments():
