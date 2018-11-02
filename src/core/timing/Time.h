@@ -33,20 +33,6 @@
 
 #include <chrono>
 
-#if defined(_MSC_VER)
-#  ifndef NOMINMAX
-#    define NOMINMAX
-#  endif
-#  include <windows.h>
-#  include <winsock.h>
-#  include <time.h>
-#  include <sys/timeb.h>
-#else
-#  include <sys/resource.h>
-#  include <sys/time.h>
-#  include <sys/types.h>
-#endif
-
 
 namespace walberla {
 namespace timing {
@@ -57,14 +43,6 @@ namespace timing {
 //  TIME FUNCTIONS
 //
 //======================================================================================================================
-
-//**********************************************************************************************************************
-/*!\name Time functions */
-//@{
-inline double      getWcTime();
-inline double      getCpuTime();
-//@}
-//**********************************************************************************************************************
 
 
 //**********************************************************************************************************************
@@ -86,25 +64,7 @@ inline double getWcTime()
 //
 // \return The current CPU time in seconds.
 */
-inline double getCpuTime()
-{
-#ifdef WIN32
-   FILETIME CreateTime, ExitTime, KernelTime, UserTime;
-   SYSTEMTIME SysTime;
-
-   if( GetProcessTimes( GetCurrentProcess(), &CreateTime, &ExitTime, &KernelTime, &UserTime ) != 1 ) {
-      return 0.0;
-   }
-   else {
-      FileTimeToSystemTime( &UserTime, &SysTime );
-      return ( static_cast<double>( SysTime.wSecond ) + static_cast<double>( SysTime.wMilliseconds )/1E3 );
-   }
-#else
-   struct rusage ruse;
-   getrusage( RUSAGE_SELF, &ruse );
-   return ( static_cast<double>( ruse.ru_utime.tv_sec ) + static_cast<double>( ruse.ru_utime.tv_usec )/1E6 );
-#endif
-}
+double getCpuTime();
 //**********************************************************************************************************************
 
 

@@ -293,7 +293,7 @@ void Raytracer::writeImageToFile(const std::vector<BodyIntersectionInfo>& inters
    filesystem::path file (fileName);
    filesystem::path fullPath = dir / file;
    
-   std::vector<u_char> lodeImageBuffer(pixelsHorizontal_*pixelsVertical_*3);
+   std::vector<uint8_t> lodeImageBuffer(pixelsHorizontal_*pixelsVertical_*3);
    
    uint32_t l = 0;
    real_t patchSize = real_c(antiAliasFactor_*antiAliasFactor_);
@@ -308,9 +308,9 @@ void Raytracer::writeImageToFile(const std::vector<BodyIntersectionInfo>& inters
                b_sum += real_c(intersectionsBuffer[i].b);
             }
          }
-         u_char r = (u_char)(255 * (r_sum/patchSize));
-         u_char g = (u_char)(255 * (g_sum/patchSize));
-         u_char b = (u_char)(255 * (b_sum/patchSize));
+         uint8_t r = (uint8_t)(255 * (r_sum/patchSize));
+         uint8_t g = (uint8_t)(255 * (g_sum/patchSize));
+         uint8_t b = (uint8_t)(255 * (b_sum/patchSize));
          
          lodeImageBuffer[l] = r;
          lodeImageBuffer[l+1] = g;
