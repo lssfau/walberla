@@ -31,6 +31,18 @@
 #define WALBERLA_RESTRICT
 #endif
 
+// forced inline for different compilers
+#if defined(__INTEL_COMPILER)
+# define  WALBERLA_FORCE_INLINE(func) __forceinline func
+#elif defined(_MSC_VER)
+#  define WALBERLA_FORCE_INLINE(func) __forceinline func
+#elif defined(__GNUC__)
+#  define WALBERLA_FORCE_INLINE(func) inline func __attribute__ ((always_inline))
+#else
+#  pragma message("WARNING: You need to implement WALBERLA_FORCE_INLINE for this compiler!")
+#  define WALBERLA_FORCE_INLINE(func) inline func
+#endif
+
 // pragma in macros (-> https://stackoverflow.com/a/3030312)
 
 #ifdef WALBERLA_CXX_COMPILER_IS_MSVC
