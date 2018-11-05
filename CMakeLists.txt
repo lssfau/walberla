@@ -1090,6 +1090,11 @@ if ( WALBERLA_BUILD_WITH_CUDA )
             list ( APPEND CUDA_NVCC_FLAGS "-std=c++14" )
         endif ()
 
+        if(CMAKE_BUILD_TYPE MATCHES Debug)
+            list ( APPEND CUDA_NVCC_FLAGS "-g -G" )
+        endif()
+
+
         # Bug with gcc5 and cuda7.5:
         #list( APPEND CUDA_NVCC_FLAGS  "-D_MWAITXINTRIN_H_INCLUDED -D_FORCE_INLINES  -D__STRICT_ANSI__")
 
