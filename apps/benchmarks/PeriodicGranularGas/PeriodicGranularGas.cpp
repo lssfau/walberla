@@ -26,6 +26,7 @@
 #include <core/math/Random.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
+#include <core/timing/TimingTree.h>
 #include <core/waLBerlaBuildInfo.h>
 #include <vtk/VTKOutput.h>
 
@@ -40,6 +41,7 @@ using BodyTuple = boost::tuple<Sphere> ;
 
 int main( int argc, char ** argv )
 {
+   WcTimingTree tt;
    Environment env(argc, argv);
 
    logging::Logging::instance()->setStreamLogLevel(logging::Logging::INFO);
@@ -122,11 +124,11 @@ int main( int argc, char ** argv )
    std::unique_ptr<cr::ICR> cr;
    if (bDEM)
    {
-      cr = std::make_unique<cr::DEM>(globalBodyStorage, forest, storageID, ccdID, fcdID);
+      cr = std::make_unique<cr::DEM>(globalBodyStorage, forest, storageID, ccdID, fcdID, &tt);
       WALBERLA_LOG_INFO_ON_ROOT("Using DEM!");
    } else if (bHCSITS)
    {
-      cr = std::make_unique<cr::HCSITS>(globalBodyStorage, forest, storageID, ccdID, fcdID);
+      cr = std::make_unique<cr::HCSITS>(globalBodyStorage, forest, storageID, ccdID, fcdID, &tt);
       configure(mainConf, *static_cast<cr::HCSITS*>(cr.get()));
       WALBERLA_LOG_INFO_ON_ROOT("Using HCSITS!");
 
@@ -161,11 +163,11 @@ int main( int argc, char ** argv )
    std::function<void(void)> syncCallWithoutTT;
    if (bNN)
    {
-      syncCallWithoutTT = std::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.1), false );
+      syncCallWithoutTT = std::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, &tt, real_c(0.1), false );
       WALBERLA_LOG_INFO_ON_ROOT("Using NextNeighbor sync!");
    } else if (bSO)
    {
-      syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.1), false );
+      syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(*forest), storageID, &tt, real_c(0.1), false );
       WALBERLA_LOG_INFO_ON_ROOT("Using ShadowOwner sync!");
    } else
    {
@@ -229,6 +231,12 @@ int main( int argc, char ** argv )
    timer.end();
    WALBERLA_LOG_INFO_ON_ROOT("runtime: " << timer.average());
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
+
+   auto temp = tt.getReduced( );
+   WALBERLA_ROOT_SECTION()
+   {
+      std::cout << temp;
+   }
 
    WALBERLA_LOG_INFO_ON_ROOT("*** CHECKING RESULT - START ***");
    for (auto& currentBlock : *forest)
