@@ -1677,8 +1677,24 @@ Matrix3< typename MathTrait<T0,T1>::High > tensorProduct( Vector3<T0> v0, Vector
 }
 //**********************************************************************************************************************
 
+/**
+ * Equivalent to R*A*R.getTranspose().
+ */
+template< typename Type>
+inline Matrix3< Type > transformMatrixRART( const Matrix3<Type>& R, const Matrix3<Type>& A )
+{
+   const auto r0 = A[0]*R[0]*R[0] + A[1]*R[0]*R[1] + A[2]*R[0]*R[2] + A[3]*R[0]*R[1] + A[4]*R[1]*R[1] + A[5]*R[1]*R[2] + A[6]*R[0]*R[2] + A[7]*R[1]*R[2] + A[8]*R[2]*R[2];
+   const auto r1 = A[0]*R[0]*R[3] + A[1]*R[0]*R[4] + A[2]*R[0]*R[5] + A[3]*R[1]*R[3] + A[4]*R[1]*R[4] + A[5]*R[1]*R[5] + A[6]*R[2]*R[3] + A[7]*R[2]*R[4] + A[8]*R[2]*R[5];
+   const auto r2 = A[0]*R[0]*R[6] + A[1]*R[0]*R[7] + A[2]*R[0]*R[8] + A[3]*R[1]*R[6] + A[4]*R[1]*R[7] + A[5]*R[1]*R[8] + A[6]*R[2]*R[6] + A[7]*R[2]*R[7] + A[8]*R[2]*R[8];
+   const auto r3 = A[0]*R[0]*R[3] + A[1]*R[1]*R[3] + A[2]*R[2]*R[3] + A[3]*R[0]*R[4] + A[4]*R[1]*R[4] + A[5]*R[2]*R[4] + A[6]*R[0]*R[5] + A[7]*R[1]*R[5] + A[8]*R[2]*R[5];
+   const auto r4 = A[0]*R[3]*R[3] + A[1]*R[3]*R[4] + A[2]*R[3]*R[5] + A[3]*R[3]*R[4] + A[4]*R[4]*R[4] + A[5]*R[4]*R[5] + A[6]*R[3]*R[5] + A[7]*R[4]*R[5] + A[8]*R[5]*R[5];
+   const auto r5 = A[0]*R[3]*R[6] + A[1]*R[3]*R[7] + A[2]*R[3]*R[8] + A[3]*R[4]*R[6] + A[4]*R[4]*R[7] + A[5]*R[4]*R[8] + A[6]*R[5]*R[6] + A[7]*R[5]*R[7] + A[8]*R[5]*R[8];
+   const auto r6 = A[0]*R[0]*R[6] + A[1]*R[1]*R[6] + A[2]*R[2]*R[6] + A[3]*R[0]*R[7] + A[4]*R[1]*R[7] + A[5]*R[2]*R[7] + A[6]*R[0]*R[8] + A[7]*R[1]*R[8] + A[8]*R[2]*R[8];
+   const auto r7 = A[0]*R[3]*R[6] + A[1]*R[4]*R[6] + A[2]*R[5]*R[6] + A[3]*R[3]*R[7] + A[4]*R[4]*R[7] + A[5]*R[5]*R[7] + A[6]*R[3]*R[8] + A[7]*R[4]*R[8] + A[8]*R[5]*R[8];
+   const auto r8 = A[0]*R[6]*R[6] + A[1]*R[6]*R[7] + A[2]*R[6]*R[8] + A[3]*R[6]*R[7] + A[4]*R[7]*R[7] + A[5]*R[7]*R[8] + A[6]*R[6]*R[8] + A[7]*R[7]*R[8] + A[8]*R[8]*R[8];
 
-
+   return Matrix3<Type>(r0,r1,r2,r3,r4,r5,r6,r7,r8);
+}
 
 } // namespace math
 

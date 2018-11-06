@@ -874,7 +874,7 @@ inline const Mat3& RigidBody::getBodyInertia() const
  */
 inline const Mat3 RigidBody::getInertia() const
 {
-   return R_ * I_ * R_.getTranspose();
+   return math::transformMatrixRART(R_, I_);
 }
 //*************************************************************************************************
 
@@ -898,7 +898,7 @@ inline const Mat3& RigidBody::getInvBodyInertia() const
  */
 inline const Mat3 RigidBody::getInvInertia() const
 {
-   return R_ * Iinv_ * R_.getTranspose();
+   return math::transformMatrixRART(R_, Iinv_);
 }
 //*************************************************************************************************
 
@@ -1810,7 +1810,7 @@ inline void RigidBody::addImpulseAtPos( const Vec3& j, const Vec3& p )
 {
    if( !hasSuperBody() ) {
       v_ += j * invMass_;
-      w_ += ( R_ * Iinv_ * R_.getTranspose() ) * ( ( p - gpos_ ) % j );
+      w_ += getInvInertia() * ( ( p - gpos_ ) % j );
       wake();
    }
    else sb_->addImpulseAtPos( j, p );
@@ -2002,7 +2002,7 @@ inline const Vec3 RigidBody::accFromWF( const Vec3& gpos ) const
       const Vec3 vdot( force_ * invMass_ );
 
       // Calculating the angular acceleration
-      const Vec3 wdot( R_ * Iinv_ * R_.getTranspose() * ( torque_ - w_ % ( R_ * I_ * R_.getTranspose() * w_ ) ) );
+      const Vec3 wdot( getInvInertia() * ( torque_ - w_ % ( getInertia() * w_ ) ) );
 
       // Calculating the distance to the center of mass of the superordinate body
       const Vec3 r( gpos - gpos_ );
