@@ -594,6 +594,21 @@ inline Vector3<HIGH> Vector3<Type>::operator%( const Vector3<Other>& rhs ) const
 
 
 //**********************************************************************************************************************
+/*!\brief Cross product (outer product) of two vectors (\f$ \vec{a}=\vec{b}\times\vec{c} \f$).
+//
+// \param lhs The left-hand-side vector for the cross product.
+// \param rhs The right-hand-side vector for the cross product.
+// \return The cross product.
+*/
+template< typename Type >
+inline Vector3<Type> cross( const Vector3<Type>& lhs, const Vector3<Type>& rhs )
+{
+   return lhs % rhs;
+}
+//**********************************************************************************************************************
+
+
+//**********************************************************************************************************************
 /*!\fn Vector3<HIGH> Vector3<Type>::operator+( const Vector3<Other>& rhs ) const
 // \brief Addition operator for the addition of two vectors (\f$ \vec{a}=\vec{b}+\vec{c} \f$).
 //
@@ -696,6 +711,13 @@ inline Vector3<HIGH> Vector3<Type>::operator/( Other rhs ) const
       const HIGH tmp( 1/static_cast<HIGH>( rhs ) );
       return Vector3<HIGH>( v_[0]*tmp, v_[1]*tmp, v_[2]*tmp );
    }
+}
+//**********************************************************************************************************************
+
+template< typename Type, typename Other >
+inline Vector3<HIGH> operator/( Other lhs, const Vector3<Type>& rhs )
+{
+   return Vector3<HIGH>( lhs/rhs[0], lhs/rhs[1], lhs/rhs[2] );
 }
 //**********************************************************************************************************************
 
@@ -1740,6 +1762,41 @@ Vector3<T> & normalize( Vector3<T> & v )
                                                        " (length prior to normalization was: " << len << ")" );
 
    return v;
+}
+//**********************************************************************************************************************
+
+//**********************************************************************************************************************
+/**
+// \brief Length of the vector.
+//
+// \return Length of the vector.
+*/
+template<typename T>
+real_t length( const Vector3<T> & v )
+{
+   return v.length();
+}
+//**********************************************************************************************************************
+//**********************************************************************************************************************
+/**
+// \brief Length of the vector squared.
+//
+// \return Length of the vector squared.
+*/
+template<typename T>
+real_t sqrLength( const Vector3<T> & v )
+{
+   return v.sqrLength();
+}
+//**********************************************************************************************************************
+//**********************************************************************************************************************
+/**
+// \brief Dot product of two vectors.
+*/
+template<typename T>
+real_t dot( const Vector3<T> & v1, const Vector3<T> & v2 )
+{
+   return v1*v2;
 }
 //**********************************************************************************************************************
 

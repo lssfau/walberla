@@ -655,7 +655,7 @@ inline void GenericRecvBuffer<T>::readDebugMarker( const char * expectedMarker )
          valid = false;
    }
 
-   WALBERLA_ASSERT( valid , "Packed and unpacked datatype do not match." );
+   WALBERLA_ASSERT( valid , "Packed and unpacked (" << expectedMarker << ") datatype do not match." );
 
 }
 #else

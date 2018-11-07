@@ -36,6 +36,7 @@
 
 #include "core/mpi/SendBuffer.h"
 #include "core/mpi/RecvBuffer.h"
+#include <core/logging/Logging.h>
 
 #include <boost/type_traits/is_floating_point.hpp>
 #include <boost/type_traits/is_const.hpp>
@@ -406,7 +407,8 @@ inline Type Quaternion<Type>::operator[]( size_t index ) const
 template< typename Type >  // Data type of the quaternion
 inline Quaternion<Type>& Quaternion<Type>::set( Type r, Type i, Type j, Type k )
 {
-   WALBERLA_CHECK_FLOAT_EQUAL( std::fabs( r*r + i*i + j*j + k*k ), Type(1), "Invalid quaternion parameters" );
+   WALBERLA_CHECK_FLOAT_EQUAL( std::fabs( r*r + i*i + j*j + k*k ), Type(1),
+                               "Invalid quaternion parameters: " << r << ", "<< i << ", "<< j << ", "<< k );
    v_[0] = r;
    v_[1] = i;
    v_[2] = j;
