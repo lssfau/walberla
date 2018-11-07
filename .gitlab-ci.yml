@@ -1519,6 +1519,9 @@ clang-tidy:
       - cmake . -LAH
       - utilities/filterCompileCommands.py compile_commands.json
       - run-clang-tidy.py -quiet | tee clang-tidy-output.txt
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
    artifacts:
       paths:
          - $CI_PROJECT_DIR/build/clang-tidy-output.txt
@@ -1962,14 +1965,14 @@ conda-py35-linux:
          - $CI_PROJECT_DIR/build/apps/benchmarks/PeriodicGranularGas/PeriodicGranularGas_HCSITS_NN_IGMDC.txt
          - $CI_PROJECT_DIR/build/apps/benchmarks/PeriodicGranularGas/PeriodicGranularGas_HCSITS_SO_IFC.txt
 
-benchmark_intel17:
+benchmark_intel19:
    <<: *benchmark_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:17
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
 
 benchmark_gcc7:
    <<: *benchmark_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
 
-benchmark_clang6:
+benchmark_clang7:
    <<: *benchmark_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
