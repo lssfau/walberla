@@ -1519,6 +1519,9 @@ clang-tidy:
   - cmake . -LAH
   - utilities/filterCompileCommands.py compile_commands.json
   - run-clang-tidy.py -quiet | tee clang-tidy-output.txt
+  except:
+    variables:
+    - $DISABLE_PER_COMMIT_BUILDS
   artifacts:
     paths:
     - $CI_PROJECT_DIR/build/clang-tidy-output.txt
