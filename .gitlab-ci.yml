@@ -5,6 +5,7 @@
 ###############################################################################
 
 stages:
+   - pretest
    - test
    - deploy
 
@@ -746,6 +747,7 @@ gcc_7_mpionly:
 gcc_7_hybrid:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
+   stage: pretest
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "ON"
@@ -1462,6 +1464,7 @@ clang_7.0_hybrid_dbg:
 clang_7.0_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
+   stage: pretest
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
