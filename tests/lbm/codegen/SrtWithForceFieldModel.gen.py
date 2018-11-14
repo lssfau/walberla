@@ -1,6 +1,6 @@
 import sympy as sp
 from lbmpy.boundaries import NoSlip, UBB
-from lbmpy_walberla import Field, generate_lattice_model_files, RefinementScaling
+from lbmpy_walberla import generate_lattice_model_files, RefinementScaling
 from lbmpy.creationfunctions import create_lb_method
 from lbmpy_walberla.boundary import create_boundary_class
 from pystencils_walberla.cmake_integration import codegen
@@ -25,11 +25,12 @@ def genBoundary():
     method = create_lb_method(stencil='D3Q19', method='srt')
     return create_boundary_class(boundary, method)
 
+
 def genNoSlip():
     boundary = NoSlip(name='MyNoSlip')
     method = create_lb_method(stencil='D3Q19', method='srt')
     return create_boundary_class(boundary, method)
 
-codegen.register(['MyUBB.h', 'MyUBB.cpp'], genBoundary)
-codegen.register(['MyNoSlip.h', 'MyNoSlip.cpp',], genNoSlip)
 
+codegen.register(['MyUBB.h', 'MyUBB.cpp'], genBoundary)
+codegen.register(['MyNoSlip.h', 'MyNoSlip.cpp'], genNoSlip)
