@@ -19,6 +19,7 @@
 #include "core/timing/RemainingTimeLogger.h"
 #include "cuda/AddGPUFieldToStorage.h"
 #include "cuda/communication/UniformGPUScheme.h"
+#include "cuda/DeviceSelectMPI.h"
 #include "lbm/sweeps/CellwiseSweep.h"
 #include "domain_decomposition/SharedSweep.h"
 
@@ -46,6 +47,7 @@ using FlagField_T = FlagField<flag_t>;
 int main( int argc, char **argv )
 {
    mpi::Environment env( argc, argv );
+   cuda::selectDeviceBasedOnMpiRank();
 
    for( auto cfg = python_coupling::configBegin( argc, argv ); cfg != python_coupling::configEnd(); ++cfg )
    {
