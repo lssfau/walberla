@@ -111,8 +111,8 @@ int main( int argc, char **argv )
             {
                {
                   auto p = boundaryInnerStreams.parallelSection( innerStream );
-                  p.run( [&]( auto s ) { ubb.inner( &block, s ); } );
-                  p.run( [&]( auto s ) { noSlip.inner( &block, s ); } );
+                  p.run( [&block, &ubb]( cudaStream_t s ) { ubb.inner( &block, s ); } );
+                  p.run( [&block, &noSlip]( cudaStream_t s ) { noSlip.inner( &block, s ); } );
                }
                lbKernel.inner( &block, innerStream );
             }
@@ -125,8 +125,8 @@ int main( int argc, char **argv )
             {
                {
                   auto p = boundaryOuterStreams.parallelSection( outerStream );
-                  p.run( [&]( auto s ) { ubb.outer( &block, s ); } );
-                  p.run( [&]( auto s ) { noSlip.outer( &block, s ); } );
+                  p.run( [&block, &ubb]( cudaStream_t s ) { ubb.outer( &block, s ); } );
+                  p.run( [&block, &noSlip]( cudaStream_t s ) { noSlip.outer( &block, s ); } );
                }
                lbKernel.outer( &block, outerStream );
             }
@@ -142,8 +142,8 @@ int main( int argc, char **argv )
          {
             {
                auto p = boundaryStreams.parallelSection( defaultStream );
-               p.run( [&]( auto s ) { ubb( &block, s ); } );
-               p.run( [&]( auto s ) { noSlip( &block, s ); } );
+               p.run( [&block, &ubb]( cudaStream_t s ) { ubb( &block, s ); } );
+               p.run( [&block, &noSlip]( cudaStream_t s ) { noSlip( &block, s ); } );
             }
             lbKernel( &block );
          }
