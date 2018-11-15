@@ -148,10 +148,10 @@ inline real_t         getFriction(ConstContactID c)
 {
    // Calculating the relative velocity
    const Vec3 rvel( c->getBody1()->velFromWF( c->getPosition() ) - c->getBody2()->velFromWF( c->getPosition() ) );  // Relative velocity
-   const real_t nvel( c->getNormal() * rvel );                              // Normal relative velocity
-   const real_t tvel( c->getNormal() * ( rvel - c->getNormal() * nvel ) );         // Tangential relative velocity
+   const Vec3 nvel( ( c->getNormal() * rvel ) * c->getNormal() );    // Normal relative velocity
+   const Vec3 tvel( rvel - nvel );                                   // Tangential relative velocity
 
-   if( std::fabs( tvel ) > frictionThreshold )
+   if( std::fabs( tvel.length() ) > frictionThreshold )
       return Material::getDynamicFriction( c->getBody1()->getMaterial(), c->getBody2()->getMaterial() );
    else
       return Material::getStaticFriction( c->getBody1()->getMaterial(), c->getBody2()->getMaterial() );
