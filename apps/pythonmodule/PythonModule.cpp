@@ -63,7 +63,6 @@ typedef bmpl::vector<
             Field<walberla::int64_t,2>,
             Field<walberla::int64_t,3>,
             Field<walberla::int64_t,4>,
-            Field<walberla::int64_t,5>,
 
             Field<walberla::uint8_t,1>,
             Field<walberla::uint16_t,1>,
