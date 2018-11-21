@@ -49,6 +49,7 @@ typedef bmpl::vector<
             Field<walberla::real_t,3>,
             Field<walberla::real_t,4>,
             Field<walberla::real_t,5>,
+            Field<walberla::real_t,6>,
             Field<walberla::real_t,9>,
             Field<walberla::real_t,15>,
             Field<walberla::real_t,19>,
