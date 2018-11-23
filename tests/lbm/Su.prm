@@ -1,0 +1,35 @@
+Parameters 
+{
+	eta_s           0.5;
+	timesteps       1000;
+	force           0.00001;
+	lambda_p        30.0;
+	eta_p           0.5;
+    period          1;
+    baseFolder      vtk_out;
+    writePeriod     1;
+
+    checkpointFrequency 1000;
+	remainingTimeLoggerFrequency 6.0; // in seconds
+}
+
+DomainSetup
+{
+   blocks        <  3,3,1 >;
+   cartesianSetup false;
+   cellsPerBlock <  10,10, 1 >;
+   periodic      <  1, 0, 0 >;
+}
+
+StabilityChecker
+{
+   checkFrequency 1;
+   streamOutput   false;
+   vtkOutput      true;
+}
+
+Boundaries 
+{
+	    Border { direction N,S;  walldistance -1;  NoSlip    {} }
+}
+
