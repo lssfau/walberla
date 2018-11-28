@@ -43,8 +43,6 @@
 
 #include "timeloop/SweepTimeloop.h"
 
-#include <iostream>
-
 using namespace walberla;
 
 //////////////
