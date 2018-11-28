@@ -46,7 +46,7 @@ public:
 
    Su( Blocks_T blocks, BlockDataID force, BlockDataID pdfId, BlockDataID boundaryHandlingId, BlockDataID stressId, BlockDataID stressOldId, real_t lambda_p, real_t eta_p,
        uint_t period = uint_c(1), bool compressibleFlag = false): blocks_( blocks ), forceId_( force ), pdfId_(pdfId), boundaryHandlingId_(boundaryHandlingId), stressId_(stressId), stressOldId_(stressOldId),
-                                   inv_lambda_p_( real_c(1.0)/lambda_p ), eta_p_( eta_p ), delta_t_( real_c(period) ), executionCount_( 0 ), communicateStress_(blocks), communicateStressOld_(blocks),
+                                   inv_lambda_p_( real_c(1.0)/lambda_p ), eta_p_( eta_p ), delta_t_( real_c(period) ), executionCount_( 0 ), communicateStress_(blocks), 
                                    communicateVelocities_(blocks), compressibleFlag_(compressibleFlag)
    {
       // create velocity fields
@@ -54,7 +54,6 @@ public:
 
       // stress and velocity communication scheme
       communicateStress_.addPackInfo( make_shared< field::communication::PackInfo<StressField_T> >( stressId_ ));
-      communicateStressOld_.addPackInfo( make_shared< field::communication::PackInfo<StressField_T> >( stressOldId_ ));
       communicateVelocities_.addPackInfo( make_shared< field::communication::PackInfo<VelocityField_T> >( velocityId_ ));
 
       WALBERLA_ASSERT_GREATER_EQUAL(delta_t_, real_c(1.0));
@@ -62,12 +61,11 @@ public:
 
    Su( Blocks_T blocks, BlockDataID force, BlockDataID pdfId, BlockDataID boundaryHandlingId, BlockDataID stressId, BlockDataID stressOldId, BlockDataID velocityId, real_t lambda_p, real_t eta_p,
        uint_t period = uint_c(1), bool compressibleFlag = false): blocks_( blocks ), forceId_( force ), pdfId_(pdfId), boundaryHandlingId_(boundaryHandlingId), stressId_(stressId), stressOldId_(stressOldId),
-                                   velocityId_(velocityId), inv_lambda_p_( real_c(1.0)/lambda_p ), eta_p_( eta_p ), delta_t_( real_c(period) ), executionCount_( 0 ), communicateStress_(blocks), communicateStressOld_(blocks),
+                                   velocityId_(velocityId), inv_lambda_p_( real_c(1.0)/lambda_p ), eta_p_( eta_p ), delta_t_( real_c(period) ), executionCount_( 0 ), communicateStress_(blocks), 
                                    communicateVelocities_(blocks), compressibleFlag_(compressibleFlag)
    {
       // stress and velocity communication scheme
       communicateStress_.addPackInfo( make_shared< field::communication::PackInfo<StressField_T> >( stressId_ ));
-      communicateStressOld_.addPackInfo( make_shared< field::communication::PackInfo<StressField_T> >( stressOldId_ ));
       communicateVelocities_.addPackInfo( make_shared< field::communication::PackInfo<VelocityField_T> >( velocityId_ ));
 
       WALBERLA_ASSERT_GREATER_EQUAL(delta_t_, real_c(1.0));
@@ -245,7 +243,6 @@ public:
          }
       }
       communicateVelocities_();
-      communicateStressOld_();
       for( auto it = blocks_->begin(); it != blocks_->end(); ++it ){
          auto block = it.get();
          if (executionCount_ % uint_c(delta_t_) == 0)
@@ -265,7 +262,7 @@ private:
    BlockDataID forceId_, pdfId_, boundaryHandlingId_, stressId_, stressOldId_, velocityId_;
    const real_t inv_lambda_p_, eta_p_, delta_t_;
    uint_t executionCount_;
-   blockforest::communication::UniformBufferedScheme< typename LatticeModel_T::CommunicationStencil > communicateStress_, communicateStressOld_, communicateVelocities_;
+   blockforest::communication::UniformBufferedScheme< typename LatticeModel_T::CommunicationStencil > communicateStress_, communicateVelocities_;
    bool compressibleFlag_;
 };
         

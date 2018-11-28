@@ -179,7 +179,7 @@ public:
       for (auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt) {
          PdfField_T *pdf = blockIt.get()->getData<PdfField_T>(pdfFieldId_);
 
-         if (blockIt.get()->getAABB().contains(L_/2.0, H_/2.0, 0)) {
+         if (blockIt.get()->getAABB().contains(float_c(L_/2.0), float_c(H_/2.0), 0)) {
             uCurr_ = pdf->getVelocity(int32_c(blockSize_/2), int32_c(blockSize_/2), 0)[0]/uExpected_;
             tCurr_ = timeloop_.getCurrentTimeStep();
             if (tCurr_ == timesteps_ - 1){
@@ -254,7 +254,7 @@ int main(int argc, char ** argv ){
    const uint_t          timesteps       = parameters.getParameter< uint_t > ("timesteps");
 
    // reference data
-   const real_t          uExpected       = force*H*H/(8.0*(eta_s + eta_p));
+   const real_t          uExpected       = force*H*H/(real_c(8.0)*(eta_s + eta_p));
    const real_t          uMax            = parameters.getParameter< real_t > ("uMax");
    const real_t          t0              = parameters.getParameter< real_t > ("t0");
    const real_t          t1              = parameters.getParameter< real_t > ("t1");
@@ -293,10 +293,10 @@ int main(int argc, char ** argv ){
 
 
    // compare to reference data
-   real_t errSteady = abs(testData->getUSteady() - 1.0)/1.0;
-   real_t errMax = abs(testData->getUMax() - uMax)/uMax;
-   real_t errt0 = abs(testData->getT0() - t0)/t0;
-   real_t errt1 = abs(testData->getT1() - t1)/t1;
+   real_t errSteady = fabs(testData->getUSteady() - real_c(1.0))/real_c(1.0);
+   real_t errMax = fabs(testData->getUMax() - uMax)/uMax;
+   real_t errt0 = fabs(testData->getT0() - t0)/t0;
+   real_t errt1 = fabs(testData->getT1() - t1)/t1;
 
    WALBERLA_LOG_RESULT("Steady State Velocity Error: " << errSteady );
    WALBERLA_LOG_RESULT("Maximum Velocity Error: " << errMax );
