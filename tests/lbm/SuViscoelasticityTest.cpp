@@ -293,10 +293,10 @@ int main(int argc, char ** argv ){
 
 
    // compare to reference data
-   real_t errSteady = fabs(testData->getUSteady() - real_c(1.0))/real_c(1.0);
-   real_t errMax = fabs(testData->getUMax() - uMax)/uMax;
-   real_t errt0 = fabs(testData->getT0() - t0)/t0;
-   real_t errt1 = fabs(testData->getT1() - t1)/t1;
+   real_t errSteady = real_c(fabs(testData->getUSteady() - real_c(1.0))/real_c(1.0));
+   real_t errMax = real_c(fabs(testData->getUMax() - uMax)/uMax);
+   real_t errt0 = real_c(fabs(testData->getT0() - t0)/t0);
+   real_t errt1 = real_c(fabs(testData->getT1() - t1)/t1);
 
    WALBERLA_LOG_RESULT("Steady State Velocity Error: " << errSteady );
    WALBERLA_LOG_RESULT("Maximum Velocity Error: " << errMax );
