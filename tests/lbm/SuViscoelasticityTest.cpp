@@ -16,56 +16,40 @@
 //! \file SuViscoelasticityTest.cpp
 //! \ingroup lbm
 //! \author Cameron Stewart <cstewart@icp.uni-stuttgart.de>
-//! \brief D2Q9 Poisuielle flow simulation with viscoelasticity
+//! \brief D2Q9 Poiseuille flow simulation with Oldroyd-B viscoelasticity - Checks against analytical formula and
+//!        reference data
 //
 //
 //======================================================================================================================
-
 
 #include "blockforest/Initialization.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
 
 #include "boundary/BoundaryHandling.h"
 
-#include "core/Abort.h"
 #include "core/Environment.h"
-#include "core/debug/TestSubsystem.h"
-#include "core/logging/Logging.h"
-#include "core/timing/RemainingTimeLogger.h"
 #include "core/SharedFunctor.h"
-#include "core/Filesystem.h"
 
 #include "domain_decomposition/SharedSweep.h"
 
 #include "field/communication/PackInfo.h"
-#include "field/StabilityChecker.h"
 
-#include "geometry/initializer/BoundaryFromDomainBorder.h"
-#include "geometry/InitBoundaryHandling.h"
-
-#include "lbm/lattice_model/D2Q9.h"
-#include "lbm/field/AddToStorage.h"
 #include "lbm/boundary/all.h"
-#include "lbm/communication/PdfFieldPackInfo.h"
+#include "lbm/field/AddToStorage.h"
+#include "lbm/lattice_model/D2Q9.h"
 #include "lbm/lattice_model/ForceModel.h"
 #include "lbm/SuViscoelasticity.h"
 #include "lbm/sweeps/CellwiseSweep.h"
-#include "lbm/vtk/all.h"
 
 #include "timeloop/SweepTimeloop.h"
 
-#include <math.h>
 #include <iostream>
-#include <iomanip>
-#include <vector>
-#include <lbm/boundary/factories/ExtendedBoundaryHandlingFactory.h>
 
 using namespace walberla;
 
 //////////////
 // TYPEDEFS //
 //////////////
-
 
 typedef GhostLayerField< Vector3<real_t>, 1> ForceField_T;
 
@@ -261,21 +245,21 @@ int main(int argc, char ** argv ){
    auto parameters = env.config()->getOneBlock( "Parameters" );
 
    // extract some constants from the parameters
-   const real_t          eta_s           = parameters.getParameter< real_t >         ( "eta_s",           real_c( 1.4 ) );
-   const real_t          force           = parameters.getParameter< real_t >         ( "force",           real_c( 1 )   );
-   const real_t          eta_p           = parameters.getParameter< real_t >         ( "eta_p",           real_c( 1.0 ) );
-   const real_t          lambda_p        = parameters.getParameter< real_t >         ( "lambda_p",        real_c( 10  ) );
-   const uint_t          period          = parameters.getParameter< uint_t >         ( "period",          uint_c( 1   ) );
-   const real_t          L               = parameters.getParameter< real_t >         ( "L",               real_c( 10  ) );
-   const real_t          H               = parameters.getParameter< real_t >         ( "H",               real_c( 30  ) );
-   const uint_t          blockSize       = parameters.getParameter< uint_t >         ( "blockSize",       uint_c( 11  ) );
-   const uint_t          timesteps       = parameters.getParameter< uint_t >         ( "timesteps",       uint_c( 10  ) );
+   const real_t          eta_s           = parameters.getParameter< real_t > ("eta_s");
+   const real_t          force           = parameters.getParameter< real_t > ("force");
+   const real_t          eta_p           = parameters.getParameter< real_t > ("eta_p");
+   const real_t          lambda_p        = parameters.getParameter< real_t > ("lambda_p");
+   const uint_t          period          = parameters.getParameter< uint_t > ("period");
+   const real_t          L               = parameters.getParameter< real_t > ("L");
+   const real_t          H               = parameters.getParameter< real_t > ("H");
+   const uint_t          blockSize       = parameters.getParameter< uint_t > ("blockSize");
+   const uint_t          timesteps       = parameters.getParameter< uint_t > ("timesteps");
 
    // reference data
-   const real_t          uExpected = force*H*H/(8.0*(eta_s + eta_p));
-   const real_t          uMax      = parameters.getParameter< real_t > ("uMax");
-   const real_t          t0        = parameters.getParameter< real_t > ("t0");
-   const real_t          t1        = parameters.getParameter< real_t > ("t1");
+   const real_t          uExpected       = force*H*H/(8.0*(eta_s + eta_p));
+   const real_t          uMax            = parameters.getParameter< real_t > ("uMax");
+   const real_t          t0              = parameters.getParameter< real_t > ("t0");
+   const real_t          t1              = parameters.getParameter< real_t > ("t1");
 
    // create fields
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field", FieldGhostLayers);
@@ -297,6 +281,7 @@ int main(int argc, char ** argv ){
    communication.addPackInfo( make_shared< field::communication::PackInfo< PdfField_T > >( pdfFieldId ) );
    auto testData = make_shared< TestData >(TestData(timeloop, blocks, pdfFieldId, stressId, timesteps, blockSize, L, H, uExpected));
 
+   // structure timeloop
    timeloop.add() << BeforeFunction( communication, "communication" )
                   << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingId ), "boundary handling" );
    timeloop.add() << BeforeFunction( lbm::viscoelastic::Su<LatticeModel_T, BoundaryHandling_T>(blocks, forceFieldId, pdfFieldId, boundaryHandlingId, stressId, stressOldId, velocityId,
@@ -315,18 +300,18 @@ int main(int argc, char ** argv ){
    real_t errt0 = abs(testData->getT0() - t0)/t0;
    real_t errt1 = abs(testData->getT1() - t1)/t1;
 
-   std::cout << "Relative Errors" << std::endl << std::endl;
-   std::cout << "Steady State Velocity: " << errSteady << std::endl;
-   std::cout << "Maximum Velocity: " << errMax << std::endl;
-   std::cout << "Time of Maximum: " << errt0 << std::endl;
-   std::cout << "Decay Time: " << errt1 << std::endl << std::endl;
+   WALBERLA_LOG_RESULT("Steady State Velocity Error: " << errSteady );
+   WALBERLA_LOG_RESULT("Maximum Velocity Error: " << errMax );
+   WALBERLA_LOG_RESULT("Time of Maximum Error: " << errt0 );
+   WALBERLA_LOG_RESULT("Decay Time Error: " << errt1 );
 
+   // check that errors < 1%
    if (errSteady < 0.01 && errMax < 0.01 && errt0 < 0.01 && errt1 < 0.01){
-      std::cout << "Success" << std::endl;
+      WALBERLA_LOG_RESULT("Success" );
       return EXIT_SUCCESS;
    }
    else {
-      std::cout << "Failure" << std::endl;
+      WALBERLA_LOG_RESULT("Failure" );
       return EXIT_FAILURE;
    }
 

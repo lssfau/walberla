@@ -16,27 +16,17 @@
 //! \file SuViscoelasticity.h
 //! \ingroup lbm
 //! \author Cameron Stewart <cstewart@icp.uni-stuttgart.de>
-//! \brief Oldroyd-B viscoelasticity modeled my Su et al. Phys. Rev. E, 2013
+//! \brief Oldroyd-B viscoelasticity extended from Su et al. Phys. Rev. E, 2013
 //
 //======================================================================================================================
-#include "field/GhostLayerField.h"
-#include "../field/AddToStorage.h"
-#include "domain_decomposition/IBlock.h"
+
+
+#include "blockforest/communication/UniformBufferedScheme.h"
 #include "core/math/Matrix3.h"
-#include "core/DataTypes.h"
-#include "stencil/Directions.h"
-#include "stencil/D2Q4.h"
+#include <field/AddToStorage.h>
+#include "field/GhostLayerField.h"
 #include "field/communication/PackInfo.h"
 #include "lbm/field/PdfField.h"
-#include "blockforest/communication/UniformBufferedScheme.h"
-#include "lbm/boundary/factories/ExtendedBoundaryHandlingFactory.h"
-
-#include "stencil/D2Q9.h"
-#include "stencil/D3Q6.h"
-
-#include <iostream>
-#include <math.h>
-#include <field/all.h>
 
 namespace walberla {
 namespace lbm {
@@ -101,8 +91,9 @@ public:
          Matrix3<real_t> relstr  = Matrix3<real_t>(0.0);
          bool nearBoundaryFlag = false;
 
-         // If cell is a fluid cell then calculate the stress tensor
+         // if cell is a fluid cell then calculate the stress tensor
          if (boundaryHandling->isDomain(cell)) {
+            // check if near a wall
             if (boundaryHandling->isNearBoundary(cell)) {
                nearBoundaryFlag = true;
             }
@@ -119,7 +110,7 @@ public:
                Cell cell2 = cell1 - *d;
                Cell cell3 = cell + *d;
 
-               // Check if using compressible of incompressible algorithm
+               // check if using compressible of incompressible algorithm
                if (compressibleFlag_) {
                   if (nearBoundaryFlag) {
                      if (boundaryHandling->isDomain(cell1)) {
@@ -151,9 +142,9 @@ public:
                   }
                }
             }
-            // Compute velocity gradient
             Matrix3<real_t> gradu = Matrix3<real_t>(0.0);
 
+            // compute velocity gradient
             for (auto d = LatticeModel_T::Stencil::beginNoCenter(); d.direction() != stencil::NW; ++d) {
                for (uint_t a = 0; a < LatticeModel_T::Stencil::D; ++a) {
                   for (uint_t b = 0; b < LatticeModel_T::Stencil::D; ++b) {
@@ -169,14 +160,14 @@ public:
             }
             auto graduT = gradu.getTranspose();
 
-            // Equation 16 from Su 2013
+            // equation 16 from Su 2013
             relstr = stressOld->get(cell) * gradu + graduT * stressOld->get(cell);
 
             if(eta_p_ > real_t(0)) {
                relstr += ((gradu + graduT) * eta_p_ - stressOld->get(cell)) * inv_lambda_p_;
             }
 
-            // Equation 23 from Su 2013
+            // equation 23 from Su 2013
             stressNew->get(cell) = stressOld->get(cell) + (stress1 * real_c(2.0) - stress2 * real_c(1.5) - stress3 * real_c(0.5)) * delta_t_ * (real_c(1) / pdf->getDensity(cell)) +
                                    relstr * delta_t_;
          }
@@ -198,8 +189,8 @@ public:
 
       WALBERLA_ASSERT_GREATER_EQUAL( velocity->nrOfGhostLayers(), 1 );
 
-      // Update velocity field for all fluid cells
-      WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(velocity,{
+      // update velocity field for all fluid cells
+      WALBERLA_FOR_ALL_CELLS_XYZ(velocity,{
          Cell cell(x, y, z);
          if( boundaryHandling->isDomain(cell) ) {
             velocity->get( cell ) = pdf->getVelocity(x, y, z);
