@@ -50,7 +50,7 @@ void createWithNeighborhood(BlockForest& bf, const BlockDataID boundaryHandlingI
 
    for (auto blockIt = bf.begin(); blockIt != bf.end(); ++blockIt)
    {
-      blockforest::Block* block = static_cast<blockforest::Block*> (&(*blockIt));
+      auto * block = static_cast<blockforest::Block*> (&(*blockIt));
 
       // evaluate LBM quantities
       BoundaryHandling_T * boundaryHandling = blockIt->getData< BoundaryHandling_T >( boundaryHandlingID );
@@ -70,14 +70,14 @@ void createWithNeighborhood(BlockForest& bf, const BlockDataID boundaryHandlingI
       }
 
       // evaluate PE quantities
-      pe::Storage * bodyStorage = block->getData<pe::Storage>(bodyStorageID);
+      auto * bodyStorage = block->getData<pe::Storage>(bodyStorageID);
       pe::BodyStorage const & localStorage  = (*bodyStorage)[pe::StorageType::LOCAL];
       pe::BodyStorage const & shadowStorage = (*bodyStorage)[pe::StorageType::SHADOW];
       const uint_t numLocalParticles = localStorage.size();
       const uint_t numShadowParticles = shadowStorage.size();
 
-      pe::ccd::ICCD * ccd = block->getData<pe::ccd::ICCD>(ccdID);
-      pe::fcd::IFCD * fcd = block->getData<pe::fcd::IFCD>(fcdID);
+      auto * ccd = block->getData<pe::ccd::ICCD>(ccdID);
+      auto * fcd = block->getData<pe::fcd::IFCD>(fcdID);
       ccd->generatePossibleContacts();
       pe::Contacts& contacts = fcd->generateContacts( ccd->getPossibleContacts() );
       const uint_t numContacts = contacts.size();
@@ -87,7 +87,7 @@ void createWithNeighborhood(BlockForest& bf, const BlockDataID boundaryHandlingI
 
       ic.insert( infoCollectionEntry );
 
-      for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
+      for( auto nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
       {
          bs.sendBuffer( block->getNeighborProcess(nb) ) << infoCollectionEntry;
       }

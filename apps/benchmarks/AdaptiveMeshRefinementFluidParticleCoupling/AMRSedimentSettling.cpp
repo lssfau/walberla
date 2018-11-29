@@ -174,7 +174,7 @@ void VectorGradientRefinement< LatticeModel_T, Filter_T >::operator()( std::vect
 
       const VectorField_T * uField = block->template getData< VectorField_T >( fieldID_ );
 
-      if( uField == NULL )
+      if( uField == nullptr )
       {
          it->second = uint_t(0);
          continue;
@@ -208,7 +208,7 @@ void VectorGradientRefinement< LatticeModel_T, Filter_T >::operator()( std::vect
           // obtain the matrix grad(u) with the help of the gradient formula from
           // See: Ramadugu et al - Lattice differential operators for computational physics (2013)
           // with T = c_s**2
-          const real_t inv_c_s_sqr = real_t(3);
+          const auto inv_c_s_sqr = real_t(3);
           uGradient = real_t(0);
           for( auto dir = Stencil_T::beginNoCenter(); dir != Stencil_T::end(); ++dir)
           {
@@ -237,9 +237,9 @@ void VectorGradientRefinement< LatticeModel_T, Filter_T >::operator()( std::vect
           }
           uGradient *= inv_c_s_sqr;
 
-          real_t norm( real_t(0) );
+          auto norm = real_t(0);
           //compute maximums norm of 3x3 matrix
-          for( uint_t i = uint_t(0); i < uint_t(3*3); ++i )
+          for (auto i = uint_t(0); i < uint_t(3*3); ++i)
              norm = std::max(norm, std::fabs(uGradient[i]));
 
           if( norm > lowerLimit_ )
@@ -447,35 +447,33 @@ private:
 
 static void refinementSelection( SetupBlockForest& forest, uint_t levels, const AABB & refinementBox )
 {
-   real_t dx = real_t(1); // dx on finest level
-   for( auto block = forest.begin(); block != forest.end(); ++block )
-   {
-      uint_t blockLevel = block->getLevel();
+   auto dx = real_t(1); // dx on finest level
+   for (auto &block : forest) {
+      uint_t blockLevel = block.getLevel();
       uint_t levelScalingFactor = ( uint_t(1) << (levels - uint_t(1) - blockLevel) );
       real_t dxOnLevel = dx * real_c(levelScalingFactor);
-      AABB blockAABB = block->getAABB();
+      AABB blockAABB = block.getAABB();
 
       // extend block AABB by ghostlayers
       AABB extendedBlockAABB = blockAABB.getExtended( dxOnLevel * real_c(FieldGhostLayers) );
 
       if( extendedBlockAABB.intersects( refinementBox ) )
          if( blockLevel < ( levels - uint_t(1) ) )
-            block->setMarker( true );
+            block.setMarker( true );
    }
 }
 
 static void workloadAndMemoryAssignment( SetupBlockForest& forest )
 {
-   for( auto block = forest.begin(); block != forest.end(); ++block )
-   {
-      block->setWorkload( numeric_cast< workload_t >( uint_t(1) << block->getLevel() ) );
-      block->setMemory( numeric_cast< memory_t >(1) );
+   for (auto &block : forest) {
+      block.setWorkload( numeric_cast< workload_t >( uint_t(1) << block.getLevel() ) );
+      block.setMemory( numeric_cast< memory_t >(1) );
    }
 }
 
 static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & domainAABB, Vector3<uint_t> blockSizeInCells,
                                                                  uint_t numberOfLevels, const AABB & refinementBox,
-                                                                 bool useBox, std::string loadDistributionStrategy,
+                                                                 bool useBox, const std::string & loadDistributionStrategy,
                                                                  bool keepGlobalBlockInformation = false )
 {
    SetupBlockForest sforest;
@@ -565,7 +563,7 @@ public:
          blocks_( blocks ), flagFieldID_( flagFieldID ), pdfFieldID_( pdfFieldID ), bodyFieldID_ ( bodyFieldID )
    {}
 
-   BoundaryHandling_T * initialize( IBlock * const block );
+   BoundaryHandling_T * initialize( IBlock * const block ) override;
 
 private:
 
@@ -582,9 +580,9 @@ BoundaryHandling_T * MyBoundaryHandling::initialize( IBlock * const block )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
-   FlagField_T * flagField       = block->getData< FlagField_T >( flagFieldID_ );
-   PdfField_T *  pdfField        = block->getData< PdfField_T > ( pdfFieldID_ );
-   BodyField_T * bodyField       = block->getData< BodyField_T >( bodyFieldID_ );
+   auto * flagField = block->getData< FlagField_T >( flagFieldID_ );
+   auto *  pdfField = block->getData< PdfField_T > ( pdfFieldID_ );
+   auto * bodyField = block->getData< BodyField_T >( bodyFieldID_ );
 
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
@@ -634,10 +632,10 @@ public:
    {
       const uint_t timestep (timeloop_->getCurrentTimeStep() );
 
-      uint_t numSediments( uint_t(0));
-      real_t meanPos(real_t(0));
-      real_t meanVel(real_t(0));
-      real_t maxVel(real_t(0));
+      auto numSediments = uint_t(0);
+      auto meanPos = real_t(0);
+      auto meanVel = real_t(0);
+      auto maxVel = real_t(0);
 
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
@@ -713,7 +711,7 @@ void clearBoundaryHandling( BlockForest & forest, const BlockDataID & boundaryHa
 {
    for( auto blockIt = forest.begin(); blockIt != forest.end(); ++blockIt )
    {
-      BoundaryHandling_T * boundaryHandling = blockIt->getData<BoundaryHandling_T>(boundaryHandlingID);
+      auto * boundaryHandling = blockIt->getData<BoundaryHandling_T>(boundaryHandlingID);
       boundaryHandling->clear( FieldGhostLayers );
    }
 }
@@ -722,7 +720,7 @@ void clearBodyField( BlockForest & forest, const BlockDataID & bodyFieldID )
 {
    for( auto blockIt = forest.begin(); blockIt != forest.end(); ++blockIt )
    {
-      BodyField_T * bodyField = blockIt->getData<BodyField_T>(bodyFieldID);
+      auto * bodyField = blockIt->getData<BodyField_T>(bodyFieldID);
       bodyField->setWithGhostLayer( NULL );
    }
 }
@@ -731,7 +729,7 @@ void recreateBoundaryHandling( BlockForest & forest, const BlockDataID & boundar
 {
    for( auto blockIt = forest.begin(); blockIt != forest.end(); ++blockIt )
    {
-      BoundaryHandling_T * boundaryHandling = blockIt->getData<BoundaryHandling_T>(boundaryHandlingID);
+      auto * boundaryHandling = blockIt->getData<BoundaryHandling_T>(boundaryHandlingID);
       boundaryHandling->fillWithDomain( FieldGhostLayers );
    }
 }
@@ -747,22 +745,22 @@ public:
    real_t getTimings(const std::vector<std::string> & timerNames, uint_t level )
    {
 
-      real_t timing = real_t(0);
-      for( auto timerIt = timerNames.begin(); timerIt != timerNames.end(); ++timerIt )
+      auto timing = real_t(0);
+      for (const auto &timerName : timerNames)
       {
-         std::string timerNameLvlWise = *timerIt;// +
+         std::string timerNameLvlWise = timerName;// +
          // put level between timer string and possible suffix
-         auto suffixBegin = timerNameLvlWise.find_first_of("[");
+         auto suffixBegin = timerNameLvlWise.find_first_of('[');
          if( suffixBegin != std::string::npos)
          {
             // suffix detected
-            auto suffixEnd = timerNameLvlWise.find_last_of("]");
+            auto suffixEnd = timerNameLvlWise.find_last_of(']');
             if( suffixEnd != std::string::npos)
             {
                auto timerString = timerNameLvlWise.substr(0,suffixBegin);
                auto suffixString = timerNameLvlWise.substr(suffixBegin,suffixEnd-suffixBegin+1);
 
-               timerNameLvlWise = timerString + "(" + std::to_string(level) + ") " + suffixString;
+               timerNameLvlWise = timerString + "(" + std::to_string(level) + ") " + suffixString; // NOLINT
 
             }
             else
@@ -780,9 +778,8 @@ public:
 
          if( level == numberOfLevels_- 1)
          {
-            std::string timerNamePE = *timerIt;
-            if( peTimingTree_.timerExists(timerNamePE))
-               timing += peTimingTree_[timerNamePE].total();
+            if( peTimingTree_.timerExists(timerName))
+               timing += peTimingTree_[timerName].total();
          }
       }
 
@@ -802,18 +799,18 @@ real_t weightEvaluation(BlockForest & forest,
                         const shared_ptr<pe_coupling::InfoCollection>& couplingInfoCollection,
                         const shared_ptr<pe::InfoCollection> & peInfoCollection,
                         real_t peBlockBaseWeight,
-                        std::string loadEvaluationStrategy,
+                        const std::string & loadEvaluationStrategy,
                         uint_t level,
                         bool useEllipsoids )
 {
-   real_t weight = real_t(0);
+   auto weight = real_t(0);
    for( auto blockIt = forest.begin(); blockIt != forest.end(); ++blockIt )
    {
       if( forest.getLevel(*blockIt) != level) continue;
 
 
-      blockforest::Block* block = static_cast<blockforest::Block*> (&(*blockIt));
-      auto blockID = block->getId();
+      auto * block = static_cast<blockforest::Block*> (&(*blockIt));
+      const auto &blockID = block->getId();
 
       if(loadEvaluationStrategy == "LBM")
       {
@@ -849,11 +846,11 @@ uint_t evaluateEdgeCut(BlockForest & forest)
 
    //note: only works for edges in uniform grids
 
-   uint_t edgecut = uint_t(0); // = edge weights between processes
+   auto edgecut = uint_t(0); // = edge weights between processes
 
    for( auto blockIt = forest.begin(); blockIt != forest.end(); ++blockIt )
    {
-      blockforest::Block* block = static_cast<blockforest::Block*> (&(*blockIt));
+      auto * block = static_cast<blockforest::Block*> (&(*blockIt));
 
       real_t blockVolume = block->getAABB().volume();
       real_t approximateEdgeLength = std::cbrt( blockVolume );
@@ -865,7 +862,7 @@ uint_t evaluateEdgeCut(BlockForest & forest)
 
       for( const uint_t idx : blockforest::getFaceNeighborhoodSectionIndices() )
       {
-         for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSectionSize(idx); ++nb )
+         for (auto nb = uint_t(0); nb < block->getNeighborhoodSectionSize(idx); ++nb)
          {
             if( block->neighborExistsRemotely(idx,nb) ) edgecut += faceNeighborWeight;
          }
@@ -873,7 +870,7 @@ uint_t evaluateEdgeCut(BlockForest & forest)
 
       for( const uint_t idx : blockforest::getEdgeNeighborhoodSectionIndices() )
       {
-         for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSectionSize(idx); ++nb )
+         for (auto nb = uint_t(0); nb < block->getNeighborhoodSectionSize(idx); ++nb)
          {
             if( block->neighborExistsRemotely(idx,nb) ) edgecut += edgeNeighborWeight;
          }
@@ -881,7 +878,7 @@ uint_t evaluateEdgeCut(BlockForest & forest)
 
       for( const uint_t idx : blockforest::getCornerNeighborhoodSectionIndices() )
       {
-         for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSectionSize(idx); ++nb )
+         for (auto nb = uint_t(0); nb < block->getNeighborhoodSectionSize(idx); ++nb)
          {
             if( block->neighborExistsRemotely(idx,nb) ) edgecut += cornerNeighborWeight;
          }
@@ -896,14 +893,14 @@ void evaluateTotalSimulationTimePassed(WcTimingPool & timeloopTimingPool, real_t
    shared_ptr< WcTimingPool> reduced = timeloopTimingPool.getReduced(WcTimingPool::REDUCE_TOTAL, 0);
 
    std::string simulationString("LBM refinement time step");
-   real_t totalTime = real_t(0);
+   auto totalTime = real_t(0);
    WALBERLA_ROOT_SECTION(){
       totalTime = (*reduced)[simulationString].total();
    }
    totalSimTime = totalTime;
 
    std::string lbString("refinement checking");
-   real_t lbTime = real_t(0);
+   auto lbTime = real_t(0);
    WALBERLA_ROOT_SECTION(){
       lbTime = (*reduced)[lbString].total();
    }
@@ -920,9 +917,9 @@ void createSedimentLayer(uint_t numberOfSediments, const AABB & generationDomain
 {
    WALBERLA_LOG_INFO_ON_ROOT("Starting creation of sediments");
 
-   real_t xParticle = real_t(0);
-   real_t yParticle = real_t(0);
-   real_t zParticle = real_t(0);
+   auto xParticle = real_t(0);
+   auto yParticle = real_t(0);
+   auto zParticle = real_t(0);
 
    for( uint_t nSed = 0; nSed < numberOfSediments; ++nSed )
    {
@@ -944,7 +941,7 @@ void createSedimentLayer(uint_t numberOfSediments, const AABB & generationDomain
       if( useEllipsoids )
       {
          // prolate ellipsoids
-         real_t axisFactor = real_t(1.5);
+         auto axisFactor = real_t(1.5);
          real_t axisFactor2 = std::sqrt(real_t(1)/axisFactor);
          real_t radius = diameter * real_t(0.5);
          pe::createEllipsoid( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( xParticle, yParticle, zParticle ), Vector3<real_t>(axisFactor*radius, axisFactor2*radius, axisFactor2*radius), peMaterial );
@@ -959,7 +956,7 @@ void createSedimentLayer(uint_t numberOfSediments, const AABB & generationDomain
    syncCall();
 
    // carry out 100 simulations to resolve all overlaps
-   for( uint_t pet = uint_t(1); pet <= uint_t(100); ++pet )
+   for (auto pet = uint_t(1); pet <= uint_t(100); ++pet)
    {
       cr.timestep( real_t(1) );
       syncCall();
@@ -976,15 +973,15 @@ void createSedimentLayer(uint_t numberOfSediments, const AABB & generationDomain
    }
 
 
-   const uint_t maxInitialPeSteps = (shortRun) ? uint_t(10) : uint_t(200000);
-   const real_t dt_PE_init = real_t(1);
+   const auto maxInitialPeSteps = (shortRun) ? uint_t(10) : uint_t(200000);
+   const auto dt_PE_init = real_t(1);
 
    real_t gravityGeneration = real_t(0.1) * gravitationalAcceleration;
    cr.setGlobalLinearAcceleration(Vector3<real_t>(real_t(0), real_t(0), gravityGeneration));
 
-   real_t oldMinBodyPosition = real_t(0);
+   auto oldMinBodyPosition = real_t(0);
    real_t convergenceLimit = std::fabs(gravityGeneration);
-   for( uint_t pet = uint_t(1); pet <= maxInitialPeSteps; ++pet )
+   for (auto pet = uint_t(1); pet <= maxInitialPeSteps; ++pet)
    {
       cr.timestep( dt_PE_init );
       syncCall();
@@ -1025,9 +1022,9 @@ void createSedimentLayer(uint_t numberOfSediments, const AABB & generationDomain
    cr.setGlobalLinearAcceleration(Vector3<real_t>(real_t(0), real_t(0), -gravityGeneration));
 
    // carry out a few time steps to relax the system towards the real condition
-   const uint_t relaxationTimeSteps = uint_t(std::sqrt(real_t(2)/std::fabs(gravitationalAcceleration)));
+   const auto relaxationTimeSteps = uint_t(std::sqrt(real_t(2)/std::fabs(gravitationalAcceleration)));
    WALBERLA_LOG_INFO_ON_ROOT("Carrying out " << relaxationTimeSteps << " more time steps with correct gravity");
-   for( uint_t pet = uint_t(1); pet <= relaxationTimeSteps; ++pet )
+   for (auto pet = uint_t(1); pet <= relaxationTimeSteps; ++pet)
    {
       cr.timestep(dt_PE_init);
       syncCall();
@@ -1101,31 +1098,31 @@ int main( int argc, char **argv )
    std::string baseFolder = "vtk_out_AMRSedimentSettling"; // folder for vtk and file output
 
    // physical setup
-   real_t GalileoNumber = real_t(50);
-   real_t densityRatio = real_t(1.5);
-   real_t diameter = real_t(15);
-   real_t solidVolumeFraction = real_t(0.1);
-   uint_t blockSize = uint_t(32);
-   uint_t XBlocks = uint_t(12);
-   uint_t YBlocks = uint_t(12);
-   uint_t ZBlocks = uint_t(16);
+   auto GalileoNumber = real_t(50);
+   auto densityRatio = real_t(1.5);
+   auto diameter = real_t(15);
+   auto solidVolumeFraction = real_t(0.1);
+   auto blockSize = uint_t(32);
+   auto XBlocks = uint_t(12);
+   auto YBlocks = uint_t(12);
+   auto ZBlocks = uint_t(16);
    bool useBox = false;
    bool useHopper = false;
    bool useEllipsoids = false;
-   real_t hopperRelHeight = real_t(0.5); // for hopper setup
-   real_t hopperRelOpening = real_t(0.3); // for hopper setup
+   auto hopperRelHeight = real_t(0.5); // for hopper setup
+   auto hopperRelOpening = real_t(0.3); // for hopper setup
 
-   uint_t timestepsOnFinestLevel = uint_t(80000);
+   auto timestepsOnFinestLevel = uint_t(80000);
 
    //numerical parameters
    bool averageForceTorqueOverTwoTimSteps = true;
-   uint_t numberOfLevels = uint_t(1);
-   uint_t refinementCheckFrequency = uint_t(100);
-   uint_t numPeSubCycles = uint_t(10);
+   auto numberOfLevels = uint_t(1);
+   auto refinementCheckFrequency = uint_t(100);
+   auto numPeSubCycles = uint_t(10);
 
    // refinement criteria
-   real_t lowerFluidRefinementLimit = real_t(0);
-   real_t upperFluidRefinementLimit = std::numeric_limits<real_t>::infinity();
+   auto lowerFluidRefinementLimit = real_t(0);
+   auto upperFluidRefinementLimit = std::numeric_limits<real_t>::infinity();
    bool useVorticityCriterion = false;
    bool useGradientCriterion = false;
 
@@ -1133,12 +1130,12 @@ int main( int argc, char **argv )
    std::string loadEvaluationStrategy = "LBM"; //LBM, PE, Fit
    std::string loadDistributionStrategy = "Hilbert"; //Morton, Hilbert, ParMetis, Diffusive
 
-   real_t parMetis_ipc2redist = real_t(1000);
-   real_t parMetisTolerance = real_t(-1);
+   auto parMetis_ipc2redist = real_t(1000);
+   auto parMetisTolerance = real_t(-1);
    std::string parMetisAlgorithmString = "ADAPTIVE_REPART";
 
-   uint_t diffusionFlowIterations = uint_t(15);
-   uint_t diffusionMaxIterations = uint_t(20);
+   auto diffusionFlowIterations = uint_t(15);
+   auto diffusionMaxIterations = uint_t(20);
 
 
    for( int i = 1; i < argc; ++i )
@@ -1232,7 +1229,7 @@ int main( int argc, char **argv )
    //////////////////////////
 
    const Vector3<uint_t> domainSize( XBlocks * blockSize, YBlocks * blockSize, ZBlocks * blockSize );
-   const real_t domainVolume = real_t(domainSize[0] * domainSize[1] * domainSize[2]);
+   const auto domainVolume = real_t(domainSize[0] * domainSize[1] * domainSize[2]);
    const real_t sphereVolume = math::M_PI / real_t(6) * diameter * diameter * diameter;
    const uint_t numberOfSediments = uint_c(std::ceil(solidVolumeFraction * domainVolume / sphereVolume));
 
@@ -1240,7 +1237,7 @@ int main( int argc, char **argv )
    const real_t expectedSedimentedVolume = real_t(1)/expectedSedimentVolumeFraction * real_c(numberOfSediments) * sphereVolume;
    const real_t expectedSedimentedHeight = std::max(diameter, expectedSedimentedVolume / real_c(domainSize[0] * domainSize[1]));
 
-   const real_t uRef = real_t(0.02);
+   const auto uRef = real_t(0.02);
    const real_t xRef = diameter;
    const real_t tRef = xRef / uRef;
 
@@ -1249,9 +1246,9 @@ int main( int argc, char **argv )
    const real_t omega = lbm::collision_model::omegaFromViscosity(viscosity);
    const real_t tau = real_t(1) / omega;
 
-   const uint_t loggingDisplayFrequency = uint_t(100);
+   const auto loggingDisplayFrequency = uint_t(100);
 
-   const real_t dx = real_t(1);
+   const auto dx = real_t(1);
    const real_t overlap = real_t( 1.5 ) * dx;
 
    if( useVorticityCriterion && floatIsEqual(lowerFluidRefinementLimit, real_t(0)) && std::isinf(upperFluidRefinementLimit) )
@@ -1327,8 +1324,8 @@ int main( int argc, char **argv )
 
    if( refinementCheckFrequency == 0 && numberOfLevels != 1 )
    {
-      // determine check frequency automatically based on maximum admissable velocity and block sizes
-      real_t uMax = real_t(0.1);
+      // determine check frequency automatically based on maximum admissible velocity and block sizes
+      auto uMax = real_t(0.1);
       refinementCheckFrequency = uint_c(( overlap + real_c(blockSize) - real_t(2) * real_t(FieldGhostLayers) * dx) / uMax) / lbmTimeStepsPerTimeLoopIteration;
    }
    WALBERLA_LOG_INFO_ON_ROOT(" - refinement / load balancing check frequency (coarse time steps): " << refinementCheckFrequency);
@@ -1453,7 +1450,7 @@ int main( int argc, char **argv )
 
       blockforest.setRefreshMinTargetLevelDeterminationFunction( initialMinTargetLevelDeterminationFunctions );
 
-      for( uint_t refreshCycle = uint_t(0); refreshCycle < finestLevel; ++refreshCycle)
+      for ( auto refreshCycle = uint_t(0); refreshCycle < finestLevel; ++refreshCycle)
       {
 
          WALBERLA_LOG_INFO_ON_ROOT("Refreshing blockforest...")
@@ -1477,7 +1474,7 @@ int main( int argc, char **argv )
 
          for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
          {
-            pe::ccd::ICCD* ccd = blockIt->getData< pe::ccd::ICCD >( ccdID );
+            auto * ccd = blockIt->getData< pe::ccd::ICCD >( ccdID );
             ccd->reloadBodies();
          }
       }
@@ -1505,7 +1502,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf, FieldGhostLayers );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf, FieldGhostLayers );
 
    // add velocity field and utility
    BlockDataID velocityFieldID = field::addToStorage<VelocityField_T>( blocks, "velocity field", Vector3<real_t>(real_t(0)), field::zyxf, uint_t(2) );
@@ -1590,7 +1587,7 @@ int main( int argc, char **argv )
    bool curveAllGather = true;
    bool balanceLevelwise = true;
 
-   real_t peBlockBaseWeight = real_t(1); //default value, might not be the best
+   auto peBlockBaseWeight = real_t(1); //default value, might not be the best
    shared_ptr<pe::InfoCollection> peInfoCollection = walberla::make_shared<pe::InfoCollection>();
 
    if( loadDistributionStrategy == "Hilbert" || loadDistributionStrategy == "Morton")
@@ -1934,41 +1931,41 @@ int main( int argc, char **argv )
    }
 
    std::vector<std::string> LBMTimer;
-   LBMTimer.push_back("collide");
-   LBMTimer.push_back("stream");
-   LBMTimer.push_back("stream & collide");
+   LBMTimer.emplace_back("collide");
+   LBMTimer.emplace_back("stream");
+   LBMTimer.emplace_back("stream & collide");
 
    std::vector<std::string> bhTimer;
-   bhTimer.push_back("boundary handling");
+   bhTimer.emplace_back("boundary handling");
 
    std::vector<std::string> couplingTimer1;
-   couplingTimer1.push_back("Body Mapping");
+   couplingTimer1.emplace_back("Body Mapping");
    std::vector<std::string> couplingTimer2;
-   couplingTimer2.push_back("PDF Restore");
+   couplingTimer2.emplace_back("PDF Restore");
 
    std::vector<std::string> peTimer;
-   peTimer.push_back("Simulation Step.Collision Detection");
-   peTimer.push_back("Simulation Step.Collision Response Integration");
-   peTimer.push_back("Simulation Step.Collision Response Resolution.Collision Response Solving");
+   peTimer.emplace_back("Simulation Step.Collision Detection");
+   peTimer.emplace_back("Simulation Step.Collision Response Integration");
+   peTimer.emplace_back("Simulation Step.Collision Response Resolution.Collision Response Solving");
 
    std::vector<std::string> LBMCommTimer;
-   LBMCommTimer.push_back("communication equal level [pack & send]");
-   LBMCommTimer.push_back("communication equal level [wait & unpack]");
+   LBMCommTimer.emplace_back("communication equal level [pack & send]");
+   LBMCommTimer.emplace_back("communication equal level [wait & unpack]");
 
    std::vector<std::string> peCommTimer;
    //Adapt if using different collision response (like DEM!)
-   peCommTimer.push_back("Simulation Step.Collision Response Resolution.Velocity Sync");
-   peCommTimer.push_back("Sync");
+   peCommTimer.emplace_back("Simulation Step.Collision Response Resolution.Velocity Sync");
+   peCommTimer.emplace_back("Sync");
 
 
    real_t terminationPosition = expectedSedimentedHeight;
    real_t terminationVelocity = real_t(0.05) * uRef;
 
-   real_t oldmTotSim = real_t(0);
-   real_t oldmLB = real_t(0);
+   auto oldmTotSim = real_t(0);
+   auto oldmLB = real_t(0);
 
-   uint_t measurementFileCounter = uint_t(0);
-   uint_t predictionFileCounter = uint_t(0);
+   auto measurementFileCounter = uint_t(0);
+   auto predictionFileCounter = uint_t(0);
 
    std::string loadEvaluationStep("load evaluation");
 
@@ -2119,7 +2116,7 @@ int main( int argc, char **argv )
                syncCall();
 
                for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
-                  pe::ccd::ICCD *ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
+                  auto * ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
                   ccd->reloadBodies();
                }
 
@@ -2168,26 +2165,24 @@ int main( int argc, char **argv )
          // write process local load predictions to files (per process, per load balancing step)
          {
 
-            real_t wlLBM = real_t(0);
-            real_t wlBH = real_t(0);
-            real_t wlCoup1 = real_t(0);
-            real_t wlCoup2 = real_t(0);
-            real_t wlRB = real_t(0);
+            auto wlLBM = real_t(0);
+            auto wlBH = real_t(0);
+            auto wlCoup1 = real_t(0);
+            auto wlCoup2 = real_t(0);
+            auto wlRB = real_t(0);
 
             auto & forest = blocks->getBlockForest();
             pe_coupling::createWithNeighborhood<BoundaryHandling_T>(forest, boundaryHandlingID, bodyStorageID, ccdID, fcdID, numPeSubCycles, *couplingInfoCollection);
 
             for( auto blockIt = forest.begin(); blockIt != forest.end(); ++blockIt ) {
-               blockforest::Block *block = static_cast<blockforest::Block *> (&(*blockIt));
-               auto blockID = block->getId();
+               auto * block = static_cast<blockforest::Block *> (&(*blockIt));
+               const auto &blockID = block->getId();
                auto infoIt = couplingInfoCollection->find(blockID);
                auto blockInfo = infoIt->second;
 
                if( useEllipsoids )
                {
-
                   WALBERLA_ABORT("Not yet implemented!");
-
                }
                else
                {

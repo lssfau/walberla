@@ -29,11 +29,10 @@ namespace amr {
 void GlobalBodyPresenceLevelDetermination::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
                                                        std::vector< const Block * > &, const BlockForest & /*forest*/ )
 {
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
-   {
-      uint_t currentLevelOfBlock = it->first->getLevel();
+   for (auto &minTargetLevel : minTargetLevels) {
+      uint_t currentLevelOfBlock = minTargetLevel.first->getLevel();
 
-      auto blockExtendedAABB = it->first->getAABB().getExtended(blockExtensionLength_);
+      auto blockExtendedAABB = minTargetLevel.first->getAABB().getExtended(blockExtensionLength_);
       bool blockPartiallyOverlapsWithGlobalBodies = checkForPartialOverlapWithGlobalBodies(blockExtendedAABB);
 
       uint_t targetLevelOfBlock = currentLevelOfBlock; //keep everything as it is
@@ -50,7 +49,7 @@ void GlobalBodyPresenceLevelDetermination::operator()( std::vector< std::pair< c
       }
 
       WALBERLA_ASSERT_LESS_EQUAL(std::abs(int_c(targetLevelOfBlock) - int_c(currentLevelOfBlock)), uint_t(1), "Only level difference of maximum 1 allowed!");
-      it->second = targetLevelOfBlock;
+      minTargetLevel.second = targetLevelOfBlock;
    }
 }
 
@@ -58,7 +57,7 @@ bool GlobalBodyPresenceLevelDetermination::checkForPartialOverlapWithGlobalBodie
 {
    const Vector3<real_t> boxMidPoint( box.min() + real_t(0.5) * box.sizes());
    const Vector3<real_t> dxVec( box.sizes() );
-   const uint_t maxDepthSuperSampling = uint_t(2);
+   const auto maxDepthSuperSampling = uint_t(2);
 
    bool partialOverlapWithAllBodies = false;
 

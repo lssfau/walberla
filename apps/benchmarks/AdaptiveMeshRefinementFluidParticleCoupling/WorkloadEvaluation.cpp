@@ -57,6 +57,7 @@
 #include "timeloop/SweepTimeloop.h"
 
 #include "pe/basic.h"
+#include "pe/cr/ICR.h"
 #include "pe/fcd/GJKEPACollideFunctor.h"
 #include "pe/vtk/BodyVtkOutput.h"
 #include "pe/vtk/EllipsoidVtkOutput.h"
@@ -140,9 +141,9 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    WALBERLA_ASSERT_NOT_NULLPTR( block );
    WALBERLA_ASSERT_NOT_NULLPTR( storage );
 
-   FlagField_T * flagField       = block->getData< FlagField_T >( flagFieldID_ );
-   PdfField_T *  pdfField        = block->getData< PdfField_T > ( pdfFieldID_ );
-   BodyField_T * bodyField       = block->getData< BodyField_T >( bodyFieldID_ );
+   auto * flagField = block->getData< FlagField_T >( flagFieldID_ );
+   auto *  pdfField = block->getData< PdfField_T > ( pdfFieldID_ );
+   auto * bodyField = block->getData< BodyField_T >( bodyFieldID_ );
 
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
@@ -163,7 +164,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
 class CollisionPropertiesEvaluator
 {
 public:
-   CollisionPropertiesEvaluator( pe::cr::ICR & collisionResponse ) : collisionResponse_( collisionResponse )
+   explicit CollisionPropertiesEvaluator( pe::cr::ICR & collisionResponse ) : collisionResponse_( collisionResponse )
    {}
 
    real_t get()
@@ -189,12 +190,12 @@ public:
 
    real_t get()
    {
-      real_t maximumPenetration = real_t(0);
+      auto maximumPenetration = real_t(0);
       for (auto it = blocks_->begin(); it != blocks_->end(); ++it) {
          IBlock &currentBlock = *it;
 
-         pe::ccd::ICCD *ccd = currentBlock.getData<pe::ccd::ICCD>(ccdID_);
-         pe::fcd::IFCD *fcd = currentBlock.getData<pe::fcd::IFCD>(fcdID_);
+         auto *ccd = currentBlock.getData<pe::ccd::ICCD>(ccdID_);
+         auto *fcd = currentBlock.getData<pe::fcd::IFCD>(fcdID_);
          ccd->generatePossibleContacts();
          pe::Contacts& contacts = fcd->generateContacts( ccd->getPossibleContacts() );
          size_t numContacts( contacts.size() );
@@ -226,9 +227,9 @@ public:
 
    Vector3<real_t> get()
    {
-      real_t maxVelX = real_t(0);
-      real_t maxVelY = real_t(0);
-      real_t maxVelZ = real_t(0);
+      auto maxVelX = real_t(0);
+      auto maxVelY = real_t(0);
+      auto maxVelZ = real_t(0);
 
       for (auto it = blocks_->begin(); it != blocks_->end(); ++it) {
 
@@ -250,7 +251,7 @@ public:
 
    real_t getMagnitude()
    {
-      real_t magnitude = real_t(0);
+      auto magnitude = real_t(0);
 
       for (auto it = blocks_->begin(); it != blocks_->end(); ++it) {
 
@@ -277,13 +278,13 @@ void evaluateFluidQuantities(const shared_ptr< StructuredBlockStorage > & blocks
 
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
-      BoundaryHandling_T * boundaryHandling = blockIt->getData< BoundaryHandling_T >( boundaryHandlingID );
+      auto * boundaryHandling = blockIt->getData< BoundaryHandling_T >( boundaryHandlingID );
       auto xyzSize = boundaryHandling->getFlagField()->xyzSize();
       numCells += xyzSize.numCells();
 
-      for( cell_idx_t z = cell_idx_t(xyzSize.zMin()); z <= cell_idx_t(xyzSize.zMax()); ++z ){
-         for( cell_idx_t y = cell_idx_t(xyzSize.yMin()); y <= cell_idx_t(xyzSize.yMax()); ++y ){
-            for( cell_idx_t x = cell_idx_t(xyzSize.xMin()); x <= cell_idx_t(xyzSize.xMax()); ++x ) {
+      for(auto z = cell_idx_t(xyzSize.zMin()); z <= cell_idx_t(xyzSize.zMax()); ++z ){
+         for(auto y = cell_idx_t(xyzSize.yMin()); y <= cell_idx_t(xyzSize.yMax()); ++y ){
+            for(auto x = cell_idx_t(xyzSize.xMin()); x <= cell_idx_t(xyzSize.xMax()); ++x ) {
                if (boundaryHandling->isDomain(x, y, z)) {
                   ++numFluidCells;
                }
@@ -297,22 +298,18 @@ void evaluateFluidQuantities(const shared_ptr< StructuredBlockStorage > & blocks
 }
 
 void evaluatePEQuantities( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID bodyStorageID,
-                           const BlockDataID ccdID, const BlockDataID fcdID,
+                           const pe::cr::ICR & cr,
                            uint_t & numLocalParticles, uint_t & numShadowParticles, uint_t & numContacts)
 {
 
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
-      pe::Storage * bodyStorage = blockIt->getData<pe::Storage>(bodyStorageID);
+      auto * bodyStorage = blockIt->getData<pe::Storage>(bodyStorageID);
       pe::BodyStorage const & localStorage  = (*bodyStorage)[pe::StorageType::LOCAL];
       pe::BodyStorage const & shadowStorage = (*bodyStorage)[pe::StorageType::SHADOW];
       numLocalParticles += localStorage.size();
       numShadowParticles += shadowStorage.size();
 
-      pe::ccd::ICCD * ccd = blockIt->getData<pe::ccd::ICCD>(ccdID);
-      pe::fcd::IFCD * fcd = blockIt->getData<pe::fcd::IFCD>(fcdID);
-      ccd->generatePossibleContacts();
-      pe::Contacts& contacts = fcd->generateContacts( ccd->getPossibleContacts() );
-      numContacts += contacts.size();
+      numContacts += cr.getNumberOfContactsTreated();
    }
 }
 
@@ -321,22 +318,21 @@ void evaluateTimers(WcTimingPool & timingPool, WcTimingTree & peTimingTree,
                     std::vector<real_t> & timings )
 {
 
-   for( auto timingsIt = timings.begin(); timingsIt != timings.end(); ++timingsIt )
+   for (auto & timingsIt : timings)
    {
-      *timingsIt = real_t(0);
+      timingsIt = real_t(0);
    }
 
    timingPool.unifyRegisteredTimersAcrossProcesses();
    peTimingTree.synchronize();
 
-   real_t scalingFactor = real_t(1000); // milliseconds
+   auto scalingFactor = real_t(1000); // milliseconds
 
-   for(uint_t i = uint_t(0); i < timerKeys.size(); ++i )
+   for (auto i = uint_t(0); i < timerKeys.size(); ++i )
    {
       auto keys = timerKeys[i];
-      for(auto keyIt = keys.begin(); keyIt != keys.end(); ++keyIt)
+      for (const auto &timerName : keys)
       {
-         std::string timerName = *keyIt;
          if(timingPool.timerExists(timerName))
          {
             timings[i] += real_c(timingPool[timerName].total()) * scalingFactor;
@@ -381,19 +377,19 @@ int main( int argc, char **argv )
    mpi::Environment env( argc, argv );
 
 
-   real_t solidVolumeFraction = real_t(0.2);
+   auto solidVolumeFraction = real_t(0.2);
 
    // LBM / numerical parameters
-   uint_t blockSize  = uint_t(32);
-   real_t uSettling = real_t(0.1); // characteristic settling velocity
-   real_t diameter = real_t(10);
+   auto blockSize  = uint_t(32);
+   auto uSettling = real_t(0.1); // characteristic settling velocity
+   auto diameter = real_t(10);
 
-   real_t Ga = real_t(30); //Galileo number
-   uint_t numPeSubCycles = uint_t(10);
+   auto Ga = real_t(30); //Galileo number
+   auto numPeSubCycles = uint_t(10);
 
-   uint_t vtkIOFreq = 0;
-   real_t timestepsNonDim = real_t(2.5);
-   uint_t numSamples = uint_t(2000);
+   auto vtkIOFreq = uint_t(0);
+   auto timestepsNonDim = real_t(2.5);
+   auto numSamples = uint_t(2000);
    std::string baseFolder = "workload_files"; // folder for vtk and file output
 
    bool useEllipsoids = false;
@@ -437,9 +433,9 @@ int main( int argc, char **argv )
    // SIMULATION PROPERTIES //
    ///////////////////////////
 
-   const uint_t XBlocks = uint_t(4);
-   const uint_t YBlocks = uint_t(4);
-   const uint_t ZBlocks = uint_t(5);
+   const auto XBlocks = uint_t(4);
+   const auto YBlocks = uint_t(4);
+   const auto ZBlocks = uint_t(5);
 
    if( MPIManager::instance()->numProcesses() != XBlocks * YBlocks * ZBlocks )
    {
@@ -471,7 +467,7 @@ int main( int argc, char **argv )
    uint_t numberOfParticles = uint_c(std::ceil(solidVolume / ( math::M_PI / real_t(6) * diameter * diameter * diameter )));
    diameter = std::cbrt( solidVolume / ( real_c(numberOfParticles) * math::M_PI / real_t(6) ) );
 
-   real_t densityRatio = real_t(2.5);
+   auto densityRatio = real_t(2.5);
 
    real_t viscosity = uSettling * diameter / Ga;
    const real_t omega = lbm::collision_model::omegaFromViscosity(viscosity);
@@ -554,9 +550,9 @@ int main( int argc, char **argv )
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,1), Vector3<real_t>(0,0,0), peMaterial );
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,-1), Vector3<real_t>(0,0,real_c(ZCells)-topWallOffset), peMaterial );
 
-   real_t xParticle = real_t(0);
-   real_t yParticle = real_t(0);
-   real_t zParticle = real_t(0);
+   auto xParticle = real_t(0);
+   auto yParticle = real_t(0);
+   auto zParticle = real_t(0);
 
    for( uint_t nPart = 0; nPart < numberOfParticles; ++nPart )
    {
@@ -578,7 +574,7 @@ int main( int argc, char **argv )
       if( useEllipsoids )
       {
          // prolate ellipsoids
-         real_t axisFactor = real_t(1.5);
+         auto axisFactor = real_t(1.5);
          real_t axisFactor2 = std::sqrt(real_t(1)/axisFactor);
          real_t radius = diameter * real_t(0.5);
          pe::createEllipsoid( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( xParticle, yParticle, zParticle ), Vector3<real_t>(axisFactor*radius, axisFactor2*radius, axisFactor2*radius), peMaterial );
@@ -595,7 +591,7 @@ int main( int argc, char **argv )
 
    // 100 iterations of solver to resolve all major overlaps
    {
-      for( uint_t pet = uint_t(1); pet <= uint_t(100); ++pet )
+      for (auto pet = uint_t(1); pet <= uint_t(100); ++pet )
       {
          cr.timestep( real_t(1) );
          syncCall();
@@ -615,8 +611,8 @@ int main( int argc, char **argv )
 
    // resolve remaining overlaps via particle simulation
    {
-      const uint_t initialPeSteps = uint_t(2000);
-      const real_t dt_PE_init = real_t(1);
+      const auto initialPeSteps = uint_t(2000);
+      const auto dt_PE_init = real_t(1);
       const real_t overlapLimit = real_t(0.001) * diameter;
 
       WALBERLA_LOG_INFO_ON_ROOT("Particle creation done --- resolving overlaps with goal all < " << overlapLimit / diameter * real_t(100) << "%");
@@ -626,7 +622,7 @@ int main( int argc, char **argv )
       ContactDistanceEvaluator contactDistanceEvaluator(blocks, ccdID, fcdID);
       MaxVelocityEvaluator maxVelEvaluator(blocks, bodyStorageID);
 
-      for( uint_t pet = uint_t(1); pet <= initialPeSteps; ++pet )
+      for(auto pet = uint_t(1); pet <= initialPeSteps; ++pet )
       {
          cr.timestep( dt_PE_init );
          syncCall();
@@ -695,7 +691,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(
@@ -850,26 +846,26 @@ int main( int argc, char **argv )
 
    std::vector< std::vector<std::string> > timerKeys;
    std::vector<std::string> LBMTimer;
-   LBMTimer.push_back("Stream&Collide");
-   LBMTimer.push_back("Stream");
-   LBMTimer.push_back("Collide");
+   LBMTimer.emplace_back("Stream&Collide");
+   LBMTimer.emplace_back("Stream");
+   LBMTimer.emplace_back("Collide");
    timerKeys.push_back(LBMTimer);
 
    std::vector<std::string> bhTimer;
-   bhTimer.push_back("Boundary Handling");
+   bhTimer.emplace_back("Boundary Handling");
    timerKeys.push_back(bhTimer);
 
    std::vector<std::string> couplingTimer1;
-   couplingTimer1.push_back("Body Mapping");
+   couplingTimer1.emplace_back("Body Mapping");
    std::vector<std::string> couplingTimer2;
-   couplingTimer2.push_back("PDF Restore");
+   couplingTimer2.emplace_back("PDF Restore");
    timerKeys.push_back(couplingTimer1);
    timerKeys.push_back(couplingTimer2);
 
    std::vector<std::string> peTimer;
-   peTimer.push_back("Simulation Step.Collision Detection");
-   peTimer.push_back("Simulation Step.Collision Response Integration");
-   peTimer.push_back("Simulation Step.Collision Response Resolution.Collision Response Solving");
+   peTimer.emplace_back("Simulation Step.Collision Detection");
+   peTimer.emplace_back("Simulation Step.Collision Response Integration");
+   peTimer.emplace_back("Simulation Step.Collision Response Resolution.Collision Response Solving");
    timerKeys.push_back(peTimer);
 
    uint_t numCells, numFluidCells, numNBCells, numLocalParticles, numShadowParticles, numContacts;
@@ -912,7 +908,7 @@ int main( int argc, char **argv )
    }
 
 
-   uint_t timeStepOfFirstTiming = uint_t(50);
+   auto timeStepOfFirstTiming = uint_t(50);
 
    if( timesteps - timeStepOfFirstTiming < numSamples )
    {
@@ -934,7 +930,7 @@ int main( int argc, char **argv )
          // include -> evaluate all timers and quantities
 
          evaluateFluidQuantities(blocks, boundaryHandlingID, numCells, numFluidCells, numNBCells);
-         evaluatePEQuantities(blocks, bodyStorageID, ccdID, fcdID, numLocalParticles, numShadowParticles, numContacts);
+         evaluatePEQuantities(blocks, bodyStorageID, cr, numLocalParticles, numShadowParticles, numContacts);
 
          evaluateTimers(timeloopTiming, timingTreePE, timerKeys, timings);
 
@@ -945,9 +941,8 @@ int main( int argc, char **argv )
             file << timeloop.getCurrentTimeStep() << " " << real_c(timeloop.getCurrentTimeStep()) / Tref << " "
                  << numCells << " " << numFluidCells << " " << numNBCells << " "
                  << numLocalParticles << " " << numShadowParticles << " " << numContacts << " " << numPeSubCycles;
-            for( auto timeIt = timings.begin(); timeIt != timings.end(); ++timeIt )
-            {
-               file << " " << *timeIt;
+            for (real_t timing : timings) {
+               file << " " << timing;
             }
             file << " " << totalTime << "\n";
          }

@@ -27,9 +27,8 @@ namespace amr {
 
 void MetisAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & /*phantomBlockForest*/)
 {
-   for( auto it = blockData.begin(); it != blockData.end(); ++it )
-   {
-      const PhantomBlock * block = it->first;
+   for (auto &it : blockData) {
+      const PhantomBlock * block = it.first;
       //only change of one level is supported!
       WALBERLA_ASSERT_LESS( std::abs(int_c(block->getLevel()) - int_c(block->getSourceLevel())), 2 );
 
@@ -39,7 +38,7 @@ void MetisAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBl
 
       std::vector<int64_t> metisVertexWeights(ncon_);
 
-      for( uint_t con = uint_t(0); con < ncon_; ++con )
+      for( auto con = uint_t(0); con < ncon_; ++con )
       {
          real_t vertexWeight = std::max(weightEvaluationFct_[con](blockInfo), blockBaseWeight_);
 
@@ -51,9 +50,9 @@ void MetisAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBl
 
       blockforest::DynamicParMetisBlockInfo info( metisVertexWeights );
 
-      info.setVertexCoords( it->first->getAABB().center() );
+      info.setVertexCoords(it.first->getAABB().center() );
 
-      real_t blockVolume = it->first->getAABB().volume();
+      real_t blockVolume = it.first->getAABB().volume();
       real_t approximateEdgeLength = std::cbrt( blockVolume );
 
       int64_t faceNeighborWeight = int64_c(approximateEdgeLength * approximateEdgeLength ); //common face
@@ -65,32 +64,32 @@ void MetisAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBl
 
       for( const uint_t idx : blockforest::getFaceNeighborhoodSectionIndices() )
       {
-         for( uint_t nb = uint_t(0); nb < it->first->getNeighborhoodSectionSize(idx); ++nb )
+         for( auto nb = uint_t(0); nb < it.first->getNeighborhoodSectionSize(idx); ++nb )
          {
-            auto neighborBlockID = it->first->getNeighborId(idx,nb);
+            auto neighborBlockID = it.first->getNeighborId(idx,nb);
             info.setEdgeWeight(neighborBlockID, faceNeighborWeight );
          }
       }
 
       for( const uint_t idx : blockforest::getEdgeNeighborhoodSectionIndices() )
       {
-         for( uint_t nb = uint_t(0); nb < it->first->getNeighborhoodSectionSize(idx); ++nb )
+         for( auto nb = uint_t(0); nb < it.first->getNeighborhoodSectionSize(idx); ++nb )
          {
-            auto neighborBlockID = it->first->getNeighborId(idx,nb);
+            auto neighborBlockID = it.first->getNeighborId(idx,nb);
             info.setEdgeWeight(neighborBlockID, edgeNeighborWeight );
          }
       }
 
       for( const uint_t idx : blockforest::getCornerNeighborhoodSectionIndices() )
       {
-         for( uint_t nb = uint_t(0); nb < it->first->getNeighborhoodSectionSize(idx); ++nb )
+         for( auto nb = uint_t(0); nb < it.first->getNeighborhoodSectionSize(idx); ++nb )
          {
-            auto neighborBlockID = it->first->getNeighborId(idx,nb);
+            auto neighborBlockID = it.first->getNeighborId(idx,nb);
             info.setEdgeWeight(neighborBlockID, cornerNeighborWeight );
          }
       }
 
-      it->second = info;
+      it.second = info;
 
    }
 }

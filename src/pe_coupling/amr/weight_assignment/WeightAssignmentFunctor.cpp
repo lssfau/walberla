@@ -26,9 +26,8 @@ namespace amr {
 
 void WeightAssignmentFunctor::operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
 {
-   for( auto it = blockData.begin(); it != blockData.end(); ++it )
-   {
-      const PhantomBlock * block = it->first;
+   for (auto &it : blockData) {
+      const PhantomBlock * block = it.first;
       //only change of one level is supported!
       WALBERLA_ASSERT_LESS( std::abs(int_c(block->getLevel()) - int_c(block->getSourceLevel())), 2 );
 
@@ -37,7 +36,7 @@ void WeightAssignmentFunctor::operator()( std::vector< std::pair< const PhantomB
 
       real_t blockWeight = std::max(weightEvaluationFct_(blockInfo), blockBaseWeight_);
 
-      it->second = PhantomBlockWeight( double_c( blockWeight ) );
+      it.second = PhantomBlockWeight( double_c( blockWeight ) );
 
    }
 }

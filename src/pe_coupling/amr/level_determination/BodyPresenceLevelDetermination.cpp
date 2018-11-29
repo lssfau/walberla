@@ -28,11 +28,10 @@ namespace amr {
 void BodyPresenceLevelDetermination::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
                                                  std::vector< const Block * > &, const BlockForest & /*forest*/ )
 {
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
-   {
-      uint_t currentLevelOfBlock = it->first->getLevel();
+   for (auto &minTargetLevel : minTargetLevels) {
+      uint_t currentLevelOfBlock = minTargetLevel.first->getLevel();
 
-      const uint_t numberOfParticlesInDirectNeighborhood = getNumberOfLocalAndShadowBodiesInNeighborhood(it->first);
+      const uint_t numberOfParticlesInDirectNeighborhood = getNumberOfLocalAndShadowBodiesInNeighborhood(minTargetLevel.first);
 
       uint_t targetLevelOfBlock = currentLevelOfBlock; //keep everything as it is
       if ( numberOfParticlesInDirectNeighborhood > uint_t(0) )
@@ -48,13 +47,13 @@ void BodyPresenceLevelDetermination::operator()( std::vector< std::pair< const B
       }
 
       WALBERLA_CHECK_LESS_EQUAL(std::abs(int_c(targetLevelOfBlock) - int_c(currentLevelOfBlock)), uint_t(1), "Only level difference of maximum 1 allowed!");
-      it->second = targetLevelOfBlock;
+      minTargetLevel.second = targetLevelOfBlock;
    }
 }
 
 uint_t BodyPresenceLevelDetermination::getNumberOfLocalAndShadowBodiesInNeighborhood(const Block * block)
 {
-   uint_t numBodies = uint_t(0);
+   auto numBodies = uint_t(0);
 
    // add bodies of current block
    const auto infoIt = infoCollection_->find(block->getId());
@@ -66,7 +65,7 @@ uint_t BodyPresenceLevelDetermination::getNumberOfLocalAndShadowBodiesInNeighbor
    // add bodies of all neighboring blocks
    for(uint_t i = 0; i < block->getNeighborhoodSize(); ++i)
    {
-      BlockID neighborBlockID = block->getNeighborId(i);
+      const BlockID &neighborBlockID = block->getNeighborId(i);
       const auto infoItNeighbor = infoCollection_->find(neighborBlockID);
       WALBERLA_CHECK_UNEQUAL(infoItNeighbor, infoCollection_->end(), "Neighbor block with ID " << neighborBlockID << " not found in info collection!");
 
