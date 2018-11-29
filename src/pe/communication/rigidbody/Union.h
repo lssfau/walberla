@@ -123,8 +123,7 @@ inline std::unique_ptr<Union<BodyTypeTuple>> instantiate( mpi::RecvBuffer& buffe
                                                      false,
                                                      subobjparam.communicating_,
                                                      subobjparam.infiniteMass_ );
-   un->setLinearVel( subobjparam.v_ );
-   un->setAngularVel( subobjparam.w_ );
+
    un->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
 
    // Decoding the contained primitives
@@ -136,7 +135,8 @@ inline std::unique_ptr<Union<BodyTypeTuple>> instantiate( mpi::RecvBuffer& buffe
       obj->setRemote( true );
       un->add(std::move(obj));
    }
-
+   un->setLinearVel( subobjparam.v_ );
+   un->setAngularVel( subobjparam.w_ );
    newBody = un.get();
    return un;
 }
