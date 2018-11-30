@@ -84,6 +84,7 @@
 #include "lbm/refinement/BoundarySetup.h"
 #include "lbm/refinement/PdfFieldSyncPackInfo.h"
 #include "lbm/refinement/TimeStep.h"
+#include "lbm/refinement/VorticityBasedLevelDetermination.h"
 #include "lbm/sweeps/CellwiseSweep.h"
 #include "lbm/sweeps/SplitPureSweep.h"
 #include "lbm/sweeps/SplitSweep.h"
@@ -1062,109 +1063,6 @@ Set<SUID> Pseudo2DBlockStateDetermination::operator()( const std::vector< std::p
    
    return state;
 }
-
-
-
-template< typename VectorField_T, typename Filter_T, bool Pseudo2D = false >
-class VorticityRefinement // used as a 'BlockForest::RefreshMinTargetLevelDeterminationFunction'
-{
-public:
-
-   VorticityRefinement( const ConstBlockDataID & fieldId, const Filter_T & filter,
-                       const real_t upperLimit, const real_t lowerLimit, const uint_t maxLevel ) :
-      fieldId_( fieldId ), filter_( filter ),
-      upperLimit_( upperLimit * upperLimit ), lowerLimit_( lowerLimit * lowerLimit ), maxLevel_( maxLevel )
-   {}
-
-   void operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                    std::vector< const Block * > & blocksAlreadyMarkedForRefinement,
-                    const BlockForest & forest );
-
-private:
-
-   ConstBlockDataID fieldId_;
-
-   Filter_T filter_;
-
-   real_t upperLimit_;
-   real_t lowerLimit_;
-
-   uint_t maxLevel_;
-   
-}; // class VorticityRefinement
-
-template< typename VectorField_T, typename Filter_T, bool Pseudo2D >
-void VorticityRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                                                                           std::vector< const Block * > &, const BlockForest & )
-{
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
-   {
-      const Block * const block = it->first;
-      const VectorField_T * u = block->template getData< VectorField_T >( fieldId_ );
-
-      if( u == nullptr )
-      {
-         it->second = uint_t(0);
-         continue;
-      }
-      
-      CellInterval interval = u->xyzSize();
-      Cell expand( cell_idx_c(-1), cell_idx_c(-1), Pseudo2D ? cell_idx_t(0) : cell_idx_c(-1) );
-      interval.expand( expand );
-
-      const cell_idx_t one( cell_idx_t(1) );
-      const real_t half( real_c(0.5) );
-      
-      bool refine( false );
-      bool coarsen( true );
-
-      filter_( *block );
-
-      WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ( interval,
-
-         if( filter_(x,y,z) && filter_(x+one,y,z) && filter_(x-one,y,z) && filter_(x,y+one,z) && filter_(x,y-one,z) &&
-                  ( Pseudo2D || (filter_(x,y,z+one) && filter_(x,y,z-one)) ) )
-         {
-            const Vector3< real_t >& xa = u->get(x+one,y,z);
-            const Vector3< real_t >& xb = u->get(x-one,y,z);
-            const Vector3< real_t >& ya = u->get(x,y+one,z);
-            const Vector3< real_t >& yb = u->get(x,y-one,z);
-            const Vector3< real_t >  za = Pseudo2D ? Vector3< real_t >(0) : u->get(x,y,z+one);
-            const Vector3< real_t >  zb = Pseudo2D ? Vector3< real_t >(0) : u->get(x,y,z-one);
-
-            // ATTENTION: dx/y/z is assumed to be equal to '1'!
-            const real_t duzdy = half * ( ya[2] - yb[2] );
-            const real_t duydz = half * ( za[1] - zb[1] );
-            const real_t duxdz = half * ( za[0] - zb[0] );
-            const real_t duzdx = half * ( xa[2] - xb[2] );
-            const real_t duydx = half * ( xa[1] - xb[1] );
-            const real_t duxdy = half * ( ya[0] - yb[0] );
-
-            const Vector3< real_t > curl( duzdy - duydz, duxdz - duzdx, duydx - duxdy );
-            const auto curlSqr = curl.sqrLength();
-
-            if( curlSqr > lowerLimit_ )
-            {
-               coarsen = false;
-               if( curlSqr > upperLimit_ )
-                  refine = true;
-            }
-         }
-      )
-      
-      if( refine && block->getLevel() < maxLevel_ )
-      {
-         WALBERLA_ASSERT( !coarsen );
-         it->second = block->getLevel() + uint_t(1);
-      }
-      if( coarsen && block->getLevel() > uint_t(0) )
-      {
-         WALBERLA_ASSERT( !refine );
-         it->second = block->getLevel() - uint_t(1);
-      }
-   }
-}
-
 
 
 // used as a 'BlockForest::RefreshMinTargetLevelDeterminationFunction
@@ -2578,8 +2476,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
       {
          const real_t lowerLimit = configBlock.getParameter< real_t >( "curlLowerLimit" );
          const real_t upperLimit = configBlock.getParameter< real_t >( "curlUpperLimit" );
-         
-         VorticityRefinement< VelocityField_T, field::FlagFieldEvaluationFilter<FlagField_T>, Is2D<LatticeModel_T>::value > vorticityRefinement(
+
+         lbm::refinement::VorticityBasedLevelDetermination< field::FlagFieldEvaluationFilter<FlagField_T>, Is2D<LatticeModel_T>::value > vorticityRefinement(
             velocityFieldId, flagFieldFilter, upperLimit, lowerLimit, configBlock.getParameter< uint_t >( "maxLevel", uint_t(0) ) );
 
          minTargetLevelDeterminationFunctions.add( vorticityRefinement );
