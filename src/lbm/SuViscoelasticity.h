@@ -223,7 +223,7 @@ public:
                   if (boundaryHandling->isDomain(cell + *d)) {
                      f[i] += stress->get(cell + *d)(k, i) * d.c(k);
                   } else if(boundaryHandling->isDomain(cell - *d)){
-                     f[i] += -stress->get(cell - *d)(k, i) * d.c(k) + stress->get(cell)(k, i) * d.c(k) * real_c(2);
+                     f[i] += -stress->get(cell - *d)(k, i) * d.c(k) + stress->get(cell)(k, i) * d.c(k) * real_c(2.0);
                   } else {
                      f[i] += real_t(0);
                   }
