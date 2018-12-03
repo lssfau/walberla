@@ -1,3 +1,4 @@
+add_subdirectory( AdaptiveMeshRefinementFluidParticleCoupling )
 add_subdirectory( ComplexGeometry )
 add_subdirectory( DEM )
 add_subdirectory( MeshDistance )
