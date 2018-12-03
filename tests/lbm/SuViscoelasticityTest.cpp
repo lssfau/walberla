@@ -263,7 +263,7 @@ int main(int argc, char ** argv ){
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field", FieldGhostLayers);
    BlockDataID forceFieldId = field::addToStorage<ForceField_T>( blocks, "Force Field", Vector3<real_t>(0.0), field::zyxf, FieldGhostLayers);
    LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::TRT::constructWithMagicNumber( walberla::lbm::collision_model::omegaFromViscosity(eta_s)), lbm::force_model::GuoField<ForceField_T>( forceFieldId ) );
-   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, Vector3<real_t>(), real_c(1), FieldGhostLayers );
+   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, Vector3<real_t>(), real_c(1.0), FieldGhostLayers );
    BlockDataID stressId = walberla::field::addToStorage<StressField_T>( blocks, "Stress Field", Matrix3<real_t>(0.0), field::zyxf, FieldGhostLayers);
    BlockDataID stressOldId = walberla::field::addToStorage<StressField_T>( blocks, "Old Stress Field", Matrix3<real_t>(0.0), field::zyxf, FieldGhostLayers);
    BlockDataID velocityId = walberla::field::addToStorage<VelocityField_T> (blocks, "Velocity Field", Vector3<real_t>(0.0), field::zyxf, FieldGhostLayers);

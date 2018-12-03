@@ -147,9 +147,9 @@ public:
                for (uint_t a = 0; a < LatticeModel_T::Stencil::D; ++a) {
                   for (uint_t b = 0; b < LatticeModel_T::Stencil::D; ++b) {
                      if(boundaryHandling->isDomain(cell + *d) ) {
-                        gradu(b, a) += (velocity->get(cell + *d)[a] * d.c(b)) * real_c(0.5);
+                        gradu(b, a) += velocity->get(cell + *d)[a] * real_c(d.c(b)) * real_c(0.5);
                      } else if(boundaryHandling->isDomain(cell - *d)){
-                        gradu(b, a) += (velocity->get(cell - *d)[a] * d.c(b)) * real_c(-0.5) + velocity->get(cell)[a] * d.c(b);
+                        gradu(b, a) += velocity->get(cell - *d)[a] * real_c(d.c(b)) * real_c(-0.5) + velocity->get(cell)[a] * real_c(d.c(b));
                      } else {
                         gradu(b, a) += real_t(0);
                      }
@@ -166,7 +166,7 @@ public:
             }
 
             // equation 23 from Su 2013
-            stressNew->get(cell) = stressOld->get(cell) + (stress1 * real_c(2.0) - stress2 * real_c(1.5) - stress3 * real_c(0.5)) * delta_t_ * (real_c(1) / pdf->getDensity(cell)) +
+            stressNew->get(cell) = stressOld->get(cell) + (stress1 * real_c(2.0) - stress2 * real_c(1.5) - stress3 * real_c(0.5)) * delta_t_ * (real_c(1.0) / pdf->getDensity(cell)) +
                                    relstr * delta_t_;
          }
       })
@@ -221,9 +221,9 @@ public:
                      k = 2;
                   }
                   if (boundaryHandling->isDomain(cell + *d)) {
-                     f[i] += stress->get(cell + *d)(k, i) * d.c(k);
+                     f[i] += stress->get(cell + *d)(k, i) * real_c(d.c(k));
                   } else if(boundaryHandling->isDomain(cell - *d)){
-                     f[i] += -stress->get(cell - *d)(k, i) * d.c(k) + stress->get(cell)(k, i) * d.c(k) * real_c(2.0);
+                     f[i] += -stress->get(cell - *d)(k, i) * real_c(d.c(k)) + stress->get(cell)(k, i) * real_c(d.c(k)) * real_c(2.0);
                   } else {
                      f[i] += real_t(0);
                   }
