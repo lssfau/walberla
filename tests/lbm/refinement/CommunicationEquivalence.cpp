@@ -50,11 +50,10 @@
 
 #include "timeloop/SweepTimeloop.h"
 
-#include <boost/bind.hpp>
-
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
+#include <functional>
 
 //#define TEST_USES_VTK_OUTPUT
 #ifdef TEST_USES_VTK_OUTPUT
@@ -64,14 +63,7 @@
 enum TestMode { ENTIRE_TOP, TOP, MIDDLE, ENTIRE_BOTTOM };
 static const TestMode testMode = TOP;
 
-
-
-///////////
-// USING //
-///////////
-
-using namespace walberla;
-using walberla::uint_t;
+namespace walberla{
 
 //////////////
 // TYPEDEFS //
@@ -80,12 +72,12 @@ using walberla::uint_t;
 typedef lbm::D3Q19< lbm::collision_model::SRT,      false > LatticeModel_T;
 //typedef lbm::D3Q19< lbm::collision_model::TRT,      false > LatticeModel_T;
 //typedef lbm::D3Q19< lbm::collision_model::D3Q19MRT, false > LatticeModel_T;
-typedef LatticeModel_T::Stencil                             Stencil_T;
+using Stencil_T = LatticeModel_T::Stencil;
 
-typedef lbm::PdfField< LatticeModel_T >  PdfField_T;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t    flag_t;
-typedef FlagField< flag_t >  FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 const uint_t FieldGhostLayers = 4;
 
@@ -190,7 +182,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const uint_t le
    // initialize SetupBlockForest = determine domain decomposition
    SetupBlockForest sforest;
 
-   sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, levels ) );
+   sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, levels ) );
    sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
    sforest.init( AABB( real_c(0), real_c(0), real_c(0), real_c( numberOfXBlocks * numberOfXCellsPerBlock ),
@@ -494,4 +486,10 @@ int main( int argc, char ** argv )
    logging::Logging::printFooterOnStream();
    
    return EXIT_SUCCESS;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   return walberla::main(argc, argv);
 }

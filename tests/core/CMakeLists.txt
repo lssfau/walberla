@@ -144,13 +144,6 @@ waLBerla_compile_test( FILES mpi/ProbeVsExtraMessage.cpp DEPENDS postprocessing)
 
 
 ##############
-# ptrvector #
-##############
-
-waLBerla_compile_test( NAME PtrVector FILES ptrvector/PtrVector.cpp )
-waLBerla_execute_test( NAME PtrVector )
-
-##############
 # selectable #
 ##############
 

@@ -24,7 +24,7 @@
 #include "core/logging/Logging.h"
 #include "core/mpi/Environment.h"
 
-using namespace walberla;
+namespace walberla{
 
 void TwoBlockForestsTest()
 {
@@ -74,4 +74,10 @@ int main( int argc, char** argv )
    TwoBlockForestsTest();
 
    return EXIT_SUCCESS;
+}
+}
+
+int main( int argc, char** argv )
+{
+   return walberla::main(argc,argv);
 }

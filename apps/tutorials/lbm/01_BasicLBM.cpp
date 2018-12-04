@@ -31,16 +31,16 @@
 
 
 
-using namespace walberla;
+namespace walberla {
 
-typedef lbm::D2Q9< lbm::collision_model::SRT >  LatticeModel_T;
-typedef LatticeModel_T::Stencil                 Stencil_T;
-typedef LatticeModel_T::CommunicationStencil    CommunicationStencil_T;
+using LatticeModel_T = lbm::D2Q9<lbm::collision_model::SRT>;
+using Stencil_T = LatticeModel_T::Stencil;
+using CommunicationStencil_T = LatticeModel_T::CommunicationStencil;
 
-typedef lbm::PdfField< LatticeModel_T >  PdfField_T;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t    flag_t;
-typedef FlagField< flag_t >  FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 
 
@@ -119,4 +119,10 @@ int main( int argc, char ** argv )
       timeloop.run();
 
    return EXIT_SUCCESS;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   walberla::main(argc, argv);
 }

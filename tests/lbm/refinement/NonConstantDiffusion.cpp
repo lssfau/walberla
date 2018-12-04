@@ -75,6 +75,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <stdexcept>
+#include <functional>
 
 #include "gather/GnuPlotGraphWriter.h"
 #include "field/vtk/FlagFieldCellFilter.h"
@@ -92,11 +93,11 @@ typedef GhostLayerField< Vector3<real_t>, 1 > VectorField;
 
 typedef lbm::D3Q19< lbm::collision_model::SRTField<ScalarField>, true, lbm::force_model::None, 1 >  LM;
 
-typedef LM::Stencil             Stencil;
-typedef lbm::PdfField< LM >     MyPdfField;
+using Stencil = LM::Stencil;
+using MyPdfField = lbm::PdfField<LM>;
 
-typedef uint8_t                 flag_t;
-typedef FlagField< flag_t >     MyFlagField;
+using flag_t = uint8_t;
+using MyFlagField = FlagField<flag_t>;
 
 typedef lbm::DefaultDiffusionBoundaryHandlingFactory< LM, MyFlagField > MyBoundaryHandling;
 
@@ -137,7 +138,7 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
 
     uint_t cells[]  = { length, width, width  };
     uint_t blocks[] = { uint_t(1u), uint_t(1u), uint_t(1u) };
-    sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, refinement ) );
+    sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, refinement ) );
     sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
     sforest.init(

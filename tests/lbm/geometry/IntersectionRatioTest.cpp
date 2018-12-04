@@ -80,9 +80,9 @@ void testAABB()
    std::mt19937 randomEngine;
 
    std::vector<math::AABB> testAABBs;
-   testAABBs.push_back( math::AABB( -UNIT, UNIT ) );
-   testAABBs.push_back( math::AABB(  ZERO, UNIT ) );
-   testAABBs.push_back( math::AABB( -UNIT, ZERO ) );
+   testAABBs.emplace_back( -UNIT, UNIT );
+   testAABBs.emplace_back(  ZERO, UNIT );
+   testAABBs.emplace_back( -UNIT, ZERO );
 
    for( auto aabbIt = testAABBs.begin(); aabbIt != testAABBs.end(); ++aabbIt )
    {
@@ -94,7 +94,7 @@ void testAABB()
          Vector3<real_t> outerPoint, innerPoint;
          do { outerPoint = outerAABB.randomPoint( randomEngine ); } while( aabbIt->contains( outerPoint ) );
          innerPoint = aabbIt->randomPoint( randomEngine );
-         testPoints.push_back( std::make_pair( outerPoint, innerPoint - outerPoint ) );
+         testPoints.emplace_back( outerPoint, innerPoint - outerPoint );
       }
       
       for( auto pointIt = testPoints.begin(); pointIt != testPoints.end(); ++pointIt )

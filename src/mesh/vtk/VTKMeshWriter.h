@@ -52,6 +52,7 @@ public:
    {
    public:
       DataSource( const std::string & _name ) : name_( _name ) { }
+      virtual ~DataSource() = default;
       typedef T value_type;
       virtual uint_t      numComponents() = 0;
       const std::string & name() { return name_; }
@@ -67,6 +68,7 @@ public:
       typedef typename VTKMeshWriter::Vertices Vertices;
 
       VertexDataSource( const std::string & _name ) : DataSource<T>( _name ) { }
+      virtual ~VertexDataSource() = default;
       virtual void getData( const MeshType &, const Vertices & vertices, std::vector<T> & ) = 0;
    };
 
@@ -78,6 +80,7 @@ public:
       typedef typename VTKMeshWriter::Faces Faces;
 
       FaceDataSource( const std::string & _name ) : DataSource<T>( _name ) { }
+      virtual ~FaceDataSource() = default;
       virtual void getData( const MeshType &, const Faces & faces, std::vector<T> & ) = 0;
    };
 

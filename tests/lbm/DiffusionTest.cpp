@@ -79,15 +79,17 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include <functional>
+
 
 namespace walberla {
 
-typedef uint8_t            flag_t;
-typedef Vector3< real_t >  vec3_t;
+using flag_t = uint8_t;
+using vec3_t = Vector3<real_t>;
 
 typedef GhostLayerField< real_t, 1         >  ScalarField;
 typedef GhostLayerField< vec3_t, 1         >  VectorField;
-typedef FlagField      < flag_t            >  MyFlagField;
+using MyFlagField = FlagField<flag_t>;
 
 typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::Correction<VectorField>, 1 > AdvDiffLatticeModel_Corr;
 typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None,                    1 > AdvDiffLatticeModel_None;
@@ -168,8 +170,8 @@ template< typename AdvDiffLatticeModel >
 int run( int argc, char **argv )
 {
    // typedefs
-   typedef typename AdvDiffLatticeModel::Stencil    AdvDiffStencil;
-   typedef lbm::PdfField< AdvDiffLatticeModel >     AdvDiffPDFField;
+   using AdvDiffStencil = typename AdvDiffLatticeModel::Stencil;
+   using AdvDiffPDFField = lbm::PdfField<AdvDiffLatticeModel>;
 
 #ifdef _OPENMP
    omp_set_num_threads( std::max( omp_get_num_threads()>>1, 4 ) );
@@ -280,16 +282,16 @@ int run( int argc, char **argv )
    scheme.addPackInfo( make_shared< field::communication::PackInfo<  AdvDiffPDFField > >( srcFieldID ) );
    timeloop.addFuncBeforeTimeStep( scheme, "Communication" );
 
-   using boost::ref;
+   using std::ref;
 
-   timeloop.add() << Sweep( boost::bind( hydroFunc, _1, velFieldID, u, tperiod, ref(timestep) ), "Hydro Func" );
+   timeloop.add() << Sweep( std::bind( hydroFunc, std::placeholders::_1, velFieldID, u, tperiod, ref(timestep) ), "Hydro Func" );
    
    timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseAdvectionDiffusionSweep< AdvDiffLatticeModel, VectorField, MyFlagField >(
                                                 srcFieldID, velFieldID, flagFieldID, getFluidFlag() ) ), "LBM_SRT" );
   
-   timeloop.add() << BeforeFunction( boost::bind( prepFunc, u[dim], dv, D, cperiod, tperiod, ref(timestep), ref(cosi), ref(sisi), ref(sexp) ), "prepare test" )
-                  << Sweep         ( boost::bind( testFunc<AdvDiffPDFField>, _1, srcFieldID, dim, v, cperiod, ref(cosi), ref(sisi), ref(sexp), ref(E_mean_) ), "Test Func" ) 
-                  << AfterFunction ( boost::bind( incTimeFunc, ref(timestep) ), "increment time" );
+   timeloop.add() << BeforeFunction( std::bind( prepFunc, u[dim], dv, D, cperiod, tperiod, ref(timestep), ref(cosi), ref(sisi), ref(sexp) ), "prepare test" )
+                  << Sweep         ( std::bind( testFunc<AdvDiffPDFField>, std::placeholders::_1, srcFieldID, dim, v, cperiod, ref(cosi), ref(sisi), ref(sexp), ref(E_mean_) ), "Test Func" ) 
+                  << AfterFunction ( std::bind( incTimeFunc, ref(timestep) ), "increment time" );
 
    // --- run timeloop --- //
 

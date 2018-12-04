@@ -46,13 +46,13 @@
 
 #include <cmath>
 
-using namespace walberla;
+namespace walberla {
 
 
 
 typedef GhostLayerField< real_t, 1 > PdeField_T;
-typedef stencil::D2Q5                Stencil_T;
-typedef pde::Jacobi<Stencil_T>::StencilField_T  StencilField_T;
+using Stencil_T = stencil::D2Q5;
+using StencilField_T = pde::Jacobi<Stencil_T>::StencilField_T;
 
 
 
@@ -209,4 +209,10 @@ int main( int argc, char** argv )
 
    logging::Logging::printFooterOnStream();
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

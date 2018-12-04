@@ -30,6 +30,8 @@
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
 #include "core/mpi/SetReduction.h"
+#include "core/extern/json.hpp"
+
 
 #include <algorithm>
 #include <iomanip>
@@ -111,7 +113,7 @@ void TimingNode<TP>::swap(TimingNode<TP>& tt)
     }
 }
 
-/// Finds the spezified timer in the timing hierarchy
+/// Finds the specified timer in the timing hierarchy
 /// \param name timer name which may include more than one hierarchy separated by "."
 /// \code findTimer(tn, "firstLevel.secondLevel.thirdLevel.timerName"); \endcode
 /// \relates TimingNode
@@ -127,6 +129,31 @@ const Timer<TP>& findTimer( const TimingNode<TP>& tn, const std::string& name)
    {
       WALBERLA_ASSERT_UNEQUAL( tn.tree_.find(name), tn.tree_.end(), "Could not find timer: " << name );
       return tn.tree_.at(name).timer_;
+   }
+}
+
+/// Checks if the specified timer exists in the timing hierarchy
+/// \param name timer name which may include more than one hierarchy separated by "."
+/// \code timerExists(tn, "firstLevel.secondLevel.thirdLevel.timerName"); \endcode
+/// \relates TimingNode
+template< typename TP >  // Timing policy
+bool timerExists( const TimingNode<TP>& tn, const std::string& name )
+{
+   auto pos = name.find_first_of(".");
+   if (pos != std::string::npos)
+   {
+      if( tn.tree_.find(name.substr(0, pos)) != tn.tree_.end() )
+      {
+         return timerExists( tn.tree_.at(name.substr(0, pos)), name.substr(pos+1, std::string::npos));
+      }
+      else
+      {
+         return false;
+      }
+   }
+   else
+   {
+      return tn.tree_.find(name) != tn.tree_.end();
    }
 }
 
@@ -456,6 +483,43 @@ std::ostream& operator<<(std::ostream& os, const TimingNode<TP>& tn)
    return os;
 }
 
+/// convertes a TimingNode to json. The signature is required by the json library
+/// \relates TimingNode
+template < typename TP > // Timing policy
+void to_json( nlohmann::json& j, const TimingNode< TP >& tn )
+{
+   /// ignore the first timer in the timing node since it is empty
+   if( tn.last_ == nullptr )
+   {
+      j = nlohmann::json( tn.tree_ );
+   } else
+   {
+      j           = nlohmann::json( tn.timer_ );
+      j["childs"] = nlohmann::json( tn.tree_ );
+   }
+}
+
+namespace internal {
+/// adds a sub timer containing the remainder of all other subtimers on the same hierarchy level
+/// \relates TimingNode
+template< typename TP >
+// Timing policy
+void addRemainderNodes(timing::TimingNode<TP> &tn) {
+   if (tn.tree_.empty()) {
+      return;
+   }
+   double remainder = tn.timer_.total();
+   for (auto i = tn.tree_.begin(); i != tn.tree_.end(); ++i) {
+      remainder -= i->second.timer_.total();
+      addRemainderNodes(i->second);
+   }
+   if (tn.last_ != nullptr) {
+      WALBERLA_ASSERT( tn.tree_.find("Remainder") == tn.tree_.end());
+      tn.tree_["Remainder"].timer_ = timing::Timer<TP>(1, 0, 0, remainder, 0);
+      tn.tree_["Remainder"].last_ = &tn;
+   }
+}
+} /// namespace internal
 }
 
 typedef timing::TimingNode<timing::WcPolicy>  WcTimingNode;

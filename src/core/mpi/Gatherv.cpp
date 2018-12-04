@@ -112,7 +112,7 @@ void gathervBuffer( const mpi::SendBuffer & sendBuffer, mpi::RecvBuffer & recvBu
 
    // Gather the message sizes on root process
    MPI_Gather( &sendBufferSize,                   1, MPITrait<int>::type(),
-               isGatherProcess? &sizes[0] : NULL, 1, MPITrait<int>::type(),
+               isGatherProcess? &sizes[0] : nullptr, 1, MPITrait<int>::type(),
                targetRank, comm );
 
    int totalSize = 0;
@@ -128,8 +128,8 @@ void gathervBuffer( const mpi::SendBuffer & sendBuffer, mpi::RecvBuffer & recvBu
 
    MPI_Gatherv( sendBuffer.ptr(), int_c( sendBuffer.size() ), MPITrait< mpi::SendBuffer::ElementType >::type(),
                 recvBuffer.ptr(),
-                isGatherProcess? &sizes[0] : NULL,
-                isGatherProcess? &displacements[0] : NULL,
+                isGatherProcess? &sizes[0] : nullptr,
+                isGatherProcess? &displacements[0] : nullptr,
                 MPITrait< mpi::RecvBuffer::ElementType >::type(), targetRank, comm );
 }
 

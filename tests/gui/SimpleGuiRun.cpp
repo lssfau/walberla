@@ -41,16 +41,14 @@
 #include "timeloop/SweepTimeloop.h"
 
 
-using namespace walberla;
-using namespace blockforest;
-
+namespace walberla {
 
 typedef GhostLayerField<real_t,19> PdfField;
 typedef GhostLayerField<real_t,1>  ScalarField;
 typedef GhostLayerField<Vector3<real_t>,1 > VectorField;
-typedef FlagField<walberla::uint32_t > FField;
+using FField = FlagField<walberla::uint32_t>;
 
-typedef lbm::D3Q19<lbm::collision_model::SRT> LatticeModel;
+using LatticeModel = lbm::D3Q19<lbm::collision_model::SRT>;
 
 
 int main(int argc, char **argv )
@@ -62,7 +60,7 @@ int main(int argc, char **argv )
    const uint_t nrOfTimeSteps = 20;
 
    // Create BlockForest
-   auto blocks = createUniformBlockGrid(blockCount[0],blockCount[1],blockCount[2],  //blocks
+   auto blocks = blockforest::createUniformBlockGrid(blockCount[0],blockCount[1],blockCount[2],  //blocks
                                         cells[0],cells[1],cells[2], //cells
                                         1,                          //dx
                                         false,                      //one block per process
@@ -143,9 +141,14 @@ int main(int argc, char **argv )
    lbm::connectToGui<LatticeModel>( gui );
    gui.run();
    //timeloop.singleStep();
+   return EXIT_SUCCESS;
 }
+}// namespace walberla
 
 
+int main(int argc, char **argv){
+  return walberla::main( argc, argv );
+}
 
 
 

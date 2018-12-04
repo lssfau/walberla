@@ -183,6 +183,7 @@ public:
    inline T operator()( cell_idx_t x, cell_idx_t y, cell_idx_t z, uint_t f) const     { return functor_( glField_, x,y,z,cell_idx_c(f)); }
    inline T operator()( const Cell & c ) const                                        { return functor_( glField_, c[0], c[1], c[2] ); }
    inline T operator()( const Cell & c, cell_idx_t f ) const                          { return functor_( glField_, c[0], c[1], c[2], f ); }
+   inline T operator()( const Cell & c, uint_t f ) const                              { return functor_( glField_, c[0], c[1], c[2], cell_idx_c(f) ); }
 
 
    inline T get( cell_idx_t x, cell_idx_t y, cell_idx_t z) const                      { return functor_( glField_, x, y, z    ); }
@@ -190,6 +191,7 @@ public:
    inline T get( cell_idx_t x, cell_idx_t y, cell_idx_t z, uint_t f ) const           { return functor_( glField_, x, y, z, cell_idx_c(f) ); }
    inline T get( const Cell & c ) const                                               { return functor_( glField_, c[0], c[1], c[2] ); }
    inline T get( const Cell & c, cell_idx_t f ) const                                 { return functor_( glField_, c[0], c[1], c[2], f ); }
+   inline T get( const Cell & c, uint_t f ) const                                     { return functor_( glField_, c[0], c[1], c[2], cell_idx_c(f) ); }
    //@}
    //*******************************************************************************************************************
 

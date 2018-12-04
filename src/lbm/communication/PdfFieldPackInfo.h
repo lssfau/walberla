@@ -24,6 +24,7 @@
 #pragma once
 
 #include "lbm/field/PdfField.h"
+#include "field/communication/StencilRestrictedPackInfo.h"
 #include "communication/UniformPackInfo.h"
 #include "core/debug/Debug.h"
 #include "stencil/Directions.h"
@@ -55,96 +56,8 @@ namespace lbm {
  * \ingroup lbm
  */
 template< typename LatticeModel_T >
-class PdfFieldPackInfo : public walberla::communication::UniformPackInfo
-{
-public:
-
-   typedef PdfField<LatticeModel_T>          PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
-
-   PdfFieldPackInfo( const BlockDataID & pdfFieldId ) : pdfFieldId_( pdfFieldId ) {}
-   virtual ~PdfFieldPackInfo() {}
-
-   bool constantDataExchange() const { return true; }
-   bool threadsafeReceiving()  const { return true; }
-
-   void unpackData( IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer );
-
-   void communicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir );
-
-protected:
-
-   void packDataImpl( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer ) const;
-
-
-
-   const BlockDataID pdfFieldId_;
-};
-
-
-
-template< typename LatticeModel_T >
-void PdfFieldPackInfo< LatticeModel_T >::unpackData( IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer )
-{
-   if( Stencil::idx[ stencil::inverseDir[dir] ] >= Stencil::Size )
-      return;
-
-   PdfField_T * pdfField = receiver->getData< PdfField_T >( pdfFieldId_ );
-   WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
-   WALBERLA_ASSERT_EQUAL( pdfField->nrOfGhostLayers(), 1 );
-
-   stencil::Direction packerDirection = stencil::inverseDir[dir];
-
-   for(auto i = pdfField->beginGhostLayerOnlyXYZ(dir); i != pdfField->end(); ++i )
-      for(uint_t f = 0; f < Stencil::d_per_d_length[packerDirection]; ++f)
-         buffer >> i.getF( Stencil::idx[ Stencil::d_per_d[packerDirection][f] ] );
-}
-
-
-
-template< typename LatticeModel_T >
-void PdfFieldPackInfo< LatticeModel_T >::communicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir )
-{
-   if( Stencil::idx[dir] >= Stencil::Size )
-      return;
-
-   const PdfField_T * sf = sender  ->getData< PdfField_T >( pdfFieldId_ );
-         PdfField_T * rf = receiver->getData< PdfField_T >( pdfFieldId_ );
-
-   WALBERLA_ASSERT_EQUAL( sf->xyzSize(), rf->xyzSize() );
-
-   typename PdfField_T::const_iterator srcIter = sf->beginSliceBeforeGhostLayerXYZ(dir);
-   typename PdfField_T::iterator       dstIter = rf->beginGhostLayerOnlyXYZ(stencil::inverseDir[dir]);
-
-   while( srcIter != sf->end() )
-   {
-      for( uint_t f = 0; f < Stencil::d_per_d_length[dir]; ++f )
-         dstIter.getF( Stencil::idx[ Stencil::d_per_d[dir][f] ] ) = srcIter.getF( Stencil::idx[ Stencil::d_per_d[dir][f] ] );
-
-      ++srcIter;
-      ++dstIter;
-   }
-   WALBERLA_ASSERT( srcIter == sf->end() );
-   WALBERLA_ASSERT( dstIter == rf->end() );
-}
-
-
-
-template< typename LatticeModel_T >
-void PdfFieldPackInfo< LatticeModel_T >::packDataImpl( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer ) const
-{
-   if( Stencil::idx[dir] >= Stencil::Size )
-      return;
-
-   const PdfField_T * pdfField = sender->getData< PdfField_T >( pdfFieldId_ );
-   WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
-   WALBERLA_ASSERT_EQUAL( pdfField->nrOfGhostLayers(), 1 );
-
-   for( auto i = pdfField->beginSliceBeforeGhostLayerXYZ(dir); i != pdfField->end(); ++i )
-      for(uint_t f = 0; f < Stencil::d_per_d_length[dir]; ++f)
-         outBuffer << i.getF( Stencil::idx[ Stencil::d_per_d[dir][f] ] );
-}
-
+using PdfFieldPackInfo = field::communication::StencilRestrictedPackInfo< PdfField<LatticeModel_T>,
+                                                                          typename LatticeModel_T::Stencil>;
 
 
 } // namespace lbm

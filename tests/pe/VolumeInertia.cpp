@@ -36,7 +36,7 @@ void calcNumeric( const ContainmentT & body, const AABB & aabb, const real_t spa
 
    uint_t volume = 0;
    math::KahanAccumulator<real_t> centroid[3];
-   math::KahanAccumulator<real_t> intertiaTensor[6];
+   math::KahanAccumulator<real_t> inertiaTensor[6];
    uint_t numPoints = 0;
 
    for(grid_generator::SCIterator it( aabb, pointOfReference, spacing ); it != grid_generator::SCIterator(); ++it)
@@ -57,12 +57,12 @@ void calcNumeric( const ContainmentT & body, const AABB & aabb, const real_t spa
          const real_t & y = p[1];
          const real_t & z = p[2];
 
-         intertiaTensor[0] += y*y + z*z;
-         intertiaTensor[1] += -x*y;
-         intertiaTensor[2] += -x*z;
-         intertiaTensor[3] += x*x + z*z;
-         intertiaTensor[4] += -y*z;
-         intertiaTensor[5] += x*x + y*y;
+         inertiaTensor[0] += y*y + z*z;
+         inertiaTensor[1] += -x*y;
+         inertiaTensor[2] += -x*z;
+         inertiaTensor[3] += x*x + z*z;
+         inertiaTensor[4] += -y*z;
+         inertiaTensor[5] += x*x + y*y;
          ++numPoints;
       }
    }
@@ -71,9 +71,9 @@ void calcNumeric( const ContainmentT & body, const AABB & aabb, const real_t spa
    auto dm = dV * Material::getDensity( body.getMaterial() );
    outVolume  = real_c(volume) * dV;
    outCOM     = Vec3( centroid[0].get(), centroid[1].get(), centroid[2].get() ) / real_c(numPoints);
-   outInertia = Mat3( intertiaTensor[0].get(), intertiaTensor[1].get(), intertiaTensor[2].get(),
-         intertiaTensor[1].get(), intertiaTensor[3].get(), intertiaTensor[4].get(),
-         intertiaTensor[2].get(), intertiaTensor[4].get(), intertiaTensor[5].get() ) * dm;
+   outInertia = Mat3( inertiaTensor[0].get(), inertiaTensor[1].get(), inertiaTensor[2].get(),
+         inertiaTensor[1].get(), inertiaTensor[3].get(), inertiaTensor[4].get(),
+         inertiaTensor[2].get(), inertiaTensor[4].get(), inertiaTensor[5].get() ) * dm;
 }
 
 int main( int argc, char ** argv )

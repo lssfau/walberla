@@ -25,9 +25,10 @@
 #include <core/grid_generator/HCPIterator.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
+#include <core/math/Random.h>
 //! [Includes]
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 //! [BodyTypeTuple]
@@ -101,7 +102,7 @@ int main( int argc, char ** argv )
    //! [Material]
 
    auto simulationDomain = forest->getDomain();
-   auto generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
+   const auto& generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
    //! [Planes]
    createPlane(*globalBodyStorage, 0, Vec3(1,0,0), simulationDomain.minCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), simulationDomain.maxCorner(), material );
@@ -120,8 +121,8 @@ int main( int argc, char ** argv )
       {
          SphereID sp = createSphere( *globalBodyStorage, *forest, storageID, 0, *it, radius, material);
          Vec3 rndVel(math::realRandom<real_t>(-vMax, vMax), math::realRandom<real_t>(-vMax, vMax), math::realRandom<real_t>(-vMax, vMax));
-         if (sp != NULL) sp->setLinearVel(rndVel);
-         if (sp != NULL) ++numParticles;
+         if (sp != nullptr) sp->setLinearVel(rndVel);
+         if (sp != nullptr) ++numParticles;
       }
    }
    WALBERLA_LOG_INFO_ON_ROOT("#particles created: " << numParticles);
@@ -160,4 +161,10 @@ int main( int argc, char ** argv )
    //! [PostProcessing]
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

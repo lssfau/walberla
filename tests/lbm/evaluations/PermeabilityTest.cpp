@@ -28,10 +28,10 @@
 #include "timeloop/all.h"
 
 
-using namespace walberla;
+namespace walberla {
 
-typedef walberla::uint8_t   flag_t;
-typedef FlagField< flag_t > FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 enum Scenario { BCC };
 
@@ -117,7 +117,7 @@ BlockDataID initPdfField( const shared_ptr<StructuredBlockForest> & blocks, real
 template< >
 BlockDataID initPdfField< lbm::collision_model::SRT >( const shared_ptr<StructuredBlockForest> & blocks, real_t omega )
 {
-   typedef lbm::D3Q19< lbm::collision_model::SRT > LatticeModel_T;
+   using LatticeModel_T = lbm::D3Q19<lbm::collision_model::SRT>;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::SRT( omega ) );
    return lbm::addPdfFieldToStorage( blocks, "PDF Field (SRT)", latticeModel, Vector3<real_t>(), real_t(1) );
@@ -126,7 +126,7 @@ BlockDataID initPdfField< lbm::collision_model::SRT >( const shared_ptr<Structur
 template< >
 BlockDataID initPdfField< lbm::collision_model::TRT >( const shared_ptr<StructuredBlockForest> & blocks, real_t omega )
 {
-   typedef lbm::D3Q19< lbm::collision_model::TRT > LatticeModel_T;
+   using LatticeModel_T = lbm::D3Q19<lbm::collision_model::TRT>;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ) );
    return lbm::addPdfFieldToStorage( blocks, "PDF Field (TRT)", latticeModel, Vector3<real_t>(), real_t(1) );
@@ -135,7 +135,7 @@ BlockDataID initPdfField< lbm::collision_model::TRT >( const shared_ptr<Structur
 template< >
 BlockDataID initPdfField< lbm::collision_model::D3Q19MRT >( const shared_ptr<StructuredBlockForest> & blocks, real_t omega )
 {
-   typedef lbm::D3Q19< lbm::collision_model::D3Q19MRT > LatticeModel_T;
+   using LatticeModel_T = lbm::D3Q19<lbm::collision_model::D3Q19MRT>;
 
    LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::D3Q19MRT::constructPanWithMagicNumber( omega ) );
    return lbm::addPdfFieldToStorage( blocks, "PDF Field (MRT)", latticeModel, Vector3<real_t>(), real_t(1) );
@@ -155,7 +155,7 @@ template< typename LatticeModel_T >
 BlockDataID initBoundaryHandling( shared_ptr<StructuredBlockForest> & blocks, const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const FlagUID & fluid, Setup setup )
 {
    typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory_T;
-   typedef typename BHFactory_T::BoundaryHandling                             BoundaryHandling_T;
+   using BoundaryHandling_T = typename BHFactory_T::BoundaryHandling;
 
    BlockDataID boundaryHandlingId = BHFactory_T::addBoundaryHandlingToStorage( blocks, "boundary handling", flagFieldId, pdfFieldId, fluid,
                                                                                Vector3<real_t>(),
@@ -172,16 +172,16 @@ BlockDataID initBoundaryHandling( shared_ptr<StructuredBlockForest> & blocks, co
       const real_t r = real_c(std::sqrt(real_c(3))) / real_c(4) * L * setup.kappa;
 
       // spheres in all eight corners of the domain
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( 0, 0, 0 ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( L, 0, 0 ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( 0, L, 0 ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( 0, 0, L ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( L, L, 0 ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( L, 0, L ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( 0, L, L ), r ) );
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( L, L, L ), r ) );
+      spheres.emplace_back( Vector3<real_t>( 0, 0, 0 ), r );
+      spheres.emplace_back( Vector3<real_t>( L, 0, 0 ), r );
+      spheres.emplace_back( Vector3<real_t>( 0, L, 0 ), r );
+      spheres.emplace_back( Vector3<real_t>( 0, 0, L ), r );
+      spheres.emplace_back( Vector3<real_t>( L, L, 0 ), r );
+      spheres.emplace_back( Vector3<real_t>( L, 0, L ), r );
+      spheres.emplace_back( Vector3<real_t>( 0, L, L ), r );
+      spheres.emplace_back( Vector3<real_t>( L, L, L ), r );
       // and one sphere in the middle
-      spheres.push_back( geometry::Sphere( Vector3<real_t>( L / real_c(2), L / real_c(2), L / real_c(2) ), r ) );
+      spheres.emplace_back( Vector3<real_t>( L / real_c(2), L / real_c(2), L / real_c(2) ), r );
 
       break;
    }
@@ -207,9 +207,9 @@ BlockDataID initBoundaryHandling( shared_ptr<StructuredBlockForest> & blocks, co
 template< typename LM_T >
 int setupAndExecute( Setup setup )
 {
-   typedef lbm::PdfField< LM_T >                                    PdfField_T;
+   using PdfField_T = lbm::PdfField< LM_T >;
    typedef lbm::DefaultBoundaryHandlingFactory< LM_T, FlagField_T > BHFactory_T;
-   typedef typename BHFactory_T::BoundaryHandling                   BoundaryHandling_T;
+   using BoundaryHandling_T = typename BHFactory_T::BoundaryHandling;
 
    Vector3<uint_t> blockLength;
    blockLength[0] = setup.length / setup.blocks[0];
@@ -300,4 +300,10 @@ int main( int argc, char ** argv )
    } catch( const std::exception & e ) {
       WALBERLA_ABORT( "Unexpected error: " << e.what() << "! Aborting ..." );
    }
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

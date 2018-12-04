@@ -63,6 +63,8 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
+#include <functional>
+
 namespace settling_sphere_mem
 {
 
@@ -79,11 +81,11 @@ using walberla::uint_t;
 
 // PDF field, flag field & body field
 typedef lbm::D3Q19< lbm::collision_model::TRT, false >  LatticeModel_T;
-typedef LatticeModel_T::Stencil          Stencil_T;
-typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 const uint_t FieldGhostLayers = 1;
@@ -453,11 +455,11 @@ int main( int argc, char **argv )
    auto fcdID          = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
 
    // set up collision response, here DEM solver
-   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, NULL);
+   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, nullptr);
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
-   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
 
    // create pe bodies
@@ -493,7 +495,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
 
    // add boundary handling
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >( MyBoundaryHandling( flagFieldID, pdfFieldID, bodyFieldID ), "boundary handling" );
@@ -530,11 +532,11 @@ int main( int argc, char **argv )
                   ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag ), "PDF Restore" );
 
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> storeForceTorqueInCont1 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
+   std::function<void(void)> storeForceTorqueInCont1 = std::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer2 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
+   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = std::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
    shared_ptr<pe_coupling::ForceTorqueOnBodiesScaler> forceScaler = make_shared<pe_coupling::ForceTorqueOnBodiesScaler>(blocks, bodyStorageID, real_t(1));
-   std::function<void(void)> setForceScalingFactorToHalf = boost::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(0.5));
+   std::function<void(void)> setForceScalingFactorToHalf = std::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(0.5));
 
    if( averageForceTorqueOverTwoTimSteps ) {
       bodiesFTContainer2->store();
@@ -559,7 +561,7 @@ int main( int argc, char **argv )
       timeloop.addFuncAfterTimeStep(setForceTorqueOnBodiesFromCont2, "Force setting");
 
       // average the force/torque by scaling it with factor 1/2 (except in first timestep, there it is 1, which it is initially)
-      timeloop.addFuncAfterTimeStep( pe_coupling::ForceTorqueOnBodiesScaler(blocks, bodyStorageID, real_t(0.5)),  "Force averaging");
+      timeloop.addFuncAfterTimeStep( SharedFunctor<pe_coupling::ForceTorqueOnBodiesScaler>(forceScaler),  "Force averaging");
       timeloop.addFuncAfterTimeStep( setForceScalingFactorToHalf, "Force scaling adjustment" );
 
       // swap containers

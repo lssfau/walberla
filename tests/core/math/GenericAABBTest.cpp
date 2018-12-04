@@ -36,7 +36,7 @@ using math::GenericAABB;
 template< typename T >
 void testEmptyAABB( const GenericAABB< T > & aabb )
 {
-   typedef Vector3< T > VecT;
+   using VecT = Vector3<T>;
 
    WALBERLA_CHECK_EQUAL( aabb.minCorner(), VecT( T(0), T(0), T(0) ) );
    WALBERLA_CHECK_EQUAL( aabb.maxCorner(), VecT( T(0), T(0), T(0) ) );
@@ -122,7 +122,7 @@ void testNonEmptyAABB( const GenericAABB< T > & aabb )
 template< typename T >
 void testAnyAABB( const GenericAABB< T > & aabb )
 {
-   typedef Vector3< T > VecT;
+   using VecT = Vector3<T>;
 
 
    WALBERLA_CHECK_IDENTICAL( aabb.minCorner()[0], aabb.xMin() );
@@ -274,7 +274,7 @@ void testAnyAABB( const GenericAABB< T > & aabb )
 template< typename T >
 void testFixedAABB()
 {
-   typedef Vector3< T > VecT;
+   using VecT = Vector3<T>;
 
    GenericAABB<T> aabb0;
    testEmptyAABB( aabb0 );
@@ -330,7 +330,7 @@ void testFixedAABB()
 template< typename T >
 void testConstructors( const T x0, const T y0, const T z0, const T x1, const T y1, const T z1 )
 {
-   typedef Vector3< T > VecT;
+   using VecT = Vector3<T>;
 
    {
       GenericAABB< T > refAABB;
@@ -364,7 +364,7 @@ void testConstructors( const T x0, const T y0, const T z0, const T x1, const T y
 
    {
       GenericAABB< T > toBeCopied( x0, y0, z0, x1, y1, z1 );
-      GenericAABB< T > refAABB( toBeCopied );
+      const GenericAABB< T > refAABB( toBeCopied ); // NOLINT
       WALBERLA_CHECK_IDENTICAL( refAABB.minCorner()[0], std::min( x0, x1 ) );
       WALBERLA_CHECK_IDENTICAL( refAABB.minCorner()[1], std::min( y0, y1 ) );
       WALBERLA_CHECK_IDENTICAL( refAABB.minCorner()[2], std::min( z0, z1 ) );
@@ -645,7 +645,10 @@ int main(int argc, char**argv)
    GenericAABB< double > doubleAABB( 1.0, 1.0, 1.0, 2.0, 2.0 ,2.0 );
    
    GenericAABB< double > copiedAABB0( floatAABB );
-   GenericAABB< double > copiedAABB1( doubleAABB );
+   const GenericAABB< double > copiedAABB1( doubleAABB );
+
+   WALBERLA_UNUSED(copiedAABB0);
+   WALBERLA_UNUSED(copiedAABB1);
    
    randomTest<float>();
    randomTest<double>();

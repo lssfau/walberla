@@ -76,6 +76,7 @@
 
 #include <stdexcept>
 #include <array>
+#include <functional>
 
 #include "gather/GnuPlotGraphWriter.h"
 #include "field/vtk/FlagFieldCellFilter.h"
@@ -85,7 +86,6 @@
 #include "vtk/VTKOutput.h"
 
 
-
 namespace walberla {
 
 typedef GhostLayerField< real_t, 1 >          ScalarField;
@@ -93,11 +93,11 @@ typedef GhostLayerField< Vector3<real_t>, 1 > VectorField;
 
 typedef lbm::D3Q19< lbm::collision_model::SRT, true, lbm::force_model::None, 1 >  LM;
 
-typedef LM::CommunicationStencil  CommunicationStencil;
-typedef lbm::PdfField< LM >       MyPdfField;
+using CommunicationStencil = LM::CommunicationStencil;
+using MyPdfField = lbm::PdfField<LM>;
 
-typedef uint8_t                 flag_t;
-typedef FlagField< flag_t >     MyFlagField;
+using flag_t = uint8_t;
+using MyFlagField = FlagField<flag_t>;
 
 typedef lbm::DefaultDiffusionBoundaryHandlingFactory< LM, MyFlagField > MyBoundaryHandling;
 
@@ -138,7 +138,7 @@ shared_ptr< StructuredBlockForest > makeStructuredBlockStorage( uint_t length, u
 
     uint_t cells[]  = { length, width, width  };
     uint_t blocks[] = { uint_t(1u), uint_t(1u), uint_t(1u) };
-    sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, refinement ) );
+    sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, refinement ) );
     sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
     sforest.init(
@@ -249,6 +249,7 @@ public:
 #ifdef TEST_USES_VTK_OUTPUT
         error_.resize(time_);
 #endif
+        WALBERLA_UNUSED(maxValue_);
 }
 
    void operator()();

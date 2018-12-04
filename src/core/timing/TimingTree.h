@@ -28,6 +28,7 @@
 #include "core/logging/Logging.h"
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
+#include "core/extern/json.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -59,13 +60,13 @@ public:
 
    void swap(TimingTree<TP>& tt);
 
-   /// Starts a timer beneath the current hirarchy level
+   /// Starts a timer beneath the current hierarchy level
    void start(const std::string& name);
-   /// Stops the last started timer and jumps back one hirarchy level
+   /// Stops the last started timer and jumps back one hierarchy level
    void stop(const std::string& name);
    /// Checks if specified timer is currently running.
    bool isTimerRunning(const std::string& name) const;
-   /// Resets the the timing hirarchy
+   /// Resets the the timing hierarchy
    void reset();
 
    //** Reduction ******************************************************************************************************
@@ -81,15 +82,21 @@ public:
 
    /// Returns the raw tree data structure
    const TimingNode<TP>& getRawData() const;
+
    const Timer<TP>& operator[](const std::string& name) const;
+   inline bool timerExists ( const std::string & n ) const;
 
    /// Returns the name of the currently running timer
    /// Might be expensive due to value search.
    std::string getCurrentTimerName() const;
+
+   /// Returns a copy of the timing tree containing the remaining time as a subnode
+   TimingTree< TP > getCopyWithRemainder() const;
+
 private:
    /// Tree data structure
    TimingNode<TP>  root_;
-   /// Pointer to the current hirarchy level.
+   /// Pointer to the current hierarchy level.
    TimingNode<TP>* current_;
 };
 
@@ -204,13 +211,22 @@ const TimingNode<TP>& TimingTree<TP>::getRawData() const
    return root_;
 }
 
-/// Finds the spezified timer in the timing hierarchy
+/// Finds the specified timer in the timing hierarchy
 /// \param name timer name which may include more than one hierarchy separated by "."
 /// \code tt["firstLevel.secondLevel.thirdLevel.timerName"].total(); \endcode
 template< typename TP >  // Timing policy
 const Timer<TP>& TimingTree<TP>::operator[](const std::string& name) const
 {
    return findTimer(root_, name);
+}
+
+/// Checks if the specified timer exists in the timing hierarchy
+/// \param name timer name which may include more than one hierarchy separated by "."
+/// \code tt.timerExists("firstLevel.secondLevel.thirdLevel.timerName"); \endcode
+template< typename TP >  // Timing policy
+bool TimingTree<TP>::timerExists(const std::string& name) const
+{
+   return walberla::timing::timerExists(root_, name);
 }
 
 template< typename TP >  // Timing policy
@@ -228,6 +244,21 @@ std::string TimingTree<TP>::getCurrentTimerName() const
    return "No timer found!";
 }
 
+template < typename TP > // Timing policy
+TimingTree< TP > TimingTree< TP >::getCopyWithRemainder() const
+{
+   TimingTree< TP > tt( *this );
+   timing::internal::addRemainderNodes< TP >( tt.root_ );
+   return tt;
+}
+
+/// convertes a TimingTree to json. The signature is required by the json library
+/// \relates TimingTree
+template < typename TP > // Timing policy
+void to_json( nlohmann::json& j, const TimingTree< TP >& tt )
+{
+   j = nlohmann::json( tt.getRawData() );
+}
 }
 
 typedef timing::TimingTree<timing::WcPolicy>  WcTimingTree;

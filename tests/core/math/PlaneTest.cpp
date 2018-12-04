@@ -36,10 +36,10 @@ using math::Plane;
 template < typename scalar_t >
 struct RandomPointGenerator
 {
-   typedef walberla::Vector3<scalar_t> vector_t;
+   using vector_t = walberla::Vector3<scalar_t>;
    typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
-   typedef mt11213b RandomNumberEngine;
-   typedef std::normal_distribution<scalar_t> NormalDistribution;
+   using RandomNumberEngine = mt11213b;
+   using NormalDistribution = std::normal_distribution<scalar_t>;
 
    RandomPointGenerator( const vector_t & mu, const vector_t & sigma )
    {
@@ -99,7 +99,7 @@ int main(int argc, char * argv[])
 
    mpi::Environment mpiEnv( argc, argv );
 
-   typedef Vector3<real_t> Vec3Real;
+   using Vec3Real = Vector3<real_t>;
 
    Plane p( Vec3Real( real_t(0), real_t(0), real_t(0) ), Vec3Real( real_t(1), real_t(0), real_t(0) ) );
 
@@ -115,7 +115,7 @@ int main(int argc, char * argv[])
 
    for( real_t x(-10); x < real_t(11); x += real_t(0.25) )
    {
-      static const Vector3<real_t> ZERO_VECTOR;
+      static const Vector3<real_t> ZERO_VECTOR {};
       Plane pShifted( p );
       pShifted.shift( x );
       WALBERLA_CHECK_FLOAT_EQUAL( pShifted.signedDistance( ZERO_VECTOR ), -x );

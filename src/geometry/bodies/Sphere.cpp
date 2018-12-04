@@ -32,13 +32,6 @@ namespace geometry {
       updateBoxes();
    }
 
-   Sphere::Sphere( const Sphere & o )
-      : midpoint_( o.midpoint_ ),
-        radius_( o.radius_ ),
-        boundingBox_ ( o.boundingBox_ ),
-        innerBox_ ( o.innerBox_ )
-   {}
-
    void Sphere::updateBoxes()
    {
       static const real_t oneOverSqrt3 = real_t(1) / std::sqrt( real_t(3) );
@@ -70,19 +63,20 @@ namespace geometry {
    }
 
    template<>
-   FastOverlapResult fastOverlapCheck ( const Sphere & sphere, const Vector3<real_t> & cellMidpoint, real_t dx )
+   FastOverlapResult fastOverlapCheck ( const Sphere & sphere, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx )
    {
       static const real_t sqrt3half = std::sqrt( real_t(3) ) / real_t(2);
 
       const real_t midPointDistSq = (sphere.midpoint() - cellMidpoint).sqrLength();
 
+      const real_t dxMax = dx.max();
       // Check against outer circle of box
-      const real_t dist1 = sphere.radius() + sqrt3half * dx;
+      const real_t dist1 = sphere.radius() + sqrt3half * dxMax;
       if ( midPointDistSq > dist1 * dist1 )
          return COMPLETELY_OUTSIDE;
 
       // Check against inner circle of box
-      const real_t dist2 = sphere.radius() - sqrt3half * dx;
+      const real_t dist2 = sphere.radius() - sqrt3half * dxMax;
       if ( midPointDistSq < dist2 * dist2 )
          return CONTAINED_INSIDE_BODY;
 

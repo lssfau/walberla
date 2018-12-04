@@ -66,6 +66,7 @@
 #include "lbm/vtk/Velocity.h"
 #include "vtk/VTKOutput.h"
 
+#include <functional>
 
 namespace squirmer
 {
@@ -79,14 +80,14 @@ using namespace walberla;
 using walberla::uint_t;
 
 // PDF field, flag field & body field
-typedef lbm::force_model::None ForceModel_T;
+using ForceModel_T = lbm::force_model::None;
 typedef lbm::D3Q19<lbm::collision_model::TRT, false, ForceModel_T> LatticeModel_T;
 
-typedef LatticeModel_T::Stencil Stencil_T;
-typedef lbm::PdfField<LatticeModel_T> PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t flag_t;
-typedef FlagField<flag_t> FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField<pe::BodyID, 1> PeBodyField_T;
 
 const uint_t FieldGhostLayers = 1;
@@ -94,10 +95,10 @@ const uint_t FieldGhostLayers = 1;
 // boundary handling
 typedef pe_coupling::SimpleBB<LatticeModel_T, FlagField_T> MO_BB_T;
 
-typedef boost::tuples::tuple<MO_BB_T> BoundaryConditions_T;
+using BoundaryConditions_T = boost::tuples::tuple<MO_BB_T>;
 typedef BoundaryHandling<FlagField_T, Stencil_T, BoundaryConditions_T> BoundaryHandling_T;
 
-typedef boost::tuple<pe::Squirmer> BodyTypeTuple;
+using BodyTypeTuple = boost::tuple<pe::Squirmer>;
 
 ///////////
 // FLAGS //
@@ -289,9 +290,9 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
    }
 
-   std::function<void(void)> syncCall = boost::bind(pe::syncShadowOwners<BodyTypeTuple>,
-                                                      boost::ref(blocks->getBlockForest()), bodyStorageID,
-                                                      static_cast<WcTimingTree *>(NULL), overlap, false);
+   std::function<void(void)> syncCall = std::bind(pe::syncShadowOwners<BodyTypeTuple>,
+                                                      std::ref(blocks->getBlockForest()), bodyStorageID,
+                                                      static_cast<WcTimingTree *>(nullptr), overlap, false);
 
    const auto myMat = pe::createMaterial("myMat", real_c(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1),
                                          real_t(1), real_t(0), real_t(0));
@@ -324,7 +325,7 @@ int main(int argc, char **argv) {
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>(blocks, "flag field");
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<PeBodyField_T>(blocks, "body field", NULL, field::zyxf);
+   BlockDataID bodyFieldID = field::addToStorage<PeBodyField_T>(blocks, "body field", nullptr, field::zyxf);
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData<BoundaryHandling_T>(
@@ -419,7 +420,7 @@ int main(int argc, char **argv) {
    auto b2 = beta * b1;
    auto e = q.rotate(up).getNormalized();
    auto radius = R;
-   auto squirmer_pos = position;
+   const auto& squirmer_pos = position;
 
    real_t abs_tolerance = real_c(0.0026);
    real_t rel_tolerance = real_c(0.10);

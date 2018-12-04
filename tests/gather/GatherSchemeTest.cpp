@@ -36,7 +36,7 @@
 #include <iostream>
 
 
-using namespace walberla;
+namespace walberla {
 
 typedef GhostLayerField<cell_idx_t, 1> ScalarField;
 
@@ -95,7 +95,7 @@ public:
         : cellInterval_ ( ci )
     {}
 
-   virtual void process(const std::vector<std::vector<real_t> > & data)
+   void process(const std::vector<std::vector<real_t> > & data) override
    {
       uint_t counter =0;
       for( auto it = cellInterval_.begin(); it != cellInterval_.end(); ++it )
@@ -189,4 +189,10 @@ int main(int argc, char ** argv )
       throw e;
    }
    return 0;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

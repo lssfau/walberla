@@ -26,6 +26,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
+#include <memory>
 
 
 #define E_VAL 2.71828182845904523536
@@ -75,7 +76,7 @@ NodePtr EquationParser::parseNumber( const std::string& str, size_t& index ) con
       value = boost::lexical_cast< double >( str.substr(start, index-start) );
    }
 
-   return NodePtr ( new Node(value) );
+   return std::make_shared<Node>( value );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +128,7 @@ NodePtr EquationParser::parseVariable( const std::string& str, size_t& index ) c
    if ( es_.varMap_.find(name) != es_.varMap_.end() ){
       varPtr = es_.varMap_[name];
    } else {
-      varPtr = VarPtr( new Var ( name ) );
+      varPtr = std::make_shared<Var>( name );
       es_.varMap_[name] = varPtr;
    }
 
@@ -147,21 +148,21 @@ NodePtr EquationParser::parseVariable( const std::string& str, size_t& index ) c
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool EquationParser::checkFunction( const std::string& str, size_t& index ) const
 {
-   return (str.substr(index, 4).compare("exp("  ) == 0) ||
-         (str.substr(index, 3).compare("ln("   ) == 0) ||
-         (str.substr(index, 5).compare("sqrt(" ) == 0);
+   return (str.substr(index, 4) == "exp(") ||
+         (str.substr(index, 3) == "ln(") ||
+         (str.substr(index, 5) == "sqrt(");
 }
 
 NodePtr EquationParser::parseFunction( const std::string& str, size_t& index ) const
 {
    OpFunction opFunc;
-   if ( str.substr(index, 4).compare("exp(") == 0 ){
+   if ( str.substr(index, 4) == "exp(" ){
       opFunc = OP_FUNC_EXP;
       index += 4;
-   } else if ( str.substr(index, 3).compare("ln(") == 0 ){
+   } else if ( str.substr(index, 3) == "ln(" ){
       opFunc = OP_FUNC_LN;
       index += 3;
-   } else if ( str.substr(index, 5).compare("sqrt(") == 0 ){
+   } else if ( str.substr(index, 5) == "sqrt(" ){
       opFunc = OP_FUNC_SQRT;
       index += 5;
    } else {
@@ -177,19 +178,19 @@ NodePtr EquationParser::parseFunction( const std::string& str, size_t& index ) c
    switch(opFunc)
    {
    case OP_FUNC_EXP:
-      funcPtr = NodePtr( new Node( OP_PROD ) );
-      funcPtr->left()  = NodePtr( new Node( E_VAL  ) );
+      funcPtr = std::make_shared<Node>( OP_PROD );
+      funcPtr->left()  = std::make_shared<Node>( E_VAL  );
       funcPtr->right() = nodePtr;
       return funcPtr;
    case OP_FUNC_LN:
-      funcPtr = NodePtr( new Node( OP_LOG ) );
-      funcPtr->right() = NodePtr( new Node( E_VAL  ) );
+      funcPtr = std::make_shared<Node>( OP_LOG );
+      funcPtr->right() = std::make_shared<Node>( E_VAL  );
       funcPtr->left()  = nodePtr;
       return funcPtr;
    case OP_FUNC_SQRT:
-      funcPtr = NodePtr( new Node( OP_PROD ) );
+      funcPtr = std::make_shared<Node>( OP_PROD );
       funcPtr->left()  = nodePtr;
-      funcPtr->right() = NodePtr( new Node( 0.5 ) );
+      funcPtr->right() = std::make_shared<Node>( 0.5 );
       return funcPtr;
    default:
       WALBERLA_ABORT( "Function not yet defined" );
@@ -327,7 +328,7 @@ EquationPtr EquationParser::parseEquation( const std::string& str, size_t& index
    nodePtr->left()  = leftPtr;
    nodePtr->right() = rightPtr;
 
-   return EquationPtr ( new Equation(nodePtr) );
+   return std::make_shared<Equation>( nodePtr );
 }
 
 } // namespace math

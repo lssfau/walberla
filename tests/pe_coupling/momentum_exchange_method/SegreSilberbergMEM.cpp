@@ -65,6 +65,8 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
+#include <functional>
+
 namespace segre_silberberg_mem
 {
 
@@ -82,11 +84,11 @@ using lbm::force_model::SimpleConstant;
 
 // PDF field, flag field & body field
 typedef lbm::D3Q19< lbm::collision_model::TRT, false, SimpleConstant >  LatticeModel_T;
-typedef LatticeModel_T::Stencil          Stencil_T;
-typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 const uint_t FieldGhostLayers = 1;
@@ -542,17 +544,17 @@ int main( int argc, char **argv )
    auto fcdID          = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
 
    // set up collision response, here DEM solver
-   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, NULL);
+   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, nullptr);
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
    std::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
-      syncCall = boost::bind( pe::syncNextNeighbors<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+      syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
    } else
    {
-      syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+      syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
    }
 
    // create pe bodies
@@ -566,7 +568,7 @@ int main( int argc, char **argv )
    const auto sphereMaterial = pe::createMaterial( "mySphereMat", setup.rho_p , real_t(0.5), real_t(0.1), real_t(0.1), real_t(0.24), real_t(200), real_t(200), real_t(0), real_t(0) );
    Vector3<real_t> position( real_c(setup.xlength) * real_t(0.5), real_c(setup.ylength) * real_t(0.5), real_c(setup.zlength) * real_t(0.5) - real_t(1) );
    auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, particleRadius, sphereMaterial );
-   if( sphere != NULL )
+   if( sphere != nullptr )
    {
       real_t height = real_t( 0.5 ) * real_c( setup.zlength );
       // set sphere velocity to undisturbed fluid velocity at sphere center
@@ -599,7 +601,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(
@@ -670,9 +672,9 @@ int main( int argc, char **argv )
    }
 
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> storeForceTorqueInCont1 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
+   std::function<void(void)> storeForceTorqueInCont1 = std::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer2 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
+   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = std::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
 
    bodiesFTContainer2->store();
 

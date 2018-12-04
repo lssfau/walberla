@@ -108,12 +108,12 @@ public:
    //*******************************************************************************************************************
 
    //**Constructors*****************************************************************************************************
-                              explicit inline Vector3();
+                              explicit inline Vector3() = default;
                               explicit inline Vector3( Type init );
    template< typename Other > explicit inline Vector3( Other init );
                               explicit inline Vector3( Type x, Type y, Type z );
                               explicit inline Vector3( const Type* init );
-                                       inline Vector3( const Vector3& v );
+                                       inline Vector3( const Vector3& v ) = default;
 
    template< typename Other >
    inline Vector3( const Vector3<Other>& v );
@@ -126,7 +126,7 @@ public:
    //**Operators********************************************************************************************************
    /*!\name Operators */
    //@{
-   inline Vector3&                              operator= ( const Vector3& v );
+   inline Vector3&                              operator= ( const Vector3& v ) = default;
    template< typename Other > inline Vector3&   operator= ( const Vector3<Other>& v );
    template< typename Other > inline bool       operator==( Other rhs )                 const;
    template< typename Other > inline bool       operator==( const Vector3<Other>& rhs ) const;
@@ -179,15 +179,20 @@ public:
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{
-   Type v_[3];  //!< The three statically allocated vector elements.
-                /*!< Access to the vector values is gained via the subscript operator.
-                     The order of the elements is
-                     \f[\left(\begin{array}{*{3}{c}}
-                     0 & 1 & 2 \\
-                     \end{array}\right)\f] */
+   /**
+    * The three statically allocated vector elements.
+    *
+    * Access to the vector values is gained via the subscript operator.
+    * The order of the elements is
+    * \f[\left(\begin{array}{*{3}{c}}
+    * 0 & 1 & 2 \\
+    * \end{array}\right)\f]
+   **/
+   Type v_[3] = {Type(), Type(), Type()};
    //@}
    //*******************************************************************************************************************
 };
+static_assert( std::is_trivially_copyable<Vector3<real_t>>::value, "Vector3<real_t> has to be trivially copyable!");
 //**********************************************************************************************************************
 
 template<typename T>
@@ -199,19 +204,6 @@ Vector3<T> & normalize( Vector3<T> & v );
 //  CONSTRUCTORS
 //
 //======================================================================================================================
-
-//**********************************************************************************************************************
-/*!\fn Vector3<Type>::Vector3()
-// \brief The default constructor for Vector3.
-//
-// All vector elements are initialized to the default value (i.e. 0 for integral data types).
-*/
-template< typename Type >
-inline Vector3<Type>::Vector3()
-{
-   v_[0] = v_[1] = v_[2] = Type();
-}
-//**********************************************************************************************************************
 
 
 //**********************************************************************************************************************
@@ -282,24 +274,6 @@ inline Vector3<Type>::Vector3( const Type* init )
 
 
 //**********************************************************************************************************************
-/*!\fn Vector3<Type>::Vector3( const Vector3& v )
-// \brief The copy constructor for Vector3.
-//
-// \param v Vector to be copied.
-//
-// The copy constructor is explicitly defined in order to enable/facilitate NRV optimization.
-*/
-template< typename Type >
-inline Vector3<Type>::Vector3( const Vector3& v )
-{
-   v_[0] = v.v_[0];
-   v_[1] = v.v_[1];
-   v_[2] = v.v_[2];
-}
-//**********************************************************************************************************************
-
-
-//**********************************************************************************************************************
 /*!\fn Vector3<Type>::Vector3( const Vector3<Other>& v )
 // \brief Conversion constructor from different Vector3 instances.
 //
@@ -323,29 +297,6 @@ inline Vector3<Type>::Vector3( const Vector3<Other>& v )
 //  OPERATORS
 //
 //======================================================================================================================
-
-//**********************************************************************************************************************
-/*!\fn Vector3<Type>& Vector3<Type>::operator=( const Vector3& v )
-// \brief Copy assignment operator for Vector3.
-//
-// \param v Vector to be copied.
-// \return Reference to the assigned vector.
-//
-// Explicit definition of a copy assignment operator for performance reasons.
-*/
-template< typename Type >
-inline Vector3<Type>& Vector3<Type>::operator=( const Vector3& v )
-{
-   // This implementation is faster than the synthesized default copy assignment operator and
-   // faster than an implementation with the C library function 'memcpy' in combination with a
-   // protection against self-assignment. Additionally, this version goes without a protection
-   // against self-assignment.
-   v_[0] = v.v_[0];
-   v_[1] = v.v_[1];
-   v_[2] = v.v_[2];
-   return *this;
-}
-//**********************************************************************************************************************
 
 
 //**********************************************************************************************************************
@@ -643,6 +594,21 @@ inline Vector3<HIGH> Vector3<Type>::operator%( const Vector3<Other>& rhs ) const
 
 
 //**********************************************************************************************************************
+/*!\brief Cross product (outer product) of two vectors (\f$ \vec{a}=\vec{b}\times\vec{c} \f$).
+//
+// \param lhs The left-hand-side vector for the cross product.
+// \param rhs The right-hand-side vector for the cross product.
+// \return The cross product.
+*/
+template< typename Type >
+inline Vector3<Type> cross( const Vector3<Type>& lhs, const Vector3<Type>& rhs )
+{
+   return lhs % rhs;
+}
+//**********************************************************************************************************************
+
+
+//**********************************************************************************************************************
 /*!\fn Vector3<HIGH> Vector3<Type>::operator+( const Vector3<Other>& rhs ) const
 // \brief Addition operator for the addition of two vectors (\f$ \vec{a}=\vec{b}+\vec{c} \f$).
 //
@@ -745,6 +711,13 @@ inline Vector3<HIGH> Vector3<Type>::operator/( Other rhs ) const
       const HIGH tmp( 1/static_cast<HIGH>( rhs ) );
       return Vector3<HIGH>( v_[0]*tmp, v_[1]*tmp, v_[2]*tmp );
    }
+}
+//**********************************************************************************************************************
+
+template< typename Type, typename Other >
+inline Vector3<HIGH> operator/( Other lhs, const Vector3<Type>& rhs )
+{
+   return Vector3<HIGH>( lhs/rhs[0], lhs/rhs[1], lhs/rhs[2] );
 }
 //**********************************************************************************************************************
 
@@ -1792,6 +1765,41 @@ Vector3<T> & normalize( Vector3<T> & v )
 }
 //**********************************************************************************************************************
 
+//**********************************************************************************************************************
+/**
+// \brief Length of the vector.
+//
+// \return Length of the vector.
+*/
+template<typename T>
+real_t length( const Vector3<T> & v )
+{
+   return v.length();
+}
+//**********************************************************************************************************************
+//**********************************************************************************************************************
+/**
+// \brief Length of the vector squared.
+//
+// \return Length of the vector squared.
+*/
+template<typename T>
+real_t sqrLength( const Vector3<T> & v )
+{
+   return v.sqrLength();
+}
+//**********************************************************************************************************************
+//**********************************************************************************************************************
+/**
+// \brief Dot product of two vectors.
+*/
+template<typename T>
+real_t dot( const Vector3<T> & v1, const Vector3<T> & v2 )
+{
+   return v1*v2;
+}
+//**********************************************************************************************************************
+
 
 //**********************************************************************************************************************
 /**
@@ -1895,13 +1903,13 @@ namespace walberla {
    {
       static inline MPI_Datatype type()
       {
-         static mpi::Datatype datatype;
+         // cannot use mpi::Datatype here because its destructor calls MPI_Type_free and static variables are destroyed after the MPI_Finalize
+         static MPI_Datatype datatype;
          static bool initialized = false;
 
          if( ! initialized ) {
-            MPI_Datatype newDatatype;
-            MPI_Type_contiguous(3, MPITrait<T>::type(), &newDatatype );
-            datatype.init( newDatatype );
+            MPI_Type_contiguous(3, MPITrait<T>::type(), &datatype );
+            MPI_Type_commit( &datatype );
             initialized = true;
          }
          return datatype;

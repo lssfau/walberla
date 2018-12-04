@@ -36,10 +36,10 @@
 #include <vector>
 
 
-using namespace walberla;
+namespace walberla {
 
 typedef GhostLayerField<real_t,1> ScalarField;
-typedef stencil::D2Q5 Stencil_T;
+using Stencil_T = stencil::D2Q5;
 
 
 // function to initialize the boundaries of the source and destination fields
@@ -295,4 +295,10 @@ int main( int argc, char ** argv )
    gui.run();
 
    return 0;
+}
+}
+
+int main( int argc, char ** argv )
+{
+   walberla::main(argc, argv);
 }

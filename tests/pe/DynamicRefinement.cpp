@@ -24,15 +24,16 @@
 #include "pe/utility/DestroyBody.h"
 
 #include "blockforest/Initialization.h"
+#include <blockforest/loadbalancing/DynamicCurve.h>
 #include "core/all.h"
 #include "domain_decomposition/all.h"
 
 #include "core/debug/TestSubsystem.h"
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 class ReGrid
 {
@@ -192,4 +193,10 @@ int main( int argc, char** argv )
    }
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

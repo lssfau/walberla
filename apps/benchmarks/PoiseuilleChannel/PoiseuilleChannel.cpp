@@ -88,13 +88,13 @@
 #include "vtk/Initialization.h"
 #include "vtk/VTKOutput.h"
 
-#include <boost/bind.hpp>
-
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <iostream>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -127,12 +127,12 @@ typedef lbm::D3Q27< lbm::collision_model::TRT, true,  lbm::force_model::SimpleCo
 template< typename LatticeModel_T >
 struct Types
 {
-   typedef typename LatticeModel_T::Stencil Stencil_T;
-   typedef lbm::PdfField< LatticeModel_T >  PdfField_T;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
 };
 
-typedef walberla::uint16_t  flag_t;
-typedef FlagField< flag_t > FlagField_T;
+using flag_t = walberla::uint16_t;
+using FlagField_T = FlagField<flag_t>;
 
 const uint_t FieldGhostLayers  = uint_t(4);
 
@@ -303,7 +303,7 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
                                                              ( setup.zCells + uint_t(2) * FieldGhostLayers ) ) * memoryPerCell;
 
    forest->addRefinementSelectionFunction( refinementSelectionFunctions );
-   forest->addWorkloadMemorySUIDAssignmentFunction( boost::bind( workloadAndMemoryAssignment, _1, memoryPerBlock ) );
+   forest->addWorkloadMemorySUIDAssignmentFunction( std::bind( workloadAndMemoryAssignment, std::placeholders::_1, memoryPerBlock ) );
 
    forest->init( AABB( real_c(0), real_c(0), real_c(0), real_c( setup.xBlocks * setup.xCells ),
                                                         real_c( setup.yBlocks * setup.yCells ),
@@ -343,9 +343,9 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
 
       MPIManager::instance()->useWorldComm();
 
-      auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false ) );
+      auto bf = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false );
 
-      auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, setup.xCells, setup.yCells, setup.zCells ) );
+      auto sbf = std::make_shared< StructuredBlockForest >( bf, setup.xCells, setup.yCells, setup.zCells );
       sbf->createCellBoundingBoxes();
 
       return sbf;
@@ -358,9 +358,9 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
                                                                     memoryPerCell, processMemoryLimit,
                                                                     configBlock.getParameter< bool >( "outputSetupForest", false ) );
 
-   auto bf = shared_ptr< blockforest::BlockForest >( new blockforest::BlockForest( uint_c( MPIManager::instance()->rank() ), *sforest, false ) );
+   auto bf = std::make_shared< blockforest::BlockForest >( uint_c( MPIManager::instance()->rank() ), *sforest, false );
 
-   auto sbf = shared_ptr< blockforest::StructuredBlockForest >( new blockforest::StructuredBlockForest( bf, setup.xCells, setup.yCells, setup.zCells ) );
+   auto sbf = std::make_shared< blockforest::StructuredBlockForest >( bf, setup.xCells, setup.yCells, setup.zCells );
    sbf->createCellBoundingBoxes();
    
    return sbf;
@@ -478,7 +478,7 @@ template< typename LatticeModel_T >
 typename MyBoundaryHandling<LatticeModel_T>::BoundaryHandling_T *
 MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block ) const
 {
-   typedef typename Types<LatticeModel_T>::PdfField_T PdfField_T;
+   using PdfField_T = typename Types< LatticeModel_T >::PdfField_T;
 
    FlagField_T * flagField = block->getData< FlagField_T >( flagFieldId_ );
    PdfField_T *   pdfField = block->getData< PdfField_T > (  pdfFieldId_ );
@@ -497,7 +497,7 @@ class CurvedDeltaValueCalculation
 {
 public:
 
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    CurvedDeltaValueCalculation( const shared_ptr< StructuredBlockForest > & blocks, const IBlock & block, const Channel & channel ) :
       blocks_( blocks ), block_( block ), channel_( channel ) {}
@@ -587,16 +587,16 @@ class ErrorVTKWriter : public vtk::BlockCellDataWriter< OutputType, 3 >
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = lbm::PdfField< LatticeModel_T >;
 
    ErrorVTKWriter( const ConstBlockDataID & pdfFieldId, const std::string & id, const Setup & setup ) :
-      vtk::BlockCellDataWriter< OutputType, 3 >( id ), bdid_( pdfFieldId ), pdf_( NULL ), setup_( setup ) {}
+      vtk::BlockCellDataWriter< OutputType, 3 >( id ), bdid_( pdfFieldId ), pdf_( nullptr ), setup_( setup ) {}
 
 protected:
 
-   void configure() { WALBERLA_ASSERT_NOT_NULLPTR( this->block_ ); pdf_ = this->block_->template getData< PdfField_T >( bdid_ ); }
+   void configure() override { WALBERLA_ASSERT_NOT_NULLPTR( this->block_ ); pdf_ = this->block_->template getData< PdfField_T >( bdid_ ); }
 
-   OutputType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f )
+   OutputType evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( pdf_ );
 
@@ -657,7 +657,7 @@ class MyVTKOutput {
 public:
 
    MyVTKOutput( const ConstBlockDataID & pdfField, const ConstBlockDataID & flagField,
-                vtk::VTKOutput::BeforeFunction pdfGhostLayerSync, const Setup & setup ) :
+                const vtk::VTKOutput::BeforeFunction& pdfGhostLayerSync, const Setup & setup ) :
       setup_( setup ), pdfField_( pdfField ), flagField_( flagField ), pdfGhostLayerSync_( pdfGhostLayerSync ) {}
 
    void operator()( std::vector< shared_ptr<vtk::BlockCellDataWriterInterface> > & writers,
@@ -786,8 +786,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                                                               Vector3< real_t >( initVelocity, real_c(0), real_c(0) ), real_t(1),
                                                               FieldGhostLayers, field::zyxf );
 
-   typedef typename lbm::Adaptor<LatticeModel_T>::VelocityVector  VelocityAdaptor_T;
-   typedef typename lbm::Adaptor<LatticeModel_T>::Density          DensityAdaptor_T;
+   using VelocityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::VelocityVector;
+   using DensityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::Density;
    BlockDataID velocityAdaptorId = field::addFieldAdaptor< VelocityAdaptor_T >( blocks, pdfFieldId, "velocity adaptor" );
    BlockDataID  densityAdaptorId = field::addFieldAdaptor<  DensityAdaptor_T >( blocks, pdfFieldId, "density adaptor" );
    
@@ -834,7 +834,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    shared_ptr<WcTimingPool> refinementTimeStepTiming = make_shared<WcTimingPool>();
    shared_ptr<WcTimingPool> refinementTimeStepLevelwiseTiming = make_shared<WcTimingPool>();
 
-   typedef typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T BH_T;
+   using BH_T = typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T;
 
    auto mySweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldId, flagFieldId, Fluid_Flag );
    auto ts = lbm::refinement::makeTimeStep< LatticeModel_T, BH_T >( blocks, mySweep, pdfFieldId, boundaryHandlingId );
@@ -847,12 +847,12 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                                                  
    // evaluation 
    
-   const auto exactSolutionFunction = setup.circularProfile ? boost::bind( exactPipeVelocity, _1, blocks, setup ) :
-                                                              boost::bind( exactPlatesVelocity, _1, blocks, setup );
+   const auto exactSolutionFunction = setup.circularProfile ? std::bind( exactPipeVelocity, std::placeholders::_1, blocks, setup ) :
+                                                              std::bind( exactPlatesVelocity, std::placeholders::_1, blocks, setup );
 
    auto volumetricFlowRate = field::makeVolumetricFlowRateEvaluation< VelocityAdaptor_T, FlagField_T >( configBlock, blocks, velocityAdaptorId,
                                                                                                         flagFieldId, Fluid_Flag,
-                                                                                                        boost::bind( exactFlowRate, setup.flowRate_L ),
+                                                                                                        std::bind( exactFlowRate, setup.flowRate_L ),
                                                                                                         exactSolutionFunction );
    volumetricFlowRate->setNormalizationFactor( real_t(1) / setup.maxVelocity_L );
    volumetricFlowRate->setDomainNormalization( Vector3<real_t>( real_t(1) ) );
@@ -1107,7 +1107,7 @@ int main( int argc, char **argv )
    //WALBERLA_ROOT_SECTION() { logging::Logging::instance()->setLogLevel( logging::Logging::PROGRESS ); }
 
 #ifdef _OPENMP
-   if( std::getenv( "OMP_NUM_THREADS" ) == NULL )
+   if( std::getenv( "OMP_NUM_THREADS" ) == nullptr )
       WALBERLA_ABORT( "If you are using a version of the program that was compiled with OpenMP you have to "
                       "specify the environment variable \'OMP_NUM_THREADS\' accordingly!" );
 #endif

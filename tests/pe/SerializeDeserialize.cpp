@@ -34,10 +34,10 @@
 
 #include <boost/tuple/tuple.hpp>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 void createDump()
 {
@@ -144,4 +144,10 @@ int main( int argc, char ** argv )
    checkDump();
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

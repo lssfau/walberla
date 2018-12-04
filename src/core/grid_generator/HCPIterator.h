@@ -76,5 +76,39 @@ private:
    bool ended_;
 };
 
+/// Convenience class to enable range based for loops over grid points.
+/// Usage:
+/// \code for (const auto& pt : HCPGrid(...) ) \endcode
+class HCPGrid
+{
+public:
+   using iterator = HCPIterator;
+   using value_type = iterator::value_type;
+
+   /**
+    * @param domain volume were lattice points will be returned
+    * @param pointOfReference point somewhere in the world which fixes the lattice
+    * @param spacing spacing between grid points in x direction
+    */
+   HCPGrid(const AABB& domain, const Vector3<real_t>& pointOfReference, const real_t spacing)
+      : domain_(domain)
+      , pointOfReference_(pointOfReference)
+      , spacing_(spacing)
+   {}
+
+   HCPIterator begin() {return HCPIterator(domain_, pointOfReference_, spacing_);}
+   HCPIterator begin()  const {return HCPIterator(domain_, pointOfReference_, spacing_);}
+   HCPIterator cbegin() const {return HCPIterator(domain_, pointOfReference_, spacing_);}
+
+   HCPIterator end() {return HCPIterator();}
+   HCPIterator end()  const {return HCPIterator();}
+   HCPIterator cend() const {return HCPIterator();}
+
+private:
+   AABB domain_;
+   Vector3<real_t> pointOfReference_;
+   real_t spacing_;
+};
+
 } // namespace grid_generator
 } // namespace walberla

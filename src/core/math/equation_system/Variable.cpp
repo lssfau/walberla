@@ -28,7 +28,7 @@
 namespace walberla {
 namespace math {
 
-   Var::Var ( std::string name ) :
+   Var::Var ( const std::string& name ) :
       name_ (name),
       valid_ (false),
       value_ (FP_NAN)
@@ -40,7 +40,7 @@ namespace math {
    }
 
    bool Var::operator==( const Var& var) const {
-      return name_.compare( var.name_ ) == 0;
+      return name_ == var.name_;
    }
 
    std::ostream& operator<<( std::ostream& os, const Var & var ){

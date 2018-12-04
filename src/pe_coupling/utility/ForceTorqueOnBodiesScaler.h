@@ -21,15 +21,12 @@
 
 #pragma once
 
-#include "core/math/Vector3.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
-#include "pe/rigidbody/BodyIterators.h"
-
 
 namespace walberla {
 namespace pe_coupling {
 
-// scales force/torquew on all bodies (local and remote) by a constant scalar value
+// scales force/torque on all bodies (local and remote) by a constant scalar value
 // can e.g. be used to average the force/torque over two time steps
 class ForceTorqueOnBodiesScaler
 {  
@@ -41,29 +38,9 @@ public:
      { }
 
    // resets forces and torques on all (local and remote) bodies
-   void operator()()
-   {
-      Vector3<real_t> force(real_t(0));
-      Vector3<real_t> torque(real_t(0));
-      for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
-      {
-         for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-         {
-            force  = scalingFactor_ * bodyIt->getForce();
-            torque = scalingFactor_ * bodyIt->getTorque();
+   void operator()();
 
-            bodyIt->resetForceAndTorque();
-
-            bodyIt->setForce ( force );
-            bodyIt->setTorque( torque );
-         }
-      }
-   }
-
-   void resetScalingFactor( const real_t newScalingFactor )
-   {
-      scalingFactor_ = newScalingFactor;
-   }
+   void resetScalingFactor( const real_t newScalingFactor );
 
 private:
 

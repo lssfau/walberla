@@ -64,7 +64,7 @@ GeomPrimitive::GeomPrimitive( id_t const typeID, id_t sid, id_t uid, MaterialID 
 /*!\brief Destructor for the Primitive class.
  */
 GeomPrimitive::~GeomPrimitive()
-{}
+= default;
 //*************************************************************************************************
 
 }  // namespace pe

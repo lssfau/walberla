@@ -31,10 +31,12 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/math/Random.h"
 
-using namespace walberla;
+#include <functional>
+
+namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 int main( int argc, char** argv )
 {
@@ -69,7 +71,7 @@ int main( int argc, char** argv )
     SetBodyTypeIDs<BodyTuple>::execute();
 
     auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
-    Storage* firstStorage = NULL, *secondStorage = NULL;
+    Storage* firstStorage = nullptr, *secondStorage = nullptr;
     for (auto it = forest->begin(); it != forest->end(); ++it)
     {
        IBlock & currentBlock = *it;
@@ -83,10 +85,10 @@ int main( int argc, char** argv )
     std::function<void(void)> syncCall;
     if (!syncShadowOwners)
     {
-       syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+       syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
     } else
     {
-       syncCall = boost::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+       syncCall = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
     }
 
     pe::createSphere(*globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(5,5,5), 2);
@@ -119,4 +121,10 @@ int main( int argc, char** argv )
     WALBERLA_CHECK_EQUAL( secondStorage->at(1).size(), 0 );
 
     return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

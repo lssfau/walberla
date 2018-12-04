@@ -62,6 +62,13 @@ void rotationTest()
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON( result, cmp, real_t(1e-5) );
 }
 
+void RARTTest()
+{
+   Matrix3<real_t> A ( 1,2,3,4,5,6,7,8,9 );
+   Matrix3<real_t> R ( 2,3,4,5,6,7,8,9,1 );
+   WALBERLA_CHECK_FLOAT_EQUAL( math::transformMatrixRART(R,A), R * A * R.getTranspose() );
+}
+
 int main()
 {
 
@@ -72,6 +79,7 @@ int main()
    m1 * m2;
 
    rotationTest();
+   RARTTest();
 
    return 0;
 }

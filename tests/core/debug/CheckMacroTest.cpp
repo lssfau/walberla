@@ -54,7 +54,7 @@ int main()
 
    {
       // Pointers
-      int* nullPointer = 0;
+      int* nullPointer = nullptr;
       shared_ptr<int> sharedNullPointer;
       WALBERLA_CHECK_NULLPTR(nullPointer);
       WALBERLA_CHECK_NULLPTR(sharedNullPointer);

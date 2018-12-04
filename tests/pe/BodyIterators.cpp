@@ -14,7 +14,7 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file BodyIterators.cpp
-//! \author Florian Schornbaum <florian.schornbaum@fau.de>
+//! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
@@ -33,10 +33,10 @@
 #include <iostream>
 
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 int main( int argc, char **argv )
 {
@@ -73,13 +73,13 @@ int main( int argc, char **argv )
 
     uint_t sphereCount = 0;
 
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(25), real_t(25), real_t(50) ), 1) != NULL)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(25), real_t(25), real_t(50) ), 1) != nullptr)
         ++sphereCount;
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(99), real_t(25), real_t(50) ), 2) != NULL)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(99), real_t(25), real_t(50) ), 2) != nullptr)
         ++sphereCount;
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(101), real_t(25), real_t(50) ), 2) != NULL)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(101), real_t(25), real_t(50) ), 2) != nullptr)
         ++sphereCount;
-    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(125), real_t(25), real_t(50) ), 1) != NULL)
+    if (pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), storageID, 0, Vec3( real_t(125), real_t(25), real_t(50) ), 1) != nullptr)
         ++sphereCount;
 
     syncShadowOwners<BodyTuple>( blocks->getBlockForest(), storageID);
@@ -149,4 +149,10 @@ int main( int argc, char **argv )
     WALBERLA_CHECK_EQUAL( counter, 6 );
 
     return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

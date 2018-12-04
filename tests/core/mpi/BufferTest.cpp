@@ -122,6 +122,16 @@ void initBoostArray( boost::array< T, N > & array )
       *it = dist( rng );
 }
 
+template<typename T, std::size_t N>
+void initStdArray( std::array< T, N > & array )
+{
+   static std::mt19937 rng;
+   std::uniform_int_distribution<T> dist;
+
+   for( auto it = array.begin(); it != array.end(); ++it )
+      *it = dist( rng );
+}
+
 
 /// Simulates one send and receive operation
 /// data is put into send buffer and copied to RecvBuffer
@@ -153,6 +163,7 @@ void bufferTest()
    std::multimap<unsigned int, walberla::int64_t> stdMultiMap, stdMultiMapEmpty;
 
    boost::array< unsigned int, 19 > boostArray;
+   std::array  < unsigned int, 19 > stdArray;
 
    initVecBool(boolStdVec);
    initIntegerContainer(stdVec);
@@ -163,6 +174,7 @@ void bufferTest()
    initIntegerMap(stdMap);
    initIntegerMap(stdMultiMap);
    initBoostArray(boostArray);
+   initStdArray(stdArray);
 
    // Create send buffer and put two values in it
    GenericSendBuffer<T> sb;
@@ -178,7 +190,7 @@ void bufferTest()
    sb << stdMultiSet << stdMultiSetEmpty;
    sb << stdMap      << stdMapEmpty;
    sb << stdMultiMap << stdMultiMapEmpty;
-   sb << boostArray;
+   sb << boostArray  << stdArray;
 
    // Copying
    //RecvBuffer<T> rb;
@@ -209,6 +221,7 @@ void bufferTest()
    std::multimap<unsigned int, walberla::int64_t> recvStdMultiMap, recvStdMultiMapEmpty;
 
    boost::array<unsigned int, 19> recvBoostArray;
+   std::array  <unsigned int, 19> recvStdArray;
 
    rb >> recvD           >> recvI;
    rb >> recvVec         >> recvMat;
@@ -222,7 +235,7 @@ void bufferTest()
    rb >> recvStdMultiSet >> recvStdMultiSetEmpty;
    rb >> recvStdMap      >> recvStdMapEmpty;
    rb >> recvStdMultiMap >> recvStdMultiMapEmpty;
-   rb >> recvBoostArray;
+   rb >> recvBoostArray  >> recvStdArray;
 
    // Validate
    WALBERLA_CHECK_FLOAT_EQUAL(recvD,testDouble);
@@ -254,6 +267,7 @@ void bufferTest()
    WALBERLA_CHECK_EQUAL(recvStdMultiMapEmpty, stdMultiMapEmpty);
 
    WALBERLA_CHECK_EQUAL(recvBoostArray, boostArray);
+   WALBERLA_CHECK_EQUAL(recvStdArray,   stdArray);
 }
 
 

@@ -55,7 +55,7 @@ SimpleCCD::~SimpleCCD()
 PossibleContacts& SimpleCCD::generatePossibleContacts( WcTimingTree* tt ){
    contacts_.clear();
 
-   if (tt != NULL) tt->start("SimpleCCD");
+   if (tt != nullptr) tt->start("SimpleCCD");
    for (auto it1 = bodies_.begin(); it1 != bodies_.end(); ++it1){
       for (auto it2 = it1 + 1; it2 !=bodies_.end(); ++it2)
       {
@@ -70,16 +70,16 @@ PossibleContacts& SimpleCCD::generatePossibleContacts( WcTimingTree* tt ){
 
       for (auto it2 = globalStorage_.begin(); it2 != globalStorage_.end(); ++it2)
       {
-         if (!((*it1)->hasInfiniteMass() && (*it2)->hasInfiniteMass()))
+         if (!((*it1)->hasInfiniteMass() && it2->hasInfiniteMass()))
          {
-            if ( (*it1)->getSystemID() > (*it2)->getSystemID() )
-               contacts_.push_back(std::make_pair(*it2, *it1));
+            if ( (*it1)->getSystemID() > it2->getSystemID() )
+               contacts_.push_back(std::make_pair(it2.getBodyID(), *it1));
             else
-               contacts_.push_back(std::make_pair(*it1, *it2));
+               contacts_.push_back(std::make_pair(*it1, it2.getBodyID()));
          }
       }
    }
-   if (tt != NULL) tt->stop("SimpleCCD");
+   if (tt != nullptr) tt->stop("SimpleCCD");
 
    return contacts_;
 }

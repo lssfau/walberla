@@ -33,10 +33,10 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/math/Random.h"
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 int main( int argc, char** argv )
 {
@@ -60,7 +60,7 @@ int main( int argc, char** argv )
     math::seedRandomGenerator(1337);
 
     for (uint_t i = 0; i < 100; ++i)
-      storage[0].add( new Sphere(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Vec3(0,0,0), Quat(), 1, iron, false, false, false) );
+      storage[0].add( std::make_unique<Sphere>(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Vec3(0,0,0), Quat(), real_t(1), iron, false, false, false) );
 
     sccd.generatePossibleContacts();
 
@@ -70,7 +70,7 @@ int main( int argc, char** argv )
 
     WALBERLA_LOG_DEVEL( s_fcd.getContacts().size() );
 
-    BodyID bd = *(storage[0].begin() + 5);
+    BodyID bd = (storage[0].begin() + 5).getBodyID();
     storage[0].remove( bd );
 
     sccd.generatePossibleContacts();
@@ -84,14 +84,14 @@ int main( int argc, char** argv )
 
     bs.clear();
 
-    bs.add( new Sphere(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Vec3(0,0,0), Quat(), 1, iron, false, false, false) );
+    bs.add( std::make_unique<Sphere>(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Vec3(0,0,0), Quat(), real_t(1), iron, false, false, false) );
 
     WcTimingPool pool;
     for (int runs = 0; runs < 10; ++runs)
     {
        auto oldSize = bs.size();
        for (uint_t i = 0; i < oldSize; ++i)
-         bs.add( new Sphere(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Vec3(0,0,0), Quat(), 0.5, iron, false, false, false) );
+         bs.add( std::make_unique<Sphere>(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Vec3(0,0,0), Quat(), real_t(0.5), iron, false, false, false) );
        pool["SCCD"].start();
        sccd.generatePossibleContacts();
        pool["SCCD"].end();
@@ -107,4 +107,12 @@ int main( int argc, char** argv )
        WALBERLA_LOG_DEVEL_ON_ROOT(bs.size() << "\t" << pool["SCCD"].last() << "\t" << pool["HG"].last() << "\t" << sccd.getPossibleContacts().size() << "\t" << hg.getPossibleContacts().size() << "\t" << hg.active());
        //std::cout << pool << std::endl;
     }
+
+    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

@@ -21,10 +21,7 @@
 
 #pragma once
 
-#include "core/math/Vector3.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
-#include "pe/rigidbody/BodyIterators.h"
-
 
 namespace walberla {
 namespace pe_coupling {
@@ -38,17 +35,7 @@ public:
      { }
 
    // resets forces and torques on all (local and remote) bodies
-   void operator()()
-   {
-      for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
-      {
-         for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-         {
-            bodyIt->resetForceAndTorque();
-         }
-      }
-   }
-
+   void operator()();
 
 private:
 

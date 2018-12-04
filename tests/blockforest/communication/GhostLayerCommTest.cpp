@@ -40,7 +40,7 @@
 #include <iostream>
 
 
-using namespace walberla;
+namespace walberla {
 namespace wlb = walberla;
 
 typedef GhostLayerField<real_t,19> PdfField;
@@ -269,8 +269,14 @@ int main(int argc, char **argv)
 
 
    timeLoop.run();
+
+   return EXIT_SUCCESS;
+}
 }
 
+int main(int argc, char **argv) {
+  return walberla::main(argc, argv);
+}
 
 
 

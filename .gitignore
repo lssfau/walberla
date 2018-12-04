@@ -4,6 +4,9 @@ ui_*
 qrc_*
 *~
 
+# macOS
+**/.DS_Store
+
 # Backup files of kate/kwrite
 
 # Generated files

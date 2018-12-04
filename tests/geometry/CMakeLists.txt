@@ -28,3 +28,5 @@ waLBerla_execute_test( NAME ScalarFieldFromGrayScaleImageTest )
 
 waLBerla_compile_test( FILES ImageTest.cpp )
 waLBerla_execute_test( NAME ImageTest )
+
+waLBerla_compile_test( FILES BinaryRawFileTest.cpp )

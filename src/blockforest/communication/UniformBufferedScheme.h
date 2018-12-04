@@ -38,9 +38,7 @@
 #include "core/selectable/IsSetSelected.h"
 #include "core/uid/SUID.h"
 
-#include <boost/bind.hpp>
 #include <functional>
-
 #include <map>
 #include <vector>
 
@@ -321,13 +319,13 @@ void UniformBufferedScheme<Stencil>::startCommunication()
                      localBuffers_.push_back( buffer );
                      const uint_t index = uint_c( localBuffers_.size() ) - uint_t(1);
 
-                     VoidFunction pack = boost::bind( &UniformBufferedScheme<Stencil>::localBufferPacking, this,
-                                                      index, boost::cref( *packInfo ), block, *dir );
+                     VoidFunction pack = std::bind( &UniformBufferedScheme<Stencil>::localBufferPacking, this,
+                                                      index, std::cref( *packInfo ), block, *dir );
 
                      threadsafeLocalCommunication_.push_back( pack );
 
-                     VoidFunction unpack = boost::bind( &UniformBufferedScheme<Stencil>::localBufferUnpacking, this,
-                                                        index, boost::cref( *packInfo ), neighbor, *dir  );
+                     VoidFunction unpack = std::bind( &UniformBufferedScheme<Stencil>::localBufferUnpacking, this,
+                                                        index, std::cref( *packInfo ), neighbor, *dir  );
 
                      if( (*packInfo)->threadsafeReceiving() )
                         threadsafeLocalCommunicationUnpack_.push_back( unpack );
@@ -336,7 +334,7 @@ void UniformBufferedScheme<Stencil>::startCommunication()
                   }
                   else
                   {
-                     VoidFunction localCommunicationFunction = boost::bind( &walberla::communication::UniformPackInfo::communicateLocal,
+                     VoidFunction localCommunicationFunction = std::bind( &walberla::communication::UniformPackInfo::communicateLocal,
                                                                             *packInfo, block, neighbor, *dir );
                      if( (*packInfo)->threadsafeReceiving() )
                         threadsafeLocalCommunication_.push_back( localCommunicationFunction );
@@ -350,11 +348,11 @@ void UniformBufferedScheme<Stencil>::startCommunication()
                auto nProcess = block->getNeighborProcess( neighborIdx, uint_t(0) );
 
                if( !packInfos_.empty() )
-                  sendFunctions[ nProcess ].push_back( boost::bind( UniformBufferedScheme<Stencil>::writeHeader, _1, nBlockId, *dir ) );
+                  sendFunctions[ nProcess ].push_back( std::bind( UniformBufferedScheme<Stencil>::writeHeader, std::placeholders::_1, nBlockId, *dir ) );
 
                for( auto packInfo = packInfos_.begin(); packInfo != packInfos_.end(); ++packInfo )
-                  sendFunctions[ nProcess ].push_back( boost::bind( &walberla::communication::UniformPackInfo::packData,
-                                                                     *packInfo, block, *dir, _1 ) );
+                  sendFunctions[ nProcess ].push_back( std::bind( &walberla::communication::UniformPackInfo::packData,
+                                                                     *packInfo, block, *dir,  std::placeholders::_1 ) );
             }
          }
       }
@@ -368,8 +366,8 @@ void UniformBufferedScheme<Stencil>::startCommunication()
 
       for( auto sender = sendFunctions.begin(); sender != sendFunctions.end(); ++sender )
       {
-         bufferSystem_.addSendingFunction  ( int_c(sender->first), boost::bind(  UniformBufferedScheme<Stencil>::send, _1, sender->second ) );
-         bufferSystem_.addReceivingFunction( int_c(sender->first), boost::bind( &UniformBufferedScheme<Stencil>::receive, this, _1 ) );
+         bufferSystem_.addSendingFunction  ( int_c(sender->first), std::bind(  UniformBufferedScheme<Stencil>::send, std::placeholders::_1, sender->second ) );
+         bufferSystem_.addReceivingFunction( int_c(sender->first), std::bind( &UniformBufferedScheme<Stencil>::receive, this, std::placeholders::_1 ) );
       }
 
       setupBeforeNextCommunication_ = false;
@@ -539,13 +537,13 @@ void UniformBufferedScheme<Stencil>::localBufferUnpacking( const uint_t index, c
 template< typename Stencil >
 std::function<void()> UniformBufferedScheme<Stencil>::getStartCommunicateFunctor()
 {
-   return boost::bind( &UniformBufferedScheme::startCommunication, this );
+   return std::bind( &UniformBufferedScheme::startCommunication, this );
 }
 
 template< typename Stencil >
 std::function<void()> UniformBufferedScheme<Stencil>::getWaitFunctor()
 {
-   return boost::bind( &UniformBufferedScheme::wait, this );
+   return std::bind( &UniformBufferedScheme::wait, this );
 }
 
 

@@ -86,11 +86,9 @@
 #include <iostream>
 #include <vector>
 
+namespace walberla {
 
-using namespace walberla;
-
-
-typedef walberla::uint8_t                   flag_t;
+using flag_t = walberla::uint8_t;
 
 // Compressible SRT with constant force
 using lbm::collision_model::SRT;
@@ -98,8 +96,8 @@ using lbm::force_model::GuoConstant;
 typedef lbm::D3Q19< SRT, true, GuoConstant> LM;
 
 // Fields
-typedef lbm::PdfField<LM>                   PdfField;
-typedef FlagField<flag_t>                   FField;
+using PdfField = lbm::PdfField<LM>;
+using FField = FlagField<flag_t>;
 typedef GhostLayerField<Vector3<real_t>,1 > VectorField;
 typedef GhostLayerField<real_t,1 >          ScalarField;
 
@@ -390,6 +388,9 @@ int main( int argc, char** argv )
    */
    return 0;
 }
+} // namespace walberla
 
-
-
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
+}

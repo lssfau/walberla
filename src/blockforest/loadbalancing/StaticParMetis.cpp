@@ -43,12 +43,12 @@ template< typename T >
 T * ptr( std::vector<T> & v )
 {
    if( v.empty() )
-      return NULL;
+      return nullptr;
    else
       return &( v.front() );
 }
 
-typedef uint_t idx_t;
+using idx_t = uint_t;
 
 
 uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uint_t numberOfProcesses, const memory_t /*perProcessMemoryLimit*/ ) const
@@ -114,7 +114,7 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
 
             if(weightsToUse_ == PARMETIS_EDGE_WEIGHTS || weightsToUse_ == PARMETIS_BOTH_WEIGHTS)
             {
-               blockPairs.push_back( BlockPair( blocks[i], *nit ) );
+               blockPairs.emplace_back( blocks[i], *nit );
             }
          }
 

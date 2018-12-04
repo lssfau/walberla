@@ -217,9 +217,9 @@ int main( int argc, char * argv[] )
 
    typedef lbm::D3Q19<lbm::collision_model::SRT, false, lbm::force_model::SimpleConstant> LatticeModel_T;
 
-   typedef walberla::uint8_t                     flag_t;
-   typedef FlagField< flag_t >                   FlagField_T;
-   typedef lbm::PdfField< LatticeModel_T >       PdfField_T;
+   using flag_t = walberla::uint8_t;
+   using FlagField_T = FlagField<flag_t>;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
    LatticeModel_T latticeModel{ lbm::collision_model::SRT( omega ), lbm::force_model::SimpleConstant( bodyForce ) };
 

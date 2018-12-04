@@ -19,6 +19,7 @@
 //======================================================================================================================
 
 #include "pe/basic.h"
+#include "pe/rigidbody/UnionFactory.h"
 #include "pe/utility/GetBody.h"
 #include "pe/utility/DestroyBody.h"
 
@@ -28,16 +29,31 @@
 
 #include "core/debug/TestSubsystem.h"
 
-using namespace walberla;
+#include <functional>
+
+namespace walberla {
 using namespace walberla::pe;
 
-typedef Union< boost::tuple<Sphere> > UnionT;
+using UnionT = Union<boost::tuple<Sphere> >;
 typedef boost::tuple<Sphere, UnionT> BodyTuple ;
 
 int main( int argc, char** argv )
 {
    walberla::debug::enterTestMode();
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
+
+   bool syncShadowOwners = false;
+   for( int i = 1; i < argc; ++i )
+   {
+      if( std::strcmp( argv[i], "--syncShadowOwners" ) == 0 ) syncShadowOwners = true;
+   }
+   if (syncShadowOwners)
+   {
+      WALBERLA_LOG_DEVEL("running with syncShadowOwners");
+   } else
+   {
+      WALBERLA_LOG_DEVEL("running with syncNextNeighbour");
+   }
 
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
@@ -61,14 +77,14 @@ int main( int argc, char** argv )
 //   logging::Logging::instance()->setFileLogLevel(logging::Logging::DETAIL);
 //   logging::Logging::instance()->includeLoggingToFile("ShadowCopy");
 
-   bool syncShadowOwners = false;
+
    std::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
-      syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
    } else
    {
-      syncCall = boost::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCall = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(forest->getBlockForest()), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
    }
 
    WALBERLA_LOG_PROGRESS_ON_ROOT( " *** SPHERE *** ");
@@ -92,13 +108,27 @@ int main( int argc, char** argv )
    WALBERLA_CHECK_FLOAT_EQUAL( sp->getRadius(), real_t(1.2) );
    destroyBodyBySID( *globalBodyStorage, forest->getBlockStorage(), storageID, sid );
 
+   WALBERLA_LOG_PROGRESS_ON_ROOT( " *** SPHERE AT BLOCK EDGE *** ");
+   sp = pe::createSphere(
+            *globalBodyStorage,
+            forest->getBlockStorage(),
+            storageID,
+            999999999,
+            Vec3(0,2,2),
+            real_c(1.2));
+   sid = sp->getSystemID();
+   syncCall();
+   sp = static_cast<SphereID> (getBody( *globalBodyStorage, forest->getBlockStorage(), storageID, sid, StorageSelect::LOCAL ));
+   sp->setPosition(real_c(-1)*std::numeric_limits<real_t>::epsilon(),2,2);
+   syncCall();
+   sp = static_cast<SphereID> (getBody( *globalBodyStorage, forest->getBlockStorage(), storageID, sid, StorageSelect::LOCAL ));
+   WALBERLA_CHECK_NOT_NULLPTR(sp);
+   destroyBodyBySID( *globalBodyStorage, forest->getBlockStorage(), storageID, sid );
+
    WALBERLA_LOG_PROGRESS_ON_ROOT( " *** UNION *** ");
-   MaterialID iron = Material::find("iron");
    UnionT* un   = createUnion< boost::tuple<Sphere> >( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(2,2,2) );
-   SphereID sp1 = new Sphere( 10, 0, Vec3(real_t(4.9),2,2), Vec3(0,0,0), Quat(), real_t(1)  , iron, false, true, false );
-   SphereID sp2 = new Sphere( 11, 0, Vec3(3,2,2)          , Vec3(0,0,0), Quat(), real_t(1.5), iron, false, true, false );
-   un->add(sp1);
-   un->add(sp2);
+   auto sp1 = createSphere(un, 10, Vec3(real_t(4.9),2,2), real_t(1));
+   auto sp2 = createSphere(un, 11, Vec3(3,2,2), real_t(1.5));
    un->setPosition( Vec3( real_t(4.9), 2, 2) );
    auto relPosSp1 = sp1->getRelPosition();
    auto relPosSp2 = sp2->getRelPosition();
@@ -111,8 +141,8 @@ int main( int argc, char** argv )
    syncCall();
 
    un  = static_cast<UnionT*> (getBody( *globalBodyStorage, forest->getBlockStorage(), storageID, sid, StorageSelect::LOCAL ));
-   sp1 = static_cast<SphereID> (*(un->begin()));
-   sp2 = static_cast<SphereID> (*(++(un->begin())));
+   sp1 = static_cast<SphereID> (un->begin().getBodyID());
+   sp2 = static_cast<SphereID> ((++(un->begin())).getBodyID());
    WALBERLA_CHECK_NOT_NULLPTR(sp1);
    WALBERLA_CHECK_NOT_NULLPTR(sp2);
    WALBERLA_CHECK_EQUAL( sp1->getTypeID(), Sphere::getStaticTypeID() );
@@ -150,8 +180,8 @@ int main( int argc, char** argv )
 
    posUnion = Vec3(real_t(0.9),2,2);
    un  = static_cast<UnionT*> (getBody( *globalBodyStorage, forest->getBlockStorage(), storageID, sid, StorageSelect::LOCAL ));
-   sp1 = static_cast<SphereID> (*(un->begin()));
-   sp2 = static_cast<SphereID> (*(++(un->begin())));
+   sp1 = static_cast<SphereID> (un->begin().getBodyID());
+   sp2 = static_cast<SphereID> ((++(un->begin())).getBodyID());
    WALBERLA_CHECK_NOT_NULLPTR(sp1);
    WALBERLA_CHECK_NOT_NULLPTR(sp2);
    WALBERLA_CHECK_EQUAL( sp1->getTypeID(), Sphere::getStaticTypeID() );
@@ -172,4 +202,10 @@ int main( int argc, char** argv )
    }
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

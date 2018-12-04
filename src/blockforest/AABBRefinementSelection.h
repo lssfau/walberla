@@ -22,6 +22,7 @@
 #pragma once
 
 #include "SetupBlockForest.h"
+#include "BlockForest.h"
 
 #include "core/config/Config.h"
 #include "core/math/AABB.h"
@@ -38,6 +39,8 @@ namespace blockforest {
 class AABBRefinementSelection
 {
 public:
+
+   AABBRefinementSelection(){}
 
    AABBRefinementSelection( const Config::BlockHandle & configBlock )
    {
@@ -79,25 +82,10 @@ public:
       regions_.push_back( std::make_pair( region, level ) );
    }
 
-   std::vector< std::pair< math::AABB, uint_t > > transformRegionsToAABBs( SetupBlockForest & forest ) const
-   {
-      std::vector< std::pair< math::AABB, uint_t > > aabbs;
-      math::AABB aabb = forest.getDomain();
-      for( auto region = regions_.begin(); region != regions_.end(); ++region )
-      {
-         aabbs.push_back( std::make_pair( math::AABB( aabb.xMin() + region->first.xMin() * aabb.xSize(),
-                                                      aabb.yMin() + region->first.yMin() * aabb.ySize(),
-                                                      aabb.zMin() + region->first.zMin() * aabb.zSize(),
-                                                      aabb.xMin() + region->first.xMax() * aabb.xSize(),
-                                                      aabb.yMin() + region->first.yMax() * aabb.ySize(),
-                                                      aabb.zMin() + region->first.zMax() * aabb.zSize() ), region->second ) );
-      }
-      return aabbs;
-   }
-
+   // for static refinement
    void operator()( SetupBlockForest & forest )
    {
-      std::vector< std::pair< math::AABB, uint_t > > aabbs = transformRegionsToAABBs( forest );
+      std::vector< std::pair< math::AABB, uint_t > > aabbs = transformRegionsToAABBs( forest.getDomain() );
       aabbs.insert( aabbs.end(), aabbs_.begin(), aabbs_.end() );
 
       if( aabbs.empty() )
@@ -113,7 +101,59 @@ public:
       }
    }
 
+   // for dynamic refinement
+   void operator()(std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
+                   std::vector< const Block * > &, const BlockForest & forest )
+   {
+      std::vector< std::pair< math::AABB, uint_t > > aabbs = transformRegionsToAABBs( forest.getDomain() );
+      aabbs.insert( aabbs.end(), aabbs_.begin(), aabbs_.end() );
+
+      for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
+      {
+         uint_t currentLevelOfBlock = it->first->getLevel();
+         uint_t targetLevelOfBlock = currentLevelOfBlock;
+
+         for( auto aabb = aabbs.begin(); aabb != aabbs.end(); ++aabb )
+         {
+            if( it->first->getAABB().intersects( aabb->first ) )
+            {
+               uint_t targetLevelOfAABB = aabb->second;
+               if( currentLevelOfBlock > targetLevelOfAABB )
+               {
+                  targetLevelOfBlock = currentLevelOfBlock - uint_t(1);
+               }
+               else if ( currentLevelOfBlock < targetLevelOfBlock )
+               {
+                  targetLevelOfBlock = currentLevelOfBlock + uint_t(1);
+               }
+               // only the first found intersecting AABB is taken into account
+               break;
+            }
+         }
+
+         WALBERLA_CHECK_LESS_EQUAL(std::abs(int_c(targetLevelOfBlock) - int_c(currentLevelOfBlock)), uint_t(1), "Only level difference of maximum 1 allowed!");
+         it->second = targetLevelOfBlock;
+      }
+   }
+
+
 private:
+
+   std::vector< std::pair< math::AABB, uint_t > > transformRegionsToAABBs( const math::AABB & simulationDomain ) const
+   {
+      std::vector< std::pair< math::AABB, uint_t > > aabbs;
+      for( auto region = regions_.begin(); region != regions_.end(); ++region )
+      {
+         aabbs.push_back( std::make_pair( math::AABB( simulationDomain.xMin() + region->first.xMin() * simulationDomain.xSize(),
+                                                      simulationDomain.yMin() + region->first.yMin() * simulationDomain.ySize(),
+                                                      simulationDomain.zMin() + region->first.zMin() * simulationDomain.zSize(),
+                                                      simulationDomain.xMin() + region->first.xMax() * simulationDomain.xSize(),
+                                                      simulationDomain.yMin() + region->first.yMax() * simulationDomain.ySize(),
+                                                      simulationDomain.zMin() + region->first.zMax() * simulationDomain.zSize() ), region->second ) );
+      }
+      return aabbs;
+   }
+
 
    std::vector< std::pair< math::AABB, uint_t > > aabbs_;
    std::vector< std::pair< math::AABB, uint_t > > regions_;

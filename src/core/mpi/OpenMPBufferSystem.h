@@ -60,8 +60,8 @@ public:
 
    bool isSizeCommunicatedInNextStep() const          { return bs_.isSizeCommunicatedInNextStep(); }
 
-   void addReceivingFunction( MPIRank rank, std::function<void ( RecvBuffer & buf ) > recvFunction );
-   void addSendingFunction  ( MPIRank rank, std::function<void ( SendBuffer & buf ) > sendFunction );
+   void addReceivingFunction( MPIRank rank, const std::function<void ( RecvBuffer & buf ) >& recvFunction );
+   void addSendingFunction  ( MPIRank rank, const std::function<void ( SendBuffer & buf ) >& sendFunction );
 
    void clearReceivingFunctions() { dirty_ = true; recvFunctions_.clear(); }
    void clearSendingFunctions()   { dirty_ = true; sendFunctions_.clear(); sendRanks_.clear(); }

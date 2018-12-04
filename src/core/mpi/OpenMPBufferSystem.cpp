@@ -47,14 +47,14 @@ OpenMPBufferSystem::OpenMPBufferSystem( const MPI_Comm & communicator, int tag,
 }
 
 
-void OpenMPBufferSystem::addReceivingFunction( MPIRank rank, std::function<void ( RecvBuffer & buf ) > recvFunction )
+void OpenMPBufferSystem::addReceivingFunction( MPIRank rank, const std::function<void ( RecvBuffer & buf ) >& recvFunction )
 {
    dirty_ = true;
    recvFunctions_[rank] = recvFunction;
 }
 
 
-void OpenMPBufferSystem::addSendingFunction  ( MPIRank rank, std::function<void ( SendBuffer & buf ) > sendFunction )
+void OpenMPBufferSystem::addSendingFunction  ( MPIRank rank, const std::function<void ( SendBuffer & buf ) >& sendFunction )
 {
    dirty_ = true;
    sendRanks_.push_back( rank );
@@ -184,7 +184,7 @@ void OpenMPBufferSystem::waitOpenMP()
    for( int i = 0; i < numReceives; ++i )
    {
       MPIRank recvRank = INVALID_RANK;
-      RecvBuffer * recvBuffer = NULL;
+      RecvBuffer * recvBuffer = nullptr;
 
       #ifdef _OPENMP
       #pragma omp critical

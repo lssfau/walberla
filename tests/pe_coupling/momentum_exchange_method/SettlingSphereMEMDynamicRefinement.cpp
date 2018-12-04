@@ -21,6 +21,9 @@
 
 #include "blockforest/Initialization.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
+#include <blockforest/loadbalancing/DynamicCurve.h>
+#include <blockforest/loadbalancing/StaticCurve.h>
+#include <blockforest/SetupBlockForest.h>
 
 #include "boundary/all.h"
 
@@ -55,6 +58,7 @@
 #include "pe/Types.h"
 #include "pe/synchronization/ClearSynchronization.h"
 
+#include "pe_coupling/amr/all.h"
 #include "pe_coupling/mapping/all.h"
 #include "pe_coupling/momentum_exchange_method/all.h"
 #include "pe_coupling/utility/all.h"
@@ -64,6 +68,8 @@
 #include "vtk/all.h"
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
+
+#include <functional>
 
 namespace settling_sphere_mem_dynamic_refinement
 {
@@ -81,11 +87,11 @@ using walberla::uint_t;
 
 // PDF field, flag field & body field
 typedef lbm::D3Q19< lbm::collision_model::TRT, false >  LatticeModel_T;
-typedef LatticeModel_T::Stencil          Stencil_T;
-typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 const uint_t FieldGhostLayers = 4;
@@ -110,80 +116,6 @@ const FlagUID MO_Flag( "moving obstacle" );
 const FlagUID FormerMO_Flag( "former moving obstacle" );
 
 
-//////////////////////////////////////
-// DYNAMIC REFINEMENT FUNCTIONALITY //
-//////////////////////////////////////
-
-/*
- * Class to determine the minimum level a block can be.
- * For coupled LBM-PE simulations the following rules apply:
- *  - a moving body will always remain on the finest block
- *  - a moving body is not allowed to extend into an area with a coarser block
- *  - if no moving body is present, the level can be as coarse as possible (restricted by the 2:1 rule)
- * Therefore, if a body, local or remote (due to bodies that are larger than a block), is present on any of the
- * neighboring blocks of a certain block, this block's target level is the finest level.
- * This, together with a refinement checking frequency that depends on the maximum translational body velocity,
- * ensures the above given requirements.
- */
-class LevelDeterminator
-{
-public:
-
-   LevelDeterminator( const shared_ptr<pe::InfoCollection> & infoCollection, uint_t finestLevel) :
-         infoCollection_( infoCollection ), finestLevel_( finestLevel)
-   {}
-
-   void operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                    std::vector< const Block * > &, const BlockForest & /*forest*/ )
-   {
-      for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
-      {
-         const uint_t numberOfParticlesInDirectNeighborhood = getNumberOfLocalAndShadowBodiesInNeighborhood(it->first);
-
-         uint_t currentLevelOfBlock = it->first->getLevel();
-
-         uint_t targetLevelOfBlock = currentLevelOfBlock; //keep everything as it is
-         if ( numberOfParticlesInDirectNeighborhood > uint_t(0) )
-         {
-            // set block to finest level if there are bodies nearby
-            targetLevelOfBlock = finestLevel_;
-            //WALBERLA_LOG_DEVEL(currentLevelOfBlock << " -> " << targetLevelOfBlock << " (" << numberOfParticlesInDirectNeighborhood << ")" );
-         }
-         else
-         {
-            // block could coarsen sicne there are no bodies nearby
-            if( currentLevelOfBlock > uint_t(0) )
-               targetLevelOfBlock = currentLevelOfBlock - uint_t(1);
-            //WALBERLA_LOG_DEVEL(currentLevelOfBlock << " -> " << targetLevelOfBlock << " (" << numberOfParticlesInDirectNeighborhood << ")" );
-         }
-         it->second = targetLevelOfBlock;
-      }
-   }
-
-private:
-   uint_t getNumberOfLocalAndShadowBodiesInNeighborhood(const Block * block)
-   {
-      uint_t numBodies = uint_t(0);
-
-      // add bodies of current block
-      const auto infoIt = infoCollection_->find(block->getId());
-      numBodies += infoIt->second.numberOfLocalBodies;
-      numBodies += infoIt->second.numberOfShadowBodies;
-
-      // add bodies of all neighboring blocks
-      for(uint_t i = 0; i < block->getNeighborhoodSize(); ++i)
-      {
-         BlockID neighborBlockID = block->getNeighborId(i);
-         const auto infoItNeighbor = infoCollection_->find(neighborBlockID);
-         numBodies += infoItNeighbor->second.numberOfLocalBodies;
-         numBodies += infoItNeighbor->second.numberOfShadowBodies;
-      }
-      return numBodies;
-   }
-
-   shared_ptr<pe::InfoCollection> infoCollection_;
-   uint_t finestLevel_;
-};
 
 /////////////////////
 // BLOCK STRUCTURE //
@@ -251,7 +183,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & do
 
    WALBERLA_LOG_INFO_ON_ROOT(" - refinement box: " << refinementBox);
 
-   sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, numberOfLevels, refinementBox ) );
+   sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, numberOfLevels, refinementBox ) );
    sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
    sforest.init( domainAABB, numberOfCoarseBlocksPerDirection[0], numberOfCoarseBlocksPerDirection[1], numberOfCoarseBlocksPerDirection[2], false, false, false );
@@ -285,7 +217,7 @@ public:
          blocks_( blocks ), flagFieldID_( flagFieldID ), pdfFieldID_( pdfFieldID ), bodyFieldID_ ( bodyFieldID )
    {}
 
-   BoundaryHandling_T * initialize( IBlock * const block );
+   BoundaryHandling_T * initialize( IBlock * const block ) override;
 
 private:
 
@@ -650,11 +582,10 @@ int main( int argc, char **argv )
    blockforest.reevaluateMinTargetLevelsAfterForcedRefinement( false );
    blockforest.allowRefreshChangingDepth( false );
 
-   shared_ptr<pe::InfoCollection> peInfoCollection = walberla::make_shared<pe::InfoCollection>();
+   shared_ptr<pe_coupling::InfoCollection> couplingInfoCollection = walberla::make_shared<pe_coupling::InfoCollection>();
+   pe_coupling::amr::BodyPresenceLevelDetermination particlePresenceRefinement( couplingInfoCollection, finestLevel );
 
-   LevelDeterminator levelDet( peInfoCollection, finestLevel );
-
-   blockforest.setRefreshMinTargetLevelDeterminationFunction( levelDet );
+   blockforest.setRefreshMinTargetLevelDeterminationFunction( particlePresenceRefinement );
 
    bool curveHilbert = false;
    bool curveAllGather = true;
@@ -673,11 +604,11 @@ int main( int argc, char **argv )
    auto fcdID          = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
 
    // set up collision response, here DEM solver
-   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, NULL);
+   pe::cr::DEM cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, nullptr);
 
    // set up synchronization procedure
    const real_t overlap = real_t( 1.5 ) * dx;
-   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    // create pe bodies
 
@@ -713,7 +644,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf, FieldGhostLayers );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf, FieldGhostLayers );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addBlockData( make_shared< MyBoundaryHandling >( blocks, flagFieldID, pdfFieldID, bodyFieldID ),
@@ -728,12 +659,12 @@ int main( int argc, char **argv )
 
    // force averaging functionality
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> storeForceTorqueInCont1 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
+   std::function<void(void)> storeForceTorqueInCont1 = std::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer2 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
-   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = boost::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
+   std::function<void(void)> setForceTorqueOnBodiesFromCont2 = std::bind(&pe_coupling::BodiesForceTorqueContainer::setOnBodies, bodiesFTContainer2);
    shared_ptr<pe_coupling::ForceTorqueOnBodiesScaler> forceScaler = make_shared<pe_coupling::ForceTorqueOnBodiesScaler>(blocks, bodyStorageID, real_t(0.5));
-   std::function<void(void)> setForceScalingFactorToOne = boost::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(1));
-   std::function<void(void)> setForceScalingFactorToHalf = boost::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(0.5));
+   std::function<void(void)> setForceScalingFactorToOne = std::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(1));
+   std::function<void(void)> setForceScalingFactorToHalf = std::bind(&pe_coupling::ForceTorqueOnBodiesScaler::resetScalingFactor,forceScaler,real_t(0.5));
 
    if( averageForceTorqueOverTwoTimSteps ) {
       bodiesFTContainer2->store();
@@ -868,7 +799,7 @@ int main( int argc, char **argv )
       if( i % refinementCheckFrequency == 0)
       {
          auto & forest = blocks->getBlockForest();
-         pe::createWithNeighborhood(forest, bodyStorageID, *peInfoCollection);
+         pe_coupling::createWithNeighborhood<BoundaryHandling_T>(forest, boundaryHandlingID, bodyStorageID, ccdID, fcdID, numPeSubCycles, *couplingInfoCollection);
 
          uint_t stampBefore = blocks->getBlockForest().getModificationStamp();
          blocks->refresh();

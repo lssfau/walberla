@@ -33,8 +33,6 @@
 #include <vector>
 #include <string>
 
-#include <iso646.h>
-
 namespace walberla {
 namespace mesh {
 
@@ -58,7 +56,7 @@ void test( const std::string & meshFile )
    for( auto it = mesh->faces_begin(); it != mesh->faces_end(); ++it )
    {
       mesh->status( *it ).set_tagged( b );
-      b =  not b;
+      b = !b;
    }
 
    mesh->request_vertex_status();

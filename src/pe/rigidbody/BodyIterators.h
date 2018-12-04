@@ -33,104 +33,109 @@ class BodyIterator
 {
 public:
 
-    template< typename T >
-    class iterator : public std::iterator< std::input_iterator_tag, typename T::value_type, typename T::difference_type, typename T::pointer, typename T::reference >
-    {
-        friend class BodyIterator;
-    public:
-        iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
-        iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
+   template< typename T >
+   class iterator : public std::iterator< std::input_iterator_tag, typename T::value_type, typename T::difference_type, typename T::pointer, typename T::reference >
+   {
+      friend class BodyIterator;
+   public:
+      iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
+      iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
 
-        bool operator==( const iterator & rhs ) const
-        {
-            if (ended_ || rhs.ended_)
+      bool operator==( const iterator & rhs ) const
+      {
+         if (ended_ || rhs.ended_)
+         {
+            if (ended_ == rhs.ended_)
             {
-               if (ended_ == rhs.ended_)
-               {
-                  return true;
-               }
-               else
-               {
-                  return false;
-               }
+               return true;
             }
+            else
+            {
+               return false;
+            }
+         }
 
+         //std::vector::iterator cannot be compared between different instances (assert!)
+         if (local_ == rhs.local_)
             return it_ == rhs.it_;
-        }
-        bool operator!=( const iterator & rhs ) const { return !(*this == rhs); }
+         else
+            return false;
+      }
+      bool operator!=( const iterator & rhs ) const { return !(*this == rhs); }
 
-        typename T::value_type operator*()  { return *it_; }
-        typename T::pointer    operator->() { return *it_; }
+      typename T::reference  operator*()  { return *it_; }
+      typename T::pointer    operator->() { return it_.operator->(); }
+      typename T::pointer    getBodyID()  { return it_.getBodyID(); }
 
-    private:
+   private:
 
-        iterator( const T& begin,
-                  const T& localEnd,
-                  const T& shadowBegin,
-                  const T& shadowEnd )
-            : it_(begin)
-            , itLocalEnd_(localEnd)
-            , itShadowBegin_(shadowBegin)
-            , itShadowEnd_(shadowEnd)
-            , local_(true)
-            , ended_(false)
-        {
-            checkStateAndAdapt();
-        }
+      iterator( const T& begin,
+                const T& localEnd,
+                const T& shadowBegin,
+                const T& shadowEnd )
+         : it_(begin)
+         , itLocalEnd_(localEnd)
+         , itShadowBegin_(shadowBegin)
+         , itShadowEnd_(shadowEnd)
+         , local_(true)
+         , ended_(false)
+      {
+         checkStateAndAdapt();
+      }
 
-        iterator( )
-            : ended_( true )
-        {}
+      iterator( )
+         : ended_( true )
+      {}
 
-        void checkStateAndAdapt()
-        {
-            if( local_ && it_ == itLocalEnd_ )
-            {
-               it_ = itShadowBegin_;
-               local_ = false;
-            }
+      void checkStateAndAdapt()
+      {
+         if( local_ && it_ == itLocalEnd_ )
+         {
+            it_ = itShadowBegin_;
+            local_ = false;
+         }
 
-            if( it_ == itShadowEnd_ )
-            {
-                ended_ = true;
-            }
-        }
+         if( !local_ && it_ == itShadowEnd_ )
+         {
+            ended_ = true;
+         }
+      }
 
-        T it_;
-        T itLocalEnd_;
-        T itShadowBegin_;
-        T itShadowEnd_;
+      T it_;
+      T itLocalEnd_;
+      T itShadowBegin_;
+      T itShadowEnd_;
 
-        bool local_;
+      bool local_; //!< still in local storage?
 
-        bool ended_;
-    };
+      bool ended_;
+   };
 
-    static inline iterator<pe::BodyStorage::Bodies::Iterator>         begin(      IBlock & block,
-                                                                            const BlockDataID & bodyStorageId)
-    {
-        pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
-        return iterator<pe::BodyStorage::Bodies::Iterator> ( (*storage)[0].begin(), (*storage)[0].end(), (*storage)[1].begin(), (*storage)[1].end() );
-    }
+   static inline iterator<pe::BodyStorage::iterator>         begin(      IBlock & block,
+                                                                         const BlockDataID & bodyStorageId)
+   {
+      pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
+      return iterator<pe::BodyStorage::iterator> ( (*storage)[0].begin(), (*storage)[0].end(), (*storage)[1].begin(), (*storage)[1].end() );
+   }
 
-    template< typename C >
-    static inline iterator<pe::BodyStorage::Bodies::CastIterator<C> > begin(      IBlock & block,
-                                                                            const BlockDataID & bodyStorageId)
-    {
-        pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
-        return iterator<pe::BodyStorage::Bodies::CastIterator<C> > ( (*storage)[0].begin<C>(), (*storage)[0].end<C>(), (*storage)[1].begin<C>(), (*storage)[1].end<C>() );
-    }
+   template< typename C >
+   static inline iterator<pe::BodyStorage::cast_iterator<C> > begin(      IBlock & block,
+                                                                          const BlockDataID & bodyStorageId)
+   {
+      pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
+      return iterator<pe::BodyStorage::cast_iterator<C> > ( (*storage)[0].begin<C>(), (*storage)[0].end<C>(), (*storage)[1].begin<C>(), (*storage)[1].end<C>() );
+   }
 
 
-    static inline iterator<pe::BodyStorage::Bodies::Iterator>             end()
-    {
-        return iterator<pe::BodyStorage::Bodies::Iterator> ( );
-    }
-    template< typename C >
-    static inline iterator<pe::BodyStorage::Bodies::CastIterator<C> >     end()
-    {
-        return iterator<pe::BodyStorage::Bodies::CastIterator<C> > ( );
-    }
+   static inline iterator<pe::BodyStorage::iterator>             end()
+   {
+      return iterator<pe::BodyStorage::iterator> ( );
+   }
+   template< typename C >
+   static inline iterator<pe::BodyStorage::cast_iterator<C> >     end()
+   {
+      return iterator<pe::BodyStorage::cast_iterator<C> > ( );
+   }
 
 }; // class BodyIterator
 
@@ -140,87 +145,88 @@ class LocalBodyIterator
 {
 public:
 
-    template< typename T >
-    class iterator : public std::iterator< std::input_iterator_tag, typename T::value_type, typename T::difference_type, typename T::pointer, typename T::reference >
-    {
-        friend class LocalBodyIterator;
-    public:
-        iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
-        iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
+   template< typename T >
+   class iterator : public std::iterator< std::input_iterator_tag, typename T::value_type, typename T::difference_type, typename T::pointer, typename T::reference >
+   {
+      friend class LocalBodyIterator;
+   public:
+      iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
+      iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
 
-        bool operator==( const iterator & rhs ) const
-        {
-            if (ended_ || rhs.ended_)
+      bool operator==( const iterator & rhs ) const
+      {
+         if (ended_ || rhs.ended_)
+         {
+            if (ended_ == rhs.ended_)
             {
-               if (ended_ == rhs.ended_)
-               {
-                  return true;
-               }
-               else
-               {
-                  return false;
-               }
+               return true;
             }
-
-            return it_ == rhs.it_;
-        }
-        bool operator!=( const iterator & rhs ) const { return !(*this == rhs); }
-
-        typename T::value_type operator*()  { return *it_; }
-        typename T::pointer    operator->() { return *it_; }
-
-    private:
-
-        iterator( const T& begin,
-                  const T& end )
-            : it_(begin), itEnd_(end), ended_( false )
-        {
-            checkStateAndAdapt();
-        }
-
-        iterator( )
-            : ended_( true )
-        {}
-
-        void checkStateAndAdapt()
-        {
-            if( it_ == itEnd_ )
+            else
             {
-                ended_ = true;
+               return false;
             }
-        }
+         }
 
-        T it_;
-        T itEnd_;
+         return it_ == rhs.it_;
+      }
+      bool operator!=( const iterator & rhs ) const { return !(*this == rhs); }
 
-        bool ended_;
-    };
+      typename T::reference  operator*()  { return *it_; }
+      typename T::pointer    operator->() { return it_.operator->(); }
+      typename T::pointer    getBodyID()  { return it_.getBodyID(); }
 
-    static inline iterator<pe::BodyStorage::Bodies::Iterator>         begin(      IBlock & block,
-                                                                            const BlockDataID & bodyStorageId)
-    {
-        pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
-        return iterator<pe::BodyStorage::Bodies::Iterator> ( (*storage)[0].begin(), (*storage)[0].end() );
-    }
+   private:
 
-    template< typename C >
-    static inline iterator<pe::BodyStorage::Bodies::CastIterator<C> > begin(      IBlock & block,
-                                                                            const BlockDataID & bodyStorageId)
-    {
-        pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
-        return iterator<pe::BodyStorage::Bodies::CastIterator<C> > ( (*storage)[0].begin<C>(), (*storage)[0].end<C>() );
-    }
+      iterator( const T& begin,
+                const T& end )
+         : it_(begin), itEnd_(end), ended_( false )
+      {
+         checkStateAndAdapt();
+      }
+
+      iterator( )
+         : ended_( true )
+      {}
+
+      void checkStateAndAdapt()
+      {
+         if( it_ == itEnd_ )
+         {
+            ended_ = true;
+         }
+      }
+
+      T it_;
+      T itEnd_;
+
+      bool ended_;
+   };
+
+   static inline iterator<pe::BodyStorage::iterator>         begin(      IBlock & block,
+                                                                         const BlockDataID & bodyStorageId)
+   {
+      pe::BodyStorage& storage = (*block.getData< pe::Storage >( bodyStorageId ))[0];
+      return iterator<pe::BodyStorage::iterator> ( storage.begin(), storage.end() );
+   }
+
+   template< typename C >
+   static inline iterator<pe::BodyStorage::cast_iterator<C> > begin(      IBlock & block,
+                                                                          const BlockDataID & bodyStorageId)
+   {
+      pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
+      return iterator<pe::BodyStorage::cast_iterator<C> > ( (*storage)[0].begin<C>(), (*storage)[0].end<C>() );
+   }
 
 
-    static inline iterator<pe::BodyStorage::Bodies::Iterator>             end()
-    {
-        return iterator<pe::BodyStorage::Bodies::Iterator> ( );
-    }
-    template< typename C >
-    static inline iterator<pe::BodyStorage::Bodies::CastIterator<C> >     end()
-    {
-        return iterator<pe::BodyStorage::Bodies::CastIterator<C> > ( );
-    }
+   static inline iterator<pe::BodyStorage::iterator>             end()
+   {
+      return iterator<pe::BodyStorage::iterator> ( );
+   }
+   template< typename C >
+   static inline iterator<pe::BodyStorage::cast_iterator<C> >     end()
+   {
+      return iterator<pe::BodyStorage::cast_iterator<C> > ( );
+   }
 
 }; // class LocalBodyIterator
 
@@ -229,87 +235,88 @@ class ShadowBodyIterator
 {
 public:
 
-    template< typename T >
-    class iterator : public std::iterator< std::input_iterator_tag, typename T::value_type, typename T::difference_type, typename T::pointer, typename T::reference >
-    {
-        friend class ShadowBodyIterator;
-    public:
-        iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
-        iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
+   template< typename T >
+   class iterator : public std::iterator< std::input_iterator_tag, typename T::value_type, typename T::difference_type, typename T::pointer, typename T::reference >
+   {
+      friend class ShadowBodyIterator;
+   public:
+      iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
+      iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
 
-        bool operator==( const iterator & rhs ) const
-        {
-            if (ended_ || rhs.ended_)
+      bool operator==( const iterator & rhs ) const
+      {
+         if (ended_ || rhs.ended_)
+         {
+            if (ended_ == rhs.ended_)
             {
-               if (ended_ == rhs.ended_)
-               {
-                  return true;
-               }
-               else
-               {
-                  return false;
-               }
+               return true;
             }
-
-            return it_ == rhs.it_;
-        }
-        bool operator!=( const iterator & rhs ) const { return !(*this == rhs); }
-
-        typename T::value_type operator*()  { return *it_; }
-        typename T::pointer    operator->() { return *it_; }
-
-    private:
-
-        iterator( const T& begin,
-                  const T& end )
-            : it_(begin), itEnd_(end), ended_( false )
-        {
-            checkStateAndAdapt();
-        }
-
-        iterator( )
-            : ended_( true )
-        {}
-
-        void checkStateAndAdapt()
-        {
-            if( it_ == itEnd_ )
+            else
             {
-                ended_ = true;
+               return false;
             }
-        }
+         }
 
-        T it_;
-        T itEnd_;
+         return it_ == rhs.it_;
+      }
+      bool operator!=( const iterator & rhs ) const { return !(*this == rhs); }
 
-        bool ended_;
-    };
+      typename T::reference  operator*()  { return *it_; }
+      typename T::pointer    operator->() { return it_.operator->(); }
+      typename T::pointer    getBodyID()  { return it_.getBodyID(); }
 
-    static inline iterator<pe::BodyStorage::Bodies::Iterator>         begin(      IBlock & block,
-                                                                            const BlockDataID & bodyStorageId)
-    {
-        pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
-        return iterator<pe::BodyStorage::Bodies::Iterator> ( (*storage)[1].begin(), (*storage)[1].end() );
-    }
+   private:
 
-    template< typename C >
-    static inline iterator<pe::BodyStorage::Bodies::CastIterator<C> > begin(      IBlock & block,
-                                                                            const BlockDataID & bodyStorageId)
-    {
-        pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
-        return iterator<pe::BodyStorage::Bodies::CastIterator<C> > ( (*storage)[1].begin<C>(), (*storage)[1].end<C>() );
-    }
+      iterator( const T& begin,
+                const T& end )
+         : it_(begin), itEnd_(end), ended_( false )
+      {
+         checkStateAndAdapt();
+      }
+
+      iterator( )
+         : ended_( true )
+      {}
+
+      void checkStateAndAdapt()
+      {
+         if( it_ == itEnd_ )
+         {
+            ended_ = true;
+         }
+      }
+
+      T it_;
+      T itEnd_;
+
+      bool ended_;
+   };
+
+   static inline iterator<pe::BodyStorage::iterator>         begin(      IBlock & block,
+                                                                         const BlockDataID & bodyStorageId)
+   {
+      pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
+      return iterator<pe::BodyStorage::iterator> ( (*storage)[1].begin(), (*storage)[1].end() );
+   }
+
+   template< typename C >
+   static inline iterator<pe::BodyStorage::cast_iterator<C> > begin(      IBlock & block,
+                                                                          const BlockDataID & bodyStorageId)
+   {
+      pe::Storage * storage = block.getData< pe::Storage >( bodyStorageId );
+      return iterator<pe::BodyStorage::cast_iterator<C> > ( (*storage)[1].begin<C>(), (*storage)[1].end<C>() );
+   }
 
 
-    static inline iterator<pe::BodyStorage::Bodies::Iterator>             end()
-    {
-        return iterator<pe::BodyStorage::Bodies::Iterator> ( );
-    }
-    template< typename C >
-    static inline iterator<pe::BodyStorage::Bodies::CastIterator<C> >     end()
-    {
-        return iterator<pe::BodyStorage::Bodies::CastIterator<C> > ( );
-    }
+   static inline iterator<pe::BodyStorage::iterator>             end()
+   {
+      return iterator<pe::BodyStorage::iterator> ( );
+   }
+   template< typename C >
+   static inline iterator<pe::BodyStorage::cast_iterator<C> >     end()
+   {
+      return iterator<pe::BodyStorage::cast_iterator<C> > ( );
+   }
 
 }; // class ShadowBodyIterator
 

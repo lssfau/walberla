@@ -36,7 +36,7 @@ namespace math {
       double value_;
 
    public:
-      Var ( std::string name );
+      Var ( const std::string& name );
    private:
       Var& operator=( const Var& ){ return *this; }
 

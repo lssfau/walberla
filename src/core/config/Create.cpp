@@ -154,7 +154,7 @@ namespace config {
 
             if ( blockName.empty() )
             {
-               currentBlock = NULL;
+               currentBlock = nullptr;
                WALBERLA_LOG_WARNING("Ignoring Parameter '" << *param << "' empty block name");
                break;
             }
@@ -162,7 +162,7 @@ namespace config {
             currentBlock->getWritableBlocks( blockName, possibleBlocks );
             if ( possibleBlocks.size() > 1 )
             {
-               currentBlock = NULL;
+               currentBlock = nullptr;
                WALBERLA_LOG_WARNING("Ignoring Parameter '" << *param << "' since block is ambiguous: " << blockName );
                break;
             }
@@ -205,7 +205,7 @@ namespace config {
    public:
       SingleConfigGenerator( const shared_ptr<Config> & config ): config_ ( config ) {}
 
-      virtual shared_ptr<Config> next()
+      shared_ptr<Config> next() override
       {
          auto res = config_;
          config_.reset();
@@ -223,7 +223,7 @@ namespace config {
       MultipleConfigGenerator( const std::string & baseName, const std::string & extension, int numberOfDigits )
          : baseName_( baseName ), extension_( extension ), numberOfDigits_( numberOfDigits), counter_(-1) {}
 
-      virtual shared_ptr<Config> next()
+      shared_ptr<Config> next() override
       {
          ++counter_;
          std::stringstream ss;
@@ -261,7 +261,7 @@ namespace config {
           throw std::runtime_error( usageString(argv[0]) );
 
 
-      auto dotPosition = filename.find_last_of(".");
+      auto dotPosition = filename.find_last_of('.');
 
       int numberOfZeros=0;
       if ( dotPosition != std::string::npos )

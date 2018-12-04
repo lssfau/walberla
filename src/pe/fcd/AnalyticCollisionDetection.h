@@ -818,7 +818,9 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       for( unsigned int i=0; i<3; ++i ) {
          sign[i] = ( sign[i]>0 ) ? ( hl1[i] ) : ( -hl1[i] );
       }
+      #ifdef WALBERLA_LOGLEVEL_DETAIL
       const Vec3 tmp1( sign );
+      #endif
       pB1 += R1 * sign;
 
       Vec3 pB2 = b2->getPosition();
@@ -826,7 +828,9 @@ bool collide( BoxID b1, BoxID b2, Container& container )
       for( size_t i=0; i<3; ++i ) {
          sign[i] = ( sign[i]>0 ) ? ( -hl2[i] ) : ( hl2[i] );
       }
+      #ifdef WALBERLA_LOGLEVEL_DETAIL
       const Vec3 tmp2( sign );
+      #endif
       pB2 += R2 * sign;
 
       Vec3 ua, ub;
@@ -2124,7 +2128,7 @@ bool collide( Union<BodyTypeTuple>* bd1, BodyB* bd2, Container& container )
    bool collision = false;
    for( auto it=bd1->begin(); it!=bd1->end(); ++it )
    {
-      collision |= SingleCast<BodyTypeTuple, AnalyticSingleCollideFunctor<BodyB, Container>, bool>::execute(*it, func);
+      collision |= SingleCast<BodyTypeTuple, AnalyticSingleCollideFunctor<BodyB, Container>, bool>::execute(it.getBodyID(), func);
    }
    return collision;
 }
@@ -2146,7 +2150,7 @@ bool collide( Union<BodyTypeTupleA>* bd1, Union<BodyTypeTupleB>* bd2, Container&
    {
       for( auto it2=bd2->begin(); it2!=bd2->end(); ++it2 )
       {
-         collision |= DoubleCast<BodyTypeTupleA, BodyTypeTupleB, AnalyticCollideFunctor<Container>, bool>::execute(*it1, *it2, func);
+         collision |= DoubleCast<BodyTypeTupleA, BodyTypeTupleB, AnalyticCollideFunctor<Container>, bool>::execute(it1.getBodyID(), it2.getBodyID(), func);
       }
    }
    return collision;

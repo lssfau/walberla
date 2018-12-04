@@ -86,7 +86,7 @@ Matrix3<real_t> inertiaTensorNumeric( const ContainmentT & body, const AABB & aa
 {
    Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t(0.5) * spacing );
 
-   math::KahanAccumulator<real_t> intertiaTensor[6];
+   math::KahanAccumulator<real_t> inertiaTensor[6];
    uint_t numPoints = 0;
 
    for(grid_generator::SCIterator it( aabb, pointOfReference, spacing ); it != grid_generator::SCIterator(); ++it)
@@ -98,19 +98,19 @@ Matrix3<real_t> inertiaTensorNumeric( const ContainmentT & body, const AABB & aa
          const real_t & y = p[1];
          const real_t & z = p[2];
 
-         intertiaTensor[0] += y*y + z*z;
-         intertiaTensor[1] += -x*y;
-         intertiaTensor[2] += -x*z;
-         intertiaTensor[3] += x*x + z*z;
-         intertiaTensor[4] += -y*z;
-         intertiaTensor[5] += x*x + y*y;
+         inertiaTensor[0] += y*y + z*z;
+         inertiaTensor[1] += -x*y;
+         inertiaTensor[2] += -x*z;
+         inertiaTensor[3] += x*x + z*z;
+         inertiaTensor[4] += -y*z;
+         inertiaTensor[5] += x*x + y*y;
          ++numPoints;
       }
    }
 
-   return Matrix3<real_t>( intertiaTensor[0].get(), intertiaTensor[1].get(), intertiaTensor[2].get(),
-                           intertiaTensor[1].get(), intertiaTensor[3].get(), intertiaTensor[4].get(),
-                           intertiaTensor[2].get(), intertiaTensor[4].get(), intertiaTensor[5].get() ) * (spacing * spacing * spacing);
+   return Matrix3<real_t>( inertiaTensor[0].get(), inertiaTensor[1].get(), inertiaTensor[2].get(),
+                           inertiaTensor[1].get(), inertiaTensor[3].get(), inertiaTensor[4].get(),
+                           inertiaTensor[2].get(), inertiaTensor[4].get(), inertiaTensor[5].get() ) * (spacing * spacing * spacing);
 }
 
 
@@ -147,10 +147,10 @@ void testNumeric( const shared_ptr<MeshType> & mesh )
    WALBERLA_CHECK( std::fabs( numericCentroid[0] - geometricalCentroid[0] ) < real_t(0.001) || std::fabs( real_t(1) - numericCentroid[1] / geometricalCentroid[1] ) < real_t(0.001) );
    WALBERLA_CHECK( std::fabs( numericCentroid[0] - geometricalCentroid[0] ) < real_t(0.001) || std::fabs( real_t(1) - numericCentroid[2] / geometricalCentroid[2] ) < real_t(0.001) );
 
-   WALBERLA_LOG_INFO("Computing numeric intertia tensor");
+   WALBERLA_LOG_INFO("Computing numeric inertia tensor");
    Matrix3<real_t> numericTensor = inertiaTensorNumeric(*containmentOctree, aabb, spacing );
-   WALBERLA_LOG_INFO("Computing geometrical intertia tensor");
-   Matrix3<real_t> geometricalTensor = computeIntertiaTensor(*mesh);
+   WALBERLA_LOG_INFO("Computing geometrical inertia tensor");
+   Matrix3<real_t> geometricalTensor = computeInertiaTensor(*mesh);
    WALBERLA_LOG_INFO("Numerical tensor:\n"   << numericTensor << "\n" <<
                      "Geometrical tensor:\n" << geometricalTensor << "\n" <<
                      "Difference:\n"         << numericTensor - geometricalTensor );

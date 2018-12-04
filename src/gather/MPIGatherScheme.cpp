@@ -137,7 +137,7 @@ void MPIGatherScheme::runSetupPhase()
          recvBuffer.resize( uint_c( nrOfGatherProcesses ) );
 
       MPI_Gather( & bytesToSend_,   1, MPITrait<decltype(bytesToSend_)>::type(),
-                  recvBuffer.empty()? NULL : & recvBuffer[0],  1, MPITrait<decltype(bytesToSend_)>::type(),
+                  recvBuffer.empty()? nullptr : & recvBuffer[0],  1, MPITrait<decltype(bytesToSend_)>::type(),
                   gatherRank_, gatherCommunicator_  );
 
       WALBERLA_ASSERT_EQUAL( displacementVector_.size(), 0 );
@@ -193,8 +193,8 @@ void MPIGatherScheme::communicate()
 
    mpi::GenericRecvBuffer<unsigned char>  recvBuffer;
 
-   int * displacementVectorPtr = NULL;
-   int * sendBytesPerProcessPtr = NULL;
+   int * displacementVectorPtr = nullptr;
+   int * sendBytesPerProcessPtr = nullptr;
    if ( mpiManager->rank() == gatherRankInGlobalComm_  ) {
       recvBuffer.resize( uint_c( gatherMsgSize_ ) );
       displacementVectorPtr  = &displacementVector_[0];

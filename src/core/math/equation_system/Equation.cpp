@@ -23,8 +23,9 @@
 #include "Operator.h"
 #include "Variable.h"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <memory>
 
 
 namespace walberla {
@@ -117,7 +118,7 @@ namespace math {
    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // EQUATION
    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   Equation::Equation( NodePtr root) : root_ (root)
+   Equation::Equation( const NodePtr& root) : root_ (root)
    {
       root_->collectVariables( varMap_ );
    }
@@ -201,7 +202,7 @@ namespace math {
    void Equation::rotate(bool flip, OpType& leftOp, OpType& rightOp){
       NodePtr newNode;
       if ( root_->left_->nodeDir_ == ND_LEFT ){
-         newNode = NodePtr( new Node( leftOp ) );
+         newNode = std::make_shared<Node>( leftOp );
          if (flip){
             newNode->left_  = root_->left_->right_;
             newNode->right_ = root_->right_;
@@ -211,7 +212,7 @@ namespace math {
          }
          root_->left_ = root_->left_->left_;
       } else {
-         newNode = NodePtr( new Node( rightOp ) );
+         newNode = std::make_shared<Node>( rightOp );
          if (flip){
             newNode->right_ = root_->left_->left_;
             newNode->left_  = root_->right_;

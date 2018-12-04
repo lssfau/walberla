@@ -47,7 +47,7 @@ void testCube()
 {
    MeshType mesh;
 
-   typedef typename MeshType::Scalar Scalar;
+   using Scalar = typename MeshType::Scalar;
 
    readAndBroadcast("cube.obj", mesh);
 
@@ -91,7 +91,7 @@ void testCube()
    WALBERLA_CHECK_FLOAT_EQUAL( centroid[1], aabbCenter[1] );
    WALBERLA_CHECK_FLOAT_EQUAL( centroid[2], aabbCenter[2] );
 
-   Matrix3<Scalar> inertiaTensor = computeIntertiaTensor(mesh);
+   Matrix3<Scalar> inertiaTensor = computeInertiaTensor(mesh);
    WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(0,0), ( aabb.ySize() * aabb.ySize() + aabb.zSize() * aabb.zSize() ) / ( real_t(12) * aabb.volume() ) );
    WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(1,1), ( aabb.xSize() * aabb.xSize() + aabb.zSize() * aabb.zSize() ) / ( real_t(12) * aabb.volume() ) );
    WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(2,2), ( aabb.xSize() * aabb.xSize() + aabb.ySize() * aabb.ySize() ) / ( real_t(12) * aabb.volume() ) );
@@ -116,7 +116,7 @@ void testCube()
    WALBERLA_CHECK_FLOAT_EQUAL( centroid[1], aabbCenter[1] );
    WALBERLA_CHECK_FLOAT_EQUAL( centroid[2], aabbCenter[2] );
 
-   inertiaTensor = computeIntertiaTensor(mesh);
+   inertiaTensor = computeInertiaTensor(mesh);
    WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(0,0), aabb.volume() * ( aabb.ySize() * aabb.ySize() + aabb.zSize() * aabb.zSize() ) / real_t(12) );
    WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(1,1), aabb.volume() * ( aabb.xSize() * aabb.xSize() + aabb.zSize() * aabb.zSize() ) / real_t(12) );
    WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(2,2), aabb.volume() * ( aabb.xSize() * aabb.xSize() + aabb.ySize() * aabb.ySize() ) / real_t(12) );

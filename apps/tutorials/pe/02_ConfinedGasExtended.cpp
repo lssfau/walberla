@@ -21,20 +21,25 @@
 #include <pe/basic.h>
 #include <pe/statistics/BodyStatistics.h>
 #include <pe/vtk/SphereVtkOutput.h>
+#include <pe/raytracing/Raytracer.h>
 
 #include <core/Abort.h>
 #include <core/Environment.h>
 #include <core/grid_generator/HCPIterator.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
+#include <core/math/Random.h>
 #include <core/timing/TimingTree.h>
 #include <core/waLBerlaBuildInfo.h>
 #include <postprocessing/sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
 
-using namespace walberla;
+#include <functional>
+
+namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::timing;
+using namespace walberla::pe::raytracing;
 
 typedef boost::tuple<Sphere, Plane> BodyTuple ;
 
@@ -62,7 +67,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("*** READING CONFIG FILE ***");
    auto cfg = env.config();
-   if (cfg == NULL) WALBERLA_ABORT("No config specified!");
+   if (cfg == nullptr) WALBERLA_ABORT("No config specified!");
    const Config::BlockHandle mainConf  = cfg->getBlock( "ConfinedGasExtended" );
 
    const std::string sqlFile = mainConf.getParameter< std::string >( "sqlFile", "ConfinedGas.sqlite" );
@@ -150,22 +155,35 @@ int main( int argc, char ** argv )
    std::function<void(void)> syncCall;
    if (!syncShadowOwners)
    {
-      syncCall = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, &tt, real_c(0.0), false );
+      syncCall = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, &tt, real_c(0.0), false );
    } else
    {
-      syncCall = boost::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(*forest), storageID, &tt, real_c(0.0), false );
+      syncCall = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(*forest), storageID, &tt, real_c(0.0), false );
    }
 
    //! [Bind Sync Call]
    std::function<void(void)> syncCallWithoutTT;
    if (!syncShadowOwners)
    {
-      syncCallWithoutTT = boost::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCallWithoutTT = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
    } else
    {
-      syncCallWithoutTT = boost::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(*forest), storageID, static_cast<WcTimingTree*>(NULL), real_c(0.0), false );
+      syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(*forest), storageID, static_cast<WcTimingTree*>(nullptr), real_c(0.0), false );
    }
    //! [Bind Sync Call]
+   
+   WALBERLA_LOG_INFO_ON_ROOT("*** RAYTRACER ***");
+   //! [Raytracer Init]
+   std::function<ShadingParameters (const BodyID body)> customShadingFunction = [](const BodyID body) {
+      if (body->getTypeID() == Sphere::getStaticTypeID()) {
+         return processRankDependentShadingParams(body).makeGlossy();
+      }
+      return defaultBodyTypeDependentShadingParams(body);
+   };
+   Raytracer raytracer(forest, storageID, globalBodyStorage, ccdID,
+                       cfg->getBlock("Raytracing"),
+                       customShadingFunction);
+   //! [Raytracer Init]
 
    WALBERLA_LOG_INFO_ON_ROOT("*** VTK ***");
    //! [VTK Domain Output]
@@ -182,7 +200,7 @@ int main( int argc, char ** argv )
    MaterialID     material = createMaterial( "granular", real_t( 1.0 ), 0, static_cof, dynamic_cof, real_t( 0.5 ), 1, 1, 0, 0 );
 
    auto simulationDomain = forest->getDomain();
-   auto generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
+   const auto& generationDomain = simulationDomain; // simulationDomain.getExtended(-real_c(0.5) * spacing);
    createPlane(*globalBodyStorage, 0, Vec3(1,0,0), simulationDomain.minCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(-1,0,0), simulationDomain.maxCorner(), material );
    createPlane(*globalBodyStorage, 0, Vec3(0,1,0), simulationDomain.minCorner(), material );
@@ -199,8 +217,8 @@ int main( int argc, char ** argv )
       {
          SphereID sp = pe::createSphere( *globalBodyStorage, *forest, storageID, 0, *it, radius, material);
          Vec3 rndVel(math::realRandom<real_t>(-vMax, vMax), math::realRandom<real_t>(-vMax, vMax), math::realRandom<real_t>(-vMax, vMax));
-         if (sp != NULL) sp->setLinearVel(rndVel);
-         if (sp != NULL) ++numParticles;
+         if (sp != nullptr) sp->setLinearVel(rndVel);
+         if (sp != nullptr) ++numParticles;
       }
    }
    mpi::reduceInplace(numParticles, mpi::SUM);
@@ -242,6 +260,9 @@ int main( int argc, char ** argv )
          vtkDomainOutput->write( );
          vtkSphereOutput->write( );
          //! [VTK Output]
+         //! [Image Output]
+         raytracer.generateImage<BodyTuple>(size_t(i), &tt);
+         //! [Image Output]
       }
    }
    tp["Total"].end();
@@ -273,4 +294,10 @@ int main( int argc, char ** argv )
    //! [SQL Save]
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

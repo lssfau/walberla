@@ -30,7 +30,7 @@
 #include <iostream>
 #include <sstream>
 
-using namespace walberla;
+namespace walberla {
 
 int getProcToReceiveFrom()
 {
@@ -207,4 +207,10 @@ int main( int argc, char ** argv )
    }
 
    return 0;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

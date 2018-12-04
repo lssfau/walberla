@@ -36,6 +36,7 @@
 
 #include "core/mpi/SendBuffer.h"
 #include "core/mpi/RecvBuffer.h"
+#include <core/logging/Logging.h>
 
 #include <boost/type_traits/is_floating_point.hpp>
 #include <boost/type_traits/is_const.hpp>
@@ -115,7 +116,7 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit inline Quaternion();
+   explicit inline Quaternion() = default;
 
    explicit inline Quaternion( Type r, Type i, Type j, Type k );
 
@@ -127,7 +128,7 @@ public:
    template< typename Other >
    explicit inline Quaternion( const Vector3<Other>& euler );
 
-   inline Quaternion( const Quaternion& q );
+   inline Quaternion( const Quaternion& q ) = default;
 
    template< typename Other >
    inline Quaternion( const Quaternion<Other>& q );
@@ -141,7 +142,7 @@ public:
    //**Operators***********************************************************************************
    /*!\name Operators */
    //@{
-                              inline Quaternion& operator= ( const Quaternion& rhs );
+                              inline Quaternion& operator= ( const Quaternion& rhs ) = default;
    template< typename Other > inline Quaternion& operator= ( const Quaternion<Other>& rhs );
                               inline Type        operator[]( size_t index ) const;
    //@}
@@ -195,15 +196,20 @@ private:
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{
-   Type v_[4];  //!< The four statically allocated quaternion elements.
-                /*!< Access to the quaternion values is gained via the subscript operator.
-                     The order of the elements is
-                     \f[\left(\begin{array}{*{4}{c}}
-                     0 & 1 & 2 & 3 \\
-                     \end{array}\right)\f] */
+   /**
+    * The four statically allocated quaternion elements.
+    *
+    * Access to the quaternion values is gained via the subscript operator.
+    * The order of the elements is
+    * \f[\left(\begin{array}{*{4}{c}}
+    * 0 & 1 & 2 & 3 \\
+    * \end{array}\right)\f]
+   **/
+   Type v_[4] = {Type(1), Type(0), Type(0), Type(0)};
    //@}
    //**********************************************************************************************
 };
+static_assert( std::is_trivially_copyable<Quaternion<real_t>>::value, "Quaternion<real_t> has to be trivially copyable!");
 //*************************************************************************************************
 
 
@@ -214,21 +220,6 @@ private:
 //  CONSTRUCTORS
 //
 //=================================================================================================
-
-//*************************************************************************************************
-/*!\brief The default constructor for Quaternion.
- *
- * The real part of the quaternion is initialized with 1, whereas the imaginary parts are
- * initialized with 0:
-
-           \f[ \left(\begin{array}{c} 1 \\ 0 \\ 0 \\ 0 \end{array}\right) \f]
- */
-template< typename Type >  // Data type of the quaternion
-inline Quaternion<Type>::Quaternion()
-{
-   reset();
-}
-//*************************************************************************************************
 
 
 //*************************************************************************************************
@@ -332,24 +323,6 @@ inline Quaternion<Type>::Quaternion( const Vector3<Other>& euler )
 
 
 //*************************************************************************************************
-/*!\brief The copy constructor for Quaternion.
- *
- * \param q Quaternion to be copied.
- *
- * The copy constructor is explicitly defined in order to enable/facilitate NRV optimization.
- */
-template< typename Type >  // Data type of the quaternion
-inline Quaternion<Type>::Quaternion( const Quaternion& q )
-{
-   v_[0] = q.v_[0];
-   v_[1] = q.v_[1];
-   v_[2] = q.v_[2];
-   v_[3] = q.v_[3];
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
 /*!\brief Conversion constructor from different Quaternion instances.
  *
  * \param q Quaternion to be copied.
@@ -373,29 +346,6 @@ inline Quaternion<Type>::Quaternion( const Quaternion<Other>& q )
 //  OPERATORS
 //
 //=================================================================================================
-
-//*************************************************************************************************
-/*!\brief Copy assignment operator for Quaternion.
- *
- * \param rhs Quaternion to be copied.
- * \return Reference to the assigned quaternion.
- *
- * Explicit definition of a copy assignment operator for performance reasons.
- */
-template< typename Type >  // Data type of the quaternion
-inline Quaternion<Type>& Quaternion<Type>::operator=( const Quaternion<Type>& rhs )
-{
-   // This implementation is faster than the synthesized default copy assignment operator and
-   // faster than an implementation with the C library function 'memcpy' in combination with a
-   // protection against self-assignment. Additionally, this version goes without a protection
-   // against self-assignment.
-   v_[0] = rhs.v_[0];
-   v_[1] = rhs.v_[1];
-   v_[2] = rhs.v_[2];
-   v_[3] = rhs.v_[3];
-   return *this;
-}
-//*************************************************************************************************
 
 
 //*************************************************************************************************
@@ -457,7 +407,8 @@ inline Type Quaternion<Type>::operator[]( size_t index ) const
 template< typename Type >  // Data type of the quaternion
 inline Quaternion<Type>& Quaternion<Type>::set( Type r, Type i, Type j, Type k )
 {
-   WALBERLA_CHECK_FLOAT_EQUAL( std::fabs( r*r + i*i + j*j + k*k ), Type(1), "Invalid quaternion parameters" );
+   WALBERLA_CHECK_FLOAT_EQUAL( std::fabs( r*r + i*i + j*j + k*k ), Type(1),
+                               "Invalid quaternion parameters: " << r << ", "<< i << ", "<< j << ", "<< k );
    v_[0] = r;
    v_[1] = i;
    v_[2] = j;

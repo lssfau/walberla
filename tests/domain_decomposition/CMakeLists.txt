@@ -4,6 +4,9 @@
 #
 ###################################################################################################
 
+waLBerla_compile_test( NAME MapPointToPeriodicDomain FILES MapPointToPeriodicDomain.cpp DEPENDS core )
+waLBerla_execute_test( NAME MapPointToPeriodicDomain )
+
 waLBerla_compile_test( NAME PeriodicIntersect FILES PeriodicIntersect.cpp DEPENDS core blockforest )
 waLBerla_execute_test( NAME PeriodicIntersect )
 

@@ -23,19 +23,11 @@
 
 #pragma once
 
-#include "core/debug/Debug.h"
 #include "core/timing/TimingTree.h"
-
-#include "domain_decomposition/BlockStorage.h"
-
+#include "domain_decomposition/StructuredBlockStorage.h"
 #include "pe/cr/ICR.h"
-#include "pe/rigidbody/BodyIterators.h"
-#include "pe/synchronization/SyncForces.h"
 
 #include <functional>
-
-#include <map>
-
 
 namespace walberla {
 namespace pe_coupling {
@@ -72,93 +64,9 @@ public:
          , forceEvaluationFunc_( forceEvaluationFunc )
    {}
 
-   void operator()()
-   {
-      if( numberOfSubIterations_ == 1 )
-      {
-         forceEvaluationFunc_();
+   void operator()();
 
-         collisionResponse_.timestep( timeStepSize_ );
-         synchronizeFunc_();
-      }
-      else
-      {
-         // during the intermediate time steps of the collision response, the currently acting forces
-         // (interaction forces, gravitational force, ...) have to remain constant.
-         // Since they are reset after the call to collision response, they have to be stored explicitly before.
-         // Then they are set again after each intermediate step.
-
-         // sum up all forces/torques from shadow copies on local body (owner)
-         pe::reduceForces( blockStorage_->getBlockStorage(), bodyStorageID_ );
-         // send total forces/torques to shadow owners
-         pe::distributeForces( blockStorage_->getBlockStorage(), bodyStorageID_ );
-
-         // generate map from all known bodies (process local) to total forces/torques
-         std::map< walberla::id_t, std::vector< real_t > > forceMap;
-         for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
-         {
-            // iterate over local and remote bodies and store force/torque in map
-            // Remote bodies are required since during the then following collision response time steps,
-            // bodies can change ownership (i.e. a now remote body could become a local body ).
-            // Since only the owning process re-sets the force/torque later, remote body values have to be stored as well.
-            for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-            {
-               auto & f = forceMap[ bodyIt->getSystemID() ];
-
-               // only add if body has not been added already before (from another block)
-               if( f.empty() )
-               {
-                  const auto & force = bodyIt->getForce();
-                  f.push_back( force[0] );
-                  f.push_back( force[1] );
-                  f.push_back( force[2] );
-
-                  const auto & torque = bodyIt->getTorque();
-                  f.push_back( torque[0] );
-                  f.push_back( torque[1] );
-                  f.push_back( torque[2] );
-               }
-
-               // reset of force/torque on remote bodies necessary to erase the multiple occurrences of forces/torques on bodies
-               // (due to call to distributeForces() before)
-               if ( bodyIt->isRemote() )
-               {
-                  bodyIt->resetForceAndTorque();
-               }
-            }
-         }
-
-         // perform pe time steps
-         const real_t subTimeStepSize = timeStepSize_ / real_c( numberOfSubIterations_ );
-         for( uint_t i = 0; i != numberOfSubIterations_; ++i )
-         {
-
-            // in the first iteration, forces on local bodies are already set by force synchronization
-            if( i != 0 )
-            {
-               for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
-               {
-                  // only owning process sets force/torque on bodies
-                  for( auto bodyIt = pe::LocalBodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
-                  {
-                     const auto & f = forceMap[ bodyIt->getSystemID() ];
-                     WALBERLA_ASSERT( !f.empty(), "When attempting to set force/torque on local body " << bodyIt->getSystemID() << " at position " << bodyIt->getPosition() << ", body was not found in map!");
-                     bodyIt->addForce ( f[0], f[1], f[2] );
-                     bodyIt->addTorque( f[3], f[4], f[5] );
-                  }
-               }
-            }
-
-            // evaluate forces (e.g. lubrication forces)
-            forceEvaluationFunc_();
-
-            collisionResponse_.timestep( subTimeStepSize );
-            synchronizeFunc_();
-         }
-      }
-   }
-
-protected:
+private:
 
    const real_t timeStepSize_;
    const uint_t numberOfSubIterations_;

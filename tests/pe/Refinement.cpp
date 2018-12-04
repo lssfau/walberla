@@ -40,7 +40,7 @@
 #include <algorithm>
 #include <vector>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
 typedef boost::tuple<Sphere, Plane> BodyTuple ;
@@ -141,7 +141,7 @@ int main( int argc, char ** argv )
    auto fcdID               = forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
 
    //cr::DEM    cr(globalStorage, forest->getBlockStorage(), storageID, ccdID, fcdID, NULL );
-   cr::HCSITS cr(globalStorage, forest->getBlockStoragePointer(), storageID, ccdID, fcdID, NULL );
+   cr::HCSITS cr(globalStorage, forest->getBlockStoragePointer(), storageID, ccdID, fcdID, nullptr );
 
    auto vtkOutput   = make_shared<DefaultBodyVTKOutput>(storageID, forest->getBlockStorage()) ;
    auto vtkWriter   = vtk::createVTKOutput_PointData(vtkOutput, "Bodies", 1, "vtk", "simulation_step", false, false);
@@ -185,4 +185,10 @@ int main( int argc, char ** argv )
    }
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

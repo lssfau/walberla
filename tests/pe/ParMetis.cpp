@@ -21,6 +21,7 @@
 #include "pe/utility/CreateWorld.h"
 
 #include <blockforest/loadbalancing/DynamicParMetis.h>
+#include <core/debug/TestSubsystem.h>
 #include <core/Environment.h>
 #include <core/logging/Logging.h>
 #include <core/math/Sample.h>
@@ -45,8 +46,8 @@ class MetisAssignmentFunctor
 {
 public:
 
-   typedef blockforest::DynamicParMetisBlockInfo           PhantomBlockWeight;
-   typedef blockforest::DynamicParMetisBlockInfoPackUnpack PhantomBlockWeightPackUnpackFunctor;
+   using PhantomBlockWeight = blockforest::DynamicParMetisBlockInfo;
+   using PhantomBlockWeightPackUnpackFunctor = blockforest::DynamicParMetisBlockInfoPackUnpack;
 
    void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
    {
@@ -129,7 +130,7 @@ int main( int argc, char ** argv )
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
    walberla::MPIManager::instance()->useWorldComm();
 
-   std::vector<std::string> algs = {"PART_GEOM", "PART_GEOM_KWAY", "PART_KWAY", "PART_ADAPTIVE_REPART", "REFINE_KWAY"};
+   std::vector<std::string> algs = {"PART_GEOM", "PART_GEOM_KWAY", "PART_KWAY", "ADAPTIVE_REPART", "REFINE_KWAY"};
    std::vector<std::string> wtu  = {"NO_WEIGHTS", "EDGE_WEIGHTS", "VERTEX_WEIGHTS", "BOTH_WEIGHTS"};
    std::vector<std::string> es   = {"EDGES_FROM_FOREST", "EDGES_FROM_EDGE_WEIGHTS"};
 

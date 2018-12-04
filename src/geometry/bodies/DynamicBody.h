@@ -30,8 +30,9 @@ namespace geometry {
 
 class AbstractBody {
 public:
+   virtual ~AbstractBody() = default;
    virtual bool contains (const Vector3<real_t> & point ) const = 0;
-   virtual FastOverlapResult fastOverlapCheck ( const Vector3<real_t> & cellMidpoint, real_t dx ) const = 0;
+   virtual FastOverlapResult fastOverlapCheck ( const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx ) const = 0;
    virtual FastOverlapResult fastOverlapCheck ( const AABB & box ) const = 0;
 };
 
@@ -43,11 +44,12 @@ public:
    DynamicBody( const Body & b )
       : body_(b)
    {}
+   
    virtual bool contains (const Vector3<real_t> & point ) const
    {
         return geometry::contains( body_, point );
    }
-   virtual FastOverlapResult fastOverlapCheck ( const Vector3<real_t> & cellMidpoint, real_t dx ) const
+   virtual FastOverlapResult fastOverlapCheck ( const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx ) const
    {
       return geometry::fastOverlapCheck( body_, cellMidpoint, dx );
    }
@@ -79,7 +81,7 @@ inline FastOverlapResult fastOverlapCheck ( const AbstractBody & body, const AAB
 }
 
 template<>
-inline FastOverlapResult fastOverlapCheck ( const AbstractBody & body, const Vector3<real_t> & cellMidpoint, real_t dx )
+inline FastOverlapResult fastOverlapCheck ( const AbstractBody & body, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx )
 {
    return body.fastOverlapCheck( cellMidpoint, dx );
 }

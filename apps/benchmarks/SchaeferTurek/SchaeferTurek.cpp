@@ -84,6 +84,7 @@
 #include "lbm/refinement/BoundarySetup.h"
 #include "lbm/refinement/PdfFieldSyncPackInfo.h"
 #include "lbm/refinement/TimeStep.h"
+#include "lbm/refinement/VorticityBasedLevelDetermination.h"
 #include "lbm/sweeps/CellwiseSweep.h"
 #include "lbm/sweeps/SplitPureSweep.h"
 #include "lbm/sweeps/SplitSweep.h"
@@ -106,13 +107,14 @@
 #include <boost/mpl/equal_to.hpp>
 #include <boost/mpl/int.hpp>
 #include <boost/mpl/or.hpp>
-#include <boost/bind.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <functional>
 #include <iostream>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -157,12 +159,12 @@ typedef lbm::D3Q27< lbm::collision_model::TRT,      true  > D3Q27_TRT_COMP;
 template< typename LatticeModel_T >
 struct Types
 {
-   typedef typename LatticeModel_T::Stencil Stencil_T;
-   typedef lbm::PdfField< LatticeModel_T >  PdfField_T;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using PdfField_T = lbm::PdfField< LatticeModel_T >;
 };
 
-typedef walberla::uint16_t  flag_t;
-typedef FlagField< flag_t > FlagField_T;
+using flag_t = walberla::uint16_t;
+using FlagField_T = FlagField<flag_t>;
 
 const uint_t FieldGhostLayers  = uint_t(4);
 
@@ -656,7 +658,7 @@ static shared_ptr< SetupBlockForest > createSetupBlockForest( const blockforest:
                                                              ( setup.xCells + uint_t(2) * FieldGhostLayers ) ) * memoryPerCell;
 
    forest->addRefinementSelectionFunction( refinementSelectionFunctions );
-   forest->addWorkloadMemorySUIDAssignmentFunction( boost::bind( workloadMemoryAndSUIDAssignment, _1, memoryPerBlock, boost::cref( setup ) ) );
+   forest->addWorkloadMemorySUIDAssignmentFunction( std::bind( workloadMemoryAndSUIDAssignment, std::placeholders::_1, memoryPerBlock, std::cref( setup ) ) );
 
    forest->init( AABB( real_c(0), real_c(0), real_c(0),
                        setup.H * ( real_c(setup.xBlocks) * real_c(setup.xCells) ) / ( real_c(setup.yzBlocks) * real_c(setup.yzCells) ), setup.H, setup.H ),
@@ -695,9 +697,9 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
 
       MPIManager::instance()->useWorldComm();
 
-      auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false ) );
+      auto bf = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sbffile.c_str(), true, false );
 
-      auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, setup.xCells, setup.yzCells, setup.pseudo2D ? uint_t(1) : setup.yzCells ) );
+      auto sbf = std::make_shared< StructuredBlockForest >( bf, setup.xCells, setup.yzCells, setup.pseudo2D ? uint_t(1) : setup.yzCells );
       sbf->createCellBoundingBoxes();
 
       return sbf;
@@ -710,9 +712,9 @@ shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( co
                                                                     memoryPerCell, processMemoryLimit,
                                                                     configBlock.getParameter< bool >( "outputSetupForest", false ) );
 
-   auto bf = shared_ptr< blockforest::BlockForest >( new blockforest::BlockForest( uint_c( MPIManager::instance()->rank() ), *sforest, false ) );
+   auto bf = std::make_shared< blockforest::BlockForest >( uint_c( MPIManager::instance()->rank() ), *sforest, false );
 
-   auto sbf = shared_ptr< blockforest::StructuredBlockForest >( new blockforest::StructuredBlockForest( bf, setup.xCells, setup.yzCells, setup.pseudo2D ? uint_t(1) : setup.yzCells ) );
+   auto sbf = std::make_shared< blockforest::StructuredBlockForest >( bf, setup.xCells, setup.yzCells, setup.pseudo2D ? uint_t(1) : setup.yzCells );
    sbf->createCellBoundingBoxes();
    
    return sbf;
@@ -798,17 +800,17 @@ class MyBoundaryHandling : public blockforest::AlwaysInitializeBlockDataHandling
 {
 public:
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::NoSlip_T          NoSlip_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::Obstacle_T        Obstacle_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::Curved_T          Curved_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::DynamicUBB_T      DynamicUBB_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::Outlet21_T        Outlet21_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::Outlet43_T        Outlet43_T;
-   typedef typename MyBoundaryTypes< LatticeModel_T >::PressureOutlet_T  PressureOutlet_T;
+   using NoSlip_T = typename MyBoundaryTypes<LatticeModel_T>::NoSlip_T;
+   using Obstacle_T = typename MyBoundaryTypes<LatticeModel_T>::Obstacle_T;
+   using Curved_T = typename MyBoundaryTypes<LatticeModel_T>::Curved_T;
+   using DynamicUBB_T = typename MyBoundaryTypes<LatticeModel_T>::DynamicUBB_T;
+   using Outlet21_T = typename MyBoundaryTypes<LatticeModel_T>::Outlet21_T;
+   using Outlet43_T = typename MyBoundaryTypes<LatticeModel_T>::Outlet43_T;
+   using PressureOutlet_T = typename MyBoundaryTypes<LatticeModel_T>::PressureOutlet_T;
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::BoundaryConditions_T BoundaryConditions_T;
+   using BoundaryConditions_T = typename MyBoundaryTypes<LatticeModel_T>::BoundaryConditions_T;
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::BoundaryHandling_T BoundaryHandling_T;
+   using BoundaryHandling_T = typename MyBoundaryTypes<LatticeModel_T>::BoundaryHandling_T;
 
 
 
@@ -818,7 +820,7 @@ public:
       flagFieldId_( flagFieldId ), pdfFieldId_( pdfFieldId ), blocks_( blocks ), setup_( setup ), timeTracker_( timeTracker )
    {}
 
-   BoundaryHandling_T * initialize( IBlock * const block );
+   BoundaryHandling_T * initialize( IBlock * const block ) override;
 
 private:
 
@@ -836,7 +838,7 @@ template< typename LatticeModel_T >
 typename MyBoundaryHandling<LatticeModel_T>::BoundaryHandling_T *
 MyBoundaryHandling<LatticeModel_T>::initialize( IBlock * const block )
 {
-   typedef typename Types<LatticeModel_T>::PdfField_T PdfField_T;
+   using PdfField_T = typename Types< LatticeModel_T >::PdfField_T;
 
    FlagField_T * flagField = block->getData< FlagField_T >( flagFieldId_ );
    PdfField_T *   pdfField = block->getData< PdfField_T > (  pdfFieldId_ );
@@ -865,7 +867,7 @@ class CurvedDeltaValueCalculation
 {
 public:
 
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
    
    CurvedDeltaValueCalculation( const shared_ptr< StructuredBlockForest > & blocks, const IBlock & block, const Cylinder & cylinder ) :
       blocks_( blocks ), block_( block ), cylinder_( cylinder ) {}
@@ -908,7 +910,7 @@ class BoundarySetter
 {
 public:
 
-   typedef typename MyBoundaryTypes< LatticeModel_T >::BoundaryHandling_T BoundaryHandling_T;
+   using BoundaryHandling_T = typename MyBoundaryTypes< LatticeModel_T >::BoundaryHandling_T;
 
    BoundarySetter( const weak_ptr<StructuredBlockForest> & blockForest, const BlockDataID & boundaryHandlingId, const Setup & setup,
                    const int obstacleBoundary, const int outletType,
@@ -1063,109 +1065,6 @@ Set<SUID> Pseudo2DBlockStateDetermination::operator()( const std::vector< std::p
 }
 
 
-
-template< typename VectorField_T, typename Filter_T, bool Pseudo2D = false >
-class VorticityRefinement // used as a 'BlockForest::RefreshMinTargetLevelDeterminationFunction'
-{
-public:
-
-   VorticityRefinement( const ConstBlockDataID & fieldId, const Filter_T & filter,
-                       const real_t upperLimit, const real_t lowerLimit, const uint_t maxLevel ) :
-      fieldId_( fieldId ), filter_( filter ),
-      upperLimit_( upperLimit * upperLimit ), lowerLimit_( lowerLimit * lowerLimit ), maxLevel_( maxLevel )
-   {}
-
-   void operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                    std::vector< const Block * > & blocksAlreadyMarkedForRefinement,
-                    const BlockForest & forest );
-
-private:
-
-   ConstBlockDataID fieldId_;
-
-   Filter_T filter_;
-
-   real_t upperLimit_;
-   real_t lowerLimit_;
-
-   uint_t maxLevel_;
-   
-}; // class VorticityRefinement
-
-template< typename VectorField_T, typename Filter_T, bool Pseudo2D >
-void VorticityRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                                                                           std::vector< const Block * > &, const BlockForest & )
-{
-   for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
-   {
-      const Block * const block = it->first;
-      const VectorField_T * u = block->template getData< VectorField_T >( fieldId_ );
-
-      if( u == NULL )
-      {
-         it->second = uint_t(0);
-         continue;
-      }
-      
-      CellInterval interval = u->xyzSize();
-      Cell expand( cell_idx_c(-1), cell_idx_c(-1), Pseudo2D ? cell_idx_t(0) : cell_idx_c(-1) );
-      interval.expand( expand );
-
-      const cell_idx_t one( cell_idx_t(1) );
-      const real_t half( real_c(0.5) );
-      
-      bool refine( false );
-      bool coarsen( true );
-
-      filter_( *block );
-
-      WALBERLA_FOR_ALL_CELLS_IN_INTERVAL_XYZ( interval,
-
-         if( filter_(x,y,z) && filter_(x+one,y,z) && filter_(x-one,y,z) && filter_(x,y+one,z) && filter_(x,y-one,z) &&
-                  ( Pseudo2D || (filter_(x,y,z+one) && filter_(x,y,z-one)) ) )
-         {
-            const Vector3< real_t > xa = u->get(x+one,y,z);
-            const Vector3< real_t > xb = u->get(x-one,y,z);
-            const Vector3< real_t > ya = u->get(x,y+one,z);
-            const Vector3< real_t > yb = u->get(x,y-one,z);
-            const Vector3< real_t > za = Pseudo2D ? Vector3< real_t >(0) : u->get(x,y,z+one);
-            const Vector3< real_t > zb = Pseudo2D ? Vector3< real_t >(0) : u->get(x,y,z-one);
-
-            // ATTENTION: dx/y/z is assumed to be equal to '1'!
-            const real_t duzdy = half * ( ya[2] - yb[2] );
-            const real_t duydz = half * ( za[1] - zb[1] );
-            const real_t duxdz = half * ( za[0] - zb[0] );
-            const real_t duzdx = half * ( xa[2] - xb[2] );
-            const real_t duydx = half * ( xa[1] - xb[1] );
-            const real_t duxdy = half * ( ya[0] - yb[0] );
-
-            const Vector3< real_t > curl( duzdy - duydz, duxdz - duzdx, duydx - duxdy );
-            const auto curlSqr = curl.sqrLength();
-
-            if( curlSqr > lowerLimit_ )
-            {
-               coarsen = false;
-               if( curlSqr > upperLimit_ )
-                  refine = true;
-            }
-         }
-      )
-      
-      if( refine && block->getLevel() < maxLevel_ )
-      {
-         WALBERLA_ASSERT( !coarsen );
-         it->second = block->getLevel() + uint_t(1);
-      }
-      if( coarsen && block->getLevel() > uint_t(0) )
-      {
-         WALBERLA_ASSERT( !refine );
-         it->second = block->getLevel() - uint_t(1);
-      }
-   }
-}
-
-
-
 // used as a 'BlockForest::RefreshMinTargetLevelDeterminationFunction
 void keepInflowOutflowAtTheSameLevel( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
                                       std::vector< const Block * > & blocksAlreadyMarkedForRefinement,
@@ -1266,7 +1165,7 @@ class Pseudo2DPhantomWeight // used as a 'PhantomBlockForest::PhantomBlockDataAs
 {
 public:
 
-   typedef uint8_t weight_t;
+   using weight_t = uint8_t;
 
    Pseudo2DPhantomWeight( const weight_t _weight ) : weight_( _weight ) {}
 
@@ -1332,7 +1231,7 @@ class MyVTKOutput {
 public:
 
    MyVTKOutput( const ConstBlockDataID & pdfField, const ConstBlockDataID & flagField,
-                vtk::VTKOutput::BeforeFunction pdfGhostLayerSync ) :
+                const vtk::VTKOutput::BeforeFunction& pdfGhostLayerSync ) :
       pdfField_( pdfField ), flagField_( flagField ), pdfGhostLayerSync_( pdfGhostLayerSync ) {}
 
    void operator()( std::vector< shared_ptr<vtk::BlockCellDataWriterInterface> > & writers,
@@ -1398,13 +1297,13 @@ class Evaluation
 {
 public:
 
-   typedef typename Types<LatticeModel_T>::PdfField_T PdfField_T;
-   typedef typename LatticeModel_T::Stencil           Stencil_T;
+   using PdfField_T = typename Types< LatticeModel_T >::PdfField_T;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    Evaluation( const weak_ptr< StructuredBlockStorage > & blocks, const uint_t checkFrequency,
                const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const FlagUID & fluid, const FlagUID & obstacle,
                const Setup & setup,
-               const bool logToStream = true, const bool logToFile = true, const std::string filename = std::string("SchaeferTurek.txt"),
+               const bool logToStream = true, const bool logToFile = true, const std::string& filename = std::string("SchaeferTurek.txt"),
                const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() ) :
       initialized_( false ), blocks_( blocks ),
@@ -1532,7 +1431,7 @@ void Evaluation< LatticeModel_T >::operator()()
    if( setup_.evaluateStrouhal )
    {
       auto block = blocks->getBlock( setup_.pStrouhal );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const PdfField_T * const pdfField = block->template getData< PdfField_T >( pdfFieldId_ );
          const auto cell = blocks->getBlockLocalCell( *block, setup_.pStrouhal );
@@ -2012,7 +1911,7 @@ void Evaluation< LatticeModel_T >::refresh()
       int omega( 0 );
 
       auto block = blocks->getBlock( setup_.pAlpha );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const FlagField_T * const flagField = block->template getData< FlagField_T >( flagFieldId_ );
 
@@ -2036,7 +1935,7 @@ void Evaluation< LatticeModel_T >::refresh()
       }
 
       block = blocks->getBlock( setup_.pOmega );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const FlagField_T * const flagField = block->template getData< FlagField_T >( flagFieldId_ );
 
@@ -2065,7 +1964,7 @@ void Evaluation< LatticeModel_T >::refresh()
       if( alpha == 0 )
       {
          block = blocks->getBlock( setup_.pAlpha );
-         if( block != NULL )
+         if( block != nullptr )
          {
             const FlagField_T * const flagField = block->template getData< FlagField_T >( flagFieldId_ );
 
@@ -2085,7 +1984,7 @@ void Evaluation< LatticeModel_T >::refresh()
       if( omega == 0 )
       {
          block = blocks->getBlock( setup_.pOmega );
-         if( block != NULL )
+         if( block != nullptr )
          {
             const FlagField_T * const flagField = block->template getData< FlagField_T >( flagFieldId_ );
 
@@ -2121,7 +2020,7 @@ void Evaluation< LatticeModel_T >::refresh()
       int strouhal( 0 );
 
       auto block = blocks->getBlock( setup_.pStrouhal );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const FlagField_T * const flagField = block->template getData< FlagField_T >( flagFieldId_ );
 
@@ -2181,7 +2080,7 @@ void Evaluation< LatticeModel_T >::evaluate( real_t & cDRealArea, real_t & cLRea
    if( setup_.evaluatePressure )
    {
       auto block = blocks->getBlock( setup_.pAlpha );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const PdfField_T * const pdfField = block->template getData< PdfField_T >( pdfFieldId_ );
          const auto cell = blocks->getBlockLocalCell( *block, setup_.pAlpha );
@@ -2190,7 +2089,7 @@ void Evaluation< LatticeModel_T >::evaluate( real_t & cDRealArea, real_t & cLRea
       }
 
       block = blocks->getBlock( setup_.pOmega );
-      if( block != NULL )
+      if( block != nullptr )
       {
          const PdfField_T * const pdfField = block->template getData< PdfField_T >( pdfFieldId_ );
          const auto cell = blocks->getBlockLocalCell( *block, setup_.pOmega );
@@ -2356,7 +2255,7 @@ void addRefinementTimeStep( SweepTimeloop & timeloop, shared_ptr< blockforest::S
                             const shared_ptr< Evaluation< LatticeModel_T > > & evaluation,
                             const shared_ptr< lbm::TimeTracker > & timeTracker )
 {
-   typedef typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T BH_T;
+   using BH_T = typename MyBoundaryHandling< LatticeModel_T >::BoundaryHandling_T;
 
    auto ts = lbm::refinement::makeTimeStep< LatticeModel_T, BH_T >( blocks, sweep, pdfFieldId, boundaryHandlingId, None, Empty );
    ts->asynchronousCommunication( !syncComm );
@@ -2385,7 +2284,7 @@ struct AddRefinementTimeStep
       {
          if( pure )
          {
-            typedef lbm::SplitPureSweep< LatticeModel_T > Sweep_T;
+            using Sweep_T = lbm::SplitPureSweep< LatticeModel_T >;
             auto mySweep = make_shared< Sweep_T >( pdfFieldId );
 
             addRefinementTimeStep< LatticeModel_T, Sweep_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,
@@ -2469,7 +2368,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
 
    // add density adaptor
 
-   typedef typename lbm::Adaptor<LatticeModel_T>::Density DensityAdaptor_T;
+   using DensityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::Density;
    BlockDataID densityAdaptorId = field::addFieldAdaptor< DensityAdaptor_T >( blocks, pdfFieldId, "density adaptor", None, Empty );
    
    // add velocity field + initialize velocity field writer (only used for simulations with an adaptive block structure)
@@ -2577,8 +2476,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
       {
          const real_t lowerLimit = configBlock.getParameter< real_t >( "curlLowerLimit" );
          const real_t upperLimit = configBlock.getParameter< real_t >( "curlUpperLimit" );
-         
-         VorticityRefinement< VelocityField_T, field::FlagFieldEvaluationFilter<FlagField_T>, Is2D<LatticeModel_T>::value > vorticityRefinement(
+
+         lbm::refinement::VorticityBasedLevelDetermination< field::FlagFieldEvaluationFilter<FlagField_T>, Is2D<LatticeModel_T>::value > vorticityRefinement(
             velocityFieldId, flagFieldFilter, upperLimit, lowerLimit, configBlock.getParameter< uint_t >( "maxLevel", uint_t(0) ) );
 
          minTargetLevelDeterminationFunctions.add( vorticityRefinement );
@@ -2602,7 +2501,8 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
          adaptiveRefinementLog = oss.str();
       }
 
-      minTargetLevelDeterminationFunctions.add( boost::bind( keepInflowOutflowAtTheSameLevel, _1, _2, _3, boost::cref(setup) ) );
+      minTargetLevelDeterminationFunctions.add( std::bind( keepInflowOutflowAtTheSameLevel, std::placeholders::_1, std::placeholders::_2, 
+                                                           std::placeholders::_3, std::cref(setup) ) );
 
       if( Is2D< LatticeModel_T >::value )
          minTargetLevelDeterminationFunctions.add( pseudo2DTargetLevelCorrection );
@@ -3006,7 +2906,7 @@ int main( int argc, char **argv )
    //WALBERLA_ROOT_SECTION() { logging::Logging::instance()->setLogLevel( logging::Logging::PROGRESS ); }
 
 #ifdef _OPENMP
-   if( std::getenv( "OMP_NUM_THREADS" ) == NULL )
+   if( std::getenv( "OMP_NUM_THREADS" ) == nullptr )
       WALBERLA_ABORT( "If you are using a version of the program that was compiled with OpenMP you have to "
                       "specify the environment variable \'OMP_NUM_THREADS\' accordingly!" );
 #endif
@@ -3171,7 +3071,7 @@ int main( int argc, char **argv )
       refinementSelectionFunctions.add( cylinderRefinementSelection );
    }
 
-   refinementSelectionFunctions.add( boost::bind( setInflowOutflowToSameLevel, _1, setup ) );
+   refinementSelectionFunctions.add( std::bind( setInflowOutflowToSameLevel, std::placeholders::_1, setup ) );
 
    if( setup.pseudo2D )
       refinementSelectionFunctions.add( Pseudo2DRefinementSelectionCorrection );

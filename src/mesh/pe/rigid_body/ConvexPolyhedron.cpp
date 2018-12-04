@@ -97,7 +97,7 @@ void ConvexPolyhedron::init( const Vec3& gpos, const Vec3& rpos, const Quat& q,
    } else
    {
       // sets inverse mass and interatio tensor
-      setMassAndInertia( getVolume() * Material::getDensity( getMaterial() ), mesh::computeIntertiaTensor( mesh_ ) );
+      setMassAndInertia( getVolume() * Material::getDensity( getMaterial() ), mesh::computeInertiaTensor( mesh_ ) );
    }
    setCommunicating( communicating );
    setFinite( true );
@@ -299,8 +299,10 @@ bool ConvexPolyhedron::containsRelPointImpl( real_t px, real_t py, real_t pz ) c
 
    for(auto fh : mesh_.faces())
    {
-      const TriangleMesh::Point & p = mesh_.normal(fh);
-      if( p[0] * px + p[1] * py + p[2] * pz >= real_t(0) )
+      const TriangleMesh::Normal & n = mesh_.normal(fh); // Plane normal
+      const TriangleMesh::Point & pp = mesh_.point(mesh_.to_vertex_handle(mesh_.halfedge_handle(fh))); // Point on plane
+
+      if( n[0] * (px - pp[0]) + n[1] * (py - pp[1]) + n[2] * (pz - pp[2]) >= real_t(0) )
          return false;
    }
 

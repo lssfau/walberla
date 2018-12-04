@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "amr/all.h"
 #include "discrete_particle_methods/all.h"
 #include "mapping/all.h"
 #include "geometry/all.h"

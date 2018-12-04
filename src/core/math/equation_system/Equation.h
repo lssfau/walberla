@@ -86,7 +86,7 @@ namespace math {
       VarMap  varMap_;
 
    public:
-      Equation( NodePtr root );
+      Equation( const NodePtr& root );
 
    private:
       uint_t countUnknownVariables(){ return uint_c( root_->countUnknownVariables() ); }

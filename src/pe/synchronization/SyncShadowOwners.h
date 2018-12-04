@@ -20,9 +20,12 @@
 
 #pragma once
 
-#include "blockforest/all.h"
-#include "core/all.h"
-#include "domain_decomposition/all.h"
+#include <blockforest/BlockForest.h>
+#include <core/DataTypes.h>
+#include <core/mpi/BufferSystem.h>
+#include <core/mpi/RecvBuffer.h>
+#include <core/mpi/Reduce.h>
+#include <core/mpi/SendBuffer.h>
 
 #include "pe/BlockFunctions.h"
 #include "pe/rigidbody/BodyStorage.h"
@@ -79,7 +82,15 @@ void updateAndMigrate( BlockForest& forest, BlockDataID storageID, const bool sy
 
       for( auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); )
       {
-         BodyID b (*bodyIt);
+         BodyID b (bodyIt.getBodyID());
+
+         //correct position to make sure body is always inside the domain!
+         if (!b->isFixed())
+         {
+            auto pos = b->getPosition();
+            block.getBlockStorage().mapToPeriodicDomain(pos);
+            b->setPosition(pos);
+         }
 
          if( !b->isCommunicating() && !syncNonCommunicatingBodies ) {
             ++bodyIt;
@@ -131,8 +142,12 @@ void updateAndMigrate( BlockForest& forest, BlockDataID storageID, const bool sy
                b->setRemote( true );
 
                // Move body to shadow copy storage.
-               bodyIt = localStorage.release( bodyIt );
-               shadowStorage.add( b );
+               {
+                  auto pos = b->getPosition();
+                  correctBodyPosition(forest.getDomain(), block.getAABB().center(), pos);
+                  b->setPosition(pos);
+               }
+               shadowStorage.add( localStorage.release( bodyIt ) );
 
                b->MPITrait.deregisterShadowOwner( owner );
 
@@ -216,11 +231,11 @@ void checkAndResolveOverlap( BlockForest& forest, BlockDataID storageID, const r
       BodyStorage& shadowStorage = (*storage)[1];
 
       const Owner me( int_c(block.getProcess()), block.getId().getID() );
-//      const math::AABB& blkAABB = block->getAABB();
+      //      const math::AABB& blkAABB = block->getAABB();
 
       for( auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt)
       {
-         BodyID b (*bodyIt);
+         BodyID b (bodyIt.getBodyID());
 
          if( !b->isCommunicating() && !syncNonCommunicatingBodies ) continue;
 
@@ -239,10 +254,10 @@ void checkAndResolveOverlap( BlockForest& forest, BlockDataID storageID, const r
 
             if (b->MPITrait.getOwner() == nbProcess) continue; // dont send to owner!!
             if (b->MPITrait.getBlockState( nbProcess.blockID_ )) continue; // only send to neighbor which do not know this body
-//            WALBERLA_LOG_DEVEL("neighobur aabb: " << block.getNeighborAABB(nb));
-//            WALBERLA_LOG_DEVEL("isInsideDomain: " << isInsideDomain);
-//            WALBERLA_LOG_DEVEL("body AABB: " << b->getAABB());
-//            WALBERLA_LOG_DEVEL("neighbour AABB: " << block.getNeighborAABB(nb));
+            //            WALBERLA_LOG_DEVEL("neighobur aabb: " << block.getNeighborAABB(nb));
+            //            WALBERLA_LOG_DEVEL("isInsideDomain: " << isInsideDomain);
+            //            WALBERLA_LOG_DEVEL("body AABB: " << b->getAABB());
+            //            WALBERLA_LOG_DEVEL("neighbour AABB: " << block.getNeighborAABB(nb));
 
             if( (isInsideDomain ? block.getNeighborAABB(nb).intersects( b->getAABB(), dx ) : block.getBlockStorage().periodicIntersect(block.getNeighborAABB(nb), b->getAABB(), dx)) )
             {
@@ -256,7 +271,7 @@ void checkAndResolveOverlap( BlockForest& forest, BlockDataID storageID, const r
       }
       for( auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); )
       {
-         BodyID b (*bodyIt);
+         BodyID b (bodyIt.getBodyID());
          WALBERLA_ASSERT(!b->isGlobal(), "Global body in ShadowStorage!");
          bool isInsideDomain = forest.getDomain().contains( b->getAABB(), -dx );
 

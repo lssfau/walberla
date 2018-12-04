@@ -93,7 +93,7 @@ inline EPA::EPA_Triangle::EPA_Triangle( size_t a, size_t b, size_t c,
    sqrDist_ = closest_.sqrLength();
 
    //adjoined triangles not set yet
-   adjTriangle_[0] = adjTriangle_[1] = adjTriangle_[2] = NULL;
+   adjTriangle_[0] = adjTriangle_[1] = adjTriangle_[2] = nullptr;
    adjEdges_[0]    = adjEdges_[1]    = adjEdges_[2] = 4;
 
    obsolete_ = false;
@@ -269,7 +269,7 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
    }
 
    std::make_heap(entryHeap.begin(), entryHeap.end(), EPA::EPA_TriangleComp());
-   EPA_Triangle* current = NULL;
+   EPA_Triangle* current = nullptr;
 
    numIterations_ = 0;
    //EPA Main-Loop
@@ -715,7 +715,7 @@ inline bool EPA::originInTetrahedron( const Vec3& p0, const Vec3& p1, const Vec3
 inline bool EPA::originInTetrahedronVolumeMethod( const Vec3& A, const Vec3& B, const Vec3& C,
                                                   const Vec3& D )
 {
-   Vec3 aoT = A;
+   const Vec3& aoT = A;
    if((aoT * (B % C)) <= real_t(0.0)) {
       //if volume of ABC and Origin <0.0 than the origin is on the wrong side of ABC
       //http://mathworld.wolfram.com/Tetrahedron.html volume formula

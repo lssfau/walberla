@@ -142,15 +142,15 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
       std::string type = loggingBlock.getParameter< std::string >( "logLevel" );
       boost::algorithm::to_lower( type );
 
-      if( type.compare("warning") == 0 ){
+      if( type == "warning" ){
          logging::Logging::instance()->setLogLevel( logging::Logging::WARNING );
-      } else if( type.compare("info") == 0 ){
+      } else if( type == "info" ){
          logging::Logging::instance()->setLogLevel( logging::Logging::INFO );
-      } else if( type.compare("progress") == 0 ){
+      } else if( type == "progress" ){
          logging::Logging::instance()->setLogLevel( logging::Logging::PROGRESS );
-      } else if( type.compare("detail") == 0 ){
+      } else if( type == "detail" ){
          logging::Logging::instance()->setLogLevel( logging::Logging::DETAIL );
-      } else if( type.compare("tracing") == 0 ){
+      } else if( type == "tracing" ){
          logging::Logging::instance()->setLogLevel( logging::Logging::TRACING );
       } else
          throw std::runtime_error("Error: Unknown parameter for 'logLevel'. Possible parameters are: warning|info|progress|detail|tracing");
@@ -161,15 +161,15 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
       std::string type = loggingBlock.getParameter< std::string >( "streamLogLevel" );
       boost::algorithm::to_lower( type );
 
-      if( type.compare("warning") == 0 ){
+      if( type == "warning" ){
          logging::Logging::instance()->setStreamLogLevel( logging::Logging::WARNING );
-      } else if( type.compare("info") == 0 ){
+      } else if( type == "info" ){
          logging::Logging::instance()->setStreamLogLevel( logging::Logging::INFO );
-      } else if( type.compare("progress") == 0 ){
+      } else if( type == "progress" ){
          logging::Logging::instance()->setStreamLogLevel( logging::Logging::PROGRESS );
-      } else if( type.compare("detail") == 0 ){
+      } else if( type == "detail" ){
          logging::Logging::instance()->setStreamLogLevel( logging::Logging::DETAIL );
-      } else if( type.compare("tracing") == 0 ){
+      } else if( type == "tracing" ){
          logging::Logging::instance()->setStreamLogLevel( logging::Logging::TRACING );
       } else
          throw std::runtime_error("Error: Unknown parameter for 'streamLogLevel'. Possible parameters are: warning|info|progress|detail|tracing");
@@ -180,15 +180,15 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
       std::string type = loggingBlock.getParameter< std::string >( "fileLogLevel" );
       boost::algorithm::to_lower( type );
 
-      if( type.compare("warning") == 0 ){
+      if( type == "warning" ){
          logging::Logging::instance()->setFileLogLevel( logging::Logging::WARNING );
-      } else if( type.compare("info") == 0 ){
+      } else if( type == "info" ){
          logging::Logging::instance()->setFileLogLevel( logging::Logging::INFO );
-      } else if( type.compare("progress") == 0 ){
+      } else if( type == "progress" ){
          logging::Logging::instance()->setFileLogLevel( logging::Logging::PROGRESS );
-      } else if( type.compare("detail") == 0 ){
+      } else if( type == "detail" ){
          logging::Logging::instance()->setFileLogLevel( logging::Logging::DETAIL );
-      } else if( type.compare("tracing") == 0 ){
+      } else if( type == "tracing" ){
          logging::Logging::instance()->setFileLogLevel( logging::Logging::TRACING );
       } else
          throw std::runtime_error("Error: Unknown parameter for 'fileLogLevel'. Possible parameters are: warning|info|progress|detail|tracing");

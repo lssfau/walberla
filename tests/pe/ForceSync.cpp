@@ -38,9 +38,8 @@
 #include <algorithm>
 #include <vector>
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
-using namespace walberla::blockforest;
 
 typedef boost::tuple<Sphere, Plane> BodyTuple ;
 
@@ -98,12 +97,12 @@ int main( int argc, char ** argv )
 
       for (auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt)
       {
-         BodyID b = *bodyIt;
+         BodyID b = bodyIt.getBodyID();
          b->addForce( Vec3(1,0,0) );
       }
       for (auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); ++bodyIt)
       {
-         BodyID b = *bodyIt;
+         BodyID b = bodyIt.getBodyID();
          b->addForce( Vec3(0,1,0) );
       }
    }
@@ -113,9 +112,9 @@ int main( int argc, char ** argv )
    SphereID sp1 = static_cast<SphereID> (getBody(*globalStorage, forest->getBlockStorage(), storageID_, id1));
    SphereID sp2 = static_cast<SphereID> (getBody(*globalStorage, forest->getBlockStorage(), storageID_, id2));
 
-   if ( (sp1 != NULL) && (!sp1->isRemote() ))
+   if ( (sp1 != nullptr) && (!sp1->isRemote() ))
       WALBERLA_ASSERT_FLOAT_EQUAL(sp1->getForce(), Vec3(1,0,0));
-   if ( (sp2 != NULL) && (!sp2->isRemote() ))
+   if ( (sp2 != nullptr) && (!sp2->isRemote() ))
       WALBERLA_ASSERT_FLOAT_EQUAL(sp2->getForce(), Vec3(1,1,0));
 
 //   for (auto it = forest->begin(); it != forest->end(); ++it){
@@ -127,12 +126,12 @@ int main( int argc, char ** argv )
 
 //      for (auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt)
 //      {
-//         BodyID b = *bodyIt;
+//         BodyID b = bodyIt.getBodyID();
 //         WALBERLA_LOG_DEVEL("LOCAL\n" << b << "\nForce: " << b->getForce());
 //      }
 //      for (auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); ++bodyIt)
 //      {
-//         BodyID b = *bodyIt;
+//         BodyID b = bodyIt.getBodyID();
 //         WALBERLA_LOG_DEVEL("SHADOW\n" << b << "\nForce: " << b->getForce());
 //      }
 //   }
@@ -140,4 +139,10 @@ int main( int argc, char ** argv )
    forest.reset();
 
    return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

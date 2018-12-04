@@ -68,13 +68,9 @@ void PlainIntegratorSolver<Integrator>::timestep( const real_t dt )
          WALBERLA_ASSERT( bd->checkInvariants(), "Invalid body state detected" );
          WALBERLA_ASSERT( !bd->hasSuperBody(), "Invalid superordinate body detected" );
 
-         // Resetting the contact node and removing all attached contacts
-      //      bd->resetNode();
-         bd->clearContacts();
-
          // Moving the body according to the acting forces (don't move a sleeping body)
          if( bd->isAwake() && !bd->hasInfiniteMass() ) {
-            integrate_( *bd, dt, *this );
+            integrate_( bd.getBodyID(), dt, *this );
          }
 
          // Resetting the acting forces

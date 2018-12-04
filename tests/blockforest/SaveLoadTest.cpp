@@ -19,6 +19,8 @@
 //======================================================================================================================
 
 
+#include <memory>
+
 #include "blockforest/all.h"
 #include "core/all.h"
 #include "core/math/IntegerFactorization.h"
@@ -26,7 +28,7 @@
 
 #include "core/debug/TestSubsystem.h"
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::blockforest;
 
 void blockForestSaveLoadTest(const BlockForest::FileIOMode ioMode, const bool broadcast)
@@ -58,7 +60,7 @@ void blockForestSaveLoadTest(const BlockForest::FileIOMode ioMode, const bool br
 
    check.clear();
 
-   auto forestCheck = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), "SerializeDeserialize.sbf", broadcast ) );
+   auto forestCheck = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), "SerializeDeserialize.sbf", broadcast );
 
    for (auto blockIt = forestCheck->begin(); blockIt != forestCheck->end(); ++blockIt)
    {
@@ -119,4 +121,11 @@ int main( int argc, char ** argv )
    blockForestSaveLoadTest(BlockForest::SERIALIZED_DISTRIBUTED, false);
 
    return EXIT_SUCCESS;
+}
+}
+
+
+int main( int argc, char ** argv )
+{
+   return walberla::main(argc,argv);
 }

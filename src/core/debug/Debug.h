@@ -26,8 +26,8 @@
 #ifndef NDEBUG
 #   include "CheckFunctions.h"
 #   include <functional>
-#   include <boost/bind.hpp>
 #   include <string>
+#   include "core/Macros.h"
 #endif
 
 
@@ -265,7 +265,7 @@ private:
 /// \endcond
 
 #define WALBERLA_ASSERT_SECTION(condition) if(true)\
-   if(const walberla::debug::ConditionalExec COND_EXEC = walberla::debug::ConditionalExec(!(condition),boost::bind(walberla::debug::myAssert,__FILE__,__LINE__)))
+   if(const walberla::debug::ConditionalExec COND_EXEC = walberla::debug::ConditionalExec(!(condition),std::bind(walberla::debug::myAssert,__FILE__,__LINE__)))
 
 #else
 

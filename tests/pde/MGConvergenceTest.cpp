@@ -44,13 +44,13 @@
 
 #include <cmath>
 
-using namespace walberla;
+namespace walberla {
 
 
 
 typedef GhostLayerField< real_t, 1 > PdeField_T;
-typedef stencil::D3Q7                Stencil_T;
-typedef pde::VCycles<Stencil_T>::StencilField_T  StencilField_T;
+using Stencil_T = stencil::D3Q7;
+using StencilField_T = pde::VCycles<Stencil_T>::StencilField_T;
 
 
 
@@ -506,3 +506,9 @@ int main( int argc, char** argv )
    return EXIT_SUCCESS;
 }
 //**********************************************************************************************************************
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
+}

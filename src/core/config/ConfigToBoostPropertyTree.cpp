@@ -21,7 +21,6 @@
 
 #include "ConfigToBoostPropertyTree.h"
 
-#include <boost/foreach.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 
@@ -39,7 +38,7 @@ boost::property_tree::iptree configBlockHandleToBoostPropertyTree( const Config:
 	Config::Blocks blocks;
 	blockHandle.getBlocks(blocks);
 
-	BOOST_FOREACH( const Config::BlockHandle & handle, blocks )
+	for( const Config::BlockHandle & handle : blocks )
 		propTree.add_child( handle.getKey(), configBlockHandleToBoostPropertyTree( handle ) );
 
 	return propTree;

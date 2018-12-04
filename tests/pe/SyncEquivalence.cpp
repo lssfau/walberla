@@ -40,11 +40,11 @@
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/PythonCallback.h"
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::timing;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 struct BodyData
 {
@@ -115,7 +115,7 @@ void createSimulation(math::AABB& simulationDomain,
     info.ccdID               = info.forest->addBlockData(ccd::createHashGridsDataHandling( info.globalBodyStorage, info.storageID ), "CCD");
     info.fcdID               = info.forest->addBlockData(fcd::createGenericFCDDataHandling<BodyTuple, fcd::AnalyticCollideFunctor>(), "FCD");
 
-    info.cr = shared_ptr<cr::ICR>(new cr::HCSITS(info.globalBodyStorage, info.forest->getBlockStoragePointer(), info.storageID, info.ccdID, info.fcdID) );
+    info.cr = std::make_shared<cr::HCSITS>(info.globalBodyStorage, info.forest->getBlockStoragePointer(), info.storageID, info.ccdID, info.fcdID );
 
     int numParticles = int_c(0);
 
@@ -126,8 +126,8 @@ void createSimulation(math::AABB& simulationDomain,
         {
             SphereID sp = pe::createSphere( *(info.globalBodyStorage.get()), info.forest->getBlockStorage(), info.storageID, static_cast<walberla::id_t>(mpi::MPIManager::instance()->worldRank() * 1000000 + numParticles), *it, radius);
             Vec3 rndVel(math::realRandom<real_t>(-vMax, vMax, generator), math::realRandom<real_t>(-vMax, vMax, generator), math::realRandom<real_t>(-vMax, vMax, generator));
-            if (sp != NULL) sp->setLinearVel(rndVel);
-            if (sp != NULL) ++numParticles;
+            if (sp != nullptr) sp->setLinearVel(rndVel);
+            if (sp != nullptr) ++numParticles;
         }
     }
     WALBERLA_LOG_INFO_ON_ROOT(numParticles << " particles created on root");
@@ -227,11 +227,17 @@ int main( int argc, char ** argv )
                   WALBERLA_CHECK_EQUAL(shadowOwnersIt1->blockID_, shadowOwnersIt2->blockID_);
                }
 
-               checkVitalParameters( static_cast<SphereID>(*bodyIt1), static_cast<SphereID>(*bodyIt2) );
+               checkVitalParameters( static_cast<SphereID>(bodyIt1.getBodyID()), static_cast<SphereID>(bodyIt2.getBodyID()) );
 
             }
         }
      }
 
     return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

@@ -25,6 +25,8 @@
 
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Squirmer.h"
+#include "pe/rigidbody/Plane.h"
 
 #include "PeBodyOverlapFunctions.h"
 
@@ -33,18 +35,23 @@ namespace pe_coupling{
 
 
 real_t overlapFractionPe( const pe::RigidBody & peRigidBody, const Vector3<real_t> & cellMidpoint,
-                          real_t dx, uint_t maxDepth=4 )
+                          const Vector3<real_t> & dx, uint_t maxDepth=4 )
 {
-   if( peRigidBody.getTypeID() == pe::Sphere::getStaticTypeID() )
+   if( peRigidBody.getTypeID() == pe::Sphere::getStaticTypeID() || peRigidBody.getTypeID() == pe::Squirmer::getStaticTypeID() )
    {
       const pe::Sphere & sphere = static_cast< const pe::Sphere & >( peRigidBody );
       return geometry::overlapFraction( sphere, cellMidpoint, dx, maxDepth );
    }
-   // Add more pe bodies here if specific fastOverlapCheck(...) and contains(...) function is available
-   else
+   if( peRigidBody.getTypeID() == pe::Plane::getStaticTypeID() )
    {
-      return geometry::overlapFraction( peRigidBody, cellMidpoint, dx, maxDepth );
+      const pe::Plane & plane = static_cast< const pe::Plane & >( peRigidBody );
+      return geometry::overlapFraction( plane, cellMidpoint, dx, maxDepth );
    }
+
+   // Add more pe bodies here if specific fastOverlapCheck(...) and contains(...) function is available
+   // else: fallback to default implementation
+   return geometry::overlapFraction( peRigidBody, cellMidpoint, dx, maxDepth );
+
 }
 
 

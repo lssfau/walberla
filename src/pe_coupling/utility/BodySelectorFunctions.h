@@ -21,29 +21,18 @@
 
 #pragma once
 
-#include "pe/Types.h"
+#include "pe/rigidbody/RigidBody.h"
 
 namespace walberla {
 namespace pe_coupling {
 
-bool selectAllBodies(pe::BodyID /*bodyID*/)
-{
-   return true;
-}
+bool selectAllBodies(pe::BodyID /*bodyID*/);
 
-bool selectRegularBodies(pe::BodyID bodyID)
-{
-   return !bodyID->hasInfiniteMass() && !bodyID->isGlobal();
-}
+bool selectRegularBodies(pe::BodyID bodyID);
 
-bool selectFixedBodies(pe::BodyID bodyID)
-{
-   return bodyID->hasInfiniteMass() && !bodyID->isGlobal();
-}
+bool selectFixedBodies(pe::BodyID bodyID);
 
-bool selectGlobalBodies(pe::BodyID bodyID)
-{
-   return bodyID->isGlobal();
-}
+bool selectGlobalBodies(pe::BodyID bodyID);
+
 } // namespace pe_coupling
 } // namespace walberla

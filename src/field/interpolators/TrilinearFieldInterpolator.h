@@ -26,7 +26,7 @@
 #include "domain_decomposition/StructuredBlockStorage.h"
 
 #include "field/FlagField.h"
-
+#include "field/interpolators/NearestNeighborFieldInterpolator.h"
 
 namespace walberla {
 namespace field {

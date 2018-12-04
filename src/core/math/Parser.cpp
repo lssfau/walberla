@@ -66,8 +66,8 @@ namespace math {
 
 
 FunctionParser::FunctionParser() 
-   : expression_ ( 0 ),
-     symbolTable_( 0 ),
+   : expression_ ( nullptr ),
+     symbolTable_( nullptr ),
      isConstant_(false),
      isZero_(false)
 {
@@ -125,7 +125,7 @@ void FunctionParser::parse( const std::string & eq )
 
 double FunctionParser::evaluate( const std::map<std::string,double> & symbolTable) const
 {
-   if( expression_ == 0 )
+   if( expression_ == nullptr )
    {
       WALBERLA_ASSERT_NULLPTR( symbolTable_ );
       WALBERLA_ABORT( "Error: You are trying to evaluate an expression which you never have parsed!" );
@@ -149,7 +149,7 @@ double FunctionParser::evaluate( const std::map<std::string,double> & symbolTabl
 
 bool FunctionParser::symbolExists(const std::string & symbol) const
 {
-   if( expression_ == 0 )
+   if( expression_ == nullptr )
    {
       WALBERLA_ASSERT_NULLPTR( symbolTable_ );
       WALBERLA_ABORT( "Error: You are trying to evaluate an expression which you never have parsed!" );

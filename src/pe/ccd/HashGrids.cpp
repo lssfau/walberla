@@ -65,7 +65,7 @@ HashGrids::HashGrid::HashGrid( real_t cellSpan )
    // Initialization of each cell - i.e., initially setting the pointer to the body container to
    // NULL (=> no bodies are assigned to this hash grid yet!) and ...
    for( Cell* c  = cell_; c < cell_ + xyzCellCount_; ++c ) {
-      c->bodies_ = NULL;
+      c->bodies_ = nullptr;
    }
    // ... setting up the neighborhood relationship (using the offset array).
    initializeNeighborOffsets();
@@ -215,7 +215,7 @@ void HashGrids::HashGrid::clear()
 {
    for( auto cellIt = occupiedCells_.begin(); cellIt < occupiedCells_.end(); ++cellIt ) {
       delete (*cellIt)->bodies_;
-      (*cellIt)->bodies_ = NULL;
+      (*cellIt)->bodies_ = nullptr;
    }
    occupiedCells_.clear();
    bodyCount_ = 0;
@@ -313,6 +313,21 @@ void HashGrids::HashGrid::initializeNeighborOffsets()
  *
  * \param body The body whose hash value is about to be calculated.
  * \return The hash value (=cell association) of the body.
+ */
+size_t HashGrids::HashGrid::hash( BodyID body ) const
+{
+   const AABB& bodyAABB = body->getAABB();
+   return hashPoint(bodyAABB.xMin(), bodyAABB.yMin(), bodyAABB.zMin());
+}
+//*************************************************************************************************
+
+   
+/*!\brief Computes the hash for a given point.
+ *
+ * \param x X value of the point.
+ * \param y Y value of the point.
+ * \param y Z value of the point.
+ * \return The hash value (=cell association) of the point.
  *
  * The hash calculation uses modulo operations in order to spatially map entire blocks of connected
  * cells to the origin of the coordinate system. This block of cells at the origin of the coordinate
@@ -324,16 +339,11 @@ void HashGrids::HashGrid::initializeNeighborOffsets()
  * Note that the modulo calculations are replaced with fast bitwise AND operations - hence, the
  * spatial dimensions of the hash grid must be restricted to powers of two!
  */
-size_t HashGrids::HashGrid::hash( BodyID body ) const
-{
-   real_t x = body->getAABB().xMin();
-   real_t y = body->getAABB().yMin();
-   real_t z = body->getAABB().zMin();
-
+size_t HashGrids::HashGrid::hashPoint(real_t x, real_t y, real_t z) const {
    size_t xHash;
    size_t yHash;
    size_t zHash;
-
+   
    if( x < 0 ) {
       real_t i = ( -x ) * inverseCellSpan_;
       xHash  = xCellCount_ - 1 - ( static_cast<size_t>( i ) & xHashMask_ );
@@ -342,7 +352,7 @@ size_t HashGrids::HashGrid::hash( BodyID body ) const
       real_t i = x * inverseCellSpan_;
       xHash  = static_cast<size_t>( i ) & xHashMask_;
    }
-
+   
    if( y < 0 ) {
       real_t i = ( -y ) * inverseCellSpan_;
       yHash  = yCellCount_ - 1 - ( static_cast<size_t>( i ) & yHashMask_ );
@@ -351,7 +361,7 @@ size_t HashGrids::HashGrid::hash( BodyID body ) const
       real_t i = y * inverseCellSpan_;
       yHash  = static_cast<size_t>( i ) & yHashMask_;
    }
-
+   
    if( z < 0 ) {
       real_t i = ( -z ) * inverseCellSpan_;
       zHash  = zCellCount_ - 1 - ( static_cast<size_t>( i ) & zHashMask_ );
@@ -360,11 +370,9 @@ size_t HashGrids::HashGrid::hash( BodyID body ) const
       real_t i = z * inverseCellSpan_;
       zHash  = static_cast<size_t>( i ) & zHashMask_;
    }
-
+   
    return xHash + yHash * xCellCount_ + zHash * xyCellCount_;
 }
-//*************************************************************************************************
-
 
 //*************************************************************************************************
 /*!\brief Adds a body to a specific cell in this hash grid.
@@ -384,7 +392,7 @@ void HashGrids::HashGrid::add( BodyID body, Cell* cell )
    // (i.e., allocated) and properly initialized (i.e., sufficient initial storage capacity must be
    // reserved). Furthermore, the cell must be inserted into the grid-global vector 'occupiedCells_'
    // in which all cells that are currently occupied by bodies are recorded.
-   if( cell->bodies_ == NULL )
+   if( cell->bodies_ == nullptr )
    {
       cell->bodies_ = new BodyVector;
       cell->bodies_->reserve( cellVectorSize );
@@ -428,7 +436,7 @@ void HashGrids::HashGrid::remove( BodyID body, Cell* cell )
 
       // ... the cell's body container is destroyed and ...
       delete cell->bodies_;
-      cell->bodies_ = NULL;
+      cell->bodies_ = nullptr;
       cell->lastNonFixedBody_ = -1;
 
       // ... the cell is removed from the grid-global vector 'occupiedCells_' that records all
@@ -534,7 +542,7 @@ void HashGrids::HashGrid::enlarge()
 
    // ... initialized, and finally ...
    for( Cell* c  = cell_; c < cell_ + xyzCellCount_; ++c ) {
-      c->bodies_ = NULL;
+      c->bodies_ = nullptr;
       c->lastNonFixedBody_ = -1;
    }
    initializeNeighborOffsets();
@@ -665,7 +673,7 @@ void HashGrids::add( BodyID body )
    // The body is marked as being added to 'bodiesToAdd_' by setting the grid pointer to NULL and
    // setting the cell-ID to '0'. Additionally, the hash value is used to memorize the body's
    // index position in the 'bodiesToAdd_' vector.
-   body->setGrid  ( NULL );
+   body->setGrid  ( nullptr );
    body->setHash  ( bodiesToAdd_.size() );
    body->setCellId( 0 );
 
@@ -692,7 +700,7 @@ void HashGrids::remove( BodyID body )
    HashGrid* grid = static_cast<HashGrid*>( body->getGrid() );
 
    // The body is stored in a hash grid from which it must be removed.
-   if( grid != NULL ) {
+   if( grid != nullptr ) {
       grid->remove( body );
    }
    // The body's grid pointer is equal to NULL.
@@ -756,15 +764,15 @@ void HashGrids::reloadBodies()
 {
    clear();
 
-   for (auto bodyIt = bodystorage_.begin(); bodyIt != bodystorage_.end(); ++bodyIt)
+   for (auto& body : bodystorage_)
    {
-      add( *bodyIt );
+      add( &body );
    }
    if( &bodystorage_ != &bodystorageShadowCopies_ )
    {
-      for (auto bodyIt = bodystorageShadowCopies_.begin(); bodyIt != bodystorageShadowCopies_.end(); ++bodyIt)
+      for (auto& body : bodystorageShadowCopies_)
       {
-         add( *bodyIt );
+         add( &body );
       }
    }
 }
@@ -778,7 +786,7 @@ void HashGrids::update(WcTimingTree* tt)
 {
    // ----- UPDATE PHASE ----- //
 
-   if (tt != NULL) tt->start("AddNewBodies");
+   if (tt != nullptr) tt->start("AddNewBodies");
    // Finally add all bodies that were temporarily stored in 'bodiesToAdd_' to the data structure.
    if( bodiesToAdd_.size() > 0 )
    {
@@ -789,9 +797,9 @@ void HashGrids::update(WcTimingTree* tt)
       }
       bodiesToAdd_.clear();
    }
-   if (tt != NULL) tt->stop("AddNewBodies");
+   if (tt != nullptr) tt->stop("AddNewBodies");
 
-   if (tt != NULL) tt->start("Update");
+   if (tt != nullptr) tt->start("Update");
    // Update the data structure (=> adapt to the current body distribution) by taking care of
    // moved, rotated and/or deformed bodies.
    if( gridActive_ )
@@ -864,52 +872,48 @@ void HashGrids::update(WcTimingTree* tt)
       //                        suitably sized cells (=> "addGrid()").
 
       {
-         const auto end( bodystorage_.end() );
-         for( auto bIt = bodystorage_.begin(); bIt != end; ++bIt )
+         for( auto& body : bodystorage_ )
          {
-            BodyID body = *bIt;
-            HashGrid* grid = static_cast<HashGrid*>( body->getGrid() );
+            HashGrid* grid = static_cast<HashGrid*>( body.getGrid() );
 
-            if( grid != NULL )
+            if( grid != nullptr )
             {
-               real_t size     = body->getAABBSize();
+               real_t size     = body.getAABBSize();
                real_t cellSpan = grid->getCellSpan();
 
                if( size >= cellSpan || size < ( cellSpan / hierarchyFactor ) ) {
-                  grid->remove( body );
-                  addGrid( body );
+                  grid->remove( &body );
+                  addGrid( &body );
                }
                else {
-                  grid->update( body );
+                  grid->update( &body );
                }
             }
          }
       }
 
       if( &bodystorage_ != &bodystorageShadowCopies_ ) {
-         const auto end( bodystorageShadowCopies_.end() );
-         for( auto bIt = bodystorageShadowCopies_.begin(); bIt != end; ++bIt )
+         for( auto& body : bodystorageShadowCopies_ )
          {
-            BodyID body = *bIt;
-            HashGrid* grid = static_cast<HashGrid*>( body->getGrid() );
+            HashGrid* grid = static_cast<HashGrid*>( body.getGrid() );
 
-            if( grid != NULL )
+            if( grid != nullptr )
             {
-               real_t size     = body->getAABBSize();
+               real_t size     = body.getAABBSize();
                real_t cellSpan = grid->getCellSpan();
 
                if( size >= cellSpan || size < ( cellSpan / hierarchyFactor ) ) {
-                  grid->remove( body );
-                  addGrid( body );
+                  grid->remove( &body );
+                  addGrid( &body );
                }
                else {
-                  grid->update( body );
+                  grid->update( &body );
                }
             }
          }
       }
    }
-   if (tt != NULL) tt->stop("Update");
+   if (tt != nullptr) tt->stop("Update");
 }
 
 //**Implementation of ICCD interface ********************************************************
@@ -923,7 +927,7 @@ void HashGrids::update(WcTimingTree* tt)
  */
 PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
 {
-   if (tt != NULL) tt->start("CCD");
+   if (tt != nullptr) tt->start("CCD");
 
    contacts_.clear();
 
@@ -931,7 +935,7 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
 
    update(tt);
 
-   if (tt != NULL) tt->start("Detection");
+   if (tt != nullptr) tt->start("Detection");
    // ----- DETECTION STEP ----- //
 
    // Contact generation by traversing through all hash grids (which are sorted in ascending order
@@ -939,7 +943,7 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
    for( auto gridIt = gridList_.begin(); gridIt != gridList_.end(); ++gridIt ) {
 
       // Contact generation for all bodies stored in the currently processed grid 'grid'.
-      BodyID* bodies     = NULL;
+      BodyID* bodies     = nullptr;
       size_t  bodyCount = (*gridIt)->process( &bodies, contacts_ );
 
       if( bodyCount > 0 ) {
@@ -958,7 +962,7 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
             }
             // Test all bodies stored in 'grid' against all bodies stored in 'globalStorage_'.
             for( auto bIt = globalStorage_.begin(); bIt < globalStorage_.end(); ++bIt ) {
-               collide( *a, *bIt, contacts_ );
+               collide( *a, &(*bIt), contacts_ );
             }
          }
       }
@@ -974,10 +978,10 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
 
       // Pairwise test (=> contact generation) for all bodies that are stored in 'nonGridBodies_' with global bodies.
       for( auto bIt = globalStorage_.begin(); bIt < globalStorage_.end(); ++bIt ) {
-         collide( *aIt, *bIt, contacts_ );
+         collide( *aIt, &(*bIt), contacts_ );
       }
    }
-   if (tt != NULL) tt->stop("Detection");
+   if (tt != nullptr) tt->stop("Detection");
 
    WALBERLA_LOG_DETAIL_SECTION()
    {
@@ -993,7 +997,7 @@ PossibleContacts& HashGrids::generatePossibleContacts( WcTimingTree* tt )
       WALBERLA_LOG_DETAIL( log.str() );
    }
 
-   if (tt != NULL) tt->stop("CCD");
+   if (tt != nullptr) tt->stop("CCD");
 
    return contacts_;
 }
@@ -1021,7 +1025,7 @@ void HashGrids::addGrid( BodyID body )
    // If the body is finite in size, it must be assigned to a grid with suitably sized cells.
    if( size > 0 )
    {
-      HashGrid* grid = NULL;
+      HashGrid* grid = nullptr;
 
       if( gridList_.empty() )
       {
@@ -1073,7 +1077,7 @@ void HashGrids::addGrid( BodyID body )
    // the grid pointer to NULL and setting the cell-ID to '1'. Additionally, the hash value is used
    // to memorize the body's index position in the 'nonGridBodies_' vector.
 
-   body->setGrid  ( NULL );
+   body->setGrid  ( nullptr );
    body->setHash  ( nonGridBodies_.size() );
    body->setCellId( 1 );
 
@@ -1138,7 +1142,7 @@ void HashGrids::addList( BodyID body )
    // setting the cell-ID to '1'. Additionally, the hash value is used to memorize the body's index
    // position in the 'nonGridBodies_' vector.
 
-   body->setGrid  ( NULL );
+   body->setGrid  ( nullptr );
    body->setHash  ( nonGridBodies_.size() );
    body->setCellId( 1 );
 
@@ -1172,6 +1176,8 @@ bool HashGrids::powerOfTwo( size_t number )
 //*************************************************************************************************
 
 
+uint64_t HashGrids::intersectionTestCount = 0; //ToDo remove again
+   
 //=================================================================================================
 //
 //  CONSTANTS

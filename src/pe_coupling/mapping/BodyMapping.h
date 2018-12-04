@@ -106,14 +106,14 @@ void mapBodies( StructuredBlockStorage & blockStorage, const BlockDataID & bound
 
       for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
-         if( mappingBodySelectorFct(*bodyIt))
-            mapBody<BoundaryHandling_T>( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle );
+         if( mappingBodySelectorFct(bodyIt.getBodyID()))
+            mapBody<BoundaryHandling_T>( bodyIt.getBodyID(), *blockIt, blockStorage, boundaryHandlingID, obstacle );
       }
 
       for( auto bodyIt = globalBodyStorage.begin(); bodyIt != globalBodyStorage.end(); ++bodyIt )
       {
-         if( mappingBodySelectorFct(*bodyIt))
-            mapBody< BoundaryHandling_T >( *bodyIt, *blockIt, blockStorage, boundaryHandlingID, obstacle );
+         if( mappingBodySelectorFct(bodyIt.getBodyID()))
+            mapBody< BoundaryHandling_T >( bodyIt.getBodyID(), *blockIt, blockStorage, boundaryHandlingID, obstacle );
       }
    }
 }

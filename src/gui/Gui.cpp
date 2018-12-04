@@ -158,7 +158,7 @@ DisplayAdaptor * GUI::findDisplayAdaptorForBlockID ( ConstBlockDataID bdId ) con
 }
 
 
-void GUI::registerPropertyTree( const shared_ptr<PropertyTree> propertyTree ) {
+void GUI::registerPropertyTree( const shared_ptr<PropertyTree>& propertyTree ) {
    pImpl->propertyTrees_.push_back( propertyTree );
 }
 
@@ -212,7 +212,7 @@ void GUI::breakpoint( const std::string & comment, const std::string & file, int
 namespace walberla {
 namespace gui {
 
-GUI * GUI::lastInstance_ = NULL;
+GUI * GUI::lastInstance_ = nullptr;
 
 GUI::GUI(timeloop::ITimeloop & timeloop, const shared_ptr<StructuredBlockForest> & blockForest, int& , char ** )
    :  timeloop_(timeloop),
@@ -220,13 +220,13 @@ GUI::GUI(timeloop::ITimeloop & timeloop, const shared_ptr<StructuredBlockForest>
 {
 }
 
-GUI::~GUI() {}
+GUI::~GUI() = default;
 
 void GUI::run() {
    timeloop_.run();
 }
 
-void GUI::registerPropertyTree( const shared_ptr<PropertyTree>  ) {}
+void GUI::registerPropertyTree( const shared_ptr<PropertyTree>&  ) {}
 
 const std::vector<shared_ptr<PropertyTree> > & GUI::getPropertyTrees() const  {
    throw( "Should not happen!" );

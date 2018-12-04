@@ -33,8 +33,7 @@ namespace pe{
  * \param uid The user-specific ID of the rigid body.
  */
 RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
-   : Node()
-   , awake_( true )           // Sleep mode flag
+   : awake_( true )           // Sleep mode flag
    , mass_( 0 )               // Total mass of the rigid body
    , invMass_( 0 )            // Inverse total mass of the rigid body
    , motion_(sleepThreshold)  // The current motion of the rigid body
@@ -48,7 +47,7 @@ RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
    , Iinv_( real_c(0) )       // Inverse moment of inertia
    , q_()                     // Orientation of the body frame
    , R_()                     // Rigid body rotation
-   , manager_(0)              // The rigid body manager responsible for the rigid body
+   , manager_(nullptr)              // The rigid body manager responsible for the rigid body
    , finite_ (true)           // Finiteness flag
    , visible_(true)           // Visibility flag
    , remote_ (false)          // Remote flag
@@ -57,7 +56,6 @@ RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
    , toBeDeleted_(false)      // deletion flag
    , sid_    (sid)            // System-specific body index
    , uid_    (uid)            // User-specific body ID
-   , contacts_()              // Vector of the currently attached contacts
    , typeID_(typeID)          // geometry type
 {
    sb_ = this;           // The superordinate rigid body
@@ -77,8 +75,7 @@ RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
 /*!\brief Destructor for the RigidBody class.
  */
 RigidBody::~RigidBody()
-{
-}
+= default;
 //*************************************************************************************************
 
 

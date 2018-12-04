@@ -27,6 +27,7 @@
 
 #include <boost/array.hpp>
 
+#include <memory>
 #include <vector>
 
 namespace walberla{
@@ -57,8 +58,6 @@ using math::AABB;
 //
 //=================================================================================================
 
-class Attachable;
-class BallJoint;
 class BodyManager;
 class BodyStorage;
 class Box;
@@ -67,21 +66,11 @@ class Contact;
 class Cylinder;
 class Ellipsoid;
 class CylindricalBoundary;
-class FixedJoint;
-class ForceGenerator;
 class GeomPrimitive;
-class Gravity;
-class HingeJoint;
-class Joint;
-class Link;
 class Material;
 class MPISystem;
-class Node;
 class Plane;
-class Process;
 class RigidBody;
-class Section;
-class SliderJoint;
 class Sphere;
 class Spring;
 class Squirmer;
@@ -92,6 +81,7 @@ class Union;
 typedef RigidBody             BodyType;            //!< Type of the rigid bodies.
 typedef RigidBody*            BodyID;              //!< Handle for a rigid body.
 typedef const RigidBody*      ConstBodyID;         //!< Handle for a constant rigid body.
+using   BodyPtr             = std::unique_ptr<RigidBody>;
 
 typedef GeomPrimitive*  GeomID;
 typedef const GeomPrimitive*  ConstGeomID;
@@ -99,79 +89,51 @@ typedef const GeomPrimitive*  ConstGeomID;
 typedef Box                   BoxType;             //!< Type of the box geometric primitive.
 typedef Box*                  BoxID;               //!< Handle for a box primitive.
 typedef const Box*            ConstBoxID;          //!< Handle for a constant box primitive.
+using   BoxPtr              = std::unique_ptr<Box>;
 
 typedef Capsule               CapsuleType;         //!< Type of the capsule geometric primitive.
 typedef Capsule*              CapsuleID;           //!< Handle for a capsule primitive.
 typedef const Capsule*        ConstCapsuleID;      //!< Handle for a constant capsule primitive.
+using   CapsulePtr          = std::unique_ptr<Capsule>;
 
 typedef Cylinder              CylinderType;        //!< Type of the cylinder geometric primitive.
 typedef Cylinder*             CylinderID;          //!< Handle for a cylinder primitive.
 typedef const Cylinder*       ConstCylinderID;     //!< Handle for a constant cylinder primitive.
+using   CylinderPtr         = std::unique_ptr<Cylinder>;
 
 typedef CylindricalBoundary        CylindricalBoundaryType;        //!< Type of the cylindrical boundary geometric primitive.
 typedef CylindricalBoundary*       CylindricalBoundaryID;          //!< Handle for a cylindrical boundary primitive.
 typedef const CylindricalBoundary* ConstCylindricalBoundaryID;     //!< Handle for a constant cylindrical boundary primitive.
+using   CylindricalBoundaryPtr   = std::unique_ptr<CylindricalBoundary>;
 
 typedef Ellipsoid             EllipsoidType;       //!< Type of the ellipsoid geometric primitive.
 typedef Ellipsoid*            EllipsoidID;         //!< Handle for a ellipsoid primitive.
 typedef const Ellipsoid*      ConstEllipsoidID;    //!< Handle for a constant ellipsoid primitive.
+using   EllipsoidPtr        = std::unique_ptr<Ellipsoid>;
 
 typedef Plane                 PlaneType;           //!< Type of the plane geometric primitive.
 typedef Plane*                PlaneID;             //!< Handle for a plane primitive.
 typedef const Plane*          ConstPlaneID;        //!< Handle for a constant plane primitive.
+using   PlanePtr            = std::unique_ptr<Plane>;
 
 typedef Sphere                SphereType;          //!< Type of the sphere geometric primitive.
 typedef Sphere*               SphereID;            //!< Handle for a sphere primitive.
 typedef const Sphere*         ConstSphereID;       //!< Handle for a constant sphere primitive.
+using   SpherePtr           = std::unique_ptr<Sphere>;
 
 typedef Squirmer              SquirmerType;        //!< Type of the squirmer geometric primitive.
 typedef Squirmer*             SquirmerID;          //!< Handle for a squirmer primitive.
 typedef const Squirmer*       ConstSquirmerID;     //!< Handle for a constant squirmer primitive.
+using   SquirmerPtr         = std::unique_ptr<Squirmer>;
 
 typedef TriangleMesh          MeshType;             //!< Type of the triangle mesh geometric primitive.
 typedef TriangleMesh*         MeshID;               //!< Handle for a triangle mesh primitive.
 typedef const TriangleMesh*   ConstMeshID;          //!< Handle for a constant triangle mesh primitive.
-
-typedef Attachable            AttachableType;      //!< Type of the attachables.
-typedef Attachable*           AttachableID;        //!< Handle for an attachable.
-typedef const Attachable*     ConstAttachableID;   //!< Handle for a constant attachable.
-
-typedef Gravity               GravityType;         //!< Type of the gravity force generators.
-typedef Gravity*              GravityID;           //!< Handle for a gravity force generator.
-typedef const Gravity*        ConstGravityID;      //!< Handle for a constant gravity force generator.
-
-typedef Spring                SpringType;          //!< Type of the spring force generators.
-typedef Spring*               SpringID;            //!< Handle for a spring force generator.
-typedef const Spring*         ConstSpringID;       //!< Handle for a constant spring force generator.
+using   TriangleMeshPtr     = std::unique_ptr<TriangleMesh>;
 
 typedef Contact               ContactType;         //!< Type of the contacts.
 typedef Contact*              ContactID;           //!< Handle for a contact.
 typedef const Contact*        ConstContactID;      //!< Handle for a constant contact.
-
-typedef Joint                 JointType;           //!< Type of the joints.
-typedef Joint*                JointID;             //!< Handle for a joint.
-typedef const Joint*          ConstJointID;        //!< Handle for a constant joint.
-
-typedef SliderJoint           SliderJointType;     //!< Type of the slider joint.
-typedef SliderJoint*          SldierJointID;       //!< Handle for a slider joint.
-typedef const SliderJoint*    ConstSliderJointID;  //!< Handle for a constant slider joint.
-
-typedef HingeJoint            HingeJointType;      //!< Type of the hinge joint.
-typedef HingeJoint*           HingeJointID;        //!< Handle for a hinge joint.
-typedef const HingeJoint*     ConstHingeJointID;   //!< Handle for a constant hinge joint.
-
-typedef BallJoint             BallJointType;       //!< Type of the ball joint.
-typedef BallJoint*            BallJointID;         //!< Handle for a ball joint.
-typedef const BallJoint*      ConstBallJointID;    //!< Handle for a constant ball joint.
-
-typedef Node                  NodeType;
-typedef Node*                 NodeID;       //!< Handle to a BodyTrait instance.
-typedef const Node*           ConstNodeID;  //!< Handle to a constant BodyTrait instance.
-
-typedef Process               ProcessType;         //!< Type of the remote processes.
-typedef Process*              ProcessID;           //!< Handle for a remote process.
-typedef const Process*        ConstProcessID;      //!< Handle for a constant remote process.
-
 
 typedef BodyManager*          ManagerID;           //!< Handle for a BodyManager.
 typedef const BodyManager*    ConstManagerID;      //!< Handle for a constant BodyManager.

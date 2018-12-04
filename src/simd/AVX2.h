@@ -25,7 +25,7 @@
 #include "immintrin.h"
 
 #include "waLBerlaDefinitions.h"
-
+#include "core/DataTypes.h"
 #include "IntelVecTypesCppOperators.h"
 
 

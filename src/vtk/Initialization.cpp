@@ -29,7 +29,8 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/bind.hpp>
+
+#include <functional>
 
 
 namespace walberla {
@@ -43,7 +44,7 @@ static void splitVector( T& x, T& y, T& z, const Config::BlockHandle& bb, const 
    std::vector< std::string > coordinates;
    std::string vector = bb.getParameter< std::string >( vertex );
    boost::split( coordinates, vector, boost::is_any_of("<,> \t") );
-   coordinates.erase( std::remove_if( coordinates.begin(), coordinates.end(), boost::bind( &std::string::empty, _1 ) ), coordinates.end() );
+   coordinates.erase( std::remove_if( coordinates.begin(), coordinates.end(), std::bind( &std::string::empty,  std::placeholders::_1 ) ), coordinates.end() );
 
    if( coordinates.size() != 3 )
       WALBERLA_ABORT( errorMsg );
@@ -60,7 +61,7 @@ static std::vector< std::string > splitList( const std::string& string )
    std::vector< std::string > list;
 
    boost::split( list, string, boost::is_any_of(", \t") );
-   list.erase( std::remove_if( list.begin(), list.end(), boost::bind( &std::string::empty, _1 ) ), list.end() );
+   list.erase( std::remove_if( list.begin(), list.end(), std::bind( &std::string::empty,  std::placeholders::_1 ) ), list.end() );
 
    return list;
 }
@@ -71,7 +72,7 @@ static void addStates( Set<SUID>& set, const std::string& string )
 {
    std::vector< std::string > states;
    boost::split( states, string, boost::is_any_of(", \t") );
-   states.erase( std::remove_if( states.begin(), states.end(), boost::bind( &std::string::empty, _1 ) ), states.end() );
+   states.erase( std::remove_if( states.begin(), states.end(), std::bind( &std::string::empty,  std::placeholders::_1 ) ), states.end() );
 
    for( auto it = states.begin(); it != states.end(); ++it )
       set += SUID( *it );
@@ -294,7 +295,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
       {
          for( auto inclusionFilterId = inclusionFiltersBlock.begin(); inclusionFilterId != inclusionFiltersBlock.end(); ++inclusionFilterId )
          {
-            if( inclusionFilterId->first.compare( "combine" ) == 0 )
+            if( inclusionFilterId->first == "combine" )
             {
                std::vector< std::string > filterList = splitList( inclusionFilterId->second );
                ChainedFilter combine;
@@ -322,7 +323,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
       {
          for( auto exclusionFilterId = exclusionFiltersBlock.begin(); exclusionFilterId != exclusionFiltersBlock.end(); ++exclusionFilterId )
          {
-            if( exclusionFilterId->first.compare( "combine" ) == 0 )
+            if( exclusionFilterId->first == "combine" )
             {
                std::vector< std::string > filterList = splitList( exclusionFilterId->second );
                ChainedFilter combine;
@@ -564,7 +565,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
 *   \param configBlockName           Name of the block in the configuration that is used to setup the VTK output
 */
 //**********************************************************************************************************************
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, RegisterVTKOutputFunction registerVTKOutputFunction,
+void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, const RegisterVTKOutputFunction& registerVTKOutputFunction,
                           const shared_ptr< const StructuredBlockStorage > & storage, const shared_ptr< Config > & config,
                           const std::string & configBlockName )
 {
@@ -574,7 +575,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
 
 
 
-void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, RegisterVTKOutputFunction registerVTKOutputFunction,
+void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, const RegisterVTKOutputFunction& registerVTKOutputFunction,
                           const shared_ptr< const StructuredBlockStorage > & storage, const Config::BlockHandle & parentBlockHandle,
                           const std::string & configBlockName )
 {

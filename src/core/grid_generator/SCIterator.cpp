@@ -30,7 +30,7 @@
 namespace walberla {
 namespace grid_generator {
 
-SCIterator::SCIterator(const AABB& domain, const Vector3<real_t>& pointOfReference, const real_t spacing)
+SCIterator::SCIterator(const AABB& domain, const Vector3<real_t>& pointOfReference, const real_t& spacing)
    : i_(0)
    , j_(0)
    , k_(0)
@@ -64,7 +64,7 @@ SCIterator::SCIterator(const AABB& domain, const Vector3<real_t>& pointOfReferen
    auto min = domain.min() - pointOfReference_;
    iReturn_ = int_c( ceil( min[0] / spacing[0] ) );
    i_ = iReturn_;
-   jReturn_ = int_c(ceil( min[1] / spacing[1] ) + real_c(0.1));
+   jReturn_ = int_c(ceil( min[1] / spacing[1] ));
    j_ = jReturn_;
    k_ = int_c (ceil( min[2] / spacing[2] ));
 

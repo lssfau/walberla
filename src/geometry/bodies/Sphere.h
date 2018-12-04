@@ -48,7 +48,7 @@ namespace geometry {
    public:
 
       explicit Sphere( const Vector3<real_t> & midp, real_t rad );
-      Sphere( const Sphere & o );
+      Sphere( const Sphere & o ) = default;
 
       void setMidpoint( const Vector3<real_t> & point ) { midpoint_ = point;         updateBoxes(); }
       void setMidpoint( real_t newVal, uint_t coord )   { midpoint_[coord] = newVal; updateBoxes(); }
@@ -76,7 +76,7 @@ namespace geometry {
 
    // Body concept
    template<> FastOverlapResult fastOverlapCheck ( const Sphere & sphere, const AABB & box );
-   template<> FastOverlapResult fastOverlapCheck ( const Sphere & sphere, const Vector3<real_t> & cellMidpoint, real_t dx );
+   template<> FastOverlapResult fastOverlapCheck ( const Sphere & sphere, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx );
    template<> bool contains ( const Sphere & sphere, const Vector3<real_t> & point );
 
 

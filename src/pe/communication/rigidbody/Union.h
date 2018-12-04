@@ -72,12 +72,12 @@ void marshal( mpi::SendBuffer& buffer, const Union<BodyTypeTuple>& obj )
    buffer << static_cast<size_t> (obj.size());                  // Encoding the number of contained bodies
 
    // Encoding the contained primitives
-   const typename Union<BodyTypeTuple>::ConstIterator begin( obj.begin() );
-   const typename Union<BodyTypeTuple>::ConstIterator end  ( obj.end()   );
-   for(  typename Union<BodyTypeTuple>::ConstIterator body=begin; body!=end; ++body )
+   const typename Union<BodyTypeTuple>::const_iterator begin( obj.begin() );
+   const typename Union<BodyTypeTuple>::const_iterator end  ( obj.end()   );
+   for(  typename Union<BodyTypeTuple>::const_iterator body=begin; body!=end; ++body )
    {
       buffer << body->getTypeID();
-      MarshalDynamically<BodyTypeTuple>::execute( buffer, **body );
+      MarshalDynamically<BodyTypeTuple>::execute( buffer, *body );
    }
 }
 
@@ -110,34 +110,35 @@ void unmarshal( mpi::RecvBuffer& buffer, UnionParameters& objparam )
 
 
 template <typename BodyTypeTuple>
-inline Union<BodyTypeTuple>* instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, Union<BodyTypeTuple>*& newBody )
+inline std::unique_ptr<Union<BodyTypeTuple>> instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, Union<BodyTypeTuple>*& newBody )
 {
    UnionParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   newBody = new Union<BodyTypeTuple>( subobjparam.sid_,
-                                       subobjparam.uid_,
-                                       subobjparam.gpos_,
-                                       subobjparam.rpos_,
-                                       subobjparam.q_,
-                                       false,
-                                       subobjparam.communicating_,
-                                       subobjparam.infiniteMass_ );
-   newBody->setLinearVel( subobjparam.v_ );
-   newBody->setAngularVel( subobjparam.w_ );
-   newBody->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
+   auto un = std::make_unique<Union<BodyTypeTuple>>( subobjparam.sid_,
+                                                     subobjparam.uid_,
+                                                     subobjparam.gpos_,
+                                                     subobjparam.rpos_,
+                                                     subobjparam.q_,
+                                                     false,
+                                                     subobjparam.communicating_,
+                                                     subobjparam.infiniteMass_ );
+
+   un->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );
 
    // Decoding the contained primitives
    for( size_t i = 0; i < subobjparam.size_; ++i )
    {
       decltype ( static_cast<BodyID>(nullptr)->getTypeID() ) type;
       buffer >> type;
-      BodyID obj = UnmarshalDynamically<BodyTypeTuple>::execute(buffer, type, domain, block);
+      BodyPtr obj( UnmarshalDynamically<BodyTypeTuple>::execute(buffer, type, domain, block) );
       obj->setRemote( true );
-      newBody->add(obj);
+      un->add(std::move(obj));
    }
-
-   return newBody;
+   un->setLinearVel( subobjparam.v_ );
+   un->setAngularVel( subobjparam.w_ );
+   newBody = un.get();
+   return un;
 }
 
 }  // namespace communication

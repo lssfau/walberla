@@ -45,7 +45,7 @@ VTKOutput::VTKOutput( const BlockStorage & bs, const std::string & identifier, c
                       const uint_t initialExecutionCount ) :
 
    unstructuredBlockStorage_( &bs ),
-   blockStorage_( NULL ),
+   blockStorage_( nullptr ),
    baseFolder_( baseFolder ), executionFolder_( executionFolder ),
    executionCounter_(initialExecutionCount), initialWriteCallsToSkip_(0), writeFrequency_( writeFrequency ), continuousNumbering_( continuousNumbering ),
    pvdEnd_(-2), binary_( binary ), format_( binary ? std::string("binary") : std::string("ascii") ),
@@ -81,12 +81,12 @@ VTKOutput::VTKOutput( const StructuredBlockStorage & sbs, const std::string & id
 
 
 
-VTKOutput::VTKOutput( const shared_ptr< PointDataSource > pds, const std::string & identifier, const uint_t writeFrequency,
+VTKOutput::VTKOutput( const shared_ptr< PointDataSource >& pds, const std::string & identifier, const uint_t writeFrequency,
                       const std::string & baseFolder, const std::string & executionFolder,
                       const bool continuousNumbering, const bool binary, const bool littleEndian, const bool useMPIIO,
                       const uint_t initialExecutionCount ) :
 
-   unstructuredBlockStorage_(NULL), blockStorage_( NULL ), pointDataSource_( pds ),
+   unstructuredBlockStorage_(nullptr), blockStorage_( nullptr ), pointDataSource_( pds ),
    baseFolder_( baseFolder ), executionFolder_( executionFolder ),
    executionCounter_(initialExecutionCount), initialWriteCallsToSkip_(0), writeFrequency_( writeFrequency ), continuousNumbering_( continuousNumbering ),
    pvdEnd_(-2), binary_( binary ), format_( binary ? std::string("binary") : std::string("ascii") ),
@@ -102,12 +102,12 @@ VTKOutput::VTKOutput( const shared_ptr< PointDataSource > pds, const std::string
 
 
 
-VTKOutput::VTKOutput( const shared_ptr< PolylineDataSource > pds, const std::string & identifier, const uint_t writeFrequency,
+VTKOutput::VTKOutput( const shared_ptr< PolylineDataSource >& pds, const std::string & identifier, const uint_t writeFrequency,
                       const std::string & baseFolder, const std::string & executionFolder,
                       const bool continuousNumbering, const bool binary, const bool littleEndian, const bool useMPIIO,
                       const uint_t initialExecutionCount ) :
 
-   unstructuredBlockStorage_(NULL), blockStorage_( NULL ), polylineDataSource_( pds ),
+   unstructuredBlockStorage_(nullptr), blockStorage_( nullptr ), polylineDataSource_( pds ),
    baseFolder_( baseFolder ), executionFolder_( executionFolder ),
    executionCounter_(initialExecutionCount), initialWriteCallsToSkip_(0), writeFrequency_( writeFrequency ), continuousNumbering_( continuousNumbering ),
    pvdEnd_(-2), binary_( binary ), format_( binary ? std::string("binary") : std::string("ascii") ),
@@ -1240,9 +1240,9 @@ void VTKOutput::writeVTUPiece( std::ostream& ofs, const IBlock& block, const Cel
                {
                   vimap[v] = numeric_cast< Index >(vc.size());
                   ci.push_back(numeric_cast< Index >(vc.size()));
-                  vc.push_back(VertexCoord((x == 0) ? aabb.xMin() : aabb.xMax(),
+                  vc.emplace_back((x == 0) ? aabb.xMin() : aabb.xMax(),
                      (y == 0) ? aabb.yMin() : aabb.yMax(),
-                     (z == 0) ? aabb.zMin() : aabb.zMax()));
+                     (z == 0) ? aabb.zMin() : aabb.zMax());
                }
             }
          }
@@ -1329,9 +1329,9 @@ void VTKOutput::writeVTUPiece_sampling(std::ostream& ofs, const IBlock& block, c
                {
                   vimap[v] = numeric_cast< Index >(vc.size());
                   ci.push_back(numeric_cast< Index >(vc.size()));
-                  vc.push_back(VertexCoord((x == 0) ? cell->aabb_.xMin() : cell->aabb_.xMax(),
+                  vc.emplace_back((x == 0) ? cell->aabb_.xMin() : cell->aabb_.xMax(),
                      (y == 0) ? cell->aabb_.yMin() : cell->aabb_.yMax(),
-                     (z == 0) ? cell->aabb_.zMin() : cell->aabb_.zMax()));
+                     (z == 0) ? cell->aabb_.zMin() : cell->aabb_.zMax());
                }
             }
          }

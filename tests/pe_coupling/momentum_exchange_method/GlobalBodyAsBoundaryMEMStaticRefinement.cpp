@@ -21,6 +21,8 @@
 
 #include "blockforest/Initialization.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
+#include <blockforest/loadbalancing/StaticCurve.h>
+#include <blockforest/SetupBlockForest.h>
 
 #include "boundary/all.h"
 
@@ -60,6 +62,8 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
+#include <functional>
+
 namespace global_body_as_boundary_mem_static_refinement
 {
 
@@ -76,11 +80,11 @@ using walberla::uint_t;
 
 // PDF field, flag field & body field
 typedef lbm::D3Q19< lbm::collision_model::TRT, false >  LatticeModel_T;
-typedef LatticeModel_T::Stencil          Stencil_T;
-typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 const uint_t FieldGhostLayers = 4;
@@ -88,10 +92,10 @@ const uint_t FieldGhostLayers = 4;
 // boundary handling
 typedef pe_coupling::SimpleBB< LatticeModel_T, FlagField_T > MO_SBB_T;
 
-typedef boost::tuples::tuple< MO_SBB_T > BoundaryConditions_T;
+using BoundaryConditions_T = boost::tuples::tuple<MO_SBB_T>;
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
-typedef boost::tuple< pe::Plane > BodyTypeTuple;
+using BodyTypeTuple = boost::tuple<pe::Plane>;
 
 ///////////
 // FLAGS //
@@ -163,7 +167,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & do
 
    WALBERLA_LOG_INFO_ON_ROOT(" - refinement box: " << refinementBox);
 
-   sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, numberOfLevels, refinementBox ) );
+   sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, numberOfLevels, refinementBox ) );
    sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
    sforest.init( domainAABB, numberOfCoarseBlocksPerDirection[0], numberOfCoarseBlocksPerDirection[1], numberOfCoarseBlocksPerDirection[2], false, false, false );
@@ -377,7 +381,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf, FieldGhostLayers );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf, FieldGhostLayers );
 
    // add boundary handling
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >( MyBoundaryHandling( flagFieldID, pdfFieldID, bodyFieldID ), "boundary handling" );

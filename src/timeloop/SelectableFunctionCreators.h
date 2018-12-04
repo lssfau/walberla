@@ -25,7 +25,6 @@
 #include "core/uid/SUID.h"
 #include "domain_decomposition/BlockStorage.h"
 
-#include <boost/bind.hpp>
 #include <functional>
 #include <string>
 
@@ -177,7 +176,7 @@ namespace timeloop {
          BlockDataID bdId = bs_.addBlockData() << bdCreator;
 
          // add a sweep function that fetches the block data sweep and executes it
-         auto sweepFunc = boost::bind ( executeSweepOnBlock<SweepClass>, _1, bdId );
+         auto sweepFunc = std::bind ( executeSweepOnBlock<SweepClass>,  std::placeholders::_1, bdId );
          ( *this ) << Sweep ( sweepFunc, sw.identifier_, sw.requiredSelectors_, sw.incompatibleSelectors_  );
 
          return *this;

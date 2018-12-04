@@ -59,7 +59,7 @@ namespace geometry {
       *  \param radii       the length of the semi axes
       *****************************************************************************************************************/
       explicit Ellipsoid( const Vector3<real_t> & midpoint,
-               Vector3<real_t> axis1, Vector3<real_t> axis2, Vector3<real_t> radii );
+               Vector3<real_t> axis1, Vector3<real_t> axis2, const Vector3<real_t>& radii );
 
 
       const AABB & boundingBox() const { return boundingBox_; }
@@ -91,7 +91,7 @@ namespace geometry {
 
    // Body concept
    template<> FastOverlapResult fastOverlapCheck ( const Ellipsoid & e, const AABB & box );
-   template<> FastOverlapResult fastOverlapCheck ( const Ellipsoid & e, const Vector3<real_t> & cellMidpoint, real_t dx );
+   template<> FastOverlapResult fastOverlapCheck ( const Ellipsoid & e, const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx );
    template<> bool contains ( const Ellipsoid & ellipsoid, const Vector3<real_t> & point );
 
 

@@ -24,6 +24,7 @@
 
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/rigidbody/Sphere.h"
+#include "pe/rigidbody/Squirmer.h"
 
 namespace walberla {
 namespace pe_coupling {
@@ -32,7 +33,7 @@ namespace pe_coupling {
 // calculates sphere-equivalent diameter (diameter of a sphere with same volume as given body)
 real_t getSphereEquivalentDiameter( pe::RigidBody & body )
 {
-   if( body.getTypeID() == pe::Sphere::getStaticTypeID() )
+   if( body.getTypeID() == pe::Sphere::getStaticTypeID() || body.getTypeID() == pe::Squirmer::getStaticTypeID() )
    {
       pe::Sphere & sphere = static_cast<pe::Sphere &>( body );
       real_t radius = sphere.getRadius();

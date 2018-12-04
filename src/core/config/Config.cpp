@@ -64,7 +64,7 @@ Config::Config()
 // \brief Destructor for the Config class.
  */
 Config::~Config()
-{}
+= default;
 //**********************************************************************************************************************
 
 
@@ -273,7 +273,7 @@ void Config::parseFromFile( const char* filename, Block& block, unsigned int lev
       {
          input.ignore( 1 );
          while( (value.find("$(") != value.npos) && (value.find(')') != value.npos) ) {
-            size_t s = value.find("$("); size_t e = value.find(")");
+            size_t s = value.find("$("); size_t e = value.find(')');
             ValueReplacementMap::iterator mkey = valueReplacements_.find( value.substr( s+2, e-s+1-3 ) );
             if(mkey != valueReplacements_.end()) {
                value.replace( s,e-s+1, mkey->second );
@@ -315,7 +315,7 @@ void Config::parseFromString( const std::string & str, Block& block, unsigned in
    while (!input.empty()) {
       std::string::size_type f=input.find_first_of(" {");
       if (input[f]==' ') {
-         std::string::size_type posSemicolon = input.substr(f+1).find(";");
+         std::string::size_type posSemicolon = input.substr(f+1).find(';');
          block.addParameter(input.substr(0,f),input.substr(f+1,posSemicolon));
          input = input.substr(f+1+posSemicolon+1);
       } else {
@@ -406,7 +406,7 @@ void Config::extractBlock( const char* filename, std::stringstream& input, Block
       {
          input.ignore( 1 );
          while( (value.find("$(") != value.npos) && (value.find(')') != value.npos) ) {
-            size_t s = value.find("$("); size_t e = value.find(")");
+            size_t s = value.find("$("); size_t e = value.find(')');
             ValueReplacementMap::iterator mkey = valueReplacements_.find( value.substr( s+2, e-s+1-3 ) );
             if(mkey != valueReplacements_.end()) {
                value.replace( s,e-s+1, mkey->second );
@@ -474,16 +474,6 @@ Config::Block::Block( const std::string& key )
 
 
 //**********************************************************************************************************************
-/*!\fn Config::Block::Block( const Block& b )
-// \brief The copy constructor for the Block class.
- */
-Config::Block::Block( const Block& b )
-   :key_(b.key_),blocks_(b.blocks_),params_(b.params_)
-{}
-//**********************************************************************************************************************
-
-
-//**********************************************************************************************************************
 /*!\fn Config::Block& Config::Block::operator=( const Block& b )
 // \brief The copy assignment operator for the Block class.
 //
@@ -508,7 +498,7 @@ Config::Block& Config::Block::operator=( const Block& b )
 // \brief Default destructor of the Block class.
  */
 Config::Block::~Block()
-{}
+= default;
 //**********************************************************************************************************************
 
 
@@ -682,7 +672,7 @@ bool Config::Block::addParameter( std::string key, const std::string& value )
 // \param key The key of the new block.
 // \return Reference to the new block.
  */
-Config::Block& Config::Block::createBlock( std::string key )
+Config::Block& Config::Block::createBlock( const std::string& key )
 {
    blocks_.push_back( Block( key ) );
    return *blocks_.rbegin();

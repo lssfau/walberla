@@ -95,7 +95,7 @@ private:
 
 public:
    //**Constructors*****************************************************************************************************
-   explicit inline Matrix3();
+   explicit inline Matrix3() = default;
    explicit inline Matrix3( Type init );
    explicit inline Matrix3( const Vector3<Type>& a, const Vector3<Type>& b, const Vector3<Type>& c );
    explicit inline Matrix3( Type xx, Type xy, Type xz, Type yx, Type yy, Type yz, Type zx, Type zy, Type zz );
@@ -104,7 +104,7 @@ public:
    template< typename Axis, typename Angle >
    explicit Matrix3( Vector3<Axis> axis, Angle angle );
 
-   inline Matrix3( const Matrix3& m );
+   inline Matrix3( const Matrix3& m ) = default;
 
    template< typename Other >
    inline Matrix3( const Matrix3<Other>& m );
@@ -122,7 +122,7 @@ public:
    /*!\name Operators */
    //@{
                               inline Matrix3&    operator= ( Type set );
-                              inline Matrix3&    operator= ( const Matrix3& set );
+                              inline Matrix3&    operator= ( const Matrix3& set ) = default;
    template< typename Other > inline Matrix3&    operator= ( const Matrix3<Other>& set );
    template< typename Other > inline bool        operator==( const Matrix3<Other>& rhs )   const;
    template< typename Other > inline bool        operator!=( const Matrix3<Other>& rhs )   const;
@@ -236,17 +236,23 @@ private:
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{
-   Type v_[9];  //!< The nine statically allocated matrix elements.
-                /*!< Access to the matrix elements is gained via the subscript or function call
-                     operator. The order of the elements is
-                     \f[\left(\begin{array}{*{3}{c}}
-                     0 & 1 & 2 \\
-                     3 & 4 & 5 \\
-                     6 & 7 & 8 \\
-                     \end{array}\right)\f] */
+   /**
+    * The nine statically allocated matrix elements.
+    * Access to the matrix elements is gained via the subscript or function call
+    * operator. The order of the elements is
+    * \f[\left(\begin{array}{*{3}{c}}
+    * 0 & 1 & 2 \\
+    * 3 & 4 & 5 \\
+    * 6 & 7 & 8 \\
+    * \end{array}\right)\f]
+   **/
+   Type v_[9] = {Type(1), Type(0), Type(0),
+                 Type(0), Type(1), Type(0),
+                 Type(0), Type(0), Type(1)};
    //@}
    //*******************************************************************************************************************
 };
+static_assert( std::is_trivially_copyable<Matrix3<real_t>>::value, "Matrix3<real_t> has to be trivially copyable!");
 //**********************************************************************************************************************
 
 
@@ -257,21 +263,6 @@ private:
 //  CONSTRUCTORS
 //
 //======================================================================================================================
-
-//**********************************************************************************************************************
-/*!\fn Matrix3<Type>::Matrix3()
-// \brief The default constructor for Matrix3.
-//
-// The diagonal matrix elements are initialized with 1, all other elements are initialized
-// with 0.
-*/
-template< typename Type >
-inline Matrix3<Type>::Matrix3()
-{
-   v_[0] = v_[4] = v_[8] = Type(1);
-   v_[1] = v_[2] = v_[3] = v_[5] = v_[6] = v_[7] = Type(0);
-}
-//**********************************************************************************************************************
 
 
 //**********************************************************************************************************************
@@ -393,30 +384,6 @@ Matrix3<Type>::Matrix3( Vector3<Axis> axis, Angle angle )
 
 
 //**********************************************************************************************************************
-/*!\fn Matrix3<Type>::Matrix3( const Matrix3& m )
-// \brief The copy constructor for Matrix3.
-//
-// \param m Matrix to be copied.
-//
-// The copy constructor is explicitly defined in order to enable/facilitate NRV optimization.
-*/
-template< typename Type >
-inline Matrix3<Type>::Matrix3( const Matrix3& m )
-{
-   v_[0] = m.v_[0];
-   v_[1] = m.v_[1];
-   v_[2] = m.v_[2];
-   v_[3] = m.v_[3];
-   v_[4] = m.v_[4];
-   v_[5] = m.v_[5];
-   v_[6] = m.v_[6];
-   v_[7] = m.v_[7];
-   v_[8] = m.v_[8];
-}
-//**********************************************************************************************************************
-
-
-//**********************************************************************************************************************
 /*!\fn Matrix3<Type>::Matrix3( const Matrix3<Other>& m )
 // \brief Conversion constructor from different Matrix3 instances.
 //
@@ -509,36 +476,6 @@ inline Matrix3<Type>& Matrix3<Type>::operator=( Type set )
    v_[6] = set;
    v_[7] = set;
    v_[8] = set;
-   return *this;
-}
-//**********************************************************************************************************************
-
-
-//**********************************************************************************************************************
-/*!\fn Matrix3<Type>& Matrix3<Type>::operator=( const Matrix3& set )
-// \brief Copy assignment operator for Matrix3.
-//
-// \param set Matrix to be copied.
-// \return Reference to the assigned matrix.
-//
-// Explicit definition of a copy assignment operator for performance reasons.
-*/
-template< typename Type >
-inline Matrix3<Type>& Matrix3<Type>::operator=( const Matrix3& set )
-{
-   // This implementation is faster than the synthesized default copy assignment operator and
-   // faster than an implementation with the C library function 'memcpy' in combination with a
-   // protection against self-assignment. Additionally, this version goes without a protection
-   // against self-assignment.
-   v_[0] = set.v_[0];
-   v_[1] = set.v_[1];
-   v_[2] = set.v_[2];
-   v_[3] = set.v_[3];
-   v_[4] = set.v_[4];
-   v_[5] = set.v_[5];
-   v_[6] = set.v_[6];
-   v_[7] = set.v_[7];
-   v_[8] = set.v_[8];
    return *this;
 }
 //**********************************************************************************************************************
@@ -1740,8 +1677,24 @@ Matrix3< typename MathTrait<T0,T1>::High > tensorProduct( Vector3<T0> v0, Vector
 }
 //**********************************************************************************************************************
 
+/**
+ * Equivalent to R*A*R.getTranspose().
+ */
+template< typename Type>
+inline Matrix3< Type > transformMatrixRART( const Matrix3<Type>& R, const Matrix3<Type>& A )
+{
+   const auto r0 = A[0]*R[0]*R[0] + A[1]*R[0]*R[1] + A[2]*R[0]*R[2] + A[3]*R[0]*R[1] + A[4]*R[1]*R[1] + A[5]*R[1]*R[2] + A[6]*R[0]*R[2] + A[7]*R[1]*R[2] + A[8]*R[2]*R[2];
+   const auto r1 = A[0]*R[0]*R[3] + A[1]*R[0]*R[4] + A[2]*R[0]*R[5] + A[3]*R[1]*R[3] + A[4]*R[1]*R[4] + A[5]*R[1]*R[5] + A[6]*R[2]*R[3] + A[7]*R[2]*R[4] + A[8]*R[2]*R[5];
+   const auto r2 = A[0]*R[0]*R[6] + A[1]*R[0]*R[7] + A[2]*R[0]*R[8] + A[3]*R[1]*R[6] + A[4]*R[1]*R[7] + A[5]*R[1]*R[8] + A[6]*R[2]*R[6] + A[7]*R[2]*R[7] + A[8]*R[2]*R[8];
+   const auto r3 = A[0]*R[0]*R[3] + A[1]*R[1]*R[3] + A[2]*R[2]*R[3] + A[3]*R[0]*R[4] + A[4]*R[1]*R[4] + A[5]*R[2]*R[4] + A[6]*R[0]*R[5] + A[7]*R[1]*R[5] + A[8]*R[2]*R[5];
+   const auto r4 = A[0]*R[3]*R[3] + A[1]*R[3]*R[4] + A[2]*R[3]*R[5] + A[3]*R[3]*R[4] + A[4]*R[4]*R[4] + A[5]*R[4]*R[5] + A[6]*R[3]*R[5] + A[7]*R[4]*R[5] + A[8]*R[5]*R[5];
+   const auto r5 = A[0]*R[3]*R[6] + A[1]*R[3]*R[7] + A[2]*R[3]*R[8] + A[3]*R[4]*R[6] + A[4]*R[4]*R[7] + A[5]*R[4]*R[8] + A[6]*R[5]*R[6] + A[7]*R[5]*R[7] + A[8]*R[5]*R[8];
+   const auto r6 = A[0]*R[0]*R[6] + A[1]*R[1]*R[6] + A[2]*R[2]*R[6] + A[3]*R[0]*R[7] + A[4]*R[1]*R[7] + A[5]*R[2]*R[7] + A[6]*R[0]*R[8] + A[7]*R[1]*R[8] + A[8]*R[2]*R[8];
+   const auto r7 = A[0]*R[3]*R[6] + A[1]*R[4]*R[6] + A[2]*R[5]*R[6] + A[3]*R[3]*R[7] + A[4]*R[4]*R[7] + A[5]*R[5]*R[7] + A[6]*R[3]*R[8] + A[7]*R[4]*R[8] + A[8]*R[5]*R[8];
+   const auto r8 = A[0]*R[6]*R[6] + A[1]*R[6]*R[7] + A[2]*R[6]*R[8] + A[3]*R[6]*R[7] + A[4]*R[7]*R[7] + A[5]*R[7]*R[8] + A[6]*R[6]*R[8] + A[7]*R[7]*R[8] + A[8]*R[8]*R[8];
 
-
+   return Matrix3<Type>(r0,r1,r2,r3,r4,r5,r6,r7,r8);
+}
 
 } // namespace math
 
@@ -1839,3 +1792,30 @@ namespace mpi {
       };
 }
 }
+
+//======================================================================================================================
+//
+//  MPI Datatype
+//
+//======================================================================================================================
+
+namespace walberla {
+
+   template< typename T>
+   struct MPITrait< Matrix3<T> >
+   {
+      static inline MPI_Datatype type()
+      {
+         // cannot use mpi::Datatype here because its destructor calls MPI_Type_free and static variables are destroyed after the MPI_Finalize
+         static MPI_Datatype datatype;
+         static bool initialized = false;
+
+         if( ! initialized ) {
+            MPI_Type_contiguous(9, MPITrait<T>::type(), &datatype );
+            MPI_Type_commit( &datatype );
+            initialized = true;
+         }
+         return datatype;
+      }
+   };
+} // namespace walberla

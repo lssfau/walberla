@@ -90,45 +90,62 @@ void referencePointTest()
    WALBERLA_CHECK_EQUAL( higherIt, endIt);
 }
 
+template <class Grid>
+void rangeBasedTest()
+{
+   math::AABB domain(0,0,0,10,10,10);
+   real_t spacing = real_c(1);
+   auto dx = Vector3<real_t>( Grid::iterator::getUnitCellX(spacing), Grid::iterator::getUnitCellY(spacing), Grid::iterator::getUnitCellZ(spacing) );
+   auto lowerIt  = typename Grid::iterator(domain, Vector3<real_t>(5,5,5) - dx * 30, spacing);
+   auto endIt = typename Grid::iterator();
+   for ( const auto& pt : Grid(domain, Vector3<real_t>(5,5,5) - dx * 30, spacing) )
+   {
+      WALBERLA_CHECK( lowerIt != endIt );
+      WALBERLA_CHECK_FLOAT_EQUAL( *lowerIt, pt);
+      ++lowerIt;
+   }
+   WALBERLA_CHECK( lowerIt == endIt );
+}
+
 int main( int argc, char** argv )
 {
    walberla::Environment env(argc, argv);
    WALBERLA_UNUSED(env);
 
    std::vector< Vector3<real_t> > points;
-   points.push_back( Vector3<real_t>(0,0,0) );
-   points.push_back( Vector3<real_t>(1,0,0) );
-   points.push_back( Vector3<real_t>(0,1,0) );
-   points.push_back( Vector3<real_t>(1,1,0) );
-   points.push_back( Vector3<real_t>(0,0,1) );
-   points.push_back( Vector3<real_t>(1,0,1) );
-   points.push_back( Vector3<real_t>(0,1,1) );
-   points.push_back( Vector3<real_t>(1,1,1) );
+   points.emplace_back( real_t(0), real_t(0), real_t(0) );
+   points.emplace_back( real_t(1), real_t(0), real_t(0) );
+   points.emplace_back( real_t(0), real_t(1), real_t(0) );
+   points.emplace_back( real_t(1), real_t(1), real_t(0) );
+   points.emplace_back( real_t(0), real_t(0), real_t(1) );
+   points.emplace_back( real_t(1), real_t(0), real_t(1) );
+   points.emplace_back( real_t(0), real_t(1), real_t(1) );
+   points.emplace_back( real_t(1), real_t(1), real_t(1) );
    auto correctPointIt = points.begin();
    for (auto it = SCIterator(AABB(real_c(-0.01), real_c(-0.01), real_c(-0.01), real_c(1.9),real_c(1.9),real_c(1.9)), Vector3<real_t>(0,0,0), 1); it != SCIterator(); ++it, ++correctPointIt)
       WALBERLA_CHECK_FLOAT_EQUAL( *it, *correctPointIt, (*it) << "!=" << (*correctPointIt) );
 
    points.clear();
-   points.push_back( Vector3<real_t>(0,0,0) );
-   points.push_back( Vector3<real_t>(1,0,0) );
-   points.push_back( Vector3<real_t>(real_c(0.5), real_c(0.866025),0) );
-   points.push_back( Vector3<real_t>(real_c(1.5), real_c(0.866025),0) );
-   points.push_back( Vector3<real_t>(0, real_c(1.73205),0) );
-   points.push_back( Vector3<real_t>(1, real_c(1.73205),0) );
+   points.emplace_back(real_t(0),real_t(0),real_t(0) );
+   points.emplace_back(real_t(1),real_t(0),real_t(0) );
+   points.emplace_back(real_c(0.5), real_c(0.866025),real_t(0) );
+   points.emplace_back(real_c(1.5), real_c(0.866025),real_t(0) );
+   points.emplace_back(real_t(0), real_c(1.73205),real_t(0) );
+   points.emplace_back(real_t(1), real_c(1.73205),real_t(0) );
 
-   points.push_back( Vector3<real_t>(real_c(0.5), real_c(0.288675), real_c(0.816497)) );
-   points.push_back( Vector3<real_t>(real_c(1.5), real_c(0.288675), real_c(0.816497)) );
-   points.push_back( Vector3<real_t>(0, real_c(1.1547), real_c(0.816497)) );
-   points.push_back( Vector3<real_t>(1, real_c(1.1547), real_c(0.816497)) );
+   points.emplace_back(real_c(0.5), real_c(0.288675), real_c(0.816497) );
+   points.emplace_back(real_c(1.5), real_c(0.288675), real_c(0.816497) );
+   points.emplace_back(real_t(0), real_c(1.1547), real_c(0.816497) );
+   points.emplace_back(real_t(1), real_c(1.1547), real_c(0.816497) );
 
-   points.push_back( Vector3<real_t>(0,0, real_c(1.63299) ) );
-   points.push_back( Vector3<real_t>(1,0, real_c(1.63299) ) );
-   points.push_back( Vector3<real_t>(real_c(0.5), real_c(0.866025), real_c(1.63299) ) );
-   points.push_back( Vector3<real_t>(real_c(1.5), real_c(0.866025), real_c(1.63299) ) );
-   points.push_back( Vector3<real_t>(0, real_c(1.73205), real_c(1.63299) ) );
-   points.push_back( Vector3<real_t>(1, real_c(1.73205), real_c(1.63299) ) );
+   points.emplace_back(real_t(0),real_t(0), real_c(1.63299) );
+   points.emplace_back(real_t(1),real_t(0), real_c(1.63299) );
+   points.emplace_back(real_c(0.5), real_c(0.866025), real_c(1.63299) );
+   points.emplace_back(real_c(1.5), real_c(0.866025), real_c(1.63299) );
+   points.emplace_back(real_t(0), real_c(1.73205), real_c(1.63299) );
+   points.emplace_back(real_t(1), real_c(1.73205), real_c(1.63299) );
    correctPointIt = points.begin();
-   for (auto it = HCPIterator(AABB(real_c(-0.01), real_c(-0.01), real_c(-0.01), real_c(1.9),real_c(1.9),real_c(1.9)), Vector3<real_t>(0,0,0), 1); it != HCPIterator(); ++it, ++correctPointIt)
+   for (auto it = HCPIterator(AABB(real_c(-0.01), real_c(-0.01), real_c(-0.01), real_c(1.9),real_c(1.9),real_c(1.9)), Vector3<real_t>(real_t(0),real_t(0),real_t(0)), 1); it != HCPIterator(); ++it, ++correctPointIt)
    {
       WALBERLA_CHECK( floatIsEqual((*it)[0], (*correctPointIt)[0], real_c(0.00001)), (*it) << "!=" << (*correctPointIt));
       WALBERLA_CHECK( floatIsEqual((*it)[1], (*correctPointIt)[1], real_c(0.00001)), (*it) << "!=" << (*correctPointIt));
@@ -138,6 +155,9 @@ int main( int argc, char** argv )
    unitCellTest();
    referencePointTest<SCIterator>();
    referencePointTest<HCPIterator>();
+
+   rangeBasedTest<SCGrid>();
+   rangeBasedTest<HCPGrid>();
 
    return EXIT_SUCCESS;
 }

@@ -77,16 +77,16 @@ using walberla::uint_t;
 // PDF field, flag field & body field
 typedef lbm::D3Q19< lbm::collision_model::SRT, false, lbm::force_model::None, 1>  LatticeModel_T;
 
-typedef LatticeModel_T::Stencil                         Stencil_T;
-typedef lbm::PdfField< LatticeModel_T >                 PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 
 typedef std::pair< pe::BodyID, real_t >                              BodyAndVolumeFraction_T;
 typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
 
-typedef boost::tuple<pe::Sphere> BodyTypeTuple ;
+using BodyTypeTuple = boost::tuple<pe::Sphere> ;
 
 ///////////
 // FLAGS //
@@ -355,14 +355,14 @@ int main( int argc, char **argv )
    // create the sphere in the middle of the domain
    Vector3<real_t> position (real_c(setup.length) * real_c(0.5));
    auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, setup.radius );
-   if ( sphere != NULL )
+   if ( sphere != nullptr )
    {
       sphere->setAngularVel( real_c(0), setup.angularVel, real_c(0) );
    }
 
    // synchronize often enough for large bodies
    for( uint_t i = 0; i < XBlocks / 2; ++i)
-      pe::syncShadowOwners<BodyTypeTuple>( blocks->getBlockForest(), bodyStorageID, NULL, overlap);
+      pe::syncShadowOwners<BodyTypeTuple>( blocks->getBlockForest(), bodyStorageID, nullptr, overlap);
 
 
    ///////////////////////

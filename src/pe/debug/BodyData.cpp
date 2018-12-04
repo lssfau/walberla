@@ -37,7 +37,7 @@ namespace debug {
 //
 //=================================================================================================
 
-BodyData::BodyData() {}
+BodyData::BodyData() = default;
 
 BodyData::BodyData(ConstBodyID rb)
    : uid(rb->getID())

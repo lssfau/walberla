@@ -41,7 +41,7 @@ using namespace std::literals::chrono_literals;
 
 
 
-typedef std::mt19937 base_generator_type;
+using base_generator_type = std::mt19937;
 
 /**
  * Utility function for sleeping a random time
@@ -55,7 +55,7 @@ void randomSleep( int maxTimeInMs = 20 )
    counter += 100;
 
    int rank          = MPIManager::instance()->worldRank();
-   unsigned int seed = static_cast<unsigned int>(std::time(0)) + static_cast<unsigned int>(rank*1000) + counter;
+   unsigned int seed = static_cast<unsigned int>(std::time(nullptr)) + static_cast<unsigned int>(rank*1000) + counter;
    generator.seed(seed);
 
    std::uniform_int_distribution<> uni_dist(0,maxTimeInMs);

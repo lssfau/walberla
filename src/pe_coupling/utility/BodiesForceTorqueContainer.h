@@ -21,13 +21,10 @@
 
 #pragma once
 
-#include "core/math/Vector3.h"
-#include "domain_decomposition/StructuredBlockStorage.h"
-#include "pe/rigidbody/BodyIterators.h"
-#include "pe/synchronization/SyncForces.h"
+#include "blockforest/StructuredBlockForest.h"
 
 #include <map>
-#include <vector>
+#include <array>
 
 namespace walberla {
 namespace pe_coupling {
@@ -36,95 +33,40 @@ class BodiesForceTorqueContainer
 {  
 public:
 
-   BodiesForceTorqueContainer( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyStorageID )
-   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID )
-     { }
+   typedef std::map< walberla::id_t, std::array<real_t,6> > ForceTorqueStorage_T;
+
+   BodiesForceTorqueContainer( const shared_ptr<StructuredBlockForest> & blockForest, const BlockDataID & bodyStorageID )
+   : blockForest_( blockForest ), bodyStorageID_( bodyStorageID )
+   {
+      // has to be added to the forest (not the storage) to register correctly
+      bodyForceTorqueStorageID_ = blockForest->addBlockData(make_shared<blockforest::AlwaysCreateBlockDataHandling<ForceTorqueStorage_T> >(), "BodiesForceTorqueContainer");
+   }
 
    void operator()()
    {
       store();
    }
 
-   void store()
-   {
-      // clear map
-      clear();
+   void store();
 
-      // sum up all forces/torques from shadow copies on local body (owner)
-      pe::reduceForces( blockStorage_->getBlockStorage(), bodyStorageID_ );
-      // send total forces/torques to shadow owners
-      pe::distributeForces( blockStorage_->getBlockStorage(), bodyStorageID_ );
+   void setOnBodies();
 
-      // (re-)build map
-      for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
-      {
-         for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
-         {
-            auto & f = bodyForceTorqueMap_[ bodyIt->getSystemID() ];
+   void clear();
 
-            // only add if body has not been added already before (from another block)
-            if( f.empty() )
-            {
-               const auto & force = bodyIt->getForce();
-               f.push_back( force[0] );
-               f.push_back( force[1] );
-               f.push_back( force[2] );
-
-               const auto & torque = bodyIt->getTorque();
-               f.push_back( torque[0] );
-               f.push_back( torque[1] );
-               f.push_back( torque[2] );
-            }
-
-            // reset of force/torque on remote bodies necessary to erase the multiple occurrences of forces/torques on bodies
-            // (due to call to distributeForces() before)
-            if ( bodyIt->isRemote() )
-            {
-               bodyIt->resetForceAndTorque();
-            }
-         }
-      }
-
-   }
-
-   void setOnBodies()
-   {
-      // owning process sets the force/torque on the bodies
-      for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
-      {
-         for( auto bodyIt = pe::LocalBodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
-         {
-            const auto &f = bodyForceTorqueMap_[bodyIt->getSystemID()];
-            WALBERLA_ASSERT( !f.empty(), "When attempting to set force/torque on local body " << bodyIt->getSystemID() << " at position " << bodyIt->getPosition() << ", body was not found in map!");
-            bodyIt->addForce ( f[0], f[1], f[2] );
-            bodyIt->addTorque( f[3], f[4], f[5] );
-         }
-      }
-   }
-
-   void clear()
-   {
-      bodyForceTorqueMap_.clear();
-   }
-
-   void swap( BodiesForceTorqueContainer & other )
-   {
-      std::swap( this->bodyForceTorqueMap_, other.bodyForceTorqueMap_ );
-   }
+   void swap( BodiesForceTorqueContainer & other );
 
 private:
 
-   shared_ptr<StructuredBlockStorage> blockStorage_;
+   shared_ptr<StructuredBlockStorage> blockForest_;
    const BlockDataID bodyStorageID_;
-   std::map< walberla::id_t, std::vector<real_t> > bodyForceTorqueMap_;
+   BlockDataID bodyForceTorqueStorageID_;
 };
 
 
 class BodyContainerSwapper
 {
 public:
-   BodyContainerSwapper( const shared_ptr<BodiesForceTorqueContainer> & cont1,
-                         const shared_ptr<BodiesForceTorqueContainer> & cont2 )
+   BodyContainerSwapper( const shared_ptr<BodiesForceTorqueContainer> & cont1, const shared_ptr<BodiesForceTorqueContainer> & cont2 )
    : cont1_( cont1 ), cont2_( cont2 )
    { }
 

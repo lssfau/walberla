@@ -31,10 +31,10 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/math/Random.h"
 
-using namespace walberla;
+namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+using BodyTuple = boost::tuple<Sphere> ;
 
 int main( int argc, char** argv )
 {
@@ -56,7 +56,7 @@ int main( int argc, char** argv )
     SetBodyTypeIDs<BodyTuple>::execute();
 
     auto storageID           = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
-    Storage* firstStorage = NULL, *secondStorage = NULL;
+    Storage* firstStorage = nullptr, *secondStorage = nullptr;
     for (auto it = forest->begin(); it != forest->end(); ++it)
     {
        IBlock & currentBlock = *it;
@@ -115,4 +115,10 @@ int main( int argc, char** argv )
     WALBERLA_CHECK_EQUAL( secondStorage->at(1).size(), 0 );
 
     return EXIT_SUCCESS;
+}
+} // namespace walberla
+
+int main( int argc, char* argv[] )
+{
+  return walberla::main( argc, argv );
 }

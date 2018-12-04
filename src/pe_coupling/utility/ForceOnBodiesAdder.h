@@ -23,8 +23,6 @@
 
 #include "core/math/Vector3.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
-#include "pe/rigidbody/BodyIterators.h"
-
 
 namespace walberla {
 namespace pe_coupling {
@@ -39,21 +37,9 @@ public:
      { }
 
    // set a constant force on all (only local, to avoid force duplication) bodies
-   void operator()()
-   {
-      for( auto blockIt = blockStorage_->begin(); blockIt != blockStorage_->end(); ++blockIt )
-      {
-         for( auto bodyIt = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
-         {
-            bodyIt->addForce ( force_ );
-         }
-      }
-   }
+   void operator()();
 
-   void updateForce( const Vector3<real_t> & newForce )
-   {
-      force_ = newForce;
-   }
+   void updateForce( const Vector3<real_t> & newForce );
 
 private:
 

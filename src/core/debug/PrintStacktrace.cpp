@@ -39,7 +39,7 @@ void printStacktrace()
 #if defined(WALBERLA_CXX_COMPILER_IS_GNU) || defined(WALBERLA_CXX_COMPILER_IS_INTEL) || defined( WALBERLA_CXX_COMPILER_IS_CLANG)
 
 #include <execinfo.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 
 namespace walberla {

@@ -64,6 +64,9 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
+#include <functional>
+#include <memory>
+
 namespace segre_silberberg_psm
 {
 
@@ -81,11 +84,11 @@ using lbm::force_model::SimpleConstant;
 
 // PDF field, flag field & body field
 typedef lbm::D3Q19< lbm::collision_model::SRT, false, SimpleConstant >  LatticeModel_T;
-typedef LatticeModel_T::Stencil          Stencil_T;
-typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 const uint_t FieldGhostLayers = 1;
@@ -95,7 +98,7 @@ typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolu
 
 // boundary handling
 typedef lbm::NoSlip< LatticeModel_T, flag_t > NoSlip_T;
-typedef boost::tuples::tuple< NoSlip_T >     BoundaryConditions_T;
+using BoundaryConditions_T = boost::tuples::tuple<NoSlip_T>;
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
 typedef boost::tuple< pe::Sphere, pe::Plane > BodyTypeTuple;
@@ -498,11 +501,11 @@ int main( int argc, char **argv )
    auto fcdID          = blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
 
    // set up collision response, here DEM solver
-   pe::cr::DEM cr( globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, NULL );
+   pe::cr::DEM cr( globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, nullptr );
 
    // set up synchronization procedure
    const real_t overlap = real_c( 1.5 ) * dx;
-   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    // create pe bodies
 
@@ -515,7 +518,7 @@ int main( int argc, char **argv )
    const auto sphereMaterial = pe::createMaterial( "mySphereMat", setup.rho_p , real_c(0.5), real_c(0.1), real_c(0.1), real_c(0.24), real_c(200), real_c(200), real_c(0), real_c(0) );
    Vector3<real_t> position( real_c(setup.xlength) * real_c(0.5), real_c(setup.ylength) * real_c(0.5), real_c(setup.zlength) * real_c(0.5) - real_c(1) );
    auto sphere = pe::createSphere( *globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, position, particleRadius, sphereMaterial );
-   if( sphere != NULL )
+   if( sphere != nullptr )
    {
       real_t height = real_c( 0.5 ) * real_c( setup.zlength );
       // set sphere velocity to undisturbed fluid velocity at sphere center
@@ -630,8 +633,8 @@ int main( int argc, char **argv )
    timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, dt_pe, pe_interval ), "pe Time Step" );
 
    // check for convergence of the particle position
-   shared_ptr< SteadyStateCheck > check = shared_ptr< SteadyStateCheck >( new SteadyStateCheck( &timeloop, &setup, blocks, bodyStorageID,
-                                                                                                fileIO, SC1W1, SC2W1, SC3W1, SC1W2, SC2W2, SC3W2 ) );
+   shared_ptr< SteadyStateCheck > check = std::make_shared< SteadyStateCheck >( &timeloop, &setup, blocks, bodyStorageID,
+                                                                                                fileIO, SC1W1, SC2W1, SC3W1, SC1W2, SC2W2, SC3W2 );
    timeloop.addFuncAfterTimeStep( SharedFunctor< SteadyStateCheck >( check ), "steady state check" );
 
    if( vtkIO )

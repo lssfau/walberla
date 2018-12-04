@@ -21,6 +21,8 @@
 
 #include "blockforest/Initialization.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
+#include <blockforest/loadbalancing/StaticCurve.h>
+#include <blockforest/SetupBlockForest.h>
 
 #include "boundary/all.h"
 
@@ -64,6 +66,7 @@
 #include <vector>
 #include <iomanip>
 #include <iostream>
+#include <functional>
 
 namespace body_at_block_boarder_check
 {
@@ -76,23 +79,23 @@ using namespace walberla;
 using walberla::uint_t;
 
 // PDF field, flag field & body field
-typedef lbm::D3Q19< lbm::collision_model::TRT >  LatticeModel_T;
+using LatticeModel_T = lbm::D3Q19<lbm::collision_model::TRT>;
 
-typedef LatticeModel_T::Stencil                         Stencil_T;
-typedef lbm::PdfField< LatticeModel_T >                 PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
 const uint_t FieldGhostLayers = 4;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
 typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 
 // boundary handling
 typedef pe_coupling::SimpleBB< LatticeModel_T, FlagField_T >  MO_T;
-typedef boost::tuples::tuple< MO_T > BoundaryConditions_T;
+using BoundaryConditions_T = boost::tuples::tuple<MO_T>;
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
-typedef boost::tuple<pe::Sphere> BodyTypeTuple ;
+using BodyTypeTuple = boost::tuple<pe::Sphere> ;
 
 ///////////
 // FLAGS //
@@ -132,7 +135,7 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( AABB domainAABB
                                                      uint_c(domainAABB.zMax()) / blockSizeInCells[2] );
 
    AABB refinementBox( domainAABB.xMin(), domainAABB.yMin(), domainAABB.zMin(), domainAABB.xMax() * real_c(0.5), domainAABB.yMax(), domainAABB.zMax() );
-   sforest.addRefinementSelectionFunction( boost::bind( refinementSelection, _1, numberOfLevels, refinementBox ) );
+   sforest.addRefinementSelectionFunction( std::bind( refinementSelection, std::placeholders::_1, numberOfLevels, refinementBox ) );
    sforest.addWorkloadMemorySUIDAssignmentFunction( workloadAndMemoryAssignment );
 
    sforest.init( domainAABB, numberOfCoarseBlocksPerDirection[0], numberOfCoarseBlocksPerDirection[1], numberOfCoarseBlocksPerDirection[2], true, true, true );
@@ -281,18 +284,18 @@ int main( int argc, char **argv )
 
    // connect to pe
    const real_t overlap = real_c( 1.5 ) * dx;
-   std::function<void(void)> syncCall = boost::bind( pe::syncShadowOwners<BodyTypeTuple>, boost::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(NULL), overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncShadowOwners<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, static_cast<WcTimingTree*>(nullptr), overlap, false );
 
    auto sphereMaterialID = pe::createMaterial( "sphereMat", real_c(1) , real_c(0.3), real_c(0.2), real_c(0.2), real_c(0.24), real_c(200), real_c(200), real_c(0), real_c(0) );
    // create two spheres: one which overlaps with a block boundary and one inside the block
    pe::Vec3 referenceVelocity( real_c(0.1), real_c(0), real_c(0) );
    auto sphereAtBorder = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_c(31), real_c(31), real_c(31) ), radius, sphereMaterialID );
-   if( sphereAtBorder != NULL )
+   if( sphereAtBorder != nullptr )
    {
       sphereAtBorder->setLinearVel( referenceVelocity );
    }
    auto sphereInInner = pe::createSphere(*globalBodyStorage, blocks->getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( real_c(7), real_c(7), real_c(7) ), radius, sphereMaterialID );
-   if( sphereInInner != NULL )
+   if( sphereInInner != nullptr )
    {
       sphereInInner->setLinearVel( referenceVelocity );
    }
@@ -314,7 +317,7 @@ int main( int argc, char **argv )
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field", FieldGhostLayers );
 
    // add body field
-   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", NULL, field::zyxf, FieldGhostLayers );
+   BlockDataID bodyFieldID = field::addToStorage<BodyField_T>( blocks, "body field", nullptr, field::zyxf, FieldGhostLayers );
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(
