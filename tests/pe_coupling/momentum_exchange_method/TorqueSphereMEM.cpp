@@ -76,7 +76,7 @@ using namespace walberla;
 using walberla::uint_t;
 
 // PDF field, flag field & body field
-typedef lbm::D3Q19< lbm::collision_model::TRT, false, lbm::force_model::None, 1>  LatticeModel_T;
+typedef lbm::D3Q19< lbm::collision_model::TRT >  LatticeModel_T;
 
 using Stencil_T = LatticeModel_T::Stencil;
 using PdfField_T = lbm::PdfField<LatticeModel_T>;

@@ -73,11 +73,10 @@ namespace drag_force_sphere_mem
 
 using namespace walberla;
 using walberla::uint_t;
-using lbm::force_model::SimpleConstant;
 
 // PDF field, flag field & body field
 using ForceModel_T = lbm::force_model::LuoConstant;
-typedef lbm::D3Q19< lbm::collision_model::TRT, false, ForceModel_T, 1>  LatticeModel_T;
+typedef lbm::D3Q19< lbm::collision_model::TRT, false, ForceModel_T >  LatticeModel_T;
 
 using Stencil_T = LatticeModel_T::Stencil;
 using PdfField_T = lbm::PdfField<LatticeModel_T>;

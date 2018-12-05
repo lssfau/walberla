@@ -361,7 +361,7 @@ private:
 };
 
 void initializeCouetteProfile( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDataID & pdfFieldID, const BlockDataID & boundaryHandlingID,
-                               const real_t & substrateHeight, const real_t & domainHeight, const real_t wallVelocity )
+                               const real_t & domainHeight, const real_t wallVelocity )
 {
    const real_t rho = real_c(1);
 
@@ -377,10 +377,8 @@ void initializeCouetteProfile( const shared_ptr< StructuredBlockStorage > & bloc
 
                                  Vector3< real_t > velocity( real_c(0) );
 
-                                 if( coord[2] >= substrateHeight )
-                                 {
-                                    velocity[0] =  wallVelocity * (coord[2] - substrateHeight) / ( domainHeight - substrateHeight);
-                                 }
+                                 velocity[0] =  wallVelocity * coord[2] / domainHeight;
+
                                  pdfField->setToEquilibrium( x, y, z, velocity, rho );
       )
    }
@@ -632,7 +630,7 @@ int main( int argc, char **argv )
 
 
    // initialize Couette velocity profile in whole domain
-   if( !zeroShearTest ) initializeCouetteProfile(blocks, pdfFieldID, boundaryHandlingID, diameter, domainHeight, wallVelocity);
+   if( !zeroShearTest ) initializeCouetteProfile(blocks, pdfFieldID, boundaryHandlingID, domainHeight, wallVelocity);
 
    ///////////////
    // TIME LOOP //

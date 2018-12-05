@@ -69,14 +69,12 @@ namespace taylor_coette_flow_mem
 using namespace walberla;
 using walberla::uint_t;
 
-
-
 //////////////
 // TYPEDEFS //
 //////////////
 
 // pdf field & flag field
-typedef lbm::D3Q19< lbm::collision_model::TRT, false >  LatticeModel_T;
+typedef lbm::D3Q19< lbm::collision_model::TRT >  LatticeModel_T;
 using Stencil_T = LatticeModel_T::Stencil;
 using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
