@@ -22,4 +22,5 @@
 
 #pragma once
 
+#include "Dirichlet.h"
 #include "Neumann.h"

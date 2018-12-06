@@ -4,7 +4,8 @@
 #
 ###################################################################################################
 
-waLBerla_add_module( DEPENDS blockforest 
+waLBerla_add_module( DEPENDS blockforest
+                             boundary 
                              core
                              domain_decomposition
                              field
