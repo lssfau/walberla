@@ -22,12 +22,14 @@
 //======================================================================================================================
 
 #include "MPIManager.h"
+#include "core/logging/Logging.h"
 
 #include <boost/exception_ptr.hpp>
 #include <exception>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <string>
 
 
 namespace walberla{
@@ -106,6 +108,22 @@ void MPIManager::initializeMPI( int* argc, char*** argv, bool abortOnException )
       isMPIInitialized_ = true;
       MPI_Comm_size( MPI_COMM_WORLD, &numProcesses_ );
       MPI_Comm_rank( MPI_COMM_WORLD, &worldRank_ );
+
+      // Avoid using the Cartesian MPI-communicator with certain versions of OpenMPI (see waLBerla issue #73)
+      #if defined(OMPI_MAJOR_VERSION) && defined(OMPI_MINOR_VERSION) && defined(OMPI_RELEASE_VERSION)
+         std::string ompi_ver = std::to_string(OMPI_MAJOR_VERSION) + "." + std::to_string(OMPI_MINOR_VERSION) + "." +
+                                std::to_string(OMPI_RELEASE_VERSION);
+
+         if (ompi_ver == "2.0.0" || ompi_ver == "2.0.1" || ompi_ver == "2.0.2" || ompi_ver == "2.0.3" ||
+             ompi_ver == "2.1.0" || ompi_ver == "2.1.1") {
+
+            useWorldComm();
+
+            WALBERLA_LOG_WARNING_ON_ROOT( "Your version of OpenMPI (" << ompi_ver << ") contains a bug. See waLBerla "
+                                         "issue #73 for more information. Using MPI_COMM_WORLD instead of a Cartesian "
+                                         "MPI communicator as a workaround." );
+         }
+      #endif
 
       if( abortOnException )
          std::set_terminate( customTerminateHandler );
