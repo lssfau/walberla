@@ -62,10 +62,10 @@ inline void    omp_set_max_active_levels (int) { WALBERLA_OPENMP_FUNCTION_ERROR 
 inline void    omp_set_schedule          (omp_sched_t, int) { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 /* query API functions */
-inline int     omp_get_num_threads  (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_num_threads  (void) { return 1; }
 inline int     omp_get_dynamic      (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline int     omp_get_nested       (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
-inline int     omp_get_max_threads  (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
+inline int     omp_get_max_threads  (void) { return 1; }
 inline int     omp_get_thread_num   (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline int     omp_get_num_procs    (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline int     omp_in_parallel      (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
