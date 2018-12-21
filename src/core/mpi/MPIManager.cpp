@@ -109,22 +109,6 @@ void MPIManager::initializeMPI( int* argc, char*** argv, bool abortOnException )
       MPI_Comm_size( MPI_COMM_WORLD, &numProcesses_ );
       MPI_Comm_rank( MPI_COMM_WORLD, &worldRank_ );
 
-      // Avoid using the Cartesian MPI-communicator with certain versions of OpenMPI (see waLBerla issue #73)
-      #if defined(OMPI_MAJOR_VERSION) && defined(OMPI_MINOR_VERSION) && defined(OMPI_RELEASE_VERSION)
-         std::string ompi_ver = std::to_string(OMPI_MAJOR_VERSION) + "." + std::to_string(OMPI_MINOR_VERSION) + "." +
-                                std::to_string(OMPI_RELEASE_VERSION);
-
-         if (ompi_ver == "2.0.0" || ompi_ver == "2.0.1" || ompi_ver == "2.0.2" || ompi_ver == "2.0.3" ||
-             ompi_ver == "2.1.0" || ompi_ver == "2.1.1") {
-
-            useWorldComm();
-
-            WALBERLA_LOG_WARNING_ON_ROOT( "Your version of OpenMPI (" << ompi_ver << ") contains a bug. See waLBerla "
-                                         "issue #73 for more information. Using MPI_COMM_WORLD instead of a Cartesian "
-                                         "MPI communicator as a workaround." );
-         }
-      #endif
-
       if( abortOnException )
          std::set_terminate( customTerminateHandler );
    }
@@ -174,12 +158,18 @@ void MPIManager::createCartesianComm( int dims[3], int periodicity[3] )
    WALBERLA_ASSERT_GREATER( dims[1], 0 );
    WALBERLA_ASSERT_GREATER( dims[2], 0 );
 
+   if ( isCartesianCommValid() ) {
+      WALBERLA_LOG_WARNING_ON_ROOT( "Your version of OpenMPI contains a bug which might lead to a segmentation fault "
+                                    "when generating vtk output. Since the bug only occurs with a 3D Cartesian MPI "
+                                    "communicator, try to use MPI_COMM_WORLD instead. See waLBerla issue #73 for "
+                                    "additional information." );
+   }
+
    MPI_Cart_create( MPI_COMM_WORLD, 3, dims, periodicity, true, &comm_ );
-
-   WALBERLA_ASSERT_UNEQUAL(comm_, MPI_COMM_NULL);
-
    MPI_Comm_rank( comm_, &rank_ );
    cartesianSetup_ = true;
+
+   WALBERLA_ASSERT_UNEQUAL(comm_, MPI_COMM_NULL);
 }
 
 
@@ -241,6 +231,25 @@ int MPIManager::cartesianRank( const uint_t x, const uint_t y, const uint_t z ) 
    coords[2] = numeric_cast<int>(z);
 
    return cartesianRank( coords );
+}
+
+bool MPIManager::isCartesianCommValid() const
+{
+   // Avoid using the Cartesian MPI-communicator with certain (buggy) versions of OpenMPI (see waLBerla issue #73)
+   #if defined(OMPI_MAJOR_VERSION) && defined(OMPI_MINOR_VERSION) && defined(OMPI_RELEASE_VERSION)
+      std::string ompi_ver = std::to_string(OMPI_MAJOR_VERSION) + "." + std::to_string(OMPI_MINOR_VERSION) + "." +
+            std::to_string(OMPI_RELEASE_VERSION);
+
+      if (ompi_ver == "2.0.0" || ompi_ver == "2.0.1" || ompi_ver == "2.0.2" || ompi_ver == "2.0.3" ||
+          ompi_ver == "2.1.0" || ompi_ver == "2.1.1") {
+         return true;
+      }
+      else {
+         return false;
+      }
+   #else
+      return false;
+   #endif
 }
 
 std::string MPIManager::getMPIErrorString(int errorCode)

@@ -122,6 +122,9 @@ public:
    bool hasCartesianSetup() const { return cartesianSetup_;  }
    /// Rank is valid after calling createCartesianComm() or useWorldComm()
    bool rankValid()         const { return rank_ >= 0;       }
+
+   /// Using a Cartesian MPI communicator is not valid for certain versions of OpenMPI (see waLBerla issue #73)
+   bool isCartesianCommValid() const;
    //@}
    //*******************************************************************************************************************
 
