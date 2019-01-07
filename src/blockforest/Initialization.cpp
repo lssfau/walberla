@@ -229,18 +229,26 @@ createBlockForest(      const AABB& domainAABB,
       //create cartesian communicator only if not yet a cartesian communicator (or other communicator was created)
       if ( ! mpiManager->rankValid() )
       {
-         mpiManager->createCartesianComm( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, xPeriodic, yPeriodic, zPeriodic );
+         if ( mpiManager->isCartesianCommValid() ) {
+            mpiManager->createCartesianComm( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, xPeriodic, yPeriodic, zPeriodic );
 
-         processIdMap = new std::vector< uint_t >( numberOfProcesses );
+            processIdMap = new std::vector< uint_t >( numberOfProcesses );
 
-         for( uint_t z = 0; z != numberOfZProcesses; ++z ) {
-            for( uint_t y = 0; y != numberOfYProcesses; ++y ) {
-               for( uint_t x = 0; x != numberOfXProcesses; ++x ) {
+            for( uint_t z = 0; z != numberOfZProcesses; ++z ) {
+               for( uint_t y = 0; y != numberOfYProcesses; ++y ) {
+                  for( uint_t x = 0; x != numberOfXProcesses; ++x ) {
 
-                  (*processIdMap)[ z * numberOfXProcesses * numberOfYProcesses + y * numberOfXProcesses + x ] =
-                        uint_c( MPIManager::instance()->cartesianRank(x,y,z) );
+                     (*processIdMap)[ z * numberOfXProcesses * numberOfYProcesses + y * numberOfXProcesses + x ] =
+                           uint_c( MPIManager::instance()->cartesianRank(x,y,z) );
+                  }
                }
             }
+         }
+         else {
+            WALBERLA_LOG_WARNING_ON_ROOT( "Your version of OpenMPI contains a bug. See waLBerla issue #73 for more "
+                                          "information. As a workaround, MPI_COMM_WORLD instead of a "
+                                          "Cartesian MPI communicator is used." );
+            mpiManager->useWorldComm();
          }
       }
    }
