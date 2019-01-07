@@ -263,7 +263,7 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
 
       WALBERLA_MPI_SECTION()
       {
-         if ( ! MPIManager::instance()->isCartesianCommValid() )
+         if ( MPIManager::instance()->isCartesianCommValid() )
          {
             MPIManager::instance()->createCartesianComm(numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, false, false, false);
 

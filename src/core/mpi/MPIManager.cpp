@@ -158,7 +158,7 @@ void MPIManager::createCartesianComm( int dims[3], int periodicity[3] )
    WALBERLA_ASSERT_GREATER( dims[1], 0 );
    WALBERLA_ASSERT_GREATER( dims[2], 0 );
 
-   if ( isCartesianCommValid() ) {
+   if ( ! isCartesianCommValid() ) {
       WALBERLA_LOG_WARNING_ON_ROOT( "Your version of OpenMPI contains a bug which might lead to a segmentation fault "
                                     "when generating vtk output. Since the bug only occurs with a 3D Cartesian MPI "
                                     "communicator, try to use MPI_COMM_WORLD instead. See waLBerla issue #73 for "
@@ -242,13 +242,13 @@ bool MPIManager::isCartesianCommValid() const
 
       if (ompi_ver == "2.0.0" || ompi_ver == "2.0.1" || ompi_ver == "2.0.2" || ompi_ver == "2.0.3" ||
           ompi_ver == "2.1.0" || ompi_ver == "2.1.1") {
-         return true;
-      }
-      else {
          return false;
       }
+      else {
+         return true;
+      }
    #else
-      return false;
+      return true;
    #endif
 }
 

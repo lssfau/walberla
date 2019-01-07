@@ -229,7 +229,7 @@ createBlockForest(      const AABB& domainAABB,
       //create cartesian communicator only if not yet a cartesian communicator (or other communicator was created)
       if ( ! mpiManager->rankValid() )
       {
-         if ( ! mpiManager->isCartesianCommValid() ) {
+         if ( mpiManager->isCartesianCommValid() ) {
             mpiManager->createCartesianComm( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, xPeriodic, yPeriodic, zPeriodic );
 
             processIdMap = new std::vector< uint_t >( numberOfProcesses );
