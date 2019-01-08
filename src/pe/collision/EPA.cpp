@@ -337,11 +337,10 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
                {
                   const auto ilen = real_t(1.0) / center_len;
                   ctr *= -ilen;
-                  // std::cerr << "New support direction: " <<  ctr << std::endl;
                   pushSupportMargin(geom1, geom2, ctr, margin, epaVolume, supportA, supportB);
                   support = epaVolume.back();
                   // Check if support is in expected direction
-                  real_t supp_dist = support.length()
+                  real_t supp_dist = support.length();
                   if(floatIsEqual((support % ctr).sqrLength()/support.sqrLength(), real_t(0.0)) &&
                      supp_dist*supp_dist <= upperBoundSqr &&
                      supp_dist*supp_dist >= lowerBoundSqr)
@@ -350,7 +349,7 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
                      contactPoint = real_t(0.5) * (supportA.back() + supportB.back());
                      penetrationDepth = -supp_dist + real_t(2.0) * margin;
                      retNormal = -ctr;
-                     // std::cerr << "Found penetration depth " << penetrationDepth << " with CurvedEPA!" << std::endl;
+                     
                      if(penetrationDepth < contactThreshold){
                         return true;
                      }else{
