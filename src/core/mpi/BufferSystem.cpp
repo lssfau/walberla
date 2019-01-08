@@ -53,6 +53,9 @@ void BufferSystem::iterator::operator++()
    currentRecvBuffer_ = bufferSystem_.waitForNext( currentSenderRank_ );
    if ( ! currentRecvBuffer_ ) {
       WALBERLA_ASSERT_EQUAL( currentSenderRank_, -1 );
+   } else
+   {
+      bufferSystem_.bytesReceived_ += currentRecvBuffer_->size() * sizeof(RecvBuffer::ElementType);
    }
 }
 
@@ -303,7 +306,10 @@ void BufferSystem::sendAll()
       if ( ! iter->second.alreadySent )
       {
          if ( iter->second.buffer.size() > 0 )
+         {
+            bytesSent_ += iter->second.buffer.size() * sizeof(SendBuffer::ElementType);
             currentComm_->send( iter->first, iter->second.buffer );
+         }
 
          iter->second.alreadySent = true;
       }
@@ -331,7 +337,10 @@ void BufferSystem::send( MPIRank rank )
    WALBERLA_ASSERT( ! iter->second.alreadySent ); // this buffer has already been sent
 
    if ( iter->second.buffer.size() > 0 )
+   {
+      bytesSent_ += iter->second.buffer.size() * sizeof(SendBuffer::ElementType);
       currentComm_->send( rank, iter->second.buffer );
+   }
 
    iter->second.alreadySent = true;
 }
@@ -362,6 +371,9 @@ void BufferSystem::startCommunication()
 
    currentComm_->scheduleReceives( recvInfos_ );
    communicationRunning_ = true;
+
+   bytesSent_     = 0;
+   bytesReceived_ = 0;
 }
 
 
