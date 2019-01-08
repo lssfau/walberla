@@ -110,6 +110,9 @@ void symmetricCommunication()
 
       WALBERLA_CHECK_EQUAL( receivedVal, it.rank() );
    }
+
+   WALBERLA_CHECK_EQUAL( bs.getBytesSent(), (MSG_SIZE * sizeof(int) + MSG_SIZE * mpi::BUFFER_DEBUG_OVERHEAD) * 2 );
+   WALBERLA_CHECK_EQUAL( bs.getBytesReceived(), (MSG_SIZE * sizeof(int) + MSG_SIZE * mpi::BUFFER_DEBUG_OVERHEAD) * 2 );
 }
 
 /**
@@ -175,6 +178,9 @@ void asymmetricCommunication()
          WALBERLA_CHECK( it.buffer().isEmpty() );
       }
    }
+
+   WALBERLA_CHECK_EQUAL( bs.getBytesSent(), int64_c(sizeof(int) + mpi::BUFFER_DEBUG_OVERHEAD) * int64_c(rank + rank) );
+   WALBERLA_CHECK_EQUAL( bs.getBytesReceived(), int64_c(sizeof(int) + mpi::BUFFER_DEBUG_OVERHEAD) * int64_c(leftNeighbor + rightNeighbor) );
 }
 
 
