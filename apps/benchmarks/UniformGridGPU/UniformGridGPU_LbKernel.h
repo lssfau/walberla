@@ -51,6 +51,15 @@ public:
         : pdfsID(pdfsID_), omega(omega_)
     {};
 
+    
+    ~UniformGridGPU_LbKernel() {  
+        for(auto p: cache_pdfs_) {
+            delete p;
+        }
+     }
+
+
+
     void operator() ( IBlock * block , cudaStream_t stream = 0 );
 
     void inner( IBlock * block , cudaStream_t stream = 0 );

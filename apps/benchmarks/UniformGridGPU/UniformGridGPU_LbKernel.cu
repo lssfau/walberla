@@ -73,7 +73,6 @@ static FUNC_PREFIX void UniformGridGPU_LbKernel(double * const _data_pdfs, doubl
       double * const _data_pdfs_11_20_32 = _data_pdfs + _stride_pdfs_1*ctr_1 + _stride_pdfs_1 + _stride_pdfs_2*ctr_2 + 2*_stride_pdfs_3;
       double * const _data_pdfs_10_21_36 = _data_pdfs + _stride_pdfs_1*ctr_1 + _stride_pdfs_2*ctr_2 + _stride_pdfs_2 + 6*_stride_pdfs_3;
       const double rho = vel0Term + vel1Term + vel2Term + _data_pdfs_10_20_30[_stride_pdfs_0*ctr_0] + _data_pdfs_10_20_33[_stride_pdfs_0*ctr_0 + _stride_pdfs_0] + _data_pdfs_10_21_317[_stride_pdfs_0*ctr_0 + _stride_pdfs_0] + _data_pdfs_10_21_36[_stride_pdfs_0*ctr_0] + _data_pdfs_11_20_32[_stride_pdfs_0*ctr_0] + _data_pdfs_11_20_39[_stride_pdfs_0*ctr_0 + _stride_pdfs_0] + _data_pdfs_11_21_316[_stride_pdfs_0*ctr_0];
-      const double xi_27 = rho*-0.333333333333333;
       const double u_0 = vel0Term + xi_18 + xi_19 - _data_pdfs_10_20_33[_stride_pdfs_0*ctr_0 + _stride_pdfs_0] - _data_pdfs_10_2m1_313[_stride_pdfs_0*ctr_0 + _stride_pdfs_0] - _data_pdfs_1m1_20_37[_stride_pdfs_0*ctr_0 + _stride_pdfs_0];
       const double xi_23 = (u_0*u_0);
       const double u_1 = vel1Term + xi_19 + xi_20 - _data_pdfs_11_20_310[_stride_pdfs_0*ctr_0 - _stride_pdfs_0] - _data_pdfs_11_20_32[_stride_pdfs_0*ctr_0] - _data_pdfs_11_2m1_312[_stride_pdfs_0*ctr_0] + _data_pdfs_1m1_20_38[_stride_pdfs_0*ctr_0 - _stride_pdfs_0];
@@ -90,9 +89,10 @@ static FUNC_PREFIX void UniformGridGPU_LbKernel(double * const _data_pdfs, doubl
       const double u0Pu2 = u_0 + u_2;
       const double f_eq_common = rho - xi_23 - xi_24 - xi_25;
       const double xi_26 = f_eq_common + rho*-0.666666666666667;
-      const double xi_28 = f_eq_common + xi_25 + xi_27;
-      const double xi_29 = f_eq_common + xi_23 + xi_27;
-      const double xi_30 = f_eq_common + xi_24 + xi_27;
+      const double xi_27 = f_eq_common + rho*-0.333333333333333;
+      const double xi_28 = xi_25 + xi_27;
+      const double xi_29 = xi_23 + xi_27;
+      const double xi_30 = xi_24 + xi_27;
       const double xi_2 = xi_24*2 + xi_26;
       const double xi_3 = xi_23*2 + xi_26;
       const double xi_4 = xi_25*2 + xi_26;
@@ -183,7 +183,7 @@ void UniformGridGPU_LbKernel::operator() ( IBlock * block , cudaStream_t stream 
     const int64_t _stride_pdfs_2 = int64_t(pdfs->zStride());
     const int64_t _stride_pdfs_3 = int64_t(pdfs->fStride());
     dim3 _block(int(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)), int(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)), int(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)));
-    dim3 _grid(int(( (_size_pdfs_0 - 2) % int(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) == 0 ? (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) : ( (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) ) +1 )), int(( (_size_pdfs_1 - 2) % int(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) == 0 ? (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) : ( (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) ) +1 )), int(( (_size_pdfs_2 - 2) % int(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) == 0 ? (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) : ( (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) ) +1 )));
+    dim3 _grid(int(( (_size_pdfs_0 - 2) % (((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) == 0 ? (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) : ( (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) ) +1 )), int(( (_size_pdfs_1 - 2) % (((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) == 0 ? (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) : ( (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) ) +1 )), int(( (_size_pdfs_2 - 2) % (((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) == 0 ? (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) : ( (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) ) +1 )));
     internal_UniformGridGPU_LbKernel::UniformGridGPU_LbKernel<<<_grid, _block, 0, stream>>>(_data_pdfs, _data_pdfs_tmp, _size_pdfs_0, _size_pdfs_1, _size_pdfs_2, _stride_pdfs_0, _stride_pdfs_1, _stride_pdfs_2, _stride_pdfs_3, omega);
     pdfs->swapDataPointers(pdfs_tmp);
 
@@ -212,12 +212,12 @@ void UniformGridGPU_LbKernel::inner( IBlock * block , cudaStream_t stream )
     inner.expand(-1);
 
     WALBERLA_ASSERT_GREATER_EQUAL(inner.xMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
-    WALBERLA_ASSERT_GREATER_EQUAL(inner.zMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
     WALBERLA_ASSERT_GREATER_EQUAL(inner.yMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
+    WALBERLA_ASSERT_GREATER_EQUAL(inner.zMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
     double * const _data_pdfs = pdfs->dataAt(inner.xMin() - 1, inner.yMin() - 1, inner.zMin() - 1, 0);
     WALBERLA_ASSERT_GREATER_EQUAL(inner.xMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
-    WALBERLA_ASSERT_GREATER_EQUAL(inner.zMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
     WALBERLA_ASSERT_GREATER_EQUAL(inner.yMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
+    WALBERLA_ASSERT_GREATER_EQUAL(inner.zMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
     double * _data_pdfs_tmp = pdfs_tmp->dataAt(inner.xMin() - 1, inner.yMin() - 1, inner.zMin() - 1, 0);
     WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(inner.xSize() + 2));
     const int64_t _size_pdfs_0 = int64_t(inner.xSize() + 2);
@@ -230,7 +230,7 @@ void UniformGridGPU_LbKernel::inner( IBlock * block , cudaStream_t stream )
     const int64_t _stride_pdfs_2 = int64_t(pdfs->zStride());
     const int64_t _stride_pdfs_3 = int64_t(pdfs->fStride());
     dim3 _block(int(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)), int(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)), int(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)));
-    dim3 _grid(int(( (_size_pdfs_0 - 2) % int(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) == 0 ? (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) : ( (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) ) +1 )), int(( (_size_pdfs_1 - 2) % int(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) == 0 ? (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) : ( (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) ) +1 )), int(( (_size_pdfs_2 - 2) % int(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) == 0 ? (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) : ( (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) ) +1 )));
+    dim3 _grid(int(( (_size_pdfs_0 - 2) % (((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) == 0 ? (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) : ( (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) ) +1 )), int(( (_size_pdfs_1 - 2) % (((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) == 0 ? (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) : ( (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) ) +1 )), int(( (_size_pdfs_2 - 2) % (((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) == 0 ? (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) : ( (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) ) +1 )));
     internal_UniformGridGPU_LbKernel::UniformGridGPU_LbKernel<<<_grid, _block, 0, stream>>>(_data_pdfs, _data_pdfs_tmp, _size_pdfs_0, _size_pdfs_1, _size_pdfs_2, _stride_pdfs_0, _stride_pdfs_1, _stride_pdfs_2, _stride_pdfs_3, omega);
 }
 
@@ -284,13 +284,13 @@ void UniformGridGPU_LbKernel::outer( IBlock * block , cudaStream_t stream  )
         for( auto & ci: layers )
         {
             parallelSection_.run([&]( auto s ) {
-                WALBERLA_ASSERT_GREATER_EQUAL(ci.xMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
                 WALBERLA_ASSERT_GREATER_EQUAL(ci.yMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
                 WALBERLA_ASSERT_GREATER_EQUAL(ci.zMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
+                WALBERLA_ASSERT_GREATER_EQUAL(ci.xMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
                 double * const _data_pdfs = pdfs->dataAt(ci.xMin() - 1, ci.yMin() - 1, ci.zMin() - 1, 0);
-                WALBERLA_ASSERT_GREATER_EQUAL(ci.xMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
                 WALBERLA_ASSERT_GREATER_EQUAL(ci.yMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
                 WALBERLA_ASSERT_GREATER_EQUAL(ci.zMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
+                WALBERLA_ASSERT_GREATER_EQUAL(ci.xMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
                 double * _data_pdfs_tmp = pdfs_tmp->dataAt(ci.xMin() - 1, ci.yMin() - 1, ci.zMin() - 1, 0);
                 WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(ci.xSize() + 2));
                 const int64_t _size_pdfs_0 = int64_t(ci.xSize() + 2);
@@ -303,7 +303,7 @@ void UniformGridGPU_LbKernel::outer( IBlock * block , cudaStream_t stream  )
                 const int64_t _stride_pdfs_2 = int64_t(pdfs->zStride());
                 const int64_t _stride_pdfs_3 = int64_t(pdfs->fStride());
                 dim3 _block(int(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)), int(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)), int(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)));
-                dim3 _grid(int(( (_size_pdfs_0 - 2) % int(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) == 0 ? (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) : ( (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) ) +1 )), int(( (_size_pdfs_1 - 2) % int(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) == 0 ? (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) : ( (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) ) +1 )), int(( (_size_pdfs_2 - 2) % int(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) == 0 ? (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) : ( (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) ) +1 )));
+                dim3 _grid(int(( (_size_pdfs_0 - 2) % (((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) == 0 ? (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) : ( (int64_t)(_size_pdfs_0 - 2) / (int64_t)(((128 < _size_pdfs_0 - 2) ? 128 : _size_pdfs_0 - 2)) ) +1 )), int(( (_size_pdfs_1 - 2) % (((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) == 0 ? (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) : ( (int64_t)(_size_pdfs_1 - 2) / (int64_t)(((1 < _size_pdfs_1 - 2) ? 1 : _size_pdfs_1 - 2)) ) +1 )), int(( (_size_pdfs_2 - 2) % (((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) == 0 ? (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) : ( (int64_t)(_size_pdfs_2 - 2) / (int64_t)(((1 < _size_pdfs_2 - 2) ? 1 : _size_pdfs_2 - 2)) ) +1 )));
                 internal_UniformGridGPU_LbKernel::UniformGridGPU_LbKernel<<<_grid, _block, 0, s>>>(_data_pdfs, _data_pdfs_tmp, _size_pdfs_0, _size_pdfs_1, _size_pdfs_2, _stride_pdfs_0, _stride_pdfs_1, _stride_pdfs_2, _stride_pdfs_3, omega);
             });
         }

@@ -63,9 +63,9 @@ static FUNC_PREFIX void boundary_UniformGridGPU_NoSlip(uint8_t * const _data_ind
       
       uint8_t * const _data_indexVector_112 = _data_indexVector + 12;
       const int32_t dir = *((int32_t *)(& _data_indexVector_112[16*blockDim.x*blockIdx.x + 16*threadIdx.x]));
-      double * _data_pdfs_m3B5BEDEA5094B12F = _data_pdfs + _stride_pdfs_1*y + _stride_pdfs_1*cy[dir] + _stride_pdfs_2*z + _stride_pdfs_2*cz[dir] + _stride_pdfs_3*invdir[dir];
-      double * _data_pdfs_10_20_m2227275638DDD757 = _data_pdfs + _stride_pdfs_1*y + _stride_pdfs_2*z + _stride_pdfs_3*dir;
-      _data_pdfs_m3B5BEDEA5094B12F[_stride_pdfs_0*x + _stride_pdfs_0*cx[dir]] = _data_pdfs_10_20_m2227275638DDD757[_stride_pdfs_0*x];
+      double * _data_pdfs_1ACA00C755A3ABE3 = _data_pdfs + _stride_pdfs_1*y + _stride_pdfs_1*cy[dir] + _stride_pdfs_2*z + _stride_pdfs_2*cz[dir] + _stride_pdfs_3*invdir[dir];
+      double * _data_pdfs_10_20_m7D57D887F63BE1DF = _data_pdfs + _stride_pdfs_1*y + _stride_pdfs_2*z + _stride_pdfs_3*dir;
+      _data_pdfs_1ACA00C755A3ABE3[_stride_pdfs_0*x + _stride_pdfs_0*cx[dir]] = _data_pdfs_10_20_m7D57D887F63BE1DF[_stride_pdfs_0*x];
    } 
 }
 }
@@ -97,7 +97,7 @@ void UniformGridGPU_NoSlip::run( IBlock * block, IndexVectors::Type type , cudaS
     const int64_t _stride_pdfs_2 = int64_t(pdfs->zStride());
     const int64_t _stride_pdfs_3 = int64_t(pdfs->fStride());
     dim3 _block(int(((256 < indexVectorSize) ? 256 : indexVectorSize)), int(1), int(1));
-    dim3 _grid(int(( (indexVectorSize) % int(((256 < indexVectorSize) ? 256 : indexVectorSize)) == 0 ? (int64_t)(indexVectorSize) / (int64_t)(((256 < indexVectorSize) ? 256 : indexVectorSize)) : ( (int64_t)(indexVectorSize) / (int64_t)(((256 < indexVectorSize) ? 256 : indexVectorSize)) ) +1 )), int(1), int(1));
+    dim3 _grid(int(( (indexVectorSize) % (((256 < indexVectorSize) ? 256 : indexVectorSize)) == 0 ? (int64_t)(indexVectorSize) / (int64_t)(((256 < indexVectorSize) ? 256 : indexVectorSize)) : ( (int64_t)(indexVectorSize) / (int64_t)(((256 < indexVectorSize) ? 256 : indexVectorSize)) ) +1 )), int(1), int(1));
     internal_boundary_UniformGridGPU_NoSlip::boundary_UniformGridGPU_NoSlip<<<_grid, _block, 0, stream>>>(_data_indexVector, _data_pdfs, _stride_pdfs_0, _stride_pdfs_1, _stride_pdfs_2, _stride_pdfs_3, indexVectorSize);
 }
 
