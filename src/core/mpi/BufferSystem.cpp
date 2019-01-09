@@ -56,6 +56,7 @@ void BufferSystem::iterator::operator++()
    } else
    {
       bufferSystem_.bytesReceived_ += currentRecvBuffer_->size() * sizeof(RecvBuffer::ElementType);
+      bufferSystem_.numberOfReceives_ += 1;
    }
 }
 
@@ -307,7 +308,8 @@ void BufferSystem::sendAll()
       {
          if ( iter->second.buffer.size() > 0 )
          {
-            bytesSent_ += iter->second.buffer.size() * sizeof(SendBuffer::ElementType);
+            bytesSent_     += iter->second.buffer.size() * sizeof(SendBuffer::ElementType);
+            numberOfSends_ += 1;
             currentComm_->send( iter->first, iter->second.buffer );
          }
 
@@ -338,7 +340,8 @@ void BufferSystem::send( MPIRank rank )
 
    if ( iter->second.buffer.size() > 0 )
    {
-      bytesSent_ += iter->second.buffer.size() * sizeof(SendBuffer::ElementType);
+      bytesSent_     += iter->second.buffer.size() * sizeof(SendBuffer::ElementType);
+      numberOfSends_ += 1;
       currentComm_->send( rank, iter->second.buffer );
    }
 
@@ -372,8 +375,11 @@ void BufferSystem::startCommunication()
    currentComm_->scheduleReceives( recvInfos_ );
    communicationRunning_ = true;
 
-   bytesSent_     = 0;
-   bytesReceived_ = 0;
+   bytesSent_        = 0;
+   bytesReceived_    = 0;
+
+   numberOfSends_    = 0;
+   numberOfReceives_ = 0;
 }
 
 
