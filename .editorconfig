@@ -1,0 +1,10 @@
+# See https://editorconfig.org/
+root = true # top-most .editorconfig-file
+
+[*]
+tab_width = 3
+indent_style = space
+indent_size = 3
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = false
