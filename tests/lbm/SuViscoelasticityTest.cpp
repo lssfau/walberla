@@ -43,7 +43,7 @@
 
 #include "timeloop/SweepTimeloop.h"
 
-using namespace walberla;
+namespace walberla {
 
 //////////////
 // TYPEDEFS //
@@ -312,5 +312,7 @@ int main(int argc, char ** argv ){
       WALBERLA_LOG_RESULT("Failure" );
       return EXIT_FAILURE;
    }
+
+}
 
 }
