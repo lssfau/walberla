@@ -238,7 +238,6 @@ private:
 int main(int argc, char ** argv ){
    using namespace walberla;
 
-   debug::enterTestMode();
    Environment env( argc, argv );
 
    // read parameter
