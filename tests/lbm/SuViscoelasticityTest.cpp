@@ -229,14 +229,17 @@ private:
    real_t L_, H_, uMax_, uPrev_, uCurr_, uExpected_, uSteady_;
 };
 
+} // namespace walberla
 
 //////////
 // Main //
 //////////
 
 int main(int argc, char ** argv ){
+   using namespace walberla;
 
-   walberla::Environment env( argc, argv );
+   debug::enterTestMode();
+   Environment env( argc, argv );
 
    // read parameter
    shared_ptr<StructuredBlockForest> blocks = blockforest::createUniformBlockGridFromConfig( env.config() );
@@ -315,4 +318,4 @@ int main(int argc, char ** argv ){
 
 }
 
-}
+
