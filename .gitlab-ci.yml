@@ -9,7 +9,7 @@ stages:
    - test
    - deploy
 
-   
+
 ###############################################################################
 ##                                                                           ##
 ##    Build templates                                                        ##
@@ -1589,7 +1589,7 @@ doc:
       - docker
    artifacts:
       paths:
-        - build/doc
+         - build/doc
       expire_in: 1 weeks
 
 
@@ -1669,13 +1669,13 @@ coverage:
 
 
 
-###############################################################################
-##                                                                           ##
-##    Windows Builds                                                         ##
-##                                                                           ##
-###############################################################################
-      
-     
+      ###############################################################################
+      ##                                                                           ##
+      ##    Windows Builds                                                         ##
+      ##                                                                           ##
+      ###############################################################################
+
+
 .win_build_template: &win_build_definition
    tags:
       - win
@@ -1690,8 +1690,8 @@ coverage:
       - cmake -LAH -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DWALBERLA_DOUBLE_ACCURACY=$WALBERLA_DOUBLE_ACCURACY -DWARNING_ERROR=ON -G "$CMAKE_GENERATOR" ..
       - MSBuild.exe walberla.sln /property:Configuration=$BUILD_CONFIGURATION /verbosity:minimal /maxcpucount:4
       - ctest -LE $CTEST_EXCLUDE_LABELS -C $BUILD_CONFIGURATION --output-on-failure -j 4
-      
-      
+
+
 msvc-14_Hybrid_Dbg:
    <<: *win_build_definition
    variables:
@@ -1704,7 +1704,7 @@ msvc-14_Hybrid_Dbg:
    except:
       variables:
          - $DISABLE_PER_COMMIT_BUILDS
-      
+
 msvc-14_Hybrid_SP_Dbg:
    <<: *win_build_definition
    variables:
@@ -1717,7 +1717,7 @@ msvc-14_Hybrid_SP_Dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-      
+
 msvc-14_Hybrid:
    <<: *win_build_definition
    variables:
@@ -1730,7 +1730,7 @@ msvc-14_Hybrid:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-      
+
 msvc-14_Serial_Dbg:
    <<: *win_build_definition
    variables:
@@ -1743,7 +1743,7 @@ msvc-14_Serial_Dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-      
+
 msvc-14_Serial:
    <<: *win_build_definition
    variables:
@@ -1756,7 +1756,7 @@ msvc-14_Serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-      
+
 msvc-14_MpiOnly_Dbg:
    <<: *win_build_definition
    variables:
@@ -1769,7 +1769,7 @@ msvc-14_MpiOnly_Dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-      
+
 msvc-14_MpiOnly:
    <<: *win_build_definition
    variables:
@@ -1782,8 +1782,8 @@ msvc-14_MpiOnly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-      
-      
+
+
 msvc-14.1_Hybrid_Dbg:
    <<: *win_build_definition
    variables:
@@ -1796,7 +1796,7 @@ msvc-14.1_Hybrid_Dbg:
    except:
       variables:
          - $DISABLE_PER_COMMIT_BUILDS
-      
+
 msvc-14.1_Hybrid_SP_Dbg:
    <<: *win_build_definition
    variables:
@@ -1809,7 +1809,7 @@ msvc-14.1_Hybrid_SP_Dbg:
    except:
       variables:
          - $DISABLE_PER_COMMIT_BUILDS
-      
+
 msvc-14.1_Hybrid:
    <<: *win_build_definition
    variables:
@@ -1822,7 +1822,7 @@ msvc-14.1_Hybrid:
    except:
       variables:
          - $DISABLE_PER_COMMIT_BUILDS
-      
+
 msvc-14.1_Serial_Dbg:
    <<: *win_build_definition
    variables:
@@ -1835,7 +1835,7 @@ msvc-14.1_Serial_Dbg:
    except:
       variables:
          - $DISABLE_PER_COMMIT_BUILDS
-      
+
 msvc-14.1_Serial:
    <<: *win_build_definition
    variables:
@@ -1848,7 +1848,7 @@ msvc-14.1_Serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-      
+
 msvc-14.1_MpiOnly_Dbg:
    <<: *win_build_definition
    variables:
@@ -1861,7 +1861,7 @@ msvc-14.1_MpiOnly_Dbg:
    except:
       variables:
          - $DISABLE_PER_COMMIT_BUILDS
-      
+
 msvc-14.1_MpiOnly:
    <<: *win_build_definition
    variables:
@@ -1971,7 +1971,7 @@ mac_MpiOnly:
    dependencies: []
    when: manual
    only:
-      - master@walberla/walberla   
+      - master@walberla/walberla
       - tags@walberla/walberla
 
 conda-py36-win:
@@ -1980,13 +1980,23 @@ conda-py36-win:
       - win
    script:
       - conda build --python=3.6 --user=lssfau utilities\\conda\\walberla
-      
-conda-py35-win:
+
+conda-py37-win:
    <<: *conda_deploy_definition
    tags:
       - win
    script:
-      - conda build --python=3.5 --user=lssfau utilities\\conda\\walberla
+      - conda build --python=3.7 --user=lssfau utilities\\conda\\walberla
+
+conda-py37-linux:
+   <<: *conda_deploy_definition
+   tags:
+      - docker
+   image: continuumio/miniconda3
+   script:
+      - apt-get update
+      - apt-get install -y build-essential
+      - conda build --python=3.7 --user=lssfau utilities/conda/walberla
 
 conda-py36-linux:
    <<: *conda_deploy_definition
@@ -1997,16 +2007,6 @@ conda-py36-linux:
       - apt-get update
       - apt-get install -y build-essential
       - conda build --python=3.6 --user=lssfau utilities/conda/walberla
-      
-conda-py35-linux:
-   <<: *conda_deploy_definition
-   tags:
-      - docker
-   image: continuumio/miniconda3
-   script:
-      - apt-get update
-      - apt-get install -y build-essential
-      - conda build --python=3.5 --user=lssfau utilities/conda/walberla
 
 
 ###############################################################################

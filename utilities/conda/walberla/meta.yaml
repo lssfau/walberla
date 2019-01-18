@@ -1,8 +1,3 @@
-about:
-  home: www.walberla.net
-  license: GPLv3
-  summary: High Performance, Multi-physics Simulation Framework
-
 package:
   name: walberla
   version: {{ GIT_DESCRIBE_TAG }}
@@ -34,3 +29,8 @@ source:
 test:
   imports:
     - waLBerla
+
+about:
+  home: www.walberla.net
+  license: GPLv3
+  summary: High Performance, Multi-physics Simulation Framework
