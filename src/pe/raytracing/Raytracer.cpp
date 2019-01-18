@@ -219,7 +219,7 @@ void Raytracer::setupMPI_() {
    MPI_Op_create((MPI_User_function *)BodyIntersectionInfo_Comparator_MPI_OP, true, &bodyIntersectionInfo_reduction_op);
    
    const int nblocks = 7;
-   const int blocklengths[nblocks] = {1,1,1,1,1,1,1};
+   int blocklengths[nblocks] = {1,1,1,1,1,1,1};
    MPI_Datatype types[nblocks] = {
       MPI_UNSIGNED, // for coordinate
       MPI_UNSIGNED, // for coordinate
