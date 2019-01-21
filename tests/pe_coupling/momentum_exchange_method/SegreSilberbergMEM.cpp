@@ -76,14 +76,13 @@ namespace segre_silberberg_mem
 
 using namespace walberla;
 using walberla::uint_t;
-using lbm::force_model::SimpleConstant;
 
 //////////////
 // TYPEDEFS //
 //////////////
 
 // PDF field, flag field & body field
-typedef lbm::D3Q19< lbm::collision_model::TRT, false, SimpleConstant >  LatticeModel_T;
+typedef lbm::D3Q19< lbm::collision_model::TRT, false, lbm::force_model::SimpleConstant >  LatticeModel_T;
 using Stencil_T = LatticeModel_T::Stencil;
 using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
@@ -582,7 +581,8 @@ int main( int argc, char **argv )
    ////////////////////////
 
    // create the lattice model
-   LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ), SimpleConstant( Vector3<real_t> ( setup.forcing, real_t(0), real_t(0) ) ) );
+   LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( omega ),
+                                                 lbm::force_model::SimpleConstant( Vector3<real_t> ( setup.forcing, real_t(0), real_t(0) ) ) );
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (zyxf)", latticeModel,

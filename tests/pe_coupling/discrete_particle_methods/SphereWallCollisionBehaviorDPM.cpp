@@ -61,7 +61,6 @@ namespace sphere_wall_collision_behavior_dpm
 using namespace walberla;
 using walberla::uint_t;
 
-
 ///////////////
 // CONSTANTS //
 ///////////////

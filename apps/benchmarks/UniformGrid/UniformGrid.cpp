@@ -263,18 +263,27 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
 
       WALBERLA_MPI_SECTION()
       {
-         MPIManager::instance()->createCartesianComm( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, false, false, false );
+         if ( MPIManager::instance()->isCartesianCommValid() )
+         {
+            MPIManager::instance()->createCartesianComm(numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, false, false, false);
 
-         processIdMap = make_shared< std::vector<uint_t> >( numberOfXProcesses * numberOfYProcesses * numberOfZProcesses );
+            processIdMap = make_shared<std::vector<uint_t> >(numberOfXProcesses * numberOfYProcesses * numberOfZProcesses);
 
-         for( uint_t z = 0; z != numberOfZProcesses; ++z ) {
-            for( uint_t y = 0; y != numberOfYProcesses; ++y ) {
-               for( uint_t x = 0; x != numberOfXProcesses; ++x )
-               {
-                  (*processIdMap)[z * numberOfXProcesses * numberOfYProcesses + y * numberOfXProcesses + x] =
-                     uint_c( MPIManager::instance()->cartesianRank( x, y, z ) );
+            for (uint_t z = 0; z != numberOfZProcesses; ++z) {
+               for (uint_t y = 0; y != numberOfYProcesses; ++y) {
+                  for (uint_t x = 0; x != numberOfXProcesses; ++x)
+                  {
+                     (*processIdMap)[z * numberOfXProcesses * numberOfYProcesses + y * numberOfXProcesses + x] =
+                           uint_c(MPIManager::instance()->cartesianRank(x, y, z));
+                  }
                }
             }
+         }
+         else {
+            WALBERLA_LOG_WARNING_ON_ROOT( "Your version of OpenMPI contains a bug. See waLBerla issue #73 for more "
+                                          "information. As a workaround, MPI_COMM_WORLD instead of a "
+                                          "Cartesian MPI communicator is used." );
+            MPIManager::instance()->useWorldComm();
          }
       }
       else

@@ -62,7 +62,6 @@ namespace hindered_settling_dynamics_dpm
 using namespace walberla;
 using walberla::uint_t;
 
-
 ///////////////
 // CONSTANTS //
 ///////////////

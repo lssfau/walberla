@@ -193,6 +193,16 @@ public:
    //@}
    //*******************************************************************************************************************
 
+   ///Bytes sent during the current or last communication
+   int64_t getBytesSent() const { return bytesSent_; }
+   ///Bytes received during the current or last communication
+   int64_t getBytesReceived() const { return bytesReceived_; }
+
+   ///Communication partners during current or last send operation
+   int64_t getNumberOfSends() const { return numberOfSends_; }
+   ///Communication partners during current or last receive operation
+   int64_t getNumberOfReceives() const { return numberOfReceives_; }
+
 
    //* Rank Ranges     *************************************************************************************************
    /*! \name Rank Ranges  */
@@ -240,6 +250,12 @@ protected:
    //stores tags of running communications in debug mode to ensure that
    //each concurrently running communication uses different tags
    static std::set<int> activeTags_;
+
+   int64_t bytesSent_        = 0; ///< number of bytes sent during last communication
+   int64_t bytesReceived_    = 0; ///< number of bytes received during last communication
+
+   int64_t numberOfSends_    = 0; ///< number of communication partners during last send
+   int64_t numberOfReceives_ = 0; ///< number of communication partners during last receive
 };
 
 

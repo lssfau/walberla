@@ -13,14 +13,28 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file all.h
-//! \ingroup pde
-//! \author Florian Schornbaum <florian.schornbaum@fau.de>
-//! \brief Collective header file for module pde
+//! \file OpenMPWrapperTest.cpp
+//! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
-#pragma once
+#include <core/debug/TestSubsystem.h>
+#include <core/logging/Logging.h>
+#include <core/OpenMP.h>
 
-#include "Dirichlet.h"
-#include "Neumann.h"
+using namespace walberla;
+
+int main( int /*argc*/, char** /*argv*/ )
+{
+   debug::enterTestMode();
+   
+   WALBERLA_OPENMP_SECTION()
+   {
+      WALBERLA_LOG_DEVEL_VAR(omp_get_num_threads  ());
+      WALBERLA_LOG_DEVEL_VAR(omp_get_dynamic      ());
+      WALBERLA_LOG_DEVEL_VAR(omp_get_nested       ());
+      WALBERLA_LOG_DEVEL_VAR(omp_get_max_threads  ());
+      WALBERLA_LOG_DEVEL_VAR(omp_get_thread_num   ());
+      WALBERLA_LOG_DEVEL_VAR(omp_get_num_procs    ());
+   }
+}

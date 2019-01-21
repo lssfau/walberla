@@ -40,7 +40,7 @@ namespace kernelweights
 
 // corresponds to the smoothed dirac delta function from Roma et al - An Adaptive Version of the Immersed Boundary Method
 // f(r) != 0 for abs(r) < 1.5 -> requires three neighborhood cells
-real_t smoothedDeltaFunction( const real_t & r )
+inline real_t smoothedDeltaFunction( const real_t & r )
 {
    real_t rAbs = std::fabs(r);
    if( rAbs <= real_t(0.5) )
@@ -58,17 +58,17 @@ real_t smoothedDeltaFunction( const real_t & r )
 
 // X: Lagrangian position, x: Eulerian position (usually cell center), global coordinates
 // dx, dy, dz: mesh spacing
-real_t kernelWeightFunction( const real_t & X, const real_t & Y, const real_t & Z,
-                             const real_t & x, const real_t & y, const real_t & z,
-                             const real_t & dx = real_t(1), const real_t & dy = real_t(1), const real_t & dz = real_t(1) )
+inline real_t kernelWeightFunction( const real_t & X, const real_t & Y, const real_t & Z,
+                                    const real_t & x, const real_t & y, const real_t & z,
+                                    const real_t & dx = real_t(1), const real_t & dy = real_t(1), const real_t & dz = real_t(1) )
 {
    return smoothedDeltaFunction( ( X - x ) / dx ) * smoothedDeltaFunction( ( Y - y ) / dy ) * smoothedDeltaFunction( ( Z - z ) / dz );
 }
 
 // X: Lagrangian position, x: Eulerian position (usually cell center), global coordinates
 // dx, dy, dz: mesh spacing
-real_t kernelWeightFunction( const Vector3<real_t> & X, const Vector3<real_t> & x,
-                             const real_t & dx = real_t(1), const real_t & dy = real_t(1), const real_t & dz = real_t(1) )
+inline real_t kernelWeightFunction( const Vector3<real_t> & X, const Vector3<real_t> & x,
+                                    const real_t & dx = real_t(1), const real_t & dy = real_t(1), const real_t & dz = real_t(1) )
 {
    return smoothedDeltaFunction( ( X[0] - x[0] ) / dx ) * smoothedDeltaFunction( ( X[1] - x[1] ) / dy ) * smoothedDeltaFunction( ( X[2] - x[2] ) / dz );
 }
