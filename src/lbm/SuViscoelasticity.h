@@ -150,8 +150,6 @@ public:
                         gradu(b, a) += velocity->get(cell + *d)[a] * real_c(d.c(b)) * real_c(0.5);
                      } else if(boundaryHandling->isDomain(cell - *d)){
                         gradu(b, a) += velocity->get(cell - *d)[a] * real_c(d.c(b)) * real_c(-0.5) + velocity->get(cell)[a] * real_c(d.c(b));
-                     } else {
-                        gradu(b, a) += real_t(0);
                      }
                   }
                }
@@ -224,8 +222,6 @@ public:
                      f[i] += stress->get(cell + *d)(k, i) * real_c(d.c(k));
                   } else if(boundaryHandling->isDomain(cell - *d)){
                      f[i] += -stress->get(cell - *d)(k, i) * real_c(d.c(k)) + stress->get(cell)(k, i) * real_c(d.c(k)) * real_c(2.0);
-                  } else {
-                     f[i] += real_t(0);
                   }
                }
             }
