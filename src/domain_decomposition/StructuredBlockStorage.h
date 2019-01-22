@@ -257,7 +257,9 @@ public:
    { return blockStorage_->loadBlockData( file, dataHandling, identifier, requiredSelectors, incompatibleSelectors ); }
    
    void saveBlockData( const std::string & file, const BlockDataID & id ) { blockStorage_->saveBlockData( file, id ); }
-   
+   void serializeBlockData( const BlockDataID & id, mpi::SendBuffer & buffer ) { blockStorage_->serializeBlockData(id, buffer); }
+   void deserializeBlockData( const BlockDataID & id, mpi::RecvBuffer & buffer )  { blockStorage_->deserializeBlockData(id, buffer); }
+
    void clearBlockData( const BlockDataID & id ) { blockStorage_->clearBlockData(id); }
 
    uint_t numberOfBlockDataItems() const { return blockStorage_->numberOfBlockDataItems(); }

@@ -489,7 +489,10 @@ public:
                               const internal::SelectableBlockDataHandlingWrapper & dataHandling, const std::string & identifier = std::string() );
                               
    void saveBlockData( const std::string & file, const BlockDataID & id );
-   
+
+   void serializeBlockData( const BlockDataID & id, mpi::SendBuffer & buffer );
+   void deserializeBlockData( const BlockDataID & id, mpi::RecvBuffer & buffer );
+
    inline void clearBlockData( const BlockDataID & id );
 
    uint_t numberOfBlockDataItems() const { return blockDataItem_.size(); }
