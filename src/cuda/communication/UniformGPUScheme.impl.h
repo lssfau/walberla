@@ -223,8 +223,8 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr_wrapper <StructuredBlockFo
       bufferSystemGPU_.setReceiverInfo( receiverInfo );
 
       for( auto it : receiverInfo ) {
-         bufferSystemCPU_.sendBuffer( it.first ).resize( it.second );
-         bufferSystemGPU_.sendBuffer( it.first ).resize( it.second );
+         bufferSystemCPU_.sendBuffer( it.first ).resize( size_t(it.second) );
+         bufferSystemGPU_.sendBuffer( it.first ).resize( size_t(it.second) );
       }
 
       forestModificationStamp_ = forest->getBlockForest().getModificationStamp();

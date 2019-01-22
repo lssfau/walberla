@@ -169,15 +169,15 @@ void UniformGridGPU_LbKernel::operator() ( IBlock * block , cudaStream_t stream 
     }
 
     WALBERLA_ASSERT_GREATER_EQUAL(-1, -int_c(pdfs->nrOfGhostLayers()));
-    double * const _data_pdfs = pdfs->dataAt(-1, -1, -1, 0);
+    double * const _data_pdfs = pdfs->dataAt(-1, 0, 0, 0);
     WALBERLA_ASSERT_GREATER_EQUAL(-1, -int_c(pdfs_tmp->nrOfGhostLayers()));
-    double * _data_pdfs_tmp = pdfs_tmp->dataAt(-1, -1, -1, 0);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(pdfs->xSize() + 2));
-    const int64_t _size_pdfs_0 = int64_t(pdfs->xSize() + 2);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(pdfs->ySize() + 2));
-    const int64_t _size_pdfs_1 = int64_t(pdfs->ySize() + 2);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(pdfs->zSize() + 2));
-    const int64_t _size_pdfs_2 = int64_t(pdfs->zSize() + 2);
+    double * _data_pdfs_tmp = pdfs_tmp->dataAt(-1, 0, 0, 0);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->xSize()) + 2));
+    const int64_t _size_pdfs_0 = int64_t(cell_idx_c(pdfs->xSize()) + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->ySize()) + 2));
+    const int64_t _size_pdfs_1 = int64_t(cell_idx_c(pdfs->ySize()) + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->zSize()) + 2));
+    const int64_t _size_pdfs_2 = int64_t(cell_idx_c(pdfs->zSize()) + 2);
     const int64_t _stride_pdfs_0 = int64_t(pdfs->xStride());
     const int64_t _stride_pdfs_1 = int64_t(pdfs->yStride());
     const int64_t _stride_pdfs_2 = int64_t(pdfs->zStride());
@@ -219,12 +219,12 @@ void UniformGridGPU_LbKernel::inner( IBlock * block , cudaStream_t stream )
     WALBERLA_ASSERT_GREATER_EQUAL(inner.yMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
     WALBERLA_ASSERT_GREATER_EQUAL(inner.zMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
     double * _data_pdfs_tmp = pdfs_tmp->dataAt(inner.xMin() - 1, inner.yMin() - 1, inner.zMin() - 1, 0);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(inner.xSize() + 2));
-    const int64_t _size_pdfs_0 = int64_t(inner.xSize() + 2);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(inner.ySize() + 2));
-    const int64_t _size_pdfs_1 = int64_t(inner.ySize() + 2);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(inner.zSize() + 2));
-    const int64_t _size_pdfs_2 = int64_t(inner.zSize() + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(cell_idx_c(inner.xSize()) + 2));
+    const int64_t _size_pdfs_0 = int64_t(cell_idx_c(inner.xSize()) + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(cell_idx_c(inner.ySize()) + 2));
+    const int64_t _size_pdfs_1 = int64_t(cell_idx_c(inner.ySize()) + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(cell_idx_c(inner.zSize()) + 2));
+    const int64_t _size_pdfs_2 = int64_t(cell_idx_c(inner.zSize()) + 2);
     const int64_t _stride_pdfs_0 = int64_t(pdfs->xStride());
     const int64_t _stride_pdfs_1 = int64_t(pdfs->yStride());
     const int64_t _stride_pdfs_2 = int64_t(pdfs->zStride());
@@ -284,20 +284,20 @@ void UniformGridGPU_LbKernel::outer( IBlock * block , cudaStream_t stream  )
         for( auto & ci: layers )
         {
             parallelSection_.run([&]( auto s ) {
+                WALBERLA_ASSERT_GREATER_EQUAL(ci.xMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
                 WALBERLA_ASSERT_GREATER_EQUAL(ci.yMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
                 WALBERLA_ASSERT_GREATER_EQUAL(ci.zMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
-                WALBERLA_ASSERT_GREATER_EQUAL(ci.xMin() - 1, -int_c(pdfs->nrOfGhostLayers()));
                 double * const _data_pdfs = pdfs->dataAt(ci.xMin() - 1, ci.yMin() - 1, ci.zMin() - 1, 0);
+                WALBERLA_ASSERT_GREATER_EQUAL(ci.xMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
                 WALBERLA_ASSERT_GREATER_EQUAL(ci.yMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
                 WALBERLA_ASSERT_GREATER_EQUAL(ci.zMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
-                WALBERLA_ASSERT_GREATER_EQUAL(ci.xMin() - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
                 double * _data_pdfs_tmp = pdfs_tmp->dataAt(ci.xMin() - 1, ci.yMin() - 1, ci.zMin() - 1, 0);
-                WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(ci.xSize() + 2));
-                const int64_t _size_pdfs_0 = int64_t(ci.xSize() + 2);
-                WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(ci.ySize() + 2));
-                const int64_t _size_pdfs_1 = int64_t(ci.ySize() + 2);
-                WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(ci.zSize() + 2));
-                const int64_t _size_pdfs_2 = int64_t(ci.zSize() + 2);
+                WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(cell_idx_c(ci.xSize()) + 2));
+                const int64_t _size_pdfs_0 = int64_t(cell_idx_c(ci.xSize()) + 2);
+                WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(cell_idx_c(ci.ySize()) + 2));
+                const int64_t _size_pdfs_1 = int64_t(cell_idx_c(ci.ySize()) + 2);
+                WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(cell_idx_c(ci.zSize()) + 2));
+                const int64_t _size_pdfs_2 = int64_t(cell_idx_c(ci.zSize()) + 2);
                 const int64_t _stride_pdfs_0 = int64_t(pdfs->xStride());
                 const int64_t _stride_pdfs_1 = int64_t(pdfs->yStride());
                 const int64_t _stride_pdfs_2 = int64_t(pdfs->zStride());

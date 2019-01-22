@@ -30,6 +30,21 @@
 
 #define FUNC_PREFIX
 
+#ifdef WALBERLA_CXX_COMPILER_IS_GNU
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wshadow"
+#endif
+
+#ifdef WALBERLA_CXX_COMPILER_IS_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wshadow"
+#endif
+
+
 using namespace std;
 
 namespace walberla {
@@ -458,15 +473,15 @@ void UniformGridGPU_LatticeModel::Sweep::streamCollide( IBlock * block, const ui
 
     auto & omega = lm.omega;
     WALBERLA_ASSERT_GREATER_EQUAL(-cell_idx_c(numberOfGhostLayersToInclude) - 1, -int_c(pdfs->nrOfGhostLayers()));
-    double * const _data_pdfs = pdfs->dataAt(-cell_idx_c(numberOfGhostLayersToInclude) - 1, -cell_idx_c(numberOfGhostLayersToInclude) - 1, -cell_idx_c(numberOfGhostLayersToInclude) - 1, 0);
+    double * const _data_pdfs = pdfs->dataAt(-cell_idx_c(numberOfGhostLayersToInclude) - 1, 0, 0, 0);
     WALBERLA_ASSERT_GREATER_EQUAL(-cell_idx_c(numberOfGhostLayersToInclude) - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
-    double * _data_pdfs_tmp = pdfs_tmp->dataAt(-cell_idx_c(numberOfGhostLayersToInclude) - 1, -cell_idx_c(numberOfGhostLayersToInclude) - 1, -cell_idx_c(numberOfGhostLayersToInclude) - 1, 0);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(pdfs->xSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
-    const int64_t _size_pdfs_0 = int64_t(pdfs->xSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(pdfs->ySize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
-    const int64_t _size_pdfs_1 = int64_t(pdfs->ySize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(pdfs->zSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
-    const int64_t _size_pdfs_2 = int64_t(pdfs->zSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
+    double * _data_pdfs_tmp = pdfs_tmp->dataAt(-cell_idx_c(numberOfGhostLayersToInclude) - 1, 0, 0, 0);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->xSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
+    const int64_t _size_pdfs_0 = int64_t(cell_idx_c(pdfs->xSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->ySize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
+    const int64_t _size_pdfs_1 = int64_t(cell_idx_c(pdfs->ySize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->zSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
+    const int64_t _size_pdfs_2 = int64_t(cell_idx_c(pdfs->zSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
     const int64_t _stride_pdfs_0 = int64_t(pdfs->xStride());
     const int64_t _stride_pdfs_1 = int64_t(pdfs->yStride());
     const int64_t _stride_pdfs_2 = int64_t(pdfs->zStride());
@@ -486,13 +501,13 @@ void UniformGridGPU_LatticeModel::Sweep::collide( IBlock * block, const uint_t n
 
     auto & omega = lm.omega;
     WALBERLA_ASSERT_GREATER_EQUAL(-cell_idx_c(numberOfGhostLayersToInclude) - 1, -int_c(pdfs->nrOfGhostLayers()));
-    double * _data_pdfs = pdfs->dataAt(-cell_idx_c(numberOfGhostLayersToInclude) - 1, -cell_idx_c(numberOfGhostLayersToInclude) - 1, -cell_idx_c(numberOfGhostLayersToInclude) - 1, 0);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(pdfs->xSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
-    const int64_t _size_pdfs_0 = int64_t(pdfs->xSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(pdfs->ySize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
-    const int64_t _size_pdfs_1 = int64_t(pdfs->ySize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(pdfs->zSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
-    const int64_t _size_pdfs_2 = int64_t(pdfs->zSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
+    double * _data_pdfs = pdfs->dataAt(-cell_idx_c(numberOfGhostLayersToInclude) - 1, 0, 0, 0);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->xSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
+    const int64_t _size_pdfs_0 = int64_t(cell_idx_c(pdfs->xSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->ySize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
+    const int64_t _size_pdfs_1 = int64_t(cell_idx_c(pdfs->ySize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->zSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
+    const int64_t _size_pdfs_2 = int64_t(cell_idx_c(pdfs->zSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
     const int64_t _stride_pdfs_0 = int64_t(pdfs->xStride());
     const int64_t _stride_pdfs_1 = int64_t(pdfs->yStride());
     const int64_t _stride_pdfs_2 = int64_t(pdfs->zStride());
@@ -519,15 +534,15 @@ void UniformGridGPU_LatticeModel::Sweep::stream( IBlock * block, const uint_t nu
 
 
     WALBERLA_ASSERT_GREATER_EQUAL(-cell_idx_c(numberOfGhostLayersToInclude) - 1, -int_c(pdfs->nrOfGhostLayers()));
-    double * const _data_pdfs = pdfs->dataAt(-cell_idx_c(numberOfGhostLayersToInclude) - 1, -cell_idx_c(numberOfGhostLayersToInclude) - 1, -cell_idx_c(numberOfGhostLayersToInclude) - 1, 0);
+    double * const _data_pdfs = pdfs->dataAt(-cell_idx_c(numberOfGhostLayersToInclude) - 1, 0, 0, 0);
     WALBERLA_ASSERT_GREATER_EQUAL(-cell_idx_c(numberOfGhostLayersToInclude) - 1, -int_c(pdfs_tmp->nrOfGhostLayers()));
-    double * _data_pdfs_tmp = pdfs_tmp->dataAt(-cell_idx_c(numberOfGhostLayersToInclude) - 1, -cell_idx_c(numberOfGhostLayersToInclude) - 1, -cell_idx_c(numberOfGhostLayersToInclude) - 1, 0);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(pdfs->xSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
-    const int64_t _size_pdfs_0 = int64_t(pdfs->xSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(pdfs->ySize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
-    const int64_t _size_pdfs_1 = int64_t(pdfs->ySize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
-    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(pdfs->zSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
-    const int64_t _size_pdfs_2 = int64_t(pdfs->zSize() + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
+    double * _data_pdfs_tmp = pdfs_tmp->dataAt(-cell_idx_c(numberOfGhostLayersToInclude) - 1, 0, 0, 0);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->xSizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->xSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
+    const int64_t _size_pdfs_0 = int64_t(cell_idx_c(pdfs->xSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->ySizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->ySize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
+    const int64_t _size_pdfs_1 = int64_t(cell_idx_c(pdfs->ySize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
+    WALBERLA_ASSERT_GREATER_EQUAL(pdfs->zSizeWithGhostLayer(), int64_t(cell_idx_c(pdfs->zSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2));
+    const int64_t _size_pdfs_2 = int64_t(cell_idx_c(pdfs->zSize()) + 2*cell_idx_c(numberOfGhostLayersToInclude) + 2);
     const int64_t _stride_pdfs_0 = int64_t(pdfs->xStride());
     const int64_t _stride_pdfs_1 = int64_t(pdfs->yStride());
     const int64_t _stride_pdfs_2 = int64_t(pdfs->zStride());
@@ -569,3 +584,11 @@ mpi::RecvBuffer & operator>> (mpi::RecvBuffer & buf, ::walberla::lbm::UniformGri
 
 } // namespace mpi
 } // namespace walberla
+
+#ifdef WALBERLA_CXX_COMPILER_IS_GNU
+#pragma GCC diagnostic pop
+#endif
+
+#ifdef WALBERLA_CXX_COMPILER_IS_CLANG
+#pragma clang diagnostic pop
+#endif

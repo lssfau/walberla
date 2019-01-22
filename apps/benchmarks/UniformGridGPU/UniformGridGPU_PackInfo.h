@@ -19,7 +19,7 @@ public:
     UniformGridGPU_PackInfo( BlockDataID pdfsID_ )
         : pdfsID(pdfsID_)
     {};
-
+    virtual ~UniformGridGPU_PackInfo() {}
 
     virtual void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block, cudaStream_t stream);
     virtual void unpack(stencil::Direction dir, unsigned char * buffer, IBlock * block, cudaStream_t stream);

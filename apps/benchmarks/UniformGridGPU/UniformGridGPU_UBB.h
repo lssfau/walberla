@@ -87,7 +87,7 @@ public:
         void syncGPU()
         {
             gpuVectors_.resize( cpuVectors_.size() );
-            for(int i=0; i < NUM_TYPES; ++i )
+            for(size_t i=0; i < size_t(NUM_TYPES); ++i )
             {
                 auto & gpuVec = gpuVectors_[i];
                 auto & cpuVec = cpuVectors_[i];

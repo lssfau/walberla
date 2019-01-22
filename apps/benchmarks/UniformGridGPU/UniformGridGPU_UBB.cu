@@ -40,6 +40,12 @@ namespace lbm {
 #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
+#ifdef __CUDACC__
+#pragma push
+#pragma diag_suppress = declared_but_not_referenced
+#endif
+
+
 namespace internal_boundary_UniformGridGPU_UBB {
 static FUNC_PREFIX void boundary_UniformGridGPU_UBB(uint8_t * const _data_indexVector, double * _data_pdfs, int64_t const _stride_pdfs_0, int64_t const _stride_pdfs_1, int64_t const _stride_pdfs_2, int64_t const _stride_pdfs_3, int64_t indexVectorSize)
 {
@@ -63,15 +69,19 @@ static FUNC_PREFIX void boundary_UniformGridGPU_UBB(uint8_t * const _data_indexV
       
       uint8_t * const _data_indexVector_112 = _data_indexVector + 12;
       const int32_t dir = *((int32_t *)(& _data_indexVector_112[16*blockDim.x*blockIdx.x + 16*threadIdx.x]));
-      double * _data_pdfs_1ACA00C755A3ABE3 = _data_pdfs + _stride_pdfs_1*y + _stride_pdfs_1*cy[dir] + _stride_pdfs_2*z + _stride_pdfs_2*cz[dir] + _stride_pdfs_3*invdir[dir];
-      double * _data_pdfs_10_20_m7D57D887F63BE1DF = _data_pdfs + _stride_pdfs_1*y + _stride_pdfs_2*z + _stride_pdfs_3*dir;
-      _data_pdfs_1ACA00C755A3ABE3[_stride_pdfs_0*x + _stride_pdfs_0*cx[dir]] = -0.30000000000000004*cx[dir]*weights[dir] + _data_pdfs_10_20_m7D57D887F63BE1DF[_stride_pdfs_0*x];
+      double * _data_pdfsf9cc34cc4e2b6261 = _data_pdfs + _stride_pdfs_1*y + _stride_pdfs_1*cy[dir] + _stride_pdfs_2*z + _stride_pdfs_2*cz[dir] + _stride_pdfs_3*invdir[dir];
+      double * _data_pdfs_10_2011ac6bf6446d4afa = _data_pdfs + _stride_pdfs_1*y + _stride_pdfs_2*z + _stride_pdfs_3*dir;
+      _data_pdfsf9cc34cc4e2b6261[_stride_pdfs_0*x + _stride_pdfs_0*cx[dir]] = -0.30000000000000004*cx[dir]*weights[dir] + _data_pdfs_10_2011ac6bf6446d4afa[_stride_pdfs_0*x];
    } 
 }
 }
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
+
+#ifdef __CUDACC__
+#pragma pop
 #endif
 
 
@@ -119,3 +129,4 @@ void UniformGridGPU_UBB::outer( IBlock * block, cudaStream_t stream  )
 
 } // namespace lbm
 } // namespace walberla
+
