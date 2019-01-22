@@ -32,6 +32,7 @@
 #include "core/Abort.h"
 #include "core/cell/CellInterval.h"
 #include "core/math/AABB.h"
+#include "core/mpi/MPIIO.h"
 #include "core/timing/TimingPool.h"
 #include "core/timing/TimingTree.h"
 #include "communication/UniformPackInfo.h"
@@ -748,6 +749,13 @@ bool IBlock_equals( IBlock & block1, IBlock & block2 )
    return block1.getId() == block2.getId();
 }
 
+std::string IBlock_str( IBlock & b ) {
+   std::stringstream out;
+   out <<  "Block at " << b.getAABB();
+   return out.str();
+
+}
+
 void exportIBlock()
 {
    register_exception_translator<NoSuchBlockData>( & NoSuchBlockData::translate );
@@ -761,7 +769,10 @@ void exportIBlock()
          .add_property( "id",                &IBlock_getIntegerID)
          .def         ( "__hash__",          &IBlock_getIntegerID)
          .def         ( "__eq__",            &IBlock_equals)
-         .add_property( "__iter__",          &IBlock_iter    );
+         .def         ( "__repr__",          &IBlock_str )
+         .add_property( "__iter__",          &IBlock_iter  )
+         .add_property("aabb", make_function(&IBlock::getAABB, return_value_policy<copy_const_reference>()))
+         ;
 
 }
 
@@ -950,6 +961,24 @@ object SbS_transformLocalToGlobal ( StructuredBlockStorage & s, IBlock & block, 
    throw error_already_set();
 }
 
+void SbS_writeBlockData( StructuredBlockStorage & s,const std::string & blockDataId, const std::string & file )
+{
+   mpi::SendBuffer buffer;
+   s.serializeBlockData( blockDataIDFromString(s, blockDataId), buffer);
+   mpi::writeMPIIO(file, buffer);
+}
+
+void SbS_readBlockData( StructuredBlockStorage & s,const std::string & blockDataId, const std::string & file )
+{
+   mpi::RecvBuffer buffer;
+   mpi::readMPIIO(file, buffer);
+
+   s.deserializeBlockData( blockDataIDFromString(s, blockDataId), buffer );
+   if ( ! buffer.isEmpty() ) {
+      PyErr_SetString(PyExc_RuntimeError, "Reading failed - file does not contain matching data for this type." );
+      throw error_already_set();
+   }
+}
 
 CellInterval SbS_getBlockCellBB( StructuredBlockStorage & s, const IBlock * block )
 {
@@ -1039,10 +1068,11 @@ void exportStructuredBlockStorage()
        .def( "getBlockCellBB",                          &SbS_getBlockCellBB  )
        .def( "transformGlobalToLocal",                  &SbS_transformGlobalToLocal )
        .def( "transformLocalToGlobal",                  &SbS_transformLocalToGlobal )
-       .add_property("__iter__",                        &StructuredBlockStorage_iter                      )
+       .def( "writeBlockData",                          &SbS_writeBlockData )
+       .def( "readBlockData",                           &SbS_readBlockData )
+       .add_property("__iter__",                        &StructuredBlockStorage_iter                            )
        .add_property( "containsGlobalBlockInformation", &StructuredBlockStorage::containsGlobalBlockInformation )
        .add_property( "periodic",                       &SbS_periodic )
-
        ;
 
 #if BOOST_VERSION < 106300

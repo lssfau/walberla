@@ -28,6 +28,9 @@
 #include "blockforest/communication/UniformBufferedScheme.h"
 #include "blockforest/Initialization.h"
 #include "blockforest/SetupBlock.h"
+#include "blockforest/SetupBlockForest.h"
+#include "blockforest/loadbalancing/StaticCurve.h"
+
 #include "core/logging/Logging.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
 #include "python_coupling/Manager.h"
@@ -38,6 +41,7 @@
 #include "stencil/D3Q27.h"
 
 #include <boost/algorithm/string.hpp>
+#include <sstream>
 
 #ifdef _MSC_VER
 #  pragma warning(push)
@@ -131,6 +135,113 @@ object python_createUniformBlockGrid(tuple args, dict kw)
 
 }
 
+shared_ptr<StructuredBlockForest> createStructuredBlockForest( Vector3<uint_t> blocks,
+                                                               Vector3<uint_t> cellsPerBlock,
+                                                               Vector3<bool> periodic,
+                                                               object blockExclusionCallback = object(),
+                                                               object workloadMemoryCallback = object(),
+                                                               object refinementCallback = object(),
+                                                               const real_t dx = 1.0,
+                                                               memory_t processMemoryLimit = std::numeric_limits<memory_t>::max(),
+                                                               const bool keepGlobalBlockInformation = false)
+{
+   using namespace blockforest;
+   Vector3<real_t> bbMax;
+   for( uint_t i=0; i < 3; ++i )
+      bbMax[i] = real_c( blocks[i] * cellsPerBlock[i] ) * dx;
+   AABB domainAABB ( Vector3<real_t>(0),  bbMax );
+
+   SetupBlockForest sforest;
+
+   auto blockExclusionFunc = [&blockExclusionCallback] ( std::vector<walberla::uint8_t>& excludeBlock, const SetupBlockForest::RootBlockAABB& aabb ) -> void
+   {
+      for( uint_t i = 0; i != excludeBlock.size(); ++i )
+      {
+         AABB bb = aabb(i);
+         auto pythonReturnVal = blockExclusionCallback(bb);
+         if( ! extract<bool>( pythonReturnVal ).check() ) {
+            PyErr_SetString( PyExc_ValueError, "blockExclusionCallback has to return a boolean");
+            throw boost::python::error_already_set();
+         }
+
+         bool returnVal = extract<bool>(pythonReturnVal);
+         if ( returnVal )
+            excludeBlock[i] = 1;
+      }
+   };
+
+   auto workloadMemoryFunc = [&workloadMemoryCallback] ( SetupBlockForest & forest )-> void
+   {
+      std::vector< SetupBlock* > blockVector;
+      forest.getBlocks( blockVector );
+
+      for( uint_t i = 0; i != blockVector.size(); ++i ) {
+         blockVector[i]->setMemory( memory_t(1) );
+         blockVector[i]->setWorkload( workload_t(1) );
+         workloadMemoryCallback( boost::python::ptr(blockVector[i]) );
+      }
+   };
+
+   auto refinementFunc = [&refinementCallback] ( SetupBlockForest & forest )-> void
+   {
+      for( auto block = forest.begin(); block != forest.end(); ++block )
+      {
+         SetupBlock * sb = &(*block);
+         auto pythonRes = refinementCallback( boost::python::ptr(sb) );
+         if( ! extract<bool>( pythonRes ).check() ) {
+            PyErr_SetString( PyExc_ValueError, "refinementCallback has to return a boolean");
+            throw boost::python::error_already_set();
+         }
+         bool returnVal = extract<bool>( pythonRes );
+         if( returnVal )
+            block->setMarker( true );
+      }
+   };
+
+   if ( blockExclusionCallback ) {
+      if( !PyCallable_Check( blockExclusionCallback.ptr() ) ) {
+         PyErr_SetString( PyExc_ValueError, "blockExclusionCallback has to be callable");
+         throw boost::python::error_already_set();
+      }
+      sforest.addRootBlockExclusionFunction( blockExclusionFunc );
+   }
+
+   if ( workloadMemoryCallback ) {
+      if( !PyCallable_Check( workloadMemoryCallback.ptr() ) ) {
+         PyErr_SetString( PyExc_ValueError, "workloadMemoryCallback has to be callable");
+         throw boost::python::error_already_set();
+      }
+      sforest.addWorkloadMemorySUIDAssignmentFunction( workloadMemoryFunc );
+   }
+   else
+      sforest.addWorkloadMemorySUIDAssignmentFunction( uniformWorkloadAndMemoryAssignment );
+
+   if ( refinementCallback ) {
+      if( !PyCallable_Check( refinementCallback.ptr() ) ) {
+         PyErr_SetString( PyExc_ValueError, "refinementCallback has to be callable");
+         throw boost::python::error_already_set();
+      }
+      sforest.addRefinementSelectionFunction( refinementFunc );
+   }
+
+   sforest.init( domainAABB, blocks[0], blocks[1], blocks[2], periodic[0], periodic[1], periodic[2] );
+
+   // calculate process distribution
+   sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalanceWeighted(),
+                        uint_c( MPIManager::instance()->numProcesses() ),
+                        real_t(0), processMemoryLimit );
+
+   if( !MPIManager::instance()->rankValid() )
+      MPIManager::instance()->useWorldComm();
+
+   // create StructuredBlockForest (encapsulates a newly created BlockForest)
+   auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, keepGlobalBlockInformation ) );
+
+   auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2] ) );
+   sbf->createCellBoundingBoxes();
+
+   return sbf;
+}
 
 object createUniformNeighborScheme(  const shared_ptr<StructuredBlockForest> & bf,
                                      const std::string & stencil )
@@ -164,6 +275,12 @@ void exportUniformBufferedScheme()
 
 }
 
+std::string printSetupBlock(const SetupBlock & b )
+{
+   std::stringstream out;
+   out <<  "SetupBlock at " << b.getAABB();
+   return out.str();
+}
 
 
 
@@ -174,12 +291,12 @@ void exportBlockForest()
            bases<StructuredBlockStorage>, boost::noncopyable > ( "StructuredBlockForest", no_init );
 
    class_< SetupBlock, boost::noncopyable > ( "SetupBlock", no_init )
-            .def( "getLevel",    &SetupBlock::getLevel    )
-            .def( "getWorkload", &SetupBlock::getWorkload )
-            .def( "setWorkload", &SetupBlock::setWorkload )
-            .def( "getMemory",   &SetupBlock::getMemory   )
-            .def( "setMemory",   &SetupBlock::setMemory   )
-   ;
+            .add_property("level", &SetupBlock::getLevel)
+            .add_property("workload", &SetupBlock::getWorkload, &SetupBlock::setWorkload)
+            .add_property("memory",  &SetupBlock::getMemory, &SetupBlock::setMemory)
+            .add_property("aabb", make_function(&SetupBlock::getAABB, return_value_policy<copy_const_reference>()))
+            .def("__repr__", &printSetupBlock)
+            ;
 
 #ifdef _MSC_VER
 #  pragma warning(push)
@@ -191,6 +308,14 @@ void exportBlockForest()
 #  pragma warning(pop)
 #endif //_MSC_VER
 
+   def( "createCustomBlockGrid", createStructuredBlockForest,
+               (arg("blocks"), arg("cellsPerBlock"), arg("periodic"),
+                arg("blockExclusionCallback") = object(),
+                arg("workloadMemoryCallback") = object(),
+                arg("refinementCallback") = object() ,
+                arg("dx") = 1.0,
+                arg("processMemoryLimit") = std::numeric_limits<memory_t>::max(),
+                arg("keepGlobalBlockInformation") = false ) );
 }
 
 } // namespace domain_decomposition

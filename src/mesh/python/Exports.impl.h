@@ -118,6 +118,33 @@ namespace internal
 }
 
 
+bool Octree_isAABBFullyInside(const Octree & octree, const AABB & aabb)
+{
+   for( auto corner: aabb.corners() )
+   {
+      const Octree::Point p ( numeric_cast<Octree::Scalar>(corner[0]),
+                              numeric_cast<Octree::Scalar>(corner[1]),
+                              numeric_cast<Octree::Scalar>(corner[2]) );
+      if( octree.sqSignedDistance(p) > 0 )
+         return false;
+   }
+   return true;
+}
+
+
+bool Octree_isAABBFullyOutside(const Octree & octree, const AABB & aabb)
+{
+   for( auto corner: aabb.corners() )
+   {
+      const Octree::Point p ( numeric_cast<Octree::Scalar>(corner[0]),
+                              numeric_cast<Octree::Scalar>(corner[1]),
+                              numeric_cast<Octree::Scalar>(corner[2]) );
+      if( octree.sqSignedDistance(p) < 0 )
+         return false;
+   }
+   return true;
+}
+
 
 template<typename FlagFields>
 void exportModuleToPython()
@@ -143,13 +170,14 @@ void exportModuleToPython()
       .def("sqDistance", sqDistance1, (arg("p")))
       .def("height", &Octree::height)
       .def("writeVTKOutput", &Octree::writeVTKOutput, (arg("filestem")))
+      .def("isAABBfullyOutside", &Octree_isAABBFullyOutside)
+      .def("isAABBfullyInside", &Octree_isAABBFullyInside)
    ;
 
    class_<MeshWriter, shared_ptr<MeshWriter> >("VTKMeshWriter", no_init)
       .def("__init__", make_constructor(internal::makeVTKMeshWriter, default_call_policies() ,(arg("mesh"), arg("identifier"), arg("writeFrequency")=1u, arg("baseFolder")="vtk_out") ) )
       .def("__call__", &MeshWriter::operator())
    ;
-
 
 }
 
