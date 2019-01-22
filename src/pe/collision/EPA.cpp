@@ -324,34 +324,39 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
                   epaVolume[(*current)[2]],
                   ctr);
             if(radius2 > real_t(0.0)){ //if a Sphere exists
-               //std::cerr << "Circle created with center at " << ctr << ". r2=" << radius2 << std::endl;
+               // std::cerr << "Circle created with center at " << ctr << ". r2=" << radius2 << std::endl;
                real_t center_len = ctr.length();
                real_t circle_dist = (std::sqrt(radius2) - center_len); //Distance from center to the spheres surface
-               //Check if the circle matches the bounds given by EPA and limit max error to ca. 5%
+
+               // Check if the circle matches the bounds given by EPA and limit max error to ca. 5%
                if (circle_dist*circle_dist <= upperBoundSqr &&
                    circle_dist*circle_dist >= lowerBoundSqr &&
                    (circle_dist*circle_dist) < real_t(1.10) * lowerBoundSqr &&
-                   !floatIsEqual(center_len, real_t(0.0)))
+                   !floatIsEqual(center_len, real_t(0.0)) &&
+                   circle_dist > real_t(0.0)) // In case of numerical errors, this can be the case
                {
                   const auto ilen = real_t(1.0) / center_len;
                   ctr *= -ilen;
-                  //std::cerr << "New support direction: " <<  ctr << std::endl;
                   pushSupportMargin(geom1, geom2, ctr, margin, epaVolume, supportA, supportB);
                   support = epaVolume.back();
                   // Check if support is in expected direction
-
-                  if(floatIsEqual((support % ctr).sqrLength()/support.sqrLength(), real_t(0.0)))
-                  { //Accept sphere
+                  real_t supp_dist = support.length();
+                  if(floatIsEqual((support % ctr).sqrLength()/support.sqrLength(), real_t(0.0)) &&
+                     supp_dist*supp_dist <= upperBoundSqr &&
+                     supp_dist*supp_dist >= lowerBoundSqr)
+                  {
+                     //Accept sphere
                      contactPoint = real_t(0.5) * (supportA.back() + supportB.back());
-                     penetrationDepth = -support.length() + real_t(2.0) * margin;
+                     penetrationDepth = -supp_dist + real_t(2.0) * margin;
                      retNormal = -ctr;
-                     //std::cerr << "Found penetration depth " << penetrationDepth << " with CurvedEPA!" << std::endl;
+                     
                      if(penetrationDepth < contactThreshold){
                         return true;
                      }else{
                         return false;
                      }
-                  } else { //Reject sphere
+                  } else {
+                     //Reject sphere
                      removeSupportMargin(epaVolume, supportA, supportB);
                      support = epaVolume.back();
                   }
@@ -872,7 +877,7 @@ inline real_t EPA::calculateCircle(const Vec3& A, const Vec3& B, const Vec3& C,
 
    // Here we already see if such circle exists.
    const real_t det = n1 * (n2 % n3);
-   if(std::fabs(det) < math::Limits<real_t>::fpuAccuracy()){
+   if(floatIsEqual(det, real_t(0.0))){
       //no circle exists. Leave center untouched, and return -1.0
       return real_t(-1.0);
    }
