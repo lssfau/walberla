@@ -60,6 +60,9 @@ endif( WALBERLA_BUILD_WITH_MPI )
 
 # CodeGen Tests
 
+waLBerla_python_file_generates(codegen/JacobiKernel.py
+                                  JacobiKernel2D.cpp JacobiKernel2D.h
+                                  JacobiKernel3D.cpp JacobiKernel3D.h)
 waLBerla_compile_test( FILES codegen/CodegenJacobiCPU.cpp codegen/JacobiKernel.py
                        DEPENDS gui timeloop )
 waLBerla_execute_test( NAME CodegenJacobiCPU )

@@ -40,11 +40,10 @@ function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generator
         if( ${sourceFile} MATCHES ".*\\.py$" )
             set(codeGenRequired YES)
             if( WALBERLA_BUILD_WITH_CODEGEN)
-                execute_process(COMMAND ${PYTHON_EXECUTABLE} ${sourceFile} -l
-                            OUTPUT_VARIABLE generatedSourceFiles)
-                string(REGEX REPLACE "\n$" "" generatedSourceFiles "${generatedSourceFiles}")
+                get_filename_component(pythonFileAbsolutePath ${sourceFile} ABSOLUTE )
+                set( generatedSourceFiles ${WALBERLA_CODEGEN_INFO_${pythonFileAbsolutePath}} )
 
-                set(generatedWithAbsolutePath )
+                set( generatedWithAbsolutePath )
                 foreach( filename ${generatedSourceFiles} )
                     list(APPEND generatedWithAbsolutePath ${CMAKE_CURRENT_BINARY_DIR}/${filename})
                 endforeach()
@@ -52,9 +51,19 @@ function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generator
                 list(APPEND generatedResult  ${generatedWithAbsolutePath} )
                 list(APPEND generatorsResult ${sourceFile} )
 
+                string (REPLACE ";" "\", \"" jsonFileList "${generatedWithAbsolutePath}" )
+                set(pythonParameters
+                        "{\"EXPECTED_FILES\": [\"${jsonFileList}\"], \"CMAKE_VARS\" : {  "
+                            "\"WALBERLA_OPTIMIZE_FOR_LOCALHOST\": \"${WALBERLA_OPTIMIZE_FOR_LOCALHOST}\","
+                            "\"WALBERLA_DOUBLE_ACCURACY\": \"${WALBERLA_DOUBLE_ACCURACY}\","
+                            "\"WALBERLA_BUILD_WITH_MPI\": \"${WALBERLA_BUILD_WITH_MPI}\","
+                            "\"WALBERLA_BUILD_WITH_OPENMP\": \"${WALBERLA_BUILD_WITH_OPENMP}\" } }"
+                        )
+                string(REPLACE "\"" "\\\"" pythonParameters ${pythonParameters})   # even one more quoting level required
+                string(REPLACE "\n" "" pythonParameters ${pythonParameters})  # remove newline characters
                 add_custom_command(OUTPUT ${generatedWithAbsolutePath}
                                    DEPENDS ${sourceFile}
-                                   COMMAND ${PYTHON_EXECUTABLE} ${sourceFile} -g
+                                   COMMAND ${PYTHON_EXECUTABLE} ${sourceFile} ${pythonParameters}
                                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
                 include_directories(${CMAKE_CURRENT_BINARY_DIR})
             endif()

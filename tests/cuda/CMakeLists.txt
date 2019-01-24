@@ -19,6 +19,10 @@ waLBerla_execute_test( NAME  SimpleKernelTest )
 waLBerla_compile_test( FILES FieldIndexing3DTest.cpp FieldIndexing3DTest.cu )
 waLBerla_execute_test( NAME  FieldIndexing3DTest )
 
+
+waLBerla_python_file_generates(codegen/CudaJacobiKernel.py
+        CudaJacobiKernel2D.cu CudaJacobiKernel2D.h
+        CudaJacobiKernel3D.cu CudaJacobiKernel3D.h)
 waLBerla_compile_test( FILES codegen/CodegenJacobiGPU.cpp
                              codegen/CudaJacobiKernel.py
                        DEPENDS blockforest timeloop gui )
@@ -34,8 +38,8 @@ waLBerla_compile_test( FILES CudaMPI DEPENDS blockforest timeloop gui )
 
 waLBerla_compile_test( FILES AlignmentTest.cpp DEPENDS blockforest timeloop )
 
-waLBerla_compile_test( FILES codegen/MicroBenchmarkGpuLbm.cpp codegen/MicroBenchmarkGpuLbm.py)
 
-waLBerla_add_executable ( NAME CpuGpuGeneratedEquivalenceTest
-                          FILES codegen/EquivalenceTest.cpp codegen/EquivalenceTest.gen.py
-                          DEPENDS blockforest boundary core cuda field stencil timeloop vtk gui )
+waLBerla_python_file_generates(codegen/MicroBenchmarkGpuLbm.py
+        MicroBenchmarkStreamKernel.cu MicroBenchmarkStreamKernel.h
+        MicroBenchmarkCopyKernel.cu MicroBenchmarkCopyKernel.h)
+waLBerla_compile_test( FILES codegen/MicroBenchmarkGpuLbm.cpp codegen/MicroBenchmarkGpuLbm.py)

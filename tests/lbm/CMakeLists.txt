@@ -64,5 +64,9 @@ waLBerla_execute_test( NAME PdfFieldInitializerTest COMMAND $<TARGET_FILE:PdfFie
 
 
 # Code Generation
-waLBerla_compile_test( FILES codegen/SrtWithForceFieldModel.gen.py
+waLBerla_python_file_generates(codegen/SrtWithForceFieldModel.py
+        SrtWithForceFieldModel.cpp SrtWithForceFieldModel.h
+        MyNoSlip.cpp MyNoSlip.h
+        MyUBB.cpp MyUBB.h)
+waLBerla_compile_test( FILES codegen/SrtWithForceFieldModel.py
                              codegen/SrtWithForceField.cpp )
