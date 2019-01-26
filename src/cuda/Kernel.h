@@ -107,9 +107,6 @@ namespace cuda {
 
 
    protected:
-      template<typename T> size_t determineNextOffset();
-
-
       //** Members        **********************************************************************************************
       /*! \name Members  */
       //@{
@@ -120,11 +117,7 @@ namespace cuda {
       dim3 blockDim_;
       std::size_t sharedMemSize_;
 
-      struct ParamInfo {
-         std::vector<char> data;
-         size_t offset;
-      };
-      std::vector< ParamInfo > params_;
+      std::vector< std::vector<char> > params_;
       //@}
       //****************************************************************************************************************
 
@@ -187,10 +180,9 @@ namespace cuda {
    template<typename T>
    void Kernel<FP>::addParam( const T & param )
    {
-      ParamInfo paramInfo;
-      paramInfo.data.resize( sizeof(T) );
-      std::memcpy ( &(paramInfo.data[0]), &param, sizeof(T) );
-      paramInfo.offset = determineNextOffset<T>();
+      std::vector<char> paramInfo;
+      paramInfo.resize( sizeof(T) );
+      std::memcpy ( paramInfo.data(), &param, sizeof(T) );
 
       WALBERLA_ASSERT( checkParameter<T>( params_.size() +1 ),
                        "cuda::Kernel type mismatch of parameter " << params_.size() +1  );
@@ -231,28 +223,21 @@ namespace cuda {
    void Kernel<FP>::operator() ( cudaStream_t stream ) const
    {
       // check for correct number of parameter calls
-
       if ( params_.size() != boost::function_traits<FuncType>::arity ) {
          WALBERLA_ABORT( "Error when calling cuda::Kernel - Wrong number of arguments. " <<
                          "Expected " << boost::function_traits<FuncType>::arity << ", received " << params_.size() );
       }
 
-      // set the number of blocks and  threads,
-      WALBERLA_CUDA_CHECK( cudaConfigureCall( gridDim_, blockDim_, sharedMemSize_, stream ) );
-
       // register all parameters
+      std::vector<void*> args;
       for( auto paramIt = params_.begin(); paramIt != params_.end(); ++paramIt )  {
-         const void * ptr = &(paramIt->data[0]);
-         WALBERLA_CUDA_CHECK( cudaSetupArgument( ptr, paramIt->data.size(), paramIt->offset ) );
+         args.push_back( const_cast<char*>(paramIt->data()) );
       }
 
       // .. and launch the kernel
       static_assert( sizeof(void *) == sizeof(void (*)(void)),
                      "object pointer and function pointer sizes must be equal" );
-      // dirty casting trick to circumvent compiler warning
-      // essentially the next two lines are:  cudaLaunch( funcPtr_ );
-      void *q = (void*) &funcPtr_;
-      WALBERLA_CUDA_CHECK( cudaLaunch( (const char*) ( *static_cast<void **>(q) )) );
+      WALBERLA_CUDA_CHECK( cudaLaunchKernel( (void*) funcPtr_, gridDim_, blockDim_, args.data(), sharedMemSize_, stream ) );
    }
 
 
@@ -273,19 +258,6 @@ namespace cuda {
             WALBERLA_ABORT("Too many parameters passed to kernel");
       }
       return false;
-   }
-
-
-   template<typename FP>
-   template<typename T>
-   size_t Kernel<FP>::determineNextOffset()
-   {
-      size_t currentOffset = 0;
-      if ( !params_.empty() )
-         currentOffset = params_.back().offset + params_.back().data.size();
-
-      size_t alignment = __alignof( T );
-      return (currentOffset + alignment-1) & ~(alignment-1);
    }
 
 
