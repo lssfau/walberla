@@ -1,5 +1,7 @@
 #include "core/Environment.h"
 #include "python_coupling/CreateConfig.h"
+#include "python_coupling/PythonCallback.h"
+#include "python_coupling/DictWrapper.h"
 #include "blockforest/Initialization.h"
 #include "lbm/field/PdfField.h"
 #include "lbm/field/AddToStorage.h"
@@ -28,6 +30,7 @@
 #include "UniformGridGPU_PackInfo.h"
 #include "UniformGridGPU_UBB.h"
 #include "UniformGridGPU_NoSlip.h"
+#include "UniformGridGPU_Communication.h"
 
 
 using namespace walberla;
@@ -80,11 +83,10 @@ int main( int argc, char **argv )
       noSlip.fillFromFlagField<FlagField_T>( blocks, flagFieldID, FlagUID("NoSlip"), fluidFlagUID );
       //pressure.fillFromFlagField<FlagField_T>( blocks, flagFieldID, FlagUID("pressure"), fluidFlagUID );
 
-
-
       // Communication setup
       bool overlapCommunication = parameters.getParameter<bool>( "overlapCommunication", true );
       bool cudaEnabledMPI = parameters.getParameter<bool>( "cudaEnabledMPI", false );
+      int communicationScheme = parameters.getParameter<int>( "communicationScheme", (int) CommunicationSchemeType::UniformGPUScheme_Baseline );
 
       int streamHighPriority = 0;
       int streamLowPriority = 0;
@@ -92,9 +94,10 @@ int main( int argc, char **argv )
 
       pystencils::UniformGridGPU_LbKernel lbKernel( pdfFieldGpuID, omega );
       lbKernel.setOuterPriority( streamHighPriority );
-      CommScheme_T gpuComm( blocks, cudaEnabledMPI );
-      gpuComm.addPackInfo( make_shared<pystencils::UniformGridGPU_PackInfo>( pdfFieldGpuID ));
-
+      //CommScheme_T gpuComm( blocks, cudaEnabledMPI );
+      //gpuComm.addPackInfo( make_shared<pystencils::UniformGridGPU_PackInfo>( pdfFieldGpuID ));
+      UniformGridGPU_Communication< CommunicationStencil_T, cuda::GPUField< double > >
+         gpuComm( blocks, pdfFieldGpuID, (CommunicationSchemeType) communicationScheme, cudaEnabledMPI );
 
       auto defaultStream = cuda::StreamRAII::newPriorityStream( streamLowPriority );
       auto innerOuterStreams = cuda::ParallelStreams( streamHighPriority );
@@ -121,6 +124,7 @@ int main( int argc, char **argv )
          innerOuterSection.run([&]( auto outerStream )
          {
             gpuComm( outerStream );
+
             for( auto &block: *blocks )
             {
                {
@@ -172,10 +176,41 @@ int main( int argc, char **argv )
       auto remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 ); // in seconds
       timeLoop.addFuncAfterTimeStep( timing::RemainingTimeLogger( timeLoop.getNrOfTimeSteps(), remainingTimeLoggerFrequency ), "remaining time logger" );
 
+      /*
       lbm::PerformanceLogger<FlagField_T> performanceLogger(blocks, flagFieldID, fluidFlagUID, 500);
       timeLoop.addFuncAfterTimeStep( performanceLogger, "remaining time logger" );
 
       timeLoop.run();
+      */
+
+      auto performanceReportFrequency = parameters.getParameter< uint_t >( "performanceReportFrequency", 500 ); // in timesteps
+      lbm::PerformanceLogger<FlagField_T> performanceLogger(blocks, flagFieldID, fluidFlagUID, performanceReportFrequency);
+      timeLoop.addFuncAfterTimeStep([&performanceLogger] { performanceLogger(); }, "performance logger" );
+
+      timeLoop.run();
+
+      std::map< std::string, int > integerProperties;
+      std::map< std::string, double > realProperties;
+      std::map< std::string, std::string > stringProperties;
+
+      performanceLogger.logOverallResultsOnRoot();
+      performanceLogger.getBestResultsForSQLOnRoot(integerProperties, realProperties, stringProperties);
+
+      WALBERLA_ROOT_SECTION()
+      {
+         python_coupling::PythonCallback pythonCallbackResults ( "results_callback" );
+         if ( pythonCallbackResults.isCallable() )
+         {
+            pythonCallbackResults.data().exposeValue( "mlups_total", realProperties["MLUPS"] );
+            pythonCallbackResults.data().exposeValue( "mlups_process", realProperties["MLUPS_process"] );
+
+            pythonCallbackResults.data().exposeValue( "mflups_total", realProperties["MFLUPS"] );
+            pythonCallbackResults.data().exposeValue( "mflups_process", realProperties["MFLUPS_process"] );
+
+            // Call Python function to report results
+            pythonCallbackResults();
+         }
+      }
    }
 
    return 0;

@@ -57,42 +57,16 @@ class GPUPackInfo : public walberla::communication::UniformPackInfo
 public:
    typedef typename GPUField_T::value_type FieldType;
 
-   GPUPackInfo( const BlockDataID & bdId, cudaStream_t stream = 0 )
-   : bdId_( bdId ), communicateAllGhostLayers_( true ), numberOfGhostLayers_( 0 )
+   GPUPackInfo( const BlockDataID & bdId )
+   : bdId_( bdId ), communicateAllGhostLayers_( true ), numberOfGhostLayers_( 0 ),
+     copyAsync_( false ), communicationStream_( 0 )
    {
-      streams_.push_back( stream );
-      copyAsync_ = (stream != 0);
    }
 
-   GPUPackInfo( const BlockDataID & bdId, const uint_t numberOfGHostLayers, cudaStream_t stream = 0 )
-   : bdId_( bdId ), communicateAllGhostLayers_( false ), numberOfGhostLayers_(  numberOfGHostLayers )
+   GPUPackInfo( const BlockDataID & bdId, const uint_t numberOfGHostLayers )
+   : bdId_( bdId ), communicateAllGhostLayers_( false ), numberOfGhostLayers_(  numberOfGHostLayers ),
+     copyAsync_( false ), communicationStream_( 0 )
    {
-      streams_.push_back( stream );
-      copyAsync_ = (stream != 0);
-   }
-
-   GPUPackInfo( const BlockDataID & bdId, std::vector< cudaStream_t > & streams )
-   : bdId_( bdId ), communicateAllGhostLayers_( true ), numberOfGhostLayers_( 0 ), streams_( streams )
-   {
-      copyAsync_ = true;
-      for( auto streamIt = streams_.begin(); streamIt != streams_.end(); ++streamIt )
-         if ( *streamIt == 0 )
-         {
-            copyAsync_ = false;
-            break;
-         }
-   }
-
-   GPUPackInfo( const BlockDataID & bdId, const uint_t numberOfGHostLayers, std::vector< cudaStream_t > & streams )
-   : bdId_( bdId ), communicateAllGhostLayers_( false ), numberOfGhostLayers_(  numberOfGHostLayers ), streams_( streams )
-   {
-      copyAsync_ = true;
-      for( auto streamIt = streams_.begin(); streamIt != streams_.end(); ++streamIt )
-         if ( *streamIt == 0 )
-         {
-            copyAsync_ = false;
-            break;
-         }
    }
 
    virtual ~GPUPackInfo() {}
@@ -104,18 +78,25 @@ public:
 
    void communicateLocal(const IBlock * sender, IBlock * receiver, stencil::Direction dir);
 
+   void setCommunicationStream( cudaStream_t stream )
+   {
+      if ( stream != 0 )
+      {
+         copyAsync_ = true;
+         communicationStream_ = stream;
+      }
+   }
+
 protected:
    void packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const;
 
    uint_t numberOfGhostLayersToCommunicate( const GPUField_T * const field ) const;
 
-   inline cudaStream_t & getStream(stencil::Direction & dir) { return streams_[dir % streams_.size()]; }
-
    const BlockDataID bdId_;
    bool   communicateAllGhostLayers_;
    uint_t numberOfGhostLayers_;
-   std::vector< cudaStream_t > streams_;
    bool copyAsync_;
+   cudaStream_t communicationStream_;
    std::map< stencil::Direction, PinnedMemoryBuffer > pinnedRecvBuffers_;
    mutable std::map< stencil::Direction, PinnedMemoryBuffer > pinnedSendBuffers_;
 };
@@ -145,7 +126,7 @@ void GPUPackInfo<GPUField_T>::unpackData(IBlock * receiver, stencil::Direction d
       std::copy( bufPtr, static_cast< unsigned char * >( bufPtr + nrOfBytesToRead ), copyBufferPtr );
    }
 
-   cudaStream_t & unpackStream = getStream(dir);
+   cudaStream_t & unpackStream = communicationStream_;
 
    auto dstOffset = std::make_tuple( uint_c(fieldCi.xMin() + nrOfGhostLayers),
                                      uint_c(fieldCi.yMin() + nrOfGhostLayers),
@@ -201,7 +182,7 @@ void GPUPackInfo<GPUField_T>::communicateLocal(const IBlock * sender, IBlock * r
    CellInterval sCi = field::getSliceBeforeGhostLayer( *sf, dir, nrOfGhostLayers, false );
    CellInterval rCi = field::getGhostRegion( *rf, stencil::inverseDir[dir], nrOfGhostLayers, false );
 
-   cudaStream_t & commStream = getStream(dir);
+   cudaStream_t & commStream = communicationStream_;
 
    auto dstOffset = std::make_tuple( uint_c(rCi.xMin() + nrOfGhostLayers),
                                      uint_c(rCi.yMin() + nrOfGhostLayers),
@@ -255,7 +236,7 @@ void GPUPackInfo<GPUField_T>::packDataImpl(const IBlock * sender, stencil::Direc
 
    unsigned char * outBufferPtr = outBuffer.forward( nrOfBytesToPack );
 
-   const cudaStream_t & packStream = streams_[dir % streams_.size()];
+   const cudaStream_t & packStream = communicationStream_;
 
    unsigned char * copyBufferPtr = outBufferPtr;
    if ( copyAsync_ )
