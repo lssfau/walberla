@@ -120,7 +120,7 @@ void simpleSweep( IBlock * block )
 There is still a problem with this function: It can only have a single argument, otherwise we can not register
 it as a sweep at the time loop since we additionally need the BlockDataID of our field.
 One possibility would be to have a global variable where the BlockDataID is stored (very bad design, do not do that!),
-or we could use a construct from the boost library called boost::bind().
+or we could use a construct from the standard library called std::bind().
 The last can transform a function pointer of a two-argument function to a function pointer of a one-argument function
 by keeping the second argument constant: It "binds" the second argument to a fixed value.
 
@@ -139,7 +139,7 @@ and register it at the time loop with the following:
 \code
 SweepTimeloop timeloop( blocks, uint_c(1) );
 auto pointerToTwoArgFunction = & simpleSweep;
-auto pointerToOneArgFunction = boost::bind( pointerToTwoArgFunction, _1, fieldID );
+auto pointerToOneArgFunction = std::bind( pointerToTwoArgFunction, _1, fieldID );
 timeloop.add() << Sweep( pointerToOneArgFunction, "BogusAlgorithm" );
 \endcode
 
@@ -149,7 +149,7 @@ can be piped in. If you want to know more about the sweep registration read the 
 
 \section tut02_sweep_class Register a Class as Sweep
 
-The variant described above using boost::bind() may seem a little strange but there is also another solution.
+The variant described above using std::bind() may seem a little strange but there is also another solution.
 Instead of writing a sweep function, we write a functor class overloading the call operator.
 
 \code
@@ -182,7 +182,7 @@ private:
 };
 \endcode
 
-With this, the registration code does not need boost::bind any more:
+With this, the registration code does not need std::bind any more:
 
 \code
 timeloop.add() << Sweep( SimpleSweep(fieldID), "BogusAlgorithmButNowAsFunctor" );
