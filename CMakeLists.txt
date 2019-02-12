@@ -64,6 +64,7 @@ option ( WALBERLA_BUILD_BENCHMARKS          "Build Benchmarks"                  
 option ( WALBERLA_BUILD_TOOLS               "Build Tools"                                        )
 option ( WALBERLA_BUILD_TUTORIALS           "Build Tutorials"                                 ON )
 option ( WALBERLA_BUILD_SHOWCASES           "Build Showcases"                                OFF )
+option ( WALBERLA_BUILD_DOC                 "Build Documentation"                             ON )
 
 option ( WALBERLA_BUILD_WITH_MPI            "Build with MPI"                                  ON )
 option ( WALBERLA_BUILD_WITH_METIS          "Build with metis graph partitioner"             OFF )
@@ -275,7 +276,7 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 set( CMAKE_CXX_EXTENSIONS OFF )
 
 # common flags for intel and g++
-if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL )
+if ( NOT WARNING_DISABLE AND ( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL ) )
    add_flag ( CMAKE_CXX_FLAGS "-Wall -Wconversion -Wshadow" )
 endif()
 
@@ -613,12 +614,13 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
     endif()
 
 
-    # Sphinx documentation
-    # to build documentation make sure to have sphinx and read-the-docs theme installed
-    # Install with: "pip install sphinx sphinx_rtd_theme"
-    add_custom_target( docPython sphinx-build -b html "${walberla_SOURCE_DIR}/python/waLBerla_docs" "${walberla_BINARY_DIR}/doc/python"
-                       COMMENT "Building HTML documentation for Python extension with Sphinx")
-
+    if(WALBERLA_BUILD_DOC)
+      # Sphinx documentation
+      # to build documentation make sure to have sphinx and read-the-docs theme installed
+      # Install with: "pip install sphinx sphinx_rtd_theme"
+      add_custom_target( docPython sphinx-build -b html "${walberla_SOURCE_DIR}/python/waLBerla_docs" "${walberla_BINARY_DIR}/doc/python"
+                         COMMENT "Building HTML documentation for Python extension with Sphinx")
+  endif()
 endif()
 
 
@@ -1235,28 +1237,31 @@ endif()
 ############################################################################################################################
 # Documentation Generation
 #
-# Build documentation using Doxygen (www.doxygen.org)
-############################################################################################################################
-find_package ( Doxygen  )
-find_package ( HTMLHelp )
+if (WALBERLA_BUILD_DOC)
+  # Build documentation using Doxygen (www.doxygen.org)
+  ############################################################################################################################
+  find_package ( Doxygen  )
+  find_package ( HTMLHelp )
+  
+  if ( HTML_HELP_COMPILER EQUAL "" )
+     set ( HTML_HELP_FOUND "NO" )
+  else ( )
+     set ( HTML_HELP_FOUND "YES" )
+  endif ( )
+  
+  if ( DOXYGEN_FOUND )
+     set ( DOXYGEN_HTML_HEADER ${walberla_SOURCE_DIR}/doc/header.html )
+     set ( DOXYGEN_HTML_FOOTER ${walberla_SOURCE_DIR}/doc/footer.html )
+     set ( DOXYGEN_HTML_OUTPUT "html" )
+  
+     configure_file ( ${walberla_SOURCE_DIR}/doc/doxygen.in ${walberla_BINARY_DIR}/doc/doxygen.cfg @ONLY )
 
-if ( HTML_HELP_COMPILER EQUAL "" )
-   set ( HTML_HELP_FOUND "NO" )
-else ( )
-   set ( HTML_HELP_FOUND "YES" )
-endif ( )
+     add_custom_target ( doc   ${DOXYGEN_EXECUTABLE} ${walberla_BINARY_DIR}/doc/doxygen.cfg
+                            COMMENT "Generating API documentation with Doxygen" VERBATIM )
 
-if ( DOXYGEN_FOUND )
-   set ( DOXYGEN_HTML_HEADER ${walberla_SOURCE_DIR}/doc/header.html )
-   set ( DOXYGEN_HTML_FOOTER ${walberla_SOURCE_DIR}/doc/footer.html )
-   set ( DOXYGEN_HTML_OUTPUT "html" )
+  endif ( )
+endif()
 
-   configure_file ( ${walberla_SOURCE_DIR}/doc/doxygen.in ${walberla_BINARY_DIR}/doc/doxygen.cfg @ONLY )
-
-   add_custom_target ( doc   ${DOXYGEN_EXECUTABLE} ${walberla_BINARY_DIR}/doc/doxygen.cfg
-                       COMMENT "Generating API documentation with Doxygen" VERBATIM )
-
-endif ( )
 ############################################################################################################################
 
 
