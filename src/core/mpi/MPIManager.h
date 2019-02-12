@@ -156,9 +156,12 @@ private:
 
    bool currentlyAborting_;
 
+   bool finalizeOnDestruction_;
+
    // Singleton
    MPIManager() : worldRank_(0), rank_(-1), numProcesses_(1), comm_(MPI_COMM_NULL),
-                  isMPIInitialized_(false), cartesianSetup_(false), currentlyAborting_(false)
+                  isMPIInitialized_(false), cartesianSetup_(false), currentlyAborting_(false),
+                  finalizeOnDestruction_(false)
    { WALBERLA_NON_MPI_SECTION() { rank_ = 0; } }
 
 }; // class MPIManager
