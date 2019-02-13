@@ -31,7 +31,7 @@
 # This mechanism is just for convenience, one can simply compile an application that uses walberla modules
 # by standard cmake mechanisms:
 #  add_executable ( myApp  ${mySourceFiles} )
-#  target_link_libraries ( myApp  walberlaModule1 core-field  lbm-boundary ) 
+#  target_link_libraries ( myApp  ${WALBERLA_LINK_LIBRARIES_KEYWORD} walberlaModule1 core-field  lbm-boundary ) 
 # The difference here is that all transitively depending modules also have to be specified manually.
 # i.e. assume core-field depends on core-stencil, then core-stencil has to be added by hand. 
 # If you use waLBerla_add_executable , these dependent modules are added automatically.
@@ -202,7 +202,7 @@ function ( target_link_modules target )
         if( TARGET ${libraryName} ) 
      	   get_target_property( target_type ${libraryName} TYPE ) 
      	   if( ${target_type} MATCHES LIBRARY ) 
-     	      target_link_libraries( ${target} ${libraryName} )
+     	      target_link_libraries( ${target} ${WALBERLA_LINK_LIBRARIES_KEYWORD} ${libraryName} )
      	   endif( )                    
      	endif( ) 
     endforeach()

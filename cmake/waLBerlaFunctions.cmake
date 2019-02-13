@@ -228,7 +228,7 @@ function ( waLBerla_add_executable )
     set_source_files_properties( ${generatedSourceFiles} PROPERTIES GENERATED TRUE )
 
     target_link_modules  ( ${ARG_NAME} ${ARG_DEPENDS}  )
-    target_link_libraries( ${ARG_NAME} ${SERVICE_LIBS} )
+    target_link_libraries( ${ARG_NAME} ${WALBERLA_LINK_LIBRARIES_KEYWORD} ${SERVICE_LIBS} )
     set_property( TARGET ${ARG_NAME} PROPERTY CXX_STANDARD 14 )
 
     if( WALBERLA_GROUP_PROJECTS )

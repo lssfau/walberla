@@ -26,7 +26,7 @@ if ( WALBERLA_BUILD_WITH_PYTHON_MODULE )
         add_library( walberla_cpp SHARED PythonModule.cpp )
     endif()
 
-    target_link_libraries( walberla_cpp ${pythonModules} ${SERVICE_LIBS}  )
+    target_link_libraries( walberla_cpp ${WALBERLA_LINK_LIBRARIES_KEYWORD} ${pythonModules} ${SERVICE_LIBS}  )
     set_target_properties( walberla_cpp PROPERTIES PREFIX "")
     if ( APPLE )
        set_target_properties( walberla_cpp PROPERTIES SUFFIX ".so")

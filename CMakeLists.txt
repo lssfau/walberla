@@ -130,6 +130,11 @@ list( APPEND WALBERLA_MODULE_DIRS "${walberla_SOURCE_DIR}/src" "${walberla_SOURC
 list( REMOVE_DUPLICATES  WALBERLA_MODULE_DIRS )
 set ( WALBERLA_MODULE_DIRS  ${WALBERLA_MODULE_DIRS} CACHE INTERNAL "All folders that contain modules or tests" )
 
+# target_link_libraries needs to called with keywords everywhere if it is called with keywords once
+if( DEFINED CUDA_LINK_LIBRARIES_KEYWORD AND NOT CUDA_LINK_LIBRARIES_KEYWORD STREQUAL "" )
+    set( WALBERLA_LINK_LIBRARIES_KEYWORD PUBLIC )
+endif()
+
 ############################################################################################################################
 
 
