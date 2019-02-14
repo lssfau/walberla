@@ -73,7 +73,14 @@ void SphereVtkOutput::push( std::ostream& os, const uint_t data, const uint_t po
    switch( data )
    {
    case 0:
-      vtk::toStream( os, numeric_cast< float >(bodies_.at( point )->getMass()) );
+      if( bodies_.at( point )->hasInfiniteMass() )
+      {
+         vtk::toStream( os, std::numeric_limits< float >::infinity() );
+      }
+      else
+      {
+         vtk::toStream( os, numeric_cast< float >(bodies_.at( point )->getMass()) );
+      }
       break;
    case 1:
       vtk::toStream( os, numeric_cast< float >(bodies_.at( point )->getRadius()) );
@@ -107,7 +114,14 @@ void SphereVtkOutput::push( vtk::Base64Writer& b64, const uint_t data, const uin
    switch( data )
    {
    case 0:
-      b64 << numeric_cast< float >(bodies_.at( point )->getMass());
+      if( bodies_.at( point )->hasInfiniteMass() )
+      {
+         b64 << std::numeric_limits< float >::infinity();
+      }
+      else
+      {
+         b64 << numeric_cast< float >(bodies_.at( point )->getMass());
+      }
       break;
    case 1:
       b64 << numeric_cast< float >(bodies_.at( point )->getRadius());
