@@ -103,6 +103,7 @@ void MPIManager::initializeMPI( int* argc, char*** argv, bool abortOnException )
       MPI_Initialized( &mpiAlreadyInitialized );
       if ( ! mpiAlreadyInitialized ) {
          MPI_Init( argc, argv );
+         finalizeOnDestruction_ = true;
       }
 
       isMPIInitialized_ = true;
@@ -122,7 +123,10 @@ void MPIManager::finalizeMPI()
       if( isMPIInitialized_ && !currentlyAborting_ )
       {
          isMPIInitialized_ = false;
-         MPI_Finalize();
+         if (finalizeOnDestruction_)
+         {
+            MPI_Finalize();
+         }
       }
    }
 }
