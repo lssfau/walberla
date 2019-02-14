@@ -218,11 +218,10 @@ function ( waLBerla_add_executable )
         return()
     endif()
 
-
-    if ( CUDA_FOUND )
-        cuda_add_executable( ${ARG_NAME} ${sourceFiles} ${generatedSourceFiles} ${generatorSourceFiles} )
+    if ( WALBERLA_BUILD_WITH_CUDA )
+        cuda_add_executable( ${ARG_NAME} ${sourceFiles} ${generatedSourceFiles} )
     else()
-        add_executable( ${ARG_NAME} ${sourceFiles} ${generatedSourceFiles} ${generatorSourceFiles} )
+        add_executable( ${ARG_NAME} ${sourceFiles} ${generatedSourceFiles}  )
     endif()
 
     set_source_files_properties( ${generatedSourceFiles} PROPERTIES GENERATED TRUE )
