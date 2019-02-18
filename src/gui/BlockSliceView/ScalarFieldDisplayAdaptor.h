@@ -56,7 +56,6 @@ namespace gui {
       typedef typename field_t::value_type T;
 
       static const uint_t F_SIZE = field_t::F_SIZE;
-      static_assert( F_SIZE ==1, "Only Scalar fields can be displayed" );
 
       void drawScalarFieldNumeric( CellView * cell, const typename field_t::const_iterator & it );
       void drawScalarFieldColormap( CellView * cell, const typename field_t::const_iterator & it, T min, T max );
@@ -65,7 +64,7 @@ namespace gui {
       using FieldDisplayAdaptor<field_t>::field_;
       using FieldDisplayAdaptor<field_t>::sliceInterval_;
       using FieldDisplayAdaptor<field_t>::blockDataId_;
-
+      cell_idx_t f;
       DisplayPropertiesItem * displayProperties_;
    };
 

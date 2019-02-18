@@ -136,6 +136,14 @@ DisplayAdaptor * GUI::findDisplayAdaptorForBlockID ( ConstBlockDataID bdId ) con
       if ( block.isDataOfType< GhostLayerField<real_t,3> >         ( bdId) ) return new ScalarField3DisplayAdaptor<GhostLayerField<real_t,3> >        ( bdId );
 
 
+      if ( block.isDataOfType< GhostLayerField<real_t,2>   >( bdId) ) return new ScalarFieldDisplayAdaptor<GhostLayerField<real_t, 2>   >( bdId );
+      if ( block.isDataOfType< GhostLayerField<real_t,3>   >( bdId) ) return new ScalarFieldDisplayAdaptor<GhostLayerField<real_t, 3>   >( bdId );
+      if ( block.isDataOfType< GhostLayerField<real_t,4>   >( bdId) ) return new ScalarFieldDisplayAdaptor<GhostLayerField<real_t, 4>   >( bdId );
+      if ( block.isDataOfType< GhostLayerField<real_t,5>   >( bdId) ) return new ScalarFieldDisplayAdaptor<GhostLayerField<real_t, 5>   >( bdId );
+      if ( block.isDataOfType< GhostLayerField<real_t,6>   >( bdId) ) return new ScalarFieldDisplayAdaptor<GhostLayerField<real_t, 6>   >( bdId );
+      if ( block.isDataOfType< GhostLayerField<real_t,7>   >( bdId) ) return new ScalarFieldDisplayAdaptor<GhostLayerField<real_t, 7>   >( bdId );
+
+
       // Fields
       if ( block.isDataOfType< Field<uint8_t ,1>   >( bdId) ) return new ScalarFieldDisplayAdaptor<Field<uint8_t ,1>   >( bdId );
       if ( block.isDataOfType< Field<uint16_t,1>   >( bdId) ) return new ScalarFieldDisplayAdaptor<Field<uint16_t,1>   >( bdId );

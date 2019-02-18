@@ -37,6 +37,7 @@ namespace gui {
 template< typename field_t>
 ScalarFieldDisplayAdaptor<field_t>::ScalarFieldDisplayAdaptor( ConstBlockDataID scalarFieldID )
       : FieldDisplayAdaptor<field_t>( scalarFieldID ),
+        f(0),
         displayProperties_ ( NULL )
 {
 }
@@ -67,7 +68,17 @@ void ScalarFieldDisplayAdaptor<field_t>::addConfigurationItem( QTreeWidgetItem *
    if ( ! displayProperties_ )
    {
       QStringList options;
-      options << "Numeric" << "Color Map";
+
+      if( field_t::F_SIZE == 1) {
+         options << "Numeric" << "Color Map";
+      }
+      else
+      {
+         for( uint_t i=0; i < field_t::F_SIZE; ++i ) {
+            options << QString("%1 Numeric").arg(i);
+            options << QString("%1 Color Map").arg(i);
+         }
+      }
 
       displayProperties_ = new DisplayPropertiesItem( options, parentItem );
       displayProperties_->enableGradientSelect();
@@ -87,9 +98,10 @@ void ScalarFieldDisplayAdaptor<field_t>::draw( QVector<QVector<CellView*> > & gr
       return;
 
    // displayType is option index in the QStringList passed to the constructor of displayProperties
-   int displayType = displayProperties_->getComboBoxSelection();
+   int comboSelection = displayProperties_->getComboBoxSelection();
+   int displayType = comboSelection % 2;
+   f = comboSelection / 2;
    assert ( displayType >=0 && displayType <2 );
-
 
    T min = std::numeric_limits<T>::max();
    T max = std::numeric_limits<T>::min();
@@ -117,26 +129,28 @@ void ScalarFieldDisplayAdaptor<field_t>::draw( QVector<QVector<CellView*> > & gr
 }
 
 template< typename field_t>
-void ScalarFieldDisplayAdaptor<field_t>::drawScalarFieldNumeric( CellView * cell, const typename field_t::const_iterator & it )
+void ScalarFieldDisplayAdaptor<field_t>::drawScalarFieldNumeric( CellView * cell,
+                                                                 const typename field_t::const_iterator & it)
 {
    if( boost::is_same<T,float>::value || boost::is_same<T,double>::value )
-      cell->setText( QString("%1").arg( real_c(*it), 0,'g',6)  );
-   else if ( *it < std::numeric_limits<T>::max() )
-      cell->setText( QString("%1").arg(*it)  );
+      cell->setText(QString("%1").arg(real_c(it.getF(f)), 0, 'g', 6));
+   else if ( it.getF(f) < std::numeric_limits<T>::max() )
+      cell->setText( QString("%1").arg(it.getF(f))  );
    else
       cell->setText("");
 }
 
 
 template< typename field_t>
-void ScalarFieldDisplayAdaptor<field_t>::drawScalarFieldColormap( CellView * cell, const typename field_t::const_iterator & it,
-                                                  T min, T max )
+void ScalarFieldDisplayAdaptor<field_t>::drawScalarFieldColormap( CellView * cell,
+                                                                  const typename field_t::const_iterator & it,
+                                                                  T min, T max )
 {
    real_t normVal = 0;
    if ( fabs( real_c(max) - real_c(min) ) > 1e-7 )
-      normVal = real_c( *it - min ) / real_c(max-min);
+       normVal = real_c(it.getF(f) - min) / real_c(max - min);
 
-   if ( *it < std::numeric_limits<T>::max() )
+   if ( it.getF(f) < std::numeric_limits<T>::max() )
       cell->setBrush( displayProperties_->getColorFromColormap( normVal ) );
    else
       cell->setBrush( QBrush(Qt::red) );
