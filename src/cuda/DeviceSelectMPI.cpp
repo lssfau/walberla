@@ -27,7 +27,15 @@
 namespace walberla {
 namespace cuda {
 
-#ifdef WALBERLA_BUILD_WITH_MPI
+#if MPI_VERSION == 2 || MPI_VERSION == 1
+
+#ifndef MPI_COMM_TYPE_SHARED
+
+void selectDeviceBasedOnMpiRank() {
+   WALBERLA_ABORT("Your MPI implementation is tool old - it does not support CUDA device selection based on MPI rank");
+}
+
+#else
 
 void selectDeviceBasedOnMpiRank()
 {
@@ -62,6 +70,8 @@ void selectDeviceBasedOnMpiRank()
       WALBERLA_CUDA_CHECK( cudaSetDevice( rankOnNode % deviceCount ) );
    }
 }
+#endif
+
 
 #else
 
