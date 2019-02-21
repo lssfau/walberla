@@ -35,14 +35,14 @@ namespace cuda {
       ~ParallelSection();
       void run( const std::function<void( cudaStream_t )> &f );
 
+      cudaStream_t stream();
+      void next();
+
    private:
       friend class ParallelStreams;
 
       ParallelSection( ParallelStreams *parent, cudaStream_t mainStream );
       void synchronize();
-
-      cudaStream_t stream();
-      void next();
 
       ParallelStreams * parent_;
       cudaStream_t mainStream_;
