@@ -21,6 +21,7 @@
 #pragma once
 
 #include "core/Abort.h"
+#include "waLBerlaDefinitions.h"
 
 // MPI SECTION //
 

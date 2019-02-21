@@ -21,11 +21,13 @@
 #include <core/debug/TestSubsystem.h>
 #include <core/logging/Logging.h>
 #include <core/OpenMP.h>
+#include <core/mpi/Environment.h>
 
 using namespace walberla;
 
-int main( int /*argc*/, char** /*argv*/ )
+int main( int argc, char** argv )
 {
+   mpi::Environment env(argc, argv);
    debug::enterTestMode();
    
    WALBERLA_OPENMP_SECTION()
