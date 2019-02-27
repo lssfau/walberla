@@ -441,10 +441,9 @@
          const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0) \
          { \
             CODE \
-            ++it0; \
          } \
       } \
    } \
@@ -456,10 +455,9 @@
          const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0) \
          { \
             CODE \
-            ++it0; \
          } \
       } \
    } }
@@ -481,10 +479,9 @@
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1) \
          { \
             CODE \
-            ++it0; ++it1; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
       } \
@@ -498,10 +495,9 @@
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1) \
          { \
             CODE \
-            ++it0; ++it1; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
       } \
@@ -527,10 +523,9 @@
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -546,10 +541,9 @@
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -579,10 +573,9 @@
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
          auto it3 = (f3)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -600,10 +593,9 @@
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
          auto it3 = (f3)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -637,10 +629,9 @@
          auto it2 = (f2)->beginSliceXYZ( interval ); \
          auto it3 = (f3)->beginSliceXYZ( interval ); \
          auto it4 = (f4)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -660,10 +651,9 @@
          auto it2 = (f2)->beginSliceXYZ( interval ); \
          auto it3 = (f3)->beginSliceXYZ( interval ); \
          auto it4 = (f4)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -701,10 +691,9 @@
          auto it3 = (f3)->beginSliceXYZ( interval ); \
          auto it4 = (f4)->beginSliceXYZ( interval ); \
          auto it5 = (f5)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -726,10 +715,9 @@
          auto it3 = (f3)->beginSliceXYZ( interval ); \
          auto it4 = (f4)->beginSliceXYZ( interval ); \
          auto it5 = (f5)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -771,10 +759,9 @@
          auto it4 = (f4)->beginSliceXYZ( interval ); \
          auto it5 = (f5)->beginSliceXYZ( interval ); \
          auto it6 = (f6)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it6) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -798,10 +785,9 @@
          auto it4 = (f4)->beginSliceXYZ( interval ); \
          auto it5 = (f5)->beginSliceXYZ( interval ); \
          auto it6 = (f6)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it6) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -847,10 +833,9 @@
          auto it5 = (f5)->beginSliceXYZ( interval ); \
          auto it6 = (f6)->beginSliceXYZ( interval ); \
          auto it7 = (f7)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it6, ++it7) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -876,10 +861,9 @@
          auto it5 = (f5)->beginSliceXYZ( interval ); \
          auto it6 = (f6)->beginSliceXYZ( interval ); \
          auto it7 = (f7)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it6, ++it7) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1183,10 +1167,9 @@
          const ::walberla::cell_idx_t z = ::walberla::cell_idx_c( iz ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0) \
          { \
             CODE \
-            ++it0; \
          } \
       } \
    } \
@@ -1198,10 +1181,9 @@
          const ::walberla::cell_idx_t y = ::walberla::cell_idx_c( iy ); \
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0) \
          { \
             CODE \
-            ++it0; \
          } \
       } \
    } }
@@ -1223,10 +1205,9 @@
          const CellInterval interval( ::walberla::cell_idx_t(0), ::walberla::cell_idx_t(0), z, xSize__ - ::walberla::cell_idx_t(1), ySize__ - ::walberla::cell_idx_t(1), z ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1) \
          { \
             CODE \
-            ++it0; ++it1; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
       } \
@@ -1240,10 +1221,9 @@
          const CellInterval interval( ::walberla::cell_idx_t(0), y, ::walberla::cell_idx_t(0), xSize__ - ::walberla::cell_idx_t(1), y, zSize__ - ::walberla::cell_idx_t(1) ); \
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1) \
          { \
             CODE \
-            ++it0; ++it1; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
       } \
@@ -1269,10 +1249,9 @@
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1288,10 +1267,9 @@
          auto it0 = (f0)->beginSliceXYZ( interval ); \
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1321,10 +1299,9 @@
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
          auto it3 = (f3)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1342,10 +1319,9 @@
          auto it1 = (f1)->beginSliceXYZ( interval ); \
          auto it2 = (f2)->beginSliceXYZ( interval ); \
          auto it3 = (f3)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1379,10 +1355,9 @@
          auto it2 = (f2)->beginSliceXYZ( interval ); \
          auto it3 = (f3)->beginSliceXYZ( interval ); \
          auto it4 = (f4)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1402,10 +1377,9 @@
          auto it2 = (f2)->beginSliceXYZ( interval ); \
          auto it3 = (f3)->beginSliceXYZ( interval ); \
          auto it4 = (f4)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1443,10 +1417,9 @@
          auto it3 = (f3)->beginSliceXYZ( interval ); \
          auto it4 = (f4)->beginSliceXYZ( interval ); \
          auto it5 = (f5)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1468,10 +1441,9 @@
          auto it3 = (f3)->beginSliceXYZ( interval ); \
          auto it4 = (f4)->beginSliceXYZ( interval ); \
          auto it5 = (f5)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1513,10 +1485,9 @@
          auto it4 = (f4)->beginSliceXYZ( interval ); \
          auto it5 = (f5)->beginSliceXYZ( interval ); \
          auto it6 = (f6)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it6) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1540,10 +1511,9 @@
          auto it4 = (f4)->beginSliceXYZ( interval ); \
          auto it5 = (f5)->beginSliceXYZ( interval ); \
          auto it6 = (f6)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it6) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1589,10 +1559,9 @@
          auto it5 = (f5)->beginSliceXYZ( interval ); \
          auto it6 = (f6)->beginSliceXYZ( interval ); \
          auto it7 = (f7)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it6, ++it7) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1618,10 +1587,9 @@
          auto it5 = (f5)->beginSliceXYZ( interval ); \
          auto it6 = (f6)->beginSliceXYZ( interval ); \
          auto it7 = (f7)->beginSliceXYZ( interval ); \
-         while( it0 != (f0)->end() ) \
+         for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it6, ++it7) \
          { \
             CODE \
-            ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7; \
          } \
          WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
          WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1714,11 +1682,10 @@
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_4( it0, f0, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
-   auto it0 = (f0)->beginXYZ(); \
-   while( it0 != (f0)->end() ) \
+   auto it0 = (f0)->beginXYZ() \
+   for(/* see above */; it0 != (f0)->end(); ++it0) \
    { \
       CODE \
-      ++it0; \
    } }
 
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
@@ -1728,10 +1695,9 @@
    WALBERLA_ASSERT_EQUAL_2( (f0)->xyzSize(), (f1)->xyzSize() ); \
    auto it0 = (f0)->beginXYZ(); \
    auto it1 = (f1)->beginXYZ(); \
-   while( it0 != (f0)->end() ) \
+   for(/* see above */; it0 != (f0)->end(); ++it0, ++it1) \
    { \
       CODE \
-      ++it0; ++it1; \
    } \
    WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); }
 
@@ -1745,10 +1711,9 @@
    auto it0 = (f0)->beginXYZ(); \
    auto it1 = (f1)->beginXYZ(); \
    auto it2 = (f2)->beginXYZ(); \
-   while( it0 != (f0)->end() ) \
+   for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2) \
    { \
       CODE \
-      ++it0; ++it1; ++it2; \
    } \
    WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
    WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); }
@@ -1766,10 +1731,9 @@
    auto it1 = (f1)->beginXYZ(); \
    auto it2 = (f2)->beginXYZ(); \
    auto it3 = (f3)->beginXYZ(); \
-   while( it0 != (f0)->end() ) \
+   for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3) \
    { \
       CODE \
-      ++it0; ++it1; ++it2; ++it3; \
    } \
    WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
    WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1791,10 +1755,9 @@
    auto it2 = (f2)->beginXYZ(); \
    auto it3 = (f3)->beginXYZ(); \
    auto it4 = (f4)->beginXYZ(); \
-   while( it0 != (f0)->end() ) \
+   for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4) \
    { \
       CODE \
-      ++it0; ++it1; ++it2; ++it3; ++it4;\
    } \
    WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
    WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1820,10 +1783,9 @@
    auto it3 = (f3)->beginXYZ(); \
    auto it4 = (f4)->beginXYZ(); \
    auto it5 = (f5)->beginXYZ(); \
-   while( it0 != (f0)->end() ) \
+   for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5) \
    { \
       CODE \
-      ++it0; ++it1; ++it2; ++it3; ++it4; ++it5;\
    } \
    WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
    WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1853,10 +1815,9 @@
    auto it4 = (f4)->beginXYZ(); \
    auto it5 = (f5)->beginXYZ(); \
    auto it6 = (f6)->beginXYZ(); \
-   while( it0 != (f0)->end() ) \
+   for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it6) \
    { \
       CODE \
-      ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6;\
    } \
    WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
    WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
@@ -1890,10 +1851,9 @@
    auto it5 = (f5)->beginXYZ(); \
    auto it6 = (f6)->beginXYZ(); \
    auto it7 = (f7)->beginXYZ(); \
-   while( it0 != (f0)->end() ) \
+   for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it7) \
    { \
       CODE \
-      ++it0; ++it1; ++it2; ++it3; ++it4; ++it5; ++it6; ++it7;\
    } \
    WALBERLA_ASSERT_EQUAL_2( it1, (f1)->end() ); \
    WALBERLA_ASSERT_EQUAL_2( it2, (f2)->end() ); \
