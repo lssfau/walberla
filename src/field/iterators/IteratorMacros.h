@@ -1682,7 +1682,7 @@
 // Do not call this macro, call 'WALBERLA_FOR_ALL_CELLS_OMP' (using the same signature) instead
 #define WALBERLA_FOR_ALL_CELLS_OMP_4( it0, f0, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (f0) ); \
-   auto it0 = (f0)->beginXYZ() \
+   auto it0 = (f0)->beginXYZ(); \
    for(/* see above */; it0 != (f0)->end(); ++it0) \
    { \
       CODE \
