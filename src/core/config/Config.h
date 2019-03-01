@@ -128,8 +128,8 @@ public:
    public:
       //**Constructors**************************************************************************************************
       explicit Parameter():parameter_(),error_(noerror) {}
-      explicit Parameter( const Type& parameter, ErrorCode err, const std::string & key )
-         : parameter_(parameter), error_(err), key_(key) {}
+      explicit Parameter(Type parameter, ErrorCode err, std::string key )
+         : parameter_(std::move(parameter)), error_(err), key_(std::move(key)) {}
       // No explicitly declared copy constructor.
       //****************************************************************************************************************
 
