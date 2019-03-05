@@ -1851,7 +1851,7 @@
    auto it5 = (f5)->beginXYZ(); \
    auto it6 = (f6)->beginXYZ(); \
    auto it7 = (f7)->beginXYZ(); \
-   for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it7) \
+   for(/* see above */; it0 != (f0)->end(); ++it0, ++it1, ++it2, ++it3, ++it4, ++it5, ++it6, ++it7) \
    { \
       CODE \
    } \
