@@ -57,6 +57,7 @@ function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generator
                             "\"WALBERLA_OPTIMIZE_FOR_LOCALHOST\": \"${WALBERLA_OPTIMIZE_FOR_LOCALHOST}\","
                             "\"WALBERLA_DOUBLE_ACCURACY\": \"${WALBERLA_DOUBLE_ACCURACY}\","
                             "\"WALBERLA_BUILD_WITH_MPI\": \"${WALBERLA_BUILD_WITH_MPI}\","
+                            "\"WALBERLA_BUILD_WITH_CUDA\": \"${WALBERLA_BUILD_WITH_CUDA}\","
                             "\"WALBERLA_BUILD_WITH_OPENMP\": \"${WALBERLA_BUILD_WITH_OPENMP}\" } }"
                         )
                 string(REPLACE "\"" "\\\"" pythonParameters ${pythonParameters})   # even one more quoting level required
