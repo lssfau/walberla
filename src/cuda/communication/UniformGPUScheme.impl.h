@@ -139,8 +139,6 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr_wrapper <StructuredBlockFo
          auto parallelSection = parallelSectionManager_.parallelSection( stream );
          for( auto recvInfo = bufferSystemCPU_.begin(); recvInfo != bufferSystemCPU_.end(); ++recvInfo )
          {
-            using namespace std::chrono_literals;
-            std::this_thread::sleep_for( 1ms );
             auto &gpuBuffer = bufferSystemGPU_.sendBuffer( recvInfo.rank());
 
             gpuBuffer.clear();

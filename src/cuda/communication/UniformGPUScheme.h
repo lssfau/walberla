@@ -33,7 +33,6 @@
 #include "cuda/communication/CustomMemoryBuffer.h"
 #include "cuda/ParallelStreams.h"
 
-#include <chrono>
 #include <thread>
 
 namespace walberla {
