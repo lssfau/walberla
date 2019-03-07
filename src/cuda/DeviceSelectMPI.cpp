@@ -29,8 +29,6 @@ namespace cuda {
 
 #if MPI_VERSION == 2 || MPI_VERSION == 1
 
-#ifndef MPI_COMM_TYPE_SHARED
-
 void selectDeviceBasedOnMpiRank() {
    WALBERLA_ABORT("Your MPI implementation is tool old - it does not support CUDA device selection based on MPI rank");
 }
@@ -39,43 +37,39 @@ void selectDeviceBasedOnMpiRank() {
 
 void selectDeviceBasedOnMpiRank()
 {
+#ifdef WALBERLA_BUILD_WITH_MPI
    int deviceCount;
-   WALBERLA_CUDA_CHECK( cudaGetDeviceCount ( &deviceCount ) );
-
+   WALBERLA_CUDA_CHECK( cudaGetDeviceCount( &deviceCount ));
+   WALBERLA_LOG_INFO_ON_ROOT( "Selecting CUDA device depending on MPI Rank" );
 
    MPI_Info info;
    MPI_Info_create( &info );
    MPI_Comm newCommunicator;
-   MPI_Comm_split_type( MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, info, &newCommunicator );
+   MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, info, &newCommunicator );
 
    int processesOnNode;
    int rankOnNode;
    MPI_Comm_size( newCommunicator, &processesOnNode );
    MPI_Comm_rank( newCommunicator, &rankOnNode );
 
-   if( deviceCount == processesOnNode )
+   if ( deviceCount == processesOnNode )
    {
-      WALBERLA_CUDA_CHECK( cudaSetDevice( rankOnNode ) );
+      WALBERLA_CUDA_CHECK( cudaSetDevice( rankOnNode ));
    }
    else if ( deviceCount > processesOnNode )
    {
-      WALBERLA_LOG_WARNING("Not using all available GPUs on node. Processes on node "
-                                   << processesOnNode << " available GPUs on node " << deviceCount );
-      WALBERLA_CUDA_CHECK( cudaSetDevice( rankOnNode ) );
+      WALBERLA_LOG_WARNING( "Not using all available GPUs on node. Processes on node "
+                               << processesOnNode << " available GPUs on node " << deviceCount );
+      WALBERLA_CUDA_CHECK( cudaSetDevice( rankOnNode ));
    }
    else
    {
-      WALBERLA_LOG_WARNING("Too many processes started per node - should be one per GPU. Number of processes per node "
-                                   << processesOnNode << ", available GPUs on node " << deviceCount );
-      WALBERLA_CUDA_CHECK( cudaSetDevice( rankOnNode % deviceCount ) );
+      WALBERLA_LOG_WARNING( "Too many processes started per node - should be one per GPU. Number of processes per node "
+                               << processesOnNode << ", available GPUs on node " << deviceCount );
+      WALBERLA_CUDA_CHECK( cudaSetDevice( rankOnNode % deviceCount ));
    }
-}
 #endif
-
-
-#else
-
-void selectDeviceBasedOnMpiRank() {}
+}
 
 #endif
 

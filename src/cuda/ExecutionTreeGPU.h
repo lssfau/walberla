@@ -26,6 +26,19 @@
 
 #include <cuda_runtime.h>
 
+#ifdef CUDART_VERSION
+#if CUDART_VERSION <= 9020
+cudaError_t cudaLaunchHostFunc( cudaStream_t,  void(CUDART_CB* )( void*  userData ), void* ) {
+        static bool printedWarning = false;
+        if( ! printedWarning ) {
+                WALBERLA_LOG_WARNING_ON_ROOT("Timing of CUDA functions only implemented for CUDA versions >= 10.0" );
+                printedWarning = true;
+        }
+        return cudaSuccess;
+}
+#endif
+#endif
+
 namespace walberla {
 namespace executiontree {
 
