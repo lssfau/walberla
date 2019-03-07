@@ -1102,6 +1102,9 @@ if ( WALBERLA_BUILD_WITH_CUDA )
             list ( APPEND CUDA_NVCC_FLAGS "-g -G" )
         endif()
 
+        if( WALBERLA_BUILD_WITH_FASTMATH )
+           list ( APPEND CUDA_NVCC_FLAGS "-use_fast_math" )
+        endif()
 
         # Bug with gcc5 and cuda7.5:
         #list( APPEND CUDA_NVCC_FLAGS  "-D_MWAITXINTRIN_H_INCLUDED -D_FORCE_INLINES  -D__STRICT_ANSI__")
