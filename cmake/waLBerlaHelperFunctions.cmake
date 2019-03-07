@@ -53,15 +53,16 @@ function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generator
 
                 string (REPLACE ";" "\", \"" jsonFileList "${generatedWithAbsolutePath}" )
                 set(pythonParameters
-                        "{\"EXPECTED_FILES\": [\"${jsonFileList}\"], \"CMAKE_VARS\" : {  "
+                        "\\\{\"EXPECTED_FILES\": [\"${jsonFileList}\"], \"CMAKE_VARS\" : \\\{  "
                             "\"WALBERLA_OPTIMIZE_FOR_LOCALHOST\": \"${WALBERLA_OPTIMIZE_FOR_LOCALHOST}\","
                             "\"WALBERLA_DOUBLE_ACCURACY\": \"${WALBERLA_DOUBLE_ACCURACY}\","
                             "\"WALBERLA_BUILD_WITH_MPI\": \"${WALBERLA_BUILD_WITH_MPI}\","
                             "\"WALBERLA_BUILD_WITH_CUDA\": \"${WALBERLA_BUILD_WITH_CUDA}\","
-                            "\"WALBERLA_BUILD_WITH_OPENMP\": \"${WALBERLA_BUILD_WITH_OPENMP}\" } }"
+                            "\"WALBERLA_BUILD_WITH_OPENMP\": \"${WALBERLA_BUILD_WITH_OPENMP}\" \\\} \\\}"
                         )
                 string(REPLACE "\"" "\\\"" pythonParameters ${pythonParameters})   # even one more quoting level required
                 string(REPLACE "\n" "" pythonParameters ${pythonParameters})  # remove newline characters
+
                 add_custom_command(OUTPUT ${generatedWithAbsolutePath}
                                    DEPENDS ${sourceFile}
                                    COMMAND ${PYTHON_EXECUTABLE} ${sourceFile} ${pythonParameters}
