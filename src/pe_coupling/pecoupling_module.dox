@@ -1,0 +1,222 @@
+//======================================================================================================================
+//
+//  This file is part of waLBerla. waLBerla is free software: you can 
+//  redistribute it and/or modify it under the terms of the GNU General Public
+//  License as published by the Free Software Foundation, either version 3 of 
+//  the License, or (at your option) any later version.
+//  
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//  for more details.
+//  
+//  You should have received a copy of the GNU General Public License along
+//  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
+//
+//! \file pecoupling_module.dox
+//! \ingroup pe_coupling
+//! \author Christoph Rettinger <christoph.rettinger@fau.de>
+//
+//======================================================================================================================
+
+namespace walberla {
+namespace pe_coupling {
+
+/**
+\defgroup pe_coupling pe_coupling - Coupled fluid-particle simulations with LBM and PE
+
+\section couplings Which coupling techniques are available in waLBerla?
+
+This module provides algorithms that allow coupled simulations of LBM for the fluid part and rigid particles from the PE module.
+This coupling can be achieved in various ways, depending on whether the particles should be fully resolved by the fluid flow around it (as in a direct numerical simulation) or if modelling assumptions are introduced that allow for unresolved particles.
+
+The following coupling techniques are provided by the framework:
+
+\subsection mem Momentum exchange method
+
+This is a coupling method for geometrically fully resolved simulations, i.e. the numerical resolution is significantly finer than the size of the particle.
+It is based on the work of \cite ladd1994mem and \cite aidun1998mem.
+It explicitly maps the particles into the fluid domain by flagging the containing cells as "obstacle".
+The coupling is then established by a velocity boundary condition for LBM along the particles' surface and by calculating the hydrodynamic force acting on the particles.
+This is the main coupling technique that we are using in waLBerla.
+
+See \cite rettinger2017comparative for more infos and benchmark tests. See \cite rettinger2017dunes for a large-scale application of this coupling.
+
+\subsection psm Partially saturated cells method
+
+This is a second option for fully resolved coupled simulations and is based on the work of \cite noble1998psm.
+It uses a solid volume fraction field that stores the occupancy of the fluid cells by the solid phase.
+This scalar value is then used in a special LBM collision operator that models the interaction by a weighting between the fluid collision and the solid collision.
+This collision step results in the interaction forces that are then set onto the particles.
+
+See \cite rettinger2017comparative for more info and benchmark tests.
+
+\subsection dps Discrete particle simulations
+
+This is a completely different class of methods that uses particles that are smaller than an LBM cell.
+This necessitates the introduction of models for the fluid-particle interaction forces, where the drag and pressure forces are usually the most important ones.
+In short, fluid quantities like velocity are interpolated to the particle positions and used there to evaluate the empirical formulas for the interaction forces.
+This forces are then applied to the particles and the corresponding reaction-force is distributed back to the surrounding fluid cells.
+For denser systems, the equations of fluid motion have to be altered to incorporate displacement effects by the solid phase, yielding the volume-averaged Navier-Stokes equations.
+For higher Reynolds number flows, also turbulence models might become necessary since the resolution for the fluid motion is usually very coarse.
+The results are highly dependent on the included models and extensive pre-studies have to be undertaken to incorporate all important effects.
+The current implementation provides a variety of the mentioned functionalities.
+
+See \cite rettinger2018dps for more information.
+
+\section mem_setup How do I set up a simulation with the momentum exchange method?
+
+Since it is a coupled simulation, you first of all need both, the LBM parts and the PE parts. So also the restrictions coming from these modules apply (like number of blocks in periodic setups with particles, see \ref tutorial_pe_01).
+
+\attention Make sure that the PE simulation (e.g. the material parameters) is set up with the same units as the LBM simulation, i.e. we usually use lattice units everywhere.
+This means e.g. that the density of the particles is given as the density ratio.
+
+We only focus on the additional coupling part here.
+The functionalities for that are found in src/pe_coupling, and the tests in tests/pe_coupling.
+A good starting point is tests/pe_coupling/momentum_exchange_method/SegreSilberbergMEM.cpp as it contains a lot of the mentioned functionality.
+
+\subsection mapping Mapping of the particles
+
+Every PE particle can be mapped into the domain as long as its type has the pe::RigidBody::containsPoint() member function implemented.
+With this mechanism, also a object from the mesh module can be mapped when seen as a mesh::pe::ConvexPolyhedron.
+Generally, the mapping sets the cells with the cell center contained inside the particle to a given flag that signals that it is not fluid.
+
+\subsubsection initialMapping Initial mapping
+
+Before the simulation starts, the particle have to be mapped into the domain.
+
+Two mechanisms / functionalities are provided: mapBodies() and mapMovingBodies().
+
+The mapBodies() functionality is used to set a constant boundary condition (like lbm::NoSlip), i.e. one does not change in time.
+With this, e.g. bounding planes can be mapped to set up the outer boundaries of the fluid domain.
+
+The mapMovingBodies() functionality is similar but needs an additional data structure, called the body field, which stores a pointer (pe::BodyID) inside each flagged cell to the containing particle.
+In this way, e.g. the particle corresponding to a specific boundary cell can be found so that its local surface velocity can be obtained and hydrodynamic forces are applied to the correct particle
+This is the functionality that is needed for moving particles in your coupled simulation.
+
+Make sure that you map the particle with ONLY ONE of them to avoid overwriting of the already set flags.
+The mapping functions can be given selector functors that allow you to specify rules on which particles should be mapped.
+Several can be found in src/pe_coupling/utility/BodySelectorFunctions.h, like pe_coupling::selectAllBodies().
+
+\attention The mapping has to be done also in the ghost layers of the flag field since the flag field is not communicated.
+This has some important consequences:
+The default synchronization routines of the PE (e.g. pe::syncNextNeighbors() or pe::syncShadowOwners(), see \cite eibl2018sync) would check whether a particle intersects with the axis-aligned bounding box (AABB) of a block.
+If this is not the case, the particle is removed from the block-local data structure and thus can no longer be accessed.
+Since the ghost layer is outside of the block's AABB, the mapping would thus not work.
+Therefore we enlarge the block's AABB artificially in the PE synchronization routines to circumvent this issue.
+This is done by the overlap parameter that is passed to the PE's sync routine.
+For only the mapping to be correct, an overlap of half a cell length would be sufficient, if using a single ghost layer.
+Since we will need the particle information a bit longer than that, we typically use a value of \f$1.5\f$ here, see \ref reconstruction for more infos.
+
+\subsubsection simulationMapping Update mapping during simulation
+
+For the moving particles, the pe_coupling::BodyMapping class is available and to be used as a sweep inside the time loop to update the mapping of these particles.
+It additionally requires a second flag, the formerObstacle flag, whose usage will become clear in the next section.
+In essence, this class transforms fluid to obstacle cells if required and turns newly uncovered obstacle cells to formerObstacle cells.
+
+\subsection reconstruction Reconstructing missing fluid information in uncovered cells
+
+As the particles move across the fluid mesh, cells will become covered and uncovered by the particle.
+Covering simply turns the former fluid cells to obstacle cells (see \ref simulationMapping).
+Extra work is required for cells that turn from obstacle to fluid before the simulation can continue as the information about the fluid is missing.
+This is where we need to use the pe_coupling::PDFReconstruction that restores the missing PDF information based on a templated reconstructor.
+
+Available reconstructors are:
+ - EquilibriumReconstructor
+ - EquilibriumAndNonEquilibriumReconstructor
+ - ExtrapolationReconstructor
+
+The two latter ones require an extrapolation direction. This can be provided in two ways:
+ - FlagFieldNormalExtrapolationDirectionFinder
+ - SphereNormalExtrapolationDirectionFinder
+
+After reconstructing the PDFs in a cell, the flag is turned from formerObstacle to fluid and the pointer in the body field is invalidated.
+Note that this procedure is split into two separate loops (1. reconstruct PDFs in all formerObstacle cells, 2. turn all formerObstacle flags to fluid).
+The reason is that the reconstructors look for valid fluid cells in the vicinity of the uncovered cell, which is done based on the fluid flag, and we want to avoid that recently reconstructed values are regarded as valid data.
+
+As for the reconstruction part particle information is still required (e.g. the particle's surface velocity), we use the overlap of \f$1.5\f$ cell length to keep the particle available (see arguments in \ref initialMapping).
+This originates from \f$0.5\f$ mentioned in \ref initialMapping, and a totally maximal admissible position change of \f$1\f$ cell per time step, so \f$1.5\f$ in total.
+
+\subsection boundaryCondition Boundary conditions along moving particles
+
+This is the part where the main coupling is happening.
+The fluid is affected by the moving particle via velocity boundary conditions that use the local surface velocity of the particle.
+As a result, the hydrodynamic force and torque acting on the particle is obtained.
+Both parts are computed in the boundary handling routine.
+
+Different variants of different order are available:
+ - pe_coupling::SimpleBB (simple bounce-back, particle surface is assumed midway between fluid and obstacle cell)
+ - pe_coupling::CurvedLinear (CLI boundary condition, recommended)
+ - pe_coupling::CurvedQuadratic (multi reflection boundary condition, requires additional PDF field with pre-collision values)
+
+The two latter ones require the exact position of the particle surface.
+See \cite rettinger2017comparative for more details and comparison tests of the boundary conditions.
+This is calculated as a ray-particle intersection which can be done analytically for a sphere (intersectionRatioSpherePe()), ellipsoid (intersectionRatioEllipsoidPe()) or a plane (intersectionRatioPlanePe()) and is done by a expensive bisection line search in other cases (intersectionRatioBisection()).
+If you want to add your specialization, do this by extending the cases in the intersectionRatio() variant that takes a PE body.
+
+\subsection peStep PE step
+
+Once the forces and torques on the particles have been calculated, the physics engine is used to compute the inter-particle collision forces and to update the particle's position and orientation, as well as the linear and angular velocity.
+This is conveniently achieved by using the pe_coupling::TimeStep class that can be inserted into the time loop.
+It also features a sub-stepping capability where several PE time steps with smaller time step sizes are carried out which is desirable in closely packed scenarios to avoid large overlaps of the particles, see e.g. \cite biegert2017collisionmodel.
+During this sub-stepping, the hydrodynamic forces and torques are kept constant.
+
+\subsection memalgorithm Algorithm overview
+
+The typical coupled simulation looks like the following:
+
+Initially: set up data structures, map particles, set boundary conditions
+
+Time loop:
+
+ -# Communicate PDF ghost layers.
+ -# Carry out boundary handling sweep, with special coupling boundary conditions, see \ref boundaryCondition. This also computes the hydrodynamic force and torque on particles.
+ -# Carry out LBM sweep (stream & collide).
+ -# Add external forces on the particles (e.g. buoyancy) with pe_coupling::ForceOnBodiesAdder.
+ -# Carry out PE step (with possible sub-stepping), see \ref peStep :
+   -# Evaluate inter-particle forces (collision, lubrication,..).
+   -# Synchronize and reduce forces and torques.
+   -# Integrate particles and reset forces and torques.
+   -# Synchronize particle info (velocities, position,...).
+ -# Update body mapping with pe_coupling::BodyMapping sweep, see \ref simulationMapping.
+ -# Reconstruct missing PDF information in uncovered cells with pe_coupling::PDFReconstruction sweep, see \ref reconstruction.
+ -# (optionally) VTK output
+
+\subsection misc Other important points
+
+This is a collection of lessons learned and tips that should be kept in mind when setting up a coupled simulation:
+ - To stabilize the coupling, we usually average the hydrodynamic forces and torques over two consecutive time steps and apply the averaged ones onto the particles, as suggested by \cite ladd1994mem. Otherwise, oscillations in the force and thus in velocity and position can occur.
+ - The coupling is unstable for particles with a density smaller than the fluid density (i.e. \f$1\f$). Additional stabilization techniques have to be used and implemented first to make it work for lighter particles, see e.g. \cite schwarz2015light.
+ - When driving a periodic flow with a body force on the fluid (to imitate a pressure driven flow), make sure to apply a corresponding buoyancy force onto the particle. This is necessary as the flow would normally feature a pressure gradient that drives the flow.
+   But due to the artificial setup it is not present and thus the force from the pressure gradient has to be added explicitly.
+ - Generally, when applying forces on the fluid, special care has to be taken to not violate physical principles (i.e. momentum balances) and to avoid e.g. infinitely accelerating particles.
+   This can be achieved by applying a matching counterforce on the particles.
+ - For accurate and stable results, the maximum particle velocity should not exceed \f$0.1\f$ in lattice units at any time (rule of thumb).
+   More specifically, the particle velocity should be significantly smaller than the lattice speed of sound (\f$1/\sqrt{3}\f$) to avoid compressibility effects.
+ - The numerical resolution should be at least \f$10\f$ cells per diameter (rule of thumb) to obtain reasonable results.
+   Larger Reynolds numbers require a finer resolution.
+   This value depends on the physical setup at hand and also the type of the particle (sphere, ellipsoid, squirmer,...).
+   As always, convergence studies should be carried out beforehand to ensure resolution-independent results.
+   Only then, a direct numerical simulation is realized and the results can be trusted.
+ - The coupling method is unable to predict the hydrodynamic forces correctly when particles are close to each other as the resolution of the gap between the particle surfaces is not fine enough in this case.
+   This then requires to explicitly take into account the unresolved lubrication forces by applying lubrication correction forces between the particles \cite nguyen2002lubrication.
+   This can be achieved with pe_coupling::LubricationCorrection.
+ - Evaluating particle properties is best done using the provided pe::BodyIterator functionalities.
+   In a parallel setup, it is important to know which iterator to use for which property as the information could be distributed over several processes that know of this particle (local and remote bodies).
+   If you want to evaluate forces and torques, do this between the boundary handling and the PE step and use the pe::BodyIterator, as those are distributed values, followed by an reduce operation.
+   All other properties (velocity, position) are evaluated with the pe::LocalBodyIterator to only include this information once.
+   For examples have a look at the available coupling tests or at apps/benchmarks/MotionSingleHeavySphere/MotionSingleHeavySphere.cpp .
+
+
+\section load_balancing How does load balancing work with a coupled simulation?
+
+Since the fluid and particle part of the simulation generate different load characteristics, load balancing is non-trivial and different approaches are possible.
+In waLBerla, we generally want to maintain the same domain partitioning of the fluid and the particle simulation.
+
+See \cite rettinger2019loadbalancing for one possibility. The corresponding application codes can be found in apps/benchmarks/AdaptiveMeshRefinementFluidParticleCoupling/AMRSedimentSettling.cpp to see how the load balancing routines are set up.
+
+
+**/
+
+}
+}

@@ -17,7 +17,7 @@ a particular body type.
 
 \snippet 01_ConfinedGas.cpp BodyTypeTuple
 
-Next the waLBerla environment is initalized, the random number generator is seeded and some simulation parameters are set.
+Next the waLBerla environment is initialized, the random number generator is seeded and some simulation parameters are set.
 \snippet 01_ConfinedGas.cpp Parameters
 
 The BlockForest is the main datastructure in the waLBerla framework. It is responsible for the domain decomposition and
@@ -25,7 +25,7 @@ holds all the blocks with their data. For more information about the general des
 to \ref tutorial_basics_01 and the documentation of domain_decomposition::BlockStorage. You can choose the number of blocks
 you want to have in each direction. In a parallel simulation these blocks get assigned to different processes. You should
 make sure that you always have at least as many blocks as processes. The number of processes you want your simulation to run
-with is specified when you start your programm with mpiexec.
+with is specified when you start your program with mpiexec.
 
 \attention If you run a simulation with periodic boundaries you need at least three blocks in the direction of periodicity!
 
@@ -42,7 +42,7 @@ In addition to the block local storage also the coarse as well as the fine colli
 Therefore the corresponding data handling has to be registered.
 \snippet 01_ConfinedGas.cpp AdditionalBlockData
 
-Only one final component is missing for a successfull simulation - the time integrator. Currently there exists two
+Only one final component is missing for a successful simulation - the time integrator. Currently there exists two
 integrators cr::DEM for soft contacts and cr::HCSITS for hard contacts. These have to be setup as local objects.
 \snippet 01_ConfinedGas.cpp Integrator
 
@@ -70,7 +70,7 @@ distributed correctly. Two synchronization methods are available syncNextNeighbo
 
 Since the setup is finished now we can run the simulation loop. The simulation loop is as simple as:
 \snippet 01_ConfinedGas.cpp GameLoop
-cr::ICR::timestep() evolves your simulation in time. The subsequent sychronization keeps all particles that are known to more
+cr::ICR::timestep() evolves your simulation in time. The subsequent synchronization keeps all particles that are known to more
 than one process in sync.
 
 After the simulation is finished we can collect the results. In this case we only calculate the mean velocity of all particles.

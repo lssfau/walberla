@@ -37,6 +37,14 @@ all the basic data strcutures and concepts of the framework.
 - \ref tutorial_lbm01 \n
   A full LBM simulation is built.
    
+\section further_info Further information
+
+Not all features of the framework are covered in the tutorials.
+To get further information have a look at the modules pages.
+
+Also, the test cases provided in the tests directory are a good starting point for your own developments.
+Additionally, there is a folder for full-fledged application codes to be found under \ref apps/benchmarks where also codes of walBerla publications are found.
+
 \section cite Please cite us
 
 If you use waLBerla in the preparation of a publication, please cite
@@ -44,7 +52,7 @@ If you use waLBerla in the preparation of a publication, please cite
 which you should cite in addition if you use them.
 
 - Grid refinement: \cite schornbaum2016massively
-- PE coupling: \cite rettinger2016simulations, \cite rettinger2017comparative
+- PE coupling: \cite rettinger2017comparative
 - Python interface: \cite bauer2015python
 
 \htmlonly
