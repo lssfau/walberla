@@ -437,7 +437,7 @@ public:
 
       // construct a temporary, second pdf field that will be used for streaming
       // by cloning the pdf field stored at the block
-      shared_ptr< PdfField_T > tmpPdfField( pdfField->cloneUninitialized() );
+      shared_ptr< PdfField_T > tmpPdfField( pdfField->clone() );
 
       // get the flag that marks a cell as being fluid
       auto fluid = flagField->getFlag( fluid_ );
