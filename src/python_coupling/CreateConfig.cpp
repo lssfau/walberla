@@ -27,7 +27,6 @@
 #include "core/logging/Logging.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/exception/all.hpp>
 #include <exception>
 
 
