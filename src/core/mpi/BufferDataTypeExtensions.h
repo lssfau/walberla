@@ -29,7 +29,6 @@
 #include "core/DataTypes.h"
 #include "core/Optional.h"
 
-#include <boost/array.hpp>
 #include <boost/integer.hpp>
 #include <boost/uuid/uuid.hpp>
 
@@ -592,38 +591,6 @@ inline RecvBuffer & operator>>( RecvBuffer & buf, boost::uuids::uuid & uuid )
    return buf;
 }
 
-
-// ---------------------------------------------------------------------------------------------------------------------
-// --------------------------------------- Boost array Support ----------------------------------------------------------
-// ---------------------------------------------------------------------------------------------------------------------
-
-template<typename T, std::size_t N>
-struct BufferSizeTrait< boost::array< T, N > > {
-   static const bool constantSize = true;
-   static const uint_t size = N * sizeof(T) + BUFFER_DEBUG_OVERHEAD;
-};
-
-
-template<typename ET, typename G, typename T, std::size_t N>
-inline GenericSendBuffer<ET, G> & operator<<( GenericSendBuffer<ET, G> & buf, const boost::array< T, N > & array )
-{
-   buf.addDebugMarker( "ba" );
-   for( auto it = array.begin(); it != array.end(); ++it )
-      buf << *it;
-
-   return buf;
-}
-
-
-template<typename ET, typename T, std::size_t N>
-inline GenericRecvBuffer<ET> & operator>>( GenericRecvBuffer<ET> & buf, boost::array< T, N > & array )
-{
-   buf.readDebugMarker( "ba" );
-   for( auto it = array.begin(); it != array.end(); ++it )
-      buf >> *it;
-
-   return buf;
-}
 
 } //namespace mpi
 } //namespace walberla
