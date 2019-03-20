@@ -83,6 +83,9 @@ waLBerla_execute_test( NAME   PE_PARSEMESSAGE )
 waLBerla_compile_test( NAME   PE_REFINEMENT FILES Refinement.cpp DEPENDS core blockforest   timeloop )
 waLBerla_execute_test( NAME   PE_REFINEMENT )
 
+waLBerla_compile_test( NAME   PE_REFINEMENTWITHSPAREPROCESSES FILES RefinementWithSpareProcesses.cpp DEPENDS core blockforest  )
+waLBerla_execute_test( NAME   PE_REFINEMENTWITHSPAREPROCESSES PROCESSES 27 )
+
 waLBerla_compile_test( NAME   PE_RIGIDBODY FILES RigidBody.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_RIGIDBODY )
 
