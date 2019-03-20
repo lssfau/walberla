@@ -27,7 +27,6 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include <boost/array.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
 
 #include <random>
@@ -148,7 +147,7 @@ public:
    inline value_type sqDistance( const GenericAABB & other ) const;
    inline value_type sqMaxDistance( const GenericAABB & other ) const;
 
-   inline boost::array< vector_type, 8 > corners() const;
+   inline std::array< vector_type, 8 > corners() const;
 
    // Modifiers
    inline void init();

@@ -1270,9 +1270,9 @@ inline typename GenericAABB< T >::value_type GenericAABB< T >::sqMaxDistance( co
  * \returns An array of size eight containing the corner points. Indices match those of the stencil::D3CornerStencil
  */
 template< typename T >
-inline boost::array< typename GenericAABB< T >::vector_type, 8 > GenericAABB< T >::corners() const
+inline std::array< typename GenericAABB< T >::vector_type, 8 > GenericAABB< T >::corners() const
 {
-   boost::array< vector_type, 8 > cornerArray;
+   std::array< vector_type, 8 > cornerArray;
 
    // TNE
    cornerArray[0][0] = maxCorner_[0];
