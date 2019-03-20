@@ -997,7 +997,7 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
 
 ///This class is deprecated use DynamicDiffusionBalance instead.
 template< typename PhantomData_T >
-using DynamicLevelwiseDiffusionBalance = DynamicDiffusionBalance<PhantomData_T> ;
+using DynamicLevelwiseDiffusionBalance [[deprecated]] = DynamicDiffusionBalance<PhantomData_T> ;
 
 } // namespace blockforest
 } // namespace walberla

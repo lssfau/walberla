@@ -589,7 +589,7 @@ int main( int argc, char **argv )
 
    bool curveHilbert = false;
    bool curveAllGather = true;
-   blockforest.setRefreshPhantomBlockMigrationPreparationFunction( blockforest::DynamicLevelwiseCurveBalance< blockforest::NoPhantomData >( curveHilbert, curveAllGather ) );
+   blockforest.setRefreshPhantomBlockMigrationPreparationFunction( blockforest::DynamicCurveBalance< blockforest::NoPhantomData >( curveHilbert, curveAllGather ) );
 
    /////////////////
    // PE COUPLING //

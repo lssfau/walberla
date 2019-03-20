@@ -2553,11 +2553,11 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
             blockforest.setRefreshBlockStateDeterminationFunction( Pseudo2DBlockStateDetermination( blockforest, Empty ) );
             blockforest.setRefreshPhantomBlockDataAssignmentFunction( Pseudo2DPhantomWeightAssignment( Empty ) );
             blockforest.setRefreshPhantomBlockMigrationPreparationFunction(
-                     blockforest::DynamicLevelwiseCurveBalance< Pseudo2DPhantomWeight >( hilbert, allGather ) );
+                     blockforest::DynamicCurveBalance< Pseudo2DPhantomWeight >( hilbert, allGather ) );
          }
          else
             blockforest.setRefreshPhantomBlockMigrationPreparationFunction(
-                     blockforest::DynamicLevelwiseCurveBalance< blockforest::NoPhantomData >( hilbert, allGather ) );
+                     blockforest::DynamicCurveBalance< blockforest::NoPhantomData >( hilbert, allGather ) );
       }
       else
       {
@@ -2571,11 +2571,11 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
             blockforest.setRefreshPhantomBlockDataPackFunction( Pseudo2DPhantomWeightPackUnpack() );
             blockforest.setRefreshPhantomBlockDataUnpackFunction( Pseudo2DPhantomWeightPackUnpack() );
             blockforest.setRefreshPhantomBlockMigrationPreparationFunction(
-                     blockforest::DynamicLevelwiseDiffusionBalance< Pseudo2DPhantomWeight >( maxIterations, flowIterations ) );
+                     blockforest::DynamicDiffusionBalance< Pseudo2DPhantomWeight >( maxIterations, flowIterations ) );
          }
          else
             blockforest.setRefreshPhantomBlockMigrationPreparationFunction(
-                     blockforest::DynamicLevelwiseDiffusionBalance< blockforest::NoPhantomData >( maxIterations, flowIterations ) );
+                     blockforest::DynamicDiffusionBalance< blockforest::NoPhantomData >( maxIterations, flowIterations ) );
       }
 
       // add callback functions which are executed after all block data was unpakced after the dynamic load balancing

@@ -777,14 +777,14 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
       if( dynamicLoadBalancingType == 0 )
       {
          blockforest.setRefreshPhantomBlockMigrationPreparationFunction(
-                  blockforest::DynamicLevelwiseCurveBalance< blockforest::NoPhantomData >( curveHilbert, curveAllGather ) );
+                  blockforest::DynamicCurveBalance< blockforest::NoPhantomData >( curveHilbert, curveAllGather ) );
                   
          loadBalanceLogging << "\n   + type:            " << ( curveHilbert ? "Hilbert order" : "Morton order" ) <<
                                "\n   + parallelization: " << ( curveAllGather? "all gather" : "master-slave" );
       }
       else
       {
-         using DLDB = blockforest::DynamicLevelwiseDiffusionBalance<blockforest::NoPhantomData>;
+         using DLDB = blockforest::DynamicDiffusionBalance<blockforest::NoPhantomData>;
          DLDB balancer( diffusionMaxIterations, diffusionFlowIterations );
          if( diffusionMode == 0 )
             balancer.setMode( DLDB::DIFFUSION_PUSH );
