@@ -28,8 +28,6 @@ waLBerla_compile_test( FILES boundary/DiffusionDirichlet.cpp DEPENDS field block
 waLBerla_execute_test( NAME DiffusionDirichletTest1 COMMAND $<TARGET_FILE:DiffusionDirichlet>  -l 16 -w 1 -o 1.2  -v 0.1  -e 0.097711 -t  50 )
 waLBerla_execute_test( NAME DiffusionDirichletTest2 COMMAND $<TARGET_FILE:DiffusionDirichlet>  -l 16 -w 1 -o 1.79 -v 0.05 -e 0.295170 -t 100 )
 
-waLBerla_compile_test( FILES Poiseuille.cpp DEPENDS blockforest gather timeloop vtk gui )
-
 
 waLBerla_compile_test( FILES DiffusionTest.cpp DEPENDS field blockforest timeloop vtk gui postprocessing)
 waLBerla_execute_test( NAME  DiffusionTestCorr COMMAND $<TARGET_FILE:DiffusionTest>  -c 1  -dx 0.01  -dt 0.002  -d 0.005  -v 5  -err 0.0025 )
