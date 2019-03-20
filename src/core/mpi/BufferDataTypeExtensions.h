@@ -29,7 +29,6 @@
 #include "core/DataTypes.h"
 #include "core/Optional.h"
 
-#include <boost/integer.hpp>
 #include <boost/uuid/uuid.hpp>
 
 #include <array>
@@ -276,7 +275,7 @@ template< typename T,    // Element type of SendBuffer
 GenericSendBuffer<T,G>& packBoolVectorWithoutSize(GenericSendBuffer<T,G> & buf, const std::vector<bool> & bools )
 {
    // Use an unsigned type at least as large as the SendBuffer base type as container for the bools
-   typedef typename boost::uint_t<std::numeric_limits<T>::digits>::least ContainerType;
+   typedef typename leastUnsignedInteger< std::numeric_limits<T>::digits >::type ContainerType;
    static const size_t NUM_BITS = std::numeric_limits<ContainerType>::digits;
 
    auto it = bools.begin();
@@ -297,7 +296,7 @@ template< typename T >    // Element type  of RecvBuffer
 GenericRecvBuffer<T>& unpackBoolVectorWithoutSize(GenericRecvBuffer<T> & buf, std::vector<bool> & bools, size_t size )
 {
    // Use an unsigned type at least as large as the RecvBuffer base type as container for the bools
-   typedef typename boost::uint_t<std::numeric_limits<T>::digits>::least ContainerType;
+   typedef typename leastUnsignedInteger<std::numeric_limits<T>::digits>::type ContainerType;
    static const size_t NUM_BITS = std::numeric_limits<ContainerType>::digits;
 
    bools.resize(size);
