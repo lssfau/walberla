@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file RegridMinMax.h
+//! \file MinMaxLevelDetermination.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -32,11 +32,11 @@ namespace walberla {
 namespace pe {
 namespace amr {
 
-class ReGridMinMax
+class MinMaxLevelDetermination
 {
 public:
 
-   ReGridMinMax( const shared_ptr<InfoCollection>& ic, const size_t minBodies, const size_t maxBodies) :
+   MinMaxLevelDetermination( const shared_ptr<InfoCollection>& ic, const size_t minBodies, const size_t maxBodies) :
       ic_( ic ), minBodies_(minBodies), maxBodies_(maxBodies)
    {}
 

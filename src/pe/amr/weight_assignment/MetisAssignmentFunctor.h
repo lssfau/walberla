@@ -29,11 +29,18 @@ namespace walberla {
 namespace pe {
 namespace amr {
 
+/**
+ * Assignment functor for ParMetis based load balancing.
+ *
+ * Uses BlockInfo::computationalWeight as vertex weight.
+ * Uses the overlap between neighboring domains as edge weight.
+ */
 class MetisAssignmentFunctor
 {
 public:
-
+   ///Convenience typedef to be used as PhantomBlock weight in conjunction with this weight assignment functor.
    typedef blockforest::DynamicParMetisBlockInfo           PhantomBlockWeight;
+   ///Convenience typdef for pack and unpack functions to be used in conjunction with PhantomBlockWeight.
    typedef blockforest::DynamicParMetisBlockInfoPackUnpack PhantomBlockWeightPackUnpackFunctor;
 
    MetisAssignmentFunctor( shared_ptr<InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
@@ -54,7 +61,7 @@ public:
          //all information is provided by info collection
          auto infoIt         = ic_->find( block->getId() );
          WALBERLA_CHECK_UNEQUAL( infoIt, ic_->end() );
-         const double weight = double_c( infoIt->second.numberOfLocalBodies ) + baseWeight_;
+         const double weight = double_c( infoIt->second.computationalWeight ) + baseWeight_;
          blockforest::DynamicParMetisBlockInfo info( 0 );
          info.setVertexWeight( int64_c(weight) );
          info.setVertexSize( int64_c( weight ) );

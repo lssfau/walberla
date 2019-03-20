@@ -30,23 +30,23 @@ namespace pe {
 
 struct BlockInfo
 {
-   uint_t numberOfLocalBodies;
-   uint_t numberOfShadowBodies;
+   uint_t computationalWeight;
+   uint_t communicationWeight;
 
    BlockInfo()
-      : numberOfLocalBodies(0)
-      , numberOfShadowBodies(0)
+      : computationalWeight(0)
+      , communicationWeight(0)
    {}
 
-   BlockInfo(const uint_t particles, const uint_t sparticles)
-      : numberOfLocalBodies(particles)
-      , numberOfShadowBodies(sparticles)
+   BlockInfo(const uint_t compWeight, const uint_t commWeight)
+      : computationalWeight(compWeight)
+      , communicationWeight(commWeight)
    {}
 
    BlockInfo&      operator+=( const BlockInfo& rhs )
    {
-      numberOfLocalBodies  += rhs.numberOfLocalBodies;
-      numberOfShadowBodies += rhs.numberOfShadowBodies;
+      computationalWeight += rhs.computationalWeight;
+      communicationWeight += rhs.communicationWeight;
       return *this;
    }
 };
@@ -62,7 +62,7 @@ BlockInfo operator+ ( const BlockInfo& lhs, const BlockInfo& rhs )
 inline
 std::ostream& operator<<( std::ostream& os, const BlockInfo& bi )
 {
-   os << bi.numberOfLocalBodies << " / " << bi.numberOfShadowBodies;
+   os << bi.computationalWeight << " / " << bi.communicationWeight;
    return os;
 }
 
@@ -71,7 +71,7 @@ template< typename T,    // Element type of SendBuffer
 mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const BlockInfo& info )
 {
    buf.addDebugMarker( "pa" );
-   buf << info.numberOfLocalBodies << info.numberOfShadowBodies;
+   buf << info.computationalWeight << info.communicationWeight;
    return buf;
 }
 
@@ -79,7 +79,7 @@ template< typename T>    // Element type of SendBuffer
 mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, BlockInfo& info )
 {
    buf.readDebugMarker( "pa" );
-   buf >> info.numberOfLocalBodies >> info.numberOfShadowBodies;
+   buf >> info.computationalWeight >> info.communicationWeight;
    return buf;
 }
 

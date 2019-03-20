@@ -20,6 +20,7 @@
 
 #include "InfoCollection.h"
 
+#include "pe/fcd/IFCD.h"
 #include "pe/rigidbody/BodyStorage.h"
 
 #include "blockforest/BlockID.h"
@@ -28,7 +29,7 @@
 namespace walberla {
 namespace pe {
 
-void createWithNeighborhood(const BlockForest& bf, const BlockDataID storageID, InfoCollection& ic )
+void createWithNeighborhoodLocalShadow(const BlockForest& bf, const BlockDataID storageID, InfoCollection& ic )
 {
    ic.clear();
 
@@ -67,6 +68,65 @@ void createWithNeighborhood(const BlockForest& bf, const BlockDataID storageID, 
          for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
          {
             bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(childID, BlockInfo(local, shadow));
+         }
+      }
+   }
+
+   // size of buffer is unknown and changes with each send
+   bs.setReceiverInfoFromSendBufferState(false, true);
+   bs.sendAll();
+
+   for( auto recvIt = bs.begin(); recvIt != bs.end(); ++recvIt )
+   {
+      while( !recvIt.buffer().isEmpty() )
+      {
+         InfoCollectionPair val;
+         recvIt.buffer() >> val;
+         ic.insert(val);
+      }
+   }
+}
+
+void createWithNeighborhoodContacts(BlockForest& bf, const BlockDataID storageID, const BlockDataID fcdID, InfoCollection& ic )
+{
+   ic.clear();
+
+   mpi::BufferSystem bs( MPIManager::instance()->comm(), 756 );
+
+   for (auto blockIt = bf.begin(); blockIt != bf.end(); ++blockIt)
+   {
+      blockforest::Block* block   = static_cast<blockforest::Block*> (&(*blockIt));
+      Storage const *     storage       = block->getData< Storage >( storageID );
+      BodyStorage const & shadowStorage = (*storage)[StorageType::SHADOW];
+      fcd::IFCD *     fcd         = block->getData< fcd::IFCD >( fcdID );
+      ic.insert( InfoCollection::value_type(block->getId(), BlockInfo(fcd->getContacts().size(), shadowStorage.size())) );
+      for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
+      {
+         bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(block->getId(), BlockInfo(fcd->getContacts().size(), shadowStorage.size()));
+      }
+
+      for (uint_t branchID = 0; branchID < 8; ++branchID)
+      {
+         const auto childID   = BlockID(block->getId(), branchID);
+         const auto childAABB = bf.getAABBFromBlockId(childID);
+         uint_t localContacts  = 0;
+         auto& contacts = fcd->getContacts();
+         for (auto cIt = contacts.begin(); cIt != contacts.end(); ++cIt)
+         {
+            if (childAABB.contains(cIt->getPosition()))
+               ++localContacts;
+         }
+         uint_t shadow  = 0;
+         for (auto bodyIt = shadowStorage.begin(); bodyIt != shadowStorage.end(); ++bodyIt)
+         {
+            if (childAABB.contains(bodyIt->getPosition()))
+               ++shadow;
+         }
+         ic.insert( InfoCollection::value_type(childID, BlockInfo(localContacts, shadow)) );
+
+         for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
+         {
+            bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(childID, BlockInfo(localContacts, shadow));
          }
       }
    }

@@ -820,7 +820,7 @@ real_t weightEvaluation(BlockForest & forest,
       }else if(loadEvaluationStrategy == "PE")
       {
          auto infoIt = peInfoCollection->find( blockID );
-         weight += real_c(infoIt->second.numberOfLocalBodies) + peBlockBaseWeight;
+         weight += real_c(infoIt->second.computationalWeight) + peBlockBaseWeight;
       }else if(loadEvaluationStrategy == "Fit" || loadEvaluationStrategy == "FitMulti")
       {
          auto infoIt = couplingInfoCollection->find( blockID );
@@ -2077,7 +2077,7 @@ int main( int argc, char **argv )
             auto &forest = blocks->getBlockForest();
             pe_coupling::createWithNeighborhood<BoundaryHandling_T>(forest, boundaryHandlingID, bodyStorageID, ccdID,
                                                                     fcdID, numPeSubCycles, *couplingInfoCollection);
-            pe::createWithNeighborhood(forest, bodyStorageID, *peInfoCollection);
+            pe::createWithNeighborhoodLocalShadow(forest, bodyStorageID, *peInfoCollection);
 
             // for the fluid property based check:
             if (useVorticityCriterion || useGradientCriterion) {

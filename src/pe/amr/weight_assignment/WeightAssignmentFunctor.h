@@ -29,10 +29,17 @@ namespace walberla {
 namespace pe {
 namespace amr {
 
+/**
+ * General assignment functor for load balancing.
+ *
+ * Uses BlockInfo::computationalWeight as PhantomBlockWeight
+ */
 class WeightAssignmentFunctor
 {
 public:
+   ///Convenience typedef to be used as PhantomBlock weight in conjunction with this weight assignment functor.
    typedef walberla::blockforest::PODPhantomWeight<double>           PhantomBlockWeight;
+   ///Convenience typdef for pack and unpack functions to be used in conjunction with PhantomBlockWeight.
    typedef walberla::blockforest::PODPhantomWeightPackUnpack<double> PhantomBlockWeightPackUnpackFunctor;
 
    WeightAssignmentFunctor( shared_ptr<InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
@@ -47,7 +54,7 @@ public:
 
          auto infoIt = ic_->find( block->getId()/*.getFatherId()*/ );
          WALBERLA_CHECK_UNEQUAL( infoIt, ic_->end() );
-         it->second = PhantomBlockWeight( double_c(infoIt->second.numberOfLocalBodies) + baseWeight_ );
+         it->second = PhantomBlockWeight( double_c(infoIt->second.computationalWeight) + baseWeight_ );
       }
    }
 
