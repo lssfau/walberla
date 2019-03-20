@@ -32,8 +32,6 @@
 
 #include <vector>
 
-#include <boost/array.hpp>
-
 namespace walberla {
 namespace pe {
 

@@ -25,8 +25,7 @@
 #include "core/math/AABBFwd.h"
 #include "stencil/D3Q27.h"
 
-#include <boost/array.hpp>
-
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -188,7 +187,7 @@ struct StorageSelect
 };
 
 ///Container for local and shadow body storage
-typedef boost::array<BodyStorage, 2> Storage;
+typedef std::array<BodyStorage, 2> Storage;
 
 }  // namespace pe
 }  // namespace walberla
