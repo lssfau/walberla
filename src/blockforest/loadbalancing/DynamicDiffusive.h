@@ -355,8 +355,13 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
             if( processLevel[l] )
             {
                const double correctedOutflow = std::max( processWeight[l] - processWeightLimit[l] - inflow[l], 0.0 ); // identical to below ...
-               //const double correctedOutflow = std::max( outflow[l] - processWeightLimit[l] + diffusionAvgWeight, 0.0 );            
+               //const double correctedOutflow = std::max( outflow[l] - processWeightLimit[l] + diffusionAvgWeight, 0.0 );
                flowScaleFactor[l] = correctedOutflow / outflow[l];
+               if (std::isnan(flowScaleFactor[l]))
+               {
+                  flowScaleFactor[l] = real_t(1);
+                  continue;
+               }
                outflow[l] = correctedOutflow;
             }
          }
@@ -619,6 +624,11 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
             {
                const double correctedInflow = std::max( processWeightLimit[l] - processWeight[l] + outflow[l], 0.0 );           
                flowScaleFactor[l] = correctedInflow / inflow[l];
+               if (std::isnan(flowScaleFactor[l]))
+               {
+                  flowScaleFactor[l] = real_t(1);
+                  continue;
+               }
                inflow[l] = correctedInflow;
             }
          }
