@@ -24,7 +24,6 @@
 #include "MPIManager.h"
 #include "core/logging/Logging.h"
 
-#include <boost/exception_ptr.hpp>
 #include <exception>
 #include <iostream>
 #include <stdexcept>
@@ -57,8 +56,8 @@ static void customTerminateHandler()
    // i.e. in cases when this hack does not work, we just cannot print the message
    // otherwise we re-throw the exception to get the type, and print exception.what()
    try {
-      if(boost::current_exception() )
-         boost::rethrow_exception(boost::current_exception());
+      if(std::current_exception() )
+         std::rethrow_exception(std::current_exception());
    } catch (std::exception const & exc) {
       std::cerr << exc.what() << std::endl;
    }
