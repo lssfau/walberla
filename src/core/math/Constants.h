@@ -14,7 +14,6 @@
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file Constants.h
-//! \ingroup core
 //! \author Klaus Iglberger
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Header file for mathematical constants
@@ -31,7 +30,6 @@
 #include <core/DataTypes.h>
 
 #include <cmath>
-#include <boost/math/constants/constants.hpp>
 
 // Disable false warnings in GCC 5
 #if ( defined __GNUC__ ) && ( __GNUC__ == 5 ) && ( __GNUC_MINOR__ == 1 )
@@ -42,170 +40,33 @@
 namespace walberla {
 namespace math {
 
-//=================================================================================================
-//
-//  MATHEMATICAL CONSTANT E
-//
-//=================================================================================================
+# undef M_E
+# undef M_LOG2E
+# undef M_LOG10E
+# undef M_LN2
+# undef M_LN10
+# undef M_PI
+# undef M_PI_2
+# undef M_PI_4
+# undef M_1_PI
+# undef M_2_PI
+# undef M_2_SQRTPI
+# undef M_SQRT2
+# undef M_SQRT1_2
 
-#ifdef M_E
-#  undef M_E
-#endif
-
-//*************************************************************************************************
-/*!\brief Definition of the mathematical constant \f$ e \f$.
- * \ingroup math
- */
-const real_t M_E = boost::math::constants::e<real_t>();
-//*************************************************************************************************
-
-
-
-
-#if 0
-//=================================================================================================
-//
-//  MATHEMATICAL CONSTANT LOG2E
-//
-//=================================================================================================
-
-#ifdef M_LOG2E
-#  undef M_LOG2E
-#endif
-
-//*************************************************************************************************
-/*!\brief Definition of the mathematical constant \f$ \log_2 e \f$.
- * \ingroup math
- */
-const real_t M_LOG2E = 1.4426950408889634073599246810018921;
-//*************************************************************************************************
-#endif
-
-
-
-
-//=================================================================================================
-//
-//  MATHEMATICAL CONSTANT LOG10E
-//
-//=================================================================================================
-
-#if 0
-#ifdef M_LOG10E
-#  undef M_LOG10E
-#endif
-
-//*************************************************************************************************
-/*!\brief Definition of the mathematical constant \f$ \log_{10} e \f$.
- * \ingroup math
- */
-const real_t M_LOG10E = boost::math::constants::log10_e<real_t>();
-//*************************************************************************************************
-#endif
-
-
-
-
-//=================================================================================================
-//
-//  MATHEMATICAL CONSTANT LN2
-//
-//=================================================================================================
-
-#ifdef M_LN2
-#  undef M_LN2
-#endif
-
-//*************************************************************************************************
-/*!\brief Definition of the mathematical constant \f$ \ln 2 \f$.
- * \ingroup math
- */
-const real_t M_LN2 = boost::math::constants::ln_two<real_t>();
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  MATHEMATICAL CONSTANT LN10
-//
-//=================================================================================================
-
-#if 0
-#ifdef M_LN10
-#  undef M_LN10
-#endif
-
-//*************************************************************************************************
-/*!\brief Definition of the mathematical constant \f$ \ln 10 \f$.
- * \ingroup math
- */
-const real_t M_LN10 = boost::math::constants::one_div_log10_e<real_t>();
-//*************************************************************************************************
-#endif
-
-
-
-
-//=================================================================================================
-//
-//  MATHEMATICAL CONSTANT PI
-//
-//=================================================================================================
-
-#ifdef M_PI
-#  undef M_PI
-#endif
-
-//*************************************************************************************************
-/*!\brief Definition of the mathematical constant \f$ \pi \f$.
- * \ingroup math
- */
-const real_t M_PI = boost::math::constants::pi<real_t>();
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  MATHEMATICAL CONSTANT SQRT2
-//
-//=================================================================================================
-
-#ifdef M_SQRT2
-#  undef M_SQRT2
-#endif
-
-//*************************************************************************************************
-/*!\brief Definition of the mathematical constant \f$ \sqrt{2} \f$.
- * \ingroup math
- */
-const real_t M_SQRT2 = boost::math::constants::root_two<real_t>();
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  MATHEMATICAL CONSTANT SQRT3
-//
-//=================================================================================================
-
-#if 0
-#ifdef M_SQRT3
-#  undef M_SQRT3
-#endif
-
-//*************************************************************************************************
-/*!\brief Definition of the mathematical constant \f$ \sqrt{3} \f$.
- * \ingroup math
- */
-const real_t M_SQRT3 = boost::math::constants::root_three<real_t>();
-//*************************************************************************************************
-#endif
+constexpr real_t M_E          = real_t( 2.7182818284590452354  );  /* e */
+constexpr real_t M_LOG2E      = real_t( 1.4426950408889634074  );  /* log_2 e */
+constexpr real_t M_LOG10E     = real_t( 0.43429448190325182765 );  /* log_10 e */
+constexpr real_t M_LN2        = real_t( 0.69314718055994530942 );  /* log_e 2 */
+constexpr real_t M_LN10       = real_t( 2.30258509299404568402 );  /* log_e 10 */
+constexpr real_t M_PI         = real_t( 3.14159265358979323846 );  /* pi */
+constexpr real_t M_PI_2       = real_t( 1.57079632679489661923 );  /* pi/2 */
+constexpr real_t M_PI_4       = real_t( 0.78539816339744830962 );  /* pi/4 */
+constexpr real_t M_1_PI       = real_t( 0.31830988618379067154 );  /* 1/pi */
+constexpr real_t M_2_PI       = real_t( 0.63661977236758134308 );  /* 2/pi */
+constexpr real_t M_2_SQRTPI   = real_t( 1.12837916709551257390 );  /* 2/sqrt(pi) */
+constexpr real_t M_SQRT2      = real_t( 1.41421356237309504880 );  /* sqrt(2) */
+constexpr real_t M_SQRT1_2    = real_t( 0.70710678118654752440 );  /* 1/sqrt(2) */
 
 } // namespace math
 }
