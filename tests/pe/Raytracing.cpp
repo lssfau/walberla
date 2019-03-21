@@ -13,6 +13,7 @@
 #include "pe/rigidbody/SetBodyTypeIDs.h"
 #include "pe/Types.h"
 
+#include "blockforest/Initialization.h"
 #include "core/debug/TestSubsystem.h"
 #include "core/DataTypes.h"
 #include <core/math/Random.h>
@@ -272,7 +273,7 @@ ShadingParameters customBodyToShadingParams(const BodyID body) {
 void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS, walberla::uint8_t antiAliasFactor = 1) {
    WALBERLA_LOG_INFO("Raytracer");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
+   auto forest = blockforest::createBlockForest(AABB(0,0,0,10,10,10), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
    
@@ -378,7 +379,7 @@ ShadingParameters customSpheresBodyToShadingParams(const BodyID body) {
 void RaytracerSpheresTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRACE_HASHGRIDS, walberla::uint8_t antiAliasFactor = 1) {
    WALBERLA_LOG_INFO("Raytracer Spheres Scene");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,10,10,10), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
+   auto forest = blockforest::createBlockForest(AABB(0,0,0,10,10,10), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling( globalBodyStorage, storageID ), "CCD");
    
@@ -438,7 +439,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
    tt.start("Setup");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vector3<uint_t>(2,3,1), Vector3<bool>(false, false, false));
+   auto forest = blockforest::createBlockForest(AABB(0,0,0,4,4,4), Vector3<uint_t>(2,3,1), Vector3<bool>(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
    
@@ -637,7 +638,7 @@ void HashGridsArtifactsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::
    WALBERLA_LOG_INFO(" Generating " << boxes << " boxes");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
+   auto forest = blockforest::createBlockForest(AABB(0,0,0,4,4,4), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
    
@@ -678,7 +679,7 @@ void HashGridsFromNegativeArtifactsTest(Raytracer::Algorithm raytracingAlgorithm
    WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
+   auto forest = blockforest::createBlockForest(AABB(0,0,0,4,4,4), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
    
@@ -722,7 +723,7 @@ void HashGridsFromNegativeXArtifactsTest(Raytracer::Algorithm raytracingAlgorith
    WALBERLA_LOG_INFO_ON_ROOT(" Generating " << boxes << " boxes");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,4,4,4), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
+   auto forest = blockforest::createBlockForest(AABB(0,0,0,4,4,4), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
    
@@ -768,7 +769,7 @@ void HashGridsTestScene(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RA
    WALBERLA_LOG_INFO_ON_ROOT("HashGrids Test Scene");
    
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
-   shared_ptr<BlockForest> forest = createBlockForest(AABB(0,0,0,8,8,8), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
+   auto forest = blockforest::createBlockForest(AABB(0,0,0,8,8,8), Vector3<uint_t>(1,1,1), Vector3<bool>(false, false, false));
    auto storageID = forest->addBlockData(createStorageDataHandling<BodyTuple>(), "Storage");
    auto ccdID = forest->addBlockData(ccd::createHashGridsDataHandling(globalBodyStorage, storageID), "CCD");
    

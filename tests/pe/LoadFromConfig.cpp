@@ -19,12 +19,11 @@
 //======================================================================================================================
 
 
-#include "blockforest/all.h"
-#include "core/all.h"
-#include "domain_decomposition/all.h"
+#include "blockforest/Initialization.h"
+#include "core/debug/TestSubsystem.h"
+#include "core/Environment.h"
 
 #include "pe/basic.h"
-#include "pe/utility/CreateWorld.h"
 
 #include "core/debug/TestSubsystem.h"
 
@@ -53,7 +52,7 @@ int main( int argc, char ** argv )
 
    // create blocks
    //! [Config BlockForest]
-   shared_ptr<BlockForest> forest = createBlockForestFromConfig( configBlock );
+   shared_ptr<BlockForest> forest = blockforest::createBlockForestFromConfig( configBlock );
    //! [Config BlockForest]
    WALBERLA_CHECK_EQUAL( forest->getXSize(), 3 );
    WALBERLA_CHECK_EQUAL( forest->getYSize(), 4 );

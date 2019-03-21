@@ -21,6 +21,7 @@
 #include <pe/basic.h>
 #include <pe/vtk/SphereVtkOutput.h>
 
+#include <blockforest/Initialization.h>
 #include <core/Abort.h>
 #include <core/Environment.h>
 #include <core/math/Random.h>
@@ -99,7 +100,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("*** BLOCKFOREST ***");
    // create forest
-   shared_ptr< BlockForest > forest = createBlockForestFromConfig( mainConf );
+   shared_ptr< BlockForest > forest = blockforest::createBlockForestFromConfig( mainConf );
    if (!forest)
    {
       WALBERLA_LOG_INFO_ON_ROOT( "No BlockForest created ... exiting!");

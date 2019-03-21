@@ -22,11 +22,9 @@
 #include "pe/basic.h"
 #include <pe/utility/DestroyBody.h>
 
-#include "blockforest/all.h"
-#include "core/all.h"
-#include "domain_decomposition/all.h"
-
+#include "blockforest/Initialization.h"
 #include "core/debug/TestSubsystem.h"
+#include "core/Environment.h"
 
 namespace walberla {
 using namespace walberla::pe;
@@ -74,10 +72,10 @@ int main( int argc, char** argv )
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
    // create blocks
-   shared_ptr< BlockForest > forest = createBlockForest( AABB(0,0,0,20,20,20), // simulation domain
-                                                         Vector3<uint_t>(2,1,1), // blocks in each direction
-                                                         Vector3<bool>(false, false, false) // periodicity
-                                                         );
+   auto forest = blockforest::createBlockForest( AABB(0,0,0,20,20,20), // simulation domain
+                                                 Vector3<uint_t>(2,1,1), // blocks in each direction
+                                                 Vector3<bool>(false, false, false) // periodicity
+                                                 );
 
    SetBodyTypeIDs<BodyTypeTuple>::execute();
 

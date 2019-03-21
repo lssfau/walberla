@@ -19,7 +19,7 @@
 //======================================================================================================================
 
 
-#include "blockforest/BlockForest.h"
+#include "blockforest/Initialization.h"
 #include "blockforest/loadbalancing/DynamicCurve.h"
 #include "blockforest/loadbalancing/DynamicDiffusive.h"
 #include "blockforest/loadbalancing/DynamicParMetis.h"
@@ -57,10 +57,9 @@ int main( int /*argc*/, char ** /*argv*/, const std::string& LBAlgorithm )
    shared_ptr<BodyStorage> globalStorage = make_shared<BodyStorage>();
 
    // create forest
-   auto blockforest = createBlockForest(
-                         math::AABB(0,0,0,10,10,10),
-                         Vector3<uint_t>(2,2,2),
-                         Vector3<bool>(false, false, false) );
+   auto blockforest = blockforest::createBlockForest( math::AABB(0,0,0,10,10,10),
+                                                      Vector3<uint_t>(2,2,2),
+                                                      Vector3<bool>(false, false, false) );
 
    SetBodyTypeIDs<BodyTuple>::execute();
 

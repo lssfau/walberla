@@ -49,5 +49,4 @@
 #include "pe/synchronization/SyncNextNeighbors.h"
 #include "pe/synchronization/SyncShadowOwners.h"
 
-#include "pe/utility/CreateWorld.h"
 #include "pe/utility/GetBody.h"

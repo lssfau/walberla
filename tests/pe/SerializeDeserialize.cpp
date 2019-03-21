@@ -19,9 +19,9 @@
 //======================================================================================================================
 
 
-#include "blockforest/all.h"
-#include "core/all.h"
-#include "domain_decomposition/all.h"
+#include "blockforest/Initialization.h"
+#include "core/Environment.h"
+#include "core/debug/TestSubsystem.h"
 
 #include "pe/basic.h"
 #include "pe/communication/ParseMessage.h"
@@ -47,9 +47,9 @@ void createDump()
 
    // create blocks
    //! [Dump Blockforest]
-   auto forest = createBlockForest( math::AABB(0,0,0,60,60,60),
-                                    Vector3<uint_t>(2,2,2),                   // number of blocks
-                                    Vector3<bool>(false, false, false));      // periodicity
+   auto forest = blockforest::createBlockForest( math::AABB(0,0,0,60,60,60),
+                                                 Vector3<uint_t>(2,2,2),                   // number of blocks
+                                                 Vector3<bool>(false, false, false));      // periodicity
    forest->saveToFile("SerializeDeserialize.sbf");
    //! [Dump Blockforest]
 

@@ -24,6 +24,7 @@
 #include "StructuredBlockForest.h"
 
 #include "core/config/Config.h"
+#include "core/mpi/MPIManager.h"
 
 
 
@@ -48,6 +49,26 @@ createBlockForest(      const AABB& domainAABB,
                         const uint_t numberOfXProcesses,     const uint_t numberOfYProcesses,     const uint_t numberOfZProcesses,
                         const bool   xPeriodic = false,      const bool   yPeriodic = false,      const bool   zPeriodic = false,
                         const bool keepGlobalBlockInformation = false );
+shared_ptr<BlockForest>
+createBlockForest(const math::AABB& simulationDomain,
+                  const Vector3<uint_t>& blocks,
+                  const Vector3<bool>& isPeriodic,
+                  const uint_t numberOfProcesses = uint_c(mpi::MPIManager::instance()->numProcesses()),
+                  const uint_t initialRefinementLevel = uint_t(0),
+                  const bool keepGlobalBlockInformation = false);
+shared_ptr<BlockForest>
+createBlockForest(const math::AABB& simulationDomain,
+                  const Vector3<uint_t>& blocks,
+                  const Vector3<bool>& isPeriodic,
+                  const bool setupRun,
+                  const std::string& sbffile,
+                  const uint_t numberOfProcesses = uint_c(mpi::MPIManager::instance()->numProcesses()),
+                  const uint_t initialRefinementLevel = uint_t(0),
+                  const bool keepGlobalBlockInformation = false);
+shared_ptr<BlockForest>
+createBlockForestFromConfig(const Config::BlockHandle& mainConf,
+                            const bool keepGlobalBlockInformation = false);
+
 shared_ptr< StructuredBlockForest >
 createUniformBlockGrid( const AABB& domainAABB,
                         const uint_t numberOfXBlocks,        const uint_t numberOfYBlocks,        const uint_t numberOfZBlocks,

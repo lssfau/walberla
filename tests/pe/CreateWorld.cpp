@@ -20,11 +20,10 @@
 //======================================================================================================================
 
 #include "pe/basic.h"
-#include "pe/utility/CreateWorld.h"
 
-#include "blockforest/all.h"
-#include "core/all.h"
-#include "domain_decomposition/all.h"
+#include "blockforest/Initialization.h"
+#include "core/debug/TestSubsystem.h"
+#include "core/Environment.h"
 
 #include "core/debug/TestSubsystem.h"
 
@@ -40,12 +39,11 @@ int main( int argc, char** argv )
    WALBERLA_UNUSED(env);
 
    // create blocks
-   auto forest = createBlockForest(
-                    math::AABB(0,0,0,10,10,10),
-                    Vector3<uint_t>(1,1,1),
-                    Vector3<bool>(false, false, false),
-                    1,
-                    1);
+   auto forest = blockforest::createBlockForest( math::AABB(0,0,0,10,10,10),
+                                                 Vector3<uint_t>(1,1,1),
+                                                 Vector3<bool>(false, false, false),
+                                                 1,
+                                                 1);
 
    WALBERLA_CHECK_EQUAL( forest->size(), 8);
    for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)

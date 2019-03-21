@@ -18,8 +18,7 @@
 //
 //======================================================================================================================
 
-#include "pe/utility/CreateWorld.h"
-
+#include "blockforest/Initialization.h"
 #include <blockforest/loadbalancing/DynamicParMetis.h>
 #include <core/debug/TestSubsystem.h>
 #include <core/Environment.h>
@@ -27,7 +26,6 @@
 #include <core/math/Sample.h>
 
 using namespace walberla;
-using namespace walberla::pe;
 
 class ReGrid
 {
@@ -78,11 +76,11 @@ int parmetisTest(const std::string& algorithm,
    WALBERLA_LOG_INFO_ON_ROOT("****** " << algorithm << " | " << weightsToUse << " | " << edgeSource);
 
    // create forest
-   shared_ptr< BlockForest > forest   = createBlockForest( math::AABB(0,0,0,40,40,40),
-                                                           Vector3<uint_t>(4, 4, 4),
-                                                           Vector3<bool>(false, false, false),
-                                                           64,
-                                                           0);
+   auto forest = blockforest::createBlockForest( math::AABB(0,0,0,40,40,40),
+                                                 Vector3<uint_t>(4, 4, 4),
+                                                 Vector3<bool>(false, false, false),
+                                                 64,
+                                                 0);
    if (!forest)
    {
       WALBERLA_LOG_INFO_ON_ROOT( "No BlockForest created ... exiting!");

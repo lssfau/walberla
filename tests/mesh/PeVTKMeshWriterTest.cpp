@@ -31,6 +31,7 @@
 #include <mesh/pe/communication/ConvexPolyhedron.h>
 #include <mesh/PolyMeshes.h>
 
+#include <blockforest/Initialization.h>
 #include <core/Abort.h>
 #include <core/Environment.h>
 #include <core/grid_generator/HCPIterator.h>
@@ -128,8 +129,8 @@ int main( int argc, char ** argv )
 
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
 
-   shared_ptr< BlockForest > forest = createBlockForest( AABB( real_t(0), real_t(0), real_t(0), real_t(6), real_t(6), real_t(6) ), 
-                                                         Vector3<uint_t>( uint_t(2) ), Vector3<bool>( false ) );
+   auto forest = blockforest::createBlockForest( AABB( real_t(0), real_t(0), real_t(0), real_t(6), real_t(6), real_t(6) ),
+                                                 Vector3<uint_t>( uint_t(2) ), Vector3<bool>( false ) );
 
    SetBodyTypeIDs<BodyTuple>::execute();
 
