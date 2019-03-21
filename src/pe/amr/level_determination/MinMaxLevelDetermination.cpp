@@ -13,19 +13,19 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file RegridMinMax.cpp
+//! \file MinMaxLevelDetermination.cpp
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
-#include "RegridMinMax.h"
+#include "MinMaxLevelDetermination.h"
 
 namespace walberla {
 namespace pe {
 namespace amr {
 
-void ReGridMinMax::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                               std::vector< const Block * > &, const BlockForest & /*forest*/ )
+void MinMaxLevelDetermination::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
+                                           std::vector< const Block * > &, const BlockForest & /*forest*/ )
 {
    for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
    {
@@ -35,16 +35,16 @@ void ReGridMinMax::operator()( std::vector< std::pair< const Block *, uint_t > >
       it->second = it->first->getLevel(); //keep everything as it is
 
       //check for refinement
-      if (infoIt->second.numberOfLocalBodies > maxBodies_)
+      if (infoIt->second.computationalWeight > maxBodies_)
       {
          it->second = it->first->getLevel() + uint_t(1);
          continue;
       }
 
       //check for coarsening
-      if ((it->first->getLevel() > 0) && (infoIt->second.numberOfLocalBodies < minBodies_))
+      if ((it->first->getLevel() > 0) && (infoIt->second.computationalWeight < minBodies_))
       {
-         if (getOrCreateCoarseInfo(it->first->getId())->second.numberOfLocalBodies < maxBodies_)
+         if (getOrCreateCoarseInfo(it->first->getId())->second.computationalWeight < maxBodies_)
          {
             it->second = it->first->getLevel() - uint_t(1);
          }
@@ -53,7 +53,7 @@ void ReGridMinMax::operator()( std::vector< std::pair< const Block *, uint_t > >
    }
 }
 
-InfoCollection::const_iterator ReGridMinMax::getOrCreateCoarseInfo( const blockforest::BlockID& id )
+InfoCollection::const_iterator MinMaxLevelDetermination::getOrCreateCoarseInfo( const blockforest::BlockID& id )
 {
    auto fatherId = id.getFatherId();
    auto infoIt   = ic_->find( fatherId );
