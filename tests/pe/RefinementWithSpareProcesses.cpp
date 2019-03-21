@@ -27,7 +27,7 @@
 
 #include "pe/basic.h"
 #include "pe/amr/InfoCollection.h"
-#include "pe/amr/regrid/RegridMinMax.h"
+#include "pe/amr/level_determination/MinMaxLevelDetermination.h"
 #include "pe/amr/weight_assignment/MetisAssignmentFunctor.h"
 #include "pe/amr/weight_assignment/WeightAssignmentFunctor.h"
 #include "pe/ccd/SimpleCCDDataHandling.h"
@@ -80,8 +80,7 @@ int main( int /*argc*/, char ** /*argv*/, const std::string& LBAlgorithm )
 
    auto ic = make_shared<InfoCollection>();
 
-   amr::ReGridMinMax regrid(ic, 50, 100);
-   blockforest->setRefreshMinTargetLevelDeterminationFunction( regrid );
+   blockforest->setRefreshMinTargetLevelDeterminationFunction( amr::MinMaxLevelDetermination(ic, 50, 100) );
 
    if (LBAlgorithm == "Morton")
    {
@@ -138,7 +137,7 @@ int main( int /*argc*/, char ** /*argv*/, const std::string& LBAlgorithm )
    WALBERLA_CHECK_GREATER_EQUAL(blockforest->size(), 0);
    WALBERLA_CHECK_LESS(blockforest->size(), 2);
 
-   createWithNeighborhood( *blockforest, storageID, *ic );
+   createWithNeighborhoodLocalShadow( *blockforest, storageID, *ic );
    blockforest->refresh();
 
    WALBERLA_CHECK_GREATER(blockforest->size(), 0);
