@@ -31,9 +31,9 @@
 #include "core/debug/Debug.h"
 #include "core/math/Uint.h"
 
-#include <boost/array.hpp>
 #include <boost/type_traits/is_same.hpp>
 
+#include <array>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -214,7 +214,7 @@ protected:
       {}
 
       /// Maps bitNr's to strings
-      boost::array<FlagUID, sizeof(flag_t)*8> flagToUID;
+      std::array<FlagUID, sizeof(flag_t)*8> flagToUID;
 
       /// Maps strings to bit-masks
       std::map<FlagUID, flag_t> uidToFlag;

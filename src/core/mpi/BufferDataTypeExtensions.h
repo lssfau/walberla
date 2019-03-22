@@ -29,8 +29,6 @@
 #include "core/DataTypes.h"
 #include "core/Optional.h"
 
-#include <boost/array.hpp>
-#include <boost/integer.hpp>
 #include <boost/uuid/uuid.hpp>
 
 #include <array>
@@ -277,7 +275,7 @@ template< typename T,    // Element type of SendBuffer
 GenericSendBuffer<T,G>& packBoolVectorWithoutSize(GenericSendBuffer<T,G> & buf, const std::vector<bool> & bools )
 {
    // Use an unsigned type at least as large as the SendBuffer base type as container for the bools
-   typedef typename boost::uint_t<std::numeric_limits<T>::digits>::least ContainerType;
+   typedef typename leastUnsignedInteger< std::numeric_limits<T>::digits >::type ContainerType;
    static const size_t NUM_BITS = std::numeric_limits<ContainerType>::digits;
 
    auto it = bools.begin();
@@ -298,7 +296,7 @@ template< typename T >    // Element type  of RecvBuffer
 GenericRecvBuffer<T>& unpackBoolVectorWithoutSize(GenericRecvBuffer<T> & buf, std::vector<bool> & bools, size_t size )
 {
    // Use an unsigned type at least as large as the RecvBuffer base type as container for the bools
-   typedef typename boost::uint_t<std::numeric_limits<T>::digits>::least ContainerType;
+   typedef typename leastUnsignedInteger<std::numeric_limits<T>::digits>::type ContainerType;
    static const size_t NUM_BITS = std::numeric_limits<ContainerType>::digits;
 
    bools.resize(size);
@@ -592,38 +590,6 @@ inline RecvBuffer & operator>>( RecvBuffer & buf, boost::uuids::uuid & uuid )
    return buf;
 }
 
-
-// ---------------------------------------------------------------------------------------------------------------------
-// --------------------------------------- Boost array Support ----------------------------------------------------------
-// ---------------------------------------------------------------------------------------------------------------------
-
-template<typename T, std::size_t N>
-struct BufferSizeTrait< boost::array< T, N > > {
-   static const bool constantSize = true;
-   static const uint_t size = N * sizeof(T) + BUFFER_DEBUG_OVERHEAD;
-};
-
-
-template<typename ET, typename G, typename T, std::size_t N>
-inline GenericSendBuffer<ET, G> & operator<<( GenericSendBuffer<ET, G> & buf, const boost::array< T, N > & array )
-{
-   buf.addDebugMarker( "ba" );
-   for( auto it = array.begin(); it != array.end(); ++it )
-      buf << *it;
-
-   return buf;
-}
-
-
-template<typename ET, typename T, std::size_t N>
-inline GenericRecvBuffer<ET> & operator>>( GenericRecvBuffer<ET> & buf, boost::array< T, N > & array )
-{
-   buf.readDebugMarker( "ba" );
-   for( auto it = array.begin(); it != array.end(); ++it )
-      buf >> *it;
-
-   return buf;
-}
 
 } //namespace mpi
 } //namespace walberla

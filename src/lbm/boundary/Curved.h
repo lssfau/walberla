@@ -35,8 +35,7 @@
 
 #include "stencil/Directions.h"
 
-#include <boost/array.hpp>
-
+#include <array>
 #include <vector>
 
 namespace walberla {
@@ -53,7 +52,7 @@ class Curved : public Boundary< typename FlagField_T::flag_t >
    typedef typename LatticeModel_T::Stencil  Stencil;
    typedef typename FlagField_T::flag_t      flag_t;
 
-   typedef GhostLayerField< shared_ptr< boost::array<real_t, Stencil::Size> >, 1 >  WeightField;
+   typedef GhostLayerField< shared_ptr< std::array<real_t, Stencil::Size> >, 1 >  WeightField;
 
 public:
 
@@ -105,9 +104,9 @@ public:
 private:
 
    inline static real_t deltaToWeight( const real_t delta ) { return ( real_t( 1 ) - real_t( 2 ) * delta ) / ( real_t( 1 ) + real_t( 2 ) * delta ); }
-   inline static shared_ptr< boost::array<real_t, Stencil::Size> > makeDeltaArray()
+   inline static shared_ptr< std::array<real_t, Stencil::Size> > makeDeltaArray()
    {
-      return walberla::shared_ptr< boost::array<real_t, Stencil::Size> >( new boost::array<real_t, Stencil::Size> );
+      return walberla::shared_ptr< std::array<real_t, Stencil::Size> >( new std::array<real_t, Stencil::Size> );
    }
 
    const FlagUID uid_;

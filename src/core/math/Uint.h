@@ -26,7 +26,6 @@
 #include "core/debug/Debug.h"
 
 #include <boost/type_traits/is_unsigned.hpp>
-#include <boost/integer.hpp>
 
 
 namespace walberla {

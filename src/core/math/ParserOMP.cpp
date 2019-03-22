@@ -53,7 +53,7 @@ void FunctionParserOMP::parse(const std::string & eq)
    #endif
    for (int t = 0; t < omp_get_max_threads(); ++t)
    {
-      parser_[t].parse(eq);
+      parser_[uint_c(t)].parse(eq);
    }
 }
 
@@ -61,7 +61,7 @@ double FunctionParserOMP::evaluate(const std::map<std::string,double> & symbolTa
 {
    WALBERLA_ASSERT_EQUAL(omp_get_max_threads(), num_parsers_);
 
-   return parser_[omp_get_thread_num()].evaluate(symbolTable);
+   return parser_[uint_c(omp_get_thread_num())].evaluate(symbolTable);
 }
 
 

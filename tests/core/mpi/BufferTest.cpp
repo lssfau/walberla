@@ -112,15 +112,6 @@ void initCellContainer( T & container )
       container.insert( container.end(), Cell( dist(rng), dist(rng), dist(rng) ) );
 }
 
-template<typename T, std::size_t N>
-void initBoostArray( boost::array< T, N > & array )
-{
-   static std::mt19937 rng;
-   std::uniform_int_distribution<T> dist;
-
-   for( auto it = array.begin(); it != array.end(); ++it )
-      *it = dist( rng );
-}
 
 template<typename T, std::size_t N>
 void initStdArray( std::array< T, N > & array )
@@ -162,7 +153,6 @@ void bufferTest()
    std::map     <unsigned int, walberla::int64_t> stdMap,      stdMapEmpty;
    std::multimap<unsigned int, walberla::int64_t> stdMultiMap, stdMultiMapEmpty;
 
-   boost::array< unsigned int, 19 > boostArray;
    std::array  < unsigned int, 19 > stdArray;
 
    initVecBool(boolStdVec);
@@ -173,7 +163,6 @@ void bufferTest()
    initIntegerAssocContainer(stdMultiSet);
    initIntegerMap(stdMap);
    initIntegerMap(stdMultiMap);
-   initBoostArray(boostArray);
    initStdArray(stdArray);
 
    // Create send buffer and put two values in it
@@ -190,7 +179,7 @@ void bufferTest()
    sb << stdMultiSet << stdMultiSetEmpty;
    sb << stdMap      << stdMapEmpty;
    sb << stdMultiMap << stdMultiMapEmpty;
-   sb << boostArray  << stdArray;
+   sb << stdArray;
 
    // Copying
    //RecvBuffer<T> rb;
@@ -220,7 +209,6 @@ void bufferTest()
    std::map     <unsigned int, walberla::int64_t> recvStdMap,      recvStdMapEmpty;
    std::multimap<unsigned int, walberla::int64_t> recvStdMultiMap, recvStdMultiMapEmpty;
 
-   boost::array<unsigned int, 19> recvBoostArray;
    std::array  <unsigned int, 19> recvStdArray;
 
    rb >> recvD           >> recvI;
@@ -235,7 +223,7 @@ void bufferTest()
    rb >> recvStdMultiSet >> recvStdMultiSetEmpty;
    rb >> recvStdMap      >> recvStdMapEmpty;
    rb >> recvStdMultiMap >> recvStdMultiMapEmpty;
-   rb >> recvBoostArray  >> recvStdArray;
+   rb >> recvStdArray;
 
    // Validate
    WALBERLA_CHECK_FLOAT_EQUAL(recvD,testDouble);
@@ -266,7 +254,6 @@ void bufferTest()
    WALBERLA_CHECK_EQUAL(recvStdMultiMap,      stdMultiMap);
    WALBERLA_CHECK_EQUAL(recvStdMultiMapEmpty, stdMultiMapEmpty);
 
-   WALBERLA_CHECK_EQUAL(recvBoostArray, boostArray);
    WALBERLA_CHECK_EQUAL(recvStdArray,   stdArray);
 }
 

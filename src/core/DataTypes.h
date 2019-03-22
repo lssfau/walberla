@@ -120,6 +120,34 @@ inline void static_assert_uint_t() {
                  !std::numeric_limits<UINT>::is_signed, "Unsigned integer type required/expected!" );
 }
 
+template< uint_t size > struct uintFromBitWidth;
+template<> struct uintFromBitWidth<  8 > { typedef uint8_t  type; };
+template<> struct uintFromBitWidth< 16 > { typedef uint16_t type; };
+template<> struct uintFromBitWidth< 32 > { typedef uint32_t type; };
+template<> struct uintFromBitWidth< 64 > { typedef uint64_t type; };
+
+constexpr uint_t leastUnsignedIntegerBitWidth( uint_t width )
+{
+   if ( width <=  8 ) return  8;
+   if ( width <= 16 ) return 16;
+   if ( width <= 32 ) return 32;
+   if ( width <= 64 ) return 64;
+   return width;
+}
+
+/// \brief Provides the smallest unsigned integer type that has at least minSize bits.
+///
+/// Example:
+///
+///   leastUnsignedInteger< 5 >::type a; // a is an 8-bit unsigned integer
+///   leastUnsignedInteger< 9 >::type b; // b is a 16-bit unsigned integer
+///
+template< uint_t minSize >
+struct leastUnsignedInteger
+{
+   typedef typename uintFromBitWidth< leastUnsignedIntegerBitWidth( minSize ) >::type type;
+};
+
 /// \cond internal
 static const uint_t UINT_BITS  = static_cast< uint_t >( std::numeric_limits< uint_t >::digits );
 static const uint_t UINT_BYTES = static_cast< uint_t >( std::numeric_limits< uint_t >::digits ) >> 3;

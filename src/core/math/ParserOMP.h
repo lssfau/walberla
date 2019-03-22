@@ -22,8 +22,8 @@
 #pragma once
 
 #include "Parser.h"
-#include <boost/shared_array.hpp>
 
+#include <memory>
 
 namespace walberla {
 namespace math {
@@ -39,7 +39,7 @@ public:
    inline bool symbolExists(const std::string & symbol) const { return parser_[0].symbolExists(symbol); }
 
 private:
-   boost::shared_array<FunctionParser> parser_;
+   std::unique_ptr< FunctionParser[] > parser_;
 #ifndef NDEBUG
    int num_parsers_;
 #endif
