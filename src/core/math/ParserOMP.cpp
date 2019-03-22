@@ -51,9 +51,9 @@ void FunctionParserOMP::parse(const std::string & eq)
    #ifdef _OPENMP
    #pragma omp parallel for schedule(static)
    #endif
-   for (uint_t t = 0; t < uint_c( omp_get_max_threads() ); ++t)
+   for (int t = 0; t < omp_get_max_threads(); ++t)
    {
-      parser_[t].parse(eq);
+      parser_[uint_c(t)].parse(eq);
    }
 }
 
