@@ -39,7 +39,9 @@ typedef std::pair<blockforest::BlockID, BlockInfo> InfoCollectionPair;
  * The number of shadow particles is used as the communication weight.
  *
  */
-void createWithNeighborhoodLocalShadow(const BlockForest& bf, const BlockDataID storageID, InfoCollection& ic );
+void createWithNeighborhoodLocalShadow( const BlockForest& bf,
+                                        const BlockDataID storageID,
+                                        InfoCollection& ic );
 
 /**
  * @brief Fills \a InfoCollection with up to date information.
@@ -48,7 +50,10 @@ void createWithNeighborhoodLocalShadow(const BlockForest& bf, const BlockDataID 
  * The number of shadow particles is used as the communication weight.
  *
  */
-void createWithNeighborhoodContactsShadow(const BlockForest& bf, const BlockDataID storageID, const BlockDataID fcdID, InfoCollection& ic );
+void createWithNeighborhoodContactsShadow( BlockForest& bf,
+                                           const BlockDataID storageID,
+                                           const BlockDataID fcdID,
+                                           InfoCollection& ic );
 
 }
 }

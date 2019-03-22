@@ -29,7 +29,9 @@
 namespace walberla {
 namespace pe {
 
-void createWithNeighborhoodLocalShadow(const BlockForest& bf, const BlockDataID storageID, InfoCollection& ic )
+void createWithNeighborhoodLocalShadow( const BlockForest& bf,
+                                        const BlockDataID storageID,
+                                        InfoCollection& ic )
 {
    ic.clear();
 
@@ -87,7 +89,10 @@ void createWithNeighborhoodLocalShadow(const BlockForest& bf, const BlockDataID 
    }
 }
 
-void createWithNeighborhoodContacts(BlockForest& bf, const BlockDataID storageID, const BlockDataID fcdID, InfoCollection& ic )
+void createWithNeighborhoodContactsShadow( BlockForest& bf,
+                                           const BlockDataID storageID,
+                                           const BlockDataID fcdID,
+                                           InfoCollection& ic )
 {
    ic.clear();
 
@@ -95,7 +100,7 @@ void createWithNeighborhoodContacts(BlockForest& bf, const BlockDataID storageID
 
    for (auto blockIt = bf.begin(); blockIt != bf.end(); ++blockIt)
    {
-      blockforest::Block* block   = static_cast<blockforest::Block*> (&(*blockIt));
+      blockforest::Block* block         = static_cast<blockforest::Block*> (&(*blockIt));
       Storage const *     storage       = block->getData< Storage >( storageID );
       BodyStorage const & shadowStorage = (*storage)[StorageType::SHADOW];
       fcd::IFCD *     fcd         = block->getData< fcd::IFCD >( fcdID );
