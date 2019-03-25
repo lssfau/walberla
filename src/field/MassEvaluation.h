@@ -422,6 +422,10 @@ shared_ptr< MassEvaluation< DensityField_T, Filter_T > > makeMassEvaluation( con
 }
 
 
+#ifndef KEEP_WALBERLA_FIELD_MAKE_MASS_EVALUATION
+#undef WALBERLA_FIELD_MAKE_MASS_EVALUATION_CONFIG_PARSER
+#undef WALBERLA_FIELD_MAKE_MASS_EVALUATION_SET_AND_RETURN
+#endif
 
 } // namespace field
 } // namespace walberla

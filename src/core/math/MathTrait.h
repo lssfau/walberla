@@ -688,5 +688,7 @@ WALBERLA_CREATE_MATHTRAIT_SPECIALIZATION( long double   , long double   , long d
 /*! \endcond */
 //*************************************************************************************************
 
+#undef WALBERLA_CREATE_MATHTRAIT_SPECIALIZATION
+
 }
 }

@@ -32,10 +32,6 @@
 #include <limits>
 #include <cmath>
 
-#define BLOCK_SIZE_X       uint_t( 32 )
-#define BLOCK_SIZE_Y       uint_t( 2 )
-#define BLOCK_SIZE_Z       uint_t( 2 )
-
 namespace walberla {
 namespace cuda {
 
@@ -43,7 +39,7 @@ namespace cuda {
 inline unsigned int iDivUp( unsigned int a, unsigned int b ) { return ( a + b - 1 ) / b; }
 
 
-dim3 FieldIndexing3DBase::preferredBlockDim_( BLOCK_SIZE_X, BLOCK_SIZE_Y, BLOCK_SIZE_Z );
+dim3 FieldIndexing3DBase::preferredBlockDim_( 32, 2, 2 );
 
 
 template< typename T>

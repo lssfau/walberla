@@ -443,6 +443,7 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
                   grad[i] = v - tmpField->get( min[i], f );
                }
 #endif
+#undef WALBERLA_LBM_REFINEMENT_EXPLOSION_EXCLUDE_EXTRAPOLATION
             }
 
 #define WALBERLA_LBM_REFINEMENT_EXPLOSION_CHEN_CORRECTION
@@ -453,6 +454,7 @@ void linearInterpolation( const cell_idx_t y, const cell_idx_t z, const CellInte
 
             grad = grad - cNorm * ( cNorm * grad );
 #endif
+#undef WALBERLA_LBM_REFINEMENT_EXPLOSION_CHEN_CORRECTION
 
             const auto xx = x + cell_idx_t(1);
             const auto yy = y + cell_idx_t(1);

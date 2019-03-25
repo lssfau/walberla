@@ -45,8 +45,6 @@
 #include <pe/utility/BodyCast.h>
 #include <pe/raytracing/Intersects.h>
 
-#define BLOCKCELL_NORMAL_INDETERMINATE 3
-
 namespace walberla{
 namespace pe{
 
@@ -189,6 +187,8 @@ private:
       BodyID getRayIntersectingBody(const raytracing::Ray& ray, const AABB& blockAABB, real_t& t, Vec3& n,
                                     std::function<bool (const BodyID body)> isBodyVisibleFunc) const;
       
+      static const int BLOCKCELL_NORMAL_INDETERMINATE = 3;
+
       template<typename BodyTuple>
       BodyID getBodyIntersectionForBlockCell(const Vector3<int32_t>& blockCell,
                                              const int8_t cellNormalAxis, const int8_t cellNormalDir,

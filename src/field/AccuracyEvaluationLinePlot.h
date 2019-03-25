@@ -692,5 +692,8 @@ makeAccuracyEvaluationLinePlotter( const Config_T & config,
 
 
 
+#undef WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_LINE_PLOT_CONFIG_PARSER
+#undef WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_LINE_PLOT_SET_AND_RETURN
+
 } // namespace field
 } // namespace walberla
