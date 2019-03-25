@@ -656,5 +656,8 @@ makeStabilityChecker( const Config_T & config,
 
 
 
+#undef WALBERLA_FIELD_MAKE_STABILITY_CHECKER_CONFIG_PARSER
+#undef WALBERLA_FIELD_MAKE_STABILITY_CHECKER_SET_AND_RETURN
+
 } // namespace field
 } // namespace walberla

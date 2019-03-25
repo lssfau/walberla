@@ -23,13 +23,21 @@
 #include "EquationParser.h"
 #include "Operator.h"
 #include "Variable.h"
+#include "core/math/Constants.h"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 #include <memory>
 
 
-#define E_VAL 2.71828182845904523536
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// PARSE UTIL
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define THROW(msg, str, index) {\
+   std::stringstream ss;\
+   ss << (msg) << " -> [" << (str) << "] at [" << (index) << "]";\
+   throw std::runtime_error( ss.str() );\
+}
 
 namespace walberla {
 namespace math {
@@ -179,12 +187,12 @@ NodePtr EquationParser::parseFunction( const std::string& str, size_t& index ) c
    {
    case OP_FUNC_EXP:
       funcPtr = std::make_shared<Node>( OP_PROD );
-      funcPtr->left()  = std::make_shared<Node>( E_VAL  );
+      funcPtr->left()  = std::make_shared<Node>( M_E  );
       funcPtr->right() = nodePtr;
       return funcPtr;
    case OP_FUNC_LN:
       funcPtr = std::make_shared<Node>( OP_LOG );
-      funcPtr->right() = std::make_shared<Node>( E_VAL  );
+      funcPtr->right() = std::make_shared<Node>( M_E  );
       funcPtr->left()  = nodePtr;
       return funcPtr;
    case OP_FUNC_SQRT:

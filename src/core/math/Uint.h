@@ -138,6 +138,7 @@ static const uint8_t msbLookupTable[256] =
       0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
       msbLT(5), msbLT(6), msbLT(6), msbLT(7), msbLT(7), msbLT(7), msbLT(7),
       msbLT(8), msbLT(8), msbLT(8), msbLT(8), msbLT(8), msbLT(8), msbLT(8), msbLT(8)
+#undef msbLT
 };
 
 //**********************************************************************************************************************

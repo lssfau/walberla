@@ -21,6 +21,7 @@
 
 #pragma once
 
+#define KEEP_WALBERLA_FIELD_MAKE_MASS_EVALUATION
 #include "field/MassEvaluation.h"
 
 
@@ -285,6 +286,10 @@ makeMassEvaluation( const Config_T & config,
 }
 
 
+
+#undef WALBERLA_FIELD_MAKE_MASS_EVALUATION_CONFIG_PARSER
+#undef WALBERLA_FIELD_MAKE_MASS_EVALUATION_SET_AND_RETURN
+#undef KEEP_WALBERLA_FIELD_MAKE_MASS_EVALUATION
 
 } // namespace lbm
 } // namespace walberla

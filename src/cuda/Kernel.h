@@ -146,6 +146,8 @@ namespace cuda {
       CHECK_PARAMETER_FUNC(7)
       CHECK_PARAMETER_FUNC(8)
 
+      #undef CHECK_PARAMETER_FUNC
+
       template<typename T> bool checkParameter( uint_t n );
       //@}
       //****************************************************************************************************************

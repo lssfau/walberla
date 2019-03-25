@@ -159,6 +159,7 @@ static const boost::uint8_t logBase2LookupTable[256] =
       0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
       logBase2LT(4), logBase2LT(5), logBase2LT(5), logBase2LT(6), logBase2LT(6), logBase2LT(6), logBase2LT(6),
       logBase2LT(7), logBase2LT(7), logBase2LT(7), logBase2LT(7), logBase2LT(7), logBase2LT(7), logBase2LT(7), logBase2LT(7)
+#undef logBase2LT
 };
 
 template< typename UINT > size_t logBase2( UINT value ); // 1000 -> 3, 0010 -> 1, 0001 -> 0, etc.

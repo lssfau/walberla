@@ -639,5 +639,8 @@ makeVolumetricFlowRateEvaluation( const Config_T & config,
 
 
 
+#undef WALBERLA_FIELD_MAKE_VOLUMETRIC_FLOW_RATE_EVALUATION_CONFIG_PARSER
+#undef WALBERLA_FIELD_MAKE_VOLUMETRIC_FLOW_RATE_EVALUATION_SET_AND_RETURN
+
 } // namespace field
 } // namespace walberla

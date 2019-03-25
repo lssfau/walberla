@@ -32,9 +32,6 @@
 #include <cassert>
 
 
-#define _unused(x) ((void)x)
-
-
 namespace walberla {
 namespace gui {
 
@@ -56,7 +53,7 @@ QMimeData * createMimeDataFromPointer(void * p, const QString & role)
 
     int bytesWritten = s.writeRawData( ( const char * ) & p, int_c( sizeof( void * ) ) );
     WALBERLA_ASSERT_EQUAL( bytesWritten, sizeof( void*) );
-    _unused(bytesWritten);
+    WALBERLA_UNUSED(bytesWritten);
 
     data->setData( role, d );
 
@@ -76,7 +73,7 @@ void * getPointerFromMimeData(const QMimeData *data, const QString& type)
 
     int bytesRead = s.readRawData( (char*)&ptr, int_c( sizeof( void * ) ) );
     WALBERLA_ASSERT_EQUAL( bytesRead, sizeof(void*) );
-    _unused(bytesRead);
+    WALBERLA_UNUSED(bytesRead);
 
     return ptr;
 }
