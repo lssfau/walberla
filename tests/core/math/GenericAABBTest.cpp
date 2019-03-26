@@ -28,6 +28,7 @@
 #include "stencil/D3CornerStencil.h"
 
 #include <random>
+#include <array>
 
 
 using namespace walberla;

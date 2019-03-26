@@ -56,7 +56,6 @@
 
 #include "vtk/VTKOutput.h"
 
-#include <boost/lexical_cast.hpp>
 #include <stdexcept>
 
 
@@ -218,11 +217,11 @@ int main( int argc, char **argv )
       if( args.size() != 6 )
          throw std::invalid_argument( "Wrong number of command line arguments!" );
 
-      channelLength = boost::lexical_cast<uint_t>( args[1] );
-      channelWidth  = boost::lexical_cast<uint_t>( args[2] );
-      omega         = boost::lexical_cast<real_t>( args[3] );
-      deltaDensity  = boost::lexical_cast<real_t>( args[4] );
-      numTimesteps  = boost::lexical_cast<uint_t>( args[5] );
+      channelLength = string_to_num<uint_t>( args[1] );
+      channelWidth  = string_to_num<uint_t>( args[2] );
+      omega         = string_to_num<real_t>( args[3] );
+      deltaDensity  = string_to_num<real_t>( args[4] );
+      numTimesteps  = string_to_num<uint_t>( args[5] );
    }
    catch( std::exception & )
    {

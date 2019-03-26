@@ -25,8 +25,6 @@
 #include "core/math/Parser.h"
 #include "equation_system/EquationParser.h"
 
-#include <boost/lexical_cast.hpp>
-
 
 namespace walberla {
 namespace math {
@@ -96,7 +94,7 @@ namespace math {
 
       for (size_t i=0; i<equations.size(); ++i){
          index = 0;
-         es_.add( boost::lexical_cast<std::string>(es_.getNumberOfEquations()+1), ep.parseEquation( equations[i], index ) );
+         es_.add( std::to_string(es_.getNumberOfEquations()+1), ep.parseEquation( equations[i], index ) );
       }
    }
 
@@ -107,7 +105,7 @@ namespace math {
 
       solved_ = false;
 
-      es_.add( boost::lexical_cast<std::string>(es_.getNumberOfEquations()+1), ep.parseEquation( equation, index ) );
+      es_.add( std::to_string(es_.getNumberOfEquations()+1), ep.parseEquation( equation, index ) );
    }
 
    void PhysicalCheck::addUnitParameterRelations( const std::map< std::string, std::string >& unitParameterRelations )
@@ -134,7 +132,7 @@ namespace math {
                if( j < unitString.size() && unitString[j] == '^' )
                {
                   ++j;
-                  int expo = factor * boost::lexical_cast<int>( unitString[j] );
+                  int expo = factor * std::atoi( &unitString[j] );
                   if( !setVarUnit( i->first, unitString.substr(index,1), expo ) )
                      WALBERLA_ABORT( "Error in PhysicalCheck::addUnitParameterRelations(). Non-unique description for unit '" << unitString[index] << "' for parameter '" << i->first << "'." );
                }
@@ -153,7 +151,7 @@ namespace math {
                if( j < unitString.size() && unitString[j] == '^' )
                {
                   ++j;
-                  int expo = factor * boost::lexical_cast<int>( unitString[j] );
+                  int expo = factor * std::atoi( &unitString[j] );
                   if( !setVarUnit( i->first, unitString.substr(index,2), expo ) )
                      WALBERLA_ABORT( "Error in PhysicalCheck::addUnitParameterRelations(). Non-unique description for unit 'kg' for parameter '" << i->first << "'.");
                }
@@ -277,7 +275,9 @@ namespace math {
             }
 
             // set the current parameter to the evaluated result in the current block
-            configBlock.setParameter( param->first, boost::lexical_cast<std::string>(result) );
+            std::ostringstream os;
+            os << std::setprecision(16) << result;
+            configBlock.setParameter( param->first, os.str() );
 
             // check for the equality of the parameter and the result
             double val = configBlock.getParameter<double>( param->first );

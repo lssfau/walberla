@@ -27,6 +27,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 
 // Own data structure with comparison operators but without operator<<

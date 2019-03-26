@@ -62,11 +62,11 @@ void ScalarFieldFromCellInterval<Field_T>::init( const Config::BlockHandle & blo
    
    try
    {
-      Value_T value = boost::lexical_cast<Value_T>(expression);
+      Value_T value = string_to_num<Value_T>(expression);
       init(globalCellInterval, value, id);
    }
    
-   catch(boost::bad_lexical_cast&)
+   catch(std::invalid_argument&)
    {
       math::FunctionParser p;
       p.parse(expression);

@@ -41,8 +41,6 @@
 #include "vtk/VTKOutput.h"
 #include "vtk/BlockCellDataWriter.h"
 
-#include <boost/lexical_cast.hpp>
-
 int main( int argc, char * argv[] )
 {
    using namespace walberla;
@@ -57,8 +55,8 @@ int main( int argc, char * argv[] )
    bool            vtk = true;
 
    try {
-      fieldSize.set( boost::lexical_cast< uint_t >( args.at(1) ), boost::lexical_cast< uint_t >( args.at(2) ) );
-      partitions = boost::lexical_cast< uint_t >( args.at(3) );
+      fieldSize.set( string_to_num< uint_t >( args.at(1) ), string_to_num< uint_t >( args.at(2) ) );
+      partitions = string_to_num< uint_t >( args.at(3) );
 
       auto it = std::find( args.begin(), args.end(), "--no-vtk" );
       if(it != args.end())

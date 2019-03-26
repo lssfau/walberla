@@ -32,7 +32,6 @@
 #include "mesh/MeshOperations.h"
 
 #include <random>
-#include <boost/lexical_cast.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -52,8 +51,8 @@ int main( int argc, char * argv[] )
       WALBERLA_ABORT_NO_DEBUG_INFO( "USAGE: " << args[0] << " MESH_FILE NUM_BOXES NUM_POINTS_TESTED_PER_BOX" );
 
    const std::string & meshFile = args[1];
-   const uint_t numBoxes = boost::lexical_cast<uint_t>( args[2] );
-   const uint_t numPointsTestedPerBox = boost::lexical_cast<uint_t>( args[3] );
+   const uint_t numBoxes = string_to_num<uint_t>( args[2] );
+   const uint_t numPointsTestedPerBox = string_to_num<uint_t>( args[3] );
 
    auto mesh = make_shared<TriangleMesh>();
    mesh::readAndBroadcast( meshFile, *mesh );

@@ -162,7 +162,7 @@ int main( int argc, char ** argv )
    
    uint_t timeSteps = uint_c(2000);
    if( argc > 1 )
-      timeSteps = boost::lexical_cast<uint_t>( argv[1] );
+      timeSteps = uint_c(std::stoul( argv[1] ));
    SweepTimeloop timeloop( blocks->getBlockStorage(), timeSteps );
  
    blockforest::communication::UniformBufferedScheme< CommunicationStencil_T > communication( blocks );

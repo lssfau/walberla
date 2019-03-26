@@ -33,8 +33,6 @@
 #include "field/Field.h"
 #include "field/FileIO.h"
 
-#include <boost/lexical_cast.hpp>
-
 
 namespace mpi_file_io_test {
    
@@ -86,10 +84,10 @@ int main( int argc, char* argv[] )
    
    if( args.size() == 5 )
    {
-      numBlocks  = boost::lexical_cast<uint_t>( args[1] );
-      xBlockSize = boost::lexical_cast<uint_t>( args[2] );
-      yBlockSize = boost::lexical_cast<uint_t>( args[3] );
-      zBlockSize = boost::lexical_cast<uint_t>( args[4] );
+      numBlocks  = string_to_num<uint_t>( args[1] );
+      xBlockSize = string_to_num<uint_t>( args[2] );
+      yBlockSize = string_to_num<uint_t>( args[3] );
+      zBlockSize = string_to_num<uint_t>( args[4] );
    }
    else if( args.size() > 5 )
    {

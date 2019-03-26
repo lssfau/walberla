@@ -738,7 +738,7 @@ int main( int argc, char **argv )
    const real_t viscosity = ( viscosity_SI/densityFluid_SI ) * dt_SI / ( dx_SI * dx_SI );
    const real_t tau = real_t(1) / lbm::collision_model::omegaFromViscosity( viscosity );
 
-   real_t gravitationalForce = - gravity * ( densityRatio - real_t(1) ) * diameter * diameter * diameter * math::PI / real_t(6);
+   real_t gravitationalForce = - gravity * ( densityRatio - real_t(1) ) * diameter * diameter * diameter * math::M_PI / real_t(6);
 
    // unhindered settling velocity of a single sphere in infinite fluid, would come from experiments or DNS, NOT Stokes settling velocity, from Finn et al, Tab 5
    const real_t velUnhindered_SI = real_t(-0.048); // m/s
@@ -1488,9 +1488,9 @@ int main( int argc, char **argv )
                WALBERLA_LOG_INFO_ON_ROOT("initial simulation ended with relative difference of interaction forces of " << relativeForceDiffLimit << " after " << t << " time steps.");
 
 
-               real_t actingExternalForceOnSpheres = real_c(numSpheres) * ( ( - gravity * densityRatio * diameter * diameter * diameter * math::PI / real_t(6)  ) +
-                                                                            ( gravity * real_t(1) * diameter * diameter * diameter * math::PI / real_t(6) ) +
-                                                                            ( extForce[2] * real_t(1) * diameter * diameter * diameter * math::PI / real_t(6) ) );
+               real_t actingExternalForceOnSpheres = real_c(numSpheres) * ( ( - gravity * densityRatio * diameter * diameter * diameter * math::M_PI / real_t(6)  ) +
+                                                                            ( gravity * real_t(1) * diameter * diameter * diameter * math::M_PI / real_t(6) ) +
+                                                                            ( extForce[2] * real_t(1) * diameter * diameter * diameter * math::M_PI / real_t(6) ) );
                WALBERLA_LOG_INFO_ON_ROOT("f_interaction_z = " << curInteractionForce << ", f_ext_z = " << actingExternalForceOnSpheres );
                if( std::fabs( ( std::fabs( curInteractionForce ) - std::fabs( actingExternalForceOnSpheres ) )/ std::fabs( curInteractionForce ) ) < relativeForceConvergenceLimit )
                {
@@ -1521,7 +1521,7 @@ int main( int argc, char **argv )
    WALBERLA_LOG_INFO_ON_ROOT("===================================================================================" );
    WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with:" );
    WALBERLA_LOG_INFO_ON_ROOT("external forcing on fluid = " << extForce );
-   WALBERLA_LOG_INFO_ON_ROOT("total external forces on all particles = " << real_c(numSpheres) * ( - gravity * ( densityRatio - real_t(1) ) + extForce[2] ) * diameter * diameter * diameter * math::PI / real_t(6) );
+   WALBERLA_LOG_INFO_ON_ROOT("total external forces on all particles = " << real_c(numSpheres) * ( - gravity * ( densityRatio - real_t(1) ) + extForce[2] ) * diameter * diameter * diameter * math::M_PI / real_t(6) );
    WALBERLA_LOG_INFO_ON_ROOT("simulating " << timesteps << " time steps" );
 
 
@@ -1642,9 +1642,9 @@ int main( int argc, char **argv )
 
       // ext forces on bodies
       timeloop.add() << Sweep( DummySweep(), "Dummy Sweep ")
-                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,- gravity * densityRatio * diameter * diameter * diameter * math::PI / real_t(6) )  ), "Gravitational Force Add" )
-                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,gravity * real_t(1) * diameter * diameter * diameter * math::PI / real_t(6) ) ), "Buoyancy Force (due to gravity) Add" )
-                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,extForce[2] * real_t(1) * diameter * diameter * diameter * math::PI / real_t(6) ) ), "Buoyancy Force (due to external fluid force) Add" )
+                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,- gravity * densityRatio * diameter * diameter * diameter * math::M_PI / real_t(6) )  ), "Gravitational Force Add" )
+                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,gravity * real_t(1) * diameter * diameter * diameter * math::M_PI / real_t(6) ) ), "Buoyancy Force (due to gravity) Add" )
+                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,extForce[2] * real_t(1) * diameter * diameter * diameter * math::M_PI / real_t(6) ) ), "Buoyancy Force (due to external fluid force) Add" )
                      << AfterFunction( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, dtInteractionSubCycle, peSubSteps, lubricationEvaluationFunction ), "Pe Time Step" );
 
       timeloop.add() << Sweep( DummySweep(), "Dummy Sweep ")

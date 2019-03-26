@@ -49,9 +49,9 @@ static void splitVector( T& x, T& y, T& z, const Config::BlockHandle& bb, const 
    if( coordinates.size() != 3 )
       WALBERLA_ABORT( errorMsg );
 
-   x = boost::lexical_cast< T >( coordinates[0] );
-   y = boost::lexical_cast< T >( coordinates[1] );
-   z = boost::lexical_cast< T >( coordinates[2] );
+   x = string_to_num< T >( coordinates[0] );
+   y = string_to_num< T >( coordinates[1] );
+   z = string_to_num< T >( coordinates[2] );
 }
 
 

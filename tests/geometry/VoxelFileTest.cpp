@@ -23,18 +23,6 @@
 
 #ifdef _MSC_VER
 #  pragma warning(push)
-// disable warning boost/concept/detail/msvc.hpp(22): warning C4100: 'x' : unreferenced formal parameter
-#  pragma warning( disable : 4100 )
-// disable warning bboost/concept/detail/msvc.hpp(76): warning C4067 : unexpected tokens following preprocessor directive - expected a newline
-#  pragma warning( disable : 4067 )
-
-#include <boost/concept/detail/msvc.hpp>
-
-#  pragma warning(pop)
-#endif //_MSC_VER
-
-#ifdef _MSC_VER
-#  pragma warning(push)
 // disable warning boost/multi_array/base.hpp(475): warning C4189: 'bound_adjustment' : local variable is initialized but not referenced
 #  pragma warning( disable : 4189 )
 #endif //_MSC_VER

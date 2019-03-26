@@ -65,6 +65,24 @@ namespace debug {
       for (i = 0; i < size; i++)
       {
          std::string line ( strings[i] );
+#ifdef __APPLE__
+         // one line might look like this:
+         //0   PrintStacktraceTest                 0x0000000000408c6b _ZN8walberla4core15printStacktraceEv + 75
+
+         size_t plusPos       = line.find_last_of('+');
+         size_t funcPos       = line.find_last_of(' ', plusPos-2)+1;
+
+         string functionName = line.substr( funcPos, plusPos-funcPos-1 );
+
+         size_t addrPos       = line.find_last_of('x', funcPos-2)-2;
+         size_t afterLevelPos = line.find_first_of(' ');
+         size_t beforeAppPos  = line.find_first_not_of(" ", afterLevelPos);
+
+         string appName      = line.substr( beforeAppPos, addrPos-beforeAppPos );
+
+         size_t afterAppPos   = appName.find_last_not_of(" ")+1;
+         appName             = appName.substr( 0, afterAppPos );
+#else
          // one line might look like this:
          //./PrintStacktraceTest(_ZN8walberla4core15printStacktraceEv+0x4b) [0x408c6b]
 
@@ -80,6 +98,7 @@ namespace debug {
          size_t plusPos = bracketPart.find_first_of('+');
          string functionName = bracketPart.substr(0, plusPos );
          string offset       = bracketPart.substr( plusPos+1 );
+#endif
 
          // try to demangle -> no return code if successfull
          // but the returned string starts with "demangle" if demangling failed

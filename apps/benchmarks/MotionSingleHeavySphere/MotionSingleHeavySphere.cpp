@@ -1081,7 +1081,7 @@ int main( int argc, char **argv )
       WALBERLA_LOG_INFO_ON_ROOT("Initial simulation has ended.")
 
       //evaluate the gravitational force necessary to keep the sphere at a approximately fixed position
-      gravity = forceEval->getForce() / ( (densityRatio - real_t(1) ) * diameter * diameter * diameter * math::PI / real_t(6) );
+      gravity = forceEval->getForce() / ( (densityRatio - real_t(1) ) * diameter * diameter * diameter * math::M_PI / real_t(6) );
       GalileoSim = std::sqrt( ( densityRatio - real_t(1) ) * gravity * diameter * diameter * diameter ) / viscosity;
       ReynoldsSim = uIn * diameter / viscosity;
       u_ref = std::sqrt( std::fabs(densityRatio - real_t(1)) * gravity * diameter );
@@ -1235,7 +1235,7 @@ int main( int argc, char **argv )
    }
 
    // add gravity
-   Vector3<real_t> extForcesOnSphere( real_t(0), real_t(0), - gravity * ( densityRatio - real_t(1) ) * diameter * diameter * diameter * math::PI / real_t(6));
+   Vector3<real_t> extForcesOnSphere( real_t(0), real_t(0), - gravity * ( densityRatio - real_t(1) ) * diameter * diameter * diameter * math::M_PI / real_t(6));
    timeloop.addFuncAfterTimeStep( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, extForcesOnSphere ), "Add external forces (gravity and buoyancy)" );
 
    // evaluate the sphere properties

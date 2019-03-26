@@ -164,8 +164,8 @@ int main( int argc, char * argv[] )
       WALBERLA_ABORT_NO_DEBUG_INFO( "USAGE: " << args[0] << " [--no-brute-force] [--force-float] MESH_FILE NUM_POINTS NUM_REPETITIONS" );
 
    const std::string & meshFile = args[1];
-   const uint_t numPoints       = boost::lexical_cast<uint_t>( args[2] );
-   const uint_t numRepetitions  = boost::lexical_cast<uint_t>( args[3] );
+   const uint_t numPoints       = string_to_num<uint_t>( args[2] );
+   const uint_t numRepetitions  = string_to_num<uint_t>( args[3] );
 
    if(forceFloat)
    {

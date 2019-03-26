@@ -34,6 +34,7 @@
 #include "core/debug/Debug.h"
 #include "core/debug/TestSubsystem.h"
 #include "core/logging/Logging.h"
+#include "core/math/Constants.h"
 #include "core/math/Sample.h"
 #include "core/math/Vector3.h"
 #include "core/mpi/Environment.h"
@@ -762,7 +763,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    {
       setup.maxVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( real_t(4) * setup.viscosity_L );
       setup.meanVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( real_t(8) * setup.viscosity_L );
-      setup.flowRate_L = setup.meanVelocity_L * math::PI * setup.radius_L * setup.radius_L;
+      setup.flowRate_L = setup.meanVelocity_L * math::M_PI * setup.radius_L * setup.radius_L;
    }
    else
    {

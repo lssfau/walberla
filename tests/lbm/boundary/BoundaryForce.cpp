@@ -25,6 +25,7 @@
 
 #include "boundary/BoundaryHandling.h"
 
+#include "core/math/Constants.h"
 #include "core/mpi/Environment.h"
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
@@ -167,7 +168,7 @@ int main( int argc, char ** argv )
    
    uint_t timeSteps = uint_c(200);
    if( argc > 1 )
-      timeSteps = boost::lexical_cast<uint_t>( argv[1] );
+      timeSteps = uint_c(std::stoul( argv[1] ));
    SweepTimeloop timeloop( blocks->getBlockStorage(), timeSteps );
  
    blockforest::communication::UniformBufferedScheme< CommunicationStencil_T > communication( blocks );
@@ -211,7 +212,7 @@ int main( int argc, char ** argv )
    mpi::allReduceInplace( force[2], mpi::SUM );
    
    real_t visc = lbm::collision_model::viscosityFromOmega( omega );
-   Vector3<real_t> stokes = 6 * math::PI * visc * R * velocity;
+   Vector3<real_t> stokes = 6 * math::M_PI * visc * R * velocity;
 
    WALBERLA_LOG_RESULT_ON_ROOT("Expected force: " << stokes);
    WALBERLA_LOG_RESULT_ON_ROOT("Actual force: " << force);

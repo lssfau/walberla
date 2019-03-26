@@ -3,6 +3,7 @@
 #include "core/Environment.h"
 #include "core/debug/TestSubsystem.h"
 #include "core/logging/Logging.h"
+#include "core/math/Constants.h"
 #include "field/AddToStorage.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
 #include "stencil/D3Q7.h"
@@ -55,9 +56,9 @@ int main (int argc, char** argv)
    auto greens = [&dim] (uint_t x, uint_t y, uint_t z) -> real_t {
       if (x == 0 && y == 0 && z == 0)
          return 0;
-      return real_c(0.5) / ( std::cos( real_c(2) * real_c(M_PI) * real_c(x) / real_c(dim[0])) +
-                             std::cos( real_c(2) * real_c(M_PI) * real_c(y) / real_c(dim[1])) +
-                             std::cos( real_c(2) * real_c(M_PI) * real_c(z) / real_c(dim[2])) -
+      return real_c(0.5) / ( std::cos( real_c(2) * real_c(math::M_PI) * real_c(x) / real_c(dim[0])) +
+                             std::cos( real_c(2) * real_c(math::M_PI) * real_c(y) / real_c(dim[1])) +
+                             std::cos( real_c(2) * real_c(math::M_PI) * real_c(z) / real_c(dim[2])) -
                              real_c(3) ) / real_c(dim[0]*dim[1]*dim[2]);
    };
    

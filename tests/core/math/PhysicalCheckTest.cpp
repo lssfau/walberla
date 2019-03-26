@@ -26,7 +26,6 @@
 #include "core/logging/Logging.h"
 #include "core/math/PhysicalCheck.h"
 
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <map>
 #include <string>

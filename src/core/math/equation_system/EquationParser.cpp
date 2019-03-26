@@ -26,7 +26,6 @@
 #include "core/math/Constants.h"
 
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/lexical_cast.hpp>
 #include <memory>
 
 
@@ -78,10 +77,10 @@ NodePtr EquationParser::parseNumber( const std::string& str, size_t& index ) con
          THROW( "Number ends with 'e'", str, index );
       while( isdigit(str[++index]) != int(0) );
 
-      value =  boost::lexical_cast< double >( str.substr(start, estart-start-1) ) *
-            pow(10.0, boost::lexical_cast< int >( str.substr(estart, index-estart) ) );
+      value =  std::stod( str.substr(start, estart-start-1) ) *
+            pow(10.0, std::stoi( str.substr(estart, index-estart) ) );
    } else {
-      value = boost::lexical_cast< double >( str.substr(start, index-start) );
+      value = std::stod( str.substr(start, index-start) );
    }
 
    return std::make_shared<Node>( value );

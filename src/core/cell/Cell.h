@@ -28,10 +28,9 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include <boost/functional/hash.hpp>
 #include <algorithm>
 #include <iterator>
-#include <ostream>
+#include <iostream>
 
 
 namespace walberla {
@@ -336,9 +335,12 @@ inline std::istream & operator>>( std::istream & is, Cell & cell )
 inline std::size_t hash_value( const Cell & cell )
 {
   std::size_t seed = 0;
-  boost::hash_combine( seed, cell.x() );
-  boost::hash_combine( seed, cell.y() );
-  boost::hash_combine( seed, cell.z() );
+  std::hash<cell_idx_t> hasher;
+
+  seed ^= hasher(cell.x()) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+  seed ^= hasher(cell.y()) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+  seed ^= hasher(cell.z()) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+
   return seed;
 }
 

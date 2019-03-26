@@ -25,7 +25,6 @@
 #include "core/mpi/Reduce.h"
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/lexical_cast.hpp>
 
 
 
@@ -172,28 +171,27 @@ void DistributedSample::mpiGatherRoot()
 std::string DistributedSample::format( const std::string & formatString ) const
 {
    using boost::algorithm::replace_all;
-   using boost::lexical_cast;
 
    std::string result = formatString;
 
    if( size_ > uint_t(0) )
    {
       if( result.find( "%min" ) != std::string::npos )
-         replace_all(result, "%min", lexical_cast<std::string>( min_ ) );
+         replace_all(result, "%min", std::to_string( min_ ) );
       if( result.find( "%max" ) != std::string::npos )
-         replace_all(result, "%max", lexical_cast<std::string>( max_ ) );
+         replace_all(result, "%max", std::to_string( max_ ) );
       if( result.find( "%sum" ) != std::string::npos )
-         replace_all(result, "%sum",lexical_cast<std::string>( sum_ ) );
+         replace_all(result, "%sum",std::to_string( sum_ ) );
       if( result.find( "%mean" ) != std::string::npos )
-         replace_all(result, "%mean", lexical_cast<std::string>( mean_ ) );
+         replace_all(result, "%mean", std::to_string( mean_ ) );
       if( result.find( "%var" ) != std::string::npos )
-         replace_all(result, "%var", lexical_cast<std::string>( variance_ ) );
+         replace_all(result, "%var", std::to_string( variance_ ) );
       if( result.find( "%stddev" ) != std::string::npos )
-         replace_all(result, "%stddev", lexical_cast<std::string>( stdDeviation() ) );
+         replace_all(result, "%stddev", std::to_string( stdDeviation() ) );
       if( result.find( "%relstddev" ) != std::string::npos )
-         replace_all(result, "%relstddev", lexical_cast<std::string>( relativeStdDeviation() ) );
+         replace_all(result, "%relstddev", std::to_string( relativeStdDeviation() ) );
       if( result.find( "%size" ) != std::string::npos )
-         replace_all(result, "%size", lexical_cast<std::string>( size_ ) );
+         replace_all(result, "%size", std::to_string( size_ ) );
    }
    else // empty()
    {

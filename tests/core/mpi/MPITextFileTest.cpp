@@ -120,7 +120,7 @@ int main( int argc, char * argv[] )
    std::string filename;
    try
    {
-      chunkSize = boost::lexical_cast<size_t>( args.at(2) );
+      chunkSize = walberla::string_to_num<size_t>( args.at(2) );
       filename  = args.at( 1 );
    }
    catch( ... )

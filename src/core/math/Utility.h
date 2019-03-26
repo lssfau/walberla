@@ -25,25 +25,14 @@
 #include "MathTrait.h"
 #include "core/DataTypes.h"
 
-#include <boost/math/constants/constants.hpp>
 #include <cmath>
 #include <cstddef>
 #include <limits>
+#include <type_traits>
 
 
 namespace walberla {
 namespace math {
-
-//======================================================================================================================
-//
-//  MATHEMATICAL CONSTANTS
-//
-//======================================================================================================================
-
-//! Definition of the mathematical value \f$ \pi \f$.
-const real_t PI = boost::math::constants::pi<real_t>();
-
-
 
 //======================================================================================================================
 //
@@ -58,9 +47,9 @@ template< typename T >
 inline const T sign( T a );
 
 template< typename T >
-inline const typename boost::enable_if_c<  boost::is_unsigned<T>::value, T >::type abs( T a );
+inline const typename std::enable_if<  std::is_unsigned<T>::value, T >::type abs( T a );
 template< typename T >
-inline const typename boost::enable_if_c< !boost::is_unsigned<T>::value, T >::type abs( T a );
+inline const typename std::enable_if< !std::is_unsigned<T>::value, T >::type abs( T a );
 
 
 template< typename T1, typename T2 >
@@ -113,13 +102,13 @@ inline const T sign( T a )
 // \return The value if it is greater than or equal to zero, -1 times the value if the value is smaller than zero.
  */
 template< typename T >
-inline const typename boost::enable_if_c<  boost::is_unsigned<T>::value, T >::type abs( T a )
+inline const typename std::enable_if<  std::is_unsigned<T>::value, T >::type abs( T a )
 {
    return a;
 }
 
 template< typename T >
-inline const typename boost::enable_if_c< !boost::is_unsigned<T>::value, T >::type abs( T a )
+inline const typename std::enable_if< !std::is_unsigned<T>::value, T >::type abs( T a )
 {
    return std::abs( a );
 }
