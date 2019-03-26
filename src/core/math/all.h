@@ -23,6 +23,7 @@
 #pragma once
 
 #include "AABB.h"
+#include "Constants.h"
 #include "DistributedSample.h"
 #include "FPClassify.h"
 #include "FastInvSqrt.h"

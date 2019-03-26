@@ -54,7 +54,7 @@ real_t dragCoeffSchillerNaumann( real_t reynoldsNumber )
 }
 
 // Coefficient from Stokes' law for drag, only valid for Stokes regime (low Reynolds numbers)
-// = 3 * PI * mu * D * fluidVolumeFraction
+// = 3 * M_PI * mu * D * fluidVolumeFraction
 real_t dragCoeffStokes ( real_t fluidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity )
 {
    return real_t(3) * math::M_PI * diameter * fluidDynamicViscosity * fluidVolumeFraction;

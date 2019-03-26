@@ -26,7 +26,6 @@
 #include "core/math/equation_system/EquationParser.h"
 #include "core/math/equation_system/EquationSystem.h"
 
-#include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -128,7 +127,7 @@ int equationInput(){
 
    for (size_t i=0; i<eqStringList.size(); ++i){
       index = 0;
-      es.add( boost::lexical_cast<std::string>(++number), ep.parseEquation( eqStringList[i], index ) );
+      es.add( std::to_string(++number), ep.parseEquation( eqStringList[i], index ) );
    }
 
    WALBERLA_CHECK( es.solve() );
@@ -139,7 +138,7 @@ int equationInput(){
 
 int unitTest(double v)
 {
-   std::string s = boost::lexical_cast<std::string>( v );
+   std::string s = std::to_string( v );
 
    std::vector<std::string> eqStringList;
    eqStringList.push_back(       "a = " + s );

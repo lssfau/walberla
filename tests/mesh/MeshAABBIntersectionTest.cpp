@@ -30,7 +30,6 @@
 #include "mesh/TriangleMeshes.h"
 
 #include <random>
-#include <boost/lexical_cast.hpp>
 
 #include <vector>
 #include <string>
@@ -88,7 +87,7 @@ int main( int argc, char * argv[] )
    if( args.size() != 2 )
       WALBERLA_ABORT_NO_DEBUG_INFO( "USAGE: " << args[0] << " NUM_AABBS" );
 
-   const uint_t numAABBs = boost::lexical_cast< uint_t >( args[1] );
+   const uint_t numAABBs = string_to_num< uint_t >( args[1] );
 
    runTests< mesh::TriangleMesh >( numAABBs );
    runTests< mesh::FloatTriangleMesh >( numAABBs );

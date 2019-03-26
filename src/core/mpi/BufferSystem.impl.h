@@ -525,36 +525,35 @@ void GenericBufferSystem<Rb, Sb>::setCommunicationType( const bool knownSize )
 template< typename Rb, typename Sb>
 typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::noRanks()
 {
-   return RankRange ( RankCountIter( 0 ),
-                      RankCountIter( 0 ) );
+   return RankRange();
 }
 template< typename Rb, typename Sb>
 typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::allRanks()
 {
    int numProcesses = MPIManager::instance()->numProcesses();
-   return RankRange ( RankCountIter( 0            ),
-                      RankCountIter( numProcesses ) );
+   RankRange r;
+   std::generate_n( std::inserter(r, r.end()), numProcesses, [&]{ return MPIRank(r.size()); } );
+   return r;
 }
 template< typename Rb, typename Sb>
 typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::allRanksButRoot()
 {
    int numProcesses = MPIManager::instance()->numProcesses();
-   return RankRange ( RankCountIter( 1            ),
-                      RankCountIter( numProcesses ) );
+   RankRange r;
+   std::generate_n( std::inserter(r, r.end()), numProcesses-1, [&]{ return MPIRank(r.size()+size_t(1)); } );
+   return r;
 }
 template< typename Rb, typename Sb>
 typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::onlyRank( int includedRank )
 {
    WALBERLA_ASSERT_LESS( includedRank, MPIManager::instance()->numProcesses() );
-   return RankRange ( RankCountIter( includedRank   ),
-                      RankCountIter( includedRank+1 ) );
+   return RankRange { includedRank };
 }
 
 template< typename Rb, typename Sb>
 typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::onlyRoot()
 {
-   return RankRange ( RankCountIter( 0 ),
-                      RankCountIter( 1 ) );
+   return RankRange { 0 };
 }
 
 

@@ -20,6 +20,8 @@
 //======================================================================================================================
 
 
+#include <algorithm>
+
 #include <boost/type_traits/integral_constant.hpp>
 
 /// \cond internal

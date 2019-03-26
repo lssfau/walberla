@@ -47,6 +47,7 @@
 #include "core/cell/CellVector.h"
 #include "core/config/Config.h"
 #include "core/debug/TestSubsystem.h"
+#include "core/math/Constants.h"
 #include "core/math/IntegerFactorization.h"
 #include "core/math/Limits.h"
 #include "core/mpi/Environment.h"
@@ -71,8 +72,6 @@
 #include "stencil/D3Q19.h"
 
 #include "timeloop/SweepTimeloop.h"
-
-#include <boost/lexical_cast.hpp>
 
 #include <stdexcept>
 #include <array>
@@ -237,8 +236,8 @@ public:
          delta_( maxValue - minValue),
          length_(real_c(length)),
          lengthInv_(real_t(1)/real_c(length)),
-         pi_(math::PI),
-         piInv_(real_t(1)/math::PI),
+         pi_(math::M_PI),
+         piInv_(real_t(1)/math::M_PI),
          valid_(uint_c(std::ceil(omega*omega*omega*real_t(10)))),
          time_( time ),
          expArray(),
@@ -430,13 +429,13 @@ int main( int argc, char **argv )
    if( argc > 1 ) {
       std::vector<std::string> args( argv, argv + argc );
       for( uint_t i = 1; i < uint_c(argc); ++i ) {
-              if( boost::equals(argv[i], "-l"    ) )   length  = boost::lexical_cast<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-w"    ) )   width   = boost::lexical_cast<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-t"    ) )   time    = boost::lexical_cast<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-d"    ) )   dv      = boost::lexical_cast<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-o"    ) )   omega   = boost::lexical_cast<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-c"    ) )   closed  = boost::lexical_cast< bool >( args[++i] );
-         else if( boost::equals(argv[i], "-r"    ) )   levels += boost::lexical_cast<uint_t>( args[++i] );
+              if( boost::equals(argv[i], "-l"    ) )   length  = string_to_num<uint_t>( args[++i] );
+         else if( boost::equals(argv[i], "-w"    ) )   width   = string_to_num<uint_t>( args[++i] );
+         else if( boost::equals(argv[i], "-t"    ) )   time    = string_to_num<uint_t>( args[++i] );
+         else if( boost::equals(argv[i], "-d"    ) )   dv      = string_to_num<real_t>( args[++i] );
+         else if( boost::equals(argv[i], "-o"    ) )   omega   = string_to_num<real_t>( args[++i] );
+         else if( boost::equals(argv[i], "-c"    ) )   closed  = string_to_num<int>( args[++i] ) != 0;
+         else if( boost::equals(argv[i], "-r"    ) )   levels += string_to_num<uint_t>( args[++i] );
          else if( boost::equals(argv[i], "--vtk" ) )   useVTK  = true;
          else if( argv[i][0] != '-' ){
             std::cerr << "Usage: -option value" << std::endl; return EXIT_FAILURE;

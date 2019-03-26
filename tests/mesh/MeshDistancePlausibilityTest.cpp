@@ -44,8 +44,6 @@
 
 #include "stencil/D3Q27.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include <vector>
 #include <string>
 
@@ -74,7 +72,7 @@ int main( int argc, char * argv[] )
       args.erase( vtkArgIt );
    }
    const std::string & meshFile = args[1];
-   real_t dx = boost::lexical_cast<real_t>( args[2] );
+   real_t dx = string_to_num<real_t>( args[2] );
 
    auto mesh = make_shared<mesh::TriangleMesh>();
    mesh::readAndBroadcast( meshFile, *mesh);

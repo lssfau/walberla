@@ -38,6 +38,7 @@
 #include "core/debug/Debug.h"
 #include "core/debug/TestSubsystem.h"
 #include "core/logging/Logging.h"
+#include "core/math/Constants.h"
 #include "core/math/Sample.h"
 #include "core/math/Vector3.h"
 #include "core/mpi/Environment.h"
@@ -746,8 +747,7 @@ public:
 
    void operator()( const real_t t )
    {
-      const real_t PI = real_t( 3.141592653589793238462643383279502884 );
-      tConstTerm_ = ( sinPeriod_ > real_t(0) ) ? ( std::abs( std::sin( PI * t / sinPeriod_ ) ) ) : real_t(1);
+      tConstTerm_ = ( sinPeriod_ > real_t(0) ) ? ( std::abs( std::sin( math::M_PI * t / sinPeriod_ ) ) ) : real_t(1);
       tConstTerm_ *= uTerm_ * HTerm_;
       tConstTerm_ *= ( raisingTime_ > real_t(0) ) ? std::min( t / raisingTime_, real_t(1) ) : real_t(1);
    }

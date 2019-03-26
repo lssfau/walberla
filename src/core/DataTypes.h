@@ -24,13 +24,16 @@
 #include "waLBerlaDefinitions.h"
 
 #include <cstdint>
-#include <boost/numeric/conversion/cast.hpp>
 #include <memory>
 #include <type_traits>
-#include <boost/units/detail/utility.hpp>
-
+#include <string>
 #include <cmath>
 #include <limits>
+
+#if (defined( __has_include ) && __has_include(<cxxabi.h>)) || defined( __GLIBCXX__ )
+#define HAVE_CXXABI_H
+#include <cxxabi.h>
+#endif
 
 
 namespace walberla {
@@ -40,6 +43,8 @@ namespace walberla {
 
 
 template <typename> struct never_true : std::false_type {};
+
+template< typename T > bool isIdentical( const T a, const T b );
 
 
 // shared ptr
@@ -54,12 +59,49 @@ using std::dynamic_pointer_cast;
 
 template< typename S, typename T >
 inline S numeric_cast( T t ) {
-#ifdef NDEBUG
-   return static_cast< S >(t);
-#else
-   return boost::numeric_cast< S >(t);
+#ifndef NDEBUG
+   if( std::is_integral<S>::value && std::is_integral<T>::value && !std::is_same<S,T>::value )
+        // integer to different integer: check that forward and back conversion does not change value
+   {
+      if( !isIdentical( static_cast<T>( static_cast<S>(t) ), t ) )
+      {
+         throw std::range_error("out of range");
+      }
+   }
+   else if( !std::is_integral<S>::value && !std::is_integral<T>::value && sizeof(S) < sizeof(T) )
+       // float to shorter float: check that value within limits of shorter type
+   {
+      using H = typename std::conditional< !std::is_integral<S>::value && !std::is_integral<T>::value && (sizeof(S) < sizeof(T)), T, long double >::type; // always true, but makes Intel's overflow check happy
+      H h = static_cast<H>(t);
+      if( h < static_cast<H>(std::numeric_limits<S>::lowest()) || h > static_cast<H>(std::numeric_limits<S>::max()) ) {
+         throw std::range_error("out of range");
+      }
+   }
+   else if( std::is_integral<S>::value && !std::is_integral<T>::value )
+       // float to integer: check that value within limits of integer
+   {
+      using H = typename std::conditional< std::is_integral<S>::value && !std::is_integral<T>::value, T, long double >::type; // always true, but makes Intel's overflow check happy
+      H h = static_cast<H>(t);
+      if( h < static_cast<H>(std::numeric_limits<S>::lowest()) || h > static_cast<H>(std::numeric_limits<S>::max()) ) {
+         throw std::range_error("out of range");
+      }
+   }
 #endif
+   return static_cast< S >(t);
 }
+
+
+
+template<typename S>
+inline S string_to_num( std::string & t );
+template <> inline float              string_to_num( std::string & t ) { return std::stof(t); }
+template <> inline double             string_to_num( std::string & t ) { return std::stod(t); }
+template <> inline long double        string_to_num( std::string & t ) { return std::stold(t); }
+template <> inline int                string_to_num( std::string & t ) { return std::stoi(t); }
+template <> inline long               string_to_num( std::string & t ) { return std::stol(t); }
+template <> inline long long          string_to_num( std::string & t ) { return std::stoll(t); }
+template <> inline unsigned long      string_to_num( std::string & t ) { return std::stoul(t); }
+template <> inline unsigned long long string_to_num( std::string & t ) { return std::stoull(t); }
 
 
 
@@ -286,7 +328,20 @@ template< typename T > inline const char* typeToString( T ) { return typeToStrin
 
 inline std::string demangle( const std::string & name )
 {
-   return boost::units::detail::demangle( name.c_str() );
+#ifdef HAVE_CXXABI_H
+   int status = 0;
+   std::size_t size = 0;
+   const char * demangled = abi::__cxa_demangle( name.c_str(), NULL, &size, &status );
+   if( demangled == nullptr )
+   {
+      return name;
+   }
+   std::string demangled_str(demangled);
+   std::free( const_cast<char*>(demangled) );
+   return demangled_str;
+#else
+   return name;
+#endif
 }
 
 

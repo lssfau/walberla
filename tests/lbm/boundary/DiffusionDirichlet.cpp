@@ -56,6 +56,7 @@
 #include "core/cell/CellVector.h"
 #include "core/config/Config.h"
 #include "core/debug/TestSubsystem.h"
+#include "core/math/Constants.h"
 #include "core/math/IntegerFactorization.h"
 #include "core/mpi/Environment.h"
 
@@ -78,8 +79,6 @@
 #include "timeloop/SweepTimeloop.h"
 
 #include "vtk/VTKOutput.h"
-
-#include <boost/lexical_cast.hpp>
 
 
 namespace walberla {
@@ -107,7 +106,7 @@ public:
    using cplx_t = std::complex<real_t>;
 
    PlugFlow( real_t L, real_t H, real_t u, real_t k ) :
-      period_( real_t(2)*math::PI/L ),
+      period_( real_t(2)*math::M_PI/L ),
       lambda_( period_*sqrt( cplx_t(real_t(1), u/k/period_) ) ),
       emH_   ( real_t(1) - exp(-lambda_*H) ),
       epH_   ( real_t(1) - exp(+lambda_*H) ),
@@ -220,12 +219,12 @@ int main( int argc, char **argv )
    if( argc > 1 ) {
       std::vector<std::string> args( argv, argv + argc );
       for( uint_t i = 1; i < uint_c(argc); ++i ) {
-              if( boost::equals(argv[i], "-o"    ) ) omega  = boost::lexical_cast<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-l"    ) ) length = boost::lexical_cast<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-w"    ) ) width  = boost::lexical_cast<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-v"    ) ) velx   = boost::lexical_cast<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-t"    ) ) time   = boost::lexical_cast<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-e"    ) ) error  = boost::lexical_cast<real_t>( args[++i] );
+              if( boost::equals(argv[i], "-o"    ) ) omega  = string_to_num<real_t>( args[++i] );
+         else if( boost::equals(argv[i], "-l"    ) ) length = string_to_num<uint_t>( args[++i] );
+         else if( boost::equals(argv[i], "-w"    ) ) width  = string_to_num<uint_t>( args[++i] );
+         else if( boost::equals(argv[i], "-v"    ) ) velx   = string_to_num<real_t>( args[++i] );
+         else if( boost::equals(argv[i], "-t"    ) ) time   = string_to_num<uint_t>( args[++i] );
+         else if( boost::equals(argv[i], "-e"    ) ) error  = string_to_num<real_t>( args[++i] );
          else if( boost::equals(argv[i], "--gui" ) ) useGui = true;
          else if( boost::equals(argv[i], "--vtk" ) ) useVTK = true;
          else if( argv[i][0] != '-' ){
@@ -252,7 +251,7 @@ int main( int argc, char **argv )
 
    BlockDataID boundaryHandling = MyBoundaryHandling::addDefaultDiffusionBoundaryHandlingToStorage( blockStorage, "BoundaryHandling", flagFieldID, getFluidFlag(), srcFieldID );
 
-   auto cbc = make_shared<CosBoundaryConfiguration>( real_t(2)*math::PI/real_c(length) );
+   auto cbc = make_shared<CosBoundaryConfiguration>( real_t(2)*math::M_PI/real_c(length) );
    geometry::initializer::BoundaryFromDomainBorder<MyBoundaryHandling::BoundaryHandling_T> bfdb( *blockStorage, boundaryHandling );
    bfdb.init( MyBoundaryHandling::getDiffusionDirichletBoundaryUID(), stencil::N, cbc, -1, 1 );
    bfdb.init( MyBoundaryHandling::getDiffusionDirichletBoundaryUID(), stencil::S, cbc, -1, 1 );

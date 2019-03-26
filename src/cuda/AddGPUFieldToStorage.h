@@ -25,8 +25,6 @@
 
 #include "domain_decomposition/StructuredBlockStorage.h"
 
-#include <boost/bind.hpp>
-
 
 namespace walberla {
 namespace cuda {

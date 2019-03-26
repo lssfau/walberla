@@ -24,6 +24,7 @@
 
 #include "core/Abort.h"
 #include "core/debug/TestSubsystem.h"
+#include "core/math/Constants.h"
 #include "core/mpi/Environment.h"
 #include "core/mpi/MPIManager.h"
 
@@ -69,8 +70,8 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
          for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
          {
             const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-            src->get( *cell ) = std::sin( real_t(2) * math::PI * p[0] ) * std::sinh( real_t(2) * math::PI * p[1] );
-            dst->get( *cell ) = std::sin( real_t(2) * math::PI * p[0] ) * std::sinh( real_t(2) * math::PI * p[1] );
+            src->get( *cell ) = std::sin( real_t(2) * math::M_PI * p[0] ) * std::sinh( real_t(2) * math::M_PI * p[1] );
+            dst->get( *cell ) = std::sin( real_t(2) * math::M_PI * p[0] ) * std::sinh( real_t(2) * math::M_PI * p[1] );
          }
       }
    }
@@ -87,7 +88,7 @@ void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
       {
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-         f->get( *cell ) = real_t(4) * math::PI * math::PI * std::sin( real_t(2) * math::PI * p[0] ) * std::sinh( real_t(2) * math::PI * p[1] );
+         f->get( *cell ) = real_t(4) * math::M_PI * math::M_PI * std::sin( real_t(2) * math::M_PI * p[0] ) * std::sinh( real_t(2) * math::M_PI * p[1] );
       }
    }
 }
@@ -167,7 +168,7 @@ int main( int argc, char** argv )
    communication.addPackInfo( make_shared< field::communication::PackInfo< PdeField_T > >( srcId ) );
 
    std::vector< real_t > weights( Stencil_T::Size );
-   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(2) / ( blocks->dx() * blocks->dx() ) + real_t(2) / ( blocks->dy() * blocks->dy() ) + real_t(4) * math::PI * math::PI;
+   weights[ Stencil_T::idx[ stencil::C ] ] = real_t(2) / ( blocks->dx() * blocks->dx() ) + real_t(2) / ( blocks->dy() * blocks->dy() ) + real_t(4) * math::M_PI * math::M_PI;
    weights[ Stencil_T::idx[ stencil::N ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
    weights[ Stencil_T::idx[ stencil::S ] ] = real_t(-1) / ( blocks->dy() * blocks->dy() );
    weights[ Stencil_T::idx[ stencil::E ] ] = real_t(-1) / ( blocks->dx() * blocks->dx() );

@@ -27,8 +27,6 @@
 #include "core/debug/Debug.h"
 #include "core/mpi/BufferDataTypeExtensions.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -201,7 +199,7 @@ void UID<T>::init( const std::string& identifier, const bool newUid, const bool 
 
       uid_ = T::generateUID();
 
-      std::string idString = ( appendUIDtoIdentifier ? ( identifier + " [" + boost::lexical_cast< std::string >( uid_ ) + "]" ) : identifier );
+      std::string idString = ( appendUIDtoIdentifier ? ( identifier + " [" + std::to_string( uid_ ) + "]" ) : identifier );
 
       WALBERLA_ASSERT( stringToUid().find( idString ) == stringToUid().end() ); // 'idString' must not exist
 
@@ -250,7 +248,7 @@ UID<T>::UID( const bool createAnonymousUID ) : uid_( 0 ) {
 
       uid_ = T::generateUID();
 
-      std::string identifier = std::string("[anonymous #") + boost::lexical_cast< std::string >( T::toIndex( uid_ ) ) + std::string("]");
+      std::string identifier = std::string("[anonymous #") + std::to_string( T::toIndex( uid_ ) ) + std::string("]");
 
       WALBERLA_ASSERT( stringToUid().find( identifier ) == stringToUid().end() ); // 'identifier' must not exist
 

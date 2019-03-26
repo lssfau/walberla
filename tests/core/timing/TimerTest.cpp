@@ -21,6 +21,7 @@
 
 
 #include "core/debug/TestSubsystem.h"
+#include "core/math/Constants.h"
 #include "core/timing/Timer.h"
 
 #include <cmath>
@@ -30,7 +31,7 @@ namespace walberla {
 static double burnTime()
 {
    double sum = 0.0;
-   for( double d = 0.0; d < math::PI; d += 0.000001 )
+   for( double d = 0.0; d < math::M_PI; d += 0.000001 )
    {
       sum += std::atan( std::tan( d ) );
       sum += std::asin( std::sin( d ) );

@@ -71,7 +71,7 @@ void JacobiSweep::operator()( IBlock * const block )
       dst->get(x,y,z) += ( real_c(1) / (dx_ * dx_) ) * src->get( x-1,  y , z );
       dst->get(x,y,z) += ( real_c(1) / (dy_ * dy_) ) * src->get(  x , y+1, z );
       dst->get(x,y,z) += ( real_c(1) / (dy_ * dy_) ) * src->get(  x , y-1, z );
-      dst->get(x,y,z) /= ( real_c(2) / (dx_ * dx_) + real_c(2)/(dy_ * dy_) + real_c(4) * math::PI * math::PI );
+      dst->get(x,y,z) /= ( real_c(2) / (dx_ * dx_) + real_c(2)/(dy_ * dy_) + real_c(4) * math::M_PI * math::M_PI );
    )
 
    // swap source and destination fields
@@ -90,7 +90,7 @@ typedef stencil::D2Q5 Stencil_T;
 
 // set up the stencil weights
 std::vector< real_t > weights( Stencil_T::Size );
-weights[ Stencil_T::idx[ stencil::C ] ] = real_c(2) / ( dx * dx ) + real_c(2) / ( dy * dy ) + real_c(4) * math::PI * math::PI;
+weights[ Stencil_T::idx[ stencil::C ] ] = real_c(2) / ( dx * dx ) + real_c(2) / ( dy * dy ) + real_c(4) * math::M_PI * math::M_PI;
 weights[ Stencil_T::idx[ stencil::E ] ] = real_c(-1) / ( dx * dx );
 weights[ Stencil_T::idx[ stencil::W ] ] = real_c(-1) / ( dx * dx );
 weights[ Stencil_T::idx[ stencil::N ] ] = real_c(-1) / ( dy * dy );
@@ -185,9 +185,9 @@ void initRHS( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDa
          // obtain the physical coordinate of the center of the current cell
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
 
-         // set the right-hand side, given by the function f(x,y) = 4*PI*PI*sin(2*PI*x)*sinh(2*PI*y)
-         f->get( *cell ) = real_c(4) * math::PI * math::PI * std::sin( real_c(2) * math::PI * p[0] ) *
-                           std::sinh( real_c(2) * math::PI * p[1] );
+         // set the right-hand side, given by the function f(x,y) = 4*M_PI*PI*sin(2*M_PI*x)*sinh(2*M_PI*y)
+         f->get( *cell ) = real_c(4) * math::M_PI * math::M_PI * std::sin( real_c(2) * math::M_PI * p[0] ) *
+                           std::sinh( real_c(2) * math::M_PI * p[1] );
       }
    }
 }
@@ -236,10 +236,10 @@ void initBC( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDat
             // obtain the physical coordinate of the center of the current cell
             const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
 
-            // set the values of the Dirichlet boundary condition given by the function u(x,1) = sin(2*PI*x)*sinh(2*PI)
+            // set the values of the Dirichlet boundary condition given by the function u(x,1) = sin(2*M_PI*x)*sinh(2*M_PI)
             // in the source and destination field
-            src->get( *cell ) = std::sin( real_c(2) * math::PI * p[0] ) * std::sinh( real_c(2) * math::PI );
-            dst->get( *cell ) = std::sin( real_c(2) * math::PI * p[0] ) * std::sinh( real_c(2) * math::PI );
+            src->get( *cell ) = std::sin( real_c(2) * math::M_PI * p[0] ) * std::sinh( real_c(2) * math::M_PI );
+            dst->get( *cell ) = std::sin( real_c(2) * math::M_PI * p[0] ) * std::sinh( real_c(2) * math::M_PI );
          }
       }
    }

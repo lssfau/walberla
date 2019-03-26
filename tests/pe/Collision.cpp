@@ -119,8 +119,8 @@ void BoxTest()
    b4.rotate( Vec3(1,1,0), real_t(atan(sqrt(2))) );
 
    Box b5(123, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
-   b5.rotate( Vec3(0,0,1), real_t(math::PI * 0.25) );
-   b5.rotate( Vec3(1,0,0), real_t(math::PI * 0.25) );
+   b5.rotate( Vec3(0,0,1), real_t(math::M_PI * 0.25) );
+   b5.rotate( Vec3(1,0,0), real_t(math::M_PI * 0.25) );
 
    std::vector<Contact> contacts;
    fcd::AnalyticCollideFunctor< std::vector<Contact> > collideFunc(contacts);

@@ -19,8 +19,6 @@
 //
 //======================================================================================================================
 
-#include <boost/range/adaptor/map.hpp>
-
 
 namespace walberla {
 namespace mpi {
@@ -69,8 +67,10 @@ void GenericOpenMPBufferSystem<Rb, Sb>::setupBufferSystem()
    if ( ! dirty_ )
       return;
 
-   using boost::adaptors::map_keys;
-   bs_.setReceiverInfo( recvFunctions_ | map_keys, sizeChangesEverytime_ );
+   std::set<MPIRank> recvRanks;
+   std::transform( recvFunctions_.begin(), recvFunctions_.end(), std::inserter(recvRanks, recvRanks.end()),
+                   []( typename decltype(recvFunctions_)::value_type r ){ return r.first; });
+   bs_.setReceiverInfo( recvRanks, sizeChangesEverytime_ );
 
    for( auto sendRank = sendRanks_.begin(); sendRank != sendRanks_.end(); ++sendRank ) // Do NOT delete this for loop! This loop is needed ...
       bs_.sendBuffer( *sendRank ); // ... so that the "sendBuffer(rank)" call in startCommunicationOpenMP is thread-safe!

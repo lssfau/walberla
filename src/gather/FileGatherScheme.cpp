@@ -28,7 +28,6 @@
 #include "core/mpi/SendBuffer.h"
 
 #include "core/Filesystem.h"
-#include <boost/lexical_cast.hpp>
 
 
 namespace walberla {
@@ -57,12 +56,11 @@ FileGatherScheme::~FileGatherScheme()
 void FileGatherScheme::deleteTemporaryFiles()
 {
    using namespace filesystem;
-   using std::string;
 
    for(int rank=0; rank < MPIManager::instance()->numProcesses(); ++rank)
    {
-      string fileName = "tmp_collection_" + boost::lexical_cast<string>(myId_) + "_"
-                                          + boost::lexical_cast<string>(rank);
+      std::string fileName = "tmp_collection_" + std::to_string(myId_) + "_"
+                                               + std::to_string(rank);
 
       if( exists(fileName) )
          remove(fileName);
@@ -73,8 +71,6 @@ void FileGatherScheme::deleteTemporaryFiles()
 
 void FileGatherScheme::writeToFile()
 {
-   using std::string;
-
    static mpi::SendBuffer buffer;
 
    buffer.clear();
@@ -88,8 +84,8 @@ void FileGatherScheme::writeToFile()
       // not important if rank() or worldRank() we need only a distinct number
       // for each process
       int rank = MPIManager::instance()->worldRank();
-      string fileName = "tmp_collection_" + boost::lexical_cast<string>(myId_) + "_"
-                                          + boost::lexical_cast<string>(rank);
+      std::string fileName = "tmp_collection_" + std::to_string(myId_) + "_"
+                                               + std::to_string(rank);
 
       fileStream_.open( fileName.c_str(), std::ios::binary );
    }
@@ -126,8 +122,8 @@ void FileGatherScheme::collectFromFiles()
    //look for files from all processes
    for(int rank=0; rank < MPIManager::instance()->numProcesses(); ++rank)
    {
-      string fileName = "tmp_collection_" + boost::lexical_cast<string>(myId_) + "_"
-                                          + boost::lexical_cast<string>(rank);
+      string fileName = "tmp_collection_" + to_string(myId_) + "_"
+                                          + to_string(rank);
 
       if(exists(fileName)) {
 		  std::ifstream * str = new std::ifstream(fileName.c_str(),ios::in|ios::binary);

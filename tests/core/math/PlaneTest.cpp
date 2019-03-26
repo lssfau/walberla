@@ -21,6 +21,7 @@
 
 #include "core/debug/TestSubsystem.h"
 #include "core/logging/Logging.h"
+#include "core/math/Constants.h"
 #include "core/math/Plane.h"
 #include "core/math/Vector3.h"
 #include "core/mpi/Environment.h"
@@ -137,7 +138,7 @@ int main(int argc, char * argv[])
 
       real_t angle = std::acos( (p1-p0) * (p2-p0) / std::sqrt( (p1-p0).sqrLength() * (p2-p0).sqrLength() ) );
 
-      if( (p0 - p1).sqrLength() < 1e-6 || (p0 - p2).sqrLength() < 1e-6 || (p2 - p1).sqrLength() < 1e-6 || angle < math::PI / real_t(180) )
+      if( (p0 - p1).sqrLength() < 1e-6 || (p0 - p2).sqrLength() < 1e-6 || (p2 - p1).sqrLength() < 1e-6 || angle < math::M_PI / real_t(180) )
       {
          --i;
          continue;

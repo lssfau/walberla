@@ -29,6 +29,7 @@
 
 #include "core/debug/TestSubsystem.h"
 #include "core/logging/Logging.h"
+#include "core/math/Constants.h"
 #include "core/math/Vector3.h"
 
 #include "field/AddToStorage.h"
@@ -47,7 +48,6 @@ using namespace geometry;
 const uint_t confBlockCount []      = { 1, 1, 1 };
 const uint_t confCells []           = { 30, 30, 30 };
 
-const real_t PI = real_t(3.1415927);
 const bool   useGui = false;
 
 
@@ -156,7 +156,7 @@ void ellipsoidTest( StructuredBlockStorage & storage,
    const Vector3<real_t> axis1 (  real_t(1), real_t(1), real_t(0) );
    const Vector3<real_t> axis2 ( -real_t(1), real_t(1), real_t(0) );
 
-   const real_t expectedVolume = real_t(4) / real_t(3) * radii[0] * radii[1] * radii[2] * PI;
+   const real_t expectedVolume = real_t(4) / real_t(3) * radii[0] * radii[1] * radii[2] * math::M_PI;
 
    resetField( storage, fieldID );
 
@@ -209,7 +209,7 @@ void sphereTest( StructuredBlockStorage & storage,
 {
    const Vector3<real_t> midpoint ( real_t(15), real_t(15), real_t(15) );
    const real_t radius = real_t(5);
-   const real_t expectedVolume = real_t(4) / real_t(3) * radius * radius * radius * PI;
+   const real_t expectedVolume = real_t(4) / real_t(3) * radius * radius * radius * math::M_PI;
 
    resetField( storage, fieldID );
 

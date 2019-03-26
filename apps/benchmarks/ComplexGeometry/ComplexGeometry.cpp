@@ -78,8 +78,6 @@
 
 #include "core/timing/RemainingTimeLogger.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include <cmath>
 #include <vector>
 #include <string>

@@ -38,7 +38,6 @@
 #include "core/mpi/SendBuffer.h"
 #include "core/debug/CheckFunctions.h"
 
-#include <boost/functional/hash.hpp>
 #include <boost/type_traits.hpp>
 #include <boost/type_traits/is_floating_point.hpp>
 #include <boost/type_traits/is_fundamental.hpp>
@@ -1837,10 +1836,11 @@ template< typename T >
 size_t hash_value( const Vector3<T> & v )
 {
    size_t seed = 0;
+   std::hash<T> hasher;
 
-   boost::hash_combine( seed, v[0] );
-   boost::hash_combine( seed, v[1] );
-   boost::hash_combine( seed, v[2] );
+   seed ^= hasher(v[0]) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+   seed ^= hasher(v[1]) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+   seed ^= hasher(v[2]) + 0x9e3779b9 + (seed<<6) + (seed>>2);
 
    return seed;
 

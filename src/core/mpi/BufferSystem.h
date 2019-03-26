@@ -26,7 +26,6 @@
 #include "core/DataTypes.h"
 #include "core/debug/Debug.h"
 
-#include <boost/range/counting_range.hpp>
 #include <map>
 #include <set>
 #include <vector>
@@ -209,8 +208,7 @@ public:
    //* Rank Ranges     *************************************************************************************************
    /*! \name Rank Ranges  */
    //@{
-   typedef boost::counting_iterator<MPIRank> RankCountIter;
-   typedef boost::iterator_range< RankCountIter > RankRange;
+   typedef std::set<MPIRank> RankRange;
    static RankRange noRanks();
    static RankRange allRanks();
    static RankRange allRanksButRoot();

@@ -30,6 +30,7 @@
 #include "core/mpi/MPIWrapper.h"
 
 #include <boost/type_traits/is_arithmetic.hpp>
+#include <boost/type_traits/is_same.hpp>
 #include <vector>
 
 
