@@ -52,6 +52,21 @@ namespace lbm {
 *   z-coordinates!
 *   Also, particle distribution functions (i.e., the values stored in the field) can be accessed using stencil
 *   directions, e.g. "pdfField( x, y, z, stencil::NE )".
+*
+*   Note that the behavior is different for compressible and incompressible lattice models.
+*   In the compressible case, the behavior and formulas are as expected from common LBM literature and the density
+*   is taken as the 0-th order moment of the PDFs and this value is used.
+*   In order to make LBM quasi-incompressible, it was suggested, e.g. in
+*     Q. Zou, S. Hou, S. Chen, G.D. Doolen, J. Stat. Phys. 81(1–2), 35 (1995)
+*     X. He, L.S. Luo, J. Stat. Phys. 88(3–4), 927 (1997)
+*   that the density is implicitly assumed to have a constant value of 1 in many cases (e.g. in getVelocity()),
+*   and only the deviation from this value enters some of the formulas, like the equilibrium distribution functions.
+*   Additionally, the PDFs are normalized around 0 in the incompressible case to increase the numerical accuracy,
+*   i.e. only the deviation of the PDF values from their respective lattice weight is stored.
+*   As a result, manually summing of the PDF values will yield the density deviation in this case.
+*   But the getDensity() function reverts this normalization (by adding 1) and will yield the physical density.
+*   This normalization, however, usually doesn't affect the implementation of functions like LBM sweeps.
+*
 */
 //**********************************************************************************************************************
 
