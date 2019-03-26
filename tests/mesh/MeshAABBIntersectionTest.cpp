@@ -51,7 +51,7 @@ void runTests( const uint_t numAABBs )
 
    TriangleDistance<MeshType> triDist( mesh );
 
-   WALBERLA_CHECK( isIntersecting( triDist, meshAABB, real_t(0) ) );
+   WALBERLA_CHECK( isIntersecting( triDist, meshAABB, real_t(0) ).value, boost::logic::tribool::true_value );
 
    std::mt19937 rng( uint32_t(42) );
 
