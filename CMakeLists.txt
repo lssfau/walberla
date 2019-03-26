@@ -643,7 +643,7 @@ else()
 endif()
 
 if ( WALBERLA_BUILD_WITH_PYTHON AND WALBERLA_CXX_COMPILER_IS_MSVC )
-    list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS python3 )
+    list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS python36 )
 endif()
 
 # This variable is necessary, if the CMAKE version used is not aware of a more recent boost version (keep this up to date!)
@@ -729,6 +729,7 @@ if ( WALBERLA_BUILD_WITH_PYTHON AND NOT WALBERLA_CXX_COMPILER_IS_MSVC)
     endif()
     if( PYTHON_LIBRARY MATCHES "python3" )
         find_library( BOOST_PYTHON_LIBRARY NAMES
+                boost_python36${_boost_MULTITHREADED} 
                 boost_python-py36${_boost_MULTITHREADED} boost_python-py35${_boost_MULTITHREADED}
                 boost_python-py34${_boost_MULTITHREADED} boost_python-py33${_boost_MULTITHREADED}
                 boost_python-py32${_boost_MULTITHREADED} boost_python3${_boost_MULTITHREADED}
