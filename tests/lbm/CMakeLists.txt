@@ -23,6 +23,13 @@ waLBerla_execute_test( NAME SimpleDiffusionDirichletDef COMMAND $<TARGET_FILE:Si
 waLBerla_execute_test( NAME SimpleDiffusionDirichletRef COMMAND $<TARGET_FILE:SimpleDiffusionDirichlet>  -l 4 -w 4 -o 1.2 -d 3 -t 3   -c 0 -r 1 )
 waLBerla_execute_test( NAME SimpleDiffusionDirichletCav COMMAND $<TARGET_FILE:SimpleDiffusionDirichlet>  -l 5 -w 3 -o 1.2 -d 3 -t 333 -c 1 )
 
+waLBerla_compile_test( FILES boundary/BoundaryForce.cpp DEPENDS blockforest timeloop )
+waLBerla_execute_test( NAME BoundaryForceShort COMMAND $<TARGET_FILE:BoundaryForce> 10 PROCESSES 2 CONFIGURATIONS Debug DebugOptimized )
+waLBerla_execute_test( NAME BoundaryForce COMMAND COMMAND $<TARGET_FILE:BoundaryForce> PROCESSES 2 CONFIGURATIONS Release RelWithDbgInfo )
+
+waLBerla_compile_test( FILES boundary/BoundaryForceCouette.cpp DEPENDS blockforest timeloop )
+waLBerla_execute_test( NAME BoundaryForceCouetteShort COMMAND $<TARGET_FILE:BoundaryForceCouette> 10 PROCESSES 2 CONFIGURATIONS Debug DebugOptimized )
+waLBerla_execute_test( NAME BoundaryForceCouette COMMAND COMMAND $<TARGET_FILE:BoundaryForceCouette> PROCESSES 2 CONFIGURATIONS Release RelWithDbgInfo )
 
 waLBerla_compile_test( FILES boundary/DiffusionDirichlet.cpp DEPENDS field blockforest geometry timeloop vtk )
 waLBerla_execute_test( NAME DiffusionDirichletTest1 COMMAND $<TARGET_FILE:DiffusionDirichlet>  -l 16 -w 1 -o 1.2  -v 0.1  -e 0.097711 -t  50 )
