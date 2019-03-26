@@ -46,13 +46,15 @@ namespace lbm {
 
 
 
-template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce = false >
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce = false, bool StoreForce = false >
 class UBB : public Boundary<flag_t>
 {
    typedef PdfField< LatticeModel_T >        PDFField;
    typedef typename LatticeModel_T::Stencil  Stencil;
 
    typedef GhostLayerField< Vector3<real_t>, 1 >  VelField;
+
+   typedef GhostLayerField< Vector3<real_t>, 1 > ForceField;
 
 public:
 
@@ -89,7 +91,7 @@ public:
 
    void pushFlags( std::vector< FlagUID > & uids ) const { uids.push_back( uid_ ); }
 
-   void beforeBoundaryTreatment() const {}
+   inline void beforeBoundaryTreatment() const;
    void  afterBoundaryTreatment() const {}
 
    template< typename Buffer_T >
@@ -110,19 +112,26 @@ public:
 
    inline const Vector3<real_t> & getValue( const cell_idx_t x, cell_idx_t y, cell_idx_t z ) const { return vel_->get(x,y,z); }
 
+   const typename ForceField::value_type & getForce( const cell_idx_t x, cell_idx_t y, cell_idx_t z ) const
+   {
+      static_assert(StoreForce, "this member function is only available if the fourth template argument on the class is true");
+      return force_->get(x,y,z);
+   }
+
 private:
 
    const FlagUID uid_;
 
    PDFField* const      pdfField_;
    shared_ptr<VelField> vel_;
+   shared_ptr<ForceField> force_;
 
 }; // class UBB
 
 
 
-template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
-inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::Velocity::Velocity( const Config::BlockHandle & config  )
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
+inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::Velocity::Velocity( const Config::BlockHandle & config  )
 {
    velocity_[0] = ( config && config.isDefined( "x" ) ) ? config.getParameter<real_t>( "x" ) : real_c(0.0);
    velocity_[1] = ( config && config.isDefined( "y" ) ) ? config.getParameter<real_t>( "y" ) : real_c(0.0);
@@ -131,8 +140,8 @@ inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::Velocity::Ve
 
 
 
-template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
-inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::UBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, FlagField<flag_t> * const flagField ) :
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
+inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::UBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, FlagField<flag_t> * const flagField ) :
 
    Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField )
 {
@@ -141,30 +150,42 @@ inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::UBB( const B
       vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::zyxf );
    else
       vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
+
+   if (StoreForce)
+      force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
 }
 
 
 
-template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
+inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::beforeBoundaryTreatment() const
+{
+   if (StoreForce)
+      force_->setWithGhostLayer( Vector3<real_t>() );
+}
+
+
+
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
 template< typename Buffer_T >
-inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::packCell( Buffer_T & buffer, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
+inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::packCell( Buffer_T & buffer, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    buffer << vel_->get( x, y, z );
 }
 
 
 
-template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
 template< typename Buffer_T >
-inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::registerCell( Buffer_T & buffer, const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::registerCell( Buffer_T & buffer, const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    buffer >> vel_->get( x, y, z );
 }
 
 
 
-template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
-inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::registerCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
+inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::registerCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                                        const BoundaryConfiguration & velocity )
 {
    WALBERLA_ASSERT_EQUAL( dynamic_cast< const Velocity * >( &velocity ), &velocity );
@@ -177,8 +198,8 @@ inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::registe
 
 
 
-template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
-inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::registerCells( const flag_t, const CellInterval & cells, const BoundaryConfiguration & velocity )
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
+inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::registerCells( const flag_t, const CellInterval & cells, const BoundaryConfiguration & velocity )
 {
    WALBERLA_ASSERT_EQUAL( dynamic_cast< const Velocity * >( &velocity ), &velocity );
    WALBERLA_ASSERT_NOT_NULLPTR( vel_ );
@@ -191,9 +212,9 @@ inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::registe
 
 
 
-template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
 template< typename CellIterator >
-inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::registerCells( const flag_t, const CellIterator & begin, const CellIterator & end,
+inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::registerCells( const flag_t, const CellIterator & begin, const CellIterator & end,
                                                                                         const BoundaryConfiguration & velocity )
 {
    WALBERLA_ASSERT_EQUAL( dynamic_cast< const Velocity * >( &velocity ), &velocity );
@@ -207,12 +228,12 @@ inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::registe
 
 
 
-template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce >
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
 #ifndef NDEBUG
-inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
+inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
                                                                                          const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t mask )
 #else
-inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
+inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::treatDirection( const cell_idx_t  x, const cell_idx_t  y, const cell_idx_t  z, const stencil::Direction dir,
                                                                                          const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz, const flag_t /*mask*/ )
 #endif
 {
@@ -222,6 +243,8 @@ inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::treatDi
    WALBERLA_ASSERT_UNEQUAL( mask & this->mask_, numeric_cast<flag_t>(0) );
    WALBERLA_ASSERT_EQUAL( mask & this->mask_, this->mask_ ); // only true if "this->mask_" only contains one single flag, which is the case for the
                                                              // current implementation of this boundary condition (UBB)
+
+   const real_t pdf_old = pdfField_->get( x, y, z, Stencil::idx[dir] );
 
    if( LatticeModel_T::compressible )
    {
@@ -245,6 +268,15 @@ inline void UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce >::treatDi
                                                                  ( real_c(stencil::cx[ dir ]) * velocity[0] +
                                                                    real_c(stencil::cy[ dir ]) * velocity[1] +
                                                                    real_c(stencil::cz[ dir ]) * velocity[2] ) );
+   }
+
+   if (StoreForce && pdfField_->isInInnerPart( Cell(x,y,z) ))
+   {
+      const real_t forceMEM = pdf_old + pdfField_->get( nx, ny, nz, Stencil::invDirIdx(dir) );
+      Vector3<real_t> force( real_c( stencil::cx[dir] ) * forceMEM,
+                             real_c( stencil::cy[dir] ) * forceMEM,
+                             real_c( stencil::cz[dir] ) * forceMEM );
+      force_->get( nx, ny, nz ) += force;
    }
 }
 

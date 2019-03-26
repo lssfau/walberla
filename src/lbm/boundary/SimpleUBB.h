@@ -45,11 +45,13 @@ namespace lbm {
 
 
 
-template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce = false >
+template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce = false, bool StoreForce = false >
 class SimpleUBB : public Boundary<flag_t>
 {
    typedef PdfField< LatticeModel_T >        PDFField;
    typedef typename LatticeModel_T::Stencil  Stencil;
+
+   typedef GhostLayerField< Vector3<real_t>, 1 > ForceField;
 
 public:
 
@@ -61,14 +63,30 @@ public:
 
 
    SimpleUBB( const BoundaryUID& boundaryUID, const FlagUID& uid, PDFField* const pdfField, const Vector3< real_t > & velocity ) :
-      Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), velocity_( velocity ) { WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ ); }
+      Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), velocity_( velocity )
+{
+   WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
+
+   if (StoreForce)
+      force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
+}
 
    SimpleUBB( const BoundaryUID& boundaryUID, const FlagUID& uid, PDFField* const pdfField, const real_t x, const real_t y, const real_t z ) :
-      Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), velocity_( x, y, z ) { WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ ); }
+      Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField ), velocity_( x, y, z )
+{
+   WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
+
+   if (StoreForce)
+      force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
+}
 
    void pushFlags( std::vector< FlagUID >& uids ) const { uids.push_back( uid_ ); }
 
-   void beforeBoundaryTreatment() const {}
+   void beforeBoundaryTreatment() const
+   {
+      if (StoreForce)
+         force_->setWithGhostLayer( Vector3<real_t>() );
+   }
    void  afterBoundaryTreatment() const {}
 
    template< typename Buffer_T >
@@ -99,6 +117,8 @@ public:
       WALBERLA_ASSERT_EQUAL( mask & this->mask_, this->mask_ ); // only true if "this->mask_" only contains one single flag, which is the case for the
                                                                 // current implementation of this boundary condition (SimpleUBB)
 
+      const real_t pdf_old = pdfField_->get( x, y, z, Stencil::idx[dir] );
+
       if( LatticeModel_T::compressible )
       {
          const auto density  = pdfField_->getDensity(x,y,z);
@@ -122,6 +142,21 @@ public:
                                                                       real_c(stencil::cy[ dir ]) * velocity[1] +
                                                                       real_c(stencil::cz[ dir ]) * velocity[2] ) );
       }
+
+      if (StoreForce && pdfField_->isInInnerPart( Cell(x,y,z) ))
+      {
+         const real_t forceMEM = pdf_old + pdfField_->get( nx, ny, nz, Stencil::invDirIdx(dir) );
+         Vector3<real_t> force( real_c( stencil::cx[dir] ) * forceMEM,
+                                real_c( stencil::cy[dir] ) * forceMEM,
+                                real_c( stencil::cz[dir] ) * forceMEM );
+         force_->get( nx, ny, nz ) += force;
+      }
+   }
+
+   const typename ForceField::value_type & getForce( const cell_idx_t x, cell_idx_t y, cell_idx_t z ) const
+   {
+      static_assert(StoreForce, "this member function is only available if the fourth template argument on the class is true");
+      return force_->get(x,y,z);
    }
 
 private:
@@ -131,6 +166,8 @@ private:
    PDFField* const pdfField_;
 
    const Vector3< real_t > velocity_;
+
+   shared_ptr<ForceField> force_;
 
 }; // class SimpleUBB
 

@@ -51,11 +51,13 @@ namespace lbm {
 //   2. A member function "Vector3< real_t > operator()( const Vector3< real_t > & x, const real_t t )" that is called for every
 //      boundary link treated by "treatDirection". The arguments are the position 'x' of the boudnary cell in the simulation space and the current time 't'.
 //      The functon is supposed to return the velocity used by the boundary treatment.
-template< typename LatticeModel_T, typename flag_t, typename VelocityFunctor_T, bool AdaptVelocityToExternalForce = false >
+template< typename LatticeModel_T, typename flag_t, typename VelocityFunctor_T, bool AdaptVelocityToExternalForce = false, bool StoreForce = false >
 class DynamicUBB : public Boundary<flag_t>
 {
    typedef lbm::PdfField< LatticeModel_T >   PDFField;
    typedef typename LatticeModel_T::Stencil  Stencil;
+
+   typedef GhostLayerField< Vector3<real_t>, 1 > ForceField;
 
 public:
 
@@ -83,6 +85,9 @@ public:
       {
          velocity_( time_ );
       }
+
+      if (StoreForce)
+         force_ = make_shared<ForceField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );
    }
    DynamicUBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField * const pdfField,
                const uint_t level, const VelocityFunctor_T & velocity, const AABB & aabb ) :
@@ -100,6 +105,9 @@ public:
         time_ = timeTracker_->getTime( level_ );
         velocity_( time_ );
      }
+
+     if (StoreForce)
+        force_->setWithGhostLayer( Vector3<real_t>() );
    }
    void  afterBoundaryTreatment() const {}
 
@@ -131,6 +139,8 @@ public:
       WALBERLA_ASSERT_EQUAL( mask & this->mask_, this->mask_ ); // only true if "this->mask_" only contains one single flag, which is the case for the
                                                                 // current implementation of this boundary condition (DynamicUBB)
 
+      const real_t pdf_old = pdfField_->get( x, y, z, Stencil::idx[dir] );
+
       const Vector3< real_t > pos( origin_[0] + real_c(nx) * dx_[0],
                                    origin_[1] + real_c(ny) * dx_[1],
                                    origin_[2] + real_c(nz) * dx_[2] );
@@ -160,6 +170,21 @@ public:
                                                                       real_c(stencil::cy[ dir ]) * vel[1] +
                                                                       real_c(stencil::cz[ dir ]) * vel[2] ) );
       }
+
+      if (StoreForce && pdfField_->isInInnerPart( Cell(x,y,z) ))
+      {
+         const real_t forceMEM = pdf_old + pdfField_->get( nx, ny, nz, Stencil::invDirIdx(dir) );
+         Vector3<real_t> force( real_c( stencil::cx[dir] ) * forceMEM,
+                                real_c( stencil::cy[dir] ) * forceMEM,
+                                real_c( stencil::cz[dir] ) * forceMEM );
+         force_->get( nx, ny, nz ) += force;
+      }
+   }
+
+   const typename ForceField::value_type & getForce( const cell_idx_t x, cell_idx_t y, cell_idx_t z ) const
+   {
+      static_assert(StoreForce, "this member function is only available if the fourth template argument on the class is true");
+      return force_->get(x,y,z);
    }
 
 private:
@@ -177,6 +202,7 @@ private:
    uint_t level_;
 
    VelocityFunctor_T velocity_;
+   shared_ptr<ForceField> force_;
 
 }; // class DynamicUBB
 
