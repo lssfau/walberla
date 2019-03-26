@@ -890,7 +890,7 @@ uint_t evaluateEdgeCut(BlockForest & forest)
 
 void evaluateTotalSimulationTimePassed(WcTimingPool & timeloopTimingPool, real_t & totalSimTime, real_t & totalLBTime)
 {
-   shared_ptr< WcTimingPool> reduced = timeloopTimingPool.getReduced(WcTimingPool::REDUCE_TOTAL, 0);
+   shared_ptr< WcTimingPool> reduced = timeloopTimingPool.getReduced(timing::REDUCE_TOTAL, 0);
 
    std::string simulationString("LBM refinement time step");
    auto totalTime = real_t(0);

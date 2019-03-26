@@ -23,6 +23,7 @@
 #pragma once
 
 #include "Timer.h"
+#include "ReduceType.h"
 
 #include "core/debug/Debug.h"
 #include "core/logging/Logging.h"
@@ -196,20 +197,6 @@ size_t getHierarchyDepth(const TimingNode<TP>& tn)
    }
    return depth + maxDepth;
 }
-
-/// The reduce type describes which values are reduced from each process
-enum ReduceType
-{
-   /// Treats each process as one timing sample. For the timing sample the min value is used.
-   REDUCE_MIN,
-   /// Treats each process as one timing sample. For the timing sample the average value is used.
-   REDUCE_AVG,
-   /// Treats each process as one timing sample. For the timing sample the max value is used.
-   REDUCE_MAX,
-   /// Collects all timing samples from all processes and accumulates the data.
-   /// The number of measurements afterwards are: nrOfProcesses*measurementsPerProcess
-   REDUCE_TOTAL
-};
 
 /// Collects all the timing data from different processes
 /// \attention Will overwrite the current timer data! Multiple calls will accumulate!

@@ -33,6 +33,7 @@
 #include "core/cell/CellInterval.h"
 #include "core/math/AABB.h"
 #include "core/mpi/MPIIO.h"
+#include "core/timing/ReduceType.h"
 #include "core/timing/TimingPool.h"
 #include "core/timing/TimingTree.h"
 #include "communication/UniformPackInfo.h"
@@ -634,11 +635,11 @@ void exportTiming()
          .def( self_ns::str(self) )
          ;
 
-      enum_<WcTimingPool::ReduceType>("ReduceType")
-          .value("min"  , WcTimingPool::REDUCE_MIN)
-          .value("avg"  , WcTimingPool::REDUCE_AVG)
-          .value("max"  , WcTimingPool::REDUCE_MAX)
-          .value("total", WcTimingPool::REDUCE_TOTAL)
+      enum_<timing::ReduceType>("ReduceType")
+          .value("min"  , timing::REDUCE_MIN)
+          .value("avg"  , timing::REDUCE_AVG)
+          .value("max"  , timing::REDUCE_MAX)
+          .value("total", timing::REDUCE_TOTAL)
           .export_values()
           ;
    }
