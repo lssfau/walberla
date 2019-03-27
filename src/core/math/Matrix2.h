@@ -841,7 +841,7 @@ inline const Matrix2<Type> fabs( const Matrix2<Type>& m );
 //template< typename Type, typename Other >
 //inline const Matrix2<HIGH> operator*( Other scalar, const Matrix2<Type>& matrix )
 //{
-//   static_assert( ! boost::is_scalar<Other>::value, "Only scalar types allowed" );
+//   static_assert( ! std::is_scalar<Other>::value, "Only scalar types allowed" );
 //   return matrix*scalar;
 //}
 //**********************************************************************************************************************
