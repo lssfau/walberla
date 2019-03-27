@@ -553,11 +553,13 @@ endif ( )
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CODEGEN )
     find_package( PythonInterp 3 QUIET REQUIRED)
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import pystencils_walberla" RESULT_VARIABLE PYTHON_RET_CODE)
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import pystencils_walberla; from pystencils.include import get_pystencils_include_path; print(get_pystencils_include_path())"
+                    RESULT_VARIABLE PYTHON_RET_CODE
+                    OUTPUT_VARIABLE PYSTENCILS_INCLUDE_PATH)
     if(NOT PYTHON_RET_CODE EQUAL 0)
         message(FATAL_ERROR "WALBERLA_BUILD_WITH_CODEGEN activated and pystencils_walberla package not found")
     endif()
-
+    include_directories( ${PYSTENCILS_INCLUDE_PATH} )
 endif()
 ############################################################################################################################
 
