@@ -289,7 +289,7 @@ int main( int argc, char * argv[] )
    timeloop.run( timingPool );
    WALBERLA_LOG_INFO_ON_ROOT( "Timeloop done" );
    timingPool.unifyRegisteredTimersAcrossProcesses();
-   timingPool.logResultOnRoot( WcTimingPool::REDUCE_TOTAL, true );
+   timingPool.logResultOnRoot( timing::REDUCE_TOTAL, true );
 
    return EXIT_SUCCESS;
 }

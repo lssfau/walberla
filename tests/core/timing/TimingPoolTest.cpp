@@ -103,7 +103,7 @@ void reduction()
    WcTimer timerBackup = pool["test"];
 
    // Test minimum reduction
-   auto red = pool.getReduced( WcTimingPool::REDUCE_MIN, 0 );
+   auto red = pool.getReduced( timing::REDUCE_MIN, 0 );
    WALBERLA_ROOT_SECTION() {
       WcTimer & t = (*red)["test"];
       WALBERLA_CHECK_FLOAT_EQUAL( t.min(), 1.0 );
@@ -115,7 +115,7 @@ void reduction()
    }
 
    // Test maximum reduction
-   red = pool.getReduced( WcTimingPool::REDUCE_MAX, 0 );
+   red = pool.getReduced( timing::REDUCE_MAX, 0 );
    WALBERLA_ROOT_SECTION() {
       WcTimer & t = (*red)["test"];
       WALBERLA_CHECK_FLOAT_EQUAL( t.min(), 4.0 );
@@ -127,7 +127,7 @@ void reduction()
    }
 
    // Test complete reduction
-   red = pool.getReduced( WcTimingPool::REDUCE_TOTAL, 0 );
+   red = pool.getReduced( timing::REDUCE_TOTAL, 0 );
    WALBERLA_ROOT_SECTION() {
       WcTimer & t = (*red)["test"];
       WALBERLA_CHECK_FLOAT_EQUAL( t.min(), 1.0 );
@@ -138,7 +138,7 @@ void reduction()
 
 
    red.reset();
-   red = pool.getReduced(  WcTimingPool::REDUCE_TOTAL, -1 );
+   red = pool.getReduced(  timing::REDUCE_TOTAL, -1 );
    WALBERLA_CHECK_NOT_NULLPTR( red );
    WALBERLA_CRITICAL_SECTION_START
    cout << *red << endl;
@@ -154,7 +154,7 @@ void reduction()
       cout << pool << endl;
       WALBERLA_CRITICAL_SECTION_END
 
-      red = pool.getReduced( WcTimingPool::REDUCE_TOTAL, 0 );
+      red = pool.getReduced( timing::REDUCE_TOTAL, 0 );
       WALBERLA_ROOT_SECTION() {
          cout << "Reduced System" << endl << *red << endl;
       }
