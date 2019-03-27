@@ -34,8 +34,8 @@
 namespace walberla {
 using namespace walberla::pe;
 
-using UnionT = Union<boost::tuple<Sphere> >;
-typedef boost::tuple<Sphere, UnionT> BodyTuple ;
+using UnionT = Union<std::tuple<Sphere> >;
+typedef std::tuple<Sphere, UnionT> BodyTuple ;
 
 int main( int argc, char** argv )
 {
@@ -126,7 +126,7 @@ int main( int argc, char** argv )
    destroyBodyBySID( *globalBodyStorage, forest->getBlockStorage(), storageID, sid );
 
    WALBERLA_LOG_PROGRESS_ON_ROOT( " *** UNION *** ");
-   UnionT* un   = createUnion< boost::tuple<Sphere> >( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(2,2,2) );
+   UnionT* un   = createUnion< std::tuple<Sphere> >( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(2,2,2) );
    auto sp1 = createSphere(un, 10, Vec3(real_t(4.9),2,2), real_t(1));
    auto sp2 = createSphere(un, 11, Vec3(3,2,2), real_t(1.5));
    un->setPosition( Vec3( real_t(4.9), 2, 2) );

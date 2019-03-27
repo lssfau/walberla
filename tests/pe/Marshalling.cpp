@@ -32,18 +32,18 @@
 #include "pe/rigidbody/SetBodyTypeIDs.h"
 #include "pe/Materials.h"
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::pe::communication;
 
-using UnionTypeTuple = boost::tuple<Sphere>;
+using UnionTypeTuple = std::tuple<Sphere>;
 using UnionT = Union<UnionTypeTuple>;
 using UnionID = UnionT *;
 using UnionPtr = std::unique_ptr<UnionT>;
 
-typedef boost::tuple<Box, Capsule, Sphere, Squirmer, UnionT, Ellipsoid> BodyTuple ;
+typedef std::tuple<Box, Capsule, Sphere, Squirmer, UnionT, Ellipsoid> BodyTuple ;
 
 void testBox()
 {

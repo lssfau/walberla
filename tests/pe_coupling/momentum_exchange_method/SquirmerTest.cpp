@@ -97,7 +97,7 @@ typedef pe_coupling::SimpleBB<LatticeModel_T, FlagField_T> MO_BB_T;
 using BoundaryConditions_T = boost::tuples::tuple<MO_BB_T>;
 typedef BoundaryHandling<FlagField_T, Stencil_T, BoundaryConditions_T> BoundaryHandling_T;
 
-using BodyTypeTuple = boost::tuple<pe::Squirmer>;
+using BodyTypeTuple = std::tuple<pe::Squirmer>;
 
 ///////////
 // FLAGS //

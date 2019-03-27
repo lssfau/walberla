@@ -91,7 +91,7 @@ typedef lbm::NoSlip< LatticeModel_T, flag_t >                          NoSlip_T;
 using BoundaryConditions_T = boost::tuples::tuple<NoSlip_T>;
 typedef BoundaryHandling<FlagField_T, Stencil_T, BoundaryConditions_T> BoundaryHandling_T;
 
-typedef boost::tuple<pe::Plane, pe::Sphere> BodyTypeTuple ;
+typedef std::tuple<pe::Plane, pe::Sphere> BodyTypeTuple ;
 
 ///////////
 // FLAGS //

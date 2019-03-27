@@ -27,7 +27,7 @@
 
 #include "core/debug/TestSubsystem.h"
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 namespace walberla {
 using namespace walberla::pe;

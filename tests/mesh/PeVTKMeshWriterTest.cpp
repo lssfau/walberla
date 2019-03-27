@@ -46,12 +46,13 @@
 
 #include <functional>
 #include <random>
+#include <tuple>
 
 using namespace walberla;
 using namespace walberla::pe;
 using namespace walberla::mesh::pe;
 
-typedef boost::tuple<ConvexPolyhedron, Plane> BodyTuple ;
+typedef std::tuple<ConvexPolyhedron, Plane> BodyTuple ;
 
 std::vector<Vector3<real_t>> generatePointCloudCube()
 {

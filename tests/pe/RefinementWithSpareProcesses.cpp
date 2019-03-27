@@ -35,7 +35,7 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/grid_generator/SCIterator.h"
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 #include <algorithm>
 #include <limits>
@@ -44,7 +44,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTuple ;
+typedef std::tuple<Sphere> BodyTuple ;
 
 int main( int /*argc*/, char ** /*argv*/, const std::string& LBAlgorithm )
 {

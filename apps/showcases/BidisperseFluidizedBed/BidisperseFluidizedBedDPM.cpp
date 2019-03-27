@@ -101,7 +101,7 @@ typedef lbm::SimplePressure< LatticeModel_T, flag_t >                  Outflow_T
 typedef boost::tuples::tuple< NoSlip_T, Inflow_T, Outflow_T >          BoundaryConditions_T;
 typedef BoundaryHandling<FlagField_T, Stencil_T, BoundaryConditions_T> BoundaryHandling_T;
 
-typedef boost::tuple<pe::Plane, pe::Sphere> BodyTypeTuple ;
+typedef std::tuple<pe::Plane, pe::Sphere> BodyTypeTuple ;
 
 ///////////
 // FLAGS //

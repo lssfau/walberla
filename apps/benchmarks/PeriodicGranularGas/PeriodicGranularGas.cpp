@@ -33,12 +33,13 @@
 
 #include <functional>
 #include <memory>
+#include <tuple>
 
 namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::timing;
 
-using BodyTuple = boost::tuple<Sphere> ;
+using BodyTuple = std::tuple<Sphere> ;
 
 int main( int argc, char ** argv )
 {
@@ -164,11 +165,11 @@ int main( int argc, char ** argv )
    std::function<void(void)> syncCallWithoutTT;
    if (bNN)
    {
-      syncCallWithoutTT = std::bind( pe::syncNextNeighbors<BodyTuple>, boost::ref(*forest), storageID, &tt, real_c(0.1), false );
+      syncCallWithoutTT = std::bind( pe::syncNextNeighbors<BodyTuple>, std::ref(*forest), storageID, &tt, real_c(0.1), false );
       WALBERLA_LOG_INFO_ON_ROOT("Using NextNeighbor sync!");
    } else if (bSO)
    {
-      syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, boost::ref(*forest), storageID, &tt, real_c(0.1), false );
+      syncCallWithoutTT = std::bind( pe::syncShadowOwners<BodyTuple>, std::ref(*forest), storageID, &tt, real_c(0.1), false );
       WALBERLA_LOG_INFO_ON_ROOT("Using ShadowOwner sync!");
    } else
    {

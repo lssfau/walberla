@@ -36,7 +36,7 @@
 #include "core/debug/TestSubsystem.h"
 #include "vtk/VTKOutput.h"
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 #include <algorithm>
 #include <vector>
@@ -44,8 +44,8 @@
 namespace walberla {
 using namespace walberla::pe;
 
-using UnionType = Union<boost::tuple<Sphere> > ;
-typedef boost::tuple<Sphere, Plane, UnionType> BodyTuple ;
+using UnionType = Union<std::tuple<Sphere> > ;
+typedef std::tuple<Sphere, Plane, UnionType> BodyTuple ;
 
 void SnowManFallingOnPlane()
 {
@@ -75,7 +75,7 @@ void SnowManFallingOnPlane()
 
    createPlane( *globalBodyStorage, 0, Vec3(0,0,1), Vec3(0,0,0) );
 
-   UnionType* un  = createUnion< boost::tuple<Sphere> >( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(5,5,5) );
+   UnionType* un  = createUnion< std::tuple<Sphere> >( *globalBodyStorage, forest->getBlockStorage(), storageID, 0, Vec3(5,5,5) );
    auto sp1       = createSphere(un, 10, Vec3(5,5,1), real_t(1));
    auto sp2       = createSphere(un, 11, Vec3(real_t(6.7),5,real_t(1.2)), real_t(1.1));
 

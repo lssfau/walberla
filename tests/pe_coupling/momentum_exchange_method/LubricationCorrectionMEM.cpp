@@ -99,7 +99,7 @@ typedef boost::tuples::tuple< FreeSlip_T, MO_T > BoundaryConditions_T;
 
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
-typedef boost::tuple<pe::Sphere, pe::Plane> BodyTypeTuple ;
+typedef std::tuple<pe::Sphere, pe::Plane> BodyTypeTuple ;
 
 ///////////
 // FLAGS //

@@ -35,7 +35,7 @@
 
 #include "core/debug/TestSubsystem.h"
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 #include <algorithm>
 #include <vector>
@@ -43,7 +43,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere, Plane> BodyTuple ;
+typedef std::tuple<Sphere, Plane> BodyTuple ;
 
 class SimpleLB
 {

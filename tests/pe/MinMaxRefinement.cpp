@@ -42,7 +42,7 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/logging/Logging.h"
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 #include <algorithm>
 #include <limits>
@@ -51,7 +51,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere, Plane> BodyTuple ;
+typedef std::tuple<Sphere, Plane> BodyTuple ;
 
 int main( int argc, char ** argv )
 {

@@ -72,7 +72,7 @@ you should call RigidBody::getTopSuperBody() and then RigidBody::getMass()
 (RigidBody::getInertia()) using the returned rigid body.
 
 \subsection SyncCalls How can I dynamically switch between sync calls?
-You can bind the function to a boost function and call this one.
+You can bind the function to a std::function and call this one.
 \snippet 02_ConfinedGasExtended.cpp Bind Sync Call
 
 \section CommonFunctions Important Classes and Functions

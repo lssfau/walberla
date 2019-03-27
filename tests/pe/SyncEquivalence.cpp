@@ -44,7 +44,7 @@ namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::timing;
 
-using BodyTuple = boost::tuple<Sphere> ;
+using BodyTuple = std::tuple<Sphere> ;
 
 struct BodyData
 {

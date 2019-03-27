@@ -43,7 +43,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 namespace walberla {
 namespace pe {
@@ -208,7 +208,7 @@ private:
 
    //** friend declaration
    /// needed to be able to set static type ids with setStaticTypeID
-   template <class T>
+   template <class T, int N>
    friend struct SetBodyTypeIDs;
 };
 //*************************************************************************************************
