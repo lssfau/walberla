@@ -153,7 +153,7 @@ public:
 
 // http://graphics.stanford.edu/~seander/bithacks.html
 
-static const boost::uint8_t logBase2LookupTable[256] =
+static const uint8_t logBase2LookupTable[256] =
 {
 #define logBase2LT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
       0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
@@ -164,9 +164,9 @@ static const boost::uint8_t logBase2LookupTable[256] =
 
 template< typename UINT > size_t logBase2( UINT value ); // 1000 -> 3, 0010 -> 1, 0001 -> 0, etc.
 
-template<> inline size_t logBase2< boost::uint64_t >( boost::uint64_t value ) {
+template<> inline size_t logBase2< uint64_t >( uint64_t value ) {
 
-   boost::uint64_t i, j;
+   uint64_t i, j;
 
    i = value >> 32;
    if( i != 0 ) {
@@ -187,9 +187,9 @@ template<> inline size_t logBase2< boost::uint64_t >( boost::uint64_t value ) {
    return ( i != 0 ) ? (8 + logBase2LookupTable[i]) : logBase2LookupTable[value];
 }
 
-template<> inline size_t logBase2< boost::uint32_t >( boost::uint32_t value ) {
+template<> inline size_t logBase2< uint32_t >( uint32_t value ) {
 
-   boost::uint32_t i, j;
+   uint32_t i, j;
 
    j = value >> 16;
    if( j != 0 ) {

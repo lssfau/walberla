@@ -46,7 +46,7 @@ void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AAB
 
 
 
-/// see documetation of 'void mapPointToPeriodicDomain( const boost::array< bool, 3 > & periodic, const AABB & domain, real_t & x, real_t & y, real_t & z )'
+/// see documetation of 'void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AABB & domain, real_t & x, real_t & y, real_t & z )'
 inline void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AABB & domain, Vector3< real_t > & p )
 {
    mapPointToPeriodicDomain( periodic, domain, p[0], p[1], p[2] );
@@ -54,7 +54,7 @@ inline void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, co
 
 
 
-/// see documetation of 'void mapPointToPeriodicDomain( const boost::array< bool, 3 > & periodic, const AABB & domain, real_t & x, real_t & y, real_t & z )'
+/// see documetation of 'void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AABB & domain, real_t & x, real_t & y, real_t & z )'
 inline Vector3< real_t > mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AABB & domain, const Vector3< real_t > & p )
 {
    Vector3< real_t > point( p );

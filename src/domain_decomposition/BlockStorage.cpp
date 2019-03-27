@@ -40,7 +40,7 @@ namespace domain_decomposition {
 //**********************************************************************************************************************
 /*!
 *   For documentation, see documentation of free function
-*   'void mapPointToPeriodicDomain( const boost::array< bool, 3 > & periodic, const AABB & domain,
+*   'void mapPointToPeriodicDomain( const std::array< bool, 3 > & periodic, const AABB & domain,
 *                                   real_t & x, real_t & y, real_t & z )'
 */
 //**********************************************************************************************************************
@@ -57,7 +57,7 @@ void BlockStorage::mapToPeriodicDomain( real_t & x, real_t & y, real_t & z ) con
 //**********************************************************************************************************************
 /*!
 *   For documentation, see documentation of free function
-*   'bool periodicIntersect( const boost::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB & box1, const math::AABB & box2 )'
+*   'bool periodicIntersect( const std::array< bool, 3 > & periodic, const math::AABB & domain, const math::AABB & box1, const math::AABB & box2 )'
 */
 //**********************************************************************************************************************
 bool BlockStorage::periodicIntersect( const math::AABB & box1, const math::AABB & box2 ) const

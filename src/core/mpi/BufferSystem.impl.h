@@ -520,8 +520,6 @@ void GenericBufferSystem<Rb, Sb>::setCommunicationType( const bool knownSize )
 //
 //======================================================================================================================
 
-// using boost::counting_range didn't work on all supported compilers
-// so the range is created explicitly
 template< typename Rb, typename Sb>
 typename GenericBufferSystem<Rb, Sb>::RankRange GenericBufferSystem<Rb,Sb>::noRanks()
 {
