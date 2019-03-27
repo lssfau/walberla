@@ -9,7 +9,7 @@ in particular the fluid-particle coupling.
 It scales from laptops to current and future supercomputers while maintaining 
 near-perfect efficiency.
 
-See http://walberla.net/ for more information and a showcase of applications.
+See https://www.walberla.net/ for more information and a showcase of applications.
 
 ## Documentation and Tutorials
 
