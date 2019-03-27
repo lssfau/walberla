@@ -231,7 +231,7 @@ namespace internal {
 
       auto result = make_shared<boost::python::object>();
       AddToStorageExporter exporter( blocks, name, fs, gl, layout, type, usePitchedMem );
-      python_coupling::for_each_noncopyable_type<GpuFields>( boost::ref(exporter) );
+      python_coupling::for_each_noncopyable_type<GpuFields>( std::ref(exporter) );
 
       if ( ! exporter.successful() ) {
          PyErr_SetString( PyExc_ValueError, "Adding Field failed.");
