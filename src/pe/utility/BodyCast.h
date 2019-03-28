@@ -23,55 +23,56 @@
 #include <core/DataTypes.h>
 #include <pe/rigidbody/RigidBody.h>
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 namespace walberla {
 namespace pe {
 
-template < typename TypeList, typename Functor, typename ReturnType >
+template < typename TypeList, typename Functor, typename ReturnType, int N = std::tuple_size<TypeList>::value - 1 >
 class SingleCast
 {
 public:
-   static ReturnType execute(const id_t typeID, Functor& func){
-      static_assert(boost::is_base_of<RigidBody, typename TypeList::head_type>::value, "only downcasting allowed!");
-      if (TypeList::head_type::getStaticTypeID() == typeID)
+   static ReturnType execute(const id_t typeID, Functor& func)
+   {
+      using CastBodyType = typename std::tuple_element<N, TypeList>::type;
+      static_assert(std::is_base_of<RigidBody, CastBodyType>::value, "only downcasting allowed!");
+      if (CastBodyType::getStaticTypeID() == typeID)
       {
-         typedef typename TypeList::head_type CastBodyType;
          CastBodyType* bd = NULL;
          return func( static_cast<CastBodyType *>( bd ) );
       } else
       {
-         return SingleCast<typename TypeList::tail_type, Functor, ReturnType>::execute(typeID, func);
+         return SingleCast<TypeList, Functor, ReturnType, N - 1>::execute(typeID, func);
       }
    }
 
    static ReturnType execute(RigidBody* bd, Functor& func){
-      static_assert(boost::is_base_of<RigidBody, typename TypeList::head_type>::value, "only downcasting allowed!");
-      if (TypeList::head_type::getStaticTypeID() == bd->getTypeID())
+      using CastBodyType = typename std::tuple_element<N, TypeList>::type;
+      static_assert(std::is_base_of<RigidBody, CastBodyType>::value, "only downcasting allowed!");
+      if (CastBodyType::getStaticTypeID() == bd->getTypeID())
       {
-         typedef typename TypeList::head_type CastBodyType;
          return func( static_cast<CastBodyType *>(bd) );
       } else
       {
-         return SingleCast<typename TypeList::tail_type, Functor, ReturnType>::execute(bd, func);
+         return SingleCast<TypeList, Functor, ReturnType, N - 1>::execute(bd, func);
       }
    }
 
    static ReturnType execute(const RigidBody* bd, Functor& func){
-      static_assert(boost::is_base_of<RigidBody, typename TypeList::head_type>::value, "only downcasting allowed!");
-      if (TypeList::head_type::getStaticTypeID() == bd->getTypeID())
+      using CastBodyType = typename std::tuple_element<N, TypeList>::type;
+      static_assert(std::is_base_of<RigidBody, CastBodyType>::value, "only downcasting allowed!");
+      if (CastBodyType::getStaticTypeID() == bd->getTypeID())
       {
-         typedef typename TypeList::head_type CastBodyType;
          return func( static_cast<const CastBodyType *>(bd) );
       } else
       {
-         return SingleCast<typename TypeList::tail_type, Functor, ReturnType>::execute(bd, func);
+         return SingleCast<TypeList, Functor, ReturnType, N - 1>::execute(bd, func);
       }
    }
 };
 
-template < typename Functor, typename ReturnType >
-struct SingleCast< boost::tuples::null_type, Functor, ReturnType >{
+template < typename TypeList, typename Functor, typename ReturnType >
+struct SingleCast< TypeList, Functor, ReturnType, -1 >{
    static ReturnType execute(const id_t typeID, Functor& /*func*/)
    {
       WALBERLA_ABORT("SingleCast: BodyType could not be determined (" << typeID << ")");
@@ -90,7 +91,11 @@ struct SingleCast< boost::tuples::null_type, Functor, ReturnType >{
    }
 };
 
-template < typename TypeListA, typename TypeListB, typename Functor, typename ReturnType >
+template < typename TypeListA,
+           typename TypeListB,
+           typename Functor,
+           typename ReturnType,
+           int N = std::tuple_size<TypeListA>::value - 1 >
 class DoubleCast
 {
 private:
@@ -118,40 +123,40 @@ private:
    };
 public:
    static ReturnType execute(RigidBody* a, RigidBody* b, Functor& func){
-      static_assert(boost::is_base_of<RigidBody, typename TypeListA::head_type>::value, "only downcasting allowed!");
-      if (TypeListA::head_type::getStaticTypeID() == a->getTypeID())
+      using CastBodyType = typename std::tuple_element<N, TypeListA>::type;
+      static_assert(std::is_base_of<RigidBody, CastBodyType>::value, "only downcasting allowed!");
+      if (CastBodyType::getStaticTypeID() == a->getTypeID())
       {
-         typedef typename TypeListA::head_type CastBodyType;
          SingleCastFunctor<CastBodyType> singleFunc( static_cast<CastBodyType *>(a), func);
          return SingleCast<TypeListB, SingleCastFunctor<CastBodyType>, ReturnType>::execute(b, singleFunc );
       } else
       {
-         return DoubleCast<typename TypeListA::tail_type, TypeListB, Functor, ReturnType>::execute(a, b, func);
+         return DoubleCast<TypeListA, TypeListB, Functor, ReturnType, N - 1>::execute(a, b, func);
       }
    }
 
    static ReturnType execute(const RigidBody* a, const RigidBody* b, Functor& func){
-      static_assert(boost::is_base_of<RigidBody, typename TypeListA::head_type>::value, "only downcasting allowed!");
-      if (TypeListA::head_type::getStaticTypeID() == a->getTypeID())
+      using CastBodyType = typename std::tuple_element<N, TypeListA>::type;
+      static_assert(std::is_base_of<RigidBody, CastBodyType>::value, "only downcasting allowed!");
+      if (CastBodyType::getStaticTypeID() == a->getTypeID())
       {
-         typedef typename TypeListA::head_type CastBodyType;
          SingleCastConstFunctor<CastBodyType> singleFunc( static_cast<CastBodyType *>(a), func);
          return SingleCast<TypeListB, SingleCastConstFunctor<CastBodyType>, ReturnType>::execute(b, singleFunc );
       } else
       {
-         return DoubleCast<typename TypeListA::tail_type, TypeListB, Functor, ReturnType>::execute(a, b, func);
+         return DoubleCast<TypeListA, TypeListB, Functor, ReturnType, N - 1>::execute(a, b, func);
       }
    }
 };
 
-template < typename TypeListB, typename Functor, typename ReturnType >
-struct DoubleCast< boost::tuples::null_type, TypeListB, Functor, ReturnType >{
+template < typename TypeListA, typename TypeListB, typename Functor, typename ReturnType >
+struct DoubleCast< TypeListA, TypeListB, Functor, ReturnType, -1 >{
    static ReturnType execute(RigidBody* a, RigidBody* /*b*/, Functor& /*func*/)
    {
       WALBERLA_ABORT("DoubleCast: Type of body " << a->getSystemID() << " could not be determined (" << a->getTypeID() << ")");
       return ReturnType();
    }
-   static ReturnType execute(const RigidBody* a, const RigidBody* b, Functor& /*func*/)
+   static ReturnType execute(const RigidBody* a, const RigidBody* /*b*/, Functor& /*func*/)
    {
       WALBERLA_ABORT("DoubleCast: Type of body " << a->getSystemID() << " could not be determined (" << a->getTypeID() << ")");
       return ReturnType();

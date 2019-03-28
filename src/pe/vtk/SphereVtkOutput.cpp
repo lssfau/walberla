@@ -58,36 +58,36 @@ void SphereVtkOutput::configure()
       {
          if (body.getTypeID() == Sphere::getStaticTypeID() || body.getTypeID() == Squirmer::getStaticTypeID())
             bodies_.push_back( static_cast<Sphere const *> (&body) );
-         if (body.getTypeID() == Union<boost::tuple<Sphere> >::getStaticTypeID())
+         if (body.getTypeID() == Union<std::tuple<Sphere> >::getStaticTypeID())
          {
-            auto un = static_cast<Union<boost::tuple<Sphere> > const * > (&body);
+            auto un = static_cast<Union<std::tuple<Sphere> > const * > (&body);
             for( auto it2 = un->begin(); it2 != un->end(); ++it2 )
             {
                if (it2->getTypeID() == Sphere::getStaticTypeID())
                   bodies_.push_back( static_cast<ConstSphereID> (it2.getBodyID()) );
             }
          }
-         if (body.getTypeID() == Union<boost::tuple<Squirmer> >::getStaticTypeID())
+         if (body.getTypeID() == Union<std::tuple<Squirmer> >::getStaticTypeID())
          {
-            auto un = static_cast<Union<boost::tuple<Squirmer> > const * > (&body);
+            auto un = static_cast<Union<std::tuple<Squirmer> > const * > (&body);
             for( auto it2 = un->begin(); it2 != un->end(); ++it2 )
             {
                if (it2->getTypeID() == Squirmer::getStaticTypeID())
                   bodies_.push_back( static_cast<ConstSphereID> (it2.getBodyID()) );
             }
          }
-         if (body.getTypeID() == Union<boost::tuple<Sphere,Squirmer> >::getStaticTypeID())
+         if (body.getTypeID() == Union<std::tuple<Sphere,Squirmer> >::getStaticTypeID())
          {
-            auto un = static_cast<Union<boost::tuple<Sphere,Squirmer> > const * > (&body);
+            auto un = static_cast<Union<std::tuple<Sphere,Squirmer> > const * > (&body);
             for( auto it2 = un->begin(); it2 != un->end(); ++it2 )
             {
                if (it2->getTypeID() == Sphere::getStaticTypeID() || it2->getTypeID() == Squirmer::getStaticTypeID())
                   bodies_.push_back( static_cast<ConstSphereID> (it2.getBodyID()) );
             }
          }
-         if (body.getTypeID() == Union<boost::tuple<Squirmer,Sphere> >::getStaticTypeID())
+         if (body.getTypeID() == Union<std::tuple<Squirmer,Sphere> >::getStaticTypeID())
          {
-            auto un = static_cast<Union<boost::tuple<Squirmer,Sphere> > const * > (&body);
+            auto un = static_cast<Union<std::tuple<Squirmer,Sphere> > const * > (&body);
             for( auto it2 = un->begin(); it2 != un->end(); ++it2 )
             {
                if (it2->getTypeID() == Sphere::getStaticTypeID() || it2->getTypeID() == Squirmer::getStaticTypeID())

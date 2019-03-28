@@ -45,7 +45,7 @@ private:
 };
 
 class A : public Base{
-    template <class T>
+    template <class T, int N>
     friend struct SetBodyTypeIDs;
 private:
     static id_t staticTypeID_;
@@ -57,7 +57,7 @@ public:
 };
 
 class B : public Base{
-    template <class T>
+    template <class T, int N>
     friend struct SetBodyTypeIDs;
 private:
     static id_t staticTypeID_;
@@ -69,7 +69,7 @@ public:
 };
 
 class C : public Base{
-   template <class T>
+   template <class T, int N>
    friend struct SetBodyTypeIDs;
 private:
     static id_t staticTypeID_;
@@ -114,7 +114,7 @@ int main( int argc, char** argv )
 
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
 
-   typedef boost::tuple<A, B, C> BodyTuple ;
+   typedef std::tuple<A, B, C> BodyTuple ;
    SetBodyTypeIDs<BodyTuple>::execute();
 
    WALBERLA_CHECK_UNEQUAL(A::getStaticTypeID(), 100);
@@ -125,7 +125,7 @@ int main( int argc, char** argv )
    WALBERLA_CHECK_UNEQUAL(A::getStaticTypeID(), C::getStaticTypeID());
    WALBERLA_CHECK_UNEQUAL(B::getStaticTypeID(), C::getStaticTypeID());
 
-   typedef boost::tuple<Plane, Sphere, Box, Capsule, Union< boost::tuple<Sphere, Box> > > BodyTuple2 ;
+   typedef std::tuple<Plane, Sphere, Box, Capsule, Union< std::tuple<Sphere, Box> > > BodyTuple2 ;
    SetBodyTypeIDs<BodyTuple2>::execute();
    WALBERLA_CHECK_UNEQUAL(Plane::getStaticTypeID(), Sphere::getStaticTypeID());
    WALBERLA_CHECK_UNEQUAL(Plane::getStaticTypeID(), Box::getStaticTypeID());

@@ -33,7 +33,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-using BodyTuple = boost::tuple<Sphere> ;
+using BodyTuple = std::tuple<Sphere> ;
 
 class ReGrid
 {

@@ -41,7 +41,7 @@ namespace pe_intersection_ratio_test
 
 using namespace walberla;
 
-typedef boost::tuple<pe::Sphere, pe::Plane, pe::Ellipsoid> BodyTypeTuple;
+typedef std::tuple<pe::Sphere, pe::Plane, pe::Ellipsoid> BodyTypeTuple;
 
 /*!\brief TODO
  */

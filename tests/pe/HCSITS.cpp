@@ -30,7 +30,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere, Plane> BodyTuple ;
+typedef std::tuple<Sphere, Plane> BodyTuple ;
 
 void normalReactionTest(cr::HCSITS& cr, SphereID sp)
 {

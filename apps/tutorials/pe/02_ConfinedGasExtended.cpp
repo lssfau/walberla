@@ -36,13 +36,14 @@
 #include <vtk/VTKOutput.h>
 
 #include <functional>
+#include <tuple>
 
 namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::timing;
 using namespace walberla::pe::raytracing;
 
-typedef boost::tuple<Sphere, Plane> BodyTuple ;
+typedef std::tuple<Sphere, Plane> BodyTuple ;
 
 int main( int argc, char ** argv )
 {

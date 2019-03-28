@@ -37,7 +37,7 @@
 #include "core/math/Shims.h"
 #include "geometry/GeometricalFunctions.h"
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 namespace walberla {
 namespace pe {

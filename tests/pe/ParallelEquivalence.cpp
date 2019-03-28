@@ -31,7 +31,7 @@
 
 #include "core/debug/TestSubsystem.h"
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 #include <algorithm>
 #include <vector>
@@ -41,7 +41,7 @@ using namespace walberla::pe;
 
 int runs = 1000;
 
-typedef boost::tuple<Sphere, Plane> BodyTuple ;
+typedef std::tuple<Sphere, Plane> BodyTuple ;
 
 struct BodyData
 {

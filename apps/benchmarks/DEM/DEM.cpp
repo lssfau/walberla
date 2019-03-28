@@ -25,6 +25,7 @@
 #include <core/DataTypes.h>
 
 #include <string>
+#include <tuple>
 
 namespace walberla {
 
@@ -47,7 +48,7 @@ int main( int argc, char** argv )
    using namespace walberla;
    using namespace walberla::pe;
 
-   typedef boost::tuple<Sphere, Plane> BodyTuple ;
+   typedef std::tuple<Sphere, Plane> BodyTuple ;
 
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
 

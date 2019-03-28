@@ -30,7 +30,7 @@
 #include "pe/rigidbody/Union.h"
 #include "pe/utility/BodyCast.h"
 #include <core/math/Utility.h>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 #include <pe/raytracing/Ray.h>
 

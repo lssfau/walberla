@@ -50,7 +50,7 @@ namespace pe {
  * \ingroup pe
  * \brief Setup of a new Union.
  *
- * \tparam BodyTypeTuple boost::tuple of all geometries the Union should be able to contain
+ * \tparam BodyTypeTuple std::tuple of all geometries the Union should be able to contain
  * \param globalStorage process local global storage
  * \param blocks storage of all the blocks on this process
  * \param storageID BlockDataID of the BlockStorage block datum
@@ -116,7 +116,7 @@ Union<BodyTypeTuple>* createUnion(   BodyStorage& globalStorage, BlockStorage& b
  * \ingroup pe
  * \brief Setup of a new Box directly attached to a Union.
  *
- * \tparam BodyTypeTuple boost::tuple of all geometries the Union is able to contain
+ * \tparam BodyTypeTuple std::tuple of all geometries the Union is able to contain
  * \exception std::runtime_error    Box TypeID not initalized!
  * \exception std::invalid_argument createBox: Union argument is NULL
  * \exception std::logic_error      createBox: Union is remote
@@ -180,7 +180,7 @@ BoxID createBox( Union<BodyTypeTuple>* un,
  * \ingroup pe
  * \brief Setup of a new Capsule directly attached to a Union.
  *
- * \tparam BodyTypeTuple boost::tuple of all geometries the Union is able to contain
+ * \tparam BodyTypeTuple std::tuple of all geometries the Union is able to contain
  * \exception std::runtime_error    Capsule TypeID not initalized!
  * \exception std::invalid_argument createCapsule: Union argument is NULL
  * \exception std::logic_error      createCapsule: Union is remote
@@ -242,7 +242,7 @@ CapsuleID createCapsule( Union<BodyTypeTuple>* un,
  * \ingroup pe
  * \brief Setup of a new Sphere directly attached to a Union.
  *
- * \tparam BodyTypeTuple boost::tuple of all geometries the Union is able to contain
+ * \tparam BodyTypeTuple std::tuple of all geometries the Union is able to contain
  * \exception std::runtime_error    Sphere TypeID not initalized!
  * \exception std::invalid_argument createSphere: Union argument is NULL
  * \exception std::logic_error      createSphere: Union is remote

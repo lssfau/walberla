@@ -33,12 +33,13 @@
 
 #include <functional>
 #include <memory>
+#include <tuple>
 
 namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::timing;
 
-using BodyTuple = boost::tuple<Sphere> ;
+using BodyTuple = std::tuple<Sphere> ;
 
 int main( int argc, char ** argv )
 {

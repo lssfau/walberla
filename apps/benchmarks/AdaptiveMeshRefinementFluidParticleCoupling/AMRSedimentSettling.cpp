@@ -109,7 +109,7 @@ typedef pe_coupling::CurvedLinear< LatticeModel_T, FlagField_T > MO_T;
 typedef boost::tuples::tuple< NoSlip_T, MO_T > BoundaryConditions_T;
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
-typedef boost::tuple<pe::Sphere, pe::Ellipsoid, pe::Plane> BodyTypeTuple;
+typedef std::tuple<pe::Sphere, pe::Ellipsoid, pe::Plane> BodyTypeTuple;
 
 ///////////
 // FLAGS //

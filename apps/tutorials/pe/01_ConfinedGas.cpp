@@ -27,13 +27,15 @@
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
 #include <core/math/Random.h>
+
+#include <tuple>
 //! [Includes]
 
 namespace walberla {
 using namespace walberla::pe;
 
 //! [BodyTypeTuple]
-typedef boost::tuple<Sphere, Plane> BodyTypeTuple ;
+typedef std::tuple<Sphere, Plane> BodyTypeTuple ;
 //! [BodyTypeTuple]
 
 int main( int argc, char ** argv )

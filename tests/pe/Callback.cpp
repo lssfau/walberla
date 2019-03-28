@@ -29,7 +29,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-typedef boost::tuple<Sphere> BodyTypeTuple ;
+typedef std::tuple<Sphere> BodyTypeTuple ;
 
 enum class State{ LOCALIZED0, SHADOW, MIGRATED, LOCALIZED1, REMOVED};
 State state;

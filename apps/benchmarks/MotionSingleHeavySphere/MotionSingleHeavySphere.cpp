@@ -101,7 +101,7 @@ typedef pe_coupling::CurvedQuadratic< LatticeModel_T, FlagField_T > MEM_MR_T;
 typedef boost::tuples::tuple< UBB_T, Outlet_T, MEM_BB_T, MEM_CLI_T, MEM_MR_T > BoundaryConditions_T;
 typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
 
-using BodyTypeTuple = boost::tuple<pe::Sphere>;
+using BodyTypeTuple = std::tuple<pe::Sphere>;
 
 ///////////
 // FLAGS //

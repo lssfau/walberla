@@ -34,18 +34,19 @@
 #include "pe/rigidbody/SetBodyTypeIDs.h"
 #include "pe/Materials.h"
 
-#include <boost/tuple/tuple.hpp>
 #include <memory>
+#include <tuple>
+
 namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::pe::communication;
 
-using UnionTypeTuple = boost::tuple<mesh::pe::ConvexPolyhedron>;
+using UnionTypeTuple = std::tuple<mesh::pe::ConvexPolyhedron>;
 using UnionT = Union<UnionTypeTuple>;
 using UnionID = UnionT *;
 using UnionPtr = std::unique_ptr<UnionT>;
 
-typedef boost::tuple<mesh::pe::ConvexPolyhedron, UnionT> BodyTuple ;
+typedef std::tuple<mesh::pe::ConvexPolyhedron, UnionT> BodyTuple ;
 
 std::vector<Vector3<real_t>> generateOctahedron( const real_t radius)
 {

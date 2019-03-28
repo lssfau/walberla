@@ -23,8 +23,7 @@
 #include "AnalyticCollisionDetection.h"
 #include "GenericFCD.h"
 
-#include <boost/type_traits/is_base_of.hpp>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 namespace walberla{
 namespace pe{

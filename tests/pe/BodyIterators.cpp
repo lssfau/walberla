@@ -36,7 +36,7 @@
 namespace walberla {
 using namespace walberla::pe;
 
-using BodyTuple = boost::tuple<Sphere> ;
+using BodyTuple = std::tuple<Sphere> ;
 
 int main( int argc, char **argv )
 {

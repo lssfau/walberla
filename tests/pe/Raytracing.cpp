@@ -38,7 +38,7 @@ namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::pe::raytracing;
 
-typedef boost::tuple<Box, Plane, Sphere, Capsule, Ellipsoid> BodyTuple ;
+typedef std::tuple<Box, Plane, Sphere, Capsule, Ellipsoid> BodyTuple ;
 
 void SphereIntersectsTest()
 {

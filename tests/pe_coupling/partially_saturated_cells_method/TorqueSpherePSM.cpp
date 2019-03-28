@@ -86,7 +86,7 @@ using FlagField_T = FlagField<flag_t>;
 typedef std::pair< pe::BodyID, real_t >                              BodyAndVolumeFraction_T;
 typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
 
-using BodyTypeTuple = boost::tuple<pe::Sphere> ;
+using BodyTypeTuple = std::tuple<pe::Sphere> ;
 
 ///////////
 // FLAGS //

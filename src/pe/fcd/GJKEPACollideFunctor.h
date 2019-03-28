@@ -28,7 +28,7 @@
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Union.h"
 #include <pe/Thresholds.h>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 namespace walberla{
 namespace pe{
