@@ -104,7 +104,7 @@ class CellwiseSweep
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( specialization ) \
    template< typename LatticeModel_T, typename Filter_T, typename DensityVelocityIn_T, typename DensityVelocityOut_T > \
-   class CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, typename boost::enable_if< specialization >::type > \
+   class CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, typename std::enable_if< specialization >::type > \
       : public SweepBase< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T > \
    { \
    public: \
@@ -136,7 +136,7 @@ class CellwiseSweep
    }; \
    \
    template< typename LatticeModel_T, typename Filter_T, typename DensityVelocityIn_T, typename DensityVelocityOut_T > \
-   void CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, typename boost::enable_if< specialization >::type \
+   void CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, typename std::enable_if< specialization >::type \
       >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude ) \
    { \
       PdfField_T * src( NULL ); \
@@ -149,7 +149,7 @@ class CellwiseSweep
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( specialization) \
    template< typename LatticeModel_T, typename Filter_T, typename DensityVelocityIn_T, typename DensityVelocityOut_T > \
-   void CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, typename boost::enable_if< specialization >::type \
+   void CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, typename std::enable_if< specialization >::type \
       >::streamCollide( IBlock * const block, const uint_t numberOfGhostLayersToInclude ) \
    { \
       PdfField_T * src( NULL ); \
@@ -173,7 +173,7 @@ class CellwiseSweep
 
 #define WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( specialization ) \
    template< typename LatticeModel_T, typename Filter_T, typename DensityVelocityIn_T, typename DensityVelocityOut_T > \
-   void CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, typename boost::enable_if< specialization >::type \
+   void CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, typename std::enable_if< specialization >::type \
       >::collide( IBlock * const block, const uint_t numberOfGhostLayersToInclude ) \
    { \
       PdfField_T * src = this->getSrcField( block ); \

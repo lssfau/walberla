@@ -27,6 +27,8 @@
 #include "lbm/lattice_model/CollisionModel.h"
 #include "lbm/lattice_model/EquilibriumDistribution.h"
 
+#include <type_traits>
+
 
 
 // Back-end for calculating macroscopic values
@@ -45,7 +47,7 @@ namespace internal {
     };
 
     template<typename CollisionModel_T>
-    struct ShearRelaxationParameter<CollisionModel_T, typename boost::enable_if_c<boost::is_same<typename CollisionModel_T::tag,
+    struct ShearRelaxationParameter<CollisionModel_T, typename std::enable_if<std::is_same<typename CollisionModel_T::tag,
                                                                                                  collision_model::SRT_tag>::value>::type>
     {
         static inline real_t get(const CollisionModel_T &lm, cell_idx_t x, cell_idx_t y, cell_idx_t z)
@@ -55,7 +57,7 @@ namespace internal {
     };
 
     template<typename CollisionModel_T>
-    struct ShearRelaxationParameter<CollisionModel_T, typename boost::enable_if_c<boost::is_same<typename CollisionModel_T::tag,
+    struct ShearRelaxationParameter<CollisionModel_T, typename std::enable_if<std::is_same<typename CollisionModel_T::tag,
                                                                                                  collision_model::TRT_tag>::value>::type>
     {
         static inline real_t get(const CollisionModel_T &lm, cell_idx_t, cell_idx_t, cell_idx_t) {
@@ -64,7 +66,7 @@ namespace internal {
     };
 
     template<typename CollisionModel_T>
-    struct ShearRelaxationParameter<CollisionModel_T, typename boost::enable_if_c<boost::is_same<typename CollisionModel_T::tag,
+    struct ShearRelaxationParameter<CollisionModel_T, typename std::enable_if<std::is_same<typename CollisionModel_T::tag,
                                                                                                collision_model::MRT_tag>::value>::type>
     {
         static inline real_t get(const CollisionModel_T &lm, cell_idx_t, cell_idx_t, cell_idx_t) {
@@ -73,7 +75,7 @@ namespace internal {
     };
 
     template<typename CollisionModel_T>
-    struct ShearRelaxationParameter<CollisionModel_T, typename boost::enable_if_c<boost::is_same<typename CollisionModel_T::tag,
+    struct ShearRelaxationParameter<CollisionModel_T, typename std::enable_if<std::is_same<typename CollisionModel_T::tag,
                                                                                                  collision_model::Cumulant_tag>::value>::type>
     {
         static inline real_t get(const CollisionModel_T &cm, cell_idx_t, cell_idx_t, cell_idx_t) {

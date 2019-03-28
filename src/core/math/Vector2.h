@@ -37,15 +37,10 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/is_fundamental.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/utility/enable_if.hpp>
-
 #include <cmath>
 #include <iostream>
 #include <limits>
-
+#include <type_traits>
 
 namespace walberla {
 namespace math {
@@ -88,7 +83,7 @@ namespace math {
 template< typename Type >
 class Vector2
 {
-   static_assert( boost::is_arithmetic<Type>::value, "Vector2 only accepts arithmetic data types" );
+   static_assert( std::is_arithmetic<Type>::value, "Vector2 only accepts arithmetic data types" );
 
 private:
    //**Friend declarations*************************************************************************
@@ -222,7 +217,7 @@ template< typename Type >
 template< typename Other >
 inline Vector2<Type>::Vector2( Other init )
 {
-   static_assert( boost::is_arithmetic<Other>::value, "Vector2 only accepts arithmetic data types in Vector2( Other init )");
+   static_assert( std::is_arithmetic<Other>::value, "Vector2 only accepts arithmetic data types in Vector2( Other init )");
 
    v_[0] = v_[1] = init;
 }
@@ -1325,7 +1320,7 @@ inline bool operator!=( long double scalar, const Vector2<Type>& vec )
 // \return The scaled result vector.
 */
 template< typename Type, typename Other >
-inline typename boost::enable_if_c< boost::is_fundamental<Other>::value, Vector2<HIGH> >::type
+inline typename std::enable_if< std::is_fundamental<Other>::value, Vector2<HIGH> >::type
    operator*( Other scalar, const Vector2<Type>& vec )
 {
    return vec * scalar;
@@ -1523,9 +1518,9 @@ inline const Vector2<Type> fabs( const Vector2<Type>& v )
 template<typename T>
 Vector2<T> & normalize( Vector2<T> & v )
 {
-   static_assert( boost::is_floating_point<T>::value,
+   static_assert( std::is_floating_point<T>::value,
       "You can only normalize floating point vectors in-place!");
-   static_assert( (boost::is_same<T, typename Vector2<T>::Length>::value),
+   static_assert( (std::is_same<T, typename Vector2<T>::Length>::value),
       "The type of your Vector2's length does not match its element type!" );
 
    const T len( v.length() );

@@ -35,9 +35,7 @@
 #include <core/Macros.h>
 #include <core/math/Shims.h>
 
-#include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/is_arithmetic.hpp>
-#include <boost/type_traits/is_volatile.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -91,8 +89,8 @@ class MatrixMxN
 {
    //**Compile time checks*************************************************************************
    /*! \cond internal */
-   static_assert(!boost::is_const<Type>::value, "only non const Types are allowed!");
-   static_assert(!boost::is_volatile<Type>::value, "only non volatile types are allowed!");
+   static_assert(!std::is_const<Type>::value, "only non const Types are allowed!");
+   static_assert(!std::is_volatile<Type>::value, "only non volatile types are allowed!");
    /*! \endcond */
    //**********************************************************************************************
 

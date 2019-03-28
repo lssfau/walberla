@@ -32,13 +32,9 @@
 #include "core/debug/Debug.h"
 #include "core/Sanitizer.h"
 
-#include <boost/mpl/logical.hpp>
-#include <boost/type_traits/is_enum.hpp>
-#include <boost/type_traits/is_arithmetic.hpp>
-#include <boost/utility/enable_if.hpp>
-
 #include <algorithm>
 #include <cstring>
+#include <type_traits>
 
 namespace walberla {
 namespace mpi {
@@ -128,7 +124,7 @@ public:
    /*!\name Operators */
    //@{
    template< typename V >
-   typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
+   typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
                               GenericRecvBuffer& >::type
    operator>>( V& value );
    //@}
@@ -163,7 +159,7 @@ private:
    /*!\name Utility functions */
    //@{
    template< typename V >
-   typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
+   typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
                               GenericRecvBuffer& >::type
    get( V& value );
    //@}
@@ -172,7 +168,7 @@ private:
 
 
    //**Compile time checks**********************************************************************************************
-   static_assert( boost::is_arithmetic<T>::value, "SendBuffer<T>: T has to be native datatype" ) ;
+   static_assert( std::is_arithmetic<T>::value, "SendBuffer<T>: T has to be native datatype" ) ;
    //*******************************************************************************************************************
 };
 //**********************************************************************************************************************
@@ -389,12 +385,12 @@ inline bool GenericRecvBuffer<T>::isEmpty() const
 */
 template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
-typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
+typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
                            GenericRecvBuffer<T> & >::type
 GenericRecvBuffer<T>::get( V& value )
 {
    // Compile time check that V is built-in data type
-   static_assert( boost::is_arithmetic<V>::value || boost::is_enum<V>::value,
+   static_assert( std::is_arithmetic<V>::value || std::is_enum<V>::value,
                             "RecvBuffer accepts only built-in data types");
 
 
@@ -431,7 +427,7 @@ GenericRecvBuffer<T>::get( V& value )
 */
 template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
-typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
+typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
                            GenericRecvBuffer<T> & >::type
 GenericRecvBuffer<T>::operator>>( V& value )
 {
@@ -554,7 +550,7 @@ template< typename T >  // Element type
 template< typename V >  // Type of the built-in data value
 inline void GenericRecvBuffer<T>::peek( V& value ) const
 {
-   WALBERLA_STATIC_ASSERT( boost::is_arithmetic<V>::value );
+   WALBERLA_STATIC_ASSERT( std::is_arithmetic<V>::value );
 
    WALBERLA_STATIC_ASSERT( sizeof(V) > sizeof(T) );
    WALBERLA_STATIC_ASSERT( sizeof(V) % sizeof(T) == 0);

@@ -25,7 +25,7 @@
 #include "FieldDisplayAdaptor.h"
 #include "core/math/Vector3.h"
 
-#include <boost/type_traits/is_same.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -63,7 +63,7 @@ namespace gui {
 
    protected:
       // first value_type for field, second for Vector3
-      static_assert( (boost::is_same<typename field_t::value_type, Vector3<T> >::value), "Can only display Vector3" );
+      static_assert( (std::is_same<typename field_t::value_type, Vector3<T> >::value), "Can only display Vector3" );
 
       void drawVectorFieldNumeric ( CellView * cell, const typename field_t::const_iterator & it );
       void drawVectorFieldColormap( CellView * cell, const typename field_t::const_iterator & it, length_t min, length_t max );

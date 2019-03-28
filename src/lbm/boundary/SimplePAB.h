@@ -40,7 +40,7 @@
 
 #include "stencil/Directions.h"
 
-#include <boost/type_traits/is_same.hpp>
+#include <type_traits>
 
 #include <vector>
 
@@ -53,9 +53,9 @@ namespace lbm {
 template< typename LatticeModel_T, typename FlagFieldT >
 class SimplePAB : public Boundary<typename FlagFieldT::flag_t>
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
    static_assert( LatticeModel_T::compressible == false,                                                             "Only works with incompressible models!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
 
    typedef PdfField< LatticeModel_T >        PDFField;
    typedef typename LatticeModel_T::Stencil  Stencil;

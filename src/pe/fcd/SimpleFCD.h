@@ -24,6 +24,7 @@
 #include "GenericFCD.h"
 
 #include <tuple>
+#include <type_traits>
 
 namespace walberla{
 namespace pe{

@@ -25,9 +25,7 @@
 #include "lbm/lattice_model/EquilibriumDistribution.h"
 #include "lbm/lattice_model/LatticeModelBase.h"
 
-#include <boost/mpl/logical.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -54,19 +52,17 @@ namespace lbm {
 ///////////////////////////////
 
 template< typename LatticeModel_T >
-class DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                                         collision_model::SRT_tag >,
-                                                                                         boost::mpl::bool_< LatticeModel_T::CollisionModel::constant >,
-                                                                                         boost::mpl::not_< boost::is_same< typename LatticeModel_T::Stencil,
-                                                                                                                  stencil::D3Q19 > >,
-                                                                                         boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                                         force_model::None_tag > > >::type >
+class DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                     LatticeModel_T::CollisionModel::constant &&
+                                                                     std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                                     std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                                     >::type >
 {
 public:
 
-   static_assert( (boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false),              "There is a specialization for D3Q19!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false),              "There is a specialization for D3Q19!" );
+   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    typedef PdfField< LatticeModel_T >        PdfField_T;
@@ -129,16 +125,15 @@ private:
 /////////////////////////////////////////////
 
 template< typename LatticeModel_T >
-class DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                                         collision_model::SRT_tag >,
-                                                                                         boost::mpl::bool_< LatticeModel_T::CollisionModel::constant >,
-                                                                                         boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                                         force_model::Guo_tag > > >::type >
+class DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                     LatticeModel_T::CollisionModel::constant &&
+                                                                     std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >::value
+                                                                     >::type >
 {                                                                                   
 public:
 
-   static_assert( (boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >::value),         "Only works with Guo constant force model !" );
+   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >::value),         "Only works with Guo constant force model !" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    typedef PdfField< LatticeModel_T >        PdfField_T;
@@ -220,20 +215,19 @@ private:
 ///////////////////////////////
 
 template< typename LatticeModel_T >
-class DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                                         collision_model::SRT_tag >,
-                                                                                         boost::mpl::bool_< LatticeModel_T::CollisionModel::constant >,
-                                                                                         boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >,
-                                                                                         boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                         boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                                         force_model::None_tag > > >::type >
+class DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                     LatticeModel_T::CollisionModel::constant &&
+                                                                     std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                                     ! LatticeModel_T::compressible &&
+                                                                     std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                                     >::type >
 {
 public:
 
-   static_assert( (boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
+   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
    static_assert( LatticeModel_T::compressible == false,                                                             "Only works with incompressible models!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    typedef PdfField< LatticeModel_T >        PdfField_T;
@@ -264,13 +258,12 @@ private:
 };
 
 template< typename LatticeModel_T >
-void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                                        collision_model::SRT_tag >,
-                                                                                        boost::mpl::bool_< LatticeModel_T::CollisionModel::constant >,
-                                                                                        boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >,
-                                                                                        boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                        boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                                        force_model::None_tag > > >::type
+void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                    LatticeModel_T::CollisionModel::constant &&
+                                                                    std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                                    ! LatticeModel_T::compressible &&
+                                                                    std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                                    >::type
    >::operator()( PdfField_T * src, PdfField_T * dst, cell_idx_t x, cell_idx_t y, cell_idx_t z ) const
 {
    using namespace stencil;
@@ -363,13 +356,12 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
 
 template< typename LatticeModel_T >
 template< typename FieldPtrOrIterator >
-void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                                        collision_model::SRT_tag >,
-                                                                                        boost::mpl::bool_< LatticeModel_T::CollisionModel::constant >,
-                                                                                        boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >,
-                                                                                        boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                        boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                                        force_model::None_tag > > >::type
+void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                    LatticeModel_T::CollisionModel::constant &&
+                                                                    std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                                    ! LatticeModel_T::compressible &&
+                                                                    std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                                    >::type
    >::operator()( FieldPtrOrIterator & src, FieldPtrOrIterator & dst ) const
 {
    using namespace stencil;
@@ -469,20 +461,19 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
 ///////////////////////////////
 
 template< typename LatticeModel_T >
-class DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                                         collision_model::SRT_tag >,
-                                                                                         boost::mpl::bool_< LatticeModel_T::CollisionModel::constant >,
-                                                                                         boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >,
-                                                                                         boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                         boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                                         force_model::None_tag > > >::type >
+class DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                     LatticeModel_T::CollisionModel::constant &&
+                                                                     std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                                     LatticeModel_T::compressible &&
+                                                                     std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                                     >::type >
 {
 public:
 
-   static_assert( (boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
+   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
    static_assert( LatticeModel_T::compressible,                                                                      "Only works with compressible models!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    typedef PdfField< LatticeModel_T >        PdfField_T;
@@ -514,13 +505,12 @@ private:
 };
 
 template< typename LatticeModel_T >
-void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                                        collision_model::SRT_tag >,
-                                                                                        boost::mpl::bool_< LatticeModel_T::CollisionModel::constant >,
-                                                                                        boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >,
-                                                                                        boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                        boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                                        force_model::None_tag > > >::type
+void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                    LatticeModel_T::CollisionModel::constant &&
+                                                                    std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                                    LatticeModel_T::compressible &&
+                                                                    std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                                    >::type
    >::operator()( PdfField_T * src, PdfField_T * dst, cell_idx_t x, cell_idx_t y, cell_idx_t z ) const
 {
    using namespace stencil;
@@ -618,13 +608,12 @@ void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl
 
 template< typename LatticeModel_T >
 template< typename FieldPtrOrIterator >
-void DefaultCellOperation< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                                        collision_model::SRT_tag >,
-                                                                                        boost::mpl::bool_< LatticeModel_T::CollisionModel::constant >,
-                                                                                        boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >,
-                                                                                        boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                        boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                                        force_model::None_tag > > >::type
+void DefaultCellOperation< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                    LatticeModel_T::CollisionModel::constant &&
+                                                                    std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                                    LatticeModel_T::compressible &&
+                                                                    std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                                    >::type
    >::operator()( FieldPtrOrIterator & src, FieldPtrOrIterator & dst ) const
 {
    using namespace stencil;

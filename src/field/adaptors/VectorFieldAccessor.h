@@ -23,6 +23,8 @@
 
 #include "core/math/Vector3.h"
 
+#include <type_traits>
+
 namespace walberla {
 namespace field {
 
@@ -32,7 +34,7 @@ namespace field {
    struct VectorFieldAccessor
    {
       static_assert( VectorField_T::F_SIZE == 3, "Only valid for Fields with 3 components (F_SIZE==3)" );
-      static_assert( boost::is_same< typename VectorField_T::value_type, real_t >::value, "Only works for real valued fields" );
+      static_assert( std::is_same< typename VectorField_T::value_type, real_t >::value, "Only works for real valued fields" );
 
       typedef Vector3<real_t> vector_or_constRefVector;
 
@@ -51,7 +53,7 @@ namespace field {
 
    template<typename VectorField_T>
    struct VectorFieldAccessor<VectorField_T,
-                              typename boost::enable_if_c< boost::is_same< typename VectorField_T::value_type,
+                              typename std::enable_if< std::is_same< typename VectorField_T::value_type,
                                                                            Vector3<real_t> >::value >::type >
    {
        typedef const Vector3<real_t> & vector_or_constRefVector;

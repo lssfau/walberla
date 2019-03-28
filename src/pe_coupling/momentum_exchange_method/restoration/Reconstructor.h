@@ -30,6 +30,8 @@
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/Types.h"
 
+#include <type_traits>
+
 
 namespace walberla {
 namespace pe_coupling {
@@ -277,7 +279,7 @@ public:
       ( blockStorage, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationDirectionFinder ) )
    {
       if( enforceNoSlipConstraintAfterExtrapolation_ ) {
-         WALBERLA_CHECK((boost::is_same<typename LatticeModel_T::Stencil, stencil::D3Q19>::value),
+         WALBERLA_CHECK((std::is_same<typename LatticeModel_T::Stencil, stencil::D3Q19>::value),
                         "Enforcing no-slip constraint after extrapolation currently only works with D3Q19 stencil!");
       }
    }

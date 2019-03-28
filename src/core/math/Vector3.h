@@ -38,16 +38,10 @@
 #include "core/mpi/SendBuffer.h"
 #include "core/debug/CheckFunctions.h"
 
-#include <boost/type_traits.hpp>
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/is_fundamental.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/type_traits/is_arithmetic.hpp>
-#include <boost/utility/enable_if.hpp>
-
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <type_traits>
 
 
 namespace walberla {
@@ -89,7 +83,7 @@ namespace math {
 template< typename Type >
 class Vector3
 {
-   static_assert( boost::is_arithmetic<Type>::value, "Vector3 only accepts arithmetic data types" );
+   static_assert( std::is_arithmetic<Type>::value, "Vector3 only accepts arithmetic data types" );
 
 private:
    //**Friend declarations*************************************************************************
@@ -229,7 +223,7 @@ template< typename Type >
 template< typename Other >
 inline Vector3<Type>::Vector3( Other init )
 {
-   static_assert( boost::is_arithmetic<Other>::value, "Vector3 only accepts arithmetic data types in Vector3( Other init )");
+   static_assert( std::is_arithmetic<Other>::value, "Vector3 only accepts arithmetic data types in Vector3( Other init )");
 
    v_[0] = v_[1] = v_[2] = numeric_cast<Type>(init);
 }
@@ -1477,7 +1471,7 @@ inline bool operator!=( long double scalar, const Vector3<Type>& vec )
 // \return The scaled result vector.
 */
 template< typename Type, typename Other >
-inline typename boost::enable_if_c< boost::is_fundamental<Other>::value, Vector3<HIGH> >::type
+inline typename std::enable_if< std::is_fundamental<Other>::value, Vector3<HIGH> >::type
    operator*( Other scalar, const Vector3<Type>& vec )
 {
    return vec * scalar;
@@ -1744,9 +1738,9 @@ inline void normals(const Vector3<Type>& v, Vector3<Type>& defNor, Vector3<Type>
 template<typename T>
 Vector3<T> & normalize( Vector3<T> & v )
 {
-   static_assert( boost::is_floating_point<T>::value,
+   static_assert( std::is_floating_point<T>::value,
       "You can only normalize floating point vectors in-place!");
-   static_assert( (boost::is_same<T, typename Vector3<T>::Length>::value),
+   static_assert( (std::is_same<T, typename Vector3<T>::Length>::value),
       "The type of your Vector3's length does not match its element type!" );
 
    const T len( v.length() );

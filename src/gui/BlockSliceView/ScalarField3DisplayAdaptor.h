@@ -25,7 +25,7 @@
 #include "FieldDisplayAdaptor.h"
 #include "core/math/Vector3.h"
 
-#include <boost/type_traits/is_same.hpp>
+#include <type_traits>
 
 
 namespace walberla {

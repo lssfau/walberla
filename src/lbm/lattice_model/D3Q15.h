@@ -25,7 +25,7 @@
 #include "stencil/D3Q15.h"
 #include "stencil/D3Q27.h"
 
-#include <boost/type_traits/is_same.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -59,7 +59,7 @@ public:
    D3Q15( const CollisionModel_T & cm ) :
       LatticeModelBase< CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder >( cm, force_model::None() )
    {
-      static_assert( (boost::is_same< ForceModel_T, force_model::None >::value), "This constructor is only available if the force model is equal to force_model::None!" );
+      static_assert( (std::is_same< ForceModel_T, force_model::None >::value), "This constructor is only available if the force model is equal to force_model::None!" );
    }
 
    virtual ~D3Q15() {}

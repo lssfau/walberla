@@ -180,6 +180,9 @@ waLBerla_execute_test( NAME ConcatIterator )
 waLBerla_compile_test( FILES DataTypesTest.cpp )
 waLBerla_execute_test( NAME DataTypesTest )
 
+waLBerla_compile_test( FILES FunctionTraitsTest.cpp )
+waLBerla_execute_test( NAME FunctionTraitsTest )
+
 waLBerla_compile_test( FILES GridGeneratorTest.cpp )
 waLBerla_execute_test( NAME GridGeneratorTest )
 

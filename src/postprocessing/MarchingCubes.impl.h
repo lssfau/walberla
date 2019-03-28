@@ -28,6 +28,8 @@
 
 #include "core/logging/Logging.h"
 
+#include <type_traits>
+
 namespace walberla {
 namespace postprocessing {
 
@@ -65,7 +67,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
                                   uint_t fCoord, const Vector3<real_t> & posOffset,
                                   const CellInterval & cellInterval )
 {
-   static_assert( (boost::is_same<typename Field_T::value_type, real_t>::value ), "Currently only real valued fields are supported" );
+   static_assert( (std::is_same<typename Field_T::value_type, real_t>::value ), "Currently only real valued fields are supported" );
 
    CellInterval targetInterval = cellInterval;
    if ( targetInterval.empty() )

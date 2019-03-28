@@ -35,12 +35,7 @@
 #include "field/EvaluationFilter.h"
 #include "field/iterators/IteratorMacros.h"
 
-#include <boost/mpl/logical.hpp>
-#include <boost/mpl/equal_to.hpp>
-#include <boost/mpl/bool.hpp>
-#include <boost/mpl/int.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 namespace walberla{
@@ -52,13 +47,12 @@ namespace lbm{
 
 // I will need to some changes to this also 
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_CUMULANT_1 \
-   boost::mpl::and_< boost::mpl::and_< boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::Cumulant_tag >, \
-                                       boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >, \
-                                       boost::mpl::bool_< LatticeModel_T::compressible >, \
-                                       boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::equilibriumAccuracyOrder >, boost::mpl::int_<2> >, \
-                                       boost::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag > >, \
-                     boost::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation > \
-   >
+   (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::Cumulant_tag >::value && \
+   std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value && \
+   LatticeModel_T::compressible && \
+   LatticeModel_T::equilibriumAccuracyOrder == 2 && \
+   std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value && \
+   std::is_same< DensityVelocityIn_T, DefaultDensityEquilibriumVelocityCalculation >::value)
    
 WALBERLA_LBM_CELLWISE_SWEEP_CLASS_HEAD_AND_STREAM( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_CUMULANT_1 ) // changed to SRT_1 for cumulant only in this file 
 

@@ -31,14 +31,12 @@
 #include "core/debug/Debug.h"
 #include "core/math/Uint.h"
 
-#include <boost/type_traits/is_same.hpp>
-
 #include <array>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
-
+#include <type_traits>
 
 namespace walberla {
 namespace field {
@@ -232,10 +230,10 @@ protected:
 
 
 
-   static_assert( (boost::is_same<T,uint8_t >::value ||
-                   boost::is_same<T,uint16_t>::value ||
-                   boost::is_same<T,uint32_t>::value ||
-                   boost::is_same<T,uint64_t>::value),
+   static_assert( (std::is_same<T,uint8_t >::value ||
+                   std::is_same<T,uint16_t>::value ||
+                   std::is_same<T,uint32_t>::value ||
+                   std::is_same<T,uint64_t>::value),
                   "Only unsigned types of various lengths are allowed as type of FlagFields");
 
 
@@ -254,7 +252,7 @@ protected:
    friend bool isFlagInNeighborhood( const FieldPtrOrIterator & i, typename FieldPtrOrIterator::value_t mask);
 
    template <class Stencil, typename FieldPtrOrIterator>
-   friend typename boost::remove_const<typename FieldPtrOrIterator::value_type>::type
+   friend typename std::remove_const<typename FieldPtrOrIterator::value_type>::type
       getOredNeighborhood(const FieldPtrOrIterator & i);
 
    //@}

@@ -41,6 +41,7 @@
 #include "pe/rigidbody/RigidBody.h"
 #include "pe/Types.h"
 
+#include <type_traits>
 #include <vector>
 
 
@@ -72,7 +73,7 @@ namespace pe_coupling {
 template< typename LatticeModel_T, typename FlagField_T >
 class CurvedQuadratic : public Boundary< typename FlagField_T::flag_t >
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::TRT_tag >::value), "Only works with TRT!" ); // to access lambda_d
+   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::TRT_tag >::value), "Only works with TRT!" ); // to access lambda_d
 
    typedef lbm::PdfField< LatticeModel_T >   PDFField_T;
    typedef typename LatticeModel_T::Stencil  Stencil_T;

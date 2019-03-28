@@ -24,7 +24,7 @@
 #include "LatticeModelBase.h"
 #include "stencil/D3Q27.h"
 
-#include <boost/mpl/not.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -37,7 +37,7 @@ class D3Q27 : public LatticeModelBase< CollisionModel_T, Compressible, ForceMode
 {
 public:
 
-   static_assert( (boost::mpl::not_< boost::is_same< CollisionModel_T, collision_model::D3Q19MRT > >::value), "D3Q19MRT only works with D3Q19!" );
+   static_assert( ( ! std::is_same< CollisionModel_T, collision_model::D3Q19MRT >::value), "D3Q19MRT only works with D3Q19!" );
 
    typedef typename LatticeModelBase< CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder >::CollisionModel  CollisionModel;
    typedef typename LatticeModelBase< CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder >::ForceModel      ForceModel;
@@ -61,7 +61,7 @@ public:
    D3Q27( const CollisionModel_T & cm ) :
       LatticeModelBase< CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder >( cm, force_model::None() )
    {
-      static_assert( (boost::is_same< ForceModel_T, force_model::None >::value), "This constructor is only available if the force model is equal to force_model::None!" );
+      static_assert( (std::is_same< ForceModel_T, force_model::None >::value), "This constructor is only available if the force model is equal to force_model::None!" );
    }
 
    virtual ~D3Q27() {}

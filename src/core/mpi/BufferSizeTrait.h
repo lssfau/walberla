@@ -25,8 +25,7 @@
 
 #include "core/DataTypes.h"
 
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits/is_enum.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -68,7 +67,7 @@ namespace mpi {
 
    // Specialization for all enums
    template< typename T>
-   struct BufferSizeTrait< T, typename boost::enable_if< boost::is_enum< T > >::type >
+   struct BufferSizeTrait< T, typename std::enable_if< std::is_enum< T >::value >::type >
    {
       static const bool constantSize = true;
       static const size_t size = sizeof( T ) + BUFFER_DEBUG_OVERHEAD;

@@ -24,6 +24,7 @@
 #include <pe/rigidbody/RigidBody.h>
 
 #include <tuple>
+#include <type_traits>
 
 namespace walberla {
 namespace pe {

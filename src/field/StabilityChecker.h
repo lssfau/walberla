@@ -40,7 +40,7 @@
 #include "vtk/DumpBlockStructureProcess.h"
 #include "vtk/VTKOutput.h"
 
-
+#include <type_traits>
 
 namespace walberla {
 namespace field {
@@ -280,7 +280,7 @@ public:
       vtkForcePVTU_( internal::stabilityCheckerVTKForcePVTU ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
-      static_assert( (boost::is_same< Filter_T, DefaultEvaluationFilter >::value),
+      static_assert( (std::is_same< Filter_T, DefaultEvaluationFilter >::value),
                      "This constructor is only available if DefaultEvaluationFilter is set as filter type!" );
    }
    

@@ -24,9 +24,7 @@
 #include "stencil/D2Q9.h"
 #include "stencil/D3Q27.h"
 
-#include <boost/mpl/equal_to.hpp>
-#include <boost/mpl/int.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 
@@ -39,13 +37,13 @@ template< typename LatticeModel_T, class Enable = void  >
 struct NeighborsStencil;
 
 template< typename LatticeModel_T >
-struct NeighborsStencil< LatticeModel_T, typename boost::enable_if< boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::Stencil::D >, boost::mpl::int_<2> > >::type >
+struct NeighborsStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 2 >::type >
 {
    typedef stencil::D2Q9 type;
 };
 
 template< typename LatticeModel_T >
-struct NeighborsStencil< LatticeModel_T, typename boost::enable_if< boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::Stencil::D >, boost::mpl::int_<3> > >::type >
+struct NeighborsStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 3 >::type >
 {
    typedef stencil::D3Q27 type;
 };

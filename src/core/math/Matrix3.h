@@ -32,8 +32,7 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include <boost/type_traits/is_arithmetic.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 #include <algorithm>
 #include <cmath>
@@ -148,8 +147,8 @@ public:
    template< typename Other > inline const Vector3<HIGH> operator* ( const Vector3<Other>& rhs ) const;
    template< typename Other > inline const Matrix3<HIGH> operator* ( const Matrix3<Other>& rhs ) const;
 
-   template< typename Other > inline typename boost::enable_if< boost::is_arithmetic<Other>, Matrix3&            >::type operator*=( Other rhs );
-   template< typename Other > inline typename boost::enable_if< boost::is_arithmetic<Other>, const Matrix3<HIGH> >::type operator* ( Other rhs ) const;
+   template< typename Other > inline typename std::enable_if< std::is_arithmetic<Other>::value, Matrix3&            >::type operator*=( Other rhs );
+   template< typename Other > inline typename std::enable_if< std::is_arithmetic<Other>::value, const Matrix3<HIGH> >::type operator* ( Other rhs ) const;
    //@}
    //*******************************************************************************************************************
 
@@ -700,7 +699,7 @@ inline Matrix3<Type>& Matrix3<Type>::operator-=( const Matrix3<Other>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline typename boost::enable_if< boost::is_arithmetic<Other>, Matrix3<Type>& >::type Matrix3<Type>::operator*=( Other rhs )
+inline typename std::enable_if< std::is_arithmetic<Other>::value, Matrix3<Type>& >::type Matrix3<Type>::operator*=( Other rhs )
 {
    v_[0] *= rhs;
    v_[1] *= rhs;
@@ -824,7 +823,7 @@ inline const Matrix3<Type> operator-( const Matrix3<Type>& rhs )
 */
 template< typename Type >
 template< typename Other >
-inline typename boost::enable_if< boost::is_arithmetic<Other> ,const Matrix3<HIGH> >::type Matrix3<Type>::operator*( Other rhs ) const
+inline typename std::enable_if< std::is_arithmetic<Other>::value ,const Matrix3<HIGH> >::type Matrix3<Type>::operator*( Other rhs ) const
 {
    return Matrix3<HIGH>( v_[0]*rhs, v_[1]*rhs, v_[2]*rhs,
                          v_[3]*rhs, v_[4]*rhs, v_[5]*rhs,
@@ -1423,7 +1422,7 @@ inline const Matrix3<Type> fabs( const Matrix3<Type>& m );
 //template< typename Type, typename Other >
 //inline const Matrix3<HIGH> operator*( Other scalar, const Matrix3<Type>& matrix )
 //{
-//   static_assert( ! boost::is_scalar<Other>::value, "Only scalar types allowed" );
+//   static_assert( ! std::is_scalar<Other>::value, "Only scalar types allowed" );
 //   return matrix*scalar;
 //}
 //**********************************************************************************************************************

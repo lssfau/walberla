@@ -34,15 +34,10 @@
 #include "core/debug/Debug.h"
 #include "core/Sanitizer.h"
 
-#include <boost/mpl/logical.hpp>
-#include <boost/type_traits/is_enum.hpp>
-#include <boost/type_traits/is_arithmetic.hpp>
-#include <boost/type_traits/is_fundamental.hpp>
-#include <boost/utility/enable_if.hpp>
-
 #include <algorithm>
 #include <typeinfo>
 #include <cstring>
+#include <type_traits>
 
 namespace walberla {
 namespace mpi {
@@ -91,7 +86,7 @@ public:
    class Ptr
    {
    public:
-      static_assert( boost::is_fundamental<VT>::value, "only fundamental data types are allowed");
+      static_assert( std::is_fundamental<VT>::value, "only fundamental data types are allowed");
       typedef VT value_type;
 
       Ptr(GenericSendBuffer<T, G>& buffer, const std::ptrdiff_t offset, const size_t length)
@@ -146,7 +141,7 @@ public:
    /*!\name Operators */
    //@{
    template< typename V >
-   typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
+   typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
    GenericSendBuffer&  >::type
    operator<<( V value );
 
@@ -194,7 +189,7 @@ private:
    void extendMemory( size_t newCapacity );
 
    template< typename V >
-   typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
+   typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
    GenericSendBuffer&  >::type
    put( V value );
 
@@ -213,7 +208,7 @@ private:
    //*******************************************************************************************************************
 
    //**Compile time checks**********************************************************************************************
-   static_assert( boost::is_arithmetic<T>::value, "SendBuffer<T>: T has to be native datatype" ) ;
+   static_assert( std::is_arithmetic<T>::value, "SendBuffer<T>: T has to be native datatype" ) ;
    //*******************************************************************************************************************
 
    template< typename U >
@@ -443,12 +438,12 @@ inline bool GenericSendBuffer<T,G>::isEmpty() const
 template< typename T    // Element type
           , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
-typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
+typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
 GenericSendBuffer<T,G>& >::type
 GenericSendBuffer<T,G>::put( V value )
 {
    // Compile time check that V is built-in data type
-   static_assert( boost::is_arithmetic<V>::value || boost::is_enum<V>::value,
+   static_assert( std::is_arithmetic<V>::value || std::is_enum<V>::value,
                   "SendBuffer accepts only built-in data types");
 
    static_assert( sizeof(V) >= sizeof(T), "Type that is stored has to be bigger than T" );
@@ -488,7 +483,7 @@ GenericSendBuffer<T,G>::put( V value )
 template< typename T    // Element type
           , typename G >  // Growth policy
 template< typename V >  // Type of the built-in data value
-typename boost::enable_if< boost::mpl::or_< boost::is_arithmetic<V>, boost::is_enum<V> >,
+typename std::enable_if< std::is_arithmetic<V>::value || std::is_enum<V>::value,
 GenericSendBuffer<T,G>& >::type
 GenericSendBuffer<T,G>::operator<<( V value )
 {

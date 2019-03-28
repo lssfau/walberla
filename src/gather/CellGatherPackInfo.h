@@ -27,7 +27,7 @@
 #include "core/mpi/BufferDataTypeExtensions.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
 
-#include <boost/type_traits/is_fundamental.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -90,7 +90,7 @@ public:
 
 
 protected:
-   static_assert( boost::is_fundamental<typename Field_T::value_type >::value,
+   static_assert( std::is_fundamental<typename Field_T::value_type >::value,
                   "CellGatherPackInfo supports fields of build in datatypes"  );
 
 

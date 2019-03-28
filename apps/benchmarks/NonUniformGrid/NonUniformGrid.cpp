@@ -79,6 +79,7 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <type_traits>
 
 
 
@@ -136,7 +137,7 @@ template< typename LatticeModel_T, class Enable = void >
 struct StencilString;
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
 {
    static const char * str() { return "D3Q19"; }
 };
@@ -145,21 +146,21 @@ template< typename LatticeModel_T, class Enable = void >
 struct CollisionModelString;
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
+struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
                                                                                           lbm::collision_model::SRT_tag >::value >::type >
 {
    static const char * str() { return "SRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
+struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
                                                                                           lbm::collision_model::TRT_tag >::value >::type >
 {
    static const char * str() { return "TRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
+struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
                                                                                           lbm::collision_model::MRT_tag >::value >::type >
 {
    static const char * str() { return "MRT"; }
@@ -647,7 +648,7 @@ struct AddRefinementTimeStep
 };
 
 template< typename LatticeModel_T  >
-struct AddRefinementTimeStep< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
+struct AddRefinementTimeStep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
                                                                                            lbm::collision_model::MRT_tag >::value >::type >
 {
    static void add( SweepTimeloop & timeloop, shared_ptr< blockforest::StructuredBlockForest > & blocks,

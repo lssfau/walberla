@@ -24,7 +24,7 @@
 #include "gui/BlockSliceView/DisplayPropertiesItem.h"
 #include "gui/BlockSliceView/FieldDisplayAdaptor.h"
 
-#include <boost/type_traits/is_same.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -58,7 +58,7 @@ namespace lbm {
 
    private:
       typedef typename field_t::value_type T;
-      static_assert( (boost::is_same<T,double>::value || boost::is_same<T,float>::value),
+      static_assert( (std::is_same<T,double>::value || std::is_same<T,float>::value),
                      "Only floating point fields are supported" );
 
       using gui::FieldDisplayAdaptor<field_t>::sliceDim_;

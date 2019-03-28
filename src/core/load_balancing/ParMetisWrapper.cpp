@@ -64,7 +64,7 @@
 
 #include "core/Abort.h"
 
-#include <boost/type_traits/is_same.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -79,8 +79,8 @@ int ParMETIS_V3_AdaptiveRepart(
    ::walberla::int64_t *options, ::walberla::int64_t *edgecut, ::walberla::int64_t *part, MPI_Comm *comm )
 {
 
-   static_assert( boost::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!"        );
-   static_assert( boost::is_same< double, ::real_t >::value,             "You have to compile the metis library with 64-bit wide floating-point type support!" );
+   static_assert( std::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!"        );
+   static_assert( std::is_same< double, ::real_t >::value,             "You have to compile the metis library with 64-bit wide floating-point type support!" );
 
    return ::ParMETIS_V3_AdaptiveRepart( vtxdist, xadj, adjncy, vwgt,
                                         vsize, adjwgt, wgtflag, numflag, ncon,
@@ -94,8 +94,8 @@ int ParMETIS_V3_PartKway(
    double *tpwgts, double *ubvec, ::walberla::int64_t *options, ::walberla::int64_t *edgecut, ::walberla::int64_t *part,
    MPI_Comm *comm )
 {
-   static_assert( boost::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!" );
-   static_assert( boost::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!" );
+   static_assert( std::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!" );
+   static_assert( std::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!" );
 
    return ::ParMETIS_V3_PartKway( vtxdist, xadj, adjncy, vwgt,
                                   adjwgt, wgtflag, numflag, ncon, nparts,
@@ -109,8 +109,8 @@ int ParMETIS_V3_PartGeomKway(
    ::walberla::int64_t *ncon, ::walberla::int64_t *nparts, double *tpwgts, double *ubvec, ::walberla::int64_t *options,
    ::walberla::int64_t *edgecut, ::walberla::int64_t *part, MPI_Comm *comm )
 {
-   static_assert( boost::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!" );
-   static_assert( boost::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!" );
+   static_assert( std::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!" );
+   static_assert( std::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!" );
 
    return ::ParMETIS_V3_PartGeomKway( vtxdist, xadj, adjncy, vwgt,
                                       adjwgt, wgtflag, numflag, ndims, xyz,
@@ -121,8 +121,8 @@ int ParMETIS_V3_PartGeomKway(
 int ParMETIS_V3_PartGeom(
    ::walberla::int64_t *vtxdist, ::walberla::int64_t *ndims, double *xyz, ::walberla::int64_t *part, MPI_Comm *comm )
 {
-   static_assert( boost::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!" );
-   static_assert( boost::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!" );
+   static_assert( std::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!" );
+   static_assert( std::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!" );
 
    return ::ParMETIS_V3_PartGeom( vtxdist, ndims, xyz, part, comm );
 }
@@ -133,8 +133,8 @@ int ParMETIS_V3_RefineKway(
    double *tpwgts, double *ubvec, ::walberla::int64_t *options, ::walberla::int64_t *edgecut,
    ::walberla::int64_t *part, MPI_Comm *comm )
 {
-   static_assert( boost::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!" );
-   static_assert( boost::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!" );
+   static_assert( std::is_same< ::walberla::int64_t, ::idx_t >::value, "You have to compile the metis library with 64-bit wide integer type support!" );
+   static_assert( std::is_same< double, ::real_t >::value, "You have to compile the metis library with 64-bit wide floating-point type support!" );
 
    return ::ParMETIS_V3_RefineKway( vtxdist, xadj, adjncy, vwgt,
                                     adjwgt, wgtflag, numflag, ncon, nparts,

@@ -28,6 +28,7 @@
 #include "core/math/Vector3.h"
 #include "field/FlagField.h"
 
+#include <type_traits>
 
 
 namespace walberla {
@@ -414,7 +415,7 @@ public:
                              const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
       blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_( initValue ), layout_( layout ), calculateSize_( calculateSize )
    {
-      static_assert( !boost::is_same< GhostLayerField_T, FlagField< Value_T > >::value,
+      static_assert( !std::is_same< GhostLayerField_T, FlagField< Value_T > >::value,
                      "When using class FlagField, only constructors without the explicit specification of an initial value and the field layout are available!" );
    }
 
@@ -477,7 +478,7 @@ public:
                                       const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
       blocks_( blocks ), nrOfGhostLayers_( nrOfGhostLayers ), initValue_( initValue ), layout_( layout ), calculateSize_( calculateSize )
    {
-      static_assert( !boost::is_same< GhostLayerField_T, FlagField< Value_T > >::value,
+      static_assert( ! std::is_same< GhostLayerField_T, FlagField< Value_T > >::value,
                      "When using class FlagField, only constructors without the explicit specification of an initial value and the field layout are available!" );
    }
 
