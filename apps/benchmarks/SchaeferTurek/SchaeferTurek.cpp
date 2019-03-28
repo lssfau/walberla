@@ -105,10 +105,6 @@
 #include "vtk/Initialization.h"
 #include "vtk/VTKOutput.h"
 
-#include <boost/mpl/equal_to.hpp>
-#include <boost/mpl/int.hpp>
-#include <boost/mpl/or.hpp>
-
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -116,6 +112,7 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -196,7 +193,7 @@ const Set<SUID> None( Set<SUID>::emptySet() );
 template< typename LatticeModel_T >
 struct Is2D
 {
-   static const bool value = boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::Stencil::D >, boost::mpl::int_< 2 > >::value;
+   static const bool value = LatticeModel_T::Stencil::D == 2;
 };
 
 /////////////////////
@@ -207,25 +204,25 @@ template< typename LatticeModel_T, class Enable = void >
 struct StencilString;
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::Stencil, stencil::D2Q9 >::value >::type >
+struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D2Q9 >::value >::type >
 {
    static const char * str() { return "D2Q9"; }
 };
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q15 >::value >::type >
+struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q15 >::value >::type >
 {
    static const char * str() { return "D3Q15"; }
 };
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
+struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
 {
    static const char * str() { return "D3Q19"; }
 };
 
 template< typename LatticeModel_T >
-struct StencilString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value >::type >
+struct StencilString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value >::type >
 {
    static const char * str() { return "D3Q27"; }
 };
@@ -235,21 +232,21 @@ template< typename LatticeModel_T, class Enable = void >
 struct CollisionModelString;
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
+struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
                                                                                           lbm::collision_model::SRT_tag >::value >::type >
 {
    static const char * str() { return "SRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
+struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
                                                                                           lbm::collision_model::TRT_tag >::value >::type >
 {
    static const char * str() { return "TRT"; }
 };
 
 template< typename LatticeModel_T >
-struct CollisionModelString< LatticeModel_T, typename boost::enable_if_c< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
+struct CollisionModelString< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag,
                                                                                           lbm::collision_model::MRT_tag >::value >::type >
 {
    static const char * str() { return "MRT"; }
@@ -2313,11 +2310,11 @@ struct AddRefinementTimeStep
 };
 
 template< typename LatticeModel_T  >
-struct AddRefinementTimeStep< LatticeModel_T, typename boost::enable_if< boost::mpl::or_< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                                          lbm::collision_model::MRT_tag >,
-                                                                                          boost::is_same< typename LatticeModel_T::Stencil, stencil::D2Q9 >,
-                                                                                          boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q15 >,
-                                                                                          boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 > > >::type >
+struct AddRefinementTimeStep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::MRT_tag >::value ||
+                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D2Q9 >::value ||
+                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q15 >::value ||
+                                                                       std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value
+                                                                       >::type >
 {
    static void add( SweepTimeloop & timeloop, shared_ptr< blockforest::StructuredBlockForest > & blocks,
                     const BlockDataID & pdfFieldId, const BlockDataID & flagFieldId, const BlockDataID & boundaryHandlingId,

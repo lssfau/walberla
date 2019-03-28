@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include <boost/type_traits/is_floating_point.hpp>
+#include <type_traits>
 
 namespace walberla {
 namespace math {

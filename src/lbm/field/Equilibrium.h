@@ -26,12 +26,7 @@
 
 #include "stencil/D3Q19.h"
 
-#include <boost/mpl/equal_to.hpp>
-#include <boost/mpl/logical.hpp>
-#include <boost/mpl/int.hpp>
-#include <boost/mpl/bool.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 // Back-end for calculating macroscopic values
@@ -56,12 +51,12 @@ struct Equilibrium
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::is_same< typename LatticeModel_T::Stencil,
-                                                                                                                   stencil::D3Q19 > >,
-                                                                                 boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                 boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::equilibriumAccuracyOrder>, boost::mpl::int_<2> > > >::type >
+struct Equilibrium< LatticeModel_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                             ! LatticeModel_T::compressible &&
+                                                             LatticeModel_T::equilibriumAccuracyOrder == 2
+                                                             >::type >
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
    static_assert( LatticeModel_T::compressible == false,                                                "Only works with incompressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
@@ -94,8 +89,9 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                 boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::equilibriumAccuracyOrder >, boost::mpl::int_<1> > > >::type >
+struct Equilibrium< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+                                                             LatticeModel_T::equilibriumAccuracyOrder == 1
+                                                             >::type >
 {
    static_assert( LatticeModel_T::compressible == false,         "Only works with incompressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 1, "Only works for lattice models that require the equilibrium distribution to be order 1 accurate!" );
@@ -131,12 +127,12 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::is_same< typename LatticeModel_T::Stencil,
-                                                                                                   stencil::D3Q19 > >,
-                                                                                 boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                 boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::equilibriumAccuracyOrder >, boost::mpl::int_< 2 > > > >::type >
+struct Equilibrium< LatticeModel_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                             LatticeModel_T::compressible &&
+                                                             LatticeModel_T::equilibriumAccuracyOrder == 2
+                                                             >::type >
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
    static_assert( LatticeModel_T::compressible,                                                         "Only works with compressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
@@ -169,8 +165,9 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::compressible >,
-	                                                           boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::equilibriumAccuracyOrder >, boost::mpl::int_< 1 > > > >::type >
+struct Equilibrium< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+	                                                          LatticeModel_T::equilibriumAccuracyOrder == 1
+	                                                          >::type >
 {
    static_assert( LatticeModel_T::compressible,                  "Only works with compressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 1, "Only works for lattice models that require the equilibrium distribution to be order 1 accurate!" );
@@ -204,12 +201,12 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LatticeModel_T::Stencil,
-                                                                                                 stencil::D3Q19 >,
-                                                                                 boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                 boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::equilibriumAccuracyOrder >, boost::mpl::int_< 2 > > > >::type >
+struct Equilibrium< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                             ! LatticeModel_T::compressible &&
+                                                             LatticeModel_T::equilibriumAccuracyOrder == 2
+                                                             >::type >
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
    static_assert( LatticeModel_T::compressible == false,                                       "Only works with incompressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
@@ -353,12 +350,12 @@ struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_<
 
 
 template< typename LatticeModel_T >
-struct Equilibrium< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LatticeModel_T::Stencil,
-                                                                                                 stencil::D3Q19 >,
-	                                                                              boost::mpl::bool_< LatticeModel_T::compressible >,
-	                                                                              boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::equilibriumAccuracyOrder >, boost::mpl::int_< 2 > > > >::type >
+struct Equilibrium< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+	                                                          LatticeModel_T::compressible &&
+	                                                          LatticeModel_T::equilibriumAccuracyOrder == 2
+	                                                          >::type >
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
    static_assert( LatticeModel_T::compressible,                                                "Only works with compressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
@@ -514,8 +511,9 @@ struct EquilibriumRange
 };
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                                        boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::equilibriumAccuracyOrder >, boost::mpl::int_< 2 > > > >::type >
+struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< ! LatticeModel_T::compressible &&
+                                                                                    LatticeModel_T::equilibriumAccuracyOrder == 2
+                                                                                    >::type >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
                     const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
@@ -536,8 +534,9 @@ struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enabl
 };
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                                        boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::equilibriumAccuracyOrder >, boost::mpl::int_<1> > > >::type >
+struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< ! LatticeModel_T::compressible &&
+                                                                                    LatticeModel_T::equilibriumAccuracyOrder == 1
+                                                                                    >::type >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
                     const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
@@ -558,8 +557,9 @@ struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enabl
 };
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                                        boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::equilibriumAccuracyOrder>, boost::mpl::int_<2> > > >::type >
+struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< LatticeModel_T::compressible &&
+                                                                                    LatticeModel_T::equilibriumAccuracyOrder == 2
+                                                                                    >::type >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
                     const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
@@ -580,8 +580,9 @@ struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enabl
 };
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                                        boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::equilibriumAccuracyOrder>, boost::mpl::int_<1> > > >::type >
+struct EquilibriumRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< LatticeModel_T::compressible &&
+                                                                                    LatticeModel_T::equilibriumAccuracyOrder == 1
+                                                                                    >::type >
 {
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end,
                     const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )

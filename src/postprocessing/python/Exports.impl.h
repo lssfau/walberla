@@ -32,11 +32,6 @@
 
 #include "postprocessing/FieldToSurfaceMesh.h"
 
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/vector_c.hpp>
-#include <boost/mpl/for_each.hpp>
-
-
 using namespace boost::python;
 
 

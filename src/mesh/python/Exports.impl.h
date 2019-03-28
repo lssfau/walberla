@@ -53,11 +53,6 @@
 #include "mesh/boundary/BoundarySetup.h"
 #include "mesh/vtk/VTKMeshWriter.h"
 
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/vector_c.hpp>
-#include <boost/mpl/for_each.hpp>
-
-
 using namespace boost::python;
 
 

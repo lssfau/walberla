@@ -28,6 +28,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <type_traits>
 
 
 namespace walberla {
@@ -119,7 +120,7 @@ namespace gui {
    template< typename field_t>
    void VectorFieldDisplayAdaptor<field_t>::drawVectorFieldNumeric( CellView * cell, const typename field_t::const_iterator & it )
    {
-      if( boost::is_same<T,float>::value || boost::is_same<T,double>::value )
+      if( std::is_same<T,float>::value || std::is_same<T,double>::value )
          cell->setText( QString("%1\n%2\n%3").arg( real_c( (*it)[0]), 0,'g',6)
                                              .arg( real_c( (*it)[1]), 0,'g',6)
                                              .arg( real_c( (*it)[2]), 0,'g',6) );

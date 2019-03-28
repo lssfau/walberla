@@ -27,7 +27,6 @@
 #include "core/math/GenericAABB.h"
 
 #include <boost/logic/tribool.hpp>
-#include <boost/type_traits/is_same.hpp>
 
 #include <set>
 #include <iterator>

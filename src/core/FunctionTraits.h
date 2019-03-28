@@ -13,38 +13,48 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file VectorTrait.h
+//! \file FunctionTraits.h
 //! \ingroup core
-//! \author Christian Godenschwager <christian.godenschwager@fau.de>
-//! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Christoph Schwarzmeier <christoph.schwarzmeier@fau.de>
 //
 //======================================================================================================================
 
 #pragma once
 
-#include <type_traits>
-
+#include <cstddef>
+#include <tuple>
 
 namespace walberla {
 
-
 //**********************************************************************************************************************
-/*! Provides information on how to serialize (=extract components) from a compound data type
+/*! Gives a function's return type as well as the number and type of arguments accepted by a function.
 *
-* This is the general implementation for arithmetic data-types, for a specialization example see Vector3.h
+* This variadic template substitutes <boost/function_traits>.
+*
+* Usage:
+* FunctionTraits<F>::return_type       Type returned by function type F.
+* FunctionTraits<F>::arity             Number of arguments accepted by function type F.
+* FunctionTraits<F>::argument<N>       Type of the Nth argument of function type F with 0 <= N < arity of F.
+*
 */
 //**********************************************************************************************************************
 
-template< typename T >
-struct VectorTrait
+template< typename F >
+struct FunctionTraits;
+
+template< typename R, typename ...Args >
+struct FunctionTraits< R( Args... ) >
 {
-   typedef T OutputType;
+   using return_type = R;
 
-   static const uint_t F_SIZE = 1u;
-   static T get   ( T   value, uint_t /*f*/ )        { return value; }
-   static void set( T & value, uint_t /*f*/, T val ) { value = val;  }
-   static_assert( std::is_arithmetic<T>::value, "Specialize OutputTrait for your type!" );
+   static constexpr std::size_t arity = sizeof...(Args);
+
+   template< std::size_t N >
+   struct argument
+   {
+      static_assert(N < arity, "Error: Parameter index is not valid!");
+      using type = typename std::tuple_element< N, std::tuple<Args...> >::type;
+   };
 };
-
 
 } // namespace walberla

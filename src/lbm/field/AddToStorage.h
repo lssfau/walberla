@@ -27,10 +27,6 @@
 #include "core/uid/SUID.h"
 #include "field/blockforest/BlockDataHandling.h"
 
-#include <boost/mpl/int.hpp>
-#include <boost/mpl/equal_to.hpp>
-
-
 namespace walberla {
 namespace lbm {
 
@@ -40,12 +36,12 @@ namespace internal {
    
 template< typename LatticeModel_T >
 class PdfFieldHandling : public field::BlockDataHandling< PdfField<LatticeModel_T>,
-                                                          boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::Stencil::D>, boost::mpl::int_<2> >::value >
+                                                          LatticeModel_T::Stencil::D == 2 >
 {
 public:
 
    typedef PdfField<LatticeModel_T> PdfField_T;
-   typedef field::BlockDataHandling< PdfField_T, boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::Stencil::D>, boost::mpl::int_<2> >::value > Base_T;
+   typedef field::BlockDataHandling< PdfField_T, LatticeModel_T::Stencil::D == 2 > Base_T;
 
    PdfFieldHandling( const weak_ptr< StructuredBlockStorage > & blocks, const LatticeModel_T & latticeModel,
                      const bool _initialize, const Vector3<real_t> & initialVelocity, const real_t initialDensity,

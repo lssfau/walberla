@@ -27,6 +27,7 @@
 
 #include <QVector>
 #include <QMap>
+#include <type_traits>
 
 namespace walberla {
 namespace gui {
@@ -59,10 +60,10 @@ namespace gui {
       typedef typename field_t::value_type T;
 
       static_assert( field_t::F_SIZE == 1, "Flag fields have no F_SIZE > 1 " );
-      static_assert( boost::is_same<T,uint8_t >::value ||
-                     boost::is_same<T,uint16_t>::value ||
-                     boost::is_same<T,uint32_t>::value ||
-                     boost::is_same<T,uint64_t>::value,
+      static_assert( std::is_same<T,uint8_t >::value ||
+                     std::is_same<T,uint16_t>::value ||
+                     std::is_same<T,uint32_t>::value ||
+                     std::is_same<T,uint64_t>::value,
                      "Flag fields have unsigned integers as value");
 
       using FieldDisplayAdaptor<field_t>::sliceDim_;

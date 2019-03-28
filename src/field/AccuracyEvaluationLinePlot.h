@@ -40,7 +40,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <string>
-
+#include <type_traits>
 
 
 namespace walberla {
@@ -218,7 +218,7 @@ public:
       relLinePoint_( Vector3<real_t>( real_c(0.5) ) ), normalizationFactor_( real_t(1) ),
       requiredSelectors_(requiredSelectors), incompatibleSelectors_( incompatibleSelectors )
    {
-      static_assert( (boost::is_same< Filter_T, DefaultEvaluationFilter >::value),
+      static_assert( (std::is_same< Filter_T, DefaultEvaluationFilter >::value),
                      "This constructor is only available if DefaultEvaluationFilter is set as filter type!" );
 
       auto _blocks = blocks_.lock();

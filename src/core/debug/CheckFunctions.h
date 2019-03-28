@@ -28,10 +28,6 @@
 #include "core/math/Utility.h"
 #include "core/VectorTrait.h"
 
-#include <boost/type_traits/is_arithmetic.hpp>
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/has_left_shift.hpp>
-
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
@@ -40,6 +36,7 @@
 #include <limits>
 #include <locale>
 #include <sstream>
+#include <type_traits>
 
 
 
@@ -240,19 +237,19 @@ template< typename T, typename U >
 inline bool check_equal( const T & lhs, const U & rhs );
 
 template< typename T, typename U >
-inline bool check_equal( const T & lhs, const U & rhs, const boost::true_type & );
+inline bool check_equal( const T & lhs, const U & rhs, const std::true_type & );
 
 template< typename T, typename U >
-inline bool check_equal( const T & lhs, const U & rhs, const boost::false_type & );
+inline bool check_equal( const T & lhs, const U & rhs, const std::false_type & );
 
 template< typename T, typename U >
 inline bool check_unequal( const T & lhs, const U & rhs );
 
 template< typename T, typename U >
-inline bool check_unequal( const T & lhs, const U & rhs, const boost::true_type & );
+inline bool check_unequal( const T & lhs, const U & rhs, const std::true_type & );
 
 template< typename T, typename U >
-inline bool check_unequal( const T & lhs, const U & rhs, const boost::false_type & );
+inline bool check_unequal( const T & lhs, const U & rhs, const std::false_type & );
 
 template< typename T, typename U >
 inline bool check_float_equal( const T & lhs, const U & rhs );
@@ -270,55 +267,55 @@ template< typename T, typename U >
 inline bool check_identical( const T & lhs, const U & rhs );
 
 template< typename T, typename U >
-inline bool check_identical( const T & lhs, const U & rhs, const boost::true_type & );
+inline bool check_identical( const T & lhs, const U & rhs, const std::true_type & );
 
 template< typename T, typename U >
-inline bool check_identical( const T & lhs, const U & rhs, const boost::false_type & );
+inline bool check_identical( const T & lhs, const U & rhs, const std::false_type & );
 
 template< typename T, typename U >
 inline bool check_not_identical( const T & lhs, const U & rhs );
 
 template< typename T, typename U >
-inline bool check_not_identical( const T & lhs, const U & rhs, const boost::true_type & );
+inline bool check_not_identical( const T & lhs, const U & rhs, const std::true_type & );
 
 template< typename T, typename U >
-inline bool check_not_identical( const T & lhs, const U & rhs, const boost::false_type & );
+inline bool check_not_identical( const T & lhs, const U & rhs, const std::false_type & );
 
 template< typename T, typename U >
 inline bool check_less( const T & lhs, const U & rhs );
 
 template< typename T, typename U >
-inline bool check_less( const T & lhs, const U & rhs, const boost::true_type & );
+inline bool check_less( const T & lhs, const U & rhs, const std::true_type & );
 
 template< typename T, typename U >
-inline bool check_less( const T & lhs, const U & rhs, const boost::false_type & );
+inline bool check_less( const T & lhs, const U & rhs, const std::false_type & );
 
 template< typename T, typename U >
 inline bool check_greater( const T & lhs, const U & rhs );
 
 template< typename T, typename U >
-inline bool check_greater( const T & lhs, const U & rhs, const boost::true_type & );
+inline bool check_greater( const T & lhs, const U & rhs, const std::true_type & );
 
 template< typename T, typename U >
-inline bool check_greater( const T & lhs, const U & rhs, const boost::false_type & );
+inline bool check_greater( const T & lhs, const U & rhs, const std::false_type & );
 
 template< typename T, typename U >
 inline bool check_less_equal( const T & lhs, const U & rhs );
 
 template< typename T, typename U >
-inline bool check_less_equal( const T & lhs, const U & rhs, const boost::true_type & );
+inline bool check_less_equal( const T & lhs, const U & rhs, const std::true_type & );
 
 template< typename T, typename U >
-inline bool check_less_equal( const T & lhs, const U & rhs, const boost::false_type & );
+inline bool check_less_equal( const T & lhs, const U & rhs, const std::false_type & );
 
 template< typename T, typename U >
 inline bool check_greater_equal( const T & lhs, const U & rhs );
 
 template< typename T, typename U >
-inline bool check_greater_equal( const T & lhs, const U & rhs, const boost::true_type & );
+inline bool check_greater_equal( const T & lhs, const U & rhs, const std::true_type & );
 
 template< typename T, typename U >
-inline bool check_greater_equal( const T & lhs, const U & rhs, const boost::false_type & );
+inline bool check_greater_equal( const T & lhs, const U & rhs, const std::false_type & );
 
 
 
@@ -394,10 +391,10 @@ template< typename T >
 std::ostream & printValue( std::ostream & os, const T & value );
 
 template< typename T >
-std::ostream & printValue( std::ostream & os, const T & value, const boost::true_type & );
+std::ostream & printValue( std::ostream & os, const T & value, const std::true_type & );
 
 template< typename T >
-std::ostream & printValue( std::ostream & os, const T & value, const boost::false_type & );
+std::ostream & printValue( std::ostream & os, const T & value, const std::false_type & );
 
 template< typename T >
 std::ostream & printValue( std::ostream & os, const T * value );

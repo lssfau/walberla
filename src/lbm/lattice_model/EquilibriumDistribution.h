@@ -26,11 +26,7 @@
 
 #include "stencil/Directions.h"
 
-#include <boost/mpl/bool.hpp>
-#include <boost/mpl/logical.hpp>
-#include <boost/mpl/equal_to.hpp>
-#include <boost/mpl/int.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -66,8 +62,9 @@ class EquilibriumDistribution;
 
 
 template< typename LatticeModel_T >
-class EquilibriumDistribution< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-	                                                                       boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::equilibriumAccuracyOrder>, boost::mpl::int_<2> > > >::type >
+class EquilibriumDistribution< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+	                                                                     LatticeModel_T::equilibriumAccuracyOrder == 2
+	                                                                     >::type >
 {
 public:
 
@@ -121,8 +118,9 @@ public:
 
 
 template< typename LatticeModel_T >
-class EquilibriumDistribution< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                          boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::equilibriumAccuracyOrder>, boost::mpl::int_<1> > > >::type >
+class EquilibriumDistribution< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+                                                                        LatticeModel_T::equilibriumAccuracyOrder == 1
+                                                                        >::type >
 {
 public:
 
@@ -170,8 +168,8 @@ public:
 
 
 template< typename LatticeModel_T >
-class EquilibriumDistribution< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_<LatticeModel_T::compressible>,
-                                                                          boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::equilibriumAccuracyOrder>, boost::mpl::int_<2> > > >::type >
+class EquilibriumDistribution< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+                                                                        LatticeModel_T::equilibriumAccuracyOrder == 2 >::type >
 {
 public:
 
@@ -225,8 +223,8 @@ public:
 
 
 template< typename LatticeModel_T >
-class EquilibriumDistribution< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_<LatticeModel_T::compressible>,
-                                                                          boost::mpl::equal_to< boost::mpl::int_<LatticeModel_T::equilibriumAccuracyOrder>, boost::mpl::int_<1> > > >::type >
+class EquilibriumDistribution< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+                                                                        LatticeModel_T::equilibriumAccuracyOrder == 1 >::type >
 {
 public:
 

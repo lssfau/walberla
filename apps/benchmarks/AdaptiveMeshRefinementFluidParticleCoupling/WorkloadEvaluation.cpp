@@ -71,6 +71,8 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
+#include <boost/tuple/tuple.hpp>
+
 #include <vector>
 #include <iomanip>
 #include <iostream>

@@ -26,8 +26,7 @@
 #include "core/debug/Debug.h"
 #include "core/DataTypes.h"
 
-#include <boost/type_traits/is_unsigned.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 namespace walberla {
 namespace boundary {
@@ -118,7 +117,7 @@ template< typename flag_t >
 class Boundary {
 public:
 
-   static_assert( boost::is_unsigned<flag_t>::value, "You are trying to instantiate walberla::boundary::Boundary with "
+   static_assert( std::is_unsigned<flag_t>::value, "You are trying to instantiate walberla::boundary::Boundary with "
                                                      "a flag_t which is not an unsigned integer!" );
 
 #ifndef NDEBUG
@@ -157,7 +156,7 @@ struct isThreadSafe
 };
 
 template< typename Boundary_T >
-struct isThreadSafe< Boundary_T, typename boost::enable_if_c< Boundary_T::threadsafe >::type >
+struct isThreadSafe< Boundary_T, typename std::enable_if< Boundary_T::threadsafe >::type >
 {
    static const bool value = Boundary_T::threadsafe;
 };

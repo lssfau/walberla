@@ -49,7 +49,7 @@ inline const T sign( T a );
 template< typename T >
 inline const typename std::enable_if<  std::is_unsigned<T>::value, T >::type abs( T a );
 template< typename T >
-inline const typename std::enable_if< !std::is_unsigned<T>::value, T >::type abs( T a );
+inline const typename std::enable_if< ! std::is_unsigned<T>::value, T >::type abs( T a );
 
 
 template< typename T1, typename T2 >

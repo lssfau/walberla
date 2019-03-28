@@ -26,10 +26,7 @@
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
 
-#include <boost/mpl/logical.hpp>
-#include <boost/mpl/bool.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 // Back-end for calculating macroscopic values
@@ -44,7 +41,7 @@ namespace internal {
 template< typename LatticeModel_T, typename FieldPtrOrIterator >
 void getMomentumDensity( Vector3< real_t > & momentumDensity, const FieldPtrOrIterator & it )
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false),
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false),
                   "If you have the D3Q19 stencil, you should use the optimized function!" );
 
    auto d = LatticeModel_T::Stencil::begin();
@@ -73,7 +70,7 @@ template< typename LatticeModel_T, typename PdfField_T >
 void getMomentumDensity( Vector3< real_t > & momentumDensity, const PdfField_T & pdf,
                          const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false),
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false),
                   "If you have the D3Q19 stencil, you should use the optimized function!" );
 
    const auto & xyz0 = pdf(x,y,z,0);
@@ -103,7 +100,7 @@ void getMomentumDensity( Vector3< real_t > & momentumDensity, const PdfField_T &
 template< typename LatticeModel_T, typename FieldPtrOrIterator >
 void getMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, const FieldPtrOrIterator & it )
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "This function works with D3Q19 stencils only!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "This function works with D3Q19 stencils only!" );
 
    using namespace stencil;
    typedef typename LatticeModel_T::Stencil Stencil;
@@ -120,7 +117,7 @@ template< typename LatticeModel_T, typename PdfField_T >
 void getMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, const PdfField_T & pdf,
                               const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "This function works with D3Q19 stencils only!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "This function works with D3Q19 stencils only!" );
 
    using namespace stencil;
    typedef typename LatticeModel_T::Stencil Stencil;
@@ -154,8 +151,9 @@ struct MacroscopicForceCorrection
 };
 
 template< typename LatticeModel_T >
-struct MacroscopicForceCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::ForceModel::constant >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > >::type >
+struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftMacVel
+                                                                            >::type >
 {
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
@@ -180,8 +178,9 @@ struct MacroscopicForceCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct MacroscopicForceCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::constant > >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > >::type >
+struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftMacVel
+                                                                            >::type >
 {
    /*
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
@@ -218,7 +217,7 @@ struct MacroscopicForceCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct MacroscopicForceCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > >::type >
+struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::shiftMacVel >::type >
 {
    static void apply( const LatticeModel_T &, Vector3< real_t > & ) {}
 
@@ -241,8 +240,9 @@ struct EquilibriumForceCorrection
 };
 
 template< typename LatticeModel_T >
-struct EquilibriumForceCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::ForceModel::constant >,
-	                                                                                            boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel > > >::type >
+struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::ForceModel::constant &&
+	                                                                         LatticeModel_T::ForceModel::shiftEquVel
+	                                                                         >::type >
 {
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
@@ -267,8 +267,9 @@ struct EquilibriumForceCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct EquilibriumForceCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_<  boost::mpl::bool_< LatticeModel_T::ForceModel::constant > >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel > > >::type >
+struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftEquVel
+                                                                            >::type >
 {
    /*
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
@@ -305,7 +306,7 @@ struct EquilibriumForceCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct EquilibriumForceCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel > > >::type >
+struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::shiftEquVel >::type >
 {
    static void apply( const LatticeModel_T &, Vector3< real_t > & ) {}
 
@@ -328,10 +329,9 @@ struct MomentumDensity
 };
 
 template< typename LatticeModel_T >
-struct MomentumDensity< LatticeModel_T, typename boost::enable_if< boost::mpl::not_< boost::is_same< typename LatticeModel_T::Stencil,
-                                                                                                     stencil::D3Q19 > > >::type >
+struct MomentumDensity< LatticeModel_T, typename std::enable_if< ! std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "For D3Q19 there is an optimized version!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "For D3Q19 there is an optimized version!" );
 
    template< typename FieldPtrOrIterator >
    static void getEquilibrium( Vector3< real_t > & momentumDensity, const LatticeModel_T & latticeModel, const FieldPtrOrIterator & it )
@@ -365,9 +365,9 @@ struct MomentumDensity< LatticeModel_T, typename boost::enable_if< boost::mpl::n
 };
 
 template< typename LatticeModel_T >
-struct MomentumDensity< LatticeModel_T, typename boost::enable_if< boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 > >::type >
+struct MomentumDensity< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value >::type >
 {
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
 
    template< typename FieldPtrOrIterator >
    static void getEquilibrium( Vector3< real_t > & momentumDensity, const LatticeModel_T & latticeModel, const FieldPtrOrIterator & it )

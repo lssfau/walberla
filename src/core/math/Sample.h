@@ -26,9 +26,7 @@
 #include "core/math/KahanSummation.h"
 #include "core/mpi/BufferDataTypeExtensions.h"
 
-#include <boost/type_traits/is_arithmetic.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-
+#include <type_traits>
 #include <algorithm>
 #include <cmath>
 #include <iosfwd>
@@ -94,7 +92,7 @@ std::ostream & operator<<( std::ostream & os, const Sample & statReal );
 template< typename T >
 Sample::iterator Sample::castToRealAndInsert(const T& val)
 {
-   static_assert( boost::is_arithmetic<T>::value, "You can only use Sample::castToRealAndInsert with " \
+   static_assert( std::is_arithmetic<T>::value, "You can only use Sample::castToRealAndInsert with " \
                   "arithmetic types!" );
 
    return insert( numeric_cast<value_type>( val ) );
@@ -103,7 +101,7 @@ Sample::iterator Sample::castToRealAndInsert(const T& val)
 template< typename T >
 Sample::iterator Sample::castToRealAndInsert(const_iterator position, const T& val)
 {
-   static_assert( boost::is_arithmetic<T>::value, "You can only use Sample::castToRealAndInsert with " \
+   static_assert( std::is_arithmetic<T>::value, "You can only use Sample::castToRealAndInsert with " \
                   "arithmetic types!" );
 
    return insert( position, numeric_cast<value_type>( val ) );
@@ -112,7 +110,7 @@ Sample::iterator Sample::castToRealAndInsert(const_iterator position, const T& v
 template <class InputIterator>
 void Sample::castToRealAndInsert(InputIterator first, InputIterator last)
 {
-   static_assert( boost::is_arithmetic< typename std::iterator_traits<InputIterator>::value_type >::value,
+   static_assert( std::is_arithmetic< typename std::iterator_traits<InputIterator>::value_type >::value,
                   "You can only use Sample::castToRealAndInsert with sequences of arithmetic types!" );
 
    while( first != last )

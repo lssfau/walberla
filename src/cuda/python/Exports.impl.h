@@ -34,7 +34,7 @@
 #include "python_coupling/helper/MplHelpers.h"
 #include "python_coupling/helper/BoostPythonHelpers.h"
 
-#include <boost/type_traits/is_unsigned.hpp>
+#include <type_traits>
 #include <iostream>
 
 namespace walberla {

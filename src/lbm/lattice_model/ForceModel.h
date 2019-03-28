@@ -33,6 +33,8 @@
 #include "lbm/lattice_model/CollisionModel.h"
 #include "lbm/lattice_model/EquilibriumDistribution.h"
 
+#include <type_traits>
+
 
 
 namespace walberla {
@@ -251,7 +253,7 @@ private:
       static real_t get( const real_t ) { return real_t(0); }
    };
    template< typename LatticeModel_T >
-   struct DirectionIndependentTerm< LatticeModel_T, typename boost::enable_if_c< LatticeModel_T::compressible >::type >
+   struct DirectionIndependentTerm< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible >::type >
    {
       static real_t get( const real_t rho ) { return real_t(1) / rho; }
    };
@@ -265,7 +267,7 @@ private:
       }
    };
    template< typename LatticeModel_T >
-   struct ShiftedVelocity< LatticeModel_T, typename boost::enable_if_c< LatticeModel_T::compressible >::type >
+   struct ShiftedVelocity< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible >::type >
    {
       static Vector3<real_t> get( const Vector3<real_t> & velocity, const Vector3<real_t> & force, const real_t rhoInv )
       {
@@ -494,7 +496,7 @@ public:
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
                                                           const Vector3<real_t> & velocity, const real_t /*rho*/, const real_t omega, const real_t omega_bulk ) const
    {
-      if (!boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
+      if (!std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
       {
          const real_t one_third  = real_t(1) / real_t(3);
       
@@ -516,7 +518,7 @@ public:
                      const real_t cx, const real_t cy, const real_t cz, const real_t omega, const real_t /*omega_bulk*/ ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
-      if (!boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
+      if (!std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
       {
          const real_t one_third  = real_t(1) / real_t(3);
       
@@ -580,7 +582,7 @@ public:
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                           const Vector3<real_t> & velocity, const real_t /*rho*/, const real_t omega, const real_t omega_bulk ) const
    {
-      if (!boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
+      if (!std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
       {
          const real_t one_third  = real_t(1) / real_t(3);
       
@@ -603,7 +605,7 @@ public:
                      const real_t cx, const real_t cy, const real_t cz, const real_t omega, const real_t /*omega_bulk*/ ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
-      if (!boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
+      if (!std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
       {
          const real_t one_third  = real_t(1) / real_t(3);
       

@@ -28,6 +28,7 @@
 
 #include <cassert>
 #include <limits>
+#include <type_traits>
 
 
 namespace walberla {
@@ -132,7 +133,7 @@ template< typename field_t>
 void ScalarFieldDisplayAdaptor<field_t>::drawScalarFieldNumeric( CellView * cell,
                                                                  const typename field_t::const_iterator & it)
 {
-   if( boost::is_same<T,float>::value || boost::is_same<T,double>::value )
+   if( std::is_same<T,float>::value || std::is_same<T,double>::value )
       cell->setText(QString("%1").arg(real_c(it.getF(f)), 0, 'g', 6));
    else if ( it.getF(f) < std::numeric_limits<T>::max() )
       cell->setText( QString("%1").arg(it.getF(f))  );

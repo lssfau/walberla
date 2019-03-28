@@ -24,9 +24,7 @@
 
 #include "core/DataTypes.h"
 
-#include <boost/type_traits/is_arithmetic.hpp>
-#include <boost/type_traits/remove_reference.hpp>
-
+#include <type_traits>
 #include <iterator>
 #include <vector>
 
@@ -101,7 +99,7 @@ private:
 template< typename T >
 void DistributedSample::castToRealAndInsert( const T & val )
 {
-   static_assert( boost::is_arithmetic<T>::value, "You can only use DistributedSample::castToRealAndInsert with " \
+   static_assert( std::is_arithmetic<T>::value, "You can only use DistributedSample::castToRealAndInsert with " \
                   "arithmetic types!" );
 
    insert( numeric_cast< real_t >( val ) );
@@ -110,7 +108,7 @@ void DistributedSample::castToRealAndInsert( const T & val )
 template <class InputIterator>
 void DistributedSample::castToRealAndInsert( InputIterator first, InputIterator last )
 {
-   static_assert( boost::is_arithmetic< typename std::iterator_traits<InputIterator>::value_type >::value,
+   static_assert( std::is_arithmetic< typename std::iterator_traits<InputIterator>::value_type >::value,
                   "You can only use DistributedSample::castToRealAndInsert with sequences of arithmetic types!" );
 
    while( first != last )

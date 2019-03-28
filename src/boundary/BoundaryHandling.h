@@ -42,6 +42,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <ostream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 
@@ -391,9 +392,9 @@ private:
 
    template< typename Boundary_T, typename Head, typename Tail >
    inline const Boundary_T & getBoundaryCondition( const BoundaryUID & uid, const boost::tuples::cons<Head, Tail> & boundaryConditions,
-                                                   typename boost::enable_if< boost::is_same< Boundary_T, Head > >::type* /*dummy*/ = 0,
-                                                   typename boost::enable_if< boost::is_same< typename boost::is_same< Tail, boost::tuples::null_type >::type,
-                                                                                              boost::false_type > >::type* /*dummy*/ = 0 ) const
+                                                   typename std::enable_if< std::is_same< Boundary_T, Head >::value >::type* /*dummy*/ = 0,
+                                                   typename std::enable_if< std::is_same< typename std::is_same< Tail, boost::tuples::null_type >::type,
+                                                                                              std::false_type >::value >::type* /*dummy*/ = 0 ) const
    {
       if( uid == boundaryConditions.get_head().getUID() )
          return boundaryConditions.get_head();
@@ -403,7 +404,7 @@ private:
 
    template< typename Boundary_T, typename Head, typename Tail >
    inline const Boundary_T & getBoundaryCondition( const BoundaryUID & uid, const boost::tuples::cons<Head, boost::tuples::null_type> & boundaryConditions,
-                                                   typename boost::enable_if< boost::is_same< Boundary_T, Head > >::type* /*dummy*/ = 0 ) const
+                                                   typename std::enable_if< std::is_same< Boundary_T, Head >::value >::type* /*dummy*/ = 0 ) const
    {
       if( uid == boundaryConditions.get_head().getUID() )
          return boundaryConditions.get_head();
@@ -417,18 +418,18 @@ private:
 
    template< typename Boundary_T, typename Head, typename Tail >
    inline const Boundary_T & getBoundaryCondition( const BoundaryUID & uid, const boost::tuples::cons<Head, Tail> & boundaryConditions,
-                                                   typename boost::enable_if< boost::is_same< typename boost::is_same< Boundary_T, Head >::type,
-                                                                                              boost::false_type > >::type* /*dummy*/ = 0,
-                                                   typename boost::enable_if< boost::is_same< typename boost::is_same< Tail, boost::tuples::null_type >::type,
-                                                                                              boost::false_type > >::type* /*dummy*/ = 0 ) const
+                                                   typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, Head >::type,
+                                                                                              std::false_type >::value >::type* /*dummy*/ = 0,
+                                                   typename std::enable_if< std::is_same< typename std::is_same< Tail, boost::tuples::null_type >::type,
+                                                                                              std::false_type >::value >::type* /*dummy*/ = 0 ) const
    {
       return getBoundaryCondition< Boundary_T, typename Tail::head_type, typename Tail::tail_type >( uid, boundaryConditions.get_tail() );
    }
 
    template< typename Boundary_T, typename Head, typename Tail >
    inline const Boundary_T & getBoundaryCondition( const BoundaryUID & /*uid*/, const boost::tuples::cons<Head, boost::tuples::null_type> & /*boundaryConditions*/,
-                                                   typename boost::enable_if< boost::is_same< typename boost::is_same< Boundary_T, Head >::type,
-                                                                                              boost::false_type > >::type* /*dummy*/ = 0 ) const
+                                                   typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, Head >::type,
+                                                                                              std::false_type >::value >::type* /*dummy*/ = 0 ) const
    {
       static_assert( sizeof(Boundary_T) == 0, "The requested boundary class is not part of this boundary handling." );
    }
@@ -443,9 +444,9 @@ private:
 
    template< typename Boundary_T, typename Head, typename Tail >
    inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const boost::tuples::cons<Head, Tail> & boundaryConditions,
-                                                              typename boost::enable_if< boost::is_same< Boundary_T, Head > >::type* /*dummy*/ = 0,
-                                                              typename boost::enable_if< boost::is_same< typename boost::is_same< Tail, boost::tuples::null_type >::type,
-                                                                                                         boost::false_type > >::type* /*dummy*/ = 0 ) const
+                                                              typename std::enable_if< std::is_same< Boundary_T, Head >::value >::type* /*dummy*/ = 0,
+                                                              typename std::enable_if< std::is_same< typename std::is_same< Tail, boost::tuples::null_type >::type,
+                                                                                                         std::false_type >::value >::type* /*dummy*/ = 0 ) const
    {
       if( uid == boundaryConditions.get_head().getUID() )
          return boundaryConditions.get_head();
@@ -455,7 +456,7 @@ private:
 
    template< typename Boundary_T, typename Head, typename Tail >
    inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const boost::tuples::cons<Head, boost::tuples::null_type> & boundaryConditions,
-                                                              typename boost::enable_if< boost::is_same< Boundary_T, Head > >::type* /*dummy*/ = 0 ) const
+                                                              typename std::enable_if< std::is_same< Boundary_T, Head >::value >::type* /*dummy*/ = 0 ) const
    {
       if( uid == boundaryConditions.get_head().getUID() )
          return boundaryConditions.get_head();
@@ -469,18 +470,18 @@ private:
 
    template< typename Boundary_T, typename Head, typename Tail >
    inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const boost::tuples::cons<Head, Tail> & boundaryConditions,
-                                                              typename boost::enable_if< boost::is_same< typename boost::is_same< Boundary_T, Head >::type,
-                                                                                                         boost::false_type > >::type* /*dummy*/ = 0,
-                                                              typename boost::enable_if< boost::is_same< typename boost::is_same< Tail, boost::tuples::null_type >::type,
-                                                                                                         boost::false_type > >::type* /*dummy*/ = 0 ) const
+                                                              typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, Head >::type,
+                                                                                                         std::false_type >::value >::type* /*dummy*/ = 0,
+                                                              typename std::enable_if< std::is_same< typename std::is_same< Tail, boost::tuples::null_type >::type,
+                                                                                                         std::false_type >::value >::type* /*dummy*/ = 0 ) const
    {
       return getBoundaryCondition_TypeExists< Boundary_T, typename Tail::head_type, typename Tail::tail_type >( uid, boundaryConditions.get_tail() );
    }
 
    template< typename Boundary_T, typename Head, typename Tail >
    inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const boost::tuples::cons<Head, boost::tuples::null_type> & /*boundaryConditions*/,
-                                                              typename boost::enable_if< boost::is_same< typename boost::is_same< Boundary_T, Head >::type,
-                                                                                                         boost::false_type > >::type* /*dummy*/ = 0 ) const
+                                                              typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, Head >::type,
+                                                                                                         std::false_type >::value >::type* /*dummy*/ = 0 ) const
    {
       WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
 

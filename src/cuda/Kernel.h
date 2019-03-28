@@ -23,11 +23,12 @@
 
 #include "core/Abort.h"
 #include "core/debug/Debug.h"
+#include "core/FunctionTraits.h"
 
 #include "ErrorChecking.h"
 
 #include <cuda_runtime.h>
-#include <boost/type_traits.hpp>
+#include <type_traits>
 #include <vector>
 
 
@@ -125,18 +126,20 @@ namespace cuda {
       //** Type checking of parameters **********************************************************************************
       /*! \name Type checking of parameters  */
       //@{
-      typedef typename boost::remove_pointer<FuncPtr>::type FuncType;
+      typedef typename std::remove_pointer<FuncPtr>::type FuncType;
 
       #define CHECK_PARAMETER_FUNC( Number ) \
       template<typename T> \
-      bool checkParameter##Number( typename boost::enable_if_c< (boost::function_traits<FuncType>::arity >= Number ), T >::type *  = 0 ) { \
-         return boost::is_same< T, typename boost::function_traits<FuncType>::arg##Number##_type >::value; \
+      bool checkParameter##Number( typename std::enable_if< (FunctionTraits<FuncType>::arity > Number ), T >::type *  = 0 ) { \
+         typedef typename FunctionTraits<FuncType>::template argument<Number>::type ArgType; \
+         return std::is_same< T, ArgType >::value; \
       } \
       template<typename T> \
-      bool checkParameter##Number( typename boost::disable_if_c< (boost::function_traits<FuncType>::arity >= Number ),T >::type *  = 0 ) { \
+      bool checkParameter##Number( typename std::enable_if< (FunctionTraits<FuncType>::arity <= Number ),T >::type *  = 0 ) { \
          return false; \
       }
 
+      CHECK_PARAMETER_FUNC(0)
       CHECK_PARAMETER_FUNC(1)
       CHECK_PARAMETER_FUNC(2)
       CHECK_PARAMETER_FUNC(3)
@@ -144,7 +147,6 @@ namespace cuda {
       CHECK_PARAMETER_FUNC(5)
       CHECK_PARAMETER_FUNC(6)
       CHECK_PARAMETER_FUNC(7)
-      CHECK_PARAMETER_FUNC(8)
 
       #undef CHECK_PARAMETER_FUNC
 
@@ -186,8 +188,8 @@ namespace cuda {
       paramInfo.resize( sizeof(T) );
       std::memcpy ( paramInfo.data(), &param, sizeof(T) );
 
-      WALBERLA_ASSERT( checkParameter<T>( params_.size() +1 ),
-                       "cuda::Kernel type mismatch of parameter " << params_.size() +1  );
+      WALBERLA_ASSERT( checkParameter<T>( params_.size() ),
+                       "cuda::Kernel type mismatch of parameter " << params_.size()  );
 
       params_.push_back( paramInfo );
    }
@@ -225,9 +227,9 @@ namespace cuda {
    void Kernel<FP>::operator() ( cudaStream_t stream ) const
    {
       // check for correct number of parameter calls
-      if ( params_.size() != boost::function_traits<FuncType>::arity ) {
+      if ( params_.size() != FunctionTraits<FuncType>::arity ) {
          WALBERLA_ABORT( "Error when calling cuda::Kernel - Wrong number of arguments. " <<
-                         "Expected " << boost::function_traits<FuncType>::arity << ", received " << params_.size() );
+                         "Expected " << FunctionTraits<FuncType>::arity << ", received " << params_.size() );
       }
 
       // register all parameters
@@ -248,6 +250,7 @@ namespace cuda {
    bool Kernel<FP>::checkParameter( uint_t n )
    {
       switch (n) {
+         case 0: return checkParameter0<T>();
          case 1: return checkParameter1<T>();
          case 2: return checkParameter2<T>();
          case 3: return checkParameter3<T>();
@@ -255,7 +258,6 @@ namespace cuda {
          case 5: return checkParameter5<T>();
          case 6: return checkParameter6<T>();
          case 7: return checkParameter7<T>();
-         case 8: return checkParameter8<T>();
          default:
             WALBERLA_ABORT("Too many parameters passed to kernel");
       }
@@ -267,5 +269,3 @@ namespace cuda {
 
 } // namespace cuda
 } // namespace walberla
-
-

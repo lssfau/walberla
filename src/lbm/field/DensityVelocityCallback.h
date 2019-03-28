@@ -30,9 +30,7 @@
 #include "field/AddToStorage.h"
 #include "field/GhostLayerField.h"
 
-#include <boost/mpl/logical.hpp>
-#include <boost/mpl/bool.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 
@@ -68,10 +66,11 @@ struct VelocityCallbackCorrection
 };
 
 template< typename LatticeModel_T >
-struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::constant >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel > > > >::type >
+struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+                                                                            LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftMacVel &&
+                                                                            ! LatticeModel_T::ForceModel::shiftEquVel
+                                                                            >::type >
 {
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t rho )
@@ -81,10 +80,11 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::constant >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel > > > >::type >
+struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+                                                                            LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftMacVel &&
+                                                                            ! LatticeModel_T::ForceModel::shiftEquVel
+                                                                            >::type >
 {
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t )
@@ -94,10 +94,11 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::constant > >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel > > > >::type >
+struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+                                                                            ! LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftMacVel &&
+                                                                            ! LatticeModel_T::ForceModel::shiftEquVel
+                                                                            >::type >
 {
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t rho )
@@ -107,10 +108,11 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::constant > >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel > > > >::type >
+struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+                                                                            ! LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftMacVel &&
+                                                                            ! LatticeModel_T::ForceModel::shiftEquVel
+                                                                            >::type >
 {
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t )
@@ -120,10 +122,11 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::constant >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > > >::type >
+struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+                                                                            LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+                                                                            ! LatticeModel_T::ForceModel::shiftMacVel
+                                                                            >::type >
 {
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t rho )
@@ -133,10 +136,11 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::constant >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > > >::type >
+struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+                                                                            LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+                                                                            ! LatticeModel_T::ForceModel::shiftMacVel
+                                                                            >::type >
 {
    static void apply( Vector3< real_t > & velocity, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                       const LatticeModel_T & latticeModel, const real_t )
@@ -146,10 +150,11 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::constant > >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > > >::type >
+struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+                                                                            ! LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+                                                                            ! LatticeModel_T::ForceModel::shiftMacVel
+                                                                            >::type >
 {
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t rho )
@@ -159,10 +164,11 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::constant > >,
-                                                                                                boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > > >::type >
+struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+                                                                            ! LatticeModel_T::ForceModel::constant &&
+                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+                                                                            ! LatticeModel_T::ForceModel::shiftMacVel
+                                                                            >::type >
 {
    static void apply( Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                       const LatticeModel_T & latticeModel, const real_t )
@@ -172,15 +178,17 @@ struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< bo
 };
 
 template< typename LatticeModel_T >
-struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel >,
-                                                                                         boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel > > >::type >
+struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::ForceModel::shiftMacVel &&
+                                                                            LatticeModel_T::ForceModel::shiftEquVel
+                                                                            >::type >
 {
    static void apply( Vector3< real_t > &, const cell_idx_t, const cell_idx_t, const cell_idx_t, const LatticeModel_T &, const real_t ) {}
 };
 
 template< typename LatticeModel_T >
-struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > >,
-                                                                                                boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftEquVel > > > >::type >
+struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::shiftMacVel &&
+                                                                            ! LatticeModel_T::ForceModel::shiftEquVel
+                                                                            >::type >
 {
    static void apply( Vector3< real_t > &, const cell_idx_t, const cell_idx_t, const cell_idx_t, const LatticeModel_T &, const real_t ) {}
 };
@@ -338,7 +346,7 @@ private:
 
 
 template< typename VelocityField_T  >
-class VelocityCallback<VelocityField_T, typename boost::enable_if_c< boost::is_same< typename VelocityField_T::value_type, Vector3<real_t> >::value >::type >
+class VelocityCallback<VelocityField_T, typename std::enable_if< std::is_same< typename VelocityField_T::value_type, Vector3<real_t> >::value >::type >
 {
 public:
    VelocityCallback( const BlockDataID & fieldId ) : fieldId_( fieldId ), field_( NULL ) {}
@@ -438,8 +446,6 @@ private:
 //namespace walberla {
 //namespace lbm {
 //
-//using boost::type_traits::ice_and;
-//using boost::type_traits::ice_not;
 //
 //
 //
@@ -450,7 +456,7 @@ private:
 //};
 //
 //template< typename LatticeModel_T > 
-//struct VelocityField< LatticeModel_T, typename boost::enable_if_c< LatticeModel_T::ForceModel::shiftMacVel >::type >
+//struct VelocityField< LatticeModel_T, typename std::enable_if< LatticeModel_T::ForceModel::shiftMacVel >::type >
 //{
 //   typedef walberla::field::GhostLayerField< Vector3<real_t>, uint_t(2) > type;
 //};
@@ -477,10 +483,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< LatticeModel_T::compressible,
-//                                                                                         LatticeModel_T::ForceModel::constant,
-//                                                                                         LatticeModel_T::ForceModel::shiftMacVel,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::shiftEquVel >::value >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+//                                                                            LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftMacVel &&
+//                                                                            ! LatticeModel_T::ForceModel::shiftEquVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -493,10 +500,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< ice_not< LatticeModel_T::compressible >::value,
-//                                                                                         LatticeModel_T::ForceModel::constant,
-//                                                                                         LatticeModel_T::ForceModel::shiftMacVel,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::shiftEquVel >::value >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+//                                                                            LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftMacVel &&
+//                                                                            ! LatticeModel_T::ForceModel::shiftEquVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -509,10 +517,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< LatticeModel_T::compressible,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::constant >::value,
-//                                                                                         LatticeModel_T::ForceModel::shiftMacVel,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::shiftEquVel >::value >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+//                                                                            ! LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftMacVel &&
+//                                                                            ! LatticeModel_T::ForceModel::shiftEquVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -525,10 +534,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< ice_not< LatticeModel_T::compressible >::value,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::constant >::value,
-//                                                                                         LatticeModel_T::ForceModel::shiftMacVel,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::shiftEquVel >::value >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+//                                                                            ! LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftMacVel &&
+//                                                                            ! LatticeModel_T::ForceModel::shiftEquVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -541,10 +551,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< LatticeModel_T::compressible,
-//                                                                                         LatticeModel_T::ForceModel::constant,
-//                                                                                         LatticeModel_T::ForceModel::shiftEquVel,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::shiftMacVel >::value >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+//                                                                            LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+//                                                                            ! LatticeModel_T::ForceModel::shiftMacVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -555,10 +566,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< ice_not< LatticeModel_T::compressible >::value,
-//                                                                                         LatticeModel_T::ForceModel::constant,
-//                                                                                         LatticeModel_T::ForceModel::shiftEquVel,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::shiftMacVel >::value >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+//                                                                            LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+//                                                                            ! LatticeModel_T::ForceModel::shiftMacVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -569,10 +581,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< LatticeModel_T::compressible,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::constant >::value,
-//                                                                                         LatticeModel_T::ForceModel::shiftEquVel,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::shiftMacVel >::value >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+//                                                                            ! LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+//                                                                            ! LatticeModel_T::ForceModel::shiftMacVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -583,10 +596,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< ice_not< LatticeModel_T::compressible >::value,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::constant >::value,
-//                                                                                         LatticeModel_T::ForceModel::shiftEquVel,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::shiftMacVel >::value >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+//                                                                            ! LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+//                                                                            ! LatticeModel_T::ForceModel::shiftMacVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -597,10 +611,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< LatticeModel_T::compressible,
-//                                                                                         LatticeModel_T::ForceModel::constant,
-//                                                                                         LatticeModel_T::ForceModel::shiftEquVel,
-//                                                                                         LatticeModel_T::ForceModel::shiftMacVel >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+//                                                                            LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+//                                                                            LatticeModel_T::ForceModel::shiftMacVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -614,10 +629,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< ice_not< LatticeModel_T::compressible >::value,
-//                                                                                         LatticeModel_T::ForceModel::constant,
-//                                                                                         LatticeModel_T::ForceModel::shiftEquVel,
-//                                                                                         LatticeModel_T::ForceModel::shiftMacVel >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+//                                                                            LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+//                                                                            LatticeModel_T::ForceModel::shiftMacVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -631,10 +647,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< LatticeModel_T::compressible,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::constant >::value,
-//                                                                                         LatticeModel_T::ForceModel::shiftEquVel,
-//                                                                                         LatticeModel_T::ForceModel::shiftMacVel >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+//                                                                            ! LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+//                                                                            LatticeModel_T::ForceModel::shiftMacVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -648,10 +665,11 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< ice_not< LatticeModel_T::compressible >::value,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::constant >::value,
-//                                                                                         LatticeModel_T::ForceModel::shiftEquVel,
-//                                                                                         LatticeModel_T::ForceModel::shiftMacVel >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+//                                                                            ! LatticeModel_T::ForceModel::constant &&
+//                                                                            LatticeModel_T::ForceModel::shiftEquVel &&
+//                                                                            LatticeModel_T::ForceModel::shiftMacVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > & velocity, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
@@ -665,8 +683,9 @@ private:
 //};
 //
 //template< typename LatticeModel_T >
-//struct VelocityCallbackCorrection< LatticeModel_T, typename boost::enable_if_c< ice_and< ice_not< LatticeModel_T::ForceModel::shiftMacVel >::value,
-//                                                                                         ice_not< LatticeModel_T::ForceModel::shiftEquVel >::value >::value >::type >
+//struct VelocityCallbackCorrection< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::shiftMacVel &&
+//                                                                            ! LatticeModel_T::ForceModel::shiftEquVel
+//                                                                            >::type >
 //{
 //   template< typename VelocityField_T >
 //   static void apply( VelocityField_T * const & field, const Vector3< real_t > &, const cell_idx_t, const cell_idx_t, const cell_idx_t,

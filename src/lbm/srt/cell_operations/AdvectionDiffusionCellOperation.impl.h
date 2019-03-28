@@ -25,9 +25,7 @@
 #include "lbm/lattice_model/EquilibriumDistribution.h"
 #include "lbm/lattice_model/LatticeModelBase.h"
 
-#include <boost/mpl/logical.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -53,19 +51,17 @@ namespace lbm {
 ///////////////////////////////
 
 template< typename LM_AdvDiff, typename LM_Hydro >
-class AdvectionDiffusionCellOperation< LM_AdvDiff, LM_Hydro, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LM_AdvDiff::CollisionModel::tag,
-                                                                                                                          collision_model::SRT_tag >,
-                                                                                                          boost::mpl::bool_< LM_AdvDiff::CollisionModel::constant >,
-                                                                                                          boost::mpl::bool_< LM_AdvDiff::compressible >,
-                                                                                                          boost::is_same< typename LM_AdvDiff::ForceModel::tag,
-                                                                                                                          force_model::None_tag >
-                                                                                                         > >::type >
+class AdvectionDiffusionCellOperation< LM_AdvDiff, LM_Hydro, typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                                      LM_AdvDiff::CollisionModel::constant &&
+                                                                                      LM_AdvDiff::compressible &&
+                                                                                      std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value
+                                                                                      >::type >
 {
 public:
 
-   static_assert( (boost::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( (std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
    static_assert( LM_AdvDiff::compressible,                                                                      "Only works with compressible models!" );
-   static_assert( (boost::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( (std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
 
    typedef PdfField< LM_AdvDiff >        AdvDiffPdfField_T;
    typedef PdfField< LM_Hydro   >        HydroPdfField_T;
@@ -130,19 +126,17 @@ private:
 ///////////////////////////////
 
 template< typename LM_AdvDiff, typename LM_Hydro >
-class AdvectionDiffusionCellOperation< LM_AdvDiff, LM_Hydro, typename boost::enable_if< boost::mpl::and_< boost::is_same< typename LM_AdvDiff::CollisionModel::tag,
-                                                                                                                          collision_model::SRT_tag >,
-                                                                                                          boost::mpl::bool_< LM_AdvDiff::CollisionModel::constant >,
-                                                                                                          boost::mpl::bool_< LM_AdvDiff::compressible >,
-                                                                                                          boost::is_same< typename LM_AdvDiff::ForceModel::tag,
-                                                                                                                          force_model::Correction_tag >
-                                                                                               > >::type >
+class AdvectionDiffusionCellOperation< LM_AdvDiff, LM_Hydro, typename std::enable_if< std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                                      LM_AdvDiff::CollisionModel::constant &&
+                                                                                      LM_AdvDiff::compressible &&
+                                                                                      std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value
+                                                                                      >::type >
 {
 public:
 
-   static_assert( (boost::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( (std::is_same< typename LM_AdvDiff::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
    static_assert( LM_AdvDiff::compressible,                                                                      "Only works with compressible models!" );
-   static_assert( (boost::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value),  "Only works with correction force!" );
+   static_assert( (std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value),  "Only works with correction force!" );
 
    typedef PdfField< LM_AdvDiff >        AdvDiffPdfField_T;
    typedef PdfField< LM_Hydro   >        HydroPdfField_T;

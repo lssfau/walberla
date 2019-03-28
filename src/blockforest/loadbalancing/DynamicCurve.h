@@ -37,6 +37,7 @@
 #include <map>
 #include <set>
 #include <stack>
+#include <type_traits>
 #include <vector>
 
 
@@ -176,7 +177,7 @@ private:
 
    bool weightedBlocks() const
    {
-      return ! boost::is_same< PhantomData_T, NoPhantomData >::value;
+      return ! std::is_same< PhantomData_T, NoPhantomData >::value;
    }
    
    template< typename T >

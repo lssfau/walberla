@@ -43,11 +43,7 @@
 #include "GhostLayerField.h"
 #include "field/blockforest/BlockDataHandling.h"
 
-#include <boost/mpl/logical.hpp>
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/is_integral.hpp>
-#include <boost/type_traits/is_same.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 namespace walberla {
@@ -120,8 +116,8 @@ struct AddToStorage
 
 template< typename GhostLayerField_T, typename BlockStorage_T >
 struct AddToStorage< GhostLayerField_T, BlockStorage_T,
-                     typename boost::enable_if< boost::mpl::and_< boost::mpl::or_< boost::is_integral< typename GhostLayerField_T::value_type >, boost::is_floating_point< typename GhostLayerField_T::value_type > >,
-	                                            boost::mpl::not_< boost::is_same< GhostLayerField_T, FlagField< typename GhostLayerField_T::value_type > > > > >::type >
+                     typename std::enable_if< ( std::is_integral< typename GhostLayerField_T::value_type >::value || std::is_floating_point< typename GhostLayerField_T::value_type >::value ) &&
+	                                            ! std::is_same< GhostLayerField_T, FlagField< typename GhostLayerField_T::value_type > >::value >::type >
 {
    static BlockDataID add( const shared_ptr< BlockStorage_T > & blocks, const std::string & identifier,
                            const typename GhostLayerField_T::value_type & initValue, const Layout layout, const uint_t nrOfGhostLayers,
@@ -301,8 +297,8 @@ struct Creator : public domain_decomposition::BlockDataCreator< GhostLayerField_
 
 template< typename GhostLayerField_T >
 struct Creator< GhostLayerField_T,
-                typename boost::enable_if< boost::mpl::or_< boost::is_integral< typename GhostLayerField_T::value_type >,
-                                                            boost::is_floating_point< typename GhostLayerField_T::value_type > > >::type >
+                typename std::enable_if< std::is_integral< typename GhostLayerField_T::value_type >::value ||
+                                         std::is_floating_point< typename GhostLayerField_T::value_type >::value  >::type >
    : public domain_decomposition::BlockDataCreator< GhostLayerField_T >
 {
    Creator( const shared_ptr< StructuredBlockStorage > & blocks,

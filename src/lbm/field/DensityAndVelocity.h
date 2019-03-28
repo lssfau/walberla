@@ -25,9 +25,7 @@
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
 
-#include <boost/mpl/bool.hpp>
-#include <boost/mpl/logical.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 // Back-end for calculating macroscopic values
@@ -48,9 +46,10 @@ struct AdaptVelocityToForce
 };
 
 template< typename LatticeModel_T >
-struct AdaptVelocityToForce< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                          boost::mpl::bool_< LatticeModel_T::ForceModel::constant >,
-                                                                                          boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > >::type >
+struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+                                                                      LatticeModel_T::ForceModel::constant &&
+                                                                      LatticeModel_T::ForceModel::shiftMacVel
+                                                                      >::type >
 {
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t rho )
    {
@@ -71,9 +70,10 @@ struct AdaptVelocityToForce< LatticeModel_T, typename boost::enable_if< boost::m
 };
 
 template< typename LatticeModel_T >
-struct AdaptVelocityToForce< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                          boost::mpl::bool_< LatticeModel_T::ForceModel::constant >,
-                                                                                          boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > >::type >
+struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+                                                                      LatticeModel_T::ForceModel::constant &&
+                                                                      LatticeModel_T::ForceModel::shiftMacVel
+                                                                      >::type >
 {
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t )
    {
@@ -94,9 +94,10 @@ struct AdaptVelocityToForce< LatticeModel_T, typename boost::enable_if< boost::m
 };
 
 template< typename LatticeModel_T >
-struct AdaptVelocityToForce< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::bool_< LatticeModel_T::compressible >,
-                                                                                          boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::constant > >,
-                                                                                          boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > >::type >
+struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible &&
+                                                                      ! LatticeModel_T::ForceModel::constant &&
+                                                                      LatticeModel_T::ForceModel::shiftMacVel
+                                                                      >::type >
 {
    /*
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t rho )
@@ -119,9 +120,10 @@ struct AdaptVelocityToForce< LatticeModel_T, typename boost::enable_if< boost::m
 };
 
 template< typename LatticeModel_T >
-struct AdaptVelocityToForce< LatticeModel_T, typename boost::enable_if< boost::mpl::and_< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > >,
-                                                                                          boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::constant > >,
-                                                                                          boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > >::type >
+struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible &&
+                                                                      ! LatticeModel_T::ForceModel::constant &&
+                                                                      LatticeModel_T::ForceModel::shiftMacVel
+                                                                      >::type >
 {
    /*
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t )
@@ -144,7 +146,7 @@ struct AdaptVelocityToForce< LatticeModel_T, typename boost::enable_if< boost::m
 };
 
 template< typename LatticeModel_T >
-struct AdaptVelocityToForce< LatticeModel_T, typename boost::enable_if< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::shiftMacVel > > >::type >
+struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::ForceModel::shiftMacVel >::type >
 {
    static Vector3<real_t> get( const LatticeModel_T &, const Vector3< real_t > & velocity, const real_t )
    {
@@ -207,7 +209,7 @@ struct DensityAndVelocityRange
 
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct DensityAndVelocityRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enable_if_c< LatticeModel_T::ForceModel::constant >::type >
+struct DensityAndVelocityRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< LatticeModel_T::ForceModel::constant >::type >
 {
    static_assert( LatticeModel_T::ForceModel::constant, "Only works with constant forces!" );
 
@@ -222,7 +224,7 @@ struct DensityAndVelocityRange< LatticeModel_T, FieldIteratorXYZ, typename boost
 
 
 template< typename LatticeModel_T, typename FieldIteratorXYZ >
-struct DensityAndVelocityRange< LatticeModel_T, FieldIteratorXYZ, typename boost::enable_if< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::ForceModel::constant > > >::type >
+struct DensityAndVelocityRange< LatticeModel_T, FieldIteratorXYZ, typename std::enable_if< ! LatticeModel_T::ForceModel::constant >::type >
 {
    static_assert( LatticeModel_T::ForceModel::constant == false, "Does not work with constant forces!" );
 

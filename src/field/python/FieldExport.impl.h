@@ -39,9 +39,10 @@
 #include "python_coupling/helper/MplHelpers.h"
 #include "python_coupling/helper/BoostPythonHelpers.h"
 
-#include <boost/type_traits/is_unsigned.hpp>
+#include <boost/mpl/vector.hpp>
 
 #include <iostream>
+#include <type_traits>
 
 namespace walberla {
 namespace field {
@@ -778,7 +779,7 @@ namespace internal {
    //===================================================================================================================
 
    template<typename T>
-   void exportFlagFieldIfUnsigned( typename boost::enable_if<boost::is_unsigned<T> >::type* = 0 )
+   void exportFlagFieldIfUnsigned( typename std::enable_if<std::is_unsigned<T>::value >::type* = 0 )
    {
       using namespace boost::python;
 
@@ -795,7 +796,7 @@ namespace internal {
 
    }
    template<typename T>
-   void exportFlagFieldIfUnsigned( typename boost::disable_if<boost::is_unsigned<T> >::type* = 0 )  {}
+   void exportFlagFieldIfUnsigned( typename std::enable_if< ! std::is_unsigned<T>::value >::type* = 0 )  {}
 
 
    struct FieldExporter

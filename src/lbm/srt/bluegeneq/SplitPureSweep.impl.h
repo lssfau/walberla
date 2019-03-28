@@ -30,8 +30,7 @@
 #include "lbm/sweeps/Streaming.h"
 #include "lbm/sweeps/SweepBase.h"
 
-#include <boost/utility/enable_if.hpp>
-#include <boost/type_traits.hpp>
+#include <type_traits>
 
 #include <builtins.h>
 
@@ -44,10 +43,6 @@
 
 namespace walberla {
 namespace lbm {
-
-using boost::type_traits::ice_and;
-using boost::type_traits::ice_not;
-
 
 
 ///////////////////////////////////////////////////////
@@ -68,22 +63,20 @@ using boost::type_traits::ice_not;
 ///////////////////////////////
 
 template< typename LatticeModel_T >
-class SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                            collision_model::SRT_tag >::value,
-                                                                            LatticeModel_T::CollisionModel::constant,
-                                                                            boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value,
-                                                                            ice_not< LatticeModel_T::compressible >::value,
-                                                                            boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                            force_model::None_tag >::value
-                                                                 >::value >::type > :
+class SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                               LatticeModel_T::CollisionModel::constant &&
+                                                               std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                               ! LatticeModel_T::compressible &&
+                                                               std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                               >::type > :
    public SweepBase< LatticeModel_T >
 {
 public:
 
-   static_assert( (boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
+   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
    static_assert( LatticeModel_T::compressible == false,                                                             "Only works with incompressible models!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    typedef typename SweepBase<LatticeModel_T>::PdfField_T  PdfField_T;
@@ -104,13 +97,12 @@ public:
 };
 
 template< typename LatticeModel_T >
-void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                           collision_model::SRT_tag >::value,
-                                                                           LatticeModel_T::CollisionModel::constant,
-                                                                           boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value,
-                                                                           ice_not< LatticeModel_T::compressible >::value,
-                                                                           boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                           force_model::None_tag >::value >::value >::type
+void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                              LatticeModel_T::CollisionModel::constant &&
+                                                              std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                              ! LatticeModel_T::compressible >::value &&
+                                                              std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag>::value
+                                                              >::type
    >::operator()( IBlock * const block )
 {
    PdfField_T * src( NULL );
@@ -571,13 +563,12 @@ void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost
 
 
 template< typename LatticeModel_T >
-void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                           collision_model::SRT_tag >::value,
-                                                                           LatticeModel_T::CollisionModel::constant,
-                                                                           boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value,
-                                                                           ice_not< LatticeModel_T::compressible >::value,
-                                                                           boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                           force_model::None_tag >::value >::value >::type
+void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                              LatticeModel_T::CollisionModel::constant &&
+                                                              std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                              ! LatticeModel_T::compressible >::value &&
+                                                              std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                              >::type
    >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    PdfField_T * src( NULL );
@@ -591,13 +582,12 @@ void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost
 
 
 template< typename LatticeModel_T >
-void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                           collision_model::SRT_tag >::value,
-                                                                           LatticeModel_T::CollisionModel::constant,
-                                                                           boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value,
-                                                                           ice_not< LatticeModel_T::compressible >::value,
-                                                                           boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                           force_model::None_tag >::value >::value >::type
+void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                              LatticeModel_T::CollisionModel::constant &&
+                                                              std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                              ! LatticeModel_T::compressible >::value &&
+                                                              std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                              >::type
 #ifdef NDEBUG
    >::collide( IBlock * const block, const uint_t /*numberOfGhostLayersToInclude*/ )
 #else
@@ -961,22 +951,20 @@ void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost
 ///////////////////////////////
 
 template< typename LatticeModel_T >
-class SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                            collision_model::SRT_tag >::value,
-                                                                            LatticeModel_T::CollisionModel::constant,
-                                                                            boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value,
-                                                                            LatticeModel_T::compressible,
-                                                                            boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                            force_model::None_tag >::value
-                                                                 >::value >::type > :
+class SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                               LatticeModel_T::CollisionModel::constant &&
+                                                               std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                               LatticeModel_T::compressible,
+                                                               std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                               >::type > :
    public SweepBase< LatticeModel_T >
 {
 public:
 
-   static_assert( (boost::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
+   static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value), "Only works with SRT!" );
+   static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value),                       "Only works with D3Q19!" );
    static_assert( LatticeModel_T::compressible,                                                                      "Only works with compressible models!" );
-   static_assert( (boost::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
+   static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
    typedef typename SweepBase<LatticeModel_T>::PdfField_T  PdfField_T;
@@ -997,13 +985,12 @@ public:
 };
 
 template< typename LatticeModel_T >
-void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                           collision_model::SRT_tag >::value,
-                                                                           LatticeModel_T::CollisionModel::constant,
-                                                                           boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value,
-                                                                           LatticeModel_T::compressible,
-                                                                           boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                           force_model::None_tag >::value >::value >::type
+void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                              LatticeModel_T::CollisionModel::constant &&
+                                                              std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                              LatticeModel_T::compressible &&
+                                                              std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                              >::type
    >::operator()( IBlock * const block )
 {
    PdfField_T * src( NULL );
@@ -1468,13 +1455,12 @@ void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost
 }
 
 template< typename LatticeModel_T >
-void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                           collision_model::SRT_tag >::value,
-                                                                           LatticeModel_T::CollisionModel::constant,
-                                                                           boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value,
-                                                                           LatticeModel_T::compressible,
-                                                                           boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                           force_model::None_tag >::value >::value >::type
+void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                                LatticeModel_T::CollisionModel::constant &&
+                                                                std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                                LatticeModel_T::compressible &&
+                                                                std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                                >::type
    >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
    PdfField_T * src( NULL );
@@ -1486,13 +1472,12 @@ void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost
 }
 
 template< typename LatticeModel_T >
-void SplitPureSweep< LatticeModel_T, typename boost::enable_if_c< ice_and< boost::is_same< typename LatticeModel_T::CollisionModel::tag,
-                                                                                           collision_model::SRT_tag >::value,
-                                                                           LatticeModel_T::CollisionModel::constant,
-                                                                           boost::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value,
-                                                                           LatticeModel_T::compressible,
-                                                                           boost::is_same< typename LatticeModel_T::ForceModel::tag,
-                                                                                           force_model::None_tag >::value >::value >::type
+void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value &&
+                                                              LatticeModel_T::CollisionModel::constant &&
+                                                              std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value &&
+                                                              LatticeModel_T::compressible &&
+                                                              std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value
+                                                              >::type
 #ifdef NDEBUG
    >::collide( IBlock * const block, const uint_t /*numberOfGhostLayersToInclude*/ )
 #else

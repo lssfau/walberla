@@ -34,6 +34,7 @@
 
 #include <map>
 #include <set>
+#include <type_traits>
 #include <vector>
 
 
@@ -115,7 +116,7 @@ private:
 
    double weight( const PhantomBlock * block ) const
    {
-      return boost::is_same< PhantomData_T, NoPhantomData >::value ? 1.0 :
+      return std::is_same< PhantomData_T, NoPhantomData >::value ? 1.0 :
                numeric_cast< double >( block->template getData< PhantomData_T >().weight() );
    }
 

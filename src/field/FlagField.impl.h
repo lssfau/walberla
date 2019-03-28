@@ -20,7 +20,7 @@
 //
 //======================================================================================================================
 
-
+#include <type_traits>
 
 namespace walberla {
 namespace field {
@@ -489,12 +489,12 @@ namespace field {
     template<class Sten, typename FieldPtrOrIterator>
     inline bool isFlagInNeighborhood(const FieldPtrOrIterator & i, typename FieldPtrOrIterator::value_type mask)
     {
-       typedef typename boost::remove_const< typename FieldPtrOrIterator::value_type >::type T;
+       typedef typename std::remove_const< typename FieldPtrOrIterator::value_type >::type T;
 
-       static_assert( (boost::is_same< T,uint8_t >::value ||
-                       boost::is_same< T,uint16_t>::value ||
-                       boost::is_same< T,uint32_t>::value ||
-                       boost::is_same< T,uint64_t>::value),
+       static_assert( (std::is_same< T,uint8_t >::value ||
+                       std::is_same< T,uint16_t>::value ||
+                       std::is_same< T,uint32_t>::value ||
+                       std::is_same< T,uint64_t>::value),
                       "Only unsigned types of various lengths are allowed as type of FlagFields");
 
        T flag = 0;
@@ -509,10 +509,10 @@ namespace field {
     /*!\brief Ores the neighborhood of the specified stencil and returns mask
      ******************************************************************************************************************/
     template<class Sten, typename FieldPtrOrIterator>
-    inline typename boost::remove_const<typename FieldPtrOrIterator::value_type>::type
+    inline typename std::remove_const<typename FieldPtrOrIterator::value_type>::type
        getOredNeighborhood(const FieldPtrOrIterator & i)
     {
-       typedef typename boost::remove_const<typename FieldPtrOrIterator::value_type>::type RetType;
+       typedef typename std::remove_const<typename FieldPtrOrIterator::value_type>::type RetType;
 
        RetType flag = 0;
        for( auto d = Sten::beginNoCenter(); d != Sten::end(); ++d ) {

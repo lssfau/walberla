@@ -34,14 +34,11 @@
 #include "core/DataTypes.h"
 #include "core/debug/Debug.h"
 
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/is_volatile.hpp>
-
 #include <algorithm>
 #include <cmath>
 #include <ostream>
 #include <limits>
+#include <type_traits>
 
 namespace walberla {
 namespace math {
@@ -142,9 +139,9 @@ class RotationMatrix : public Matrix3<Type>
 {
    //**Compile time checks*************************************************************************
    /*! \cond internal */
-   static_assert(boost::is_floating_point<Type>::value, "T has to be floating point!");
-   static_assert(!boost::is_const<Type>::value, "T has to be non const!");
-   static_assert(!boost::is_volatile<Type>::value, "T has to be non volatile!");
+   static_assert(std::is_floating_point<Type>::value, "T has to be floating point!");
+   static_assert(!std::is_const<Type>::value, "T has to be non const!");
+   static_assert(!std::is_volatile<Type>::value, "T has to be non volatile!");
    /*! \endcond */
    //**********************************************************************************************
 
@@ -332,7 +329,7 @@ template< typename Type >  // Data type of the rotation matrix
 template< typename Axis >  // Data type of the rotation axis
 RotationMatrix<Type>::RotationMatrix( Vector3<Axis> axis, Type angle )
 {
-   static_asser(boost::is_floating_point<Axis>::value, "Axis has to be floating point!");
+   static_asser(std::is_floating_point<Axis>::value, "Axis has to be floating point!");
 
    WALBERLA_ASSERT( ( axis.sqrLength() > Axis(0) || angle == Type(0) ), "Invalid matrix parameters" );
 
@@ -745,7 +742,7 @@ template< typename Other >  // Data type of the standard matrix
 inline const Matrix3< typename MathTrait<Type,Other>::MultType >
    RotationMatrix<Type>::rotate( const Matrix3<Other>& m ) const
 {
-   static_assert(boost::is_floating_point<Other>::value, "Other has to be floating point!");
+   static_assert(std::is_floating_point<Other>::value, "Other has to be floating point!");
 
    typedef typename MathTrait<Type,Other>::MultType  MT;
 
@@ -809,7 +806,7 @@ template< typename Other >  // Data type of the diagonal standard matrix
 inline const Matrix3< typename MathTrait<Type,Other>::MultType >
    RotationMatrix<Type>::diagRotate( const Matrix3<Other>& m ) const
 {
-   static_assert(boost::is_floating_point<Other>::value, "Other has to be floating point!");
+   static_assert(std::is_floating_point<Other>::value, "Other has to be floating point!");
 
    typedef typename MathTrait<Type,Other>::MultType  MT;
 

@@ -23,9 +23,7 @@
 
 #include "core/DataTypes.h"
 
-#include <boost/mpl/bool.hpp>
-#include <boost/mpl/logical.hpp>
-#include <boost/utility/enable_if.hpp>
+#include <type_traits>
 
 
 // Back-end for calculating macroscopic values
@@ -45,7 +43,7 @@ struct Density;
 //////////////////
 
 template< typename LatticeModel_T >
-struct Density< LatticeModel_T, typename boost::enable_if_c< LatticeModel_T::compressible >::type >
+struct Density< LatticeModel_T, typename std::enable_if< LatticeModel_T::compressible >::type >
 {
    static_assert( LatticeModel_T::compressible, "Only works with compressible models!" );
 
@@ -80,7 +78,7 @@ struct Density< LatticeModel_T, typename boost::enable_if_c< LatticeModel_T::com
 ////////////////////
 
 template< typename LatticeModel_T >
-struct Density< LatticeModel_T, typename boost::enable_if< boost::mpl::not_< boost::mpl::bool_< LatticeModel_T::compressible > > >::type >
+struct Density< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible >::type >
 {
    static_assert( LatticeModel_T::compressible == false, "Only works with incompressible models!" );
 

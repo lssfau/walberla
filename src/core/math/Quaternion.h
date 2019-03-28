@@ -38,9 +38,7 @@
 #include "core/mpi/RecvBuffer.h"
 #include <core/logging/Logging.h>
 
-#include <boost/type_traits/is_floating_point.hpp>
-#include <boost/type_traits/is_const.hpp>
-#include <boost/type_traits/is_volatile.hpp>
+#include <type_traits>
 
 #include <cmath>
 #include <istream>
@@ -102,9 +100,9 @@ class Quaternion
 {
    //**Compile time checks*************************************************************************
    /*! \cond internal */
-   static_assert(boost::is_floating_point<Type>::value, "T has to be floating point!");
-   static_assert(!boost::is_const<Type>::value, "T has to be non const!");
-   static_assert(!boost::is_volatile<Type>::value, "T has to be non volatile!");
+   static_assert(std::is_floating_point<Type>::value, "T has to be floating point!");
+   static_assert(!std::is_const<Type>::value, "T has to be non const!");
+   static_assert(!std::is_volatile<Type>::value, "T has to be non volatile!");
    /*! \endcond */
    //**********************************************************************************************
 
@@ -259,7 +257,7 @@ template< typename Type >  // Data type of the quaternion
 template< typename Axis >  // Data type of the rotation axis
 inline Quaternion<Type>::Quaternion( Vector3<Axis> axis, Type angle )
 {
-   static_assert(boost::is_floating_point<Axis>::value, "Axis has to be floating point!" );
+   static_assert(std::is_floating_point<Axis>::value, "Axis has to be floating point!" );
 
    auto axisLength = axis.length();
    if( (floatIsEqual(axisLength, 0)) || (math::equal(std::fabs(angle), real_t(0)))  ) {

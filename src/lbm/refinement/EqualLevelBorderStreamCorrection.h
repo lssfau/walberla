@@ -31,8 +31,7 @@
 #include "stencil/D2CornerStencil.h"
 #include "stencil/D3EdgeCornerStencil.h"
 
-#include <boost/mpl/int.hpp>
-#include <boost/mpl/equal_to.hpp>
+#include <type_traits>
 
 
 
@@ -46,12 +45,12 @@ namespace internal {
 template< typename LatticeModel_T, class Enable = void  >
 struct EdgeCornerStencil;
 template< typename LatticeModel_T >
-struct EdgeCornerStencil< LatticeModel_T, typename boost::enable_if< boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::Stencil::D >, boost::mpl::int_<2> > >::type >
+struct EdgeCornerStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 2 >::type >
 {
    typedef stencil::D2CornerStencil type;
 };
 template< typename LatticeModel_T >
-struct EdgeCornerStencil< LatticeModel_T, typename boost::enable_if< boost::mpl::equal_to< boost::mpl::int_< LatticeModel_T::Stencil::D >, boost::mpl::int_<3> > >::type >
+struct EdgeCornerStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 3 >::type >
 {
    typedef stencil::D3EdgeCornerStencil type;
 };

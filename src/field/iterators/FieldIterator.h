@@ -30,11 +30,9 @@
 
 #include "stencil/Directions.h"
 
-#include <boost/type_traits/remove_const.hpp>
-
 #include <iostream>
 #include <iterator>
-
+#include <type_traits>
 
 namespace walberla {
 namespace field {
@@ -71,7 +69,7 @@ namespace field {
    class FieldIterator : public std::iterator <std::forward_iterator_tag,T>
    {
    public:
-      typedef Field<typename boost::remove_const<T>::type, fieldFSize> FieldType;
+      typedef Field<typename std::remove_const<T>::type, fieldFSize> FieldType;
       typedef T value_type;
 
       static const uint_t F_SIZE = fieldFSize;
@@ -159,7 +157,7 @@ namespace field {
       //****************************************************************************************************************
 
 
-      friend class Field<typename boost::remove_const<T>::type, fieldFSize>;
+      friend class Field<typename std::remove_const<T>::type, fieldFSize>;
 
       void incrementLine();
       void decrementLine();
@@ -217,7 +215,7 @@ namespace field {
    {
    public:
       typedef FieldIterator<T,fieldFSize> Parent;
-      typedef Field<typename boost::remove_const<T>::type, fieldFSize> FieldType;
+      typedef Field<typename std::remove_const<T>::type, fieldFSize> FieldType;
 
       //**Constructor/Destructor****************************************************************************************
       /*!\name Constructor/Destructor */
@@ -260,7 +258,7 @@ namespace field {
    {
    public:
        typedef FieldIterator<T,fieldFSize> Parent;
-       typedef Field<typename boost::remove_const<T>::type, fieldFSize> FieldType;
+       typedef Field<typename std::remove_const<T>::type, fieldFSize> FieldType;
 
       //**Constructor/Destructor****************************************************************************************
       /*!\name Constructor/Destructor */

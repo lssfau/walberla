@@ -27,9 +27,8 @@
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
-#include <boost/type_traits/is_floating_point.hpp>
-
 #include <random>
+#include <type_traits>
 
 
 namespace walberla {
@@ -45,7 +44,7 @@ namespace math {
 template< typename T >
 class GenericAABB
 {
-   static_assert( boost::is_floating_point< T >::value, "GenericAABB only works with floating point types for T!" );
+   static_assert( std::is_floating_point< T >::value, "GenericAABB only works with floating point types for T!" );
 
 public:
    // Typedefs
