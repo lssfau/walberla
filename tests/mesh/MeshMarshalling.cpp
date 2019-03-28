@@ -41,8 +41,7 @@ namespace walberla {
 using namespace walberla::pe;
 using namespace walberla::pe::communication;
 
-using UnionTypeTuple = std::tuple<mesh::pe::ConvexPolyhedron>;
-using UnionT = Union<UnionTypeTuple>;
+using UnionT = Union<mesh::pe::ConvexPolyhedron>;
 using UnionID = UnionT *;
 using UnionPtr = std::unique_ptr<UnionT>;
 

@@ -23,7 +23,6 @@
 #include "AnalyticCollisionDetection.h"
 #include "GenericFCD.h"
 
-#include <tuple>
 #include <type_traits>
 
 namespace walberla{

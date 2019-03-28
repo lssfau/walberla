@@ -37,8 +37,6 @@
 #include "core/math/Shims.h"
 #include "geometry/GeometricalFunctions.h"
 
-#include <tuple>
-
 namespace walberla {
 namespace pe {
 namespace fcd {
@@ -110,17 +108,17 @@ template <typename Container>
 inline
 bool collide( CapsuleID c, BoxID b, Container& container );
 
-template <typename BodyTypeTuple, typename BodyB, typename Container>
+template <typename... BodyTypes, typename BodyB, typename Container>
 inline
-bool collide( Union<BodyTypeTuple>* bd1, BodyB* bd2, Container& container );
+bool collide( Union<BodyTypes...>* bd1, BodyB* bd2, Container& container );
 
-template <typename BodyA, typename BodyTypeTuple, typename Container>
+template <typename BodyA, typename... BodyTypes, typename Container>
 inline
-bool collide( BodyA* bd1, Union<BodyTypeTuple>* bd2, Container& container );
+bool collide( BodyA* bd1, Union<BodyTypes...>* bd2, Container& container );
 
-template <typename BodyTypeTupleA, typename BodyTypeTupleB, typename Container>
+template <typename... BodyTypesA, typename... BodyTypesB, typename Container>
 inline
-bool collide( Union<BodyTypeTupleA>* bd1, Union<BodyTypeTupleB>* bd2, Container& container );
+bool collide( Union<BodyTypesA...>* bd1, Union<BodyTypesB...>* bd2, Container& container );
 
 } //namespace analytic
 
@@ -2120,29 +2118,29 @@ bool collide( CapsuleID c, BoxID b, Container& container )
    return collide(b, c, container);
 }
 
-template <typename BodyTypeTuple, typename BodyB, typename Container>
+template <typename... BodyTypes, typename BodyB, typename Container>
 inline
-bool collide( Union<BodyTypeTuple>* bd1, BodyB* bd2, Container& container )
+bool collide( Union<BodyTypes...>* bd1, BodyB* bd2, Container& container )
 {
    AnalyticSingleCollideFunctor<BodyB, Container> func(bd2, container);
    bool collision = false;
    for( auto it=bd1->begin(); it!=bd1->end(); ++it )
    {
-      collision |= SingleCast<BodyTypeTuple, AnalyticSingleCollideFunctor<BodyB, Container>, bool>::execute(it.getBodyID(), func);
+      collision |= SingleCast<std::tuple<BodyTypes...>, AnalyticSingleCollideFunctor<BodyB, Container>, bool>::execute(it.getBodyID(), func);
    }
    return collision;
 }
 
-template <typename BodyA, typename BodyTypeTuple, typename Container>
+template <typename BodyA, typename... BodyTypes, typename Container>
 inline
-bool collide( BodyA* bd1, Union<BodyTypeTuple>* bd2, Container& container )
+bool collide( BodyA* bd1, Union<BodyTypes...>* bd2, Container& container )
 {
    return collide (bd2, bd1, container);
 }
 
-template <typename BodyTypeTupleA, typename BodyTypeTupleB, typename Container>
+template <typename... BodyTypesA, typename... BodyTypesB, typename Container>
 inline
-bool collide( Union<BodyTypeTupleA>* bd1, Union<BodyTypeTupleB>* bd2, Container& container )
+bool collide( Union<BodyTypesA...>* bd1, Union<BodyTypesB...>* bd2, Container& container )
 {
    AnalyticCollideFunctor<Container> func(container);
    bool collision = false;
@@ -2150,7 +2148,7 @@ bool collide( Union<BodyTypeTupleA>* bd1, Union<BodyTypeTupleB>* bd2, Container&
    {
       for( auto it2=bd2->begin(); it2!=bd2->end(); ++it2 )
       {
-         collision |= DoubleCast<BodyTypeTupleA, BodyTypeTupleB, AnalyticCollideFunctor<Container>, bool>::execute(it1.getBodyID(), it2.getBodyID(), func);
+         collision |= DoubleCast<std::tuple<BodyTypesA...>, std::tuple<BodyTypesB...>, AnalyticCollideFunctor<Container>, bool>::execute(it1.getBodyID(), it2.getBodyID(), func);
       }
    }
    return collision;

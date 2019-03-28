@@ -39,7 +39,7 @@
 namespace walberla{
 namespace pe{
 
-template <typename BodyTypeTuple>
+template <typename... BodyTypes>
 class Union;
 
 /**
@@ -50,7 +50,7 @@ class RigidBody : public ccd::HashGridsBodyTrait
                 , private NonCopyable
 {
 private:
-   template <typename BodyTypeTuple>
+   template <typename... BodyTypes>
    friend class Union;
 
 protected:

@@ -235,7 +235,7 @@ void CapsuleTest2()
 
 void UnionTest()
 {
-   using UnionT = Union<std::tuple<Sphere> >;
+   using UnionT = Union<Sphere>;
    UnionT  un1(120, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), false, true, false);
    UnionT  un2(121, 0, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), false, true, false);
    auto sp1 = createSphere(&un1, 123, Vec3(0,0,0), 1);

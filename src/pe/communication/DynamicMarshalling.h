@@ -38,8 +38,6 @@
 
 #include "core/Abort.h"
 
-#include <tuple>
-
 
 namespace walberla {
 namespace pe {
