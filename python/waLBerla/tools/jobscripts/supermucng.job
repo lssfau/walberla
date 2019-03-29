@@ -7,15 +7,10 @@
 #SBATCH --ntasks-per-core={tasks_per_core}
 #SBATCH --ntasks-per-node={tasks_per_node}
 #SBATCH --cpus-per-task={cpus_per_task}
-#SBATCH --partition=normal
-#SBATCH --constraint=gpu
+#SBATCH --partition={partition}
 {additional_lines}
 
 cd {initial_dir}
 
-module load daint-gpu
-
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
-export CRAY_CUDA_MPS=1
-
-
+export OMP_PLACES={omp_places}
