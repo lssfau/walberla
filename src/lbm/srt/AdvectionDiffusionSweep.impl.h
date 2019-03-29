@@ -160,7 +160,7 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
                                  LM_AdvDiff::CollisionModel::constant &&
                                  LM_AdvDiff::compressible &&
                                  std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder > == 1 )
+                                 ! ( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
                               >::type
    > ::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
@@ -282,7 +282,7 @@ void AdvectionDiffusionSweep< LM_AdvDiff, VelocityAdapter_T, FlagField_T, Vector
                                  ! LM_AdvDiff::CollisionModel::constant &&
                                  LM_AdvDiff::compressible &&
                                  std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value &&
-                                 !( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 > && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
+                                 !( std::is_same< typename LM_AdvDiff::Stencil, stencil::D3Q19 >::value && LM_AdvDiff::equilibriumAccuracyOrder == 1 )
                               >::type
    > ::operator() ( IBlock * block )
 {
