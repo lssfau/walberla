@@ -41,6 +41,12 @@ namespace lbm {
 // D3Q19 SPECIALIZATION //
 //////////////////////////
 
+// This MRT variant is taken from the dissertation of Ulf Schiller 
+// "Thermal fluctuations and boundary conditions in the lattice Boltzmann method" (2008), p. 24ff
+// There are some typos in the moment matrix on p.27
+// The here implemented ordering of the moments is however different from the reference (Eq. 2.61-2.63)
+// The moments are weighted orthogonal (Eq. 2.58)
+
 #define WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZATION_MRT_1 \
    std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >::value && \
    std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value && \
