@@ -23,9 +23,7 @@
 
 #include "extern/sqlite3.h"
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
+#include <core/RandomUUID.h>
 
 #include <sstream>
 
@@ -93,7 +91,7 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
 
    string insertRunCommand = "INSERT INTO runs (timestamp, uuid ";
    std::stringstream values;
-   auto uuid = boost::uuids::random_generator()();
+   auto uuid = RandomUUID();
    values << " VALUES ( CURRENT_TIMESTAMP, \"" << uuid << "\" ";
    // Add columns for integer properties
    for ( auto i = integerProperties.begin(); i != integerProperties.end(); ++i )
