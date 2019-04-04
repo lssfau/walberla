@@ -63,7 +63,7 @@ void runTests( const uint_t numAABBs )
 
       walberla::optional< bool > result = isIntersecting( triDist, testAABB, maxErr );
 
-      if ( result.has_value() )
+      if ( result )
       {
          if(result.value())
          {
