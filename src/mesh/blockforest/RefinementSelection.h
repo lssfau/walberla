@@ -103,7 +103,7 @@ inline void walberla::mesh::RefinementSelection<DistanceObject>::operator()( blo
          continue;
 
       walberla::optional< bool > intersects = intersectsSurface( *distanceObject_, blocks[ shuffle[ii] ]->getAABB(), maxError_, distance_ );
-      if( intersects.value_or( true ) )
+      if( !intersects || intersects.value() )
          refine[ shuffle[ ii ] ] = uint8_t( 1 );
    }
 
