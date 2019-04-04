@@ -23,6 +23,7 @@
 #include "core/logging/Logging.h"
 #include "core/math/AABB.h"
 #include "core/mpi/Environment.h"
+#include "core/Optional.h"
 
 #include "mesh/MeshIO.h"
 #include "mesh/MeshOperations.h"
@@ -50,7 +51,7 @@ void runTests( const uint_t numAABBs )
 
    TriangleDistance<MeshType> triDist( mesh );
 
-   WALBERLA_CHECK( isIntersecting( triDist, meshAABB, real_t(0) ).value, boost::logic::tribool::true_value );
+   WALBERLA_CHECK( isIntersecting( triDist, meshAABB, real_t(0) ).value_or( false ) );
 
    std::mt19937 rng( uint32_t(42) );
 
@@ -60,19 +61,18 @@ void runTests( const uint_t numAABBs )
 
       const real_t maxErr = real_t(1e-2);
 
-      boost::tribool result = isIntersecting( triDist, testAABB, maxErr );
+      walberla::optional< bool > result = isIntersecting( triDist, testAABB, maxErr );
 
-      if(result)
+      if ( result.has_value() )
       {
-         WALBERLA_CHECK( meshAABB.intersects( testAABB ), "Box#: " << i );
-      }
-      else if(!result)
-      {
-         WALBERLA_CHECK( !meshAABB.intersects( testAABB ), "Box#: " << i );
-      }
-      else
-      {
-         WALBERLA_ASSERT( boost::logic::indeterminate( result ) );
+         if(result.value())
+         {
+            WALBERLA_CHECK( meshAABB.intersects( testAABB ), "Box#: " << i );
+         }
+         else if(!result.value())
+         {
+            WALBERLA_CHECK( !meshAABB.intersects( testAABB ), "Box#: " << i );
+         }
       }
    }
 }
