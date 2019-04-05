@@ -2,8 +2,8 @@
 #SBATCH --job-name={job_name}
 #SBATCH --time={wall_time}
 #SBATCH --nodes={nodes}
-#SBATCH -o {{output_file}}
-#SBATCH -o {{error_file}}
+#SBATCH -o {output_file}
+#SBATCH -o {error_file}
 #SBATCH --ntasks-per-core={tasks_per_core}
 #SBATCH --ntasks-per-node={tasks_per_node}
 #SBATCH --cpus-per-task={cpus_per_task}

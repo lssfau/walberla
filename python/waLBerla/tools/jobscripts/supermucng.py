@@ -50,7 +50,9 @@ def createJobscript(wall_time=None, nodes=None, cores=None, job_class=None, init
         else:
             job_class = 'special'
 
-    tasks_per_node = min(cores_per_node, cores)
+    if  cores_per_node % omp_num_threads != 0:
+        raise ValueError("Could not divede cores_per_node %d to omp_num_threads %d", (cores_per_node, omp_num_threads))
+    tasks_per_node = min(cores_per_node//omp_num_threads, cores)
 
     omp_places = "cores" if hyperthreading == 1 else "threads"
 
@@ -75,17 +77,17 @@ def createJobscript(wall_time=None, nodes=None, cores=None, job_class=None, init
                                                additional_lines=additional_lines,
                                                error_file=error_file)
 
-    exec_line = "mpiexec -n %d %s %s \n"
+    exec_line = "srun %s %s \n"
 
     if exe_name is not None:
         for param_file in parameter_files:
-            result += exec_line % (cores, exe_name, param_file)
+            result += exec_line % (exe_name, param_file)
 
     for exe_paramfile_pair in commands:
         if type(exe_paramfile_pair) is not tuple:
             result += exe_paramfile_pair + "\n"
         else:
-            result += exec_line % (cores, exe_paramfile_pair[0], exe_paramfile_pair[1])
+            result += exec_line % (exe_paramfile_pair[0], exe_paramfile_pair[1])
 
     return result
 
