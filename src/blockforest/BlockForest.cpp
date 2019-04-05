@@ -538,10 +538,10 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
          const BlockID id( buffer, offset, blockIdBytes );
 
          Set<SUID> state;
-         boost::dynamic_bitset< uint8_t > suidBitset = byteArrayToBitset( buffer, offset + blockIdBytes, suidBytes );
-         for( uint_t j = 0; j != suidBitset.size(); ++j ) {
-            WALBERLA_ASSERT( !suidBitset.test( j ) || j < suidMap.size() );
-            if( suidBitset.test( j ) )
+         std::vector< bool > suidBoolVec = byteArrayToBoolVector( buffer, offset + blockIdBytes, suidBytes );
+         for( uint_t j = 0; j != suidBoolVec.size(); ++j ) {
+            WALBERLA_ASSERT( !suidBoolVec[ j ] || j < suidMap.size() );
+            if( suidBoolVec[j])
                state += suidMap[j];
          }
 
@@ -560,10 +560,10 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
             const BlockID id( buffer, offset, blockIdBytes );
 
             Set<SUID> state;
-            boost::dynamic_bitset< uint8_t > suidBitset = byteArrayToBitset( buffer, offset + blockIdBytes, suidBytes );
-            for( uint_t k = 0; k != suidBitset.size(); ++k ) {
-               WALBERLA_ASSERT( !suidBitset.test( k ) || k < suidMap.size() );
-               if( suidBitset.test( k ) )
+            std::vector< bool > suidBoolVec = byteArrayToBoolVector( buffer, offset + blockIdBytes, suidBytes );
+            for( uint_t k = 0; k != suidBoolVec.size(); ++k ) {
+               WALBERLA_ASSERT( !suidBoolVec[k] || k < suidMap.size() );
+               if( suidBoolVec[k])
                   state += suidMap[k];
             }
 
@@ -584,10 +584,10 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
          // block state (SUID set)
 
          Set<SUID> state;
-         boost::dynamic_bitset< uint8_t > suidBitset = byteArrayToBitset( buffer, offset + blockIdBytes, suidBytes );
-         for( uint_t j = 0; j != suidBitset.size(); ++j ) {
-            WALBERLA_ASSERT( !suidBitset.test( j ) || j < suidMap.size() );
-            if( suidBitset.test( j ) )
+         std::vector< bool > suidBoolVec = byteArrayToBoolVector( buffer, offset + blockIdBytes, suidBytes );
+         for( uint_t j = 0; j != suidBoolVec.size(); ++j ) {
+            WALBERLA_ASSERT( !suidBoolVec[j] || j < suidMap.size() );
+            if( suidBoolVec[j])
                state += suidMap[j];
          }
 
@@ -618,10 +618,10 @@ BlockForest::BlockForest( const uint_t process, const char* const filename, cons
             ids.emplace_back( buffer, offset, blockIdBytes );
 
             Set<SUID> state;
-            boost::dynamic_bitset< uint8_t > suidBitset = byteArrayToBitset( buffer, offset + blockIdBytes, suidBytes );
-            for( uint_t k = 0; k != suidBitset.size(); ++k ) {
-               WALBERLA_ASSERT( !(suidBitset.test( k ) ) || k < suidMap.size() );
-               if( suidBitset.test( k ) )
+            std::vector< bool > suidBoolVec = byteArrayToBoolVector( buffer, offset + blockIdBytes, suidBytes );
+            for( uint_t k = 0; k != suidBoolVec.size(); ++k ) {
+               WALBERLA_ASSERT( !suidBoolVec[k] || k < suidMap.size() );
+               if( suidBoolVec[k])
                   state += suidMap[k];
             }
 
@@ -1329,14 +1329,14 @@ void BlockForest::saveToFile( const std::string & filename, const Set<SUID> & bl
 
    const uint_t suidBytes = ( ( blockStates.size() % 8 == 0 ) ? ( blockStates.size() / 8 ) : ( blockStates.size() / 8 + 1 ) );
 
-   std::map< SUID, boost::dynamic_bitset< uint8_t > > suidMap;
+   std::map< SUID, std::vector< bool > > suidMap;
 
    uint_t i = 0;
    for( Set<SUID>::const_iterator it = blockStates.begin(); it != blockStates.end(); ++it ) {
 
-      boost::dynamic_bitset< uint8_t > suidBitset( 8 * suidBytes );
-      suidBitset.set( i, true );
-      suidMap[ *it ] = suidBitset;
+      std::vector< bool > suidBoolVec( 8 * suidBytes );
+      suidBoolVec[i] = true;
+      suidMap[ *it ] = suidBoolVec;
       ++i;
    }
 
@@ -2758,7 +2758,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 /// \attention 'suidMap' and 'suidBytes' must be identical for every process!
 /// \see BlockForestFile.h
 void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMode,
-                              const std::map< SUID, boost::dynamic_bitset<uint8_t> > & suidMap, const uint_t suidBytes ) const
+                              const std::map< SUID, std::vector< bool > > & suidMap, const uint_t suidBytes ) const
 {
    // process data
 
@@ -2834,7 +2834,7 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
       // block state (SUID set)
       if( suidBytes > 0 )
       {
-         boost::dynamic_bitset< uint8_t > suidBitset( 8 * suidBytes );
+         std::vector< bool > suidBoolVec( 8 * suidBytes );
 
          const Set<SUID> & state = block->second->getState();
          for( auto suid = state.begin(); suid != state.end(); ++suid )
@@ -2842,10 +2842,13 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
             WALBERLA_CHECK( suidMap.find( *suid ) != suidMap.end(), "Block state SUID missing from SUID list saved to file."
                                                                     "\n- SUID = " << *suid << "\n- block ID = " << block->first <<
                                                                     "\n- block AABB = " << block->second->getAABB() );
-            suidBitset |= suidMap.find( *suid )->second;
+            //Elementwise OR of all elements
+            for (uint_t i = 0; i < suidBoolVec.size(); ++i) {
+               suidBoolVec[i] = suidBoolVec[i] | suidMap.find( *suid )->second[i];
+            }
          }
 
-         bitsetToByteArray( suidBitset, processDataBuffer, offset );
+         boolVectorToByteArray( suidBoolVec, processDataBuffer, offset );
          offset += suidBytes;
       }
    }

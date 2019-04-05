@@ -24,8 +24,6 @@
 #include "DataTypes.h"
 #include "core/debug/Debug.h"
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <cmath>
 #include <limits>
 #include <vector>
@@ -146,33 +144,35 @@ REAL_T byteArrayToReal( const std::vector< uint8_t >& array, const uint_t offset
 }
 
 
-
-inline void bitsetToByteArray( const boost::dynamic_bitset< uint8_t >& bitset, std::vector< uint8_t >& array, const uint_t offset )
+inline void boolVectorToByteArray( const std::vector< bool >& boolVec, std::vector< uint8_t >& array, const uint_t offset )
 {
    static const uint_t bit[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
-   const uint_t bytes = bitset.num_blocks();
+   WALBERLA_ASSERT_EQUAL( boolVec.size() % 8, uint_t(0) );
+   const uint_t bytes =  uint_c(boolVec.size() / 8);
 
    WALBERLA_ASSERT_LESS_EQUAL( offset + bytes, array.size() );
 
    for( uint_t i = 0; i != bytes; ++i ) {
-      array[ offset + i ] = uint8_c( bitset[i*8+0]*bit[0] + bitset[i*8+1]*bit[1] + bitset[i*8+2]*bit[2] + bitset[i*8+3]*bit[3] +
-                                     bitset[i*8+4]*bit[4] + bitset[i*8+5]*bit[5] + bitset[i*8+6]*bit[6] + bitset[i*8+7]*bit[7] );
+      WALBERLA_ASSERT_LESS_EQUAL(offset + i, array.size());
+      array[ offset + i ] = uint8_c( boolVec[i*8+0]*bit[0] + boolVec[i*8+1]*bit[1] + boolVec[i*8+2]*bit[2] + boolVec[i*8+3]*bit[3] +
+                                     boolVec[i*8+4]*bit[4] + boolVec[i*8+5]*bit[5] + boolVec[i*8+6]*bit[6] + boolVec[i*8+7]*bit[7] );
    }
 }
-inline boost::dynamic_bitset< uint8_t > byteArrayToBitset( const std::vector< uint8_t >& array, const uint_t offset, const uint_t bytes )
+
+inline std::vector< bool > byteArrayToBoolVector( const std::vector< uint8_t >& array, const uint_t offset, const uint_t bytes )
 {
    static const uint8_t bit[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
    WALBERLA_ASSERT_LESS_EQUAL( offset + bytes, array.size() );
 
-   boost::dynamic_bitset< uint8_t > bitset( 8 * bytes );
+   std::vector< bool > boolVec( 8 * bytes );
 
    for( uint_t i = 0; i != bytes; ++i )
       for( uint_t j = 0; j != 8; ++j )
-         bitset.set( i * 8 + j, (array[ offset + i ] & bit[j]) != uint8_t(0) );
+         boolVec[i * 8 + j] = (array[offset + i] & bit[j]) != uint8_t(0);
 
-   return bitset;
+   return boolVec;
 }
 
 

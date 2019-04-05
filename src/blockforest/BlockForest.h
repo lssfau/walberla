@@ -501,7 +501,7 @@ private:
    void update( PhantomBlockForest & phantomForest );
 
    void saveToFile( const std::string & filename, FileIOMode fileIOMode,
-                    const std::map< SUID, boost::dynamic_bitset<uint8_t> > & suidMap, const uint_t suidBytes ) const;
+                    const std::map< SUID, std::vector< bool > > & suidMap, const uint_t suidBytes ) const;
    void storeFileHeader( std::vector< uint8_t > & data, uint_t & offset ) const;
 
 
