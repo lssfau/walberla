@@ -37,8 +37,6 @@
 
 #include "domain_decomposition/MapPointToPeriodicDomain.h"
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <cmath>
 #include <fstream>
 #include <iomanip>
@@ -1700,7 +1698,7 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
    file.write( reinterpret_cast< const char* >( &(buffer[0]) ), numeric_cast< std::streamsize >( buffer.size() ) );
    buffer.clear();
 
-   std::map< SUID, boost::dynamic_bitset< uint8_t > > suidMap;
+   std::map< SUID, std::vector< bool > > suidMap;
 
    const uint_t suidBytes = ( ( suids.size() % 8 == 0 ) ? ( suids.size() / 8 ) : ( suids.size() / 8 + 1 ) );
 
@@ -1709,9 +1707,9 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
    uint_t i = 0;
    for( Set<SUID>::const_iterator it = suids.begin(); it != suids.end(); ++it ) {
 
-      boost::dynamic_bitset< uint8_t > suidBitset( 8 * suidBytes );
-      suidBitset.set( i, true );
-      suidMap[ *it ] = suidBitset;
+      std::vector< bool > suidBoolVec( 8 * suidBytes );
+      suidBoolVec[i] =  true;
+      suidMap[ *it ] = suidBoolVec;
 
       // length of its identifier string
 
@@ -1774,16 +1772,18 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
             // block state (SUID set)
 
             if( suidBytes > 0 ) {
-
-               boost::dynamic_bitset< uint8_t > suidBitset( 8 * suidBytes );
+               std::vector< bool > suidBoolVec( 8 * suidBytes );
 
                const Set<SUID>& state = block->getState();
                for( Set<SUID>::const_iterator suid = state.begin(); suid != state.end(); ++suid ) {
                   WALBERLA_ASSERT( suidMap.find( *suid ) != suidMap.end() );
-                  suidBitset |= suidMap[ *suid ];
+                  //Elementwise OR of all elements
+                  for (uint_t k = 0;k  < suidBoolVec.size(); ++k) {
+                     suidBoolVec[k] = suidBoolVec[k] | suidMap.find( *suid )->second[k];
+                  }
                }
 
-               bitsetToByteArray( suidBitset, buffer, offset );
+               boolVectorToByteArray( suidBoolVec, buffer, offset );
                offset += suidBytes;
             }
 
