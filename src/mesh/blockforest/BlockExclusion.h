@@ -103,7 +103,8 @@ void walberla::mesh::ExcludeMeshExterior<DistanceObject>::operator()( std::vecto
       for( int i = chunkBegin; i < chunkEnd; ++i )
       {
          size_t is = numeric_cast<size_t>( i );
-         if( !isIntersecting( *distanceObject_, aabb( shuffle[is] ), maxError_ ) )
+         auto intersectionDefined = isIntersecting( *distanceObject_, aabb( shuffle[is] ), maxError_ );
+         if( intersectionDefined && !intersectionDefined.value() )
             excludeBlock[ shuffle[is] ] = uint8_t( 1 );
       }
 
@@ -143,7 +144,8 @@ void walberla::mesh::ExcludeMeshInterior<DistanceObject>::operator()( std::vecto
    for( int i = chunkBegin; i < chunkEnd; ++i )
    {
       size_t is = numeric_cast<size_t>( i );
-      if( fullyCoversAABB( *distanceObject_, aabb( shuffle[is] ), maxError_ ) )
+      auto fullCoveringAABBDefined = fullyCoversAABB( *distanceObject_, aabb( shuffle[is] ), maxError_ );
+      if( fullCoveringAABBDefined && fullCoveringAABBDefined.value() )
          excludeBlock[ shuffle[is] ] = uint8_t( 1 );
    }
 
