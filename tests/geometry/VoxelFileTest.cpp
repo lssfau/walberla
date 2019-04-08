@@ -20,19 +20,6 @@
 //======================================================================================================================
 
 
-
-#ifdef _MSC_VER
-#  pragma warning(push)
-// disable warning boost/multi_array/base.hpp(475): warning C4189: 'bound_adjustment' : local variable is initialized but not referenced
-#  pragma warning( disable : 4189 )
-#endif //_MSC_VER
-
-#include <boost/multi_array/base.hpp>
-
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif //_MSC_VER
-
 #include "geometry/structured/VoxelFileReader.h"
 #include "core/Abort.h"
 #include "core/DataTypes.h"
@@ -44,20 +31,7 @@
 
 #include <random>
 
-#ifdef _MSC_VER
-#  pragma warning(push)
-// disable warning for multi_array: "declaration of 'extents' hides global declaration"
-#  pragma warning( disable : 4459 )
-#endif //_MSC_VER
-
-#include <boost/multi_array.hpp>
-
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif //_MSC_VER
-
 typedef std::mersenne_twister_engine< walberla::uint32_t, 32, 351, 175, 19, 0xccab8ee7, 11, 0xffffffff, 7, 0x31b6ab00, 15, 0xffe50000, 17, 0xa37d3c92 > mt11213b;
-
 
 /// randomize the memory underlying the vector up the maximal size (== capacity)
 template<typename T>
@@ -102,48 +76,41 @@ void randomizeVector( std::vector<char> & v )
 }
 
 template<typename T>
-void makeRandomMultiArray( boost::multi_array<T, 3> & ma)
+void makeRandomMultiArray( std::vector<T> & ma)
 {
    static_assert(sizeof(T) > sizeof(char), "cannot use char");
 
    mt11213b rng;
    std::uniform_int_distribution<T> dist( std::numeric_limits<T>::min(), std::numeric_limits<T>::max() );
 
-   for(T* it = ma.data(); it != ma.data() + ma.num_elements(); ++it)
+   for(auto it = ma.begin(); it != ma.end(); ++it)
       *it = dist(rng);
 }
 
 template<>
-void makeRandomMultiArray( boost::multi_array<unsigned char, 3> & ma)
-{
+void makeRandomMultiArray( std::vector<unsigned char> & ma) {
    mt11213b rng;
-   std::uniform_int_distribution<walberla::int16_t> dist( std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max() );
+   std::uniform_int_distribution<walberla::int16_t> dist(std::numeric_limits<unsigned char>::min(), std::numeric_limits<unsigned char>::max());
 
-   for(unsigned char* it = ma.data(); it != ma.data() + ma.num_elements(); ++it)
-      *it = static_cast<unsigned char>( dist(rng) );
+   for (auto it = ma.begin(); it != ma.end(); ++it)
+      *it = static_cast<unsigned char>( dist(rng));
 }
 
 template<>
-void makeRandomMultiArray( boost::multi_array<char, 3> & ma)
+void makeRandomMultiArray( std::vector<char> & ma)
 {
    mt11213b rng;
    std::uniform_int_distribution<int16_t> dist( std::numeric_limits<char>::min(), std::numeric_limits<char>::max() );
-
-   for(char* it = ma.data(); it != ma.data() + ma.num_elements(); ++it)
+   for (auto it = ma.begin(); it != ma.end(); ++it)
       *it = static_cast<char>( dist(rng) );
 }
 
 template<typename T>
 void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t zSize);
 
-template<typename T>
-void makeRandomMultiArray( boost::multi_array<T, 3> & ma);
-
 void modifyHeader(std::string inputFilename, std::string outputFilename,
                   size_t xSize, size_t ySize, size_t zSize);
 
-template<typename T>
-void makeRandomMultiArray( boost::multi_array<T, 3> & ma);
 
 int main(int argc, char** argv)
 {
@@ -281,13 +248,12 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
 
    data.clear();
 
-   using bindex = boost::multi_array_types::index;
+   std::vector<T> reference(zSize * ySize * xSize);
 
-   boost::multi_array<T, 3> reference(boost::extents[walberla::numeric_cast<bindex>(zSize)][walberla::numeric_cast<bindex>(ySize)][walberla::numeric_cast<bindex>(xSize)]);
    makeRandomMultiArray(reference);
 
-   data.resize(reference.num_elements());
-   std::copy( reference.data(), reference.data() + reference.num_elements(), data.begin() );
+   data.resize(reference.size());
+   std::copy( reference.begin(), reference.end(), data.begin() );
 
    geometryFile.open(filename);
    WALBERLA_CHECK( geometryFile.isOpen() );
@@ -302,8 +268,8 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
    randomizeVector(data);
    geometryFile.read(aabb, data);
 
-   WALBERLA_CHECK_EQUAL(reference.num_elements(), data.size());
-   WALBERLA_CHECK( std::equal(reference.data(), reference.data() + reference.num_elements(), data.begin()) );
+   WALBERLA_CHECK_EQUAL(reference.size(), data.size());
+   WALBERLA_CHECK( std::equal(reference.begin(), reference.end(), data.begin()) );
 
    randomizeVector(data);
 
@@ -317,8 +283,8 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
 
    geometryFile.read(aabb, data);
 
-   WALBERLA_CHECK_EQUAL(reference.num_elements(), data.size());
-   WALBERLA_CHECK( std::equal(reference.data(), reference.data() + reference.num_elements(), data.begin()) );
+   WALBERLA_CHECK_EQUAL(reference.size(), data.size());
+   WALBERLA_CHECK( std::equal(reference.begin(), reference.end(), data.begin()) );
 
    std::vector<size_t> blockSizesX;
    blockSizesX.push_back(std::max(xSize / 2, size_t(1)));
@@ -359,17 +325,16 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
                      geometryFile.read(blockAABB, data);
                      WALBERLA_CHECK_EQUAL( data.size(), blockAABB.numCells() );
 
-                     typename boost::multi_array<T, 3>::template array_view<3>::type myview =
-                        reference[ boost::indices[boost::multi_array_types::index_range(blockAABB.zMin(), blockAABB.zMax() + 1)]
-                                                 [boost::multi_array_types::index_range(blockAABB.yMin(), blockAABB.yMax() + 1)]
-                                                 [boost::multi_array_types::index_range(blockAABB.xMin(), blockAABB.xMax() + 1)] ];
+                     auto zIndexOffset = walberla::numeric_cast<size_t>(blockAABB.zMin());
+                     auto yIndexOffset = walberla::numeric_cast<size_t>(blockAABB.yMin());
+                     auto xIndexOffset = walberla::numeric_cast<size_t>(blockAABB.xMin());
 
                      size_t vectorIdx = 0;
                      for(size_t z = 0; z < blockAABB.zSize(); ++z)
                         for(size_t y = 0; y < blockAABB.ySize(); ++y)
                            for(size_t x = 0; x < blockAABB.xSize(); ++x)
                            {
-                              WALBERLA_CHECK_EQUAL(data[vectorIdx], myview[walberla::numeric_cast<bindex>(z)][walberla::numeric_cast<bindex>(y)][walberla::numeric_cast<bindex>(x)]);
+                              WALBERLA_CHECK_EQUAL(data[vectorIdx], reference[(zIndexOffset+z)*ySize*xSize + (yIndexOffset+y)*xSize + (xIndexOffset+x)]);
                               ++vectorIdx;
                            }
                   }
@@ -408,10 +373,9 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
                      WALBERLA_CHECK_LESS(blockAABB.yMax(), ySize);
                      WALBERLA_CHECK_LESS(blockAABB.zMax(), zSize);
 
-                     typename boost::multi_array<T, 3>::template array_view<3>::type myview =
-                        reference[ boost::indices[boost::multi_array_types::index_range(blockAABB.zMin(), blockAABB.zMax() + 1)]
-                                                 [boost::multi_array_types::index_range(blockAABB.yMin(), blockAABB.yMax() + 1)]
-                                                 [boost::multi_array_types::index_range(blockAABB.xMin(), blockAABB.xMax() + 1)] ];
+                     auto zIndexOffset = walberla::numeric_cast<size_t>(blockAABB.zMin());
+                     auto yIndexOffset = walberla::numeric_cast<size_t>(blockAABB.yMin());
+                     auto xIndexOffset = walberla::numeric_cast<size_t>(blockAABB.xMin());
 
                      data.resize(blockAABB.numCells());
                      size_t vectorIdx = 0;
@@ -419,7 +383,7 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
                         for(size_t y = 0; y < blockAABB.ySize(); ++y)
                            for(size_t x = 0; x < blockAABB.xSize(); ++x)
                            {
-                              data[vectorIdx] = myview[walberla::numeric_cast<bindex>(z)][walberla::numeric_cast<bindex>(y)][walberla::numeric_cast<bindex>(x)];
+                              data[vectorIdx] = reference[(zIndexOffset+z)*ySize*xSize + (yIndexOffset+y)*xSize + (xIndexOffset+x)];
                               ++vectorIdx;
                            }
 
@@ -428,8 +392,8 @@ void runTests(const std::string & filename, size_t xSize, size_t ySize, size_t z
                }
             }
             geometryFile.read(aabb, data);
-            WALBERLA_CHECK_EQUAL(reference.num_elements(), data.size());
-            WALBERLA_CHECK( std::equal(reference.data(), reference.data() + reference.num_elements(), data.begin()) );
+            WALBERLA_CHECK_EQUAL(reference.size(), data.size());
+            WALBERLA_CHECK( std::equal(reference.begin(), reference.end(), data.begin()) );
          }
       }
    }
