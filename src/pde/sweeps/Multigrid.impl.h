@@ -26,18 +26,7 @@
 
 #include "stencil/D3Q7.h"
 
-#ifdef _MSC_VER
-#  pragma warning(push)
-// disable warning for multi_array: "declaration of 'extents' hides global declaration"
-#  pragma warning( disable : 4459 )
-#endif //_MSC_VER
-
-#include <boost/multi_array.hpp>
-
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif //_MSC_VER
-
+#include <array>
 
 namespace walberla {
 namespace pde {
@@ -195,32 +184,34 @@ void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<Blo
          StencilField_T * coarse = block->getData< StencilField_T >( stencilFieldId[lvl] );
 
 
-         typedef boost::multi_array<real_t, 3> Array3D;
-         Array3D p(boost::extents[7][7][7]);
-         Array3D r(boost::extents[2][2][2]);
+         typedef std::array<std::array<std::array<real_t,7>,7>,7> Array3D_7;
+         typedef std::array<std::array<std::array<real_t,2>,2>,2> Array3D_2;
+
+         Array3D_2 r;
+         Array3D_7 p;
 
          // Set to restriction weights from constant restrict operator
-          for(Array3D::index z=0; z<2; ++z) {
-            for(Array3D::index y=0; y<2; ++y) {
-               for(Array3D::index x=0; x<2; ++x) {
+          for(auto z = uint_t(0); z < uint_t(2); ++z) {
+            for(auto y = uint_t(0); y < uint_t(2); ++y) {
+               for(auto x = uint_t(0); x < uint_t(2); ++x) {
                   r[x][y][z] = real_t(1);
                }
             }
          }
 
          // Init to 0 //
-         for(Array3D::index k=0; k<7; ++k) {
-            for(Array3D::index j=0; j<7; ++j) {
-               for(Array3D::index i=0; i<7; ++i) {
+         for(auto k = uint_t(0); k < uint_t(7); ++k) {
+            for(auto j = uint_t(0); j < uint_t(7); ++j) {
+               for(auto i = uint_t(0); i < uint_t(7); ++i) {
                   p[i][j][k] = real_t(0);
                }
             }
          }
 
          // Set center to prolongation weights, including overrelaxation factor (latter therefore no longer needed in ProlongateAndCorrect)
-         for(Array3D::index k=0; k<2; ++k) {
-            for(Array3D::index j=0; j<2; ++j) {
-               for(Array3D::index i=0; i<2; ++i) {
+         for(auto k = uint_t(0); k < uint_t(2); ++k) {
+            for(auto j = uint_t(0); j < uint_t(2); ++j) {
+               for(auto i = uint_t(0); i < uint_t(2); ++i) {
                   p[i+2][j+2][k+2] = real_t(0.125)/overrelaxFact_;   // Factor 0.125 such that same prolongation operator for DCA and GCA
                }
             }
@@ -229,35 +220,35 @@ void CoarsenStencilFieldsGCA< stencil::D3Q7 >::operator()( const std::vector<Blo
 
          WALBERLA_FOR_ALL_CELLS_XYZ(coarse,
 
-            Array3D ap(boost::extents[7][7][7]);
+            Array3D_7 ap;
 
             const cell_idx_t fx = 2*x;
             const cell_idx_t fy = 2*y;
             const cell_idx_t fz = 2*z;
 
-            for(Array3D::index k=0; k<7; ++k)
-               for(Array3D::index j=0; j<7; ++j)
-                  for(Array3D::index i=0; i<7; ++i)
+            for(auto k = uint_t(0); k < uint_t(7); ++k)
+               for(auto j = uint_t(0); j < uint_t(7); ++j)
+                  for(auto i = uint_t(0); i < uint_t(7); ++i)
                      ap[i][j][k] = real_t(0);
 
 
             // Tested for spatially varying stencils! //
-            for(Array3D::index k=1; k<5; ++k)
-               for(Array3D::index j=1; j<5; ++j)
-                  for(Array3D::index i=1; i<5; ++i) {
+            for(auto k = uint_t(1); k < uint_t(5); ++k)
+               for(auto j = uint_t(1); j < uint_t(5); ++j)
+                  for(auto i = uint_t(1); i < uint_t(5); ++i){
                      ap[i][j][k] = real_t(0);
                      for(auto d = stencil::D3Q7::begin(); d != stencil::D3Q7::end(); ++d ){
-                        ap[i][j][k] += p[ i+d.cx() ] [ j+d.cy() ] [k+d.cz() ] * fine->get( fx+cell_idx_c(i%2), fy+cell_idx_c(j%2), fz+cell_idx_c(k%2), d.toIdx() ); // contains elements of one row of coarse grid matrix
+                        ap[i][j][k] += p[ uint_c(cell_idx_c(i)+d.cx()) ] [ uint_c(cell_idx_c(j)+d.cy()) ] [uint_c(cell_idx_c(k)+d.cz()) ] * fine->get( fx+cell_idx_c(i%2), fy+cell_idx_c(j%2), fz+cell_idx_c(k%2), d.toIdx() ); // contains elements of one row of coarse grid matrix
                      }
                   }
 
             // Checked, correct! //
             for(auto d = stencil::D3Q7::begin(); d != stencil::D3Q7::end(); ++d ){
                real_t sum = 0;
-               for(Array3D::index k=0; k<2; ++k)
-                  for(Array3D::index j=0; j<2; ++j)
-                     for(Array3D::index i=0; i<2; ++i) {
-                        sum += ap[i+2-2*d.cx()] [j+2-2*d.cy()] [k+2-2*d.cz()] * r[i][j][k];
+               for(auto k = uint_t(0); k < uint_t(2); ++k)
+                  for(auto j = uint_t(0); j < uint_t(2); ++j)
+                     for(auto i = uint_t(0); i < uint_t(2); ++i) {
+                        sum += ap[uint_c(cell_idx_c(i)+2-2*d.cx())] [uint_c(cell_idx_c(j)+2-2*d.cy())] [uint_c(cell_idx_c(k)+2-2*d.cz())] * r[i][j][k];
                         // either i+0 or i+4    // either j+0 or j+4    // either k+0 or k+4       // always 1 here
                      }
 
