@@ -25,8 +25,7 @@
 #include "TriangleMeshes.h"
 
 #include "core/math/GenericAABB.h"
-
-#include <boost/logic/tribool.hpp>
+#include "core/Optional.h"
 
 #include <set>
 #include <iterator>
@@ -72,13 +71,13 @@ template< typename MeshType >
 void findConnectedVertices( const MeshType & mesh, const typename MeshType::FaceHandle & face, std::vector< typename MeshType::VertexHandle > & outVertices );
 
 template< typename DistanceObject, typename T, typename U >
-boost::logic::tribool isIntersecting( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const T & maxError );
+walberla::optional< bool > isIntersecting( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const T & maxError );
 
 template< typename DistanceObject, typename T, typename U >
-boost::logic::tribool fullyCoversAABB( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const T & maxError );
+walberla::optional< bool > fullyCoversAABB( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const T & maxError );
 
 template< typename DistanceObject, typename T, typename U, typename V >
-boost::logic::tribool intersectsSurface( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError, const V & surfaceDistance );
+walberla::optional< bool > intersectsSurface( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError, const V & surfaceDistance );
 
 template< typename MeshType, typename InputIterator >
 typename MeshType::Point principalComponent( const MeshType & mesh, InputIterator beginFh, InputIterator endFh, const uint_t iterations = uint_t(10) );
@@ -341,7 +340,7 @@ void findConnectedVertices( const MeshType & mesh, const typename MeshType::Face
 
 
 template< typename DistanceObject, typename T, typename U >
-boost::logic::tribool isIntersecting( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError )
+walberla::optional< bool > isIntersecting( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError )
 {
    typedef typename DistanceObject::Scalar Scalar;
 
@@ -388,7 +387,7 @@ boost::logic::tribool isIntersecting( const DistanceObject & distanceObject, con
 
       if( error < maxErrorScalar )
       {
-         return boost::logic::indeterminate; // we still don't know if there is an intersection but the error margin is already small enough
+         return walberla::nullopt; // we still don't know if there is an intersection but the error margin is already small enough
       }
 
       const auto &    min = curAabb.minCorner();
@@ -413,7 +412,7 @@ boost::logic::tribool isIntersecting( const DistanceObject & distanceObject, con
 
 
 template< typename DistanceObject, typename T, typename U >
-boost::logic::tribool fullyCoversAABB( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError )
+walberla::optional< bool > fullyCoversAABB( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError )
 {
    typedef typename DistanceObject::Scalar Scalar;
 
@@ -459,7 +458,7 @@ boost::logic::tribool fullyCoversAABB( const DistanceObject & distanceObject, co
 
       if( error < maxErrorScalar )
       {
-         return boost::logic::indeterminate; // we still don't know if there is an intersection but the error margin is already small enough
+         return walberla::nullopt; // we still don't know if there is an intersection but the error margin is already small enough
       }
 
       const auto &    min = curAabb.minCorner();
@@ -484,7 +483,7 @@ boost::logic::tribool fullyCoversAABB( const DistanceObject & distanceObject, co
 
 
 template< typename DistanceObject, typename T, typename U, typename V >
-boost::logic::tribool intersectsSurface( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError, const V & surfaceDistance )
+walberla::optional< bool > intersectsSurface( const DistanceObject & distanceObject, const math::GenericAABB< T > & aabb, const U & maxError, const V & surfaceDistance )
 {
    typedef typename DistanceObject::Scalar Scalar;
 
@@ -532,7 +531,7 @@ boost::logic::tribool intersectsSurface( const DistanceObject & distanceObject, 
 
       if(error < maxErrorScalar)
       {
-         return boost::logic::indeterminate; // we still don't know if there is an intersection but the error margin is already small enough
+         return walberla::nullopt; // we still don't know if there is an intersection but the error margin is already small enough
       }
 
       const auto &    min = curAabb.minCorner();
