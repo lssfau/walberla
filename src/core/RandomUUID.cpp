@@ -35,6 +35,12 @@ RandomUUID::RandomUUID()
    std::random_device rd2;
    std::mt19937 gen2( rd2() );
    b_ = dis(gen2);
+   //unsure how independent these two random numbers really are
+
+   //setting version numbers
+   //https://en.m.wikipedia.org/wiki/Universally_unique_identifier
+   a_ = ((a_ & 0xFFFFFFFFFFFF0FFF) | 0x0000000000004000);
+   b_ = ((b_ & 0x3FFFFFFFFFFFFFFF) | 0x8000000000000000);
 }
 
 RandomUUID::RandomUUID( const UIntType a, const UIntType b)
@@ -49,7 +55,7 @@ std::string RandomUUID::toString() const
       << std::setfill('0')
       << std::setw(8) << (a_ >> 32) << "-"
       << std::setw(4) << ((a_&0xFFFFFFFF)>>16) << "-"
-      << std::setw(4) <<(a_&0xFFFF) << "-"
+      << std::setw(4) << (a_&0xFFFF) << "-"
       << std::setw(4) << (b_ >> 48) << "-"
       << std::setw(12) << (b_&0xFFFFFFFFFFFF);
    return ss.str();
