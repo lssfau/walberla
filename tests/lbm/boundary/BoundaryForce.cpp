@@ -68,8 +68,7 @@ using FlagField_T = FlagField<flag_t>;
 
 typedef lbm::SimpleUBB< LatticeModel_T, flag_t, false, true >  UBB_Sphere_T;
 typedef lbm::SimpleUBB< LatticeModel_T, flag_t >  UBB_Wall_T;
-typedef boost::tuples::tuple< UBB_Sphere_T, UBB_Wall_T >  BoundaryConditions_T;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, UBB_Sphere_T, UBB_Wall_T > BoundaryHandling_T;
 
 
 
@@ -113,8 +112,8 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
    const flag_t fluid = flagField->registerFlag( Fluid_Flag ); // register the fluid flag at the flag field
    
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
-                                 boost::tuples::make_tuple( UBB_Sphere_T( "sphere", UBB_Sphere_Flag, pdfField, Vector3<real_t>() ),
-                                                            UBB_Wall_T(   "wall",   UBB_Wall_Flag,   pdfField, velocity_ ) ) );
+                                  UBB_Sphere_T( "sphere", UBB_Sphere_Flag, pdfField, Vector3<real_t>() ),
+                                  UBB_Wall_T(   "wall",   UBB_Wall_Flag,   pdfField, velocity_ ) );
 }
 
 

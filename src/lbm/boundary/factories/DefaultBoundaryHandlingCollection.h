@@ -40,11 +40,8 @@ private:
    typedef typename DefaultBoundaryHandlingFactory         < LatticeModel_T,          FlagField_T >::BoundaryHandling    DefaultBoundaryHandling_T;
    typedef typename DefaultDiffusionBoundaryHandlingFactory< DiffusionLatticeModel_T, FlagField_T >::BoundaryHandling_T  DefaultDiffusionBoundaryHandlingFactory_T;
 
-private:
-   typedef boost::tuples::tuple< DefaultBoundaryHandling_T &, DefaultDiffusionBoundaryHandlingFactory_T & >  BoundaryHandlings;
-
 public:
-   typedef BoundaryHandlingCollection< FlagField_T, BoundaryHandlings > BoundaryHandlingCollection_T;
+   typedef BoundaryHandlingCollection< FlagField_T, DefaultBoundaryHandling_T &, DefaultDiffusionBoundaryHandlingFactory_T & > BoundaryHandlingCollection_T;
 
 
 private:
@@ -62,7 +59,7 @@ private:
       DefaultBoundaryHandling_T                 & handling          = * block->getData< DefaultBoundaryHandling_T                 >( handlingID          );
       DefaultDiffusionBoundaryHandlingFactory_T & diffusionHandling = * block->getData< DefaultDiffusionBoundaryHandlingFactory_T >( diffusionHandlingID );
             
-      return new BoundaryHandlingCollection_T( " Diffusion Boundary Handling Collection", flagField, BoundaryHandlings( handling, diffusionHandling ) );
+      return new BoundaryHandlingCollection_T( " Diffusion Boundary Handling Collection", flagField, handling, diffusionHandling );
    }
 
 public:

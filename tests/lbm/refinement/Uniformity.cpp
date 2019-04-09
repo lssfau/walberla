@@ -89,8 +89,7 @@ const uint_t FieldGhostLayers = 4;
 
 // dummy boundary handling
 typedef lbm::NoSlip< LatticeModel_T, flag_t > NoSlip_T;
-using BoundaryConditions_T = boost::tuples::tuple<NoSlip_T>;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T > BoundaryHandling_T;
 
 ///////////
 // FLAGS //
@@ -206,7 +205,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
    flagField->setWithGhostLayer( fluid );
 
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( NoSlip_T( "no slip", NoSlip_Flag, pdfField ) ) );
+                                  NoSlip_T( "no slip", NoSlip_Flag, pdfField ) );
 }
 
 

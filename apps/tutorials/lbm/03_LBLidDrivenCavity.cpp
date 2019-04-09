@@ -79,10 +79,7 @@ typedef lbm::NoSlip< LatticeModel_T, flag_t >     NoSlip_T; // no slip boundary 
 typedef lbm::SimpleUBB< LatticeModel_T, flag_t >  UBB_T;    // velocity bounce back boundary condition that internally works with one ...
                                                             // ... constant velocity that must be set during the setup phase
 
-typedef boost::tuples::tuple< NoSlip_T, UBB_T >  BoundaryConditions_T; // a collection of all boundary conditions - required for
-                                                                       // defining the type of the boundary handling (see below)
-
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T; // the boundary handling
+typedef BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T, UBB_T > BoundaryHandling_T; // the boundary handling, includes a collection of all boundary conditions
 
 ///////////
 // FLAGS //
@@ -139,11 +136,11 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
    // The fluid flag is used in order to decide whether a certain cell is part of the domain (and therefore has to be
    // treated by the boundary handling if it is located next to a boundary). Also, the no slip and velocity bounce back
    // boundary conditions are initialized (Please note that the order in which these boundary conditions are initialized
-   // must be identical to the order in 'BoundaryConditions_T'!).
+   // must be identical to the order of the template arguments of 'BoundaryHandling_T'!).
 
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
-                                       UBB_T( "velocity bounce back", UBB_Flag, pdfField, topVelocity_, real_c(0), real_c(0) ) ) );
+                                  NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
+                                     UBB_T( "velocity bounce back", UBB_Flag, pdfField, topVelocity_, real_c(0), real_c(0) ) );
 }
 
 

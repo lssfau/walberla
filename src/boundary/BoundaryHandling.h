@@ -56,12 +56,12 @@ typedef UID< BHUIDGenerator > BoundaryHandlingUID;
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple > // Tuple: all the boundary classes that are considered by this boundary handler
+template< typename FlagField_T, typename Stencil, typename... Boundaries > // Boundaries: all the boundary classes that are considered by this boundary handler
 class BoundaryHandling
 {
 public:
 
-   template< typename F, typename T >
+   template< typename F, typename... T >
    friend class BoundaryHandlingCollection;
 
    typedef FlagField_T                               FlagField;
@@ -87,7 +87,7 @@ public:
 
 
 
-   BoundaryHandling( const std::string & identifier, FlagField_T * const flagField, const flag_t domain, const Tuple & boundaryConditions,
+   BoundaryHandling( const std::string & identifier, FlagField_T * const flagField, const flag_t domain, const Boundaries & ... boundaryConditions,
                      const Mode mode = OPTIMIZED_SPARSE_TRAVERSAL );
 
    bool operator==( const BoundaryHandling & rhs ) const { WALBERLA_CHECK( false, "You are trying to compare boundary handling " << uid_ <<                        // For testing purposes, block data items must be comparable with operator "==".
@@ -649,6 +649,7 @@ private:
    std::vector< std::vector< std::vector< std::pair< Cell, stencil::Direction > > > > cellDirectionPairs_; // 1st vector: numberOfGhostLayersToInclude
                                                                                                            // 2nd vector: boundary condition index
                                                                                                            // 3rd vector: vector of cell<->direction pairs
+   typedef boost::tuples::tuple<Boundaries...> Tuple;
    Tuple boundaryConditions_;
    bool  threadSafeBCs_;
 
@@ -656,9 +657,9 @@ private:
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-BoundaryHandling< FlagField_T, Stencil, Tuple >::BoundaryHandling( const std::string & identifier, FlagField_T * const flagField,
-                                                                   const flag_t domain, const Tuple & boundaryConditions, const Mode mode ) :
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+BoundaryHandling< FlagField_T, Stencil, Boundaries... >::BoundaryHandling( const std::string & identifier, FlagField_T * const flagField,
+                                                                   const flag_t domain, const Boundaries & ... boundaryConditions, const Mode mode ) :
 
    uid_( identifier ),
    flagField_( flagField ),
@@ -673,7 +674,7 @@ BoundaryHandling< FlagField_T, Stencil, Tuple >::BoundaryHandling( const std::st
    domain_( domain ),
    mode_( mode ),
    dirty_( false ),
-   boundaryConditions_( boundaryConditions ),
+   boundaryConditions_( boost::make_tuple(boundaryConditions...) ),
    threadSafeBCs_( true )
 {
    setupBoundaryConditions( boundaryConditions_ );
@@ -694,40 +695,40 @@ BoundaryHandling< FlagField_T, Stencil, Tuple >::BoundaryHandling( const std::st
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isEmpty( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isEmpty( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    return !flagField_->isPartOfMaskSet( x, y, z, boundary_ ) && !flagField_->isPartOfMaskSet( x, y, z, domain_ );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isNearBoundary( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isNearBoundary( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    return flagField_->isFlagSet( x, y, z, nearBoundary_ );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isBoundary( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isBoundary( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    return flagField_->isPartOfMaskSet( x, y, z, boundary_ );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    return flagField_->isPartOfMaskSet( x, y, z, domain_ );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isEmpty( const Cell & cell ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isEmpty( const Cell & cell ) const
 {
    return !flagField_->isPartOfMaskSet( cell.x(), cell.y(), cell.z(), boundary_ ) && 
           !flagField_->isPartOfMaskSet( cell.x(), cell.y(), cell.z(), domain_ );
@@ -735,32 +736,32 @@ inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isEmpty( const Cell
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isNearBoundary( const Cell & cell ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isNearBoundary( const Cell & cell ) const
 {
    return flagField_->isFlagSet( cell.x(), cell.y(), cell.z(), nearBoundary_ );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isBoundary( const Cell & cell ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isBoundary( const Cell & cell ) const
 {
    return flagField_->isPartOfMaskSet( cell.x(), cell.y(), cell.z(), boundary_ );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isDomain( const Cell & cell ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isDomain( const Cell & cell ) const
 {
    return flagField_->isPartOfMaskSet( cell.x(), cell.y(), cell.z(), domain_ );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isEmpty( const ConstFlagFieldBaseIterator & it ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isEmpty( const ConstFlagFieldBaseIterator & it ) const
 {
    WALBERLA_ASSERT_EQUAL( it.getField(), flagField_ );
 
@@ -769,8 +770,8 @@ inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isEmpty( const Cons
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isNearBoundary( const ConstFlagFieldBaseIterator & it ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isNearBoundary( const ConstFlagFieldBaseIterator & it ) const
 {
    WALBERLA_ASSERT_EQUAL( it.getField(), flagField_ );
 
@@ -779,8 +780,8 @@ inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isNearBoundary( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isBoundary( const ConstFlagFieldBaseIterator & it ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isBoundary( const ConstFlagFieldBaseIterator & it ) const
 {
    WALBERLA_ASSERT_EQUAL( it.getField(), flagField_ );
 
@@ -789,8 +790,8 @@ inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isBoundary( const C
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isDomain( const ConstFlagFieldBaseIterator & it ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::isDomain( const ConstFlagFieldBaseIterator & it ) const
 {
    WALBERLA_ASSERT_EQUAL( it.getField(), flagField_ );
 
@@ -799,16 +800,16 @@ inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::isDomain( const Con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::containsBoundaryCondition( const BoundaryUID & uid ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::containsBoundaryCondition( const BoundaryUID & uid ) const
 {
    return containsBoundaryCondition( boundaryConditions_, uid );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::containsBoundaryCondition( const FlagUID & flag ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::containsBoundaryCondition( const FlagUID & flag ) const
 {
    if( !flagField_->flagExists( flag ) )
       return false;
@@ -818,26 +819,26 @@ inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::containsBoundaryCon
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Boundary_T >
-inline const Boundary_T & BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryCondition( const BoundaryUID & uid ) const
+inline const Boundary_T & BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryCondition( const BoundaryUID & uid ) const
 {
    return getBoundaryCondition< Boundary_T, typename Tuple::head_type, typename Tuple::tail_type >( uid, boundaryConditions_ );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Boundary_T >
-inline Boundary_T & BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryCondition( const BoundaryUID & uid )
+inline Boundary_T & BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryCondition( const BoundaryUID & uid )
 {
    return const_cast< Boundary_T & >( static_cast< const BoundaryHandling * >( this )->template getBoundaryCondition< Boundary_T >( uid ) );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryUID( const FlagUID & flag ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUID( const FlagUID & flag ) const
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
 
@@ -846,8 +847,8 @@ inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryU
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryUID( const flag_t flag ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUID( const flag_t flag ) const
 {
    WALBERLA_ASSERT( field::isFlag( flag ) );
    WALBERLA_ASSERT( flagField_->isRegistered( flag ) );
@@ -857,16 +858,16 @@ inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryU
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline uint_t BoundaryHandling< FlagField_T, Stencil, Tuple >::numberOfMatchingBoundaryConditions( const flag_t mask ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline uint_t BoundaryHandling< FlagField_T, Stencil, Boundaries... >::numberOfMatchingBoundaryConditions( const flag_t mask ) const
 {
    return numberOfMatchingBoundaryConditions( boundaryConditions_, mask );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::checkConsistency( const uint_t numberOfGhostLayersToInclude ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::checkConsistency( const uint_t numberOfGhostLayersToInclude ) const
 {
    CellInterval cells = getGhostLayerCellInterval( numberOfGhostLayersToInclude );
    return checkConsistency( cells );
@@ -874,8 +875,8 @@ inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::checkConsistency( c
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-bool BoundaryHandling< FlagField_T, Stencil, Tuple >::checkConsistency( const CellInterval & cells ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::checkConsistency( const CellInterval & cells ) const
 {
    CellInterval localCells( innerBB_ );
    localCells.intersect( cells );
@@ -937,8 +938,8 @@ bool BoundaryHandling< FlagField_T, Stencil, Tuple >::checkConsistency( const Ce
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::refresh( const uint_t numberOfGhostLayersToInclude )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::refresh( const uint_t numberOfGhostLayersToInclude )
 {
    CellInterval cells = getGhostLayerCellInterval( numberOfGhostLayersToInclude );
    refresh( cells );
@@ -946,8 +947,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::refresh( const uint
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-void BoundaryHandling< FlagField_T, Stencil, Tuple >::refresh( const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::refresh( const CellInterval & cells )
 {
    CellInterval localCells( innerBB_ );
    localCells.intersect( cells );
@@ -974,8 +975,8 @@ void BoundaryHandling< FlagField_T, Stencil, Tuple >::refresh( const CellInterva
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-void BoundaryHandling< FlagField_T, Stencil, Tuple >::refreshOutermostLayer( cell_idx_t thickness )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::refreshOutermostLayer( cell_idx_t thickness )
 {
    uint_t extent = std::min( std::min( innerBB_.xSize(), innerBB_.ySize() ), innerBB_.zSize() );
    WALBERLA_ASSERT_GREATER( extent, uint_t(0) );
@@ -1015,8 +1016,8 @@ void BoundaryHandling< FlagField_T, Stencil, Tuple >::refreshOutermostLayer( cel
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT( field::isFlag( domain_ ) );
    setDomain( domain_, x, y, z );
@@ -1024,8 +1025,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const ce
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const flag_t domainSubFlag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setDomain( const flag_t domainSubFlag,
                                                                         const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT_EQUAL( domain_ & domainSubFlag, domainSubFlag );
@@ -1037,8 +1038,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const fl
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setDomain( const CellInterval & cells )
 {
    WALBERLA_ASSERT( field::isFlag( domain_ ) );
    setDomain( domain_, cells );
@@ -1046,8 +1047,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const Ce
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const flag_t domainSubFlag, const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setDomain( const flag_t domainSubFlag, const CellInterval & cells )
 {
    WALBERLA_ASSERT_EQUAL( domain_ & domainSubFlag, domainSubFlag );
    WALBERLA_ASSERT( field::isFlag( domainSubFlag ) );
@@ -1090,9 +1091,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const fl
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setDomain( const CellIterator & begin, const CellIterator & end )
 {
    WALBERLA_ASSERT( field::isFlag( domain_ ) );
    setDomain( domain_, begin, end );
@@ -1100,9 +1101,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const Ce
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const flag_t domainSubFlag, const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setDomain( const flag_t domainSubFlag, const CellIterator & begin, const CellIterator & end )
 {
    WALBERLA_ASSERT_EQUAL( domain_ & domainSubFlag, domainSubFlag );
    WALBERLA_ASSERT( field::isFlag( domainSubFlag ) );
@@ -1120,16 +1121,16 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setDomain( const fl
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    forceDomain( domain_, x, y, z );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceDomain( const flag_t domainSubFlag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceDomain( const flag_t domainSubFlag,
                                                                           const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    clear( x, y, z );
@@ -1138,16 +1139,16 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceDomain( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceDomain( const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceDomain( const CellInterval & cells )
 {
    forceDomain( domain_, cells );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceDomain( const flag_t domainSubFlag, const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceDomain( const flag_t domainSubFlag, const CellInterval & cells )
 {
    clear( cells );
    setDomain( domainSubFlag, cells );
@@ -1155,18 +1156,18 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceDomain( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceDomain( const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceDomain( const CellIterator & begin, const CellIterator & end )
 {
    forceDomain( domain_, begin, end );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceDomain( const flag_t domainSubFlag, const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceDomain( const flag_t domainSubFlag, const CellIterator & begin, const CellIterator & end )
 {
    clear( begin, end );
    setDomain( domainSubFlag, begin, end );
@@ -1174,8 +1175,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceDomain( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( const uint_t numberOfGhostLayersToInclude )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::fillWithDomain( const uint_t numberOfGhostLayersToInclude )
 {
    WALBERLA_ASSERT_GREATER_EQUAL( flagField_->nrOfGhostLayers(), numberOfGhostLayersToInclude );
    WALBERLA_ASSERT( field::isFlag( domain_ ) );
@@ -1184,8 +1185,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( const flag_t domainSubFlag, const uint_t numberOfGhostLayersToInclude )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::fillWithDomain( const flag_t domainSubFlag, const uint_t numberOfGhostLayersToInclude )
 {
    WALBERLA_ASSERT_EQUAL( domain_ & domainSubFlag, domainSubFlag );
    WALBERLA_ASSERT( field::isFlag( domainSubFlag ) );
@@ -1197,8 +1198,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::fillWithDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT( field::isFlag( domain_ ) );
    fillWithDomain( domain_, x, y, z );
@@ -1206,8 +1207,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( const flag_t domainSubFlag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::fillWithDomain( const flag_t domainSubFlag,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT_EQUAL( domain_ & domainSubFlag, domainSubFlag );
@@ -1219,8 +1220,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::fillWithDomain( const CellInterval & cells )
 {
    WALBERLA_ASSERT( field::isFlag( domain_ ) );
    fillWithDomain( domain_, cells );
@@ -1228,8 +1229,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( const flag_t domainSubFlag, const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::fillWithDomain( const flag_t domainSubFlag, const CellInterval & cells )
 {
    WALBERLA_ASSERT_EQUAL( domain_ & domainSubFlag, domainSubFlag );
    WALBERLA_ASSERT( field::isFlag( domainSubFlag ) );
@@ -1253,18 +1254,18 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::fillWithDomain( const CellIterator & begin, const CellIterator & end )
 {
    fillWithDomain( domain_, begin, end );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( const flag_t domainSubFlag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::fillWithDomain( const flag_t domainSubFlag,
                                                                              const CellIterator & begin, const CellIterator & end )
 {
    WALBERLA_ASSERT_EQUAL( domain_ & domainSubFlag, domainSubFlag );
@@ -1283,8 +1284,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::fillWithDomain( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil, Tuple >::createBoundaryConfiguration( const BoundaryUID & uid,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil, Boundaries... >::createBoundaryConfiguration( const BoundaryUID & uid,
                                                                                                                        const Config::BlockHandle & config ) const
 {
    return createBoundaryConfiguration( boundaryConditions_, uid, config );
@@ -1292,8 +1293,8 @@ inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil,
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const FlagUID & flag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const FlagUID & flag,
                                                                           const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                           const BoundaryConfiguration & parameter )
 {
@@ -1304,8 +1305,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const flag_t flag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const flag_t flag,
                                                                           const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                           const BoundaryConfiguration & parameter )
 {
@@ -1319,8 +1320,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const FlagUID & flag, const CellInterval & cells,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const FlagUID & flag, const CellInterval & cells,
                                                                           const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
@@ -1330,8 +1331,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const flag_t flag, const CellInterval & cells,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const flag_t flag, const CellInterval & cells,
                                                                           const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT_EQUAL( flag & boundary_, flag );
@@ -1349,9 +1350,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const FlagUID & flag, const CellIterator & begin, const CellIterator & end,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const FlagUID & flag, const CellIterator & begin, const CellIterator & end,
                                                                           const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
@@ -1361,9 +1362,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const flag_t flag, const CellIterator & begin, const CellIterator & end,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const flag_t flag, const CellIterator & begin, const CellIterator & end,
                                                                           const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT_EQUAL( flag & boundary_, flag );
@@ -1379,8 +1380,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( const FlagUID & flag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceBoundary( const FlagUID & flag,
                                                                             const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                             const BoundaryConfiguration & parameter )
 {
@@ -1391,8 +1392,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( cons
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( const flag_t flag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceBoundary( const flag_t flag,
                                                                             const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                             const BoundaryConfiguration & parameter )
 {
@@ -1403,8 +1404,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( cons
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( const FlagUID & flag, const CellInterval & cells,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceBoundary( const FlagUID & flag, const CellInterval & cells,
                                                                             const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
@@ -1414,8 +1415,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( cons
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( const flag_t flag, const CellInterval & cells,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceBoundary( const flag_t flag, const CellInterval & cells,
                                                                             const BoundaryConfiguration & parameter )
 {
    clear( cells );
@@ -1424,9 +1425,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( cons
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( const FlagUID & flag, const CellIterator & begin, const CellIterator & end,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceBoundary( const FlagUID & flag, const CellIterator & begin, const CellIterator & end,
                                                                             const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
@@ -1436,9 +1437,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( cons
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( const flag_t flag, const CellIterator & begin, const CellIterator & end,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceBoundary( const flag_t flag, const CellIterator & begin, const CellIterator & end,
                                                                             const BoundaryConfiguration & parameter )
 {
    for( auto cell = begin; cell != end; ++cell )
@@ -1450,8 +1451,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceBoundary( cons
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    if( outerBB_.contains(x,y,z) )
    {
@@ -1463,8 +1464,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const flag_t mask,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeDomain( const flag_t mask,
                                                                            const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    if( outerBB_.contains(x,y,z) )
@@ -1480,8 +1481,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const uint_t numberOfGhostLayersToInclude )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeDomain( const uint_t numberOfGhostLayersToInclude )
 {
    WALBERLA_ASSERT_GREATER_EQUAL( flagField_->nrOfGhostLayers(), numberOfGhostLayersToInclude );
 
@@ -1491,8 +1492,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeDomain( const CellInterval & cells )
 {
    CellInterval localCells( outerBB_ );
    localCells.intersect( cells );
@@ -1511,8 +1512,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const flag_t mask, const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeDomain( const flag_t mask, const CellInterval & cells )
 {
    const flag_t dMask = mask & domain_;
    if( dMask == 0 )
@@ -1537,9 +1538,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeDomain( const CellIterator & begin, const CellIterator & end )
 {
    for( auto cell = begin; cell != end; ++cell )
       removeDomain( cell->x(), cell->y(), cell->z() );
@@ -1547,9 +1548,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const flag_t mask, const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeDomain( const flag_t mask, const CellIterator & begin, const CellIterator & end )
 {
    const flag_t dMask = mask & domain_;
    if( dMask == 0 )
@@ -1575,8 +1576,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeDomain( const
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    if( outerBB_.contains(x,y,z) && flagField_->isPartOfMaskSet( x, y, z, boundary_ ) )
       removeBoundary( boundaryConditions_, x, y, z );
@@ -1584,8 +1585,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( const FlagUID & flag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const FlagUID & flag,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    if( !flagField_->flagExists( flag ) )
@@ -1596,8 +1597,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( const flag_t mask,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const flag_t mask,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    const flag_t bMask = mask & boundary_;
@@ -1610,8 +1611,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( const uint_t numberOfGhostLayersToInclude )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const uint_t numberOfGhostLayersToInclude )
 {
    WALBERLA_ASSERT_GREATER_EQUAL( flagField_->nrOfGhostLayers(), numberOfGhostLayersToInclude );
 
@@ -1621,8 +1622,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const CellInterval & cells )
 {
    CellInterval localCells( outerBB_ );
    localCells.intersect( cells );
@@ -1675,8 +1676,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( const FlagUID & flag, const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const FlagUID & flag, const CellInterval & cells )
 {
    if( !flagField_->flagExists( flag ) )
       return;
@@ -1686,8 +1687,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( const flag_t mask, const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const flag_t mask, const CellInterval & cells )
 {
    const flag_t bMask = mask & boundary_;
    if( bMask == 0 )
@@ -1703,18 +1704,18 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const CellIterator & begin, const CellIterator & end )
 {
    removeBoundary( boundary_, begin, end );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( const FlagUID & flag, const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const FlagUID & flag, const CellIterator & begin, const CellIterator & end )
 {
    if( !flagField_->flagExists( flag ) )
       return;
@@ -1724,9 +1725,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( const flag_t mask, const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( const flag_t mask, const CellIterator & begin, const CellIterator & end )
 {
    const flag_t bMask = mask & boundary_;
    if( bMask == 0 )
@@ -1745,8 +1746,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const FlagUID & flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setFlag( const FlagUID & flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                       const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
@@ -1756,8 +1757,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const Flag
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setFlag( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                       const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( field::isFlag(flag) );
@@ -1775,8 +1776,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const flag
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const FlagUID & flag, const CellInterval & cells,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setFlag( const FlagUID & flag, const CellInterval & cells,
                                                                       const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
@@ -1786,8 +1787,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const Flag
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const flag_t flag, const CellInterval & cells,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setFlag( const flag_t flag, const CellInterval & cells,
                                                                       const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( field::isFlag(flag) );
@@ -1812,9 +1813,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const flag
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const FlagUID & flag, const CellIterator & begin, const CellIterator & end,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setFlag( const FlagUID & flag, const CellIterator & begin, const CellIterator & end,
                                                                       const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
@@ -1824,9 +1825,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const Flag
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const flag_t flag, const CellIterator & begin, const CellIterator & end,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setFlag( const flag_t flag, const CellIterator & begin, const CellIterator & end,
                                                                       const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( field::isFlag(flag) );
@@ -1848,8 +1849,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setFlag( const flag
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const FlagUID & flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceFlag( const FlagUID & flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                         const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
@@ -1859,8 +1860,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const Fl
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceFlag( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                         const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( field::isFlag(flag) );
@@ -1875,8 +1876,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const fl
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const FlagUID & flag, const CellInterval & cells,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceFlag( const FlagUID & flag, const CellInterval & cells,
                                                                         const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
@@ -1886,8 +1887,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const Fl
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const flag_t flag, const CellInterval & cells,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceFlag( const flag_t flag, const CellInterval & cells,
                                                                         const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( field::isFlag(flag) );
@@ -1909,9 +1910,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const fl
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const FlagUID & flag, const CellIterator & begin, const CellIterator & end,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceFlag( const FlagUID & flag, const CellIterator & begin, const CellIterator & end,
                                                                         const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
@@ -1921,9 +1922,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const Fl
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const flag_t flag, const CellIterator & begin, const CellIterator & end,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::forceFlag( const flag_t flag, const CellIterator & begin, const CellIterator & end,
                                                                         const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( field::isFlag(flag) );
@@ -1942,8 +1943,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::forceFlag( const fl
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const FlagUID & flag, const uint_t numberOfGhostLayersToInclude )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeFlag( const FlagUID & flag, const uint_t numberOfGhostLayersToInclude )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
 
@@ -1952,8 +1953,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const F
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const flag_t flag, const uint_t numberOfGhostLayersToInclude )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeFlag( const flag_t flag, const uint_t numberOfGhostLayersToInclude )
 {
    WALBERLA_ASSERT_GREATER_EQUAL( flagField_->nrOfGhostLayers(), numberOfGhostLayersToInclude );
 
@@ -1963,8 +1964,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const f
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const FlagUID & flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeFlag( const FlagUID & flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
 
@@ -1973,8 +1974,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const F
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeFlag( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    if( ( flag & boundary_ ) == flag )
       removeBoundary( flag, x, y, z );
@@ -1986,8 +1987,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const f
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const FlagUID & flag, const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeFlag( const FlagUID & flag, const CellInterval & cells )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
 
@@ -1996,8 +1997,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const F
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const flag_t flag, const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeFlag( const flag_t flag, const CellInterval & cells )
 {
    if( ( flag & boundary_ ) == flag )
       removeBoundary( flag, cells );
@@ -2016,9 +2017,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const f
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const FlagUID & flag, const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeFlag( const FlagUID & flag, const CellIterator & begin, const CellIterator & end )
 {
    WALBERLA_ASSERT( flagField_->flagExists( flag ) );
 
@@ -2027,9 +2028,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const F
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const flag_t flag, const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeFlag( const flag_t flag, const CellIterator & begin, const CellIterator & end )
 {
    if( ( flag & boundary_ ) == flag )
       removeBoundary( flag, begin, end );
@@ -2045,8 +2046,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeFlag( const f
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::clear( const uint_t numberOfGhostLayersToInclude )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::clear( const uint_t numberOfGhostLayersToInclude )
 {
    WALBERLA_ASSERT_GREATER_EQUAL( flagField_->nrOfGhostLayers(), numberOfGhostLayersToInclude );
 
@@ -2056,8 +2057,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::clear( const uint_t
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::clear( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::clear( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    if( outerBB_.contains(x,y,z) )
    {
@@ -2073,8 +2074,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::clear( const cell_i
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::clear( const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::clear( const CellInterval & cells )
 {
    CellInterval localCells( outerBB_ );
    localCells.intersect( cells );
@@ -2112,9 +2113,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::clear( const CellIn
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::clear( const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::clear( const CellIterator & begin, const CellIterator & end )
 {
    for( auto cell = begin; cell != end; ++cell )
       clear( cell->x(), cell->y(), cell->z() );
@@ -2122,8 +2123,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::clear( const CellIt
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::operator()( const uint_t numberOfGhostLayersToInclude )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::operator()( const uint_t numberOfGhostLayersToInclude )
 {
    WALBERLA_ASSERT_LESS( numberOfGhostLayersToInclude, flagField_->nrOfGhostLayers() );
    WALBERLA_ASSERT( checkConsistency( numberOfGhostLayersToInclude ) );
@@ -2182,8 +2183,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::operator()( const u
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::operator()( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::operator()( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT( innerBB_.contains(x,y,z) );
 
@@ -2203,8 +2204,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::operator()( const c
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::operator()( const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::operator()( const CellInterval & cells )
 {
    CellInterval localCells( innerBB_ );
    localCells.intersect( cells );
@@ -2234,9 +2235,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::operator()( const C
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename CellIterator >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::operator()( const CellIterator & begin, const CellIterator & end )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::operator()( const CellIterator & begin, const CellIterator & end )
 {
    for( auto cell = begin; cell != end; ++cell )
    {
@@ -2251,9 +2252,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::operator()( const C
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Buffer_T >
-void BoundaryHandling< FlagField_T, Stencil, Tuple >::pack( Buffer_T & buffer, const CellInterval & interval, const bool assumeIdenticalFlagMapping ) const
+void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::pack( Buffer_T & buffer, const CellInterval & interval, const bool assumeIdenticalFlagMapping ) const
 {
    WALBERLA_UNUSED( assumeIdenticalFlagMapping );
 
@@ -2283,9 +2284,9 @@ void BoundaryHandling< FlagField_T, Stencil, Tuple >::pack( Buffer_T & buffer, c
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Buffer_T >
-void BoundaryHandling< FlagField_T, Stencil, Tuple >::unpack( Buffer_T & buffer, const CellInterval & interval, const bool assumeIdenticalFlagMapping )
+void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::unpack( Buffer_T & buffer, const CellInterval & interval, const bool assumeIdenticalFlagMapping )
 {
    bool identicalFlagMapping = false;
    std::vector< flag_t > flagMapping = getNeighborFlagMapping( buffer, assumeIdenticalFlagMapping, identicalFlagMapping ); // neighbor-flag_t -> flag_t
@@ -2322,9 +2323,9 @@ void BoundaryHandling< FlagField_T, Stencil, Tuple >::unpack( Buffer_T & buffer,
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Buffer_T >
-void BoundaryHandling< FlagField_T, Stencil, Tuple >::pack( Buffer_T & buffer, stencil::Direction direction, const uint_t numberOfLayers,
+void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::pack( Buffer_T & buffer, stencil::Direction direction, const uint_t numberOfLayers,
                                                             const bool assumeIdenticalFlagMapping ) const
 {
    CellInterval interval = getPackingInterval( direction, numberOfLayers );
@@ -2333,9 +2334,9 @@ void BoundaryHandling< FlagField_T, Stencil, Tuple >::pack( Buffer_T & buffer, s
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Buffer_T >
-void BoundaryHandling< FlagField_T, Stencil, Tuple >::unpack( Buffer_T & buffer, stencil::Direction direction, const uint_t numberOfLayers,
+void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::unpack( Buffer_T & buffer, stencil::Direction direction, const uint_t numberOfLayers,
                                                               const bool assumeIdenticalFlagMapping )
 {
    CellInterval interval = getUnpackingInterval( direction, numberOfLayers );
@@ -2344,8 +2345,8 @@ void BoundaryHandling< FlagField_T, Stencil, Tuple >::unpack( Buffer_T & buffer,
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::toStream( std::ostream & os ) const {
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::toStream( std::ostream & os ) const {
 
    os << "==================== BoundaryHandling ====================\n\n"
       << "Identifier: " << uid_.getIdentifier() << "\n\n"
@@ -2370,8 +2371,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::toStream( std::ostr
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline std::string BoundaryHandling< FlagField_T, Stencil, Tuple >::toString() const {
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline std::string BoundaryHandling< FlagField_T, Stencil, Boundaries... >::toString() const {
 
    std::ostringstream oss;
    toStream( oss );
@@ -2380,8 +2381,8 @@ inline std::string BoundaryHandling< FlagField_T, Stencil, Tuple >::toString() c
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-CellInterval BoundaryHandling< FlagField_T, Stencil, Tuple >::getGhostLayerCellInterval( const uint_t numberOfGhostLayersToInclude ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+CellInterval BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getGhostLayerCellInterval( const uint_t numberOfGhostLayersToInclude ) const
 {
    CellInterval cells( -cell_idx_c( numberOfGhostLayersToInclude ),
                        -cell_idx_c( numberOfGhostLayersToInclude ),
@@ -2394,9 +2395,9 @@ CellInterval BoundaryHandling< FlagField_T, Stencil, Tuple >::getGhostLayerCellI
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-void BoundaryHandling< FlagField_T, Stencil, Tuple >::setupBoundaryConditions( boost::tuples::cons<Head, Tail> & boundaryConditions )
+void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setupBoundaryConditions( boost::tuples::cons<Head, Tail> & boundaryConditions )
 {
    Head & boundaryCondition = boundaryConditions.get_head();
 
@@ -2430,8 +2431,8 @@ void BoundaryHandling< FlagField_T, Stencil, Tuple >::setupBoundaryConditions( b
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline std::vector< BoundaryUID > BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryUIDs() const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline std::vector< BoundaryUID > BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUIDs() const
 {
    std::vector< BoundaryUID > uids;
    getBoundaryUIDs( boundaryConditions_, uids );
@@ -2440,9 +2441,9 @@ inline std::vector< BoundaryUID > BoundaryHandling< FlagField_T, Stencil, Tuple 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryUIDs( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUIDs( const boost::tuples::cons<Head, Tail> & boundaryConditions,
                                                                               std::vector< BoundaryUID > & uids ) const
 {
    uids.push_back( boundaryConditions.get_head().getUID() );
@@ -2451,9 +2452,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryUIDs( co
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryUID( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUID( const boost::tuples::cons<Head, Tail> & boundaryConditions,
                                                                                     const flag_t flag ) const
 {
    const Head & boundaryCondition = boundaryConditions.get_head();
@@ -2470,8 +2471,8 @@ inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryU
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryUID( const boost::tuples::null_type &,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUID( const boost::tuples::null_type &,
                                                                                     const flag_t flag ) const
 {
    if( !flagField_->isRegistered( flag ) )
@@ -2489,9 +2490,9 @@ inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryU
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::containsBoundaryCondition( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::containsBoundaryCondition( const boost::tuples::cons<Head, Tail> & boundaryConditions,
                                                                                         const BoundaryUID & uid ) const
 {
    if( boundaryConditions.get_head().getUID() == uid )
@@ -2501,10 +2502,10 @@ inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::containsBoundaryCon
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline typename BoundaryHandling< FlagField_T, Stencil, Tuple >::flag_t
-   BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryMask( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+inline typename BoundaryHandling< FlagField_T, Stencil, Boundaries... >::flag_t
+   BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryMask( const boost::tuples::cons<Head, Tail> & boundaryConditions,
                                                                      const BoundaryUID & uid ) const
 {
    const Head & boundaryCondition = boundaryConditions.get_head();
@@ -2516,17 +2517,17 @@ inline typename BoundaryHandling< FlagField_T, Stencil, Tuple >::flag_t
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline uint_t BoundaryHandling< FlagField_T, Stencil, Tuple >::numberOfMatchingBoundaryConditions( const BoundaryUID & uid ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline uint_t BoundaryHandling< FlagField_T, Stencil, Boundaries... >::numberOfMatchingBoundaryConditions( const BoundaryUID & uid ) const
 {
    return numberOfMatchingBoundaryConditions( boundaryConditions_, uid );
 }
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline uint_t BoundaryHandling< FlagField_T, Stencil, Tuple >::numberOfMatchingBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+inline uint_t BoundaryHandling< FlagField_T, Stencil, Boundaries... >::numberOfMatchingBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions,
                                                                                                  const BoundaryUID & uid ) const
 {
    return ( ( boundaryConditions.get_head().getUID() == uid ) ? uint_c(1) : uint_c(0) ) +
@@ -2535,9 +2536,9 @@ inline uint_t BoundaryHandling< FlagField_T, Stencil, Tuple >::numberOfMatchingB
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline uint_t BoundaryHandling< FlagField_T, Stencil, Tuple >::numberOfMatchingBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+inline uint_t BoundaryHandling< FlagField_T, Stencil, Boundaries... >::numberOfMatchingBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions,
                                                                                                  const flag_t mask ) const
 {
    return ( ( ( boundaryConditions.get_head().getMask() & mask ) != 0 ) ? uint_c(1) : uint_c(0) ) +
@@ -2546,8 +2547,8 @@ inline uint_t BoundaryHandling< FlagField_T, Stencil, Tuple >::numberOfMatchingB
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::checkFlagField( const uint_t numberOfGhostLayersToInclude ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::checkFlagField( const uint_t numberOfGhostLayersToInclude ) const
 {
    if( !flagField_->isRegistered( nearBoundary_ ) )
       return false;
@@ -2589,8 +2590,8 @@ inline bool BoundaryHandling< FlagField_T, Stencil, Tuple >::checkFlagField( con
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::addDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const flag_t domain )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::addDomain( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const flag_t domain )
 {
    WALBERLA_ASSERT( outerBB_.contains(x,y,z) );
    WALBERLA_ASSERT_EQUAL( domain_ & domain, domain );
@@ -2617,9 +2618,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::addDomain( const ce
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil, Tuple >::createBoundaryConfiguration( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil, Boundaries... >::createBoundaryConfiguration( const boost::tuples::cons<Head, Tail> & boundaryConditions,
                                                                                                                        const BoundaryUID & uid, const Config::BlockHandle & config ) const
 {
    if( boundaryConditions.get_head().getUID() == uid )
@@ -2628,8 +2629,8 @@ inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil,
    return createBoundaryConfiguration( boundaryConditions.get_tail(), uid, config );
 }
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil, Tuple >::createBoundaryConfiguration( const boost::tuples::null_type &,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil, Boundaries... >::createBoundaryConfiguration( const boost::tuples::null_type &,
                                                                                                                        const BoundaryUID & uid, const Config::BlockHandle & ) const
 {
    WALBERLA_CHECK( false, "There is no boundary condition registered at boundary handling " << uid_ << " for a boundary with UID" << uid << "." );
@@ -2639,8 +2640,8 @@ inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil,
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::addNearBoundary( const CellInterval & cells )
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::addNearBoundary( const CellInterval & cells )
 {
    WALBERLA_ASSERT( innerBB_.contains( cells ) );
 
@@ -2660,8 +2661,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::addNearBoundary( co
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::addBoundary( const flag_t flag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::addBoundary( const flag_t flag,
                                                                           const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT( outerBB_.contains(x,y,z) );
@@ -2683,9 +2684,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::addBoundary( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag,
                                                                           const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                           const BoundaryConfiguration & parameter )
 {
@@ -2702,8 +2703,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( boost:
       setBoundary( boundaryConditions.get_tail(), flag, x, y, z, parameter );
 }
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const boost::tuples::null_type &, const flag_t flag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const boost::tuples::null_type &, const flag_t flag,
                                                                           const cell_idx_t, const cell_idx_t, const cell_idx_t,
                                                                           const BoundaryConfiguration & ) const
 {
@@ -2719,9 +2720,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag,
                                                                           const CellInterval & cells, const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( outerBB_.contains( cells ) );
@@ -2754,8 +2755,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( boost:
       setBoundary( boundaryConditions.get_tail(), flag, cells, parameter );
 }
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const boost::tuples::null_type &, const flag_t flag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const boost::tuples::null_type &, const flag_t flag,
                                                                           const CellInterval &, const BoundaryConfiguration & ) const
 {
    if( flagField_->isRegistered( flag ) )
@@ -2770,9 +2771,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag,
                                                                           const CellVector & cells, const BoundaryConfiguration & parameter )
 {
    if( cells.empty() )
@@ -2790,8 +2791,8 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( boost:
       setBoundary( boundaryConditions.get_tail(), flag, cells, parameter );
 }
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const boost::tuples::null_type &, const flag_t flag,
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const boost::tuples::null_type &, const flag_t flag,
                                                                           const CellVector &, const BoundaryConfiguration & ) const
 {
    if( flagField_->isRegistered( flag ) )
@@ -2806,9 +2807,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::setBoundary( const 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                              const bool checkNearBoundaryFlags )
 {
@@ -2864,9 +2865,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::removeBoundary( boo
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::treatDirection( boost::tuples::cons<Head, Tail> & boundaryConditions, const uint_t index,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::treatDirection( boost::tuples::cons<Head, Tail> & boundaryConditions, const uint_t index,
                                                                              const std::vector< std::vector< std::pair< Cell, stencil::Direction > > > & cellDirectionPairs )
 {
    Head & boundaryCondition = boundaryConditions.get_head();
@@ -2897,9 +2898,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::treatDirection( boo
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::treatDirection( boost::tuples::cons<Head, Tail> & boundaryConditions,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::treatDirection( boost::tuples::cons<Head, Tail> & boundaryConditions,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                              const stencil::Direction dir,
                                                                              const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz )
@@ -2918,9 +2919,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::treatDirection( boo
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::beforeBoundaryTreatment( boost::tuples::cons<Head, Tail> & boundaryConditions )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::beforeBoundaryTreatment( boost::tuples::cons<Head, Tail> & boundaryConditions )
 {
    boundaryConditions.get_head().beforeBoundaryTreatment();
 
@@ -2929,9 +2930,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::beforeBoundaryTreat
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::afterBoundaryTreatment( boost::tuples::cons<Head, Tail> & boundaryConditions )
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::afterBoundaryTreatment( boost::tuples::cons<Head, Tail> & boundaryConditions )
 {
    boundaryConditions.get_head().afterBoundaryTreatment();
 
@@ -2940,9 +2941,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::afterBoundaryTreatm
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline std::map< std::string, typename BoundaryHandling< FlagField_T, Stencil, Tuple >::flag_t >
-BoundaryHandling< FlagField_T, Stencil, Tuple >::getFlagMapping() const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline std::map< std::string, typename BoundaryHandling< FlagField_T, Stencil, Boundaries... >::flag_t >
+BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getFlagMapping() const
 {
    std::map< std::string, flag_t > mapping;
    const auto uidMapping = flagField_->getMapping();
@@ -2953,10 +2954,10 @@ BoundaryHandling< FlagField_T, Stencil, Tuple >::getFlagMapping() const
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Buffer_T >
-std::vector< typename BoundaryHandling< FlagField_T, Stencil, Tuple >::flag_t >
-BoundaryHandling< FlagField_T, Stencil, Tuple >::getNeighborFlagMapping( Buffer_T & buffer, const bool assumeIdenticalFlagMapping,
+std::vector< typename BoundaryHandling< FlagField_T, Stencil, Boundaries... >::flag_t >
+BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getNeighborFlagMapping( Buffer_T & buffer, const bool assumeIdenticalFlagMapping,
                                                                          bool & identicalFlagMapping ) const
 {
    identicalFlagMapping = assumeIdenticalFlagMapping;
@@ -3000,8 +3001,8 @@ BoundaryHandling< FlagField_T, Stencil, Tuple >::getNeighborFlagMapping( Buffer_
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-void BoundaryHandling< FlagField_T, Stencil, Tuple >::translateMask( flag_t & mask, const std::vector< flag_t > & flagMapping ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::translateMask( flag_t & mask, const std::vector< flag_t > & flagMapping ) const
 {
    flag_t neighbor( mask );
    mask = static_cast< flag_t >(0);
@@ -3012,8 +3013,8 @@ void BoundaryHandling< FlagField_T, Stencil, Tuple >::translateMask( flag_t & ma
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-CellInterval BoundaryHandling< FlagField_T, Stencil, Tuple >::getPackingInterval( stencil::Direction direction, const uint_t numberOfLayers ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+CellInterval BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getPackingInterval( stencil::Direction direction, const uint_t numberOfLayers ) const
 {
    CellInterval interval = getUnpackingInterval( direction, numberOfLayers );
 
@@ -3029,8 +3030,8 @@ CellInterval BoundaryHandling< FlagField_T, Stencil, Tuple >::getPackingInterval
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-CellInterval BoundaryHandling< FlagField_T, Stencil, Tuple >::getUnpackingInterval( stencil::Direction direction, const uint_t numberOfLayers ) const
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+CellInterval BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getUnpackingInterval( stencil::Direction direction, const uint_t numberOfLayers ) const
 {
    WALBERLA_ASSERT_GREATER_EQUAL( numberOfLayers, uint_t(1) );
    WALBERLA_ASSERT( stencil::cx[direction] == 0 || outerBB_.xSize() >= ( uint_c(4) * numberOfLayers ) );
@@ -3058,9 +3059,9 @@ CellInterval BoundaryHandling< FlagField_T, Stencil, Tuple >::getUnpackingInterv
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Buffer_T >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::pack( Buffer_T & buffer, const flag_t mask,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::pack( Buffer_T & buffer, const flag_t mask,
                                                                    const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    if( field::isPartOfMaskSet( mask, boundary_ ) )
@@ -3069,9 +3070,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::pack( Buffer_T & bu
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Buffer_T, typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::pack( const boost::tuples::cons<Head, Tail> & boundaryConditions, Buffer_T & buffer,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::pack( const boost::tuples::cons<Head, Tail> & boundaryConditions, Buffer_T & buffer,
                                                                    const flag_t mask, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
    const Head & boundaryCondition = boundaryConditions.get_head();
@@ -3085,9 +3086,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::pack( const boost::
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Buffer_T >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::unpack( Buffer_T & buffer, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::unpack( Buffer_T & buffer, const flag_t flag,
                                                                      const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT( field::isFlag(flag) );
@@ -3100,9 +3101,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::unpack( Buffer_T & 
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Buffer_T >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::unpackBoundary( Buffer_T & buffer, const flag_t flag,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::unpackBoundary( Buffer_T & buffer, const flag_t flag,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT_EQUAL( flag & boundary_, flag );
@@ -3115,9 +3116,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::unpackBoundary( Buf
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Buffer_T, typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::unpackBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, Buffer_T & buffer,
+inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::unpackBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, Buffer_T & buffer,
                                                                              const flag_t flag,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
@@ -3136,9 +3137,9 @@ inline void BoundaryHandling< FlagField_T, Stencil, Tuple >::unpackBoundary( boo
 
 
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Head, typename Tail >
-void BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions,
                                                                              std::vector< std::string > & bcs ) const
 {
    const Head & boundaryCondition = boundaryConditions.get_head();
@@ -3172,8 +3173,8 @@ void BoundaryHandling< FlagField_T, Stencil, Tuple >::getBoundaryConditions( con
 
 using boundary::BoundaryHandling;
 
-template< typename FlagField_T, typename Stencil, typename Tuple >
-inline std::ostream & operator<<( std::ostream & os, const BoundaryHandling< FlagField_T, Stencil, Tuple > & boundaryHandling ) {
+template< typename FlagField_T, typename Stencil, typename... Boundaries >
+inline std::ostream & operator<<( std::ostream & os, const BoundaryHandling< FlagField_T, Stencil, Boundaries... > & boundaryHandling ) {
 
    boundaryHandling.toStream( os );
    return os;

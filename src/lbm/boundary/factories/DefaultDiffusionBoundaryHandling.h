@@ -34,8 +34,6 @@
 
 #include "field/FlagFunctions.h"
 
-#include <boost/tuple/tuple.hpp>
-
 #include <functional>
 
 
@@ -56,12 +54,9 @@ public:
    typedef lbm::NoDiffusion             < LatticeModel_T, flag_t      >  NoDiffusion_T;
    typedef lbm::FreeDiffusion           < LatticeModel_T, FlagField_T >  FreeDiffusion_T;
 
-private:
-   typedef boost::tuples::tuple< DiffusionDirichlet_T, SimpleDiffusionDirichlet_T, NoDiffusion_T, FreeDiffusion_T, SimpleDiffusionDirichlet_T, SimpleDiffusionDirichlet_T >  BoundaryConditions;
-
 public:
-   typedef walberla::boundary::BoundaryHandling< FlagField_T, Stencil, BoundaryConditions > BoundaryHandling_T;
-   typedef walberla::boundary::BoundaryHandling< FlagField_T, Stencil, BoundaryConditions > BoundaryHandling;
+   typedef walberla::boundary::BoundaryHandling< FlagField_T, Stencil, DiffusionDirichlet_T, SimpleDiffusionDirichlet_T, NoDiffusion_T, FreeDiffusion_T, SimpleDiffusionDirichlet_T, SimpleDiffusionDirichlet_T > BoundaryHandling_T;
+   typedef BoundaryHandling_T BoundaryHandling;
 
    const static FlagUID& getDiffusionDirichletFlagUID()        { static FlagUID uid( "DiffusionDirichlet"        ); return uid; }
    const static FlagUID& getSimpleDiffusionDirichletFlagUID()  { static FlagUID uid( "SimpleDiffusionDirichlet"  ); return uid; }
@@ -106,13 +101,13 @@ private:
       for( auto domainFlagUID = domainFlagUIDs.begin(); domainFlagUID != domainFlagUIDs.end(); ++domainFlagUID )
          field::addMask( domainMask, flagField->getOrRegisterFlag( *domainFlagUID ) );
 
-      BoundaryHandling_T * handling = new BoundaryHandling_T( "Diffusion Boundary Handling", flagField, domainMask, boost::tuples::make_tuple( 
+      BoundaryHandling_T * handling = new BoundaryHandling_T( "Diffusion Boundary Handling", flagField, domainMask,
          DiffusionDirichlet_T      ( getDiffusionDirichletBoundaryUID(),        getDiffusionDirichletFlagUID(),        pdfField, flagField ),
          SimpleDiffusionDirichlet_T( getSimpleDiffusionDirichletBoundaryUID(),  getSimpleDiffusionDirichletFlagUID(),  pdfField ),
          NoDiffusion_T             ( getNoDiffusionBoundaryUID(),               getNoDiffusionFlagUID(),               pdfField ),
          FreeDiffusion_T           ( getFreeDiffusionBoundaryUID(),             getFreeDiffusionFlagUID(),             pdfField, flagField, domainMask ),
          SimpleDiffusionDirichlet_T( getSimpleDiffusionDirichletBoundaryUID1(), getSimpleDiffusionDirichletFlagUID1(), pdfField ),
-         SimpleDiffusionDirichlet_T( getSimpleDiffusionDirichletBoundaryUID2(), getSimpleDiffusionDirichletFlagUID2(), pdfField )) );
+         SimpleDiffusionDirichlet_T( getSimpleDiffusionDirichletBoundaryUID2(), getSimpleDiffusionDirichletFlagUID2(), pdfField ) );
 
       if( initFlagUIDs.size() > size_t(0u) )
       {

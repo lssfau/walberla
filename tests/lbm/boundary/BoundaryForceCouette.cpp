@@ -67,8 +67,7 @@ using FlagField_T = FlagField<flag_t>;
 
 typedef lbm::NoSlip< LatticeModel_T, flag_t, true >  BottomWall_T;
 typedef lbm::SimpleUBB< LatticeModel_T, flag_t, false, true >  TopWall_T;
-typedef boost::tuples::tuple< BottomWall_T, TopWall_T >  BoundaryConditions_T;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, BottomWall_T, TopWall_T > BoundaryHandling_T;
 
 
 
@@ -112,8 +111,8 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
    const flag_t fluid = flagField->registerFlag( Fluid_Flag ); // register the fluid flag at the flag field
    
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
-                                 boost::tuples::make_tuple( BottomWall_T( "bottom", BottomWall_Flag, pdfField ),
-                                                            TopWall_T( "top", TopWall_Flag, pdfField, velocity_ ) ) );
+                                  BottomWall_T( "bottom", BottomWall_Flag, pdfField ),
+                                  TopWall_T( "top", TopWall_Flag, pdfField, velocity_ ) );
 }
 
 

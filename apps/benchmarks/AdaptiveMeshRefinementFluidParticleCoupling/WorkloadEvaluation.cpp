@@ -71,8 +71,6 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
-#include <boost/tuple/tuple.hpp>
-
 #include <vector>
 #include <iomanip>
 #include <iostream>
@@ -102,8 +100,7 @@ const uint_t FieldGhostLayers = 1;
 // boundary handling
 typedef pe_coupling::CurvedLinear< LatticeModel_T, FlagField_T > MO_CLI_T;
 
-typedef boost::tuples::tuple<MO_CLI_T >               BoundaryConditions_T;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, MO_CLI_T > BoundaryHandling_T;
 
 typedef std::tuple<pe::Sphere, pe::Ellipsoid, pe::Plane> BodyTypeTuple;
 
@@ -152,7 +149,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    BoundaryHandling_T::Mode mode = (useEntireFieldTraversal_) ? BoundaryHandling_T::Mode::ENTIRE_FIELD_TRAVERSAL : BoundaryHandling_T::Mode::OPTIMIZED_SPARSE_TRAVERSAL ;
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "fixed obstacle boundary handling", flagField, fluid,
-                                                           boost::tuples::make_tuple( MO_CLI_T ( "MO_CLI", MO_CLI_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ) ),
+                                                           MO_CLI_T ( "MO_CLI", MO_CLI_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
                                                            mode);
 
    // boundaries are set by mapping the planes into the domain

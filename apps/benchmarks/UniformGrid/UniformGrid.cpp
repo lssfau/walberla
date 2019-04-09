@@ -353,9 +353,7 @@ public:
    typedef lbm::NoSlip< LatticeModel_T, flag_t >    NoSlip_T;
    typedef lbm::SimpleUBB< LatticeModel_T, flag_t > UBB_T;
 
-   typedef boost::tuples::tuple< NoSlip_T, UBB_T > BoundaryConditions_T;
-
-   typedef BoundaryHandling< FlagField_T, typename Types<LatticeModel_T>::Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+   typedef BoundaryHandling< FlagField_T, typename Types<LatticeModel_T>::Stencil_T, NoSlip_T, UBB_T > BoundaryHandling_T;
 
 
 
@@ -388,8 +386,8 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block, const Stru
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
-                                       UBB_T( "velocity bounce back", UBB_Flag, pdfField, velocity_, real_c(0), real_c(0) ) ) );
+                                                           NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
+                                                           UBB_T( "velocity bounce back", UBB_Flag, pdfField, velocity_, real_c(0), real_c(0) ) );
 
    CellInterval domainBB = storage->getDomainCellBB();
    storage->transformGlobalToBlockLocalCellInterval( domainBB, *block );

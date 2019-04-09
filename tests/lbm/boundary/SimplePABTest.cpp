@@ -108,8 +108,7 @@ class BoundaryHandlingCreator
 public:
    typedef lbm::NoSlip<LatticeModel,flag_t>                              MyNoSlip;
    typedef lbm::SimplePAB<LatticeModel,MyFlagField>                      MySimplePAB;
-   typedef boost::tuples::tuple< MyNoSlip, MySimplePAB, MySimplePAB >    BoundaryConditionsT;
-   typedef BoundaryHandling< MyFlagField, Stencil, BoundaryConditionsT > BoundaryHandlingT;
+   typedef BoundaryHandling< MyFlagField, Stencil, MyNoSlip, MySimplePAB, MySimplePAB > BoundaryHandlingT;
 
    BoundaryHandlingCreator( const BlockDataID& flagField, const BlockDataID& pdfField,
                             const real_t leftLatticeDensity, const real_t rightLatticeDensity,
@@ -148,11 +147,10 @@ BoundaryHandlingCreator::BoundaryHandlingT * BoundaryHandlingCreator::operator()
    */
 
    BoundaryHandlingT * handling = new BoundaryHandlingT( "Boundary Handling", flagField, fluidFlag,
-      boost::tuples::make_tuple(
          MyNoSlip( "NoSlip", getNoSlipFlag(), block->getData< PDFField >( pdfField_ ) ),
          MySimplePAB( "SimplePABLeft",  getSimplePABLeftFlag(),  block->getData< PDFField >( pdfField_ ), block->getData< MyFlagField >( flagField_ ), leftLatticeDensity_,  omega_, getFluidFlag(), getNoSlipFlag() ),
          MySimplePAB( "SimplePABRight", getSimplePABRightFlag(), block->getData< PDFField >( pdfField_ ), block->getData< MyFlagField >( flagField_ ), rightLatticeDensity_,  omega_, getFluidFlag(), getNoSlipFlag() )
-      ) );
+      );
 
    CellInterval channelBB(0, 0, 0,
       cell_idx_c(channelWidth_) - 1,  cell_idx_c(channelWidth_) - 1,  cell_idx_c(channelLength_) - 1 );

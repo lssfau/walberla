@@ -94,8 +94,7 @@ const uint_t FieldGhostLayers = 1;
 // boundary handling
 typedef pe_coupling::SimpleBB<LatticeModel_T, FlagField_T> MO_BB_T;
 
-using BoundaryConditions_T = boost::tuples::tuple<MO_BB_T>;
-typedef BoundaryHandling<FlagField_T, Stencil_T, BoundaryConditions_T> BoundaryHandling_T;
+typedef BoundaryHandling<FlagField_T, Stencil_T, MO_BB_T> BoundaryHandling_T;
 
 using BodyTypeTuple = std::tuple<pe::Squirmer>;
 
@@ -143,10 +142,8 @@ MyBoundaryHandling::operator()(IBlock *const block, const StructuredBlockStorage
    const auto fluid = flagField->flagExists(Fluid_Flag) ? flagField->getFlag(Fluid_Flag) : flagField->registerFlag(
          Fluid_Flag);
 
-   BoundaryHandling_T *handling = new BoundaryHandling_T("fixed obstacle boundary handling", flagField, fluid,
-                                                         boost::tuples::make_tuple(
-                                                               MO_BB_T("MO_BB", MO_BB_Flag, pdfField, flagField,
-                                                                       bodyField, fluid, *storage, *block)));
+   BoundaryHandling_T *handling = new BoundaryHandling_T( "fixed obstacle boundary handling", flagField, fluid,
+                                                          MO_BB_T("MO_BB", MO_BB_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ) );
 
    handling->fillWithDomain(FieldGhostLayers);
 

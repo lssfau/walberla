@@ -98,8 +98,7 @@ typedef pe_coupling::SimpleBB< LatticeModel_T, FlagField_T >        MEM_BB_T;
 typedef pe_coupling::CurvedLinear< LatticeModel_T, FlagField_T >    MEM_CLI_T;
 typedef pe_coupling::CurvedQuadratic< LatticeModel_T, FlagField_T > MEM_MR_T;
 
-typedef boost::tuples::tuple< UBB_T, Outlet_T, MEM_BB_T, MEM_CLI_T, MEM_MR_T > BoundaryConditions_T;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, UBB_T, Outlet_T, MEM_BB_T, MEM_CLI_T, MEM_MR_T > BoundaryHandling_T;
 
 using BodyTypeTuple = std::tuple<pe::Sphere>;
 
@@ -199,11 +198,11 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "moving obstacle boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( UBB_T( "UBB", UBB_Flag, pdfField, velocity_),
+                                    UBB_T( "UBB", UBB_Flag, pdfField, velocity_),
                                     Outlet_T( "Outlet", Outlet_Flag, pdfField, real_t(1) ),
                                     MEM_BB_T (  "MEM_BB",  MEM_BB_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
                                     MEM_CLI_T( "MEM_CLI", MEM_CLI_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
-                                    MEM_MR_T (  "MEM_MR",  MEM_MR_Flag, pdfField, flagField, bodyField, fluid, *storage, *block, pdfFieldPreCol ) )  );
+                                    MEM_MR_T (  "MEM_MR",  MEM_MR_Flag, pdfField, flagField, bodyField, fluid, *storage, *block, pdfFieldPreCol ) );
 
    const auto ubb = flagField->getFlag( UBB_Flag );
    const auto outlet = flagField->getFlag( Outlet_Flag );

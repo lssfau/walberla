@@ -458,9 +458,7 @@ public:
    typedef lbm::NoSlip< LatticeModel_T, flag_t >      NoSlip_T;
    typedef lbm::Curved< LatticeModel_T, FlagField_T > Curved_T;
 
-   typedef boost::tuples::tuple< NoSlip_T, Curved_T > BoundaryConditions_T;
-
-   typedef BoundaryHandling< FlagField_T, typename Types<LatticeModel_T>::Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+   typedef BoundaryHandling< FlagField_T, typename Types<LatticeModel_T>::Stencil_T, NoSlip_T, Curved_T > BoundaryHandling_T;
 
 
 
@@ -488,8 +486,8 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block ) const
    const flag_t fluid = flagField->registerFlag( Fluid_Flag );
 
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
-                                    Curved_T( "curved", Curved_Flag, pdfField, flagField, fluid ) ) );
+                                   NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
+                                   Curved_T( "curved", Curved_Flag, pdfField, flagField, fluid ) );
 }
 
 

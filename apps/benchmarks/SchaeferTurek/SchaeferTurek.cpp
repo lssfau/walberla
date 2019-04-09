@@ -784,11 +784,8 @@ struct MyBoundaryTypes
    typedef lbm::Outlet< LatticeModel_T, FlagField_T, 2, 1 >                       Outlet21_T;
    typedef lbm::Outlet< LatticeModel_T, FlagField_T, 4, 3 >                       Outlet43_T;
    typedef lbm::SimplePressure< LatticeModel_T, flag_t >                          PressureOutlet_T;
-   
 
-   typedef boost::tuples::tuple< NoSlip_T, Obstacle_T, Curved_T, DynamicUBB_T, Outlet21_T, Outlet43_T, PressureOutlet_T > BoundaryConditions_T;
-
-   typedef BoundaryHandling< FlagField_T, typename Types<LatticeModel_T>::Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+   typedef BoundaryHandling< FlagField_T, typename Types<LatticeModel_T>::Stencil_T, NoSlip_T, Obstacle_T, Curved_T, DynamicUBB_T, Outlet21_T, Outlet43_T, PressureOutlet_T > BoundaryHandling_T;
 };
 
 
@@ -804,8 +801,6 @@ public:
    using Outlet21_T = typename MyBoundaryTypes<LatticeModel_T>::Outlet21_T;
    using Outlet43_T = typename MyBoundaryTypes<LatticeModel_T>::Outlet43_T;
    using PressureOutlet_T = typename MyBoundaryTypes<LatticeModel_T>::PressureOutlet_T;
-
-   using BoundaryConditions_T = typename MyBoundaryTypes<LatticeModel_T>::BoundaryConditions_T;
 
    using BoundaryHandling_T = typename MyBoundaryTypes<LatticeModel_T>::BoundaryHandling_T;
 
@@ -848,13 +843,13 @@ MyBoundaryHandling<LatticeModel_T>::initialize( IBlock * const block )
    SinusInflowVelocity<Is2D< LatticeModel_T >::value> velocity( setup_.inflowVelocity_L, setup_.raisingTime_L, setup_.sinPeriod_L, setup_.H );
 
    return new BoundaryHandling_T( "boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
+                                    NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
                                   Obstacle_T( "obstacle (staircase)", Obstacle_Flag, pdfField ),
                                     Curved_T( "obstacle (curved)", Curved_Flag, pdfField, flagField, fluid ),
                                 DynamicUBB_T( "velocity bounce back", UBB_Flag, pdfField, timeTracker_, blocks->getLevel(*block), velocity, block->getAABB() ),
                                   Outlet21_T( "outlet (2/1)", Outlet21_Flag, pdfField, flagField, fluid ),
                                   Outlet43_T( "outlet (4/3)", Outlet43_Flag, pdfField, flagField, fluid ),
-                            PressureOutlet_T( "pressure outlet", PressureOutlet_Flag, pdfField, real_t(1) ) ) );
+                            PressureOutlet_T( "pressure outlet", PressureOutlet_Flag, pdfField, real_t(1) ) );
 }
 
 

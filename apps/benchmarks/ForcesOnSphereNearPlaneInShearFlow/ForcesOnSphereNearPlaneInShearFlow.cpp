@@ -95,8 +95,7 @@ const uint_t FieldGhostLayers = 4;
 typedef pe_coupling::SimpleBB< LatticeModel_T, FlagField_T > MO_SBB_T;
 typedef pe_coupling::CurvedLinear< LatticeModel_T, FlagField_T > MO_CLI_T;
 
-typedef boost::tuples::tuple< MO_SBB_T, MO_CLI_T > BoundaryConditions_T;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, MO_SBB_T, MO_CLI_T > BoundaryHandling_T;
 
 typedef std::tuple< pe::Sphere, pe::Plane > BodyTypeTuple;
 
@@ -238,8 +237,8 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "moving obstacle boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( MO_SBB_T( "MO_SBB", MO_SBB_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
-                                    MO_CLI_T( "MO_CLI", MO_CLI_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ) ) );
+                                                           MO_SBB_T( "MO_SBB", MO_SBB_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
+                                                           MO_CLI_T( "MO_CLI", MO_CLI_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ) );
 
    // boundary conditions are set by mapping the (moving) planes into the domain
 

@@ -87,8 +87,7 @@ using FlagField_T = FlagField<flag_t>;
 // boundary handling
 typedef lbm::NoSlip< LatticeModel_T, flag_t >                          NoSlip_T;
 
-using BoundaryConditions_T = boost::tuples::tuple<NoSlip_T>;
-typedef BoundaryHandling<FlagField_T, Stencil_T, BoundaryConditions_T> BoundaryHandling_T;
+typedef BoundaryHandling<FlagField_T, Stencil_T, NoSlip_T> BoundaryHandling_T;
 
 typedef std::tuple<pe::Plane, pe::Sphere> BodyTypeTuple ;
 
@@ -152,7 +151,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "Boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ) ) );
+                                                           NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ) );
 
    const auto noslip = flagField->getFlag( NoSlip_Flag );
 
