@@ -39,7 +39,7 @@
 
 #include "stencil/Directions.h"
 
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 #include <ostream>
 #include <string>
 #include <type_traits>
@@ -363,26 +363,31 @@ private:
 
    CellInterval getGhostLayerCellInterval( const uint_t numberOfGhostLayersToInclude ) const;
 
-   template< typename Head, typename Tail >
-   void setupBoundaryConditions(       boost::tuples::cons<Head, Tail> & boundaryConditions );
-   void setupBoundaryConditions( const boost::tuples::null_type & ) const {}
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   typename std::enable_if<(N!=-1), void>::type setupBoundaryConditions(       BoundariesTuple & boundaryConditions );
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1  >
+   typename std::enable_if<(N==-1), void>::type setupBoundaryConditions( const BoundariesTuple & ) const {}
 
    inline std::vector< BoundaryUID > getBoundaryUIDs() const;
-   template< typename Head, typename Tail >
-   inline void getBoundaryUIDs( const boost::tuples::cons<Head, Tail> & boundaryConditions, std::vector< BoundaryUID > & uids ) const;
-   inline void getBoundaryUIDs( const boost::tuples::null_type &, std::vector< BoundaryUID > & ) const {}
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type getBoundaryUIDs( const BoundariesTuple & boundaryConditions, std::vector< BoundaryUID > & uids ) const;
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), void>::type getBoundaryUIDs( const BoundariesTuple &, std::vector< BoundaryUID > & ) const {}
 
-   template< typename Head, typename Tail >
-   inline BoundaryUID getBoundaryUID( const boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag ) const;
-   inline BoundaryUID getBoundaryUID( const boost::tuples::null_type &, const flag_t flagUID ) const;
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), BoundaryUID>::type getBoundaryUID( const BoundariesTuple & boundaryConditions, const flag_t flag ) const;
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), BoundaryUID>::type getBoundaryUID( const BoundariesTuple &, const flag_t flagUID ) const;
 
-   template< typename Head, typename Tail >
-   inline bool containsBoundaryCondition( const boost::tuples::cons<Head, Tail> & boundaryConditions, const BoundaryUID & uid ) const;
-   inline bool containsBoundaryCondition( const boost::tuples::null_type &, const BoundaryUID & ) const { return false; }
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), bool>::type containsBoundaryCondition( const BoundariesTuple & boundaryConditions, const BoundaryUID & uid ) const;
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), bool>::type containsBoundaryCondition( const BoundariesTuple &, const BoundaryUID & ) const { return false; }
 
-   template< typename Head, typename Tail >
-   inline flag_t getBoundaryMask( const boost::tuples::cons<Head, Tail> & boundaryConditions, const BoundaryUID & uid ) const;
-   inline flag_t getBoundaryMask( const boost::tuples::null_type &, const BoundaryUID & ) const { return numeric_cast<flag_t>(0); }
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), flag_t>::type getBoundaryMask( const BoundariesTuple & boundaryConditions, const BoundaryUID & uid ) const;
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), flag_t>::type getBoundaryMask( const BoundariesTuple &, const BoundaryUID & ) const { return numeric_cast<flag_t>(0); }
 
    //** Get Boundary Class (private helper functions) ******************************************************************
    /*! \name Get Boundary Class (private helper functions) */
@@ -390,24 +395,22 @@ private:
 
    // matching type (-> Boundary_T) not yet found ...
 
-   template< typename Boundary_T, typename Head, typename Tail >
-   inline const Boundary_T & getBoundaryCondition( const BoundaryUID & uid, const boost::tuples::cons<Head, Tail> & boundaryConditions,
-                                                   typename std::enable_if< std::is_same< Boundary_T, Head >::value >::type* /*dummy*/ = 0,
-                                                   typename std::enable_if< std::is_same< typename std::is_same< Tail, boost::tuples::null_type >::type,
-                                                                                              std::false_type >::value >::type* /*dummy*/ = 0 ) const
+   template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline const typename std::enable_if<(N!=0), Boundary_T>::type & getBoundaryCondition( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions,
+                                                   typename std::enable_if< std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::value >::type* /*dummy*/ = 0 ) const
    {
-      if( uid == boundaryConditions.get_head().getUID() )
-         return boundaryConditions.get_head();
+      if( uid == std::get<N>( boundaryConditions ).getUID() )
+         return std::get<N>( boundaryConditions );
       else
-         return getBoundaryCondition_TypeExists< Boundary_T, typename Tail::head_type, typename Tail::tail_type >( uid, boundaryConditions.get_tail() );
+         return getBoundaryCondition_TypeExists< Boundary_T, BoundariesTuple, N-1 >( uid, boundaryConditions );
    }
 
-   template< typename Boundary_T, typename Head, typename Tail >
-   inline const Boundary_T & getBoundaryCondition( const BoundaryUID & uid, const boost::tuples::cons<Head, boost::tuples::null_type> & boundaryConditions,
-                                                   typename std::enable_if< std::is_same< Boundary_T, Head >::value >::type* /*dummy*/ = 0 ) const
+   template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline const typename std::enable_if<(N==0), Boundary_T>::type & getBoundaryCondition( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions,
+                                                   typename std::enable_if< std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::value >::type* /*dummy*/ = 0 ) const
    {
-      if( uid == boundaryConditions.get_head().getUID() )
-         return boundaryConditions.get_head();
+      if( uid == std::get<N>( boundaryConditions ).getUID() )
+         return std::get<N>( boundaryConditions );
       else
          WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
 
@@ -416,50 +419,41 @@ private:
 #endif
    }
 
-   template< typename Boundary_T, typename Head, typename Tail >
-   inline const Boundary_T & getBoundaryCondition( const BoundaryUID & uid, const boost::tuples::cons<Head, Tail> & boundaryConditions,
-                                                   typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, Head >::type,
+   template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline const typename std::enable_if<(N!=0), Boundary_T>::type & getBoundaryCondition( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions,
+                                                   typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::type,
                                                                                               std::false_type >::value >::type* /*dummy*/ = 0,
-                                                   typename std::enable_if< std::is_same< typename std::is_same< Tail, boost::tuples::null_type >::type,
-                                                                                              std::false_type >::value >::type* /*dummy*/ = 0 ) const
+                                                   typename std::enable_if< (N>0) >::type* /*dummy*/ = 0 ) const
    {
-      return getBoundaryCondition< Boundary_T, typename Tail::head_type, typename Tail::tail_type >( uid, boundaryConditions.get_tail() );
+      return getBoundaryCondition< Boundary_T, BoundariesTuple, N-1 >( uid, boundaryConditions );
    }
 
-   template< typename Boundary_T, typename Head, typename Tail >
-   inline const Boundary_T & getBoundaryCondition( const BoundaryUID & /*uid*/, const boost::tuples::cons<Head, boost::tuples::null_type> & /*boundaryConditions*/,
-                                                   typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, Head >::type,
+   template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline const typename std::enable_if<(N==0), Boundary_T>::type & getBoundaryCondition( const BoundaryUID & /*uid*/, const BoundariesTuple & /*boundaryConditions*/,
+                                                   typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, typename std::tuple_element<0, BoundariesTuple>::type >::type,
                                                                                               std::false_type >::value >::type* /*dummy*/ = 0 ) const
    {
       static_assert( sizeof(Boundary_T) == 0, "The requested boundary class is not part of this boundary handling." );
    }
 
-   //template< typename Boundary_T >
-   //inline const Boundary_T & getBoundaryCondition( const BoundaryUID & /*uid*/, const boost::tuples::null_type & ) const
-   //{
-   //   static_assert( sizeof(Boundary_T) == 0, "The requested boundary class is not part of this boundary handling." );
-   //}
-
    // matching type (-> Boundary_T) exists!
 
-   template< typename Boundary_T, typename Head, typename Tail >
-   inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const boost::tuples::cons<Head, Tail> & boundaryConditions,
-                                                              typename std::enable_if< std::is_same< Boundary_T, Head >::value >::type* /*dummy*/ = 0,
-                                                              typename std::enable_if< std::is_same< typename std::is_same< Tail, boost::tuples::null_type >::type,
-                                                                                                         std::false_type >::value >::type* /*dummy*/ = 0 ) const
+   template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline const typename std::enable_if<(N!=0), Boundary_T>::type & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions,
+                                                              typename std::enable_if< std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::value >::type* /*dummy*/ = 0 ) const
    {
-      if( uid == boundaryConditions.get_head().getUID() )
-         return boundaryConditions.get_head();
+      if( uid == std::get<N>( boundaryConditions ).getUID() )
+         return std::get<N>( boundaryConditions );
       else
-         return getBoundaryCondition_TypeExists< Boundary_T, typename Tail::head_type, typename Tail::tail_type >( uid, boundaryConditions.get_tail() );
+         return getBoundaryCondition_TypeExists< Boundary_T, BoundariesTuple, N-1 >( uid, boundaryConditions );
    }
 
-   template< typename Boundary_T, typename Head, typename Tail >
-   inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const boost::tuples::cons<Head, boost::tuples::null_type> & boundaryConditions,
-                                                              typename std::enable_if< std::is_same< Boundary_T, Head >::value >::type* /*dummy*/ = 0 ) const
+   template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline const typename std::enable_if<(N==0), Boundary_T>::type & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions,
+                                                              typename std::enable_if< std::is_same< Boundary_T, typename std::tuple_element<0, BoundariesTuple>::type >::value >::type* /*dummy*/ = 0 ) const
    {
-      if( uid == boundaryConditions.get_head().getUID() )
-         return boundaryConditions.get_head();
+      if( uid == std::get<0>( boundaryConditions ).getUID() )
+         return std::get<0>( boundaryConditions );
       else
          WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
 
@@ -468,19 +462,17 @@ private:
 #endif
    }
 
-   template< typename Boundary_T, typename Head, typename Tail >
-   inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const boost::tuples::cons<Head, Tail> & boundaryConditions,
-                                                              typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, Head >::type,
-                                                                                                         std::false_type >::value >::type* /*dummy*/ = 0,
-                                                              typename std::enable_if< std::is_same< typename std::is_same< Tail, boost::tuples::null_type >::type,
+   template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline const typename std::enable_if<(N!=0), Boundary_T>::type & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions,
+                                                              typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::type,
                                                                                                          std::false_type >::value >::type* /*dummy*/ = 0 ) const
    {
-      return getBoundaryCondition_TypeExists< Boundary_T, typename Tail::head_type, typename Tail::tail_type >( uid, boundaryConditions.get_tail() );
+      return getBoundaryCondition_TypeExists< Boundary_T, BoundariesTuple, N-1 >( uid, boundaryConditions );
    }
 
-   template< typename Boundary_T, typename Head, typename Tail >
-   inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const boost::tuples::cons<Head, boost::tuples::null_type> & /*boundaryConditions*/,
-                                                              typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, Head >::type,
+   template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline const typename std::enable_if<(N==0), Boundary_T>::type & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const BoundariesTuple & /*boundaryConditions*/,
+                                                              typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, typename std::tuple_element<0, BoundariesTuple>::type >::type,
                                                                                                          std::false_type >::value >::type* /*dummy*/ = 0 ) const
    {
       WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
@@ -490,23 +482,19 @@ private:
 #endif
    }
 
-   //template< typename Boundary_T >
-   //inline const Boundary_T & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const boost::tuples::null_type & ) const
-   //{
-   //   WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
-   //}
-   //@}
    //*******************************************************************************************************************
 
    inline uint_t numberOfMatchingBoundaryConditions( const BoundaryUID & uid ) const;
 
-   template< typename Head, typename Tail >
-   inline uint_t numberOfMatchingBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions, const BoundaryUID & uid ) const;
-   inline uint_t numberOfMatchingBoundaryConditions( const boost::tuples::null_type &, const BoundaryUID & ) const { return uint_c(0); }
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), uint_t>::type numberOfMatchingBoundaryConditions( const BoundariesTuple & boundaryConditions, const BoundaryUID & uid ) const;
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), uint_t>::type numberOfMatchingBoundaryConditions( const BoundariesTuple &, const BoundaryUID & ) const { return uint_c(0); }
 
-   template< typename Head, typename Tail >
-   inline uint_t numberOfMatchingBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t mask ) const;
-   inline uint_t numberOfMatchingBoundaryConditions( const boost::tuples::null_type &, const flag_t ) const { return uint_c(0); }
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), uint_t>::type numberOfMatchingBoundaryConditions( const BoundariesTuple & boundaryConditions, const flag_t mask ) const;
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), uint_t>::type numberOfMatchingBoundaryConditions( const BoundariesTuple &, const flag_t ) const { return uint_c(0); }
 
    inline bool checkFlagField( const uint_t numberOfGhostLayersToInclude = 0 ) const;
 
@@ -515,67 +503,76 @@ private:
    //** Set Boundary Cells (private helper functions) ******************************************************************
    /*! \name Set Boundary Cells (private helper functions) */
    //@{
-   template< typename Head, typename Tail >
-   inline shared_ptr<BoundaryConfiguration> createBoundaryConfiguration( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), shared_ptr<BoundaryConfiguration>>::type createBoundaryConfiguration( const BoundariesTuple & boundaryConditions,
                                                                          const BoundaryUID & uid, const Config::BlockHandle & config ) const;
-   inline shared_ptr<BoundaryConfiguration> createBoundaryConfiguration( const boost::tuples::null_type &, const BoundaryUID & uid,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), shared_ptr<BoundaryConfiguration>>::type createBoundaryConfiguration( const BoundariesTuple &, const BoundaryUID & uid,
                                                                          const Config::BlockHandle & ) const;
 
    inline void addNearBoundary( const CellInterval & cells );
    inline void addBoundary( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
 
-   template< typename Head, typename Tail >
-   inline void setBoundary(       boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type setBoundary(       BoundariesTuple & boundaryConditions, const flag_t flag,
                                                                                         const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                                         const BoundaryConfiguration & parameter );
-   inline void setBoundary( const boost::tuples::null_type &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), void>::type setBoundary( const BoundariesTuple &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                                                               const BoundaryConfiguration & ) const;
 
-   template< typename Head, typename Tail >
-   inline void setBoundary(       boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag, const CellInterval & cells,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type setBoundary(       BoundariesTuple & boundaryConditions, const flag_t flag, const CellInterval & cells,
                                                                                         const BoundaryConfiguration & parameter );
-   inline void setBoundary( const boost::tuples::null_type &, const flag_t, const CellInterval &, const BoundaryConfiguration & ) const;
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), void>::type setBoundary( const BoundariesTuple &, const flag_t, const CellInterval &, const BoundaryConfiguration & ) const;
 
-   template< typename Head, typename Tail >
-   inline void setBoundary(       boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag, const CellVector & cells,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type setBoundary(       BoundariesTuple & boundaryConditions, const flag_t flag, const CellVector & cells,
                                                                                         const BoundaryConfiguration & parameter );
-   inline void setBoundary( const boost::tuples::null_type &, const flag_t, const CellVector &, const BoundaryConfiguration & ) const;
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), void>::type setBoundary( const BoundariesTuple &, const flag_t, const CellVector &, const BoundaryConfiguration & ) const;
    //@}
    //*******************************************************************************************************************
 
    //** Remove Boundary Cells (private helper functions) ***************************************************************
    /*! \name Remove Boundary Cells (private helper functions) */
    //@{
-   template< typename Head, typename Tail >
-   inline void removeBoundary(       boost::tuples::cons<Head, Tail> & boundaryConditions, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type removeBoundary(       BoundariesTuple & boundaryConditions, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                                            const bool checkNearBoundaryFlags = true );
-   inline void removeBoundary( const boost::tuples::null_type &, const cell_idx_t, const cell_idx_t, const cell_idx_t, const bool ) const { WALBERLA_CHECK( false ); }
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), void>::type removeBoundary( const BoundariesTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t, const bool ) const { WALBERLA_CHECK( false ); }
    //@}
    //*******************************************************************************************************************
 
    //** Boundary Treatment (private helper functions) ******************************************************************
    /*! \name Boundary Treatment (private helper functions) */
    //@{
-   template< typename Head, typename Tail >
-   inline void treatDirection( boost::tuples::cons<Head, Tail> & boundaryConditions, const uint_t index,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type treatDirection( BoundariesTuple & boundaryConditions, const uint_t index,
                                const std::vector< std::vector< std::pair< Cell, stencil::Direction > > > & cellDirectionPairs );
-   inline void treatDirection( const boost::tuples::null_type &, const uint_t,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), void>::type treatDirection( const BoundariesTuple &, const uint_t,
                                const std::vector< std::vector< std::pair< Cell, stencil::Direction > > > & ) const {}
 
-   template< typename Head, typename Tail >
-   inline void treatDirection(       boost::tuples::cons<Head, Tail> & boundaryConditions, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type treatDirection(       BoundariesTuple & boundaryConditions, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                                            const stencil::Direction dir,
                                                                                            const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz );
-   inline void treatDirection( const boost::tuples::null_type & , const cell_idx_t, const cell_idx_t, const cell_idx_t, const stencil::Direction,
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), void>::type treatDirection( const BoundariesTuple & , const cell_idx_t, const cell_idx_t, const cell_idx_t, const stencil::Direction,
                                                                   const cell_idx_t, const cell_idx_t, const cell_idx_t ) const { WALBERLA_CHECK( false ); }
 
-   template< typename Head, typename Tail >
-   inline void beforeBoundaryTreatment(       boost::tuples::cons<Head, Tail> & boundaryConditions );
-   inline void beforeBoundaryTreatment( const boost::tuples::null_type & ) const {}
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type beforeBoundaryTreatment(       BoundariesTuple & boundaryConditions );
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), void>::type beforeBoundaryTreatment( const BoundariesTuple & ) const {}
 
-   template< typename Head, typename Tail >
-   inline void afterBoundaryTreatment(       boost::tuples::cons<Head, Tail> & boundaryConditions );
-   inline void afterBoundaryTreatment( const boost::tuples::null_type & ) const {}
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type afterBoundaryTreatment(       BoundariesTuple & boundaryConditions );
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), void>::type afterBoundaryTreatment( const BoundariesTuple & ) const {}
    //@}
    //*******************************************************************************************************************
 
@@ -595,11 +592,11 @@ private:
    template< typename Buffer_T >
    inline void pack( Buffer_T & buffer, const flag_t mask, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
 
-   template< typename Buffer_T, typename Head, typename Tail >
-   inline void pack( const boost::tuples::cons<Head, Tail> & boundaryConditions, Buffer_T & buffer,
+   template< typename Buffer_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type pack( const BoundariesTuple & boundaryConditions, Buffer_T & buffer,
                      const flag_t mask, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const;
-   template< typename Buffer_T >
-   void pack( const boost::tuples::null_type &, Buffer_T &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t )
+   template< typename Buffer_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   typename std::enable_if<(N==-1), void>::type pack( const BoundariesTuple &, Buffer_T &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t )
               const { WALBERLA_CHECK( false ); }
 
    template< typename Buffer_T >
@@ -608,18 +605,19 @@ private:
    template< typename Buffer_T >
    inline void unpackBoundary( Buffer_T & buffer, const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
 
-   template< typename Buffer_T, typename Head, typename Tail >
-   inline void unpackBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, Buffer_T & buffer, const flag_t flag,
+   template< typename Buffer_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N!=-1), void>::type unpackBoundary( BoundariesTuple & boundaryConditions, Buffer_T & buffer, const flag_t flag,
                                const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
-   template< typename Buffer_T >
-   inline void unpackBoundary( const boost::tuples::null_type &, Buffer_T &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t)
+   template< typename Buffer_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   inline typename std::enable_if<(N==-1), void>::type unpackBoundary( const BoundariesTuple &, Buffer_T &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t)
                                const { WALBERLA_CHECK( false ); }
    //@}
    //*******************************************************************************************************************
 
-   template< typename Head, typename Tail >
-   void getBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions, std::vector< std::string > & bcs ) const;
-   void getBoundaryConditions( const boost::tuples::null_type &, std::vector< std::string > & ) const {}
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   typename std::enable_if<(N!=-1), void>::type getBoundaryConditions( const BoundariesTuple & boundaryConditions, std::vector< std::string > & bcs ) const;
+   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   typename std::enable_if<(N==-1), void>::type getBoundaryConditions( const BoundariesTuple &, std::vector< std::string > & ) const {}
 
    template< typename T > static void valueToStream( std::ostream & os, const T       value ) { os << value; }
                           static void valueToStream( std::ostream & os, const  int8_t value ) { os <<  int_c( value ); }
@@ -649,7 +647,7 @@ private:
    std::vector< std::vector< std::vector< std::pair< Cell, stencil::Direction > > > > cellDirectionPairs_; // 1st vector: numberOfGhostLayersToInclude
                                                                                                            // 2nd vector: boundary condition index
                                                                                                            // 3rd vector: vector of cell<->direction pairs
-   typedef boost::tuples::tuple<Boundaries...> Tuple;
+   typedef std::tuple<Boundaries...> Tuple;
    Tuple boundaryConditions_;
    bool  threadSafeBCs_;
 
@@ -674,7 +672,7 @@ BoundaryHandling< FlagField_T, Stencil, Boundaries... >::BoundaryHandling( const
    domain_( domain ),
    mode_( mode ),
    dirty_( false ),
-   boundaryConditions_( boost::make_tuple(boundaryConditions...) ),
+   boundaryConditions_( std::make_tuple(boundaryConditions...) ),
    threadSafeBCs_( true )
 {
    setupBoundaryConditions( boundaryConditions_ );
@@ -823,7 +821,7 @@ template< typename FlagField_T, typename Stencil, typename... Boundaries >
 template< typename Boundary_T >
 inline const Boundary_T & BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryCondition( const BoundaryUID & uid ) const
 {
-   return getBoundaryCondition< Boundary_T, typename Tuple::head_type, typename Tuple::tail_type >( uid, boundaryConditions_ );
+   return getBoundaryCondition< Boundary_T, std::tuple< Boundaries... > >( uid, boundaryConditions_ );
 }
 
 
@@ -2396,10 +2394,11 @@ CellInterval BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getGhostLa
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setupBoundaryConditions( boost::tuples::cons<Head, Tail> & boundaryConditions )
+template< typename BoundariesTuple, int N >
+typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setupBoundaryConditions( BoundariesTuple & boundaryConditions )
 {
-   Head & boundaryCondition = boundaryConditions.get_head();
+   using BoundaryType = typename std::tuple_element<N, BoundariesTuple>::type;
+   BoundaryType & boundaryCondition = std::get<N>( boundaryConditions );
 
    if( numberOfMatchingBoundaryConditions( boundaryCondition.getUID() ) != 1 )
       WALBERLA_ABORT( "Every boundary condition registered at the same boundary handler must have a unique boundary UID!\n"
@@ -2424,9 +2423,9 @@ void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setupBoundaryCondi
 
    bcMaskMapping_.push_back( mask );
 
-   threadSafeBCs_ &= isThreadSafe< Head >::value;
+   threadSafeBCs_ &= isThreadSafe< BoundaryType >::value;
 
-   setupBoundaryConditions( boundaryConditions.get_tail() );
+   setupBoundaryConditions< BoundariesTuple, N-1 >( boundaryConditions );
 }
 
 
@@ -2442,22 +2441,22 @@ inline std::vector< BoundaryUID > BoundaryHandling< FlagField_T, Stencil, Bounda
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUIDs( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUIDs( const BoundariesTuple & boundaryConditions,
                                                                               std::vector< BoundaryUID > & uids ) const
 {
-   uids.push_back( boundaryConditions.get_head().getUID() );
-   getBoundaryUIDs( boundaryConditions.get_tail(), uids );
+   uids.push_back( std::get<N>( boundaryConditions ).getUID() );
+   getBoundaryUIDs< BoundariesTuple, N-1 >( boundaryConditions, uids );
 }
 
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUID( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), BoundaryUID>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUID( const BoundariesTuple & boundaryConditions,
                                                                                     const flag_t flag ) const
 {
-   const Head & boundaryCondition = boundaryConditions.get_head();
+   auto & boundaryCondition = std::get<N>( boundaryConditions );
 
    if( ( boundaryCondition.getMask() & flag ) == flag )
    {
@@ -2465,14 +2464,15 @@ inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getB
    }
    else
    {
-      return getBoundaryUID( boundaryConditions.get_tail(), flag );
+      return getBoundaryUID< BoundariesTuple, N-1 >( boundaryConditions, flag );
    }
 }
 
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUID( const boost::tuples::null_type &,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N==-1), BoundaryUID>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUID( const BoundariesTuple &,
                                                                                     const flag_t flag ) const
 {
    if( !flagField_->isRegistered( flag ) )
@@ -2491,28 +2491,28 @@ inline BoundaryUID BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getB
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline bool BoundaryHandling< FlagField_T, Stencil, Boundaries... >::containsBoundaryCondition( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), bool>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::containsBoundaryCondition( const BoundariesTuple & boundaryConditions,
                                                                                         const BoundaryUID & uid ) const
 {
-   if( boundaryConditions.get_head().getUID() == uid )
+   if( std::get<N>( boundaryConditions ).getUID() == uid )
       return true;
-   return containsBoundaryCondition( boundaryConditions.get_tail(), uid );
+   return containsBoundaryCondition< BoundariesTuple, N-1 >( boundaryConditions, uid );
 }
 
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline typename BoundaryHandling< FlagField_T, Stencil, Boundaries... >::flag_t
-   BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryMask( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), typename BoundaryHandling< FlagField_T, Stencil, Boundaries... >::flag_t>::type
+   BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryMask( const BoundariesTuple & boundaryConditions,
                                                                      const BoundaryUID & uid ) const
 {
-   const Head & boundaryCondition = boundaryConditions.get_head();
+   auto & boundaryCondition = std::get<N>( boundaryConditions );
 
    if( boundaryCondition.getUID() == uid )
       return boundaryCondition.getMask();
-   return getBoundaryMask( boundaryConditions.get_tail(), uid );
+   return getBoundaryMask< BoundariesTuple, N-1 >( boundaryConditions, uid );
 }
 
 
@@ -2526,23 +2526,23 @@ inline uint_t BoundaryHandling< FlagField_T, Stencil, Boundaries... >::numberOfM
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline uint_t BoundaryHandling< FlagField_T, Stencil, Boundaries... >::numberOfMatchingBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), uint_t>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::numberOfMatchingBoundaryConditions( const BoundariesTuple & boundaryConditions,
                                                                                                  const BoundaryUID & uid ) const
 {
-   return ( ( boundaryConditions.get_head().getUID() == uid ) ? uint_c(1) : uint_c(0) ) +
-          numberOfMatchingBoundaryConditions( boundaryConditions.get_tail(), uid );
+   return ( ( std::get<N>( boundaryConditions ).getUID() == uid ) ? uint_c(1) : uint_c(0) ) +
+          numberOfMatchingBoundaryConditions< BoundariesTuple, N-1 >( boundaryConditions, uid );
 }
 
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline uint_t BoundaryHandling< FlagField_T, Stencil, Boundaries... >::numberOfMatchingBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), uint_t>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::numberOfMatchingBoundaryConditions( const BoundariesTuple & boundaryConditions,
                                                                                                  const flag_t mask ) const
 {
-   return ( ( ( boundaryConditions.get_head().getMask() & mask ) != 0 ) ? uint_c(1) : uint_c(0) ) +
-          numberOfMatchingBoundaryConditions( boundaryConditions.get_tail(), mask );
+   return ( ( ( std::get<N>( boundaryConditions ).getMask() & mask ) != 0 ) ? uint_c(1) : uint_c(0) ) +
+          numberOfMatchingBoundaryConditions< BoundariesTuple, N-1 >( boundaryConditions, mask );
 }
 
 
@@ -2619,18 +2619,22 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::addDomain( 
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil, Boundaries... >::createBoundaryConfiguration( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), shared_ptr<BoundaryConfiguration>>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::createBoundaryConfiguration( const BoundariesTuple & boundaryConditions,
                                                                                                                        const BoundaryUID & uid, const Config::BlockHandle & config ) const
 {
-   if( boundaryConditions.get_head().getUID() == uid )
-      return Head::createConfiguration( config );
+   using BoundaryType = typename std::tuple_element<N, BoundariesTuple>::type;
+   const BoundaryType & boundaryCondition = std::get<N>( boundaryConditions );
+   
+   if( boundaryCondition.getUID() == uid )
+      return BoundaryType::createConfiguration( config );
 
-   return createBoundaryConfiguration( boundaryConditions.get_tail(), uid, config );
+   return createBoundaryConfiguration< BoundariesTuple, N-1 >( boundaryConditions, uid, config );
 }
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-inline shared_ptr<BoundaryConfiguration> BoundaryHandling< FlagField_T, Stencil, Boundaries... >::createBoundaryConfiguration( const boost::tuples::null_type &,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N==-1), shared_ptr<BoundaryConfiguration>>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::createBoundaryConfiguration( const BoundariesTuple &,
                                                                                                                        const BoundaryUID & uid, const Config::BlockHandle & ) const
 {
    WALBERLA_CHECK( false, "There is no boundary condition registered at boundary handling " << uid_ << " for a boundary with UID" << uid << "." );
@@ -2685,14 +2689,14 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::addBoundary
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( BoundariesTuple & boundaryConditions, const flag_t flag,
                                                                           const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                           const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( outerBB_.contains(x,y,z) );
 
-   Head & boundaryCondition = boundaryConditions.get_head();
+   auto & boundaryCondition = std::get<N>( boundaryConditions );
    if( ( boundaryCondition.getMask() & flag ) == flag )
    {
       addBoundary( flag, x, y, z );
@@ -2700,11 +2704,12 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
       boundaryCondition.registerCell( flag, x, y, z, parameter );
    }
    else
-      setBoundary( boundaryConditions.get_tail(), flag, x, y, z, parameter );
+      setBoundary< BoundariesTuple, N-1 >( boundaryConditions, flag, x, y, z, parameter );
 }
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const boost::tuples::null_type &, const flag_t flag,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N==-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const BoundariesTuple &, const flag_t flag,
                                                                           const cell_idx_t, const cell_idx_t, const cell_idx_t,
                                                                           const BoundaryConfiguration & ) const
 {
@@ -2721,14 +2726,14 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( BoundariesTuple & boundaryConditions, const flag_t flag,
                                                                           const CellInterval & cells, const BoundaryConfiguration & parameter )
 {
    WALBERLA_ASSERT( outerBB_.contains( cells ) );
    WALBERLA_ASSERT( !cells.empty() );
 
-   Head & boundaryCondition = boundaryConditions.get_head();
+   auto & boundaryCondition = std::get<N>( boundaryConditions );
    if( ( boundaryCondition.getMask() & flag ) == flag )
    {
       // setting boundary flag
@@ -2752,11 +2757,12 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
       boundaryCondition.registerCells( flag, cells, parameter );
    }
    else
-      setBoundary( boundaryConditions.get_tail(), flag, cells, parameter );
+      setBoundary< BoundariesTuple, N-1 >( boundaryConditions, flag, cells, parameter );
 }
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const boost::tuples::null_type &, const flag_t flag,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N==-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const BoundariesTuple &, const flag_t flag,
                                                                           const CellInterval &, const BoundaryConfiguration & ) const
 {
    if( flagField_->isRegistered( flag ) )
@@ -2772,14 +2778,14 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, const flag_t flag,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( BoundariesTuple & boundaryConditions, const flag_t flag,
                                                                           const CellVector & cells, const BoundaryConfiguration & parameter )
 {
    if( cells.empty() )
       return;
 
-   Head & boundaryCondition = boundaryConditions.get_head();
+   auto & boundaryCondition = std::get<N>( boundaryConditions );
    if( ( boundaryCondition.getMask() & flag ) == flag )
    {
       for( auto cell = cells.begin(); cell != cells.end(); ++cell )
@@ -2788,11 +2794,12 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
       boundaryCondition.registerCells( flag, cells.begin(), cells.end(), parameter );
    }
    else
-      setBoundary( boundaryConditions.get_tail(), flag, cells, parameter );
+      setBoundary< BoundariesTuple, N-1 >( boundaryConditions, flag, cells, parameter );
 }
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const boost::tuples::null_type &, const flag_t flag,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N==-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary( const BoundariesTuple &, const flag_t flag,
                                                                           const CellVector &, const BoundaryConfiguration & ) const
 {
    if( flagField_->isRegistered( flag ) )
@@ -2808,15 +2815,15 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::setBoundary
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBoundary( BoundariesTuple & boundaryConditions,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                              const bool checkNearBoundaryFlags )
 {
    WALBERLA_ASSERT( outerBB_.contains(x,y,z) );
    WALBERLA_ASSERT( flagField_->isPartOfMaskSet( x, y, z, boundary_ ) );
 
-   Head & boundaryCondition = boundaryConditions.get_head();
+   auto & boundaryCondition = std::get<N>( boundaryConditions );
 
    if( flagField_->isPartOfMaskSet( x, y, z, boundaryCondition.getMask() ) )
    {
@@ -2859,18 +2866,18 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::removeBound
    }
    else
    {
-      removeBoundary( boundaryConditions.get_tail(), x, y, z, checkNearBoundaryFlags );
+      removeBoundary< BoundariesTuple, N-1 >( boundaryConditions, x, y, z, checkNearBoundaryFlags );
    }
 }
 
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::treatDirection( boost::tuples::cons<Head, Tail> & boundaryConditions, const uint_t index,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::treatDirection( BoundariesTuple & boundaryConditions, const uint_t index,
                                                                              const std::vector< std::vector< std::pair< Cell, stencil::Direction > > > & cellDirectionPairs )
 {
-   Head & boundaryCondition = boundaryConditions.get_head();
+   auto & boundaryCondition = std::get<N>( boundaryConditions );
 
    WALBERLA_ASSERT_LESS( index, cellDirectionPairs.size() );
 
@@ -2893,19 +2900,19 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::treatDirect
       boundaryCondition.treatDirection( x, y, z, direction, nx, ny, nz, flagField_->get(nx,ny,nz) );
    }
 
-   treatDirection( boundaryConditions.get_tail(), index + uint_t(1), cellDirectionPairs );
+   treatDirection< BoundariesTuple, N-1 >( boundaryConditions, index + uint_t(1), cellDirectionPairs );
 }
 
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::treatDirection( boost::tuples::cons<Head, Tail> & boundaryConditions,
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::treatDirection( BoundariesTuple & boundaryConditions,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                              const stencil::Direction dir,
                                                                              const cell_idx_t nx, const cell_idx_t ny, const cell_idx_t nz )
 {
-   Head & boundaryCondition = boundaryConditions.get_head();
+   auto & boundaryCondition = std::get<N>( boundaryConditions );
 
    if( flagField_->isPartOfMaskSet( nx, ny, nz, boundaryCondition.getMask() ) )
    {
@@ -2913,30 +2920,30 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::treatDirect
    }
    else
    {
-      treatDirection( boundaryConditions.get_tail(), x, y, z, dir, nx, ny, nz );
+      treatDirection< BoundariesTuple, N-1 >( boundaryConditions, x, y, z, dir, nx, ny, nz );
    }
 }
 
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::beforeBoundaryTreatment( boost::tuples::cons<Head, Tail> & boundaryConditions )
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::beforeBoundaryTreatment( BoundariesTuple & boundaryConditions )
 {
-   boundaryConditions.get_head().beforeBoundaryTreatment();
+   std::get<N>( boundaryConditions ).beforeBoundaryTreatment();
 
-   beforeBoundaryTreatment( boundaryConditions.get_tail() );
+   beforeBoundaryTreatment< BoundariesTuple, N-1 >( boundaryConditions );
 }
 
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::afterBoundaryTreatment( boost::tuples::cons<Head, Tail> & boundaryConditions )
+template< typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::afterBoundaryTreatment( BoundariesTuple & boundaryConditions )
 {
-   boundaryConditions.get_head().afterBoundaryTreatment();
+   std::get<N>( boundaryConditions ).afterBoundaryTreatment();
 
-   afterBoundaryTreatment( boundaryConditions.get_tail() );
+   afterBoundaryTreatment< BoundariesTuple, N-1 >( boundaryConditions );
 }
 
 
@@ -3071,17 +3078,17 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::pack( Buffe
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Buffer_T, typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::pack( const boost::tuples::cons<Head, Tail> & boundaryConditions, Buffer_T & buffer,
+template< typename Buffer_T, typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::pack( const BoundariesTuple & boundaryConditions, Buffer_T & buffer,
                                                                    const flag_t mask, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) const
 {
-   const Head & boundaryCondition = boundaryConditions.get_head();
+   const auto & boundaryCondition = std::get<N>( boundaryConditions );
    if( field::isPartOfMaskSet( mask, boundaryCondition.getMask() ) )
    {
       boundaryCondition.packCell( buffer, x, y, z );
    }
    else
-      pack( boundaryConditions.get_tail(), buffer, mask, x, y, z );
+      pack< Buffer_T, BoundariesTuple, N-1 >( boundaryConditions, buffer, mask, x, y, z );
 }
 
 
@@ -3117,14 +3124,14 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::unpackBound
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Buffer_T, typename Head, typename Tail >
-inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::unpackBoundary( boost::tuples::cons<Head, Tail> & boundaryConditions, Buffer_T & buffer,
+template< typename Buffer_T, typename BoundariesTuple, int N >
+inline typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::unpackBoundary( BoundariesTuple & boundaryConditions, Buffer_T & buffer,
                                                                              const flag_t flag,
                                                                              const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
 {
    WALBERLA_ASSERT( outerBB_.contains(x,y,z) );
 
-   Head & boundaryCondition = boundaryConditions.get_head();
+   auto & boundaryCondition = std::get<N>( boundaryConditions );
    if( ( boundaryCondition.getMask() & flag ) == flag )
    {
       addBoundary( flag, x, y, z );
@@ -3132,17 +3139,17 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::unpackBound
       boundaryCondition.registerCell( buffer, flag, x, y, z );
    }
    else
-      unpackBoundary( boundaryConditions.get_tail(), buffer, flag, x, y, z );
+      unpackBoundary< Buffer_T, BoundariesTuple, N-1 >( boundaryConditions, buffer, flag, x, y, z );
 }
 
 
 
 template< typename FlagField_T, typename Stencil, typename... Boundaries >
-template< typename Head, typename Tail >
-void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryConditions( const boost::tuples::cons<Head, Tail> & boundaryConditions,
+template< typename BoundariesTuple, int N >
+typename std::enable_if<(N!=-1), void>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryConditions( const BoundariesTuple & boundaryConditions,
                                                                              std::vector< std::string > & bcs ) const
 {
-   const Head & boundaryCondition = boundaryConditions.get_head();
+   const auto & boundaryCondition = std::get<N>( boundaryConditions );
 
    std::ostringstream oss;
    oss << boundaryCondition.getUID().getIdentifier() << " (";
@@ -3162,7 +3169,7 @@ void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryConditi
 
    bcs.push_back( oss.str() );
 
-   getBoundaryConditions( boundaryConditions.get_tail(), bcs );
+   getBoundaryConditions< BoundariesTuple, N-1 >( boundaryConditions, bcs );
 }
 
 
