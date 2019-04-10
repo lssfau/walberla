@@ -22,12 +22,11 @@
 
 #include "Config.h"
 #include "core/mpi/MPIManager.h"
+#include "core/StringUtility.h"
 
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-
-#include <boost/algorithm/string/trim.hpp>
 
 namespace walberla {
 namespace config {
@@ -247,7 +246,7 @@ void Config::parseFromFile( const char* filename, Block& block, unsigned int lev
                        getLineNumber( lineNumbers, input.tellg() ), level );
       }
 
-      else if( boost::algorithm::iequals( key, "include" ) )
+      else if( string_icompare( key, "include" ) == 0 )
       {
          if( std::getline( input, value, ';' ) && !input.eof() )
          {
@@ -362,7 +361,7 @@ void Config::extractBlock( const char* filename, std::stringstream& input, Block
 
    while( input >> key )
    {
-      if(  boost::algorithm::iequals( key, "}" ) ) {
+      if( string_icompare( key, "}" ) == 0 ) {
          return;
       }
       else if( input >> std::ws && input.eof() ) {
@@ -380,7 +379,7 @@ void Config::extractBlock( const char* filename, std::stringstream& input, Block
                getLineNumber( lineNumbers, input.tellg() ), level );
       }
 
-      else if(  boost::algorithm::iequals( key, "include" ) )
+      else if( string_icompare( key, "include" ) == 0 )
       {
          if( std::getline( input, value, ';' ) && !input.eof() )
          {
@@ -515,7 +514,7 @@ Config::size_type Config::Block::getNumBlocks( const std::string& key ) const
 {
    size_type c = 0;
    for( List::const_iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      if(  boost::algorithm::iequals( key, it->getKey() ) ) {
+      if( string_icompare( key, it->getKey() ) == 0 ) {
          ++c;
       }
    }
@@ -569,7 +568,7 @@ void Config::Block::getBlocks( const std::string& key, Blocks& blocks, size_t mi
 {
    size_t c = 0;
    for( List::const_iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      if(  boost::algorithm::iequals( key, it->getKey() ) ) {
+      if( string_icompare( key, it->getKey() ) == 0 ) {
          blocks.push_back( BlockHandle( &*it ) );
          ++c;
       }
@@ -627,7 +626,7 @@ void Config::Block::getWritableBlocks( const std::string & key, std::vector<Bloc
 {
    size_t c = 0;
    for( List::iterator it=blocks_.begin(); it!=blocks_.end(); ++it ) {
-      if(  boost::algorithm::iequals( key, it->getKey() ) ) {
+      if( string_icompare( key, it->getKey() ) == 0 ) {
          blocks.push_back(  &*it );
          ++c;
       }
@@ -735,7 +734,7 @@ static void printConfig( std::ostream & os, const Config::BlockHandle & block, i
    if ( depth >=0 )
    {
       std::string blockName = block.getKey();
-      boost::algorithm::trim( blockName );
+      string_trim( blockName );
       os << prefix.str() << blockName << "\n";
       os << prefix.str() << "{\n";
    }
@@ -746,8 +745,8 @@ static void printConfig( std::ostream & os, const Config::BlockHandle & block, i
    for( auto paramIt = block.begin(); paramIt != block.end(); ++paramIt ) {
       std::string key = paramIt->first;
       std::string value = paramIt->second;
-      boost::algorithm::trim( key );
-      boost::algorithm::trim( value );
+      string_trim( key );
+      string_trim( value );
       os << prefix.str() << "   " << key << " " << value << ";\n";
    }
 

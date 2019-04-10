@@ -32,8 +32,6 @@
 #include "core/logging/Logging.h"
 #include "field/GhostLayerField.h"
 
-#include <boost/algorithm/string.hpp>
-
 
 namespace walberla {
 namespace geometry {

@@ -74,6 +74,7 @@
 
 #include <stdexcept>
 #include <functional>
+#include <string>
 
 #include "gather/GnuPlotGraphWriter.h"
 #include "field/vtk/FlagFieldCellFilter.h"
@@ -273,16 +274,16 @@ int main( int argc, char **argv )
    if( argc > 1 ) {
       std::vector<std::string> args( argv, argv + argc );
       for( uint_t i = 1; i < uint_c(argc); ++i ) {
-              if( boost::equals(argv[i], "-l"    ) )   length  = string_to_num<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-w"    ) )   width   = string_to_num<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-t"    ) )   time    = string_to_num<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-dv"   ) )   dv      = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-v"    ) )   v       = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-do"   ) )   domega  = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-o"    ) )   omega   = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-c"    ) )   closed  = string_to_num<int>( args[++i] ) != 0;
-         else if( boost::equals(argv[i], "-r"    ) )   levels += string_to_num<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "--vtk" ) )   useVTK  = true;
+              if( std::string(argv[i]) == "-l"    )   length  = string_to_num<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-w"    )   width   = string_to_num<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-t"    )   time    = string_to_num<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-dv"   )   dv      = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-v"    )   v       = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-do"   )   domega  = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-o"    )   omega   = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-c"    )   closed  = string_to_num<int>( args[++i] ) != 0;
+         else if( std::string(argv[i]) == "-r"    )   levels += string_to_num<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "--vtk" )   useVTK  = true;
          else if( argv[i][0] != '-' ){
             std::cerr << "Usage: -option value" << std::endl; return EXIT_FAILURE;
          } else

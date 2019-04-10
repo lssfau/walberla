@@ -33,8 +33,7 @@
 
 #include "core/timing/Timer.h"
 
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#include "core/StringUtility.h"
 
 namespace walberla {
 namespace blockforest {
@@ -204,8 +203,8 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
 
 StaticLevelwiseParMetis::Algorithm StaticLevelwiseParMetis::stringToAlgorithm( std::string s )
 {
-   boost::algorithm::to_upper( s );
-   boost::algorithm::trim( s );
+   string_to_upper( s );
+   string_trim( s );
 
    if( s == "PART_GEOM_KWAY" )
       return PARMETIS_PART_GEOM_KWAY;
@@ -218,8 +217,8 @@ StaticLevelwiseParMetis::Algorithm StaticLevelwiseParMetis::stringToAlgorithm( s
 
 StaticLevelwiseParMetis::WeightsToUse StaticLevelwiseParMetis::stringToWeightsToUse( std::string s )
 {
-   boost::algorithm::to_upper( s );
-   boost::algorithm::trim( s );
+   string_to_upper( s );
+   string_trim( s );
 
    if( s == "NO_WEIGHTS" )
       return PARMETIS_NO_WEIGHTS;

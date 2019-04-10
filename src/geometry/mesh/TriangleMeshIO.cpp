@@ -29,8 +29,7 @@
 #include "core/math/AABB.h"
 #include "core/mpi/Broadcast.h"
 #include "core/Regex.h"
-
-#include <boost/algorithm/string.hpp>
+#include "core/StringUtility.h"
 
 #include <cmath>
 #include <fstream>
@@ -52,11 +51,11 @@ namespace geometry {
       if( is.fail() )
          WALBERLA_ABORT( "Error while opening file " << meshFilename << "!" );
 
-      if ( boost::algorithm::ends_with( meshFilename, ".obj")  )
+      if ( string_ends_with( meshFilename, ".obj")  )
          readMeshObj( is, mesh );
-      else if ( boost::algorithm::ends_with( meshFilename, ".pov") )
+      else if ( string_ends_with( meshFilename, ".pov") )
          readMeshPov( is, mesh );
-      else if ( boost::algorithm::ends_with( meshFilename, ".off") )
+      else if ( string_ends_with( meshFilename, ".off") )
          readMeshOff( is, mesh );
       else
          WALBERLA_ABORT( "Unknown mesh file format when loading " << meshFilename << ". Supported formats are obj, pov and off." );
@@ -75,13 +74,13 @@ namespace geometry {
       if( os.fail() )
          WALBERLA_ABORT( "Error while opening file " << meshFilename << "!" );
 
-      if ( boost::algorithm::ends_with( meshFilename, ".obj")  )
+      if ( string_ends_with( meshFilename, ".obj")  )
          writeMeshObj( os, mesh );
-      else if ( boost::algorithm::ends_with( meshFilename, ".pov") )
+      else if ( string_ends_with( meshFilename, ".pov") )
          writeMeshPov( os, mesh );
-      else if ( boost::algorithm::ends_with( meshFilename, ".off") )
+      else if ( string_ends_with( meshFilename, ".off") )
          writeMeshOff( os, mesh );
-      else if ( boost::algorithm::ends_with( meshFilename, ".vtp") )
+      else if ( string_ends_with( meshFilename, ".vtp") )
          writeMeshVtp( os, mesh );
       else
          WALBERLA_ABORT( "Unknown mesh file format when writing " << meshFilename << ". Supported formats are: obj,pov,off and vtp.");
@@ -354,8 +353,7 @@ namespace geometry {
       else
          faceOffset = mesh.getNumVertices();
 
-      std::vector< string > splitVec;
-      boost::split( splitVec, stripped, boost::is_any_of("{}"), boost::token_compress_on );
+      std::vector< string > splitVec = string_split( stripped, "{}" );
 
       State state;
 
@@ -363,7 +361,7 @@ namespace geometry {
 
       for( size_t i=1; i<splitVec.size(); ++i )
       {
-         boost::trim(splitVec[i]);
+         string_trim(splitVec[i]);
          if( splitVec[i] == "vertex_vectors" ) {
             state = VERTEX;
          } else if ( splitVec[i] == "normal_vectors" ) {

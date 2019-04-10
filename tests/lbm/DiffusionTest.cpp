@@ -79,6 +79,7 @@
 #include "vtk/VTKOutput.h"
 
 #include <functional>
+#include <string>
 
 
 namespace walberla {
@@ -197,18 +198,18 @@ int run( int argc, char **argv )
    if( argc > 1 ) {
       std::vector<std::string> args( argv, argv + argc );
       for( uint_t i = 1; i < uint_c(argc); ++i ) {
-              if( boost::equals(argv[i], "-d"      ) )   d      = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-dim"    ) )   dim    = string_to_num<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-dx"     ) )   dx     = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-dt"     ) )   dt     = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-dv"     ) )   dv     = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-v"      ) )   u_in   = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-t"      ) )   time   = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-err"    ) )   err    = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "--gui"   ) )   useGui = true;
-         else if( boost::equals(argv[i], "--quiet" ) )   quiet  = true;
-         else if( boost::equals(argv[i], "--vtk"   ) )   useVTK = true;
-         else if( boost::equals(argv[i], "-c"      ) )   ++i;
+              if( std::string(argv[i]) == "-d"      )   d      = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-dim"    )   dim    = string_to_num<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-dx"     )   dx     = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-dt"     )   dt     = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-dv"     )   dv     = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-v"      )   u_in   = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-t"      )   time   = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-err"    )   err    = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "--gui"   )   useGui = true;
+         else if( std::string(argv[i]) == "--quiet" )   quiet  = true;
+         else if( std::string(argv[i]) == "--vtk"   )   useVTK = true;
+         else if( std::string(argv[i]) == "-c"      )   ++i;
          else if( argv[i][0] != '-' ){
             WALBERLA_ABORT( "Usage: -option value" );
          } else
@@ -345,7 +346,7 @@ int main(int argc, char **argv)
    mpi::Environment env( argc, argv );
    bool corr = true;
    for( int i=0; i<argc; ++i ){
-      if( boost::equals(argv[i], "-c" ) ){
+      if( std::string(argv[i]) == "-c" ){
          corr = std::atoi( argv[++i] ) != 0;
          break;
       }

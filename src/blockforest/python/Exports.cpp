@@ -32,6 +32,7 @@
 #include "blockforest/loadbalancing/StaticCurve.h"
 
 #include "core/logging/Logging.h"
+#include "core/StringUtility.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
 #include "python_coupling/Manager.h"
 #include "python_coupling/helper/ConfigFromDict.h"
@@ -40,7 +41,6 @@
 #include "stencil/D3Q19.h"
 #include "stencil/D3Q27.h"
 
-#include <boost/algorithm/string.hpp>
 #include <sstream>
 
 #ifdef _MSC_VER
@@ -246,11 +246,11 @@ shared_ptr<StructuredBlockForest> createStructuredBlockForest( Vector3<uint_t> b
 object createUniformNeighborScheme(  const shared_ptr<StructuredBlockForest> & bf,
                                      const std::string & stencil )
 {
-   if ( boost::iequals(stencil, "D3Q7") )
+   if ( string_icompare(stencil, "D3Q7") == 0 )
       return object ( make_shared< UniformBufferedScheme<stencil::D3Q7> > ( bf ) );
-   if ( boost::iequals(stencil, "D3Q19") )
+   if ( string_icompare(stencil, "D3Q19") == 0 )
       return object ( make_shared< UniformBufferedScheme<stencil::D3Q19> > ( bf ) );
-   if ( boost::iequals(stencil, "D3Q27") )
+   if ( string_icompare(stencil, "D3Q27") == 0 )
       return object ( make_shared< UniformBufferedScheme<stencil::D3Q27> > ( bf ) );
    else {
       PyErr_SetString( PyExc_RuntimeError, "Unknown stencil. Allowed values 'D3Q27', 'D3Q19', 'D3Q7'");

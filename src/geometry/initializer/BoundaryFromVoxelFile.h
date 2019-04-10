@@ -44,7 +44,6 @@
 
 #include "field/FlagField.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <map>
 #include <utility>
 #include <vector>

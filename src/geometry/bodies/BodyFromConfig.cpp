@@ -23,6 +23,7 @@
 
 #include <memory>
 #include "core/Abort.h"
+#include "core/StringUtility.h"
 
 
 namespace walberla {
@@ -138,27 +139,27 @@ shared_ptr<AbstractBody> bodyFromConfig (const Config::BlockHandle & block )
 {
    std::string shape = block.getParameter<std::string>("shape");
    
-   if      ( boost::iequals( shape, "Sphere"   ) )
+   if      ( string_icompare( shape, "Sphere"   ) == 0 )
       return make_DynamicBody(sphereFromConfig   ( block ) );
-   else if ( boost::iequals( shape, "Cylinder" ) )
+   else if ( string_icompare( shape, "Cylinder" ) == 0 )
       return make_DynamicBody(cylinderFromConfig ( block ) );
-   else if ( boost::iequals( shape, "Torus"    ) )
+   else if ( string_icompare( shape, "Torus"    ) == 0 )
       return make_DynamicBody(torusFromConfig    ( block ) );
-   else if ( boost::iequals( shape, "Ellipsoid") )
+   else if ( string_icompare( shape, "Ellipsoid") == 0 )
       return make_DynamicBody(ellipsoidFromConfig( block ) );
-   else if ( boost::iequals( shape, "Box"      ) )
+   else if ( string_icompare( shape, "Box"      ) == 0 )
       return make_DynamicBody(AABBFromConfig     ( block ) );
-   else if ( boost::iequals( shape, "SphereSlice") )
+   else if ( string_icompare( shape, "SphereSlice") == 0 )
       return make_DynamicBody(sphereSliceFromConfig   ( block ) );
-   else if ( boost::iequals( shape, "HollowSphere") )
+   else if ( string_icompare( shape, "HollowSphere") == 0 )
       return make_DynamicBody(hollowSphereFromConfig  ( block ) );
-   else if ( boost::iequals( shape, "LogicalAND") )
+   else if ( string_icompare( shape, "LogicalAND") == 0 )
       return bodyANDFromConfig ( block );
-   else if ( boost::iequals( shape, "LogicalOR") )
+   else if ( string_icompare( shape, "LogicalOR") == 0 )
       return bodyORFromConfig  ( block );
-   else if ( boost::iequals( shape, "LogicalXOR") )
+   else if ( string_icompare( shape, "LogicalXOR") == 0 )
       return bodyXORFromConfig  ( block );
-   else if ( boost::iequals( shape, "LogicalNOT") )
+   else if ( string_icompare( shape, "LogicalNOT") == 0 )
       return bodyNOTFromConfig  ( block );
 
    WALBERLA_ABORT( "Unknown Block " << block.getKey() << "\nAllowed blocks are 'Sphere', 'Cylinder', 'Torus' and 'Ellipsoid'" );

@@ -31,8 +31,6 @@
 #include "core/logging/Logging.h"
 #include "core/mpi/Reduce.h"
 
-#include <boost/algorithm/string.hpp>
-
 
 namespace walberla {
 namespace geometry {

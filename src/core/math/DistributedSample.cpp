@@ -23,8 +23,10 @@
 #include "DistributedSample.h"
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
+#include "core/StringUtility.h"
 
-#include <boost/algorithm/string/replace.hpp>
+#include <algorithm>
+#include <string>
 
 
 
@@ -166,43 +168,33 @@ void DistributedSample::mpiGatherRoot()
  *    %relstddev by relativeStdDeviation()
  *    %size      by size()
  *
- * \returns  The formated string.
+ * \returns  The formatted string.
  **********************************************************************************************************************/
 std::string DistributedSample::format( const std::string & formatString ) const
 {
-   using boost::algorithm::replace_all;
-
    std::string result = formatString;
 
    if( size_ > uint_t(0) )
    {
-      if( result.find( "%min" ) != std::string::npos )
-         replace_all(result, "%min", std::to_string( min_ ) );
-      if( result.find( "%max" ) != std::string::npos )
-         replace_all(result, "%max", std::to_string( max_ ) );
-      if( result.find( "%sum" ) != std::string::npos )
-         replace_all(result, "%sum",std::to_string( sum_ ) );
-      if( result.find( "%mean" ) != std::string::npos )
-         replace_all(result, "%mean", std::to_string( mean_ ) );
-      if( result.find( "%var" ) != std::string::npos )
-         replace_all(result, "%var", std::to_string( variance_ ) );
-      if( result.find( "%stddev" ) != std::string::npos )
-         replace_all(result, "%stddev", std::to_string( stdDeviation() ) );
-      if( result.find( "%relstddev" ) != std::string::npos )
-         replace_all(result, "%relstddev", std::to_string( relativeStdDeviation() ) );
-      if( result.find( "%size" ) != std::string::npos )
-         replace_all(result, "%size", std::to_string( size_ ) );
+      string_replace_all( result, "%min", std::to_string( min_ ) );
+      string_replace_all( result, "%max", std::to_string( max_ ) );
+      string_replace_all( result, "%sum", std::to_string( sum_ ) );
+      string_replace_all( result, "%mean", std::to_string( mean_ ) );
+      string_replace_all( result, "%var", std::to_string( variance_ ) );
+      string_replace_all( result, "%stddev", std::to_string( stdDeviation() ) );
+      string_replace_all( result, "%relstddev", std::to_string( relativeStdDeviation() ) );
+      string_replace_all( result, "%size", std::to_string( size_ ) );
    }
    else // empty()
    {
-      replace_all(result, "%min",       "N/A" );
-      replace_all(result, "%max",       "N/A" );
-      replace_all(result, "%sum",       "N/A" );
-      replace_all(result, "%mean",      "N/A" );
-      replace_all(result, "%var",       "N/A" );
-      replace_all(result, "%stddev",    "N/A" );
-      replace_all(result, "%relstddev", "N/A" );
-      replace_all(result, "%size",      "0"   );
+      string_replace_all( result, "%min", "N/A" );
+      string_replace_all( result, "%max", "N/A" );
+      string_replace_all( result, "%sum", "N/A" );
+      string_replace_all( result, "%mean", "N/A" );
+      string_replace_all( result, "%var", "N/A" );
+      string_replace_all( result, "%stddev", "N/A" );
+      string_replace_all( result, "%relstddev", "N/A" );
+      string_replace_all( result, "%size", "0" );
    }
 
    return result;
