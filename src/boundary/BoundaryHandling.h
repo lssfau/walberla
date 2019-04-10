@@ -2456,7 +2456,7 @@ template< typename BoundariesTuple, int N >
 inline typename std::enable_if<(N!=-1), BoundaryUID>::type BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryUID( const BoundariesTuple & boundaryConditions,
                                                                                     const flag_t flag ) const
 {
-   auto & boundaryCondition = std::get<N>( boundaryConditions );
+   const auto & boundaryCondition = std::get<N>( boundaryConditions );
 
    if( ( boundaryCondition.getMask() & flag ) == flag )
    {
@@ -2508,7 +2508,7 @@ inline typename std::enable_if<(N!=-1), typename BoundaryHandling< FlagField_T, 
    BoundaryHandling< FlagField_T, Stencil, Boundaries... >::getBoundaryMask( const BoundariesTuple & boundaryConditions,
                                                                      const BoundaryUID & uid ) const
 {
-   auto & boundaryCondition = std::get<N>( boundaryConditions );
+   const auto & boundaryCondition = std::get<N>( boundaryConditions );
 
    if( boundaryCondition.getUID() == uid )
       return boundaryCondition.getMask();
