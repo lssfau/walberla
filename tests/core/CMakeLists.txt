@@ -189,6 +189,9 @@ waLBerla_execute_test( NAME GridGeneratorTest )
 waLBerla_compile_test( FILES OpenMPWrapperTest.cpp )
 waLBerla_execute_test( NAME OpenMPWrapperTest )
 
+waLBerla_compile_test( FILES RandomUUID.cpp )
+waLBerla_execute_test( NAME RandomUUID )
+
 waLBerla_compile_test( FILES SetTest.cpp )
 waLBerla_execute_test( NAME SetTest )
 
