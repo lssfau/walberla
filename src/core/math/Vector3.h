@@ -165,6 +165,7 @@ public:
    inline Vector3<Length> getNormalized()                const;
    inline Vector3<Length> getNormalizedOrZero()          const;
    inline void            reset();
+   inline Type*           data()                         {return v_;}
    //@}
    //*******************************************************************************************************************
 

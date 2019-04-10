@@ -119,7 +119,7 @@ void symmetricCommunication()
  * Every process sends a message as big as his rank number
  * to the neighboring processes (1D , periodic boundary)
  */
-void asymmetricCommunication()
+void asymmetricCommunication(const bool useIProbe)
 {
    auto mpiManager = MPIManager::instance();
 
@@ -132,6 +132,7 @@ void asymmetricCommunication()
 
 
    BufferSystem bs ( MPI_COMM_WORLD );
+   bs.useIProbe(useIProbe);
 
    // Set receiver information
    std::set<int> receiveFrom;
@@ -186,7 +187,7 @@ void asymmetricCommunication()
 
 // like asymmetricCommunication, but the message size is a random value
 // that changes every communication step
-void timeVaryingCommunication()
+void timeVaryingCommunication(const bool useIProbe)
 {
    auto mpiManager = MPIManager::instance();
 
@@ -198,6 +199,7 @@ void timeVaryingCommunication()
    WALBERLA_CHECK_GREATER_EQUAL( numProcesses, 3 );
 
    BufferSystem bs ( MPI_COMM_WORLD );
+   bs.useIProbe(useIProbe);
 
    // artificial special case: no message from root
    bs.sendBuffer( rightNeighbor );
@@ -257,7 +259,7 @@ void timeVaryingCommunication()
  *    i.e. rank 1 sends a "1" once, rank 2 sends a message containing two "2"'s ...
  */
 
-void gatherUsingAsymmetricCommunication()
+void gatherUsingAsymmetricCommunication(const bool useIProbe)
 {
    int rank          = MPIManager::instance()->worldRank();
    int numProcesses  = MPIManager::instance()->numProcesses();
@@ -267,6 +269,7 @@ void gatherUsingAsymmetricCommunication()
    const int TAG=42;
 
    BufferSystem bs (MPI_COMM_WORLD, TAG );
+   bs.useIProbe(useIProbe);
 
 
    if ( rank ==0 )
@@ -381,13 +384,16 @@ int main(int argc, char**argv)
    symmetricCommunication();
 
    WALBERLA_LOG_INFO_ON_ROOT("Testing Asymmetric Communication...");
-   asymmetricCommunication();
+   asymmetricCommunication(false);
+   asymmetricCommunication(true);
 
    WALBERLA_LOG_INFO_ON_ROOT("Testing time-varying Communication...");
-   timeVaryingCommunication();
+   timeVaryingCommunication(false);
+   timeVaryingCommunication(true);
 
    WALBERLA_LOG_INFO_ON_ROOT("Testing Gather Operation...");
-   gatherUsingAsymmetricCommunication();
+   gatherUsingAsymmetricCommunication(false);
+   gatherUsingAsymmetricCommunication(true);
 
    WALBERLA_LOG_INFO_ON_ROOT("Testing self-send...");
    selfSend();

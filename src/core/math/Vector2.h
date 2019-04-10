@@ -159,6 +159,7 @@ public:
    inline Length          length()                       const;
    inline Type            sqrLength()                    const;
    inline Vector2<Length> getNormalized()                const;
+   inline Type*           data()                         {return v_;}
    //@}
    //*******************************************************************************************************************
 

@@ -194,6 +194,9 @@ public:
    //@}
    //*******************************************************************************************************************
 
+   void useIProbe(const bool use) { useIProbe_ = use; }
+   bool isIProbedUsed() const { return useIProbe_; }
+
    ///Bytes sent during the current or last communication
    int64_t getBytesSent() const { return bytesSent_; }
    ///Bytes received during the current or last communication
@@ -226,10 +229,11 @@ protected:
    RecvBuffer_T * waitForNext( MPIRank & fromRank );
    void setCommunicationType( const bool knownSize );
 
-   internal::KnownSizeCommunication<RecvBuffer_T, SendBuffer_T>   knownSizeComm_;
-   internal::UnknownSizeCommunication<RecvBuffer_T, SendBuffer_T> unknownSizeComm_;
-   internal::NoMPICommunication<RecvBuffer_T, SendBuffer_T>       noMPIComm_;
-   internal::AbstractCommunication<RecvBuffer_T, SendBuffer_T> *  currentComm_;  //< after receiver setup, this points to unknown- or knownSizeComm_
+   internal::KnownSizeCommunication<RecvBuffer_T, SendBuffer_T>         knownSizeComm_;
+   internal::UnknownSizeCommunication<RecvBuffer_T, SendBuffer_T>       unknownSizeComm_;
+   internal::UnknownSizeCommunicationIProbe<RecvBuffer_T, SendBuffer_T> unknownSizeCommIProbe_;
+   internal::NoMPICommunication<RecvBuffer_T, SendBuffer_T>             noMPIComm_;
+   internal::AbstractCommunication<RecvBuffer_T, SendBuffer_T> *        currentComm_;  //< after receiver setup, this points to unknown- or knownSizeComm_
 
    bool sizeChangesEverytime_; //< if set to true, the receiveSizeUnknown_ is set to true before communicating
    bool communicationRunning_; //< indicates if a communication step is currently running
@@ -250,6 +254,8 @@ protected:
    //stores tags of running communications in debug mode to ensure that
    //each concurrently running communication uses different tags
    static std::set<int> activeTags_;
+
+   bool useIProbe_ = false; ///< switch betwenn IProbe and two message communication for varying size communication
 
    int64_t bytesSent_        = 0; ///< number of bytes sent during last communication
    int64_t bytesReceived_    = 0; ///< number of bytes received during last communication

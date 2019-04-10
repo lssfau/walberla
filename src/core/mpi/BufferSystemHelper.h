@@ -162,6 +162,34 @@ namespace internal {
 
 
    template< typename RecvBuffer_T, typename SendBuffer_T>
+   class UnknownSizeCommunicationIProbe : public AbstractCommunication<RecvBuffer_T, SendBuffer_T>
+   {
+   public:
+      using typename AbstractCommunication<RecvBuffer_T, SendBuffer_T>::ReceiveInfo;
+
+      UnknownSizeCommunicationIProbe( const MPI_Comm & communicator, int tag = 0 )
+           :  AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ), sending_(false), receiving_(false) {}
+
+      virtual ~UnknownSizeCommunicationIProbe() {}
+
+      virtual void send( MPIRank receiver, const SendBuffer_T & sendBuffer );
+      virtual void waitForSends();
+
+      virtual void scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos );
+
+      /// size field of recvInfos can be invalid, is filled in with the actual message size
+      virtual MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos );
+
+   private:
+      bool sending_;
+      bool receiving_;
+      int  pendingReceives_;
+
+      std::vector<MPI_Request> sendRequests_;
+   };
+
+
+   template< typename RecvBuffer_T, typename SendBuffer_T>
    class NoMPICommunication : public AbstractCommunication<RecvBuffer_T, SendBuffer_T>
    {
    public:

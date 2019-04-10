@@ -151,6 +151,7 @@ public:
    inline const Matrix2       getInverse()                               const;
    inline bool                isSingular()                               const;
    inline bool                isSymmetric()                              const;
+   inline Type*               data()                                     {return v_;}
    //@}
    //*******************************************************************************************************************
 
