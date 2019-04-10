@@ -22,7 +22,9 @@
 #pragma once
 
 #include "core/Abort.h"
+#include "core/Filesystem.h"
 #include "core/debug/CheckFunctions.h"
+#include "core/StringUtility.h"
 
 #include <cctype>
 #include <iostream>
@@ -35,9 +37,7 @@
 #include <vector>
 
 
-// boost includes
-#include <boost/algorithm/string/predicate.hpp>
-#include "core/Filesystem.h"
+
 
 
 
@@ -50,7 +50,7 @@ struct CaseInsensitiveCompare
 {
    bool operator()( const std::string & lhs, const std::string & rhs) const
    {
-      return boost::algorithm::ilexicographical_compare(lhs, rhs);
+      return ( string_icompare(lhs, rhs) < 0 );
    }
 };
 
@@ -905,17 +905,17 @@ inline Config::Parameter<bool> Config::Block::getParameter<bool>( std::string ke
 
    if( it != params_.end() )
    {
-      if( ( it->second.length() == 1u && it->second[0] == '1' )        ||
-          boost::algorithm::iequals( it->second, std::string("true") ) ||
-          boost::algorithm::iequals( it->second, std::string("yes") )  ||
-          boost::algorithm::iequals( it->second, std::string("on") ) )
+      if( ( it->second.length() == 1u && it->second[0] == '1' )   ||
+          string_icompare( it->second, std::string("true") ) == 0 ||
+          string_icompare( it->second, std::string("yes") ) == 0  ||
+          string_icompare( it->second, std::string("on") ) == 0 )
       {
          return Parameter<bool>( true, noerror, key );
       }
-      else if( ( it->second.length() == 1u && it->second[0] == '0' )         ||
-               boost::algorithm::iequals( it->second, std::string("false") ) ||
-               boost::algorithm::iequals( it->second, std::string("no") )    ||
-               boost::algorithm::iequals( it->second, std::string("off") ) )
+      else if( ( it->second.length() == 1u && it->second[0] == '0' )    ||
+               string_icompare( it->second, std::string("false") ) == 0 ||
+               string_icompare( it->second, std::string("no") ) == 0    ||
+               string_icompare( it->second, std::string("off") ) ==0 )
       {
          return Parameter<bool>( false, noerror, key );
       }

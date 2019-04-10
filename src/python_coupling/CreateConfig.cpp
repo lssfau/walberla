@@ -25,8 +25,8 @@
 #include "core/config/Config.h"
 #include "core/config/Create.h"
 #include "core/logging/Logging.h"
+#include "core/StringUtility.h"
 
-#include <boost/algorithm/string.hpp>
 #include <exception>
 
 
@@ -223,7 +223,7 @@ namespace python_coupling {
 
       auto argVec = std::vector<std::string> (argv+1, argv + argc);
 
-      if ( boost::algorithm::ends_with( filename, ".py")  ) {
+      if ( string_ends_with( filename, ".py")  ) {
          config = createConfigFromPythonScript( filename, "config", argVec );
       }
       else {
@@ -242,7 +242,7 @@ namespace python_coupling {
          throw std::runtime_error( config::usageString(argv[0]) );
 
       std::string filename( argv[1] );
-      if ( boost::algorithm::ends_with( filename, ".py")  ) {
+      if ( string_ends_with( filename, ".py")  ) {
          auto argVec = std::vector<std::string> (argv+1, argv + argc);
          return createConfigIteratorFromPythonScript( filename, "config", argVec );
       }

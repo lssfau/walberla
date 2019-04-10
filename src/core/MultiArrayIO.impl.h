@@ -22,9 +22,9 @@
 #pragma once
 
 #include "core/DataTypes.h"
+#include "core/StringUtility.h"
 
 #include <sstream>
-#include <boost/algorithm/string.hpp>
 
 namespace boost {
 
@@ -53,8 +53,7 @@ bool parseArray1D( std::vector<T> & arr, std::istream & is,
       return false;
 
 
-   std::vector<std::string> stringArr;
-   boost::split( stringArr,line, boost::is_any_of( delimiter ), boost::token_compress_on );
+   std::vector<std::string> stringArr = walberla::string_split( line, delimiter );
 
    arr.clear();
    arr.reserve( stringArr.size() );

@@ -26,9 +26,8 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <string>
 
-
-#include <boost/algorithm/string.hpp>
 
 namespace filesystem = walberla::filesystem;
 
@@ -51,7 +50,7 @@ namespace walberla{
 
 int main(int argc, char** argv)
 {
-   if( argc == 1 || boost::equals(argv[1], "-h" ) ){
+   if( argc == 1 || std::string(argv[1]) == "-h" ){
       PRINT_DEF( "Usage: PovrayFileCompressor [OPTIONS] <inDir> <outDir>\n"
          << "compresses povray mesh2 files mode\n"
          << "OPTIONS (optional):\n -h help\n -q quiet: no output\n -v verbose: most output\n -n number of vertices per mesh\n -s number of unconnected meshes beginning with biggest mest\n -o maximum distance between two vertices to be merged" )
@@ -69,15 +68,15 @@ int main(int argc, char** argv)
 
    if( argc > 3 ) {
       for( walberla::uint_t i = 1; i < walberla::uint_c(argc-2); ++i ) {
-         if( boost::equals(argv[i], "-q" ) )
+         if( std::string(argv[i]) == "-q" )
             quiet = true;
-         else if( boost::equals(argv[i], "-v" ) )
+         else if( std::string(argv[i]) == "-v" )
             verbose = true;
-         else if( boost::equals(argv[i], "-n" ) )
+         else if( std::string(argv[i]) == "-n" )
             n = walberla::numeric_cast< size_t >( atoi( argv[++i] ) );
-         else if( boost::equals(argv[i], "-s" ) )
+         else if( std::string(argv[i]) == "-s" )
             s = walberla::numeric_cast< size_t >( atoi( argv[++i] ) );
-         else if( boost::equals(argv[i], "-o" ) )
+         else if( std::string(argv[i]) == "-o" )
             o = walberla::real_c( atof( argv[++i] ) );
          else if( argv[i][0] != '-' )
             PRINT_ERR( "Usage: PovrayFileCompressor [-q|-v] <inDir> <outDir>\n" )

@@ -32,9 +32,8 @@
 #include "core/Abort.h"
 #include "core/config/Config.h"
 #include "core/logging/Logging.h"
+#include "core/StringUtility.h"
 #include "field/GhostLayerField.h"
-
-#include <boost/algorithm/string.hpp>
 
 
 namespace walberla {
@@ -92,11 +91,11 @@ namespace initializer {
 
          uint_t superSamplingDepth = subBlock.getParameter<uint_t>("superSamplingDepth", uint_t(4) );
 
-         if      ( boost::iequals( shape, "Sphere"   ) )  init ( sphereFromConfig   ( subBlock ), addOrSubtract, superSamplingDepth );
-         else if ( boost::iequals( shape, "Cylinder" ) )  init ( cylinderFromConfig ( subBlock ), addOrSubtract, superSamplingDepth );
-         else if ( boost::iequals( shape, "Torus"    ) )  init ( torusFromConfig    ( subBlock ), addOrSubtract, superSamplingDepth );
-         else if ( boost::iequals( shape, "Ellipsoid") )  init ( ellipsoidFromConfig( subBlock ), addOrSubtract, superSamplingDepth );
-         else if ( boost::iequals( shape, "Box"      ) )  init ( AABBFromConfig     ( subBlock ), addOrSubtract, superSamplingDepth );
+         if      ( string_icompare( shape, "Sphere"   ) == 0 )  init ( sphereFromConfig   ( subBlock ), addOrSubtract, superSamplingDepth );
+         else if ( string_icompare( shape, "Cylinder" ) == 0 )  init ( cylinderFromConfig ( subBlock ), addOrSubtract, superSamplingDepth );
+         else if ( string_icompare( shape, "Torus"    ) == 0 )  init ( torusFromConfig    ( subBlock ), addOrSubtract, superSamplingDepth );
+         else if ( string_icompare( shape, "Ellipsoid") == 0 )  init ( ellipsoidFromConfig( subBlock ), addOrSubtract, superSamplingDepth );
+         else if ( string_icompare( shape, "Box"      ) == 0 )  init ( AABBFromConfig     ( subBlock ), addOrSubtract, superSamplingDepth );
          else
          {
             WALBERLA_ABORT( "Unknown Block " << subBlock.getKey() << " in block " << blockHandle.getKey() << "\n"

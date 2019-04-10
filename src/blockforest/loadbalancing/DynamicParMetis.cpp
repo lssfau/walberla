@@ -33,9 +33,7 @@
 #include "core/mpi/Reduce.h"
 
 #include "core/timing/Timer.h"
-
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#include "core/StringUtility.h"
 
 #include <array>
 #include <vector>
@@ -305,8 +303,8 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
 
 DynamicParMetis::Algorithm DynamicParMetis::stringToAlgorithm( std::string s )
 {
-   boost::algorithm::to_upper( s );
-   boost::algorithm::trim( s );
+   string_to_upper( s );
+   string_trim( s );
 
    if( s == "PART_GEOM_KWAY" )
       return PARMETIS_PART_GEOM_KWAY;
@@ -325,8 +323,8 @@ DynamicParMetis::Algorithm DynamicParMetis::stringToAlgorithm( std::string s )
 
 DynamicParMetis::WeightsToUse DynamicParMetis::stringToWeightsToUse( std::string s )
 {
-   boost::algorithm::to_upper( s );
-   boost::algorithm::trim( s );
+   string_to_upper( s );
+   string_trim( s );
 
    if( s == "NO_WEIGHTS" )
       return PARMETIS_NO_WEIGHTS;
@@ -343,8 +341,8 @@ DynamicParMetis::WeightsToUse DynamicParMetis::stringToWeightsToUse( std::string
 
 DynamicParMetis::EdgeSource DynamicParMetis::stringToEdgeSource( std::string s )
 {
-   boost::algorithm::to_upper( s );
-   boost::algorithm::trim( s );
+   string_to_upper( s );
+   string_trim( s );
 
    if( s == "EDGES_FROM_FOREST" )
       return PARMETIS_EDGES_FROM_FOREST;

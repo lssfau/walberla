@@ -22,11 +22,7 @@
 #include "Create.h"
 #include "core/logging/Tracing.h"
 #include "core/Abort.h"
-
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#include "core/StringUtility.h"
 
 #include <iomanip>
 
@@ -109,14 +105,10 @@ namespace config {
    {
       using std::vector;
       using std::string;
-      using boost::algorithm::split;
-      using boost::algorithm::is_any_of;
-      using boost::algorithm::trim;
 
       for( auto param = params.begin(); param != params.end(); ++param )
       {
-         vector< string > equalitySignSplitResult;
-         split( equalitySignSplitResult, *param,  is_any_of("=") );
+         vector< string > equalitySignSplitResult = string_split( *param, "=" );
 
          std::string value;
          if ( equalitySignSplitResult.size() == 0 )
@@ -138,8 +130,7 @@ namespace config {
 
          const std::string & blockDescriptor = equalitySignSplitResult[0];
 
-         vector< string > blocks;
-         split( blocks, blockDescriptor, is_any_of(".") );
+         vector< string > blocks = string_split( blockDescriptor, "." );
 
          if ( blocks.empty() ) {
             WALBERLA_LOG_WARNING( "Ignoring Parameter: Missing block descriptor on left hand side: '" << *param <<"'" );
@@ -150,7 +141,7 @@ namespace config {
          for( uint_t i=0; i < blocks.size() -1; ++i )
          {
             std::string & blockName = blocks[i];
-            trim( blockName );
+            string_trim( blockName );
 
             if ( blockName.empty() )
             {
@@ -177,7 +168,7 @@ namespace config {
          if ( ! currentBlock )
             continue;
 
-         trim( blocks.back() );
+         string_trim( blocks.back() );
          if ( blocks.back().empty() )
          {
             WALBERLA_LOG_WARNING( "Ignoring Parameter '" << *param << "' since key is empty");

@@ -27,10 +27,9 @@
 #include "core/logging/Logging.h"
 #include "core/logging/Tracing.h"
 #include "core/mpi/MPIManager.h"
+#include "core/StringUtility.h"
 #include "core/uid/GlobalState.h"
 #include "core/uid/SUID.h"
-
-#include <boost/algorithm/string.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -82,8 +81,7 @@ void configureGlobalState( const shared_ptr<Config> & config ) {
 
       std::string suids = config->getParameter< std::string >( "GlobalState" );
 
-      std::vector< std::string > states;
-      boost::split( states, suids, boost::is_any_of(", \t") );
+      std::vector< std::string > states = string_split( suids, ", \t" );
       states.erase( std::remove_if( states.begin(), states.end(), std::bind( &std::string::empty, std::placeholders::_1 ) ), states.end() );
 
       Set<SUID> state;

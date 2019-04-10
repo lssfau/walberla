@@ -29,8 +29,8 @@
 #include "core/singleton/Singleton.h"
 #include "core/timing/WcPolicy.h"
 #include "core/Regex.h"
+#include "core/StringUtility.h"
 
-#include <boost/algorithm/string/replace.hpp>
 #include <functional>
 
 #include <cmath>
@@ -485,7 +485,7 @@ inline std::string Logging::resetLinebreaks( const std::string & message ) const
    std::string newline = std::string("\n") + getRankStamp();
    newline.append( TAG_WIDTH + ( showTimeStamp_ ? TIMESTAMP_WIDTH : uint_c(0) )
                              + ( additionalStamp_ ? additionalStamp_->maxStampWidth() : uint_c(0) ) + uint_c(1), ' ' );
-   return boost::algorithm::replace_all_copy( message, "\n", newline );
+   return string_replace_all_copy( message, "\n", newline );
 }
 
 

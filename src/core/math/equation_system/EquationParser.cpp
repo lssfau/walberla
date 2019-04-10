@@ -24,8 +24,8 @@
 #include "Operator.h"
 #include "Variable.h"
 #include "core/math/Constants.h"
+#include "core/StringUtility.h"
 
-#include <boost/algorithm/string/trim.hpp>
 #include <memory>
 
 
@@ -321,7 +321,7 @@ NodePtr EquationParser::parseExpression( const std::string& str, size_t& index )
 EquationPtr EquationParser::parseEquation( const std::string& str, size_t& index )
 {
    // removing leading and trailing spaces of input string
-   std::string trimmedStr = boost::algorithm::trim_copy(str);
+   std::string trimmedStr = string_trim_copy(str);
    // removing spaces inside the trimmed string
    trimmedStr.erase(std::remove(trimmedStr.begin(), trimmedStr.end(), ' '), trimmedStr.end());
    NodePtr leftPtr = parseExpression(trimmedStr, index);

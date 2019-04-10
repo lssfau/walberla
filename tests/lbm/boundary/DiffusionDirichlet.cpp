@@ -81,6 +81,7 @@
 #include "vtk/VTKOutput.h"
 
 #include <complex>
+#include <string>
 
 
 namespace walberla {
@@ -221,14 +222,14 @@ int main( int argc, char **argv )
    if( argc > 1 ) {
       std::vector<std::string> args( argv, argv + argc );
       for( uint_t i = 1; i < uint_c(argc); ++i ) {
-              if( boost::equals(argv[i], "-o"    ) ) omega  = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-l"    ) ) length = string_to_num<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-w"    ) ) width  = string_to_num<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-v"    ) ) velx   = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "-t"    ) ) time   = string_to_num<uint_t>( args[++i] );
-         else if( boost::equals(argv[i], "-e"    ) ) error  = string_to_num<real_t>( args[++i] );
-         else if( boost::equals(argv[i], "--gui" ) ) useGui = true;
-         else if( boost::equals(argv[i], "--vtk" ) ) useVTK = true;
+              if( std::string(argv[i]) == "-o" ) omega  = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-l" ) length = string_to_num<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-w" ) width  = string_to_num<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-v" ) velx   = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-t" ) time   = string_to_num<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-e" ) error  = string_to_num<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "--gui" ) useGui = true;
+         else if( std::string(argv[i]) == "--vtk" ) useVTK = true;
          else if( argv[i][0] != '-' ){
             WALBERLA_ABORT( "Usage: --option or -option value" );
          } else

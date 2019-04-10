@@ -21,8 +21,7 @@
 
 #include "Initialization.h"
 #include "Logging.h"
-
-#include <boost/algorithm/string.hpp>
+#include "core/StringUtility.h"
 
 #include <algorithm>
 #include <sstream>
@@ -42,7 +41,7 @@ static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector<
       {
          std::string regexString = ignoreBlock->getParameter<std::string>( "callerPathPattern" );
          // Replace slashes with a regex to allow for windows/linux compatibility
-         boost::algorithm::replace_all( regexString, "/", "(\\\\|/)" );
+         string_replace_all( regexString, "/", "(\\\\|/)" );
          try
          {
             walberla::regex regex( regexString );
@@ -140,7 +139,7 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
    if( loggingBlock.isDefined( "logLevel" ) )
    {
       std::string type = loggingBlock.getParameter< std::string >( "logLevel" );
-      boost::algorithm::to_lower( type );
+      string_to_lower( type );
 
       if( type == "warning" ){
          logging::Logging::instance()->setLogLevel( logging::Logging::WARNING );
@@ -159,7 +158,7 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
    if( loggingBlock.isDefined( "streamLogLevel" ) )
    {
       std::string type = loggingBlock.getParameter< std::string >( "streamLogLevel" );
-      boost::algorithm::to_lower( type );
+      string_to_lower( type );
 
       if( type == "warning" ){
          logging::Logging::instance()->setStreamLogLevel( logging::Logging::WARNING );
@@ -178,7 +177,7 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
    if( loggingBlock.isDefined( "fileLogLevel" ) )
    {
       std::string type = loggingBlock.getParameter< std::string >( "fileLogLevel" );
-      boost::algorithm::to_lower( type );
+      string_to_lower( type );
 
       if( type == "warning" ){
          logging::Logging::instance()->setFileLogLevel( logging::Logging::WARNING );

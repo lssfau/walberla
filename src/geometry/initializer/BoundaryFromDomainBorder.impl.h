@@ -19,8 +19,9 @@
 //
 //======================================================================================================================
 
+#include "core/StringUtility.h"
 
-#include <boost/algorithm/string.hpp>
+#include <algorithm>
 
 namespace walberla {
 namespace geometry {
@@ -68,15 +69,15 @@ void BoundaryFromDomainBorder<Handling>::init( const Config::BlockHandle & block
    cell_idx_t  wallDistance            = blockHandle.getParameter<cell_idx_t>( "walldistance", 0 );
    cell_idx_t  ghostLayersToInitialize = blockHandle.getParameter<cell_idx_t>( "ghostLayersToInitialize", std::numeric_limits<cell_idx_t>::max() );
 
-   std::set<std::string> directionStrings;
-   boost::split( directionStrings, directionStr,boost::is_any_of(","));
+   std::vector<std::string> directionStrings = string_split( directionStr, "," );
 
    bool atLeastOneBoundarySet = false;
    using stencil::D3Q7;
    for( auto dirIt = D3Q7::beginNoCenter(); dirIt != D3Q7::end(); ++dirIt )
    {
-      bool isAll = boost::algorithm::iequals( directionStr, "all" );
-      bool isInDirectionStrings = directionStrings.find( stencil::dirToString[*dirIt] ) != directionStrings.end();
+      bool isAll = string_icompare( directionStr, "all" ) == 0;
+      bool isInDirectionStrings = std::find( directionStrings.begin(), directionStrings.end(),
+                                             stencil::dirToString[*dirIt] ) != directionStrings.end();
 
       if( isAll || isInDirectionStrings )
       {

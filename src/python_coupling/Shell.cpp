@@ -30,8 +30,7 @@
 #include "Manager.h"
 
 #include "core/logging/Logging.h"
-
-#include <boost/algorithm/string.hpp>
+#include "core/StringUtility.h"
 
 
 namespace walberla {
@@ -124,7 +123,7 @@ namespace python_coupling {
 
          std::string strLine ( line );
          std::string strTrimmedLine( line );
-         boost::algorithm::trim( strTrimmedLine );
+         string_trim( strTrimmedLine );
 
          PyMem_Free( line );
 

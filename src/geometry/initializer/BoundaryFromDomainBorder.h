@@ -34,8 +34,6 @@
 #include "stencil/D3Q7.h"
 #include "stencil/Directions.h"
 
-#include <boost/algorithm/string/predicate.hpp>
-
 
 namespace walberla {
 namespace geometry {

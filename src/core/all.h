@@ -29,6 +29,7 @@
 #include "Deprecated.h"
 #include "EndianIndependentSerialization.h"
 #include "Environment.h"
+#include "FunctionTraits.h"
 #include "GetPID.h"
 #include "Hostname.h"
 #include "Macros.h"
@@ -39,6 +40,7 @@
 #include "Set.h"
 #include "SharedFunctor.h"
 #include "Sleep.h"
+#include "StringUtility.h"
 #include "VectorTrait.h"
 
 #include "cell/all.h"
