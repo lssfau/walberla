@@ -26,6 +26,7 @@
 #include <core/RandomUUID.h>
 
 #include <sstream>
+#include <cassert>
 
 
 namespace walberla {
