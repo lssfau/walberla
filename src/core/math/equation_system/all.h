@@ -23,7 +23,9 @@
 #pragma once
 
 #include "Equation.h"
+#ifdef WALBERLA_BUILD_WITH_BOOST
 #include "EquationParser.h"
 #include "EquationSystem.h"
+#endif
 #include "Operator.h"
 #include "Variable.h"

@@ -19,6 +19,9 @@
 //
 //======================================================================================================================
 
+#include "waLBerlaDefinitions.h"
+#ifdef WALBERLA_BUILD_WITH_BOOST
+
 #include "Equation.h"
 #include "EquationParser.h"
 #include "Operator.h"
@@ -340,3 +343,5 @@ EquationPtr EquationParser::parseEquation( const std::string& str, size_t& index
 
 } // namespace math
 } // namespace walberla
+
+#endif

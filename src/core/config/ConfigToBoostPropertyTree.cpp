@@ -19,6 +19,9 @@
 //
 //======================================================================================================================
 
+#include "waLBerlaDefinitions.h"
+#ifdef WALBERLA_BUILD_WITH_BOOST
+
 #include "ConfigToBoostPropertyTree.h"
 
 #include <boost/property_tree/ptree.hpp>
@@ -51,3 +54,5 @@ boost::property_tree::iptree configToBoostPropertyTree( const Config & config )
 
 } // namespace config
 } // namespace walberla
+
+#endif
