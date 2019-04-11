@@ -140,9 +140,6 @@ waLBerla_execute_test( NAME SetReductionTest27 COMMAND $<TARGET_FILE:SetReductio
 
 
 
-waLBerla_compile_test( FILES mpi/ProbeVsExtraMessage.cpp DEPENDS postprocessing)
-
-
 ##############
 # selectable #
 ##############
