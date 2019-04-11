@@ -49,6 +49,20 @@
 namespace walberla {
 namespace boundary {
 
+namespace internal {
+#if defined(__GLIBCXX__) && (!defined(_GLIBCXX_RELEASE) || _GLIBCXX_RELEASE < 7)
+template< typename T >
+struct tuple_size : std::tuple_size<std::tuple<>>
+{};
+
+template< typename... Members >
+struct tuple_size< std::tuple<Members...> > : std::tuple_size<std::tuple<Members...>>
+{};
+#else
+using std::tuple_size;
+#endif
+}
+
 
 
 class BHUIDGenerator : public uid::IndexGenerator< BHUIDGenerator, uint_t >{};
@@ -242,7 +256,7 @@ public:
    //** Remove Boundary Cells ******************************************************************************************
    /*! \name Remove Boundary Cells */
    //@{
-   inline void removeBoundary(                      const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
+   inline void removeBoundary(                       const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
    inline void removeBoundary( const FlagUID & flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
    inline void removeBoundary( const flag_t    mask, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
 
@@ -513,24 +527,24 @@ private:
    inline void addNearBoundary( const CellInterval & cells );
    inline void addBoundary( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z );
 
-   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
    inline typename std::enable_if<(N!=-1), void>::type setBoundary(       BoundariesTuple & boundaryConditions, const flag_t flag,
                                                                                         const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                                         const BoundaryConfiguration & parameter );
-   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
    inline typename std::enable_if<(N==-1), void>::type setBoundary( const BoundariesTuple &, const flag_t, const cell_idx_t, const cell_idx_t, const cell_idx_t,
                                                               const BoundaryConfiguration & ) const;
 
-   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
    inline typename std::enable_if<(N!=-1), void>::type setBoundary(       BoundariesTuple & boundaryConditions, const flag_t flag, const CellInterval & cells,
                                                                                         const BoundaryConfiguration & parameter );
-   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
    inline typename std::enable_if<(N==-1), void>::type setBoundary( const BoundariesTuple &, const flag_t, const CellInterval &, const BoundaryConfiguration & ) const;
 
-   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
    inline typename std::enable_if<(N!=-1), void>::type setBoundary(       BoundariesTuple & boundaryConditions, const flag_t flag, const CellVector & cells,
                                                                                         const BoundaryConfiguration & parameter );
-   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
    inline typename std::enable_if<(N==-1), void>::type setBoundary( const BoundariesTuple &, const flag_t, const CellVector &, const BoundaryConfiguration & ) const;
    //@}
    //*******************************************************************************************************************
@@ -538,10 +552,10 @@ private:
    //** Remove Boundary Cells (private helper functions) ***************************************************************
    /*! \name Remove Boundary Cells (private helper functions) */
    //@{
-   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
    inline typename std::enable_if<(N!=-1), void>::type removeBoundary(       BoundariesTuple & boundaryConditions, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                                            const bool checkNearBoundaryFlags = true );
-   template< typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
+   template< typename BoundariesTuple, int N = internal::tuple_size<BoundariesTuple>::value - 1 >
    inline typename std::enable_if<(N==-1), void>::type removeBoundary( const BoundariesTuple &, const cell_idx_t, const cell_idx_t, const cell_idx_t, const bool ) const { WALBERLA_CHECK( false ); }
    //@}
    //*******************************************************************************************************************
