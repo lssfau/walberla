@@ -4,15 +4,16 @@ ui_*
 qrc_*
 *~
 
+
 # macOS
 **/.DS_Store
 
-# Backup files of kate/kwrite
 
 # Generated files
 *.out
 /src/waLBerlaDefinitions.h
 /src/core/waLBerlaBuildInfo.cpp
+
 
 # Eclipse
 /.cproject
@@ -20,9 +21,15 @@ qrc_*
 /.pydevproject
 /.settings
 
+
 # Visual Studio
 /CMakeSettings.json
 /.vs
+
+
+# CLion
+*.idea
+
 
 # Binary Files
 /bin/
@@ -39,16 +46,12 @@ logfile*.txt
 # Compiled python
 *.pyc
 
+
 # Blockforest saves
 *.sav
 
 
-/utilities/.idea
-/utilities/py_waLBerla/.idea
-/python/.idea
-
-/src/stencil/.idea
-
+# CMake
 /CMakeLists.txt.user
 
 # CMake build files
