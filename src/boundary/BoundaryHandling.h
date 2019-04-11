@@ -102,7 +102,10 @@ public:
 
 
    BoundaryHandling( const std::string & identifier, FlagField_T * const flagField, const flag_t domain, const Boundaries & ... boundaryConditions,
-                     const Mode mode = OPTIMIZED_SPARSE_TRAVERSAL );
+                     const Mode mode );
+   BoundaryHandling( const std::string & identifier, FlagField_T * const flagField, const flag_t domain, const Boundaries & ... boundaryConditions ) :
+      BoundaryHandling( identifier, flagField, domain, boundaryConditions..., OPTIMIZED_SPARSE_TRAVERSAL )
+   {}
 
    bool operator==( const BoundaryHandling & rhs ) const { WALBERLA_CHECK( false, "You are trying to compare boundary handling " << uid_ <<                        // For testing purposes, block data items must be comparable with operator "==".
                                                                                   " with boundary handling " << rhs.getUID() <<                                    // Since instances of type "BoundaryHandling" are registered as block data items,
