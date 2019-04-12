@@ -385,7 +385,10 @@ void initializeCouetteProfile( const shared_ptr< StructuredBlockStorage > & bloc
 }
 
 void logFinalResult( const std::string & fileName, real_t Re, real_t wallDistance, real_t diameter, uint_t numLevels,
-                     real_t dragCoeff, real_t liftCoeff, real_t timestep )
+                     uint_t domainLength, uint_t domainWidth, uint_t domainHeight,
+                     real_t dragCoeff, real_t dragCoeffRef,
+                     real_t liftCoeff, real_t liftCoeffRef,
+                     uint_t timestep, real_t nonDimTimestep )
 {
    WALBERLA_ROOT_SECTION()
    {
@@ -393,11 +396,15 @@ void logFinalResult( const std::string & fileName, real_t Re, real_t wallDistanc
       file.open( fileName.c_str(), std::ofstream::app );
 
       file << Re << "\t " << wallDistance << "\t " << diameter << "\t " << numLevels << "\t "
-           << dragCoeff << "\t " << liftCoeff << "\t " << timestep
+           << domainLength << "\t " << domainWidth << "\t " << domainHeight << "\t "
+           << dragCoeff << "\t " << dragCoeffRef << "\t "<< std::abs(dragCoeff-dragCoeffRef) / dragCoeffRef << "\t "
+           << liftCoeff << "\t " << liftCoeffRef << "\t "<< std::abs(liftCoeff-liftCoeffRef) / liftCoeffRef << "\t "
+           << timestep << "\t " << nonDimTimestep
            << "\n";
       file.close();
    }
 }
+
 
 //////////
 // MAIN //
@@ -420,7 +427,7 @@ void logFinalResult( const std::string & fileName, real_t Re, real_t wallDistanc
  *  - Domain size [x, y, z] = [48 x 16 x 8 ] * diameter = [L(ength), W(idth), H(eight)]
  *  - horizontally periodic, bounded by two planes in z-direction
  *  - top plane is moving with constant wall velocity -> shear flow
- *  - sphere is placed in the vicinity of the bottom plane at [ L/2 + xOffset, W72 + yOffset, dist * diameter]
+ *  - sphere is placed in the vicinity of the bottom plane at [ L/2 + xOffset, W/2 + yOffset, dist * diameter]
  *  - distance of sphere center to the bottom plane is crucial parameter
  *  - viscosity is adjusted to match specified Reynolds number = shearRate * diameter * wallDistance / viscosity
  *  - dimensionless drag and lift forces are evaluated and written to logging file
@@ -799,8 +806,8 @@ int main( int argc, char **argv )
    if ( !zeroShearTest )
    {
       std::string resultFileName( baseFolderLogging + "/ResultForcesNearPlane.txt");
-      logFinalResult(resultFileName, ReynoldsNumberShear, normalizedWallDistance, diameter, numberOfLevels,
-                     logger->getLiftCoefficient(), logger->getLiftCoefficient(), real_c(timestep * lbmTimeStepsPerTimeLoopIteration) / physicalTimeScale );
+      logFinalResult(resultFileName, ReynoldsNumberShear, normalizedWallDistance, diameter, numberOfLevels, domainSize[0], domainSize[1], domainSize[2],
+                     logger->getDragCoefficient(), dragCorrelationZeng, logger->getLiftCoefficient(), liftCorrelationZeng, timestep, real_c(timestep) / physicalTimeScale );
    }
 
    return EXIT_SUCCESS;
