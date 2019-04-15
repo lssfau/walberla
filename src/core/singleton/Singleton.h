@@ -86,7 +86,8 @@ public:
    //@{
    static const shared_ptr<T>& instance()
    {
-      std::lock_guard<std::mutex> lock( instanceMutex_ );
+      // this implementation is thread safe
+      // https://stackoverflow.com/questions/1661529/is-meyers-implementation-of-the-singleton-pattern-thread-safe
       static shared_ptr<T> object( new T() );
       isInstantiated_ = true;
       return object;
