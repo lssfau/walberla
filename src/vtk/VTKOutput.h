@@ -35,7 +35,7 @@
 
 #include "core/Filesystem.h"
 #include <functional>
-#include <boost/tuple/tuple.hpp>
+#include <tuple>
 
 #include <fstream>
 #include <string>
@@ -55,16 +55,16 @@ private:
    typedef UID< VTKGEN > VTKUID;
 
    // types used during vertex-index mapping procedure when writing (P)VTU files
-   typedef boost::tuple< cell_idx_t, cell_idx_t, cell_idx_t > Vertex;
-   typedef boost::tuple< real_t,     real_t,     real_t >     VertexCoord;
+   typedef std::tuple< cell_idx_t, cell_idx_t, cell_idx_t > Vertex;
+   typedef std::tuple< real_t,     real_t,     real_t >     VertexCoord;
    typedef uint32_t Index;
 
    struct VertexCompare {
       bool operator()( const Vertex& lhs, const Vertex& rhs ) const
       {
-         if( lhs.get<0>() < rhs.get<0>() ||
-             ( lhs.get<0>() == rhs.get<0>() && lhs.get<1>() < rhs.get<1>() ) ||
-             ( lhs.get<0>() == rhs.get<0>() && lhs.get<1>() == rhs.get<1>() && lhs.get<2>() < rhs.get<2>() ) )
+         if( std::get<0>(lhs) < std::get<0>(rhs) ||
+             ( std::get<0>(lhs) == std::get<0>(rhs) && std::get<1>(lhs) < std::get<1>(rhs) ) ||
+             ( std::get<0>(lhs) == std::get<0>(rhs) && std::get<1>(lhs) == std::get<1>(rhs) && std::get<2>(lhs) < std::get<2>(rhs) ) )
             return true;
          return false;
       }

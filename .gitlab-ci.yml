@@ -795,6 +795,22 @@ gcc_8_hybrid_dbg:
    tags:
       - docker
 
+gcc_8_hybrid_dbg_noboost:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   before_script:
+      - rm -rf /opt/boost /usr/include/boost
+   variables:
+      <<: *build_hybrid_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+      WALBERLA_BUILD_WITH_PYTHON: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
 gcc_8_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8

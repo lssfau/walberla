@@ -35,8 +35,6 @@
 
 #include "stencil/D3Q27.h"
 
-#include <boost/tuple/tuple.hpp>
-
 
 namespace walberla {
 
@@ -203,7 +201,7 @@ private:
 // TEST BOUNDARY HANDLING //
 ////////////////////////////
 
-typedef BoundaryHandling< FlagField_T, stencil::D3Q27, boost::tuples::tuple< CopyBoundary, AddBoundary > > TestBoundaryHandling;
+typedef BoundaryHandling< FlagField_T, stencil::D3Q27, CopyBoundary, AddBoundary > TestBoundaryHandling;
 
 
 
@@ -368,7 +366,7 @@ static int main( int argc, char **argv )
    FactorField_T factorField_Ref( xSize, ySize, zSize, gl, uint_c(0) );
 
    TestBoundaryHandling handling( "test boundary handling", &flagField_BH, numeric_cast<flag_t>( domainFlag1 | domainFlag2 ),
-         boost::tuples::make_tuple( CopyBoundary( copy1, copy2, &workField_BH ), AddBoundary( add, &workField_BH ) ) );
+         CopyBoundary( copy1, copy2, &workField_BH ), AddBoundary( add, &workField_BH ) );
 
    // START TESTING / COMPARING
 

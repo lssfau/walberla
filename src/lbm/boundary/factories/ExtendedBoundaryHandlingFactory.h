@@ -33,8 +33,6 @@
 #include "boundary/BoundaryHandling.h"
 #include "lbm/field/PdfField.h"
 
-#include <boost/tuple/tuple.hpp>
-
 namespace walberla {
 namespace lbm {
 
@@ -86,8 +84,7 @@ public:
    typedef Outlet<LatticeModel, FlagFieldT >      BcOutlet;
    typedef Curved<LatticeModel, FlagFieldT >      BcCurved;
 
-   typedef boost::tuple< BcNoSlip, BcFreeSlip, BcPressure, BcUBB, BcOutlet, BcCurved >      BoundaryConditions;
-   typedef walberla::boundary::BoundaryHandling< FlagFieldT, Stencil, BoundaryConditions >  BoundaryHandling;
+   typedef walberla::boundary::BoundaryHandling< FlagFieldT, Stencil, BcNoSlip, BcFreeSlip, BcPressure, BcUBB, BcOutlet, BcCurved >  BoundaryHandling;
 
    static BlockDataID addBoundaryHandlingToStorage( const shared_ptr< StructuredBlockStorage > & bs, const std::string & identifier,
                                                     BlockDataID flagFieldID, BlockDataID pdfFieldID, const Set< FlagUID > & flagUIDSet )
@@ -156,14 +153,12 @@ ExtendedBoundaryHandlingFactory<LatticeModel, FlagFieldT>::operator()( IBlock * 
 
 
    BoundaryHandling * handling = new BoundaryHandling( "extended lbm boundary handling", flagField, mask,
-      boost::tuples::make_tuple(
         BcNoSlip    ( getNoSlipBoundaryUID(),   getNoSlip(),   pdfField ),
         BcFreeSlip  ( getFreeSlipBoundaryUID(), getFreeSlip(), pdfField, flagField, mask ),
         BcPressure  ( getPressureBoundaryUID(), getPressure(), pdfField ),
         BcUBB       ( getUBBBoundaryUID(),      getUBB(),      pdfField, flagField, storage->getLevel(*block), block->getAABB() ),
         BcOutlet    ( getOutletBoundaryUID(),   getOutlet(),   pdfField, flagField, mask ),
         BcCurved    ( getCurvedBoundaryUID(),   getCurved(),   pdfField, flagField, mask )
-      )
     );
 
    return handling;

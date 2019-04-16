@@ -19,6 +19,9 @@
 //
 //======================================================================================================================
 
+#include "waLBerlaDefinitions.h"
+#ifdef WALBERLA_BUILD_WITH_BOOST
+
 #include "Equation.h"
 #include "EquationSystem.h"
 #include "Variable.h"
@@ -198,3 +201,5 @@ std::ostream& operator<<( std::ostream& os, EquationSystem& es )
 
 } // namespace math
 } // namespace walberla
+
+#endif

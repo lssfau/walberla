@@ -86,8 +86,7 @@ const uint_t FieldGhostLayers = 1;
 
 typedef pe_coupling::CurvedLinear< LatticeModel_T, FlagField_T > MO_T;
 
-using BoundaryConditions_T = boost::tuples::tuple<MO_T>;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, MO_T > BoundaryHandling_T;
 
 typedef std::tuple< pe::Capsule, pe::CylindricalBoundary > BodyTypeTuple;
 
@@ -200,7 +199,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "cf boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( MO_T( "MO", MO_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ) ) );
+                                                           MO_T( "MO", MO_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ) );
 
    CellInterval domainBB = storage->getDomainCellBB();
    domainBB.xMin() -= cell_idx_c( FieldGhostLayers );

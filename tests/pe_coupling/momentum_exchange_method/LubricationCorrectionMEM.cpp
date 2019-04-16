@@ -95,9 +95,7 @@ typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
 typedef lbm::FreeSlip< LatticeModel_T, FlagField_T>           FreeSlip_T;
 typedef pe_coupling::SimpleBB< LatticeModel_T, FlagField_T > MO_T;
 
-typedef boost::tuples::tuple< FreeSlip_T, MO_T > BoundaryConditions_T;
-
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, FreeSlip_T, MO_T > BoundaryHandling_T;
 
 typedef std::tuple<pe::Sphere, pe::Plane> BodyTypeTuple ;
 
@@ -461,8 +459,8 @@ BoundaryHandling_T * SphSphTestBoundaryHandling::operator()( IBlock * const bloc
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "cf boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( FreeSlip_T( "FreeSlip", FreeSlip_Flag, pdfField, flagField, fluid ),
-                                    MO_T( "MO", MO_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ) ) );
+                                                           FreeSlip_T( "FreeSlip", FreeSlip_Flag, pdfField, flagField, fluid ),
+                                                           MO_T( "MO", MO_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ) );
 
    const auto freeslip = flagField->getFlag( FreeSlip_Flag );
 
@@ -548,8 +546,8 @@ BoundaryHandling_T * SphWallTestBoundaryHandling::operator()( IBlock * const blo
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "cf boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( FreeSlip_T( "FreeSlip", FreeSlip_Flag, pdfField, flagField, fluid ),
-                                    MO_T( "MO", MO_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ) ) );
+                                                           FreeSlip_T( "FreeSlip", FreeSlip_Flag, pdfField, flagField, fluid ),
+                                                           MO_T( "MO", MO_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ) );
 
    const auto freeslip = flagField->getFlag( FreeSlip_Flag );
 

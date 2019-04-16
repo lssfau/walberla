@@ -62,9 +62,7 @@ typedef FlagField < flag_t >   FlagField_T;
 typedef pde::Dirichlet< Stencil_T, flag_t >  Dirichlet_T;
 typedef pde::Neumann< Stencil_T, flag_t >  Neumann_T;
 
-typedef boost::tuples::tuple< Dirichlet_T, Neumann_T >  BoundaryConditions_T;
-
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, Dirichlet_T, Neumann_T > BoundaryHandling_T;
 
 
 const FlagUID  Domain_Flag( "domain" );
@@ -118,9 +116,8 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block ) cons
    // A new boundary handling instance that uses the just fetched flag field is created:
    // Additional, internal flags used by the boundary handling will be stored in this flag field.
    return new BoundaryHandling_T( "boundary handling", flagField, domain,
-         boost::tuples::make_tuple( Dirichlet_T( "dirichlet", Dirichlet_Flag, rhsField, stencilField, adaptStencilField, flagField ) ,
+                                  Dirichlet_T( "dirichlet", Dirichlet_Flag, rhsField, stencilField, adaptStencilField, flagField ) ,
                                     Neumann_T( "neumann", Neumann_Flag, rhsField, stencilField, adaptStencilField, flagField, blockStorage_ )
-         )
    );
 }
 

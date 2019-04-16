@@ -19,6 +19,9 @@
 //
 //======================================================================================================================
 
+#include "waLBerlaDefinitions.h"
+#ifdef WALBERLA_BUILD_WITH_BOOST
+
 #include "PhysicalCheck.h"
 #include "core/Abort.h"
 #include "core/logging/Logging.h"
@@ -536,3 +539,5 @@ namespace math {
 
 } // namespace math
 } // namespace walberla
+
+#endif

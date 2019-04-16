@@ -92,8 +92,7 @@ typedef pe_coupling::SimpleBB       < LatticeModel_T, FlagField_T >  MO_BB_T;
 typedef pe_coupling::CurvedLinear   < LatticeModel_T, FlagField_T > MO_CLI_T;
 typedef pe_coupling::CurvedQuadratic< LatticeModel_T, FlagField_T >  MO_MR_T;
 
-typedef boost::tuples::tuple< MO_BB_T, MO_CLI_T, MO_MR_T >               BoundaryConditions_T;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, MO_BB_T, MO_CLI_T, MO_MR_T > BoundaryHandling_T;
 
 using BodyTypeTuple = std::tuple<pe::Sphere> ;
 
@@ -158,9 +157,9 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "fixed obstacle boundary handling", flagField, fluid,
-                                                           boost::tuples::make_tuple( MO_BB_T (  "MO_BB",  MO_BB_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
-                                                                                     MO_CLI_T ( "MO_CLI", MO_CLI_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
-                                                                                      MO_MR_T (  "MO_MR",  MO_MR_Flag, pdfField, flagField, bodyField, fluid, *storage, *block, pdfFieldPreCol ) ) );
+                                                            MO_BB_T (  "MO_BB",  MO_BB_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
+                                                           MO_CLI_T ( "MO_CLI", MO_CLI_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
+                                                            MO_MR_T (  "MO_MR",  MO_MR_Flag, pdfField, flagField, bodyField, fluid, *storage, *block, pdfFieldPreCol ) );
 
    handling->fillWithDomain( FieldGhostLayers );
 

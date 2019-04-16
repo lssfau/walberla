@@ -106,8 +106,7 @@ typedef lbm::NoSlip< LatticeModel_T, flag_t > NoSlip_T;
 
 typedef pe_coupling::CurvedLinear< LatticeModel_T, FlagField_T > MO_T;
 
-typedef boost::tuples::tuple< NoSlip_T, MO_T > BoundaryConditions_T;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T, MO_T > BoundaryHandling_T;
 
 typedef std::tuple<pe::Sphere, pe::Ellipsoid, pe::Plane> BodyTypeTuple;
 
@@ -590,8 +589,8 @@ BoundaryHandling_T * MyBoundaryHandling::initialize( IBlock * const block )
    WALBERLA_CHECK_NOT_NULLPTR( blocksPtr );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "moving obstacle boundary handling", flagField, fluid,
-                                                           boost::tuples::make_tuple( NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
-                                                                                      MO_T( "MO", MO_Flag, pdfField, flagField, bodyField, fluid, *blocksPtr, *block ) ),
+                                                           NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
+                                                           MO_T( "MO", MO_Flag, pdfField, flagField, bodyField, fluid, *blocksPtr, *block ),
                                                            BoundaryHandling_T::Mode::ENTIRE_FIELD_TRAVERSAL);
 
    handling->fillWithDomain( FieldGhostLayers );

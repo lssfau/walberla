@@ -85,9 +85,7 @@ public:
    typedef lbm::NoSlip< LatticeModel_T, flag_t >  NoSlip_T;
    typedef lbm::UBB< LatticeModel_T, flag_t >     UBB_T;
 
-   typedef boost::tuples::tuple< NoSlip_T, UBB_T > BoundaryConditions_T;
-
-   typedef BoundaryHandling< FlagField_T, typename LatticeModel_T::Stencil, BoundaryConditions_T > BoundaryHandling_T;
+   typedef BoundaryHandling< FlagField_T, typename LatticeModel_T::Stencil, NoSlip_T, UBB_T > BoundaryHandling_T;
 
    MyBoundaryHandling( const std::string & id, const BlockDataID & flagField, const BlockDataID & pdfField, const real_t velocity ) :
       id_( id ), flagField_( flagField ), pdfField_( pdfField ), velocity_( velocity ) {}
@@ -119,8 +117,8 @@ MyBoundaryHandling<LatticeModel_T>::operator()( IBlock * const block, const Stru
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * boundaryHandling = new BoundaryHandling_T( std::string("boundary handling ")+id_, flagField, fluid,
-         boost::tuples::make_tuple( NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
-                                       UBB_T( "velocity bounce back", UBB_Flag, pdfField ) ) );
+                                                                   NoSlip_T( "no slip", NoSlip_Flag, pdfField ),
+                                                                   UBB_T( "velocity bounce back", UBB_Flag, pdfField ) );
 
    // closed no slip channel, periodic in x-direction
 

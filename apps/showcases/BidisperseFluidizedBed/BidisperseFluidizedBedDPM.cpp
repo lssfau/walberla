@@ -98,8 +98,7 @@ typedef lbm::Outlet< LatticeModel_T, FlagField_T >                     Outflow_T
 typedef lbm::SimplePressure< LatticeModel_T, flag_t >                  Outflow_T;
 #endif
 
-typedef boost::tuples::tuple< NoSlip_T, Inflow_T, Outflow_T >          BoundaryConditions_T;
-typedef BoundaryHandling<FlagField_T, Stencil_T, BoundaryConditions_T> BoundaryHandling_T;
+typedef BoundaryHandling<FlagField_T, Stencil_T, NoSlip_T, Inflow_T, Outflow_T> BoundaryHandling_T;
 
 typedef std::tuple<pe::Plane, pe::Sphere> BodyTypeTuple ;
 
@@ -165,14 +164,14 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
 
 #ifdef OutletBC
    BoundaryHandling_T * handling = new BoundaryHandling_T( "Boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
+                                    NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
                                     Inflow_T( "Inflow", Inflow_Flag, pdfField, Vector3<real_t>(real_t(0),real_t(0),uInflow_) ),
-                                    Outflow_T( "Outflow", Outflow_Flag, pdfField, flagField, fluid ) ) );
+                                    Outflow_T( "Outflow", Outflow_Flag, pdfField, flagField, fluid ) );
 #else
    BoundaryHandling_T * handling = new BoundaryHandling_T( "Boundary handling", flagField, fluid,
-         boost::tuples::make_tuple( NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
+                                    NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
                                     Inflow_T( "Inflow", Inflow_Flag, pdfField, Vector3<real_t>(real_t(0),real_t(0),uInflow_) ),
-                                    Outflow_T( "Outflow", Outflow_Flag, pdfField, real_t(1) ) ) );
+                                    Outflow_T( "Outflow", Outflow_Flag, pdfField, real_t(1) ) );
 #endif
 
    const auto noslip  = flagField->getFlag( NoSlip_Flag );

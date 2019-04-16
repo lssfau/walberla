@@ -64,8 +64,7 @@ typedef FlagField< flag_t > FlagField_T;
 const uint_t FieldGhostLayers = 2;
 
 typedef lbm::NoSlip< LatticeModel_T, flag_t> NoSlip_T;
-typedef boost::tuples::tuple< NoSlip_T > BoundaryConditions_T;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T> BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T> BoundaryHandling_T;
 
 ///////////
 // FLAGS //
@@ -105,7 +104,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "moving obstacle boundary handling", flagField, fluid,
-                                                           boost::tuples::make_tuple(    NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ) ) );
+                                                           NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ) );
 
    const auto noSlip = flagField->getFlag(NoSlip_Flag);
 

@@ -718,9 +718,18 @@ if ( Boost_FOUND )
       list( APPEND LINK_DIRS ${PYTHON_LIBRARY_DIR}/libs )
    endif()
 
+   set( WALBERLA_BUILD_WITH_BOOST TRUE CACHE INTERNAL "Build with Boost" )
 else( Boost_FOUND )
-   # Search again, this time with the REQUIRED option. This will give a CMAKE error and a detailed error message for the user
-   find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} REQUIRED ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${waLBerla_OPTIONAL_BOOST_COMPONENTS} )
+   if( (WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM OR WALBERLA_USE_STD_FILESYSTEM) AND (WALBERLA_USE_STD_EXPERIMENTAL_ANY OR WALBERLA_USE_STD_ANY) AND (WALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL OR WALBERLA_USE_STD_OPTIONAL) AND NOT WALBERLA_BUILD_WITH_PYTHON)
+      # we don't really need Boost
+      set( WALBERLA_BUILD_WITH_BOOST FALSE CACHE INTERNAL "Build with Boost" )
+   else()
+      # Search again, this time with the REQUIRED option. This will give a CMAKE error and a detailed error message for the user
+      find_package ( Boost ${waLBerla_REQUIRED_MIN_BOOST_VERSION} REQUIRED ${waLBerla_REQUIRED_BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${waLBerla_OPTIONAL_BOOST_COMPONENTS} )
+      if( (WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM OR WALBERLA_USE_STD_FILESYSTEM) AND (WALBERLA_USE_STD_EXPERIMENTAL_ANY OR WALBERLA_USE_STD_ANY) AND (WALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL OR WALBERLA_USE_STD_OPTIONAL) )
+         message(WARNING "If you set WALBERLA_BUILD_WITH_PYTHON=OFF, you can build without the Boost library.")
+      endif()
+   endif()
 endif( Boost_FOUND )
 
 

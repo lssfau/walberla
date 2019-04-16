@@ -1377,13 +1377,13 @@ void VTKOutput::writeVTUHeaderPiece( std::ostream& ofs, const uint_t numberOfCel
    {
       Base64Writer base64;
       for( auto vertex = vc.begin(); vertex != vc.end(); ++vertex )
-         base64 << numeric_cast<float>( ( *vertex ).get<0>() ) << numeric_cast<float>( ( *vertex ).get<1>() )
-                << numeric_cast<float>( ( *vertex ).get<2>() );
+         base64 << numeric_cast<float>( std::get<0>( *vertex ) ) << numeric_cast<float>( std::get<1>( *vertex ) )
+                << numeric_cast<float>( std::get<2>( *vertex ) );
       ofs << "     "; base64.toStream( ofs );
    }
    else for( auto vertex = vc.begin(); vertex != vc.end(); ++vertex )
-      ofs << "     " << numeric_cast<float>( ( *vertex ).get<0>() ) << " " << numeric_cast<float>( ( *vertex ).get<1>() )
-          << " " << numeric_cast<float>( ( *vertex ).get<2>() ) << "\n";
+      ofs << "     " << numeric_cast<float>( std::get<0>( *vertex ) ) << " " << numeric_cast<float>( std::get<1>( *vertex ) )
+          << " " << numeric_cast<float>( std::get<2>( *vertex ) ) << "\n";
 
    ofs << "    </DataArray>\n"
        << "   </Points>\n"

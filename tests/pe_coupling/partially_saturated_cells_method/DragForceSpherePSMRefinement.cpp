@@ -99,8 +99,7 @@ typedef std::pair< pe::BodyID, real_t >                              BodyAndVolu
 typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
 
 typedef lbm::NoSlip< LatticeModel_T, flag_t > NoSlip_T;
-using BoundaryConditions_T = boost::tuples::tuple<NoSlip_T>;
-typedef BoundaryHandling< FlagField_T, Stencil_T, BoundaryConditions_T > BoundaryHandling_T;
+typedef BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T > BoundaryHandling_T;
 
 using BodyTypeTuple = std::tuple<pe::Sphere> ;
 
@@ -243,7 +242,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "fixed obstacle boundary handling", flagField, fluid,
-                                                           boost::tuples::make_tuple( NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ) ) );
+                                                           NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ) );
 
    handling->fillWithDomain( FieldGhostLayers );
 
