@@ -74,7 +74,7 @@ class Sphere;
 class Spring;
 class Squirmer;
 class TriangleMesh;
-template <typename BodyTypeTuple>
+template <typename... BodyTypes>
 class Union;
 
 typedef RigidBody             BodyType;            //!< Type of the rigid bodies.

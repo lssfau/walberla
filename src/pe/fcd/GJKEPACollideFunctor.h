@@ -28,7 +28,6 @@
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Union.h"
 #include <pe/Thresholds.h>
-#include <tuple>
 
 namespace walberla{
 namespace pe{
@@ -50,25 +49,25 @@ namespace gjkepa{
    inline bool generateContacts(Plane *a, Plane *b, Container& contacts_);
 
    //Unions
-   template<typename BodyTupleA, typename BodyB, typename Container>
-   inline bool generateContacts(Union<BodyTupleA> *a, BodyB *b, Container& contacts_);
+   template<typename... BodyTypesA, typename BodyB, typename Container>
+   inline bool generateContacts(Union<BodyTypesA...> *a, BodyB *b, Container& contacts_);
 
-   template<typename BodyA, typename BodyTupleB, typename Container>
-   inline bool generateContacts(BodyA *a, Union<BodyTupleB> *b, Container& contacts_);
+   template<typename BodyA, typename... BodyTypesB, typename Container>
+   inline bool generateContacts(BodyA *a, Union<BodyTypesB...> *b, Container& contacts_);
 
-   template<typename BodyTupleA, typename BodyTupleB, typename Container>
-   inline bool generateContacts(Union<BodyTupleA> *a, Union<BodyTupleB>  *b, Container& contacts_);
+   template<typename... BodyTypesA, typename... BodyTypesB, typename Container>
+   inline bool generateContacts(Union<BodyTypesA...> *a, Union<BodyTypesB...>  *b, Container& contacts_);
 
    //Union and Plane
-   template<typename BodyTupleA, typename Container>
-   inline bool generateContacts(Union<BodyTupleA> *a, Plane *b, Container& contacts_);
+   template<typename... BodyTypesA, typename Container>
+   inline bool generateContacts(Union<BodyTypesA...> *a, Plane *b, Container& contacts_);
 
-   template<typename BodyTupleB, typename Container>
-   inline bool generateContacts(Plane *a, Union<BodyTupleB> *b, Container& contacts_);
+   template<typename... BodyTypesB, typename Container>
+   inline bool generateContacts(Plane *a, Union<BodyTypesB...> *b, Container& contacts_);
 }
 
 /* Iterative Collide Functor for contact Generation with iterative collision detection (GJK and EPA algorithms).
- * Usage: fcd::GenericFCD<BodyTuple, fcd::GJKEPACollideFunctor> testFCD;
+ * Usage: fcd::GenericFCD<BodyTypes..., fcd::GJKEPACollideFunctor> testFCD;
  * testFCD.generateContacts(...);
  */
 template <typename Container>
@@ -163,50 +162,50 @@ namespace gjkepa{
    }
 
    //Unions
-   template<typename BodyTupleA, typename BodyB, typename Container>
-   inline bool generateContacts(Union<BodyTupleA> *a, BodyB *b, Container& contacts_){
+   template<typename... BodyTypesA, typename BodyB, typename Container>
+   inline bool generateContacts(Union<BodyTypesA...> *a, BodyB *b, Container& contacts_){
       GJKEPASingleCollideFunctor<BodyB, Container> func(b, contacts_);
       bool collision = false;
       for( auto it=a->begin(); it!=a->end(); ++it )
       {
-         collision |= SingleCast<BodyTupleA, GJKEPASingleCollideFunctor<BodyB, Container>, bool>::execute(it.getBodyID(), func);
+         collision |= SingleCast<std::tuple<BodyTypesA...>, GJKEPASingleCollideFunctor<BodyB, Container>, bool>::execute(it.getBodyID(), func);
       }
       return collision;
    }
 
-   template<typename BodyA, typename BodyTupleB, typename Container>
-   inline bool generateContacts(BodyA *a, Union<BodyTupleB> *b, Container& contacts_){
+   template<typename BodyA, typename... BodyTypesB, typename Container>
+   inline bool generateContacts(BodyA *a, Union<BodyTypesB...> *b, Container& contacts_){
       return generateContacts(b, a, contacts_);
    }
 
-   template<typename BodyTupleA, typename BodyTupleB, typename Container>
-   inline bool generateContacts(Union<BodyTupleA> *a, Union<BodyTupleB>  *b, Container& contacts_){
+   template<typename... BodyTypesA, typename... BodyTypesB, typename Container>
+   inline bool generateContacts(Union<BodyTypesA...> *a, Union<BodyTypesB...>  *b, Container& contacts_){
       GJKEPACollideFunctor<Container> func(contacts_);
       bool collision = false;
       for( auto it1=a->begin(); it1!=a->end(); ++it1 )
       {
          for( auto it2=b->begin(); it2!=b->end(); ++it2 )
          {
-            collision |= DoubleCast<BodyTupleA, BodyTupleB, GJKEPACollideFunctor<Container>, bool>::execute(it1.getBodyID(), it2.getBodyID(), func);
+            collision |= DoubleCast<std::tuple<BodyTypesA...>, std::tuple<BodyTypesB...>, GJKEPACollideFunctor<Container>, bool>::execute(it1.getBodyID(), it2.getBodyID(), func);
          }
       }
       return collision;
    }
 
    //Union and Plane (these calls are ambigous if not implemented seperatly)
-   template<typename BodyTupleA, typename Container>
-   inline bool generateContacts(Union<BodyTupleA> *a, Plane *b, Container& contacts_){
+   template<typename... BodyTypesA, typename Container>
+   inline bool generateContacts(Union<BodyTypesA...> *a, Plane *b, Container& contacts_){
       GJKEPASingleCollideFunctor<Plane, Container> func(b, contacts_);
       bool collision = false;
       for( auto it=a->begin(); it!=a->end(); ++it )
       {
-         collision |= SingleCast<BodyTupleA, GJKEPASingleCollideFunctor<Plane, Container>, bool>::execute(it.getBodyID(), func);
+         collision |= SingleCast<std::tuple<BodyTypesA...>, GJKEPASingleCollideFunctor<Plane, Container>, bool>::execute(it.getBodyID(), func);
       }
       return collision;
    }
 
-   template<typename BodyTupleB, typename Container>
-   inline bool generateContacts(Plane *a, Union<BodyTupleB> *b, Container& contacts_){
+   template<typename... BodyTypesB, typename Container>
+   inline bool generateContacts(Plane *a, Union<BodyTypesB...> *b, Container& contacts_){
       return generateContacts(b, a, contacts_);
    }
 

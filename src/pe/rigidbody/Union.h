@@ -43,8 +43,6 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <tuple>
-
 namespace walberla {
 namespace pe {
 
@@ -63,13 +61,10 @@ namespace pe {
  * the basic functionality of a sphere. For a full description of the sphere geometry,
  * see the Sphere class description.
  */
-template <typename BodyTypeTuple>
+template <typename... BodyTypes>
 class Union : public RigidBody
 {
 public:
-   //**Type definitions****************************************************************************
-   using BodyTypeTupleT        = BodyTypeTuple;
-
    //**********************************************************************************************
 
    using size_type             = BodyStorage::size_type;           //!< Size type of the body storage.
@@ -232,8 +227,8 @@ private:
  * \param communicating specifies if the sphere should take part in synchronization (syncNextNeighbour, syncShadowOwner)
  * \param infiniteMass specifies if the sphere has infinite mass and will be treated as an obstacle
  */
-template <typename BodyTypeTuple>
-Union<BodyTypeTuple>::Union( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+template <typename... BodyTypes>
+Union<BodyTypes...>::Union( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
                              const bool global, const bool communicating, const bool /*infiniteMass*/ )
    : RigidBody( getStaticTypeID(), sid, uid )  // Initialization of the parent class
 {
@@ -265,8 +260,8 @@ Union<BodyTypeTuple>::Union( id_t sid, id_t uid, const Vec3& gpos, const Vec3& r
 //*************************************************************************************************
 /*!\brief Destructor for the Sphere class.
  */
-template <typename BodyTypeTuple>
-Union<BodyTypeTuple>::~Union()
+template <typename... BodyTypes>
+Union<BodyTypes...>::~Union()
 {
    // Clearing the bodies
    bodies_.clear();
@@ -281,8 +276,8 @@ Union<BodyTypeTuple>::~Union()
  *
  * \return The volume of the union.
  */
-template <typename BodyTypeTuple>
-inline real_t Union<BodyTypeTuple>::getVolume() const
+template <typename... BodyTypes>
+inline real_t Union<BodyTypes...>::getVolume() const
 {
    real_t volume(0);
    for( auto bodyIt=bodies_.begin(); bodyIt!=bodies_.end(); ++bodyIt )
@@ -302,8 +297,8 @@ inline real_t Union<BodyTypeTuple>::getVolume() const
  * communication to set the remote status of a union within the simulation world. Using
  * this function explicitly may lead to simulation errors during a parallel simulation!
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::setRemote( bool remote )
+template <typename... BodyTypes>
+void Union<BodyTypes...>::setRemote( bool remote )
 {
    remote_ = remote;
 
@@ -322,8 +317,8 @@ void Union<BodyTypeTuple>::setRemote( bool remote )
  * This function updates the axis-aligned bounding box of the union according to the current
  * position and orientation of the contained rigid bodies.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::calcBoundingBox()
+template <typename... BodyTypes>
+void Union<BodyTypes...>::calcBoundingBox()
 {
    // Setting the bounding box of an empty union
    if( bodies_.isEmpty() ) {
@@ -356,8 +351,8 @@ void Union<BodyTypeTuple>::calcBoundingBox()
  *
  * \return void
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::calcCenterOfMass()
+template <typename... BodyTypes>
+void Union<BodyTypes...>::calcCenterOfMass()
 {
    // Checking the state of the union
    WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
@@ -440,8 +435,8 @@ void Union<BodyTypeTuple>::calcCenterOfMass()
  *
  * \return void
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::calcInertia()
+template <typename... BodyTypes>
+void Union<BodyTypes...>::calcInertia()
 {
    // Checking the state of the union
    WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
@@ -506,8 +501,8 @@ void Union<BodyTypeTuple>::calcInertia()
  * rigid body, the function shifts the union to reposition its anchor point according to the
  * given global coordinate.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::setPositionImpl( real_t px, real_t py, real_t pz )
+template <typename... BodyTypes>
+void Union<BodyTypes...>::setPositionImpl( real_t px, real_t py, real_t pz )
 {
    Vec3 gpos = Vec3( px, py, pz );
 
@@ -521,7 +516,7 @@ void Union<BodyTypeTuple>::setPositionImpl( real_t px, real_t py, real_t pz )
    for( auto& b : bodies_ )
       b.update( dp );
 
-   Union<BodyTypeTuple>::calcBoundingBox();    // Setting the axis-aligned bounding box
+   Union<BodyTypes...>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
    signalTranslation();  // Signaling the position change to the superordinate body
 }
@@ -544,8 +539,8 @@ void Union<BodyTypeTuple>::setPositionImpl( real_t px, real_t py, real_t pz )
  * the anchor point of the union (if the union is infinite). The orientation of the rigid bodies
  * within the union in reference to the body frame of the union is not changed.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::setOrientationImpl( real_t r, real_t i, real_t j, real_t k )
+template <typename... BodyTypes>
+void Union<BodyTypes...>::setOrientationImpl( real_t r, real_t i, real_t j, real_t k )
 {
    const Quat q ( r, i, j, k );
    const Quat dq( q * q_.getInverse() );
@@ -557,7 +552,7 @@ void Union<BodyTypeTuple>::setOrientationImpl( real_t r, real_t i, real_t j, rea
    for( auto& b : bodies_ )
       b.update( dq );
 
-   Union<BodyTypeTuple>::calcBoundingBox();  // Setting the axis-aligned bounding box
+   Union<BodyTypes...>::calcBoundingBox();  // Setting the axis-aligned bounding box
    wake();             // Waking the union from sleep mode
    signalRotation();   // Signaling the change of orientation to the superordinate body
 }
@@ -581,8 +576,8 @@ void Union<BodyTypeTuple>::setOrientationImpl( real_t r, real_t i, real_t j, rea
  * movement. This movement involves a change in the global position and the axis-aligned
  * bounding box.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::update( const Vec3& dp )
+template <typename... BodyTypes>
+void Union<BodyTypes...>::update( const Vec3& dp )
 {
    // Checking the state of the union
    WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
@@ -596,7 +591,7 @@ void Union<BodyTypeTuple>::update( const Vec3& dp )
       b.update( dp );
 
    // Setting the axis-aligned bounding box
-   Union<BodyTypeTuple>::calcBoundingBox();
+   Union<BodyTypes...>::calcBoundingBox();
 
    // Checking the state of the union
    WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
@@ -614,8 +609,8 @@ void Union<BodyTypeTuple>::update( const Vec3& dp )
  * This movement involves a change in the global position, the orientation/rotation and the
  * axis-aligned bounding box of the box.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::update( const Quat& dq )
+template <typename... BodyTypes>
+void Union<BodyTypes...>::update( const Quat& dq )
 {
    // Checking the state of the union
    WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
@@ -633,7 +628,7 @@ void Union<BodyTypeTuple>::update( const Quat& dq )
       b.update( dq );
 
    // Setting the axis-aligned bounding box
-   Union<BodyTypeTuple>::calcBoundingBox();
+   Union<BodyTypes...>::calcBoundingBox();
 
    // Checking the state of the union
    WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
@@ -699,8 +694,8 @@ void Union<BodyTypeTuple>::update( const Quat& dq )
  *    individually for the rigid body (to exclusively make the body (in-)visible) or the entire
  *    union (to make the entire union (in-)visible.
  */
-template <typename BodyTypeTuple>
-RigidBody& Union<BodyTypeTuple>::add( std::unique_ptr<RigidBody>&& body )
+template <typename... BodyTypes>
+RigidBody& Union<BodyTypes...>::add( std::unique_ptr<RigidBody>&& body )
 {
    // Checking for "self-assignment"
    if( body.get() == BodyID( this ) ) return *this;
@@ -770,8 +765,8 @@ RigidBody& Union<BodyTypeTuple>::add( std::unique_ptr<RigidBody>&& body )
  * Changing the global position of the entire union's center of mass. All contained rigid bodies
  * are moved by the same displacement.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::translateImpl( real_t dx, real_t dy, real_t dz )
+template <typename... BodyTypes>
+void Union<BodyTypes...>::translateImpl( real_t dx, real_t dy, real_t dz )
 {
    Vec3 dp(dx, dy, dz);
 
@@ -782,7 +777,7 @@ void Union<BodyTypeTuple>::translateImpl( real_t dx, real_t dy, real_t dz )
    for( auto& b : bodies_ )
       b.update( dp );
 
-   Union<BodyTypeTuple>::calcBoundingBox();    // Setting the axis-aligned bounding box
+   Union<BodyTypes...>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
    signalTranslation();  // Signaling the position change to the superordinate body
 }
@@ -809,8 +804,8 @@ void Union<BodyTypeTuple>::translateImpl( real_t dx, real_t dy, real_t dz )
  * around the anchor point of the union (if the union is infinite). The orientation of the
  * bodies within the union in reference to the body frame of the union is not changed.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::rotateImpl( const Quat& dq )
+template <typename... BodyTypes>
+void Union<BodyTypes...>::rotateImpl( const Quat& dq )
 {
    if (isFixed())
       WALBERLA_ABORT("Trying to rotate a fixed body: " << *this);
@@ -822,7 +817,7 @@ void Union<BodyTypeTuple>::rotateImpl( const Quat& dq )
    for( auto& b : bodies_ )
       b.update( dq );
 
-   Union<BodyTypeTuple>::calcBoundingBox();  // Setting the axis-aligned bounding box
+   Union<BodyTypes...>::calcBoundingBox();  // Setting the axis-aligned bounding box
    wake();             // Waking the union from sleep mode
    signalRotation();   // Signaling the change of orientation to the superordinate body
 }
@@ -843,8 +838,8 @@ void Union<BodyTypeTuple>::rotateImpl( const Quat& dq )
  * are applied in the order x, y, z. The orientation of the bodies within the union in
  * reference to the body frame of the union is not changed.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::rotateAroundOriginImpl( const Quat& dq )
+template <typename... BodyTypes>
+void Union<BodyTypes...>::rotateAroundOriginImpl( const Quat& dq )
 {
    q_    = dq * q_;                // Updating the orientation of the union
    R_    = q_.toRotationMatrix();  // Updating the rotation of the union
@@ -854,7 +849,7 @@ void Union<BodyTypeTuple>::rotateAroundOriginImpl( const Quat& dq )
    for( auto& b : bodies_ )
       b.update( dq );
 
-   Union<BodyTypeTuple>::calcBoundingBox();    // Setting the axis-aligned bounding box
+   Union<BodyTypes...>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
    signalTranslation();  // Signaling the position change to the superordinate body
 }
@@ -874,8 +869,8 @@ void Union<BodyTypeTuple>::rotateAroundOriginImpl( const Quat& dq )
  * all contained rigid bodies change their position and orientation accordingly. The orientation
  * of the bodies within the union in reference to the body frame of the union is not changed.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::rotateAroundPointImpl( const Vec3& point, const Quat &dq )
+template <typename... BodyTypes>
+void Union<BodyTypes...>::rotateAroundPointImpl( const Vec3& point, const Quat &dq )
 {
    const Vec3 dp( gpos_ - point );
 
@@ -887,7 +882,7 @@ void Union<BodyTypeTuple>::rotateAroundPointImpl( const Vec3& point, const Quat 
    for( auto& b : bodies_ )
       b.update( dq );
 
-   Union<BodyTypeTuple>::calcBoundingBox();    // Setting the axis-aligned bounding box
+   Union<BodyTypes...>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
    signalTranslation();  // Signaling the position change to the superordinate body
 }
@@ -910,8 +905,8 @@ void Union<BodyTypeTuple>::rotateAroundPointImpl( const Vec3& point, const Quat 
  * \param pz The z-component of the relative coordinate.
  * \return \a true if the point lies inside the sphere, \a false if not.
  */
-template <typename BodyTypeTuple>
-bool Union<BodyTypeTuple>::containsRelPointImpl( real_t px, real_t py, real_t pz ) const
+template <typename... BodyTypes>
+bool Union<BodyTypes...>::containsRelPointImpl( real_t px, real_t py, real_t pz ) const
 {
    const Vec3 gpos( pointFromBFtoWF( px, py, pz ) );
    for( auto& b : bodies_ )
@@ -931,8 +926,8 @@ bool Union<BodyTypeTuple>::containsRelPointImpl( real_t px, real_t py, real_t pz
  *
  * The tolerance level of the check is pe::surfaceThreshold.
  */
-template <typename BodyTypeTuple>
-bool Union<BodyTypeTuple>::isSurfaceRelPointImpl( real_t px, real_t py, real_t pz ) const
+template <typename... BodyTypes>
+bool Union<BodyTypes...>::isSurfaceRelPointImpl( real_t px, real_t py, real_t pz ) const
 {
    bool surface( false );
    const Vec3 gpos( pointFromBFtoWF( px, py, pz ) );
@@ -964,8 +959,8 @@ bool Union<BodyTypeTuple>::isSurfaceRelPointImpl( real_t px, real_t py, real_t p
  * In case one of the contained rigid bodies is interally modified, this function is called to
  * recalculate the changed properties of the union.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::handleModification()
+template <typename... BodyTypes>
+void Union<BodyTypes...>::handleModification()
 {
    // Setting the finite flag
    finite_ = true;
@@ -990,7 +985,7 @@ void Union<BodyTypeTuple>::handleModification()
    calcInertia();
 
    // Updating the axis-aligned bounding box
-   Union<BodyTypeTuple>::calcBoundingBox();
+   Union<BodyTypes...>::calcBoundingBox();
 
    // Signaling the internal modification to the superordinate body
    signalModification();
@@ -1006,8 +1001,8 @@ void Union<BodyTypeTuple>::handleModification()
  * In case one of the contained rigid bodies changes its position, this function is called
  * to recalculate the changed properties of the union.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::handleTranslation()
+template <typename... BodyTypes>
+void Union<BodyTypes...>::handleTranslation()
 {
    // Setting the union's total mass and center of mass
    calcCenterOfMass();
@@ -1019,7 +1014,7 @@ void Union<BodyTypeTuple>::handleTranslation()
    // Setting the moment of inertia
    calcInertia();
 
-   Union<BodyTypeTuple>::calcBoundingBox();    // Setting the axis-aligned bounding box
+   Union<BodyTypes...>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
    signalTranslation();  // Signaling the position change to the superordinate body
 }
@@ -1034,13 +1029,13 @@ void Union<BodyTypeTuple>::handleTranslation()
  * In case one of the contained rigid bodies changes its orientation, this function is called
  * to recalculate the changed properties of the union.
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::handleRotation()
+template <typename... BodyTypes>
+void Union<BodyTypes...>::handleRotation()
 {
    // Setting the moment of inertia
    calcInertia();
 
-   Union<BodyTypeTuple>::calcBoundingBox();  // Setting the axis-aligned bounding box
+   Union<BodyTypes...>::calcBoundingBox();  // Setting the axis-aligned bounding box
    wake();             // Waking the union from sleep mode
    signalRotation();   // Signaling the change of orientation to the superordinate body
 }
@@ -1062,8 +1057,8 @@ void Union<BodyTypeTuple>::handleRotation()
  * \param tab Indentation in front of every line of the union output.
  * \return void
  */
-template <typename BodyTypeTuple>
-void Union<BodyTypeTuple>::print( std::ostream& os, const char* tab ) const
+template <typename... BodyTypes>
+void Union<BodyTypes...>::print( std::ostream& os, const char* tab ) const
 {
    using std::setw;
 
@@ -1125,8 +1120,8 @@ void Union<BodyTypeTuple>::print( std::ostream& os, const char* tab ) const
  * \param u Reference to a constant union object.
  * \return Reference to the output stream.
  */
-template <typename BodyTypeTuple>
-std::ostream& operator<<( std::ostream& os, const Union<BodyTypeTuple>& u )
+template <typename... BodyTypes>
+std::ostream& operator<<( std::ostream& os, const Union<BodyTypes...>& u )
 {
    os << "--" << "UNION PARAMETERS"
       << "--------------------------------------------------------------\n";
@@ -1145,8 +1140,8 @@ std::ostream& operator<<( std::ostream& os, const Union<BodyTypeTuple>& u )
  * \param u Constant union handle.
  * \return Reference to the output stream.
  */
-template <typename BodyTypeTuple>
-std::ostream& operator<<( std::ostream& os, Union<BodyTypeTuple> const * u )
+template <typename... BodyTypes>
+std::ostream& operator<<( std::ostream& os, Union<BodyTypes...> const * u )
 {
    os << "--" << "UNION PARAMETERS"
       << "--------------------------------------------------------------\n";
@@ -1170,14 +1165,14 @@ std::ostream& operator<<( std::ostream& os, Union<BodyTypeTuple> const * u )
  *
  * \return geometry specific type id
  */
-template <typename BodyTypeTuple>
-inline id_t Union<BodyTypeTuple>::getStaticTypeID()
+template <typename... BodyTypes>
+inline id_t Union<BodyTypes...>::getStaticTypeID()
 {
    return staticTypeID_;
 }
 
-template <typename BodyTypeTuple>
-id_t Union<BodyTypeTuple>::staticTypeID_ = std::numeric_limits<id_t>::max();
+template <typename... BodyTypes>
+id_t Union<BodyTypes...>::staticTypeID_ = std::numeric_limits<id_t>::max();
 
 } // namespace pe
 }  // namespace walberla

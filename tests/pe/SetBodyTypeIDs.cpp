@@ -125,7 +125,7 @@ int main( int argc, char** argv )
    WALBERLA_CHECK_UNEQUAL(A::getStaticTypeID(), C::getStaticTypeID());
    WALBERLA_CHECK_UNEQUAL(B::getStaticTypeID(), C::getStaticTypeID());
 
-   typedef std::tuple<Plane, Sphere, Box, Capsule, Union< std::tuple<Sphere, Box> > > BodyTuple2 ;
+   typedef std::tuple<Plane, Sphere, Box, Capsule, Union<Sphere, Box> > BodyTuple2 ;
    SetBodyTypeIDs<BodyTuple2>::execute();
    WALBERLA_CHECK_UNEQUAL(Plane::getStaticTypeID(), Sphere::getStaticTypeID());
    WALBERLA_CHECK_UNEQUAL(Plane::getStaticTypeID(), Box::getStaticTypeID());

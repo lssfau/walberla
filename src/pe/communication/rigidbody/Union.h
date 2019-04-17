@@ -31,6 +31,8 @@
 #include "pe/communication/Marshalling.h"
 #include "pe/rigidbody/Union.h"
 
+#include <tuple>
+
 namespace walberla {
 namespace pe {
 namespace communication {
@@ -57,8 +59,8 @@ struct UnionParameters : public GeomPrimitiveParameters {
  * \param obj The object to be marshalled.
  * \return void
  */
-template < typename BodyTypeTuple >
-void marshal( mpi::SendBuffer& buffer, const Union<BodyTypeTuple>& obj )
+template < typename... BodyTypes >
+void marshal( mpi::SendBuffer& buffer, const Union<BodyTypes...>& obj )
 {
    // Material of union is not relevant for reconstruction thus marshal RigidBody instead of GeomPrimitive.
    marshal( buffer, static_cast<const RigidBody&>( obj ) );
@@ -72,12 +74,12 @@ void marshal( mpi::SendBuffer& buffer, const Union<BodyTypeTuple>& obj )
    buffer << static_cast<size_t> (obj.size());                  // Encoding the number of contained bodies
 
    // Encoding the contained primitives
-   const typename Union<BodyTypeTuple>::const_iterator begin( obj.begin() );
-   const typename Union<BodyTypeTuple>::const_iterator end  ( obj.end()   );
-   for(  typename Union<BodyTypeTuple>::const_iterator body=begin; body!=end; ++body )
+   const typename Union<BodyTypes...>::const_iterator begin( obj.begin() );
+   const typename Union<BodyTypes...>::const_iterator end  ( obj.end()   );
+   for(  typename Union<BodyTypes...>::const_iterator body=begin; body!=end; ++body )
    {
       buffer << body->getTypeID();
-      MarshalDynamically<BodyTypeTuple>::execute( buffer, *body );
+      MarshalDynamically<std::tuple<BodyTypes...>>::execute( buffer, *body );
    }
 }
 
@@ -109,13 +111,13 @@ void unmarshal( mpi::RecvBuffer& buffer, UnionParameters& objparam )
 //*************************************************************************************************
 
 
-template <typename BodyTypeTuple>
-inline std::unique_ptr<Union<BodyTypeTuple>> instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, Union<BodyTypeTuple>*& newBody )
+template <typename... BodyTypes>
+inline std::unique_ptr<Union<BodyTypes...>> instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, const math::AABB& block, Union<BodyTypes...>*& newBody )
 {
    UnionParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   auto un = std::make_unique<Union<BodyTypeTuple>>( subobjparam.sid_,
+   auto un = std::make_unique<Union<BodyTypes...>>( subobjparam.sid_,
                                                      subobjparam.uid_,
                                                      subobjparam.gpos_,
                                                      subobjparam.rpos_,
@@ -131,7 +133,7 @@ inline std::unique_ptr<Union<BodyTypeTuple>> instantiate( mpi::RecvBuffer& buffe
    {
       decltype ( static_cast<BodyID>(nullptr)->getTypeID() ) type;
       buffer >> type;
-      BodyPtr obj( UnmarshalDynamically<BodyTypeTuple>::execute(buffer, type, domain, block) );
+      BodyPtr obj( UnmarshalDynamically<std::tuple<BodyTypes...>>::execute(buffer, type, domain, block) );
       obj->setRemote( true );
       un->add(std::move(obj));
    }

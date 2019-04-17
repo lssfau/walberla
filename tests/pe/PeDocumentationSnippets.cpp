@@ -47,8 +47,7 @@ namespace walberla {
 using namespace walberla::pe;
 
 //! [Definition of Union Types]
-typedef std::tuple<Box, Capsule, Sphere>  UnionTypeTuple;
-using UnionT = Union<UnionTypeTuple>;
+using UnionT = Union<Box, Capsule, Sphere>;
 using UnionID = UnionT *;
 //! [Definition of Union Types]
 
@@ -123,7 +122,7 @@ int main( int argc, char ** argv )
 
    //! [Create a Union]
    // Create a union and add a box, capsule and sphere.
-   UnionID un = createUnion<UnionTypeTuple>( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4) );
+   UnionID un = createUnion<Box, Capsule, Sphere>( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4) );
    if (un != nullptr)
    {
       createBox    ( un, 1, Vec3(2,3,4), Vec3(2.5,2.5,2.5) );

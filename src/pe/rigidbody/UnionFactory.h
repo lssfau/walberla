@@ -50,7 +50,7 @@ namespace pe {
  * \ingroup pe
  * \brief Setup of a new Union.
  *
- * \tparam BodyTypeTuple std::tuple of all geometries the Union should be able to contain
+ * \tparam BodyTypes all geometries the Union should be able to contain
  * \param globalStorage process local global storage
  * \param blocks storage of all the blocks on this process
  * \param storageID BlockDataID of the BlockStorage block datum
@@ -67,23 +67,23 @@ namespace pe {
  * \snippet PeDocumentationSnippets.cpp Definition of Union Types
  * \snippet PeDocumentationSnippets.cpp Create a Union
  */
-template <typename BodyTypeTuple>
-Union<BodyTypeTuple>* createUnion(   BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID storageID,
+template <typename... BodyTypes>
+Union<BodyTypes...>* createUnion(   BodyStorage& globalStorage, BlockStorage& blocks, BlockDataID storageID,
                                      id_t uid, const Vec3& gpos,
                                      bool global = false, bool communicating = true, bool infiniteMass = false )
 {
-   if (Union<BodyTypeTuple>::getStaticTypeID() == std::numeric_limits<id_t>::max())
+   if (Union<BodyTypes...>::getStaticTypeID() == std::numeric_limits<id_t>::max())
       throw std::runtime_error("Union TypeID not initalized!");
 
-   Union<BodyTypeTuple>* bd = nullptr;
+   Union<BodyTypes...>* bd = nullptr;
 
    if (global)
    {
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      auto un = std::make_unique<Union<BodyTypeTuple>>(sid, uid, gpos, Vec3(0,0,0), Quat(), global, false, true);
-      bd = static_cast<Union<BodyTypeTuple>*>(&globalStorage.add(std::move(un)));
+      auto un = std::make_unique<Union<BodyTypes...>>(sid, uid, gpos, Vec3(0,0,0), Quat(), global, false, true);
+      bd = static_cast<Union<BodyTypes...>*>(&globalStorage.add(std::move(un)));
    } else
    {
       for (auto& block : blocks){
@@ -92,9 +92,9 @@ Union<BodyTypeTuple>* createUnion(   BodyStorage& globalStorage, BlockStorage& b
             const id_t sid( UniqueID<RigidBody>::create() );
 
             BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
-            auto un = std::make_unique<Union<BodyTypeTuple>>(sid, uid, gpos, Vec3(0,0,0), Quat(), global, communicating, infiniteMass);
+            auto un = std::make_unique<Union<BodyTypes...>>(sid, uid, gpos, Vec3(0,0,0), Quat(), global, communicating, infiniteMass);
             un->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
-            bd = static_cast<Union<BodyTypeTuple>*>(&bs.add(std::move(un)));
+            bd = static_cast<Union<BodyTypes...>*>(&bs.add(std::move(un)));
          }
       }
    }
@@ -116,15 +116,15 @@ Union<BodyTypeTuple>* createUnion(   BodyStorage& globalStorage, BlockStorage& b
  * \ingroup pe
  * \brief Setup of a new Box directly attached to a Union.
  *
- * \tparam BodyTypeTuple std::tuple of all geometries the Union is able to contain
+ * \tparam BodyTypes all geometries the Union is able to contain
  * \exception std::runtime_error    Box TypeID not initalized!
  * \exception std::invalid_argument createBox: Union argument is NULL
  * \exception std::logic_error      createBox: Union is remote
  * \exception std::invalid_argument Invalid side length
  * \see createBox for more details
  */
-template <typename BodyTypeTuple>
-BoxID createBox( Union<BodyTypeTuple>* un,
+template <typename... BodyTypes>
+BoxID createBox( Union<BodyTypes...>* un,
                  id_t uid, const Vec3& gpos, const Vec3& lengths,
                  MaterialID material = Material::find("iron"),
                  bool global = false, bool communicating = true, bool infiniteMass = false )
@@ -180,7 +180,7 @@ BoxID createBox( Union<BodyTypeTuple>* un,
  * \ingroup pe
  * \brief Setup of a new Capsule directly attached to a Union.
  *
- * \tparam BodyTypeTuple std::tuple of all geometries the Union is able to contain
+ * \tparam BodyTypes all geometries the Union is able to contain
  * \exception std::runtime_error    Capsule TypeID not initalized!
  * \exception std::invalid_argument createCapsule: Union argument is NULL
  * \exception std::logic_error      createCapsule: Union is remote
@@ -189,8 +189,8 @@ BoxID createBox( Union<BodyTypeTuple>* un,
  *
  * \see createCapsule for more details
  */
-template <typename BodyTypeTuple>
-CapsuleID createCapsule( Union<BodyTypeTuple>* un,
+template <typename... BodyTypes>
+CapsuleID createCapsule( Union<BodyTypes...>* un,
                          id_t uid, const Vec3& gpos, const real_t radius, const real_t length,
                          MaterialID material = Material::find("iron"),
                          bool global = false, bool communicating = true, bool infiniteMass = false )
@@ -242,7 +242,7 @@ CapsuleID createCapsule( Union<BodyTypeTuple>* un,
  * \ingroup pe
  * \brief Setup of a new Sphere directly attached to a Union.
  *
- * \tparam BodyTypeTuple std::tuple of all geometries the Union is able to contain
+ * \tparam BodyTypes all geometries the Union is able to contain
  * \exception std::runtime_error    Sphere TypeID not initalized!
  * \exception std::invalid_argument createSphere: Union argument is NULL
  * \exception std::logic_error      createSphere: Union is remote
@@ -250,8 +250,8 @@ CapsuleID createCapsule( Union<BodyTypeTuple>* un,
  *
  * \see createSphere for more details
  */
-template <typename BodyTypeTuple>
-SphereID createSphere( Union<BodyTypeTuple>* un,
+template <typename... BodyTypes>
+SphereID createSphere( Union<BodyTypes...>* un,
                        id_t uid, const Vec3& gpos, real_t radius,
                        MaterialID material = Material::find("iron"),
                        bool global = false, bool communicating = true, bool infiniteMass = false )
