@@ -550,7 +550,7 @@ BoundaryHandlingCollection< FlagField_T, Handlers... >::BoundaryHandlingCollecti
    outerBB_( -cell_idx_c( flagField_->nrOfGhostLayers() ), -cell_idx_c( flagField_->nrOfGhostLayers() ), -cell_idx_c( flagField_->nrOfGhostLayers() ),
              cell_idx_c( flagField_->xSize() + flagField_->nrOfGhostLayers() ) - 1, cell_idx_c( flagField_->ySize() + flagField_->nrOfGhostLayers() ) - 1,
              cell_idx_c( flagField_->zSize() + flagField_->nrOfGhostLayers() ) - 1 ),
-   boundaryHandlers_( std::make_tuple(boundaryHandlers...) )
+   boundaryHandlers_( std::tuple< Handlers... >( boundaryHandlers... ) )
 {
    if( flagField_->nrOfGhostLayers() < 1 )
       WALBERLA_ABORT( "The flag field passed to the boundary handling collection\"" << identifier << "\" must contain at least one ghost layer!" );
