@@ -101,14 +101,6 @@ int main( int argc, char ** argv )
    debug::enterTestMode();
    mpi::Environment mpiEnv( argc, argv );
 
-   std::vector< cudaStream_t > streams;
-
-   for( uint_t i = 0; i < StencilType::Size; ++i )
-   {
-      cudaStream_t stream(nullptr);
-      WALBERLA_CUDA_CHECK( cudaStreamCreate(&stream) );
-      streams.push_back( stream );
-   }
 
    const Vector3< uint_t > cells = Vector3< uint_t >( 4, 4, 4 );
 
@@ -153,7 +145,7 @@ int main( int argc, char ** argv )
 
       // Setup communication scheme for asynchronous GPUPackInfo, which uses CUDA streams
       CommSchemeType asyncCommScheme(blocks);
-      asyncCommScheme.addPackInfo( make_shared< GPUPackInfoType >( asyncGPUFieldId, streams ) );
+      asyncCommScheme.addPackInfo( make_shared< GPUPackInfoType >( asyncGPUFieldId ) );
 
       // Perform one communication step for each scheme
       syncCommScheme();
@@ -180,8 +172,6 @@ int main( int argc, char ** argv )
       }
    }
 
-   for( uint_t i = 0; i < StencilType::Size; ++i )
-      WALBERLA_CUDA_CHECK( cudaStreamDestroy(streams[i]) );
 
    return EXIT_SUCCESS;
 }

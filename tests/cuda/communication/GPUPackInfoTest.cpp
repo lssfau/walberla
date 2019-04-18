@@ -62,8 +62,8 @@ public:
 
    typedef cuda::communication::GPUPackInfo< cuda::GPUField<int> > GPUPackInfoType;
 
-   GPUPackInfoTester( IBlock* block, BlockDataID fieldId, std::vector< cudaStream_t > & streams ) :
-      block_( block ), fieldId_( fieldId ), streams_(streams) {}
+   GPUPackInfoTester( IBlock* block, BlockDataID fieldId ) :
+      block_( block ), fieldId_( fieldId ) {}
 
    virtual ~GPUPackInfoTester() {}
 
@@ -87,7 +87,7 @@ public:
       }
       cuda::fieldCpy( gpuField, cpuField );
 
-      GPUPackInfoType gpuPackInfo( fieldId_, streams_ );
+      GPUPackInfoType gpuPackInfo( fieldId_ );
 
       communicate( gpuPackInfo, dir );
       cuda::fieldCpy( cpuField, gpuField );
@@ -106,7 +106,6 @@ protected:
 
    IBlock* block_;
    BlockDataID fieldId_;
-   std::vector< cudaStream_t > streams_;
 };
 
 
@@ -114,7 +113,7 @@ protected:
 class GPUPackInfoBufferTester: public GPUPackInfoTester
 {
 public:
-   GPUPackInfoBufferTester( IBlock* block, BlockDataID fieldId, std::vector< cudaStream_t > & streams): GPUPackInfoTester( block, fieldId, streams ) {}
+   GPUPackInfoBufferTester( IBlock* block, BlockDataID fieldId): GPUPackInfoTester( block, fieldId ) {}
 
 protected:
    void communicate( GPUPackInfoType& gpuPackInfo, stencil::Direction dir )
@@ -140,7 +139,7 @@ protected:
 class GPUPackInfoLocalTester: public GPUPackInfoTester
 {
 public:
-   GPUPackInfoLocalTester( IBlock* block, BlockDataID fieldId, std::vector< cudaStream_t > & streams ): GPUPackInfoTester( block, fieldId, streams ) {}
+   GPUPackInfoLocalTester( IBlock* block, BlockDataID fieldId ): GPUPackInfoTester( block, fieldId ) {}
 
 protected:
    void communicate( GPUPackInfoType& gpuPackInfo, stencil::Direction dir )
@@ -159,13 +158,6 @@ int main(int argc, char **argv)
 
    for(; fieldLayoutIndex < fieldLayouts.size(); ++fieldLayoutIndex )
    {
-      std::vector< cudaStream_t > streams;
-      for( uint_t s = 0; s < stencil::D3Q27::Size; ++s )
-      {
-         cudaStream_t stream(nullptr);
-         WALBERLA_CUDA_CHECK( cudaStreamCreate( &stream ) );
-         streams.push_back( stream );
-      }
       // Create BlockForest
       uint_t processes = uint_c( MPIManager::instance()->numProcesses() );
       auto blocks = createUniformBlockGrid(processes,1,1,  //blocks
@@ -179,20 +171,14 @@ int main(int argc, char **argv)
 
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
-         GPUPackInfoBufferTester bufferTester( &(*blockIt), scalarGPUFieldId, streams );
-         GPUPackInfoLocalTester localTester( &(*blockIt), scalarGPUFieldId, streams );
+         GPUPackInfoBufferTester bufferTester( &(*blockIt), scalarGPUFieldId );
+         GPUPackInfoLocalTester localTester( &(*blockIt), scalarGPUFieldId );
 
          for( auto dir = stencil::D3Q27::beginNoCenter(); dir != stencil::D3Q27::end(); ++dir )
          {
             localTester.test( *dir );
             bufferTester.test( *dir );
          }
-      }
-
-      for( auto streamIt = streams.begin(); streamIt != streams.end(); ++streamIt )
-      {
-         cudaStream_t & stream = *streamIt;
-         WALBERLA_CUDA_CHECK( cudaStreamDestroy( stream ) );
       }
    }
 
