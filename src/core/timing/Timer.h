@@ -28,6 +28,8 @@
 #include "WcPolicy.h"
 #include "core/DataTypes.h"
 
+#include <iomanip>
+#include <iostream>
 #include <limits>
 
 
@@ -440,6 +442,24 @@ inline void Timer<TP>::merge( const Timer<TP> & other )
    max_           = std::max( max_, other.max_ );
 }
 //**********************************************************************************************************************
+
+
+//======================================================================================================================
+//
+//  OSTREAM OVERLOAD
+//
+//======================================================================================================================
+
+template< typename TP >  // Timing policy
+std::ostream & operator<< ( std::ostream & os, const Timer<TP> & timer )
+{
+   os << std::fixed << std::setprecision(3) <<
+         "average: " << timer.average() <<
+         " | min: " << timer.min() <<
+         " | max: " << timer.max() <<
+         " | variance: " << timer.variance();
+   return os;
+}
 
 
 } // namespace timing

@@ -351,6 +351,133 @@ MPIRank UnknownSizeCommunication<Rb, Sb>::waitForNextReceive( std::map<MPIRank, 
 
 //======================================================================================================================
 //
+//  Unknown Size Communication (IProbe method)
+//
+//======================================================================================================================
+
+template< typename Rb, typename Sb>
+void UnknownSizeCommunicationIProbe<Rb, Sb>::send( MPIRank receiver, const Sb & sendBuffer )
+{
+   WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
+
+   if ( ! sending_ )
+      sending_ = true;
+
+
+   // Send content message
+
+   sendRequests_.push_back( MPI_REQUEST_NULL );
+   MPI_Request & contentMsgReq = sendRequests_.back();
+
+   //WALBERLA_LOG_DEVEL("sending " << sendBuffer.size() << " to " << receiver);
+
+   MPI_Isend(sendBuffer.ptr(),           // pointer to size buffer
+             int_c( sendBuffer.size() ), // send one size
+             MPI_BYTE,                   // type
+             receiver,                   // receiver rank
+             this->tag_,                 // message tag
+             this->communicator_,        // communicator
+             & contentMsgReq             // request needed for wait
+             );
+}
+
+template< typename Rb, typename Sb>
+void UnknownSizeCommunicationIProbe<Rb, Sb>::waitForSends()
+{
+   WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
+
+   sending_ = false;
+
+   if ( sendRequests_.empty() )
+      return;
+
+   MPI_Waitall( int_c( sendRequests_.size() ),
+                &sendRequests_[0],
+                MPI_STATUSES_IGNORE );
+
+   sendRequests_.clear();
+}
+
+template< typename Rb, typename Sb>
+void UnknownSizeCommunicationIProbe<Rb, Sb>::scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos )
+{
+   WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
+
+   receiving_ = true;
+
+   pendingReceives_ = int_c(recvInfos.size());
+   for( auto it = recvInfos.begin(); it != recvInfos.end(); ++it )
+   {
+      ReceiveInfo & recvInfo = it->second;
+      recvInfo.size = INVALID_SIZE;
+   }
+}
+
+
+template< typename Rb, typename Sb>
+MPIRank UnknownSizeCommunicationIProbe<Rb, Sb>::waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos )
+{
+   WALBERLA_NON_MPI_SECTION() { WALBERLA_ASSERT( false ); }
+
+   WALBERLA_ASSERT( receiving_ );
+
+   if( pendingReceives_ < 1 ) {
+      receiving_ = false;
+      return INVALID_RANK;
+   }
+
+   // On first entry in this function:
+   //  - receive request vector contains requests for size messages
+   //  - all ReceiveInfo's have sizeReceived=false
+   while( true ) // this loops as long as size messages are received
+   {
+      for( auto it = recvInfos.begin(); it != recvInfos.end(); ++it )
+      {
+         const MPIRank sender   = it->first;
+         ReceiveInfo & recvInfo = it->second;
+
+         if (recvInfo.size != INVALID_SIZE) continue;
+
+         int probeFlag;
+         MPI_Status probeStatus;
+         MPI_Iprobe( sender,
+                     this->tag_,
+                     this->communicator_,
+                     &probeFlag,
+                     &probeStatus);
+         if (probeFlag)
+         {
+            int count = 0;
+            MPI_Get_count( &probeStatus, MPI_BYTE, &count );
+            //WALBERLA_LOG_DEVEL("received " << count << " from " << sender);
+            recvInfo.size = count;
+            recvInfo.buffer.resize( uint_c( recvInfo.size ) );
+
+            MPI_Status recvStatus;
+            MPI_Recv( recvInfo.buffer.ptr(),      // where to store received size
+                      count,                      // size of expected message
+                      MPI_BYTE,                   // type
+                      sender,                     // rank of sender process
+                      this->tag_,                 // message tag
+                      this->communicator_,        // communicator
+                      &recvStatus                 // request, needed for wait
+                      );
+
+            --pendingReceives_;
+            return sender;
+         }
+      }
+   }
+
+   WALBERLA_ASSERT( false );
+   return INVALID_RANK; //cannot happen - only to prevent compiler warnings
+}
+
+
+
+
+//======================================================================================================================
+//
 //  NoMPI Communication
 //
 //======================================================================================================================

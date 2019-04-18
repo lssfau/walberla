@@ -127,6 +127,7 @@ template< typename Rb, typename Sb>
 GenericBufferSystem<Rb, Sb>::GenericBufferSystem( const MPI_Comm & communicator, int tag )
    : knownSizeComm_  ( communicator, tag ),
      unknownSizeComm_( communicator, tag ),
+     unknownSizeCommIProbe_( communicator, tag ),
      noMPIComm_( communicator, tag ),
      currentComm_    ( nullptr ),
      sizeChangesEverytime_( true ),
@@ -138,6 +139,7 @@ template< typename Rb, typename Sb>
 GenericBufferSystem<Rb, Sb>::GenericBufferSystem( const GenericBufferSystem &other )
    : knownSizeComm_  ( other.knownSizeComm_.getCommunicator(), other.knownSizeComm_.getTag() ),
      unknownSizeComm_( other.knownSizeComm_.getCommunicator(), other.knownSizeComm_.getTag() ),
+     unknownSizeCommIProbe_( other.knownSizeComm_.getCommunicator(), other.knownSizeComm_.getTag() ),
      noMPIComm_      ( other.knownSizeComm_.getCommunicator(), other.knownSizeComm_.getTag() ),
      currentComm_ ( nullptr ),
      sizeChangesEverytime_( other.sizeChangesEverytime_ ),
@@ -150,6 +152,8 @@ GenericBufferSystem<Rb, Sb>::GenericBufferSystem( const GenericBufferSystem &oth
       currentComm_ = &knownSizeComm_;
    else if ( other.currentComm_ == &other.unknownSizeComm_ )
       currentComm_ = &unknownSizeComm_;
+   else if ( other.currentComm_ == &other.unknownSizeCommIProbe_ )
+      currentComm_ = &unknownSizeCommIProbe_;
    else if ( other.currentComm_ == &other.noMPIComm_ )
       currentComm_ = &noMPIComm_;
    else
@@ -170,6 +174,8 @@ GenericBufferSystem<Rb, Sb> & GenericBufferSystem<Rb, Sb>::operator=( const Gene
       currentComm_ = &knownSizeComm_;
    else if ( other.currentComm_ == &other.unknownSizeComm_ )
       currentComm_ = &unknownSizeComm_;
+   else if ( other.currentComm_ == &other.unknownSizeCommIProbe_ )
+      currentComm_ = &unknownSizeCommIProbe_;
    else if ( other.currentComm_ == &other.noMPIComm_ )
       currentComm_ = &noMPIComm_;
    else
@@ -508,6 +514,8 @@ void GenericBufferSystem<Rb, Sb>::setCommunicationType( const bool knownSize )
    {
       if( knownSize )
          currentComm_ = &knownSizeComm_;
+      else if ( useIProbe_ )
+         currentComm_ = &unknownSizeCommIProbe_;
       else
          currentComm_ = &unknownSizeComm_;
    }
