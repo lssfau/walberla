@@ -7,7 +7,7 @@
 #SBATCH --ntasks-per-core={tasks_per_core}
 #SBATCH --ntasks-per-node={tasks_per_node}
 #SBATCH --cpus-per-task={cpus_per_task}
-#SBATCH --partition=normal
+#SBATCH --partition={partition}
 #SBATCH --constraint=gpu
 {additional_lines}
 

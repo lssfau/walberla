@@ -37,6 +37,10 @@ def createJobscript(wall_time=None, nodes=None, cores=None, initial_dir=None, jo
     if not error_file:
         error_file = job_name
 
+    partition = 'normal'
+    if nodes <= 4 and wall_time.total_seconds() < 30 * 60:
+        partition = 'debug'
+
     tasks_per_node = min(CORES_PER_NODE, cores)
     additional_lines = ""
     if account:
@@ -52,10 +56,11 @@ def createJobscript(wall_time=None, nodes=None, cores=None, initial_dir=None, jo
                                                output_file=output_file,
                                                additional_lines=additional_lines,
                                                error_file=error_file,
+                                               partition=partition,
                                                job_name=job_name,
                                                wall_time=wall_time)
 
-    exec_line = "srun %s %s \n"
+    exec_line = "srun -n %d %s %s \n"
 
     if exe_name is not None:
         for param_file in parameter_files:
