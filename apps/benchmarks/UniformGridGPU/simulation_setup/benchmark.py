@@ -23,7 +23,7 @@ CommunicationSchemeName = {
 
 # Base configuration for the benchmark
 BASE_CONFIG = {
-    'DomainSetup' : {
+    'DomainSetup': {
         'cellsPerBlock': (64, 64, 64),
         'blocks': (1, 1, 1),
         'nrOfProcesses': (1, 1, 1),
@@ -53,44 +53,52 @@ BASE_CONFIG = {
 
 
 class BenchmarkScenario:
-    def __init__(self, testcase, decomposition_axes=None):
+    def __init__(self, testcase, time_steps, decomposition_axes=None, fully_periodic=False):
         self.testcase = testcase
         self.scenario_config = copy.deepcopy(BASE_CONFIG)
+        self.scenario_config['Parameters']['timesteps'] = time_steps
+        self.fully_periodic = fully_periodic
+        if fully_periodic:
+            del self.scenario_config['Boundaries']['Border']
+            self.scenario_config['DomainSetup']['periodic'] = (1, 1, 1)
         self.decomposition_axes = decomposition_axes
 
         now = datetime.now().replace(second=0, microsecond=0)
         self.output_filename = f'{self.testcase}_{now.strftime("%Y-%m-%d_%H-%M")}.csv'
 
-    @wlb.member_callback
-    def config(self, **kwargs):
-        return self.scenario_config
-
-    @wlb.member_callback
-    def results_callback(self, **kwargs):
+    def get_data(self):
         block_setup = self.scenario_config.get('DomainSetup')
         params = self.scenario_config.get('Parameters')
 
-        data = [{
+        return {
             'processesX': block_setup.get('nrOfProcesses')[0],
             'processesY': block_setup.get('nrOfProcesses')[1],
             'processesZ': block_setup.get('nrOfProcesses')[2],
             'blocksX': block_setup.get('blocks')[0],
             'blocksY': block_setup.get('blocks')[1],
             'blocksZ': block_setup.get('blocks')[2],
+            'fully_periodic': self.fully_periodic,
             'cellsPerBlockX': block_setup.get('cellsPerBlock')[0],
             'cellsPerBlockY': block_setup.get('cellsPerBlock')[1],
             'cellsPerBlockZ': block_setup.get('cellsPerBlock')[2],
             'cudaEnabledMPI': params.get('cudaEnabledMPI'),
             'overlapCommunication': params.get('overlapCommunication'),
+            'time_steps': params['timesteps'],
             'domainDecomposition': self.decomposition_axes,
             'communicationScheme': CommunicationSchemeName[params.get('communicationScheme')],
-            'mlupsTotal': kwargs.get('mlups_total'),
-            'mlupsProcess': kwargs.get('mlups_process'),
-            'mflupsTotal': kwargs.get('mflups_total'),
-            'mflupsProcess': kwargs.get('mflups_process'),
-        }]
+        }
 
-        self.save_data(data)
+    @wlb.member_callback
+    def config(self, **kwargs):
+        from pprint import pformat
+        wlb.log_info_on_root("Scenario:\n" + pformat(self.get_data()))
+        return self.scenario_config
+
+    @wlb.member_callback
+    def results_callback(self, **kwargs):
+        data = self.get_data()
+        data.update(kwargs)
+        self.save_data([data])
 
     def save_data(self, data):
         df = pd.DataFrame(data)

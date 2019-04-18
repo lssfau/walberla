@@ -176,18 +176,14 @@ int main( int argc, char **argv )
       auto remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 ); // in seconds
       timeLoop.addFuncAfterTimeStep( timing::RemainingTimeLogger( timeLoop.getNrOfTimeSteps(), remainingTimeLoggerFrequency ), "remaining time logger" );
 
-      /*
-      lbm::PerformanceLogger<FlagField_T> performanceLogger(blocks, flagFieldID, fluidFlagUID, 500);
-      timeLoop.addFuncAfterTimeStep( performanceLogger, "remaining time logger" );
-
-      timeLoop.run();
-      */
 
       auto performanceReportFrequency = parameters.getParameter< uint_t >( "performanceReportFrequency", 500 ); // in timesteps
       lbm::PerformanceLogger<FlagField_T> performanceLogger(blocks, flagFieldID, fluidFlagUID, performanceReportFrequency);
       timeLoop.addFuncAfterTimeStep([&performanceLogger] { performanceLogger(); }, "performance logger" );
 
+      WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps");
       timeLoop.run();
+      WALBERLA_LOG_INFO_ON_ROOT("Simulation finished");
 
       std::map< std::string, int > integerProperties;
       std::map< std::string, double > realProperties;
@@ -203,9 +199,6 @@ int main( int argc, char **argv )
          {
             pythonCallbackResults.data().exposeValue( "mlups_total", realProperties["MLUPS"] );
             pythonCallbackResults.data().exposeValue( "mlups_process", realProperties["MLUPS_process"] );
-
-            pythonCallbackResults.data().exposeValue( "mflups_total", realProperties["MFLUPS"] );
-            pythonCallbackResults.data().exposeValue( "mflups_process", realProperties["MFLUPS_process"] );
 
             // Call Python function to report results
             pythonCallbackResults();
