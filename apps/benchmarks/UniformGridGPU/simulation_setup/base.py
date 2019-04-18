@@ -26,7 +26,7 @@ communication_schemes = ['GPUPackInfo_Streams', 'UniformGPUScheme_Baseline', 'Un
 def calculate_time_steps(runtime, expected_mlups, domain_size):
     cells = reduce(operator.mul, domain_size, 1)
     time_steps_per_second = expected_mlups * 1e6 / cells
-    return time_steps_per_second * runtime
+    return int(time_steps_per_second * runtime)
 
 
 def side_length_to_fill_memory(memory_fill_percentage, memory_in_gb):

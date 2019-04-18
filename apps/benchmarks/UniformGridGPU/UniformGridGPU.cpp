@@ -1,4 +1,5 @@
 #include "core/Environment.h"
+#include "core/logging/Initialization.h"
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/PythonCallback.h"
 #include "python_coupling/DictWrapper.h"
@@ -55,7 +56,10 @@ int main( int argc, char **argv )
    for( auto cfg = python_coupling::configBegin( argc, argv ); cfg != python_coupling::configEnd(); ++cfg )
    {
       auto config = *cfg;
+      logging::configureLogging( config );
       auto blocks = blockforest::createUniformBlockGridFromConfig( config );
+
+      Vector3<uint_t> cellsPerBlock = config->getBlock( "DomainSetup" ).getParameter<Vector3<uint_t>  >( "cellsPerBlock" );
 
       // Reading parameters
       auto parameters = config->getOneBlock( "Parameters" );
@@ -177,28 +181,25 @@ int main( int argc, char **argv )
       timeLoop.addFuncAfterTimeStep( timing::RemainingTimeLogger( timeLoop.getNrOfTimeSteps(), remainingTimeLoggerFrequency ), "remaining time logger" );
 
 
-      auto performanceReportFrequency = parameters.getParameter< uint_t >( "performanceReportFrequency", 500 ); // in timesteps
-      lbm::PerformanceLogger<FlagField_T> performanceLogger(blocks, flagFieldID, fluidFlagUID, performanceReportFrequency);
-      timeLoop.addFuncAfterTimeStep([&performanceLogger] { performanceLogger(); }, "performance logger" );
-
+      WcTimer simTimer;
+      cudaDeviceSynchronize();
       WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps");
+      simTimer.start();
+      cudaDeviceSynchronize();
       timeLoop.run();
+      simTimer.end();
       WALBERLA_LOG_INFO_ON_ROOT("Simulation finished");
-
-      std::map< std::string, int > integerProperties;
-      std::map< std::string, double > realProperties;
-      std::map< std::string, std::string > stringProperties;
-
-      performanceLogger.logOverallResultsOnRoot();
-      performanceLogger.getBestResultsForSQLOnRoot(integerProperties, realProperties, stringProperties);
-
+      auto time = simTimer.last();
+      auto nrOfCells = real_c( cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2] );
+      auto mlupsPerProcess = nrOfCells * real_c( timesteps ) / time * 1e-6;
+      WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process " << mlupsPerProcess);
+      WALBERLA_LOG_RESULT_ON_ROOT("Time per time step " << time / real_c( timesteps ) );
       WALBERLA_ROOT_SECTION()
       {
          python_coupling::PythonCallback pythonCallbackResults ( "results_callback" );
          if ( pythonCallbackResults.isCallable() )
          {
-            pythonCallbackResults.data().exposeValue( "mlups_total", realProperties["MLUPS"] );
-            pythonCallbackResults.data().exposeValue( "mlups_process", realProperties["MLUPS_process"] );
+            pythonCallbackResults.data().exposeValue( "mlups_per_process", mlupsPerProcess );
 
             // Call Python function to report results
             pythonCallbackResults();

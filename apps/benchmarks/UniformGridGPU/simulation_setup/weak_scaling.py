@@ -19,7 +19,7 @@ gpu_memory_gb = 16
 cells_per_block = [side_length_to_fill_memory(pc, gpu_memory_gb) for pc in (0.8, 0.5, 0.05)]
 
 expected_mlups = 200  # to compute how many time steps have to be done
-time_per_scenarios = 3  # benchmark time in seconds
+time_per_scenarios = 5  # benchmark time in seconds
 
 fully_periodic = [False, True]
 
