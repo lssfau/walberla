@@ -1,0 +1,142 @@
+Language:        Cpp
+AccessModifierOffset: -2
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlines: DontAlign
+AlignOperands:   true
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: true
+BinPackArguments: true
+BinPackParameters: true
+BraceWrapping:   
+  AfterClass:      true
+  AfterControlStatement: true
+  AfterEnum:       false
+  AfterFunction:   true
+  AfterNamespace:  true
+  AfterObjCDeclaration: false
+  AfterStruct:     true
+  AfterUnion:      true
+  AfterExternBlock: true
+  BeforeCatch:     false
+  BeforeElse:      true
+  IndentBraces:    false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Custom
+BreakBeforeInheritanceComma: false
+BreakBeforeTernaryOperators: false
+BreakConstructorInitializers: BeforeColon
+BreakStringLiterals: true
+ColumnLimit:     120
+CommentPragmas:  '^ IWYU pragma:'
+CompactNamespaces: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerIndentWidth: 3
+ContinuationIndentWidth: 3
+Cpp11BracedListStyle: false
+DerivePointerAlignment: false
+DisableFormat:   false
+ExperimentalAutoDetectBinPacking: false
+FixNamespaceComments: true
+ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
+IncludeBlocks: Regroup
+IncludeCategories: 
+  - Regex:           '^"blockforest/'
+    Priority:        1
+  - Regex:           '^"boundary/'
+    Priority:        2
+  - Regex:           '^"communication/'
+    Priority:        3
+  - Regex:           '^"core/'
+    Priority:        4
+  - Regex:           '^"cuda/'
+    Priority:        5
+  - Regex:           '^"domain_decomposition/'
+    Priority:        6
+  - Regex:           '^"domain_decomposition/'
+    Priority:        7
+  - Regex:           '^"fft/'
+    Priority:        8
+  - Regex:           '^"field/'
+    Priority:        9
+  - Regex:           '^"gather/'
+    Priority:        10
+  - Regex:           '^"geometry/'
+    Priority:        11
+  - Regex:           '^"gui/'
+    Priority:        12
+  - Regex:           '^"lbm/'
+    Priority:        13
+  - Regex:           '^"mesh/'
+    Priority:        14
+  - Regex:           '^"pde/'
+    Priority:        15
+  - Regex:           '^"pe/'
+    Priority:        16
+  - Regex:           '^"pe_coupling/'
+    Priority:        17
+  - Regex:           '^"postprocessing/'
+    Priority:        18
+  - Regex:           '^"python_coupling/'
+    Priority:        19
+  - Regex:           '^"simd/'
+    Priority:        20
+  - Regex:           '^"stencil/'
+    Priority:        21
+  - Regex:           '^"timeloop/'
+    Priority:        22
+  - Regex:           '^"vtk/'
+    Priority:        23
+  - Regex:           '^<boost/'
+    Priority:        24
+  - Regex:           '^<'
+    Priority:        25
+IndentCaseLabels: false
+IndentPPDirectives: AfterHash
+IndentWidth: 3
+IndentWrappedFunctionNames: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+MacroBlockBegin: ''
+MacroBlockEnd:   ''
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+ObjCBlockIndentWidth: 2
+ObjCSpaceAfterProperty: false
+ObjCSpaceBeforeProtocolList: true
+PenaltyBreakAssignment: 2
+PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakComment: 300
+PenaltyBreakFirstLessLess: 120
+PenaltyBreakString: 1000
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 60
+PointerAlignment: Left
+ReflowComments:  true
+SortIncludes:    true
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: true
+SpaceAfterTemplateKeyword: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles:  true
+SpacesInContainerLiterals: true
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+Standard:        Cpp11
+TabWidth:        3
+UseTab:          Never
