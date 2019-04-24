@@ -795,22 +795,6 @@ gcc_8_hybrid_dbg:
    tags:
       - docker
 
-gcc_8_hybrid_dbg_noboost:
-   <<: *build_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
-   before_script:
-      - rm -rf /opt/boost /usr/include/boost
-   variables:
-      <<: *build_hybrid_dbg_variables
-      WALBERLA_BUILD_WITH_CUDA: "OFF"
-      WALBERLA_ENABLE_GUI: 0
-      WALBERLA_BUILD_WITH_PYTHON: "OFF"
-   except:
-      variables:
-         - $DISABLE_PER_COMMIT_BUILDS
-   tags:
-      - docker
-
 gcc_8_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
@@ -1327,6 +1311,7 @@ clang-tidy:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    script:
       - $CXX --version
+      - clang-tidy -version
       - cmake --version
       - mkdir $CI_PROJECT_DIR/build
       - cd $CI_PROJECT_DIR/build
@@ -1391,6 +1376,23 @@ coverage:
       LDFLAGS: "-fprofile-arcs -ftest-coverage -fPIC -O0"
 
 
+gcc_8_hybrid_dbg_noboost:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   before_script:
+      - rm -rf /opt/boost /usr/include/boost
+   variables:
+      <<: *build_hybrid_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+      WALBERLA_BUILD_WITH_PYTHON: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
+
 
 ###############################################################################
 ##                                                                           ##
@@ -1424,9 +1426,9 @@ msvc-14.1_Hybrid_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14.1_Hybrid_SP_Dbg:
    <<: *win_build_definition
@@ -1437,9 +1439,9 @@ msvc-14.1_Hybrid_SP_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "OFF"
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14.1_Hybrid:
    <<: *win_build_definition
@@ -1450,9 +1452,9 @@ msvc-14.1_Hybrid:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14.1_Serial_Dbg:
    <<: *win_build_definition
@@ -1463,9 +1465,9 @@ msvc-14.1_Serial_Dbg:
       WALBERLA_BUILD_WITH_MPI: "OFF"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14.1_Serial:
    <<: *win_build_definition
@@ -1489,14 +1491,105 @@ msvc-14.1_MpiOnly_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_DOUBLE_ACCURACY: "ON"
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
       
 msvc-14.1_MpiOnly:
    <<: *win_build_definition
    variables:
       CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
+      BUILD_CONFIGURATION: "Release"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+
+msvc-14.2_Hybrid_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 16 2019"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+      
+msvc-14.2_Hybrid_SP_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 16 2019"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      WALBERLA_DOUBLE_ACCURACY: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+      
+msvc-14.2_Hybrid:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 16 2019"
+      BUILD_CONFIGURATION: "Release"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "ON"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+      
+msvc-14.2_Serial_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 16 2019"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+      
+msvc-14.2_Serial:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 16 2019"
+      BUILD_CONFIGURATION: "Release"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+      
+msvc-14.2_MpiOnly_Dbg:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 16 2019"
+      BUILD_CONFIGURATION: "DebugOptimized"
+      CTEST_EXCLUDE_LABELS: "longrun"
+      WALBERLA_BUILD_WITH_MPI: "ON"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_DOUBLE_ACCURACY: "ON"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+      
+msvc-14.2_MpiOnly:
+   <<: *win_build_definition
+   variables:
+      CMAKE_GENERATOR: "Visual Studio 16 2019"
       BUILD_CONFIGURATION: "Release"
       CTEST_EXCLUDE_LABELS: "longrun"
       WALBERLA_BUILD_WITH_MPI: "ON"
