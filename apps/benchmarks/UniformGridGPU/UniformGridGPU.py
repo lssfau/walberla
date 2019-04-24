@@ -6,6 +6,10 @@ from lbmpy_walberla import generate_lattice_model, generate_boundary
 from pystencils_walberla import CodeGeneration, generate_sweep
 
 
+sweep_block_size = (128, 1, 1)
+sweep_params = {'block_size': sweep_block_size}
+
+
 with CodeGeneration() as ctx:
     # LB options
     options = {
@@ -16,8 +20,8 @@ with CodeGeneration() as ctx:
         'compressible': False,
         'temporary_field_name': 'pdfs_tmp',
         'optimization': {'cse_global': True,
-                         'cse_pdfs': True,
-                         'gpu_indexing_params': {'block_size': (128, 1, 1)}}
+                         'cse_pdfs': False,
+                         }
     }
     lb_method = create_lb_method(**options)
     update_rule = create_lb_update_rule(lb_method=lb_method, **options)
@@ -27,7 +31,7 @@ with CodeGeneration() as ctx:
 
     # gpu LB sweep & boundaries
     generate_sweep(ctx, 'UniformGridGPU_LbKernel', update_rule, field_swaps=[('pdfs', 'pdfs_tmp')],
-                   inner_outer_split=True, target='gpu')
+                   inner_outer_split=True, target='gpu', gpu_indexing_params=sweep_params)
     generate_boundary(ctx, 'UniformGridGPU_NoSlip', NoSlip(), lb_method, target='gpu')
     generate_boundary(ctx, 'UniformGridGPU_UBB', UBB([0.05, 0, 0]), lb_method, target='gpu')
 

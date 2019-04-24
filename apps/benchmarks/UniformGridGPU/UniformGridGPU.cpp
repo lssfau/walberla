@@ -87,7 +87,10 @@ int main( int argc, char **argv )
       noSlip.fillFromFlagField<FlagField_T>( blocks, flagFieldID, FlagUID("NoSlip"), fluidFlagUID );
       //pressure.fillFromFlagField<FlagField_T>( blocks, flagFieldID, FlagUID("pressure"), fluidFlagUID );
 
-      // Communication setup
+      bool disableBoundaries = parameters.getParameter<bool>( "disableBoundaries", false );
+      bool kernelOnly = parameters.getParameter<bool>( "kernelOnly", false );
+
+       // Communication setup
       bool overlapCommunication = parameters.getParameter<bool>( "overlapCommunication", true );
       bool cudaEnabledMPI = parameters.getParameter<bool>( "cudaEnabledMPI", false );
       int communicationScheme = parameters.getParameter<int>( "communicationScheme", (int) CommunicationSchemeType::UniformGPUScheme_Baseline );
@@ -98,8 +101,6 @@ int main( int argc, char **argv )
 
       pystencils::UniformGridGPU_LbKernel lbKernel( pdfFieldGpuID, omega );
       lbKernel.setOuterPriority( streamHighPriority );
-      //CommScheme_T gpuComm( blocks, cudaEnabledMPI );
-      //gpuComm.addPackInfo( make_shared<pystencils::UniformGridGPU_PackInfo>( pdfFieldGpuID ));
       UniformGridGPU_Communication< CommunicationStencil_T, cuda::GPUField< double > >
          gpuComm( blocks, pdfFieldGpuID, (CommunicationSchemeType) communicationScheme, cudaEnabledMPI );
 
@@ -116,6 +117,7 @@ int main( int argc, char **argv )
          {
             for( auto &block: *blocks )
             {
+               if(!disableBoundaries)
                {
                   auto p = boundaryInnerStreams.parallelSection( innerStream );
                   p.run( [&block, &ubb]( cudaStream_t s ) { ubb.inner( &block, s ); } );
@@ -131,6 +133,7 @@ int main( int argc, char **argv )
 
             for( auto &block: *blocks )
             {
+               if(!disableBoundaries)
                {
                   auto p = boundaryOuterStreams.parallelSection( outerStream );
                   p.run( [&block, &ubb]( cudaStream_t s ) { ubb.outer( &block, s ); } );
@@ -148,6 +151,7 @@ int main( int argc, char **argv )
          gpuComm();
          for( auto &block: *blocks )
          {
+            if(!disableBoundaries)
             {
                auto p = boundaryStreams.parallelSection( defaultStream );
                p.run( [&block, &ubb]( cudaStream_t s ) { ubb( &block, s ); } );
@@ -157,9 +161,21 @@ int main( int argc, char **argv )
          }
       };
 
+      auto kernelOnlyFunc = [&] ()
+      {
+          for( auto &block: *blocks )
+              lbKernel( &block );
+      };
+
       SweepTimeloop timeLoop( blocks->getBlockStorage(), timesteps );
       std::function<void()> timeStep = overlapCommunication ? std::function<void()>( overlapTimeStep ) :
                                                               std::function<void()>( normalTimeStep );
+      if( kernelOnly )
+      {
+          WALBERLA_LOG_INFO_ON_ROOT("Running only compute kernel without boundary - this makes only sense for benchmarking!")
+          timeStep = kernelOnlyFunc;
+      }
+
       timeLoop.add() << BeforeFunction( timeStep  )
                      << Sweep( []( IBlock * ) {}, "time step" );
 
@@ -185,8 +201,8 @@ int main( int argc, char **argv )
       cudaDeviceSynchronize();
       WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps");
       simTimer.start();
-      cudaDeviceSynchronize();
       timeLoop.run();
+      cudaDeviceSynchronize();
       simTimer.end();
       WALBERLA_LOG_INFO_ON_ROOT("Simulation finished");
       auto time = simTimer.last();

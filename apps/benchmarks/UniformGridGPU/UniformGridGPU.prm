@@ -2,13 +2,16 @@
 Parameters 
 {
 	omega           1.8;
-	timesteps       1000;
+	timesteps       500;
 
 	remainingTimeLoggerFrequency 3;
 	vtkWriteFrequency 0;
 
 	overlapCommunication true;
 	cudaEnabledMPI false;
+
+	kernelOnly false;
+	disableBoundaries false;
 }
 
 DomainSetup
@@ -20,8 +23,10 @@ DomainSetup
 
 Boundaries 
 {
+    /*
 	Border { direction W;    walldistance -1;  flag NoSlip; }
 	Border { direction E;    walldistance -1;  flag NoSlip; }
     Border { direction S;    walldistance -1;  flag NoSlip; }
     Border { direction N;    walldistance -1;  flag UBB; }
+    */
 }
