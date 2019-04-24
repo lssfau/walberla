@@ -1108,6 +1108,12 @@ if ( WALBERLA_BUILD_WITH_CUDA )
 
         list( APPEND CUDA_NVCC_FLAGS "-Wno-deprecated-gpu-targets")
 
+        find_library( NVTX_LIBRARY nvToolsExt PATHS ${CUDA_TOOLKIT_ROOT_DIR} PATH_SUFFIXES lib lib64 )
+        if( NVTX_LIBRARY )
+            set( WALBERLA_CUDA_NVTX_AVAILABLE 1)
+            list ( APPEND SERVICE_LIBS ${NVTX_LIBRARY} )
+        endif()
+
         if ( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std=" AND NOT WALBERLA_CXX_COMPILER_IS_MSVC )
             list ( APPEND CUDA_NVCC_FLAGS "-std=c++14" )
         endif ()

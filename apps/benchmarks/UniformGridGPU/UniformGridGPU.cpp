@@ -18,6 +18,7 @@
 #include "cuda/HostFieldAllocator.h"
 #include "cuda/communication/GPUPackInfo.h"
 #include "cuda/ParallelStreams.h"
+#include "cuda/NVTX.h"
 #include "core/timing/TimingPool.h"
 #include "core/timing/RemainingTimeLogger.h"
 #include "cuda/AddGPUFieldToStorage.h"
@@ -115,6 +116,7 @@ int main( int argc, char **argv )
 
          innerOuterSection.run([&]( auto innerStream )
          {
+            cuda::nameStream(innerStream, "inner stream");
             for( auto &block: *blocks )
             {
                if(!disableBoundaries)
@@ -129,6 +131,7 @@ int main( int argc, char **argv )
 
          innerOuterSection.run([&]( auto outerStream )
          {
+            cuda::nameStream(outerStream, "inner stream");
             gpuComm( outerStream );
 
             for( auto &block: *blocks )
