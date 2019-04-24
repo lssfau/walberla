@@ -68,7 +68,7 @@ public:
          info.setVertexCoords( it->first->getAABB().center() );
          for( uint_t nb = uint_t(0); nb < it->first->getNeighborhoodSize(); ++nb )
          {
-            const double dx(1.0);
+            const real_t dx(1.0);
             info.setEdgeWeight( it->first->getNeighborId(nb),
                                 static_cast<blockforest::DynamicParMetisBlockInfo::weight_t>(
                                 domain_decomposition::periodicIntersectionVolume( periodic,
