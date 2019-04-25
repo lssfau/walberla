@@ -45,6 +45,7 @@ To register a certain python function as callback it has to be set as attribute 
 """
 
 from __future__ import print_function, absolute_import, division, unicode_literals
+import os
 from functools import partial
 
 
@@ -52,9 +53,10 @@ from functools import partial
 
 class callback:
     """Decorator class to mark a Python function as waLBerla callback"""
-    def __init__(self, callbackFunction ):
+
+    def __init__(self, callbackFunction):
         if not type(callbackFunction) is str:
-            raise Exception( "waLBerla callback: Name of function has to be a string" )
+            raise Exception("waLBerla callback: Name of function has to be a string")
         self.callbackFunction = callbackFunction
 
     def __call__(self, f):
@@ -63,13 +65,12 @@ class callback:
         except ImportError:
             try:
                 import walberla_cpp
-                setattr( walberla_cpp.callbacks, self.callbackFunction, f)
+                setattr(walberla_cpp.callbacks, self.callbackFunction, f)
             except ImportError:
                 # fail silently if waLBerla is not available
                 pass
 
             return f
-
 
 
 # ---------------------------- "Callback Classes"    -------------------------------------------------------------
@@ -79,7 +80,6 @@ def memberCallback(f):
     """Decorator to mark a member function as waLBerla callback"""
     f.waLBerla_callback_member = True
     return f
-
 
 
 class ScenarioManager:
@@ -95,57 +95,72 @@ class ScenarioManager:
            When config is called again the calbacks of the next scenario are activated.
             
     """
+
     def __init__(self):
         self._scenarios = []
         self._startScenario = 0
-    
-    
+
     def add(self, scenario):
         """Adds a scenario to the manager and activates the manager itself"""
-        self._scenarios.append( scenario )
+        self._scenarios.append(scenario)
         self.activate()
-    
+
     def activate(self):
         """Activates this scenario manager instance"""
         try:
             import walberla_cpp
             boundFunc = self._configLoopCallback
-            setattr( walberla_cpp.callbacks, "config", boundFunc )
+            setattr(walberla_cpp.callbacks, "config", boundFunc)
         except ImportError:
             pass
-    
-    def restrictScenarios( self, startScenario=0 ):
+
+    def restrictScenarios(self, startScenario=0):
         """Simulates not all scenarios registered at this manager, but skips the first startScenario-1 scenarios"""
         self._startScenario = startScenario
-        
-    def _configLoopCallback( self, *args, **kwargs ):
-        def findCallbacks( classType ):
+
+    def _configLoopCallback(self, *args, **kwargs):
+        def findCallbacks(classType):
             res = dict()
-            for key,value in classType.__dict__.items():
-                if( hasattr(value, "waLBerla_callback_member") ):
-                    res[ key ] = value        
+            for key, value in classType.__dict__.items():
+                if hasattr(value, "waLBerla_callback_member"):
+                    res[key] = value
             return res
+
+        def get_config_from_scenario(sc):
+            callbacks = findCallbacks(type(sc))
+            for callback_name, callback_func in callbacks.items():
+                if callback_name == 'config':
+                    continue
+                bound_callback = partial(callback_func, sc)  # bind the 'self' parameter of member function
+                setattr(walberla_cpp.callbacks, callback_name, bound_callback)
+
+            if 'config' not in callbacks:
+                walberla_cpp.log_warning_on_root("Error: Registered Scenario of class '%s' has no 'config' callback. Skipping... " % (type(sc),))
+                return None
+
+            config = sc.config(*args, **kwargs)
+            return config
 
         try:
             import walberla_cpp
-            for idx, scenario in enumerate( self._scenarios ):
-                if idx < self._startScenario: continue #Skip over all scenarios with id < startScenario
-                
-                callbacks = findCallbacks( type( scenario ) )
-                for callbackName, callbackFunc in callbacks.items():
-                    if callbackName == 'config': continue
-                    boundCallback = partial( callbackFunc, scenario) # bind the 'self' parameter of member function
-                    setattr( walberla_cpp.callbacks, callbackName, boundCallback )
-                
-                if 'config' not in callbacks:
-                    walberla_cpp.log_warning_on_root( "Error: Registered Scenario of class '%s' has no 'config' callback. Skipping... " % ( type(scenario) ,) )
-                    continue
+            if 'WALBERLA_SCENARIO_IDX' in os.environ:
+                scenario_idx = int(os.environ['WALBERLA_SCENARIO_IDX'])
+                try:
+                    scenario = self._scenarios[scenario_idx]
+                except IndexError:
+                    walberla_cpp.log_info_on_root("Scenario does not exists - all scenarios simulated?")
+                    exit(1)
+                walberla_cpp.log_info_on_root("Simulating Scenario %d of %d :" % (scenario_idx, len(self._scenarios)))
+                yield get_config_from_scenario(scenario)
+            else:
+                for idx, scenario in enumerate(self._scenarios):
+                    if idx < self._startScenario:
+                        continue  # Skip over all scenarios with id < startScenario
+                    cfg = None
+                    while cfg is None:
+                        cfg = get_config_from_scenario(scenario)
+                    walberla_cpp.log_info_on_root("Simulating Scenario %d of %d :" % (idx, len(self._scenarios)))
+                    yield cfg
 
-                walberla_cpp.log_info_on_root( "Simulating Scenario %d of %d :" % ( idx+1, len(self._scenarios) ) )
-                
-                config =  scenario.config( *args, **kwargs )
-                yield config
-                
         except ImportError:
             pass
-
