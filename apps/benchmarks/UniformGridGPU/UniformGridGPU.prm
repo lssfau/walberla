@@ -1,32 +1,32 @@
+DomainSetup
+{
+   blocks        <  1,    1,   1 >;
+   cellsPerBlock <  256, 256, 128 >;
+   periodic      <  1,    1,   1 >;
+}
 
 Parameters 
 {
 	omega           1.8;
-	timesteps       500;
+	timesteps       10000;
+    warmupSteps     0;
+    outerIterations 1;
 
-	remainingTimeLoggerFrequency 3;
-	vtkWriteFrequency 0;
+	remainingTimeLoggerFrequency 30;
+	vtkWriteFrequency 500;
 
-	overlapCommunication true;
 	cudaEnabledMPI false;
 
-	kernelOnly false;
-	disableBoundaries false;
+	timeStepStrategy noOverlap;
+	innerOuterSplit < 64, 1, 1>;
 }
 
-DomainSetup
+/*
+Boundaries
 {
-   blocks        <  1,    1, 1 >;
-   cellsPerBlock <  300, 300, 150 >;
-   periodic      <  0,    0, 1 >;  
-}
-
-Boundaries 
-{
-    /*
 	Border { direction W;    walldistance -1;  flag NoSlip; }
 	Border { direction E;    walldistance -1;  flag NoSlip; }
     Border { direction S;    walldistance -1;  flag NoSlip; }
     Border { direction N;    walldistance -1;  flag UBB; }
-    */
 }
+*/

@@ -76,9 +76,14 @@ int main( int argc, char **argv )
 
       // Boundaries
       const FlagUID fluidFlagUID( "Fluid" );
-      auto boundariesConfig = config->getOneBlock( "Boundaries" );
-      geometry::initBoundaryHandling<FlagField_T>(*blocks, flagFieldID, boundariesConfig);
-      geometry::setNonBoundaryCellsToDomain<FlagField_T>(*blocks, flagFieldID, fluidFlagUID);
+      auto boundariesConfig = config->getBlock( "Boundaries" );
+      bool disableBoundaries = true;
+      if( boundariesConfig )
+      {
+          disableBoundaries = false;
+          geometry::initBoundaryHandling< FlagField_T >( *blocks, flagFieldID, boundariesConfig );
+          geometry::setNonBoundaryCellsToDomain< FlagField_T >( *blocks, flagFieldID, fluidFlagUID );
+      }
 
       lbm::UniformGridGPU_UBB ubb(blocks, pdfFieldGpuID);
       lbm::UniformGridGPU_NoSlip noSlip(blocks, pdfFieldGpuID);
@@ -88,19 +93,17 @@ int main( int argc, char **argv )
       noSlip.fillFromFlagField<FlagField_T>( blocks, flagFieldID, FlagUID("NoSlip"), fluidFlagUID );
       //pressure.fillFromFlagField<FlagField_T>( blocks, flagFieldID, FlagUID("pressure"), fluidFlagUID );
 
-      bool disableBoundaries = parameters.getParameter<bool>( "disableBoundaries", false );
-      bool kernelOnly = parameters.getParameter<bool>( "kernelOnly", false );
-
        // Communication setup
-      bool overlapCommunication = parameters.getParameter<bool>( "overlapCommunication", true );
       bool cudaEnabledMPI = parameters.getParameter<bool>( "cudaEnabledMPI", false );
       int communicationScheme = parameters.getParameter<int>( "communicationScheme", (int) CommunicationSchemeType::UniformGPUScheme_Baseline );
+      Vector3<int> innerOuterSplit = parameters.getParameter<Vector3<int> >("innerOuterSplit", Vector3<int>(1, 1, 1));
+
 
       int streamHighPriority = 0;
       int streamLowPriority = 0;
       WALBERLA_CUDA_CHECK( cudaDeviceGetStreamPriorityRange(&streamLowPriority, &streamHighPriority) );
 
-      pystencils::UniformGridGPU_LbKernel lbKernel( pdfFieldGpuID, omega );
+      pystencils::UniformGridGPU_LbKernel lbKernel( pdfFieldGpuID, omega, Cell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]) );
       lbKernel.setOuterPriority( streamHighPriority );
       UniformGridGPU_Communication< CommunicationStencil_T, cuda::GPUField< double > >
          gpuComm( blocks, pdfFieldGpuID, (CommunicationSchemeType) communicationScheme, cudaEnabledMPI );
@@ -110,8 +113,21 @@ int main( int argc, char **argv )
       auto boundaryOuterStreams = cuda::ParallelStreams( streamHighPriority );
       auto boundaryInnerStreams = cuda::ParallelStreams( streamHighPriority );
 
+      uint_t currentTimeStep = 0;
+
+      auto simpleOverlapTimeStep = [&] ()
+      {
+          gpuComm.startCommunication(defaultStream);
+          for( auto &block: *blocks )
+              lbKernel.inner( &block, defaultStream );
+          gpuComm.wait(defaultStream);
+          for( auto &block: *blocks )
+              lbKernel.outer( &block, defaultStream );
+      };
+
       auto overlapTimeStep = [&]()
       {
+         cuda::NvtxRange namedRange("timestep");
          auto innerOuterSection = innerOuterStreams.parallelSection( defaultStream );
 
          innerOuterSection.run([&]( auto innerStream )
@@ -131,7 +147,7 @@ int main( int argc, char **argv )
 
          innerOuterSection.run([&]( auto outerStream )
          {
-            cuda::nameStream(outerStream, "inner stream");
+            cuda::nameStream(outerStream, "outer stream");
             gpuComm( outerStream );
 
             for( auto &block: *blocks )
@@ -145,6 +161,7 @@ int main( int argc, char **argv )
                lbKernel.outer( &block, outerStream );
             }
          });
+         currentTimeStep += 1;
       };
 
 
@@ -171,12 +188,21 @@ int main( int argc, char **argv )
       };
 
       SweepTimeloop timeLoop( blocks->getBlockStorage(), timesteps );
-      std::function<void()> timeStep = overlapCommunication ? std::function<void()>( overlapTimeStep ) :
-                                                              std::function<void()>( normalTimeStep );
-      if( kernelOnly )
-      {
+
+      const std::string timeStepStrategy = parameters.getParameter<std::string>( "timeStepStrategy", "normal");
+      std::function<void()> timeStep;
+      if (timeStepStrategy == "noOverlap")
+          timeStep = std::function<void()>( normalTimeStep );
+      else if (timeStepStrategy == "complexOverlap")
+          timeStep = std::function<void()>( overlapTimeStep );
+      else if (timeStepStrategy == "simpleOverlap")
+          timeStep = simpleOverlapTimeStep;
+      else if (timeStepStrategy == "kernelOnly") {
           WALBERLA_LOG_INFO_ON_ROOT("Running only compute kernel without boundary - this makes only sense for benchmarking!")
           timeStep = kernelOnlyFunc;
+      }
+      else {
+          WALBERLA_ABORT_NO_DEBUG_INFO("Invalid value for 'timeStepStrategy'. Allowed values are 'noOverlap', 'complexOverlap', 'simpleOverlap', 'kernelOnly'");
       }
 
       timeLoop.add() << BeforeFunction( timeStep  )
@@ -196,33 +222,46 @@ int main( int argc, char **argv )
          timeLoop.addFuncAfterTimeStep( vtk::writeFiles( vtkOutput ), "VTK Output" );
       }
 
-      auto remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 ); // in seconds
-      timeLoop.addFuncAfterTimeStep( timing::RemainingTimeLogger( timeLoop.getNrOfTimeSteps(), remainingTimeLoggerFrequency ), "remaining time logger" );
 
 
-      WcTimer simTimer;
-      cudaDeviceSynchronize();
-      WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps");
-      simTimer.start();
-      timeLoop.run();
-      cudaDeviceSynchronize();
-      simTimer.end();
-      WALBERLA_LOG_INFO_ON_ROOT("Simulation finished");
-      auto time = simTimer.last();
-      auto nrOfCells = real_c( cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2] );
-      auto mlupsPerProcess = nrOfCells * real_c( timesteps ) / time * 1e-6;
-      WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process " << mlupsPerProcess);
-      WALBERLA_LOG_RESULT_ON_ROOT("Time per time step " << time / real_c( timesteps ) );
-      WALBERLA_ROOT_SECTION()
+      int warmupSteps = parameters.getParameter<int>( "warmupSteps", 2 );
+      int outerIterations = parameters.getParameter<int>( "outerIterations", 1 );
+      for(int i=0; i < warmupSteps; ++i )
+         timeLoop.singleStep();
+
+      auto remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", -1.0 ); // in seconds
+      if (remainingTimeLoggerFrequency > 0) {
+          auto logger = timing::RemainingTimeLogger( timeLoop.getNrOfTimeSteps() * outerIterations, remainingTimeLoggerFrequency );
+          timeLoop.addFuncAfterTimeStep( logger, "remaining time logger" );
+      }
+
+      for(int outerIteration = 0; outerIteration < outerIterations; ++outerIteration)
       {
-         python_coupling::PythonCallback pythonCallbackResults ( "results_callback" );
-         if ( pythonCallbackResults.isCallable() )
-         {
-            pythonCallbackResults.data().exposeValue( "mlups_per_process", mlupsPerProcess );
-
-            // Call Python function to report results
-            pythonCallbackResults();
-         }
+          timeLoop.setCurrentTimeStepToZero();
+          WcTimer simTimer;
+          cudaDeviceSynchronize();
+          WALBERLA_LOG_INFO_ON_ROOT( "Starting simulation with " << timesteps << " time steps" );
+          simTimer.start();
+          timeLoop.run();
+          cudaDeviceSynchronize();
+          simTimer.end();
+          WALBERLA_LOG_INFO_ON_ROOT( "Simulation finished" );
+          auto time = simTimer.last();
+          auto nrOfCells = real_c( cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2] );
+          auto mlupsPerProcess = nrOfCells * real_c( timesteps ) / time * 1e-6;
+          WALBERLA_LOG_RESULT_ON_ROOT( "MLUPS per process " << mlupsPerProcess );
+          WALBERLA_LOG_RESULT_ON_ROOT( "Time per time step " << time / real_c( timesteps ));
+          WALBERLA_ROOT_SECTION()
+          {
+              python_coupling::PythonCallback pythonCallbackResults( "results_callback" );
+              if ( pythonCallbackResults.isCallable())
+              {
+                  pythonCallbackResults.data().exposeValue( "mlupsPerProcess", mlupsPerProcess );
+                  pythonCallbackResults.data().exposeValue( "githash", WALBERLA_GIT_SHA1 );
+                  // Call Python function to report results
+                  pythonCallbackResults();
+              }
+          }
       }
    }
 
