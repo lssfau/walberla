@@ -7,18 +7,21 @@ DomainSetup
 
 Parameters 
 {
-	omega           1.8;
-	timesteps       10000;
-    warmupSteps     0;
-    outerIterations 1;
 
-	remainingTimeLoggerFrequency 30;
-	vtkWriteFrequency 500;
+	timesteps       10000;  // time steps of one performance measurement
+	warmupSteps     0;      // number of steps to run before measurement starts
+    outerIterations 1;      // how many measurements to conduct
 
-	cudaEnabledMPI false;
+    // Can be one of: GPUPackInfo_Baseline, GPUPackInfo_Streams, UniformGPUScheme_Baseline, UniformGPUScheme_Memcpy
+    communicationScheme UniformGPUScheme_Baseline;
 
-	timeStepStrategy noOverlap;
-	innerOuterSplit < 64, 1, 1>;
+	vtkWriteFrequency 0;             // write a VTK file every n'th step, if zero VTK output is disabled
+	cudaEnabledMPI false;            // switch on if you have a CUDA-enabled MPI implementation
+
+	timeStepStrategy noOverlap;      // can be: noOverlap, simpleOverlap, complexOverlap, kernelOnly
+	innerOuterSplit < 32, 1, 1>;     // slice-thickness that 'outer'-kernels process when overlapping
+
+	remainingTimeLoggerFrequency 0;  // interval in seconds to log the estimated remaining time
 }
 
 /*

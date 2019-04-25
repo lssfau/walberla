@@ -60,15 +60,21 @@ def overlap_benchmark():
                           (4, 4, 1), (8, 8, 1), (16, 16, 1), (32, 32, 1),
                           (4, 4, 4), (8, 8, 8), (16, 16, 16), (32, 32, 32)]
 
-    scenarios.add(Scenario(timeStepStrategy='noOverlap'))
-    for strategy in ['simpleOverlap', 'complexOverlap']:
-        for inner_outer_split in inner_outer_splits:
-            scenario = Scenario(timeStepStrategy=strategy, innerOuterSplit=inner_outer_split)
-            scenarios.add(scenario)
+    for comm_strategy in ['UniformGPUScheme_Baseline', 'UniformGPUScheme_Memcpy']:  # 'GPUPackInfo_Baseline', 'GPUPackInfo_Streams'
+        # no overlap
+        scenarios.add(Scenario(timeStepStrategy='noOverlap', communicationScheme=comm_strategy, innerOuterSplit=(1, 1, 1)))
+
+        # overlap
+        for overlap_strategy in ['simpleOverlap', 'complexOverlap']:
+            for inner_outer_split in inner_outer_splits:
+                scenario = Scenario(timeStepStrategy=overlap_strategy,
+                                    communicationScheme=comm_strategy,
+                                    innerOuterSplit=inner_outer_split)
+                scenarios.add(scenario)
 
 
-if __name__ == '__main__':
-    for node_count in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2400]:
+def generate_jobscripts(machine='pizdaint_hybrid'):
+    for node_count in [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 2400]:
         with open("job_overlap_benchmark_{:04d}.sh".format(node_count), 'w') as f:
             js = createJobscript(nodes=node_count,
                                  output_file='overlap_bench_{:04d}_%j.txt'.format(node_count),
@@ -77,9 +83,14 @@ if __name__ == '__main__':
                                  exe_name='UniformGridBenchmarkGPU',
                                  parameter_files=['overlap_benchmark.py'],
                                  wall_time=timedelta(minutes=25),
-                                 machine='pizdaint_hybrid',
+                                 machine=machine,
                                  account='d105',
                                  )
             f.write(js)
+
+
+if __name__ == '__main__':
+    print("Called without waLBerla - generating job scripts for PizDaint")
+    generate_jobscripts()
 else:
     overlap_benchmark()

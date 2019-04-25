@@ -58,8 +58,8 @@ void selectDeviceBasedOnMpiRank()
    }
    else if ( deviceCount > processesOnNode )
    {
-      WALBERLA_LOG_WARNING( "Not using all available GPUs on node. Processes on node "
-                               << processesOnNode << " available GPUs on node " << deviceCount );
+      WALBERLA_LOG_WARNING( "Not using all available GPUs on node. Processes on node: "
+                               << processesOnNode << ", available GPUs on node: " << deviceCount );
       WALBERLA_CUDA_CHECK( cudaSetDevice( rankOnNode ));
    }
    else

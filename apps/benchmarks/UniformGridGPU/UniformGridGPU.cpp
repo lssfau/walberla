@@ -89,15 +89,27 @@ int main( int argc, char **argv )
 
       lbm::UniformGridGPU_UBB ubb(blocks, pdfFieldGpuID);
       lbm::UniformGridGPU_NoSlip noSlip(blocks, pdfFieldGpuID);
-      //lbm::GeneratedFixedDensity pressure(blocks, pdfFieldGpuID);
 
       ubb.fillFromFlagField<FlagField_T>( blocks, flagFieldID, FlagUID("UBB"), fluidFlagUID );
       noSlip.fillFromFlagField<FlagField_T>( blocks, flagFieldID, FlagUID("NoSlip"), fluidFlagUID );
-      //pressure.fillFromFlagField<FlagField_T>( blocks, flagFieldID, FlagUID("pressure"), fluidFlagUID );
 
        // Communication setup
       bool cudaEnabledMPI = parameters.getParameter<bool>( "cudaEnabledMPI", false );
-      int communicationScheme = parameters.getParameter<int>( "communicationScheme", (int) CommunicationSchemeType::UniformGPUScheme_Baseline );
+
+      const std::string communicationSchemeStr = parameters.getParameter<std::string>("communicationScheme", "UniformGPUScheme_Baseline");
+      CommunicationSchemeType communicationScheme;
+      if( communicationSchemeStr == "GPUPackInfo_Baseline")
+          communicationScheme = GPUPackInfo_Baseline;
+      else if (communicationSchemeStr == "GPUPackInfo_Streams")
+          communicationScheme = GPUPackInfo_Streams;
+      else if (communicationSchemeStr == "UniformGPUScheme_Baseline")
+          communicationScheme = UniformGPUScheme_Baseline;
+      else if (communicationSchemeStr == "UniformGPUScheme_Memcpy")
+          communicationScheme = UniformGPUScheme_Memcpy;
+      else {
+          WALBERLA_ABORT_NO_DEBUG_INFO("Invalid choice for communicationScheme")
+      }
+
       Vector3<int> innerOuterSplit = parameters.getParameter<Vector3<int> >("innerOuterSplit", Vector3<int>(1, 1, 1));
 
 
