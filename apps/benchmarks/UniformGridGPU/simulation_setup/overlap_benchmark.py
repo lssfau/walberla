@@ -8,13 +8,13 @@ from waLBerla.tools.sqlitedb import sequenceValuesToScalars
 from os import getcwd
 from waLBerla.tools.jobscripts import createJobscript
 from datetime import timedelta
-
+from copy import deepcopy
 
 CSV_FILE = "overlap_benchmark.csv"
 
 BASE_CONFIG = {
     'DomainSetup': {
-        'cellsPerBlock': (256, 256, 256),
+        'cellsPerBlock': (256, 128, 128),
         'periodic': (1, 1, 1),
     },
     'Parameters': {
@@ -29,7 +29,7 @@ BASE_CONFIG = {
 
 class Scenario:
     def __init__(self, **kwargs):
-        self.config_dict = BASE_CONFIG.copy()
+        self.config_dict = deepcopy(BASE_CONFIG)
         self.config_dict['Parameters'].update(kwargs)
         self.config_dict['DomainSetup']['blocks'] = block_decomposition(wlb.mpi.numProcesses())
 
@@ -56,14 +56,13 @@ class Scenario:
 
 def overlap_benchmark():
     scenarios = wlb.ScenarioManager()
-    inner_outer_splits = [(1, 1, 1), (4, 1, 1), (8, 1, 1), (16, 1, 1), (32, 1, 1), (64, 1, 1),
-                          (4, 4, 1), (8, 8, 1), (16, 16, 1), (32, 32, 1), (64, 64, 1),
-                          (4, 4, 4), (8, 8, 8), (16, 16, 16), (32, 32, 32), (64, 64, 64)]
+    inner_outer_splits = [(1, 1, 1), (4, 1, 1), (8, 1, 1), (16, 1, 1), (32, 1, 1),
+                          (4, 4, 1), (8, 8, 1), (16, 16, 1), (32, 32, 1),
+                          (4, 4, 4), (8, 8, 8), (16, 16, 16), (32, 32, 32)]
 
-    for strategy in ['simpleOverlap', 'complexOverlap', 'noOverlap']:
+    scenarios.add(Scenario(timeStepStrategy='noOverlap'))
+    for strategy in ['simpleOverlap', 'complexOverlap']:
         for inner_outer_split in inner_outer_splits:
-            if strategy == 'noOverlap' and inner_outer_split != (1, 1, 1):
-                continue
             scenario = Scenario(timeStepStrategy=strategy, innerOuterSplit=inner_outer_split)
             scenarios.add(scenario)
 

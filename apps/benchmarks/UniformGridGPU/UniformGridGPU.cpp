@@ -56,6 +56,8 @@ int main( int argc, char **argv )
 
    for( auto cfg = python_coupling::configBegin( argc, argv ); cfg != python_coupling::configEnd(); ++cfg )
    {
+      WALBERLA_MPI_WORLD_BARRIER();
+
       auto config = *cfg;
       logging::configureLogging( config );
       auto blocks = blockforest::createUniformBlockGridFromConfig( config );
