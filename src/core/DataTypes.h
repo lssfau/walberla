@@ -23,12 +23,13 @@
 
 #include "waLBerlaDefinitions.h"
 
-#include <cstdint>
-#include <memory>
-#include <type_traits>
-#include <string>
 #include <cmath>
+#include <cstdint>
 #include <limits>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <type_traits>
 
 #if (defined( __has_include ) && __has_include(<cxxabi.h>)) || defined( __GLIBCXX__ )
 #define HAVE_CXXABI_H
