@@ -30,9 +30,16 @@
 #include <cmath>
 #include <limits>
 
-#if (defined( __has_include ) && __has_include(<cxxabi.h>)) || defined( __GLIBCXX__ )
+#ifdef __GLIBCXX__ 
 #define HAVE_CXXABI_H
 #include <cxxabi.h>
+#else
+#ifdef __has_include
+#if __has_include(<cxxabi.h>)
+#define HAVE_CXXABI_H
+#include <cxxabi.h>
+#endif
+#endif
 #endif
 
 
