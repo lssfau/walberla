@@ -22,7 +22,10 @@
 
 #include "pe_coupling/geometry/PeIntersectionRatio.h"
 
+#include "core/math/Limits.h"
 #include "core/math/Matrix3.h"
+
+#include <algorithm>
 
 namespace walberla {
 namespace lbm {
@@ -48,9 +51,9 @@ real_t intersectionRatioSpherePe( const pe::Sphere & sphere,
    delta /= dirLength;
 
    WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t( 0 ) );
-   WALBERLA_ASSERT_LESS_EQUAL( delta, real_t( 1 ) );
+   WALBERLA_ASSERT_LESS_EQUAL( delta - real_t(1), math::Limits<real_t>::accuracy(), delta );
 
-   return delta;
+   return std::min(std::max(delta, real_c(0)), real_c(1));
 
 }
 
@@ -74,9 +77,9 @@ real_t intersectionRatioPlanePe( const pe::Plane & plane,
    real_t delta = diff * planeNormal / denom;
 
    WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t( 0 ) );
-   WALBERLA_ASSERT_LESS_EQUAL( delta, real_t( 1 ) );
+   WALBERLA_ASSERT_LESS_EQUAL( delta - real_t(1), math::Limits<real_t>::accuracy(), delta );
 
-   return delta;
+   return std::min(std::max(delta, real_c(0)), real_c(1));
 
 }
 
@@ -110,9 +113,9 @@ real_t intersectionRatioEllipsoidPe( const pe::Ellipsoid & ellipsoid,
    real_t delta = (-b - root) / (real_t(2) * a);
 
    WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t( 0 ) );
-   WALBERLA_ASSERT_LESS_EQUAL( delta, real_t( 1 ) );
+   WALBERLA_ASSERT_LESS_EQUAL( delta - real_t(1), math::Limits<real_t>::accuracy(), delta );
 
-   return delta;
+   return std::min(std::max(delta, real_c(0)), real_c(1));
 
 }
 
