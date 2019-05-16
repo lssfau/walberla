@@ -841,14 +841,6 @@ if ( WALBERLA_BUILD_WITH_MPI AND NOT WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
      add_flag ( CMAKE_MODULE_LINKER_FLAGS "${MPI_CXX_LINK_FLAGS}" )
      add_flag ( CMAKE_EXE_LINKER_FLAGS    "${MPI_CXX_LINK_FLAGS}" )
      add_flag ( CMAKE_SHARED_LINKER_FLAGS "${MPI_CXX_LINK_FLAGS}" )
-
-     # When using Intel MPI, mpi.h has to be included before including the standard library
-     # therefore we use the -include flag to enforce this.
-     if ( MPI_C_INCLUDE_PATH MATCHES "intel" )
-         message (STATUS "Activating IntelMPI include workaround for mpi.h" )
-         add_flag ( CMAKE_CXX_FLAGS "-include mpi.h" )
-         add_flag ( CMAKE_C_FLAGS   "-include mpi.h" )
-     endif ( )
    endif ( )
 endif ( )
 
