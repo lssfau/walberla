@@ -44,32 +44,41 @@ public:
 
    int getNeighborRank(const stencil::Direction& dir);
 private:
+   shared_ptr<mpi::MPIManager> manager_;
    Vector3<uint_t> procs_;
    Vector3<bool>   periodicity_;
    Vector3<int>    pos_;
+   std::array<int, 27> ranks_;
 };
 
 MPIInfo::MPIInfo( const Vector3<uint_t>& procs, const Vector3<bool>& periodicity )
-   : procs_(procs)
+   : manager_(mpi::MPIManager::instance())
+   , procs_(procs)
    , periodicity_(periodicity)
 {
-   mpi::MPIManager::instance()->createCartesianComm(procs[0], procs[1], procs[2], periodicity[0], periodicity[1], periodicity[2]);
-   mpi::MPIManager::instance()->cartesianCoord(pos_.data());
+   manager_->createCartesianComm(procs[0], procs[1], procs[2], periodicity[0], periodicity[1], periodicity[2]);
+   manager_->cartesianCoord(pos_.data());
+
+   for (auto dirIt = stencil::D3Q27::beginNoCenter(); dirIt != stencil::D3Q27::end(); ++dirIt)
+   {
+      auto neighborCoord = pos_;
+      neighborCoord[0] += stencil::cx[*dirIt];
+      neighborCoord[1] += stencil::cy[*dirIt];
+      neighborCoord[2] += stencil::cz[*dirIt];
+      if (!periodicity_[0] && (neighborCoord[0] < 0)) ranks_[*dirIt] = -1;
+      if (!periodicity_[1] && (neighborCoord[1] < 0)) ranks_[*dirIt] = -1;
+      if (!periodicity_[2] && (neighborCoord[2] < 0)) ranks_[*dirIt] = -1;
+      if (!periodicity_[0] && (neighborCoord[0] >= int_c(procs_[0]))) ranks_[*dirIt] = -1;
+      if (!periodicity_[1] && (neighborCoord[1] >= int_c(procs_[1]))) ranks_[*dirIt] = -1;
+      if (!periodicity_[2] && (neighborCoord[2] >= int_c(procs_[2]))) ranks_[*dirIt] = -1;
+      ranks_[*dirIt] = manager_->cartesianRank(uint_c(neighborCoord[0]), uint_c(neighborCoord[1]), uint_c(neighborCoord[2]));
+   }
 }
 
+inline
 int MPIInfo::getNeighborRank( const stencil::Direction& dir )
 {
-   auto neighborCoord = pos_;
-   neighborCoord[0] += stencil::cx[dir];
-   neighborCoord[1] += stencil::cy[dir];
-   neighborCoord[2] += stencil::cz[dir];
-   if (neighborCoord[0] < 0) return -1;
-   if (neighborCoord[1] < 0) return -1;
-   if (neighborCoord[2] < 0) return -1;
-   if (neighborCoord[0] >= int_c(procs_[0])) return -1;
-   if (neighborCoord[1] >= int_c(procs_[1])) return -1;
-   if (neighborCoord[2] >= int_c(procs_[2])) return -1;
-   return mpi::MPIManager::instance()->cartesianRank(uint_c(neighborCoord[0]), uint_c(neighborCoord[1]), uint_c(neighborCoord[2]));
+   return ranks_[dir];
 }
 
 template <typename Stencil>
@@ -82,35 +91,53 @@ void communicate( MPIInfo& mpiInfo,
    std::vector<char> sendBuf(messageSize);
    std::vector<char> recvBuf(messageSize);
 
-   WcTimer& timer = tp[iProbe ? "IProbe" : "twoMessage"];
+   WcTimer& timer0 = tp[iProbe ? "IProbe0" : "twoMessage0"];
+   WcTimer& timer1 = tp[iProbe ? "IProbe1" : "twoMessage1"];
+   WcTimer& timer2 = tp[iProbe ? "IProbe2" : "twoMessage2"];
 
    mpi::BufferSystem bs( mpi::MPIManager::instance()->comm() );
    bs.useIProbe(iProbe);
 
-   for( uint_t i =0; i < iterations; ++i )
+   for( int i = -1; i < int_c(iterations); ++i )
    {
-      timer.start();
+      WALBERLA_MPI_BARRIER();
 
+      timer0.start();
       for (auto dirIt = Stencil::beginNoCenter(); dirIt != Stencil::end(); ++dirIt)
       {
          auto recvRank = mpiInfo.getNeighborRank( *dirIt );
          if (recvRank == -1) continue;
-         bs.sendBuffer(recvRank) << sendBuf;
+         auto& sb = bs.sendBuffer(recvRank);
+         auto pos = sb.forward(messageSize);
+         memcpy(pos, sendBuf.data(), messageSize);
          WALBERLA_ASSERT_EQUAL(bs.sendBuffer(recvRank).size(), messageSize + sizeof(size_t));
       }
+      timer0.end();
 
+      timer1.start();
       bs.setReceiverInfoFromSendBufferState(false, true);
       bs.sendAll();
+      //WALBERLA_LOG_DEVEL_VAR_ON_ROOT(bs.getBytesSent());
+      timer1.end();
 
+      timer2.start();
       for( auto it = bs.begin(); it != bs.end(); ++it )
       {
          WALBERLA_ASSERT_EQUAL(it.buffer().size(), messageSize + sizeof(size_t));
-         it.buffer() >> recvBuf;
+         auto pos = it.buffer().skip(messageSize);
+         memcpy(recvBuf.data(), pos, messageSize);
          WALBERLA_ASSERT_EQUAL(recvBuf.size(), messageSize);
          WALBERLA_ASSERT(it.buffer().isEmpty());
       }
+      timer2.end();
 
-      timer.end();
+      if (i==0)
+      {
+         timer0.reset();
+         timer1.reset();
+         timer2.reset();
+      }
+
    }
 }
 
@@ -167,7 +194,6 @@ int main( int argc, char ** argv )
    MPIInfo mpiInfo(procs, periodicity);
 
    WcTimingPool tp;
-   WALBERLA_MPI_BARRIER();
    if (stencil == "D3Q27")
    {
       communicate<stencil::D3Q27>(mpiInfo, iterations, messageSize, false, tp);
@@ -215,8 +241,8 @@ int main( int argc, char ** argv )
       stringProperties["SLURM_NTASKS_PER_SOCKET"]  = envToString(std::getenv( "SLURM_NTASKS_PER_SOCKET" ));
       stringProperties["SLURM_TASKS_PER_NODE"]     = envToString(std::getenv( "SLURM_TASKS_PER_NODE" ));
 
-      auto runId = postprocessing::storeRunInSqliteDB( "ProbeVsTwoMessages.sqlite", integerProperties, stringProperties, realProperties );
-      postprocessing::storeTimingPoolInSqliteDB( "ProbeVsTwoMessages.sqlite", runId, tp, "Timings" );
+      auto runId = postprocessing::storeRunInSqliteDB( "ProbeVsExtraMessage.sqlite", integerProperties, stringProperties, realProperties );
+      postprocessing::storeTimingPoolInSqliteDB( "ProbeVsExtraMessage.sqlite", runId, tp, "Timings" );
    }
 
    return 0;
