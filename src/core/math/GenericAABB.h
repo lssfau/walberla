@@ -196,7 +196,10 @@ public:
    inline friend mpi::GenericRecvBuffer< ET > & operator>>( mpi::GenericRecvBuffer< ET > & buf, GenericAABB< T > & aabb )
    {
       buf.readDebugMarker( "bb" );
-      buf >> aabb.minCorner_ >> aabb.maxCorner_;
+      static_assert ( std::is_trivially_copyable< GenericAABB< T > >::value,
+                      "type has to be trivially copyable for the memcpy to work correctly" );
+      auto pos = buf.skip(sizeof(GenericAABB< T >));
+      std::memcpy(&aabb, pos, sizeof(GenericAABB< T >));
       WALBERLA_ASSERT( aabb.checkInvariant() );
       return buf;
    }

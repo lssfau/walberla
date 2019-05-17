@@ -166,6 +166,7 @@ public:
    inline Vector3<Length> getNormalizedOrZero()          const;
    inline void            reset();
    inline Type*           data()                         {return v_;}
+   inline Type const *    data()                         const {return v_;}
    //@}
    //*******************************************************************************************************************
 
@@ -1864,7 +1865,10 @@ namespace mpi {
    mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const Vector3<VT> & vec )
    {
       buf.addDebugMarker( "v3" );
-      buf << vec[0] << vec[1] << vec[2];
+      static_assert ( std::is_trivially_copyable< Vector3<VT> >::value,
+                      "type has to be trivially copyable for the memcpy to work correctly" );
+      auto pos = buf.forward(sizeof(Vector3<VT>));
+      std::memcpy(pos, &vec, sizeof(Vector3<VT>));
       return buf;
    }
 
@@ -1873,7 +1877,11 @@ namespace mpi {
    mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Vector3<VT> & vec )
    {
       buf.readDebugMarker( "v3" );
-      buf >> vec[0] >> vec[1] >> vec[2];
+      static_assert ( std::is_trivially_copyable< Vector3<VT> >::value,
+                      "type has to be trivially copyable for the memcpy to work correctly" );
+      auto pos = buf.skip(sizeof(Vector3<VT>));
+      //suppress https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html#index-Wclass-memaccess
+      std::memcpy(static_cast<void*>(&vec), pos, sizeof(Vector3<VT>));
       return buf;
    }
 

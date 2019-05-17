@@ -35,6 +35,7 @@
 #include <type_traits>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -174,6 +175,7 @@ public:
    template< typename Other > inline const Vector3<HIGH> solve( const Vector3<Other> &rhs )         const;
                               inline Type                trace()                                    const;
                               inline Type*               data()                                     {return v_;}
+                              inline Type const *        data()                                     const {return v_;}
    //@}
    //*******************************************************************************************************************
 
@@ -246,9 +248,9 @@ private:
     * 6 & 7 & 8 \\
     * \end{array}\right)\f]
    **/
-   Type v_[9] = {Type(1), Type(0), Type(0),
-                 Type(0), Type(1), Type(0),
-                 Type(0), Type(0), Type(1)};
+   std::array<Type, 9> v_ = {{Type(1), Type(0), Type(0),
+                              Type(0), Type(1), Type(0),
+                              Type(0), Type(0), Type(1)}};
    //@}
    //*******************************************************************************************************************
 };
@@ -1769,9 +1771,11 @@ namespace mpi {
                 typename MT >  // Element type of matrix
       mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const Matrix3<MT> & m )
       {
-         for(unsigned int i=0; i<9; ++i)
-            buf << m[i];
-
+         buf.addDebugMarker( "m3" );
+         static_assert ( std::is_trivially_copyable< Matrix3<MT> >::value,
+                         "type has to be trivially copyable for the memcpy to work correctly" );
+         auto pos = buf.forward(sizeof(Matrix3<MT>));
+         std::memcpy(pos, &m, sizeof(Matrix3<MT>));
          return buf;
       }
 
@@ -1779,9 +1783,12 @@ namespace mpi {
                 typename MT >  // Element type of matrix
       mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Matrix3<MT> & m )
       {
-         for(unsigned int i=0; i<9; ++i)
-            buf >> m[i];
-
+         buf.readDebugMarker( "m3" );
+         static_assert ( std::is_trivially_copyable< Matrix3<MT> >::value,
+                         "type has to be trivially copyable for the memcpy to work correctly" );
+         auto pos = buf.skip(sizeof(Matrix3<MT>));
+         //suppress https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html#index-Wclass-memaccess
+         std::memcpy(static_cast<void*>(&m), pos, sizeof(Matrix3<MT>));
          return buf;
       }
 
