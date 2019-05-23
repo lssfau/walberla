@@ -417,6 +417,11 @@ void GenericBufferSystem<Rb, Sb>::send( MPIRank rank )
 template< typename Rb, typename Sb>
 void GenericBufferSystem<Rb, Sb>::startCommunication()
 {
+   // Clear receive buffers
+   for( auto iter = recvInfos_.begin(); iter != recvInfos_.end(); ++iter )  {
+      iter->second.buffer.clear();
+   }
+
    const auto tag = currentComm_->getTag();
    WALBERLA_CHECK_EQUAL(activeTags_.find(tag), activeTags_.end(),
                         "Another communication with the same MPI tag is currently in progress.");
@@ -454,11 +459,6 @@ void GenericBufferSystem<Rb, Sb>::endCommunication()
    for( auto iter = sendInfos_.begin(); iter != sendInfos_.end(); ++iter )
    {
       iter->second.alreadySent = false;
-      iter->second.buffer.clear();
-   }
-
-   // Clear receive buffers
-   for( auto iter = recvInfos_.begin(); iter != recvInfos_.end(); ++iter )  {
       iter->second.buffer.clear();
    }
 

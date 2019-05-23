@@ -37,6 +37,22 @@
 
 namespace walberla {
 
+class CustomBufferSystem : public mpi::BufferSystem
+{
+public:
+   explicit CustomBufferSystem( const MPI_Comm & communicator, int tag = 0 )
+      : mpi::BufferSystem(communicator, tag)
+   {}
+   auto& recvBuffer ( walberla::mpi::MPIRank rank )
+   {
+      auto it = recvInfos_.find(rank);
+      WALBERLA_CHECK_UNEQUAL(it, recvInfos_.end(), recvInfos_.size());
+      return it->second.buffer;
+   }
+
+   auto& getRecvInfos() {return recvInfos_;}
+};
+
 class MPIInfo
 {
 public:
@@ -91,53 +107,43 @@ void communicate( MPIInfo& mpiInfo,
    std::vector<char> sendBuf(messageSize);
    std::vector<char> recvBuf(messageSize);
 
-   WcTimer& timer0 = tp[iProbe ? "IProbe0" : "twoMessage0"];
-   WcTimer& timer1 = tp[iProbe ? "IProbe1" : "twoMessage1"];
-   WcTimer& timer2 = tp[iProbe ? "IProbe2" : "twoMessage2"];
-
-   mpi::BufferSystem bs( mpi::MPIManager::instance()->comm() );
+   CustomBufferSystem bs( mpi::MPIManager::instance()->comm() );
    bs.useIProbe(iProbe);
 
-   for( int i = -1; i < int_c(iterations); ++i )
+   for( uint_t i =0; i < iterations; ++i )
    {
       WALBERLA_MPI_BARRIER();
-
-      timer0.start();
+      tp["pack"].start();
       for (auto dirIt = Stencil::beginNoCenter(); dirIt != Stencil::end(); ++dirIt)
       {
          auto recvRank = mpiInfo.getNeighborRank( *dirIt );
          if (recvRank == -1) continue;
-         auto& sb = bs.sendBuffer(recvRank);
-         auto pos = sb.forward(messageSize);
-         memcpy(pos, sendBuf.data(), messageSize);
+         bs.sendBuffer(recvRank) << sendBuf;
          WALBERLA_ASSERT_EQUAL(bs.sendBuffer(recvRank).size(), messageSize + sizeof(size_t));
       }
-      timer0.end();
+      tp["pack"].end();
 
-      timer1.start();
+      WALBERLA_MPI_BARRIER();
+      tp["communicate"].start();
       bs.setReceiverInfoFromSendBufferState(false, true);
       bs.sendAll();
-      //WALBERLA_LOG_DEVEL_VAR_ON_ROOT(bs.getBytesSent());
-      timer1.end();
-
-      timer2.start();
       for( auto it = bs.begin(); it != bs.end(); ++it )
       {
          WALBERLA_ASSERT_EQUAL(it.buffer().size(), messageSize + sizeof(size_t));
-         auto pos = it.buffer().skip(messageSize);
-         memcpy(recvBuf.data(), pos, messageSize);
          WALBERLA_ASSERT_EQUAL(recvBuf.size(), messageSize);
-         WALBERLA_ASSERT(it.buffer().isEmpty());
       }
-      timer2.end();
+      tp["communicate"].end();
 
-      if (i==0)
+      WALBERLA_MPI_BARRIER();
+      tp["unpack"].start();
+      auto& recvInfos = bs.getRecvInfos();
+      for (auto recvIt = recvInfos.begin(); recvIt != recvInfos.end(); ++recvIt)
       {
-         timer0.reset();
-         timer1.reset();
-         timer2.reset();
+         auto& rb = recvIt->second.buffer;
+         rb >> recvBuf;
+         WALBERLA_ASSERT(rb.isEmpty());
       }
-
+      tp["unpack"].end();
    }
 }
 
@@ -193,24 +199,27 @@ int main( int argc, char ** argv )
 
    MPIInfo mpiInfo(procs, periodicity);
 
-   WcTimingPool tp;
+   WcTimingPool tp_twoMessages;
+   WcTimingPool tp_probe;
+   WALBERLA_MPI_BARRIER();
    if (stencil == "D3Q27")
    {
-      communicate<stencil::D3Q27>(mpiInfo, iterations, messageSize, false, tp);
-      communicate<stencil::D3Q27>(mpiInfo, iterations, messageSize, true, tp);
+      communicate<stencil::D3Q27>(mpiInfo, iterations, messageSize, false, tp_twoMessages);
+      communicate<stencil::D3Q27>(mpiInfo, iterations, messageSize, true, tp_probe);
    } else if (stencil == "D3Q19")
    {
-      communicate<stencil::D3Q19>(mpiInfo, iterations, messageSize, false, tp);
-      communicate<stencil::D3Q19>(mpiInfo, iterations, messageSize, true, tp);
+      communicate<stencil::D3Q19>(mpiInfo, iterations, messageSize, false, tp_twoMessages);
+      communicate<stencil::D3Q19>(mpiInfo, iterations, messageSize, true, tp_probe);
    } else if (stencil == "D3Q7")
    {
-      communicate<stencil::D3Q7>(mpiInfo, iterations, messageSize, false, tp);
-      communicate<stencil::D3Q7>(mpiInfo, iterations, messageSize, true, tp);
+      communicate<stencil::D3Q7>(mpiInfo, iterations, messageSize, false, tp_twoMessages);
+      communicate<stencil::D3Q7>(mpiInfo, iterations, messageSize, true, tp_probe);
    } else
    {
       WALBERLA_ABORT("stencil not supported: " << stencil);
    }
-   WALBERLA_LOG_INFO_ON_ROOT(tp);
+   WALBERLA_LOG_INFO_ON_ROOT(tp_twoMessages);
+   WALBERLA_LOG_INFO_ON_ROOT(tp_probe);
 
    WALBERLA_ROOT_SECTION()
    {
@@ -241,8 +250,9 @@ int main( int argc, char ** argv )
       stringProperties["SLURM_NTASKS_PER_SOCKET"]  = envToString(std::getenv( "SLURM_NTASKS_PER_SOCKET" ));
       stringProperties["SLURM_TASKS_PER_NODE"]     = envToString(std::getenv( "SLURM_TASKS_PER_NODE" ));
 
-      auto runId = postprocessing::storeRunInSqliteDB( "ProbeVsExtraMessage.sqlite", integerProperties, stringProperties, realProperties );
-      postprocessing::storeTimingPoolInSqliteDB( "ProbeVsExtraMessage.sqlite", runId, tp, "Timings" );
+      auto runId = postprocessing::storeRunInSqliteDB( "ProbeVsTwoMessages.sqlite", integerProperties, stringProperties, realProperties );
+      postprocessing::storeTimingPoolInSqliteDB( "ProbeVsTwoMessages.sqlite", runId, tp_twoMessages, "twoMessages" );
+      postprocessing::storeTimingPoolInSqliteDB( "ProbeVsTwoMessages.sqlite", runId, tp_probe, "probe" );
    }
 
    return 0;
