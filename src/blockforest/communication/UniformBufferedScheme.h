@@ -77,11 +77,11 @@ namespace communication {
 * for the schemes: the tag can be passed in the constructor.
 */
 //*******************************************************************************************************************
-template< typename Stencil >
+template< typename Stencil_T >
 class UniformBufferedScheme
 {
 public:
-
+   typedef Stencil_T Stencil;
    typedef mpi::SendBuffer SendBuffer;
    typedef mpi::RecvBuffer RecvBuffer;
 

@@ -45,11 +45,11 @@ namespace communication {
 *
 */
 //*******************************************************************************************************************
-template< typename Stencil >
+template< typename Stencil_T >
 class UniformDirectScheme
 {
 public:
-
+   typedef Stencil_T Stencil;
    typedef walberla::communication::UniformMPIDatatypeInfo UniformMPIDatatypeInfo;
    typedef walberla::communication::UniformMPIDatatypeInfo CommunicationItemInfo;
 
