@@ -47,31 +47,72 @@ class Rot3
    /*! \endcond */
    //**********************************************************************************************
 public:
-   Rot3(const Quaternion<Type>& q);
+   Rot3();
+   Rot3(const Vector3<Type>& rot);
+   Rot3(const Vector3<Type>& axis, const real_t& angle);
+   Rot3(const Quaternion<Type> q);
 
    const Quaternion<Type>& getQuaternion() const { return quat_; }
    const Matrix3<Type>&    getMatrix() const { return mat_; }
 
-   void rotate(const Quaternion<Type>& q);
+   void rotate(const Vector3<Type>& rot);
+   void rotate(const Vector3<Type>& axis, const real_t& angle);
 private:
    Quaternion<Type> quat_;
    Matrix3<Type>    mat_;
 };
 
 template< typename Type >  // floating point type
-inline Rot3<Type>::Rot3(const Quaternion<Type>& q)
-   : quat_(q)
-   , mat_ (q.toRotationMatrix())
+inline Rot3<Type>::Rot3()
+   : quat_(Vector3<Type>(Type(1),Type(0),Type(0)), Type(0))
+   , mat_(quat_.toRotationMatrix())
 {
    WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t(1), "Corrupted rotation matrix determinant" );
 }
 
 template< typename Type >  // floating point type
-inline void Rot3<Type>::rotate(const Quaternion<Type>& q)
+inline Rot3<Type>::Rot3(const Vector3<Type>& phi)
+   : Rot3<Type>()
 {
-   quat_ = q * quat_;
-   mat_  = quat_.toRotationMatrix();
-   WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t(1), "Corrupted rotation matrix determinant" );
+   rotate(phi);
+}
+
+template< typename Type >  // floating point type
+inline Rot3<Type>::Rot3(const Vector3<Type>& axis, const real_t& angle)
+   : Rot3<Type>()
+{
+   rotate(axis, angle);
+}
+
+template< typename Type >  // floating point type
+inline Rot3<Type>::Rot3(const Quaternion<Type> q)
+   : quat_(q)
+   , mat_(quat_.toRotationMatrix())
+{}
+
+template< typename Type >  // floating point type
+inline void Rot3<Type>::rotate(const Vector3<Type>& phi)
+{
+   auto len = phi.length();
+   if (!floatIsEqual(len, 0))
+   {
+      auto q = Quaternion<Type>( phi, len );
+      quat_ = q * quat_;
+      mat_  = quat_.toRotationMatrix();
+      WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t(1), "Corrupted rotation matrix determinant" );
+   }
+}
+
+template< typename Type >  // floating point type
+inline void Rot3<Type>::rotate(const Vector3<Type>& axis, const real_t& angle)
+{
+   if (!floatIsEqual(angle, 0))
+   {
+      auto q = Quaternion<Type>( axis, angle );
+      quat_ = q * quat_;
+      mat_  = quat_.toRotationMatrix();
+      WALBERLA_ASSERT_FLOAT_EQUAL( mat_.getDeterminant(), real_t(1), "Corrupted rotation matrix determinant" );
+   }
 }
 
 template< typename Type >  // floating point type

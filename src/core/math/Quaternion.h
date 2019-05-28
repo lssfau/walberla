@@ -235,7 +235,12 @@ template< typename Type >  // Data type of the quaternion
 inline Quaternion<Type>::Quaternion( Type r, Type i, Type j, Type k )
 {
    v_[0] = r; v_[1] = i; v_[2] = j; v_[3] = k;
-   WALBERLA_CHECK_FLOAT_EQUAL( r*r + i*i + j*j + k*k, Type(1), "Invalid quaternion parameters" );
+
+   WALBERLA_CHECK_FLOAT_EQUAL( r*r + i*i + j*j + k*k, Type(1), "Invalid quaternion parameters:\n" <<
+                               "r: " << r << "\n" <<
+                               "i: " << i << "\n" <<
+                               "j: " << j << "\n" <<
+                               "k: " << k);
 }
 //*************************************************************************************************
 
@@ -495,7 +500,9 @@ inline const Matrix3<Type> Quaternion<Type>::toRotationMatrix() const
 template< typename Type >
 inline Type Quaternion<Type>::getAngle() const
 {
-   return Type(2)*std::acos(v_[0]);
+   //due to numerical accuracy v_[0] might be slightly larger than 1
+   //which will results in nan for the acos function.
+   if (v_[0]<Type(1)) return Type(2)*std::acos(v_[0]); else return Type(0);
 }
 //*************************************************************************************************
 
@@ -510,11 +517,17 @@ inline Type Quaternion<Type>::getAngle() const
 template< typename Type >
 inline const Vector3<Type> Quaternion<Type>::getAxis() const
 {
-   Type s( std::sqrt( 1-v_[0]*v_[0] ) );
-   if (s < std::numeric_limits<Type>::epsilon())
+   // tmp might be negative due to numerical accuracy
+   // check before putting it into sqrt!!!
+   auto tmp = Type(1)-v_[0]*v_[0];
+
+   if (tmp < std::numeric_limits<Type>::epsilon())
+   {
       return Vector3<Type>( 1, 0, 0 );
-   else
+   } else {
+      Type s( std::sqrt( tmp ) );
       return Vector3<Type>( v_[1] / s, v_[2] / s, v_[3] / s );
+   }
 }
 //*************************************************************************************************
 
@@ -1054,6 +1067,7 @@ inline const Quaternion< typename MathTrait<T1,T2>::MultType >
    const MT k( lhs[0]*rhs[3] + lhs[3]*rhs[0] + lhs[1]*rhs[2] - lhs[2]*rhs[1] );
 
    const MT len2( r*r + i*i + j*j + k*k );
+   WALBERLA_ASSERT(!std::isnan(len2), lhs << "\n" << rhs);
 
    if( std::fabs( len2 - MT(1) ) < MT(1E-8) ) {
       return Quaternion<MT>( r, i, j, k );

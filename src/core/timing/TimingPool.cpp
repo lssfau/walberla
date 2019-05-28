@@ -295,7 +295,7 @@ void TimingPool<TP>::print( std::ostream & os ) const
       os << setw(firstColumn-1) << std::left  << i->first  << " "       << "|";
       os << setw(PERCENT_COLUMN-2) << std::right << std::fixed << std::setprecision(2) << percentage << "% |";
       os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.total() )    << "|";
-      os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.average() )  << "|";
+      os << setw(OTHER_COLUMNS) << std::right << std::setprecision(3) << ( ( count == uint_t(0) ) ? 0.0 : i->second.average() )  << "|";
       os << setw(OTHER_COLUMNS) << std::right << i->second.getCounter() << "|";
       os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.min() )      << "|";
       os << setw(OTHER_COLUMNS) << std::right << ( ( count == uint_t(0) ) ? 0.0 : i->second.max() )      << "|";

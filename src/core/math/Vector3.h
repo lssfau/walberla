@@ -882,7 +882,7 @@ Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedOrZero() con
                             static_cast<Length>( v_[1] ) * ilen,
                             static_cast<Length>( v_[2] ) * ilen );
 
-   WALBERLA_ASSERT_FLOAT_EQUAL( result.sqrLength(), 1.0 );
+   WALBERLA_ASSERT_FLOAT_EQUAL( result.sqrLength(), 1.0, "initial vector: " << result );
 
    return result;
 }
