@@ -233,7 +233,7 @@ private:
 
       size_t xyCellCount_;   /*!< \brief Number of cells allocated in x-axis direction multiplied by
                                          the number of cells allocated in y-axis direction. */
-      size_t xyzCellCount_;  //!< Total number of allocated cells.
+   public: size_t xyzCellCount_;  //!< Total number of allocated cells.
 
       size_t enlargementThreshold_;  /*!< \brief The enlargement threshold - the moment the number
                                                  of assigned bodies exceeds this threshold, the

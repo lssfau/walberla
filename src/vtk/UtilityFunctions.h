@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "VTKTrait.h"
+
 #include "core/DataTypes.h"
 
 #include <ostream>
@@ -40,50 +42,10 @@ template<>             inline void toStream( std::ostream& os, const uint8_t val
 
 
 template< typename T >
-inline const std::string& typeToString();
-
-template<> inline const std::string& typeToString< int8_t >() {
-   static std::string type( "Int8" );
-   return type;
+inline std::string typeToString()
+{
+   return VTKTrait<T>::type_string;
 }
-template<> inline const std::string& typeToString< int16_t >() {
-   static std::string type( "Int16" );
-   return type;
-}
-template<> inline const std::string& typeToString< int32_t >() {
-   static std::string type( "Int32" );
-   return type;
-}
-template<> inline const std::string& typeToString< int64_t >() {
-   static std::string type( "Int64" );
-   return type;
-}
-template<> inline const std::string& typeToString< uint8_t >() {
-   static std::string type( "UInt8" );
-   return type;
-}
-template<> inline const std::string& typeToString< uint16_t >() {
-   static std::string type( "UInt16" );
-   return type;
-}
-template<> inline const std::string& typeToString< uint32_t >() {
-   static std::string type( "UInt32" );
-   return type;
-}
-template<> inline const std::string& typeToString< uint64_t >() {
-   static std::string type( "UInt64" );
-   return type;
-}
-template<> inline const std::string& typeToString< float >() {
-   static std::string type( "Float32" );
-   return type;
-}
-template<> inline const std::string& typeToString< double >() {
-   static std::string type( "Float64" );
-   return type;
-}
-
-
 
 } // namespace vtk
 } // namespace walberla

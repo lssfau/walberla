@@ -1,0 +1,10 @@
+namespace walberla {
+namespace mesa_pd {
+
+/**
+ * \defgroup mesa_pd MESA-PD - Modular and Extensible Software Architecture for Particle Dynamics
+ * The particle dynamics module of the waLBerla multi-physics framework.
+**/
+
+}
+}

@@ -76,7 +76,7 @@ namespace internal {
 *   assigned a specific string in VTK. This string must be returned by the pure virtual member function "typeString()".
 *   This function should always be implemented by calling the utility function "vtk::typeToString()":
 *   \code
-*      const std::string& typeString() const { return vtk::typeToString< [DataType] >(); }
+*      std::string typeString() const { return vtk::typeToString< [DataType] >(); }
 *   \endcode
 *
 *   Additionally, every class derived from BlockCellDataWriter can implement two further push functions that are used
@@ -143,11 +143,11 @@ public:
    *   Every data type is assigned a specific string in VTK. This string must be returned by this function, which should
    *   always be implemented by calling the utility function "vtk::typeToString()":
    *   \code
-   *      const std::string& typeString() const { return vtk::typeToString< [DataType] >(); }
+   *      std::string typeString() const { return vtk::typeToString< [DataType] >(); }
    *   \endcode
    */
    //*******************************************************************************************************************
-   virtual const std::string & typeString() const = 0;
+   virtual std::string typeString() const = 0;
 
    const std::string & identifier() const { return identifier_; };
 
@@ -255,7 +255,7 @@ public:
 
    uint_t fSize() const { return F_SIZE; }
 
-   const std::string & typeString() const { return vtk::typeToString< T >(); }
+   std::string typeString() const { return vtk::typeToString< T >(); }
 
 protected:
    virtual T evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f ) = 0;
