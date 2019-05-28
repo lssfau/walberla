@@ -25,7 +25,7 @@ namespace walberla {
 namespace blockforest {
 
 
-enum LocalCommunicationMode { START = 0, WAIT = 1, BUFFER = 2 };
+enum LocalCommunicationMode { START = 0, WAIT = 1, BUFFER = 2, NO_OPTIMIZATION = 3 };
 
 
 } // namespace blockforest
