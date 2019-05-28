@@ -1,6 +1,7 @@
 add_subdirectory( AdaptiveMeshRefinementFluidParticleCoupling )
 add_subdirectory( ComplexGeometry )
 add_subdirectory( DEM )
+add_subdirectory( FieldCommunication )
 add_subdirectory( MeshDistance )
 add_subdirectory( CouetteFlow )
 add_subdirectory( ForcesOnSphereNearPlaneInShearFlow )

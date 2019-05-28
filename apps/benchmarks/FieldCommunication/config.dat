@@ -1,0 +1,31 @@
+Domain
+{
+    cellsPerBlock < 60, 60, 60 >;
+    domainWeights < 1, 1, 1 >;
+    blocksPerProcess 1;
+}
+
+Communication
+{
+    stencil D3Q19;
+    ghostLayers 1;
+    buffered 1;
+    singleMessage 1;
+
+    Fields {
+        pdf 1;
+        pdfOpt 1;
+        vector 0;
+        scalar 0;
+    }
+
+    localCommunicationMode start;
+    layout fzyx;
+}
+
+Run
+{
+    warmupIterations 2;
+    iterations 50;
+    databaseFile FieldCommunication.sqlite;
+}
