@@ -36,7 +36,7 @@ class SingleMessageBufferedScheme
 public:
     typedef Stencil_T Stencil;
 
-    SingleMessageBufferedScheme( weak_ptr_wrapper< StructuredBlockForest > bf, const int tag = 17953 )
+    SingleMessageBufferedScheme( const weak_ptr_wrapper< StructuredBlockForest > & bf, const int tag = 17953 )
             : blockForest_( bf ), tag_( tag ) {}
 
     inline void addDataToCommunicate( const shared_ptr< communication::UniformPackInfo > &packInfo )
