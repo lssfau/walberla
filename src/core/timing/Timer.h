@@ -25,10 +25,12 @@
 #pragma once
 
 #include "CpuPolicy.h"
+#include "ReduceType.h"
 #include "WcPolicy.h"
 #include "core/DataTypes.h"
 
 #include "core/mpi/RecvBuffer.h"
+#include "core/mpi/Reduce.h"
 #include "core/mpi/SendBuffer.h"
 
 #include <iomanip>
@@ -155,7 +157,7 @@ public:
    //@}
    //*******************************************************************************************************************
 
- private:
+private:
 
    uint_t counter_;      //!< Number of performed time measurements.
    double start_;        //!< Start of the current time measurement.
@@ -211,14 +213,14 @@ inline Timer<TP>::Timer()
 template< typename TP>
 inline Timer<TP>::Timer( uint_t _counter, double _min, double _max,
                          double _total, double _sumOfSquares )
-    : counter_     ( _counter      )
-    , start_       ( 0.0           )
-    , end_         ( 0.0           )
-    , time_        ( _total        )
-    , sumOfSquares_( _sumOfSquares )
-    , min_         ( _min          )
-    , max_         ( _max          )
-    , last_        (  0.0          )
+   : counter_     ( _counter      )
+   , start_       ( 0.0           )
+   , end_         ( 0.0           )
+   , time_        ( _total        )
+   , sumOfSquares_( _sumOfSquares )
+   , min_         ( _min          )
+   , max_         ( _max          )
+   , last_        (  0.0          )
 {
 }
 //**********************************************************************************************************************
@@ -457,6 +459,80 @@ inline void Timer<TP>::merge( const Timer<TP> & other )
 
 //======================================================================================================================
 //
+//  REDUCTION
+//
+//======================================================================================================================
+
+//**********************************************************************************************************************
+/*! Returns a reduced Timer, holding information from all processes
+ *
+ * \param timer      Timer which should be reduced
+ * \param rt         Specified the method how the reduction is done. See documentation for ReduceType
+ * \param targetRank the world rank of the target process. Or negative value for an all-reduction
+ *                   operation
+ *
+ * \return  a nonzero shared pointer to a Timer on the process with rank "targetRank"
+ *          and a zero pointer otherwise. For the all-reduction a valid timer is returned on all processes.
+ **********************************************************************************************************************/
+template< typename TP >
+shared_ptr<Timer<TP> > getReduced( Timer<TP>& timer, ReduceType rt, int targetRank )
+{
+   WALBERLA_NON_MPI_SECTION() {
+      return make_shared<Timer<TP> >( timer );
+   }
+
+   double val; //value to be reduced
+   switch (rt)
+   {
+   case REDUCE_MIN  :
+      val = timer.min();
+      break;
+   case REDUCE_AVG  :
+      val = timer.average();
+      break;
+
+   case REDUCE_MAX  :
+      val = timer.max();
+      break;
+
+   case REDUCE_TOTAL:
+      val = timer.total();
+      break;
+
+   default:
+      WALBERLA_ABORT( "Unknown reduce type" );
+      break;
+   }
+
+   double min;
+   double max;
+   double total;
+   double sumOfSquares;
+
+   if (targetRank >= 0)
+   {
+      min          = mpi::reduce(val, mpi::MIN, targetRank);
+      max          = mpi::reduce(val, mpi::MAX, targetRank);
+      total        = mpi::reduce(val, mpi::SUM, targetRank);
+      sumOfSquares = mpi::reduce(val*val, mpi::SUM, targetRank);
+   } else
+   {
+      min          = mpi::allReduce(val, mpi::MIN);
+      max          = mpi::allReduce(val, mpi::MAX);
+      total        = mpi::allReduce(val, mpi::SUM);
+      sumOfSquares = mpi::allReduce(val*val, mpi::SUM);
+   }
+
+   //uint_t counter, double min, double max, double total, double sumOfSquares
+   if ( targetRank < 0 || targetRank == MPIManager::instance()->worldRank() )
+      return make_shared<Timer<TP> >( mpi::MPIManager::instance()->numProcesses(), min, max, total, sumOfSquares  );
+
+   return nullptr;
+}
+
+
+//======================================================================================================================
+//
 //  OSTREAM OVERLOAD
 //
 //======================================================================================================================
@@ -478,38 +554,38 @@ std::ostream & operator<< ( std::ostream & os, const Timer<TP> & timer )
 //
 //======================================================================================================================
 
-   template< typename T,    // Element type of SendBuffer
-             typename G,    // Growth policy of SendBuffer
-             typename TP >  // Element type of vector
-   mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const Timer<TP> & t )
-   {
-      buf.addDebugMarker( "ti" );
-      buf << t.counter_;
-      buf << t.start_;
-      buf << t.end_;
-      buf << t.time_;
-      buf << t.sumOfSquares_;
-      buf << t.min_;
-      buf << t.max_;
-      buf << t.last_;
-      return buf;
-   }
+template< typename T,    // Element type of SendBuffer
+          typename G,    // Growth policy of SendBuffer
+          typename TP >  // Element type of vector
+mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const Timer<TP> & t )
+{
+   buf.addDebugMarker( "ti" );
+   buf << t.counter_;
+   buf << t.start_;
+   buf << t.end_;
+   buf << t.time_;
+   buf << t.sumOfSquares_;
+   buf << t.min_;
+   buf << t.max_;
+   buf << t.last_;
+   return buf;
+}
 
-   template< typename T,    // Element type  of RecvBuffer
-             typename TP >  // Element type of vector
-   mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Timer<TP> & t )
-   {
-      buf.readDebugMarker( "ti" );
-      buf >> t.counter_;
-      buf >> t.start_;
-      buf >> t.end_;
-      buf >> t.time_;
-      buf >> t.sumOfSquares_;
-      buf >> t.min_;
-      buf >> t.max_;
-      buf >> t.last_;
-      return buf;
-   }
+template< typename T,    // Element type  of RecvBuffer
+          typename TP >  // Element type of vector
+mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Timer<TP> & t )
+{
+   buf.readDebugMarker( "ti" );
+   buf >> t.counter_;
+   buf >> t.start_;
+   buf >> t.end_;
+   buf >> t.time_;
+   buf >> t.sumOfSquares_;
+   buf >> t.min_;
+   buf >> t.max_;
+   buf >> t.last_;
+   return buf;
+}
 
 } //namespace timing
 

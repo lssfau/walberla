@@ -159,6 +159,9 @@ waLBerla_execute_test( NAME SetSelectableObjectTest  )
 # timing #
 ##########
 
+waLBerla_compile_test( FILES timing/ParallelTimerTest.cpp )
+waLBerla_execute_test( NAME ParallelTimerTest PROCESSES 2 )
+
 waLBerla_compile_test( FILES timing/TimerTest.cpp )
 waLBerla_execute_test( NAME TimerTest )
 
