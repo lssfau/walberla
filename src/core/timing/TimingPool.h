@@ -24,6 +24,9 @@
 #include "Timer.h"
 #include "ReduceType.h"
 
+#include "core/mpi/RecvBuffer.h"
+#include "core/mpi/SendBuffer.h"
+
 #include <iostream>
 #include <map>
 #include <stdexcept>
@@ -47,6 +50,14 @@ class ScopeTimer;
 template< typename TP >  // Timing policy
 class TimingPool
 {
+   template< typename T,     // Element type of SendBuffer
+             typename G,     // Growth policy of SendBuffer
+             typename TP2 >  // Element type of vector
+   friend mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const TimingPool<TP2> & tp );
+
+   template< typename T,     // Element type  of RecvBuffer
+             typename TP2 >  // Element type of vector
+   friend mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, TimingPool<TP2> & tp );
 public:
 
    //**Construction & Destruction***************************************************************************************
@@ -197,6 +208,37 @@ std::ostream & operator<< ( std::ostream & os, const TimingPool<TP> & tp ) {
 
 } // namespace timing
 } // namespace walberla
+
+//======================================================================================================================
+//
+//  Send/Recv Buffer Serialization Specialization
+//
+//======================================================================================================================
+
+namespace walberla {
+namespace timing {
+
+   template< typename T,    // Element type of SendBuffer
+             typename G,    // Growth policy of SendBuffer
+             typename TP >  // Element type of vector
+   mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const timing::TimingPool<TP> & tp )
+   {
+      buf.addDebugMarker( "tp" );
+      buf << tp.timerMap_;
+      return buf;
+   }
+
+   template< typename T,    // Element type  of RecvBuffer
+             typename TP >  // Element type of vector
+   mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, timing::TimingPool<TP> & tp )
+   {
+      buf.readDebugMarker( "tp" );
+      buf >> tp.timerMap_;
+      return buf;
+   }
+
+} //namespace timing
+} //namespace walberla
 
 
 //======================================================================================================================

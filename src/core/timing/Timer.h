@@ -28,6 +28,9 @@
 #include "WcPolicy.h"
 #include "core/DataTypes.h"
 
+#include "core/mpi/RecvBuffer.h"
+#include "core/mpi/SendBuffer.h"
+
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -90,7 +93,15 @@ namespace timing {
 template< typename TP >  // Timing policy
 class Timer
 {
- public:
+   template< typename T,     // Element type of SendBuffer
+             typename G,     // Growth policy of SendBuffer
+             typename TP2 >  // Element type of vector
+   friend mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const Timer<TP2> & t );
+
+   template< typename T,     // Element type  of RecvBuffer
+             typename TP2 >  // Element type of vector
+   friend mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Timer<TP2> & t );
+public:
    //**Type definitions*************************************************************************************************
    typedef TP  TimingPolicy;  //!< Timing policy of the Timer.
    //*******************************************************************************************************************
@@ -461,8 +472,46 @@ std::ostream & operator<< ( std::ostream & os, const Timer<TP> & timer )
    return os;
 }
 
+//======================================================================================================================
+//
+//  Send/Recv Buffer Serialization Specialization
+//
+//======================================================================================================================
 
-} // namespace timing
+   template< typename T,    // Element type of SendBuffer
+             typename G,    // Growth policy of SendBuffer
+             typename TP >  // Element type of vector
+   mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const Timer<TP> & t )
+   {
+      buf.addDebugMarker( "ti" );
+      buf << t.counter_;
+      buf << t.start_;
+      buf << t.end_;
+      buf << t.time_;
+      buf << t.sumOfSquares_;
+      buf << t.min_;
+      buf << t.max_;
+      buf << t.last_;
+      return buf;
+   }
+
+   template< typename T,    // Element type  of RecvBuffer
+             typename TP >  // Element type of vector
+   mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Timer<TP> & t )
+   {
+      buf.readDebugMarker( "ti" );
+      buf >> t.counter_;
+      buf >> t.start_;
+      buf >> t.end_;
+      buf >> t.time_;
+      buf >> t.sumOfSquares_;
+      buf >> t.min_;
+      buf >> t.max_;
+      buf >> t.last_;
+      return buf;
+   }
+
+} //namespace timing
 
 typedef timing::Timer<timing::CpuPolicy>  CpuTimer;
 typedef timing::Timer<timing::WcPolicy>    WcTimer;
