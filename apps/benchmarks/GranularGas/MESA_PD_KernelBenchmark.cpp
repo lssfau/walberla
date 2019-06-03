@@ -41,8 +41,12 @@
 #include <blockforest/Initialization.h>
 #include <core/Abort.h>
 #include <core/Environment.h>
+#include <core/Hostname.h>
 #include <core/math/Random.h>
+#include <core/mpi/Gatherv.h>
+#include <core/mpi/RecvBuffer.h>
 #include <core/mpi/Reduce.h>
+#include <core/mpi/SendBuffer.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
 #include <core/OpenMP.h>
@@ -131,6 +135,57 @@ std::string envToString(const char* env)
 {
    return env != nullptr ? std::string(env) : "";
 }
+
+void storeNodeTimings( const uint_t                 runId,
+                       const std::string          & dbFile,
+                       const std::string          & tableName,
+                       const WcTimingPool         & tp )
+{
+   std::map< std::string, walberla::int64_t > integerProperties;
+   std::map< std::string, double >            realProperties;
+   std::map< std::string, std::string >       stringProperties;
+
+   walberla::mpi::SendBuffer sb;
+   walberla::mpi::RecvBuffer rb;
+
+   sb << walberla::getHostName();
+   sb << int64_t(walberla::mpi::MPIManager::instance()->rank());
+   sb << tp;
+
+   walberla::mpi::gathervBuffer(sb, rb);
+
+   WALBERLA_ROOT_SECTION()
+   {
+      while (!rb.isEmpty())
+      {
+         integerProperties.clear();
+         realProperties.clear();
+         stringProperties.clear();
+
+         std::string  hostname;
+         int64_t      rank;
+         WcTimingPool cTP;
+         rb >> hostname;
+         rb >> rank;
+         rb >> cTP;
+
+         stringProperties["hostname"] = hostname;
+         integerProperties["rank"]    = rank;
+         for (auto& v : cTP)
+         {
+            realProperties[v.first] = v.second.average();
+         }
+
+         postprocessing::storeAdditionalRunInfoInSqliteDB( runId,
+                                                           dbFile,
+                                                           tableName,
+                                                           integerProperties,
+                                                           stringProperties,
+                                                           realProperties );
+      }
+   }
+}
+
 
 int main( int argc, char ** argv )
 {
@@ -438,6 +493,8 @@ int main( int argc, char ** argv )
       walberla::mpi::reduceInplace(local_aabbs, walberla::mpi::SUM);
       walberla::mpi::reduceInplace(neighbor_subdomains, walberla::mpi::SUM);
       walberla::mpi::reduceInplace(neighbor_processes, walberla::mpi::SUM);
+
+      uint_t runId = uint_c(-1);
       WALBERLA_ROOT_SECTION()
       {
          std::map< std::string, walberla::int64_t > integerProperties;
@@ -450,6 +507,7 @@ int main( int argc, char ** argv )
          integerProperties["jobid"]               = jobid;
          integerProperties["mpi_num_processes"]   = mpiManager->numProcesses();
          integerProperties["omp_max_threads"]     = omp_get_max_threads();
+         integerProperties["outerIteration"]      = int64_c(outerIteration);
          integerProperties["numOuterIterations"]  = numOuterIterations;
          integerProperties["simulationSteps"]     = simulationSteps;
          integerProperties["bBarrier"]            = int64_c(bBarrier);
@@ -492,9 +550,10 @@ int main( int argc, char ** argv )
          stringProperties["SLURM_TASKS_PER_NODE"]     = envToString(std::getenv( "SLURM_TASKS_PER_NODE" ));
 
 
-         auto runId = postprocessing::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
+         runId = postprocessing::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
          postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *tp_reduced, "Timeloop" );
       }
+      storeNodeTimings(runId, sqlFile, "NodeTiming", tp);
       WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - END ***");
    }
 

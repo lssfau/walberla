@@ -47,7 +47,6 @@
 #include <core/logging/Logging.h>
 #include <core/OpenMP.h>
 #include <core/timing/Timer.h>
-#include <core/timing/TimingPool.h>
 #include <core/waLBerlaBuildInfo.h>
 #include <postprocessing/sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
@@ -277,6 +276,7 @@ int main( int argc, char ** argv )
       int64_t contactsDetected = 0;
       int64_t contactsTreated  = 0;
       if (bBarrier) WALBERLA_MPI_BARRIER();
+      timer.start();
       for (int64_t i=0; i < simulationSteps; ++i)
       {
          //      if (i % visSpacing == 0)
@@ -330,42 +330,49 @@ int main( int argc, char ** argv )
          if (bBarrier) WALBERLA_MPI_BARRIER();
          tp["SNN"].end();
 
-         if( i % 100 == 0 )
-         {
-            WALBERLA_LOG_DEVEL_ON_ROOT( "Timestep " << i << " / " << simulationSteps );
-            SNNBytesSent     = SNN.getBytesSent();
-            SNNBytesReceived = SNN.getBytesReceived();
-            SNNSends         = SNN.getNumberOfSends();
-            SNNReceives      = SNN.getNumberOfReceives();
-            RPBytesSent      = RP.getBytesSent();
-            RPBytesReceived  = RP.getBytesReceived();
-            RPSends          = RP.getNumberOfSends();
-            RPReceives       = RP.getNumberOfReceives();
-            walberla::mpi::reduceInplace(SNNBytesSent, walberla::mpi::SUM);
-            walberla::mpi::reduceInplace(SNNBytesReceived, walberla::mpi::SUM);
-            walberla::mpi::reduceInplace(SNNSends, walberla::mpi::SUM);
-            walberla::mpi::reduceInplace(SNNReceives, walberla::mpi::SUM);
-            walberla::mpi::reduceInplace(RPBytesSent, walberla::mpi::SUM);
-            walberla::mpi::reduceInplace(RPBytesReceived, walberla::mpi::SUM);
-            walberla::mpi::reduceInplace(RPSends, walberla::mpi::SUM);
-            walberla::mpi::reduceInplace(RPReceives, walberla::mpi::SUM);
-            auto cC = walberla::mpi::reduce(contactsChecked, walberla::mpi::SUM);
-            auto cD = walberla::mpi::reduce(contactsDetected, walberla::mpi::SUM);
-            auto cT = walberla::mpi::reduce(contactsTreated, walberla::mpi::SUM);
-            WALBERLA_LOG_DEVEL_ON_ROOT( "SNN bytes communicated:   " << SNNBytesSent << " / " << SNNBytesReceived );
-            WALBERLA_LOG_DEVEL_ON_ROOT( "SNN communication partners: " << SNNSends << " / " << SNNReceives );
-            WALBERLA_LOG_DEVEL_ON_ROOT( "RP bytes communicated:  " << RPBytesSent << " / " << RPBytesReceived );
-            WALBERLA_LOG_DEVEL_ON_ROOT( "RP communication partners: " << RPSends << " / " << RPReceives );
-            WALBERLA_LOG_DEVEL_ON_ROOT( "contacts checked/detected/treated: " << cC << " / " << cD << " / " << cT );
-            if (bBarrier) WALBERLA_MPI_BARRIER();
-         }
+         //               if( i % 100 == 0 )
+         //               {
+         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "Timestep " << i << " / " << simulationSteps );
+         //                  SNNBytesSent     = SNN.getBytesSent();
+         //                  SNNBytesReceived = SNN.getBytesReceived();
+         //                  SNNSends         = SNN.getNumberOfSends();
+         //                  SNNReceives      = SNN.getNumberOfReceives();
+         //                  RPBytesSent      = RP.getBytesSent();
+         //                  RPBytesReceived  = RP.getBytesReceived();
+         //                  RPSends          = RP.getNumberOfSends();
+         //                  RPReceives       = RP.getNumberOfReceives();
+         //                  walberla::mpi::reduceInplace(SNNBytesSent, walberla::mpi::SUM);
+         //                  walberla::mpi::reduceInplace(SNNBytesReceived, walberla::mpi::SUM);
+         //                  walberla::mpi::reduceInplace(SNNSends, walberla::mpi::SUM);
+         //                  walberla::mpi::reduceInplace(SNNReceives, walberla::mpi::SUM);
+         //                  walberla::mpi::reduceInplace(RPBytesSent, walberla::mpi::SUM);
+         //                  walberla::mpi::reduceInplace(RPBytesReceived, walberla::mpi::SUM);
+         //                  walberla::mpi::reduceInplace(RPSends, walberla::mpi::SUM);
+         //                  walberla::mpi::reduceInplace(RPReceives, walberla::mpi::SUM);
+         //                  auto cC = walberla::mpi::reduce(contactsChecked, walberla::mpi::SUM);
+         //                  auto cD = walberla::mpi::reduce(contactsDetected, walberla::mpi::SUM);
+         //                  auto cT = walberla::mpi::reduce(contactsTreated, walberla::mpi::SUM);
+         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "SNN bytes communicated:   " << SNNBytesSent << " / " << SNNBytesReceived );
+         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "SNN communication partners: " << SNNSends << " / " << SNNReceives );
+         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "RP bytes communicated:  " << RPBytesSent << " / " << RPBytesReceived );
+         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "RP communication partners: " << RPSends << " / " << RPReceives );
+         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "contacts checked/detected/treated: " << cC << " / " << cD << " / " << cT );
+         //               }
       }
       timer.end();
+
+      auto timer_reduced = walberla::timing::getReduced(timer, REDUCE_TOTAL, 0);
+      double PUpS = 0.0;
+      WALBERLA_ROOT_SECTION()
+      {
+         WALBERLA_LOG_INFO_ON_ROOT(*timer_reduced);
+         WALBERLA_LOG_INFO_ON_ROOT("runtime: " << timer_reduced->max());
+         PUpS = double_c(numParticles) * double_c(simulationSteps) / double_c(timer_reduced->max());
+         WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpS);
+      }
+
       auto tp_reduced = tp.getReduced();
       WALBERLA_LOG_INFO_ON_ROOT(*tp_reduced);
-      WALBERLA_LOG_INFO_ON_ROOT("runtime: " << timer.average());
-      auto PUpS = real_c(numParticles) * real_c(simulationSteps) / timer.average();
-      WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpS);
       WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
 
       WALBERLA_LOG_INFO_ON_ROOT("*** CHECKING RESULT - START ***");
@@ -436,8 +443,8 @@ int main( int argc, char ** argv )
          integerProperties["contacts_detected"]   = contactsDetected;
          integerProperties["contacts_treated"]    = contactsTreated;
          integerProperties["blocks_x"]            = int64_c(forest->getXSize());
-         integerProperties["blocks_y"]            = int64_c(forest->getXSize());
-         integerProperties["blocks_z"]            = int64_c(forest->getXSize());
+         integerProperties["blocks_y"]            = int64_c(forest->getYSize());
+         integerProperties["blocks_z"]            = int64_c(forest->getZSize());
          realProperties["domain_x"]               = double_c(forest->getDomain().xSize());
          realProperties["domain_y"]               = double_c(forest->getDomain().ySize());
          realProperties["domain_z"]               = double_c(forest->getDomain().zSize());
@@ -454,6 +461,10 @@ int main( int argc, char ** argv )
          integerProperties["RPReceives"]          = RPReceives;
          realProperties["linkedCellsVolume"]      = linkedCellsVolume;
          integerProperties["numLinkedCells"]      = int64_c(numLinkedCells);
+         realProperties["timer_min"]              = timer_reduced->min();
+         realProperties["timer_max"]              = timer_reduced->max();
+         realProperties["timer_average"]          = timer_reduced->average();
+         realProperties["timer_total"]            = timer_reduced->total();
          stringProperties["SLURM_CLUSTER_NAME"]       = envToString(std::getenv( "SLURM_CLUSTER_NAME" ));
          stringProperties["SLURM_CPUS_ON_NODE"]       = envToString(std::getenv( "SLURM_CPUS_ON_NODE" ));
          stringProperties["SLURM_CPUS_PER_TASK"]      = envToString(std::getenv( "SLURM_CPUS_PER_TASK" ));
@@ -466,11 +477,10 @@ int main( int argc, char ** argv )
          stringProperties["SLURM_NTASKS_PER_CORE"]    = envToString(std::getenv( "SLURM_NTASKS_PER_CORE" ));
          stringProperties["SLURM_NTASKS_PER_NODE"]    = envToString(std::getenv( "SLURM_NTASKS_PER_NODE" ));
          stringProperties["SLURM_NTASKS_PER_SOCKET"]  = envToString(std::getenv( "SLURM_NTASKS_PER_SOCKET" ));
-         stringProperties["SLURM_TASKS_PER_NODE"]     = envToString(std::getenv( "SLURM_TASKS_PER_NODE" ));
-
 
          auto runId = postprocessing::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
          postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *tp_reduced, "Timeloop" );
+
       }
       WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - END ***");
    }

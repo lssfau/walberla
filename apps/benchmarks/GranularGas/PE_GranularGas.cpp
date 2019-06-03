@@ -43,6 +43,11 @@ using namespace walberla::timing;
 
 using BodyTuple = std::tuple<Sphere, Plane> ;
 
+std::string envToString(const char* env)
+{
+   return env != nullptr ? std::string(env) : "";
+}
+
 int main( int argc, char ** argv )
 {
    WcTimingTree tt;
@@ -250,9 +255,10 @@ int main( int argc, char ** argv )
    for (int64_t outerIteration = 0; outerIteration < numOuterIterations; ++outerIteration)
    {
       WALBERLA_LOG_INFO_ON_ROOT("*** RUNNING OUTER ITERATION " << outerIteration << " ***");
-      WALBERLA_MPI_BARRIER();
       WcTimer timer;
       WcTimingPool tp;
+      WALBERLA_MPI_BARRIER();
+      timer.start();
       for (int64_t i=0; i < simulationSteps; ++i)
       {
          if( i % 200 == 0 )
@@ -273,11 +279,17 @@ int main( int argc, char ** argv )
          //   vtkSphereOutput->write( );
          //}
       }
-      WALBERLA_MPI_BARRIER();
       timer.end();
-      WALBERLA_LOG_INFO_ON_ROOT("runtime: " << timer.average());
-      auto PUpS = real_c(numParticles) * real_c(simulationSteps) / timer.average();
-      WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpS);
+      auto timer_reduced = walberla::timing::getReduced(timer, REDUCE_TOTAL, 0);
+      double PUpS = 0.0;
+      WALBERLA_ROOT_SECTION()
+      {
+         WALBERLA_LOG_INFO_ON_ROOT(*timer_reduced);
+         WALBERLA_LOG_INFO_ON_ROOT("runtime: " << timer_reduced->max());
+         PUpS = double_c(numParticles) * double_c(simulationSteps) / double_c(timer_reduced->max());
+         WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpS);
+      }
+
       auto tp_reduced = tp.getReduced();
       WALBERLA_LOG_INFO_ON_ROOT(*tp_reduced);
       WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
@@ -330,14 +342,30 @@ int main( int argc, char ** argv )
          integerProperties["simulationSteps"]     = simulationSteps;
          integerProperties["bBarrier"]            = int64_c(bBarrier);
          realProperties["PUpS"]                   = double_c(PUpS);
+         realProperties["timer_min"]              = timer_reduced->min();
+         realProperties["timer_max"]              = timer_reduced->max();
+         realProperties["timer_average"]          = timer_reduced->average();
+         realProperties["timer_total"]            = timer_reduced->total();
          integerProperties["num_particles"]       = numParticles;
          integerProperties["num_ghost_particles"] = numGhostParticles;
          integerProperties["blocks_x"]            = int64_c(forest->getXSize());
-         integerProperties["blocks_y"]            = int64_c(forest->getXSize());
-         integerProperties["blocks_z"]            = int64_c(forest->getXSize());
+         integerProperties["blocks_y"]            = int64_c(forest->getYSize());
+         integerProperties["blocks_z"]            = int64_c(forest->getZSize());
          realProperties["domain_x"]               = double_c(forest->getDomain().xSize());
          realProperties["domain_y"]               = double_c(forest->getDomain().ySize());
          realProperties["domain_z"]               = double_c(forest->getDomain().zSize());
+         stringProperties["SLURM_CLUSTER_NAME"]       = envToString(std::getenv( "SLURM_CLUSTER_NAME" ));
+         stringProperties["SLURM_CPUS_ON_NODE"]       = envToString(std::getenv( "SLURM_CPUS_ON_NODE" ));
+         stringProperties["SLURM_CPUS_PER_TASK"]      = envToString(std::getenv( "SLURM_CPUS_PER_TASK" ));
+         stringProperties["SLURM_JOB_ACCOUNT"]        = envToString(std::getenv( "SLURM_JOB_ACCOUNT" ));
+         stringProperties["SLURM_JOB_ID"]             = envToString(std::getenv( "SLURM_JOB_ID" ));
+         stringProperties["SLURM_JOB_CPUS_PER_NODE"]  = envToString(std::getenv( "SLURM_JOB_CPUS_PER_NODE" ));
+         stringProperties["SLURM_JOB_NAME"]           = envToString(std::getenv( "SLURM_JOB_NAME" ));
+         stringProperties["SLURM_JOB_NUM_NODES"]      = envToString(std::getenv( "SLURM_JOB_NUM_NODES" ));
+         stringProperties["SLURM_NTASKS"]             = envToString(std::getenv( "SLURM_NTASKS" ));
+         stringProperties["SLURM_NTASKS_PER_CORE"]    = envToString(std::getenv( "SLURM_NTASKS_PER_CORE" ));
+         stringProperties["SLURM_NTASKS_PER_NODE"]    = envToString(std::getenv( "SLURM_NTASKS_PER_NODE" ));
+         stringProperties["SLURM_NTASKS_PER_SOCKET"]  = envToString(std::getenv( "SLURM_NTASKS_PER_SOCKET" ));
 
          auto runId = postprocessing::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
          postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *tp_reduced, "Timeloop" );
