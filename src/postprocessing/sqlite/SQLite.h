@@ -100,17 +100,21 @@ uint_t storeRunInSqliteDB( const string               & dbFile,
                            const map<string, double > & realProperties   = map<string,double>(),
                            const int                    busyTimeout      = BUSY_TIMEOUT );
 
-void storeAdditionalRunInfoInSqliteDB( const string               & dbFile,
-                                       const map<string, int>     & integerProperties= map<string,int>(),
-                                       const map<string, string > & stringProperties = map<string,string>(),
-                                       const map<string, double > & realProperties   = map<string,double>(),
-                                       const int                    busyTimeout      = BUSY_TIMEOUT );
+void storeAdditionalRunInfoInSqliteDB( const uint_t                 runId,
+                                       const string               & dbFile,
+                                       const string               & tableName,
+                                       const map<string, int>     & integerProperties,
+                                       const map<string, string > & stringProperties,
+                                       const map<string, double > & realProperties,
+                                       const int                    busyTimeout = BUSY_TIMEOUT);
 
-void storeAdditionalRunInfoInSqliteDB( const string               & dbFile,
-                                       const map<string, int64_t> & integerProperties= map<string,int64_t>(),
-                                       const map<string, string > & stringProperties = map<string,string>(),
-                                       const map<string, double > & realProperties   = map<string,double>(),
-                                       const int                    busyTimeout      = BUSY_TIMEOUT );
+void storeAdditionalRunInfoInSqliteDB( const uint_t                 runId,
+                                       const string               & dbFile,
+                                       const string               & tableName,
+                                       const map<string, int64_t> & integerProperties,
+                                       const map<string, string > & stringProperties,
+                                       const map<string, double > & realProperties,
+                                       const int                    busyTimeout = BUSY_TIMEOUT);
 
 void storeTimingPoolInSqliteDB( const string & dbFile, uint_t runId, const WcTimingPool & tp,
                                 const std::string & name, const int busyTimeout = BUSY_TIMEOUT );
