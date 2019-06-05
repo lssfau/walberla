@@ -123,7 +123,7 @@ void SyncNextNeighbors::generateSynchronizationMessages(data::ParticleStorage& p
          continue;
       }
 
-      if (domain.isContainedInLocalSubdomain(pIt->getPosition(), pIt->getInteractionRadius()))
+      if (domain.isContainedInLocalSubdomain(pIt->getPosition(), pIt->getInteractionRadius() + dx))
       {
          //no sync needed
          //just delete ghost particles if there are any
