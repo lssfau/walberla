@@ -1,6 +1,6 @@
 
 waLBerla_link_files_to_builddir( "*.prm" )
-waLBerla_link_files_to_builddir( "simulation_setup" )
+#waLBerla_link_files_to_builddir( "simulation_setup" )
 
 waLBerla_python_file_generates(UniformGridGPU.py
         UniformGridGPU_LatticeModel.cpp UniformGridGPU_LatticeModel.h
