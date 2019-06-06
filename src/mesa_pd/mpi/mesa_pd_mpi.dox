@@ -1,0 +1,11 @@
+namespace walberla {
+namespace mesa_pd {
+
+/**
+ * \defgroup mesa_pd_mpi Communication functionality for MESA-PD module.
+ * \ingroup mesa_pd
+ * Description of all communication functions available in the MESA-PD module.
+**/
+
+}
+}

@@ -21,68 +21,14 @@
 
 #pragma once
 
-#include "core/debug/Debug.h"
-#include "communication/UniformMPIDatatypeInfo.h"
-#include "field/communication/MPIDatatypes.h"
-
-#include <set>
+#include "field/communication/StencilRestrictedMPIDatatypeInfo.h"
 
 namespace walberla {
 namespace lbm {
 namespace communication {
 
 template<typename PdfField_T>
-class PdfFieldMPIDatatypeInfo : public walberla::communication::UniformMPIDatatypeInfo
-{
-public:
-   PdfFieldMPIDatatypeInfo( BlockDataID pdfFieldID ) : pdfFieldID_( pdfFieldID ) {}
-
-   virtual ~PdfFieldMPIDatatypeInfo() {}
-
-   virtual shared_ptr<mpi::Datatype> getSendDatatype ( IBlock * block, const stencil::Direction dir )
-   {
-      return make_shared<mpi::Datatype>( field::communication::mpiDatatypeSliceBeforeGhostlayerXYZ(
-         *getField( block ), dir, uint_t( 1 ), getOptimizedCommunicationIndices( dir ), false ) );
-   }
-
-   virtual shared_ptr<mpi::Datatype> getRecvDatatype ( IBlock * block, const stencil::Direction dir )
-   {
-      return make_shared<mpi::Datatype>( field::communication::mpiDatatypeGhostLayerOnlyXYZ(
-         *getField( block ), dir, false, getOptimizedCommunicationIndices( stencil::inverseDir[dir] ) ) );
-   }
-
-   virtual void * getSendPointer( IBlock * block, const stencil::Direction )
-   {
-      return getField(block)->data();
-   }
-
-   virtual void * getRecvPointer( IBlock * block, const stencil::Direction )
-   {
-      return getField(block)->data();
-   }
-
-private:
-
-   inline static std::set< cell_idx_t > getOptimizedCommunicationIndices( const stencil::Direction dir )
-   {
-      std::set< cell_idx_t > result;
-      for( uint_t i = 0; i < PdfField_T::Stencil::d_per_d_length[dir]; ++i )
-      {
-         result.insert( cell_idx_c( PdfField_T::Stencil::idx[PdfField_T::Stencil::d_per_d[dir][i]] ) );
-      }
-
-      return result;
-   }
-
-   PdfField_T * getField( IBlock * block )
-   {
-      PdfField_T * const f = block->getData<PdfField_T>( pdfFieldID_ );
-      WALBERLA_ASSERT_NOT_NULLPTR( f );
-      return f;
-   }
-
-   BlockDataID pdfFieldID_;
-};
+using PdfFieldMPIDatatypeInfo = field::communication::StencilRestrictedMPIDatatypeInfo<PdfField_T, typename PdfField_T::Stencil>;
 
 
 } // namespace communication

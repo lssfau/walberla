@@ -1,5 +1,6 @@
 add_subdirectory(basics)
 add_subdirectory(cuda)
 add_subdirectory(lbm)
+add_subdirectory(mesa_pd)
 add_subdirectory(pde)
 add_subdirectory(pe)           

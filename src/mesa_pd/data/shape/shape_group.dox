@@ -1,0 +1,11 @@
+namespace walberla {
+namespace mesa_pd {
+
+/**
+ * \defgroup mesa_pd_shape Particle shapes of MESA-PD module
+ * \ingroup mesa_pd
+ * Description of particle shapes available in the MESA-PD module.
+**/
+
+}
+}

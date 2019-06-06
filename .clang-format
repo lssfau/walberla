@@ -65,7 +65,7 @@ IncludeCategories:
     Priority:        5
   - Regex:           '^"domain_decomposition/'
     Priority:        6
-  - Regex:           '^"domain_decomposition/'
+  - Regex:           '^"executiontree/'
     Priority:        7
   - Regex:           '^"fft/'
     Priority:        8

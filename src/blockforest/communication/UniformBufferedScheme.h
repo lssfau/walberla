@@ -77,11 +77,11 @@ namespace communication {
 * for the schemes: the tag can be passed in the constructor.
 */
 //*******************************************************************************************************************
-template< typename Stencil >
+template< typename Stencil_T >
 class UniformBufferedScheme
 {
 public:
-
+   typedef Stencil_T Stencil;
    typedef mpi::SendBuffer SendBuffer;
    typedef mpi::RecvBuffer RecvBuffer;
 
@@ -306,7 +306,7 @@ void UniformBufferedScheme<Stencil>::startCommunication()
             if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
                continue;
 
-            if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) )
+            if( block->neighborExistsLocally( neighborIdx, uint_t(0) ) && localMode_ != NO_OPTIMIZATION )
             {
                auto neighbor = dynamic_cast< Block * >( forest->getBlock(nBlockId) );
                WALBERLA_ASSERT_EQUAL( neighbor->getProcess(), block->getProcess() );
