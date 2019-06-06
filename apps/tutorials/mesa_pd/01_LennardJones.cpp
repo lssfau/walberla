@@ -89,15 +89,15 @@ int main( int argc, char ** argv )
       WALBERLA_LOG_DEVEL(timestep);
       linkedCells.clear();
       storage->forEachParticle(true, kernel::SelectAll(), ac, ipilc, ac, linkedCells);
-      storage->forEachParticle(true, kernel::SelectAll(), ac, vvPreForce, ac);
+      storage->forEachParticle(true, kernel::SelectLocal(), ac, vvPreForce, ac);
       linkedCells.forEachParticlePairHalf(true, kernel::SelectAll(), ac, lj, ac);
       const real_t coeff = real_t(0.2);
       storage->forEachParticle(true,
-                               kernel::SelectAll(),
+                               kernel::SelectLocal(),
                                ac,
                                [coeff](const size_t idx, auto& access){ access.setForce(idx, -coeff*access.getPosition(idx) + access.getForce(idx)); },
                                ac);
-      storage->forEachParticle(true, kernel::SelectAll(), ac, vvPostForce, ac);
+      storage->forEachParticle(true, kernel::SelectLocal(), ac, vvPostForce, ac);
       vtkWriter->write();
    }
 

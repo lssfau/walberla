@@ -28,6 +28,7 @@
 
 #include <mesa_pd/data/ContactHistory.h>
 #include <mesa_pd/data/DataTypes.h>
+#include <mesa_pd/mpi/notifications/reset.h>
 
 #include <core/mpi/BufferDataTypeExtensions.h>
 #include <core/mpi/Datatype.h>
@@ -55,6 +56,12 @@ public:
 
    const data::Particle& p_;
 };
+
+template <>
+void reset<ContactHistoryNotification>(data::Particle& p)
+{
+   p.setNewContactHistory(std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>());
+}
 
 void reduce(data::Particle&& p, const ContactHistoryNotification::Parameters& objparam)
 {
