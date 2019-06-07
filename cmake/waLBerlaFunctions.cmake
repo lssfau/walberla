@@ -91,7 +91,7 @@ function ( waLBerla_add_module )
     if ( hasSourceFiles )
         set( generatedSourceFiles )
         set( generatorSourceFiles )
-        handle_python_codegen(sourceFiles generatedSourceFiles generatorSourceFiles codeGenRequired ${sourceFiles})
+        handle_python_codegen(sourceFiles generatedSourceFiles generatorSourceFiles codeGenRequired "default_codegen" ${sourceFiles})
         if( NOT WALBERLA_BUILD_WITH_CODEGEN AND codeGenRequired)
             message(STATUS "Skipping ${ARG_NAME} since pystencils code generation is not enabled")
             return()
@@ -124,6 +124,10 @@ function ( waLBerla_add_module )
                                                LIBRARY DESTINATION lib
                                                ARCHIVE DESTINATION lib )
     endif( )
+
+    if( codeGenRequired)
+        target_include_directories(${ARG_NAME} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/default_codegen")
+    endif()
 
     # Install rule for header
     install ( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
@@ -159,12 +163,13 @@ endfunction ( waLBerla_add_module )
 # The application is linked against all waLBerla modules that are listed after DEPENDS
 #
 #
-#   NAME    [required]   Name of application
-#   GROUP   [optional]   IDE group name (e.g. VS)
-#   DEPENDS [required]   list of modules, that this application depends on
-#   FILES   [optional]   list of all source and header files belonging to that application
-#                        if this is not given, all source and header files in the directory are added.
-#                        Careful: when file was added or deleted, cmake has to be run again
+#   NAME    [required]    Name of application
+#   GROUP   [optional]    IDE group name (e.g. VS)
+#   DEPENDS [required]    list of modules, that this application depends on
+#   FILES   [optional]    list of all source and header files belonging to that application
+#                         if this is not given, all source and header files in the directory are added.
+#                         Careful: when file was added or deleted, cmake has to be run again
+#   CODGEN_CFG [optional] string passed to code generation scripts
 #
 #  Example:
 #     waLBerla_compile_app ( NAME myApp DEPENDS core field lbm/boundary )
@@ -172,12 +177,16 @@ endfunction ( waLBerla_add_module )
 
 function ( waLBerla_add_executable )
     set( options )
-    set( oneValueArgs NAME GROUP )
-    set( multiValueArgs FILES DEPENDS )
+    set( oneValueArgs NAME GROUP CODEGEN_CFG)
+    set( multiValueArgs FILES DEPENDS)
     cmake_parse_arguments( ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
     if( NOT ARG_NAME )
       message ( FATAL_ERROR "waLBerla_add_executable called without a NAME" )
+    endif()
+
+    if( NOT ARG_CODEGEN_CFG)
+        set(ARG_CODEGEN_CFG "default_codegen")
     endif()
 
     # Skip this app, if it depends on modules that have not been built ( because they for example depend on PE)
@@ -211,7 +220,8 @@ function ( waLBerla_add_executable )
 
     set( generatedSourceFiles )
     set( generatorSourceFiles )
-    handle_python_codegen(sourceFiles generatedSourceFiles generatorSourceFiles codeGenRequired ${sourceFiles})
+    handle_python_codegen(sourceFiles generatedSourceFiles generatorSourceFiles
+                          codeGenRequired ${ARG_CODEGEN_CFG} ${sourceFiles} )
 
     if( NOT WALBERLA_BUILD_WITH_CODEGEN AND codeGenRequired)
         message(STATUS "Skipping ${ARG_NAME} since pystencils code generation is not enabled")
@@ -235,6 +245,10 @@ function ( waLBerla_add_executable )
             set( ARG_GROUP "APPS" )
         endif()
         set_property( TARGET  ${ARG_NAME}  PROPERTY  FOLDER  ${ARG_GROUP} )
+    endif()
+
+    if( codeGenRequired )
+        target_include_directories(${ARG_NAME} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/${ARG_CODEGEN_CFG}")
     endif()
 
 endfunction ( waLBerla_add_executable )

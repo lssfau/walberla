@@ -31,7 +31,7 @@ endfunction ( add_flag )
 # The python script, when called with -l, should return a semicolon-separated list of generated files
 # if this list changes, CMake has to be run manually again.
 #######################################################################################################################
-function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generatorsOut codeGenRequiredOut )
+function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generatorsOut codeGenRequiredOut codegenCfg)
     set(result )
     set(generatedResult )
     set(generatorsResult )
@@ -45,7 +45,7 @@ function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generator
 
                 set( generatedWithAbsolutePath )
                 foreach( filename ${generatedSourceFiles} )
-                    list(APPEND generatedWithAbsolutePath ${CMAKE_CURRENT_BINARY_DIR}/${filename})
+                    list(APPEND generatedWithAbsolutePath ${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}/${filename})
                 endforeach()
 
                 list(APPEND generatedResult  ${generatedWithAbsolutePath} )
@@ -56,6 +56,7 @@ function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generator
                         "\\\{\"EXPECTED_FILES\": [\"${jsonFileList}\"], \"CMAKE_VARS\" : \\\{  "
                             "\"WALBERLA_OPTIMIZE_FOR_LOCALHOST\": \"${WALBERLA_OPTIMIZE_FOR_LOCALHOST}\","
                             "\"WALBERLA_DOUBLE_ACCURACY\": \"${WALBERLA_DOUBLE_ACCURACY}\","
+                            "\"CODEGEN_CFG\": \"${codegenCfg}\","
                             "\"WALBERLA_BUILD_WITH_MPI\": \"${WALBERLA_BUILD_WITH_MPI}\","
                             "\"WALBERLA_BUILD_WITH_CUDA\": \"${WALBERLA_BUILD_WITH_CUDA}\","
                             "\"WALBERLA_BUILD_WITH_OPENMP\": \"${WALBERLA_BUILD_WITH_OPENMP}\" \\\} \\\}"
@@ -63,11 +64,11 @@ function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generator
                 string(REPLACE "\"" "\\\"" pythonParameters ${pythonParameters})   # even one more quoting level required
                 string(REPLACE "\n" "" pythonParameters ${pythonParameters})  # remove newline characters
 
+                file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
                 add_custom_command(OUTPUT ${generatedWithAbsolutePath}
                                    DEPENDS ${sourceFile}
                                    COMMAND ${PYTHON_EXECUTABLE} ${sourceFile} ${pythonParameters}
-                                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-                include_directories(${CMAKE_CURRENT_BINARY_DIR})
+                                   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
             endif()
         else()
             list(APPEND result ${sourceFile})
