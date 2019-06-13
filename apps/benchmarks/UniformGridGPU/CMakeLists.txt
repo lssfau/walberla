@@ -10,6 +10,9 @@ waLBerla_python_file_generates(UniformGridGPU.py
         UniformGridGPU_PackInfo.cu UniformGridGPU_PackInfo.h
         )
 
-waLBerla_add_executable ( NAME UniformGridBenchmarkGPU
-                          FILES UniformGridGPU.cpp UniformGridGPU.py
-                          DEPENDS blockforest boundary core cuda domain_decomposition field geometry timeloop vtk )
+foreach(config srt trt mrt smagorinsky entropic )
+    waLBerla_add_executable ( NAME UniformGridBenchmarkGPU_${config}
+                              FILES UniformGridGPU.cpp UniformGridGPU.py
+                              DEPENDS blockforest boundary core cuda domain_decomposition field geometry timeloop vtk
+                              CODEGEN_CFG ${config})
+endforeach()

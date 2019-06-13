@@ -1,7 +1,7 @@
 DomainSetup
 {
-   blocks        <  1,    1,   1 >;
-   cellsPerBlock <  256, 256, 128 >;
+   blocks        <  2,    1,   1 >;
+   cellsPerBlock <  64, 64, 64 >;
    periodic      <  1,    1,   1 >;
 }
 
@@ -15,13 +15,16 @@ Parameters
     // Can be one of: GPUPackInfo_Baseline, GPUPackInfo_Streams, UniformGPUScheme_Baseline, UniformGPUScheme_Memcpy
     communicationScheme UniformGPUScheme_Baseline;
 
-	vtkWriteFrequency 0;             // write a VTK file every n'th step, if zero VTK output is disabled
+	vtkWriteFrequency 100;             // write a VTK file every n'th step, if zero VTK output is disabled
 	cudaEnabledMPI false;            // switch on if you have a CUDA-enabled MPI implementation
 
 	timeStepStrategy noOverlap;      // can be: noOverlap, simpleOverlap, complexOverlap, kernelOnly
-	innerOuterSplit < 32, 1, 1>;     // slice-thickness that 'outer'-kernels process when overlapping
+	innerOuterSplit < 8, 1, 1>;     // slice-thickness that 'outer'-kernels process when overlapping
 
-	remainingTimeLoggerFrequency 0;  // interval in seconds to log the estimated remaining time
+	remainingTimeLoggerFrequency 5;  // interval in seconds to log the estimated remaining time
+
+	omega 1.92;
+	initShearFlow 1;
 }
 
 /*

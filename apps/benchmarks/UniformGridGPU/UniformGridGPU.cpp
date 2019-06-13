@@ -1,5 +1,6 @@
 #include "core/Environment.h"
 #include "core/logging/Initialization.h"
+#include "core/math/Random.h"
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/PythonCallback.h"
 #include "python_coupling/DictWrapper.h"
@@ -48,6 +49,27 @@ using flag_t = walberla::uint8_t;
 using FlagField_T = FlagField<flag_t>;
 
 
+void initShearVelocity(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID pdfFieldID,
+                       const real_t xMagnitude=0.1, const real_t fluctuationMagnitude=0.05 )
+{
+    math::seedRandomGenerator(0);
+    auto halfZ = blocks->getDomainCellBB().zMax() / 2;
+    for( auto & block: *blocks)
+    {
+        PdfField_T * pdfField = block.getData<PdfField_T>( pdfFieldID );
+        WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(pdfField,
+            Cell globalCell;
+            blocks->transformBlockLocalToGlobalCell(globalCell, block, Cell(x, y, z));
+            real_t randomReal = xMagnitude * math::realRandom<real_t>(-fluctuationMagnitude, fluctuationMagnitude);
+            if( globalCell[2] >= halfZ ) {
+                pdfField->setDensityAndVelocity(x, y, z, Vector3<real_t>(xMagnitude, 0, randomReal), real_t(1.0));
+            } else {
+                pdfField->setDensityAndVelocity(x, y, z, Vector3<real_t>(-xMagnitude, 0,randomReal), real_t(1.0));
+            }
+        );
+    }
+}
+
 
 int main( int argc, char **argv )
 {
@@ -63,18 +85,24 @@ int main( int argc, char **argv )
       auto blocks = blockforest::createUniformBlockGridFromConfig( config );
 
       Vector3<uint_t> cellsPerBlock = config->getBlock( "DomainSetup" ).getParameter<Vector3<uint_t>  >( "cellsPerBlock" );
-
       // Reading parameters
       auto parameters = config->getOneBlock( "Parameters" );
       const real_t omega = parameters.getParameter<real_t>( "omega", real_c( 1.4 ));
       const uint_t timesteps = parameters.getParameter<uint_t>( "timesteps", uint_c( 50 ));
       const Vector3<real_t> initialVelocity = parameters.getParameter< Vector3<real_t> >( "initialVelocity", Vector3<real_t>() );
+      const bool initShearFlow = parameters.getParameter<bool>("initShearFlow", false);
 
       // Creating fields
       auto latticeModel = LatticeModel_T( omega );
       BlockDataID pdfFieldCpuID = lbm::addPdfFieldToStorage( blocks, "pdfs on CPU", latticeModel, initialVelocity, real_t(1), field::fzyx );
+      if( initShearFlow ) {
+          WALBERLA_LOG_INFO_ON_ROOT("Initializing shear flow");
+          initShearVelocity( blocks, pdfFieldCpuID );
+      }
+
       BlockDataID pdfFieldGpuID = cuda::addGPUFieldToStorage<PdfField_T >( blocks, pdfFieldCpuID, "pdfs on GPU", true );
       BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
+
 
       // Boundaries
       const FlagUID fluidFlagUID( "Fluid" );
@@ -95,7 +123,7 @@ int main( int argc, char **argv )
 
        // Communication setup
       bool cudaEnabledMPI = parameters.getParameter<bool>( "cudaEnabledMPI", false );
-
+      Vector3<int32_t> gpuBlockSize = parameters.getParameter<Vector3<int32_t> > ("gpuBlockSize", Vector3<int32_t>(256, 1, 1));
       const std::string communicationSchemeStr = parameters.getParameter<std::string>("communicationScheme", "UniformGPUScheme_Baseline");
       CommunicationSchemeType communicationScheme;
       if( communicationSchemeStr == "GPUPackInfo_Baseline")
@@ -106,6 +134,8 @@ int main( int argc, char **argv )
           communicationScheme = UniformGPUScheme_Baseline;
       else if (communicationSchemeStr == "UniformGPUScheme_Memcpy")
           communicationScheme = UniformGPUScheme_Memcpy;
+      else if (communicationSchemeStr == "MPIDatatypes")
+          communicationScheme = MPIDatatypes;
       else {
           WALBERLA_ABORT_NO_DEBUG_INFO("Invalid choice for communicationScheme")
       }
@@ -116,8 +146,9 @@ int main( int argc, char **argv )
       int streamHighPriority = 0;
       int streamLowPriority = 0;
       WALBERLA_CUDA_CHECK( cudaDeviceGetStreamPriorityRange(&streamLowPriority, &streamHighPriority) );
-
-      pystencils::UniformGridGPU_LbKernel lbKernel( pdfFieldGpuID, omega, Cell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]) );
+      WALBERLA_CHECK(gpuBlockSize[2] == 1);
+      pystencils::UniformGridGPU_LbKernel lbKernel( pdfFieldGpuID, omega, gpuBlockSize[0], gpuBlockSize[1],
+                                                    Cell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]) );
       lbKernel.setOuterPriority( streamHighPriority );
       UniformGridGPU_Communication< CommunicationStencil_T, cuda::GPUField< double > >
          gpuComm( blocks, pdfFieldGpuID, (CommunicationSchemeType) communicationScheme, cudaEnabledMPI );
