@@ -161,6 +161,8 @@ public:
                               inline void                       rotateZ( Type angle );
                               inline void                       swap( Quaternion& q ) /* throw() */;
                               inline const Vector3<Type>        getEulerAnglesXYZ() const;
+                              inline Type*                      data()                         {return v_;}
+                              inline Type const *               data()                         const {return v_;}
    //@}
    //**********************************************************************************************
 
@@ -1097,7 +1099,10 @@ namespace mpi {
    mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const math::Quaternion<VT> & quat )
    {
       buf.addDebugMarker( "q4" );
-      buf << quat[0] << quat[1] << quat[2] << quat[3];
+      static_assert ( std::is_trivially_copyable< math::Quaternion<VT> >::value,
+                      "type has to be trivially copyable for the memcpy to work correctly" );
+      auto pos = buf.forward(sizeof(math::Quaternion<VT>));
+      std::memcpy(pos, &quat, sizeof(math::Quaternion<VT>));
       return buf;
    }
 
@@ -1106,9 +1111,11 @@ namespace mpi {
    mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, math::Quaternion<VT> & quat )
    {
       buf.readDebugMarker( "q4" );
-      VT tmp1, tmp2, tmp3, tmp4;
-      buf >> tmp1 >> tmp2 >> tmp3 >> tmp4;
-      quat.set(tmp1, tmp2, tmp3, tmp4);
+      static_assert ( std::is_trivially_copyable< math::Quaternion<VT> >::value,
+                      "type has to be trivially copyable for the memcpy to work correctly" );
+      auto pos = buf.skip(sizeof(math::Quaternion<VT>));
+      //suppress https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html#index-Wclass-memaccess
+      std::memcpy(static_cast<void*>(&quat), pos, sizeof(math::Quaternion<VT>));
       return buf;
    }
 
