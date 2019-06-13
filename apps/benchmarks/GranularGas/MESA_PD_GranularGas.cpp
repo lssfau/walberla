@@ -329,37 +329,33 @@ int main( int argc, char ** argv )
          SNN(*ps, domain);
          if (bBarrier) WALBERLA_MPI_BARRIER();
          tp["SNN"].end();
-
-         //               if( i % 100 == 0 )
-         //               {
-         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "Timestep " << i << " / " << simulationSteps );
-         //                  SNNBytesSent     = SNN.getBytesSent();
-         //                  SNNBytesReceived = SNN.getBytesReceived();
-         //                  SNNSends         = SNN.getNumberOfSends();
-         //                  SNNReceives      = SNN.getNumberOfReceives();
-         //                  RPBytesSent      = RP.getBytesSent();
-         //                  RPBytesReceived  = RP.getBytesReceived();
-         //                  RPSends          = RP.getNumberOfSends();
-         //                  RPReceives       = RP.getNumberOfReceives();
-         //                  walberla::mpi::reduceInplace(SNNBytesSent, walberla::mpi::SUM);
-         //                  walberla::mpi::reduceInplace(SNNBytesReceived, walberla::mpi::SUM);
-         //                  walberla::mpi::reduceInplace(SNNSends, walberla::mpi::SUM);
-         //                  walberla::mpi::reduceInplace(SNNReceives, walberla::mpi::SUM);
-         //                  walberla::mpi::reduceInplace(RPBytesSent, walberla::mpi::SUM);
-         //                  walberla::mpi::reduceInplace(RPBytesReceived, walberla::mpi::SUM);
-         //                  walberla::mpi::reduceInplace(RPSends, walberla::mpi::SUM);
-         //                  walberla::mpi::reduceInplace(RPReceives, walberla::mpi::SUM);
-         //                  auto cC = walberla::mpi::reduce(contactsChecked, walberla::mpi::SUM);
-         //                  auto cD = walberla::mpi::reduce(contactsDetected, walberla::mpi::SUM);
-         //                  auto cT = walberla::mpi::reduce(contactsTreated, walberla::mpi::SUM);
-         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "SNN bytes communicated:   " << SNNBytesSent << " / " << SNNBytesReceived );
-         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "SNN communication partners: " << SNNSends << " / " << SNNReceives );
-         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "RP bytes communicated:  " << RPBytesSent << " / " << RPBytesReceived );
-         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "RP communication partners: " << RPSends << " / " << RPReceives );
-         //                  WALBERLA_LOG_DEVEL_ON_ROOT( "contacts checked/detected/treated: " << cC << " / " << cD << " / " << cT );
-         //               }
       }
       timer.end();
+
+      SNNBytesSent     = SNN.getBytesSent();
+      SNNBytesReceived = SNN.getBytesReceived();
+      SNNSends         = SNN.getNumberOfSends();
+      SNNReceives      = SNN.getNumberOfReceives();
+      RPBytesSent      = RP.getBytesSent();
+      RPBytesReceived  = RP.getBytesReceived();
+      RPSends          = RP.getNumberOfSends();
+      RPReceives       = RP.getNumberOfReceives();
+      walberla::mpi::reduceInplace(SNNBytesSent, walberla::mpi::SUM);
+      walberla::mpi::reduceInplace(SNNBytesReceived, walberla::mpi::SUM);
+      walberla::mpi::reduceInplace(SNNSends, walberla::mpi::SUM);
+      walberla::mpi::reduceInplace(SNNReceives, walberla::mpi::SUM);
+      walberla::mpi::reduceInplace(RPBytesSent, walberla::mpi::SUM);
+      walberla::mpi::reduceInplace(RPBytesReceived, walberla::mpi::SUM);
+      walberla::mpi::reduceInplace(RPSends, walberla::mpi::SUM);
+      walberla::mpi::reduceInplace(RPReceives, walberla::mpi::SUM);
+      auto cC = walberla::mpi::reduce(contactsChecked, walberla::mpi::SUM);
+      auto cD = walberla::mpi::reduce(contactsDetected, walberla::mpi::SUM);
+      auto cT = walberla::mpi::reduce(contactsTreated, walberla::mpi::SUM);
+      WALBERLA_LOG_DEVEL_ON_ROOT( "SNN bytes communicated:   " << SNNBytesSent << " / " << SNNBytesReceived );
+      WALBERLA_LOG_DEVEL_ON_ROOT( "SNN communication partners: " << SNNSends << " / " << SNNReceives );
+      WALBERLA_LOG_DEVEL_ON_ROOT( "RP bytes communicated:  " << RPBytesSent << " / " << RPBytesReceived );
+      WALBERLA_LOG_DEVEL_ON_ROOT( "RP communication partners: " << RPSends << " / " << RPReceives );
+      WALBERLA_LOG_DEVEL_ON_ROOT( "contacts checked/detected/treated: " << cC << " / " << cD << " / " << cT );
 
       auto timer_reduced = walberla::timing::getReduced(timer, REDUCE_TOTAL, 0);
       double PUpS = 0.0;
