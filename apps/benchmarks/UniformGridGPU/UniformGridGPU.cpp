@@ -5,12 +5,10 @@
 #include "python_coupling/PythonCallback.h"
 #include "python_coupling/DictWrapper.h"
 #include "blockforest/Initialization.h"
-#include "lbm/field/PdfField.h"
-#include "lbm/field/AddToStorage.h"
 #include "field/FlagField.h"
 #include "field/AddToStorage.h"
-#include "lbm/communication/PdfFieldPackInfo.h"
-#include "lbm/vtk/VTKOutput.h"
+#include "field/vtk/VTKWriter.h"
+#include "field/communication/PackInfo.h"
 #include "lbm/PerformanceLogger.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
 #include "timeloop/all.h"
@@ -25,8 +23,9 @@
 #include "cuda/AddGPUFieldToStorage.h"
 #include "cuda/communication/UniformGPUScheme.h"
 #include "cuda/DeviceSelectMPI.h"
-#include "lbm/sweeps/CellwiseSweep.h"
 #include "domain_decomposition/SharedSweep.h"
+#include "gui/Gui.h"
+#include "lbm/gui/Connection.h"
 
 #include "UniformGridGPU_LatticeModel.h"
 #include "UniformGridGPU_LbKernel.h"
@@ -34,37 +33,45 @@
 #include "UniformGridGPU_UBB.h"
 #include "UniformGridGPU_NoSlip.h"
 #include "UniformGridGPU_Communication.h"
+#include "UniformGridGPU_MacroSetter.h"
+#include "UniformGridGPU_MacroGetter.h"
 
 
 using namespace walberla;
 
 using LatticeModel_T = lbm::UniformGridGPU_LatticeModel;
 
+const auto Q = LatticeModel_T::Stencil::Q;
+
+
 using Stencil_T = LatticeModel_T::Stencil;
 using CommunicationStencil_T = LatticeModel_T::CommunicationStencil;
-using PdfField_T = lbm::PdfField<LatticeModel_T>;
+using PdfField_T = GhostLayerField<real_t, Q>;
 using CommScheme_T = cuda::communication::UniformGPUScheme<CommunicationStencil_T>;
-
+using VelocityField_T = GhostLayerField<real_t, 3>;
 using flag_t = walberla::uint8_t;
 using FlagField_T = FlagField<flag_t>;
 
 
-void initShearVelocity(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID pdfFieldID,
+void initShearVelocity(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID velFieldID,
                        const real_t xMagnitude=0.1, const real_t fluctuationMagnitude=0.05 )
 {
     math::seedRandomGenerator(0);
     auto halfZ = blocks->getDomainCellBB().zMax() / 2;
     for( auto & block: *blocks)
     {
-        PdfField_T * pdfField = block.getData<PdfField_T>( pdfFieldID );
-        WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(pdfField,
+        auto velField = block.getData<VelocityField_T>( velFieldID );
+        WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(velField,
             Cell globalCell;
             blocks->transformBlockLocalToGlobalCell(globalCell, block, Cell(x, y, z));
             real_t randomReal = xMagnitude * math::realRandom<real_t>(-fluctuationMagnitude, fluctuationMagnitude);
+            velField->get(x, y, z, 1) = real_t(0);
+            velField->get(x, y, z, 2) = randomReal;
+
             if( globalCell[2] >= halfZ ) {
-                pdfField->setDensityAndVelocity(x, y, z, Vector3<real_t>(xMagnitude, 0, randomReal), real_t(1.0));
+                velField->get(x, y, z, 0) = xMagnitude;
             } else {
-                pdfField->setDensityAndVelocity(x, y, z, Vector3<real_t>(-xMagnitude, 0,randomReal), real_t(1.0));
+                velField->get(x, y, z, 0) = -xMagnitude;
             }
         );
     }
@@ -89,16 +96,24 @@ int main( int argc, char **argv )
       auto parameters = config->getOneBlock( "Parameters" );
       const real_t omega = parameters.getParameter<real_t>( "omega", real_c( 1.4 ));
       const uint_t timesteps = parameters.getParameter<uint_t>( "timesteps", uint_c( 50 ));
-      const Vector3<real_t> initialVelocity = parameters.getParameter< Vector3<real_t> >( "initialVelocity", Vector3<real_t>() );
       const bool initShearFlow = parameters.getParameter<bool>("initShearFlow", false);
 
       // Creating fields
-      auto latticeModel = LatticeModel_T( omega );
-      BlockDataID pdfFieldCpuID = lbm::addPdfFieldToStorage( blocks, "pdfs on CPU", latticeModel, initialVelocity, real_t(1), field::fzyx );
+      BlockDataID pdfFieldCpuID = field::addToStorage< PdfField_T >( blocks, "pdfs cpu", real_t(99.8), field::fzyx);
+      BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >( blocks, "vel", real_t(0), field::fzyx);
+
       if( initShearFlow ) {
           WALBERLA_LOG_INFO_ON_ROOT("Initializing shear flow");
-          initShearVelocity( blocks, pdfFieldCpuID );
+          initShearVelocity( blocks, velFieldCpuID );
       }
+      pystencils::UniformGridGPU_MacroSetter setterSweep(pdfFieldCpuID, velFieldCpuID);
+      for( auto & block : *blocks )
+          setterSweep( &block );
+      // setter sweep only initializes interior of domain - for push schemes to work a first communication is required here
+      blockforest::communication::UniformBufferedScheme<CommunicationStencil_T> initialComm(blocks);
+      initialComm.addPackInfo( make_shared< field::communication::PackInfo<PdfField_T> >( pdfFieldCpuID ) );
+      initialComm();
+
 
       BlockDataID pdfFieldGpuID = cuda::addGPUFieldToStorage<PdfField_T >( blocks, pdfFieldCpuID, "pdfs on GPU", true );
       BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
@@ -253,17 +268,21 @@ int main( int argc, char **argv )
       timeLoop.add() << BeforeFunction( timeStep  )
                      << Sweep( []( IBlock * ) {}, "time step" );
 
+      pystencils::UniformGridGPU_MacroGetter getterSweep( pdfFieldCpuID, velFieldCpuID );
+
       // VTK
       uint_t vtkWriteFrequency = parameters.getParameter<uint_t>( "vtkWriteFrequency", 0 );
       if( vtkWriteFrequency > 0 )
       {
          auto vtkOutput = vtk::createVTKOutput_BlockData( *blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
                                                           "simulation_step", false, true, true, false, 0 );
-         vtkOutput->addCellDataWriter(
-                 make_shared<lbm::VelocityVTKWriter<LatticeModel_T> >( pdfFieldCpuID, "Velocity" ));
-         vtkOutput->addCellDataWriter( make_shared<lbm::DensityVTKWriter<LatticeModel_T> >( pdfFieldCpuID, "Density" ));
-         vtkOutput->addBeforeFunction(
-                 cuda::fieldCpyFunctor<PdfField_T, cuda::GPUField<real_t> >( blocks, pdfFieldCpuID, pdfFieldGpuID ));
+         auto velWriter = make_shared< field::VTKWriter<VelocityField_T> >(velFieldCpuID, "vel");
+         vtkOutput->addCellDataWriter(velWriter);
+         vtkOutput->addBeforeFunction( [&]() {
+             cuda::fieldCpy<PdfField_T, cuda::GPUField<real_t> >( blocks, pdfFieldCpuID, pdfFieldGpuID );
+             for( auto & block : *blocks )
+                 getterSweep( &block );
+         });
          timeLoop.addFuncAfterTimeStep( vtk::writeFiles( vtkOutput ), "VTK Output" );
       }
 
@@ -280,31 +299,41 @@ int main( int argc, char **argv )
           timeLoop.addFuncAfterTimeStep( logger, "remaining time logger" );
       }
 
-      for(int outerIteration = 0; outerIteration < outerIterations; ++outerIteration)
+      bool useGui = parameters.getParameter<bool>( "useGui", false );
+      if( useGui )
       {
-          timeLoop.setCurrentTimeStepToZero();
-          WcTimer simTimer;
-          cudaDeviceSynchronize();
-          WALBERLA_LOG_INFO_ON_ROOT( "Starting simulation with " << timesteps << " time steps" );
-          simTimer.start();
-          timeLoop.run();
-          cudaDeviceSynchronize();
-          simTimer.end();
-          WALBERLA_LOG_INFO_ON_ROOT( "Simulation finished" );
-          auto time = simTimer.last();
-          auto nrOfCells = real_c( cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2] );
-          auto mlupsPerProcess = nrOfCells * real_c( timesteps ) / time * 1e-6;
-          WALBERLA_LOG_RESULT_ON_ROOT( "MLUPS per process " << mlupsPerProcess );
-          WALBERLA_LOG_RESULT_ON_ROOT( "Time per time step " << time / real_c( timesteps ));
-          WALBERLA_ROOT_SECTION()
+          GUI gui( timeLoop, blocks, argc, argv);
+          lbm::connectToGui<LatticeModel_T>(gui);
+          gui.run();
+      }
+      else
+      {
+          for ( int outerIteration = 0; outerIteration < outerIterations; ++outerIteration )
           {
-              python_coupling::PythonCallback pythonCallbackResults( "results_callback" );
-              if ( pythonCallbackResults.isCallable())
+              timeLoop.setCurrentTimeStepToZero();
+              WcTimer simTimer;
+              cudaDeviceSynchronize();
+              WALBERLA_LOG_INFO_ON_ROOT( "Starting simulation with " << timesteps << " time steps" );
+              simTimer.start();
+              timeLoop.run();
+              cudaDeviceSynchronize();
+              simTimer.end();
+              WALBERLA_LOG_INFO_ON_ROOT( "Simulation finished" );
+              auto time = simTimer.last();
+              auto nrOfCells = real_c( cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2] );
+              auto mlupsPerProcess = nrOfCells * real_c( timesteps ) / time * 1e-6;
+              WALBERLA_LOG_RESULT_ON_ROOT( "MLUPS per process " << mlupsPerProcess );
+              WALBERLA_LOG_RESULT_ON_ROOT( "Time per time step " << time / real_c( timesteps ));
+              WALBERLA_ROOT_SECTION()
               {
-                  pythonCallbackResults.data().exposeValue( "mlupsPerProcess", mlupsPerProcess );
-                  pythonCallbackResults.data().exposeValue( "githash", WALBERLA_GIT_SHA1 );
-                  // Call Python function to report results
-                  pythonCallbackResults();
+                  python_coupling::PythonCallback pythonCallbackResults( "results_callback" );
+                  if ( pythonCallbackResults.isCallable())
+                  {
+                      pythonCallbackResults.data().exposeValue( "mlupsPerProcess", mlupsPerProcess );
+                      pythonCallbackResults.data().exposeValue( "githash", WALBERLA_GIT_SHA1 );
+                      // Call Python function to report results
+                      pythonCallbackResults();
+                  }
               }
           }
       }

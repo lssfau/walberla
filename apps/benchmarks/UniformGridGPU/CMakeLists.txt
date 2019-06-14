@@ -8,11 +8,31 @@ waLBerla_python_file_generates(UniformGridGPU.py
         UniformGridGPU_NoSlip.cu UniformGridGPU_NoSlip.h
         UniformGridGPU_UBB.cu UniformGridGPU_UBB.h
         UniformGridGPU_PackInfo.cu UniformGridGPU_PackInfo.h
+        UniformGridGPU_MacroSetter.cpp UniformGridGPU_MacroSetter.h
+        UniformGridGPU_MacroGetter.cpp UniformGridGPU_MacroGetter.h
         )
 
 foreach(config srt trt mrt smagorinsky entropic )
     waLBerla_add_executable ( NAME UniformGridBenchmarkGPU_${config}
                               FILES UniformGridGPU.cpp UniformGridGPU.py
-                              DEPENDS blockforest boundary core cuda domain_decomposition field geometry timeloop vtk
+                              DEPENDS blockforest boundary core cuda domain_decomposition field geometry timeloop vtk gui
                               CODEGEN_CFG ${config})
 endforeach()
+
+
+
+
+waLBerla_python_file_generates(UniformGridGPU_AA.py
+        UniformGridGPU_AA_LbKernelEven.cu UniformGridGPU_AA_LbKernelEven.h
+        UniformGridGPU_AA_LbKernelOdd.cu  UniformGridGPU_AA_LbKernelOdd.h
+        UniformGridGPU_AA_PackInfoPull.cu UniformGridGPU_AA_PackInfoPull.h
+        UniformGridGPU_AA_PackInfoPush.cu UniformGridGPU_AA_PackInfoPush.h
+        UniformGridGPU_AA_MacroSetter.cpp UniformGridGPU_AA_MacroSetter.h
+        UniformGridGPU_AA_MacroGetter.cpp UniformGridGPU_AA_MacroGetter.h
+        )
+
+set(config "srt")
+waLBerla_add_executable ( NAME UniformGridBenchmarkGPU_AA_${config}
+        FILES UniformGridGPU_AA.cpp UniformGridGPU_AA.py
+        DEPENDS blockforest boundary core cuda domain_decomposition field geometry timeloop vtk gui
+        CODEGEN_CFG ${config})

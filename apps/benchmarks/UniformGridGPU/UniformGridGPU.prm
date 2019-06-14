@@ -1,21 +1,21 @@
 DomainSetup
 {
-   blocks        <  2,    1,   1 >;
-   cellsPerBlock <  64, 64, 64 >;
+   blocks        <  1,    1,   1 >;
+   cellsPerBlock <  512, 256, 256 >;
    periodic      <  1,    1,   1 >;
 }
 
 Parameters 
 {
 
-	timesteps       10000;  // time steps of one performance measurement
+	timesteps       2000; //10000;  // time steps of one performance measurement
 	warmupSteps     0;      // number of steps to run before measurement starts
     outerIterations 1;      // how many measurements to conduct
 
     // Can be one of: GPUPackInfo_Baseline, GPUPackInfo_Streams, UniformGPUScheme_Baseline, UniformGPUScheme_Memcpy
     communicationScheme UniformGPUScheme_Baseline;
 
-	vtkWriteFrequency 100;             // write a VTK file every n'th step, if zero VTK output is disabled
+	vtkWriteFrequency 0; //100;             // write a VTK file every n'th step, if zero VTK output is disabled
 	cudaEnabledMPI false;            // switch on if you have a CUDA-enabled MPI implementation
 
 	timeStepStrategy noOverlap;      // can be: noOverlap, simpleOverlap, complexOverlap, kernelOnly
@@ -25,6 +25,7 @@ Parameters
 
 	omega 1.92;
 	initShearFlow 1;
+	useGui 0;
 }
 
 /*
