@@ -110,6 +110,9 @@ int main( int argc, char ** argv )
    int64_t numOuterIterations = mainConf.getParameter<int64_t>("numOuterIterations", 10 );
    WALBERLA_LOG_INFO_ON_ROOT("numOuterIterations: " << numOuterIterations);
 
+   int64_t initialRefinementLevel = mainConf.getParameter<int64_t>("initialRefinementLevel", 0 );
+   WALBERLA_LOG_INFO_ON_ROOT("initialRefinementLevel: " << initialRefinementLevel);
+
    int64_t simulationSteps = mainConf.getParameter<int64_t>("simulationSteps", 10 );
    WALBERLA_LOG_INFO_ON_ROOT("simulationSteps: " << simulationSteps);
 
@@ -351,6 +354,7 @@ int main( int argc, char ** argv )
          integerProperties["blocks_x"]            = int64_c(forest->getXSize());
          integerProperties["blocks_y"]            = int64_c(forest->getYSize());
          integerProperties["blocks_z"]            = int64_c(forest->getZSize());
+         integerProperties["initialRefinementLevel"] = int64_c(initialRefinementLevel);
          realProperties["domain_x"]               = double_c(forest->getDomain().xSize());
          realProperties["domain_y"]               = double_c(forest->getDomain().ySize());
          realProperties["domain_z"]               = double_c(forest->getDomain().zSize());
