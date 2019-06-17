@@ -29,6 +29,7 @@
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/mpi/notifications/NotificationType.h>
+#include <mesa_pd/mpi/notifications/reset.h>
 
 #include <core/mpi/Datatype.h>
 #include <core/mpi/RecvBuffer.h>
@@ -53,6 +54,12 @@ public:
 
    const data::Particle& p_;
 };
+
+template <>
+void reset<HeatFluxNotification>(data::Particle& p)
+{
+   p.setHeatFlux( real_t(0) );
+}
 
 void reduce(data::Particle&& p, const HeatFluxNotification::Parameters& objparam)
 {

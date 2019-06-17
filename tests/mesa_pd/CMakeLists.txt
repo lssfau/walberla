@@ -128,6 +128,9 @@ waLBerla_execute_test( NAME   MESA_PD_MPI_ReduceContactHistory PROCESSES 8 )
 waLBerla_compile_test( NAME   MESA_PD_MPI_ReduceProperty FILES mpi/ReduceProperty.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_MPI_ReduceProperty PROCESSES 8 )
 
+waLBerla_compile_test( NAME   MESA_PD_Sorting FILES Sorting.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Sorting )
+
 waLBerla_compile_test( NAME   MESA_PD_VTK_Outputs FILES vtk/VTKOutputs.cpp DEPENDS blockforest core vtk )
 waLBerla_execute_test( NAME   MESA_PD_VTK_Outputs PROCESSES 8 )
 

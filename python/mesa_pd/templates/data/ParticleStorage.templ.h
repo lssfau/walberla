@@ -133,7 +133,7 @@ public:
 
    iterator begin() { return iterator(this, 0); }
    iterator end()   { return iterator(this, size()); }
-   iterator operator[](const size_t n) { return iterator(this, n); }
+   Particle operator[](const size_t n) { return *iterator(this, n); }
 
    {% for prop in properties %}
    const {{prop.type}}& get{{prop.name | capFirst}}(const size_t idx) const {return {{prop.name}}_[idx];}
@@ -159,6 +159,8 @@ public:
    inline void reserve(const size_t size);
    inline void clear();
    inline size_t size() const;
+   template <class Compare>
+   void sort(Compare comp);
 
    /**
     * Calls the provided functor \p func for all Particles.
@@ -254,6 +256,15 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(ParticleStorage:
    get{{prop.name | capFirst}}Ref() = std::move(rhs.get{{prop.name | capFirst}}Ref());
    {%- endfor %}
    return *this;
+}
+
+inline
+void swap(ParticleStorage::Particle lhs, ParticleStorage::Particle rhs)
+{
+   if (lhs.i_ == rhs.i_) return;
+   {%- for prop in properties %}
+   std::swap(lhs.get{{prop.name | capFirst}}Ref(), rhs.get{{prop.name | capFirst}}Ref());
+   {%- endfor %}
 }
 
 inline
@@ -392,7 +403,7 @@ inline ParticleStorage::iterator ParticleStorage::find(const id_t& uid)
    //use unordered_map for faster lookup
    auto it = uidToIdx_.find(uid);
    if (it == uidToIdx_.end()) return end();
-   WALBERLA_ASSERT_EQUAL(it->first, uid, "Lookup via uidToIdx map is not up to date!!!");
+   WALBERLA_ASSERT_EQUAL(getUid(it->second), uid, "Lookup via uidToIdx map is not up to date!!!");
    return iterator(this, it->second);
 }
 
@@ -417,6 +428,47 @@ inline size_t ParticleStorage::size() const
    //WALBERLA_ASSERT_EQUAL( {{properties[0].name}}_.size(), {{prop.name}}.size() );
    {%- endfor %}
    return {{properties[0].name}}_.size();
+}
+
+template <class Compare>
+void ParticleStorage::sort(Compare comp)
+{
+   using WeightPair = std::pair<size_t, double>; //idx, weight
+
+   const size_t length = size();
+   std::vector<size_t>     newIdx(length); //where is old idx now?
+   std::vector<size_t>     oldIdx(length); //what old idx is at that idx?
+   std::vector<WeightPair> weight(length);
+
+   for (size_t idx = 0; idx < length; ++idx)
+   {
+      newIdx[idx] = idx;
+      oldIdx[idx] = idx;
+      weight[idx] = std::make_pair(idx, comp.getWeight(operator[](idx)));
+   }
+   std::sort(weight.begin(), weight.end(), [](const WeightPair& lhs, const WeightPair& rhs){return lhs.second < rhs.second;});
+   for (size_t idx = 0; idx < length; ++idx)
+   {
+      using std::swap;
+      WALBERLA_ASSERT_IDENTICAL(weight[idx].second, comp.getWeight(operator[](newIdx[weight[idx].first])));
+
+      WALBERLA_ASSERT_LESS_EQUAL(comp.getWeight(operator[](newIdx[weight[idx].first])), comp.getWeight(operator[](idx)));
+      swap( operator[](idx), operator[](newIdx[weight[idx].first]) );
+      const auto lhsIDX = idx;
+      const auto rhsIDX = newIdx[weight[idx].first];
+
+      newIdx[oldIdx[lhsIDX]] = rhsIDX;
+      newIdx[oldIdx[rhsIDX]] = lhsIDX;
+
+      swap(oldIdx[lhsIDX], oldIdx[rhsIDX]);
+   }
+
+   //rebuild lookup table
+   uidToIdx_.clear();
+   for (size_t idx = 0; idx < length; ++idx)
+   {
+      uidToIdx_[getUid(idx)] = idx;
+   }
 }
 
 {%- for const in ["", "const"] %}
