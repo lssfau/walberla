@@ -151,6 +151,8 @@ int main( int argc, char **argv )
           communicationScheme = UniformGPUScheme_Memcpy;
       else if (communicationSchemeStr == "MPIDatatypes")
           communicationScheme = MPIDatatypes;
+      else if (communicationSchemeStr == "MPIDatatypesFull")
+          communicationScheme = MPIDatatypesFull;
       else {
           WALBERLA_ABORT_NO_DEBUG_INFO("Invalid choice for communicationScheme")
       }

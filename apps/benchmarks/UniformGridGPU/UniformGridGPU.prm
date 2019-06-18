@@ -1,27 +1,28 @@
 DomainSetup
 {
    blocks        <  1,    1,   1 >;
-   cellsPerBlock <  512, 256, 256 >;
+   cellsPerBlock <  128, 128, 128 >;
    periodic      <  1,    1,   1 >;
 }
 
 Parameters 
 {
 
-	timesteps       2000; //10000;  // time steps of one performance measurement
-	warmupSteps     0;      // number of steps to run before measurement starts
-    outerIterations 1;      // how many measurements to conduct
+	timesteps       1000;   // time steps of one performance measurement
+	warmupSteps     100;    // number of steps to run before measurement starts
+    outerIterations 3;      // how many measurements to conduct
 
     // Can be one of: GPUPackInfo_Baseline, GPUPackInfo_Streams, UniformGPUScheme_Baseline, UniformGPUScheme_Memcpy
     communicationScheme UniformGPUScheme_Baseline;
 
-	vtkWriteFrequency 0; //100;             // write a VTK file every n'th step, if zero VTK output is disabled
+	vtkWriteFrequency 0;             // write a VTK file every n'th step, if zero VTK output is disabled
 	cudaEnabledMPI false;            // switch on if you have a CUDA-enabled MPI implementation
 
-	timeStepStrategy noOverlap;      // can be: noOverlap, simpleOverlap, complexOverlap, kernelOnly
+	timeStepStrategy kernelOnly;    // can be: noOverlap, simpleOverlap, complexOverlap, kernelOnly
 	innerOuterSplit < 8, 1, 1>;     // slice-thickness that 'outer'-kernels process when overlapping
 
 	remainingTimeLoggerFrequency 5;  // interval in seconds to log the estimated remaining time
+    	gpuBlockSize < 128, 1, 1>;
 
 	omega 1.92;
 	initShearFlow 1;

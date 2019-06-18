@@ -12,10 +12,14 @@ from pystencils.fast_approximation import insert_fast_sqrts, insert_fast_divisio
 from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
 
 omega = sp.symbols("omega")
-# sweep_block_size = (128, 1, 1)
-sweep_block_size = (TypedSymbol("cudaBlockSize0", np.int32),
-                    TypedSymbol("cudaBlockSize1", np.int32),
-                    1)
+compile_time_block_size = False
+
+if compile_time_block_size:
+    sweep_block_size = (128, 1, 1)
+else:
+    sweep_block_size = (TypedSymbol("cudaBlockSize0", np.int32),
+                        TypedSymbol("cudaBlockSize1", np.int32),
+                        1)
 
 sweep_params = {'block_size': sweep_block_size}
 

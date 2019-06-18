@@ -21,9 +21,13 @@
 #include "cuda/communication/UniformGPUScheme.h"
 #include "cuda/DeviceSelectMPI.h"
 #include "domain_decomposition/SharedSweep.h"
-#include "stencil/D3Q19.h"
-#include "stencil/D3Q27.h"
 #include "InitShearVelocity.h"
+#include "gui/Gui.h"
+
+#ifdef WALBERLA_ENABLE_GUI
+#include "lbm/gui/PdfFieldDisplayAdaptor.h"
+#endif
+
 
 #include "UniformGridGPU_AA_PackInfoPush.h"
 #include "UniformGridGPU_AA_PackInfoPull.h"
@@ -31,11 +35,12 @@
 #include "UniformGridGPU_AA_MacroGetter.h"
 #include "UniformGridGPU_AA_LbKernelEven.h"
 #include "UniformGridGPU_AA_LbKernelOdd.h"
+#include "UniformGridGPU_AA_Defines.h"
 
+#include <cmath>
 
 using namespace walberla;
 
-using Stencil_T = stencil::D3Q19; //TODO make generic - and determine from python script
 using CommunicationStencil_T = Stencil_T;
 using PdfField_T = GhostLayerField< real_t, Stencil_T::Q >;
 using VelocityField_T = GhostLayerField< real_t, 3 >;
@@ -50,6 +55,8 @@ int main( int argc, char **argv )
     {
         WALBERLA_MPI_WORLD_BARRIER();
 
+        WALBERLA_CUDA_CHECK( cudaPeekAtLastError() );
+
         auto config = *cfg;
         logging::configureLogging( config );
         auto blocks = blockforest::createUniformBlockGridFromConfig( config );
@@ -61,7 +68,7 @@ int main( int argc, char **argv )
         const uint_t timesteps = parameters.getParameter< uint_t >( "timesteps", uint_c( 50 ));
 
         // Creating fields
-        BlockDataID pdfFieldCpuID = field::addToStorage< PdfField_T >( blocks, "pdfs cpu", real_t( 42.0 ), field::fzyx );
+        BlockDataID pdfFieldCpuID = field::addToStorage< PdfField_T >( blocks, "pdfs cpu", real_t( std::nan("") ), field::fzyx );
         BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >( blocks, "vel", real_t( 0 ), field::fzyx );
 
         WALBERLA_LOG_INFO_ON_ROOT( "Initializing shear flow" );
@@ -215,32 +222,52 @@ int main( int argc, char **argv )
             timeLoop.addFuncAfterTimeStep( logger, "remaining time logger" );
         }
 
-        for ( int outerIteration = 0; outerIteration < outerIterations; ++outerIteration )
+        bool useGui = parameters.getParameter<bool>( "useGui", false );
+        if( useGui )
         {
-            timeLoop.setCurrentTimeStepToZero();
-            WcTimer simTimer;
-            cudaDeviceSynchronize();
-            WALBERLA_LOG_INFO_ON_ROOT( "Starting simulation with " << timesteps << " time steps" );
-            simTimer.start();
-            timeLoop.run();
-            cudaDeviceSynchronize();
-            simTimer.end();
-            WALBERLA_LOG_INFO_ON_ROOT( "Simulation finished" );
-            auto time = simTimer.last();
-            auto nrOfCells = real_c( cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2] );
-
-            auto mlupsPerProcess = nrOfCells * real_c( timesteps ) / time * 1e-6;
-            WALBERLA_LOG_RESULT_ON_ROOT( "MLUPS per process " << mlupsPerProcess );
-            WALBERLA_LOG_RESULT_ON_ROOT( "Time per time step " << time / real_c( timesteps ));
-            WALBERLA_ROOT_SECTION()
+            cuda::fieldCpy< PdfField_T, cuda::GPUField< real_t > >( blocks, pdfFieldCpuID, pdfFieldGpuID );
+            timeLoop.addFuncAfterTimeStep( cuda::fieldCpyFunctor<PdfField_T, cuda::GPUField<real_t> >( blocks, pdfFieldCpuID, pdfFieldGpuID ), "copy to CPU" );
+            GUI gui( timeLoop, blocks, argc, argv);
+                gui.registerDisplayAdaptorCreator(
+                [&](const IBlock & block, ConstBlockDataID blockDataID) -> gui::DisplayAdaptor * {
+                    if ( block.isDataOfType< PdfField_T >( blockDataID) )
+                        return new lbm::PdfFieldDisplayAdaptor<GhostLayerField<real_t, Stencil_T::Q>, Stencil_T >( blockDataID );
+                    return nullptr;
+                });
+            gui.run();
+        }
+        else
+        {
+            for ( int outerIteration = 0; outerIteration < outerIterations; ++outerIteration )
             {
-                python_coupling::PythonCallback pythonCallbackResults( "results_callback" );
-                if ( pythonCallbackResults.isCallable())
+                WALBERLA_CUDA_CHECK( cudaPeekAtLastError() );
+
+                timeLoop.setCurrentTimeStepToZero();
+                WcTimer simTimer;
+                cudaDeviceSynchronize();
+                WALBERLA_CUDA_CHECK( cudaPeekAtLastError() );
+                WALBERLA_LOG_INFO_ON_ROOT( "Starting simulation with " << timesteps << " time steps" );
+                simTimer.start();
+                timeLoop.run();
+                cudaDeviceSynchronize();
+                simTimer.end();
+                WALBERLA_LOG_INFO_ON_ROOT( "Simulation finished" );
+                auto time = simTimer.last();
+                auto nrOfCells = real_c( cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2] );
+
+                auto mlupsPerProcess = nrOfCells * real_c( timesteps ) / time * 1e-6;
+                WALBERLA_LOG_RESULT_ON_ROOT( "MLUPS per process " << mlupsPerProcess );
+                WALBERLA_LOG_RESULT_ON_ROOT( "Time per time step " << time / real_c( timesteps ));
+                WALBERLA_ROOT_SECTION()
                 {
-                    pythonCallbackResults.data().exposeValue( "mlupsPerProcess", mlupsPerProcess );
-                    pythonCallbackResults.data().exposeValue( "githash", WALBERLA_GIT_SHA1 );
-                    // Call Python function to report results
-                    pythonCallbackResults();
+                    python_coupling::PythonCallback pythonCallbackResults( "results_callback" );
+                    if ( pythonCallbackResults.isCallable())
+                    {
+                        pythonCallbackResults.data().exposeValue( "mlupsPerProcess", mlupsPerProcess );
+                        pythonCallbackResults.data().exposeValue( "githash", WALBERLA_GIT_SHA1 );
+                        // Call Python function to report results
+                        pythonCallbackResults();
+                    }
                 }
             }
         }

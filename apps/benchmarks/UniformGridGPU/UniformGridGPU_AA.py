@@ -10,10 +10,14 @@ from pystencils.fast_approximation import insert_fast_sqrts, insert_fast_divisio
 from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
 
 omega = sp.symbols("omega")
-# sweep_block_size = (128, 1, 1)
-sweep_block_size = (TypedSymbol("cudaBlockSize0", np.int32),
-                    TypedSymbol("cudaBlockSize1", np.int32),
-                    1)
+compile_time_block_size = False
+
+if compile_time_block_size:
+    sweep_block_size = (128, 1, 1)
+else:
+    sweep_block_size = (TypedSymbol("cudaBlockSize0", np.int32),
+                        TypedSymbol("cudaBlockSize1", np.int32),
+                        1)
 
 sweep_params = {'block_size': sweep_block_size}
 
@@ -58,7 +62,9 @@ with CodeGeneration() as ctx:
     common_options = {
         'field_name': 'pdfs',
         'optimization': {'cse_global': True,
-                         'cse_pdfs': False}
+                         'cse_pdfs': False,
+                         'field_layout': 'fzyx',
+                         }
     }
     options = options_dict.get(ctx.config, options_dict['srt'])
     options.update(common_options)
@@ -98,3 +104,6 @@ with CodeGeneration() as ctx:
     # communication
     generate_pack_info_from_kernel(ctx, 'UniformGridGPU_AA_PackInfoPull', update_rules['Odd'], kind='pull', target='gpu')
     generate_pack_info_from_kernel(ctx, 'UniformGridGPU_AA_PackInfoPush', update_rules['Odd'], kind='push', target='gpu')
+
+    ctx.write_file("UniformGridGPU_AA_Defines.h",
+                   '#include "stencil/D3Q{0}.h"\nusing Stencil_T = walberla::stencil::D3Q{0}; \n '.format(q))

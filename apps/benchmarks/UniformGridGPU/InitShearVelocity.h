@@ -6,7 +6,7 @@ namespace walberla {
 
 
 inline void initShearVelocity(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID velFieldID,
-                              const real_t xMagnitude=0.1, const real_t fluctuationMagnitude=0.05 )
+                              const real_t xMagnitude=0.005, const real_t fluctuationMagnitude=0.05 )
 {
     math::seedRandomGenerator(0);
     auto halfZ = blocks->getDomainCellBB().zMax() / 2;

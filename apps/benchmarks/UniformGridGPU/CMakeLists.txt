@@ -29,10 +29,12 @@ waLBerla_python_file_generates(UniformGridGPU_AA.py
         UniformGridGPU_AA_PackInfoPush.cu UniformGridGPU_AA_PackInfoPush.h
         UniformGridGPU_AA_MacroSetter.cpp UniformGridGPU_AA_MacroSetter.h
         UniformGridGPU_AA_MacroGetter.cpp UniformGridGPU_AA_MacroGetter.h
+        UniformGridGPU_AA_Defines.h
         )
 
-set(config "srt")
-waLBerla_add_executable ( NAME UniformGridBenchmarkGPU_AA_${config}
-        FILES UniformGridGPU_AA.cpp UniformGridGPU_AA.py
-        DEPENDS blockforest boundary core cuda domain_decomposition field geometry timeloop vtk gui
-        CODEGEN_CFG ${config})
+foreach(config srt trt mrt smagorinsky entropic )
+    waLBerla_add_executable ( NAME UniformGridBenchmarkGPU_AA_${config}
+            FILES UniformGridGPU_AA.cpp UniformGridGPU_AA.py
+            DEPENDS blockforest boundary core cuda domain_decomposition field geometry timeloop vtk gui
+            CODEGEN_CFG ${config})
+endforeach()

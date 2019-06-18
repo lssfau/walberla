@@ -6,6 +6,7 @@
 #include "blockforest/communication/UniformBufferedScheme.h"
 #include "blockforest/communication/UniformDirectScheme.h"
 #include "field/communication/StencilRestrictedMPIDatatypeInfo.h"
+#include "field/communication/UniformMPIDatatypeInfo.h"
 #include "cuda/communication/GPUPackInfo.h"
 #include "cuda/communication/UniformGPUScheme.h"
 #include "cuda/communication/MemcpyPackInfo.h"
@@ -20,7 +21,8 @@ enum CommunicationSchemeType {
     GPUPackInfo_Streams = 1,
     UniformGPUScheme_Baseline = 2,
     UniformGPUScheme_Memcpy = 3,
-    MPIDatatypes = 4
+    MPIDatatypes = 4,
+    MPIDatatypesFull = 5
 };
 
 
@@ -36,6 +38,7 @@ public:
         auto generatedPackInfo = make_shared<pystencils::UniformGridGPU_PackInfo>( bdId );
         auto memcpyPackInfo = make_shared< cuda::communication::MemcpyPackInfo< GPUFieldType > >( bdId );
         auto dataTypeInfo = make_shared< field::communication::StencilRestrictedMPIDatatypeInfo< GPUFieldType, StencilType > >( bdId );
+        auto dataTypeInfoFull = make_shared< field::communication::UniformMPIDatatypeInfo<GPUFieldType> >( bdId );
 
         switch(_commSchemeType)
         {
@@ -62,6 +65,12 @@ public:
                     WALBERLA_ABORT("MPI datatype-based communication not possible if no cudaEnabledMPI is available.");
                 }
                 _directScheme = make_shared< blockforest::communication::UniformDirectScheme< StencilType > >( bf, dataTypeInfo );
+                break;
+            case MPIDatatypesFull:
+                if( ! cudaEnabledMPI ) {
+                    WALBERLA_ABORT("MPI datatype-based communication not possible if no cudaEnabledMPI is available.");
+                }
+                _directScheme = make_shared< blockforest::communication::UniformDirectScheme< StencilType > >( bf, dataTypeInfoFull );
                 break;
             default:
                 WALBERLA_ABORT("Invalid GPU communication scheme specified!");
@@ -103,6 +112,7 @@ public:
                 _gpuCommunicationScheme->startCommunication( communicationStream );
                 break;
             case MPIDatatypes:
+            case MPIDatatypesFull:
                 WALBERLA_ASSERT_NOT_NULLPTR( _directScheme );
                 _directScheme->startCommunication();
                 break;
@@ -131,6 +141,7 @@ public:
                 _gpuCommunicationScheme->wait( communicationStream );
                 break;
             case MPIDatatypes:
+            case MPIDatatypesFull:
                 WALBERLA_ASSERT_NOT_NULLPTR( _directScheme );
                 _directScheme->wait();
                 break;
