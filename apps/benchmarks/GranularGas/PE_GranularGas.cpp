@@ -18,6 +18,10 @@
 //
 //======================================================================================================================
 
+#include "NodeTimings.h"
+#include "Parameters.h"
+#include "SQLProperties.h"
+
 #include <pe/basic.h>
 #include <pe/vtk/SphereVtkOutput.h>
 
@@ -42,11 +46,6 @@ using namespace walberla::pe;
 using namespace walberla::timing;
 
 using BodyTuple = std::tuple<Sphere, Plane> ;
-
-std::string envToString(const char* env)
-{
-   return env != nullptr ? std::string(env) : "";
-}
 
 int main( int argc, char ** argv )
 {
@@ -91,41 +90,8 @@ int main( int argc, char ** argv )
    auto cfg = env.config();
    if (cfg == nullptr) WALBERLA_ABORT("No config specified!");
    const Config::BlockHandle mainConf  = cfg->getBlock( "GranularGas" );
-
-   const std::string host = mainConf.getParameter<std::string>("host", "none" );
-   WALBERLA_LOG_INFO_ON_ROOT("host: " << host);
-
-   const int jobid = mainConf.getParameter<int>("jobid", 0 );
-   WALBERLA_LOG_INFO_ON_ROOT("jobid: " << jobid);
-
-   const real_t spacing = mainConf.getParameter<real_t>("spacing", real_t(1.0) );
-   WALBERLA_LOG_INFO_ON_ROOT("spacing: " << spacing);
-
-   const real_t radius = mainConf.getParameter<real_t>("radius", real_t(0.5) );
-   WALBERLA_LOG_INFO_ON_ROOT("radius: " << radius);
-
-   bool bBarrier = false;
-   WALBERLA_LOG_INFO_ON_ROOT("bBarrier: " << bBarrier);
-
-   int64_t numOuterIterations = mainConf.getParameter<int64_t>("numOuterIterations", 10 );
-   WALBERLA_LOG_INFO_ON_ROOT("numOuterIterations: " << numOuterIterations);
-
-   int64_t initialRefinementLevel = mainConf.getParameter<int64_t>("initialRefinementLevel", 0 );
-   WALBERLA_LOG_INFO_ON_ROOT("initialRefinementLevel: " << initialRefinementLevel);
-
-   int64_t simulationSteps = mainConf.getParameter<int64_t>("simulationSteps", 10 );
-   WALBERLA_LOG_INFO_ON_ROOT("simulationSteps: " << simulationSteps);
-
-   real_t dt = mainConf.getParameter<real_t>("dt", real_c(0.01) );
-   WALBERLA_LOG_INFO_ON_ROOT("dt: " << dt);
-
-   const int visSpacing = mainConf.getParameter<int>("visSpacing",  1000 );
-   WALBERLA_LOG_INFO_ON_ROOT("visSpacing: " << visSpacing);
-   const std::string path = mainConf.getParameter<std::string>("path",  "vtk_out" );
-   WALBERLA_LOG_INFO_ON_ROOT("path: " << path);
-
-   const std::string sqlFile = mainConf.getParameter<std::string>("sqlFile",  "benchmark.sqlite" );
-   WALBERLA_LOG_INFO_ON_ROOT("sqlFile: " << sqlFile);
+   Parameters params;
+   loadFromConfig(params, mainConf);
 
    WALBERLA_LOG_INFO_ON_ROOT("*** GLOBALBODYSTORAGE ***");
    shared_ptr<BodyStorage> globalBodyStorage = make_shared<BodyStorage>();
@@ -223,9 +189,13 @@ int main( int argc, char ** argv )
 
    for (auto& currentBlock : *forest)
    {
-      for (auto it = grid_generator::SCIterator(currentBlock.getAABB().getIntersection(generationDomain), Vector3<real_t>(spacing, spacing, spacing) * real_c(0.5), spacing); it != grid_generator::SCIterator(); ++it)
+      for (auto it = grid_generator::SCIterator(currentBlock.getAABB().getIntersection(generationDomain),
+                                                Vector3<real_t>(params.spacing) * real_c(0.5),
+                                                params.spacing);
+           it != grid_generator::SCIterator();
+           ++it)
       {
-         SphereID sp = pe::createSphere( *globalBodyStorage, *forest, storageID, 0, *it, radius, material);
+         SphereID sp = pe::createSphere( *globalBodyStorage, *forest, storageID, 0, *it, params.radius, material);
          if (sp != nullptr) ++numParticles;
       }
    }
@@ -255,22 +225,22 @@ int main( int argc, char ** argv )
    syncCallWithoutTT();
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - START ***");
-   for (int64_t outerIteration = 0; outerIteration < numOuterIterations; ++outerIteration)
+   for (int64_t outerIteration = 0; outerIteration < params.numOuterIterations; ++outerIteration)
    {
       WALBERLA_LOG_INFO_ON_ROOT("*** RUNNING OUTER ITERATION " << outerIteration << " ***");
       WcTimer timer;
       WcTimingPool tp;
       WALBERLA_MPI_BARRIER();
       timer.start();
-      for (int64_t i=0; i < simulationSteps; ++i)
+      for (int64_t i=0; i < params.simulationSteps; ++i)
       {
          if( i % 200 == 0 )
          {
-            WALBERLA_LOG_DEVEL_ON_ROOT( "Timestep " << i << " / " << simulationSteps );
+            WALBERLA_LOG_DEVEL_ON_ROOT( "Timestep " << i << " / " << params.simulationSteps );
          }
 
          tp["CR"].start();
-         cr->timestep( real_c(dt) );
+         cr->timestep( real_c(params.dt) );
          tp["CR"].end();
          tp["Sync"].start();
          syncCallWithoutTT();
@@ -289,7 +259,7 @@ int main( int argc, char ** argv )
       {
          WALBERLA_LOG_INFO_ON_ROOT(*timer_reduced);
          WALBERLA_LOG_INFO_ON_ROOT("runtime: " << timer_reduced->max());
-         PUpS = double_c(numParticles) * double_c(simulationSteps) / double_c(timer_reduced->max());
+         PUpS = double_c(numParticles) * double_c(params.simulationSteps) / double_c(timer_reduced->max());
          WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpS);
       }
 
@@ -315,7 +285,9 @@ int main( int argc, char ** argv )
          numGhostParticles += shadowStorage.size();
 
          auto bodyIt = localStorage.begin();
-         for (auto it = grid_generator::SCIterator(currentBlock.getAABB().getIntersection(generationDomain), Vector3<real_t>(spacing, spacing, spacing) * real_c(0.5), spacing);
+         for (auto it = grid_generator::SCIterator(currentBlock.getAABB().getIntersection(generationDomain),
+                                                   Vector3<real_t>(params.spacing) * real_c(0.5),
+                                                   params.spacing);
               it != grid_generator::SCIterator();
               ++it, ++bodyIt)
          {
@@ -327,6 +299,7 @@ int main( int argc, char ** argv )
       mpi::reduceInplace(numGhostParticles, mpi::SUM);
       WALBERLA_LOG_INFO_ON_ROOT("*** CHECKING RESULT - END ***");
 
+      uint_t runId = uint_c(-1);
       WALBERLA_ROOT_SECTION()
       {
          std::map< std::string, walberla::int64_t > integerProperties;
@@ -335,15 +308,10 @@ int main( int argc, char ** argv )
 
          stringProperties["walberla_git"]         = WALBERLA_GIT_SHA1;
          stringProperties["tag"]                  = "pe";
-         stringProperties["host"]                 = host;
-         integerProperties["jobid"]               = jobid;
          integerProperties["bDEM"]                = bDEM;
          integerProperties["bNN"]                 = bNN;
          integerProperties["mpi_num_processes"]   = mpi::MPIManager::instance()->numProcesses();
          integerProperties["omp_max_threads"]     = omp_get_max_threads();
-         integerProperties["numOuterIterations"]  = numOuterIterations;
-         integerProperties["simulationSteps"]     = simulationSteps;
-         integerProperties["bBarrier"]            = int64_c(bBarrier);
          realProperties["PUpS"]                   = double_c(PUpS);
          realProperties["timer_min"]              = timer_reduced->min();
          realProperties["timer_max"]              = timer_reduced->max();
@@ -351,28 +319,17 @@ int main( int argc, char ** argv )
          realProperties["timer_total"]            = timer_reduced->total();
          integerProperties["num_particles"]       = numParticles;
          integerProperties["num_ghost_particles"] = numGhostParticles;
-         integerProperties["blocks_x"]            = int64_c(forest->getXSize());
-         integerProperties["blocks_y"]            = int64_c(forest->getYSize());
-         integerProperties["blocks_z"]            = int64_c(forest->getZSize());
-         integerProperties["initialRefinementLevel"] = int64_c(initialRefinementLevel);
-         realProperties["domain_x"]               = double_c(forest->getDomain().xSize());
-         realProperties["domain_y"]               = double_c(forest->getDomain().ySize());
-         realProperties["domain_z"]               = double_c(forest->getDomain().zSize());
-         stringProperties["SLURM_CLUSTER_NAME"]       = envToString(std::getenv( "SLURM_CLUSTER_NAME" ));
-         stringProperties["SLURM_CPUS_ON_NODE"]       = envToString(std::getenv( "SLURM_CPUS_ON_NODE" ));
-         stringProperties["SLURM_CPUS_PER_TASK"]      = envToString(std::getenv( "SLURM_CPUS_PER_TASK" ));
-         stringProperties["SLURM_JOB_ACCOUNT"]        = envToString(std::getenv( "SLURM_JOB_ACCOUNT" ));
-         stringProperties["SLURM_JOB_ID"]             = envToString(std::getenv( "SLURM_JOB_ID" ));
-         stringProperties["SLURM_JOB_CPUS_PER_NODE"]  = envToString(std::getenv( "SLURM_JOB_CPUS_PER_NODE" ));
-         stringProperties["SLURM_JOB_NAME"]           = envToString(std::getenv( "SLURM_JOB_NAME" ));
-         stringProperties["SLURM_JOB_NUM_NODES"]      = envToString(std::getenv( "SLURM_JOB_NUM_NODES" ));
-         stringProperties["SLURM_NTASKS"]             = envToString(std::getenv( "SLURM_NTASKS" ));
-         stringProperties["SLURM_NTASKS_PER_CORE"]    = envToString(std::getenv( "SLURM_NTASKS_PER_CORE" ));
-         stringProperties["SLURM_NTASKS_PER_NODE"]    = envToString(std::getenv( "SLURM_NTASKS_PER_NODE" ));
-         stringProperties["SLURM_NTASKS_PER_SOCKET"]  = envToString(std::getenv( "SLURM_NTASKS_PER_SOCKET" ));
 
-         auto runId = postprocessing::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
-         postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *tp_reduced, "Timeloop" );
+         saveToSQL(params, integerProperties, realProperties, stringProperties );
+         mesa_pd::addDomainPropertiesToSQL(*forest, integerProperties, realProperties, stringProperties);
+         mesa_pd::addSlurmPropertiesToSQL(integerProperties, realProperties, stringProperties);
+
+         runId = postprocessing::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
+         postprocessing::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tp_reduced, "Timeloop" );
+      }
+      if (params.storeNodeTimings)
+      {
+         mesa_pd::storeNodeTimings(runId, params.sqlFile, "NodeTiming", tp);
       }
       WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - END ***");
    }
