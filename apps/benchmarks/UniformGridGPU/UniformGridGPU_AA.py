@@ -53,6 +53,16 @@ options_dict = {
     }
 }
 
+
+info_header = """
+#include "stencil/D3Q{q}.h"\nusing Stencil_T = walberla::stencil::D3Q{q}; 
+const char * infoStencil = "{stencil}";
+const char * infoConfigName = "{configName}";
+const bool infoCseGlobal = {cse_global};
+const bool infoCsePdfs = {cse_pdfs};
+"""
+
+
 with CodeGeneration() as ctx:
     accessors = {
         'Even': AAEvenTimeStepAccessor(),
@@ -105,5 +115,11 @@ with CodeGeneration() as ctx:
     generate_pack_info_from_kernel(ctx, 'UniformGridGPU_AA_PackInfoPull', update_rules['Odd'], kind='pull', target='gpu')
     generate_pack_info_from_kernel(ctx, 'UniformGridGPU_AA_PackInfoPush', update_rules['Odd'], kind='push', target='gpu')
 
-    ctx.write_file("UniformGridGPU_AA_Defines.h",
-                   '#include "stencil/D3Q{0}.h"\nusing Stencil_T = walberla::stencil::D3Q{0}; \n '.format(q))
+    infoHeaderParams = {
+        'stencil': stencil_str,
+        'q': q,
+        'configName': ctx.config,
+        'cse_global': int(options['optimization']['cse_global']),
+        'cse_pdfs': int(options['optimization']['cse_pdfs']),
+    }
+    ctx.write_file("UniformGridGPU_AA_Defines.h", info_header.format(**infoHeaderParams))

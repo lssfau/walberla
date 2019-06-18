@@ -102,7 +102,7 @@ void testNonEmptyAABB( const GenericAABB< T > & aabb )
    WALBERLA_CHECK_EQUAL( tmpAABB, aabb.getIntersection( intersectingBox ) );
    WALBERLA_CHECK_EQUAL( aabb.getIntersection( intersectingBox ), tmpAABB );
    WALBERLA_CHECK_FLOAT_EQUAL( tmpAABB.volume(), aabb.volume() / T(8) );
-   WALBERLA_CHECK_IDENTICAL( tmpAABB.volume(), aabb.intersectionVolume( intersectingBox ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( tmpAABB.volume(), aabb.intersectionVolume( intersectingBox ) );
 
    intersectingBox.init( aabb.minCorner() + aabb.sizes(), aabb.maxCorner() + aabb.sizes() );
    tmpAABB = aabb;
@@ -231,7 +231,7 @@ void testAnyAABB( const GenericAABB< T > & aabb )
 
    WALBERLA_CHECK( aabb.intersectsClosedInterval( aabb ) );
    WALBERLA_CHECK_EQUAL( aabb.getIntersection( aabb ), aabb );
-   WALBERLA_CHECK_IDENTICAL( aabb.intersectionVolume( aabb ), aabb.volume() );
+   WALBERLA_CHECK_FLOAT_EQUAL( aabb.intersectionVolume( aabb ), aabb.volume() );
 
    WALBERLA_CHECK( aabb.isIdentical( aabb ) );
    WALBERLA_CHECK( aabb.isEqual( aabb ) );

@@ -35,6 +35,7 @@
 #include "UniformGridGPU_Communication.h"
 #include "UniformGridGPU_MacroSetter.h"
 #include "UniformGridGPU_MacroGetter.h"
+#include "UniformGridGPU_Defines.h"
 
 
 using namespace walberla;
@@ -332,7 +333,10 @@ int main( int argc, char **argv )
                   if ( pythonCallbackResults.isCallable())
                   {
                       pythonCallbackResults.data().exposeValue( "mlupsPerProcess", mlupsPerProcess );
-                      pythonCallbackResults.data().exposeValue( "githash", WALBERLA_GIT_SHA1 );
+                      pythonCallbackResults.data().exposeValue( "stencil", infoStencil );
+                      pythonCallbackResults.data().exposeValue( "configName", infoConfigName );
+                      pythonCallbackResults.data().exposeValue( "cse_global", infoCseGlobal );
+                      pythonCallbackResults.data().exposeValue( "cse_pdfs", infoCsePdfs );
                       // Call Python function to report results
                       pythonCallbackResults();
                   }

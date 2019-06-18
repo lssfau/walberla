@@ -10,6 +10,7 @@ waLBerla_python_file_generates(UniformGridGPU.py
         UniformGridGPU_PackInfo.cu UniformGridGPU_PackInfo.h
         UniformGridGPU_MacroSetter.cpp UniformGridGPU_MacroSetter.h
         UniformGridGPU_MacroGetter.cpp UniformGridGPU_MacroGetter.h
+        UniformGridGPU_Defines.h
         )
 
 foreach(config srt trt mrt smagorinsky entropic )

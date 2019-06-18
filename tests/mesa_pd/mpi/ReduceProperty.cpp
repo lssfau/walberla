@@ -95,7 +95,7 @@ void main( int argc, char ** argv )
       WALBERLA_CHECK_FLOAT_EQUAL( pIt->getForce(), Vec3(real_t(28)) );
    } else
    {
-      WALBERLA_CHECK_FLOAT_EQUAL( pIt->getForce(), Vec3(real_t(walberla::mpi::MPIManager::instance()->rank())) );
+      WALBERLA_CHECK_FLOAT_EQUAL( pIt->getForce(), Vec3(0) );
    }
 }
 

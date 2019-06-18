@@ -225,6 +225,7 @@ int main( int argc, char **argv )
         bool useGui = parameters.getParameter<bool>( "useGui", false );
         if( useGui )
         {
+#ifdef WALBERLA_ENABLE_GUI
             cuda::fieldCpy< PdfField_T, cuda::GPUField< real_t > >( blocks, pdfFieldCpuID, pdfFieldGpuID );
             timeLoop.addFuncAfterTimeStep( cuda::fieldCpyFunctor<PdfField_T, cuda::GPUField<real_t> >( blocks, pdfFieldCpuID, pdfFieldGpuID ), "copy to CPU" );
             GUI gui( timeLoop, blocks, argc, argv);
@@ -235,6 +236,9 @@ int main( int argc, char **argv )
                     return nullptr;
                 });
             gui.run();
+#else
+            WALBERLA_ABORT_NO_DEBUG_INFO("Application was built without GUI. Set useGui to false or re-compile with GUI.")
+#endif
         }
         else
         {
@@ -264,7 +268,10 @@ int main( int argc, char **argv )
                     if ( pythonCallbackResults.isCallable())
                     {
                         pythonCallbackResults.data().exposeValue( "mlupsPerProcess", mlupsPerProcess );
-                        pythonCallbackResults.data().exposeValue( "githash", WALBERLA_GIT_SHA1 );
+                        pythonCallbackResults.data().exposeValue( "stencil", infoStencil );
+                        pythonCallbackResults.data().exposeValue( "configName", infoConfigName );
+                        pythonCallbackResults.data().exposeValue( "cse_global", infoCseGlobal );
+                        pythonCallbackResults.data().exposeValue( "cse_pdfs", infoCsePdfs );
                         // Call Python function to report results
                         pythonCallbackResults();
                     }

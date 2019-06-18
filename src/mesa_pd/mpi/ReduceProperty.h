@@ -29,6 +29,7 @@
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/Flags.h>
 #include <mesa_pd/data/ParticleStorage.h>
+#include <mesa_pd/mpi/notifications/reset.h>
 
 #include <core/mpi/BufferSystem.h>
 #include <core/logging/Logging.h>
@@ -100,6 +101,7 @@ void ReduceProperty::operator()(data::ParticleStorage& ps) const
          }
 
          sb << Notification( p );
+         reset<Notification>( p );
       } else
       {
          //local particles should receive the property and sum it up
