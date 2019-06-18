@@ -70,6 +70,6 @@ def createJobscript(wall_time=None, nodes=None, cores=None, initial_dir=None, jo
         if type(exe_paramfile_pair) is not tuple:
             result += exe_paramfile_pair + "\n"
         else:
-            result += exec_line % exe_paramfile_pair
+            result += exec_line % ((cores,) + exe_paramfile_pair)
 
     return result
