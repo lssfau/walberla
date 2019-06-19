@@ -24,10 +24,20 @@
 #include <blockforest/loadbalancing/DynamicDiffusive.h>
 #include <blockforest/loadbalancing/DynamicParMetis.h>
 #include <core/DataTypes.h>
-#include <pe/cr/HCSITS.h>
+#include <core/waLBerlaBuildInfo.h>
 
 namespace walberla {
 namespace mesa_pd {
+
+void addBuildInfoToSQL( std::map< std::string, int64_t > &       /*integerProperties*/,
+                        std::map< std::string, double > &        /*realProperties*/,
+                        std::map< std::string, std::string > & stringProperties )
+{
+   stringProperties["walberla_sha"]    = walberla::core::buildinfo::gitSHA1();
+   stringProperties["build_type"]      = walberla::core::buildinfo::buildType();
+   stringProperties["compiler_flags"]  = walberla::core::buildinfo::compilerFlags();
+   stringProperties["build_machine"]   = walberla::core::buildinfo::buildMachine();
+}
 
 void addDomainPropertiesToSQL( const ::walberla::blockforest::BlockForest& forest,
                                std::map< std::string, int64_t > &          integerProperties,

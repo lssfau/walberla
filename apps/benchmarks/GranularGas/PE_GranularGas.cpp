@@ -320,6 +320,7 @@ int main( int argc, char ** argv )
          integerProperties["num_particles"]       = numParticles;
          integerProperties["num_ghost_particles"] = numGhostParticles;
 
+         mesa_pd::addBuildInfoToSQL( integerProperties, realProperties, stringProperties );
          saveToSQL(params, integerProperties, realProperties, stringProperties );
          mesa_pd::addDomainPropertiesToSQL(*forest, integerProperties, realProperties, stringProperties);
          mesa_pd::addSlurmPropertiesToSQL(integerProperties, realProperties, stringProperties);

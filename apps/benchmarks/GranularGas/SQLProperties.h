@@ -33,6 +33,10 @@ class DynamicParMetis;
 namespace walberla {
 namespace mesa_pd {
 
+void addBuildInfoToSQL( std::map< std::string, int64_t > &       integerProperties,
+                        std::map< std::string, double > &        realProperties,
+                        std::map< std::string, std::string > & stringProperties );
+
 void addDomainPropertiesToSQL( const walberla::blockforest::BlockForest& forest,
                                std::map< std::string, int64_t > &       integerProperties,
                                std::map< std::string, double > &        realProperties,

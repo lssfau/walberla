@@ -367,6 +367,7 @@ int main( int argc, char ** argv )
          realProperties["linkedCellsVolume"]      = linkedCellsVolume;
          integerProperties["numLinkedCells"]      = int64_c(numLinkedCells);
 
+         addBuildInfoToSQL( integerProperties, realProperties, stringProperties );
          saveToSQL(params, integerProperties, realProperties, stringProperties );
          addDomainPropertiesToSQL(*forest, integerProperties, realProperties, stringProperties);
          addSlurmPropertiesToSQL(integerProperties, realProperties, stringProperties);
