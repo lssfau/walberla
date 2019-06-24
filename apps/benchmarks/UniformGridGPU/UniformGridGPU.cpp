@@ -332,9 +332,11 @@ int main( int argc, char **argv )
                   python_coupling::PythonCallback pythonCallbackResults( "results_callback" );
                   if ( pythonCallbackResults.isCallable())
                   {
+                      const char * storagePattern = "twofield";
                       pythonCallbackResults.data().exposeValue( "mlupsPerProcess", mlupsPerProcess );
                       pythonCallbackResults.data().exposeValue( "stencil", infoStencil );
                       pythonCallbackResults.data().exposeValue( "configName", infoConfigName );
+                      pythonCallbackResults.data().exposeValue( "storagePattern", storagePattern );
                       pythonCallbackResults.data().exposeValue( "cse_global", infoCseGlobal );
                       pythonCallbackResults.data().exposeValue( "cse_pdfs", infoCsePdfs );
                       // Call Python function to report results
