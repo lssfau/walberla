@@ -54,7 +54,12 @@ void sortParticleStorage( data::ParticleStorage& ps,
    }
    if( algorithm == "hilbert" )
    {
-      sorting::HilbertCompareFunctor hilbert(domain, 1ul << math::uintMSBPosition(cells));
+      auto tmp = uint_t(1) << math::uintMSBPosition(cells);
+      if (tmp!=cells)
+      {
+         tmp <<= 1;
+      }
+      sorting::HilbertCompareFunctor hilbert(domain, tmp);
       ps.sort(hilbert);
       return;
    }
