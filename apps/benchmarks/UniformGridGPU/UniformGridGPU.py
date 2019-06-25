@@ -91,9 +91,13 @@ with CodeGeneration() as ctx:
     }
     config_name = ctx.config
     noopt = False
+    d3q27 = False
     if config_name.endswith("_noopt"):
         noopt = True
         config_name = config_name[:-len("_noopt")]
+    if config_name.endswith("_d3q27"):
+        d3q27 = True
+        config_name = config_name[:-len("_d3q27")]
 
     options = options_dict[config_name]
     options.update(common_options)
@@ -102,6 +106,8 @@ with CodeGeneration() as ctx:
     if noopt:
         options['optimization']['cse_global'] = False
         options['optimization']['cse_pdfs'] = False
+    if d3q27:
+        options['stencil'] = 'D3Q27'
 
     stencil_str = options['stencil']
     q = int(stencil_str[stencil_str.find('Q')+1:])
