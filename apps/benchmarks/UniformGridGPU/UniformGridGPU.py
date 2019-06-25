@@ -12,6 +12,7 @@ from pystencils.fast_approximation import insert_fast_sqrts, insert_fast_divisio
 from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
 
 omega = sp.symbols("omega")
+omega_fill = sp.symbols("omega_:10")
 compile_time_block_size = False
 
 if compile_time_block_size:
@@ -40,11 +41,23 @@ options_dict = {
         'stencil': 'D3Q19',
         'relaxation_rates': [0, omega, 1.3, 1.4, omega, 1.2, 1.1],
     },
+    'mrt_full': {
+        'method': 'mrt',
+        'stencil': 'D3Q19',
+        'relaxation_rates': [omega_fill[0], omega, omega_fill[1], omega_fill[2], omega_fill[3], omega_fill[4], omega_fill[5]],
+    },
     'entropic': {
         'method': 'mrt3',
         'stencil': 'D3Q19',
         'compressible': True,
         'relaxation_rates': [omega, omega, sp.Symbol("omega_free")],
+        'entropic': True,
+    },
+    'entropic_kbc_n4': {
+        'method': 'trt-kbc-n4',
+        'stencil': 'D3Q27',
+        'compressible': True,
+        'relaxation_rates': [omega, sp.Symbol("omega_free")],
         'entropic': True,
     },
     'smagorinsky': {
@@ -76,8 +89,19 @@ with CodeGeneration() as ctx:
         'optimization': {'cse_global': True,
                          'cse_pdfs': False}
     }
-    options = options_dict.get(ctx.config, options_dict['srt'])
+    config_name = ctx.config
+    noopt = False
+    if config_name.endswith("_noopt"):
+        noopt = True
+        config_name = config_name[:-len("_noopt")]
+
+    options = options_dict[config_name]
     options.update(common_options)
+    options = options.copy()
+
+    if noopt:
+        options['optimization']['cse_global'] = False
+        options['optimization']['cse_pdfs'] = False
 
     stencil_str = options['stencil']
     q = int(stencil_str[stencil_str.find('Q')+1:])
@@ -85,14 +109,22 @@ with CodeGeneration() as ctx:
     options['optimization']['symbolic_field'] = pdfs
 
     vp = [
+        ('double', 'omega_0'),
+        ('double', 'omega_1'),
+        ('double', 'omega_2'),
+        ('double', 'omega_3'),
+        ('double', 'omega_4'),
+        ('double', 'omega_5'),
+        ('double', 'omega_6'),
         ('int32_t', 'cudaBlockSize0'),
-        ('int32_t', 'cudaBlockSize1')
+        ('int32_t', 'cudaBlockSize1'),
     ]
     lb_method = create_lb_method(**options)
     update_rule = create_lb_update_rule(lb_method=lb_method, **options)
 
-    update_rule = insert_fast_divisions(update_rule)
-    update_rule = insert_fast_sqrts(update_rule)
+    if not noopt:
+        update_rule = insert_fast_divisions(update_rule)
+        update_rule = insert_fast_sqrts(update_rule)
 
     # CPU lattice model - required for macroscopic value computation, VTK output etc.
     options_without_opt = options.copy()

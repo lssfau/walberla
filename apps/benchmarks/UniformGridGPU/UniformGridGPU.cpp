@@ -95,26 +95,32 @@ int main( int argc, char **argv )
       Vector3<uint_t> cellsPerBlock = config->getBlock( "DomainSetup" ).getParameter<Vector3<uint_t>  >( "cellsPerBlock" );
       // Reading parameters
       auto parameters = config->getOneBlock( "Parameters" );
+      const std::string timeStepStrategy = parameters.getParameter<std::string>( "timeStepStrategy", "normal");
       const real_t omega = parameters.getParameter<real_t>( "omega", real_c( 1.4 ));
       const uint_t timesteps = parameters.getParameter<uint_t>( "timesteps", uint_c( 50 ));
       const bool initShearFlow = parameters.getParameter<bool>("initShearFlow", false);
 
       // Creating fields
-      BlockDataID pdfFieldCpuID = field::addToStorage< PdfField_T >( blocks, "pdfs cpu", real_t(99.8), field::fzyx);
+      BlockDataID pdfFieldCpuID = field::addToStorage< PdfField_T >( blocks, "pdfs cpu", real_t(0), field::fzyx);
       BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >( blocks, "vel", real_t(0), field::fzyx);
 
-      if( initShearFlow ) {
-          WALBERLA_LOG_INFO_ON_ROOT("Initializing shear flow");
-          initShearVelocity( blocks, velFieldCpuID );
-      }
-      pystencils::UniformGridGPU_MacroSetter setterSweep(pdfFieldCpuID, velFieldCpuID);
-      for( auto & block : *blocks )
-          setterSweep( &block );
-      // setter sweep only initializes interior of domain - for push schemes to work a first communication is required here
-      blockforest::communication::UniformBufferedScheme<CommunicationStencil_T> initialComm(blocks);
-      initialComm.addPackInfo( make_shared< field::communication::PackInfo<PdfField_T> >( pdfFieldCpuID ) );
-      initialComm();
+      if( timeStepStrategy != "kernelOnlyNoInit")
+      {
+          if ( initShearFlow )
+          {
+              WALBERLA_LOG_INFO_ON_ROOT( "Initializing shear flow" );
+              initShearVelocity( blocks, velFieldCpuID );
+          }
 
+          pystencils::UniformGridGPU_MacroSetter setterSweep(pdfFieldCpuID, velFieldCpuID);
+          for( auto & block : *blocks )
+              setterSweep( &block );
+
+          // setter sweep only initializes interior of domain - for push schemes to work a first communication is required here
+          blockforest::communication::UniformBufferedScheme<CommunicationStencil_T> initialComm(blocks);
+          initialComm.addPackInfo( make_shared< field::communication::PackInfo<PdfField_T> >( pdfFieldCpuID ) );
+          initialComm();
+      }
 
       BlockDataID pdfFieldGpuID = cuda::addGPUFieldToStorage<PdfField_T >( blocks, pdfFieldCpuID, "pdfs on GPU", true );
       BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
@@ -165,7 +171,9 @@ int main( int argc, char **argv )
       int streamLowPriority = 0;
       WALBERLA_CUDA_CHECK( cudaDeviceGetStreamPriorityRange(&streamLowPriority, &streamHighPriority) );
       WALBERLA_CHECK(gpuBlockSize[2] == 1);
-      pystencils::UniformGridGPU_LbKernel lbKernel( pdfFieldGpuID, omega, gpuBlockSize[0], gpuBlockSize[1],
+      pystencils::UniformGridGPU_LbKernel lbKernel( pdfFieldGpuID, omega,
+                                                    1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
+                                                    gpuBlockSize[0], gpuBlockSize[1],
                                                     Cell(innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]) );
       lbKernel.setOuterPriority( streamHighPriority );
       UniformGridGPU_Communication< CommunicationStencil_T, cuda::GPUField< double > >
@@ -252,7 +260,6 @@ int main( int argc, char **argv )
 
       SweepTimeloop timeLoop( blocks->getBlockStorage(), timesteps );
 
-      const std::string timeStepStrategy = parameters.getParameter<std::string>( "timeStepStrategy", "normal");
       std::function<void()> timeStep;
       if (timeStepStrategy == "noOverlap")
           timeStep = std::function<void()>( normalTimeStep );
@@ -260,7 +267,7 @@ int main( int argc, char **argv )
           timeStep = std::function<void()>( overlapTimeStep );
       else if (timeStepStrategy == "simpleOverlap")
           timeStep = simpleOverlapTimeStep;
-      else if (timeStepStrategy == "kernelOnly") {
+      else if (timeStepStrategy == "kernelOnly" or timeStepStrategy == "kernelOnlyNoInit") {
           WALBERLA_LOG_INFO_ON_ROOT("Running only compute kernel without boundary - this makes only sense for benchmarking!")
           timeStep = kernelOnlyFunc;
       }
