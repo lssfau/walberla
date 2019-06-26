@@ -4,6 +4,9 @@
 #
 ###################################################################################################
 
+waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticCollisionFunctions FILES collision_detection/AnalyticCollisionFunctions.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticCollisionFunctions )
+
 waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticContactDetection FILES collision_detection/AnalyticContactDetection.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticContactDetection )
 

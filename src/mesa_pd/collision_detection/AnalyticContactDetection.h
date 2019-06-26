@@ -23,6 +23,8 @@
 #include <mesa_pd/collision_detection/AnalyticCollisionFunctions.h>
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/shape/BaseShape.h>
+#include <mesa_pd/data/shape/Box.h>
+#include <mesa_pd/data/shape/CylindricalBoundary.h>
 #include <mesa_pd/data/shape/HalfSpace.h>
 #include <mesa_pd/data/shape/Sphere.h>
 
@@ -70,6 +72,34 @@ public:
                     const size_t idx2,
                     const data::Sphere& geo1,
                     const data::Sphere& geo2,
+                    Accessor& ac);
+
+   template <typename Accessor>
+   bool operator()( const size_t idx1,
+                    const size_t idx2,
+                    const data::Sphere& s,
+                    const data::Box& bx,
+                    Accessor& ac );
+
+   template <typename Accessor>
+   bool operator()( const size_t idx1,
+                    const size_t idx2,
+                    const data::Box& bx,
+                    const data::Sphere& s,
+                    Accessor& ac);
+
+   template <typename Accessor>
+   bool operator()( const size_t idx1,
+                    const size_t idx2,
+                    const data::Sphere& s,
+                    const data::CylindricalBoundary& cb,
+                    Accessor& ac );
+
+   template <typename Accessor>
+   bool operator()( const size_t idx1,
+                    const size_t idx2,
+                    const data::CylindricalBoundary& cb,
+                    const data::Sphere& s,
                     Accessor& ac);
 
    template <typename Accessor>
@@ -129,6 +159,68 @@ inline bool AnalyticContactDetection::operator()( const size_t idx1,
                                                 getContactNormal(),
                                                 getPenetrationDepth(),
                                                 getContactThreshold());
+}
+
+template <typename Accessor>
+inline bool AnalyticContactDetection::operator()( const size_t idx1,
+                                                  const size_t idx2,
+                                                  const data::Sphere& s,
+                                                  const data::Box& bx,
+                                                  Accessor& ac )
+{
+   getIdx1() = idx1;
+   getIdx2() = idx2;
+   return analytic::detectSphereBoxCollision(ac.getPosition(getIdx1()),
+                                             s.getRadius(),
+                                             ac.getPosition(getIdx2()),
+                                             bx.getEdgeLength(),
+                                             ac.getRotation(getIdx2()),
+                                             getContactPoint(),
+                                             getContactNormal(),
+                                             getPenetrationDepth(),
+                                             getContactThreshold());
+}
+
+template <typename Accessor>
+inline bool AnalyticContactDetection::operator()( const size_t idx1,
+                                                  const size_t idx2,
+                                                  const data::Box& bx,
+                                                  const data::Sphere& s,
+                                                  Accessor& ac)
+{
+   return operator()(idx2, idx1, s, bx, ac);
+}
+
+template <typename Accessor>
+inline bool AnalyticContactDetection::operator()( const size_t idx1,
+                                                  const size_t idx2,
+                                                  const data::Sphere& s,
+                                                  const data::CylindricalBoundary& cb,
+                                                  Accessor& ac )
+{
+   WALBERLA_ASSERT_UNEQUAL(idx1, idx2, "colliding with itself!");
+
+   getIdx1() = idx1;
+   getIdx2() = idx2;
+   return analytic::detectSphereCylindricalBoundaryCollision(ac.getPosition(getIdx1()),
+                                                             s.getRadius(),
+                                                             ac.getPosition(getIdx2()),
+                                                             cb.getRadius(),
+                                                             cb.getAxis(),
+                                                             getContactPoint(),
+                                                             getContactNormal(),
+                                                             getPenetrationDepth(),
+                                                             getContactThreshold());
+}
+
+template <typename Accessor>
+inline bool AnalyticContactDetection::operator()( const size_t idx1,
+                                                  const size_t idx2,
+                                                  const data::CylindricalBoundary& cb,
+                                                  const data::Sphere& s,
+                                                  Accessor& ac)
+{
+   return operator()(idx2, idx1, s, cb, ac);
 }
 
 template <typename Accessor>

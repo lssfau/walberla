@@ -27,7 +27,7 @@ if __name__ == '__main__':
    os.makedirs(args.path + "/src/mesa_pd/mpi/notifications", exist_ok = True)
    os.makedirs(args.path + "/src/mesa_pd/vtk", exist_ok = True)
 
-   shapes = ["Sphere", "HalfSpace"]
+   shapes = ["Sphere", "HalfSpace", "CylindricalBoundary", "Box"]
 
    ps    = data.ParticleStorage()
    ch    = data.ContactHistory()

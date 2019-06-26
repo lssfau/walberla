@@ -31,6 +31,8 @@
 #include <mesa_pd/data/shape/BaseShape.h>
 #include <mesa_pd/data/shape/Sphere.h>
 #include <mesa_pd/data/shape/HalfSpace.h>
+#include <mesa_pd/data/shape/CylindricalBoundary.h>
+#include <mesa_pd/data/shape/Box.h>
 
 #include <core/Abort.h>
 #include <core/debug/Debug.h>
@@ -58,6 +60,8 @@ struct ShapeStorage
 };
 //Make sure that no two different shapes have the same unique identifier!
 static_assert( Sphere::SHAPE_TYPE != HalfSpace::SHAPE_TYPE, "Shape types have to be different!" );
+static_assert( Sphere::SHAPE_TYPE != CylindricalBoundary::SHAPE_TYPE, "Shape types have to be different!" );
+static_assert( Sphere::SHAPE_TYPE != Box::SHAPE_TYPE, "Shape types have to be different!" );
 
 template <typename ShapeT, typename... Args>
 size_t ShapeStorage::create(Args&&... args)
@@ -75,6 +79,8 @@ ReturnType ShapeStorage::singleDispatch( ParticleStorage& ps, size_t idx, func& 
    {
       case Sphere::SHAPE_TYPE : return f(ps, idx, *static_cast<Sphere*>(shapes[ps.getShapeID(idx)].get()));
       case HalfSpace::SHAPE_TYPE : return f(ps, idx, *static_cast<HalfSpace*>(shapes[ps.getShapeID(idx)].get()));
+      case CylindricalBoundary::SHAPE_TYPE : return f(ps, idx, *static_cast<CylindricalBoundary*>(shapes[ps.getShapeID(idx)].get()));
+      case Box::SHAPE_TYPE : return f(ps, idx, *static_cast<Box*>(shapes[ps.getShapeID(idx)].get()));
       default : WALBERLA_ABORT("Shape type (" << shapes[ps.getShapeID(idx)]->getShapeType() << ") could not be determined!");
    }
 }
@@ -100,6 +106,16 @@ ReturnType ShapeStorage::doubleDispatch( ParticleStorage& ps, size_t idx, size_t
                                                    *static_cast<Sphere*>(shapes[ps.getShapeID(idx)].get()),
                                                    idy,
                                                    *static_cast<HalfSpace*>(shapes[ps.getShapeID(idy)].get()));
+            case CylindricalBoundary::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<Sphere*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<CylindricalBoundary*>(shapes[ps.getShapeID(idy)].get()));
+            case Box::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<Sphere*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<Box*>(shapes[ps.getShapeID(idy)].get()));
             default : WALBERLA_ABORT("Shape type (" << shapes[ps.getShapeID(idy)]->getShapeType() << ") could not be determined!");
          }
       case HalfSpace::SHAPE_TYPE :
@@ -115,6 +131,66 @@ ReturnType ShapeStorage::doubleDispatch( ParticleStorage& ps, size_t idx, size_t
                                                    *static_cast<HalfSpace*>(shapes[ps.getShapeID(idx)].get()),
                                                    idy,
                                                    *static_cast<HalfSpace*>(shapes[ps.getShapeID(idy)].get()));
+            case CylindricalBoundary::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<HalfSpace*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<CylindricalBoundary*>(shapes[ps.getShapeID(idy)].get()));
+            case Box::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<HalfSpace*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<Box*>(shapes[ps.getShapeID(idy)].get()));
+            default : WALBERLA_ABORT("Shape type (" << shapes[ps.getShapeID(idy)]->getShapeType() << ") could not be determined!");
+         }
+      case CylindricalBoundary::SHAPE_TYPE :
+         switch (shapes[ps.getShapeID(idy)]->getShapeType())
+         {
+            case Sphere::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<CylindricalBoundary*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<Sphere*>(shapes[ps.getShapeID(idy)].get()));
+            case HalfSpace::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<CylindricalBoundary*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<HalfSpace*>(shapes[ps.getShapeID(idy)].get()));
+            case CylindricalBoundary::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<CylindricalBoundary*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<CylindricalBoundary*>(shapes[ps.getShapeID(idy)].get()));
+            case Box::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<CylindricalBoundary*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<Box*>(shapes[ps.getShapeID(idy)].get()));
+            default : WALBERLA_ABORT("Shape type (" << shapes[ps.getShapeID(idy)]->getShapeType() << ") could not be determined!");
+         }
+      case Box::SHAPE_TYPE :
+         switch (shapes[ps.getShapeID(idy)]->getShapeType())
+         {
+            case Sphere::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<Box*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<Sphere*>(shapes[ps.getShapeID(idy)].get()));
+            case HalfSpace::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<Box*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<HalfSpace*>(shapes[ps.getShapeID(idy)].get()));
+            case CylindricalBoundary::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<Box*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<CylindricalBoundary*>(shapes[ps.getShapeID(idy)].get()));
+            case Box::SHAPE_TYPE : return f(ps,
+                                                   idx,
+                                                   *static_cast<Box*>(shapes[ps.getShapeID(idx)].get()),
+                                                   idy,
+                                                   *static_cast<Box*>(shapes[ps.getShapeID(idy)].get()));
             default : WALBERLA_ABORT("Shape type (" << shapes[ps.getShapeID(idy)]->getShapeType() << ") could not be determined!");
          }
       default : WALBERLA_ABORT("Shape type (" << shapes[ps.getShapeID(idx)]->getShapeType() << ") could not be determined!");

@@ -48,6 +48,11 @@ public:
 class ShapeTester
 {
 public:
+   void operator()(const size_t /*idx0*/, const size_t /*idx1*/, data::BaseShape& /*hs*/, data::BaseShape& /*hs*/)
+   {
+      WALBERLA_ABORT("Not implemented!");
+   }
+
    void operator()(const size_t idx0, const size_t idx1, data::HalfSpace& /*hs*/, data::HalfSpace& /*hs*/)
    {
       WALBERLA_CHECK_EQUAL(idx0, 0);

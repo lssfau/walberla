@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <mesa_pd/data/Flags.h>
+
 namespace walberla {
 namespace mesa_pd {
 namespace collision_detection {
