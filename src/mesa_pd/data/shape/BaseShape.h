@@ -51,6 +51,8 @@ public:
 
    const int& getShapeType() const {return shapeType_;}
 
+   virtual Vec3 support( const Vec3& /*d*/ ) const {WALBERLA_ABORT("Not implemented!");}
+
    static const int INVALID_SHAPE = -1; ///< Unique *invalid* shape type identifier.\ingroup mesa_pd_shape
 protected:
    real_t mass_         = real_t(0);       ///< mass

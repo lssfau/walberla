@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file Box.h
+//! \file Ellipsoid.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -28,49 +28,49 @@ namespace walberla {
 namespace mesa_pd {
 namespace data {
 
-class Box : public BaseShape
+class Ellipsoid : public BaseShape
 {
 public:
-   explicit Box(const Vec3& edgeLength)
-      : BaseShape(Box::SHAPE_TYPE)
-      , edgeLength_(edgeLength)
+   explicit Ellipsoid(const Vec3& semiAxes)
+      : BaseShape(Ellipsoid::SHAPE_TYPE)
+      , semiAxes_(semiAxes)
    {}
 
-   const Vec3&   getEdgeLength() const   { return edgeLength_; }
+   const Vec3&   getSemiAxes() const   { return semiAxes_; }
 
-   real_t getVolume() const override { return edgeLength_[0] * edgeLength_[1] * edgeLength_[2]; };
+   real_t getVolume() const override { return real_c(4.0/3.0) * math::M_PI * semiAxes_[0] * semiAxes_[1] * semiAxes_[2]; }
    void   updateMassAndInertia(const real_t density) override;
 
-   Vec3 support( const Vec3& bfD ) const override;
+   Vec3 support( const Vec3& d_loc ) const override;
 
-   constexpr static int SHAPE_TYPE = 3; ///< Unique shape type identifier for boxes.\ingroup mesa_pd_shape
+   constexpr static int SHAPE_TYPE = 4; ///< Unique shape type identifier for boxes.\ingroup mesa_pd_shape
 
 private:
-   Vec3   edgeLength_;   ///< edge length of the box
+   Vec3   semiAxes_;   ///< edge length of the box
 };
 
 inline
-void Box::updateMassAndInertia(const real_t density)
+void Ellipsoid::updateMassAndInertia(const real_t density)
 {
    const real_t m = getVolume() * density;
    const Mat3   I = Mat3::makeDiagonalMatrix(
-         edgeLength_[1]*edgeLength_[1] + edgeLength_[2]*edgeLength_[2] ,
-         edgeLength_[0]*edgeLength_[0] + edgeLength_[2]*edgeLength_[2] ,
-         edgeLength_[0]*edgeLength_[0] + edgeLength_[1]*edgeLength_[1] ) * (m / static_cast<real_t>( 12 ));
+                       real_c(0.2) * m * (semiAxes_[1] * semiAxes_[1] + semiAxes_[2] * semiAxes_[2]),
+         real_c(0.2) * m * (semiAxes_[2] * semiAxes_[2] + semiAxes_[0] * semiAxes_[0]),
+         real_c(0.2) * m * (semiAxes_[0] * semiAxes_[0] + semiAxes_[1] * semiAxes_[1]));
 
    invMass_      = real_t(1.0) / m;
    invInertiaBF_ = I.getInverse();
 }
 
 inline
-Vec3 Box::support( const Vec3& bfD ) const
+Vec3 Ellipsoid::support( const Vec3& d_loc ) const
 {
-   //As it is save to say we have atleast one component of the d-vector != 0 we can use
-   Vec3 relativSupport = Vec3( math::sign(bfD[0])*edgeLength_[0]*real_t(0.5),
-                               math::sign(bfD[1])*edgeLength_[1]*real_t(0.5),
-                               math::sign(bfD[2])*edgeLength_[2]*real_t(0.5) );
-
-   return relativSupport;
+   Vec3 norm_vec(d_loc[0] * semiAxes_[0], d_loc[1] * semiAxes_[1], d_loc[2] * semiAxes_[2]);
+   real_t norm_length = norm_vec.length();
+   Vec3 local_support = (real_t(1.0) / norm_length) * Vec3(semiAxes_[0] * semiAxes_[0] * d_loc[0],
+         semiAxes_[1] * semiAxes_[1] * d_loc[1],
+         semiAxes_[2] * semiAxes_[2] * d_loc[2]);
+   return local_support;
 }
 
 } //namespace data

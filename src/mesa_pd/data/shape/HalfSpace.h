@@ -43,7 +43,7 @@ public:
 
    const Vec3& getNormal() const { return normal_; }
 
-   static const int SHAPE_TYPE = 0; ///< Unique shape type identifier for planes.\ingroup mesa_pd_shape
+   constexpr static int SHAPE_TYPE = 0; ///< Unique shape type identifier for planes.\ingroup mesa_pd_shape
 private:
    /**
     * Normal of the plane in reference to the global world frame.

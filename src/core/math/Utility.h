@@ -84,6 +84,8 @@ inline real_t round( real_t a );
 //
 // The sign function only works for signed built-in data types. The attempt to use unsigned data
 // types or user-defined class types will result in a compile time error.
+//
+// http://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
  */
 template< typename T >
 inline const T sign( T a )

@@ -33,6 +33,7 @@
 #include <mesa_pd/data/shape/HalfSpace.h>
 #include <mesa_pd/data/shape/CylindricalBoundary.h>
 #include <mesa_pd/data/shape/Box.h>
+#include <mesa_pd/data/shape/Ellipsoid.h>
 
 #include <core/Abort.h>
 #include <core/debug/Debug.h>
@@ -68,6 +69,7 @@ auto SingleCast::operator()( size_t idx, Accessor& ac, func& f, Args&&... args )
       case HalfSpace::SHAPE_TYPE : return f(idx, *static_cast<HalfSpace*>(ac.getShape(idx)), std::forward<Args>(args)...);
       case CylindricalBoundary::SHAPE_TYPE : return f(idx, *static_cast<CylindricalBoundary*>(ac.getShape(idx)), std::forward<Args>(args)...);
       case Box::SHAPE_TYPE : return f(idx, *static_cast<Box*>(ac.getShape(idx)), std::forward<Args>(args)...);
+      case Ellipsoid::SHAPE_TYPE : return f(idx, *static_cast<Ellipsoid*>(ac.getShape(idx)), std::forward<Args>(args)...);
       default : WALBERLA_ABORT("Shape type (" << ac.getShape(idx)->getShapeType() << ") could not be determined!");
    }
 }

@@ -13,33 +13,25 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file   Accessor.h
+//! \file TensorGlyph.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
-#include <mesa_pd/data/ParticleAccessor.h>
-#include <mesa_pd/data/ParticleStorage.h>
-#include <mesa_pd/data/ShapeStorage.h>
+#pragma once
+
+#include <mesa_pd/data/DataTypes.h>
+
+#include <array>
 
 namespace walberla {
 namespace mesa_pd {
+namespace vtk {
 
-class ParticleAccessorWithShape : public data::ParticleAccessor
-{
-public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-      : ParticleAccessor(ps)
-      , ss_(ss)
-   {}
+using TensorGlyph = std::array<real_t, 6>;
 
-   const auto& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvMass();}
-   const auto& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvInertiaBF();}
+TensorGlyph createTensorGlyph(const Vec3& semiAxes, const Rot3& rot);
 
-   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)].get();}
-private:
-   std::shared_ptr<data::ShapeStorage> ss_;
-};
-
-} // namespace mesa_pd
+} // namespace vtk
+} // namespace pe
 } // namespace walberla

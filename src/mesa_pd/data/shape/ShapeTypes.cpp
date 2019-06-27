@@ -13,33 +13,27 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file   Accessor.h
+//! \file ShapeTypes.cpp
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
-#include <mesa_pd/data/ParticleAccessor.h>
-#include <mesa_pd/data/ParticleStorage.h>
-#include <mesa_pd/data/ShapeStorage.h>
+#include <mesa_pd/data/shape/Box.h>
+#include <mesa_pd/data/shape/CylindricalBoundary.h>
+#include <mesa_pd/data/shape/HalfSpace.h>
+#include <mesa_pd/data/shape/Ellipsoid.h>
+#include <mesa_pd/data/shape/Sphere.h>
 
 namespace walberla {
 namespace mesa_pd {
+namespace data {
 
-class ParticleAccessorWithShape : public data::ParticleAccessor
-{
-public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-      : ParticleAccessor(ps)
-      , ss_(ss)
-   {}
+const int Box::SHAPE_TYPE                ;
+const int CylindricalBoundary::SHAPE_TYPE;
+const int HalfSpace::SHAPE_TYPE          ;
+const int Ellipsoid::SHAPE_TYPE          ;
+const int Sphere::SHAPE_TYPE             ;
 
-   const auto& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvMass();}
-   const auto& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvInertiaBF();}
-
-   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)].get();}
-private:
-   std::shared_ptr<data::ShapeStorage> ss_;
-};
-
-} // namespace mesa_pd
-} // namespace walberla
+} //namespace data
+} //namespace mesa_pd
+} //namespace walberla

@@ -528,6 +528,8 @@ void swap(ParticleStorage::Particle lhs, ParticleStorage::Particle rhs)
    std::swap(lhs.getNewContactHistoryRef(), rhs.getNewContactHistoryRef());
    std::swap(lhs.getTemperatureRef(), rhs.getTemperatureRef());
    std::swap(lhs.getHeatFluxRef(), rhs.getHeatFluxRef());
+   std::swap(lhs.getDvRef(), rhs.getDvRef());
+   std::swap(lhs.getDwRef(), rhs.getDwRef());
 }
 
 inline

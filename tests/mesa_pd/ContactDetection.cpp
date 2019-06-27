@@ -21,6 +21,7 @@
 #include <mesa_pd/vtk/ParticleVtkOutput.h>
 
 #include <mesa_pd/collision_detection/AnalyticContactDetection.h>
+#include <mesa_pd/collision_detection/GeneralContactDetection.h>
 #include <mesa_pd/data/LinkedCells.h>
 #include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>

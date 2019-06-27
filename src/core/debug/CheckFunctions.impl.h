@@ -351,7 +351,7 @@ void check_float_equal( const T & lhs, const U & rhs,
       << "File:       " << filename << ":" << line << '\n'
       << "Expression: " << lhsExpression << " == " << rhsExpression << '\n'
       //<< "ULP:        " << distance << '\n'
-      << "Values:     " << std::setw(length) << std::setfill(' ') << lhsExpression << " = ";
+      << "Values:     "  << std::setw(length) << std::setfill(' ') << lhsExpression << " = ";
 
    printValue( ss, lhs ) << '\n';
 

@@ -39,7 +39,9 @@ public:
 
    real_t getVolume() const override { return (real_t(4) / real_t(3)) * math::pi * getRadius() * getRadius() * getRadius(); }
 
-   static const int SHAPE_TYPE = 1; ///< Unique shape type identifier for spheres.\ingroup mesa_pd_shape
+   Vec3 support( const Vec3& d ) const override;
+
+   constexpr static int SHAPE_TYPE = 1; ///< Unique shape type identifier for spheres.\ingroup mesa_pd_shape
 
 private:
       real_t radius_; ///< radius of the sphere
@@ -56,6 +58,12 @@ void Sphere::updateMassAndInertia(const real_t density)
 
    inertiaBF_    = I;
    invInertiaBF_ = I.getInverse();
+}
+
+inline
+Vec3 Sphere::support( const Vec3& d ) const
+{
+   return radius_ * d;
 }
 
 } //namespace data

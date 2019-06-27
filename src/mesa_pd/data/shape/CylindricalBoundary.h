@@ -45,7 +45,7 @@ public:
    real_t getVolume() const override { return std::numeric_limits<real_t>::infinity(); };
    void   updateMassAndInertia(const real_t density) override;
 
-   static const int SHAPE_TYPE = 2; ///< Unique shape type identifier for cylindrical boundaries.\ingroup mesa_pd_shape
+   constexpr static int SHAPE_TYPE = 2; ///< Unique shape type identifier for cylindrical boundaries.\ingroup mesa_pd_shape
 
 private:
       real_t radius_; ///< radius of the cylinder
@@ -55,8 +55,8 @@ private:
 inline
 void CylindricalBoundary::updateMassAndInertia(const real_t /*density*/)
 {
-   getInvMass()      = real_t(0.0);
-   getInvInertiaBF() = Mat3(real_t(0.0));
+   invMass_      = real_t(0.0);
+   invInertiaBF_ = Mat3(real_t(0.0));
 }
 
 } //namespace data

@@ -158,7 +158,7 @@ private:
 *   \brief Returns a random floating point number of type REAL in the range [min,max) (max excluded!)
 */
 //**********************************************************************************************************************
-template< typename REAL >
+template< typename REAL = real_t >
 REAL realRandom( const REAL min = REAL(0), const REAL max = REAL(1), std::mt19937 & generator = internal::getGenerator() )
 {
    static_assert( std::numeric_limits<REAL>::is_specialized && !std::numeric_limits<REAL>::is_integer, "Floating point type required/expected!" );

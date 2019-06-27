@@ -67,6 +67,6 @@ private:
 };
 
 } // namespace vtk
-} // namespace pe
+} // namespace mesa_pd
 } // namespace walberla
 

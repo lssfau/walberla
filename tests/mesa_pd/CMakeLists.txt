@@ -10,6 +10,27 @@ waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticCollisionFuncti
 waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticContactDetection FILES collision_detection/AnalyticContactDetection.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_AnalyticContactDetection )
 
+waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_BoxSupport FILES collision_detection/BoxSupport.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_BoxSupport )
+
+waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_EllipsoidSupport FILES collision_detection/EllipsoidSupport.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_EllipsoidSupport )
+
+waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_EPA FILES collision_detection/EPA.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_EPA )
+
+waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_GeneralContactDetection FILES collision_detection/GeneralContactDetection.cpp DEPENDS blockforest core pe)
+waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_GeneralContactDetection )
+
+waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_GJK FILES collision_detection/GJK.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_GJK )
+
+waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_GJKEPA FILES collision_detection/GJK_EPA.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_GJKEPA )
+
+waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_SphereSupport FILES collision_detection/SphereSupport.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_SphereSupport )
+
 waLBerla_compile_test( NAME   MESA_PD_COMMON_IntersectionRatio FILES common/IntersectionRatio.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_COMMON_IntersectionRatio )
 
@@ -41,6 +62,9 @@ waLBerla_execute_test( NAME   MESA_PD_Domain_DynamicRefinement PROCESSES 8)
 
 waLBerla_compile_test( NAME   MESA_PD_Domain_SerializeDeserialize FILES domain/SerializeDeserialize.cpp DEPENDS blockforest core pe)
 waLBerla_execute_test( NAME   MESA_PD_Domain_SerializeDeserialize PROCESSES 8 )
+
+waLBerla_compile_test( NAME   MESA_PD_DropTest FILES DropTest.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_DropTest )
 
 waLBerla_compile_test( NAME   MESA_PD_Kernel_ClearNextNeighborSync FILES kernel/ClearNextNeighborSync.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_ClearNextNeighborSync PROCESSES 2 )

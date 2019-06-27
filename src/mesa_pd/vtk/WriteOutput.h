@@ -21,6 +21,7 @@
 #pragma once
 
 #include <mesa_pd/data/DataTypes.h>
+#include <mesa_pd/vtk/TensorGlyph.h>
 
 #include <core/debug/CheckFunctions.h>
 #include <vtk/Base64Writer.h>
@@ -44,6 +45,14 @@ void writeOutput(std::ostream& os, const T& data, const uint_t component)
 
 template <>
 inline
+void writeOutput(std::ostream& os, const TensorGlyph& data, const uint_t component)
+{
+   WALBERLA_ASSERT_LESS(component, 6);
+   walberla::vtk::toStream(os, data[component]);
+}
+
+template <>
+inline
 void writeOutput(std::ostream& os, const Vec3& data, const uint_t component)
 {
    WALBERLA_ASSERT_LESS(component, 3);
@@ -58,6 +67,14 @@ void writeOutput(walberla::vtk::Base64Writer& b64, const T& data, const uint_t c
    WALBERLA_ASSERT_EQUAL(component, 0);
    WALBERLA_UNUSED(component);
    b64 << data;
+}
+
+template <>
+inline
+void writeOutput(walberla::vtk::Base64Writer& b64, const TensorGlyph& data, const uint_t component)
+{
+   WALBERLA_ASSERT_LESS(component, 6);
+   b64 << data[component];
 }
 
 template <>
