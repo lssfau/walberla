@@ -39,12 +39,17 @@ options_dict = {
     'mrt': {
         'method': 'mrt',
         'stencil': 'D3Q19',
-        'relaxation_rates': [0, omega, 1.3, 1.4, omega, 1.2, 1.1],
+        'relaxation_rates': [0, omega, 1.3, 1.4, omega, 1.2, 1.1, 1.15, 1.234, 1.4235, 1.242, 1.2567, 0.9, 0.7],
     },
     'mrt_full': {
         'method': 'mrt',
         'stencil': 'D3Q19',
         'relaxation_rates': [omega_fill[0], omega, omega_fill[1], omega_fill[2], omega_fill[3], omega_fill[4], omega_fill[5]],
+    },
+    'mrt3': {
+        'method': 'mrt3',
+        'stencil': 'D3Q19',
+        'relaxation_rates': [omega, 1.1, 1.2],
     },
     'entropic': {
         'method': 'mrt3',
