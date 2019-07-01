@@ -13,19 +13,17 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file BoundarySetup.h
+//! \file DistanceFunction.h
 //! \ingroup mesh
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
-//! \author Christian Godenschwager <martin.bauer@fau.de>
+//! \author Martin Bauer <martin.bauer@fau.de>
 //
 //======================================================================================================================
 
-#include "core/DataTypes.h"
-
+#include "core/math/Vector3.h"
+#include "mesh/MatrixVectorOperations.h"
 
 namespace walberla {
-namespace mesh {
-
 
 template<typename MeshDistanceType>
 struct MeshDistanceFunction
@@ -48,5 +46,4 @@ makeMeshDistanceFunction( const shared_ptr <MeshDistanceType> & meshDistanceObje
    return MeshDistanceFunction<MeshDistanceType>( meshDistanceObject );
 }
 
-} // namespace mesh
 } // namespace walberla
