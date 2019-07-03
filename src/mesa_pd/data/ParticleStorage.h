@@ -152,6 +152,14 @@ public:
       walberla::real_t& getHeatFluxRef() {return storage_.getHeatFluxRef(i_);}
       void setHeatFlux(const walberla::real_t& v) { storage_.setHeatFlux(i_, v);}
       
+      const walberla::mesa_pd::Vec3& getDv() const {return storage_.getDv(i_);}
+      walberla::mesa_pd::Vec3& getDvRef() {return storage_.getDvRef(i_);}
+      void setDv(const walberla::mesa_pd::Vec3& v) { storage_.setDv(i_, v);}
+      
+      const walberla::mesa_pd::Vec3& getDw() const {return storage_.getDw(i_);}
+      walberla::mesa_pd::Vec3& getDwRef() {return storage_.getDwRef(i_);}
+      void setDw(const walberla::mesa_pd::Vec3& v) { storage_.setDw(i_, v);}
+      
 
       size_t getIdx() const {return i_;}
    public:
@@ -296,6 +304,14 @@ public:
    walberla::real_t& getHeatFluxRef(const size_t idx) {return heatFlux_[idx];}
    void setHeatFlux(const size_t idx, const walberla::real_t& v) { heatFlux_[idx] = v; }
    
+   const walberla::mesa_pd::Vec3& getDv(const size_t idx) const {return dv_[idx];}
+   walberla::mesa_pd::Vec3& getDvRef(const size_t idx) {return dv_[idx];}
+   void setDv(const size_t idx, const walberla::mesa_pd::Vec3& v) { dv_[idx] = v; }
+   
+   const walberla::mesa_pd::Vec3& getDw(const size_t idx) const {return dw_[idx];}
+   walberla::mesa_pd::Vec3& getDwRef(const size_t idx) {return dw_[idx];}
+   void setDw(const size_t idx, const walberla::mesa_pd::Vec3& v) { dw_[idx] = v; }
+   
 
    /**
     * @brief creates a new particle and returns an iterator pointing to it
@@ -406,6 +422,8 @@ public:
    std::vector<std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>> newContactHistory_ {};
    std::vector<walberla::real_t> temperature_ {};
    std::vector<walberla::real_t> heatFlux_ {};
+   std::vector<walberla::mesa_pd::Vec3> dv_ {};
+   std::vector<walberla::mesa_pd::Vec3> dw_ {};
    std::unordered_map<id_t, size_t> uidToIdx_;
    static_assert(std::is_same<decltype(uid_)::value_type, id_t>::value,
                  "Property uid of type id_t is missing. This property is required!");
@@ -436,6 +454,8 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(const ParticleSt
    getNewContactHistoryRef() = rhs.getNewContactHistory();
    getTemperatureRef() = rhs.getTemperature();
    getHeatFluxRef() = rhs.getHeatFlux();
+   getDvRef() = rhs.getDv();
+   getDwRef() = rhs.getDw();
    return *this;
 }
 
@@ -463,6 +483,8 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(ParticleStorage:
    getNewContactHistoryRef() = std::move(rhs.getNewContactHistoryRef());
    getTemperatureRef() = std::move(rhs.getTemperatureRef());
    getHeatFluxRef() = std::move(rhs.getHeatFluxRef());
+   getDvRef() = std::move(rhs.getDvRef());
+   getDwRef() = std::move(rhs.getDwRef());
    return *this;
 }
 
@@ -492,6 +514,8 @@ std::ostream& operator<<( std::ostream& os, const ParticleStorage::Particle& p )
          "newContactHistory   : " << p.getNewContactHistory() << "\n" <<
          "temperature         : " << p.getTemperature() << "\n" <<
          "heatFlux            : " << p.getHeatFlux() << "\n" <<
+         "dv                  : " << p.getDv() << "\n" <<
+         "dw                  : " << p.getDw() << "\n" <<
          "================================" << std::endl;
    return os;
 }
@@ -590,6 +614,8 @@ inline ParticleStorage::iterator ParticleStorage::create(const id_t& uid)
    newContactHistory_.emplace_back();
    temperature_.emplace_back(real_t(0));
    heatFlux_.emplace_back(real_t(0));
+   dv_.emplace_back(real_t(0));
+   dw_.emplace_back(real_t(0));
    uid_.back() = uid;
    uidToIdx_[uid] = uid_.size() - 1;
    return iterator(this, size() - 1);
@@ -643,6 +669,8 @@ inline ParticleStorage::iterator ParticleStorage::erase(iterator& it)
    newContactHistory_.pop_back();
    temperature_.pop_back();
    heatFlux_.pop_back();
+   dv_.pop_back();
+   dw_.pop_back();
    return it;
 }
 
@@ -683,6 +711,8 @@ inline void ParticleStorage::reserve(const size_t size)
    newContactHistory_.reserve(size);
    temperature_.reserve(size);
    heatFlux_.reserve(size);
+   dv_.reserve(size);
+   dw_.reserve(size);
 }
 
 inline void ParticleStorage::clear()
@@ -708,6 +738,8 @@ inline void ParticleStorage::clear()
    newContactHistory_.clear();
    temperature_.clear();
    heatFlux_.clear();
+   dv_.clear();
+   dw_.clear();
    uidToIdx_.clear();
 }
 
@@ -734,6 +766,8 @@ inline size_t ParticleStorage::size() const
    //WALBERLA_ASSERT_EQUAL( uid_.size(), newContactHistory.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), temperature.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), heatFlux.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), dv.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), dw.size() );
    return uid_.size();
 }
 template <typename Selector, typename Accessor, typename Func, typename... Args>
@@ -1064,6 +1098,24 @@ public:
    walberla::real_t& operator()(data::Particle& p) const {return p.getHeatFluxRef();}
    walberla::real_t& operator()(data::Particle&& p) const {return p.getHeatFluxRef();}
    const walberla::real_t& operator()(const data::Particle& p) const {return p.getHeatFlux();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleDv
+{
+public:
+   using return_type = walberla::mesa_pd::Vec3;
+   walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getDvRef();}
+   walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getDvRef();}
+   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getDv();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleDw
+{
+public:
+   using return_type = walberla::mesa_pd::Vec3;
+   walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getDwRef();}
+   walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getDwRef();}
+   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getDw();}
 };
 
 } //namespace data

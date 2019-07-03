@@ -132,6 +132,14 @@ public:
    walberla::real_t& getHeatFluxRef(const size_t p_idx) {return ps_->getHeatFluxRef(p_idx);}
    void setHeatFlux(const size_t p_idx, const walberla::real_t& v) { ps_->setHeatFlux(p_idx, v);}
    
+   const walberla::mesa_pd::Vec3& getDv(const size_t p_idx) const {return ps_->getDv(p_idx);}
+   walberla::mesa_pd::Vec3& getDvRef(const size_t p_idx) {return ps_->getDvRef(p_idx);}
+   void setDv(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setDv(p_idx, v);}
+   
+   const walberla::mesa_pd::Vec3& getDw(const size_t p_idx) const {return ps_->getDw(p_idx);}
+   walberla::mesa_pd::Vec3& getDwRef(const size_t p_idx) {return ps_->getDwRef(p_idx);}
+   void setDw(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setDw(p_idx, v);}
+   
 
    id_t getInvalidUid() const {return UniqueID<data::Particle>::invalidID();}
    size_t getInvalidIdx() const {return std::numeric_limits<size_t>::max();}
@@ -261,6 +269,14 @@ public:
    void setHeatFlux(const size_t /*p_idx*/, const walberla::real_t& v) { heatFlux_ = v;}
    walberla::real_t& getHeatFluxRef(const size_t /*p_idx*/) {return heatFlux_;}
    
+   const walberla::mesa_pd::Vec3& getDv(const size_t /*p_idx*/) const {return dv_;}
+   void setDv(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { dv_ = v;}
+   walberla::mesa_pd::Vec3& getDvRef(const size_t /*p_idx*/) {return dv_;}
+   
+   const walberla::mesa_pd::Vec3& getDw(const size_t /*p_idx*/) const {return dw_;}
+   void setDw(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { dw_ = v;}
+   walberla::mesa_pd::Vec3& getDwRef(const size_t /*p_idx*/) {return dw_;}
+   
 
    id_t getInvalidUid() const {return UniqueID<data::Particle>::invalidID();}
    size_t getInvalidIdx() const {return std::numeric_limits<size_t>::max();}
@@ -293,6 +309,8 @@ private:
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> newContactHistory_;
    walberla::real_t temperature_;
    walberla::real_t heatFlux_;
+   walberla::mesa_pd::Vec3 dv_;
+   walberla::mesa_pd::Vec3 dw_;
 };
 
 } //namespace data

@@ -43,17 +43,19 @@ public:
 
    virtual real_t getVolume() const = 0;
 
-   real_t& getInvMass() {return invMass_;}
+   const real_t& getMass() const {return mass_;}
    const real_t& getInvMass() const {return invMass_;}
 
-   Mat3& getInvInertiaBF() {return invInertiaBF_;}
+   const Mat3& getInertiaBF() const {return inertiaBF_;}
    const Mat3& getInvInertiaBF() const {return invInertiaBF_;}
 
    const int& getShapeType() const {return shapeType_;}
 
    static const int INVALID_SHAPE = -1; ///< Unique *invalid* shape type identifier.\ingroup mesa_pd_shape
-private:
+protected:
+   real_t mass_         = real_t(0);       ///< mass
    real_t invMass_      = real_t(0);       ///< inverse mass
+   Mat3   inertiaBF_    = Mat3(real_t(0)); ///< inertia matrix in the body frame
    Mat3   invInertiaBF_ = Mat3(real_t(0)); ///< inverse inertia matrix in the body frame
    int    shapeType_    = INVALID_SHAPE;   ///< \ingroup mesa_pd_shape
 };

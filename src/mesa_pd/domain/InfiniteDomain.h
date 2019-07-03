@@ -30,11 +30,11 @@ class InfiniteDomain : public IDomain
 {
 public:
    bool   isContainedInProcessSubdomain(const uint_t /*rank*/, const Vec3& /*pt*/) const override {return true;}
-   int    findContainingProcessRank(const Vec3& /*pt*/) const override {return mpi::MPIManager::instance()->rank();}
+   int    findContainingProcessRank(const Vec3& /*pt*/) const override {return walberla::mpi::MPIManager::instance()->rank();}
    void   periodicallyMapToDomain(Vec3& /*pt*/) const override {}
    std::vector<uint_t> getNeighborProcesses() const override {return {};}
    bool   intersectsWithProcessSubdomain(const uint_t rank, const Vec3& /*pt*/, const real_t& /*radius*/) const override
-   { return int_c(rank)==mpi::MPIManager::instance()->rank() ? true : false;}
+   { return int_c(rank)==walberla::mpi::MPIManager::instance()->rank() ? true : false;}
    void   correctParticlePosition(Vec3& /*pt*/) const override {}
 };
 
