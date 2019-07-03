@@ -38,17 +38,13 @@ class ParticleAccessorWithShape : public data::ParticleAccessor
 {
 public:
    ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-      : ParticleAccessor(ps)
-      , ss_(ss)
+         : ParticleAccessor(ps)
+         , ss_(ss)
    {}
 
-   const walberla::real_t& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvMass();}
-   walberla::real_t& getInvMassRef(const size_t p_idx) {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvMass();}
-   void setInvMass(const size_t p_idx, const walberla::real_t& v) { ss_->shapes[ps_->getShapeID(p_idx)]->getInvMass() = v;}
+   const auto& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvMass();}
 
    const auto& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvInertiaBF();}
-   auto& getInvInertiaBFRef(const size_t p_idx) {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvInertiaBF();}
-   void setInvInertiaBF(const size_t p_idx, const Mat3& v) { ss_->shapes[ps_->getShapeID(p_idx)]->getInvInertiaBF() = v;}
 
    data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)].get();}
 private:
