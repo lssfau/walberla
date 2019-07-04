@@ -19,6 +19,8 @@
 //
 //==============================================================================================================================================================
 
+#pragma once
+
 #include "domain_decomposition/IBlock.h"
 #include "executiontree/ExecutionTree.h"
 #include "ExecutionTreeGPU.h"

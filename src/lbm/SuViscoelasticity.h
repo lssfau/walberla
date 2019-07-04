@@ -20,6 +20,7 @@
 //
 //======================================================================================================================
 
+#pragma once
 
 #include "blockforest/communication/UniformBufferedScheme.h"
 #include "core/math/Matrix3.h"
