@@ -745,6 +745,97 @@ gcc_8_mpionly:
 gcc_8_hybrid:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   variables:
+      <<: *build_hybrid_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_8_serial_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   variables:
+      <<: *build_serial_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_8_mpionly_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   variables:
+      <<: *build_mpionly_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_8_hybrid_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   variables:
+      <<: *build_hybrid_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_8_hybrid_dbg_sp:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   variables:
+      <<: *build_hybrid_dbg_sp_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_9_serial:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   variables:
+      <<: *build_serial_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_9_mpionly:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   variables:
+      <<: *build_mpionly_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_9_hybrid:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    stage: pretest
    variables:
       <<: *build_hybrid_variables
@@ -756,9 +847,9 @@ gcc_8_hybrid:
    tags:
       - docker
 
-gcc_8_serial_dbg:
+gcc_9_serial_dbg:
    <<: *build_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -769,9 +860,9 @@ gcc_8_serial_dbg:
    tags:
       - docker
 
-gcc_8_mpionly_dbg:
+gcc_9_mpionly_dbg:
    <<: *build_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -782,9 +873,9 @@ gcc_8_mpionly_dbg:
    tags:
       - docker
 
-gcc_8_hybrid_dbg:
+gcc_9_hybrid_dbg:
    <<: *build_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -795,9 +886,9 @@ gcc_8_hybrid_dbg:
    tags:
       - docker
 
-gcc_8_hybrid_dbg_sp:
+gcc_9_hybrid_dbg_sp:
    <<: *build_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
