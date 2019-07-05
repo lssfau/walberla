@@ -260,8 +260,8 @@ class BlockID : public IBlockID {
 
 public:
 
-   inline BlockID() : id_( uint_c(0) ) {}
-   inline BlockID( const BlockID& id ) : id_( id.id_ ) {}
+   inline BlockID() = default;
+   inline BlockID( const BlockID& id ) = default;
    inline BlockID( const uint_t id ) : id_( id ) {}
    inline BlockID( const uint_t treeIndex, const uint_t treeIdMarker );
    inline BlockID( const BlockID& id, const uint_t branchId );
@@ -302,7 +302,7 @@ public:
 
 private:
 
-   uint_t id_;
+   uint_t id_ = uint_c(0);
 
 }; // class BlockID
 
