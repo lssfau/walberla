@@ -60,7 +60,7 @@ int main( int argc, char** argv )
     math::seedRandomGenerator(1337);
 
     for (uint_t i = 0; i < 100; ++i)
-      storage[0].add( std::make_unique<Sphere>(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Vec3(0,0,0), Quat(), real_t(1), iron, false, false, false) );
+      storage[0].add( std::make_unique<Sphere>(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Quat(), real_t(1), iron, false, false, false) );
 
     sccd.generatePossibleContacts();
 
@@ -84,14 +84,14 @@ int main( int argc, char** argv )
 
     bs.clear();
 
-    bs.add( std::make_unique<Sphere>(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Vec3(0,0,0), Quat(), real_t(1), iron, false, false, false) );
+    bs.add( std::make_unique<Sphere>(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Quat(), real_t(1), iron, false, false, false) );
 
     WcTimingPool pool;
     for (int runs = 0; runs < 10; ++runs)
     {
        auto oldSize = bs.size();
        for (uint_t i = 0; i < oldSize; ++i)
-         bs.add( std::make_unique<Sphere>(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Vec3(0,0,0), Quat(), real_t(0.5), iron, false, false, false) );
+         bs.add( std::make_unique<Sphere>(UniqueID<Sphere>::createGlobal(), 0, Vec3( math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10)), math::realRandom(real_c(0), real_c(10))), Quat(), real_t(0.5), iron, false, false, false) );
        pool["SCCD"].start();
        sccd.generatePossibleContacts();
        pool["SCCD"].end();

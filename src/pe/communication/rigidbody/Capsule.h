@@ -66,7 +66,7 @@ inline CapsulePtr instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain
    CapsuleParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   auto cp = std::make_unique<Capsule>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.radius_, subobjparam.length_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   auto cp = std::make_unique<Capsule>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_,  subobjparam.q_, subobjparam.radius_, subobjparam.length_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
    cp->setLinearVel( subobjparam.v_ );
    cp->setAngularVel( subobjparam.w_ );
    cp->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );

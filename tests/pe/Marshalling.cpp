@@ -50,7 +50,7 @@ void testBox()
 
    MaterialID iron = Material::find("iron");
 
-   Box b1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), Vec3(1,2,3), iron, false, true, false);
+   Box b1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Quat(), Vec3(1,2,3), iron, false, true, false);
    b1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
    b1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
 
@@ -75,7 +75,7 @@ void testCapsule()
 
    MaterialID iron = Material::find("iron");
 
-   Capsule c1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), 5, 7, iron, false, false, false);
+   Capsule c1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Quat(), 5, 7, iron, false, false, false);
    c1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
    c1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
 
@@ -101,7 +101,7 @@ void testSphere()
 
    MaterialID iron = Material::find("iron");
 
-   Sphere s1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), 5, iron, false, false, false);
+   Sphere s1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)),  Quat(), 5, iron, false, false, false);
    s1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
    s1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
 
@@ -126,7 +126,7 @@ void testSquirmer()
 
    MaterialID iron = Material::find("iron");
 
-   Squirmer s1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), real_c(5), real_c(0.1), real_c(4.93), iron, false, false, false);
+   Squirmer s1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Quat(), real_c(5), real_c(0.1), real_c(4.93), iron, false, false, false);
 
    mpi::SendBuffer sb;
    WALBERLA_ASSERT_UNEQUAL(Sphere::getStaticTypeID(), Squirmer::getStaticTypeID(), "Squirmer did not get its own type ID");
@@ -147,7 +147,7 @@ void testEllipsoid()
 
    MaterialID iron = Material::find("iron");
 
-   Ellipsoid e1(759847, 1234795, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), Vec3(3,1,5), iron, false, false, false);
+   Ellipsoid e1(759847, 1234795, Vec3(real_c(1), real_c(2), real_c(3)), Quat(), Vec3(3,1,5), iron, false, false, false);
    e1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
    e1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
 
@@ -169,7 +169,7 @@ void testEllipsoid()
 void testUnion()
 {
    WALBERLA_LOG_INFO_ON_ROOT("*** testUnion ***");
-   UnionT u1(159, 423, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), false, false, false);
+   UnionT u1(159, 423, Vec3(real_c(1), real_c(2), real_c(3)), Quat(), false, false, false);
    SphereID s11 = createSphere(&u1, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), 2);
    SphereID s21 = createSphere(&u1, 4567789, Vec3(real_c(3), real_c(2), real_c(3)), real_c(1.5));
    WALBERLA_CHECK_NOT_NULLPTR( s11 );
@@ -185,6 +185,8 @@ void testUnion()
 
    WALBERLA_CHECK_EQUAL(u1.size(), 2);
    WALBERLA_CHECK_EQUAL(u1.size(), u2->size());
+   // More exhaustive tests (with inertia, rotation, etc.)
+   // can be found in tests/mesh/MeshMarshalling.cpp
 
    //getting spheres of second union
    SphereID s12 = static_cast<SphereID> (u2->begin().getBodyID());

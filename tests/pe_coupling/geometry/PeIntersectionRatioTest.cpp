@@ -60,8 +60,7 @@ int main( int argc, char **argv )
 
    walberla::id_t sid = 0;
    walberla::id_t uid = 0;
-
-   Vector3<real_t> rPos( real_t(0));
+   
    Vector3<real_t> rotationAngles( real_t(0));
    Quaternion<real_t> quat( rotationAngles );
    pe::MaterialID material = pe::Material::find("iron");
@@ -74,7 +73,7 @@ int main( int argc, char **argv )
       Vector3<real_t> bodyPos(real_t(1), real_t(0), real_t(0));
       real_t radius = real_t(1);
 
-      pe::Sphere sphere(++sid, ++uid, bodyPos, rPos, quat, radius, material, false, false, false);
+      pe::Sphere sphere(++sid, ++uid, bodyPos, quat, radius, material, false, false, false);
 
       pe::RigidBody & rb = sphere; // otherwise not the pe_coupling/geometry version is matched
 
@@ -123,7 +122,7 @@ int main( int argc, char **argv )
       Vector3<real_t> bodyPos(real_t(1), real_t(0), real_t(0));
       Vector3<real_t> semiAxes1(real_t(1), real_t(1), real_t(1));
 
-      pe::Ellipsoid ellip1(++sid, ++uid, bodyPos, rPos, quat, semiAxes1, material, false, false, false);
+      pe::Ellipsoid ellip1(++sid, ++uid, bodyPos, quat, semiAxes1, material, false, false, false);
 
       pe::RigidBody & rb1 = ellip1; // otherwise not the pe_coupling/geometry version is matched
 
@@ -138,7 +137,7 @@ int main( int argc, char **argv )
       WALBERLA_CHECK_FLOAT_EQUAL(delta2, (std::sqrt(2) - real_t(1)) / std::sqrt(2), "Intersection ratio with ellipsoid wrong!");
 
       Vector3<real_t> semiAxes2(real_t(2), real_t(0.5), real_t(2));
-      pe::Ellipsoid ellip2(++sid, ++uid, bodyPos, rPos, quat, semiAxes2, material, false, false, false);
+      pe::Ellipsoid ellip2(++sid, ++uid, bodyPos, quat, semiAxes2, material, false, false, false);
 
       pe::RigidBody & rb2 = ellip2; // otherwise not the pe_coupling/geometry version is matched
 

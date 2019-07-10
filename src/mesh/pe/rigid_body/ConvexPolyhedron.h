@@ -65,7 +65,7 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   ConvexPolyhedron( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+   ConvexPolyhedron( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                      const TriangleMesh & mesh, MaterialID material,
                      const bool global, const bool communicating, const bool infiniteMass );
    //@}
@@ -80,7 +80,7 @@ public:
    //**********************************************************************************************
 
 public:
-   void init( const Vec3& gpos, const Vec3& rpos, const Quat& q,
+   void init( const Vec3& gpos, const Quat& q,
               const bool global, const bool communicating, const bool infiniteMass );
 
    //**Get functions*******************************************************************************

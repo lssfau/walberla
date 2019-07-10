@@ -62,18 +62,18 @@ namespace pe {
 * \param communicating specifies if the ConvexPolyhedron should take part in synchronization (syncNextNeighbour, syncShadowOwner)
 * \param infiniteMass specifies if the ConvexPolyhedron has infinite mass and will be treated as an obstacle
 */
-ConvexPolyhedron::ConvexPolyhedron( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+ConvexPolyhedron::ConvexPolyhedron( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                                     const TriangleMesh & mesh, MaterialID material,
                                     const bool global, const bool communicating, const bool infiniteMass )
    : GeomPrimitive( getStaticTypeID(), sid, uid, material ),  // Initialization of the parent class
      mesh_( mesh )
 {
-   init( gpos, rpos, q, global, communicating, infiniteMass );
+   init( gpos, q, global, communicating, infiniteMass );
 }
 //*************************************************************************************************
 
 
-void ConvexPolyhedron::init( const Vec3& gpos, const Vec3& rpos, const Quat& q,
+void ConvexPolyhedron::init( const Vec3& gpos,  const Quat& q,
                              const bool global, const bool communicating, const bool infiniteMass )
 {
    WALBERLA_ASSERT_FLOAT_EQUAL( (toWalberla( computeCentroid( mesh_ ) ) - Vec3() ).length(), real_t(0) );
@@ -82,14 +82,21 @@ void ConvexPolyhedron::init( const Vec3& gpos, const Vec3& rpos, const Quat& q,
    mesh_.request_face_normals();
    mesh_.update_face_normals();
 
+   // Calculate the bounding sphere radius first, as setPosition will trigger a call to calcBoundingBox(), which needs it
+   real_t maxSqRadius(0);
+   for(auto vh : mesh_.vertices())
+   {
+      real_t sqRadius = mesh_.point( vh ).sqrnorm();
+      if( sqRadius > maxSqRadius )
+         maxSqRadius = sqRadius;
+   }
+   boundingSphereRadius_ = std::sqrt( maxSqRadius );
+
    // Setting the center of the ConvexPolyhedron
-   gpos_ = gpos;
+   setPosition(gpos);
 
    // Initializing the instantiated ConvexPolyhedron
-   rpos_   = rpos;                   // Setting the relative position
-   q_      = q;                      // Setting the orientation
-   R_      = q_.toRotationMatrix();  // Setting the rotation matrix
-
+   setOrientation(q);
    setGlobal( global );
    if (infiniteMass)
    {
@@ -103,14 +110,7 @@ void ConvexPolyhedron::init( const Vec3& gpos, const Vec3& rpos, const Quat& q,
    setFinite( true );
 
    // Setting the axis-aligned bounding box
-   real_t maxSqRadius(0);
-   for(auto vh : mesh_.vertices())
-   {
-      real_t sqRadius = mesh_.point( vh ).sqrnorm();
-      if( sqRadius > maxSqRadius )
-         maxSqRadius = sqRadius;
-   }
-   boundingSphereRadius_ = std::sqrt( maxSqRadius );
+
    ConvexPolyhedron::calcBoundingBox();
 
    octandVertices_[0] = supportVertex( TriangleMesh::Normal( real_t( 1), real_t( 1), real_t( 1) ), *mesh_.vertices_begin() );
@@ -365,11 +365,12 @@ void ConvexPolyhedron::print( std::ostream& os, const char* tab ) const
 
    //   if( verboseMode )
    //   {
+   Mat3 R = getRotation();
    os << tab << "   Bounding box      = " << getAABB() << "\n"
       << tab << "   Quaternion        = " << getQuaternion() << "\n"
-      << tab << "   Rotation matrix   = ( " << setw(9) << R_[0] << " , " << setw(9) << R_[1] << " , " << setw(9) << R_[2] << " )\n"
-      << tab << "                       ( " << setw(9) << R_[3] << " , " << setw(9) << R_[4] << " , " << setw(9) << R_[5] << " )\n"
-      << tab << "                       ( " << setw(9) << R_[6] << " , " << setw(9) << R_[7] << " , " << setw(9) << R_[8] << " )\n";
+      << tab << "   Rotation matrix   = ( " << setw(9) << R[0] << " , " << setw(9) << R[1] << " , " << setw(9) << R[2] << " )\n"
+      << tab << "                       ( " << setw(9) << R[3] << " , " << setw(9) << R[4] << " , " << setw(9) << R[5] << " )\n"
+      << tab << "                       ( " << setw(9) << R[6] << " , " << setw(9) << R[7] << " , " << setw(9) << R[8] << " )\n";
 
    os << std::setiosflags(std::ios::right)
       << tab << "   Moment of inertia = ( " << setw(9) << I_[0] << " , " << setw(9) << I_[1] << " , " << setw(9) << I_[2] << " )\n"

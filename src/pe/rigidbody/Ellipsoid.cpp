@@ -58,12 +58,12 @@ namespace pe {
  * \param communicating specifies if the Ellipsoid should take part in synchronization (syncNextNeighbour, syncShadowOwner)
  * \param infiniteMass specifies if the Ellipsoid has infinite mass and will be treated as an obstacle
  */
-Ellipsoid::Ellipsoid( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+Ellipsoid::Ellipsoid( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                 const Vec3& semiAxes, MaterialID material,
                 const bool global, const bool communicating, const bool infiniteMass )
-   : Ellipsoid::Ellipsoid( getStaticTypeID(), sid, uid, gpos, rpos, q, semiAxes, material, global, communicating, infiniteMass )
+   : Ellipsoid::Ellipsoid( getStaticTypeID(), sid, uid, gpos, q, semiAxes, material, global, communicating, infiniteMass )
 {}
-Ellipsoid::Ellipsoid( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+Ellipsoid::Ellipsoid( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                 const Vec3& semiAxes, MaterialID material,
                 const bool global, const bool communicating, const bool infiniteMass )
    : GeomPrimitive( typeId, sid, uid, material )  // Initialization of the parent class
@@ -76,13 +76,10 @@ Ellipsoid::Ellipsoid( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, c
    WALBERLA_ASSERT( semiAxes_[0] > real_c(0), "Invalid Ellipsoid radius" );
    WALBERLA_ASSERT( semiAxes_[1] > real_c(0), "Invalid Ellipsoid radius" );
    WALBERLA_ASSERT( semiAxes_[2] > real_c(0), "Invalid Ellipsoid radius" );
-   // Setting the center of the Ellipsoid
-   gpos_ = gpos;
 
-   // Initializing the instantiated Ellipsoid
-   rpos_   = rpos;                   // Setting the relative position
-   q_      = q;                      // Setting the orientation
-   R_      = q_.toRotationMatrix();  // Setting the rotation matrix
+   // Setting the center of the Ellipsoid
+   setPosition(gpos);
+   setOrientation(q);
 
    setGlobal( global );
    if (infiniteMass)
@@ -182,6 +179,8 @@ void Ellipsoid::print( std::ostream& os, const char* tab ) const
 {
    using std::setw;
 
+   Mat3 R = getRotation();
+
    os << tab << " Ellipsoid " << uid_ << " with semi-axis " << semiAxes_ << "\n";
 
    os << tab << "   Fixed: " << isFixed() << " , sleeping: " << !isAwake() << "\n";
@@ -199,9 +198,9 @@ void Ellipsoid::print( std::ostream& os, const char* tab ) const
 //   {
       os << tab << "   Bounding box      = " << getAABB() << "\n"
          << tab << "   Quaternion        = " << getQuaternion() << "\n"
-         << tab << "   Rotation matrix   = ( " << setw(9) << R_[0] << " , " << setw(9) << R_[1] << " , " << setw(9) << R_[2] << " )\n"
-         << tab << "                       ( " << setw(9) << R_[3] << " , " << setw(9) << R_[4] << " , " << setw(9) << R_[5] << " )\n"
-         << tab << "                       ( " << setw(9) << R_[6] << " , " << setw(9) << R_[7] << " , " << setw(9) << R_[8] << " )\n";
+         << tab << "   Rotation matrix   = ( " << setw(9) << R[1] << " , " << setw(9) << R[1] << " , " << setw(9) << R[2] << " )\n"
+         << tab << "                       ( " << setw(9) << R[3] << " , " << setw(9) << R[4] << " , " << setw(9) << R[5] << " )\n"
+         << tab << "                       ( " << setw(9) << R[6] << " , " << setw(9) << R[7] << " , " << setw(9) << R[8] << " )\n";
 
       os << std::setiosflags(std::ios::right)
          << tab << "   Moment of inertia = ( " << setw(9) << I_[0] << " , " << setw(9) << I_[1] << " , " << setw(9) << I_[2] << " )\n"

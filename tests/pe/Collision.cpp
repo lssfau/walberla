@@ -55,10 +55,10 @@ void checkContact(const Contact& c1, const Contact& c2)
 void SphereTest()
 {
    MaterialID iron = Material::find("iron");
-   Sphere sp1(123, 1, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   Sphere sp2(124, 2, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   Sphere sp3(125, 3, Vec3(real_t(3.0),0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   Sphere sp4(124, 2, Vec3(0,real_t(1.5),0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   Sphere sp1(123, 1, Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   Sphere sp2(124, 2, Vec3(real_t(1.5),0,0), Quat(), 1, iron, false, true, false);
+   Sphere sp3(125, 3, Vec3(real_t(3.0),0,0), Quat(), 1, iron, false, true, false);
+   Sphere sp4(124, 2, Vec3(0,real_t(1.5),0), Quat(), 1, iron, false, true, false);
    Plane  pl1(223, 1, Vec3(0,0,0), Vec3(1,1,1).getNormalized(), 0, iron);
    CylindricalBoundary cb1(333, 0, Vec3(-100,0,0), 2, iron);
 
@@ -112,13 +112,13 @@ void SphereTest()
 void BoxTest()
 {
    MaterialID iron = Material::find("iron");
-   Box b1(123, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
-   Box b2(124, 0, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
-   Box b3(125, 0, Vec3(real_t(3.0),0,0), Vec3(0,0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
-   Box b4(123, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
+   Box b1(123, 0, Vec3(0,0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
+   Box b2(124, 0, Vec3(real_t(1.5),0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
+   Box b3(125, 0, Vec3(real_t(3.0),0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
+   Box b4(123, 0, Vec3(0,0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
    b4.rotate( Vec3(1,1,0), real_t(atan(sqrt(2))) );
 
-   Box b5(123, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
+   Box b5(123, 0, Vec3(0,0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
    b5.rotate( Vec3(0,0,1), real_t(math::M_PI * 0.25) );
    b5.rotate( Vec3(1,0,0), real_t(math::M_PI * 0.25) );
 
@@ -157,7 +157,7 @@ void BoxTest()
    b5.setPosition( (Vec3(0,0,1) * real_t(sqrt(3)) + Vec3(0,0,1)) * 1.01);
    WALBERLA_CHECK( !collideFunc(&b1, &b5) );
 
-   Sphere s1(126, 0, Vec3(real_t(1.5), real_t(1.5), real_t(1.5)), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   Sphere s1(126, 0, Vec3(real_t(1.5), real_t(1.5), real_t(1.5)), Quat(), 1, iron, false, true, false);
    WALBERLA_CHECK( collideFunc(&b1, &s1) );
 //   WALBERLA_LOG_WARNING("contactPoint    : " << contactPoint);
 //   WALBERLA_LOG_WARNING("contactNormal   : " << contactNormal);
@@ -167,8 +167,8 @@ void BoxTest()
 void CapsuleTest()
 {
    MaterialID iron = Material::find("iron");
-   Capsule c1(100, 100, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, 2, iron, false, true, false);
-   Sphere sp1(123, 123, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   Capsule c1(100, 100, Vec3(0,0,0), Quat(), 1, 2, iron, false, true, false);
+   Sphere sp1(123, 123, Vec3(0,0,0), Quat(), 1, iron, false, true, false);
 
    std::vector<Contact> contacts;
    fcd::AnalyticCollideFunctor< std::vector<Contact> > collideFunc(contacts);
@@ -210,9 +210,9 @@ void CapsuleTest2()
    const real_t   dynamic_cof ( static_cof ); // Coefficient of dynamic friction. Similar to static friction for low speed friction.
    MaterialID     material = createMaterial( "granular", real_t( 1.0 ), 0, static_cof, dynamic_cof, real_t( 0.5 ), 1, 1, 0, 0 );
    //create obstacle
-   Capsule c1(100, 100, Vec3(10,10,0), Vec3(0,0,0), Quat(), 3, 40, material, false, true, false);
+   Capsule c1(100, 100, Vec3(10,10,0), Quat(), 3, 40, material, false, true, false);
    c1.rotate( Vec3(0,1,0), math::M_PI * real_t(0.5) );
-   Sphere sp1(123, 123, Vec3(real_t(6.5316496854295262864), real_t(10.099999999999999645), real_t(0.46999999991564372914) ), Vec3(0,0,0), Quat(), real_t(0.47), material, false, true, false);
+   Sphere sp1(123, 123, Vec3(real_t(6.5316496854295262864), real_t(10.099999999999999645), real_t(0.46999999991564372914) ), Quat(), real_t(0.47), material, false, true, false);
 
    std::vector<Contact> contacts;
 
@@ -236,8 +236,8 @@ void CapsuleTest2()
 void UnionTest()
 {
    using UnionT = Union<Sphere>;
-   UnionT  un1(120, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), false, true, false);
-   UnionT  un2(121, 0, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), false, true, false);
+   UnionT  un1(120, 0, Vec3(0,0,0), Quat(), false, true, false);
+   UnionT  un2(121, 0, Vec3(real_t(1.5),0,0), Quat(), false, true, false);
    auto sp1 = createSphere(&un1, 123, Vec3(0,0,0), 1);
    auto sp2 = createSphere(&un2, 124, Vec3(real_t(1.5),0,0), 1);
 

@@ -63,10 +63,10 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit Sphere( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+   explicit Sphere( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                     real_t radius, MaterialID material,
                     const bool global, const bool communicating, const bool infiniteMass );
-   explicit Sphere( id_t const typeID, id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+   explicit Sphere( id_t const typeID, id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                     real_t radius, MaterialID material,
                     const bool global, const bool communicating, const bool infiniteMass );
    //@}
@@ -115,7 +115,6 @@ public:
    /*!\name Utility functions */
    //@{
    inline virtual Vec3 support( const Vec3& d ) const;
-   inline virtual Vec3 supportContactThreshold( const Vec3& d ) const;
    //@}
    //**********************************************************************************************
 
@@ -266,18 +265,18 @@ inline real_t Sphere::calcDensity( real_t radius, real_t mass )
 inline void Sphere::calcBoundingBox()
 {
    const real_t length( radius_ + contactThreshold );
-
+   Vec3 gpos = getPosition();
    aabb_    = AABB(
-              gpos_[0] - length,
-              gpos_[1] - length,
-              gpos_[2] - length,
-              gpos_[0] + length,
-              gpos_[1] + length,
-              gpos_[2] + length
+              gpos[0] - length,
+              gpos[1] - length,
+              gpos[2] - length,
+              gpos[0] + length,
+              gpos[1] + length,
+              gpos[2] + length
    );
 
 //   WALBERLA_ASSERT( aabb_.isValid()        , "Invalid bounding box detected" );
-   WALBERLA_ASSERT( aabb_.contains( gpos_ ), "Invalid bounding box detected("<< getSystemID() <<")\n" << "pos: " << gpos_ << "\nlength: " << length << "\nvel: " << getLinearVel() << "\nbox: " << aabb_ );
+   WALBERLA_ASSERT( aabb_.contains( gpos ), "Invalid bounding box detected("<< getSystemID() <<")\n" << "pos: " << gpos << "\nlength: " << length << "\nvel: " << getLinearVel() << "\nbox: " << aabb_ );
 }
 //*************************************************************************************************
 
@@ -316,29 +315,6 @@ inline Vec3 Sphere::support( const Vec3& d ) const
 }
 //*************************************************************************************************
 
-
-//*************************************************************************************************
-/*!\brief Estimates the point which is farthest in direction \a d.
- *
- * \param d The normalized search direction in world-frame coordinates
- * \return The support point in world-frame coordinates in direction a\ d extended by a vector in
- *         direction \a d of length \a pe::contactThreshold.
- */
-inline Vec3 Sphere::supportContactThreshold( const Vec3& d ) const
-{
-   auto len = d.sqrLength();
-   if (!math::equal(len, real_t(0)))
-   {
-      //WALBERLA_ASSERT_FLOAT_EQUAL( len, real_t(1), "search direction not normalized!");
-      const Vec3 s = getPosition() + (getRadius() / sqrt(len) + contactThreshold) * d;
-      //std::cout << "Support in direction " << d << " with center " << getPosition() << " (r=" << getRadius() << ") is " << s << std::endl;
-      return s;
-   } else
-   {
-      return Vec3(0,0,0);
-   }
-}
-//*************************************************************************************************
 
 //=================================================================================================
 //
@@ -409,7 +385,7 @@ inline real_t Sphere::getDepth( real_t px, real_t py, real_t pz ) const
  */
 inline real_t Sphere::getDepth( const Vec3& gpos ) const
 {
-   return ( radius_ - ( gpos - gpos_ ).length() );
+   return ( radius_ - ( gpos - getPosition() ).length() );
 }
 //*************************************************************************************************
 
@@ -477,7 +453,7 @@ inline real_t Sphere::getDistance( real_t px, real_t py, real_t pz ) const
  */
 inline real_t Sphere::getDistance( const Vec3& gpos ) const
 {
-   return ( ( gpos - gpos_ ).length() - radius_ );
+   return ( ( gpos - getPosition() ).length() - radius_ );
 }
 //*************************************************************************************************
 

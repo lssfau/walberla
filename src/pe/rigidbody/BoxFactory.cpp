@@ -50,7 +50,7 @@ BoxID createBox(       BodyStorage& globalStorage, BlockStorage& blocks, BlockDa
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      BoxPtr bx = std::make_unique<Box>(sid, uid, gpos, Vec3(0,0,0), Quat(), lengths, material, global, false, true);
+      BoxPtr bx = std::make_unique<Box>(sid, uid, gpos, Quat(), lengths, material, global, false, true);
       box = static_cast<BoxID>(&globalStorage.add(std::move(bx)));
    } else
    {
@@ -60,7 +60,7 @@ BoxID createBox(       BodyStorage& globalStorage, BlockStorage& blocks, BlockDa
             const id_t sid( UniqueID<RigidBody>::create() );
 
             BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
-            BoxPtr bx = std::make_unique<Box>(sid, uid, gpos, Vec3(0,0,0), Quat(), lengths, material, global, communicating, infiniteMass);
+            BoxPtr bx = std::make_unique<Box>(sid, uid, gpos, Quat(), lengths, material, global, communicating, infiniteMass);
             bx->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
             box = static_cast<BoxID>(&bs.add(std::move(bx)));
          }

@@ -49,7 +49,7 @@ SphereID createSphere( BodyStorage& globalStorage, BlockStorage& blocks, BlockDa
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      SpherePtr sp = std::make_unique<Sphere>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, material, global, false, true);
+      SpherePtr sp = std::make_unique<Sphere>(sid, uid, gpos, Quat(), radius, material, global, false, true);
       sphere = static_cast<SphereID>(&globalStorage.add( std::move(sp) ));
    } else
    {
@@ -59,7 +59,7 @@ SphereID createSphere( BodyStorage& globalStorage, BlockStorage& blocks, BlockDa
             const id_t sid( UniqueID<RigidBody>::create() );
 
             BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
-            SpherePtr sp = std::make_unique<Sphere>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, material, global, communicating, infiniteMass);
+            SpherePtr sp = std::make_unique<Sphere>(sid, uid, gpos, Quat(), radius, material, global, communicating, infiniteMass);
             sp->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
             sphere = static_cast<SphereID>(&bs.add( std::move(sp) ));
          }

@@ -66,10 +66,6 @@ void marshal( mpi::SendBuffer& buffer, const RigidBody& obj ) {
    buffer << obj.hasInfiniteMass();
    buffer << obj.getPosition();
    buffer << obj.hasSuperBody();
-   if( obj.hasSuperBody() )
-   {
-      buffer <<  obj.getRelPosition();
-   }
    buffer << obj.getQuaternion();
    if( !obj.hasSuperBody() )
    {
@@ -96,12 +92,6 @@ void unmarshal( mpi::RecvBuffer& buffer, RigidBodyParameters& objparam ) {
    buffer >> objparam.infiniteMass_;
    buffer >> objparam.gpos_;
    buffer >> objparam.hasSuperBody_;
-
-   if( objparam.hasSuperBody_ )
-   {
-      buffer >> objparam.rpos_;
-   }
-
    buffer >> objparam.q_;
 
    if( !objparam.hasSuperBody_ )

@@ -119,8 +119,7 @@ inline std::unique_ptr<Union<BodyTypes...>> instantiate( mpi::RecvBuffer& buffer
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
    auto un = std::make_unique<Union<BodyTypes...>>( subobjparam.sid_,
                                                      subobjparam.uid_,
-                                                     subobjparam.gpos_,
-                                                     subobjparam.rpos_,
+                                                     Vec3(),
                                                      subobjparam.q_,
                                                      false,
                                                      subobjparam.communicating_,
@@ -140,6 +139,10 @@ inline std::unique_ptr<Union<BodyTypes...>> instantiate( mpi::RecvBuffer& buffer
    un->setLinearVel( subobjparam.v_ );
    un->setAngularVel( subobjparam.w_ );
    newBody = un.get();
+   // Checks with global data of the union
+   WALBERLA_ASSERT_FLOAT_EQUAL(subobjparam.m_, un->getMass());
+   WALBERLA_ASSERT_FLOAT_EQUAL(subobjparam.I_, un->getBodyInertia());
+   WALBERLA_ASSERT_FLOAT_EQUAL(subobjparam.gpos_, un->getPosition());
    return un;
 }
 

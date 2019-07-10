@@ -71,9 +71,8 @@ CylindricalBoundary::CylindricalBoundary( id_t sid, id_t uid, const Vec3& gpos, 
    WALBERLA_ASSERT_GREATER( radius, real_t(0), "Invalid cylinder radius"  );
 
    // Initializing the instantiated cylinder
-   gpos_   = gpos;
-   q_      = Quat();                 // Setting the orientation
-   R_      = q_.toRotationMatrix();  // Setting the rotation matrix
+   setPosition(gpos);
+   setOrientation(Quat());
 
    // Setting the axis-aligned bounding box
    CylindricalBoundary::calcBoundingBox();
@@ -147,7 +146,7 @@ void CylindricalBoundary::calcBoundingBox()
          +math::Limits<real_t>::inf(),
          +math::Limits<real_t>::inf());
 
-   WALBERLA_ASSERT( aabb_.contains( gpos_ ), "Invalid bounding box detected" );
+   WALBERLA_ASSERT( aabb_.contains( getPosition() ), "Invalid bounding box detected" );
 }
 //*************************************************************************************************
 
@@ -179,12 +178,12 @@ void CylindricalBoundary::print( std::ostream& os, const char* tab ) const
       << tab << "   Global position   = " << getPosition() << "\n"
       << tab << "   Linear velocity   = " << getLinearVel() << "\n"
       << tab << "   Angular velocity  = " << getAngularVel() << "\n";
-
+   Mat3 R = getRotation();
    os << tab << "   Bounding box      = " << getAABB() << "\n"
       << tab << "   Quaternion        = " << getQuaternion() << "\n"
-      << tab << "   Rotation matrix   = ( " << setw(9) << R_[0] << " , " << setw(9) << R_[1] << " , " << setw(9) << R_[2] << " )\n"
-      << tab << "                       ( " << setw(9) << R_[3] << " , " << setw(9) << R_[4] << " , " << setw(9) << R_[5] << " )\n"
-      << tab << "                       ( " << setw(9) << R_[6] << " , " << setw(9) << R_[7] << " , " << setw(9) << R_[8] << " )\n";
+      << tab << "   Rotation matrix   = ( " << setw(9) << R[0] << " , " << setw(9) << R[1] << " , " << setw(9) << R[2] << " )\n"
+      << tab << "                       ( " << setw(9) << R[3] << " , " << setw(9) << R[4] << " , " << setw(9) << R[5] << " )\n"
+      << tab << "                       ( " << setw(9) << R[6] << " , " << setw(9) << R[7] << " , " << setw(9) << R[8] << " )\n";
 }
 //*************************************************************************************************
 

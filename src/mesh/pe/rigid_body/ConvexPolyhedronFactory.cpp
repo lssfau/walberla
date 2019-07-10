@@ -78,7 +78,7 @@ ConvexPolyhedronID createConvexPolyhedron( BodyStorage& globalStorage, BlockStor
       WALBERLA_CHECK_EQUAL(communicating, false, "Global bodies can not be communicating!" );
       WALBERLA_CHECK_EQUAL(infiniteMass, true, "Global bodies must have infinite mass!" );
 
-      auto cp = std::make_unique<ConvexPolyhedron>(sid, uid, gpos, Vec3(0,0,0), Quat(), mesh, material, global, false, true);
+      auto cp = std::make_unique<ConvexPolyhedron>(sid, uid, gpos, Quat(), mesh, material, global, false, true);
       poly = static_cast<ConvexPolyhedronID>(&globalStorage.add(std::move(cp)));
    } else
    {
@@ -88,7 +88,7 @@ ConvexPolyhedronID createConvexPolyhedron( BodyStorage& globalStorage, BlockStor
             const id_t sid( UniqueID<RigidBody>::create() );
 
             BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
-            auto cp = std::make_unique<ConvexPolyhedron>(sid, uid, gpos, Vec3(0,0,0), Quat(), mesh, material, global, communicating, infiniteMass);
+            auto cp = std::make_unique<ConvexPolyhedron>(sid, uid, gpos,  Quat(), mesh, material, global, communicating, infiniteMass);
             cp->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
             poly = static_cast<ConvexPolyhedronID>(&bs.add( std::move(cp) ) );
          }

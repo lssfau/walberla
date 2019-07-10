@@ -62,8 +62,8 @@ std::vector<Vector3<real_t>> generateOctahedron( const real_t radius)
 void checkMeshEquals(const mesh::TriangleMesh &m1, const mesh::TriangleMesh &m2){
 	// Very basic checks
 	WALBERLA_CHECK_FLOAT_EQUAL(mesh::computeVolume(m1), mesh::computeVolume(m2));
-	WALBERLA_CHECK_EQUAL(mesh::computeCentroid(m1), mesh::computeCentroid(m2));
-	WALBERLA_CHECK_EQUAL(mesh::computeInertiaTensor(m1), mesh::computeInertiaTensor(m2));
+	WALBERLA_CHECK_FLOAT_EQUAL(mesh::toWalberla(mesh::computeCentroid(m1)), mesh::toWalberla(mesh::computeCentroid(m2)));
+	WALBERLA_CHECK_FLOAT_EQUAL(mesh::computeInertiaTensor(m1), mesh::computeInertiaTensor(m2));
 }
 
 // Checks two convexPolyhedrons for equality
@@ -71,8 +71,10 @@ void checkConvexPolyhedronEquals(const mesh::pe::ConvexPolyhedron &b1, const mes
    WALBERLA_CHECK_FLOAT_EQUAL(b1.getPosition(), b2.getPosition());
    WALBERLA_CHECK_FLOAT_EQUAL(b1.getLinearVel(), b2.getLinearVel());
    WALBERLA_CHECK_FLOAT_EQUAL(b1.getAngularVel(), b2.getAngularVel());
-   WALBERLA_CHECK_EQUAL(b1.getInertia(), b2.getInertia());
+   WALBERLA_CHECK_FLOAT_EQUAL(b1.getInertia(), b2.getInertia());
    WALBERLA_CHECK_EQUAL(b1.getMaterial(), b2.getMaterial());
+   WALBERLA_CHECK_FLOAT_EQUAL(b1.getQuaternion(), b2.getQuaternion());
+   WALBERLA_CHECK_FLOAT_EQUAL(b1.getRotation(), b2.getRotation());
    // Check equality of the meshes
    checkMeshEquals(b1.getMesh(), b2.getMesh());
    WALBERLA_CHECK_EQUAL(b1.getID(), b2.getID());
@@ -90,7 +92,7 @@ void testConvexPolyhedron()
    
    MaterialID iron = Material::find("iron");
    
-   mesh::pe::ConvexPolyhedron b1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), *octamesh, iron, false, true, false);
+   mesh::pe::ConvexPolyhedron b1(759846, 1234794, Vec3(real_c(1), real_c(2), real_c(3)), Quat(), *octamesh, iron, false, true, false);
    b1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
    b1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
 
@@ -99,7 +101,7 @@ void testConvexPolyhedron()
    mpi::RecvBuffer rb(sb);
 
    auto bPtr = UnmarshalDynamically<BodyTuple>::execute(rb, mesh::pe::ConvexPolyhedron::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)));
-   mesh::pe::ConvexPolyhedronID b2 = static_cast<mesh::pe::ConvexPolyhedronID>(bPtr.get());
+   auto b2 = dynamic_cast<mesh::pe::ConvexPolyhedronID>(bPtr.get());
    checkConvexPolyhedronEquals(b1, *b2);
    
 }
@@ -114,11 +116,12 @@ void testUnion()
    qhull.run();
    
    MaterialID iron = Material::find("iron");
-   
-   UnionT u1(159, 423, Vec3(real_c(1), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), false, false, false);
-   u1.add(std::make_unique<mesh::pe::ConvexPolyhedron>(753326, 1267824, Vec3(real_c(2), real_c(2), real_c(3)), Vec3(0,0,0), Quat(), *octamesh, iron, false, true, false));
-   u1.add(std::make_unique<mesh::pe::ConvexPolyhedron>(753246, 1233424, Vec3(real_c(-1), real_c(4), real_c(-2)), Vec3(0,0,0), Quat(), *octamesh, iron, false, true, false));
-   
+   Quat q(real_t(0.3), real_t(0.1), real_t(0.9), real_t(0.3));
+   Quat w(real_t(0.1), real_t(0.3), real_t(0.9), real_t(0.3));
+   UnionT u1(159, 423, Vec3(real_c(1), real_c(2), real_c(3)),  q, false, false, false);
+   u1.add(std::make_unique<mesh::pe::ConvexPolyhedron>(753326, 1267824, Vec3(real_c(2), real_c(2), real_c(3)), w, *octamesh, iron, false, true, false));
+   u1.add(std::make_unique<mesh::pe::ConvexPolyhedron>(753246, 1233424, Vec3(real_c(-1), real_c(4), real_c(-2)), w, *octamesh, iron, false, true, false));
+
    u1.setLinearVel(Vec3(real_c(5.2), real_c(6.3), real_c(7.4)));
    u1.setAngularVel(Vec3(real_c(1.2), real_c(2.3), real_c(3.4)));
    
@@ -127,23 +130,24 @@ void testUnion()
    mpi::RecvBuffer rb(sb);
 
    auto uPtr = UnmarshalDynamically<BodyTuple>::execute(rb, UnionT::getStaticTypeID(), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)), math::AABB(Vec3(-100,-100,-100), Vec3(100,100,100)));
-   UnionID u2 = static_cast<UnionID>(uPtr.get());
+   auto u2 = dynamic_cast<UnionID>(uPtr.get());
    WALBERLA_CHECK_NOT_NULLPTR( u2 );
-
    WALBERLA_CHECK_EQUAL(u1.size(), 2);
    WALBERLA_CHECK_EQUAL(u1.size(), u2->size());
-   WALBERLA_CHECK_EQUAL(u1.getInertia(), u2->getInertia());
-   WALBERLA_CHECK_EQUAL(u1.getPosition(), u2->getPosition());
+   WALBERLA_CHECK_FLOAT_EQUAL(u1.getInertia(), u2->getInertia());
+   WALBERLA_CHECK_FLOAT_EQUAL(u1.getPosition(), u2->getPosition());
    WALBERLA_CHECK_FLOAT_EQUAL(u1.getLinearVel(), u2->getLinearVel());
    WALBERLA_CHECK_FLOAT_EQUAL(u1.getAngularVel(), u2->getAngularVel());
-   
+   WALBERLA_CHECK_FLOAT_EQUAL(u1.getQuaternion(), u2->getQuaternion());
+   WALBERLA_CHECK_FLOAT_EQUAL(u1.getRotation(), u2->getRotation());
+
    //getting polyhedrons of first union
-   mesh::pe::ConvexPolyhedronID p11 = static_cast<mesh::pe::ConvexPolyhedronID > (u1.begin().getBodyID());
-   mesh::pe::ConvexPolyhedronID p21 = static_cast<mesh::pe::ConvexPolyhedronID > ((++(u1.begin())).getBodyID());
+   mesh::pe::ConvexPolyhedronID p11 = dynamic_cast<mesh::pe::ConvexPolyhedronID > (u1.begin().getBodyID());
+   mesh::pe::ConvexPolyhedronID p21 = dynamic_cast<mesh::pe::ConvexPolyhedronID > ((++(u1.begin())).getBodyID());
    
    //getting polyhedrons of second union
-   mesh::pe::ConvexPolyhedronID p12 = static_cast<mesh::pe::ConvexPolyhedronID > (u2->begin().getBodyID());
-   mesh::pe::ConvexPolyhedronID p22 = static_cast<mesh::pe::ConvexPolyhedronID > ((++(u2->begin())).getBodyID());
+   mesh::pe::ConvexPolyhedronID p12 = dynamic_cast<mesh::pe::ConvexPolyhedronID > (u2->begin().getBodyID());
+   mesh::pe::ConvexPolyhedronID p22 = dynamic_cast<mesh::pe::ConvexPolyhedronID > ((++(u2->begin())).getBodyID());
    
    checkConvexPolyhedronEquals(*p11, *p12);
    checkConvexPolyhedronEquals(*p21, *p22);

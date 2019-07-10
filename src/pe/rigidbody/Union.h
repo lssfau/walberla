@@ -55,11 +55,11 @@ namespace pe {
 //*************************************************************************************************
 /**
  * \ingroup pe
- * \brief Base class for the sphere geometry.
+ * \brief Base class for the union geometry, a rigid assebly of bodies.
  *
- * The Sphere class represents the base class for the sphere geometry. It provides
- * the basic functionality of a sphere. For a full description of the sphere geometry,
- * see the Sphere class description.
+ * The Union class represents the base class for the sphere geometry.
+ * For a full description of the union geometry,
+ * see the Union class description.
  */
 template <typename... BodyTypes>
 class Union : public RigidBody
@@ -79,7 +79,7 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit Union( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+   explicit Union( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                    const bool global, const bool communicating, const bool infiniteMass );
    //@}
    //**********************************************************************************************
@@ -132,14 +132,6 @@ public:
 
    virtual inline bool   hasSubBodies()      const WALBERLA_OVERRIDE { return true; }
 
-   //**Simulation functions************************************************************************
-   /*!\name Simulation functions */
-   //@{
-   virtual void update( const Vec3& dp ) WALBERLA_OVERRIDE;  // Translation update of a subordinate rigid body
-   virtual void update( const Quat& dq ) WALBERLA_OVERRIDE;  // Rotation update of a subordinate rigid body
-   //@}
-   //**********************************************************************************************
-
    //**Signal functions***************************************************************************
    /*!\name Signal functions */
    //@{
@@ -189,7 +181,7 @@ protected:
    /*!\name Utility functions */
    //@{
    inline virtual void calcBoundingBox() WALBERLA_OVERRIDE;  // Calculation of the axis-aligned bounding box
-   void calcCenterOfMass(); ///< updates the center of mass (gpos)
+   inline         void calcCenterOfMass(); // Compute mass and center of gravity
    inline         void calcInertia();      // Calculation of the moment of inertia
    //@}
    //**********************************************************************************************
@@ -228,15 +220,13 @@ private:
  * \param infiniteMass specifies if the sphere has infinite mass and will be treated as an obstacle
  */
 template <typename... BodyTypes>
-Union<BodyTypes...>::Union( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+Union<BodyTypes...>::Union( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                              const bool global, const bool communicating, const bool /*infiniteMass*/ )
    : RigidBody( getStaticTypeID(), sid, uid )  // Initialization of the parent class
 {
    // Initializing the instantiated union
-   gpos_   = gpos;                   // Setting the global center of mass
-   rpos_   = rpos;                   // Setting the relative position
-   q_      = q;                      // Setting the orientation
-   R_      = q_.toRotationMatrix();  // Setting the rotation matrix
+   setPosition(gpos);                // Setting the global center of mass
+   setOrientation(q);                // Setting the orientation
 
    calcCenterOfMass();
    calcInertia();
@@ -258,7 +248,7 @@ Union<BodyTypes...>::Union( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rp
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Destructor for the Sphere class.
+/*!\brief Destructor for the Union class.
  */
 template <typename... BodyTypes>
 Union<BodyTypes...>::~Union()
@@ -266,7 +256,7 @@ Union<BodyTypes...>::~Union()
    // Clearing the bodies
    bodies_.clear();
 
-   // Logging the destruction of the sphere
+   // Logging the destruction of the union
    WALBERLA_LOG_DETAIL( "Destroyed union " << sid_ );
 }
 //*************************************************************************************************
@@ -321,27 +311,31 @@ template <typename... BodyTypes>
 void Union<BodyTypes...>::calcBoundingBox()
 {
    // Setting the bounding box of an empty union
+   Vec3 gpos = getPosition();
    if( bodies_.isEmpty() ) {
       aabb_ = math::AABB(
-                 gpos_[0] - real_t(0.01),
-            gpos_[1] - real_t(0.01),
-            gpos_[2] - real_t(0.01),
-            gpos_[0] + real_t(0.01),
-            gpos_[1] + real_t(0.01),
-            gpos_[2] + real_t(0.01)
+              gpos[0] - real_t(0.01),
+              gpos[1] - real_t(0.01),
+              gpos[2] - real_t(0.01),
+              gpos[0] + real_t(0.01),
+              gpos[1] + real_t(0.01),
+              gpos[2] + real_t(0.01)
             );
    }
 
    // Using the bounding box of the first contained bodies as initial bounding box
    // and merging it with the bounding boxes of all other bodies
    else {
+      bodies_.begin()->calcBoundingBox();
       aabb_ = bodies_.begin()->getAABB();
-      for( auto b=bodies_.begin()+1; b!=bodies_.end(); ++b )
-         aabb_.merge( b->getAABB() );
+      for( auto &b : bodies_ ){
+         b.calcBoundingBox();
+         aabb_.merge( b.getAABB() );
+      }
    }
 
    WALBERLA_ASSERT( aabb_.checkInvariant() , "Invalid bounding box detected" );
-   WALBERLA_ASSERT( aabb_.contains( gpos_ ), "Invalid bounding box detected" );
+   WALBERLA_ASSERT( aabb_.contains( getPosition() ), "Invalid bounding box detected" );
 }
 //*************************************************************************************************
 
@@ -364,64 +358,58 @@ void Union<BodyTypes...>::calcCenterOfMass()
    // Don't calculate the center of mass of an empty union
    if( bodies_.isEmpty() ) return;
 
-   // Calculating the center of mass of a single body
-   if( bodies_.size() == 1 )
+   // Resetting the center of mass
+   Vec3 gpos = Vec3(0,0,0);
+   real_t mass = real_t(0.0);
+   // Calculating the center of mass of a finite union
+   if( finite_ )
    {
-      const BodyID body( bodies_.begin().getBodyID() );
-      gpos_ = body->getPosition();
-      mass_ = body->getMass();
-      if( !isFixed() && mass_ > real_t(0) )
-         invMass_ = real_t(1) / mass_;
-   }
-
-   // Calculating the center of mass of a union containing several bodies
-   else
-   {
-      // Resetting the center of mass
-      gpos_.reset();
-
-      // Calculating the center of mass of a finite union
-      if( finite_ )
-      {
-         // Accumulating the mass of all contained rigid bodies
-         for( auto b=bodies_.begin(); b!=bodies_.end(); ++b ) {
-            WALBERLA_ASSERT( b->isFinite(), "Invalid infinite body in finite union detected" );
-            mass_ += b->getMass();
-            gpos_ += b->getPosition() * b->getMass();
-         }
-
-         // Calculating the center of mass for unions with non-zero mass
-         if( mass_ > real_t(0) ) {
-            if( !isFixed() ) invMass_ = real_t(1) / mass_;
-            gpos_ /= mass_;
-         }
-
-         // Calculating the center of mass for unions with a mass of zero
-         else {
-            size_t counter( 0 );
-            gpos_.reset();
-
-            for( auto b=bodies_.begin(); b!=bodies_.end(); ++b ) {
-               gpos_ += b->getPosition();
-               ++counter;
-            }
-
-            gpos_ /= counter;
-         }
+      // Accumulating the mass of all contained rigid bodies
+      for( auto &b : bodies_ ) {
+         WALBERLA_ASSERT( b.isFinite(), "Invalid infinite body in finite union detected" );
+         mass += b.getMass();
+         gpos += b.getPosition() * b.getMass();
       }
 
-      // Calculating the center of mass of an infinite union
+
+      mass_ = mass;
+      // Calculating the center of mass for unions with non-zero mass
+      if( mass > real_t(0) ) {
+         if( !isFixed() ) invMass_ = real_t(1) / mass;
+         gpos /= mass;
+      }
+
+         // Calculating the center of mass for unions with a mass of zero
       else {
          size_t counter( 0 );
 
-         for( auto b=bodies_.begin(); b!=bodies_.end(); ++b ) {
-            if( b->isFinite() ) continue;
-            gpos_ += b->getPosition();
+         for( auto &b : bodies_ ) {
+            gpos += b.getPosition();
             ++counter;
          }
 
-         gpos_ /= counter;
+         gpos /= counter;
       }
+   }
+
+      // Calculating the center of mass of an infinite union
+   else {
+      size_t counter( 0 );
+
+      for( auto &b : bodies_ ) {
+         if( b.isFinite() ) continue;
+         gpos += b.getPosition();
+         ++counter;
+      }
+
+      gpos /= counter;
+   }
+
+   // Set new center of mass and adapt all relative positions
+   Vec3 shift = getQuaternion().getInverse().rotate(gpos - getPosition());
+   gpos_ = gpos;
+   for( auto &b : bodies_) {
+      b.setRelPosition(b.getRelPosition() - shift);
    }
 
    // Checking the state of the union
@@ -430,8 +418,12 @@ void Union<BodyTypes...>::calcCenterOfMass()
 //*************************************************************************************************
 
 
+
 //*************************************************************************************************
 /*!\brief Calculation of the moment of inertia in reference to the body frame of the union.
+ *
+ * Use this function only if the center of gravity is set correctly (e.g. after calling
+ * calcCenterOfMass)
  *
  * \return void
  */
@@ -455,7 +447,7 @@ void Union<BodyTypes...>::calcInertia()
    for( auto b=bodies_.begin(); b!=bodies_.end(); ++b )
    {
       mass = b->getMass();
-      pos  = b->getPosition() - gpos_;
+      pos  = getRotation() * b->getRelPosition();
 
       I_ += b->getInertia();
       I_[0] += mass * ( pos[1]*pos[1] + pos[2]*pos[2] );
@@ -468,9 +460,8 @@ void Union<BodyTypes...>::calcInertia()
       I_[7] -= mass * pos[1] * pos[2];
       I_[8] += mass * ( pos[0]*pos[0] + pos[1]*pos[1] );
    }
-
    // Rotating the moment of inertia from the global frame of reference to the body frame of reference
-   I_ = R_ * I_ * R_;
+   I_ = getRotation().getTranspose() * I_ * getRotation();
 
    // Calculating the inverse of the body moment of inertia
    if( !isFixed() ) Iinv_ = I_.getInverse();
@@ -504,17 +495,7 @@ void Union<BodyTypes...>::calcInertia()
 template <typename... BodyTypes>
 void Union<BodyTypes...>::setPositionImpl( real_t px, real_t py, real_t pz )
 {
-   Vec3 gpos = Vec3( px, py, pz );
-
-   // Calculating the position change
-   const Vec3 dp( gpos - gpos_ );
-
-   // Setting the global position
-   gpos_ = gpos;
-
-   // Updating the contained bodies
-   for( auto& b : bodies_ )
-      b.update( dp );
+   gpos_ = Vec3( px, py, pz );
 
    Union<BodyTypes...>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
@@ -542,99 +523,17 @@ void Union<BodyTypes...>::setPositionImpl( real_t px, real_t py, real_t pz )
 template <typename... BodyTypes>
 void Union<BodyTypes...>::setOrientationImpl( real_t r, real_t i, real_t j, real_t k )
 {
-   const Quat q ( r, i, j, k );
-   const Quat dq( q * q_.getInverse() );
+   if ( hasSuperBody() ) return;
 
+   const Quat q ( r, i, j, k );
    q_ = q;
    R_ = q_.toRotationMatrix();
-
-   // Updating the contained bodies
-   for( auto& b : bodies_ )
-      b.update( dq );
 
    Union<BodyTypes...>::calcBoundingBox();  // Setting the axis-aligned bounding box
    wake();             // Waking the union from sleep mode
    signalRotation();   // Signaling the change of orientation to the superordinate body
 }
 //*************************************************************************************************
-
-
-
-//=================================================================================================
-//
-//  SIMULATION FUNCTIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*!\brief Translation update of a subordinate union.
- *
- * \param dp Change in the global position of the superordinate union.
- * \return void
- *
- * This update function is triggered by the superordinate body in case of a translational
- * movement. This movement involves a change in the global position and the axis-aligned
- * bounding box.
- */
-template <typename... BodyTypes>
-void Union<BodyTypes...>::update( const Vec3& dp )
-{
-   // Checking the state of the union
-   WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
-   WALBERLA_ASSERT( hasSuperBody(), "Invalid superordinate body detected" );
-
-   // Updating the global position
-   gpos_ += dp;
-
-   // Updating the contained bodies
-   for( auto& b : bodies_ )
-      b.update( dp );
-
-   // Setting the axis-aligned bounding box
-   Union<BodyTypes...>::calcBoundingBox();
-
-   // Checking the state of the union
-   WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Rotation update of a subordinate union.
- *
- * \param dq Change in the orientation of the superordinate union.
- * \return void
- *
- * This update function is triggered by the superordinate body in case of a rotational movement.
- * This movement involves a change in the global position, the orientation/rotation and the
- * axis-aligned bounding box of the box.
- */
-template <typename... BodyTypes>
-void Union<BodyTypes...>::update( const Quat& dq )
-{
-   // Checking the state of the union
-   WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
-   WALBERLA_ASSERT( hasSuperBody(), "Invalid superordinate body detected" );
-
-   // Calculating the new global position
-   gpos_ = sb_->getPosition() + ( sb_->getRotation() * rpos_ );
-
-   // Calculating the new orientation and rotation
-   q_ = dq * q_;
-   R_ = q_.toRotationMatrix();
-
-   // Updating the contained bodies
-   for( auto& b : bodies_ )
-      b.update( dq );
-
-   // Setting the axis-aligned bounding box
-   Union<BodyTypes...>::calcBoundingBox();
-
-   // Checking the state of the union
-   WALBERLA_ASSERT( checkInvariants(), "Invalid union state detected" );
-}
-//*************************************************************************************************
-
 
 
 
@@ -660,9 +559,9 @@ void Union<BodyTypes...>::update( const Quat& dq )
  * The union takes full responsibility for the newly added body, including the necessary
  * memory management. After adding the body to the union, the body is considered part of the
  * union. All functions called on the union (as for instance all kinds of set functions,
- * translation or rotation functions) additionally affect the rigid body. However, the body
- * can still individually be positioned, oriented, translated, rotated, or made (in-)visible
- * within the union.\n\n
+ * translation or rotation functions) additionally define the values for the rigid body
+ * according to its relative position and orientation. Do not call any Set-Functions on the
+ * single rigid body.\n
  *
  *
  * \section union_add_infinite Adding infinite rigid bodies
@@ -704,16 +603,23 @@ RigidBody& Union<BodyTypes...>::add( std::unique_ptr<RigidBody>&& body )
    if( body->isGlobal() ^ global_ )
       throw std::logic_error( "Global flags of body and union do not match" );
 
+   // Only add non-moving particles to a union.
+   WALBERLA_ASSERT_EQUAL(body->getLinearVel(), Vec3());
+   WALBERLA_ASSERT_EQUAL(body->getAngularVel(), Vec3());
+
    // Registering the rigid body
    auto& bd = bodies_.add( std::move(body) );
 
-   Vec3 oldCenterOfMass = getPosition();
-   Vec3 oldImpulse      = getLinearVel() * getMass();
+   Vec3 bdglobalPos = bd.getPosition();
+   Quat bdglobalRot = bd.getQuaternion();
 
-   Vec3 bodyCenterOfMass = bd.getPosition();
-   Vec3 bodyImpulse      = bd.getLinearVel() * bd.getMass();
+   bd.setSB(this);
+   //having a superbody will forward all getVel/Pos/Rot calls to the superbody from now !
 
-   bd.setSB(this); //having a superbody will forward all getVel calls to superbody!!!
+   bd.setRelPosition(getQuaternion().getInverse().rotate(bdglobalPos - getPosition()));
+   bd.setRelOrientation(bdglobalRot * getQuaternion().getInverse());
+   // Update mass, COG and relative positions
+   calcCenterOfMass();
 
    // Updating the axis-aligned bounding box
    if( bodies_.size() == 1 )
@@ -721,23 +627,9 @@ RigidBody& Union<BodyTypes...>::add( std::unique_ptr<RigidBody>&& body )
    else
       aabb_.merge( bd.getAABB() );
 
-   // Setting the union's total mass and center of mass
-   calcCenterOfMass();
-
-   // Setting the contained primitives' relative position in reference to the center of mass
-   for( auto& b : bodies_ )
-      b.calcRelPosition();
 
    // Setting the moment of inertia
    calcInertia();
-
-   //moving impuls to union
-   setLinearVel( Vec3(0,0,0) );
-   setAngularVel( Vec3(0,0,0) );
-   addImpulseAtPos( oldImpulse, oldCenterOfMass);
-   addImpulseAtPos( bodyImpulse, bodyCenterOfMass);
-   bd.setLinearVel( Vec3(0,0,0) );
-   bd.setAngularVel( Vec3(0,0,0) );
 
    // Signaling the internal modification to the superordinate body
    signalModification();
@@ -772,10 +664,6 @@ void Union<BodyTypes...>::translateImpl( real_t dx, real_t dy, real_t dz )
 
    // Changing the global position/reference point
    gpos_ += dp;
-
-   // Updating the contained bodies
-   for( auto& b : bodies_ )
-      b.update( dp );
 
    Union<BodyTypes...>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
@@ -813,10 +701,6 @@ void Union<BodyTypes...>::rotateImpl( const Quat& dq )
    q_ = dq * q_;                // Updating the orientation of the union
    R_ = q_.toRotationMatrix();  // Updating the rotation of the union
 
-   // Updating the contained bodies
-   for( auto& b : bodies_ )
-      b.update( dq );
-
    Union<BodyTypes...>::calcBoundingBox();  // Setting the axis-aligned bounding box
    wake();             // Waking the union from sleep mode
    signalRotation();   // Signaling the change of orientation to the superordinate body
@@ -844,10 +728,6 @@ void Union<BodyTypes...>::rotateAroundOriginImpl( const Quat& dq )
    q_    = dq * q_;                // Updating the orientation of the union
    R_    = q_.toRotationMatrix();  // Updating the rotation of the union
    gpos_ = dq.rotate( gpos_ );     // Updating the global position of the union
-
-   // Updating the contained bodies
-   for( auto& b : bodies_ )
-      b.update( dq );
 
    Union<BodyTypes...>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
@@ -877,10 +757,6 @@ void Union<BodyTypes...>::rotateAroundPointImpl( const Vec3& point, const Quat &
    q_    = dq * q_;                  // Updating the orientation of the union
    R_    = q_.toRotationMatrix();    // Updating the rotation of the union
    gpos_ = point + dq.rotate( dp );  // Updating the global position of the union
-
-   // Updating the contained bodies
-   for( auto& b : bodies_ )
-      b.update( dq );
 
    Union<BodyTypes...>::calcBoundingBox();    // Setting the axis-aligned bounding box
    wake();               // Waking the union from sleep mode
@@ -977,10 +853,6 @@ void Union<BodyTypes...>::handleModification()
    // Setting the union's total mass and center of mass
    calcCenterOfMass();
 
-   // Setting the contained primitives' relative position in reference to the center of mass
-   for( auto& b : bodies_ )
-      b.calcRelPosition();
-
    // Setting the moment of inertia
    calcInertia();
 
@@ -1006,10 +878,6 @@ void Union<BodyTypes...>::handleTranslation()
 {
    // Setting the union's total mass and center of mass
    calcCenterOfMass();
-
-   // Setting the contained bodies' relative position in reference to the center of mass
-   for( auto& b : bodies_ )
-      b.calcRelPosition();
 
    // Setting the moment of inertia
    calcInertia();
@@ -1074,7 +942,6 @@ void Union<BodyTypes...>::print( std::ostream& os, const char* tab ) const
    else os << "*infinite*\n";
 
    os << tab << "   Global position   = " << gpos_ << "\n"
-      << tab << "   Relative position = " << rpos_ << "\n"
       << tab << "   Linear velocity   = " << v_ << "\n"
       << tab << "   Angular velocity  = " << w_ << "\n";
 

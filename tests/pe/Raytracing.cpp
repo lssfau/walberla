@@ -43,7 +43,7 @@ typedef std::tuple<Box, Plane, Sphere, Capsule, Ellipsoid> BodyTuple ;
 void SphereIntersectsTest()
 {
    MaterialID iron = Material::find("iron");
-   Sphere sp1(123, 1, Vec3(3,3,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
+   Sphere sp1(123, 1, Vec3(3,3,3), Quat(), 2, iron, false, true, false);
    real_t t;
    Vec3 n;
    
@@ -62,11 +62,11 @@ void SphereIntersectsTest()
    WALBERLA_CHECK(intersects(&sp1, ray2, t, n));
    
    // sphere behind ray origin
-   Sphere sp2(123, 1, Vec3(3,-8,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
+   Sphere sp2(123, 1, Vec3(3,-8,3), Quat(), 2, iron, false, true, false);
    WALBERLA_CHECK(!intersects(&sp2, ray1, t, n));
    
    // sphere around ray origin
-   Sphere sp3(123, 1, Vec3(3,-5,3), Vec3(0,0,0), Quat(), 2, iron, false, true, false);
+   Sphere sp3(123, 1, Vec3(3,-5,3), Quat(), 2, iron, false, true, false);
    WALBERLA_CHECK(intersects(&sp3, ray1, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(2));
 }
@@ -128,15 +128,15 @@ void BoxIntersectsTest() {
    real_t t;
    Vec3 n;
    
-   Box box1(127, 5, Vec3(0, -15, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Box box1(127, 5, Vec3(0, -15, 0),  Quat(), Vec3(10, 10, 10), iron, false, true, false);
    Ray ray1(Vec3(3,-5,3), Vec3(0,1,0));
    WALBERLA_CHECK(!intersects(&box1, ray1, t, n));
    
-   Box box2(128, 5, Vec3(0, -2, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Box box2(128, 5, Vec3(0, -2, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(intersects(&box2, ray1, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(8), real_t(1e-7));
    
-   Box box3(128, 5, Vec3(0, 5, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Box box3(128, 5, Vec3(0, 5, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(intersects(&box3, ray1, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL(t, real_t(5));
    
@@ -160,14 +160,14 @@ void BoxIntersectsTest() {
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(7.0710), real_t(1e-4));
    
    Ray ray3(Vec3(3,-5,3), Vec3(2, real_t(-1.5), real_t(0.5)).getNormalized());
-   Box box4(128, 5, Vec3(0, 8, 0), Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Box box4(128, 5, Vec3(0, 8, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    WALBERLA_CHECK(!intersects(&box4, ray3, t, n));
    
    Ray ray4(Vec3(3,-5,3), Vec3(-2, 3, real_t(0.5)).getNormalized());
    WALBERLA_CHECK(intersects(&box4, ray4, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(9.7068), real_t(1e-4));
    
-   Box box5(128, 5, Vec3(4, 0, 0), Vec3(0, 0, 0), Quat(), Vec3(4, 4, 4), iron, false, true, false);
+   Box box5(128, 5, Vec3(4, 0, 0), Quat(), Vec3(4, 4, 4), iron, false, true, false);
    box5.rotate(0,0,math::M_PI/4);
    Ray ray5(Vec3(0,1.5,0), Vec3(1,0,0));
    WALBERLA_CHECK(intersects(&box5, ray5, t, n));
@@ -202,7 +202,7 @@ void CapsuleIntersectsTest() {
    real_t t;
    Vec3 n;
    
-   Capsule cp1(0, 0, Vec3(2,3,3), Vec3(0,0,0), Quat(), real_t(2), real_t(2), iron, false, true, false);
+   Capsule cp1(0, 0, Vec3(2,3,3), Quat(), real_t(2), real_t(2), iron, false, true, false);
    
    // ray through the center
    Ray ray1(Vec3(3,-5,3), Vec3(0,1,0));
@@ -229,7 +229,7 @@ void EllipsoidTest() {
    real_t t;
    Vec3 n;
    
-   Ellipsoid el1(0,0, Vec3(2,3,3), Vec3(0,0,0), Quat(), Vec3(2,3,1), iron, false, true, false);
+   Ellipsoid el1(0,0, Vec3(2,3,3), Quat(), Vec3(2,3,1), iron, false, true, false);
    
    Ray ray1(Vec3(-2,3,3), Vec3(1,0,0).getNormalized());
    WALBERLA_CHECK(intersects(&el1, ray1, t, n));
