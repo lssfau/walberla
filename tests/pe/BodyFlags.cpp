@@ -70,12 +70,12 @@ int main( int argc, char ** argv )
 
    MaterialID iron = Material::find("iron");
 
-   Sphere refGlobalSphere(1, 0, Vec3(9, 9, 9), Vec3(0,0,0), Quat(), 3, iron, true, false, true);
+   Sphere refGlobalSphere(1, 0, Vec3(9, 9, 9),  Quat(), 3, iron, true, false, true);
    refGlobalSphere.setLinearVel(Vec3(2,2,2));
    SphereID globalSphere = createSphere( *globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(9,9,9), 3, iron, true, false, true);
    globalSphere->setLinearVel(Vec3(2,2,2));
 
-   Sphere refFixedSphere(2, 0, Vec3(9,9,14), Vec3(0,0,0), Quat(), 3, iron, false, false, true);
+   Sphere refFixedSphere(2, 0, Vec3(9,9,14), Quat(), 3, iron, false, false, true);
    SphereID fixedSphere = createSphere( *globalStorage, forest->getBlockStorage(), storageID, 0, Vec3(9,9,14), 3, iron, false, false, true);
    walberla::id_t fixedSphereID = 0;
    if (fixedSphere != nullptr) fixedSphereID = fixedSphere->getSystemID();

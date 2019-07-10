@@ -50,7 +50,7 @@ CapsuleID createCapsule(   BodyStorage& globalStorage, BlockStorage& blocks, Blo
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      CapsulePtr cp = std::make_unique<Capsule>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, length, material, global, false, true);
+      CapsulePtr cp = std::make_unique<Capsule>(sid, uid, gpos, Quat(), radius, length, material, global, false, true);
       capsule = static_cast<CapsuleID>(&globalStorage.add(std::move(cp)));
    } else
    {
@@ -60,7 +60,7 @@ CapsuleID createCapsule(   BodyStorage& globalStorage, BlockStorage& blocks, Blo
             const id_t sid( UniqueID<RigidBody>::create() );
 
             BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
-            CapsulePtr cp = std::make_unique<Capsule>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, length, material, global, communicating, infiniteMass);
+            CapsulePtr cp = std::make_unique<Capsule>(sid, uid, gpos, Quat(), radius, length, material, global, communicating, infiniteMass);
             cp->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
             capsule = static_cast<CapsuleID>(&bs.add( std::move(cp) ));
          }

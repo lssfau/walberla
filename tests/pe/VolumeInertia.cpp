@@ -97,7 +97,7 @@ int main( int argc, char ** argv )
    Vec3   COM;
    Mat3   inertia;
 
-   Sphere sp(0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), real_t(2.34), material, false, true, false);
+   Sphere sp(0, 0, Vec3(0,0,0), Quat(), real_t(2.34), material, false, true, false);
    calcNumeric(sp, sp.getAABB(), real_t(0.01), volume, COM, inertia);
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(sp.getVolume(), volume, real_t(10e-4)) );
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(Sphere::calcVolume( real_t(2.34) ), volume, real_t(10e-4)) );
@@ -105,7 +105,7 @@ int main( int argc, char ** argv )
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(sp.getMass(), volume * Material::getDensity(material), real_t(10e-4)) );
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(COM, Vec3(0), real_t(10e-4)) );
 
-   Box bx(0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), Vec3(real_t(1.5), real_t(2.5), real_t(3.5)), material, false, true, false);
+   Box bx(0, 0, Vec3(0,0,0), Quat(), Vec3(real_t(1.5), real_t(2.5), real_t(3.5)), material, false, true, false);
    calcNumeric(bx, bx.getAABB(), real_t(0.01), volume, COM, inertia);
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(bx.getVolume(), volume, real_t(10e-4)) );
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(Box::calcVolume( Vec3(real_t(1.5), real_t(2.5), real_t(3.5)) ), volume, real_t(10e-4)) );
@@ -113,7 +113,7 @@ int main( int argc, char ** argv )
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(bx.getMass(), volume * Material::getDensity(material), real_t(10e-4)) );
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(COM, Vec3(0), real_t(10e-4)) );
 
-   Ellipsoid el(0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), Vec3(real_t(1.5), real_t(2.5), real_t(3.5)), material, false, true, false);
+   Ellipsoid el(0, 0, Vec3(0,0,0), Quat(), Vec3(real_t(1.5), real_t(2.5), real_t(3.5)), material, false, true, false);
    calcNumeric(el, el.getAABB(), real_t(0.01), volume, COM, inertia);
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(el.getVolume(), volume, real_t(10e-4)) );
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(Ellipsoid::calcVolume( Vec3(real_t(1.5), real_t(2.5), real_t(3.5)) ), volume, real_t(10e-4)) );
@@ -121,7 +121,7 @@ int main( int argc, char ** argv )
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(el.getMass(), volume * Material::getDensity(material), real_t(10e-4)) );
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(COM, Vec3(0), real_t(10e-4)) );
 
-   Capsule cp(0, 0, Vec3(0,0,0), Vec3(0,0,0), Quat(), real_t(1.5), real_t(2.5), material, false, true, false);
+   Capsule cp(0, 0, Vec3(0,0,0), Quat(), real_t(1.5), real_t(2.5), material, false, true, false);
    calcNumeric(cp, cp.getAABB(), real_t(0.01), volume, COM, inertia);
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(cp.getVolume(), volume, real_t(10e-4)) );
    WALBERLA_CHECK( walberla::debug::check_functions_detail::check_float_equal_eps(Capsule::calcVolume( real_t(1.5), real_t(2.5) ), volume, real_t(10e-4)) );

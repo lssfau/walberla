@@ -74,7 +74,7 @@ inline mesh::pe::ConvexPolyhedronPtr instantiate( mpi::RecvBuffer& buffer, const
    mesh::pe::ConvexPolyhedronParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   auto cp = std::make_unique<mesh::pe::ConvexPolyhedron>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.mesh_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   auto cp = std::make_unique<mesh::pe::ConvexPolyhedron>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.q_, subobjparam.mesh_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
    cp->setLinearVel( subobjparam.v_ );
    cp->setAngularVel( subobjparam.w_ );
    cp->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );

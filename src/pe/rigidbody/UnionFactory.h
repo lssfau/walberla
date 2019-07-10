@@ -82,7 +82,7 @@ Union<BodyTypes...>* createUnion(   BodyStorage& globalStorage, BlockStorage& bl
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      auto un = std::make_unique<Union<BodyTypes...>>(sid, uid, gpos, Vec3(0,0,0), Quat(), global, false, true);
+      auto un = std::make_unique<Union<BodyTypes...>>(sid, uid, gpos, Quat(), global, false, true);
       bd = static_cast<Union<BodyTypes...>*>(&globalStorage.add(std::move(un)));
    } else
    {
@@ -92,7 +92,7 @@ Union<BodyTypes...>* createUnion(   BodyStorage& globalStorage, BlockStorage& bl
             const id_t sid( UniqueID<RigidBody>::create() );
 
             BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
-            auto un = std::make_unique<Union<BodyTypes...>>(sid, uid, gpos, Vec3(0,0,0), Quat(), global, communicating, infiniteMass);
+            auto un = std::make_unique<Union<BodyTypes...>>(sid, uid, gpos, Quat(), global, communicating, infiniteMass);
             un->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
             bd = static_cast<Union<BodyTypes...>*>(&bs.add(std::move(un)));
          }
@@ -156,7 +156,7 @@ BoxID createBox( Union<BodyTypes...>* un,
       sid = UniqueID<RigidBody>::create();
    }
 
-   std::unique_ptr<Box> box = std::make_unique<Box>(sid, uid, gpos, Vec3(0,0,0), Quat(), lengths, material, global, communicating, infiniteMass);
+   std::unique_ptr<Box> box = std::make_unique<Box>(sid, uid, gpos, Quat(), lengths, material, global, communicating, infiniteMass);
    box->MPITrait.setOwner( un->MPITrait.getOwner() );
 
    if (box != NULL)
@@ -226,7 +226,7 @@ CapsuleID createCapsule( Union<BodyTypes...>* un,
       sid = UniqueID<RigidBody>::create();
    }
 
-   std::unique_ptr<Capsule> capsule = std::make_unique<Capsule>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, length, material, global, communicating, infiniteMass);
+   std::unique_ptr<Capsule> capsule = std::make_unique<Capsule>(sid, uid, gpos, Quat(), radius, length, material, global, communicating, infiniteMass);
    capsule->MPITrait.setOwner( un->MPITrait.getOwner() );
 
    if (capsule != NULL)
@@ -284,7 +284,7 @@ SphereID createSphere( Union<BodyTypes...>* un,
       sid = UniqueID<RigidBody>::create();
    }
 
-   std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, material, global, communicating, infiniteMass);
+   std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>(sid, uid, gpos, Quat(), radius, material, global, communicating, infiniteMass);
    sphere->MPITrait.setOwner( un->MPITrait.getOwner() );
 
    if (sphere != NULL)

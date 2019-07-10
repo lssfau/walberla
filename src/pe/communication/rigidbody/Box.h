@@ -64,7 +64,7 @@ inline BoxPtr instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain, co
    BoxParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   auto bx = std::make_unique<Box>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.lengths_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   auto bx = std::make_unique<Box>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.q_, subobjparam.lengths_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
    bx->setLinearVel( subobjparam.v_ );
    bx->setAngularVel( subobjparam.w_ );
    bx->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );

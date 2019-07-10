@@ -48,7 +48,7 @@ SquirmerID createSquirmer( BodyStorage& globalStorage, BlockStorage& blocks, Blo
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      SquirmerPtr sq = std::make_unique<Squirmer>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, squirmerVelocity, squirmerBeta, material, global, false, true);
+      SquirmerPtr sq = std::make_unique<Squirmer>(sid, uid, gpos, Quat(), radius, squirmerVelocity, squirmerBeta, material, global, false, true);
       squirmer = static_cast<SquirmerID>(&globalStorage.add(std::move(sq)));
    } else
    {
@@ -58,7 +58,7 @@ SquirmerID createSquirmer( BodyStorage& globalStorage, BlockStorage& blocks, Blo
             const id_t sid( UniqueID<RigidBody>::create() );
 
             BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
-            SquirmerPtr sq = std::make_unique<Squirmer>(sid, uid, gpos, Vec3(0,0,0), Quat(), radius, squirmerVelocity, squirmerBeta, material, global, communicating, infiniteMass);
+            SquirmerPtr sq = std::make_unique<Squirmer>(sid, uid, gpos, Quat(), radius, squirmerVelocity, squirmerBeta, material, global, communicating, infiniteMass);
             sq->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
             squirmer = static_cast<SquirmerID>(&bs.add( std::move(sq) ));
          }

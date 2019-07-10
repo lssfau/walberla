@@ -50,7 +50,6 @@ namespace pe {
  * \param sid Unique system-specific ID for the sphere.
  * \param uid User-specific ID for the sphere.
  * \param gpos Global geometric center of the sphere.
- * \param rpos The relative position within the body frame of a superordinate body.
  * \param q The orientation of the sphere's body frame in the global world frame.
  * \param radius The radius of the sphere \f$ (0..\infty) \f$.
  * \param material The material of the sphere.
@@ -58,12 +57,13 @@ namespace pe {
  * \param communicating specifies if the sphere should take part in synchronization (syncNextNeighbour, syncShadowOwner)
  * \param infiniteMass specifies if the sphere has infinite mass and will be treated as an obstacle
  */
-Sphere::Sphere( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+Sphere::Sphere( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                 real_t radius, MaterialID material,
                 const bool global, const bool communicating, const bool infiniteMass )
-   : Sphere::Sphere( getStaticTypeID(), sid, uid, gpos, rpos, q, radius, material, global, communicating, infiniteMass )
+   : Sphere::Sphere( getStaticTypeID(), sid, uid, gpos, q, radius, material, global, communicating, infiniteMass )
 {}
-Sphere::Sphere( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+
+Sphere::Sphere( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                 real_t radius, MaterialID material,
                 const bool global, const bool communicating, const bool infiniteMass )
    : GeomPrimitive( typeId, sid, uid, material )  // Initialization of the parent class
@@ -76,12 +76,8 @@ Sphere::Sphere( id_t const typeId, id_t sid, id_t uid, const Vec3& gpos, const V
    WALBERLA_ASSERT( radius > real_c(0), "Invalid sphere radius" );
 
    // Setting the center of the sphere
-   gpos_ = gpos;
-
-   // Initializing the instantiated sphere
-   rpos_   = rpos;                   // Setting the relative position
-   q_      = q;                      // Setting the orientation
-   R_      = q_.toRotationMatrix();  // Setting the rotation matrix
+   setPosition(gpos);
+   setOrientation(q);
 
    setGlobal( global );
    if (infiniteMass)
@@ -196,11 +192,12 @@ void Sphere::print( std::ostream& os, const char* tab ) const
 
    //   if( verboseMode )
    //   {
+   Mat3 R = getRotation();
    os << tab << "   Bounding box      = " << getAABB() << "\n"
       << tab << "   Quaternion        = " << getQuaternion() << "\n"
-      << tab << "   Rotation matrix   = ( " << setw(9) << R_[0] << " , " << setw(9) << R_[1] << " , " << setw(9) << R_[2] << " )\n"
-      << tab << "                       ( " << setw(9) << R_[3] << " , " << setw(9) << R_[4] << " , " << setw(9) << R_[5] << " )\n"
-      << tab << "                       ( " << setw(9) << R_[6] << " , " << setw(9) << R_[7] << " , " << setw(9) << R_[8] << " )\n";
+      << tab << "   Rotation matrix   = ( " << setw(9) << R[0] << " , " << setw(9) << R[1] << " , " << setw(9) << R[2] << " )\n"
+      << tab << "                       ( " << setw(9) << R[3] << " , " << setw(9) << R[4] << " , " << setw(9) << R[5] << " )\n"
+      << tab << "                       ( " << setw(9) << R[6] << " , " << setw(9) << R[7] << " , " << setw(9) << R[8] << " )\n";
 
    os << std::setiosflags(std::ios::right)
       << tab << "   Moment of inertia = ( " << setw(9) << I_[0] << " , " << setw(9) << I_[1] << " , " << setw(9) << I_[2] << " )\n"

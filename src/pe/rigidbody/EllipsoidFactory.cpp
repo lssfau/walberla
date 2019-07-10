@@ -48,7 +48,7 @@ EllipsoidID createEllipsoid( BodyStorage& globalStorage, BlockStorage& blocks, B
       const id_t sid = UniqueID<RigidBody>::createGlobal();
       WALBERLA_ASSERT_EQUAL(communicating, false);
       WALBERLA_ASSERT_EQUAL(infiniteMass, true);
-      EllipsoidPtr el = std::make_unique<Ellipsoid>(sid, uid, gpos, Vec3(0,0,0), Quat(), semiAxes, material, global, false, true);
+      EllipsoidPtr el = std::make_unique<Ellipsoid>(sid, uid, gpos, Quat(), semiAxes, material, global, false, true);
       ellipsoid = static_cast<EllipsoidID>(&globalStorage.add(std::move(el)));
    } else
    {
@@ -58,7 +58,7 @@ EllipsoidID createEllipsoid( BodyStorage& globalStorage, BlockStorage& blocks, B
             const id_t sid( UniqueID<RigidBody>::create() );
 
             BodyStorage& bs = (*block.getData<Storage>(storageID))[0];
-            EllipsoidPtr el = std::make_unique<Ellipsoid>(sid, uid, gpos, Vec3(0,0,0), Quat(), semiAxes, material, global, communicating, infiniteMass);
+            EllipsoidPtr el = std::make_unique<Ellipsoid>(sid, uid, gpos, Quat(), semiAxes, material, global, communicating, infiniteMass);
             el->MPITrait.setOwner(Owner(MPIManager::instance()->rank(), block.getId().getID()));
             ellipsoid = static_cast<EllipsoidID>(&bs.add(std::move(el)));
          }

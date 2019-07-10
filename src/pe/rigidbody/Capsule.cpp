@@ -55,7 +55,7 @@ namespace pe {
  *
  * The capsule is created lying along the x-axis.
  */
-Capsule::Capsule( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+Capsule::Capsule( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                   real_t  radius, real_t  length, MaterialID material,
                   const bool global, const bool communicating, const bool infiniteMass )
    : GeomPrimitive( getStaticTypeID(), sid, uid, material )           // Initializing the base object
@@ -70,10 +70,8 @@ Capsule::Capsule( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const 
    WALBERLA_ASSERT_GREATER( length, real_t(0), "Invalid capsule length"  );
 
    // Initializing the instantiated capsule
-   gpos_   = gpos;
-   rpos_   = rpos;                   // Setting the relative position
-   q_      = q;                      // Setting the orientation
-   R_      = q_.toRotationMatrix();  // Setting the rotation matrix
+   setPosition(gpos);
+   setOrientation(q);
 
    setGlobal( global );
    if (infiniteMass)
@@ -171,18 +169,20 @@ bool Capsule::isSurfaceRelPointImpl( real_t px, real_t py, real_t  pz ) const
  */
 void Capsule::calcBoundingBox()
 {
-   const real_t  xlength( std::fabs( R_[0]*length_ )*real_t (0.5) + radius_ + contactThreshold );
-   const real_t  ylength( std::fabs( R_[3]*length_ )*real_t (0.5) + radius_ + contactThreshold );
-   const real_t  zlength( std::fabs( R_[6]*length_ )*real_t (0.5) + radius_ + contactThreshold );
+   Mat3 R = getRotation();
+   Vec3 gpos = getPosition();
+   const real_t  xlength( std::fabs( R[0]*length_ )*real_t (0.5) + radius_ + contactThreshold );
+   const real_t  ylength( std::fabs( R[3]*length_ )*real_t (0.5) + radius_ + contactThreshold );
+   const real_t  zlength( std::fabs( R[6]*length_ )*real_t (0.5) + radius_ + contactThreshold );
    aabb_ = math::AABB(
-            gpos_[0] - xlength,
-         gpos_[1] - ylength,
-         gpos_[2] - zlength,
-         gpos_[0] + xlength,
-         gpos_[1] + ylength,
-         gpos_[2] + zlength);
+           gpos[0] - xlength,
+         gpos[1] - ylength,
+         gpos[2] - zlength,
+         gpos[0] + xlength,
+         gpos[1] + ylength,
+         gpos[2] + zlength);
 
-   WALBERLA_ASSERT( aabb_.contains( gpos_ ), "Invalid bounding box detected" );
+   WALBERLA_ASSERT( aabb_.contains( getPosition() ), "Invalid bounding box detected" );
 }
 //*************************************************************************************************
 
@@ -243,11 +243,12 @@ void Capsule::print( std::ostream& os, const char* tab ) const
       << tab << "   Linear velocity   = " << getLinearVel() << "\n"
       << tab << "   Angular velocity  = " << getAngularVel() << "\n";
 
+   Mat3 R = getRotation();
    os << tab << "   Bounding box      = " << getAABB() << "\n"
       << tab << "   Quaternion        = " << getQuaternion() << "\n"
-      << tab << "   Rotation matrix   = ( " << setw(9) << R_[0] << " , " << setw(9) << R_[1] << " , " << setw(9) << R_[2] << " )\n"
-      << tab << "                       ( " << setw(9) << R_[3] << " , " << setw(9) << R_[4] << " , " << setw(9) << R_[5] << " )\n"
-      << tab << "                       ( " << setw(9) << R_[6] << " , " << setw(9) << R_[7] << " , " << setw(9) << R_[8] << " )\n";
+      << tab << "   Rotation matrix   = ( " << setw(9) << R[0] << " , " << setw(9) << R[1] << " , " << setw(9) << R[2] << " )\n"
+      << tab << "                       ( " << setw(9) << R[3] << " , " << setw(9) << R[4] << " , " << setw(9) << R[5] << " )\n"
+      << tab << "                       ( " << setw(9) << R[6] << " , " << setw(9) << R[7] << " , " << setw(9) << R[8] << " )\n";
 
    os << std::setiosflags(std::ios::right)
       << tab << "   Moment of inertia = ( " << setw(9) << I_[0] << " , " << setw(9) << I_[1] << " , " << setw(9) << I_[2] << " )\n"

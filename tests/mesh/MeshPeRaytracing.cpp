@@ -58,9 +58,9 @@ int CpRayIntersectionTest(const int resolution = 10)
 
    const Vec3 center(1,2,3);
 
-   ConvexPolyhedron cp(0, 0, center, Vec3(0,0,0), Quat(), *mesh, Material::find("iron"), false, true, true);
+   ConvexPolyhedron cp(0, 0, center,Quat(), *mesh, Material::find("iron"), false, true, true);
    cp.rotate(real_t(1), real_t(2), real_t(3));
-   Box bx(0, 0, center, Vec3(0,0,0), Quat(), Vec3(2,2,2), Material::find("iron"), false, true, true);
+   Box bx(0, 0, center, Quat(), Vec3(2,2,2), Material::find("iron"), false, true, true);
    bx.rotate(real_t(1), real_t(2), real_t(3));
 
    real_t dx = real_t(1.0) / static_cast<real_t>(resolution);

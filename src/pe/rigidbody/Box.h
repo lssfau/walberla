@@ -65,7 +65,7 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit Box( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+   explicit Box( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
                  const Vec3& lengths, MaterialID material,
                  const bool global, const bool communicating, const bool infiniteMass );
    //@}
@@ -440,7 +440,7 @@ inline Vec3 Box::support( const Vec3& d ) const
                                math::sign(bfD[1])*lengths_[1]*real_t(0.5),
                                math::sign(bfD[2])*lengths_[2]*real_t(0.5) );
 
-   return gpos_ + vectorFromBFtoWF(relativSupport);
+   return getPosition() + vectorFromBFtoWF(relativSupport);
 }
 //*************************************************************************************************
 
