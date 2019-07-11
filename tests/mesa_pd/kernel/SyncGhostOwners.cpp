@@ -13,14 +13,14 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file   SyncNextNeighbors.cpp
+//! \file   SyncGhostOwners.cpp
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
-#include <mesa_pd/mpi/SyncNextNeighbors.h>
+#include <mesa_pd/mpi/SyncGhostOwners.h>
 
 #include <blockforest/BlockForest.h>
 #include <blockforest/Initialization.h>
@@ -64,7 +64,7 @@ int main( int argc, char ** argv )
    walberla::mpi::MPIManager::instance()->useWorldComm();
 
    //logging::Logging::instance()->setStreamLogLevel(logging::Logging::DETAIL);
-//   logging::Logging::instance()->includeLoggingToFile("MESA_PD_Kernel_SyncNextNeighbor");
+//   logging::Logging::instance()->includeLoggingToFile("MESA_PD_Kernel_SyncGhostOwners");
 //   logging::Logging::instance()->setFileLogLevel(logging::Logging::DETAIL);
 
    //init domain partitioning
@@ -86,7 +86,7 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_DEVEL_ON_ROOT("uid: " << uid);
 
    //init kernels
-   mpi::SyncNextNeighbors SNN;
+   mpi::SyncGhostOwners SNN;
 
    std::vector<real_t> deltas { real_t(0),
             real_t(4.9),

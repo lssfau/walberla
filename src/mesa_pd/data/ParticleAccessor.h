@@ -68,9 +68,9 @@ public:
    int& getOwnerRef(const size_t p_idx) {return ps_->getOwnerRef(p_idx);}
    void setOwner(const size_t p_idx, const int& v) { ps_->setOwner(p_idx, v);}
    
-   const std::vector<int>& getGhostOwners(const size_t p_idx) const {return ps_->getGhostOwners(p_idx);}
-   std::vector<int>& getGhostOwnersRef(const size_t p_idx) {return ps_->getGhostOwnersRef(p_idx);}
-   void setGhostOwners(const size_t p_idx, const std::vector<int>& v) { ps_->setGhostOwners(p_idx, v);}
+   const std::unordered_set<walberla::mpi::MPIRank>& getGhostOwners(const size_t p_idx) const {return ps_->getGhostOwners(p_idx);}
+   std::unordered_set<walberla::mpi::MPIRank>& getGhostOwnersRef(const size_t p_idx) {return ps_->getGhostOwnersRef(p_idx);}
+   void setGhostOwners(const size_t p_idx, const std::unordered_set<walberla::mpi::MPIRank>& v) { ps_->setGhostOwners(p_idx, v);}
    
    const size_t& getShapeID(const size_t p_idx) const {return ps_->getShapeID(p_idx);}
    size_t& getShapeIDRef(const size_t p_idx) {return ps_->getShapeIDRef(p_idx);}
@@ -140,6 +140,10 @@ public:
    walberla::mesa_pd::Vec3& getDwRef(const size_t p_idx) {return ps_->getDwRef(p_idx);}
    void setDw(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setDw(p_idx, v);}
    
+   const std::unordered_set<walberla::mpi::MPIRank>& getNeighborState(const size_t p_idx) const {return ps_->getNeighborState(p_idx);}
+   std::unordered_set<walberla::mpi::MPIRank>& getNeighborStateRef(const size_t p_idx) {return ps_->getNeighborStateRef(p_idx);}
+   void setNeighborState(const size_t p_idx, const std::unordered_set<walberla::mpi::MPIRank>& v) { ps_->setNeighborState(p_idx, v);}
+   
 
    id_t getInvalidUid() const {return UniqueID<data::Particle>::invalidID();}
    size_t getInvalidIdx() const {return std::numeric_limits<size_t>::max();}
@@ -205,9 +209,9 @@ public:
    void setOwner(const size_t /*p_idx*/, const int& v) { owner_ = v;}
    int& getOwnerRef(const size_t /*p_idx*/) {return owner_;}
    
-   const std::vector<int>& getGhostOwners(const size_t /*p_idx*/) const {return ghostOwners_;}
-   void setGhostOwners(const size_t /*p_idx*/, const std::vector<int>& v) { ghostOwners_ = v;}
-   std::vector<int>& getGhostOwnersRef(const size_t /*p_idx*/) {return ghostOwners_;}
+   const std::unordered_set<walberla::mpi::MPIRank>& getGhostOwners(const size_t /*p_idx*/) const {return ghostOwners_;}
+   void setGhostOwners(const size_t /*p_idx*/, const std::unordered_set<walberla::mpi::MPIRank>& v) { ghostOwners_ = v;}
+   std::unordered_set<walberla::mpi::MPIRank>& getGhostOwnersRef(const size_t /*p_idx*/) {return ghostOwners_;}
    
    const size_t& getShapeID(const size_t /*p_idx*/) const {return shapeID_;}
    void setShapeID(const size_t /*p_idx*/, const size_t& v) { shapeID_ = v;}
@@ -277,6 +281,10 @@ public:
    void setDw(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { dw_ = v;}
    walberla::mesa_pd::Vec3& getDwRef(const size_t /*p_idx*/) {return dw_;}
    
+   const std::unordered_set<walberla::mpi::MPIRank>& getNeighborState(const size_t /*p_idx*/) const {return neighborState_;}
+   void setNeighborState(const size_t /*p_idx*/, const std::unordered_set<walberla::mpi::MPIRank>& v) { neighborState_ = v;}
+   std::unordered_set<walberla::mpi::MPIRank>& getNeighborStateRef(const size_t /*p_idx*/) {return neighborState_;}
+   
 
    id_t getInvalidUid() const {return UniqueID<data::Particle>::invalidID();}
    size_t getInvalidIdx() const {return std::numeric_limits<size_t>::max();}
@@ -293,7 +301,7 @@ private:
    walberla::real_t interactionRadius_;
    walberla::mesa_pd::data::particle_flags::FlagT flags_;
    int owner_;
-   std::vector<int> ghostOwners_;
+   std::unordered_set<walberla::mpi::MPIRank> ghostOwners_;
    size_t shapeID_;
    walberla::mesa_pd::Rot3 rotation_;
    walberla::mesa_pd::Vec3 angularVelocity_;
@@ -311,6 +319,7 @@ private:
    walberla::real_t heatFlux_;
    walberla::mesa_pd::Vec3 dv_;
    walberla::mesa_pd::Vec3 dw_;
+   std::unordered_set<walberla::mpi::MPIRank> neighborState_;
 };
 
 } //namespace data

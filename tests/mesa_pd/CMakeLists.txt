@@ -98,6 +98,12 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_SingleCast )
 waLBerla_compile_test( NAME   MESA_PD_Kernel_SpringDashpot FILES kernel/SpringDashpot.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SpringDashpot )
 
+waLBerla_compile_test( NAME   MESA_PD_Kernel_SyncGhostOwners FILES kernel/SyncGhostOwners.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncGhostOwners PROCESSES 27 )
+
+waLBerla_compile_test( NAME   MESA_PD_Kernel_SyncGhostOwnersLarge FILES kernel/SyncGhostOwnersLarge.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncGhostOwnersLarge PROCESSES 27 )
+
 waLBerla_compile_test( NAME   MESA_PD_Kernel_SyncNextNeighbors FILES kernel/SyncNextNeighbors.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncNextNeighbors PROCESSES 27 )
 

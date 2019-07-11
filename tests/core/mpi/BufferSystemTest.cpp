@@ -219,7 +219,7 @@ void timeVaryingCommunication(const bool useIProbe)
       bs.send( rightNeighbor );
 
 
-      WALBERLA_CHECK( bs.isCommunciationRunning()  );
+      WALBERLA_CHECK( bs.isCommunicationRunning()  );
 
       for( auto it = bs.begin(); it != bs.end(); ++it )
       {
@@ -245,7 +245,7 @@ void timeVaryingCommunication(const bool useIProbe)
          WALBERLA_CHECK( it.buffer().isEmpty() );
 
       }
-      WALBERLA_CHECK( ! bs.isCommunciationRunning()  );
+      WALBERLA_CHECK( ! bs.isCommunicationRunning()  );
    }
 }
 

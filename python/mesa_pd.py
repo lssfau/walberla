@@ -111,6 +111,7 @@ if __name__ == '__main__':
    comm.append(mpi.ClearNextNeighborSync())
    comm.append(mpi.ReduceContactHistory())
    comm.append(mpi.ReduceProperty())
+   comm.append(mpi.SyncGhostOwners(ps))
    comm.append(mpi.SyncNextNeighbors(ps))
 
 

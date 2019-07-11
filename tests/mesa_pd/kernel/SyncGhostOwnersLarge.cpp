@@ -13,14 +13,14 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file   SyncNextNeighbors.cpp
+//! \file   SyncGhostOwnersLarge.cpp
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
-#include <mesa_pd/mpi/SyncNextNeighbors.h>
+#include <mesa_pd/mpi/SyncGhostOwners.h>
 
 #include <blockforest/BlockForest.h>
 #include <blockforest/Initialization.h>
@@ -34,7 +34,7 @@
 namespace walberla {
 namespace mesa_pd {
 
-const real_t radius = real_t(1);
+const real_t radius = real_t(20);
 
 walberla::id_t createSphere(data::ParticleStorage& ps, domain::IDomain& domain)
 {
@@ -64,13 +64,13 @@ int main( int argc, char ** argv )
    walberla::mpi::MPIManager::instance()->useWorldComm();
 
    //logging::Logging::instance()->setStreamLogLevel(logging::Logging::DETAIL);
-//   logging::Logging::instance()->includeLoggingToFile("MESA_PD_Kernel_SyncNextNeighbor");
-//   logging::Logging::instance()->setFileLogLevel(logging::Logging::DETAIL);
+   //logging::Logging::instance()->includeLoggingToFile("MESA_PD_Kernel_SyncGhostOwnersLarge");
+   //logging::Logging::instance()->setFileLogLevel(logging::Logging::DETAIL);
 
    //init domain partitioning
-   auto forest = blockforest::createBlockForest( AABB(-15,-15,-15,15,15,15), // simulation domain
+   auto forest = blockforest::createBlockForest( AABB(-5,-5,-5,25,25,25), // simulation domain
                                                  Vector3<uint_t>(3,3,3), // blocks in each direction
-                                                 Vector3<bool>(true, true, true) // periodicity
+                                                 Vector3<bool>(false, false, false) // periodicity
                                                  );
    domain::BlockForestDomain domain(forest);
    std::array< bool, 3 > periodic;
@@ -86,23 +86,27 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_DEVEL_ON_ROOT("uid: " << uid);
 
    //init kernels
-   mpi::SyncNextNeighbors SNN;
+   mpi::SyncGhostOwners SNN;
 
-   std::vector<real_t> deltas { real_t(0),
+   SNN(ps, domain);
+   SNN(ps, domain);
+   SNN(ps, domain);
+   SNN(ps, domain);
+
+   std::vector<real_t> deltas {
+      real_t(0),
             real_t(4.9),
             real_t(5.1),
             real_t(10),
             real_t(14.9),
-            real_t(-14.9),
-            real_t(-10),
-            real_t(-5.1),
-            real_t(-4.9),
-            real_t(0)};
+            real_t(15.1),
+            real_t(20),
+            real_t(24.9)};
 
    for (auto delta : deltas)
    {
       WALBERLA_LOG_DEVEL(delta);
-      auto pos = Vec3(1,-1,1) * delta;
+      auto pos = Vec3(1,0,0) * delta;
       WALBERLA_LOG_DETAIL("checking position: " << pos);
       // owner moves particle to new position
       auto pIt = ps.find(uid);
@@ -118,7 +122,7 @@ int main( int argc, char ** argv )
       SNN(ps, domain);
 
       //check
-      if (sqDistancePointToAABBPeriodic(pos, forest->begin()->getAABB(), forest->getDomain(), periodic) <= radius * radius)
+      if (sqDistancePointToAABB(pos, forest->begin()->getAABB()) <= radius * radius)
       {
          WALBERLA_CHECK_EQUAL(ps.size(), 1);
          if (forest->begin()->getAABB().contains(pos))

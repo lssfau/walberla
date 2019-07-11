@@ -29,11 +29,13 @@
 
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/domain/IDomain.h>
+#include <mesa_pd/mpi/notifications/NewGhostParticleNotification.h>
 #include <mesa_pd/mpi/notifications/NotificationType.h>
 #include <mesa_pd/mpi/notifications/ParticleCopyNotification.h>
 #include <mesa_pd/mpi/notifications/ParticleMigrationNotification.h>
 #include <mesa_pd/mpi/notifications/ParticleRemoteMigrationNotification.h>
 #include <mesa_pd/mpi/notifications/ParticleRemovalNotification.h>
+#include <mesa_pd/mpi/notifications/ParticleRemovalInformationNotification.h>
 #include <mesa_pd/mpi/notifications/ParticleUpdateNotification.h>
 
 #include <core/debug/Debug.h>
@@ -70,14 +72,18 @@ void ParseMessage::operator()(int sender,
 
       WALBERLA_LOG_DETAIL( "Received PARTICLE_COPY_NOTIFICATION for particle " << objparam.uid << "from neighboring process with rank " << sender );
 
-      WALBERLA_CHECK_EQUAL( ps.find(objparam.uid), ps.end(), "Ghost particle with id " << objparam.uid << " already existend.");
+      if ( ps.find(objparam.uid) == ps.end() )
+      {
+         auto pIt = createNewParticle(ps, objparam);
 
-      auto pIt = createNewParticle(ps, objparam);
+         domain.correctParticlePosition(pIt->getPositionRef());
 
-      domain.correctParticlePosition(pIt->getPositionRef());
-
-      WALBERLA_CHECK(!data::particle_flags::isSet(pIt->getFlags(), data::particle_flags::GHOST));
-      data::particle_flags::set(pIt->getFlagsRef(), data::particle_flags::GHOST);
+         //WALBERLA_CHECK(!data::particle_flags::isSet(pIt->getFlags(), data::particle_flags::GHOST));
+         data::particle_flags::set(pIt->getFlagsRef(), data::particle_flags::GHOST);
+      } else
+      {
+         WALBERLA_LOG_DETAIL("Ghost particle with id " << objparam.uid << " already existend.");
+      }
 
       WALBERLA_LOG_DETAIL( "Processed PARTICLE_COPY_NOTIFICATION for particle " << objparam.uid << "."  );
 
@@ -185,8 +191,61 @@ void ParseMessage::operator()(int sender,
 
       break;
    }
+   case NEW_GHOST_PARTICLE_NOTIFICATION: {
+      NewGhostParticleNotification::Parameters objparam;
+      rb >> objparam;
+
+      WALBERLA_LOG_DETAIL( "Received new ghost particle notification for particle " <<
+                           objparam.uid_ <<
+                           " from neighboring process with rank " <<
+                           sender <<
+                           "." );
+
+      auto pIt = ps.find( objparam.uid_ );
+      WALBERLA_CHECK_UNEQUAL( pIt, ps.end() );
+
+      pIt->getGhostOwnersRef().insert( objparam.newOwner_ );
+
+      WALBERLA_LOG_DETAIL( "Processed new ghost particle notification" );
+
+      break;
+   }
+   case PARTICLE_REMOVAL_INFORMATION_NOTIFICATION: {
+      ParticleRemovalInformationNotification::Parameters objparam;
+      rb >> objparam;
+
+      WALBERLA_LOG_DETAIL( "Received particle removal information notification for particle " <<
+                           objparam.uid_ <<
+                           " from neighboring process with rank " <<
+                           sender <<
+                           "." );
+
+      if (objparam.owner_ == receiver_)
+      {
+         using namespace walberla::mesa_pd::data::particle_flags;
+         auto pIt = ps.find( objparam.uid_ );
+         WALBERLA_CHECK_UNEQUAL( pIt, ps.end() );
+         WALBERLA_CHECK(!isSet( pIt->getFlags(), GHOST));
+
+         pIt->getGhostOwnersRef().erase( sender );
+         pIt->getNeighborStateRef().erase( sender );
+      } else
+      {
+         using namespace walberla::mesa_pd::data::particle_flags;
+         auto pIt = ps.find( objparam.uid_ );
+         if (pIt != ps.end() )
+         {
+            WALBERLA_CHECK(isSet( pIt->getFlags(), GHOST));
+            pIt->getNeighborStateRef().erase( sender );
+         }
+      }
+
+      WALBERLA_LOG_DETAIL( "Processed rigid body removal information notification" );
+
+      break;
+   }
    default:
-      throw std::runtime_error( "Received invalid notification type." );
+      WALBERLA_ABORT( "Received invalid notification type: " << notificationType << " from sender: " << sender );
    }
 }
 
