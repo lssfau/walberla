@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ParticleMigrationNotification.h
+//! \file ParticleRemovalInformationNotification.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -26,38 +26,40 @@
 
 #pragma once
 
+#include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/mpi/notifications/NotificationType.h>
 
-#include <core/mpi/BufferDataTypeExtensions.h>
 #include <core/mpi/Datatype.h>
 #include <core/mpi/RecvBuffer.h>
 #include <core/mpi/SendBuffer.h>
-
 
 namespace walberla {
 namespace mesa_pd {
 
 /**
- * Migrate the particle to this process. Making the receiver the new owner.
+ * The ParticleRemovalInformationNotification class is used to signal other processes that a
+ * shadow copy was destroyed.
  */
-class ParticleMigrationNotification {
+class ParticleRemovalInformationNotification
+{
 public:
-   struct Parameters {
-      id_t uid_;
-      std::unordered_set<walberla::mpi::MPIRank> ghostOwners_ {};
-      walberla::mesa_pd::Vec3 oldForce_ {real_t(0)};
-      walberla::mesa_pd::Vec3 oldTorque_ {real_t(0)};
+   struct Parameters
+   {
+      id_t    uid_;
+      walberla::mpi::MPIRank owner_;
    };
 
-   inline explicit ParticleMigrationNotification( const data::Particle& particle ) : particle_(particle) {}
+   inline explicit ParticleRemovalInformationNotification( const data::Particle& particle )
+      : particle_(particle)
+   {}
    const data::Particle& particle_;
 };
 
 template<>
-struct NotificationTrait<ParticleMigrationNotification>
+struct NotificationTrait<ParticleRemovalInformationNotification>
 {
-   static const NotificationType id = PARTICLE_MIGRATION_NOTIFICATION;
+   static const NotificationType id = PARTICLE_REMOVAL_INFORMATION_NOTIFICATION;
 };
 
 }  // namespace mesa_pd
@@ -74,31 +76,22 @@ namespace mpi {
 
 template< typename T,    // Element type of SendBuffer
           typename G>    // Growth policy of SendBuffer
-mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::ParticleMigrationNotification& obj )
+mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::ParticleRemovalInformationNotification& obj )
 {
-   buf.addDebugMarker( "mn" );
+   buf.addDebugMarker( "ri" );
    buf << obj.particle_.getUid();
-   buf << obj.particle_.getGhostOwners();
-   buf << obj.particle_.getOldForce();
-   buf << obj.particle_.getOldTorque();
+   buf << static_cast<walberla::mpi::MPIRank>(obj.particle_.getOwner());
    return buf;
 }
 
 template< typename T>    // Element type  of RecvBuffer
-mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::ParticleMigrationNotification::Parameters& objparam )
+mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::ParticleRemovalInformationNotification::Parameters& objparam )
 {
-   buf.readDebugMarker( "mn" );
+   buf.readDebugMarker( "ri" );
    buf >> objparam.uid_;
-   buf >> objparam.ghostOwners_;
-   buf >> objparam.oldForce_;
-   buf >> objparam.oldTorque_;
+   buf >> objparam.owner_;
    return buf;
 }
-
-template<>
-struct BufferSizeTrait< mesa_pd::ParticleMigrationNotification > {
-   static const bool constantSize = false;
-};
 
 } // mpi
 } // walberla

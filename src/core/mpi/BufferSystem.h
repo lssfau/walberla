@@ -189,7 +189,7 @@ public:
    /*! \name Status Queries  */
    //@{
    bool isSizeCommunicatedInNextStep() const { return (currentComm_ == &unknownSizeComm_); }
-   bool isCommunciationRunning() const       { return communicationRunning_;               }
+   bool isCommunicationRunning() const       { return communicationRunning_;               }
    bool isReceiverInformationSet() const     { return currentComm_ != NULL;                }
    //@}
    //*******************************************************************************************************************

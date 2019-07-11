@@ -10,12 +10,12 @@ class ParticleStorage(Container):
 
       self.addInclude("mesa_pd/data/Flags.h")
 
-      self.addProperty("uid",               "walberla::id_t",      defValue = "UniqueID<data::Particle>::invalidID()", syncMode="ALWAYS")
+      self.addProperty("uid",               "walberla::id_t",       defValue = "UniqueID<data::Particle>::invalidID()", syncMode="ALWAYS")
       self.addProperty("position",          "walberla::mesa_pd::Vec3", defValue = "real_t(0)", syncMode="ALWAYS")
-      self.addProperty("interactionRadius", "walberla::real_t",    defValue = "real_t(0)", syncMode="COPY")
+      self.addProperty("interactionRadius", "walberla::real_t",     defValue = "real_t(0)", syncMode="COPY")
       self.addProperty("flags",             "walberla::mesa_pd::data::particle_flags::FlagT", defValue = "", syncMode="COPY")
-      self.addProperty("owner",             "int",                 defValue = "-1", syncMode="COPY")
-      self.addProperty("ghostOwners",       "std::vector<int>",    defValue = "", syncMode="MIGRATION")
+      self.addProperty("owner",             "int",                  defValue = "-1", syncMode="COPY")
+      self.addProperty("ghostOwners",       "std::unordered_set<walberla::mpi::MPIRank>", defValue = "", syncMode="MIGRATION")
 
    def generate(self, path):
       self.unrollDimension()
@@ -40,7 +40,9 @@ class ParticleStorage(Container):
       generateFile(path, 'mpi/notifications/HeatFluxNotification.templ.h', context)
       generateFile(path, 'mpi/notifications/ParseMessage.templ.h', context)
       generateFile(path, 'mpi/notifications/ParticleCopyNotification.templ.h', context)
+      generateFile(path, 'mpi/notifications/NewGhostParticleNotification.templ.h', context)
       generateFile(path, 'mpi/notifications/ParticleMigrationNotification.templ.h', context)
       generateFile(path, 'mpi/notifications/ParticleRemoteMigrationNotification.templ.h', context)
+      generateFile(path, 'mpi/notifications/ParticleRemovalInformationNotification.templ.h', context)
       generateFile(path, 'mpi/notifications/ParticleRemovalNotification.templ.h', context)
       generateFile(path, 'mpi/notifications/ParticleUpdateNotification.templ.h', context)

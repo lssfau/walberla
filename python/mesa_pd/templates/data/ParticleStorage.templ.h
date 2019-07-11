@@ -31,6 +31,7 @@
 #include <map>
 #include <type_traits>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <mesa_pd/data/ContactHistory.h>
@@ -44,6 +45,7 @@
 #include <core/Abort.h>
 #include <core/debug/Debug.h>
 #include <core/math/AABB.h>
+#include <core/mpi/MPIWrapper.h>
 #include <core/OpenMP.h>
 #include <core/STLIO.h>
 #include <core/UniqueID.h>

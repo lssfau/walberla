@@ -143,15 +143,17 @@ void bufferTest()
    initCellContainer(cellVector);
    initCellContainer(cellSet);
 
-   std::vector  <bool>         boolStdVec,  boolStdVecEmpty;
-   std::vector  <unsigned int> stdVec,      stdVecEmpty;
-   std::deque   <unsigned int> stdDeque,    stdDequeEmpty;
-   std::list    <unsigned int> stdList,     stdListEmpty;
-   std::set     <unsigned int> stdSet,      stdSetEmpty;
-   std::multiset<unsigned int> stdMultiSet, stdMultiSetEmpty;
+   std::vector       <bool>         boolStdVec,      boolStdVecEmpty;
+   std::vector       <unsigned int> stdVec,          stdVecEmpty;
+   std::deque        <unsigned int> stdDeque,        stdDequeEmpty;
+   std::list         <unsigned int> stdList,         stdListEmpty;
+   std::set          <unsigned int> stdSet,          stdSetEmpty;
+   std::multiset     <unsigned int> stdMultiSet,     stdMultiSetEmpty;
+   std::unordered_set<unsigned int> stdUnorderedSet, stdUnorderedSetEmpty;
 
-   std::map     <unsigned int, walberla::int64_t> stdMap,      stdMapEmpty;
-   std::multimap<unsigned int, walberla::int64_t> stdMultiMap, stdMultiMapEmpty;
+   std::map          <unsigned int, walberla::int64_t> stdMap,          stdMapEmpty;
+   std::multimap     <unsigned int, walberla::int64_t> stdMultiMap,     stdMultiMapEmpty;
+   std::unordered_map<unsigned int, walberla::int64_t> stdUnorderedMap, stdUnorderedMapEmpty;
 
    std::array  < unsigned int, 19 > stdArray;
 
@@ -161,24 +163,28 @@ void bufferTest()
    initIntegerContainer(stdList);
    initIntegerAssocContainer(stdSet);
    initIntegerAssocContainer(stdMultiSet);
+   initIntegerAssocContainer(stdUnorderedSet);
    initIntegerMap(stdMap);
    initIntegerMap(stdMultiMap);
+   initIntegerMap(stdUnorderedMap);
    initStdArray(stdArray);
 
    // Create send buffer and put two values in it
    GenericSendBuffer<T> sb;
-   sb << testDouble  << testInt;
-   sb << vec         << mat;
-   sb << cell        << cellInterval;
-   sb << cellVector  << cellSet;
-   sb << boolStdVec  << boolStdVecEmpty;
-   sb << stdVec      << stdVecEmpty;
-   sb << stdDeque    << stdDequeEmpty;
-   sb << stdList     << stdListEmpty;
-   sb << stdSet      << stdSetEmpty;
-   sb << stdMultiSet << stdMultiSetEmpty;
-   sb << stdMap      << stdMapEmpty;
-   sb << stdMultiMap << stdMultiMapEmpty;
+   sb << testDouble       << testInt;
+   sb << vec              << mat;
+   sb << cell             << cellInterval;
+   sb << cellVector       << cellSet;
+   sb << boolStdVec       << boolStdVecEmpty;
+   sb << stdVec           << stdVecEmpty;
+   sb << stdDeque         << stdDequeEmpty;
+   sb << stdList          << stdListEmpty;
+   sb << stdSet           << stdSetEmpty;
+   sb << stdMultiSet      << stdMultiSetEmpty;
+   sb << stdUnorderedSet  << stdUnorderedSetEmpty;
+   sb << stdMap           << stdMapEmpty;
+   sb << stdMultiMap      << stdMultiMapEmpty;
+   sb << stdUnorderedMap  << stdUnorderedMapEmpty;
    sb << stdArray;
 
    // Copying
@@ -199,30 +205,34 @@ void bufferTest()
    CellVector      recvCellVector;
    CellSet         recvCellSet;
 
-   std::vector  <bool>         recvBoolStdVec,  recvBoolStdVecEmpty;
-   std::vector  <unsigned int> recvStdVec,      recvStdVecEmpty;
-   std::deque   <unsigned int> recvStdDeque,    recvStdDequeEmpty;
-   std::list    <unsigned int> recvStdList,     recvStdListEmpty;
-   std::set     <unsigned int> recvStdSet,      recvStdSetEmpty;
-   std::multiset<unsigned int> recvStdMultiSet, recvStdMultiSetEmpty;
+   std::vector        <bool>         recvBoolStdVec,      recvBoolStdVecEmpty;
+   std::vector        <unsigned int> recvStdVec,          recvStdVecEmpty;
+   std::deque         <unsigned int> recvStdDeque,        recvStdDequeEmpty;
+   std::list          <unsigned int> recvStdList,         recvStdListEmpty;
+   std::set           <unsigned int> recvStdSet,          recvStdSetEmpty;
+   std::multiset      <unsigned int> recvStdMultiSet,     recvStdMultiSetEmpty;
+   std::unordered_set <unsigned int> recvStdUnorderedSet, recvStdUnorderedSetEmpty;
 
-   std::map     <unsigned int, walberla::int64_t> recvStdMap,      recvStdMapEmpty;
-   std::multimap<unsigned int, walberla::int64_t> recvStdMultiMap, recvStdMultiMapEmpty;
+   std::map           <unsigned int, walberla::int64_t> recvStdMap,          recvStdMapEmpty;
+   std::multimap      <unsigned int, walberla::int64_t> recvStdMultiMap,     recvStdMultiMapEmpty;
+   std::unordered_map <unsigned int, walberla::int64_t> recvStdUnorderedMap, recvStdUnorderedMapEmpty;
 
    std::array  <unsigned int, 19> recvStdArray;
 
-   rb >> recvD           >> recvI;
-   rb >> recvVec         >> recvMat;
-   rb >> recvCell        >> recvCellInterval;
-   rb >> recvCellVector  >> recvCellSet;
-   rb >> recvBoolStdVec  >> recvBoolStdVecEmpty;
-   rb >> recvStdVec      >> recvStdVecEmpty;
-   rb >> recvStdDeque    >> recvStdDequeEmpty;
-   rb >> recvStdList     >> recvStdListEmpty;
-   rb >> recvStdSet      >> recvStdSetEmpty;
-   rb >> recvStdMultiSet >> recvStdMultiSetEmpty;
-   rb >> recvStdMap      >> recvStdMapEmpty;
-   rb >> recvStdMultiMap >> recvStdMultiMapEmpty;
+   rb >> recvD                >> recvI;
+   rb >> recvVec              >> recvMat;
+   rb >> recvCell             >> recvCellInterval;
+   rb >> recvCellVector       >> recvCellSet;
+   rb >> recvBoolStdVec       >> recvBoolStdVecEmpty;
+   rb >> recvStdVec           >> recvStdVecEmpty;
+   rb >> recvStdDeque         >> recvStdDequeEmpty;
+   rb >> recvStdList          >> recvStdListEmpty;
+   rb >> recvStdSet           >> recvStdSetEmpty;
+   rb >> recvStdMultiSet      >> recvStdMultiSetEmpty;
+   rb >> recvStdUnorderedSet  >> recvStdUnorderedSetEmpty;
+   rb >> recvStdMap           >> recvStdMapEmpty;
+   rb >> recvStdMultiMap      >> recvStdMultiMapEmpty;
+   rb >> recvStdUnorderedMap  >> recvStdUnorderedMapEmpty;
    rb >> recvStdArray;
 
    // Validate
@@ -245,14 +255,19 @@ void bufferTest()
    WALBERLA_CHECK_EQUAL(recvStdList,         stdList);
    WALBERLA_CHECK_EQUAL(recvStdListEmpty,    stdListEmpty);
 
-   WALBERLA_CHECK_EQUAL(recvStdSet,           stdSet);
-   WALBERLA_CHECK_EQUAL(recvStdSetEmpty,      stdSetEmpty);
-   WALBERLA_CHECK_EQUAL(recvStdMultiSet,      stdMultiSet);
-   WALBERLA_CHECK_EQUAL(recvStdMultiSetEmpty, stdMultiSetEmpty);
-   WALBERLA_CHECK_EQUAL(recvStdMap,           stdMap);
-   WALBERLA_CHECK_EQUAL(recvStdMapEmpty,      stdMapEmpty);
-   WALBERLA_CHECK_EQUAL(recvStdMultiMap,      stdMultiMap);
-   WALBERLA_CHECK_EQUAL(recvStdMultiMapEmpty, stdMultiMapEmpty);
+   WALBERLA_CHECK_EQUAL(recvStdSet,               stdSet);
+   WALBERLA_CHECK_EQUAL(recvStdSetEmpty,          stdSetEmpty);
+   WALBERLA_CHECK_EQUAL(recvStdMultiSet,          stdMultiSet);
+   WALBERLA_CHECK_EQUAL(recvStdMultiSetEmpty,     stdMultiSetEmpty);
+   WALBERLA_CHECK_EQUAL(recvStdUnorderedSet,      stdUnorderedSet);
+   WALBERLA_CHECK_EQUAL(recvStdUnorderedSetEmpty, stdUnorderedSetEmpty);
+
+   WALBERLA_CHECK_EQUAL(recvStdMap,               stdMap);
+   WALBERLA_CHECK_EQUAL(recvStdMapEmpty,          stdMapEmpty);
+   WALBERLA_CHECK_EQUAL(recvStdMultiMap,          stdMultiMap);
+   WALBERLA_CHECK_EQUAL(recvStdMultiMapEmpty,     stdMultiMapEmpty);
+   WALBERLA_CHECK_EQUAL(recvStdUnorderedMap,      stdUnorderedMap);
+   WALBERLA_CHECK_EQUAL(recvStdUnorderedMapEmpty, stdUnorderedMapEmpty);
 
    WALBERLA_CHECK_EQUAL(recvStdArray,   stdArray);
 }
