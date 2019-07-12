@@ -53,7 +53,7 @@ void testJacobi2D()
            xSize, ySize, uint_t(1),            // how many cells per block (x,y,z)
            real_t(1),                          // dx: length of one cell in physical coordinates
            false,                              // one block per process - "false" means all blocks to one process
-           true, true, true );                 // no periodicity
+           true, true, true );                 // full periodicity
 
 
    BlockDataID fieldID = field::addToStorage<ScalarField>(blocks, "Field", real_t(0.0));
