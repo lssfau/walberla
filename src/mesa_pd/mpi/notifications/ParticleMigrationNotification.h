@@ -45,7 +45,7 @@ class ParticleMigrationNotification {
 public:
    struct Parameters {
       id_t uid_;
-      std::vector<int> ghostOwners_ {};
+      std::unordered_set<walberla::mpi::MPIRank> ghostOwners_ {};
       walberla::mesa_pd::Vec3 oldForce_ {real_t(0)};
       walberla::mesa_pd::Vec3 oldTorque_ {real_t(0)};
    };

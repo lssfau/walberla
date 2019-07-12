@@ -66,7 +66,7 @@ inline EllipsoidPtr instantiate( mpi::RecvBuffer& buffer, const math::AABB& doma
    EllipsoidParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   auto el = std::make_unique<Ellipsoid>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.semiAxes_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   auto el = std::make_unique<Ellipsoid>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_,  subobjparam.q_, subobjparam.semiAxes_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
    el->setLinearVel( subobjparam.v_ );
    el->setAngularVel( subobjparam.w_ );
    el->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );

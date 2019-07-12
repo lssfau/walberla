@@ -37,17 +37,13 @@ RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
    , mass_( 0 )               // Total mass of the rigid body
    , invMass_( 0 )            // Inverse total mass of the rigid body
    , motion_(sleepThreshold)  // The current motion of the rigid body
-   , gpos_()                  // Global position of the center of mass
-   , rpos_()                  // Relative position within the body frame of the superordinate body
    , v_()                     // Linear velocity
    , w_()                     // Angular velocity
    , force_()                 // Total force
    , torque_()                // Total torque
    , I_( real_c(0) )          // Moment of inertia
    , Iinv_( real_c(0) )       // Inverse moment of inertia
-   , q_()                     // Orientation of the body frame
-   , R_()                     // Rigid body rotation
-   , manager_(nullptr)              // The rigid body manager responsible for the rigid body
+   , manager_(nullptr)        // The rigid body manager responsible for the rigid body
    , finite_ (true)           // Finiteness flag
    , visible_(true)           // Visibility flag
    , remote_ (false)          // Remote flag
@@ -56,6 +52,9 @@ RigidBody::RigidBody( id_t const typeID, id_t sid, id_t uid )
    , toBeDeleted_(false)      // deletion flag
    , sid_    (sid)            // System-specific body index
    , uid_    (uid)            // User-specific body ID
+   , gpos_()                  // Global position of the center of mass
+   , q_()                     // Orientation of the body frame
+   , R_()                     // Rigid body rotation
    , typeID_(typeID)          // geometry type
 {
    sb_ = this;           // The superordinate rigid body

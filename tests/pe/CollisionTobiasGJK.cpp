@@ -160,9 +160,9 @@ void MainTest()
    MaterialID iron = Material::find("iron");
 
    // Original SPHERE <-> SPHERE
-   Sphere sp1(123, 1, Vec3(0,0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   Sphere sp2(124, 2, Vec3(real_t(1.5),0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   Sphere sp3(125, 3, Vec3(real_t(3.0),0,0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   Sphere sp1(123, 1, Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   Sphere sp2(124, 2, Vec3(real_t(1.5),0,0), Quat(), 1, iron, false, true, false);
+   Sphere sp3(125, 3, Vec3(real_t(3.0),0,0), Quat(), 1, iron, false, true, false);
 
    Vec3     normal;
    Vec3     contactPoint;
@@ -179,8 +179,8 @@ void MainTest()
    WALBERLA_LOG_INFO("Test 01: BOX <-> SPHERE");
    real_t sqr3_inv = real_t(1.0)/std::sqrt(real_t(3.0));
    real_t coordinate= real_t(5.0)* sqr3_inv + real_t(5.0); // 5*(1+ (1/sqrt(3)))
-   Box box1_1(127, 5, Vec3(0, 0, 0), Vec3(0,0,0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
-   Sphere sphere1_2(130, 8, Vec3(coordinate, coordinate, coordinate), Vec3(0,0,0), Quat(), 5, iron, false, true, false);
+   Box box1_1(127, 5, Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Sphere sphere1_2(130, 8, Vec3(coordinate, coordinate, coordinate), Quat(), 5, iron, false, true, false);
    Vec3 wp1(real_t(5.0), real_t(5.0), real_t(5.0));
    Vec3 wpm1(sqr3_inv*real_t(-0.5), sqr3_inv*real_t(-0.5), sqr3_inv*real_t(-0.5));
    Vec3 axis1(-sqr3_inv, -sqr3_inv, -sqr3_inv);
@@ -189,7 +189,7 @@ void MainTest()
    //Testcase 02 Box LongBox (touching plane)
    //Reuse box1_1
    WALBERLA_LOG_INFO("Test 02: BOX <-> LONG BOX");
-   Box box2_1(131, 9, Vec3(real_t(20.0),0,0), Vec3(0,0,0), Quat(), Vec3(real_t(30.0),1,1), iron, false, true, false);
+   Box box2_1(131, 9, Vec3(real_t(20.0),0,0),  Quat(), Vec3(real_t(30.0),1,1), iron, false, true, false);
    Vec3 wp2(5, 0, 0);
    Vec3 wpm2(real_t(-0.5),0,0);
    Vec3 axis2(-1,0,0);
@@ -197,8 +197,8 @@ void MainTest()
 
    //Testcase 03 Sphere Sphere
    WALBERLA_LOG_INFO("Test 03: SPHERE <-> SPHERE");
-   Sphere sphere3_1(129, 7, Vec3(0,0,0), Vec3(0,0,0), Quat(), 5, iron, false, true, false);
-   Sphere sphere3_2(128, 6, Vec3(real_t(10.0),0,0), Vec3(0,0,0), Quat(), 5, iron, false, true, false);
+   Sphere sphere3_1(129, 7, Vec3(0,0,0), Quat(), 5, iron, false, true, false);
+   Sphere sphere3_2(128, 6, Vec3(real_t(10.0),0,0), Quat(), 5, iron, false, true, false);
    Vec3 wp3(5, 0, 0);
    Vec3 wpm3(real_t(-0.5),0,0);
    Vec3 axis3(-1,0,0);
@@ -213,8 +213,8 @@ void MainTest()
 
    //create turned box
    real_t sqr2 = std::sqrt(real_t(2.0));
-   Box box4_1(132, 10, Vec3(real_t(5.0)*(real_t(1.0)+sqr2), real_t(-5.0), 0), Vec3(0,0,0), q4, Vec3(10, 10, 10), iron, false, true, false);
-   Box box4_2(133, 11, Vec3(0, 0, 0), Vec3(0,0,0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Box box4_1(132, 10, Vec3(real_t(5.0)*(real_t(1.0)+sqr2), real_t(-5.0), 0), q4, Vec3(10, 10, 10), iron, false, true, false);
+   Box box4_2(133, 11, Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    Vec3 wp4(5, -5, 0);
    Vec3 wpm4(real_t(-0.25),real_t(+0.25),0);
    Vec3 collision_axis4(-sqr2/real_t(2.0),+sqr2/real_t(2.0),0);
@@ -224,8 +224,8 @@ void MainTest()
 
    //Testcase 05 Cube and Long Box non-centric (touching plane)
    WALBERLA_LOG_INFO("Test 05: CUBE <-> LONG BOX (NON_CENTRIC)");
-   Box box5_1(133, 12, Vec3(0, 0, 0), Vec3(0,0,0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
-   Box box5_2(134, 13, Vec3(real_t(15.0),real_t(5.5), 0), Vec3(0,0,0), Quat(), Vec3(real_t(30.0),1,1), iron, false, true, false);
+   Box box5_1(133, 12, Vec3(0, 0, 0),  Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Box box5_2(134, 13, Vec3(real_t(15.0),real_t(5.5), 0), Quat(), Vec3(real_t(30.0),1,1), iron, false, true, false);
    Vec3 wp5(real_t(3.75), 5, 0);
    Vec3 wpm5(0, real_t(-0.5), 0);
    Vec3 axis5(0, -1, 0);
@@ -243,8 +243,8 @@ void MainTest()
    Quat q6(rot_axis6, angle6);
 
    //create turned box with pos = (5*(1+sqrt(3)), 0, 0)
-   Box box6_1(136, 14, Vec3(real_t(5.0)*(real_t(1.0)+sqr6_3), 0, 0), Vec3(0,0,0), q6, Vec3(10, 10, 10), iron, false, true, false);
-   Box box6_2(136, 15, Vec3(0, 0, 0), Vec3(0,0,0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
+   Box box6_1(136, 14, Vec3(real_t(5.0)*(real_t(1.0)+sqr6_3), 0, 0),  q6, Vec3(10, 10, 10), iron, false, true, false);
+   Box box6_2(136, 15, Vec3(0, 0, 0), Quat(), Vec3(10, 10, 10), iron, false, true, false);
    Vec3 wp6(5, 0, 0);
    Vec3 wpm6(real_t(-0.5), 0, 0);
    Vec3 axis6(-1, 0, 0);
@@ -253,8 +253,8 @@ void MainTest()
    //Testcase 07:
    // BOX <-> SPHERE
    WALBERLA_LOG_INFO("Test 07: BOX <-> SPHERE");
-   Sphere sphere7_1(137, 16, Vec3(0,0,0), Vec3(0,0,0), Quat(), 5, iron, false, true, false);
-   Box box7_2(138, 17, Vec3(0, 0,real_t(7.5)), Vec3(0,0,0), Quat(), Vec3(5, 5, 5), iron, false, true, false);
+   Sphere sphere7_1(137, 16, Vec3(0,0,0),  Quat(), 5, iron, false, true, false);
+   Box box7_2(138, 17, Vec3(0, 0,real_t(7.5)), Quat(), Vec3(5, 5, 5), iron, false, true, false);
    Vec3 wpm7(0, 0, real_t(-0.5));
    Vec3 wp7(0, 0, real_t(5.0));
    Vec3 axis7(0, 0,  real_t(-1.0));
@@ -264,8 +264,8 @@ void MainTest()
    // CAPSULE <-> CAPSULE
    WALBERLA_LOG_INFO("Test 08: CAPSULE <-> CAPSULE");
    Quat q8(Vec3(0,1,0), walberla::math::M_PI/real_t(2.0)); //creates a y-axis aligned capsule
-   Capsule cap8_1(139, 18, Vec3(0,0,0), Vec3(0,0,0), Quat(), real_t(4.0), real_t(10.0), iron, false, true, false);
-   Capsule cap8_2(140, 19, Vec3(0,0, real_t(13.0)), Vec3(0,0,0), q8, real_t(4.0), real_t(10.0), iron, false, true, false);
+   Capsule cap8_1(139, 18, Vec3(0,0,0), Quat(), real_t(4.0), real_t(10.0), iron, false, true, false);
+   Capsule cap8_2(140, 19, Vec3(0,0, real_t(13.0)),  q8, real_t(4.0), real_t(10.0), iron, false, true, false);
    Vec3 wpm8(0, 0, real_t(-0.5));
    Vec3 wp8(0, 0, real_t(4.0));
    Vec3 axis8(0, 0,  real_t(-1.0));
@@ -274,8 +274,8 @@ void MainTest()
    //Testcase 09:
    // ELLIPSOID <-> ELLIPSOID
    WALBERLA_LOG_INFO("Test 09: ELLIPSOID <-> ELLIPSOID");
-   Ellipsoid ell9_1(141, 20, Vec3(0,0,0), Vec3(0,0,0), Quat(), Vec3(10,5,5), iron, false, true, false);
-   Ellipsoid ell9_2(142, 21, Vec3(15,0,0), Vec3(0,0,0), Quat(), Vec3(5,10,5), iron, false, true, false);
+   Ellipsoid ell9_1(141, 20, Vec3(0,0,0), Quat(), Vec3(10,5,5), iron, false, true, false);
+   Ellipsoid ell9_2(142, 21, Vec3(15,0,0), Quat(), Vec3(5,10,5), iron, false, true, false);
    Vec3 wpm9(real_t(-0.5), 0, 0);
    Vec3 wp9(real_t(10), 0, 0);
    Vec3 axis9(real_t(-1.0), 0, 0);
@@ -292,8 +292,8 @@ void PlaneTest()
    fcd::GenericFCD<BodyTuple, fcd::GJKEPACollideFunctor> testFCD;
 
    Plane pl(1, 1, Vec3(0, 1, 0), Vec3(0, 1, 0), real_t(1.0), iron );
-   Sphere sphere(2, 2, Vec3(0, real_t(1.9), 0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
-   Sphere sphere2(3, 3, Vec3(0, real_t(0.1), 0), Vec3(0,0,0), Quat(), 1, iron, false, true, false);
+   Sphere sphere(2, 2, Vec3(0, real_t(1.9), 0), Quat(), 1, iron, false, true, false);
+   Sphere sphere2(3, 3, Vec3(0, real_t(0.1), 0), Quat(), 1, iron, false, true, false);
 
    PossibleContacts pcs;
 
@@ -353,17 +353,17 @@ void UnionTest(){
    fcd::GenericFCD<BodyTuple, fcd::GJKEPACollideFunctor> testFCD;
 
    //A recursive union of three spheres is dropped on a box.
-   Box box(179, 179, Vec3(0,0,0), Vec3(0,0,0), Quat(), Vec3(real_t(10),real_t(2), real_t(10)), iron, false, true, false);
+   Box box(179, 179, Vec3(0,0,0), Quat(), Vec3(real_t(10),real_t(2), real_t(10)), iron, false, true, false);
 
 
    using UnionT = Union<Sphere>;
-   auto unsub = std::make_unique<UnionT>(192, 192, Vec3(0,real_t(3.8),0), Vec3(0,0,0), Quat(), false, true, false);
+   auto unsub = std::make_unique<UnionT>(192, 192, Vec3(0,real_t(3.8),0), Quat(), false, true, false);
 
    auto sp1 = createSphere(unsub.get(), 180, Vec3(-3,real_t(3.8),0), real_t(3.0));
    auto sp2 = createSphere(unsub.get(), 181, Vec3(3,real_t(3.8),0), real_t(3.0));
 
    //Create another union, and add sub union
-   Union<Sphere, Union<Sphere>> un(193, 193, Vec3(0, 0, 0), Vec3(0,0,0), Quat(), false, true, false);
+   Union<Sphere, Union<Sphere>> un(193, 193, Vec3(0,0,0), Quat(), false, true, false);
    createSphere(&un, 182, Vec3(0,real_t(6),0), real_t(3.0));
    un.add(std::move(unsub));
 

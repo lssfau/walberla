@@ -160,7 +160,7 @@ int main( int argc, char ** argv )
    walberla::id_t sid = 123;
    Vec3 gpos = Vec3(3.5, 3.5, 3.5);
    const real_t r = real_c(1.6);
-   Sphere refSphere(1, 0, gpos, Vec3(0,0,0), Quat(), r, iron, false, true, false);
+   Sphere refSphere(1, 0, gpos, Quat(), r, iron, false, true, false);
    refSphere.setLinearVel(4, 5, 6);
    refSphere.setAngularVel( 1, 2, 3);
 

@@ -26,6 +26,8 @@
 
 #include "SyncNextNeighbors.h"
 
+#include <mesa_pd/mpi/RemoveAndNotify.h>
+
 namespace walberla {
 namespace mesa_pd {
 namespace mpi {
@@ -66,38 +68,6 @@ void SyncNextNeighbors::operator()(data::ParticleStorage& ps,
    WALBERLA_LOG_DETAIL( "Parsing of particle synchronization response ended." );
 }
 
-/**
- * Removes a particle from the local storage and informs ghost particle holders.
- *
- * This function removes the particle from the particle storage and generates deletion notifications.
- */
-inline
-data::ParticleStorage::iterator removeAndNotify( walberla::mpi::BufferSystem& bs,
-                                                 data::ParticleStorage& ps,
-                                                 data::ParticleStorage::iterator& pIt )
-{
-   WALBERLA_ASSERT( !data::particle_flags::isSet( pIt->getFlags(), data::particle_flags::GHOST),
-                    "Trying to remove ghost particle from the particle storage." );
-
-   WALBERLA_ASSERT( !data::particle_flags::isSet( pIt->getFlags(), data::particle_flags::GLOBAL),
-                    "Trying to remove a global particle from the particle storage." );
-
-   if( !pIt->getGhostOwners().empty() )
-   {
-      // Notify registered processes (intersecting or interacting) of particle removal since they possess a shadow copy.
-      for( auto ghostRank : pIt->getGhostOwnersRef() )
-      {
-         WALBERLA_LOG_DETAIL( "__Notify registered process " << ghostRank << " of deletion of particle " << pIt->getUid() );
-         auto& sb = bs.sendBuffer(ghostRank);
-         if (sb.isEmpty()) sb << walberla::uint8_c(0);
-         packNotification(sb, ParticleRemovalNotification( *pIt ));
-      }
-   }
-
-   pIt->getGhostOwnersRef().clear();
-   return ps.erase( pIt );
-}
-
 void SyncNextNeighbors::generateSynchronizationMessages(data::ParticleStorage& ps,
                                                         const domain::IDomain& domain,
                                                         const real_t dx) const
@@ -130,7 +100,7 @@ void SyncNextNeighbors::generateSynchronizationMessages(data::ParticleStorage& p
 
          for (const auto& ghostOwner : pIt->getGhostOwners() )
          {
-            auto& buffer( bs.sendBuffer(ghostOwner) );
+            auto& buffer( bs.sendBuffer(static_cast<walberla::mpi::MPIRank>(ghostOwner)) );
 
             WALBERLA_LOG_DETAIL( "Sending removal notification for particle " << pIt->getUid() << " to process " << ghostOwner );
 
@@ -174,7 +144,7 @@ void SyncNextNeighbors::generateSynchronizationMessages(data::ParticleStorage& p
                auto& buffer( bs.sendBuffer(nbProcessRank) );
                WALBERLA_LOG_DETAIL( "Sending shadow copy notification for particle " << pIt->getUid() << " to process " << (nbProcessRank) );
                packNotification(buffer, ParticleCopyNotification( *pIt ));
-               pIt->getGhostOwnersRef().emplace_back( int_c(nbProcessRank) );
+               pIt->getGhostOwnersRef().insert( int_c(nbProcessRank) );
             }
          }
          else
@@ -232,7 +202,7 @@ void SyncNextNeighbors::generateSynchronizationMessages(data::ParticleStorage& p
 
          for( auto ghostRank : pIt->getGhostOwners() )
          {
-            auto& buffer( bs.sendBuffer(ghostRank) );
+            auto& buffer( bs.sendBuffer(static_cast<walberla::mpi::MPIRank>(ghostRank)) );
 
             WALBERLA_LOG_DETAIL( "Sending remote migration notification for particle " << pIt->getUid() <<
                                  " to process " << ghostRank );
@@ -240,7 +210,7 @@ void SyncNextNeighbors::generateSynchronizationMessages(data::ParticleStorage& p
             packNotification(buffer, ParticleRemoteMigrationNotification( *pIt, ownerRank ));
          }
 
-         pIt->getGhostOwnersRef().emplace_back( int_c(ownRank) );
+         pIt->getGhostOwnersRef().insert( int_c(ownRank) );
 
          // Send migration notification to new owner
          auto& buffer( bs.sendBuffer(ownerRank) );

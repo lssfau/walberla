@@ -210,7 +210,7 @@ void GenericOpenMPBufferSystem<Rb, Sb>::waitOpenMP()
    WALBERLA_ASSERT_NULLPTR( ret ); // call last time to finish communication
    WALBERLA_UNUSED( ret );
 
-   WALBERLA_ASSERT( ! bs_.isCommunciationRunning() );
+   WALBERLA_ASSERT( ! bs_.isCommunicationRunning() );
 }
 
 

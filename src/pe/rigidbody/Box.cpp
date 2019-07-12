@@ -55,7 +55,7 @@ namespace pe {
  * \param visible Specifies if the box is visible in a visualization.
  * \param fixed \a true to fix the box, \a false to unfix it.
  */
-Box::Box( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+Box::Box( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
           const Vec3& lengths, MaterialID material,
           const bool global, const bool communicating, const bool infiniteMass )
    : GeomPrimitive( getStaticTypeID(), sid, uid, material )  // Initialization of the parent class
@@ -70,10 +70,8 @@ Box::Box( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
    WALBERLA_ASSERT_GREATER( lengths[2], real_t(0), "Invalid side length in z-dimension" );
 
    // Initializing the instantiated box
-   gpos_   = gpos;
-   rpos_   = rpos;                   // Setting the relative position
-   q_      = q;                      // Setting the orientation
-   R_      = q_.toRotationMatrix();  // Setting the rotation matrix
+   setPosition(gpos);
+   setOrientation(q);                      // Setting the orientation
 
    setGlobal( global );
    if (infiniteMass)
@@ -267,11 +265,12 @@ void Box::print( std::ostream& os, const char* tab ) const
 
    //if( verboseMode )
    {
+      Mat3 R = getRotation();
       os << tab << "   Bounding box      = " << getAABB() << "\n"
          << tab << "   Quaternion        = " << getQuaternion() << "\n"
-         << tab << "   Rotation matrix   = ( " << setw(9) << R_[0] << " , " << setw(9) << R_[1] << " , " << setw(9) << R_[2] << " )\n"
-         << tab << "                       ( " << setw(9) << R_[3] << " , " << setw(9) << R_[4] << " , " << setw(9) << R_[5] << " )\n"
-         << tab << "                       ( " << setw(9) << R_[6] << " , " << setw(9) << R_[7] << " , " << setw(9) << R_[8] << " )\n";
+         << tab << "   Rotation matrix   = ( " << setw(9) << R[0] << " , " << setw(9) << R[1] << " , " << setw(9) << R[2] << " )\n"
+         << tab << "                       ( " << setw(9) << R[3] << " , " << setw(9) << R[4] << " , " << setw(9) << R[5] << " )\n"
+         << tab << "                       ( " << setw(9) << R[6] << " , " << setw(9) << R[7] << " , " << setw(9) << R[8] << " )\n";
 
       os << std::setiosflags(std::ios::right)
          << tab << "   Moment of inertia = ( " << setw(9) << I_[0] << " , " << setw(9) << I_[1] << " , " << setw(9) << I_[2] << " )\n"
@@ -302,22 +301,23 @@ void Box::print( std::ostream& os, const char* tab ) const
 void Box::calcBoundingBox()
 {
    using std::fabs;
-
-   const real_t xlength( real_t(0.5) * ( fabs(R_[0]*lengths_[0]) + fabs(R_[1]*lengths_[1]) + fabs(R_[2]*lengths_[2]) ) + contactThreshold );
-   const real_t ylength( real_t(0.5) * ( fabs(R_[3]*lengths_[0]) + fabs(R_[4]*lengths_[1]) + fabs(R_[5]*lengths_[2]) ) + contactThreshold );
-   const real_t zlength( real_t(0.5) * ( fabs(R_[6]*lengths_[0]) + fabs(R_[7]*lengths_[1]) + fabs(R_[8]*lengths_[2]) ) + contactThreshold );
+   Mat3 R = getRotation();
+   const real_t xlength( real_t(0.5) * ( fabs(R[0]*lengths_[0]) + fabs(R[1]*lengths_[1]) + fabs(R[2]*lengths_[2]) ) + contactThreshold );
+   const real_t ylength( real_t(0.5) * ( fabs(R[3]*lengths_[0]) + fabs(R[4]*lengths_[1]) + fabs(R[5]*lengths_[2]) ) + contactThreshold );
+   const real_t zlength( real_t(0.5) * ( fabs(R[6]*lengths_[0]) + fabs(R[7]*lengths_[1]) + fabs(R[8]*lengths_[2]) ) + contactThreshold );
    aabb_ = math::AABB(
-            gpos_[0] - xlength,
-         gpos_[1] - ylength,
-         gpos_[2] - zlength,
-         gpos_[0] + xlength,
-         gpos_[1] + ylength,
-         gpos_[2] + zlength
+            getPosition()[0] - xlength,
+         getPosition()[1] - ylength,
+         getPosition()[2] - zlength,
+         getPosition()[0] + xlength,
+         getPosition()[1] + ylength,
+         getPosition()[2] + zlength
          );
 
    //WALBERLA_ASSERT( aabb_.isValid()        , "Invalid bounding box detected" );
-   WALBERLA_ASSERT( aabb_.contains( gpos_ ), "Invalid bounding box detected" );
+   WALBERLA_ASSERT( aabb_.contains( getPosition() ), "Invalid bounding box detected" );
 }
+
 //*************************************************************************************************
 
 

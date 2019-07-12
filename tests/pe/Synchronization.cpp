@@ -116,7 +116,7 @@ int main( int argc, char ** argv )
 
    MaterialID iron = Material::find("iron");
    walberla::id_t sid = 123;
-   Sphere refSphere(1, 0, Vec3(15, 15, 15), Vec3(0,0,0), Quat(), 3, iron, false, true, false);
+   Sphere refSphere(1, 0, Vec3(15, 15, 15), Quat(), 3, iron, false, true, false);
    refSphere.setLinearVel(4, 5, 6);
    refSphere.setAngularVel( 1, 2, 3);
    Vec3 gpos = Vec3(15, 15, 15);

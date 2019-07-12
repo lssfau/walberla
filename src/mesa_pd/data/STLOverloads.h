@@ -23,6 +23,9 @@
 #include <mesa_pd/data/DataTypes.h>
 
 #include <map>
+#include <set>
+#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 namespace walberla {
@@ -50,6 +53,42 @@ std::ostream& operator<<( std::ostream& os, const std::map<Key, T, Compare, Allo
    for (auto& v : m)
    {
       os << v.first << ":" << v.second << ", ";
+   }
+   os << "}";
+   return os;
+}
+
+template< typename Key, typename Compare, typename Allocator >
+std::ostream& operator<<( std::ostream& os, const std::set<Key, Compare, Allocator>& m )
+{
+   os << "{";
+   for (auto& v : m)
+   {
+      os << v << ", ";
+   }
+   os << "}";
+   return os;
+}
+
+template< typename Key, typename T, typename Compare, typename Allocator >
+std::ostream& operator<<( std::ostream& os, const std::unordered_map<Key, T, Compare, Allocator>& m )
+{
+   os << "{";
+   for (auto& v : m)
+   {
+      os << v.first << ":" << v.second << ", ";
+   }
+   os << "}";
+   return os;
+}
+
+template< typename Key, typename Compare, typename Allocator >
+std::ostream& operator<<( std::ostream& os, const std::unordered_set<Key, Compare, Allocator>& m )
+{
+   os << "{";
+   for (auto& v : m)
+   {
+      os << v << ", ";
    }
    os << "}";
    return os;

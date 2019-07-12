@@ -21,9 +21,11 @@
 #pragma once
 
 #include <core/DataTypes.h>
+#include <core/math/Matrix2.h>
 #include <core/math/Matrix3.h>
 #include <core/math/Quaternion.h>
 #include <core/math/Rot3.h>
+#include <core/math/Vector2.h>
 #include <core/math/Vector3.h>
 
 #include <mesa_pd/data/Flags.h>
@@ -32,9 +34,10 @@ namespace walberla {
 namespace mesa_pd {
 
 using Mat3 = math::Matrix3<real_t>;
+using Mat2 = math::Matrix2<real_t>;
 using Rot3 = math::Rot3<real_t>;
 using Quat = math::Quaternion<real_t>;
 using Vec3 = math::Vector3<real_t>;
-
+using Vec2 = math::Vector2<real_t>;
 }
 }

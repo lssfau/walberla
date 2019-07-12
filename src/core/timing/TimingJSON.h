@@ -19,6 +19,8 @@
 //
 //======================================================================================================================
 
+#pragma once
+
 #include "core/extern/json.hpp"
 #include "core/timing/Timer.h"
 #include "core/timing/TimingNode.h"

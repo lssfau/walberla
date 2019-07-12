@@ -66,7 +66,7 @@ inline SpherePtr instantiate( mpi::RecvBuffer& buffer, const math::AABB& domain,
    SphereParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   auto sp = std::make_unique<Sphere>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.radius_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   auto sp = std::make_unique<Sphere>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.q_, subobjparam.radius_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
    sp->setLinearVel( subobjparam.v_ );
    sp->setAngularVel( subobjparam.w_ );
    sp->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );

@@ -50,6 +50,7 @@ walberla::id_t createSphere(data::ParticleStorage& ps, domain::IDomain& domain)
       p.getAngularVelocityRef()   = Vec3(4,5,6);
       p.getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
       uid = p.getUid();
+      WALBERLA_LOG_DETAIL("SPHERE CREATED");
    }
 
    walberla::mpi::allReduceInplace(uid, walberla::mpi::SUM);
@@ -62,7 +63,7 @@ int main( int argc, char ** argv )
    WALBERLA_UNUSED(env);
    walberla::mpi::MPIManager::instance()->useWorldComm();
 
-//   logging::Logging::instance()->setStreamLogLevel(logging::Logging::DETAIL);
+   //logging::Logging::instance()->setStreamLogLevel(logging::Logging::DETAIL);
 //   logging::Logging::instance()->includeLoggingToFile("MESA_PD_Kernel_SyncNextNeighbor");
 //   logging::Logging::instance()->setFileLogLevel(logging::Logging::DETAIL);
 
@@ -100,6 +101,7 @@ int main( int argc, char ** argv )
 
    for (auto delta : deltas)
    {
+      WALBERLA_LOG_DEVEL(delta);
       auto pos = Vec3(1,-1,1) * delta;
       WALBERLA_LOG_DETAIL("checking position: " << pos);
       // owner moves particle to new position

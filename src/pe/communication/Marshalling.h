@@ -75,7 +75,7 @@ struct RigidBodyParameters {
    MPIRigidBodyTraitParameter mpiTrait_;
    bool communicating_, infiniteMass_;
    id_t sid_, uid_;
-   Vec3 gpos_, rpos_, v_, w_;
+   Vec3 gpos_, v_, w_;
    bool hasSuperBody_;
    Quat q_;
 };

@@ -70,7 +70,7 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   explicit Capsule( id_t sid, id_t uid, const Vec3& gpos, const Vec3& rpos, const Quat& q,
+   explicit Capsule( id_t sid, id_t uid, const Vec3& gpos,  const Quat& q,
                      real_t  radius, real_t  length, MaterialID material,
                      const bool global, const bool communicating, const bool infiniteMass );
    //@}
@@ -97,7 +97,6 @@ public:
    /*!\name Utility functions */
    //@{
    inline virtual Vec3 support( const Vec3& d ) const;
-   inline virtual Vec3 supportContactThreshold( const Vec3& d ) const;
    //@}
    //**********************************************************************************************
 
@@ -278,28 +277,9 @@ inline Vec3 Capsule::support( const Vec3& d ) const
    const Vec3 supportSegment = Vec3( math::sign(bfD[0])*length_*real_t (0.5), real_t (0.0), real_t (0.0));
    const Vec3 supportSphere = radius_ * dnorm;
 
-   return gpos_ + vectorFromBFtoWF(supportSegment) + supportSphere;
+   return getPosition() + vectorFromBFtoWF(supportSegment) + supportSphere;
 }
 //*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Estimates the point which is farthest in direction \a d.
- *
- * \param d The normalized search direction in world-frame coordinates
- * \return The support point in world-frame coordinates in direction a\ d extended by a vector in
- *         direction \a d of length \a pe::contactThreshold.
- */
-inline Vec3 Capsule::supportContactThreshold( const Vec3& d ) const
-{
-   auto len = d.sqrLength();
-   if (math::equal(len, real_t(0)))
-      return Vec3(0,0,0);
-
-   return support(d) + d*contactThreshold;
-}
-//*************************************************************************************************
-
 
 
 

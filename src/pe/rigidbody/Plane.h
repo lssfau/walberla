@@ -138,14 +138,6 @@ protected:
    //@}
    //**********************************************************************************************
 
-   //**Simulation functions************************************************************************
-   /*!\name Simulation functions */
-   //@{
-   virtual void update( const Vec3& dp );  // Translation update of a subordinate plane
-   virtual void update( const Quat& dq );  // Rotation update of a subordinate plane
-   //@}
-   //**********************************************************************************************
-
    //**Member variables****************************************************************************
    /*!\name Member variables */
    //@{

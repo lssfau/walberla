@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from .DetectAndStoreContacts import DetectAndStoreContacts
 from .DoubleCast import DoubleCast
 from .ExplicitEuler import ExplicitEuler
 from .ExplicitEulerWithShape import ExplicitEulerWithShape
@@ -15,6 +15,7 @@ from .VelocityVerlet import VelocityVerlet
 from .VelocityVerletWithShape import VelocityVerletWithShape
 
 __all__ = ['DoubleCast',
+           'DetectAndStoreContacts',
            'ExplicitEuler',
            'ExplicitEulerWithShape',
            'ForceLJ',

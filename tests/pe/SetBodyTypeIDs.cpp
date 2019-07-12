@@ -132,8 +132,8 @@ int main( int argc, char** argv )
    WALBERLA_CHECK_UNEQUAL(Plane::getStaticTypeID(), Capsule::getStaticTypeID());
 
    SingleTypeFunctor singleFunc;
-   Box     bx (0, 0, Vec3(0), Vec3(0), Quat(), Vec3(1), Material::find("iron"), false, false, false);
-   Capsule cap(0, 0, Vec3(0), Vec3(0), Quat(), 1, 1, Material::find("iron"), false, false, false);
+   Box     bx (0, 0, Vec3(0), Quat(), Vec3(1), Material::find("iron"), false, false, false);
+   Capsule cap(0, 0, Vec3(0), Quat(), 1, 1, Material::find("iron"), false, false, false);
 
    SingleCast<BodyTuple2, SingleTypeFunctor, void>::execute(Box::getStaticTypeID(), singleFunc);
    SingleCast<BodyTuple2, SingleTypeFunctor, void>::execute(Capsule::getStaticTypeID(), singleFunc);

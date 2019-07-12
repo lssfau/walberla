@@ -54,6 +54,9 @@ waLBerla_compile_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionNLSD FILES 
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionNLSDEuler COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionNLSD> )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionVelocityVerlet COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionNLSD> --useVV )
 
+waLBerla_compile_test( NAME   MESA_PD_Kernel_DetectAndStoreContacts FILES kernel/DetectAndStoreContacts.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_DetectAndStoreContacts )
+
 waLBerla_compile_test( NAME   MESA_PD_Kernel_DoubleCast FILES kernel/DoubleCast.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_DoubleCast )
 
@@ -94,6 +97,12 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_SingleCast )
 
 waLBerla_compile_test( NAME   MESA_PD_Kernel_SpringDashpot FILES kernel/SpringDashpot.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SpringDashpot )
+
+waLBerla_compile_test( NAME   MESA_PD_Kernel_SyncGhostOwners FILES kernel/SyncGhostOwners.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncGhostOwners PROCESSES 27 )
+
+waLBerla_compile_test( NAME   MESA_PD_Kernel_SyncGhostOwnersLarge FILES kernel/SyncGhostOwnersLarge.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncGhostOwnersLarge PROCESSES 27 )
 
 waLBerla_compile_test( NAME   MESA_PD_Kernel_SyncNextNeighbors FILES kernel/SyncNextNeighbors.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncNextNeighbors PROCESSES 27 )

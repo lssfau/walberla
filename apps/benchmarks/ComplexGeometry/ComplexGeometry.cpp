@@ -57,6 +57,7 @@
 #include "mesh/TriangleMeshes.h"
 #include "mesh/MeshOperations.h"
 #include "mesh/DistanceComputations.h"
+#include "mesh/DistanceFunction.h"
 #include "mesh/MeshIO.h"
 #include "mesh/MatrixVectorOperations.h"
 #include "mesh/blockforest/BlockForestInitialization.h"
@@ -67,6 +68,7 @@
 #include "mesh/boundary/BoundarySetup.h"
 #include "mesh/boundary/BoundaryInfo.h"
 #include "mesh/boundary/BoundaryLocation.h"
+#include "mesh/boundary/BoundaryLocationFunction.h"
 #include "mesh/boundary/BoundaryUIDFaceDataSource.h"
 #include "mesh/boundary/ColorToBoundaryMapper.h"
 #include "mesh/vtk/VTKMeshWriter.h"
@@ -83,47 +85,6 @@
 #include <string>
 
 namespace walberla {
-
-
-template< typename MeshDistanceType >
-struct MeshDistanceFunction
-{
-   MeshDistanceFunction( const shared_ptr< MeshDistanceType > & meshDistanceObject ) : meshDistanceObject_( meshDistanceObject ) { }
-
-   inline real_t operator()( const Vector3< real_t > & p ) const { return real_c( meshDistanceObject_->sqSignedDistance( mesh::toOpenMesh( p ) ) ); }
-
-   shared_ptr< MeshDistanceType > meshDistanceObject_;
-};
-
-template< typename MeshDistanceType >
-inline MeshDistanceFunction< MeshDistanceType > makeMeshDistanceFunction( const shared_ptr< MeshDistanceType > & meshDistanceObject )
-{
-   return MeshDistanceFunction< MeshDistanceType >( meshDistanceObject );
-}
-
-
-template< typename MeshDistanceType, typename MeshType >
-struct BoundaryLocationFunction
-{
-   BoundaryLocationFunction( const shared_ptr< MeshDistanceType > & meshDistanceObject, const shared_ptr< mesh::BoundaryLocation< MeshType > > & boundaryLocation )
-      : meshDistanceObject_( meshDistanceObject ), boundaryLocation_( boundaryLocation ) { }
-
-   inline const mesh::BoundaryInfo & operator()( const Vector3< real_t > & p ) const
-   {
-      typename MeshType::FaceHandle fh;
-      meshDistanceObject_->sqSignedDistance( mesh::toOpenMesh( p ), fh );
-      return (*boundaryLocation_)[ fh ];
-   }
-
-   shared_ptr< MeshDistanceType > meshDistanceObject_;
-   shared_ptr< mesh::BoundaryLocation< MeshType > > boundaryLocation_;
-};
-
-template< typename MeshDistanceType, typename MeshType >
-inline BoundaryLocationFunction< MeshDistanceType, MeshType > makeBoundaryLocationFunction( const shared_ptr< MeshDistanceType > & meshDistanceObject, const shared_ptr< mesh::BoundaryLocation< MeshType > > & boundaryLocation )
-{
-   return BoundaryLocationFunction< MeshDistanceType, MeshType >( meshDistanceObject, boundaryLocation );
-}
 
 template< typename MeshType >
 void vertexToFaceColor( MeshType & mesh, const typename MeshType::Color & defaultColor )

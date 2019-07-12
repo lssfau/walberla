@@ -31,6 +31,7 @@
 #include <map>
 #include <type_traits>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <mesa_pd/data/ContactHistory.h>
@@ -42,6 +43,7 @@
 #include <core/Abort.h>
 #include <core/debug/Debug.h>
 #include <core/math/AABB.h>
+#include <core/mpi/MPIWrapper.h>
 #include <core/OpenMP.h>
 #include <core/STLIO.h>
 #include <core/UniqueID.h>
@@ -88,9 +90,9 @@ public:
       int& getOwnerRef() {return storage_.getOwnerRef(i_);}
       void setOwner(const int& v) { storage_.setOwner(i_, v);}
       
-      const std::vector<int>& getGhostOwners() const {return storage_.getGhostOwners(i_);}
-      std::vector<int>& getGhostOwnersRef() {return storage_.getGhostOwnersRef(i_);}
-      void setGhostOwners(const std::vector<int>& v) { storage_.setGhostOwners(i_, v);}
+      const std::unordered_set<walberla::mpi::MPIRank>& getGhostOwners() const {return storage_.getGhostOwners(i_);}
+      std::unordered_set<walberla::mpi::MPIRank>& getGhostOwnersRef() {return storage_.getGhostOwnersRef(i_);}
+      void setGhostOwners(const std::unordered_set<walberla::mpi::MPIRank>& v) { storage_.setGhostOwners(i_, v);}
       
       const size_t& getShapeID() const {return storage_.getShapeID(i_);}
       size_t& getShapeIDRef() {return storage_.getShapeIDRef(i_);}
@@ -151,6 +153,18 @@ public:
       const walberla::real_t& getHeatFlux() const {return storage_.getHeatFlux(i_);}
       walberla::real_t& getHeatFluxRef() {return storage_.getHeatFluxRef(i_);}
       void setHeatFlux(const walberla::real_t& v) { storage_.setHeatFlux(i_, v);}
+      
+      const walberla::mesa_pd::Vec3& getDv() const {return storage_.getDv(i_);}
+      walberla::mesa_pd::Vec3& getDvRef() {return storage_.getDvRef(i_);}
+      void setDv(const walberla::mesa_pd::Vec3& v) { storage_.setDv(i_, v);}
+      
+      const walberla::mesa_pd::Vec3& getDw() const {return storage_.getDw(i_);}
+      walberla::mesa_pd::Vec3& getDwRef() {return storage_.getDwRef(i_);}
+      void setDw(const walberla::mesa_pd::Vec3& v) { storage_.setDw(i_, v);}
+      
+      const std::unordered_set<walberla::mpi::MPIRank>& getNeighborState() const {return storage_.getNeighborState(i_);}
+      std::unordered_set<walberla::mpi::MPIRank>& getNeighborStateRef() {return storage_.getNeighborStateRef(i_);}
+      void setNeighborState(const std::unordered_set<walberla::mpi::MPIRank>& v) { storage_.setNeighborState(i_, v);}
       
 
       size_t getIdx() const {return i_;}
@@ -232,9 +246,9 @@ public:
    int& getOwnerRef(const size_t idx) {return owner_[idx];}
    void setOwner(const size_t idx, const int& v) { owner_[idx] = v; }
    
-   const std::vector<int>& getGhostOwners(const size_t idx) const {return ghostOwners_[idx];}
-   std::vector<int>& getGhostOwnersRef(const size_t idx) {return ghostOwners_[idx];}
-   void setGhostOwners(const size_t idx, const std::vector<int>& v) { ghostOwners_[idx] = v; }
+   const std::unordered_set<walberla::mpi::MPIRank>& getGhostOwners(const size_t idx) const {return ghostOwners_[idx];}
+   std::unordered_set<walberla::mpi::MPIRank>& getGhostOwnersRef(const size_t idx) {return ghostOwners_[idx];}
+   void setGhostOwners(const size_t idx, const std::unordered_set<walberla::mpi::MPIRank>& v) { ghostOwners_[idx] = v; }
    
    const size_t& getShapeID(const size_t idx) const {return shapeID_[idx];}
    size_t& getShapeIDRef(const size_t idx) {return shapeID_[idx];}
@@ -295,6 +309,18 @@ public:
    const walberla::real_t& getHeatFlux(const size_t idx) const {return heatFlux_[idx];}
    walberla::real_t& getHeatFluxRef(const size_t idx) {return heatFlux_[idx];}
    void setHeatFlux(const size_t idx, const walberla::real_t& v) { heatFlux_[idx] = v; }
+   
+   const walberla::mesa_pd::Vec3& getDv(const size_t idx) const {return dv_[idx];}
+   walberla::mesa_pd::Vec3& getDvRef(const size_t idx) {return dv_[idx];}
+   void setDv(const size_t idx, const walberla::mesa_pd::Vec3& v) { dv_[idx] = v; }
+   
+   const walberla::mesa_pd::Vec3& getDw(const size_t idx) const {return dw_[idx];}
+   walberla::mesa_pd::Vec3& getDwRef(const size_t idx) {return dw_[idx];}
+   void setDw(const size_t idx, const walberla::mesa_pd::Vec3& v) { dw_[idx] = v; }
+   
+   const std::unordered_set<walberla::mpi::MPIRank>& getNeighborState(const size_t idx) const {return neighborState_[idx];}
+   std::unordered_set<walberla::mpi::MPIRank>& getNeighborStateRef(const size_t idx) {return neighborState_[idx];}
+   void setNeighborState(const size_t idx, const std::unordered_set<walberla::mpi::MPIRank>& v) { neighborState_[idx] = v; }
    
 
    /**
@@ -390,7 +416,7 @@ public:
    std::vector<walberla::real_t> interactionRadius_ {};
    std::vector<walberla::mesa_pd::data::particle_flags::FlagT> flags_ {};
    std::vector<int> owner_ {};
-   std::vector<std::vector<int>> ghostOwners_ {};
+   std::vector<std::unordered_set<walberla::mpi::MPIRank>> ghostOwners_ {};
    std::vector<size_t> shapeID_ {};
    std::vector<walberla::mesa_pd::Rot3> rotation_ {};
    std::vector<walberla::mesa_pd::Vec3> angularVelocity_ {};
@@ -406,6 +432,9 @@ public:
    std::vector<std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>> newContactHistory_ {};
    std::vector<walberla::real_t> temperature_ {};
    std::vector<walberla::real_t> heatFlux_ {};
+   std::vector<walberla::mesa_pd::Vec3> dv_ {};
+   std::vector<walberla::mesa_pd::Vec3> dw_ {};
+   std::vector<std::unordered_set<walberla::mpi::MPIRank>> neighborState_ {};
    std::unordered_map<id_t, size_t> uidToIdx_;
    static_assert(std::is_same<decltype(uid_)::value_type, id_t>::value,
                  "Property uid of type id_t is missing. This property is required!");
@@ -436,6 +465,9 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(const ParticleSt
    getNewContactHistoryRef() = rhs.getNewContactHistory();
    getTemperatureRef() = rhs.getTemperature();
    getHeatFluxRef() = rhs.getHeatFlux();
+   getDvRef() = rhs.getDv();
+   getDwRef() = rhs.getDw();
+   getNeighborStateRef() = rhs.getNeighborState();
    return *this;
 }
 
@@ -463,6 +495,9 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(ParticleStorage:
    getNewContactHistoryRef() = std::move(rhs.getNewContactHistoryRef());
    getTemperatureRef() = std::move(rhs.getTemperatureRef());
    getHeatFluxRef() = std::move(rhs.getHeatFluxRef());
+   getDvRef() = std::move(rhs.getDvRef());
+   getDwRef() = std::move(rhs.getDwRef());
+   getNeighborStateRef() = std::move(rhs.getNeighborStateRef());
    return *this;
 }
 
@@ -492,6 +527,9 @@ std::ostream& operator<<( std::ostream& os, const ParticleStorage::Particle& p )
          "newContactHistory   : " << p.getNewContactHistory() << "\n" <<
          "temperature         : " << p.getTemperature() << "\n" <<
          "heatFlux            : " << p.getHeatFlux() << "\n" <<
+         "dv                  : " << p.getDv() << "\n" <<
+         "dw                  : " << p.getDw() << "\n" <<
+         "neighborState       : " << p.getNeighborState() << "\n" <<
          "================================" << std::endl;
    return os;
 }
@@ -590,6 +628,9 @@ inline ParticleStorage::iterator ParticleStorage::create(const id_t& uid)
    newContactHistory_.emplace_back();
    temperature_.emplace_back(real_t(0));
    heatFlux_.emplace_back(real_t(0));
+   dv_.emplace_back(real_t(0));
+   dw_.emplace_back(real_t(0));
+   neighborState_.emplace_back();
    uid_.back() = uid;
    uidToIdx_[uid] = uid_.size() - 1;
    return iterator(this, size() - 1);
@@ -643,6 +684,9 @@ inline ParticleStorage::iterator ParticleStorage::erase(iterator& it)
    newContactHistory_.pop_back();
    temperature_.pop_back();
    heatFlux_.pop_back();
+   dv_.pop_back();
+   dw_.pop_back();
+   neighborState_.pop_back();
    return it;
 }
 
@@ -683,6 +727,9 @@ inline void ParticleStorage::reserve(const size_t size)
    newContactHistory_.reserve(size);
    temperature_.reserve(size);
    heatFlux_.reserve(size);
+   dv_.reserve(size);
+   dw_.reserve(size);
+   neighborState_.reserve(size);
 }
 
 inline void ParticleStorage::clear()
@@ -708,6 +755,9 @@ inline void ParticleStorage::clear()
    newContactHistory_.clear();
    temperature_.clear();
    heatFlux_.clear();
+   dv_.clear();
+   dw_.clear();
+   neighborState_.clear();
    uidToIdx_.clear();
 }
 
@@ -734,6 +784,9 @@ inline size_t ParticleStorage::size() const
    //WALBERLA_ASSERT_EQUAL( uid_.size(), newContactHistory.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), temperature.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), heatFlux.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), dv.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), dw.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), neighborState.size() );
    return uid_.size();
 }
 template <typename Selector, typename Accessor, typename Func, typename... Args>
@@ -925,10 +978,10 @@ public:
 class SelectParticleGhostOwners
 {
 public:
-   using return_type = std::vector<int>;
-   std::vector<int>& operator()(data::Particle& p) const {return p.getGhostOwnersRef();}
-   std::vector<int>& operator()(data::Particle&& p) const {return p.getGhostOwnersRef();}
-   const std::vector<int>& operator()(const data::Particle& p) const {return p.getGhostOwners();}
+   using return_type = std::unordered_set<walberla::mpi::MPIRank>;
+   std::unordered_set<walberla::mpi::MPIRank>& operator()(data::Particle& p) const {return p.getGhostOwnersRef();}
+   std::unordered_set<walberla::mpi::MPIRank>& operator()(data::Particle&& p) const {return p.getGhostOwnersRef();}
+   const std::unordered_set<walberla::mpi::MPIRank>& operator()(const data::Particle& p) const {return p.getGhostOwners();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleShapeID
@@ -1064,6 +1117,33 @@ public:
    walberla::real_t& operator()(data::Particle& p) const {return p.getHeatFluxRef();}
    walberla::real_t& operator()(data::Particle&& p) const {return p.getHeatFluxRef();}
    const walberla::real_t& operator()(const data::Particle& p) const {return p.getHeatFlux();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleDv
+{
+public:
+   using return_type = walberla::mesa_pd::Vec3;
+   walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getDvRef();}
+   walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getDvRef();}
+   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getDv();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleDw
+{
+public:
+   using return_type = walberla::mesa_pd::Vec3;
+   walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getDwRef();}
+   walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getDwRef();}
+   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getDw();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleNeighborState
+{
+public:
+   using return_type = std::unordered_set<walberla::mpi::MPIRank>;
+   std::unordered_set<walberla::mpi::MPIRank>& operator()(data::Particle& p) const {return p.getNeighborStateRef();}
+   std::unordered_set<walberla::mpi::MPIRank>& operator()(data::Particle&& p) const {return p.getNeighborStateRef();}
+   const std::unordered_set<walberla::mpi::MPIRank>& operator()(const data::Particle& p) const {return p.getNeighborState();}
 };
 
 } //namespace data

@@ -45,13 +45,9 @@ public:
       sp.updateMassAndInertia(real_t(1234));
    }
 
-   const walberla::real_t& getInvMass(const size_t /*p_idx*/) const {return sp.getInvMass();}
-   walberla::real_t& getInvMassRef(const size_t /*p_idx*/) {return sp.getInvMass();}
-   void setInvMass(const size_t /*p_idx*/, const walberla::real_t& v) { sp.getInvMass() = v;}
+   const auto& getInvMass(const size_t /*p_idx*/) const {return sp.getInvMass();}
 
    const auto& getInvInertiaBF(const size_t /*p_idx*/) const {return sp.getInvInertiaBF();}
-   auto& getInvInertiaBFRef(const size_t /*p_idx*/) {return sp.getInvInertiaBF();}
-   void setInvInertiaBF(const size_t /*p_idx*/, const Mat3& v) { sp.getInvInertiaBF() = v;}
 
    data::BaseShape* getShape(const size_t /*p_idx*/) {return &sp;}
 private:

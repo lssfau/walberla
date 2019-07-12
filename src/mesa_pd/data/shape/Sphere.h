@@ -51,8 +51,11 @@ void Sphere::updateMassAndInertia(const real_t density)
    const real_t m = (real_c(4.0)/real_c(3.0) * math::M_PI) * getRadius() * getRadius() * getRadius() * density;
    const Mat3   I = Mat3::makeDiagonalMatrix( real_c(0.4) * m * getRadius() * getRadius() );
 
-   getInvMass()      = real_t(1.0) / m;
-   getInvInertiaBF() = I.getInverse();
+   mass_         = m;
+   invMass_      = real_t(1.0) / m;
+
+   inertiaBF_    = I;
+   invInertiaBF_ = I.getInverse();
 }
 
 } //namespace data

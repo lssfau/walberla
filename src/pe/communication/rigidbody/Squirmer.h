@@ -66,7 +66,7 @@ inline SquirmerPtr instantiate( mpi::RecvBuffer& buffer, const math::AABB& domai
    SquirmerParameters subobjparam;
    unmarshal( buffer, subobjparam );
    correctBodyPosition(domain, block.center(), subobjparam.gpos_);
-   auto sq = std::make_unique<Squirmer>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.rpos_, subobjparam.q_, subobjparam.radius_, subobjparam.squirmerVelocity_, subobjparam.squirmerBeta_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
+   auto sq = std::make_unique<Squirmer>( subobjparam.sid_, subobjparam.uid_, subobjparam.gpos_, subobjparam.q_, subobjparam.radius_, subobjparam.squirmerVelocity_, subobjparam.squirmerBeta_, subobjparam.material_, false, subobjparam.communicating_, subobjparam.infiniteMass_ );
    sq->setLinearVel( subobjparam.v_ );
    sq->setAngularVel( subobjparam.w_ );
    sq->MPITrait.setOwner( subobjparam.mpiTrait_.owner_ );

@@ -98,14 +98,15 @@ public:
    inline bool           isMarkedForDeletion() const { return toBeDeleted_; }
    inline id_t           getSystemID()       const;
    inline id_t           getID()             const;
-   inline const Vec3&    getRelPosition()    const;
-   inline const Vec3&    getPosition()       const;
-   inline const Vec3     getRelLinearVel()   const;
-   inline const Vec3&    getLinearVel()      const;
-   inline const Vec3     getRelAngularVel()  const;
-   inline const Vec3&    getAngularVel()     const;
-   inline const Quat&    getQuaternion()     const;
-   inline const Mat3&    getRotation()       const;
+   inline const Vec3     getRelPosition()    const;
+   inline const Vec3     getPosition()       const;
+   inline const Vec3     getBodyLinearVel()   const;
+   inline const Vec3     getLinearVel()      const;
+   inline const Vec3     getBodyAngularVel()  const;
+   inline const Vec3 &   getAngularVel()     const;
+   inline const Quat     getRelQuaternion()  const;
+   inline const Quat     getQuaternion()     const;
+   inline const Mat3     getRotation()       const;
    inline real_t         getMass()           const;
    inline real_t         getInvMass()        const;
    virtual inline real_t getVolume()         const;
@@ -149,8 +150,10 @@ public:
    inline  void setVisible    ( bool visible );
    inline  void setPosition   ( real_t px, real_t py, real_t pz );
    inline  void setPosition   ( const Vec3& gpos );
+   inline  void setRelPosition( const Vec3& gpos );
    inline  void setOrientation( real_t r, real_t i, real_t j, real_t k );
    inline  void setOrientation( const Quat& q );
+   inline  void setRelOrientation( const Quat& q );
    inline  void setMassAndInertiaToInfinity();
 
    inline void setRelLinearVel ( real_t vx, real_t vy, real_t vz );
@@ -309,8 +312,6 @@ protected:
    virtual bool isSurfaceRelPointImpl ( real_t px, real_t py, real_t pz ) const;
 
    inline  void setMassAndInertia     ( const real_t mass, const Mat3& inertia );
-
-   inline void calcRelPosition();
    //@}
    //**********************************************************************************************
 
@@ -318,14 +319,6 @@ protected:
    /*!\name Fixation functions */
    //@{
    virtual void fix  ();
-   //@}
-   //**********************************************************************************************
-
-   //**Simulation functions************************************************************************
-   /*!\name Simulation functions */
-   //@{
-   virtual void update( const Vec3& dp );  // Translation update of a subordinate rigid body
-   virtual void update( const Quat& dq );  // Rotation update of a subordinate rigid body
    //@}
    //**********************************************************************************************
 
@@ -357,12 +350,7 @@ protected:
    real_t motion_;   //!< The current motion of the rigid body.
                   /*!< If this value drops under the specified sleep threshold, the
                        rigid body will be put to sleep. */
-   Vec3 gpos_;       //!< The global position of the center of mass of this rigid body.
-   Vec3 rpos_;       //!< The relative position within the body frame of the superordinate body.
-                  /*!< If the body is contained within a superordinate Union the relative
-                       position gives the position of the body's center of mass within the
-                       body frame of the superordinate body. If the body is not contained
-                       in a Union, the relative position is 0. */
+
    mutable Vec3 v_;  //!< The linear velocity of this rigid body.
    mutable Vec3 w_;  //!< Angular velocity of this rigid body.
    Vec3 force_;      //!< Total force (external+contact) acting in the body's center of mass.
@@ -379,8 +367,7 @@ protected:
                                       I_{zx} & I_{zy} & I_{zz} \\
                                       \end{array}\right)\f] */
    Mat3 Iinv_;       //!< The inverse moment of inertia within the body frame.
-   Quat q_;          //!< The orientation of the body frame in the global world frame.
-   Mat3 R_;          //!< The rotation in reference to the global frame of reference.
+
    //@}
    //**********************************************************************************************
 
@@ -390,6 +377,7 @@ protected:
    BodyID sb_;                //!< The superordinate rigid body.
                               /*!< This data member is the connection to the superordinate body,
                                    which is either the enclosing Union or the rigid body itself. */
+
    bool finite_;              //!< Finiteness flag.
                               /*!< The flag value indicates if the rigid body is finite (\a true)
                                    or infinite (\a false). */
@@ -417,7 +405,15 @@ protected:
    AABB aabb_;  //!< Axis-aligned bounding box for the rigid body.
    //@}
    //**********************************************************************************************
+
 private:
+
+   Vec3 gpos_;       /*!< The position of the center of mass of this rigid body. If the body is contained in union
+                          this and the other properties are relative to its center / orientation. Use the respective function
+                          getPosition() / getRotation() to access the actual global Position in the world frame */
+   Quat q_;          //!< The orientation of the body frame in the global world frame.
+   Mat3 R_;          //!< The rotation in reference to the global frame of reference.
+
    id_t typeID_; //< identify geometry type
 };
 
@@ -694,19 +690,7 @@ inline id_t RigidBody::getID() const
 //*************************************************************************************************
 
 
-//*************************************************************************************************
-/*!\brief Returns the relative position of the rigid body within the superordinate body.
- *
- * \return The relative position of the rigid body.
- *
- * If the rigid body is not contained in a superordinate body, the returned relative position will
- * be \f$ \left(\begin{array}{*{3}{c}} 0 & 0 & 0 \end{array}\right) \f$.
- */
-inline const Vec3& RigidBody::getRelPosition() const
-{
-   return rpos_;
-}
-//*************************************************************************************************
+
 
 
 //*************************************************************************************************
@@ -714,9 +698,30 @@ inline const Vec3& RigidBody::getRelPosition() const
  *
  * \return The global position of the center of mass.
  */
-inline const Vec3& RigidBody::getPosition() const
+inline const Vec3 RigidBody::getPosition() const
 {
-   return gpos_;
+   if( !hasSuperBody() ){
+      return gpos_;
+   }
+   return sb_->getPosition() + sb_->getRotation() * getRelPosition();
+
+}
+//*************************************************************************************************
+
+//*************************************************************************************************
+/*!\brief Returns the relative position of the rigid body within the superordinate body.
+ *
+ * \return The relative position of the rigid body.
+ *
+ * If this body is not containted in a superbody the zero-vector is returned.
+ */
+inline const Vec3 RigidBody::getRelPosition() const
+{
+   if( hasSuperBody() ){
+      return gpos_;
+   }
+   return Vec3(0, 0, 0);
+
 }
 //*************************************************************************************************
 
@@ -729,11 +734,9 @@ inline const Vec3& RigidBody::getPosition() const
  * This function returns the linear velocity of the center of mass of the rigid body in reference
  * to the body's own frame of reference.
  */
-inline const Vec3 RigidBody::getRelLinearVel() const
+inline const Vec3 RigidBody::getBodyLinearVel() const
 {
-   if( hasSuperBody() )
-      v_ = sb_->velFromWF( gpos_ );
-   return R_.getTranspose() * v_;
+   return getRotation().getTranspose() * getLinearVel();
 }
 //*************************************************************************************************
 
@@ -746,11 +749,13 @@ inline const Vec3 RigidBody::getRelLinearVel() const
  * This function returns the linear velocity of the center of mass of the rigid body in reference
  * to the global world frame.
  */
-inline const Vec3& RigidBody::getLinearVel() const
+inline const Vec3 RigidBody::getLinearVel() const
 {
-   if( hasSuperBody() )
-      v_ = sb_->velFromWF( gpos_ );
+   if( hasSuperBody() ){
+      return sb_->getLinearVel() + (sb_->getAngularVel() % (getPosition() - sb_->getPosition()));
+   }
    return v_;
+
 }
 //*************************************************************************************************
 
@@ -760,14 +765,12 @@ inline const Vec3& RigidBody::getLinearVel() const
  *
  * \return The relative angular velocity.
  *
- * This function returns the angluar velocity of the center of mass in reference to the body's
+ * This function returns the angular velocity of the center of mass in reference to the body's
  * own frame of reference.
  */
-inline const Vec3 RigidBody::getRelAngularVel() const
+inline const Vec3 RigidBody::getBodyAngularVel() const
 {
-   if( hasSuperBody() )
-      w_ = sb_->getAngularVel();
-   return R_.getTranspose() * w_;
+   return getRotation().getTranspose() * getAngularVel();
 }
 //*************************************************************************************************
 
@@ -780,10 +783,11 @@ inline const Vec3 RigidBody::getRelAngularVel() const
  * This function returns the angluar velocity of the center of mass in reference to the global
  * world frame.
  */
-inline const Vec3& RigidBody::getAngularVel() const
+inline const Vec3 & RigidBody::getAngularVel() const
 {
-   if( hasSuperBody() )
-      w_ = sb_->getAngularVel();
+   if( hasSuperBody() ) {
+      return sb_->getAngularVel();
+   }
    return w_;
 }
 //*************************************************************************************************
@@ -797,12 +801,33 @@ inline const Vec3& RigidBody::getAngularVel() const
  * This function returns the quaternion of the rigid body, which represents the orientation of
  * the body in reference to the global world frame.
  */
-inline const Quat& RigidBody::getQuaternion() const
+inline const Quat RigidBody::getQuaternion() const
 {
+   if( hasSuperBody() ){
+      return getRelQuaternion() * sb_->getQuaternion();
+   }
    return q_;
 }
 //*************************************************************************************************
 
+
+//*************************************************************************************************
+/*!\brief Returns the relative orientation of the rigid body to its superbody.
+ *
+ * \return The relative orientation of the rigid body.
+ *
+ * This function returns the quaternion, which represents the orientation of
+ * the body in reference to coordinate system of the superbody. If this body has no superbody
+ * the union-quaternion is returned.
+ */
+inline const Quat RigidBody::getRelQuaternion() const
+{
+   if( hasSuperBody() ){
+      return q_;
+   }
+   return Quat();
+}
+//*************************************************************************************************
 
 //*************************************************************************************************
 /*!\brief Returns the rotation of the rigid body.
@@ -812,8 +837,11 @@ inline const Quat& RigidBody::getQuaternion() const
  * This function returns the rotation matrix of the rigid body, which represents the rotation of
  * the body in reference to the global world frame.
  */
-inline const Mat3& RigidBody::getRotation() const
+inline const Mat3 RigidBody::getRotation() const
 {
+   if( hasSuperBody() ) {
+      return getQuaternion().toRotationMatrix();
+   }
    return R_;
 }
 //*************************************************************************************************
@@ -874,7 +902,7 @@ inline const Mat3& RigidBody::getBodyInertia() const
  */
 inline const Mat3 RigidBody::getInertia() const
 {
-   return math::transformMatrixRART(R_, I_);
+   return math::transformMatrixRART(getRotation(), I_);
 }
 //*************************************************************************************************
 
@@ -898,7 +926,7 @@ inline const Mat3& RigidBody::getInvBodyInertia() const
  */
 inline const Mat3 RigidBody::getInvInertia() const
 {
-   return math::transformMatrixRART(R_, Iinv_);
+   return math::transformMatrixRART(getRotation(), Iinv_);
 }
 //*************************************************************************************************
 
@@ -941,6 +969,7 @@ inline real_t   RigidBody::getKineticEnergy()      const
    return real_c(0.5) * getMass() * getLinearVel() * getLinearVel();
 }
 //*************************************************************************************************
+
 //*************************************************************************************************
 /*!\brief Returns the rotational energy of the rigid body
  *
@@ -951,6 +980,7 @@ inline real_t   RigidBody::getRotationalEnergy()      const
    return real_c(0.5) * getAngularVel() * (getInertia() * getAngularVel());
 }
 //*************************************************************************************************
+
 //*************************************************************************************************
 /*!\brief Returns the energy of the rigid body
  *
@@ -976,7 +1006,7 @@ inline real_t   RigidBody::getEnergy()      const
  */
 inline const Vec3 RigidBody::vectorFromBFtoWF( real_t vx, real_t vy, real_t vz ) const
 {
-   return R_ * Vec3( vx, vy, vz );
+   return getRotation() * Vec3( vx, vy, vz );
 }
 //*************************************************************************************************
 
@@ -992,7 +1022,7 @@ inline const Vec3 RigidBody::vectorFromBFtoWF( real_t vx, real_t vy, real_t vz )
  */
 inline const Vec3 RigidBody::vectorFromBFtoWF( const Vec3& v ) const
 {
-   return R_ * v;
+   return getRotation()  * v;
 }
 //*************************************************************************************************
 
@@ -1010,7 +1040,7 @@ inline const Vec3 RigidBody::vectorFromBFtoWF( const Vec3& v ) const
  */
 inline const Vec3 RigidBody::pointFromBFtoWF( real_t px, real_t py, real_t pz ) const
 {
-   return gpos_ + ( R_ * Vec3( px, py, pz ) );
+   return getPosition() + ( getRotation() * Vec3( px, py, pz ) );
 }
 //*************************************************************************************************
 
@@ -1026,7 +1056,7 @@ inline const Vec3 RigidBody::pointFromBFtoWF( real_t px, real_t py, real_t pz ) 
  */
 inline const Vec3 RigidBody::pointFromBFtoWF( const Vec3& rpos ) const
 {
-   return gpos_ + ( R_ * rpos );
+   return getPosition() + ( getRotation() * rpos );
 }
 //*************************************************************************************************
 
@@ -1044,7 +1074,7 @@ inline const Vec3 RigidBody::pointFromBFtoWF( const Vec3& rpos ) const
  */
 inline const Vec3 RigidBody::vectorFromWFtoBF( real_t vx, real_t vy, real_t vz ) const
 {
-   return R_.getTranspose() * Vec3( vx, vy, vz );
+   return getRotation() .getTranspose() * Vec3( vx, vy, vz );
 }
 //*************************************************************************************************
 
@@ -1060,7 +1090,7 @@ inline const Vec3 RigidBody::vectorFromWFtoBF( real_t vx, real_t vy, real_t vz )
  */
 inline const Vec3 RigidBody::vectorFromWFtoBF( const Vec3& v ) const
 {
-   return R_.getTranspose() * v;
+   return getRotation() .getTranspose() * v;
 }
 //*************************************************************************************************
 
@@ -1078,7 +1108,7 @@ inline const Vec3 RigidBody::vectorFromWFtoBF( const Vec3& v ) const
  */
 inline const Vec3 RigidBody::pointFromWFtoBF( real_t px, real_t py, real_t pz ) const
 {
-   return R_.getTranspose() * ( Vec3( px, py, pz ) - gpos_ );
+   return getRotation().getTranspose() * ( Vec3( px, py, pz ) - getPosition() );
 }
 //*************************************************************************************************
 
@@ -1094,7 +1124,7 @@ inline const Vec3 RigidBody::pointFromWFtoBF( real_t px, real_t py, real_t pz ) 
  */
 inline const Vec3 RigidBody::pointFromWFtoBF( const Vec3& gpos ) const
 {
-   return R_.getTranspose() * ( gpos - gpos_ );
+   return getRotation().getTranspose() * ( gpos - getPosition() );
 }
 //*************************************************************************************************
 
@@ -1279,23 +1309,6 @@ inline void RigidBody::setAngularVel( const Vec3& avel )
 //*************************************************************************************************
 
 
-//*************************************************************************************************
-/*!\brief Calculation of the relative position within a superordinate body.
- *
- * \return void
- *
- * The function calculates the relative position depending on its current global position, the
- * current global position of the superordinate body and the rotation of the superordinate body.
- */
-inline void RigidBody::calcRelPosition()
-{
-   rpos_ = sb_->R_.getTranspose()*( gpos_ - sb_->gpos_ );
-}
-//*************************************************************************************************
-
-
-
-
 //=================================================================================================
 //
 //  FORCE FUNCTIONS
@@ -1374,8 +1387,12 @@ inline  void RigidBody::resetSB()
 inline void RigidBody::setForce( const Vec3& f )
 {
    // Increasing the force on this rigid body
+   if(hasSuperBody()){
+      sb_->setForce(f);
+      sb_->setTorque((getPosition() - sb_->getPosition()) % f);
+      return;
+   }
    force_ = f;
-
    wake();
 }
 //*************************************************************************************************
@@ -1389,9 +1406,13 @@ inline void RigidBody::setForce( const Vec3& f )
  */
 inline void RigidBody::setTorque( const Vec3& tau )
 {
-   // Increasing the force on this rigid body
+   // Increasing the torque on this rigid body
+      // Increasing the force on this rigid body
+   if(hasSuperBody()){
+      sb_->setTorque(tau);
+      return;
+   }
    torque_ = tau;
-
    wake();
 }
 //*************************************************************************************************
@@ -1479,7 +1500,7 @@ inline void RigidBody::addForce( const Vec3& f )
       wake();
    } else
    {
-      sb_->addForceAtPos( f, gpos_ );
+      sb_->addForceAtPos( f, getPosition() );
    }
 }
 //*************************************************************************************************
@@ -2099,6 +2120,7 @@ inline void RigidBody::setVisible( bool visible )
 //*************************************************************************************************
 inline void RigidBody::setPositionImpl( real_t px, real_t py, real_t pz )
 {
+   if ( hasSuperBody() ) return;
    if (isFixed())
       WALBERLA_ABORT("Trying to move a fixed body: " << *this);
 
@@ -2109,6 +2131,36 @@ inline void RigidBody::setPositionImpl( real_t px, real_t py, real_t pz )
    calcBoundingBox();    // Updating the axis-aligned bounding box of the box
    wake();               // Waking the box from sleep mode
    signalTranslation();  // Signaling the position change to the superordinate body
+}
+//*************************************************************************************************
+
+//*************************************************************************************************
+/*!\fn void RigidBody::setRelPosition( const Vec3 &gpos )
+ * \brief Setting the global position of the rigid body.
+ *
+ * \param gpos The relative position.
+ * \return void
+ *
+ * This function sets the relatvie position of the rigid body w. r. t. the superbodies position.
+ *
+ * \b Note:
+ * - Setting the position of a rigid body without superbody will have no effect.
+ * - In case of a <b>MPI parallel simulation</b>, changing the settings of a (local) rigid body
+ *   on one process may invalidate the settings of the body on another process. In order to
+ *   synchronize all rigid bodies after local changes, the simulation has to be synchronized
+ *   by the user. Note that any changes on remote rigid
+ *   bodies are neglected and overwritten by the settings of the rigid body on its local process!
+ */
+//*************************************************************************************************
+inline void RigidBody::setRelPosition(const Vec3 &gpos) {
+
+   if ( !hasSuperBody() ) return;
+   if (isFixed())
+   WALBERLA_ABORT("Trying to move a fixed body: " << *this);
+
+   gpos_ = gpos;
+   calcBoundingBox();    // Updating the axis-aligned bounding box of the box
+   wake();               // Waking the box from sleep mode
 }
 //*************************************************************************************************
 
@@ -2194,6 +2246,7 @@ inline void RigidBody::setPosition( const Vec3& gpos )
 //*************************************************************************************************
 inline void RigidBody::setOrientationImpl( real_t r, real_t i, real_t j, real_t k )
 {
+   if ( hasSuperBody() ) return;
    if (isFixed())
       WALBERLA_ABORT("Trying to rotate a fixed body: " << *this);
 
@@ -2260,6 +2313,38 @@ inline void RigidBody::setOrientation( real_t r, real_t i, real_t j, real_t k )
 inline void RigidBody::setOrientation( const Quat& q )
 {
    setOrientationImpl( q[0], q[1], q[2], q[3] );
+}
+//*************************************************************************************************
+
+//*************************************************************************************************
+/*!\fn void RigidBody::setRelOrientation( const Quat &q )
+ * \brief Setting the relative position of the rigid body.
+ *
+ * \param q The relative orientation.
+ * \return void
+ *
+ * This function sets the relative orientation of the rigid body w. r. t. the superbodies position.
+ *
+ * \b Note:
+ * - Setting the relative orientation of a rigid body without superbody will have no effect.
+ * - In case of a <b>MPI parallel simulation</b>, changing the settings of a (local) rigid body
+ *   on one process may invalidate the settings of the body on another process. In order to
+ *   synchronize all rigid bodies after local changes, the simulation has to be synchronized
+ *   by the user. Note that any changes on remote rigid
+ *   bodies are neglected and overwritten by the settings of the rigid body on its local process!
+ */
+//*************************************************************************************************
+inline void RigidBody::setRelOrientation(const Quat &q) {
+
+   if ( !hasSuperBody() ) return;
+
+   if (isFixed())
+   WALBERLA_ABORT("Trying to move a fixed body: " << *this);
+
+   q_ = q;
+
+   calcBoundingBox();    // Updating the axis-aligned bounding box of the box
+   wake();               // Waking the box from sleep mode
 }
 //*************************************************************************************************
 
@@ -2988,125 +3073,6 @@ inline void RigidBody::fix()
    signalFixation();
 }
 //*************************************************************************************************
-
-
-//=================================================================================================
-//
-//  SIMULATION FUNCTIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*!\brief Translation update of a subordinate rigid body.
- *
- * \param dp Change in the global position of the superordinate rigid body.
- * \return void
- *
- * This update function is triggered by the superordinate body in case of a translational
- * movement. This movement involves a change in the global position and the axis-aligned
- * bounding box.
- */
-inline void RigidBody::update( const Vec3& dp )
-{
-   // Checking the state of the sphere
-   WALBERLA_ASSERT( checkInvariants(), "Invalid sphere state detected" );
-   WALBERLA_ASSERT( hasSuperBody(), "Invalid superordinate body detected" );
-
-   // Updating the global position
-   gpos_ += dp;
-
-   // Setting the axis-aligned bounding box
-   calcBoundingBox();
-
-   // Checking the state of the sphere
-   WALBERLA_ASSERT( checkInvariants(), "Invalid sphere state detected" );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Rotation update of a subordinate rigid body.
- *
- * \param dq Change in the orientation of the superordinate rigid body.
- * \return void
- *
- * This update function is triggered by the superordinate body in case of a rotational movement.
- * This movement involves a change in the global position, the orientation/rotation and the
- * axis-aligned bounding box of the sphere.
- */
-inline void RigidBody::update( const Quat& dq )
-{
-   // Checking the state of the sphere
-   WALBERLA_ASSERT( checkInvariants(), "Invalid sphere state detected" );
-   WALBERLA_ASSERT( hasSuperBody(), "Invalid superordinate body detected" );
-
-   // Calculating the new global position
-   gpos_ = sb_->getPosition() + ( sb_->getRotation() * rpos_ );
-
-   // Calculating the new orientation and rotation
-   q_ = dq * q_;
-   R_ = q_.toRotationMatrix();
-
-   // Setting the axis-aligned bounding box
-   calcBoundingBox();
-
-   // Checking the state of the sphere
-   WALBERLA_ASSERT( checkInvariants(), "Invalid sphere state detected" );
-}
-//*************************************************************************************************
-
-
-
-
-//=================================================================================================
-//
-//  SIMULATION FUNCTIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*!\fn void RigidBody::update( const Vec3& dp )
- * \brief Translation update of a subordinate rigid body.
- *
- * \param dp Change in the global position of the superordinate rigid body.
- * \return void
- *
- * This function calculates the necessary updates for a subordinate rigid body contained
- * in a superordinate rigid body that has performed a translational movement. This function
- * is triggered automatically by the superordinate body in case of a translational movement.
- * All classes deriving from the RigidBody class have to implement this function to update
- * the properties of the rigid body. The following properties of the body might change due
- * to this translation. All derived classes have to make sure these properties are updated
- * correctly:
- *
- *   - the global position
- *   - the axis-aligned bounding box
- */
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\fn void RigidBody::update( const Quat& dq )
- * \brief Rotation update of a subordinate rigid body.
- *
- * \param dq Change in the orientation of the superordinate rigid body.
- * \return void
- *
- * This function calculates the necessary updates for a subordinate rigid body contained
- * in a superordinate rigid body that has performed a rotational movement. The function
- * is triggered automatically by the superordinate body in case of a rotational movement.
- * All classes deriving from the RigidBody class have to implement this function to update
- * the properties of the rigid body. The following properties of the body might change due
- * to this rotation. All derived classes have to make sure these properties are updated
- * correctly:
- *
- *   - the global position
- *   - the orientation/rotation (i.e. the quaterion and the rotation matrix)
- *   - the axis-aligned bounding box
- */
-//*************************************************************************************************
-
-
 
 
 //=================================================================================================

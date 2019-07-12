@@ -87,17 +87,15 @@ Plane::Plane( id_t sid, id_t uid,
    WALBERLA_ASSERT_FLOAT_EQUAL( normal.sqrLength(), real_c(1) , "Invalid plane normal" );
 
    // Setting the global position (anchor point) of the plane
-   gpos_ = gpos;
+   setPosition(gpos);
 
    // Calculating the orientation and rotation
    // The default normal of a plane is <0,0,1>. The rotation of the plane is calculated
    // as the rotation of this default normal to the specified normal.
    if( normal[0]*normal[0] + normal[1]*normal[1] < math::Limits<real_t>::accuracy() )
-      q_ = Quat( Vec3( 1, 0, 0 ), std::acos( normal[2] ) );
+      setOrientation( Quat(Vec3( 1, 0, 0 ), std::acos( normal[2] ) ) );
    else
-      q_ = Quat( Vec3( -normal[1], normal[0], real_c(0) ), std::acos( normal[2] ) );
-
-   R_ = q_.toRotationMatrix();
+      setOrientation( Quat( Vec3( -normal[1], normal[0], real_c(0) ), std::acos( normal[2] ) ) );
 
    // Setting the axis-aligned bounding box
    Plane::calcBoundingBox();
@@ -175,11 +173,8 @@ void Plane::calcBoundingBox()
  */
 void Plane::setPositionImpl( real_t px, real_t py, real_t pz )
 {
-   gpos_[0] = px;
-   gpos_[1] = py;
-   gpos_[2] = pz;
-   d_ = normal_ * gpos_;
-
+   RigidBody::setPositionImpl(px,py,pz);
+   d_ = normal_ * getPosition();
    Plane::calcBoundingBox();    // Updating the axis-aligned bounding box of the plane
 #if MOBILE_INFINITE
    wake();               // Waking the box from sleep mode
@@ -210,16 +205,15 @@ void Plane::setPositionImpl( real_t px, real_t py, real_t pz )
  */
 void Plane::setOrientationImpl( real_t r, real_t i, real_t j, real_t k )
 {
-   q_.set(r, i, j, k);          // Updating the orientation of the plane
-   R_ = q_.toRotationMatrix();  // Updating the rotation of the plane
-
+   RigidBody::setOrientationImpl(r,i,j,k);
+   Mat3 R = getRotation();
    // Updating the normal of the plane ( R * <0,0,1> )
-   normal_[0] = R_[2];
-   normal_[1] = R_[5];
-   normal_[2] = R_[8];
+   normal_[0] = R[2];
+   normal_[1] = R[5];
+   normal_[2] = R[8];
 
    // Updating the displacement from the origin
-   d_ = normal_ * gpos_;
+   d_ = normal_ * getPosition();
 
    Plane::calcBoundingBox();  // Updating the axis-aligned bounding box of the plane
 #if MOBILE_INFINITE
@@ -256,10 +250,9 @@ void Plane::setOrientationImpl( real_t r, real_t i, real_t j, real_t k )
  */
 void Plane::translateImpl( real_t dx, real_t dy, real_t dz )
 {
-   gpos_[0] += dx;
-   gpos_[1] += dy;
-   gpos_[2] += dz;
-   d_ = normal_ * gpos_;
+
+   setPosition(getPosition() + Vec3(dx,dy,dz));
+   d_ = normal_ * getPosition();
 
    Plane::calcBoundingBox();    // Updating the axis-aligned bounding box
 #if MOBILE_INFINITE
@@ -301,16 +294,16 @@ void Plane::rotateImpl( const Quat& dq )
 //   if( ExclusiveSection::isActive() )
 //      throw std::logic_error( "Invalid rotation of a plane inside an exclusive section" );
 
-   q_ = dq * q_;                // Updating the orientation of the plane
-   R_ = q_.toRotationMatrix();  // Updating the rotation of the plane
+   setOrientation(dq * getQuaternion());
 
    // Updating the normal of the plane ( R * <0,0,1> )
-   normal_[0] = R_[2];
-   normal_[1] = R_[5];
-   normal_[2] = R_[8];
+   Mat3 R = getRotation();
+   normal_[0] = R[2];
+   normal_[1] = R[5];
+   normal_[2] = R[8];
 
    // Updating the displacement from the origin
-   d_ = normal_ * gpos_;
+   d_ = normal_ * getPosition();
 
    Plane::calcBoundingBox();  // Updating the axis-aligned bounding box of the plane
 #if MOBILE_INFINITE
@@ -342,14 +335,16 @@ void Plane::rotateImpl( const Quat& dq )
  */
 void Plane::rotateAroundOriginImpl( const Quat& dq )
 {
-   gpos_ = dq.rotate( gpos_ );     // Updating the global position of the plane
-   q_    = dq * q_;                // Updating the orientation of the plane
-   R_    = q_.toRotationMatrix();  // Updating the rotation of the plane
+
+   setPosition(dq.rotate( getPosition() ));     // Updating the global position of the plane
+   setOrientation(dq * getQuaternion());                // Updating the orientation of the plane
+
 
    // Updating the normal of the plane ( R * <0,0,1> )
-   normal_[0] = R_[2];
-   normal_[1] = R_[5];
-   normal_[2] = R_[8];
+   Mat3 R = getRotation();
+   normal_[0] = R[2];
+   normal_[1] = R[5];
+   normal_[2] = R[8];
 
    Plane::calcBoundingBox();  // Updating the axis-aligned bounding box of the plane
    signalRotation();   // Signaling the change of orientation to the superordinate body
@@ -382,19 +377,19 @@ void Plane::rotateAroundOriginImpl( const Quat& dq )
  */
 void Plane::rotateAroundPointImpl( const Vec3& point, const Quat& dq )
 {
-   const Vec3 dp( gpos_ - point );
+   const Vec3 dp( getPosition() - point );
 
-   gpos_ = point + dq.rotate( dp );  // Updating the global position of the box
-   q_    = dq * q_;                  // Updating the orientation of the box
-   R_    = q_.toRotationMatrix();    // Updating the rotation of the box
+   setPosition(point + dq.rotate( dp ) );  // Updating the global position of the box
+   setOrientation(dq * getQuaternion());   // Updating the orientation of the box
 
    // Updating the normal of the plane ( R * <0,0,1> )
-   normal_[0] = R_[2];
-   normal_[1] = R_[5];
-   normal_[2] = R_[8];
+   Mat3 R = getRotation();
+   normal_[0] = R[2];
+   normal_[1] = R[5];
+   normal_[2] = R[8];
 
    // Updating the displacement from the origin
-   d_ = normal_ * gpos_;
+   d_ = normal_ * getPosition();
 
    Plane::calcBoundingBox();  // Updating the axis-aligned bounding box of the plane
 #if MOBILE_INFINITE
@@ -447,85 +442,6 @@ bool Plane::isSurfaceRelPointImpl( real_t /*px*/, real_t /*py*/, real_t pz ) con
 //*************************************************************************************************
 
 
-
-
-
-//=================================================================================================
-//
-//  SIMULATION FUNCTIONS
-//
-//=================================================================================================
-
-//*************************************************************************************************
-/*!\brief Translation update of a subordinate plane.
- *
- * \param dp Change in the global position of the superordinate body.
- * \return void
- *
- * This update function is triggered by the superordinate body in case of a translational
- * movement. This movement involves a change of the global position, the displacement from
- * the origin and the axis-aligned bounding box.
- */
-void Plane::update( const Vec3& dp )
-{
-   // Checking the state of the plane
-   WALBERLA_ASSERT( checkInvariants(), "Invalid plane state detected" );
-   WALBERLA_ASSERT( hasSuperBody(), "Invalid superordinate body detected" );
-
-   // Updating the global position and the displacement
-   gpos_ += dp;
-   d_ = normal_ * gpos_;
-
-   // Setting the axis-aligned bounding box
-   Plane::calcBoundingBox();
-
-   // Checking the state of the plane
-   WALBERLA_ASSERT( checkInvariants(), "Invalid plane state detected" );
-}
-//*************************************************************************************************
-
-
-//*************************************************************************************************
-/*!\brief Rotation update of a subordinate plane.
- *
- * \param dq Change in the orientation of the superordinate body.
- * \return void
- *
- * This update function is triggered by the superordinate body in case of a rotational
- * movement. This movement involves a change in the global position, the displacement from
- * the origin, the orientation/rotation, the normal and the axis-aligned bounding box of
- * the plane.
- */
-void Plane::update( const Quat& dq )
-{
-   // Checking the state of the plane
-   WALBERLA_ASSERT( checkInvariants(), "Invalid plane state detected" );
-   WALBERLA_ASSERT( hasSuperBody(), "Invalid superordinate body detected" );
-
-   // Calculating the new orientation and rotation
-   q_ = dq * q_;
-   R_ = q_.toRotationMatrix();
-
-   // Updating the normal of the plane ( R * <0,0,1> )
-   normal_[0] = R_[2];
-   normal_[1] = R_[5];
-   normal_[2] = R_[8];
-
-   // Updating the global position and the displacement
-   gpos_ = sb_->getPosition() + ( sb_->getRotation() * rpos_ );
-   d_    = normal_ * gpos_;
-
-   // Setting the axis-aligned bounding box
-   Plane::calcBoundingBox();
-
-   // Checking the state of the plane
-   WALBERLA_ASSERT( checkInvariants(), "Invalid plane state detected" );
-}
-//*************************************************************************************************
-
-
-
-
 //=================================================================================================
 //
 //  OUTPUT FUNCTIONS
@@ -546,14 +462,15 @@ void Plane::print( std::ostream& os, const char* tab ) const
    os << tab << " Plane " << uid_ << " with normal " << normal_ << " and displacement " << d_ << "\n"
       << tab << "   System ID         = " << sid_ << "\n"
       << tab << "   Material          = " << Material::getName( material_ ) << "\n"
-      << tab << "   Global position   = " << gpos_ << "\n";
+      << tab << "   Global position   = " << getPosition() << "\n";
 
-   os << tab << "   Relative position = " << rpos_ << "\n"
+   os << tab << "   Relative position = " << getRelPosition() << "\n"
       << tab << "   Bounding box      = " << aabb_ << "\n"
-      << tab << "   Quaternion        = " << q_ << "\n"
-      << tab << "   Rotation matrix   = ( " << setw(9) << R_[0] << " , " << setw(9) << R_[1] << " , " << setw(9) << R_[2] << " )\n"
-      << tab << "                       ( " << setw(9) << R_[3] << " , " << setw(9) << R_[4] << " , " << setw(9) << R_[5] << " )\n"
-      << tab << "                       ( " << setw(9) << R_[6] << " , " << setw(9) << R_[7] << " , " << setw(9) << R_[8] << " )\n";
+      << tab << "   Quaternion        = " << getQuaternion()<< "\n";
+   Mat3 R = getRotation();
+   os << tab << "   Rotation matrix   = ( " << setw(9) << R[0] << " , " << setw(9) << R[1] << " , " << setw(9) << R[2] << " )\n"
+      << tab << "                       ( " << setw(9) << R[3] << " , " << setw(9) << R[4] << " , " << setw(9) << R[5] << " )\n"
+      << tab << "                       ( " << setw(9) << R[6] << " , " << setw(9) << R[7] << " , " << setw(9) << R[8] << " )\n";
 }
 //*************************************************************************************************
 

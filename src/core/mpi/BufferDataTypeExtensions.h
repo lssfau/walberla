@@ -37,6 +37,8 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -411,6 +413,32 @@ GenericRecvBuffer<T>& operator>>( GenericRecvBuffer<T> & buf, std::set<CK, CC, C
 template<typename T, typename C, typename A>
 struct BufferSizeTrait< std::set<T,C,A> > { static const bool constantSize = false;  };
 
+template< typename T,    // Element type of SendBuffer
+          typename G,    // Growth policy of SendBuffer
+          typename CK,   // Key type
+          typename CC,   // Comparison type
+          typename CA>   // Allocator type
+GenericSendBuffer<T,G>& operator<<( GenericSendBuffer<T,G> & buf, const std::unordered_set<CK, CC, CA> & c )
+{
+   buf.addDebugMarker( "us" );
+   sendAssocContainer(buf, c);
+   return buf;
+}
+
+template< typename T,    // Element type of RecvBuffer
+          typename CK,   // Key type
+          typename CC,   // Comparison type
+          typename CA>   // Allocator type
+GenericRecvBuffer<T>& operator>>( GenericRecvBuffer<T> & buf, std::unordered_set<CK, CC, CA> & c )
+{
+   buf.readDebugMarker( "us" );
+   recvAssocContainer(buf, c);
+   return buf;
+}
+
+template<typename T, typename C, typename A>
+struct BufferSizeTrait< std::unordered_set<T,C,A> > { static const bool constantSize = false;  };
+
 
 
 
@@ -472,6 +500,34 @@ GenericRecvBuffer<T>& operator>>( GenericRecvBuffer<T> & buf, std::map<CK, CT, C
 
 template<typename T, typename K, typename C, typename A>
 struct BufferSizeTrait< std::map<K,T,C,A> > { static const bool constantSize = false;  };
+
+template< typename T,    // Element type of SendBuffer
+          typename G,    // Growth policy of SendBuffer
+          typename CK,   // Key type
+          typename CT,   // Element type
+          typename CC,   // Comparison type
+          typename CA>   // Allocator type
+GenericSendBuffer<T,G>& operator<<( GenericSendBuffer<T,G> & buf, const std::unordered_map<CK, CT, CC, CA> & c )
+{
+   buf.addDebugMarker( "um" );
+   sendAssocContainer(buf, c);
+   return buf;
+}
+
+template< typename T,    // Element type of RecvBuffer
+          typename CK,   // Key type
+          typename CT,   // Element type
+          typename CC,   // Comparison type
+          typename CA>   // Allocator type
+GenericRecvBuffer<T>& operator>>( GenericRecvBuffer<T> & buf, std::unordered_map<CK, CT, CC, CA> & c )
+{
+   buf.readDebugMarker( "um" );
+   recvMap(buf, c);
+   return buf;
+}
+
+template<typename T, typename K, typename C, typename A>
+struct BufferSizeTrait< std::unordered_map<K,T,C,A> > { static const bool constantSize = false;  };
 
 
 
