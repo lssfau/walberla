@@ -70,7 +70,14 @@ options_dict = {
         'stencil': 'D3Q19',
         'smagorinsky': True,
         'relaxation_rate': omega,
-    }
+    },
+    'cumulant': {
+        'stencil': 'D3Q19',
+        'compressible': True,
+        'method': 'mrt',
+        'cumulant': True,
+        'relaxation_rates': [0, omega, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    },
 }
 
 info_header = """
