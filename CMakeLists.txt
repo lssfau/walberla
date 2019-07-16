@@ -95,11 +95,13 @@ option ( WALBERLA_NO_OUTDATED_FEATURES      "Show warning/errors when outdated f
                                             "(i.e. features that will be deprecated) are used"   )
 
 # Profile guided optimization
-option ( WALBERLA_PROFILE_GENERATE  "Generates Profile for Optimization"             )
-option ( WALBERLA_PROFILE_USE       "Uses Profile to optimize"                       )
+option ( WALBERLA_PROFILE_GENERATE          "Generates Profile for Optimization"                 )
+option ( WALBERLA_PROFILE_USE               "Uses Profile to optimize"                           )
 
 # Compiler Optimization
-option ( WALBERLA_OPTIMIZE_FOR_LOCALHOST "Enable compiler optimizations spcific to localhost" )
+option ( WALBERLA_OPTIMIZE_FOR_LOCALHOST    "Enable compiler optimizations spcific to localhost" )
+
+option ( WALBERLA_LOG_SKIPPED               "Log skipped cmake targets"                       OFF)
 
 # Installation Directory
 set ( CMAKE_INSTALL_PREFIX /usr/local/waLBerla CACHE STRING "The default installation directory."   )
