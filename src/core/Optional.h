@@ -25,6 +25,7 @@
 #if defined(WALBERLA_USE_STD_OPTIONAL)
 #include <optional>
 #elif defined(WALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL)
+#undef _LIBCPP_WARN_ON_DEPRECATED_EXPERIMENTAL_HEADER
 #include <experimental/optional>
 #else
 #include <boost/optional.hpp>

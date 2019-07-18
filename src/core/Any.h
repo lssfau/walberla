@@ -25,6 +25,7 @@
 #if defined(WALBERLA_USE_STD_ANY)
 #include <any>
 #elif defined(WALBERLA_USE_STD_EXPERIMENTAL_ANY)
+#undef _LIBCPP_WARN_ON_DEPRECATED_EXPERIMENTAL_HEADER
 #include <experimental/any>
 #else
 #include <boost/any.hpp>
