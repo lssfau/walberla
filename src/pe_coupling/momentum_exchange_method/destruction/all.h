@@ -15,14 +15,11 @@
 //
 //! \file all.h
 //! \ingroup pe_coupling
-//! \author Florian Schornbaum <florian.schornbaum@fau.de>
-//! \brief Collective header file for module pe_coupling
+//! \author Michael Kuron <mkuron@icp.uni-stuttgart.de>
+//! \brief Collective header file for module pe_coupling moving obstacle destruction
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "boundary/all.h"
-#include "destruction/all.h"
-#include "restoration/all.h"
-#include "BodyMapping.h"
+#include "Destroyer.h"

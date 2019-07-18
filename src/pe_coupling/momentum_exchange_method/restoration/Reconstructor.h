@@ -43,7 +43,7 @@ namespace pe_coupling {
 *   \brief Classes to be used together with the PDFReconstruction class to reconstruct PDFs
 *
 *   Each reconstructor must exactly implement the member function
-*     void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block );
+*     void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField );
 *   that reconstructs all PDFs in a specific cell with indices x,y,z on a given block.
 *
 *   Different variants are available:
@@ -77,48 +77,46 @@ public:
    typedef Field< pe::BodyID, 1 >          BodyField_T;
 
    EquilibriumReconstructor( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID,
-                             const BlockDataID & pdfFieldID, const BlockDataID & bodyFieldID )
-   : blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ), pdfFieldID_( pdfFieldID ),  bodyFieldID_( bodyFieldID )
+                             const BlockDataID & bodyFieldID )
+   : blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ), bodyFieldID_( bodyFieldID )
    {}
 
-   void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block );
+   void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField );
 
 private:
 
-   void setLocalEquilibrium( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block );
+   void setLocalEquilibrium( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField );
 
-   real_t getLocalAverageDensity( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block ) const;
+   real_t getLocalAverageDensity( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField ) const;
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
 
    const BlockDataID boundaryHandlingID_;
-   const BlockDataID pdfFieldID_;
    const BlockDataID bodyFieldID_;
 
 };
 
 template< typename LatticeModel_T, typename BoundaryHandling_T >
 void EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T >
-::operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block )
+::operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( block );
-   setLocalEquilibrium( x, y, z, block);
+   setLocalEquilibrium( x, y, z, block, pdfField);
 }
 
 template< typename LatticeModel_T, typename BoundaryHandling_T >
 void EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T >
-::setLocalEquilibrium( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block )
+::setLocalEquilibrium( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
-   PdfField_T *  pdfField  = block->getData< PdfField_T >( pdfFieldID_ );
    BodyField_T * bodyField = block->getData< BodyField_T >( bodyFieldID_ );
 
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
    WALBERLA_ASSERT_NOT_NULLPTR( bodyField );
    WALBERLA_ASSERT_EQUAL( pdfField->xyzSize(), bodyField->xyzSize() );
 
-   const real_t averageDensity = getLocalAverageDensity( x, y, z, block );
+   const real_t averageDensity = getLocalAverageDensity( x, y, z, block, pdfField );
 
    real_t cx, cy, cz;
    blockStorage_->getBlockLocalCellCenter( *block, Cell(x,y,z), cx, cy, cz );
@@ -131,11 +129,10 @@ void EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T >
 
 template< typename LatticeModel_T, typename BoundaryHandling_T >
 real_t EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T >
-::getLocalAverageDensity( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block ) const
+::getLocalAverageDensity( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField ) const
 {
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
-   PdfField_T *         pdfField         = block->getData< PdfField_T >( pdfFieldID_ );
    BoundaryHandling_T * boundaryHandling = block->getData< BoundaryHandling_T >( boundaryHandlingID_ );
 
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
@@ -175,25 +172,24 @@ public:
    typedef Field< pe::BodyID, 1 >          BodyField_T;
 
    EquilibriumAndNonEquilibriumReconstructor( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID,
-                                              const BlockDataID & pdfFieldID, const BlockDataID & bodyFieldID,
+                                              const BlockDataID & bodyFieldID,
                                               const ExtrapolationDirectionFinder_T & extrapolationDirectionFinder )
    : blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ),
-     pdfFieldID_( pdfFieldID ), bodyFieldID_( bodyFieldID ),
+     bodyFieldID_( bodyFieldID ),
      extrapolationDirectionFinder_( extrapolationDirectionFinder ),
-     equilibriumReconstructor_( EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T >( blockStorage, boundaryHandlingID, pdfFieldID, bodyFieldID ) )
+     equilibriumReconstructor_( EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T >( blockStorage, boundaryHandlingID, bodyFieldID ) )
    { }
 
-   void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block );
-   void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, const Vector3<cell_idx_t> & extrapolationDirection );
+   void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField );
+   void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField, const Vector3<cell_idx_t> & extrapolationDirection );
 
 private:
 
-   void setNonEquilibrium( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, const Vector3<cell_idx_t> & extrapolationDirection );
+   void setNonEquilibrium( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField, const Vector3<cell_idx_t> & extrapolationDirection );
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
 
    const BlockDataID boundaryHandlingID_;
-   const BlockDataID pdfFieldID_;
    const BlockDataID bodyFieldID_;
 
    ExtrapolationDirectionFinder_T extrapolationDirectionFinder_;
@@ -203,37 +199,36 @@ private:
 
 template< typename LatticeModel_T, typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T >
 void EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
-::operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block )
+::operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
    Vector3<cell_idx_t> extrapolationDirection(0);
    extrapolationDirectionFinder_.getDirection( x, y, z, block, extrapolationDirection );
 
-   (*this)(x, y, z, block, extrapolationDirection);
+   (*this)(x, y, z, block, pdfField, extrapolationDirection);
 }
 
 template< typename LatticeModel_T, typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T >
 void EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
-::operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, const Vector3<cell_idx_t> & extrapolationDirection  )
+::operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField, const Vector3<cell_idx_t> & extrapolationDirection  )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
-   equilibriumReconstructor_( x, y, z, block );
+   equilibriumReconstructor_( x, y, z, block, pdfField );
 
    if( extrapolationDirection != cell_idx_t(0) )
    {
-      setNonEquilibrium( x, y, z, block, extrapolationDirection);
+      setNonEquilibrium( x, y, z, block, pdfField, extrapolationDirection);
    }
 }
 
 template< typename LatticeModel_T, typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T >
 void EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
-::setNonEquilibrium( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, const Vector3<cell_idx_t> & extrapolationDirection )
+::setNonEquilibrium( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField, const Vector3<cell_idx_t> & extrapolationDirection )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
-   PdfField_T * pdfField                 = block->getData< PdfField_T >( pdfFieldID_ );
    BoundaryHandling_T * boundaryHandling = block->getData< BoundaryHandling_T >( boundaryHandlingID_ );
 
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
@@ -268,15 +263,15 @@ public:
    typedef Field< pe::BodyID, 1 >          BodyField_T;
 
    ExtrapolationReconstructor( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID,
-                               const BlockDataID & pdfFieldID, const BlockDataID & bodyFieldID,
+                               const BlockDataID & bodyFieldID,
                                const ExtrapolationDirectionFinder_T & extrapolationDirectionFinder,
                                const bool & enforceNoSlipConstraintAfterExtrapolation = false )
    : blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ),
-     pdfFieldID_( pdfFieldID ), bodyFieldID_( bodyFieldID ),
+     bodyFieldID_( bodyFieldID ),
      enforceNoSlipConstraintAfterExtrapolation_( enforceNoSlipConstraintAfterExtrapolation ),
      extrapolationDirectionFinder_( extrapolationDirectionFinder ),
      alternativeReconstructor_( EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
-      ( blockStorage, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationDirectionFinder ) )
+      ( blockStorage, boundaryHandlingID, bodyFieldID, extrapolationDirectionFinder ) )
    {
       if( enforceNoSlipConstraintAfterExtrapolation_ ) {
          WALBERLA_CHECK((std::is_same<typename LatticeModel_T::Stencil, stencil::D3Q19>::value),
@@ -284,22 +279,21 @@ public:
       }
    }
 
-   void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block );
+   void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField );
 
 private:
 
-   uint_t getNumberOfExtrapolationCells( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block,
+   uint_t getNumberOfExtrapolationCells( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField,
                                          const Vector3<cell_idx_t> & extrapolationDirection ) const;
 
-   void extrapolatePDFs( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block,
+   void extrapolatePDFs( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField,
                          const Vector3<cell_idx_t> & extrapolationDirection, const uint_t & numberOfCellsForExtrapolation);
 
-   void enforceNoSlipConstraint( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block );
+   void enforceNoSlipConstraint( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField );
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
 
    const BlockDataID boundaryHandlingID_;
-   const BlockDataID pdfFieldID_;
    const BlockDataID bodyFieldID_;
 
    const bool enforceNoSlipConstraintAfterExtrapolation_;
@@ -312,37 +306,36 @@ private:
 
 template< typename LatticeModel_T, typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T >
 void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
-::operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block )
+::operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
    Vector3<cell_idx_t> extrapolationDirection(0);
    extrapolationDirectionFinder_.getDirection( x, y, z, block, extrapolationDirection );
 
-   uint_t numberOfCellsForExtrapolation = getNumberOfExtrapolationCells( x, y, z, block, extrapolationDirection );
+   uint_t numberOfCellsForExtrapolation = getNumberOfExtrapolationCells( x, y, z, block, pdfField, extrapolationDirection );
 
    if( numberOfCellsForExtrapolation < uint_t(2) )
    {
-      alternativeReconstructor_( x, y, z, block, extrapolationDirection );
+      alternativeReconstructor_( x, y, z, block, pdfField, extrapolationDirection );
    }
    else
    {
-      extrapolatePDFs( x, y, z, block, extrapolationDirection, numberOfCellsForExtrapolation );
+      extrapolatePDFs( x, y, z, block, pdfField, extrapolationDirection, numberOfCellsForExtrapolation );
       if( enforceNoSlipConstraintAfterExtrapolation_ )
       {
-         enforceNoSlipConstraint( x, y, z, block );
+         enforceNoSlipConstraint( x, y, z, block, pdfField );
       }
    }
 }
 
 template< typename LatticeModel_T, typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T >
 uint_t ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
-::getNumberOfExtrapolationCells( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block,
+::getNumberOfExtrapolationCells( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField,
                                  const Vector3<cell_idx_t> & extrapolationDirection ) const
 {
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
-   PdfField_T * pdfField                 = block->getData< PdfField_T >( pdfFieldID_ );
    BoundaryHandling_T * boundaryHandling = block->getData< BoundaryHandling_T >( boundaryHandlingID_ );
 
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
@@ -371,12 +364,9 @@ uint_t ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, Extrapola
 
 template< typename LatticeModel_T, typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T >
 void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
-::extrapolatePDFs( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block,
+::extrapolatePDFs( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const /*block*/, PdfField_T * const pdfField,
                    const Vector3<cell_idx_t> & extrapolationDirection, const uint_t & numberOfCellsForExtrapolation)
 {
-   WALBERLA_ASSERT_NOT_NULLPTR( block );
-
-   PdfField_T * pdfField = block->getData< PdfField_T >( pdfFieldID_ );
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
 
    if( numberOfCellsForExtrapolation == uint_t(3) )
@@ -400,13 +390,12 @@ void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, Extrapolati
 
 template< typename LatticeModel_T, typename BoundaryHandling_T, typename ExtrapolationDirectionFinder_T >
 void ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationDirectionFinder_T >
-::enforceNoSlipConstraint( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block )
+::enforceNoSlipConstraint( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const block, PdfField_T * const pdfField )
 {
    //NOTE: this currently works only for D3Q19 stencils!
 
    WALBERLA_ASSERT_NOT_NULLPTR( block );
 
-   PdfField_T *  pdfField  = block->getData< PdfField_T >( pdfFieldID_ );
    BodyField_T * bodyField = block->getData< BodyField_T >( bodyFieldID_ );
 
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField );

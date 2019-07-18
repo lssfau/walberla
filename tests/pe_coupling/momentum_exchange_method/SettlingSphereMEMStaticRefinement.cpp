@@ -651,15 +651,15 @@ int main( int argc, char **argv )
                                                  "pe Time Step", finestLevel );
 
    // add sweep for updating the pe body mapping into the LBM simulation
-   refinementTimestep->addPostStreamVoidFunction(lbm::refinement::SweepAsFunctorWrapper( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID,
+   refinementTimestep->addPostStreamVoidFunction(lbm::refinement::SweepAsFunctorWrapper( pe_coupling::BodyMapping< LatticeModel_T, BoundaryHandling_T >( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID,
                                                  globalBodyStorage, bodyFieldID,  MO_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), blocks ),
                                                  "Body Mapping", finestLevel );
 
    // add sweep for restoring PDFs in cells previously occupied by pe bodies
    pe_coupling::SphereNormalExtrapolationDirectionFinder extrapolationFinder( blocks, bodyFieldID );
    typedef pe_coupling::EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T, pe_coupling::SphereNormalExtrapolationDirectionFinder > Reconstructor_T;
-   Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder );
-   refinementTimestep->addPostStreamVoidFunction(lbm::refinement::SweepAsFunctorWrapper( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T > ( blocks,
+   Reconstructor_T reconstructor( blocks, boundaryHandlingID, bodyFieldID, extrapolationFinder );
+   refinementTimestep->addPostStreamVoidFunction(lbm::refinement::SweepAsFunctorWrapper( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T > ( blocks, pdfFieldID,
                                                  boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), blocks ),
                                                  "PDF Restore", finestLevel );
 

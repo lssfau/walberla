@@ -162,10 +162,12 @@ class SpherePropertyLogger
 {
 public:
    SpherePropertyLogger( SweepTimeloop* timeloop, const shared_ptr< StructuredBlockStorage > & blocks,
+                         const BlockDataID & pdfFieldID, const BlockDataID & boundaryHandlingID,
                          const BlockDataID & bodyStorageID, const std::string & fileName, bool fileIO,
-                         real_t dx_SI, real_t dt_SI, real_t diameter) :
-      timeloop_( timeloop ), blocks_( blocks ), bodyStorageID_( bodyStorageID ), fileName_( fileName ), fileIO_(fileIO),
-      dx_SI_( dx_SI ), dt_SI_( dt_SI ), diameter_( diameter ),
+                         real_t dx_SI, real_t dt_SI, real_t diameter, real_t mass) :
+      timeloop_( timeloop ), blocks_( blocks ), pdfFieldID_( pdfFieldID ),
+      boundaryHandlingID_( boundaryHandlingID ), bodyStorageID_( bodyStorageID ), fileName_( fileName ), fileIO_(fileIO),
+      dx_SI_( dx_SI ), dt_SI_( dt_SI ), diameter_( diameter ), mass_( mass ),
       position_( real_t(0) ), maxVelocity_( real_t(0) )
    {
       if ( fileIO_ )
@@ -186,13 +188,24 @@ public:
 
       Vector3<real_t> pos(real_t(0));
       Vector3<real_t> transVel(real_t(0));
+      Vector3<real_t> force(real_t(0));
+      Vector3<real_t> fluidMomentum(real_t(0));
 
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
+         PdfField_T * pdfField = blockIt->getData<PdfField_T>(pdfFieldID_);
+         BoundaryHandling_T * bh = blockIt->getData<BoundaryHandling_T>(boundaryHandlingID_);
+         WALBERLA_FOR_ALL_CELLS_XYZ(pdfField,
+               if( bh->isDomain(Cell(x,y,z)) ) fluidMomentum += pdfField->getMomentumDensity(x,y,z);)
+
          for( auto bodyIt = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
          {
             pos = bodyIt->getPosition();
             transVel = bodyIt->getLinearVel();
+         }
+         for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
+         {
+            force += bodyIt->getForce();
          }
       }
 
@@ -205,13 +218,21 @@ public:
          mpi::allReduceInplace( transVel[0], mpi::SUM );
          mpi::allReduceInplace( transVel[1], mpi::SUM );
          mpi::allReduceInplace( transVel[2], mpi::SUM );
+
+         mpi::allReduceInplace( force[0], mpi::SUM );
+         mpi::allReduceInplace( force[1], mpi::SUM );
+         mpi::allReduceInplace( force[2], mpi::SUM );
+
+         mpi::allReduceInplace( fluidMomentum[0], mpi::SUM );
+         mpi::allReduceInplace( fluidMomentum[1], mpi::SUM );
+         mpi::allReduceInplace( fluidMomentum[2], mpi::SUM );
       }
 
       position_ = pos[2];
       maxVelocity_ = std::max(maxVelocity_, -transVel[2]);
 
       if( fileIO_ )
-         writeToFile( timestep, pos, transVel);
+         writeToFile( timestep, pos, transVel, force, fluidMomentum);
    }
 
    real_t getPosition() const
@@ -225,7 +246,7 @@ public:
    }
 
 private:
-   void writeToFile( uint_t timestep, const Vector3<real_t> & position, const Vector3<real_t> & velocity )
+   void writeToFile( uint_t timestep, const Vector3<real_t> & position, const Vector3<real_t> & velocity, const Vector3<real_t> & force, const Vector3<real_t> & fluidMomentum )
    {
       WALBERLA_ROOT_SECTION()
       {
@@ -239,6 +260,9 @@ private:
          file << timestep << "\t" << real_c(timestep) * dt_SI_ << "\t"
               << "\t" << scaledPosition[0] << "\t" << scaledPosition[1] << "\t" << scaledPosition[2] - real_t(0.5)
               << "\t" << velocity_SI[0] << "\t" << velocity_SI[1] << "\t" << velocity_SI[2]
+              << "\t" << force[0] << "\t" << force[1] << "\t" << force[2]
+              << "\t" << fluidMomentum[0] << "\t" << fluidMomentum[1] << "\t" << fluidMomentum[2]
+              << "\t" << mass_ * velocity[0] << "\t" << mass_ * velocity[1] << "\t" << mass_ * velocity[2]
               << "\n";
          file.close();
       }
@@ -246,10 +270,12 @@ private:
 
    SweepTimeloop* timeloop_;
    shared_ptr< StructuredBlockStorage > blocks_;
+   const BlockDataID pdfFieldID_;
+   const BlockDataID boundaryHandlingID_;
    const BlockDataID bodyStorageID_;
    std::string fileName_;
    bool fileIO_;
-   real_t dx_SI_, dt_SI_, diameter_;
+   real_t dx_SI_, dt_SI_, diameter_, mass_;
 
    real_t position_;
    real_t maxVelocity_;
@@ -428,7 +454,7 @@ int main( int argc, char **argv )
    auto blocks = blockforest::createUniformBlockGrid( numberOfBlocksPerDirection[0], numberOfBlocksPerDirection[1], numberOfBlocksPerDirection[2],
                                                       cellsPerBlockPerDirection[0], cellsPerBlockPerDirection[1], cellsPerBlockPerDirection[2], dx,
                                                       0, false, false,
-                                                      false, false, false, //periodicity
+                                                      true, true, true, //periodicity
                                                       false );
 
    WALBERLA_LOG_INFO_ON_ROOT("Domain decomposition:");
@@ -464,6 +490,7 @@ int main( int argc, char **argv )
    // create pe bodies
 
    // bounding planes (global)
+   /*
    const auto planeMaterial = pe::createMaterial( "myPlaneMat", real_t(8920), real_t(0), real_t(1), real_t(1), real_t(0), real_t(1), real_t(1), real_t(0), real_t(0) );
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(1,0,0), Vector3<real_t>(0,0,0), planeMaterial );
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(-1,0,0), Vector3<real_t>(real_c(domainSize[0]),0,0), planeMaterial );
@@ -471,6 +498,7 @@ int main( int argc, char **argv )
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,-1,0), Vector3<real_t>(0,real_c(domainSize[1]),0), planeMaterial );
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,1), Vector3<real_t>(0,0,0), planeMaterial );
    pe::createPlane( *globalBodyStorage, 0, Vector3<real_t>(0,0,-1), Vector3<real_t>(0,0,real_c(domainSize[2])), planeMaterial );
+   */
 
    // add the sphere
    const auto sphereMaterial = pe::createMaterial( "mySphereMat", densitySphere , real_t(0.5), real_t(0.1), real_t(0.1), real_t(0.24), real_t(200), real_t(200), real_t(0), real_t(0) );
@@ -500,7 +528,7 @@ int main( int argc, char **argv )
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >( MyBoundaryHandling( flagFieldID, pdfFieldID, bodyFieldID ), "boundary handling" );
 
    // map planes into the LBM simulation -> act as no-slip boundaries
-   pe_coupling::mapBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectGlobalBodies );
+   //pe_coupling::mapBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, NoSlip_Flag, pe_coupling::selectGlobalBodies );
 
    // map pe bodies into the LBM simulation
    pe_coupling::mapMovingBodies< BoundaryHandling_T >( *blocks, boundaryHandlingID, bodyStorageID, *globalBodyStorage, bodyFieldID, MO_Flag, pe_coupling::selectRegularBodies );
@@ -520,15 +548,15 @@ int main( int argc, char **argv )
 
    // sweep for updating the pe body mapping into the LBM simulation
    timeloop.add()
-         << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MO_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
+         << Sweep( pe_coupling::BodyMapping< LatticeModel_T, BoundaryHandling_T >( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MO_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
 
    // sweep for restoring PDFs in cells previously occupied by pe bodies
    pe_coupling::SphereNormalExtrapolationDirectionFinder extrapolationFinder( blocks, bodyFieldID );
    typedef pe_coupling::EquilibriumAndNonEquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T, pe_coupling::SphereNormalExtrapolationDirectionFinder > Reconstructor_T;
-   Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder );
+   Reconstructor_T reconstructor( blocks, boundaryHandlingID, bodyFieldID, extrapolationFinder );
    timeloop.add()
       << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                  ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag ), "PDF Restore" );
+                  ( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag ), "PDF Restore" );
 
    shared_ptr<pe_coupling::BodiesForceTorqueContainer> bodiesFTContainer1 = make_shared<pe_coupling::BodiesForceTorqueContainer>(blocks, bodyStorageID);
    std::function<void(void)> storeForceTorqueInCont1 = std::bind(&pe_coupling::BodiesForceTorqueContainer::store, bodiesFTContainer1);
@@ -568,12 +596,6 @@ int main( int argc, char **argv )
 
    }
 
-   Vector3<real_t> gravitationalForce( real_t(0), real_t(0), -(densitySphere - densityFluid) * gravitationalAcceleration * sphereVolume );
-   timeloop.addFuncAfterTimeStep( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, gravitationalForce ), "Gravitational force" );
-
-   // add pe timesteps
-   timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, real_t(1), numPeSubCycles ), "pe Time Step" );
-
    // check for convergence of the particle position
    std::string loggingFileName( baseFolder + "/LoggingSettlingSphere_");
    loggingFileName += std::to_string(fluidType);
@@ -582,9 +604,15 @@ int main( int argc, char **argv )
    {
       WALBERLA_LOG_INFO_ON_ROOT(" - writing logging output to file \"" << loggingFileName << "\"");
    }
-   shared_ptr< SpherePropertyLogger > logger = walberla::make_shared< SpherePropertyLogger >( &timeloop, blocks, bodyStorageID,
-                                                                                              loggingFileName, fileIO, dx_SI, dt_SI, diameter );
+   shared_ptr< SpherePropertyLogger > logger = walberla::make_shared< SpherePropertyLogger >( &timeloop, blocks, pdfFieldID, boundaryHandlingID, bodyStorageID,
+                                                                                              loggingFileName, fileIO, dx_SI, dt_SI, diameter, sphereVolume * densitySphere );
    timeloop.addFuncAfterTimeStep( SharedFunctor< SpherePropertyLogger >( logger ), "Sphere property logger" );
+
+   Vector3<real_t> gravitationalForce( real_t(0), real_t(0), -(densitySphere - densityFluid) * gravitationalAcceleration * sphereVolume );
+   timeloop.addFuncAfterTimeStep( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, gravitationalForce ), "Gravitational force" );
+
+   // add pe timesteps
+   timeloop.addFuncAfterTimeStep( pe_coupling::TimeStep( blocks, bodyStorageID, cr, syncCall, real_t(1), numPeSubCycles ), "pe Time Step" );
 
    if( vtkIOFreq != uint_t(0) )
    {
@@ -624,7 +652,7 @@ int main( int argc, char **argv )
 
    WcTimingPool timeloopTiming;
 
-   real_t terminationPosition = real_t(0.51) * diameter; // right before sphere touches the bottom wall
+   real_t terminationPosition = diameter; // right before sphere touches the bottom wall
 
    // time loop
    for (uint_t i = 0; i < timesteps; ++i )

@@ -511,14 +511,14 @@ int main( int argc, char **argv )
 
    // sweep for updating the pe body mapping into the LBM simulation
    timeloop.add()
-      << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MO_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ),
+      << Sweep( pe_coupling::BodyMapping< LatticeModel_T, BoundaryHandling_T >( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MO_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ),
                 "Body Mapping" );
 
    // sweep for restoring PDFs in cells previously occupied by pe bodies
    typedef pe_coupling::EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T > Reconstructor_T;
-   Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID );
+   Reconstructor_T reconstructor( blocks, boundaryHandlingID, bodyFieldID );
    timeloop.add()
-      << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,
+      << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >( blocks, pdfFieldID,  boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID,
                                                                                                        reconstructor, FormerMO_Flag, Fluid_Flag  ), "PDF Restore" );
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
