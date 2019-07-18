@@ -350,14 +350,14 @@ int main( int argc, char **argv )
                                                   "pe Time Step", finestLevel );
 
    // add sweep for updating the pe body mapping into the LBM simulation
-   refinementTimestep->addPostStreamVoidFunction( lbm::refinement::SweepAsFunctorWrapper( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID,
+   refinementTimestep->addPostStreamVoidFunction( lbm::refinement::SweepAsFunctorWrapper( pe_coupling::BodyMapping< LatticeModel_T, BoundaryHandling_T >( blocks, pdfFieldID, boundaryHandlingID,
                                                   bodyStorageID, globalBodyStorage, bodyFieldID, MO_Flag, FormerMO_Flag ), blocks ),
                                                   "Body Mapping", finestLevel );
 
    // add sweep for restoring PDFs in cells previously occupied by pe bodies
    typedef pe_coupling::EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T > Reconstructor_T;
-   Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID );
-   refinementTimestep->addPostStreamVoidFunction( lbm::refinement::SweepAsFunctorWrapper( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T > ( blocks,
+   Reconstructor_T reconstructor( blocks, boundaryHandlingID, bodyFieldID );
+   refinementTimestep->addPostStreamVoidFunction( lbm::refinement::SweepAsFunctorWrapper( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T > ( blocks, pdfFieldID,
                                                   boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag  ), blocks ),
                                                   "PDF Restore", finestLevel );
 

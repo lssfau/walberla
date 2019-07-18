@@ -1195,20 +1195,20 @@ int main( int argc, char **argv )
 
       // sweep for updating the pe body mapping into the LBM simulation
       if( memVariant == MEMVariant::CLI )
-         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_CLI_Flag, FormerMEM_Flag ), "Body Mapping" );
+         timeloop.add() << Sweep( pe_coupling::BodyMapping< LatticeModel_T, BoundaryHandling_T >( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_CLI_Flag, FormerMEM_Flag ), "Body Mapping" );
       else if ( memVariant == MEMVariant::MR )
-         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_MR_Flag, FormerMEM_Flag ), "Body Mapping" );
+         timeloop.add() << Sweep( pe_coupling::BodyMapping< LatticeModel_T, BoundaryHandling_T >( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_MR_Flag, FormerMEM_Flag ), "Body Mapping" );
       else
-         timeloop.add() << Sweep( pe_coupling::BodyMapping< BoundaryHandling_T >( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_BB_Flag, FormerMEM_Flag ), "Body Mapping" );
+         timeloop.add() << Sweep( pe_coupling::BodyMapping< LatticeModel_T, BoundaryHandling_T >( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MEM_BB_Flag, FormerMEM_Flag ), "Body Mapping" );
 
 
       // reconstruct missing PDFs
       using ExtrapolationFinder_T = pe_coupling::SphereNormalExtrapolationDirectionFinder;
       ExtrapolationFinder_T extrapolationFinder( blocks, bodyFieldID );
       typedef pe_coupling::ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationFinder_T > Reconstructor_T;
-      Reconstructor_T reconstructor( blocks, boundaryHandlingID, pdfFieldID, bodyFieldID, extrapolationFinder, true );
+      Reconstructor_T reconstructor( blocks, boundaryHandlingID, bodyFieldID, extrapolationFinder, true );
       timeloop.add() << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
-                               ( blocks, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMEM_Flag, Fluid_Flag ), "PDF Restore" );
+                               ( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMEM_Flag, Fluid_Flag ), "PDF Restore" );
 
       for( uint_t lbmcycle = 0; lbmcycle < numLBMSubCycles; ++lbmcycle ){
 

@@ -55,35 +55,55 @@ namespace pe_coupling {
  *
  * The 'mappingBodySelectorFct' can be used to decide which bodies should be mapped or not.
  */
-template< typename BoundaryHandling_T >
+template< typename LatticeModel_T, typename BoundaryHandling_T, typename Destroyer_T = NaNDestroyer<LatticeModel_T>, bool conserveMomentum = false >
 class BodyMapping
 {
 public:
 
+   typedef lbm::PdfField< LatticeModel_T >        PdfField_T;
    typedef typename BoundaryHandling_T::FlagField FlagField_T;
    typedef typename BoundaryHandling_T::flag_t    flag_t;
    typedef Field< pe::BodyID, 1 >                 BodyField_T;
 
    BodyMapping( const shared_ptr<StructuredBlockStorage> & blockStorage,
+                const BlockDataID & pdfFieldID,
+                const BlockDataID & boundaryHandlingID,
+                const BlockDataID & bodyStorageID,
+                const shared_ptr<pe::BodyStorage> & globalBodyStorage,
+                const BlockDataID & bodyFieldID,
+                const Destroyer_T & destroyer,
+                const FlagUID & obstacle, const FlagUID & formerObstacle,
+                const std::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectRegularBodies )
+   : blockStorage_( blockStorage ), pdfFieldID_( pdfFieldID ), boundaryHandlingID_( boundaryHandlingID ),
+     bodyStorageID_(bodyStorageID), globalBodyStorage_( globalBodyStorage ), bodyFieldID_( bodyFieldID ),
+     destroyer_( destroyer ), obstacle_( obstacle ), formerObstacle_( formerObstacle ),
+     mappingBodySelectorFct_( mappingBodySelectorFct )
+   {}
+
+   BodyMapping( const shared_ptr<StructuredBlockStorage> & blockStorage,
+                const BlockDataID & pdfFieldID,
                 const BlockDataID & boundaryHandlingID,
                 const BlockDataID & bodyStorageID,
                 const shared_ptr<pe::BodyStorage> & globalBodyStorage,
                 const BlockDataID & bodyFieldID,
                 const FlagUID & obstacle, const FlagUID & formerObstacle,
                 const std::function<bool(pe::BodyID)> & mappingBodySelectorFct = selectRegularBodies )
-   : blockStorage_( blockStorage ), boundaryHandlingID_( boundaryHandlingID ),
+   : blockStorage_( blockStorage ), pdfFieldID_( pdfFieldID ), boundaryHandlingID_( boundaryHandlingID ),
      bodyStorageID_(bodyStorageID), globalBodyStorage_( globalBodyStorage ), bodyFieldID_( bodyFieldID ),
-     obstacle_( obstacle ), formerObstacle_( formerObstacle ), mappingBodySelectorFct_( mappingBodySelectorFct )
+     destroyer_( Destroyer_T() ), obstacle_( obstacle ), formerObstacle_( formerObstacle ),
+     mappingBodySelectorFct_( mappingBodySelectorFct )
    {}
 
    void operator()( IBlock * const block )
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
 
+      PdfField_T *         pdfField         = block->getData< PdfField_T >( pdfFieldID_ );
       BoundaryHandling_T * boundaryHandling = block->getData< BoundaryHandling_T >( boundaryHandlingID_ );
       FlagField_T *        flagField        = boundaryHandling->getFlagField();
       BodyField_T *        bodyField        = block->getData< BodyField_T >( bodyFieldID_ );
 
+      WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
       WALBERLA_ASSERT_NOT_NULLPTR( boundaryHandling );
       WALBERLA_ASSERT_NOT_NULLPTR( flagField );
       WALBERLA_ASSERT_NOT_NULLPTR( bodyField );
@@ -103,19 +123,19 @@ public:
       for( auto bodyIt = pe::BodyIterator::begin(*block, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
          if( mappingBodySelectorFct_(bodyIt.getBodyID()) )
-            mapBodyAndUpdateMapping(bodyIt.getBodyID(), block, boundaryHandling, flagField , bodyField, obstacle, formerObstacle, dx, dy, dz);
+            mapBodyAndUpdateMapping(bodyIt.getBodyID(), block, pdfField, boundaryHandling, flagField , bodyField, obstacle, formerObstacle, dx, dy, dz);
       }
       for( auto bodyIt = globalBodyStorage_->begin(); bodyIt != globalBodyStorage_->end(); ++bodyIt)
       {
          if( mappingBodySelectorFct_(bodyIt.getBodyID()))
-            mapBodyAndUpdateMapping(bodyIt.getBodyID(), block, boundaryHandling, flagField , bodyField, obstacle, formerObstacle, dx, dy, dz);
+            mapBodyAndUpdateMapping(bodyIt.getBodyID(), block, pdfField, boundaryHandling, flagField , bodyField, obstacle, formerObstacle, dx, dy, dz);
       }
    }
 
 private:
 
    void mapBodyAndUpdateMapping(pe::BodyID body, IBlock * const block,
-                                BoundaryHandling_T * boundaryHandling, FlagField_T * flagField, BodyField_T * bodyField,
+                                PdfField_T * pdfField, BoundaryHandling_T * boundaryHandling, FlagField_T * flagField, BodyField_T * bodyField,
                                 const flag_t & obstacle, const flag_t & formerObstacle,
                                 real_t dx, real_t dy, real_t dz)
    {
@@ -156,6 +176,19 @@ private:
                      {
                         // set obstacle flag
                         boundaryHandling->forceBoundary( obstacle, x, y, z );
+
+                        if( conserveMomentum && pdfField->isInInnerPart(Cell(x,y,z)) ) {
+                           // this removes the fluid information (PDFs) from the simulation, together with the containing momentum
+                           // to ensure momentum conservation, the momentum of this fluid cell has to be added to the particle
+                           // see Aidun, C. K., Lu, Y., & Ding, E. J. (1998). Direct analysis of particulate suspensions with inertia using the discrete Boltzmann equation. Journal of Fluid Mechanics, 373, 287-311.
+
+                           // force = momentum / dt, with dt = 1
+                           Vector3<real_t> momentum = pdfField->getMomentumDensity(x, y, z);
+                           body->addForceAtPos(momentum[0], momentum[1], momentum[2], cx, cy, cz);
+                        }
+
+                        // invalidate PDF values
+                        destroyer_( x, y, z, block, pdfField );
                      }
                   }
                   // let pointer from body field point to this body
@@ -190,10 +223,13 @@ private:
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
 
+   const BlockDataID pdfFieldID_;
    const BlockDataID boundaryHandlingID_;
    const BlockDataID bodyStorageID_;
    shared_ptr<pe::BodyStorage> globalBodyStorage_;
    const BlockDataID bodyFieldID_;
+
+   Destroyer_T destroyer_;
 
    const FlagUID obstacle_;
    const FlagUID formerObstacle_;
