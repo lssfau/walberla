@@ -25,6 +25,7 @@
 #if defined(WALBERLA_USE_STD_FILESYSTEM)
 #include <filesystem>
 #elif defined(WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM)
+#define _LIBCPP_NO_EXPERIMENTAL_DEPRECATION_WARNING_FILESYSTEM
 #include <experimental/filesystem>
 #else
 #include <boost/filesystem.hpp>
