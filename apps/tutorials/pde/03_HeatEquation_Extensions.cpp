@@ -67,8 +67,8 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
          // obtain the physical coordinate of the center of the current cell
          const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
 
-         // set the initial condition, given by the function u(x,y,0) = sin(M_PI*x)*sin(M_PI*y)
-         u->get( *cell ) = std::sin( math::M_PI * p[0] ) * std::sin( math::M_PI * p[1] );
+         // set the initial condition, given by the function u(x,y,0) = sin(PI*x)*sin(PI*y)
+         u->get( *cell ) = std::sin( math::pi * p[0] ) * std::sin( math::pi * p[1] );
       }
    }
 }

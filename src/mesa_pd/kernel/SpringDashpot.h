@@ -100,7 +100,7 @@ public:
                                        const real_t meff)
    {
       auto a = real_t(0.5) * getDampingN(type1, type2) / meff;
-      return std::exp(-a * math::M_PI / std::sqrt(getStiffness(type1, type2) / meff - a*a));
+      return std::exp(-a * math::pi / std::sqrt(getStiffness(type1, type2) / meff - a*a));
    }
 
    inline
@@ -109,7 +109,7 @@ public:
                             const real_t meff)
    {
       auto a = real_t(0.5) * getDampingN(type1, type2) / meff;
-      return math::M_PI / std::sqrt( getStiffness(type1, type2)/meff - a*a);
+      return math::pi / std::sqrt( getStiffness(type1, type2)/meff - a*a);
    }
 
    inline
@@ -120,8 +120,8 @@ public:
                              const real_t meff)
    {
       const real_t lnDryResCoeff = std::log(cor);
-      setStiffness(type1, type2, math::M_PI * math::M_PI * meff / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::M_PI * math::M_PI + lnDryResCoeff* lnDryResCoeff ))  ));
-      setDampingN( type1, type2, - real_t(2) * std::sqrt( meff * getStiffness(type1, type2) ) * ( lnDryResCoeff / std::sqrt( math::M_PI * math::M_PI + ( lnDryResCoeff * lnDryResCoeff ) ) ));
+      setStiffness(type1, type2, math::pi * math::pi * meff / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ))  ));
+      setDampingN( type1, type2, - real_t(2) * std::sqrt( meff * getStiffness(type1, type2) ) * ( lnDryResCoeff / std::sqrt( math::pi * math::pi + ( lnDryResCoeff * lnDryResCoeff ) ) ));
    }
 private:
    uint_t numParticleTypes_;

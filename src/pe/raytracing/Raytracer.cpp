@@ -197,7 +197,7 @@ void Raytracer::setupView_() {
    // viewing plane setup
    d_ = (cameraPosition_ - lookAtPoint_).length();
    aspectRatio_ = real_t(pixelsHorizontal_) / real_t(pixelsVertical_);
-   real_t fov_vertical_rad = fov_vertical_ * math::M_PI / real_t(180.0);
+   real_t fov_vertical_rad = fov_vertical_ * math::pi / real_t(180.0);
    viewingPlaneHeight_ = real_c(tan(fov_vertical_rad/real_t(2.))) * real_t(2.) * d_;
    viewingPlaneWidth_ = viewingPlaneHeight_ * aspectRatio_;
    viewingPlaneOrigin_ = lookAtPoint_ - u_*viewingPlaneWidth_/real_t(2.) - v_*viewingPlaneHeight_/real_t(2.);

@@ -54,10 +54,10 @@ real_t dragCoeffSchillerNaumann( real_t reynoldsNumber )
 }
 
 // Coefficient from Stokes' law for drag, only valid for Stokes regime (low Reynolds numbers)
-// = 3 * M_PI * mu * D * fluidVolumeFraction
+// = 3 * math::pi * mu * D * fluidVolumeFraction
 real_t dragCoeffStokes ( real_t fluidVolumeFraction, real_t diameter, real_t fluidDynamicViscosity )
 {
-   return real_t(3) * math::M_PI * diameter * fluidDynamicViscosity * fluidVolumeFraction;
+   return real_t(3) * math::pi * diameter * fluidDynamicViscosity * fluidVolumeFraction;
 }
 
 // threshold value for absolute relative velocity
@@ -172,7 +172,7 @@ Vector3<real_t> dragForceFelice( const Vector3<real_t> & fluidVel, const Vector3
    real_t temp2 = real_t(1.5) - std::log10( reynoldsNumber );
    real_t chi = real_t(3.7) - std::pow( real_t(0.65), (- real_t(0.5) * temp2 * temp2 ) );
 
-   return real_t(0.125) * dragCoeff * fluidDensity * math::M_PI * diameter * diameter * absVelDiff *
+   return real_t(0.125) * dragCoeff * fluidDensity * math::pi * diameter * diameter * absVelDiff *
           std::pow( fluidVolumeFraction, real_t(2) - chi) * velDiff;
 
 }
@@ -206,7 +206,7 @@ Vector3<real_t> dragForceTenneti( const Vector3<real_t> & fluidVel, const Vector
 
    const real_t CdRe = fluidVolumeFraction * ( CdRe0Sphere / fvfCubed + A + B );
 
-   return real_t(3) * math::M_PI * diameter * fluidDynamicViscosity * fluidVolumeFraction * CdRe * velDiff;
+   return real_t(3) * math::pi * diameter * fluidDynamicViscosity * fluidVolumeFraction * CdRe * velDiff;
 
 }
 

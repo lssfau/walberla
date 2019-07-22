@@ -189,7 +189,7 @@ pe::Vec3 LubricationCorrection::compLubricationSphrSphr( real_t gap, const pe::S
    real_t radiiSQR    = ( radiusSphereI * radiusSphereJ ) * ( radiusSphereI * radiusSphereJ );
    real_t radiiSumSQR = ( radiusSphereI + radiusSphereJ ) * ( radiusSphereI + radiusSphereJ );
 
-   pe::Vec3 fLub = ( -real_t(6) * dynamicViscosity_ * walberla::math::M_PI * radiiSQR / radiiSumSQR * ( real_t(1) / gap - real_t(1) / cutOffDistance_) * length * rIJ);
+   pe::Vec3 fLub = ( -real_t(6) * dynamicViscosity_ * walberla::math::pi * radiiSQR / radiiSumSQR * ( real_t(1) / gap - real_t(1) / cutOffDistance_) * length * rIJ);
 
    WALBERLA_LOG_DETAIL_SECTION()
    {
@@ -247,7 +247,7 @@ pe::Vec3 LubricationCorrection::compLubricationSphrPlane( real_t gap, const pe::
 
    real_t radiiSQR = radiusSphereI * radiusSphereI;
 
-   pe::Vec3 fLub( -real_t(6) * dynamicViscosity_ * walberla::math::M_PI * radiiSQR * (real_t(1) / gap - real_t(1) / cutOffDistance_) * length * rIJ);
+   pe::Vec3 fLub( -real_t(6) * dynamicViscosity_ * walberla::math::pi * radiiSQR * (real_t(1) / gap - real_t(1) / cutOffDistance_) * length * rIJ);
 
    WALBERLA_LOG_DETAIL_SECTION() {
       std::stringstream ss;

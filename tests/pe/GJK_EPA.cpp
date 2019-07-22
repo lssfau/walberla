@@ -128,11 +128,11 @@ int main( int argc, char ** argv )
 
 //      WALBERLA_LOG_INFO("**** (" << dir.cx() << ", " << dir.cy() << ", " << dir.cz() << ") ****");
 //      WALBERLA_LOG_INFO("deltaPoint : |" << contactPoint - contactPointGJK << "| = " << (contactPoint - contactPointGJK).length() );
-//      WALBERLA_LOG_INFO("deltaNormal: |" << normal - normalGJK << "| = " << (normal - normalGJK).length() << " (" << acos(normal*normalGJK) / math::M_PI * 180 << "°)" );
+//      WALBERLA_LOG_INFO("deltaNormal: |" << normal - normalGJK << "| = " << (normal - normalGJK).length() << " (" << acos(normal*normalGJK) / math::pi * 180 << "°)" );
 //      WALBERLA_LOG_INFO("deltaPen   : " << penetrationDepth << " - " << penetrationDepthGJK << " = " << penetrationDepth - penetrationDepthGJK);
 
       point.insert( (contactPoint - contactPointGJK).length() );
-      norm.insert( acos(normal*normalGJK) / math::M_PI * 180 );
+      norm.insert( acos(normal*normalGJK) / math::pi * 180 );
       pen.insert( fabs(penetrationDepth - penetrationDepthGJK) );
    }
 

@@ -23,6 +23,7 @@
 #include "core/logging/Logging.h"
 #include "core/mpi/Environment.h"
 #include "core/timing/Timer.h"
+#include "core/math/Constants.h"
 #include "core/math/Utility.h"
 
 #include "mesh/TriangleMeshes.h"
@@ -209,7 +210,7 @@ std::vector<Vector3<real_t>> generatPointCloudOnSphere( const real_t radius, con
    std::vector<Vector3<real_t>> pointCloud( numPoints );
    for( auto & p : pointCloud )
    {
-      real_t theta = 2 * real_t(M_PI) * distribution(rng);
+      real_t theta = 2 * real_t(math::pi) * distribution(rng);
       real_t phi = std::acos( real_t(1.0) - real_t(2.0) * distribution(rng) );
       p[0] = std::sin(phi) * std::cos(theta) * radius;
       p[1] = std::sin(phi) * std::sin(theta) * radius;

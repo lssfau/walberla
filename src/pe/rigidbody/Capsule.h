@@ -223,7 +223,7 @@ inline real_t  Capsule::getVolume() const
  */
 inline real_t  Capsule::calcVolume( real_t  radius, real_t  length )
 {
-   return math::M_PI*radius*radius*( ( static_cast<real_t >( 4 ) / static_cast<real_t >( 3 ) )*radius + length );
+   return math::pi*radius*radius*( ( static_cast<real_t >( 4 ) / static_cast<real_t >( 3 ) )*radius + length );
 }
 //*************************************************************************************************
 
@@ -238,7 +238,7 @@ inline real_t  Capsule::calcVolume( real_t  radius, real_t  length )
  */
 inline real_t  Capsule::calcMass( real_t  radius, real_t  length, real_t  density )
 {
-   return math::M_PI*radius*radius*( ( static_cast<real_t >( 4 ) / static_cast<real_t >( 3 ) )*radius + length ) * density;
+   return math::pi*radius*radius*( ( static_cast<real_t >( 4 ) / static_cast<real_t >( 3 ) )*radius + length ) * density;
 }
 //*************************************************************************************************
 
@@ -253,7 +253,7 @@ inline real_t  Capsule::calcMass( real_t  radius, real_t  length, real_t  densit
  */
 inline real_t  Capsule::calcDensity( real_t  radius, real_t  length, real_t  mass )
 {
-   return mass / ( math::M_PI*radius*radius*( ( static_cast<real_t >( 4 ) / static_cast<real_t >( 3 ) )*radius + length ) );
+   return mass / ( math::pi*radius*radius*( ( static_cast<real_t >( 4 ) / static_cast<real_t >( 3 ) )*radius + length ) );
 }
 //*************************************************************************************************
 

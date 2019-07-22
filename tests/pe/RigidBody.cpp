@@ -87,34 +87,34 @@ void checkRotationFunctions()
    auto sp3 = std::make_shared<Sphere>( 0, 0, Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
    auto sp4 = std::make_shared<Sphere>( 0, 0, Vec3(0,0,0), Quat(), real_t(1), iron, false, true, false );
 
-   sp1->rotate( 1, 0, 0, math::M_PI * real_t(0.5));
-   sp1->rotate( 0, 1, 0, math::M_PI * real_t(0.5));
-   sp1->rotate( 0, 0, 1, math::M_PI * real_t(0.5));
+   sp1->rotate( 1, 0, 0, math::pi * real_t(0.5));
+   sp1->rotate( 0, 1, 0, math::pi * real_t(0.5));
+   sp1->rotate( 0, 0, 1, math::pi * real_t(0.5));
 
-   sp2->rotate( 1, 0, 0, math::M_PI * real_t(0.5));
-   sp2->rotate( 0, 1, 0, math::M_PI * real_t(0.5));
-   sp2->rotate( 0, 0, 1, math::M_PI * real_t(0.5));
+   sp2->rotate( 1, 0, 0, math::pi * real_t(0.5));
+   sp2->rotate( 0, 1, 0, math::pi * real_t(0.5));
+   sp2->rotate( 0, 0, 1, math::pi * real_t(0.5));
 
-   sp3->rotate( math::M_PI * real_t(0.5), math::M_PI * real_t(0.5), math::M_PI * real_t(0.5) );
-   sp4->rotate( Vec3(math::M_PI * real_t(0.5), math::M_PI * real_t(0.5), math::M_PI * real_t(0.5)) );
+   sp3->rotate( math::pi * real_t(0.5), math::pi * real_t(0.5), math::pi * real_t(0.5) );
+   sp4->rotate( Vec3(math::pi * real_t(0.5), math::pi * real_t(0.5), math::pi * real_t(0.5)) );
 
-   WALBERLA_CHECK_FLOAT_EQUAL( sp1->getQuaternion(), Quat(math::M_SQRT2 * real_t(0.5), 0, math::M_SQRT2 * real_t(0.5), 0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp2->getQuaternion(), Quat(math::M_SQRT2 * real_t(0.5), 0, math::M_SQRT2 * real_t(0.5), 0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp3->getQuaternion(), Quat(math::M_SQRT2 * real_t(0.5), 0, math::M_SQRT2 * real_t(0.5), 0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( sp4->getQuaternion(), Quat(math::M_SQRT2 * real_t(0.5), 0, math::M_SQRT2 * real_t(0.5), 0) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp1->getQuaternion(), Quat(math::root_two * real_t(0.5), 0, math::root_two * real_t(0.5), 0) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp2->getQuaternion(), Quat(math::root_two * real_t(0.5), 0, math::root_two * real_t(0.5), 0) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp3->getQuaternion(), Quat(math::root_two * real_t(0.5), 0, math::root_two * real_t(0.5), 0) );
+   WALBERLA_CHECK_FLOAT_EQUAL( sp4->getQuaternion(), Quat(math::root_two * real_t(0.5), 0, math::root_two * real_t(0.5), 0) );
 
    WALBERLA_CHECK_FLOAT_EQUAL( sp1->getPosition(), Vec3(0, 0, 0) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp2->getPosition(), Vec3(0, 0, 0) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp3->getPosition(), Vec3(0, 0, 0) );
    WALBERLA_CHECK_FLOAT_EQUAL( sp4->getPosition(), Vec3(0, 0, 0) );
 
-   sp1->rotateAroundPoint( Vec3(-10, 0, 0), Vec3(0, 1, 0), math::M_PI );
+   sp1->rotateAroundPoint( Vec3(-10, 0, 0), Vec3(0, 1, 0), math::pi );
    WALBERLA_CHECK_FLOAT_EQUAL( sp1->getPosition(), Vec3(-20, 0, 0) );
 
-   sp2->rotateAroundPoint( Vec3(-10, 0, 0), Vec3(0, 0, 1), math::M_PI );
+   sp2->rotateAroundPoint( Vec3(-10, 0, 0), Vec3(0, 0, 1), math::pi );
    WALBERLA_CHECK_FLOAT_EQUAL( sp2->getPosition(), Vec3(-20, 0, 0) );
 
-   sp3->rotateAroundPoint( Vec3(0, 10, 0), Vec3(0, 0, 1), math::M_PI );
+   sp3->rotateAroundPoint( Vec3(0, 10, 0), Vec3(0, 0, 1), math::pi );
    WALBERLA_CHECK_FLOAT_EQUAL( sp3->getPosition(), Vec3(0, 20, 0) );
 }
 
@@ -155,9 +155,9 @@ int main( int argc, char** argv )
    Vec3 v0 = Vec3(-1,-1,1);
 
    for (auto it = storage.begin(); it != storage.end(); ++it){
-      it->rotateAroundPoint(Vec3(1,1,0), Vec3(0,0,1), math::M_PI);
+      it->rotateAroundPoint(Vec3(1,1,0), Vec3(0,0,1), math::pi);
       WALBERLA_CHECK_FLOAT_EQUAL(it->getPosition(), Vec3(2,2,0));
-      it->rotateAroundOrigin(Vec3(0,0,1), real_c(0.5) * math::M_PI);
+      it->rotateAroundOrigin(Vec3(0,0,1), real_c(0.5) * math::pi);
       WALBERLA_CHECK_FLOAT_EQUAL(it->getPosition(), x0);
       it->setLinearVel(v0);
    }

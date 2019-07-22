@@ -617,7 +617,7 @@ int main( int argc, char **argv )
    const real_t viscosity = ug * diameter / GalileoNumber;
    const real_t tau = real_t(1) / lbm::collision_model::omegaFromViscosity(viscosity);
 
-   const real_t sphereVolume = math::M_PI * diameter * diameter * diameter / real_t(6);
+   const real_t sphereVolume = math::pi * diameter * diameter * diameter / real_t(6);
    Vector3<real_t> gravitationalForce ( real_t(0), real_t(0), ( densityRatio - real_t(1) ) * sphereVolume * gravity );
 
    if( !funcTest )
@@ -710,13 +710,13 @@ int main( int argc, char **argv )
    const real_t particleMass = densityRatio * sphereVolume;
    const real_t Mij = particleMass; // * particleMass / ( real_t(2) * particleMass ); // Mij = M for sphere-wall collision
    const real_t lnDryResCoeff = std::log(restitutionCoeff);
-   const real_t stiffnessCoeff = math::M_PI * math::M_PI * Mij / ( scaledCollisionTime * scaledCollisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::M_PI * math::M_PI + lnDryResCoeff* lnDryResCoeff ) ) );
+   const real_t stiffnessCoeff = math::pi * math::pi * Mij / ( scaledCollisionTime * scaledCollisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ) ) );
    const real_t normalizedStiffnessCoeff = stiffnessCoeff / ( ( densityRatio - real_t(1) ) * gravity * sphereVolume / diameter );
 
    const real_t dampingCoeff = - real_t(2) * std::sqrt( Mij * stiffnessCoeff ) *
-                               ( std::log(restitutionCoeff) / std::sqrt( math::M_PI * math::M_PI + (std::log(restitutionCoeff) * std::log(restitutionCoeff) ) ) );
-   const real_t contactDuration = real_t(2) * math::M_PI * Mij / ( std::sqrt( real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlman
-   const real_t contactDuration2 = std::sqrt(( math::M_PI * math::M_PI + std::log(restitutionCoeff) * std::log(restitutionCoeff)) / ( stiffnessCoeff / Mij)); //formula from Finn
+                               ( std::log(restitutionCoeff) / std::sqrt( math::pi * math::pi + (std::log(restitutionCoeff) * std::log(restitutionCoeff) ) ) );
+   const real_t contactDuration = real_t(2) * math::pi * Mij / ( std::sqrt( real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlman
+   const real_t contactDuration2 = std::sqrt(( math::pi * math::pi + std::log(restitutionCoeff) * std::log(restitutionCoeff)) / ( stiffnessCoeff / Mij)); //formula from Finn
 
    if( !funcTest )
    {

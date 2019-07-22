@@ -140,7 +140,7 @@ int main( int argc, char **argv )
       auto planeShape = shapeStorage->create<mesa_pd::data::HalfSpace>( normal.getNormalized() );
 
       // rotate to same position as half space before
-      Vector3<real_t> rotationAngles( -math::M_PI / real_t(4), real_t(0), real_t(0));
+      Vector3<real_t> rotationAngles( -math::pi / real_t(4), real_t(0), real_t(0));
       Quaternion<real_t> quat( rotationAngles );
 
       mesa_pd::data::Particle&& p = *ps->create(true);

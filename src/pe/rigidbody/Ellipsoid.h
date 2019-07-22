@@ -203,7 +203,7 @@ inline real_t Ellipsoid::getVolume() const
  */
 inline real_t Ellipsoid::calcVolume(const Vec3& semiAxes ) 
 {
-   return real_c(4.0)/real_c(3.0) * math::M_PI * semiAxes[0] * semiAxes[1] * semiAxes[2];
+   return real_c(4.0)/real_c(3.0) * math::pi * semiAxes[0] * semiAxes[1] * semiAxes[2];
 }
 //*************************************************************************************************
 
@@ -217,7 +217,7 @@ inline real_t Ellipsoid::calcVolume(const Vec3& semiAxes )
  */
 inline real_t Ellipsoid::calcMass(const Vec3& semiAxes, real_t density )
 {
-   return real_c(4.0)/real_c(3.0) * math::M_PI * semiAxes[0] * semiAxes[1] * semiAxes[2] * density;
+   return real_c(4.0)/real_c(3.0) * math::pi * semiAxes[0] * semiAxes[1] * semiAxes[2] * density;
 }
 //*************************************************************************************************
 
@@ -231,7 +231,7 @@ inline real_t Ellipsoid::calcMass(const Vec3& semiAxes, real_t density )
  */
 inline real_t Ellipsoid::calcDensity(const Vec3& semiAxes, real_t mass )
 {
-   return real_c(0.75) * mass / ( math::M_PI * semiAxes[0] * semiAxes[1] * semiAxes[2] );
+   return real_c(0.75) * mass / ( math::pi * semiAxes[0] * semiAxes[1] * semiAxes[2] );
 }
 //*************************************************************************************************
 

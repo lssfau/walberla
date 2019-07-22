@@ -207,7 +207,7 @@ void MainTest()
    //Testcase 04 Cube with turned Cube
    WALBERLA_LOG_INFO("Test 04: CUBE <-> TURNED CUBE");
    //compute rotation.
-   real_t angle = walberla::math::M_PI/real_t(4.0);
+   real_t angle = walberla::math::pi/real_t(4.0);
    Vec3 zaxis(0, 0, 1);
    Quat q4(zaxis, angle);
 
@@ -263,7 +263,7 @@ void MainTest()
    //Testcase 08:
    // CAPSULE <-> CAPSULE
    WALBERLA_LOG_INFO("Test 08: CAPSULE <-> CAPSULE");
-   Quat q8(Vec3(0,1,0), walberla::math::M_PI/real_t(2.0)); //creates a y-axis aligned capsule
+   Quat q8(Vec3(0,1,0), walberla::math::pi/real_t(2.0)); //creates a y-axis aligned capsule
    Capsule cap8_1(139, 18, Vec3(0,0,0), Quat(), real_t(4.0), real_t(10.0), iron, false, true, false);
    Capsule cap8_2(140, 19, Vec3(0,0, real_t(13.0)),  q8, real_t(4.0), real_t(10.0), iron, false, true, false);
    Vec3 wpm8(0, 0, real_t(-0.5));

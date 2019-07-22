@@ -225,9 +225,9 @@ public:
       real_t uBar = computeAverageVel();
 
       // f_total = f_drag + f_buoyancy
-      real_t totalForce = forceX  + real_c(4.0/3.0) * math::M_PI * setup_->radius * setup_->radius * setup_->radius * setup_->extForce ;
+      real_t totalForce = forceX  + real_c(4.0/3.0) * math::pi * setup_->radius * setup_->radius * setup_->radius * setup_->extForce ;
 
-      real_t normalizedDragForce = totalForce / real_c( 6.0 * math::M_PI * setup_->visc * setup_->radius * uBar );
+      real_t normalizedDragForce = totalForce / real_c( 6.0 * math::pi * setup_->visc * setup_->radius * uBar );
 
       // update drag force values
       normalizedDragOld_ = normalizedDragNew_;

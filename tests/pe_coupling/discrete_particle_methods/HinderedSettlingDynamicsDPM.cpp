@@ -247,7 +247,7 @@ uint_t createSpheresRandomly( StructuredBlockForest & forest, pe::BodyStorage & 
 {
    real_t domainVolume = generationDomain.volume();
    real_t totalSphereVolume = domainVolume * solidVolumeFraction;
-   real_t sphereVolume = diameter * diameter * diameter * math::M_PI / real_t(6);
+   real_t sphereVolume = diameter * diameter * diameter * math::pi / real_t(6);
    uint_t numberOfSpheres = uint_c( totalSphereVolume / sphereVolume );
 
    real_t xParticle = real_t(0);
@@ -286,7 +286,7 @@ uint_t createSphereLattice( StructuredBlockForest & forest, pe::BodyStorage & gl
                             const BlockDataID & bodyStorageID, const AABB & generationDomain,
                             real_t diameter, real_t solidVolumeFraction, pe::MaterialID & material, real_t initialZVelocity )
 {
-   real_t sphereVolume = math::M_PI * diameter * diameter * diameter / real_t(6);
+   real_t sphereVolume = math::pi * diameter * diameter * diameter / real_t(6);
    real_t numSpheresDesired = solidVolumeFraction * generationDomain.volume() / sphereVolume;
    uint_t spheresPerDirection = uint_c(std::cbrt(numSpheresDesired) );
 
@@ -722,7 +722,7 @@ int main( int argc, char **argv )
    if( solidVolumeFraction < real_t(1e-10) )
    {
       // create only a single sphere
-      solidVolumeFraction = math::M_PI * diameter * diameter * diameter / ( real_t(6) * real_c( xlength * ylength * zlength));
+      solidVolumeFraction = math::pi * diameter * diameter * diameter / ( real_t(6) * real_c( xlength * ylength * zlength));
    }
 
    const real_t diameter_SI = real_t(0.00035); // m, Finn et al, Tab 5
@@ -737,7 +737,7 @@ int main( int argc, char **argv )
    const real_t viscosity = ( viscosity_SI/densityFluid_SI ) * dt_SI / ( dx_SI * dx_SI );
    const real_t tau = real_t(1) / lbm::collision_model::omegaFromViscosity( viscosity );
 
-   real_t gravitationalForce = - gravity * ( densityRatio - real_t(1) ) * diameter * diameter * diameter * math::M_PI / real_t(6);
+   real_t gravitationalForce = - gravity * ( densityRatio - real_t(1) ) * diameter * diameter * diameter * math::pi / real_t(6);
 
    // unhindered settling velocity of a single sphere in infinite fluid, would come from experiments or DNS, NOT Stokes settling velocity, from Finn et al, Tab 5
    const real_t velUnhindered_SI = real_t(-0.048); // m/s
@@ -826,15 +826,15 @@ int main( int argc, char **argv )
    const real_t restitutionCoeff = real_t(0.88);
    const real_t frictionCoeff = real_t(0.25);
 
-   real_t sphereVolume = diameter * diameter * diameter * math::M_PI / real_t(6);
+   real_t sphereVolume = diameter * diameter * diameter * math::pi / real_t(6);
    const real_t particleMass = densityRatio * sphereVolume;
    const real_t Mij = particleMass * particleMass / ( real_t(2) * particleMass );
    const real_t lnDryResCoeff = std::log(restitutionCoeff);
    const real_t collisionTime = real_t(0.5);
-   const real_t stiffnessCoeff = math::M_PI * math::M_PI * Mij / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::M_PI * math::M_PI + lnDryResCoeff* lnDryResCoeff ) ) );
+   const real_t stiffnessCoeff = math::pi * math::pi * Mij / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ) ) );
    const real_t dampingCoeff = - real_t(2) * std::sqrt( Mij * stiffnessCoeff ) *
-                               ( std::log(restitutionCoeff) / std::sqrt( math::M_PI * math::M_PI + (std::log(restitutionCoeff) * std::log(restitutionCoeff) ) ) );
-   const real_t contactDuration = real_t(2) * math::M_PI * Mij / ( std::sqrt( real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlman
+                               ( std::log(restitutionCoeff) / std::sqrt( math::pi * math::pi + (std::log(restitutionCoeff) * std::log(restitutionCoeff) ) ) );
+   const real_t contactDuration = real_t(2) * math::pi * Mij / ( std::sqrt( real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlman
 
    if( !funcTest ) {
       WALBERLA_LOG_INFO_ON_ROOT("Created sediment material with:\n"
@@ -901,7 +901,7 @@ int main( int argc, char **argv )
 
 
    const real_t domainVolume = real_c( xlength * ylength * zlength );
-   real_t actualSolidVolumeFraction = real_c( numSpheres ) * diameter * diameter * diameter * math::M_PI / ( real_t(6) * domainVolume );
+   real_t actualSolidVolumeFraction = real_c( numSpheres ) * diameter * diameter * diameter * math::pi / ( real_t(6) * domainVolume );
    real_t ReynoldsNumber = std::fabs(velUnhindered) * diameter / viscosity;
 
    // apply external forcing on fluid to approximately balance the force from the settling particles to avoid too large fluid or particle velocities
@@ -1487,9 +1487,9 @@ int main( int argc, char **argv )
                WALBERLA_LOG_INFO_ON_ROOT("initial simulation ended with relative difference of interaction forces of " << relativeForceDiffLimit << " after " << t << " time steps.");
 
 
-               real_t actingExternalForceOnSpheres = real_c(numSpheres) * ( ( - gravity * densityRatio * diameter * diameter * diameter * math::M_PI / real_t(6)  ) +
-                                                                            ( gravity * real_t(1) * diameter * diameter * diameter * math::M_PI / real_t(6) ) +
-                                                                            ( extForce[2] * real_t(1) * diameter * diameter * diameter * math::M_PI / real_t(6) ) );
+               real_t actingExternalForceOnSpheres = real_c(numSpheres) * ( ( - gravity * densityRatio * diameter * diameter * diameter * math::pi / real_t(6)  ) +
+                                                                            ( gravity * real_t(1) * diameter * diameter * diameter * math::pi / real_t(6) ) +
+                                                                            ( extForce[2] * real_t(1) * diameter * diameter * diameter * math::pi / real_t(6) ) );
                WALBERLA_LOG_INFO_ON_ROOT("f_interaction_z = " << curInteractionForce << ", f_ext_z = " << actingExternalForceOnSpheres );
                if( std::fabs( ( std::fabs( curInteractionForce ) - std::fabs( actingExternalForceOnSpheres ) )/ std::fabs( curInteractionForce ) ) < relativeForceConvergenceLimit )
                {
@@ -1520,7 +1520,7 @@ int main( int argc, char **argv )
    WALBERLA_LOG_INFO_ON_ROOT("===================================================================================" );
    WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with:" );
    WALBERLA_LOG_INFO_ON_ROOT("external forcing on fluid = " << extForce );
-   WALBERLA_LOG_INFO_ON_ROOT("total external forces on all particles = " << real_c(numSpheres) * ( - gravity * ( densityRatio - real_t(1) ) + extForce[2] ) * diameter * diameter * diameter * math::M_PI / real_t(6) );
+   WALBERLA_LOG_INFO_ON_ROOT("total external forces on all particles = " << real_c(numSpheres) * ( - gravity * ( densityRatio - real_t(1) ) + extForce[2] ) * diameter * diameter * diameter * math::pi / real_t(6) );
    WALBERLA_LOG_INFO_ON_ROOT("simulating " << timesteps << " time steps" );
 
 
@@ -1641,9 +1641,9 @@ int main( int argc, char **argv )
 
       // ext forces on bodies
       timeloop.add() << Sweep( DummySweep(), "Dummy Sweep ")
-                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,- gravity * densityRatio * diameter * diameter * diameter * math::M_PI / real_t(6) )  ), "Gravitational Force Add" )
-                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,gravity * real_t(1) * diameter * diameter * diameter * math::M_PI / real_t(6) ) ), "Buoyancy Force (due to gravity) Add" )
-                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,extForce[2] * real_t(1) * diameter * diameter * diameter * math::M_PI / real_t(6) ) ), "Buoyancy Force (due to external fluid force) Add" )
+                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,- gravity * densityRatio * diameter * diameter * diameter * math::pi / real_t(6) )  ), "Gravitational Force Add" )
+                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,gravity * real_t(1) * diameter * diameter * diameter * math::pi / real_t(6) ) ), "Buoyancy Force (due to gravity) Add" )
+                     << AfterFunction( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, Vector3<real_t>(0,0,extForce[2] * real_t(1) * diameter * diameter * diameter * math::pi / real_t(6) ) ), "Buoyancy Force (due to external fluid force) Add" )
                      << AfterFunction( pe_coupling::TimeStep( blocks, bodyStorageID, *cr, syncCall, dtInteractionSubCycle, peSubSteps, lubricationEvaluationFunction ), "Pe Time Step" );
 
       timeloop.add() << Sweep( DummySweep(), "Dummy Sweep ")

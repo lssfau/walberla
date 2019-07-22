@@ -33,13 +33,13 @@ namespace dem {
 real_t calcCoefficientOfRestitution(const real_t k, const real_t gamma, const real_t meff)
 {
    auto a = real_t(0.5) * gamma / meff;
-   return std::exp(-a * math::M_PI / std::sqrt(k / meff - a*a));
+   return std::exp(-a * math::pi / std::sqrt(k / meff - a*a));
 }
 
 real_t calcCollisionTime(const real_t k, const real_t gamma, const real_t meff)
 {
    auto a = real_t(0.5) * gamma / meff;
-   return math::M_PI / std::sqrt( k/meff - a*a);
+   return math::pi / std::sqrt( k/meff - a*a);
 }
 }
 

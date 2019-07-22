@@ -34,7 +34,7 @@ real_t getSphereSphereOverlap(const real_t d, const real_t r1, const real_t r2)
    //http://math.stackexchange.com/questions/297751/overlapping-spheres
    if (d > r1+r2)
       return 0; else
-      return math::M_PI / (real_c(12.0)  * d) * (r1 + r2 - d) * (r1 + r2 - d) * (d*d + 2*d*(r1+r2) - 3*(r1-r2)*(r1-r2));
+      return math::pi / (real_c(12.0)  * d) * (r1 + r2 - d) * (r1 + r2 - d) * (d*d + 2*d*(r1+r2) - 3*(r1-r2)*(r1-r2));
 }
 
 }  // namespace pe

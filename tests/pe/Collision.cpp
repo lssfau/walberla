@@ -96,7 +96,7 @@ void SphereTest()
    WALBERLA_CHECK(  collideFunc(&sp4, &cb1) );
    checkContact( contacts.at(0),
                  Contact( &sp4, &cb1, Vec3(0,real_t(2),real_t(0)), Vec3(0, -1, 0).getNormalized(), real_t(-0.5)) );
-   cb1.rotateAroundOrigin( Vec3( 0,0,1), math::M_PI * real_t(0.25) );
+   cb1.rotateAroundOrigin( Vec3( 0,0,1), math::pi * real_t(0.25) );
    WALBERLA_CHECK(  !collideFunc(&sp1, &cb1) );
    WALBERLA_CHECK(  collideFunc(&sp2, &cb1) );
    WALBERLA_CHECK(  collideFunc(&sp4, &cb1) );
@@ -119,8 +119,8 @@ void BoxTest()
    b4.rotate( Vec3(1,1,0), real_t(atan(sqrt(2))) );
 
    Box b5(123, 0, Vec3(0,0,0), Quat(), Vec3(2,2,2), iron, false, true, false);
-   b5.rotate( Vec3(0,0,1), real_t(math::M_PI * 0.25) );
-   b5.rotate( Vec3(1,0,0), real_t(math::M_PI * 0.25) );
+   b5.rotate( Vec3(0,0,1), real_t(math::pi * 0.25) );
+   b5.rotate( Vec3(1,0,0), real_t(math::pi * 0.25) );
 
    std::vector<Contact> contacts;
    fcd::AnalyticCollideFunctor< std::vector<Contact> > collideFunc(contacts);
@@ -211,7 +211,7 @@ void CapsuleTest2()
    MaterialID     material = createMaterial( "granular", real_t( 1.0 ), 0, static_cof, dynamic_cof, real_t( 0.5 ), 1, 1, 0, 0 );
    //create obstacle
    Capsule c1(100, 100, Vec3(10,10,0), Quat(), 3, 40, material, false, true, false);
-   c1.rotate( Vec3(0,1,0), math::M_PI * real_t(0.5) );
+   c1.rotate( Vec3(0,1,0), math::pi * real_t(0.5) );
    Sphere sp1(123, 123, Vec3(real_t(6.5316496854295262864), real_t(10.099999999999999645), real_t(0.46999999991564372914) ), Quat(), real_t(0.47), material, false, true, false);
 
    std::vector<Contact> contacts;

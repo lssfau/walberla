@@ -225,9 +225,9 @@ pe::Vec3 LubricationForceEvaluator::compLubricationSphrSphr( real_t gap, const p
    real_t d = real_t(2) * diameterSphereI * diameterSphereJ / ( diameterSphereI + diameterSphereJ );
    real_t h = gap;
    real_t r = d + h;
-   real_t a_sq = ( real_t(3) * dynamicViscosity_ * walberla::math::M_PI * d / real_t(2) ) * ( d / ( real_t(4) * h ) + ( real_t(18) / real_t(40) ) * std::log( d / ( real_t(2) * h ) ) +
+   real_t a_sq = ( real_t(3) * dynamicViscosity_ * walberla::math::pi * d / real_t(2) ) * ( d / ( real_t(4) * h ) + ( real_t(18) / real_t(40) ) * std::log( d / ( real_t(2) * h ) ) +
                                                                                             ( real_t(9)/real_t(84) ) * ( h / d ) * std::log( d/( real_t(2)*h ) ) );
-   real_t a_sh = ( dynamicViscosity_ * walberla::math::M_PI * d / real_t(2) ) * std::log( d / ( real_t(2) * h ) ) * ( d + h ) * ( d + h ) / real_t(4);
+   real_t a_sh = ( dynamicViscosity_ * walberla::math::pi * d / real_t(2) ) * std::log( d / ( real_t(2) * h ) ) * ( d + h ) * ( d + h ) / real_t(4);
    pe::Vec3 fLub( - a_sq * length * rIJ - a_sh * ( real_t(2) / r ) * ( real_t(2) / r ) * ( velDiff - length * rIJ ) );
 
    WALBERLA_LOG_DETAIL_SECTION()
@@ -274,9 +274,9 @@ pe::Vec3 LubricationForceEvaluator::compLubricationSphrPlane( real_t gap, const 
    real_t d = real_t(4) * radiusSphereI;
    real_t h = gap;
    real_t r = d + h;
-   real_t a_sq = ( real_t(3) * dynamicViscosity_ * walberla::math::M_PI * d / real_t(2) ) * ( d / ( real_t(4) * h ) + ( real_t(18) / real_t(40) ) * std::log( d / ( real_t(2) * h ) ) +
+   real_t a_sq = ( real_t(3) * dynamicViscosity_ * walberla::math::pi * d / real_t(2) ) * ( d / ( real_t(4) * h ) + ( real_t(18) / real_t(40) ) * std::log( d / ( real_t(2) * h ) ) +
                                                                                             ( real_t(9)/real_t(84) ) * ( h / d ) * std::log( d/( real_t(2)*h ) ) );
-   real_t a_sh = ( dynamicViscosity_ * walberla::math::M_PI * d / real_t(2) ) * std::log( d / ( real_t(2) * h ) ) * ( d + h ) * ( d + h ) / real_t(4);
+   real_t a_sh = ( dynamicViscosity_ * walberla::math::pi * d / real_t(2) ) * std::log( d / ( real_t(2) * h ) ) * ( d + h ) * ( d + h ) / real_t(4);
    pe::Vec3 fLub( - a_sq * length * rIJ - a_sh * ( real_t(2) / r ) * ( real_t(2) / r ) * ( v1 - length * rIJ ) );
 
    WALBERLA_LOG_DETAIL_SECTION() {

@@ -623,7 +623,7 @@ int main( int argc, char **argv )
    // The buoyancy force on the body due to this pressure gradient has to be added 'artificially'
    // F_{buoyancy} = - V_{body} * grad ( p ) = V_{body} * \rho_{fluid} *  a
    // ( V_{body} := volume of body,  a := acceleration driving the flow )
-   Vector3<real_t> buoyancyForce(math::M_PI / real_t(6) * setup.forcing * setup.particleDiam * setup.particleDiam * setup.particleDiam ,
+   Vector3<real_t> buoyancyForce(math::pi / real_t(6) * setup.forcing * setup.particleDiam * setup.particleDiam * setup.particleDiam ,
                                  real_t(0), real_t(0));
    timeloop.addFuncAfterTimeStep( pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, buoyancyForce ), "Buoyancy force" );
 

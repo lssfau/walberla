@@ -111,8 +111,8 @@ public:
    inline bool containsClosedInterval( const vector_type & point ) const;
    inline bool containsClosedInterval( const vector_type & point, const value_type dx ) const;
 
-   inline GenericAABB getExtended( const value_type e ) const;
-   inline GenericAABB getExtended( const vector_type & e ) const;
+   inline GenericAABB getExtended( const value_type eps ) const;
+   inline GenericAABB getExtended( const vector_type & eps ) const;
 
    inline GenericAABB getTranslated( const vector_type & translation ) const;
 
@@ -162,8 +162,8 @@ public:
 
    inline void setAxisBounds( const uint_t index, const value_type value1, const value_type value2 );
 
-   inline void extend( const value_type e );
-   inline void extend( const vector_type & e );
+   inline void extend( const value_type eps );
+   inline void extend( const vector_type & eps );
 
    inline void setCenter( const vector_type & center );
    inline void translate( const vector_type & translation );

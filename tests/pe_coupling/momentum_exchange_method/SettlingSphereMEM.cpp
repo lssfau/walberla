@@ -407,7 +407,7 @@ int main( int argc, char **argv )
                                      uint_c(floor(domainSize_SI[1] / dx_SI + real_t(0.5)) ),
                                      uint_c(floor(domainSize_SI[2] / dx_SI + real_t(0.5)) ) );
    const real_t diameter = diameter_SI / dx_SI;
-   const real_t sphereVolume = math::M_PI / real_t(6) * diameter * diameter * diameter;
+   const real_t sphereVolume = math::pi / real_t(6) * diameter * diameter * diameter;
 
    const real_t expectedSettlingVelocity = real_t(0.01);
    const real_t dt_SI = expectedSettlingVelocity / expectedSettlingVelocity_SI * dx_SI;

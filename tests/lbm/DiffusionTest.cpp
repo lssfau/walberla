@@ -236,8 +236,8 @@ int run( int argc, char **argv )
    if(!quiet) WALBERLA_LOG_RESULT( " -> u   = " << u   );
    if(!quiet) WALBERLA_LOG_RESULT( " -> tau = " << tau );
 
-   const real_t tperiod = real_t(2) * math::M_PI / real_c( timesteps  );
-   const real_t cperiod = real_t(2) * math::M_PI / real_c( cells[dim] );
+   const real_t tperiod = real_t(2) * math::pi / real_c( timesteps  );
+   const real_t cperiod = real_t(2) * math::pi / real_c( cells[dim] );
 
    // --- create blockstorage --- //
    auto blockStorage = blockforest::createUniformBlockGrid(

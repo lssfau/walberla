@@ -107,7 +107,7 @@ real_t permeability( Setup setup )
    for( uint_t i = 0; i < 31; i++ )
       drag += real_c(qs[i]) * real_c(std::pow( setup.kappa, real_c(i) ));
 
-   return ( L * L * L ) / ( real_t(6) * math::M_PI * r * real_t(2) * drag );
+   return ( L * L * L ) / ( real_t(6) * math::pi * r * real_t(2) * drag );
 }
 
 

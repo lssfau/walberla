@@ -1203,8 +1203,8 @@ inline real_t HardContactSemiImplicitTimesteppingSolvers::relaxInelasticGenerali
                                                       alpha_left = -angleI - shiftI;
                                                       alpha_right = +angleI - shiftI;
                                                       if( alpha_left < 0 ) {
-                                                         alpha_left += 2 * math::M_PI;
-                                                         alpha_right += 2 * math::M_PI;
+                                                         alpha_left += 2 * math::pi;
+                                                         alpha_right += 2 * math::pi;
                                                       }
                                                    }
                                                    else if( contactCache.diag_nto_[i](0, 0) > contactCache.mu_[i] * a3 ) {
@@ -1213,8 +1213,8 @@ inline real_t HardContactSemiImplicitTimesteppingSolvers::relaxInelasticGenerali
                alpha_left = -angleJ - shiftJ;
                alpha_right = +angleJ - shiftJ;
                if( alpha_left < 0 ) {
-                  alpha_left += 2 * math::M_PI;
-                  alpha_right += 2 * math::M_PI;
+                  alpha_left += 2 * math::pi;
+                  alpha_right += 2 * math::pi;
                }
             }
             else {
@@ -1223,15 +1223,15 @@ inline real_t HardContactSemiImplicitTimesteppingSolvers::relaxInelasticGenerali
                real_t alpha1_left( -angleJ - shiftJ );
                real_t alpha1_right( +angleJ - shiftJ );
                if( alpha1_left < 0 ) {
-                  alpha1_left += 2 * math::M_PI;
-                  alpha1_right += 2 * math::M_PI;
+                  alpha1_left += 2 * math::pi;
+                  alpha1_right += 2 * math::pi;
                }
                const real_t angleI( std::acos( fractionI ) );
                real_t alpha2_left( -angleI - shiftI );
                real_t alpha2_right( +angleI - shiftI );
                if( alpha2_left < 0 ) {
-                  alpha2_left += 2 * math::M_PI;
-                  alpha2_right += 2 * math::M_PI;
+                  alpha2_left += 2 * math::pi;
+                  alpha2_right += 2 * math::pi;
                }
 
                // Swap intervals if second interval does not start right of the first interval.
@@ -1241,7 +1241,7 @@ inline real_t HardContactSemiImplicitTimesteppingSolvers::relaxInelasticGenerali
                }
 
                if( alpha2_left > alpha1_right ) {
-                  alpha2_right -= 2*math::M_PI;
+                  alpha2_right -= 2*math::pi;
                   if( alpha2_right > alpha1_right ) {
                      // [alpha1_left; alpha1_right] \subset [alpha2_left; alpha2_right]
                   }
@@ -1807,7 +1807,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::integratePositions( Body
             v = v * (edge * getSpeedLimitFactor() / dt / speed );
          }
 
-         const real_t maxPhi = real_t(2) * math::M_PI * getSpeedLimitFactor();
+         const real_t maxPhi = real_t(2) * math::pi * getSpeedLimitFactor();
          const real_t phi    = w.length() * dt;
          if (phi > maxPhi)
          {

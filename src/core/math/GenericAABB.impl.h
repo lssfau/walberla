@@ -674,19 +674,19 @@ bool GenericAABB< T >::containsClosedInterval( const vector_type & point, const 
 /**
  * \brief Creates a new GenericAABB by extending this one
  *
- * \param e epsilon by which the bounding box is extended in each direction
+ * \param eps epsilon by which the bounding box is extended in each direction
  *
  * \returns The extended GenericAABB
  */
 template< typename T >
-GenericAABB< T > GenericAABB< T >::getExtended( const value_type e ) const
+GenericAABB< T > GenericAABB< T >::getExtended( const value_type eps ) const
 {
-   vector_type newMinCorner( minCorner_[0] - e, minCorner_[1] - e, minCorner_[2] - e );
+   vector_type newMinCorner( minCorner_[0] - eps, minCorner_[1] - eps, minCorner_[2] - eps );
 
    return createFromMinMaxCorner( newMinCorner[0], newMinCorner[1], newMinCorner[2],
-                                  std::max( newMinCorner[0], maxCorner_[0] + e ),
-                                  std::max( newMinCorner[1], maxCorner_[1] + e ),
-                                  std::max( newMinCorner[2], maxCorner_[2] + e ) );
+                                  std::max( newMinCorner[0], maxCorner_[0] + eps ),
+                                  std::max( newMinCorner[1], maxCorner_[1] + eps ),
+                                  std::max( newMinCorner[2], maxCorner_[2] + eps ) );
 }
 
 
@@ -694,19 +694,19 @@ GenericAABB< T > GenericAABB< T >::getExtended( const value_type e ) const
 /**
  * \brief Creates a new GenericAABB by extending this one
  *
- * \param e epsilon vector by which the bounding box is extended. The box is extended in each direction by
+ * \param eps epsilon vector by which the bounding box is extended. The box is extended in each direction by
  *          the corresponding vector component.
  *
  * \returns The extended GenericAABB
  */
 template< typename T >
-GenericAABB< T > GenericAABB< T >::getExtended( const vector_type & e ) const
+GenericAABB< T > GenericAABB< T >::getExtended( const vector_type & eps ) const
 {
-   vector_type newMinCorner( minCorner_ - e );
+   vector_type newMinCorner( minCorner_ - eps );
    return createFromMinMaxCorner( newMinCorner[0], newMinCorner[1], newMinCorner[2],
-                                  std::max( newMinCorner[0], maxCorner_[0] + e[0] ),
-                                  std::max( newMinCorner[1], maxCorner_[1] + e[0] ),
-                                  std::max( newMinCorner[2], maxCorner_[2] + e[0] ) );
+                                  std::max( newMinCorner[0], maxCorner_[0] + eps[0] ),
+                                  std::max( newMinCorner[1], maxCorner_[1] + eps[0] ),
+                                  std::max( newMinCorner[2], maxCorner_[2] + eps[0] ) );
 }
 
 
@@ -1519,18 +1519,18 @@ void GenericAABB< T >::setAxisBounds( const uint_t index, const value_type value
 /**
  * \brief Extends this GenericAABB
  *
- * \param e epsilon by which the bounding box is extended in each direction
+ * \param eps epsilon by which the bounding box is extended in each direction
  */
 template< typename T >
-void GenericAABB< T >::extend( const value_type e )
+void GenericAABB< T >::extend( const value_type eps )
 {
-   minCorner_[0] -= e;
-   minCorner_[1] -= e;
-   minCorner_[2] -= e;
+   minCorner_[0] -= eps;
+   minCorner_[1] -= eps;
+   minCorner_[2] -= eps;
 
-   maxCorner_[0] += e;
-   maxCorner_[1] += e;
-   maxCorner_[2] += e;
+   maxCorner_[0] += eps;
+   maxCorner_[1] += eps;
+   maxCorner_[2] += eps;
 
    for( uint_t i = 0; i < 3; ++i )
       if( minCorner_[i] > maxCorner_[i] )
@@ -1544,14 +1544,14 @@ void GenericAABB< T >::extend( const value_type e )
 /**
  * \brief Extends this GenericAABB
  *
- * \param e epsilon vector by which the bounding box is extended. The box is extended in each direction by
+ * \param eps epsilon vector by which the bounding box is extended. The box is extended in each direction by
  *          the corresponding vector component.
  */
 template< typename T >
-void GenericAABB< T >::extend( const vector_type & e )
+void GenericAABB< T >::extend( const vector_type & eps )
 {
-   minCorner_ -= e;
-   maxCorner_ += e;
+   minCorner_ -= eps;
+   maxCorner_ += eps;
 
    for( uint_t i = 0; i < 3; ++i )
       if( minCorner_[i] > maxCorner_[i] )

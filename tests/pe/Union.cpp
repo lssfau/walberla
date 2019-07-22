@@ -126,7 +126,7 @@ void UnionConstruction()
    WALBERLA_CHECK_FLOAT_EQUAL(subb1.getRelQuaternion(), Quat(real_t(0.5), real_t(0.5),real_t(0.5),real_t(0.5)));
 
    // Check mass volume and inertia
-   WALBERLA_CHECK_FLOAT_EQUAL(un->getVolume(), (real_t(4./3.)*real_t(math::M_PI)));
+   WALBERLA_CHECK_FLOAT_EQUAL(un->getVolume(), (real_t(4./3.)*real_t(math::pi)));
    WALBERLA_CHECK_FLOAT_EQUAL(un->getMass(), un->getVolume()*Material::getDensity(iron));
    real_t scalar_inertia = real_t(0.4)*un->getMass(); // for sphere: I = 2/5*m*r*r
    WALBERLA_CHECK_EQUAL(un->getInertia(), Mat3(scalar_inertia,0,0,0,scalar_inertia,0,0,0,scalar_inertia));
@@ -143,10 +143,10 @@ void UnionConstruction()
    WALBERLA_CHECK_FLOAT_EQUAL(subb2.getPosition(), Vec3(-1,0,0));
 
    // Check mass volume and inertia
-   WALBERLA_CHECK_FLOAT_EQUAL(un->getVolume(), (real_t(8./3.)*real_t(math::M_PI)));
+   WALBERLA_CHECK_FLOAT_EQUAL(un->getVolume(), (real_t(8./3.)*real_t(math::pi)));
    WALBERLA_CHECK_FLOAT_EQUAL(un->getMass(), un->getVolume()*Material::getDensity(iron));
    // Mass of one sphere
-   real_t masssphere = real_t(4./3.)*real_t(math::M_PI)*Material::getDensity(iron);
+   real_t masssphere = real_t(4./3.)*real_t(math::pi)*Material::getDensity(iron);
    Mat3 bodyinertia(real_t(2.0)*scalar_inertia, 0, 0, 0, real_t(2.0)*(scalar_inertia + masssphere),0, 0, 0, real_t(2.0)*(scalar_inertia + masssphere));
    WALBERLA_CHECK_FLOAT_EQUAL(un->getInertia(), bodyinertia);
 
@@ -156,7 +156,7 @@ void UnionConstruction()
 
    WALBERLA_LOG_INFO("- Performing Rotation.");
    //Check values for rotated union
-   Quat rotz30(Vec3(0,0,1), real_t(math::M_PI/6.0)); // rotate by 30 deg via z axis
+   Quat rotz30(Vec3(0,0,1), real_t(math::pi/6.0)); // rotate by 30 deg via z axis
    real_t sin30 = real_t(0.5);
    real_t cos30 = real_t(sqrt(3.0)/2.0);
    un->setOrientation(rotz30);
@@ -259,7 +259,7 @@ void UnionAABB() {
    aabb = un->getAABB();
    checkAABB(aabb, AABB(real_t(8),real_t(9),real_t(9),real_t(12),real_t(11),real_t(11)));
 
-   Quat rotz30(Vec3(0,0,1), real_t(math::M_PI/6.0)); // rotate by 30 deg via z axis
+   Quat rotz30(Vec3(0,0,1), real_t(math::pi/6.0)); // rotate by 30 deg via z axis
    real_t sin30 = real_t(0.5);
    real_t cos30 = real_t(sqrt(3.0)/2.0);
    un->setOrientation(rotz30);
