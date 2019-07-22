@@ -108,8 +108,8 @@ int main( int argc, char** argv )
    const real_t particleMass = real_t(1) / ss->shapes[sphereShape]->getInvMass();
    const real_t Mij = particleMass; // Mij = M for sphere-wall collision
    const real_t lnDryResCoeff = std::log(restitutionCoeff);
-   const real_t stiffnessN = math::M_PI * math::M_PI * Mij / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::M_PI * math::M_PI + lnDryResCoeff* lnDryResCoeff ))  );
-   const real_t dampingN = - real_t(2) * std::sqrt( Mij * stiffnessN ) * ( lnDryResCoeff / std::sqrt( math::M_PI * math::M_PI + ( lnDryResCoeff * lnDryResCoeff ) ) );
+   const real_t stiffnessN = math::pi * math::pi * Mij / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ))  );
+   const real_t dampingN = - real_t(2) * std::sqrt( Mij * stiffnessN ) * ( lnDryResCoeff / std::sqrt( math::pi * math::pi + ( lnDryResCoeff * lnDryResCoeff ) ) );
 
    WALBERLA_LOG_INFO("dt = " << dt << ", Tc = " << collisionTime << ", coefficient of restitution = " << restitutionCoeff);
    WALBERLA_LOG_INFO(" -> mass " << particleMass << ", collision duration = " << collisionTime / dt << ", stiffness = " << stiffnessN << ", damping = " << dampingN);

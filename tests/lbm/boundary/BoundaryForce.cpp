@@ -211,7 +211,7 @@ int main( int argc, char ** argv )
    mpi::allReduceInplace( force[2], mpi::SUM );
    
    real_t visc = lbm::collision_model::viscosityFromOmega( omega );
-   Vector3<real_t> stokes = 6 * math::M_PI * visc * R * velocity;
+   Vector3<real_t> stokes = 6 * math::pi * visc * R * velocity;
 
    WALBERLA_LOG_RESULT_ON_ROOT("Expected force: " << stokes);
    WALBERLA_LOG_RESULT_ON_ROOT("Actual force: " << force);

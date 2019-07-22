@@ -1229,7 +1229,7 @@ int main( int argc, char **argv )
 
    const Vector3<uint_t> domainSize( XBlocks * blockSize, YBlocks * blockSize, ZBlocks * blockSize );
    const auto domainVolume = real_t(domainSize[0] * domainSize[1] * domainSize[2]);
-   const real_t sphereVolume = math::M_PI / real_t(6) * diameter * diameter * diameter;
+   const real_t sphereVolume = math::pi / real_t(6) * diameter * diameter * diameter;
    const uint_t numberOfSediments = uint_c(std::ceil(solidVolumeFraction * domainVolume / sphereVolume));
 
    real_t expectedSedimentVolumeFraction = (useBox||useHopper) ? real_t(0.45) : real_t(0.52);

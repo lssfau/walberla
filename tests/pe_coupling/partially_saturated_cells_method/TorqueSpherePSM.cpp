@@ -309,7 +309,7 @@ int main( int argc, char **argv )
    setup.checkFrequency = uint_t( 100 );                      // evaluate the torque only every checkFrequency time steps
    setup.radius = real_c(0.5) * chi * real_c( setup.length ); // sphere radius
    setup.visc   = ( setup.tau - real_c(0.5) ) / real_c(3);    // viscosity in lattice units
-   setup.phi    = real_c(4.0/3.0) * math::M_PI * setup.radius * setup.radius * setup.radius /
+   setup.phi    = real_c(4.0/3.0) * math::pi * setup.radius * setup.radius * setup.radius /
                   ( real_c( setup.length * setup.length * setup.length ) ); // solid volume fraction
    const real_t omega      = real_c(1) / setup.tau;           // relaxation rate
    const real_t dx         = real_c(1);                       // lattice dx

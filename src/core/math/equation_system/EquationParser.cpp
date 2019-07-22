@@ -189,12 +189,12 @@ NodePtr EquationParser::parseFunction( const std::string& str, size_t& index ) c
    {
    case OP_FUNC_EXP:
       funcPtr = std::make_shared<Node>( OP_PROD );
-      funcPtr->left()  = std::make_shared<Node>( M_E  );
+      funcPtr->left()  = std::make_shared<Node>( math::e  );
       funcPtr->right() = nodePtr;
       return funcPtr;
    case OP_FUNC_LN:
       funcPtr = std::make_shared<Node>( OP_LOG );
-      funcPtr->right() = std::make_shared<Node>( M_E  );
+      funcPtr->right() = std::make_shared<Node>( math::e  );
       funcPtr->left()  = nodePtr;
       return funcPtr;
    case OP_FUNC_SQRT:

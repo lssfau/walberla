@@ -463,8 +463,8 @@ int main( int argc, char **argv )
    real_t domainHeight = real_c(ZCells) - topWallOffset;
    real_t fluidVolume =  real_c( XCells * YCells ) * domainHeight;
    real_t solidVolume = solidVolumeFraction * fluidVolume;
-   uint_t numberOfParticles = uint_c(std::ceil(solidVolume / ( math::M_PI / real_t(6) * diameter * diameter * diameter )));
-   diameter = std::cbrt( solidVolume / ( real_c(numberOfParticles) * math::M_PI / real_t(6) ) );
+   uint_t numberOfParticles = uint_c(std::ceil(solidVolume / ( math::pi / real_t(6) * diameter * diameter * diameter )));
+   diameter = std::cbrt( solidVolume / ( real_c(numberOfParticles) * math::pi / real_t(6) ) );
 
    auto densityRatio = real_t(2.5);
 
@@ -821,7 +821,7 @@ int main( int argc, char **argv )
 
    }
 
-   real_t sphereVolume = diameter * diameter * diameter * math::M_PI / real_t(6);
+   real_t sphereVolume = diameter * diameter * diameter * math::pi / real_t(6);
    Vector3<real_t> gravitationalForce( real_t(0), real_t(0), -(densityRatio - real_t(1)) * gravitationalAcceleration * sphereVolume );
    timeloop.addFuncAfterTimeStep(pe_coupling::ForceOnBodiesAdder( blocks, bodyStorageID, gravitationalForce ), "Gravitational force" );
 

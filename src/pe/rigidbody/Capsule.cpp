@@ -194,8 +194,8 @@ void Capsule::calcBoundingBox()
  */
 Mat3 Capsule::calcInertia( const real_t radius, const real_t length, const real_t density)
 {
-   const real_t  sphereMass( real_t (4)/real_t (3) * math::M_PI * radius*radius*radius * density );
-   const real_t  cylinderMass( math::M_PI * radius*radius * length * density );
+   const real_t  sphereMass( real_t (4)/real_t (3) * math::pi * radius*radius*radius * density );
+   const real_t  cylinderMass( math::pi * radius*radius * length * density );
 
    // 'Ia' represent the moment of inertia along the x-axis. 'Ia' contains the following two parts:
    //  - cylinder :  I = (1/2)*mass*radius^2

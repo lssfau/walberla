@@ -259,10 +259,10 @@ private:
             WALBERLA_CHECK_FLOAT_EQUAL ( forceSphr2[0], -forceSphr1[0] );
 
             // according to the formula from Ding & Aidun 2003
-            // F = 3/2 * M_PI * rho_L * nu_L * relative velocity of both spheres * r * r * 1/gap
+            // F = 3/2 * math::pi * rho_L * nu_L * relative velocity of both spheres * r * r * 1/gap
             // the correct analytically calculated value is 339.2920063998
             // in this geometry setup the relative error is 0.1246489711 %
-            real_t analytical = real_c(3.0)/real_c(2.0) * walberla::math::M_PI * real_c(1.0) * nu_L_ * real_c(2.0) * real_c(vel_[0]) * radius_ * radius_ * real_c(1.0)/gap;
+            real_t analytical = real_c(3.0)/real_c(2.0) * walberla::math::pi * real_c(1.0) * nu_L_ * real_c(2.0) * real_c(vel_[0]) * radius_ * radius_ * real_c(1.0)/gap;
             real_t relErr     = std::fabs( analytical - forceSphr2[0] ) / analytical * real_c(100.0);
             WALBERLA_CHECK_LESS( relErr, real_t(1) );
          }
@@ -355,10 +355,10 @@ private:
          if ( timestep == uint_t(26399) )
          {
             // according to the formula from Ding & Aidun 2003
-            // F = 6 * M_PI * rho_L * nu_L * relative velocity of both bodies=relative velocity of the sphere * r * r * 1/gap
+            // F = 6 * math::pi * rho_L * nu_L * relative velocity of both bodies=relative velocity of the sphere * r * r * 1/gap
             // the correct analytically calculated value is 339.292006996217
             // in this geometry setup the relative error is 0.183515322065561 %
-            real_t analytical = real_c(6.0) * walberla::math::M_PI * real_c(1.0) * nu_L_ * real_c(-vel_[0]) * radius_ * radius_ * real_c(1.0)/gap;
+            real_t analytical = real_c(6.0) * walberla::math::pi * real_c(1.0) * nu_L_ * real_c(-vel_[0]) * radius_ * radius_ * real_c(1.0)/gap;
             real_t relErr     = std::fabs( analytical - forceSphr1[0] ) / analytical * real_c(100.0);
             WALBERLA_CHECK_LESS( relErr, real_t(1) );
          }

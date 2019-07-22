@@ -137,7 +137,7 @@ public:
                   const BlockDataID & boundaryHandlingID, const BlockDataID & bodyFieldID, real_t sphereRadius) :
          blocks_( blocks ), bodyStorageID_( bodyStorageID ), globalBodyStorage_( globalBodyStorage ),
          boundaryHandlingID_( boundaryHandlingID ), bodyFieldID_( bodyFieldID ),
-         sphereVolume_( math::M_PI * real_t(4) / real_t(3) * sphereRadius * sphereRadius * sphereRadius )
+         sphereVolume_( math::pi * real_t(4) / real_t(3) * sphereRadius * sphereRadius * sphereRadius )
    { }
 
    // check the mapping in the inner domain of the block and check mapped volume against real sphere volume

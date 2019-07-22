@@ -675,7 +675,7 @@ int main( int argc, char **argv )
    auto refinementTimestep = lbm::refinement::makeTimeStep< LatticeModel_T, BoundaryHandling_T >( blocks, sweep, pdfFieldID, boundaryHandlingID );
 
    // add force evaluation and logging
-   real_t normalizationFactor = ( zeroShearTest ) ? real_t(1) : ( math::M_PI / real_t(8) * densityFluid * shearRate * shearRate * wallDistance * wallDistance * diameter * diameter );
+   real_t normalizationFactor = ( zeroShearTest ) ? real_t(1) : ( math::pi / real_t(8) * densityFluid * shearRate * shearRate * wallDistance * wallDistance * diameter * diameter );
    std::string loggingFileName( baseFolderLogging + "/LoggingForcesNearPlane");
    loggingFileName += "_lvl" + std::to_string(numberOfLevels);
    loggingFileName += "_D" + std::to_string(uint_c(diameter));

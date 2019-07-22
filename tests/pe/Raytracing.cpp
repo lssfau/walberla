@@ -168,7 +168,7 @@ void BoxIntersectsTest() {
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(9.7068), real_t(1e-4));
    
    Box box5(128, 5, Vec3(4, 0, 0), Quat(), Vec3(4, 4, 4), iron, false, true, false);
-   box5.rotate(0,0,math::M_PI/4);
+   box5.rotate(0,0,math::pi/4);
    Ray ray5(Vec3(0,1.5,0), Vec3(1,0,0));
    WALBERLA_CHECK(intersects(&box5, ray5, t, n));
    WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(t, real_t(2.67157), real_t(1e-4));
@@ -310,7 +310,7 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
    createSphere(*globalBodyStorage, *forest, storageID, 3, Vec3(4,real_t(5.5),5), real_t(1));
    createSphere(*globalBodyStorage, *forest, storageID, 6, Vec3(3,real_t(8.5),5), real_t(1));
    BoxID box = createBox(*globalBodyStorage, *forest, storageID, 7, Vec3(5,real_t(6.5),5), Vec3(2,4,3));
-   if (box != nullptr) box->rotate(0,math::M_PI/4,math::M_PI/4);
+   if (box != nullptr) box->rotate(0,math::pi/4,math::pi/4);
    createBox(*globalBodyStorage, *forest, storageID, 8, Vec3(5,1,8), Vec3(2,2,2));
    // Test scene v1 end
    
@@ -318,12 +318,12 @@ void RaytracerTest(Raytracer::Algorithm raytracingAlgorithm = Raytracer::RAYTRAC
    createBox(*globalBodyStorage, *forest, storageID, 9, Vec3(9,9,5), Vec3(1,1,10));
    createCapsule(*globalBodyStorage, *forest, storageID, 10, Vec3(3, 9, 1), real_t(0.5), real_t(7), iron);
    CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, 11, Vec3(7, real_t(3.5), real_t(7.5)), real_t(1), real_t(2), iron);
-   if (capsule != nullptr) capsule->rotate(0,math::M_PI/3,math::M_PI/4-math::M_PI/8);
+   if (capsule != nullptr) capsule->rotate(0,math::pi/3,math::pi/4-math::pi/8);
    // Test scene v2 end
    
    // Test scene v3 additions start
    EllipsoidID ellipsoid = createEllipsoid(*globalBodyStorage, *forest, storageID, 12, Vec3(6,2,real_t(2.5)), Vec3(3,2,real_t(1.2)));
-   ellipsoid->rotate(0, math::M_PI/real_t(6), 0);
+   ellipsoid->rotate(0, math::pi/real_t(6), 0);
    // Test scene v3 end
    
    //raytracer.setTBufferOutputDirectory("tbuffer");
@@ -460,7 +460,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
       BoxID box_ = createBox(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), Vec3(len, len, len));
       WALBERLA_CHECK(box_ != nullptr);
       if (boxRotation) {
-         box_->rotate(0, math::realRandom(real_t(0), real_t(1))*math::M_PI, math::realRandom(real_t(0), real_t(1))*math::M_PI);
+         box_->rotate(0, math::realRandom(real_t(0), real_t(1))*math::pi, math::realRandom(real_t(0), real_t(1))*math::pi);
       }
       bodies.push_back(box_);
       bodySIDs.push_back(box_->getSystemID());
@@ -475,7 +475,7 @@ void HashGridsTest(Raytracer::Algorithm raytracingAlgorithm, walberla::uint8_t a
       walberla::id_t id = walberla::id_t(boxes+i);
       CapsuleID capsule = createCapsule(*globalBodyStorage, *forest, storageID, id, Vec3(x, y, z), radius, len);
       WALBERLA_CHECK(capsule != nullptr);
-      capsule->rotate(0, math::realRandom(real_t(0), real_t(1))*math::M_PI, math::realRandom(real_t(0), real_t(1))*math::M_PI);
+      capsule->rotate(0, math::realRandom(real_t(0), real_t(1))*math::pi, math::realRandom(real_t(0), real_t(1))*math::pi);
       bodies.push_back(capsule);
       bodySIDs.push_back(capsule->getSystemID());
    }

@@ -109,7 +109,7 @@ public:
    using cplx_t = std::complex<real_t>;
 
    PlugFlow( real_t L, real_t H, real_t u, real_t k ) :
-      period_( real_t(2)*math::M_PI/L ),
+      period_( real_t(2)*math::pi/L ),
       lambda_( period_*sqrt( cplx_t(real_t(1), u/k/period_) ) ),
       emH_   ( real_t(1) - exp(-lambda_*H) ),
       epH_   ( real_t(1) - exp(+lambda_*H) ),
@@ -254,7 +254,7 @@ int main( int argc, char **argv )
 
    BlockDataID boundaryHandling = MyBoundaryHandling::addDefaultDiffusionBoundaryHandlingToStorage( blockStorage, "BoundaryHandling", flagFieldID, getFluidFlag(), srcFieldID );
 
-   auto cbc = make_shared<CosBoundaryConfiguration>( real_t(2)*math::M_PI/real_c(length) );
+   auto cbc = make_shared<CosBoundaryConfiguration>( real_t(2)*math::pi/real_c(length) );
    geometry::initializer::BoundaryFromDomainBorder<MyBoundaryHandling::BoundaryHandling_T> bfdb( *blockStorage, boundaryHandling );
    bfdb.init( MyBoundaryHandling::getDiffusionDirichletBoundaryUID(), stencil::N, cbc, -1, 1 );
    bfdb.init( MyBoundaryHandling::getDiffusionDirichletBoundaryUID(), stencil::S, cbc, -1, 1 );

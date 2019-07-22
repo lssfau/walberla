@@ -762,7 +762,7 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
    {
       setup.maxVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( real_t(4) * setup.viscosity_L );
       setup.meanVelocity_L = ( setup.acceleration_L * setup.radius_L * setup.radius_L ) / ( real_t(8) * setup.viscosity_L );
-      setup.flowRate_L = setup.meanVelocity_L * math::M_PI * setup.radius_L * setup.radius_L;
+      setup.flowRate_L = setup.meanVelocity_L * math::pi * setup.radius_L * setup.radius_L;
    }
    else
    {

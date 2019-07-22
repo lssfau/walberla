@@ -211,7 +211,7 @@ inline real_t Sphere::getVolume() const
  */
 inline real_t Sphere::calcVolume( real_t radius )
 {
-   return real_c(4.0)/real_c(3.0) * math::M_PI * radius * radius * radius;
+   return real_c(4.0)/real_c(3.0) * math::pi * radius * radius * radius;
 }
 //*************************************************************************************************
 
@@ -225,7 +225,7 @@ inline real_t Sphere::calcVolume( real_t radius )
  */
 inline real_t Sphere::calcMass( real_t radius, real_t density )
 {
-   return real_c(4.0)/real_c(3.0) * math::M_PI * radius * radius * radius * density;
+   return real_c(4.0)/real_c(3.0) * math::pi * radius * radius * radius * density;
 }
 //*************************************************************************************************
 
@@ -239,7 +239,7 @@ inline real_t Sphere::calcMass( real_t radius, real_t density )
  */
 inline real_t Sphere::calcDensity( real_t radius, real_t mass )
 {
-   return real_c(0.75) * mass / ( math::M_PI * radius * radius * radius );
+   return real_c(0.75) * mass / ( math::pi * radius * radius * radius );
 }
 //*************************************************************************************************
 

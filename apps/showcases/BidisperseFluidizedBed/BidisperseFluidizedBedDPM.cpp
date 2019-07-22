@@ -371,7 +371,7 @@ uint_t createSpheresRandomly( StructuredBlockForest & forest, pe::BodyStorage & 
 
       pe::createSphere( globalBodyStorage, forest.getBlockStorage(), bodyStorageID, 0, Vector3<real_t>( xParticle, yParticle, zParticle ), creationDiameter * real_t(0.5), material );
 
-      currentSphereVolume += math::M_PI / real_t(6) * creationDiameter * creationDiameter * creationDiameter;
+      currentSphereVolume += math::pi / real_t(6) * creationDiameter * creationDiameter * creationDiameter;
 
       ++numberOfSpheres;
    }
@@ -851,16 +851,16 @@ int main( int argc, char **argv ) {
    const real_t restitutionCoeff = real_t(0.88);
    const real_t frictionCoeff = real_t(0.25);
 
-   real_t sphereVolume = diameterAvg * diameterAvg * diameterAvg * math::M_PI / real_t(6); // based on avg. diameter
+   real_t sphereVolume = diameterAvg * diameterAvg * diameterAvg * math::pi / real_t(6); // based on avg. diameter
    const real_t particleMass = densityRatio * sphereVolume;
    const real_t Mij = particleMass * particleMass / (real_t(2) * particleMass);
    const real_t lnDryResCoeff = std::log(restitutionCoeff);
    const real_t collisionTime = real_t(0.5);
-   const real_t stiffnessCoeff = math::M_PI * math::M_PI * Mij / (collisionTime * collisionTime *
-                                 (real_t(1) - lnDryResCoeff * lnDryResCoeff / (math::M_PI * math::M_PI + lnDryResCoeff * lnDryResCoeff)));
+   const real_t stiffnessCoeff = math::pi * math::pi * Mij / (collisionTime * collisionTime *
+                                 (real_t(1) - lnDryResCoeff * lnDryResCoeff / (math::pi * math::pi + lnDryResCoeff * lnDryResCoeff)));
    const real_t dampingCoeff = -real_t(2) * std::sqrt(Mij * stiffnessCoeff) *
-                               (std::log(restitutionCoeff) / std::sqrt(math::M_PI * math::M_PI + (std::log(restitutionCoeff) * std::log(restitutionCoeff))));
-   const real_t contactDuration = real_t(2) * math::M_PI * Mij / (std::sqrt(real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff)); //formula from Uhlman
+                               (std::log(restitutionCoeff) / std::sqrt(math::pi * math::pi + (std::log(restitutionCoeff) * std::log(restitutionCoeff))));
+   const real_t contactDuration = real_t(2) * math::pi * Mij / (std::sqrt(real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff)); //formula from Uhlman
 
    WALBERLA_LOG_INFO_ON_ROOT("Created particle material with:\n"
                                    << " - coefficient of restitution = " << restitutionCoeff << "\n"

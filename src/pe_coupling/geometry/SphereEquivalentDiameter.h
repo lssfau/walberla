@@ -39,7 +39,7 @@ real_t getSphereEquivalentDiameter( pe::RigidBody & body )
       real_t radius = sphere.getRadius();
       return real_t(2) * radius;
    } else {
-      const real_t preFac = real_t(6) / math::M_PI;
+      const real_t preFac = real_t(6) / math::pi;
       return std::cbrt( body.getVolume() * preFac );
    }
 }

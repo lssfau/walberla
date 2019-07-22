@@ -97,14 +97,14 @@ int main( int argc, char ** argv )
    // be used to for instance rotate the box around the global y-axis.
    BoxID box = createBox( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4), Vec3(2.5,2.5,2.5) );
    if (box != nullptr)
-      box->rotate( 0.0, real_c(math::M_PI/3.0), 0.0 );
+      box->rotate( 0.0, real_c(math::pi/3.0), 0.0 );
    //! [Create a Box]
 
    //! [Create a Capsule]
    // Create a capsule and rotate it after successfull creation.
    CapsuleID capsule = createCapsule( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4), real_t(1), real_t(1) );
    if (capsule != nullptr)
-      capsule->rotate( 0.0, real_c(math::M_PI/3.0), 0.0 );
+      capsule->rotate( 0.0, real_c(math::pi/3.0), 0.0 );
    //! [Create a Capsule]
 
    //! [Create a Plane]
@@ -117,7 +117,7 @@ int main( int argc, char ** argv )
    // Create a sphere and rotate it after successfull creation.
    SphereID sphere = createSphere( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4), real_t(1) );
    if (sphere != nullptr)
-      sphere->rotate( 0.0, real_c(math::M_PI/3.0), 0.0 );
+      sphere->rotate( 0.0, real_c(math::pi/3.0), 0.0 );
    //! [Create a Sphere]
 
    //! [Create a Union]

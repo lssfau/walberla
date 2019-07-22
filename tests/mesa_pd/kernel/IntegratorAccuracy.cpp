@@ -90,12 +90,12 @@ int main( int argc, char ** argv )
    }
 
 
-   real_t phase = phaseFraction * math::M_PI;
+   real_t phase = phaseFraction * math::pi;
    real_t omega = std::sqrt(k / mass);
-   real_t durationOnePeriod = real_t(2) * math::M_PI / omega;
+   real_t durationOnePeriod = real_t(2) * math::pi / omega;
    uint_t timeSteps = uint_c(periods * durationOnePeriod / dt);
 
-   WALBERLA_LOG_INFO("omega = " << omega << ", T = " << real_t(2) * math::M_PI / omega << ", time steps = " << timeSteps << ", phase = " << phase << ", periods = " << periods);
+   WALBERLA_LOG_INFO("omega = " << omega << ", T = " << real_t(2) * math::pi / omega << ", time steps = " << timeSteps << ", phase = " << phase << ", periods = " << periods);
 
    //initialize particle
    const auto pos = Vec3(0,0,analyticalTrajectory(amplitude, real_t(0), omega, phase));
