@@ -44,8 +44,8 @@ namespace initializer {
     *
     * 1) Setup
     *    - setConfigBlock: complete configuration block
-    *       Example: a) setting boundary  { NoSlip {} } or { UBB{ vel: 0.1; } }
-    *                b) setting flag      { flag: fluid; } also allowed for boundaries { flag: NoSlip }
+    *       Example: a) setting boundary  { NoSlip {} } or { UBB{ vel 0.1; } }
+    *                b) setting flag      { flag fluid; } also allowed for boundaries { flag NoSlip; }
     *
     *    - setBoundaryConfigBlock( BoundaryUID, config::block)
     *          setting boundaryUID with configuration as config::block
