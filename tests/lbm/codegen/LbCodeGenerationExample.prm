@@ -1,0 +1,75 @@
+
+Parameters 
+{
+	omega           1.8;
+	timesteps       500;
+
+	useGui 0;
+	remainingTimeLoggerFrequency 3; // in seconds
+}
+
+DomainSetup
+{
+   blocks        <  1,    1, 1 >;
+   cellsPerBlock <  30, 30, 10 >;
+   periodic      <  0,    0, 1 >;  
+}
+
+StabilityChecker
+{
+   checkFrequency 100;
+   streamOutput   false;
+   vtkOutput      true;
+}
+
+Boundaries 
+{
+    /*
+       possible sub-blocks: documentation for the subblocks can be found in src/geometry/initializers/BoundaryFrom*.h
+       	   - CellInterval	 BoundaryFromCellInterval.h
+       	   - Border          BoundaryFromDomainBorder.h
+       	   - VoxelFile	     BoundaryFromVoxelFile.h
+       	   - Body			 BoundaryFromBody.h
+       	   - GrayScaleImage  BoundaryFromImage.h
+       	   - RGBAImage	     BoundaryFromImage.h
+    */
+    
+	Border { direction W;    walldistance -1;  flag NoSlip; }
+	Border { direction E;    walldistance -1;  flag NoSlip; }
+    Border { direction S;    walldistance -1;  flag NoSlip; }
+    Border { direction N;    walldistance -1;  flag UBB; }
+}
+
+
+VTK 
+{
+   fluid_field
+   {
+      writeFrequency 100;
+      ghostLayers    1;
+      
+      before_functions {
+         PDFGhostLayerSync;
+      }
+      
+      inclusion_filters {
+         DomainFilter;
+      }
+      
+      writers {
+         Velocity;
+         Density;
+      }
+   }
+   
+   flag_field
+   {
+      writeFrequency 10000000; // write only once
+      ghostLayers    1;
+      
+      writers {
+         FlagField;
+      }
+   }
+
+}

@@ -71,9 +71,9 @@ waLBerla_compile_test( FILES SuViscoelasticityTest.cpp DEPENDS field blockforest
 waLBerla_execute_test( NAME  SuViscoelasticityTest COMMAND $<TARGET_FILE:SuViscoelasticityTest> ${CMAKE_CURRENT_SOURCE_DIR}/Su.prm )
 
 # Code Generation
-waLBerla_python_file_generates(codegen/SrtWithForceFieldModel.py
-        SrtWithForceFieldModel.cpp SrtWithForceFieldModel.h
-        MyNoSlip.cpp MyNoSlip.h
-        MyUBB.cpp MyUBB.h)
-waLBerla_compile_test( FILES codegen/SrtWithForceFieldModel.py
-                             codegen/SrtWithForceField.cpp )
+waLBerla_python_file_generates(codegen/LbCodeGenerationExample.py
+                              LbCodeGenerationExample_LatticeModel.cpp
+                              LbCodeGenerationExample_NoSlip.cpp
+                              LbCodeGenerationExample_UBB.cpp )
+waLBerla_compile_test( FILES codegen/LbCodeGenerationExample.py
+                             codegen/LbCodeGenerationExample.cpp)

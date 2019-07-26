@@ -18,8 +18,6 @@
 //
 //======================================================================================================================
 
-#include "SrtWithForceFieldModel.h"
-
 #include "blockforest/all.h"
 #include "core/all.h"
 #include "domain_decomposition/all.h"
@@ -34,18 +32,20 @@
 #include "lbm/gui/Connection.h"
 #include "lbm/vtk/VTKOutput.h"
 
-#include "MyUBB.h"
-#include "MyNoSlip.h"
+#include "LbCodeGenerationExample_UBB.h"
+#include "LbCodeGenerationExample_NoSlip.h"
+#include "LbCodeGenerationExample_LatticeModel.h"
 
 
 using namespace walberla;
 
-typedef lbm::SrtWithForceFieldModel          LatticeModel_T;
-typedef LatticeModel_T::Stencil              Stencil_T;
-typedef LatticeModel_T::CommunicationStencil CommunicationStencil_T;
-typedef lbm::PdfField< LatticeModel_T >      PdfField_T;
+typedef lbm::LbCodeGenerationExample_LatticeModel LatticeModel_T;
+typedef LatticeModel_T::Stencil                   Stencil_T;
+typedef LatticeModel_T::CommunicationStencil      CommunicationStencil_T;
+typedef lbm::PdfField< LatticeModel_T >           PdfField_T;
 
-typedef GhostLayerField<real_t, LatticeModel_T::Stencil::D > ForceField_T;
+typedef GhostLayerField< real_t, LatticeModel_T::Stencil::D > VectorField_T;
+typedef GhostLayerField< real_t, 1 > ScalarField_T;
 
 typedef walberla::uint8_t    flag_t;
 typedef FlagField< flag_t >  FlagField_T;
@@ -68,9 +68,11 @@ int main( int argc, char ** argv )
    const double remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 ); // in seconds
 
    // create fields
-   BlockDataID forceFieldId = field::addToStorage<ForceField_T>(blocks, "Force", real_t(0.0) );
+   BlockDataID forceFieldId = field::addToStorage<VectorField_T>( blocks, "Force", real_t( 0.0 ));
+   BlockDataID velFieldId = field::addToStorage<VectorField_T>( blocks, "Velocity", real_t( 0.0 ));
+   BlockDataID omegaFieldId = field::addToStorage<ScalarField_T>( blocks, "Omega", real_t( 0.0 ));
 
-   LatticeModel_T latticeModel = LatticeModel_T( forceFieldId, omega );
+   LatticeModel_T latticeModel = LatticeModel_T( forceFieldId, omegaFieldId, velFieldId, omega );
    BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, initialVelocity, real_t(1) );
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
@@ -80,8 +82,8 @@ int main( int argc, char ** argv )
 
    auto boundariesConfig = walberlaEnv.config()->getOneBlock( "Boundaries" );
 
-   lbm::MyUBB ubb(blocks, pdfFieldId);
-   lbm::MyNoSlip noSlip(blocks, pdfFieldId);
+   lbm::LbCodeGenerationExample_UBB ubb(blocks, pdfFieldId);
+   lbm::LbCodeGenerationExample_NoSlip noSlip(blocks, pdfFieldId);
 
    geometry::initBoundaryHandling<FlagField_T>(*blocks, flagFieldId, boundariesConfig);
    geometry::setNonBoundaryCellsToDomain<FlagField_T>(*blocks, flagFieldId, fluidFlagUID);
