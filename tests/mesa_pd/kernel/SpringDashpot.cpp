@@ -124,6 +124,15 @@ int main( int argc, char ** argv )
                                        real_t(101) * Vec3(1,1,1).getNormalized() * ((std::sqrt(real_t(12)) - 4) * sd.getStiffness(0, 0)),
                                        real_t(1e-6) );
 
+   auto cor  = real_t(0.87);
+   auto ct   = real_t(0.17);
+   auto meff = real_t(0.65);
+   sd.setParametersFromCOR(0, 0, cor, ct, meff);
+   //WALBERLA_CHECK_FLOAT_EQUAL(sd.getStiffness(0,0), (math::M_PI*math::M_PI - std::log(cor)*std::log(cor)) / (ct*ct) * meff);
+   //WALBERLA_CHECK_FLOAT_EQUAL(sd.getDampingN(0,0),  -real_t(2)*std::log(cor)/ct*meff);
+   WALBERLA_CHECK_FLOAT_EQUAL(sd.calcCoefficientOfRestitution(0, 0, meff), cor);
+   WALBERLA_CHECK_FLOAT_EQUAL(sd.calcCollisionTime(0, 0, meff), ct);
+
    return EXIT_SUCCESS;
 }
 
