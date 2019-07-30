@@ -101,7 +101,7 @@ option ( WALBERLA_PROFILE_USE               "Uses Profile to optimize"          
 # Compiler Optimization
 option ( WALBERLA_OPTIMIZE_FOR_LOCALHOST    "Enable compiler optimizations spcific to localhost" )
 
-option ( WALBERLA_LOG_SKIPPED               "Log skipped cmake targets"                       OFF)
+option ( WALBERLA_LOG_SKIPPED               "Log skipped cmake targets"                      ON  )
 
 # Installation Directory
 set ( CMAKE_INSTALL_PREFIX /usr/local/waLBerla CACHE STRING "The default installation directory."   )
