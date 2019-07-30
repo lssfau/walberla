@@ -553,7 +553,7 @@ inline void EPA::createInitialSimplex( size_t numPoints,
       }
 
       Vec3 direction1 = (d % axis).getNormalizedOrZero();
-      Quat q(d, (real_t(2.0)/real_t(3.0)) * real_t(walberla::math::M_PI));
+      Quat q(d, (real_t(2.0)/real_t(3.0)) * real_t(walberla::math::pi));
       Mat3 rot = q.toRotationMatrix();
       Vec3 direction2 = (rot*direction1).getNormalizedOrZero();
       Vec3 direction3 = (rot*direction2).getNormalizedOrZero();

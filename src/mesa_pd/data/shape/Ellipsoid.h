@@ -38,7 +38,7 @@ public:
 
    const Vec3&   getSemiAxes() const   { return semiAxes_; }
 
-   real_t getVolume() const override { return real_c(4.0/3.0) * math::M_PI * semiAxes_[0] * semiAxes_[1] * semiAxes_[2]; }
+   real_t getVolume() const override { return real_c(4.0/3.0) * math::pi * semiAxes_[0] * semiAxes_[1] * semiAxes_[2]; }
    void   updateMassAndInertia(const real_t density) override;
 
    Vec3 support( const Vec3& d_loc ) const override;

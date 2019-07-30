@@ -200,7 +200,7 @@ void MainTest()
    //Testcase 04 Cube with turned Cube
    WALBERLA_LOG_INFO("Test 04: CUBE <-> TURNED CUBE");
    //compute rotation.
-   real_t angle = walberla::math::M_PI/real_t(4.0);
+   real_t angle = walberla::math::pi/real_t(4.0);
    Vec3 zaxis(0, 0, 1);
    Quat q4(zaxis, angle);
 
