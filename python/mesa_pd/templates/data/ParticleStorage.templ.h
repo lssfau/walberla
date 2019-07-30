@@ -72,9 +72,13 @@ public:
       Particle* operator->(){return this;}
 
       {% for prop in properties %}
-      const {{prop.type}}& get{{prop.name | capFirst}}() const {return storage_.get{{prop.name | capFirst}}(i_);}
-      {{prop.type}}& get{{prop.name | capFirst}}Ref() {return storage_.get{{prop.name | capFirst}}Ref(i_);}
-      void set{{prop.name | capFirst}}(const {{prop.type}}& v) { storage_.set{{prop.name | capFirst}}(i_, v);}
+      using {{prop.name}}_type = {{prop.type}};
+      {%- endfor %}
+
+      {% for prop in properties %}
+      const {{prop.name}}_type& get{{prop.name | capFirst}}() const {return storage_.get{{prop.name | capFirst}}(i_);}
+      {{prop.name}}_type& get{{prop.name | capFirst}}Ref() {return storage_.get{{prop.name | capFirst}}Ref(i_);}
+      void set{{prop.name | capFirst}}(const {{prop.name}}_type& v) { storage_.set{{prop.name | capFirst}}(i_, v);}
       {% endfor %}
 
       size_t getIdx() const {return i_;}
@@ -136,9 +140,13 @@ public:
    Particle operator[](const size_t n) { return *iterator(this, n); }
 
    {% for prop in properties %}
-   const {{prop.type}}& get{{prop.name | capFirst}}(const size_t idx) const {return {{prop.name}}_[idx];}
-   {{prop.type}}& get{{prop.name | capFirst}}Ref(const size_t idx) {return {{prop.name}}_[idx];}
-   void set{{prop.name | capFirst}}(const size_t idx, const {{prop.type}}& v) { {{prop.name}}_[idx] = v; }
+   using {{prop.name}}_type = {{prop.type}};
+   {%- endfor %}
+
+   {% for prop in properties %}
+   const {{prop.name}}_type& get{{prop.name | capFirst}}(const size_t idx) const {return {{prop.name}}_[idx];}
+   {{prop.name}}_type& get{{prop.name | capFirst}}Ref(const size_t idx) {return {{prop.name}}_[idx];}
+   void set{{prop.name | capFirst}}(const size_t idx, const {{prop.name}}_type& v) { {{prop.name}}_[idx] = v; }
    {% endfor %}
 
    /**
@@ -150,12 +158,12 @@ public:
     * @param uid unique id of the particle to be created
     * @return iterator to the newly created particle
     */
-   inline iterator create(const id_t& uid);
+   inline iterator create(const uid_type& uid);
    inline iterator create(const bool global = false);
    inline iterator erase(iterator& it);
    /// Finds the entry corresponding to \p uid.
    /// \return iterator to the object or end iterator
-   inline iterator find(const id_t& uid);
+   inline iterator find(const uid_type& uid);
    inline void reserve(const size_t size);
    inline void clear();
    inline size_t size() const;
@@ -232,10 +240,10 @@ public:
 
    private:
    {%- for prop in properties %}
-   std::vector<{{prop.type}}> {{prop.name}}_ {};
+   std::vector<{{prop.name}}_type> {{prop.name}}_ {};
    {%- endfor %}
-   std::unordered_map<id_t, size_t> uidToIdx_;
-   static_assert(std::is_same<decltype(uid_)::value_type, id_t>::value,
+   std::unordered_map<uid_type, size_t> uidToIdx_;
+   static_assert(std::is_same<uid_type, id_t>::value,
                  "Property uid of type id_t is missing. This property is required!");
 };
 using Particle = ParticleStorage::Particle;
