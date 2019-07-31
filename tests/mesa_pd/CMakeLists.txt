@@ -63,8 +63,11 @@ waLBerla_execute_test( NAME   MESA_PD_Domain_DynamicRefinement PROCESSES 8)
 waLBerla_compile_test( NAME   MESA_PD_Domain_SerializeDeserialize FILES domain/SerializeDeserialize.cpp DEPENDS blockforest core pe)
 waLBerla_execute_test( NAME   MESA_PD_Domain_SerializeDeserialize PROCESSES 8 )
 
-waLBerla_compile_test( NAME   MESA_PD_DropTest FILES DropTest.cpp DEPENDS core )
-waLBerla_execute_test( NAME   MESA_PD_DropTest )
+waLBerla_compile_test( NAME   MESA_PD_DropTestAnalytic FILES DropTestAnalytic.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_DropTestAnalytic )
+
+waLBerla_compile_test( NAME   MESA_PD_DropTestGeneral FILES DropTestGeneral.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_DropTestGeneral )
 
 waLBerla_compile_test( NAME   MESA_PD_Kernel_ClearNextNeighborSync FILES kernel/ClearNextNeighborSync.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_ClearNextNeighborSync PROCESSES 2 )
