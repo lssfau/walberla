@@ -295,18 +295,18 @@ void FuzzyEllipsoidBox(uint_t iterations)
 {
    using namespace walberla::mesa_pd::data;
 
-   Vec3     normal;
-   Vec3     contactPoint;
-   real_t   penetrationDepth;
+   auto normal               = Vec3();
+   auto contactPoint         = Vec3();
+   auto penetrationDepth     = real_t(0);
 
-   Vec3     gjk_normal;
-   Vec3     gjk_contactPoint;
-   real_t   gjk_penetrationDepth;
+   auto gjk_normal           = Vec3();
+   auto gjk_contactPoint     = Vec3();
+   auto gjk_penetrationDepth = real_t(0);
 
    Box       bx(Vec3(2,2,2));
    Ellipsoid el(Vec3(2,2,2));
-   Support p1(Vec3(0,0,0), Rot3(), el);
-   Support p2(Vec3(real_t(3.999),0,0), Rot3(), bx);
+   Support   p1(Vec3(0,0,0), Rot3(), el);
+   Support   p2(Vec3(real_t(3.999),0,0), Rot3(), bx);
 
    for (uint_t i = 0; i < iterations; ++i)
    {
