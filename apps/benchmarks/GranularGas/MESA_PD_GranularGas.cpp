@@ -366,6 +366,11 @@ int main( int argc, char ** argv )
          integerProperties["RPReceives"]          = RPReceives;
          realProperties["linkedCellsVolume"]      = linkedCellsVolume;
          integerProperties["numLinkedCells"]      = int64_c(numLinkedCells);
+         realProperties["PUpS"]                   = double_c(PUpS);
+         realProperties["timer_min"]              = timer_reduced->min();
+         realProperties["timer_max"]              = timer_reduced->max();
+         realProperties["timer_average"]          = timer_reduced->average();
+         realProperties["timer_total"]            = timer_reduced->total();
 
          addBuildInfoToSQL( integerProperties, realProperties, stringProperties );
          saveToSQL(params, integerProperties, realProperties, stringProperties );
