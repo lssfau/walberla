@@ -108,6 +108,7 @@ void addSlurmPropertiesToSQL( std::map< std::string, int64_t > &        /*intege
    stringProperties["SLURM_NTASKS_PER_CORE"]    = envToString(std::getenv( "SLURM_NTASKS_PER_CORE" ));
    stringProperties["SLURM_NTASKS_PER_NODE"]    = envToString(std::getenv( "SLURM_NTASKS_PER_NODE" ));
    stringProperties["SLURM_NTASKS_PER_SOCKET"]  = envToString(std::getenv( "SLURM_NTASKS_PER_SOCKET" ));
+   stringProperties["SLURM_CPU_BIND_TYPE"]      = envToString(std::getenv( "SLURM_CPU_BIND_TYPE" ));
 }
 
 } //namespace mesa_pd
