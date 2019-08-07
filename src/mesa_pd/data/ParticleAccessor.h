@@ -48,101 +48,105 @@ class ParticleAccessor : public IAccessor
 public:
    ParticleAccessor(const std::shared_ptr<data::ParticleStorage>& ps) : ps_(ps) {}
    virtual ~ParticleAccessor() = default;
-   const walberla::id_t& getUid(const size_t p_idx) const {return ps_->getUid(p_idx);}
+   walberla::id_t const & getUid(const size_t p_idx) const {return ps_->getUid(p_idx);}
    walberla::id_t& getUidRef(const size_t p_idx) {return ps_->getUidRef(p_idx);}
-   void setUid(const size_t p_idx, const walberla::id_t& v) { ps_->setUid(p_idx, v);}
+   void setUid(const size_t p_idx, walberla::id_t const & v) { ps_->setUid(p_idx, v);}
    
-   const walberla::mesa_pd::Vec3& getPosition(const size_t p_idx) const {return ps_->getPosition(p_idx);}
+   walberla::mesa_pd::Vec3 const & getPosition(const size_t p_idx) const {return ps_->getPosition(p_idx);}
    walberla::mesa_pd::Vec3& getPositionRef(const size_t p_idx) {return ps_->getPositionRef(p_idx);}
-   void setPosition(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setPosition(p_idx, v);}
+   void setPosition(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setPosition(p_idx, v);}
    
-   const walberla::real_t& getInteractionRadius(const size_t p_idx) const {return ps_->getInteractionRadius(p_idx);}
+   walberla::real_t const & getInteractionRadius(const size_t p_idx) const {return ps_->getInteractionRadius(p_idx);}
    walberla::real_t& getInteractionRadiusRef(const size_t p_idx) {return ps_->getInteractionRadiusRef(p_idx);}
-   void setInteractionRadius(const size_t p_idx, const walberla::real_t& v) { ps_->setInteractionRadius(p_idx, v);}
+   void setInteractionRadius(const size_t p_idx, walberla::real_t const & v) { ps_->setInteractionRadius(p_idx, v);}
    
-   const walberla::mesa_pd::data::particle_flags::FlagT& getFlags(const size_t p_idx) const {return ps_->getFlags(p_idx);}
+   walberla::mesa_pd::data::particle_flags::FlagT const & getFlags(const size_t p_idx) const {return ps_->getFlags(p_idx);}
    walberla::mesa_pd::data::particle_flags::FlagT& getFlagsRef(const size_t p_idx) {return ps_->getFlagsRef(p_idx);}
-   void setFlags(const size_t p_idx, const walberla::mesa_pd::data::particle_flags::FlagT& v) { ps_->setFlags(p_idx, v);}
+   void setFlags(const size_t p_idx, walberla::mesa_pd::data::particle_flags::FlagT const & v) { ps_->setFlags(p_idx, v);}
    
-   const int& getOwner(const size_t p_idx) const {return ps_->getOwner(p_idx);}
+   int const & getOwner(const size_t p_idx) const {return ps_->getOwner(p_idx);}
    int& getOwnerRef(const size_t p_idx) {return ps_->getOwnerRef(p_idx);}
-   void setOwner(const size_t p_idx, const int& v) { ps_->setOwner(p_idx, v);}
+   void setOwner(const size_t p_idx, int const & v) { ps_->setOwner(p_idx, v);}
    
-   const std::unordered_set<walberla::mpi::MPIRank>& getGhostOwners(const size_t p_idx) const {return ps_->getGhostOwners(p_idx);}
+   std::unordered_set<walberla::mpi::MPIRank> const & getGhostOwners(const size_t p_idx) const {return ps_->getGhostOwners(p_idx);}
    std::unordered_set<walberla::mpi::MPIRank>& getGhostOwnersRef(const size_t p_idx) {return ps_->getGhostOwnersRef(p_idx);}
-   void setGhostOwners(const size_t p_idx, const std::unordered_set<walberla::mpi::MPIRank>& v) { ps_->setGhostOwners(p_idx, v);}
+   void setGhostOwners(const size_t p_idx, std::unordered_set<walberla::mpi::MPIRank> const & v) { ps_->setGhostOwners(p_idx, v);}
    
-   const size_t& getShapeID(const size_t p_idx) const {return ps_->getShapeID(p_idx);}
+   size_t const & getShapeID(const size_t p_idx) const {return ps_->getShapeID(p_idx);}
    size_t& getShapeIDRef(const size_t p_idx) {return ps_->getShapeIDRef(p_idx);}
-   void setShapeID(const size_t p_idx, const size_t& v) { ps_->setShapeID(p_idx, v);}
+   void setShapeID(const size_t p_idx, size_t const & v) { ps_->setShapeID(p_idx, v);}
    
-   const walberla::mesa_pd::Rot3& getRotation(const size_t p_idx) const {return ps_->getRotation(p_idx);}
+   walberla::mesa_pd::Rot3 const & getRotation(const size_t p_idx) const {return ps_->getRotation(p_idx);}
    walberla::mesa_pd::Rot3& getRotationRef(const size_t p_idx) {return ps_->getRotationRef(p_idx);}
-   void setRotation(const size_t p_idx, const walberla::mesa_pd::Rot3& v) { ps_->setRotation(p_idx, v);}
+   void setRotation(const size_t p_idx, walberla::mesa_pd::Rot3 const & v) { ps_->setRotation(p_idx, v);}
    
-   const walberla::mesa_pd::Vec3& getAngularVelocity(const size_t p_idx) const {return ps_->getAngularVelocity(p_idx);}
+   walberla::mesa_pd::Vec3 const & getAngularVelocity(const size_t p_idx) const {return ps_->getAngularVelocity(p_idx);}
    walberla::mesa_pd::Vec3& getAngularVelocityRef(const size_t p_idx) {return ps_->getAngularVelocityRef(p_idx);}
-   void setAngularVelocity(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setAngularVelocity(p_idx, v);}
+   void setAngularVelocity(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setAngularVelocity(p_idx, v);}
    
-   const walberla::mesa_pd::Vec3& getTorque(const size_t p_idx) const {return ps_->getTorque(p_idx);}
+   walberla::mesa_pd::Vec3 const & getTorque(const size_t p_idx) const {return ps_->getTorque(p_idx);}
    walberla::mesa_pd::Vec3& getTorqueRef(const size_t p_idx) {return ps_->getTorqueRef(p_idx);}
-   void setTorque(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setTorque(p_idx, v);}
+   void setTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setTorque(p_idx, v);}
    
-   const walberla::mesa_pd::Vec3& getLinearVelocity(const size_t p_idx) const {return ps_->getLinearVelocity(p_idx);}
+   walberla::mesa_pd::Vec3 const & getLinearVelocity(const size_t p_idx) const {return ps_->getLinearVelocity(p_idx);}
    walberla::mesa_pd::Vec3& getLinearVelocityRef(const size_t p_idx) {return ps_->getLinearVelocityRef(p_idx);}
-   void setLinearVelocity(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setLinearVelocity(p_idx, v);}
+   void setLinearVelocity(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setLinearVelocity(p_idx, v);}
    
-   const walberla::real_t& getInvMass(const size_t p_idx) const {return ps_->getInvMass(p_idx);}
+   walberla::real_t const & getInvMass(const size_t p_idx) const {return ps_->getInvMass(p_idx);}
    walberla::real_t& getInvMassRef(const size_t p_idx) {return ps_->getInvMassRef(p_idx);}
-   void setInvMass(const size_t p_idx, const walberla::real_t& v) { ps_->setInvMass(p_idx, v);}
+   void setInvMass(const size_t p_idx, walberla::real_t const & v) { ps_->setInvMass(p_idx, v);}
    
-   const walberla::mesa_pd::Vec3& getForce(const size_t p_idx) const {return ps_->getForce(p_idx);}
+   walberla::mesa_pd::Vec3 const & getForce(const size_t p_idx) const {return ps_->getForce(p_idx);}
    walberla::mesa_pd::Vec3& getForceRef(const size_t p_idx) {return ps_->getForceRef(p_idx);}
-   void setForce(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setForce(p_idx, v);}
+   void setForce(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setForce(p_idx, v);}
    
-   const walberla::mesa_pd::Vec3& getOldForce(const size_t p_idx) const {return ps_->getOldForce(p_idx);}
+   walberla::mesa_pd::Vec3 const & getOldForce(const size_t p_idx) const {return ps_->getOldForce(p_idx);}
    walberla::mesa_pd::Vec3& getOldForceRef(const size_t p_idx) {return ps_->getOldForceRef(p_idx);}
-   void setOldForce(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setOldForce(p_idx, v);}
+   void setOldForce(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldForce(p_idx, v);}
    
-   const walberla::mesa_pd::Vec3& getOldTorque(const size_t p_idx) const {return ps_->getOldTorque(p_idx);}
+   walberla::mesa_pd::Vec3 const & getOldTorque(const size_t p_idx) const {return ps_->getOldTorque(p_idx);}
    walberla::mesa_pd::Vec3& getOldTorqueRef(const size_t p_idx) {return ps_->getOldTorqueRef(p_idx);}
-   void setOldTorque(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setOldTorque(p_idx, v);}
+   void setOldTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldTorque(p_idx, v);}
    
-   const uint_t& getType(const size_t p_idx) const {return ps_->getType(p_idx);}
+   blockforest::Block* const & getCurrentBlock(const size_t p_idx) const {return ps_->getCurrentBlock(p_idx);}
+   blockforest::Block*& getCurrentBlockRef(const size_t p_idx) {return ps_->getCurrentBlockRef(p_idx);}
+   void setCurrentBlock(const size_t p_idx, blockforest::Block* const & v) { ps_->setCurrentBlock(p_idx, v);}
+   
+   uint_t const & getType(const size_t p_idx) const {return ps_->getType(p_idx);}
    uint_t& getTypeRef(const size_t p_idx) {return ps_->getTypeRef(p_idx);}
-   void setType(const size_t p_idx, const uint_t& v) { ps_->setType(p_idx, v);}
+   void setType(const size_t p_idx, uint_t const & v) { ps_->setType(p_idx, v);}
    
-   const int& getNextParticle(const size_t p_idx) const {return ps_->getNextParticle(p_idx);}
+   int const & getNextParticle(const size_t p_idx) const {return ps_->getNextParticle(p_idx);}
    int& getNextParticleRef(const size_t p_idx) {return ps_->getNextParticleRef(p_idx);}
-   void setNextParticle(const size_t p_idx, const int& v) { ps_->setNextParticle(p_idx, v);}
+   void setNextParticle(const size_t p_idx, int const & v) { ps_->setNextParticle(p_idx, v);}
    
-   const std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& getOldContactHistory(const size_t p_idx) const {return ps_->getOldContactHistory(p_idx);}
+   std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> const & getOldContactHistory(const size_t p_idx) const {return ps_->getOldContactHistory(p_idx);}
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& getOldContactHistoryRef(const size_t p_idx) {return ps_->getOldContactHistoryRef(p_idx);}
-   void setOldContactHistory(const size_t p_idx, const std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& v) { ps_->setOldContactHistory(p_idx, v);}
+   void setOldContactHistory(const size_t p_idx, std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> const & v) { ps_->setOldContactHistory(p_idx, v);}
    
-   const std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& getNewContactHistory(const size_t p_idx) const {return ps_->getNewContactHistory(p_idx);}
+   std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> const & getNewContactHistory(const size_t p_idx) const {return ps_->getNewContactHistory(p_idx);}
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& getNewContactHistoryRef(const size_t p_idx) {return ps_->getNewContactHistoryRef(p_idx);}
-   void setNewContactHistory(const size_t p_idx, const std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& v) { ps_->setNewContactHistory(p_idx, v);}
+   void setNewContactHistory(const size_t p_idx, std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> const & v) { ps_->setNewContactHistory(p_idx, v);}
    
-   const walberla::real_t& getTemperature(const size_t p_idx) const {return ps_->getTemperature(p_idx);}
+   walberla::real_t const & getTemperature(const size_t p_idx) const {return ps_->getTemperature(p_idx);}
    walberla::real_t& getTemperatureRef(const size_t p_idx) {return ps_->getTemperatureRef(p_idx);}
-   void setTemperature(const size_t p_idx, const walberla::real_t& v) { ps_->setTemperature(p_idx, v);}
+   void setTemperature(const size_t p_idx, walberla::real_t const & v) { ps_->setTemperature(p_idx, v);}
    
-   const walberla::real_t& getHeatFlux(const size_t p_idx) const {return ps_->getHeatFlux(p_idx);}
+   walberla::real_t const & getHeatFlux(const size_t p_idx) const {return ps_->getHeatFlux(p_idx);}
    walberla::real_t& getHeatFluxRef(const size_t p_idx) {return ps_->getHeatFluxRef(p_idx);}
-   void setHeatFlux(const size_t p_idx, const walberla::real_t& v) { ps_->setHeatFlux(p_idx, v);}
+   void setHeatFlux(const size_t p_idx, walberla::real_t const & v) { ps_->setHeatFlux(p_idx, v);}
    
-   const walberla::mesa_pd::Vec3& getDv(const size_t p_idx) const {return ps_->getDv(p_idx);}
+   walberla::mesa_pd::Vec3 const & getDv(const size_t p_idx) const {return ps_->getDv(p_idx);}
    walberla::mesa_pd::Vec3& getDvRef(const size_t p_idx) {return ps_->getDvRef(p_idx);}
-   void setDv(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setDv(p_idx, v);}
+   void setDv(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setDv(p_idx, v);}
    
-   const walberla::mesa_pd::Vec3& getDw(const size_t p_idx) const {return ps_->getDw(p_idx);}
+   walberla::mesa_pd::Vec3 const & getDw(const size_t p_idx) const {return ps_->getDw(p_idx);}
    walberla::mesa_pd::Vec3& getDwRef(const size_t p_idx) {return ps_->getDwRef(p_idx);}
-   void setDw(const size_t p_idx, const walberla::mesa_pd::Vec3& v) { ps_->setDw(p_idx, v);}
+   void setDw(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setDw(p_idx, v);}
    
-   const std::unordered_set<walberla::mpi::MPIRank>& getNeighborState(const size_t p_idx) const {return ps_->getNeighborState(p_idx);}
+   std::unordered_set<walberla::mpi::MPIRank> const & getNeighborState(const size_t p_idx) const {return ps_->getNeighborState(p_idx);}
    std::unordered_set<walberla::mpi::MPIRank>& getNeighborStateRef(const size_t p_idx) {return ps_->getNeighborStateRef(p_idx);}
-   void setNeighborState(const size_t p_idx, const std::unordered_set<walberla::mpi::MPIRank>& v) { ps_->setNeighborState(p_idx, v);}
+   void setNeighborState(const size_t p_idx, std::unordered_set<walberla::mpi::MPIRank> const & v) { ps_->setNeighborState(p_idx, v);}
    
 
    id_t getInvalidUid() const {return UniqueID<data::Particle>::invalidID();}
@@ -189,100 +193,104 @@ class SingleParticleAccessor : public IAccessor
 {
 public:
    virtual ~SingleParticleAccessor() = default;
-   const walberla::id_t& getUid(const size_t /*p_idx*/) const {return uid_;}
-   void setUid(const size_t /*p_idx*/, const walberla::id_t& v) { uid_ = v;}
+   walberla::id_t const & getUid(const size_t /*p_idx*/) const {return uid_;}
+   void setUid(const size_t /*p_idx*/, walberla::id_t const & v) { uid_ = v;}
    walberla::id_t& getUidRef(const size_t /*p_idx*/) {return uid_;}
    
-   const walberla::mesa_pd::Vec3& getPosition(const size_t /*p_idx*/) const {return position_;}
-   void setPosition(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { position_ = v;}
+   walberla::mesa_pd::Vec3 const & getPosition(const size_t /*p_idx*/) const {return position_;}
+   void setPosition(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { position_ = v;}
    walberla::mesa_pd::Vec3& getPositionRef(const size_t /*p_idx*/) {return position_;}
    
-   const walberla::real_t& getInteractionRadius(const size_t /*p_idx*/) const {return interactionRadius_;}
-   void setInteractionRadius(const size_t /*p_idx*/, const walberla::real_t& v) { interactionRadius_ = v;}
+   walberla::real_t const & getInteractionRadius(const size_t /*p_idx*/) const {return interactionRadius_;}
+   void setInteractionRadius(const size_t /*p_idx*/, walberla::real_t const & v) { interactionRadius_ = v;}
    walberla::real_t& getInteractionRadiusRef(const size_t /*p_idx*/) {return interactionRadius_;}
    
-   const walberla::mesa_pd::data::particle_flags::FlagT& getFlags(const size_t /*p_idx*/) const {return flags_;}
-   void setFlags(const size_t /*p_idx*/, const walberla::mesa_pd::data::particle_flags::FlagT& v) { flags_ = v;}
+   walberla::mesa_pd::data::particle_flags::FlagT const & getFlags(const size_t /*p_idx*/) const {return flags_;}
+   void setFlags(const size_t /*p_idx*/, walberla::mesa_pd::data::particle_flags::FlagT const & v) { flags_ = v;}
    walberla::mesa_pd::data::particle_flags::FlagT& getFlagsRef(const size_t /*p_idx*/) {return flags_;}
    
-   const int& getOwner(const size_t /*p_idx*/) const {return owner_;}
-   void setOwner(const size_t /*p_idx*/, const int& v) { owner_ = v;}
+   int const & getOwner(const size_t /*p_idx*/) const {return owner_;}
+   void setOwner(const size_t /*p_idx*/, int const & v) { owner_ = v;}
    int& getOwnerRef(const size_t /*p_idx*/) {return owner_;}
    
-   const std::unordered_set<walberla::mpi::MPIRank>& getGhostOwners(const size_t /*p_idx*/) const {return ghostOwners_;}
-   void setGhostOwners(const size_t /*p_idx*/, const std::unordered_set<walberla::mpi::MPIRank>& v) { ghostOwners_ = v;}
+   std::unordered_set<walberla::mpi::MPIRank> const & getGhostOwners(const size_t /*p_idx*/) const {return ghostOwners_;}
+   void setGhostOwners(const size_t /*p_idx*/, std::unordered_set<walberla::mpi::MPIRank> const & v) { ghostOwners_ = v;}
    std::unordered_set<walberla::mpi::MPIRank>& getGhostOwnersRef(const size_t /*p_idx*/) {return ghostOwners_;}
    
-   const size_t& getShapeID(const size_t /*p_idx*/) const {return shapeID_;}
-   void setShapeID(const size_t /*p_idx*/, const size_t& v) { shapeID_ = v;}
+   size_t const & getShapeID(const size_t /*p_idx*/) const {return shapeID_;}
+   void setShapeID(const size_t /*p_idx*/, size_t const & v) { shapeID_ = v;}
    size_t& getShapeIDRef(const size_t /*p_idx*/) {return shapeID_;}
    
-   const walberla::mesa_pd::Rot3& getRotation(const size_t /*p_idx*/) const {return rotation_;}
-   void setRotation(const size_t /*p_idx*/, const walberla::mesa_pd::Rot3& v) { rotation_ = v;}
+   walberla::mesa_pd::Rot3 const & getRotation(const size_t /*p_idx*/) const {return rotation_;}
+   void setRotation(const size_t /*p_idx*/, walberla::mesa_pd::Rot3 const & v) { rotation_ = v;}
    walberla::mesa_pd::Rot3& getRotationRef(const size_t /*p_idx*/) {return rotation_;}
    
-   const walberla::mesa_pd::Vec3& getAngularVelocity(const size_t /*p_idx*/) const {return angularVelocity_;}
-   void setAngularVelocity(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { angularVelocity_ = v;}
+   walberla::mesa_pd::Vec3 const & getAngularVelocity(const size_t /*p_idx*/) const {return angularVelocity_;}
+   void setAngularVelocity(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { angularVelocity_ = v;}
    walberla::mesa_pd::Vec3& getAngularVelocityRef(const size_t /*p_idx*/) {return angularVelocity_;}
    
-   const walberla::mesa_pd::Vec3& getTorque(const size_t /*p_idx*/) const {return torque_;}
-   void setTorque(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { torque_ = v;}
+   walberla::mesa_pd::Vec3 const & getTorque(const size_t /*p_idx*/) const {return torque_;}
+   void setTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { torque_ = v;}
    walberla::mesa_pd::Vec3& getTorqueRef(const size_t /*p_idx*/) {return torque_;}
    
-   const walberla::mesa_pd::Vec3& getLinearVelocity(const size_t /*p_idx*/) const {return linearVelocity_;}
-   void setLinearVelocity(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { linearVelocity_ = v;}
+   walberla::mesa_pd::Vec3 const & getLinearVelocity(const size_t /*p_idx*/) const {return linearVelocity_;}
+   void setLinearVelocity(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { linearVelocity_ = v;}
    walberla::mesa_pd::Vec3& getLinearVelocityRef(const size_t /*p_idx*/) {return linearVelocity_;}
    
-   const walberla::real_t& getInvMass(const size_t /*p_idx*/) const {return invMass_;}
-   void setInvMass(const size_t /*p_idx*/, const walberla::real_t& v) { invMass_ = v;}
+   walberla::real_t const & getInvMass(const size_t /*p_idx*/) const {return invMass_;}
+   void setInvMass(const size_t /*p_idx*/, walberla::real_t const & v) { invMass_ = v;}
    walberla::real_t& getInvMassRef(const size_t /*p_idx*/) {return invMass_;}
    
-   const walberla::mesa_pd::Vec3& getForce(const size_t /*p_idx*/) const {return force_;}
-   void setForce(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { force_ = v;}
+   walberla::mesa_pd::Vec3 const & getForce(const size_t /*p_idx*/) const {return force_;}
+   void setForce(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { force_ = v;}
    walberla::mesa_pd::Vec3& getForceRef(const size_t /*p_idx*/) {return force_;}
    
-   const walberla::mesa_pd::Vec3& getOldForce(const size_t /*p_idx*/) const {return oldForce_;}
-   void setOldForce(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { oldForce_ = v;}
+   walberla::mesa_pd::Vec3 const & getOldForce(const size_t /*p_idx*/) const {return oldForce_;}
+   void setOldForce(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldForce_ = v;}
    walberla::mesa_pd::Vec3& getOldForceRef(const size_t /*p_idx*/) {return oldForce_;}
    
-   const walberla::mesa_pd::Vec3& getOldTorque(const size_t /*p_idx*/) const {return oldTorque_;}
-   void setOldTorque(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { oldTorque_ = v;}
+   walberla::mesa_pd::Vec3 const & getOldTorque(const size_t /*p_idx*/) const {return oldTorque_;}
+   void setOldTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldTorque_ = v;}
    walberla::mesa_pd::Vec3& getOldTorqueRef(const size_t /*p_idx*/) {return oldTorque_;}
    
-   const uint_t& getType(const size_t /*p_idx*/) const {return type_;}
-   void setType(const size_t /*p_idx*/, const uint_t& v) { type_ = v;}
+   blockforest::Block* const & getCurrentBlock(const size_t /*p_idx*/) const {return currentBlock_;}
+   void setCurrentBlock(const size_t /*p_idx*/, blockforest::Block* const & v) { currentBlock_ = v;}
+   blockforest::Block*& getCurrentBlockRef(const size_t /*p_idx*/) {return currentBlock_;}
+   
+   uint_t const & getType(const size_t /*p_idx*/) const {return type_;}
+   void setType(const size_t /*p_idx*/, uint_t const & v) { type_ = v;}
    uint_t& getTypeRef(const size_t /*p_idx*/) {return type_;}
    
-   const int& getNextParticle(const size_t /*p_idx*/) const {return nextParticle_;}
-   void setNextParticle(const size_t /*p_idx*/, const int& v) { nextParticle_ = v;}
+   int const & getNextParticle(const size_t /*p_idx*/) const {return nextParticle_;}
+   void setNextParticle(const size_t /*p_idx*/, int const & v) { nextParticle_ = v;}
    int& getNextParticleRef(const size_t /*p_idx*/) {return nextParticle_;}
    
-   const std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& getOldContactHistory(const size_t /*p_idx*/) const {return oldContactHistory_;}
-   void setOldContactHistory(const size_t /*p_idx*/, const std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& v) { oldContactHistory_ = v;}
+   std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> const & getOldContactHistory(const size_t /*p_idx*/) const {return oldContactHistory_;}
+   void setOldContactHistory(const size_t /*p_idx*/, std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> const & v) { oldContactHistory_ = v;}
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& getOldContactHistoryRef(const size_t /*p_idx*/) {return oldContactHistory_;}
    
-   const std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& getNewContactHistory(const size_t /*p_idx*/) const {return newContactHistory_;}
-   void setNewContactHistory(const size_t /*p_idx*/, const std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& v) { newContactHistory_ = v;}
+   std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> const & getNewContactHistory(const size_t /*p_idx*/) const {return newContactHistory_;}
+   void setNewContactHistory(const size_t /*p_idx*/, std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> const & v) { newContactHistory_ = v;}
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& getNewContactHistoryRef(const size_t /*p_idx*/) {return newContactHistory_;}
    
-   const walberla::real_t& getTemperature(const size_t /*p_idx*/) const {return temperature_;}
-   void setTemperature(const size_t /*p_idx*/, const walberla::real_t& v) { temperature_ = v;}
+   walberla::real_t const & getTemperature(const size_t /*p_idx*/) const {return temperature_;}
+   void setTemperature(const size_t /*p_idx*/, walberla::real_t const & v) { temperature_ = v;}
    walberla::real_t& getTemperatureRef(const size_t /*p_idx*/) {return temperature_;}
    
-   const walberla::real_t& getHeatFlux(const size_t /*p_idx*/) const {return heatFlux_;}
-   void setHeatFlux(const size_t /*p_idx*/, const walberla::real_t& v) { heatFlux_ = v;}
+   walberla::real_t const & getHeatFlux(const size_t /*p_idx*/) const {return heatFlux_;}
+   void setHeatFlux(const size_t /*p_idx*/, walberla::real_t const & v) { heatFlux_ = v;}
    walberla::real_t& getHeatFluxRef(const size_t /*p_idx*/) {return heatFlux_;}
    
-   const walberla::mesa_pd::Vec3& getDv(const size_t /*p_idx*/) const {return dv_;}
-   void setDv(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { dv_ = v;}
+   walberla::mesa_pd::Vec3 const & getDv(const size_t /*p_idx*/) const {return dv_;}
+   void setDv(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { dv_ = v;}
    walberla::mesa_pd::Vec3& getDvRef(const size_t /*p_idx*/) {return dv_;}
    
-   const walberla::mesa_pd::Vec3& getDw(const size_t /*p_idx*/) const {return dw_;}
-   void setDw(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { dw_ = v;}
+   walberla::mesa_pd::Vec3 const & getDw(const size_t /*p_idx*/) const {return dw_;}
+   void setDw(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { dw_ = v;}
    walberla::mesa_pd::Vec3& getDwRef(const size_t /*p_idx*/) {return dw_;}
    
-   const std::unordered_set<walberla::mpi::MPIRank>& getNeighborState(const size_t /*p_idx*/) const {return neighborState_;}
-   void setNeighborState(const size_t /*p_idx*/, const std::unordered_set<walberla::mpi::MPIRank>& v) { neighborState_ = v;}
+   std::unordered_set<walberla::mpi::MPIRank> const & getNeighborState(const size_t /*p_idx*/) const {return neighborState_;}
+   void setNeighborState(const size_t /*p_idx*/, std::unordered_set<walberla::mpi::MPIRank> const & v) { neighborState_ = v;}
    std::unordered_set<walberla::mpi::MPIRank>& getNeighborStateRef(const size_t /*p_idx*/) {return neighborState_;}
    
 
@@ -311,6 +319,7 @@ private:
    walberla::mesa_pd::Vec3 force_;
    walberla::mesa_pd::Vec3 oldForce_;
    walberla::mesa_pd::Vec3 oldTorque_;
+   blockforest::Block* currentBlock_;
    uint_t type_;
    int nextParticle_;
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> oldContactHistory_;

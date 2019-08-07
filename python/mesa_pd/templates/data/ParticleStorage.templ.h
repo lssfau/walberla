@@ -76,9 +76,9 @@ public:
       {%- endfor %}
 
       {% for prop in properties %}
-      const {{prop.name}}_type& get{{prop.name | capFirst}}() const {return storage_.get{{prop.name | capFirst}}(i_);}
+      {{prop.name}}_type const & get{{prop.name | capFirst}}() const {return storage_.get{{prop.name | capFirst}}(i_);}
       {{prop.name}}_type& get{{prop.name | capFirst}}Ref() {return storage_.get{{prop.name | capFirst}}Ref(i_);}
-      void set{{prop.name | capFirst}}(const {{prop.name}}_type& v) { storage_.set{{prop.name | capFirst}}(i_, v);}
+      void set{{prop.name | capFirst}}({{prop.name}}_type const & v) { storage_.set{{prop.name | capFirst}}(i_, v);}
       {% endfor %}
 
       size_t getIdx() const {return i_;}
@@ -144,9 +144,9 @@ public:
    {%- endfor %}
 
    {% for prop in properties %}
-   const {{prop.name}}_type& get{{prop.name | capFirst}}(const size_t idx) const {return {{prop.name}}_[idx];}
+   {{prop.name}}_type const & get{{prop.name | capFirst}}(const size_t idx) const {return {{prop.name}}_[idx];}
    {{prop.name}}_type& get{{prop.name | capFirst}}Ref(const size_t idx) {return {{prop.name}}_[idx];}
-   void set{{prop.name | capFirst}}(const size_t idx, const {{prop.name}}_type& v) { {{prop.name}}_[idx] = v; }
+   void set{{prop.name | capFirst}}(const size_t idx, {{prop.name}}_type const & v) { {{prop.name}}_[idx] = v; }
    {% endfor %}
 
    /**
@@ -567,7 +567,7 @@ public:
    using return_type = {{prop.type}};
    {{prop.type}}& operator()(data::Particle& p) const {return p.get{{prop.name | capFirst}}Ref();}
    {{prop.type}}& operator()(data::Particle&& p) const {return p.get{{prop.name | capFirst}}Ref();}
-   const {{prop.type}}& operator()(const data::Particle& p) const {return p.get{{prop.name | capFirst}}();}
+   {{prop.type}} const & operator()(const data::Particle& p) const {return p.get{{prop.name | capFirst}}();}
 };
 {%- endfor %}
 
