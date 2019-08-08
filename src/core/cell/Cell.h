@@ -381,3 +381,15 @@ namespace mpi
 
 
 } // namespace walberla
+
+namespace std
+{
+   template<>
+   struct hash< walberla::Cell >
+   {
+      std::size_t operator()( walberla::Cell const & cell ) const noexcept
+      {
+         return walberla::cell::hash_value( cell );
+      }
+   };
+} // namespace std
