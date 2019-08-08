@@ -347,6 +347,11 @@ int main( int argc, char ** argv )
          stringProperties["tag"]                  = "mesa_pd";
          integerProperties["mpi_num_processes"]   = mpiManager->numProcesses();
          integerProperties["omp_max_threads"]     = omp_get_max_threads();
+         realProperties["PUpS"]                   = double_c(PUpS);
+         realProperties["timer_min"]              = timer_reduced->min();
+         realProperties["timer_max"]              = timer_reduced->max();
+         realProperties["timer_average"]          = timer_reduced->average();
+         realProperties["timer_total"]            = timer_reduced->total();
          integerProperties["outerIteration"]      = int64_c(outerIteration);
          integerProperties["num_particles"]       = numParticles;
          integerProperties["num_ghost_particles"] = numGhostParticles;
