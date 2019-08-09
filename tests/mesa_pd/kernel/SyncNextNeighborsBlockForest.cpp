@@ -80,13 +80,7 @@ int main( int argc, char ** argv )
    //checking blocks distribution
    WALBERLA_CHECK_EQUAL(forest->size(), 8);
 
-   math::AABB localDomain = forest->begin()->getAABB();
-   for (auto& iBlk : *forest)
-   {
-      localDomain.merge(iBlk.getAABB());
-   }
-
-   domain::BlockForestDomain domain(forest);
+   auto domain = std::make_shared<domain::BlockForestDomain>(forest);
    std::array< bool, 3 > periodic;
    periodic[0] = forest->isPeriodic(0);
    periodic[1] = forest->isPeriodic(1);
@@ -97,7 +91,7 @@ int main( int argc, char ** argv )
    data::ParticleAccessor ac(ps);
 
    //initialize particle
-   auto uid = createSphere(*ps, domain);
+   auto uid = createSphere(*ps, *domain);
    WALBERLA_LOG_DEVEL_ON_ROOT("uid: " << uid);
 
    //init kernels
@@ -136,13 +130,13 @@ int main( int argc, char ** argv )
       }
 
       //sync
-      SNN(*ps, forest);
+      SNN(*ps, forest, domain);
 
       //check
-      if (sqDistancePointToAABBPeriodic(pos, localDomain, forest->getDomain(), periodic) <= radius * radius)
+      if (sqDistancePointToAABBPeriodic(pos, domain->getUnionOfLocalAABBs(), forest->getDomain(), periodic) <= radius * radius)
       {
          WALBERLA_CHECK_EQUAL(ps->size(), 1);
-         if (localDomain.contains(pos))
+         if (domain->getUnionOfLocalAABBs().contains(pos))
          {
             WALBERLA_CHECK(!data::particle_flags::isSet(ps->begin()->getFlags(), data::particle_flags::GHOST));
          } else
