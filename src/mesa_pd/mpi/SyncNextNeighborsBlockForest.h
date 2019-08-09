@@ -29,7 +29,7 @@
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/Flags.h>
 #include <mesa_pd/data/ParticleStorage.h>
-#include <mesa_pd/domain/IDomain.h>
+#include <mesa_pd/domain/BlockForestDomain.h>
 #include <mesa_pd/mpi/notifications/PackNotification.h>
 #include <mesa_pd/mpi/notifications/ParseMessage.h>
 #include <mesa_pd/mpi/notifications/ParticleCopyNotification.h>
@@ -57,6 +57,7 @@ class SyncNextNeighborsBlockForest
 public:
    void operator()(data::ParticleStorage& ps,
                    const std::shared_ptr<blockforest::BlockForest>& blockforest,
+                   const std::shared_ptr<domain::BlockForestDomain>& domain,
                    const real_t dx = real_t(0)) const;
 
    int64_t getBytesSent() const { return bs.getBytesSent(); }

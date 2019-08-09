@@ -52,6 +52,7 @@ void correctParticlePosition(Vec3& pt,
 
 void SyncNextNeighborsBlockForest::operator()(data::ParticleStorage& ps,
                                               const std::shared_ptr<blockforest::BlockForest>& bf,
+                                              const std::shared_ptr<domain::BlockForestDomain>& domain,
                                               const real_t dx) const
 {
    if (numProcesses_ == 1) return;
@@ -79,14 +80,13 @@ void SyncNextNeighborsBlockForest::operator()(data::ParticleStorage& ps,
    // Receiving the updates for the remote rigid bodies from the connected processes
    WALBERLA_LOG_DETAIL( "Parsing of particle synchronization response starts..." );
    ParseMessage parseMessage;
-   domain::BlockForestDomain domain(bf);
    for( auto it = bs.begin(); it != bs.end(); ++it )
    {
       walberla::uint8_t tmp;
       it.buffer() >> tmp;
       while( !it.buffer().isEmpty() )
       {
-         parseMessage(it.rank(), it.buffer(), ps, domain);
+         parseMessage(it.rank(), it.buffer(), ps, *domain);
       }
    }
    WALBERLA_LOG_DETAIL( "Parsing of particle synchronization response ended." );
