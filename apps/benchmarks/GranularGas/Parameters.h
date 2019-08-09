@@ -48,6 +48,15 @@ struct Parameters
    int64_t visSpacing = 1000;
    std::string path = "vtk_out";
    std::string sqlFile = "benchmark.sqlite";
+   uint_t regridMin = uint_c(100);
+   uint_t regridMax = uint_c(1000);
+   int maxBlocksPerProcess = int_c(1000);
+   real_t baseWeight = real_t(10.0);
+   real_t metisipc2redist = real_t(1000.0);
+   std::string LBAlgorithm = "Hilbert";
+   std::string metisAlgorithm = "PART_GEOM_KWAY";
+   std::string metisWeightsToUse = "BOTH_WEIGHTS";
+   std::string metisEdgeSource = "EDGES_FROM_EDGE_WEIGHTS";
 };
 
 void loadFromConfig(Parameters& params,

@@ -71,6 +71,33 @@ void loadFromConfig(Parameters& params, const Config::BlockHandle& cfg)
    params.sqlFile = cfg.getParameter<std::string>("sqlFile", "benchmark.sqlite" );
    WALBERLA_LOG_INFO_ON_ROOT("sqlFile: " << params.sqlFile);
    
+   params.regridMin = cfg.getParameter<uint_t>("regridMin", uint_c(100) );
+   WALBERLA_LOG_INFO_ON_ROOT("regridMin: " << params.regridMin);
+   
+   params.regridMax = cfg.getParameter<uint_t>("regridMax", uint_c(1000) );
+   WALBERLA_LOG_INFO_ON_ROOT("regridMax: " << params.regridMax);
+   
+   params.maxBlocksPerProcess = cfg.getParameter<int>("maxBlocksPerProcess", int_c(1000) );
+   WALBERLA_LOG_INFO_ON_ROOT("maxBlocksPerProcess: " << params.maxBlocksPerProcess);
+   
+   params.baseWeight = cfg.getParameter<real_t>("baseWeight", real_t(10.0) );
+   WALBERLA_LOG_INFO_ON_ROOT("baseWeight: " << params.baseWeight);
+   
+   params.metisipc2redist = cfg.getParameter<real_t>("metisipc2redist", real_t(1000.0) );
+   WALBERLA_LOG_INFO_ON_ROOT("metisipc2redist: " << params.metisipc2redist);
+   
+   params.LBAlgorithm = cfg.getParameter<std::string>("LBAlgorithm", "Hilbert" );
+   WALBERLA_LOG_INFO_ON_ROOT("LBAlgorithm: " << params.LBAlgorithm);
+   
+   params.metisAlgorithm = cfg.getParameter<std::string>("metisAlgorithm", "PART_GEOM_KWAY" );
+   WALBERLA_LOG_INFO_ON_ROOT("metisAlgorithm: " << params.metisAlgorithm);
+   
+   params.metisWeightsToUse = cfg.getParameter<std::string>("metisWeightsToUse", "BOTH_WEIGHTS" );
+   WALBERLA_LOG_INFO_ON_ROOT("metisWeightsToUse: " << params.metisWeightsToUse);
+   
+   params.metisEdgeSource = cfg.getParameter<std::string>("metisEdgeSource", "EDGES_FROM_EDGE_WEIGHTS" );
+   WALBERLA_LOG_INFO_ON_ROOT("metisEdgeSource: " << params.metisEdgeSource);
+   
 }
 
 void saveToSQL(const Parameters& params,
@@ -100,6 +127,21 @@ void saveToSQL(const Parameters& params,
    stringProperties["path"] = params.path;
    
    stringProperties["sqlFile"] = params.sqlFile;
+   
+   
+   
+   
+   realProperties["baseWeight"] = double_c(params.baseWeight);
+   
+   realProperties["metisipc2redist"] = double_c(params.metisipc2redist);
+   
+   stringProperties["LBAlgorithm"] = params.LBAlgorithm;
+   
+   stringProperties["metisAlgorithm"] = params.metisAlgorithm;
+   
+   stringProperties["metisWeightsToUse"] = params.metisWeightsToUse;
+   
+   stringProperties["metisEdgeSource"] = params.metisEdgeSource;
    
 }
 
