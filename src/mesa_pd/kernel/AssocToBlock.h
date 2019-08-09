@@ -18,12 +18,6 @@
 //
 //======================================================================================================================
 
-//======================================================================================================================
-//
-//  THIS FILE IS GENERATED - PLEASE CHANGE THE TEMPLATE !!!
-//
-//======================================================================================================================
-
 #pragma once
 
 #include <mesa_pd/data/DataTypes.h>
@@ -35,6 +29,16 @@ namespace walberla {
 namespace mesa_pd {
 namespace kernel {
 
+/**
+ * Kernel which updates the currentBlock property of all local properties.
+ * All particles are checked against the blocks in the BlockForest and the property
+ * is set accordingly.
+ *
+ * \attention This kernel must only be run on local particles. Ghost particles do not have
+ * a corresponding block!
+ * \post currentBlock property of all local particles is up-to-date.
+ * \ingroup mesa_pd_kernel
+ */
 class AssocToBlock
 {
 public:
@@ -72,7 +76,17 @@ inline void AssocToBlock::operator()(const size_t idx,
       }
    }
 
-   WALBERLA_CHECK_NOT_NULLPTR(currentBlock, ac.getPosition(idx) << "\n" << bf_->begin()->getAABB());
+   //cannot happen if called only for local particles!
+   //no "owning" block was found within the BlockForest...
+   if  (currentBlock == nullptr)
+   {
+      WALBERLA_LOG_DEVEL( ac.getPosition(idx) );
+      for (auto& blk : bf_->getBlockMap())
+      {
+         WALBERLA_LOG_DEVEL(blk.second->getAABB());
+      }
+   }
+   WALBERLA_CHECK_NOT_NULLPTR(currentBlock, ac.getPosition(idx));
 }
 
 } //namespace kernel
