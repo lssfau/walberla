@@ -264,6 +264,7 @@ int main( int argc, char ** argv )
    int64_t contactsDetected = 0;
    int64_t contactsTreated  = 0;
 
+   WALBERLA_MPI_BARRIER();
    WALBERLA_LOG_DEVEL_ON_ROOT("running imbalanced simulation");
    timerImbalanced.start();
    for (int64_t i=0; i < params.simulationSteps; ++i)
@@ -326,8 +327,8 @@ int main( int argc, char ** argv )
       tpImbalanced["SNN"].end();
    }
    timerImbalanced.end();
-   WALBERLA_MPI_BARRIER();
 
+   WALBERLA_MPI_BARRIER();
    timerLoadBalancing.start();
    if (bRebalance)
    {
@@ -349,7 +350,6 @@ int main( int argc, char ** argv )
       domain->refresh();
       lc = std::make_shared<data::LinkedCells>(domain->getUnionOfLocalAABBs().getExtended(params.spacing), params.spacing );
       ps->forEachParticle(true, kernel::SelectLocal(), accessor, assoc, accessor);
-      WALBERLA_LOG_DEVEL_VAR(ps->size());
       SNN(*ps, forest, domain);
       sortParticleStorage(*ps, params.sorting, lc->domain_, uint_c(lc->numCellsPerDim_[0]));
    }
@@ -448,7 +448,7 @@ int main( int argc, char ** argv )
    double PUpSImbalanced = 0.0;
    WALBERLA_ROOT_SECTION()
    {
-      WALBERLA_LOG_INFO_ON_ROOT(*timerImbalancedReduced);
+      WALBERLA_LOG_INFO_ON_ROOT("IMBALANCED " << *timerImbalancedReduced);
       PUpSImbalanced = double_c(numParticles) * double_c(params.simulationSteps) / double_c(timerImbalancedReduced->max());
       WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpSImbalanced);
    }
@@ -457,7 +457,7 @@ int main( int argc, char ** argv )
    double PUpSBalanced = 0.0;
    WALBERLA_ROOT_SECTION()
    {
-      WALBERLA_LOG_INFO_ON_ROOT(*timerBalancedReduced);
+      WALBERLA_LOG_INFO_ON_ROOT("BALANCED " << *timerBalancedReduced);
       PUpSBalanced = double_c(numParticles) * double_c(params.simulationSteps) / double_c(timerBalancedReduced->max());
       WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpSBalanced);
    }
