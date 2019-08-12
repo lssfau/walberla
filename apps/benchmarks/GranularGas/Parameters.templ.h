@@ -27,11 +27,12 @@
 #pragma once
 
 #include <core/config/Config.h>
-#include <core/DataTypes.h>
+#include <mesa_pd/data/DataTypes.h>
 
 #include <string>
 
 namespace walberla {
+namespace mesa_pd {
 
 struct Parameters
 {
@@ -48,4 +49,5 @@ void saveToSQL(const Parameters& params,
                std::map< std::string, double >&            realProperties,
                std::map< std::string, std::string >&       stringProperties );
 
+} //namespace mesa_pd
 } //namespace walberla

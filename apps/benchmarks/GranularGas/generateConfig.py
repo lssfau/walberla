@@ -5,6 +5,7 @@ from ConfigGenerator import Config
 
 cfg = Config()
 cfg.addParameter("sorting",                "std::string", '"none"')
+cfg.addParameter("normal",                 "Vec3",        "Vec3(real_t(1.0), real_t(1.0), real_t(1.0))")
 cfg.addParameter("spacing",                "real_t",      "real_t(1.0)")
 cfg.addParameter("radius",                 "real_t",      "real_t(0.5)")
 cfg.addParameter("bBarrier",               "bool",        "false")
@@ -27,6 +28,5 @@ cfg.addParameter("LBAlgorithm",            "std::string", '"Hilbert"')
 cfg.addParameter("metisAlgorithm",         "std::string", '"PART_GEOM_KWAY"' );
 cfg.addParameter("metisWeightsToUse",      "std::string", '"BOTH_WEIGHTS"' );
 cfg.addParameter("metisEdgeSource",        "std::string", '"EDGES_FROM_EDGE_WEIGHTS"' );
-
 
 cfg.generate()

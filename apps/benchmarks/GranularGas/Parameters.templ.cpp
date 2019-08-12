@@ -29,6 +29,7 @@
 #include <core/logging/Logging.h>
 
 namespace walberla {
+namespace mesa_pd {
 
 void loadFromConfig(Parameters& params, const Config::BlockHandle& cfg)
 {
@@ -56,4 +57,5 @@ void saveToSQL(const Parameters& params,
    {% endfor %}
 }
 
+} //namespace mesa_pd
 } //namespace walberla

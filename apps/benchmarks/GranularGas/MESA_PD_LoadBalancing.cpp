@@ -89,8 +89,9 @@ int main( int argc, char ** argv )
    auto mpiManager = walberla::mpi::MPIManager::instance();
    mpiManager->useWorldComm();
 
-   logging::Logging::instance()->setStreamLogLevel(logging::Logging::INFO);
-   logging::Logging::instance()->setFileLogLevel(logging::Logging::INFO);
+   //   logging::Logging::instance()->setStreamLogLevel(logging::Logging::INFO);
+   //   logging::Logging::instance()->includeLoggingToFile("LoadBalancing");
+   //   logging::Logging::instance()->setFileLogLevel(logging::Logging::DETAIL);
 
    WALBERLA_LOG_INFO_ON_ROOT( "config file: " << argv[1] );
    WALBERLA_LOG_INFO_ON_ROOT( "waLBerla Revision: " << WALBERLA_GIT_SHA1 );
@@ -184,7 +185,6 @@ int main( int argc, char ** argv )
    }
 
    auto domain = std::make_shared<domain::BlockForestDomain>(forest);
-   auto simulationDomain = forest->getDomain();
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - START ***");
 
@@ -205,7 +205,7 @@ int main( int argc, char ** argv )
                                             params.spacing))
       {
          WALBERLA_CHECK(iBlk.getAABB().contains(pt));
-         auto tmp = dot( (pt - center), Vec3(real_t(1), real_t(1), real_t(1)) );
+         auto tmp = dot( (pt - center), params.normal );
          if (tmp < 0)
          {
             createSphere(*ps, pt, params.radius, smallSphere);
@@ -215,27 +215,6 @@ int main( int argc, char ** argv )
    int64_t numParticles = int64_c(ps->size());
    walberla::mpi::reduceInplace(numParticles, walberla::mpi::SUM);
    WALBERLA_LOG_INFO_ON_ROOT("#particles created: " << numParticles);
-
-   auto shift = (params.spacing - params.radius - params.radius) * real_t(0.5);
-   auto confiningDomain = simulationDomain.getExtended(shift);
-
-   //   if (!forest->isPeriodic(0))
-   //   {
-   //      createPlane(*ps, *ss, confiningDomain.minCorner(), Vec3(+1,0,0));
-   //      createPlane(*ps, *ss, confiningDomain.maxCorner(), Vec3(-1,0,0));
-   //   }
-
-   //   if (!forest->isPeriodic(1))
-   //   {
-   //      createPlane(*ps, *ss, confiningDomain.minCorner(), Vec3(0,+1,0));
-   //      createPlane(*ps, *ss, confiningDomain.maxCorner(), Vec3(0,-1,0));
-   //   }
-
-   //   if (!forest->isPeriodic(2))
-   //   {
-   //      createPlane(*ps, *ss, confiningDomain.minCorner(), Vec3(0,0,+1));
-   //      createPlane(*ps, *ss, confiningDomain.maxCorner(), Vec3(0,0,-1));
-   //   }
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - END ***");
 
@@ -264,224 +243,328 @@ int main( int argc, char ** argv )
    mpi::SyncNextNeighborsBlockForest     SNN;
 
    // initial sync
-   domain::createWithNeighborhood( accessor, *forest, *ic );
-   forest->refresh();
-   domain->refresh();
-   lc = std::make_shared<data::LinkedCells>(domain->getUnionOfLocalAABBs().getExtended(params.spacing), params.spacing );
    ps->forEachParticle(true, kernel::SelectLocal(), accessor, assoc, accessor);
-   WALBERLA_LOG_DEVEL_VAR(ps->size());
    SNN(*ps, forest, domain);
    sortParticleStorage(*ps, params.sorting, lc->domain_, uint_c(lc->numCellsPerDim_[0]));
 
-   for (int64_t outerIteration = 0; outerIteration < params.numOuterIterations; ++outerIteration)
+   WcTimer      timerImbalanced;
+   WcTimer      timerLoadBalancing;
+   WcTimer      timerBalanced;
+   WcTimingPool tpImbalanced;
+   WcTimingPool tpBalanced;
+   auto    SNNBytesSent     = SNN.getBytesSent();
+   auto    SNNBytesReceived = SNN.getBytesReceived();
+   auto    SNNSends         = SNN.getNumberOfSends();
+   auto    SNNReceives      = SNN.getNumberOfReceives();
+   auto    RPBytesSent      = RP.getBytesSent();
+   auto    RPBytesReceived  = RP.getBytesReceived();
+   auto    RPSends          = RP.getNumberOfSends();
+   auto    RPReceives       = RP.getNumberOfReceives();
+   int64_t contactsChecked  = 0;
+   int64_t contactsDetected = 0;
+   int64_t contactsTreated  = 0;
+
+   WALBERLA_LOG_DEVEL_ON_ROOT("running imbalanced simulation");
+   timerImbalanced.start();
+   for (int64_t i=0; i < params.simulationSteps; ++i)
    {
-      WALBERLA_LOG_DEVEL_ON_ROOT("*** RUNNING OUTER ITERATION " << outerIteration << " ***");
+      //WALBERLA_LOG_DEVEL_ON_ROOT("timestep: " << i << " / " << params.simulationSteps );
+      //         if (i % params.visSpacing == 0)
+      //         {
+      //            vtkWriter->write();
+      //         }
 
-      WcTimer      timer;
-      WcTimingPool tp;
-      auto    SNNBytesSent     = SNN.getBytesSent();
-      auto    SNNBytesReceived = SNN.getBytesReceived();
-      auto    SNNSends         = SNN.getNumberOfSends();
-      auto    SNNReceives      = SNN.getNumberOfReceives();
-      auto    RPBytesSent      = RP.getBytesSent();
-      auto    RPBytesReceived  = RP.getBytesReceived();
-      auto    RPSends          = RP.getNumberOfSends();
-      auto    RPReceives       = RP.getNumberOfReceives();
-      int64_t contactsChecked  = 0;
-      int64_t contactsDetected = 0;
-      int64_t contactsTreated  = 0;
+      tpImbalanced["AssocToBlock"].start();
+      ps->forEachParticle(true, kernel::SelectLocal(), accessor, assoc, accessor);
       if (params.bBarrier) WALBERLA_MPI_BARRIER();
-      std::stringstream fout;
-      timer.start();
-      for (int64_t i=0; i < params.simulationSteps; ++i)
+      tpImbalanced["AssocToBlock"].end();
+
+      tpImbalanced["GenerateLinkedCells"].start();
+      lc->clear();
+      ps->forEachParticle(true, kernel::SelectAll(), accessor, ipilc, accessor, *lc);
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpImbalanced["GenerateLinkedCells"].end();
+
+      tpImbalanced["DEM"].start();
+      contactsChecked  = 0;
+      contactsDetected = 0;
+      contactsTreated  = 0;
+      lc->forEachParticlePairHalf(true,
+                                  kernel::SelectAll(),
+                                  accessor,
+                                  [&](const size_t idx1, const size_t idx2, auto& ac)
       {
-         fout.clear();
-         //WALBERLA_LOG_DEVEL_ON_ROOT("timestep: " << i << " / " << params.simulationSteps );
-         //         if (i % params.visSpacing == 0)
-         //         {
-         //            vtkWriter->write();
-         //         }
-
-         tp["AssocToBlock"].start();
-         ps->forEachParticle(true, kernel::SelectLocal(), accessor, assoc, accessor);
-         if (params.bBarrier) WALBERLA_MPI_BARRIER();
-         tp["AssocToBlock"].end();
-
-         tp["GenerateLinkedCells"].start();
-         lc->clear();
-         ps->forEachParticle(true, kernel::SelectAll(), accessor, ipilc, accessor, *lc);
-         if (params.bBarrier) WALBERLA_MPI_BARRIER();
-         tp["GenerateLinkedCells"].end();
-
-         tp["DEM"].start();
-         contactsChecked  = 0;
-         contactsDetected = 0;
-         contactsTreated  = 0;
-         lc->forEachParticlePairHalf(true,
-                                     kernel::SelectAll(),
-                                     accessor,
-                                     [&](const size_t idx1, const size_t idx2, auto& ac)
+         ++contactsChecked;
+         if (double_cast(idx1, idx2, ac, acd, ac ))
          {
-            ++contactsChecked;
-            if (double_cast(idx1, idx2, ac, acd, ac ))
+            ++contactsDetected;
+            if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), *domain))
             {
-               ++contactsDetected;
-               if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), *domain))
-               {
-                  ++contactsTreated;
-                  dem(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth());
-               }
+               ++contactsTreated;
+               dem(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth());
             }
-         },
-         accessor );
-         if (params.bBarrier) WALBERLA_MPI_BARRIER();
-         tp["DEM"].end();
-
-         tp["ReduceForce"].start();
-         RP.operator()<ForceTorqueNotification>(*ps);
-         if (params.bBarrier) WALBERLA_MPI_BARRIER();
-         tp["ReduceForce"].end();
-
-         tp["Euler"].start();
-         //ps->forEachParticle(false, [&](const size_t idx){WALBERLA_CHECK_EQUAL(ps->getForce(idx), Vec3(0,0,0), *(*ps)[idx] << "\n" << idx);});
-         ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEulerWithShape, accessor);
-         if (params.bBarrier) WALBERLA_MPI_BARRIER();
-         tp["Euler"].end();
-
-         tp["SNN"].start();
-         SNN(*ps, forest, domain);
-         if (params.bBarrier) WALBERLA_MPI_BARRIER();
-         tp["SNN"].end();
-      }
-      timer.end();
-
-      SNNBytesSent     = SNN.getBytesSent();
-      SNNBytesReceived = SNN.getBytesReceived();
-      SNNSends         = SNN.getNumberOfSends();
-      SNNReceives      = SNN.getNumberOfReceives();
-      RPBytesSent      = RP.getBytesSent();
-      RPBytesReceived  = RP.getBytesReceived();
-      RPSends          = RP.getNumberOfSends();
-      RPReceives       = RP.getNumberOfReceives();
-      walberla::mpi::reduceInplace(SNNBytesSent, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(SNNBytesReceived, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(SNNSends, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(SNNReceives, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(RPBytesSent, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(RPBytesReceived, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(RPSends, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(RPReceives, walberla::mpi::SUM);
-      auto cC = walberla::mpi::reduce(contactsChecked, walberla::mpi::SUM);
-      auto cD = walberla::mpi::reduce(contactsDetected, walberla::mpi::SUM);
-      auto cT = walberla::mpi::reduce(contactsTreated, walberla::mpi::SUM);
-      WALBERLA_LOG_DEVEL_ON_ROOT( "SNN bytes communicated:   " << SNNBytesSent << " / " << SNNBytesReceived );
-      WALBERLA_LOG_DEVEL_ON_ROOT( "SNN communication partners: " << SNNSends << " / " << SNNReceives );
-      WALBERLA_LOG_DEVEL_ON_ROOT( "RP bytes communicated:  " << RPBytesSent << " / " << RPBytesReceived );
-      WALBERLA_LOG_DEVEL_ON_ROOT( "RP communication partners: " << RPSends << " / " << RPReceives );
-      WALBERLA_LOG_DEVEL_ON_ROOT( "contacts checked/detected/treated: " << cC << " / " << cD << " / " << cT );
-
-      auto timer_reduced = walberla::timing::getReduced(timer, REDUCE_TOTAL, 0);
-      double PUpS = 0.0;
-      WALBERLA_ROOT_SECTION()
-      {
-         WALBERLA_LOG_INFO_ON_ROOT(*timer_reduced);
-         WALBERLA_LOG_INFO_ON_ROOT("runtime: " << timer_reduced->max());
-         PUpS = double_c(numParticles) * double_c(params.simulationSteps) / double_c(timer_reduced->max());
-         WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpS);
-      }
-
-      auto tp_reduced = tp.getReduced();
-      WALBERLA_LOG_INFO_ON_ROOT(*tp_reduced);
-      WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
-
-      if (params.checkSimulation)
-      {
-         check(*ps, *forest, params.spacing);
-      }
-
-      WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - START ***");
-      numParticles = 0;
-      int64_t numGhostParticles = 0;
-      ps->forEachParticle(false,
-                          kernel::SelectAll(),
-                          accessor,
-                          [&numParticles, &numGhostParticles](const size_t idx, auto& ac)
-      {
-         if (data::particle_flags::isSet( ac.getFlagsRef(idx), data::particle_flags::GHOST))
-         {
-            ++numGhostParticles;
-         } else
-         {
-            ++numParticles;
          }
       },
-      accessor);
-      walberla::mpi::reduceInplace(numParticles, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(numGhostParticles, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(contactsChecked, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(contactsDetected, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(contactsTreated, walberla::mpi::SUM);
-      double linkedCellsVolume = lc->domain_.volume();
-      walberla::mpi::reduceInplace(linkedCellsVolume, walberla::mpi::SUM);
-      size_t numLinkedCells = lc->cells_.size();
-      walberla::mpi::reduceInplace(numLinkedCells, walberla::mpi::SUM);
-      size_t local_aabbs         = domain->getNumLocalAABBs();
-      size_t neighbor_subdomains = domain->getNumNeighborSubdomains();
-      size_t neighbor_processes  = domain->getNumNeighborProcesses();
-      walberla::mpi::reduceInplace(local_aabbs, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(neighbor_subdomains, walberla::mpi::SUM);
-      walberla::mpi::reduceInplace(neighbor_processes, walberla::mpi::SUM);
+      accessor );
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpImbalanced["DEM"].end();
 
-      WALBERLA_LOG_DEVEL_VAR_ON_ROOT(numParticles);
-      WALBERLA_LOG_DEVEL_VAR_ON_ROOT(numGhostParticles);
+      tpImbalanced["ReduceForce"].start();
+      RP.operator()<ForceTorqueNotification>(*ps);
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpImbalanced["ReduceForce"].end();
 
-      uint_t runId = uint_c(-1);
-      WALBERLA_ROOT_SECTION()
-      {
-         stringProperties["walberla_git"]         = WALBERLA_GIT_SHA1;
-         stringProperties["tag"]                  = "mesa_pd";
-         integerProperties["mpi_num_processes"]   = mpiManager->numProcesses();
-         integerProperties["omp_max_threads"]     = omp_get_max_threads();
-         realProperties["PUpS"]                   = double_c(PUpS);
-         realProperties["timer_min"]              = timer_reduced->min();
-         realProperties["timer_max"]              = timer_reduced->max();
-         realProperties["timer_average"]          = timer_reduced->average();
-         realProperties["timer_total"]            = timer_reduced->total();
-         integerProperties["outerIteration"]      = int64_c(outerIteration);
-         integerProperties["num_particles"]       = numParticles;
-         integerProperties["num_ghost_particles"] = numGhostParticles;
-         integerProperties["contacts_checked"]    = contactsChecked;
-         integerProperties["contacts_detected"]   = contactsDetected;
-         integerProperties["contacts_treated"]    = contactsTreated;
-         integerProperties["local_aabbs"]         = int64_c(local_aabbs);
-         integerProperties["neighbor_subdomains"] = int64_c(neighbor_subdomains);
-         integerProperties["neighbor_processes"]  = int64_c(neighbor_processes);
-         integerProperties["SNNBytesSent"]        = SNNBytesSent;
-         integerProperties["SNNBytesReceived"]    = SNNBytesReceived;
-         integerProperties["SNNSends"]            = SNNSends;
-         integerProperties["SNNReceives"]         = SNNReceives;
-         integerProperties["RPBytesSent"]         = RPBytesSent;
-         integerProperties["RPBytesReceived"]     = RPBytesReceived;
-         integerProperties["RPSends"]             = RPSends;
-         integerProperties["RPReceives"]          = RPReceives;
-         realProperties["linkedCellsVolume"]      = linkedCellsVolume;
-         integerProperties["numLinkedCells"]      = int64_c(numLinkedCells);
+      tpImbalanced["Euler"].start();
+      //ps->forEachParticle(false, [&](const size_t idx){WALBERLA_CHECK_EQUAL(ps->getForce(idx), Vec3(0,0,0), *(*ps)[idx] << "\n" << idx);});
+      ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEulerWithShape, accessor);
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpImbalanced["Euler"].end();
 
-         addBuildInfoToSQL( integerProperties, realProperties, stringProperties );
-         saveToSQL(params, integerProperties, realProperties, stringProperties );
-         addDomainPropertiesToSQL(*forest, integerProperties, realProperties, stringProperties);
-         addSlurmPropertiesToSQL(integerProperties, realProperties, stringProperties);
-
-         runId = postprocessing::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
-         postprocessing::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tp_reduced, "Timeloop" );
-      }
-
-      if (params.storeNodeTimings)
-      {
-         storeNodeTimings(runId, params.sqlFile, "NodeTiming", tp);
-      }
-      WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - END ***");
+      tpImbalanced["SNN"].start();
+      SNN(*ps, forest, domain);
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpImbalanced["SNN"].end();
    }
+   timerImbalanced.end();
+   WALBERLA_MPI_BARRIER();
+
+   timerLoadBalancing.start();
+   if (bRebalance)
+   {
+      WALBERLA_LOG_DEVEL_ON_ROOT("running load balancing");
+      domain::createWithNeighborhood( accessor, *forest, *ic );
+      for (auto pIt = ps->begin(); pIt != ps->end(); )
+      {
+         using namespace walberla::mesa_pd::data::particle_flags;
+         if (isSet(pIt->getFlags(), GHOST))
+         {
+            pIt = ps->erase(pIt);
+         } else
+         {
+            pIt->getGhostOwnersRef().clear();
+            ++pIt;
+         }
+      }
+      forest->refresh();
+      domain->refresh();
+      lc = std::make_shared<data::LinkedCells>(domain->getUnionOfLocalAABBs().getExtended(params.spacing), params.spacing );
+      ps->forEachParticle(true, kernel::SelectLocal(), accessor, assoc, accessor);
+      WALBERLA_LOG_DEVEL_VAR(ps->size());
+      SNN(*ps, forest, domain);
+      sortParticleStorage(*ps, params.sorting, lc->domain_, uint_c(lc->numCellsPerDim_[0]));
+   }
+   timerLoadBalancing.end();
+
+   WALBERLA_MPI_BARRIER();
+   WALBERLA_LOG_DEVEL_ON_ROOT("running balanced simulation");
+   timerBalanced.start();
+   for (int64_t i=0; i < params.simulationSteps; ++i)
+   {
+      //WALBERLA_LOG_DEVEL_ON_ROOT("timestep: " << i << " / " << params.simulationSteps );
+      //         if (i % params.visSpacing == 0)
+      //         {
+      //            vtkWriter->write();
+      //         }
+
+      tpBalanced["AssocToBlock"].start();
+      ps->forEachParticle(true, kernel::SelectLocal(), accessor, assoc, accessor);
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpBalanced["AssocToBlock"].end();
+
+      tpBalanced["GenerateLinkedCells"].start();
+      lc->clear();
+      ps->forEachParticle(true, kernel::SelectAll(), accessor, ipilc, accessor, *lc);
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpBalanced["GenerateLinkedCells"].end();
+
+      tpBalanced["DEM"].start();
+      contactsChecked  = 0;
+      contactsDetected = 0;
+      contactsTreated  = 0;
+      lc->forEachParticlePairHalf(true,
+                                  kernel::SelectAll(),
+                                  accessor,
+                                  [&](const size_t idx1, const size_t idx2, auto& ac)
+      {
+         ++contactsChecked;
+         if (double_cast(idx1, idx2, ac, acd, ac ))
+         {
+            ++contactsDetected;
+            if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), *domain))
+            {
+               ++contactsTreated;
+               dem(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth());
+            }
+         }
+      },
+      accessor );
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpBalanced["DEM"].end();
+
+      tpBalanced["ReduceForce"].start();
+      RP.operator()<ForceTorqueNotification>(*ps);
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpBalanced["ReduceForce"].end();
+
+      tpBalanced["Euler"].start();
+      //ps->forEachParticle(false, [&](const size_t idx){WALBERLA_CHECK_EQUAL(ps->getForce(idx), Vec3(0,0,0), *(*ps)[idx] << "\n" << idx);});
+      ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEulerWithShape, accessor);
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpBalanced["Euler"].end();
+
+      tpBalanced["SNN"].start();
+      SNN(*ps, forest, domain);
+      if (params.bBarrier) WALBERLA_MPI_BARRIER();
+      tpBalanced["SNN"].end();
+   }
+   timerBalanced.end();
+
+   SNNBytesSent     = SNN.getBytesSent();
+   SNNBytesReceived = SNN.getBytesReceived();
+   SNNSends         = SNN.getNumberOfSends();
+   SNNReceives      = SNN.getNumberOfReceives();
+   RPBytesSent      = RP.getBytesSent();
+   RPBytesReceived  = RP.getBytesReceived();
+   RPSends          = RP.getNumberOfSends();
+   RPReceives       = RP.getNumberOfReceives();
+   walberla::mpi::reduceInplace(SNNBytesSent, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(SNNBytesReceived, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(SNNSends, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(SNNReceives, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPBytesSent, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPBytesReceived, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPSends, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPReceives, walberla::mpi::SUM);
+   auto cC = walberla::mpi::reduce(contactsChecked, walberla::mpi::SUM);
+   auto cD = walberla::mpi::reduce(contactsDetected, walberla::mpi::SUM);
+   auto cT = walberla::mpi::reduce(contactsTreated, walberla::mpi::SUM);
+   WALBERLA_LOG_DEVEL_ON_ROOT( "SNN bytes communicated:   " << SNNBytesSent << " / " << SNNBytesReceived );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "SNN communication partners: " << SNNSends << " / " << SNNReceives );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "RP bytes communicated:  " << RPBytesSent << " / " << RPBytesReceived );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "RP communication partners: " << RPSends << " / " << RPReceives );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "contacts checked/detected/treated: " << cC << " / " << cD << " / " << cT );
+
+   auto timerImbalancedReduced = walberla::timing::getReduced(timerImbalanced, REDUCE_TOTAL, 0);
+   double PUpSImbalanced = 0.0;
+   WALBERLA_ROOT_SECTION()
+   {
+      WALBERLA_LOG_INFO_ON_ROOT(*timerImbalancedReduced);
+      PUpSImbalanced = double_c(numParticles) * double_c(params.simulationSteps) / double_c(timerImbalancedReduced->max());
+      WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpSImbalanced);
+   }
+
+   auto timerBalancedReduced = walberla::timing::getReduced(timerBalanced, REDUCE_TOTAL, 0);
+   double PUpSBalanced = 0.0;
+   WALBERLA_ROOT_SECTION()
+   {
+      WALBERLA_LOG_INFO_ON_ROOT(*timerBalancedReduced);
+      PUpSBalanced = double_c(numParticles) * double_c(params.simulationSteps) / double_c(timerBalancedReduced->max());
+      WALBERLA_LOG_INFO_ON_ROOT("PUpS: " << PUpSBalanced);
+   }
+
+   auto timerLoadBalancingReduced = walberla::timing::getReduced(timerLoadBalancing, REDUCE_TOTAL, 0);
+
+   auto tpImbalancedReduced = tpImbalanced.getReduced();
+   WALBERLA_LOG_INFO_ON_ROOT(*tpImbalancedReduced);
+
+   auto tpBalancedReduced = tpBalanced.getReduced();
+   WALBERLA_LOG_INFO_ON_ROOT(*tpBalancedReduced);
+   WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
+
+   if (params.checkSimulation)
+   {
+      check(*ps, *forest, params.spacing);
+   }
+
+   WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - START ***");
+   numParticles = 0;
+   int64_t numGhostParticles = 0;
+   ps->forEachParticle(false,
+                       kernel::SelectAll(),
+                       accessor,
+                       [&numParticles, &numGhostParticles](const size_t idx, auto& ac)
+   {
+      if (data::particle_flags::isSet( ac.getFlagsRef(idx), data::particle_flags::GHOST))
+      {
+         ++numGhostParticles;
+      } else
+      {
+         ++numParticles;
+      }
+   },
+   accessor);
+   walberla::mpi::reduceInplace(numParticles, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(numGhostParticles, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(contactsChecked, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(contactsDetected, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(contactsTreated, walberla::mpi::SUM);
+   double linkedCellsVolume = lc->domain_.volume();
+   walberla::mpi::reduceInplace(linkedCellsVolume, walberla::mpi::SUM);
+   size_t numLinkedCells = lc->cells_.size();
+   walberla::mpi::reduceInplace(numLinkedCells, walberla::mpi::SUM);
+   size_t local_aabbs         = domain->getNumLocalAABBs();
+   size_t neighbor_subdomains = domain->getNumNeighborSubdomains();
+   size_t neighbor_processes  = domain->getNumNeighborProcesses();
+   walberla::mpi::reduceInplace(local_aabbs, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(neighbor_subdomains, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(neighbor_processes, walberla::mpi::SUM);
+
+   uint_t runId = uint_c(-1);
+   WALBERLA_ROOT_SECTION()
+   {
+      stringProperties["walberla_git"]         = WALBERLA_GIT_SHA1;
+      stringProperties["tag"]                  = "mesa_pd";
+      integerProperties["mpi_num_processes"]   = mpiManager->numProcesses();
+      integerProperties["omp_max_threads"]     = omp_get_max_threads();
+      realProperties["imbalanced_PUpS"]          = double_c(PUpSImbalanced);
+      realProperties["imbalanced_timer_min"]     = timerImbalancedReduced->min();
+      realProperties["imbalanced_timer_max"]     = timerImbalancedReduced->max();
+      realProperties["imbalanced_timer_average"] = timerImbalancedReduced->average();
+      realProperties["imbalanced_timer_total"]   = timerImbalancedReduced->total();
+      realProperties["loadbalancing_timer_min"]     = timerLoadBalancingReduced->min();
+      realProperties["loadbalancing_timer_max"]     = timerLoadBalancingReduced->max();
+      realProperties["loadbalancing_timer_average"] = timerLoadBalancingReduced->average();
+      realProperties["loadbalancing_timer_total"]   = timerLoadBalancingReduced->total();
+      realProperties["balanced_PUpS"]          = double_c(PUpSBalanced);
+      realProperties["balanced_timer_min"]     = timerBalancedReduced->min();
+      realProperties["balanced_timer_max"]     = timerBalancedReduced->max();
+      realProperties["balanced_timer_average"] = timerBalancedReduced->average();
+      realProperties["balanced_timer_total"]   = timerBalancedReduced->total();
+      integerProperties["num_particles"]       = numParticles;
+      integerProperties["num_ghost_particles"] = numGhostParticles;
+      integerProperties["contacts_checked"]    = contactsChecked;
+      integerProperties["contacts_detected"]   = contactsDetected;
+      integerProperties["contacts_treated"]    = contactsTreated;
+      integerProperties["local_aabbs"]         = int64_c(local_aabbs);
+      integerProperties["neighbor_subdomains"] = int64_c(neighbor_subdomains);
+      integerProperties["neighbor_processes"]  = int64_c(neighbor_processes);
+      integerProperties["SNNBytesSent"]        = SNNBytesSent;
+      integerProperties["SNNBytesReceived"]    = SNNBytesReceived;
+      integerProperties["SNNSends"]            = SNNSends;
+      integerProperties["SNNReceives"]         = SNNReceives;
+      integerProperties["RPBytesSent"]         = RPBytesSent;
+      integerProperties["RPBytesReceived"]     = RPBytesReceived;
+      integerProperties["RPSends"]             = RPSends;
+      integerProperties["RPReceives"]          = RPReceives;
+      realProperties["linkedCellsVolume"]      = linkedCellsVolume;
+      integerProperties["numLinkedCells"]      = int64_c(numLinkedCells);
+
+      addBuildInfoToSQL( integerProperties, realProperties, stringProperties );
+      saveToSQL(params, integerProperties, realProperties, stringProperties );
+      addDomainPropertiesToSQL(*forest, integerProperties, realProperties, stringProperties);
+      addSlurmPropertiesToSQL(integerProperties, realProperties, stringProperties);
+
+      runId = postprocessing::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
+      postprocessing::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpImbalancedReduced, "imbalanced" );
+      postprocessing::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpImbalancedReduced, "balanced" );
+   }
+
+   if (params.storeNodeTimings)
+   {
+      storeNodeTimings(runId, params.sqlFile, "NodeTimingImbalanced", tpImbalanced);
+      storeNodeTimings(runId, params.sqlFile, "NodeTimingBalanced", tpBalanced);
+   }
+   WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - END ***");
 
    return EXIT_SUCCESS;
 }

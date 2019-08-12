@@ -29,11 +29,15 @@
 #include <core/logging/Logging.h>
 
 namespace walberla {
+namespace mesa_pd {
 
 void loadFromConfig(Parameters& params, const Config::BlockHandle& cfg)
 {
    params.sorting = cfg.getParameter<std::string>("sorting", "none" );
    WALBERLA_LOG_INFO_ON_ROOT("sorting: " << params.sorting);
+   
+   params.normal = cfg.getParameter<Vec3>("normal", Vec3(real_t(1.0), real_t(1.0), real_t(1.0)) );
+   WALBERLA_LOG_INFO_ON_ROOT("normal: " << params.normal);
    
    params.spacing = cfg.getParameter<real_t>("spacing", real_t(1.0) );
    WALBERLA_LOG_INFO_ON_ROOT("spacing: " << params.spacing);
@@ -107,6 +111,7 @@ void saveToSQL(const Parameters& params,
 {
    stringProperties["sorting"] = params.sorting;
    
+   
    realProperties["spacing"] = double_c(params.spacing);
    
    realProperties["radius"] = double_c(params.radius);
@@ -145,4 +150,5 @@ void saveToSQL(const Parameters& params,
    
 }
 
+} //namespace mesa_pd
 } //namespace walberla

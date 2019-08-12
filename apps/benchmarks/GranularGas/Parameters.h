@@ -27,15 +27,17 @@
 #pragma once
 
 #include <core/config/Config.h>
-#include <core/DataTypes.h>
+#include <mesa_pd/data/DataTypes.h>
 
 #include <string>
 
 namespace walberla {
+namespace mesa_pd {
 
 struct Parameters
 {
    std::string sorting = "none";
+   Vec3 normal = Vec3(real_t(1.0), real_t(1.0), real_t(1.0));
    real_t spacing = real_t(1.0);
    real_t radius = real_t(0.5);
    bool bBarrier = false;
@@ -67,4 +69,5 @@ void saveToSQL(const Parameters& params,
                std::map< std::string, double >&            realProperties,
                std::map< std::string, std::string >&       stringProperties );
 
+} //namespace mesa_pd
 } //namespace walberla

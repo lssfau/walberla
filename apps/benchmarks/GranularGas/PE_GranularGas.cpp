@@ -90,7 +90,7 @@ int main( int argc, char ** argv )
    auto cfg = env.config();
    if (cfg == nullptr) WALBERLA_ABORT("No config specified!");
    const Config::BlockHandle mainConf  = cfg->getBlock( "GranularGas" );
-   Parameters params;
+   mesa_pd::Parameters params;
    loadFromConfig(params, mainConf);
 
    WALBERLA_LOG_INFO_ON_ROOT("*** GLOBALBODYSTORAGE ***");
