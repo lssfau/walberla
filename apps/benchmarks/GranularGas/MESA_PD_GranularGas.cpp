@@ -36,6 +36,7 @@
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
+#include <mesa_pd/kernel/AssocToBlock.h>
 #include <mesa_pd/kernel/DoubleCast.h>
 #include <mesa_pd/kernel/ExplicitEulerWithShape.h>
 #include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
@@ -44,6 +45,7 @@
 #include <mesa_pd/mpi/ContactFilter.h>
 #include <mesa_pd/mpi/ReduceProperty.h>
 #include <mesa_pd/mpi/SyncNextNeighbors.h>
+#include <mesa_pd/mpi/SyncNextNeighborsBlockForest.h>
 
 #include <mesa_pd/mpi/notifications/ForceTorqueNotification.h>
 
@@ -101,7 +103,7 @@ int main( int argc, char ** argv )
       WALBERLA_LOG_INFO_ON_ROOT( "No BlockForest created ... exiting!");
       return EXIT_SUCCESS;
    }
-   domain::BlockForestDomain domain(forest);
+   auto domain = std::make_shared<domain::BlockForestDomain> (forest);
 
    auto simulationDomain = forest->getDomain();
    auto localDomain = forest->begin()->getAABB();
@@ -175,13 +177,15 @@ int main( int argc, char ** argv )
    dem.setDampingT (0, 0, real_t(0));
    dem.setFriction (0, 0, real_t(0));
    collision_detection::AnalyticContactDetection              acd;
+   kernel::AssocToBlock                  assoc(forest);
    kernel::DoubleCast                    double_cast;
    mpi::ContactFilter                    contact_filter;
    mpi::ReduceProperty                   RP;
-   mpi::SyncNextNeighbors                SNN;
+   mpi::SyncNextNeighborsBlockForest     SNN;
 
    // initial sync
-   SNN(*ps, domain);
+   ps->forEachParticle(false, kernel::SelectLocal(), accessor, assoc, accessor);
+   SNN(*ps, forest, domain);
    sortParticleStorage(*ps, params.sorting, lc.domain_, uint_c(lc.numCellsPerDim_[0]));
 //   vtkWriter->write();
 
@@ -211,6 +215,11 @@ int main( int argc, char ** argv )
          //         vtkWriter->write();
          //      }
 
+         tp["AssocToBlock"].start();
+         ps->forEachParticle(false, kernel::SelectLocal(), accessor, assoc, accessor);
+         if (params.bBarrier) WALBERLA_MPI_BARRIER();
+         tp["AssocToBlock"].end();
+
          tp["GenerateLinkedCells"].start();
          lc.clear();
          ps->forEachParticle(true, kernel::SelectAll(), accessor, ipilc, accessor, lc);
@@ -230,7 +239,7 @@ int main( int argc, char ** argv )
             if (double_cast(idx1, idx2, ac, acd, ac ))
             {
                ++contactsDetected;
-               if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), domain))
+               if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), *domain))
                {
                   ++contactsTreated;
                   dem(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth());
@@ -253,7 +262,7 @@ int main( int argc, char ** argv )
          tp["Euler"].end();
 
          tp["SNN"].start();
-         SNN(*ps, domain);
+         SNN(*ps, forest, domain);
          if (params.bBarrier) WALBERLA_MPI_BARRIER();
          tp["SNN"].end();
       }
@@ -329,9 +338,9 @@ int main( int argc, char ** argv )
       walberla::mpi::reduceInplace(linkedCellsVolume, walberla::mpi::SUM);
       size_t numLinkedCells = lc.cells_.size();
       walberla::mpi::reduceInplace(numLinkedCells, walberla::mpi::SUM);
-      size_t local_aabbs         = domain.getNumLocalAABBs();
-      size_t neighbor_subdomains = domain.getNumNeighborSubdomains();
-      size_t neighbor_processes  = domain.getNumNeighborProcesses();
+      size_t local_aabbs         = domain->getNumLocalAABBs();
+      size_t neighbor_subdomains = domain->getNumNeighborSubdomains();
+      size_t neighbor_processes  = domain->getNumNeighborProcesses();
       walberla::mpi::reduceInplace(local_aabbs, walberla::mpi::SUM);
       walberla::mpi::reduceInplace(neighbor_subdomains, walberla::mpi::SUM);
       walberla::mpi::reduceInplace(neighbor_processes, walberla::mpi::SUM);
