@@ -175,7 +175,7 @@ int main( int argc, char ** argv )
       forest->setRefreshPhantomBlockDataAssignmentFunction( pe::amr::WeightAssignmentFunctor( ic, params.baseWeight ) );
       forest->setRefreshPhantomBlockDataPackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
       forest->setRefreshPhantomBlockDataUnpackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      auto prepFunc = blockforest::DynamicLevelwiseDiffusionBalance< pe::amr::WeightAssignmentFunctor::PhantomBlockWeight >( 1, 1, false );
+      auto prepFunc = blockforest::DynamicDiffusionBalance< pe::amr::WeightAssignmentFunctor::PhantomBlockWeight >( 1, 1, false );
       //configure(cfg, prepFunc);
       //addDynamicDiffusivePropertiesToSQL(prepFunc, integerProperties, realProperties, stringProperties);
       forest->setRefreshPhantomBlockMigrationPreparationFunction(prepFunc);
