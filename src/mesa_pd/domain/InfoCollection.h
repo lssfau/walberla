@@ -36,7 +36,7 @@ void createWithNeighborhood(Accessor& ac, const BlockForest& bf, pe::InfoCollect
 {
    ic.clear();
 
-   mpi::BufferSystem bs( MPIManager::instance()->comm(), 756 );
+   walberla::mpi::BufferSystem bs( MPIManager::instance()->comm(), 756 );
 
    for (size_t idx = 0; idx < ac.size(); ++idx)
    {
