@@ -67,8 +67,8 @@ int main( int argc, char ** argv )
    walberla::mpi::MPIManager::instance()->useWorldComm();
 
    //logging::Logging::instance()->setStreamLogLevel(logging::Logging::DETAIL);
-   logging::Logging::instance()->includeLoggingToFile("MESA_PD_Kernel_SyncNextNeighbor");
-   logging::Logging::instance()->setFileLogLevel(logging::Logging::DETAIL);
+//   logging::Logging::instance()->includeLoggingToFile("MESA_PD_Kernel_SyncNextNeighbor");
+//   logging::Logging::instance()->setFileLogLevel(logging::Logging::DETAIL);
 
    //init domain partitioning
    auto forest = blockforest::createBlockForest( AABB(-15,-15,-15,15,15,15), // simulation domain
