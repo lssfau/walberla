@@ -19,6 +19,15 @@ cfg.addParameter("visSpacing",             "int64_t",     "1000")
 cfg.addParameter("path",                   "std::string", '"vtk_out"')
 cfg.addParameter("sqlFile",                "std::string", '"benchmark.sqlite"')
 
+cfg.addParameter("recalculateBlockLevelsInRefresh",                "bool", "false");
+cfg.addParameter("alwaysRebalanceInRefresh",                       "bool", "true");
+cfg.addParameter("reevaluateMinTargetLevelsAfterForcedRefinement", "bool", "false");
+cfg.addParameter("allowRefreshChangingDepth",                      "bool", "false");
+
+cfg.addParameter("allowMultipleRefreshCycles",                     "bool", "false");
+cfg.addParameter("checkForEarlyOutInRefresh",                      "bool", "true");
+cfg.addParameter("checkForLateOutInRefresh",                       "bool", "true");
+
 cfg.addParameter("regridMin",              "uint_t",      'uint_c(100)')
 cfg.addParameter("regridMax",              "uint_t",      'uint_c(1000)')
 cfg.addParameter("maxBlocksPerProcess",    "int",         'int_c(1000)')

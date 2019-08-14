@@ -75,6 +75,27 @@ void loadFromConfig(Parameters& params, const Config::BlockHandle& cfg)
    params.sqlFile = cfg.getParameter<std::string>("sqlFile", "benchmark.sqlite" );
    WALBERLA_LOG_INFO_ON_ROOT("sqlFile: " << params.sqlFile);
    
+   params.recalculateBlockLevelsInRefresh = cfg.getParameter<bool>("recalculateBlockLevelsInRefresh", false );
+   WALBERLA_LOG_INFO_ON_ROOT("recalculateBlockLevelsInRefresh: " << params.recalculateBlockLevelsInRefresh);
+   
+   params.alwaysRebalanceInRefresh = cfg.getParameter<bool>("alwaysRebalanceInRefresh", true );
+   WALBERLA_LOG_INFO_ON_ROOT("alwaysRebalanceInRefresh: " << params.alwaysRebalanceInRefresh);
+   
+   params.reevaluateMinTargetLevelsAfterForcedRefinement = cfg.getParameter<bool>("reevaluateMinTargetLevelsAfterForcedRefinement", false );
+   WALBERLA_LOG_INFO_ON_ROOT("reevaluateMinTargetLevelsAfterForcedRefinement: " << params.reevaluateMinTargetLevelsAfterForcedRefinement);
+   
+   params.allowRefreshChangingDepth = cfg.getParameter<bool>("allowRefreshChangingDepth", false );
+   WALBERLA_LOG_INFO_ON_ROOT("allowRefreshChangingDepth: " << params.allowRefreshChangingDepth);
+   
+   params.allowMultipleRefreshCycles = cfg.getParameter<bool>("allowMultipleRefreshCycles", false );
+   WALBERLA_LOG_INFO_ON_ROOT("allowMultipleRefreshCycles: " << params.allowMultipleRefreshCycles);
+   
+   params.checkForEarlyOutInRefresh = cfg.getParameter<bool>("checkForEarlyOutInRefresh", true );
+   WALBERLA_LOG_INFO_ON_ROOT("checkForEarlyOutInRefresh: " << params.checkForEarlyOutInRefresh);
+   
+   params.checkForLateOutInRefresh = cfg.getParameter<bool>("checkForLateOutInRefresh", true );
+   WALBERLA_LOG_INFO_ON_ROOT("checkForLateOutInRefresh: " << params.checkForLateOutInRefresh);
+   
    params.regridMin = cfg.getParameter<uint_t>("regridMin", uint_c(100) );
    WALBERLA_LOG_INFO_ON_ROOT("regridMin: " << params.regridMin);
    
@@ -132,6 +153,13 @@ void saveToSQL(const Parameters& params,
    stringProperties["path"] = params.path;
    
    stringProperties["sqlFile"] = params.sqlFile;
+   
+   
+   
+   
+   
+   
+   
    
    
    

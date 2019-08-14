@@ -50,6 +50,13 @@ struct Parameters
    int64_t visSpacing = 1000;
    std::string path = "vtk_out";
    std::string sqlFile = "benchmark.sqlite";
+   bool recalculateBlockLevelsInRefresh = false;
+   bool alwaysRebalanceInRefresh = true;
+   bool reevaluateMinTargetLevelsAfterForcedRefinement = false;
+   bool allowRefreshChangingDepth = false;
+   bool allowMultipleRefreshCycles = false;
+   bool checkForEarlyOutInRefresh = true;
+   bool checkForLateOutInRefresh = true;
    uint_t regridMin = uint_c(100);
    uint_t regridMax = uint_c(1000);
    int maxBlocksPerProcess = int_c(1000);
