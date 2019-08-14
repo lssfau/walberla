@@ -1969,3 +1969,15 @@ inline bool check_float_equal_eps( const math::Vector3<real_t> & lhs, const math
 }
 }
 }
+
+namespace std
+{
+    template<typename T>
+    struct hash< walberla::Vector3<T> >
+    {
+        std::size_t operator()( walberla::Vector3<T> const & v ) const noexcept
+        {
+            return walberla::Vector3<T>::hash_value( v );
+        }
+    };
+} // namespace std

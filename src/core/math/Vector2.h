@@ -1689,3 +1689,15 @@ namespace walberla {
    };
 
 } // namespace walberla
+
+namespace std
+{
+    template<typename T>
+    struct hash< walberla::Vector2<T> >
+    {
+        std::size_t operator()( walberla::Vector2<T> const & v ) const noexcept
+        {
+            return walberla::Vector2<T>::hash_value( v );
+        }
+    };
+} // namespace std
