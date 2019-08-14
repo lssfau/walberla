@@ -89,6 +89,8 @@ int main( int argc, char ** argv )
    auto mpiManager = walberla::mpi::MPIManager::instance();
    mpiManager->useWorldComm();
 
+   WALBERLA_LOG_DEVEL_ON_ROOT("MESA_PD_LoadBalancing" );
+
    //   logging::Logging::instance()->setStreamLogLevel(logging::Logging::INFO);
    //   logging::Logging::instance()->includeLoggingToFile("LoadBalancing");
    //   logging::Logging::instance()->setFileLogLevel(logging::Logging::DETAIL);
@@ -261,9 +263,9 @@ int main( int argc, char ** argv )
    auto    RPBytesReceived  = RP.getBytesReceived();
    auto    RPSends          = RP.getNumberOfSends();
    auto    RPReceives       = RP.getNumberOfReceives();
-   int64_t contactsChecked  = 0;
-   int64_t contactsDetected = 0;
-   int64_t contactsTreated  = 0;
+   int64_t imbalancedContactsChecked  = 0;
+   int64_t imbalancedContactsDetected = 0;
+   int64_t imbalancedContactsTreated  = 0;
 
    WALBERLA_MPI_BARRIER();
    WALBERLA_LOG_DEVEL_ON_ROOT("running imbalanced simulation");
@@ -288,21 +290,21 @@ int main( int argc, char ** argv )
       tpImbalanced["GenerateLinkedCells"].end();
 
       tpImbalanced["DEM"].start();
-      contactsChecked  = 0;
-      contactsDetected = 0;
-      contactsTreated  = 0;
+      imbalancedContactsChecked  = 0;
+      imbalancedContactsDetected = 0;
+      imbalancedContactsTreated  = 0;
       lc->forEachParticlePairHalf(true,
                                   kernel::SelectAll(),
                                   accessor,
                                   [&](const size_t idx1, const size_t idx2, auto& ac)
       {
-         ++contactsChecked;
+         ++imbalancedContactsChecked;
          if (double_cast(idx1, idx2, ac, acd, ac ))
          {
-            ++contactsDetected;
+            ++imbalancedContactsDetected;
             if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), *domain))
             {
-               ++contactsTreated;
+               ++imbalancedContactsTreated;
                dem(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth());
             }
          }
@@ -358,6 +360,9 @@ int main( int argc, char ** argv )
 
    WALBERLA_MPI_BARRIER();
    WALBERLA_LOG_DEVEL_ON_ROOT("running balanced simulation");
+   int64_t balancedContactsChecked  = 0;
+   int64_t balancedContactsDetected = 0;
+   int64_t balancedContactsTreated  = 0;
    timerBalanced.start();
    for (int64_t i=0; i < params.simulationSteps; ++i)
    {
@@ -379,21 +384,21 @@ int main( int argc, char ** argv )
       tpBalanced["GenerateLinkedCells"].end();
 
       tpBalanced["DEM"].start();
-      contactsChecked  = 0;
-      contactsDetected = 0;
-      contactsTreated  = 0;
+      balancedContactsChecked  = 0;
+      balancedContactsDetected = 0;
+      balancedContactsTreated  = 0;
       lc->forEachParticlePairHalf(true,
                                   kernel::SelectAll(),
                                   accessor,
                                   [&](const size_t idx1, const size_t idx2, auto& ac)
       {
-         ++contactsChecked;
+         ++balancedContactsChecked;
          if (double_cast(idx1, idx2, ac, acd, ac ))
          {
-            ++contactsDetected;
+            ++balancedContactsDetected;
             if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), *domain))
             {
-               ++contactsTreated;
+               ++balancedContactsTreated;
                dem(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth());
             }
          }
@@ -436,9 +441,9 @@ int main( int argc, char ** argv )
    walberla::mpi::reduceInplace(RPBytesReceived, walberla::mpi::SUM);
    walberla::mpi::reduceInplace(RPSends, walberla::mpi::SUM);
    walberla::mpi::reduceInplace(RPReceives, walberla::mpi::SUM);
-   auto cC = walberla::mpi::reduce(contactsChecked, walberla::mpi::SUM);
-   auto cD = walberla::mpi::reduce(contactsDetected, walberla::mpi::SUM);
-   auto cT = walberla::mpi::reduce(contactsTreated, walberla::mpi::SUM);
+   auto cC = walberla::mpi::reduce(balancedContactsChecked, walberla::mpi::SUM);
+   auto cD = walberla::mpi::reduce(balancedContactsDetected, walberla::mpi::SUM);
+   auto cT = walberla::mpi::reduce(balancedContactsTreated, walberla::mpi::SUM);
    WALBERLA_LOG_DEVEL_ON_ROOT( "SNN bytes communicated:   " << SNNBytesSent << " / " << SNNBytesReceived );
    WALBERLA_LOG_DEVEL_ON_ROOT( "SNN communication partners: " << SNNSends << " / " << SNNReceives );
    WALBERLA_LOG_DEVEL_ON_ROOT( "RP bytes communicated:  " << RPBytesSent << " / " << RPBytesReceived );
@@ -499,9 +504,12 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_DEVEL_ON_ROOT("particle ratio: " << minParticles << " / " << maxParticles);
    walberla::mpi::reduceInplace(numParticles, walberla::mpi::SUM);
    walberla::mpi::reduceInplace(numGhostParticles, walberla::mpi::SUM);
-   walberla::mpi::reduceInplace(contactsChecked, walberla::mpi::SUM);
-   walberla::mpi::reduceInplace(contactsDetected, walberla::mpi::SUM);
-   walberla::mpi::reduceInplace(contactsTreated, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(imbalancedContactsChecked, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(imbalancedContactsDetected, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(imbalancedContactsTreated, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(balancedContactsChecked, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(balancedContactsDetected, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(balancedContactsTreated, walberla::mpi::SUM);
    double linkedCellsVolume = lc->domain_.volume();
    walberla::mpi::reduceInplace(linkedCellsVolume, walberla::mpi::SUM);
    size_t numLinkedCells = lc->cells_.size();
@@ -516,44 +524,47 @@ int main( int argc, char ** argv )
    uint_t runId = uint_c(-1);
    WALBERLA_ROOT_SECTION()
    {
-      stringProperties["walberla_git"]         = WALBERLA_GIT_SHA1;
-      stringProperties["tag"]                  = "mesa_pd";
-      integerProperties["mpi_num_processes"]   = mpiManager->numProcesses();
-      integerProperties["omp_max_threads"]     = omp_get_max_threads();
-      realProperties["imbalanced_PUpS"]          = double_c(PUpSImbalanced);
-      realProperties["imbalanced_timer_min"]     = timerImbalancedReduced->min();
-      realProperties["imbalanced_timer_max"]     = timerImbalancedReduced->max();
-      realProperties["imbalanced_timer_average"] = timerImbalancedReduced->average();
-      realProperties["imbalanced_timer_total"]   = timerImbalancedReduced->total();
-      realProperties["loadbalancing_timer_min"]     = timerLoadBalancingReduced->min();
-      realProperties["loadbalancing_timer_max"]     = timerLoadBalancingReduced->max();
-      realProperties["loadbalancing_timer_average"] = timerLoadBalancingReduced->average();
-      realProperties["loadbalancing_timer_total"]   = timerLoadBalancingReduced->total();
-      realProperties["balanced_PUpS"]          = double_c(PUpSBalanced);
-      realProperties["balanced_timer_min"]     = timerBalancedReduced->min();
-      realProperties["balanced_timer_max"]     = timerBalancedReduced->max();
-      realProperties["balanced_timer_average"] = timerBalancedReduced->average();
-      realProperties["balanced_timer_total"]   = timerBalancedReduced->total();
-      integerProperties["num_particles"]       = numParticles;
-      integerProperties["num_ghost_particles"] = numGhostParticles;
-      integerProperties["minParticles"]        = minParticles;
-      integerProperties["maxParticles"]        = maxParticles;
-      integerProperties["contacts_checked"]    = contactsChecked;
-      integerProperties["contacts_detected"]   = contactsDetected;
-      integerProperties["contacts_treated"]    = contactsTreated;
-      integerProperties["local_aabbs"]         = int64_c(local_aabbs);
-      integerProperties["neighbor_subdomains"] = int64_c(neighbor_subdomains);
-      integerProperties["neighbor_processes"]  = int64_c(neighbor_processes);
-      integerProperties["SNNBytesSent"]        = SNNBytesSent;
-      integerProperties["SNNBytesReceived"]    = SNNBytesReceived;
-      integerProperties["SNNSends"]            = SNNSends;
-      integerProperties["SNNReceives"]         = SNNReceives;
-      integerProperties["RPBytesSent"]         = RPBytesSent;
-      integerProperties["RPBytesReceived"]     = RPBytesReceived;
-      integerProperties["RPSends"]             = RPSends;
-      integerProperties["RPReceives"]          = RPReceives;
-      realProperties["linkedCellsVolume"]      = linkedCellsVolume;
-      integerProperties["numLinkedCells"]      = int64_c(numLinkedCells);
+      stringProperties["walberla_git"]                  = WALBERLA_GIT_SHA1;
+      stringProperties["tag"]                           = "mesa_pd";
+      integerProperties["mpi_num_processes"]            = mpiManager->numProcesses();
+      integerProperties["omp_max_threads"]              = omp_get_max_threads();
+      realProperties["imbalanced_PUpS"]                 = double_c(PUpSImbalanced);
+      realProperties["imbalanced_timer_min"]            = timerImbalancedReduced->min();
+      realProperties["imbalanced_timer_max"]            = timerImbalancedReduced->max();
+      realProperties["imbalanced_timer_average"]        = timerImbalancedReduced->average();
+      realProperties["imbalanced_timer_total"]          = timerImbalancedReduced->total();
+      realProperties["loadbalancing_timer_min"]         = timerLoadBalancingReduced->min();
+      realProperties["loadbalancing_timer_max"]         = timerLoadBalancingReduced->max();
+      realProperties["loadbalancing_timer_average"]     = timerLoadBalancingReduced->average();
+      realProperties["loadbalancing_timer_total"]       = timerLoadBalancingReduced->total();
+      realProperties["balanced_PUpS"]                   = double_c(PUpSBalanced);
+      realProperties["balanced_timer_min"]              = timerBalancedReduced->min();
+      realProperties["balanced_timer_max"]              = timerBalancedReduced->max();
+      realProperties["balanced_timer_average"]          = timerBalancedReduced->average();
+      realProperties["balanced_timer_total"]            = timerBalancedReduced->total();
+      integerProperties["num_particles"]                = numParticles;
+      integerProperties["num_ghost_particles"]          = numGhostParticles;
+      integerProperties["minParticles"]                 = minParticles;
+      integerProperties["maxParticles"]                 = maxParticles;
+      integerProperties["imbalancedContactsChecked"]    = imbalancedContactsChecked;
+      integerProperties["imbalancedContactsDetected"]   = imbalancedContactsDetected;
+      integerProperties["imbalancedContactsTreated"]    = imbalancedContactsTreated;
+      integerProperties["balancedContactsChecked"]      = balancedContactsChecked;
+      integerProperties["balancedContactsDetected"]     = balancedContactsDetected;
+      integerProperties["balancedContactsTreated"]      = balancedContactsTreated;
+      integerProperties["local_aabbs"]                  = int64_c(local_aabbs);
+      integerProperties["neighbor_subdomains"]          = int64_c(neighbor_subdomains);
+      integerProperties["neighbor_processes"]           = int64_c(neighbor_processes);
+      integerProperties["SNNBytesSent"]                 = SNNBytesSent;
+      integerProperties["SNNBytesReceived"]             = SNNBytesReceived;
+      integerProperties["SNNSends"]                     = SNNSends;
+      integerProperties["SNNReceives"]                  = SNNReceives;
+      integerProperties["RPBytesSent"]                  = RPBytesSent;
+      integerProperties["RPBytesReceived"]              = RPBytesReceived;
+      integerProperties["RPSends"]                      = RPSends;
+      integerProperties["RPReceives"]                   = RPReceives;
+      realProperties["linkedCellsVolume"]               = linkedCellsVolume;
+      integerProperties["numLinkedCells"]               = int64_c(numLinkedCells);
 
       addBuildInfoToSQL( integerProperties, realProperties, stringProperties );
       saveToSQL(params, integerProperties, realProperties, stringProperties );

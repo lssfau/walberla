@@ -321,20 +321,23 @@ int main( int argc, char ** argv )
    }
    timerImbalanced.end();
 
-   WALBERLA_MPI_BARRIER();
-   timerLoadBalancing.start();
-   WALBERLA_LOG_INFO_ON_ROOT("*** Rebalance ***");
-   createWithNeighborhoodLocalShadow( *forest, storageID, *ic );
-   clearSynchronization( *forest, storageID );
-   forest->refresh();
-   integerProperties["MigrationIterations1"] = int64_c(forest->phantomBlockMigrationIterations());
-   syncNextNeighbors<BodyTuple>(*forest, storageID);
-   for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)
+   if (bRebalance)
    {
-      ccd::ICCD* ccd = blockIt->getData< ccd::ICCD >( ccdID );
-      ccd->reloadBodies();
+      WALBERLA_MPI_BARRIER();
+      timerLoadBalancing.start();
+      WALBERLA_LOG_INFO_ON_ROOT("*** Rebalance ***");
+      createWithNeighborhoodLocalShadow( *forest, storageID, *ic );
+      clearSynchronization( *forest, storageID );
+      forest->refresh();
+      integerProperties["MigrationIterations1"] = int64_c(forest->phantomBlockMigrationIterations());
+      syncNextNeighbors<BodyTuple>(*forest, storageID);
+      for (auto blockIt = forest->begin(); blockIt != forest->end(); ++blockIt)
+      {
+         ccd::ICCD* ccd = blockIt->getData< ccd::ICCD >( ccdID );
+         ccd->reloadBodies();
+      }
+      timerLoadBalancing.end();
    }
-   timerLoadBalancing.end();
 
    WALBERLA_MPI_BARRIER();
    timerBalanced.start();
