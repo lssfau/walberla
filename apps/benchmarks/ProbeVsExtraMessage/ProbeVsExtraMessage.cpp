@@ -26,7 +26,7 @@
 #include "core/mpi/BufferSystem.h"
 #include "core/mpi/MPIManager.h"
 #include "core/timing/TimingPool.h"
-#include "postprocessing/sqlite/SQLite.h"
+#include "sqlite/SQLite.h"
 #include "stencil/D3Q27.h"
 #include "stencil/D3Q19.h"
 #include "stencil/D3Q7.h"
@@ -250,9 +250,9 @@ int main( int argc, char ** argv )
       stringProperties["SLURM_NTASKS_PER_SOCKET"]  = envToString(std::getenv( "SLURM_NTASKS_PER_SOCKET" ));
       stringProperties["SLURM_TASKS_PER_NODE"]     = envToString(std::getenv( "SLURM_TASKS_PER_NODE" ));
 
-      auto runId = postprocessing::storeRunInSqliteDB( "ProbeVsTwoMessages.sqlite", integerProperties, stringProperties, realProperties );
-      postprocessing::storeTimingPoolInSqliteDB( "ProbeVsTwoMessages.sqlite", runId, tp_twoMessages, "twoMessages" );
-      postprocessing::storeTimingPoolInSqliteDB( "ProbeVsTwoMessages.sqlite", runId, tp_probe, "probe" );
+      auto runId = sqlite::storeRunInSqliteDB( "ProbeVsTwoMessages.sqlite", integerProperties, stringProperties, realProperties );
+      sqlite::storeTimingPoolInSqliteDB( "ProbeVsTwoMessages.sqlite", runId, tp_twoMessages, "twoMessages" );
+      sqlite::storeTimingPoolInSqliteDB( "ProbeVsTwoMessages.sqlite", runId, tp_probe, "probe" );
    }
 
    return 0;

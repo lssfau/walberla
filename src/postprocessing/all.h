@@ -23,5 +23,3 @@
 #pragma once
 
 #include "MarchingCubes.h"
-
-#include "sqlite/SQLite.h"

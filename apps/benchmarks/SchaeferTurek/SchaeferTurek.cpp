@@ -93,7 +93,7 @@
 #include "lbm/vtk/NonEquilibrium.h"
 #include "lbm/vtk/Velocity.h"
 
-#include "postprocessing/sqlite/SQLite.h"
+#include "sqlite/SQLite.h"
 
 #include "stencil/D3Q15.h"
 #include "stencil/D3Q19.h"
@@ -2787,12 +2787,12 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
             if( evaluationCheckFrequency != uint_t(0) )
                evaluation->getResultsForSQLOnRoot( realProperties, integerProperties );
 
-            auto runId = postprocessing::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
-            postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedTimeloopTiming, "Timeloop" );
-            postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedRTSTiming, "RefinementTimeStep" );
-            postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedRTSLTiming, "RefinementTimeStepLevelwise" );
+            auto runId = sqlite::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
+            sqlite::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedTimeloopTiming, "Timeloop" );
+            sqlite::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedRTSTiming, "RefinementTimeStep" );
+            sqlite::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedRTSLTiming, "RefinementTimeStepLevelwise" );
             if( dynamicBlockStructure )
-               postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedRefreshTiming, "BlockForestRefresh" );
+               sqlite::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedRefreshTiming, "BlockForestRefresh" );
          }
       }
    }

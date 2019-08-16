@@ -22,7 +22,7 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/mpi/Environment.h"
 
-#include "postprocessing/sqlite/SQLite.h"
+#include "sqlite/SQLite.h"
 
 
 int main( int argc, char ** argv )
@@ -40,7 +40,7 @@ int main( int argc, char ** argv )
       strColumns["property2"] = "value2";
       strColumns["property3"] = "value3";
       intColumns["i"] = int(i);
-      walberla::postprocessing::storeRunInSqliteDB( "dbFile.sqlite", intColumns, strColumns );
+      walberla::sqlite::storeRunInSqliteDB( "dbFile.sqlite", intColumns, strColumns );
    }
 
    for( int i=0; i< 100; ++i )
@@ -49,7 +49,7 @@ int main( int argc, char ** argv )
       strColumns["property2"] = "value2";
       strColumns["property3"] = "value3";
       largeColumns["i"] = 4294967297 + i;
-      walberla::postprocessing::storeRunInSqliteDB( "dbFile.sqlite", largeColumns, strColumns );
+      walberla::sqlite::storeRunInSqliteDB( "dbFile.sqlite", largeColumns, strColumns );
    }
 
    return 0;

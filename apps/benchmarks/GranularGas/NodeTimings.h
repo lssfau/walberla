@@ -23,7 +23,7 @@
 #include <core/mpi/Gatherv.h>
 #include <core/logging/Logging.h>
 #include <core/timing/TimingPool.h>
-#include <postprocessing/sqlite/SQLite.h>
+#include <sqlite/SQLite.h>
 
 namespace walberla {
 namespace mesa_pd {

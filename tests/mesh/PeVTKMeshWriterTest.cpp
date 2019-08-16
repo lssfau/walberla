@@ -41,7 +41,6 @@
 #include <core/waLBerlaBuildInfo.h>
 #include <core/math/Random.h>
 #include <core/math/Utility.h>
-#include <postprocessing/sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
 
 #include <functional>

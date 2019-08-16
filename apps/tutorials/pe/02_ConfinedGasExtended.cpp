@@ -32,7 +32,7 @@
 #include <core/math/Random.h>
 #include <core/timing/TimingTree.h>
 #include <core/waLBerlaBuildInfo.h>
-#include <postprocessing/sqlite/SQLite.h>
+#include <sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
 
 #include <functional>
@@ -289,9 +289,9 @@ int main( int argc, char ** argv )
    //! [SQL Save]
    WALBERLA_ROOT_SECTION()
    {
-      auto runId = postprocessing::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
-      postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *tpReduced, "Timeloop" );
-      postprocessing::storeTimingTreeInSqliteDB( sqlFile, runId, tt, "TimingTree" );
+      auto runId = sqlite::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
+      sqlite::storeTimingPoolInSqliteDB( sqlFile, runId, *tpReduced, "Timeloop" );
+      sqlite::storeTimingTreeInSqliteDB( sqlFile, runId, tt, "TimingTree" );
    }
    //! [SQL Save]
 

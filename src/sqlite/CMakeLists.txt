@@ -1,9 +1,9 @@
 ###################################################################################################
 #
-# Tests for postprocessing module
+# Module sqlite
 #
 ###################################################################################################
 
+waLBerla_add_module( DEPENDS core )
 
-waLBerla_compile_test( FILES SphereTriangulate.cpp )
-waLBerla_execute_test( NAME SphereTriangulate )
+###################################################################################################
