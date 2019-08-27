@@ -194,7 +194,7 @@ namespace math {
 
          if( i->second < 0 )
          {
-            if( denom.str().size() > 0 )
+            if( !denom.str().empty() )
                denom << " * ";
             denom << i->first;
          }
@@ -209,16 +209,16 @@ namespace math {
             num << " ^ " << i->second;
       }
 
-      if( num.str().size() == 0 && denom.str().size() == 0 )
+      if( num.str().empty() && denom.str().empty() )
          return std::string();
 
-      if( denom.str().size() == 0 )
+      if( denom.str().empty() )
       {
          num << " *";
          return num.str();
       }
 
-      if( num.str().size() == 0 )
+      if( num.str().empty() )
          num << " * 1";
 
       num << " / ( ";
@@ -321,7 +321,7 @@ namespace math {
       if( !isDefined(varName) )
       {
          WALBERLA_ABORT( "Error in PhysicalCheck::getVarUnit(). Variable not found: " << varName );
-         return nullptr;
+         return std::string();
       }
 
       std::stringstream num, denom;
@@ -341,13 +341,13 @@ namespace math {
             num << '^' << i->second;
       }
 
-      if( num.str().size() == 0 && denom.str().size() == 0 )
+      if( num.str().empty() && denom.str().empty() )
          return std::string();
 
-      if( denom.str().size() == 0 )
+      if( denom.str().empty() )
          return num.str();
 
-      if( num.str().size() == 0 )
+      if( num.str().empty() )
          num << 1;
 
       num << '/';

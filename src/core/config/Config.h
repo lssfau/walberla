@@ -225,7 +225,7 @@ public:
       //**Utility functions*********************************************************************************************
       /*! \name Utility functions */
       //@{
-      bool addParameter( std::string key, const std::string& value );
+      bool addParameter( const std::string& key, const std::string& value );
       void listParameters() const;
       //@}
       //****************************************************************************************************************

@@ -95,7 +95,7 @@ namespace timeloop {
       //** Measurement Definitions *************************************************************************************
       /*! \name Measurement Definitions */
       //@{
-      void addMeasurement( const std::string & name, CountFunction countFunction,
+      void addMeasurement( const std::string & name, const CountFunction& countFunction,
                            uint_t countFreq = 0, real_t scaling = 1 );
 
       void addMeasurement( const std::string & name, real_t scaling = 1 );

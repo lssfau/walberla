@@ -275,7 +275,7 @@ bool EPA::doEPA( Support &geom1,
       }
    }
 
-   if(entryHeap.size() == 0) {
+   if(entryHeap.empty()) {
       //unrecoverable error.
       return false;
    }
@@ -473,7 +473,7 @@ bool EPA::doEPA( Support &geom1,
 
          firstTriangle->link(2, lastTriangle, 1);
       }
-   } while (entryHeap.size() > 0 && entryHeap[0]->getSqrDist() <= upperBoundSqr);
+   } while (!entryHeap.empty() && entryHeap[0]->getSqrDist() <= upperBoundSqr);
 
    //Normal must be inverted
    retNormal   = -current->getClosest().getNormalizedOrZero();

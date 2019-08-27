@@ -55,7 +55,7 @@ public:
    template <typename T>
    void addOutput(const std::string& name) { addOutput(name, std::make_shared<OutputSelector<T>>(T())); }
 
-   void addOutput(const std::string& name, std::shared_ptr<IOutputSelector> selector);
+   void addOutput(const std::string& name, const std::shared_ptr<IOutputSelector>& selector);
 
    ///sets a function which decides which particles should be written to file
    void setParticleSelector( const ParticleSelectorFunc& func) {particleSelector_ = func;}
