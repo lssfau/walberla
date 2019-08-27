@@ -14,7 +14,7 @@
 #include "field/communication/PackInfo.h"
 #include "field/communication/StencilRestrictedPackInfo.h"
 #include "field/communication/UniformMPIDatatypeInfo.h"
-#include "postprocessing/sqlite/SQLite.h"
+#include "sqlite/SQLite.h"
 #include "python_coupling/CreateConfig.h"
 #include "stencil/D3Q7.h"
 #include "stencil/D3Q19.h"
@@ -414,9 +414,9 @@ int main( int argc, char **argv )
             stringProperties["buildType"] = std::string( WALBERLA_BUILD_TYPE );
             stringProperties["compilerFlags"] = std::string( WALBERLA_COMPILER_FLAGS );
 
-            auto runId = postprocessing::storeRunInSqliteDB( databaseFile, integerProperties, stringProperties, realProperties );
-            postprocessing::storeTimingPoolInSqliteDB( databaseFile, runId, timingPool, "TimingRoot" );
-            postprocessing::storeTimingPoolInSqliteDB( databaseFile, runId, *reducedTimingPool, "TimingReduced" );
+            auto runId = sqlite::storeRunInSqliteDB( databaseFile, integerProperties, stringProperties, realProperties );
+            sqlite::storeTimingPoolInSqliteDB( databaseFile, runId, timingPool, "TimingRoot" );
+            sqlite::storeTimingPoolInSqliteDB( databaseFile, runId, *reducedTimingPool, "TimingReduced" );
         }
 
     }

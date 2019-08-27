@@ -6,7 +6,7 @@ waLBerla_add_executable ( NAME 01_Tutorial_ConfinedGas
 
 waLBerla_add_executable ( NAME 02_Tutorial_ConfinedGasExtended
                           FILES 02_ConfinedGasExtended.cpp
-                          DEPENDS blockforest core pe postprocessing vtk )
+                          DEPENDS blockforest core pe postprocessing vtk sqlite )
 
 waLBerla_execute_test( NO_MODULE_LABEL NAME 01_Tutorial_ConfinedGas PROCESSES 8 )
 waLBerla_execute_test( NO_MODULE_LABEL NAME 02_Tutorial_ConfinedGasExtended

@@ -4,4 +4,4 @@ waLBerla_add_executable ( NAME PackPerformance
 
 waLBerla_add_executable ( NAME ProbeVsExtraMessage 
                           FILES ProbeVsExtraMessage.cpp
-                          DEPENDS core postprocessing stencil )
+                          DEPENDS core postprocessing stencil sqlite)
