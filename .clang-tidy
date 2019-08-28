@@ -32,6 +32,7 @@ performance-*,
 
 portability-*,
 
+readability-const-return-type,
 readability-container-size-empty,
 readability-misleading-indentation,
 readability-misplaced-array-index

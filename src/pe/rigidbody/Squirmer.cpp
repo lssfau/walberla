@@ -89,7 +89,7 @@ Squirmer::~Squirmer()
  *
  * The function calculates the global velocity of a point relative to the body's center of mass.
  */
-const Vec3 Squirmer::velFromBF( real_t px, real_t py, real_t pz ) const
+Vec3 Squirmer::velFromBF( real_t px, real_t py, real_t pz ) const
 {
    return velFromBF( Vec3( px, py, pz ) );
 }
@@ -104,7 +104,7 @@ const Vec3 Squirmer::velFromBF( real_t px, real_t py, real_t pz ) const
  *
  * The function calculates the global velocity of a point relative to the body's center of mass.
  */
-const Vec3 Squirmer::velFromBF( const Vec3& rpos ) const
+Vec3 Squirmer::velFromBF( const Vec3& rpos ) const
 {
    return Sphere::velFromBF( rpos ) + getSquirmerVelocity( getRotation() * rpos );
 }
@@ -120,7 +120,7 @@ const Vec3 Squirmer::velFromBF( const Vec3& rpos ) const
  *
  * The function calculates the global velocity of a point in global coordinates.
  */
-const Vec3 Squirmer::velFromWF( real_t px, real_t py, real_t pz ) const
+Vec3 Squirmer::velFromWF( real_t px, real_t py, real_t pz ) const
 {
    return velFromWF( Vec3( px, py, pz ) );
 }
@@ -133,7 +133,7 @@ const Vec3 Squirmer::velFromWF( real_t px, real_t py, real_t pz ) const
  * \param rpos The relative global coordinate.
  * \return The local surface velocity of the squirmer.
  */
-const Vec3 Squirmer::getSquirmerVelocity( const Vec3& rpos ) const
+Vec3 Squirmer::getSquirmerVelocity( const Vec3& rpos ) const
 {
    const auto rs = rpos.getNormalized();
    const auto e = getQuaternion().rotate(Vec3(0.0,0.0,1.0)).getNormalized();
@@ -152,7 +152,7 @@ const Vec3 Squirmer::getSquirmerVelocity( const Vec3& rpos ) const
  *
  * The function calculates the global velocity of a point in global coordinates.
  */
-const Vec3 Squirmer::velFromWF( const Vec3& gpos ) const
+Vec3 Squirmer::velFromWF( const Vec3& gpos ) const
 {
    return Sphere::velFromWF( gpos ) + getSquirmerVelocity( gpos - getPosition() );
 }

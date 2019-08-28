@@ -100,8 +100,8 @@ namespace math {
       //**Output functions*************************************************************************
       /*! \name Output functions */
       //@{
-      const std::string writeEquations() const;
-      const std::string writeVariables() const;
+      std::string writeEquations() const;
+      std::string writeVariables() const;
       friend std::ostream& operator<<( std::ostream& os, EquationSystem& es );
       //@}
       //****************************************************************************************************************

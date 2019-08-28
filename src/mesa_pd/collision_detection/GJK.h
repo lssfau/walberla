@@ -81,7 +81,7 @@ private:
    inline bool zeroLengthVector( const Vec3& vec )                    const { return vec.sqrLength() < math::Limits<real_t>::fpuAccuracy(); }
    real_t calcDistance    ( Vec3& normal, Vec3& contactPoint );
 
-   inline const Vec3 putSupport(const Support &geom1,
+   inline Vec3 putSupport(const Support &geom1,
                                 const Support &geom2,
                                 const Vec3& dir,
                                 const real_t margin,

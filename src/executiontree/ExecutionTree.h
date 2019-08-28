@@ -109,8 +109,8 @@ class IFunctionNode
 public:
    virtual ~IFunctionNode() {}
    virtual void operator()() = 0;
-   virtual const std::string getName() const = 0;
-   virtual const std::deque< shared_ptr< IFunctionNode > > getChildren() const { return {}; }
+   virtual std::string getName() const = 0;
+   virtual std::deque< shared_ptr< IFunctionNode > > getChildren() const { return {}; }
 };
 
 
@@ -122,7 +122,7 @@ public:
            const std::string &name,
            const TimingTreePtr & timingTree );
 
-   const std::string getName() const override { return name_ != "" ? name_ : "Functor"; };
+   std::string getName() const override { return name_ != "" ? name_ : "Functor"; };
    void operator() () override;
 
 private:
@@ -138,8 +138,8 @@ public:
    EveryNth( const IFunctionNodePtr &node, uint_t interval, bool onFirst = false, uint_t startValue = 0 );
 
    void operator()() override;
-   const std::string getName() const override;
-   const std::deque< shared_ptr< IFunctionNode > > getChildren() const override { return { wrapped_ }; }
+   std::string getName() const override;
+   std::deque< shared_ptr< IFunctionNode > > getChildren() const override { return { wrapped_ }; }
 
 private:
    IFunctionNodePtr wrapped_;
@@ -158,8 +158,8 @@ public:
 
    void push_back( const IFunctionNodePtr &fct ) { children_.push_back( fct ); }
    void push_front( const IFunctionNodePtr &fct ) { children_.push_front( fct ); }
-   const std::string getName() const override { return name_ != "" ? name_ : "Sequence"; };
-   const std::deque< IFunctionNodePtr > getChildren() const override { return children_; };
+   std::string getName() const override { return name_ != "" ? name_ : "Sequence"; };
+   std::deque< IFunctionNodePtr > getChildren() const override { return children_; };
 
 private:
    std::string name_;
@@ -185,8 +185,8 @@ public:
    uint_t getCurrentTimeStep() const override { return currentIteration_; }
    uint_t getNrOfTimeSteps() const override { return iterations_; }
 
-   const std::deque< shared_ptr< IFunctionNode > > getChildren() const override { return { body_ }; }
-   const std::string getName()  const override;
+   std::deque< shared_ptr< IFunctionNode > > getChildren() const override { return { body_ }; }
+   std::string getName()  const override;
 
 private:
    IFunctionNodePtr body_;

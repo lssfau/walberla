@@ -47,7 +47,7 @@ GJK::GJK()
  * \param dir The support point direction.
  * \param threshold Extension of the particle.
  */
-const Vec3 GJK::putSupport(const Support &geom1,
+Vec3 GJK::putSupport(const Support &geom1,
                            const Support &geom2,
                            const Vec3& dir,
                            const real_t margin,

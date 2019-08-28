@@ -125,14 +125,14 @@ public:
    inline const Vec3     vectorFromBFtoWF( const Vec3& v )             const;
    inline const Vec3     pointFromBFtoWF ( real_t px, real_t py, real_t pz ) const;
    inline const Vec3     pointFromBFtoWF ( const Vec3& rpos )          const;
-   virtual const Vec3    velFromBF       ( real_t px, real_t py, real_t pz ) const;
-   virtual const Vec3    velFromBF       ( const Vec3& rpos )          const;
+   virtual Vec3    velFromBF       ( real_t px, real_t py, real_t pz ) const;
+   virtual Vec3    velFromBF       ( const Vec3& rpos )          const;
    inline const Vec3     vectorFromWFtoBF( real_t vx, real_t vy, real_t vz ) const;
    inline const Vec3     vectorFromWFtoBF( const Vec3& v )             const;
    inline const Vec3     pointFromWFtoBF ( real_t px, real_t py, real_t pz ) const;
    inline const Vec3     pointFromWFtoBF ( const Vec3& gpos )          const;
-   virtual const Vec3    velFromWF       ( real_t px, real_t py, real_t pz ) const;
-   virtual const Vec3    velFromWF       ( const Vec3& gpos )          const;
+   virtual Vec3    velFromWF       ( real_t px, real_t py, real_t pz ) const;
+   virtual Vec3    velFromWF       ( const Vec3& gpos )          const;
    inline const Vec3     accFromWF       ( real_t px, real_t py, real_t pz ) const;
           const Vec3     accFromWF       ( const Vec3& gpos )          const;
 

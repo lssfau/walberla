@@ -171,7 +171,7 @@ size_t EquationSystem::getNumberOfEquations() const
    return eqMap_.size();
 }
 
-const std::string EquationSystem::writeEquations() const
+std::string EquationSystem::writeEquations() const
 {
    std::stringstream ss;
    ss << "Equations to solve:" << std::endl;
@@ -182,7 +182,7 @@ const std::string EquationSystem::writeEquations() const
    return ss.str();
 }
 
-const std::string EquationSystem::writeVariables() const
+std::string EquationSystem::writeVariables() const
 {
    std::stringstream ss;
    ss << "Solution for each variable:" << std::endl;
