@@ -553,12 +553,12 @@ void setFlags( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID &
       {
          CurvedDeltaValueCalculation< LatticeModel_T > deltaCalculation( blocks, *block, channel );
 
-         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block.get()),
+         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block),
                                                                            boundaryHandlingId, Curved_Flag, channel, deltaCalculation );
       }
       else // staircase (1st order bounce back no-slip boundary condition)
       {
-         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block.get()),
+         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block),
                                                                            boundaryHandlingId, NoSlip_Flag, channel );
       }
 
