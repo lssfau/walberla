@@ -39,7 +39,8 @@ readability-deleted-default,
 readability-misleading-indentation,
 readability-misplaced-array-index,
 readability-redundant-control-flow,
-readability-redundant-smartptr-get
+readability-redundant-smartptr-get,
+readability-static-accessed-through-instance
 
 '
 WarningsAsErrors: '*'
