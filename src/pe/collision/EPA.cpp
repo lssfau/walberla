@@ -263,7 +263,7 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
       }
    }
 
-   if(entryHeap.size() == 0) {
+   if(entryHeap.empty()) {
       //unrecoverable error.
       return false;
    }
@@ -461,7 +461,7 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
 
          firstTriangle->link(2, lastTriangle, 1);
       }
-   } while (entryHeap.size() > 0 && entryHeap[0]->getSqrDist() <= upperBoundSqr);
+   } while (!entryHeap.empty() && entryHeap[0]->getSqrDist() <= upperBoundSqr);
 
    //Normal must be inverted
    retNormal   = -current->getClosest().getNormalized();

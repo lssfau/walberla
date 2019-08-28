@@ -57,9 +57,9 @@ namespace geometry {
    template<>
    FastOverlapResult fastOverlapCheck ( const Sphere & sphere, const AABB & box )
    {
-           if ( ! sphere.boundingBox().intersects( box ) ) return COMPLETELY_OUTSIDE;
-      else if (   sphere.innerBox()   .contains( box ) )   return CONTAINED_INSIDE_BODY;
-      else                                                 return DONT_KNOW;
+      if ( ! sphere.boundingBox().intersects( box ) ) return COMPLETELY_OUTSIDE;
+      if (   sphere.innerBox()   .contains( box ) )   return CONTAINED_INSIDE_BODY;
+      return DONT_KNOW;
    }
 
    template<>

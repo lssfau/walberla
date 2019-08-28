@@ -82,7 +82,7 @@ namespace timeloop {
     * Behaves like addMeasurement() function above, with n= total number of cells
     *
     *******************************************************************************************************************/
-   void PerformanceMeter::addMeasurement ( const std::string & name, CountFunction countFunction,
+   void PerformanceMeter::addMeasurement ( const std::string & name, const CountFunction& countFunction,
                                            uint_t countFreq, real_t scaling  )
    {
       measurements_.emplace_back( countFunction, name, scaling, countFreq );
@@ -126,7 +126,7 @@ namespace timeloop {
     *******************************************************************************************************************/
    void PerformanceMeter::logResultOnRoot( )
    {
-      if( measurements_.size() == 0)
+      if( measurements_.empty())
          return;
 
       std::stringstream ss;
@@ -148,7 +148,7 @@ namespace timeloop {
     *******************************************************************************************************************/
    void PerformanceMeter::print( std::ostream & os, int targetRank )
    {
-      if( measurements_.size() == 0)
+      if( measurements_.empty())
          return;
 
       std::vector<real_t> totalNrCells;
@@ -294,7 +294,7 @@ namespace timeloop {
     *******************************************************************************************************************/
    void PerformanceMeter::reduce ( std::vector<real_t> & reduced, int targetRank )
    {
-      if ( measurements_.size() == 0 )
+      if ( measurements_.empty() )
          return;
 
       reduced.clear();

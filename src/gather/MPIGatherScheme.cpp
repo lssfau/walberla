@@ -169,7 +169,7 @@ void MPIGatherScheme::communicate()
 
    auto mpiManager = MPIManager::instance();
 
-   if ( packInfos_.size() == 0 ) {
+   if ( packInfos_.empty() ) {
       WALBERLA_LOG_WARNING( "Communicating MPIGatherScheme without registered PackInfos");
       return;
    }

@@ -657,7 +657,7 @@ void Config::Block::getWritableBlocks( const std::string & key, std::vector<Bloc
 // \param value The value of the new parameter.
 // \return \a true if a new parameter was added, \a false if duplicate key is present.
  */
-bool Config::Block::addParameter( std::string key, const std::string& value )
+bool Config::Block::addParameter( const std::string& key, const std::string& value )
 {
    return params_.insert( std::pair<Key,Value>(key,value) ).second;
 }

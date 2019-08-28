@@ -83,7 +83,7 @@ namespace config {
    void createFromTextFile( Config & config, const std::string & pathToTextFile )
    {
       config.readParameterFile( pathToTextFile.c_str() );
-      if (config.error() != "" )
+      if ( !config.error().empty() )
          throw std::runtime_error( "FileReader returned an error reading the parameter file: \n" + config.error() );
    }
 
@@ -111,7 +111,7 @@ namespace config {
          vector< string > equalitySignSplitResult = string_split( *param, "=" );
 
          std::string value;
-         if ( equalitySignSplitResult.size() == 0 )
+         if ( equalitySignSplitResult.empty() )
          {
             WALBERLA_LOG_WARNING( "Ignoring empty parameter");
             continue;

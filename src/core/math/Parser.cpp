@@ -111,7 +111,7 @@ void FunctionParser::parse( const std::string & eq )
    // check if this expression evaluates to constant zero
    std::vector< std::string > variables;
    symbolTable_->get_variable_list( variables );
-   isConstant_ = (variables.size() == 0);
+   isConstant_ = (variables.empty());
    if (isConstant_)
    {
       const double value = evaluate(std::map<std::string, double>());

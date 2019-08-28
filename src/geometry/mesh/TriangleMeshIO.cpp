@@ -493,16 +493,15 @@ namespace geometry {
       bool hasVertexNormals = mesh.hasVertexNormals();
 
       size_t j;
-      TriangleMesh::index_t i;
 
-      for( i = 0u; i < mesh.getNumVertices(); ++i ){
+      for( TriangleMesh::index_t i = 0; i < mesh.getNumVertices(); ++i ){
          j = i / itemsPerMesh;
          meshVec[j].addVertex( mesh.getVertex(i) );
          if( hasVertexNormals )
             meshVec[j].addVertexNormal( mesh.getVertexNormal(i) );
       }
 
-      for( i = 0u; i < mesh.getNumTriangles(); ++i ){
+      for( size_t i = 0; i < mesh.getNumTriangles(); ++i ){
          TriangleMesh::index_t ix = mesh.getVertexIndex( i, 0 );
          TriangleMesh::index_t iy = mesh.getVertexIndex( i, 1 );
          TriangleMesh::index_t iz = mesh.getVertexIndex( i, 2 );
