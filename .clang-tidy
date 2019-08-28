@@ -1,68 +1,54 @@
 ---
-Checks:          '-*,bugprone-*,-bugprone-exception-escape,misc-*,-misc-misplaced-const,modernize-*,-modernize-use-auto,-modernize-loop-convert,-modernize-pass-by-value,-modernize-raw-string-literal,-modernize-use-using,-modernize-avoid-bind,-modernize-return-braced-init-list,-modernize-use-transparent-functors,-modernize-redundant-void-arg,-modernize-avoid-c-arrays,-misc-non-private-member-variables-in-classes,performance-*,readability-container-size-empty,readability-misleading-indentation,readability-misplaced-array-index'
+Checks:          '
+
+-*,
+
+boost-*,
+
+bugprone-*,
+-bugprone-exception-escape,
+
+misc-*,
+-misc-misplaced-const,
+-misc-non-private-member-variables-in-classes,
+
+modernize-*,
+-modernize-use-auto,
+-modernize-loop-convert,
+-modernize-pass-by-value,
+-modernize-raw-string-literal,
+-modernize-use-using,
+-modernize-avoid-bind,
+-modernize-return-braced-init-list,
+-modernize-use-transparent-functors,
+-modernize-redundant-void-arg,
+-modernize-avoid-c-arrays,
+
+mpi-*,
+
+openmp-*,
+
+performance-*,
+
+portability-*,
+
+readability-const-return-type,
+readability-container-size-empty,
+readability-delete-null-pointer,
+readability-deleted-default,
+readability-misleading-indentation,
+readability-misplaced-array-index,
+readability-redundant-control-flow,
+readability-redundant-function-ptr-dereference,
+readability-redundant-smartptr-get,
+readability-redundant-string-cstr,
+readability-static-accessed-through-instance,
+readability-string-compare,
+readability-uniqueptr-delete-release
+
+'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
-FormatStyle:     none
-User:            si11fita
-CheckOptions:    
-  - key:             modernize-loop-convert.MaxCopySize
-    value:           '16'
-  - key:             modernize-loop-convert.MinConfidence
-    value:           reasonable
-  - key:             modernize-loop-convert.NamingStyle
-    value:           CamelCase
-  - key:             modernize-make-shared.IgnoreMacros
-    value:           '1'
-  - key:             modernize-make-shared.IncludeStyle
-    value:           '0'
-  - key:             modernize-make-shared.MakeSmartPtrFunction
-    value:           'std::make_shared'
-  - key:             modernize-make-shared.MakeSmartPtrFunctionHeader
-    value:           memory
-  - key:             modernize-make-unique.IgnoreMacros
-    value:           '1'
-  - key:             modernize-make-unique.IncludeStyle
-    value:           '0'
-  - key:             modernize-make-unique.MakeSmartPtrFunction
-    value:           'std::make_unique'
-  - key:             modernize-make-unique.MakeSmartPtrFunctionHeader
-    value:           memory
-  - key:             modernize-pass-by-value.IncludeStyle
-    value:           llvm
-  - key:             modernize-pass-by-value.ValuesOnly
-    value:           '0'
-  - key:             modernize-raw-string-literal.ReplaceShorterLiterals
-    value:           '0'
-  - key:             modernize-replace-auto-ptr.IncludeStyle
-    value:           llvm
-  - key:             modernize-replace-random-shuffle.IncludeStyle
-    value:           llvm
-  - key:             modernize-use-auto.RemoveStars
-    value:           '0'
-  - key:             modernize-use-default-member-init.IgnoreMacros
-    value:           '1'
-  - key:             modernize-use-default-member-init.UseAssignment
-    value:           '0'
-  - key:             modernize-use-emplace.ContainersWithPushBack
-    value:           '::std::vector;::std::list;::std::deque'
-  - key:             modernize-use-emplace.SmartPointers
-    value:           '::std::shared_ptr;::std::unique_ptr;::std::auto_ptr;::std::weak_ptr'
-  - key:             modernize-use-emplace.TupleMakeFunctions
-    value:           '::std::make_pair;::std::make_tuple'
-  - key:             modernize-use-emplace.TupleTypes
-    value:           '::std::pair;::std::tuple'
-  - key:             modernize-use-equals-default.IgnoreMacros
-    value:           '1'
-  - key:             modernize-use-noexcept.ReplacementString
-    value:           ''
-  - key:             modernize-use-noexcept.UseNoexceptFalse
-    value:           '1'
-  - key:             modernize-use-nullptr.NullMacros
-    value:           'NULL'
-  - key:             modernize-use-transparent-functors.SafeMode
-    value:           '0'
-  - key:             modernize-use-using.IgnoreMacros
-    value:           '1'
 ...
 

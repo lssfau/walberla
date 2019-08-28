@@ -125,7 +125,7 @@ void EveryNth::operator()()
    ++calls_;
 }
 
-const std::string EveryNth::getName() const
+std::string EveryNth::getName() const
 {
    std::stringstream ss;
    ss << "every " << interval_ << "th step:";
@@ -208,7 +208,7 @@ void Loop::synchronizedStop( bool stopVar )
    mpi::allReduceInplace( stop_, mpi::LOGICAL_OR );
 }
 
-const std::string Loop::getName() const
+std::string Loop::getName() const
 {
    std::stringstream ss;
    ss << "Loop [" << iterations_ << "]";

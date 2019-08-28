@@ -961,12 +961,12 @@ void BoundarySetter< LatticeModel_T >::operator()()
       {
          CurvedDeltaValueCalculation< LatticeModel_T > deltaCalculation( blocks, *block, cylinder );
 
-         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block.get()),
+         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block),
                                                                            boundaryHandlingId_, Curved_Flag, cylinder, deltaCalculation );
       }
       else // staircase
       {
-         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block.get()),
+         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block),
                                                                            boundaryHandlingId_, Obstacle_Flag, cylinder );
       }
 
