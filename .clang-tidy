@@ -37,7 +37,8 @@ readability-container-size-empty,
 readability-delete-null-pointer,
 readability-deleted-default,
 readability-misleading-indentation,
-readability-misplaced-array-index
+readability-misplaced-array-index,
+readability-redundant-control-flow
 
 '
 WarningsAsErrors: '*'

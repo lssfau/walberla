@@ -428,7 +428,6 @@ void Config::extractBlock( const char* filename, std::stringstream& input, Block
    error_ << "   Missing '}' for " << block.getKey()
       << " block starting in line " << lineNumber << "\n";
    stateFlag_ = false;
-   return;
 }
 //**********************************************************************************************************************
 
