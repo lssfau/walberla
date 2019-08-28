@@ -35,6 +35,7 @@ portability-*,
 readability-const-return-type,
 readability-container-size-empty,
 readability-delete-null-pointer,
+readability-deleted-default,
 readability-misleading-indentation,
 readability-misplaced-array-index
 
