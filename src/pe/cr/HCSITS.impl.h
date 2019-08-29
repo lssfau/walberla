@@ -97,6 +97,7 @@ inline HardContactSemiImplicitTimesteppingSolvers::HardContactSemiImplicitTimest
    , maxSubIterations_ ( 20 )
    , abortThreshold_   ( real_c(1e-7) )
    , relaxationModel_  ( InelasticFrictionlessContact )
+   , overRelaxationParam_( real_c(1.0) )
    , relaxationParam_  ( real_c(0.75) )
    , maximumPenetration_ ( real_c(0.0) )
    , numContacts_      ( 0 )
@@ -388,17 +389,17 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
             delta_max = relaxApproximateInelasticCoulombContactsByDecoupling( dtinv, contactCache, bodyCache );
             break;
 
-            //         case ApproximateInelasticCoulombContactByOrthogonalProjections:
-            //            delta_max = relaxInelasticCoulombContactsByOrthogonalProjections( dtinv, true, contactCache, bodyCache );
-            //            break;
+         case ApproximateInelasticCoulombContactByOrthogonalProjections:
+            delta_max = relaxInelasticCoulombContactsByOrthogonalProjections( dtinv, true, contactCache, bodyCache );
+            break;
 
          case InelasticCoulombContactByDecoupling:
             delta_max = relaxInelasticCoulombContactsByDecoupling( dtinv, contactCache, bodyCache );
             break;
 
-            //         case InelasticCoulombContactByOrthogonalProjections:
-            //            delta_max = relaxInelasticCoulombContactsByOrthogonalProjections( dtinv, false, contactCache, bodyCache );
-            //            break;
+         case InelasticCoulombContactByOrthogonalProjections:
+            delta_max = relaxInelasticCoulombContactsByOrthogonalProjections( dtinv, false, contactCache, bodyCache );
+            break;
 
          case InelasticGeneralizedMaximumDissipationContact:
             delta_max = relaxInelasticGeneralizedMaximumDissipationContacts( dtinv, contactCache, bodyCache );
@@ -1049,54 +1050,67 @@ inline real_t HardContactSemiImplicitTimesteppingSolvers::relaxInelasticCoulombC
       bodyCache.dv_[contactCache.body2_[i]->index_] += contactCache.body2_[i]->getInvMass() * contactCache.p_[i];
       bodyCache.dw_[contactCache.body2_[i]->index_] += contactCache.body2_[i]->getInvInertia() * ( contactCache.r2_[i] % contactCache.p_[i] );
 
-      // Calculate the relative contact velocity in the global world frame (if no contact reaction is present at contact i)
-      Vec3 gdot    ( ( bodyCache.v_[contactCache.body1_[i]->index_] + bodyCache.dv_[contactCache.body1_[i]->index_] ) - ( bodyCache.v_[contactCache.body2_[i]->index_] + bodyCache.dv_[contactCache.body2_[i]->index_] ) + ( bodyCache.w_[contactCache.body1_[i]->index_] + bodyCache.dw_[contactCache.body1_[i]->index_] ) % contactCache.r1_[i] - ( bodyCache.w_[contactCache.body2_[i]->index_] + bodyCache.dw_[contactCache.body2_[i]->index_] ) % contactCache.r2_[i] /* + diag_[i] * p */ );
+      // Calculate the relative contact velocity in the global world frame (as if no contact reaction was present at contact i)
+      Vec3 gdot(   ( bodyCache.v_[contactCache.body1_[i]->index_] + bodyCache.dv_[contactCache.body1_[i]->index_] )
+                 - ( bodyCache.v_[contactCache.body2_[i]->index_] + bodyCache.dv_[contactCache.body2_[i]->index_] )
+                 + ( bodyCache.w_[contactCache.body1_[i]->index_] + bodyCache.dw_[contactCache.body1_[i]->index_] ) % contactCache.r1_[i]
+                 - ( bodyCache.w_[contactCache.body2_[i]->index_] + bodyCache.dw_[contactCache.body2_[i]->index_] ) % contactCache.r2_[i] /* + diag_[i] * p */ );
 
       // Change from the global world frame to the contact frame
       Mat3 contactframe( contactCache.n_[i], contactCache.t_[i], contactCache.o_[i] );
       Vec3 gdot_nto( contactframe.getTranspose() * gdot );
 
-      //real_t gdot_n  ( trans( contactCache.n_[i] ) * gdot );  // The component of gdot along the contact normal n
-      //Vec3 gdot_t  ( gdot - gdot_n * contactCache.n_[i] );  // The components of gdot tangential to the contact normal n
-      //real_t g_n     ( gdot_n * dt /* + trans( contactCache.n_[i] ) * ( contactCache.body1_[i]->getPosition() + contactCache.r1_[i] ) - ( contactCache.body2_[i]->getPosition() + contactCache.r2_[i] ) */ + contactCache.dist_[i] );  // The gap in normal direction
+      //real_t gdot_n( trans( contactCache.n_[i] ) * gdot );  // The component of gdot along the contact normal n
+      //Vec3 gdot_t( gdot - gdot_n * contactCache.n_[i] );  // The components of gdot tangential to the contact normal n
+      //real_t g_n( gdot_n * dt /* + trans( contactCache.n_[i] ) * ( contactCache.body1_[i]->getPosition() + contactCache.r1_[i] ) - ( contactCache.body2_[i]->getPosition() + contactCache.r2_[i] ) */ + contactCache.dist_[i] );  // The gap in normal direction
 
       // The constraint in normal direction is actually a positional constraint but instead of g_n we use g_n/dt equivalently and call it gdot_n
-      gdot_nto[0] += ( /* + trans( contactCache.n_[i] ) * ( contactCache.body1_[i]->getPosition() + contactCache.r1_[i] ) - ( contactCache.body2_[i]->getPosition() + contactCache.r2_[i] ) */ + contactCache.dist_[i] ) * dtinv;
+      gdot_nto[0] += ( /* + trans( contactCache.n_[i] ) * ( contactCache.body1_[i]->getPosition() + contactCache.r1_[i] )
+                          - ( contactCache.body2_[i]->getPosition() + contactCache.r2_[i] ) */ + contactCache.dist_[i] ) * dtinv;
 
-      const real_t w( 1 ); // w > 0
+      // Tasora et al., 2011 starts here
+      // -------------------------------------------------------------------------------------
+
       Vec3 p_cf( contactframe.getTranspose() * contactCache.p_[i] );
       if( approximate ) {
-         // Calculate next iterate (Anitescu/Tasora).
-         p_cf = p_cf - w * ( contactCache.diag_nto_[i] * p_cf + gdot_nto );
+         // Calculate next iterate (Tasora et al., 2011).
+         p_cf = p_cf - overRelaxationParam_ * ( contactCache.diag_nto_[i] * p_cf + gdot_nto );
       }
       else {
          // Calculate next iterate (De Saxce/Feng).
          Vec3 tmp( contactCache.diag_nto_[i] * p_cf + gdot_nto );
          tmp[0] += std::sqrt( math::sq( tmp[1] ) + math::sq( tmp[2] ) ) * contactCache.mu_[i];
-         p_cf = p_cf - w * tmp;
+         p_cf = p_cf - overRelaxationParam_ * tmp;
       }
 
-      // Project.
+      // Project on friction cone (Tasora et al., 2011; Fig. 2; Eq. (46)).
       real_t flimit( contactCache.mu_[i] * p_cf[0] );
       real_t fsq( p_cf[1] * p_cf[1] + p_cf[2] * p_cf[2] );
-      if( p_cf[0] > 0 && fsq < flimit * flimit ) {
-         // Unconstrained minimum is in cone leading to a static contact and no projection
-         // is necessary.
-      }
-      else if( p_cf[0] < 0 && fsq < p_cf[0] / math::sq( contactCache.mu_[i] ) ) {
-         // Unconstrained minimum is in dual cone leading to a separating contact where no contact
-         // reaction is present (the unconstrained minimum is projected to the tip of the cone).
 
+      if( p_cf[0] > 0 && fsq < flimit * flimit ) {
+         // Unconstrained minimum is INSIDE THE UPPER CONE,
+         // with slope n*mu
+         // leading to a static contact and no projection is necessary.
+      }
+      else if( p_cf[0] < 0 && fsq < math::sq( p_cf[0] / contactCache.mu_[i] ) ) {
+         // Unconstrained minimum is INSIDE THE LOWER CONE,
+         // with slope n/mu
+         // leading to a separating contact where no contact reaction is present,
+         // i.e. the unconstrained minimum is projected to the tip of the lower cone.
          p_cf = Vec3();
       }
       else {
-         // The contact is dynamic.
-         real_t f( std::sqrt( fsq ) );
-         p_cf[0] = ( f * contactCache.mu_[i] + p_cf[0] ) / ( math::sq( contactCache.mu_[i] ) + 1 );
+         // Unconstrained minimum is OUTSIDE THE CONE -> Project on cone surface, Eq. (45) in Tasora et al., 2011
+         real_t f( std::sqrt( fsq ) ); // gamma_r
+         p_cf[0] = ( f * contactCache.mu_[i] + p_cf[0] ) / ( math::sq( contactCache.mu_[i] ) + 1 ); // p_cf[0] = gamma_n
+         
          real_t factor( contactCache.mu_[i] * p_cf[0] / f );
          p_cf[1] *= factor;
          p_cf[2] *= factor;
       }
+
+      // Tasora et al., 2011 ends here
+      // -------------------------------------------------------------------------------------
 
       Vec3 p_wf( contactframe * p_cf );
       Vec3 dp( contactCache.p_[i] - p_wf );
