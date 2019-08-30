@@ -258,6 +258,7 @@ int main( int argc, char ** argv )
    WcTimingPool tpImbalanced;
    WcTimingPool tpBalanced;
 
+   WALBERLA_LOG_INFO_ON_ROOT("*** RUNNING UNBALANCED SIMULATION ***");
    WALBERLA_MPI_BARRIER();
    tpImbalanced["AssocToBlock"].start();
    for (int64_t i=0; i < params.simulationSteps; ++i)
@@ -344,7 +345,7 @@ int main( int argc, char ** argv )
    WALBERLA_MPI_BARRIER();
    if (bRebalance)
    {
-      WALBERLA_LOG_DEVEL_ON_ROOT("running load balancing");
+      WALBERLA_LOG_INFO_ON_ROOT("*** RUNNING LOAD BALANCING ***");
       domain::createWithNeighborhood( accessor, *forest, *ic );
       for (auto pIt = ps->begin(); pIt != ps->end(); )
       {
@@ -365,6 +366,9 @@ int main( int argc, char ** argv )
       SNN(*ps, forest, domain);
       sortParticleStorage(*ps, params.sorting, lc->domain_, uint_c(lc->numCellsPerDim_[0]));
    }
+
+   WALBERLA_MPI_BARRIER();
+   WALBERLA_LOG_INFO_ON_ROOT("*** RUNNING BALANCED SIMULATION ***");
 
    WALBERLA_MPI_BARRIER();
    tpBalanced["AssocToBlock"].start();
