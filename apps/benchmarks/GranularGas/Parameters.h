@@ -48,7 +48,7 @@ struct Parameters
    int64_t simulationSteps = 10;
    real_t dt = real_t(0.01);
    int64_t visSpacing = 1000;
-   std::string path = "vtk_out";
+   std::string vtk_out = "vtk_out";
    std::string sqlFile = "benchmark.sqlite";
    bool recalculateBlockLevelsInRefresh = false;
    bool alwaysRebalanceInRefresh = true;

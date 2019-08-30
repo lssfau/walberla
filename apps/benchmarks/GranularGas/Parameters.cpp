@@ -69,8 +69,8 @@ void loadFromConfig(Parameters& params, const Config::BlockHandle& cfg)
    params.visSpacing = cfg.getParameter<int64_t>("visSpacing", 1000 );
    WALBERLA_LOG_INFO_ON_ROOT("visSpacing: " << params.visSpacing);
    
-   params.path = cfg.getParameter<std::string>("path", "vtk_out" );
-   WALBERLA_LOG_INFO_ON_ROOT("path: " << params.path);
+   params.vtk_out = cfg.getParameter<std::string>("vtk_out", "vtk_out" );
+   WALBERLA_LOG_INFO_ON_ROOT("vtk_out: " << params.vtk_out);
    
    params.sqlFile = cfg.getParameter<std::string>("sqlFile", "benchmark.sqlite" );
    WALBERLA_LOG_INFO_ON_ROOT("sqlFile: " << params.sqlFile);
@@ -150,7 +150,7 @@ void saveToSQL(const Parameters& params,
    
    integerProperties["visSpacing"] = params.visSpacing;
    
-   stringProperties["path"] = params.path;
+   stringProperties["vtk_out"] = params.vtk_out;
    
    stringProperties["sqlFile"] = params.sqlFile;
    

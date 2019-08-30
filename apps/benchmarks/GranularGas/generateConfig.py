@@ -16,7 +16,7 @@ cfg.addParameter("initialRefinementLevel", "int64_t",     "0")
 cfg.addParameter("simulationSteps",        "int64_t",     "10")
 cfg.addParameter("dt",                     "real_t",      "real_t(0.01)")
 cfg.addParameter("visSpacing",             "int64_t",     "1000")
-cfg.addParameter("path",                   "std::string", '"vtk_out"')
+cfg.addParameter("vtk_out",                "std::string", '"vtk_out"')
 cfg.addParameter("sqlFile",                "std::string", '"benchmark.sqlite"')
 
 cfg.addParameter("recalculateBlockLevelsInRefresh",                "bool", "false");
