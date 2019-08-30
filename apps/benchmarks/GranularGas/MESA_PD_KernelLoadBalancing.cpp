@@ -259,6 +259,14 @@ int main( int argc, char ** argv )
    WcTimingPool tpBalanced;
 
    WALBERLA_MPI_BARRIER();
+   tpImbalanced["AssocToBlock"].start();
+   for (int64_t i=0; i < params.simulationSteps; ++i)
+   {
+      ps->forEachParticle(true, kernel::SelectLocal(), accessor, assoc, accessor);
+   }
+   tpImbalanced["AssocToBlock"].end();
+
+   WALBERLA_MPI_BARRIER();
    tpImbalanced["GenerateLinkedCells"].start();
    for (int64_t i=0; i < params.simulationSteps; ++i)
    {
@@ -357,6 +365,14 @@ int main( int argc, char ** argv )
       SNN(*ps, forest, domain);
       sortParticleStorage(*ps, params.sorting, lc->domain_, uint_c(lc->numCellsPerDim_[0]));
    }
+
+   WALBERLA_MPI_BARRIER();
+   tpBalanced["AssocToBlock"].start();
+   for (int64_t i=0; i < params.simulationSteps; ++i)
+   {
+      ps->forEachParticle(true, kernel::SelectLocal(), accessor, assoc, accessor);
+   }
+   tpBalanced["AssocToBlock"].end();
 
    WALBERLA_MPI_BARRIER();
    tpBalanced["GenerateLinkedCells"].start();
