@@ -35,6 +35,7 @@
 #include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
+#include <mesa_pd/data/SparseLinkedCells.h>
 #include <mesa_pd/domain/BlockForestDataHandling.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
 #include <mesa_pd/domain/InfoCollection.h>
@@ -42,6 +43,7 @@
 #include <mesa_pd/kernel/DoubleCast.h>
 #include <mesa_pd/kernel/ExplicitEulerWithShape.h>
 #include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
+#include <mesa_pd/kernel/InsertParticleIntoSparseLinkedCells.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/kernel/SpringDashpot.h>
 #include <mesa_pd/mpi/ContactFilter.h>
@@ -95,8 +97,8 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_DEVEL_ON_ROOT("MESA_PD_KernelLoadBalancing" );
 
-//   logging::Logging::instance()->setStreamLogLevel(logging::Logging::INFO);
-//   logging::Logging::instance()->setFileLogLevel(logging::Logging::INFO);
+   //   logging::Logging::instance()->setStreamLogLevel(logging::Logging::INFO);
+   //   logging::Logging::instance()->setFileLogLevel(logging::Logging::INFO);
 
    WALBERLA_LOG_INFO_ON_ROOT( "config file: " << argv[1] );
    WALBERLA_LOG_INFO_ON_ROOT( "waLBerla Revision: " << WALBERLA_GIT_SHA1 );
@@ -342,6 +344,34 @@ int main( int argc, char ** argv )
    }
    tpImbalanced["SNN"].end();
 
+   auto SNNBytesSent     = SNN.getBytesSent();
+   auto SNNBytesReceived = SNN.getBytesReceived();
+   auto SNNSends         = SNN.getNumberOfSends();
+   auto SNNReceives      = SNN.getNumberOfReceives();
+   auto RPBytesSent      = RP.getBytesSent();
+   auto RPBytesReceived  = RP.getBytesReceived();
+   auto RPSends          = RP.getNumberOfSends();
+   auto RPReceives       = RP.getNumberOfReceives();
+   walberla::mpi::reduceInplace(SNNBytesSent, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(SNNBytesReceived, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(SNNSends, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(SNNReceives, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPBytesSent, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPBytesReceived, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPSends, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPReceives, walberla::mpi::SUM);
+   auto cC = walberla::mpi::reduce(imbalancedContactsChecked, walberla::mpi::SUM);
+   auto cD = walberla::mpi::reduce(imbalancedContactsDetected, walberla::mpi::SUM);
+   auto cT = walberla::mpi::reduce(imbalancedContactsTreated, walberla::mpi::SUM);
+   WALBERLA_LOG_DEVEL_ON_ROOT( "SNN bytes communicated:   " << SNNBytesSent << " / " << SNNBytesReceived );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "SNN communication partners: " << SNNSends << " / " << SNNReceives );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "RP bytes communicated:  " << RPBytesSent << " / " << RPBytesReceived );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "RP communication partners: " << RPSends << " / " << RPReceives );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "contacts checked/detected/treated: " << cC << " / " << cD << " / " << cT );
+   auto minLinkedCells = walberla::mpi::reduce(lc->cells_.size(), walberla::mpi::MIN);
+   auto maxLinkedCells = walberla::mpi::reduce(lc->cells_.size(), walberla::mpi::MAX);
+   WALBERLA_LOG_DEVEL_ON_ROOT( "linked cells: " << minLinkedCells << " / " << maxLinkedCells );
+
    WALBERLA_MPI_BARRIER();
    if (bRebalance)
    {
@@ -462,14 +492,15 @@ int main( int argc, char ** argv )
 
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - START ***");
-   auto SNNBytesSent     = SNN.getBytesSent();
-   auto SNNBytesReceived = SNN.getBytesReceived();
-   auto SNNSends         = SNN.getNumberOfSends();
-   auto SNNReceives      = SNN.getNumberOfReceives();
-   auto RPBytesSent      = RP.getBytesSent();
-   auto RPBytesReceived  = RP.getBytesReceived();
-   auto RPSends          = RP.getNumberOfSends();
-   auto RPReceives       = RP.getNumberOfReceives();
+
+   SNNBytesSent     = SNN.getBytesSent();
+   SNNBytesReceived = SNN.getBytesReceived();
+   SNNSends         = SNN.getNumberOfSends();
+   SNNReceives      = SNN.getNumberOfReceives();
+   RPBytesSent      = RP.getBytesSent();
+   RPBytesReceived  = RP.getBytesReceived();
+   RPSends          = RP.getNumberOfSends();
+   RPReceives       = RP.getNumberOfReceives();
    walberla::mpi::reduceInplace(SNNBytesSent, walberla::mpi::SUM);
    walberla::mpi::reduceInplace(SNNBytesReceived, walberla::mpi::SUM);
    walberla::mpi::reduceInplace(SNNSends, walberla::mpi::SUM);
@@ -478,14 +509,17 @@ int main( int argc, char ** argv )
    walberla::mpi::reduceInplace(RPBytesReceived, walberla::mpi::SUM);
    walberla::mpi::reduceInplace(RPSends, walberla::mpi::SUM);
    walberla::mpi::reduceInplace(RPReceives, walberla::mpi::SUM);
-   auto cC = walberla::mpi::reduce(balancedContactsChecked, walberla::mpi::SUM);
-   auto cD = walberla::mpi::reduce(balancedContactsDetected, walberla::mpi::SUM);
-   auto cT = walberla::mpi::reduce(balancedContactsTreated, walberla::mpi::SUM);
+   cC = walberla::mpi::reduce(balancedContactsChecked, walberla::mpi::SUM);
+   cD = walberla::mpi::reduce(balancedContactsDetected, walberla::mpi::SUM);
+   cT = walberla::mpi::reduce(balancedContactsTreated, walberla::mpi::SUM);
    WALBERLA_LOG_DEVEL_ON_ROOT( "SNN bytes communicated:   " << SNNBytesSent << " / " << SNNBytesReceived );
    WALBERLA_LOG_DEVEL_ON_ROOT( "SNN communication partners: " << SNNSends << " / " << SNNReceives );
    WALBERLA_LOG_DEVEL_ON_ROOT( "RP bytes communicated:  " << RPBytesSent << " / " << RPBytesReceived );
    WALBERLA_LOG_DEVEL_ON_ROOT( "RP communication partners: " << RPSends << " / " << RPReceives );
    WALBERLA_LOG_DEVEL_ON_ROOT( "contacts checked/detected/treated: " << cC << " / " << cD << " / " << cT );
+   minLinkedCells = walberla::mpi::reduce(lc->cells_.size(), walberla::mpi::MIN);
+   maxLinkedCells = walberla::mpi::reduce(lc->cells_.size(), walberla::mpi::MAX);
+   WALBERLA_LOG_DEVEL_ON_ROOT( "linked cells: " << minLinkedCells << " / " << maxLinkedCells );
 
    auto tpImbalancedReduced = tpImbalanced.getReduced();
    WALBERLA_LOG_INFO_ON_ROOT(*tpImbalancedReduced);
@@ -561,6 +595,8 @@ int main( int argc, char ** argv )
       integerProperties["RPReceives"]                   = RPReceives;
       realProperties["linkedCellsVolume"]               = linkedCellsVolume;
       integerProperties["numLinkedCells"]               = int64_c(numLinkedCells);
+      integerProperties["minLinkedCells"]               = int64_c(minLinkedCells);
+      integerProperties["maxLinkedCells"]               = int64_c(maxLinkedCells);
 
       addBuildInfoToSQL( integerProperties, realProperties, stringProperties );
       saveToSQL(params, integerProperties, realProperties, stringProperties );
