@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file InsertParticleIntoLinkedCells.h
+//! \file InsertParticleIntoSparseLinkedCells.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -28,7 +28,7 @@
 
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/IAccessor.h>
-#include <mesa_pd/data/LinkedCells.h>
+#include <mesa_pd/data/SparseLinkedCells.h>
 
 #include <vector>
 
@@ -37,9 +37,9 @@ namespace mesa_pd {
 namespace kernel {
 
 /**
- * Inserts a particle into the data::LinkedCells data structure
+ * Inserts a particle into the data::SparseLinkedCells data structure
  *
- * \attention Make sure to data::LinkedCells::clear() the data structure before
+ * \attention Make sure to data::SparseLinkedCells::clear() the data structure before
  * reinserting new particles.
  *
  * This kernel requires the following particle accessor interface
@@ -54,15 +54,15 @@ namespace kernel {
  * \endcode
  * \ingroup mesa_pd_kernel
  */
-class InsertParticleIntoLinkedCells
+class InsertParticleIntoSparseLinkedCells
 {
 public:
    template <typename Accessor>
-   void operator()(const size_t p_idx, Accessor& ac, data::LinkedCells& lc) const;
+   void operator()(const size_t p_idx, Accessor& ac, data::SparseLinkedCells& lc) const;
 };
 
 template <typename Accessor>
-inline void InsertParticleIntoLinkedCells::operator()(const size_t p_idx, Accessor& ac, data::LinkedCells& lc) const
+inline void InsertParticleIntoSparseLinkedCells::operator()(const size_t p_idx, Accessor& ac, data::SparseLinkedCells& lc) const
 {
    static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
 
@@ -81,8 +81,12 @@ inline void InsertParticleIntoLinkedCells::operator()(const size_t p_idx, Access
       if (hash1 >= lc.numCellsPerDim_[1]) hash1 = lc.numCellsPerDim_[1] - 1;
       if (hash2 < 0) hash2 = 0;
       if (hash2 >= lc.numCellsPerDim_[2]) hash2 = lc.numCellsPerDim_[2] - 1;
-      uint_t cell_idx = getCellIdx(lc, hash0, hash1, hash2);
+      uint64_t cell_idx = getCellIdx(lc, hash0, hash1, hash2);
       ac.setNextParticle(p_idx, lc.cells_[cell_idx].exchange(int_c(p_idx)));
+      if (ac.getNextParticle(p_idx) == -1)
+      {
+         lc.nonEmptyCells_.emplace_back(cell_idx);
+      }
    }
 }
 

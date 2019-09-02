@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file LinkedCells.h
+//! \file SparseLinkedCells.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -43,10 +43,12 @@ namespace walberla {
 namespace mesa_pd {
 namespace data {
 
-struct LinkedCells
+struct SparseLinkedCells
 {
-   LinkedCells(const math::AABB& domain, const real_t cellDiameter) : LinkedCells(domain, Vec3(cellDiameter,cellDiameter,cellDiameter)) {}
-   LinkedCells(const math::AABB& domain, const Vec3& cellDiameter);
+   SparseLinkedCells(const math::AABB& domain, const real_t cellDiameter)
+      : SparseLinkedCells(domain, Vec3(cellDiameter,cellDiameter,cellDiameter))
+   {}
+   SparseLinkedCells(const math::AABB& domain, const Vec3& cellDiameter);
 
    void clear();
 
@@ -84,16 +86,17 @@ struct LinkedCells
                                 Func&& func,
                                 Args&&... args) const;
 
-   math::AABB   domain_ {};
-   Vector3<int> numCellsPerDim_ {};
+   math::AABB   domain_ {}; ///< local domain covered by this data structure
+   Vector3<int> numCellsPerDim_ {}; ///< number of linked cells per dimension
    Vec3         cellDiameter_ {};
    Vec3         invCellDiameter_ {};
-   std::atomic<int> infiniteParticles_ {};
-   std::vector< std::atomic<int> > cells_ {};
+   std::atomic<int> infiniteParticles_ {}; ///< data structure for particles to large for the cells
+   std::vector< std::atomic<int> > cells_ {}; ///< actual cell data structure
+   std::vector<size_t> nonEmptyCells_ {}; ///< list of cells containing particles
 };
 
 inline
-math::AABB getCellAABB(const LinkedCells& ll,
+math::AABB getCellAABB(const SparseLinkedCells& ll,
                        const int64_t hash0,
                        const int64_t hash1,
                        const int64_t hash2)
@@ -113,7 +116,7 @@ math::AABB getCellAABB(const LinkedCells& ll,
 }
 
 inline
-uint_t getCellIdx(const LinkedCells& ll,
+uint_t getCellIdx(const SparseLinkedCells& ll,
                   const int64_t hash0,
                   const int64_t hash1,
                   const int64_t hash2)
@@ -126,7 +129,7 @@ uint_t getCellIdx(const LinkedCells& ll,
 }
 
 inline
-void getCellCoordinates(const LinkedCells& ll,
+void getCellCoordinates(const SparseLinkedCells& ll,
                         const uint64_t idx,
                         int64_t& hash0,
                         int64_t& hash1,
@@ -145,7 +148,7 @@ void getCellCoordinates(const LinkedCells& ll,
 }
 
 inline
-LinkedCells::LinkedCells(const math::AABB& domain, const Vec3& cellDiameter)
+SparseLinkedCells::SparseLinkedCells(const math::AABB& domain, const Vec3& cellDiameter)
    : domain_(domain)
    , numCellsPerDim_( static_cast<int>(std::ceil( domain.sizes()[0] / cellDiameter[0])),
      static_cast<int>(std::ceil( domain.sizes()[1] / cellDiameter[1])),
@@ -155,6 +158,7 @@ LinkedCells::LinkedCells(const math::AABB& domain, const Vec3& cellDiameter)
      domain.sizes()[2] / real_c(numCellsPerDim_[2]) )
    , invCellDiameter_( real_t(1) / cellDiameter_[0], real_t(1) / cellDiameter_[1], real_t(1) / cellDiameter_[2] )
    , cells_(uint_c(numCellsPerDim_[0]*numCellsPerDim_[1]*numCellsPerDim_[2]))
+   , nonEmptyCells_(uint_c(numCellsPerDim_[0]*numCellsPerDim_[1]*numCellsPerDim_[2]))
 {
    //precondition
    {%- for dim in range(3) %}
@@ -169,119 +173,124 @@ LinkedCells::LinkedCells(const math::AABB& domain, const Vec3& cellDiameter)
    WALBERLA_CHECK_GREATER_EQUAL(numCellsPerDim_[{{dim}}], 0);
    {%- endfor %}
 
+   nonEmptyCells_.clear();
    std::fill(cells_.begin(), cells_.end(), -1);
 }
 
-void LinkedCells::clear()
+void SparseLinkedCells::clear()
 {
-   const uint64_t cellsSize = cells_.size();
-   //clear existing linked cells
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static)
-#endif
-   for (int64_t i = 0; i < int64_c(cellsSize); ++i)
-      cells_[uint64_c(i)] = -1;
+   for (const auto v : nonEmptyCells_)
+   {
+      WALBERLA_ASSERT_LESS(v, cells_.size());
+      cells_[v] = -1;
+   }
+   nonEmptyCells_.clear();
    infiniteParticles_ = -1;
 }
 
 {%- for half in [False, True] %}
 template <typename Selector, typename Accessor, typename Func, typename... Args>
-inline void LinkedCells::forEachParticlePair{%- if half %}Half{%- endif %}(const bool openmp, const Selector& selector, Accessor& acForLC, Func&& func, Args&&... args) const
+inline void SparseLinkedCells::forEachParticlePair{%- if half %}Half{%- endif %}(const bool openmp, const Selector& selector, Accessor& acForLC, Func&& func, Args&&... args) const
 {
    static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
    WALBERLA_UNUSED(openmp);
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static) if (openmp)
-#endif
-   for (int z = 0; z < numCellsPerDim_[2]; ++z)
+
+   for (const auto cellIdx : nonEmptyCells_)
    {
-      for (int y = 0; y < numCellsPerDim_[1]; ++y)
+      int64_t x = 0;
+      int64_t y = 0;
+      int64_t z = 0;
+      getCellCoordinates(*this, cellIdx, x, y, z);
+      int p_idx = cells_[cellIdx]; ///< current particle index
+      int np_idx = -1; ///< particle to be checked against
+
+      while (p_idx != -1)
       {
-         for (int x = 0; x < numCellsPerDim_[0]; ++x)
+         WALBERLA_ASSERT_GREATER_EQUAL(p_idx, 0);
+         WALBERLA_ASSERT_LESS(p_idx, acForLC.size());
+
+         // check particles in own cell
+         np_idx = acForLC.getNextParticle(uint_c(p_idx)); ///< neighbor particle index
+         while (np_idx != -1)
          {
-            const uint_t cell_idx = getCellIdx(*this, x, y, z); ///< current cell index
-            int p_idx = cells_[cell_idx]; ///< current particle index
-            int np_idx = -1; ///< particle to be checked against
+            WALBERLA_ASSERT_GREATER_EQUAL(np_idx, 0);
+            WALBERLA_ASSERT_LESS(np_idx, acForLC.size());
 
-            while (p_idx != -1)
+            if (selector(uint_c(p_idx), uint_c(np_idx), acForLC))
             {
-               WALBERLA_ASSERT_GREATER_EQUAL(p_idx, 0);
-               WALBERLA_ASSERT_LESS(p_idx, acForLC.size());
+               func(uint_c(p_idx), uint_c(np_idx), std::forward<Args>(args)...);
+               {%- if not half %}
+               func(uint_c(np_idx), uint_c(p_idx), std::forward<Args>(args)...);
+               {%- endif %}
+            }
 
-               // check particles in own cell
-               np_idx = acForLC.getNextParticle(uint_c(p_idx)); ///< neighbor particle index
-               while (np_idx != -1)
+            // go to next particle
+            np_idx = acForLC.getNextParticle(uint_c(np_idx));
+         }
+
+         // check particles in infiniteParticles list
+         np_idx = infiniteParticles_; ///< neighbor particle index
+         while (np_idx != -1)
+         {
+            WALBERLA_ASSERT_GREATER_EQUAL(np_idx, 0);
+            WALBERLA_ASSERT_LESS(np_idx, acForLC.size());
+
+            if (selector(uint_c(p_idx), uint_c(np_idx), acForLC))
+            {
+               func(uint_c(p_idx), uint_c(np_idx), std::forward<Args>(args)...);
+               {%- if not half %}
+               func(uint_c(np_idx), uint_c(p_idx), std::forward<Args>(args)...);
+               {%- endif %}
+            }
+
+            // go to next particle
+            np_idx = acForLC.getNextParticle(uint_c(np_idx));
+         }
+
+         // go to next particle
+         p_idx = acForLC.getNextParticle(uint_c(p_idx));
+      }
+
+      // check particles in neighboring cells (only positive ones)
+      for (auto dir : stencil::D3Q27::dir_pos)
+      {
+         const int64_t nx = x + int64_c(stencil::cx[dir]);
+         const int64_t ny = y + int64_c(stencil::cy[dir]);
+         const int64_t nz = z + int64_c(stencil::cz[dir]);
+         if (nx < 0) continue;
+         if (ny < 0) continue;
+         if (nz < 0) continue;
+         if (nx >= numCellsPerDim_[0]) continue;
+         if (ny >= numCellsPerDim_[1]) continue;
+         if (nz >= numCellsPerDim_[2]) continue;
+
+         const uint64_t ncell_idx = getCellIdx(*this, nx, ny, nz); ///< neighbor cell index
+
+         p_idx = cells_[cellIdx]; ///< current particle index
+         WALBERLA_ASSERT_GREATER_EQUAL(p_idx, 0);
+         WALBERLA_ASSERT_LESS(p_idx, acForLC.size());
+         while (p_idx != -1)
+         {
+            np_idx = cells_[ncell_idx]; ///< neighbor particle index
+            while (np_idx != -1)
+            {
+               WALBERLA_ASSERT_GREATER_EQUAL(np_idx, 0);
+               WALBERLA_ASSERT_LESS(np_idx, acForLC.size());
+
+               if (selector(uint_c(p_idx), uint_c(np_idx), acForLC))
                {
-                  WALBERLA_ASSERT_GREATER_EQUAL(np_idx, 0);
-                  WALBERLA_ASSERT_LESS(np_idx, acForLC.size());
-
-                  if (selector(uint_c(p_idx), uint_c(np_idx), acForLC))
-                  {
-                     func(uint_c(p_idx), uint_c(np_idx), std::forward<Args>(args)...);
-                     {%- if not half %}
-                     func(uint_c(np_idx), uint_c(p_idx), std::forward<Args>(args)...);
-                     {%- endif %}
-                  }
-
-                  np_idx = acForLC.getNextParticle(uint_c(np_idx));
-               }
-
-               // check particles in neighboring cells (only positive ones)
-               for (auto dir : stencil::D3Q27::dir_pos)
-               {
-                  const int nx = x + stencil::cx[dir];
-                  const int ny = y + stencil::cy[dir];
-                  const int nz = z + stencil::cz[dir];
-                  if (nx < 0) continue;
-                  if (ny < 0) continue;
-                  if (nz < 0) continue;
-                  if (nx >= numCellsPerDim_[0]) continue;
-                  if (ny >= numCellsPerDim_[1]) continue;
-                  if (nz >= numCellsPerDim_[2]) continue;
-
-                  const uint_t ncell_idx = getCellIdx(*this, nx, ny, nz); ///< neighbor cell index
-
-                  WALBERLA_ASSERT_GREATER_EQUAL(p_idx, 0);
-                  WALBERLA_ASSERT_LESS(p_idx, acForLC.size());
-                  np_idx = cells_[ncell_idx]; ///< neighbor particle index
-                  while (np_idx != -1)
-                  {
-                     WALBERLA_ASSERT_GREATER_EQUAL(np_idx, 0);
-                     WALBERLA_ASSERT_LESS(np_idx, acForLC.size());
-
-                     if (selector(uint_c(p_idx), uint_c(np_idx), acForLC))
-                     {
-                        func(uint_c(p_idx), uint_c(np_idx), std::forward<Args>(args)...);
-                        {%- if not half %}
-                        func(uint_c(np_idx), uint_c(p_idx), std::forward<Args>(args)...);
-                        {%- endif %}
-                     }
-
-                     np_idx = acForLC.getNextParticle(uint_c(np_idx));
-                  }
-               }
-
-               // check particles in infiniteParticles list
-               np_idx = infiniteParticles_; ///< neighbor particle index
-               while (np_idx != -1)
-               {
-                  WALBERLA_ASSERT_GREATER_EQUAL(np_idx, 0);
-                  WALBERLA_ASSERT_LESS(np_idx, acForLC.size());
-
-                  if (selector(uint_c(p_idx), uint_c(np_idx), acForLC))
-                  {
-                     func(uint_c(p_idx), uint_c(np_idx), std::forward<Args>(args)...);
-                     {%- if not half %}
-                     func(uint_c(np_idx), uint_c(p_idx), std::forward<Args>(args)...);
-                     {%- endif %}
-                  }
-
-                  np_idx = acForLC.getNextParticle(uint_c(np_idx));
+                  func(uint_c(p_idx), uint_c(np_idx), std::forward<Args>(args)...);
+                  {%- if not half %}
+                  func(uint_c(np_idx), uint_c(p_idx), std::forward<Args>(args)...);
+                  {%- endif %}
                }
 
                // go to next particle
-               p_idx = acForLC.getNextParticle(uint_c(p_idx));
+               np_idx = acForLC.getNextParticle(uint_c(np_idx));
             }
+
+            // go to next particle
+            p_idx = acForLC.getNextParticle(uint_c(p_idx));
          }
       }
    }

@@ -6,6 +6,7 @@ from .ExplicitEulerWithShape import ExplicitEulerWithShape
 from .ForceLJ import ForceLJ
 from .HeatConduction import HeatConduction
 from .InsertParticleIntoLinkedCells import InsertParticleIntoLinkedCells
+from .InsertParticleIntoSparseLinkedCells import InsertParticleIntoSparseLinkedCells
 from .LinearSpringDashpot import LinearSpringDashpot
 from .NonLinearSpringDashpot import NonLinearSpringDashpot
 from .SingleCast import SingleCast
@@ -21,6 +22,7 @@ __all__ = ['DoubleCast',
            'ForceLJ',
            'HeatConduction',
            'InsertParticleIntoLinkedCells',
+           'InsertParticleIntoSparseLinkedCells',
            'LinearSpringDashpot',
            'NonLinearSpringDashpot',
            'SingleCast',
