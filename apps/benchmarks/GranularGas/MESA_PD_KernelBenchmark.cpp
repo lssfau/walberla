@@ -128,7 +128,7 @@ int main( int argc, char ** argv )
    for (auto& iBlk : *forest)
    {
       for (auto pt : grid_generator::SCGrid(iBlk.getAABB(),
-                                            Vector3<real_t>(params.spacing) * real_c(0.5),
+                                            Vector3<real_t>(params.spacing) * real_c(0.5) + params.shift,
                                             params.spacing))
       {
          WALBERLA_CHECK(iBlk.getAABB().contains(pt));

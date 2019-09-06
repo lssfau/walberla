@@ -42,6 +42,9 @@ void loadFromConfig(Parameters& params, const Config::BlockHandle& cfg)
    params.spacing = cfg.getParameter<real_t>("spacing", real_t(1.0) );
    WALBERLA_LOG_INFO_ON_ROOT("spacing: " << params.spacing);
    
+   params.shift = cfg.getParameter<Vec3>("shift", Vec3(real_t(0.1), real_t(0.1), real_t(0.1)) );
+   WALBERLA_LOG_INFO_ON_ROOT("shift: " << params.shift);
+   
    params.radius = cfg.getParameter<real_t>("radius", real_t(0.5) );
    WALBERLA_LOG_INFO_ON_ROOT("radius: " << params.radius);
    
@@ -134,6 +137,7 @@ void saveToSQL(const Parameters& params,
    
    
    realProperties["spacing"] = double_c(params.spacing);
+   
    
    realProperties["radius"] = double_c(params.radius);
    

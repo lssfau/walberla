@@ -39,6 +39,7 @@ struct Parameters
    std::string sorting = "none";
    Vec3 normal = Vec3(real_t(1.0), real_t(1.0), real_t(1.0));
    real_t spacing = real_t(1.0);
+   Vec3 shift = Vec3(real_t(0.1), real_t(0.1), real_t(0.1));
    real_t radius = real_t(0.5);
    bool bBarrier = false;
    bool storeNodeTimings = false;
