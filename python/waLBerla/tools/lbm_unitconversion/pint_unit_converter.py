@@ -113,12 +113,12 @@ class PintUnitConverter:
             elif type(value) is tuple:
                 try:
                     result[key] = tuple( [ self.ureg.Quantity(e) for e in value ] )
-                except (pint.unit.UndefinedUnitError, ValueError, TypeError):
+                except (pint.UndefinedUnitError, ValueError, TypeError):
                     result[key] = value
             else:
                 try:
                     result[key] = self.ureg.Quantity( value )
-                except (pint.unit.UndefinedUnitError, ValueError, TypeError):
+                except (pint.UndefinedUnitError, ValueError, TypeError):
                     result[key] = value
 
         return result
