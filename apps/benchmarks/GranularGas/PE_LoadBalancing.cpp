@@ -42,7 +42,7 @@
 #include <core/OpenMP.h>
 #include <core/timing/TimingTree.h>
 #include <core/waLBerlaBuildInfo.h>
-#include <postprocessing/sqlite/SQLite.h>
+#include <sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
 
 #include <functional>
@@ -448,9 +448,9 @@ int main( int argc, char ** argv )
       mesa_pd::addDomainPropertiesToSQL(*forest, integerProperties, realProperties, stringProperties);
       mesa_pd::addSlurmPropertiesToSQL(integerProperties, realProperties, stringProperties);
 
-      runId = postprocessing::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
-      postprocessing::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpImbalancedReduced, "imbalanced" );
-      postprocessing::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpImbalancedReduced, "balanced" );
+      runId = sqlite::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
+      sqlite::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpImbalancedReduced, "imbalanced" );
+      sqlite::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpImbalancedReduced, "balanced" );
    }
    if (params.storeNodeTimings)
    {

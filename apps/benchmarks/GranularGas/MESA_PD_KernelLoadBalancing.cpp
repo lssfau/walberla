@@ -76,7 +76,7 @@
 #include <pe/amr/level_determination/MinMaxLevelDetermination.h>
 #include <pe/amr/weight_assignment/MetisAssignmentFunctor.h>
 #include <pe/amr/weight_assignment/WeightAssignmentFunctor.h>
-#include <postprocessing/sqlite/SQLite.h>
+#include <sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
 
 #include <functional>
@@ -603,9 +603,9 @@ int main( int argc, char ** argv )
       addDomainPropertiesToSQL(*forest, integerProperties, realProperties, stringProperties);
       addSlurmPropertiesToSQL(integerProperties, realProperties, stringProperties);
 
-      runId = postprocessing::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
-      postprocessing::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpImbalancedReduced, "imbalanced" );
-      postprocessing::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpBalancedReduced, "balanced" );
+      runId = sqlite::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
+      sqlite::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpImbalancedReduced, "imbalanced" );
+      sqlite::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpBalancedReduced, "balanced" );
    }
    if (params.storeNodeTimings)
    {
