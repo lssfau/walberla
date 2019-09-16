@@ -72,7 +72,7 @@ void ParticleVtkOutput::push( walberla::vtk::Base64Writer& b64, const uint_t dat
    selectors_[data].second->push(b64, (*ps_)[particleIndices_[point]], component);
 }
 
-void ParticleVtkOutput::addOutput(const std::string& name, std::shared_ptr<IOutputSelector> selector)
+void ParticleVtkOutput::addOutput(const std::string& name, const std::shared_ptr<IOutputSelector>& selector)
 {
    if ( std::find_if(selectors_.begin(), selectors_.end(), [&name](const auto& item){return item.first==name;} ) !=
         selectors_.end() )

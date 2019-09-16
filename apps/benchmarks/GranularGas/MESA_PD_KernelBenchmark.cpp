@@ -64,7 +64,7 @@
 #include <core/timing/Timer.h>
 #include <core/timing/TimingPool.h>
 #include <core/waLBerlaBuildInfo.h>
-#include <postprocessing/sqlite/SQLite.h>
+#include <sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
 
 #include <functional>
@@ -378,8 +378,8 @@ int main( int argc, char ** argv )
          addDomainPropertiesToSQL(*forest, integerProperties, realProperties, stringProperties);
          addSlurmPropertiesToSQL(integerProperties, realProperties, stringProperties);
 
-         runId = postprocessing::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
-         postprocessing::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tp_reduced, "Timeloop" );
+         runId = sqlite::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
+         sqlite::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tp_reduced, "Timeloop" );
       }
       if (params.storeNodeTimings)
       {

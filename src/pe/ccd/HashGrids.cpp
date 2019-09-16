@@ -788,7 +788,7 @@ void HashGrids::update(WcTimingTree* tt)
 
    if (tt != nullptr) tt->start("AddNewBodies");
    // Finally add all bodies that were temporarily stored in 'bodiesToAdd_' to the data structure.
-   if( bodiesToAdd_.size() > 0 )
+   if( !bodiesToAdd_.empty() )
    {
       for( auto bodyIt = bodiesToAdd_.begin(); bodyIt < bodiesToAdd_.end(); ++bodyIt ) {
 

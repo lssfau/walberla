@@ -60,7 +60,7 @@
 #include <core/OpenMP.h>
 #include <core/timing/Timer.h>
 #include <core/waLBerlaBuildInfo.h>
-#include <postprocessing/sqlite/SQLite.h>
+#include <sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
 
 #include <functional>
@@ -380,14 +380,19 @@ int main( int argc, char ** argv )
          integerProperties["RPReceives"]          = RPReceives;
          realProperties["linkedCellsVolume"]      = linkedCellsVolume;
          integerProperties["numLinkedCells"]      = int64_c(numLinkedCells);
+         realProperties["PUpS"]                   = double_c(PUpS);
+         realProperties["timer_min"]              = timer_reduced->min();
+         realProperties["timer_max"]              = timer_reduced->max();
+         realProperties["timer_average"]          = timer_reduced->average();
+         realProperties["timer_total"]            = timer_reduced->total();
 
          addBuildInfoToSQL( integerProperties, realProperties, stringProperties );
          saveToSQL(params, integerProperties, realProperties, stringProperties );
          addDomainPropertiesToSQL(*forest, integerProperties, realProperties, stringProperties);
          addSlurmPropertiesToSQL(integerProperties, realProperties, stringProperties);
 
-         runId = postprocessing::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
-         postprocessing::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tp_reduced, "Timeloop" );
+         runId = sqlite::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
+         sqlite::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tp_reduced, "Timeloop" );
       }
 
       if (params.storeNodeTimings)

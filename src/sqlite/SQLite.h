@@ -35,7 +35,7 @@
 struct sqlite3;
 
 namespace walberla {
-namespace postprocessing {
+namespace sqlite {
 
 using std::string;
 using std::map;
@@ -126,7 +126,7 @@ void storeTimingTreeInSqliteDB( const string & dbFile, uint_t runId, const WcTim
 
 
 
-} // namespace postprocessing
+} // namespace sqlite
 } // namespace walberla
 
 

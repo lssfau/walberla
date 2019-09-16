@@ -77,3 +77,7 @@ waLBerla_python_file_generates(codegen/LbCodeGenerationExample.py
                               LbCodeGenerationExample_UBB.cpp )
 waLBerla_compile_test( FILES codegen/LbCodeGenerationExample.py
                              codegen/LbCodeGenerationExample.cpp)
+waLBerla_python_file_generates(codegen/FluctuatingMRT.py
+                              FluctuatingMRT_LatticeModel.cpp )
+waLBerla_compile_test( FILES codegen/FluctuatingMRT.py
+                             codegen/FluctuatingMRT.cpp)

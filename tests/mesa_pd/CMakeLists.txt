@@ -111,6 +111,9 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_GenerateAnalyticContacts PROCESSES 
 waLBerla_compile_test( NAME   MESA_PD_Kernel_GenerateLinkedCells FILES kernel/GenerateLinkedCells.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_GenerateLinkedCells )
 
+waLBerla_compile_test( NAME   MESA_PD_Kernel_HCSITSKernels FILES kernel/HCSITSKernels.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_HCSITSKernels )
+
 waLBerla_compile_test( NAME   MESA_PD_Kernel_HeatConduction FILES kernel/HeatConduction.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_HeatConduction )
 
@@ -166,6 +169,9 @@ waLBerla_execute_test( NAME   MESA_PD_MPI_ReduceContactHistory PROCESSES 8 )
 
 waLBerla_compile_test( NAME   MESA_PD_MPI_ReduceProperty FILES mpi/ReduceProperty.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_MPI_ReduceProperty PROCESSES 8 )
+
+waLBerla_compile_test( NAME   MESA_PD_MPI_VelocityCorrectionNotification FILES mpi/VelocityCorrectionNotification.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_MPI_VelocityCorrectionNotification PROCESSES 8)
 
 waLBerla_compile_test( NAME   MESA_PD_Sorting FILES Sorting.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Sorting )

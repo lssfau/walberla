@@ -48,7 +48,7 @@ uint_t CartesianDistribution::operator()( SetupBlockForest & forest, const uint_
       WALBERLA_ABORT( "Load balancing failed: \'Number of processes in z-direction\' must be in (0," << forest.getZSize() << "]. "
                       "You specified \'" << numberOfZProcesses_ << "\'." );
 
-   if( processIdMap_ != nullptr )
+   if( !processIdMap_->empty() )
       WALBERLA_CHECK_EQUAL( processIdMap_->size(), numberOfProcesses );
 
    uint_t partitions[3];
@@ -84,7 +84,7 @@ uint_t CartesianDistribution::operator()( SetupBlockForest & forest, const uint_
             {
                const uint_t index = z * partitions[0] * partitions[1] + y * partitions[0] + x;
 
-               (*block)->assignTargetProcess( ( processIdMap_ != nullptr ) ? (*processIdMap_)[ index ] : index );
+               (*block)->assignTargetProcess( ( !processIdMap_->empty() ) ? (*processIdMap_)[ index ] : index );
             }
          }
       }

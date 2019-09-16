@@ -47,7 +47,7 @@ GJK::GJK()
  * \param dir The support point direction.
  * \param threshold Extension of the particle.
  */
-const Vec3 GJK::putSupport(const Support &geom1,
+Vec3 GJK::putSupport(const Support &geom1,
                            const Support &geom2,
                            const Vec3& dir,
                            const real_t margin,
@@ -313,7 +313,7 @@ inline real_t GJK::calcDistance( Vec3& normal, Vec3& contactPoint )
    //its distance to the origin is the distance of the two objects
    real_t dist= 0.0;
 
-   real_t barCoords[3] = { 0.0, 0.0, 0.0};
+   std::array<real_t, 3> barCoords = {{ 0.0, 0.0, 0.0 }};
    real_t& u = barCoords[0];
    real_t& v = barCoords[1];
    real_t& w = barCoords[2];

@@ -196,7 +196,7 @@ bool RigidBody::checkInvariants()
  *
  * The function calculates the global velocity of a point relative to the body's center of mass.
  */
-const Vec3 RigidBody::velFromBF( real_t px, real_t py, real_t pz ) const
+Vec3 RigidBody::velFromBF( real_t px, real_t py, real_t pz ) const
 {
    return velFromBF( Vec3( px, py, pz ) );
 }
@@ -211,7 +211,7 @@ const Vec3 RigidBody::velFromBF( real_t px, real_t py, real_t pz ) const
  *
  * The function calculates the global velocity of a point relative to the body's center of mass.
  */
-const Vec3 RigidBody::velFromBF( const Vec3& rpos ) const
+Vec3 RigidBody::velFromBF( const Vec3& rpos ) const
 {
    if( !hasSuperBody() )
       return v_ + w_ % ( R_ * rpos );
@@ -230,7 +230,7 @@ const Vec3 RigidBody::velFromBF( const Vec3& rpos ) const
  *
  * The function calculates the global velocity of a point in global coordinates.
  */
-const Vec3 RigidBody::velFromWF( real_t px, real_t py, real_t pz ) const
+Vec3 RigidBody::velFromWF( real_t px, real_t py, real_t pz ) const
 {
    return velFromWF( Vec3( px, py, pz ) );
 }
@@ -245,7 +245,7 @@ const Vec3 RigidBody::velFromWF( real_t px, real_t py, real_t pz ) const
  *
  * The function calculates the global velocity of a point in global coordinates.
  */
-const Vec3 RigidBody::velFromWF( const Vec3& gpos ) const
+Vec3 RigidBody::velFromWF( const Vec3& gpos ) const
 {
    if( !hasSuperBody() )
       return v_ + w_ % ( gpos - gpos_ );

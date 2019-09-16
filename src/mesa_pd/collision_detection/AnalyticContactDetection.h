@@ -147,11 +147,11 @@ public:
                     Accessor& ac);
 
 protected:
-   size_t idx1_;
-   size_t idx2_;
-   Vec3   contactPoint_;
-   Vec3   contactNormal_;
-   real_t penetrationDepth_;
+   size_t idx1_ = std::numeric_limits<size_t>::max();
+   size_t idx2_ = std::numeric_limits<size_t>::max();
+   Vec3   contactPoint_ = Vec3();
+   Vec3   contactNormal_ = Vec3();
+   real_t penetrationDepth_ = real_t(0);
 
    real_t contactThreshold_ = real_t(0.0);
 };

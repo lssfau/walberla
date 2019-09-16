@@ -222,7 +222,7 @@ createBlockForest(      const AABB& domainAABB,
 
    // if possible, create Cartesian MPI communicator
 
-   std::vector< uint_t >* processIdMap = nullptr;
+   std::vector< uint_t > processIdMap(0);
 
    WALBERLA_MPI_SECTION()
    {
@@ -233,13 +233,13 @@ createBlockForest(      const AABB& domainAABB,
          if ( mpiManager->isCartesianCommValid() ) {
             mpiManager->createCartesianComm( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, xPeriodic, yPeriodic, zPeriodic );
 
-            processIdMap = new std::vector< uint_t >( numberOfProcesses );
+            processIdMap.resize( numberOfProcesses );
 
             for( uint_t z = 0; z != numberOfZProcesses; ++z ) {
                for( uint_t y = 0; y != numberOfYProcesses; ++y ) {
                   for( uint_t x = 0; x != numberOfXProcesses; ++x ) {
 
-                     (*processIdMap)[ z * numberOfXProcesses * numberOfYProcesses + y * numberOfXProcesses + x ] =
+                     processIdMap[ z * numberOfXProcesses * numberOfYProcesses + y * numberOfXProcesses + x ] =
                            uint_c( MPIManager::instance()->cartesianRank(x,y,z) );
                   }
                }
@@ -256,10 +256,8 @@ createBlockForest(      const AABB& domainAABB,
 
    // calculate process distribution
 
-   sforest.balanceLoad( blockforest::CartesianDistribution( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, processIdMap ),
+   sforest.balanceLoad( blockforest::CartesianDistribution( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, &processIdMap ),
                         numberOfXProcesses * numberOfYProcesses * numberOfZProcesses );
-
-   if( processIdMap != nullptr ) delete processIdMap;
 
    // create StructuredBlockForest (encapsulates a newly created BlockForest)
 

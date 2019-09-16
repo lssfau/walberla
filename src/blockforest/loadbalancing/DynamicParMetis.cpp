@@ -113,7 +113,7 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
    MPI_Group allGroup, subGroup;
    MPI_Comm_group( MPIManager::instance()->comm(), &allGroup );
    std::vector<int> ranks;
-   if (targetProcess.size() > 0)
+   if (!targetProcess.empty())
       ranks.push_back( MPIManager::instance()->rank() );
    ranks = mpi::allGatherv( ranks, MPIManager::instance()->comm() );
    auto numSubProcesses = ranks.size();

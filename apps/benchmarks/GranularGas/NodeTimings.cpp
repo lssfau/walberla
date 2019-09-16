@@ -63,7 +63,7 @@ void storeNodeTimings( const uint_t                 runId,
             realProperties[v.first] = v.second.average();
          }
 
-         postprocessing::storeAdditionalRunInfoInSqliteDB( runId,
+         sqlite::storeAdditionalRunInfoInSqliteDB( runId,
                                                            dbFile,
                                                            tableName,
                                                            integerProperties,

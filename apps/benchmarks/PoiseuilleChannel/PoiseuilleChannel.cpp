@@ -78,7 +78,7 @@
 #include "lbm/vtk/NonEquilibrium.h"
 #include "lbm/vtk/Velocity.h"
 
-#include "postprocessing/sqlite/SQLite.h"
+#include "sqlite/SQLite.h"
 
 #include "stencil/D3Q19.h"
 #include "stencil/D3Q27.h"
@@ -553,12 +553,12 @@ void setFlags( shared_ptr< StructuredBlockForest > & blocks, const BlockDataID &
       {
          CurvedDeltaValueCalculation< LatticeModel_T > deltaCalculation( blocks, *block, channel );
 
-         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block.get()),
+         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block),
                                                                            boundaryHandlingId, Curved_Flag, channel, deltaCalculation );
       }
       else // staircase (1st order bounce back no-slip boundary condition)
       {
-         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block.get()),
+         lbm::refinement::consistentlyForceBoundary< BoundaryHandling_T >( *blocks, dynamic_cast< blockforest::Block & >(*block),
                                                                            boundaryHandlingId, NoSlip_Flag, channel );
       }
 
@@ -995,10 +995,10 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
             
             realProperties[ "simulationProgress" ] = double_c( ( outerRun + uint_t(1) ) * innerTimeSteps ) / double_c( outerTimeSteps * innerTimeSteps );
 
-            auto runId = postprocessing::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
-            postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedTimeloopTiming, "Timeloop" );
-            postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedRTSTiming, "RefinementTimeStep" );
-            postprocessing::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedRTSLTiming, "RefinementTimeStepLevelwise" );
+            auto runId = sqlite::storeRunInSqliteDB( sqlFile, integerProperties, stringProperties, realProperties );
+            sqlite::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedTimeloopTiming, "Timeloop" );
+            sqlite::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedRTSTiming, "RefinementTimeStep" );
+            sqlite::storeTimingPoolInSqliteDB( sqlFile, runId, *reducedRTSLTiming, "RefinementTimeStepLevelwise" );
          }
       }
    }

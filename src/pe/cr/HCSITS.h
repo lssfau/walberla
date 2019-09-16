@@ -84,12 +84,12 @@ private:
    {
       void resize(const size_t n);
 
-      std::vector<Vec3>   r1_, r2_;
+      std::vector<Vec3>   r1_, r2_; // vector pointing from body1/body2 to the contact position
       std::vector<BodyID> body1_, body2_;
-      std::vector<Vec3>   n_, t_, o_;
-      std::vector<real_t> dist_;
-      std::vector<real_t> mu_;
-      std::vector<Mat3>   diag_nto_;
+      std::vector<Vec3>   n_, t_, o_; // contact normal and the two other directions perpendicular to the normal
+      std::vector<real_t> dist_; // overlap length, a contact is present if dist_ < 0
+      std::vector<real_t> mu_; // contact friction
+      std::vector<Mat3>   diag_nto_; 
       std::vector<Mat3>   diag_nto_inv_;
       std::vector<Mat2>   diag_to_inv_;
       std::vector<real_t> diag_n_inv_;
@@ -102,9 +102,9 @@ public:
    enum RelaxationModel {
       InelasticFrictionlessContact,
       ApproximateInelasticCoulombContactByDecoupling,
-//      ApproximateInelasticCoulombContactByOrthogonalProjections,
+      ApproximateInelasticCoulombContactByOrthogonalProjections,
       InelasticCoulombContactByDecoupling,
-//      InelasticCoulombContactByOrthogonalProjections,
+      InelasticCoulombContactByOrthogonalProjections,
       InelasticGeneralizedMaximumDissipationContact
    };
    //**********************************************************************************************
@@ -136,6 +136,7 @@ public:
    inline const std::map<IBlockID::IDType, ContactCache> getContactCache() const { return blockToContactCache_; }
    inline real_t                    getSpeedLimitFactor() const;
    inline size_t                    getMaxIterations() const { return maxIterations_; }
+   inline real_t                    getOverRelaxationParameter() const { return overRelaxationParam_; }
    inline real_t                    getRelaxationParameter() const { return relaxationParam_; }
    inline real_t                    getErrorReductionParameter() const { return erp_; }
    inline RelaxationModel           getRelaxationModel() const { return relaxationModel_; }
@@ -145,6 +146,7 @@ public:
    //**Set functions*******************************************************************************
    /*!\name Set functions */
    //@{
+   inline void            setOverRelaxationParameter( real_t omega );
    inline void            setRelaxationParameter( real_t f );
    inline void            setMaxIterations( size_t n );
    inline void            setRelaxationModel( RelaxationModel relaxationModel );
@@ -235,6 +237,7 @@ private:
    size_t maxSubIterations_;          //!< Maximum number of iterations of iterative solvers in the one-contact problem.
    real_t abortThreshold_;            //!< If L-infinity iterate difference drops below this threshold the iteration is aborted.
    RelaxationModel relaxationModel_;  //!< The method used to relax unilateral contacts
+   real_t overRelaxationParam_;       //!< Parameter specifying the convergence speed for othogonal projection models.
    real_t relaxationParam_;           //!< Parameter specifying underrelaxation of velocity corrections for boundary bodies.
    real_t maximumPenetration_;
    size_t numContacts_;
@@ -321,6 +324,28 @@ inline real_t HardContactSemiImplicitTimesteppingSolvers::getSpeedLimitFactor() 
 //  SET FUNCTIONS
 //
 //=================================================================================================
+
+//*************************************************************************************************
+/*!\brief Sets the relaxation parameter for boundary bodies.
+ *
+ * \param f The overrelaxation parameter.
+ * \return void
+ *
+ * The overrelaxation parameter \omega is only used when the relaxation model is one of
+ * - ApproximateInelasticCoulombContactByOrthogonalProjections
+ * - InelasticCoulombContactByOrthogonalProjections
+ *
+ * It is used to control the convergence of the model. Large values show faster convergence,
+ * but they can also lead to divergence ("exploding" particles). The default values is 1.0.
+ */
+inline void HardContactSemiImplicitTimesteppingSolvers::setOverRelaxationParameter( real_t omega )
+{
+   WALBERLA_ASSERT_GREATER( omega, 0, "Overrelaxation parameter must be positive." );
+
+   overRelaxationParam_ = omega;
+}
+//*************************************************************************************************
+
 
 //*************************************************************************************************
 /*!\brief Sets the relaxation parameter for boundary bodies.

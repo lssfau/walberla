@@ -30,7 +30,7 @@
 
 
 namespace walberla {
-namespace postprocessing {
+namespace sqlite {
 
 
 SQLiteDB::SQLiteDB( const string & dbFile, const int busyTimeout )
@@ -513,5 +513,5 @@ void storeTimingTreeInSqliteDB ( const string & dbFile, uint_t runId,
    db.storeTimingTree( runId, tt, timingTreeName );
 }
 
-} // namespace postprocessing
+} // namespace sqlite
 } // namespace walberla

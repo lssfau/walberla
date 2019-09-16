@@ -198,11 +198,11 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
    const auto fluid = flagField->flagExists( Fluid_Flag ) ? flagField->getFlag( Fluid_Flag ) : flagField->registerFlag( Fluid_Flag );
 
    BoundaryHandling_T * handling = new BoundaryHandling_T( "moving obstacle boundary handling", flagField, fluid,
-                                    UBB_T( "UBB", UBB_Flag, pdfField, velocity_),
-                                    Outlet_T( "Outlet", Outlet_Flag, pdfField, real_t(1) ),
-                                    MEM_BB_T (  "MEM_BB",  MEM_BB_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
-                                    MEM_CLI_T( "MEM_CLI", MEM_CLI_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
-                                    MEM_MR_T (  "MEM_MR",  MEM_MR_Flag, pdfField, flagField, bodyField, fluid, *storage, *block, pdfFieldPreCol ) );
+                                                           UBB_T( "UBB", UBB_Flag, pdfField, velocity_),
+                                                           Outlet_T( "Outlet", Outlet_Flag, pdfField, real_t(1) ),
+                                                           MEM_BB_T (  "MEM_BB",  MEM_BB_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
+                                                           MEM_CLI_T( "MEM_CLI", MEM_CLI_Flag, pdfField, flagField, bodyField, fluid, *storage, *block ),
+                                                           MEM_MR_T (  "MEM_MR",  MEM_MR_Flag, pdfField, flagField, bodyField, fluid, *storage, *block, pdfFieldPreCol ) );
 
    const auto ubb = flagField->getFlag( UBB_Flag );
    const auto outlet = flagField->getFlag( Outlet_Flag );
@@ -522,7 +522,7 @@ public:
    VTKInfoLogger( SweepTimeloop* timeloop, const shared_ptr< StructuredBlockStorage > & blocks,
                   const ConstBlockDataID & bodyStorageID, const std::string & baseFolder,
                   const Vector3<real_t>& u_infty ) :
-   timeloop_( timeloop ), blocks_( blocks ), bodyStorageID_( bodyStorageID ), baseFolder_( baseFolder ), u_infty_( u_infty )
+      timeloop_( timeloop ), blocks_( blocks ), bodyStorageID_( bodyStorageID ), baseFolder_( baseFolder ), u_infty_( u_infty )
    { }
 
    void operator()()
@@ -677,16 +677,44 @@ int main( int argc, char **argv )
 
    for( int i = 1; i < argc; ++i )
    {
-           if( std::strcmp( argv[i], "--Galileo"   ) == 0 ) Galileo   = real_c( std::atof( argv[++i] ) ); // targeted Galileo number
-      else if( std::strcmp( argv[i], "--diameter"  ) == 0 ) diameter  = real_c( std::atof( argv[++i] ) ); // diameter of the spheres, in cells per diameter
-      else if( std::strcmp( argv[i], "--noViscosityIterations" ) == 0 ) noViscosityIterations   = true; // keep viscosity unchanged in initial simulation
-      else if( std::strcmp( argv[i], "--vtkIOInit" ) == 0 ) vtkIOInit = true; // write vtk IO for initial simulation
-      else if( std::strcmp( argv[i], "--longDom"   ) == 0 ) longDom   = true; // use a domain that is extended by the original domain length in positive and negative streamwise direction
-      else if( std::strcmp( argv[i], "--useMEM"    ) == 0 ) // use momentum exchange coupling and the given MEM variant (BB, CLI, or MR)
-           { useMEM = true; memVariant = to_MEMVariant( argv[++i] ); }
-      else if( std::strcmp( argv[i], "--usePSM"    ) == 0 ) // use partially saturated cells method and the given PSM variant (SC1W1, SC1W2, SC2W1, SC2W2, SC3W1, or SC3W2)
-           { usePSM = true; psmVariant = to_PSMVariant( argv[++i] ); }
-      else WALBERLA_ABORT("command line argument unknown: " << argv[i] );
+      if( std::strcmp( argv[i], "--Galileo"   ) == 0 )
+      {
+         Galileo   = real_c( std::atof( argv[++i] ) ); // targeted Galileo number
+         continue;
+      }
+      if( std::strcmp( argv[i], "--diameter"  ) == 0 )
+      {
+         diameter  = real_c( std::atof( argv[++i] ) ); // diameter of the spheres, in cells per diameter
+         continue;
+      }
+      if( std::strcmp( argv[i], "--noViscosityIterations" ) == 0 )
+      {
+         noViscosityIterations   = true; // keep viscosity unchanged in initial simulation
+         continue;
+      }
+      if( std::strcmp( argv[i], "--vtkIOInit" ) == 0 )
+      {
+         vtkIOInit = true; // write vtk IO for initial simulation
+         continue;
+      }
+      if( std::strcmp( argv[i], "--longDom"   ) == 0 )
+      {
+         longDom   = true; // use a domain that is extended by the original domain length in positive and negative streamwise direction
+         continue;
+      }
+      if( std::strcmp( argv[i], "--useMEM"    ) == 0 ) // use momentum exchange coupling and the given MEM variant (BB, CLI, or MR)
+      {
+         useMEM = true;
+         memVariant = to_MEMVariant( argv[++i] );
+         continue;
+      }
+      if( std::strcmp( argv[i], "--usePSM"    ) == 0 ) // use partially saturated cells method and the given PSM variant (SC1W1, SC1W2, SC2W1, SC2W2, SC3W1, or SC3W2)
+      {
+         usePSM = true;
+         psmVariant = to_PSMVariant( argv[++i] );
+         continue;
+      }
+      WALBERLA_ABORT("command line argument unknown: " << argv[i] );
    }
    if( !useMEM && !usePSM ) WALBERLA_ABORT("No coupling method chosen via command line!\nChose either \"--useMEM MEMVARIANT\" or \"--usePSM PSMVARIANT\"!");
 
@@ -712,24 +740,24 @@ int main( int argc, char **argv )
    // values are taken from the original simulation of Uhlmann, Dusek
    switch( int(Galileo) )
    {
-      case 144:
-         Re_target = real_t(185.08);
-         timestepsNonDim = real_t(100);
-         break;
-      case 178:
-         Re_target = real_t(243.01);
-         timestepsNonDim = real_t(250);
-         break;
-      case 190:
-         Re_target = real_t(262.71);
-         timestepsNonDim = real_t(250);
-         break;
-      case 250:
-         Re_target = real_t(365.10);
-         timestepsNonDim = real_t(510);
-         break;
-      default:
-         WALBERLA_ABORT("Galileo number is different from the usual ones (144, 178, 190, or 250). No estimate of the Reynolds number available. Add this case manually!");
+   case 144:
+      Re_target = real_t(185.08);
+      timestepsNonDim = real_t(100);
+      break;
+   case 178:
+      Re_target = real_t(243.01);
+      timestepsNonDim = real_t(250);
+      break;
+   case 190:
+      Re_target = real_t(262.71);
+      timestepsNonDim = real_t(250);
+      break;
+   case 250:
+      Re_target = real_t(365.10);
+      timestepsNonDim = real_t(510);
+      break;
+   default:
+      WALBERLA_ABORT("Galileo number is different from the usual ones (144, 178, 190, or 250). No estimate of the Reynolds number available. Add this case manually!");
    }
 
    // estimate fitting inflow velocity (diffusive scaling, viscosity is fixed)
@@ -890,7 +918,7 @@ int main( int argc, char **argv )
 
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >(
-                                    MyBoundaryHandling( flagFieldID, pdfFieldID, bodyFieldID, pdfFieldPreColID, uInfty ), "boundary handling" );
+                                       MyBoundaryHandling( flagFieldID, pdfFieldID, bodyFieldID, pdfFieldPreColID, uInfty ), "boundary handling" );
 
    if( usePSM ){
       // mapping of sphere required by PSM methods
@@ -969,8 +997,8 @@ int main( int argc, char **argv )
 
       // add LBM communication function and boundary handling sweep
       timeloopInit.add()
-         << BeforeFunction( commFunction, "LBM Communication" )
-         << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
+            << BeforeFunction( commFunction, "LBM Communication" )
+            << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
 
       // LBM stream collide sweep
       if( psmVariant == PSMVariant::SC1W1 )
@@ -1079,8 +1107,8 @@ int main( int argc, char **argv )
       }
       WALBERLA_LOG_INFO_ON_ROOT("Initial simulation has ended.")
 
-      //evaluate the gravitational force necessary to keep the sphere at a approximately fixed position
-      gravity = forceEval->getForce() / ( (densityRatio - real_t(1) ) * diameter * diameter * diameter * math::pi / real_t(6) );
+            //evaluate the gravitational force necessary to keep the sphere at a approximately fixed position
+            gravity = forceEval->getForce() / ( (densityRatio - real_t(1) ) * diameter * diameter * diameter * math::pi / real_t(6) );
       GalileoSim = std::sqrt( ( densityRatio - real_t(1) ) * gravity * diameter * diameter * diameter ) / viscosity;
       ReynoldsSim = uIn * diameter / viscosity;
       u_ref = std::sqrt( std::fabs(densityRatio - real_t(1)) * gravity * diameter );
@@ -1113,9 +1141,9 @@ int main( int argc, char **argv )
       // iterate all blocks with an iterator 'block' and change the collision model
       for( auto block = blocks->begin(); block != blocks->end(); ++block )
       {
-          // get the field data out of the block
-          auto pdf = block->getData< PdfField_T > ( pdfFieldID );
-          pdf->latticeModel().collisionModel().resetWithMagicNumber( newOmega, magicNumberTRT );
+         // get the field data out of the block
+         auto pdf = block->getData< PdfField_T > ( pdfFieldID );
+         pdf->latticeModel().collisionModel().resetWithMagicNumber( newOmega, magicNumberTRT );
       }
 
       WALBERLA_LOG_INFO_ON_ROOT("==> Adapting viscosity:");
@@ -1157,8 +1185,8 @@ int main( int argc, char **argv )
 
          // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip treatment)
          timeloop.add()
-            << BeforeFunction( commFunction, "LBM Communication" )
-            << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
+               << BeforeFunction( commFunction, "LBM Communication" )
+               << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
 
          // LBM stream collide sweep
          if( psmVariant == PSMVariant::SC1W1 )
