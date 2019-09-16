@@ -26,7 +26,7 @@
 
 #pragma once
 
-#include <mesa_pd/data/IAccessor.h>
+#include <mesa_pd/data/IContactAccessor.h>
 #include <mesa_pd/data/ContactStorage.h>
 
 #include <core/UniqueID.h>
@@ -43,7 +43,7 @@ namespace data {
  * Provides get, set and getRef for all members of the ContactStorage.
  * Can be used as a basis class for a more advanced ContactAccessor.
  */
-class ContactAccessor : public IAccessor
+class ContactAccessor : public IContactAccessor
 {
 public:
    ContactAccessor(const std::shared_ptr<data::ContactStorage>& ps) : ps_(ps) {}

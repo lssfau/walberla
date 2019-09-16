@@ -4,7 +4,11 @@ from .DoubleCast import DoubleCast
 from .ExplicitEuler import ExplicitEuler
 from .ExplicitEulerWithShape import ExplicitEulerWithShape
 from .ForceLJ import ForceLJ
+from .HCSITSRelaxationStep import HCSITSRelaxationStep
 from .HeatConduction import HeatConduction
+from .InitParticlesForHCSITS import InitParticlesForHCSITS
+from .InitContactsForHCSITS import InitContactsForHCSITS
+from .IntegrateParticlesHCSITS import IntegrateParticlesHCSITS
 from .InsertParticleIntoLinkedCells import InsertParticleIntoLinkedCells
 from .LinearSpringDashpot import LinearSpringDashpot
 from .NonLinearSpringDashpot import NonLinearSpringDashpot
@@ -19,7 +23,11 @@ __all__ = ['DoubleCast',
            'ExplicitEuler',
            'ExplicitEulerWithShape',
            'ForceLJ',
+           'HCSITSRelaxationStep',
            'HeatConduction',
+           'InitParticlesForHCSITS',
+           'InitContactsForHCSITS',
+           'IntegrateParticlesHCSITS',
            'InsertParticleIntoLinkedCells',
            'LinearSpringDashpot',
            'NonLinearSpringDashpot',
