@@ -63,7 +63,7 @@ public:
    {
    public:
       inline Parser( const Config::BlockHandle & config );
-      inline Parser( std::array< std::string, 3 > & equations );
+      inline Parser( const std::array< std::string, 3 > & equations );
       Vector3< real_t > operator()( const Vector3< real_t > & x, const real_t t ) const;
       Vector3< real_t > operator()( const Vector3< real_t > & x ) const;
       bool isTimeDependent() const { return timeDependent_; }
@@ -207,7 +207,7 @@ inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForc
 }
 
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce>
-inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce>::Parser::Parser( std::array< std::string, 3 > & equations )
+inline ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce>::Parser::Parser( const std::array< std::string, 3 > & equations )
 : parsers_(), equations_( equations ), timeDependent_( false )
 {
    if( equations_[0].length() > 0 )
@@ -370,7 +370,7 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
 
    if( p.isTimeDependent() )
    {
-      parserField_->get( x, y, z ) = make_shared<Parser>(p);
+      parserField_->get( x, y, z ) = make_shared<Parser>( p.equations() );
    }
    else
    {
@@ -404,7 +404,7 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
 
    if( p.isTimeDependent() )
    {
-      auto shared_p = make_shared<Parser>(p);
+      auto shared_p = make_shared<Parser>( p.equations() );
       for( auto cell = parserField_->beginSliceXYZ( cells ); cell != parserField_->end(); ++cell )
          *cell = shared_p;
    }
