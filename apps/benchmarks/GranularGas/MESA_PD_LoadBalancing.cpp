@@ -132,8 +132,8 @@ int main( int argc, char ** argv )
 
    auto ic = make_shared<pe::InfoCollection>();
 
-   //   pe::amr::MinMaxLevelDetermination regrid(ic, regridMin, regridMax);
-   //   forest->setRefreshMinTargetLevelDeterminationFunction( regrid );
+   pe::amr::MinMaxLevelDetermination regrid(ic, params.regridMin, params.regridMax);
+   forest->setRefreshMinTargetLevelDeterminationFunction( regrid );
 
    bool bRebalance = true;
    if (params.LBAlgorithm == "None")
@@ -226,7 +226,6 @@ int main( int argc, char ** argv )
    auto vtkWriter       = walberla::vtk::createVTKOutput_PointData(vtkOutput, "Bodies", 1, params.vtk_out, "simulation_step", false, false);
    vtkOutput->addOutput<SelectRank>("rank");
    vtkOutput->addOutput<data::SelectParticleOwner>("owner");
-   vtkDomainOutput->write();
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - START ***");
    // Init kernels
@@ -331,6 +330,8 @@ int main( int argc, char ** argv )
    }
    timerImbalanced.end();
 
+   vtkDomainOutput->write( );
+   vtkWriter->write();
    WALBERLA_MPI_BARRIER();
    timerLoadBalancing.start();
    if (bRebalance)
@@ -357,6 +358,8 @@ int main( int argc, char ** argv )
       sortParticleStorage(*ps, params.sorting, lc->domain_, uint_c(lc->numCellsPerDim_[0]));
    }
    timerLoadBalancing.end();
+   vtkDomainOutput->write( );
+   vtkWriter->write();
 
    WALBERLA_MPI_BARRIER();
    WALBERLA_LOG_DEVEL_ON_ROOT("running balanced simulation");

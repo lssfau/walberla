@@ -136,8 +136,8 @@ int main( int argc, char ** argv )
 
    auto ic = make_shared<pe::InfoCollection>();
 
-   //   pe::amr::MinMaxLevelDetermination regrid(ic, regridMin, regridMax);
-   //   forest->setRefreshMinTargetLevelDeterminationFunction( regrid );
+   pe::amr::MinMaxLevelDetermination regrid(ic, params.regridMin, params.regridMax);
+   forest->setRefreshMinTargetLevelDeterminationFunction( regrid );
 
    bool bRebalance = true;
    if (params.LBAlgorithm == "None")
@@ -259,6 +259,7 @@ int main( int argc, char ** argv )
 
    WcTimingPool tpImbalanced;
    WcTimingPool tpBalanced;
+   WcTimer      timerLoadBalancing;
 
    WALBERLA_LOG_INFO_ON_ROOT("*** RUNNING UNBALANCED SIMULATION ***");
    WALBERLA_MPI_BARRIER();
@@ -372,7 +373,10 @@ int main( int argc, char ** argv )
    auto maxLinkedCells = walberla::mpi::reduce(lc->cells_.size(), walberla::mpi::MAX);
    WALBERLA_LOG_DEVEL_ON_ROOT( "linked cells: " << minLinkedCells << " / " << maxLinkedCells );
 
+   vtkDomainOutput->write( );
+   vtkWriter->write();
    WALBERLA_MPI_BARRIER();
+   timerLoadBalancing.start();
    if (bRebalance)
    {
       WALBERLA_LOG_INFO_ON_ROOT("*** RUNNING LOAD BALANCING ***");
@@ -396,6 +400,9 @@ int main( int argc, char ** argv )
       SNN(*ps, forest, domain);
       sortParticleStorage(*ps, params.sorting, lc->domain_, uint_c(lc->numCellsPerDim_[0]));
    }
+   timerLoadBalancing.end();
+   vtkDomainOutput->write( );
+   vtkWriter->write();
 
    WALBERLA_MPI_BARRIER();
    WALBERLA_LOG_INFO_ON_ROOT("*** RUNNING BALANCED SIMULATION ***");
@@ -527,6 +534,8 @@ int main( int argc, char ** argv )
    auto tpBalancedReduced = tpBalanced.getReduced();
    WALBERLA_LOG_INFO_ON_ROOT(*tpBalancedReduced);
 
+   auto timerLoadBalancingReduced = walberla::timing::getReduced(timerLoadBalancing, REDUCE_TOTAL, 0);
+
    numParticles = 0;
    int64_t numGhostParticles = 0;
    ps->forEachParticle(false,
@@ -582,6 +591,10 @@ int main( int argc, char ** argv )
       integerProperties["balancedContactsChecked"]      = balancedContactsChecked;
       integerProperties["balancedContactsDetected"]     = balancedContactsDetected;
       integerProperties["balancedContactsTreated"]      = balancedContactsTreated;
+      realProperties["loadbalancing_timer_min"]         = timerLoadBalancingReduced->min();
+      realProperties["loadbalancing_timer_max"]         = timerLoadBalancingReduced->max();
+      realProperties["loadbalancing_timer_average"]     = timerLoadBalancingReduced->average();
+      realProperties["loadbalancing_timer_total"]       = timerLoadBalancingReduced->total();
       integerProperties["local_aabbs"]                  = int64_c(local_aabbs);
       integerProperties["neighbor_subdomains"]          = int64_c(neighbor_subdomains);
       integerProperties["neighbor_processes"]           = int64_c(neighbor_processes);

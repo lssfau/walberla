@@ -132,8 +132,8 @@ int main( int argc, char ** argv )
 
    auto ic = make_shared<pe::InfoCollection>();
 
-   //   pe::amr::MinMaxLevelDetermination regrid(ic, regridMin, regridMax);
-   //   forest->setRefreshMinTargetLevelDeterminationFunction( regrid );
+   pe::amr::MinMaxLevelDetermination regrid(ic, params.regridMin, params.regridMax);
+   forest->setRefreshMinTargetLevelDeterminationFunction( regrid );
 
    bool bRebalance = true;
    if (params.LBAlgorithm == "None")
@@ -313,16 +313,18 @@ int main( int argc, char ** argv )
       syncCallWithoutTT();
       tpImbalanced["Sync"].end();
 
-      //if( i % visSpacing == 0 )
-      //{
-      //   vtkDomainOutput->write( );
-      //   vtkSphereOutput->write( );
-      //}
+      //      if( i % params.visSpacing == 0 )
+      //      {
+      //         vtkDomainOutput->write( );
+      //         vtkSphereOutput->write( );
+      //      }
    }
    timerImbalanced.end();
 
    if (bRebalance)
    {
+      vtkDomainOutput->write( );
+      vtkSphereOutput->write( );
       WALBERLA_MPI_BARRIER();
       timerLoadBalancing.start();
       WALBERLA_LOG_INFO_ON_ROOT("*** Rebalance ***");
@@ -337,6 +339,8 @@ int main( int argc, char ** argv )
          ccd->reloadBodies();
       }
       timerLoadBalancing.end();
+      vtkDomainOutput->write( );
+      vtkSphereOutput->write( );
    }
 
    WALBERLA_MPI_BARRIER();
@@ -355,11 +359,11 @@ int main( int argc, char ** argv )
       syncCallWithoutTT();
       tpBalanced["Sync"].end();
 
-      //if( i % visSpacing == 0 )
-      //{
-      //   vtkDomainOutput->write( );
-      //   vtkSphereOutput->write( );
-      //}
+      //      if( i % params.visSpacing == 0 )
+      //      {
+      //         vtkDomainOutput->write( );
+      //         vtkSphereOutput->write( );
+      //      }
    }
    timerBalanced.end();
 
