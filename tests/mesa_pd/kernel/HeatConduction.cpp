@@ -28,8 +28,7 @@
 #include <iostream>
 
 namespace walberla {
-
-using namespace walberla::mesa_pd;
+namespace mesa_pd {
 
 int main( int argc, char ** argv )
 {
@@ -71,9 +70,10 @@ int main( int argc, char ** argv )
    return EXIT_SUCCESS;
 }
 
+} //namespace mesa_pd
 } //namespace walberla
 
 int main( int argc, char ** argv )
 {
-   return walberla::main(argc, argv);
+   return walberla::mesa_pd::main(argc, argv);
 }
