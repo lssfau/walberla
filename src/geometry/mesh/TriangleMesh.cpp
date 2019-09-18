@@ -457,7 +457,9 @@ void TriangleMesh::exchangeAxes( uint_t xAxisId, uint_t yAxisId, uint_t zAxisId 
 
 real_t TriangleMesh::volume() const
 {
-   vertex_t v0, v1, v2;
+   vertex_t v0;
+   vertex_t v1;
+   vertex_t v2;
    real_t result(0);
 
    for(size_t i = 0; i < getNumTriangles(); ++i)
@@ -471,7 +473,9 @@ real_t TriangleMesh::volume() const
 
 real_t TriangleMesh::surfaceArea() const
 {
-   vertex_t v0, v1, v2;
+   vertex_t v0;
+   vertex_t v1;
+   vertex_t v2;
    real_t result(0);
 
    for(size_t i = 0; i < getNumTriangles(); ++i)

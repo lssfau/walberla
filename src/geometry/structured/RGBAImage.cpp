@@ -50,7 +50,8 @@ namespace geometry   {
 
    RGBAImage::RGBAImage( const std::string & pngFilename )
    {
-      unsigned int tmpWidth, tmpHeight;
+      unsigned int tmpWidth;
+      unsigned int tmpHeight;
       unsigned int error = lodepng::decode( image_, tmpWidth, tmpHeight, pngFilename, LCT_RGBA, 8 );
       size_[0] = tmpWidth;
       size_[1] = tmpHeight;

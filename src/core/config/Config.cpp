@@ -153,8 +153,11 @@ void Config::parseFromFile( const char* filename, Block& block, unsigned int lev
 {
    std::stringstream input;
    LineVector lineNumbers;
-   std::string line, key, value;
-   std::string::size_type pos1, pos2;
+   std::string line;
+   std::string key;
+   std::string value;
+   std::string::size_type pos1;
+   std::string::size_type pos2;
    unsigned int lineCounter(0);
    bool comment(false);
 
@@ -357,7 +360,8 @@ void Config::extractBlock( const char* filename, std::stringstream& input, Block
                            const LineVector& lineNumbers, unsigned int lineNumber,
                            unsigned int level )
 {
-   std::string key, value;
+   std::string key;
+   std::string value;
 
    while( input >> key )
    {

@@ -182,14 +182,20 @@ namespace geometry {
                if( in.peek() == 'n' )
                {
                   in.ignore();
-                  real_t nx, ny, nz;
+                  real_t nx;
+                  real_t ny;
+                  real_t nz;
                   in >> nx >> ny >> nz;
                   mesh.addVertexNormal( TriangleMesh::normal_t(nx,ny,nz) );
                   continue;
                }
-               real_t x,y,z;
+               real_t x;
+               real_t y;
+               real_t z;
                in >> x >> y >> z;
-               float r, g, b;
+               float r;
+               float g;
+               float b;
                in >> r >> g >> b;
                if( in )
                   mesh.addVertex( TriangleMesh::vertex_t(x,y,z), TriangleMesh::color_t(r,g,b) );
@@ -380,10 +386,16 @@ namespace geometry {
 
       std::stringstream vin(stateMap[VERTEX]);
       std::stringstream nin(stateMap[NORMAL]);
-      size_t vcount, ncount;
+      size_t vcount;
+      size_t ncount;
       vin >> vcount;
       nin >> ncount;
-      real_t x,y,z,nx,ny,nz;
+      real_t x;
+      real_t y;
+      real_t z;
+      real_t nx;
+      real_t ny;
+      real_t nz;
       for( size_t j=0; j<vcount; ++j )
       {
          vin >>  x >>  y >>  z;
@@ -395,7 +407,9 @@ namespace geometry {
       std::stringstream fin(stateMap[FACE]);
       size_t fcount;
       fin >> fcount;
-      TriangleMesh::index_t ix, iy, iz;
+      TriangleMesh::index_t ix;
+      TriangleMesh::index_t iy;
+      TriangleMesh::index_t iz;
       for( size_t j=0; j<fcount; ++j )
       {
          fin >> ix >> iy >> iz;
@@ -573,7 +587,9 @@ namespace geometry {
 
       skipComments( is );
 
-      uint_t vertexCount, faceCount, edgeCount;
+      uint_t vertexCount;
+      uint_t faceCount;
+      uint_t edgeCount;
       is >> vertexCount >> faceCount >> edgeCount;
 
       skipComments( is );
@@ -589,7 +605,9 @@ namespace geometry {
       for( uint_t i = 0; i < faceCount; ++i )
       {
          uint_t numVertices;
-         TriangleMesh::index_t i0, i1, i2;
+         TriangleMesh::index_t i0;
+         TriangleMesh::index_t i1;
+         TriangleMesh::index_t i2;
          is >> numVertices >> i0 >> i1 >> i2;
          if( numVertices != 3 )
             WALBERLA_ABORT( "Face with more or less than 3 vertices given while trying to read a mesh in Geomview Object File Format!" );

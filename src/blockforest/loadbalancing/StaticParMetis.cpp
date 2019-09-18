@@ -52,7 +52,8 @@ using idx_t = uint_t;
 
 uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uint_t numberOfProcesses, const memory_t /*perProcessMemoryLimit*/ ) const
 {
-   WcTimer globalTimer, parmetisTimer;
+   WcTimer globalTimer;
+   WcTimer parmetisTimer;
 
    int numRunnerProcesses = MPIManager::instance()->numProcesses(); // Number of processes running ParMetis (!= number of processes the partition is computed for)
    int rank = MPIManager::instance()->rank();
@@ -93,7 +94,10 @@ uint_t StaticLevelwiseParMetis::operator()( SetupBlockForest & forest, const uin
          vtxdist.push_back( int64_c( std::min( i * chunkSize, numBlocks ) ) );
       vtxdist.push_back( int64_t( forest.getNumberOfBlocks( level ) ) );
 
-      std::vector<int64_t> adjncy, xadj, vwgt, adjwgt;
+      std::vector<int64_t> adjncy;
+      std::vector<int64_t> xadj;
+      std::vector<int64_t> vwgt;
+      std::vector<int64_t> adjwgt;
       std::vector<double> xyz;
       std::vector< BlockPair > blockPairs;
 

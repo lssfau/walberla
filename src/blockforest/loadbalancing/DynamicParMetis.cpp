@@ -110,7 +110,8 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
 
    //create new communicator which excludes processes which do not have blocks
    MPI_Comm subComm = MPI_COMM_NULL;
-   MPI_Group allGroup, subGroup;
+   MPI_Group allGroup;
+   MPI_Group subGroup;
    MPI_Comm_group( MPIManager::instance()->comm(), &allGroup );
    std::vector<int> ranks;
    if (!targetProcess.empty())
@@ -144,7 +145,11 @@ bool DynamicParMetis::operator()( std::vector< std::pair< const PhantomBlock *, 
          WALBERLA_ASSERT_LESS( vtxdist[i-1], vtxdist[i] );
       }
 
-      std::vector<int64_t> adjncy, xadj, vsize, vwgt, adjwgt;
+      std::vector<int64_t> adjncy;
+      std::vector<int64_t> xadj;
+      std::vector<int64_t> vsize;
+      std::vector<int64_t> vwgt;
+      std::vector<int64_t> adjwgt;
       std::vector<double> xyz;
 
       uint_t blockIndex = 0;

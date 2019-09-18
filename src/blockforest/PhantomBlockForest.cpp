@@ -458,8 +458,14 @@ void PhantomBlockForest::migrate( const PhantomBlockDataPackFunction & packBlock
          {
             WALBERLA_ASSERT_EQUAL( offset, int8_t(1) );
 
-            uint32_t s0( uint32_t(0) ), s1( uint32_t(0) ), s2( uint32_t(0) ), s3( uint32_t(0) ),
-                     s4( uint32_t(0) ), s5( uint32_t(0) ), s6( uint32_t(0) ), s7( uint32_t(0) );
+            uint32_t s0( uint32_t(0) );
+            uint32_t s1( uint32_t(0) );
+            uint32_t s2( uint32_t(0) );
+            uint32_t s3( uint32_t(0) );
+            uint32_t s4( uint32_t(0) );
+            uint32_t s5( uint32_t(0) );
+            uint32_t s6( uint32_t(0) );
+            uint32_t s7( uint32_t(0) );
             buffer >> s0 >> s1 >> s2 >> s3 >> s4 >> s5 >> s6 >> s7;
             sp.push_back( s0 ); sp.push_back( s1 ); sp.push_back( s2 ); sp.push_back( s3 );
             sp.push_back( s4 ); sp.push_back( s5 ); sp.push_back( s6 ); sp.push_back( s7 );

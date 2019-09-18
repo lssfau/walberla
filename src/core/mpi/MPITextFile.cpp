@@ -52,7 +52,8 @@ void writeMPITextFile( const std::string & filename, const std::string & process
 
    WALBERLA_MPI_SECTION()
    {
-      int rank, numProcesses;
+      int rank;
+      int numProcesses;
       MPI_Comm_rank( comm, &rank         );
       MPI_Comm_size( comm, &numProcesses );
 

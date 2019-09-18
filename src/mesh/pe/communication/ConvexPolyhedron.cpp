@@ -111,7 +111,9 @@ void unmarshal( mpi::RecvBuffer& buffer, ConvexPolyhedronParameters& objparam ) 
    buffer >> numFaces;
    for(size_t i = 0; i < numFaces; ++i)
    {
-      int v0, v1, v2;
+      int v0;
+      int v1;
+      int v2;
       buffer >> v0 >> v1 >> v2;
       WALBERLA_ASSERT_GREATER_EQUAL( v0, 0 );
       WALBERLA_ASSERT_GREATER_EQUAL( v1, 0 );

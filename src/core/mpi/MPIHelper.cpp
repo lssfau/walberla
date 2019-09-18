@@ -40,7 +40,8 @@ int translateRank(const MPI_Comm srcComm, const MPI_Comm destComm, const int src
    }
 
    int destRank = -1;
-   MPI_Group srcGroup, destGroup;
+   MPI_Group srcGroup;
+   MPI_Group destGroup;
    MPI_Comm_group(srcComm, &srcGroup);
    MPI_Comm_group(destComm, &destGroup);
    MPI_Group_translate_ranks(srcGroup, 1, const_cast<int*>(&srcRank), destGroup, &destRank);
@@ -69,7 +70,8 @@ std::vector<int> translateRank(const MPI_Comm srcComm, const MPI_Comm destComm, 
    }
 
    std::vector<int> destRank(srcRank.size(), -1);
-   MPI_Group srcGroup, destGroup;
+   MPI_Group srcGroup;
+   MPI_Group destGroup;
    MPI_Comm_group(srcComm, &srcGroup);
    MPI_Comm_group(destComm, &destGroup);
    MPI_Group_translate_ranks(srcGroup, int_c(srcRank.size()), const_cast<int*>(&srcRank[0]), destGroup, &destRank[0]);

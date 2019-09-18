@@ -241,9 +241,15 @@ static inline void getCellsAndProcesses( const Config::BlockHandle & configBlock
 
 void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Config::BlockHandle & configBlock, const uint_t numberOfProcesses, const uint_t blocksPerProcess )
 {
-   uint_t numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock;
-   uint_t numberOfXProcesses, numberOfYProcesses, numberOfZProcesses;
-   uint_t numberOfXBlocks, numberOfYBlocks, numberOfZBlocks;
+   uint_t numberOfXCellsPerBlock;
+   uint_t numberOfYCellsPerBlock;
+   uint_t numberOfZCellsPerBlock;
+   uint_t numberOfXProcesses;
+   uint_t numberOfYProcesses;
+   uint_t numberOfZProcesses;
+   uint_t numberOfXBlocks;
+   uint_t numberOfYBlocks;
+   uint_t numberOfZBlocks;
 
    getCellsAndProcesses( configBlock, numberOfProcesses, blocksPerProcess,
                          numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock,
@@ -307,7 +313,9 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
 
 shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( const Config::BlockHandle & configBlock )
 {
-   uint_t numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock;
+   uint_t numberOfXCellsPerBlock;
+   uint_t numberOfYCellsPerBlock;
+   uint_t numberOfZCellsPerBlock;
    getCells( configBlock, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock );
 
    const uint_t blocksPerProcess = configBlock.getParameter< uint_t >( "blocksPerProcess", uint_t( 1 ) );

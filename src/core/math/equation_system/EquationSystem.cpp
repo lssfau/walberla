@@ -97,7 +97,8 @@ void EquationSystem::match()
    WALBERLA_ASSERT( boost::checked_edmonds_maximum_cardinality_matching(eqGraph_, &mate[0]) );
 
    WALBERLA_LOG_RESULT( "Maximum matching:" );
-   EqGraph::vertex_iterator vi, vi_end;
+   EqGraph::vertex_iterator vi;
+   EqGraph::vertex_iterator vi_end;
    for(boost::tie(vi,vi_end) = vertices(eqGraph_); vi != vi_end; ++vi)
       if (mate[*vi] != boost::graph_traits<EqGraph>::null_vertex() && *vi < mate[*vi])
          //std::cout << "{" << *vi << ", " << mate[*vi] << "}" << std::endl;

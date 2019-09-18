@@ -2020,7 +2020,8 @@ int main( int argc, char **argv )
 
          // evaluate general simulation infos (on root)
          {
-            real_t totalTimeToCurrentTimestep, totalLBTimeToCurrentTimestep;
+            real_t totalTimeToCurrentTimestep;
+            real_t totalLBTimeToCurrentTimestep;
             evaluateTotalSimulationTimePassed(timeloopTiming, totalTimeToCurrentTimestep, totalLBTimeToCurrentTimestep);
             std::vector<math::DistributedSample> numberOfBlocksPerLevel(numberOfLevels);
 

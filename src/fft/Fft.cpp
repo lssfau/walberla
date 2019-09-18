@@ -35,7 +35,8 @@ FourierTransform<Field_T>::FourierTransform( shared_ptr< StructuredBlockForest >
 #endif
    
 #ifdef WALBERLA_USE_PFFT
-   ptrdiff_t local_ni[3], local_i_start[3];
+   ptrdiff_t local_ni[3];
+   ptrdiff_t local_i_start[3];
    ptrdiff_t local_o_start[3];
    MPI_Comm comm = MPIManager::instance()->comm();
    ptrdiff_t alloc_local = pfft_local_size_dft_r2c_3d(n, comm, PFFT_TRANSPOSED_NONE,
