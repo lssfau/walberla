@@ -54,9 +54,7 @@
 #  endif
 #endif
 
-#ifdef WALBERLA_BUILD_WITH_METIS
-#  include "metis.h"
-#endif
+#include "metis.h"
 
 #ifdef _MSC_VER
 #  pragma pop_macro( "INT64_MAX" )
