@@ -36,7 +36,7 @@ void createWithNeighborhood(Accessor& ac, const BlockForest& bf, pe::InfoCollect
 {
    ic.clear();
 
-   mpi::BufferSystem bs( MPIManager::instance()->comm(), 756 );
+   walberla::mpi::BufferSystem bs( MPIManager::instance()->comm(), 756 );
 
    for (size_t idx = 0; idx < ac.size(); ++idx)
    {
@@ -55,23 +55,24 @@ void createWithNeighborhood(Accessor& ac, const BlockForest& bf, pe::InfoCollect
                ++info.computationalWeight;
             }
 
-         }
-
-         for (uint_t branchID = 0; branchID < 8; ++branchID)
-         {
-            const auto childID   = BlockID(block->getId(), branchID);
-            const auto childAABB = bf.getAABBFromBlockId(childID);
-            pe::BlockInfo& childInfo = ic[childID];
-            if (childAABB.contains(ac.getPosition(idx)))
+            for (uint_t branchID = 0; branchID < 8; ++branchID)
             {
-               if (data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::GHOST))
+               const auto childID   = BlockID(block->getId(), branchID);
+               const auto childAABB = bf.getAABBFromBlockId(childID);
+               pe::BlockInfo& childInfo = ic[childID];
+               if (childAABB.contains(ac.getPosition(idx)))
                {
-                  ++childInfo.communicationWeight;
-               } else
-               {
-                  ++childInfo.computationalWeight;
+                  if (data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::GHOST))
+                  {
+                     ++childInfo.communicationWeight;
+                  } else
+                  {
+                     ++childInfo.computationalWeight;
+                  }
+                  break; //particle can only be located within one child
                }
             }
+            break; //particle can only be located within one block
          }
       }
    }

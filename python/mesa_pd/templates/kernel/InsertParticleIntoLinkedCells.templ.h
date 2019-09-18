@@ -84,8 +84,8 @@ inline void InsertParticleIntoLinkedCells::operator()(const size_t p_idx, Access
       if (hash{{dim}} < 0) hash{{dim}} = 0;
       if (hash{{dim}} >= lc.numCellsPerDim_[{{dim}}]) hash{{dim}} = lc.numCellsPerDim_[{{dim}}] - 1;
       {%- endfor %}
-      int cell_idx = getCellIdx(lc, hash0, hash1, hash2);
-      ac.setNextParticle(p_idx, lc.cells_[uint_c(cell_idx)].exchange(int_c(p_idx)));
+      uint_t cell_idx = getCellIdx(lc, hash0, hash1, hash2);
+      ac.setNextParticle(p_idx, lc.cells_[cell_idx].exchange(int_c(p_idx)));
    }
 }
 

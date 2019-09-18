@@ -35,6 +35,14 @@ class BlockForestDomain : public IDomain
 public:
    BlockForestDomain(const std::shared_ptr<blockforest::BlockForest>& blockForest);
 
+   /**
+    * @brief If the BlockForest is changed this function has to be called in order to
+    * update all interal caches!
+    *
+    * Updates the local caches for local and neighbor AABBs.
+    */
+   void refresh();
+
    bool   isContainedInProcessSubdomain(const uint_t rank, const Vec3& pt) const override;
    bool   isContainedInLocalSubdomain(const Vec3& pt, const real_t& radius) const override;
    /// Is the sphere defined by \p pt and \p radius completely inside the local subdomin?
@@ -48,6 +56,7 @@ public:
    bool   intersectsWithProcessSubdomain(const uint_t rank, const Vec3& pt, const real_t& radius) const override;
    void   correctParticlePosition(Vec3& pt) const override;
 
+   const math::AABB& getUnionOfLocalAABBs() const {return unionOfLocalAABBs_;}
    size_t getNumLocalAABBs() const {return localAABBs_.size();}
    size_t getNumNeighborSubdomains() const {return neighborSubdomains_.size();}
    size_t getNumNeighborProcesses() const {return neighborProcesses_.size();}

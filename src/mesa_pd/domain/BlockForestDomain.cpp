@@ -33,6 +33,12 @@ namespace domain {
 BlockForestDomain::BlockForestDomain(const std::shared_ptr<blockforest::BlockForest>& blockForest)
    : blockForest_(blockForest)
 {
+   refresh();
+}
+
+/// \post neighborSubdomains_ is sorted by rank
+void BlockForestDomain::refresh()
+{
    ownRank_ = mpi::MPIManager::instance()->rank();
 
    periodic_[0] = blockForest_->isPeriodic(0);
@@ -41,6 +47,9 @@ BlockForestDomain::BlockForestDomain(const std::shared_ptr<blockforest::BlockFor
 
    if (blockForest_->empty()) return;
 
+   localAABBs_.clear();
+   neighborSubdomains_.clear();
+   neighborProcesses_.clear();
    unionOfLocalAABBs_ = blockForest_->begin()->getAABB();
    for (auto& iBlk : *blockForest_)
    {

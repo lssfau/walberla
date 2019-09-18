@@ -36,8 +36,7 @@
 #include <iostream>
 
 namespace walberla {
-
-using namespace walberla::mesa_pd;
+namespace mesa_pd {
 
 class ParticleAccessorWithShape : public data::ParticleAccessor
 {
@@ -120,9 +119,10 @@ int main( int argc, char ** argv )
    return EXIT_SUCCESS;
 }
 
+} //namespace mesa_pd
 } //namespace walberla
 
 int main( int argc, char ** argv )
 {
-   return walberla::main(argc, argv);
+   return walberla::mesa_pd::main(argc, argv);
 }

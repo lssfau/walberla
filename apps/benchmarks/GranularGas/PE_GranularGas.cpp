@@ -90,7 +90,7 @@ int main( int argc, char ** argv )
    auto cfg = env.config();
    if (cfg == nullptr) WALBERLA_ABORT("No config specified!");
    const Config::BlockHandle mainConf  = cfg->getBlock( "GranularGas" );
-   Parameters params;
+   mesa_pd::Parameters params;
    loadFromConfig(params, mainConf);
 
    WALBERLA_LOG_INFO_ON_ROOT("*** GLOBALBODYSTORAGE ***");
@@ -174,9 +174,9 @@ int main( int argc, char ** argv )
    }
 
    WALBERLA_LOG_INFO_ON_ROOT("*** VTK ***");
-   auto vtkDomainOutput = vtk::createVTKOutput_DomainDecomposition( forest, "domain_decomposition", 1, "vtk_out", "simulation_step" );
+   auto vtkDomainOutput = vtk::createVTKOutput_DomainDecomposition( forest, "domain_decomposition", 1, params.vtk_out, "simulation_step" );
    auto vtkSphereHelper = make_shared<SphereVtkOutput>(storageID, *forest) ;
-   auto vtkSphereOutput = vtk::createVTKOutput_PointData(vtkSphereHelper, "Bodies", 1, "vtk_out", "simulation_step", false, false);
+   auto vtkSphereOutput = vtk::createVTKOutput_PointData(vtkSphereHelper, "Bodies", 1, params.vtk_out, "simulation_step", false, false);
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - START ***");
    //const real_t   static_cof  ( real_c(0.1) / 2 );   // Coefficient of static friction. Note: pe doubles the input coefficient of friction for material-material contacts.
@@ -190,7 +190,7 @@ int main( int argc, char ** argv )
    for (auto& currentBlock : *forest)
    {
       for (auto it = grid_generator::SCIterator(currentBlock.getAABB().getIntersection(generationDomain),
-                                                Vector3<real_t>(params.spacing) * real_c(0.5),
+                                                Vector3<real_t>(params.spacing) * real_c(0.5) + params.shift,
                                                 params.spacing);
            it != grid_generator::SCIterator();
            ++it)

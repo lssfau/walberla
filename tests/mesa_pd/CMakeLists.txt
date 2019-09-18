@@ -40,8 +40,14 @@ waLBerla_execute_test( NAME   MESA_PD_ContactDetection PROCESSES 8 )
 waLBerla_compile_test( NAME   MESA_PD_Data_Flags FILES data/Flags.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Data_Flags )
 
+waLBerla_compile_test( NAME   MESA_PD_Data_LinkedCells FILES data/LinkedCells.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Data_LinkedCells )
+
 waLBerla_compile_test( NAME   MESA_PD_Data_ParticleStorage FILES data/ParticleStorage.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Data_ParticleStorage )
+
+waLBerla_compile_test( NAME   MESA_PD_Data_SparseLinkedCells FILES data/SparseLinkedCells.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Data_SparseLinkedCells )
 
 waLBerla_compile_test( NAME   MESA_PD_Domain_BlockForestDomain FILES domain/BlockForestDomain.cpp DEPENDS blockforest core )
 waLBerla_execute_test( NAME   MESA_PD_Domain_BlockForestDomain )
@@ -139,6 +145,9 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncGhostOwnersLarge PROCESSES 27 )
 
 waLBerla_compile_test( NAME   MESA_PD_Kernel_SyncNextNeighbors FILES kernel/SyncNextNeighbors.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncNextNeighbors PROCESSES 27 )
+
+waLBerla_compile_test( NAME   MESA_PD_Kernel_SyncNextNeighborsBlockForest FILES kernel/SyncNextNeighborsBlockForest.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncNextNeighborsBlockForest PROCESSES 27 )
 
 waLBerla_compile_test( NAME   MESA_PD_Kernel_TemperatureIntegration FILES kernel/TemperatureIntegration.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_TemperatureIntegration )

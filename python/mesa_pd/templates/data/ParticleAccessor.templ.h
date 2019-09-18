@@ -50,9 +50,9 @@ public:
    virtual ~ParticleAccessor() = default;
 
    {%- for prop in properties %}
-   const {{prop.type}}& get{{prop.name | capFirst}}(const size_t p_idx) const {return ps_->get{{prop.name | capFirst}}(p_idx);}
+   {{prop.type}} const & get{{prop.name | capFirst}}(const size_t p_idx) const {return ps_->get{{prop.name | capFirst}}(p_idx);}
    {{prop.type}}& get{{prop.name | capFirst}}Ref(const size_t p_idx) {return ps_->get{{prop.name | capFirst}}Ref(p_idx);}
-   void set{{prop.name | capFirst}}(const size_t p_idx, const {{prop.type}}& v) { ps_->set{{prop.name | capFirst}}(p_idx, v);}
+   void set{{prop.name | capFirst}}(const size_t p_idx, {{prop.type}} const & v) { ps_->set{{prop.name | capFirst}}(p_idx, v);}
    {% endfor %}
 
    id_t getInvalidUid() const {return UniqueID<data::Particle>::invalidID();}
@@ -101,8 +101,8 @@ public:
    virtual ~SingleParticleAccessor() = default;
 
    {%- for prop in properties %}
-   const {{prop.type}}& get{{prop.name | capFirst}}(const size_t /*p_idx*/) const {return {{prop.name}}_;}
-   void set{{prop.name | capFirst}}(const size_t /*p_idx*/, const {{prop.type}}& v) { {{prop.name}}_ = v;}
+   {{prop.type}} const & get{{prop.name | capFirst}}(const size_t /*p_idx*/) const {return {{prop.name}}_;}
+   void set{{prop.name | capFirst}}(const size_t /*p_idx*/, {{prop.type}} const & v) { {{prop.name}}_ = v;}
    {{prop.type}}& get{{prop.name | capFirst}}Ref(const size_t /*p_idx*/) {return {{prop.name}}_;}
    {% endfor %}
 

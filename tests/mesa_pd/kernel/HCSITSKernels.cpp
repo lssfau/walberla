@@ -50,90 +50,89 @@
 #include <iostream>
 
 namespace walberla {
+namespace mesa_pd {
 
-using namespace walberla::mesa_pd;
+class ParticleAccessorWithShape : public data::ParticleAccessor
+{
+public:
+   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
+      : ParticleAccessor(ps)
+      , ss_(ss)
+   {}
 
-   class ParticleAccessorWithShape : public data::ParticleAccessor
-   {
-      public:
-      ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-              : ParticleAccessor(ps)
-              , ss_(ss)
-      {}
+   const real_t& getMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getMass();}
+   const real_t& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvMass();}
 
-      const real_t& getMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getMass();}
-      const real_t& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvMass();}
+   const Mat3& getInertia(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInertiaBF();}
+   const Mat3& getInvInertia(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvInertiaBF();}
 
-      const Mat3& getInertia(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInertiaBF();}
-      const Mat3& getInvInertia(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvInertiaBF();}
+   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)].get();}
+private:
+   std::shared_ptr<data::ShapeStorage> ss_;
+};
 
-      data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)].get();}
-      private:
-      std::shared_ptr<data::ShapeStorage> ss_;
-   };
+template<typename PStorage, typename CStorage, typename PAccessor, typename CAccessor>
+class TestHCSITSKernel {
+public:
+   TestHCSITSKernel(PStorage &ps_, CStorage &cs_, PAccessor &pa_, CAccessor &ca_) : ps(ps_), cs(cs_), pa(pa_), ca(ca_),
+      erp(real_t(1.0)), model(kernel::HCSITSRelaxationStep::RelaxationModel::InelasticFrictionlessContact), contactThreshold(0), globalAcc(0) {}
 
-   template<typename PStorage, typename CStorage, typename PAccessor, typename CAccessor>
-   class TestHCSITSKernel {
-      public:
-      TestHCSITSKernel(PStorage &ps_, CStorage &cs_, PAccessor &pa_, CAccessor &ca_) : ps(ps_), cs(cs_), pa(pa_), ca(ca_),
-            erp(real_t(1.0)), model(kernel::HCSITSRelaxationStep::RelaxationModel::InelasticFrictionlessContact), contactThreshold(0), globalAcc(0) {}
+   void operator()(real_t dt){
+      // Perform Collision detection (call kernel, that stores contacts into cs)
+      kernel::DetectAndStoreContacts detectAndStore(cs);
+      cs.clear();
 
-      void operator()(real_t dt){
-         // Perform Collision detection (call kernel, that stores contacts into cs)
-         kernel::DetectAndStoreContacts detectAndStore(cs);
-         cs.clear();
+      domain::InfiniteDomain domain;
+      collision_detection::AnalyticContactDetection acd;
+      acd.getContactThreshold() = contactThreshold;
+      ps.forEachParticlePairHalf(false, kernel::ExcludeInfiniteInfinite(), pa, detectAndStore, pa, domain, acd);
 
-         domain::InfiniteDomain domain;
-         collision_detection::AnalyticContactDetection acd;
-         acd.getContactThreshold() = contactThreshold;
-         ps.forEachParticlePairHalf(false, kernel::ExcludeInfiniteInfinite(), pa, detectAndStore, pa, domain, acd);
+      // Create Kernels
+      kernel::InitContactsForHCSITS initContacts(1);
+      initContacts.setFriction(0,0,real_t(0.2));
+      initContacts.setErp(real_t(erp));
 
-         // Create Kernels
-         kernel::InitContactsForHCSITS initContacts(1);
-         initContacts.setFriction(0,0,real_t(0.2));
-         initContacts.setErp(real_t(erp));
+      kernel::InitParticlesForHCSITS initParticles;
+      initParticles.setGlobalAcceleration(globalAcc);
 
-         kernel::InitParticlesForHCSITS initParticles;
-         initParticles.setGlobalAcceleration(globalAcc);
+      kernel::HCSITSRelaxationStep relaxationStep;
+      relaxationStep.setRelaxationModel(model);
+      relaxationStep.setCor(real_t(0.6)); // Only effective for PGSM
 
-         kernel::HCSITSRelaxationStep relaxationStep;
-         relaxationStep.setRelaxationModel(model);
-         relaxationStep.setCor(real_t(0.6)); // Only effective for PGSM
+      kernel::IntegrateParticlesHCSITS integration;
 
-         kernel::IntegrateParticlesHCSITS integration;
+      mesa_pd::mpi::ReduceProperty reductionKernel;
+      mesa_pd::mpi::BroadcastProperty broadcastKernel;
 
-         mesa_pd::mpi::ReduceProperty reductionKernel;
-         mesa_pd::mpi::BroadcastProperty broadcastKernel;
+      // Run the HCSITS loop
+      cs.forEachContact(false, kernel::SelectAll(), ca, initContacts, ca, pa);
+      ps.forEachParticle(false, kernel::SelectAll(), pa, initParticles, pa, dt);
 
-         // Run the HCSITS loop
-         cs.forEachContact(false, kernel::SelectAll(), ca, initContacts, ca, pa);
-         ps.forEachParticle(false, kernel::SelectAll(), pa, initParticles, pa, dt);
+      VelocityUpdateNotification::Parameters::relaxationParam = real_t(1.0);
+      reductionKernel.operator()<VelocityCorrectionNotification>(ps);
+      broadcastKernel.operator()<VelocityUpdateNotification>(ps);
 
-         VelocityUpdateNotification::Parameters::relaxationParam = real_t(1.0);
+      VelocityUpdateNotification::Parameters::relaxationParam = real_t(0.8);
+      for(int i = 0; i < 10; i++){
+         cs.forEachContact(false, kernel::SelectAll(), ca, relaxationStep, ca, pa, dt);
          reductionKernel.operator()<VelocityCorrectionNotification>(ps);
          broadcastKernel.operator()<VelocityUpdateNotification>(ps);
-
-         VelocityUpdateNotification::Parameters::relaxationParam = real_t(0.8);
-         for(int i = 0; i < 10; i++){
-            cs.forEachContact(false, kernel::SelectAll(), ca, relaxationStep, ca, pa, dt);
-            reductionKernel.operator()<VelocityCorrectionNotification>(ps);
-            broadcastKernel.operator()<VelocityUpdateNotification>(ps);
-         }
-         ps.forEachParticle(false, kernel::SelectAll(), pa, integration, pa, dt);
       }
+      ps.forEachParticle(false, kernel::SelectAll(), pa, integration, pa, dt);
+   }
 
-      private:
-         PStorage  &ps;
-         CStorage  &cs;
-         PAccessor &pa;
-         CAccessor &ca;
+private:
+   PStorage  &ps;
+   CStorage  &cs;
+   PAccessor &pa;
+   CAccessor &ca;
 
-      public:
-         real_t erp;
-         kernel::HCSITSRelaxationStep::RelaxationModel model;
-         real_t contactThreshold;
-         Vec3 globalAcc;
-   };
+public:
+   real_t erp;
+   kernel::HCSITSRelaxationStep::RelaxationModel model;
+   real_t contactThreshold;
+   Vec3 globalAcc;
+};
 
 
 void normalReactionTest(kernel::HCSITSRelaxationStep::RelaxationModel model)
@@ -176,11 +175,11 @@ void normalReactionTest(kernel::HCSITSRelaxationStep::RelaxationModel model)
    testHCSITS.model = model;
 
    WALBERLA_LOG_INFO(paccessor.getInvMass(0))
-   WALBERLA_LOG_INFO(paccessor.getInvMass(1))
+         WALBERLA_LOG_INFO(paccessor.getInvMass(1))
 
-   // plane at 5,5,5
-   // radius 1.1
-   p->setPosition(  Vec3(5,5,6) );
+         // plane at 5,5,5
+         // radius 1.1
+         p->setPosition(  Vec3(5,5,6) );
    p->setLinearVelocity( Vec3(0,0,0) );
    testHCSITS( real_c( real_t(1.0) ) );
    WALBERLA_CHECK_FLOAT_EQUAL( p->getPosition() , Vec3(5,5,real_t(6.1)) );
@@ -268,48 +267,48 @@ void normalReactionTest(kernel::HCSITSRelaxationStep::RelaxationModel model)
  * */
 void SphereSphereTest(kernel::HCSITSRelaxationStep::RelaxationModel model){
 
-      //init data structures
-      auto ps = std::make_shared<data::ParticleStorage>(100);
-      auto cs = std::make_shared<data::ContactStorage>(100);
-      auto ss = std::make_shared<data::ShapeStorage>();
-      ParticleAccessorWithShape paccessor(ps, ss);
-      data::ContactAccessor caccessor(cs);
-      auto density = real_t(7.874);
-      auto radius = real_t(1.1);
+   //init data structures
+   auto ps = std::make_shared<data::ParticleStorage>(100);
+   auto cs = std::make_shared<data::ContactStorage>(100);
+   auto ss = std::make_shared<data::ShapeStorage>();
+   ParticleAccessorWithShape paccessor(ps, ss);
+   data::ContactAccessor caccessor(cs);
+   auto density = real_t(7.874);
+   auto radius = real_t(1.1);
 
-      auto smallSphere = ss->create<data::Sphere>( radius );
-      ss->shapes[smallSphere]->updateMassAndInertia( density );
+   auto smallSphere = ss->create<data::Sphere>( radius );
+   ss->shapes[smallSphere]->updateMassAndInertia( density );
 
-      auto dt = real_t(1);
+   auto dt = real_t(1);
 
-      // Create two slightly overlapping spheres in a row (located at x=0,2)
-      auto p = ps->create();
-      p->getPositionRef()          = Vec3(real_t(0), real_t(0), real_t(0));
-      p->getShapeIDRef()           = smallSphere;
-      p->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
-      p->getLinearVelocityRef()    = Vec3(real_t(1), real_t(0), real_t(0));
-      p->getTypeRef()              = 0;
-      auto p2 = ps->create();
-      p2->getPositionRef()          = Vec3(real_t(2), real_t(0), real_t(0));
-      p2->getShapeIDRef()           = smallSphere;
-      p2->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
-      p2->getLinearVelocityRef() = Vec3(real_t(-1), real_t(0), real_t(0));
-      p2->getTypeRef()              = 0;
-      TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
-      testHCSITS.model = model;
-      testHCSITS(dt);
+   // Create two slightly overlapping spheres in a row (located at x=0,2)
+   auto p = ps->create();
+   p->getPositionRef()          = Vec3(real_t(0), real_t(0), real_t(0));
+   p->getShapeIDRef()           = smallSphere;
+   p->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
+   p->getLinearVelocityRef()    = Vec3(real_t(1), real_t(0), real_t(0));
+   p->getTypeRef()              = 0;
+   auto p2 = ps->create();
+   p2->getPositionRef()          = Vec3(real_t(2), real_t(0), real_t(0));
+   p2->getShapeIDRef()           = smallSphere;
+   p2->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
+   p2->getLinearVelocityRef() = Vec3(real_t(-1), real_t(0), real_t(0));
+   p2->getTypeRef()              = 0;
+   TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
+   testHCSITS.model = model;
+   testHCSITS(dt);
 
-      WALBERLA_CHECK_FLOAT_EQUAL(p->getPosition(), Vec3(real_t(-0.1),0,0));
-      WALBERLA_CHECK_FLOAT_EQUAL(p->getLinearVelocity(), Vec3(real_t(-0.1),0,0));
-      WALBERLA_CHECK_FLOAT_EQUAL(p->getAngularVelocity(), Vec3(0,0,0));
-      WALBERLA_CHECK_FLOAT_EQUAL(p2->getPosition(), Vec3(real_t(2.1),0,0));
-      WALBERLA_CHECK_FLOAT_EQUAL(p2->getLinearVelocity(), Vec3(real_t(0.1),0,0))
-      WALBERLA_CHECK_FLOAT_EQUAL(p2->getAngularVelocity(), Vec3(0,0,0));
+   WALBERLA_CHECK_FLOAT_EQUAL(p->getPosition(), Vec3(real_t(-0.1),0,0));
+   WALBERLA_CHECK_FLOAT_EQUAL(p->getLinearVelocity(), Vec3(real_t(-0.1),0,0));
+   WALBERLA_CHECK_FLOAT_EQUAL(p->getAngularVelocity(), Vec3(0,0,0));
+   WALBERLA_CHECK_FLOAT_EQUAL(p2->getPosition(), Vec3(real_t(2.1),0,0));
+   WALBERLA_CHECK_FLOAT_EQUAL(p2->getLinearVelocity(), Vec3(real_t(0.1),0,0))
+         WALBERLA_CHECK_FLOAT_EQUAL(p2->getAngularVelocity(), Vec3(0,0,0));
 
-      WALBERLA_LOG_INFO(p->getPosition());
-      WALBERLA_LOG_INFO(p->getLinearVelocity());
-      WALBERLA_LOG_INFO(p2->getPosition());
-      WALBERLA_LOG_INFO(p2->getLinearVelocity());
+   WALBERLA_LOG_INFO(p->getPosition());
+   WALBERLA_LOG_INFO(p->getLinearVelocity());
+   WALBERLA_LOG_INFO(p2->getPosition());
+   WALBERLA_LOG_INFO(p2->getLinearVelocity());
 }
 
 /**
@@ -477,9 +476,10 @@ int main( int argc, char ** argv )
    return EXIT_SUCCESS;
 }
 
+} //namespace mesa_pd
 } //namespace walberla
 
 int main( int argc, char ** argv )
 {
-   return walberla::main(argc, argv);
+   return walberla::mesa_pd::main(argc, argv);
 }

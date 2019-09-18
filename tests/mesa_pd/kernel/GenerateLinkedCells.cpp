@@ -80,9 +80,9 @@ int main( int argc, char ** argv )
          for (int y = 0; y < linkedCells.numCellsPerDim_[1]; ++y)
             for (int z = 0; z < linkedCells.numCellsPerDim_[2]; ++z)
             {
-               const int cell_idx = getCellIdx(linkedCells, x, y, z);
+               const uint_t cell_idx = getCellIdx(linkedCells, x, y, z);
                auto aabb = getCellAABB(linkedCells, x, y, z);
-               int p_idx = linkedCells.cells_[uint_c(cell_idx)];
+               int p_idx = linkedCells.cells_[cell_idx];
                while (p_idx != -1)
                {
                   ++particleCounter;

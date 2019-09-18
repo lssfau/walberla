@@ -49,6 +49,9 @@ if __name__ == '__main__':
    ps.addProperty("flags",            "walberla::mesa_pd::data::particle_flags::FlagT", defValue="", syncMode="COPY")
    ps.addProperty("nextParticle",     "int",                     defValue="-1",        syncMode="NEVER")
 
+   ps.addInclude("blockforest/BlockForest.h")
+   ps.addProperty("currentBlock",     "blockforest::Block*",     defValue="nullptr",   syncMode="NEVER")
+
    kernels = []
    kernels.append( kernel.DoubleCast(shapes) )
    kernels.append( kernel.ExplicitEuler() )
@@ -74,6 +77,7 @@ if __name__ == '__main__':
    comm.append(mpi.ClearNextNeighborSync())
    comm.append(mpi.ReduceContactHistory())
    comm.append(mpi.ReduceProperty())
+   comm.append(mpi.SyncGhostOwners(ps))
    comm.append(mpi.SyncNextNeighbors(ps))
 
 

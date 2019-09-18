@@ -33,7 +33,6 @@
 #include "pe/utility/BodyCast.h"
 
 #include "core/debug/Debug.h"
-#include "core/math/RotationMatrix.h"
 #include "core/math/Shims.h"
 #include "geometry/GeometricalFunctions.h"
 

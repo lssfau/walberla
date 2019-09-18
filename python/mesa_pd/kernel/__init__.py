@@ -10,6 +10,7 @@ from .InitParticlesForHCSITS import InitParticlesForHCSITS
 from .InitContactsForHCSITS import InitContactsForHCSITS
 from .IntegrateParticlesHCSITS import IntegrateParticlesHCSITS
 from .InsertParticleIntoLinkedCells import InsertParticleIntoLinkedCells
+from .InsertParticleIntoSparseLinkedCells import InsertParticleIntoSparseLinkedCells
 from .LinearSpringDashpot import LinearSpringDashpot
 from .NonLinearSpringDashpot import NonLinearSpringDashpot
 from .SingleCast import SingleCast
@@ -29,6 +30,7 @@ __all__ = ['DoubleCast',
            'InitContactsForHCSITS',
            'IntegrateParticlesHCSITS',
            'InsertParticleIntoLinkedCells',
+           'InsertParticleIntoSparseLinkedCells',
            'LinearSpringDashpot',
            'NonLinearSpringDashpot',
            'SingleCast',

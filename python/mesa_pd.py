@@ -32,6 +32,7 @@ if __name__ == '__main__':
    ps    = data.ParticleStorage()
    ch    = data.ContactHistory()
    lc    = data.LinkedCells()
+   slc   = data.SparseLinkedCells()
    ss    = data.ShapeStorage(ps, shapes)
    cs    = data.ContactStorage()
 
@@ -46,6 +47,9 @@ if __name__ == '__main__':
    ps.addProperty("angularVelocity",  "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
    ps.addProperty("torque",           "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
    ps.addProperty("oldTorque",        "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="MIGRATION")
+
+   ps.addInclude("blockforest/BlockForest.h")
+   ps.addProperty("currentBlock",     "blockforest::Block*",     defValue="nullptr",   syncMode="NEVER")
 
    ps.addProperty("type",             "uint_t",                  defValue="0",         syncMode="COPY")
 
@@ -96,6 +100,7 @@ if __name__ == '__main__':
    kernels.append( kernel.InitContactsForHCSITS() )
    kernels.append( kernel.IntegrateParticlesHCSITS() )
    kernels.append( kernel.InsertParticleIntoLinkedCells() )
+   kernels.append( kernel.InsertParticleIntoSparseLinkedCells() )
    kernels.append( kernel.LinearSpringDashpot() )
    kernels.append( kernel.NonLinearSpringDashpot() )
    kernels.append( kernel.SingleCast(shapes) )
@@ -122,6 +127,7 @@ if __name__ == '__main__':
    ps.generate(args.path + "/src/mesa_pd/")
    ch.generate(args.path + "/src/mesa_pd/")
    lc.generate(args.path + "/src/mesa_pd/")
+   slc.generate(args.path + "/src/mesa_pd/")
    ss.generate(args.path + "/src/mesa_pd/")
    cs.generate(args.path + "/src/mesa_pd/")
 

@@ -128,7 +128,7 @@ int main( int argc, char ** argv )
    for (auto& iBlk : *forest)
    {
       for (auto pt : grid_generator::SCGrid(iBlk.getAABB(),
-                                            Vector3<real_t>(params.spacing) * real_c(0.5),
+                                            Vector3<real_t>(params.spacing) * real_c(0.5) + params.shift,
                                             params.spacing))
       {
          WALBERLA_CHECK(iBlk.getAABB().contains(pt));
@@ -163,9 +163,9 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - END ***");
 
    WALBERLA_LOG_INFO_ON_ROOT("*** VTK ***");
-   auto vtkDomainOutput = walberla::vtk::createVTKOutput_DomainDecomposition( forest, "domain_decomposition", 1, "vtk_out", "simulation_step" );
+   auto vtkDomainOutput = walberla::vtk::createVTKOutput_DomainDecomposition( forest, "domain_decomposition", 1, params.vtk_out, "simulation_step" );
    auto vtkOutput       = make_shared<mesa_pd::vtk::ParticleVtkOutput>(ps) ;
-   auto vtkWriter       = walberla::vtk::createVTKOutput_PointData(vtkOutput, "Bodies", 1, "vtk", "simulation_step", false, false);
+   auto vtkWriter       = walberla::vtk::createVTKOutput_PointData(vtkOutput, "Bodies", 1, params.vtk_out, "simulation_step", false, false);
    vtkOutput->addOutput<SelectRank>("rank");
    vtkOutput->addOutput<data::SelectParticleOwner>("owner");
    vtkOutput->addOutput<SelectIdx>("idx");

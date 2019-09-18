@@ -27,16 +27,19 @@
 #pragma once
 
 #include <core/config/Config.h>
-#include <core/DataTypes.h>
+#include <mesa_pd/data/DataTypes.h>
 
 #include <string>
 
 namespace walberla {
+namespace mesa_pd {
 
 struct Parameters
 {
    std::string sorting = "none";
+   Vec3 normal = Vec3(real_t(1.0), real_t(1.0), real_t(1.0));
    real_t spacing = real_t(1.0);
+   Vec3 shift = Vec3(real_t(0.1), real_t(0.1), real_t(0.1));
    real_t radius = real_t(0.5);
    bool bBarrier = false;
    bool storeNodeTimings = false;
@@ -46,8 +49,24 @@ struct Parameters
    int64_t simulationSteps = 10;
    real_t dt = real_t(0.01);
    int64_t visSpacing = 1000;
-   std::string path = "vtk_out";
+   std::string vtk_out = "vtk_out";
    std::string sqlFile = "benchmark.sqlite";
+   bool recalculateBlockLevelsInRefresh = false;
+   bool alwaysRebalanceInRefresh = true;
+   bool reevaluateMinTargetLevelsAfterForcedRefinement = false;
+   bool allowRefreshChangingDepth = false;
+   bool allowMultipleRefreshCycles = false;
+   bool checkForEarlyOutInRefresh = true;
+   bool checkForLateOutInRefresh = true;
+   uint_t regridMin = uint_c(100);
+   uint_t regridMax = uint_c(1000);
+   int maxBlocksPerProcess = int_c(1000);
+   real_t baseWeight = real_t(10.0);
+   real_t metisipc2redist = real_t(1000.0);
+   std::string LBAlgorithm = "Hilbert";
+   std::string metisAlgorithm = "PART_GEOM_KWAY";
+   std::string metisWeightsToUse = "BOTH_WEIGHTS";
+   std::string metisEdgeSource = "EDGES_FROM_EDGE_WEIGHTS";
 };
 
 void loadFromConfig(Parameters& params,
@@ -58,4 +77,5 @@ void saveToSQL(const Parameters& params,
                std::map< std::string, double >&            realProperties,
                std::map< std::string, std::string >&       stringProperties );
 
+} //namespace mesa_pd
 } //namespace walberla

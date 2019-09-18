@@ -38,6 +38,7 @@
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/IAccessor.h>
 #include <mesa_pd/data/Flags.h>
+#include <blockforest/BlockForest.h>
 #include <mesa_pd/data/STLOverloads.h>
 
 #include <core/Abort.h>
@@ -85,6 +86,7 @@ public:
       using force_type = walberla::mesa_pd::Vec3;
       using oldForce_type = walberla::mesa_pd::Vec3;
       using oldTorque_type = walberla::mesa_pd::Vec3;
+      using currentBlock_type = blockforest::Block*;
       using type_type = uint_t;
       using nextParticle_type = int;
       using oldContactHistory_type = std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>;
@@ -96,101 +98,105 @@ public:
       using neighborState_type = std::unordered_set<walberla::mpi::MPIRank>;
 
       
-      const uid_type& getUid() const {return storage_.getUid(i_);}
+      uid_type const & getUid() const {return storage_.getUid(i_);}
       uid_type& getUidRef() {return storage_.getUidRef(i_);}
-      void setUid(const uid_type& v) { storage_.setUid(i_, v);}
+      void setUid(uid_type const & v) { storage_.setUid(i_, v);}
       
-      const position_type& getPosition() const {return storage_.getPosition(i_);}
+      position_type const & getPosition() const {return storage_.getPosition(i_);}
       position_type& getPositionRef() {return storage_.getPositionRef(i_);}
-      void setPosition(const position_type& v) { storage_.setPosition(i_, v);}
+      void setPosition(position_type const & v) { storage_.setPosition(i_, v);}
       
-      const interactionRadius_type& getInteractionRadius() const {return storage_.getInteractionRadius(i_);}
+      interactionRadius_type const & getInteractionRadius() const {return storage_.getInteractionRadius(i_);}
       interactionRadius_type& getInteractionRadiusRef() {return storage_.getInteractionRadiusRef(i_);}
-      void setInteractionRadius(const interactionRadius_type& v) { storage_.setInteractionRadius(i_, v);}
+      void setInteractionRadius(interactionRadius_type const & v) { storage_.setInteractionRadius(i_, v);}
       
-      const flags_type& getFlags() const {return storage_.getFlags(i_);}
+      flags_type const & getFlags() const {return storage_.getFlags(i_);}
       flags_type& getFlagsRef() {return storage_.getFlagsRef(i_);}
-      void setFlags(const flags_type& v) { storage_.setFlags(i_, v);}
+      void setFlags(flags_type const & v) { storage_.setFlags(i_, v);}
       
-      const owner_type& getOwner() const {return storage_.getOwner(i_);}
+      owner_type const & getOwner() const {return storage_.getOwner(i_);}
       owner_type& getOwnerRef() {return storage_.getOwnerRef(i_);}
-      void setOwner(const owner_type& v) { storage_.setOwner(i_, v);}
+      void setOwner(owner_type const & v) { storage_.setOwner(i_, v);}
       
-      const ghostOwners_type& getGhostOwners() const {return storage_.getGhostOwners(i_);}
+      ghostOwners_type const & getGhostOwners() const {return storage_.getGhostOwners(i_);}
       ghostOwners_type& getGhostOwnersRef() {return storage_.getGhostOwnersRef(i_);}
-      void setGhostOwners(const ghostOwners_type& v) { storage_.setGhostOwners(i_, v);}
+      void setGhostOwners(ghostOwners_type const & v) { storage_.setGhostOwners(i_, v);}
       
-      const shapeID_type& getShapeID() const {return storage_.getShapeID(i_);}
+      shapeID_type const & getShapeID() const {return storage_.getShapeID(i_);}
       shapeID_type& getShapeIDRef() {return storage_.getShapeIDRef(i_);}
-      void setShapeID(const shapeID_type& v) { storage_.setShapeID(i_, v);}
+      void setShapeID(shapeID_type const & v) { storage_.setShapeID(i_, v);}
       
-      const rotation_type& getRotation() const {return storage_.getRotation(i_);}
+      rotation_type const & getRotation() const {return storage_.getRotation(i_);}
       rotation_type& getRotationRef() {return storage_.getRotationRef(i_);}
-      void setRotation(const rotation_type& v) { storage_.setRotation(i_, v);}
+      void setRotation(rotation_type const & v) { storage_.setRotation(i_, v);}
       
-      const angularVelocity_type& getAngularVelocity() const {return storage_.getAngularVelocity(i_);}
+      angularVelocity_type const & getAngularVelocity() const {return storage_.getAngularVelocity(i_);}
       angularVelocity_type& getAngularVelocityRef() {return storage_.getAngularVelocityRef(i_);}
-      void setAngularVelocity(const angularVelocity_type& v) { storage_.setAngularVelocity(i_, v);}
+      void setAngularVelocity(angularVelocity_type const & v) { storage_.setAngularVelocity(i_, v);}
       
-      const torque_type& getTorque() const {return storage_.getTorque(i_);}
+      torque_type const & getTorque() const {return storage_.getTorque(i_);}
       torque_type& getTorqueRef() {return storage_.getTorqueRef(i_);}
-      void setTorque(const torque_type& v) { storage_.setTorque(i_, v);}
+      void setTorque(torque_type const & v) { storage_.setTorque(i_, v);}
       
-      const linearVelocity_type& getLinearVelocity() const {return storage_.getLinearVelocity(i_);}
+      linearVelocity_type const & getLinearVelocity() const {return storage_.getLinearVelocity(i_);}
       linearVelocity_type& getLinearVelocityRef() {return storage_.getLinearVelocityRef(i_);}
-      void setLinearVelocity(const linearVelocity_type& v) { storage_.setLinearVelocity(i_, v);}
+      void setLinearVelocity(linearVelocity_type const & v) { storage_.setLinearVelocity(i_, v);}
       
-      const invMass_type& getInvMass() const {return storage_.getInvMass(i_);}
+      invMass_type const & getInvMass() const {return storage_.getInvMass(i_);}
       invMass_type& getInvMassRef() {return storage_.getInvMassRef(i_);}
-      void setInvMass(const invMass_type& v) { storage_.setInvMass(i_, v);}
+      void setInvMass(invMass_type const & v) { storage_.setInvMass(i_, v);}
       
-      const force_type& getForce() const {return storage_.getForce(i_);}
+      force_type const & getForce() const {return storage_.getForce(i_);}
       force_type& getForceRef() {return storage_.getForceRef(i_);}
-      void setForce(const force_type& v) { storage_.setForce(i_, v);}
+      void setForce(force_type const & v) { storage_.setForce(i_, v);}
       
-      const oldForce_type& getOldForce() const {return storage_.getOldForce(i_);}
+      oldForce_type const & getOldForce() const {return storage_.getOldForce(i_);}
       oldForce_type& getOldForceRef() {return storage_.getOldForceRef(i_);}
-      void setOldForce(const oldForce_type& v) { storage_.setOldForce(i_, v);}
+      void setOldForce(oldForce_type const & v) { storage_.setOldForce(i_, v);}
       
-      const oldTorque_type& getOldTorque() const {return storage_.getOldTorque(i_);}
+      oldTorque_type const & getOldTorque() const {return storage_.getOldTorque(i_);}
       oldTorque_type& getOldTorqueRef() {return storage_.getOldTorqueRef(i_);}
-      void setOldTorque(const oldTorque_type& v) { storage_.setOldTorque(i_, v);}
+      void setOldTorque(oldTorque_type const & v) { storage_.setOldTorque(i_, v);}
       
-      const type_type& getType() const {return storage_.getType(i_);}
+      currentBlock_type const & getCurrentBlock() const {return storage_.getCurrentBlock(i_);}
+      currentBlock_type& getCurrentBlockRef() {return storage_.getCurrentBlockRef(i_);}
+      void setCurrentBlock(currentBlock_type const & v) { storage_.setCurrentBlock(i_, v);}
+      
+      type_type const & getType() const {return storage_.getType(i_);}
       type_type& getTypeRef() {return storage_.getTypeRef(i_);}
-      void setType(const type_type& v) { storage_.setType(i_, v);}
+      void setType(type_type const & v) { storage_.setType(i_, v);}
       
-      const nextParticle_type& getNextParticle() const {return storage_.getNextParticle(i_);}
+      nextParticle_type const & getNextParticle() const {return storage_.getNextParticle(i_);}
       nextParticle_type& getNextParticleRef() {return storage_.getNextParticleRef(i_);}
-      void setNextParticle(const nextParticle_type& v) { storage_.setNextParticle(i_, v);}
+      void setNextParticle(nextParticle_type const & v) { storage_.setNextParticle(i_, v);}
       
-      const oldContactHistory_type& getOldContactHistory() const {return storage_.getOldContactHistory(i_);}
+      oldContactHistory_type const & getOldContactHistory() const {return storage_.getOldContactHistory(i_);}
       oldContactHistory_type& getOldContactHistoryRef() {return storage_.getOldContactHistoryRef(i_);}
-      void setOldContactHistory(const oldContactHistory_type& v) { storage_.setOldContactHistory(i_, v);}
+      void setOldContactHistory(oldContactHistory_type const & v) { storage_.setOldContactHistory(i_, v);}
       
-      const newContactHistory_type& getNewContactHistory() const {return storage_.getNewContactHistory(i_);}
+      newContactHistory_type const & getNewContactHistory() const {return storage_.getNewContactHistory(i_);}
       newContactHistory_type& getNewContactHistoryRef() {return storage_.getNewContactHistoryRef(i_);}
-      void setNewContactHistory(const newContactHistory_type& v) { storage_.setNewContactHistory(i_, v);}
+      void setNewContactHistory(newContactHistory_type const & v) { storage_.setNewContactHistory(i_, v);}
       
-      const temperature_type& getTemperature() const {return storage_.getTemperature(i_);}
+      temperature_type const & getTemperature() const {return storage_.getTemperature(i_);}
       temperature_type& getTemperatureRef() {return storage_.getTemperatureRef(i_);}
-      void setTemperature(const temperature_type& v) { storage_.setTemperature(i_, v);}
+      void setTemperature(temperature_type const & v) { storage_.setTemperature(i_, v);}
       
-      const heatFlux_type& getHeatFlux() const {return storage_.getHeatFlux(i_);}
+      heatFlux_type const & getHeatFlux() const {return storage_.getHeatFlux(i_);}
       heatFlux_type& getHeatFluxRef() {return storage_.getHeatFluxRef(i_);}
-      void setHeatFlux(const heatFlux_type& v) { storage_.setHeatFlux(i_, v);}
+      void setHeatFlux(heatFlux_type const & v) { storage_.setHeatFlux(i_, v);}
       
-      const dv_type& getDv() const {return storage_.getDv(i_);}
+      dv_type const & getDv() const {return storage_.getDv(i_);}
       dv_type& getDvRef() {return storage_.getDvRef(i_);}
-      void setDv(const dv_type& v) { storage_.setDv(i_, v);}
+      void setDv(dv_type const & v) { storage_.setDv(i_, v);}
       
-      const dw_type& getDw() const {return storage_.getDw(i_);}
+      dw_type const & getDw() const {return storage_.getDw(i_);}
       dw_type& getDwRef() {return storage_.getDwRef(i_);}
-      void setDw(const dw_type& v) { storage_.setDw(i_, v);}
+      void setDw(dw_type const & v) { storage_.setDw(i_, v);}
       
-      const neighborState_type& getNeighborState() const {return storage_.getNeighborState(i_);}
+      neighborState_type const & getNeighborState() const {return storage_.getNeighborState(i_);}
       neighborState_type& getNeighborStateRef() {return storage_.getNeighborStateRef(i_);}
-      void setNeighborState(const neighborState_type& v) { storage_.setNeighborState(i_, v);}
+      void setNeighborState(neighborState_type const & v) { storage_.setNeighborState(i_, v);}
       
 
       size_t getIdx() const {return i_;}
@@ -267,6 +273,7 @@ public:
    using force_type = walberla::mesa_pd::Vec3;
    using oldForce_type = walberla::mesa_pd::Vec3;
    using oldTorque_type = walberla::mesa_pd::Vec3;
+   using currentBlock_type = blockforest::Block*;
    using type_type = uint_t;
    using nextParticle_type = int;
    using oldContactHistory_type = std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>;
@@ -278,101 +285,105 @@ public:
    using neighborState_type = std::unordered_set<walberla::mpi::MPIRank>;
 
    
-   const uid_type& getUid(const size_t idx) const {return uid_[idx];}
+   uid_type const & getUid(const size_t idx) const {return uid_[idx];}
    uid_type& getUidRef(const size_t idx) {return uid_[idx];}
-   void setUid(const size_t idx, const uid_type& v) { uid_[idx] = v; }
+   void setUid(const size_t idx, uid_type const & v) { uid_[idx] = v; }
    
-   const position_type& getPosition(const size_t idx) const {return position_[idx];}
+   position_type const & getPosition(const size_t idx) const {return position_[idx];}
    position_type& getPositionRef(const size_t idx) {return position_[idx];}
-   void setPosition(const size_t idx, const position_type& v) { position_[idx] = v; }
+   void setPosition(const size_t idx, position_type const & v) { position_[idx] = v; }
    
-   const interactionRadius_type& getInteractionRadius(const size_t idx) const {return interactionRadius_[idx];}
+   interactionRadius_type const & getInteractionRadius(const size_t idx) const {return interactionRadius_[idx];}
    interactionRadius_type& getInteractionRadiusRef(const size_t idx) {return interactionRadius_[idx];}
-   void setInteractionRadius(const size_t idx, const interactionRadius_type& v) { interactionRadius_[idx] = v; }
+   void setInteractionRadius(const size_t idx, interactionRadius_type const & v) { interactionRadius_[idx] = v; }
    
-   const flags_type& getFlags(const size_t idx) const {return flags_[idx];}
+   flags_type const & getFlags(const size_t idx) const {return flags_[idx];}
    flags_type& getFlagsRef(const size_t idx) {return flags_[idx];}
-   void setFlags(const size_t idx, const flags_type& v) { flags_[idx] = v; }
+   void setFlags(const size_t idx, flags_type const & v) { flags_[idx] = v; }
    
-   const owner_type& getOwner(const size_t idx) const {return owner_[idx];}
+   owner_type const & getOwner(const size_t idx) const {return owner_[idx];}
    owner_type& getOwnerRef(const size_t idx) {return owner_[idx];}
-   void setOwner(const size_t idx, const owner_type& v) { owner_[idx] = v; }
+   void setOwner(const size_t idx, owner_type const & v) { owner_[idx] = v; }
    
-   const ghostOwners_type& getGhostOwners(const size_t idx) const {return ghostOwners_[idx];}
+   ghostOwners_type const & getGhostOwners(const size_t idx) const {return ghostOwners_[idx];}
    ghostOwners_type& getGhostOwnersRef(const size_t idx) {return ghostOwners_[idx];}
-   void setGhostOwners(const size_t idx, const ghostOwners_type& v) { ghostOwners_[idx] = v; }
+   void setGhostOwners(const size_t idx, ghostOwners_type const & v) { ghostOwners_[idx] = v; }
    
-   const shapeID_type& getShapeID(const size_t idx) const {return shapeID_[idx];}
+   shapeID_type const & getShapeID(const size_t idx) const {return shapeID_[idx];}
    shapeID_type& getShapeIDRef(const size_t idx) {return shapeID_[idx];}
-   void setShapeID(const size_t idx, const shapeID_type& v) { shapeID_[idx] = v; }
+   void setShapeID(const size_t idx, shapeID_type const & v) { shapeID_[idx] = v; }
    
-   const rotation_type& getRotation(const size_t idx) const {return rotation_[idx];}
+   rotation_type const & getRotation(const size_t idx) const {return rotation_[idx];}
    rotation_type& getRotationRef(const size_t idx) {return rotation_[idx];}
-   void setRotation(const size_t idx, const rotation_type& v) { rotation_[idx] = v; }
+   void setRotation(const size_t idx, rotation_type const & v) { rotation_[idx] = v; }
    
-   const angularVelocity_type& getAngularVelocity(const size_t idx) const {return angularVelocity_[idx];}
+   angularVelocity_type const & getAngularVelocity(const size_t idx) const {return angularVelocity_[idx];}
    angularVelocity_type& getAngularVelocityRef(const size_t idx) {return angularVelocity_[idx];}
-   void setAngularVelocity(const size_t idx, const angularVelocity_type& v) { angularVelocity_[idx] = v; }
+   void setAngularVelocity(const size_t idx, angularVelocity_type const & v) { angularVelocity_[idx] = v; }
    
-   const torque_type& getTorque(const size_t idx) const {return torque_[idx];}
+   torque_type const & getTorque(const size_t idx) const {return torque_[idx];}
    torque_type& getTorqueRef(const size_t idx) {return torque_[idx];}
-   void setTorque(const size_t idx, const torque_type& v) { torque_[idx] = v; }
+   void setTorque(const size_t idx, torque_type const & v) { torque_[idx] = v; }
    
-   const linearVelocity_type& getLinearVelocity(const size_t idx) const {return linearVelocity_[idx];}
+   linearVelocity_type const & getLinearVelocity(const size_t idx) const {return linearVelocity_[idx];}
    linearVelocity_type& getLinearVelocityRef(const size_t idx) {return linearVelocity_[idx];}
-   void setLinearVelocity(const size_t idx, const linearVelocity_type& v) { linearVelocity_[idx] = v; }
+   void setLinearVelocity(const size_t idx, linearVelocity_type const & v) { linearVelocity_[idx] = v; }
    
-   const invMass_type& getInvMass(const size_t idx) const {return invMass_[idx];}
+   invMass_type const & getInvMass(const size_t idx) const {return invMass_[idx];}
    invMass_type& getInvMassRef(const size_t idx) {return invMass_[idx];}
-   void setInvMass(const size_t idx, const invMass_type& v) { invMass_[idx] = v; }
+   void setInvMass(const size_t idx, invMass_type const & v) { invMass_[idx] = v; }
    
-   const force_type& getForce(const size_t idx) const {return force_[idx];}
+   force_type const & getForce(const size_t idx) const {return force_[idx];}
    force_type& getForceRef(const size_t idx) {return force_[idx];}
-   void setForce(const size_t idx, const force_type& v) { force_[idx] = v; }
+   void setForce(const size_t idx, force_type const & v) { force_[idx] = v; }
    
-   const oldForce_type& getOldForce(const size_t idx) const {return oldForce_[idx];}
+   oldForce_type const & getOldForce(const size_t idx) const {return oldForce_[idx];}
    oldForce_type& getOldForceRef(const size_t idx) {return oldForce_[idx];}
-   void setOldForce(const size_t idx, const oldForce_type& v) { oldForce_[idx] = v; }
+   void setOldForce(const size_t idx, oldForce_type const & v) { oldForce_[idx] = v; }
    
-   const oldTorque_type& getOldTorque(const size_t idx) const {return oldTorque_[idx];}
+   oldTorque_type const & getOldTorque(const size_t idx) const {return oldTorque_[idx];}
    oldTorque_type& getOldTorqueRef(const size_t idx) {return oldTorque_[idx];}
-   void setOldTorque(const size_t idx, const oldTorque_type& v) { oldTorque_[idx] = v; }
+   void setOldTorque(const size_t idx, oldTorque_type const & v) { oldTorque_[idx] = v; }
    
-   const type_type& getType(const size_t idx) const {return type_[idx];}
+   currentBlock_type const & getCurrentBlock(const size_t idx) const {return currentBlock_[idx];}
+   currentBlock_type& getCurrentBlockRef(const size_t idx) {return currentBlock_[idx];}
+   void setCurrentBlock(const size_t idx, currentBlock_type const & v) { currentBlock_[idx] = v; }
+   
+   type_type const & getType(const size_t idx) const {return type_[idx];}
    type_type& getTypeRef(const size_t idx) {return type_[idx];}
-   void setType(const size_t idx, const type_type& v) { type_[idx] = v; }
+   void setType(const size_t idx, type_type const & v) { type_[idx] = v; }
    
-   const nextParticle_type& getNextParticle(const size_t idx) const {return nextParticle_[idx];}
+   nextParticle_type const & getNextParticle(const size_t idx) const {return nextParticle_[idx];}
    nextParticle_type& getNextParticleRef(const size_t idx) {return nextParticle_[idx];}
-   void setNextParticle(const size_t idx, const nextParticle_type& v) { nextParticle_[idx] = v; }
+   void setNextParticle(const size_t idx, nextParticle_type const & v) { nextParticle_[idx] = v; }
    
-   const oldContactHistory_type& getOldContactHistory(const size_t idx) const {return oldContactHistory_[idx];}
+   oldContactHistory_type const & getOldContactHistory(const size_t idx) const {return oldContactHistory_[idx];}
    oldContactHistory_type& getOldContactHistoryRef(const size_t idx) {return oldContactHistory_[idx];}
-   void setOldContactHistory(const size_t idx, const oldContactHistory_type& v) { oldContactHistory_[idx] = v; }
+   void setOldContactHistory(const size_t idx, oldContactHistory_type const & v) { oldContactHistory_[idx] = v; }
    
-   const newContactHistory_type& getNewContactHistory(const size_t idx) const {return newContactHistory_[idx];}
+   newContactHistory_type const & getNewContactHistory(const size_t idx) const {return newContactHistory_[idx];}
    newContactHistory_type& getNewContactHistoryRef(const size_t idx) {return newContactHistory_[idx];}
-   void setNewContactHistory(const size_t idx, const newContactHistory_type& v) { newContactHistory_[idx] = v; }
+   void setNewContactHistory(const size_t idx, newContactHistory_type const & v) { newContactHistory_[idx] = v; }
    
-   const temperature_type& getTemperature(const size_t idx) const {return temperature_[idx];}
+   temperature_type const & getTemperature(const size_t idx) const {return temperature_[idx];}
    temperature_type& getTemperatureRef(const size_t idx) {return temperature_[idx];}
-   void setTemperature(const size_t idx, const temperature_type& v) { temperature_[idx] = v; }
+   void setTemperature(const size_t idx, temperature_type const & v) { temperature_[idx] = v; }
    
-   const heatFlux_type& getHeatFlux(const size_t idx) const {return heatFlux_[idx];}
+   heatFlux_type const & getHeatFlux(const size_t idx) const {return heatFlux_[idx];}
    heatFlux_type& getHeatFluxRef(const size_t idx) {return heatFlux_[idx];}
-   void setHeatFlux(const size_t idx, const heatFlux_type& v) { heatFlux_[idx] = v; }
+   void setHeatFlux(const size_t idx, heatFlux_type const & v) { heatFlux_[idx] = v; }
    
-   const dv_type& getDv(const size_t idx) const {return dv_[idx];}
+   dv_type const & getDv(const size_t idx) const {return dv_[idx];}
    dv_type& getDvRef(const size_t idx) {return dv_[idx];}
-   void setDv(const size_t idx, const dv_type& v) { dv_[idx] = v; }
+   void setDv(const size_t idx, dv_type const & v) { dv_[idx] = v; }
    
-   const dw_type& getDw(const size_t idx) const {return dw_[idx];}
+   dw_type const & getDw(const size_t idx) const {return dw_[idx];}
    dw_type& getDwRef(const size_t idx) {return dw_[idx];}
-   void setDw(const size_t idx, const dw_type& v) { dw_[idx] = v; }
+   void setDw(const size_t idx, dw_type const & v) { dw_[idx] = v; }
    
-   const neighborState_type& getNeighborState(const size_t idx) const {return neighborState_[idx];}
+   neighborState_type const & getNeighborState(const size_t idx) const {return neighborState_[idx];}
    neighborState_type& getNeighborStateRef(const size_t idx) {return neighborState_[idx];}
-   void setNeighborState(const size_t idx, const neighborState_type& v) { neighborState_[idx] = v; }
+   void setNeighborState(const size_t idx, neighborState_type const & v) { neighborState_[idx] = v; }
    
 
    /**
@@ -480,6 +491,7 @@ public:
    std::vector<force_type> force_ {};
    std::vector<oldForce_type> oldForce_ {};
    std::vector<oldTorque_type> oldTorque_ {};
+   std::vector<currentBlock_type> currentBlock_ {};
    std::vector<type_type> type_ {};
    std::vector<nextParticle_type> nextParticle_ {};
    std::vector<oldContactHistory_type> oldContactHistory_ {};
@@ -513,6 +525,7 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(const ParticleSt
    getForceRef() = rhs.getForce();
    getOldForceRef() = rhs.getOldForce();
    getOldTorqueRef() = rhs.getOldTorque();
+   getCurrentBlockRef() = rhs.getCurrentBlock();
    getTypeRef() = rhs.getType();
    getNextParticleRef() = rhs.getNextParticle();
    getOldContactHistoryRef() = rhs.getOldContactHistory();
@@ -543,6 +556,7 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(ParticleStorage:
    getForceRef() = std::move(rhs.getForceRef());
    getOldForceRef() = std::move(rhs.getOldForceRef());
    getOldTorqueRef() = std::move(rhs.getOldTorqueRef());
+   getCurrentBlockRef() = std::move(rhs.getCurrentBlockRef());
    getTypeRef() = std::move(rhs.getTypeRef());
    getNextParticleRef() = std::move(rhs.getNextParticleRef());
    getOldContactHistoryRef() = std::move(rhs.getOldContactHistoryRef());
@@ -574,6 +588,7 @@ void swap(ParticleStorage::Particle lhs, ParticleStorage::Particle rhs)
    std::swap(lhs.getForceRef(), rhs.getForceRef());
    std::swap(lhs.getOldForceRef(), rhs.getOldForceRef());
    std::swap(lhs.getOldTorqueRef(), rhs.getOldTorqueRef());
+   std::swap(lhs.getCurrentBlockRef(), rhs.getCurrentBlockRef());
    std::swap(lhs.getTypeRef(), rhs.getTypeRef());
    std::swap(lhs.getNextParticleRef(), rhs.getNextParticleRef());
    std::swap(lhs.getOldContactHistoryRef(), rhs.getOldContactHistoryRef());
@@ -605,6 +620,7 @@ std::ostream& operator<<( std::ostream& os, const ParticleStorage::Particle& p )
          "force               : " << p.getForce() << "\n" <<
          "oldForce            : " << p.getOldForce() << "\n" <<
          "oldTorque           : " << p.getOldTorque() << "\n" <<
+         "currentBlock        : " << p.getCurrentBlock() << "\n" <<
          "type                : " << p.getType() << "\n" <<
          "nextParticle        : " << p.getNextParticle() << "\n" <<
          "oldContactHistory   : " << p.getOldContactHistory() << "\n" <<
@@ -706,6 +722,7 @@ inline ParticleStorage::iterator ParticleStorage::create(const id_t& uid)
    force_.emplace_back(real_t(0));
    oldForce_.emplace_back(real_t(0));
    oldTorque_.emplace_back(real_t(0));
+   currentBlock_.emplace_back(nullptr);
    type_.emplace_back(0);
    nextParticle_.emplace_back(-1);
    oldContactHistory_.emplace_back();
@@ -762,6 +779,7 @@ inline ParticleStorage::iterator ParticleStorage::erase(iterator& it)
    force_.pop_back();
    oldForce_.pop_back();
    oldTorque_.pop_back();
+   currentBlock_.pop_back();
    type_.pop_back();
    nextParticle_.pop_back();
    oldContactHistory_.pop_back();
@@ -805,6 +823,7 @@ inline void ParticleStorage::reserve(const size_t size)
    force_.reserve(size);
    oldForce_.reserve(size);
    oldTorque_.reserve(size);
+   currentBlock_.reserve(size);
    type_.reserve(size);
    nextParticle_.reserve(size);
    oldContactHistory_.reserve(size);
@@ -833,6 +852,7 @@ inline void ParticleStorage::clear()
    force_.clear();
    oldForce_.clear();
    oldTorque_.clear();
+   currentBlock_.clear();
    type_.clear();
    nextParticle_.clear();
    oldContactHistory_.clear();
@@ -862,6 +882,7 @@ inline size_t ParticleStorage::size() const
    //WALBERLA_ASSERT_EQUAL( uid_.size(), force.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldForce.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldTorque.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), currentBlock.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), type.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), nextParticle.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldContactHistory.size() );
@@ -1061,7 +1082,7 @@ public:
    using return_type = walberla::id_t;
    walberla::id_t& operator()(data::Particle& p) const {return p.getUidRef();}
    walberla::id_t& operator()(data::Particle&& p) const {return p.getUidRef();}
-   const walberla::id_t& operator()(const data::Particle& p) const {return p.getUid();}
+   walberla::id_t const & operator()(const data::Particle& p) const {return p.getUid();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticlePosition
@@ -1070,7 +1091,7 @@ public:
    using return_type = walberla::mesa_pd::Vec3;
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getPositionRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getPositionRef();}
-   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getPosition();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getPosition();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleInteractionRadius
@@ -1079,7 +1100,7 @@ public:
    using return_type = walberla::real_t;
    walberla::real_t& operator()(data::Particle& p) const {return p.getInteractionRadiusRef();}
    walberla::real_t& operator()(data::Particle&& p) const {return p.getInteractionRadiusRef();}
-   const walberla::real_t& operator()(const data::Particle& p) const {return p.getInteractionRadius();}
+   walberla::real_t const & operator()(const data::Particle& p) const {return p.getInteractionRadius();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleFlags
@@ -1088,7 +1109,7 @@ public:
    using return_type = walberla::mesa_pd::data::particle_flags::FlagT;
    walberla::mesa_pd::data::particle_flags::FlagT& operator()(data::Particle& p) const {return p.getFlagsRef();}
    walberla::mesa_pd::data::particle_flags::FlagT& operator()(data::Particle&& p) const {return p.getFlagsRef();}
-   const walberla::mesa_pd::data::particle_flags::FlagT& operator()(const data::Particle& p) const {return p.getFlags();}
+   walberla::mesa_pd::data::particle_flags::FlagT const & operator()(const data::Particle& p) const {return p.getFlags();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleOwner
@@ -1097,7 +1118,7 @@ public:
    using return_type = int;
    int& operator()(data::Particle& p) const {return p.getOwnerRef();}
    int& operator()(data::Particle&& p) const {return p.getOwnerRef();}
-   const int& operator()(const data::Particle& p) const {return p.getOwner();}
+   int const & operator()(const data::Particle& p) const {return p.getOwner();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleGhostOwners
@@ -1106,7 +1127,7 @@ public:
    using return_type = std::unordered_set<walberla::mpi::MPIRank>;
    std::unordered_set<walberla::mpi::MPIRank>& operator()(data::Particle& p) const {return p.getGhostOwnersRef();}
    std::unordered_set<walberla::mpi::MPIRank>& operator()(data::Particle&& p) const {return p.getGhostOwnersRef();}
-   const std::unordered_set<walberla::mpi::MPIRank>& operator()(const data::Particle& p) const {return p.getGhostOwners();}
+   std::unordered_set<walberla::mpi::MPIRank> const & operator()(const data::Particle& p) const {return p.getGhostOwners();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleShapeID
@@ -1115,7 +1136,7 @@ public:
    using return_type = size_t;
    size_t& operator()(data::Particle& p) const {return p.getShapeIDRef();}
    size_t& operator()(data::Particle&& p) const {return p.getShapeIDRef();}
-   const size_t& operator()(const data::Particle& p) const {return p.getShapeID();}
+   size_t const & operator()(const data::Particle& p) const {return p.getShapeID();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleRotation
@@ -1124,7 +1145,7 @@ public:
    using return_type = walberla::mesa_pd::Rot3;
    walberla::mesa_pd::Rot3& operator()(data::Particle& p) const {return p.getRotationRef();}
    walberla::mesa_pd::Rot3& operator()(data::Particle&& p) const {return p.getRotationRef();}
-   const walberla::mesa_pd::Rot3& operator()(const data::Particle& p) const {return p.getRotation();}
+   walberla::mesa_pd::Rot3 const & operator()(const data::Particle& p) const {return p.getRotation();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleAngularVelocity
@@ -1133,7 +1154,7 @@ public:
    using return_type = walberla::mesa_pd::Vec3;
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getAngularVelocityRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getAngularVelocityRef();}
-   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getAngularVelocity();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getAngularVelocity();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleTorque
@@ -1142,7 +1163,7 @@ public:
    using return_type = walberla::mesa_pd::Vec3;
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getTorqueRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getTorqueRef();}
-   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getTorque();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getTorque();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleLinearVelocity
@@ -1151,7 +1172,7 @@ public:
    using return_type = walberla::mesa_pd::Vec3;
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getLinearVelocityRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getLinearVelocityRef();}
-   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getLinearVelocity();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getLinearVelocity();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleInvMass
@@ -1160,7 +1181,7 @@ public:
    using return_type = walberla::real_t;
    walberla::real_t& operator()(data::Particle& p) const {return p.getInvMassRef();}
    walberla::real_t& operator()(data::Particle&& p) const {return p.getInvMassRef();}
-   const walberla::real_t& operator()(const data::Particle& p) const {return p.getInvMass();}
+   walberla::real_t const & operator()(const data::Particle& p) const {return p.getInvMass();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleForce
@@ -1169,7 +1190,7 @@ public:
    using return_type = walberla::mesa_pd::Vec3;
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getForceRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getForceRef();}
-   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getForce();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getForce();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleOldForce
@@ -1178,7 +1199,7 @@ public:
    using return_type = walberla::mesa_pd::Vec3;
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getOldForceRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getOldForceRef();}
-   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getOldForce();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getOldForce();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleOldTorque
@@ -1187,7 +1208,16 @@ public:
    using return_type = walberla::mesa_pd::Vec3;
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getOldTorqueRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getOldTorqueRef();}
-   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getOldTorque();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getOldTorque();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleCurrentBlock
+{
+public:
+   using return_type = blockforest::Block*;
+   blockforest::Block*& operator()(data::Particle& p) const {return p.getCurrentBlockRef();}
+   blockforest::Block*& operator()(data::Particle&& p) const {return p.getCurrentBlockRef();}
+   blockforest::Block* const & operator()(const data::Particle& p) const {return p.getCurrentBlock();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleType
@@ -1196,7 +1226,7 @@ public:
    using return_type = uint_t;
    uint_t& operator()(data::Particle& p) const {return p.getTypeRef();}
    uint_t& operator()(data::Particle&& p) const {return p.getTypeRef();}
-   const uint_t& operator()(const data::Particle& p) const {return p.getType();}
+   uint_t const & operator()(const data::Particle& p) const {return p.getType();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleNextParticle
@@ -1205,7 +1235,7 @@ public:
    using return_type = int;
    int& operator()(data::Particle& p) const {return p.getNextParticleRef();}
    int& operator()(data::Particle&& p) const {return p.getNextParticleRef();}
-   const int& operator()(const data::Particle& p) const {return p.getNextParticle();}
+   int const & operator()(const data::Particle& p) const {return p.getNextParticle();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleOldContactHistory
@@ -1214,7 +1244,7 @@ public:
    using return_type = std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>;
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& operator()(data::Particle& p) const {return p.getOldContactHistoryRef();}
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& operator()(data::Particle&& p) const {return p.getOldContactHistoryRef();}
-   const std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& operator()(const data::Particle& p) const {return p.getOldContactHistory();}
+   std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> const & operator()(const data::Particle& p) const {return p.getOldContactHistory();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleNewContactHistory
@@ -1223,7 +1253,7 @@ public:
    using return_type = std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>;
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& operator()(data::Particle& p) const {return p.getNewContactHistoryRef();}
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& operator()(data::Particle&& p) const {return p.getNewContactHistoryRef();}
-   const std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>& operator()(const data::Particle& p) const {return p.getNewContactHistory();}
+   std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> const & operator()(const data::Particle& p) const {return p.getNewContactHistory();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleTemperature
@@ -1232,7 +1262,7 @@ public:
    using return_type = walberla::real_t;
    walberla::real_t& operator()(data::Particle& p) const {return p.getTemperatureRef();}
    walberla::real_t& operator()(data::Particle&& p) const {return p.getTemperatureRef();}
-   const walberla::real_t& operator()(const data::Particle& p) const {return p.getTemperature();}
+   walberla::real_t const & operator()(const data::Particle& p) const {return p.getTemperature();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleHeatFlux
@@ -1241,7 +1271,7 @@ public:
    using return_type = walberla::real_t;
    walberla::real_t& operator()(data::Particle& p) const {return p.getHeatFluxRef();}
    walberla::real_t& operator()(data::Particle&& p) const {return p.getHeatFluxRef();}
-   const walberla::real_t& operator()(const data::Particle& p) const {return p.getHeatFlux();}
+   walberla::real_t const & operator()(const data::Particle& p) const {return p.getHeatFlux();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleDv
@@ -1250,7 +1280,7 @@ public:
    using return_type = walberla::mesa_pd::Vec3;
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getDvRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getDvRef();}
-   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getDv();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getDv();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleDw
@@ -1259,7 +1289,7 @@ public:
    using return_type = walberla::mesa_pd::Vec3;
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getDwRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getDwRef();}
-   const walberla::mesa_pd::Vec3& operator()(const data::Particle& p) const {return p.getDw();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getDw();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleNeighborState
@@ -1268,7 +1298,7 @@ public:
    using return_type = std::unordered_set<walberla::mpi::MPIRank>;
    std::unordered_set<walberla::mpi::MPIRank>& operator()(data::Particle& p) const {return p.getNeighborStateRef();}
    std::unordered_set<walberla::mpi::MPIRank>& operator()(data::Particle&& p) const {return p.getNeighborStateRef();}
-   const std::unordered_set<walberla::mpi::MPIRank>& operator()(const data::Particle& p) const {return p.getNeighborState();}
+   std::unordered_set<walberla::mpi::MPIRank> const & operator()(const data::Particle& p) const {return p.getNeighborState();}
 };
 
 } //namespace data

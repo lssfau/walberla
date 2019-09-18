@@ -13,14 +13,17 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file   SyncNextNeighbors.cpp
+//! \file   SyncNextNeighborsBlockForest.cpp
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
+#include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
-#include <mesa_pd/mpi/SyncNextNeighbors.h>
+#include <mesa_pd/kernel/AssocToBlock.h>
+#include <mesa_pd/kernel/ParticleSelector.h>
+#include <mesa_pd/mpi/SyncNextNeighborsBlockForest.h>
 
 #include <blockforest/BlockForest.h>
 #include <blockforest/Initialization.h>
@@ -74,46 +77,51 @@ int main( int argc, char ** argv )
                                                  27, // number of processes
                                                  1 // initial refinement
                                                  );
-   math::AABB localDomain = forest->begin()->getAABB();
-   for (auto& iBlk : *forest)
-   {
-      localDomain.merge(iBlk.getAABB());
-   }
-   domain::BlockForestDomain domain(forest);
+   //checking blocks distribution
+   WALBERLA_CHECK_EQUAL(forest->size(), 8);
+
+   auto domain = std::make_shared<domain::BlockForestDomain>(forest);
    std::array< bool, 3 > periodic;
    periodic[0] = forest->isPeriodic(0);
    periodic[1] = forest->isPeriodic(1);
    periodic[2] = forest->isPeriodic(2);
 
    //init data structures
-   data::ParticleStorage ps(100);
+   auto ps = std::make_shared<data::ParticleStorage>(100);
+   data::ParticleAccessor ac(ps);
 
    //initialize particle
-   auto uid = createSphere(ps, domain);
+   auto uid = createSphere(*ps, *domain);
    WALBERLA_LOG_DEVEL_ON_ROOT("uid: " << uid);
 
    //init kernels
-   mpi::SyncNextNeighbors SNN;
+   kernel::AssocToBlock   assoc(forest);
+   mpi::SyncNextNeighborsBlockForest SNN;
 
-   std::vector<real_t> deltas { real_t(0),
+   std::vector<real_t> deltas { real_t(0.1),
             real_t(4.9),
             real_t(5.1),
-            real_t(10),
+            real_t(9.9),
+            real_t(10.1),
             real_t(14.9),
             real_t(-14.9),
-            real_t(-10),
+            real_t(-10.1),
+            real_t(-9.9),
             real_t(-5.1),
             real_t(-4.9),
-            real_t(0)};
+            real_t(-0.1)};
 
    for (auto delta : deltas)
    {
-      WALBERLA_LOG_DEVEL(delta);
+      WALBERLA_LOG_DEVEL_ON_ROOT(delta);
+
+      ps->forEachParticle(false, kernel::SelectLocal(), ac, assoc, ac);
+
       auto pos = Vec3(1,-1,1) * delta;
       WALBERLA_LOG_DETAIL("checking position: " << pos);
       // owner moves particle to new position
-      auto pIt = ps.find(uid);
-      if (pIt != ps.end())
+      auto pIt = ps->find(uid);
+      if (pIt != ps->end())
       {
          if (!data::particle_flags::isSet(pIt->getFlags(), data::particle_flags::GHOST))
          {
@@ -122,22 +130,22 @@ int main( int argc, char ** argv )
       }
 
       //sync
-      SNN(ps, domain);
+      SNN(*ps, forest, domain);
 
       //check
-      if (sqDistancePointToAABBPeriodic(pos, localDomain, forest->getDomain(), periodic) <= radius * radius)
+      if (sqDistancePointToAABBPeriodic(pos, domain->getUnionOfLocalAABBs(), forest->getDomain(), periodic) <= radius * radius)
       {
-         WALBERLA_CHECK_EQUAL(ps.size(), 1);
-         if (localDomain.contains(pos))
+         WALBERLA_CHECK_EQUAL(ps->size(), 1);
+         if (domain->getUnionOfLocalAABBs().contains(pos))
          {
-            WALBERLA_CHECK(!data::particle_flags::isSet(ps.begin()->getFlags(), data::particle_flags::GHOST));
+            WALBERLA_CHECK(!data::particle_flags::isSet(ps->begin()->getFlags(), data::particle_flags::GHOST));
          } else
          {
-            WALBERLA_CHECK(data::particle_flags::isSet(ps.begin()->getFlags(), data::particle_flags::GHOST));
+            WALBERLA_CHECK(data::particle_flags::isSet(ps->begin()->getFlags(), data::particle_flags::GHOST));
          }
       } else
       {
-         WALBERLA_CHECK_EQUAL(ps.size(), 0);
+         WALBERLA_CHECK_EQUAL(ps->size(), 0);
       }
    }
 
