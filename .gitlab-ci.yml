@@ -1856,7 +1856,9 @@ conda-py36-linux:
       - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --InelasticCoulombContactByDecoupling | tee GranularGas_HCSITS_NN_ICCBD.txt
       - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --InelasticGeneralizedMaximumDissipationContact | tee GranularGas_HCSITS_NN_IGMDC.txt
       - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncShadowOwners --InelasticFrictionlessContact | tee GranularGas_HCSITS_SO_IFC.txt
-      - python3 upload.py
+      - python3 pe_upload.py
+      - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./MESA_PD_KernelBenchmark MESA_PD_Benchmark.cfg | tee mesa_pd.txt
+      - python3 mesa_pd_upload.py
    only:
       variables:
          - $ENABLE_BENCHMARKS
@@ -1865,7 +1867,7 @@ conda-py36-linux:
    artifacts:
       paths:
          - $CI_PROJECT_DIR/build/apps/benchmarks/GranularGas/*.txt
-         - $CI_PROJECT_DIR/build/apps/benchmarks/GranularGas/benchmark.sqlite
+         - $CI_PROJECT_DIR/build/apps/benchmarks/GranularGas/*.sqlite
 
 benchmark_intel19:
    <<: *benchmark_definition
