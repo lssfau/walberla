@@ -286,7 +286,7 @@ int main( int argc, char ** argv )
 
          auto bodyIt = localStorage.begin();
          for (auto it = grid_generator::SCIterator(currentBlock.getAABB().getIntersection(generationDomain),
-                                                   Vector3<real_t>(params.spacing) * real_c(0.5),
+                                                   Vector3<real_t>(params.spacing) * real_c(0.5) + params.shift,
                                                    params.spacing);
               it != grid_generator::SCIterator();
               ++it, ++bodyIt)
