@@ -6,6 +6,7 @@ Checks:          '
 boost-*,
 
 bugprone-*,
+-bugprone-branch-clone,
 -bugprone-exception-escape,
 
 misc-*,
@@ -22,6 +23,7 @@ modernize-*,
 -modernize-return-braced-init-list,
 -modernize-use-transparent-functors,
 -modernize-redundant-void-arg,
+-modernize-use-trailing-return-type,
 -modernize-avoid-c-arrays,
 
 mpi-*,
