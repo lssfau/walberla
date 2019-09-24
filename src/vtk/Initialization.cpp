@@ -247,10 +247,14 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
          if( !aabb->isDefined("min") || !aabb->isDefined("max") )
             WALBERLA_ABORT( "You must specify a \"min\" and a \"max\" coordinate for AABB cell filter \"" << aabb->getKey() << "\"." );
 
-         real_t xmin, ymin, zmin;
+         real_t xmin;
+         real_t ymin;
+         real_t zmin;
          splitVector< real_t >( xmin, ymin, zmin, *aabb, "min", std::string( "The \"min\" coordinate of AABB cell filter \"" ) + aabb->getKey() +
                                                                 std::string( "\" must be a three-dimensional vector." ) );
-         real_t xmax, ymax, zmax;
+         real_t xmax;
+         real_t ymax;
+         real_t zmax;
          splitVector< real_t >( xmax, ymax, zmax, *aabb, "max", std::string( "The \"max\" coordinate of AABB cell filter \"" ) + aabb->getKey() +
                                                                 std::string( "\" must be a three-dimensional vector." ) );
 
@@ -270,10 +274,14 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
          if( bb->isDefined( "level" ) )
             level = bb->getParameter< uint_t >( "level" );
 
-         cell_idx_t xmin, ymin, zmin;
+         cell_idx_t xmin;
+         cell_idx_t ymin;
+         cell_idx_t zmin;
          splitVector< cell_idx_t >( xmin, ymin, zmin, *bb, "min", std::string( "The \"min\" coordinate of CellBB cell filter \"" ) + bb->getKey() +
                                                                   std::string( "\" must be a three-dimensional vector." ) );
-         cell_idx_t xmax, ymax, zmax;
+         cell_idx_t xmax;
+         cell_idx_t ymax;
+         cell_idx_t zmax;
          splitVector< cell_idx_t >( xmax, ymax, zmax, *bb, "max", std::string( "The \"max\" coordinate of CellBB cell filter \"" ) + bb->getKey() +
                                                                   std::string( "\" must be a three-dimensional vector." ) );
 

@@ -867,7 +867,12 @@ int main( int argc, char **argv )
    peTimer.emplace_back("Simulation Step.Collision Response Resolution.Collision Response Solving");
    timerKeys.push_back(peTimer);
 
-   uint_t numCells, numFluidCells, numNBCells, numLocalParticles, numShadowParticles, numContacts;
+   uint_t numCells;
+   uint_t numFluidCells;
+   uint_t numNBCells;
+   uint_t numLocalParticles;
+   uint_t numShadowParticles;
+   uint_t numContacts;
    numCells = uint_t(0);
    numFluidCells = uint_t(0);
    numNBCells = uint_t(0);

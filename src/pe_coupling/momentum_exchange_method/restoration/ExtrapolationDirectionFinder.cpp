@@ -34,7 +34,9 @@ void SphereNormalExtrapolationDirectionFinder
    WALBERLA_ASSERT_NOT_NULLPTR( bodyField );
    WALBERLA_ASSERT_NOT_NULLPTR( (*bodyField)(x,y,z) );
 
-   real_t cx, cy, cz;
+   real_t cx;
+   real_t cy;
+   real_t cz;
    blockStorage_->getBlockLocalCellCenter( *block, Cell(x,y,z), cx, cy, cz );
 
    Vector3<real_t> bodyCenterPosition = (*bodyField)(x,y,z)->getPosition();

@@ -788,7 +788,9 @@ int main( int argc, char **argv )
 
    WALBERLA_CHECK(numProcs % 16 != 0, "An integer multiple of 16 MPI ranks has to be used due to horizontal periodicity and domain decomposition requirements!");
 
-   uint_t XBlocks, YBlocks, ZBlocks;
+   uint_t XBlocks;
+   uint_t YBlocks;
+   uint_t ZBlocks;
    if( numProcs >= 192 )
    {
       XBlocks = uint_t(6);

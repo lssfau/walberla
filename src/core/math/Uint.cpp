@@ -29,7 +29,8 @@ namespace math {
 
 template<> uint_t uintMSBPosition< uint64_t >( uint64_t value ) { // for the documentation see the header file
 
-   uint64_t i, j;
+   uint64_t i;
+   uint64_t j;
 
    i = value >> 32;
    if( i != 0 ) {

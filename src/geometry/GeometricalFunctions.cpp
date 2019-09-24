@@ -297,7 +297,8 @@ void getClosestLineSegmentPoints( const Vector3<real_t>& a1, const Vector3<real_
    // If one or both of the line segments have zero length, we will never get here. Therefore
    // we don't have to worry about possible divisions by zero in the following calculations.
 
-   Vector3<real_t> n, k;
+   Vector3<real_t> n;
+   Vector3<real_t> k;
 
    const real_t la( a1a2 * a1a2 );
    if( da1 >= -Limits<real_t>::fpuAccuracy() && da3 <= +Limits<real_t>::fpuAccuracy() ) {

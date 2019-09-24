@@ -209,7 +209,8 @@ void configureLogging( const Config::BlockHandle & loggingBlock )
    logging::Logging::instance()->showTimeStamp( loggingBlock.getParameter< bool >( "time", true ) );
    logging::Logging::instance()->logCallerPath( loggingBlock.getParameter< bool >( "logCallerPath", false ) );
 
-   Config::Blocks ignoreBlocks, ignoreWarningBlocks;
+   Config::Blocks ignoreBlocks;
+   Config::Blocks ignoreWarningBlocks;
 
    loggingBlock.getBlocks( "ignore", ignoreBlocks );
    std::vector< walberla::regex > regexes;

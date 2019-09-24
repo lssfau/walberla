@@ -69,7 +69,8 @@ void getBlockInfoFromInfoCollection( const PhantomBlock * block, const shared_pt
       auto childForInitIt = ic->find( childIdForInit );
       WALBERLA_CHECK_UNEQUAL( childForInitIt, ic->end(), "Child block with ID " << childIdForInit << " not found in info collection!" );
       BlockInfo combinedInfo = childForInitIt->second;
-      uint_t numFluidCells(0), numNearBoundaryCells(0);
+      uint_t numFluidCells(0);
+      uint_t numNearBoundaryCells(0);
       for (uint_t child = 0; child < 8; ++child)
       {
          blockforest::BlockID childId(block->getId(), child);

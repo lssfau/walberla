@@ -31,7 +31,9 @@ namespace raytracing {
  */
 Color Color::colorFromHSV(real_t hue, real_t saturation, real_t value) {
    // based on Max K. Agoston: Computer Graphics and Geometric Modeling - Implementation and Algorithms
-   real_t r, g, b;
+   real_t r;
+   real_t g;
+   real_t b;
    
    if (realIsEqual(hue, real_t(360))) {
       hue = real_t(0);

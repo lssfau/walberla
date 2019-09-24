@@ -186,7 +186,8 @@ namespace math {
       parametrizationTerm["dt"]  = - unitParameterRelations_[varName]["s"] + 3*unitParameterRelations_[varName]["A"];
       parametrizationTerm["rho"] = - unitParameterRelations_[varName]["kg"] - unitParameterRelations_[varName]["A"];
 
-      std::stringstream num, denom;
+      std::stringstream num;
+      std::stringstream denom;
       for( auto i=parametrizationTerm.begin(); i!=parametrizationTerm.end(); ++i )
       {
          if( i->second == 0 )
@@ -324,7 +325,8 @@ namespace math {
          return std::string();
       }
 
-      std::stringstream num, denom;
+      std::stringstream num;
+      std::stringstream denom;
       for( auto i=unitParameterRelations_[varName].begin(); i!=unitParameterRelations_[varName].end(); ++i )
       {
          if( i->second == 0 )

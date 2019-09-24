@@ -30,7 +30,9 @@ namespace blockforest {
 
 bool StructuredBlockForest::blockExists( const Cell& cell, const uint_t level ) const {
 
-   real_t x, y, z;
+   real_t x;
+   real_t y;
+   real_t z;
    getCellCenter( x, y, z, cell, level );
 
    if( getBlockInformation().active() ) {
@@ -57,7 +59,9 @@ void StructuredBlockForest::getBlockID( IBlockID& id, const Cell& cell, const ui
 
    WALBERLA_ASSERT_EQUAL( dynamic_cast< BlockID* >( &id ), &id );
 
-   real_t x, y, z;
+   real_t x;
+   real_t y;
+   real_t z;
    getCellCenter( x, y, z, cell, level );
 
    if( getBlockInformation().active() ) {

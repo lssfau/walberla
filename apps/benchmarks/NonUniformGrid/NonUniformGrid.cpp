@@ -265,8 +265,12 @@ static void workloadAndMemoryAssignment( SetupBlockForest & forest, const memory
 
 void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Config::BlockHandle & configBlock, const uint_t numberOfProcesses )
 {
-   uint_t numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock;
-   uint_t numberOfXBlocks, numberOfYBlocks, numberOfZBlocks;
+   uint_t numberOfXCellsPerBlock;
+   uint_t numberOfYCellsPerBlock;
+   uint_t numberOfZCellsPerBlock;
+   uint_t numberOfXBlocks;
+   uint_t numberOfYBlocks;
+   uint_t numberOfZBlocks;
    
    const uint_t bufferProcesses = configBlock.getParameter< uint_t >( "bufferProcesses", 0 );
    const uint_t fineBlocksPerProcess = configBlock.getParameter< uint_t >( "fineBlocksPerProcess", 4 );
@@ -313,7 +317,9 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
 
 shared_ptr< blockforest::StructuredBlockForest > createStructuredBlockForest( const Config::BlockHandle & configBlock )
 {
-   uint_t numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock;
+   uint_t numberOfXCellsPerBlock;
+   uint_t numberOfYCellsPerBlock;
+   uint_t numberOfZCellsPerBlock;
    getCells( configBlock, numberOfXCellsPerBlock, numberOfYCellsPerBlock, numberOfZCellsPerBlock );
 
    if( configBlock.isDefined( "sbffile" ) )
