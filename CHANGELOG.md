@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [4.2] - 2019-09-27
+- Fix compiling Walberla on certain compilers
+- Fix compilation failure in ParserUBB and ExtendedBoundaryHandlingFactory
+- add missing std::hash specializations for Cell, Vector2, Vector3
+
 ## [4.1] - 2019-04-19
 ### Added
 - Galerkin coarsening for Multigrid
