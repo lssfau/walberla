@@ -1,9 +1,9 @@
 import sympy as sp
 import pystencils as ps
-from lbmpy.creationfunctions import create_lb_collision_rule
+from lbmpy.creationfunctions import create_lb_update_rule
 from lbmpy.fieldaccess import StreamPullTwoFieldsAccessor
-from lbmpy_walberla import generate_lattice_model
-from pystencils_walberla import CodeGeneration
+from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel, generate_sweep
+from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
 
 omega = sp.symbols("omega")
 omega_fill = sp.symbols("omega_:10")
@@ -81,8 +81,9 @@ with CodeGeneration() as ctx:
         'field_name': 'pdfs',
         'temporary_field_name': 'pdfs_tmp',
         'kernel_type': accessor,
-        'optimization': {'cse_global': True,
-                         'cse_pdfs': False}
+        'optimization': {'cse_global': False,
+                         'cse_pdfs': True,
+                         'split': True}
     }
     config_name = ctx.config
     noopt = False
@@ -94,6 +95,8 @@ with CodeGeneration() as ctx:
         d3q27 = True
         config_name = config_name[:-len("_d3q27")]
 
+    if config_name == '':
+        config_name = 'trt'
     options = options_dict[config_name]
     options.update(common_options)
     options = options.copy()
@@ -109,20 +112,22 @@ with CodeGeneration() as ctx:
     pdfs, velocity_field = ps.fields("pdfs({q}), velocity(3) : double[3D]".format(q=q), layout='fzyx')
     options['optimization']['symbolic_field'] = pdfs
 
-    vp = [
-        ('double', 'omega_0'),
-        ('double', 'omega_1'),
-        ('double', 'omega_2'),
-        ('double', 'omega_3'),
-        ('double', 'omega_4'),
-        ('double', 'omega_5'),
-        ('double', 'omega_6'),
-        ('int32_t', 'cudaBlockSize0'),
-        ('int32_t', 'cudaBlockSize1'),
-    ]
-    update_rule = create_lb_collision_rule(**options)
-    generate_lattice_model(ctx, 'UniformGridGenerated_LatticeModel', update_rule)
+    update_rule = create_lb_update_rule(**options)
+    vec = {'nontemporal': True, 'assume_aligned': True, 'assume_inner_stride_one': True}
 
+    # Sweeps
+    generate_sweep(ctx, 'GenLbKernel', update_rule, field_swaps=[('pdfs', 'pdfs_tmp')])
+    setter_assignments = macroscopic_values_setter(update_rule.method, velocity=velocity_field.center_vector,
+                                                   pdfs=pdfs.center_vector, density=1)
+    getter_assignments = macroscopic_values_getter(update_rule.method, velocity=velocity_field.center_vector,
+                                                   pdfs=pdfs.center_vector,  density=None)
+    generate_sweep(ctx, 'GenMacroSetter', setter_assignments)
+    generate_sweep(ctx, 'GenMacroGetter', getter_assignments)
+
+    # Communication
+    generate_pack_info_from_kernel(ctx, 'GenPackInfo', update_rule, cpu_vectorize_info={'instruction_set': None})
+
+    # Info Header
     infoHeaderParams = {
         'stencil': stencil_str,
         'q': q,
@@ -130,4 +135,5 @@ with CodeGeneration() as ctx:
         'cse_global': int(options['optimization']['cse_global']),
         'cse_pdfs': int(options['optimization']['cse_pdfs']),
     }
-    ctx.write_file("UniformGridGenerated_Defines.h", info_header.format(**infoHeaderParams))
+    ctx.write_file("GenDefines.h", info_header.format(**infoHeaderParams))
+

@@ -6,52 +6,26 @@
 #include "python_coupling/DictWrapper.h"
 #include "blockforest/Initialization.h"
 #include "field/vtk/VTKWriter.h"
+#include "field/AddToStorage.h"
 #include "field/communication/PackInfo.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
 #include "timeloop/all.h"
 #include "core/timing/TimingPool.h"
 #include "core/timing/RemainingTimeLogger.h"
 #include "domain_decomposition/SharedSweep.h"
-#include "lbm/communication/PdfFieldPackInfo.h"
-#include "lbm/field/AddToStorage.h"
-#include "lbm/vtk/VTKOutput.h"
-#include "lbm/gui/Connection.h"
-#include "lbm/vtk/Velocity.h"
 #include "gui/Gui.h"
+#include "InitShearVelocity.h"
 
-#include "UniformGridGenerated_LatticeModel.h"
-#include "UniformGridGenerated_Defines.h"
-
+#include "GenDefines.h"
+#include "GenPackInfo.h"
+#include "GenLbKernel.h"
+#include "GenMacroGetter.h"
+#include "GenMacroSetter.h"
 
 using namespace walberla;
 
-typedef lbm::UniformGridGenerated_LatticeModel LatticeModel_T;
-typedef LatticeModel_T::Stencil                Stencil_T;
-typedef LatticeModel_T::CommunicationStencil   CommunicationStencil_T;
-typedef lbm::PdfField< LatticeModel_T >        PdfField_T;
-
-
-void initShearVelocity(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID pdfFieldId,
-                       const real_t xMagnitude=0.1, const real_t fluctuationMagnitude=0.05 )
-{
-    math::seedRandomGenerator(0);
-    auto halfZ = blocks->getDomainCellBB().zMax() / 2;
-    for( auto & block: *blocks)
-    {
-        auto pdfField = block.getData<PdfField_T>( pdfFieldId );
-        WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(pdfField,
-            Cell globalCell;
-            blocks->transformBlockLocalToGlobalCell(globalCell, block, Cell(x, y, z));
-            real_t randomReal = xMagnitude * math::realRandom<real_t>(-fluctuationMagnitude, fluctuationMagnitude);
-
-            if( globalCell[2] >= halfZ ) {
-                pdfField->setDensityAndVelocity(x, y, z, Vector3<real_t>(xMagnitude, 0, randomReal), real_t(1.0));
-            } else {
-                pdfField->setDensityAndVelocity(x, y, z, Vector3<real_t>(-xMagnitude, 0, randomReal), real_t(1.0));
-            }
-        );
-    }
-}
+using PdfField_T = GhostLayerField< real_t, Stencil_T::Q >;
+using VelocityField_T = GhostLayerField< real_t, 3 >;
 
 
 int main( int argc, char **argv )
@@ -72,22 +46,25 @@ int main( int argc, char **argv )
       const std::string timeStepStrategy = parameters.getParameter<std::string>( "timeStepStrategy", "normal");
       const real_t omega = parameters.getParameter<real_t>( "omega", real_c( 1.4 ));
       const uint_t timesteps = parameters.getParameter<uint_t>( "timesteps", uint_c( 50 ));
-      const bool initShearFlow = parameters.getParameter<bool>("initShearFlow", false);
+      const real_t shearVelocityMagnitude = parameters.getParameter<real_t>("shearVelocityMagnitude", 0.08);
 
       // Creating fields
-      LatticeModel_T latticeModel = LatticeModel_T( omega );
-      BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel);
+      BlockDataID pdfFieldId = field::addToStorage< PdfField_T >( blocks, "pdfs", real_t( std::nan("") ), field::fzyx );
+      BlockDataID velFieldId = field::addToStorage< VelocityField_T >( blocks, "vel", real_t( 0 ), field::fzyx );
 
-      if( initShearFlow ) {
-          initShearVelocity(blocks, pdfFieldId);
-      }
+      pystencils::GenMacroSetter setterKernel(pdfFieldId, velFieldId);
+      pystencils::GenMacroGetter getterKernel(pdfFieldId, velFieldId);
+
+      initShearVelocity(blocks, velFieldId, shearVelocityMagnitude);
+      for( auto & b : *blocks)
+          setterKernel(&b);
 
       SweepTimeloop timeLoop( blocks->getBlockStorage(), timesteps );
-      blockforest::communication::UniformBufferedScheme< CommunicationStencil_T > communication( blocks );
-      communication.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldId ) );
+      blockforest::communication::UniformBufferedScheme< Stencil_T > communication( blocks );
+      communication.addPackInfo( make_shared< pystencils::GenPackInfo >( pdfFieldId ) );
 
       timeLoop.add() << BeforeFunction( communication, "communication" )
-                     << Sweep( LatticeModel_T::Sweep( pdfFieldId ), "LB stream & collide" );
+                     << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide" );
 
       int warmupSteps = parameters.getParameter<int>( "warmupSteps", 2 );
       int outerIterations = parameters.getParameter<int>( "outerIterations", 1 );
@@ -106,8 +83,12 @@ int main( int argc, char **argv )
       {
           auto vtkOutput = vtk::createVTKOutput_BlockData( *blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
                                                            "simulation_step", false, true, true, false, 0 );
-          auto velWriter = make_shared< lbm::VelocityVTKWriter<LatticeModel_T> >(pdfFieldId, "vel");
-          vtkOutput->addCellDataWriter(velWriter);
+          auto velWriter = make_shared< field::VTKWriter< VelocityField_T > >( velFieldId, "vel" );
+          vtkOutput->addCellDataWriter( velWriter );
+          vtkOutput->addBeforeFunction( [&]()
+                                        { for( auto & b : *blocks)
+                                            getterKernel(&b);
+                                        } );
           timeLoop.addFuncAfterTimeStep( vtk::writeFiles( vtkOutput ), "VTK Output" );
       }
 
@@ -116,7 +97,6 @@ int main( int argc, char **argv )
       if( useGui )
       {
           GUI gui( timeLoop, blocks, argc, argv);
-          lbm::connectToGui<LatticeModel_T>(gui);
           gui.run();
       }
       else

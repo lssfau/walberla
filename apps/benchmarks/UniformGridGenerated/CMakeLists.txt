@@ -1,6 +1,8 @@
+waLBerla_link_files_to_builddir( "*.prm" )
+
+
 waLBerla_python_file_generates(UniformGridGenerated.py
-        UniformGridGenerated_LatticeModel.cpp
-        UniformGridGenerated_Defines.h)
+        GenLbKernel.cpp GenMacroGetter.cpp GenMacroSetter.cpp GenPackInfo.cpp GenDefines.h)
 
 
 foreach(config trt )
