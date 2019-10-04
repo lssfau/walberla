@@ -20,6 +20,10 @@ all the basic data strcutures and concepts of the framework.
 - \ref tutorial_basics_03 \n
   The third tutorial deals with communication, iterating field/grid/lattice data, and geometry setup.
 
+\subsection mesapd Modular and Extensible Software Architecture for Particle Dynamics
+
+- \ref tutorial_mesapd_01 \n
+
 \subsection pe Rigid Body Dynamics (pe)
 
 - \ref tutorial_pe_01 \n

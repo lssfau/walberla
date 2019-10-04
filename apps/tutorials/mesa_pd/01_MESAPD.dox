@@ -1,0 +1,71 @@
+namespace walberla {
+namespace mesa_pd {
+
+/**
+\page tutorial_mesapd_01 Tutorial - Confined Gas:  Setting up a simple MESA-PD simulation
+
+This tutorial will help you to setup up a simple simulation using the MESA-PD module.
+The scenario for this tutorial a is particle gas (spheres) confined by solid walls.
+
+For this tutorial only a few waLBerla includes are needed, namely:
+\snippet 01_MESAPD.cpp walberlaIncludes
+
+The MESA-PD framework is comprised of different core components:
+- collision_detection: %collision_detection holds algorithms for determining collision information
+- \ref walberla::mesa_pd::data "data": data holds all datastructures which can be used
+- \ref walberla::mesa_pd::domain "domain": domain contains the coupling to the BlockForest domain partitioning
+- \ref walberla::mesa_pd::kernel "kernel": kernel holds all algorithms which act on particles
+- \ref walberla::mesa_pd::mpi "mpi": mpi holds all functionality needed for synchronization
+- \ref walberla::mesa_pd::vtk "vtk": vtk holds utility functions for writing the simulation to disk
+
+\snippet 01_MESAPD.cpp mesapdIncludes
+
+First, the waLBerla environment is initialized, the random number generator is seeded and some simulation parameters are set.
+\snippet 01_MESAPD.cpp Parameters
+
+We will use the BlockForest datastructure for the domain partitioning of our simulation. For more information about the general design of the waLBerla framework please refer to \ref tutorial_basics_01 and the documentation of domain_decomposition::BlockStorage. 
+
+You can choose the number of blocks you want to have in each direction. In a parallel simulation these blocks get assigned to different processes. You should make sure that you always have at least as many blocks as processes. The number of processes you want your simulation to run with is specified when you start your program with mpiexec.
+
+\attention If you run a simulation with periodic boundaries you need at least three blocks in each direction of periodicity!
+
+\snippet 01_MESAPD.cpp BlockForest
+
+Next, we initialize all data structures that we need for the simulation. The data::ParticleStorage is the data container for all particles. The data::ShapeStorage stores information about the shape of the particles. This information is separated from the particle due to that fact that most of the time there are many similar particles in on simulation. With this approach you do not need to store the information for every particle but only once.
+
+Since all kernels are written against an abstract interface to access the particle properties we also need a intermediate accessor class. This class is in most cases is the data::ParticleAccessorWithShape.
+
+Finally, to improve the complexity of the collision detection step, we need a data::LinkedCells acceleration data structure.
+
+\snippet 01_MESAPD.cpp DataStructure
+
+Now we are almost ready to initialize the particles for our simulation. For this purpose we will write two helper functions to create spheres and walls.
+
+\snippet 01_MESAPD.cpp CreationHelper
+
+The position should be self explanatory. The interaction radius is used for a first check if two particles can collide. It is the radius of the bounding volume. The shapeID is the index into the data::ShapeStorage datastructure. The owner is the current owning process of this particle and the type identifies the class this particle belongs to. This type is later on used to determine which material parameters should be used for this particle.
+
+\snippet 01_MESAPD.cpp Walls
+
+The gas particles are generated with the help of grid generators. These generators are iterators which facilitate the construction of particles on a regular grid. Currently grid_generator::SCIterator (for a simple cubic lattice) as well as grid_generator::HCPIterator (for a hexagonal close packing lattice) are supported.
+
+\snippet 01_MESAPD.cpp Spheres
+
+Before we can run the simulation we have to set up all kernels that we will use.
+\snippet 01_MESAPD.cpp Kernels
+In this example we will use the explicit euler integration method. We further need a kernel which updates our LinkedCell data structure and an interaction kernel. For the collision detection we select the analytic functions available within the framework. Together with all synchronization kernels we can now run the simulation.
+
+\attention Before you start the simulation loop you should synchronize once to make sure everything is in place.
+
+\snippet 01_MESAPD.cpp Loop
+
+After the simulation is finished we can collect the results. In this case we only calculate the mean velocity of all particles. The particles can be easily accessed via the data::ParticleStorage datastructure.
+
+\snippet 01_MESAPD.cpp PostProcessing
+
+Congratulation! You successfully created your first rigid particle simulation.
+
+*/
+
+}
+}
