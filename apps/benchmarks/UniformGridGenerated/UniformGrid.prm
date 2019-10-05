@@ -1,26 +1,22 @@
 DomainSetup
 {
    blocks        <  1,    1,   1 >;
-   cellsPerBlock <  64, 64, 128 >;
+   cellsPerBlock <  256, 128, 128 >;
    periodic      <  1,    1,   1 >;
 }
 
 Parameters 
 {
 
-	timesteps       200;   // time steps of one performance measurement
-	warmupSteps     10;    // number of steps to run before measurement starts
-    outerIterations 15;      // how many measurements to conduct
+	timesteps       400;   // time steps of one performance measurement
+	warmupSteps     1;    // number of steps to run before measurement starts
+    outerIterations 1;      // how many measurements to conduct
 
-	vtkWriteFrequency 200;             // write a VTK file every n'th step, if zero VTK output is disabled
+	vtkWriteFrequency 0;           // write a VTK file every n'th step, if zero VTK output is disabled
 	cudaEnabledMPI false;            // switch on if you have a CUDA-enabled MPI implementation
-
-	timeStepStrategy kernelOnly;    // can be: noOverlap, simpleOverlap, complexOverlap, kernelOnly
-	innerOuterSplit < 8, 1, 1>;     // slice-thickness that 'outer'-kernels process when overlapping
-
+	timeStepMode aaKernelOnly;                 // can be: noOverlap, simpleOverlap, complexOverlap, kernelOnly
 	remainingTimeLoggerFrequency 0;  // interval in seconds to log the estimated remaining time
 
 	omega 1.8;
-	initShearFlow 1;
 	useGui 0;
 }

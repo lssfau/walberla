@@ -1,13 +1,11 @@
 #include "core/Environment.h"
 #include "core/logging/Initialization.h"
-#include "core/math/Random.h"
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/PythonCallback.h"
 #include "python_coupling/DictWrapper.h"
 #include "blockforest/Initialization.h"
 #include "field/vtk/VTKWriter.h"
 #include "field/AddToStorage.h"
-#include "field/communication/PackInfo.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
 #include "timeloop/all.h"
 #include "core/timing/TimingPool.h"
@@ -17,10 +15,17 @@
 #include "InitShearVelocity.h"
 
 #include "GenDefines.h"
-#include "GenPackInfo.h"
-#include "GenLbKernel.h"
 #include "GenMacroGetter.h"
 #include "GenMacroSetter.h"
+
+#include "GenLbKernel.h"
+#include "GenLbKernelAAEven.h"
+#include "GenLbKernelAAOdd.h"
+
+#include "GenPackInfo.h"
+#include "GenPackInfoAAPush.h"
+#include "GenPackInfoAAPull.h"
+
 
 using namespace walberla;
 
@@ -43,13 +48,14 @@ int main( int argc, char **argv )
       Vector3<uint_t> cellsPerBlock = config->getBlock( "DomainSetup" ).getParameter<Vector3<uint_t>  >( "cellsPerBlock" );
       // Reading parameters
       auto parameters = config->getOneBlock( "Parameters" );
-      const std::string timeStepStrategy = parameters.getParameter<std::string>( "timeStepStrategy", "normal");
+      const std::string timeStepMode = parameters.getParameter<std::string>( "timeStepMode", "twoField");
       const real_t omega = parameters.getParameter<real_t>( "omega", real_c( 1.4 ));
-      const uint_t timesteps = parameters.getParameter<uint_t>( "timesteps", uint_c( 50 ));
+            uint_t timesteps = parameters.getParameter<uint_t>( "timesteps", uint_c( 60 ));
       const real_t shearVelocityMagnitude = parameters.getParameter<real_t>("shearVelocityMagnitude", 0.08);
 
       // Creating fields
-      BlockDataID pdfFieldId = field::addToStorage< PdfField_T >( blocks, "pdfs", real_t( std::nan("") ), field::fzyx );
+      //BlockDataID pdfFieldId = field::addToStorage< PdfField_T >( blocks, "pdfs", real_t( std::nan("") ), field::fzyx );
+      BlockDataID pdfFieldId = field::addToStorage< PdfField_T >( blocks, "pdfs", 0.0, field::fzyx );
       BlockDataID velFieldId = field::addToStorage< VelocityField_T >( blocks, "vel", real_t( 0 ), field::fzyx );
 
       pystencils::GenMacroSetter setterKernel(pdfFieldId, velFieldId);
@@ -59,12 +65,38 @@ int main( int argc, char **argv )
       for( auto & b : *blocks)
           setterKernel(&b);
 
-      SweepTimeloop timeLoop( blocks->getBlockStorage(), timesteps );
-      blockforest::communication::UniformBufferedScheme< Stencil_T > communication( blocks );
-      communication.addPackInfo( make_shared< pystencils::GenPackInfo >( pdfFieldId ) );
+      blockforest::communication::UniformBufferedScheme< Stencil_T > twoFieldComm(blocks );
+      twoFieldComm.addPackInfo(make_shared< pystencils::GenPackInfo >(pdfFieldId ) );
 
-      timeLoop.add() << BeforeFunction( communication, "communication" )
-                     << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide" );
+      blockforest::communication::UniformBufferedScheme< Stencil_T > aaPullComm(blocks);
+      aaPullComm.addPackInfo(make_shared< pystencils::GenPackInfoAAPull>(pdfFieldId));
+
+      blockforest::communication::UniformBufferedScheme< Stencil_T > aaPushComm(blocks);
+      aaPushComm.addPackInfo(make_shared< pystencils::GenPackInfoAAPush>(pdfFieldId));
+
+      SweepTimeloop timeLoop( blocks->getBlockStorage(), timesteps / 2 );
+      if( timeStepMode == "twoField")
+      {
+          timeLoop.add() << BeforeFunction(twoFieldComm, "communication" )
+                         << Sweep( pystencils::GenLbKernel(pdfFieldId), "LB stream & collide1" );
+          timeLoop.add() << BeforeFunction(twoFieldComm, "communication" )
+                         << Sweep( pystencils::GenLbKernel(pdfFieldId), "LB stream & collide2" );
+
+      } else if ( timeStepMode == "twoFieldKernelOnly") {
+          timeLoop.add() << Sweep( pystencils::GenLbKernel(pdfFieldId), "LB stream & collide1" );
+          timeLoop.add() << Sweep( pystencils::GenLbKernel(pdfFieldId), "LB stream & collide2" );
+      } else if ( timeStepMode == "aa") {
+          timeLoop.add() << Sweep( pystencils::GenLbKernelAAEven(pdfFieldId), "AA Even" );
+          timeLoop.add() << BeforeFunction( aaPullComm )
+                         << Sweep( pystencils::GenLbKernelAAOdd(pdfFieldId), "AA Odd")
+                         << AfterFunction( aaPushComm );
+      } else if ( timeStepMode == "aaKernelOnly") {
+          timeLoop.add() << Sweep( pystencils::GenLbKernelAAEven(pdfFieldId), "AA Even" );
+          timeLoop.add() << Sweep( pystencils::GenLbKernelAAOdd(pdfFieldId), "AA Odd");
+      } else {
+          WALBERLA_ABORT("Invalid value for timeStepMode ");
+      }
+
 
       int warmupSteps = parameters.getParameter<int>( "warmupSteps", 2 );
       int outerIterations = parameters.getParameter<int>( "outerIterations", 1 );
@@ -108,6 +140,14 @@ int main( int argc, char **argv )
               WALBERLA_LOG_INFO_ON_ROOT( "Starting simulation with " << timesteps << " time steps" );
               simTimer.start();
               timeLoop.run();
+              /*
+              pystencils::GenLbKernelAAEven k1(pdfFieldId, omega);
+              pystencils::GenLbKernelAAOdd k2(pdfFieldId, omega);
+              for(int t=0; t < timesteps / 2; ++t)
+              { for( auto & b : *blocks) {
+                k1(&b);
+                k2(&b);
+              }}*/
               simTimer.end();
               WALBERLA_LOG_INFO_ON_ROOT( "Simulation finished" );
               auto time = simTimer.last();

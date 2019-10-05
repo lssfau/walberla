@@ -4,8 +4,9 @@ from lbmpy.creationfunctions import create_lb_update_rule
 from lbmpy.fieldaccess import StreamPullTwoFieldsAccessor
 from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel, generate_sweep
 from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
+from lbmpy.fieldaccess import AAEvenTimeStepAccessor, AAOddTimeStepAccessor
 
-omega = sp.symbols("omega")
+omega = 1.6#sp.symbols("omega")
 omega_fill = sp.symbols("omega_:10")
 
 options_dict = {
@@ -18,6 +19,7 @@ options_dict = {
     'trt': {
         'method': 'trt',
         'stencil': 'D3Q19',
+        'compressible': False,
         'relaxation_rate': omega,
     },
     'mrt': {
@@ -74,16 +76,12 @@ const bool infoCsePdfs = {cse_pdfs};
 
 
 with CodeGeneration() as ctx:
-    accessor = StreamPullTwoFieldsAccessor()
-    assert not accessor.is_inplace, "This app does not work for inplace accessors"
-
     common_options = {
         'field_name': 'pdfs',
         'temporary_field_name': 'pdfs_tmp',
-        'kernel_type': accessor,
         'optimization': {'cse_global': False,
-                         'cse_pdfs': True,
-                         'split': True}
+                         'cse_pdfs': False,
+                         'split': False}
     }
     config_name = ctx.config
     noopt = False
@@ -101,9 +99,6 @@ with CodeGeneration() as ctx:
     options.update(common_options)
     options = options.copy()
 
-    if noopt:
-        options['optimization']['cse_global'] = False
-        options['optimization']['cse_pdfs'] = False
     if d3q27:
         options['stencil'] = 'D3Q27'
 
@@ -112,20 +107,32 @@ with CodeGeneration() as ctx:
     pdfs, velocity_field = ps.fields("pdfs({q}), velocity(3) : double[3D]".format(q=q), layout='fzyx')
     options['optimization']['symbolic_field'] = pdfs
 
-    update_rule = create_lb_update_rule(**options)
-    vec = {'nontemporal': True, 'assume_aligned': True, 'assume_inner_stride_one': True}
+    update_rule_two_field = create_lb_update_rule(**options)
+    update_rule_aa_even = create_lb_update_rule(kernel_type=AAEvenTimeStepAccessor(), **options)
+    options['optimization']['split'] = True
+    update_rule_aa_odd = create_lb_update_rule(kernel_type=AAOddTimeStepAccessor(), **options)
+
+    vec = {'nontemporal': False, 'assume_aligned': True, 'assume_inner_stride_one': True}
 
     # Sweeps
-    generate_sweep(ctx, 'GenLbKernel', update_rule, field_swaps=[('pdfs', 'pdfs_tmp')])
-    setter_assignments = macroscopic_values_setter(update_rule.method, velocity=velocity_field.center_vector,
+    generate_sweep(ctx, 'GenLbKernel', update_rule_two_field, field_swaps=[('pdfs', 'pdfs_tmp')])
+    generate_sweep(ctx, 'GenLbKernelAAEven', update_rule_aa_even, cpu_vectorize_info={'assume_aligned': True}, cpu_openmp=6, ghost_layers=1)
+    generate_sweep(ctx, 'GenLbKernelAAOdd', update_rule_aa_odd, cpu_vectorize_info={'assume_aligned': True}, cpu_openmp=6, ghost_layers=1)
+
+    setter_assignments = macroscopic_values_setter(update_rule_two_field.method, velocity=velocity_field.center_vector,
                                                    pdfs=pdfs.center_vector, density=1)
-    getter_assignments = macroscopic_values_getter(update_rule.method, velocity=velocity_field.center_vector,
-                                                   pdfs=pdfs.center_vector,  density=None)
+    getter_assignments = macroscopic_values_getter(update_rule_two_field.method, velocity=velocity_field.center_vector,
+                                                   pdfs=pdfs.center_vector, density=None)
     generate_sweep(ctx, 'GenMacroSetter', setter_assignments)
     generate_sweep(ctx, 'GenMacroGetter', getter_assignments)
 
     # Communication
-    generate_pack_info_from_kernel(ctx, 'GenPackInfo', update_rule, cpu_vectorize_info={'instruction_set': None})
+    generate_pack_info_from_kernel(ctx, 'GenPackInfo', update_rule_two_field,
+                                   cpu_vectorize_info={'instruction_set': None})
+    generate_pack_info_from_kernel(ctx, 'GenPackInfoAAPull', update_rule_aa_odd, kind='pull',
+                                   cpu_vectorize_info={'instruction_set': None})
+    generate_pack_info_from_kernel(ctx, 'GenPackInfoAAPush', update_rule_aa_odd, kind='push',
+                                   cpu_vectorize_info={'instruction_set': None})
 
     # Info Header
     infoHeaderParams = {

@@ -2,7 +2,10 @@ waLBerla_link_files_to_builddir( "*.prm" )
 
 
 waLBerla_python_file_generates(UniformGridGenerated.py
-        GenLbKernel.cpp GenMacroGetter.cpp GenMacroSetter.cpp GenPackInfo.cpp GenDefines.h)
+        GenMacroGetter.cpp GenMacroSetter.cpp
+        GenPackInfo.cpp GenPackInfoAAPush.cpp GenPackInfoAAPull.cpp
+        GenLbKernel.cpp GenLbKernelAAEven.cpp GenLbKernelAAOdd.cpp
+        GenDefines.h)
 
 
 foreach(config trt )
