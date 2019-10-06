@@ -1,21 +1,22 @@
 DomainSetup
 {
    blocks        <  1,    1,   1 >;
-   cellsPerBlock <  256, 128, 128 >;
+   cellsPerBlock <  64, 64, 64 >;
    periodic      <  1,    1,   1 >;
 }
 
 Parameters 
 {
 
-	timesteps       400;   // time steps of one performance measurement
-	warmupSteps     1;    // number of steps to run before measurement starts
+	timesteps       3000;   // time steps of one performance measurement
+	warmupSteps     1;      // number of steps to run before measurement starts
     outerIterations 1;      // how many measurements to conduct
 
-	vtkWriteFrequency 0;           // write a VTK file every n'th step, if zero VTK output is disabled
+	vtkWriteFrequency 100;           // write a VTK file every n'th step, if zero VTK output is disabled
 	cudaEnabledMPI false;            // switch on if you have a CUDA-enabled MPI implementation
-	timeStepMode aaKernelOnly;                 // can be: noOverlap, simpleOverlap, complexOverlap, kernelOnly
+	timeStepMode aa;                 // can be: noOverlap, simpleOverlap, complexOverlap, kernelOnly
 	remainingTimeLoggerFrequency 0;  // interval in seconds to log the estimated remaining time
+    directComm 1;
 
 	omega 1.8;
 	useGui 0;

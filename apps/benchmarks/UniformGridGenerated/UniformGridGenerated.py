@@ -1,7 +1,7 @@
 import sympy as sp
 import pystencils as ps
 from lbmpy.creationfunctions import create_lb_update_rule
-from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel, generate_sweep
+from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel, generate_sweep, generate_mpidtype_info_from_kernel
 from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
 from lbmpy.fieldaccess import AAEvenTimeStepAccessor, AAOddTimeStepAccessor
 
@@ -134,6 +134,10 @@ with CodeGeneration() as ctx:
                                    cpu_vectorize_info={'instruction_set': None})
     generate_pack_info_from_kernel(ctx, 'GenPackInfoAAPush', update_rule_aa_odd, kind='push',
                                    cpu_vectorize_info={'instruction_set': None})
+
+    generate_mpidtype_info_from_kernel(ctx, 'GenMpiDtypeInfo', update_rule_two_field)
+    generate_mpidtype_info_from_kernel(ctx, 'GenMpiDtypeInfoAAPull', update_rule_aa_odd, kind='pull')
+    generate_mpidtype_info_from_kernel(ctx, 'GenMpiDtypeInfoAAPush', update_rule_aa_odd, kind='push')
 
     # Info Header
     infoHeaderParams = {

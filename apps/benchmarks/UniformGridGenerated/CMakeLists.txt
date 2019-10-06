@@ -5,6 +5,7 @@ waLBerla_python_file_generates(UniformGridGenerated.py
         GenMacroGetter.cpp GenMacroSetter.cpp
         GenPackInfo.cpp GenPackInfoAAPush.cpp GenPackInfoAAPull.cpp
         GenLbKernel.cpp GenLbKernelAAEven.cpp GenLbKernelAAOdd.cpp
+        GenMpiDtypeInfo.h GenMpiDtypeInfoAAPull.h GenMpiDtypeInfoAAPush.h
         GenDefines.h)
 
 

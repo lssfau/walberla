@@ -7,6 +7,7 @@
 #include "field/vtk/VTKWriter.h"
 #include "field/AddToStorage.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
+#include "blockforest/communication/UniformDirectScheme.h"
 #include "timeloop/all.h"
 #include "core/timing/TimingPool.h"
 #include "core/timing/RemainingTimeLogger.h"
@@ -25,6 +26,9 @@
 #include "GenPackInfo.h"
 #include "GenPackInfoAAPush.h"
 #include "GenPackInfoAAPull.h"
+#include "GenMpiDtypeInfo.h"
+#include "GenMpiDtypeInfoAAPull.h"
+#include "GenMpiDtypeInfoAAPush.h"
 
 
 using namespace walberla;
@@ -52,7 +56,7 @@ int main( int argc, char **argv )
       const real_t omega = parameters.getParameter<real_t>( "omega", real_c( 1.4 ));
             uint_t timesteps = parameters.getParameter<uint_t>( "timesteps", uint_c( 60 ));
       const real_t shearVelocityMagnitude = parameters.getParameter<real_t>("shearVelocityMagnitude", 0.08);
-
+      const bool directComm = parameters.getParameter<bool>("directComm", false);
 
       auto pdfFieldAdder = [](IBlock* const block, StructuredBlockStorage * const storage) {
           return new PdfField_T(storage->getNumberOfXCells(*block),
@@ -74,6 +78,7 @@ int main( int argc, char **argv )
       for( auto & b : *blocks)
           setterKernel(&b);
 
+      // Buffered Comm
       blockforest::communication::UniformBufferedScheme< Stencil_T > twoFieldComm(blocks );
       twoFieldComm.addPackInfo(make_shared< pystencils::GenPackInfo >(pdfFieldId ) );
 
@@ -83,12 +88,23 @@ int main( int argc, char **argv )
       blockforest::communication::UniformBufferedScheme< Stencil_T > aaPushComm(blocks);
       aaPushComm.addPackInfo(make_shared< pystencils::GenPackInfoAAPush>(pdfFieldId));
 
+      // Direct Comm
+      blockforest::communication::UniformDirectScheme< Stencil_T > twoFieldCommDirect(blocks);
+      twoFieldCommDirect.addDataToCommunicate(make_shared<pystencils::GenMpiDtypeInfo>(pdfFieldId));
+
+      blockforest::communication::UniformDirectScheme< Stencil_T > aaPullCommDirect(blocks);
+      aaPullCommDirect.addDataToCommunicate(make_shared<pystencils::GenMpiDtypeInfoAAPull>(pdfFieldId));
+
+      blockforest::communication::UniformDirectScheme< Stencil_T > aaPushCommDirect(blocks);
+      aaPushCommDirect.addDataToCommunicate(make_shared<pystencils::GenMpiDtypeInfoAAPush>(pdfFieldId));
+
+      using F = std::function<void()>;
       SweepTimeloop timeLoop( blocks->getBlockStorage(), timesteps / 2 );
       if( timeStepMode == "twoField")
       {
-          timeLoop.add() << BeforeFunction(twoFieldComm, "communication" )
+          timeLoop.add() << BeforeFunction(directComm ? F(twoFieldCommDirect) : F(twoFieldComm), "communication" )
                          << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide1" );
-          timeLoop.add() << BeforeFunction(twoFieldComm, "communication" )
+          timeLoop.add()  << BeforeFunction(directComm ? F(twoFieldCommDirect) : F(twoFieldComm), "communication" )
                          << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide2" );
 
       } else if ( timeStepMode == "twoFieldKernelOnly") {
@@ -96,9 +112,9 @@ int main( int argc, char **argv )
           timeLoop.add() << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide2" );
       } else if ( timeStepMode == "aa") {
           timeLoop.add() << Sweep( pystencils::GenLbKernelAAEven(pdfFieldId, omega), "AA Even" );
-          timeLoop.add() << BeforeFunction( aaPullComm )
+          timeLoop.add() << BeforeFunction( directComm ? F(aaPullCommDirect) : F(aaPullComm) )
                          << Sweep( pystencils::GenLbKernelAAOdd(pdfFieldId, omega), "AA Odd")
-                         << AfterFunction( aaPushComm );
+                         << AfterFunction( directComm ? F(aaPushCommDirect) : F(aaPushComm) );
       } else if ( timeStepMode == "aaKernelOnly") {
           timeLoop.add() << Sweep( pystencils::GenLbKernelAAEven(pdfFieldId, omega), "AA Even" );
           timeLoop.add() << Sweep( pystencils::GenLbKernelAAOdd(pdfFieldId, omega), "AA Odd");
