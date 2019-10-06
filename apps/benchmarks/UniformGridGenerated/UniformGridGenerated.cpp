@@ -53,9 +53,18 @@ int main( int argc, char **argv )
             uint_t timesteps = parameters.getParameter<uint_t>( "timesteps", uint_c( 60 ));
       const real_t shearVelocityMagnitude = parameters.getParameter<real_t>("shearVelocityMagnitude", 0.08);
 
+
+      auto pdfFieldAdder = [](IBlock* const block, StructuredBlockStorage * const storage) {
+          return new PdfField_T(storage->getNumberOfXCells(*block),
+                                storage->getNumberOfYCells(*block),
+                                storage->getNumberOfZCells(*block),
+                                uint_t(1),
+                                field::fzyx,
+                                make_shared<field::AllocateAligned<real_t, 64>>());
+      };
+
       // Creating fields
-      //BlockDataID pdfFieldId = field::addToStorage< PdfField_T >( blocks, "pdfs", real_t( std::nan("") ), field::fzyx );
-      BlockDataID pdfFieldId = field::addToStorage< PdfField_T >( blocks, "pdfs", 0.0, field::fzyx );
+      BlockDataID pdfFieldId = blocks->addStructuredBlockData<PdfField_T>(pdfFieldAdder, "pdfs");
       BlockDataID velFieldId = field::addToStorage< VelocityField_T >( blocks, "vel", real_t( 0 ), field::fzyx );
 
       pystencils::GenMacroSetter setterKernel(pdfFieldId, velFieldId);
@@ -78,21 +87,21 @@ int main( int argc, char **argv )
       if( timeStepMode == "twoField")
       {
           timeLoop.add() << BeforeFunction(twoFieldComm, "communication" )
-                         << Sweep( pystencils::GenLbKernel(pdfFieldId), "LB stream & collide1" );
+                         << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide1" );
           timeLoop.add() << BeforeFunction(twoFieldComm, "communication" )
-                         << Sweep( pystencils::GenLbKernel(pdfFieldId), "LB stream & collide2" );
+                         << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide2" );
 
       } else if ( timeStepMode == "twoFieldKernelOnly") {
-          timeLoop.add() << Sweep( pystencils::GenLbKernel(pdfFieldId), "LB stream & collide1" );
-          timeLoop.add() << Sweep( pystencils::GenLbKernel(pdfFieldId), "LB stream & collide2" );
+          timeLoop.add() << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide1" );
+          timeLoop.add() << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide2" );
       } else if ( timeStepMode == "aa") {
-          timeLoop.add() << Sweep( pystencils::GenLbKernelAAEven(pdfFieldId), "AA Even" );
+          timeLoop.add() << Sweep( pystencils::GenLbKernelAAEven(pdfFieldId, omega), "AA Even" );
           timeLoop.add() << BeforeFunction( aaPullComm )
-                         << Sweep( pystencils::GenLbKernelAAOdd(pdfFieldId), "AA Odd")
+                         << Sweep( pystencils::GenLbKernelAAOdd(pdfFieldId, omega), "AA Odd")
                          << AfterFunction( aaPushComm );
       } else if ( timeStepMode == "aaKernelOnly") {
-          timeLoop.add() << Sweep( pystencils::GenLbKernelAAEven(pdfFieldId), "AA Even" );
-          timeLoop.add() << Sweep( pystencils::GenLbKernelAAOdd(pdfFieldId), "AA Odd");
+          timeLoop.add() << Sweep( pystencils::GenLbKernelAAEven(pdfFieldId, omega), "AA Even" );
+          timeLoop.add() << Sweep( pystencils::GenLbKernelAAOdd(pdfFieldId, omega), "AA Odd");
       } else {
           WALBERLA_ABORT("Invalid value for timeStepMode ");
       }

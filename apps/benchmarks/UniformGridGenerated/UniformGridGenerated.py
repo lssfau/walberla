@@ -1,12 +1,11 @@
 import sympy as sp
 import pystencils as ps
 from lbmpy.creationfunctions import create_lb_update_rule
-from lbmpy.fieldaccess import StreamPullTwoFieldsAccessor
 from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel, generate_sweep
 from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
 from lbmpy.fieldaccess import AAEvenTimeStepAccessor, AAOddTimeStepAccessor
 
-omega = 1.6#sp.symbols("omega")
+omega = sp.symbols("omega")
 omega_fill = sp.symbols("omega_:10")
 
 options_dict = {
@@ -116,15 +115,17 @@ with CodeGeneration() as ctx:
 
     # Sweeps
     generate_sweep(ctx, 'GenLbKernel', update_rule_two_field, field_swaps=[('pdfs', 'pdfs_tmp')])
-    generate_sweep(ctx, 'GenLbKernelAAEven', update_rule_aa_even, cpu_vectorize_info={'assume_aligned': True}, cpu_openmp=6, ghost_layers=1)
-    generate_sweep(ctx, 'GenLbKernelAAOdd', update_rule_aa_odd, cpu_vectorize_info={'assume_aligned': True}, cpu_openmp=6, ghost_layers=1)
+    generate_sweep(ctx, 'GenLbKernelAAEven', update_rule_aa_even, cpu_vectorize_info={'assume_aligned': True},
+                   cpu_openmp=True, ghost_layers=1)
+    generate_sweep(ctx, 'GenLbKernelAAOdd', update_rule_aa_odd, cpu_vectorize_info={'assume_aligned': True},
+                   cpu_openmp=True, ghost_layers=1)
 
     setter_assignments = macroscopic_values_setter(update_rule_two_field.method, velocity=velocity_field.center_vector,
                                                    pdfs=pdfs.center_vector, density=1)
     getter_assignments = macroscopic_values_getter(update_rule_two_field.method, velocity=velocity_field.center_vector,
                                                    pdfs=pdfs.center_vector, density=None)
-    generate_sweep(ctx, 'GenMacroSetter', setter_assignments)
-    generate_sweep(ctx, 'GenMacroGetter', getter_assignments)
+    generate_sweep(ctx, 'GenMacroSetter', setter_assignments, cpu_openmp=True)
+    generate_sweep(ctx, 'GenMacroGetter', getter_assignments, cpu_openmp=True)
 
     # Communication
     generate_pack_info_from_kernel(ctx, 'GenPackInfo', update_rule_two_field,
