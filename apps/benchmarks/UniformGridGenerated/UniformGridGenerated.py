@@ -129,11 +129,11 @@ with CodeGeneration() as ctx:
 
     # Communication
     generate_pack_info_from_kernel(ctx, 'GenPackInfo', update_rule_two_field,
-                                   cpu_vectorize_info={'instruction_set': None})
+                                   cpu_vectorize_info={'instruction_set': None}, cpu_openmp=False)
     generate_pack_info_from_kernel(ctx, 'GenPackInfoAAPull', update_rule_aa_odd, kind='pull',
-                                   cpu_vectorize_info={'instruction_set': None})
+                                   cpu_vectorize_info={'instruction_set': None}, cpu_openmp=False)
     generate_pack_info_from_kernel(ctx, 'GenPackInfoAAPush', update_rule_aa_odd, kind='push',
-                                   cpu_vectorize_info={'instruction_set': None})
+                                   cpu_vectorize_info={'instruction_set': None}, cpu_openmp=False)
 
     generate_mpidtype_info_from_kernel(ctx, 'GenMpiDtypeInfo', update_rule_two_field)
     generate_mpidtype_info_from_kernel(ctx, 'GenMpiDtypeInfoAAPull', update_rule_aa_odd, kind='pull')
