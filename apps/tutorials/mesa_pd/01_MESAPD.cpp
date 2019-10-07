@@ -87,6 +87,8 @@ data::ParticleStorage::iterator createSphere( data::ParticleStorage& ps,
 
 int main( int argc, char ** argv )
 {
+   using namespace walberla::mesa_pd;
+
    //! [Parameters]
    Environment env(argc, argv);
    WALBERLA_UNUSED(env);
@@ -237,7 +239,7 @@ int main( int argc, char ** argv )
    accessor);
 
    walberla::mpi::reduceInplace(meanVelocity, walberla::mpi::SUM);
-   meanVelocity /= numParticles;
+   meanVelocity /= real_c(numParticles);
    WALBERLA_LOG_INFO_ON_ROOT( "mean velocity: " << meanVelocity );
    //! [PostProcessing]
 
