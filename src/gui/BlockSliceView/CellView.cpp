@@ -95,8 +95,8 @@ namespace gui {
 
       // Paint arrows
       p->save();
-      p->setPen(QPen(QColor(0,108,255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-      p->setBrush(QColor(0,108,255));
+      p->setPen(QPen(QColor(145,192,255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+      p->setBrush(QColor(145,192,255));
       for ( auto d = stencil::D2Q9::begin(); d != stencil::D2Q9::end(); ++d )
       {
          const double dx = d.cx() * 0.9;
@@ -124,12 +124,12 @@ namespace gui {
          QPointF dst  =  QPointF( dx * halfCellSize, - dy  * halfCellSize);
 
          QFont f = p->font();
-         f.setPixelSize(2);
+         f.setPixelSize(5);
          p->setFont(f);
          QFontMetrics fontMetrics = p->fontMetrics();
 
          QPointF textPos =  cellMidPoint + 0.8 * dst;
-         QString s =  QString("%1").arg(val,0,'e',9);
+         QString s =  QString("%1").arg(val);
          textPos.setX(textPos.x() - 0.5 * fontMetrics.width(s));
          p->drawText(textPos,s);
       }

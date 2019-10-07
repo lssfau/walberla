@@ -164,7 +164,7 @@ namespace gui {
          translateVec[ uint_c(slice.sliceDimension) ] = slice.position - 0.5;
          painter->modelViewMatrix().translate( translateVec[0], translateVec[1], translateVec[2] );
 
-         Vector3<double> scaleVec ( 1.1, 1.1, 1.1 );
+         Vector3<double> scaleVec ( 1.35, 1.35, 1.35 );
          scaleVec[ uint_c(slice.sliceDimension) ] = 0.01;
          painter->modelViewMatrix().scale( scaleVec[0], scaleVec[1], scaleVec[2] );
          mesh_->draw( painter );
