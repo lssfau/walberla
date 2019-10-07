@@ -191,7 +191,9 @@ private:
    bool hilbert_;
    bool allGather_;
    /// All gets for levels are wrapped like
-   /// \code levelwise_ ? getCorrectLevel() : 0
+   /// \code
+   /// levelwise_ ? getCorrectLevel() : 0
+   /// \endcode
    ///
    /// This allows to use the same algorithm for levelwise balancing as well as for balancing without levels.
    bool levelwise_;
