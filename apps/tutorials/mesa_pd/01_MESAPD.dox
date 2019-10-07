@@ -37,7 +37,7 @@ Since all kernels are written against an abstract interface to access the partic
 
 Finally, to improve the complexity of the collision detection step, we need a data::LinkedCells acceleration data structure.
 
-\snippet 01_MESAPD.cpp DataStructure
+\snippet 01_MESAPD.cpp DataStructures
 
 Now we are almost ready to initialize the particles for our simulation. For this purpose we will write two helper functions to create spheres and walls.
 
