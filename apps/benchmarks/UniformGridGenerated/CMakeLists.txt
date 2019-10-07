@@ -1,4 +1,5 @@
 waLBerla_link_files_to_builddir( "*.prm" )
+waLBerla_link_files_to_builddir( "*.py" )
 
 
 waLBerla_python_file_generates(UniformGridGenerated.py

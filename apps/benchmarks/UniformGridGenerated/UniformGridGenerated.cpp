@@ -1,5 +1,6 @@
 #include "core/Environment.h"
 #include "core/logging/Initialization.h"
+#include "core/OpenMP.h"
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/PythonCallback.h"
 #include "python_coupling/DictWrapper.h"
@@ -11,6 +12,7 @@
 #include "timeloop/all.h"
 #include "core/timing/TimingPool.h"
 #include "core/timing/RemainingTimeLogger.h"
+#include "core/waLBerlaBuildInfo.h"
 #include "domain_decomposition/SharedSweep.h"
 #include "gui/Gui.h"
 #include "InitShearVelocity.h"
@@ -30,6 +32,7 @@
 #include "GenMpiDtypeInfoAAPull.h"
 #include "GenMpiDtypeInfoAAPush.h"
 
+#include <iomanip>
 
 using namespace walberla;
 
@@ -162,24 +165,26 @@ int main( int argc, char **argv )
           {
               timeLoop.setCurrentTimeStepToZero();
               WcTimer simTimer;
-              WALBERLA_LOG_INFO_ON_ROOT( "Starting simulation with " << timesteps << " time steps" );
+
+              auto threads = omp_get_max_threads();
+
               simTimer.start();
               timeLoop.run();
-              /*
-              pystencils::GenLbKernelAAEven k1(pdfFieldId, omega);
-              pystencils::GenLbKernelAAOdd k2(pdfFieldId, omega);
-              for(int t=0; t < timesteps / 2; ++t)
-              { for( auto & b : *blocks) {
-                k1(&b);
-                k2(&b);
-              }}*/
               simTimer.end();
-              WALBERLA_LOG_INFO_ON_ROOT( "Simulation finished" );
               auto time = simTimer.last();
               auto nrOfCells = real_c( cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2] );
               auto mlupsPerProcess = nrOfCells * real_c( timesteps ) / time * 1e-6;
-              WALBERLA_LOG_RESULT_ON_ROOT( "MLUPS per process " << mlupsPerProcess );
-              WALBERLA_LOG_RESULT_ON_ROOT( "Time per time step " << time / real_c( timesteps ));
+
+              using std::setw;
+              WALBERLA_LOG_INFO_ON_ROOT(setw(18) << timeStepMode <<
+                                                     "  procs: " << setw(6) << MPIManager::instance()->numProcesses() <<
+                                                     "  threads: " << threads <<
+                                                     "  direct_comm: " << directComm <<
+                                                     "  time steps: " << timesteps <<
+                                                     setw(15) << "  block size: " << cellsPerBlock <<
+                                                     "  mlups/core:  " << int(mlupsPerProcess/ threads) <<
+                                                     "  mlups:  " << int(mlupsPerProcess) *  MPIManager::instance()->numProcesses());
+
               WALBERLA_ROOT_SECTION()
               {
                   python_coupling::PythonCallback pythonCallbackResults( "results_callback" );
@@ -188,8 +193,11 @@ int main( int argc, char **argv )
                       pythonCallbackResults.data().exposeValue( "mlupsPerProcess", mlupsPerProcess );
                       pythonCallbackResults.data().exposeValue( "stencil", infoStencil );
                       pythonCallbackResults.data().exposeValue( "configName", infoConfigName );
-                      pythonCallbackResults.data().exposeValue( "cse_global", infoCseGlobal );
-                      pythonCallbackResults.data().exposeValue( "cse_pdfs", infoCsePdfs );
+                      pythonCallbackResults.data().exposeValue( "optimizations", optimizationDict );
+                      pythonCallbackResults.data().exposeValue( "githash", core::buildinfo::gitSHA1() );
+                      pythonCallbackResults.data().exposeValue( "compilerFlags", core::buildinfo::compilerFlags() );
+                      pythonCallbackResults.data().exposeValue( "buildMachine", core::buildinfo::buildMachine() );
+
                       // Call Python function to report results
                       pythonCallbackResults();
                   }

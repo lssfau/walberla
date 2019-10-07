@@ -69,25 +69,33 @@ info_header = """
 #include "stencil/D3Q{q}.h"\nusing Stencil_T = walberla::stencil::D3Q{q}; 
 const char * infoStencil = "{stencil}";
 const char * infoConfigName = "{configName}";
-const bool infoCseGlobal = {cse_global};
-const bool infoCsePdfs = {cse_pdfs};
+const char * optimizationDict = "{optimizationDict}";
 """
-
 
 with CodeGeneration() as ctx:
     common_options = {
         'field_name': 'pdfs',
         'temporary_field_name': 'pdfs_tmp',
-        'optimization': {'cse_global': False,
-                         'cse_pdfs': False,
-                         'split': False}
+    }
+    opts = {
+        'two_field_cse_pdfs': False,
+        'two_field_cse_global': False,
+        'two_field_split': True,
+        'two_field_nt_stores': True,
+
+        'aa_even_cse_pdfs': False,
+        'aa_even_cse_global': False,
+        'aa_even_split': False,
+        'aa_even_nt_stores': False,
+
+        'aa_odd_cse_pdfs': False,
+        'aa_odd_cse_global': False,
+        'aa_odd_split': True,
+        'aa_odd_nt_stores': False,
     }
     config_name = ctx.config
     noopt = False
     d3q27 = False
-    if config_name.endswith("_noopt"):
-        noopt = True
-        config_name = config_name[:-len("_noopt")]
     if config_name.endswith("_d3q27"):
         d3q27 = True
         config_name = config_name[:-len("_d3q27")]
@@ -104,20 +112,33 @@ with CodeGeneration() as ctx:
     stencil_str = options['stencil']
     q = int(stencil_str[stencil_str.find('Q')+1:])
     pdfs, velocity_field = ps.fields("pdfs({q}), velocity(3) : double[3D]".format(q=q), layout='fzyx')
-    options['optimization']['symbolic_field'] = pdfs
 
-    update_rule_two_field = create_lb_update_rule(**options)
-    update_rule_aa_even = create_lb_update_rule(kernel_type=AAEvenTimeStepAccessor(), **options)
-    options['optimization']['split'] = True
-    update_rule_aa_odd = create_lb_update_rule(kernel_type=AAOddTimeStepAccessor(), **options)
+    update_rule_two_field = create_lb_update_rule(optimization={'symbolic_field': pdfs,
+                                                                'split': opts['two_field_split'],
+                                                                'cse_global': opts['two_field_cse_global'],
+                                                                'cse_pdfs': opts['two_field_cse_pdfs']}, **options)
+    update_rule_aa_even = create_lb_update_rule(kernel_type=AAEvenTimeStepAccessor(),
+                                                optimization={'symbolic_field': pdfs,
+                                                              'split': opts['aa_even_split'],
+                                                              'cse_global': opts['aa_even_cse_global'],
+                                                              'cse_pdfs': opts['aa_even_cse_pdfs']}, **options)
+    update_rule_aa_odd = create_lb_update_rule(kernel_type=AAOddTimeStepAccessor(),
+                                               optimization={'symbolic_field': pdfs,
+                                                             'split': opts['aa_odd_split'],
+                                                             'cse_global': opts['aa_odd_cse_global'],
+                                                             'cse_pdfs': opts['aa_odd_cse_pdfs']}, **options)
 
-    vec = {'nontemporal': False, 'assume_aligned': True, 'assume_inner_stride_one': True}
+    vec = { 'assume_aligned': True, 'assume_inner_stride_one': True}
 
     # Sweeps
-    generate_sweep(ctx, 'GenLbKernel', update_rule_two_field, field_swaps=[('pdfs', 'pdfs_tmp')])
-    generate_sweep(ctx, 'GenLbKernelAAEven', update_rule_aa_even, cpu_vectorize_info={'assume_aligned': True},
+    vec['nontemporal'] = opts['two_field_nt_stores']
+    generate_sweep(ctx, 'GenLbKernel', update_rule_two_field, field_swaps=[('pdfs', 'pdfs_tmp')],
+                   cpu_vectorize_info=vec)
+    vec['nontemporal'] = opts['aa_even_nt_stores']
+    generate_sweep(ctx, 'GenLbKernelAAEven', update_rule_aa_even, cpu_vectorize_info=vec,
                    cpu_openmp=True, ghost_layers=1)
-    generate_sweep(ctx, 'GenLbKernelAAOdd', update_rule_aa_odd, cpu_vectorize_info={'assume_aligned': True},
+    vec['nontemporal'] = opts['aa_odd_nt_stores']
+    generate_sweep(ctx, 'GenLbKernelAAOdd', update_rule_aa_odd, cpu_vectorize_info=vec,
                    cpu_openmp=True, ghost_layers=1)
 
     setter_assignments = macroscopic_values_setter(update_rule_two_field.method, velocity=velocity_field.center_vector,
@@ -144,8 +165,6 @@ with CodeGeneration() as ctx:
         'stencil': stencil_str,
         'q': q,
         'configName': ctx.config,
-        'cse_global': int(options['optimization']['cse_global']),
-        'cse_pdfs': int(options['optimization']['cse_pdfs']),
+        'optimizationDict': str(opts),
     }
     ctx.write_file("GenDefines.h", info_header.format(**infoHeaderParams))
-
