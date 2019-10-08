@@ -44,11 +44,25 @@ ParticleDeleter::~ParticleDeleter()
 {
    for (auto pIt = ps_->begin(); pIt != ps_->end(); )
    {
+      //skip ghosts
+      if (data::particle_flags::isSet( pIt->getFlags(), data::particle_flags::GHOST))
+      {
+         ++pIt;
+         continue;
+      }
+      //skip globals
+      if (data::particle_flags::isSet( pIt->getFlags(), data::particle_flags::GLOBAL))
+      {
+         ++pIt;
+         continue;
+      }
+
       if (aabb_.contains(pIt->getPosition()))
       {
          pIt = ps_->erase(pIt);
          continue;
       }
+
       ++pIt;
    }
 }
@@ -64,7 +78,9 @@ internal::ParticleDeleter* BlockForestDataHandling::initialize( IBlock * const b
    return new internal::ParticleDeleter(ps_, block->getAABB());
 }
 
-void BlockForestDataHandling::serialize( IBlock * const block, const BlockDataID & /*id*/, mpi::SendBuffer & buffer )
+void BlockForestDataHandling::serialize( IBlock * const block,
+                                         const BlockDataID & /*id*/,
+                                         mpi::SendBuffer & buffer )
 {
    decltype(ps_->size()) numOfParticles = 0;
 
@@ -93,7 +109,9 @@ internal::ParticleDeleter* BlockForestDataHandling::deserialize( IBlock * const 
    return initialize(block);
 }
 
-void BlockForestDataHandling::deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer )
+void BlockForestDataHandling::deserialize( IBlock * const block,
+                                           const BlockDataID & id,
+                                           mpi::RecvBuffer & buffer )
 {
    deserializeImpl( block, id, buffer);
 }
@@ -187,6 +205,7 @@ void BlockForestDataHandling::deserializeImpl( IBlock * const block, const Block
 
       auto pIt = createNewParticle(*ps_, objparam);
       WALBERLA_CHECK(!data::particle_flags::isSet(pIt->getFlags(), data::particle_flags::GHOST));
+      WALBERLA_CHECK(!data::particle_flags::isSet(pIt->getFlags(), data::particle_flags::GLOBAL));
       pIt->setOwner( MPIManager::instance()->rank() );
 
       if ( !block->getAABB().contains( pIt->getPosition()) )
