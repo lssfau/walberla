@@ -107,7 +107,7 @@ int main( int argc, char **argv )
       {
           timeLoop.add() << BeforeFunction(directComm ? F(twoFieldCommDirect) : F(twoFieldComm), "communication" )
                          << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide1" );
-          timeLoop.add()  << BeforeFunction(directComm ? F(twoFieldCommDirect) : F(twoFieldComm), "communication" )
+          timeLoop.add() << BeforeFunction(directComm ? F(twoFieldCommDirect) : F(twoFieldComm), "communication" )
                          << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide2" );
 
       } else if ( timeStepMode == "twoFieldKernelOnly") {
@@ -122,7 +122,7 @@ int main( int argc, char **argv )
           timeLoop.add() << Sweep( pystencils::GenLbKernelAAEven(pdfFieldId, omega), "AA Even" );
           timeLoop.add() << Sweep( pystencils::GenLbKernelAAOdd(pdfFieldId, omega), "AA Odd");
       } else {
-          WALBERLA_ABORT("Invalid value for timeStepMode ");
+          WALBERLA_ABORT("Invalid value for timeStepMode");
       }
 
 
