@@ -86,7 +86,7 @@ public:
       using force_type = walberla::mesa_pd::Vec3;
       using oldForce_type = walberla::mesa_pd::Vec3;
       using oldTorque_type = walberla::mesa_pd::Vec3;
-      using currentBlock_type = blockforest::Block*;
+      using currentBlock_type = blockforest::BlockID;
       using type_type = uint_t;
       using nextParticle_type = int;
       using oldContactHistory_type = std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>;
@@ -273,7 +273,7 @@ public:
    using force_type = walberla::mesa_pd::Vec3;
    using oldForce_type = walberla::mesa_pd::Vec3;
    using oldTorque_type = walberla::mesa_pd::Vec3;
-   using currentBlock_type = blockforest::Block*;
+   using currentBlock_type = blockforest::BlockID;
    using type_type = uint_t;
    using nextParticle_type = int;
    using oldContactHistory_type = std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>;
@@ -722,7 +722,7 @@ inline ParticleStorage::iterator ParticleStorage::create(const id_t& uid)
    force_.emplace_back(real_t(0));
    oldForce_.emplace_back(real_t(0));
    oldTorque_.emplace_back(real_t(0));
-   currentBlock_.emplace_back(nullptr);
+   currentBlock_.emplace_back();
    type_.emplace_back(0);
    nextParticle_.emplace_back(-1);
    oldContactHistory_.emplace_back();
@@ -1214,10 +1214,10 @@ public:
 class SelectParticleCurrentBlock
 {
 public:
-   using return_type = blockforest::Block*;
-   blockforest::Block*& operator()(data::Particle& p) const {return p.getCurrentBlockRef();}
-   blockforest::Block*& operator()(data::Particle&& p) const {return p.getCurrentBlockRef();}
-   blockforest::Block* const & operator()(const data::Particle& p) const {return p.getCurrentBlock();}
+   using return_type = blockforest::BlockID;
+   blockforest::BlockID& operator()(data::Particle& p) const {return p.getCurrentBlockRef();}
+   blockforest::BlockID& operator()(data::Particle&& p) const {return p.getCurrentBlockRef();}
+   blockforest::BlockID const & operator()(const data::Particle& p) const {return p.getCurrentBlock();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleType

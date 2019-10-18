@@ -50,7 +50,7 @@ if __name__ == '__main__':
    ps.addProperty("nextParticle",     "int",                     defValue="-1",        syncMode="NEVER")
 
    ps.addInclude("blockforest/BlockForest.h")
-   ps.addProperty("currentBlock",     "blockforest::Block*",     defValue="nullptr",   syncMode="NEVER")
+   ps.addProperty("currentBlock",     "blockforest::BlockID",    defValue="",          syncMode="NEVER")
 
    kernels = []
    kernels.append( kernel.DoubleCast(shapes) )

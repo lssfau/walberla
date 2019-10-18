@@ -49,7 +49,7 @@ if __name__ == '__main__':
    ps.addProperty("oldTorque",        "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="MIGRATION")
 
    ps.addInclude("blockforest/BlockForest.h")
-   ps.addProperty("currentBlock",     "blockforest::Block*",     defValue="nullptr",   syncMode="NEVER")
+   ps.addProperty("currentBlock",     "blockforest::BlockID",    defValue="",          syncMode="NEVER")
 
    ps.addProperty("type",             "uint_t",                  defValue="0",         syncMode="COPY")
 

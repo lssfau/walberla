@@ -54,7 +54,7 @@ template <typename Accessor>
 inline void AssocToBlock::operator()(const size_t idx,
                                      Accessor& ac) const
 {
-   blockforest::Block*& currentBlock = ac.getCurrentBlockRef(idx);
+   blockforest::Block* currentBlock = bf_->getBlock(ac.getCurrentBlock(idx));
 
    if (currentBlock != nullptr)
    {
@@ -71,6 +71,7 @@ inline void AssocToBlock::operator()(const size_t idx,
    {
       if (blk.second->getAABB().contains(ac.getPosition(idx)))
       {
+         ac.setCurrentBlock(idx, blk.second->getId());
          currentBlock = blk.second.get();
          return;
       }
@@ -85,6 +86,8 @@ inline void AssocToBlock::operator()(const size_t idx,
       {
          WALBERLA_LOG_DEVEL(blk.second->getAABB());
       }
+      using namespace walberla::mesa_pd::data::particle_flags;
+      WALBERLA_LOG_DEVEL_VAR(isSet(ac.getFlags(idx), GHOST));
    }
    WALBERLA_CHECK_NOT_NULLPTR(currentBlock, ac.getPosition(idx));
 }

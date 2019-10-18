@@ -108,9 +108,9 @@ public:
    walberla::mesa_pd::Vec3& getOldTorqueRef(const size_t p_idx) {return ps_->getOldTorqueRef(p_idx);}
    void setOldTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldTorque(p_idx, v);}
    
-   blockforest::Block* const & getCurrentBlock(const size_t p_idx) const {return ps_->getCurrentBlock(p_idx);}
-   blockforest::Block*& getCurrentBlockRef(const size_t p_idx) {return ps_->getCurrentBlockRef(p_idx);}
-   void setCurrentBlock(const size_t p_idx, blockforest::Block* const & v) { ps_->setCurrentBlock(p_idx, v);}
+   blockforest::BlockID const & getCurrentBlock(const size_t p_idx) const {return ps_->getCurrentBlock(p_idx);}
+   blockforest::BlockID& getCurrentBlockRef(const size_t p_idx) {return ps_->getCurrentBlockRef(p_idx);}
+   void setCurrentBlock(const size_t p_idx, blockforest::BlockID const & v) { ps_->setCurrentBlock(p_idx, v);}
    
    uint_t const & getType(const size_t p_idx) const {return ps_->getType(p_idx);}
    uint_t& getTypeRef(const size_t p_idx) {return ps_->getTypeRef(p_idx);}
@@ -253,9 +253,9 @@ public:
    void setOldTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldTorque_ = v;}
    walberla::mesa_pd::Vec3& getOldTorqueRef(const size_t /*p_idx*/) {return oldTorque_;}
    
-   blockforest::Block* const & getCurrentBlock(const size_t /*p_idx*/) const {return currentBlock_;}
-   void setCurrentBlock(const size_t /*p_idx*/, blockforest::Block* const & v) { currentBlock_ = v;}
-   blockforest::Block*& getCurrentBlockRef(const size_t /*p_idx*/) {return currentBlock_;}
+   blockforest::BlockID const & getCurrentBlock(const size_t /*p_idx*/) const {return currentBlock_;}
+   void setCurrentBlock(const size_t /*p_idx*/, blockforest::BlockID const & v) { currentBlock_ = v;}
+   blockforest::BlockID& getCurrentBlockRef(const size_t /*p_idx*/) {return currentBlock_;}
    
    uint_t const & getType(const size_t /*p_idx*/) const {return type_;}
    void setType(const size_t /*p_idx*/, uint_t const & v) { type_ = v;}
@@ -319,7 +319,7 @@ private:
    walberla::mesa_pd::Vec3 force_;
    walberla::mesa_pd::Vec3 oldForce_;
    walberla::mesa_pd::Vec3 oldTorque_;
-   blockforest::Block* currentBlock_;
+   blockforest::BlockID currentBlock_;
    uint_t type_;
    int nextParticle_;
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> oldContactHistory_;

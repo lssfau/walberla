@@ -18,12 +18,6 @@
 //
 //======================================================================================================================
 
-//======================================================================================================================
-//
-//  THIS FILE IS GENERATED - PLEASE CHANGE THE TEMPLATE !!!
-//
-//======================================================================================================================
-
 #include "SyncNextNeighborsBlockForest.h"
 #include <mesa_pd/domain/BlockForestDomain.h>
 
@@ -122,8 +116,8 @@ void SyncNextNeighborsBlockForest::generateSynchronizationMessages(data::Particl
          continue;
       }
 
-      auto& currentBlock = pIt->getCurrentBlockRef();
-      WALBERLA_CHECK_NOT_NULLPTR(currentBlock);
+      auto currentBlock = bf->getBlock(pIt->getCurrentBlock());
+      WALBERLA_CHECK_NOT_NULLPTR(currentBlock, *pIt);
       if (isInsideAABB(pIt->getPosition(), pIt->getInteractionRadius() + dx, currentBlock->getAABB()))
       {
          //no sync needed
