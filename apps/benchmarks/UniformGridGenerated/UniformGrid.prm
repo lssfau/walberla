@@ -1,8 +1,8 @@
 DomainSetup
 {
    blocks        <  1,    1,   1 >;
-   cellsPerBlock <  128, 128, 128 >;
-   periodic      <  0,    0,   0 >;
+   cellsPerBlock <  64, 64, 64 >;
+   periodic      <  1,   1,   1 >;
 }
 
 Parameters 
@@ -13,11 +13,12 @@ Parameters
     outerIterations 1;      // how many measurements to conduct
 
 	vtkWriteFrequency 100;           // write a VTK file every n'th step, if zero VTK output is disabled
-	timeStepMode aa;                 // can be: noOverlap, simpleOverlap, complexOverlap, kernelOnly
+	timeStepMode twoField;
+	//twoFieldKernelType manual_generic;
 	remainingTimeLoggerFrequency 0;  // interval in seconds to log the estimated remaining time
-    directComm 1;
+    directComm 0;
 
 	omega 1.8;
-	shearVelocityMagnitude 0;
+	shearVelocityMagnitude 0.05;
 	useGui 0;
 }

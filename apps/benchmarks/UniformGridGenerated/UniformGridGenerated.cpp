@@ -16,6 +16,8 @@
 #include "domain_decomposition/SharedSweep.h"
 #include "gui/Gui.h"
 #include "InitShearVelocity.h"
+#include "ManualKernels.h"
+#include "lbm/lattice_model/D3Q19.h"
 
 #include "GenDefines.h"
 #include "GenMacroGetter.h"
@@ -31,6 +33,7 @@
 #include "GenMpiDtypeInfo.h"
 #include "GenMpiDtypeInfoAAPull.h"
 #include "GenMpiDtypeInfoAAPush.h"
+
 
 #include <iomanip>
 
@@ -102,14 +105,27 @@ int main( int argc, char **argv )
       blockforest::communication::UniformDirectScheme< Stencil_T > aaPushCommDirect(blocks);
       aaPushCommDirect.addDataToCommunicate(make_shared<pystencils::GenMpiDtypeInfoAAPush>(pdfFieldId));
 
+
+      const std::string twoFieldKernelType = parameters.getParameter<std::string>( "twoFieldKernelType", "generated");
+      std::function<void(IBlock*)> twoFieldKernel;
+      if( twoFieldKernelType == "generated") {
+          twoFieldKernel = pystencils::GenLbKernel(pdfFieldId, omega);
+      } else if (twoFieldKernelType == "manual_generic") {
+          using MyLM = lbm::D3Q19<lbm::collision_model::SRT>;
+          BlockDataID tmpPdfFieldId = blocks->addStructuredBlockData<PdfField_T>(pdfFieldAdder, "pdfs");
+          twoFieldKernel = StreamPullCollideGeneric<MyLM>(pdfFieldId, tmpPdfFieldId, omega);
+      } else if (twoFieldKernelType == "manual_d3q19") {
+
+      }
+
       using F = std::function<void()>;
       SweepTimeloop timeLoop( blocks->getBlockStorage(), timesteps / 2 );
       if( timeStepMode == "twoField")
       {
           timeLoop.add() << BeforeFunction(directComm ? F(twoFieldCommDirect) : F(twoFieldComm), "communication" )
-                         << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide1" );
+                         << Sweep( twoFieldKernel, "LB stream & collide1" );
           timeLoop.add() << BeforeFunction(directComm ? F(twoFieldCommDirect) : F(twoFieldComm), "communication" )
-                         << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide2" );
+                         << Sweep( twoFieldKernel, "LB stream & collide2" );
 
       } else if ( timeStepMode == "twoFieldKernelOnly") {
           timeLoop.add() << Sweep( pystencils::GenLbKernel(pdfFieldId, omega), "LB stream & collide1" );
@@ -194,6 +210,8 @@ int main( int argc, char **argv )
                       pythonCallbackResults.data().exposeValue( "mlupsPerProcess", mlupsPerProcess );
                       pythonCallbackResults.data().exposeValue( "stencil", infoStencil );
                       pythonCallbackResults.data().exposeValue( "configName", infoConfigName );
+                      pythonCallbackResults.data().exposeValue( "timeStepMode", timeStepMode );
+                      pythonCallbackResults.data().exposeValue( "twoFieldKernel", twoFieldKernelType );
                       pythonCallbackResults.data().exposeValue( "optimizations", optimizationDict );
                       pythonCallbackResults.data().exposeValue( "githash", core::buildinfo::gitSHA1() );
                       pythonCallbackResults.data().exposeValue( "compilerFlags", core::buildinfo::compilerFlags() );
