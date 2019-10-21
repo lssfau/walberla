@@ -1,14 +1,14 @@
 DomainSetup
 {
    blocks        <  1,    1,   1 >;
-   cellsPerBlock <  64, 64, 64 >;
-   periodic      <  1,    1,   1 >;
+   cellsPerBlock <  128, 128, 128 >;
+   periodic      <  0,    0,   0 >;
 }
 
 Parameters 
 {
 
-	timesteps       3000;   // time steps of one performance measurement
+	timesteps       1000;   // time steps of one performance measurement
 	warmupSteps     1;      // number of steps to run before measurement starts
     outerIterations 1;      // how many measurements to conduct
 
@@ -18,5 +18,6 @@ Parameters
     directComm 1;
 
 	omega 1.8;
+	shearVelocityMagnitude 0;
 	useGui 0;
 }

@@ -77,7 +77,8 @@ int main( int argc, char **argv )
       pystencils::GenMacroSetter setterKernel(pdfFieldId, velFieldId);
       pystencils::GenMacroGetter getterKernel(pdfFieldId, velFieldId);
 
-      initShearVelocity(blocks, velFieldId, shearVelocityMagnitude);
+      if( shearVelocityMagnitude > 0 )
+          initShearVelocity(blocks, velFieldId, shearVelocityMagnitude);
       for( auto & b : *blocks)
           setterKernel(&b);
 

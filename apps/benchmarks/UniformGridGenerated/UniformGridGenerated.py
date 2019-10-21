@@ -92,6 +92,8 @@ with CodeGeneration() as ctx:
         'aa_odd_cse_global': False,
         'aa_odd_split': True,
         'aa_odd_nt_stores': False,
+
+        'compiled_in_boundaries': True,
     }
     config_name = ctx.config
     noopt = False
@@ -118,9 +120,7 @@ with CodeGeneration() as ctx:
                                                                 'cse_global': opts['two_field_cse_global'],
                                                                 'cse_pdfs': opts['two_field_cse_pdfs']}, **options)
 
-    include_boundaries = True
-
-    if include_boundaries:
+    if opts['compiled_in_boundaries']:
         from lbmpy.boundaries import NoSlip, UBB
         from lbmpy.boundaries.boundaries_in_kernel import update_rule_with_push_boundaries
         from collections import OrderedDict
