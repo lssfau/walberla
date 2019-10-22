@@ -8,17 +8,17 @@ DomainSetup
 Parameters 
 {
 
-	timesteps       1000;   // time steps of one performance measurement
+	timesteps       200;   // time steps of one performance measurement
 	warmupSteps     1;      // number of steps to run before measurement starts
-    outerIterations 1;      // how many measurements to conduct
+    outerIterations 4;      // how many measurements to conduct
 
-	vtkWriteFrequency 100;           // write a VTK file every n'th step, if zero VTK output is disabled
+	vtkWriteFrequency 0;           // write a VTK file every n'th step, if zero VTK output is disabled
 	timeStepMode twoField;
-	//twoFieldKernelType manual_generic;
-	remainingTimeLoggerFrequency 0;  // interval in seconds to log the estimated remaining time
+	//twoFieldKernelType manualD3Q19;
+	remainingTimeLoggerFrequency 6;  // interval in seconds to log the estimated remaining time
     directComm 0;
 
 	omega 1.8;
-	shearVelocityMagnitude 0.05;
+	shearVelocityMagnitude 0.02;
 	useGui 0;
 }

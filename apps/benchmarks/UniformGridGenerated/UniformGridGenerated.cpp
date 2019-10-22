@@ -110,12 +110,17 @@ int main( int argc, char **argv )
       std::function<void(IBlock*)> twoFieldKernel;
       if( twoFieldKernelType == "generated") {
           twoFieldKernel = pystencils::GenLbKernel(pdfFieldId, omega);
-      } else if (twoFieldKernelType == "manual_generic") {
+      } else if (twoFieldKernelType == "manualGeneric") {
           using MyLM = lbm::D3Q19<lbm::collision_model::SRT>;
           BlockDataID tmpPdfFieldId = blocks->addStructuredBlockData<PdfField_T>(pdfFieldAdder, "pdfs");
           twoFieldKernel = StreamPullCollideGeneric<MyLM>(pdfFieldId, tmpPdfFieldId, omega);
-      } else if (twoFieldKernelType == "manual_d3q19") {
-
+      } else if (twoFieldKernelType == "manualD3Q19") {
+          using MyLM = lbm::D3Q19<lbm::collision_model::SRT>;
+          BlockDataID tmpPdfFieldId = blocks->addStructuredBlockData<PdfField_T>(pdfFieldAdder, "pdfs");
+          twoFieldKernel = StreamPullCollideD3Q19<MyLM>(pdfFieldId, tmpPdfFieldId, omega);
+      } else {
+          WALBERLA_ABORT_NO_DEBUG_INFO("Invalid option for \"twoFieldKernelType\", "
+                                       "valid options are \"generated\", \"manualGeneric\", \"manualD3Q19\"");
       }
 
       using F = std::function<void()>;
