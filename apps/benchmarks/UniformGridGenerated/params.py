@@ -3,8 +3,9 @@ import os
 import operator
 import waLBerla as wlb
 from waLBerla.tools.sqlitedb import *
-from waLBerla.tools.setup import block_decomposition
+from waLBerla.tools.config import block_decomposition
 from functools import reduce
+import sqlite3
 
 
 def prod(seq):
@@ -104,8 +105,19 @@ class BenchmarkScenario:
         result.update(optimizations)
         result.update(kwargs)
         sequenceValuesToScalars(result)
-        checkAndUpdateSchema(result, "runs", self.db_file_name)
-        storeSingle(result, "runs", self.db_file_name)
+        num_tries = 4
+        for num_try in range(num_tries):
+            try:
+                checkAndUpdateSchema(result, "runs", self.db_file_name)
+                storeSingle(result, "runs", self.db_file_name)
+                break
+            except sqlite3.OperationalError as e:
+                wlb.log_warning(f"Sqlite DB writing failed: try {num_try + 1}/4 " + str(e))
+
+
+def block_size_ok(sc):
+    block_size = sc.config()['DomainSetup']['cellsPerBlock']
+    return prod(block_size) * 19 < 2 ** 31
 
 
 def single_node_benchmark():
@@ -121,25 +133,41 @@ def single_node_benchmark():
                                                time_step_mode=time_step_mode, two_field_kernel_type=kt,
                                                domain_decomposition_func=domain_decomposition_func_z
                                                )
+                        if not block_size_ok(sc):
+                            continue
                         scenarios.add(sc)
 
             else:
                     sc = BenchmarkScenario(block_size=block_size, direct_comm=direct_comm,
                                            domain_decomposition_func=domain_decomposition_func_z,
                                            time_step_mode=time_step_mode)
+                    if not block_size_ok(sc):
+                        continue
                     scenarios.add(sc)
+
+
+def single_node_benchmark_small():
+    scenarios = wlb.ScenarioManager()
+    for block_size in [(128, 128, 128), (128, 64, 64), (64, 64, 128), (64, 128, 64), (64, 64, 64),
+                       (1024, 64, 32), (2048, 64, 16), (64, 32, 32), (32, 32, 32), (16, 16, 16), (256, 128, 64), (512, 128, 32)]:
+        for direct_comm in (True, False):
+            for time_step_mode in ['aa', 'aaKernelOnly', 'twoField']:
+                sc = BenchmarkScenario(block_size=block_size, direct_comm=direct_comm, time_step_mode=time_step_mode)
+                if not block_size_ok(sc):
+                    continue
+                scenarios.add(sc)
 
 
 def weak_scaling():
     scenarios = wlb.ScenarioManager()
     for block_size in [(128, 128, 128), (128, 64, 64), (64, 64, 128), (64, 128, 64), (64, 64, 64),
-                       (1024, 64, 32), (2048, 64, 16),
-                       (64, 32, 32), (32, 32, 32), (16, 16, 16), (256, 128, 64), (512, 128, 32)]:
+                       (1024, 64, 32), (2048, 64, 16), (64, 32, 32), (32, 32, 32), (16, 16, 16), (256, 128, 64), (512, 128, 32)]:
         for direct_comm in (True, False):
             sc = BenchmarkScenario(block_size=block_size, direct_comm=direct_comm,
                                    domain_decomposition_func=domain_decomposition_func_full)
+            if not block_size_ok(sc):
+                continue
             scenarios.add(sc)
 
 
 single_node_benchmark()
-
