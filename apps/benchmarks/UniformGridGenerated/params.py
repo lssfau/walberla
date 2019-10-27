@@ -64,7 +64,7 @@ class BenchmarkScenario:
 
     @wlb.member_callback
     def config(self, **kwargs):
-        time_steps_for_128_cubed = 50
+        time_steps_for_128_cubed = 10
         time_steps = int(128**3 / prod(self.block_size) * time_steps_for_128_cubed)
         time_steps = max(10, time_steps)
         cfg = {
@@ -73,8 +73,8 @@ class BenchmarkScenario:
             },
             'Parameters': {
                 'timesteps': time_steps,
-                'warmupSteps': 6,
-                'outerIterations': 3,
+                'warmupSteps': 2,
+                'outerIterations': 4,
                 'vtkWriteFrequency': 0,
                 'remainingTimeLoggerFrequency': 0,
                 'omega': 1.6,
@@ -136,14 +136,13 @@ def single_node_benchmark():
                         if not block_size_ok(sc):
                             continue
                         scenarios.add(sc)
-
-            else:
-                    sc = BenchmarkScenario(block_size=block_size, direct_comm=direct_comm,
-                                           domain_decomposition_func=domain_decomposition_func_z,
-                                           time_step_mode=time_step_mode)
-                    if not block_size_ok(sc):
-                        continue
-                    scenarios.add(sc)
+                else:
+                        sc = BenchmarkScenario(block_size=block_size, direct_comm=direct_comm,
+                                               domain_decomposition_func=domain_decomposition_func_z,
+                                               time_step_mode=time_step_mode)
+                        if not block_size_ok(sc):
+                            continue
+                        scenarios.add(sc)
 
 
 def single_node_benchmark_small():
@@ -168,6 +167,5 @@ def weak_scaling():
             if not block_size_ok(sc):
                 continue
             scenarios.add(sc)
-
 
 single_node_benchmark()

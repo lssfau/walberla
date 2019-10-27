@@ -93,7 +93,7 @@ with CodeGeneration() as ctx:
         'aa_odd_split': True,
         'aa_odd_nt_stores': False,
 
-        'compiled_in_boundaries': True,
+        'compiled_in_boundaries': False,
     }
     config_name = ctx.config
     noopt = False
