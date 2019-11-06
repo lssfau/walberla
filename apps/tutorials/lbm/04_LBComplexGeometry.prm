@@ -1,0 +1,80 @@
+
+Parameters 
+{
+	omega           1.8;
+	initialVelocity < 0.1, 0, 0 >;
+	timesteps       5000;
+
+	useGui 0;
+	remainingTimeLoggerFrequency 3; // in seconds
+}
+
+DomainSetup
+{
+   meshFile         bunny.obj;
+   numLevels        0;
+   domainScaling    <  10,  3,  1 >;
+   dx               3;
+   cellsPerBlock    < 16, 16, 16 >;
+   periodic         <  0,  0,  1 >;
+}
+
+StabilityChecker
+{
+   checkFrequency 100;
+   streamOutput   false;
+   vtkOutput      true;
+}
+
+Boundaries 
+{
+	velocity0 < 0.1, 0, 0 >; // velocity of cells where Velocity0 boundary is set
+	velocity1 <   0, 0, 0 >; // velocity of cells where Velocity1 boundary is set
+	pressure0 1.1;		     // pressure of cells where Pressure0 boundary is set
+	pressure1 1.0;			 // pressure of cells where Pressure1 boundary is set
+    
+	Border { direction W;    walldistance -1;  Velocity0 {} }
+	Border { direction E;    walldistance -1;  Pressure1 {} }
+	Border { direction S,N;  walldistance -1;  NoSlip    {} }
+
+}
+
+
+VTK 
+{
+   // for parameter documentation see src/vtk/Initialization.cpp
+   fluid_field
+   {
+      writeFrequency 100;
+      ghostLayers    1;
+      
+      before_functions {
+         PDFGhostLayerSync;
+      }
+      
+      inclusion_filters {
+         DomainFilter;
+      }
+      
+      writers {
+         Velocity;
+         Density;
+      }
+   }
+   
+   flag_field
+   {
+      writeFrequency 10000000; // write only once
+      ghostLayers    1;
+      
+      writers {
+         FlagField;
+      }
+   }
+   
+   domain_decomposition
+   {
+      writeFrequency 10000000; // write only once
+      outputDomainDecomposition true;
+   }
+}
