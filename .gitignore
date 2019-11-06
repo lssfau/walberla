@@ -64,3 +64,5 @@ cmake_install.cmake
 CMakeDefs.h
 /moduleStatistics.json
 /walberla-config.cmake
+/cmake-build-debug/
+/cmake-build-release/

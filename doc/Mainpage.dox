@@ -40,6 +40,8 @@ all the basic data strcutures and concepts of the framework.
 
 - \ref tutorial_lbm01 \n
   A full LBM simulation is built.
+- \ref tutorial_lbm04 \n
+  A LBM simulation with complex geometries is built.
    
 \section further_info Further information
 
