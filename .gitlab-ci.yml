@@ -119,6 +119,19 @@ stages:
    WALBERLA_BUILD_WITH_METIS: "OFF"
    WALBERLA_BUILD_WITH_PARMETIS: "OFF"
 
+.variables: &build_stl_debug_variables
+   CTEST_EXCLUDE_LABELS: "longrun"
+   WALBERLA_BUILD_WITH_MPI: "ON"
+   WALBERLA_BUILD_WITH_OPENMP: "ON"
+   OMP_NUM_THREADS: "4"
+   OMP_WAIT_POLICY: "PASSIVE"
+   CMAKE_BUILD_TYPE: "DebugOptimized"
+   WALBERLA_BUFFER_DEBUG: "OFF"
+   WALBERLA_DOUBLE_ACCURACY: "ON"
+   WALBERLA_BUILD_WITH_CUDA: "OFF"
+   WALBERLA_BUILD_WITH_METIS: "OFF"
+   WALBERLA_BUILD_WITH_PARMETIS: "OFF"
+   WALBERLA_BUILD_WITH_PYTHON: "OFF"
 
 ###############################################################################
 ##                                                                           ##
@@ -1455,6 +1468,45 @@ clang_9.0_hybrid_dbg_sp:
 
 
 
+gcc_8_hybrid_dbg_noboost:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
+   before_script:
+      - rm -rf /opt/boost /usr/include/boost
+   variables:
+      <<: *build_hybrid_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: "OFF"
+      WALBERLA_BUILD_WITH_PYTHON: "OFF"
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
+
+
+###############################################################################
+##                                                                           ##
+##    STL Debug Build                                                        ##
+##                                                                           ##
+###############################################################################
+
+gcc_9_stl_debug:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   before_script:
+      - rm -rf /opt/boost /usr/include/boost
+   variables:
+      <<: *build_stl_debug_variables
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+
+
 ###############################################################################
 ##                                                                           ##
 ##    Documentation                                                         ##
@@ -1556,24 +1608,6 @@ coverage:
    variables:
       CXXFLAGS: "-fprofile-arcs -ftest-coverage -fPIC -O0"
       LDFLAGS: "-fprofile-arcs -ftest-coverage -fPIC -O0"
-
-
-gcc_8_hybrid_dbg_noboost:
-   <<: *build_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
-   before_script:
-      - rm -rf /opt/boost /usr/include/boost
-   variables:
-      <<: *build_hybrid_dbg_variables
-      WALBERLA_BUILD_WITH_CUDA: "OFF"
-      WALBERLA_ENABLE_GUI: "OFF"
-      WALBERLA_BUILD_WITH_PYTHON: "OFF"
-   except:
-      variables:
-         - $DISABLE_PER_COMMIT_BUILDS
-   tags:
-      - docker
-
 
 
 ###############################################################################
