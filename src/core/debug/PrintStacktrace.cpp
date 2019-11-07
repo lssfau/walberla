@@ -36,9 +36,9 @@ void printStacktrace()
 } // namespace debug
 } // namespace walberla
 
-#if defined(WALBERLA_CXX_COMPILER_IS_GNU) || defined(WALBERLA_CXX_COMPILER_IS_INTEL) || defined( WALBERLA_CXX_COMPILER_IS_CLANG)
+#ifdef WALBERLA_BUILD_WITH_BACKTRACE
 
-#include <execinfo.h>
+#include WALBERLA_BACKTRACE_HEADER
 #include <cstdlib>
 #include <string>
 
@@ -55,14 +55,13 @@ namespace debug {
       void * array[BACKTRACE_LENGTH];
       size_t size;
       char **strings;
-      size_t i;
 
       size = numeric_cast< size_t >( backtrace (array, BACKTRACE_LENGTH) );
       strings = backtrace_symbols (array, int_c(size) );
 
       os << "Backtrace: " << std::endl;
 
-      for (i = 0; i < size; i++)
+      for (size_t i = 0; i < size; i++)
       {
          std::string line ( strings[i] );
 #ifdef __APPLE__

@@ -779,6 +779,23 @@ endif()
 
 ############################################################################################################################
 ##
+## backtrace may be in a separate library
+##
+############################################################################################################################
+
+if ( NOT WIN32 AND (WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG))
+   find_package ( Backtrace QUIET )
+   if ( Backtrace_FOUND )
+      list ( APPEND SERVICE_LIBS ${Backtrace_LIBRARIES} )
+      set ( WALBERLA_BUILD_WITH_BACKTRACE ON )
+      set ( WALBERLA_BACKTRACE_HEADER ${Backtrace_HEADER} )
+   endif ( Backtrace_FOUND )
+endif()
+
+
+
+############################################################################################################################
+##
 ## MPI
 ##
 ############################################################################################################################
