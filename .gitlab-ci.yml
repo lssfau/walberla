@@ -1303,9 +1303,9 @@ clang_8.0_hybrid:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_ENABLE_GUI: 0
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -1316,9 +1316,9 @@ clang_8.0_serial_dbg:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_ENABLE_GUI: 0
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -1329,9 +1329,9 @@ clang_8.0_mpionly_dbg:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_ENABLE_GUI: 0
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -1342,15 +1342,106 @@ clang_8.0_hybrid_dbg:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_ENABLE_GUI: 0
-   except:
+   only:
       variables:
-         - $DISABLE_PER_COMMIT_BUILDS
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
 clang_8.0_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
+   variables:
+      <<: *build_hybrid_dbg_sp_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+clang_9.0_serial:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
+   variables:
+      <<: *build_serial_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+clang_9.0_mpionly:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
+   variables:
+      <<: *build_mpionly_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+clang_9.0_hybrid:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
+   variables:
+      <<: *build_hybrid_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
+clang_9.0_serial_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
+   variables:
+      <<: *build_serial_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
+clang_9.0_mpionly_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
+   variables:
+      <<: *build_mpionly_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
+clang_9.0_hybrid_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
+   variables:
+      <<: *build_hybrid_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   except:
+      variables:
+         - $DISABLE_PER_COMMIT_BUILDS
+   tags:
+      - docker
+
+clang_9.0_hybrid_dbg_sp:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    stage: pretest
    variables:
       <<: *build_hybrid_dbg_sp_variables
@@ -1371,7 +1462,7 @@ clang_8.0_hybrid_dbg_sp:
 ###############################################################################
 
 doc:
-   image: walberla/buildenv-ubuntu-basic:16.04
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/ubuntu:18.04
    script:
       - cmake --version
       - doxygen --version
@@ -1399,7 +1490,7 @@ doc:
 ###############################################################################
 
 clang-tidy:
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    script:
       - $CXX --version
       - clang-tidy -version
@@ -1475,7 +1566,7 @@ gcc_8_hybrid_dbg_noboost:
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
-      WALBERLA_ENABLE_GUI: 0
+      WALBERLA_ENABLE_GUI: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "OFF"
    except:
       variables:
@@ -1856,6 +1947,7 @@ conda-py36-linux:
       - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --InelasticCoulombContactByDecoupling | tee GranularGas_HCSITS_NN_ICCBD.txt
       - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncNextNeighbor --InelasticGeneralizedMaximumDissipationContact | tee GranularGas_HCSITS_NN_IGMDC.txt
       - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./PE_GranularGas PE_Benchmark.cfg --HCSITS --syncShadowOwners --InelasticFrictionlessContact | tee GranularGas_HCSITS_SO_IFC.txt
+      - python3 upload.py
       - python3 pe_upload.py
       - mpirun --allow-run-as-root -np 8 --map-by core --bind-to core --report-bindings ./MESA_PD_KernelBenchmark MESA_PD_Benchmark.cfg | tee mesa_pd.txt
       - python3 mesa_pd_upload.py
