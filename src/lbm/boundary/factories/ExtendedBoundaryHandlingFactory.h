@@ -87,9 +87,16 @@ public:
    typedef walberla::boundary::BoundaryHandling< FlagFieldT, Stencil, BcNoSlip, BcFreeSlip, BcPressure, BcUBB, BcOutlet, BcCurved >  BoundaryHandling;
 
    static BlockDataID addBoundaryHandlingToStorage( const shared_ptr< StructuredBlockStorage > & bs, const std::string & identifier,
-                                                    BlockDataID flagFieldID, BlockDataID pdfFieldID, const Set< FlagUID > & flagUIDSet )
+                                                    BlockDataID flagFieldID, BlockDataID pdfFieldID, const Set< FlagUID > & flagUIDSet)
    {
-      ExtendedBoundaryHandlingFactory factory ( flagFieldID, pdfFieldID, flagUIDSet );
+      return addBoundaryHandlingToStorage(bs, identifier, pdfFieldID, pdfFieldID, flagUIDSet,BoundaryHandling::Mode::OPTIMIZED_SPARSE_TRAVERSAL );
+   }
+
+   static BlockDataID addBoundaryHandlingToStorage( const shared_ptr< StructuredBlockStorage > & bs, const std::string & identifier,
+                                                    BlockDataID flagFieldID, BlockDataID pdfFieldID, const Set< FlagUID > & flagUIDSet,
+                                                    const typename BoundaryHandling::Mode boundaryHandlingTraversalMode )
+   {
+      ExtendedBoundaryHandlingFactory factory ( flagFieldID, pdfFieldID, flagUIDSet, boundaryHandlingTraversalMode );
 
       return bs->addStructuredBlockData< BoundaryHandling >( factory, identifier );
    }
@@ -109,7 +116,8 @@ public:
    static const walberla::BoundaryUID & getCurvedBoundaryUID()    { static BoundaryUID uid( "Curved" );    return uid; }
 
 
-   ExtendedBoundaryHandlingFactory( const BlockDataID & flagField, const BlockDataID & pdfField, const Set< FlagUID > & flagUIDSet );
+   ExtendedBoundaryHandlingFactory( const BlockDataID & flagField, const BlockDataID & pdfField, const Set< FlagUID > & flagUIDSet,
+                                    const typename BoundaryHandling::Mode boundaryHandlingTraversalMode );
 
    BoundaryHandling * operator()( walberla::IBlock * const block, const walberla::StructuredBlockStorage * const storage ) const;
 
@@ -118,6 +126,8 @@ private:
    BlockDataID pdfField_;
 
    const Set< FlagUID > flagUIDSet_;
+
+   const typename BoundaryHandling::Mode boundaryHandlingTraversalMode_;
 
 }; // class ExtendedBoundaryHandlingFactory
 
@@ -132,8 +142,9 @@ private:
 //**********************************************************************************************************************
 template <typename LatticeModel, typename FlagFieldT >
 ExtendedBoundaryHandlingFactory<LatticeModel, FlagFieldT>::ExtendedBoundaryHandlingFactory(
-                                                   const BlockDataID & flagField, const BlockDataID & pdfField, const Set< FlagUID > & flagUIDSet ) :
-   flagField_( flagField ), pdfField_( pdfField ), flagUIDSet_(flagUIDSet)
+                                                   const BlockDataID & flagField, const BlockDataID & pdfField, const Set< FlagUID > & flagUIDSet,
+                                                   const typename BoundaryHandling::Mode boundaryHandlingTraversalMode ) :
+   flagField_( flagField ), pdfField_( pdfField ), flagUIDSet_(flagUIDSet), boundaryHandlingTraversalMode_(boundaryHandlingTraversalMode)
 {
 }
 
@@ -158,7 +169,8 @@ ExtendedBoundaryHandlingFactory<LatticeModel, FlagFieldT>::operator()( IBlock * 
         BcPressure  ( getPressureBoundaryUID(), getPressure(), pdfField ),
         BcUBB       ( getUBBBoundaryUID(),      getUBB(),      pdfField, flagField, storage->getLevel(*block), block->getAABB() ),
         BcOutlet    ( getOutletBoundaryUID(),   getOutlet(),   pdfField, flagField, mask ),
-        BcCurved    ( getCurvedBoundaryUID(),   getCurved(),   pdfField, flagField, mask )
+        BcCurved    ( getCurvedBoundaryUID(),   getCurved(),   pdfField, flagField, mask ),
+        boundaryHandlingTraversalMode_
     );
 
    return handling;

@@ -89,7 +89,18 @@ public:
                                                     const real_t pressure0,
                                                     const real_t pressure1 )
    {
-      DefaultBoundaryHandlingFactory factory ( flagFieldID, pdfFieldID, flagUIDSet, velocity0, velocity1, pressure0, pressure1 );
+      return addBoundaryHandlingToStorage(bs, identifier, flagFieldID, pdfFieldID, flagUIDSet, velocity0, velocity1, pressure0, pressure1, BoundaryHandling::Mode::OPTIMIZED_SPARSE_TRAVERSAL);
+   }
+
+   static BlockDataID addBoundaryHandlingToStorage( const shared_ptr< StructuredBlockStorage > & bs, const std::string & identifier,
+                                                    BlockDataID flagFieldID, BlockDataID pdfFieldID, const Set< FlagUID > & flagUIDSet,
+                                                    const Vector3<real_t> & velocity0,
+                                                    const Vector3<real_t> & velocity1,
+                                                    const real_t pressure0,
+                                                    const real_t pressure1,
+                                                    const typename BoundaryHandling::Mode boundaryHandlingTraversalMode )
+   {
+      DefaultBoundaryHandlingFactory factory ( flagFieldID, pdfFieldID, flagUIDSet, velocity0, velocity1, pressure0, pressure1, boundaryHandlingTraversalMode );
 
       return bs->addStructuredBlockData< BoundaryHandling >( factory, identifier );
    }
@@ -110,8 +121,9 @@ public:
 
 
    DefaultBoundaryHandlingFactory( const BlockDataID & flagField, const BlockDataID & pdfField, const Set< FlagUID > & flagUIDSet,
-                            const Velocity velocity0, const Velocity velocity1,
-                            const real_t   pressure0, const real_t   pressure1 );
+                                   const Velocity velocity0, const Velocity velocity1,
+                                   const real_t   pressure0, const real_t   pressure1,
+                                   const typename BoundaryHandling::Mode boundaryHandlingTraversalMode );
 
    BoundaryHandling * operator()( walberla::IBlock * const block, const walberla::StructuredBlockStorage * const storage ) const;
 
@@ -123,6 +135,8 @@ private:
 
    Velocity velocity0_, velocity1_;
    real_t   pressure0_, pressure1_;
+
+   const typename BoundaryHandling::Mode boundaryHandlingTraversalMode_;
 
 }; // class DefaultBoundaryHandlingFactory
 
@@ -143,16 +157,17 @@ template <typename LatticeModel, typename FlagFieldT >
 DefaultBoundaryHandlingFactory<LatticeModel, FlagFieldT>::DefaultBoundaryHandlingFactory(
                                                    const BlockDataID & flagField, const BlockDataID & pdfField, const Set< FlagUID > & flagUIDSet,
                                                    const Velocity velocity0, const Velocity velocity1,
-                                                   const real_t   pressure0, const real_t   pressure1 ) :
+                                                   const real_t   pressure0, const real_t   pressure1,
+                                                   const typename BoundaryHandling::Mode boundaryHandlingTraversalMode ) :
    flagField_( flagField ), pdfField_( pdfField ), flagUIDSet_(flagUIDSet), velocity0_( velocity0 ), velocity1_( velocity1 ),
-   pressure0_( pressure0 ), pressure1_( pressure1 )
+   pressure0_( pressure0 ), pressure1_( pressure1 ), boundaryHandlingTraversalMode_( boundaryHandlingTraversalMode )
 {
 }
 
 template <typename LatticeModel, typename FlagFieldT >
 typename DefaultBoundaryHandlingFactory<LatticeModel, FlagFieldT>::BoundaryHandling *
 DefaultBoundaryHandlingFactory<LatticeModel, FlagFieldT>::operator()( walberla::IBlock * const block,
-                                                               const walberla::StructuredBlockStorage * const /*storage*/ ) const
+                                                                      const walberla::StructuredBlockStorage * const /*storage*/ ) const
 {
    PdfFieldLM * const pdfField  = block->getData< PdfFieldLM >( pdfField_  );
    FlagFieldT * const flagField = block->getData< FlagFieldT >( flagField_ );
@@ -167,7 +182,8 @@ DefaultBoundaryHandlingFactory<LatticeModel, FlagFieldT>::operator()( walberla::
         BcSimpleUBB     ( getVelocity0BoundaryUID(), getVelocity0(), pdfField, velocity0_ ),
         BcSimpleUBB     ( getVelocity1BoundaryUID(), getVelocity1(), pdfField, velocity1_ ),
         BcSimplePressure( getPressure0BoundaryUID(), getPressure0(), pdfField, pressure0_ ),
-        BcSimplePressure( getPressure1BoundaryUID(), getPressure1(), pdfField, pressure1_ )
+        BcSimplePressure( getPressure1BoundaryUID(), getPressure1(), pdfField, pressure1_ ),
+        boundaryHandlingTraversalMode_
     );
 
    return handling;
