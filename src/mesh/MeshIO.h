@@ -48,14 +48,14 @@ namespace mesh {
 *
 * The mesh is read from disk by a single process and then broadcasted. This ensures a scalable load process that does
 * not put to much pressure on the file system at large scale.
-* 
+*
 * \tparam MeshType The type of the OpenMesh
 *
 * \param filename filename of the mesh to be loaded
 * \param mesh     The mesh data structure to be written to
 */
 template< typename MeshType >
-void readAndBroadcast( const std::string & filename, MeshType & mesh )
+void readAndBroadcast( const std::string & filename, MeshType & mesh, bool binaryFile = false )
 {
    if( !filesystem::exists( filename ) )
       WALBERLA_ABORT( "The mesh file \"" << filename << "\" does not exist!" );
@@ -67,9 +67,11 @@ void readAndBroadcast( const std::string & filename, MeshType & mesh )
    WALBERLA_ROOT_SECTION()
    {
       std::ifstream t( filename.c_str() );
+      if ( binaryFile )
+         t = std::ifstream( filename.c_str(), std::ifstream::in | std::ifstream::binary );
+
       if( !t )
          WALBERLA_ABORT( "Error while reading file \"" << filename << "\"!" );
-
       t.seekg( 0, std::ios::end );
       str.reserve( static_cast<std::string::size_type>( t.tellg() ) );
       t.seekg( 0, std::ios::beg );
@@ -81,10 +83,14 @@ void readAndBroadcast( const std::string & filename, MeshType & mesh )
    mpi::broadcastObject( str );
 
    std::istringstream iss( str );
+   if ( binaryFile )
+      iss = std::istringstream( str, std::ifstream::in | std::ifstream::binary );
 
    OpenMesh::IO::Options options;
    if( mesh.has_face_colors() )
       options += OpenMesh::IO::Options::FaceColor;
+   if ( binaryFile )
+      options += OpenMesh::IO::Options::Binary;
    if( mesh.has_vertex_colors() )
       options += OpenMesh::IO::Options::VertexColor;
    if( !OpenMesh::IO::read_mesh( mesh, iss, extension, options ) )
