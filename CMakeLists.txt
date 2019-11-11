@@ -497,6 +497,12 @@ else()
    endif()
 endif()
 
+try_compile( WALBERLA_USE_STD_VARIANT "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdVariant.cpp"
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_VARIANT ${CMAKE_CXX14_STANDARD_COMPILE_OPTION} )
+if( WALBERLA_USE_STD_VARIANT )
+   message( STATUS "Found std::variant")
+endif()
+
 
 
 ############################################################################################################################

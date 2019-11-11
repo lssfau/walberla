@@ -22,10 +22,6 @@
 #pragma once
 
 
-#if __cpp_lib_variant
-#define WALBERLA_USE_STD_VARIANT
-#endif
-
 #if defined(WALBERLA_USE_STD_VARIANT)
 #include <variant>
 #else
