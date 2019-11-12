@@ -130,7 +130,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("blocks: " << Vector3<uint_t>(forest->getXSize(), forest->getYSize(), forest->getZSize()) );
 
-   auto ic = make_shared<pe::InfoCollection>();
+   auto ic = make_shared<blockforest::InfoCollection>();
 
    pe::amr::MinMaxLevelDetermination regrid(ic, params.regridMin, params.regridMax);
    forest->setRefreshMinTargetLevelDeterminationFunction( regrid );

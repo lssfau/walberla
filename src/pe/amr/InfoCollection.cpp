@@ -31,22 +31,23 @@ namespace pe {
 
 void createWithNeighborhoodLocalShadow( const BlockForest& bf,
                                         const BlockDataID storageID,
-                                        InfoCollection& ic )
+                                        blockforest::InfoCollection& ic )
 {
+   using namespace walberla::blockforest;
    ic.clear();
 
    mpi::BufferSystem bs( MPIManager::instance()->comm(), 756 );
 
    for (auto blockIt = bf.begin(); blockIt != bf.end(); ++blockIt)
    {
-      const blockforest::Block* block   = static_cast<const blockforest::Block*> (&(*blockIt));
+      const Block* block   = static_cast<const Block*> (&(*blockIt));
       Storage const *     storage       = block->getData< Storage >( storageID );
       BodyStorage const & localStorage  = (*storage)[StorageType::LOCAL];
       BodyStorage const & shadowStorage = (*storage)[StorageType::SHADOW];
-      ic.insert( InfoCollection::value_type(block->getId(), BlockInfo(localStorage.size(), shadowStorage.size())) );
+      ic.insert( InfoCollectionPair(block->getId(), BlockInfo(localStorage.size(), shadowStorage.size())) );
       for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
       {
-         bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(block->getId(), BlockInfo(localStorage.size(), shadowStorage.size()));
+         bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollectionPair(block->getId(), BlockInfo(localStorage.size(), shadowStorage.size()));
       }
 
       for (uint_t branchID = 0; branchID < 8; ++branchID)
@@ -65,11 +66,11 @@ void createWithNeighborhoodLocalShadow( const BlockForest& bf,
             if (childAABB.contains(bodyIt->getPosition()))
                ++shadow;
          }
-         ic.insert( InfoCollection::value_type(childID, BlockInfo(local, shadow)) );
+         ic.insert( InfoCollectionPair(childID, BlockInfo(local, shadow)) );
 
          for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
          {
-            bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(childID, BlockInfo(local, shadow));
+            bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollectionPair(childID, BlockInfo(local, shadow));
          }
       }
    }
@@ -92,22 +93,24 @@ void createWithNeighborhoodLocalShadow( const BlockForest& bf,
 void createWithNeighborhoodContactsShadow( BlockForest& bf,
                                            const BlockDataID storageID,
                                            const BlockDataID fcdID,
-                                           InfoCollection& ic )
+                                           blockforest::InfoCollection& ic )
 {
+   using namespace walberla::blockforest;
+
    ic.clear();
 
    mpi::BufferSystem bs( MPIManager::instance()->comm(), 756 );
 
    for (auto blockIt = bf.begin(); blockIt != bf.end(); ++blockIt)
    {
-      blockforest::Block* block         = static_cast<blockforest::Block*> (&(*blockIt));
+      Block* block         = static_cast<Block*> (&(*blockIt));
       Storage const *     storage       = block->getData< Storage >( storageID );
       BodyStorage const & shadowStorage = (*storage)[StorageType::SHADOW];
       fcd::IFCD *     fcd         = block->getData< fcd::IFCD >( fcdID );
-      ic.insert( InfoCollection::value_type(block->getId(), BlockInfo(fcd->getContacts().size(), shadowStorage.size())) );
+      ic.insert( InfoCollectionPair(block->getId(), BlockInfo(fcd->getContacts().size(), shadowStorage.size())) );
       for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
       {
-         bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(block->getId(), BlockInfo(fcd->getContacts().size(), shadowStorage.size()));
+         bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollectionPair(block->getId(), BlockInfo(fcd->getContacts().size(), shadowStorage.size()));
       }
 
       for (uint_t branchID = 0; branchID < 8; ++branchID)
@@ -127,11 +130,11 @@ void createWithNeighborhoodContactsShadow( BlockForest& bf,
             if (childAABB.contains(bodyIt->getPosition()))
                ++shadow;
          }
-         ic.insert( InfoCollection::value_type(childID, BlockInfo(localContacts, shadow)) );
+         ic.insert( InfoCollectionPair(childID, BlockInfo(localContacts, shadow)) );
 
          for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
          {
-            bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(childID, BlockInfo(localContacts, shadow));
+            bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollectionPair(childID, BlockInfo(localContacts, shadow));
          }
       }
    }

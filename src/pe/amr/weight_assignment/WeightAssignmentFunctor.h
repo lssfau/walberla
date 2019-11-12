@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include "pe/amr/InfoCollection.h"
-
+#include "blockforest/loadbalancing/InfoCollection.h"
 #include "blockforest/loadbalancing/PODPhantomData.h"
+#include "blockforest/PhantomBlockForest.h"
 
 namespace walberla {
 namespace pe {
@@ -42,7 +42,7 @@ public:
    ///Convenience typdef for pack and unpack functions to be used in conjunction with PhantomBlockWeight.
    typedef walberla::blockforest::PODPhantomWeightPackUnpack<double> PhantomBlockWeightPackUnpackFunctor;
 
-   WeightAssignmentFunctor( shared_ptr<InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
+   WeightAssignmentFunctor( shared_ptr<blockforest::InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
 
    void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & )
    {
@@ -62,7 +62,7 @@ public:
    inline double getBaseWeight() const { return baseWeight_; }
 
 private:
-   shared_ptr<InfoCollection> ic_;
+   shared_ptr<blockforest::InfoCollection> ic_;
 
    ///Base weight due to allocated data structures. A weight of zero for blocks is dangerous as empty blocks might accumulate on one process!
    double baseWeight_ = real_t(10.0);

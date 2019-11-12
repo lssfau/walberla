@@ -118,6 +118,7 @@ if __name__ == "__main__":
        isFirstFile = True
        for r,d,f in os.walk('.'):
           for file in f:
+             print(r, file)
              if r != '.' and file.endswith('.sqlite'):
                 if isFirstFile:
                    print( 'Copying ' + os.path.join(r,file) )

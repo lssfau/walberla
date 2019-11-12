@@ -23,10 +23,10 @@
 #include "blockforest/loadbalancing/DynamicCurve.h"
 #include "blockforest/loadbalancing/DynamicDiffusive.h"
 #include "blockforest/loadbalancing/DynamicParMetis.h"
+#include "blockforest/loadbalancing/InfoCollection.h"
 #include "blockforest/loadbalancing/PODPhantomData.h"
 
 #include "pe/basic.h"
-#include "pe/amr/InfoCollection.h"
 #include "pe/amr/level_determination/MinMaxLevelDetermination.h"
 #include "pe/amr/weight_assignment/MetisAssignmentFunctor.h"
 #include "pe/amr/weight_assignment/WeightAssignmentFunctor.h"
@@ -77,7 +77,7 @@ int main( int /*argc*/, char ** /*argv*/, const std::string& LBAlgorithm )
    blockforest->checkForEarlyOutInRefresh( true );
    blockforest->checkForLateOutInRefresh( true );
 
-   auto ic = make_shared<InfoCollection>();
+   auto ic = make_shared<blockforest::InfoCollection>();
 
    blockforest->setRefreshMinTargetLevelDeterminationFunction( amr::MinMaxLevelDetermination(ic, 50, 100) );
 

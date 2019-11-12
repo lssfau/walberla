@@ -26,9 +26,9 @@
 
 #include <blockforest/Initialization.h>
 #include <blockforest/loadbalancing/DynamicCurve.h>
+#include <blockforest/loadbalancing/InfoCollection.h>
 #include <core/debug/TestSubsystem.h>
 #include <core/logging/Logging.h>
-#include <pe/amr/InfoCollection.h>
 #include <pe/amr/level_determination/MinMaxLevelDetermination.h>
 #include <pe/amr/weight_assignment/WeightAssignmentFunctor.h>
 
@@ -91,7 +91,7 @@ int main( bool simple )
    forest->checkForEarlyOutInRefresh( true );
    forest->checkForLateOutInRefresh( true );
 
-   auto infoCollection = make_shared<pe::InfoCollection>();
+   auto infoCollection = make_shared<blockforest::InfoCollection>();
 
    if (simple)
    {

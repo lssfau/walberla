@@ -56,6 +56,7 @@
 #include <blockforest/Initialization.h>
 #include <blockforest/loadbalancing/DynamicCurve.h>
 #include <blockforest/loadbalancing/DynamicParMetis.h>
+#include <blockforest/loadbalancing/InfoCollection.h>
 #include <blockforest/loadbalancing/PODPhantomData.h>
 #include <core/Abort.h>
 #include <core/Environment.h>
@@ -130,7 +131,7 @@ int main( int argc, char ** argv )
    forest->checkForEarlyOutInRefresh( params.checkForEarlyOutInRefresh );
    forest->checkForLateOutInRefresh( params.checkForLateOutInRefresh );
 
-   auto ic = make_shared<pe::InfoCollection>();
+   auto ic = make_shared<blockforest::InfoCollection>();
 
    pe::amr::MinMaxLevelDetermination regrid(ic, params.regridMin, params.regridMax);
    forest->setRefreshMinTargetLevelDeterminationFunction( regrid );

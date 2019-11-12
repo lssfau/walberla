@@ -20,9 +20,10 @@
 
 #pragma once
 
-#include "pe/amr/InfoCollection.h"
-
+#include "blockforest/BlockForest.h"
+#include "blockforest/PhantomBlockForest.h"
 #include "blockforest/loadbalancing/DynamicParMetis.h"
+#include "blockforest/loadbalancing/InfoCollection.h"
 #include "domain_decomposition/PeriodicIntersectionVolume.h"
 
 namespace walberla {
@@ -43,9 +44,10 @@ public:
    ///Convenience typdef for pack and unpack functions to be used in conjunction with PhantomBlockWeight.
    typedef blockforest::DynamicParMetisBlockInfoPackUnpack PhantomBlockWeightPackUnpackFunctor;
 
-   MetisAssignmentFunctor( shared_ptr<InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
+   MetisAssignmentFunctor( shared_ptr<blockforest::InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
 
-   void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData, const PhantomBlockForest & forest )
+   void operator()( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData,
+                    const PhantomBlockForest & forest )
    {
       const std::array< bool, 3 > periodic {{forest.getBlockForest().isPeriodic(0),
                   forest.getBlockForest().isPeriodic(1),
@@ -85,7 +87,7 @@ public:
    inline double getBaseWeight() const { return baseWeight_; }
 
 private:
-   shared_ptr< InfoCollection > ic_;
+   shared_ptr< blockforest::InfoCollection > ic_;
 
    ///Base weight due to allocated data structures. A weight of zero for blocks is dangerous as empty blocks might accumulate on one process!
    double baseWeight_ = 10.0;

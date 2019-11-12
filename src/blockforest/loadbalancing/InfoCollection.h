@@ -20,37 +20,16 @@
 
 #pragma once
 
-#include "blockforest/BlockForest.h"
-#include "blockforest/loadbalancing/BlockInfo.h"
-#include "blockforest/loadbalancing/InfoCollection.h"
+#include "../BlockID.h"
+#include "BlockInfo.h"
 
 #include <map>
 
 namespace walberla {
-namespace pe {
+namespace blockforest {
 
-/**
- * @brief Fills \a InfoCollection with up to date information.
- *
- * The number of local particles is used as the computational weight.
- * The number of shadow particles is used as the communication weight.
- *
- */
-void createWithNeighborhoodLocalShadow( const BlockForest& bf,
-                                        const BlockDataID storageID,
-                                        blockforest::InfoCollection& ic );
-
-/**
- * @brief Fills \a InfoCollection with up to date information.
- *
- * The number of contacts is used as the computational weight.
- * The number of shadow particles is used as the communication weight.
- *
- */
-void createWithNeighborhoodContactsShadow( BlockForest& bf,
-                                           const BlockDataID storageID,
-                                           const BlockDataID fcdID,
-                                           blockforest::InfoCollection& ic );
+using InfoCollection = std::map<BlockID, BlockInfo>;
+using InfoCollectionPair = std::pair<InfoCollection::key_type, InfoCollection::mapped_type>;
 
 }
 }

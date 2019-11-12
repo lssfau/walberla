@@ -23,17 +23,19 @@
 #include <mesa_pd/data/ParticleStorage.h>
 
 #include <blockforest/BlockForest.h>
+#include <blockforest/loadbalancing/BlockInfo.h>
+#include <blockforest/loadbalancing/InfoCollection.h>
 #include <core/mpi/BufferSystem.h>
-#include <pe/amr/BlockInfo.h>
-#include <pe/amr/InfoCollection.h>
 
 namespace walberla {
 namespace mesa_pd {
 namespace domain {
 
 template <typename Accessor>
-void createWithNeighborhood(Accessor& ac, const BlockForest& bf, pe::InfoCollection& ic )
+void createWithNeighborhood(Accessor& ac, const BlockForest& bf, blockforest::InfoCollection& ic )
 {
+   using namespace walberla::blockforest;
+
    ic.clear();
 
    walberla::mpi::BufferSystem bs( MPIManager::instance()->comm(), 756 );
@@ -44,7 +46,7 @@ void createWithNeighborhood(Accessor& ac, const BlockForest& bf, pe::InfoCollect
       {
          const blockforest::Block* block   = static_cast<const blockforest::Block*> (&(*blockIt));
 
-         pe::BlockInfo& info = ic[block->getId()];
+         BlockInfo& info = ic[block->getId()];
          if (block->getAABB().contains(ac.getPosition(idx)))
          {
             if (data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::GHOST))
@@ -59,7 +61,7 @@ void createWithNeighborhood(Accessor& ac, const BlockForest& bf, pe::InfoCollect
             {
                const auto childID   = BlockID(block->getId(), branchID);
                const auto childAABB = bf.getAABBFromBlockId(childID);
-               pe::BlockInfo& childInfo = ic[childID];
+               BlockInfo& childInfo = ic[childID];
                if (childAABB.contains(ac.getPosition(idx)))
                {
                   if (data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::GHOST))
@@ -81,21 +83,21 @@ void createWithNeighborhood(Accessor& ac, const BlockForest& bf, pe::InfoCollect
    {
       const blockforest::Block* block   = static_cast<const blockforest::Block*> (&(*blockIt));
 
-      pe::BlockInfo& info = ic[block->getId()];
+      BlockInfo& info = ic[block->getId()];
       for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
       {
-         bs.sendBuffer( block->getNeighborProcess(nb) ) << pe::InfoCollection::value_type(block->getId(), info);
+         bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(block->getId(), info);
       }
 
       for (uint_t branchID = 0; branchID < 8; ++branchID)
       {
          const auto childID   = BlockID(block->getId(), branchID);
 
-         pe::BlockInfo& childInfo = ic[childID];
+         BlockInfo& childInfo = ic[childID];
 
          for( uint_t nb = uint_t(0); nb < block->getNeighborhoodSize(); ++nb )
          {
-            bs.sendBuffer( block->getNeighborProcess(nb) ) << pe::InfoCollection::value_type(childID, childInfo);
+            bs.sendBuffer( block->getNeighborProcess(nb) ) << InfoCollection::value_type(childID, childInfo);
          }
       }
    }
@@ -108,7 +110,7 @@ void createWithNeighborhood(Accessor& ac, const BlockForest& bf, pe::InfoCollect
    {
       while( !recvIt.buffer().isEmpty() )
       {
-         pe::InfoCollectionPair val;
+         InfoCollectionPair val;
          recvIt.buffer() >> val;
          ic.insert(val);
       }

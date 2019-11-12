@@ -26,7 +26,7 @@
 #include <ostream>
 
 namespace walberla {
-namespace pe {
+namespace blockforest {
 
 struct BlockInfo
 {
@@ -43,7 +43,7 @@ struct BlockInfo
       , communicationWeight(commWeight)
    {}
 
-   BlockInfo&      operator+=( const BlockInfo& rhs )
+   BlockInfo& operator+=( const BlockInfo& rhs )
    {
       computationalWeight += rhs.computationalWeight;
       communicationWeight += rhs.communicationWeight;

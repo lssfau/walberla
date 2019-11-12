@@ -36,19 +36,22 @@ class MinMaxLevelDetermination
 {
 public:
 
-   MinMaxLevelDetermination( const shared_ptr<InfoCollection>& ic, const size_t minBodies, const size_t maxBodies) :
+   MinMaxLevelDetermination( const shared_ptr<blockforest::InfoCollection>& ic,
+                             const size_t minBodies,
+                             const size_t maxBodies) :
       ic_( ic ), minBodies_(minBodies), maxBodies_(maxBodies)
    {}
 
    void operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                    std::vector< const Block * > &, const BlockForest & forest );
+                    std::vector< const Block * > &,
+                    const BlockForest & forest );
 
 public:
-   const shared_ptr<InfoCollection> ic_;
+   const shared_ptr<blockforest::InfoCollection> ic_;
    size_t      minBodies_;
    size_t      maxBodies_;
 
-   InfoCollection::const_iterator getOrCreateCoarseInfo( const blockforest::BlockID& id );
+   blockforest::InfoCollection::const_iterator getOrCreateCoarseInfo( const blockforest::BlockID& id );
 };
 
 } // namespace amr

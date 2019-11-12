@@ -20,6 +20,7 @@
 
 
 #include "blockforest/all.h"
+#include "blockforest/loadbalancing/InfoCollection.h"
 #include <blockforest/loadbalancing/PODPhantomData.h>
 #include "core/all.h"
 #include "domain_decomposition/all.h"
@@ -28,7 +29,6 @@
 
 
 #include "pe/basic.h"
-#include "pe/amr/InfoCollection.h"
 #include "pe/amr/level_determination/MinMaxLevelDetermination.h"
 #include "pe/amr/weight_assignment/WeightAssignmentFunctor.h"
 #include "pe/ccd/SimpleCCDDataHandling.h"
@@ -95,7 +95,7 @@ int main( int argc, char ** argv )
    blockforest.checkForEarlyOutInRefresh( true );
    blockforest.checkForLateOutInRefresh( true );
 
-   auto infoCollection = make_shared<InfoCollection>();
+   auto infoCollection = make_shared<blockforest::InfoCollection>();
 
    amr::MinMaxLevelDetermination levelDetermination(infoCollection, 2, 5);
    blockforest.setRefreshMinTargetLevelDeterminationFunction( levelDetermination );

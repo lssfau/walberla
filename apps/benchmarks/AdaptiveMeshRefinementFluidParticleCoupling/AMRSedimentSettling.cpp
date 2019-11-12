@@ -796,7 +796,7 @@ private:
 
 real_t weightEvaluation(BlockForest & forest,
                         const shared_ptr<pe_coupling::InfoCollection>& couplingInfoCollection,
-                        const shared_ptr<pe::InfoCollection> & peInfoCollection,
+                        const shared_ptr<blockforest::InfoCollection> & peInfoCollection,
                         real_t peBlockBaseWeight,
                         const std::string & loadEvaluationStrategy,
                         uint_t level,
@@ -1587,7 +1587,7 @@ int main( int argc, char **argv )
    bool balanceLevelwise = true;
 
    auto peBlockBaseWeight = real_t(1); //default value, might not be the best
-   shared_ptr<pe::InfoCollection> peInfoCollection = walberla::make_shared<pe::InfoCollection>();
+   shared_ptr<blockforest::InfoCollection> peInfoCollection = walberla::make_shared<blockforest::InfoCollection>();
 
    if( loadDistributionStrategy == "Hilbert" || loadDistributionStrategy == "Morton")
    {

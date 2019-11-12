@@ -25,7 +25,8 @@ namespace pe {
 namespace amr {
 
 void MinMaxLevelDetermination::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                                           std::vector< const Block * > &, const BlockForest & /*forest*/ )
+                                           std::vector< const Block * > &,
+                                           const BlockForest & /*forest*/ )
 {
    for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
    {
@@ -53,13 +54,13 @@ void MinMaxLevelDetermination::operator()( std::vector< std::pair< const Block *
    }
 }
 
-InfoCollection::const_iterator MinMaxLevelDetermination::getOrCreateCoarseInfo( const blockforest::BlockID& id )
+blockforest::InfoCollection::const_iterator MinMaxLevelDetermination::getOrCreateCoarseInfo( const blockforest::BlockID& id )
 {
    auto fatherId = id.getFatherId();
    auto infoIt   = ic_->find( fatherId );
    if (infoIt != ic_->end()) return infoIt;
 
-   BlockInfo newWeight( 0, 0);
+   blockforest::BlockInfo newWeight( 0, 0);
    for (uint_t child = 0; child < 8; ++child)
    {
       blockforest::BlockID childId(fatherId, child);
@@ -68,8 +69,8 @@ InfoCollection::const_iterator MinMaxLevelDetermination::getOrCreateCoarseInfo( 
       //return giant number to prevent coarsening
       if (childIt == ic_->end())
       {
-         newWeight = BlockInfo( std::numeric_limits<uint_t>::max(),
-                                std::numeric_limits<uint_t>::max());
+         newWeight = blockforest::BlockInfo( std::numeric_limits<uint_t>::max(),
+                                             std::numeric_limits<uint_t>::max());
          break;
       } else
       {
