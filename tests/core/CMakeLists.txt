@@ -209,6 +209,11 @@ waLBerla_execute_test( NAME UNIQUEID PROCESSES 4)
 waLBerla_compile_test( FILES VersionTest.cpp )
 waLBerla_execute_test( NAME VersionTest )
 
+if( WALBERLA_BUILD_WITH_BOOST OR WALBERLA_USE_STD_VARIANT )
+  waLBerla_compile_test( FILES VariantTest )
+  waLBerla_execute_test( NAME VariantTest )
+endif()
+
 ##################
 # load_balancing #
 ##################
