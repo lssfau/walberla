@@ -31,6 +31,10 @@ qrc_*
 *.idea
 
 
+# QtCreator
+CMakeLists.txt.user.*
+
+
 # Binary Files
 /bin/
 /lib/
