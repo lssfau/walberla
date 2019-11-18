@@ -31,7 +31,8 @@ namespace data {
 class CylindricalBoundary : public BaseShape
 {
 public:
-   explicit CylindricalBoundary(const real_t& radius, const Vec3& axis)
+   explicit CylindricalBoundary(const real_t& radius = real_t(1),
+                                const Vec3& axis = Vec3(real_t(1), real_t(0), real_t(0)))
       : BaseShape(CylindricalBoundary::SHAPE_TYPE)
       , radius_(radius)
       , axis_(axis)
@@ -45,6 +46,9 @@ public:
    real_t getVolume() const override { return std::numeric_limits<real_t>::infinity(); };
    void   updateMassAndInertia(const real_t density) override;
 
+   void pack(walberla::mpi::SendBuffer& buf) override;
+   void unpack(walberla::mpi::RecvBuffer& buf) override;
+
    constexpr static int SHAPE_TYPE = 2; ///< Unique shape type identifier for cylindrical boundaries.\ingroup mesa_pd_shape
 
 private:
@@ -57,6 +61,21 @@ void CylindricalBoundary::updateMassAndInertia(const real_t /*density*/)
 {
    invMass_      = real_t(0.0);
    invInertiaBF_ = Mat3(real_t(0.0));
+}
+
+inline
+void CylindricalBoundary::pack(walberla::mpi::SendBuffer& buf)
+{
+   BaseShape::pack(buf);
+   buf << radius_;
+   buf << axis_;
+}
+inline
+void CylindricalBoundary::unpack(walberla::mpi::RecvBuffer& buf)
+{
+   BaseShape::unpack(buf);
+   buf >> radius_;
+   buf >> axis_;
 }
 
 } //namespace data

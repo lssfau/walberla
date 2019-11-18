@@ -28,6 +28,7 @@
 
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/ParticleStorage.h>
+#include <mesa_pd/mpi/ShapePackUnpack.h>
 #include <mesa_pd/mpi/notifications/NotificationType.h>
 
 #include <core/mpi/Datatype.h>

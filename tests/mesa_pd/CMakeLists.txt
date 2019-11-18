@@ -170,6 +170,9 @@ waLBerla_execute_test( NAME   MESA_PD_MPI_ReduceContactHistory PROCESSES 8 )
 waLBerla_compile_test( NAME   MESA_PD_MPI_ReduceProperty FILES mpi/ReduceProperty.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_MPI_ReduceProperty PROCESSES 8 )
 
+waLBerla_compile_test( NAME   MESA_PD_MPI_ShapePackUnpack FILES mpi/ShapePackUnpack.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_MPI_ShapePackUnpack )
+
 waLBerla_compile_test( NAME   MESA_PD_MPI_VelocityCorrectionNotification FILES mpi/VelocityCorrectionNotification.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_MPI_VelocityCorrectionNotification PROCESSES 8)
 

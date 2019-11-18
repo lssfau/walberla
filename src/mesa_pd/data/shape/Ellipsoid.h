@@ -31,7 +31,7 @@ namespace data {
 class Ellipsoid : public BaseShape
 {
 public:
-   explicit Ellipsoid(const Vec3& semiAxes)
+   explicit Ellipsoid(const Vec3& semiAxes = Vec3(real_t(1)))
       : BaseShape(Ellipsoid::SHAPE_TYPE)
       , semiAxes_(semiAxes)
    {}
@@ -42,6 +42,9 @@ public:
    void   updateMassAndInertia(const real_t density) override;
 
    Vec3 support( const Vec3& d_loc ) const override;
+
+   void pack(walberla::mpi::SendBuffer& buf) override;
+   void unpack(walberla::mpi::RecvBuffer& buf) override;
 
    constexpr static int SHAPE_TYPE = 4; ///< Unique shape type identifier for boxes.\ingroup mesa_pd_shape
 
@@ -71,6 +74,19 @@ Vec3 Ellipsoid::support( const Vec3& d_loc ) const
          semiAxes_[1] * semiAxes_[1] * d_loc[1],
          semiAxes_[2] * semiAxes_[2] * d_loc[2]);
    return local_support;
+}
+
+inline
+void Ellipsoid::pack(walberla::mpi::SendBuffer& buf)
+{
+   BaseShape::pack(buf);
+   buf << semiAxes_;
+}
+inline
+void Ellipsoid::unpack(walberla::mpi::RecvBuffer& buf)
+{
+   BaseShape::unpack(buf);
+   buf >> semiAxes_;
 }
 
 } //namespace data

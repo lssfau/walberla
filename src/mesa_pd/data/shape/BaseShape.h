@@ -22,6 +22,9 @@
 
 #include <mesa_pd/data/DataTypes.h>
 
+#include <core/mpi/RecvBuffer.h>
+#include <core/mpi/SendBuffer.h>
+
 namespace walberla {
 namespace mesa_pd {
 namespace data {
@@ -35,6 +38,8 @@ namespace data {
 class BaseShape
 {
 public:
+   using ShapeTypeT = int;
+
    explicit BaseShape(const int shapeType) : shapeType_(shapeType) {}
    virtual ~BaseShape() = default;
 
@@ -49,23 +54,43 @@ public:
    const Mat3& getInertiaBF() const {return inertiaBF_;}
    const Mat3& getInvInertiaBF() const {return invInertiaBF_;}
 
-   const int& getShapeType() const {return shapeType_;}
+   const ShapeTypeT& getShapeType() const {return shapeType_;}
 
    virtual Vec3 support( const Vec3& /*d*/ ) const {WALBERLA_ABORT("Not implemented!");}
 
+   virtual void pack(walberla::mpi::SendBuffer& buf);
+   virtual void unpack(walberla::mpi::RecvBuffer& buf);
+
    static const int INVALID_SHAPE = -1; ///< Unique *invalid* shape type identifier.\ingroup mesa_pd_shape
 protected:
-   real_t mass_         = real_t(0);       ///< mass
-   real_t invMass_      = real_t(0);       ///< inverse mass
-   Mat3   inertiaBF_    = Mat3(real_t(0)); ///< inertia matrix in the body frame
-   Mat3   invInertiaBF_ = Mat3(real_t(0)); ///< inverse inertia matrix in the body frame
-   int    shapeType_    = INVALID_SHAPE;   ///< \ingroup mesa_pd_shape
+   real_t     mass_         = real_t(0);       ///< mass
+   real_t     invMass_      = real_t(0);       ///< inverse mass
+   Mat3       inertiaBF_    = Mat3(real_t(0)); ///< inertia matrix in the body frame
+   Mat3       invInertiaBF_ = Mat3(real_t(0)); ///< inverse inertia matrix in the body frame
+   ShapeTypeT shapeType_    = INVALID_SHAPE;   ///< \ingroup mesa_pd_shape
 };
 
 inline
 void BaseShape::updateMassAndInertia(const real_t /*density*/)
 {
    WALBERLA_ABORT("updateMassAndInertia not implemented!");
+}
+
+inline
+void BaseShape::pack(walberla::mpi::SendBuffer& buf)
+{
+   buf << mass_;
+   buf << invMass_;
+   buf << inertiaBF_;
+   buf << invInertiaBF_;
+}
+inline
+void BaseShape::unpack(walberla::mpi::RecvBuffer& buf)
+{
+   buf >> mass_;
+   buf >> invMass_;
+   buf >> inertiaBF_;
+   buf >> invInertiaBF_;
 }
 
 } //namespace data

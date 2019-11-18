@@ -31,7 +31,9 @@ namespace data {
 class Sphere : public BaseShape
 {
 public:
-   explicit Sphere(const real_t& radius) : BaseShape(Sphere::SHAPE_TYPE), radius_(radius) {}
+   explicit Sphere(const real_t& radius = real_t(1))
+      : BaseShape(Sphere::SHAPE_TYPE), radius_(radius)
+   {}
 
    const real_t& getRadius() const { return radius_; }
 
@@ -40,6 +42,9 @@ public:
    real_t getVolume() const override { return (real_t(4) / real_t(3)) * math::pi * getRadius() * getRadius() * getRadius(); }
 
    Vec3 support( const Vec3& d ) const override;
+
+   void pack(walberla::mpi::SendBuffer& buf) override;
+   void unpack(walberla::mpi::RecvBuffer& buf) override;
 
    constexpr static int SHAPE_TYPE = 1; ///< Unique shape type identifier for spheres.\ingroup mesa_pd_shape
 
@@ -64,6 +69,19 @@ inline
 Vec3 Sphere::support( const Vec3& d ) const
 {
    return radius_ * d;
+}
+
+inline
+void Sphere::pack(walberla::mpi::SendBuffer& buf)
+{
+   BaseShape::pack(buf);
+   buf << radius_;
+}
+inline
+void Sphere::unpack(walberla::mpi::RecvBuffer& buf)
+{
+   BaseShape::unpack(buf);
+   buf >> radius_;
 }
 
 } //namespace data

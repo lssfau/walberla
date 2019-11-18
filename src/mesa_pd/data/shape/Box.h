@@ -31,7 +31,7 @@ namespace data {
 class Box : public BaseShape
 {
 public:
-   explicit Box(const Vec3& edgeLength)
+   explicit Box(const Vec3& edgeLength = Vec3(real_t(1)))
       : BaseShape(Box::SHAPE_TYPE)
       , edgeLength_(edgeLength)
    {}
@@ -42,6 +42,9 @@ public:
    void   updateMassAndInertia(const real_t density) override;
 
    Vec3 support( const Vec3& bfD ) const override;
+
+   void pack(walberla::mpi::SendBuffer& buf) override;
+   void unpack(walberla::mpi::RecvBuffer& buf) override;
 
    constexpr static int SHAPE_TYPE = 3; ///< Unique shape type identifier for boxes.\ingroup mesa_pd_shape
 
@@ -71,6 +74,19 @@ Vec3 Box::support( const Vec3& bfD ) const
                                math::sign(bfD[2])*edgeLength_[2]*real_t(0.5) );
 
    return relativSupport;
+}
+
+inline
+void Box::pack(walberla::mpi::SendBuffer& buf)
+{
+   BaseShape::pack(buf);
+   buf << edgeLength_;
+}
+inline
+void Box::unpack(walberla::mpi::RecvBuffer& buf)
+{
+   BaseShape::unpack(buf);
+   buf >> edgeLength_;
 }
 
 } //namespace data
