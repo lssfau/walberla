@@ -57,15 +57,18 @@ namespace walberla
 {
 uint_t numGhostLayers = uint_t(1);
 
+//! [typedefs]
 using LatticeModel_T         = lbm::D3Q27< lbm::collision_model::SRT >;
 using Stencil_T              = LatticeModel_T::Stencil;
 using CommunicationStencil_T = LatticeModel_T::CommunicationStencil;
+//! [typedefs]
 
 using PdfField_T = lbm::PdfField< LatticeModel_T >;
 
 using flag_t      = walberla::uint8_t;
 using FlagField_T = FlagField< flag_t >;
 
+//! [vertexToFaceColor]
 template< typename MeshType >
 void vertexToFaceColor(MeshType& mesh, const typename MeshType::Color& defaultColor)
 {
@@ -93,6 +96,7 @@ void vertexToFaceColor(MeshType& mesh, const typename MeshType::Color& defaultCo
       mesh.set_color(*faceIt, useVertexColor ? vertexColor : defaultColor);
    }
 }
+//! [vertexToFaceColor]
 
 int main(int argc, char** argv)
 {
@@ -115,10 +119,12 @@ int main(int argc, char** argv)
    const double remainingTimeLoggerFrequency =
       parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
 
+   //! [parseDomainParameters]
    // read domain parameters
    auto domainParameters = walberlaEnv.config()->getOneBlock("DomainSetup");
 
    std::string meshFile = domainParameters.getParameter< std::string >("meshFile");
+   //! [parseDomainParameters]
 
    Vector3< uint_t > domainScaling =
       domainParameters.getParameter< Vector3< uint_t > >("domainScaling", Vector3< uint_t >(1));
@@ -134,19 +140,25 @@ int main(int argc, char** argv)
 
    WALBERLA_LOG_INFO_ON_ROOT("Using mesh from " << meshFile << ".")
 
+   //! [readMesh]
    // read in mesh with vertex colors on a single process and broadcast it
    auto mesh = make_shared< mesh::TriangleMesh >();
    mesh->request_vertex_colors();
    mesh::readAndBroadcast(meshFile, *mesh);
+   //! [readMesh]
 
    // color faces according to vertices
    vertexToFaceColor(*mesh, mesh::TriangleMesh::Color(255, 255, 255));
 
+   //! [triDist]
    // add information to mesh that is required for computing signed distances from a point to a triangle
    auto triDist = make_shared< mesh::TriangleDistance< mesh::TriangleMesh > >(mesh);
+   //! [triDist]
 
+   //! [octree]
    // building distance octree
    auto distanceOctree = make_shared< mesh::DistanceOctree< mesh::TriangleMesh > >(triDist);
+   //! [octree]
 
    WALBERLA_LOG_INFO_ON_ROOT("Octree has height " << distanceOctree->height())
 
@@ -157,17 +169,25 @@ int main(int argc, char** argv)
    /// CREATE BLOCK FOREST ///
    ///////////////////////////
 
+   //! [aabb]
    auto aabb = computeAABB(*mesh);
    aabb.scale(domainScaling);
    aabb.setCenter(aabb.center() + 0.2 * Vector3< real_t >(aabb.xSize(), 0, 0));
+   //! [aabb]
 
+   //! [bfc]
    // create and configure block forest creator
    mesh::ComplexGeometryStructuredBlockforestCreator bfc(aabb, Vector3< real_t >(dx),
                                                          mesh::makeExcludeMeshInterior(distanceOctree, dx));
-   bfc.setPeriodicity(periodicity);
 
+   bfc.setPeriodicity(periodicity);
+   //! [bfc]
+
+
+   //! [blockForest]
    // create block forest
    auto blocks = bfc.createStructuredBlockForest(cellsPerBlock);
+   //! [blockForest]
 
    ////////////////////////////////////
    /// CREATE AND INITIALIZE FIELDS ///
@@ -183,6 +203,7 @@ int main(int argc, char** argv)
    /// BOUNDARY HANDLING ///
    /////////////////////////
 
+   //! [DefaultBoundaryHandling]
    // create and initialize boundary handling
    const FlagUID fluidFlagUID("Fluid");
 
@@ -197,9 +218,9 @@ int main(int argc, char** argv)
       boundariesConfig.getParameter< real_t >("pressure0", real_c(1.0)),
       boundariesConfig.getParameter< real_t >("pressure1", real_c(1.0)));
 
-   geometry::initBoundaryHandling< BHFactory::BoundaryHandling >(*blocks, boundaryHandlingId, boundariesConfig);
-   geometry::setNonBoundaryCellsToDomain< BHFactory::BoundaryHandling >(*blocks, boundaryHandlingId);
+   //! [DefaultBoundaryHandling]
 
+   //! [colorToBoundary]
    // set NoSlip UID to boundaries that we colored
    mesh::ColorToBoundaryMapper< mesh::TriangleMesh > colorToBoundaryMapper(
       (mesh::BoundaryInfo(BHFactory::getNoSlipBoundaryUID())));
@@ -208,23 +229,30 @@ int main(int argc, char** argv)
 
    // mark boundaries
    auto boundaryLocations = colorToBoundaryMapper.addBoundaryInfoToMesh(*mesh);
+   //! [colorToBoundary]
 
+   //! [VTKMesh]
    // write mesh info to file
    mesh::VTKMeshWriter< mesh::TriangleMesh > meshWriter(mesh, "meshBoundaries", 1);
    meshWriter.addDataSource(make_shared< mesh::BoundaryUIDFaceDataSource< mesh::TriangleMesh > >(boundaryLocations));
    meshWriter.addDataSource(make_shared< mesh::ColorFaceDataSource< mesh::TriangleMesh > >());
    meshWriter.addDataSource(make_shared< mesh::ColorVertexDataSource< mesh::TriangleMesh > >());
    meshWriter();
+   //! [VTKMesh]
 
+   //! [boundarySetup]
    // voxelize mesh
    mesh::BoundarySetup boundarySetup(blocks, makeMeshDistanceFunction(distanceOctree), numGhostLayers);
 
    // set fluid cells
    boundarySetup.setDomainCells< BHFactory::BoundaryHandling >(boundaryHandlingId, mesh::BoundarySetup::OUTSIDE);
 
-   // set up boundaries
+   // set up inflow/outflow/wall boundaries from DefaultBoundaryHandlingFactory
+   geometry::initBoundaryHandling< BHFactory::BoundaryHandling >(*blocks, boundaryHandlingId, boundariesConfig);
+   // set up obstacle boundaries from file
    boundarySetup.setBoundaries< BHFactory::BoundaryHandling >(
       boundaryHandlingId, makeBoundaryLocationFunction(distanceOctree, boundaryLocations), mesh::BoundarySetup::INSIDE);
+   //! [boundarySetup]
 
    //////////////////////////////////
    /// SET UP SWEEPS AND TIMELOOP ///
@@ -258,8 +286,9 @@ int main(int argc, char** argv)
    //////////////////
 
    // add VTK output to time loop
-   uint_t vtkWriteFrequency = parameters.getParameter("writeFrequency", uint_c(0));
-   auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "fluid_field", vtkWriteFrequency, numGhostLayers, false,
+   auto VTKParams = walberlaEnv.config()->getBlock("VTK");
+   uint_t vtkWriteFrequency = VTKParams.getBlock("fluid_field").getParameter("writeFrequency", uint_t(0));
+   auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "fluid_field", vtkWriteFrequency, uint_t(0), false,
                                                    "vtk_out", "simulation_step", false, true, true, false, 0);
 
    field::FlagFieldCellFilter< FlagField_T > fluidFilter(flagFieldId);
