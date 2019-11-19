@@ -9,6 +9,7 @@ Parameters
 	remainingTimeLoggerFrequency 3; // in seconds
 }
 
+//! [domainSetup]
 DomainSetup
 {
    meshFile         bunny.obj;
@@ -18,6 +19,7 @@ DomainSetup
    cellsPerBlock    < 16, 16, 16 >;
    periodic         <  0,  0,  1 >;
 }
+//! [domainSetup]
 
 StabilityChecker
 {
