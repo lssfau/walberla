@@ -1,0 +1,37 @@
+DomainSetup
+{
+    blocks < 1,1,1 >;              // use as many blocks as MPI processes
+    cellsPerBlock < 128,64,64 >;   // domain size per MPI process, leave constant for weak scaling
+    periodic < 1,1,1 >;
+}
+
+
+Parameters
+{
+    cudaEnabledMPI False;           // set to true, if MPI was compiled with CUDA
+    outerIterations 3;              // number of measurements to make
+    timeStepStrategy simpleOverlap; // one of simpleOverlap, noOverlap, the non-AA version also supports complexOverlap
+                                    // fastest is simpleOverlap
+    innerOuterSplit <8, 1, 1>;      // only important when overlapping communication
+                                    // domain is split into communication-dependent outer and inner part
+                                    // this parameter makes the outer part larger than necessary since the processing of a single outer layer is slow
+                                    // this parameter specifies the thickness of the outer layer in each direction
+                                    // make sure your block is large enough, the outer part is 2*innerOuterSplit big, make sure there is a inner part left
+    timesteps 2000;                 // time steps per measurement
+    warmupSteps 5;                  // number of time steps before starting measurement
+
+    vtkWriteFrequency 0;            // how often to write VTK output
+
+    gpuBlockSize < 128,1,1 >;       // size of CUDA blocks - usually large x extents are fast
+    omega 1.8;
+
+    // valid in the non-AA version - determines how the ghost layer exchange is done
+    // the AA version uses always the fastest "UniformGPUScheme_Baseline"
+    //communicationScheme UniformGPUScheme_Baseline
+    //   UniformGPUScheme_Baseline:  packing/unpacking in generated kernels, every direction is handled by separate CUDA stream, can make use of CUDA aware MPI, most probably the fastest version
+    //   UniformGPUScheme_Memcpy:    some as above, but packing is done with cudaMemcpy(3D)
+    //   MPIDatatypes:               use MPI datatypes for packing, needs CUDA aware MPI
+    //   MPIDatatypesFull:           same as above but sends all PDFs
+    //   GPUPackInfo_Baseline:       old implementation based on communication mechanism for CPUs
+    //   GPUPackInfo_Streams:        same as above but with CUDA streams
+}

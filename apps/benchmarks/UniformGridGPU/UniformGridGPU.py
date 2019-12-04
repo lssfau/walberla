@@ -1,7 +1,7 @@
 import sympy as sp
 import numpy as np
 import pystencils as ps
-from lbmpy.creationfunctions import create_lb_method, create_lb_update_rule
+from lbmpy.creationfunctions import create_lb_method, create_lb_update_rule, create_lb_collision_rule
 from lbmpy.boundaries import NoSlip, UBB
 from lbmpy.fieldaccess import StreamPullTwoFieldsAccessor, StreamPushTwoFieldsAccessor
 from pystencils_walberla import generate_pack_info_from_kernel
@@ -39,7 +39,7 @@ options_dict = {
     'mrt': {
         'method': 'mrt',
         'stencil': 'D3Q19',
-        'relaxation_rates': [0, omega, 1.3, 1.4, omega, 1.2, 1.1, 1.15, 1.234, 1.4235, 1.242, 1.2567, 0.9, 0.7],
+        'relaxation_rates': [omega, 1.3, 1.4, 1.2, 1.1, 1.15, 1.234, 1.4235],
     },
     'mrt_full': {
         'method': 'mrt',
@@ -147,7 +147,7 @@ with CodeGeneration() as ctx:
     # CPU lattice model - required for macroscopic value computation, VTK output etc.
     options_without_opt = options.copy()
     del options_without_opt['optimization']
-    generate_lattice_model(ctx, 'UniformGridGPU_LatticeModel', lb_method, update_rule_params=options_without_opt)
+    generate_lattice_model(ctx, 'UniformGridGPU_LatticeModel', create_lb_collision_rule(lb_method=lb_method, **options_without_opt))
 
     # gpu LB sweep & boundaries
     generate_sweep(ctx, 'UniformGridGPU_LbKernel', update_rule,

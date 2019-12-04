@@ -36,7 +36,7 @@ options_dict = {
     'mrt': {
         'method': 'mrt',
         'stencil': 'D3Q19',
-        'relaxation_rates': [0, omega, 1.3, 1.4, omega, 1.2, 1.1],
+        'relaxation_rates': [omega, 1.3, 1.4, omega, 1.2, 1.1],
     },
     'entropic': {
         'method': 'mrt3',

@@ -83,6 +83,14 @@ int main( int argc, char **argv )
         BlockDataID pdfFieldGpuID = cuda::addGPUFieldToStorage< PdfField_T >( blocks, pdfFieldCpuID, "pdfs on GPU", true );
 
         Vector3<int> innerOuterSplit = parameters.getParameter<Vector3<int> >("innerOuterSplit", Vector3<int>(1, 1, 1));
+
+        for(int i=0; i< 3; ++i)
+        {
+            if( int_c(cellsPerBlock[i]) <= innerOuterSplit[i] * 2) {
+                WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller or increase cellsPerBlock");
+            }
+        }
+
         Cell innerOuterSplitCell (innerOuterSplit[0], innerOuterSplit[1], innerOuterSplit[2]);
         bool cudaEnabledMPI = parameters.getParameter<bool>( "cudaEnabledMPI", false );
         Vector3<int32_t> gpuBlockSize = parameters.getParameter<Vector3<int32_t> > ("gpuBlockSize", Vector3<int32_t>(256, 1, 1));

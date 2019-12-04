@@ -98,7 +98,7 @@ int main( int argc, char **argv )
       const std::string timeStepStrategy = parameters.getParameter<std::string>( "timeStepStrategy", "normal");
       const real_t omega = parameters.getParameter<real_t>( "omega", real_c( 1.4 ));
       const uint_t timesteps = parameters.getParameter<uint_t>( "timesteps", uint_c( 50 ));
-      const bool initShearFlow = parameters.getParameter<bool>("initShearFlow", false);
+      const bool initShearFlow = parameters.getParameter<bool>("initShearFlow", true);
 
       // Creating fields
       BlockDataID pdfFieldCpuID = field::addToStorage< PdfField_T >( blocks, "pdfs cpu", real_t(0), field::fzyx);
@@ -165,7 +165,12 @@ int main( int argc, char **argv )
       }
 
       Vector3<int> innerOuterSplit = parameters.getParameter<Vector3<int> >("innerOuterSplit", Vector3<int>(1, 1, 1));
-
+      for(int i=0; i< 3; ++i)
+      {
+          if( int_c(cellsPerBlock[i]) <= innerOuterSplit[i] * 2) {
+              WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller or increase cellsPerBlock");
+          }
+      }
 
       int streamHighPriority = 0;
       int streamLowPriority = 0;
