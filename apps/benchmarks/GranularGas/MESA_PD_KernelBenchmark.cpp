@@ -36,6 +36,7 @@
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
+#include <mesa_pd/kernel/AssocToBlock.h>
 #include <mesa_pd/kernel/DoubleCast.h>
 #include <mesa_pd/kernel/ExplicitEulerWithShape.h>
 #include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
@@ -44,6 +45,7 @@
 #include <mesa_pd/mpi/ContactFilter.h>
 #include <mesa_pd/mpi/ReduceProperty.h>
 #include <mesa_pd/mpi/SyncNextNeighbors.h>
+#include <mesa_pd/mpi/SyncNextNeighborsBlockForest.h>
 #include <mesa_pd/mpi/notifications/ForceTorqueNotification.h>
 #include <mesa_pd/sorting/HilbertCompareFunctor.h>
 #include <mesa_pd/sorting/LinearizedCompareFunctor.h>
@@ -54,6 +56,7 @@
 #include <core/Environment.h>
 #include <core/Hostname.h>
 #include <core/math/Random.h>
+#include <core/math/Sample.h>
 #include <core/mpi/Gatherv.h>
 #include <core/mpi/RecvBuffer.h>
 #include <core/mpi/Reduce.h>
@@ -61,6 +64,7 @@
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
 #include <core/OpenMP.h>
+#include <core/perf_analysis/extern/likwid.h>
 #include <core/timing/Timer.h>
 #include <core/timing/TimingPool.h>
 #include <core/waLBerlaBuildInfo.h>
@@ -75,8 +79,88 @@
 namespace walberla {
 namespace mesa_pd {
 
+class ContactDetection
+{
+public:
+   ContactDetection(const std::shared_ptr<domain::BlockForestDomain>& domain)
+   : domain_(domain)
+   {
+      contacts_.reserve(4000000);
+   }
+
+   template <typename T>
+   inline
+   void operator()(const size_t idx1, const size_t idx2, T& ac)
+   {
+
+      ++contactsChecked_;
+      if (double_cast_(idx1, idx2, ac, acd_, ac))
+      {
+         ++contactsDetected_;
+         if (contact_filter_(acd_.getIdx1(), acd_.getIdx2(), ac, acd_.getContactPoint(),
+                             *domain_))
+         {
+            ++contactsTreated_;
+            contacts_.emplace_back(acd_.getIdx1(), acd_.getIdx2(), acd_.getContactPoint(),
+                 acd_.getContactNormal(), acd_.getPenetrationDepth());
+         }
+      }
+   }
+
+   inline const auto& getContacts() const {return contacts_;}
+
+   inline
+   void resetCounters()
+   {
+      contactsChecked_ = 0;
+      contactsDetected_ = 0;
+      contactsTreated_ = 0;
+      contacts_.clear();
+   }
+
+   inline
+   int64_t getContactsChecked() const
+   {
+      return contactsChecked_;
+   }
+
+   inline
+   int64_t getContactsDetected() const
+   {
+      return contactsDetected_;
+   }
+
+   inline
+   int64_t getContactsTreated() const
+   {
+      return contactsTreated_;
+   }
+
+private:
+   kernel::DoubleCast double_cast_;
+   mpi::ContactFilter contact_filter_;
+   std::shared_ptr<domain::BlockForestDomain> domain_;
+   collision_detection::AnalyticContactDetection acd_;
+   std::vector<Contact> contacts_;
+   int64_t contactsChecked_ = 0;
+   int64_t contactsDetected_ = 0;
+   int64_t contactsTreated_ = 0;
+};
+
+template <typename T>
+void reportOverRanks(const std::string& info, const T& value)
+{
+   math::Sample sample;
+   sample.insert(value);
+   sample.mpiGatherRoot();
+   WALBERLA_LOG_INFO_ON_ROOT(info);
+   WALBERLA_LOG_INFO_ON_ROOT(sample.format());
+}
+
 int main( int argc, char ** argv )
 {
+   LIKWID_MARKER_INIT;
+
    using namespace walberla::timing;
 
    Environment env(argc, argv);
@@ -85,6 +169,7 @@ int main( int argc, char ** argv )
 
    logging::Logging::instance()->setStreamLogLevel(logging::Logging::INFO);
    logging::Logging::instance()->setFileLogLevel(logging::Logging::INFO);
+//   logging::Logging::instance()->includeLoggingToFile("KernelBenchmark");
 
    WALBERLA_LOG_INFO_ON_ROOT( "config file: " << argv[1] );
    WALBERLA_LOG_INFO_ON_ROOT( "waLBerla Revision: " << WALBERLA_GIT_SHA1 );
@@ -106,7 +191,9 @@ int main( int argc, char ** argv )
       WALBERLA_LOG_INFO_ON_ROOT( "No BlockForest created ... exiting!");
       return EXIT_SUCCESS;
    }
-   domain::BlockForestDomain domain(forest);
+   auto domain = std::make_shared<domain::BlockForestDomain>(forest);
+
+   LIKWID_MARKER_THREADINIT;
 
    auto simulationDomain = forest->getDomain();
    auto localDomain = forest->begin()->getAABB();
@@ -114,12 +201,13 @@ int main( int argc, char ** argv )
    {
       localDomain.merge(blk.getAABB());
    }
+//   WALBERLA_LOG_DEVEL_VAR(localDomain);
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - START ***");
 
    //init data structures
-   auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
+   auto ps = std::make_shared<data::ParticleStorage>(100);
    ParticleAccessorWithShape accessor(ps, ss);
    data::LinkedCells     lc(localDomain.getExtended(params.spacing), params.spacing );
 
@@ -133,6 +221,7 @@ int main( int argc, char ** argv )
       {
          WALBERLA_CHECK(iBlk.getAABB().contains(pt));
          createSphere(*ps, pt, params.radius, smallSphere);
+//         WALBERLA_LOG_DEVEL_VAR_ON_ROOT(pt);
       }
    }
    int64_t numParticles = int64_c(ps->size());
@@ -169,27 +258,25 @@ int main( int argc, char ** argv )
    vtkOutput->addOutput<SelectRank>("rank");
    vtkOutput->addOutput<data::SelectParticleOwner>("owner");
    vtkOutput->addOutput<SelectIdx>("idx");
-   //   vtkDomainOutput->write();
+//   vtkDomainOutput->write();
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - START ***");
    // Init kernels
    kernel::ExplicitEulerWithShape        explicitEulerWithShape( params.dt );
+   kernel::AssocToBlock                  assoc(forest);
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::SpringDashpot                 dem(1);
    dem.setStiffness(0, 0, real_t(0));
    dem.setDampingN (0, 0, real_t(0));
    dem.setDampingT (0, 0, real_t(0));
    dem.setFriction (0, 0, real_t(0));
-   collision_detection::AnalyticContactDetection              acd;
-   kernel::DoubleCast                    double_cast;
-   mpi::ContactFilter                    contact_filter;
    mpi::ReduceProperty                   RP;
    mpi::SyncNextNeighbors                SNN;
-   std::vector<Contact>                  contacts;
-   contacts.reserve(4000000);
+   ContactDetection                      CD(domain);
 
    // initial sync
-   SNN(*ps, domain);
+   ps->forEachParticle(false, kernel::SelectLocal(), accessor, assoc, accessor);
+   SNN(*ps, *domain);
    sortParticleStorage(*ps, params.sorting, lc.domain_, uint_c(lc.numCellsPerDim_[0]));
 //   vtkWriter->write();
 
@@ -199,7 +286,20 @@ int main( int argc, char ** argv )
 
       WcTimingPool tp;
 
+      LIKWID_MARKER_REGISTER("AssocToBlock");
       WALBERLA_MPI_BARRIER();
+      LIKWID_MARKER_START("AssocToBlock");
+      tp["AssocToBlock"].start();
+      for (int64_t i=0; i < params.simulationSteps; ++i)
+      {
+         ps->forEachParticle(false, kernel::SelectLocal(), accessor, assoc, accessor);
+      }
+      tp["AssocToBlock"].end();
+      LIKWID_MARKER_STOP("AssocToBlock");
+
+      LIKWID_MARKER_REGISTER("GenerateLinkedCells");
+      WALBERLA_MPI_BARRIER();
+      LIKWID_MARKER_START("GenerateLinkedCells");
       tp["GenerateLinkedCells"].start();
       for (int64_t i=0; i < params.simulationSteps; ++i)
       {
@@ -207,72 +307,70 @@ int main( int argc, char ** argv )
          ps->forEachParticle(true, kernel::SelectAll(), accessor, ipilc, accessor, lc);
       }
       tp["GenerateLinkedCells"].end();
+      LIKWID_MARKER_STOP("GenerateLinkedCells");
 
-      int64_t contactsChecked  = 0;
-      int64_t contactsDetected = 0;
-      int64_t contactsTreated  = 0;
+      LIKWID_MARKER_REGISTER("ContactDetection");
       WALBERLA_MPI_BARRIER();
+      LIKWID_MARKER_START("ContactDetection");
       tp["ContactDetection"].start();
       for (int64_t i=0; i < params.simulationSteps; ++i)
       {
-         contacts.clear();
-         contactsChecked  = 0;
-         contactsDetected = 0;
-         contactsTreated  = 0;
+         CD.resetCounters();
          lc.forEachParticlePairHalf(true,
                                     kernel::SelectAll(),
                                     accessor,
-                                    [&](const size_t idx1, const size_t idx2, auto& ac)
-         {
-            ++contactsChecked;
-            if (double_cast(idx1, idx2, ac, acd, ac ))
-            {
-               ++contactsDetected;
-               if (contact_filter(acd.getIdx1(), acd.getIdx2(), ac, acd.getContactPoint(), domain))
-               {
-                  ++contactsTreated;
-                  contacts.emplace_back(acd.getIdx1(), acd.getIdx2(), acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth());
-               }
-            }
-         },
-         accessor );
+                                    CD,
+                                    accessor);
       }
       tp["ContactDetection"].end();
+      LIKWID_MARKER_STOP("ContactDetection");
 
+      LIKWID_MARKER_REGISTER("DEM");
       WALBERLA_MPI_BARRIER();
+      LIKWID_MARKER_START("DEM");
       tp["DEM"].start();
       for (int64_t i=0; i < params.simulationSteps; ++i)
       {
-         for (auto& c : contacts)
+         for (auto& c : CD.getContacts())
          {
             dem(c.idx1_, c.idx2_, accessor, c.contactPoint_, c.contactNormal_, c.penetrationDepth_);
          }
       }
       tp["DEM"].end();
+      LIKWID_MARKER_STOP("DEM");
 
+      LIKWID_MARKER_REGISTER("ReduceForce");
       WALBERLA_MPI_BARRIER();
+      LIKWID_MARKER_START("ReduceForce");
       tp["ReduceForce"].start();
       for (int64_t i=0; i < params.simulationSteps; ++i)
       {
          RP.operator()<ForceTorqueNotification>(*ps);
       }
       tp["ReduceForce"].end();
+      LIKWID_MARKER_STOP("ReduceForce");
 
+      LIKWID_MARKER_REGISTER("Euler");
       WALBERLA_MPI_BARRIER();
+      LIKWID_MARKER_START("Euler");
       tp["Euler"].start();
       for (int64_t i=0; i < params.simulationSteps; ++i)
       {
          ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEulerWithShape, accessor);
       }
       tp["Euler"].end();
+      LIKWID_MARKER_STOP("Euler");
 
+      LIKWID_MARKER_REGISTER("SNN");
       WALBERLA_MPI_BARRIER();
+      LIKWID_MARKER_START("SNN");
       tp["SNN"].start();
       for (int64_t i=0; i < params.simulationSteps; ++i)
       {
-         SNN(*ps, domain);
+         SNN(*ps, *domain);
       }
       tp["SNN"].end();
+      LIKWID_MARKER_STOP("SNN");
 
       WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
 
@@ -282,6 +380,14 @@ int main( int argc, char ** argv )
       }
 
       WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - START ***");
+      int64_t contactsChecked = CD.getContactsChecked();
+      int64_t contactsDetected = CD.getContactsDetected();
+      int64_t contactsTreated = CD.getContactsTreated();
+
+      reportOverRanks("Contacts Checked:", real_c(contactsChecked));
+      reportOverRanks("Contacts Detected:", real_c(contactsDetected));
+      reportOverRanks("Contacts Treated:", real_c(contactsTreated));
+
       auto SNNBytesSent     = SNN.getBytesSent();
       auto SNNBytesReceived = SNN.getBytesReceived();
       auto SNNSends         = SNN.getNumberOfSends();
@@ -326,6 +432,16 @@ int main( int argc, char ** argv )
          }
       },
       accessor);
+
+      reportOverRanks("Total Particles:", real_c(ps->size()));
+      reportOverRanks("Number of Particles:", real_c(numParticles));
+      reportOverRanks("Number of Ghost Particles:", real_c(numGhostParticles));
+      auto estGhostParticles = (localDomain.xSize()+2) * (localDomain.ySize()+2) * (localDomain.zSize()+2);
+      estGhostParticles -= localDomain.xSize() * localDomain.ySize() * localDomain.zSize();
+      estGhostParticles -= 4*localDomain.xSize() + 4*localDomain.ySize() + 4*localDomain.zSize();
+      estGhostParticles -= 8;
+      WALBERLA_LOG_DEVEL_ON_ROOT("Estimation: " << estGhostParticles);
+
       walberla::mpi::reduceInplace(numParticles, walberla::mpi::SUM);
       walberla::mpi::reduceInplace(numGhostParticles, walberla::mpi::SUM);
       walberla::mpi::reduceInplace(contactsChecked, walberla::mpi::SUM);
@@ -335,9 +451,9 @@ int main( int argc, char ** argv )
       walberla::mpi::reduceInplace(linkedCellsVolume, walberla::mpi::SUM);
       size_t numLinkedCells = lc.cells_.size();
       walberla::mpi::reduceInplace(numLinkedCells, walberla::mpi::SUM);
-      size_t local_aabbs         = domain.getNumLocalAABBs();
-      size_t neighbor_subdomains = domain.getNumNeighborSubdomains();
-      size_t neighbor_processes  = domain.getNumNeighborProcesses();
+      size_t local_aabbs         = domain->getNumLocalAABBs();
+      size_t neighbor_subdomains = domain->getNumNeighborSubdomains();
+      size_t neighbor_processes  = domain->getNumNeighborProcesses();
       walberla::mpi::reduceInplace(local_aabbs, walberla::mpi::SUM);
       walberla::mpi::reduceInplace(neighbor_subdomains, walberla::mpi::SUM);
       walberla::mpi::reduceInplace(neighbor_processes, walberla::mpi::SUM);
@@ -387,6 +503,8 @@ int main( int argc, char ** argv )
       }
       WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - END ***");
    }
+
+   LIKWID_MARKER_CLOSE;
 
    return EXIT_SUCCESS;
 }
