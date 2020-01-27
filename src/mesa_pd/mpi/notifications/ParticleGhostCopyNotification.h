@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ParticleCopyNotification.h
+//! \file ParticleGhostCopyNotification.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -43,7 +43,7 @@ namespace mesa_pd {
  *
  * Copies all properties marked ON_GHOST_CREATION or ALWAYS.
  */
-class ParticleCopyNotification
+class ParticleGhostCopyNotification
 {
 public:
    struct Parameters
@@ -63,11 +63,11 @@ public:
       walberla::real_t temperature {real_t(0)};
    };
 
-   inline explicit ParticleCopyNotification( const data::Particle& particle ) : particle_(particle) {}
+   inline explicit ParticleGhostCopyNotification( const data::Particle& particle ) : particle_(particle) {}
    const data::Particle& particle_;
 };
 
-inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& ps, const ParticleCopyNotification::Parameters& data)
+inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& ps, const ParticleGhostCopyNotification::Parameters& data)
 {
    WALBERLA_ASSERT_EQUAL(ps.find(data.uid), ps.end(), "Particle with same uid already existent!");
 
@@ -89,9 +89,9 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
 }
 
 template<>
-struct NotificationTrait<ParticleCopyNotification>
+struct NotificationTrait<ParticleGhostCopyNotification>
 {
-   static const NotificationType id = PARTICLE_COPY_NOTIFICATION;
+   static const NotificationType id = PARTICLE_GHOST_COPY_NOTIFICATION;
 };
 
 }  // namespace mesa_pd
@@ -108,7 +108,7 @@ namespace mpi {
 
 template< typename T,    // Element type of SendBuffer
           typename G>    // Growth policy of SendBuffer
-mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::ParticleCopyNotification& obj )
+mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::ParticleGhostCopyNotification& obj )
 {
    buf.addDebugMarker( "cn" );
    buf << obj.particle_.getUid();
@@ -128,7 +128,7 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
 }
 
 template< typename T>    // Element type  of RecvBuffer
-mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::ParticleCopyNotification::Parameters& objparam )
+mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::ParticleGhostCopyNotification::Parameters& objparam )
 {
    buf.readDebugMarker( "cn" );
    buf >> objparam.uid;

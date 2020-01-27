@@ -32,7 +32,7 @@
 #include <mesa_pd/domain/BlockForestDomain.h>
 #include <mesa_pd/mpi/notifications/PackNotification.h>
 #include <mesa_pd/mpi/notifications/ParseMessage.h>
-#include <mesa_pd/mpi/notifications/ParticleCopyNotification.h>
+#include <mesa_pd/mpi/notifications/ParticleGhostCopyNotification.h>
 #include <mesa_pd/mpi/notifications/ParticleMigrationNotification.h>
 #include <mesa_pd/mpi/notifications/ParticleRemoteMigrationNotification.h>
 #include <mesa_pd/mpi/notifications/ParticleRemovalNotification.h>

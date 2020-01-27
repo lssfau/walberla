@@ -181,8 +181,8 @@ void SyncNextNeighborsBlockForest::generateSynchronizationMessages(data::Particl
             {
                // no ghost there -> create ghost
                auto& buffer( bs.sendBuffer(nbProcessRank) );
-               WALBERLA_LOG_DETAIL( "Sending shadow copy notification for particle " << pIt->getUid() << " to process " << (nbProcessRank) );
-               packNotification(buffer, ParticleCopyNotification( *pIt ));
+               WALBERLA_LOG_DETAIL( "Sending ghost copy notification for particle " << pIt->getUid() << " to process " << (nbProcessRank) );
+               packNotification(buffer, ParticleGhostCopyNotification( *pIt ));
                pIt->getGhostOwnersRef().insert( int_c(nbProcessRank) );
             }
          }

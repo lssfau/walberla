@@ -249,8 +249,8 @@ void SyncGhostOwners::checkAndResolveOverlap( data::ParticleStorage& ps,
             if( domain.intersectsWithProcessSubdomain( nbProcessRank, pIt->getPosition(), pIt->getInteractionRadius() + dx ) )
             {
                // no ghost there -> create ghost
-               WALBERLA_LOG_DETAIL( "Sending copy notification for body " << pIt->getUid() << " to process " << (nbProcessRank) << "\n master: " << pIt->getOwner());
-               packNotification(sb, ParticleCopyNotification( *pIt ));
+               WALBERLA_LOG_DETAIL( "Sending ghost copy notification for body " << pIt->getUid() << " to process " << (nbProcessRank) << "\n master: " << pIt->getOwner());
+               packNotification(sb, ParticleGhostCopyNotification( *pIt ));
                packNotification(sbMaster, NewGhostParticleNotification( *pIt, int_c(nbProcessRank) ));
                pIt->getNeighborStateRef().insert( int_c(nbProcessRank) );
             }
@@ -274,8 +274,8 @@ void SyncGhostOwners::checkAndResolveOverlap( data::ParticleStorage& ps,
             if( domain.intersectsWithProcessSubdomain( nbProcessRank, pIt->getPosition(), pIt->getInteractionRadius() + dx ) )
             {
                // no ghost there -> create ghost
-               WALBERLA_LOG_DETAIL( "Sending copy notification for body " << pIt->getUid() << " to process " << (nbProcessRank) << "\n master: " << pIt->getOwner());
-               packNotification(sb, ParticleCopyNotification( *pIt ));
+               WALBERLA_LOG_DETAIL( "Sending ghost copy notification for body " << pIt->getUid() << " to process " << (nbProcessRank) << "\n master: " << pIt->getOwner());
+               packNotification(sb, ParticleGhostCopyNotification( *pIt ));
                packNotification(sbMaster, NewGhostParticleNotification( *pIt, int_c(nbProcessRank) ));
                pIt->getNeighborStateRef().insert( int_c(nbProcessRank) );
             }

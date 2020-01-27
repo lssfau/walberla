@@ -31,7 +31,7 @@
 #include <mesa_pd/domain/IDomain.h>
 #include <mesa_pd/mpi/notifications/NewGhostParticleNotification.h>
 #include <mesa_pd/mpi/notifications/NotificationType.h>
-#include <mesa_pd/mpi/notifications/ParticleCopyNotification.h>
+#include <mesa_pd/mpi/notifications/ParticleGhostCopyNotification.h>
 #include <mesa_pd/mpi/notifications/ParticleMigrationNotification.h>
 #include <mesa_pd/mpi/notifications/ParticleRemoteMigrationNotification.h>
 #include <mesa_pd/mpi/notifications/ParticleRemovalNotification.h>
@@ -66,11 +66,11 @@ void ParseMessage::operator()(int sender,
    rb >> notificationType;
 
    switch( notificationType ) {
-   case PARTICLE_COPY_NOTIFICATION: {
-      typename ParticleCopyNotification::Parameters objparam;
+   case PARTICLE_GHOST_COPY_NOTIFICATION: {
+      typename ParticleGhostCopyNotification::Parameters objparam;
       rb >> objparam;
 
-      WALBERLA_LOG_DETAIL( "Received PARTICLE_COPY_NOTIFICATION for particle " << objparam.uid << "from neighboring process with rank " << sender );
+      WALBERLA_LOG_DETAIL( "Received PARTICLE_GHOST_COPY_NOTIFICATION for particle " << objparam.uid << "from neighboring process with rank " << sender );
 
       if ( ps.find(objparam.uid) == ps.end() )
       {
@@ -85,7 +85,7 @@ void ParseMessage::operator()(int sender,
          WALBERLA_LOG_DETAIL("Ghost particle with id " << objparam.uid << " already existend.");
       }
 
-      WALBERLA_LOG_DETAIL( "Processed PARTICLE_COPY_NOTIFICATION for particle " << objparam.uid << "."  );
+      WALBERLA_LOG_DETAIL( "Processed PARTICLE_GHOST_COPY_NOTIFICATION for particle " << objparam.uid << "."  );
 
       break;
    }
