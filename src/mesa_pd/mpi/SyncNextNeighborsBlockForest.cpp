@@ -51,7 +51,8 @@ void SyncNextNeighborsBlockForest::operator()(data::ParticleStorage& ps,
 {
    if (numProcesses_ == 1) return;
 
-   bs = walberla::mpi::BufferSystem( walberla::mpi::MPIManager::instance()->comm() );
+   WALBERLA_CHECK(!bs.isCommunicationRunning());
+   WALBERLA_CHECK_EQUAL(bs.size(), 0);
 
    for (auto& blk : bf->getBlockMap())
    {
