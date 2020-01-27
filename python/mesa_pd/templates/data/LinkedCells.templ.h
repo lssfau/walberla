@@ -150,9 +150,7 @@ LinkedCells::LinkedCells(const math::AABB& domain, const Vec3& cellDiameter)
    , numCellsPerDim_( static_cast<int>(std::ceil( domain.sizes()[0] / cellDiameter[0])),
      static_cast<int>(std::ceil( domain.sizes()[1] / cellDiameter[1])),
      static_cast<int>(std::ceil( domain.sizes()[2] / cellDiameter[2])) )
-   , cellDiameter_( domain.sizes()[0] / real_c(numCellsPerDim_[0]),
-     domain.sizes()[1] / real_c(numCellsPerDim_[1]),
-     domain.sizes()[2] / real_c(numCellsPerDim_[2]) )
+   , cellDiameter_( cellDiameter)
    , invCellDiameter_( real_t(1) / cellDiameter_[0], real_t(1) / cellDiameter_[1], real_t(1) / cellDiameter_[2] )
    , cells_(uint_c(numCellsPerDim_[0]*numCellsPerDim_[1]*numCellsPerDim_[2]))
 {
@@ -163,10 +161,7 @@ LinkedCells::LinkedCells(const math::AABB& domain, const Vec3& cellDiameter)
 
    //postcondition
    {%- for dim in range(3) %}
-   WALBERLA_CHECK_GREATER_EQUAL(cellDiameter_[{{dim}}], real_t(0));
-   WALBERLA_CHECK_LESS_EQUAL(cellDiameter_[{{dim}}], cellDiameter[{{dim}}]);
-
-   WALBERLA_CHECK_GREATER_EQUAL(numCellsPerDim_[{{dim}}], 0);
+   WALBERLA_CHECK_GREATER_EQUAL(real_c(numCellsPerDim_[{{dim}}]) * cellDiameter_[{{dim}}], domain.size({{dim}}));
    {%- endfor %}
 
    std::fill(cells_.begin(), cells_.end(), -1);
