@@ -92,5 +92,27 @@ inline void addForceAtWFPosAtomic(const size_t p_idx, Accessor& ac, const Vec3& 
    ac.getTorqueRef(p_idx)[2] += t[2];
 }
 
+/**
+ * Torque is directly applied on the particle.
+ */
+template <typename Accessor>
+inline void addTorqueAtomic(const size_t p_idx, Accessor& ac, const Vec3& t)
+{
+   // Increasing the torque on this particle
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
+   ac.getTorqueRef(p_idx)[0]  += t[0];
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
+   ac.getTorqueRef(p_idx)[1]  += t[1];
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
+   ac.getTorqueRef(p_idx)[2]  += t[2];
+}
+
+
 } //namespace mesa_pd
 } //namespace walberla

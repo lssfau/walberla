@@ -66,6 +66,13 @@ if __name__ == '__main__':
    ps.addProperty("dv",               "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
    ps.addProperty("dw",               "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
 
+   # Properties for lbm_mesapd_coupling:
+   ps.addProperty("hydrodynamicForce", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
+   ps.addProperty("hydrodynamicTorque", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
+   ps.addProperty("oldHydrodynamicForce", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
+   ps.addProperty("oldHydrodynamicTorque", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
+
+
    ch.addProperty("tangentialSpringDisplacement", "walberla::mesa_pd::Vec3", defValue="real_t(0)")
    ch.addProperty("isSticking",                   "bool",                    defValue="false")
    ch.addProperty("impactVelocityMagnitude",      "real_t",                  defValue="real_t(0)")

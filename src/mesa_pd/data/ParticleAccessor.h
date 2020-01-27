@@ -144,6 +144,22 @@ public:
    walberla::mesa_pd::Vec3& getDwRef(const size_t p_idx) {return ps_->getDwRef(p_idx);}
    void setDw(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setDw(p_idx, v);}
    
+   walberla::mesa_pd::Vec3 const & getHydrodynamicForce(const size_t p_idx) const {return ps_->getHydrodynamicForce(p_idx);}
+   walberla::mesa_pd::Vec3& getHydrodynamicForceRef(const size_t p_idx) {return ps_->getHydrodynamicForceRef(p_idx);}
+   void setHydrodynamicForce(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setHydrodynamicForce(p_idx, v);}
+   
+   walberla::mesa_pd::Vec3 const & getHydrodynamicTorque(const size_t p_idx) const {return ps_->getHydrodynamicTorque(p_idx);}
+   walberla::mesa_pd::Vec3& getHydrodynamicTorqueRef(const size_t p_idx) {return ps_->getHydrodynamicTorqueRef(p_idx);}
+   void setHydrodynamicTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setHydrodynamicTorque(p_idx, v);}
+   
+   walberla::mesa_pd::Vec3 const & getOldHydrodynamicForce(const size_t p_idx) const {return ps_->getOldHydrodynamicForce(p_idx);}
+   walberla::mesa_pd::Vec3& getOldHydrodynamicForceRef(const size_t p_idx) {return ps_->getOldHydrodynamicForceRef(p_idx);}
+   void setOldHydrodynamicForce(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldHydrodynamicForce(p_idx, v);}
+   
+   walberla::mesa_pd::Vec3 const & getOldHydrodynamicTorque(const size_t p_idx) const {return ps_->getOldHydrodynamicTorque(p_idx);}
+   walberla::mesa_pd::Vec3& getOldHydrodynamicTorqueRef(const size_t p_idx) {return ps_->getOldHydrodynamicTorqueRef(p_idx);}
+   void setOldHydrodynamicTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldHydrodynamicTorque(p_idx, v);}
+   
    std::unordered_set<walberla::mpi::MPIRank> const & getNeighborState(const size_t p_idx) const {return ps_->getNeighborState(p_idx);}
    std::unordered_set<walberla::mpi::MPIRank>& getNeighborStateRef(const size_t p_idx) {return ps_->getNeighborStateRef(p_idx);}
    void setNeighborState(const size_t p_idx, std::unordered_set<walberla::mpi::MPIRank> const & v) { ps_->setNeighborState(p_idx, v);}
@@ -289,6 +305,22 @@ public:
    void setDw(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { dw_ = v;}
    walberla::mesa_pd::Vec3& getDwRef(const size_t /*p_idx*/) {return dw_;}
    
+   walberla::mesa_pd::Vec3 const & getHydrodynamicForce(const size_t /*p_idx*/) const {return hydrodynamicForce_;}
+   void setHydrodynamicForce(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { hydrodynamicForce_ = v;}
+   walberla::mesa_pd::Vec3& getHydrodynamicForceRef(const size_t /*p_idx*/) {return hydrodynamicForce_;}
+   
+   walberla::mesa_pd::Vec3 const & getHydrodynamicTorque(const size_t /*p_idx*/) const {return hydrodynamicTorque_;}
+   void setHydrodynamicTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { hydrodynamicTorque_ = v;}
+   walberla::mesa_pd::Vec3& getHydrodynamicTorqueRef(const size_t /*p_idx*/) {return hydrodynamicTorque_;}
+   
+   walberla::mesa_pd::Vec3 const & getOldHydrodynamicForce(const size_t /*p_idx*/) const {return oldHydrodynamicForce_;}
+   void setOldHydrodynamicForce(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldHydrodynamicForce_ = v;}
+   walberla::mesa_pd::Vec3& getOldHydrodynamicForceRef(const size_t /*p_idx*/) {return oldHydrodynamicForce_;}
+   
+   walberla::mesa_pd::Vec3 const & getOldHydrodynamicTorque(const size_t /*p_idx*/) const {return oldHydrodynamicTorque_;}
+   void setOldHydrodynamicTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldHydrodynamicTorque_ = v;}
+   walberla::mesa_pd::Vec3& getOldHydrodynamicTorqueRef(const size_t /*p_idx*/) {return oldHydrodynamicTorque_;}
+   
    std::unordered_set<walberla::mpi::MPIRank> const & getNeighborState(const size_t /*p_idx*/) const {return neighborState_;}
    void setNeighborState(const size_t /*p_idx*/, std::unordered_set<walberla::mpi::MPIRank> const & v) { neighborState_ = v;}
    std::unordered_set<walberla::mpi::MPIRank>& getNeighborStateRef(const size_t /*p_idx*/) {return neighborState_;}
@@ -328,6 +360,10 @@ private:
    walberla::real_t heatFlux_;
    walberla::mesa_pd::Vec3 dv_;
    walberla::mesa_pd::Vec3 dw_;
+   walberla::mesa_pd::Vec3 hydrodynamicForce_;
+   walberla::mesa_pd::Vec3 hydrodynamicTorque_;
+   walberla::mesa_pd::Vec3 oldHydrodynamicForce_;
+   walberla::mesa_pd::Vec3 oldHydrodynamicTorque_;
    std::unordered_set<walberla::mpi::MPIRank> neighborState_;
 };
 

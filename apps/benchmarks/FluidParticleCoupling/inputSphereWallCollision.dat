@@ -1,0 +1,122 @@
+BouncingSphere
+{
+   setup Case_St152;
+
+   // simulation quantities
+
+   // control
+   randomizeInitialSpherePosition false;
+   initializeSphereVelocity false; // with 10% of final velocity
+   applyOutflowBCAtTop true;
+   artificiallyAccelerateSphere true;
+
+   // LBM
+   uIn 0.02;
+   diameter 20;
+   magicNumber 0.1875;
+   bulkViscRateFactor 100.;
+   useOmegaBulkAdaption true;
+
+   // RPD
+   numRPDSubCycles 100;
+   useLubricationCorrection true;
+   lubricationCutOffDistance 0.666667;
+   lubricationMinimalGapSizeNonDim 0.0005;
+
+   useVelocityVerlet true;
+
+   collisionTime 60;
+   StCrit 5;
+   useACTM false;
+
+   // coupling
+   averageForceTorqueOverTwoTimeSteps true;
+   conserveMomentum false;
+   disableFluidForceDuringContact false;
+   reconstructorType Grad; // Eq EAN Grad Ext
+
+   // IO properties
+   baseFolder vtk_out_SphereWallCollision;
+   fileIO true;
+   vtkIOFreq 100;
+   vtkOutputOnCollision false;
+
+   // checkpointing
+   writeCheckPointFile true;
+   readFromCheckPointFile true;
+}
+
+// Fig. 10d
+Case_St27
+{
+   Re                           30;
+   densityFluid_SI              965; // kg/m**3
+   dynamicViscosityFluid_SI     100e-3; // Pa s
+   densitySphere_SI             7800; // kg/m**3
+   diameter_SI                  6e-3; // m
+   gravitationalAcceleration_SI 9.81; // m/s**2
+   restitutionCoeff             0.97;
+   numberOfBouncesUntilTermination 2;
+   domainSize                   <12,12,48>; // multiples of diameter
+   numberOfBlocksPerDirection   <5,5,8>;
+}
+
+// Fig. 10c
+Case_St100
+{
+   Re                           110;
+   densityFluid_SI              953; // kg/m**3
+   dynamicViscosityFluid_SI     20e-3; // Pa s
+   densitySphere_SI             7800; // kg/m**3
+   diameter_SI                  4e-3; // m
+   gravitationalAcceleration_SI 9.81; // m/s**2
+   restitutionCoeff             0.97;
+   numberOfBouncesUntilTermination 2;
+   domainSize                   <12,12,48>; // multiples of diameter
+   numberOfBlocksPerDirection   <5,5,8>;
+}
+
+// Fig. 2 a,b
+Case_St152
+{
+   Re                           164;
+   densityFluid_SI              935; // kg/m**3
+   dynamicViscosityFluid_SI     10e-3; // Pa s
+   densitySphere_SI             7800; // kg/m**3
+   diameter_SI                  0.003; // m
+   gravitationalAcceleration_SI 9.81; // m/s**2
+   restitutionCoeff             0.97;
+   numberOfBouncesUntilTermination 4;
+   domainSize                   <12,12,64>; // multiples of diameter
+   numberOfBlocksPerDirection   <5,5,8>;
+}
+
+// Fig. 10b
+Case_St192
+{
+   Re                           212;
+   densityFluid_SI              953; // kg/m**3
+   dynamicViscosityFluid_SI     20e-3; // Pa s
+   densitySphere_SI             7800; // kg/m**3
+   diameter_SI                  6e-3; // m
+   gravitationalAcceleration_SI 9.81; // m/s**2
+   restitutionCoeff             0.97;
+   numberOfBouncesUntilTermination 2;
+   domainSize                   <12,12,64>; // multiples of diameter
+   numberOfBlocksPerDirection   <5,5,8>;
+}
+
+// Fig. 10a
+Case_St742
+{
+   Re                           788;
+   densityFluid_SI              920; // kg/m**3
+   dynamicViscosityFluid_SI     5e-3; // Pa s
+   densitySphere_SI             7800; // kg/m**3
+   diameter_SI                  0.005; // m
+   gravitationalAcceleration_SI 9.81; // m/s**2
+   restitutionCoeff             0.97;
+   numberOfBouncesUntilTermination 2;
+   domainSize                   <12,12,64>; // multiples of diameter
+   numberOfBlocksPerDirection   <5,5,8>;
+}

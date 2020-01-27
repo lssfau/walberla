@@ -1,0 +1,137 @@
+Setup
+{
+
+   case 3;
+
+   impactRatio 0;
+
+   variant Acceleration; // Gravity or Acceleration
+
+   // control
+   applyOutflowBCAtTop true;
+
+   // LBM
+   diameter 30;
+   magicNumber 0.1875;
+   bulkViscRateFactor 100.;
+   useOmegaBulkAdaption true;
+
+   // RPD
+   numRPDSubCycles 10;
+   useLubricationCorrection true;
+   lubricationCutOffDistanceNormal 0.666667;
+   lubricationCutOffDistanceTangentialTranslational 0.5;
+   lubricationCutOffDistanceTangentialRotational 0.5;
+   lubricationMinimalGapSizeNonDim 0.002;
+
+   useVelocityVerlet true;
+
+   collisionTime 120;
+
+   // coupling
+   averageForceTorqueOverTwoTimeSteps true;
+   conserveMomentum false;
+   reconstructorType Grad; // Eq EAN Grad Ext
+
+   // IO properties
+   baseFolder vtk_out_ObliqueWetCollision;
+   fileIO true;
+   vtkIOFreq 0;
+
+}
+
+Variant_Gravity
+{
+   gravitationalAcceleration_SI    0.25;
+   tau                             0.502;
+   useFullGravityInNormalDirection false;
+   domainSize                      <20,10,10>; // multiples of diameter
+   numberOfBlocksPerDirection      <8,5,5>;
+   initialSphereHeight             7; // multiple of diameter
+}
+
+Variant_Acceleration
+{
+   uIn                                     0.02;
+   StTarget                                100;
+   useStTargetInNormalDirection            true;
+   domainSize                              <12,12,24>; // multiples of diameter
+   numberOfBlocksPerDirection              <5,5,8>;
+   initialSphereHeight                     22.5; // multiple of diameter
+   applyArtificialGravityAfterAccelerating true;
+   applyUInNormalDirection                 true;
+   accelerationFactor                      25;
+}
+
+Case1
+{
+   material Steel;
+   fluid Glycerol78;
+}
+
+Case2
+{
+   material Glass;
+   fluid Glycerol45;
+}
+
+Case3
+{
+   material Glass;
+   fluid Glycerol33;
+}
+
+Case4
+{
+   material Steel;
+   fluid Glycerol37;
+}
+
+Mat_Steel
+{
+   densitySphere_SI             7780; // kg/m**3
+   diameter_SI                  12.7e-3; // m
+   restitutionCoeff             0.97;
+   frictionCoeff                0.02;
+   poissonsRatio                0.27; //Joseph 2001
+}
+
+Mat_Glass
+{
+   densitySphere_SI             2540; // kg/m**3
+   diameter_SI                  12.7e-3; // m
+   restitutionCoeff             0.97;
+   frictionCoeff                0.15;
+   poissonsRatio                0.23; //Joseph 2001
+}
+
+// from https://www.internetchemie.info/chemie-lexikon/stoffe/g/glycerol.php
+Fluid_Water
+{
+   densityFluid_SI              998; // kg/m**3
+   dynamicViscosityFluid_SI     1e-3; // Pa s
+}
+
+Fluid_Glycerol33
+{
+   densityFluid_SI              1081; // kg/m**3
+   dynamicViscosityFluid_SI     2.5e-3; // Pa s
+}
+
+Fluid_Glycerol37
+{
+   densityFluid_SI              1091; // kg/m**3
+   dynamicViscosityFluid_SI     3e-3; // Pa s
+}
+
+Fluid_Glycerol45
+{
+   densityFluid_SI              1113; // kg/m**3
+   dynamicViscosityFluid_SI     4.5e-3; // Pa s
+}
+
+Fluid_Glycerol78
+{
+   densityFluid_SI              1203; // kg/m**3
+   dynamicViscosityFluid_SI     48e-3; // Pa s
+}
