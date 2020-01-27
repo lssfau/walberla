@@ -23,7 +23,7 @@
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/ParticleStorage.h>
 
-#include <mesa_pd/mpi/notifications/ParticleGhostCopyNotification.h>
+#include <mesa_pd/mpi/notifications/ParticleCopyNotification.h>
 
 #include "blockforest/BlockDataHandling.h"
 #include "blockforest/BlockForest.h"
@@ -97,7 +97,7 @@ void BlockForestDataHandling::serialize( IBlock * const block,
       //skip globals
       if (data::particle_flags::isSet( pIt->getFlags(), data::particle_flags::GLOBAL)) continue;
 
-      buffer << ParticleGhostCopyNotification( *pIt );
+      buffer << ParticleCopyNotification( *pIt );
       ++numOfParticles;
    }
 
@@ -140,7 +140,7 @@ void BlockForestDataHandling::serializeCoarseToFine( Block * const block, const 
 
       if( childAABB.contains( pIt->getPosition()) )
       {
-         buffer << ParticleGhostCopyNotification( *pIt );
+         buffer << ParticleCopyNotification( *pIt );
          ++numOfParticles;
       }
    }
@@ -164,7 +164,7 @@ void BlockForestDataHandling::serializeFineToCoarse( Block * const block, const 
       //skip globals
       if (data::particle_flags::isSet( pIt->getFlags(), data::particle_flags::GLOBAL)) continue;
 
-      buffer << ParticleGhostCopyNotification( *pIt );
+      buffer << ParticleCopyNotification( *pIt );
       ++numOfParticles;
    }
 
@@ -200,7 +200,7 @@ void BlockForestDataHandling::deserializeImpl( IBlock * const block, const Block
 
    while( numBodies > 0 )
    {
-      typename ParticleGhostCopyNotification::Parameters objparam;
+      typename ParticleCopyNotification::Parameters objparam;
       buffer >> objparam;
 
       auto pIt = createNewParticle(*ps_, objparam);

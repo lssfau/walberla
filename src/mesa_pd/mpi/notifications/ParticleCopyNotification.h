@@ -48,11 +48,22 @@ class ParticleCopyNotification
 public:
    struct Parameters
    {
-      {%- for prop in properties %}
-      {%- if not prop.syncMode == "NEVER" %}
-      {{prop.type}} {{prop.name}} {{'{'}}{{prop.defValue}}{{'}'}};
-      {%- endif %}
-      {%- endfor %}
+      walberla::id_t uid {UniqueID<data::Particle>::invalidID()};
+      walberla::mesa_pd::Vec3 position {real_t(0)};
+      walberla::real_t interactionRadius {real_t(0)};
+      walberla::mesa_pd::data::particle_flags::FlagT flags {};
+      int owner {-1};
+      std::unordered_set<walberla::mpi::MPIRank> ghostOwners {};
+      size_t shapeID {};
+      walberla::mesa_pd::Rot3 rotation {};
+      walberla::mesa_pd::Vec3 angularVelocity {real_t(0)};
+      walberla::mesa_pd::Vec3 linearVelocity {real_t(0)};
+      walberla::real_t invMass {real_t(1)};
+      walberla::mesa_pd::Vec3 oldForce {real_t(0)};
+      walberla::mesa_pd::Vec3 oldTorque {real_t(0)};
+      uint_t type {0};
+      std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> oldContactHistory {};
+      walberla::real_t temperature {real_t(0)};
    };
 
    inline explicit ParticleCopyNotification( const data::Particle& particle ) : particle_(particle) {}
@@ -64,11 +75,22 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
    WALBERLA_ASSERT_EQUAL(ps.find(data.uid), ps.end(), "Particle with same uid already existent!");
 
    auto pIt = ps.create(data.uid);
-   {%- for prop in properties %}
-   {%- if not prop.syncMode == "NEVER" %}
-   pIt->set{{prop.name | capFirst}}(data.{{prop.name}});
-   {%- endif %}
-   {%- endfor %}
+   pIt->setUid(data.uid);
+   pIt->setPosition(data.position);
+   pIt->setInteractionRadius(data.interactionRadius);
+   pIt->setFlags(data.flags);
+   pIt->setOwner(data.owner);
+   pIt->setGhostOwners(data.ghostOwners);
+   pIt->setShapeID(data.shapeID);
+   pIt->setRotation(data.rotation);
+   pIt->setAngularVelocity(data.angularVelocity);
+   pIt->setLinearVelocity(data.linearVelocity);
+   pIt->setInvMass(data.invMass);
+   pIt->setOldForce(data.oldForce);
+   pIt->setOldTorque(data.oldTorque);
+   pIt->setType(data.type);
+   pIt->setOldContactHistory(data.oldContactHistory);
+   pIt->setTemperature(data.temperature);
    return pIt;
 }
 
@@ -95,11 +117,22 @@ template< typename T,    // Element type of SendBuffer
 mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::ParticleCopyNotification& obj )
 {
    buf.addDebugMarker( "cn" );
-   {%- for prop in properties %}
-   {%- if not prop.syncMode == "NEVER" %}
-   buf << obj.particle_.get{{prop.name | capFirst}}();
-   {%- endif %}
-   {%- endfor %}
+   buf << obj.particle_.getUid();
+   buf << obj.particle_.getPosition();
+   buf << obj.particle_.getInteractionRadius();
+   buf << obj.particle_.getFlags();
+   buf << obj.particle_.getOwner();
+   buf << obj.particle_.getGhostOwners();
+   buf << obj.particle_.getShapeID();
+   buf << obj.particle_.getRotation();
+   buf << obj.particle_.getAngularVelocity();
+   buf << obj.particle_.getLinearVelocity();
+   buf << obj.particle_.getInvMass();
+   buf << obj.particle_.getOldForce();
+   buf << obj.particle_.getOldTorque();
+   buf << obj.particle_.getType();
+   buf << obj.particle_.getOldContactHistory();
+   buf << obj.particle_.getTemperature();
    return buf;
 }
 
@@ -107,11 +140,22 @@ template< typename T>    // Element type  of RecvBuffer
 mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::ParticleCopyNotification::Parameters& objparam )
 {
    buf.readDebugMarker( "cn" );
-   {%- for prop in properties %}
-   {%- if not prop.syncMode == "NEVER" %}
-   buf >> objparam.{{prop.name}};
-   {%- endif %}
-   {%- endfor %}
+   buf >> objparam.uid;
+   buf >> objparam.position;
+   buf >> objparam.interactionRadius;
+   buf >> objparam.flags;
+   buf >> objparam.owner;
+   buf >> objparam.ghostOwners;
+   buf >> objparam.shapeID;
+   buf >> objparam.rotation;
+   buf >> objparam.angularVelocity;
+   buf >> objparam.linearVelocity;
+   buf >> objparam.invMass;
+   buf >> objparam.oldForce;
+   buf >> objparam.oldTorque;
+   buf >> objparam.type;
+   buf >> objparam.oldContactHistory;
+   buf >> objparam.temperature;
    return buf;
 }
 
