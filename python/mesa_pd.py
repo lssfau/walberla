@@ -38,22 +38,22 @@ if __name__ == '__main__':
 
    ps.addProperty("position",         "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
    ps.addProperty("linearVelocity",   "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
-   ps.addProperty("invMass",          "walberla::real_t",        defValue="real_t(1)", syncMode="COPY")
+   ps.addProperty("invMass",          "walberla::real_t",        defValue="real_t(1)", syncMode="ON_GHOST_CREATION")
    ps.addProperty("force",            "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
-   ps.addProperty("oldForce",         "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="MIGRATION")
+   ps.addProperty("oldForce",         "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
 
-   ps.addProperty("shapeID",          "size_t",                  defValue="",          syncMode="COPY")
+   ps.addProperty("shapeID",          "size_t",                  defValue="",          syncMode="ON_GHOST_CREATION")
    ps.addProperty("rotation",         "walberla::mesa_pd::Rot3", defValue="",          syncMode="ALWAYS")
    ps.addProperty("angularVelocity",  "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
    ps.addProperty("torque",           "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
-   ps.addProperty("oldTorque",        "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="MIGRATION")
+   ps.addProperty("oldTorque",        "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
 
    ps.addInclude("blockforest/BlockForest.h")
    ps.addProperty("currentBlock",     "blockforest::BlockID",    defValue="",          syncMode="NEVER")
 
-   ps.addProperty("type",             "uint_t",                  defValue="0",         syncMode="COPY")
+   ps.addProperty("type",             "uint_t",                  defValue="0",         syncMode="ON_GHOST_CREATION")
 
-   ps.addProperty("flags",            "walberla::mesa_pd::data::particle_flags::FlagT", defValue="", syncMode="COPY")
+   ps.addProperty("flags",            "walberla::mesa_pd::data::particle_flags::FlagT", defValue="", syncMode="ON_GHOST_CREATION")
    ps.addProperty("nextParticle",     "int",                     defValue="-1",        syncMode="NEVER")
 
    ps.addProperty("oldContactHistory", "std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>", defValue="", syncMode="ALWAYS")

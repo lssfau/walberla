@@ -12,10 +12,10 @@ class ParticleStorage(Container):
 
       self.addProperty("uid",               "walberla::id_t",       defValue = "UniqueID<data::Particle>::invalidID()", syncMode="ALWAYS")
       self.addProperty("position",          "walberla::mesa_pd::Vec3", defValue = "real_t(0)", syncMode="ALWAYS")
-      self.addProperty("interactionRadius", "walberla::real_t",     defValue = "real_t(0)", syncMode="COPY")
-      self.addProperty("flags",             "walberla::mesa_pd::data::particle_flags::FlagT", defValue = "", syncMode="COPY")
-      self.addProperty("owner",             "int",                  defValue = "-1", syncMode="COPY")
-      self.addProperty("ghostOwners",       "std::unordered_set<walberla::mpi::MPIRank>", defValue = "", syncMode="MIGRATION")
+      self.addProperty("interactionRadius", "walberla::real_t",     defValue = "real_t(0)", syncMode="ON_GHOST_CREATION")
+      self.addProperty("flags",             "walberla::mesa_pd::data::particle_flags::FlagT", defValue = "", syncMode="ON_GHOST_CREATION")
+      self.addProperty("owner",             "int",                  defValue = "-1", syncMode="ON_GHOST_CREATION")
+      self.addProperty("ghostOwners",       "std::unordered_set<walberla::mpi::MPIRank>", defValue = "", syncMode="ON_OWNERSHIP_CHANGE")
 
    def generate(self, path):
       self.unrollDimension()

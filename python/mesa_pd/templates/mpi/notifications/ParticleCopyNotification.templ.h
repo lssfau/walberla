@@ -41,7 +41,7 @@ namespace mesa_pd {
 /**
  * A complete particle copy for a new ghost particle.
  *
- * Copies all properties marked COPY or ALWAYS.
+ * Copies all properties marked ON_GHOST_CREATION or ALWAYS.
  */
 class ParticleCopyNotification
 {
@@ -49,7 +49,7 @@ public:
    struct Parameters
    {
       {%- for prop in properties %}
-      {%- if prop.syncMode in ["COPY", "ALWAYS"] %}
+      {%- if prop.syncMode in ["ON_GHOST_CREATION", "ALWAYS"] %}
       {{prop.type}} {{prop.name}} {{'{'}}{{prop.defValue}}{{'}'}};
       {%- endif %}
       {%- endfor %}
@@ -65,7 +65,7 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
 
    auto pIt = ps.create(data.uid);
    {%- for prop in properties %}
-   {%- if prop.syncMode in ["COPY", "ALWAYS"] %}
+   {%- if prop.syncMode in ["ON_GHOST_CREATION", "ALWAYS"] %}
    pIt->set{{prop.name | capFirst}}(data.{{prop.name}});
    {%- endif %}
    {%- endfor %}
@@ -96,7 +96,7 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
 {
    buf.addDebugMarker( "cn" );
    {%- for prop in properties %}
-   {%- if prop.syncMode in ["COPY", "ALWAYS"] %}
+   {%- if prop.syncMode in ["ON_GHOST_CREATION", "ALWAYS"] %}
    buf << obj.particle_.get{{prop.name | capFirst}}();
    {%- endif %}
    {%- endfor %}
@@ -108,7 +108,7 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
 {
    buf.readDebugMarker( "cn" );
    {%- for prop in properties %}
-   {%- if prop.syncMode in ["COPY", "ALWAYS"] %}
+   {%- if prop.syncMode in ["ON_GHOST_CREATION", "ALWAYS"] %}
    buf >> objparam.{{prop.name}};
    {%- endif %}
    {%- endfor %}

@@ -21,8 +21,8 @@ class Property:
          default value the property should be initialized with
       syncMode : str
          'NEVER', this property does not have to be synced
-         'COPY', this property must be synced on creation
-         'MIGRATION', this property must be synced when the ownership changes
+         'ON_GHOST_CREATION', this property must be synced on creation
+         'ON_OWNERSHIP_CHANGE', this property must be synced when the ownership changes
          'ALWAYS', this property has to be synced in every iteration
       dim : int
          dimensions of the property
@@ -36,7 +36,7 @@ class Property:
          if not (acc in ["g","s","r"]):
             raise RuntimeError("{} is not a valid access specifier in {}".format(acc, access))
 
-      if (not syncMode in ["NEVER", "COPY", "MIGRATION", "ALWAYS"]):
+      if (not syncMode in ["NEVER", "ON_GHOST_CREATION", "ON_OWNERSHIP_CHANGE", "ALWAYS"]):
          raise RuntimeError(TerminalColor.RED + "{} is no valid sync for property: {}".format(syncMode, name) + TerminalColor.DEFAULT)
 
       if (dim < 1):

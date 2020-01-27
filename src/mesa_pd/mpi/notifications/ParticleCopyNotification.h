@@ -41,7 +41,7 @@ namespace mesa_pd {
 /**
  * A complete particle copy for a new ghost particle.
  *
- * Copies all properties marked COPY or ALWAYS.
+ * Copies all properties marked ON_GHOST_CREATION or ALWAYS.
  */
 class ParticleCopyNotification
 {
