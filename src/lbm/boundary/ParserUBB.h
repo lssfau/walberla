@@ -356,7 +356,6 @@ template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternal
 inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::registerCell( const flag_t, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
                                                                                              const BoundaryConfiguration & parser )
 {
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Parser * >( &parser ), &parser );
    WALBERLA_ASSERT_NOT_NULLPTR( parserField_ );
 
    if( auto v = dynamic_cast< const Velocity * >( &parser ) )
@@ -366,6 +365,7 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
       return;
    }
 
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Parser * >( &parser ), &parser );
    auto & p = dynamic_cast< const Parser & >( parser );
 
    if( p.isTimeDependent() )
@@ -387,7 +387,6 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce, bool StoreForce >
 inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::registerCells( const flag_t, const CellInterval & cells, const BoundaryConfiguration & parser )
 {
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Parser * >( &parser ), &parser );
    WALBERLA_ASSERT_NOT_NULLPTR( parserField_ );
 
    if( auto v = dynamic_cast< const Velocity * >( &parser ) )
@@ -400,6 +399,7 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
       return;
    }
 
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Parser * >( &parser ), &parser );
    auto & p = dynamic_cast< const Parser & >( parser );
 
    if( p.isTimeDependent() )
@@ -428,7 +428,6 @@ template< typename CellIterator >
 inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::registerCells( const flag_t, const CellIterator & begin, const CellIterator & end,
                                                                                               const BoundaryConfiguration & parser )
 {
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Parser * >( &parser ), &parser );
    WALBERLA_ASSERT_NOT_NULLPTR( parserField_ );
 
    if( auto v = dynamic_cast< const Velocity * >( &parser ) )
@@ -441,6 +440,7 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
       return;
    }
 
+   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Parser * >( &parser ), &parser );
    auto & p = dynamic_cast< const Parser & >( parser );
 
    if( p.isTimeDependent() )
