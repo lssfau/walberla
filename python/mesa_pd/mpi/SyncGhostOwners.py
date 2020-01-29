@@ -5,9 +5,9 @@ from ..utility import generateFile
 class SyncGhostOwners:
    def __init__(self, p):
       p.addProperty("position",          "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
-      p.addProperty("interactionRadius", "walberla::real_t",        defValue="real_t(0)", syncMode="ONCE")
-      p.addProperty("flags",             "walberla::mesa_pd::data::particle_flags::FlagT", defValue="", syncMode="ONCE")
-      p.addProperty("owner",             "int",                     defValue="-1",        syncMode="ONCE")
+      p.addProperty("interactionRadius", "walberla::real_t",        defValue="real_t(0)", syncMode="ON_GHOST_CREATION")
+      p.addProperty("flags",             "walberla::mesa_pd::data::particle_flags::FlagT", defValue="", syncMode="ON_GHOST_CREATION")
+      p.addProperty("owner",             "int",                     defValue="-1",        syncMode="ON_GHOST_CREATION")
       p.addProperty("ghostOwners",       "std::unordered_set<walberla::mpi::MPIRank>",    defValue="",          syncMode="NEVER")
       p.addProperty("neighborState",     "std::unordered_set<walberla::mpi::MPIRank>",       defValue="",          syncMode="NEVER")
 
