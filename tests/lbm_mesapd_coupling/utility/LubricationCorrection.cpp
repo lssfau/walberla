@@ -254,7 +254,7 @@ int main( int argc, char **argv )
       // they can be used to break the O(N^2) complexity
 
       math::AABB domain(real_t(0), real_t(0), real_t(0), real_t(10), real_t(10), real_t(10));
-      real_t spacing = real_t(1.1) * ( sphereRadius + cutOffDistance );
+      real_t spacing = real_t(2.1) * ( sphereRadius + cutOffDistance );
       mesa_pd::data::LinkedCells lc(domain.getExtended(spacing), spacing );
       mesa_pd::kernel::InsertParticleIntoLinkedCells ipilc;
 
@@ -287,7 +287,7 @@ int main( int argc, char **argv )
 
       real_t analyticalLubForce = (analyticalNonDimForceSphSph(sphereRadius, minimalGapSize) - analyticalNonDimForceSphSph(sphereRadius, cutOffDistance)) * normalizationFactor;
       WALBERLA_CHECK_GREATER(force1[1], real_t(0), "SpecialCase: Sph1, dir 1, sign check");
-      WALBERLA_CHECK_LESS((std::abs(force1[1]) - std::abs(analyticalLubForce))/ std::abs(analyticalLubForce), real_t(0.2), "SpecialCase: Sph1, dir 1, rel error check");
+      WALBERLA_CHECK_LESS(std::abs((std::abs(force1[1]) - std::abs(analyticalLubForce))/ analyticalLubForce), real_t(0.2), "SpecialCase: Sph1, dir 1, rel error check");
       WALBERLA_CHECK_FLOAT_EQUAL(force1[1], -force3[1], "SpecialCase: Sph1 - Sph3, dir 1");
       WALBERLA_CHECK_FLOAT_EQUAL(force3[0], real_t(0), "SpecialCase: Sph3, dir 0");
       WALBERLA_CHECK_FLOAT_EQUAL(force3[2], real_t(0), "SpecialCase: Sph3, dir 2");
