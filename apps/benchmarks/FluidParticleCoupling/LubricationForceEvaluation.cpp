@@ -84,11 +84,11 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
-#include "GeneratedLBM.h"
-
 #include <functional>
 
-#define USE_TRT_LIKE_LATTICE_MODEL
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+#include "GeneratedLBM.h"
+#endif
 
 namespace lubrication_force_evaluation
 {
@@ -100,7 +100,11 @@ namespace lubrication_force_evaluation
 using namespace walberla;
 using walberla::uint_t;
 
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
 using LatticeModel_T = lbm::GeneratedLBM;
+#else
+using LatticeModel_T = lbm::D3Q19< lbm::collision_model::D3Q19MRT>;
+#endif
 
 using Stencil_T = LatticeModel_T::Stencil;
 using PdfField_T = lbm::PdfField<LatticeModel_T>;
@@ -351,7 +355,7 @@ int main( int argc, char **argv )
 
    uint_t randomSeed = uint_c(std::chrono::system_clock::now().time_since_epoch().count());
    mpi::broadcastObject(randomSeed); // root process chooses seed and broadcasts it
-   std::mt19937 randomNumberGenerator(randomSeed);
+   std::mt19937 randomNumberGenerator(static_cast<unsigned int>(randomSeed));
 
    Vector3<real_t> domainCenter( real_c(xSize) * real_t(0.5), real_c(ySize) * real_t(0.5), real_c(zSize) * real_t(0.5) );
    Vector3<real_t> offsetVector(math::realRandom<real_t>(real_t(0), real_t(1), randomNumberGenerator),
@@ -499,17 +503,14 @@ int main( int argc, char **argv )
    BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
 
    // create the lattice model
-#ifdef USE_TRT_LIKE_LATTICE_MODEL
-   WALBERLA_LOG_INFO_ON_ROOT("Using TRTlike model!");
    real_t lambda_e = lbm::collision_model::TRT::lambda_e( omega );
    real_t lambda_d = lbm::collision_model::TRT::lambda_d( omega, magicNumber );
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+   WALBERLA_LOG_INFO_ON_ROOT("Using generated TRT-like lattice model!");
    LatticeModel_T latticeModel = LatticeModel_T(omegaBulkFieldID, lambda_d, lambda_e);
-   //LatticeModel_T latticeModel = LatticeModel_T(omegaBulk, lambda_d, lambda_e);
-   //LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::D3Q19MRT( omegaBulk, omegaBulk, lambda_d, lambda_e, lambda_e, lambda_d ));
 #else
-   WALBERLA_LOG_INFO_ON_ROOT("Using KBC model!");
-   // generated KBC
-   LatticeModel_T latticeModel = LatticeModel_T(omega);
+   WALBERLA_LOG_INFO_ON_ROOT("Using waLBerla built-in MRT lattice model and ignoring omega bulk field since not supported!");
+   LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::D3Q19MRT( omegaBulk, omegaBulk, lambda_d, lambda_e, lambda_e, lambda_d ));
 #endif
 
    // add PDF field
@@ -621,7 +622,13 @@ int main( int argc, char **argv )
                   << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
 
    // stream + collide LBM step
-   timeloop.add() << Sweep( LatticeModel_T::Sweep( pdfFieldID ), "LB stream & collide" );
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+   auto lbmSweep = LatticeModel_T::Sweep( pdfFieldID );
+   timeloop.add() << Sweep( lbmSweep, "LB sweep" );
+#else
+   auto lbmSweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
+   timeloop.add() << Sweep( makeSharedSweep( lbmSweep ), "cell-wise LB sweep" );
+#endif
 
 
    ////////////////////////
