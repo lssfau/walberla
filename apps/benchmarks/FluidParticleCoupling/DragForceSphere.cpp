@@ -77,9 +77,9 @@
 #include <iomanip>
 #include <iostream>
 
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
 #include "GeneratedLBMWithForce.h"
-
-#define USE_TRT_LIKE_LATTICE_MODEL
+#endif
 
 namespace drag_force_sphere_mem
 {
@@ -91,7 +91,13 @@ namespace drag_force_sphere_mem
 using namespace walberla;
 using walberla::uint_t;
 
+
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
 using LatticeModel_T = lbm::GeneratedLBMWithForce;
+#else
+using ForceModel_T = lbm::force_model::LuoConstant;
+using LatticeModel_T = lbm::D3Q19< lbm::collision_model::D3Q19MRT, false, ForceModel_T>;
+#endif
 
 using Stencil_T = LatticeModel_T::Stencil;
 using PdfField_T = lbm::PdfField<LatticeModel_T>;
@@ -517,8 +523,7 @@ int main( int argc, char **argv )
    ///////////////////////
    // ADD DATA TO BLOCKS //
    ////////////////////////
-
-
+   
    real_t lambda_e = lbm::collision_model::TRT::lambda_e( omega );
    real_t lambda_d = (useSRT) ? lambda_e : lbm::collision_model::TRT::lambda_d( omega, magicNumber );
    real_t omegaBulk = (useSRT) ? lambda_e : lbm_mesapd_coupling::omegaBulkFromOmega(omega, bulkViscRateFactor);
@@ -527,30 +532,23 @@ int main( int argc, char **argv )
    BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
 
    // create the lattice model
-
-   // generated MRT
-#ifdef USE_TRT_LIKE_LATTICE_MODEL
-   WALBERLA_LOG_INFO_ON_ROOT("Using TRT-like lattice model!");
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+   WALBERLA_LOG_INFO_ON_ROOT("Using generated TRT-like lattice model!");
    WALBERLA_LOG_INFO_ON_ROOT(" - magic number " << magicNumber);
    WALBERLA_LOG_INFO_ON_ROOT(" - omegaBulk = " << omegaBulk << ", bulk visc. = " << lbm_mesapd_coupling::bulkViscosityFromOmegaBulk(omegaBulk) << " (bvrf " << bulkViscRateFactor << ")");
    WALBERLA_LOG_INFO_ON_ROOT(" - lambda_e " << lambda_e << ", lambda_d " << lambda_d << ", omegaBulk " << omegaBulk );
    WALBERLA_LOG_INFO_ON_ROOT(" - use omega bulk adaption = " << useOmegaBulkAdaption << " (adaption layer size = " << adaptionLayerSize << ")");
 
    LatticeModel_T latticeModel = LatticeModel_T(omegaBulkFieldID, setup.extForce, lambda_d, lambda_e);
-   //LatticeModel_T latticeModel = LatticeModel_T(setup.extForce, omegaBulk, lambda_d, lambda_e);
-   //LatticeModel_T latticeModel = LatticeModel_T(setup.extForce, lambda_e, lambda_d);
 #else
-   WALBERLA_LOG_INFO_ON_ROOT("Using other lattice model!");
-   // generated KBC
-   LatticeModel_T latticeModel = LatticeModel_T(setup.extForce, omega);
+   WALBERLA_LOG_INFO_ON_ROOT("Using waLBerla built-in MRT lattice model and ignoring omega bulk field since not supported!");
+   WALBERLA_LOG_INFO_ON_ROOT(" - magic number " << magicNumber);
+   WALBERLA_LOG_INFO_ON_ROOT(" - omegaBulk = " << omegaBulk << ", bulk visc. = " << lbm_mesapd_coupling::bulkViscosityFromOmegaBulk(omegaBulk) << " (bvrf " << bulkViscRateFactor << ")");
+   WALBERLA_LOG_INFO_ON_ROOT(" - lambda_e " << lambda_e << ", lambda_d " << lambda_d << ", omegaBulk " << omegaBulk );
+
+   LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::D3Q19MRT( omegaBulk, omegaBulk, lambda_d, lambda_e, lambda_e, lambda_d ), ForceModel_T( Vector3<real_t> ( setup.extForce, 0, 0 ) ));
 #endif
 
-   // set s_e and s_eps to omegaBulk
-   // s_e allows to set a specific bulk viscosity that is different from the SRT/TRT default: nu_b = 2/3 nu_shear
-   // Khirevich et al propose to set s_eps in the same way to avoid huge differences in s_e and s_eps (would be omega in SRT/TRT) that could lead to stability problems
-   // to not break TRT properties, it is proposed to set Lambda_bulk = conste * Lambda_shear (Khirevich), where conste sets the ratio between bulk and shear viscosity-terms (1 in SRT/TRT -> nu_b = 2/3 nu_shear)
-   // all in all, this allows to set the bulk viscosity but to retain the "TRT" properties, i.e. independent drag force of tau
-   //LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::D3Q19MRT( omegaBulk, omegaBulk, lambda_d, lambda_e, lambda_e, lambda_d ), ForceModel_T( Vector3<real_t> ( setup.extForce, 0, 0 ) ));
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
@@ -636,9 +634,9 @@ int main( int argc, char **argv )
    using DragForceEval_T = DragForceEvaluator<ParticleAccessor_T>;
    auto forceEval = make_shared< DragForceEval_T >( &timeloop, &setup, blocks, flagFieldID, pdfFieldID, accessor, sphereID );
 
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+
    auto lbmSweep = LatticeModel_T::Sweep( pdfFieldID );
-
-
    // splitting stream and collide is currently buggy in lbmpy with vectorization -> build without optimize for local host and vectorization
    // collide LBM step
    timeloop.add() << Sweep([&lbmSweep](IBlock * const block){lbmSweep.collide(block);}, "collide LB sweep" );
@@ -650,16 +648,21 @@ int main( int argc, char **argv )
    // stream LBM step
    timeloop.add() << Sweep([&lbmSweep](IBlock * const block){lbmSweep.stream(block);}, "stream LB sweep" )
                   << AfterFunction( SharedFunctor< DragForceEval_T >( forceEval ), "drag force evaluation" );
+#else
+   auto lbmSweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
 
-/*
+   // collision sweep
+   timeloop.add() << Sweep( lbm::makeCollideSweep( lbmSweep ), "cell-wise LB sweep (collide)" );
+
    // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip treatment)
    timeloop.add() << BeforeFunction( optimizedPDFCommunicationScheme, "LBM Communication" )
                   << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
 
-   // stream + collide LBM step
-   timeloop.add() << Sweep( lbmSweep, "LB sweep" )
+   // streaming & force evaluation
+   timeloop.add() << Sweep( lbm::makeStreamSweep( lbmSweep ), "cell-wise LB sweep (stream)" )
                   << AfterFunction( SharedFunctor< DragForceEval_T >( forceEval ), "drag force evaluation" );
-*/
+#endif
+
    // resetting force
    timeloop.addFuncAfterTimeStep( [ps,accessor](){ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, lbm_mesapd_coupling::ResetHydrodynamicForceTorqueKernel(),*accessor);}, "reset force on sphere");
 

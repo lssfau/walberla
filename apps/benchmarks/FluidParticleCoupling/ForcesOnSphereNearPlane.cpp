@@ -78,10 +78,11 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
-#include "GeneratedLBM.h"
 #include <functional>
 
-#define USE_TRT_LIKE_LATTICE_MODEL
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+#include "GeneratedLBM.h"
+#endif
 
 namespace forces_on_sphere_near_plane
 {
@@ -97,8 +98,11 @@ using walberla::uint_t;
 // TYPEDEFS //
 //////////////
 
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
 using LatticeModel_T = lbm::GeneratedLBM;
-//using LatticeModel_T = lbm::D3Q19< lbm::collision_model::D3Q19MRT>;
+#else
+using LatticeModel_T = lbm::D3Q19< lbm::collision_model::D3Q19MRT>;
+#endif
 
 using Stencil_T = LatticeModel_T::Stencil;
 using PdfField_T = lbm::PdfField<LatticeModel_T>;
@@ -439,10 +443,6 @@ int main( int argc, char **argv )
    const real_t domainWidth  = real_t(16) * diameter; //y
    const real_t domainHeight = real_t( 8) * diameter; //z
 
-   //const real_t domainLength = real_t(3) * diameter; //x
-   //const real_t domainWidth  = real_t(3) * diameter; //y
-   //const real_t domainHeight = real_t(8) * diameter; //z
-
    Vector3<uint_t> domainSize( uint_c( std::ceil(domainLength)), uint_c( std::ceil(domainWidth)), uint_c( std::ceil(domainHeight)) );
 
 
@@ -559,15 +559,14 @@ int main( int argc, char **argv )
    BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
 
    // create the lattice model
-#ifdef USE_TRT_LIKE_LATTICE_MODEL
    real_t lambda_e = lbm::collision_model::TRT::lambda_e( omega );
    real_t lambda_d = lbm::collision_model::TRT::lambda_d( omega, magicNumber );
-   //LatticeModel_T latticeModel = LatticeModel_T(omegaBulk, lambda_d, lambda_e);
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+   WALBERLA_LOG_INFO_ON_ROOT("Using generated TRT-like lattice model!");
    LatticeModel_T latticeModel = LatticeModel_T(omegaBulkFieldID, lambda_d, lambda_e);
-   //LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::D3Q19MRT( omegaBulk, omegaBulk, lambda_d, lambda_e, lambda_e, lambda_d ));
 #else
-   // generated KBC
-   LatticeModel_T latticeModel = LatticeModel_T(omega);
+   WALBERLA_LOG_INFO_ON_ROOT("Using waLBerla built-in MRT lattice model and ignoring omega bulk field since not supported!");
+   LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::D3Q19MRT( omegaBulk, omegaBulk, lambda_d, lambda_e, lambda_e, lambda_d ));
 #endif
 
    // add PDF field
@@ -593,7 +592,7 @@ int main( int argc, char **argv )
    ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), *accessor, movingParticleMappingKernel, *accessor, CLI_Flag);
 
    // map planes
-   ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, movingParticleMappingKernel, *accessor, CLI_Flag); //TODO: was SBB_Flag?
+   ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, movingParticleMappingKernel, *accessor, CLI_Flag);
 
    // initialize Couette velocity profile in whole domain
    if(initializeVelocityProfile)
@@ -628,26 +627,12 @@ int main( int argc, char **argv )
 
    if( vtkIOFreq != uint_t(0) )
    {
-      // flag field (written only once in the first time step, ghost layers are also written)
-      //auto flagFieldVTK = vtk::createVTKOutput_BlockData( blocks, "flag_field", vtkIOFreq, uint_t(0), false, baseFolderVTK );
-      //flagFieldVTK->addCellDataWriter( make_shared< field::VTKWriter< FlagField_T > >( flagFieldID, "FlagField" ) );
-      //timeloop.addFuncBeforeTimeStep( vtk::writeFiles( flagFieldVTK ), "VTK (flag field data)" );
 
       auto pdfFieldVTK = vtk::createVTKOutput_BlockData( blocks, "fluid_field", vtkIOFreq, uint_t(0), false, baseFolderVTK );
 
       field::FlagFieldCellFilter< FlagField_T > fluidFilter( flagFieldID );
       fluidFilter.addFlag( Fluid_Flag );
       pdfFieldVTK->addCellInclusionFilter( fluidFilter );
-
-      //AABB sliceAABB( real_t(0),             real_c(domainSize[1])*real_t(0.5)-real_t(1), real_t(0),
-      //                real_c(domainSize[0]), real_c(domainSize[1])*real_t(0.5)+real_t(1), real_c(domainSize[2]) );
-      //vtk::AABBCellFilter aabbSliceFilter( sliceAABB );
-      //pdfFieldVTK->addCellInclusionFilter( aabbSliceFilter );
-
-      //vtk::ChainedFilter combinedSliceFilter;
-      //combinedSliceFilter.addFilter( fluidFilter );
-      //combinedSliceFilter.addFilter( aabbSliceFilter );
-      //pdfFieldVTK->addCellInclusionFilter( combinedSliceFilter );
 
       pdfFieldVTK->addCellDataWriter( make_shared< lbm::VelocityVTKWriter< LatticeModel_T, float > >( pdfFieldID, "VelocityFromPDF" ) );
       pdfFieldVTK->addCellDataWriter( make_shared< lbm::DensityVTKWriter < LatticeModel_T, float > >( pdfFieldID, "DensityFromPDF" ) );
@@ -656,14 +641,19 @@ int main( int argc, char **argv )
    }
 
    auto bhSweep = BoundaryHandling_T::getBlockSweep( boundaryHandlingID );
-   auto lbmSweep = LatticeModel_T::Sweep( pdfFieldID );
 
    // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip treatment)
    timeloop.add() << BeforeFunction( optimizedPDFCommunicationScheme, "LBM Communication" )
                   << Sweep(bhSweep, "Boundary Handling" );
 
    // stream + collide LBM step
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+   auto lbmSweep = LatticeModel_T::Sweep( pdfFieldID );
    timeloop.add() << Sweep( lbmSweep, "LB sweep" );
+#else
+   auto lbmSweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
+   timeloop.add() << Sweep( makeSharedSweep( lbmSweep ), "cell-wise LB sweep" );
+#endif
 
 
    // add force evaluation and logging

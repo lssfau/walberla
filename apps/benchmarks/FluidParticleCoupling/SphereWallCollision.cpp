@@ -97,11 +97,11 @@
 #include "field/vtk/all.h"
 #include "lbm/vtk/all.h"
 
-#include "GeneratedLBM.h"
-
 #include <functional>
 
-#define USE_TRT_LIKE_LATTICE_MODEL
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+#include "GeneratedLBM.h"
+#endif
 
 namespace sphere_wall_collision
 {
@@ -113,7 +113,11 @@ namespace sphere_wall_collision
 using namespace walberla;
 using walberla::uint_t;
 
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
 using LatticeModel_T = lbm::GeneratedLBM;
+#else
+using LatticeModel_T = lbm::D3Q19< lbm::collision_model::D3Q19MRT>;
+#endif
 
 using Stencil_T = LatticeModel_T::Stencil;
 using PdfField_T = lbm::PdfField<LatticeModel_T>;
@@ -292,7 +296,7 @@ public:
       return position_;
    }
 
-   void writeResult(std::string filename, uint_t tImpact)
+   void writeResult(const std::string & filename, uint_t tImpact)
    {
       WALBERLA_ROOT_SECTION()
       {
@@ -455,22 +459,16 @@ real_t getForce(walberla::id_t uid, ParticleAccessor_T & ac)
    return force;
 }
 
-
-real_t getAcceleratedSphereVelocity(real_t accelerationRate, uint_t timestep, real_t tref, real_t finalVelocity)
-{
-   return finalVelocity * (std::exp(-real_c(timestep)/(tref*accelerationRate))-real_t(1));
-}
-
 template< typename DensityInterpolator_T>
 void logDensityToFile(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID densityInterpolatorID, real_t surfaceDistance,
-                      Vector3<real_t> spherePosition, real_t diameter, std::string fileName, uint_t timestep, real_t averageDensityInSystem )
+                      Vector3<real_t> spherePosition, real_t diameter, const std::string & fileName, uint_t timestep, real_t averageDensityInSystem )
 {
    real_t evalRadius = real_t(0.5) * diameter + surfaceDistance;
    std::vector< Vector3<real_t> > evaluationPositions;
    evaluationPositions.push_back(spherePosition + Vector3<real_t>(real_t(0), real_t(0), evalRadius));
-   evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius / sqrt(real_t(2)), real_t(0), evalRadius / sqrt(real_t(2))));
+   evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius / real_c(sqrt(real_t(2))), real_t(0), real_c(evalRadius / sqrt(real_t(2)))));
    evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius, real_t(0), real_t(0)));
-   evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius / sqrt(real_t(2)), real_t(0), -evalRadius / sqrt(real_t(2))));
+   evaluationPositions.push_back(spherePosition + Vector3<real_t>(evalRadius / real_c(sqrt(real_t(2))), real_t(0), -evalRadius / real_c(sqrt(real_t(2)))));
    evaluationPositions.push_back(spherePosition + Vector3<real_t>(real_t(0), real_t(0), -evalRadius));
 
    std::vector<real_t> densityAtPos(evaluationPositions.size(), real_t(0));
@@ -689,7 +687,7 @@ int main( int argc, char **argv )
    {
       uint_t seed1 = uint_c(std::chrono::system_clock::now().time_since_epoch().count());
       mpi::broadcastObject(seed1); // root process chooses seed and broadcasts it
-      std::mt19937 g1 (seed1);
+      std::mt19937 g1 (static_cast<unsigned int>(seed1));
 
       real_t initialPositionOffset = real_t(0.5)*math::realRandom<real_t>(real_t(-1), real_t(1), g1);
       initialSpherePosition += initialPositionOffset;
@@ -901,22 +899,14 @@ int main( int argc, char **argv )
    BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
 
    // create the lattice model
-
-   // TRT
-   //LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( real_t(1) / relaxationTime ) );
-
-   // generated MRT
-#ifdef USE_TRT_LIKE_LATTICE_MODEL
-   WALBERLA_LOG_INFO_ON_ROOT("Using TRT-like lattice model!");
    real_t lambda_e = lbm::collision_model::TRT::lambda_e( omega );
    real_t lambda_d = lbm::collision_model::TRT::lambda_d( omega, magicNumber );
-   //LatticeModel_T latticeModel = LatticeModel_T(omegaBulk, lambda_d, lambda_e);
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+   WALBERLA_LOG_INFO_ON_ROOT("Using generated TRT-like lattice model!");
    LatticeModel_T latticeModel = LatticeModel_T(omegaBulkFieldID, lambda_d, lambda_e);
-   //LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::D3Q19MRT( omegaBulk, omegaBulk, lambda_d, lambda_e, lambda_e, lambda_d ));
 #else
-   WALBERLA_LOG_INFO_ON_ROOT("Using different lattice model!");
-   // generated model with a single omega
-   LatticeModel_T latticeModel = LatticeModel_T(omega);
+   WALBERLA_LOG_INFO_ON_ROOT("Using waLBerla built-in MRT lattice model and ignoring omega bulk field since not supported!");
+   LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::D3Q19MRT( omegaBulk, omegaBulk, lambda_d, lambda_e, lambda_e, lambda_d ));
 #endif
 
    // add PDF field
@@ -1025,7 +1015,6 @@ int main( int argc, char **argv )
       auto particleVtkOutput = make_shared<mesa_pd::vtk::ParticleVtkOutput>(ps);
       particleVtkOutput->addOutput<mesa_pd::data::SelectParticleOwner>("owner");
       particleVtkOutput->addOutput<mesa_pd::data::SelectParticleUid>("uid");
-      particleVtkOutput->addOutput<mesa_pd::data::SelectParticleShapeID>("shapeID");
       particleVtkOutput->addOutput<mesa_pd::data::SelectParticleLinearVelocity>("velocity");
       particleVtkOutput->setParticleSelector( [sphereShape](const mesa_pd::data::ParticleStorage::iterator& pIt) {return pIt->getShapeID() == sphereShape;} ); //limit output to sphere
       auto particleVtkWriter = vtk::createVTKOutput_PointData(particleVtkOutput, "Particles", vtkIOFreq, baseFolder, "simulation_step");
@@ -1089,10 +1078,13 @@ int main( int argc, char **argv )
                   << Sweep( BoundaryHandling_T::getBlockSweep( boundaryHandlingID ), "Boundary Handling" );
 
    // stream + collide LBM step
-   // generated LBM sweep
-   timeloop.add() << Sweep( LatticeModel_T::Sweep( pdfFieldID ), "LB stream & collide" );
-   // walberla sweeps:
-   //timeloop.add() << Sweep( makeSharedSweep( lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag ) ), "cell-wise LB sweep" );
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+   auto lbmSweep = LatticeModel_T::Sweep( pdfFieldID );
+   timeloop.add() << Sweep( lbmSweep, "LB sweep" );
+#else
+   auto lbmSweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
+   timeloop.add() << Sweep( makeSharedSweep( lbmSweep ), "cell-wise LB sweep" );
+#endif
 
    // this is carried out after the particle integration, it corrects the flag field and restores missing PDF information
    // then, the checkpointing file can be written, as otherwise some cells are invalid and can not be recovered
@@ -1134,8 +1126,6 @@ int main( int argc, char **argv )
    }
 
 
-
-
    // evaluation functionality
    std::string loggingFileName( baseFolder + "/LoggingSphereWallCollision.txt");
    if( fileIO  )
@@ -1162,8 +1152,9 @@ int main( int argc, char **argv )
    uint_t tImpact = uint_t(0);
    std::vector<uint_t> impactTimes;
 
-   real_t curVel(real_t(0)), oldVel(real_t(0));
-   real_t maxSettlingVel = real_t(0);
+   real_t curVel(real_t(0));
+   real_t oldVel(real_t(0));
+   real_t maxSettlingVel(real_t(0));
    std::vector<real_t> maxSettlingVelBetweenBounces;
 
    real_t minGapSize(real_t(0));
@@ -1328,7 +1319,7 @@ int main( int argc, char **argv )
          {
             // overwrite velocity of particle with prescribed one
             lbm_mesapd_coupling::RegularParticlesSelector sphereSelector;
-            real_t newSphereVel = uIn * (exp(-accelerationFactor * real_t(i) ) - real_t(1));
+            real_t newSphereVel = uIn * (std::exp(-accelerationFactor * real_t(i) ) - real_t(1));
             ps->forEachParticle(useOpenMP, sphereSelector, *accessor, [newSphereVel](const size_t idx, ParticleAccessor_T& ac){ ac.setLinearVelocity(idx, Vector3<real_t>(real_t(0), real_t(0), newSphereVel));}, *accessor);
          }
 
