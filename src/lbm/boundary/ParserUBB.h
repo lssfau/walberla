@@ -98,6 +98,16 @@ public:
       Vector3< real_t > velocity_;
    }; // class Velocity
 
+   static bool isParser(const BoundaryConfiguration & config) {
+      auto parser = dynamic_cast< const Parser * >( &config );
+      return parser != nullptr;
+   }
+
+   static bool isVelocity(const BoundaryConfiguration & config) {
+      auto velocity = dynamic_cast< const Velocity * >( &config );
+      return velocity != nullptr;
+   }
+
    typedef GhostLayerField< shared_ptr<Parser>, 1 > ParserField;
    typedef GhostLayerField< Vector3<real_t>, 1 >    VelocityField;
 
@@ -358,14 +368,15 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
 {
    WALBERLA_ASSERT_NOT_NULLPTR( parserField_ );
 
-   if( auto v = dynamic_cast< const Velocity * >( &parser ) )
+   if( isVelocity(parser) )
    {
+      auto v = dynamic_cast< const Velocity * >( &parser );
       velocityField_->get( x, y, z ) = v->velocity();
       parserField_->get( x, y, z ) = nullptr;
       return;
    }
 
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Parser * >( &parser ), &parser );
+   WALBERLA_ASSERT( isParser(parser) );
    auto & p = dynamic_cast< const Parser & >( parser );
 
    if( p.isTimeDependent() )
@@ -389,8 +400,9 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
 {
    WALBERLA_ASSERT_NOT_NULLPTR( parserField_ );
 
-   if( auto v = dynamic_cast< const Velocity * >( &parser ) )
+   if( isVelocity(parser) )
    {
+      auto v = dynamic_cast< const Velocity * >( &parser );
       for( auto cell = parserField_->beginSliceXYZ( cells ); cell != parserField_->end(); ++cell )
       {
          velocityField_->get( cell.x(), cell.y(), cell.z() ) = v->velocity();
@@ -399,7 +411,7 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
       return;
    }
 
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Parser * >( &parser ), &parser );
+   WALBERLA_ASSERT( isParser(parser) );
    auto & p = dynamic_cast< const Parser & >( parser );
 
    if( p.isTimeDependent() )
@@ -430,8 +442,9 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
 {
    WALBERLA_ASSERT_NOT_NULLPTR( parserField_ );
 
-   if( auto v = dynamic_cast< const Velocity * >( &parser ) )
+   if( isVelocity(parser) )
    {
+      auto v = dynamic_cast< const Velocity * >( &parser );
       for( auto cell = begin; cell != end; ++cell )
       {
          velocityField_->get( cell.x(), cell.y(), cell.z() ) = v->velocity();
@@ -440,7 +453,7 @@ inline void ParserUBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, Sto
       return;
    }
 
-   WALBERLA_ASSERT_EQUAL( dynamic_cast< const Parser * >( &parser ), &parser );
+   WALBERLA_ASSERT( isParser(parser) );
    auto & p = dynamic_cast< const Parser & >( parser );
 
    if( p.isTimeDependent() )

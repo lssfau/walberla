@@ -25,3 +25,4 @@
 #include "DefaultBoundaryHandling.h"
 #include "DefaultBoundaryHandlingCollection.h"
 #include "DefaultDiffusionBoundaryHandling.h"
+#include "ExtendedBoundaryHandlingFactory.h"
