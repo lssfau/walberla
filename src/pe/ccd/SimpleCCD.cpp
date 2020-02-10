@@ -35,11 +35,11 @@ namespace ccd {
 
 SimpleCCD::SimpleCCD(BodyStorage& globalStorage, Storage& storage) : globalStorage_(globalStorage), storage_(storage)
 {
-   storage_[0].registerAddCallback( "SimpleCCD", std::bind1st(std::mem_fun(&SimpleCCD::add), this) );
-   storage_[0].registerRemoveCallback( "SimpleCCD", std::bind1st(std::mem_fun(&SimpleCCD::remove), this) );
+   storage_[0].registerAddCallback( "SimpleCCD", std::bind(&SimpleCCD::add, this, std::placeholders::_1) );
+   storage_[0].registerRemoveCallback( "SimpleCCD", std::bind(&SimpleCCD::remove, this, std::placeholders::_1) );
 
-   storage_[1].registerAddCallback( "SimpleCCD", std::bind1st(std::mem_fun(&SimpleCCD::add), this) );
-   storage_[1].registerRemoveCallback( "SimpleCCD", std::bind1st(std::mem_fun(&SimpleCCD::remove), this) );
+   storage_[1].registerAddCallback( "SimpleCCD", std::bind(&SimpleCCD::add, this, std::placeholders::_1) );
+   storage_[1].registerRemoveCallback( "SimpleCCD", std::bind(&SimpleCCD::remove, this, std::placeholders::_1) );
 }
 
 SimpleCCD::~SimpleCCD()
