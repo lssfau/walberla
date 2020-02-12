@@ -586,8 +586,8 @@ void HashGrids::HashGrid::enlarge()
 //   // 'nonGridBodies_' and pairwise collision checks are performed.
 //   gridActive_ = false;
 
-//   bodystorage_.registerAddCallback( "HashGrids", std::bind1st(std::mem_fun(&HashGrids::add), this) );
-//   bodystorage_.registerRemoveCallback( "HashGrids", std::bind1st(std::mem_fun(&HashGrids::remove), this) );
+//   bodystorage_.registerAddCallback( "HashGrids", std::bind(&HashGrids::add, this, std::placeholders::_1) );
+//   bodystorage_.registerRemoveCallback( "HashGrids", std::bind(&HashGrids::remove, this, std::placeholders::_1) );
 //}
 //*************************************************************************************************
 
@@ -611,11 +611,11 @@ HashGrids::HashGrids( BodyStorage& globalStorage, BodyStorage& bodystorage, Body
    // 'nonGridBodies_' and pairwise collision checks are performed.
    gridActive_ = false;
 
-   bodystorage_.registerAddCallback( "HashGrids", std::bind1st(std::mem_fun(&HashGrids::add), this) );
-   bodystorage_.registerRemoveCallback( "HashGrids", std::bind1st(std::mem_fun(&HashGrids::remove), this) );
+   bodystorage_.registerAddCallback( "HashGrids", std::bind(&HashGrids::add, this, std::placeholders::_1) );
+   bodystorage_.registerRemoveCallback( "HashGrids", std::bind(&HashGrids::remove, this, std::placeholders::_1) );
 
-   bodystorageShadowCopies_.registerAddCallback( "HashGrids", std::bind1st(std::mem_fun(&HashGrids::add), this) );
-   bodystorageShadowCopies_.registerRemoveCallback( "HashGrids", std::bind1st(std::mem_fun(&HashGrids::remove), this) );
+   bodystorageShadowCopies_.registerAddCallback( "HashGrids", std::bind(&HashGrids::add, this, std::placeholders::_1) );
+   bodystorageShadowCopies_.registerRemoveCallback( "HashGrids", std::bind(&HashGrids::remove, this, std::placeholders::_1) );
 }
 //*************************************************************************************************
 
