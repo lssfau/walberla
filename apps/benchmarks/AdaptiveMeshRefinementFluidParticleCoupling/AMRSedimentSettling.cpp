@@ -398,45 +398,45 @@ real_t fittedTotalWeightEvaluationFunctionEllipsoids(const pe_coupling::BlockInf
 
 struct TimingPoolLogger
 {
-   TimingPoolLogger( WcTimingPool & timingPool, const SweepTimeloop & timeloop, const uint_t interval )
+   TimingPoolLogger( const shared_ptr<WcTimingPool> & timingPool, const shared_ptr<SweepTimeloop> & timeloop, const uint_t interval )
          : timingPool_( timingPool ), timeloop_( timeloop ), interval_( interval )
    {
    }
 
    void operator()()
    {
-      if( interval_ > uint_t(0) && timeloop_.getCurrentTimeStep() % interval_ == uint_t(0) )
+      if( interval_ > uint_t(0) && timeloop_->getCurrentTimeStep() % interval_ == uint_t(0) )
       {
-         timingPool_.logResultOnRoot();
+         timingPool_->logResultOnRoot();
       }
    }
 
 private:
-   WcTimingPool & timingPool_;
-   const SweepTimeloop & timeloop_;
+   shared_ptr<WcTimingPool> timingPool_;
+   shared_ptr<SweepTimeloop> timeloop_;
    uint_t interval_;
 };
 
 struct TimingTreeLogger
 {
-   TimingTreeLogger( WcTimingTree & timingTree, const SweepTimeloop & timeloop, const uint_t interval )
+   TimingTreeLogger( const shared_ptr<WcTimingTree> & timingTree, const shared_ptr<SweepTimeloop> & timeloop, const uint_t interval )
          : timingTree_( timingTree ), timeloop_( timeloop ), interval_( interval )
    {
    }
 
    void operator()()
    {
-      if( interval_ > uint_t(0) && timeloop_.getCurrentTimeStep() % interval_ == uint_t(0) )
+      if( interval_ > uint_t(0) && timeloop_->getCurrentTimeStep() % interval_ == uint_t(0) )
       {
-         timingTree_.synchronize();
-         auto reducedTimingTree = timingTree_.getReduced();
+         timingTree_->synchronize();
+         auto reducedTimingTree = timingTree_->getReduced();
          WALBERLA_LOG_INFO_ON_ROOT( reducedTimingTree );
       }
    }
 
 private:
-   WcTimingTree & timingTree_;
-   const SweepTimeloop & timeloop_;
+   shared_ptr<WcTimingTree> timingTree_;
+   shared_ptr<SweepTimeloop> timeloop_;
    uint_t interval_;
 };
 
@@ -610,7 +610,7 @@ BoundaryHandling_T * MyBoundaryHandling::initialize( IBlock * const block )
 class PropertyLogger
 {
 public:
-   PropertyLogger( SweepTimeloop* timeloop, const shared_ptr< StructuredBlockStorage > & blocks,
+   PropertyLogger( const shared_ptr<SweepTimeloop> & timeloop, const shared_ptr< StructuredBlockStorage > & blocks,
                    const BlockDataID & bodyStorageID, const std::string & fileName, bool fileIO) :
       timeloop_( timeloop ), blocks_( blocks ), bodyStorageID_( bodyStorageID ), fileName_( fileName ), fileIO_(fileIO),
       meanPos_( real_t(0) ), meanVel_( real_t(0) ), maxVel_( real_t(0) )
@@ -695,7 +695,7 @@ private:
       }
    }
 
-   SweepTimeloop* timeloop_;
+   shared_ptr<SweepTimeloop> timeloop_;
    shared_ptr< StructuredBlockStorage > blocks_;
    const BlockDataID bodyStorageID_;
    std::string fileName_;
@@ -737,7 +737,7 @@ void recreateBoundaryHandling( BlockForest & forest, const BlockDataID & boundar
 class TimingEvaluator
 {
 public:
-   TimingEvaluator( WcTimingPool & levelwiseTimingPool, WcTimingTree & peTimingTree, uint_t numberOfLevels)
+   TimingEvaluator( const shared_ptr<WcTimingPool> & levelwiseTimingPool, const shared_ptr<WcTimingTree> & peTimingTree, uint_t numberOfLevels)
    : levelwiseTimingPool_( levelwiseTimingPool ), peTimingTree_( peTimingTree ), numberOfLevels_( numberOfLevels )
    {}
 
@@ -772,13 +772,13 @@ public:
             timerNameLvlWise += " (" + std::to_string(level) + ")";;
          }
 
-         if( levelwiseTimingPool_.timerExists(timerNameLvlWise))
-            timing += levelwiseTimingPool_[timerNameLvlWise].total();
+         if( levelwiseTimingPool_->timerExists(timerNameLvlWise))
+            timing += real_c((*levelwiseTimingPool_)[timerNameLvlWise].total());
 
          if( level == numberOfLevels_- 1)
          {
-            if( peTimingTree_.timerExists(timerName))
-               timing += peTimingTree_[timerName].total();
+            if( peTimingTree_->timerExists(timerName))
+               timing += real_c((*peTimingTree_)[timerName].total());
          }
       }
 
@@ -788,8 +788,8 @@ public:
 
 private:
 
-   WcTimingPool & levelwiseTimingPool_;
-   WcTimingTree & peTimingTree_;
+   shared_ptr<WcTimingPool> levelwiseTimingPool_;
+   shared_ptr<WcTimingTree> peTimingTree_;
    uint_t numberOfLevels_;
 };
 
@@ -894,14 +894,14 @@ void evaluateTotalSimulationTimePassed(WcTimingPool & timeloopTimingPool, real_t
    std::string simulationString("LBM refinement time step");
    auto totalTime = real_t(0);
    WALBERLA_ROOT_SECTION(){
-      totalTime = (*reduced)[simulationString].total();
+      totalTime = real_c((*reduced)[simulationString].total());
    }
    totalSimTime = totalTime;
 
    std::string lbString("refinement checking");
    auto lbTime = real_t(0);
    WALBERLA_ROOT_SECTION(){
-      lbTime = (*reduced)[lbString].total();
+      lbTime = real_c((*reduced)[lbString].total());
    }
    totalLBTime = lbTime;
 
@@ -1148,30 +1148,30 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--vtkWriteFreqFl" )           == 0 ) { vtkWriteFreqFl = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--vtkWriteFreq" )             == 0 ) { vtkWriteFreq = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--baseFolder" )               == 0 ) { baseFolder = argv[++i]; continue; }
-      if( std::strcmp( argv[i], "--densityRatio" )             == 0 ) { densityRatio = std::atof( argv[++i] ); continue; }
-      if( std::strcmp( argv[i], "--Ga" )                       == 0 ) { GalileoNumber = std::atof( argv[++i] ); continue; }
-      if( std::strcmp( argv[i], "--diameter" )                 == 0 ) { diameter = std::atof( argv[++i] ); continue; }
+      if( std::strcmp( argv[i], "--densityRatio" )             == 0 ) { densityRatio = real_c(std::atof( argv[++i] )); continue; }
+      if( std::strcmp( argv[i], "--Ga" )                       == 0 ) { GalileoNumber = real_c(std::atof( argv[++i] )); continue; }
+      if( std::strcmp( argv[i], "--diameter" )                 == 0 ) { diameter = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--blockSize" )                == 0 ) { blockSize = uint_c(std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--XBlocks" )                  == 0 ) { XBlocks = uint_c(std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--YBlocks" )                  == 0 ) { YBlocks = uint_c(std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--ZBlocks" )                  == 0 ) { ZBlocks = uint_c(std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--useBox" )                   == 0 ) { useBox = true; continue; }
       if( std::strcmp( argv[i], "--useHopper" )                == 0 ) { useHopper = true; continue; }
-      if( std::strcmp( argv[i], "--hopperHeight" )             == 0 ) { hopperRelHeight = std::atof( argv[++i] ); continue; }
-      if( std::strcmp( argv[i], "--hopperOpening" )            == 0 ) { hopperRelOpening = std::atof( argv[++i] ); continue; }
+      if( std::strcmp( argv[i], "--hopperHeight" )             == 0 ) { hopperRelHeight = real_c(std::atof( argv[++i] )); continue; }
+      if( std::strcmp( argv[i], "--hopperOpening" )            == 0 ) { hopperRelOpening = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--timesteps" )                == 0 ) { timestepsOnFinestLevel = uint_c(std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--noForceAveraging" )         == 0 ) { averageForceTorqueOverTwoTimSteps = false; continue; }
       if( std::strcmp( argv[i], "--numPeSubCycles" )           == 0 ) { numPeSubCycles = uint_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--numLevels" )                == 0 ) { numberOfLevels = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--refinementCheckFrequency" ) == 0 ) { refinementCheckFrequency = uint_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--lowerLimit" )               == 0 ) { lowerFluidRefinementLimit = std::atof( argv[++i] ); continue; }
-      if( std::strcmp( argv[i], "--upperLimit" )               == 0 ) { upperFluidRefinementLimit = std::atof( argv[++i] ); continue; }
+      if( std::strcmp( argv[i], "--lowerLimit" )               == 0 ) { lowerFluidRefinementLimit = real_c(std::atof( argv[++i] )); continue; }
+      if( std::strcmp( argv[i], "--upperLimit" )               == 0 ) { upperFluidRefinementLimit = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--useVorticityCriterion" )    == 0 ) { useVorticityCriterion = true; continue; }
       if( std::strcmp( argv[i], "--useGradientCriterion" )     == 0 ) { useGradientCriterion = true; continue; }
       if( std::strcmp( argv[i], "--loadEvaluationStrategy" )   == 0 ) { loadEvaluationStrategy = argv[++i]; continue; }
       if( std::strcmp( argv[i], "--loadDistributionStrategy" ) == 0 ) { loadDistributionStrategy = argv[++i]; continue; }
-      if( std::strcmp( argv[i], "--ipc2redist" )               == 0 ) { parMetis_ipc2redist = std::atof( argv[++i] ); continue; }
-      if( std::strcmp( argv[i], "--parMetisTolerance" )        == 0 ) { parMetisTolerance = std::atof( argv[++i] ); continue; }
+      if( std::strcmp( argv[i], "--ipc2redist" )               == 0 ) { parMetis_ipc2redist = real_c(std::atof( argv[++i] )); continue; }
+      if( std::strcmp( argv[i], "--parMetisTolerance" )        == 0 ) { parMetisTolerance = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--parMetisAlgorithm" )        == 0 ) { parMetisAlgorithmString = argv[++i]; continue; }
       if( std::strcmp( argv[i], "--diffusionFlowIterations" )  == 0 ) { diffusionFlowIterations = uint_c(std::atof(argv[++i])); continue; }
       if( std::strcmp( argv[i], "--diffusionMaxIterations" )   == 0 ) { diffusionMaxIterations = uint_c(std::atof(argv[++i])); continue; }
@@ -1319,8 +1319,6 @@ int main( int argc, char **argv )
       WALBERLA_LOG_INFO_ON_ROOT(" - using horizontally periodic domain");
    }
 
-
-
    if( refinementCheckFrequency == 0 && numberOfLevels != 1 )
    {
       // determine check frequency automatically based on maximum admissible velocity and block sizes
@@ -1369,15 +1367,15 @@ int main( int argc, char **argv )
    BlockDataID fcdID   = (useEllipsoids) ? blocks->addBlockData( pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::GJKEPACollideFunctor>(), "FCD" )
                                          : blocks->addBlockData(pe::fcd::createGenericFCDDataHandling<BodyTypeTuple, pe::fcd::AnalyticCollideFunctor>(), "FCD");
 
-   WcTimingTree timingTreePE;
+   shared_ptr<WcTimingTree> timingTreePE = make_shared<WcTimingTree>();
 
    // set up collision response
-   pe::cr::HCSITS cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, &timingTreePE );
+   pe::cr::HCSITS cr(globalBodyStorage, blocks->getBlockStoragePointer(), bodyStorageID, ccdID, fcdID, &(*timingTreePE) );
    cr.setMaxIterations(10);
    cr.setRelaxationModel( pe::cr::HardContactSemiImplicitTimesteppingSolvers::ApproximateInelasticCoulombContactByDecoupling );
 
    // set up synchronization procedure
-   std::function<void(void)> syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, &timingTreePE, overlap, false );
+   std::function<void(void)> syncCall = std::bind( pe::syncNextNeighbors<BodyTypeTuple>, std::ref(blocks->getBlockForest()), bodyStorageID, &(*timingTreePE), overlap, false );
 
    // create pe bodies
 
@@ -1634,6 +1632,11 @@ int main( int argc, char **argv )
    }
    else if( loadDistributionStrategy == "ParMetis")
    {
+
+#ifndef WALBERLA_BUILD_WITH_PARMETIS
+      WALBERLA_ABORT( "You are trying to use ParMetis functionality but waLBerla is not configured to use it. Set 'WALBERLA_BUILD_WITH_PARMETIS' to 'ON' in your CMake cache to build against an installed version of ParMetis!" );
+#endif
+
       uint_t ncon = 1;
       if( loadEvaluationStrategy == "FitMulti")
       {
@@ -1676,7 +1679,7 @@ int main( int argc, char **argv )
       else if( loadEvaluationStrategy == "FitMulti" )
       {
          double imbalanceTolerancePE = 10.;
-         parMetisLoadImbalanceTolerance[1] = std::min(imbalanceTolerancePE, real_c(MPIManager::instance()->numProcesses()));
+         parMetisLoadImbalanceTolerance[1] = std::min(imbalanceTolerancePE, static_cast<double>(MPIManager::instance()->numProcesses()));
          WALBERLA_LOG_INFO_ON_ROOT("   - load imbalance tolerances = <" << parMetisLoadImbalanceTolerance[0] << ", " << parMetisLoadImbalanceTolerance[1] << ">" );
          dynamicParMetis.setImbalanceTolerance(parMetisLoadImbalanceTolerance[1], 1);
 
@@ -1764,7 +1767,7 @@ int main( int argc, char **argv )
    ///////////////
 
    // create the timeloop
-   SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
+   auto timeloop = make_shared<SweepTimeloop>( blocks->getBlockStorage(), timesteps );
 
    if( vtkWriteFreqBo != uint_t(0) ) {
 
@@ -1772,12 +1775,12 @@ int main( int argc, char **argv )
       if (useEllipsoids) {
          auto bodyVtkOutput = make_shared<pe::EllipsoidVtkOutput>(bodyStorageID, blocks->getBlockStorage());
          auto bodyVTK = vtk::createVTKOutput_PointData(bodyVtkOutput, "bodies", vtkWriteFreqBo, baseFolder);
-         timeloop.addFuncBeforeTimeStep(vtk::writeFiles(bodyVTK), "VTK (sediment data)");
+         timeloop->addFuncBeforeTimeStep(vtk::writeFiles(bodyVTK), "VTK (sediment data)");
 
       } else {
          auto bodyVtkOutput = make_shared<pe::SphereVtkOutput>(bodyStorageID, blocks->getBlockStorage());
          auto bodyVTK = vtk::createVTKOutput_PointData(bodyVtkOutput, "bodies", vtkWriteFreqBo, baseFolder);
-         timeloop.addFuncBeforeTimeStep(vtk::writeFiles(bodyVTK), "VTK (sediment data)");
+         timeloop->addFuncBeforeTimeStep(vtk::writeFiles(bodyVTK), "VTK (sediment data)");
       }
    }
 
@@ -1795,15 +1798,15 @@ int main( int argc, char **argv )
       pdfFieldVTK->addCellDataWriter(
             make_shared<lbm::DensityVTKWriter<LatticeModel_T, float> >(pdfFieldID, "DensityFromPDF"));
 
-      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(pdfFieldVTK), "VTK (fluid field data)");
+      timeloop->addFuncBeforeTimeStep(vtk::writeFiles(pdfFieldVTK), "VTK (fluid field data)");
    }
 
    if( vtkWriteFreqDD != uint_t(0) ) {
       auto domainDecompVTK = vtk::createVTKOutput_DomainDecomposition(blocks, "domain_decomposition", vtkWriteFreqDD, baseFolder );
-      timeloop.addFuncBeforeTimeStep( vtk::writeFiles(domainDecompVTK), "VTK (domain decomposition)");
+      timeloop->addFuncBeforeTimeStep( vtk::writeFiles(domainDecompVTK), "VTK (domain decomposition)");
    }
 
-   WcTimingPool timeloopTiming;
+   shared_ptr<WcTimingPool> timeloopTiming = make_shared<WcTimingPool>();
    shared_ptr<WcTimingPool> timeloopRefinementTiming = make_shared<WcTimingPool>();
    shared_ptr<WcTimingPool> timeloopRefinementTimingLevelwise = make_shared<WcTimingPool>();
 
@@ -1852,7 +1855,7 @@ int main( int argc, char **argv )
 
 
    // add LBM sweep with refinement
-   timeloop.addFuncBeforeTimeStep( makeSharedFunctor( refinementTimestep ), "LBM refinement time step" );
+   timeloop->addFuncBeforeTimeStep( makeSharedFunctor( refinementTimestep ), "LBM refinement time step" );
 
    std::string loggingFileName( baseFolder + "/Logging_Ga");
    loggingFileName += std::to_string(uint_c(GalileoNumber));
@@ -1863,29 +1866,29 @@ int main( int argc, char **argv )
    {
       WALBERLA_LOG_INFO_ON_ROOT(" - writing logging output to file \"" << loggingFileName << "\"");
    }
-   shared_ptr< PropertyLogger > logger = walberla::make_shared< PropertyLogger >( &timeloop, blocks, bodyStorageID,
+   shared_ptr< PropertyLogger > logger = walberla::make_shared< PropertyLogger >( timeloop, blocks, bodyStorageID,
                                                                                   loggingFileName, fileIO );
    if(logging)
    {
-      timeloop.addFuncAfterTimeStep( SharedFunctor< PropertyLogger >( logger ), "Property logger" );
+      timeloop->addFuncAfterTimeStep( SharedFunctor< PropertyLogger >( logger ), "Property logger" );
    }
 
 
-   timeloop.addFuncAfterTimeStep( RemainingTimeLogger( timeloop.getNrOfTimeSteps() ), "Remaining Time Logger" );
+   timeloop->addFuncAfterTimeStep( RemainingTimeLogger( timeloop->getNrOfTimeSteps() ), "Remaining Time Logger" );
 
 
    // add top level timing pool output
-   timeloop.addFuncAfterTimeStep( TimingPoolLogger( timeloopTiming, timeloop, loggingDisplayFrequency ), "Regular Timing Logger" );
+   timeloop->addFuncAfterTimeStep( TimingPoolLogger( timeloopTiming, timeloop, loggingDisplayFrequency ), "Regular Timing Logger" );
 
    // add regular refinement timing pool output
-   timeloop.addFuncAfterTimeStep( TimingPoolLogger( *timeloopRefinementTiming, timeloop, loggingDisplayFrequency ), "Refinement Timing Logger" );
+   timeloop->addFuncAfterTimeStep( TimingPoolLogger( timeloopRefinementTiming, timeloop, loggingDisplayFrequency ), "Refinement Timing Logger" );
 
    // add level wise timing pool output
    //if( numberOfLevels != uint_t(1))
-      timeloop.addFuncAfterTimeStep( TimingPoolLogger( *timeloopRefinementTimingLevelwise, timeloop, loggingDisplayFrequency ), "Refinement Levelwise Timing Logger" );
+   timeloop->addFuncAfterTimeStep( TimingPoolLogger( timeloopRefinementTimingLevelwise, timeloop, loggingDisplayFrequency ), "Refinement Levelwise Timing Logger" );
 
    // add PE timing tree output
-   timeloop.addFuncAfterTimeStep( TimingTreeLogger( timingTreePE, timeloop, loggingDisplayFrequency ), "PE Timing Tree Timing Logger" );
+   timeloop->addFuncAfterTimeStep( TimingTreeLogger( timingTreePE, timeloop, loggingDisplayFrequency ), "PE Timing Tree Timing Logger" );
 
 
    ////////////////////////
@@ -1893,7 +1896,7 @@ int main( int argc, char **argv )
    ////////////////////////
 
    uint_t loadEvaluationFrequency = refinementCheckFrequency;
-   TimingEvaluator timingEvaluator( *timeloopRefinementTimingLevelwise, timingTreePE, numberOfLevels );
+   TimingEvaluator timingEvaluator( timeloopRefinementTimingLevelwise, timingTreePE, numberOfLevels );
 
    // file for simulation infos
    std::string infoFileName( baseFolder + "/simulation_info.txt");
@@ -1976,7 +1979,7 @@ int main( int argc, char **argv )
       if( loadEvaluationFrequency > 0 && i % loadEvaluationFrequency == 0 && i > 0 && fileIO)
       {
 
-         timeloopTiming[loadEvaluationStep].start();
+         (*timeloopTiming)[loadEvaluationStep].start();
 
          // write process local timing measurements to files (per process, per load balancing step)
          {
@@ -1984,9 +1987,9 @@ int main( int argc, char **argv )
             // evaluate all required timers
             uint_t evalLevel = finestLevel;
 
-            real_t mTotSim = ( timeloopTiming.timerExists("LBM refinement time step") ) ? timeloopTiming["LBM refinement time step"].total() : real_t(0);
+            real_t mTotSim = ( (*timeloopTiming).timerExists("LBM refinement time step") ) ? real_c((*timeloopTiming)["LBM refinement time step"].total()) : real_t(0);
 
-            real_t mLB = ( timeloopTiming.timerExists("refinement checking") ) ? timeloopTiming["refinement checking"].total() : real_t(0);
+            real_t mLB = ( (*timeloopTiming).timerExists("refinement checking") ) ? real_c((*timeloopTiming)["refinement checking"].total()) : real_t(0);
 
             real_t mLBM = timingEvaluator.getTimings(LBMTimer, evalLevel);
             real_t mBH  = timingEvaluator.getTimings(bhTimer, evalLevel);
@@ -2022,7 +2025,7 @@ int main( int argc, char **argv )
          {
             real_t totalTimeToCurrentTimestep;
             real_t totalLBTimeToCurrentTimestep;
-            evaluateTotalSimulationTimePassed(timeloopTiming, totalTimeToCurrentTimestep, totalLBTimeToCurrentTimestep);
+            evaluateTotalSimulationTimePassed(*timeloopTiming, totalTimeToCurrentTimestep, totalLBTimeToCurrentTimestep);
             std::vector<math::DistributedSample> numberOfBlocksPerLevel(numberOfLevels);
 
             auto & forest = blocks->getBlockForest();
@@ -2056,7 +2059,7 @@ int main( int argc, char **argv )
             }
          }
 
-         timeloopTiming[loadEvaluationStep].end();
+         (*timeloopTiming)[loadEvaluationStep].end();
 
       }
 
@@ -2067,7 +2070,7 @@ int main( int argc, char **argv )
          WALBERLA_LOG_INFO_ON_ROOT("Checking for refinement and load balancing...")
 
          std::string refinementCheckStep("refinement checking");
-         timeloopTiming[refinementCheckStep].start();
+         (*timeloopTiming)[refinementCheckStep].start();
 
          if( loadEvaluationStrategy != "LBM" ) {
 
@@ -2153,14 +2156,14 @@ int main( int argc, char **argv )
 
          }
 
-         timeloopTiming[refinementCheckStep].end();
+         (*timeloopTiming)[refinementCheckStep].end();
       }
 
       // evaluate predictions (note: reflect the predictions for all upcoming simulations, thus the corresponding measurements have to be taken afterwards)
       if( loadEvaluationFrequency > 0 && i % loadEvaluationFrequency == 0 && fileIO)
       {
 
-         timeloopTiming[loadEvaluationStep].start();
+         (*timeloopTiming)[loadEvaluationStep].start();
 
          // write process local load predictions to files (per process, per load balancing step)
          {
@@ -2210,12 +2213,12 @@ int main( int argc, char **argv )
             predictionFileCounter++;;
          }
 
-         timeloopTiming[loadEvaluationStep].end();
+         (*timeloopTiming)[loadEvaluationStep].end();
 
       }
 
       // perform a single simulation step
-      timeloop.singleStep( timeloopTiming );
+      timeloop->singleStep( *timeloopTiming );
 
 
       if( logging )
@@ -2231,7 +2234,7 @@ int main( int argc, char **argv )
 
    }
 
-   timeloopTiming.logResultOnRoot();
+   (*timeloopTiming).logResultOnRoot();
 
 
    return EXIT_SUCCESS;
