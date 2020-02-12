@@ -98,7 +98,7 @@ public:
                                const size_t type2,
                                const real_t coefficientOfRestitution,
                                const real_t collisionTime,
-                               const real_t poissonsRatio,
+                               const real_t kappa,
                                const real_t effectiveMass);
 
    
@@ -386,10 +386,9 @@ inline void LinearSpringDashpot::setStiffnessAndDamping(const size_t type1,
                                                         const size_t type2,
                                                         const real_t coefficientOfRestitution,
                                                         const real_t collisionTime,
-                                                        const real_t poissonsRatio,
+                                                        const real_t kappa,
                                                         const real_t effectiveMass)
 {
-   const real_t kappa = real_t(2) * ( real_t(1) - poissonsRatio ) / ( real_t(2) - poissonsRatio ) ;
    const real_t lnDryResCoeff = std::log(coefficientOfRestitution);
 
    setStiffnessN(type1, type2, effectiveMass * ( math::pi * math::pi + lnDryResCoeff * lnDryResCoeff ) / (collisionTime * collisionTime) );
