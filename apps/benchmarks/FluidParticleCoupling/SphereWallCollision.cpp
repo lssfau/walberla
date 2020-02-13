@@ -666,16 +666,6 @@ int main( int argc, char **argv )
 
    const real_t particleMass = densityRatio * sphereVolume;
    const real_t Mij = particleMass; // * particleMass / ( real_t(2) * particleMass ); // Mij = M for sphere-wall collision
-   const real_t lnDryResCoeff = std::log(restitutionCoeff);
-   const real_t stiffnessCoeff = Mij * ( math::pi * math::pi + lnDryResCoeff * lnDryResCoeff ) / (collisionTime * collisionTime); // Costa et al., Eq. 18
-   const real_t dampingCoeff = - real_t(2) * Mij * lnDryResCoeff / collisionTime; // Costa et al., Eq. 18
-   //const real_t contactDuration = real_t(2) * math::pi * Mij / ( std::sqrt( real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlman
-
-   const real_t var_a = std::sqrt( math::pi * math::pi + (std::log(restitutionCoeff) * std::log(restitutionCoeff) ) );
-   const real_t TnLimit1 = var_a * diameter / uIn * std::exp(-std::asin(math::pi / var_a ) / math::pi); // Costa et al, Eq. 20
-   const real_t TnLimit2 = std::sqrt(diameter / gravitationalAcceleration * var_a * var_a / std::abs(real_t(1) - densityFluid/densitySphere)); // Costa et al, Eq. 21
-
-   const real_t overlapDueToWeight = std::abs(densitySphere - densityFluid) * gravitationalAcceleration * sphereVolume / stiffnessCoeff; // Costa et al., given in text after Eq. 34
 
    const real_t uInCrit = real_t(9) * StCrit * viscosity / ( densityRatio * diameter);
 
@@ -741,12 +731,8 @@ int main( int argc, char **argv )
    }
    else
    {
-      WALBERLA_LOG_INFO_ON_ROOT(" - using linear collision model with fixed parameters:" );
-      WALBERLA_LOG_INFO_ON_ROOT("  - damping coeff = " << dampingCoeff );
-      WALBERLA_LOG_INFO_ON_ROOT("  - stiffness coeff = " << stiffnessCoeff );
-      WALBERLA_LOG_INFO_ON_ROOT(" - overlap due to particle weight = " << overlapDueToWeight);
+      WALBERLA_LOG_INFO_ON_ROOT(" - using linear collision model with fixed parameters" );
    }
-   WALBERLA_LOG_INFO_ON_ROOT(" - TnCrit1 = " << TnLimit1 << ", TnCrit2 = " << TnLimit2 );
    WALBERLA_LOG_INFO_ON_ROOT(" - coeff of restitution = " << restitutionCoeff );
    WALBERLA_LOG_INFO_ON_ROOT(" - number of RPD sub cycles = " << numRPDSubCycles );
    WALBERLA_LOG_INFO_ON_ROOT(" - lubrication correction = " << (useLubricationCorrection ? "yes" : "no") );
@@ -963,12 +949,11 @@ int main( int argc, char **argv )
 
    // linear model
    mesa_pd::kernel::LinearSpringDashpot linearCollisionResponse(1);
-   linearCollisionResponse.setStiffnessN(0,0,stiffnessCoeff);
-   linearCollisionResponse.setDampingN(0,0,dampingCoeff);
+   linearCollisionResponse.setStiffnessAndDamping(0,0,restitutionCoeff,collisionTime,real_t(0),Mij); // no response in tangential direction
 
    // nonlinear model for ACTM
    mesa_pd::kernel::NonLinearSpringDashpot nonLinearCollisionResponse(1, collisionTime);
-   nonLinearCollisionResponse.setLnCORsqr(0,0,lnDryResCoeff * lnDryResCoeff);
+   nonLinearCollisionResponse.setLnCORsqr(0,0,std::log(restitutionCoeff) * std::log(restitutionCoeff));
    nonLinearCollisionResponse.setMeff(0,0,Mij);
 
    mesa_pd::mpi::ReduceProperty reduceProperty;

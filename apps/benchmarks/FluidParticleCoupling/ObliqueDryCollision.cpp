@@ -111,20 +111,7 @@ int main( int argc, char ** argv )
 
    const real_t particleMass =  real_t(1) / ss->shapes[sphereShape]->getInvMass();
    const real_t Mij = particleMass; // * particleMass / ( real_t(2) * particleMass ); // Mij = M for sphere-wall collision
-   const real_t lnDryResCoeff = std::log(restitutionCoeff);
-
-   // normal material parameters
-   const real_t stiffnessN = Mij * ( math::pi * math::pi + lnDryResCoeff * lnDryResCoeff ) / (collisionTime * collisionTime); // Costa et al., Eq. 18
-   const real_t dampingN = - real_t(2) * Mij * lnDryResCoeff / collisionTime; // Costa et al., Eq. 18
-
-   WALBERLA_LOG_INFO_ON_ROOT("normal: stiffness = " << stiffnessN << ", damping = " << dampingN);
-
-   // from Thornton et al
-   const real_t kappa = real_t(2) * ( real_t(1) - nu ) / ( real_t(2) - nu ) ;
-   const real_t stiffnessT = kappa * stiffnessN;
-   const real_t dampingT = std::sqrt(kappa) * dampingN;
-
-   WALBERLA_LOG_INFO_ON_ROOT("tangential: kappa = " << kappa << ", stiffness T = " << stiffnessT << ", damping T = " << dampingT);
+   const real_t kappa = real_t(2) * ( real_t(1) - nu ) / ( real_t(2) - nu ) ;    // from Thornton et al
 
    real_t uTin = uNin * impactAngle;
 
@@ -154,10 +141,7 @@ int main( int argc, char ** argv )
    kernel::DoubleCast           double_cast;
    kernel::LinearSpringDashpot  dem(1);
    mpi::ReduceContactHistory    rch;
-   dem.setStiffnessN(0,0,stiffnessN);
-   dem.setStiffnessT(0,0,stiffnessT);
-   dem.setDampingN(0,0,dampingN);
-   dem.setDampingT(0,0,dampingT);
+   dem.setStiffnessAndDamping(0,0,restitutionCoeff,collisionTime,kappa,Mij);
    dem.setFrictionCoefficientStatic(0,0,frictionCoeff_s);
    dem.setFrictionCoefficientDynamic(0,0,frictionCoeff_d);
 

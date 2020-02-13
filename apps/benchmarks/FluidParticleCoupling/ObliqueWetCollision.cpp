@@ -694,15 +694,7 @@ int main( int argc, char **argv )
 
    const real_t particleMass = densitySphere * sphereVolume;
    const real_t Mij = particleMass; // * particleMass / ( real_t(2) * particleMass ); // Mij = M for sphere-wall collision
-   const real_t lnDryResCoeff = std::log(restitutionCoeff);
-
-   const real_t stiffnessN = Mij * ( math::pi * math::pi + lnDryResCoeff * lnDryResCoeff ) / (collisionTime * collisionTime); // Costa et al., Eq. 18
-   const real_t dampingN = - real_t(2) * Mij * lnDryResCoeff / collisionTime; // Costa et al., Eq. 18
-
-   // from Biegert et al
    const real_t kappa = real_t(2) * ( real_t(1) - poissonsRatio ) / ( real_t(2) - poissonsRatio ) ;
-   const real_t stiffnessT = kappa * stiffnessN;
-   const real_t dampingT = std::sqrt(kappa) * dampingN;
 
    Vector3<uint_t> domainSize( uint_c(domainSizeNonDim[0] * diameter ), uint_c(domainSizeNonDim[1] * diameter ), uint_c(domainSizeNonDim[2] * diameter ) );
 
@@ -735,10 +727,6 @@ int main( int argc, char **argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("Collision Response properties:" );
    WALBERLA_LOG_INFO_ON_ROOT(" - collision time = " << collisionTime );
-   WALBERLA_LOG_INFO_ON_ROOT(" - damping coeff n = " << dampingN );
-   WALBERLA_LOG_INFO_ON_ROOT(" - stiffness coeff n = " << stiffnessN );
-   WALBERLA_LOG_INFO_ON_ROOT(" - damping coeff t = " << dampingT );
-   WALBERLA_LOG_INFO_ON_ROOT(" - stiffness coeff t= " << stiffnessT );
    WALBERLA_LOG_INFO_ON_ROOT(" - coeff of restitution = " << restitutionCoeff );
    WALBERLA_LOG_INFO_ON_ROOT(" - coeff of friction = " << frictionCoeff );
 
@@ -875,10 +863,7 @@ int main( int argc, char **argv )
 
    // linear model
    mesa_pd::kernel::LinearSpringDashpot linearCollisionResponse(1);
-   linearCollisionResponse.setStiffnessN(0,0,stiffnessN);
-   linearCollisionResponse.setDampingN(0,0,dampingN);
-   linearCollisionResponse.setStiffnessT(0,0,stiffnessT);
-   linearCollisionResponse.setDampingT(0,0,dampingT);
+   linearCollisionResponse.setStiffnessAndDamping(0,0,restitutionCoeff,collisionTime,kappa,Mij);
    //linearCollisionResponse.setFrictionCoefficientStatic(0,0,frictionCoeff); // not used in this test case
    linearCollisionResponse.setFrictionCoefficientDynamic(0,0,frictionCoeff);
 

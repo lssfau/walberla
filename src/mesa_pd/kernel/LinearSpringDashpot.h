@@ -86,6 +86,21 @@ public:
                    const real_t& penetrationDepth,
                    const real_t& dt) const;
 
+   real_t calcCoefficientOfRestitution(const size_t type1,
+                                       const size_t type2,
+                                       const real_t effectiveMass);
+
+   real_t calcCollisionTime(const size_t type1,
+                            const size_t type2,
+                            const real_t effectiveMass);
+
+   void setStiffnessAndDamping(const size_t type1,
+                               const size_t type2,
+                               const real_t coefficientOfRestitution,
+                               const real_t collisionTime,
+                               const real_t kappa,
+                               const real_t effectiveMass);
+
    
    /// assumes this parameter is symmetric
    void setStiffnessN(const size_t type1, const size_t type2, const real_t& val);
@@ -278,7 +293,7 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
          impactVelocityMagnitude = relVel.length();
       }
 
-      //TODO: move to own tangential integration kernel?
+      //TODO: move to own tangential displacement integration kernel
       Vec3 rotatedTangentialDisplacement = tangentialSpringDisplacement - contactNormal * (contactNormal * tangentialSpringDisplacement);
       Vec3 newTangentialSpringDisplacement = rotatedTangentialDisplacement.sqrLength() <= real_t(0) ? // avoid division by zero
                                              Vec3(real_t(0)) :
@@ -322,7 +337,6 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
          // if tangential force falls below coulomb limit, we are back in sticking
          if( fTLS.length() < fFrictionAbsDynamic )
          {
-            //TODO really?
             isSticking = true;
          }
       }
@@ -350,6 +364,38 @@ inline void LinearSpringDashpot::operator()(const size_t p_idx1,
       addForceAtWFPosAtomic( p_idx2, ac, -fT, contactPoint );
 
    }
+}
+
+inline real_t LinearSpringDashpot::calcCoefficientOfRestitution(const size_t type1,
+                                                                const size_t type2,
+                                                                const real_t effectiveMass)
+{
+   auto a = real_t(0.5) * getDampingN(type1, type2) / effectiveMass;
+   return std::exp(-a * math::pi / std::sqrt(getStiffnessN(type1, type2) / effectiveMass - a*a));
+}
+
+inline real_t LinearSpringDashpot::calcCollisionTime(const size_t type1,
+                                                     const size_t type2,
+                                                     const real_t effectiveMass)
+{
+   auto a = real_t(0.5) * getDampingN(type1, type2) / effectiveMass;
+   return math::pi / std::sqrt( getStiffnessN(type1, type2)/effectiveMass - a*a);
+}
+
+inline void LinearSpringDashpot::setStiffnessAndDamping(const size_t type1,
+                                                        const size_t type2,
+                                                        const real_t coefficientOfRestitution,
+                                                        const real_t collisionTime,
+                                                        const real_t kappa,
+                                                        const real_t effectiveMass)
+{
+   const real_t lnDryResCoeff = std::log(coefficientOfRestitution);
+
+   setStiffnessN(type1, type2, effectiveMass * ( math::pi * math::pi + lnDryResCoeff * lnDryResCoeff ) / (collisionTime * collisionTime) );
+   setDampingN  (type1, type2, - real_t(2) * effectiveMass * lnDryResCoeff / collisionTime );
+
+   setStiffnessT(type1, type2, kappa * getStiffnessN(type1, type2) );
+   setDampingT  (type1, type2, std::sqrt(kappa) * getDampingN(type1, type2) );
 }
 
 } //namespace kernel
