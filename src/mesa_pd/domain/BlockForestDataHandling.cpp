@@ -97,6 +97,7 @@ void BlockForestDataHandling::serialize( IBlock * const block,
       //skip globals
       if (data::particle_flags::isSet( pIt->getFlags(), data::particle_flags::GLOBAL)) continue;
 
+      pIt->getGhostOwnersRef().clear();
       buffer << ParticleCopyNotification( *pIt );
       ++numOfParticles;
    }
@@ -140,6 +141,7 @@ void BlockForestDataHandling::serializeCoarseToFine( Block * const block, const 
 
       if( childAABB.contains( pIt->getPosition()) )
       {
+         pIt->getGhostOwnersRef().clear();
          buffer << ParticleCopyNotification( *pIt );
          ++numOfParticles;
       }
@@ -164,6 +166,7 @@ void BlockForestDataHandling::serializeFineToCoarse( Block * const block, const 
       //skip globals
       if (data::particle_flags::isSet( pIt->getFlags(), data::particle_flags::GLOBAL)) continue;
 
+      pIt->getGhostOwnersRef().clear();
       buffer << ParticleCopyNotification( *pIt );
       ++numOfParticles;
    }
