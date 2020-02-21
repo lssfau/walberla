@@ -5,7 +5,7 @@ from pystencils_walberla import CodeGeneration
 from lbmpy_walberla import generate_lattice_model
 
 with CodeGeneration() as ctx:
-    omega_shear, omega_bulk = sp.symbols("omega_shear, omega_bulk")
+    omega_shear = sp.symbols("omega_shear")
     temperature = sp.symbols("temperature")
     force_field, vel_field = ps.fields("force(3), velocity(3): [3D]", layout='fzyx')
 
@@ -14,7 +14,7 @@ with CodeGeneration() as ctx:
             'temperature' : temperature,
             'block_offsets' : 'walberla',
         },
-        method='mrt3', relaxation_rates=[omega_shear, omega_bulk],
+        method='mrt', relaxation_rates=[omega_shear]*19,
         force_model='guo', force=force_field.center_vector,
         optimization={'cse_global': True}
     )

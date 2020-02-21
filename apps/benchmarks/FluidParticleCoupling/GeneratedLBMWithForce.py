@@ -1,14 +1,14 @@
 import sympy as sp
 import pystencils as ps
-from lbmpy.creationfunctions import create_lb_method_from_existing, create_lb_ast, create_lb_method
+from lbmpy.creationfunctions import create_lb_method_from_existing, create_lb_method
 from lbmpy_walberla import generate_lattice_model
 from pystencils_walberla import CodeGeneration
 
 from lbmpy.creationfunctions import create_lb_collision_rule
-from lbmpy.moments import MOMENT_SYMBOLS, is_even, get_order
+from lbmpy.moments import is_even, get_order
 from lbmpy.stencils import get_stencil
-from lbmpy.forcemodels import *
-
+from lbmpy.forcemodels import Luo
+from lbmpy.methods import mrt_orthogonal_modes_literature
 
 with CodeGeneration() as ctx:
 
@@ -18,7 +18,9 @@ with CodeGeneration() as ctx:
     stencil = get_stencil("D3Q19", 'walberla')
     omega = sp.symbols("omega_:%d" % len(stencil))
 
-    methodWithForce = create_lb_method(stencil=stencil, method='mrt', maxwellian_moments=False,force_model=forcemodel)
+    moments = mrt_orthogonal_modes_literature(stencil, True, False)
+    methodWithForce = create_lb_method(stencil=stencil, method='mrt', maxwellian_moments=False,
+                                       force_model=forcemodel, nested_moments=moments)
 
     def modification_func(moment, eq, rate):
         omegaVisc = sp.Symbol("omega_visc")
