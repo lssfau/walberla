@@ -495,7 +495,7 @@ int main( int argc, char ** argv )
 
    if (params.checkSimulation)
    {
-      check(*ps, *forest, params.spacing);
+      check(*ps, *forest, params.spacing, params.shift);
    }
 
 

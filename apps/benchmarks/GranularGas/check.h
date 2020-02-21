@@ -27,13 +27,13 @@
 namespace walberla {
 namespace mesa_pd {
 
-void check( data::ParticleStorage& ps, blockforest::BlockForest& forest, real_t spacing )
+void check( data::ParticleStorage& ps, blockforest::BlockForest& forest, real_t spacing, const Vec3& shift )
 {
    WALBERLA_LOG_INFO_ON_ROOT("*** CHECKING RESULT - START ***");
    auto pIt = ps.begin();
    for (auto& iBlk : forest)
    {
-      for (auto it = grid_generator::SCIterator(iBlk.getAABB(), Vector3<real_t>(spacing, spacing, spacing) * real_c(0.5), spacing);
+      for (auto it = grid_generator::SCIterator(iBlk.getAABB(), Vector3<real_t>(spacing, spacing, spacing) * real_c(0.5) + shift, spacing);
            it != grid_generator::SCIterator();
            ++it, ++pIt)
       {

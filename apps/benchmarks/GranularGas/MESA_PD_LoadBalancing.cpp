@@ -483,7 +483,7 @@ int main( int argc, char ** argv )
 
    if (params.checkSimulation)
    {
-      check(*ps, *forest, params.spacing);
+      check(*ps, *forest, params.spacing, params.shift);
    }
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - START ***");

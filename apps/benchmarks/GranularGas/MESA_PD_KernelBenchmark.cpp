@@ -92,7 +92,6 @@ public:
    inline
    void operator()(const size_t idx1, const size_t idx2, T& ac)
    {
-
       ++contactsChecked_;
       if (double_cast_(idx1, idx2, ac, acd_, ac))
       {
@@ -233,20 +232,20 @@ int main( int argc, char ** argv )
 
    if (!forest->isPeriodic(0))
    {
-      createPlane(*ps, *ss, confiningDomain.minCorner(), Vec3(+1,0,0));
-      createPlane(*ps, *ss, confiningDomain.maxCorner(), Vec3(-1,0,0));
+      createPlane(*ps, *ss, confiningDomain.minCorner() + params.shift, Vec3(+1,0,0));
+      createPlane(*ps, *ss, confiningDomain.maxCorner() + params.shift, Vec3(-1,0,0));
    }
 
    if (!forest->isPeriodic(1))
    {
-      createPlane(*ps, *ss, confiningDomain.minCorner(), Vec3(0,+1,0));
-      createPlane(*ps, *ss, confiningDomain.maxCorner(), Vec3(0,-1,0));
+      createPlane(*ps, *ss, confiningDomain.minCorner() + params.shift, Vec3(0,+1,0));
+      createPlane(*ps, *ss, confiningDomain.maxCorner() + params.shift, Vec3(0,-1,0));
    }
 
    if (!forest->isPeriodic(2))
    {
-      createPlane(*ps, *ss, confiningDomain.minCorner(), Vec3(0,0,+1));
-      createPlane(*ps, *ss, confiningDomain.maxCorner(), Vec3(0,0,-1));
+      createPlane(*ps, *ss, confiningDomain.minCorner() + params.shift, Vec3(0,0,+1));
+      createPlane(*ps, *ss, confiningDomain.maxCorner() + params.shift, Vec3(0,0,-1));
    }
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - END ***");
@@ -266,10 +265,9 @@ int main( int argc, char ** argv )
    kernel::AssocToBlock                  assoc(forest);
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::SpringDashpot                 dem(1);
-   dem.setStiffness(0, 0, real_t(0));
-   dem.setDampingN (0, 0, real_t(0));
    dem.setDampingT (0, 0, real_t(0));
    dem.setFriction (0, 0, real_t(0));
+   dem.setParametersFromCOR(0, 0, real_t(0.9), params.dt*real_t(20), ss->shapes[smallSphere]->getMass() * real_t(0.5));
    mpi::ReduceProperty                   RP;
    mpi::SyncNextNeighbors                SNN;
    ContactDetection                      CD(domain);
@@ -376,7 +374,8 @@ int main( int argc, char ** argv )
 
       if (params.checkSimulation)
       {
-         check(*ps, *forest, params.spacing);
+         //if you want to activate checking you have to deactivate sorting
+         check(*ps, *forest, params.spacing, params.shift);
       }
 
       WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - START ***");

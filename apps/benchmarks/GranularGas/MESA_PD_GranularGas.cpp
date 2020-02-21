@@ -74,13 +74,12 @@ namespace mesa_pd {
 class DEM
 {
 public:
-   DEM(const std::shared_ptr<domain::BlockForestDomain>& domain)
+   DEM(const std::shared_ptr<domain::BlockForestDomain>& domain, real_t dt, real_t mass)
    : domain_(domain)
    {
-      dem_.setStiffness(0, 0, real_t(0));
-      dem_.setDampingN(0, 0, real_t(0));
       dem_.setDampingT(0, 0, real_t(0));
       dem_.setFriction(0, 0, real_t(0));
+      dem_.setParametersFromCOR(0, 0, real_t(0.9), dt*real_t(20), mass * real_t(0.5));
    }
 
    inline
@@ -208,20 +207,20 @@ int main( int argc, char ** argv )
 
    if (!forest->isPeriodic(0))
    {
-      createPlane(*ps, *ss, confiningDomain.minCorner(), Vec3(+1,0,0));
-      createPlane(*ps, *ss, confiningDomain.maxCorner(), Vec3(-1,0,0));
+      createPlane(*ps, *ss, confiningDomain.minCorner()+params.shift, Vec3(+1,0,0));
+      createPlane(*ps, *ss, confiningDomain.maxCorner()+params.shift, Vec3(-1,0,0));
    }
 
    if (!forest->isPeriodic(1))
    {
-      createPlane(*ps, *ss, confiningDomain.minCorner(), Vec3(0,+1,0));
-      createPlane(*ps, *ss, confiningDomain.maxCorner(), Vec3(0,-1,0));
+      createPlane(*ps, *ss, confiningDomain.minCorner()+params.shift, Vec3(0,+1,0));
+      createPlane(*ps, *ss, confiningDomain.maxCorner()+params.shift, Vec3(0,-1,0));
    }
 
    if (!forest->isPeriodic(2))
    {
-      createPlane(*ps, *ss, confiningDomain.minCorner(), Vec3(0,0,+1));
-      createPlane(*ps, *ss, confiningDomain.maxCorner(), Vec3(0,0,-1));
+      createPlane(*ps, *ss, confiningDomain.minCorner()+params.shift, Vec3(0,0,+1));
+      createPlane(*ps, *ss, confiningDomain.maxCorner()+params.shift, Vec3(0,0,-1));
    }
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - END ***");
@@ -237,7 +236,7 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - START ***");
    // Init kernels
    kernel::ExplicitEulerWithShape        explicitEulerWithShape( params.dt );
-   DEM dem(domain);
+   DEM dem(domain, params.dt, ss->shapes[smallSphere]->getMass());
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::AssocToBlock                  assoc(forest);
    mpi::ReduceProperty                   RP;
@@ -356,7 +355,8 @@ int main( int argc, char ** argv )
 
       if (params.checkSimulation)
       {
-         check(*ps, *forest, params.spacing);
+         //if you want to activate checking you have to deactivate sorting
+         check(*ps, *forest, params.spacing, params.shift);
       }
 
       WALBERLA_LOG_INFO_ON_ROOT("*** SQL OUTPUT - START ***");
