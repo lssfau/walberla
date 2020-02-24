@@ -52,8 +52,11 @@ public:
                    walberla::mpi::RecvBuffer& rb,
                    data::ParticleStorage& ps,
                    const domain::IDomain& domain);
+   void allowMultipleGhostCopyNotifications(bool val) {allowMultipleGhostCopyNotifications_ = val;}
 private:
    int receiver_ = int_c( walberla::mpi::MPIManager::instance()->rank() );
+
+   bool allowMultipleGhostCopyNotifications_ = false;
 };
 
 inline
@@ -82,7 +85,14 @@ void ParseMessage::operator()(int sender,
          data::particle_flags::set(pIt->getFlagsRef(), data::particle_flags::GHOST);
       } else
       {
-         WALBERLA_LOG_DETAIL("Ghost particle with id " << objparam.uid << " already existend.");
+         if (allowMultipleGhostCopyNotifications_)
+         {
+            //superfluous ghost creation messages might be send during ghost owner sync
+            WALBERLA_LOG_DETAIL("Ghost particle with id " << objparam.uid << " already existend.");
+         } else
+         {
+            WALBERLA_ABORT("Ghost particle with id " << objparam.uid << " already existend.");
+         }
       }
 
       WALBERLA_LOG_DETAIL( "Processed PARTICLE_GHOST_COPY_NOTIFICATION for particle " << objparam.uid << "."  );

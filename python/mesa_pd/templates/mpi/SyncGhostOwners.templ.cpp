@@ -181,6 +181,7 @@ void SyncGhostOwners::updateAndMigrate( data::ParticleStorage& ps,
    // Receiving the updates for the remote rigid bodies from the connected processes
    WALBERLA_LOG_DETAIL( "Parsing of Update&Migrate starts..." );
    ParseMessage parseMessage;
+   parseMessage.allowMultipleGhostCopyNotifications(true);
    for( auto it = bs1.begin(); it != bs1.end(); ++it )
    {
       walberla::uint8_t tmp;
@@ -338,6 +339,7 @@ void SyncGhostOwners::checkAndResolveOverlap( data::ParticleStorage& ps,
    // Receiving the updates for the remote rigid bodies from the connected processes
    WALBERLA_LOG_DETAIL( "Parsing of Check&Resolve starts..." );
    ParseMessage parseMessage;
+   parseMessage.allowMultipleGhostCopyNotifications(true);
    for( auto it = bs2.begin(); it != bs2.end(); ++it )
    {
       walberla::uint8_t tmp;

@@ -21,8 +21,10 @@
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/domain/BlockForestDataHandling.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
+#include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
+#include <mesa_pd/mpi/ClearNextNeighborSync.h>
 #include <mesa_pd/mpi/SyncNextNeighbors.h>
 
 #include <blockforest/Initialization.h>
@@ -31,6 +33,7 @@
 #include <core/grid_generator/SCIterator.h>
 #include <core/mpi/Reduce.h>
 #include <core/logging/Logging.h>
+#include <mesa_pd/kernel/ParticleSelector.h>
 
 namespace walberla {
 namespace mesa_pd {
@@ -42,6 +45,7 @@ void createDump()
 
    WALBERLA_LOG_INFO_ON_ROOT("*** MESA_PD ***");
    auto ps = std::make_shared<data::ParticleStorage>(100);
+   auto ac = data::ParticleAccessor(ps);
    auto ss = std::make_shared<data::ShapeStorage>();
 
    auto smallSphere = ss->create<data::Sphere>(radius);
@@ -98,11 +102,14 @@ void createDump()
 
    WALBERLA_CHECK_EQUAL(ps->size(), 28);
 
+   mesa_pd::mpi::ClearNextNeighborSync CSNN;
    mesa_pd::mpi::SyncNextNeighbors SNN;
    SNN(*ps, domain);
 
+   CSNN(ac);
    WALBERLA_LOG_DEVEL_ON_ROOT("dumping simulation");
    forest->saveBlockData("SerializeDeserialize.dump", bfDataHandlingID);
+   SNN(*ps, domain);
 }
 
 void checkDump()
