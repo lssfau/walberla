@@ -68,6 +68,7 @@
 #include "lbm_mesapd_coupling/utility/ResetHydrodynamicForceTorqueKernel.h"
 #include "lbm_mesapd_coupling/utility/LubricationCorrectionKernel.h"
 #include "lbm_mesapd_coupling/utility/OmegaBulkAdaption.h"
+#include "lbm_mesapd_coupling/utility/InitializeHydrodynamicForceTorqueForAveragingKernel.h"
 
 #include "mesa_pd/collision_detection/AnalyticContactDetection.h"
 #include "mesa_pd/data/ParticleAccessorWithShape.h"
@@ -1183,9 +1184,13 @@ int main( int argc, char **argv )
       // perform a single simulation step -> this contains LBM and setting of the hydrodynamic interactions
       timeloop.singleStep( timeloopTiming );
 
-
-      if( averageForceTorqueOverTwoTimeSteps && i!= 0)
+      if( averageForceTorqueOverTwoTimeSteps )
       {
+         if( i == 0 )
+         {
+            lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
+            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+         }
          ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, averageHydrodynamicForceTorque, *accessor );
       }
 

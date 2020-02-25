@@ -63,6 +63,7 @@
 #include "lbm_mesapd_coupling/DataTypes.h"
 #include "lbm_mesapd_coupling/utility/AverageHydrodynamicForceTorqueKernel.h"
 #include "lbm_mesapd_coupling/utility/AddHydrodynamicInteractionKernel.h"
+#include "lbm_mesapd_coupling/utility/InitializeHydrodynamicForceTorqueForAveragingKernel.h"
 #include "lbm_mesapd_coupling/utility/ResetHydrodynamicForceTorqueKernel.h"
 #include "lbm_mesapd_coupling/utility/OmegaBulkAdaption.h"
 
@@ -393,7 +394,7 @@ int main( int argc, char **argv )
    bool vtkOutputAtEnd = true;
 
    //numerical parameters
-   bool averageForceTorqueOverTwoTimSteps = true;
+   bool averageForceTorqueOverTwoTimeSteps = true;
    bool conserveMomentum = false;
    uint_t numRPDSubCycles = uint_t(1);
    std::string reconstructorType = "Grad"; // Eq, EAN, Ext, Grad
@@ -424,7 +425,7 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--logDensity" )           == 0 ) { logDensity = true; continue; }
       if( std::strcmp( argv[i], "--vtkIOFreq" )            == 0 ) { vtkIOFreq = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--numRPDSubCycles" )      == 0 ) { numRPDSubCycles = uint_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--noForceAveraging" )     == 0 ) { averageForceTorqueOverTwoTimSteps = false; continue; }
+      if( std::strcmp( argv[i], "--noForceAveraging" )     == 0 ) { averageForceTorqueOverTwoTimeSteps = false; continue; }
       if( std::strcmp( argv[i], "--conserveMomentum" )     == 0 ) { conserveMomentum = true; continue; }
       if( std::strcmp( argv[i], "--baseFolder" )           == 0 ) { baseFolder = argv[++i]; continue; }
       if( std::strcmp( argv[i], "--reconstructorType" )    == 0 ) { reconstructorType = argv[++i]; continue; }
@@ -768,8 +769,13 @@ int main( int argc, char **argv )
 
       timeloopTiming["RPD"].start();
 
-      if( averageForceTorqueOverTwoTimSteps && i!= 0)
+      if( averageForceTorqueOverTwoTimeSteps )
       {
+         if( i == 0 )
+         {
+            lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
+            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+         }
          ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, averageHydrodynamicForceTorque, *accessor );
       }
 
