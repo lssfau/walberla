@@ -375,7 +375,8 @@ intel_19_mpionly:
 intel_19_hybrid:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -391,7 +392,8 @@ intel_19_hybrid:
 intel_19_serial_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -407,7 +409,8 @@ intel_19_serial_dbg:
 intel_19_mpionly_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -423,7 +426,8 @@ intel_19_mpionly_dbg:
 intel_19_hybrid_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -439,7 +443,8 @@ intel_19_hybrid_dbg:
 intel_19_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -860,7 +865,8 @@ gcc_9_hybrid:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    stage: pretest
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -875,7 +881,8 @@ gcc_9_hybrid:
 gcc_9_serial_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -890,7 +897,8 @@ gcc_9_serial_dbg:
 gcc_9_mpionly_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -905,7 +913,8 @@ gcc_9_mpionly_dbg:
 gcc_9_hybrid_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -920,7 +929,8 @@ gcc_9_hybrid_dbg:
 gcc_9_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -1423,7 +1433,8 @@ clang_9.0_mpionly:
 clang_9.0_hybrid:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -1438,7 +1449,8 @@ clang_9.0_hybrid:
 clang_9.0_serial_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -1453,7 +1465,8 @@ clang_9.0_serial_dbg:
 clang_9.0_mpionly_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -1468,7 +1481,8 @@ clang_9.0_mpionly_dbg:
 clang_9.0_hybrid_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -1484,7 +1498,8 @@ clang_9.0_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    stage: pretest
-   before_script: pip3 install lbmpy-walberla --upgrade
+   before_script:
+      -pip3 install lbmpy-walberla --upgrade
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
