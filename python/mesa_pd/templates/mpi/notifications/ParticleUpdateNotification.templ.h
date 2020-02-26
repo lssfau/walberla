@@ -45,7 +45,7 @@ namespace mesa_pd {
 class ParticleUpdateNotification {
 public:
    struct Parameters {
-   {%- for prop in properties %}
+   {%- for prop in particle.properties %}
    {%- if prop.syncMode in ["ALWAYS"] %}
    {{prop.type}} {{prop.name}} {{'{'}}{{prop.defValue}}{{'}'}};
    {%- endif %}
@@ -79,7 +79,7 @@ template< typename T,    // Element type of SendBuffer
 mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::ParticleUpdateNotification& obj )
 {
    buf.addDebugMarker( "un" );
-   {%- for prop in properties %}
+   {%- for prop in particle.properties %}
    {%- if prop.syncMode in ["ALWAYS"] %}
    buf << obj.particle_.get{{prop.name | capFirst}}();
    {%- endif %}
@@ -91,7 +91,7 @@ template< typename T>    // Element type  of RecvBuffer
 mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::ParticleUpdateNotification::Parameters& objparam )
 {
    buf.readDebugMarker( "un" );
-   {%- for prop in properties %}
+   {%- for prop in particle.properties %}
    {%- if prop.syncMode in ["ALWAYS"] %}
    buf >> objparam.{{prop.name}};
    {%- endif %}

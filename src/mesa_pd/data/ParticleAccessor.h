@@ -72,22 +72,6 @@ public:
    std::unordered_set<walberla::mpi::MPIRank>& getGhostOwnersRef(const size_t p_idx) {return ps_->getGhostOwnersRef(p_idx);}
    void setGhostOwners(const size_t p_idx, std::unordered_set<walberla::mpi::MPIRank> const & v) { ps_->setGhostOwners(p_idx, v);}
    
-   size_t const & getShapeID(const size_t p_idx) const {return ps_->getShapeID(p_idx);}
-   size_t& getShapeIDRef(const size_t p_idx) {return ps_->getShapeIDRef(p_idx);}
-   void setShapeID(const size_t p_idx, size_t const & v) { ps_->setShapeID(p_idx, v);}
-   
-   walberla::mesa_pd::Rot3 const & getRotation(const size_t p_idx) const {return ps_->getRotation(p_idx);}
-   walberla::mesa_pd::Rot3& getRotationRef(const size_t p_idx) {return ps_->getRotationRef(p_idx);}
-   void setRotation(const size_t p_idx, walberla::mesa_pd::Rot3 const & v) { ps_->setRotation(p_idx, v);}
-   
-   walberla::mesa_pd::Vec3 const & getAngularVelocity(const size_t p_idx) const {return ps_->getAngularVelocity(p_idx);}
-   walberla::mesa_pd::Vec3& getAngularVelocityRef(const size_t p_idx) {return ps_->getAngularVelocityRef(p_idx);}
-   void setAngularVelocity(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setAngularVelocity(p_idx, v);}
-   
-   walberla::mesa_pd::Vec3 const & getTorque(const size_t p_idx) const {return ps_->getTorque(p_idx);}
-   walberla::mesa_pd::Vec3& getTorqueRef(const size_t p_idx) {return ps_->getTorqueRef(p_idx);}
-   void setTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setTorque(p_idx, v);}
-   
    walberla::mesa_pd::Vec3 const & getLinearVelocity(const size_t p_idx) const {return ps_->getLinearVelocity(p_idx);}
    walberla::mesa_pd::Vec3& getLinearVelocityRef(const size_t p_idx) {return ps_->getLinearVelocityRef(p_idx);}
    void setLinearVelocity(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setLinearVelocity(p_idx, v);}
@@ -103,6 +87,22 @@ public:
    walberla::mesa_pd::Vec3 const & getOldForce(const size_t p_idx) const {return ps_->getOldForce(p_idx);}
    walberla::mesa_pd::Vec3& getOldForceRef(const size_t p_idx) {return ps_->getOldForceRef(p_idx);}
    void setOldForce(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldForce(p_idx, v);}
+   
+   size_t const & getShapeID(const size_t p_idx) const {return ps_->getShapeID(p_idx);}
+   size_t& getShapeIDRef(const size_t p_idx) {return ps_->getShapeIDRef(p_idx);}
+   void setShapeID(const size_t p_idx, size_t const & v) { ps_->setShapeID(p_idx, v);}
+   
+   walberla::mesa_pd::Rot3 const & getRotation(const size_t p_idx) const {return ps_->getRotation(p_idx);}
+   walberla::mesa_pd::Rot3& getRotationRef(const size_t p_idx) {return ps_->getRotationRef(p_idx);}
+   void setRotation(const size_t p_idx, walberla::mesa_pd::Rot3 const & v) { ps_->setRotation(p_idx, v);}
+   
+   walberla::mesa_pd::Vec3 const & getAngularVelocity(const size_t p_idx) const {return ps_->getAngularVelocity(p_idx);}
+   walberla::mesa_pd::Vec3& getAngularVelocityRef(const size_t p_idx) {return ps_->getAngularVelocityRef(p_idx);}
+   void setAngularVelocity(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setAngularVelocity(p_idx, v);}
+   
+   walberla::mesa_pd::Vec3 const & getTorque(const size_t p_idx) const {return ps_->getTorque(p_idx);}
+   walberla::mesa_pd::Vec3& getTorqueRef(const size_t p_idx) {return ps_->getTorqueRef(p_idx);}
+   void setTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setTorque(p_idx, v);}
    
    walberla::mesa_pd::Vec3 const & getOldTorque(const size_t p_idx) const {return ps_->getOldTorque(p_idx);}
    walberla::mesa_pd::Vec3& getOldTorqueRef(const size_t p_idx) {return ps_->getOldTorqueRef(p_idx);}
@@ -233,22 +233,6 @@ public:
    void setGhostOwners(const size_t /*p_idx*/, std::unordered_set<walberla::mpi::MPIRank> const & v) { ghostOwners_ = v;}
    std::unordered_set<walberla::mpi::MPIRank>& getGhostOwnersRef(const size_t /*p_idx*/) {return ghostOwners_;}
    
-   size_t const & getShapeID(const size_t /*p_idx*/) const {return shapeID_;}
-   void setShapeID(const size_t /*p_idx*/, size_t const & v) { shapeID_ = v;}
-   size_t& getShapeIDRef(const size_t /*p_idx*/) {return shapeID_;}
-   
-   walberla::mesa_pd::Rot3 const & getRotation(const size_t /*p_idx*/) const {return rotation_;}
-   void setRotation(const size_t /*p_idx*/, walberla::mesa_pd::Rot3 const & v) { rotation_ = v;}
-   walberla::mesa_pd::Rot3& getRotationRef(const size_t /*p_idx*/) {return rotation_;}
-   
-   walberla::mesa_pd::Vec3 const & getAngularVelocity(const size_t /*p_idx*/) const {return angularVelocity_;}
-   void setAngularVelocity(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { angularVelocity_ = v;}
-   walberla::mesa_pd::Vec3& getAngularVelocityRef(const size_t /*p_idx*/) {return angularVelocity_;}
-   
-   walberla::mesa_pd::Vec3 const & getTorque(const size_t /*p_idx*/) const {return torque_;}
-   void setTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { torque_ = v;}
-   walberla::mesa_pd::Vec3& getTorqueRef(const size_t /*p_idx*/) {return torque_;}
-   
    walberla::mesa_pd::Vec3 const & getLinearVelocity(const size_t /*p_idx*/) const {return linearVelocity_;}
    void setLinearVelocity(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { linearVelocity_ = v;}
    walberla::mesa_pd::Vec3& getLinearVelocityRef(const size_t /*p_idx*/) {return linearVelocity_;}
@@ -264,6 +248,22 @@ public:
    walberla::mesa_pd::Vec3 const & getOldForce(const size_t /*p_idx*/) const {return oldForce_;}
    void setOldForce(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldForce_ = v;}
    walberla::mesa_pd::Vec3& getOldForceRef(const size_t /*p_idx*/) {return oldForce_;}
+   
+   size_t const & getShapeID(const size_t /*p_idx*/) const {return shapeID_;}
+   void setShapeID(const size_t /*p_idx*/, size_t const & v) { shapeID_ = v;}
+   size_t& getShapeIDRef(const size_t /*p_idx*/) {return shapeID_;}
+   
+   walberla::mesa_pd::Rot3 const & getRotation(const size_t /*p_idx*/) const {return rotation_;}
+   void setRotation(const size_t /*p_idx*/, walberla::mesa_pd::Rot3 const & v) { rotation_ = v;}
+   walberla::mesa_pd::Rot3& getRotationRef(const size_t /*p_idx*/) {return rotation_;}
+   
+   walberla::mesa_pd::Vec3 const & getAngularVelocity(const size_t /*p_idx*/) const {return angularVelocity_;}
+   void setAngularVelocity(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { angularVelocity_ = v;}
+   walberla::mesa_pd::Vec3& getAngularVelocityRef(const size_t /*p_idx*/) {return angularVelocity_;}
+   
+   walberla::mesa_pd::Vec3 const & getTorque(const size_t /*p_idx*/) const {return torque_;}
+   void setTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { torque_ = v;}
+   walberla::mesa_pd::Vec3& getTorqueRef(const size_t /*p_idx*/) {return torque_;}
    
    walberla::mesa_pd::Vec3 const & getOldTorque(const size_t /*p_idx*/) const {return oldTorque_;}
    void setOldTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldTorque_ = v;}
@@ -342,14 +342,14 @@ private:
    walberla::mesa_pd::data::particle_flags::FlagT flags_;
    int owner_;
    std::unordered_set<walberla::mpi::MPIRank> ghostOwners_;
-   size_t shapeID_;
-   walberla::mesa_pd::Rot3 rotation_;
-   walberla::mesa_pd::Vec3 angularVelocity_;
-   walberla::mesa_pd::Vec3 torque_;
    walberla::mesa_pd::Vec3 linearVelocity_;
    walberla::real_t invMass_;
    walberla::mesa_pd::Vec3 force_;
    walberla::mesa_pd::Vec3 oldForce_;
+   size_t shapeID_;
+   walberla::mesa_pd::Rot3 rotation_;
+   walberla::mesa_pd::Vec3 angularVelocity_;
+   walberla::mesa_pd::Vec3 torque_;
    walberla::mesa_pd::Vec3 oldTorque_;
    blockforest::BlockID currentBlock_;
    uint_t type_;

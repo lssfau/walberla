@@ -1,16 +1,22 @@
 # -*- coding: utf-8 -*-
 
-from ..utility import generateFile
+from ..utility import generate_file
+
 
 class SyncGhostOwners:
-   def __init__(self, p):
-      p.addProperty("position",          "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
-      p.addProperty("interactionRadius", "walberla::real_t",        defValue="real_t(0)", syncMode="ON_GHOST_CREATION")
-      p.addProperty("flags",             "walberla::mesa_pd::data::particle_flags::FlagT", defValue="", syncMode="ON_GHOST_CREATION")
-      p.addProperty("owner",             "int",                     defValue="-1",        syncMode="ON_GHOST_CREATION")
-      p.addProperty("ghostOwners",       "std::unordered_set<walberla::mpi::MPIRank>",    defValue="",          syncMode="NEVER")
-      p.addProperty("neighborState",     "std::unordered_set<walberla::mpi::MPIRank>",       defValue="",          syncMode="NEVER")
+    def __init__(self, particle_storage):
+        particle_storage.add_property("position", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
+        particle_storage.add_property("interactionRadius", "walberla::real_t", defValue="real_t(0)",
+                                      syncMode="ON_GHOST_CREATION")
+        particle_storage.add_property("flags", "walberla::mesa_pd::data::particle_flags::FlagT", defValue="",
+                                      syncMode="ON_GHOST_CREATION")
+        particle_storage.add_property("owner", "int", defValue="-1", syncMode="ON_GHOST_CREATION")
+        particle_storage.add_property("ghostOwners", "std::unordered_set<walberla::mpi::MPIRank>", defValue="",
+                                      syncMode="NEVER")
+        particle_storage.add_property("neighborState", "std::unordered_set<walberla::mpi::MPIRank>", defValue="",
+                                      syncMode="NEVER")
 
-   def generate(self, path):
-      generateFile(path, 'mpi/SyncGhostOwners.templ.h')
-      generateFile(path, 'mpi/SyncGhostOwners.templ.cpp')
+    def generate(self, module):
+        ctx = {'module': module}
+        generate_file(module['module_path'], 'mpi/SyncGhostOwners.templ.h', ctx)
+        generate_file(module['module_path'], 'mpi/SyncGhostOwners.templ.cpp', ctx)

@@ -29,7 +29,7 @@
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/shape/BaseShape.h>
-{%- for shape in shapes %}
+{%- for shape in particle.shapes %}
 #include <mesa_pd/data/shape/{{shape}}.h>
 {%- endfor %}
 
@@ -58,8 +58,8 @@ struct ShapeStorage
    ReturnType doubleDispatch( ParticleStorage& ps, size_t idx, size_t idy, func& f );
 };
 //Make sure that no two different shapes have the same unique identifier!
-{%- for shape in shapes[1:] %}
-static_assert( {{shapes[0]}}::SHAPE_TYPE != {{shape}}::SHAPE_TYPE, "Shape types have to be different!" );
+{%- for shape in particle.shapes[1:] %}
+static_assert( {{particle.shapes[0]}}::SHAPE_TYPE != {{shape}}::SHAPE_TYPE, "Shape types have to be different!" );
 {%- endfor %}
 
 template <typename ShapeT, typename... Args>
@@ -76,7 +76,7 @@ ReturnType ShapeStorage::singleDispatch( ParticleStorage& ps, size_t idx, func& 
 
    switch (shapes[ps.getShapeID(idx)]->getShapeType())
    {
-      {%- for shape in shapes %}
+      {%- for shape in particle.shapes %}
       case {{shape}}::SHAPE_TYPE : return f(ps, idx, *static_cast<{{shape}}*>(shapes[ps.getShapeID(idx)].get()));
       {%- endfor %}
       default : WALBERLA_ABORT("Shape type (" << shapes[ps.getShapeID(idx)]->getShapeType() << ") could not be determined!");
@@ -91,11 +91,11 @@ ReturnType ShapeStorage::doubleDispatch( ParticleStorage& ps, size_t idx, size_t
 
    switch (shapes[ps.getShapeID(idx)]->getShapeType())
    {
-      {%- for shape1 in shapes %}
+      {%- for shape1 in particle.shapes %}
       case {{shape1}}::SHAPE_TYPE :
          switch (shapes[ps.getShapeID(idy)]->getShapeType())
          {
-            {%- for shape2 in shapes %}
+            {%- for shape2 in particle.shapes %}
             case {{shape2}}::SHAPE_TYPE : return f(ps,
                                                    idx,
                                                    *static_cast<{{shape1}}*>(shapes[ps.getShapeID(idx)].get()),

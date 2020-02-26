@@ -114,9 +114,9 @@ void ParseMessage::operator()(int sender,
                      "Update notification must only concern shadow copies.");
       pIt->setUid(objparam.uid);
       pIt->setPosition(objparam.position);
+      pIt->setLinearVelocity(objparam.linearVelocity);
       pIt->setRotation(objparam.rotation);
       pIt->setAngularVelocity(objparam.angularVelocity);
-      pIt->setLinearVelocity(objparam.linearVelocity);
       pIt->setOldContactHistory(objparam.oldContactHistory);
       pIt->setTemperature(objparam.temperature);
 

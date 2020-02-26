@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from ..utility import generateFile
+from ..utility import generate_file
+
 
 class ShapeStorage:
-   def __init__(self, p, shapes):
-      p.addProperty("shapeID",         "size_t",                  defValue="",          syncMode="ON_GHOST_CREATION")
-      p.addProperty("rotation",        "walberla::mesa_pd::Rot3", defValue="",          syncMode="ALWAYS")
-      p.addProperty("angularVelocity", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
-      p.addProperty("torque",          "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
+    def __init__(self, particle_storage):
+        particle_storage.add_property("shapeID", "size_t", defValue="", syncMode="ON_GHOST_CREATION")
+        particle_storage.add_property("rotation", "walberla::mesa_pd::Rot3", defValue="", syncMode="ALWAYS")
+        particle_storage.add_property("angularVelocity", "walberla::mesa_pd::Vec3", defValue="real_t(0)",
+                                      syncMode="ALWAYS")
+        particle_storage.add_property("torque", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
 
-      self.shapes          = shapes
+        self.ps = particle_storage
 
-   def generate(self, path):
-      context = dict()
-      context["shapes"]          = self.shapes
+    def generate(self, module):
+        ctx = {'module': module, 'particle': self.ps.get_context()}
 
-      generateFile(path, 'data/ShapeStorage.templ.h', context)
+        generate_file(module['module_path'], 'data/ShapeStorage.templ.h', ctx)
