@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from ..utility import generateFile
+from ..utility import generate_file
+
 
 class ShapePackUnpack:
-   def __init__(self, shapes):
-      self.shapes = shapes
-   def generate(self, path):
-      context = dict()
-      context["shapes"] = self.shapes
-      generateFile(path, 'mpi/ShapePackUnpack.templ.h', context)
+    def __init__(self, particle_storage):
+        self.ps = particle_storage
+
+    def generate(self, module):
+        ctx = {'module': module, 'particle': self.ps.get_context()}
+        generate_file(module['module_path'], 'mpi/ShapePackUnpack.templ.h', ctx)

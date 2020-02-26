@@ -27,7 +27,7 @@
 #pragma once
 
 #include <mesa_pd/data/shape/BaseShape.h>
-{%- for shape in shapes %}
+{%- for shape in particle.shapes %}
 #include <mesa_pd/data/shape/{{shape}}.h>
 {%- endfor %}
 
@@ -61,7 +61,7 @@ namespace mpi {
       buf >> shapeType;
       switch (shapeType)
       {
-         {%- for shape in shapes %}
+         {%- for shape in particle.shapes %}
          case {{shape}}::SHAPE_TYPE :
             bs = std::make_unique<mesa_pd::data::{{shape}}>();
             bs->unpack(buf);

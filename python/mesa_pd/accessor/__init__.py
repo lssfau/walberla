@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from .Accessor import Accessor
+from .Accessor import create_access
 
-__all__ = ['Accessor']
+__all__ = ['create_access']

@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from mesa_pd.accessor import Accessor
-from mesa_pd.utility import generateFile
+from mesa_pd.accessor import create_access
+from mesa_pd.utility import generate_file
+
 
 class SingleCast:
-   def __init__(self, shapes):
-      self.shapes = shapes
-      self.accessor = Accessor()
-      self.accessor.require("shape", "BaseShape*", access="g")
+    def __init__(self, particle_storage):
+        self.ps = particle_storage
+        self.context = {'interface': []}
+        self.context['interface'].append(create_access("shape", "BaseShape*", access="g"))
 
-   def getRequirements(self):
-      return self.accessor
-
-   def generate(self, path):
-      context = dict()
-      context["interface"] = self.accessor.properties
-      context["shapes"]    = self.shapes
-      generateFile(path, 'kernel/SingleCast.templ.h', context)
+    def generate(self, module):
+        ctx = {'module': module, 'particle': self.ps.get_context(), **self.context}
+        generate_file(module['module_path'], 'kernel/SingleCast.templ.h', ctx)

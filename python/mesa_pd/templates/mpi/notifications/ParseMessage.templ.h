@@ -113,7 +113,7 @@ void ParseMessage::operator()(int sender,
       WALBERLA_CHECK(data::particle_flags::isSet(pIt->getFlags(), data::particle_flags::GHOST),
                      "Update notification must only concern shadow copies.");
 
-      {%- for prop in properties %}
+      {%- for prop in particle.properties %}
       {%- if prop.syncMode in ["ALWAYS"] %}
       pIt->set{{prop.name | capFirst}}(objparam.{{prop.name}});
       {%- endif %}
@@ -144,7 +144,7 @@ void ParseMessage::operator()(int sender,
 
       pIt->setOwner(receiver_);
       data::particle_flags::unset(pIt->getFlagsRef(), data::particle_flags::GHOST);
-      {%- for prop in properties %}
+      {%- for prop in particle.properties %}
       {%- if prop.syncMode in ["ON_OWNERSHIP_CHANGE"] %}
       pIt->set{{prop.name | capFirst}}(objparam.{{prop.name}}_);
       {%- endif %}

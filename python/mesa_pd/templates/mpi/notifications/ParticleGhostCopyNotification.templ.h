@@ -48,7 +48,7 @@ class ParticleGhostCopyNotification
 public:
    struct Parameters
    {
-      {%- for prop in properties %}
+      {%- for prop in particle.properties %}
       {%- if prop.syncMode in ["ON_GHOST_CREATION", "ALWAYS"] %}
       {{prop.type}} {{prop.name}} {{'{'}}{{prop.defValue}}{{'}'}};
       {%- endif %}
@@ -64,7 +64,7 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
    WALBERLA_ASSERT_EQUAL(ps.find(data.uid), ps.end(), "Particle with same uid already existent!");
 
    auto pIt = ps.create(data.uid);
-   {%- for prop in properties %}
+   {%- for prop in particle.properties %}
    {%- if prop.syncMode in ["ON_GHOST_CREATION", "ALWAYS"] %}
    pIt->set{{prop.name | capFirst}}(data.{{prop.name}});
    {%- endif %}
@@ -95,7 +95,7 @@ template< typename T,    // Element type of SendBuffer
 mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::ParticleGhostCopyNotification& obj )
 {
    buf.addDebugMarker( "cn" );
-   {%- for prop in properties %}
+   {%- for prop in particle.properties %}
    {%- if prop.syncMode in ["ON_GHOST_CREATION", "ALWAYS"] %}
    buf << obj.particle_.get{{prop.name | capFirst}}();
    {%- endif %}
@@ -107,7 +107,7 @@ template< typename T>    // Element type  of RecvBuffer
 mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::ParticleGhostCopyNotification::Parameters& objparam )
 {
    buf.readDebugMarker( "cn" );
-   {%- for prop in properties %}
+   {%- for prop in particle.properties %}
    {%- if prop.syncMode in ["ON_GHOST_CREATION", "ALWAYS"] %}
    buf >> objparam.{{prop.name}};
    {%- endif %}

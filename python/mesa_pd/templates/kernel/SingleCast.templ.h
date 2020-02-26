@@ -29,7 +29,7 @@
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/IAccessor.h>
 #include <mesa_pd/data/shape/BaseShape.h>
-{%- for shape in shapes %}
+{%- for shape in particle.shapes %}
 #include <mesa_pd/data/shape/{{shape}}.h>
 {%- endfor %}
 
@@ -73,7 +73,7 @@ auto SingleCast::operator()( size_t idx, Accessor& ac, func& f, Args&&... args )
    using namespace mesa_pd::data;
    switch (ac.getShape(idx)->getShapeType())
    {
-      {%- for shape in shapes %}
+      {%- for shape in particle.shapes %}
       case {{shape}}::SHAPE_TYPE : return f(idx, *static_cast<{{shape}}*>(ac.getShape(idx)), std::forward<Args>(args)...);
       {%- endfor %}
       default : WALBERLA_ABORT("Shape type (" << ac.getShape(idx)->getShapeType() << ") could not be determined!");

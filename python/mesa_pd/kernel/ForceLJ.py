@@ -1,26 +1,24 @@
 # -*- coding: utf-8 -*-
 
-from mesa_pd.accessor import Accessor
-from mesa_pd.utility import generateFile
+from mesa_pd.accessor import create_access
+from mesa_pd.utility import generate_file
+
 
 class ForceLJ:
-   def __init__(self):
-      self.accessor = Accessor()
-      self.accessor.require("position",        "walberla::mesa_pd::Vec3", access="g")
-      self.accessor.require("force",           "walberla::mesa_pd::Vec3", access="r" )
-      self.accessor.require("type",            "uint_t",              access="g")
+    def __init__(self):
+        self.context = {'interface': []}
+        self.context['interface'].append(create_access("position", "walberla::mesa_pd::Vec3", access="g"))
+        self.context['interface'].append(create_access("force", "walberla::mesa_pd::Vec3", access="r"))
+        self.context['interface'].append(create_access("type", "uint_t", access="g"))
 
-   def getRequirements(self):
-      return self.accessor
+    def generate(self, module):
+        ctx = {'module': module, **self.context}
+        ctx["parameters"] = ["epsilon", "sigma"]
 
-   def generate(self, path):
-      context = dict()
-      context["parameters"]       = ["epsilon", "sigma"]
-      context["interface"]        = self.accessor.properties
+        generate_file(module['module_path'], 'kernel/ForceLJ.templ.h', ctx)
 
-      generateFile(path, 'kernel/ForceLJ.templ.h', context)
-
-      context["InterfaceTestName"] = "ForceLJInterfaceCheck"
-      context["KernelInclude"] = "kernel/ForceLJ.h"
-      context["ExplicitInstantiation"] = "template void kernel::ForceLJ::operator()(const size_t p_idx1, const size_t p_idx2, Accessor& ac) const;"
-      generateFile(path, 'tests/CheckInterface.templ.cpp', context, '../../tests/mesa_pd/kernel/interfaces/ForceLJInterfaceCheck.cpp')
+        ctx["InterfaceTestName"] = "ForceLJInterfaceCheck"
+        ctx["KernelInclude"] = "kernel/ForceLJ.h"
+        ctx["ExplicitInstantiation"] = "template void kernel::ForceLJ::operator()(const size_t p_idx1, const size_t p_idx2, Accessor& ac) const;"
+        generate_file(module['test_path'], 'tests/CheckInterface.templ.cpp', ctx,
+                      'kernel/interfaces/ForceLJInterfaceCheck.cpp')

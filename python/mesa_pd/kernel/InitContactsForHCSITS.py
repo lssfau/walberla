@@ -1,28 +1,40 @@
 # -*- coding: utf-8 -*-
 
-from mesa_pd.accessor import Accessor
-from ..Container import Container
-from mesa_pd.utility import generateFile
-
-class InitContactsForHCSITS(Container):
-   def __init__(self):
-      super().__init__()
-      self.addProperty("erp", "real_t", defValue = "real_t(0.8)")
-      self.addProperty("maximumPenetration", "real_t", defValue ="0")
-
-      self.paccessor = Accessor()
-      self.paccessor.require("uid",             "walberla::id_t",                                    access="g")
-      self.paccessor.require("position",        "walberla::mesa_pd::Vec3",                           access="g")
-      self.paccessor.require("invInertia",      "walberla::mesa_pd::Mat3",                           access="g" )
-      self.paccessor.require("invMass",         "walberla::real_t",                                  access="g" )
+from mesa_pd.accessor import create_access
+from mesa_pd.utility import generate_file
 
 
-   def getRequirements(self):
-      return self.paccessor
+def create_property(name, type, defValue=""):
+    """
+    Parameters
+    ----------
+    name : str
+       name of the property
+    type : str
+       type of the property
+    defValue : str
+       default value the property should be initialized with
+    """
 
-   def generate(self, path):
-      context = dict()
-      context["properties"]      = self.properties
-      context["material_parameters"] = ["friction"]
-      context["interface"]        = self.paccessor.properties
-      generateFile(path, 'kernel/InitContactsForHCSITS.templ.h', context)
+    return {'name': name, 'type': type, 'defValue': defValue}
+
+
+class InitContactsForHCSITS:
+    def __init__(self):
+        self.context = {'properties': [], 'interface': []}
+
+        self.context['properties'].append(create_property("erp", "real_t", defValue="real_t(0.8)"))
+        self.context['properties'].append(create_property("maximumPenetration", "real_t", defValue="0"))
+
+        self.context['interface'].append(create_access("uid", "walberla::id_t", access="g"))
+        self.context['interface'].append(create_access("position", "walberla::mesa_pd::Vec3", access="g"))
+        self.context['interface'].append(create_access("invInertia", "walberla::mesa_pd::Mat3", access="g"))
+        self.context['interface'].append(create_access("invMass", "walberla::real_t", access="g"))
+
+    def getRequirements(self):
+        return self.paccessor
+
+    def generate(self, module):
+        ctx = {'module': module, **self.context}
+        ctx["material_parameters"] = ["friction"]
+        generate_file(module['module_path'], 'kernel/InitContactsForHCSITS.templ.h', ctx)

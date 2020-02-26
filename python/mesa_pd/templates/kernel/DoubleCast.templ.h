@@ -29,7 +29,7 @@
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/IAccessor.h>
 #include <mesa_pd/data/shape/BaseShape.h>
-{%- for shape in shapes %}
+{%- for shape in particle.shapes %}
 #include <mesa_pd/data/shape/{{shape}}.h>
 {%- endfor %}
 
@@ -74,11 +74,11 @@ auto DoubleCast::operator()( size_t idx, size_t idy, Accessor& ac, func& f, Args
 
    switch (ac.getShape(idx)->getShapeType())
    {
-      {%- for shape1 in shapes %}
+      {%- for shape1 in particle.shapes %}
       case {{shape1}}::SHAPE_TYPE :
          switch (ac.getShape(idy)->getShapeType())
          {
-            {%- for shape2 in shapes %}
+            {%- for shape2 in particle.shapes %}
             case {{shape2}}::SHAPE_TYPE : return f(idx,
                                                    idy,
                                                    *static_cast<{{shape1}}*>(ac.getShape(idx)),

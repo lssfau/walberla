@@ -77,14 +77,14 @@ public:
       using flags_type = walberla::mesa_pd::data::particle_flags::FlagT;
       using owner_type = int;
       using ghostOwners_type = std::unordered_set<walberla::mpi::MPIRank>;
-      using shapeID_type = size_t;
-      using rotation_type = walberla::mesa_pd::Rot3;
-      using angularVelocity_type = walberla::mesa_pd::Vec3;
-      using torque_type = walberla::mesa_pd::Vec3;
       using linearVelocity_type = walberla::mesa_pd::Vec3;
       using invMass_type = walberla::real_t;
       using force_type = walberla::mesa_pd::Vec3;
       using oldForce_type = walberla::mesa_pd::Vec3;
+      using shapeID_type = size_t;
+      using rotation_type = walberla::mesa_pd::Rot3;
+      using angularVelocity_type = walberla::mesa_pd::Vec3;
+      using torque_type = walberla::mesa_pd::Vec3;
       using oldTorque_type = walberla::mesa_pd::Vec3;
       using currentBlock_type = blockforest::BlockID;
       using type_type = uint_t;
@@ -126,22 +126,6 @@ public:
       ghostOwners_type& getGhostOwnersRef() {return storage_.getGhostOwnersRef(i_);}
       void setGhostOwners(ghostOwners_type const & v) { storage_.setGhostOwners(i_, v);}
       
-      shapeID_type const & getShapeID() const {return storage_.getShapeID(i_);}
-      shapeID_type& getShapeIDRef() {return storage_.getShapeIDRef(i_);}
-      void setShapeID(shapeID_type const & v) { storage_.setShapeID(i_, v);}
-      
-      rotation_type const & getRotation() const {return storage_.getRotation(i_);}
-      rotation_type& getRotationRef() {return storage_.getRotationRef(i_);}
-      void setRotation(rotation_type const & v) { storage_.setRotation(i_, v);}
-      
-      angularVelocity_type const & getAngularVelocity() const {return storage_.getAngularVelocity(i_);}
-      angularVelocity_type& getAngularVelocityRef() {return storage_.getAngularVelocityRef(i_);}
-      void setAngularVelocity(angularVelocity_type const & v) { storage_.setAngularVelocity(i_, v);}
-      
-      torque_type const & getTorque() const {return storage_.getTorque(i_);}
-      torque_type& getTorqueRef() {return storage_.getTorqueRef(i_);}
-      void setTorque(torque_type const & v) { storage_.setTorque(i_, v);}
-      
       linearVelocity_type const & getLinearVelocity() const {return storage_.getLinearVelocity(i_);}
       linearVelocity_type& getLinearVelocityRef() {return storage_.getLinearVelocityRef(i_);}
       void setLinearVelocity(linearVelocity_type const & v) { storage_.setLinearVelocity(i_, v);}
@@ -157,6 +141,22 @@ public:
       oldForce_type const & getOldForce() const {return storage_.getOldForce(i_);}
       oldForce_type& getOldForceRef() {return storage_.getOldForceRef(i_);}
       void setOldForce(oldForce_type const & v) { storage_.setOldForce(i_, v);}
+      
+      shapeID_type const & getShapeID() const {return storage_.getShapeID(i_);}
+      shapeID_type& getShapeIDRef() {return storage_.getShapeIDRef(i_);}
+      void setShapeID(shapeID_type const & v) { storage_.setShapeID(i_, v);}
+      
+      rotation_type const & getRotation() const {return storage_.getRotation(i_);}
+      rotation_type& getRotationRef() {return storage_.getRotationRef(i_);}
+      void setRotation(rotation_type const & v) { storage_.setRotation(i_, v);}
+      
+      angularVelocity_type const & getAngularVelocity() const {return storage_.getAngularVelocity(i_);}
+      angularVelocity_type& getAngularVelocityRef() {return storage_.getAngularVelocityRef(i_);}
+      void setAngularVelocity(angularVelocity_type const & v) { storage_.setAngularVelocity(i_, v);}
+      
+      torque_type const & getTorque() const {return storage_.getTorque(i_);}
+      torque_type& getTorqueRef() {return storage_.getTorqueRef(i_);}
+      void setTorque(torque_type const & v) { storage_.setTorque(i_, v);}
       
       oldTorque_type const & getOldTorque() const {return storage_.getOldTorque(i_);}
       oldTorque_type& getOldTorqueRef() {return storage_.getOldTorqueRef(i_);}
@@ -284,14 +284,14 @@ public:
    using flags_type = walberla::mesa_pd::data::particle_flags::FlagT;
    using owner_type = int;
    using ghostOwners_type = std::unordered_set<walberla::mpi::MPIRank>;
-   using shapeID_type = size_t;
-   using rotation_type = walberla::mesa_pd::Rot3;
-   using angularVelocity_type = walberla::mesa_pd::Vec3;
-   using torque_type = walberla::mesa_pd::Vec3;
    using linearVelocity_type = walberla::mesa_pd::Vec3;
    using invMass_type = walberla::real_t;
    using force_type = walberla::mesa_pd::Vec3;
    using oldForce_type = walberla::mesa_pd::Vec3;
+   using shapeID_type = size_t;
+   using rotation_type = walberla::mesa_pd::Rot3;
+   using angularVelocity_type = walberla::mesa_pd::Vec3;
+   using torque_type = walberla::mesa_pd::Vec3;
    using oldTorque_type = walberla::mesa_pd::Vec3;
    using currentBlock_type = blockforest::BlockID;
    using type_type = uint_t;
@@ -333,22 +333,6 @@ public:
    ghostOwners_type& getGhostOwnersRef(const size_t idx) {return ghostOwners_[idx];}
    void setGhostOwners(const size_t idx, ghostOwners_type const & v) { ghostOwners_[idx] = v; }
    
-   shapeID_type const & getShapeID(const size_t idx) const {return shapeID_[idx];}
-   shapeID_type& getShapeIDRef(const size_t idx) {return shapeID_[idx];}
-   void setShapeID(const size_t idx, shapeID_type const & v) { shapeID_[idx] = v; }
-   
-   rotation_type const & getRotation(const size_t idx) const {return rotation_[idx];}
-   rotation_type& getRotationRef(const size_t idx) {return rotation_[idx];}
-   void setRotation(const size_t idx, rotation_type const & v) { rotation_[idx] = v; }
-   
-   angularVelocity_type const & getAngularVelocity(const size_t idx) const {return angularVelocity_[idx];}
-   angularVelocity_type& getAngularVelocityRef(const size_t idx) {return angularVelocity_[idx];}
-   void setAngularVelocity(const size_t idx, angularVelocity_type const & v) { angularVelocity_[idx] = v; }
-   
-   torque_type const & getTorque(const size_t idx) const {return torque_[idx];}
-   torque_type& getTorqueRef(const size_t idx) {return torque_[idx];}
-   void setTorque(const size_t idx, torque_type const & v) { torque_[idx] = v; }
-   
    linearVelocity_type const & getLinearVelocity(const size_t idx) const {return linearVelocity_[idx];}
    linearVelocity_type& getLinearVelocityRef(const size_t idx) {return linearVelocity_[idx];}
    void setLinearVelocity(const size_t idx, linearVelocity_type const & v) { linearVelocity_[idx] = v; }
@@ -364,6 +348,22 @@ public:
    oldForce_type const & getOldForce(const size_t idx) const {return oldForce_[idx];}
    oldForce_type& getOldForceRef(const size_t idx) {return oldForce_[idx];}
    void setOldForce(const size_t idx, oldForce_type const & v) { oldForce_[idx] = v; }
+   
+   shapeID_type const & getShapeID(const size_t idx) const {return shapeID_[idx];}
+   shapeID_type& getShapeIDRef(const size_t idx) {return shapeID_[idx];}
+   void setShapeID(const size_t idx, shapeID_type const & v) { shapeID_[idx] = v; }
+   
+   rotation_type const & getRotation(const size_t idx) const {return rotation_[idx];}
+   rotation_type& getRotationRef(const size_t idx) {return rotation_[idx];}
+   void setRotation(const size_t idx, rotation_type const & v) { rotation_[idx] = v; }
+   
+   angularVelocity_type const & getAngularVelocity(const size_t idx) const {return angularVelocity_[idx];}
+   angularVelocity_type& getAngularVelocityRef(const size_t idx) {return angularVelocity_[idx];}
+   void setAngularVelocity(const size_t idx, angularVelocity_type const & v) { angularVelocity_[idx] = v; }
+   
+   torque_type const & getTorque(const size_t idx) const {return torque_[idx];}
+   torque_type& getTorqueRef(const size_t idx) {return torque_[idx];}
+   void setTorque(const size_t idx, torque_type const & v) { torque_[idx] = v; }
    
    oldTorque_type const & getOldTorque(const size_t idx) const {return oldTorque_[idx];}
    oldTorque_type& getOldTorqueRef(const size_t idx) {return oldTorque_[idx];}
@@ -522,14 +522,14 @@ public:
    std::vector<flags_type> flags_ {};
    std::vector<owner_type> owner_ {};
    std::vector<ghostOwners_type> ghostOwners_ {};
-   std::vector<shapeID_type> shapeID_ {};
-   std::vector<rotation_type> rotation_ {};
-   std::vector<angularVelocity_type> angularVelocity_ {};
-   std::vector<torque_type> torque_ {};
    std::vector<linearVelocity_type> linearVelocity_ {};
    std::vector<invMass_type> invMass_ {};
    std::vector<force_type> force_ {};
    std::vector<oldForce_type> oldForce_ {};
+   std::vector<shapeID_type> shapeID_ {};
+   std::vector<rotation_type> rotation_ {};
+   std::vector<angularVelocity_type> angularVelocity_ {};
+   std::vector<torque_type> torque_ {};
    std::vector<oldTorque_type> oldTorque_ {};
    std::vector<currentBlock_type> currentBlock_ {};
    std::vector<type_type> type_ {};
@@ -560,14 +560,14 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(const ParticleSt
    getFlagsRef() = rhs.getFlags();
    getOwnerRef() = rhs.getOwner();
    getGhostOwnersRef() = rhs.getGhostOwners();
-   getShapeIDRef() = rhs.getShapeID();
-   getRotationRef() = rhs.getRotation();
-   getAngularVelocityRef() = rhs.getAngularVelocity();
-   getTorqueRef() = rhs.getTorque();
    getLinearVelocityRef() = rhs.getLinearVelocity();
    getInvMassRef() = rhs.getInvMass();
    getForceRef() = rhs.getForce();
    getOldForceRef() = rhs.getOldForce();
+   getShapeIDRef() = rhs.getShapeID();
+   getRotationRef() = rhs.getRotation();
+   getAngularVelocityRef() = rhs.getAngularVelocity();
+   getTorqueRef() = rhs.getTorque();
    getOldTorqueRef() = rhs.getOldTorque();
    getCurrentBlockRef() = rhs.getCurrentBlock();
    getTypeRef() = rhs.getType();
@@ -595,14 +595,14 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(ParticleStorage:
    getFlagsRef() = std::move(rhs.getFlagsRef());
    getOwnerRef() = std::move(rhs.getOwnerRef());
    getGhostOwnersRef() = std::move(rhs.getGhostOwnersRef());
-   getShapeIDRef() = std::move(rhs.getShapeIDRef());
-   getRotationRef() = std::move(rhs.getRotationRef());
-   getAngularVelocityRef() = std::move(rhs.getAngularVelocityRef());
-   getTorqueRef() = std::move(rhs.getTorqueRef());
    getLinearVelocityRef() = std::move(rhs.getLinearVelocityRef());
    getInvMassRef() = std::move(rhs.getInvMassRef());
    getForceRef() = std::move(rhs.getForceRef());
    getOldForceRef() = std::move(rhs.getOldForceRef());
+   getShapeIDRef() = std::move(rhs.getShapeIDRef());
+   getRotationRef() = std::move(rhs.getRotationRef());
+   getAngularVelocityRef() = std::move(rhs.getAngularVelocityRef());
+   getTorqueRef() = std::move(rhs.getTorqueRef());
    getOldTorqueRef() = std::move(rhs.getOldTorqueRef());
    getCurrentBlockRef() = std::move(rhs.getCurrentBlockRef());
    getTypeRef() = std::move(rhs.getTypeRef());
@@ -631,14 +631,14 @@ void swap(ParticleStorage::Particle lhs, ParticleStorage::Particle rhs)
    std::swap(lhs.getFlagsRef(), rhs.getFlagsRef());
    std::swap(lhs.getOwnerRef(), rhs.getOwnerRef());
    std::swap(lhs.getGhostOwnersRef(), rhs.getGhostOwnersRef());
-   std::swap(lhs.getShapeIDRef(), rhs.getShapeIDRef());
-   std::swap(lhs.getRotationRef(), rhs.getRotationRef());
-   std::swap(lhs.getAngularVelocityRef(), rhs.getAngularVelocityRef());
-   std::swap(lhs.getTorqueRef(), rhs.getTorqueRef());
    std::swap(lhs.getLinearVelocityRef(), rhs.getLinearVelocityRef());
    std::swap(lhs.getInvMassRef(), rhs.getInvMassRef());
    std::swap(lhs.getForceRef(), rhs.getForceRef());
    std::swap(lhs.getOldForceRef(), rhs.getOldForceRef());
+   std::swap(lhs.getShapeIDRef(), rhs.getShapeIDRef());
+   std::swap(lhs.getRotationRef(), rhs.getRotationRef());
+   std::swap(lhs.getAngularVelocityRef(), rhs.getAngularVelocityRef());
+   std::swap(lhs.getTorqueRef(), rhs.getTorqueRef());
    std::swap(lhs.getOldTorqueRef(), rhs.getOldTorqueRef());
    std::swap(lhs.getCurrentBlockRef(), rhs.getCurrentBlockRef());
    std::swap(lhs.getTypeRef(), rhs.getTypeRef());
@@ -667,14 +667,14 @@ std::ostream& operator<<( std::ostream& os, const ParticleStorage::Particle& p )
          "flags               : " << p.getFlags() << "\n" <<
          "owner               : " << p.getOwner() << "\n" <<
          "ghostOwners         : " << p.getGhostOwners() << "\n" <<
-         "shapeID             : " << p.getShapeID() << "\n" <<
-         "rotation            : " << p.getRotation() << "\n" <<
-         "angularVelocity     : " << p.getAngularVelocity() << "\n" <<
-         "torque              : " << p.getTorque() << "\n" <<
          "linearVelocity      : " << p.getLinearVelocity() << "\n" <<
          "invMass             : " << p.getInvMass() << "\n" <<
          "force               : " << p.getForce() << "\n" <<
          "oldForce            : " << p.getOldForce() << "\n" <<
+         "shapeID             : " << p.getShapeID() << "\n" <<
+         "rotation            : " << p.getRotation() << "\n" <<
+         "angularVelocity     : " << p.getAngularVelocity() << "\n" <<
+         "torque              : " << p.getTorque() << "\n" <<
          "oldTorque           : " << p.getOldTorque() << "\n" <<
          "currentBlock        : " << p.getCurrentBlock() << "\n" <<
          "type                : " << p.getType() << "\n" <<
@@ -773,14 +773,14 @@ inline ParticleStorage::iterator ParticleStorage::create(const id_t& uid)
    flags_.emplace_back();
    owner_.emplace_back(-1);
    ghostOwners_.emplace_back();
-   shapeID_.emplace_back();
-   rotation_.emplace_back();
-   angularVelocity_.emplace_back(real_t(0));
-   torque_.emplace_back(real_t(0));
    linearVelocity_.emplace_back(real_t(0));
    invMass_.emplace_back(real_t(1));
    force_.emplace_back(real_t(0));
    oldForce_.emplace_back(real_t(0));
+   shapeID_.emplace_back();
+   rotation_.emplace_back();
+   angularVelocity_.emplace_back(real_t(0));
+   torque_.emplace_back(real_t(0));
    oldTorque_.emplace_back(real_t(0));
    currentBlock_.emplace_back();
    type_.emplace_back(0);
@@ -834,14 +834,14 @@ inline ParticleStorage::iterator ParticleStorage::erase(iterator& it)
    flags_.pop_back();
    owner_.pop_back();
    ghostOwners_.pop_back();
-   shapeID_.pop_back();
-   rotation_.pop_back();
-   angularVelocity_.pop_back();
-   torque_.pop_back();
    linearVelocity_.pop_back();
    invMass_.pop_back();
    force_.pop_back();
    oldForce_.pop_back();
+   shapeID_.pop_back();
+   rotation_.pop_back();
+   angularVelocity_.pop_back();
+   torque_.pop_back();
    oldTorque_.pop_back();
    currentBlock_.pop_back();
    type_.pop_back();
@@ -882,14 +882,14 @@ inline void ParticleStorage::reserve(const size_t size)
    flags_.reserve(size);
    owner_.reserve(size);
    ghostOwners_.reserve(size);
-   shapeID_.reserve(size);
-   rotation_.reserve(size);
-   angularVelocity_.reserve(size);
-   torque_.reserve(size);
    linearVelocity_.reserve(size);
    invMass_.reserve(size);
    force_.reserve(size);
    oldForce_.reserve(size);
+   shapeID_.reserve(size);
+   rotation_.reserve(size);
+   angularVelocity_.reserve(size);
+   torque_.reserve(size);
    oldTorque_.reserve(size);
    currentBlock_.reserve(size);
    type_.reserve(size);
@@ -915,14 +915,14 @@ inline void ParticleStorage::clear()
    flags_.clear();
    owner_.clear();
    ghostOwners_.clear();
-   shapeID_.clear();
-   rotation_.clear();
-   angularVelocity_.clear();
-   torque_.clear();
    linearVelocity_.clear();
    invMass_.clear();
    force_.clear();
    oldForce_.clear();
+   shapeID_.clear();
+   rotation_.clear();
+   angularVelocity_.clear();
+   torque_.clear();
    oldTorque_.clear();
    currentBlock_.clear();
    type_.clear();
@@ -949,14 +949,14 @@ inline size_t ParticleStorage::size() const
    //WALBERLA_ASSERT_EQUAL( uid_.size(), flags.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), owner.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), ghostOwners.size() );
-   //WALBERLA_ASSERT_EQUAL( uid_.size(), shapeID.size() );
-   //WALBERLA_ASSERT_EQUAL( uid_.size(), rotation.size() );
-   //WALBERLA_ASSERT_EQUAL( uid_.size(), angularVelocity.size() );
-   //WALBERLA_ASSERT_EQUAL( uid_.size(), torque.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), linearVelocity.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), invMass.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), force.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldForce.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), shapeID.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), rotation.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), angularVelocity.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), torque.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldTorque.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), currentBlock.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), type.size() );
@@ -1210,42 +1210,6 @@ public:
    std::unordered_set<walberla::mpi::MPIRank> const & operator()(const data::Particle& p) const {return p.getGhostOwners();}
 };
 ///Predicate that selects a certain property from a Particle
-class SelectParticleShapeID
-{
-public:
-   using return_type = size_t;
-   size_t& operator()(data::Particle& p) const {return p.getShapeIDRef();}
-   size_t& operator()(data::Particle&& p) const {return p.getShapeIDRef();}
-   size_t const & operator()(const data::Particle& p) const {return p.getShapeID();}
-};
-///Predicate that selects a certain property from a Particle
-class SelectParticleRotation
-{
-public:
-   using return_type = walberla::mesa_pd::Rot3;
-   walberla::mesa_pd::Rot3& operator()(data::Particle& p) const {return p.getRotationRef();}
-   walberla::mesa_pd::Rot3& operator()(data::Particle&& p) const {return p.getRotationRef();}
-   walberla::mesa_pd::Rot3 const & operator()(const data::Particle& p) const {return p.getRotation();}
-};
-///Predicate that selects a certain property from a Particle
-class SelectParticleAngularVelocity
-{
-public:
-   using return_type = walberla::mesa_pd::Vec3;
-   walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getAngularVelocityRef();}
-   walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getAngularVelocityRef();}
-   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getAngularVelocity();}
-};
-///Predicate that selects a certain property from a Particle
-class SelectParticleTorque
-{
-public:
-   using return_type = walberla::mesa_pd::Vec3;
-   walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getTorqueRef();}
-   walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getTorqueRef();}
-   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getTorque();}
-};
-///Predicate that selects a certain property from a Particle
 class SelectParticleLinearVelocity
 {
 public:
@@ -1280,6 +1244,42 @@ public:
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getOldForceRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getOldForceRef();}
    walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getOldForce();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleShapeID
+{
+public:
+   using return_type = size_t;
+   size_t& operator()(data::Particle& p) const {return p.getShapeIDRef();}
+   size_t& operator()(data::Particle&& p) const {return p.getShapeIDRef();}
+   size_t const & operator()(const data::Particle& p) const {return p.getShapeID();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleRotation
+{
+public:
+   using return_type = walberla::mesa_pd::Rot3;
+   walberla::mesa_pd::Rot3& operator()(data::Particle& p) const {return p.getRotationRef();}
+   walberla::mesa_pd::Rot3& operator()(data::Particle&& p) const {return p.getRotationRef();}
+   walberla::mesa_pd::Rot3 const & operator()(const data::Particle& p) const {return p.getRotation();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleAngularVelocity
+{
+public:
+   using return_type = walberla::mesa_pd::Vec3;
+   walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getAngularVelocityRef();}
+   walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getAngularVelocityRef();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getAngularVelocity();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleTorque
+{
+public:
+   using return_type = walberla::mesa_pd::Vec3;
+   walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getTorqueRef();}
+   walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getTorqueRef();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getTorque();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleOldTorque

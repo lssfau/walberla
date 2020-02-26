@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from mesa_pd.accessor import Accessor
-from mesa_pd.utility import generateFile
+from mesa_pd.accessor import create_access
+from mesa_pd.utility import generate_file
+
 
 class ClearNextNeighborSync:
-   def __init__(self):
-      self.accessor = Accessor()
-      self.accessor.require("flags",        "walberla::mesa_pd::data::particle_flags::FlagT", access="g")
-      self.accessor.require("ghostOwners",  "std::vector<int>",                           access="r")
+    def __init__(self):
+        self.context = {'properties': [], 'interface': []}
 
-   def getRequirements(self):
-      return self.accessor
+        self.context['interface'].append(
+            create_access("flags", "walberla::mesa_pd::data::particle_flags::FlagT", access="g"))
+        self.context['interface'].append(create_access("ghostOwners", "std::vector<int>", access="r"))
 
-   def generate(self, path):
-      context = dict()
-      context["interface"] = self.accessor.properties
-      generateFile(path, 'mpi/ClearNextNeighborSync.templ.h', context)
+    def generate(self, module):
+        ctx = {'module': module, **self.context}
+        generate_file(module['module_path'], 'mpi/ClearNextNeighborSync.templ.h', ctx)
