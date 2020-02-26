@@ -55,6 +55,7 @@
 #include "lbm_mesapd_coupling/utility/ParticleSelector.h"
 #include "lbm_mesapd_coupling/DataTypes.h"
 #include "lbm_mesapd_coupling/utility/AverageHydrodynamicForceTorqueKernel.h"
+#include "lbm_mesapd_coupling/utility/InitializeHydrodynamicForceTorqueForAveragingKernel.h"
 #include "lbm_mesapd_coupling/utility/ResetHydrodynamicForceTorqueKernel.h"
 #include "lbm_mesapd_coupling/utility/OmegaBulkAdaption.h"
 
@@ -714,6 +715,11 @@ int main( int argc, char **argv )
       timeloop.singleStep( timeloopTiming );
 
       // average force
+      if( timestep == 0 )
+      {
+         lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
+         ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+      }
       ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, averageHydrodynamicForceTorque, *accessor );
 
       // evaluation

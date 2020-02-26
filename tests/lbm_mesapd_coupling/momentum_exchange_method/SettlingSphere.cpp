@@ -55,6 +55,7 @@
 #include "lbm_mesapd_coupling/momentum_exchange_method/reconstruction/PdfReconstructionManager.h"
 #include "lbm_mesapd_coupling/utility/AddForceOnParticlesKernel.h"
 #include "lbm_mesapd_coupling/utility/ParticleSelector.h"
+#include "lbm_mesapd_coupling/utility/InitializeHydrodynamicForceTorqueForAveragingKernel.h"
 #include "lbm_mesapd_coupling/utility/AverageHydrodynamicForceTorqueKernel.h"
 #include "lbm_mesapd_coupling/utility/AddHydrodynamicInteractionKernel.h"
 #include "lbm_mesapd_coupling/utility/ResetHydrodynamicForceTorqueKernel.h"
@@ -361,7 +362,7 @@ int main( int argc, char **argv )
 
    //numerical parameters
    uint_t numberOfCellsInHorizontalDirection = uint_t(135);
-   bool averageForceTorqueOverTwoTimSteps = true;
+   bool averageForceTorqueOverTwoTimeSteps = true;
    bool conserveMomentum = false;
    uint_t numRPDSubCycles = uint_t(1);
    bool useVelocityVerlet = false;
@@ -377,7 +378,7 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--fluidType" )           == 0 ) { fluidType = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--numRPDSubCycles" )     == 0 ) { numRPDSubCycles = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--resolution" )          == 0 ) { numberOfCellsInHorizontalDirection = uint_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--noForceAveraging" )    == 0 ) { averageForceTorqueOverTwoTimSteps = false; continue; }
+      if( std::strcmp( argv[i], "--noForceAveraging" )    == 0 ) { averageForceTorqueOverTwoTimeSteps = false; continue; }
       if( std::strcmp( argv[i], "--baseFolder" )          == 0 ) { baseFolder = argv[++i]; continue; }
       if( std::strcmp( argv[i], "--useVV" )               == 0 ) { useVelocityVerlet = true; continue; }
       if( std::strcmp( argv[i], "--useEANReconstructor" ) == 0 ) { useEANReconstructor = true; continue; }
@@ -742,8 +743,13 @@ int main( int argc, char **argv )
 
       timeloopTiming["RPD"].start();
 
-      if( averageForceTorqueOverTwoTimSteps && i!= 0)
+      if( averageForceTorqueOverTwoTimeSteps )
       {
+         if( i == 0 )
+         {
+            lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
+            ps->forEachParticle(useOpenMP, sphereSelector, *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+         }
          ps->forEachParticle(useOpenMP, sphereSelector, *accessor, averageHydrodynamicForceTorque, *accessor );
       }
 
