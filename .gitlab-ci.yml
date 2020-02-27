@@ -376,8 +376,7 @@ intel_19_hybrid:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -394,8 +393,7 @@ intel_19_serial_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -412,8 +410,7 @@ intel_19_mpionly_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -430,8 +427,7 @@ intel_19_hybrid_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -447,13 +443,9 @@ intel_19_hybrid_dbg:
 intel_19_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
-   before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_ENABLE_GUI: 0
    except:
       variables:
@@ -871,8 +863,7 @@ gcc_9_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    stage: pretest
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -888,8 +879,7 @@ gcc_9_serial_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -905,8 +895,7 @@ gcc_9_mpionly_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -922,8 +911,7 @@ gcc_9_hybrid_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -938,13 +926,9 @@ gcc_9_hybrid_dbg:
 gcc_9_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
-   before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_ENABLE_GUI: 0
    except:
       variables:
@@ -1444,8 +1428,7 @@ clang_9.0_hybrid:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_hybrid_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -1461,8 +1444,7 @@ clang_9.0_serial_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_serial_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -1478,8 +1460,7 @@ clang_9.0_mpionly_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_mpionly_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -1495,8 +1476,7 @@ clang_9.0_hybrid_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
+      - pip3 install lbmpy
    variables:
       <<: *build_hybrid_dbg_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -1512,13 +1492,9 @@ clang_9.0_hybrid_dbg_sp:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    stage: pretest
-   before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy_walberla.git
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
-      WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_ENABLE_GUI: 0
    except:
       variables:
