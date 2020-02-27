@@ -705,8 +705,8 @@ GenericAABB< T > GenericAABB< T >::getExtended( const vector_type & eps ) const
    vector_type newMinCorner( minCorner_ - eps );
    return createFromMinMaxCorner( newMinCorner[0], newMinCorner[1], newMinCorner[2],
                                   std::max( newMinCorner[0], maxCorner_[0] + eps[0] ),
-                                  std::max( newMinCorner[1], maxCorner_[1] + eps[0] ),
-                                  std::max( newMinCorner[2], maxCorner_[2] + eps[0] ) );
+                                  std::max( newMinCorner[1], maxCorner_[1] + eps[1] ),
+                                  std::max( newMinCorner[2], maxCorner_[2] + eps[2] ) );
 }
 
 
