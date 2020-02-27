@@ -105,6 +105,7 @@ if __name__ == '__main__':
     mpd.add(kernel.VelocityVerletWithShape())
 
     mpd.add(mpi.BroadcastProperty())
+    mpd.add(mpi.ClearGhostOwnerSync())
     mpd.add(mpi.ClearNextNeighborSync())
     mpd.add(mpi.Notifications(ps))
     mpd.add(mpi.ReduceContactHistory())

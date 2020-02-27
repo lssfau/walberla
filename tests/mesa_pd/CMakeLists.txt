@@ -161,6 +161,12 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_VelocityVerletWithShape )
 waLBerla_compile_test( NAME   MESA_PD_MPI_BroadcastProperty FILES mpi/BroadcastProperty.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_MPI_BroadcastProperty PROCESSES 8 )
 
+waLBerla_compile_test( NAME   MESA_PD_MPI_ClearGhostOwnerSync FILES mpi/ClearGhostOwnerSync.cpp DEPENDS blockforest core)
+waLBerla_execute_test( NAME   MESA_PD_MPI_ClearGhostOwnerSync PROCESSES 8 )
+
+waLBerla_compile_test( NAME   MESA_PD_MPI_ClearNextNeighborSync FILES mpi/ClearNextNeighborSync.cpp DEPENDS blockforest core )
+waLBerla_execute_test( NAME   MESA_PD_MPI_ClearNextNeighborSync PROCESSES 8 )
+
 waLBerla_compile_test( NAME   MESA_PD_MPI_Notifications FILES mpi/Notifications.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_MPI_Notifications )
 
