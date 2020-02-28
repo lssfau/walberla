@@ -63,7 +63,7 @@ void reset<HeatFluxNotification>(data::Particle& p)
 
 void reduce(data::Particle&& p, const HeatFluxNotification::Parameters& objparam)
 {
-   p.getHeatFluxRef()  += objparam.heatFlux_;
+   p.getHeatFluxRef() += objparam.heatFlux_;
 }
 
 void update(data::Particle&& p, const HeatFluxNotification::Parameters& objparam)
@@ -87,7 +87,7 @@ template< typename T,    // Element type of SendBuffer
           typename G>    // Growth policy of SendBuffer
 mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::HeatFluxNotification& obj )
 {
-   buf.addDebugMarker( "hf" );
+   buf.addDebugMarker( "pn" );
    buf << obj.p_.getUid();
    buf << obj.p_.getHeatFlux();
    return buf;
@@ -96,7 +96,7 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
 template< typename T>    // Element type  of RecvBuffer
 mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::HeatFluxNotification::Parameters& objparam )
 {
-   buf.readDebugMarker( "hf" );
+   buf.readDebugMarker( "pn" );
    buf >> objparam.uid_;
    buf >> objparam.heatFlux_;
    return buf;

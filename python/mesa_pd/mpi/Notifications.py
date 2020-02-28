@@ -9,8 +9,6 @@ class Notifications:
    def generate(self, module):
       ctx = {'module': module, 'particle' : self.ps.get_context()}
 
-      generate_file(module['module_path'], 'mpi/notifications/ForceTorqueNotification.templ.h', ctx)
-      generate_file(module['module_path'], 'mpi/notifications/HeatFluxNotification.templ.h', ctx)
       generate_file(module['module_path'], 'mpi/notifications/ParseMessage.templ.h', ctx)
       generate_file(module['module_path'], 'mpi/notifications/ParticleCopyNotification.templ.h', ctx)
       generate_file(module['module_path'], 'mpi/notifications/ParticleGhostCopyNotification.templ.h', ctx)

@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ParticlePropertyNotification.h
+//! \file {{name}}.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -41,38 +41,42 @@ namespace mesa_pd {
 /**
  * Trasmits force and torque information.
  */
-class ForceTorqueNotification
+class {{name}}
 {
 public:
    struct Parameters
    {
       id_t uid_;
-      Vec3 force_;
-      Vec3 torque_;
+      {%- for prop in properties %}
+      {{prop.type}} {{prop.name}}_;
+      {%- endfor %}
    };
 
-   inline explicit ForceTorqueNotification( const data::Particle& p ) : p_(p) {}
+   inline explicit {{name}}( const data::Particle& p ) : p_(p) {}
 
    const data::Particle& p_;
 };
 
 template <>
-void reset<ForceTorqueNotification>(data::Particle& p)
+void reset<{{name}}>(data::Particle& p)
 {
-   p.setForce(  Vec3(real_t(0)) );
-   p.setTorque( Vec3(real_t(0)) );
+   {%- for prop in properties %}
+   p.set{{prop.name | capFirst}}( {{prop.resetValue}} );
+   {%- endfor %}
 }
 
-void reduce(data::Particle&& p, const ForceTorqueNotification::Parameters& objparam)
+void reduce(data::Particle&& p, const {{name}}::Parameters& objparam)
 {
-   p.getForceRef()  += objparam.force_;
-   p.getTorqueRef() += objparam.torque_;
+   {%- for prop in properties %}
+   p.get{{prop.name | capFirst}}Ref() += objparam.{{prop.name}}_;
+   {%- endfor %}
 }
 
-void update(data::Particle&& p, const ForceTorqueNotification::Parameters& objparam)
+void update(data::Particle&& p, const {{name}}::Parameters& objparam)
 {
-   p.setForce(  objparam.force_  );
-   p.setTorque( objparam.torque_ );
+   {%- for prop in properties %}
+   p.set{{prop.name | capFirst}}( objparam.{{prop.name}}_ );
+   {%- endfor %}
 }
 
 }  // namespace mesa_pd
@@ -89,31 +93,34 @@ namespace mpi {
 
 template< typename T,    // Element type of SendBuffer
           typename G>    // Growth policy of SendBuffer
-mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::ForceTorqueNotification& obj )
+mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::{{name}}& obj )
 {
-   buf.addDebugMarker( "ft" );
+   buf.addDebugMarker( "pn" );
    buf << obj.p_.getUid();
-   buf << obj.p_.getForce();
-   buf << obj.p_.getTorque();
+   {%- for prop in properties %}
+   buf << obj.p_.get{{prop.name | capFirst}}();
+   {%- endfor %}
    return buf;
 }
 
 template< typename T>    // Element type  of RecvBuffer
-mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::ForceTorqueNotification::Parameters& objparam )
+mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::{{name}}::Parameters& objparam )
 {
-   buf.readDebugMarker( "ft" );
+   buf.readDebugMarker( "pn" );
    buf >> objparam.uid_;
-   buf >> objparam.force_;
-   buf >> objparam.torque_;
+   {%- for prop in properties %}
+   buf >> objparam.{{prop.name}}_;
+   {%- endfor %}
    return buf;
 }
 
 template< >
-struct BufferSizeTrait< mesa_pd::ForceTorqueNotification > {
+struct BufferSizeTrait< mesa_pd::{{name}} > {
    static const bool constantSize = true;
    static const uint_t size = BufferSizeTrait<id_t>::size +
-                              BufferSizeTrait<mesa_pd::Vec3>::size +
-                              BufferSizeTrait<mesa_pd::Vec3>::size +
+   {%- for prop in properties %}
+                              BufferSizeTrait<{{prop.type}}>::size +
+   {%- endfor %}
                               mpi::BUFFER_DEBUG_OVERHEAD;
 };
 
