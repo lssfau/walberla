@@ -152,23 +152,29 @@ with CodeGeneration() as ctx:
 
     vec = { 'assume_aligned': True, 'assume_inner_stride_one': True}
 
+    # check if openmp is enabled in cmake
+    if ctx.openmp:
+        openmp_enabled = True
+    else:
+        openmp_enabled = False
+
     # Sweeps
     vec['nontemporal'] = opts['two_field_nt_stores']
     generate_sweep(ctx, 'GenLbKernel', update_rule_two_field, field_swaps=[('pdfs', 'pdfs_tmp')],
                    cpu_vectorize_info=vec)
     vec['nontemporal'] = opts['aa_even_nt_stores']
     generate_sweep(ctx, 'GenLbKernelAAEven', update_rule_aa_even, cpu_vectorize_info=vec,
-                   cpu_openmp=True, ghost_layers=1)
+                   cpu_openmp=openmp_enabled, ghost_layers=1)
     vec['nontemporal'] = opts['aa_odd_nt_stores']
     generate_sweep(ctx, 'GenLbKernelAAOdd', update_rule_aa_odd, cpu_vectorize_info=vec,
-                   cpu_openmp=True, ghost_layers=1)
+                   cpu_openmp=openmp_enabled, ghost_layers=1)
 
     setter_assignments = macroscopic_values_setter(update_rule_two_field.method, velocity=velocity_field.center_vector,
                                                    pdfs=pdfs.center_vector, density=1)
     getter_assignments = macroscopic_values_getter(update_rule_two_field.method, velocity=velocity_field.center_vector,
                                                    pdfs=pdfs.center_vector, density=None)
-    generate_sweep(ctx, 'GenMacroSetter', setter_assignments, cpu_openmp=True)
-    generate_sweep(ctx, 'GenMacroGetter', getter_assignments, cpu_openmp=True)
+    generate_sweep(ctx, 'GenMacroSetter', setter_assignments, cpu_openmp=openmp_enabled)
+    generate_sweep(ctx, 'GenMacroGetter', getter_assignments, cpu_openmp=openmp_enabled)
 
     # Communication
     generate_pack_info_from_kernel(ctx, 'GenPackInfo', update_rule_two_field,
