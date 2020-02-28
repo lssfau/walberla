@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ParticlePropertyNotification.h
+//! \file ForceTorqueNotification.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -47,8 +47,8 @@ public:
    struct Parameters
    {
       id_t uid_;
-      Vec3 force_;
-      Vec3 torque_;
+      mesa_pd::Vec3 force_;
+      mesa_pd::Vec3 torque_;
    };
 
    inline explicit ForceTorqueNotification( const data::Particle& p ) : p_(p) {}
@@ -59,19 +59,19 @@ public:
 template <>
 void reset<ForceTorqueNotification>(data::Particle& p)
 {
-   p.setForce(  Vec3(real_t(0)) );
+   p.setForce( Vec3(real_t(0)) );
    p.setTorque( Vec3(real_t(0)) );
 }
 
 void reduce(data::Particle&& p, const ForceTorqueNotification::Parameters& objparam)
 {
-   p.getForceRef()  += objparam.force_;
+   p.getForceRef() += objparam.force_;
    p.getTorqueRef() += objparam.torque_;
 }
 
 void update(data::Particle&& p, const ForceTorqueNotification::Parameters& objparam)
 {
-   p.setForce(  objparam.force_  );
+   p.setForce( objparam.force_ );
    p.setTorque( objparam.torque_ );
 }
 
@@ -91,7 +91,7 @@ template< typename T,    // Element type of SendBuffer
           typename G>    // Growth policy of SendBuffer
 mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::ForceTorqueNotification& obj )
 {
-   buf.addDebugMarker( "ft" );
+   buf.addDebugMarker( "pn" );
    buf << obj.p_.getUid();
    buf << obj.p_.getForce();
    buf << obj.p_.getTorque();
@@ -101,7 +101,7 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
 template< typename T>    // Element type  of RecvBuffer
 mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::ForceTorqueNotification::Parameters& objparam )
 {
-   buf.readDebugMarker( "ft" );
+   buf.readDebugMarker( "pn" );
    buf >> objparam.uid_;
    buf >> objparam.force_;
    buf >> objparam.torque_;

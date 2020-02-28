@@ -21,6 +21,7 @@
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
 #include <mesa_pd/mpi/notifications/ForceTorqueNotification.h>
+#include <mesa_pd/mpi/notifications/HeatFluxNotification.h>
 #include <mesa_pd/mpi/ReduceProperty.h>
 #include <mesa_pd/mpi/SyncNextNeighbors.h>
 
@@ -86,16 +87,23 @@ void main( int argc, char ** argv )
    if (pIt != ps.end())
    {
       pIt->getForceRef() += Vec3(real_c(walberla::mpi::MPIManager::instance()->rank()));
+      pIt->getTorqueRef() += Vec3(real_c(walberla::mpi::MPIManager::instance()->rank()));
+      pIt->getHeatFluxRef() += real_c(walberla::mpi::MPIManager::instance()->rank());
    }
 
    RP.operator()<ForceTorqueNotification>(ps);
+   RP.operator()<HeatFluxNotification>(ps);
 
    if (walberla::mpi::MPIManager::instance()->rank() == 0)
    {
       WALBERLA_CHECK_FLOAT_EQUAL( pIt->getForce(), Vec3(real_t(28)) );
+      WALBERLA_CHECK_FLOAT_EQUAL( pIt->getTorque(), Vec3(real_t(28)) );
+      WALBERLA_CHECK_FLOAT_EQUAL( pIt->getHeatFlux(), real_t(28) );
    } else
    {
       WALBERLA_CHECK_FLOAT_EQUAL( pIt->getForce(), Vec3(0) );
+      WALBERLA_CHECK_FLOAT_EQUAL( pIt->getTorque(), Vec3(0) );
+      WALBERLA_CHECK_FLOAT_EQUAL( pIt->getHeatFlux(), real_t(0) );
    }
 }
 
