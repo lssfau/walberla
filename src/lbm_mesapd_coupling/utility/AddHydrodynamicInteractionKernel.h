@@ -30,7 +30,8 @@ namespace lbm_mesapd_coupling {
 /*
  * Kernel that adds the current hydrodynamic forces and torques onto the particles as forces and torques
  *
- * Should usually be carried out on local and ghost particles.
+ * When reducing hyd. force/torque before, this should usually be carried out only on local particles. (recommended)
+ * If not, it must be carried out on local and ghost particles.
  */
 class AddHydrodynamicInteractionKernel
 {

@@ -85,11 +85,13 @@
 #include "mesa_pd/kernel/NonLinearSpringDashpot.h"
 #include "mesa_pd/kernel/ParticleSelector.h"
 #include "mesa_pd/kernel/VelocityVerletWithShape.h"
+#include "mesa_pd/mpi/ClearNextNeighborSync.h"
 #include "mesa_pd/mpi/SyncNextNeighbors.h"
 #include "mesa_pd/mpi/ReduceProperty.h"
 #include "mesa_pd/mpi/ReduceContactHistory.h"
 #include "mesa_pd/mpi/ContactFilter.h"
 #include "mesa_pd/mpi/notifications/ForceTorqueNotification.h"
+#include "mesa_pd/mpi/notifications/HydrodynamicForceTorqueNotification.h"
 #include "mesa_pd/vtk/ParticleVtkOutput.h"
 
 #include "timeloop/SweepTimeloop.h"
@@ -539,7 +541,7 @@ real_t getAverageDensityInSystem(const shared_ptr<StructuredBlockStorage> & bloc
 //////////
 
 //*******************************************************************************************************************
-/*!\brief PHYSICAL Test case of a sphere settling and colliding with a wall submerged in a viscous fluid.
+/*!\brief PHYSICAL test case of a sphere settling and colliding with a wall submerged in a viscous fluid.
  *
  * The trajectory of the bouncing sphere is logged and compared to reference experiments.
  *
@@ -802,13 +804,28 @@ int main( int argc, char **argv )
                            "Unmatching domain decomposition in direction " << i << "!");
    }
 
-   auto blocks = blockforest::createUniformBlockGrid( numberOfBlocksPerDirection[0], numberOfBlocksPerDirection[1], numberOfBlocksPerDirection[2],
+   shared_ptr< StructuredBlockForest > blocks;
+   if( readFromCheckPointFile )
+   {
+      WALBERLA_LOG_INFO_ON_ROOT("Reading block forest from file!");
+      blocks = blockforest::createUniformBlockGrid(checkPointFileName+"_forest.txt", cellsPerBlockPerDirection[0], cellsPerBlockPerDirection[1], cellsPerBlockPerDirection[2], false);
+   }
+   else
+   {
+      blocks = blockforest::createUniformBlockGrid( numberOfBlocksPerDirection[0], numberOfBlocksPerDirection[1], numberOfBlocksPerDirection[2],
                                                       cellsPerBlockPerDirection[0], cellsPerBlockPerDirection[1], cellsPerBlockPerDirection[2], dx,
                                                       0, false, false,
                                                       true, true, false, //periodicity
                                                       false );
-
-   WALBERLA_LOG_INFO_ON_ROOT("Domain decomposition:");
+   
+      if(writeCheckPointFile)
+      {
+         WALBERLA_LOG_INFO_ON_ROOT("Writing block forest to file!");
+         blocks->getBlockForest().saveToFile(checkPointFileName+"_forest.txt");
+      }
+   }
+   
+   WALBERLA_LOG_INFO_ON_ROOT("Domain partitioning:");
    WALBERLA_LOG_INFO_ON_ROOT(" - blocks per direction = " << numberOfBlocksPerDirection );
    WALBERLA_LOG_INFO_ON_ROOT(" - cells per block = " << cellsPerBlockPerDirection );
 
@@ -827,6 +844,9 @@ int main( int argc, char **argv )
 
    //init data structures
    auto ps = walberla::make_shared<mesa_pd::data::ParticleStorage>(1);
+   auto ss = walberla::make_shared<mesa_pd::data::ShapeStorage>();
+   using ParticleAccessor_T = mesa_pd::data::ParticleAccessorWithShape;
+   auto accessor = walberla::make_shared<ParticleAccessor_T >(ps, ss);
    BlockDataID particleStorageID;
    if(readFromCheckPointFile)
    {
@@ -834,11 +854,9 @@ int main( int argc, char **argv )
       particleStorageID = blocks->loadBlockData( checkPointFileName + "_mesa.txt", mesa_pd::domain::createBlockForestDataHandling(ps), "Particle Storage" );
    } else {
       particleStorageID = blocks->addBlockData(mesa_pd::domain::createBlockForestDataHandling(ps), "Particle Storage");
+      mesa_pd::mpi::ClearNextNeighborSync CNNS;
+      CNNS(*accessor);
    }
-
-   auto ss = walberla::make_shared<mesa_pd::data::ShapeStorage>();
-   using ParticleAccessor_T = mesa_pd::data::ParticleAccessorWithShape;
-   auto accessor = walberla::make_shared<ParticleAccessor_T >(ps, ss);
 
    // bounding planes
    createPlaneSetup(ps,ss,blocks->getDomain(), applyOutflowBCAtTop);
@@ -1183,15 +1201,17 @@ int main( int argc, char **argv )
    {
       // perform a single simulation step -> this contains LBM and setting of the hydrodynamic interactions
       timeloop.singleStep( timeloopTiming );
+         
+      reduceProperty.operator()<mesa_pd::HydrodynamicForceTorqueNotification>(*ps);
 
       if( averageForceTorqueOverTwoTimeSteps )
       {
          if( i == 0 )
          {
             lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
-            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
          }
-         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, averageHydrodynamicForceTorque, *accessor );
+         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, averageHydrodynamicForceTorque, *accessor );
       }
 
       real_t hydForce(real_t(0));

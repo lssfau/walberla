@@ -148,6 +148,10 @@ void ParseMessage::operator()(int sender,
       pIt->setGhostOwners(objparam.ghostOwners_);
       pIt->setOldForce(objparam.oldForce_);
       pIt->setOldTorque(objparam.oldTorque_);
+      pIt->setHydrodynamicForce(objparam.hydrodynamicForce_);
+      pIt->setHydrodynamicTorque(objparam.hydrodynamicTorque_);
+      pIt->setOldHydrodynamicForce(objparam.oldHydrodynamicForce_);
+      pIt->setOldHydrodynamicTorque(objparam.oldHydrodynamicTorque_);
 
       WALBERLA_LOG_DETAIL( "Processed PARTICLE_MIGRATION_NOTIFICATION." );
 

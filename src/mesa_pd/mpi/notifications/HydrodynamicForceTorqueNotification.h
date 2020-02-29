@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ParticleMigrationNotification.h
+//! \file HydrodynamicForceTorqueNotification.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -26,43 +26,54 @@
 
 #pragma once
 
+#include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/mpi/notifications/NotificationType.h>
+#include <mesa_pd/mpi/notifications/reset.h>
 
-#include <core/mpi/BufferDataTypeExtensions.h>
 #include <core/mpi/Datatype.h>
 #include <core/mpi/RecvBuffer.h>
 #include <core/mpi/SendBuffer.h>
-
 
 namespace walberla {
 namespace mesa_pd {
 
 /**
- * Migrate the particle to this process. Making the receiver the new owner.
+ * Trasmits force and torque information.
  */
-class ParticleMigrationNotification {
+class HydrodynamicForceTorqueNotification
+{
 public:
-   struct Parameters {
+   struct Parameters
+   {
       id_t uid_;
-      std::unordered_set<walberla::mpi::MPIRank> ghostOwners_ {};
-      walberla::mesa_pd::Vec3 oldForce_ {real_t(0)};
-      walberla::mesa_pd::Vec3 oldTorque_ {real_t(0)};
-      walberla::mesa_pd::Vec3 hydrodynamicForce_ {real_t(0)};
-      walberla::mesa_pd::Vec3 hydrodynamicTorque_ {real_t(0)};
-      walberla::mesa_pd::Vec3 oldHydrodynamicForce_ {real_t(0)};
-      walberla::mesa_pd::Vec3 oldHydrodynamicTorque_ {real_t(0)};
+      mesa_pd::Vec3 hydrodynamicForce_;
+      mesa_pd::Vec3 hydrodynamicTorque_;
    };
 
-   inline explicit ParticleMigrationNotification( const data::Particle& particle ) : particle_(particle) {}
-   const data::Particle& particle_;
+   inline explicit HydrodynamicForceTorqueNotification( const data::Particle& p ) : p_(p) {}
+
+   const data::Particle& p_;
 };
 
-template<>
-struct NotificationTrait<ParticleMigrationNotification>
+template <>
+void reset<HydrodynamicForceTorqueNotification>(data::Particle& p)
 {
-   static const NotificationType id = PARTICLE_MIGRATION_NOTIFICATION;
-};
+   p.setHydrodynamicForce( Vec3(real_t(0)) );
+   p.setHydrodynamicTorque( Vec3(real_t(0)) );
+}
+
+void reduce(data::Particle&& p, const HydrodynamicForceTorqueNotification::Parameters& objparam)
+{
+   p.getHydrodynamicForceRef() += objparam.hydrodynamicForce_;
+   p.getHydrodynamicTorqueRef() += objparam.hydrodynamicTorque_;
+}
+
+void update(data::Particle&& p, const HydrodynamicForceTorqueNotification::Parameters& objparam)
+{
+   p.setHydrodynamicForce( objparam.hydrodynamicForce_ );
+   p.setHydrodynamicTorque( objparam.hydrodynamicTorque_ );
+}
 
 }  // namespace mesa_pd
 }  // namespace walberla
@@ -78,38 +89,32 @@ namespace mpi {
 
 template< typename T,    // Element type of SendBuffer
           typename G>    // Growth policy of SendBuffer
-mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::ParticleMigrationNotification& obj )
+mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const mesa_pd::HydrodynamicForceTorqueNotification& obj )
 {
-   buf.addDebugMarker( "mn" );
-   buf << obj.particle_.getUid();
-   buf << obj.particle_.getGhostOwners();
-   buf << obj.particle_.getOldForce();
-   buf << obj.particle_.getOldTorque();
-   buf << obj.particle_.getHydrodynamicForce();
-   buf << obj.particle_.getHydrodynamicTorque();
-   buf << obj.particle_.getOldHydrodynamicForce();
-   buf << obj.particle_.getOldHydrodynamicTorque();
+   buf.addDebugMarker( "pn" );
+   buf << obj.p_.getUid();
+   buf << obj.p_.getHydrodynamicForce();
+   buf << obj.p_.getHydrodynamicTorque();
    return buf;
 }
 
 template< typename T>    // Element type  of RecvBuffer
-mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::ParticleMigrationNotification::Parameters& objparam )
+mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd::HydrodynamicForceTorqueNotification::Parameters& objparam )
 {
-   buf.readDebugMarker( "mn" );
+   buf.readDebugMarker( "pn" );
    buf >> objparam.uid_;
-   buf >> objparam.ghostOwners_;
-   buf >> objparam.oldForce_;
-   buf >> objparam.oldTorque_;
    buf >> objparam.hydrodynamicForce_;
    buf >> objparam.hydrodynamicTorque_;
-   buf >> objparam.oldHydrodynamicForce_;
-   buf >> objparam.oldHydrodynamicTorque_;
    return buf;
 }
 
-template<>
-struct BufferSizeTrait< mesa_pd::ParticleMigrationNotification > {
-   static const bool constantSize = false;
+template< >
+struct BufferSizeTrait< mesa_pd::HydrodynamicForceTorqueNotification > {
+   static const bool constantSize = true;
+   static const uint_t size = BufferSizeTrait<id_t>::size +
+                              BufferSizeTrait<mesa_pd::Vec3>::size +
+                              BufferSizeTrait<mesa_pd::Vec3>::size +
+                              mpi::BUFFER_DEBUG_OVERHEAD;
 };
 
 } // mpi

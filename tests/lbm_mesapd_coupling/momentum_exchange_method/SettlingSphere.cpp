@@ -79,6 +79,7 @@
 #include "mesa_pd/mpi/SyncNextNeighbors.h"
 #include "mesa_pd/mpi/ReduceProperty.h"
 #include "mesa_pd/mpi/notifications/ForceTorqueNotification.h"
+#include "mesa_pd/mpi/notifications/HydrodynamicForceTorqueNotification.h"
 #include "mesa_pd/vtk/ParticleVtkOutput.h"
 
 #include "timeloop/SweepTimeloop.h"
@@ -206,8 +207,8 @@ public:
          {
             pos = ac_->getPosition(idx);
             transVel = ac_->getLinearVelocity(idx);
+            hydForce = ac_->getHydrodynamicForce(idx);
          }
-         hydForce = ac_->getHydrodynamicForce(idx);
       }
 
       WALBERLA_MPI_SECTION()
@@ -743,14 +744,17 @@ int main( int argc, char **argv )
 
       timeloopTiming["RPD"].start();
 
+      // -> full hydrodynamic force/torque info is available on local particle
+      reduceProperty.operator()<mesa_pd::HydrodynamicForceTorqueNotification>(*ps);
+
       if( averageForceTorqueOverTwoTimeSteps )
       {
          if( i == 0 )
          {
             lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
-            ps->forEachParticle(useOpenMP, sphereSelector, *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
          }
-         ps->forEachParticle(useOpenMP, sphereSelector, *accessor, averageHydrodynamicForceTorque, *accessor );
+         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, averageHydrodynamicForceTorque, *accessor );
       }
 
       for(auto subCycle = uint_t(0); subCycle < numRPDSubCycles; ++subCycle )
@@ -762,7 +766,7 @@ int main( int argc, char **argv )
             syncCall();
          }
 
-         ps->forEachParticle(useOpenMP, sphereSelector, *accessor, addHydrodynamicInteraction, *accessor );
+         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, addHydrodynamicInteraction, *accessor );
          ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, addGravitationalForce, *accessor );
 
          // lubrication correction

@@ -30,8 +30,6 @@ namespace lbm_mesapd_coupling {
  * Kernel that initializes the old hydrodynamic force/torque property of a particle with the currently set one.
  * This should be used when starting the simulation (from anew or from checkpoint) and after load balancing.
  * Only then, the following averaging kernel (AverageHydrodynamicForceTorqueKernel) applies the correct amount of force.
- *
- * Should usually be carried out on local and ghost particles.
  */
 class InitializeHydrodynamicForceTorqueForAveragingKernel
 {
