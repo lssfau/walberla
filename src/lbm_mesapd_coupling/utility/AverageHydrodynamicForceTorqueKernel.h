@@ -29,9 +29,10 @@ namespace lbm_mesapd_coupling {
 /*
  * Kernel that averages the force/torque over two time steps in a rolling average fashion.
  * This is said to damp oscillations of the interaction force/torque.
- * See Ladd - " Numerical simulations of particulate suspensions via a discretized Boltzmann equation. Part 1. Theoretical foundation", 1994, p.
+ * See Ladd - "Numerical simulations of particulate suspensions via a discretized Boltzmann equation. Part 1. Theoretical foundation", 1994, p.
  *
- * Should usually be carried out on local and ghost particles.
+ * When reducing hyd. force/torque before, this should usually be carried out only on local particles. (recommended)
+ * If not, it must be carried out on local and ghost particles.
  */
 class AverageHydrodynamicForceTorqueKernel
 {

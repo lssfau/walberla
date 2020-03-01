@@ -82,7 +82,6 @@
 #include "mesa_pd/kernel/DoubleCast.h"
 #include "mesa_pd/kernel/ExplicitEulerWithShape.h"
 #include "mesa_pd/kernel/LinearSpringDashpot.h"
-#include "mesa_pd/kernel/NonLinearSpringDashpot.h"
 #include "mesa_pd/kernel/ParticleSelector.h"
 #include "mesa_pd/kernel/VelocityVerletWithShape.h"
 #include "mesa_pd/mpi/SyncNextNeighbors.h"
@@ -90,6 +89,7 @@
 #include "mesa_pd/mpi/ReduceContactHistory.h"
 #include "mesa_pd/mpi/ContactFilter.h"
 #include "mesa_pd/mpi/notifications/ForceTorqueNotification.h"
+#include "mesa_pd/mpi/notifications/HydrodynamicForceTorqueNotification.h"
 #include "mesa_pd/vtk/ParticleVtkOutput.h"
 
 #include "timeloop/SweepTimeloop.h"
@@ -818,11 +818,6 @@ int main( int argc, char **argv )
    BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
 
    // create the lattice model
-
-   // TRT
-   //LatticeModel_T latticeModel = LatticeModel_T( lbm::collision_model::TRT::constructWithMagicNumber( real_t(1) / relaxationTime ) );
-
-   // generated MRT
    real_t lambda_e = lbm::collision_model::TRT::lambda_e( omega );
    real_t lambda_d = lbm::collision_model::TRT::lambda_d( omega, magicNumber );
 #ifdef WALBERLA_BUILD_WITH_CODEGEN
@@ -868,11 +863,7 @@ int main( int argc, char **argv )
    //linearCollisionResponse.setFrictionCoefficientStatic(0,0,frictionCoeff); // not used in this test case
    linearCollisionResponse.setFrictionCoefficientDynamic(0,0,frictionCoeff);
 
-   // nonlinear model for ACTM
-
-
    mesa_pd::mpi::ReduceProperty reduceProperty;
-
    mesa_pd::mpi::ReduceContactHistory reduceAndSwapContactHistory;
 
    // set up coupling functionality
@@ -1057,15 +1048,17 @@ int main( int argc, char **argv )
    {
       // perform a single simulation step -> this contains LBM and setting of the hydrodynamic interactions
       timeloop.singleStep( timeloopTiming );
+         
+      reduceProperty.operator()<mesa_pd::HydrodynamicForceTorqueNotification>(*ps);
 
       if( averageForceTorqueOverTwoTimeSteps )
       {
          if( i == 0 )
          {
             lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
-            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
          }
-         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, averageHydrodynamicForceTorque, *accessor );
+         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, averageHydrodynamicForceTorque, *accessor );
       }
 
       Vector3<real_t> hydForce(real_t(0));
@@ -1165,7 +1158,7 @@ int main( int argc, char **argv )
 
          // add hydrodynamic force
          lbm_mesapd_coupling::AddHydrodynamicInteractionKernel addHydrodynamicInteraction;
-         ps->forEachParticle(useOpenMP, lbm_mesapd_coupling::RegularParticlesSelector(), *accessor, addHydrodynamicInteraction, *accessor );
+         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, addHydrodynamicInteraction, *accessor );
 
          hydForce = getForce(sphereUid,*accessor) - lubForce - collisionForce;
          WALBERLA_ASSERT(!std::isnan(hydForce[0]) && !std::isnan(hydForce[1]) && !std::isnan(hydForce[2]), "Found nan value in hydrodynamic force = " << hydForce);

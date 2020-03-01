@@ -78,12 +78,11 @@
 #include "mesa_pd/kernel/DoubleCast.h"
 #include "mesa_pd/kernel/ExplicitEulerWithShape.h"
 #include "mesa_pd/kernel/ParticleSelector.h"
-#include "mesa_pd/kernel/SpringDashpot.h"
-#include "mesa_pd/kernel/VelocityVerlet.h"
 #include "mesa_pd/mpi/SyncNextNeighbors.h"
 #include "mesa_pd/mpi/ReduceProperty.h"
 #include "mesa_pd/mpi/ContactFilter.h"
 #include "mesa_pd/mpi/notifications/ForceTorqueNotification.h"
+#include "mesa_pd/mpi/notifications/HydrodynamicForceTorqueNotification.h"
 #include "mesa_pd/vtk/ParticleVtkOutput.h"
 
 #include "timeloop/SweepTimeloop.h"
@@ -219,14 +218,13 @@ public:
          if(!mesa_pd::data::particle_flags::isSet( ac_->getFlags(idx), mesa_pd::data::particle_flags::GHOST))
          {
             pos = ac_->getPosition(idx)[2];
+            hydForce = ac_->getHydrodynamicForce(idx)[2];
          }
-         hydForce = ac_->getHydrodynamicForce(idx)[2];
       }
 
       WALBERLA_MPI_SECTION()
       {
          mpi::allReduceInplace( pos, mpi::SUM );
-
          mpi::allReduceInplace( hydForce, mpi::SUM );
       }
 
@@ -601,7 +599,6 @@ int main( int argc, char **argv )
 
    mesa_pd::kernel::ExplicitEulerWithShape explEulerIntegrator(real_t(1)/real_t(numRPDSubCycles));
 
-   mesa_pd::kernel::SpringDashpot collisionResponse(1);
    mesa_pd::mpi::ReduceProperty reduceProperty;
 
    // set up coupling functionality
@@ -768,15 +765,17 @@ int main( int argc, char **argv )
       timeloop.singleStep( timeloopTiming );
 
       timeloopTiming["RPD"].start();
+      
+      reduceProperty.operator()<mesa_pd::HydrodynamicForceTorqueNotification>(*ps);
 
       if( averageForceTorqueOverTwoTimeSteps )
       {
          if( i == 0 )
          {
             lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
-            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
          }
-         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, averageHydrodynamicForceTorque, *accessor );
+         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, averageHydrodynamicForceTorque, *accessor );
       }
 
       reduceProperty.operator()<mesa_pd::ForceTorqueNotification>(*ps);

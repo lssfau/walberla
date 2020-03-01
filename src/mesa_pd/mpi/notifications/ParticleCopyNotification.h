@@ -64,6 +64,10 @@ public:
       uint_t type {0};
       std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> oldContactHistory {};
       walberla::real_t temperature {real_t(0)};
+      walberla::mesa_pd::Vec3 hydrodynamicForce {real_t(0)};
+      walberla::mesa_pd::Vec3 hydrodynamicTorque {real_t(0)};
+      walberla::mesa_pd::Vec3 oldHydrodynamicForce {real_t(0)};
+      walberla::mesa_pd::Vec3 oldHydrodynamicTorque {real_t(0)};
    };
 
    inline explicit ParticleCopyNotification( const data::Particle& particle ) : particle_(particle) {}
@@ -91,6 +95,10 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
    pIt->setType(data.type);
    pIt->setOldContactHistory(data.oldContactHistory);
    pIt->setTemperature(data.temperature);
+   pIt->setHydrodynamicForce(data.hydrodynamicForce);
+   pIt->setHydrodynamicTorque(data.hydrodynamicTorque);
+   pIt->setOldHydrodynamicForce(data.oldHydrodynamicForce);
+   pIt->setOldHydrodynamicTorque(data.oldHydrodynamicTorque);
    return pIt;
 }
 
@@ -133,6 +141,10 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
    buf << obj.particle_.getType();
    buf << obj.particle_.getOldContactHistory();
    buf << obj.particle_.getTemperature();
+   buf << obj.particle_.getHydrodynamicForce();
+   buf << obj.particle_.getHydrodynamicTorque();
+   buf << obj.particle_.getOldHydrodynamicForce();
+   buf << obj.particle_.getOldHydrodynamicTorque();
    return buf;
 }
 
@@ -156,6 +168,10 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
    buf >> objparam.type;
    buf >> objparam.oldContactHistory;
    buf >> objparam.temperature;
+   buf >> objparam.hydrodynamicForce;
+   buf >> objparam.hydrodynamicTorque;
+   buf >> objparam.oldHydrodynamicForce;
+   buf >> objparam.oldHydrodynamicTorque;
    return buf;
 }
 

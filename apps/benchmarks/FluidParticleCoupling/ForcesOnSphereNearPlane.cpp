@@ -70,7 +70,7 @@
 #include "mesa_pd/kernel/ParticleSelector.h"
 #include "mesa_pd/mpi/SyncNextNeighbors.h"
 #include "mesa_pd/mpi/ReduceProperty.h"
-#include "mesa_pd/mpi/notifications/ForceTorqueNotification.h"
+#include "mesa_pd/mpi/notifications/HydrodynamicForceTorqueNotification.h"
 #include "mesa_pd/vtk/ParticleVtkOutput.h"
 
 #include "timeloop/SweepTimeloop.h"
@@ -207,8 +207,11 @@ public:
       size_t idx = ac_->uidToIdx(sphereUid_);
       if( idx != ac_->getInvalidIdx())
       {
-         force = ac_->getHydrodynamicForce(idx);
-         torque = ac_->getHydrodynamicTorque(idx);
+         if(!mesa_pd::data::particle_flags::isSet(ac_->getFlags(idx),mesa_pd::data::particle_flags::GHOST))
+         { 
+            force = ac_->getHydrodynamicForce(idx);
+            torque = ac_->getHydrodynamicTorque(idx);
+         }
       }
 
       WALBERLA_MPI_SECTION()
@@ -549,8 +552,10 @@ int main( int argc, char **argv )
       mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
       syncNextNeighborFunc(*ps, *rpdDomain, overlap);
    };
-
    syncCall();
+
+   mesa_pd::mpi::ReduceProperty reduceProperty;
+
 
    ///////////////////////
    // ADD DATA TO BLOCKS //
@@ -714,13 +719,16 @@ int main( int argc, char **argv )
       // perform a single simulation step
       timeloop.singleStep( timeloopTiming );
 
+      // sync hydrodynamic force to local particle
+      reduceProperty.operator()<mesa_pd::HydrodynamicForceTorqueNotification>(*ps);
+
       // average force
       if( timestep == 0 )
       {
          lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
-         ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+         ps->forEachParticle(false, mesa_pd::kernel::SelectLocal(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
       }
-      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, averageHydrodynamicForceTorque, *accessor );
+      ps->forEachParticle(false, mesa_pd::kernel::SelectLocal(), *accessor, averageHydrodynamicForceTorque, *accessor );
 
       // evaluation
       timeloopTiming["Logging"].start();

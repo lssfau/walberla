@@ -52,9 +52,6 @@
 #include "lbm_mesapd_coupling/mapping/ParticleMapping.h"
 #include "lbm_mesapd_coupling/momentum_exchange_method/MovingParticleMapping.h"
 #include "lbm_mesapd_coupling/momentum_exchange_method/boundary/CurvedLinear.h"
-#include "lbm_mesapd_coupling/momentum_exchange_method/reconstruction/Reconstructor.h"
-#include "lbm_mesapd_coupling/momentum_exchange_method/reconstruction/ExtrapolationDirectionFinder.h"
-#include "lbm_mesapd_coupling/momentum_exchange_method/reconstruction/PdfReconstructionManager.h"
 #include "lbm_mesapd_coupling/utility/ParticleSelector.h"
 #include "lbm_mesapd_coupling/utility/ResetHydrodynamicForceTorqueKernel.h"
 #include "lbm_mesapd_coupling/utility/LubricationCorrectionKernel.h"
@@ -69,13 +66,9 @@
 #include "mesa_pd/data/shape/Sphere.h"
 #include "mesa_pd/domain/BlockForestDomain.h"
 #include "mesa_pd/kernel/DoubleCast.h"
-#include "mesa_pd/kernel/ExplicitEulerWithShape.h"
-#include "mesa_pd/kernel/SpringDashpot.h"
 #include "mesa_pd/kernel/ParticleSelector.h"
 #include "mesa_pd/mpi/SyncNextNeighbors.h"
-#include "mesa_pd/mpi/ReduceProperty.h"
 #include "mesa_pd/mpi/ContactFilter.h"
-#include "mesa_pd/mpi/notifications/ForceTorqueNotification.h"
 #include "mesa_pd/vtk/ParticleVtkOutput.h"
 
 #include "timeloop/SweepTimeloop.h"
@@ -536,10 +529,7 @@ int main( int argc, char **argv )
 
    syncCall();
 
-   mesa_pd::mpi::ReduceProperty reduceProperty;
-
    lbm_mesapd_coupling::ResetHydrodynamicForceTorqueKernel resetHydrodynamicForceTorque;
-
 
    real_t lubricationCutOffDistanceNormal = real_t(2) / real_t(3);
    real_t lubricationCutOffDistanceTangentialTranslational = real_t(0.5);
@@ -672,7 +662,6 @@ int main( int argc, char **argv )
                {
                   if (contact_filter(acd.getIdx1(), acd.getIdx2(), *accessor, acd.getContactPoint(), *rpdDomain))
                   {
-                     //WALBERLA_LOG_INFO(acd.getIdx1() << " " << acd.getIdx2() << " " << acd.getContactNormal() << " " << acd.getPenetrationDepth());
                      double_cast(acd.getIdx1(), acd.getIdx2(), *accessor, lubricationCorrectionKernel, *accessor, acd.getContactNormal(), acd.getPenetrationDepth());
                   }
                }

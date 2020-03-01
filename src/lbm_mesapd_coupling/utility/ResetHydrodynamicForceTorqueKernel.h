@@ -30,8 +30,6 @@ namespace lbm_mesapd_coupling {
 
 /*
  * Kernel that resets the values of hydrodynamicForce and hydrodynamicTorque currently stored to zero
- *
- * Should usually be carried out on local and ghost particles.
  */
 class ResetHydrodynamicForceTorqueKernel
 {
