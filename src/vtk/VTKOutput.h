@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -57,7 +57,7 @@ private:
    // types used during vertex-index mapping procedure when writing (P)VTU files
    typedef std::tuple< cell_idx_t, cell_idx_t, cell_idx_t > Vertex;
    typedef std::tuple< real_t,     real_t,     real_t >     VertexCoord;
-   typedef uint32_t Index;
+   typedef int32_t Index;
 
    struct VertexCompare {
       bool operator()( const Vertex& lhs, const Vertex& rhs ) const
@@ -126,7 +126,7 @@ public:
    friend inline shared_ptr<VTKOutput> createVTKOutput_BlockData( const StructuredBlockStorage & sbs, const std::string & identifier,
                                                                   const uint_t writeFrequency, const uint_t ghostLayers, const bool forcePVTU,
                                                                   const std::string & baseFolder, const std::string & executionFolder,
-                                                                  const bool continuousNumbering, const bool binary, const bool littleEndian, 
+                                                                  const bool continuousNumbering, const bool binary, const bool littleEndian,
                                                                   const bool useMPIIO, const uint_t initialExecutionCount );
 
    /// creates a VTKOutput object that is supposed to output arbitrary point data
@@ -140,7 +140,7 @@ public:
    friend inline shared_ptr<VTKOutput> createVTKOutput_PolylineData( const shared_ptr< PolylineDataSource > pds, const std::string & identifier,
                                                                      const uint_t writeFrequency,
                                                                      const std::string & baseFolder, const std::string & executionFolder,
-                                                                     const bool continuousNumbering, const bool binary, const bool littleEndian, 
+                                                                     const bool continuousNumbering, const bool binary, const bool littleEndian,
                                                                      const bool useMPIIO, const uint_t initialExecutionCount );
 
    typedef std::function< void () > BeforeFunction;
@@ -214,7 +214,7 @@ private:
    void writeDomainDecomposition( const std::string& path, const Set<SUID>& requiredStates, const Set<SUID>& incompatibleStates ) const;
    void writeDomainDecompositionPieces( std::ostream& ofs, const Set<SUID>& requiredStates, const Set<SUID>& incompatibleStates ) const;
 
-   void computeOutputPoints( std::vector<Vector3<real_t> > & points, std::vector<bool> & outputPoint, 
+   void computeOutputPoints( std::vector<Vector3<real_t> > & points, std::vector<bool> & outputPoint,
                              uint_t & numberOfPoints ) const;
    void writePointDataPieceHelper( const std::vector<Vector3<real_t> > & points, const std::vector<bool> & outputPoint,
                                    const uint_t numberOfPoints, std::ostream & ofs ) const;
@@ -227,7 +227,7 @@ private:
       uint_t & numberOfPolylines, uint_t & numberOfPolylinePoints ) const;
 
    void writePolylineDataPieceHelper( const std::vector< std::vector< Vector3< real_t > > > & lines,
-      const std::vector< std::vector< bool > > & outputPolylinePoint, const std::vector< size_t > & polylineSize, 
+      const std::vector< std::vector< bool > > & outputPolylinePoint, const std::vector< size_t > & polylineSize,
       const uint_t numberOfPolylines, const uint_t numberOfPolylinePoints, std::ostream & ofs ) const;
 
    void writePolylineData( const std::string& path );
