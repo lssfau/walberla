@@ -370,7 +370,7 @@ void VTKOutput::writeDomainDecompositionPieces( std::ostream& ofs, const Set<SUI
          base64 << i;
       ofs << "     "; base64.toStream( ofs );
    }
-   else for( uint_t i = 0; i != points; i += 8 )
+   else for( int32_t i = 0; i != int32_c( points ); i += 8 )
       ofs << "     " << ( i ) << " " << ( i + 1 ) << " " << ( i + 2 ) << " " << ( i + 3 ) << " "
       << ( i + 4 ) << " " << ( i + 5 ) << " " << ( i + 6 ) << " " << ( i + 7 ) << "\n";
 
@@ -380,12 +380,12 @@ void VTKOutput::writeDomainDecompositionPieces( std::ostream& ofs, const Set<SUI
    if( binary_ )
    {
       Base64Writer base64;
-      for( uint_t i = 0; i != points; i += 8 )
-         base64 << uint32_c( i + uint_c( 8 ) );
+      for( int32_t i = 0; i != int32_c( points ); i += 8 )
+         base64 << int32_c( i + uint_c( 8 ) );
       ofs << "     "; base64.toStream( ofs );
    }
-   else for( uint_t i = 0; i != points; i += 8 )
-      ofs << "     " << uint32_c( i + uint_c( 8 ) ) << "\n";
+   else for( int32_t i = 0; i != int32_c( points ); i += 8 )
+      ofs << "     " << int32_c( i + uint_c( 8 ) ) << "\n";
 
    ofs << "    </DataArray>\n"
       << "    <DataArray type=\"" << vtk::typeToString< uint8_t >() << "\" Name=\"types\" format=\"" << format_ << "\">\n";
