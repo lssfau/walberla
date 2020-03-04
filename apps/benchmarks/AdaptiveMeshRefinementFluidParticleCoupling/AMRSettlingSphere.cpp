@@ -334,6 +334,7 @@ static void workloadAndMemoryAssignment( SetupBlockForest& forest )
 
 static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & domainAABB, Vector3<uint_t> blockSizeInCells,
                                                                  uint_t numberOfLevels, real_t diameter, Vector3<real_t> spherePosition,
+                                                                 bool useStaticRefinement,
                                                                  bool keepGlobalBlockInformation = false )
 {
    SetupBlockForest sforest;
@@ -357,12 +358,23 @@ static shared_ptr< StructuredBlockForest > createBlockStructure( const AABB & do
                            "Domain can not be refined in direction " << i << " according to the specified number of levels!" );
    }
 
-   AABB refinementBox( std::floor(spherePosition[0] - real_t(0.5) * diameter),
-                       std::floor(spherePosition[1] - real_t(0.5) * diameter),
-                       std::floor(spherePosition[2] - real_t(0.5) * diameter),
-                       std::ceil( spherePosition[0] + real_t(0.5) * diameter),
-                       std::ceil( spherePosition[1] + real_t(0.5) * diameter),
-                       std::ceil( spherePosition[2] + real_t(0.5) * diameter) );
+   AABB refinementBox;
+   if(useStaticRefinement)
+   {
+      refinementBox = AABB( std::floor(spherePosition[0] - real_t(0.5) * diameter),
+                            std::floor(spherePosition[1] - real_t(0.5) * diameter),
+                            domainAABB.zMin(),
+                            std::ceil( spherePosition[0] + real_t(0.5) * diameter),
+                            std::ceil( spherePosition[1] + real_t(0.5) * diameter),
+                            domainAABB.zMax() );
+   }else{
+      refinementBox = AABB( std::floor(spherePosition[0] - real_t(0.5) * diameter),
+                            std::floor(spherePosition[1] - real_t(0.5) * diameter),
+                            std::floor(spherePosition[2] - real_t(0.5) * diameter),
+                            std::ceil( spherePosition[0] + real_t(0.5) * diameter),
+                            std::ceil( spherePosition[1] + real_t(0.5) * diameter),
+                            std::ceil( spherePosition[2] + real_t(0.5) * diameter) );
+   }
 
    WALBERLA_LOG_INFO_ON_ROOT(" - refinement box: " << refinementBox);
 
@@ -714,6 +726,7 @@ int main( int argc, char **argv )
    uint_t vtkWriteFreqBo = 0; //bodies
    uint_t vtkWriteFreqFl = 0; //fluid
    uint_t vtkWriteFreq = 0; //general
+   bool vtkWriteFluidSlice = false;
    std::string baseFolder = "vtk_out_AMRSettlingSphere"; // folder for vtk and file output
 
    // physical setup
@@ -729,6 +742,7 @@ int main( int argc, char **argv )
    bool averageForceTorqueOverTwoTimSteps = true;
    uint_t numberOfLevels = uint_t(3);
    uint_t refinementCheckFrequency = uint_t(0);
+   bool useStaticRefinement = false;
 
    real_t lowerFluidRefinementLimit = real_t(0);
    real_t upperFluidRefinementLimit = std::numeric_limits<real_t>::infinity();
@@ -752,6 +766,7 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--vtkWriteFreqDD" )   == 0 ) { vtkWriteFreqDD = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--vtkWriteFreqBo" )   == 0 ) { vtkWriteFreqBo = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--vtkWriteFreqFl" )   == 0 ) { vtkWriteFreqFl = uint_c( std::atof( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--vtkWriteFluidSlice" ) == 0 ) { vtkWriteFluidSlice = true; continue; }
       if( std::strcmp( argv[i], "--vtkWriteFreq" )     == 0 ) { vtkWriteFreq = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--densityRatio" )     == 0 ) { densityRatio = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--Ga" )               == 0 ) { GalileoNumber = real_c(std::atof( argv[++i] )); continue; }
@@ -763,6 +778,7 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--noForceAveraging" ) == 0 ) { averageForceTorqueOverTwoTimSteps = false; continue; }
       if( std::strcmp( argv[i], "--numLevels" )        == 0 ) { numberOfLevels = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--refinementCheckFrequency" ) == 0 ) { refinementCheckFrequency = uint_c( std::atof( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--useStaticRefinement" ) == 0 ) { useStaticRefinement = true; continue; }
       if( std::strcmp( argv[i], "--lowerLimit" )       == 0 ) { lowerFluidRefinementLimit = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--upperLimit" )       == 0 ) { upperFluidRefinementLimit = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--baseFolder" )       == 0 ) { baseFolder = argv[++i]; continue; }
@@ -862,6 +878,10 @@ int main( int argc, char **argv )
    WALBERLA_LOG_INFO_ON_ROOT(" - reference values: x = " << xRef << ", t = " << tRef << ", vel = " << ug);
    WALBERLA_LOG_INFO_ON_ROOT(" - omega: " << omega_msg.str());
    WALBERLA_LOG_INFO_ON_ROOT(" - number of levels: " << numberOfLevels);
+   if(useStaticRefinement)
+   {
+      WALBERLA_LOG_INFO_ON_ROOT(" - using static refinement");
+   }
    if( useVorticityCriterion )
    {
       WALBERLA_LOG_INFO_ON_ROOT(" - using vorticity criterion with lower limit = " << lowerFluidRefinementLimit << " and upper limit = " << upperFluidRefinementLimit );
@@ -880,7 +900,12 @@ int main( int argc, char **argv )
    }
    if( vtkWriteFreqFl > 0 )
    {
-      WALBERLA_LOG_INFO_ON_ROOT(" - writing vtk files of fluid data to folder \"" << baseFolder << "\" with frequency " << vtkWriteFreqFl);
+      if( vtkWriteFluidSlice ){
+         WALBERLA_LOG_INFO_ON_ROOT(" - writing vtk files of sliced fluid data to folder \"" << baseFolder << "\" with frequency " << vtkWriteFreqFl);
+      }
+      else{
+         WALBERLA_LOG_INFO_ON_ROOT(" - writing vtk files of full fluid data to folder \"" << baseFolder << "\" with frequency " << vtkWriteFreqFl);
+      }
    }
 
    ///////////////////////////
@@ -894,7 +919,7 @@ int main( int argc, char **argv )
    Vector3<uint_t> blockSizeInCells( blockSize );
 
    AABB simulationDomain( real_t(0), real_t(0), real_t(0), real_c(domainSize[0]), real_c(domainSize[1]), real_c(domainSize[2]) );
-   auto blocks = createBlockStructure( simulationDomain, blockSizeInCells, numberOfLevels, diameter, initialSpherePosition );
+   auto blocks = createBlockStructure( simulationDomain, blockSizeInCells, numberOfLevels, diameter, initialSpherePosition, useStaticRefinement );
 
    //write domain decomposition to file
    if( vtkWriteFreqDD > 0 )
@@ -902,7 +927,7 @@ int main( int argc, char **argv )
       vtk::writeDomainDecomposition( blocks, "initial_domain_decomposition", baseFolder );
    }
 
-   if( refinementCheckFrequency == 0 && numberOfLevels != 1 )
+   if( !useStaticRefinement && refinementCheckFrequency == 0 && numberOfLevels != 1 )
    {
       // determine check frequency automatically based on maximum admissable velocity and block sizes
       real_t uMax = real_t(0.1);
@@ -1087,9 +1112,24 @@ int main( int argc, char **argv )
       // pdf field
       auto pdfFieldVTK = vtk::createVTKOutput_BlockData(blocks, "fluid_field", vtkWriteFreqFl, 0, false, baseFolder);
 
-      field::FlagFieldCellFilter<FlagField_T> fluidFilter(flagFieldID);
-      fluidFilter.addFlag(Fluid_Flag);
-      pdfFieldVTK->addCellInclusionFilter(fluidFilter);
+      field::FlagFieldCellFilter< FlagField_T > fluidFilter( flagFieldID );
+      fluidFilter.addFlag( Fluid_Flag );
+
+      if(vtkWriteFluidSlice)
+      {
+         AABB sliceAABB( real_t(0), real_c(domainSize[1])*real_t(0.5)-real_t(1), real_t(0),
+                         real_c(domainSize[0]), real_c(domainSize[1])*real_t(0.5)+real_t(1), real_c(domainSize[2]) );
+         vtk::AABBCellFilter aabbSliceFilter( sliceAABB );
+
+         vtk::ChainedFilter combinedSliceFilter;
+         combinedSliceFilter.addFilter( fluidFilter );
+         combinedSliceFilter.addFilter( aabbSliceFilter );
+
+         pdfFieldVTK->addCellInclusionFilter( combinedSliceFilter );
+      }
+      else {
+         pdfFieldVTK->addCellInclusionFilter( fluidFilter );
+      }
 
       pdfFieldVTK->addCellDataWriter(
             make_shared<lbm::VelocityVTKWriter<LatticeModel_T, float> >(pdfFieldID, "VelocityFromPDF"));
