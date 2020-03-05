@@ -10,8 +10,10 @@ from lbmpy.stencils import get_stencil
 
 
 with CodeGeneration() as ctx:
+    omegaVisc = sp.Symbol("omega_visc")
+    omegaBulk = ps.fields("omega_bulk: [3D]", layout='fzyx')
+    omegaMagic = sp.Symbol("omega_magic")
     stencil = get_stencil("D3Q19", 'walberla')
-    omega = sp.symbols("omega_:%d" % len(stencil))
 
     x, y, z = MOMENT_SYMBOLS
     one = sp.Rational(1, 1)
@@ -25,30 +27,17 @@ with CodeGeneration() as ctx:
         [(2 * sq - 3) * (3 * x ** 2 - sq), (2 * sq - 3) * (y ** 2 - z ** 2)],  # [10, 12]
         [(y ** 2 - z ** 2) * x, (z ** 2 - x ** 2) * y, (x ** 2 - y ** 2) * z]  # [16, 17, 18]
     ]
-    method = create_lb_method(stencil=stencil, method='mrt', maxwellian_moments=False, nested_moments=moments)
 
-    def modification_func(moment, eq, rate):
-        omegaVisc = sp.Symbol("omega_visc")
-        omegaBulk = ps.fields("omega_bulk: [3D]", layout='fzyx')
-        omegaMagic = sp.Symbol("omega_magic")
-        if get_order(moment) <= 1:
-            return moment, eq, 0
-        elif rate == omega[1]:
-            return moment, eq, omegaBulk.center_vector
-        elif rate == omega[2]:
-            return moment, eq, omegaBulk.center_vector
-        elif is_even(moment):
-            return moment, eq, omegaVisc
-        else:
-            return moment, eq, omegaMagic
+    # relaxation rate for first group of moments (1,x,y,z) is set to zero internally
+    relaxation_rates=[omegaBulk.center_vector, omegaBulk.center_vector, omegaMagic, omegaVisc, omegaVisc, omegaMagic]
 
-    my_method = create_lb_method_from_existing(method, modification_func)
+    methodWithForce = create_lb_method(stencil=stencil, method='mrt', maxwellian_moments=False,
+                                       nested_moments=moments, relaxation_rates=relaxation_rates)
 
-    collision_rule = create_lb_collision_rule(lb_method=my_method,
-                     optimization={"cse_global": True,
-                                   "cse_pdfs": False
-                                   } )
+    #print(methodWithForce.relaxation_rates)
+    #print(methodWithForce.moment_matrix)
 
+    collision_rule = create_lb_collision_rule(lb_method=methodWithForce)
     generate_lattice_model(ctx, 'GeneratedLBM', collision_rule)
 
 

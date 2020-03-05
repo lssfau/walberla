@@ -12,10 +12,12 @@ from lbmpy.forcemodels import Luo
 with CodeGeneration() as ctx:
 
     forcing=(sp.symbols("fx"),0,0)
-    forcemodel=Luo(forcing)
-
+    omegaVisc = sp.Symbol("omega_visc")
+    omegaBulk = ps.fields("omega_bulk: [3D]", layout='fzyx')
+    omegaMagic = sp.Symbol("omega_magic")
     stencil = get_stencil("D3Q19", 'walberla')
-    omega = sp.symbols("omega_:%d" % len(stencil))
+
+    forcemodel=Luo(forcing)
 
     x, y, z = MOMENT_SYMBOLS
     one = sp.Rational(1, 1)
@@ -30,25 +32,14 @@ with CodeGeneration() as ctx:
         [(y ** 2 - z ** 2) * x, (z ** 2 - x ** 2) * y, (x ** 2 - y ** 2) * z]  # [16, 17, 18]
     ]
 
+    # relaxation rate for first group of moments (1,x,y,z) is set to zero internally
+    relaxation_rates=[omegaBulk.center_vector, omegaBulk.center_vector, omegaMagic, omegaVisc, omegaVisc, omegaMagic]
+
     methodWithForce = create_lb_method(stencil=stencil, method='mrt', maxwellian_moments=False,
-                                       force_model=forcemodel, nested_moments=moments)
+                                       force_model=forcemodel, nested_moments=moments, relaxation_rates=relaxation_rates)
 
-    def modification_func(moment, eq, rate):
-        omegaVisc = sp.Symbol("omega_visc")
-        omegaBulk = ps.fields("omega_bulk: [3D]", layout='fzyx')
-        omegaMagic = sp.Symbol("omega_magic")
-        if get_order(moment) <= 1:
-            return moment, eq, 0
-        elif rate == omega[1]:
-            return moment, eq, omegaBulk.center_vector
-        elif rate == omega[2]:
-            return moment, eq, omegaBulk.center_vector
-        elif is_even(moment):
-            return moment, eq, omegaVisc
-        else:
-            return moment, eq, omegaMagic
+    #print(methodWithForce.relaxation_rates)
+    #print(methodWithForce.moment_matrix)
 
-    my_methodWithForce = create_lb_method_from_existing(methodWithForce, modification_func)
-
-    collision_rule = create_lb_collision_rule(lb_method=my_methodWithForce)
+    collision_rule = create_lb_collision_rule(lb_method=methodWithForce)
     generate_lattice_model(ctx, 'GeneratedLBMWithForce', collision_rule)
