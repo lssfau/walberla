@@ -34,6 +34,13 @@ namespace walberla {
 namespace field {
 
 
+   template <typename T>
+   class FieldAllocatorBase
+   {
+   protected:
+      static std::map<T*, uint_t> referenceCounts_;
+   };
+
    //*******************************************************************************************************************
    /*! Allocation Strategy base class for fields
    *
@@ -44,7 +51,7 @@ namespace field {
    */
    //*******************************************************************************************************************
    template<typename T>
-   class FieldAllocator
+   class FieldAllocator : FieldAllocatorBase<void>
    {
       public:
 
@@ -196,14 +203,10 @@ namespace field {
           * \param values      Return value of allocate function()
           */
          virtual void deallocate( T *& values ) = 0;
-
-      private:
-         static std::map<T*, uint_t> referenceCounts_;
-
    };
 
    template<typename T>
-   std::map<T*, uint_t> FieldAllocator<T>::referenceCounts_ = std::map<T*,uint_t>();
+   std::map<T*, uint_t> FieldAllocatorBase<T>::referenceCounts_ = std::map<T*,uint_t>();
 
 
 

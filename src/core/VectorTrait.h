@@ -35,15 +35,22 @@ namespace walberla {
 */
 //**********************************************************************************************************************
 
-template< typename T >
+template< typename T, class Enable = void >
 struct VectorTrait
+{
+   typedef void OutputType;
+
+   static const uint_t F_SIZE = 0u;
+};
+
+template< typename T >
+struct VectorTrait<T, typename std::enable_if<std::is_arithmetic<T>::value>::type>
 {
    typedef T OutputType;
 
    static const uint_t F_SIZE = 1u;
    static T get   ( T   value, uint_t /*f*/ )        { return value; }
    static void set( T & value, uint_t /*f*/, T val ) { value = val;  }
-   static_assert( std::is_arithmetic<T>::value, "Specialize OutputTrait for your type!" );
 };
 
 

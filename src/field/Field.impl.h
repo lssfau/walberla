@@ -144,6 +144,21 @@ namespace field {
 
 
    //*******************************************************************************************************************
+   /*! Returns a flattened shallow copy of the current field.
+    *
+    *  Shallow copy means, that the new field internally uses the same memory as this field.
+    *  Flattened means that any VectorTrait-compatible containers are absorbed into the fSize.
+    *
+    * \return a new field, that has to be freed by caller
+    *******************************************************************************************************************/
+   template<typename T, uint_t fSize_>
+   typename Field<T,fSize_>::FlattenedField * Field<T,fSize_>::flattenedShallowCopy() const
+   {
+      return flattenedShallowCopyInternal();
+   }
+
+
+   //*******************************************************************************************************************
    /*!\brief Does the same as cloneShallowCopy (but is virtual)
     *
     * This version has to be implemented by derived classes. The cloneShallowCopy() itself cannot be
@@ -154,6 +169,19 @@ namespace field {
    Field<T,fSize_> * Field<T,fSize_>::cloneShallowCopyInternal() const
    {
       return new Field<T,fSize_>(*this) ;
+   }
+
+   //*******************************************************************************************************************
+   /*!\brief Does the same as flattenedShallowCopy (but is virtual)
+    *
+    * This version has to be implemented by derived classes. The flattenedShallowCopy() itself cannot be
+    * virtual, since the implementation of flattenedShallowCopy() of derived classes has a different signature.
+    *
+    *******************************************************************************************************************/
+   template<typename T, uint_t fSize_>
+   typename Field<T,fSize_>::FlattenedField * Field<T,fSize_>::flattenedShallowCopyInternal() const
+   {
+      return new FlattenedField(*this) ;
    }
 
    //*******************************************************************************************************************
@@ -222,6 +250,40 @@ namespace field {
         zfact_            ( other.zfact_ ),
         allocator_        ( other.allocator_ )
    {
+      allocator_->incrementReferenceCount ( values_ );
+   }
+
+
+   //*******************************************************************************************************************
+   /*! Private copy constructor that creates a flattened shallow copy
+    *        i.e. reuses the memory of the copied field
+    *******************************************************************************************************************/
+   template<typename T, uint_t fSize_>
+   template <typename T2, uint_t fSize2>
+   Field<T,fSize_>::Field( const Field<T2,fSize2> & other )
+      : values_           ( other.values_[0].data() ),
+        valuesWithOffset_ ( other.valuesWithOffset_[0].data() ),
+        xOff_             ( other.xOff_),
+        yOff_             ( other.yOff_),
+        zOff_             ( other.zOff_),
+        xSize_            ( other.xSize_ ),
+        ySize_            ( other.ySize_ ),
+        zSize_            ( other.zSize_ ),
+        xAllocSize_       ( other.xAllocSize_ ),
+        yAllocSize_       ( other.yAllocSize_ ),
+        zAllocSize_       ( other.zAllocSize_ ),
+        fAllocSize_       ( other.fAllocSize_*fSize_/fSize2 ),
+        layout_           ( other.layout_ ),
+        allocSize_        ( other.allocSize_*fSize_/fSize2 ),
+        ffact_            ( other.ffact_ ),
+        xfact_            ( other.xfact_*cell_idx_t(fSize_/fSize2) ),
+        yfact_            ( other.yfact_*cell_idx_t(fSize_/fSize2) ),
+        zfact_            ( other.zfact_*cell_idx_t(fSize_/fSize2) ),
+        allocator_        ( std::shared_ptr<FieldAllocator<T>>(other.allocator_, reinterpret_cast<FieldAllocator<T>*>(other.allocator_.get())) )
+   {
+      WALBERLA_CHECK_EQUAL(layout_, Layout::zyxf);
+      static_assert(fSize_ % fSize2 == 0, "number of field components do not match");
+      static_assert(std::is_same<typename Field<T2,fSize2>::FlattenedField, Field<T,fSize_>>::value, "field types are incompatible for flattening");
       allocator_->incrementReferenceCount ( values_ );
    }
 
