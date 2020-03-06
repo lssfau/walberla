@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -366,11 +366,11 @@ void VTKOutput::writeDomainDecompositionPieces( std::ostream& ofs, const Set<SUI
    if( binary_ )
    {
       Base64Writer base64;
-      for( uint32_t i = 0; i != uint32_c( points ); ++i )
+      for( int32_t i = 0; i != int32_c( points ); ++i )
          base64 << i;
       ofs << "     "; base64.toStream( ofs );
    }
-   else for( uint_t i = 0; i != points; i += 8 )
+   else for( int32_t i = 0; i != int32_c( points ); i += 8 )
       ofs << "     " << ( i ) << " " << ( i + 1 ) << " " << ( i + 2 ) << " " << ( i + 3 ) << " "
       << ( i + 4 ) << " " << ( i + 5 ) << " " << ( i + 6 ) << " " << ( i + 7 ) << "\n";
 
@@ -380,12 +380,12 @@ void VTKOutput::writeDomainDecompositionPieces( std::ostream& ofs, const Set<SUI
    if( binary_ )
    {
       Base64Writer base64;
-      for( uint_t i = 0; i != points; i += 8 )
-         base64 << uint32_c( i + uint_c( 8 ) );
+      for( int32_t i = 0; i != int32_c( points ); i += 8 )
+         base64 << i + int32_c( 8 );
       ofs << "     "; base64.toStream( ofs );
    }
-   else for( uint_t i = 0; i != points; i += 8 )
-      ofs << "     " << uint32_c( i + uint_c( 8 ) ) << "\n";
+   else for( int32_t i = 0; i != int32_c( points ); i += 8 )
+      ofs << "     " << i + int32_c( 8 ) << "\n";
 
    ofs << "    </DataArray>\n"
       << "    <DataArray type=\"" << vtk::typeToString< uint8_t >() << "\" Name=\"types\" format=\"" << format_ << "\">\n";
@@ -607,7 +607,7 @@ void VTKOutput::writePointData( const std::string& path )
    ofs << "<?xml version=\"1.0\"?>\n"
        << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"" << endianness_ << "\">\n"
        << " <UnstructuredGrid>\n";
-       
+
 
    writePointDataPieceHelper( points, outputPoint, numberOfPoints, ofs );
 
@@ -1072,10 +1072,10 @@ void VTKOutput::writeBlockPieces( std::ostream & oss, const Set<SUID>& requiredS
             writeVTIPiece_sampling( oss, block );
       }
       else // unstructured data -> vtu
-      {  
+      {
          CellVector cells; // cells to be written to file
          computeVTUCells( block, cells );
-         
+
          if( !cells.empty() )
          {
             if( samplingDx_ <= real_c(0) || samplingDy_ <= real_c(0) || samplingDz_ <= real_c(0) )
@@ -1137,7 +1137,7 @@ void VTKOutput::writeVTI_sampling( std::ostream& ofs, const IBlock& block ) cons
 {
    const AABB&  blockBB = block.getAABB();
    const AABB&  domain  = blockStorage_->getDomain();
-   
+
    CellInterval cellBB = getSampledCellInterval( blockBB );
 
    ofs << "<?xml version=\"1.0\"?>\n"
@@ -1644,11 +1644,11 @@ void VTKOutput::writePVD()
 
    std::string file( baseFolder_ + "/" + identifier_ + ".pvd" );
    std::fstream ofs( file.c_str() );
-   
+
    if( !ofs ) // failed because file does not yet exist
    {
       ofs.open( file.c_str(), std::ios::out );
-      
+
       ofs << "<?xml version=\"1.0\"?>\n"
           << "<VTKFile type=\"Collection\" version=\"0.1\" byte_order=\"" << endianness_ << "\">\n"
           << " <Collection>\n";
@@ -1695,7 +1695,7 @@ void VTKOutput::writePVD()
       ofs << "  <DataSet timestep=\"" << *collector << "\" file=\"" << collection.str() << "\"/>\n";
    }
    allCollectors_.clear();
-   
+
    pvdEnd_ = ofs.tellp();
    WALBERLA_ASSERT_GREATER( pvdEnd_, 0 );
    ofs << " </Collection>\n"
@@ -1831,7 +1831,7 @@ bool VTKOutput::writeCombinedVTI( std::string localPart, const uint_t collector 
          << cellBB.yMin() << " " << ( cellBB.yMax() + 1 ) << " "
          << cellBB.zMin() << " " << ( cellBB.zMax() + 1 ) << "\""
          << " Origin=\"" << domain.xMin() << " " << domain.yMin() << " " << domain.zMin() << "\""
-         << " Spacing=\"" << blockStorage_->dx() << " " << blockStorage_->dy() << " " << blockStorage_->dz() 
+         << " Spacing=\"" << blockStorage_->dx() << " " << blockStorage_->dy() << " " << blockStorage_->dz()
          << "\">\n\n";
 
       localPart.insert( 0, header.str() );
