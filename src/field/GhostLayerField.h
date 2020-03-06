@@ -70,7 +70,7 @@ namespace field {
       typedef typename std::conditional<VectorTrait<T>::F_SIZE!=0,
                                         GhostLayerField<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE*fSize_>,
                                         GhostLayerField<T, fSize_>
-                                        >::type FlattenedGhostLayerField;
+                                        >::type FlattenedField;
       //@}
       //****************************************************************************************************************
 
@@ -102,7 +102,7 @@ namespace field {
                  const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
 
 
-      virtual void resize( uint_t xSize, uint_t ySize, uint_t zSize ) override;
+      virtual void resize( uint_t xSize, uint_t ySize, uint_t zSize );
               void resize( uint_t xSize, uint_t ySize, uint_t zSize, uint_t gl );
 
       using Field<T,fSize_>::resize;
@@ -110,7 +110,7 @@ namespace field {
       inline GhostLayerField<T,fSize_> * clone()              const;
       inline GhostLayerField<T,fSize_> * cloneUninitialized() const;
       inline GhostLayerField<T,fSize_> * cloneShallowCopy()   const;
-      inline FlattenedGhostLayerField * flattenedShallowCopy() const;
+      inline FlattenedField * flattenedShallowCopy() const;
       //@}
       //****************************************************************************************************************
 
@@ -200,8 +200,8 @@ namespace field {
       /*! \name Slicing */
       //@{
       GhostLayerField<T,fSize_> * getSlicedField( const CellInterval & interval ) const;
-      virtual void slice           ( const CellInterval & interval ) override;
-      virtual void shiftCoordinates( cell_idx_t cx, cell_idx_t cy, cell_idx_t cz ) override;
+      virtual void slice           ( const CellInterval & interval );
+      virtual void shiftCoordinates( cell_idx_t cx, cell_idx_t cy, cell_idx_t cz );
       //@}
       //****************************************************************************************************************
 
@@ -214,8 +214,8 @@ namespace field {
       //** Shallow Copy ************************************************************************************************
       /*! \name Shallow Copy */
       //@{
-      virtual Field<T,fSize_> * cloneShallowCopyInternal()   const override;
-      virtual typename Field<T,fSize_>::FlattenedField * flattenedShallowCopyInternal() const override;
+      virtual Field<T,fSize_> * cloneShallowCopyInternal()   const;
+      virtual typename Field<T,fSize_>::FlattenedField * flattenedShallowCopyInternal() const;
       GhostLayerField(const GhostLayerField<T,fSize_> & other);
       template <typename T2, uint_t fSize2>
       GhostLayerField(const GhostLayerField<T2, fSize2> & other);

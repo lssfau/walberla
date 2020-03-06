@@ -49,7 +49,7 @@ int main( int argc, char ** argv )
    {
       VectorField * field = blockIt->getData<VectorField>( fieldID );
 
-      for( auto cellIt = field->beginXYZ(); cellIt != field->end(); ++cellIt )
+      for( auto cellIt = field->beginWithGhostLayerXYZ(); cellIt != field->end(); ++cellIt )
       {
          for( uint_t f = 0; f < 3; ++f)
          {
@@ -67,7 +67,7 @@ int main( int argc, char ** argv )
       FlattenedField * flattened = blockIt->getData<FlattenedField>( flattenedID );
       VectorField * copy = blockIt->getData<VectorField>( copyID );
 
-      for( auto cellIt = field->beginXYZ(); cellIt != field->end(); ++cellIt )
+      for( auto cellIt = field->beginWithGhostLayerXYZ(); cellIt != field->end(); ++cellIt )
       {
          for( uint_t f = 0; f < 3; ++f)
          {

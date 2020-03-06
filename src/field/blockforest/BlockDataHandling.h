@@ -542,7 +542,7 @@ private:
 
 
 template< typename Field_T >
-class FlattenedShallowCopyBlockDataHandling : public blockforest::AlwaysInitializeBlockDataHandling< typename Field_T::FlattenedGhostLayerField >
+class FlattenedShallowCopyBlockDataHandling : public blockforest::AlwaysInitializeBlockDataHandling< typename Field_T::FlattenedField >
 {
 public:
 
@@ -550,7 +550,7 @@ public:
       fieldToClone_( fieldToClone )
    {}
 
-   typename Field_T::FlattenedGhostLayerField * initialize( IBlock * const block )
+   typename Field_T::FlattenedField * initialize( IBlock * const block )
    {
       const Field_T * toClone = block->template getData< Field_T >( fieldToClone_ );
       return toClone->flattenedShallowCopy();
