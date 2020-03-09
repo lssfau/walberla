@@ -45,11 +45,13 @@ void BlockForestDomain::refresh()
    periodic_[1] = blockForest_->isPeriodic(1);
    periodic_[2] = blockForest_->isPeriodic(2);
 
-   if (blockForest_->empty()) return;
-
    localAABBs_.clear();
    neighborSubdomains_.clear();
    neighborProcesses_.clear();
+   unionOfLocalAABBs_ = math::AABB(Vec3(real_t(0)), Vec3(real_t(0)));
+
+   if (blockForest_->empty()) return;
+
    unionOfLocalAABBs_ = blockForest_->begin()->getAABB();
    for (auto& iBlk : *blockForest_)
    {
