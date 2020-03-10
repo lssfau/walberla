@@ -134,6 +134,9 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_LinkedCellsVsBruteForce PROCESSES 2
 waLBerla_compile_test( NAME   MESA_PD_Kernel_SingleCast FILES kernel/SingleCast.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SingleCast )
 
+waLBerla_compile_test( NAME   MESA_PD_Kernel_SpherePile FILES kernel/SpherePile.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_SpherePile )
+
 waLBerla_compile_test( NAME   MESA_PD_Kernel_SpringDashpot FILES kernel/SpringDashpot.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SpringDashpot )
 

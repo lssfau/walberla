@@ -98,6 +98,7 @@ if __name__ == '__main__':
     mpd.add(kernel.NonLinearSpringDashpot())
     mpd.add(kernel.SingleCast(ps))
     mpd.add(kernel.SpringDashpot())
+    mpd.add(kernel.SpringDashpotSpring())
     mpd.add(kernel.TemperatureIntegration())
     mpd.add(kernel.VelocityVerlet())
     mpd.add(kernel.VelocityVerletWithShape())
