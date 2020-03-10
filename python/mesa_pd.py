@@ -7,8 +7,6 @@ import mesa_pd.kernel as kernel
 import mesa_pd.mpi as mpi
 
 import argparse
-import numpy as np
-import os
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate all necessary files for the waLBerla mesa_pd module.')
