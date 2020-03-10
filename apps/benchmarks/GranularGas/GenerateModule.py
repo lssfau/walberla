@@ -36,6 +36,14 @@ if __name__ == '__main__':
     ps.add_include("blockforest/BlockForest.h")
     ps.add_property("currentBlock",     "blockforest::BlockID",    defValue="",          syncMode="NEVER")
 
+    ps.add_property("oldContactHistory", "std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>",
+                    defValue="", syncMode="ALWAYS")
+    ps.add_property("newContactHistory", "std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory>",
+                    defValue="", syncMode="NEVER")
+
+    ch = mpd.add(data.ContactHistory())
+    ch.add_property("tangentialSpringDisplacement", "walberla::mesa_pd::Vec3", defValue="real_t(0)")
+
     mpd.add(data.LinkedCells())
     mpd.add(data.SparseLinkedCells())
     mpd.add(data.ShapeStorage(ps))

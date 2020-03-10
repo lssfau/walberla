@@ -42,7 +42,9 @@
 #include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/kernel/SpringDashpot.h>
+#include <mesa_pd/kernel/SpringDashpotSpring.h>
 #include <mesa_pd/mpi/ContactFilter.h>
+#include <mesa_pd/mpi/ReduceContactHistory.h>
 #include <mesa_pd/mpi/ReduceProperty.h>
 #include <mesa_pd/mpi/SyncNextNeighbors.h>
 #include <mesa_pd/mpi/SyncNextNeighborsBlockForest.h>
@@ -75,11 +77,16 @@ class DEM
 {
 public:
    DEM(const std::shared_ptr<domain::BlockForestDomain>& domain, real_t dt, real_t mass)
-   : domain_(domain)
+   : dt_(dt)
+   , domain_(domain)
    {
-      dem_.setDampingT(0, 0, real_t(0));
-      dem_.setFriction(0, 0, real_t(0));
-      dem_.setParametersFromCOR(0, 0, real_t(0.9), dt*real_t(20), mass * real_t(0.5));
+      sd_.setDampingT(0, 0, real_t(0));
+      sd_.setFriction(0, 0, real_t(0));
+      sd_.setParametersFromCOR(0, 0, real_t(0.9), dt*real_t(20), mass * real_t(0.5));
+
+      sds_.setParametersFromCOR(0, 0, real_t(0.9), dt*real_t(20), mass * real_t(0.5));
+      sds_.setCoefficientOfFriction(0,0,real_t(0.4));
+      sds_.setStiffnessT(0,0,real_t(0.9) * sds_.getStiffnessN(0,0));
    }
 
    inline
@@ -94,8 +101,10 @@ public:
                              *domain_))
          {
             ++contactsTreated_;
-            dem_(acd_.getIdx1(), acd_.getIdx2(), ac, acd_.getContactPoint(),
-                 acd_.getContactNormal(), acd_.getPenetrationDepth());
+//            sd_(acd_.getIdx1(), acd_.getIdx2(), ac, acd_.getContactPoint(),
+//                 acd_.getContactNormal(), acd_.getPenetrationDepth());
+            sds_(acd_.getIdx1(), acd_.getIdx2(), ac, acd_.getContactPoint(),
+                 acd_.getContactNormal(), acd_.getPenetrationDepth(), dt_);
          }
       }
    }
@@ -127,10 +136,12 @@ public:
    }
 
 private:
+   real_t dt_;
    kernel::DoubleCast double_cast_;
    mpi::ContactFilter contact_filter_;
    std::shared_ptr<domain::BlockForestDomain> domain_;
-   kernel::SpringDashpot dem_ = kernel::SpringDashpot(1);
+   kernel::SpringDashpot sd_ = kernel::SpringDashpot(1);
+   kernel::SpringDashpotSpring sds_ = kernel::SpringDashpotSpring(1);
    collision_detection::AnalyticContactDetection acd_;
    int64_t contactsChecked_ = 0;
    int64_t contactsDetected_ = 0;
@@ -239,6 +250,7 @@ int main( int argc, char ** argv )
    DEM dem(domain, params.dt, ss->shapes[smallSphere]->getMass());
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::AssocToBlock                  assoc(forest);
+   mpi::ReduceContactHistory             RCH;
    mpi::ReduceProperty                   RP;
    mpi::SyncNextNeighborsBlockForest     SNN;
 
@@ -296,6 +308,11 @@ int main( int argc, char ** argv )
          RP.operator()<ForceTorqueNotification>(*ps);
          if (params.bBarrier) WALBERLA_MPI_BARRIER();
          tp["ReduceForce"].end();
+
+         tp["ReduceContactHistory"].start();
+         RCH(*ps);
+         if (params.bBarrier) WALBERLA_MPI_BARRIER();
+         tp["ReduceContactHistory"].end();
 
          tp["Euler"].start();
          //ps->forEachParticle(false, [&](const size_t idx){WALBERLA_CHECK_EQUAL(ps->getForce(idx), Vec3(0,0,0), *(*ps)[idx] << "\n" << idx);});
