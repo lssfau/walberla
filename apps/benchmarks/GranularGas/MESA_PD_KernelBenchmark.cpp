@@ -42,7 +42,9 @@
 #include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/kernel/SpringDashpot.h>
+#include <mesa_pd/kernel/SpringDashpotSpring.h>
 #include <mesa_pd/mpi/ContactFilter.h>
+#include <mesa_pd/mpi/ReduceContactHistory.h>
 #include <mesa_pd/mpi/ReduceProperty.h>
 #include <mesa_pd/mpi/SyncNextNeighbors.h>
 #include <mesa_pd/mpi/SyncNextNeighborsBlockForest.h>
@@ -264,12 +266,18 @@ int main( int argc, char ** argv )
    kernel::ExplicitEulerWithShape        explicitEulerWithShape( params.dt );
    kernel::AssocToBlock                  assoc(forest);
    kernel::InsertParticleIntoLinkedCells ipilc;
-   kernel::SpringDashpot                 dem(1);
-   dem.setDampingT (0, 0, real_t(0));
-   dem.setFriction (0, 0, real_t(0));
-   dem.setParametersFromCOR(0, 0, real_t(0.9), params.dt*real_t(20), ss->shapes[smallSphere]->getMass() * real_t(0.5));
+   kernel::SpringDashpot                 sd(1);
+   sd.setDampingT (0, 0, real_t(0));
+   sd.setFriction (0, 0, real_t(0));
+   sd.setParametersFromCOR(0, 0, real_t(0.9), params.dt*real_t(20), ss->shapes[smallSphere]->getMass() * real_t(0.5));
+   kernel::SpringDashpotSpring           sds(1);
+   sds.setParametersFromCOR(0, 0, real_t(0.9), params.dt*real_t(20), ss->shapes[smallSphere]->getMass() * real_t(0.5));
+   sds.setCoefficientOfFriction(0,0,real_t(0.4));
+   sds.setStiffnessT(0,0,real_t(0.9) * sds.getStiffnessN(0,0));
+
    mpi::ReduceProperty                   RP;
    mpi::SyncNextNeighbors                SNN;
+   mpi::ReduceContactHistory             RCH;
    ContactDetection                      CD(domain);
 
    // initial sync
@@ -283,6 +291,17 @@ int main( int argc, char ** argv )
       WALBERLA_LOG_INFO_ON_ROOT("*** RUNNING OUTER ITERATION " << outerIteration << " ***");
 
       WcTimingPool tp;
+
+      LIKWID_MARKER_REGISTER("SNN");
+      WALBERLA_MPI_BARRIER();
+      LIKWID_MARKER_START("SNN");
+      tp["SNN"].start();
+      for (int64_t i=0; i < params.simulationSteps; ++i)
+      {
+         SNN(*ps, *domain);
+      }
+      tp["SNN"].end();
+      LIKWID_MARKER_STOP("SNN");
 
       LIKWID_MARKER_REGISTER("AssocToBlock");
       WALBERLA_MPI_BARRIER();
@@ -323,19 +342,33 @@ int main( int argc, char ** argv )
       tp["ContactDetection"].end();
       LIKWID_MARKER_STOP("ContactDetection");
 
-      LIKWID_MARKER_REGISTER("DEM");
+      LIKWID_MARKER_REGISTER("SpringDashpot");
       WALBERLA_MPI_BARRIER();
-      LIKWID_MARKER_START("DEM");
-      tp["DEM"].start();
+      LIKWID_MARKER_START("SpringDashpot");
+      tp["SpringDashpot"].start();
       for (int64_t i=0; i < params.simulationSteps; ++i)
       {
          for (auto& c : CD.getContacts())
          {
-            dem(c.idx1_, c.idx2_, accessor, c.contactPoint_, c.contactNormal_, c.penetrationDepth_);
+            sd(c.idx1_, c.idx2_, accessor, c.contactPoint_, c.contactNormal_, c.penetrationDepth_);
          }
       }
-      tp["DEM"].end();
-      LIKWID_MARKER_STOP("DEM");
+      tp["SpringDashpot"].end();
+      LIKWID_MARKER_STOP("SpringDashpot");
+
+      LIKWID_MARKER_REGISTER("SpringDashpotSpring");
+      WALBERLA_MPI_BARRIER();
+      LIKWID_MARKER_START("SpringDashpotSpring");
+      tp["SpringDashpotSpring"].start();
+      for (int64_t i=0; i < params.simulationSteps; ++i)
+      {
+         for (auto& c : CD.getContacts())
+         {
+            sds(c.idx1_, c.idx2_, accessor, c.contactPoint_, c.contactNormal_, c.penetrationDepth_, params.dt);
+         }
+      }
+      tp["SpringDashpotSpring"].end();
+      LIKWID_MARKER_STOP("SpringDashpotSpring");
 
       LIKWID_MARKER_REGISTER("ReduceForce");
       WALBERLA_MPI_BARRIER();
@@ -348,6 +381,17 @@ int main( int argc, char ** argv )
       tp["ReduceForce"].end();
       LIKWID_MARKER_STOP("ReduceForce");
 
+      LIKWID_MARKER_REGISTER("ReduceContactHistory");
+      WALBERLA_MPI_BARRIER();
+      LIKWID_MARKER_START("ReduceContactHistory");
+      tp["ReduceContactHistory"].start();
+      for (int64_t i=0; i < params.simulationSteps; ++i)
+      {
+         RCH(*ps);
+      }
+      tp["ReduceContactHistory"].end();
+      LIKWID_MARKER_STOP("ReduceContactHistory");
+
       LIKWID_MARKER_REGISTER("Euler");
       WALBERLA_MPI_BARRIER();
       LIKWID_MARKER_START("Euler");
@@ -358,17 +402,6 @@ int main( int argc, char ** argv )
       }
       tp["Euler"].end();
       LIKWID_MARKER_STOP("Euler");
-
-      LIKWID_MARKER_REGISTER("SNN");
-      WALBERLA_MPI_BARRIER();
-      LIKWID_MARKER_START("SNN");
-      tp["SNN"].start();
-      for (int64_t i=0; i < params.simulationSteps; ++i)
-      {
-         SNN(*ps, *domain);
-      }
-      tp["SNN"].end();
-      LIKWID_MARKER_STOP("SNN");
 
       WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - END ***");
 

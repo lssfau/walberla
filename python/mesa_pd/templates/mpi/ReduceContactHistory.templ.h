@@ -96,12 +96,16 @@ void ReduceContactHistory::operator()(data::ParticleStorage& ps) const
    const auto size = ps.size();
    for (size_t idx = 0; idx < size; ++idx)
    {
+      //only for kernel benchmark
+//      ps.getOldContactHistoryRef(idx).clear();
       if (!data::particle_flags::isSet( ps.getFlags(idx), data::particle_flags::GHOST) )
       {
+         //master
          std::swap(ps.getOldContactHistoryRef(idx), ps.getNewContactHistoryRef(idx));
          ps.getNewContactHistoryRef(idx).clear();
       } else
       {
+         //ghost
          ps.getOldContactHistoryRef(idx).clear();
          ps.getNewContactHistoryRef(idx).clear();
       }
