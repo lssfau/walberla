@@ -68,6 +68,15 @@ def __lattice_model(generation_context, class_name, lb_method, stream_collide_as
 
     if refinement_scaling:
         refinement_scaling_info = [ (e0,e1,expression_to_code(e2, '', dtype=dtype)) for e0,e1,e2 in refinement_scaling.scaling_info ]
+        # append '_' to entries since they are used as members
+        for i in range(len(refinement_scaling_info)):
+            updated_entry = (refinement_scaling_info[i][0],
+                             refinement_scaling_info[i][1].replace(refinement_scaling_info[i][1],
+                                                                   refinement_scaling_info[i][1] + '_'),
+                             refinement_scaling_info[i][2].replace(refinement_scaling_info[i][1],
+                                                                   refinement_scaling_info[i][1] + '_'),
+                             )
+            refinement_scaling_info[i] = updated_entry
     else:
         refinement_scaling_info = None
 
@@ -147,8 +156,6 @@ def generate_lattice_model(generation_context, class_name, collision_rule, refin
                     refinement_scaling)
 
 
-
-
 class RefinementScaling:
     level_scale_factor = sp.Symbol("level_scale_factor")
 
@@ -217,18 +224,27 @@ def stencil_switch_statement(stencil, values):
 def field_and_symbol_substitute(expr, variable_prefix="lm.", variables_without_prefix=[]):
     variables_without_prefix = [v.name if isinstance(v, sp.Symbol) else v for v in variables_without_prefix]
     substitutions = {}
+    # check for member access
+    if variable_prefix.endswith('.'):
+        postfix = '_'
+    else:
+        postfix = ''
     for sym in expr.atoms(sp.Symbol):
         if isinstance(sym, Field.Access):
             fa = sym
             prefix = "" if fa.field.name in variables_without_prefix else variable_prefix
+            if prefix.endswith('.'):
+                postfix2 = '_'
+            else:
+                postfix2 = ''
             if fa.field.index_dimensions == 0:
-                substitutions[fa] = sp.Symbol("%s%s->get(x,y,z)" % (prefix, fa.field.name))
+                substitutions[fa] = sp.Symbol("%s%s->get(x,y,z)" % (prefix, fa.field.name + postfix2))
             else:
                 assert fa.field.index_dimensions == 1, "walberla supports only 0 or 1 index dimensions"
-                substitutions[fa] = sp.Symbol("%s%s->get(x,y,z,%s)" % (prefix, fa.field.name, fa.index[0]))
+                substitutions[fa] = sp.Symbol("%s%s->get(x,y,z,%s)" % (prefix, fa.field.name + postfix2, fa.index[0]))
         else:
             if sym.name not in variables_without_prefix:
-                substitutions[sym] = sp.Symbol(variable_prefix + sym.name)
+                substitutions[sym] = sp.Symbol(variable_prefix + sym.name + postfix)
     return expr.subs(substitutions)
 
 
@@ -244,9 +260,18 @@ def expression_to_code(expr, variable_prefix="lm.", variables_without_prefix=[],
     """
     return cpp_printer.doprint(type_expr(field_and_symbol_substitute(expr, variable_prefix, variables_without_prefix),dtype=dtype))
 
+
 def type_expr(eq, dtype):
-    eq=type_all_numbers(eq,dtype=dtype)
+    def recurse(expr):
+        for i in range(len(expr.args)):
+            if expr.args[i] == sp.Rational or expr.args[i] == sp.Float:
+                expr.args[i] = type_all_numbers(expr.args[i], dtype=dtype)
+            else:
+                recurse(expr.args[i])
+
+    recurse(eq)
     return eq.subs({s: TypedSymbol(s.name, dtype) for s in eq.atoms(sp.Symbol)})
+
 
 def equations_to_code(equations, variable_prefix="lm.", variables_without_prefix=[], dtype="double"):
 

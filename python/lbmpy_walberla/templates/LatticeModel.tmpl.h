@@ -134,17 +134,17 @@ public:
 private:
     void configureBlock(IBlock * block, StructuredBlockStorage * storage)
     {
-        {{stream_collide_kernel|generate_block_data_to_field_extraction(lmIgnores+lmOffsets, no_declarations=True)|indent(8)}}
+        {{stream_collide_kernel|generate_block_data_to_field_extraction(lmIgnores+lmOffsets, no_declarations=True, update_member=True)|indent(8)}}
         {% if need_block_offsets[0] -%}
-        block_offset_0 = uint32_c(storage->getBlockCellBB(*block).xMin());
+        block_offset_0_ = uint32_c(storage->getBlockCellBB(*block).xMin());
         {% endif -%}
         {%- if need_block_offsets[1] -%}
-        block_offset_1 = uint32_c(storage->getBlockCellBB(*block).yMin());
+        block_offset_1_ = uint32_c(storage->getBlockCellBB(*block).yMin());
         {% endif -%}
         {%- if need_block_offsets[2] -%}
-        block_offset_2 = uint32_c(storage->getBlockCellBB(*block).zMin());
+        block_offset_2_ = uint32_c(storage->getBlockCellBB(*block).zMin());
         {% endif %}
-        blockId = &block->getId();
+        blockId_ = &block->getId();
 
         {% if refinement_scaling_info -%}
         const uint_t targetLevel = block->getBlockStorage().getLevel(*block);
@@ -182,7 +182,7 @@ private:
 
     // Updated by configureBlock:
     {{stream_collide_kernel|generate_block_data_to_field_extraction(lmIgnores, declarations_only=True)|indent(4)}}
-    const IBlockID * blockId;
+    const IBlockID * blockId_;
     uint_t currentLevel;
 
     // Backend classes can access private members:

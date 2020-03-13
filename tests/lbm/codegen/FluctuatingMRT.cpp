@@ -85,7 +85,7 @@ int main( int argc, char ** argv )
    communication.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldId ) );
 
    // add LBM sweep and communication to time loop
-   timeloop.add() << BeforeFunction( [&](){ latticeModel.time_step = uint32_c(timeloop.getCurrentTimeStep()); }, "set RNG counter" )
+   timeloop.add() << BeforeFunction( [&](){ latticeModel.time_step_ = uint32_c(timeloop.getCurrentTimeStep()); }, "set RNG counter" )
                   << BeforeFunction( communication, "communication" )
                   << Sweep( LatticeModel_T::Sweep( pdfFieldId ), "LB stream & collide" );
 

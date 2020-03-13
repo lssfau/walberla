@@ -1,5 +1,6 @@
 import jinja2
 import sympy as sp
+import re
 
 from pystencils import TypedSymbol
 from pystencils.backends.cbackend import generate_c
@@ -90,7 +91,7 @@ def generate_definition(kernel_info, target='cpu'):
 
 
 def field_extraction_code(field, is_temporary, declaration_only=False,
-                          no_declaration=False, is_gpu=False):
+                          no_declaration=False, is_gpu=False, update_member=False):
     """Returns code string for getting a field pointer.
 
     This can happen in two ways: either the field is extracted from a walberla block, or a temporary field to swap is
@@ -102,9 +103,10 @@ def field_extraction_code(field, is_temporary, declaration_only=False,
         declaration_only: only create declaration instead of the full code
         no_declaration: create the extraction code, and assume that declarations are elsewhere
         is_gpu: if the field is a GhostLayerField or a GpuField
+        update_member: specify if function is used inside a constructor; add _ to members
     """
 
-    # Determine size of f coordinate which is a template parameter
+# Determine size of f coordinate which is a template parameter
     f_size = get_field_fsize(field)
     field_name = field.name
     dtype = get_base_type(field.dtype)
@@ -114,15 +116,18 @@ def field_extraction_code(field, is_temporary, declaration_only=False,
         dtype = get_base_type(field.dtype)
         field_type = make_field_type(dtype, f_size, is_gpu)
         if declaration_only:
-            return "%s * %s;" % (field_type, field_name)
+            return "%s * %s_;" % (field_type, field_name)
         else:
             prefix = "" if no_declaration else "auto "
-            return "%s%s = block->uncheckedFastGetData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
+            if update_member:
+                return "%s%s_ = block->uncheckedFastGetData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
+            else:
+                return "%s%s = block->uncheckedFastGetData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
     else:
         assert field_name.endswith('_tmp')
         original_field_name = field_name[:-len('_tmp')]
         if declaration_only:
-            return "%s * %s;" % (field_type, field_name)
+            return "%s * %s_;" % (field_type, field_name)
         else:
             declaration = "{type} * {tmp_field_name};".format(type=field_type, tmp_field_name=field_name)
             tmp_field_str = temporary_fieldTemplate.format(original_field_name=original_field_name,
@@ -132,7 +137,7 @@ def field_extraction_code(field, is_temporary, declaration_only=False,
 
 @jinja2.contextfilter
 def generate_block_data_to_field_extraction(ctx, kernel_info, parameters_to_ignore=(), parameters=None,
-                                            declarations_only=False, no_declarations=False):
+                                            declarations_only=False, no_declarations=False, update_member=False):
     """Generates code that extracts all required fields of a kernel from a walberla block storage."""
     if parameters is not None:
         assert parameters_to_ignore == ()
@@ -154,8 +159,12 @@ def generate_block_data_to_field_extraction(ctx, kernel_info, parameters_to_igno
         'no_declaration': no_declarations,
         'is_gpu': ctx['target'] == 'gpu',
     }
-    result = "\n".join(field_extraction_code(field=field, is_temporary=False, **args) for field in normal_fields) + "\n"
-    result += "\n".join(field_extraction_code(field=field, is_temporary=True, **args) for field in temporary_fields)
+    result = "\n".join(
+        field_extraction_code(field=field, is_temporary=False, update_member=update_member, **args) for field in
+        normal_fields) + "\n"
+    result += "\n".join(
+        field_extraction_code(field=field, is_temporary=True, update_member=update_member, **args) for field in
+        temporary_fields)
     return result
 
 
@@ -163,7 +172,7 @@ def generate_refs_for_kernel_parameters(kernel_info, prefix, parameters_to_ignor
     symbols = {p.field_name for p in kernel_info.parameters if p.is_field_pointer}
     symbols.update(p.symbol.name for p in kernel_info.parameters if not p.is_field_parameter)
     symbols.difference_update(parameters_to_ignore)
-    return "\n".join("auto & %s = %s%s;" % (s, prefix, s) for s in symbols)
+    return "\n".join("auto & %s = %s%s_;" % (s, prefix, s) for s in symbols)
 
 
 @jinja2.contextfilter
@@ -256,6 +265,7 @@ def generate_call(ctx, kernel_info, ghost_layers_to_include=0, cell_interval=Non
             kernel_call_lines.append("const %s %s = %s;" % (type_str, param.symbol.name, shape))
 
     call_parameters = ", ".join([p.symbol.name for p in ast_params])
+
     if not is_cpu:
         if not spatial_shape_symbols:
             spatial_shape_symbols = [p.symbol for p in ast_params if p.is_field_shape]
@@ -295,7 +305,7 @@ def generate_constructor_initializer_list(kernel_info, parameters_to_ignore=None
         if param.is_field_pointer and param.field_name not in parameters_to_ignore:
             parameter_initializer_list.append("%sID(%sID_)" % (param.field_name, param.field_name))
         elif not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
-            parameter_initializer_list.append("%s(%s_)" % (param.symbol.name, param.symbol.name))
+            parameter_initializer_list.append("%s_(%s)" % (param.symbol.name, param.symbol.name))
     return ", ".join(parameter_initializer_list)
 
 
@@ -314,8 +324,8 @@ def generate_constructor_parameters(kernel_info, parameters_to_ignore=None):
         if param.is_field_pointer and param.field_name not in parameters_to_ignore:
             parameter_list.append("BlockDataID %sID_" % (param.field_name, ))
         elif not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
-            parameter_list.append("%s %s_" % (param.symbol.dtype, param.symbol.name,))
-    varying_parameters = ["%s %s_" % e for e in varying_parameters]
+            parameter_list.append("%s %s" % (param.symbol.dtype, param.symbol.name,))
+    varying_parameters = ["%s %s" % e for e in varying_parameters]
     return ", ".join(parameter_list + varying_parameters)
 
 
@@ -335,7 +345,7 @@ def generate_members(ctx, kernel_info, parameters_to_ignore=(), only_fields=Fals
         if param.is_field_pointer and param.field_name not in params_to_skip:
             result.append("BlockDataID %sID;" % (param.field_name, ))
         elif not param.is_field_parameter and param.symbol.name not in params_to_skip:
-            result.append("%s %s;" % (param.symbol.dtype, param.symbol.name,))
+            result.append("%s %s_;" % (param.symbol.dtype, param.symbol.name,))
 
     for field_name in kernel_info.temporary_fields:
         f = fields[field_name]
@@ -348,7 +358,7 @@ def generate_members(ctx, kernel_info, parameters_to_ignore=(), only_fields=Fals
         result.append(temporary_fieldMemberTemplate.format(type=field_type, original_field_name=original_field_name))
 
     if hasattr(kernel_info, 'varying_parameters'):
-        result.extend(["%s %s;" % e for e in kernel_info.varying_parameters])
+        result.extend(["%s %s_;" % e for e in kernel_info.varying_parameters])
 
     return "\n".join(result)
 

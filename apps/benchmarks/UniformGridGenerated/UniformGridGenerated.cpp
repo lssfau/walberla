@@ -155,7 +155,7 @@ int main( int argc, char **argv )
 
       auto remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", -1.0 ); // in seconds
       if (remainingTimeLoggerFrequency > 0) {
-          auto logger = timing::RemainingTimeLogger( timeLoop.getNrOfTimeSteps() * outerIterations, remainingTimeLoggerFrequency );
+          auto logger = timing::RemainingTimeLogger( timeLoop.getNrOfTimeSteps() * uint_c( outerIterations ), remainingTimeLoggerFrequency );
           timeLoop.addFuncAfterTimeStep( logger, "remaining time logger" );
       }
 
