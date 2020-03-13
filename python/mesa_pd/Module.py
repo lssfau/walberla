@@ -33,7 +33,7 @@ class Module:
         for root, dirnames, filenames in os.walk(self.context['module_path']):
             for filename in filenames:
                 filedata = None
-                print(f'{root}/{filename}')
+                # print(f'renaming module name: {root}/{filename}')
                 with open(f'{root}/{filename}', 'r') as file:
                     filedata = file.read()
 
@@ -51,6 +51,8 @@ class Module:
 
         mesa_pd_folder = (Path(__file__).parents[2] / 'src' / 'mesa_pd').resolve()
         if (mesa_pd_folder != self.context['module_path']):
+            if not self.context['module_path'].exists():
+                self.context['module_path'].mkdir()
             shutil.rmtree(self.context['module_path'])
             shutil.copytree(mesa_pd_folder, self.context['module_path'])
 
