@@ -376,7 +376,7 @@ intel_19_hybrid:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -397,7 +397,7 @@ intel_19_serial_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -418,7 +418,7 @@ intel_19_mpionly_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -439,7 +439,7 @@ intel_19_hybrid_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -879,7 +879,7 @@ gcc_9_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    stage: pretest
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -899,7 +899,7 @@ gcc_9_serial_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -919,7 +919,7 @@ gcc_9_mpionly_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -939,7 +939,7 @@ gcc_9_hybrid_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -1460,7 +1460,7 @@ clang_9.0_hybrid:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -1480,7 +1480,7 @@ clang_9.0_serial_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -1500,7 +1500,7 @@ clang_9.0_mpionly_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
@@ -1520,7 +1520,7 @@ clang_9.0_hybrid_dbg:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install git+https://i10git.cs.fau.de/pycodegen/lbmpy.git
+      - pip3 install lbmpy
       - cd python
       - python3 -m unittest discover pystencils_walberla/
       - python3 -m unittest discover lbmpy_walberla/
