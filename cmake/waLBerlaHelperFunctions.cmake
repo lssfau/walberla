@@ -64,10 +64,11 @@ function( handle_python_codegen sourceFilesOut generatedSourceFilesOut generator
                 string(REPLACE "\"" "\\\"" pythonParameters ${pythonParameters})   # even one more quoting level required
                 string(REPLACE "\n" "" pythonParameters ${pythonParameters})  # remove newline characters
 
+                set( WALBERLA_PYTHON_DIR ${walberla_SOURCE_DIR}/python)
                 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
                 add_custom_command(OUTPUT ${generatedWithAbsolutePath}
                                    DEPENDS ${sourceFile}
-                                   COMMAND ${PYTHON_EXECUTABLE} ${sourceFile} ${pythonParameters}
+                                   COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${WALBERLA_PYTHON_DIR} ${PYTHON_EXECUTABLE} ${sourceFile} ${pythonParameters}
                                    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
             endif()
         else()
