@@ -54,17 +54,17 @@ class {{class_name}}
 {
 public:
     {{class_name}}( {{kernel|generate_constructor_parameters}}, const Cell & outerWidth=Cell(1, 1, 1))
-        : {{ kernel|generate_constructor_initializer_list }}, outerWidth_(outerWidth)
+        : {{ kernel|generate_constructor_initializer_list }}{% if kernel|generate_constructor_initializer_list|length %},{% endif %} outerWidth_(outerWidth)
     {};
 
     {{ kernel| generate_destructor(class_name) |indent(4) }}
 
 
-    void operator() ( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = 0{% endif %} );
+    void operator() ( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %} );
 
     void runOnCellInterval(const shared_ptr<StructuredBlockStorage> & blocks,
                            const CellInterval & globalCellInterval, cell_idx_t ghostLayers, IBlock * block
-                           {%if target is equalto 'gpu'%} , cudaStream_t stream = 0{% endif %});
+                           {%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %});
 
 
 
@@ -78,14 +78,14 @@ public:
                                    const CellInterval & globalCellInterval,
                                    cell_idx_t ghostLayers=1 )
     {
-        return [kernel, blocks, globalCellInterval, ghostLayers] (IBlock * b{%if target is equalto 'gpu'%} , cudaStream_t stream = 0{% endif %}) {
-            kernel->runOnCellInterval(blocks, globalCellInterval, ghostLayers, b{%if target is equalto 'gpu'%},stream {% endif %});
+        return [kernel, blocks, globalCellInterval, ghostLayers] (IBlock * b{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %}) {
+            kernel->runOnCellInterval(blocks, globalCellInterval, ghostLayers, b{%if target is equalto 'gpu'%}, stream {% endif %});
         };
     }
 
 
-    void inner( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = 0{% endif %} );
-    void outer( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = 0{% endif %} );
+    void inner( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %} );
+    void outer( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %} );
 
     void setOuterPriority(int priority ) {
         {%if target is equalto 'gpu'%}
