@@ -120,9 +120,9 @@ def field_extraction_code(field, is_temporary, declaration_only=False,
         else:
             prefix = "" if no_declaration else "auto "
             if update_member:
-                return "%s%s_ = block->uncheckedFastGetData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
+                return "%s%s_ = block->getData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
             else:
-                return "%s%s = block->uncheckedFastGetData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
+                return "%s%s = block->getData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
     else:
         assert field_name.endswith('_tmp')
         original_field_name = field_name[:-len('_tmp')]
