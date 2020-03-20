@@ -14,16 +14,18 @@ temporary_fieldMemberTemplate = """
 private: std::set< {type} *, field::SwapableCompare< {type} * > > cache_{original_field_name}_;"""
 
 temporary_fieldTemplate = """
-// Getting temporary field {tmp_field_name}
-auto it = cache_{original_field_name}_.find( {original_field_name} );
-if( it != cache_{original_field_name}_.end() )
 {{
-    {tmp_field_name} = *it;
-}}
-else 
-{{
-    {tmp_field_name} = {original_field_name}->cloneUninitialized();
-    cache_{original_field_name}_.insert({tmp_field_name});
+    // Getting temporary field {tmp_field_name}
+    auto it = cache_{original_field_name}_.find( {original_field_name} );
+    if( it != cache_{original_field_name}_.end() )
+    {{
+        {tmp_field_name} = *it;
+    }}
+    else
+    {{
+        {tmp_field_name} = {original_field_name}->cloneUninitialized();
+        cache_{original_field_name}_.insert({tmp_field_name});
+    }}
 }}
 """
 
@@ -42,7 +44,7 @@ def make_field_type(dtype, f_size, is_gpu):
     if is_gpu:
         return "cuda::GPUField<%s>" % (dtype,)
     else:
-        return "GhostLayerField<%s, %d>" % (dtype, f_size)
+        return "field::GhostLayerField<%s, %d>" % (dtype, f_size)
 
 
 def get_field_fsize(field):
@@ -120,9 +122,9 @@ def field_extraction_code(field, is_temporary, declaration_only=False,
         else:
             prefix = "" if no_declaration else "auto "
             if update_member:
-                return "%s%s_ = block->uncheckedFastGetData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
+                return "%s%s_ = block->getData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
             else:
-                return "%s%s = block->uncheckedFastGetData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
+                return "%s%s = block->getData< %s >(%sID);" % (prefix, field_name, field_type, field_name)
     else:
         assert field_name.endswith('_tmp')
         original_field_name = field_name[:-len('_tmp')]
@@ -273,6 +275,9 @@ def generate_call(ctx, kernel_info, ghost_layers_to_include=0, cell_interval=Non
         else:
             spatial_shape_symbols = [TypedSymbol(s, SHAPE_DTYPE) for s in spatial_shape_symbols]
 
+        assert spatial_shape_symbols, "No shape parameters in kernel function arguments.\n"\
+            "Please be only use kernels for generic field sizes!"
+
         indexing_dict = ast.indexing.call_parameters(spatial_shape_symbols)
         sp_printer_c = CudaSympyPrinter()
         kernel_call_lines += [
@@ -312,7 +317,7 @@ def generate_constructor_initializer_list(kernel_info, parameters_to_ignore=None
 def generate_constructor_parameters(kernel_info, parameters_to_ignore=None):
     if parameters_to_ignore is None:
         parameters_to_ignore = []
-        
+
     varying_parameters = []
     if hasattr(kernel_info, 'varying_parameters'):
         varying_parameters = kernel_info.varying_parameters

@@ -57,10 +57,10 @@ public:
 
     {{ kernel| generate_destructor(class_name) |indent(4) }}
 
-    void operator() ( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = 0{% endif %} );
+    void operator() ( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %} );
     void runOnCellInterval(const shared_ptr<StructuredBlockStorage> & blocks,
                            const CellInterval & globalCellInterval, cell_idx_t ghostLayers, IBlock * block
-                           {%if target is equalto 'gpu'%} , cudaStream_t stream = 0{% endif %});
+                           {%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %});
 
 
 
@@ -74,8 +74,8 @@ public:
                                    const CellInterval & globalCellInterval,
                                    cell_idx_t ghostLayers=1 )
     {
-        return [kernel, blocks, globalCellInterval, ghostLayers] (IBlock * b{%if target is equalto 'gpu'%} , cudaStream_t stream = 0{% endif %}) {
-            kernel->runOnCellInterval(blocks, globalCellInterval, ghostLayers, b{%if target is equalto 'gpu'%},stream {% endif %});
+        return [kernel, blocks, globalCellInterval, ghostLayers] (IBlock * b{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %}) {
+            kernel->runOnCellInterval(blocks, globalCellInterval, ghostLayers, b{%if target is equalto 'gpu'%}, stream {% endif %});
         };
     }
 
