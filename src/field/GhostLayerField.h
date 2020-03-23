@@ -66,6 +66,11 @@ namespace field {
 
       typedef typename Field<T,fSize_>::Ptr                    Ptr;
       typedef typename Field<T,fSize_>::ConstPtr               ConstPtr;
+
+      typedef typename std::conditional<VectorTrait<T>::F_SIZE!=0,
+                                        GhostLayerField<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE*fSize_>,
+                                        GhostLayerField<T, fSize_>
+                                        >::type FlattenedField;
       //@}
       //****************************************************************************************************************
 
@@ -105,6 +110,7 @@ namespace field {
       inline GhostLayerField<T,fSize_> * clone()              const;
       inline GhostLayerField<T,fSize_> * cloneUninitialized() const;
       inline GhostLayerField<T,fSize_> * cloneShallowCopy()   const;
+      inline FlattenedField * flattenedShallowCopy() const;
       //@}
       //****************************************************************************************************************
 
@@ -209,11 +215,15 @@ namespace field {
       /*! \name Shallow Copy */
       //@{
       virtual Field<T,fSize_> * cloneShallowCopyInternal()   const;
+      virtual typename Field<T,fSize_>::FlattenedField * flattenedShallowCopyInternal() const;
       GhostLayerField(const GhostLayerField<T,fSize_> & other);
+      template <typename T2, uint_t fSize2>
+      GhostLayerField(const GhostLayerField<T2, fSize2> & other);
       //@}
       //****************************************************************************************************************
 
-
+      template <typename T2, uint_t fSize2>
+      friend class GhostLayerField;
    };
 
 } // namespace field

@@ -697,6 +697,17 @@ namespace field {
    }
 
    //*******************************************************************************************************************
+   /*!\brief Private copy constructor, which does a flattened shallow copy
+    *******************************************************************************************************************/
+   template<typename T, uint_t fSize_>
+   template <typename T2, uint_t fSize2>
+   GhostLayerField<T,fSize_>::GhostLayerField(const GhostLayerField<T2,fSize2> & other)
+      : Field<T,fSize_>::Field(other),
+        gl_( other.gl_ )
+   {
+   }
+
+   //*******************************************************************************************************************
    /*!\brief See Field::cloneShallowCopyInternal()
     *  Has to be re-implemented because a new GhostLayerField is created
     *******************************************************************************************************************/
@@ -704,6 +715,16 @@ namespace field {
    Field<T,fSize_> * GhostLayerField<T,fSize_>::cloneShallowCopyInternal() const
    {
       return new GhostLayerField<T,fSize_>(*this);
+   }
+
+   //*******************************************************************************************************************
+   /*!\brief See Field::flattenedShallowCopyInternal()
+    *  Has to be re-implemented because a new GhostLayerField is created
+    *******************************************************************************************************************/
+   template<typename T, uint_t fSize_>
+   typename Field<T,fSize_>::FlattenedField * GhostLayerField<T,fSize_>::flattenedShallowCopyInternal() const
+   {
+      return new GhostLayerField<T,fSize_>::FlattenedField(*this);
    }
 
 
@@ -723,6 +744,12 @@ namespace field {
    GhostLayerField<T,fSize_> * GhostLayerField<T,fSize_>::cloneShallowCopy() const
    {
       return dynamic_cast<GhostLayerField<T,fSize_>* > (Field<T,fSize_>::cloneShallowCopy() );
+   }
+
+   template<typename T, uint_t fSize_>
+   typename GhostLayerField<T,fSize_>::FlattenedField * GhostLayerField<T,fSize_>::flattenedShallowCopy() const
+   {
+      return dynamic_cast<GhostLayerField<T,fSize_>::FlattenedField* > (Field<T,fSize_>::flattenedShallowCopy() );
    }
 
    template<typename T, uint_t fSize_>

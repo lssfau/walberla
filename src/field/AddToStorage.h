@@ -247,6 +247,36 @@ BlockDataID addCloneToStorage( const shared_ptr< BlockStorage_T > & blocks,
 
 
 //**********************************************************************************************************************
+/*! Adds a flattened shallow copy of an existing field to BlockStorage
+*
+* Template parameters:
+*   Field_T         the type of the field that should be cloned and flattened
+*   BlockStorage_T  the type of the BlockStorage ( will be deduced automatically )
+*
+* Parameters:
+*   \param blocks        BlockStorage where the original field is stored and the new one is created
+*   \param fieldToClone  BlockDataID of the Field that is cloned
+*   \param identifier    name for new the field ( displayed in GUI and debugging functions )
+*/
+//**********************************************************************************************************************
+template< typename Field_T, typename BlockStorage_T >
+BlockDataID addFlattenedShallowCopyToStorage( const shared_ptr< BlockStorage_T > & blocks,
+                                              ConstBlockDataID fieldToClone,
+                                              const std::string & identifier,
+                                              const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
+                                              const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
+{
+   return blocks->addBlockData( make_shared< field::FlattenedShallowCopyBlockDataHandling< Field_T > >( fieldToClone ),
+                                identifier, requiredSelectors, incompatibleSelectors );
+}
+
+
+
+
+
+
+
+//**********************************************************************************************************************
 /*! BlockDataCreator for fields
 *
 * Use this class when different fields should be added for different selectors.

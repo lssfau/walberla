@@ -577,6 +577,99 @@ void fieldPointerTest()
 }
 
 
+template<uint_t fSize>
+void flattenTest()
+{
+   Field<Vector3<uint_t>, fSize> field ( 2,2,1 );
+
+   for( cell_idx_t x = 0; x < cell_idx_c(field.xSize()); ++x )
+      for( cell_idx_t y = 0; y < cell_idx_c(field.ySize()); ++y )
+         for( cell_idx_t z = 0; z < cell_idx_c(field.zSize()); ++z )
+            for( cell_idx_t f = 0; f < cell_idx_c(field.fSize()); ++f )
+               for( uint_t g = 0; g < 3; ++g )
+               {
+                  uint_t val = uint_t(&(field( x,y,z,f )[g]));
+                  field( x,y,z,f )[g] = val;
+               }
+
+   shared_ptr<Field<uint_t, 3*fSize>> flattened(field.flattenedShallowCopy());
+
+   Field<uint_t, 3*fSize> cmp ( 2,2,1 );
+   WALBERLA_CHECK_EQUAL(cmp.xSize(), flattened->xSize());
+   WALBERLA_CHECK_EQUAL(cmp.ySize(), flattened->ySize());
+   WALBERLA_CHECK_EQUAL(cmp.zSize(), flattened->zSize());
+   WALBERLA_CHECK_EQUAL(cmp.fSize(), flattened->fSize());
+   WALBERLA_CHECK_EQUAL(cmp.xAllocSize(), flattened->xAllocSize());
+   WALBERLA_CHECK_EQUAL(cmp.yAllocSize(), flattened->yAllocSize());
+   WALBERLA_CHECK_EQUAL(cmp.zAllocSize(), flattened->zAllocSize());
+   WALBERLA_CHECK_EQUAL(cmp.fAllocSize(), flattened->fAllocSize());
+   WALBERLA_CHECK_EQUAL(cmp.allocSize(), flattened->allocSize());
+   WALBERLA_CHECK_EQUAL(cmp.xStride(), flattened->xStride());
+   WALBERLA_CHECK_EQUAL(cmp.yStride(), flattened->yStride());
+   WALBERLA_CHECK_EQUAL(cmp.zStride(), flattened->zStride());
+   WALBERLA_CHECK_EQUAL(cmp.fStride(), flattened->fStride());
+   WALBERLA_CHECK_EQUAL(cmp.xOff(), flattened->xOff());
+   WALBERLA_CHECK_EQUAL(cmp.yOff(), flattened->yOff());
+   WALBERLA_CHECK_EQUAL(cmp.zOff(), flattened->zOff());
+
+   for( cell_idx_t x = 0; x < cell_idx_c(field.xSize()); ++x )
+      for( cell_idx_t y = 0; y < cell_idx_c(field.ySize()); ++y )
+         for( cell_idx_t z = 0; z < cell_idx_c(field.zSize()); ++z )
+            for( cell_idx_t f = 0; f < cell_idx_c(field.fSize()); ++f )
+               for( uint_t g = 0; g < 3; ++g )
+               {
+                  WALBERLA_CHECK_EQUAL(field(x,y,z,f)[g], flattened->get(x,y,z,3*f+cell_idx_c(g)));
+               }
+}
+
+
+template<uint_t fSize>
+void ghostFlattenTest()
+{
+   GhostLayerField<Vector3<uint_t>, fSize> field ( 2,2,1, 1 );
+
+   for( cell_idx_t x = -cell_idx_c(field.nrOfGhostLayers()); x < cell_idx_c(field.xSize()+field.nrOfGhostLayers()); ++x )
+      for( cell_idx_t y = -cell_idx_c(field.nrOfGhostLayers()); y < cell_idx_c(field.ySize()+field.nrOfGhostLayers()); ++y )
+         for( cell_idx_t z = -cell_idx_c(field.nrOfGhostLayers()); z < cell_idx_c(field.zSize()+field.nrOfGhostLayers()); ++z )
+            for( cell_idx_t f = 0; f < cell_idx_c(field.fSize()); ++f )
+               for( uint_t g = 0; g < 3; ++g )
+               {
+                  uint_t val = uint_t(&(field( x,y,z,f )[g]));
+                  field( x,y,z,f )[g] = val;
+               }
+
+   shared_ptr<GhostLayerField<uint_t, 3*fSize>> flattened(field.flattenedShallowCopy());
+
+   GhostLayerField<uint_t, 3*fSize> cmp ( 2,2,1, 1 );
+   WALBERLA_CHECK_EQUAL(cmp.xSize(), flattened->xSize());
+   WALBERLA_CHECK_EQUAL(cmp.ySize(), flattened->ySize());
+   WALBERLA_CHECK_EQUAL(cmp.zSize(), flattened->zSize());
+   WALBERLA_CHECK_EQUAL(cmp.fSize(), flattened->fSize());
+   WALBERLA_CHECK_EQUAL(cmp.xAllocSize(), flattened->xAllocSize());
+   WALBERLA_CHECK_EQUAL(cmp.yAllocSize(), flattened->yAllocSize());
+   WALBERLA_CHECK_EQUAL(cmp.zAllocSize(), flattened->zAllocSize());
+   WALBERLA_CHECK_EQUAL(cmp.fAllocSize(), flattened->fAllocSize());
+   WALBERLA_CHECK_EQUAL(cmp.allocSize(), flattened->allocSize());
+   WALBERLA_CHECK_EQUAL(cmp.xStride(), flattened->xStride());
+   WALBERLA_CHECK_EQUAL(cmp.yStride(), flattened->yStride());
+   WALBERLA_CHECK_EQUAL(cmp.zStride(), flattened->zStride());
+   WALBERLA_CHECK_EQUAL(cmp.fStride(), flattened->fStride());
+   WALBERLA_CHECK_EQUAL(cmp.xOff(), flattened->xOff());
+   WALBERLA_CHECK_EQUAL(cmp.yOff(), flattened->yOff());
+   WALBERLA_CHECK_EQUAL(cmp.zOff(), flattened->zOff());
+   WALBERLA_CHECK_EQUAL(cmp.nrOfGhostLayers(), flattened->nrOfGhostLayers());
+
+   for( cell_idx_t x = -cell_idx_c(field.nrOfGhostLayers()); x < cell_idx_c(field.xSize()+field.nrOfGhostLayers()); ++x )
+      for( cell_idx_t y = -cell_idx_c(field.nrOfGhostLayers()); y < cell_idx_c(field.ySize()+field.nrOfGhostLayers()); ++y )
+         for( cell_idx_t z = -cell_idx_c(field.nrOfGhostLayers()); z < cell_idx_c(field.zSize()+field.nrOfGhostLayers()); ++z )
+            for( cell_idx_t f = 0; f < cell_idx_c(field.fSize()); ++f )
+               for( uint_t g = 0; g < 3; ++g )
+               {
+                  WALBERLA_CHECK_EQUAL(field(x,y,z,f)[g], flattened->get(x,y,z,3*f+cell_idx_c(g)));
+               }
+}
+
+
 int main( int argc, char**argv )
 {
    walberla::Environment walberlaEnv( argc, argv );
@@ -626,6 +719,11 @@ int main( int argc, char**argv )
 
    isIteratorConsecutiveTest( fzyx );
    isIteratorConsecutiveTest( zyxf );
+
+   flattenTest<1>();
+   flattenTest<3>();
+   ghostFlattenTest<1>();
+   ghostFlattenTest<3>();
 
 
    //swapableCompareTest();

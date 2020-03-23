@@ -86,6 +86,11 @@ namespace field {
       typedef FieldPointer<Field<T,fSize_>, Field<T,fSize_>, T >             Ptr;
       typedef FieldPointer<Field<T,fSize_>, const Field<T,fSize_>, const T > ConstPtr;
 
+      typedef typename std::conditional<VectorTrait<T>::F_SIZE!=0,
+                                        Field<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE*fSize_>,
+                                        Field<T, fSize_>
+                                        >::type FlattenedField;
+
       static const uint_t F_SIZE = fSize_;
       //@}
       //****************************************************************************************************************
@@ -119,6 +124,7 @@ namespace field {
       Field<T,fSize_> * clone()              const;
       Field<T,fSize_> * cloneUninitialized() const;
       Field<T,fSize_> * cloneShallowCopy()   const;
+      FlattenedField * flattenedShallowCopy() const;
       //@}
       //****************************************************************************************************************
 
@@ -320,10 +326,13 @@ namespace field {
       /*! \name Shallow Copy */
       //@{
       Field(const Field & other);
+      template <typename T2, uint_t fSize2>
+      Field(const Field<T2, fSize2> & other);
       virtual uint_t referenceCount() const;
 
 
       virtual Field<T,fSize_> * cloneShallowCopyInternal()   const;
+      virtual FlattenedField * flattenedShallowCopyInternal() const;
 
       //@}
       //****************************************************************************************************************
@@ -373,6 +382,8 @@ namespace field {
 
       friend class FieldIterator<T,fSize_>;
       friend class FieldIterator<const T,fSize_>;
+      template <typename T2, uint_t fSize2>
+      friend class Field;
 
       static_assert(fSize_ > 0, "fSize()=0 means: empty field");
 

@@ -7,6 +7,9 @@
 waLBerla_compile_test( FILES AccuracyEvaluationTest.cpp DEPENDS blockforest )
 waLBerla_execute_test( NAME AccuracyEvaluationTest4 COMMAND $<TARGET_FILE:AccuracyEvaluationTest> PROCESSES 4  )
 
+waLBerla_compile_test( FILES AddToStorageTest.cpp DEPENDS blockforest )
+waLBerla_execute_test( NAME AddToStorageTest )
+
 waLBerla_compile_test( FILES communication/FieldPackInfoTest.cpp DEPENDS blockforest )
 waLBerla_execute_test( NAME  FieldPackInfoTest )
 

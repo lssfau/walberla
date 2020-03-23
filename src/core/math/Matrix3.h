@@ -174,8 +174,8 @@ public:
                               inline const Matrix3       getCholesky()                              const;
    template< typename Other > inline const Vector3<HIGH> solve( const Vector3<Other> &rhs )         const;
                               inline Type                trace()                                    const;
-                              inline Type*               data()                                     {return v_;}
-                              inline Type const *        data()                                     const {return v_;}
+                              inline Type*               data()                                     {return v_.data();}
+                              inline Type const *        data()                                     const {return v_.data();}
    //@}
    //*******************************************************************************************************************
 

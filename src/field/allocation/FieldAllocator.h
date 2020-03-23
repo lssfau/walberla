@@ -25,6 +25,7 @@
 #include "AlignedMalloc.h"
 #include "core/debug/Debug.h"
 #include "field/CMakeDefs.h"
+#include "core/VectorTrait.h"
 
 #include <map>
 #include <new>
@@ -33,6 +34,13 @@
 namespace walberla {
 namespace field {
 
+
+   template <typename T>
+   class FieldAllocatorBase
+   {
+   protected:
+      static std::map<T*, uint_t> referenceCounts_;
+   };
 
    //*******************************************************************************************************************
    /*! Allocation Strategy base class for fields
@@ -44,9 +52,10 @@ namespace field {
    */
    //*******************************************************************************************************************
    template<typename T>
-   class FieldAllocator
+   class FieldAllocator : FieldAllocatorBase<typename std::conditional<VectorTrait<T>::F_SIZE!=0, typename VectorTrait<T>::OutputType, T>::type>
    {
       public:
+         using BaseType = typename std::conditional<VectorTrait<T>::F_SIZE!=0, typename VectorTrait<T>::OutputType, T>::type;
 
          virtual ~FieldAllocator() = default;
 
@@ -65,14 +74,15 @@ namespace field {
                          uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3)
          {
             T * mem = allocateMemory(size0,size1,size2,size3,allocSize1,allocSize2,allocSize3);
+            BaseType * bmem = reinterpret_cast<BaseType *>(mem);
             #ifdef WALBERLA_THREAD_SAFE_FIELD_ALLOCATION
             #ifdef _OPENMP
             #pragma omp critical( walberla_field_allocator_refcount )
             #endif
             #endif
             {
-               WALBERLA_ASSERT( referenceCounts_.find(mem) == referenceCounts_.end() || referenceCounts_[mem] == 0 );
-               referenceCounts_[mem] = 1;
+               WALBERLA_ASSERT( referenceCounts_.find(bmem) == referenceCounts_.end() || referenceCounts_[bmem] == 0 );
+               referenceCounts_[bmem] = 1;
             }
             return mem;
          }
@@ -89,6 +99,7 @@ namespace field {
          T * allocate ( uint_t allocSize )
          {
             T * mem = allocateMemory( allocSize );
+            BaseType * bmem = reinterpret_cast<BaseType *>(mem);
             
             #ifdef WALBERLA_THREAD_SAFE_FIELD_ALLOCATION
             #ifdef _OPENMP
@@ -96,8 +107,8 @@ namespace field {
             #endif
             #endif
             {
-               WALBERLA_ASSERT( referenceCounts_.find(mem) == referenceCounts_.end() || referenceCounts_[mem] == 0 );
-               referenceCounts_[mem] = 1;
+               WALBERLA_ASSERT( referenceCounts_.find(bmem) == referenceCounts_.end() || referenceCounts_[bmem] == 0 );
+               referenceCounts_[bmem] = 1;
             }
             return mem;
          }
@@ -112,15 +123,17 @@ namespace field {
           */
          void incrementReferenceCount( T * mem )
          {
+            BaseType * bmem = reinterpret_cast<BaseType *>(mem);
+
             #ifdef WALBERLA_THREAD_SAFE_FIELD_ALLOCATION
             #ifdef _OPENMP
             #pragma omp critical( walberla_field_allocator_refcount )
             #endif
             #endif
             {
-               WALBERLA_ASSERT( referenceCounts_.find(mem) != referenceCounts_.end() );
-               WALBERLA_ASSERT_GREATER( referenceCounts_[mem], 0 );
-               referenceCounts_[mem]++;
+               WALBERLA_ASSERT( referenceCounts_.find(bmem) != referenceCounts_.end() );
+               WALBERLA_ASSERT_GREATER( referenceCounts_[bmem], 0 );
+               referenceCounts_[bmem]++;
             }
          }
 
@@ -136,6 +149,7 @@ namespace field {
           */
          bool decrementReferenceCount( T * mem )
          {
+            BaseType * bmem = reinterpret_cast<BaseType *>(mem);
             bool memoryFreed = false;
             
             uint_t refCount = 0;
@@ -146,10 +160,10 @@ namespace field {
             #endif
             #endif
             {
-               WALBERLA_ASSERT( referenceCounts_.find(mem) != referenceCounts_.end() );
-               WALBERLA_ASSERT_GREATER( referenceCounts_[mem], 0 );
+               WALBERLA_ASSERT( referenceCounts_.find(bmem) != referenceCounts_.end() );
+               WALBERLA_ASSERT_GREATER( referenceCounts_[bmem], 0 );
 
-               refCount = --referenceCounts_[mem];
+               refCount = --referenceCounts_[bmem];
             }
 
             if( refCount == 0 ) {
@@ -163,6 +177,7 @@ namespace field {
 
          uint_t referenceCount ( T * mem ) const
          {
+            BaseType * bmem = reinterpret_cast<BaseType *>(mem);
             uint_t refCount = 0;
             #ifdef WALBERLA_THREAD_SAFE_FIELD_ALLOCATION
             #ifdef _OPENMP
@@ -170,8 +185,8 @@ namespace field {
             #endif
             #endif
             {
-               WALBERLA_ASSERT( referenceCounts_.find(mem) != referenceCounts_.end()  );
-               refCount = referenceCounts_[mem];
+               WALBERLA_ASSERT( referenceCounts_.find(bmem) != referenceCounts_.end()  );
+               refCount = referenceCounts_[bmem];
             }
             
             return refCount;
@@ -198,12 +213,11 @@ namespace field {
          virtual void deallocate( T *& values ) = 0;
 
       private:
-         static std::map<T*, uint_t> referenceCounts_;
-
+         using FieldAllocatorBase<BaseType>::referenceCounts_;
    };
 
    template<typename T>
-   std::map<T*, uint_t> FieldAllocator<T>::referenceCounts_ = std::map<T*,uint_t>();
+   std::map<T*, uint_t> FieldAllocatorBase<T>::referenceCounts_ = std::map<T*,uint_t>();
 
 
 

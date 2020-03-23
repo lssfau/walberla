@@ -538,5 +538,31 @@ private:
 
 
 
+
+
+
+template< typename Field_T >
+class FlattenedShallowCopyBlockDataHandling : public blockforest::AlwaysInitializeBlockDataHandling< typename Field_T::FlattenedField >
+{
+public:
+
+   FlattenedShallowCopyBlockDataHandling( const ConstBlockDataID & fieldToClone ) :
+      fieldToClone_( fieldToClone )
+   {}
+
+   typename Field_T::FlattenedField * initialize( IBlock * const block )
+   {
+      const Field_T * toClone = block->template getData< Field_T >( fieldToClone_ );
+      return toClone->flattenedShallowCopy();
+   }
+
+private:
+
+   ConstBlockDataID fieldToClone_;
+
+}; // class FlattenedShallowCopyBlockDataHandling
+
+
+
 } // namespace field
 } // namespace walberla
