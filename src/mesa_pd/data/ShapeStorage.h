@@ -64,6 +64,12 @@ static_assert( Sphere::SHAPE_TYPE != HalfSpace::SHAPE_TYPE, "Shape types have to
 static_assert( Sphere::SHAPE_TYPE != CylindricalBoundary::SHAPE_TYPE, "Shape types have to be different!" );
 static_assert( Sphere::SHAPE_TYPE != Box::SHAPE_TYPE, "Shape types have to be different!" );
 static_assert( Sphere::SHAPE_TYPE != Ellipsoid::SHAPE_TYPE, "Shape types have to be different!" );
+static_assert( HalfSpace::SHAPE_TYPE != CylindricalBoundary::SHAPE_TYPE, "Shape types have to be different!" );
+static_assert( HalfSpace::SHAPE_TYPE != Box::SHAPE_TYPE, "Shape types have to be different!" );
+static_assert( HalfSpace::SHAPE_TYPE != Ellipsoid::SHAPE_TYPE, "Shape types have to be different!" );
+static_assert( CylindricalBoundary::SHAPE_TYPE != Box::SHAPE_TYPE, "Shape types have to be different!" );
+static_assert( CylindricalBoundary::SHAPE_TYPE != Ellipsoid::SHAPE_TYPE, "Shape types have to be different!" );
+static_assert( Box::SHAPE_TYPE != Ellipsoid::SHAPE_TYPE, "Shape types have to be different!" );
 
 template <typename ShapeT, typename... Args>
 size_t ShapeStorage::create(Args&&... args)
