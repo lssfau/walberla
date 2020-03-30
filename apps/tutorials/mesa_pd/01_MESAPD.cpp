@@ -36,7 +36,7 @@
 #include <mesa_pd/data/ShapeStorage.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
 #include <mesa_pd/kernel/DoubleCast.h>
-#include <mesa_pd/kernel/ExplicitEulerWithShape.h>
+#include <mesa_pd/kernel/ExplicitEuler.h>
 #include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/kernel/SpringDashpot.h>
@@ -173,7 +173,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("*** KERNELS ***");
    //! [Kernels]
-   kernel::ExplicitEulerWithShape        explicitEulerWithShape( dt );
+   kernel::ExplicitEuler                 explicitEuler( dt );
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::SpringDashpot                 dem( 2 );
    auto meffSphereSphere = real_t(0.5) * (real_c(4.0)/real_c(3.0) * math::pi) * radius * radius * radius * density;
@@ -218,7 +218,7 @@ int main( int argc, char ** argv )
 
       RP.operator()<ForceTorqueNotification>(*ps);
 
-      ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEulerWithShape, accessor);
+      ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEuler, accessor);
 
       SNN(*ps, domain);
    }

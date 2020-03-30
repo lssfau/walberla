@@ -24,8 +24,9 @@
 #include <mesa_pd/kernel/ParticleSelector.h>
 
 #include <mesa_pd/data/LinkedCells.h>
-#include <mesa_pd/data/ParticleAccessor.h>
+#include <mesa_pd/data/ParticleAccessorWithShape.h>
 #include <mesa_pd/data/ParticleStorage.h>
+#include <mesa_pd/data/ShapeStorage.h>
 
 #include <core/Environment.h>
 #include <core/grid_generator/SCIterator.h>
@@ -51,9 +52,12 @@ int main( int argc, char ** argv )
 
    //init data structures
    auto storage = std::make_shared<data::ParticleStorage>(100);
+   auto ss = std::make_shared<data::ShapeStorage>();
+   auto  smallSphere = ss->create<data::Sphere>( real_t(1) );
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
    data::LinkedCells     linkedCells(domain.getScaled(2), real_t(1));
 
-   data::ParticleAccessor accessor(storage);
+   data::ParticleAccessorWithShape accessor(storage, ss);
 
    //initialize particles
    for (auto it = grid_generator::SCIterator(domain, Vec3(spacing, spacing, spacing) * real_c(0.5), spacing);
@@ -62,6 +66,7 @@ int main( int argc, char ** argv )
    {
       data::Particle&& p    = *storage->create();
       p.getPositionRef()    = (*it);
+      p.setShapeID(smallSphere);
    }
 
    //init kernels

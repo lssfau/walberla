@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ExplicitEulerWithShape.h
+//! \file ExplicitEuler.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -35,7 +35,6 @@ namespace kernel {
 
 /**
  * Kernel which explicitly integrates all particles in time.
- * This integrator integrates velocity and position as well as angular velocity and rotation.
  *
  * This kernel requires the following particle accessor interface
  * \code
@@ -50,6 +49,8 @@ namespace kernel {
  * const walberla::mesa_pd::Vec3& getForce(const size_t p_idx) const;
  * void setForce(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
  *
+ * const walberla::mesa_pd::data::particle_flags::FlagT& getFlags(const size_t p_idx) const;
+ *
  * const walberla::mesa_pd::Rot3& getRotation(const size_t p_idx) const;
  * void setRotation(const size_t p_idx, const walberla::mesa_pd::Rot3& v);
  *
@@ -61,18 +62,16 @@ namespace kernel {
  * const walberla::mesa_pd::Vec3& getTorque(const size_t p_idx) const;
  * void setTorque(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
  *
- * const walberla::mesa_pd::data::particle_flags::FlagT& getFlags(const size_t p_idx) const;
- *
  * \endcode
  *
  * \pre  All forces and torques acting on the particles have to be set.
  * \post All forces and torques are reset to 0.
  * \ingroup mesa_pd_kernel
  */
-class ExplicitEulerWithShape
+class ExplicitEuler
 {
 public:
-   explicit ExplicitEulerWithShape(const real_t dt) : dt_(dt) {}
+   explicit ExplicitEuler(const real_t dt) : dt_(dt) {}
 
    template <typename Accessor>
    void operator()(const size_t i, Accessor& ac) const;
@@ -81,7 +80,7 @@ private:
 };
 
 template <typename Accessor>
-inline void ExplicitEulerWithShape::operator()(const size_t idx,
+inline void ExplicitEuler::operator()(const size_t idx,
                                                Accessor& ac) const
 {
    static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
@@ -90,7 +89,6 @@ inline void ExplicitEulerWithShape::operator()(const size_t idx,
    {
       ac.setPosition      (idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ * dt_ + ac.getLinearVelocity(idx) * dt_ + ac.getPosition(idx));
       ac.setLinearVelocity(idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ + ac.getLinearVelocity(idx));
-
       const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
                                                   ac.getInvInertiaBF(idx)) * ac.getTorque(idx);
 

@@ -51,6 +51,17 @@ public:
    
    const walberla::mesa_pd::data::particle_flags::FlagT& getFlags(const size_t /*p_idx*/) const {return flags_;}
    
+   const walberla::mesa_pd::Rot3& getRotation(const size_t /*p_idx*/) const {return rotation_;}
+   void setRotation(const size_t /*p_idx*/, const walberla::mesa_pd::Rot3& v) { rotation_ = v;}
+   
+   const walberla::mesa_pd::Vec3& getAngularVelocity(const size_t /*p_idx*/) const {return angularVelocity_;}
+   void setAngularVelocity(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { angularVelocity_ = v;}
+   
+   const walberla::mesa_pd::Mat3& getInvInertiaBF(const size_t /*p_idx*/) const {return invInertiaBF_;}
+   
+   const walberla::mesa_pd::Vec3& getTorque(const size_t /*p_idx*/) const {return torque_;}
+   void setTorque(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { torque_ = v;}
+   
 
    id_t getInvalidUid() const {return UniqueID<int>::invalidID();}
    size_t getInvalidIdx() const {return std::numeric_limits<size_t>::max();}
@@ -67,6 +78,10 @@ private:
    walberla::real_t invMass_;
    walberla::mesa_pd::Vec3 force_;
    walberla::mesa_pd::data::particle_flags::FlagT flags_;
+   walberla::mesa_pd::Rot3 rotation_;
+   walberla::mesa_pd::Vec3 angularVelocity_;
+   walberla::mesa_pd::Mat3 invInertiaBF_;
+   walberla::mesa_pd::Vec3 torque_;
 };
 
 template void kernel::ExplicitEuler::operator()(const size_t p_idx1, Accessor& ac) const;

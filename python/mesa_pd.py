@@ -85,7 +85,6 @@ if __name__ == '__main__':
     mpd.add(kernel.DetectAndStoreContacts())
     mpd.add(kernel.DoubleCast(ps))
     mpd.add(kernel.ExplicitEuler())
-    mpd.add(kernel.ExplicitEulerWithShape())
     mpd.add(kernel.ForceLJ())
     mpd.add(kernel.HCSITSRelaxationStep())
     mpd.add(kernel.HeatConduction())
@@ -101,7 +100,6 @@ if __name__ == '__main__':
     mpd.add(kernel.SpringDashpotSpring())
     mpd.add(kernel.TemperatureIntegration())
     mpd.add(kernel.VelocityVerlet())
-    mpd.add(kernel.VelocityVerletWithShape())
 
     mpd.add(mpi.BroadcastProperty())
     mpd.add(mpi.ClearGhostOwnerSync())

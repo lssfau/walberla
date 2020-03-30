@@ -75,14 +75,20 @@ int main( int argc, char ** argv )
 
    integrator(0, accessor);
 
+   const auto& R = accessor.getRotation(0).getMatrix();
+   const auto wdot = R * accessor.getInvInertiaBF(0) * R.getTranspose() * torque;
+
    //check force
    WALBERLA_CHECK_FLOAT_EQUAL(accessor.getForce(0), Vec3(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(accessor.getTorque(0), Vec3(0));
 
    //check velocity
    WALBERLA_CHECK_FLOAT_EQUAL(accessor.getLinearVelocity(0), force * accessor.getInvMass(0) * dt + linVel);
+   WALBERLA_CHECK_FLOAT_EQUAL(accessor.getAngularVelocity(0), wdot * dt + angVel);
 
    //check position
    WALBERLA_CHECK_FLOAT_EQUAL(accessor.getPosition(0), linVel * dt + force * accessor.getInvMass(0) * dt * dt);
+   WALBERLA_CHECK_FLOAT_EQUAL(accessor.getRotation(0).getQuaternion(), Quat( (wdot * dt + angVel).getNormalized(), (wdot * dt + angVel).length() * dt ));
 
    accessor.setPosition(        0, Vec3(0,0,0));
    accessor.setRotation(        0, Rot3(Quat()));
@@ -98,12 +104,15 @@ int main( int argc, char ** argv )
 
    //check force
    WALBERLA_CHECK_FLOAT_EQUAL(accessor.getForce(0), Vec3(0));
+   WALBERLA_CHECK_FLOAT_EQUAL(accessor.getTorque(0), Vec3(0));
 
    //check velocity
    WALBERLA_CHECK_FLOAT_EQUAL(accessor.getLinearVelocity(0), linVel);
+   WALBERLA_CHECK_FLOAT_EQUAL(accessor.getAngularVelocity(0), angVel);
 
    //check position
    WALBERLA_CHECK_FLOAT_EQUAL(accessor.getPosition(0), Vec3(0,0,0));
+   WALBERLA_CHECK_FLOAT_EQUAL(accessor.getRotation(0).getQuaternion(), Quat());
 
    return EXIT_SUCCESS;
 }

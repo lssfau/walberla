@@ -80,11 +80,11 @@
 #include "mesa_pd/domain/BlockForestDomain.h"
 #include "mesa_pd/domain/BlockForestDataHandling.h"
 #include "mesa_pd/kernel/DoubleCast.h"
-#include "mesa_pd/kernel/ExplicitEulerWithShape.h"
+#include "mesa_pd/kernel/ExplicitEuler.h"
 #include "mesa_pd/kernel/LinearSpringDashpot.h"
 #include "mesa_pd/kernel/NonLinearSpringDashpot.h"
 #include "mesa_pd/kernel/ParticleSelector.h"
-#include "mesa_pd/kernel/VelocityVerletWithShape.h"
+#include "mesa_pd/kernel/VelocityVerlet.h"
 #include "mesa_pd/mpi/ClearNextNeighborSync.h"
 #include "mesa_pd/mpi/SyncNextNeighbors.h"
 #include "mesa_pd/mpi/ReduceProperty.h"
@@ -962,9 +962,9 @@ int main( int argc, char **argv )
    syncCall();
 
    real_t timeStepSizeRPD = real_t(1)/real_t(numRPDSubCycles);
-   mesa_pd::kernel::ExplicitEulerWithShape explEulerIntegrator(timeStepSizeRPD);
-   mesa_pd::kernel::VelocityVerletWithShapePreForceUpdate  vvIntegratorPreForce(timeStepSizeRPD);
-   mesa_pd::kernel::VelocityVerletWithShapePostForceUpdate vvIntegratorPostForce(timeStepSizeRPD);
+   mesa_pd::kernel::ExplicitEuler explEulerIntegrator(timeStepSizeRPD);
+   mesa_pd::kernel::VelocityVerletPreForceUpdate  vvIntegratorPreForce(timeStepSizeRPD);
+   mesa_pd::kernel::VelocityVerletPostForceUpdate vvIntegratorPostForce(timeStepSizeRPD);
 
    // linear model
    mesa_pd::kernel::LinearSpringDashpot linearCollisionResponse(1);

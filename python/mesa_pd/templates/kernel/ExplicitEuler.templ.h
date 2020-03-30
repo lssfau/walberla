@@ -35,7 +35,6 @@ namespace kernel {
 
 /**
  * Kernel which explicitly integrates all particles in time.
- * This integrator integrates velocity and position.
  *
  * This kernel requires the following particle accessor interface
  * \code
@@ -53,8 +52,8 @@ namespace kernel {
    {%- endfor %}
  * \endcode
  *
- * \pre  All forces acting on the particles have to be set.
- * \post All forces are reset to 0.
+ * \pre  All forces and torques acting on the particles have to be set.
+ * \post All forces and torques are reset to 0.
  * \ingroup mesa_pd_kernel
  */
 class ExplicitEuler
@@ -78,8 +77,27 @@ inline void ExplicitEuler::operator()(const size_t idx,
    {
       ac.setPosition      (idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ * dt_ + ac.getLinearVelocity(idx) * dt_ + ac.getPosition(idx));
       ac.setLinearVelocity(idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ + ac.getLinearVelocity(idx));
+
+      {%- if bIntegrateRotation %}
+      const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
+                                                  ac.getInvInertiaBF(idx)) * ac.getTorque(idx);
+
+      // Calculating the rotation angle
+      const Vec3 phi( ac.getAngularVelocity(idx) * dt_ + wdot * dt_ * dt_);
+
+      // Calculating the new orientation
+      auto rotation = ac.getRotation(idx);
+      rotation.rotate( phi );
+      ac.setRotation(idx, rotation);
+
+      ac.setAngularVelocity(idx, wdot * dt_ + ac.getAngularVelocity(idx));
+      {%- endif %}
    }
-   ac.setForce         (idx, Vec3(real_t(0), real_t(0), real_t(0)));
+
+   ac.setForce (idx, Vec3(real_t(0), real_t(0), real_t(0)));
+   {%- if bIntegrateRotation %}
+   ac.setTorque(idx, Vec3(real_t(0), real_t(0), real_t(0)));
+   {%- endif %}
 }
 
 } //namespace kernel

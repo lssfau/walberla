@@ -71,10 +71,10 @@
 #include "mesa_pd/data/shape/Sphere.h"
 #include "mesa_pd/domain/BlockForestDomain.h"
 #include "mesa_pd/kernel/DoubleCast.h"
-#include "mesa_pd/kernel/ExplicitEulerWithShape.h"
+#include "mesa_pd/kernel/ExplicitEuler.h"
 #include "mesa_pd/kernel/ParticleSelector.h"
 #include "mesa_pd/kernel/SpringDashpot.h"
-#include "mesa_pd/kernel/VelocityVerletWithShape.h"
+#include "mesa_pd/kernel/VelocityVerlet.h"
 #include "mesa_pd/mpi/ContactFilter.h"
 #include "mesa_pd/mpi/SyncNextNeighbors.h"
 #include "mesa_pd/mpi/ReduceProperty.h"
@@ -588,9 +588,9 @@ int main( int argc, char **argv )
 
    syncCall();
 
-   mesa_pd::kernel::ExplicitEulerWithShape explEulerIntegrator(real_t(1)/real_t(numRPDSubCycles));
-   mesa_pd::kernel::VelocityVerletWithShapePreForceUpdate  vvIntegratorPreForce(real_t(1)/real_t(numRPDSubCycles));
-   mesa_pd::kernel::VelocityVerletWithShapePostForceUpdate vvIntegratorPostForce(real_t(1)/real_t(numRPDSubCycles));
+   mesa_pd::kernel::ExplicitEuler explEulerIntegrator(real_t(1)/real_t(numRPDSubCycles));
+   mesa_pd::kernel::VelocityVerletPreForceUpdate  vvIntegratorPreForce(real_t(1)/real_t(numRPDSubCycles));
+   mesa_pd::kernel::VelocityVerletPostForceUpdate vvIntegratorPostForce(real_t(1)/real_t(numRPDSubCycles));
 
    mesa_pd::kernel::SpringDashpot collisionResponse(1);
    mesa_pd::mpi::ReduceProperty reduceProperty;

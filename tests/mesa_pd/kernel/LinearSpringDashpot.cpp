@@ -26,8 +26,8 @@
 #include "mesa_pd/data/ShapeStorage.h"
 
 #include "mesa_pd/kernel/DoubleCast.h"
-#include "mesa_pd/kernel/ExplicitEulerWithShape.h"
-#include "mesa_pd/kernel/VelocityVerletWithShape.h"
+#include "mesa_pd/kernel/ExplicitEuler.h"
+#include "mesa_pd/kernel/VelocityVerlet.h"
 #include "mesa_pd/kernel/LinearSpringDashpot.h"
 #include "mesa_pd/mpi/ReduceContactHistory.h"
 
@@ -148,11 +148,11 @@ int main( int argc, char ** argv )
    data::particle_flags::set(p0.getFlagsRef(), data::particle_flags::FIXED);
 
    // velocity verlet
-   kernel::VelocityVerletWithShapePreForceUpdate  vvPreForce( dt );
-   kernel::VelocityVerletWithShapePostForceUpdate vvPostForce( dt );
+   kernel::VelocityVerletPreForceUpdate  vvPreForce( dt );
+   kernel::VelocityVerletPostForceUpdate vvPostForce( dt );
 
    // explicit euler
-   kernel::ExplicitEulerWithShape explEuler( dt );
+   kernel::ExplicitEuler explEuler( dt );
 
    // collision response
    collision_detection::AnalyticContactDetection     acd;
