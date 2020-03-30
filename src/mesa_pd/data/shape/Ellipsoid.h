@@ -61,7 +61,9 @@ void Ellipsoid::updateMassAndInertia(const real_t density)
          real_c(0.2) * m * (semiAxes_[2] * semiAxes_[2] + semiAxes_[0] * semiAxes_[0]),
          real_c(0.2) * m * (semiAxes_[0] * semiAxes_[0] + semiAxes_[1] * semiAxes_[1]));
 
+   mass_         = m;
    invMass_      = real_t(1.0) / m;
+   inertiaBF_    = I;
    invInertiaBF_ = I.getInverse();
 }
 

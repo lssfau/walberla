@@ -59,8 +59,11 @@ private:
 inline
 void CylindricalBoundary::updateMassAndInertia(const real_t /*density*/)
 {
-   invMass_      = real_t(0.0);
-   invInertiaBF_ = Mat3(real_t(0.0));
+   mass_         = std::numeric_limits<real_t>::infinity();
+   invMass_      = real_t(0);
+
+   inertiaBF_    = Mat3(std::numeric_limits<real_t>::infinity());
+   invInertiaBF_ = Mat3(real_t(0));
 }
 
 inline

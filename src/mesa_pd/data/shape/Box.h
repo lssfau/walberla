@@ -61,7 +61,10 @@ void Box::updateMassAndInertia(const real_t density)
          edgeLength_[0]*edgeLength_[0] + edgeLength_[2]*edgeLength_[2] ,
          edgeLength_[0]*edgeLength_[0] + edgeLength_[1]*edgeLength_[1] ) * (m / static_cast<real_t>( 12 ));
 
+   mass_ = m;
    invMass_      = real_t(1.0) / m;
+
+   inertiaBF_ = I;
    invInertiaBF_ = I.getInverse();
 }
 
