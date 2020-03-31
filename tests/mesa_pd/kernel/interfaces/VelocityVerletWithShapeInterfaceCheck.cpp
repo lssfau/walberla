@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file VelocityVerletWithShapeInterfaceCheck.cpp
+//! \file VelocityVerletInterfaceCheck.cpp
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -25,7 +25,7 @@
 //======================================================================================================================
 
 #include <mesa_pd/data/IAccessor.h>
-#include <mesa_pd/kernel/VelocityVerletWithShape.h>
+#include <mesa_pd/kernel/VelocityVerlet.h>
 
 #include <core/UniqueID.h>
 
@@ -92,8 +92,8 @@ private:
    walberla::mesa_pd::data::particle_flags::FlagT flags_;
 };
 
-template void kernel::VelocityVerletWithShapePreForceUpdate::operator()(const size_t p_idx1, Accessor& ac) const;
-template void kernel::VelocityVerletWithShapePostForceUpdate::operator()(const size_t p_idx1, Accessor& ac) const;
+template void kernel::VelocityVerletPreForceUpdate::operator()(const size_t p_idx1, Accessor& ac) const;
+template void kernel::VelocityVerletPostForceUpdate::operator()(const size_t p_idx1, Accessor& ac) const;
 
 } //namespace mesa_pd
 } //namespace walberla

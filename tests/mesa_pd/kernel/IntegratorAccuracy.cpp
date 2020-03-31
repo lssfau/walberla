@@ -18,7 +18,7 @@
 //
 //======================================================================================================================
 
-#include "mesa_pd/data/ParticleAccessor.h"
+#include "mesa_pd/data/ParticleAccessorWithShape.h"
 #include "mesa_pd/data/ParticleStorage.h"
 
 #include "mesa_pd/kernel/ParticleSelector.h"
@@ -105,7 +105,10 @@ int main( int argc, char ** argv )
 
    //init data structures
    auto ps = std::make_shared<data::ParticleStorage>(1);
-   data::ParticleAccessor accessor(ps);
+   auto ss = std::make_shared<data::ShapeStorage>();
+   auto  smallSphere = ss->create<data::Sphere>( real_t(1) );
+   ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
+   data::ParticleAccessorWithShape accessor(ps, ss);
    
    data::Particle&& p = *ps->create();
    p.setPosition(pos);
@@ -113,6 +116,7 @@ int main( int argc, char ** argv )
    p.setForce(getForce(pos, k));
    p.setOldForce(getForce(pos, k));
    p.setInvMass(real_t(1) / mass);
+   p.setShapeID(smallSphere);
 
    // velocity verlet
    kernel::VelocityVerletPreForceUpdate  preForce( dt );

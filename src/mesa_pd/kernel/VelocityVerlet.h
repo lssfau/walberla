@@ -40,7 +40,6 @@ namespace kernel {
  * called before the force calculation and postFroceUpdate afterwards. The
  * integration is only complete when both functions are called. The integration
  * is symplectic.
- * \attention The force calculation has to be independent of velocity.
  *
  * This kernel requires the following particle accessor interface
  * \code
@@ -57,6 +56,20 @@ namespace kernel {
  *
  * const walberla::mesa_pd::Vec3& getOldForce(const size_t p_idx) const;
  * void setOldForce(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+ *
+ * const walberla::mesa_pd::Rot3& getRotation(const size_t p_idx) const;
+ * void setRotation(const size_t p_idx, const walberla::mesa_pd::Rot3& v);
+ *
+ * const walberla::mesa_pd::Vec3& getAngularVelocity(const size_t p_idx) const;
+ * void setAngularVelocity(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+ *
+ * const walberla::mesa_pd::Mat3& getInvInertiaBF(const size_t p_idx) const;
+ *
+ * const walberla::mesa_pd::Vec3& getTorque(const size_t p_idx) const;
+ * void setTorque(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+ *
+ * const walberla::mesa_pd::Vec3& getOldTorque(const size_t p_idx) const;
+ * void setOldTorque(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
  *
  * const walberla::mesa_pd::data::particle_flags::FlagT& getFlags(const size_t p_idx) const;
  *
@@ -96,6 +109,16 @@ inline void VelocityVerletPreForceUpdate::operator()(const size_t p_idx, Accesso
       ac.setPosition(p_idx, ac.getPosition(p_idx) +
                             ac.getLinearVelocity(p_idx) * dt_ +
                             real_t(0.5) * ac.getInvMass(p_idx) * ac.getOldForce(p_idx) * dt_ * dt_);
+      const Vec3 wdot = math::transformMatrixRART(ac.getRotation(p_idx).getMatrix(),
+                                                  ac.getInvInertiaBF(p_idx)) * ac.getOldTorque(p_idx);
+
+      // Calculating the rotation angle
+      const Vec3 phi( ac.getAngularVelocity(p_idx) * dt_ + real_t(0.5) * wdot * dt_ * dt_);
+
+      // Calculating the new orientation
+      auto rotation = ac.getRotation(p_idx);
+      rotation.rotate( phi );
+      ac.setRotation(p_idx, rotation);
    }
 }
 
@@ -108,9 +131,18 @@ inline void VelocityVerletPostForceUpdate::operator()(const size_t p_idx, Access
    {
       ac.setLinearVelocity(p_idx, ac.getLinearVelocity(p_idx) +
                                   real_t(0.5) * ac.getInvMass(p_idx) * (ac.getOldForce(p_idx) + ac.getForce(p_idx)) * dt_);
+      const auto torque = ac.getOldTorque(p_idx) + ac.getTorque(p_idx);
+      const Vec3 wdot = math::transformMatrixRART(ac.getRotation(p_idx).getMatrix(),
+                                                  ac.getInvInertiaBF(p_idx)) * torque;
+
+      ac.setAngularVelocity(p_idx, ac.getAngularVelocity(p_idx) +
+                                   real_t(0.5) * wdot * dt_ );
    }
+
    ac.setOldForce(p_idx,       ac.getForce(p_idx));
    ac.setForce(p_idx,          Vec3(real_t(0), real_t(0), real_t(0)));
+   ac.setOldTorque(p_idx,      ac.getTorque(p_idx));
+   ac.setTorque(p_idx,         Vec3(real_t(0), real_t(0), real_t(0)));
 }
 
 } //namespace kernel

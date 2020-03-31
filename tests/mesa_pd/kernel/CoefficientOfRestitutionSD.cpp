@@ -26,7 +26,7 @@
 
 #include "mesa_pd/kernel/DoubleCast.h"
 #include "mesa_pd/kernel/VelocityVerlet.h"
-#include "mesa_pd/kernel/ExplicitEulerWithShape.h"
+#include "mesa_pd/kernel/ExplicitEuler.h"
 #include "mesa_pd/kernel/SpringDashpot.h"
 
 #include "core/Environment.h"
@@ -136,7 +136,7 @@ int main( int argc, char** argv )
    collision_detection::AnalyticContactDetection acd;
    kernel::DoubleCast       double_cast;
 
-   kernel::ExplicitEulerWithShape explEuler(dt);
+   kernel::ExplicitEuler explEuler(dt);
    kernel::VelocityVerletPreForceUpdate  vvPreForce( dt );
    kernel::VelocityVerletPostForceUpdate vvPostForce( dt );
 

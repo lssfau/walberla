@@ -52,6 +52,20 @@ public:
    const walberla::mesa_pd::Vec3& getOldForce(const size_t /*p_idx*/) const {return oldForce_;}
    void setOldForce(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { oldForce_ = v;}
    
+   const walberla::mesa_pd::Rot3& getRotation(const size_t /*p_idx*/) const {return rotation_;}
+   void setRotation(const size_t /*p_idx*/, const walberla::mesa_pd::Rot3& v) { rotation_ = v;}
+   
+   const walberla::mesa_pd::Vec3& getAngularVelocity(const size_t /*p_idx*/) const {return angularVelocity_;}
+   void setAngularVelocity(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { angularVelocity_ = v;}
+   
+   const walberla::mesa_pd::Mat3& getInvInertiaBF(const size_t /*p_idx*/) const {return invInertiaBF_;}
+   
+   const walberla::mesa_pd::Vec3& getTorque(const size_t /*p_idx*/) const {return torque_;}
+   void setTorque(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { torque_ = v;}
+   
+   const walberla::mesa_pd::Vec3& getOldTorque(const size_t /*p_idx*/) const {return oldTorque_;}
+   void setOldTorque(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { oldTorque_ = v;}
+   
    const walberla::mesa_pd::data::particle_flags::FlagT& getFlags(const size_t /*p_idx*/) const {return flags_;}
    
 
@@ -70,6 +84,11 @@ private:
    walberla::real_t invMass_;
    walberla::mesa_pd::Vec3 force_;
    walberla::mesa_pd::Vec3 oldForce_;
+   walberla::mesa_pd::Rot3 rotation_;
+   walberla::mesa_pd::Vec3 angularVelocity_;
+   walberla::mesa_pd::Mat3 invInertiaBF_;
+   walberla::mesa_pd::Vec3 torque_;
+   walberla::mesa_pd::Vec3 oldTorque_;
    walberla::mesa_pd::data::particle_flags::FlagT flags_;
 };
 

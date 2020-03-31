@@ -38,7 +38,7 @@
 #include <mesa_pd/domain/BlockForestDomain.h>
 #include <mesa_pd/kernel/AssocToBlock.h>
 #include <mesa_pd/kernel/DoubleCast.h>
-#include <mesa_pd/kernel/ExplicitEulerWithShape.h>
+#include <mesa_pd/kernel/ExplicitEuler.h>
 #include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/kernel/SpringDashpot.h>
@@ -263,7 +263,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - START ***");
    // Init kernels
-   kernel::ExplicitEulerWithShape        explicitEulerWithShape( params.dt );
+   kernel::ExplicitEuler                 explicitEuler( params.dt );
    kernel::AssocToBlock                  assoc(forest);
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::SpringDashpot                 sd(1);
@@ -398,7 +398,7 @@ int main( int argc, char ** argv )
       tp["Euler"].start();
       for (int64_t i=0; i < params.simulationSteps; ++i)
       {
-         ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEulerWithShape, accessor);
+         ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEuler, accessor);
       }
       tp["Euler"].end();
       LIKWID_MARKER_STOP("Euler");

@@ -50,7 +50,6 @@ if __name__ == '__main__':
 
     mpd.add(kernel.DoubleCast(ps))
     mpd.add(kernel.ExplicitEuler())
-    mpd.add(kernel.ExplicitEulerWithShape())
     mpd.add(kernel.ForceLJ())
     mpd.add(kernel.HeatConduction())
     mpd.add(kernel.InsertParticleIntoLinkedCells())
@@ -60,7 +59,7 @@ if __name__ == '__main__':
     mpd.add(kernel.SpringDashpot())
     mpd.add(kernel.TemperatureIntegration())
     mpd.add(kernel.VelocityVerlet())
-    mpd.add(kernel.VelocityVerletWithShape())
+    mpd.add(kernel.VelocityVerlet())
 
     mpd.add(mpi.BroadcastProperty())
     mpd.add(mpi.ClearGhostOwnerSync())

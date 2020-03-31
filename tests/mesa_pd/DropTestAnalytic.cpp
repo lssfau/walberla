@@ -25,7 +25,7 @@
 #include <mesa_pd/data/ShapeStorage.h>
 
 #include <mesa_pd/kernel/DoubleCast.h>
-#include <mesa_pd/kernel/ExplicitEulerWithShape.h>
+#include <mesa_pd/kernel/ExplicitEuler.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/kernel/SpringDashpot.h>
 
@@ -102,7 +102,7 @@ int main( int argc, char ** argv )
    real_t dt = real_t(0.00001);
 
    // Init kernels
-   kernel::ExplicitEulerWithShape        explicitEulerWithShape( dt );
+   kernel::ExplicitEuler                 explicitEuler( dt );
    kernel::SpringDashpot                 dem(1);
    auto meff = real_t(1.0) / ss->shapes[sp->getShapeID()]->getInvMass();
    dem.setParametersFromCOR(0,0,real_t(0.9), dt * real_t(20), meff);
@@ -152,7 +152,7 @@ int main( int argc, char ** argv )
       ps->forEachParticle(false,
                           kernel::SelectLocal(),
                           accessor,
-                          explicitEulerWithShape,
+                          explicitEuler,
                           accessor);
 
 //      if(i%1 == 0)

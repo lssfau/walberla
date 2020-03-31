@@ -41,7 +41,7 @@
 #include <mesa_pd/domain/InfoCollection.h>
 #include <mesa_pd/kernel/AssocToBlock.h>
 #include <mesa_pd/kernel/DoubleCast.h>
-#include <mesa_pd/kernel/ExplicitEulerWithShape.h>
+#include <mesa_pd/kernel/ExplicitEuler.h>
 #include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/kernel/SpringDashpot.h>
@@ -230,7 +230,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - START ***");
    // Init kernels
-   kernel::ExplicitEulerWithShape        explicitEulerWithShape( params.dt );
+   kernel::ExplicitEuler                 explicitEuler( params.dt );
    kernel::InsertParticleIntoLinkedCells ipilc;
    kernel::SpringDashpot                 dem(1);
    dem.setStiffness(0, 0, real_t(0));
@@ -320,7 +320,7 @@ int main( int argc, char ** argv )
 
       tpImbalanced["Euler"].start();
       //ps->forEachParticle(false, [&](const size_t idx){WALBERLA_CHECK_EQUAL(ps->getForce(idx), Vec3(0,0,0), *(*ps)[idx] << "\n" << idx);});
-      ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEulerWithShape, accessor);
+      ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEuler, accessor);
       if (params.bBarrier) WALBERLA_MPI_BARRIER();
       tpImbalanced["Euler"].end();
 
@@ -418,7 +418,7 @@ int main( int argc, char ** argv )
 
       tpBalanced["Euler"].start();
       //ps->forEachParticle(false, [&](const size_t idx){WALBERLA_CHECK_EQUAL(ps->getForce(idx), Vec3(0,0,0), *(*ps)[idx] << "\n" << idx);});
-      ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEulerWithShape, accessor);
+      ps->forEachParticle(true, kernel::SelectLocal(), accessor, explicitEuler, accessor);
       if (params.bBarrier) WALBERLA_MPI_BARRIER();
       tpBalanced["Euler"].end();
 

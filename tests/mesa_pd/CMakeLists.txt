@@ -99,9 +99,6 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_DoubleCast )
 waLBerla_compile_test( NAME   MESA_PD_Kernel_ExplicitEuler FILES kernel/ExplicitEuler.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_ExplicitEuler )
 
-waLBerla_compile_test( NAME   MESA_PD_Kernel_ExplicitEulerWithShape FILES kernel/ExplicitEulerWithShape.cpp DEPENDS core )
-waLBerla_execute_test( NAME   MESA_PD_Kernel_ExplicitEulerWithShape )
-
 waLBerla_compile_test( NAME   MESA_PD_Kernel_ForceLJ FILES kernel/ForceLJ.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_ForceLJ )
 
@@ -157,9 +154,6 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_TemperatureIntegration )
 
 waLBerla_compile_test( NAME   MESA_PD_Kernel_VelocityVerlet FILES kernel/VelocityVerlet.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_VelocityVerlet )
-
-waLBerla_compile_test( NAME   MESA_PD_Kernel_VelocityVerletWithShape FILES kernel/VelocityVerletWithShape.cpp DEPENDS core )
-waLBerla_execute_test( NAME   MESA_PD_Kernel_VelocityVerletWithShape )
 
 waLBerla_compile_test( NAME   MESA_PD_MPI_BroadcastProperty FILES mpi/BroadcastProperty.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_MPI_BroadcastProperty PROCESSES 8 )

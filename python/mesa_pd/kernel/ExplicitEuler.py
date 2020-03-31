@@ -5,13 +5,19 @@ from mesa_pd.utility import generate_file
 
 
 class ExplicitEuler:
-    def __init__(self):
-        self.context = dict()
-        self.context['interface'] = [create_access("position", "walberla::mesa_pd::Vec3", access="gs"),
-                                     create_access("linearVelocity", "walberla::mesa_pd::Vec3", access="gs"),
-                                     create_access("invMass", "walberla::real_t", access="g"),
-                                     create_access("force", "walberla::mesa_pd::Vec3", access="gs"),
-                                     create_access("flags", "walberla::mesa_pd::data::particle_flags::FlagT", access="g")]
+    def __init__(self, integrate_rotation=True):
+        self.context = {'bIntegrateRotation': integrate_rotation, 'interface': []}
+        self.context['interface'].append(create_access("position", "walberla::mesa_pd::Vec3", access="gs"))
+        self.context['interface'].append(create_access("linearVelocity", "walberla::mesa_pd::Vec3", access="gs"))
+        self.context['interface'].append(create_access("invMass", "walberla::real_t", access="g"))
+        self.context['interface'].append(create_access("force", "walberla::mesa_pd::Vec3", access="gs"))
+        self.context['interface'].append(create_access("flags", "walberla::mesa_pd::data::particle_flags::FlagT", access="g"))
+
+        if integrate_rotation:
+            self.context['interface'].append(create_access("rotation", "walberla::mesa_pd::Rot3", access="gs"))
+            self.context['interface'].append(create_access("angularVelocity", "walberla::mesa_pd::Vec3", access="gs"))
+            self.context['interface'].append(create_access("invInertiaBF", "walberla::mesa_pd::Mat3", access="g"))
+            self.context['interface'].append(create_access("torque", "walberla::mesa_pd::Vec3", access="gs"))
 
     def generate(self, module):
         ctx = {'module': module, **self.context}

@@ -26,7 +26,7 @@
 #include "mesa_pd/data/ShapeStorage.h"
 
 #include "mesa_pd/kernel/DoubleCast.h"
-#include "mesa_pd/kernel/ExplicitEulerWithShape.h"
+#include "mesa_pd/kernel/ExplicitEuler.h"
 #include "mesa_pd/kernel/SpringDashpot.h"
 #include "mesa_pd/kernel/SpringDashpotSpring.h"
 #include "mesa_pd/mpi/ReduceContactHistory.h"
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
          false);
 
    // explicit euler
-   kernel::ExplicitEulerWithShape explEuler(dt);
+   kernel::ExplicitEuler explEuler(dt);
    collision_detection::AnalyticContactDetection acd;
    kernel::DoubleCast double_cast;
    kernel::SpringDashpot sd(1);
