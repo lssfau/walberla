@@ -37,6 +37,16 @@ namespace walberla {
 
 using namespace walberla::mesa_pd;
 
+void checkIdenticalOrInf(const Mat3& mat0, const Mat3& mat1) {
+   for (uint_t i = 0; i <= 8; i++) {
+      WALBERLA_CHECK((math::isinf(mat0[i]) && math::isinf(mat1[i])) || realIsIdentical(mat0[i], mat1[i]), "Matrices don't match: " << mat0 << " vs. " << mat1);
+   }
+}
+
+void checkIdenticalOrInf(real_t a, real_t b) {
+   WALBERLA_CHECK((math::isinf(a) && math::isinf(b)) || realIsIdentical(a, b), "Values don't match: " << a << " vs. " << b);
+}
+
 void checkBox()
 {
    using namespace walberla::mpi;
@@ -57,8 +67,8 @@ void checkBox()
    WALBERLA_CHECK_EQUAL(bs1->getShapeType(), data::Box::SHAPE_TYPE);
    WALBERLA_CHECK_IDENTICAL(bs0->getMass(), bs1->getMass());
    WALBERLA_CHECK_IDENTICAL(bs0->getInvMass(), bs1->getInvMass());
-   WALBERLA_CHECK_IDENTICAL(bs0->getInertiaBF(), bs1->getInertiaBF());
-   WALBERLA_CHECK_IDENTICAL(bs0->getInvInertiaBF(), bs1->getInvInertiaBF());
+   checkIdenticalOrInf(bs0->getInertiaBF(), bs1->getInertiaBF());
+   checkIdenticalOrInf(bs0->getInvInertiaBF(), bs1->getInvInertiaBF());
 
    auto bx0 = static_cast<data::Box*> (bs0.get());
    auto bx1 = static_cast<data::Box*> (bs1.get());
@@ -87,8 +97,8 @@ void checkCylindricalBoundary()
    WALBERLA_CHECK_EQUAL(bs1->getShapeType(), data::CylindricalBoundary::SHAPE_TYPE);
    WALBERLA_CHECK_IDENTICAL(bs0->getMass(), bs1->getMass());
    WALBERLA_CHECK_IDENTICAL(bs0->getInvMass(), bs1->getInvMass());
-   WALBERLA_CHECK_IDENTICAL(bs0->getInertiaBF(), bs1->getInertiaBF());
-   WALBERLA_CHECK_IDENTICAL(bs0->getInvInertiaBF(), bs1->getInvInertiaBF());
+   checkIdenticalOrInf(bs0->getInertiaBF(), bs1->getInertiaBF());
+   checkIdenticalOrInf(bs0->getInvInertiaBF(), bs1->getInvInertiaBF());
 
    auto cb0 = static_cast<data::CylindricalBoundary*> (bs0.get());
    auto cb1 = static_cast<data::CylindricalBoundary*> (bs1.get());
@@ -117,8 +127,8 @@ void checkEllipsoid()
    WALBERLA_CHECK_EQUAL(bs1->getShapeType(), data::Ellipsoid::SHAPE_TYPE);
    WALBERLA_CHECK_IDENTICAL(bs0->getMass(), bs1->getMass());
    WALBERLA_CHECK_IDENTICAL(bs0->getInvMass(), bs1->getInvMass());
-   WALBERLA_CHECK_IDENTICAL(bs0->getInertiaBF(), bs1->getInertiaBF());
-   WALBERLA_CHECK_IDENTICAL(bs0->getInvInertiaBF(), bs1->getInvInertiaBF());
+   checkIdenticalOrInf(bs0->getInertiaBF(), bs1->getInertiaBF());
+   checkIdenticalOrInf(bs0->getInvInertiaBF(), bs1->getInvInertiaBF());
 
    auto el0 = static_cast<data::Ellipsoid*> (bs0.get());
    auto el1 = static_cast<data::Ellipsoid*> (bs1.get());
@@ -144,9 +154,9 @@ void checkHalfSpace()
    WALBERLA_LOG_INFO("checking half space");
    WALBERLA_CHECK_EQUAL(bs0->getShapeType(), data::HalfSpace::SHAPE_TYPE);
    WALBERLA_CHECK_EQUAL(bs1->getShapeType(), data::HalfSpace::SHAPE_TYPE);
-//   WALBERLA_CHECK_IDENTICAL(bs0->getMass(), bs1->getMass()); //INF
+   checkIdenticalOrInf(bs0->getMass(), bs1->getMass()); //INF
    WALBERLA_CHECK_IDENTICAL(bs0->getInvMass(), bs1->getInvMass());
-//   WALBERLA_CHECK_IDENTICAL(bs0->getInertiaBF(), bs1->getInertiaBF()); //INF
+   checkIdenticalOrInf(bs0->getInertiaBF(), bs1->getInertiaBF()); //INF
    WALBERLA_CHECK_IDENTICAL(bs0->getInvInertiaBF(), bs1->getInvInertiaBF());
 
    auto hs0 = static_cast<data::HalfSpace*> (bs0.get());
