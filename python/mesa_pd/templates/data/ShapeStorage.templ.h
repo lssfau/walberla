@@ -58,8 +58,10 @@ struct ShapeStorage
    ReturnType doubleDispatch( ParticleStorage& ps, size_t idx, size_t idy, func& f );
 };
 //Make sure that no two different shapes have the same unique identifier!
-{%- for shape in particle.shapes[1:] %}
-static_assert( {{particle.shapes[0]}}::SHAPE_TYPE != {{shape}}::SHAPE_TYPE, "Shape types have to be different!" );
+{%- for shape1 in particle.shapes %}
+{%- for shape2 in particle.shapes[loop.index:] %}
+static_assert( {{shape1}}::SHAPE_TYPE != {{shape2}}::SHAPE_TYPE, "Shape types have to be different!" );
+{%- endfor %}
 {%- endfor %}
 
 template <typename ShapeT, typename... Args>
