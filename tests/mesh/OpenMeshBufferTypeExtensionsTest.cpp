@@ -24,7 +24,7 @@
 #include "core/mpi/SendBuffer.h"
 #include "core/mpi/RecvBuffer.h"
 
-#include "mesh/OpenMeshBufferTypeExtensions.h"
+#include "mesh_common/OpenMeshBufferTypeExtensions.h"
 
 #include <OpenMesh/Core/Mesh/Handles.hh>
 #include <OpenMesh/Core/Geometry/VectorT.hh>

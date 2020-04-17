@@ -25,7 +25,7 @@
 // Includes
 //*************************************************************************************************
 
-#include "mesh/TriangleMeshes.h"
+#include "mesh_common/TriangleMeshes.h"
 #include "mesh/pe/Types.h"
 
 #include "core/DataTypes.h"

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "mesh/MatrixVectorOperations.h"
+#include "mesh_common/MatrixVectorOperations.h"
 
 #include "pe/rigidbody/Box.h"
 

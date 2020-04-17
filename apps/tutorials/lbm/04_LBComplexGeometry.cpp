@@ -33,12 +33,15 @@
 
 #include "lbm/all.h"
 
-#include "mesh/DistanceComputations.h"
-#include "mesh/DistanceFunction.h"
-#include "mesh/MatrixVectorOperations.h"
-#include "mesh/MeshIO.h"
-#include "mesh/MeshOperations.h"
-#include "mesh/TriangleMeshes.h"
+#include "mesh_common/DistanceComputations.h"
+#include "mesh_common/DistanceFunction.h"
+#include "mesh_common/MatrixVectorOperations.h"
+#include "mesh_common/MeshIO.h"
+#include "mesh_common/MeshOperations.h"
+#include "mesh_common/TriangleMeshes.h"
+#include "mesh_common/distance_octree/DistanceOctree.h"
+#include "mesh_common/vtk/CommonDataSources.h"
+#include "mesh_common/vtk/VTKMeshWriter.h"
 #include "mesh/blockforest/BlockExclusion.h"
 #include "mesh/blockforest/BlockForestInitialization.h"
 #include "mesh/boundary/BoundaryInfo.h"
@@ -47,9 +50,6 @@
 #include "mesh/boundary/BoundarySetup.h"
 #include "mesh/boundary/BoundaryUIDFaceDataSource.h"
 #include "mesh/boundary/ColorToBoundaryMapper.h"
-#include "mesh/distance_octree/DistanceOctree.h"
-#include "mesh/vtk/CommonDataSources.h"
-#include "mesh/vtk/VTKMeshWriter.h"
 
 #include "timeloop/all.h"
 

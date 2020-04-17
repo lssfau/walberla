@@ -25,8 +25,8 @@
 
 #include "domain_decomposition/BlockStorage.h"
 
-#include "mesh/vtk/DistributedVTKMeshWriter.h"
-#include "mesh/vtk/CommonDataSources.h"
+#include "mesh_common/vtk/DistributedVTKMeshWriter.h"
+#include "mesh_common/vtk/CommonDataSources.h"
 
 #include "pe/rigidbody/BodyStorage.h"
 #include "pe/rigidbody/RigidBody.h"

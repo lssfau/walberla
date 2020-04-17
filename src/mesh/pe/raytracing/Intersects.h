@@ -20,9 +20,9 @@
 
 #pragma once
 
-#include <mesh/MatrixVectorOperations.h>
+#include <mesh_common/MatrixVectorOperations.h>
 #include <mesh/pe/rigid_body/ConvexPolyhedron.h>
-#include <mesh/TriangleMeshes.h>
+#include <mesh_common/TriangleMeshes.h>
 #include <pe/raytracing/Intersects.h>
 
 namespace walberla {

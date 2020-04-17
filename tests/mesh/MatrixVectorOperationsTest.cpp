@@ -22,7 +22,7 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/mpi/Environment.h"
 
-#include "mesh/MatrixVectorOperations.h"
+#include "mesh_common/MatrixVectorOperations.h"
 
 namespace walberla {
 namespace mesh {

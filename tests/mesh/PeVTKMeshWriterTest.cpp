@@ -29,7 +29,7 @@
 #include <mesh/pe/DefaultTesselation.h>
 #include <mesh/pe/rigid_body/ConvexPolyhedronFactory.h>
 #include <mesh/pe/communication/ConvexPolyhedron.h>
-#include <mesh/PolyMeshes.h>
+#include <mesh_common/PolyMeshes.h>
 
 #include <blockforest/Initialization.h>
 #include <core/Abort.h>

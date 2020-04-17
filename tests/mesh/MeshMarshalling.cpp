@@ -22,8 +22,8 @@
 
 #include "mesh/pe/rigid_body/ConvexPolyhedron.h"
 #include "mesh/pe/rigid_body/ConvexPolyhedronFactory.h"
-#include "mesh/TriangleMeshes.h"
-#include "mesh/QHull.h"
+#include "mesh_common/TriangleMeshes.h"
+#include "mesh_common/QHull.h"
 #include "mesh/pe/Types.h"
 #include "pe/rigidbody/Squirmer.h"
 #include "pe/rigidbody/UnionFactory.h"

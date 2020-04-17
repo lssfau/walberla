@@ -27,8 +27,8 @@
 #include "core/math/Matrix3.h"
 #include "core/debug/Debug.h"
 
-#include "mesh/MeshOperations.h"
-#include "mesh/QHull.h"
+#include "mesh_common/MeshOperations.h"
+#include "mesh_common/QHull.h"
 
 #include "pe/Materials.h"
 

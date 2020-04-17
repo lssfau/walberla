@@ -31,11 +31,11 @@
 #include "geometry/mesh/TriangleMesh.h"
 #include "geometry/mesh/TriangleMeshIO.h"
 
-#include "mesh/MeshOperations.h"
-#include "mesh/TriangleMeshes.h"
-#include "mesh/DistanceComputations.h"
-#include "mesh/MeshIO.h"
-#include "mesh/distance_octree/DistanceOctree.h"
+#include "mesh_common/MeshOperations.h"
+#include "mesh_common/TriangleMeshes.h"
+#include "mesh_common/DistanceComputations.h"
+#include "mesh_common/MeshIO.h"
+#include "mesh_common/distance_octree/DistanceOctree.h"
 
 
 namespace walberla {

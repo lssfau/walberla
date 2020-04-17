@@ -26,10 +26,10 @@
 #include "core/math/Constants.h"
 #include "core/math/Utility.h"
 
-#include "mesh/TriangleMeshes.h"
-#include "mesh/QHull.h"
-#include "mesh/vtk/VTKMeshWriter.h"
-#include "mesh/vtk/CommonDataSources.h"
+#include "mesh_common/TriangleMeshes.h"
+#include "mesh_common/QHull.h"
+#include "mesh_common/vtk/VTKMeshWriter.h"
+#include "mesh_common/vtk/CommonDataSources.h"
 
 #include "vtk/VTKOutput.h"
 #include "vtk/PointDataSource.h"

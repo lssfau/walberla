@@ -23,12 +23,12 @@
 #include "core/logging/Logging.h"
 #include "core/mpi/Environment.h"
 
-#include "mesh/TriangleMeshes.h"
-#include "mesh/MeshOperations.h"
-#include "mesh/MeshIO.h"
-#include "mesh/vtk/VTKMeshWriter.h"
-#include "mesh/vtk/CommonDataSources.h"
-#include "mesh/vtk/CommonFilters.h"
+#include "mesh_common/TriangleMeshes.h"
+#include "mesh_common/MeshOperations.h"
+#include "mesh_common/MeshIO.h"
+#include "mesh_common/vtk/VTKMeshWriter.h"
+#include "mesh_common/vtk/CommonDataSources.h"
+#include "mesh_common/vtk/CommonFilters.h"
 
 #include <vector>
 #include <string>

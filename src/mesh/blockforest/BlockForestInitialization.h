@@ -22,8 +22,8 @@
 #pragma once
 
 #include "BlockExclusion.h"
-#include "mesh/MeshOperations.h"
-#include "mesh/distance_octree/DistanceOctree.h"
+#include "mesh_common/MeshOperations.h"
+#include "mesh_common/distance_octree/DistanceOctree.h"
 
 #include "blockforest/StructuredBlockForest.h"
 #include "blockforest/SetupBlockForest.h"

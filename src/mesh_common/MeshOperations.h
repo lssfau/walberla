@@ -22,7 +22,7 @@
 #pragma once
 
 #include "MatrixVectorOperations.h"
-#include "TriangleMeshes.h"
+#include "mesh_common/TriangleMeshes.h"
 
 #include "core/math/GenericAABB.h"
 #include "core/Optional.h"

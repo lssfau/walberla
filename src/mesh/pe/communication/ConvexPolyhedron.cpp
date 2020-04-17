@@ -23,7 +23,7 @@
 
 #include "core/mpi/BufferDataTypeExtensions.h"
 
-#include "mesh/OpenMeshBufferTypeExtensions.h"
+#include "mesh_common/OpenMeshBufferTypeExtensions.h"
 
 #include "pe/communication/Marshalling.h"
 

@@ -24,10 +24,10 @@
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
 
-#include "mesh/TriangleMeshes.h"
-#include "mesh/MatrixVectorOperations.h"
-#include "mesh/vtk/VTKMeshWriter.h"
-#include "mesh/vtk/CommonDataSources.h"
+#include "mesh_common/TriangleMeshes.h"
+#include "mesh_common/MatrixVectorOperations.h"
+#include "mesh_common/vtk/VTKMeshWriter.h"
+#include "mesh_common/vtk/CommonDataSources.h"
 
 #include "vtk/VTKOutput.h"
 #include "vtk/PointDataSource.h"

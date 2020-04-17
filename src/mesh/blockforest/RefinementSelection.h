@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "mesh/MeshOperations.h"
+#include "mesh_common/MeshOperations.h"
 
 #include "blockforest/SetupBlockForest.h"
 #include "blockforest/Types.h"
