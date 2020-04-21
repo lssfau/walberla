@@ -39,7 +39,7 @@ def generate_staggered_boundary(generation_context, class_name, boundary_object,
     else:
         stencil = neighbor_stencil
 
-    stencil_info = [(i, ", ".join([str(e) for e in d])) for i, d in enumerate(stencil)]
+    stencil_info = [(i, d, ", ".join([str(e) for e in d])) for i, d in enumerate(stencil)]
 
     context = {
         'class_name': boundary_object.name,
@@ -50,6 +50,7 @@ def generate_staggered_boundary(generation_context, class_name, boundary_object,
         'dim': dim,
         'target': target,
         'namespace': 'pystencils',
+        'inner_or_boundary': boundary_object.inner_or_boundary
     }
 
     env = Environment(loader=PackageLoader('pystencils_walberla'), undefined=StrictUndefined)
@@ -91,7 +92,7 @@ def generate_staggered_flux_boundary(generation_context, class_name, boundary_ob
     else:
         stencil = neighbor_stencil
 
-    stencil_info = [(i, ", ".join([str(e) for e in d])) for i, d in enumerate(stencil)]
+    stencil_info = [(i, d, ", ".join([str(e) for e in d])) for i, d in enumerate(stencil)]
 
     context = {
         'class_name': boundary_object.name,
@@ -102,6 +103,7 @@ def generate_staggered_flux_boundary(generation_context, class_name, boundary_ob
         'dim': dim,
         'target': target,
         'namespace': 'pystencils',
+        'inner_or_boundary': boundary_object.inner_or_boundary
     }
 
     env = Environment(loader=PackageLoader('pystencils_walberla'), undefined=StrictUndefined)
