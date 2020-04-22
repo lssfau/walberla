@@ -170,8 +170,8 @@ def generate_block_data_to_field_extraction(ctx, kernel_info, parameters_to_igno
     return result
 
 
-def generate_refs_for_kernel_parameters(kernel_info, prefix, parameters_to_ignore):
-    symbols = {p.field_name for p in kernel_info.parameters if p.is_field_pointer}
+def generate_refs_for_kernel_parameters(kernel_info, prefix, parameters_to_ignore=(), ignore_fields=False):
+    symbols = {p.field_name for p in kernel_info.parameters if p.is_field_pointer and not ignore_fields}
     symbols.update(p.symbol.name for p in kernel_info.parameters if not p.is_field_parameter)
     symbols.difference_update(parameters_to_ignore)
     return "\n".join("auto & %s = %s%s_;" % (s, prefix, s) for s in symbols)
