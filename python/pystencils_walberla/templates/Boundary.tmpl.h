@@ -158,10 +158,14 @@ public:
             if( ! isFlagSet(it, domainFlag) )
                 continue;
 
-            {%- for dirIdx, offset in stencil_info %}
+            {%- for dirIdx, dirVec, offset in stencil_info %}
             if ( isFlagSet( it.neighbor({{offset}} {%if dim == 3%}, 0 {%endif %}), boundaryFlag ) )
             {
+                {% if inner_or_boundary -%}
                 auto element = {{StructName}}(it.x(), it.y(), {%if dim == 3%} it.z(), {%endif %} {{dirIdx}} );
+                {% else -%}
+                auto element = {{StructName}}(it.x() + cell_idx_c({{dirVec[0]}}), it.y() + cell_idx_c({{dirVec[1]}}), {%if dim == 3%} it.z() + cell_idx_c({{dirVec[2]}}), {%endif %} {{dirIdx}} );
+                {% endif -%}
                 indexVectorAll.push_back( element );
                 if( inner.contains( it.x(), it.y(), it.z() ) )
                     indexVectorInner.push_back( element );
