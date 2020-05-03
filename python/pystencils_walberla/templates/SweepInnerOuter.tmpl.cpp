@@ -48,6 +48,7 @@ namespace {{namespace}} {
 void {{class_name}}::operator() ( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream{% endif %} )
 {
     {{kernel|generate_block_data_to_field_extraction|indent(4)}}
+    {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(4) }}
     {{kernel|generate_call(stream='stream')|indent(4)}}
     {{kernel|generate_swaps|indent(4)}}
 }
@@ -67,6 +68,7 @@ void {{class_name}}::runOnCellInterval( const shared_ptr<StructuredBlockStorage>
         return;
 
     {{kernel|generate_block_data_to_field_extraction|indent(4)}}
+    {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(4) }}
     {{kernel|generate_call(stream='stream', cell_interval='ci')|indent(4)}}
     {{kernel|generate_swaps|indent(4)}}
 }
@@ -79,6 +81,7 @@ void {{class_name}}::inner( IBlock * block{%if target is equalto 'gpu'%} , cudaS
     CellInterval inner = {{field}}->xyzSize();
     inner.expand(Cell(-outerWidth_[0], -outerWidth_[1], -outerWidth_[2]));
 
+    {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(4) }}
     {{kernel|generate_call(stream='stream', cell_interval='inner')|indent(4)}}
 }
 
@@ -117,6 +120,7 @@ void {{class_name}}::outer( IBlock * block{%if target is equalto 'gpu'%} , cudaS
         for( auto & ci: layers_ )
         {
             parallelSection_.run([&]( auto s ) {
+                {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(4) }}
                 {{kernel|generate_call(stream='s', cell_interval='ci')|indent(16)}}
             });
         }
