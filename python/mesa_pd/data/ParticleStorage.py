@@ -26,6 +26,10 @@ def create_particle_property(name, type, access="grs", defValue="", syncMode="AL
        'ALWAYS', this property has to be synced in every iteration
     """
 
+    if (type == 'bool'):
+        raise RuntimeError(f"Due to flaws in the implementation of std::vector<bool>, bool is not supported as a "
+                           f"property type! Please use char instead.")
+
     # sort access specifier and remove duplicates
     foo = "".join(sorted(access))
     access = ''.join([foo[i] for i in range(len(foo) - 1) if foo[i + 1] != foo[i]] + [foo[-1]])
