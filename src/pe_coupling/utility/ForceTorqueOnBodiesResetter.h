@@ -22,6 +22,7 @@
 #pragma once
 
 #include "domain_decomposition/StructuredBlockStorage.h"
+#include "BodySelectorFunctions.h"
 
 namespace walberla {
 namespace pe_coupling {
@@ -30,8 +31,9 @@ class ForceTorqueOnBodiesResetter
 {  
 public:
 
-   ForceTorqueOnBodiesResetter( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyStorageID )
-   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID )
+   ForceTorqueOnBodiesResetter( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyStorageID, const std::function<bool(
+            pe::BodyID)> &bodySelectorFct = selectRegularBodies )
+   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), bodySelectorFct_( bodySelectorFct )
      { }
 
    // resets forces and torques on all (local and remote) bodies
@@ -41,6 +43,7 @@ private:
 
    shared_ptr<StructuredBlockStorage> blockStorage_;
    const BlockDataID bodyStorageID_;
+   const std::function<bool(pe::BodyID)> bodySelectorFct_;
 };
 
 } // namespace pe_coupling

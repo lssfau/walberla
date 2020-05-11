@@ -35,6 +35,7 @@ void ForceTorqueOnBodiesScaler::operator()()
    {
       for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
+         if( !bodySelectorFct_(bodyIt.getBodyID()) ) continue;
          force  = scalingFactor_ * bodyIt->getForce();
          torque = scalingFactor_ * bodyIt->getTorque();
 
