@@ -35,6 +35,7 @@ void ForceOnBodiesAdder::operator()()
    {
       for( auto bodyIt = pe::LocalBodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::LocalBodyIterator::end(); ++bodyIt )
       {
+         if( !bodySelectorFct_(bodyIt.getBodyID()) ) continue;
          bodyIt->addForce ( force_ );
       }
    }

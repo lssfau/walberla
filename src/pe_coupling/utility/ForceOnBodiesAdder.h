@@ -23,6 +23,7 @@
 
 #include "core/math/Vector3.h"
 #include "domain_decomposition/StructuredBlockStorage.h"
+#include "BodySelectorFunctions.h"
 
 namespace walberla {
 namespace pe_coupling {
@@ -32,8 +33,9 @@ class ForceOnBodiesAdder
 public:
 
    ForceOnBodiesAdder( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyStorageID,
-                       const Vector3<real_t> & force )
-   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), force_( force )
+                       const Vector3<real_t> & force, const std::function<bool(
+            pe::BodyID)> &bodySelectorFct = selectRegularBodies )
+   : blockStorage_( blockStorage ), bodyStorageID_( bodyStorageID ), force_( force ), bodySelectorFct_( bodySelectorFct )
      { }
 
    // set a constant force on all (only local, to avoid force duplication) bodies
@@ -46,6 +48,7 @@ private:
    shared_ptr<StructuredBlockStorage> blockStorage_;
    const BlockDataID bodyStorageID_;
    Vector3<real_t> force_;
+   const std::function<bool(pe::BodyID)> bodySelectorFct_;
 };
 
 } // namespace pe_coupling

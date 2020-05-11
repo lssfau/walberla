@@ -22,6 +22,7 @@
 #pragma once
 
 #include "blockforest/StructuredBlockForest.h"
+#include "BodySelectorFunctions.h"
 
 #include <map>
 #include <array>
@@ -35,8 +36,9 @@ public:
 
    typedef std::map< walberla::id_t, std::array<real_t,6> > ForceTorqueStorage_T;
 
-   BodiesForceTorqueContainer( const shared_ptr<StructuredBlockForest> & blockForest, const BlockDataID & bodyStorageID )
-   : blockForest_( blockForest ), bodyStorageID_( bodyStorageID )
+   BodiesForceTorqueContainer( const shared_ptr<StructuredBlockForest> & blockForest, const BlockDataID & bodyStorageID, const std::function<bool(
+            pe::BodyID)> &bodySelectorFct = selectRegularBodies)
+   : blockForest_( blockForest ), bodyStorageID_( bodyStorageID ), bodySelectorFct_( bodySelectorFct )
    {
       // has to be added to the forest (not the storage) to register correctly
       bodyForceTorqueStorageID_ = blockForest->addBlockData(make_shared<blockforest::AlwaysCreateBlockDataHandling<ForceTorqueStorage_T> >(), "BodiesForceTorqueContainer");
@@ -60,6 +62,7 @@ private:
    shared_ptr<StructuredBlockStorage> blockForest_;
    const BlockDataID bodyStorageID_;
    BlockDataID bodyForceTorqueStorageID_;
+   std::function<bool(pe::BodyID)> bodySelectorFct_;
 };
 
 

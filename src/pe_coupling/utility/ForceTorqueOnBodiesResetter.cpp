@@ -32,6 +32,7 @@ void ForceTorqueOnBodiesResetter::operator()()
    {
       for( auto bodyIt = pe::BodyIterator::begin( *blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
+         if( !bodySelectorFct_(bodyIt.getBodyID()) ) continue;
          bodyIt->resetForceAndTorque();
       }
    }

@@ -42,6 +42,7 @@ void BodiesForceTorqueContainer::store()
 
       for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
+         if( !bodySelectorFct_(bodyIt.getBodyID()) ) continue;
          auto & f = (*bodyForceTorqueStorage)[ bodyIt->getSystemID() ];
 
          const auto & force = bodyIt->getForce();
@@ -60,6 +61,7 @@ void BodiesForceTorqueContainer::setOnBodies()
 
       for( auto bodyIt = pe::BodyIterator::begin(*blockIt, bodyStorageID_); bodyIt != pe::BodyIterator::end(); ++bodyIt )
       {
+         if( !bodySelectorFct_(bodyIt.getBodyID()) ) continue;
          const auto f = bodyForceTorqueStorage->find( bodyIt->getSystemID() );
 
          if( f != bodyForceTorqueStorage->end() )
