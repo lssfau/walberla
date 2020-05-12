@@ -45,12 +45,17 @@ Many thanks go to waLBerla's [contributors](AUTHORS.txt)
 
 ### Please cite us
 
-If you use waLBerla in a publication, please cite the following article:
+If you use waLBerla in a publication, please cite the following articles:
 
 - C. Godenschwager, F. Schornbaum, M. Bauer, H. Köstler, and U. Rüde. A
 framework for hybrid parallel flow simulations with a trillion cells in complex
 geometries. In: Proceedings of the International Conference on High Performance
 Computing, Networking, Storage and Analysis, page 35. ACM, 2013.
+- M. Bauer, S. Eibl, C. Godenschwager, N. Kohl, M. Kuron, C. Rettinger,
+F. Schornbaum, C. Schwarzmeier, D. Thönnes, H. Köstler, and U. Rüde. waLBerla:
+A block-structured high-performance framework for multiphysics simulations. In:
+Computers & Mathematics with Applications, doi:10.1016/j.camwa.2020.01.007.
+Elsevier, 2020.
 
 ## License
 
