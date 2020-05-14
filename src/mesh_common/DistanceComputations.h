@@ -200,8 +200,8 @@ protected:
 template< typename MeshType >
 void TriangleDistance<MeshType>::computeNormals()
 {
-   // J. Bï¿½rentzen and H. Aanï¿½s. Signed distance computation using the angle weighted pseudonormal.
-   // Visualization and Computer Graphics, IEEE Transactions on, 11(3):243ï¿½253, 2005.
+   // J. Bærentzen and H. Aanæs. Signed distance computation using the angle weighted pseudonormal.
+   // Visualization and Computer Graphics, IEEE Transactions on, 11(3):243–253, 2005.
 
    static_assert( MeshType::IsTriMesh == 1, "computeNormals only works with triangular meshes!" );
 
