@@ -71,13 +71,12 @@ waLBerla_compile_test( FILES SuViscoelasticityTest.cpp DEPENDS field blockforest
 waLBerla_execute_test( NAME  SuViscoelasticityTest COMMAND $<TARGET_FILE:SuViscoelasticityTest> ${CMAKE_CURRENT_SOURCE_DIR}/Su.prm )
 
 # Code Generation
-waLBerla_python_file_generates(codegen/LbCodeGenerationExample.py
-                              LbCodeGenerationExample_LatticeModel.cpp
-                              LbCodeGenerationExample_NoSlip.cpp
-                              LbCodeGenerationExample_UBB.cpp )
-waLBerla_compile_test( FILES codegen/LbCodeGenerationExample.py
-                             codegen/LbCodeGenerationExample.cpp)
-waLBerla_python_file_generates(codegen/FluctuatingMRT.py
-                              FluctuatingMRT_LatticeModel.cpp )
-waLBerla_compile_test( FILES codegen/FluctuatingMRT.py
-                             codegen/FluctuatingMRT.cpp)
+waLBerla_generate_target_from_python(NAME LbCodeGenerationExampleGenerated
+      FILE codegen/LbCodeGenerationExample.py
+      OUT_FILES LbCodeGenerationExample_LatticeModel.cpp LbCodeGenerationExample_LatticeModel.h
+      LbCodeGenerationExample_NoSlip.cpp LbCodeGenerationExample_NoSlip.h
+      LbCodeGenerationExample_UBB.cpp LbCodeGenerationExample_UBB.h )
+waLBerla_compile_test( FILES codegen/LbCodeGenerationExample.cpp DEPENDS LbCodeGenerationExampleGenerated)
+waLBerla_generate_target_from_python(NAME FluctuatingMRTGenerated FILE codegen/FluctuatingMRT.py
+                              OUT_FILES FluctuatingMRT_LatticeModel.cpp FluctuatingMRT_LatticeModel.h )
+waLBerla_compile_test( FILES codegen/FluctuatingMRT.cpp DEPENDS FluctuatingMRTGenerated)

@@ -2,17 +2,19 @@ waLBerla_link_files_to_builddir( "*.prm" )
 waLBerla_link_files_to_builddir( "*.py" )
 
 
-waLBerla_python_file_generates(UniformGridGenerated.py
-        GenMacroGetter.cpp GenMacroSetter.cpp
-        GenPackInfo.cpp GenPackInfoAAPush.cpp GenPackInfoAAPull.cpp
-        GenLbKernel.cpp GenLbKernelAAEven.cpp GenLbKernelAAOdd.cpp
-        GenMpiDtypeInfo.h GenMpiDtypeInfoAAPull.h GenMpiDtypeInfoAAPush.h
-        GenDefines.h)
-
-
 foreach(config trt smagorinsky mrt3 mrt entropic_kbc_n4 cumulant )
+    waLBerla_generate_target_from_python(NAME UniformGridGenerated_${config}
+          CODEGEN_CFG ${config}
+          FILE UniformGridGenerated.py
+          OUT_FILES GenMacroGetter.cpp GenMacroGetter.h GenMacroSetter.cpp GenMacroSetter.h
+          GenPackInfo.cpp GenPackInfo.h GenPackInfoAAPush.cpp GenPackInfoAAPush.h GenPackInfoAAPull.cpp GenPackInfoAAPull.h
+          GenLbKernel.cpp GenLbKernel.h GenLbKernelAAEven.cpp GenLbKernelAAEven.h GenLbKernelAAOdd.cpp GenLbKernelAAOdd.h
+          GenMpiDtypeInfo.h GenMpiDtypeInfoAAPull.h GenMpiDtypeInfoAAPush.h
+          GenDefines.h)
+
     waLBerla_add_executable ( NAME UniformGridBenchmarkGenerated_${config}
-            FILES UniformGridGenerated.cpp UniformGridGenerated.py
-            DEPENDS blockforest boundary core domain_decomposition field geometry timeloop vtk gui
-            CODEGEN_CFG ${config})
+          FILES UniformGridGenerated.cpp
+          DEPENDS blockforest boundary core domain_decomposition field geometry timeloop vtk gui
+          UniformGridGenerated_${config})
+
 endforeach()
