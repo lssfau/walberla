@@ -23,7 +23,7 @@
 
 #include "core/math/GenericAABB.h"
 
-#include "mesh/MeshOperations.h"
+#include "mesh_common/MeshOperations.h"
 
 namespace walberla {
 namespace mesh {

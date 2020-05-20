@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "mesh/MeshOperations.h"
+#include "mesh_common/MeshOperations.h"
 
 #include "core/math/Vector3.h"
 #include "core/mpi/MPIManager.h"

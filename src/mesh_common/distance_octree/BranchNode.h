@@ -25,9 +25,9 @@
 
 #include "core/debug/Debug.h"
 
-#include "mesh/DistanceComputations.h"
-#include "mesh/MatrixVectorOperations.h"
-#include "mesh/MeshOperations.h"
+#include "mesh_common/DistanceComputations.h"
+#include "mesh_common/MatrixVectorOperations.h"
+#include "mesh_common/MeshOperations.h"
 
 #include <algorithm>
 #include <iterator>

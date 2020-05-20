@@ -25,6 +25,19 @@ namespace mesh {
 /**
 \defgroup mesh mesh - surface meshes in waLBerla
 
+\section meshmodulelayout How is the mesh module laid out?
+
+More precisely, the mesh module consists of two modules - the mesh_common module, providing basic mesh support, and the mesh module, which includes
+deep integration of meshes into waLBerla. Both operate in the same "mesh" namespace.
+
+\subsection mesh_common mesh_common - Essentials
+The mesh_common module consists of an OpenMesh wrapper (detailed further down), VTK output, distance octree,
+IO handling, arithmetic operations (i.e. calculation of inertia tensor), and MPI extensions.
+
+\subsection mesh mesh - waLBerla integrations
+To enable the usage of meshes in certain parts of waLBerla, the more waLBerla-specific "mesh" module contains extensions
+for the BlockForest, boundaries, the Physics engine, python and conversion to the waLBerla-own TriangleMesh geometry.
+
 \section meshhandling How are meshes handled in the mesh module?
 
 \subsection openmesh OpenMesh

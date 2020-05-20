@@ -26,8 +26,8 @@
 #include "core/math/GenericAABB.h"
 #include "core/math/Matrix3.h"
 
-#include "mesh/MatrixVectorOperations.h"
-#include "mesh/TriangleMeshes.h"
+#include "mesh_common/MatrixVectorOperations.h"
+#include "mesh_common/TriangleMeshes.h"
 
 #include <OpenMesh/Core/Utils/PropertyManager.hh>
 

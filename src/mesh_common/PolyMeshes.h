@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "TriangleMeshes.h"
+#include "mesh_common/TriangleMeshes.h"
 
 #include <OpenMesh/Core/Mesh/PolyMesh_ArrayKernelT.hh>
 

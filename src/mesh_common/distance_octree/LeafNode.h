@@ -23,7 +23,7 @@
 
 #include "Node.h"
 
-#include "mesh/DistanceComputations.h"
+#include "mesh_common/DistanceComputations.h"
 
 namespace walberla {
 namespace mesh {

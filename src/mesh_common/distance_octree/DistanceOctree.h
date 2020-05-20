@@ -25,7 +25,7 @@
 #include "LeafNode.h"
 #include "BranchNode.h"
 
-#include "mesh/DistanceComputations.h"
+#include "mesh_common/DistanceComputations.h"
 
 #include "core/DataTypes.h"
 #include "core/Abort.h"

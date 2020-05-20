@@ -26,7 +26,7 @@
 #include <core/math/Vector3.h>
 #include <mesh/pe/raytracing/Intersects.h>
 #include <mesh/pe/rigid_body/ConvexPolyhedron.h>
-#include <mesh/QHull.h>
+#include <mesh_common/QHull.h>
 #include <pe/Materials.h>
 #include <pe/raytracing/Intersects.h>
 #include <pe/rigidbody/Box.h>

@@ -26,7 +26,7 @@
 #include "core/debug/CheckFunctions.h"
 #include "core/mpi/MPIManager.h"
 
-#include "mesh/MatrixVectorOperations.h"
+#include "mesh_common/MatrixVectorOperations.h"
 
 #include <OpenMesh/Core/Mesh/Status.hh>
 

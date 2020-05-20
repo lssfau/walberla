@@ -26,7 +26,7 @@
 #include "geometry/mesh/TriangleMeshIO.h"
 
 #include "mesh/MeshConversion.h"
-#include "mesh/MeshIO.h"
+#include "mesh_common/MeshIO.h"
 
 namespace walberla {
 namespace mesh {

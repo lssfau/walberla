@@ -20,8 +20,8 @@
 //======================================================================================================================
 #pragma once
 
-#include "TriangleMeshes.h"
-#include "MatrixVectorOperations.h"
+#include "mesh_common/TriangleMeshes.h"
+#include "mesh_common/MatrixVectorOperations.h"
 
 #include "geometry/mesh/TriangleMesh.h"
 

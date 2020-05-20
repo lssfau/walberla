@@ -26,7 +26,7 @@
 #include "core/DataTypes.h"
 #include "core/debug/CheckFunctions.h"
 
-#include "mesh/vtk/VTKMeshWriter.h"
+#include "mesh_common/vtk/VTKMeshWriter.h"
 
 namespace walberla {
 namespace mesh {

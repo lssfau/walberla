@@ -21,7 +21,7 @@
 //======================================================================================================================
 
 #include "core/math/Vector3.h"
-#include "mesh/MatrixVectorOperations.h"
+#include "mesh_common/MatrixVectorOperations.h"
 
 namespace walberla {
 

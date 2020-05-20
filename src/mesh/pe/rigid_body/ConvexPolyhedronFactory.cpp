@@ -27,9 +27,9 @@
 #include "core/debug/Debug.h"
 
 #include "mesh/pe/rigid_body/ConvexPolyhedron.h"
-#include "mesh/MeshOperations.h"
-#include "mesh/QHull.h"
-#include "mesh/TriangleMeshes.h"
+#include "mesh_common/MeshOperations.h"
+#include "mesh_common/QHull.h"
+#include "mesh_common/TriangleMeshes.h"
 
 
 #include <vector>

@@ -22,8 +22,8 @@
 #pragma once
 
 #include "mesh/pe/rigid_body/ConvexPolyhedron.h"
-#include "mesh/MatrixVectorOperations.h"
-#include "mesh/TriangleMeshes.h"
+#include "mesh_common/MatrixVectorOperations.h"
+#include "mesh_common/TriangleMeshes.h"
 
 namespace walberla {
 namespace mesh {
