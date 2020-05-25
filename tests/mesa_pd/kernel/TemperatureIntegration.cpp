@@ -18,13 +18,11 @@
 //
 //======================================================================================================================
 
-#include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/ParticleAccessor.h>
 
 #include <mesa_pd/kernel/TemperatureIntegration.h>
 
 #include <core/Environment.h>
-#include <core/logging/Logging.h>
 
 #include <iostream>
 
@@ -45,11 +43,12 @@ int main( int argc, char ** argv )
    accessor.setType(        0, 0 );
    accessor.setHeatFlux(    0, real_t(8) );
    accessor.setTemperature( 0, real_t(5) );
+   accessor.setInvMass(     0, real_t(1) );
 
    //init kernels
    const real_t dt = real_t(1);
    kernel::TemperatureIntegration integrator( dt, 1 );
-   integrator.setInvHeatCapacity( 0, real_t(2) );
+   integrator.setInvSpecificHeat( 0, real_t(2) );
 
    integrator(0, accessor);
 

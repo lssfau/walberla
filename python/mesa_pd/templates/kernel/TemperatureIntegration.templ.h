@@ -34,8 +34,8 @@ namespace mesa_pd {
 namespace kernel {
 
 /**
- * Kernel which explicitly integrates all particles in time.
- * This integrator integrates velocity and position.
+ * Kernel which explicitly integrates a particle in time.
+ * The heat flux is converted into a temperature change.
  *
  * This kernel requires the following particle accessor interface
  * \code
@@ -53,8 +53,8 @@ namespace kernel {
    {%- endfor %}
  * \endcode
  *
- * \pre  All forces acting on the particles have to be set.
- * \post All forces are reset to 0.
+ * \pre  Heat flux has to be set/reduced.
+ * \post Heat flux is reset to 0.
  * \ingroup mesa_pd_kernel
  */
 class TemperatureIntegration
@@ -112,14 +112,14 @@ inline real_t TemperatureIntegration::get{{param | capFirst}}(const size_t type)
 {%- endfor %}
 
 template <typename Accessor>
-inline void TemperatureIntegration::operator()(const size_t idx,
+inline void TemperatureIntegration::operator()(const size_t p_idx,
                                                Accessor& ac) const
 {
    static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
 
    //formula for heat capacity
-   ac.setTemperature(idx, getInvHeatCapacity(ac.getType(idx)) * ac.getHeatFlux(idx) * dt_ + ac.getTemperature(idx));
-   ac.setHeatFlux   (idx, real_t(0));
+   ac.setTemperature(p_idx, getInvSpecificHeat(ac.getType(p_idx)) * ac.getInvMass(p_idx) * ac.getHeatFlux(p_idx) * dt_ + ac.getTemperature(p_idx));
+   ac.setHeatFlux   (p_idx, real_t(0));
 }
 
 } //namespace kernel

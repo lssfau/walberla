@@ -34,8 +34,8 @@ namespace mesa_pd {
 namespace kernel {
 
 /**
- * Kernel which explicitly integrates all particles in time.
- * This integrator integrates velocity and position.
+ * Kernel which explicitly integrates a particle in time.
+ * The heat flux is converted into a temperature change.
  *
  * This kernel requires the following particle accessor interface
  * \code
@@ -45,12 +45,14 @@ namespace kernel {
  * const walberla::real_t& getHeatFlux(const size_t p_idx) const;
  * void setHeatFlux(const size_t p_idx, const walberla::real_t& v);
  *
+ * const walberla::real_t& getInvMass(const size_t p_idx) const;
+ *
  * const uint_t& getType(const size_t p_idx) const;
  *
  * \endcode
  *
- * \pre  All forces acting on the particles have to be set.
- * \post All forces are reset to 0.
+ * \pre  Heat flux has to be set/reduced.
+ * \post Heat flux is reset to 0.
  * \ingroup mesa_pd_kernel
  */
 class TemperatureIntegration
@@ -67,16 +69,16 @@ public:
 
    
    /// assumes this parameter is symmetric
-   void setInvHeatCapacity(const size_t type, const real_t& val);
+   void setInvSpecificHeat(const size_t type, const real_t& val);
 
    
-   real_t getInvHeatCapacity(const size_t type) const;
+   real_t getInvSpecificHeat(const size_t type) const;
 private:
    real_t dt_ = real_t(0.0);
 
    uint_t numParticleTypes_;
    
-   std::vector<real_t> invHeatCapacity_ {};
+   std::vector<real_t> invSpecificHeat_ {};
 };
 
 TemperatureIntegration::TemperatureIntegration(const real_t dt, const uint_t numParticleTypes)
@@ -84,32 +86,32 @@ TemperatureIntegration::TemperatureIntegration(const real_t dt, const uint_t num
 {
    numParticleTypes_ = numParticleTypes;
    
-   invHeatCapacity_.resize(numParticleTypes, real_t(0));
+   invSpecificHeat_.resize(numParticleTypes, real_t(0));
 }
 
 
-inline void TemperatureIntegration::setInvHeatCapacity(const size_t type, const real_t& val)
+inline void TemperatureIntegration::setInvSpecificHeat(const size_t type, const real_t& val)
 {
    WALBERLA_ASSERT_LESS( type, numParticleTypes_ );
-   invHeatCapacity_[type] = val;
+   invSpecificHeat_[type] = val;
 }
 
 
-inline real_t TemperatureIntegration::getInvHeatCapacity(const size_t type) const
+inline real_t TemperatureIntegration::getInvSpecificHeat(const size_t type) const
 {
    WALBERLA_ASSERT_LESS( type, numParticleTypes_ );
-   return invHeatCapacity_[type];
+   return invSpecificHeat_[type];
 }
 
 template <typename Accessor>
-inline void TemperatureIntegration::operator()(const size_t idx,
+inline void TemperatureIntegration::operator()(const size_t p_idx,
                                                Accessor& ac) const
 {
    static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
 
    //formula for heat capacity
-   ac.setTemperature(idx, getInvHeatCapacity(ac.getType(idx)) * ac.getHeatFlux(idx) * dt_ + ac.getTemperature(idx));
-   ac.setHeatFlux   (idx, real_t(0));
+   ac.setTemperature(p_idx, getInvSpecificHeat(ac.getType(p_idx)) * ac.getInvMass(p_idx) * ac.getHeatFlux(p_idx) * dt_ + ac.getTemperature(p_idx));
+   ac.setHeatFlux   (p_idx, real_t(0));
 }
 
 } //namespace kernel
