@@ -38,9 +38,9 @@ namespace mesa_pd {
 namespace kernel {
 
 /**
- * Basic DEM kernel
+ * Heat conduction interaction kernel
  *
- * This DEM kernel supports spring&dashpot in normal direction as well as friction in tangential direction.
+ * This kernel implements a simple heat conduction: \frac{dQ}{dt} = - \alpha (T_2 - T_1)
  *
  * \code
    {%- for prop in interface %}
