@@ -30,20 +30,53 @@ namespace kernel {
 class ThermalExpansion
 {
 public:
-   ThermalExpansion() = default;
+   ThermalExpansion(const uint_t numParticleTypes);
+   ThermalExpansion(const ThermalExpansion& other) = default;
+   ThermalExpansion(ThermalExpansion&& other) = default;
+   ThermalExpansion& operator=(const ThermalExpansion& other) = default;
+   ThermalExpansion& operator=(ThermalExpansion&& other) = default;
+
+   void setLinearExpansionCoefficient(const size_t type, const real_t& val);
+   real_t getLinearExpansionCoefficient(const size_t type) const;
 
    template <typename Accessor>
-   void operator()(const size_t i, Accessor& ac) const;
+   void operator()(const size_t p_idx, Accessor& ac) const;
+private:
+       uint_t numParticleTypes_;
+
+   std::vector<real_t> linearExpansionCoefficient_ {};
 };
 
+ThermalExpansion::ThermalExpansion(const uint_t numParticleTypes)
+{
+   numParticleTypes_ = numParticleTypes;
+
+   linearExpansionCoefficient_.resize(numParticleTypes, real_t(0));
+}
+
+
+inline void ThermalExpansion::setLinearExpansionCoefficient(const size_t type, const real_t& val)
+{
+   WALBERLA_ASSERT_LESS( type, numParticleTypes_ );
+   linearExpansionCoefficient_[type] = val;
+}
+
+
+inline real_t ThermalExpansion::getLinearExpansionCoefficient(const size_t type) const
+{
+   WALBERLA_ASSERT_LESS( type, numParticleTypes_ );
+   return linearExpansionCoefficient_[type];
+}
+
 template <typename Accessor>
-inline void ThermalExpansion::operator()(const size_t idx,
+inline void ThermalExpansion::operator()(const size_t p_idx,
                                          Accessor& ac) const
 {
    static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
 
-   ac.setRadius(idx, real_t(0.004)  + (ac.getTemperature(idx)-real_t(273)) * real_t(0.002) * real_t(0.001));
-   ac.setInteractionRadius(idx, ac.getRadius(idx));
+   const auto Tc = ac.getTemperature(p_idx)-real_t(273);
+   ac.setRadiusAtTemperature(p_idx, ac.getRadius273K(p_idx) * (real_t(1) + Tc * getLinearExpansionCoefficient(ac.getType(p_idx))));
+   ac.setInteractionRadius(p_idx, ac.getRadiusAtTemperature(p_idx));
 }
 
 } //namespace kernel

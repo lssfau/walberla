@@ -108,9 +108,9 @@ public:
    walberla::mesa_pd::Vec3& getOldTorqueRef(const size_t p_idx) {return ps_->getOldTorqueRef(p_idx);}
    void setOldTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldTorque(p_idx, v);}
    
-   walberla::real_t const & getRadius(const size_t p_idx) const {return ps_->getRadius(p_idx);}
-   walberla::real_t& getRadiusRef(const size_t p_idx) {return ps_->getRadiusRef(p_idx);}
-   void setRadius(const size_t p_idx, walberla::real_t const & v) { ps_->setRadius(p_idx, v);}
+   walberla::real_t const & getRadiusAtTemperature(const size_t p_idx) const {return ps_->getRadiusAtTemperature(p_idx);}
+   walberla::real_t& getRadiusAtTemperatureRef(const size_t p_idx) {return ps_->getRadiusAtTemperatureRef(p_idx);}
+   void setRadiusAtTemperature(const size_t p_idx, walberla::real_t const & v) { ps_->setRadiusAtTemperature(p_idx, v);}
    
    blockforest::BlockID const & getCurrentBlock(const size_t p_idx) const {return ps_->getCurrentBlock(p_idx);}
    blockforest::BlockID& getCurrentBlockRef(const size_t p_idx) {return ps_->getCurrentBlockRef(p_idx);}
@@ -273,9 +273,9 @@ public:
    void setOldTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldTorque_ = v;}
    walberla::mesa_pd::Vec3& getOldTorqueRef(const size_t /*p_idx*/) {return oldTorque_;}
    
-   walberla::real_t const & getRadius(const size_t /*p_idx*/) const {return radius_;}
-   void setRadius(const size_t /*p_idx*/, walberla::real_t const & v) { radius_ = v;}
-   walberla::real_t& getRadiusRef(const size_t /*p_idx*/) {return radius_;}
+   walberla::real_t const & getRadiusAtTemperature(const size_t /*p_idx*/) const {return radiusAtTemperature_;}
+   void setRadiusAtTemperature(const size_t /*p_idx*/, walberla::real_t const & v) { radiusAtTemperature_ = v;}
+   walberla::real_t& getRadiusAtTemperatureRef(const size_t /*p_idx*/) {return radiusAtTemperature_;}
    
    blockforest::BlockID const & getCurrentBlock(const size_t /*p_idx*/) const {return currentBlock_;}
    void setCurrentBlock(const size_t /*p_idx*/, blockforest::BlockID const & v) { currentBlock_ = v;}
@@ -359,7 +359,7 @@ private:
    walberla::mesa_pd::Vec3 angularVelocity_;
    walberla::mesa_pd::Vec3 torque_;
    walberla::mesa_pd::Vec3 oldTorque_;
-   walberla::real_t radius_;
+   walberla::real_t radiusAtTemperature_;
    blockforest::BlockID currentBlock_;
    uint_t type_;
    int nextParticle_;

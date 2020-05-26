@@ -28,7 +28,7 @@ if __name__ == '__main__':
     ps.add_property("torque", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
     ps.add_property("oldTorque", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
 
-    ps.add_property("radius", "walberla::real_t", defValue="real_t(0)", syncMode="ALWAYS")
+    ps.add_property("radiusAtTemperature", "walberla::real_t", defValue="real_t(0)", syncMode="ALWAYS")
 
     ps.add_include("blockforest/BlockForest.h")
     ps.add_property("currentBlock", "blockforest::BlockID", defValue="", syncMode="NEVER")

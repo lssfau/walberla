@@ -58,7 +58,7 @@ public:
       size_t shapeID {};
       walberla::mesa_pd::Rot3 rotation {};
       walberla::mesa_pd::Vec3 angularVelocity {real_t(0)};
-      walberla::real_t radius {real_t(0)};
+      walberla::real_t radiusAtTemperature {real_t(0)};
       uint_t type {0};
       std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> oldContactHistory {};
       walberla::real_t temperature {real_t(0)};
@@ -83,7 +83,7 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
    pIt->setShapeID(data.shapeID);
    pIt->setRotation(data.rotation);
    pIt->setAngularVelocity(data.angularVelocity);
-   pIt->setRadius(data.radius);
+   pIt->setRadiusAtTemperature(data.radiusAtTemperature);
    pIt->setType(data.type);
    pIt->setOldContactHistory(data.oldContactHistory);
    pIt->setTemperature(data.temperature);
@@ -123,7 +123,7 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
    buf << obj.particle_.getShapeID();
    buf << obj.particle_.getRotation();
    buf << obj.particle_.getAngularVelocity();
-   buf << obj.particle_.getRadius();
+   buf << obj.particle_.getRadiusAtTemperature();
    buf << obj.particle_.getType();
    buf << obj.particle_.getOldContactHistory();
    buf << obj.particle_.getTemperature();
@@ -144,7 +144,7 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
    buf >> objparam.shapeID;
    buf >> objparam.rotation;
    buf >> objparam.angularVelocity;
-   buf >> objparam.radius;
+   buf >> objparam.radiusAtTemperature;
    buf >> objparam.type;
    buf >> objparam.oldContactHistory;
    buf >> objparam.temperature;

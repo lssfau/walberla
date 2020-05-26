@@ -32,30 +32,13 @@
 namespace walberla {
 namespace mesa_pd {
 
-class ContactDetection
+class ContactDetection : public collision_detection::AnalyticContactDetection
 {
 public:
-   size_t& getIdx1() {return idx1_;}
-   size_t& getIdx2() {return idx2_;}
-   Vec3&   getContactPoint() {return contactPoint_;}
-   Vec3&   getContactNormal() {return contactNormal_;}
-   real_t& getPenetrationDepth() {return penetrationDepth_;}
+   ///import all collision detection functions from AnalyticContactDetection
+   using AnalyticContactDetection::operator();
 
-   const size_t& getIdx1() const {return idx1_;}
-   const size_t& getIdx2() const {return idx2_;}
-   const Vec3&   getContactPoint() const {return contactPoint_;}
-   const Vec3&   getContactNormal() const {return contactNormal_;}
-   const real_t& getPenetrationDepth() const {return penetrationDepth_;}
-
-   real_t& getContactThreshold() {return contactThreshold_;}
-
-   template <typename GEO1_T, typename GEO2_T, typename Accessor>
-   bool operator()( const size_t idx1,
-                    const size_t idx2,
-                    const GEO1_T& geo1,
-                    const GEO2_T& geo2,
-                    Accessor& ac);
-
+   ///overwrite functions that should be different
    template <typename Accessor>
    bool operator()( const size_t idx1,
                     const size_t idx2,
@@ -69,33 +52,7 @@ public:
                     const data::Sphere& s,
                     const data::HalfSpace& p,
                     Accessor& ac );
-
-   template <typename Accessor>
-   bool operator()( const size_t idx1,
-                    const size_t idx2,
-                    const data::HalfSpace& p,
-                    const data::Sphere& s,
-                    Accessor& ac);
-
-private:
-   size_t idx1_;
-   size_t idx2_;
-   Vec3   contactPoint_;
-   Vec3   contactNormal_;
-   real_t penetrationDepth_;
-
-   real_t contactThreshold_ = real_t(0.0);
 };
-
-template <typename GEO1_T, typename GEO2_T, typename Accessor>
-inline bool ContactDetection::operator()( const size_t /*idx1*/,
-                                          const size_t /*idx2*/,
-                                          const GEO1_T& /*geo1*/,
-                                          const GEO2_T& /*geo2*/,
-                                          Accessor& /*ac*/)
-{
-   WALBERLA_ABORT("Collision not implemented!")
-}
 
 template <typename Accessor>
 inline bool ContactDetection::operator()( const size_t idx1,
@@ -114,9 +71,9 @@ inline bool ContactDetection::operator()( const size_t idx1,
    getIdx1() = idx1;
    getIdx2() = idx2;
    return detectSphereSphereCollision(ac.getPosition(getIdx1()),
-                                      ac.getRadius(getIdx1()),
+                                      ac.getRadiusAtTemperature(getIdx1()),
                                       ac.getPosition(getIdx2()),
-                                      ac.getRadius(getIdx2()),
+                                      ac.getRadiusAtTemperature(getIdx2()),
                                       getContactPoint(),
                                       getContactNormal(),
                                       getPenetrationDepth(),
@@ -136,34 +93,13 @@ inline bool ContactDetection::operator()( const size_t idx1,
    getIdx1() = idx1;
    getIdx2() = idx2;
    return detectSphereHalfSpaceCollision(ac.getPosition(getIdx1()),
-                                         ac.getRadius(getIdx1()),
+                                         ac.getRadiusAtTemperature(getIdx1()),
                                          ac.getPosition(getIdx2()),
                                          p.getNormal(),
                                          getContactPoint(),
                                          getContactNormal(),
                                          getPenetrationDepth(),
                                          getContactThreshold());
-}
-
-template <typename Accessor>
-inline bool ContactDetection::operator()( const size_t idx1,
-                                          const size_t idx2,
-                                          const data::HalfSpace& p,
-                                          const data::Sphere& s,
-                                          Accessor& ac)
-{
-   return operator()(idx2, idx1, s, p, ac);
-}
-
-inline
-std::ostream& operator<<( std::ostream& os, const ContactDetection& ac )
-{
-   os << "idx1:               " << ac.getIdx1() << "\n" <<
-         "idx2:               " << ac.getIdx2() << "\n" <<
-         "contact point:      " << ac.getContactPoint() << "\n" <<
-         "contact normal:     " << ac.getContactNormal() << "\n" <<
-         "penetration depth:  " << ac.getPenetrationDepth() << std::endl;
-   return os;
 }
 
 } //namespace mesa_pd

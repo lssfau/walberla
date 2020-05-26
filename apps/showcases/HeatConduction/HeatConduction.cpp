@@ -18,6 +18,17 @@
 //
 //======================================================================================================================
 
+//======================================================================================================================
+// This showcase combines a classic spring-dashpot interaction model with heat conduction and linear thermal expansion.
+//
+// First, a set of spheres is dropped onto a plate. The setup is periodic in horizontal directions. The plate as well
+// as the spheres shares the same initial temperature. After the spheres have settled, the plate is heated and cooled
+// down in a sinus wave. Through thermal conduction the heat is transported through the pile of spheres. At the same
+// time a linear thermal expansion model makes the spheres grow and shrink. The parameters are chosen for a visual
+// effect and are far to large for a realistic physical simulation. The evolution of the simulation is written to disk
+// as vtk files which can be visualized with paraview.
+//======================================================================================================================
+
 #include <mesa_pd/vtk/ParticleVtkOutput.h>
 
 #include <mesa_pd/collision_detection/BroadPhase.h>
@@ -179,7 +190,7 @@ int main( int argc, char ** argv )
          p->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
          p->getTypeRef()              = 0;
          p->setTemperature( 273 );
-         p->setRadius(radius);
+         p->setRadiusAtTemperature(radius);
       }
    }
    int64_t numParticles = int64_c(ps->size());
@@ -197,7 +208,7 @@ int main( int argc, char ** argv )
    auto vtkWriter       = walberla::vtk::createVTKOutput_PointData(vtkOutput, "particles", 1, "vtk", "simulation_step", false, false);
    vtkOutput->addOutput<data::SelectParticleOwner>("owner");
    vtkOutput->addOutput<data::SelectParticleTemperature>("temperature");
-   vtkOutput->addOutput<data::SelectParticleRadius>("radius");
+   vtkOutput->addOutput<data::SelectParticleRadiusAtTemperature>("radius");
    vtkOutput->addOutput<data::SelectParticleLinearVelocity>("linVel");
    vtkOutput->setParticleSelector([smallSphere](const data::ParticleStorage::iterator& pIt){ return pIt->getShapeID() == smallSphere;});
    vtkDomainOutput->write();
