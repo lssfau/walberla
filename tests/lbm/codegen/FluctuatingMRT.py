@@ -11,10 +11,10 @@ with CodeGeneration() as ctx:
     temperature = sp.symbols("temperature")
     force_field, vel_field = ps.fields("force(3), velocity(3): [3D]", layout='fzyx')
 
-    def rr_getter(moments):
-        is_shear = [is_shear_moment(m, 3) for m in moments]
-        is_bulk = [is_bulk_moment(m, 3) for m in moments]
-        order = [get_order(m) for m in moments]
+    def rr_getter(moment_group):
+        is_shear = [is_shear_moment(m, 3) for m in moment_group]
+        is_bulk = [is_bulk_moment(m, 3) for m in moment_group]
+        order = [get_order(m) for m in moment_group]
         assert min(order) == max(order)
         order = order[0]
 
