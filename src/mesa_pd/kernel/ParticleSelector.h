@@ -36,7 +36,7 @@ public:
    bool operator()(const size_t /*idx*/, const size_t /*jdx*/, Accessor& /*ac*/) const { return true; }
 };
 
-class SelectLocal
+class SelectMaster
 {
 public:
    template <typename Accessor>
@@ -48,6 +48,9 @@ public:
       return true;
    }
 };
+
+/// prefer SelectMaster over SelectLocal
+using SelectLocal = SelectMaster;
 
 class SelectGhost
 {
