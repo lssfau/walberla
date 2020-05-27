@@ -70,7 +70,7 @@ int main( int argc, char ** argv )
    // create fields
    BlockDataID forceFieldId = field::addToStorage<VectorField_T>( blocks, "Force", real_t( 0.0 ));
 
-   LatticeModel_T latticeModel = LatticeModel_T( forceFieldId, omega, seed, temperature, uint_t(0) );
+   LatticeModel_T latticeModel = LatticeModel_T( forceFieldId, omega, 0, omega, omega, seed, temperature, uint_t(0) );
    BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, initialVelocity, real_t(1) );
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
