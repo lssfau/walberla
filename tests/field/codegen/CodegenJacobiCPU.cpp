@@ -79,12 +79,13 @@ void testJacobi2D()
 
    // Registering the sweep
    timeloop.add() << BeforeFunction(  commScheme, "Communication" )
-                  << Sweep( pystencils::JacobiKernel2D(fieldID, 1.0), "Jacobi Kernel" );
+                  << Sweep( pystencils::JacobiKernel2D(fieldID), "Jacobi Kernel" );
 
    timeloop.run();
 
    auto firstBlock = blocks->begin();
    auto f = firstBlock->getData<ScalarField>( fieldID );
+
    WALBERLA_CHECK_FLOAT_EQUAL(f->get(0,0,0), real_t(1.0 / 4.0));
 }
 
@@ -127,7 +128,7 @@ void testJacobi3D()
 
    // Registering the sweep
    timeloop.add() << BeforeFunction(  commScheme, "Communication" )
-                  << Sweep( pystencils::JacobiKernel3D(fieldID, 1.0), "Jacobi Kernel" );
+                  << Sweep( pystencils::JacobiKernel3D(fieldID), "Jacobi Kernel" );
 
    timeloop.run();
 
