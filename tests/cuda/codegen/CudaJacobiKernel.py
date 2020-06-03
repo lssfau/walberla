@@ -8,10 +8,10 @@ with CodeGeneration() as ctx:
 
     # ----- Jacobi 2D - created by specifying weights in nested list --------------------------
     src, dst = ps.fields("src, src_tmp: [2D]")
-    stencil = [[0, -1, 0],
-               [-1, 4, -1],
-               [0, -1, 0]]
-    assignments = ps.assignment_from_stencil(stencil, src, dst, normalization_factor=4 * h**2)
+    stencil = [[0, 1, 0],
+               [1, 0, 1],
+               [0, 1, 0]]
+    assignments = ps.assignment_from_stencil(stencil, src, dst, normalization_factor=0.25 * h**2)
     generate_sweep(ctx, 'CudaJacobiKernel2D', assignments, field_swaps=[(src, dst)], target="gpu")
 
     # ----- Jacobi 3D - created by using kernel_decorator with assignments in '@=' format -----
