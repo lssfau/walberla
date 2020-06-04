@@ -786,26 +786,27 @@ int main( int argc, char **argv )
    ///////////////////////////
    const int numProcs = MPIManager::instance()->numProcesses();
 
-   WALBERLA_CHECK(numProcs % 16 != 0, "An integer multiple of 16 MPI ranks has to be used due to horizontal periodicity and domain decomposition requirements!");
 
    uint_t XBlocks;
    uint_t YBlocks;
    uint_t ZBlocks;
-   if( numProcs >= 192 )
+   if( numProcs > 192 )
    {
       XBlocks = uint_t(6);
       YBlocks = uint_t(6);
       ZBlocks = uint_c(numProcs) / ( XBlocks * YBlocks );
+      WALBERLA_CHECK(numProcs % 36 == 0, "An integer multiple of 36 MPI ranks has to be used due to horizontal periodicity and domain partitioning requirements!");
    } else {
       XBlocks = uint_t(4);
       YBlocks = uint_t(4);
       ZBlocks = uint_c(MPIManager::instance()->numProcesses()) / ( XBlocks * YBlocks );
+      WALBERLA_CHECK(numProcs % 16 == 0, "An integer multiple of 16 MPI ranks has to be used due to horizontal periodicity and domain partitioning requirements!");
    }
    const uint_t XCells = xlength / XBlocks;
    const uint_t YCells = ylength / YBlocks;
    const uint_t ZCells = zlength / ZBlocks;
 
-   if( (xlength != XCells * XBlocks) && (ylength != YCells * YBlocks) && (zlength != ZCells * ZBlocks) )
+   if( (xlength != XCells * XBlocks) || (ylength != YCells * YBlocks) || (zlength != ZCells * ZBlocks) )
    {
       WALBERLA_ABORT("Domain decomposition does not fit to total domain size!");
    }
