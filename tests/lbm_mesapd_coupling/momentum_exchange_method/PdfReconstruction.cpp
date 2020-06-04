@@ -59,6 +59,9 @@
 #include "vtk/all.h"
 #include "field/vtk/all.h"
 
+#include "vector"
+#include "tuple"
+
 namespace pdf_reconstruction
 {
 
@@ -404,13 +407,13 @@ void checkExtrapolationDirectionFinder( std::string identifier,
 
 }
 
-// TEST SPHERE INSIDE ONE BLOCK
+
 template<typename BoundaryHandling_T, typename ParticleAccessor_T, typename ReconstructionManager_T>
-void checkSphereInsideBlock( std::string identifier,
-                             shared_ptr< StructuredBlockForest > & blocks, shared_ptr<mesa_pd::data::ParticleStorage> & ps, shared_ptr<mesa_pd::data::ShapeStorage> ss,
-                             shared_ptr<ParticleAccessor_T> & accessor, BlockDataID pdfFieldID, BlockDataID boundaryHandlingID, BlockDataID particleFieldID,
-                             ReconstructionManager_T reconstructionManager,
-                             real_t radius, Vector3<real_t> velocity, real_t density, bool conserveMomentum )
+void checkReconstruction( std::string testIdentifier, Vector3<real_t> spherePosition, bool periodicCase,
+                                   shared_ptr< StructuredBlockForest > & blocks, shared_ptr<mesa_pd::data::ParticleStorage> & ps, shared_ptr<mesa_pd::data::ShapeStorage> ss,
+                                   shared_ptr<ParticleAccessor_T> & accessor, BlockDataID pdfFieldID, BlockDataID boundaryHandlingID, BlockDataID particleFieldID,
+                                   ReconstructionManager_T reconstructionManager,
+                                   real_t radius, Vector3<real_t> velocity, real_t density, bool conserveMomentum )
 {
 
 
@@ -425,36 +428,33 @@ void checkSphereInsideBlock( std::string identifier,
 
    auto regularParticleMapper = lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T, BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag, FormerMO_Flag, mesa_pd::kernel::SelectAll(), conserveMomentum);
 
-   std::string testIdentifier(identifier + " Test: sphere inside block");
    WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - started");
-
-   Vector3<real_t> positionInsideBlock(real_t(10), real_t(10), real_t(10));
 
    // create sphere
    walberla::id_t sphereUid = 0;
-   if (domain.isContainedInProcessSubdomain( uint_c(mpi::MPIManager::instance()->rank()), positionInsideBlock ))
+   if (domain.isContainedInProcessSubdomain( uint_c(mpi::MPIManager::instance()->rank()), spherePosition ))
    {
       mesa_pd::data::Particle&& p = *ps->create();
-      p.setPosition(positionInsideBlock);
+      p.setPosition(spherePosition);
       p.setLinearVelocity(velocity);
       p.setInteractionRadius(radius);
       p.setOwner(mpi::MPIManager::instance()->rank());
       p.setShapeID(sphereShape);
       sphereUid = p.getUid();
    }
+   syncNextNeighborFunc(*ps, domain, overlap);
 
    mpi::allReduceInplace(sphereUid, mpi::SUM);
-
-   syncNextNeighborFunc(*ps, domain, overlap);
 
    // map
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) regularParticleMapper(&(*blockIt));
 
-   auto currentSpherePosition = positionInsideBlock;
+   auto currentSpherePosition = spherePosition;
    // run several "timesteps" and advance the sphere in total one cell
    for( uint_t t = 0; t < 10; ++t )
    {
       currentSpherePosition = currentSpherePosition + velocity;
+      blocks->mapToPeriodicDomain(currentSpherePosition);
 
       // advance sphere
       size_t idx = accessor->uidToIdx(sphereUid);
@@ -472,172 +472,8 @@ void checkSphereInsideBlock( std::string identifier,
 
 
       // check mapping
-      mappingChecker(testIdentifier + " (t=" + std::to_string(t)+") ",currentSpherePosition,false);
-      mappingChecker.checkGhostLayer(testIdentifier + " (t=" + std::to_string(t)+") ",currentSpherePosition,false);
-
-      // check reconstruction
-      reconstructionChecker(testIdentifier + " (t=" + std::to_string(t)+") ");
-   }
-
-   WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - ended successfully");
-
-   // clean up
-   mappingResetter();
-   ps->clear();
-   syncNextNeighborFunc(*ps, domain, overlap);
-}
-
-// TEST SPHERE ON BLOCK BOARDER
-template<typename BoundaryHandling_T, typename ParticleAccessor_T, typename ReconstructionManager_T>
-void checkSphereOnBlockBoarder( std::string identifier,
-                                shared_ptr< StructuredBlockForest > & blocks, shared_ptr<mesa_pd::data::ParticleStorage> & ps, shared_ptr<mesa_pd::data::ShapeStorage> ss,
-                                shared_ptr<ParticleAccessor_T> & accessor, BlockDataID pdfFieldID, BlockDataID boundaryHandlingID, BlockDataID particleFieldID,
-                                ReconstructionManager_T reconstructionManager,
-                                real_t radius, Vector3<real_t> velocity, real_t density, bool conserveMomentum )
-{
-
-
-   mesa_pd::domain::BlockForestDomain domain(blocks->getBlockForestPointer());
-   auto sphereShape = ss->create<mesa_pd::data::Sphere>( radius );
-   mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
-   const real_t overlap = real_t( 1.5 );
-
-   MappingChecker<BoundaryHandling_T> mappingChecker(blocks, boundaryHandlingID, radius);
-   MappingResetter<BoundaryHandling_T> mappingResetter(blocks, boundaryHandlingID, particleFieldID, accessor->getInvalidUid());
-   ReconstructionChecker<PdfField_T, BoundaryHandling_T> reconstructionChecker(blocks, pdfFieldID, boundaryHandlingID, velocity, density, FormerMO_Flag );
-
-   auto regularParticleMapper = lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T, BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag, FormerMO_Flag, mesa_pd::kernel::SelectAll(), conserveMomentum);
-
-   std::string testIdentifier(identifier + " Test: sphere on block boarder");
-   WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - started");
-
-   Vector3<real_t> positionAtBlockBoarder(real_t(19.5), real_t(10), real_t(10));
-
-   // create sphere
-   walberla::id_t sphereUid = 0;
-   if (domain.isContainedInProcessSubdomain( uint_c(mpi::MPIManager::instance()->rank()), positionAtBlockBoarder ))
-   {
-      mesa_pd::data::Particle&& p = *ps->create();
-      p.setPosition(positionAtBlockBoarder);
-      p.setLinearVelocity(velocity);
-      p.setInteractionRadius(radius);
-      p.setOwner(mpi::MPIManager::instance()->rank());
-      p.setShapeID(sphereShape);
-      sphereUid = p.getUid();
-   }
-   syncNextNeighborFunc(*ps, domain, overlap);
-
-   mpi::allReduceInplace(sphereUid, mpi::SUM);
-
-   // map
-   for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) regularParticleMapper(&(*blockIt));
-
-   auto currentSpherePosition = positionAtBlockBoarder;
-   // run several "timesteps" and advance the sphere in total one cell
-   for( uint_t t = 0; t < 10; ++t )
-   {
-      currentSpherePosition = currentSpherePosition + velocity;
-
-      // advance sphere
-      size_t idx = accessor->uidToIdx(sphereUid);
-      if( idx != accessor->getInvalidIdx())
-      {
-         accessor->setPosition(idx, currentSpherePosition);
-      }
-      syncNextNeighborFunc(*ps, domain, overlap);
-
-      // update mapping
-      for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) regularParticleMapper(&(*blockIt));
-
-      // carry out restore step
-      for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) reconstructionManager(&(*blockIt));
-
-
-      // check mapping
-      mappingChecker(testIdentifier + " (t=" + std::to_string(t)+") ",currentSpherePosition,false);
-      mappingChecker.checkGhostLayer(testIdentifier + " (t=" + std::to_string(t)+") ",currentSpherePosition,false);
-
-      // check reconstruction
-      reconstructionChecker(testIdentifier + " (t=" + std::to_string(t)+") ");
-   }
-
-   WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - ended successfully");
-
-   // clean up
-   mappingResetter();
-   ps->clear();
-   syncNextNeighborFunc(*ps, domain, overlap);
-}
-
-// TEST SPHERE ON BLOCK BOARDER 2
-template<typename BoundaryHandling_T, typename ParticleAccessor_T, typename ReconstructionManager_T>
-void checkSphereOnBlockBoarder2( std::string identifier,
-                                 shared_ptr< StructuredBlockForest > & blocks, shared_ptr<mesa_pd::data::ParticleStorage> & ps, shared_ptr<mesa_pd::data::ShapeStorage> ss,
-                                 shared_ptr<ParticleAccessor_T> & accessor, BlockDataID pdfFieldID, BlockDataID boundaryHandlingID, BlockDataID particleFieldID,
-                                 ReconstructionManager_T reconstructionManager,
-                                 real_t radius, Vector3<real_t> velocity, real_t density, bool conserveMomentum )
-{
-
-
-   mesa_pd::domain::BlockForestDomain domain(blocks->getBlockForestPointer());
-   auto sphereShape = ss->create<mesa_pd::data::Sphere>( radius );
-   mesa_pd::mpi::SyncNextNeighbors syncNextNeighborFunc;
-   const real_t overlap = real_t( 1.5 );
-
-   MappingChecker<BoundaryHandling_T> mappingChecker(blocks, boundaryHandlingID, radius);
-   MappingResetter<BoundaryHandling_T> mappingResetter(blocks, boundaryHandlingID, particleFieldID, accessor->getInvalidUid());
-   ReconstructionChecker<PdfField_T, BoundaryHandling_T> reconstructionChecker(blocks, pdfFieldID, boundaryHandlingID, velocity, density, FormerMO_Flag );
-
-   auto regularParticleMapper = lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag, FormerMO_Flag, mesa_pd::kernel::SelectAll(), conserveMomentum);
-
-   std::string testIdentifier(identifier + " Test: sphere on block boarder 2");
-   WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - started");
-
-   Vector3<real_t> positionAtBlockBoarder2(real_t(20)+radius, real_t(10), real_t(10));
-
-   // create sphere
-   walberla::id_t sphereUid = 0;
-   if (domain.isContainedInProcessSubdomain( uint_c(mpi::MPIManager::instance()->rank()), positionAtBlockBoarder2 ))
-   {
-      mesa_pd::data::Particle&& p = *ps->create();
-      p.setPosition(positionAtBlockBoarder2);
-      p.setLinearVelocity(velocity);
-      p.setInteractionRadius(radius);
-      p.setOwner(mpi::MPIManager::instance()->rank());
-      p.setShapeID(sphereShape);
-      sphereUid = p.getUid();
-   }
-   syncNextNeighborFunc(*ps, domain, overlap);
-
-   mpi::allReduceInplace(sphereUid, mpi::SUM);
-
-   // map
-   for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) regularParticleMapper(&(*blockIt));
-
-   auto currentSpherePosition = positionAtBlockBoarder2;
-   // run several "timesteps" and advance the sphere in total one cell
-   for( uint_t t = 0; t < 10; ++t )
-   {
-      currentSpherePosition = currentSpherePosition + velocity;
-
-      // advance sphere
-      size_t idx = accessor->uidToIdx(sphereUid);
-      if( idx != accessor->getInvalidIdx())
-      {
-         accessor->setPosition(idx, currentSpherePosition);
-      }
-      syncNextNeighborFunc(*ps, domain, overlap);
-
-      // update mapping
-      for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) regularParticleMapper(&(*blockIt));
-
-      // carry out restore step
-      for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) reconstructionManager(&(*blockIt));
-
-
-      // check mapping
-      mappingChecker(testIdentifier + " (t=" + std::to_string(t)+") ",currentSpherePosition,false);
-      mappingChecker.checkGhostLayer(testIdentifier + " (t=" + std::to_string(t)+") ",currentSpherePosition,false);
+      mappingChecker(testIdentifier + " (t=" + std::to_string(t)+") ", currentSpherePosition, periodicCase);
+      mappingChecker.checkGhostLayer(testIdentifier + " (t=" + std::to_string(t)+") ", currentSpherePosition, periodicCase);
 
       // check reconstruction
       reconstructionChecker(testIdentifier + " (t=" + std::to_string(t)+") ");
@@ -663,22 +499,23 @@ void checkSphereOnBlockBoarder2( std::string identifier,
  * The following features of the PdfReconstructionManager are tested as well:
  *  - reconstruction at block boarder
  *  - version for small obstacle fraction
+ *  - periodicity
  *
  * Additionally, the following extrapolation direction finders are tested:
  *  - SphereNormalExtrapolationFinder
  *  - FlagFieldExtrapolationDirectionFinder
  *
- * -----------------------------------------------
- * #                      |                      #
- * #                      |                      #
- * #                      |                      #
- * #                      |                      #
- * #          X          X|  X                   #
- * #                      |                      #
- * #                      |                      #
- * #                      |                      #
- * #                      |                      #
- * -----------------------------------------------
+ * ----------------------------------------------------------------------
+ * #                      |                      |                      #
+ * #                      |                      |                      #
+ * #                      |                      |                      #
+ * #                      |                      |                      #
+ * # 5        1          2|  3                   |                     4#
+ * #                      |                      |                      #
+ * #                      |                      |                      #
+ * #                      |                      |                      #
+ * #                      |                      |                      #
+ * ----------------------------------------------------------------------
  */
 //////////
 // MAIN //
@@ -705,9 +542,9 @@ int main( int argc, char **argv )
    // DATA STRUCTURES SETUP //
    ///////////////////////////
 
-   Vector3<uint_t> blocksPerDirection(uint_t(2), uint_t(1), uint_t(1));
+   Vector3<uint_t> blocksPerDirection(uint_t(3), uint_t(1), uint_t(1));
    Vector3<uint_t> cellsPerBlock(uint_t(20), uint_t(20), uint_t(20));
-   Vector3<bool> periodicity(false, false, false);
+   Vector3<bool> periodicity(true, false, false);
 
    auto blocks = blockforest::createUniformBlockGrid( blocksPerDirection[0], blocksPerDirection[1], blocksPerDirection[2],
                                                       cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2],
@@ -746,22 +583,26 @@ int main( int argc, char **argv )
    //auto flagFieldVTK = vtk::createVTKOutput_BlockData( blocks, "flag_field" );
    //flagFieldVTK->addCellDataWriter( make_shared< field::VTKWriter< FlagField_T > >( flagFieldID, "FlagField" ) );
 
+   // test setups -> tuple of (setupName, spherePosition, periodicityTested)
+   std::vector<std::tuple<std::string, Vector3<real_t>, bool> > testSetups;
+   testSetups.push_back( std::make_tuple( "sphere inside block",          Vector3<real_t>(real_t(10), real_t(10), real_t(10)),        false) );
+   testSetups.push_back( std::make_tuple( "sphere on block boarder",      Vector3<real_t>(real_t(19.5), real_t(10), real_t(10)),      false) );
+   testSetups.push_back( std::make_tuple( "sphere on block boarder 2",    Vector3<real_t>(real_t(20)+radius, real_t(10), real_t(10)), false) );
+   testSetups.push_back( std::make_tuple( "sphere on periodic boarder",   Vector3<real_t>(real_t(59.5), real_t(10), real_t(10)),      true) );
+   testSetups.push_back( std::make_tuple( "sphere on periodic boarder 2", Vector3<real_t>(radius, real_t(10), real_t(10)),            true) );
+
 
    /////////////////////////////////////
    // EQUILIBRIUM RECONSTRUCTOR TESTS //
    /////////////////////////////////////
 
    auto equilibriumReconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, conserveMomentum);
-
-   checkSphereInsideBlock<BoundaryHandling_T>( "Equilibrium Reconstructor", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
+   for(auto & testSetup : testSetups)
+   {
+      checkReconstruction<BoundaryHandling_T>( "Equilibrium Reconstructor Test: " + std::get<0>(testSetup), std::get<1>(testSetup), std::get<2>(testSetup),
+                                               blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
                                                *equilibriumReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder<BoundaryHandling_T>( "Equilibrium Reconstructor", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                  *equilibriumReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder2<BoundaryHandling_T>( "Equilibrium Reconstructor", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                   *equilibriumReconstructionManager, radius, velocity, density, conserveMomentum );
-
+   }
 
    /////////////////////////////////////
    // EQUILIBRIUM RECONSTRUCTOR TESTS //
@@ -769,15 +610,12 @@ int main( int argc, char **argv )
    /////////////////////////////////////
 
    auto equilibriumReconstructionSmallObstacleFractionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, conserveMomentum, true);
-
-   checkSphereInsideBlock<BoundaryHandling_T>( "Equilibrium Reconstructor Small Obstacle Fraction", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
+   for(auto & testSetup : testSetups)
+   {
+      checkReconstruction<BoundaryHandling_T>( "Equilibrium Reconstructor Small Obstacle Fraction Test: " + std::get<0>(testSetup), std::get<1>(testSetup), std::get<2>(testSetup),
+                                               blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
                                                *equilibriumReconstructionSmallObstacleFractionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder<BoundaryHandling_T>( "Equilibrium Reconstructor Small Obstacle Fraction", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                  *equilibriumReconstructionSmallObstacleFractionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder2<BoundaryHandling_T>( "Equilibrium Reconstructor Small Obstacle Fraction", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                   *equilibriumReconstructionSmallObstacleFractionManager, radius, velocity, density, conserveMomentum );
+   }
 
    /////////////////////////////////////////////////////////
    // EQUILIBRIUM AND NON-EQUILIBRIUM RECONSTRUCTOR TESTS //
@@ -793,14 +631,12 @@ int main( int argc, char **argv )
    auto equilibriumAndNonEquilibriumSphereNormalReconstructor = lbm_mesapd_coupling::makeEquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, 3);
    auto equilibriumAndNonEquilibriumSphereNormalReconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, equilibriumAndNonEquilibriumSphereNormalReconstructor, conserveMomentum);
 
-   checkSphereInsideBlock<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with Sphere Normal", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
+   for(auto & testSetup : testSetups)
+   {
+      checkReconstruction<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with Sphere Normal Test: " + std::get<0>(testSetup), std::get<1>(testSetup), std::get<2>(testSetup),
+                                               blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
                                                *equilibriumAndNonEquilibriumSphereNormalReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with Sphere Normal", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                  *equilibriumAndNonEquilibriumSphereNormalReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder2<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with Sphere Normal", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                   *equilibriumAndNonEquilibriumSphereNormalReconstructionManager, radius, velocity, density, conserveMomentum );
+   }
 
 
    /////////////////////////////////////////////////////////
@@ -816,15 +652,12 @@ int main( int argc, char **argv )
    auto equilibriumAndNonEquilibriumFlagFieldNormalReconstructor = lbm_mesapd_coupling::makeEquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, flagFieldNormalExtrapolationDirectionFinder, 2);
    auto equilibriumAndNonEquilibriumFlagFieldNormalReconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, equilibriumAndNonEquilibriumFlagFieldNormalReconstructor, conserveMomentum);
 
-   checkSphereInsideBlock<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with FlagField Normal", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
+   for(auto & testSetup : testSetups)
+   {
+      checkReconstruction<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with FlagField Normal Test: " + std::get<0>(testSetup), std::get<1>(testSetup), std::get<2>(testSetup),
+                                               blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
                                                *equilibriumAndNonEquilibriumFlagFieldNormalReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with FlagField Normal", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                  *equilibriumAndNonEquilibriumFlagFieldNormalReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder2<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with FlagField Normal", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                   *equilibriumAndNonEquilibriumFlagFieldNormalReconstructionManager, radius, velocity, density, conserveMomentum );
-
+   }
 
    /////////////////////////////////////////////////////////
    // EQUILIBRIUM AND NON-EQUILIBRIUM RECONSTRUCTOR TESTS //
@@ -834,15 +667,12 @@ int main( int argc, char **argv )
    auto equilibriumAndNonEquilibriumSphereNormal1Reconstructor = lbm_mesapd_coupling::makeEquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, 1);
    auto equilibriumAndNonEquilibriumSphereNormal1ReconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, equilibriumAndNonEquilibriumSphereNormal1Reconstructor, conserveMomentum);
 
-   checkSphereInsideBlock<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with one ext cell", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
+   for(auto & testSetup : testSetups)
+   {
+      checkReconstruction<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with one ext cell Test: " + std::get<0>(testSetup), std::get<1>(testSetup), std::get<2>(testSetup),
+                                               blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
                                                *equilibriumAndNonEquilibriumSphereNormal1ReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with one ext cell", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                  *equilibriumAndNonEquilibriumSphereNormal1ReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder2<BoundaryHandling_T>( "Equilibrium and NonEquilibrium Reconstructor with one ext cell", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                   *equilibriumAndNonEquilibriumSphereNormal1ReconstructionManager, radius, velocity, density, conserveMomentum );
-
+   }
 
    ///////////////////////////////////////
    // EXTRAPOLATION RECONSTRUCTOR TESTS //
@@ -851,15 +681,12 @@ int main( int argc, char **argv )
    auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder);
    auto extrapolationReconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, extrapolationReconstructor, conserveMomentum);
 
-   checkSphereInsideBlock<BoundaryHandling_T>( "Extrapolation Reconstructor", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
+   for(auto & testSetup : testSetups)
+   {
+      checkReconstruction<BoundaryHandling_T>( "Extrapolation Reconstructor Test: " + std::get<0>(testSetup), std::get<1>(testSetup), std::get<2>(testSetup),
+                                               blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
                                                *extrapolationReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder<BoundaryHandling_T>( "Extrapolation Reconstructor", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                  *extrapolationReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder2<BoundaryHandling_T>( "Extrapolation Reconstructor", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                   *extrapolationReconstructionManager, radius, velocity, density, conserveMomentum );
-
+   }
 
    ///////////////////////////////////////
    // EXTRAPOLATION RECONSTRUCTOR TESTS //
@@ -869,14 +696,12 @@ int main( int argc, char **argv )
    auto extrapolationConstrainReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder, true>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder);
    auto extrapolationConstrainReconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, extrapolationReconstructor, conserveMomentum);
 
-   checkSphereInsideBlock<BoundaryHandling_T>( "Extrapolation Reconstructor with Constrain", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
+   for(auto & testSetup : testSetups)
+   {
+      checkReconstruction<BoundaryHandling_T>( "Extrapolation Reconstructor with Constrain Test: " + std::get<0>(testSetup), std::get<1>(testSetup), std::get<2>(testSetup),
+                                               blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
                                                *extrapolationConstrainReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder<BoundaryHandling_T>( "Extrapolation Reconstructor with Constrain", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                  *extrapolationConstrainReconstructionManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder2<BoundaryHandling_T>( "Extrapolation Reconstructor with Constrain", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                   *extrapolationConstrainReconstructionManager, radius, velocity, density, conserveMomentum );
+   }
 
    //////////////////////////////////////////////
    // GRADs MOMENT APPROXIMATION RECONSTRUCTOR //
@@ -885,14 +710,12 @@ int main( int argc, char **argv )
    auto gradReconstructor = lbm_mesapd_coupling::makeGradsMomentApproximationReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, omega, false);
    auto gradReconstructorManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, gradReconstructor, conserveMomentum);
 
-   checkSphereInsideBlock<BoundaryHandling_T>( "Grads Moment Approximation Reconstructor", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
+   for(auto & testSetup : testSetups)
+   {
+      checkReconstruction<BoundaryHandling_T>( "Grads Moment Approximation Reconstructor Test: " + std::get<0>(testSetup), std::get<1>(testSetup), std::get<2>(testSetup),
+                                               blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
                                                *gradReconstructorManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder<BoundaryHandling_T>( "Grads Moment Approximation Reconstructor", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                  *gradReconstructorManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder2<BoundaryHandling_T>( "Grads Moment Approximation Reconstructor", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                   *gradReconstructorManager, radius, velocity, density, conserveMomentum );
+   }
 
    //////////////////////////////////////////////
    // GRADs MOMENT APPROXIMATION RECONSTRUCTOR //
@@ -902,14 +725,12 @@ int main( int argc, char **argv )
    auto gradReconstructorWithRecomp = lbm_mesapd_coupling::makeGradsMomentApproximationReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, omega, true);
    auto gradReconstructorWithRecompManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, gradReconstructorWithRecomp, conserveMomentum);
 
-   checkSphereInsideBlock<BoundaryHandling_T>( "Grads Moment Approximation Reconstructor with Density Recomputation", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
+   for(auto & testSetup : testSetups)
+   {
+      checkReconstruction<BoundaryHandling_T>( "Grads Moment Approximation Reconstructor with Density Recomputation Test: " + std::get<0>(testSetup), std::get<1>(testSetup), std::get<2>(testSetup),
+                                               blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
                                                *gradReconstructorWithRecompManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder<BoundaryHandling_T>( "Grads Moment Approximation Reconstructor with Density Recomputation", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                  *gradReconstructorWithRecompManager, radius, velocity, density, conserveMomentum );
-
-   checkSphereOnBlockBoarder2<BoundaryHandling_T>( "Grads Moment Approximation Reconstructor with Density Recomputation", blocks, ps, ss, accessor, pdfFieldID, boundaryHandlingID, particleFieldID,
-                                                   *gradReconstructorWithRecompManager, radius, velocity, density, conserveMomentum );
+   }
 
    return 0;
 
