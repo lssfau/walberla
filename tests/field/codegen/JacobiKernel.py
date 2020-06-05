@@ -6,9 +6,9 @@ from pystencils_walberla import CodeGeneration, generate_sweep
 with CodeGeneration() as ctx:
     # ----- Stencil 2D - created by specifying weights in nested list --------------------------
     src, dst = ps.fields("src, src_tmp: [2D]", layout='fzyx')
-    stencil = [[1, 2, 3],
-               [4, 5, 6],
-               [7, 8, 9]]
+    stencil = [[1.11, 2.22, 3.33],
+               [4.44, 5.55, 6.66],
+               [7.77, 8.88, 9.99]]
     assignments = ps.assignment_from_stencil(stencil, src, dst, normalization_factor=1 / np.sum(stencil))
     generate_sweep(ctx, 'JacobiKernel2D', assignments, field_swaps=[(src, dst)])
 

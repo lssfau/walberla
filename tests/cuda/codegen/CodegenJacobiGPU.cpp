@@ -109,7 +109,7 @@ void testJacobi2D()
 
    // Registering the sweep
    timeloop.add() << BeforeFunction(  commScheme, "Communication" )
-                  << Sweep( pystencils::CudaJacobiKernel2D(gpuField, 2.0), "Jacobi Kernel" );
+                  << Sweep( pystencils::CudaJacobiKernel2D(gpuField), "Jacobi Kernel" );
 
 
    cuda::fieldCpy<GPUField, ScalarField>( blocks, gpuField, cpuFieldID );
@@ -163,7 +163,7 @@ void testJacobi3D()
 
    // Registering the sweep
    timeloop.add() << BeforeFunction(  commScheme, "Communication" )
-                  << Sweep( pystencils::CudaJacobiKernel3D(gpuField, 1.0), "Jacobi Kernel" );
+                  << Sweep( pystencils::CudaJacobiKernel3D(gpuField), "Jacobi Kernel" );
 
 
    cuda::fieldCpy<GPUField, ScalarField>( blocks, gpuField, cpuFieldID );
