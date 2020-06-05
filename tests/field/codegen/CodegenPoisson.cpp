@@ -70,8 +70,7 @@ void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       CellInterval xyz = f->xyzSize();
       for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
       {
-         const Vector3< real_t > p = blocks->getBlockLocalCellCenter( *block, *cell );
-         f->get( *cell ) = real_t(4) * math::pi * math::pi * std::sin( real_t(2) * math::pi * p[0] ) * std::sinh( real_t(2) * math::pi * p[1] );
+         f->get( *cell ) = 0.0;
       }
    }
 }
@@ -79,9 +78,9 @@ void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
 void testPoisson()
 {
 
-   const uint_t xCells = uint_t(200);
+   const uint_t xCells = uint_t(100);
    const uint_t yCells = uint_t(100);
-   const real_t xSize = real_t(2);
+   const real_t xSize = real_t(1);
    const real_t ySize = real_t(1);
    const real_t dx = xSize / real_c( xCells + uint_t(1) );
    const real_t dy = ySize / real_c( yCells + uint_t(1) );
@@ -116,6 +115,10 @@ void testPoisson()
                   << Sweep( pystencils::Poisson(fId, fieldID, dx, dy), "Poisson Kernel" );
 
    timeloop.run();
+
+   auto firstBlock = blocks->begin();
+   auto f = firstBlock->getData<ScalarField_T>( fieldID );
+   WALBERLA_CHECK_LESS(f->get(50,99,0) - std::sin( math::pi  * 0.5 ) * std::sinh( math::pi * 0.99 ), 0.01);
 }
 
 
