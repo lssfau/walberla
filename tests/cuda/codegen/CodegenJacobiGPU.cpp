@@ -78,7 +78,7 @@ void testJacobi2D()
    // Create blocks
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
            uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
-           xSize, ySize, uint_t(1),  // how many cells per block (x,y,z)
+           xSize, ySize, uint_t(1),            // how many cells per block (x,y,z)
            real_t(1),                          // dx: length of one cell in physical coordinates
            false,                              // one block per process - "false" means all blocks to one process
            true, true, true );                 // no periodicity
@@ -87,7 +87,8 @@ void testJacobi2D()
    BlockDataID cpuFieldID = blocks->addStructuredBlockData<ScalarField>( &createField, "CPU Field" );
    BlockDataID gpuField = cuda::addGPUFieldToStorage<ScalarField>( blocks, cpuFieldID, "GPU Field Src" );
 
-
+   // Initialize a quarter of the field with ones, the rest remains 0
+   // Jacobi averages the domain -> every cell should be at 0.25 at sufficiently many timesteps
    for(auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
       auto f = blockIt->getData<ScalarField>( cpuFieldID );
@@ -95,8 +96,6 @@ void testJacobi2D()
          for( cell_idx_t x = 0; x < cell_idx_c( f->xSize() / 2 ); ++x )
             f->get( x, y, 0 ) = 1.0;
    }
-
-
 
    typedef blockforest::communication::UniformBufferedScheme<stencil::D2Q9> CommScheme;
    typedef cuda::communication::GPUPackInfo<GPUField> Packing;
@@ -110,7 +109,7 @@ void testJacobi2D()
 
    // Registering the sweep
    timeloop.add() << BeforeFunction(  commScheme, "Communication" )
-                  << Sweep( pystencils::CudaJacobiKernel2D(gpuField, 1.0), "Jacobi Kernel" );
+                  << Sweep( pystencils::CudaJacobiKernel2D(gpuField), "Jacobi Kernel" );
 
 
    cuda::fieldCpy<GPUField, ScalarField>( blocks, gpuField, cpuFieldID );
@@ -141,7 +140,8 @@ void testJacobi3D()
    BlockDataID cpuFieldID = blocks->addStructuredBlockData<ScalarField>( &createField, "CPU Field" );
    BlockDataID gpuField = cuda::addGPUFieldToStorage<ScalarField>( blocks, cpuFieldID, "GPU Field Src" );
 
-
+   // Initialize a quarter of the field with ones, the rest remains 0
+   // Jacobi averages the domain -> every cell should be at 0.25 at sufficiently many timesteps
    for(auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
       auto f = blockIt->getData<ScalarField>( cpuFieldID );
@@ -150,8 +150,6 @@ void testJacobi3D()
             for( cell_idx_t x = 0; x < cell_idx_c( f->xSize() / 2 ); ++x )
                f->get( x, y, z ) = 1.0;
    }
-
-
 
    typedef blockforest::communication::UniformBufferedScheme<stencil::D3Q7> CommScheme;
    typedef cuda::communication::GPUPackInfo<GPUField> Packing;
@@ -165,7 +163,7 @@ void testJacobi3D()
 
    // Registering the sweep
    timeloop.add() << BeforeFunction(  commScheme, "Communication" )
-                  << Sweep( pystencils::CudaJacobiKernel3D(gpuField, 1.0), "Jacobi Kernel" );
+                  << Sweep( pystencils::CudaJacobiKernel3D(gpuField), "Jacobi Kernel" );
 
 
    cuda::fieldCpy<GPUField, ScalarField>( blocks, gpuField, cpuFieldID );
