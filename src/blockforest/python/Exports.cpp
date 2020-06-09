@@ -64,7 +64,7 @@ namespace blockforest {
 
 using walberla::blockforest::communication::UniformBufferedScheme;
 
-bool checkForThreeTuple( object obj )
+bool checkForThreeTuple( object obj ) //NOLINT
 {
    if( ! extract<tuple> ( obj ).check() )
       return false;
@@ -74,7 +74,7 @@ bool checkForThreeTuple( object obj )
 }
 
 
-object python_createUniformBlockGrid(tuple args, dict kw)
+object python_createUniformBlockGrid(tuple args, dict kw) //NOLINT
 {
    if( len(args) > 0 ) {
       PyErr_SetString( PyExc_ValueError, "This function takes only keyword arguments" );

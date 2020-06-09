@@ -670,7 +670,7 @@ void exportTiming()
 //
 //======================================================================================================================
 
-boost::python::object IBlock_getData( boost::python::object iblockObject, const std::string & stringID )
+boost::python::object IBlock_getData( boost::python::object iblockObject, const std::string & stringID ) //NOLINT
 {
    IBlock * block = boost::python::extract<IBlock*>( iblockObject );
 
@@ -701,7 +701,7 @@ boost::python::object IBlock_getData( boost::python::object iblockObject, const 
 }
 
 
-boost::python::list IBlock_blockDataList( boost::python::object iblockObject )
+boost::python::list IBlock_blockDataList( boost::python::object iblockObject ) //NOLINT
 {
    IBlock * block = boost::python::extract<IBlock*>( iblockObject );
 
@@ -722,7 +722,7 @@ boost::python::list IBlock_blockDataList( boost::python::object iblockObject )
 
 boost::python::object IBlock_iter(  boost::python::object iblockObject )
 {
-   boost::python::list resultList = IBlock_blockDataList( iblockObject );
+   boost::python::list resultList = IBlock_blockDataList( iblockObject ); //NOLINT
    return resultList.attr("__iter__");
 }
 
@@ -847,13 +847,13 @@ void exportLogging()
 //======================================================================================================================
 
 
-object * blockDataCreationHelper( IBlock * block, StructuredBlockStorage * bs,  object callable )
+object * blockDataCreationHelper( IBlock * block, StructuredBlockStorage * bs,  object callable ) //NOLINT
 {
    object * res = new object( callable( ptr(block), ptr(bs) ) );
    return res;
 }
 
-uint_t StructuredBlockStorage_addBlockData( StructuredBlockStorage & s, const std::string & name, object functionPtr )
+uint_t StructuredBlockStorage_addBlockData( StructuredBlockStorage & s, const std::string & name, object functionPtr ) //NOLINT
 {
    BlockDataID res = s.addStructuredBlockData(name)
                << StructuredBlockDataCreator<object>( std::bind( &blockDataCreationHelper, std::placeholders::_1, std::placeholders::_2, functionPtr ) );
@@ -865,7 +865,7 @@ uint_t StructuredBlockStorage_addBlockData( StructuredBlockStorage & s, const st
 // boost::python comes with iteration helpers but non of this worked:
 //    .def("__iter__"   range(&StructuredBlockStorage::begin, &StructuredBlockStorage::end))
 //    .def("__iter__",  range<return_value_policy<copy_non_const_reference> >( beginPtr, endPtr) )
-boost::python::object StructuredBlockStorage_iter( boost::python::object structuredBlockStorage )
+boost::python::object StructuredBlockStorage_iter( boost::python::object structuredBlockStorage ) //NOLINT
 {
    shared_ptr<StructuredBlockStorage> s = extract< shared_ptr<StructuredBlockStorage> > ( structuredBlockStorage );
 
@@ -884,7 +884,7 @@ boost::python::object StructuredBlockStorage_iter( boost::python::object structu
 }
 
 
-boost::python::object StructuredBlockStorage_getItem( boost::python::object structuredBlockStorage, uint_t i )
+boost::python::object StructuredBlockStorage_getItem( boost::python::object structuredBlockStorage, uint_t i ) //NOLINT
 {
    shared_ptr<StructuredBlockStorage> s = extract< shared_ptr<StructuredBlockStorage> > ( structuredBlockStorage );
 
@@ -1090,7 +1090,7 @@ void exportStructuredBlockStorage()
 void exportCommunication()
 {
    using communication::UniformPackInfo;
-   class_< UniformPackInfo, shared_ptr<UniformPackInfo>, boost::noncopyable>
+   class_< UniformPackInfo, shared_ptr<UniformPackInfo>, boost::noncopyable> //NOLINT
       ( "UniformPackInfo", no_init );
 
    using communication::UniformMPIDatatypeInfo;

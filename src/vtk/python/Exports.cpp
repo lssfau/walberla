@@ -67,7 +67,7 @@ void exportModuleToPython()
    void ( VTKOutput::*p_setSamplingResolution1) ( const real_t  ) = &VTKOutput::setSamplingResolution;
    void ( VTKOutput::*p_setSamplingResolution2) ( const real_t, const real_t, const real_t ) = &VTKOutput::setSamplingResolution;
 
-   class_<BlockCellDataWriterInterface,
+   class_<BlockCellDataWriterInterface, //NOLINT
            boost::noncopyable,
            shared_ptr<BlockCellDataWriterInterface> > ("BlockCellDataWriterInterface", no_init)
        ;
