@@ -85,7 +85,7 @@ namespace python_coupling {
    public:
       PythonMultipleConfigGenerator( bp::stl_input_iterator< bp::dict > iterator  )  : iter_( iterator ), firstTime_(true) {}
 
-      virtual shared_ptr<Config> next()
+      shared_ptr<Config> next() override
       {
          // this seemingly unnecessary complicated firstTime variable is used
          // since in alternative version where (++iter_) is at the end of the function
@@ -119,7 +119,7 @@ namespace python_coupling {
    public:
       PythonSingleConfigGenerator( const shared_ptr<Config> & config ): config_ ( config ) {}
 
-      virtual shared_ptr<Config> next()
+      shared_ptr<Config> next() override
       {
          auto res = config_;
          config_.reset();

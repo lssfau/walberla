@@ -42,13 +42,13 @@ namespace timeloop {
 #endif
 struct ITimeloopWrap : public ITimeloop, public wrapper<ITimeloop>
 {
-   void run()                          {        this->get_override( "run" )();                     }
-   void singleStep()                   {        this->get_override( "singleStep" )();              }
-   void stop()                         {        this->get_override( "stop" )();                    }
-   void synchronizedStop( bool s )     {        this->get_override( "synchronizedStop" )(s);       }
-   void setCurrentTimeStep( uint_t ts) {        this->get_override( "setCurrentTimeStep" )(ts);    }
-   uint_t getCurrentTimeStep() const   { return this->get_override( "getCurrentTimeStep" )();      }
-   uint_t getNrOfTimeSteps()   const   { return this->get_override( "getNrOfTimeSteps" )();        }
+   void run() override                          {        this->get_override( "run" )();                     }
+   void singleStep() override                   {        this->get_override( "singleStep" )();              }
+   void stop() override                         {        this->get_override( "stop" )();                    }
+   void synchronizedStop( bool s ) override     {        this->get_override( "synchronizedStop" )(s);       }
+   void setCurrentTimeStep( uint_t ts) override {        this->get_override( "setCurrentTimeStep" )(ts);    }
+   uint_t getCurrentTimeStep() const override   { return this->get_override( "getCurrentTimeStep" )();      }
+   uint_t getNrOfTimeSteps()   const override   { return this->get_override( "getNrOfTimeSteps" )();        }
 };
 
 #ifdef WALBERLA_CXX_COMPILER_IS_GNU
