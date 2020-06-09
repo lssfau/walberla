@@ -1430,7 +1430,7 @@ doc:
 ###############################################################################
 
 clang-tidy:
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    script:
       - $CXX --version
       - clang-tidy -version
