@@ -41,6 +41,8 @@
 #include "stencil/D3Q19.h"
 #include "stencil/D3Q27.h"
 
+#include <memory>
+
 #include <sstream>
 
 #ifdef _MSC_VER
@@ -235,9 +237,9 @@ shared_ptr<StructuredBlockForest> createStructuredBlockForest( Vector3<uint_t> b
       MPIManager::instance()->useWorldComm();
 
    // create StructuredBlockForest (encapsulates a newly created BlockForest)
-   auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, keepGlobalBlockInformation ) );
+   auto bf = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sforest, keepGlobalBlockInformation );
 
-   auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2] ) );
+   auto sbf = std::make_shared< StructuredBlockForest >( bf, cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2] );
    sbf->createCellBoundingBoxes();
 
    return sbf;
