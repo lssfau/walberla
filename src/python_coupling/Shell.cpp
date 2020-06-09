@@ -134,7 +134,7 @@ namespace python_coupling {
 
          if ( lineCounter == 1 && commandComplete )
             return true;
-         if ( strTrimmedLine.size() == 0 && isCompleteCommand(result) ) // multiline commands have to end with empty line
+         if ( strTrimmedLine.empty() && isCompleteCommand(result) ) // multiline commands have to end with empty line
             return true;
       }
 
