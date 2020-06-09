@@ -1143,7 +1143,13 @@ void exportStencilDirections()
        .value("BSW", stencil::BSW)
        .export_values()
        ;
-   boost::python::list cx, cy, cz, dirStrings;
+   boost::python::list cx;
+
+   boost::python::list cy;
+
+   boost::python::list cz;
+
+   boost::python::list dirStrings;
    for( uint_t i=0; i < stencil::NR_OF_DIRECTIONS; ++i  )
    {
       cx.append( stencil::cx[i] );

@@ -114,7 +114,11 @@ void Manager::triggerInitialization()
 
    }
    catch ( boost::python::error_already_set & ) {
-      PyObject *type_ptr = nullptr, *value_ptr = nullptr, *traceback_ptr = nullptr;
+      PyObject *type_ptr = nullptr;
+
+      PyObject *value_ptr = nullptr;
+
+      PyObject *traceback_ptr = nullptr;
       PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
 
       if( type_ptr )
