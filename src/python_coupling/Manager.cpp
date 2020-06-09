@@ -53,7 +53,7 @@ Manager::Manager()
 {
 }
 
-Manager::~Manager( )
+Manager::~Manager( ) //NOLINT
 {
    // To work reliably this would have to be called at the end of the
    // main function. At this position this leads to a segfault in some cases
@@ -114,7 +114,11 @@ void Manager::triggerInitialization()
 
    }
    catch ( boost::python::error_already_set & ) {
-      PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;
+      PyObject *type_ptr = nullptr;
+
+      PyObject *value_ptr = nullptr;
+
+      PyObject *traceback_ptr = nullptr;
       PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
 
       if( type_ptr )

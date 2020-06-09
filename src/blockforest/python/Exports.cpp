@@ -41,6 +41,8 @@
 #include "stencil/D3Q19.h"
 #include "stencil/D3Q27.h"
 
+#include <memory>
+
 #include <sstream>
 
 #ifdef _MSC_VER
@@ -62,7 +64,7 @@ namespace blockforest {
 
 using walberla::blockforest::communication::UniformBufferedScheme;
 
-bool checkForThreeTuple( object obj )
+bool checkForThreeTuple( object obj ) //NOLINT
 {
    if( ! extract<tuple> ( obj ).check() )
       return false;
@@ -72,7 +74,7 @@ bool checkForThreeTuple( object obj )
 }
 
 
-object python_createUniformBlockGrid(tuple args, dict kw)
+object python_createUniformBlockGrid(tuple args, dict kw) //NOLINT
 {
    if( len(args) > 0 ) {
       PyErr_SetString( PyExc_ValueError, "This function takes only keyword arguments" );
@@ -124,7 +126,7 @@ object python_createUniformBlockGrid(tuple args, dict kw)
    shared_ptr<Config> cfg = python_coupling::configFromPythonDict( kw );
 
    try {
-      shared_ptr< StructuredBlockForest > blocks = createUniformBlockGridFromConfig( cfg->getGlobalBlock(), NULL, keepGlobalBlockInformation );
+      shared_ptr< StructuredBlockForest > blocks = createUniformBlockGridFromConfig( cfg->getGlobalBlock(), nullptr, keepGlobalBlockInformation );
       return object(blocks);
    }
    catch( std::exception & e)
@@ -235,9 +237,9 @@ shared_ptr<StructuredBlockForest> createStructuredBlockForest( Vector3<uint_t> b
       MPIManager::instance()->useWorldComm();
 
    // create StructuredBlockForest (encapsulates a newly created BlockForest)
-   auto bf = shared_ptr< BlockForest >( new BlockForest( uint_c( MPIManager::instance()->rank() ), sforest, keepGlobalBlockInformation ) );
+   auto bf = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ), sforest, keepGlobalBlockInformation );
 
-   auto sbf = shared_ptr< StructuredBlockForest >( new StructuredBlockForest( bf, cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2] ) );
+   auto sbf = std::make_shared< StructuredBlockForest >( bf, cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2] );
    sbf->createCellBoundingBoxes();
 
    return sbf;
@@ -286,7 +288,7 @@ std::string printSetupBlock(const SetupBlock & b )
 
 void exportBlockForest()
 {
-   class_< StructuredBlockForest,
+   class_< StructuredBlockForest, //NOLINT
            shared_ptr<StructuredBlockForest>,
            bases<StructuredBlockStorage>, boost::noncopyable > ( "StructuredBlockForest", no_init );
 

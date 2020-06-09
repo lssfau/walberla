@@ -45,7 +45,7 @@ namespace python_coupling {
    //
    //===================================================================================================================
 
-   static object broadcast_string( object value, int sendRank )
+   static object broadcast_string( object value, int sendRank ) //NOLINT
    {
       if ( extract<std::string>(value).check() )
       {
@@ -58,7 +58,7 @@ namespace python_coupling {
       return object( extractedValue );
    }
 
-   static object broadcast_int( object value, int sendRank )
+   static object broadcast_int( object value, int sendRank ) //NOLINT
    {
       if ( extract<int64_t>(value).check() )
       {
@@ -71,7 +71,7 @@ namespace python_coupling {
       return object( extractedValue );
    }
 
-   static object broadcast_real( object value, int sendRank )
+   static object broadcast_real( object value, int sendRank ) //NOLINT
    {
       if ( extract<real_t>(value).check() )
       {
@@ -92,7 +92,7 @@ namespace python_coupling {
    //===================================================================================================================
 
 
-   static object reduce_int( object value, mpi::Operation op, int recvRank )
+   static object reduce_int( object value, mpi::Operation op, int recvRank ) //NOLINT
    {
       if ( extract<int64_t>(value).check() )
       {
@@ -105,7 +105,7 @@ namespace python_coupling {
       return object( extractedValue );
    }
 
-   static object reduce_real( object value, mpi::Operation op, int recvRank )
+   static object reduce_real( object value, mpi::Operation op, int recvRank ) //NOLINT
    {
       if ( extract<real_t>(value).check() )
       {
@@ -119,7 +119,7 @@ namespace python_coupling {
    }
 
 
-   static object allreduce_int( object value, mpi::Operation op )
+   static object allreduce_int( object value, mpi::Operation op ) //NOLINT
    {
       if ( extract<int64_t>(value).check() )
       {
@@ -132,7 +132,7 @@ namespace python_coupling {
       return object( extractedValue );
    }
 
-   static object allreduce_real( object value, mpi::Operation op )
+   static object allreduce_real( object value, mpi::Operation op ) //NOLINT
    {
       if ( extract<real_t>(value).check() )
       {
@@ -152,7 +152,7 @@ namespace python_coupling {
    //
    //===================================================================================================================
 
-   static IntStdVector gather_int( object value, int recvRank )
+   static IntStdVector gather_int( object value, int recvRank ) //NOLINT
    {
       if ( ! extract<int64_t>(value).check() )
       {
@@ -163,7 +163,7 @@ namespace python_coupling {
       return mpi::gather( extractedValue , recvRank );
    }
 
-   static RealStdVector gather_real( object value, int recvRank )
+   static RealStdVector gather_real( object value, int recvRank ) //NOLINT
    {
       if ( ! extract<real_t>(value).check() )
       {
@@ -175,7 +175,7 @@ namespace python_coupling {
    }
 
 
-   static IntStdVector allgather_int( object value )
+   static IntStdVector allgather_int( object value ) //NOLINT
    {
       if ( ! extract<int64_t>(value).check() )
       {
@@ -186,7 +186,7 @@ namespace python_coupling {
       return mpi::allGather( extractedValue );
    }
 
-   static RealStdVector allgather_real( object value )
+   static RealStdVector allgather_real( object value ) //NOLINT
    {
       if ( ! extract<real_t>(value).check() )
       {

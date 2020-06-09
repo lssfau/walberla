@@ -116,7 +116,7 @@ namespace python_coupling {
          else
             line = PyOS_Readline( stdin, stdout, (char*)prompt2_.c_str() );
 
-         if ( line == NULL || *line == '\0' ) {  // interrupt or EOF
+         if ( line == nullptr || *line == '\0' ) {  // interrupt or EOF
             result.clear();
             return false;
          }
@@ -134,7 +134,7 @@ namespace python_coupling {
 
          if ( lineCounter == 1 && commandComplete )
             return true;
-         if ( strTrimmedLine.size() == 0 && isCompleteCommand(result) ) // multiline commands have to end with empty line
+         if ( strTrimmedLine.empty() && isCompleteCommand(result) ) // multiline commands have to end with empty line
             return true;
       }
 
