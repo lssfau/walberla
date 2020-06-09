@@ -84,7 +84,7 @@ namespace python_coupling {
    {
    public:
       PythonMultipleConfigGenerator( bp::stl_input_iterator< bp::dict > iterator  )  //NOLINT
-         : iter_( iterator ), firstTime_(true) 
+         : iter_( iterator ), firstTime_(true) //NOLINT
       {}
 
       shared_ptr<Config> next() override

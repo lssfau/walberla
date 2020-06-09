@@ -288,7 +288,7 @@ std::string printSetupBlock(const SetupBlock & b )
 
 void exportBlockForest()
 {
-   class_< StructuredBlockForest,
+   class_< StructuredBlockForest, //NOLINT
            shared_ptr<StructuredBlockForest>,
            bases<StructuredBlockStorage>, boost::noncopyable > ( "StructuredBlockForest", no_init );
 

@@ -53,7 +53,7 @@ Manager::Manager()
 {
 }
 
-Manager::~Manager( )
+Manager::~Manager( ) //NOLINT
 {
    // To work reliably this would have to be called at the end of the
    // main function. At this position this leads to a segfault in some cases
