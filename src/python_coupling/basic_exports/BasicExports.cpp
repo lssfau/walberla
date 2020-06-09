@@ -67,7 +67,7 @@ struct NumpyIntConversion
        auto typeName = std::string( Py_TYPE(pyObj)->tp_name );
        if ( typeName.substr(0,9) == "numpy.int" )
           return pyObj;
-       return 0;
+       return nullptr;
     }
 
     static void construct( PyObject* pyObj, converter::rvalue_from_python_stage1_data* data )
@@ -94,7 +94,7 @@ struct NumpyFloatConversion
        auto typeName = std::string( Py_TYPE(pyObj)->tp_name );
        if ( typeName.substr(0,11) == "numpy.float" )
           return pyObj;
-        return 0;
+        return nullptr;
     }
 
     static void construct(PyObject* pyObj, converter::rvalue_from_python_stage1_data* data)
@@ -208,7 +208,7 @@ struct PythonTuple_to_Vector3
       using namespace boost::python;
 
       if ( ! ( PySequence_Check(obj) && PySequence_Size( obj ) == 3 ))
-         return NULL;
+         return nullptr;
 
       object element0 ( handle<>( borrowed( PySequence_GetItem(obj,0) )));
       object element1 ( handle<>( borrowed( PySequence_GetItem(obj,1) )));
@@ -219,7 +219,7 @@ struct PythonTuple_to_Vector3
             extract<T>( element2 ).check() )
          return obj;
       else
-         return NULL;
+         return nullptr;
    }
 
    static void construct( PyObject* obj, boost::python::converter::rvalue_from_python_stage1_data* data )
@@ -302,7 +302,7 @@ struct PythonTuple_to_Cell
       using namespace boost::python;
 
       if ( ! ( PySequence_Check(obj) && PySequence_Size( obj ) == 3 ))
-         return NULL;
+         return nullptr;
 
       object element0 ( handle<>( borrowed( PySequence_GetItem(obj,0) )));
       object element1 ( handle<>( borrowed( PySequence_GetItem(obj,1) )));
@@ -313,7 +313,7 @@ struct PythonTuple_to_Cell
             extract<cell_idx_t>( element2 ).check() )
          return obj;
       else
-         return NULL;
+         return nullptr;
    }
 
    static void construct( PyObject* obj, boost::python::converter::rvalue_from_python_stage1_data* data )

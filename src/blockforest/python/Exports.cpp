@@ -126,7 +126,7 @@ object python_createUniformBlockGrid(tuple args, dict kw)
    shared_ptr<Config> cfg = python_coupling::configFromPythonDict( kw );
 
    try {
-      shared_ptr< StructuredBlockForest > blocks = createUniformBlockGridFromConfig( cfg->getGlobalBlock(), NULL, keepGlobalBlockInformation );
+      shared_ptr< StructuredBlockForest > blocks = createUniformBlockGridFromConfig( cfg->getGlobalBlock(), nullptr, keepGlobalBlockInformation );
       return object(blocks);
    }
    catch( std::exception & e)

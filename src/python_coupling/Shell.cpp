@@ -116,7 +116,7 @@ namespace python_coupling {
          else
             line = PyOS_Readline( stdin, stdout, (char*)prompt2_.c_str() );
 
-         if ( line == NULL || *line == '\0' ) {  // interrupt or EOF
+         if ( line == nullptr || *line == '\0' ) {  // interrupt or EOF
             result.clear();
             return false;
          }
