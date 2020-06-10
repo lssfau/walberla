@@ -158,15 +158,15 @@ private:
 *   \brief Returns a random floating point number of type REAL in the range [min,max) (max excluded!)
 */
 //**********************************************************************************************************************
-template< typename REAL = real_t >
-REAL realRandom( const REAL min = REAL(0), const REAL max = REAL(1), std::mt19937 & generator = internal::getGenerator() )
+template< typename REAL_TYPE = real_t >
+REAL_TYPE realRandom( const REAL_TYPE min = REAL_TYPE(0), const REAL_TYPE max = REAL_TYPE(1), std::mt19937 & generator = internal::getGenerator() )
 {
-   static_assert( std::numeric_limits<REAL>::is_specialized && !std::numeric_limits<REAL>::is_integer, "Floating point type required/expected!" );
+   static_assert( std::numeric_limits<REAL_TYPE>::is_specialized && !std::numeric_limits<REAL_TYPE>::is_integer, "Floating point type required/expected!" );
    WALBERLA_ASSERT_LESS( min, max );
 
-   std::uniform_real_distribution< REAL > distribution( min, max );
+   std::uniform_real_distribution< REAL_TYPE > distribution( min, max );
 
-   REAL value;
+   REAL_TYPE value;
 #ifdef _OPENMP
    #pragma omp critical (Random_random)
 #endif
@@ -177,12 +177,12 @@ REAL realRandom( const REAL min = REAL(0), const REAL max = REAL(1), std::mt1993
 
 
 
-template< typename REAL >
+template< typename REAL_TYPE >
 class RealRandom
 {
 public:
    RealRandom( const std::mt19937::result_type & seed = std::mt19937::result_type() ) { generator_.seed( seed ); }
-   REAL operator()( const REAL min = REAL(0), const REAL max = REAL(1) )
+   REAL_TYPE operator()( const REAL_TYPE min = REAL_TYPE(0), const REAL_TYPE max = REAL_TYPE(1) )
    {
       return realRandom( min, max, generator_ );
    }
