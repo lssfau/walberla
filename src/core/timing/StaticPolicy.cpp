@@ -25,7 +25,7 @@
 namespace walberla {
 namespace timing {
 
-double StaticPolicy::time_;
+double StaticPolicy::time_ = 0;
 
 } // namespace timing
 } // namespace walberla
