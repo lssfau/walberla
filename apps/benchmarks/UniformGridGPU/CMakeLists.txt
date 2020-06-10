@@ -12,6 +12,7 @@ foreach (config srt trt mrt smagorinsky entropic smagorinsky_noopt entropic_kbc_
           FILE UniformGridGPU.py
           CODEGEN_CFG ${config}
           OUT_FILES UniformGridGPU_LatticeModel.cpp UniformGridGPU_LatticeModel.h
+          UniformGridGPU_LbKernel.cu UniformGridGPU_LbKernel.h
           UniformGridGPU_NoSlip.cu UniformGridGPU_NoSlip.h
           UniformGridGPU_UBB.cu UniformGridGPU_UBB.h
           UniformGridGPU_PackInfo.cu UniformGridGPU_PackInfo.h
@@ -33,6 +34,8 @@ foreach (config srt trt mrt smagorinsky entropic)
           FILE UniformGridGPU_AA.py
           CODEGEN_CFG ${config}
           OUT_FILES UniformGridGPU_AA_PackInfoPull.cu UniformGridGPU_AA_PackInfoPull.h
+          UniformGridGPU_AA_LbKernelOdd.cu UniformGridGPU_AA_LbKernelOdd.h
+          UniformGridGPU_AA_LbKernelEven.cu UniformGridGPU_AA_LbKernelEven.h
           UniformGridGPU_AA_PackInfoPush.cu UniformGridGPU_AA_PackInfoPush.h
           UniformGridGPU_AA_MacroSetter.cpp UniformGridGPU_AA_MacroSetter.h
           UniformGridGPU_AA_MacroGetter.cpp UniformGridGPU_AA_MacroGetter.h

@@ -71,6 +71,7 @@ waLBerla_compile_test( FILES SuViscoelasticityTest.cpp DEPENDS field blockforest
 waLBerla_execute_test( NAME  SuViscoelasticityTest COMMAND $<TARGET_FILE:SuViscoelasticityTest> ${CMAKE_CURRENT_SOURCE_DIR}/Su.prm )
 
 # Code Generation
+if( WALBERLA_BUILD_WITH_CODEGEN )
 waLBerla_generate_target_from_python(NAME LbCodeGenerationExampleGenerated
       FILE codegen/LbCodeGenerationExample.py
       OUT_FILES LbCodeGenerationExample_LatticeModel.cpp LbCodeGenerationExample_LatticeModel.h
@@ -80,3 +81,4 @@ waLBerla_compile_test( FILES codegen/LbCodeGenerationExample.cpp DEPENDS LbCodeG
 waLBerla_generate_target_from_python(NAME FluctuatingMRTGenerated FILE codegen/FluctuatingMRT.py
                               OUT_FILES FluctuatingMRT_LatticeModel.cpp FluctuatingMRT_LatticeModel.h )
 waLBerla_compile_test( FILES codegen/FluctuatingMRT.cpp DEPENDS FluctuatingMRTGenerated)
+endif()

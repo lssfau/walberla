@@ -89,13 +89,9 @@ function ( waLBerla_add_module )
  	endforeach( )
 
     if ( hasSourceFiles )
-        if ( CUDA_FOUND )
-            cuda_add_library( ${moduleLibraryName} STATIC ${sourceFiles} ${otherFiles} )
-        else()
-            add_library( ${moduleLibraryName} STATIC ${sourceFiles} ${otherFiles} )
-        endif( CUDA_FOUND )
+       add_library( ${moduleLibraryName} STATIC ${sourceFiles} ${otherFiles} )
  	else( )
- 	   add_custom_target( ${moduleLibraryName} SOURCES ${sourceFiles} ${otherFiles} )  # dummy IDE target
+       add_custom_target( ${moduleLibraryName} SOURCES ${sourceFiles} ${otherFiles} )  # dummy IDE target
  	endif( )
 
     waLBerla_register_dependency ( ${moduleName} ${ARG_DEPENDS} )
@@ -201,11 +197,7 @@ function ( waLBerla_add_executable )
         endif ( )
     endif()
 
-    if ( WALBERLA_BUILD_WITH_CUDA )
-        cuda_add_executable( ${ARG_NAME} ${sourceFiles} )
-    else()
-        add_executable( ${ARG_NAME} ${sourceFiles} )
-    endif()
+    add_executable( ${ARG_NAME} ${sourceFiles} )
 
     target_link_modules  ( ${ARG_NAME} ${ARG_DEPENDS}  )
     target_link_libraries( ${ARG_NAME} ${WALBERLA_LINK_LIBRARIES_KEYWORD} ${SERVICE_LIBS} )

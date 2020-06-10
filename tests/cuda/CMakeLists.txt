@@ -40,7 +40,7 @@ waLBerla_compile_test( FILES CudaMPI DEPENDS blockforest timeloop gui )
 waLBerla_compile_test( FILES AlignmentTest.cpp DEPENDS blockforest timeloop )
 
 waLBerla_generate_target_from_python(NAME MicroBenchmarkGpuLbmGenerated FILE codegen/MicroBenchmarkGpuLbm.py
-      OUT_FILES MicroBenchmarkStreamKernel.cu MicroBenchmarkCopyKernel.cu)
+      OUT_FILES MicroBenchmarkStreamKernel.cu MicroBenchmarkCopyKernel.cu MicroBenchmarkStreamKernel.h MicroBenchmarkCopyKernel.h)
 waLBerla_compile_test( FILES codegen/MicroBenchmarkGpuLbm.cpp DEPENDS MicroBenchmarkGpuLbmGenerated)
 
 endif()
