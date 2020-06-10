@@ -17,7 +17,7 @@ waLBerla_compile_test( FILES distributors/DistributionTest.cpp)
 waLBerla_execute_test( NAME DistributionTest )
 
 waLBerla_compile_test( FILES FieldTest.cpp )
-waLBerla_execute_test( NAME FieldTest ) 
+waLBerla_execute_test( NAME FieldTest )
 
 waLBerla_compile_test( FILES FieldOfCustomTypesTest.cpp  )
 waLBerla_execute_test( NAME FieldOfCustomTypesTest )
@@ -62,7 +62,7 @@ endif( WALBERLA_BUILD_WITH_MPI )
 
 
 # CodeGen Tests
-
+if( WALBERLA_BUILD_WITH_CODEGEN )
 waLBerla_generate_target_from_python(NAME CodegenJacobiCPUGeneratedJacobiKernel FILE codegen/JacobiKernel.py
       OUT_FILES JacobiKernel2D.cpp JacobiKernel2D.h JacobiKernel3D.cpp JacobiKernel3D.h )
 waLBerla_compile_test( FILES codegen/CodegenJacobiCPU.cpp DEPENDS gui timeloop CodegenJacobiCPUGeneratedJacobiKernel)
@@ -72,5 +72,4 @@ waLBerla_generate_target_from_python(NAME CodegenPoissonGeneratedKernel FILE cod
       OUT_FILES Poisson.cpp Poisson.h )
 waLBerla_compile_test( FILES codegen/CodegenPoisson.cpp DEPENDS gui timeloop CodegenPoissonGeneratedKernel)
 waLBerla_execute_test( NAME CodegenPoisson )
-
-
+endif()

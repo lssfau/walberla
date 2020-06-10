@@ -25,7 +25,7 @@
 ##
 ############################################################################################################################
 
-CMAKE_MINIMUM_REQUIRED (VERSION 3.1)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.10)
 
 
 PROJECT ( walberla )
@@ -1094,66 +1094,28 @@ endif()
 ##
 ############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CUDA )
+    include(CheckLanguage)
+    check_language(CUDA)
+    if( CMAKE_CUDA_COMPILER )
+      enable_language(CUDA)
 
-    get_directory_property(COMPILE_DEFINITIONS_SAVED_STATE DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)
-    # cleanup compile definitions for CUDA (remove generator expression and empty elements which lead to warnings)
-    set(CLEANED_COMPILE_DEFINITIONS )
-    foreach( element ${COMPILE_DEFINITIONS_SAVED_STATE})
-        if(NOT ${element} MATCHES "^\\$")
-            list(APPEND CLEANED_COMPILE_DEFINITIONS ${element})
-        endif()
-    endforeach()
-    set_directory_properties(PROPERTIES COMPILE_DEFINITIONS CLEANED_COMPILE_DEFINITIONS)
+      #include directories and cudart lib is needed for cpp files that use cuda headers/libs
+      include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+      find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
+      list ( APPEND SERVICE_LIBS ${CUDART_LIBRARY} )
 
-    #   set ( BUILD_SHARED_LIBS                      ON )
-    set ( CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON )
+      #TODO: check if this is really needed? is it possible that nvtx is missing?
+      find_library( NVTX_LIBRARY nvToolsExt ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES} )
+      if( NVTX_LIBRARY )
+          set( WALBERLA_CUDA_NVTX_AVAILABLE 1)
+          list ( APPEND SERVICE_LIBS ${NVTX_LIBRARY} )
+      endif()
 
-    if( NOT WALBERLA_CXX_COMPILER_IS_MSVC )
-        set ( CUDA_PROPAGATE_HOST_FLAGS OFF CACHE BOOL "" )
-    endif()
-
-    if ( (NOT DEFINED CUDA_HOST_COMPILER) AND (${CMAKE_C_COMPILER} MATCHES "ccache") )
-        string ( STRIP "${CMAKE_C_COMPILER_ARG1}" stripped_compiler_string )
-        find_program ( CUDA_HOST_COMPILER ${stripped_compiler_string} )
-    endif ()
-
-    find_package ( CUDA REQUIRED )
-
-    if ( CUDA_FOUND )
-        include_directories ( ${CUDA_INCLUDE_DIRS} )
-        list ( APPEND SERVICE_LIBS ${CUDA_LIBRARIES} )
-
-        list( APPEND CUDA_NVCC_FLAGS "-Wno-deprecated-gpu-targets")
-
-        find_library( NVTX_LIBRARY nvToolsExt PATHS ${CUDA_TOOLKIT_ROOT_DIR} PATH_SUFFIXES lib lib64 )
-        if( NVTX_LIBRARY )
-            set( WALBERLA_CUDA_NVTX_AVAILABLE 1)
-            list ( APPEND SERVICE_LIBS ${NVTX_LIBRARY} )
-        endif()
-
-        if ( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std=" AND NOT WALBERLA_CXX_COMPILER_IS_MSVC )
-            list ( APPEND CUDA_NVCC_FLAGS "-std=c++${CMAKE_CXX_STANDARD}" )
-        endif ()
-
-        if(CMAKE_BUILD_TYPE MATCHES Debug)
-            list ( APPEND CUDA_NVCC_FLAGS "-g -G" )
-        endif()
-
-        if( WALBERLA_BUILD_WITH_FASTMATH )
-           list ( APPEND CUDA_NVCC_FLAGS "-use_fast_math" )
-        endif()
-
-        # Bug with gcc5 and cuda7.5:
-        #list( APPEND CUDA_NVCC_FLAGS  "-D_MWAITXINTRIN_H_INCLUDED -D_FORCE_INLINES  -D__STRICT_ANSI__")
-
-        # NOTICE: exisiting cuda flags are overwritten
-        #set ( CUDA_NVCC_FLAGS "--compiler-bindir=/usr/bin/g++-4.3" )
-        #set ( CUDA_NVCC_FLAGS "-arch sm_20" )
+      #CUDA_FOUND is need for our cmake mechanism
+      set ( CUDA_FOUND TRUE )
     else()
-        set ( WALBERLA_BUILD_WITH_CUDA FALSE )
+      set ( WALBERLA_BUILD_WITH_CUDA FALSE )
     endif ( )
-
-    set_directory_properties(PROPERTIES COMPILE_DEFINITIONS "${COMPILE_DEFINITIONS_SAVED_STATE}" )
 endif ( )
 ############################################################################################################################
 
@@ -1288,18 +1250,18 @@ if (WALBERLA_BUILD_DOC)
   ############################################################################################################################
   find_package ( Doxygen  )
   find_package ( HTMLHelp )
-  
+
   if ( HTML_HELP_COMPILER EQUAL "" )
      set ( HTML_HELP_FOUND "NO" )
   else ( )
      set ( HTML_HELP_FOUND "YES" )
   endif ( )
-  
+
   if ( DOXYGEN_FOUND )
      set ( DOXYGEN_HTML_HEADER ${walberla_SOURCE_DIR}/doc/header.html )
      set ( DOXYGEN_HTML_FOOTER ${walberla_SOURCE_DIR}/doc/footer.html )
      set ( DOXYGEN_HTML_OUTPUT "html" )
-  
+
      configure_file ( ${walberla_SOURCE_DIR}/doc/doxygen.in ${walberla_BINARY_DIR}/doc/doxygen.cfg @ONLY )
 
      add_custom_target ( doc   ${DOXYGEN_EXECUTABLE} ${walberla_BINARY_DIR}/doc/doxygen.cfg

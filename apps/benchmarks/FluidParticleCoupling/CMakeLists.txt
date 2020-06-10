@@ -1,14 +1,14 @@
 waLBerla_link_files_to_builddir( "*.dat" )
 
-waLBerla_generate_target_from_python(NAME FluidParticleCouplingGeneratedLBM FILE GeneratedLBM.py
-      OUT_FILES GeneratedLBM.cpp GeneratedLBM.h
-      )
-
-waLBerla_generate_target_from_python(NAME FluidParticleCouplingGeneratedLBMWithForce FILE GeneratedLBMWithForce.py
-      OUT_FILES GeneratedLBMWithForce.cpp GeneratedLBMWithForce.h
-      )
-
 if( WALBERLA_BUILD_WITH_CODEGEN )
+
+    waLBerla_generate_target_from_python(NAME FluidParticleCouplingGeneratedLBM FILE GeneratedLBM.py
+            OUT_FILES GeneratedLBM.cpp GeneratedLBM.h
+            )
+
+    waLBerla_generate_target_from_python(NAME FluidParticleCouplingGeneratedLBMWithForce FILE GeneratedLBMWithForce.py
+            OUT_FILES GeneratedLBMWithForce.cpp GeneratedLBMWithForce.h
+            )
 
    waLBerla_add_executable(NAME SphereWallCollision FILES SphereWallCollision.cpp
          DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling

@@ -84,7 +84,7 @@ int main( int argc, char **argv )
 
         Vector3<int> innerOuterSplit = parameters.getParameter<Vector3<int> >("innerOuterSplit", Vector3<int>(1, 1, 1));
 
-        for(int i=0; i< 3; ++i)
+        for(uint_t i=0; i< 3; ++i)
         {
             if( int_c(cellsPerBlock[i]) <= innerOuterSplit[i] * 2) {
                 WALBERLA_ABORT_NO_DEBUG_INFO("innerOuterSplit too large - make it smaller or increase cellsPerBlock");
@@ -226,7 +226,7 @@ int main( int argc, char **argv )
         double  remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", -1.0 ); // in seconds
         if ( remainingTimeLoggerFrequency > 0 )
         {
-            auto logger = timing::RemainingTimeLogger( timeLoop.getNrOfTimeSteps() * outerIterations, remainingTimeLoggerFrequency );
+            auto logger = timing::RemainingTimeLogger( timeLoop.getNrOfTimeSteps() * uint_c(outerIterations), remainingTimeLoggerFrequency );
             timeLoop.addFuncAfterTimeStep( logger, "remaining time logger" );
         }
 

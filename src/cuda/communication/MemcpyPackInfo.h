@@ -19,7 +19,7 @@ public:
     MemcpyPackInfo( BlockDataID pdfsID_ )
         : pdfsID(pdfsID_), numberOfGhostLayers_(0), communicateAllGhostLayers_(true)
     {};
-
+    virtual ~MemcpyPackInfo() {};
 
     virtual void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block, cudaStream_t stream);
     virtual void unpack(stencil::Direction dir, unsigned char * buffer, IBlock * block, cudaStream_t stream);
