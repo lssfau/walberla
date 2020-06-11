@@ -12,6 +12,7 @@ from pystencils.fast_approximation import insert_fast_sqrts, insert_fast_divisio
 from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
 
 omega = sp.symbols("omega")
+omega_free = sp.Symbol("omega_free")
 omega_fill = sp.symbols("omega_:10")
 compile_time_block_size = False
 
@@ -46,23 +47,18 @@ options_dict = {
         'stencil': 'D3Q19',
         'relaxation_rates': [omega_fill[0], omega, omega_fill[1], omega_fill[2], omega_fill[3], omega_fill[4], omega_fill[5]],
     },
-    'mrt3': {
-        'method': 'mrt3',
-        'stencil': 'D3Q19',
-        'relaxation_rates': [omega, 1.1, 1.2],
-    },
     'entropic': {
-        'method': 'mrt3',
+        'method': 'mrt',
         'stencil': 'D3Q19',
         'compressible': True,
-        'relaxation_rates': [omega, omega, sp.Symbol("omega_free")],
+        'relaxation_rates': [omega, omega, omega_free, omega_free, omega_free, omega_free],
         'entropic': True,
     },
     'entropic_kbc_n4': {
         'method': 'trt-kbc-n4',
         'stencil': 'D3Q27',
         'compressible': True,
-        'relaxation_rates': [omega, sp.Symbol("omega_free")],
+        'relaxation_rates': [omega, omega_free],
         'entropic': True,
     },
     'smagorinsky': {

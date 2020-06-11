@@ -12,7 +12,7 @@ with CodeGeneration() as ctx:
     # the collision rule of the LB method where the some advanced features
     collision_rule = create_lb_collision_rule(
         stencil='D3Q19', compressible=True,
-        method='mrt3', relaxation_rates=[omega, omega, omega_free],
+        method='mrt', relaxation_rates=[omega, omega, omega_free, omega_free, omega_free, omega_free],
         entropic=True,                    # entropic method where second omega is chosen s.t. entropy condition
         omega_output_field=omega_out,     # scalar field where automatically chosen omega of entropic or Smagorinsky method is written to
         force=force_field.center_vector,  # read forces for each lattice cell from an external force field
