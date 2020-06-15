@@ -29,6 +29,7 @@
 #include "core/math/Vector2.h"
 #include "core/math/IntegerFactorization.h"
 #include "core/logging/Logging.h"
+#include "core/stringToNum.h"
 
 #include "field/AddToStorage.h"
 #include "field/GhostLayerField.h"
@@ -55,8 +56,8 @@ int main( int argc, char * argv[] )
    bool            vtk = true;
 
    try {
-      fieldSize.set( string_to_num< uint_t >( args.at(1) ), string_to_num< uint_t >( args.at(2) ) );
-      partitions = string_to_num< uint_t >( args.at(3) );
+      fieldSize.set( stringToNum< uint_t >( args.at(1) ), stringToNum< uint_t >( args.at(2) ) );
+      partitions = stringToNum< uint_t >( args.at(3) );
 
       auto it = std::find( args.begin(), args.end(), "--no-vtk" );
       if(it != args.end())

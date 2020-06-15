@@ -50,6 +50,7 @@
 #include "core/math/IntegerFactorization.h"
 #include "core/math/Limits.h"
 #include "core/mpi/Environment.h"
+#include "core/stringToNum.h"
 
 #include "domain_decomposition/SharedSweep.h"
 
@@ -274,15 +275,15 @@ int main( int argc, char **argv )
    if( argc > 1 ) {
       std::vector<std::string> args( argv, argv + argc );
       for( uint_t i = 1; i < uint_c(argc); ++i ) {
-              if( std::string(argv[i]) == "-l"    )   length  = string_to_num<uint_t>( args[++i] );
-         else if( std::string(argv[i]) == "-w"    )   width   = string_to_num<uint_t>( args[++i] );
-         else if( std::string(argv[i]) == "-t"    )   time    = string_to_num<uint_t>( args[++i] );
-         else if( std::string(argv[i]) == "-dv"   )   dv      = string_to_num<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "-v"    )   v       = string_to_num<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "-do"   )   domega  = string_to_num<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "-o"    )   omega   = string_to_num<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "-c"    )   closed  = string_to_num<int>( args[++i] ) != 0;
-         else if( std::string(argv[i]) == "-r"    )   levels += string_to_num<uint_t>( args[++i] );
+              if( std::string(argv[i]) == "-l"    )   length  = stringToNum<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-w"    )   width   = stringToNum<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-t"    )   time    = stringToNum<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-dv"   )   dv      = stringToNum<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-v"    )   v       = stringToNum<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-do"   )   domega  = stringToNum<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-o"    )   omega   = stringToNum<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-c"    )   closed  = stringToNum<int>( args[++i] ) != 0;
+         else if( std::string(argv[i]) == "-r"    )   levels += stringToNum<uint_t>( args[++i] );
          else if( std::string(argv[i]) == "--vtk" )   useVTK  = true;
          else if( argv[i][0] != '-' ){
             std::cerr << "Usage: -option value" << std::endl; return EXIT_FAILURE;

@@ -27,6 +27,8 @@
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/MPITextFile.h"
 
+#include "core/stringToNum.h"
+
 #include "core/Filesystem.h"
 
 #include <vector>
@@ -120,7 +122,7 @@ int main( int argc, char * argv[] )
    std::string filename;
    try
    {
-      chunkSize = walberla::string_to_num<size_t>( args.at(2) );
+      chunkSize = walberla::stringToNum<size_t>( args.at(2) );
       filename  = args.at( 1 );
    }
    catch( ... )

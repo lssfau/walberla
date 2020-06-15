@@ -28,7 +28,6 @@
 #include <limits>
 #include <memory>
 #include <stdexcept>
-#include <string>
 #include <type_traits>
 
 namespace walberla {
@@ -84,20 +83,6 @@ inline S numeric_cast( T t ) {
 #endif
    return static_cast< S >(t);
 }
-
-
-
-template<typename S>
-inline S string_to_num( std::string & t );
-template <> inline float              string_to_num( std::string & t ) { return std::stof(t); }
-template <> inline double             string_to_num( std::string & t ) { return std::stod(t); }
-template <> inline long double        string_to_num( std::string & t ) { return std::stold(t); }
-template <> inline int                string_to_num( std::string & t ) { return std::stoi(t); }
-template <> inline long               string_to_num( std::string & t ) { return std::stol(t); }
-template <> inline long long          string_to_num( std::string & t ) { return std::stoll(t); }
-template <> inline unsigned long      string_to_num( std::string & t ) { return std::stoul(t); }
-template <> inline unsigned long long string_to_num( std::string & t ) { return std::stoull(t); }
-
 
 
 // fixed size signed integral types
