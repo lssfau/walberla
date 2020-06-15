@@ -140,8 +140,8 @@ private:
 
    inline Logging();
 
-   inline bool isInIgnoreCallerPaths( const std::vector< walberla::regex > & regexes,
-                                      const std::string & callerPath, const int line ) const;
+   bool isInIgnoreCallerPaths( const std::vector< walberla::regex > & regexes,
+                               const std::string & callerPath, const int line ) const;
 
    inline void logError   ( const std::string & message, const std::string & callerPath, const int line );
    inline void logDevel   ( const std::string & message, const std::string & callerPath, const int line );
@@ -302,24 +302,6 @@ inline bool Logging::logTracing( const std::string & /*callerPath*/, const int /
 {
    return false;
 #endif
-}
-
-
-
-inline bool Logging::isInIgnoreCallerPaths( const std::vector< walberla::regex > & regexes,
-                                            const std::string & callerPath, const int line ) const
-{
-   if( !regexes.empty() )
-   {
-      std::stringstream callerPathAndLine;
-      callerPathAndLine << callerPath << ":" << line;
-
-      for( auto regex = regexes.begin(); regex != regexes.end(); ++regex )
-         if( walberla::regex_search( callerPathAndLine.str(), *regex ) )
-            return true;
-   }
-
-   return false;
 }
 
 

@@ -22,6 +22,7 @@
 #include "Logging.h"
 
 #include "core/Filesystem.h"
+#include "core/Regex.h"
 #include <ctime>
 
 
@@ -192,6 +193,23 @@ std::string Logging::createLog( const std::string & type, const std::string & me
       log << "\n\n(from: " << callerPath << ":" << line << ")";
 
    return resetLinebreaks( log.str() );
+}
+
+
+bool Logging::isInIgnoreCallerPaths( const std::vector< walberla::regex > & regexes,
+                                            const std::string & callerPath, const int line ) const
+{
+   if( !regexes.empty() )
+   {
+      std::stringstream callerPathAndLine;
+      callerPathAndLine << callerPath << ":" << line;
+
+      for( auto regex = regexes.begin(); regex != regexes.end(); ++regex )
+         if( walberla::regex_search( callerPathAndLine.str(), *regex ) )
+            return true;
+   }
+
+   return false;
 }
 
 
