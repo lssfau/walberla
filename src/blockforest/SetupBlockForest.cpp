@@ -34,6 +34,7 @@
 #include "core/debug/CheckFunctions.h"
 #include "core/logging/Logging.h"
 #include "core/math/Sample.h"
+#include "core/typeToString.h"
 
 #include "domain_decomposition/MapPointToPeriodicDomain.h"
 

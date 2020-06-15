@@ -290,35 +290,6 @@ inline bool floatIsEqual( float lhs, float rhs, const float epsilon = real_compa
    return std::fabs( lhs - rhs ) < epsilon;
 }
 
-
-
-// data type to string conversion
-
-template< typename T > inline const char* typeToString();
-
-#define TypeToString(X) template<> inline const char* typeToString< X >() { \
-   static char string[] = #X; \
-   return string; \
-}
-
-TypeToString(bool)
-TypeToString(char)
-TypeToString(short)
-TypeToString(int)
-TypeToString(long)
-TypeToString(long long)
-TypeToString(unsigned char)
-TypeToString(unsigned short)
-TypeToString(unsigned int)
-TypeToString(unsigned long)
-TypeToString(unsigned long long)
-TypeToString(float)
-TypeToString(double)
-
-#undef TypeToString
-
-template< typename T > inline const char* typeToString( T ) { return typeToString<T>(); }
-
 } // namespace walberla
 
 #define WALBERLA_UNUSED(x)  (void)(x)
