@@ -25,6 +25,7 @@
 #include "IBlockID.h"
 
 #include "core/Abort.h"
+#include "core/debug/demangle.h"
 #include "core/NonCopyable.h"
 #include "core/debug/Debug.h"
 #include "core/math/AABB.h"
@@ -103,8 +104,8 @@ public:
       catch (...) {}
 #ifndef NDEBUG
       WALBERLA_ABORT( "BlockData access type violation! (The block data you added is of a different type than the block data you are trying to access!)"
-                      "\nThe original data type was:       " << demangle( typeInfo_ ) <<
-                      "\nYou try to retrieve data of type: " << demangle( typeid(U).name() ) )
+                      "\nThe original data type was:       " << debug::demangle( typeInfo_ ) <<
+                      "\nYou try to retrieve data of type: " << debug::demangle( typeid(U).name() ) )
 #else
       WALBERLA_ABORT( "BlockData access type violation! (The block data you added is of a different type than the block data you are trying to access!)" )
 #endif

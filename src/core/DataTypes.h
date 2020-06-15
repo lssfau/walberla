@@ -31,19 +31,6 @@
 #include <string>
 #include <type_traits>
 
-#ifdef __GLIBCXX__ 
-#define HAVE_CXXABI_H
-#include <cxxabi.h>
-#else
-#ifdef __has_include
-#if __has_include(<cxxabi.h>)
-#define HAVE_CXXABI_H
-#include <cxxabi.h>
-#endif
-#endif
-#endif
-
-
 namespace walberla {
 
 
@@ -331,28 +318,6 @@ TypeToString(double)
 #undef TypeToString
 
 template< typename T > inline const char* typeToString( T ) { return typeToString<T>(); }
-
-// type info demangling
-
-inline std::string demangle( const std::string & name )
-{
-#ifdef HAVE_CXXABI_H
-   int status = 0;
-   std::size_t size = 0;
-   const char * demangled = abi::__cxa_demangle( name.c_str(), NULL, &size, &status );
-   if( demangled == nullptr )
-   {
-      return name;
-   }
-   std::string demangled_str(demangled);
-   std::free( const_cast<char*>(demangled) );
-   return demangled_str;
-#else
-   return name;
-#endif
-}
-
-
 
 } // namespace walberla
 

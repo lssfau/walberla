@@ -28,6 +28,7 @@
 //*************************************************************************************************
 
 #include "core/Abort.h"
+#include "core/debug/demangle.h"
 #include "core/math/AABB.h"
 #include "core/math/Vector3.h"
 
@@ -57,7 +58,7 @@ void correctBodyPosition(const math::AABB& domain, const Vec3& center, Vec3& pos
 template < class BodyT >
 std::unique_ptr<BodyT> instantiate( mpi::RecvBuffer& /*buffer*/, const math::AABB& /*domain*/, const math::AABB& /*block*/, BodyT*& /*newBody*/ )
 {
-   WALBERLA_ABORT( "Body instantiation not implemented! (" << demangle(typeid(BodyT).name()) << ")" );
+   WALBERLA_ABORT( "Body instantiation not implemented! (" << debug::demangle(typeid(BodyT).name()) << ")" );
 }
 
 }  // namespace communication
