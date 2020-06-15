@@ -193,7 +193,57 @@ template<> inline uint_t uintMSBPosition< uint8_t >( uint8_t value ) {
    return msbLookupTable[value];
 }
 
+template< uint_t size > struct uintFromBitWidth;
+template<> struct uintFromBitWidth<  8 > { typedef uint8_t  type; };
+template<> struct uintFromBitWidth< 16 > { typedef uint16_t type; };
+template<> struct uintFromBitWidth< 32 > { typedef uint32_t type; };
+template<> struct uintFromBitWidth< 64 > { typedef uint64_t type; };
 
+constexpr uint_t leastUnsignedIntegerBitWidth( uint_t width )
+{
+   if ( width <=  8 ) return  8;
+   if ( width <= 16 ) return 16;
+   if ( width <= 32 ) return 32;
+   if ( width <= 64 ) return 64;
+   return width;
+}
+
+/// \brief Provides the smallest unsigned integer type that has at least minSize bits.
+///
+/// Example:
+///
+///   leastUnsignedInteger< 5 >::type a; // a is an 8-bit unsigned integer
+///   leastUnsignedInteger< 9 >::type b; // b is a 16-bit unsigned integer
+///
+template< uint_t minSize >
+struct leastUnsignedInteger
+{
+   typedef typename uintFromBitWidth< leastUnsignedIntegerBitWidth( minSize ) >::type type;
+};
+
+/// \cond internal
+static const uint_t UINT_BITS  = static_cast< uint_t >( std::numeric_limits< uint_t >::digits );
+static const uint_t UINT_BYTES = static_cast< uint_t >( std::numeric_limits< uint_t >::digits ) >> 3;
+
+static_assert( !(UINT_BITS & (UINT_BITS - 1)), "Type \"uint_t\" must consist of 2^x Bits!" ); // power of two
+
+template< int N >
+struct int_ld
+{
+   static_assert( N >= 1 && !(N & (N - 1)), "Calculating log_2(N) -> \"N\" must be a power of two!" );
+   static const uint_t exp = 1 + int_ld< (N >> 1) >::exp;
+};
+
+template< int N > const uint_t int_ld<N>::exp;
+
+template<>
+struct int_ld<1>
+{
+   static const uint_t exp = 0;
+};
+
+static const uint_t UINT_BITS_LD = int_ld< std::numeric_limits< uint_t >::digits >::exp;
+/// \endcond
 
 } // namespace math
 } // namespace walberla

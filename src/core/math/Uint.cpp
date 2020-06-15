@@ -25,8 +25,6 @@
 namespace walberla {
 namespace math {
 
-
-
 template<> uint_t uintMSBPosition< uint64_t >( uint64_t value ) { // for the documentation see the header file
 
    uint64_t i;
@@ -51,7 +49,11 @@ template<> uint_t uintMSBPosition< uint64_t >( uint64_t value ) { // for the doc
    return ( i != 0 ) ? (8 + msbLookupTable[i]) : msbLookupTable[value];
 }
 
+#ifndef WALBERLA_CXX_COMPILER_IS_MSVC
 
+const uint_t int_ld<1>::exp;
+
+#endif
 
 } // namespace math
 } // namespace walberla

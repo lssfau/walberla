@@ -25,6 +25,7 @@
 #include "Utility.h"
 
 #include "core/debug/Debug.h"
+#include "core/math/Uint.h"
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
 
@@ -91,10 +92,10 @@ private:
    uint_t usedBits_;
    std::vector< uint_t >  blocks_;
 
-   static const uint_t SHIFT = UINT_BITS - 3;
+   static const uint_t SHIFT = math::UINT_BITS - 3;
 
-   WALBERLA_STATIC_ASSERT( UINT_BITS > 31 );
-   WALBERLA_STATIC_ASSERT( !(UINT_BITS & (UINT_BITS - 1)) ); // power of two
+   WALBERLA_STATIC_ASSERT( math::UINT_BITS > 31 );
+   WALBERLA_STATIC_ASSERT( !(math::UINT_BITS & (math::UINT_BITS - 1)) ); // power of two
 
 }; // class BlockID
 
@@ -141,7 +142,7 @@ inline void BlockID::init( const uint_t treeIndex, const uint_t treeIdMarker )
 inline uint_t BlockID::getTreeId() const
 {
    WALBERLA_ASSERT_GREATER( usedBits_, 0 );
-   WALBERLA_ASSERT_LESS_EQUAL( usedBits_, UINT_BITS );
+   WALBERLA_ASSERT_LESS_EQUAL( usedBits_, math::UINT_BITS );
    WALBERLA_CHECK_EQUAL( blocks_.size(), 1 );
    WALBERLA_ASSERT_EQUAL( usedBits_, uintMSBPosition( blocks_[0] ) );
 
@@ -153,7 +154,7 @@ inline uint_t BlockID::getTreeId() const
 inline uint_t BlockID::getTreeIndex() const
 {
    WALBERLA_ASSERT_GREATER( usedBits_, 0 );
-   WALBERLA_ASSERT_LESS_EQUAL( usedBits_, UINT_BITS );
+   WALBERLA_ASSERT_LESS_EQUAL( usedBits_, math::UINT_BITS );
    WALBERLA_CHECK_EQUAL( blocks_.size(), 1 );
    WALBERLA_ASSERT_EQUAL( usedBits_, uintMSBPosition( blocks_[0] ) );
 
@@ -220,7 +221,7 @@ void BlockID::toBuffer( Buffer_T& buffer ) const
 
    uint8_t b(0);
    for( uint_t i = 0; i != blocks_.size(); ++i )
-      for( uint_t j = 0; j != UINT_BYTES && b != bytes; ++j, ++b )
+      for( uint_t j = 0; j != math::UINT_BYTES && b != bytes; ++j, ++b )
          buffer << uint8_c( ( blocks_[i] >> ( uint_c(j) * uint_c(8) ) ) & uint_c(255) );
 }
 
@@ -232,22 +233,22 @@ void BlockID::fromBuffer( Buffer_T& buffer ) {
    uint8_t bytes(0);
    buffer >> bytes;
 
-   const uint_t blocks = ( bytes / UINT_BYTES ) + ( ( (bytes & ( UINT_BYTES - 1 )) == 0 ) ? 0 : 1 );
+   const uint_t blocks = ( bytes / math::UINT_BYTES ) + ( ( (bytes & ( math::UINT_BYTES - 1 )) == 0 ) ? 0 : 1 );
 
    uint8_t b(0);
    blocks_.clear();
    for( uint_t i = 0; i != blocks; ++i ) {
       blocks_.push_back(0);
-      for( uint_t j = 0; j != UINT_BYTES && b != bytes; ++j, ++b ) {
+      for( uint_t j = 0; j != math::UINT_BYTES && b != bytes; ++j, ++b ) {
          uint8_t byte(0);
          buffer >> byte;
          blocks_.back() |= uint_c( byte ) << ( uint_c(j) * uint_c(8) );
       }
    }
 
-   for( uint_t i = 0; i != UINT_BITS; ++i )
+   for( uint_t i = 0; i != math::UINT_BITS; ++i )
       if( ( blocks_[ blocks-1 ] & ( uint_c(1) << uint_c(i) ) ) != uint_c(0) )
-         usedBits_ = i + 1 + (blocks-1) * UINT_BITS;
+         usedBits_ = i + 1 + (blocks-1) * math::UINT_BITS;
 }
 
 
@@ -278,7 +279,7 @@ public:
    BlockID getSuperId()  const { WALBERLA_ASSERT_GREATER_EQUAL( getUsedBits(), uint_c(4) ); return BlockID( id_ >> 3 ); }
    BlockID getFatherId() const { return getSuperId(); }
 
-   void   appendBranchId( const uint_t branchId ) { WALBERLA_ASSERT_LESS_EQUAL( getUsedBits() + 3, UINT_BITS ); WALBERLA_ASSERT_LESS( branchId, 8 ); id_ = (id_ << 3) + branchId; }
+   void   appendBranchId( const uint_t branchId ) { WALBERLA_ASSERT_LESS_EQUAL( getUsedBits() + 3, math::UINT_BITS ); WALBERLA_ASSERT_LESS( branchId, 8 ); id_ = (id_ << 3) + branchId; }
    void   removeBranchId() { WALBERLA_ASSERT_GREATER_EQUAL( getUsedBits(), uint_c(4) ); id_ >>= 3; }
    uint_t    getBranchId() const { WALBERLA_ASSERT_GREATER_EQUAL( getUsedBits(), uint_c(4) ); return id_ & uint_c(7); }
 
@@ -317,7 +318,7 @@ inline BlockID::BlockID( const uint_t treeIndex, const uint_t treeIdMarker ) : i
 
 inline BlockID::BlockID( const BlockID& id, const uint_t branchId ) : id_( (id.id_ << 3) + branchId )
 {
-   WALBERLA_ASSERT_LESS_EQUAL( id.getUsedBits() + 3, UINT_BITS );
+   WALBERLA_ASSERT_LESS_EQUAL( id.getUsedBits() + 3, math::UINT_BITS );
    WALBERLA_ASSERT_LESS( branchId, 8 );
 }
 
@@ -366,7 +367,7 @@ void BlockID::fromBuffer( Buffer_T& buffer ) {
    uint8_t bytes(0);
    buffer >> bytes;
 
-   WALBERLA_ASSERT_LESS_EQUAL( bytes, UINT_BYTES );
+   WALBERLA_ASSERT_LESS_EQUAL( bytes, math::UINT_BYTES );
 
    id_ = uint_c(0);
    for( uint8_t i = 0; i != bytes; ++i ) {
