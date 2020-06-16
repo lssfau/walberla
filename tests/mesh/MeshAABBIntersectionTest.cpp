@@ -24,6 +24,7 @@
 #include "core/math/AABB.h"
 #include "core/mpi/Environment.h"
 #include "core/Optional.h"
+#include "core/stringToNum.h"
 
 #include "mesh_common/MeshIO.h"
 #include "mesh_common/MeshOperations.h"
@@ -87,7 +88,7 @@ int main( int argc, char * argv[] )
    if( args.size() != 2 )
       WALBERLA_ABORT_NO_DEBUG_INFO( "USAGE: " << args[0] << " NUM_AABBS" );
 
-   const uint_t numAABBs = string_to_num< uint_t >( args[1] );
+   const uint_t numAABBs = stringToNum< uint_t >( args[1] );
 
    runTests< mesh::TriangleMesh >( numAABBs );
    runTests< mesh::FloatTriangleMesh >( numAABBs );

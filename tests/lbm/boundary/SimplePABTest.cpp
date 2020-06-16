@@ -42,6 +42,7 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/math/IntegerFactorization.h"
 #include "core/mpi/MPIManager.h"
+#include "core/stringToNum.h"
 
 #include "domain_decomposition/SharedSweep.h"
 
@@ -215,11 +216,11 @@ int main( int argc, char **argv )
       if( args.size() != 6 )
          throw std::invalid_argument( "Wrong number of command line arguments!" );
 
-      channelLength = string_to_num<uint_t>( args[1] );
-      channelWidth  = string_to_num<uint_t>( args[2] );
-      omega         = string_to_num<real_t>( args[3] );
-      deltaDensity  = string_to_num<real_t>( args[4] );
-      numTimesteps  = string_to_num<uint_t>( args[5] );
+      channelLength = stringToNum<uint_t>( args[1] );
+      channelWidth  = stringToNum<uint_t>( args[2] );
+      omega         = stringToNum<real_t>( args[3] );
+      deltaDensity  = stringToNum<real_t>( args[4] );
+      numTimesteps  = stringToNum<uint_t>( args[5] );
    }
    catch( std::exception & )
    {

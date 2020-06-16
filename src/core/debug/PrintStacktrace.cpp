@@ -20,6 +20,7 @@
 //======================================================================================================================
 
 #include "PrintStacktrace.h"
+#include "demangle.h"
 #include "core/DataTypes.h"
 
 #include <iostream>

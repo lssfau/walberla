@@ -22,6 +22,7 @@
 #include "core/DataTypes.h"
 #include "core/debug/Debug.h"
 #include "core/debug/TestSubsystem.h"
+#include "core/math/Uint.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -39,17 +40,17 @@ int main( int /*argc*/, char** /*argv*/ )
 {
    debug::enterTestMode();
 
-   WALBERLA_CHECK_EQUAL( UINT_BITS_LD, uintBitsLd( UINT_BITS ) );
+   WALBERLA_CHECK_EQUAL( math::UINT_BITS_LD, uintBitsLd( math::UINT_BITS ) );
 
-   WALBERLA_CHECK_EQUAL( int_ld< 2048 >::exp, 11 );
+   WALBERLA_CHECK_EQUAL( math::int_ld< 2048 >::exp, 11 );
 
-   WALBERLA_CHECK_EQUAL( int_ld< 64 >::exp, 6 );
-   WALBERLA_CHECK_EQUAL( int_ld< 32 >::exp, 5 );
-   WALBERLA_CHECK_EQUAL( int_ld< 16 >::exp, 4 );
-   WALBERLA_CHECK_EQUAL( int_ld<  8 >::exp, 3 );
-   WALBERLA_CHECK_EQUAL( int_ld<  4 >::exp, 2 );
-   WALBERLA_CHECK_EQUAL( int_ld<  2 >::exp, 1 );
-   WALBERLA_CHECK_EQUAL( int_ld<  1 >::exp, 0 );
+   WALBERLA_CHECK_EQUAL( math::int_ld< 64 >::exp, 6 );
+   WALBERLA_CHECK_EQUAL( math::int_ld< 32 >::exp, 5 );
+   WALBERLA_CHECK_EQUAL( math::int_ld< 16 >::exp, 4 );
+   WALBERLA_CHECK_EQUAL( math::int_ld<  8 >::exp, 3 );
+   WALBERLA_CHECK_EQUAL( math::int_ld<  4 >::exp, 2 );
+   WALBERLA_CHECK_EQUAL( math::int_ld<  2 >::exp, 1 );
+   WALBERLA_CHECK_EQUAL( math::int_ld<  1 >::exp, 0 );
 
    return EXIT_SUCCESS;
 }

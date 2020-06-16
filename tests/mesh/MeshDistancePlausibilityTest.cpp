@@ -26,6 +26,7 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/logging/Logging.h"
 #include "core/mpi/Environment.h"
+#include "core/stringToNum.h"
 
 #include "field/AddToStorage.h"
 #include "field/vtk/VTKWriter.h"
@@ -72,7 +73,7 @@ int main( int argc, char * argv[] )
       args.erase( vtkArgIt );
    }
    const std::string & meshFile = args[1];
-   real_t dx = string_to_num<real_t>( args[2] );
+   real_t dx = stringToNum<real_t>( args[2] );
 
    auto mesh = make_shared<mesh::TriangleMesh>();
    mesh::readAndBroadcast( meshFile, *mesh);

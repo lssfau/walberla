@@ -28,6 +28,7 @@
 #include "core/mpi/Environment.h"
 #include "core/timing/Timer.h"
 #include "core/math/IntegerFactorization.h"
+#include "core/stringToNum.h"
 
 #include "field/AddToStorage.h"
 #include "field/Field.h"
@@ -84,10 +85,10 @@ int main( int argc, char* argv[] )
    
    if( args.size() == 5 )
    {
-      numBlocks  = string_to_num<uint_t>( args[1] );
-      xBlockSize = string_to_num<uint_t>( args[2] );
-      yBlockSize = string_to_num<uint_t>( args[3] );
-      zBlockSize = string_to_num<uint_t>( args[4] );
+      numBlocks  = stringToNum<uint_t>( args[1] );
+      xBlockSize = stringToNum<uint_t>( args[2] );
+      yBlockSize = stringToNum<uint_t>( args[3] );
+      zBlockSize = stringToNum<uint_t>( args[4] );
    }
    else if( args.size() > 5 )
    {

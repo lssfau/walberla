@@ -26,6 +26,7 @@
 #include "core/logging/Logging.h"
 #include "core/math/IntegerFactorization.h"
 #include "core/mpi/Environment.h"
+#include "core/stringToNum.h"
 
 #include "geometry/mesh/TriangleMesh.h"
 #include "geometry/mesh/TriangleMeshIO.h"
@@ -148,7 +149,7 @@ int main( int argc, char * argv[] )
       WALBERLA_ABORT_NO_DEBUG_INFO( "USAGE: " << args[0] << " MESH_FILE NUM_BLOCKS" );
 
    const std::string & meshFile       = args[1];
-   const uint_t        numTotalBlocks = string_to_num< uint_t >( args[2] );
+   const uint_t        numTotalBlocks = stringToNum< uint_t >( args[2] );
 
    run< mesh::TriangleMesh >( meshFile, numTotalBlocks );
    run< mesh::FloatTriangleMesh >( meshFile, numTotalBlocks );

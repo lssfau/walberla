@@ -20,7 +20,7 @@
 //
 //======================================================================================================================
 
-
+#include "core/stringToNum.h"
 
 namespace walberla {
 namespace geometry {
@@ -62,7 +62,7 @@ void ScalarFieldFromCellInterval<Field_T>::init( const Config::BlockHandle & blo
    
    try
    {
-      Value_T value = string_to_num<Value_T>(expression);
+      Value_T value = stringToNum<Value_T>(expression);
       init(globalCellInterval, value, id);
    }
    

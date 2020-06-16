@@ -23,6 +23,7 @@
 
 #include "DataTypes.h"
 #include "core/debug/Debug.h"
+#include "core/math/Uint.h"
 
 #include <cmath>
 #include <limits>
@@ -52,7 +53,7 @@ namespace walberla {
 inline void uintToByteArray( uint_t value, std::vector< uint8_t >& array, const uint_t offset, const uint_t bytes )
 {
    WALBERLA_ASSERT_LESS_EQUAL( offset + bytes, array.size() );
-   WALBERLA_ASSERT_LESS_EQUAL( bytes, UINT_BYTES );
+   WALBERLA_ASSERT_LESS_EQUAL( bytes, math::UINT_BYTES );
 
    for( uint_t i = 0; i != bytes; ++i ) {
 
@@ -79,7 +80,7 @@ inline void uintToByteArray( uint_t value, std::vector< uint8_t >& array, const 
 inline uint_t byteArrayToUint( const std::vector< uint8_t >& array, const uint_t offset, const uint_t bytes )
 {
    WALBERLA_ASSERT_LESS_EQUAL( offset + bytes, array.size() );
-   WALBERLA_ASSERT_LESS_EQUAL( bytes, UINT_BYTES );
+   WALBERLA_ASSERT_LESS_EQUAL( bytes, math::UINT_BYTES );
 
    uint_t value = 0;
    for( uint_t i = 0; i != bytes; ++i )

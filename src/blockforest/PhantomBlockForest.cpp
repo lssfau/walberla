@@ -26,6 +26,7 @@
 #include "core/debug/CheckFunctions.h"
 #include "core/debug/Debug.h"
 #include "core/logging/Logging.h"
+#include "core/math/Uint.h"
 #include "core/mpi/BufferSizeTrait.h"
 #include "core/mpi/BufferSystem.h"
 #include "core/mpi/MPIManager.h"
@@ -188,7 +189,7 @@ void PhantomBlockForest::initialize( const BlockStateDeterminationFunction & fun
       depth_ = blockforest_.getDepth();
 
 #ifdef WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID
-   WALBERLA_CHECK_LESS_EQUAL( blockforest_.getTreeIdDigits() + depth_ * uint_t(3), UINT_BITS );
+   WALBERLA_CHECK_LESS_EQUAL( blockforest_.getTreeIdDigits() + depth_ * uint_t(3), math::UINT_BITS );
 #endif
 
    // phantom block neighborhood construction

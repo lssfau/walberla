@@ -33,6 +33,8 @@
 #include "core/math/GenericAABB.h"
 #include "core/math/Vector3.h"
 
+#include "core/typeToString.h"
+
 
 #include <vector>
 #include <queue>

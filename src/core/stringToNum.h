@@ -13,47 +13,28 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file Uint.cpp
-//! \ingroup core
+//! \file stringToNum.h
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>
 //
 //======================================================================================================================
 
-#include "Uint.h"
+#pragma once
 
+#include <string>
 
 namespace walberla {
-namespace math {
 
-template<> uint_t uintMSBPosition< uint64_t >( uint64_t value ) { // for the documentation see the header file
+template<typename S>
+inline S stringToNum( std::string & t );
+template <> inline float              stringToNum( std::string & t ) { return std::stof(t); }
+template <> inline double             stringToNum( std::string & t ) { return std::stod(t); }
+template <> inline long double        stringToNum( std::string & t ) { return std::stold(t); }
+template <> inline int                stringToNum( std::string & t ) { return std::stoi(t); }
+template <> inline long               stringToNum( std::string & t ) { return std::stol(t); }
+template <> inline long long          stringToNum( std::string & t ) { return std::stoll(t); }
+template <> inline unsigned long      stringToNum( std::string & t ) { return std::stoul(t); }
+template <> inline unsigned long long stringToNum( std::string & t ) { return std::stoull(t); }
 
-   uint64_t i;
-   uint64_t j;
-
-   i = value >> 32;
-   if( i != 0 ) {
-      j = value >> 48;
-      if( j != 0 ) {
-         i = value >> 56;
-         return ( i != 0 ) ? (56 + msbLookupTable[i]) : (48 + msbLookupTable[j]);
-      }
-      j = value >> 40;
-      return ( j != 0 ) ? (40 + msbLookupTable[j]) : (32 + msbLookupTable[i]);
-   }
-   j = value >> 16;
-   if( j != 0 ) {
-      i = value >> 24;
-      return ( i != 0 ) ? (24 + msbLookupTable[i]) : (16 + msbLookupTable[j]);
-   }
-   i = value >> 8;
-   return ( i != 0 ) ? (8 + msbLookupTable[i]) : msbLookupTable[value];
-}
-
-#ifndef WALBERLA_CXX_COMPILER_IS_MSVC
-
-const uint_t int_ld<1>::exp;
-
-#endif
-
-} // namespace math
 } // namespace walberla
+
+

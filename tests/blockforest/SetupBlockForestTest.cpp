@@ -52,8 +52,8 @@ static void refinementSelectionFunctionRandom( SetupBlockForest& forest ) {
 #ifndef WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID
    const uint_t maxLevel = 25;
 #else
-   WALBERLA_ASSERT_GREATER_EQUAL( UINT_BITS, 32 );
-   const uint_t maxLevel = ( UINT_BITS - 14 ) / 3;
+   WALBERLA_ASSERT_GREATER_EQUAL( math::UINT_BITS, 32 );
+   const uint_t maxLevel = ( math::UINT_BITS - 14 ) / 3;
 #endif
 
    std::vector< SetupBlock* > blocks;

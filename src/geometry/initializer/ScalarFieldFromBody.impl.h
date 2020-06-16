@@ -30,6 +30,7 @@
 #include "core/config/Config.h"
 #include "core/logging/Logging.h"
 #include "core/mpi/Reduce.h"
+#include "core/stringToNum.h"
 
 
 namespace walberla {
@@ -64,7 +65,7 @@ namespace initializer {
       
       try
       {
-         Value_T value = string_to_num<Value_T>(expression);
+         Value_T value = stringToNum<Value_T>(expression);
          init ( *bodyFromConfig ( subBlock ), value, addOrSet, id );
       }
       

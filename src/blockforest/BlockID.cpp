@@ -51,12 +51,12 @@ BlockID::BlockID( const std::vector< uint8_t >& array, const uint_t offset, cons
 
    WALBERLA_ASSERT_UNEQUAL( usedBits_, 0 );
 
-   const uint_t blocks = ( usedBits_ / UINT_BITS ) + ( ( (usedBits_ & ( UINT_BITS - 1 )) == 0 ) ? 0 : 1 );
+   const uint_t blocks = ( usedBits_ / math::UINT_BITS ) + ( ( (usedBits_ & ( math::UINT_BITS - 1 )) == 0 ) ? 0 : 1 );
 
    uint_t b = offset;
    for( uint_t i = 0; i != blocks; ++i ) {
       blocks_.push_back(0);
-      for( uint_t j = 0; j != UINT_BYTES && b != offset + bytes; ++j, ++b ) {
+      for( uint_t j = 0; j != math::UINT_BYTES && b != offset + bytes; ++j, ++b ) {
          blocks_.back() |= uint_c( array[b] ) << ( j * 8 );
       }
    }
@@ -68,11 +68,11 @@ void BlockID::appendBranchId( const uint_t branchId )
 {
    WALBERLA_ASSERT( !blocks_.empty() );
    WALBERLA_ASSERT_LESS( branchId, 8 );
-   WALBERLA_ASSERT_EQUAL( usedBits_, uintMSBPosition( blocks_.back() ) + UINT_BITS * (blocks_.size()-1) );
+   WALBERLA_ASSERT_EQUAL( usedBits_, uintMSBPosition( blocks_.back() ) + math::UINT_BITS * (blocks_.size()-1) );
 
-   const uint_t unusedBits = UINT_BITS - ( usedBits_ & ( UINT_BITS - 1 ) );
+   const uint_t unusedBits = math::UINT_BITS - ( usedBits_ & ( math::UINT_BITS - 1 ) );
 
-   if( unusedBits < 3 || unusedBits == UINT_BITS )
+   if( unusedBits < 3 || unusedBits == math::UINT_BITS )
       blocks_.push_back(0);
 
    for( uint_t i = static_cast< uint_t >( blocks_.size() ) - 1; i != 0; --i )
@@ -81,8 +81,8 @@ void BlockID::appendBranchId( const uint_t branchId )
    blocks_[0] = ( blocks_[0] << 3 ) | branchId;
    usedBits_ += 3;
 
-   WALBERLA_ASSERT_EQUAL( usedBits_, uintMSBPosition( blocks_.back() ) + UINT_BITS * (blocks_.size()-1) );
-   WALBERLA_ASSERT_GREATER_EQUAL( blocks_.size() * UINT_BITS, usedBits_ );
+   WALBERLA_ASSERT_EQUAL( usedBits_, uintMSBPosition( blocks_.back() ) + math::UINT_BITS * (blocks_.size()-1) );
+   WALBERLA_ASSERT_GREATER_EQUAL( blocks_.size() * math::UINT_BITS, usedBits_ );
 }
 
 
@@ -91,19 +91,19 @@ void BlockID::removeBranchId()
 {
    WALBERLA_ASSERT( !blocks_.empty() );
    WALBERLA_ASSERT_GREATER( usedBits_, 3 );
-   WALBERLA_ASSERT_EQUAL( usedBits_, uintMSBPosition( blocks_.back() ) + UINT_BITS * (blocks_.size()-1) );
+   WALBERLA_ASSERT_EQUAL( usedBits_, uintMSBPosition( blocks_.back() ) + math::UINT_BITS * (blocks_.size()-1) );
 
    for( uint_t i = 0; i != static_cast< uint_t >( blocks_.size() ) - 1; ++i )
       blocks_[i] = ( blocks_[i] >> 3 ) | ( (blocks_[i+1] & uint_c(7)) << SHIFT );
 
-   const uint_t bits = usedBits_ & ( UINT_BITS - 1 );
+   const uint_t bits = usedBits_ & ( math::UINT_BITS - 1 );
 
    if( 0 < bits && bits < 4 ) blocks_.pop_back();
    else blocks_.back() >>= 3;
 
    usedBits_ -= 3;
 
-   WALBERLA_ASSERT_EQUAL( usedBits_, uintMSBPosition( blocks_.back() ) + UINT_BITS * (blocks_.size()-1) );
+   WALBERLA_ASSERT_EQUAL( usedBits_, uintMSBPosition( blocks_.back() ) + math::UINT_BITS * (blocks_.size()-1) );
    WALBERLA_ASSERT( !blocks_.empty() );
 }
 
@@ -124,7 +124,7 @@ void BlockID::toByteArray( std::vector< uint8_t >& array, const uint_t offset, c
 
       uint_t block = blocks_[i];
 
-      for( uint_t j = 0; j != UINT_BYTES && b != offset + bytes; ++j, ++b ) {
+      for( uint_t j = 0; j != math::UINT_BYTES && b != offset + bytes; ++j, ++b ) {
 
          array[b] = static_cast< uint8_t >( block & uint_c(255) );
          block >>= 8;

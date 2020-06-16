@@ -24,6 +24,7 @@
 
 #include "core/Abort.h"
 #include "core/logging/Logging.h"
+#include "core/stringToNum.h"
 #include "core/StringUtility.h"
 
 #include <functional>
@@ -46,9 +47,9 @@ static void splitVector( T& x, T& y, T& z, const Config::BlockHandle& bb, const 
    if( coordinates.size() != 3 )
       WALBERLA_ABORT( errorMsg );
 
-   x = string_to_num< T >( coordinates[0] );
-   y = string_to_num< T >( coordinates[1] );
-   z = string_to_num< T >( coordinates[2] );
+   x = stringToNum< T >( coordinates[0] );
+   y = stringToNum< T >( coordinates[1] );
+   z = stringToNum< T >( coordinates[2] );
 }
 
 

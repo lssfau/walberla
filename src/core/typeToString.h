@@ -13,47 +13,40 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file Uint.cpp
-//! \ingroup core
+//! \file typeToString.h
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>
 //
 //======================================================================================================================
 
-#include "Uint.h"
-
+#pragma once
 
 namespace walberla {
-namespace math {
 
-template<> uint_t uintMSBPosition< uint64_t >( uint64_t value ) { // for the documentation see the header file
+// data type to string conversion
 
-   uint64_t i;
-   uint64_t j;
+template< typename T > inline const char* typeToString();
 
-   i = value >> 32;
-   if( i != 0 ) {
-      j = value >> 48;
-      if( j != 0 ) {
-         i = value >> 56;
-         return ( i != 0 ) ? (56 + msbLookupTable[i]) : (48 + msbLookupTable[j]);
-      }
-      j = value >> 40;
-      return ( j != 0 ) ? (40 + msbLookupTable[j]) : (32 + msbLookupTable[i]);
-   }
-   j = value >> 16;
-   if( j != 0 ) {
-      i = value >> 24;
-      return ( i != 0 ) ? (24 + msbLookupTable[i]) : (16 + msbLookupTable[j]);
-   }
-   i = value >> 8;
-   return ( i != 0 ) ? (8 + msbLookupTable[i]) : msbLookupTable[value];
+#define TypeToString(X) template<> inline const char* typeToString< X >() { \
+   static char string[] = #X; \
+   return string; \
 }
 
-#ifndef WALBERLA_CXX_COMPILER_IS_MSVC
+TypeToString(bool)
+TypeToString(char)
+TypeToString(short)
+TypeToString(int)
+TypeToString(long)
+TypeToString(long long)
+TypeToString(unsigned char)
+TypeToString(unsigned short)
+TypeToString(unsigned int)
+TypeToString(unsigned long)
+TypeToString(unsigned long long)
+TypeToString(float)
+TypeToString(double)
 
-const uint_t int_ld<1>::exp;
+#undef TypeToString
 
-#endif
+template< typename T > inline const char* typeToString( T ) { return typeToString<T>(); }
 
-} // namespace math
 } // namespace walberla

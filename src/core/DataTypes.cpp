@@ -24,12 +24,6 @@
 
 namespace walberla {
 
-#ifndef WALBERLA_CXX_COMPILER_IS_MSVC
-
-const uint_t int_ld<1>::exp;
-
-#endif
-
 namespace real_comparison
 {
    const       float Epsilon<       float >::value = static_cast<       float >(1e-4);

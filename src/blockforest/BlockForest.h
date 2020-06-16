@@ -28,6 +28,7 @@
 #include "Types.h"
 
 #include "core/debug/Debug.h"
+#include "core/math/Uint.h"
 #include "core/timing/TimingPool.h"
 
 #include "domain_decomposition/BlockStorage.h"
@@ -259,7 +260,7 @@ public:
    uint_t getMaxDepth() const
    {
 #ifdef WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID
-      return ( UINT_BITS - treeIdDigits_ ) / uint_t(3);
+      return ( math::UINT_BITS - treeIdDigits_ ) / uint_t(3);
 #else
       return std::numeric_limits< uint_t >::max();
 #endif

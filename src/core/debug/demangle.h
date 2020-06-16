@@ -13,47 +13,47 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file Uint.cpp
-//! \ingroup core
+//! \file demangle.h
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>
 //
 //======================================================================================================================
 
-#include "Uint.h"
+#pragma once
 
+#include <string>
 
-namespace walberla {
-namespace math {
-
-template<> uint_t uintMSBPosition< uint64_t >( uint64_t value ) { // for the documentation see the header file
-
-   uint64_t i;
-   uint64_t j;
-
-   i = value >> 32;
-   if( i != 0 ) {
-      j = value >> 48;
-      if( j != 0 ) {
-         i = value >> 56;
-         return ( i != 0 ) ? (56 + msbLookupTable[i]) : (48 + msbLookupTable[j]);
-      }
-      j = value >> 40;
-      return ( j != 0 ) ? (40 + msbLookupTable[j]) : (32 + msbLookupTable[i]);
-   }
-   j = value >> 16;
-   if( j != 0 ) {
-      i = value >> 24;
-      return ( i != 0 ) ? (24 + msbLookupTable[i]) : (16 + msbLookupTable[j]);
-   }
-   i = value >> 8;
-   return ( i != 0 ) ? (8 + msbLookupTable[i]) : msbLookupTable[value];
-}
-
-#ifndef WALBERLA_CXX_COMPILER_IS_MSVC
-
-const uint_t int_ld<1>::exp;
-
+#ifdef __GLIBCXX__ 
+#define HAVE_CXXABI_H
+#include <cxxabi.h>
+#else
+#ifdef __has_include
+#if __has_include(<cxxabi.h>)
+#define HAVE_CXXABI_H
+#include <cxxabi.h>
+#endif
+#endif
 #endif
 
-} // namespace math
+namespace walberla {
+namespace debug {
+
+inline std::string demangle( const std::string & name )
+{
+#ifdef HAVE_CXXABI_H
+   int status = 0;
+   std::size_t size = 0;
+   const char * demangled = abi::__cxa_demangle( name.c_str(), NULL, &size, &status );
+   if( demangled == nullptr )
+   {
+      return name;
+   }
+   std::string demangled_str(demangled);
+   std::free( const_cast<char*>(demangled) );
+   return demangled_str;
+#else
+   return name;
+#endif
+}
+
+} // namespace debug
 } // namespace walberla

@@ -62,6 +62,7 @@
 #include "core/math/Constants.h"
 #include "core/math/IntegerFactorization.h"
 #include "core/mpi/Environment.h"
+#include "core/stringToNum.h"
 
 #include "domain_decomposition/SharedSweep.h"
 
@@ -198,14 +199,14 @@ int run( int argc, char **argv )
    if( argc > 1 ) {
       std::vector<std::string> args( argv, argv + argc );
       for( uint_t i = 1; i < uint_c(argc); ++i ) {
-              if( std::string(argv[i]) == "-d"      )   d      = string_to_num<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "-dim"    )   dim    = string_to_num<uint_t>( args[++i] );
-         else if( std::string(argv[i]) == "-dx"     )   dx     = string_to_num<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "-dt"     )   dt     = string_to_num<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "-dv"     )   dv     = string_to_num<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "-v"      )   u_in   = string_to_num<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "-t"      )   time   = string_to_num<real_t>( args[++i] );
-         else if( std::string(argv[i]) == "-err"    )   err    = string_to_num<real_t>( args[++i] );
+              if( std::string(argv[i]) == "-d"      )   d      = stringToNum<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-dim"    )   dim    = stringToNum<uint_t>( args[++i] );
+         else if( std::string(argv[i]) == "-dx"     )   dx     = stringToNum<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-dt"     )   dt     = stringToNum<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-dv"     )   dv     = stringToNum<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-v"      )   u_in   = stringToNum<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-t"      )   time   = stringToNum<real_t>( args[++i] );
+         else if( std::string(argv[i]) == "-err"    )   err    = stringToNum<real_t>( args[++i] );
          else if( std::string(argv[i]) == "--gui"   )   useGui = true;
          else if( std::string(argv[i]) == "--quiet" )   quiet  = true;
          else if( std::string(argv[i]) == "--vtk"   )   useVTK = true;

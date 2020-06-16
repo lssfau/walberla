@@ -30,6 +30,7 @@
 #include "core/DataTypes.h"
 #include "core/math/GenericAABB.h"
 #include "core/math/KahanSummation.h"
+#include "core/typeToString.h"
 
 #include <queue>
 #include <vector>
