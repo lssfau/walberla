@@ -30,21 +30,20 @@ class Module:
         return component
 
     def rename(self):
-        for root, dirnames, filenames in os.walk(self.context['module_path']):
-            for filename in filenames:
-                filedata = None
-                # print(f'renaming module name: {root}/{filename}')
-                with open(f'{root}/{filename}', 'r') as file:
-                    filedata = file.read()
+        for filename in (f for f in self.context['module_path'].glob('**/*') if f.is_file()):
+            filedata = None
+            #print(f'renaming module name: {filename}')
+            with open(filename, encoding="utf-8") as fin:
+               filedata = fin.read()
 
-                filedata = filedata.replace('mesa_pd', self.context['name'])
+            filedata = filedata.replace('mesa_pd', self.context['name'])
 
-                with open(f'{root}/{filename}', 'w') as file:
-                    file.write(filedata)
+            with open(filename, 'w', encoding="utf-8") as fout:
+               fout.write(filedata)
 
     def generate(self, folder_check=True):
+        print(f"This operation will overwrite the content of: {self.context['module_path']}")
         if (folder_check):
-            print(f"This operation will overwrite the content of: {self.context['module_path']}")
             answer = input("Continue? (y to confirm)")
             if (answer != "y"):
                 return
@@ -52,7 +51,7 @@ class Module:
         mesa_pd_folder = (Path(__file__).parents[2] / 'src' / 'mesa_pd').resolve()
         if (mesa_pd_folder != self.context['module_path']):
             if not self.context['module_path'].exists():
-                self.context['module_path'].mkdir()
+                self.context['module_path'].mkdir(parents=True)
             shutil.rmtree(self.context['module_path'])
             shutil.copytree(mesa_pd_folder, self.context['module_path'])
 

@@ -25,6 +25,8 @@ stages:
       - cmake --version
       - ccache --version
       - mpirun --version
+      - python3 --version
+      - python3 python/mesa_pd.py -y ..
       - export CCACHE_BASEDIR=$CI_PROJECT_DIR
       - mkdir $CI_PROJECT_DIR/build
       - cd $CI_PROJECT_DIR/build
