@@ -39,7 +39,7 @@ CMakeLists.txt.user.*
 /bin/
 /lib/
 *.a
-/build
+/build*
 
 
 # Logfiles

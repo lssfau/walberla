@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -672,7 +672,7 @@ void BlockForest::getAABB( AABB& aabb, const IBlockID& id ) const {
    }
    else {
       const Block* const block = getBlock( id );
-      if( block == nullptr ) 
+      if( block == nullptr )
       {
          const BlockID& bid = *static_cast< const BlockID* >( &id );
          aabb = getAABBFromBlockId( bid );
@@ -906,7 +906,7 @@ void BlockForest::refresh()
       WALBERLA_ASSERT_NOT_NULLPTR( block->second );
       block->second->setTargetLevel( block->second->getLevel() );
    }
-   
+
    if( recalculateBlockLevelsInRefresh_ )
    {
       WALBERLA_LOG_PROGRESS( "BlockForest refresh: determining new block levels" );
@@ -929,22 +929,22 @@ void BlockForest::refresh()
 
    if( alwaysRebalanceInRefresh_ && refreshPhantomBlockMigrationPreparationFunction_ )
       rebalanceAndRedistribute = true;
-      
+
    while( rebalanceAndRedistribute )
    {
       // create phantom block forest
-      
+
       WALBERLA_LOG_PROGRESS( "BlockForest refresh: creating phantom forest/blocks" );
 
       refreshTiming_[ "phantom forest creation" ].start();
 
       PhantomBlockForest phantomForest( *this );
       phantomForest.initialize( refreshBlockStateDeterminationFunction_, allowChangingDepth_ );
-      
+
       refreshTiming_[ "phantom forest creation" ].end();
 
       // move phantom blocks between processes (= dynamic load balancing)
-      
+
       WALBERLA_MPI_SECTION()
       {
          refreshTiming_[ "phantom block redistribution (= load balancing)" ].start();
@@ -966,15 +966,15 @@ void BlockForest::refresh()
                ++iteration;
             }
             phantomBlockMigrationIterations_ = iteration;
-            
+
             WALBERLA_LOG_PROGRESS( "BlockForest refresh: phantom block redistribution/load balancing finished after " << phantomBlockMigrationIterations_ << " iterations" );
          }
 
          refreshTiming_[ "phantom block redistribution (= load balancing)" ].end();
       }
-      
+
       // update block forest: transfer block data (includes migrating, deleting and creating blocks), adapt depth, adapt process neighborhood, etc.
-      
+
       bool performUpdate( true );
       if( checkForEarlyOutAfterLoadBalancing_ )
       {
@@ -1010,23 +1010,23 @@ void BlockForest::refresh()
       {
          WALBERLA_ASSERT( recalculateBlockLevelsInRefresh_ );
          WALBERLA_ASSERT( allowMultipleRefreshCycles_ );
-         
+
          refreshTiming_[ "block level determination" ].start();
-         
+
          for( auto block = blocks_.begin(); block != blocks_.end(); ++block )
          {
             WALBERLA_ASSERT_NOT_NULLPTR( block->second );
             block->second->setTargetLevel( block->second->getLevel() );
          }
-         
+
          WALBERLA_LOG_PROGRESS( "BlockForest refresh: determining new block levels (again -> more refresh cycles required!)" );
-         
+
          bool rerun( true );
          while( rerun )
          {
             rebalanceAndRedistribute = determineBlockTargetLevels( additionalRefreshCycleRequired, rerun );
          }
-         
+
          if( !rebalanceAndRedistribute )
             WALBERLA_LOG_PROGRESS( "BlockForest refresh: block levels do not change" );
 
@@ -1035,7 +1035,7 @@ void BlockForest::refresh()
       else
          rebalanceAndRedistribute = false;
    }
-   
+
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: finished!" );
 }
 
@@ -1267,7 +1267,7 @@ void BlockForest::restoreSnapshot( const SnapshotRestorenFunction & processMappi
                ++iteration;
             }
             phantomBlockMigrationIterations_ = iteration;
-            
+
             WALBERLA_LOG_PROGRESS( "BlockForest refresh: phantom block redistribution/load balancing finished after " << phantomBlockMigrationIterations_ << " iterations" );
          }
 
@@ -1651,7 +1651,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
 
       const uint_t level = block->getLevel();
       uint_t minTargetLevel = minTargetLevels[id];
-      
+
       if( allowMultipleRefreshCycles_ )
       {
          if( minTargetLevel > ( level + uint_t(1) ) )
@@ -1683,7 +1683,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
          }
       }
    }
-   
+
    if( allowMultipleRefreshCycles_ )
       mpi::allReduceInplace( additionalRefreshCycleRequired, mpi::LOGICAL_OR );
 
@@ -2037,7 +2037,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    //////////////////////////////////////
 
    std::map< uint_t, uint_t > numberOfBlocksToRecv; // does not include local transfers
-   
+
    const auto & phantomBlocks = phantomForest.getBlockMap();
    for( auto phantom = phantomBlocks.begin(); phantom != phantomBlocks.end(); ++phantom )
    {
@@ -2061,15 +2061,15 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       else { WALBERLA_ASSERT( blocks_.find( pBlock->getId() ) != blocks_.end() ); }
 #endif
    }
-   
+
    std::map< uint_t, std::vector< uint_t > > recvBufferSizes; // does not include local transfers
-   
+
    for( auto it = numberOfBlocksToRecv.begin(); it != numberOfBlocksToRecv.end(); ++it )
    {
       WALBERLA_ASSERT_GREATER( it->second, uint_t(0) );
       recvBufferSizes[ it->first ].resize( it->second );
    }
-   
+
    std::vector< MPI_Request > recvBufferSizesRequests( numberOfBlocksToRecv.size() ); // do not resize this vector!
 
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - schedule receives for buffer sizes" );
@@ -2081,15 +2081,15 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                  int_c( it->first ), 0, MPIManager::instance()->comm(), &(recvBufferSizesRequests[i]) );
       ++i;
    }
-   
+
    ///////////////////////////////
    // FETCH TARGET BLOCK STATES //
    ///////////////////////////////
 
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - fetch target block states" );
-   
+
    std::set< mpi::MPIRank > ranksToRecvFrom;
-   
+
    for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
    {
       auto & block = it->second;
@@ -2102,12 +2102,12 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                ranksToRecvFrom.insert( numeric_cast< mpi::MPIRank >(*p) );
       }
    }
-   
+
    mpi::BufferSystem bufferSystem( MPIManager::instance()->comm(), 1184 ); // blockforest = 98 108 111 99 107 102 111 114 101 115 116 + 2
-   bufferSystem.setReceiverInfo( ranksToRecvFrom, true ); // ATTENTION: true = the size of a message from A to B varies   
-   
+   bufferSystem.setReceiverInfo( ranksToRecvFrom, true ); // ATTENTION: true = the size of a message from A to B varies
+
    std::map< uint_t, std::map< BlockID, Set<SUID> > > blockStates;
-   
+
    for( auto phantom = phantomBlocks.begin(); phantom != phantomBlocks.end(); ++phantom )
    {
       auto & pBlock = phantom->second;
@@ -2126,9 +2126,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    }
 
    bufferSystem.sendAll();
-   
+
    std::map< BlockID, Set<SUID> > targetBlockStates;
-   
+
    for( auto recvIt = bufferSystem.begin(); recvIt != bufferSystem.end(); ++recvIt )
    {
       WALBERLA_ASSERT_UNEQUAL( uint_c( recvIt.rank() ), process_ );
@@ -2147,9 +2147,9 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       {
          WALBERLA_ASSERT( targetBlockStates.find( state->first ) == targetBlockStates.end() );
          targetBlockStates[ state->first ] = state->second;
-      }      
+      }
    }
-   
+
    ///////////////
    // PACK DATA //
    ///////////////
@@ -2187,7 +2187,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       auto & id = block->getId();
 
       auto & targetProcesses = block->getTargetProcess();
-      
+
       std::vector< Set<SUID> > targetState;
 
       // header = sender block ID + receiver block ID
@@ -2204,7 +2204,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
             processesToSendTo[ targetProcesses[0] ].push_back( &(buffers[0]) );
          else
             localBlocks.push_back( &(buffers[0]) );
-         
+
          WALBERLA_ASSERT( targetBlockStates.find(id) != targetBlockStates.end() );
          targetState.push_back( targetBlockStates[id] );
       }
@@ -2221,7 +2221,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
             processesToSendTo[ targetProcesses[0] ].push_back( &(buffers[0]) );
          else
             localBlocks.push_back( &(buffers[0]) );
-         
+
          WALBERLA_ASSERT( targetBlockStates.find(fid) != targetBlockStates.end() );
          targetState.push_back( targetBlockStates[fid] );
       }
@@ -2241,7 +2241,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                processesToSendTo[ targetProcesses[c] ].push_back( &(buffers[c]) );
             else
                localBlocks.push_back( &(buffers[c]) );
-            
+
             WALBERLA_ASSERT( targetBlockStates.find(cid) != targetBlockStates.end() );
             targetState.push_back( targetBlockStates[cid] );
          }
@@ -2298,7 +2298,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
          WALBERLA_ASSERT_EQUAL( buffers.size(), uint_t(8) );
          WALBERLA_ASSERT_EQUAL( targetProcesses.size(), uint_t(8) );
          WALBERLA_ASSERT_EQUAL( targetState.size(), uint_t(8) );
-         
+
          for( auto dataItem = blockDataItem_.begin(); dataItem != blockDataItem_.end(); ++dataItem )
          {
             for( uint_t c = uint_t(0); c != uint_t(8); ++c )
@@ -2344,12 +2344,12 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    for( auto it = processesToSendTo.begin(); it != processesToSendTo.end(); ++it )
    {
       WALBERLA_ASSERT( sendBufferSizes.find( it->first ) == sendBufferSizes.end() );
-      
+
       auto & sizes = sendBufferSizes[ it->first ];
       WALBERLA_ASSERT( sizes.empty() );
       for( auto buffer = it->second.begin(); buffer != it->second.end(); ++buffer )
          sizes.push_back( (*buffer)->size() );
-      
+
       blockDataSendRequests[ it->first ].resize( it->second.size() ); // do not resize this vector after this point!
    }
 
@@ -2378,7 +2378,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
 
       ++i;
    }
-   
+
    ///////////////////
    // CREATE BLOCKS //
    ///////////////////
@@ -2399,7 +2399,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
          blocks_[ pBlock->getId() ]->resetNeighborhood( *pBlock );
       }
    }
-   
+
    // adapt depth
 
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - adapting block structure (use current state of phantom forest as reference)" );
@@ -2421,21 +2421,21 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    //////////////////////////////////////
    // WAIT FOR RECV's FOR BUFFER SIZES //
    //////////////////////////////////////
-   
+
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - wait for buffer sizes" );
 
    if( ! recvBufferSizesRequests.empty() )
       MPI_Waitall( int_c( recvBufferSizesRequests.size() ), &(recvBufferSizesRequests[0]), MPI_STATUSES_IGNORE );
-   
+
    ////////////////////////////////////
    // SCHEDULE RECV's FOR BLOCK DATA //
    ////////////////////////////////////
-   
+
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - schedule block data receive operations" );
 
    std::map< uint_t, std::vector< mpi::RecvBuffer > > recvBlockData;
    std::map< uint_t, std::vector< MPI_Request > > blockDataRecvRequests;
-   
+
    for( auto it = recvBufferSizes.begin(); it != recvBufferSizes.end(); ++it )
    {
       WALBERLA_ASSERT_UNEQUAL( it->first, process_ );
@@ -2446,7 +2446,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       requests.resize( sizes.size() );
    }
    auto & recvLocalBlocks = recvBlockData[ process_ ];
-   
+
    for( auto it = recvBufferSizes.begin(); it != recvBufferSizes.end(); ++it )
    {
       WALBERLA_ASSERT_UNEQUAL( it->first, process_ );
@@ -2462,11 +2462,11 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
                     int_c( it->first ), int_c(i)+1, MPIManager::instance()->comm(), &(requests[i]) );
       }
    }
-   
+
    ///////////////////////////
    // COPY LOCAL BLOCK DATA //
    ///////////////////////////
-   
+
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - perform local data transfer" );
 
    for( auto buffer = localBlocks.begin(); buffer != localBlocks.end(); ++buffer )
@@ -2475,7 +2475,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    ////////////////////////////////////
    // WAIT FOR RECV's FOR BLOCK DATA //
    ////////////////////////////////////
-   
+
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - wait for block data to be received" );
 
    for( auto it = blockDataRecvRequests.begin(); it != blockDataRecvRequests.end(); ++it )
@@ -2483,16 +2483,16 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       auto & requests = it->second;
       MPI_Waitall( int_c( requests.size() ), &(requests[0]), MPI_STATUSES_IGNORE );
    }
-   
+
    //////////////////////////////////
    // WAIT FOR ALL SENDS TO FINISH //
    //////////////////////////////////
-   
+
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - wait for block data sends to complete" );
 
    if( ! sendBufferSizesRequests.empty() )
       MPI_Waitall( int_c( sendBufferSizesRequests.size() ), &(sendBufferSizesRequests[0]), MPI_STATUSES_IGNORE );
-   
+
    for( auto it = blockDataSendRequests.begin(); it != blockDataSendRequests.end(); ++it )
    {
       auto & requests = it->second;
@@ -2502,7 +2502,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    ////////////////////////////////////////
    // CLEAR SEND BUFFERS (= FREE MEMORY) //
    ////////////////////////////////////////
-   
+
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - clear send buffers (= free memory)" );
 
    for( auto it = blocksToPack.begin(); it != blocksToPack.end(); ++it )
@@ -2515,11 +2515,11 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    ////////////////////////////////
    // PREPARE DATA FOR UNPACKING //
    ////////////////////////////////
-   
+
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - prepare received data for unpacking" );
 
    std::map< Block *, std::vector< std::pair< Set<SUID>, mpi::RecvBuffer * > > > blocksToUnpack; // includes data that is NOT transfered via MPI but copied locally
-   
+
    for( auto it = recvBlockData.begin(); it != recvBlockData.end(); ++it )
    {
       auto & buffers = it->second;
@@ -2536,7 +2536,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
          WALBERLA_ASSERT( phantomBlocks.find( rId ) != phantomBlocks.end() );
          Block * block = blocks_[ rId ].get();
          const auto & phantom = phantomBlocks.find(rId)->second;
-         
+
          if( phantom->sourceBlockHasTheSameSize() || phantom->sourceBlockIsLarger() )
          {
             WALBERLA_ASSERT( blocksToUnpack.find( block ) == blocksToUnpack.end() );
@@ -2552,7 +2552,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
          }
       }
    }
-   
+
 #ifndef NDEBUG
    for( auto it = phantomBlocks.begin(); it != phantomBlocks.end(); ++it )
    {
@@ -2571,7 +2571,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    //////////////////////////////
    // GLOBAL BLOCK INFORMATION //
    //////////////////////////////
-   
+
    // adapt global block information stored on every process (this is only done if the block forest is set-up to store global information!)
 
    if( containsGlobalBlockInformation() )
@@ -2579,7 +2579,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
       WALBERLA_LOG_PROGRESS( "BlockForest refresh: - update global block information that is stored locally on every process" );
       constructBlockInformation();
    }
-   
+
    ++modificationStamp_;
 
    //////////////
@@ -2595,7 +2595,7 @@ void BlockForest::update( PhantomBlockForest & phantomForest )
    /////////////////
    // UNPACK DATA //
    /////////////////
-   
+
    WALBERLA_LOG_PROGRESS( "BlockForest refresh: - unpacking block data from buffers" );
 
    std::vector< std::pair< Block *, std::vector< std::pair< Set<SUID>, mpi::RecvBuffer * > > > > dataToUnpack;
@@ -2866,6 +2866,13 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
    // store data to file
 
    WALBERLA_NON_MPI_SECTION()
+   {
+      fileIOMode = MASTER_SLAVE;
+   }
+
+   // use serial I/O for versions of OpenMPI that produce segmentation faults when using MPI-IO with a 3D Cartesian MPI
+   // communicator (see waLBerla issue #73)
+   if (!MPIManager::instance()->isCommMPIIOValid())
    {
       fileIOMode = MASTER_SLAVE;
    }

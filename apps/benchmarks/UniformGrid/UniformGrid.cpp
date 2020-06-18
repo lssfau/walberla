@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -269,31 +269,20 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
 
       WALBERLA_MPI_SECTION()
       {
-         if ( MPIManager::instance()->isCartesianCommValid() )
-         {
-            MPIManager::instance()->createCartesianComm(numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, false, false, false);
+         MPIManager::instance()->createCartesianComm(numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, false, false, false);
 
-            processIdMap = make_shared<std::vector<uint_t> >(numberOfXProcesses * numberOfYProcesses * numberOfZProcesses);
+         processIdMap = make_shared<std::vector<uint_t> >(numberOfXProcesses * numberOfYProcesses * numberOfZProcesses);
 
-            for (uint_t z = 0; z != numberOfZProcesses; ++z) {
-               for (uint_t y = 0; y != numberOfYProcesses; ++y) {
-                  for (uint_t x = 0; x != numberOfXProcesses; ++x)
-                  {
-                     (*processIdMap)[z * numberOfXProcesses * numberOfYProcesses + y * numberOfXProcesses + x] =
-                           uint_c(MPIManager::instance()->cartesianRank(x, y, z));
-                  }
+         for (uint_t z = 0; z != numberOfZProcesses; ++z) {
+            for (uint_t y = 0; y != numberOfYProcesses; ++y) {
+               for (uint_t x = 0; x != numberOfXProcesses; ++x)
+               {
+                  (*processIdMap)[z * numberOfXProcesses * numberOfYProcesses + y * numberOfXProcesses + x] =
+                     uint_c(MPIManager::instance()->cartesianRank(x, y, z));
                }
             }
          }
-         else {
-            WALBERLA_LOG_WARNING_ON_ROOT( "Your version of OpenMPI contains a bug. See waLBerla issue #73 for more "
-                                          "information. As a workaround, MPI_COMM_WORLD instead of a "
-                                          "Cartesian MPI communicator is used." );
-            MPIManager::instance()->useWorldComm();
-         }
       }
-      else
-         MPIManager::instance()->useWorldComm();
 
       sforest.balanceLoad( blockforest::CartesianDistribution( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, processIdMap.get() ),
                            numberOfXProcesses * numberOfYProcesses * numberOfZProcesses );
@@ -615,7 +604,7 @@ struct AddLB< LatticeModel_T, typename std::enable_if< std::is_same< typename La
       std::function< void () > commFunction;
       if( directComm )
       {
-         
+
          if( fullComm )
          {
             blockforest::communication::UniformDirectScheme< stencil::D3Q27 > comm( blocks );
