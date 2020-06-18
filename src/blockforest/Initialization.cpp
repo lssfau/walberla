@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -230,26 +230,18 @@ createBlockForest(      const AABB& domainAABB,
       //create cartesian communicator only if not yet a cartesian communicator (or other communicator was created)
       if ( ! mpiManager->rankValid() )
       {
-         if ( mpiManager->isCartesianCommValid() ) {
-            mpiManager->createCartesianComm( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, xPeriodic, yPeriodic, zPeriodic );
+         mpiManager->createCartesianComm( numberOfXProcesses, numberOfYProcesses, numberOfZProcesses, xPeriodic, yPeriodic, zPeriodic );
 
-            processIdMap.resize( numberOfProcesses );
+         processIdMap.resize( numberOfProcesses );
 
-            for( uint_t z = 0; z != numberOfZProcesses; ++z ) {
-               for( uint_t y = 0; y != numberOfYProcesses; ++y ) {
-                  for( uint_t x = 0; x != numberOfXProcesses; ++x ) {
+         for( uint_t z = 0; z != numberOfZProcesses; ++z ) {
+            for( uint_t y = 0; y != numberOfYProcesses; ++y ) {
+               for( uint_t x = 0; x != numberOfXProcesses; ++x ) {
 
-                     processIdMap[ z * numberOfXProcesses * numberOfYProcesses + y * numberOfXProcesses + x ] =
-                           uint_c( MPIManager::instance()->cartesianRank(x,y,z) );
-                  }
+                  processIdMap[ z * numberOfXProcesses * numberOfYProcesses + y * numberOfXProcesses + x ] =
+                     uint_c( MPIManager::instance()->cartesianRank(x,y,z) );
                }
             }
-         }
-         else {
-            WALBERLA_LOG_WARNING_ON_ROOT( "Your version of OpenMPI contains a bug. See waLBerla issue #73 for more "
-                                          "information. As a workaround, MPI_COMM_WORLD instead of a "
-                                          "Cartesian MPI communicator is used." );
-            mpiManager->useWorldComm();
          }
       }
    }

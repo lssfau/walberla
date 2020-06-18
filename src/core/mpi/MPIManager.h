@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -123,8 +123,9 @@ public:
    /// Rank is valid after calling createCartesianComm() or useWorldComm()
    bool rankValid()         const { return rank_ >= 0;       }
 
-   /// Using a Cartesian MPI communicator is not valid for certain versions of OpenMPI (see waLBerla issue #73)
-   bool isCartesianCommValid() const;
+   /// Indicates whether MPI-IO can be used with the current MPI communicator; certain versions of OpenMPI produce
+   /// segmentation faults when using MPI-IO with a 3D Cartesian MPI communicator (see waLBerla issue #73)
+   bool isCommMPIIOValid() const;
    //@}
    //*******************************************************************************************************************
 
