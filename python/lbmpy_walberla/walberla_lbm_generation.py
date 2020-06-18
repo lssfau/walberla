@@ -122,7 +122,7 @@ def __lattice_model(generation_context, class_name, lb_method, stream_collide_as
     generation_context.write_file("{}.cpp".format(class_name), source)
 
 
-def generate_lattice_model(generation_context, class_name, collision_rule, refinement_scaling=None,
+def generate_lattice_model(generation_context, class_name, collision_rule, field_layout='fzyx', refinement_scaling=None,
                            **create_kernel_params):
 
     # usually a numpy layout is chosen by default i.e. xyzf - which is bad for waLBerla where at least the spatial
@@ -138,8 +138,11 @@ def generate_lattice_model(generation_context, class_name, collision_rule, refin
     if create_kernel_params['target'] == 'gpu':
         raise ValueError("Lattice Models can only be generated for CPUs. To generate LBM on GPUs use sweeps directly")
 
-    src_field = ps.Field.create_generic('pdfs', dim, dtype, index_dimensions=1, layout='fzyx', index_shape=(q,))
-    dst_field = ps.Field.create_generic('pdfs_tmp', dim, dtype, index_dimensions=1, layout='fzyx', index_shape=(q,))
+    if field_layout != 'fzyx' and create_kernel_params['cpu_vectorize_info']['instruction_set'] != None:
+        raise ValueError("Vectorization is not available for given field layout, use fzyx instead")
+
+    src_field = ps.Field.create_generic('pdfs', dim, dtype, index_dimensions=1, layout=field_layout, index_shape=(q,))
+    dst_field = ps.Field.create_generic('pdfs_tmp', dim, dtype, index_dimensions=1, layout=field_layout, index_shape=(q,))
 
     stream_collide_update_rule = create_lbm_kernel(collision_rule, src_field, dst_field, StreamPullTwoFieldsAccessor())
     stream_collide_ast = create_kernel(stream_collide_update_rule, **create_kernel_params)
@@ -149,7 +152,7 @@ def generate_lattice_model(generation_context, class_name, collision_rule, refin
     collide_ast = create_kernel(collide_update_rule, **create_kernel_params)
     collide_ast.function_name = 'kernel_collide'
 
-    stream_update_rule = create_stream_pull_only_kernel(lb_method.stencil, None, 'pdfs', 'pdfs_tmp', 'fzyx', dtype)
+    stream_update_rule = create_stream_pull_only_kernel(lb_method.stencil, None, 'pdfs', 'pdfs_tmp', field_layout, dtype)
     stream_ast = create_kernel(stream_update_rule, **create_kernel_params)
     stream_ast.function_name = 'kernel_stream'
     __lattice_model(generation_context, class_name, lb_method, stream_collide_ast, collide_ast, stream_ast,
