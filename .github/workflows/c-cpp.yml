@@ -16,7 +16,7 @@ jobs:
     - name: create build-dir
       run: mkdir build
     - name: CMake
-      run: cmake -S . -B build
+      run: cmake -S . -B build -DWALBERLA_BUILD_WITH_MPI=OFF
     - name: make
       run: cmake --build build
     - name: ctest
