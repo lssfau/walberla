@@ -11,6 +11,7 @@ FourierTransform<Field_T>::FourierTransform( shared_ptr< StructuredBlockForest >
 : blocks_(blocks), fieldId_(fieldId), greens_()
 {
 #ifdef WALBERLA_USE_PFFT
+   WALBERLA_CHECK_UNEQUAL(MPIManager::instance()->comm(), MPI_COMM_WORLD, "PFFT does not support MPI_COMM_WORLD");
    pfft_init();
 #else
 #ifdef WALBERLA_BUILD_WITH_MPI
