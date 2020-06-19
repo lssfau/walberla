@@ -11,6 +11,7 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate all necessary files for the waLBerla mesa_pd module.')
     parser.add_argument('path', help='Where should the files be created?')
+    parser.add_argument('-y', action='store_true', help='Silent mode. Accept all questions with yes.')
     args = parser.parse_args()
 
     mpd = Module(args.path)
@@ -122,4 +123,4 @@ if __name__ == '__main__':
     mpd.add(mpi.SyncNextNeighbors(ps))
     mpd.add(mpi.SyncNextNeighborsNoGhosts(ps))
 
-    mpd.generate()
+    mpd.generate(not args.y)
