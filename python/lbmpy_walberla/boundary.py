@@ -29,6 +29,7 @@ def generate_boundary(generation_context, class_name, boundary_object, lb_method
     kernel = create_lattice_boltzmann_boundary_kernel(pdf_field, index_field, lb_method, boundary_object, target=target,
                                                       openmp=generation_context.openmp)
     kernel.function_name = "boundary_" + boundary_object.name
+    kernel.assumed_inner_stride_one = False
 
     # waLBerla is a 3D framework. Therefore, a zero for the z index has to be added if we work in 2D
     if lb_method.dim == 2:

@@ -57,6 +57,7 @@ def generate_sweep(generation_context, class_name, assignments,
         ast = create_kernel(assignments, **create_kernel_params)
     else:
         ast = create_staggered_kernel(assignments, **create_kernel_params)
+    ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
     def to_name(f):
         return f.name if isinstance(f, Field) else f
@@ -223,15 +224,18 @@ def generate_pack_info(generation_context, class_name: str,
         pack_assignments = [Assignment(buffer(i), term) for i, term in enumerate(terms)]
         pack_ast = create_kernel(pack_assignments, **create_kernel_params, ghost_layers=0)
         pack_ast.function_name = 'pack_{}'.format("_".join(direction_strings))
+        pack_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
         unpack_assignments = [Assignment(term, buffer(i)) for i, term in enumerate(terms)]
         unpack_ast = create_kernel(unpack_assignments, **create_kernel_params, ghost_layers=0)
         unpack_ast.function_name = 'unpack_{}'.format("_".join(direction_strings))
+        unpack_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
         pack_kernels[direction_strings] = KernelInfo(pack_ast)
         unpack_kernels[direction_strings] = KernelInfo(unpack_ast)
         elements_per_cell[direction_strings] = len(terms)
 
     fused_kernel = create_kernel([Assignment(buffer.center, t) for t in all_accesses], **create_kernel_params)
+    fused_kernel.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
     jinja_context = {
         'class_name': class_name,

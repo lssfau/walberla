@@ -149,14 +149,17 @@ def generate_lattice_model(generation_context, class_name, collision_rule, field
     stream_collide_update_rule = create_lbm_kernel(collision_rule, src_field, dst_field, StreamPullTwoFieldsAccessor())
     stream_collide_ast = create_kernel(stream_collide_update_rule, **create_kernel_params)
     stream_collide_ast.function_name = 'kernel_streamCollide'
+    stream_collide_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
     collide_update_rule = create_lbm_kernel(collision_rule, src_field, dst_field, CollideOnlyInplaceAccessor())
     collide_ast = create_kernel(collide_update_rule, **create_kernel_params)
     collide_ast.function_name = 'kernel_collide'
+    collide_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
     stream_update_rule = create_stream_pull_only_kernel(lb_method.stencil, None, 'pdfs', 'pdfs_tmp', field_layout, dtype)
     stream_ast = create_kernel(stream_update_rule, **create_kernel_params)
     stream_ast.function_name = 'kernel_stream'
+    stream_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
     __lattice_model(generation_context, class_name, lb_method, stream_collide_ast, collide_ast, stream_ast,
                     refinement_scaling)
 
