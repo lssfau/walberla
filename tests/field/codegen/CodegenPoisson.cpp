@@ -95,10 +95,10 @@ void testPoisson()
            false, false, false );              // no periodicity
 
 
-   BlockDataID fieldID = field::addToStorage<ScalarField_T>(blocks, "Field", real_t(0.0));
+   BlockDataID fieldID = field::addToStorage<ScalarField_T>(blocks, "Field", real_t(0.0), field::fzyx);
    initU( blocks, fieldID );
 
-   BlockDataID fId = field::addToStorage< ScalarField_T >( blocks, "f", real_t(0.0));
+   BlockDataID fId = field::addToStorage< ScalarField_T >( blocks, "f", real_t(0.0), field::fzyx);
    initF( blocks, fId );
 
    typedef blockforest::communication::UniformBufferedScheme<stencil::D2Q9> CommScheme;
