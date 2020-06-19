@@ -86,6 +86,7 @@ public:
       using angularVelocity_type = walberla::mesa_pd::Vec3;
       using torque_type = walberla::mesa_pd::Vec3;
       using oldTorque_type = walberla::mesa_pd::Vec3;
+      using radiusAtTemperature_type = walberla::real_t;
       using currentBlock_type = blockforest::BlockID;
       using type_type = uint_t;
       using nextParticle_type = int;
@@ -161,6 +162,10 @@ public:
       oldTorque_type const & getOldTorque() const {return storage_.getOldTorque(i_);}
       oldTorque_type& getOldTorqueRef() {return storage_.getOldTorqueRef(i_);}
       void setOldTorque(oldTorque_type const & v) { storage_.setOldTorque(i_, v);}
+      
+      radiusAtTemperature_type const & getRadiusAtTemperature() const {return storage_.getRadiusAtTemperature(i_);}
+      radiusAtTemperature_type& getRadiusAtTemperatureRef() {return storage_.getRadiusAtTemperatureRef(i_);}
+      void setRadiusAtTemperature(radiusAtTemperature_type const & v) { storage_.setRadiusAtTemperature(i_, v);}
       
       currentBlock_type const & getCurrentBlock() const {return storage_.getCurrentBlock(i_);}
       currentBlock_type& getCurrentBlockRef() {return storage_.getCurrentBlockRef(i_);}
@@ -293,6 +298,7 @@ public:
    using angularVelocity_type = walberla::mesa_pd::Vec3;
    using torque_type = walberla::mesa_pd::Vec3;
    using oldTorque_type = walberla::mesa_pd::Vec3;
+   using radiusAtTemperature_type = walberla::real_t;
    using currentBlock_type = blockforest::BlockID;
    using type_type = uint_t;
    using nextParticle_type = int;
@@ -368,6 +374,10 @@ public:
    oldTorque_type const & getOldTorque(const size_t idx) const {return oldTorque_[idx];}
    oldTorque_type& getOldTorqueRef(const size_t idx) {return oldTorque_[idx];}
    void setOldTorque(const size_t idx, oldTorque_type const & v) { oldTorque_[idx] = v; }
+   
+   radiusAtTemperature_type const & getRadiusAtTemperature(const size_t idx) const {return radiusAtTemperature_[idx];}
+   radiusAtTemperature_type& getRadiusAtTemperatureRef(const size_t idx) {return radiusAtTemperature_[idx];}
+   void setRadiusAtTemperature(const size_t idx, radiusAtTemperature_type const & v) { radiusAtTemperature_[idx] = v; }
    
    currentBlock_type const & getCurrentBlock(const size_t idx) const {return currentBlock_[idx];}
    currentBlock_type& getCurrentBlockRef(const size_t idx) {return currentBlock_[idx];}
@@ -531,6 +541,7 @@ public:
    std::vector<angularVelocity_type> angularVelocity_ {};
    std::vector<torque_type> torque_ {};
    std::vector<oldTorque_type> oldTorque_ {};
+   std::vector<radiusAtTemperature_type> radiusAtTemperature_ {};
    std::vector<currentBlock_type> currentBlock_ {};
    std::vector<type_type> type_ {};
    std::vector<nextParticle_type> nextParticle_ {};
@@ -569,6 +580,7 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(const ParticleSt
    getAngularVelocityRef() = rhs.getAngularVelocity();
    getTorqueRef() = rhs.getTorque();
    getOldTorqueRef() = rhs.getOldTorque();
+   getRadiusAtTemperatureRef() = rhs.getRadiusAtTemperature();
    getCurrentBlockRef() = rhs.getCurrentBlock();
    getTypeRef() = rhs.getType();
    getNextParticleRef() = rhs.getNextParticle();
@@ -604,6 +616,7 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(ParticleStorage:
    getAngularVelocityRef() = std::move(rhs.getAngularVelocityRef());
    getTorqueRef() = std::move(rhs.getTorqueRef());
    getOldTorqueRef() = std::move(rhs.getOldTorqueRef());
+   getRadiusAtTemperatureRef() = std::move(rhs.getRadiusAtTemperatureRef());
    getCurrentBlockRef() = std::move(rhs.getCurrentBlockRef());
    getTypeRef() = std::move(rhs.getTypeRef());
    getNextParticleRef() = std::move(rhs.getNextParticleRef());
@@ -640,6 +653,7 @@ void swap(ParticleStorage::Particle lhs, ParticleStorage::Particle rhs)
    std::swap(lhs.getAngularVelocityRef(), rhs.getAngularVelocityRef());
    std::swap(lhs.getTorqueRef(), rhs.getTorqueRef());
    std::swap(lhs.getOldTorqueRef(), rhs.getOldTorqueRef());
+   std::swap(lhs.getRadiusAtTemperatureRef(), rhs.getRadiusAtTemperatureRef());
    std::swap(lhs.getCurrentBlockRef(), rhs.getCurrentBlockRef());
    std::swap(lhs.getTypeRef(), rhs.getTypeRef());
    std::swap(lhs.getNextParticleRef(), rhs.getNextParticleRef());
@@ -676,6 +690,7 @@ std::ostream& operator<<( std::ostream& os, const ParticleStorage::Particle& p )
          "angularVelocity     : " << p.getAngularVelocity() << "\n" <<
          "torque              : " << p.getTorque() << "\n" <<
          "oldTorque           : " << p.getOldTorque() << "\n" <<
+         "radiusAtTemperature : " << p.getRadiusAtTemperature() << "\n" <<
          "currentBlock        : " << p.getCurrentBlock() << "\n" <<
          "type                : " << p.getType() << "\n" <<
          "nextParticle        : " << p.getNextParticle() << "\n" <<
@@ -782,6 +797,7 @@ inline ParticleStorage::iterator ParticleStorage::create(const id_t& uid)
    angularVelocity_.emplace_back(real_t(0));
    torque_.emplace_back(real_t(0));
    oldTorque_.emplace_back(real_t(0));
+   radiusAtTemperature_.emplace_back(real_t(0));
    currentBlock_.emplace_back();
    type_.emplace_back(0);
    nextParticle_.emplace_back(-1);
@@ -843,6 +859,7 @@ inline ParticleStorage::iterator ParticleStorage::erase(iterator& it)
    angularVelocity_.pop_back();
    torque_.pop_back();
    oldTorque_.pop_back();
+   radiusAtTemperature_.pop_back();
    currentBlock_.pop_back();
    type_.pop_back();
    nextParticle_.pop_back();
@@ -891,6 +908,7 @@ inline void ParticleStorage::reserve(const size_t size)
    angularVelocity_.reserve(size);
    torque_.reserve(size);
    oldTorque_.reserve(size);
+   radiusAtTemperature_.reserve(size);
    currentBlock_.reserve(size);
    type_.reserve(size);
    nextParticle_.reserve(size);
@@ -924,6 +942,7 @@ inline void ParticleStorage::clear()
    angularVelocity_.clear();
    torque_.clear();
    oldTorque_.clear();
+   radiusAtTemperature_.clear();
    currentBlock_.clear();
    type_.clear();
    nextParticle_.clear();
@@ -958,6 +977,7 @@ inline size_t ParticleStorage::size() const
    //WALBERLA_ASSERT_EQUAL( uid_.size(), angularVelocity.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), torque.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldTorque.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), radiusAtTemperature.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), currentBlock.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), type.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), nextParticle.size() );
@@ -1289,6 +1309,15 @@ public:
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getOldTorqueRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getOldTorqueRef();}
    walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getOldTorque();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleRadiusAtTemperature
+{
+public:
+   using return_type = walberla::real_t;
+   walberla::real_t& operator()(data::Particle& p) const {return p.getRadiusAtTemperatureRef();}
+   walberla::real_t& operator()(data::Particle&& p) const {return p.getRadiusAtTemperatureRef();}
+   walberla::real_t const & operator()(const data::Particle& p) const {return p.getRadiusAtTemperature();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleCurrentBlock

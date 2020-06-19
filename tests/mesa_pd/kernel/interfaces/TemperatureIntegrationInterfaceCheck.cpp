@@ -44,6 +44,8 @@ public:
    const walberla::real_t& getHeatFlux(const size_t /*p_idx*/) const {return heatFlux_;}
    void setHeatFlux(const size_t /*p_idx*/, const walberla::real_t& v) { heatFlux_ = v;}
    
+   const walberla::real_t& getInvMass(const size_t /*p_idx*/) const {return invMass_;}
+   
    const uint_t& getType(const size_t /*p_idx*/) const {return type_;}
    
 
@@ -59,6 +61,7 @@ public:
 private:
    walberla::real_t temperature_;
    walberla::real_t heatFlux_;
+   walberla::real_t invMass_;
    uint_t type_;
 };
 

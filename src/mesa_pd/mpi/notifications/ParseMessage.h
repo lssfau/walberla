@@ -117,6 +117,7 @@ void ParseMessage::operator()(int sender,
       pIt->setLinearVelocity(objparam.linearVelocity);
       pIt->setRotation(objparam.rotation);
       pIt->setAngularVelocity(objparam.angularVelocity);
+      pIt->setRadiusAtTemperature(objparam.radiusAtTemperature);
       pIt->setOldContactHistory(objparam.oldContactHistory);
       pIt->setTemperature(objparam.temperature);
 

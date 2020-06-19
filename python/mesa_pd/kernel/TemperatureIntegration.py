@@ -9,11 +9,12 @@ class TemperatureIntegration:
         self.context = {'interface': []}
         self.context['interface'].append(create_access("temperature", "walberla::real_t", access="gs"))
         self.context['interface'].append(create_access("heatFlux", "walberla::real_t", access="gs"))
+        self.context['interface'].append(create_access("invMass", "walberla::real_t", access="g"))
         self.context['interface'].append(create_access("type", "uint_t", access="g"))
 
     def generate(self, module):
         ctx = {'module': module, **self.context}
-        ctx["parameters"] = ["invHeatCapacity"]
+        ctx["parameters"] = ["invSpecificHeat"]
         generate_file(module['module_path'], 'kernel/TemperatureIntegration.templ.h', ctx)
 
         ctx["InterfaceTestName"] = "TemperatureIntegrationInterfaceCheck"
