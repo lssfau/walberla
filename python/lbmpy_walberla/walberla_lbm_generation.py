@@ -122,7 +122,7 @@ def __lattice_model(generation_context, class_name, lb_method, stream_collide_as
     generation_context.write_file("{}.cpp".format(class_name), source)
 
 
-def generate_lattice_model(generation_context, class_name, collision_rule, field_layout='fzyx', refinement_scaling=None,
+def generate_lattice_model(generation_context, class_name, collision_rule, field_layout='zyxf', refinement_scaling=None,
                            **create_kernel_params):
 
     # usually a numpy layout is chosen by default i.e. xyzf - which is bad for waLBerla where at least the spatial
@@ -134,12 +134,14 @@ def generate_lattice_model(generation_context, class_name, collision_rule, field
     q = len(lb_method.stencil)
     dim = lb_method.dim
 
+    if field_layout == 'fzyx':
+        create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one'] = True
+    elif field_layout == 'zyxf':
+        create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one'] = False
+
     create_kernel_params = default_create_kernel_parameters(generation_context, create_kernel_params)
     if create_kernel_params['target'] == 'gpu':
         raise ValueError("Lattice Models can only be generated for CPUs. To generate LBM on GPUs use sweeps directly")
-
-    if field_layout != 'fzyx' and create_kernel_params['cpu_vectorize_info']['instruction_set'] != None:
-        raise ValueError("Vectorization is not available for given field layout, use fzyx instead")
 
     src_field = ps.Field.create_generic('pdfs', dim, dtype, index_dimensions=1, layout=field_layout, index_shape=(q,))
     dst_field = ps.Field.create_generic('pdfs_tmp', dim, dtype, index_dimensions=1, layout=field_layout, index_shape=(q,))

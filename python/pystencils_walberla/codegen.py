@@ -13,7 +13,8 @@ from pystencils.stencil import inverse_direction, offset_to_direction_string
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 
 __all__ = ['generate_sweep', 'generate_pack_info', 'generate_pack_info_for_field', 'generate_pack_info_from_kernel',
-           'generate_mpidtype_info_from_kernel', 'default_create_kernel_parameters', 'KernelInfo']
+           'generate_mpidtype_info_from_kernel', 'default_create_kernel_parameters', 'KernelInfo',
+           'get_vectorize_instruction_set']
 
 
 def generate_sweep(generation_context, class_name, assignments,
@@ -322,26 +323,28 @@ class KernelInfo:
         self.parameters = ast.get_parameters()  # cache parameters here
 
 
-def default_create_kernel_parameters(generation_context, params):
-    default_dtype = "float64" if generation_context.double_accuracy else 'float32'
-
+def get_vectorize_instruction_set(generation_context):
     if generation_context.optimize_for_localhost:
         supported_instruction_sets = get_supported_instruction_sets()
         if supported_instruction_sets:
-            default_vec_is = get_supported_instruction_sets()[-1]
+            return get_supported_instruction_sets()[-1]
         else:  # if cpuinfo package is not installed
-            default_vec_is = 'sse'
+            return 'sse'
     else:
-        default_vec_is = None
+        return None
+
+def default_create_kernel_parameters(generation_context, params):
+    default_dtype = "float64" if generation_context.double_accuracy else 'float32'
 
     params['target'] = params.get('target', 'cpu')
     params['data_type'] = params.get('data_type', default_dtype)
     params['cpu_openmp'] = params.get('cpu_openmp', generation_context.openmp)
     params['cpu_vectorize_info'] = params.get('cpu_vectorize_info', {})
 
+    default_vec_is = get_vectorize_instruction_set(generation_context)
     vec = params['cpu_vectorize_info']
     vec['instruction_set'] = vec.get('instruction_set', default_vec_is)
-    vec['assume_inner_stride_one'] = True
+    vec['assume_inner_stride_one'] = vec.get('assume_inner_stride_one', True)
     vec['assume_aligned'] = vec.get('assume_aligned', False)
     vec['nontemporal'] = vec.get('nontemporal', False)
     return params
