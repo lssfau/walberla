@@ -1621,7 +1621,7 @@ cppcheck:
 
 
 coverage:
-   image: walberla/coverage
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    script:
       - $CXX --version
       - cmake --version
@@ -1629,10 +1629,10 @@ coverage:
       - mkdir build
       - cd build
       - if dpkg --compare-versions `ompi_info | head -2 | tail -1 | sed 's/[^0-9.]*\([0-9.]*\).*/\1/'` ge 1.10; then export MPIEXEC_PREFLAGS="--allow-run-as-root" ; fi
-      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=Debug -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_BUILD_WITH_CODEGEN=$WALBERLA_BUILD_WITH_CODEGEN
+      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=OFF -DWALBERLA_BUILD_TUTORIALS=OFF -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=Debug -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_BUILD_WITH_CODEGEN=OFF
       - cmake . -LAH
-      - make -j 8
-      - ctest -LE longrun --output-on-failure -j 8_Hybrid
+      - make -j $NUM_BUILD_CORES -l $NUM_CORES
+      - ctest -LE longrun --output-on-failure -j $NUM_CORES
       - cd ..
       - mkdir coverage
       - cd coverage
