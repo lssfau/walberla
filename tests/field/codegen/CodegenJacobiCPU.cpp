@@ -56,7 +56,7 @@ void testJacobi2D()
            true, true, true );                 // full periodicity
 
 
-   BlockDataID fieldID = field::addToStorage<ScalarField>(blocks, "Field", real_t(0.0), field::fzyx);
+   BlockDataID fieldID = field::addToStorage<ScalarField>(blocks, "Field", real_t(0.0));
 
    // Initialize a quarter of the field with ones, the rest remains 0
    // Jacobi averages the domain -> every cell should be at 0.25 at sufficiently many timesteps
@@ -104,7 +104,7 @@ void testJacobi3D()
            true, true, true );                 // no periodicity
 
 
-   BlockDataID fieldID = field::addToStorage<ScalarField>(blocks, "Field", real_t(0.0), field::fzyx);
+   BlockDataID fieldID = field::addToStorage<ScalarField>(blocks, "Field", real_t(0.0));
 
    // Initialize a quarter of the field with ones, the rest remains 0
    // Jacobi averages the domain -> every cell should be at 0.25 at sufficiently many timesteps
