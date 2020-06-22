@@ -7,7 +7,7 @@ from lbmpy_walberla import RefinementScaling, generate_boundary, generate_lattic
 
 with CodeGeneration() as ctx:
     omega, omega_free = sp.symbols("omega, omega_free")
-    force_field, vel_field, omega_out = ps.fields("force(3), velocity(3), omega_out: [3D]", layout='fzyx')
+    force_field, vel_field, omega_out = ps.fields("force(3), velocity(3), omega_out: [3D]", layout='zyxf')
 
     # the collision rule of the LB method where the some advanced features
     collision_rule = create_lb_collision_rule(

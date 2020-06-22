@@ -22,3 +22,4 @@ with CodeGeneration() as ctx:
     for conf in configurations:
         generate_lattice_model(ctx, 'FieldLayoutAndVectorizationTest_'+conf.name+'_LatticeModel', collision_rule,
                                field_layout=conf.field_layout, refinement_scaling=None, cpu_vectorize_info=conf.vectorization_dict)
+

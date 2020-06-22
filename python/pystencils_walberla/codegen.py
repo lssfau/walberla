@@ -1,3 +1,4 @@
+import warnings
 from collections import OrderedDict, defaultdict
 from itertools import product
 from typing import Dict, Optional, Sequence, Tuple
@@ -331,8 +332,9 @@ def get_vectorize_instruction_set(generation_context):
     if generation_context.optimize_for_localhost:
         supported_instruction_sets = get_supported_instruction_sets()
         if supported_instruction_sets:
-            return get_supported_instruction_sets()[-1]
+            return supported_instruction_sets[-1]
         else:  # if cpuinfo package is not installed
+            warnings.warn("Could not obtain supported vectorization instruction sets - defaulting to sse")
             return 'sse'
     else:
         return None
