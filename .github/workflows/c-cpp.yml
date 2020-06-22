@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: waLBerla Tests
 
 on:
   push:
@@ -13,11 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: create build-dir
+    - name: create build directory
       run: mkdir build
     - name: CMake
       run: cmake -S . -B build -DWALBERLA_BUILD_WITH_MPI=OFF -DWALBERLA_BUILD_TESTS=ON
     - name: make
       run: cmake --build build
     - name: ctest
-      run: ctest --build-run-dir build/tests/
+      run: cd build; ctest
