@@ -13,7 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: apt update; apt install -y libomp-dev
+    - name: |
+        sudo apt-get update
+        sudo apt-get install -y libomp-dev
       run: apt install -y openmpi-dev
     - name: create build directory
       run: mkdir build
