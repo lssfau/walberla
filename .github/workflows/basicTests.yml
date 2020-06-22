@@ -13,11 +13,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: apt update; apt install -y libomp-dev
+      run: apt install -y openmpi-dev
     - name: create build directory
       run: mkdir build
     - name: CMake
-      run: cmake -S . -B build -DWALBERLA_BUILD_WITH_MPI=OFF -DWALBERLA_BUILD_TESTS=ON
+      run: cmake -S . -B build -DWALBERLA_BUILD_WITH_MPI=OFF -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_WITH_OPENMP=ON
     - name: make
-      run: cmake --build build
+      run: cmake --build build -j 2
     - name: ctest
       run: cd build; ctest
