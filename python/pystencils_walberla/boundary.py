@@ -29,6 +29,7 @@ def generate_staggered_boundary(generation_context, class_name, boundary_object,
     kernel = create_boundary_kernel(staggered_field, index_field, neighbor_stencil, boundary_object, target=target,
                                     openmp=generation_context.openmp)
     kernel.function_name = "boundary_" + boundary_object.name
+    kernel.assumed_inner_stride_one = False
 
     # waLBerla is a 3D framework. Therefore, a zero for the z index has to be added if we work in 2D
     if dim == 2:
@@ -82,6 +83,7 @@ def generate_staggered_flux_boundary(generation_context, class_name, boundary_ob
     kernel = create_boundary_kernel(staggered_field, index_field, neighbor_stencil, boundary_object, target=target,
                                     openmp=generation_context.openmp)
     kernel.function_name = "boundary_" + boundary_object.name
+    kernel.assumed_inner_stride_one = False
 
     # waLBerla is a 3D framework. Therefore, a zero for the z index has to be added if we work in 2D
     if dim == 2:

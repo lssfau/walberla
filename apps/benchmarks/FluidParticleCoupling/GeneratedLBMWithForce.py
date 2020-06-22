@@ -41,5 +41,5 @@ with CodeGeneration() as ctx:
     #print(methodWithForce.relaxation_rates)
     #print(methodWithForce.moment_matrix)
 
-    collision_rule = create_lb_collision_rule(lb_method=methodWithForce)
-    generate_lattice_model(ctx, 'GeneratedLBMWithForce', collision_rule)
+    collision_rule = create_lb_collision_rule(lb_method=methodWithForce, optimization={'cse_global': True})
+    generate_lattice_model(ctx, 'GeneratedLBMWithForce', collision_rule, field_layout='fzyx')

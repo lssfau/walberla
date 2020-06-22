@@ -252,6 +252,8 @@ def generate_call(ctx, kernel_info, ghost_layers_to_include=0, cell_interval=Non
                 coordinates = tuple(coordinates)
                 kernel_call_lines.append("%s %s = %s->dataAt(%s, %s, %s, %s);" %
                                          ((param.symbol.dtype, param.symbol.name, param.field_name) + coordinates))
+                if ast.assumed_inner_stride_one and field.index_dimensions > 0:
+                    kernel_call_lines.append("WALBERLA_ASSERT_EQUAL(%s->layout(), field::fzyx);" % (param.field_name,))
         elif param.is_field_stride:
             casted_stride = get_field_stride(param)
             type_str = param.symbol.dtype.base_name
@@ -265,6 +267,8 @@ def generate_call(ctx, kernel_info, ghost_layers_to_include=0, cell_interval=Non
             max_value = "%s->%sSizeWithGhostLayer()" % (field.name, ('x', 'y', 'z')[coord])
             kernel_call_lines.append("WALBERLA_ASSERT_GREATER_EQUAL(%s, %s);" % (max_value, shape))
             kernel_call_lines.append("const %s %s = %s;" % (type_str, param.symbol.name, shape))
+            if ast.assumed_inner_stride_one and field.index_dimensions > 0:
+                kernel_call_lines.append("WALBERLA_ASSERT_EQUAL(%s->layout(), field::fzyx);" % (field.name,))
 
     call_parameters = ", ".join([p.symbol.name for p in ast_params])
 

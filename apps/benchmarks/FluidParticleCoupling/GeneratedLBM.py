@@ -10,6 +10,7 @@ from lbmpy.stencils import get_stencil
 
 
 with CodeGeneration() as ctx:
+
     omegaVisc = sp.Symbol("omega_visc")
     omegaBulk = ps.fields("omega_bulk: [3D]", layout='fzyx')
     omegaMagic = sp.Symbol("omega_magic")
@@ -37,8 +38,8 @@ with CodeGeneration() as ctx:
     #print(methodWithForce.relaxation_rates)
     #print(methodWithForce.moment_matrix)
 
-    collision_rule = create_lb_collision_rule(lb_method=methodWithForce)
-    generate_lattice_model(ctx, 'GeneratedLBM', collision_rule)
+    collision_rule = create_lb_collision_rule(lb_method=methodWithForce, optimization={'cse_global': True})
+    generate_lattice_model(ctx, 'GeneratedLBM', collision_rule, field_layout='fzyx')
 
 
 

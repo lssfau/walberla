@@ -1,3 +1,4 @@
+import warnings
 from collections import OrderedDict, defaultdict
 from itertools import product
 from typing import Dict, Optional, Sequence, Tuple
@@ -13,7 +14,8 @@ from pystencils.stencil import inverse_direction, offset_to_direction_string
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 
 __all__ = ['generate_sweep', 'generate_pack_info', 'generate_pack_info_for_field', 'generate_pack_info_from_kernel',
-           'generate_mpidtype_info_from_kernel', 'default_create_kernel_parameters', 'KernelInfo']
+           'generate_mpidtype_info_from_kernel', 'default_create_kernel_parameters', 'KernelInfo',
+           'get_vectorize_instruction_set']
 
 
 def generate_sweep(generation_context, class_name, assignments,
@@ -56,6 +58,7 @@ def generate_sweep(generation_context, class_name, assignments,
         ast = create_kernel(assignments, **create_kernel_params)
     else:
         ast = create_staggered_kernel(assignments, **create_kernel_params)
+    ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
     def to_name(f):
         return f.name if isinstance(f, Field) else f
@@ -222,15 +225,18 @@ def generate_pack_info(generation_context, class_name: str,
         pack_assignments = [Assignment(buffer(i), term) for i, term in enumerate(terms)]
         pack_ast = create_kernel(pack_assignments, **create_kernel_params, ghost_layers=0)
         pack_ast.function_name = 'pack_{}'.format("_".join(direction_strings))
+        pack_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
         unpack_assignments = [Assignment(term, buffer(i)) for i, term in enumerate(terms)]
         unpack_ast = create_kernel(unpack_assignments, **create_kernel_params, ghost_layers=0)
         unpack_ast.function_name = 'unpack_{}'.format("_".join(direction_strings))
+        unpack_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
         pack_kernels[direction_strings] = KernelInfo(pack_ast)
         unpack_kernels[direction_strings] = KernelInfo(unpack_ast)
         elements_per_cell[direction_strings] = len(terms)
 
     fused_kernel = create_kernel([Assignment(buffer.center, t) for t in all_accesses], **create_kernel_params)
+    fused_kernel.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
     jinja_context = {
         'class_name': class_name,
@@ -322,26 +328,29 @@ class KernelInfo:
         self.parameters = ast.get_parameters()  # cache parameters here
 
 
-def default_create_kernel_parameters(generation_context, params):
-    default_dtype = "float64" if generation_context.double_accuracy else 'float32'
-
+def get_vectorize_instruction_set(generation_context):
     if generation_context.optimize_for_localhost:
         supported_instruction_sets = get_supported_instruction_sets()
         if supported_instruction_sets:
-            default_vec_is = get_supported_instruction_sets()[-1]
+            return supported_instruction_sets[-1]
         else:  # if cpuinfo package is not installed
-            default_vec_is = 'sse'
+            warnings.warn("Could not obtain supported vectorization instruction sets - defaulting to sse")
+            return 'sse'
     else:
-        default_vec_is = None
+        return None
+
+def default_create_kernel_parameters(generation_context, params):
+    default_dtype = "float64" if generation_context.double_accuracy else 'float32'
 
     params['target'] = params.get('target', 'cpu')
     params['data_type'] = params.get('data_type', default_dtype)
     params['cpu_openmp'] = params.get('cpu_openmp', generation_context.openmp)
     params['cpu_vectorize_info'] = params.get('cpu_vectorize_info', {})
 
+    default_vec_is = get_vectorize_instruction_set(generation_context)
     vec = params['cpu_vectorize_info']
     vec['instruction_set'] = vec.get('instruction_set', default_vec_is)
-    vec['assume_inner_stride_one'] = True
+    vec['assume_inner_stride_one'] = vec.get('assume_inner_stride_one', True)
     vec['assume_aligned'] = vec.get('assume_aligned', False)
     vec['nontemporal'] = vec.get('nontemporal', False)
     return params

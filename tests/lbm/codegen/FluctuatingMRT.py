@@ -9,7 +9,7 @@ from lbmpy_walberla import generate_lattice_model
 with CodeGeneration() as ctx:
     omega_shear = sp.symbols("omega_shear")
     temperature = sp.symbols("temperature")
-    force_field, vel_field = ps.fields("force(3), velocity(3): [3D]", layout='fzyx')
+    force_field, vel_field = ps.fields("force(3), velocity(3): [3D]", layout='zyxf')
 
     def rr_getter(moment_group):
         is_shear = [is_shear_moment(m, 3) for m in moment_group]
