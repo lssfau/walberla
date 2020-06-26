@@ -34,9 +34,6 @@ def generate_file(path, template, context={}, filename=None):
     if filename == None:
         filename = template.replace(".templ", "")
     env = get_jinja_environment()
-    if not (path / filename).exists():
-        print(f"{TerminalColor.YELLOW}skipping: {(path / filename)}{TerminalColor.DEFAULT}")
-        return
     print(f"generating: {(path / filename)}")
     with open(path / filename, "wb") as fout:
         content = env.get_template(template).render(context)
