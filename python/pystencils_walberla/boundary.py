@@ -41,6 +41,10 @@ def generate_staggered_boundary(generation_context, class_name, boundary_object,
         stencil = neighbor_stencil
 
     stencil_info = [(i, d, ", ".join([str(e) for e in d])) for i, d in enumerate(stencil)]
+    inv_dirs = []
+    for direction in stencil:
+        inverse_dir = tuple([-i for i in direction])
+        inv_dirs.append(stencil.index(inverse_dir))
 
     context = {
         'class_name': boundary_object.name,
@@ -48,6 +52,7 @@ def generate_staggered_boundary(generation_context, class_name, boundary_object,
         'StructDeclaration': struct_from_numpy_dtype(struct_name, index_struct_dtype),
         'kernel': KernelInfo(kernel),
         'stencil_info': stencil_info,
+        'inverse_directions' : inv_dirs,
         'dim': dim,
         'target': target,
         'namespace': 'pystencils',
@@ -95,6 +100,10 @@ def generate_staggered_flux_boundary(generation_context, class_name, boundary_ob
         stencil = neighbor_stencil
 
     stencil_info = [(i, d, ", ".join([str(e) for e in d])) for i, d in enumerate(stencil)]
+    inv_dirs = []
+    for direction in stencil:
+        inverse_dir = tuple([-i for i in direction])
+        inv_dirs.append(stencil.index(inverse_dir))
 
     context = {
         'class_name': boundary_object.name,
@@ -102,6 +111,7 @@ def generate_staggered_flux_boundary(generation_context, class_name, boundary_ob
         'StructDeclaration': struct_from_numpy_dtype(struct_name, index_struct_dtype),
         'kernel': KernelInfo(kernel),
         'stencil_info': stencil_info,
+        'inverse_directions' : inv_dirs,
         'dim': dim,
         'target': target,
         'namespace': 'pystencils',
