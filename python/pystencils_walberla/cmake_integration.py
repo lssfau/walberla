@@ -38,7 +38,8 @@ class CodeGeneration:
                     [os.path.basename(p) for p in only_in_cmake])
             if only_generated:
                 error_message += "Unexpected generated files {}\n".format([os.path.basename(p) for p in only_generated])
-            raise ValueError(error_message)
+            if len(only_in_cmake) > 0 or len(only_generated) > 0:
+                raise ValueError(error_message)
 
 
 def parse_json_args():
