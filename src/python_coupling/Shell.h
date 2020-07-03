@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "waLBerlaDefinitions.h"
 #include "core/DataTypes.h"
 
