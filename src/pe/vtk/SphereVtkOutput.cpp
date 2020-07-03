@@ -42,6 +42,7 @@ std::vector< SphereVtkOutput::Attributes > SphereVtkOutput::getAttributes() cons
    attributes.emplace_back( vtk::typeToString< int >(),   "rank", uint_c(1) );
    attributes.emplace_back( vtk::typeToString< id_t >(),   "id", uint_c(1) );
    attributes.emplace_back( vtk::typeToString< id_t >(),  "uid", uint_c(1) );
+   attributes.emplace_back( vtk::typeToString< float >(), "angular_velocity", uint_c(3) );
 
    return attributes;
 }

@@ -98,6 +98,9 @@ void SphereVtkOutput::push( std::ostream& os, const uint_t data, const uint_t po
    case 6:
       vtk::toStream( os, numeric_cast< id_t >(bodies_.at( point )->getTopSuperBody()->getID()) );
       break;
+   case 7:
+      vtk::toStream( os, numeric_cast< float >(bodies_.at( point )->getAngularVel()[component]) );
+      break;
    }
 
 }
@@ -138,6 +141,9 @@ void SphereVtkOutput::push( vtk::Base64Writer& b64, const uint_t data, const uin
       break;
    case 6:
       b64 << numeric_cast< id_t >(bodies_.at( point )->getTopSuperBody()->getID());
+      break;
+   case 7:
+      b64 << numeric_cast< float >(bodies_.at( point )->getAngularVel()[component]);
       break;
    }
 }
