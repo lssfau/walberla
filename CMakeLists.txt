@@ -1127,8 +1127,7 @@ endif ( )
 ##
 ############################################################################################################################
 if (WALBERLA_BUILD_WITH_GCOV AND CMAKE_COMPILER_IS_GNUCXX  )
-    add_flag ( CMAKE_CXX_FLAGS_DEBUG "-fprofile-arcs -ftest-coverage" )
-    add_flag ( LD_FLAGS              "-fprofile-arcs -ftest-coverage" )
+    add_flag ( CMAKE_CXX_FLAGS_DEBUG "--coverage" )
 endif()
 ############################################################################################################################
 
