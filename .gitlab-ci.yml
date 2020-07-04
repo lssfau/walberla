@@ -1625,22 +1625,23 @@ cppcheck:
 coverage:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    script:
+      - pip3 install gcovr
+      - export NUM_CORES=$(nproc --all)
+      - export MAX_BUILD_CORES=$(( $(awk '( $1 == "MemTotal:" ) { print $2 }' /proc/meminfo) / ( 4 * 1024 * 1024  ) ))
       - $CXX --version
       - cmake --version
       - gcovr --version
       - mkdir build
       - cd build
       - if dpkg --compare-versions `ompi_info | head -2 | tail -1 | sed 's/[^0-9.]*\([0-9.]*\).*/\1/'` ge 1.10; then export MPIEXEC_PREFLAGS="--allow-run-as-root" ; fi
-      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=Debug -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_BUILD_WITH_CODEGEN=OFF
+      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=Debug -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_BUILD_WITH_CODEGEN=OFF -DWALBERLA_BUILD_WITH_GCOV=ON
       - cmake . -LAH
       - make -j $NUM_BUILD_CORES -l $NUM_CORES
-      - ctest -LE longrun --output-on-failure -j $NUM_CORES
+      - ctest -LE longrun --output-on-failure -j $NUM_CORES --timeout 3000
       - cd ..
       - mkdir coverage
-      - cd coverage
       - pwd
-      - gcovr -r $CI_PROJECT_DIR -f ".*\\/src\\/.*" -k
-      - gcovr -r $CI_PROJECT_DIR -f ".*\\/src\\/.*" --html --html-details -o coverage.html -g
+      - gcovr -r $CI_PROJECT_DIR -k build -f "src" --html --html-details -o coverage/coverage.html
    artifacts:
       paths:
          - coverage/
@@ -1649,9 +1650,6 @@ coverage:
          - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
-   variables:
-      CXXFLAGS: "-fprofile-arcs -ftest-coverage -fPIC -O0"
-      LDFLAGS: "-fprofile-arcs -ftest-coverage -fPIC -O0"
 
 
 ###############################################################################
