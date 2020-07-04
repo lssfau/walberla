@@ -1,0 +1,19 @@
+name: waLBerla Tests
+
+on: push
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: create build directory
+      run: mkdir build
+    - name: CMake
+      run: cmake -S . -B build -DWALBERLA_BUILD_WITH_MPI=OFF -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_WITH_OPENMP=ON
+    - name: make
+      run: cmake --build build -j 2
+    - name: ctest
+      run: cd build; ctest
