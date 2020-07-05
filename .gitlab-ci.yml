@@ -1641,10 +1641,12 @@ coverage:
       - cd ..
       - mkdir coverage
       - pwd
-      - gcovr -r $CI_PROJECT_DIR -k build -f "src" --html --html-details -o coverage/coverage.html
+      - gcovr -r $CI_PROJECT_DIR -k build -f "src" --print-summary --html coverage/coverage.html --html-details --xml coverage/coverage.xml
    artifacts:
       paths:
          - coverage/
+      reports:
+        cobertura: coverage/coverage.xml
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
