@@ -2,7 +2,6 @@
 
 from pathlib import Path
 import shutil
-import os
 
 
 class Module:
@@ -32,14 +31,14 @@ class Module:
     def rename(self):
         for filename in (f for f in self.context['module_path'].glob('**/*') if f.is_file()):
             filedata = None
-            #print(f'renaming module name: {filename}')
+            # print(f'renaming module name: {filename}')
             with open(filename, encoding="utf-8") as fin:
-               filedata = fin.read()
+                filedata = fin.read()
 
             filedata = filedata.replace('mesa_pd', self.context['name'])
 
             with open(filename, 'w', encoding="utf-8") as fout:
-               fout.write(filedata)
+                fout.write(filedata)
 
     def generate(self, folder_check=True):
         print(f"This operation will overwrite the content of: {self.context['module_path']}")

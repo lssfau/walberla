@@ -31,7 +31,7 @@ def get_jinja_environment():
 
 
 def generate_file(path, template, context={}, filename=None):
-    if filename == None:
+    if filename is None:
         filename = template.replace(".templ", "")
     env = get_jinja_environment()
     print(f"generating: {(path / filename)}")
