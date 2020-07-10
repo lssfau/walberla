@@ -3,6 +3,14 @@
 #include "core/DataTypes.h"
 #include "{{class_name}}.h"
 
+#if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wfloat-equal"
+#   pragma GCC diagnostic ignored "-Wshadow"
+#   pragma GCC diagnostic ignored "-Wconversion"
+#   pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 {% for header in headers %}
 #include {{header}}
 {% endfor %}

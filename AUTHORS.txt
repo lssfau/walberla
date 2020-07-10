@@ -1,6 +1,7 @@
 List of contributors
 ====================
 
+Cameron Stewart
 Christian Feichtinger
 Christian Godenschwager
 Christoph Rettinger
@@ -12,14 +13,20 @@ Dominik Bartuschat
 Ehsan Fattahi
 Felix Winterhalter
 Florian Schornbaum
+Helen Schottenhamml
 Jan Götz
+Jan Hönig
+João Victor Tozatti Risso
 Johannes Habich
 Klaus Iglberger
 Kristina Pickl
 Lorenz Hufnagel
+Lukas Werner
+Markus Holzer
 Martin Bauer
 Matthias Markl
 Michael Kuron
+Nils Kohl
 Paulo Carvalho
 Regina Ammer
 Sagar Dolas
@@ -27,7 +34,9 @@ Sebastian Eibl
 Silke Bergler
 Simon Bogner
 Stefan Donath
+Stephan Seitz
 Sunil Kontham
+Tobias Leemann
 Tobias Preclik
 Tobias Scharpff
 Tobias Schruff
