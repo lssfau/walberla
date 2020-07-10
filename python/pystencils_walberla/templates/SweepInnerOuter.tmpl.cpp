@@ -128,6 +128,7 @@ void {{class_name}}::outer( IBlock * block{%if target is equalto 'gpu'%} , cudaS
     {% else %}
     for( auto & ci: layers_ )
     {
+        {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(8) }}
         {{kernel|generate_call(cell_interval='ci')|indent(8)}}
     }
     {% endif %}
