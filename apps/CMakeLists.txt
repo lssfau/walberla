@@ -35,4 +35,3 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
     # no else with "EXLUDE_FROM_ALL" here, since if WALBERLA_BUILD_WITH_PYTHON_MODULE is not activated
     # waLBerla was build without -fPIC , so no linking into shared library is possible
 endif()
-

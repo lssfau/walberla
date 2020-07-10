@@ -253,6 +253,7 @@ typename MeshType::Point computeCentroid( const MeshType & mesh )
 template< typename MeshType >
 Matrix3<typename MeshType::Scalar> computeInertiaTensor( const MeshType & mesh )
 {
+   // Inertia tensor is calculated relative to the origin of the meshes coordinate system!
    static_assert( MeshType::IsTriMesh == 1, "computeInertiaTensor only works with triangular meshes!" );
 
    typedef typename MeshType::Point  Point;
@@ -313,6 +314,100 @@ typename MeshType::Point computeCentroid( const MeshType & mesh, const typename 
    centroid /= numeric_cast<Scalar>(numVertices);
 
    return centroid;
+}
+
+/**
+ * \brief Computes all mass properties (mass, centroid, inertia tensor at once).
+ *
+ * This function computes the mass, centroid and the inertia tensor relative to the calculated centroid.
+ * Source: https://www.cs.upc.edu/~virtual/SGI/docs/3.%20Further%20Reading/Polyhedral%20Mass%20Properties%20Revisited.pdf
+ *
+ * \tparam MeshType
+ * \param mesh      Triangular input mesh.
+ * \param density   Density of the mesh.
+ * \param centroid  Output centroid point.
+ * \param inertiaTensor Output inertia matrix.
+ * \param mass      Output mass.
+ * \attention The inertia tensor is computed relative to the centroid.
+ */
+template< typename MeshType >
+void computeMassProperties(const MeshType & mesh, typename MeshType::Scalar density,
+      Vector3<typename MeshType::Scalar>& centroid, Matrix3<typename MeshType::Scalar>& inertiaTensor,
+      typename MeshType::Scalar& mass) {
+   static_assert( MeshType::IsTriMesh == 1, "computeMassProperties only works with triangular meshes!" );
+
+   typedef typename MeshType::Point Point;
+   typedef typename MeshType::Scalar Scalar;
+
+   const Scalar mult[10] = {Scalar(1)/Scalar(6),
+                            Scalar(1)/Scalar(24), Scalar(1)/Scalar(24), Scalar(1)/Scalar(24),
+                            Scalar(1)/Scalar(60), Scalar(1)/Scalar(60), Scalar(1)/Scalar(60),
+                            Scalar(1)/Scalar(120), Scalar(1)/Scalar(120), Scalar(1)/Scalar(120)};
+
+   Scalar intg[10] = {0,0,0,0,0,0,0,0,0,0};
+
+   auto subExpr = [](Scalar& w0, Scalar& w1, Scalar& w2,
+         Scalar& f1, Scalar& f2, Scalar& f3,
+         Scalar& g0, Scalar& g1, Scalar& g2){
+      Scalar temp0 = w0+w1;
+      f1 = temp0 + w2;
+      Scalar temp1 = w0*w0;
+      Scalar temp2 = temp1 + w1*temp0;
+      f2 = temp2 + w2*f1;
+      f3 = w0*temp1 + w1*temp2 + w2*f2;
+      g0 = f2 + w0*(f1+w0);
+      g1 = f2 + w1*(f1+w1);
+      g2 = f2 + w2*(f1+w2);
+   };
+
+   Point v0, v1, v2;
+   for (auto fIt = mesh.faces_begin(); fIt != mesh.faces_end(); ++fIt) {
+      getVertexPositions(mesh, *fIt, v0, v1, v2);
+
+      Scalar a1 = v1[0]-v0[0];
+      Scalar b1 = v1[1]-v0[1];
+      Scalar c1 = v1[2]-v0[2];
+      Scalar a2 = v2[0]-v0[0];
+      Scalar b2 = v2[1]-v0[1];
+      Scalar c2 = v2[2]-v0[2];
+
+      Scalar d0 = b1*c2 - b2*c1;
+      Scalar d1 = a2*c1 - a1*c2;
+      Scalar d2 = a1*b2 - a2*b1;
+
+      Scalar f1x, f2x, f3x, g0x, g1x, g2x;
+      subExpr(v0[0], v1[0], v2[0], f1x, f2x, f3x, g0x, g1x, g2x);
+      Scalar f1y, f2y, f3y, g0y, g1y, g2y;
+      subExpr(v0[1], v1[1], v2[1], f1y, f2y, f3y, g0y, g1y, g2y);
+      Scalar f1z, f2z, f3z, g0z, g1z, g2z;
+      subExpr(v0[2], v1[2], v2[2], f1z, f2z, f3z, g0z, g1z, g2z);
+
+      intg[0] += d0*f1x;
+      intg[1] += d0*f2x; intg[2] += d1*f2y; intg[3] += d2*f2z;
+      intg[4] += d0*f3x; intg[5] += d1*f3y; intg[6] += d2*f3z;
+      intg[7] += d0*(v0[1]*g0x + v1[1]*g1x + v2[1]*g2x);
+      intg[8] += d1*(v0[2]*g0y + v1[2]*g1y + v2[2]*g2y);
+      intg[9] += d2*(v0[0]*g0z + v1[0]*g1z + v2[0]*g2z);
+   }
+
+   for (uint_t i = 0; i < 10; ++i) {
+      intg[i] *= mult[i];
+   }
+
+   mass = intg[0];
+
+   centroid[0] = intg[1] / mass;
+   centroid[1] = intg[2] / mass;
+   centroid[2] = intg[3] / mass;
+
+   inertiaTensor[0] = density * (intg[5] + intg[6] - mass*(centroid[1]*centroid[1] + centroid[2]*centroid[2])); //xx
+   inertiaTensor[4] = density * (intg[4] + intg[6] - mass*(centroid[2]*centroid[2] + centroid[0]*centroid[0])); // yy
+   inertiaTensor[8] = density * (intg[4] + intg[5] - mass*(centroid[0]*centroid[0] + centroid[1]*centroid[1])); // zz
+   inertiaTensor[1] = density * (-(intg[7] - mass * centroid[0]*centroid[1]));
+   inertiaTensor[5] = density * (-(intg[8] - mass * centroid[1]*centroid[2]));
+   inertiaTensor[2] = density * (-(intg[9] - mass * centroid[2]*centroid[0]));
+
+   mass *= density;
 }
 
 

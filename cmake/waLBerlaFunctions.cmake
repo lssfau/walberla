@@ -25,15 +25,18 @@ set ( WALBERLA_GLOB_FILES *.cpp
 #   [optional]           This is done using the ${arg}_FOUND variable.
 #                        Example: waLBerla_add_module( DEPENDS someModule BUILD_ONLY_IF_FOUND pe)
 #                                 This module is only built if PE_FOUND is true.
+#   OPTIONAL_DEPENDS     Lists modules, that this module might depend on. For example a module could depend on mesh_common if OpenMesh is
+#   [optional]           available.
 #
 #######################################################################################################################
 
 function ( waLBerla_add_module )
     set( options )
     set( oneValueArgs )
-    set( multiValueArgs DEPENDS EXCLUDE FILES BUILD_ONLY_IF_FOUND )
+    set( multiValueArgs DEPENDS EXCLUDE FILES BUILD_ONLY_IF_FOUND OPTIONAL_DEPENDS )
     cmake_parse_arguments( ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
+    set( ALL_DEPENDENCIES ${ARG_DEPENDS} ${ARG_OPTIONAL_DEPENDS})
     # Module name is the directory relative to WALBERLA_MODULE_DIRS
     get_current_module_name ( moduleName )
     get_module_library_name ( moduleLibraryName ${moduleName} )
@@ -76,7 +79,7 @@ function ( waLBerla_add_module )
     endif ( )
 
     # Dependency Check
-    check_dependencies( missingDeps additionalDeps FILES ${sourceFiles} EXPECTED_DEPS ${ARG_DEPENDS} ${moduleName} )
+    check_dependencies( missingDeps additionalDeps FILES ${sourceFiles} EXPECTED_DEPS ${ALL_DEPENDENCIES} ${moduleName} )
     if ( missingDeps )
         message ( WARNING "The module ${moduleName} depends on ${missingDeps} which are not listed as dependencies!" )
     endif()

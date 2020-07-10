@@ -24,53 +24,45 @@
 #include "blockforest/communication/UniformBufferedScheme.h"
 #include "blockforest/loadbalancing/StaticParMetis.h"
 
-#include "core/SharedFunctor.h"
 #include "core/Environment.h"
+#include "core/SharedFunctor.h"
 #include "core/logging/Logging.h"
 #include "core/math/IntegerFactorization.h"
+#include "core/timing/RemainingTimeLogger.h"
 
 #include "domain_decomposition/SharedSweep.h"
 
 #include "field/AddToStorage.h"
 #include "field/StabilityChecker.h"
 
+#include "geometry/InitBoundaryHandling.h"
+#include "geometry/mesh/TriangleMesh.h"
+#include "geometry/mesh/TriangleMeshIO.h"
+
+#include "lbm/BlockForestEvaluation.h"
+#include "lbm/PerformanceEvaluation.h"
+#include "lbm/PerformanceLogger.h"
 #include "lbm/boundary/factories/DefaultBoundaryHandling.h"
 #include "lbm/communication/PdfFieldPackInfo.h"
 #include "lbm/communication/SparsePdfFieldPackInfo.h"
 #include "lbm/field/AddToStorage.h"
+#include "lbm/lattice_model/CollisionModel.h"
 #include "lbm/lattice_model/D3Q19.h"
 #include "lbm/lattice_model/D3Q27.h"
-#include "lbm/lattice_model/CollisionModel.h"
 #include "lbm/lattice_model/ForceModel.h"
 #include "lbm/refinement/TimeStep.h"
 #include "lbm/sweeps/CellwiseSweep.h"
 #include "lbm/sweeps/SplitPureSweep.h"
 #include "lbm/vtk/VTKOutput.h"
-#include "lbm/BlockForestEvaluation.h"
-#include "lbm/PerformanceEvaluation.h"
-#include "lbm/PerformanceLogger.h"
 
-#include "geometry/mesh/TriangleMesh.h"
-#include "geometry/mesh/TriangleMeshIO.h"
-#include "geometry/InitBoundaryHandling.h"
-
-#include "mesh_common/TriangleMeshes.h"
-#include "mesh_common/MeshOperations.h"
-#include "mesh_common/DistanceComputations.h"
-#include "mesh_common/DistanceFunction.h"
-#include "mesh_common/MeshIO.h"
-#include "mesh_common/MatrixVectorOperations.h"
-#include "mesh_common/distance_octree/DistanceOctree.h"
-#include "mesh_common/vtk/VTKMeshWriter.h"
-#include "mesh_common/vtk/CommonDataSources.h"
+#include "mesh/blockforest/BlockExclusion.h"
 #include "mesh/blockforest/BlockForestInitialization.h"
 #include "mesh/blockforest/BlockWorkloadMemory.h"
-#include "mesh/blockforest/BlockExclusion.h"
 #include "mesh/blockforest/RefinementSelection.h"
-#include "mesh/boundary/BoundarySetup.h"
 #include "mesh/boundary/BoundaryInfo.h"
 #include "mesh/boundary/BoundaryLocation.h"
 #include "mesh/boundary/BoundaryLocationFunction.h"
+#include "mesh/boundary/BoundarySetup.h"
 #include "mesh/boundary/BoundaryUIDFaceDataSource.h"
 #include "mesh/boundary/ColorToBoundaryMapper.h"
 
@@ -78,11 +70,19 @@
 
 #include "timeloop/SweepTimeloop.h"
 
-#include "core/timing/RemainingTimeLogger.h"
-
 #include <cmath>
-#include <vector>
 #include <string>
+#include <vector>
+
+#include "mesh_common/DistanceComputations.h"
+#include "mesh_common/DistanceFunction.h"
+#include "mesh_common/MatrixVectorOperations.h"
+#include "mesh_common/MeshIO.h"
+#include "mesh_common/MeshOperations.h"
+#include "mesh_common/TriangleMeshes.h"
+#include "mesh_common/distance_octree/DistanceOctree.h"
+#include "mesh_common/vtk/CommonDataSources.h"
+#include "mesh_common/vtk/VTKMeshWriter.h"
 
 namespace walberla {
 
