@@ -32,6 +32,7 @@
 #include <mesa_pd/data/shape/CylindricalBoundary.h>
 #include <mesa_pd/data/shape/Box.h>
 #include <mesa_pd/data/shape/Ellipsoid.h>
+#include <mesa_pd/data/shape/ConvexPolyhedron.h>
 
 #include <core/mpi/RecvBuffer.h>
 #include <core/mpi/SendBuffer.h>
@@ -81,6 +82,10 @@ namespace mpi {
             break;
          case Ellipsoid::SHAPE_TYPE :
             bs = std::make_unique<mesa_pd::data::Ellipsoid>();
+            bs->unpack(buf);
+            break;
+         case ConvexPolyhedron::SHAPE_TYPE :
+            bs = std::make_unique<mesa_pd::data::ConvexPolyhedron>();
             bs->unpack(buf);
             break;
          default : WALBERLA_ABORT("Shape type (" << shapeType << ") could not be determined!");

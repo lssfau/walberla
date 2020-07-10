@@ -188,3 +188,13 @@ waLBerla_execute_test( NAME   MESA_PD_Sorting )
 waLBerla_compile_test( NAME   MESA_PD_VTK_Outputs FILES vtk/VTKOutputs.cpp DEPENDS blockforest core vtk )
 waLBerla_execute_test( NAME   MESA_PD_VTK_Outputs PROCESSES 8 )
 
+if (WALBERLA_MESAPD_CONVEX_POLYHEDRON_AVAILABLE)
+    waLBerla_compile_test( NAME   MESA_PD_VTK_ConvexPolyhedron FILES vtk/ConvexPolyhedronVTKOutput.cpp DEPENDS core mesa_pd mesh_common vtk )
+    waLBerla_execute_test( NAME   MESA_PD_VTK_ConvexPolyhedron )
+
+    waLBerla_compile_test( NAME   MESA_PD_Data_ConvexPolyhedron FILES data/ConvexPolyhedron.cpp DEPENDS core mesa_pd mesh_common )
+    waLBerla_execute_test( NAME   MESA_PD_Data_ConvexPolyhedron )
+
+    waLBerla_compile_test( NAME   MESA_PD_COLLISIONDETECTION_ConvexPolyhedron_GJK_EPA FILES collision_detection/ConvexPolyhedron_GJK_EPA.cpp DEPENDS core mesa_pd mesh_common )
+    waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_ConvexPolyhedron_GJK_EPA )
+endif()

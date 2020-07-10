@@ -16,6 +16,7 @@
 //! \file MeshIO.h
 //! \ingroup mesh
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
+//! \author Lukas Werner
 //
 //======================================================================================================================
 
@@ -42,6 +43,30 @@
 namespace walberla {
 namespace mesh {
 
+/**
+ * \brief Reads a mesh from a generic input stream.
+ *
+ * \tparam MeshType     The type of the OpenMesh
+ *
+ * \param inputStream   The input stream from which the mesh should be read
+ * \param mesh          The mesh data structure to be written to
+ * \param extension     The mesh file's extension
+ *
+ * \return Whether the read operation was successful.
+ */
+template< typename MeshType >
+bool readFromStream( std::istream & inputStream, MeshType & mesh, const std::string & extension,
+                     bool binaryFile = false )
+{
+   OpenMesh::IO::Options options;
+   if( mesh.has_face_colors() )
+      options += OpenMesh::IO::Options::FaceColor;
+   if ( binaryFile )
+      options += OpenMesh::IO::Options::Binary;
+   if( mesh.has_vertex_colors() )
+      options += OpenMesh::IO::Options::VertexColor;
+   return OpenMesh::IO::read_mesh( mesh, inputStream, extension, options );
+}
 
 /**
 * \brief Loads an OpenMesh in parallel
@@ -86,16 +111,41 @@ void readAndBroadcast( const std::string & filename, MeshType & mesh, bool binar
    if ( binaryFile )
       iss = std::istringstream( str, std::ifstream::in | std::ifstream::binary );
 
-   OpenMesh::IO::Options options;
-   if( mesh.has_face_colors() )
-      options += OpenMesh::IO::Options::FaceColor;
-   if ( binaryFile )
-      options += OpenMesh::IO::Options::Binary;
-   if( mesh.has_vertex_colors() )
-      options += OpenMesh::IO::Options::VertexColor;
-   if( !OpenMesh::IO::read_mesh( mesh, iss, extension, options ) )
+   if (!readFromStream<MeshType>(iss, mesh, extension, binaryFile)) {
       WALBERLA_ABORT( "Error while reading file \"" << filename << "\"!" );
+   }
 }
+
+/**
+ * \brief Read a mesh from a file.
+ * \attention If reading in parallel, readAndBroadcast should be preferred!
+ *
+ * \tparam MeshType     The type of the OpenMesh
+ *
+ * \param filename      Filename of the mesh to be loaded
+ * \param mesh          The mesh data structure to be written to
+ */
+template< typename MeshType >
+void readFromFile( const std::string & filename, MeshType & mesh, bool binaryFile = false )
+{
+   if (!filesystem::exists(filename)) {
+      WALBERLA_ABORT( "The mesh file \"" << filename << "\" does not exist!" );
+   }
+
+   std::string extension = filesystem::path(filename).extension().string();
+
+   std::ios_base::openmode openMode = std::ifstream::in;
+   if (binaryFile) {
+      openMode |= std::ifstream::binary;
+   }
+   std::ifstream inputFileStream = std::ifstream(filename, openMode);
+
+   if (!readFromStream<MeshType>(inputFileStream, mesh, extension, binaryFile)) {
+      WALBERLA_ABORT( "Error while reading file \"" << filename << "\"!" );
+   }
+   inputFileStream.close();
+}
+
 
 } // namespace mesh
 } // namespace walberla

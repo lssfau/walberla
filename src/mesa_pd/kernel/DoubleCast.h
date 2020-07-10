@@ -34,6 +34,7 @@
 #include <mesa_pd/data/shape/CylindricalBoundary.h>
 #include <mesa_pd/data/shape/Box.h>
 #include <mesa_pd/data/shape/Ellipsoid.h>
+#include <mesa_pd/data/shape/ConvexPolyhedron.h>
 
 #include <core/Abort.h>
 #include <core/debug/Debug.h>
@@ -94,6 +95,11 @@ auto DoubleCast::operator()( size_t idx, size_t idy, Accessor& ac, func& f, Args
                                                    *static_cast<Sphere*>(ac.getShape(idx)),
                                                    *static_cast<Ellipsoid*>(ac.getShape(idy)),
                                                    std::forward<Args>(args)...);
+            case ConvexPolyhedron::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<Sphere*>(ac.getShape(idx)),
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
             default : WALBERLA_ABORT("Shape type (" << ac.getShape(idy)->getShapeType() << ") could not be determined!");
          }
       case HalfSpace::SHAPE_TYPE :
@@ -123,6 +129,11 @@ auto DoubleCast::operator()( size_t idx, size_t idy, Accessor& ac, func& f, Args
                                                    idy,
                                                    *static_cast<HalfSpace*>(ac.getShape(idx)),
                                                    *static_cast<Ellipsoid*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
+            case ConvexPolyhedron::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<HalfSpace*>(ac.getShape(idx)),
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idy)),
                                                    std::forward<Args>(args)...);
             default : WALBERLA_ABORT("Shape type (" << ac.getShape(idy)->getShapeType() << ") could not be determined!");
          }
@@ -154,6 +165,11 @@ auto DoubleCast::operator()( size_t idx, size_t idy, Accessor& ac, func& f, Args
                                                    *static_cast<CylindricalBoundary*>(ac.getShape(idx)),
                                                    *static_cast<Ellipsoid*>(ac.getShape(idy)),
                                                    std::forward<Args>(args)...);
+            case ConvexPolyhedron::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<CylindricalBoundary*>(ac.getShape(idx)),
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
             default : WALBERLA_ABORT("Shape type (" << ac.getShape(idy)->getShapeType() << ") could not be determined!");
          }
       case Box::SHAPE_TYPE :
@@ -184,6 +200,11 @@ auto DoubleCast::operator()( size_t idx, size_t idy, Accessor& ac, func& f, Args
                                                    *static_cast<Box*>(ac.getShape(idx)),
                                                    *static_cast<Ellipsoid*>(ac.getShape(idy)),
                                                    std::forward<Args>(args)...);
+            case ConvexPolyhedron::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<Box*>(ac.getShape(idx)),
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
             default : WALBERLA_ABORT("Shape type (" << ac.getShape(idy)->getShapeType() << ") could not be determined!");
          }
       case Ellipsoid::SHAPE_TYPE :
@@ -213,6 +234,46 @@ auto DoubleCast::operator()( size_t idx, size_t idy, Accessor& ac, func& f, Args
                                                    idy,
                                                    *static_cast<Ellipsoid*>(ac.getShape(idx)),
                                                    *static_cast<Ellipsoid*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
+            case ConvexPolyhedron::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<Ellipsoid*>(ac.getShape(idx)),
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
+            default : WALBERLA_ABORT("Shape type (" << ac.getShape(idy)->getShapeType() << ") could not be determined!");
+         }
+      case ConvexPolyhedron::SHAPE_TYPE :
+         switch (ac.getShape(idy)->getShapeType())
+         {
+            case Sphere::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idx)),
+                                                   *static_cast<Sphere*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
+            case HalfSpace::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idx)),
+                                                   *static_cast<HalfSpace*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
+            case CylindricalBoundary::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idx)),
+                                                   *static_cast<CylindricalBoundary*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
+            case Box::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idx)),
+                                                   *static_cast<Box*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
+            case Ellipsoid::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idx)),
+                                                   *static_cast<Ellipsoid*>(ac.getShape(idy)),
+                                                   std::forward<Args>(args)...);
+            case ConvexPolyhedron::SHAPE_TYPE : return f(idx,
+                                                   idy,
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idx)),
+                                                   *static_cast<ConvexPolyhedron*>(ac.getShape(idy)),
                                                    std::forward<Args>(args)...);
             default : WALBERLA_ABORT("Shape type (" << ac.getShape(idy)->getShapeType() << ") could not be determined!");
          }

@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     mpd = Module(args.path)
     ps = mpd.add(data.ParticleStorage())
-    ps.set_shapes('Sphere', 'HalfSpace', 'CylindricalBoundary', 'Box', 'Ellipsoid')
+    ps.set_shapes('Sphere', 'HalfSpace', 'CylindricalBoundary', 'Box', 'Ellipsoid', 'ConvexPolyhedron')
     ps.add_property("position", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
     ps.add_property("linearVelocity", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
     ps.add_property("invMass", "walberla::real_t", defValue="real_t(1)", syncMode="ON_GHOST_CREATION")
