@@ -15,6 +15,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     mpd = Module(args.path)
+    mpd.enable_openmp(False)
     ps = mpd.add(data.ParticleStorage())
     ps.set_shapes('Sphere', 'HalfSpace', 'CylindricalBoundary', 'Box', 'Ellipsoid')
     ps.add_property("position", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")

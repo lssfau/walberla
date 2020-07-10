@@ -107,23 +107,6 @@ int main( int argc, char ** argv )
    WALBERLA_CHECK_FLOAT_EQUAL( ps->getForce(0), -ps->getForce(1) );
    WALBERLA_CHECK_FLOAT_EQUAL( ps->getForce(0), Vec3(1,1,1).getNormalized() * ((std::sqrt(real_t(12)) - 4) * sd.getStiffness(0, 0)) );
 
-   // thread safety test
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static)
-#endif
-   for (int i = 0; i < 100; ++i)
-      sd(contact.getIdx1(),
-         contact.getIdx2(),
-         ac,
-         contact.getContactPoint(),
-         contact.getContactNormal(),
-         contact.getPenetrationDepth());
-
-   WALBERLA_CHECK_FLOAT_EQUAL( ps->getForce(0), -ps->getForce(1) );
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON( ps->getForce(0),
-                                       real_t(101) * Vec3(1,1,1).getNormalized() * ((std::sqrt(real_t(12)) - 4) * sd.getStiffness(0, 0)),
-                                       real_t(1e-6) );
-
    auto cor  = real_t(0.87);
    auto ct   = real_t(0.17);
    auto meff = real_t(0.65);

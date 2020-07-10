@@ -369,9 +369,9 @@ inline void ContactStorage::forEachContact(const bool openmp, const Selector& se
 {
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
-   #ifdef _OPENMP
-   #pragma omp parallel for schedule(static) if (openmp)
-   #endif
+   {%- if module.enableOpenMP %}
+   #pragma omp parallel for schedule(static) firstprivate(selector,func) if (openmp)
+   {%- endif %}
    for (int64_t i = 0; i < int64_c(len); ++i)
       if (selector(uint64_c(i), acForPS)){
          func( uint64_c(i), std::forward<Args>(args)... );
