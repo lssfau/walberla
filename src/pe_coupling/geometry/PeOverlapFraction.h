@@ -34,8 +34,8 @@ namespace walberla {
 namespace pe_coupling{
 
 
-real_t overlapFractionPe( const pe::RigidBody & peRigidBody, const Vector3<real_t> & cellMidpoint,
-                          const Vector3<real_t> & dx, uint_t maxDepth=4 )
+inline real_t overlapFractionPe( const pe::RigidBody & peRigidBody, const Vector3<real_t> & cellMidpoint,
+                                 const Vector3<real_t> & dx, uint_t maxDepth=4 )
 {
    if( peRigidBody.getTypeID() == pe::Sphere::getStaticTypeID() || peRigidBody.getTypeID() == pe::Squirmer::getStaticTypeID() )
    {
