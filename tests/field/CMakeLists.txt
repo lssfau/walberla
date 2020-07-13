@@ -72,4 +72,9 @@ waLBerla_generate_target_from_python(NAME CodegenPoissonGeneratedKernel FILE cod
       OUT_FILES Poisson.cpp Poisson.h )
 waLBerla_compile_test( FILES codegen/CodegenPoisson.cpp DEPENDS gui timeloop CodegenPoissonGeneratedKernel)
 waLBerla_execute_test( NAME CodegenPoisson )
+
+waLBerla_generate_target_from_python(NAME CodeGenMultipleFieldSwaps FILE codegen/MultipleFieldSwaps.py
+        OUT_FILES MultipleFieldSwaps.cpp MultipleFieldSwaps.h )
+waLBerla_compile_test( FILES codegen/MultipleFieldSwaps.cpp DEPENDS gui timeloop CodeGenMultipleFieldSwaps)
+waLBerla_execute_test( NAME MultipleFieldSwaps )
 endif()
