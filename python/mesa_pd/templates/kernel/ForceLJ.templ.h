@@ -26,6 +26,7 @@
 
 #pragma once
 
+#include <mesa_pd/common/ParticleFunctions.h>
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/IAccessor.h>
 
@@ -129,31 +130,9 @@ inline void ForceLJ::operator()(const size_t p_idx, const size_t np_idx, Accesso
       const real_t force = real_t(48) * sr6 * ( sr6 - real_t(0.5) ) * sr2 * getEpsilon(ac.getType(p_idx), ac.getType(np_idx));
       const Vec3 f = force * dir;
 
-#ifdef _OPENMP
-#pragma omp atomic
-#endif
-   ac.getForceRef(p_idx)[0]  += f[0];
-#ifdef _OPENMP
-#pragma omp atomic
-#endif
-   ac.getForceRef(p_idx)[1]  += f[1];
-#ifdef _OPENMP
-#pragma omp atomic
-#endif
-   ac.getForceRef(p_idx)[2]  += f[2];
-
-#ifdef _OPENMP
-#pragma omp atomic
-#endif
-   ac.getForceRef(np_idx)[0]  -= f[0];
-#ifdef _OPENMP
-#pragma omp atomic
-#endif
-   ac.getForceRef(np_idx)[1]  -= f[1];
-#ifdef _OPENMP
-#pragma omp atomic
-#endif
-   ac.getForceRef(np_idx)[2]  -= f[2];
+      // Add normal force at contact point
+      addForceAtomic( p_idx, ac, f );
+      addForceAtomic( np_idx, ac, -f );
    }
 }
 

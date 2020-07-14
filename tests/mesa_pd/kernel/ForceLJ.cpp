@@ -102,21 +102,6 @@ int main( int argc, char ** argv )
    lj(0, 1, accessor);
    WALBERLA_CHECK_FLOAT_EQUAL( p1.getForce(), -p2.getForce() );
 
-   // thread safety test
-   auto singleForce = p1.getForce();
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static)
-#endif
-   for (int i = 0; i < 100; ++i)
-      lj(0, 1, accessor);
-
-   WALBERLA_LOG_DEVEL(p1);
-   WALBERLA_LOG_DEVEL(p2);
-   WALBERLA_CHECK_FLOAT_EQUAL( p1.getForce(), -p2.getForce() );
-   WALBERLA_CHECK_FLOAT_EQUAL_EPSILON( p1.getForce(),
-                                       real_t(101) * singleForce,
-                                       real_t(1e-13) );
-
    return EXIT_SUCCESS;
 }
 

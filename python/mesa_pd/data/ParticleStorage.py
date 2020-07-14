@@ -100,5 +100,6 @@ class ParticleStorage():
     def generate(self, module):
         ctx = {'module': module, **self.context}
 
-        generate_file(module['module_path'], 'data/ParticleStorage.templ.h', ctx, filename='data/ParticleStorage.h')
-        generate_file(module['module_path'], 'data/ParticleAccessor.templ.h', ctx, filename='data/ParticleAccessor.h')
+        generate_file(module['module_path'], 'data/ParticleStorage.templ.h', ctx)
+        generate_file(module['module_path'], 'data/ParticleAccessor.templ.h', ctx)
+        generate_file(module['module_path'], 'common/ParticleFunctions.templ.h', ctx)

@@ -1045,9 +1045,6 @@ inline void ParticleStorage::forEachParticle(const bool openmp,
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
-   #ifdef _OPENMP
-   #pragma omp parallel for schedule(static) if (openmp)
-   #endif
    for (int64_t i = 0; i < int64_c(len); ++i)
    {
       if (selector(uint64_c(i), acForPS))
@@ -1064,9 +1061,6 @@ inline void ParticleStorage::forEachParticle(const bool openmp,
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
-   #ifdef _OPENMP
-   #pragma omp parallel for schedule(static) if (openmp)
-   #endif
    for (int64_t i = 0; i < int64_c(len); ++i)
    {
       if (selector(uint64_c(i), acForPS))
@@ -1083,9 +1077,6 @@ inline void ParticleStorage::forEachParticlePair(const bool openmp,
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
-   #ifdef _OPENMP
-   #pragma omp parallel for schedule(static) if (openmp)
-   #endif
    for (int64_t i = 0; i < int64_c(len); ++i)
    {
       for (int64_t j = 0; j < int64_c(len); ++j)
@@ -1110,9 +1101,6 @@ inline void ParticleStorage::forEachParticlePair(const bool openmp,
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
-   #ifdef _OPENMP
-   #pragma omp parallel for schedule(static) if (openmp)
-   #endif
    for (int64_t i = 0; i < int64_c(len); ++i)
    {
       for (int64_t j = 0; j < int64_c(len); ++j)
@@ -1137,9 +1125,6 @@ inline void ParticleStorage::forEachParticlePairHalf(const bool openmp,
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
-   #ifdef _OPENMP
-   #pragma omp parallel for schedule(static) if (openmp)
-   #endif
    for (int64_t i = 0; i < int64_c(len); ++i)
    {
       for (int64_t j = i+1; j < int64_c(len); ++j)
@@ -1161,9 +1146,6 @@ inline void ParticleStorage::forEachParticlePairHalf(const bool openmp,
 
    WALBERLA_UNUSED(openmp);
    const uint64_t len = size();
-   #ifdef _OPENMP
-   #pragma omp parallel for schedule(static) if (openmp)
-   #endif
    for (int64_t i = 0; i < int64_c(len); ++i)
    {
       for (int64_t j = i+1; j < int64_c(len); ++j)

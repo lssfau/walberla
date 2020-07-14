@@ -17,17 +17,23 @@ class Module:
            name of the generated module
         """
 
-        self.context = {}
-        self.context['path'] = Path(path).resolve()
-        self.context['name'] = module_name
-        self.context['module_path'] = self.context['path'] / 'src' / self.context['name']
-        self.context['test_path']   = self.context['path'] / 'tests' / self.context['name']
+        path = Path(path).resolve()
+        self.context = {
+            'path': path,
+            'name': module_name,
+            'module_path': path / 'src' / module_name,
+            'test_path': path / 'tests' / module_name,
+            'enableOpenMP': False
+        }
 
         self.components = []
 
     def add(self, component):
         self.components.append(component)
         return component
+
+    def enable_openmp(self, enabled):
+        self.context['enableOpenMP'] = enabled
 
     def rename(self):
         for filename in (f for f in self.context['module_path'].glob('**/*') if f.is_file()):

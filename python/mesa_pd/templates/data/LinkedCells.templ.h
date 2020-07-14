@@ -171,9 +171,9 @@ void LinkedCells::clear()
 {
    const uint64_t cellsSize = cells_.size();
    //clear existing linked cells
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static)
-#endif
+   {%- if module.enableOpenMP %}
+   #pragma omp parallel for schedule(static)
+   {%- endif %}
    for (int64_t i = 0; i < int64_c(cellsSize); ++i)
       cells_[uint64_c(i)] = -1;
    infiniteParticles_ = -1;
@@ -185,9 +185,9 @@ inline void LinkedCells::forEachParticlePair{%- if half %}Half{%- endif %}(const
 {
    static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
    WALBERLA_UNUSED(openmp);
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static) if (openmp)
-#endif
+   {%- if module.enableOpenMP %}
+   #pragma omp parallel for collapse(2) schedule(static) firstprivate(selector,func) if (openmp)
+   {%- endif %}
    for (int z = 0; z < numCellsPerDim_[2]; ++z)
    {
       for (int y = 0; y < numCellsPerDim_[1]; ++y)
