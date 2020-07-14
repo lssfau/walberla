@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
 from ..utility import TerminalColor, find, generate_file
 
 
@@ -26,7 +25,7 @@ class ContactStorage():
 
     def add_property(self, name, type, defValue=""):
         prop = find(lambda x: x['name'] == name, self.context['properties'])
-        if (prop == None):
+        if (prop is None):
             # print(f"{TerminalColor.GREEN} creating property: {name} {TerminalColor.DEFAULT}")
             self.context['properties'].append(create_contact_storage_property(name, type, defValue=defValue))
         else:
@@ -55,8 +54,7 @@ class ContactStorage():
         print("=" * 90)
 
     def generate(self, module):
-        ctx = {}
-        ctx['module'] = module
+        ctx = {'module': module}
         ctx.update(self.context)
 
         generate_file(module['module_path'], 'data/ContactStorage.templ.h', ctx, filename='data/ContactStorage.h')

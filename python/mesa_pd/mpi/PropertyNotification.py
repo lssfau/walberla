@@ -9,7 +9,7 @@ class PropertyNotification:
 
     def add_property(self, name, type, reset_value):
         prop = find(lambda x: x['name'] == name, self.context['properties'])
-        if (prop == None):
+        if (prop is None):
             self.context['properties'].append({'name': name, 'type': type, 'resetValue': reset_value})
         else:
             if not (prop['type'] == type and prop['name'] == name and prop['resetValue'] == reset_value):

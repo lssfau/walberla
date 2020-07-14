@@ -11,4 +11,5 @@ __all__ = ['ContactHistory',
            'ContactStorage',
            'LinkedCells',
            'ParticleStorage',
+           'ShapeStorage',
            'SparseLinkedCells']

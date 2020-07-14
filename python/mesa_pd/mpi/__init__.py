@@ -15,6 +15,7 @@ from .SyncNextNeighborsNoGhosts import SyncNextNeighborsNoGhosts
 __all__ = ['BroadcastProperty',
            'ClearGhostOwnerSync',
            'ClearNextNeighborSync',
+           'Notifications',
            'PropertyNotification',
            'ReduceContactHistory',
            'ReduceProperty',
