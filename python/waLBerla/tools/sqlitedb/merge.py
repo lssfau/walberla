@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import sqlite3
 
@@ -109,21 +109,31 @@ def mergeSqliteFiles ( targetFile, fileToMerge ):
 
 
 if __name__ == "__main__":
-    import sys
-    import os
+    import argparse
+    from pathlib import Path
+    import re
     import shutil
-    if ( len(sys.argv) < 2 ):
-        print( "Usage: mergeSqliteFiles <targetFile>" )
-    else:
-       isFirstFile = True
-       for r,d,f in os.walk('.'):
-          for file in f:
-             print(r, file)
-             if r != '.' and file.endswith('.sqlite'):
-                if isFirstFile:
-                   print( 'Copying ' + os.path.join(r,file) )
-                   shutil.copy( os.path.join(r,file), sys.argv[1] )
-                   isFirstFile = False
-                else:
-                   print( 'Merging ' + os.path.join(r,file) )
-                   mergeSqliteFiles( sys.argv[1], os.path.join(r,file) )
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('output_file', type=Path)
+    parser.add_argument('input_folder', type=Path)
+    parser.add_argument('-r', '--recursive', action='store_true', help='Take all subfolders into account.')
+    parser.add_argument('-f', '--filter', default='.*', dest='regex', help='Only files matching this regex are accepted.')
+    args = parser.parse_args()
+
+    regex = re.compile(args.regex)
+
+    if not args.input_folder.is_dir():
+        raise ValueError(f'{args.input_folder} is not a folder')
+
+    search_pattern = '**/*.sqlite' if args.recursive else '*.sqlite'
+
+    files = filter(lambda x: regex.match(x.name), args.input_folder.glob(search_pattern))
+    try:
+        first_file = next(files)
+        print(f'Copying {first_file}')
+        shutil.copy(str(first_file.resolve()), str(args.output_file.resolve()))
+    except StopIteration:
+        raise ValueError(f'{args.input_folder} has no matching sqlite files')
+    for file in files:
+        mergeSqliteFiles(str(args.output_file.resolve()), str(file.resolve()))
