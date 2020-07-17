@@ -7,26 +7,26 @@ This C++ class can call a Python function identified by a string using this C++ 
     python_coupling::PythonCallback callback ( "someMagicString" );
     // expose some data here and pass them as arguments ( see C++ documentation for details)
 
-    
+
 There are two ways to mark a python function to be called by this callback.
 The first option are normal function callbacks::
- 
+
     @waLBerla.callback("someMagicString")
     def someArbitraryName( parameter1 ):
         pass
 
-    
+
 More advanced are callback classes, which can carry state::
 
     class MyScenario:
         def __init__( someState ):
             self._someState = someState
-            
+
         @waLBerla.memberCallback
         def someMagicString:
             # react here according to the state
             pass
-    
+
     scenarios = waLBerla.ScenarioManager()
     scenarios.add( MyScenario() )
 
@@ -38,7 +38,7 @@ Internals:
 ^^^^^^^^^
 
 The C++ waLBerla module walberla_cpp has a callbacks object.
-To register a certain python function as callback it has to be set as attribute of this object: 
+To register a certain python function as callback it has to be set as attribute of this object:
 ``setattr( walberla_cpp.callbacks, "someMagicString", theCallbackFunction)``
 
 
@@ -86,14 +86,15 @@ class ScenarioManager:
     """Use this class to simulate multiple scenarios
        A scenario is an instance of a class with member callbacks.
        See docstring of this module for an example.
-       
+
        Internals:
            ScenarioManager is driven by "config" callbacks from the C++ code.
-              ``for( auto configIt = python_coupling::configBegin(argc, argv); configIt != python_coupling::configEnd(); ++configIt )``
+              ``for( auto configIt = python_coupling::configBegin(argc, argv); configIt != python_coupling::configEnd();
+                     ++configIt )``
            Activation means to register the _configLoopCallback as 'config' waLBerla callback function
            which is called when a new scenario is expected.
            When config is called again the calbacks of the next scenario are activated.
-            
+
     """
 
     def __init__(self):
@@ -135,7 +136,8 @@ class ScenarioManager:
                 setattr(walberla_cpp.callbacks, callback_name, bound_callback)
 
             if 'config' not in callbacks:
-                walberla_cpp.log_warning_on_root("Error: Registered Scenario of class '%s' has no 'config' callback. Skipping... " % (type(sc),))
+                walberla_cpp.log_warning_on_root(
+                    "Error: Registered Scenario of class '%s' has no 'config' callback. Skipping... " % (type(sc),))
                 return None
 
             config = sc.config(*args, **kwargs)

@@ -1,6 +1,6 @@
 import jinja2
 import sympy as sp
-import re
+# import re
 
 from pystencils import TypedSymbol
 from pystencils.backends.cbackend import generate_c

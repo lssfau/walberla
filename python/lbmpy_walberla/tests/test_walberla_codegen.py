@@ -84,7 +84,7 @@ class WalberlaLbmpyCodegenTest(unittest.TestCase):
             # the collision rule of the LB method where the some advanced features
             collision_rule = create_lb_collision_rule(
                 stencil='D3Q19', compressible=True, fluctuating={'seed': 0, 'temperature': 1e-6},
-                method='mrt', relaxation_rates=[omega_shear]*19,
+                method='mrt', relaxation_rates=[omega_shear] * 19,
                 force_model='guo', force=force_field.center_vector,
                 optimization={'cse_global': False}
             )

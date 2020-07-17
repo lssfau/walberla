@@ -32,7 +32,8 @@ class CodeGeneration:
             written = set(os.path.realpath(f) for f in self.context.files_written)
             only_in_cmake = expected - written
             only_generated = written - expected
-            error_message = "Generated files (OUT_FILES) specified not correctly in cmake with 'waLBerla_generate_target_from_python'\n"
+            error_message = "Generated files (OUT_FILES) specified not correctly" \
+                            + "in cmake with 'waLBerla_generate_target_from_python'\n"
             if only_in_cmake:
                 error_message += "Files only specified in CMake {}\n".format(
                     [os.path.basename(p) for p in only_in_cmake])

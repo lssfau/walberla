@@ -22,31 +22,29 @@ import os.path
 # complete -o filenames  -o nospace -F _cdb cdb
 
 
-
 # Example:
 # ./folderComplete.py /home/bauer/devel/walberla tests/g
 
 
 # Input:   directory name, and beginning of word
-base_dir    = sys.argv[1] 
+base_dir = sys.argv[1]
 
-if len( sys.argv ) == 2:
-  to_complete=""
+if len(sys.argv) == 2:
+    to_complete = ""
 else:
-  to_complete = sys.argv[2]
-
+    to_complete = sys.argv[2]
 
 complete_path = base_dir + "/" + to_complete
 
 # In example valid_path = "/home/bauer/devel/walberla/tests "
 #            tail = "g"
-valid_path, tail = complete_path.rsplit("/",1)
+valid_path, tail = complete_path.rsplit("/", 1)
 
 # We look for all subdirs in valid_path, only if they start with tail
-subdirs = [o for o in os.listdir( valid_path ) if os.path.isdir( valid_path + "/" + o) and o.startswith(tail) ]
+subdirs = [o for o in os.listdir(valid_path) if os.path.isdir(valid_path + "/" + o) and o.startswith(tail)]
 
 # Make all paths relative to base_dir
-result = [ os.path.relpath( valid_path + "/" + p, base_dir) + "/" for p in subdirs ]
+result = [os.path.relpath(valid_path + "/" + p, base_dir) + "/" for p in subdirs]
 
 # Print the result
-print (" ".join( result))
+print(" ".join(result))

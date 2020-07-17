@@ -17,8 +17,8 @@ with CodeGeneration() as ctx:
 
     @ps.kernel
     def kernel_func():
-        dst[0, 0, 0] @= (3 * src[1, 0, 0] + 4 * src[-1, 0, 0] +
-                         5 * src[0, 1, 0] + 6 * src[0, -1, 0] +
-                         7 * src[0, 0, 1] + 8 * src[0, 0, -1]) / 33
+        dst[0, 0, 0] @= (3 * src[1, 0, 0] + 4 * src[-1, 0, 0]
+                         + 5 * src[0, 1, 0] + 6 * src[0, -1, 0]
+                         + 7 * src[0, 0, 1] + 8 * src[0, 0, -1]) / 33
 
     generate_sweep(ctx, 'JacobiKernel3D', kernel_func, field_swaps=[(src, dst)])

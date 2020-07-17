@@ -13,10 +13,13 @@ from waLBerla.tools.jobscripts.pizdaint_hybrid import createJobscript as _cr_piz
 
 def createJobscript(*args, **kwargs):
     """
-        :param machine:     Currently supported target machines are  ``supermuc``, ``supermuc_phase2``, ``juqueen`` and ``hornet``
+        :param machine:     Currently supported target machines are  ``supermuc``, ``supermuc_phase2``,
+                            ``juqueen`` and ``hornet``
         :param nodes:       Number of nodes to run on. You can either specify nodes or cores.
-        :param cores:       specify eiter nodes or cores. If using more than one node the nodes have to be filled completely
-        :param job_class:   optional, the jobclass is usually computed depending on number of nodes and wall_time, this parameter overrides this
+        :param cores:       specify eiter nodes or cores. If using more than one node the nodes
+                            have to be filled completely
+        :param job_class:   optional, the jobclass is usually computed depending on number of nodes and wall_time,
+                            this parameter overrides this
         :param initial_dir: initial working directory of the job, optional, defaults to home directory
         :param job_name:    name of the job in the queuing system, defaults to 'waLBerla'
         :param output_file: file where stdout will be redirected to by the queueing system
@@ -32,8 +35,8 @@ def createJobscript(*args, **kwargs):
 
         Run multiple programs:
 
-        :param commands:  can be either a list of two-tuples with (executableName, configFile), which are then run in this order with mpirun
-                          or a list of string which are just appended to the jobscript file
+        :param commands:  can be either a list of two-tuples with (executableName, configFile), which are then run
+                          in this order with mpirun or a list of string which are just appended to the jobscript file
     """
     funcs = {
         'supermuc': _cr_supermuc,
