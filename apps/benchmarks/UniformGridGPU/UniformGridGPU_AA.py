@@ -56,7 +56,7 @@ options_dict = {
 
 
 info_header = """
-#include "stencil/D3Q{q}.h"\nusing Stencil_T = walberla::stencil::D3Q{q}; 
+#include "stencil/D3Q{q}.h"\nusing Stencil_T = walberla::stencil::D3Q{q};
 const char * infoStencil = "{stencil}";
 const char * infoConfigName = "{configName}";
 const bool infoCseGlobal = {cse_global};
@@ -113,8 +113,10 @@ with CodeGeneration() as ctx:
     generate_sweep(ctx, 'UniformGridGPU_AA_MacroGetter', getter_assignments)
 
     # communication
-    generate_pack_info_from_kernel(ctx, 'UniformGridGPU_AA_PackInfoPull', update_rules['Odd'], kind='pull', target='gpu')
-    generate_pack_info_from_kernel(ctx, 'UniformGridGPU_AA_PackInfoPush', update_rules['Odd'], kind='push', target='gpu')
+    generate_pack_info_from_kernel(ctx, 'UniformGridGPU_AA_PackInfoPull', update_rules['Odd'],
+                                   kind='pull', target='gpu')
+    generate_pack_info_from_kernel(ctx, 'UniformGridGPU_AA_PackInfoPush', update_rules['Odd'],
+                                   kind='push', target='gpu')
 
     infoHeaderParams = {
         'stencil': stencil_str,

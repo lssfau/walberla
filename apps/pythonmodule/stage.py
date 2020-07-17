@@ -1,3 +1,2 @@
-
 if __name__ == "__main__":
-    install()
+    install()  # noqa: F821

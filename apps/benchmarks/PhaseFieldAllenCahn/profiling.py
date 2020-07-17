@@ -1,4 +1,3 @@
-import os
 import waLBerla as wlb
 
 

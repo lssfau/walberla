@@ -9,9 +9,8 @@ from lbmpy.stencils import get_stencil
 from pystencils_walberla import CodeGeneration, generate_sweep, generate_pack_info_from_kernel
 from lbmpy_walberla import generate_boundary
 
-from lbmpy.phasefield_allen_cahn.kernel_equations import initializer_kernel_phase_field_lb, \
-     initializer_kernel_hydro_lb, interface_tracking_force, \
-     hydrodynamic_force, get_collision_assignments_hydro
+from lbmpy.phasefield_allen_cahn.kernel_equations import initializer_kernel_phase_field_lb,\
+    initializer_kernel_hydro_lb, interface_tracking_force, hydrodynamic_force, get_collision_assignments_hydro
 
 from lbmpy.phasefield_allen_cahn.force_model import MultiphaseForceModel
 
@@ -159,7 +158,7 @@ sweep_block_size = (TypedSymbol("cudaBlockSize0", np.int32),
 sweep_params = {'block_size': sweep_block_size}
 
 info_header = f"""
-#include "stencil/D3Q{q_phase}.h"\nusing Stencil_phase_T = walberla::stencil::D3Q{q_phase}; 
+#include "stencil/D3Q{q_phase}.h"\nusing Stencil_phase_T = walberla::stencil::D3Q{q_phase};
 #include "stencil/D3Q{q_hydro}.h"\nusing Stencil_hydro_T = walberla::stencil::D3Q{q_hydro};
 """
 

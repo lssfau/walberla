@@ -9,8 +9,8 @@ Look at the end of the file to select the benchmark to run
 
 import os
 import waLBerla as wlb
-from waLBerla.tools.config import block_decomposition, toPrm
-from waLBerla.tools.sqlitedb import *
+from waLBerla.tools.config import block_decomposition
+from waLBerla.tools.sqlitedb import sequenceValuesToScalars, checkAndUpdateSchema, storeSingle
 from copy import deepcopy
 import sys
 import sqlite3
@@ -53,7 +53,7 @@ class Scenario:
         from pprint import pformat
         wlb.log_info_on_root("Scenario:\n" + pformat(self.config_dict))
         # Write out the configuration as text-based prm:
-        #print(toPrm(self.config_dict))
+        # print(toPrm(self.config_dict))
         return self.config_dict
 
     @wlb.member_callback
@@ -71,16 +71,17 @@ class Scenario:
         result = data
         sequenceValuesToScalars(result)
         num_tries = 4
-        for num_try in range(num_tries):  # check multiple times e.g. may fail when multiple benchmark processes are running
+        # check multiple times e.g. may fail when multiple benchmark processes are running
+        for num_try in range(num_tries):
             try:
                 checkAndUpdateSchema(result, "runs", DB_FILE)
                 storeSingle(result, "runs", DB_FILE)
                 break
             except sqlite3.OperationalError as e:
-                wlb.log_warning("Sqlite DB writing failed: try {}/{}  {}".format(num_try+1, num_tries, str(e)))
+                wlb.log_warning("Sqlite DB writing failed: try {}/{}  {}".format(num_try + 1, num_tries, str(e)))
 
 
-# -------------------------------------- Functions trying different parameter sets -------------------------------------------------------------------
+# -------------------------------------- Functions trying different parameter sets -----------------------------------
 
 
 def overlap_benchmark():
@@ -93,9 +94,11 @@ def overlap_benchmark():
                           (4, 4, 1), (8, 8, 1), (16, 16, 1), (32, 32, 1),
                           (4, 4, 4), (8, 8, 8), (16, 16, 16), (32, 32, 32)]
 
-    for comm_strategy in ['UniformGPUScheme_Baseline', 'UniformGPUScheme_Memcpy']:  # 'GPUPackInfo_Baseline', 'GPUPackInfo_Streams'
+    # 'GPUPackInfo_Baseline', 'GPUPackInfo_Streams'
+    for comm_strategy in ['UniformGPUScheme_Baseline', 'UniformGPUScheme_Memcpy']:
         # no overlap
-        scenarios.add(Scenario(timeStepStrategy='noOverlap', communicationScheme=comm_strategy, innerOuterSplit=(1, 1, 1)))
+        scenarios.add(Scenario(timeStepStrategy='noOverlap', communicationScheme=comm_strategy,
+                               innerOuterSplit=(1, 1, 1)))
 
         # overlap
         for overlap_strategy in ['simpleOverlap', 'complexOverlap']:
@@ -123,7 +126,8 @@ def communication_compare():
                           timesteps=num_time_steps(block_size))
             scenarios.add(sc)
             for inner_outer_split in [(4, 1, 1), (8, 1, 1), (16, 1, 1), (32, 1, 1)]:
-                if 3 * inner_outer_split[0] > block_size[0]:  # ensure that the inner part of the domain is still large enough
+                # ensure that the inner part of the domain is still large enough
+                if 3 * inner_outer_split[0] > block_size[0]:
                     continue
                 sc = Scenario(cells_per_block=block_size,
                               gpuBlockSize=(128, 1, 1),
@@ -155,7 +159,7 @@ def single_gpu_benchmark():
             scenarios.add(scenario)
 
 
-# -------------------------------------- Optional job script generation for PizDaint -------------------------------------------------------------------
+# -------------------------------------- Optional job script generation for PizDaint ---------------------------------
 
 
 job_script_header = """
@@ -223,7 +227,8 @@ def generate_jobscripts(exe_names=all_executables):
 
         job_script = job_script_header.format(nodes=node_count, folder=os.path.join(os.getcwd(), folder_name))
         for exe in exe_names:
-            job_script += job_script_exe_part.format(app="../" + exe, nodes=node_count, config='../communication_compare.py')
+            job_script += job_script_exe_part.format(app="../" + exe, nodes=node_count,
+                                                     config='../communication_compare.py')
 
         with open(os.path.join(folder_name, 'job.sh'), 'w') as f:
             f.write(job_script)
@@ -235,6 +240,8 @@ if __name__ == '__main__':
 else:
     wlb.log_info_on_root("Batch run of benchmark scenarios, saving result to {}".format(DB_FILE))
     # Select the benchmark you want to run
-    single_gpu_benchmark()  # benchmarks different CUDA block sizes and domain sizes and measures single GPU performance of compute kernel (no communication)
-    #communication_compare()  # benchmarks different communication routines, with and without overlap
-    #overlap_benchmark()      # benchmarks different communication overlap options
+    single_gpu_benchmark()
+    # benchmarks different CUDA block sizes and domain sizes and measures single
+    # GPU performance of compute kernel (no communication)
+    # communication_compare(): benchmarks different communication routines, with and without overlap
+    # overlap_benchmark(): benchmarks different communication overlap options

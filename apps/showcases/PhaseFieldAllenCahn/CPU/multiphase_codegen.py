@@ -1,4 +1,4 @@
-from pystencils import fields, TypedSymbol
+from pystencils import fields
 from pystencils.simp import sympy_cse
 from pystencils import AssignmentCollection
 
@@ -6,7 +6,7 @@ from lbmpy.boundaries import NoSlip
 from lbmpy.creationfunctions import create_lb_method, create_lb_update_rule
 from lbmpy.stencils import get_stencil
 
-from pystencils_walberla import CodeGeneration, generate_sweep, generate_pack_info_from_kernel
+from pystencils_walberla import CodeGeneration, generate_sweep
 from lbmpy_walberla import generate_boundary
 
 from lbmpy.phasefield_allen_cahn.kernel_equations import initializer_kernel_phase_field_lb, \
@@ -155,7 +155,7 @@ vp = [('int32_t', 'cudaBlockSize0'),
       ('int32_t', 'cudaBlockSize1')]
 
 info_header = f"""
-#include "stencil/D3Q{q_phase}.h"\nusing Stencil_phase_T = walberla::stencil::D3Q{q_phase}; 
+#include "stencil/D3Q{q_phase}.h"\nusing Stencil_phase_T = walberla::stencil::D3Q{q_phase};
 #include "stencil/D3Q{q_hydro}.h"\nusing Stencil_hydro_T = walberla::stencil::D3Q{q_hydro};
 """
 

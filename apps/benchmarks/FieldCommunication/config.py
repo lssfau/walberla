@@ -34,7 +34,8 @@ sng_network = supermuc_network_spread()
 
 class AlreadySimulated:
 
-    def __init__(self, db_file, properties=('processes0*processes1*processes2', 'layout', 'ghostLayers', 'cartesianCommunicator', 'stencil',
+    def __init__(self, db_file, properties=('processes0*processes1*processes2', 'layout', 'ghostLayers',
+                                            'cartesianCommunicator', 'stencil',
                                             'cellsPerBlock0', 'cellsPerBlock1', 'cellsPerBlock2',
                                             'blocksPerProcess', 'localCommunicationMode', 'singleMessage',
                                             'fieldsPdf', 'fieldsPdfOpt', 'fieldsVector', 'fieldsScalar',
