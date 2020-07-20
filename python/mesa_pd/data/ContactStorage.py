@@ -32,7 +32,9 @@ class ContactStorage():
             if not (prop['type'] == type and prop['name'] == name and prop['defValue'] == defValue):
                 new_prop = create_contact_storage_property(name, type, defValue=defValue)
                 raise RuntimeError(
-                    f"{TerminalColor.RED} property definition differs from previous one:\nPREVIOUS {prop}\nNEW {new_prop} {TerminalColor.DEFAULT}")
+                    f"{TerminalColor.RED} property definition differs from previous one:\n"
+                    f"PREVIOUS {prop}\n"
+                    f"NEW {new_prop} {TerminalColor.DEFAULT}")
             print(f"{TerminalColor.YELLOW} reusing property: {name} {TerminalColor.DEFAULT}")
 
     def add_include(self, include):

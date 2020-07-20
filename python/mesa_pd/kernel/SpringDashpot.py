@@ -24,7 +24,13 @@ class SpringDashpot:
 
         ctx["InterfaceTestName"] = "SpringDashpotInterfaceCheck"
         ctx["KernelInclude"] = "kernel/SpringDashpot.h"
-        ctx[
-            "ExplicitInstantiation"] = "template void kernel::SpringDashpot::operator()(const size_t p_idx1, const size_t p_idx2, Accessor& ac, const Vec3& contactPoint, const Vec3& contactNormal, const real_t& penetrationDepth) const;"
+        ctx["ExplicitInstantiation"] = \
+            "template void kernel::SpringDashpot::operator()(" \
+            "const size_t p_idx1, " \
+            "const size_t p_idx2, " \
+            "Accessor& ac, " \
+            "const Vec3& contactPoint, " \
+            "const Vec3& contactNormal, " \
+            "const real_t& penetrationDepth) const;"
         generate_file(module['test_path'], 'tests/CheckInterface.templ.cpp', ctx,
                       'kernel/interfaces/SpringDashpotInterfaceCheck.cpp')
