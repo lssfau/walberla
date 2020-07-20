@@ -51,6 +51,8 @@ void SyncNextNeighborsBlockForest::operator()(data::ParticleStorage& ps,
 {
    if (numProcesses_ == 1) return;
 
+   walberla::mpi::BufferSystem bs( walberla::mpi::MPIManager::instance()->comm() );
+
    WALBERLA_CHECK(!bs.isCommunicationRunning());
    WALBERLA_CHECK_EQUAL(bs.size(), 0);
 
@@ -67,7 +69,7 @@ void SyncNextNeighborsBlockForest::operator()(data::ParticleStorage& ps,
       }
    }
 
-   generateSynchronizationMessages(ps, bf, dx);
+   generateSynchronizationMessages(bs, ps, bf, dx);
 
    // size of buffer is unknown and changes with each send
    bs.setReceiverInfoFromSendBufferState(false, true);
@@ -86,9 +88,15 @@ void SyncNextNeighborsBlockForest::operator()(data::ParticleStorage& ps,
       }
    }
    WALBERLA_LOG_DETAIL( "Parsing of particle synchronization response ended." );
+
+   bytesSent_ = bs.getBytesSent();
+   bytesReceived_ = bs.getBytesReceived();
+   numberOfSends_ = bs.getNumberOfSends();
+   numberOfReceives_ = bs.getNumberOfReceives();
 }
 
-void SyncNextNeighborsBlockForest::generateSynchronizationMessages(data::ParticleStorage& ps,
+void SyncNextNeighborsBlockForest::generateSynchronizationMessages(walberla::mpi::BufferSystem& bs,
+                                                                   data::ParticleStorage& ps,
                                                                    const std::shared_ptr<blockforest::BlockForest>& bf,
                                                                    const real_t dx) const
 {

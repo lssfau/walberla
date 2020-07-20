@@ -60,20 +60,24 @@ public:
                    const std::shared_ptr<domain::BlockForestDomain>& domain,
                    const real_t dx = real_t(0)) const;
 
-   int64_t getBytesSent() const { return bs.getBytesSent(); }
-   int64_t getBytesReceived() const { return bs.getBytesReceived(); }
+   int64_t getBytesSent() const { return bytesSent_; }
+   int64_t getBytesReceived() const { return bytesReceived_; }
 
-   int64_t getNumberOfSends() const { return bs.getNumberOfSends(); }
-   int64_t getNumberOfReceives() const { return bs.getNumberOfReceives(); }
+   int64_t getNumberOfSends() const { return numberOfSends_; }
+   int64_t getNumberOfReceives() const { return numberOfReceives_; }
 private:
-   void generateSynchronizationMessages(data::ParticleStorage& ps,
+   void generateSynchronizationMessages(walberla::mpi::BufferSystem& bs,
+                                        data::ParticleStorage& ps,
                                         const std::shared_ptr<blockforest::BlockForest>& blockforest,
                                         const real_t dx) const;
 
-   mutable walberla::mpi::BufferSystem bs = walberla::mpi::BufferSystem( walberla::mpi::MPIManager::instance()->comm() );
-
    int numProcesses_ = walberla::mpi::MPIManager::instance()->numProcesses();
    int rank_         = walberla::mpi::MPIManager::instance()->rank();
+
+   mutable int64_t bytesSent_ = 0;
+   mutable int64_t bytesReceived_ = 0;
+   mutable int64_t numberOfSends_ = 0;
+   mutable int64_t numberOfReceives_ = 0;
 };
 
 }  // namespace mpi

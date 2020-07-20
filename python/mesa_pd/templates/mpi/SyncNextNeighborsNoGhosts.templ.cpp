@@ -37,6 +37,8 @@ void SyncNextNeighborsNoGhosts::operator()(data::ParticleStorage& ps,
 {
    if (numProcesses_ == 1) return;
 
+   walberla::mpi::BufferSystem bs( walberla::mpi::MPIManager::instance()->comm() );
+
    neighborRanks_ = domain.getNeighborProcesses();
    for( uint_t nbProcessRank : neighborRanks_ )
    {
@@ -46,7 +48,7 @@ void SyncNextNeighborsNoGhosts::operator()(data::ParticleStorage& ps,
          bs.sendBuffer(nbProcessRank) << walberla::uint8_c(0);
       }
    }
-   generateSynchronizationMessages(ps, domain);
+   generateSynchronizationMessages(bs, ps, domain);
 
    // size of buffer is unknown and changes with each send
    bs.setReceiverInfoFromSendBufferState(false, true);
@@ -65,9 +67,15 @@ void SyncNextNeighborsNoGhosts::operator()(data::ParticleStorage& ps,
       }
    }
    WALBERLA_LOG_DETAIL( "Parsing of particle synchronization response ended." );
+
+   bytesSent_ = bs.getBytesSent();
+   bytesReceived_ = bs.getBytesReceived();
+   numberOfSends_ = bs.getNumberOfSends();
+   numberOfReceives_ = bs.getNumberOfReceives();
 }
 
-void SyncNextNeighborsNoGhosts::generateSynchronizationMessages(data::ParticleStorage& ps,
+void SyncNextNeighborsNoGhosts::generateSynchronizationMessages(walberla::mpi::BufferSystem& bs,
+                                                                data::ParticleStorage& ps,
                                                                 const domain::IDomain& domain) const
 {
    const uint_t ownRank = uint_c(rank_);
