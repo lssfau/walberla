@@ -38,6 +38,8 @@ void SyncNextNeighbors::operator()(data::ParticleStorage& ps,
 {
    if (numProcesses_ == 1) return;
 
+   walberla::mpi::BufferSystem bs( walberla::mpi::MPIManager::instance()->comm() );
+
    neighborRanks_ = domain.getNeighborProcesses();
    for( uint_t nbProcessRank : neighborRanks_ )
    {
@@ -47,7 +49,7 @@ void SyncNextNeighbors::operator()(data::ParticleStorage& ps,
          bs.sendBuffer(nbProcessRank) << walberla::uint8_c(0);
       }
    }
-   generateSynchronizationMessages(ps, domain, dx);
+   generateSynchronizationMessages(bs, ps, domain, dx);
 
    // size of buffer is unknown and changes with each send
    bs.setReceiverInfoFromSendBufferState(false, true);
@@ -66,9 +68,15 @@ void SyncNextNeighbors::operator()(data::ParticleStorage& ps,
       }
    }
    WALBERLA_LOG_DETAIL( "Parsing of particle synchronization response ended." );
+
+   bytesSent_ = bs.getBytesSent();
+   bytesReceived_ = bs.getBytesReceived();
+   numberOfSends_ = bs.getNumberOfSends();
+   numberOfReceives_ = bs.getNumberOfReceives();
 }
 
-void SyncNextNeighbors::generateSynchronizationMessages(data::ParticleStorage& ps,
+void SyncNextNeighbors::generateSynchronizationMessages(walberla::mpi::BufferSystem& bs,
+                                                        data::ParticleStorage& ps,
                                                         const domain::IDomain& domain,
                                                         const real_t dx) const
 {

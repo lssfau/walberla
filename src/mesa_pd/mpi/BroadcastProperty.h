@@ -59,21 +59,26 @@ public:
    template <typename Notification>
    void operator()(data::ParticleStorage& ps) const;
 
-   int64_t getBytesSent() const { return bs.getBytesSent(); }
-   int64_t getBytesReceived() const { return bs.getBytesReceived(); }
+   int64_t getBytesSent() const { return bytesSent_; }
+   int64_t getBytesReceived() const { return bytesReceived_; }
 
-   int64_t getNumberOfSends() const { return bs.getNumberOfSends(); }
-   int64_t getNumberOfReceives() const { return bs.getNumberOfReceives(); }
+   int64_t getNumberOfSends() const { return numberOfSends_; }
+   int64_t getNumberOfReceives() const { return numberOfReceives_; }
 private:
-   mutable walberla::mpi::BufferSystem bs = walberla::mpi::BufferSystem(walberla::mpi::MPIManager::instance()->comm() );
-
    int numProcesses_ = walberla::mpi::MPIManager::instance()->numProcesses();
+
+   mutable int64_t bytesSent_ = 0;
+   mutable int64_t bytesReceived_ = 0;
+   mutable int64_t numberOfSends_ = 0;
+   mutable int64_t numberOfReceives_ = 0;
 };
 
 template <typename Notification>
 void BroadcastProperty::operator()(data::ParticleStorage& ps) const
 {
    if (numProcesses_ == 1) return;
+
+   walberla::mpi::BufferSystem bs(walberla::mpi::MPIManager::instance()->comm());
 
    std::set<int> recvRanks; // potential message senders
 
@@ -128,6 +133,11 @@ void BroadcastProperty::operator()(data::ParticleStorage& ps) const
       }
    }
    WALBERLA_LOG_DETAIL( "Parsing of property broadcasting message ended." );
+
+   bytesSent_ = bs.getBytesSent();
+   bytesReceived_ = bs.getBytesReceived();
+   numberOfSends_ = bs.getNumberOfSends();
+   numberOfReceives_ = bs.getNumberOfReceives();
 }
 
 }  // namespace mpi

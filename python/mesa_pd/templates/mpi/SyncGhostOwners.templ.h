@@ -60,11 +60,11 @@ public:
                     const real_t dx = real_t(0),
                     const bool syncNonCommunicatingBodies = false ) const;
 
-   int64_t getBytesSent() const { return bs1.getBytesSent() + bs2.getBytesSent(); }
-   int64_t getBytesReceived() const { return bs1.getBytesReceived() + bs2.getBytesReceived(); }
+   int64_t getBytesSent() const { return bytesSent_; }
+   int64_t getBytesReceived() const { return bytesReceived_; }
 
-   int64_t getNumberOfSends() const { return bs1.getNumberOfSends() + bs2.getNumberOfSends(); }
-   int64_t getNumberOfReceives() const { return bs1.getNumberOfReceives() + bs2.getNumberOfReceives(); }
+   int64_t getNumberOfSends() const { return numberOfSends_; }
+   int64_t getNumberOfReceives() const { return numberOfReceives_; }
 private:
    void updateAndMigrate( data::ParticleStorage& ps,
                           const domain::IDomain& domain,
@@ -77,11 +77,13 @@ private:
 
    mutable std::vector<uint_t> neighborRanks_; ///cache for neighbor ranks -> will be updated in operator()
 
-   mutable walberla::mpi::BufferSystem bs1 = walberla::mpi::BufferSystem( walberla::mpi::MPIManager::instance()->comm(), 749861);
-   mutable walberla::mpi::BufferSystem bs2 = walberla::mpi::BufferSystem( walberla::mpi::MPIManager::instance()->comm(), 255367);
-
    int numProcesses_ = walberla::mpi::MPIManager::instance()->numProcesses();
    int rank_         = walberla::mpi::MPIManager::instance()->rank();
+
+   mutable int64_t bytesSent_ = 0;
+   mutable int64_t bytesReceived_ = 0;
+   mutable int64_t numberOfSends_ = 0;
+   mutable int64_t numberOfReceives_ = 0;
 };
 
 }  // namespace mpi

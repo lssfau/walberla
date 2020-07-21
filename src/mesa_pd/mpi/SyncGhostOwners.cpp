@@ -39,6 +39,11 @@ void SyncGhostOwners::operator()( data::ParticleStorage& ps,
 {
    if (numProcesses_ == 1) return;
 
+   bytesSent_ = 0;
+   bytesReceived_ = 0;
+   numberOfSends_ = 0;
+   numberOfReceives_ = 0;
+
    //==========================================================
    // STEP1: Update & Migrate
    //==========================================================
@@ -58,6 +63,8 @@ void SyncGhostOwners::updateAndMigrate( data::ParticleStorage& ps,
    //==========================================================
    // STEP1: Update & Migrate
    //==========================================================
+
+   walberla::mpi::BufferSystem bs1( walberla::mpi::MPIManager::instance()->comm(), 749861);
 
    WALBERLA_CHECK(!bs1.isCommunicationRunning());
 
@@ -192,6 +199,11 @@ void SyncGhostOwners::updateAndMigrate( data::ParticleStorage& ps,
       }
    }
    WALBERLA_LOG_DETAIL( "Parsing of Update&Migrate ended." );
+
+   bytesSent_ += bs1.getBytesSent();
+   bytesReceived_ += bs1.getBytesReceived();
+   numberOfSends_ += bs1.getNumberOfSends();
+   numberOfReceives_ += bs1.getNumberOfReceives();
 }
 
 void SyncGhostOwners::checkAndResolveOverlap( data::ParticleStorage& ps,
@@ -203,6 +215,8 @@ void SyncGhostOwners::checkAndResolveOverlap( data::ParticleStorage& ps,
    //==========================================================
    // STEP2: Check&Resolve
    //==========================================================
+
+   walberla::mpi::BufferSystem bs2( walberla::mpi::MPIManager::instance()->comm(), 255367);
 
    WALBERLA_CHECK(!bs2.isCommunicationRunning());
 
@@ -350,6 +364,11 @@ void SyncGhostOwners::checkAndResolveOverlap( data::ParticleStorage& ps,
       }
    }
    WALBERLA_LOG_DETAIL( "Parsing of Check&Resolve ended." );
+
+   bytesSent_ += bs2.getBytesSent();
+   bytesReceived_ += bs2.getBytesReceived();
+   numberOfSends_ += bs2.getNumberOfSends();
+   numberOfReceives_ += bs2.getNumberOfReceives();
 }
 
 }  // namespace mpi
