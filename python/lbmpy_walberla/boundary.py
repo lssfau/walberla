@@ -52,7 +52,7 @@ def generate_boundary(generation_context, class_name, boundary_object, lb_method
         'StructDeclaration': struct_from_numpy_dtype(struct_name, index_struct_dtype),
         'kernel': KernelInfo(kernel),
         'stencil_info': stencil_info,
-        'inverse_directions' : inv_dirs,
+        'inverse_directions': inv_dirs,
         'dim': lb_method.dim,
         'target': target,
         'namespace': 'lbm',

@@ -30,7 +30,8 @@ if __name__ == '__main__':
 
     ps.add_property("type",             "uint_t",                  defValue="0",         syncMode="ON_GHOST_CREATION")
 
-    ps.add_property("flags",            "walberla::mesa_pd::data::particle_flags::FlagT", defValue="", syncMode="ON_GHOST_CREATION")
+    ps.add_property("flags",            "walberla::mesa_pd::data::particle_flags::FlagT", defValue="",
+                    syncMode="ON_GHOST_CREATION")
     ps.add_property("nextParticle",     "int",                     defValue="-1",        syncMode="NEVER")
 
     ps.add_include("blockforest/BlockForest.h")

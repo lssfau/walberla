@@ -14,11 +14,13 @@ with CodeGeneration() as ctx:
         stencil='D3Q19', compressible=True,
         method='mrt', relaxation_rates=[omega, omega, omega_free, omega_free, omega_free, omega_free],
         entropic=True,                    # entropic method where second omega is chosen s.t. entropy condition
-        omega_output_field=omega_out,     # scalar field where automatically chosen omega of entropic or Smagorinsky method is written to
+        omega_output_field=omega_out,     # scalar field where automatically chosen omega of entropic or
+                                          # Smagorinsky method is written to
         force=force_field.center_vector,  # read forces for each lattice cell from an external force field
                                           # that is initialized and changed in C++ app
         output={'velocity': vel_field},   # write macroscopic velocity to field in every time step
-                                          # useful for coupling multiple LB methods, e.g. hydrodynamic to advection/diffusion LBM
+                                          # useful for coupling multiple LB methods,
+                                          # e.g. hydrodynamic to advection/diffusion LBM
         optimization={'cse_global': True}
     )
 

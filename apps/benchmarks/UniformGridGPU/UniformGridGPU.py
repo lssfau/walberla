@@ -3,7 +3,7 @@ import numpy as np
 import pystencils as ps
 from lbmpy.creationfunctions import create_lb_method, create_lb_update_rule, create_lb_collision_rule
 from lbmpy.boundaries import NoSlip, UBB
-from lbmpy.fieldaccess import StreamPullTwoFieldsAccessor, StreamPushTwoFieldsAccessor
+from lbmpy.fieldaccess import StreamPullTwoFieldsAccessor
 from pystencils_walberla import generate_pack_info_from_kernel
 from lbmpy_walberla import generate_lattice_model, generate_boundary
 from pystencils_walberla import CodeGeneration, generate_sweep
@@ -45,7 +45,8 @@ options_dict = {
     'mrt_full': {
         'method': 'mrt',
         'stencil': 'D3Q19',
-        'relaxation_rates': [omega_fill[0], omega, omega_fill[1], omega_fill[2], omega_fill[3], omega_fill[4], omega_fill[5]],
+        'relaxation_rates': [omega_fill[0], omega, omega_fill[1], omega_fill[2],
+                             omega_fill[3], omega_fill[4], omega_fill[5]],
     },
     'entropic': {
         'method': 'mrt',
@@ -77,7 +78,7 @@ options_dict = {
 }
 
 info_header = """
-#include "stencil/D3Q{q}.h"\nusing Stencil_T = walberla::stencil::D3Q{q}; 
+#include "stencil/D3Q{q}.h"\nusing Stencil_T = walberla::stencil::D3Q{q};
 const char * infoStencil = "{stencil}";
 const char * infoConfigName = "{configName}";
 const bool infoCseGlobal = {cse_global};
@@ -87,7 +88,7 @@ const bool infoCsePdfs = {cse_pdfs};
 
 with CodeGeneration() as ctx:
     accessor = StreamPullTwoFieldsAccessor()
-    #accessor = StreamPushTwoFieldsAccessor()
+    # accessor = StreamPushTwoFieldsAccessor()
     assert not accessor.is_inplace, "This app does not work for inplace accessors"
 
     common_options = {
@@ -118,7 +119,7 @@ with CodeGeneration() as ctx:
         options['stencil'] = 'D3Q27'
 
     stencil_str = options['stencil']
-    q = int(stencil_str[stencil_str.find('Q')+1:])
+    q = int(stencil_str[stencil_str.find('Q') + 1:])
     pdfs, velocity_field = ps.fields("pdfs({q}), velocity(3) : double[3D]".format(q=q), layout='fzyx')
     options['optimization']['symbolic_field'] = pdfs
 
@@ -143,7 +144,8 @@ with CodeGeneration() as ctx:
     # CPU lattice model - required for macroscopic value computation, VTK output etc.
     options_without_opt = options.copy()
     del options_without_opt['optimization']
-    generate_lattice_model(ctx, 'UniformGridGPU_LatticeModel', create_lb_collision_rule(lb_method=lb_method, **options_without_opt))
+    generate_lattice_model(ctx, 'UniformGridGPU_LatticeModel', create_lb_collision_rule(lb_method=lb_method,
+                                                                                        **options_without_opt))
 
     # gpu LB sweep & boundaries
     generate_sweep(ctx, 'UniformGridGPU_LbKernel', update_rule,
@@ -158,7 +160,7 @@ with CodeGeneration() as ctx:
     setter_assignments = macroscopic_values_setter(lb_method, velocity=velocity_field.center_vector,
                                                    pdfs=pdfs.center_vector, density=1)
     getter_assignments = macroscopic_values_getter(lb_method, velocity=velocity_field.center_vector,
-                                                   pdfs=pdfs.center_vector,  density=None)
+                                                   pdfs=pdfs.center_vector, density=None)
     generate_sweep(ctx, 'UniformGridGPU_MacroSetter', setter_assignments)
     generate_sweep(ctx, 'UniformGridGPU_MacroGetter', getter_assignments)
 

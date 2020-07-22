@@ -54,10 +54,14 @@ if __name__ == '__main__':
     ps.add_property("dw", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
 
     # Properties for lbm_mesapd_coupling:
-    ps.add_property("hydrodynamicForce", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
-    ps.add_property("hydrodynamicTorque", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
-    ps.add_property("oldHydrodynamicForce", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
-    ps.add_property("oldHydrodynamicTorque", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("hydrodynamicForce", "walberla::mesa_pd::Vec3", defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("hydrodynamicTorque", "walberla::mesa_pd::Vec3", defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("oldHydrodynamicForce", "walberla::mesa_pd::Vec3", defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("oldHydrodynamicTorque", "walberla::mesa_pd::Vec3", defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
 
     ch = mpd.add(data.ContactHistory())
     ch.add_property("tangentialSpringDisplacement", "walberla::mesa_pd::Vec3", defValue="real_t(0)")

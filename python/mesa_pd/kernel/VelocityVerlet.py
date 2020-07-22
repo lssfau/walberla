@@ -30,8 +30,12 @@ class VelocityVerlet:
 
         ctx["InterfaceTestName"] = "VelocityVerletInterfaceCheck"
         ctx["KernelInclude"] = "kernel/VelocityVerlet.h"
-        ctx[
-            "ExplicitInstantiation"] = "template void kernel::VelocityVerletPreForceUpdate::operator()(const size_t p_idx1, Accessor& ac) const;\n" + \
-                                       "template void kernel::VelocityVerletPostForceUpdate::operator()(const size_t p_idx1, Accessor& ac) const;"
+        ctx["ExplicitInstantiation"] = \
+            "template void kernel::VelocityVerletPreForceUpdate::operator()(" \
+            "const size_t p_idx1, " \
+            "Accessor& ac) const;\n" + \
+            "template void kernel::VelocityVerletPostForceUpdate::operator()(" \
+            "const size_t p_idx1, " \
+            "Accessor& ac) const;"
         generate_file(module['test_path'], 'tests/CheckInterface.templ.cpp', ctx,
                       'kernel/interfaces/VelocityVerletInterfaceCheck.cpp')

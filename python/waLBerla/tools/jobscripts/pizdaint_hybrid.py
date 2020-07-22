@@ -10,7 +10,7 @@ def createJobscript(wall_time=None, nodes=None, cores=None, initial_dir=None, jo
     if type(hyperthreading) is bool:
         hyperthreading = 2 if hyperthreading else 1
 
-    CORES_PER_NODE = 1#12 * hyperthreading
+    CORES_PER_NODE = 1  # 12 * hyperthreading
 
     if wall_time and wall_time.total_seconds() > 24 * 3600:
         raise ValueError("No jobs longer that 24h allowed")

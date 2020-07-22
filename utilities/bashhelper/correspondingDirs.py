@@ -4,7 +4,6 @@ import sys
 import os
 import os.path
 
-
 DIR1 = sys.argv[1]
 DIR2 = sys.argv[2]
 
@@ -15,8 +14,8 @@ def is_in_folder(filename, folder):
     fd = os.path.normpath(folder)
 
     if fn == fd:
-      return True
-    
+        return True
+
     # get common prefix
     commonprefix = os.path.commonprefix([fn, fd])
     if commonprefix == fd:
@@ -31,11 +30,11 @@ def is_in_folder(filename, folder):
     return False
 
 
-if is_in_folder( os.getcwd(), DIR1 ):
-  rel = os.path.relpath( os.getcwd(), DIR1) 
-  print (DIR2 + "/" + rel)
-elif is_in_folder( os.getcwd(), DIR2 ):
-  rel = os.path.relpath( os.getcwd(), DIR2) 
-  print (DIR1 + "/" + rel)
+if is_in_folder(os.getcwd(), DIR1):
+    rel = os.path.relpath(os.getcwd(), DIR1)
+    print(DIR2 + "/" + rel)
+elif is_in_folder(os.getcwd(), DIR2):
+    rel = os.path.relpath(os.getcwd(), DIR2)
+    print(DIR1 + "/" + rel)
 else:
-  print ( os.getcwd() )
+    print(os.getcwd())

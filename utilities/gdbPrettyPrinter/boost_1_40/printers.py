@@ -35,20 +35,27 @@
 import gdb
 import re
 
+
 class static:
     "Creates a 'static' method"
+
     def __init__(self, function):
         self.__call__ = function
 
-boost_pretty_printers = [ ]
+
+boost_pretty_printers = []
+
+
 def register_pretty_printer(pretty_printer):
     "Registers a Pretty Printer"
     boost_pretty_printers.append(pretty_printer)
     return pretty_printer
 
+
 @register_pretty_printer
 class BoostIteratorRange:
     "Pretty Printer for boost::iterator_range (Boost.Range)"
+
     @static
     def supports(typename):
         return re.compile('^boost::iterator_range<.*>$').search(typename)
@@ -86,6 +93,7 @@ class BoostIteratorRange:
     def display_hint(self):
         return 'array'
 
+
 @register_pretty_printer
 class BoostOptional:
     "Pretty Printer for boost::optional (Boost.Optional)"
@@ -108,14 +116,14 @@ class BoostOptional:
             return self
 
         def next(self):
-            if(self.done):
+            if (self.done):
                 raise StopIteration
             self.done = True
             return ('value', self.member.dereference())
 
     def children(self):
         initialized = self.value['m_initialized']
-        if(not initialized):
+        if (not initialized):
             return self._iterator('', True)
         else:
             match = BoostOptional.regex.search(self.typename)
@@ -124,15 +132,16 @@ class BoostOptional:
                     membertype = gdb.lookup_type(match.group(1)).pointer()
                     member = self.value['m_storage']['dummy_']['data'].address.cast(membertype)
                     return self._iterator(member, False)
-                except:
+                except Exception:
                     return self._iterator('', True)
 
     def to_string(self):
         initialized = self.value['m_initialized']
-        if(not initialized):
+        if (not initialized):
             return "%s is not initialized" % self.typename
         else:
             return "%s is initialized" % self.typename
+
 
 @register_pretty_printer
 class BoostReferenceWrapper:
@@ -150,6 +159,7 @@ class BoostReferenceWrapper:
     def to_string(self):
         return '(%s) %s' % (self.typename, self.value['t_'].dereference())
 
+
 @register_pretty_printer
 class BoostTribool:
     "Pretty Printer for boost::logic::tribool (Boost.Tribool)"
@@ -166,17 +176,19 @@ class BoostTribool:
     def to_string(self):
         state = self.value['value']
         s = 'indeterminate'
-        if(state == 0):
+        if (state == 0):
             s = 'false'
-        elif(state == 1):
+        elif (state == 1):
             s = 'true'
         return '(%s) %s' % (self.typename, s)
+
 
 @register_pretty_printer
 class BoostScopedPtr:
     "Pretty Printer for boost::scoped/intrusive_ptr/array (Boost.SmartPtr)"
 
     regex = re.compile('^boost::(intrusive|scoped)_(ptr|array)<(.*)>$')
+
     @static
     def supports(typename):
         return BoostScopedPtr.regex.search(typename)
@@ -188,26 +200,28 @@ class BoostScopedPtr:
     def to_string(self):
         return '(%s) %s' % (self.typename, self.value['px'])
 
+
 @register_pretty_printer
 class BoostSharedPtr:
     "Pretty Printer for boost::shared/weak_ptr/array (Boost.SmartPtr)"
-    
+
     class _iterator:
-        def __init__(self,sharedPtr):
+        def __init__(self, sharedPtr):
             self.sharedPtr = sharedPtr
-            self.atEnd     = False
+            self.atEnd = False
+
         def __iter__(self):
             return self
-        
+
         def next(self):
             if self.atEnd:
                 raise StopIteration
             else:
                 self.atEnd = True
-                return ('[deref]', self.sharedPtr['px'].dereference() )
-        
+                return ('[deref]', self.sharedPtr['px'].dereference())
 
     regex = re.compile('^boost::(weak|shared)_(ptr|array)<(.*)>$')
+
     @static
     def supports(typename):
         return BoostSharedPtr.regex.search(typename)
@@ -225,13 +239,16 @@ class BoostSharedPtr:
         return '(%s) (count %d, weak count %d) %s' % (self.typename,
                                                       refcount, weakcount,
                                                       self.value['px'])
+
     def children(self):
         return self._iterator(self.value)
+
 
 @register_pretty_printer
 class BoostArray:
     "Pretty Printer for boost::array (Boost.Array)"
-    regex = re.compile('^boost::array<(.*)>$');
+    regex = re.compile('^boost::array<(.*)>$')
+
     @static
     def supports(typename):
         return BoostArray.regex.search(typename)
@@ -246,10 +263,12 @@ class BoostArray:
     def display_hint(self):
         return 'array'
 
+
 @register_pretty_printer
 class BoostVariant:
     "Pretty Printer for boost::variant (Boost.Variant)"
-    regex = re.compile('^boost::variant<(.*)>$');
+    regex = re.compile('^boost::variant<(.*)>$')
+
     @static
     def supports(typename):
         return BoostVariant.regex.search(typename)
@@ -262,17 +281,18 @@ class BoostVariant:
         m = BoostVariant.regex.search(self.typename)
         # TODO this breaks with boost::variant< foo<a,b>, bar >!
         types = map(lambda s: s.strip(), m.group(1).split(','))
-        which = long(self.value['which_'])
+        which = self.value['which_']
         type = types[which]
         data = ''
         try:
             ptrtype = gdb.lookup_type(type).pointer()
             data = self.value['storage_']['data_']['buf'].address.cast(ptrtype)
-        except:
+        except Exception:
             data = self.value['storage_']['data_']['buf']
         return '(boost::variant<...>) which (%d) = %s value = %s' % (which,
                                                                      type,
                                                                      data.dereference())
+
 
 @register_pretty_printer
 class BoostUuid:
@@ -288,21 +308,22 @@ class BoostUuid:
         self.value = value
 
     def to_string(self):
-        u = (self.value['data'][i] for i in xrange(16))
+        u = (self.value['data'][i] for i in range(16))
         s = 'xxxx-xx-xx-xx-xxxxxx'.replace('x', '%02x') % tuple(u)
         return '(%s) %s' % (self.typename, s)
+
 
 def find_pretty_printer(value):
     "Find a pretty printer suitable for value"
     type = value.type
 
     if type.code == gdb.TYPE_CODE_REF:
-       type = type.target()
+        type = type.target()
 
     type = type.unqualified().strip_typedefs()
 
     typename = type.tag
-    if typename == None:
+    if typename is None:
         return None
 
     for pretty_printer in boost_pretty_printers:
@@ -311,8 +332,9 @@ def find_pretty_printer(value):
 
     return None
 
+
 def register_boost_printers(obj):
     "Register Boost Pretty Printers."
-    if obj == None:
+    if obj is None:
         obj = gdb
     obj.pretty_printers.append(find_pretty_printer)

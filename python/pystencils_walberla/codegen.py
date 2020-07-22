@@ -132,7 +132,7 @@ def generate_pack_info_from_kernel(generation_context, class_name: str, assignme
         class_name: name of the generated class
         assignments: list of assignments from the compute kernel - generates PackInfo for "pull" part only
                      i.e. the kernel is expected to only write to the center
-        kind:                      
+        kind:
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
     assert kind in ('push', 'pull')
@@ -338,6 +338,7 @@ def get_vectorize_instruction_set(generation_context):
             return 'sse'
     else:
         return None
+
 
 def default_create_kernel_parameters(generation_context, params):
     default_dtype = "float64" if generation_context.double_accuracy else 'float32'

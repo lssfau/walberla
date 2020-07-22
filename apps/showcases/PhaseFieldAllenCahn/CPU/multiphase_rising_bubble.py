@@ -5,6 +5,7 @@ import numpy as np
 from waLBerla.core_extension import makeSlice
 from lbmpy.phasefield_allen_cahn.parameter_calculation import calculate_dimensionless_rising_bubble
 
+
 class Scenario:
     def __init__(self):
         # output frequencies

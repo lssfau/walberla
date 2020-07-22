@@ -4,9 +4,11 @@ import os
 import math
 
 
-def createJobscript(wall_time=None, nodes=None, cores=None, job_class=None, initial_dir='~', job_name="waLBerla",
-                    exe_name=None, parameter_files=[], commands=[], hyperthreading=1,
-                    output_file=None, error_file=None, account=None, fixed_freq=True, omp_num_threads=1, **_):
+def createJobscript_supermucng(wall_time=None, nodes=None, cores=None, job_class=None,
+                               initial_dir='~', job_name="waLBerla", exe_name=None,
+                               parameter_files=[], commands=[], hyperthreading=1,
+                               output_file=None, error_file=None, account=None,
+                               fixed_freq=True, omp_num_threads=1, **_):
     if type(hyperthreading) == bool:
         hyperthreading = 2 if hyperthreading else 1
 
@@ -30,7 +32,8 @@ def createJobscript(wall_time=None, nodes=None, cores=None, job_class=None, init
         cores = nodes * cores_per_node
 
     if cores > cores_per_node and cores % cores_per_node != 0:
-        raise ValueError("When using more than one node, the number of cores has to be a multiple of %d", (cores_per_node,))
+        raise ValueError("When using more than one node, the number of cores has to be a multiple of %d",
+                         (cores_per_node,))
 
     if not output_file:
         output_file = job_name
@@ -50,9 +53,9 @@ def createJobscript(wall_time=None, nodes=None, cores=None, job_class=None, init
         else:
             job_class = 'special'
 
-    if  cores_per_node % omp_num_threads != 0:
+    if cores_per_node % omp_num_threads != 0:
         raise ValueError("Could not divede cores_per_node %d to omp_num_threads %d", (cores_per_node, omp_num_threads))
-    tasks_per_node = min(cores_per_node//omp_num_threads, cores)
+    tasks_per_node = min(cores_per_node // omp_num_threads, cores)
 
     omp_places = "cores" if hyperthreading == 1 else "threads"
 
@@ -94,5 +97,6 @@ def createJobscript(wall_time=None, nodes=None, cores=None, job_class=None, init
 
 if __name__ == '__main__':
     from waLBerla.tools.jobscripts import createJobscript
-    print(createJobscript(wall_time=60*60, nodes=4, exe_name='grandchem', parameter_files=['a.cfg', 'b.cfg'],
+
+    print(createJobscript(wall_time=60 * 60, nodes=4, exe_name='grandchem', parameter_files=['a.cfg', 'b.cfg'],
                           machine='supermuc_ng'))

@@ -31,9 +31,9 @@ class CodegenTest(unittest.TestCase):
 
                     @ps.kernel
                     def kernel_func():
-                        dst[0, 0, 0] @= (src[1, 0, 0] + src[-1, 0, 0] +
-                                         src[0, 1, 0] + src[0, -1, 0] +
-                                         src[0, 0, 1] + src[0, 0, -1]) / (6 * h ** 2)
+                        dst[0, 0, 0] @= (src[1, 0, 0] + src[-1, 0, 0]
+                                         + src[0, 1, 0] + src[0, -1, 0]
+                                         + src[0, 0, 1] + src[0, 0, -1]) / (6 * h ** 2)
 
                     generate_sweep(ctx, 'JacobiKernel3D', kernel_func, field_swaps=[(src, dst)])
 

@@ -1,7 +1,8 @@
 import sympy as sp
 import pystencils as ps
 from lbmpy.creationfunctions import create_lb_update_rule, create_lb_collision_rule
-from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel, generate_sweep, generate_mpidtype_info_from_kernel
+from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel, generate_sweep,\
+    generate_mpidtype_info_from_kernel
 from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
 from lbmpy.fieldaccess import AAEvenTimeStepAccessor, AAOddTimeStepAccessor
 
@@ -30,7 +31,8 @@ options_dict = {
     'mrt_full': {
         'method': 'mrt',
         'stencil': 'D3Q19',
-        'relaxation_rates': [omega_fill[0], omega, omega_fill[1], omega_fill[2], omega_fill[3], omega_fill[4], omega_fill[5]],
+        'relaxation_rates': [omega_fill[0], omega, omega_fill[1], omega_fill[2],
+                             omega_fill[3], omega_fill[4], omega_fill[5]],
     },
     'entropic': {
         'method': 'mrt',
@@ -62,7 +64,7 @@ options_dict = {
 }
 
 info_header = """
-#include "stencil/D3Q{q}.h"\nusing Stencil_T = walberla::stencil::D3Q{q}; 
+#include "stencil/D3Q{q}.h"\nusing Stencil_T = walberla::stencil::D3Q{q};
 const char * infoStencil = "{stencil}";
 const char * infoConfigName = "{configName}";
 const char * optimizationDict = "{optimizationDict}";
@@ -108,7 +110,7 @@ with CodeGeneration() as ctx:
         options['stencil'] = 'D3Q27'
 
     stencil_str = options['stencil']
-    q = int(stencil_str[stencil_str.find('Q')+1:])
+    q = int(stencil_str[stencil_str.find('Q') + 1:])
     pdfs, velocity_field = ps.fields("pdfs({q}), velocity(3) : double[3D]".format(q=q), layout='fzyx')
 
     update_rule_two_field = create_lb_update_rule(optimization={'symbolic_field': pdfs,
@@ -128,12 +130,16 @@ with CodeGeneration() as ctx:
             ((0, 0, 1), UBB([0.05, 0, 0])),
             ((0, 0, -1), NoSlip()),
         ))
-        cr_even = create_lb_collision_rule(stencil="D3Q19", compressible=False, optimization={'cse_global': opts['aa_even_cse_global'],
-                                                                                              'cse_pdfs': opts['aa_even_cse_pdfs']})
-        cr_odd = create_lb_collision_rule(stencil="D3Q19", compressible=False, optimization={'cse_global': opts['aa_odd_cse_global'],
-                                                                                             'cse_pdfs': opts['aa_odd_cse_pdfs']})
-        update_rule_aa_even = update_rule_with_push_boundaries(cr_even, pdfs, boundaries, AAEvenTimeStepAccessor, AAOddTimeStepAccessor.read)
-        update_rule_aa_odd = update_rule_with_push_boundaries(cr_odd, pdfs, boundaries, AAOddTimeStepAccessor, AAEvenTimeStepAccessor.read)
+        cr_even = create_lb_collision_rule(stencil="D3Q19", compressible=False,
+                                           optimization={'cse_global': opts['aa_even_cse_global'],
+                                                         'cse_pdfs': opts['aa_even_cse_pdfs']})
+        cr_odd = create_lb_collision_rule(stencil="D3Q19", compressible=False,
+                                          optimization={'cse_global': opts['aa_odd_cse_global'],
+                                                        'cse_pdfs': opts['aa_odd_cse_pdfs']})
+        update_rule_aa_even = update_rule_with_push_boundaries(cr_even, pdfs, boundaries,
+                                                               AAEvenTimeStepAccessor, AAOddTimeStepAccessor.read)
+        update_rule_aa_odd = update_rule_with_push_boundaries(cr_odd, pdfs, boundaries,
+                                                              AAOddTimeStepAccessor, AAEvenTimeStepAccessor.read)
     else:
         update_rule_aa_even = create_lb_update_rule(kernel_type=AAEvenTimeStepAccessor(),
                                                     optimization={'symbolic_field': pdfs,
@@ -146,7 +152,7 @@ with CodeGeneration() as ctx:
                                                                  'cse_global': opts['aa_odd_cse_global'],
                                                                  'cse_pdfs': opts['aa_odd_cse_pdfs']}, **options)
 
-    vec = { 'assume_aligned': True, 'assume_inner_stride_one': True}
+    vec = {'assume_aligned': True, 'assume_inner_stride_one': True}
 
     # check if openmp is enabled in cmake
     if ctx.openmp:

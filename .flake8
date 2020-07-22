@@ -1,3 +1,6 @@
 [flake8]
 max-line-length=120
+exclude=apps/showcases/Mixer/GenerateModule.py, # contains only statements
+        apps/benchmarks/FieldCommunication/config.py # just a config file 
+        utilities/bashhelper/createShortcuts.py # contains a lot of really long strings
 ignore = W503 C901 E741

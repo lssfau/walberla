@@ -6,10 +6,13 @@ from mesa_pd.utility import generate_file
 
 class HeatConduction:
     def __init__(self):
-        self.context = {'interface': []}
-        self.context['interface'].append(create_access("temperature", "walberla::real_t", access="g"))
-        self.context['interface'].append(create_access("heatFlux", "walberla::real_t", access="gsr"))
-        self.context['interface'].append(create_access("type", "uint_t", access="g"))
+        self.context = {
+            'interface': [
+                create_access("temperature", "walberla::real_t", access="g"),
+                create_access("heatFlux", "walberla::real_t", access="gsr"),
+                create_access("type", "uint_t", access="g")
+            ]
+        }
 
     def generate(self, module):
         ctx = {'module': module,
@@ -20,6 +23,10 @@ class HeatConduction:
 
         ctx["InterfaceTestName"] = "HeatConductionInterfaceCheck"
         ctx["KernelInclude"] = "kernel/HeatConduction.h"
-        ctx["ExplicitInstantiation"] = "template void kernel::HeatConduction::operator()(const size_t p_idx1, const size_t p_idx2, Accessor& ac) const;"
+        ctx["ExplicitInstantiation"] = \
+            "template void kernel::HeatConduction::operator()(" \
+            "const size_t p_idx1, " \
+            "const size_t p_idx2, " \
+            "Accessor& ac) const;"
         generate_file(module['test_path'], 'tests/CheckInterface.templ.cpp', ctx,
                       'kernel/interfaces/HeatConductionInterfaceCheck.cpp')

@@ -89,17 +89,17 @@ class Scenario:
             spike_data = wlb.field.gather(blocks, 'phase', makeSlice[self.size[0] // 2, :, self.size[2] // 2])
             if spike_data:
                 spike_field = np.asarray(spike_data.buffer()).squeeze()
-                location_of_spike = (np.argmax(spike_field > 0.5) - ny//2)/l0
+                location_of_spike = (np.argmax(spike_field > 0.5) - ny // 2) / l0
 
             bubble_data = wlb.field.gather(blocks, 'phase', makeSlice[0, :, 0])
             if bubble_data:
                 bubble_field = np.asarray(bubble_data.buffer()).squeeze()
-                location_of_bubble = (np.argmax(bubble_field > 0.5) - ny//2)/l0
+                location_of_bubble = (np.argmax(bubble_field > 0.5) - ny // 2) / l0
 
             saddle_data = wlb.field.gather(blocks, 'phase', makeSlice[0, :, self.size[2] // 2])
             if saddle_data:
                 saddle_field = np.asarray(saddle_data.buffer()).squeeze()
-                location_of_saddle = (np.argmax(saddle_field > 0.5) - ny//2)/l0
+                location_of_saddle = (np.argmax(saddle_field > 0.5) - ny // 2) / l0
 
             phase = wlb.field.gather(blocks, 'phase', makeSlice[:, :, :])
             if phase:

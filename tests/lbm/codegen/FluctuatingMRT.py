@@ -42,8 +42,8 @@ with CodeGeneration() as ctx:
     collision_rule = create_lb_collision_rule(
         method,
         fluctuating={
-            'temperature' : temperature,
-            'block_offsets' : 'walberla',
+            'temperature': temperature,
+            'block_offsets': 'walberla',
         },
         optimization={'cse_global': True}
     )
