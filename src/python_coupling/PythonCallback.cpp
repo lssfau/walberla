@@ -77,17 +77,21 @@ namespace python_coupling {
 
       std::string cwd(cwd_buf);
       std::free(cwd_buf);
-#else
-      filesystem::path cwd = filesystem::current_path();
-#endif
       path = filesystem::absolute( path, cwd );
+#else
+      path = filesystem::absolute( path );
+#endif
       if ( path.extension() == ".py" )
       {
          moduleName = path.stem().string();
 
 
          if ( ! path.parent_path().empty() )  {
+#ifdef CURRENT_PATH_WORKAROUND
             std::string p = filesystem::canonical(path.parent_path(), cwd).string();
+#else
+            std::string p = filesystem::canonical(path.parent_path()).string();
+#endif
             code << "sys.path.append( r'" << p << "')" << "\n";
          }
       }
