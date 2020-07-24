@@ -84,9 +84,11 @@ int main( int argc, char ** argv )
    blockforest::communication::UniformBufferedScheme< CommunicationStencil_T > communication( blocks );
    communication.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldId ) );
 
-   // add LBM sweep and communication to time loop
+   // set the RNG counter to match the time step and propagate it to the fields' copies of the lattice model
    timeloop.add() << BeforeFunction( [&](){ latticeModel.time_step_ = uint32_c(timeloop.getCurrentTimeStep()); }, "set RNG counter" )
-                  << BeforeFunction( communication, "communication" )
+                  << Sweep( [&]( IBlock * block ){ block->getData< PdfField_T >( pdfFieldId )->resetLatticeModel( latticeModel ); }, "set RNG counter" );
+   // add LBM sweep and communication to time loop
+   timeloop.add() << BeforeFunction( communication, "communication" )
                   << Sweep( LatticeModel_T::Sweep( pdfFieldId ), "LB stream & collide" );
 
    // LBM stability check
