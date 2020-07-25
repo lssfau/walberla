@@ -89,9 +89,7 @@ int main( int argc, char ** argv )
    timeloop.add() << BeforeFunction( [&](){ latticeModel.time_step_ = uint32_c(timeloop.getCurrentTimeStep()); }, "set RNG counter" )
                   << Sweep( [&]( IBlock * block ){
                         auto field = block->getData< PdfField_T >( pdfFieldId );
-                        field->resetLatticeModel( latticeModel );
-                        field->latticeModel().configure( *block, *blocks );
-                        WALBERLA_ASSERT_EQUAL( field->latticeModel().time_step_, latticeModel.time_step_ );
+                        field->latticeModel().time_step_ = latticeModel.time_step_;
                      }, "set RNG counter" );
    // add LBM sweep and communication to time loop
    timeloop.add() << BeforeFunction( communication, "communication" )
