@@ -96,9 +96,9 @@ GPUField<T>::~GPUField()
 template<typename T>
 T * GPUField<T>::dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f)
 {
-   auto offset = (x + nrOfGhostLayers_) * xStride() +
-                 (y + nrOfGhostLayers_) * yStride() +
-                 (z + nrOfGhostLayers_) * zStride() +
+   auto offset = (x + cell_idx_c(nrOfGhostLayers_)) * xStride() +
+                 (y + cell_idx_c(nrOfGhostLayers_)) * yStride() +
+                 (z + cell_idx_c(nrOfGhostLayers_)) * zStride() +
                  f * fStride();
    return static_cast<T*>(pitchedPtr_.ptr) + offset;
 }
@@ -106,9 +106,9 @@ T * GPUField<T>::dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f)
 template<typename T>
 const T * GPUField<T>::dataAt(cell_idx_t x, cell_idx_t y, cell_idx_t z, cell_idx_t f) const
 {
-   auto offset = (x + nrOfGhostLayers_) * xStride() +
-                 (y + nrOfGhostLayers_) * yStride() +
-                 (z + nrOfGhostLayers_) * zStride() +
+   auto offset = (x + cell_idx_c(nrOfGhostLayers_)) * xStride() +
+                 (y + cell_idx_c(nrOfGhostLayers_)) * yStride() +
+                 (z + cell_idx_c(nrOfGhostLayers_)) * zStride() +
                  f * fStride();
    return static_cast<T*>(pitchedPtr_.ptr) + offset;
 }
