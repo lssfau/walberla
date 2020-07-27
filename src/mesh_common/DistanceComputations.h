@@ -25,6 +25,7 @@
 #include "core/debug/Debug.h"
 #include "core/math/GenericAABB.h"
 #include "core/math/Matrix3.h"
+#include "core/logging/Logging.h"
 
 #include "mesh_common/MatrixVectorOperations.h"
 #include "mesh_common/TriangleMeshes.h"
