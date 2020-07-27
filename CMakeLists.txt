@@ -652,9 +652,14 @@ else()
   list ( APPEND waLBerla_OPTIONAL_BOOST_COMPONENTS system )
 endif()
 
-if ( WALBERLA_BUILD_WITH_PYTHON AND WALBERLA_CXX_COMPILER_IS_MSVC )
+if ( WALBERLA_BUILD_WITH_PYTHON )
+  if( WALBERLA_CXX_COMPILER_IS_MSVC )
     get_filename_component(PYTHON_REQUIRED_LIB ${PYTHON_LIBRARY} NAME_WE)
     list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS ${PYTHON_REQUIRED_LIB} )
+  elseif( WALBERLA_USE_STD_FILESYSTEM OR WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
+    list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS system )
+    list( REMOVE_ITEM waLBerla_OPTIONAL_BOOST_COMPONENTS system )
+  endif()
 endif()
 
 # This variable is necessary, if the CMAKE version used is not aware of a more recent boost version (keep this up to date!)
@@ -749,11 +754,13 @@ if ( WALBERLA_BUILD_WITH_PYTHON AND NOT WALBERLA_CXX_COMPILER_IS_MSVC)
         SET(_boost_MULTITHREADED "-mt")
     endif()
     if( PYTHON_LIBRARY MATCHES "python3" )
+        string(REPLACE "." ";" VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
+        list(GET VERSION_LIST 0 PY_VER_MAJOR)
+        list(GET VERSION_LIST 1 PY_VER_MINOR)
         find_library( BOOST_PYTHON_LIBRARY NAMES
-                boost_python37${_boost_MULTITHREADED} boost_python36${_boost_MULTITHREADED} boost_python35${_boost_MULTITHREADED}
-                boost_python-py37${_boost_MULTITHREADED} boost_python-py36${_boost_MULTITHREADED} boost_python-py35${_boost_MULTITHREADED}
-                boost_python-py34${_boost_MULTITHREADED} boost_python-py33${_boost_MULTITHREADED}
-                boost_python3${_boost_MULTITHREADED}
+                boost_python${PY_VER_MAJOR}${PY_VER_MINOR}${_boost_MULTITHREADED}
+                boost_python-py${PY_VER_MAJOR}${PY_VER_MINOR}${_boost_MULTITHREADED}
+                boost_python${PY_VER_MAJOR}${_boost_MULTITHREADED}
                 boost_python${_boost_MULTITHREADED}
                 PATHS ${Boost_LIBRARY_DIRS} NO_DEFAULT_PATH )
     else()
