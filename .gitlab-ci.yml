@@ -1558,7 +1558,7 @@ gcc_9_stl_debug:
 ###############################################################################
 
 doc:
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/ubuntu:18.04
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    script:
       - cmake --version
       - doxygen --version
