@@ -32,6 +32,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#ifdef __APPLE__
+#include <thread>
+#endif
 
 namespace walberla
 {
@@ -94,6 +97,12 @@ void MPIManager::initializeMPI(int* argc, char*** argv, bool abortOnException)
       MPI_Initialized(&mpiAlreadyInitialized);
       if (!mpiAlreadyInitialized)
       {
+#ifdef __APPLE__
+         /* Work around a race condition on macOS.
+            If a process started by mpiexec finishes too quickly, it sometimes doesn't start all processes.
+          */
+         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+#endif
          MPI_Init(argc, argv);
          finalizeOnDestruction_ = true;
       }
