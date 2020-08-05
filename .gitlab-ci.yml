@@ -1558,7 +1558,7 @@ gcc_9_stl_debug:
 ###############################################################################
 
 doc:
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/ubuntu:18.04
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    script:
       - cmake --version
       - doxygen --version
@@ -1916,6 +1916,7 @@ mac_MpiOnly_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+      OMPI_MCA_btl: "self,tcp"
    except:
       variables:
          - $DISABLE_PER_COMMIT_BUILDS
@@ -1928,6 +1929,7 @@ mac_MpiOnly:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+      OMPI_MCA_btl: "self,tcp"
    except:
       variables:
          - $DISABLE_PER_COMMIT_BUILDS
