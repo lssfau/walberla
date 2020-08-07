@@ -136,37 +136,6 @@ void test( const std::string & meshFile, const uint_t numProcesses, const uint_t
 #endif
 }
 
-template< typename MeshType >
-void testHelperFunctions( const std::string & meshFile, const uint_t numTotalBlocks )
-{
-   auto mesh = make_shared<MeshType>();
-   mesh::readAndBroadcast( meshFile, *mesh);
-   auto triDist = make_shared< mesh::TriangleDistance<MeshType> >( mesh );
-   auto distanceOctree = make_shared< DistanceOctree< MeshType > >( triDist );
-
-   const real_t meshVolume  = real_c( computeVolume( *mesh ) );
-   const real_t blockVolume = meshVolume / real_c( numTotalBlocks );
-   static const real_t cellsPersBlock = real_t(1000);
-   const real_t cellVolume = blockVolume / cellsPersBlock;
-   const real_t dx = std::pow( cellVolume, real_t(1) / real_t(3) );
-
-   WALBERLA_LOG_INFO_ON_ROOT( "Creating SBF with createStructuredBlockStorageInsideMesh with block size" );
-   auto sbf0 = mesh::createStructuredBlockStorageInsideMesh( distanceOctree, dx, numTotalBlocks );
-   
-   WALBERLA_LOG_INFO_ON_ROOT( "Creating SBF with createStructuredBlockStorageInsideMesh with block size" );
-   Vector3<uint_t> blockSize( sbf0->getNumberOfXCells(), sbf0->getNumberOfYCells(), sbf0->getNumberOfZCells() );
-   auto sbf1 = mesh::createStructuredBlockStorageInsideMesh( distanceOctree, dx, blockSize );
-
-   auto exteriorAabb = computeAABB( *mesh ).getScaled( real_t(2) );
-
-   WALBERLA_LOG_INFO_ON_ROOT( "Creating SBF with createStructuredBlockStorageInsideMesh with block size" );
-   auto sbf2 = mesh::createStructuredBlockStorageOutsideMesh( exteriorAabb, distanceOctree, dx, numTotalBlocks );
-
-   WALBERLA_LOG_INFO_ON_ROOT( "Creating SBF with createStructuredBlockStorageInsideMesh with block size" );
-   blockSize = Vector3<uint_t>( sbf2->getNumberOfXCells(), sbf2->getNumberOfYCells(), sbf2->getNumberOfZCells() );
-   auto sbf3 = mesh::createStructuredBlockStorageOutsideMesh( exteriorAabb, distanceOctree, dx, blockSize );
-}
-
 int main( int argc, char * argv[] )
 {
    debug::enterTestMode();
@@ -184,8 +153,6 @@ int main( int argc, char * argv[] )
    test< mesh::TriangleMesh >( meshFile, numProcesses, numTotalBlocks );
    //test< mesh::FloatTriangleMesh >( meshFile, numProcesses, numTotalBlocks );
    //test< mesh::PythonTriangleMesh >( meshFile, numProcesses, numTotalBlocks );
-
-   testHelperFunctions< mesh::TriangleMesh >( meshFile, numTotalBlocks );
 
    return EXIT_SUCCESS;
 }
