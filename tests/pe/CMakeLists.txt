@@ -146,5 +146,14 @@ endif()
 waLBerla_compile_test( NAME   PE_RAYTRACING FILES Raytracing.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_RAYTRACING )
 
+waLBerla_compile_test( NAME   PE_RAYTRACING_INTERSECTION FILES RaytracingIntersection.cpp DEPENDS core  )
+waLBerla_execute_test( NAME   PE_RAYTRACING_INTERSECTION )
+
+waLBerla_compile_test( NAME   PE_RAYTRACING_SPHERE FILES RaytracingSphere.cpp DEPENDS core  )
+waLBerla_execute_test( NAME   PE_RAYTRACING_SPHERE )
+
+waLBerla_compile_test( NAME   PE_RAYTRACING_HASHGRIDS FILES RaytracingHashGrids.cpp DEPENDS core  )
+waLBerla_execute_test( NAME   PE_RAYTRACING_HASHGRIDS )
+
 waLBerla_compile_test( NAME   PE_VOLUMEINERTIA FILES VolumeInertia.cpp DEPENDS core  )
 waLBerla_execute_test( NAME   PE_VOLUMEINERTIA CONFIGURATIONS Release RelWithDbgInfo)
