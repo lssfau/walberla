@@ -29,6 +29,10 @@ waLBerla_compile_test( FILES codegen/CodegenJacobiGPU.cpp
                        DEPENDS blockforest timeloop gui CodegenJacobiGPUGeneratedCudaJacobiKernel )
 waLBerla_execute_test( NAME CodegenJacobiGPU )
 
+waLBerla_generate_target_from_python(NAME CodegenPoissonGPUGeneratedKernel FILE codegen/CudaPoisson.py
+        OUT_FILES PoissonGPU.cu PoissonGPU.h )
+waLBerla_compile_test( FILES codegen/CodegenPoissonGPU.cpp DEPENDS gui cuda timeloop CodegenPoissonGPUGeneratedKernel)
+waLBerla_execute_test( NAME CodegenPoissonGPU )
 
 # The following tests work only for CUDA enabled MPI
 waLBerla_compile_test( FILES communication/CommTest )

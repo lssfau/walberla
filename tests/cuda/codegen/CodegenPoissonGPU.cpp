@@ -20,7 +20,6 @@
 
 #include "PoissonGPU.h"
 
-#include "cuda/HostFieldAllocator.h"
 #include "blockforest/Initialization.h"
 #include "blockforest/communication/UniformDirectScheme.h"
 #include "blockforest/communication/UniformBufferedScheme.h"
@@ -29,10 +28,8 @@
 #include "core/debug/TestSubsystem.h"
 #include "core/math/Constants.h"
 
-#include "cuda/HostFieldAllocator.h"
 #include "cuda/FieldCopy.h"
 #include "cuda/GPUField.h"
-#include "cuda/Kernel.h"
 #include "cuda/AddGPUFieldToStorage.h"
 #include "cuda/communication/GPUPackInfo.h"
 #include "cuda/FieldIndexing.h"
@@ -42,8 +39,6 @@
 #include "field/vtk/VTKWriter.h"
 
 #include "geometry/initializer/ScalarFieldFromGrayScaleImage.h"
-
-#include "gui/Gui.h"
 
 #include "stencil/D2Q9.h"
 
