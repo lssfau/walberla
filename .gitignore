@@ -26,6 +26,8 @@ qrc_*
 /CMakeSettings.json
 /.vs
 
+# Visual Studio Code
+/.vscode
 
 # CLion
 *.idea
@@ -50,6 +52,8 @@ logfile*.txt
 # Compiled python
 *.pyc
 
+# Jupyter Notebook
+**/.ipynb_checkpoints
 
 # Blockforest saves
 *.sav
