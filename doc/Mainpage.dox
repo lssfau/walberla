@@ -42,6 +42,11 @@ all the basic data strcutures and concepts of the framework.
   A full LBM simulation is built.
 - \ref tutorial_lbm04 \n
   A LBM simulation with complex geometries is built.
+
+\subsection codegen Code Generation with pystencils
+
+- \ref tutorial_codegen01 \n
+  This tutorial shows how to use pystencils to generate waLBerla sweeps from symbolic descriptions. 
    
 \section further_info Further information
 
