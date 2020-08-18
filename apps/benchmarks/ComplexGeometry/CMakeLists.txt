@@ -9,6 +9,6 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
 	# Some tests #
 	##############
 
-	waLBerla_execute_test( NO_MODULE_LABEL NAME ComplexGeometry COMMAND $<TARGET_FILE:ComplexGeometry> test.conf DEPENDS_ON_TARGETS ComplexGeometry )
+   waLBerla_execute_test( NO_MODULE_LABEL NAME ComplexGeometry LABELS longrun COMMAND $<TARGET_FILE:ComplexGeometry> test.conf DEPENDS_ON_TARGETS ComplexGeometry )
 endif()
 
