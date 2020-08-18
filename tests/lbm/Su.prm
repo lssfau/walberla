@@ -12,6 +12,7 @@ Parameters
     uMax            1.28737;
     t0              370;
     t1              326;
+    shortrun        false;
 }
 
 DomainSetup
