@@ -244,15 +244,16 @@ int main(int argc, char ** argv ){
    auto parameters = env.config()->getOneBlock( "Parameters" );
 
    // extract some constants from the parameters
-   const real_t          eta_s           = parameters.getParameter< real_t > ("eta_s");
-   const real_t          force           = parameters.getParameter< real_t > ("force");
-   const real_t          eta_p           = parameters.getParameter< real_t > ("eta_p");
-   const real_t          lambda_p        = parameters.getParameter< real_t > ("lambda_p");
-   const uint_t          period          = parameters.getParameter< uint_t > ("period");
-   const real_t          L               = parameters.getParameter< real_t > ("L");
-   const real_t          H               = parameters.getParameter< real_t > ("H");
-   const uint_t          blockSize       = parameters.getParameter< uint_t > ("blockSize");
-   const uint_t          timesteps       = parameters.getParameter< uint_t > ("timesteps");
+   const real_t eta_s     = parameters.getParameter< real_t > ("eta_s");
+   const real_t force     = parameters.getParameter< real_t > ("force");
+   const real_t eta_p     = parameters.getParameter< real_t > ("eta_p");
+   const real_t lambda_p  = parameters.getParameter< real_t > ("lambda_p");
+   const uint_t period    = parameters.getParameter< uint_t > ("period");
+   const real_t L         = parameters.getParameter< real_t > ("L");
+   const real_t H         = parameters.getParameter< real_t > ("H");
+   const uint_t blockSize = parameters.getParameter< uint_t > ("blockSize");
+   const bool   shortrun  = parameters.getParameter<   bool > ("shortrun");
+   const uint_t timesteps = shortrun ? uint_t(2) : parameters.getParameter< uint_t > ("timesteps");
 
    // reference data
    const real_t          uExpected       = force*H*H/(real_c(8.0)*(eta_s + eta_p));
@@ -293,25 +294,30 @@ int main(int argc, char ** argv ){
    timeloop.run();
 
 
-   // compare to reference data
-   real_t errSteady = real_c(fabs(testData->getUSteady() - real_c(1.0))/real_c(1.0));
-   real_t errMax = real_c(fabs(testData->getUMax() - uMax)/uMax);
-   real_t errt0 = real_c(fabs(testData->getT0() - t0)/t0);
-   real_t errt1 = real_c(fabs(testData->getT1() - t1)/t1);
+   if(!shortrun)
+   {
+      // compare to reference data
+      real_t errSteady = real_c(fabs(testData->getUSteady() - real_c(1.0))/real_c(1.0));
+      real_t errMax = real_c(fabs(testData->getUMax() - uMax)/uMax);
+      real_t errt0 = real_c(fabs(testData->getT0() - t0)/t0);
+      real_t errt1 = real_c(fabs(testData->getT1() - t1)/t1);
 
-   WALBERLA_LOG_RESULT("Steady State Velocity Error: " << errSteady );
-   WALBERLA_LOG_RESULT("Maximum Velocity Error: " << errMax );
-   WALBERLA_LOG_RESULT("Time of Maximum Error: " << errt0 );
-   WALBERLA_LOG_RESULT("Decay Time Error: " << errt1 );
+      WALBERLA_LOG_RESULT("Steady State Velocity Error: " << errSteady );
+      WALBERLA_LOG_RESULT("Maximum Velocity Error: " << errMax );
+      WALBERLA_LOG_RESULT("Time of Maximum Error: " << errt0 );
+      WALBERLA_LOG_RESULT("Decay Time Error: " << errt1 );
 
-   // check that errors < 1%
-   if (errSteady < 0.01 && errMax < 0.01 && errt0 < 0.01 && errt1 < 0.01){
-      WALBERLA_LOG_RESULT("Success" );
+      // check that errors < 1%
+      if (errSteady < 0.01 && errMax < 0.01 && errt0 < 0.01 && errt1 < 0.01){
+         WALBERLA_LOG_RESULT("Success" );
+         return EXIT_SUCCESS;
+      }
+      else {
+         WALBERLA_LOG_RESULT("Failure" );
+         return EXIT_FAILURE;
+      }
+   } else{
       return EXIT_SUCCESS;
-   }
-   else {
-      WALBERLA_LOG_RESULT("Failure" );
-      return EXIT_FAILURE;
    }
 
 }

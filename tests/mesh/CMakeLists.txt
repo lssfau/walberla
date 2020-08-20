@@ -61,13 +61,20 @@ if ( WALBERLA_BUILD_WITH_OPENMESH )
    waLBerla_execute_test( NAME  MeshAABBIntersectionTest    COMMAND $<TARGET_FILE:MeshAABBIntersectionTest> 10000 CONFIGURATIONS Release RelWithDbgInfo )
    
    waLBerla_compile_test( FILES MeshInitilizationTest.cpp DEPENDS mesh )
-   waLBerla_execute_test( NAME  MeshInitializationTestDbg1P1 COMMAND $<TARGET_FILE:MeshInitilizationTest> cube.obj 1 1              )
-   waLBerla_execute_test( NAME  MeshInitializationTestDbg2P1 COMMAND $<TARGET_FILE:MeshInitilizationTest> cube.obj 2 12             )
-   waLBerla_execute_test( NAME  MeshInitializationTestDbg2P2 COMMAND $<TARGET_FILE:MeshInitilizationTest> cube.obj 2 12 PROCESSES 2 )
+   waLBerla_execute_test( NAME  MeshInitializationTestDbg1P1 COMMAND $<TARGET_FILE:MeshInitilizationTest> cube.obj 1 1  LABELS longrun )
+   waLBerla_execute_test( NAME  MeshInitializationTestDbg2P1 COMMAND $<TARGET_FILE:MeshInitilizationTest> cube.obj 2 12 LABELS longrun )
+   waLBerla_execute_test( NAME  MeshInitializationTestDbg2P2 COMMAND $<TARGET_FILE:MeshInitilizationTest> cube.obj 2 12 PROCESSES 2    )
    
    waLBerla_execute_test( NAME  MeshInitializationTest1P    COMMAND $<TARGET_FILE:MeshInitilizationTest> bunny.obj 6 40 CONFIGURATIONS Release RelWithDbgInfo )
    waLBerla_execute_test( NAME  MeshInitializationTest4P    COMMAND $<TARGET_FILE:MeshInitilizationTest> bunny.obj 6 40 PROCESSES 4 CONFIGURATIONS Release RelWithDbgInfo )
 
+   waLBerla_compile_test( FILES MeshInitilizationHelperTest.cpp DEPENDS mesh )
+   waLBerla_execute_test( NAME  MeshInitializationHelperTestDbg1P1 COMMAND $<TARGET_FILE:MeshInitilizationHelperTest> cube.obj 1 1              )
+   waLBerla_execute_test( NAME  MeshInitializationHelperTestDbg2P1 COMMAND $<TARGET_FILE:MeshInitilizationHelperTest> cube.obj 2 12             )
+   waLBerla_execute_test( NAME  MeshInitializationHelperTestDbg2P2 COMMAND $<TARGET_FILE:MeshInitilizationHelperTest> cube.obj 2 12 PROCESSES 2 )
+   
+   waLBerla_execute_test( NAME  MeshInitializationHelperTest1P    COMMAND $<TARGET_FILE:MeshInitilizationHelperTest> bunny.obj 6 40 CONFIGURATIONS Release RelWithDbgInfo )
+   waLBerla_execute_test( NAME  MeshInitializationHelperTest4P    COMMAND $<TARGET_FILE:MeshInitilizationHelperTest> bunny.obj 6 40 PROCESSES 4 CONFIGURATIONS Release RelWithDbgInfo )
    
    waLBerla_compile_test( FILES MeshBlockExclusionTest.cpp DEPENDS mesh )
    waLBerla_execute_test( NAME  MeshBlockExclusionTestBunny  COMMAND $<TARGET_FILE:MeshBlockExclusionTest> bunny.obj  10000 CONFIGURATIONS Release RelWithDbgInfo )

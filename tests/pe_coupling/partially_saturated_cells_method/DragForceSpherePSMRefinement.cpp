@@ -488,7 +488,7 @@ int main( int argc, char **argv )
    const real_t omega      = real_c(1) / setup.tau;
    setup.visc              = lbm::collision_model::viscosityFromOmega( omega );
    const real_t dx         = real_c(1);
-   const uint_t timesteps  = funcTest ? 2 : ( shortrun ? uint_c(150) : uint_c( 1000000 ) );  // maximum number of time steps for the whole simulation
+   const uint_t timesteps  = funcTest ? 1 : ( shortrun ? uint_c(150) : uint_c( 1000000 ) );  // maximum number of time steps for the whole simulation
 
    ///////////////////////////
    // BLOCK STRUCTURE SETUP //
