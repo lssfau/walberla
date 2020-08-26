@@ -26,6 +26,6 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
 
     walberla_add_executable ( NAME 02_LBMLatticeModelGenerationApp 
                     FILES 02_LBMLatticeModelGeneration.cpp
-                    DEPENDS blockforest core field stencil timeloop vtk pde LBMLatticeModelGenerationPython )
+                    DEPENDS blockforest core domain_decomposition field geometry timeloop lbm stencil vtk LBMLatticeModelGenerationPython )
 
 endif()

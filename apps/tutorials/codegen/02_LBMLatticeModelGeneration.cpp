@@ -35,10 +35,23 @@
 #include "CumulantMRTLatticeModel.h"
 #include "EntropicMRTLatticeModel.h"
 
+//    Generated Communication Pack Infos
+#include "SRTPackInfo.h"
+#include "CumulantMRTPackInfo.h"
+#include "EntropicMRTPackInfo.h"
+
+//    Generated NoSlip Boundaries
+#include "SRTNoSlip.h"
+#include "CumulantMRTNoSlip.h"
+#include "EntropicMRTNoSlip.h"
+
 namespace walberla{
 
-// Set a typedef alias for our generated lattice model, for convenience.
+// Set a typedef alias for our generated lattice model, the PackInfo, and the boundary.
+// Changing the Method only requires changing these aliases.
 typedef lbm::SRTLatticeModel LatticeModel_T;
+typedef pystencils::SRTPackInfo PackInfo_T;
+typedef lbm::SRTNoSlip NoSlip_T;
 
 // Also set aliases for the stencils involved...
 typedef LatticeModel_T::Stencil                   Stencil_T;
@@ -85,17 +98,14 @@ int main( int argc, char ** argv )
    // create and initialize boundary handling
    const FlagUID fluidFlagUID( "Fluid" );
 
-
    auto boundariesConfig = walberlaEnv.config()->getOneBlock( "Boundaries" );
 
-   // TODO: Replace by my NoSlip
-   // lbm::LbCodeGenerationExample_NoSlip noSlip(blocks, pdfFieldId);
+   NoSlip_T noSlip(blocks, pdfFieldId);
 
    geometry::initBoundaryHandling<FlagField_T>(*blocks, flagFieldId, boundariesConfig);
    geometry::setNonBoundaryCellsToDomain<FlagField_T>(*blocks, flagFieldId, fluidFlagUID);
 
-   // TODO
-   // noSlip.fillFromFlagField<FlagField_T>( blocks, flagFieldId, FlagUID("NoSlip"), fluidFlagUID );
+   noSlip.fillFromFlagField<FlagField_T>( blocks, flagFieldId, FlagUID("NoSlip"), fluidFlagUID );
 
    // create time loop
    SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
@@ -105,8 +115,8 @@ int main( int argc, char ** argv )
    communication.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldId ) );
 
    // add LBM sweep and communication to time loop
-   timeloop.add() << BeforeFunction( communication, "communication" );
-                  //<< Sweep( walls, "Boundary Walls" );
+   timeloop.add() << BeforeFunction( communication, "communication" )
+                  << Sweep( noSlip, "NoSlip Boundaries" );
    timeloop.add() << Sweep( LatticeModel_T::Sweep( pdfFieldId ), "LB stream & collide" );
 
    // LBM stability check
