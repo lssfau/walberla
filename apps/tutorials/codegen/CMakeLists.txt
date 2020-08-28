@@ -24,6 +24,8 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
                     EntropicMRTPackInfo.cpp EntropicMRTPackInfo.h
                     EntropicMRTNoSlip.cpp EntropicMRTNoSlip.h )
 
+    waLBerla_link_files_to_builddir( *.prm )
+
     walberla_add_executable ( NAME 02_LBMLatticeModelGenerationApp 
                     FILES 02_LBMLatticeModelGeneration.cpp
                     DEPENDS blockforest core domain_decomposition field geometry timeloop lbm stencil vtk LBMLatticeModelGenerationPython )

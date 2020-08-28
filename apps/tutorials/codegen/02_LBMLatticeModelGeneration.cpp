@@ -19,124 +19,201 @@
 //======================================================================================================================
 
 #include "blockforest/all.h"
-#include "core/all.h"
-#include "domain_decomposition/all.h"
-#include "field/all.h"
-#include "geometry/all.h"
-#include "timeloop/all.h"
 
-#include "lbm/field/PdfField.h"
-#include "lbm/field/AddToStorage.h"
+#include "core/all.h"
+
+#include "domain_decomposition/all.h"
+
+#include "field/all.h"
+
+#include "geometry/all.h"
+
 #include "lbm/communication/PdfFieldPackInfo.h"
+#include "lbm/field/AddToStorage.h"
+#include "lbm/field/PdfField.h"
+#include "lbm/field/initializer/all.h"
 #include "lbm/vtk/VTKOutput.h"
 
+#include "timeloop/all.h"
+
 //    Codegen Includes
-#include "SRTLatticeModel.h"
 #include "CumulantMRTLatticeModel.h"
 #include "EntropicMRTLatticeModel.h"
+#include "SRTLatticeModel.h"
 
 //    Generated Communication Pack Infos
-#include "SRTPackInfo.h"
 #include "CumulantMRTPackInfo.h"
 #include "EntropicMRTPackInfo.h"
+#include "SRTPackInfo.h"
 
 //    Generated NoSlip Boundaries
-#include "SRTNoSlip.h"
 #include "CumulantMRTNoSlip.h"
 #include "EntropicMRTNoSlip.h"
+#include "SRTNoSlip.h"
 
-namespace walberla{
+namespace walberla
+{
+///////////////////////
+/// Typedef Aliases ///
+///////////////////////
 
-// Set a typedef alias for our generated lattice model, the PackInfo, and the boundary.
+// Set a typedef alias for our generated lattice model and the boundary.
 // Changing the Method only requires changing these aliases.
+
 typedef lbm::SRTLatticeModel LatticeModel_T;
-typedef pystencils::SRTPackInfo PackInfo_T;
 typedef lbm::SRTNoSlip NoSlip_T;
 
+// Entropic Model
+// typedef lbm::EntropicMRTLatticeModel LatticeModel_T;
+// typedef lbm::EntropicMRTNoSlip NoSlip_T;
+
+// Cumulant Model
+// typedef lbm::CumulantMRTLatticeModel LatticeModel_T;
+// typedef lbm::CumulantMRTNoSlip NoSlip_T;
+
+// Communication Pack Info
+typedef lbm::PdfFieldPackInfo< LatticeModel_T > PackInfo_T;
+
 // Also set aliases for the stencils involved...
-typedef LatticeModel_T::Stencil                   Stencil_T;
-typedef LatticeModel_T::CommunicationStencil      CommunicationStencil_T;
+typedef LatticeModel_T::Stencil Stencil_T;
+typedef LatticeModel_T::CommunicationStencil CommunicationStencil_T;
 
 // ... and for the required field types. These include the PdfField for the simulation
-typedef lbm::PdfField< LatticeModel_T >           PdfField_T;
+typedef lbm::PdfField< LatticeModel_T > PdfField_T;
 
 // and scalar- and vector-valued fields for output of macroscopic quantities.
 typedef GhostLayerField< real_t, LatticeModel_T::Stencil::D > VectorField_T;
 typedef GhostLayerField< real_t, 1 > ScalarField_T;
 
 // Also, for boundary handling, a flag data type and flag field are required.
-typedef walberla::uint8_t    flag_t;
-typedef FlagField< flag_t >  FlagField_T;
+typedef walberla::uint8_t flag_t;
+typedef FlagField< flag_t > FlagField_T;
 
-int main( int argc, char ** argv )
+/////////////////////////////////////////
+/// Shear Flow Initialization Functor ///
+/////////////////////////////////////////
+
+struct ShearFlowInit
 {
-   walberla::Environment walberlaEnv( argc, argv );
+ private:
+   lbm::initializer::ExprSystemInitFunction exprInitFunc_;
+   const real_t noiseMagnitude_;
+   math::RealRandom< real_t > rng_;
 
-   auto blocks = blockforest::createUniformBlockGridFromConfig( walberlaEnv.config() );
+ public:
+   ShearFlowInit(const shared_ptr< StructuredBlockForest >& blocks, const Config::BlockHandle& setup)
+      : exprInitFunc_(blocks), noiseMagnitude_(setup.getParameter< real_t >("u_y_noise_magnitude")),
+        rng_(setup.getParameter< std::mt19937::result_type >("noise_seed"))
+   {
+      if (!exprInitFunc_.parse(setup)) { WALBERLA_ABORT("Shear Flow Setup was incomplete."); }
+   }
+
+   std::vector< real_t > operator()(const Cell& globalCell)
+   {
+      std::vector< real_t > densityAndVelocity = exprInitFunc_(globalCell);
+      real_t yPerturbation                     = noiseMagnitude_ * rng_();
+      densityAndVelocity[2] += yPerturbation;
+
+      return densityAndVelocity;
+   }
+};
+
+/////////////////////
+/// Main Function ///
+/////////////////////
+
+int main(int argc, char** argv)
+{
+   walberla::Environment walberlaEnv(argc, argv);
+
+   if (!walberlaEnv.config()) { WALBERLA_ABORT("No configuration file specified!"); }
+
+   ///////////////////////////////////////////////////////
+   /// Block Storage Creation and Simulation Parameter ///
+   ///////////////////////////////////////////////////////
+
+   auto blocks = blockforest::createUniformBlockGridFromConfig(walberlaEnv.config());
 
    // read parameters
-   auto parameters = walberlaEnv.config()->getOneBlock( "Parameters" );
+   auto parameters = walberlaEnv.config()->getOneBlock("Parameters");
 
-   const real_t          omega           = parameters.getParameter< real_t >         ( "omega",           real_c( 1.4 ) );
-   const Vector3<real_t> initialVelocity = parameters.getParameter< Vector3<real_t> >( "initialVelocity", Vector3<real_t>() );
-   const uint_t          timesteps       = parameters.getParameter< uint_t >         ( "timesteps",       uint_c( 10 )  );
+   const uint_t timesteps = parameters.getParameter< uint_t >("timesteps", uint_c(10));
+   const real_t omega     = parameters.getParameter< real_t >("omega", real_c(1.8));
+   const double remainingTimeLoggerFrequency =
+      parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
 
-   const double remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 ); // in seconds
-
-   // create fields
+   ///////////////////
+   /// Field Setup ///
+   ///////////////////
 
    // TODO: Do we need a force field?
-   //BlockDataID forceFieldId = field::addToStorage<VectorField_T>( blocks, "Force", real_t( 0.0 ));
-   
+   // BlockDataID forceFieldId = field::addToStorage<VectorField_T>( blocks, "Force", real_t( 0.0 ));
+
    // Velocity output field
-   BlockDataID velFieldId = field::addToStorage<VectorField_T>( blocks, "Velocity", real_t( 0.0 ));
+   // We don't need that either, do we?
+   BlockDataID velFieldId = field::addToStorage< VectorField_T >(blocks, "Velocity", real_t(0.0));
 
-   LatticeModel_T latticeModel = LatticeModel_T(velFieldId, omega );
-   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, initialVelocity, real_t(1) );
-   BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
+   LatticeModel_T latticeModel = LatticeModel_T(velFieldId, omega);
+   BlockDataID pdfFieldId      = lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, field::zyxf);
+   BlockDataID flagFieldId     = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
-   // create and initialize boundary handling
-   const FlagUID fluidFlagUID( "Fluid" );
+   ////////////////////////
+   /// Shear Flow Setup ///
+   ////////////////////////
 
-   auto boundariesConfig = walberlaEnv.config()->getOneBlock( "Boundaries" );
+   auto shearFlowSetup = walberlaEnv.config()->getOneBlock("ShearFlowSetup");
+   ShearFlowInit shearFlowInitFunc(blocks, shearFlowSetup);
+   lbm::initializer::PdfFieldInitializer< LatticeModel_T > fieldInit(pdfFieldId, blocks);
+   fieldInit.initDensityAndVelocity(shearFlowInitFunc);
+
+   /////////////////////////
+   /// Boundary Handling ///
+   /////////////////////////
+
+   const FlagUID fluidFlagUID("Fluid");
+
+   auto boundariesConfig = walberlaEnv.config()->getOneBlock("Boundaries");
 
    NoSlip_T noSlip(blocks, pdfFieldId);
 
-   geometry::initBoundaryHandling<FlagField_T>(*blocks, flagFieldId, boundariesConfig);
-   geometry::setNonBoundaryCellsToDomain<FlagField_T>(*blocks, flagFieldId, fluidFlagUID);
+   geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldId, boundariesConfig);
+   geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldId, fluidFlagUID);
 
-   noSlip.fillFromFlagField<FlagField_T>( blocks, flagFieldId, FlagUID("NoSlip"), fluidFlagUID );
+   noSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldId, FlagUID("NoSlip"), fluidFlagUID);
 
-   // create time loop
-   SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
+   /////////////////
+   /// Time Loop ///
+   /////////////////
 
-   // create communication for PdfField
-   blockforest::communication::UniformBufferedScheme< CommunicationStencil_T > communication( blocks );
-   communication.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldId ) );
+   SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
 
-   // add LBM sweep and communication to time loop
-   timeloop.add() << BeforeFunction( communication, "communication" )
-                  << Sweep( noSlip, "NoSlip Boundaries" );
-   timeloop.add() << Sweep( LatticeModel_T::Sweep( pdfFieldId ), "LB stream & collide" );
+   // Communication
+   blockforest::communication::UniformBufferedScheme< CommunicationStencil_T > communication(blocks);
+   communication.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
+   timeloop.add() << BeforeFunction(communication, "communication");
 
-   // LBM stability check
-   timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< PdfField_T, FlagField_T >( walberlaEnv.config(), blocks, pdfFieldId,
-                                                                                                             flagFieldId, fluidFlagUID ) ),
-                                  "LBM stability check" );
+   // Boundaries and LBM Sweep
+   timeloop.add() << Sweep(noSlip, "NoSlip Boundaries")
+                  << Sweep(LatticeModel_T::Sweep(pdfFieldId), "LB stream & collide");
 
-   // log remaining time
-   timeloop.addFuncAfterTimeStep( timing::RemainingTimeLogger( timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency ), "remaining time logger" );
+   // Stability Checker
+   timeloop.addFuncAfterTimeStep(makeSharedFunctor(field::makeStabilityChecker< PdfField_T, FlagField_T >(
+                                    walberlaEnv.config(), blocks, pdfFieldId, flagFieldId, fluidFlagUID)),
+                                 "LBM stability check");
 
-   // add VTK output to time loop
-   lbm::VTKOutput< LatticeModel_T, FlagField_T >::addToTimeloop( timeloop, blocks, walberlaEnv.config(), pdfFieldId, flagFieldId, fluidFlagUID );
+   // Time logger
+   timeloop.addFuncAfterTimeStep(timing::RemainingTimeLogger(timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency),
+                                 "remaining time logger");
+
+   // LBM VTK Output
+   lbm::VTKOutput< LatticeModel_T, FlagField_T >::addToTimeloop(timeloop, blocks, walberlaEnv.config(), pdfFieldId,
+                                                                flagFieldId, fluidFlagUID);
 
    timeloop.run();
 
    return EXIT_SUCCESS;
 }
 
-}
+} // namespace walberla
 
-int main(int argc, char ** argv){
-   return walberla::main(argc, argv);
-}
+int main(int argc, char** argv) { return walberla::main(argc, argv); }

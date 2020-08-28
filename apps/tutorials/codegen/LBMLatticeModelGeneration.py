@@ -16,10 +16,10 @@ OMEGA = sp.Symbol('omega')
 LAYOUT = 'zyxf'
 
 #   Optimization
-OPT = {'target': 'cpu', 'cse_global': True}
+OPT = {'target': 'cpu', 'cse_global': True, 'field_layout': LAYOUT}
 
 #   Velocity Output Field
-vel_field = ps.fields("velocity(3): [2D]", layout=LAYOUT)
+vel_field = ps.fields("velocity(2): [2D]", layout=LAYOUT)
 OUTPUT = {'velocity': vel_field}
 
 #   ==================================================================================================
@@ -36,7 +36,7 @@ def build_srt_method(ctx):
     srt_collision_rule = create_lb_collision_rule(optimization=OPT, output=OUTPUT, **srt_params)
     generate_lattice_model(ctx, "SRTLatticeModel", srt_collision_rule, field_layout=LAYOUT)
 
-    srt_update_rule = create_lb_update_rule(collision_rule=srt_collision_rule)
+    srt_update_rule = create_lb_update_rule(collision_rule=srt_collision_rule, optimization=OPT)
     generate_pack_info_from_kernel(ctx, "SRTPackInfo", srt_update_rule)
 
     generate_boundary(ctx, "SRTNoSlip", NoSlip(), srt_collision_rule.method)
@@ -53,7 +53,7 @@ def build_cumulant_method(ctx):
     mrt_cumulant_collision_rule = create_lb_collision_rule(optimization=OPT, output=OUTPUT, **mrt_cumulant_params)
     generate_lattice_model(ctx, "CumulantMRTLatticeModel", mrt_cumulant_collision_rule, field_layout=LAYOUT)
 
-    mrt_cumulant_update_rule = create_lb_update_rule(collision_rule=mrt_cumulant_collision_rule)
+    mrt_cumulant_update_rule = create_lb_update_rule(collision_rule=mrt_cumulant_collision_rule, optimization=OPT)
     generate_pack_info_from_kernel(ctx, "CumulantMRTPackInfo", mrt_cumulant_update_rule)
 
     generate_boundary(ctx, "CumulantMRTNoSlip", NoSlip(), mrt_cumulant_collision_rule.method)
@@ -72,7 +72,7 @@ def build_entropic_method(ctx):
     mrt_entropic_collision_rule = create_lb_collision_rule(optimization=OPT, output=OUTPUT, **mrt_entropic_params)
     generate_lattice_model(ctx, "EntropicMRTLatticeModel", mrt_entropic_collision_rule, field_layout=LAYOUT)
 
-    mrt_entropic_update_rule = create_lb_update_rule(collision_rule=mrt_entropic_collision_rule)
+    mrt_entropic_update_rule = create_lb_update_rule(collision_rule=mrt_entropic_collision_rule, optimization=OPT)
     generate_pack_info_from_kernel(ctx, "EntropicMRTPackInfo", mrt_entropic_update_rule)
 
     generate_boundary(ctx, "EntropicMRTNoSlip", NoSlip(), mrt_entropic_collision_rule.method)
