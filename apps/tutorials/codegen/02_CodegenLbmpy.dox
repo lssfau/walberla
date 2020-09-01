@@ -1,0 +1,25 @@
+namespace walberla{
+
+/**
+\page tutorial_codegen02 Tutorial - Code Generation 2: Lattice Model Generation with lbmpy
+
+\section overview Overview
+
+This tutorial demonstrates how to use <a href="https://pycodegen.pages.i10git.cs.fau.de/lbmpy/notebooks/00_tutorial_lbmpy_walberla_overview.html" target="_blank">lbmpy</a> in conjunction with waLBerla to generate efficient implementations of various Lattice Boltzmann Methods to be included in large-scale distributed memory fluid flow simulations. While waLBerla provides an advanced framework for setting up and running complex fluid simulations, it only implements a small set of Lattice Boltzmann collision operators. Writing an efficient C++ implementation of an advanced Lattice-Boltzmann method can be very cumbersome. For this reason, lbmpy has been developed. It is a Python framework which allows to define a set of LB equations at different levels of abstraction, and then generate a highly optimized C implementation of these equations. An introduction to lbmpy can be found <a href="https://pycodegen.pages.i10git.cs.fau.de/lbmpy/notebooks/00_tutorial_lbmpy_walberla_overview.html" target="_blank">here</a>. 
+
+
+As in the previous tutorial (\ref tutorial_codegen01), we will first define the numeric methods and set up code generation in a Python script. We will then include the generated code in a waLBerla application to simulate a two-dimensional shear flow in a periodic domain. Additionally, it will be shown how a waLBerla simulation with complex initial conditions can be initialized using parameter files.
+
+\section lbmpy_codegen_script The Code Generation Script
+
+\section lbmpy_simulation_app The Simulation application
+
+\subsection lbmpy_codegen_inclusion Inclusion of the generated code
+
+\subsection lbmpy_shear_flow_init Initialization of the Shear Flow
+
+\tableofcontents
+
+*/
+
+}
