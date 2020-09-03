@@ -12,22 +12,15 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
                               DEPENDS blockforest core field stencil timeloop vtk pde CodegenHeatEquationKernel )
 
     #   Tutorial 2: lbmpy Lattice Model Generation
-    walberla_generate_target_from_python( NAME LBMLatticeModelGenerationPython
-        FILE LBMLatticeModelGeneration.py
-        OUT_FILES   SRTLatticeModel.cpp SRTLatticeModel.h 
-                    SRTPackInfo.cpp SRTPackInfo.h
-                    SRTNoSlip.cpp SRTNoSlip.h
-                    CumulantMRTLatticeModel.cpp CumulantMRTLatticeModel.h 
-                    CumulantMRTPackInfo.cpp CumulantMRTPackInfo.h
-                    CumulantMRTNoSlip.cpp CumulantMRTNoSlip.h
-                    EntropicMRTLatticeModel.cpp EntropicMRTLatticeModel.h
-                    EntropicMRTPackInfo.cpp EntropicMRTPackInfo.h
-                    EntropicMRTNoSlip.cpp EntropicMRTNoSlip.h )
-
     waLBerla_link_files_to_builddir( *.prm )
+    
+    walberla_generate_target_from_python( NAME 02_LBMLatticeModelGenerationPython
+        FILE 02_LBMLatticeModelGeneration.py
+        OUT_FILES   SRTLatticeModel.cpp SRTLatticeModel.h 
+                    SRTPackInfo.cpp SRTPackInfo.h )
 
     walberla_add_executable ( NAME 02_LBMLatticeModelGenerationApp 
                     FILES 02_LBMLatticeModelGeneration.cpp
-                    DEPENDS blockforest core domain_decomposition field geometry timeloop lbm stencil vtk LBMLatticeModelGenerationPython )
+                    DEPENDS blockforest core domain_decomposition field geometry timeloop lbm stencil vtk 02_LBMLatticeModelGenerationPython )
 
 endif()

@@ -28,6 +28,7 @@
 
 #include "geometry/all.h"
 
+#include "lbm/boundary/factories/DefaultBoundaryHandling.h"
 #include "lbm/communication/PdfFieldPackInfo.h"
 #include "lbm/field/AddToStorage.h"
 #include "lbm/field/PdfField.h"
@@ -37,19 +38,8 @@
 #include "timeloop/all.h"
 
 //    Codegen Includes
-#include "CumulantMRTLatticeModel.h"
-#include "EntropicMRTLatticeModel.h"
 #include "SRTLatticeModel.h"
-
-//    Generated Communication Pack Infos
-#include "CumulantMRTPackInfo.h"
-#include "EntropicMRTPackInfo.h"
 #include "SRTPackInfo.h"
-
-//    Generated NoSlip Boundaries
-#include "CumulantMRTNoSlip.h"
-#include "EntropicMRTNoSlip.h"
-#include "SRTNoSlip.h"
 
 namespace walberla
 {
@@ -57,37 +47,23 @@ namespace walberla
 /// Typedef Aliases ///
 ///////////////////////
 
-// Set a typedef alias for our generated lattice model and the boundary.
-// Changing the Method only requires changing these aliases.
-
+// Typedef alias for the lattice model
 typedef lbm::SRTLatticeModel LatticeModel_T;
-typedef lbm::SRTNoSlip NoSlip_T;
-
-// Entropic Model
-// typedef lbm::EntropicMRTLatticeModel LatticeModel_T;
-// typedef lbm::EntropicMRTNoSlip NoSlip_T;
-
-// Cumulant Model
-// typedef lbm::CumulantMRTLatticeModel LatticeModel_T;
-// typedef lbm::CumulantMRTNoSlip NoSlip_T;
 
 // Communication Pack Info
-typedef lbm::PdfFieldPackInfo< LatticeModel_T > PackInfo_T;
+typedef pystencils::SRTPackInfo PackInfo_T;
 
 // Also set aliases for the stencils involved...
 typedef LatticeModel_T::Stencil Stencil_T;
 typedef LatticeModel_T::CommunicationStencil CommunicationStencil_T;
 
-// ... and for the required field types. These include the PdfField for the simulation
+// ... and for the required field types.
 typedef lbm::PdfField< LatticeModel_T > PdfField_T;
-
-// and scalar- and vector-valued fields for output of macroscopic quantities.
-typedef GhostLayerField< real_t, LatticeModel_T::Stencil::D > VectorField_T;
-typedef GhostLayerField< real_t, 1 > ScalarField_T;
 
 // Also, for boundary handling, a flag data type and flag field are required.
 typedef walberla::uint8_t flag_t;
 typedef FlagField< flag_t > FlagField_T;
+typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory;
 
 /////////////////////////////////////////
 /// Shear Flow Initialization Functor ///
@@ -146,15 +122,8 @@ int main(int argc, char** argv)
    /// Field Setup ///
    ///////////////////
 
-   // TODO: Do we need a force field?
-   // BlockDataID forceFieldId = field::addToStorage<VectorField_T>( blocks, "Force", real_t( 0.0 ));
-
-   // Velocity output field
-   // We don't need that either, do we?
-   BlockDataID velFieldId = field::addToStorage< VectorField_T >(blocks, "Velocity", real_t(0.0));
-
-   LatticeModel_T latticeModel = LatticeModel_T(velFieldId, omega);
-   BlockDataID pdfFieldId      = lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, field::zyxf);
+   LatticeModel_T latticeModel = LatticeModel_T(omega);
+   BlockDataID pdfFieldId      = lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, field::fzyx);
    BlockDataID flagFieldId     = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
    ////////////////////////
@@ -174,12 +143,12 @@ int main(int argc, char** argv)
 
    auto boundariesConfig = walberlaEnv.config()->getOneBlock("Boundaries");
 
-   NoSlip_T noSlip(blocks, pdfFieldId);
+   BlockDataID boundaryHandlingId =
+      BHFactory::addBoundaryHandlingToStorage(blocks, "boundary handling", flagFieldId, pdfFieldId, fluidFlagUID,
+                                              Vector3< real_t >(), Vector3< real_t >(), real_c(0.0), real_c(0.0));
 
-   geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldId, boundariesConfig);
-   geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldId, fluidFlagUID);
-
-   noSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldId, FlagUID("NoSlip"), fluidFlagUID);
+   geometry::initBoundaryHandling< BHFactory::BoundaryHandling >(*blocks, boundaryHandlingId, boundariesConfig);
+   geometry::setNonBoundaryCellsToDomain< BHFactory::BoundaryHandling >(*blocks, boundaryHandlingId);
 
    /////////////////
    /// Time Loop ///
@@ -190,11 +159,11 @@ int main(int argc, char** argv)
    // Communication
    blockforest::communication::UniformBufferedScheme< CommunicationStencil_T > communication(blocks);
    communication.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
-   timeloop.add() << BeforeFunction(communication, "communication");
-
-   // Boundaries and LBM Sweep
-   timeloop.add() << Sweep(noSlip, "NoSlip Boundaries")
-                  << Sweep(LatticeModel_T::Sweep(pdfFieldId), "LB stream & collide");
+   
+   // Timeloop
+   timeloop.add() << BeforeFunction(communication, "communication")
+                  << Sweep(BHFactory::BoundaryHandling::getBlockSweep(boundaryHandlingId), "Boundary Handling");
+   timeloop.add() << Sweep(LatticeModel_T::Sweep(pdfFieldId), "LB stream & collide");
 
    // Stability Checker
    timeloop.addFuncAfterTimeStep(makeSharedFunctor(field::makeStabilityChecker< PdfField_T, FlagField_T >(
