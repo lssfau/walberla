@@ -72,13 +72,13 @@ typedef lbm::CumulantMRTNoSlip NoSlip_T;
 /// Shear Flow Velocity Initialization ///
 //////////////////////////////////////////
 
-bool initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& blocks, const BlockDataID& velocityFieldId,
+void initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& blocks, const BlockDataID& velocityFieldId,
                                 const Config::BlockHandle& config)
 {
-   math::RealRandom< real_t > rng(config.getParameter< std::mt19937::result_type >("noise_seed", 42));
+   math::RealRandom< real_t > rng(config.getParameter< std::mt19937::result_type >("noiseSeed", 42));
 
-   real_t velocityMagnitude = config.getParameter< real_t >("VelocityMagnitude", real_c(0.08));
-   real_t noiseMagnitude    = config.getParameter< real_t >("NoiseMagnitude", real_c(0.1) * velocityMagnitude);
+   real_t velocityMagnitude = config.getParameter< real_t >("velocityMagnitude", real_c(0.08));
+   real_t noiseMagnitude    = config.getParameter< real_t >("noiseMagnitude", real_c(0.1) * velocityMagnitude);
 
    real_t n_y = real_c(blocks->getNumberOfYCells());
 
@@ -99,6 +99,47 @@ bool initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& block
       }
    }
 }
+
+////////////////////////
+/// VTK Output Setup ///
+////////////////////////
+
+struct VTKOutputSetup
+{
+ private:
+   const ConstBlockDataID velocityFieldId_;
+   const ConstBlockDataID flagFieldId_;
+   const FlagUID& domainFlag_;
+
+ public:
+   VTKOutputSetup(const BlockDataID& velocityFieldId, const BlockDataID& flagFieldId, const FlagUID& domainFlag)
+      : velocityFieldId_(velocityFieldId), flagFieldId_(flagFieldId), domainFlag_(domainFlag)
+   {}
+
+   void operator()(std::vector< shared_ptr< vtk::BlockCellDataWriterInterface > >& writers,
+                   std::map< std::string, vtk::VTKOutput::CellFilter >& filters,
+                   std::map< std::string, vtk::VTKOutput::BeforeFunction >& /*beforeFunctions*/) const
+   {
+      // Add VTK writers for velocity and velocity magnitude
+      writers.push_back(make_shared< field::VTKWriter< VectorField_T, float > >(velocityFieldId_, "Velocity"));
+
+      // Add domain cell filter
+      filters["DomainFilter"] = field::FlagFieldCellFilter< FlagField_T >(flagFieldId_, domainFlag_);
+   }
+
+   void initializeAndAdd(SweepTimeloop& timeloop, const shared_ptr< StructuredBlockForest >& blocks,
+                         const shared_ptr<Config> & config)
+   {
+      std::map< std::string, vtk::SelectableOutputFunction > vtkOutputFunctions;
+      vtk::initializeVTKOutput(vtkOutputFunctions, *this, blocks, config, "VTK");
+
+      for (auto funcIt = vtkOutputFunctions.begin(); funcIt != vtkOutputFunctions.end(); ++funcIt)
+      {
+         timeloop.addFuncBeforeTimeStep(funcIt->second.outputFunction, funcIt->first,
+                                        funcIt->second.requiredGlobalStates, funcIt->second.incompatibleGlobalStates);
+      }
+   }
+};
 
 /////////////////////
 /// Main Function ///
@@ -124,15 +165,11 @@ int main(int argc, char** argv)
    const double remainingTimeLoggerFrequency =
       parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
 
-   ////////////////////////////
-   /// Velocity Field Setup ///
-   ////////////////////////////
+   ////////////////////////////////////
+   /// PDF Field and Velocity Setup ///
+   ////////////////////////////////////
 
    BlockDataID velocityFieldId = field::addToStorage< VectorField_T >(blocks, "velocity", real_c(0.0), field::fzyx);
-
-   ///////////////////////
-   /// PDF Field Setup ///
-   ///////////////////////
 
    BlockDataID pdfFieldId  = field::addToStorage< PdfField_T >(blocks, "pdf field", real_c(0.0), field::fzyx);
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
@@ -146,8 +183,9 @@ int main(int argc, char** argv)
 
    // ... and then use the generated PDF setter to initialize the PDF field.
    pystencils::DensityAndVelocityFieldSetter pdfSetter(pdfFieldId, velocityFieldId, rho);
-   
-   for(auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt){
+
+   for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
+   {
       pdfSetter(&(*blockIt));
    }
 
@@ -159,12 +197,12 @@ int main(int argc, char** argv)
 
    auto boundariesConfig = walberlaEnv.config()->getOneBlock("Boundaries");
 
-   // BlockDataID boundaryHandlingId =
-   //    BHFactory::addBoundaryHandlingToStorage(blocks, "boundary handling", flagFieldId, pdfFieldId, fluidFlagUID,
-   //                                            Vector3< real_t >(), Vector3< real_t >(), real_c(0.0), real_c(0.0));
+   NoSlip_T noSlip(blocks, pdfFieldId);
 
-   // geometry::initBoundaryHandling< BHFactory::BoundaryHandling >(*blocks, boundaryHandlingId, boundariesConfig);
-   // geometry::setNonBoundaryCellsToDomain< BHFactory::BoundaryHandling >(*blocks, boundaryHandlingId);
+   geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldId, boundariesConfig);
+   geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldId, fluidFlagUID);
+
+   noSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldId, FlagUID("NoSlip"), fluidFlagUID);
 
    /////////////////
    /// Time Loop ///
@@ -177,7 +215,9 @@ int main(int argc, char** argv)
    communication.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
 
    // Timeloop
-   timeloop.add() << BeforeFunction(communication, "communication");
+   timeloop.add() << BeforeFunction(communication, "communication") << Sweep(noSlip);
+
+   timeloop.add() << Sweep(pystencils::CumulantMRTSweep(pdfFieldId, velocityFieldId, omega));
 
    // Stability Checker
    timeloop.addFuncAfterTimeStep(makeSharedFunctor(field::makeStabilityChecker< PdfField_T, FlagField_T >(
@@ -188,10 +228,9 @@ int main(int argc, char** argv)
    timeloop.addFuncAfterTimeStep(timing::RemainingTimeLogger(timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency),
                                  "remaining time logger");
 
-   // TODO: Replace
-   // LBM VTK Output
-   // lbm::VTKOutput< LatticeModel_T, FlagField_T >::addToTimeloop(timeloop, blocks, walberlaEnv.config(), pdfFieldId,
-   //                                                              flagFieldId, fluidFlagUID);
+   // VTK Output
+   VTKOutputSetup vtkOutput(velocityFieldId, flagFieldId, fluidFlagUID);
+   vtkOutput.initializeAndAdd(timeloop, blocks, walberlaEnv.config());
 
    timeloop.run();
 

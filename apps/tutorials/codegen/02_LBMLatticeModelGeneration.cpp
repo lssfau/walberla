@@ -78,7 +78,7 @@ struct ShearFlowInit
 
  public:
    ShearFlowInit(const shared_ptr< StructuredBlockForest >& blocks, const Config::BlockHandle& setup)
-      : exprInitFunc_(blocks), noiseMagnitude_(setup.getParameter< real_t >("u_y_noise_magnitude")),
+      : exprInitFunc_(blocks), noiseMagnitude_(setup.getParameter< real_t >("noise_magnitude")),
         rng_(setup.getParameter< std::mt19937::result_type >("noise_seed", 42))
    {
       if (!exprInitFunc_.parse(setup)) { WALBERLA_ABORT("Shear Flow Setup was incomplete."); }

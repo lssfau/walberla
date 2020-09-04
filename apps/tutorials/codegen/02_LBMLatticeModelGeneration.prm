@@ -15,7 +15,7 @@ ShearFlowSetup
    u_y   0;
    u_z   0;
 
-   u_y_noise_magnitude     0.005;
+   noise_magnitude     0.005;
    noise_seed              42;
 }
 
