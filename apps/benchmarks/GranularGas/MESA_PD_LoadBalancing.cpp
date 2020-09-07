@@ -305,6 +305,22 @@ int main( int argc, char ** argv )
    auto    RPBytesReceived  = RP.getBytesReceived();
    auto    RPSends          = RP.getNumberOfSends();
    auto    RPReceives       = RP.getNumberOfReceives();
+   auto    SNNMinSends      = walberla::mpi::reduce(SNNSends, walberla::mpi::MIN);
+   auto    SNNMaxSends      = walberla::mpi::reduce(SNNSends, walberla::mpi::MAX);
+   WALBERLA_LOG_DEVEL_ON_ROOT( "SNN min/max communication partners: " << SNNMinSends << " / " << SNNMaxSends );
+   walberla::mpi::reduceInplace(SNNBytesSent, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(SNNBytesReceived, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(SNNSends, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(SNNReceives, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPBytesSent, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPBytesReceived, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPSends, walberla::mpi::SUM);
+   walberla::mpi::reduceInplace(RPReceives, walberla::mpi::SUM);
+   WALBERLA_LOG_DEVEL_ON_ROOT( "SNN bytes communicated:   " << SNNBytesSent << " / " << SNNBytesReceived );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "SNN communication partners: " << SNNSends << " / " << SNNReceives );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "RP bytes communicated:  " << RPBytesSent << " / " << RPBytesReceived );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "RP communication partners: " << RPSends << " / " << RPReceives );
+
    int64_t imbalancedContactsChecked  = 0;
    int64_t imbalancedContactsDetected = 0;
    int64_t imbalancedContactsTreated  = 0;
@@ -479,6 +495,9 @@ int main( int argc, char ** argv )
    RPBytesReceived  = RP.getBytesReceived();
    RPSends          = RP.getNumberOfSends();
    RPReceives       = RP.getNumberOfReceives();
+   SNNMinSends      = walberla::mpi::reduce(SNNSends, walberla::mpi::MIN);
+   SNNMaxSends      = walberla::mpi::reduce(SNNSends, walberla::mpi::MAX);
+   WALBERLA_LOG_DEVEL_ON_ROOT( "SNN min/max communication partners: " << SNNMinSends << " / " << SNNMaxSends );
    walberla::mpi::reduceInplace(SNNBytesSent, walberla::mpi::SUM);
    walberla::mpi::reduceInplace(SNNBytesReceived, walberla::mpi::SUM);
    walberla::mpi::reduceInplace(SNNSends, walberla::mpi::SUM);
@@ -547,6 +566,10 @@ int main( int argc, char ** argv )
    accessor);
    auto minParticles = walberla::mpi::reduce(numParticles, walberla::mpi::MIN);
    auto maxParticles = walberla::mpi::reduce(numParticles, walberla::mpi::MAX);
+   auto minGhostParticles = walberla::mpi::reduce(numGhostParticles, walberla::mpi::MIN);
+   auto maxGhostParticles = walberla::mpi::reduce(numGhostParticles, walberla::mpi::MAX);
+   auto minTotalParticles = walberla::mpi::reduce(numParticles + numGhostParticles, walberla::mpi::MIN);
+   auto maxTotalParticles = walberla::mpi::reduce(numParticles + numGhostParticles, walberla::mpi::MAX);
    WALBERLA_LOG_DEVEL_ON_ROOT("particle ratio: " << minParticles << " / " << maxParticles);
    walberla::mpi::reduceInplace(numParticles, walberla::mpi::SUM);
    walberla::mpi::reduceInplace(numGhostParticles, walberla::mpi::SUM);
@@ -592,6 +615,10 @@ int main( int argc, char ** argv )
       integerProperties["num_ghost_particles"]          = numGhostParticles;
       integerProperties["minParticles"]                 = minParticles;
       integerProperties["maxParticles"]                 = maxParticles;
+      integerProperties["minGhostParticles"]            = minGhostParticles;
+      integerProperties["maxGhostParticles"]            = maxGhostParticles;
+      integerProperties["minTotalParticles"]            = minTotalParticles;
+      integerProperties["maxTotalParticles"]            = maxTotalParticles;
       integerProperties["imbalancedContactsChecked"]    = imbalancedContactsChecked;
       integerProperties["imbalancedContactsDetected"]   = imbalancedContactsDetected;
       integerProperties["imbalancedContactsTreated"]    = imbalancedContactsTreated;
@@ -605,6 +632,8 @@ int main( int argc, char ** argv )
       integerProperties["SNNBytesReceived"]             = SNNBytesReceived;
       integerProperties["SNNSends"]                     = SNNSends;
       integerProperties["SNNReceives"]                  = SNNReceives;
+      integerProperties["SNNMinSends"]                  = SNNMinSends;
+      integerProperties["SNNMaxSends"]                  = SNNMaxSends;
       integerProperties["RPBytesSent"]                  = RPBytesSent;
       integerProperties["RPBytesReceived"]              = RPBytesReceived;
       integerProperties["RPSends"]                      = RPSends;
