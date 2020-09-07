@@ -503,8 +503,8 @@ public:
          const auto common = Matrix3<real_t>::makeDiagonalMatrix( velocity * bodyForce_ );
          return (tensorProduct( velocity, bodyForce_ ) +
                  tensorProduct( bodyForce_, velocity ) -
-                 common * (real_t(2)*one_over_d) ) * real_t(0.5) * ( real_t(2) + omega )
-                + common * ( one_over_d * ( real_t(2) + omega_bulk ) );
+                 common * (real_t(2)*one_over_d) ) * real_t(0.5) * ( real_t(2) - omega )
+                + common * ( one_over_d * ( real_t(2) - omega_bulk ) );
       }
       else
       {
@@ -589,8 +589,8 @@ public:
          const auto common = Matrix3<real_t>::makeDiagonalMatrix( velocity * force(x,y,z) );
          return (tensorProduct( velocity, force(x,y,z) ) +
                  tensorProduct( force(x,y,z), velocity ) -
-                 common * (real_t(2)*one_over_d) ) * real_t(0.5) * ( real_t(2) + omega )
-                + common * ( one_over_d * ( real_t(2) + omega_bulk ) );
+                 common * (real_t(2)*one_over_d) ) * real_t(0.5) * ( real_t(2) - omega )
+                + common * ( one_over_d * ( real_t(2) - omega_bulk ) );
       }
       else
       {
