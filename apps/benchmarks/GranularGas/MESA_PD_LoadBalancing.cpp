@@ -82,6 +82,48 @@
 namespace walberla {
 namespace mesa_pd {
 
+template <typename PhantomBlockWeight_T>
+void configure( const walberla::Config::BlockHandle& config, walberla::blockforest::DynamicDiffusionBalance<PhantomBlockWeight_T>& ddb )
+{
+   using namespace walberla;
+
+   ddb.setMaxIterations  ( config.getParameter<uint_t>( "diffMaxIterations", uint_c(20)) );
+   WALBERLA_LOG_INFO_ON_ROOT( "diffMaxIterations: " << ddb.getMaxIterations() );
+
+   ddb.setFlowIterations ( config.getParameter<uint_t>( "diffFlowIterations", uint_c(12)) );
+   WALBERLA_LOG_INFO_ON_ROOT( "diffFlowIterations: " << ddb.getFlowIterations() );
+
+   ddb.checkForEarlyAbort( config.getParameter<bool>("bDiffAbortEarly", true ) );
+   WALBERLA_LOG_INFO_ON_ROOT("bDiffAbortEarly: " << ddb.checkForEarlyAbort());
+
+   ddb.adaptInflowWithGlobalInformation( config.getParameter<bool>("bDiffAdaptInflow", true ) );
+   WALBERLA_LOG_INFO_ON_ROOT("bDiffAdaptInflow: " << ddb.adaptInflowWithGlobalInformation());
+
+   ddb.adaptOutflowWithGlobalInformation( config.getParameter<bool>("bDiffAdaptOutflow", true ) );
+   WALBERLA_LOG_INFO_ON_ROOT("bDiffAdaptOutflow: " << ddb.adaptOutflowWithGlobalInformation());
+
+   std::string diffModeStr = config.getParameter<std::string>("diffMode", "push" );
+   if (diffModeStr == "push")
+   {
+      ddb.setMode( blockforest::DynamicDiffusionBalance<PhantomBlockWeight_T>::DIFFUSION_PUSH );
+   } else if (diffModeStr == "pull")
+   {
+      ddb.setMode( blockforest::DynamicDiffusionBalance<PhantomBlockWeight_T>::DIFFUSION_PULL );
+   } else if (diffModeStr == "pushpull")
+   {
+      ddb.setMode( blockforest::DynamicDiffusionBalance<PhantomBlockWeight_T>::DIFFUSION_PUSHPULL );
+   } else
+   {
+      WALBERLA_ABORT("Unknown Diffusion Mode: " << diffModeStr);
+   }
+   diffModeStr = "unknown";
+   if (ddb.getMode() == blockforest::DynamicDiffusionBalance<PhantomBlockWeight_T>::DIFFUSION_PUSH) diffModeStr = "push";
+   if (ddb.getMode() == blockforest::DynamicDiffusionBalance<PhantomBlockWeight_T>::DIFFUSION_PULL) diffModeStr = "pull";
+   if (ddb.getMode() == blockforest::DynamicDiffusionBalance<PhantomBlockWeight_T>::DIFFUSION_PUSHPULL) diffModeStr = "pushpull";
+   WALBERLA_LOG_INFO_ON_ROOT("diffMode: " << diffModeStr);
+}
+
+
 int main( int argc, char ** argv )
 {
    using namespace walberla::timing;
@@ -179,8 +221,8 @@ int main( int argc, char ** argv )
       forest->setRefreshPhantomBlockDataPackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
       forest->setRefreshPhantomBlockDataUnpackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
       auto prepFunc = blockforest::DynamicDiffusionBalance< pe::amr::WeightAssignmentFunctor::PhantomBlockWeight >( 1, 1, false );
-      //configure(cfg, prepFunc);
-      //addDynamicDiffusivePropertiesToSQL(prepFunc, integerProperties, realProperties, stringProperties);
+      configure(mainConf, prepFunc);
+      addDynamicDiffusivePropertiesToSQL(prepFunc, integerProperties, realProperties, stringProperties);
       forest->setRefreshPhantomBlockMigrationPreparationFunction(prepFunc);
    } else
    {
