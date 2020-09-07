@@ -78,9 +78,9 @@ void walberla::mesh::ExcludeMeshExterior<DistanceObject>::operator()( std::vecto
       const uint_t numProcesses = uint_c( MPIManager::instance()->numProcesses() );
       const uint_t chunkSize    = uint_c( std::ceil( real_c( numBlocks ) / real_c( numProcesses ) ) );
 
-      const uint_t rank    = uint_c( MPIManager::instance()->rank() );
-      const int chunkBegin = int_c( rank * chunkSize );
-      const int chunkEnd   = std::min( int_c( ( rank + 1 ) * chunkSize ), int_c( numBlocks ) );
+      const uint_t rank       = uint_c( MPIManager::instance()->rank() );
+      const size_t chunkBegin = rank * chunkSize;
+      const size_t chunkEnd   = std::min( ( rank + 1 ) * chunkSize, numBlocks );
 
       std::vector<size_t> shuffle( excludeBlock.size() );
       for( size_t i = 0; i < excludeBlock.size(); ++i )
@@ -100,12 +100,11 @@ void walberla::mesh::ExcludeMeshExterior<DistanceObject>::operator()( std::vecto
       #ifdef _OPENMP
       #pragma omp parallel for schedule( dynamic )
       #endif
-      for( int i = chunkBegin; i < chunkEnd; ++i )
+      for( size_t i = chunkBegin; i < chunkEnd; ++i )
       {
-         size_t is = numeric_cast<size_t>( i );
-         auto intersectionDefined = isIntersecting( *distanceObject_, aabb( shuffle[is] ), maxError_ );
+         auto intersectionDefined = isIntersecting( *distanceObject_, aabb( shuffle[i] ), maxError_ );
          if( intersectionDefined && !intersectionDefined.value() )
-            excludeBlock[ shuffle[is] ] = uint8_t( 1 );
+            excludeBlock[ shuffle[i] ] = uint8_t( 1 );
       }
 
       allReduceInplace( excludeBlock, mpi::LOGICAL_OR );
