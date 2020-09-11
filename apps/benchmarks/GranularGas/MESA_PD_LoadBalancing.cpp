@@ -648,7 +648,7 @@ int main( int argc, char ** argv )
 
       runId = sqlite::storeRunInSqliteDB( params.sqlFile, integerProperties, stringProperties, realProperties );
       sqlite::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpImbalancedReduced, "imbalanced" );
-      sqlite::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpImbalancedReduced, "balanced" );
+      sqlite::storeTimingPoolInSqliteDB( params.sqlFile, runId, *tpBalancedReduced, "balanced" );
    }
 
    if (params.storeNodeTimings)
