@@ -31,7 +31,7 @@
 #include <mesa_pd/vtk/ParticleVtkOutput.h>
 
 #include <mesa_pd/collision_detection/AnalyticContactDetection.h>
-#include <mesa_pd/data/LinkedCells.h>
+#include <mesa_pd/data/SparseLinkedCells.h>
 #include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
@@ -42,7 +42,7 @@
 #include <mesa_pd/kernel/AssocToBlock.h>
 #include <mesa_pd/kernel/DoubleCast.h>
 #include <mesa_pd/kernel/ExplicitEuler.h>
-#include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
+#include <mesa_pd/kernel/InsertParticleIntoSparseLinkedCells.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/kernel/SpringDashpot.h>
 #include <mesa_pd/mpi/ContactFilter.h>
@@ -237,7 +237,7 @@ int main( int argc, char ** argv )
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
    ParticleAccessorWithShape accessor(ps, ss);
-   auto lc = std::make_shared<data::LinkedCells>(domain->getUnionOfLocalAABBs().getExtended(params.spacing), params.spacing );
+   auto lc = std::make_shared<data::SparseLinkedCells>(domain->getUnionOfLocalAABBs().getExtended(params.spacing), params.spacing );
    forest->addBlockData(domain::createBlockForestDataHandling(ps), "Storage");
 
    auto center = forest->getDomain().center();
@@ -273,7 +273,7 @@ int main( int argc, char ** argv )
    WALBERLA_LOG_INFO_ON_ROOT("*** SIMULATION - START ***");
    // Init kernels
    kernel::ExplicitEuler                 explicitEuler( params.dt );
-   kernel::InsertParticleIntoLinkedCells ipilc;
+   kernel::InsertParticleIntoSparseLinkedCells ipilc;
    kernel::SpringDashpot                 dem(1);
    dem.setStiffness(0, 0, real_t(0));
    dem.setDampingN (0, 0, real_t(0));
@@ -341,11 +341,11 @@ int main( int argc, char ** argv )
       if (params.bBarrier) WALBERLA_MPI_BARRIER();
       tpImbalanced["AssocToBlock"].end();
 
-      tpImbalanced["GenerateLinkedCells"].start();
+      tpImbalanced["GenerateSparseLinkedCells"].start();
       lc->clear();
       ps->forEachParticle(true, kernel::SelectAll(), accessor, ipilc, accessor, *lc);
       if (params.bBarrier) WALBERLA_MPI_BARRIER();
-      tpImbalanced["GenerateLinkedCells"].end();
+      tpImbalanced["GenerateSparseLinkedCells"].end();
 
       tpImbalanced["DEM"].start();
       imbalancedContactsChecked  = 0;
@@ -411,7 +411,7 @@ int main( int argc, char ** argv )
       }
       forest->refresh();
       domain->refresh();
-      lc = std::make_shared<data::LinkedCells>(domain->getUnionOfLocalAABBs().getExtended(params.spacing), params.spacing );
+      lc = std::make_shared<data::SparseLinkedCells>(domain->getUnionOfLocalAABBs().getExtended(params.spacing), params.spacing );
       ps->forEachParticle(true, kernel::SelectLocal(), accessor, assoc, accessor);
       SNN(*ps, forest, domain);
       sortParticleStorage(*ps, params.sorting, lc->domain_, uint_c(lc->numCellsPerDim_[0]));
@@ -439,11 +439,11 @@ int main( int argc, char ** argv )
       if (params.bBarrier) WALBERLA_MPI_BARRIER();
       tpBalanced["AssocToBlock"].end();
 
-      tpBalanced["GenerateLinkedCells"].start();
+      tpBalanced["GenerateSparseLinkedCells"].start();
       lc->clear();
       ps->forEachParticle(true, kernel::SelectAll(), accessor, ipilc, accessor, *lc);
       if (params.bBarrier) WALBERLA_MPI_BARRIER();
-      tpBalanced["GenerateLinkedCells"].end();
+      tpBalanced["GenerateSparseLinkedCells"].end();
 
       tpBalanced["DEM"].start();
       balancedContactsChecked  = 0;
