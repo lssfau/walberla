@@ -216,7 +216,6 @@ int main(int argc, char** argv)
 
    // Timeloop
    timeloop.add() << BeforeFunction(communication, "communication") << Sweep(noSlip);
-
    timeloop.add() << Sweep(pystencils::CumulantMRTSweep(pdfFieldId, velocityFieldId, omega));
 
    // Stability Checker

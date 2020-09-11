@@ -159,7 +159,7 @@ int main(int argc, char** argv)
    // Communication
    blockforest::communication::UniformBufferedScheme< CommunicationStencil_T > communication(blocks);
    communication.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
-   
+
    // Timeloop
    timeloop.add() << BeforeFunction(communication, "communication")
                   << Sweep(BHFactory::BoundaryHandling::getBlockSweep(boundaryHandlingId), "Boundary Handling");

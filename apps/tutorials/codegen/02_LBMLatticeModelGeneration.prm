@@ -1,7 +1,7 @@
 
 Parameters 
 {
-	omega           1.8;
+   omega           1.8;
 	timesteps       10000;
 
 	remainingTimeLoggerFrequency 3; // in seconds
@@ -16,7 +16,7 @@ ShearFlowSetup
    u_z   0;
 
    noise_magnitude     0.005;
-   noise_seed              42;
+   noise_seed          42;
 }
 
 DomainSetup
@@ -42,10 +42,12 @@ Boundaries
 VTK 
 {
    // for parameter documentation see src/vtk/Initialization.cpp
-   fluid_field
+   srt_velocity_field
    {
       writeFrequency 100;
       ghostLayers    1;
+
+      baseFolder     vtk_out/srt_lattice_model;
       
       before_functions {
          PDFGhostLayerSync;
@@ -57,23 +59,6 @@ VTK
       
       writers {
          Velocity;
-         Density;
       }
-   }
-   
-   flag_field
-   {
-      writeFrequency 10000000; // write only once
-   // ghostLayers    1;
-      
-      writers {
-         FlagField;
-      }
-   }
-   
-   domain_decomposition
-   {
-      writeFrequency 10000000; // write only once
-      outputDomainDecomposition true;
    }
 }
