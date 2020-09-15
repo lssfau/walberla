@@ -1,7 +1,7 @@
 
 Parameters 
 {
-   omega           1.8;
+    omega           1.8;
 	timesteps       10000;
 
 	remainingTimeLoggerFrequency 3; // in seconds
@@ -35,7 +35,7 @@ StabilityChecker
 
 Boundaries 
 {   
-	Border { direction S,N; walldistance -1; NoSlip {} }		
+	Border { direction S, N; walldistance -1; NoSlip {} }
 }
 
 

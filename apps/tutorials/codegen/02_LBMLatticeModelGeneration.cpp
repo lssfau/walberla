@@ -29,7 +29,6 @@
 #include "geometry/all.h"
 
 #include "lbm/boundary/factories/DefaultBoundaryHandling.h"
-#include "lbm/communication/PdfFieldPackInfo.h"
 #include "lbm/field/AddToStorage.h"
 #include "lbm/field/PdfField.h"
 #include "lbm/field/initializer/all.h"

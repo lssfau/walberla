@@ -9,28 +9,30 @@ from lbmpy_walberla import generate_lattice_model
 #      General Parameters
 #   ========================
 
-STENCIL = 'D2Q9'
-OMEGA = sp.Symbol('omega')
-LAYOUT = 'fzyx'
+stencil = 'D2Q9'
+omega = sp.Symbol('omega')
+layout = 'fzyx'
 
-#   Optimization
-OPT = {'target': 'cpu', 'cse_global': True, 'field_layout': LAYOUT}
+#   Optimizations to be used by the code generator
+optimizations = {'target': 'cpu', 'cse_global': True, 'field_layout': layout}
 
 #   ===========================
 #      SRT Method Definition
 #   ===========================
 
-srt_params = {'stencil': STENCIL,
+srt_params = {'stencil': stencil,
               'method': 'srt',
-              'relaxation_rate': OMEGA}
+              'relaxation_rate': omega}
 
-srt_collision_rule = create_lb_collision_rule(optimization=OPT, **srt_params)
-srt_update_rule = create_lb_update_rule(collision_rule=srt_collision_rule, optimization=OPT)
+srt_collision_rule = create_lb_collision_rule(optimization=optimizations, **srt_params)
+srt_update_rule = create_lb_update_rule(collision_rule=srt_collision_rule, optimization=optimizations)
 
 #   =====================
 #      Code Generation
 #   =====================
 
 with CodeGeneration() as ctx:
-    generate_lattice_model(ctx, "SRTLatticeModel", srt_collision_rule, field_layout=LAYOUT)
+    # generation of the lattice model ...
+    generate_lattice_model(ctx, "SRTLatticeModel", srt_collision_rule, field_layout=layout)
+    # ... and generation of the pack information to be used for the MPI communication
     generate_pack_info_from_kernel(ctx, "SRTPackInfo", srt_update_rule)
