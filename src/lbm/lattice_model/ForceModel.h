@@ -498,13 +498,13 @@ public:
    {
       if (!std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
       {
-         const real_t one_third  = real_t(1) / real_t(3);
+         const real_t one_over_d  = real_t(1) / real_t(LatticeModel_T::Stencil::D);
       
          const auto common = Matrix3<real_t>::makeDiagonalMatrix( velocity * bodyForce_ );
          return (tensorProduct( velocity, bodyForce_ ) +
                  tensorProduct( bodyForce_, velocity ) -
-                 common * (real_t(2)*one_third) ) * real_t(0.5) * ( real_t(2) + omega )
-                + common * ( one_third * ( real_t(2) + omega_bulk ) );
+                 common * (real_t(2)*one_over_d) ) * real_t(0.5) * ( real_t(2) - omega )
+                + common * ( one_over_d * ( real_t(2) - omega_bulk ) );
       }
       else
       {
@@ -584,13 +584,13 @@ public:
    {
       if (!std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
       {
-         const real_t one_third  = real_t(1) / real_t(3);
+         const real_t one_over_d  = real_t(1) / real_t(LatticeModel_T::Stencil::D);
       
          const auto common = Matrix3<real_t>::makeDiagonalMatrix( velocity * force(x,y,z) );
          return (tensorProduct( velocity, force(x,y,z) ) +
                  tensorProduct( force(x,y,z), velocity ) -
-                 common * (real_t(2)*one_third) ) * real_t(0.5) * ( real_t(2) + omega )
-                + common * ( one_third * ( real_t(2) + omega_bulk ) );
+                 common * (real_t(2)*one_over_d) ) * real_t(0.5) * ( real_t(2) - omega )
+                + common * ( one_over_d * ( real_t(2) - omega_bulk ) );
       }
       else
       {
