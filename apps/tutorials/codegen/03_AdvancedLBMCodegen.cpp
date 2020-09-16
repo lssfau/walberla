@@ -29,10 +29,7 @@
 #include "geometry/all.h"
 
 #include "lbm/boundary/factories/DefaultBoundaryHandling.h"
-#include "lbm/communication/PdfFieldPackInfo.h"
-#include "lbm/field/AddToStorage.h"
-#include "lbm/field/PdfField.h"
-#include "lbm/field/initializer/all.h"
+#include "field/vtk/VTKWriter.h"
 #include "lbm/vtk/VTKOutput.h"
 
 #include "stencil/D2Q9.h"
@@ -227,9 +224,25 @@ int main(int argc, char** argv)
    timeloop.addFuncAfterTimeStep(timing::RemainingTimeLogger(timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency),
                                  "remaining time logger");
 
+   int vtkWriteFrequency = 100;
+   if (vtkWriteFrequency > 0)
+   {
+      const std::string path = "vtk_out";
+      auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, path,
+                                                      "simulation_step", false, true, true, false, 0);
+
+
+      auto velWriter = make_shared<field::VTKWriter<VectorField_T>>(velocityFieldId, "Velocity");
+      vtkOutput->addCellDataWriter(velWriter);
+
+      timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
+
+
+   }
+
    // VTK Output
-   VTKOutputSetup vtkOutput(velocityFieldId, flagFieldId, fluidFlagUID);
-   vtkOutput.initializeAndAdd(timeloop, blocks, walberlaEnv.config());
+   // VTKOutputSetup vtkOutput(velocityFieldId, flagFieldId, fluidFlagUID);
+   // vtkOutput.initializeAndAdd(timeloop, blocks, walberlaEnv.config());
 
    timeloop.run();
 

@@ -2,7 +2,7 @@
 Parameters 
 {
 	omega           1.8;
-	timesteps       100;
+	timesteps       1000;
 
 	remainingTimeLoggerFrequency 3; // in seconds
 }
