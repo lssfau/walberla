@@ -24,12 +24,11 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
                     DEPENDS blockforest core domain_decomposition field geometry timeloop lbm stencil vtk 02_LBMLatticeModelGenerationPython )
 
     #   Tutorial 3: Advanced lbmpy Code Generation
-
     walberla_generate_target_from_python( NAME 03_AdvancedLBMCodegenPython
         FILE 03_AdvancedLBMCodegen.py
         OUT_FILES   CumulantMRTSweep.cpp CumulantMRTSweep.h
                     CumulantMRTPackInfo.cpp CumulantMRTPackInfo.h
-                    DensityAndVelocityFieldSetter.cpp DensityAndVelocityFieldSetter.h
+                    InitialPDFsSetter.cpp InitialPDFsSetter.h
                     CumulantMRTNoSlip.cpp CumulantMRTNoSlip.h)
 
     walberla_add_executable ( NAME 03_AdvancedLBMCodegenApp 

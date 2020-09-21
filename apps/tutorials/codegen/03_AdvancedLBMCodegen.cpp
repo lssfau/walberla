@@ -25,11 +25,10 @@
 #include "domain_decomposition/all.h"
 
 #include "field/all.h"
+#include "field/vtk/VTKWriter.h"
 
 #include "geometry/all.h"
 
-#include "lbm/boundary/factories/DefaultBoundaryHandling.h"
-#include "field/vtk/VTKWriter.h"
 #include "lbm/vtk/VTKOutput.h"
 
 #include "stencil/D2Q9.h"
@@ -40,7 +39,7 @@
 #include "CumulantMRTNoSlip.h"
 #include "CumulantMRTPackInfo.h"
 #include "CumulantMRTSweep.h"
-#include "DensityAndVelocityFieldSetter.h"
+#include "InitialPDFsSetter.h"
 
 namespace walberla
 {
@@ -69,7 +68,8 @@ typedef lbm::CumulantMRTNoSlip NoSlip_T;
 /// Shear Flow Velocity Initialization ///
 //////////////////////////////////////////
 
-void initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& blocks, const BlockDataID& velocityFieldId,
+void initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& blocks, 
+                                const BlockDataID& velocityFieldId,
                                 const Config::BlockHandle& config)
 {
    math::RealRandom< real_t > rng(config.getParameter< std::mt19937::result_type >("noiseSeed", 42));
@@ -96,47 +96,6 @@ void initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& block
       }
    }
 }
-
-////////////////////////
-/// VTK Output Setup ///
-////////////////////////
-
-struct VTKOutputSetup
-{
- private:
-   const ConstBlockDataID velocityFieldId_;
-   const ConstBlockDataID flagFieldId_;
-   const FlagUID& domainFlag_;
-
- public:
-   VTKOutputSetup(const BlockDataID& velocityFieldId, const BlockDataID& flagFieldId, const FlagUID& domainFlag)
-      : velocityFieldId_(velocityFieldId), flagFieldId_(flagFieldId), domainFlag_(domainFlag)
-   {}
-
-   void operator()(std::vector< shared_ptr< vtk::BlockCellDataWriterInterface > >& writers,
-                   std::map< std::string, vtk::VTKOutput::CellFilter >& filters,
-                   std::map< std::string, vtk::VTKOutput::BeforeFunction >& /*beforeFunctions*/) const
-   {
-      // Add VTK writers for velocity and velocity magnitude
-      writers.push_back(make_shared< field::VTKWriter< VectorField_T, float > >(velocityFieldId_, "Velocity"));
-
-      // Add domain cell filter
-      filters["DomainFilter"] = field::FlagFieldCellFilter< FlagField_T >(flagFieldId_, domainFlag_);
-   }
-
-   void initializeAndAdd(SweepTimeloop& timeloop, const shared_ptr< StructuredBlockForest >& blocks,
-                         const shared_ptr<Config> & config)
-   {
-      std::map< std::string, vtk::SelectableOutputFunction > vtkOutputFunctions;
-      vtk::initializeVTKOutput(vtkOutputFunctions, *this, blocks, config, "VTK");
-
-      for (auto funcIt = vtkOutputFunctions.begin(); funcIt != vtkOutputFunctions.end(); ++funcIt)
-      {
-         timeloop.addFuncBeforeTimeStep(funcIt->second.outputFunction, funcIt->first,
-                                        funcIt->second.requiredGlobalStates, funcIt->second.incompatibleGlobalStates);
-      }
-   }
-};
 
 /////////////////////
 /// Main Function ///
@@ -171,15 +130,14 @@ int main(int argc, char** argv)
    BlockDataID pdfFieldId  = field::addToStorage< PdfField_T >(blocks, "pdf field", real_c(0.0), field::fzyx);
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
-   // First, set up the initial shear flow in the velocity field...
-
+   // Velocity field setup
    auto shearFlowSetup = walberlaEnv.config()->getOneBlock("ShearFlowSetup");
    initShearFlowVelocityField(blocks, velocityFieldId, shearFlowSetup);
 
-   real_t rho = shearFlowSetup.getParameter("rho", real_c(1.8));
+   real_t rho = shearFlowSetup.getParameter("rho", real_c(1.0));
 
-   // ... and then use the generated PDF setter to initialize the PDF field.
-   pystencils::DensityAndVelocityFieldSetter pdfSetter(pdfFieldId, velocityFieldId, rho);
+   // pdfs setup
+   pystencils::InitialPDFsSetter pdfSetter(pdfFieldId, velocityFieldId, rho);
 
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
@@ -227,22 +185,15 @@ int main(int argc, char** argv)
    int vtkWriteFrequency = 100;
    if (vtkWriteFrequency > 0)
    {
-      const std::string path = "vtk_out";
-      auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, path,
-                                                      "simulation_step", false, true, true, false, 0);
+      const std::string path = "vtk_out/tut03";
+      auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "cumulant_mrt_velocity_field", vtkWriteFrequency, 0,
+                                                      false, path, "simulation_step", false, true, true, false, 0);
 
-
-      auto velWriter = make_shared<field::VTKWriter<VectorField_T>>(velocityFieldId, "Velocity");
+      auto velWriter = make_shared< field::VTKWriter< VectorField_T > >(velocityFieldId, "Velocity");
       vtkOutput->addCellDataWriter(velWriter);
 
       timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
-
-
    }
-
-   // VTK Output
-   // VTKOutputSetup vtkOutput(velocityFieldId, flagFieldId, fluidFlagUID);
-   // vtkOutput.initializeAndAdd(timeloop, blocks, walberlaEnv.config());
 
    timeloop.run();
 
