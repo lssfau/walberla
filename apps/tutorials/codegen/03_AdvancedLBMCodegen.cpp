@@ -68,8 +68,7 @@ typedef lbm::CumulantMRTNoSlip NoSlip_T;
 /// Shear Flow Velocity Initialization ///
 //////////////////////////////////////////
 
-void initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& blocks, 
-                                const BlockDataID& velocityFieldId,
+void initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& blocks, const BlockDataID& velocityFieldId,
                                 const Config::BlockHandle& config)
 {
    math::RealRandom< real_t > rng(config.getParameter< std::mt19937::result_type >("noiseSeed", 42));
@@ -182,7 +181,7 @@ int main(int argc, char** argv)
    timeloop.addFuncAfterTimeStep(timing::RemainingTimeLogger(timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency),
                                  "remaining time logger");
 
-   int vtkWriteFrequency = 100;
+   uint_t vtkWriteFrequency = uint_c(100);
    if (vtkWriteFrequency > 0)
    {
       const std::string path = "vtk_out/tut03";
