@@ -16,7 +16,7 @@ In this section, we will define a single relaxation time (SRT) collision operato
 - The **LBM sweep** which consists of the collision operator and the streaming pattern. We will be using a standard pull-scheme with a temporary field.
 - The **force model**. Since no forces will be present in our simulation, we will not use a force model in this tutorial. For details about force models, see <a href="https://pycodegen.pages.i10git.cs.fau.de/lbmpy/sphinx/forcemodels.html" target="_blank">lbmpy's documentation on force models</a>.
 
-In addition to the lattice model, it will be shown how to generate a method-specific pack info class for MPI communication to reduce communication load to the necessary minimum. 
+In addition to the lattice model, it will be shown how to generate a method-specific pack info class for MPI communication to reduce communication load to the necessary minimum.
 
 In the code generation python script, we first require a few imports from lbmpy itself and from the waLBerla code generation libraries. lbmpy code generation is based on pystencils; the basic procedure is thus the same as in the previous tutorial. We need the `CodeGeneration` context from the `pystencils_walberla` module for the connection to the build system. For generating the communication pack info, we will use `generate_pack_info_from_kernel` from the same module. This method of pack info generation is not limited to LBM implementations but can be used with any sweep kernel. The function `generate_pack_info_from_kernel` takes a pystencils `AssignmentCollection` and extracts all field accesses to determine which cell entries need to be communicated.
 
@@ -31,7 +31,7 @@ from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel
 from lbmpy_walberla import generate_lattice_model
 \endcode
 
-First, we define a few general parameters. These include the stencil (D2Q9) and the memory layout (`fzyx`, see \ref tutorial_codegen01 ). We define a SymPy symbol for the relaxation rate $\omega$. This means we can later set it to a specific value from the waLBerla code. A dictionary with optimization parameters is also set up. Here, we define the compilation target, enable global common subexpression elimination (`cse_global`) and set the PDF field's memory layout. In general, the target could be set to `gpu` to create a CUDA implementation, but this is currently not possible for creating a `LatticeModel` class.
+First, we define a few general parameters. These include the stencil (D2Q9) and the memory layout (`fzyx`, see \ref tutorial_codegen01 ). We define a SymPy symbol for the relaxation rate \f$ \omega \f$. This means we can later set it to a specific value from the waLBerla code. A dictionary with optimization parameters is also set up. Here, we define the compilation target, enable global common subexpression elimination (`cse_global`) and set the PDF field's memory layout. In general, the target could be set to `gpu` to create a CUDA implementation, but this is currently not possible for creating a `LatticeModel` class.
 \code
 stencil = 'D2Q9'
 omega = sp.Symbol('omega')
@@ -62,7 +62,7 @@ with CodeGeneration() as ctx:
     generate_pack_info_from_kernel(ctx, "SRTPackInfo", srt_update_rule)
 \endcode
 
-Notice that, other than in \ref tutorial_codegen01, we did not need to define any fields. Both the source and destination PDF fields are created internally by lbmpy and `generate_lattice_model`. 
+Notice that, other than in \ref tutorial_codegen01, we did not need to define any fields. Both the source and destination PDF fields are created internally by lbmpy and `generate_lattice_model`.
 
 As a final touch, we still need to set up the CMake build target for the code generation script. This time, two distinct classes (the lattice model and the pack information) will be generated. Therefore, we need to list the header and source file names for both classes separately.
 
@@ -116,7 +116,7 @@ The only significant difference caused by the usage of a generated lattice model
 timeloop.add() << Sweep(LatticeModel_T::Sweep(pdfFieldId), "LB stream & collide");
 \endcode
 
-The remaining extensions concern only the setup of boundaries and the initial velocities. 
+The remaining extensions concern only the setup of boundaries and the initial velocities.
 
 \subsection lbmpy_shear_flow_init Setup of the Shear Flow Scenario
 
@@ -137,14 +137,14 @@ DomainSetup
 {
    blocks        <  1,    1, 1 >;
    cellsPerBlock <  300, 80, 1 >;
-   periodic      <  1,    0, 1 >;  
+   periodic      <  1,    0, 1 >;
 }
 
 (...)
 
-Boundaries 
-{   
-   Border { direction S,N; walldistance -1; NoSlip {} }		
+Boundaries
+{
+   Border { direction S,N; walldistance -1; NoSlip {} }
 }
 \endcode
 
@@ -156,9 +156,9 @@ The PdfFieldInitializer's `initDensityAndVelocity` function expects a function o
 - A random number generator `rng_` for the y-velocities, which is an instance of walberla::math::RealRandom;
 - The magnitude of the random noise.
 
-All members will be set using parameters specified in a parameter file block. The functor `exprInitFunc_` is initialized by calling it's `parse` method inside the constructor.
+All members will be set using parameters specified in a parameter file block. The functor `exprInitFunc_` is initialized by calling its `parse` method inside the constructor.
 
-We also define the `operator()` with the above signature. It first calls `exprInitFunc_` to set density and velocity, and then adds the random perturbation to the y component. 
+We also define the `operator()` with the above signature. It first calls `exprInitFunc_` to set density and velocity, and then adds the random perturbation to the y component.
 
 \code
 struct ShearFlowInit
@@ -189,14 +189,14 @@ struct ShearFlowInit
 
 The required parameters and expressions for initializing the density and velocity are defined in the parameter file. The block is called `ShearFlowSetup`. For `rho`, `u_x`, `u_y` and `u_z`, mathematical expressions can be specified which may include the variables `x`, `y`, `z` for a cell's global position and `n_x`, `n_y`, `n_z` representing the number of cells in each direction. These expressions will be evaluated for each domain cell.
 
-A seed for the random number generator is also specified, which controls the random noise and to make the test case reproducible.
+A seed for the random number generator is also specified, which controls the random noise and therefore makes the test case reproducible.
 
 \code
 ShearFlowSetup
 {
    rho   1;
-   
-   u_x   if( ( y / n_y < 0.3 ) or (y / n_y > 0.7) , 0.08, -0.08);   
+
+   u_x   if( ( y / n_y < 0.3 ) or (y / n_y > 0.7) , 0.08, -0.08);
    u_y   0;
    u_z   0;
 
