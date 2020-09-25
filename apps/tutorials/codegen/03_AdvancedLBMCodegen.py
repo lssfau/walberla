@@ -64,15 +64,19 @@ pdfs_setter = macroscopic_values_setter(lbm_method,
 #   =====================
 
 with CodeGeneration() as ctx:
+    if ctx.cuda:
+        target = 'gpu'
+    else:
+        target = 'cpu'
 
     #   LBM Sweep
-    generate_sweep(ctx, "CumulantMRTSweep", lbm_update_rule, field_swaps=[(pdfs, pdfs_tmp)])
+    generate_sweep(ctx, "CumulantMRTSweep", lbm_update_rule, field_swaps=[(pdfs, pdfs_tmp)], target=target)
 
     #   Pack Info
-    generate_pack_info_from_kernel(ctx, "CumulantMRTPackInfo", lbm_update_rule)
+    generate_pack_info_from_kernel(ctx, "CumulantMRTPackInfo", lbm_update_rule, target=target)
 
     #   Macroscopic Values Setter
-    generate_sweep(ctx, "InitialPDFsSetter", pdfs_setter)
+    generate_sweep(ctx, "InitialPDFsSetter", pdfs_setter, target=target)
 
     #   NoSlip Boundary
-    generate_boundary(ctx, "CumulantMRTNoSlip", NoSlip(), lbm_method)
+    generate_boundary(ctx, "CumulantMRTNoSlip", NoSlip(), lbm_method, target=target)

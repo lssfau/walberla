@@ -2,9 +2,10 @@
 Parameters 
 {
 	omega           1.8;
-	timesteps       100000;
+	timesteps       10001;
 
 	remainingTimeLoggerFrequency 3; // in seconds
+	VTKwriteFrequency 1000;
 }
 
 ShearFlowSetup
@@ -34,22 +35,4 @@ StabilityChecker
 Boundaries 
 {   
 	Border { direction S,N; walldistance -1; flag NoSlip; }		
-}
-
-
-VTK 
-{
-   velocity_field
-   {
-      writeFrequency 10;
-      ghostLayers    1;
-      
-      inclusion_filters {
-         DomainFilter;
-      }
-      
-      writers {
-         Velocity;
-      }
-   }
 }

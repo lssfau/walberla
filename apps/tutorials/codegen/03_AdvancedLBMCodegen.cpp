@@ -22,14 +22,22 @@
 
 #include "core/all.h"
 
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+#include "cuda/HostFieldAllocator.h"
+#include "cuda/ParallelStreams.h"
+#include "cuda/NVTX.h"
+#include "cuda/AddGPUFieldToStorage.h"
+#include "cuda/communication/GPUPackInfo.h"
+#include "cuda/DeviceSelectMPI.h"
+#include "cuda/communication/UniformGPUScheme.h"
+#endif
+
 #include "domain_decomposition/all.h"
 
 #include "field/all.h"
 #include "field/vtk/VTKWriter.h"
 
 #include "geometry/all.h"
-
-#include "lbm/vtk/VTKOutput.h"
 
 #include "stencil/D2Q9.h"
 
@@ -63,6 +71,10 @@ typedef field::GhostLayerField< real_t, Stencil_T::D > VectorField_T;
 typedef walberla::uint8_t flag_t;
 typedef FlagField< flag_t > FlagField_T;
 typedef lbm::CumulantMRTNoSlip NoSlip_T;
+
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+typedef cuda::GPUField<double> GPUField;
+#endif
 
 //////////////////////////////////////////
 /// Shear Flow Velocity Initialization ///
@@ -119,15 +131,24 @@ int main(int argc, char** argv)
    const real_t omega     = parameters.getParameter< real_t >("omega", real_c(1.8));
    const double remainingTimeLoggerFrequency =
       parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
+   const int32_t VTKwriteFrequency = parameters.getParameter< int32_t >("VTKwriteFrequency", 1000);
 
    ////////////////////////////////////
    /// PDF Field and Velocity Setup ///
    ////////////////////////////////////
-
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+   // CPU fields
+   BlockDataID velocityFieldId = field::addToStorage< VectorField_T >(blocks, "velocity", real_c(0.0), field::fzyx);
+   BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
+   // GPU fields
+   BlockDataID pdfFieldId = cuda::addGPUFieldToStorage<cuda::GPUField<real_t >>( blocks,"pdf field on GPU", Stencil_T::Size, field::fzyx, uint_t (1));
+   BlockDataID velocityFieldIdGPU = cuda::addGPUFieldToStorage<VectorField_T >( blocks, velocityFieldId, "velocity on GPU", true );
+#else
    BlockDataID velocityFieldId = field::addToStorage< VectorField_T >(blocks, "velocity", real_c(0.0), field::fzyx);
 
    BlockDataID pdfFieldId  = field::addToStorage< PdfField_T >(blocks, "pdf field", real_c(0.0), field::fzyx);
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
+#endif
 
    // Velocity field setup
    auto shearFlowSetup = walberlaEnv.config()->getOneBlock("ShearFlowSetup");
@@ -136,12 +157,27 @@ int main(int argc, char** argv)
    real_t rho = shearFlowSetup.getParameter("rho", real_c(1.0));
 
    // pdfs setup
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+   cuda::fieldCpy<GPUField, VectorField_T>(blocks, velocityFieldIdGPU, velocityFieldId);
+   pystencils::InitialPDFsSetter pdfSetter(pdfFieldId, velocityFieldIdGPU, rho);
+#else
    pystencils::InitialPDFsSetter pdfSetter(pdfFieldId, velocityFieldId, rho);
+#endif
 
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
       pdfSetter(&(*blockIt));
    }
+
+   /////////////
+   /// Sweep ///
+   /////////////
+
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+   pystencils::CumulantMRTSweep CumulantMRTSweep(pdfFieldId, velocityFieldIdGPU, omega);
+#else
+   pystencils::CumulantMRTSweep CumulantMRTSweep(pdfFieldId, velocityFieldId, omega);
+#endif
 
    /////////////////////////
    /// Boundary Handling ///
@@ -165,29 +201,37 @@ int main(int argc, char** argv)
    SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
 
    // Communication
+#if defined(WALBERLA_BUILD_WITH_CUDA)
+   cuda::communication::UniformGPUScheme< Stencil_T > com( blocks, 0 );
+   com.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
+   auto simpleOverlapTimeStep = [&]()
+   {
+     com.communicate(nullptr);
+   };
+   auto communication = std::function<void()>( simpleOverlapTimeStep );
+#else
    blockforest::communication::UniformBufferedScheme< Stencil_T > communication(blocks);
    communication.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
+#endif
 
    // Timeloop
    timeloop.add() << BeforeFunction(communication, "communication") << Sweep(noSlip);
-   timeloop.add() << Sweep(pystencils::CumulantMRTSweep(pdfFieldId, velocityFieldId, omega));
-
-   // Stability Checker
-   timeloop.addFuncAfterTimeStep(makeSharedFunctor(field::makeStabilityChecker< PdfField_T, FlagField_T >(
-                                    walberlaEnv.config(), blocks, pdfFieldId, flagFieldId, fluidFlagUID)),
-                                 "LBM stability check");
+   timeloop.add() << Sweep(CumulantMRTSweep);
 
    // Time logger
    timeloop.addFuncAfterTimeStep(timing::RemainingTimeLogger(timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency),
                                  "remaining time logger");
 
-   uint_t vtkWriteFrequency = uint_c(100);
-   if (vtkWriteFrequency > 0)
+   if (VTKwriteFrequency > 0)
    {
       const std::string path = "vtk_out/tut03";
-      auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "cumulant_mrt_velocity_field", vtkWriteFrequency, 0,
-                                                      false, path, "simulation_step", false, true, true, false, 0);
-
+      auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "cumulant_mrt_velocity_field", VTKwriteFrequency, 0,
+                                                false, path, "simulation_step", false, true, true, false, 0);
+      #if defined(WALBERLA_BUILD_WITH_CUDA)
+         vtkOutput->addBeforeFunction( [&]() {
+            cuda::fieldCpy<VectorField_T, GPUField>(blocks, velocityFieldId, velocityFieldIdGPU);
+          });
+      #endif
       auto velWriter = make_shared< field::VTKWriter< VectorField_T > >(velocityFieldId, "Velocity");
       vtkOutput->addCellDataWriter(velWriter);
 
