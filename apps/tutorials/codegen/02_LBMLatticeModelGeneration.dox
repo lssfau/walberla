@@ -31,7 +31,7 @@ from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel
 from lbmpy_walberla import generate_lattice_model
 \endcode
 
-First, we define a few general parameters. These include the stencil (D2Q9) and the memory layout (`fzyx`, see \ref tutorial_codegen01 ). We define a SymPy symbol for the relaxation rate \f$ \omega \f$. This means we can later set it to a specific value from the waLBerla code. A dictionary with optimization parameters is also set up. Here, we define the compilation target, enable global common subexpression elimination (`cse_global`) and set the PDF field's memory layout. In general, the target could be set to `gpu` to create a CUDA implementation, but this is currently not possible for creating a `LatticeModel` class.
+First, we define a few general parameters. These include the stencil (D2Q9) and the memory layout (`fzyx`, see \ref tutorial_codegen01 ). We define a SymPy symbol for the relaxation rate \f$ \omega \f$. This means we can later set it to a specific value from the waLBerla code. A dictionary with optimization parameters is also set up. Here, we enable global common subexpression elimination (`cse_global`) and set the PDF field's memory layout.
 \code
 stencil = 'D2Q9'
 omega = sp.Symbol('omega')

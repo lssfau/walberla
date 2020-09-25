@@ -14,7 +14,7 @@ omega = sp.Symbol('omega')
 layout = 'fzyx'
 
 #   Optimizations to be used by the code generator
-optimizations = {'target': 'cpu', 'cse_global': True, 'field_layout': layout}
+optimizations = {'cse_global': True, 'field_layout': layout}
 
 #   ===========================
 #      SRT Method Definition
