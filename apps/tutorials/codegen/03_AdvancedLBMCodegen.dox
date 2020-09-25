@@ -7,6 +7,8 @@ namespace walberla{
 
 This tutorial demonstrates how to use [pystencils](https://pycodegen.pages.i10git.cs.fau.de/pystencils) and [lbmpy](https://pycodegen.pages.i10git.cs.fau.de/lbmpy) to their full potential for generating highly optimized and hardware-specific Lattice Boltzmann simulation code within the waLBerla framework. Other than in \ref tutorial_codegen02, we will be generating a full LBM sweep instead of a lattice model class. Furthermore, we will generate a communication pack info class and a sweep for setting the initial densities and velocities of the LBM field. A hardware-specific implementation of a NoSlip boundary handler will also be generated. Those components will then be combined in a waLBerla application for simulating the same shear flow scenario as in the previous tutorial.
 
+For large-scale simulations, the highly parallel design of a general purpose graphics processing unit (GPGPU) can yield significant improvements in performance. The waLBerla framework relies on Nvidia's CUDA platform to run simulations on GPUs. In this tutorial, we will also show how code generation can be used to generate native CUDA implementations of different kinds of kernels. 
+
 In this tutorial, we will be using the more advanced cumulant-based multiple-relaxation-time (MRT) collision operator. Instead of relaxing the entire distribution functions toward their equilibrium values, their [cumulants](https://en.wikipedia.org/wiki/Cumulant) are relaxed with individual relaxation rates. We will also be using the D2Q9 velocity set. For this velocity set, the zeroth- and first-order cumulants correspond to density and momentum which are conserved during collisions, so their relaxation rates can be set to zero. We will only specify one common relaxation rate $\omega$ for the three second-order cumulants; the higher-order cumulants will be set to their equilibrium values which corresponds to a relaxation rate of 1.
 
 \section advancedlbmcodegen_python Code Generation in Python
@@ -30,8 +32,7 @@ velocity = ps.fields("velocity(2): [2D]", layout=layout)
 output = {'velocity': velocity}
 
 #   Optimization
-optimization = {'target': 'cpu',
-                'cse_global': True,
+optimization = {'cse_global': True,
                 'symbolic_field': pdfs,
                 'symbolic_temporary_field': pdfs_tmp,
                 'field_layout': layout}
@@ -64,36 +65,42 @@ pdfs_setter = macroscopic_values_setter(lbm_method,
                                         pdfs.center_vector)
 \endcode
 
-Everything is now prepared to generate the actual C++ code. We create the code generation context and call several functions from `pystencils_walberla` and `lbmpy_walberla`:
+Everything is now prepared to generate the actual C++ code. We create the code generation context and evaluate the `ctx.cuda` flag to find out if waLBerla is configured to build GPU code. If CUDA is enabled, we set the `target` to `gpu`; otherwise to `cpu`.  This target is then passed to all code generation functions. If GPU code is to be generated, the generated classes will be implemented in `*.cu` files and their sweeps will run on the graphics processor.
+
+To generate the classes, several functions from `pystencils_walberla` and `lbmpy_walberla` are called:
 
 - The LBM sweep is generated from the `lbm_update_rule` equations using `generate_sweep`. This function takes an additional parameter `field_swaps` which takes a list of pairs of fields. Each of these pairs consists of a source and a destination (or temporary) field which shall be swapped after the sweep is completed. 
 - The communication pack info is generated using `generate_pack_info_from_kernel` which infers from the update rule's write accesses the pdf indices that need to be communicated. Without further specification, it assumes a pull-type kernel.
 - The pdf initialization kernel is generated from the `pdfs_setter` assignment collection using `generate_sweep`.
 - Using `generate_boundary`, we generate an optimized implementation of a NoSlip boundary handler for the domain's walls. 
 
-All implementations generated this way will be optimized for the hardware targets specified in the waLberla build configuration. If, for example, CUDA was enabled and the hardware target set to `gpu` above, a highly efficient CUDA implementation of every class involved would be created for running the simulation on a graphics card.
-
 \code 
 with CodeGeneration() as ctx:
+    if ctx.cuda:
+        target = 'gpu'
+    else:
+        target = 'cpu'
 
     #   LBM Sweep
-    generate_sweep(ctx, "CumulantMRTSweep", lbm_update_rule, field_swaps=[(pdfs, pdfs_tmp)])
+    generate_sweep(ctx, "CumulantMRTSweep", lbm_update_rule, field_swaps=[(pdfs, pdfs_tmp)], target=target)
 
     #   Pack Info
-    generate_pack_info_from_kernel(ctx, "CumulantMRTPackInfo", lbm_update_rule)
+    generate_pack_info_from_kernel(ctx, "CumulantMRTPackInfo", lbm_update_rule, target=target)
 
     #   Macroscopic Values Setter
-    generate_sweep(ctx, "DensityAndVelocityFieldSetter", pdfs_setter)
+    generate_sweep(ctx, "InitialPDFsSetter", pdfs_setter, target=target)
 
     #   NoSlip Boundary
-    generate_boundary(ctx, "CumulantMRTNoSlip", NoSlip(), lbm_method)
+    generate_boundary(ctx, "CumulantMRTNoSlip", NoSlip(), lbm_method, target=target)
 \endcode
 
-As in \ref tutorial_codegen02, the classes generated by above code need to be registered with CMake using the `walberla_generate_target_from_python` macro.
+As in \ref tutorial_codegen02, the classes generated by above code need to be registered with CMake using the `walberla_generate_target_from_python` macro. Since the source file extension is different if CUDA code is generated (`*.cu` instead of `*.cpp`), the code generation target needs to be added twice. During the build process, the correct target is selected through the surrounding `if(WALBERLA_BUILD_WITH_CUDA)` block.
 
 \section advancedlbmcodegen_application The waLBerla application
 
-We will now integrate the generated classes into a waLBerla application. After adding the code generation target as a CMake dependency, we can include their header files:
+We will now integrate the generated classes into a waLBerla application. If CUDA is enabled and the application is meant to utilise the GPU kernels, some implementation details will be different from a CPU-only version. This mainly concerns the creation and management of fields, MPI communication and VTK output. For the largest part, though, the C++ code is identical. The remainder of the tutorial will focus only on CPU code. In the source file 03_AdvancedLBMCodegen.cpp, code blocks which are different in a GPU implementation are toggled via preprocessor conditionals. 
+
+After adding the code generation target as a CMake dependency, we can include their header files:
 
 \code
 #include "CumulantMRTNoSlip.h"
@@ -224,7 +231,7 @@ The simulation is now ready to be run.
 
 \section advancedlbmpy_conclusion Conclusion and Outlook
 
-We have now successfully implemented a waLBerla LBM simulation application with an advanced collision operator, which can be specialized for any hardware target. This is still just a glimpse of the capabilities of code generation. One possible extension would be the use of advanced streaming patterns like the AA-pattern or EsoTwist to reduce the simulation's memory footprint. Also, lbmpy gives us the tools to develop advanced lattice boltzmann methods for many kinds of applications. The basic principles demonstrated in these tutorials can thus be used for creating much more complicated simulations with specially tailored, optimized lattice boltzmann code.
+We have now successfully implemented a waLBerla LBM simulation application with an advanced collision operator, which can be specialized for both CPU and GPU hardware targets. This is still just a glimpse of the capabilities of code generation. One possible extension would be the use of advanced streaming patterns like the AA-pattern or EsoTwist to reduce the simulation's memory footprint. Also, lbmpy gives us the tools to develop advanced lattice boltzmann methods for many kinds of applications. The basic principles demonstrated in these tutorials can thus be used for creating much more complicated simulations with specially tailored, optimized lattice boltzmann code.
 
 \tableofcontents
 
