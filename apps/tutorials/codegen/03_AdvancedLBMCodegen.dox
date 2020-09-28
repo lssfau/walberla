@@ -5,19 +5,19 @@ namespace walberla{
 
 \section overview Overview
 
-This tutorial demonstrates how to use [pystencils](https://pycodegen.pages.i10git.cs.fau.de/pystencils) and [lbmpy](https://pycodegen.pages.i10git.cs.fau.de/lbmpy) to their full potential for generating highly optimized and hardware-specific Lattice Boltzmann simulation code within the waLBerla framework. Other than in \ref tutorial_codegen02, we will be generating a full LBM sweep instead of a lattice model class. Furthermore, we will generate a communication pack info class and a sweep for setting the initial densities and velocities of the LBM field. A hardware-specific implementation of a NoSlip boundary handler will also be generated. Those components will then be combined in a waLBerla application for simulating the same shear flow scenario as in the previous tutorial.
+This tutorial demonstrates how to use [pystencils](https://pycodegen.pages.i10git.cs.fau.de/pystencils) and [lbmpy](https://pycodegen.pages.i10git.cs.fau.de/lbmpy) to generate highly optimised and hardware-specific Lattice Boltzmann simulation code within the waLBerla framework. Other than in \ref tutorial_codegen02, we will be generating a full LBM sweep instead of a lattice model class. Furthermore, we will generate a communication pack info class and a sweep to initialise the PDF field. A hardware-specific implementation of a NoSlip boundary handler will also be generated. Those components will then be combined in a waLBerla application for simulating the same shear flow scenario as in the previous tutorial.
 
-For large-scale simulations, the highly parallel design of a general purpose graphics processing unit (GPGPU) can yield significant improvements in performance. The waLBerla framework relies on Nvidia's CUDA platform to run simulations on GPUs. In this tutorial, we will also show how code generation can be used to generate native CUDA implementations of different kinds of kernels. 
+For large-scale LB simulations, the highly parallel design of a general-purpose graphics processing unit (GPGPU) can yield significant improvements in performance. The waLBerla framework relies on CUDA to run simulations on NVIDIA GPUs. In this tutorial, we will also show how code generation can be used to generate native CUDA code for different kinds of kernels.
 
-In this tutorial, we will be using the more advanced cumulant-based multiple-relaxation-time (MRT) collision operator. Instead of relaxing the entire distribution functions toward their equilibrium values, their [cumulants](https://en.wikipedia.org/wiki/Cumulant) are relaxed with individual relaxation rates. We will also be using the D2Q9 velocity set. For this velocity set, the zeroth- and first-order cumulants correspond to density and momentum which are conserved during collisions, so their relaxation rates can be set to zero. We will only specify one common relaxation rate $\omega$ for the three second-order cumulants; the higher-order cumulants will be set to their equilibrium values which corresponds to a relaxation rate of 1.
+In this tutorial, we will be using the more advanced cumulant-based multiple-relaxation-time (MRT) collision operator. Instead of relaxing the entire distribution functions toward their equilibrium values, their [cumulants](https://en.wikipedia.org/wiki/Cumulant) are relaxed with individual relaxation rates. We will also use the D2Q9 velocity set. For this velocity set, the zeroth- and first-order cumulants correspond to density and momentum which are conserved during collisions, so their relaxation rates can be set to zero. We will specify one common relaxation rate $\omega$ for the three second-order cumulants to ensure the correct viscosity of the fluid; the higher-order cumulants will be set to their equilibrium values which correspond to a relaxation rate of 1.
 
 \section advancedlbmcodegen_python Code Generation in Python
 
-We start off by defining some general parameters as well as [SymPy](https://www.sympy.org/) symbols and pystencils fields which we will need later. Those include the stencil (`D2Q9`), the memory layout (`fzyx`, see \ref tutorial_codegen01) and the symbol $\omega$ for the relaxation rate of the second-order cumulants.
+We start by defining some general parameters as well as [SymPy](https://www.sympy.org/) symbols and pystencils fields for later usage. Those include the stencil (`D2Q9`), the memory layout (`fzyx`, see \ref tutorial_codegen01) and the symbol $\omega$ for the relaxation rate of the second-order cumulants.
 
-For the stream-pull-collide type kernel we will be implementing, two pdf fields are required which we set up using pystencils. We will use the built-in field swapping functionality of `generate_sweep` to swap the temporary destination field with the source field after each time step. This requires us to obey a certain naming convention: The temporary field *must* have the same *field name* as the original field, but with a suffix `_tmp`. Otherwise, an error will occur during compilation. This does not mean the name of the python variable, but the name passed to `ps.fields`.
+For the stream-pull-collide type kernel, we need two pdf fields which we set up using pystencils. We will use the built-in field swapping functionality of `generate_sweep`. It will generate the pointer swapping for the temporary destination field with the source field after each time step. This requires us to obey a specific naming convention: The temporary field *must* have the same *field name* (passed as a string to `ps.fields`) as the original field but with a suffix `_tmp`. Otherwise, an error will occur during compilation.
 
-For VTK output and the initial velocity setup, we define a velocity vector field as an output field for the LB method. Such an output field can also be used for the coupling of methods which require the macroscopic velocity, such as the phase-field model for simulating multicomponent flows.
+For VTK output and the initial velocity setup, we define a velocity vector field as an output field for the LB method.
 
 \code
 stencil = 'D2Q9'
@@ -54,7 +54,7 @@ lbm_update_rule = create_lb_update_rule(optimization=optimization,
 lbm_method = lbm_update_rule.method
 \endcode
 
-In \ref tutorial_codegen02, we were able to use the framework built around the waLBerla lattice model template API for setting up the shear flow's initial velocity profile. Since we are not using a lattice model class this time, this API is not available to us. With lbmpy, though, we can generate a kernel which takes in scalar values and/or fields for the initial density and velocity, and sets the initial PDF values to the corresponding equilibrium. The function `macroscopic_values_setter` from `lbmpy.macroscopic_value_kernels` returns a set of assignments for this initialization procedure. It takes the LB method definition as an argument, as well as either symbols or pystencils field accesses for the initial density `rho` and the initial velocity. Lastly, it takes the pdf field's center vector as the destination for the pdf values. We define a separate symbol for the density and use the velocity field defined above.
+In \ref tutorial_codegen02, we were able to use the framework built around the waLBerla lattice model template API for setting up the shear flow's initial velocity profile. Since we are not using a lattice model class this time, this API is not available to us. With lbmpy, though, we can generate a kernel which takes in scalar values or fields for the initial density and velocity and sets the initial PDF values to the corresponding equilibrium. The function `macroscopic_values_setter` from `lbmpy.macroscopic_value_kernels` returns a set of assignments for this initialization procedure. It takes the LB method definition as an argument, as well as either symbols or pystencils field accesses for the initial density `rho` and the initial velocity. Lastly, it takes the pdf field's centre vector as the destination for the pdf values. We define a separate symbol for the density and use the velocity field defined above.
 
 \code
 initial_rho = sp.Symbol('rho_0')
@@ -65,14 +65,14 @@ pdfs_setter = macroscopic_values_setter(lbm_method,
                                         pdfs.center_vector)
 \endcode
 
-Everything is now prepared to generate the actual C++ code. We create the code generation context and evaluate the `ctx.cuda` flag to find out if waLBerla is configured to build GPU code. If CUDA is enabled, we set the `target` to `gpu`; otherwise to `cpu`.  This target is then passed to all code generation functions. If GPU code is to be generated, the generated classes will be implemented in `*.cu` files and their sweeps will run on the graphics processor.
+Everything is now prepared to generate the actual C++ code. We create the code generation context and evaluate the `ctx.cuda` flag to find out if waLBerla is configured to build GPU code. If CUDA is enabled, we set the `target` to `gpu`; otherwise to `cpu`.  The target is then passed to all code generation functions. If GPU code is to be generated, the generated classes will be implemented in `*.cu` files, and their sweeps will run on the GPU.
 
-To generate the classes, several functions from `pystencils_walberla` and `lbmpy_walberla` are called:
+Several functions from `pystencils_walberla` and `lbmpy_walberla` are called to generate the classes:
 
-- The LBM sweep is generated from the `lbm_update_rule` equations using `generate_sweep`. This function takes an additional parameter `field_swaps` which takes a list of pairs of fields. Each of these pairs consists of a source and a destination (or temporary) field which shall be swapped after the sweep is completed. 
+- The LBM sweep is generated by the `lbm_update_rule` equations using `generate_sweep`. This function takes an additional parameter `field_swaps` which takes a list of pairs of fields to generate the pointer swapping.
 - The communication pack info is generated using `generate_pack_info_from_kernel` which infers from the update rule's write accesses the pdf indices that need to be communicated. Without further specification, it assumes a pull-type kernel.
 - The pdf initialization kernel is generated from the `pdfs_setter` assignment collection using `generate_sweep`.
-- Using `generate_boundary`, we generate an optimized implementation of a NoSlip boundary handler for the domain's walls. 
+- Using `generate_boundary`, we generate an optimised implementation of a NoSlip boundary handler for the domain's walls.
 
 \code 
 with CodeGeneration() as ctx:
@@ -94,7 +94,7 @@ with CodeGeneration() as ctx:
     generate_boundary(ctx, "CumulantMRTNoSlip", NoSlip(), lbm_method, target=target)
 \endcode
 
-As in \ref tutorial_codegen02, the classes generated by above code need to be registered with CMake using the `walberla_generate_target_from_python` macro. Since the source file extension is different if CUDA code is generated (`*.cu` instead of `*.cpp`), the code generation target needs to be added twice. During the build process, the correct target is selected through the surrounding `if(WALBERLA_BUILD_WITH_CUDA)` block.
+As in \ref tutorial_codegen02, the classes generated by the above code need to be registered with CMake using the `walberla_generate_target_from_python` macro. Since the source file extension is different if CUDA code is generated (`*.cu` instead of `*.cpp`), the code generation target needs to be added twice. During the build process, the correct target is selected through the surrounding `if(WALBERLA_BUILD_WITH_CUDA)` block. Furthermore, the application depends on `cuda`, which is used from the waLBerla backend.
 
 \section advancedlbmcodegen_application The waLBerla application
 
@@ -107,7 +107,7 @@ We will now integrate the generated classes into a waLBerla application. After a
 #include "DensityAndVelocityFieldSetter.h"
 \endcode
 
-We set up typedef aliases for the generated pack info and the D2Q9 stencil. For the PDF and velocity fields we use instances of the field::GhostLayerField template. The pdf field has nine entries per spatial position, as specified by the `Stencil_T::Size` parameter. As our domain is two-dimensional, the velocity at each lattice node is a two-dimensional vector. Thus, we set up the velocity field to have two index dimensions by passing the stencil's dimension as a template parameter. Finally, we also define a typedef alias for our generated NoSlip boundary.
+We set up typedef aliases for the generated pack info and the D2Q9 stencil. For the PDF and velocity fields, we use instances of the field::GhostLayerField template. The pdf field has nine entries per spatial position, as specified by the `Stencil_T::Size` parameter. As our domain is two-dimensional, the velocity at each lattice node is a two-dimensional vector. Thus, we set up the velocity field to have two index dimensions passing the stencil's dimension as a template parameter. Finally, we also define a typedef alias for our generated NoSlip boundary.
 
 \code
 // Communication Pack Info
@@ -128,7 +128,7 @@ typedef FlagField< flag_t > FlagField_T;
 typedef lbm::CumulantMRTNoSlip NoSlip_T;
 \endcode
 
-The pdf field, the velocity field and the flag field which stores information about the cell types for boundary handling are set up using field::addToStorage. The memory layout `fzyx` is explicitly set for the pdf and velocity fields. We set initial values of `0.0` for both of them since they will be explicitly initialized later on.
+The pdf field, the velocity field and the flag field which stores information about the cell types for boundary handling are set up using field::addToStorage. The memory layout `fzyx` is explicitly set for the pdf and velocity fields. We set initial values of `0.0` for both of them since they will be explicitly initialised later on.
 
 \subsection advancedlbmpy_app_sweep_and_packinfo Using the generated sweep and pack info
 
@@ -147,7 +147,7 @@ Upon construction, the generated sweep class requires the pdf field, the velocit
 
 \subsection advancedlbmpy_app_boundary Adding the NoSlip Boundary
 
-The generated NoSlip boundary works independent of the native waLBerla LBM boundary handling classes, which are templated for the use with lattice models. Still, we use the functions exposed by the geometry module to initialize the flag field from the parameter file. The NoSlip boundary handler is constructed by passing the block grid and the pdf field's identifier. After the flag field has been set up, the `fillFromFlagField` method is called to register the boundary cells with the boundary handler.
+The generated NoSlip boundary works independently of the native waLBerla LBM boundary handling classes, which are templated for the use with lattice models. Still, we use the functions exposed by the geometry module to initialise the flag field from the parameter file. The NoSlip boundary handler is constructed passing the block grid and the pdf field's identifier. After the flag field has been set up, the `fillFromFlagField` method is called to register the boundary cells with the boundary handler.
 
 \code
    const FlagUID fluidFlagUID("Fluid");
@@ -162,7 +162,7 @@ The generated NoSlip boundary works independent of the native waLBerla LBM bound
    noSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldId, FlagUID("NoSlip"), fluidFlagUID);
 \endcode
 
-The generated boundary handler holds an internal list of tuples `(x, y, dir)`, the so called index vector. Each entry corresponds to a fluid cell which is a direct neighbour of a boundary cell. For each of these fluid cells, their position `x, y` is saved as well as the direction pointing toward the boundary cell. In our scenario, the north and south domain borders are marked as NoSlip-boundaries. The boundary cells are located on the northern and southern ghost layers, so the top and bottom row of fluid cells are neighbours to these boundaries. Thus, in the index vector, for all cells of the bottom row the tuples `(x, 0, 2)`, `(x, 0, 7)` and `(x, 0, 8)` are saved. The indices 2, 7 and 8 correspond to the South, South-East and South-West directions of the D2Q9 lattice, respectively. The boundary sweep then runs over this index vector, reflecting the outgoing populations in the stored directions off the wall according to the NoSlip rule.
+The generated boundary handler holds an internal list of tuples `(x, y, dir)`, the so-called index vector. Each entry corresponds to a fluid cell which is a direct neighbour of a boundary cell. The direction pointing towards the boundary cell and the position is saved for each of these fluid cells. In our scenario, the north and south domain borders are marked as NoSlip-boundaries. The boundary cells are located on the northern and southern ghost layers, so the top and bottom row of fluid cells are neighbours to these boundaries. Thus, in the index vector, for all cells of the bottom row the tuples `(x, 0, 2)`, `(x, 0, 7)` and `(x, 0, 8)` are saved. The indices 2, 7 and 8 correspond to the South, South-East and South-West directions of the D2Q9 lattice, respectively. The boundary sweep then runs over this index vector, reflecting the outgoing populations in the stored directions off the wall according to the NoSlip rule.
 
 The NoSlip sweep can now be added to the timeloop before the LBM sweep. We also register the communication functor as a BeforeFunction of the boundary sweep, since it needs to be run first in every time step.
 
@@ -170,11 +170,11 @@ The NoSlip sweep can now be added to the timeloop before the LBM sweep. We also 
    timeloop.add() << BeforeFunction(communication, "communication") << Sweep(noSlip);
 \endcode
 
-\subsection advancedlbmpy_velinit Initialization of the Velocity Profile
+\subsection advancedlbmpy_velinit Initialisation of the Velocity Profile
 
-Setting up the shear flow's initial velocity profile consists of two parts. First, the velocity field is initialized to the shear flow. Second, the prepared velocity field is passed to the generated pdf field setter which then initializes the equilibrium pdf values from the velocities. The density is uniformly set to unity.
+Setting up the shear flow's initial velocity profile consists of two parts. First, the velocity field is initialised to the shear flow. Second, the prepared velocity field is passed to the generated pdf field setter, which then initialises the equilibrium pdf values from the velocities. The density is uniformly set to unity.
 
-The `initShearFlowVelocityField` function takes a pointer to the block storage, the velocity field's identifier and a handle to a parameter file block. It then reads the magnitudes of the velocity's $x$-component and the perturbation in the $y$-direction. For the random noise, a random number generator is created with a seed specified in the parameter file. Then, the function iterates over all blocks of the current process, and over all cells of these blocks. A cell's velocity is then set according to its global position.
+The `initShearFlowVelocityField` function takes a pointer to the block storage, the velocity field's identifier and a handle to a parameter file block. It then reads the magnitudes of the velocity's $x$-component and the perturbation in the $y$-direction. For the random noise, a random number generator is created with a seed specified in the parameter file. Then, the function iterates over all blocks (distributed to MPI processes) and cells. A cell's velocity is then set according to its global position.
 
 \code
 void initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& blocks, 
@@ -207,7 +207,7 @@ void initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& block
 }
 \endcode
 
-After the velocity field has been initialized, the generated `InitialPDFsSetter` sweep is created and run once on each block. After this step, the pdf field will be initialized with the correct equilibrium distributions for the first iteration.
+After the velocity field has been initialised, the generated `InitialPDFsSetter` sweep is created and run once on each block. After this step, the pdf field will be initialised with the correct equilibrium distributions for the first iteration.
 
 \code
    // Velocity field setup
@@ -225,17 +225,17 @@ After the velocity field has been initialized, the generated `InitialPDFsSetter`
    }
 \endcode
 
-The simulation is now ready to be run.
+The simulation is now ready to run.
 
 \subsection advancedlbmpy_cuda Differences in the GPU application
 
-If CUDA is enabled and the application is meant to utilise the GPU kernels, some implementation details need to be different from a CPU-only version. This mainly concerns the creation and management of fields, MPI communication and VTK output. Since the initialization, LBM and NoSlip sweeps run entirely on the GPU, the PDF field has to be set up only in graphics memory. The velocity field in turn is required both by CPU and GPU code: The shear flow velocity profile is constructed by CPU code before the initialization kernel maps it onto the PDF field on the GPU. Also, the VTK output routines which run on the CPU need to read the velocity field. It thus needs to be created twice: Once in main memory, and once in GPU memory. Its contents are then copied on-demand. 
+If CUDA is enabled, some implementation details need to be different from a CPU-only version. This mainly concerns the creation and management of fields, MPI communication and VTK output. Since the initialisation, LBM and NoSlip sweeps run entirely on the GPU, the PDF field has to be set up only in graphics memory. In contrast to that is the velocity field required by CPU and GPU. The shear flow velocity profile is constructed by CPU code before the initialisation kernel maps it onto the PDF field on the GPU. Also, the VTK output routines which run on the CPU need to read the velocity field. It thus needs to be created twice: Once in the main memory, and once in GPU memory. It is then copied on-demand from the GPU to the CPU. Furthermore, we create a flag field, which is only needed on the CPU. After the initialisation, we use it to create the index-vectors for the boundary-handling. The index vectors are then transferred to the GPU and not the entire flag field.
 
 For the largest part, though, the C++ code is identical. The code snippets presented above represent only the CPU variant of the code. The GPU implementation can be found in the source file 03_AdvancedLBMCodegen.cpp. There, code blocks which are different from the CPU to the GPU implementation are toggled via preprocessor conditionals. 
 
 \section advancedlbmpy_conclusion Conclusion and Outlook
 
-We have now successfully implemented a waLBerla LBM simulation application with an advanced collision operator, which can be specialized for both CPU and GPU hardware targets. This is still just a glimpse of the capabilities of code generation. One possible extension would be the use of advanced streaming patterns like the AA-pattern or EsoTwist to reduce the simulation's memory footprint. Also, lbmpy gives us the tools to develop advanced lattice boltzmann methods for many kinds of applications. The basic principles demonstrated in these tutorials can thus be used for creating much more complicated simulations with specially tailored, optimized lattice boltzmann code.
+We have now successfully implemented a waLBerla LBM simulation application with an advanced collision operator, which can be specialised for both CPU and GPU hardware targets. Other possible extensions would be the use of advanced streaming patterns like the AA-pattern or EsoTwist to reduce the simulation's memory footprint. Also, lbmpy gives us the tools to develop advanced lattice Boltzmann methods for many kinds of applications. Thus, the basic principles demonstrated in these tutorials can be used for creating more complicated simulations with optimised lattice Boltzmann code.
 
 \tableofcontents
 

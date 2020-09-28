@@ -139,7 +139,7 @@ int main(int argc, char** argv)
 
    // Common Fields
    BlockDataID velocityFieldId = field::addToStorage< VectorField_T >(blocks, "velocity", real_c(0.0), field::fzyx);
-   BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
+   BlockDataID flagFieldId     = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
    // GPU Field for PDFs
@@ -150,7 +150,8 @@ int main(int argc, char** argv)
    BlockDataID velocityFieldIdGPU =
       cuda::addGPUFieldToStorage< VectorField_T >(blocks, velocityFieldId, "velocity on GPU", true);
 #else
-   BlockDataID pdfFieldId  = field::addToStorage< PdfField_T >(blocks, "pdf field", real_c(0.0), field::fzyx);
+   // CPU Field for PDFs
+   BlockDataID pdfFieldId = field::addToStorage< PdfField_T >(blocks, "pdf field", real_c(0.0), field::fzyx);
 #endif
 
    // Velocity field setup
@@ -207,8 +208,7 @@ int main(int argc, char** argv)
 #if defined(WALBERLA_BUILD_WITH_CUDA)
    cuda::communication::UniformGPUScheme< Stencil_T > com(blocks, 0);
    com.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
-   auto simpleOverlapTimeStep = [&]() { com.communicate(nullptr); };
-   auto communication         = std::function< void() >(simpleOverlapTimeStep);
+   auto communication = std::function< void() >([&]() { com.communicate(nullptr); });
 #else
    blockforest::communication::UniformBufferedScheme< Stencil_T > communication(blocks);
    communication.addPackInfo(make_shared< PackInfo_T >(pdfFieldId));
