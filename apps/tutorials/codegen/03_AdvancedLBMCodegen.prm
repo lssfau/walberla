@@ -1,0 +1,38 @@
+
+Parameters 
+{
+	omega           1.8;
+	timesteps       10001;
+
+	remainingTimeLoggerFrequency 3; // in seconds
+	VTKwriteFrequency 1000;
+}
+
+ShearFlowSetup
+{
+   rho   1.0;
+   
+   velocityMagnitude   0.08;
+   noiseMagnitude     0.005;
+
+   noiseSeed            42;
+}
+
+DomainSetup
+{
+   blocks        <  1,    1, 1 >;
+   cellsPerBlock <  300, 80, 1 >;
+   periodic      <  1,    0, 1 >;  
+}
+
+StabilityChecker
+{
+   checkFrequency 1;
+   streamOutput   false;
+   vtkOutput      true;
+}
+
+Boundaries 
+{   
+	Border { direction S,N; walldistance -1; flag NoSlip; }		
+}

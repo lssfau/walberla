@@ -1,0 +1,220 @@
+namespace walberla{
+
+/**
+\page tutorial_codegen02 Tutorial - Code Generation 2: Lattice Model Generation with lbmpy
+
+\section overview Overview
+
+This tutorial demonstrates how to use <a href="https://pycodegen.pages.i10git.cs.fau.de/lbmpy" target="_blank">lbmpy</a> with waLBerla to generate efficient implementations of Lattice Boltzmann Methods (LBM) to be included in large-scale distributed memory fluid flow simulations. While waLBerla provides an advanced framework for setting up and running complex fluid simulations, lbmpy brings the flexibility to generate highly optimized LBMs for CPUs and GPUs. Manually writing an efficient C++ or GPU implementation of an advanced LBM can be very cumbersome, especially because the compute kernel needs to be optimized for specific hardware. For this reason, lbmpy was developed. It is a Python framework which allows defining a set of LB equations at an abstract level, thus enabling development on the mathematical description of the problem directly and then generate a highly optimized C, OpenCL or CUDA implementation of these equations. An introduction to lbmpy can be found <a href="https://pycodegen.pages.i10git.cs.fau.de/lbmpy/notebooks/00_tutorial_lbmpy_walberla_overview.html" target="_blank">here</a>.
+
+As in the previous tutorial (\ref tutorial_codegen01), we will first define the numeric methods and set up code generation in a Python script. We will then include the generated code in a waLBerla application to simulate a two-dimensional shear flow in a periodic domain. Additionally, it will be shown how a waLBerla simulation with complex initial conditions can be initialized using parameter files.
+
+\section latticemodelcodegen_python Setting up code generation in Python
+
+In this section, we will define a single relaxation time (SRT) collision operator in Python using lbmpy and generate a waLBerla lattice model implementation from its equations. A lattice model defines several things, including:
+- The **velocity set** together with its weights. For our two-dimensional domain, we will be using the D2Q9 velocity set.
+- The **LBM sweep** which consists of the collision operator and the streaming pattern. We will be using a standard pull-scheme with a temporary field.
+- The **force model**. Since no forces will be present in our simulation, we will not use a force model in this tutorial. For details about force models, see <a href="https://pycodegen.pages.i10git.cs.fau.de/lbmpy/sphinx/forcemodels.html" target="_blank">lbmpy's documentation on force models</a>.
+
+In addition to the lattice model, it will be shown how to generate a method-specific pack info class for MPI communication to reduce communication load to the necessary minimum.
+
+In the code generation python script, we first require a few imports from lbmpy itself and from the waLBerla code generation libraries. lbmpy code generation is based on pystencils; the basic procedure is thus the same as in the previous tutorial. We need the `CodeGeneration` context from the `pystencils_walberla` module for the connection to the build system. For generating the communication pack info, we will use `generate_pack_info_from_kernel` from the same module. This method of pack info generation is not limited to LBM implementations but can be used with any sweep kernel. The function `generate_pack_info_from_kernel` takes a pystencils `AssignmentCollection` and extracts all field accesses to determine which cell entries need to be communicated.
+
+From the `lbmpy.creationfunctions` we require the functions to create collision and update rules. For the actual code generation, `generate_lattice_model` from `lbmpy_walberla` is required. Since we will define symbols, `SymPy` is also needed.
+
+\code
+import sympy as sp
+
+from lbmpy.creationfunctions import create_lb_collision_rule, create_lb_update_rule
+
+from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel
+from lbmpy_walberla import generate_lattice_model
+\endcode
+
+First, we define a few general parameters. These include the stencil (D2Q9) and the memory layout (`fzyx`, see \ref tutorial_codegen01 ). We define a SymPy symbol for the relaxation rate \f$ \omega \f$. This means we can later set it to a specific value from the waLBerla code. A dictionary with optimization parameters is also set up. Here, we enable global common subexpression elimination (`cse_global`) and set the PDF field's memory layout.
+\code
+stencil = 'D2Q9'
+omega = sp.Symbol('omega')
+layout = 'fzyx'
+
+#   Optimization
+optimizations = {'target': 'cpu', 'cse_global': True, 'field_layout': layout}
+\endcode
+
+Next, we set the parameters for the SRT method in a dictionary and create both the collision and update rules by calling the respective lbmpy functions. They both return an `AssignmentCollection` containing all necessary equations. The only parameters needed for SRT are the stencil and the relaxation rate. For generating the lattice model, we only require the collision rule's equations since `generate_lattice_model` adds the two-fields pull scheme for the streaming step internally. At this point, the lattice model generation is limited to the standard stream-pull-collide scheme.
+
+The update rule is still needed in the code generation process; namely for the pack info generation. The collision step only acts within one cell. Thus, the collision rule's equations contain no neighbour accesses. Calling `create_lb_update_rule` inserts the two-fields pull scheme as `generate_lattice_model`, and resulting update rule contains exactly those neighbour accesses which are required for `generate_pack_info_from_kernel` to build the optimized pack info.
+
+\code
+srt_params = {'stencil': stencil,
+              'method': 'srt',
+              'relaxation_rate': omega}
+
+srt_collision_rule = create_lb_collision_rule(optimization=optimizations, **srt_params)
+srt_update_rule = create_lb_update_rule(collision_rule=srt_collision_rule, optimization=optimizations)
+\endcode
+
+Finally, we create the code generation context and call the respective functions for generating the lattice model and the pack info. Both require the context and a class name as parameters. To  `generate_lattice_model`, we also pass the collision rule and the field layout; `generate_pack_info_from_kernel` receives the update rule.
+
+\code
+with CodeGeneration() as ctx:
+    generate_lattice_model(ctx, "SRTLatticeModel", srt_collision_rule, field_layout=layout)
+    generate_pack_info_from_kernel(ctx, "SRTPackInfo", srt_update_rule)
+\endcode
+
+Notice that, other than in \ref tutorial_codegen01, we did not need to define any fields. Both the source and destination PDF fields are created internally by lbmpy and `generate_lattice_model`.
+
+Furthermore, if we optimise the waLBerla for the machine, it is compiled on with the CMake flag `OPTIMIZE_FOR_LOCALHOST`, the code generator automatically introduces vector intrinsics in the kernel files. Available intrinsics sets are `sse`, `avx` and `avx512`. These sets can be passed manually with the argument `cpu_vectorize_info`. More information on CPU optimisations available in `lbmpy` can be found <a href="https://pycodegen.pages.i10git.cs.fau.de/lbmpy/sphinx/kernelcreation.html" target="_blank">here</a>. By installing the `cpu_vectorize_info` package, it is also possible for `lbmpy` to automatically determine the support intrinsics set of the hardware.
+
+As a final touch, we still need to set up the CMake build target for the code generation script. This time, two distinct classes (the lattice model and the pack information) will be generated. Therefore, we need to list the header and source file names for both classes separately.
+
+\code
+walberla_generate_target_from_python( NAME 02_LBMLatticeModelGenerationPython
+                                      FILE 02_LBMLatticeModelGeneration.py
+                                      OUT_FILES SRTLatticeModel.cpp SRTLatticeModel.h
+                                                SRTPackInfo.cpp SRTPackInfo.h )
+\endcode
+
+This completes the code generation part.
+
+\section lbmpy_simulation_app The Simulation application
+
+This section is concerned with the implementation of a waLBerla C++ application for the simulation of a periodic shear flow using the generated SRT lattice model and pack info. After adding the code generation target defined above as a dependency to the application's CMake target, we can include both generated classes:
+
+\code
+#include "SRTLatticeModel.h"
+#include "SRTPackInfo.h"
+\endcode
+
+For convenience, we define typedef aliases for the several types and templates that will later be used. Since our generated LBM implementation is consistent with the waLBerla LatticeModel API, we can use the lbm::PdfField class template for our PDF fields.
+
+\code
+// Typedef alias for the lattice model
+typedef lbm::SRTLatticeModel LatticeModel_T;
+
+// Communication Pack Info
+typedef pystencils::SRTPackInfo PackInfo_T;
+
+// Also set aliases for the stencils involved...
+typedef LatticeModel_T::Stencil Stencil_T;
+typedef LatticeModel_T::CommunicationStencil CommunicationStencil_T;
+
+// ... and for the required field types.
+typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+
+// Also, for boundary handling, a flag data type and flag field are required.
+typedef walberla::uint8_t flag_t;
+typedef FlagField< flag_t > FlagField_T;
+typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory;
+\endcode
+
+The application will be mostly similar to \ref tutorial_lbm01, so we will mainly focus on the differences here. It will also be configured by a parameter file as described in the other tutorial.
+
+\subsection lbmpy_add_lattice_model_sweep Adding the generated sweep
+
+The only significant difference caused by the usage of a generated lattice model is when the LBM sweep is added to the timeloop. The sweep is exposed as a static member of the generated lattice model class and can be added like this:
+
+\code
+timeloop.add() << Sweep(LatticeModel_T::Sweep(pdfFieldId), "LB stream & collide");
+\endcode
+
+The remaining extensions concern only the setup of boundaries and the initial velocities.
+
+\subsection lbmpy_shear_flow_init Setup of the Shear Flow Scenario
+
+We will set up a shear flow scenario in a rectangular, two-dimensional domain which is periodic in the x-direction and limited by NoSlip-boundaries (i.e. walls) to the north and south. The fluid will be moving rightwards in the northern and southern parts of the domain, and leftwards in the middle with the same speed. Its velocity in the y-direction will be slightly perturbed by random noise, which will cause the development of vortices between the shear layers during the simulation.
+
+For simplicity, the boundaries are set up using the lbm::DefaultBoundaryHandlingFactory as described in \ref tutorial_lbm01.
+
+\code
+BlockDataID boundaryHandlingId =
+      BHFactory::addBoundaryHandlingToStorage(blocks, "boundary handling", flagFieldId, pdfFieldId, fluidFlagUID,
+                                              Vector3< real_t >(), Vector3< real_t >(), real_c(0.0), real_c(0.0));
+\endcode
+
+In the parameter file, the boundary block only defines the NoSlip boundaries. Also, in the `DomainSetup` block, the domain needs to be periodic in the x-direction.
+
+\code
+DomainSetup
+{
+   blocks        <  1,    1, 1 >;
+   cellsPerBlock <  300, 80, 1 >;
+   periodic      <  1,    0, 1 >;
+}
+
+(...)
+
+Boundaries
+{
+   Border { direction S,N; walldistance -1; NoSlip {} }
+}
+\endcode
+
+The velocity initialization can be defined directly in the parameter file. We will be using the lbm::initializer::PdfFieldInitializer class with lbm::initializer::ExprSystemInitFunction which is capable of parsing mathematical expressions from the parameter file to set up complex initial flows. For this purpose, waLBerla uses the [exprtk](http://www.partow.net/programming/exprtk/index.html) C++ library. We will need to extend this functionality a little to introduce the random noise.
+
+The PdfFieldInitializer's `initDensityAndVelocity` function expects a function of type `std::vector< real_t > (const Cell&)`. This function will receive a `Cell` with global coordinates and should return a `std::vector` with four entries: One density and three cartesian velocity components for the given cell. For this purpose, we create a functor struct with these members:
+
+- An instance `exprInitFunc_` of lbm::initializer::ExprSystemInitFunction for initializing the x-velocities;
+- A random number generator `rng_` for the y-velocities, which is an instance of walberla::math::RealRandom;
+- The magnitude of the random noise.
+
+All members will be set using parameters specified in a parameter file block. The functor `exprInitFunc_` is initialized by calling its `parse` method inside the constructor.
+
+We also define the `operator()` with the above signature. It first calls `exprInitFunc_` to set density and velocity, and then adds the random perturbation to the y component.
+
+\code
+struct ShearFlowInit
+{
+ private:
+   lbm::initializer::ExprSystemInitFunction exprInitFunc_;
+   const real_t noiseMagnitude_;
+   math::RealRandom< real_t > rng_;
+
+ public:
+   ShearFlowInit(const shared_ptr< StructuredBlockForest >& blocks, const Config::BlockHandle& setup)
+      : exprInitFunc_(blocks), noiseMagnitude_(setup.getParameter< real_t >("noise_magnitude")),
+        rng_(setup.getParameter< std::mt19937::result_type >("noise_seed", 42))
+   {
+      if (!exprInitFunc_.parse(setup)) { WALBERLA_ABORT("Shear Flow Setup was incomplete."); }
+   }
+
+   std::vector< real_t > operator()(const Cell& globalCell)
+   {
+      std::vector< real_t > densityAndVelocity = exprInitFunc_(globalCell);
+      real_t yPerturbation                     = noiseMagnitude_ * rng_();
+      densityAndVelocity[2] += yPerturbation;
+
+      return densityAndVelocity;
+   }
+};
+\endcode
+
+The required parameters and expressions for initializing the density and velocity are defined in the parameter file. The block is called `ShearFlowSetup`. For `rho`, `u_x`, `u_y` and `u_z`, mathematical expressions can be specified which may include the variables `x`, `y`, `z` for a cell's global position and `n_x`, `n_y`, `n_z` representing the number of cells in each direction. These expressions will be evaluated for each domain cell.
+
+A seed for the random number generator is also specified, which controls the random noise and therefore makes the test case reproducible.
+
+\code
+ShearFlowSetup
+{
+   rho   1;
+
+   u_x   if( ( y / n_y < 0.3 ) or (y / n_y > 0.7) , 0.08, -0.08);
+   u_y   0;
+   u_z   0;
+
+   noise_magnitude     0.005;
+   noise_seed          42;
+}
+\endcode
+
+This completes the C++ implementation. It will produce VTK files which can then be viewed using ParaView, as described in previous tutorials.
+
+\section lbmpy_lattice_model_outlook Outlook
+
+Although generated lattice models are easy to define and easy to integrate with the waLBerla framework, they are somewhat limited in features. For example, the waLBerla code generation methods for lattice models do not allow advanced streaming patterns or the generation of CUDA code. This is remedied by generating sweeps using `generate_sweep` directly instead of `generate_lattice_model`. The result is a generic waLBerla sweep which is not consistent with the lattice model API, thus making implementations a little more complicated since many class templates created for the use with lattice models can not be used. For this problem too, code generation offers solutions which will be further explained in the next tutorial.
+
+\tableofcontents
+
+*/
+
+}

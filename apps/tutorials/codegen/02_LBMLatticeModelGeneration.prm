@@ -1,0 +1,64 @@
+
+Parameters 
+{
+    omega           1.8;
+	timesteps       10000;
+
+	remainingTimeLoggerFrequency 3; // in seconds
+}
+
+ShearFlowSetup
+{
+   rho   1;
+   
+   u_x   if( ( y / n_y < 0.3 ) or (y / n_y > 0.7) , 0.08, -0.08);
+   u_y   0;
+   u_z   0;
+
+   noise_magnitude     0.005;
+   noise_seed          42;
+}
+
+DomainSetup
+{
+   blocks        <  1,    1, 1 >;
+   cellsPerBlock <  300, 80, 1 >;
+   periodic      <  1,    0, 1 >;  
+}
+
+StabilityChecker
+{
+   checkFrequency 1;
+   streamOutput   false;
+   vtkOutput      true;
+}
+
+Boundaries 
+{   
+	Border { direction S, N; walldistance -1; NoSlip {} }
+}
+
+
+VTK 
+{
+   // for parameter documentation see src/vtk/Initialization.cpp
+   srt_velocity_field
+   {
+      writeFrequency 100;
+      ghostLayers    1;
+
+      baseFolder     vtk_out/srt_lattice_model;
+      
+      before_functions {
+         PDFGhostLayerSync;
+      }
+      
+      inclusion_filters {
+         DomainFilter;
+      }
+      
+      writers {
+         Velocity;
+      }
+   }
+}

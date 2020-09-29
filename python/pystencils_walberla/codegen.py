@@ -186,8 +186,14 @@ def generate_pack_info(generation_context, class_name: str,
     items = sorted(items, key=lambda e: e[0])
     directions_to_pack_terms = OrderedDict(items)
 
+    if 'cpu_vectorize_info' in create_kernel_params:
+        vec_params = create_kernel_params['cpu_vectorize_info']
+        if 'instruction_set' in vec_params and vec_params['instruction_set'] is not None:
+            raise NotImplementedError("Vectorisation of the pack info is not implemented.")
+
     create_kernel_params = default_create_kernel_parameters(generation_context, create_kernel_params)
     target = create_kernel_params.get('target', 'cpu')
+    create_kernel_params['cpu_vectorize_info']['instruction_set'] = None
 
     template_name = "CpuPackInfo.tmpl" if target == 'cpu' else 'GpuPackInfo.tmpl'
 
