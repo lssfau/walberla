@@ -131,7 +131,7 @@ int main(int argc, char** argv)
    const real_t omega     = parameters.getParameter< real_t >("omega", real_c(1.8));
    const double remainingTimeLoggerFrequency =
       parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
-   const int32_t VTKwriteFrequency = parameters.getParameter< int32_t >("VTKwriteFrequency", 1000);
+   const uint_t VTKwriteFrequency = parameters.getParameter< uint_t >("VTKwriteFrequency", 1000);
 
    ////////////////////////////////////
    /// PDF Field and Velocity Setup ///

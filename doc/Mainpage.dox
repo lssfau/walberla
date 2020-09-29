@@ -46,10 +46,14 @@ all the basic data strcutures and concepts of the framework.
 \subsection codegen Code Generation
 
 - \ref tutorial_codegen01 \n
-  This tutorial shows how to use pystencils to generate waLBerla sweeps from symbolic descriptions. 
+  This tutorial shows how to use pystencils to generate waLBerla sweeps from symbolic descriptions.
 - \ref tutorial_codegen02 \n
-   
-   
+  This tutorial demonstrates how to use lbmpy to generate an efficient lattice model for a waLBerla sweep.
+- \ref tutorial_codegen03 \n
+  This tutorial describes how to use lbmpy to generate a full LBM sweep for waLBerla.
+
+
+
 \section further_info Further information
 
 Not all features of the framework are covered in the tutorials.
