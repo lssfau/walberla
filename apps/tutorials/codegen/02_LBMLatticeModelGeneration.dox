@@ -64,6 +64,8 @@ with CodeGeneration() as ctx:
 
 Notice that, other than in \ref tutorial_codegen01, we did not need to define any fields. Both the source and destination PDF fields are created internally by lbmpy and `generate_lattice_model`.
 
+Furthermore, if we optimise the waLBerla for the machine, it is compiled on with the CMake flag `OPTIMIZE_FOR_LOCALHOST`, the code generator automatically introduces vector intrinsics in the kernel files. Available intrinsics sets are `sse`, `avx` and `avx512`. These sets can be passed manually with the argument `cpu_vectorize_info`. More information on CPU optimisations available in `lbmpy` can be found <a href="https://pycodegen.pages.i10git.cs.fau.de/lbmpy/sphinx/kernelcreation.html" target="_blank">here</a>. By installing the `cpu_vectorize_info` package, it is also possible for `lbmpy` to automatically determine the support intrinsics set of the hardware.
+
 As a final touch, we still need to set up the CMake build target for the code generation script. This time, two distinct classes (the lattice model and the pack information) will be generated. Therefore, we need to list the header and source file names for both classes separately.
 
 \code
