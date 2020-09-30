@@ -112,7 +112,7 @@ template<> inline FastOverlapResult fastOverlapCheck( const pe::Plane & pePlane,
    }
 
    uint_t numberOfContainedCorners( 0 );
-   for( const Vector3<real_t> aabbCorner : box.corners() )
+   for( const Vector3<real_t> & aabbCorner : box.corners() )
    {
       if( pePlane.containsPoint(aabbCorner))
       {
