@@ -87,7 +87,13 @@ public:
    template< typename T >
    T getData() const { return walberla::any_cast<T>( data_ ); }
    
-   bool hasData() const { return !(data_.empty()); }
+   bool hasData() const {
+#ifdef WALBELRLA_USE_STD_ANY 
+      return data_.has_value();
+#else
+      return !(data_.empty());
+#endif
+   }
    
    inline       void                             clearNeighborhoodSection  ( const uint_t index );
    inline const std::vector< NeighborBlock * > & getNeighborhoodSection    ( const uint_t index ) const;
