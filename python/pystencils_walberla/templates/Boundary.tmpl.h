@@ -29,6 +29,7 @@
 #include "domain_decomposition/IBlock.h"
 #include "blockforest/StructuredBlockForest.h"
 #include "field/FlagField.h"
+#include "core/debug/Debug.h"
 
 #include <set>
 #include <vector>
@@ -83,12 +84,15 @@ public:
         void syncGPU()
         {
             {% if target == 'gpu' -%}
+            for( auto & gpuVec: gpuVectors_)
+                cudaFree( gpuVec );
             gpuVectors_.resize( cpuVectors_.size() );
-            for(size_t i=0; i < size_t(NUM_TYPES); ++i )
+
+            WALBERLA_ASSERT_EQUAL(cpuVectors_.size(), NUM_TYPES);
+            for(size_t i=0; i < cpuVectors_.size(); ++i )
             {
                 auto & gpuVec = gpuVectors_[i];
                 auto & cpuVec = cpuVectors_[i];
-                cudaFree( gpuVec );
                 cudaMalloc( &gpuVec, sizeof({{StructName}}) * cpuVec.size() );
                 cudaMemcpy( gpuVec, &cpuVec[0], sizeof({{StructName}}) * cpuVec.size(), cudaMemcpyHostToDevice );
             }
