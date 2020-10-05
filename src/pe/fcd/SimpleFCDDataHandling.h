@@ -34,8 +34,8 @@ public:
     SimpleFCD<BodyTypeTuple> * initialize( IBlock * const /*block*/ ) {return new SimpleFCD<BodyTypeTuple>();}
 };
 
-[[deprecated("Use createGenericFCDDataHandling<BodyTypeTuple, AnalyticCollideFunctor>() instead")]]
 template <typename BodyTypeTuple>
+[[deprecated("Use createGenericFCDDataHandling<BodyTypeTuple, AnalyticCollideFunctor>() instead")]]
 shared_ptr<SimpleFCDDataHandling<BodyTypeTuple> > createSimpleFCDDataHandling();
 
 template <typename BodyTypeTuple>

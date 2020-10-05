@@ -121,7 +121,7 @@ public:
    //@}
    //**********************************************************************************************
 
-   virtual inline real_t getVolume()         const;
+   virtual inline real_t getVolume()         const override;
 
    //**Set functions*******************************************************************************
    /*!\name Set functions */
@@ -158,7 +158,7 @@ public:
    //**Output functions****************************************************************************
    /*!\name Output functions */
    //@{
-   virtual void print( std::ostream& os, const char* tab ) const;
+   virtual void print( std::ostream& os, const char* tab ) const override;
    //@}
    //**********************************************************************************************
 

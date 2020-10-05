@@ -57,7 +57,7 @@ public:
    /// Convenience operator to make class a functor.
    void operator()(const real_t dt) { timestep(dt); }
    /// Advances the simulation dt seconds.
-   void timestep( const real_t dt );
+   void timestep( const real_t dt ) override;
 
    inline Integrator                getIntegrator()                const { return integrate_; }
    inline ContactResolver           getContactResolver()           const { return resolveContact_; }
