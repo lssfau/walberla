@@ -43,12 +43,6 @@
 #  define WALBERLA_FORCE_INLINE(func) inline func
 #endif
 
-#ifndef WALBERLA_CXX_COMPILER_IS_IBM
-#define WALBERLA_OVERRIDE
-#else
-#define WALBERLA_OVERRIDE override
-#endif
-
 // macro overloading (-> https://stackoverflow.com/a/24028231)
 
 #define WALBERLA_GLUE(x, y) x y

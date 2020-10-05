@@ -61,9 +61,9 @@ public:
 
    inline Integrator                getIntegrator()                const { return integrate_; }
    inline ContactResolver           getContactResolver()           const { return resolveContact_; }
-   virtual inline real_t            getMaximumPenetration()        const WALBERLA_OVERRIDE { return maxPenetration_; }
-   virtual inline size_t            getNumberOfContacts()          const WALBERLA_OVERRIDE { return numberOfContacts_; }
-   virtual inline size_t            getNumberOfContactsTreated()   const WALBERLA_OVERRIDE { return numberOfContactsTreated_; }
+   virtual inline real_t            getMaximumPenetration()        const override { return maxPenetration_; }
+   virtual inline size_t            getNumberOfContacts()          const override { return numberOfContacts_; }
+   virtual inline size_t            getNumberOfContactsTreated()   const override { return numberOfContactsTreated_; }
 private:
    Integrator                        integrate_;
    ContactResolver                   resolveContact_;
