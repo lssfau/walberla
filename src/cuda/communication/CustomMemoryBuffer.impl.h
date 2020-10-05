@@ -83,7 +83,10 @@ namespace communication {
 
          newBegin = reinterpret_cast<ElementType *>(Allocator::allocate( newSize ));
 
-         Allocator::memcpy( newBegin, begin_, size_t(end_ - begin_) );
+         // memcpy: If either dest or src is an invalid or null pointer, the behavior is undefined, even if count is zero. 
+         if(begin_) {
+             Allocator::memcpy( newBegin, begin_, size_t(end_ - begin_) );
+         }
 
          std::swap( begin_, newBegin );
          if( newBegin != nullptr )
