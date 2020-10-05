@@ -43,14 +43,6 @@
 #  define WALBERLA_FORCE_INLINE(func) inline func
 #endif
 
-// pragma in macros (-> https://stackoverflow.com/a/3030312)
-
-#ifdef WALBERLA_CXX_COMPILER_IS_MSVC
-#define WALBERLA_PRAGMA(x) __pragma(x)
-#else
-#define WALBERLA_PRAGMA(x) _Pragma(#x)
-#endif
-
 #ifndef WALBERLA_CXX_COMPILER_IS_IBM
 #define WALBERLA_OVERRIDE
 #else
