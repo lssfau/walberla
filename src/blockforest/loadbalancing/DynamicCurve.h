@@ -938,9 +938,8 @@ void DynamicCurveBalance< PhantomData_T >::finalAssignment( const uint_t index, 
       processesToRecvFrom.insert( uint_c(*s) ) ;
 }
 
-///This class is deprecated use DynamicCurveBalance instead.
 template< typename PhantomData_T >
-using DynamicLevelwiseCurveBalance [[deprecated]] = DynamicCurveBalance<PhantomData_T> ;
+using DynamicLevelwiseCurveBalance [[deprecated("Use DynamicCurveBalance with the corresponding argument!")]] = DynamicCurveBalance<PhantomData_T> ;
 
 } // namespace blockforest
 } // namespace walberla
