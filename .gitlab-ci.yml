@@ -746,6 +746,139 @@ gcc_9_mpionly:
 gcc_9_hybrid:
    <<: *build_definition
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m unittest discover pystencils_walberla/
+      - python3 -m unittest discover lbmpy_walberla/
+      - cd ..
+   variables:
+      <<: *build_hybrid_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_9_serial_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m unittest discover pystencils_walberla/
+      - python3 -m unittest discover lbmpy_walberla/
+      - cd ..
+   variables:
+      <<: *build_serial_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_9_mpionly_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m unittest discover pystencils_walberla/
+      - python3 -m unittest discover lbmpy_walberla/
+      - cd ..
+   variables:
+      <<: *build_mpionly_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_9_hybrid_dbg:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m unittest discover pystencils_walberla/
+      - python3 -m unittest discover lbmpy_walberla/
+      - cd ..
+   variables:
+      <<: *build_hybrid_dbg_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_9_hybrid_dbg_sp:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   variables:
+      <<: *build_hybrid_dbg_sp_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_10_serial:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m unittest discover pystencils_walberla/
+      - python3 -m unittest discover lbmpy_walberla/
+      - cd ..
+   variables:
+      <<: *build_serial_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_10_mpionly:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m unittest discover pystencils_walberla/
+      - python3 -m unittest discover lbmpy_walberla/
+      - cd ..
+   variables:
+      <<: *build_mpionly_variables
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_ENABLE_GUI: 0
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_10_hybrid:
+   <<: *build_definition
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    stage: pretest
    before_script:
       - pip3 install lbmpy jinja2
@@ -764,9 +897,9 @@ gcc_9_hybrid:
    tags:
       - docker
 
-gcc_9_serial_dbg:
+gcc_10_serial_dbg:
    <<: *build_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
@@ -784,9 +917,9 @@ gcc_9_serial_dbg:
    tags:
       - docker
 
-gcc_9_mpionly_dbg:
+gcc_10_mpionly_dbg:
    <<: *build_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
@@ -804,9 +937,9 @@ gcc_9_mpionly_dbg:
    tags:
       - docker
 
-gcc_9_hybrid_dbg:
+gcc_10_hybrid_dbg:
    <<: *build_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
@@ -824,9 +957,9 @@ gcc_9_hybrid_dbg:
    tags:
       - docker
 
-gcc_9_hybrid_dbg_sp:
+gcc_10_hybrid_dbg_sp:
    <<: *build_definition
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    variables:
       <<: *build_hybrid_dbg_sp_variables
       WALBERLA_BUILD_WITH_CUDA: "OFF"
