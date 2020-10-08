@@ -23,7 +23,6 @@
 #include "SimpleFCD.h"
 
 #include "blockforest/BlockDataHandling.h"
-#include "core/Deprecated.h"
 
 namespace walberla{
 namespace pe{
@@ -35,9 +34,9 @@ public:
     SimpleFCD<BodyTypeTuple> * initialize( IBlock * const /*block*/ ) {return new SimpleFCD<BodyTypeTuple>();}
 };
 
-/// \attention This function is deprecated. Use createGenericFCDDataHandling<BodyTypeTuple, AnalyticCollideFunctor>() instead!
 template <typename BodyTypeTuple>
-WALBERLA_DEPRECATED(shared_ptr<SimpleFCDDataHandling<BodyTypeTuple> > createSimpleFCDDataHandling());
+[[deprecated("Use createGenericFCDDataHandling<BodyTypeTuple, AnalyticCollideFunctor>() instead")]]
+shared_ptr<SimpleFCDDataHandling<BodyTypeTuple> > createSimpleFCDDataHandling();
 
 template <typename BodyTypeTuple>
 shared_ptr<SimpleFCDDataHandling<BodyTypeTuple> > createSimpleFCDDataHandling()

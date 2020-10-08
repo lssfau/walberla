@@ -91,9 +91,6 @@ option ( WALBERLA_SIMD_FORCE_SCALAR         "Do not use SIMD operations even whe
 
 option ( WALBERLA_BUFFER_DEBUG              "Type checking for BufferSystem ( slow )"        OFF )
 
-option ( WALBERLA_NO_OUTDATED_FEATURES      "Show warning/errors when outdated features "
-                                            "(i.e. features that will be deprecated) are used"   )
-
 # Profile guided optimization
 option ( WALBERLA_PROFILE_GENERATE          "Generates Profile for Optimization"                 )
 option ( WALBERLA_PROFILE_USE               "Uses Profile to optimize"                           )

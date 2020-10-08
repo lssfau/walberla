@@ -121,23 +121,23 @@ public:
    //@}
    //**********************************************************************************************
 
-   virtual inline real_t getVolume()         const;
+   virtual inline real_t getVolume()         const override;
 
    //**Set functions*******************************************************************************
    /*!\name Set functions */
    //@{
-   virtual void setRemote( bool remote ) WALBERLA_OVERRIDE;
+   virtual void setRemote( bool remote ) override;
    //@}
    //**********************************************************************************************
 
-   virtual inline bool   hasSubBodies()      const WALBERLA_OVERRIDE { return true; }
+   virtual inline bool   hasSubBodies()      const override { return true; }
 
    //**Signal functions***************************************************************************
    /*!\name Signal functions */
    //@{
-   virtual void handleModification() WALBERLA_OVERRIDE;
-   virtual void handleTranslation() WALBERLA_OVERRIDE;
-   virtual void handleRotation() WALBERLA_OVERRIDE;
+   virtual void handleModification() override;
+   virtual void handleTranslation() override;
+   virtual void handleRotation() override;
    //@}
    //**********************************************************************************************
 
@@ -158,7 +158,7 @@ public:
    //**Output functions****************************************************************************
    /*!\name Output functions */
    //@{
-   virtual void print( std::ostream& os, const char* tab ) const;
+   virtual void print( std::ostream& os, const char* tab ) const override;
    //@}
    //**********************************************************************************************
 
@@ -166,21 +166,21 @@ protected:
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   virtual void setPositionImpl       ( real_t px, real_t py, real_t pz )         WALBERLA_OVERRIDE;
-   virtual void setOrientationImpl    ( real_t r, real_t i, real_t j, real_t k )  WALBERLA_OVERRIDE;
-   virtual void translateImpl         ( real_t dx, real_t dy, real_t dz )         WALBERLA_OVERRIDE;
-   virtual void rotateImpl            ( const Quat& dq )                          WALBERLA_OVERRIDE;
-   virtual void rotateAroundOriginImpl( const Quat& dq )                          WALBERLA_OVERRIDE;
-   virtual void rotateAroundPointImpl ( const Vec3& point, const Quat& dq )       WALBERLA_OVERRIDE;
-   virtual bool containsRelPointImpl   ( real_t px, real_t py, real_t pz ) const  WALBERLA_OVERRIDE;
-   virtual bool isSurfaceRelPointImpl  ( real_t px, real_t py, real_t pz ) const  WALBERLA_OVERRIDE;
+   virtual void setPositionImpl       ( real_t px, real_t py, real_t pz )         override;
+   virtual void setOrientationImpl    ( real_t r, real_t i, real_t j, real_t k )  override;
+   virtual void translateImpl         ( real_t dx, real_t dy, real_t dz )         override;
+   virtual void rotateImpl            ( const Quat& dq )                          override;
+   virtual void rotateAroundOriginImpl( const Quat& dq )                          override;
+   virtual void rotateAroundPointImpl ( const Vec3& point, const Quat& dq )       override;
+   virtual bool containsRelPointImpl   ( real_t px, real_t py, real_t pz ) const  override;
+   virtual bool isSurfaceRelPointImpl  ( real_t px, real_t py, real_t pz ) const  override;
    //@}
    //**********************************************************************************************
 
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline virtual void calcBoundingBox() WALBERLA_OVERRIDE;  // Calculation of the axis-aligned bounding box
+   inline virtual void calcBoundingBox() override;  // Calculation of the axis-aligned bounding box
    inline         void calcCenterOfMass(); // Compute mass and center of gravity
    inline         void calcInertia();      // Calculation of the moment of inertia
    //@}

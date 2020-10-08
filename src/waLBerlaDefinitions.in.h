@@ -63,10 +63,6 @@
 // SIMD
 #cmakedefine WALBERLA_SIMD_FORCE_SCALAR
 
-// Deprecated and Outdated
-#cmakedefine WARNING_DEPRECATED
-#cmakedefine WALBERLA_NO_OUTDATED_FEATURES
-
 // Version Information
 #define WALBERLA_MAJOR_VERSION  ${WALBERLA_MAJOR_VERSION}
 #define WALBERLA_PATCH_LEVEL    ${WALBERLA_PATCH_LEVEL}

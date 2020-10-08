@@ -1008,9 +1008,8 @@ bool DynamicDiffusionBalance< PhantomData_T >::operator()( std::vector< std::pai
    return ( iteration + uint_t(1) ) < maxIterations_;
 }
 
-///This class is deprecated use DynamicDiffusionBalance instead.
 template< typename PhantomData_T >
-using DynamicLevelwiseDiffusionBalance [[deprecated]] = DynamicDiffusionBalance<PhantomData_T> ;
+using DynamicLevelwiseDiffusionBalance [[deprecated("Use DynamicDiffusionBalance with the corresponding argument!")]] = DynamicDiffusionBalance<PhantomData_T> ;
 
 } // namespace blockforest
 } // namespace walberla

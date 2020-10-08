@@ -26,7 +26,6 @@
 #include "AllSet.h"
 #include "Array.h"
 #include "DataTypes.h"
-#include "Deprecated.h"
 #include "EndianIndependentSerialization.h"
 #include "Environment.h"
 #include "FunctionTraits.h"

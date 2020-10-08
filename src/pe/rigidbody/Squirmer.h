@@ -53,12 +53,12 @@ public:
    inline real_t getSquirmerVelocity() const;
    inline real_t getSquirmerBeta()     const;
 
-   inline Vec3     velFromBF       ( real_t px, real_t py, real_t pz ) const WALBERLA_OVERRIDE;
-   inline Vec3     velFromBF       ( const Vec3& rpos )                const WALBERLA_OVERRIDE;
-   inline Vec3     velFromWF       ( real_t px, real_t py, real_t pz ) const WALBERLA_OVERRIDE;
-   inline Vec3     velFromWF       ( const Vec3& gpos )                const WALBERLA_OVERRIDE;
+   inline Vec3     velFromBF       ( real_t px, real_t py, real_t pz ) const override;
+   inline Vec3     velFromBF       ( const Vec3& rpos )                const override;
+   inline Vec3     velFromWF       ( real_t px, real_t py, real_t pz ) const override;
+   inline Vec3     velFromWF       ( const Vec3& gpos )                const override;
 
-   static inline id_t getStaticTypeID() WALBERLA_OVERRIDE;
+   static inline id_t getStaticTypeID();
    //@}
    //**********************************************************************************************
 
@@ -80,7 +80,7 @@ protected:
 
 private:
    static id_t staticTypeID_;  //< type id of sphere, will be set by SetBodyTypeIDs
-   static void setStaticTypeID(id_t typeID) WALBERLA_OVERRIDE {staticTypeID_ = typeID;}
+   static void setStaticTypeID(id_t typeID) {staticTypeID_ = typeID;}
 
    //** friend declaration
    /// needed to be able to set static type ids with setStaticTypeID
