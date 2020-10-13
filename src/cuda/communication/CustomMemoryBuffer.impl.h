@@ -45,6 +45,7 @@ namespace communication {
 
    template<typename Allocator>
    CustomMemoryBuffer<Allocator>::CustomMemoryBuffer( const CustomMemoryBuffer &pb )
+           : begin_( nullptr ), cur_( nullptr ), end_( nullptr )
    {
       if( pb.begin_ != nullptr )
       {

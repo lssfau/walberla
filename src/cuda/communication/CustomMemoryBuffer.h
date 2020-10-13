@@ -85,9 +85,9 @@ namespace communication {
       T *advanceNoResize( std::size_t bytes ) { return reinterpret_cast<T *>( advanceNoResize( bytes * sizeof( T ))); }
 
    private:
-      ElementType *begin_;
-      ElementType *cur_;
-      ElementType *end_;
+      ElementType *begin_ = nullptr;
+      ElementType *cur_ = nullptr;
+      ElementType *end_ = nullptr;
    };
 
 
