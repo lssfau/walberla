@@ -27,7 +27,8 @@
 #include "pe/collision/GJK.h"
 #include "pe/rigidbody/Plane.h"
 #include "pe/rigidbody/Union.h"
-#include <pe/Thresholds.h>
+#include "pe/Thresholds.h"
+#include "pe/utility/BodyCast.h"
 
 namespace walberla{
 namespace pe{
