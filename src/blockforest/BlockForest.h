@@ -50,16 +50,14 @@ class BlockForest : public BlockStorage
 {
 public:
 
-   typedef std::function< void ( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                                   std::vector< const Block * > & blocksAlreadyMarkedForRefinement,
-                                   const BlockForest & forest ) >
-           RefreshMinTargetLevelDeterminationFunction;
+   using RefreshMinTargetLevelDeterminationFunction = std::function<void (std::vector<std::pair<const Block *, uint_t>> &, std::vector<const Block *> &, const BlockForest &)>;
 
-   typedef std::function< void ( BlockForest & forest, const PhantomBlockForest & phantomForest ) >  RefreshCallbackFunction;
+   using RefreshCallbackFunction = std::function<void (BlockForest &, const PhantomBlockForest &)>;
 
-   typedef std::function< void ( std::vector<uint_t> & sendTo, std::vector<uint_t> & recvFrom ) > SnapshotCreationFunction;
-   typedef std::function< uint_t ( const uint_t ) > SnapshotRestorenFunction;
-   typedef std::function< void () > SnapshotRestoreCallbackFunction;
+   using SnapshotCreationFunction = std::function<void (std::vector<uint_t> &, std::vector<uint_t> &)>;
+   [[deprecated("typo: use SnapshotRestoreFunction")]] typedef std::function<uint_t (const uint_t)> SnapshotRestorenFunction;
+   using SnapshotRestoreFunction = std::function<uint_t (const uint_t)>;
+   using SnapshotRestoreCallbackFunction = std::function<void ()>;
 
    enum FileIOMode { MPI_PARALLEL, MASTER_SLAVE, SERIALIZED_DISTRIBUTED };
 
@@ -88,7 +86,7 @@ public:
    class RefreshCallbackWrappper
    {
    public:
-      typedef std::function< void () >  Functor_T;
+      using Functor_T = std::function<void ()>;
       RefreshCallbackWrappper( const Functor_T & functor ) : functor_( functor ) {}
       void operator()( BlockForest &, const PhantomBlockForest & ) { functor_(); }
    private:
@@ -469,7 +467,7 @@ public:
 
 
    void  createSnapshot( const std::vector<uint_t> & sendTo, const std::vector<uint_t> & recvFrom );
-   void restoreSnapshot( const SnapshotRestorenFunction & processMapping, const bool rebelance = true );
+   void restoreSnapshot( const SnapshotRestoreFunction & processMapping, const bool rebelance = true );
 
    SnapshotCreationFunctor getSnapshotCreationFunctor( const SnapshotCreationFunction & function,
                                                        const uint_t checkFrequency = uint_t(1) ) { return SnapshotCreationFunctor( *this, function, checkFrequency ); }
@@ -967,7 +965,7 @@ class MinTargetLevelDeterminationFunctions
 {
 public:
 
-   typedef blockforest::BlockForest::RefreshMinTargetLevelDeterminationFunction MinTargetLevelDeterminationFunction;
+   using MinTargetLevelDeterminationFunction = blockforest::BlockForest::RefreshMinTargetLevelDeterminationFunction;
 
    void add( const MinTargetLevelDeterminationFunction & function )
    {
@@ -994,7 +992,7 @@ class CombinedMinTargetLevelDeterminationFunctions
 {
 public:
 
-   typedef blockforest::BlockForest::RefreshMinTargetLevelDeterminationFunction MinTargetLevelDeterminationFunction;
+   using MinTargetLevelDeterminationFunction = blockforest::BlockForest::RefreshMinTargetLevelDeterminationFunction;
 
    CombinedMinTargetLevelDeterminationFunctions(const std::function<uint_t(const std::vector<uint_t> &)> & targetLevelReductionFct = [](const std::vector<uint_t> & t){ return *std::max_element(t.begin(), t.end());})
    : targetLevelReductionFct_( targetLevelReductionFct )
