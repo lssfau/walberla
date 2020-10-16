@@ -1152,7 +1152,7 @@ void BlockForest::createSnapshot( const std::vector<uint_t> & sendTo, const std:
 
 
 
-void BlockForest::restoreSnapshot( const SnapshotRestorenFunction & processMapping, const bool rebelance )
+void BlockForest::restoreSnapshot( const SnapshotRestoreFunction & processMapping, const bool rebalance )
 {
    WALBERLA_CHECK( snapshotExists_ );
    WALBERLA_CHECK_EQUAL( snapshotBlockDataItems_, blockDataItem_.size() );
@@ -1239,7 +1239,7 @@ void BlockForest::restoreSnapshot( const SnapshotRestorenFunction & processMappi
 
    WALBERLA_MPI_SECTION()
    {
-      if( rebelance && refreshPhantomBlockMigrationPreparationFunction_ )
+      if( rebalance && refreshPhantomBlockMigrationPreparationFunction_ )
       {
          // create phantom block forest
 
