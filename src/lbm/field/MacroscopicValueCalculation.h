@@ -27,6 +27,8 @@
 #include "Equilibrium.h"
 #include "ShearRate.h"
 #include "PressureTensor.h"
+#include "QCriterion.h"
+#include "Vorticity.h"
 
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
@@ -430,6 +432,21 @@ template< typename LatticeModel_T, typename FieldPtrOrIterator >
 inline void getPressureTensor( Matrix3< real_t > & pressureTensor, const LatticeModel_T & latticeModel, const FieldPtrOrIterator & it )
 {
    PressureTensor<LatticeModel_T>::get( pressureTensor, it );
+}
+
+
+template< typename VelocityField_T, typename Filter_T >
+inline real_t getQCriterion(const VelocityField_T &velocityField, const Filter_T &filter,
+                            const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+                            real_t dx = real_t(1), real_t dy = real_t(1), real_t dz = real_t(1)) {
+   return QCriterion::get(velocityField, filter, x, y, z, dx, dy, dz);
+}
+
+template< typename VelocityField_T, typename Filter_T >
+inline Vector3<real_t> getVorticity(const VelocityField_T &velocityField, const Filter_T &filter,
+                                    const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+                                    real_t dx = real_t(1), real_t dy = real_t(1), real_t dz = real_t(1)) {
+   return Vorticity::get(velocityField, filter, x, y, z, dx, dy, dz);
 }
 
 

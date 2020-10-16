@@ -27,5 +27,9 @@
 #include "Velocity.h"
 #include "VTKOutput.h"
 #include "PressureTensor.h"
-
+#include "QCriterion.h"
+#include "Vorticity.h"
+#include "CurlMagnitude.h"
+#include "QCriterionCellFilter.h"
+#include "VelocityCellFilter.h"
 
