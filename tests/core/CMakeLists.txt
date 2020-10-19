@@ -194,6 +194,9 @@ waLBerla_execute_test( NAME FunctionTraitsTest )
 waLBerla_compile_test( FILES GridGeneratorTest.cpp )
 waLBerla_execute_test( NAME GridGeneratorTest )
 
+waLBerla_compile_test( FILES MemoryUsage.cpp )
+waLBerla_execute_test( NAME MemoryUsage )
+
 waLBerla_compile_test( FILES OpenMPWrapperTest.cpp )
 waLBerla_execute_test( NAME OpenMPWrapperTest )
 
