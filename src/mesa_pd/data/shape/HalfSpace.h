@@ -30,13 +30,13 @@ namespace data {
  * Half space shape class.
  *
  * \attention
- * The HalfSpace does not obay any rotation. The rotation is given purely be the normal of the half space!
+ * The HalfSpace does not obey any rotation. The rotation is given purely by the normal of the half space!
  */
 class HalfSpace : public BaseShape
 {
 public:
    explicit HalfSpace(const Vec3& normal = Vec3(real_t(1), real_t(0), real_t(0)))
-      : BaseShape(HalfSpace::SHAPE_TYPE), normal_(normal)
+      : BaseShape(HalfSpace::SHAPE_TYPE), normal_(normal.getNormalized())
    { updateMassAndInertia(real_t(1.0)); }
 
    void updateMassAndInertia(const real_t density) override;
@@ -48,12 +48,12 @@ public:
    void pack(walberla::mpi::SendBuffer& buf) override;
    void unpack(walberla::mpi::RecvBuffer& buf) override;
 
-   constexpr static int SHAPE_TYPE = 0; ///< Unique shape type identifier for planes.\ingroup mesa_pd_shape
+   constexpr static int SHAPE_TYPE = 0; ///< Unique shape type identifier for half spaces.\ingroup mesa_pd_shape
 private:
    /**
-    * Normal of the plane in reference to the global world frame.
+    * Normal of the half space in reference to the global world frame.
     *
-    * The normal of the plane is always pointing towards the halfspace outside the plane.
+    * The normal of the half space is always pointing from the occupied half space towards the open half space.
    **/
    Vec3   normal_;
 };

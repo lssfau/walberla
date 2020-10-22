@@ -40,9 +40,9 @@ bool isPointInsideSphere(const Vector3<real_t>& point,
 }
 
 bool isPointInsideHalfSpace(const Vector3<real_t>& point,
-                            const Vector3<real_t>& halfSpacePosition, const Vector3<real_t>& halfSpaceNormal, const math::Matrix3<real_t>& halfSpaceRotationMatrix )
+                            const Vector3<real_t>& halfSpacePosition, const Vector3<real_t>& halfSpaceNormal )
 {
-   return !(halfSpaceRotationMatrix.getTranspose() * (point - halfSpacePosition) * halfSpaceNormal > real_t(0));
+   return !((point - halfSpacePosition) * halfSpaceNormal > real_t(0));
 }
 
 //TODO add ellipsoids
@@ -68,7 +68,7 @@ struct ContainsPointFunctor
    {
       static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
 
-      return isPointInsideHalfSpace(point, ac.getPosition(particleIdx), halfSpace.getNormal(), ac.getRotation(particleIdx).getMatrix() );
+      return isPointInsideHalfSpace(point, ac.getPosition(particleIdx), halfSpace.getNormal() );
    }
 
 };

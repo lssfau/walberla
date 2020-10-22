@@ -798,44 +798,7 @@ int main( int argc, char **argv )
    // ROTATED HALFSPACE //
    ///////////////////////
 
-   // rotate such that normal is <0,1,0> now
-   Vector3<real_t> rotationAngles( -math::pi / real_t(2), real_t(0), real_t(0));
-   Quaternion<real_t> quat( rotationAngles );
-
-   {
-      std::string testIdentifier("Test: rotated half space with no slip mapping ");
-      WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - started");
-
-      // create half space
-      {
-         mesa_pd::data::Particle&& p = *ps->create(true);
-         p.setPosition(halfSpacePosition);
-         p.setOwner(mpi::MPIManager::instance()->rank());
-         p.setShapeID(halfSpaceShape);
-         p.setRotation(quat);
-         mesa_pd::data::particle_flags::set(p.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
-         mesa_pd::data::particle_flags::set(p.getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
-      }
-      syncNextNeighborFunc(*ps, domain, overlap);
-
-      // map
-      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), accessor, particleMappingKernel, accessor, NoSlip_Flag );
-
-      if( writeVTK ) flagFieldVTK->write();
-
-      auto rotatedNormal = quat.toRotationMatrix() * halfSpaceNormal;
-
-      // check mapping
-      halfSpaceMappingChecker(testIdentifier,halfSpacePosition,rotatedNormal);
-      halfSpaceMappingChecker.checkGhostLayer(testIdentifier,halfSpacePosition,rotatedNormal);
-      mappingResetter();
-
-      WALBERLA_LOG_DEVEL_ON_ROOT(testIdentifier << " - ended successfully");
-
-      // clean up
-      ps->clear();
-      syncNextNeighborFunc(*ps, domain, overlap);
-   }
+   // removed because rotation is not supported by half space, see half space docu
 
 
    return 0;

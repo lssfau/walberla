@@ -60,20 +60,18 @@ real_t raySphereIntersectionRatio( const Vector3<real_t> & rayOrigin, const Vect
 }
 
 real_t rayHalfSpaceIntersectionRatio( const Vector3<real_t> & rayOrigin, const Vector3<real_t> & rayDirection,
-                                      const Vector3<real_t> & halfSpacePosition, const Vector3<real_t> & halfSpaceNormal, const math::Matrix3<real_t>& halfSpaceRotationMatrix)
+                                      const Vector3<real_t> & halfSpacePosition, const Vector3<real_t> & halfSpaceNormal)
 {
-   WALBERLA_ASSERT( !isPointInsideHalfSpace( rayOrigin, halfSpacePosition, halfSpaceNormal, halfSpaceRotationMatrix ), "rayOrigin: " << rayOrigin );
-   WALBERLA_ASSERT(  isPointInsideHalfSpace( rayOrigin + rayDirection, halfSpacePosition, halfSpaceNormal, halfSpaceRotationMatrix ), "rayOrigin + rayDirection: " << rayOrigin + rayDirection );
+   WALBERLA_ASSERT( !isPointInsideHalfSpace( rayOrigin, halfSpacePosition, halfSpaceNormal ), "rayOrigin: " << rayOrigin );
+   WALBERLA_ASSERT(  isPointInsideHalfSpace( rayOrigin + rayDirection, halfSpacePosition, halfSpaceNormal ), "rayOrigin + rayDirection: " << rayOrigin + rayDirection );
 
-   const Vector3<real_t> planeNormal( halfSpaceRotationMatrix * halfSpaceNormal );
-
-   real_t denom = planeNormal * rayDirection;
+   real_t denom = halfSpaceNormal * rayDirection;
 
    auto diff = halfSpacePosition - rayOrigin;
 
    WALBERLA_ASSERT_FLOAT_UNEQUAL(denom, real_t(0));
 
-   real_t delta = diff * planeNormal / denom;
+   real_t delta = diff * halfSpaceNormal / denom;
 
    WALBERLA_ASSERT_GREATER_EQUAL( delta, real_t( 0 ) );
    WALBERLA_ASSERT_LESS_EQUAL( delta, real_t( 1 ) );
@@ -143,7 +141,7 @@ struct RayParticleIntersectionRatioFunctor
    {
       static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
 
-      return rayHalfSpaceIntersectionRatio(rayOrigin, rayDirection, ac.getPosition(particleIdx), halfSpace.getNormal(), ac.getRotation(particleIdx).getMatrix() );
+      return rayHalfSpaceIntersectionRatio(rayOrigin, rayDirection, ac.getPosition(particleIdx), halfSpace.getNormal() );
    }
 
 };

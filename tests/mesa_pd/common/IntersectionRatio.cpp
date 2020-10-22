@@ -133,35 +133,8 @@ int main( int argc, char **argv )
    /////////////////////////
    // HALFSPACE (rotated) //
    /////////////////////////
-   {
-      Vector3<real_t> position(real_t(1), real_t(0), real_t(0));
-      Vector3<real_t> normal(real_t(0), real_t(0), real_t(1));
-
-      auto planeShape = shapeStorage->create<mesa_pd::data::HalfSpace>( normal.getNormalized() );
-
-      // rotate to same position as half space before
-      Vector3<real_t> rotationAngles( -math::pi / real_t(4), real_t(0), real_t(0));
-      Quaternion<real_t> quat( rotationAngles );
-
-      mesa_pd::data::Particle&& p = *ps->create(true);
-      p.setPosition(position);
-      p.setShapeID(planeShape);
-      p.setRotation(quat);
-      auto idx = p.getIdx();
-
-      Vector3<real_t> pos1(real_t(1), real_t(0.5), real_t(0.5));
-      Vector3<real_t> dir1(real_t(0), -real_t(1), -real_t(1));
-      real_t delta1 = singleCast(idx, accessor, intersectionRatioFctr, accessor, pos1, dir1, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta1, real_t(0.5), "Intersection ratio 1 with rotated half space wrong!");
-
-      Vector3<real_t> dir2(real_t(0), real_t(0), -real_t(2));
-      real_t delta2 = singleCast(idx, accessor, intersectionRatioFctr, accessor, pos1, dir2, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta2, real_t(0.5), "Intersection ratio 2 with rotated half space wrong!");
-
-      Vector3<real_t> dir3(real_t(0), -real_t(3), real_t(0));
-      real_t delta3 = singleCast(idx, accessor, intersectionRatioFctr, accessor, pos1, dir3, epsilon );
-      WALBERLA_CHECK_FLOAT_EQUAL(delta3, real_t(1)/real_t(3), "Intersection ratio 3 with rotated half space wrong!");
-   }
+   
+   // removed because rotation is not supported by half space, see half space docu
 
    ///////////////////////////
    // Bisection Line Search //
