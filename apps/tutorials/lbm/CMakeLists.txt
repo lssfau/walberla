@@ -22,3 +22,7 @@ waLBerla_add_executable ( NAME 04_LBComplexGeometry
                           DEPENDS blockforest boundary core field lbm mesh stencil timeloop vtk )
                           
 endif()
+
+waLBerla_add_executable ( NAME 05_BackwardFacingStep
+                          FILES 05_BackwardFacingStep.cpp
+                          DEPENDS blockforest boundary core field lbm stencil timeloop vtk )

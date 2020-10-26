@@ -1,0 +1,67 @@
+
+//! [Parameters]
+Parameters 
+{
+    Re              400;
+    timesteps       10000000;
+    uLB             0.05;
+    remainingTimeLoggerFrequency 3; // in seconds
+    loggingFrequency 50; // in time steps
+}
+//! [Parameters]
+
+DomainSetup
+{
+   blocks        <  1,  1,  1 >;
+   cellsPerBlock <  6000, 100, 1 >;
+   periodic      <  0,   0,  1 >;  
+}
+
+Boundaries 
+{
+	velocity0 < 0.01, 0, 0 >; // velocity of cells where Velocity0 boundary is set
+	velocity1 <   0, 0, 0 >; // velocity of cells where Velocity1 boundary is set
+	pressure0 1.1;		     // pressure of cells where Pressure0 boundary is set
+	pressure1 1.0;			 // pressure of cells where Pressure1 boundary is set
+    
+    
+	Border { direction W;    walldistance -1;  Velocity0 {} }
+	Border { direction E;    walldistance -1;  Pressure1 {} }
+	Border { direction S,N;  walldistance -1;  NoSlip    {} }
+//! [geometry]
+    Body
+    {
+       shape box;
+       min <0,0,0>;
+       max <2000,50,1>;
+       NoSlip {} 
+    }
+//! [geometry]
+}
+
+VTK 
+{
+   // for parameter documentation see src/vtk/Initialization.cpp
+   fluid_field
+   {
+      writeFrequency   20000;
+      
+      writers {
+         Velocity;
+         Density;
+      }
+      
+      baseFolder	vtk_05_BackwardFacingStep;
+   }
+   
+   flag_field
+   {
+      writeFrequency 10000000; // write only once
+      
+      writers {
+          FlagField;
+      }
+      baseFolder	vtk_05_BackwardFacingStep;
+   }
+
+}
