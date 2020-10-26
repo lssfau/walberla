@@ -1,0 +1,115 @@
+namespace walberla {
+
+/**
+\page tutorial_lbm05 Tutorial - LBM 5:  Backward-facing step
+
+\brief A configurable application for simulation of backward-facing step problem
+
+\section tutorial05_overview Overview
+
+The aim of this tutorial is to show how to build and solve the backward-facing step model using lattice Boltzman method in waLBerla.
+The "01_BasicLBM" case is used as the foundation of the current work. Therefore, most of the functionalities have already been introduced and discussed in LBM 1 tutorial.
+Here the main focus is on the following areas:
+
+- parameterization with the help of the Reynolds number
+- setting up the step geometry with the help of the input file
+- evaluation of the recirculation length
+
+\image html tutorial_lbm05_BackwardFacingStep_Re400Result.png "Backward-facing step (implemented by a box shape in configuration file) in a 2D channel, Re=400"  width=1200px
+
+\section tutorial05_lbmdgeneralsetup General Setup
+
+A 2D channel flow with a backward-facing step is simulated.
+The application is configured with the Reynolds number and lattice velocity as input and reattachment location as the output.
+The input parameters are specified in a configuration file while the calculation and writing of reattachment locations are performed in a functor `ReattachmentLengthFinder` which is implemented inside the program.
+
+\section tutorial05_lbmdatastructures Lattice Boltzmann Model
+
+Since the simulations are carried out in 2D, the standard D2Q9 stencil with SRT collision model is used which is already implemented in the 'lbm' module.
+
+\snippet 05_BackwardFacingStep.cpp typedefs
+
+
+\section tutorial05_parameterization Parameterization with Reynolds number
+
+The **main()** function must be modified so that the program could accept the Reynolds number and lattice velocity as input parameters.
+These parameters are specified in the 'parameters' section of the config file.
+
+\snippet 05_BackwardFacingStep.prm Parameters
+
+The following lines inside the main() function reads these two values from the parameters section of the configuration file:
+
+\snippet 05_BackwardFacingStep.cpp Params
+
+The height of the channel is considered as the reference length in this simulation (it may differ in other applications).
+This value is read from the DomainSetup section in the configuration file where the dimensions of the channel are specified.
+
+\snippet 05_BackwardFacingStep.cpp height
+
+Finally, viscosity consequently **omega** are calculated with the Reynolds number, lattice velocity and reference length.
+
+\snippet 05_BackwardFacingStep.cpp Omega
+
+
+\section tutorial05_geometry Geometry
+
+Since the step geometry is a plain rectangular area, the simplest approach is to create it by geometry module in walberla.
+This module offers capability to read boundaries of a random geometry from images, voxel files, coordinates of verticies, etc.
+Using this module, obstacles of basic shapes could be conveniently positioned inside the domain.
+It is also easier to have the program to read the geometry specifications from the Boundaries section of the configuration file.
+This is implemented by reading and storing the Boundaries block of the configuration file in 'boundariesConfig' object and passing it to a convenience function provided in the geometry class to initialize the boundaries.
+
+\snippet 05_BackwardFacingStep.cpp geomboundary
+Here a subblock 'Body' is created inside 'Boundaries' section in the configuration file in order to create a box (rectangle in 2D) using two diagonal verticies.
+
+\snippet 05_BackwardFacingStep.prm geometry
+
+For more details about specifying boundaries using configuration file, please refer to the documentation of walberla::geometry::initBoundaryHandling().
+
+
+\section tutorial05_evaluation Evaluation of the recirculation length
+
+In order to find the reattachment location precisely, the velocity on each lattice cell on the bottom boundary line of the domain following the step is examined.
+The idea is to locate the exact position on the bottom boundary in which the streamwise velocity component switches sign.
+This mechanism is implemented by a functor named `ReattachmentLengthFinder` and is passed to a method of timeloop 'addFuncBeforeTimeStep()'' to create the logger.
+
+\snippet 05_BackwardFacingStep.cpp Logger
+
+After running the program, the locations of reattachment against timestep are written to 'ReattachmentLengthLogging_Re_[Re].txt' in the working directory.
+Note that there might be more than one reattachment location before the flow fully develops along the channel, and all are given in the file.
+This simply means that it is expected to have multiple occurances of seperation and reattachment at the same time along the bottom boundary of the channel following the step in the early stages.
+However, most of them are smeared later as the flow starts to develop.
+The logging frequency can also be adjusted by 'checkFrequency' which is passed to the `ReattachmentLengthFinder` functor.
+
+\section tutorial05_results Results
+
+The following results of the normalized reattachment length were obtained by a numerical study, using the here developed application.
+Note that it might take a long time until the simulation has reached a steady state and the final values for this length can be obtained.
+Also, the step has to be long enough to feature a converged, parabolic flow profile before the expansion, and the domain itself has to be long enough to not perturb the results by the vicinity of the outflow boundary condition.
+Reference results were taken from Ercan Erturk, “Numerical solutions of 2-D steady incompressible flow over a backward-facing step, Part I: High Reynolds number solutions”, Computers & Fluids, Vol. 37, 2008.
+
+<table>
+<caption id="multi_row">Normalized recirculation length for different Re</caption>
+<tr><th>Re     <th>simulation  <th>literature <th>% of difference
+<tr><td>   100 <td>  2.880 <td>  2.922 <td> 1.44
+<tr><td>   200 <td>  4.940 <td>  4.982 <td> 0.84
+<tr><td>   300 <td>  6.700 <td>  6.751 <td> 0.76
+<tr><td>   400 <td>  8.180 <td>  8.237 <td> 0.69
+<tr><td>   500 <td>  9.360 <td>  9.420 <td> 0.64
+<tr><td>   600 <td> 10.300 <td> 10.349 <td> 0.47
+<tr><td>   700 <td> 11.080 <td> 11.129 <td> 0.44
+<tr><td>   800 <td> 11.780 <td> 11.834 <td> 0.46
+<tr><td>   900 <td> 12.420 <td> 12.494 <td> 0.59
+<tr><td>  1000 <td> 13.040 <td> 13.121 <td> 0.62
+</table>
+
+\section tutorial05_outlook Outlook
+
+To improve this application, parallelization with a proper synchronization of the reattachment lengths could be added.
+Also, a stopping criterion based on the convergence of some relevant quantity could be added to avoid a manual termination of the simulation.
+
+\tableofcontents
+
+*/
+
+}// namespace walberla
