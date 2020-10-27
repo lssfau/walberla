@@ -24,13 +24,6 @@
 #include "core/DataTypes.h"
 #include "core/math/Vector3.h"
 
-#include "lbm/lattice_model/CollisionModel.h"
-#include "lbm/lattice_model/EquilibriumDistribution.h"
-
-#include <type_traits>
-
-
-
 // Back-end for calculating macroscopic values
 // You should never use these functions directly, always refer to the member functions
 // of PdfField or the free functions that can be found in MacroscopicValueCalculation.h

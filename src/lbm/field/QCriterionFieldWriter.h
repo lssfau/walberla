@@ -16,6 +16,7 @@
 //! \file VelocityFieldWriter.h
 //! \ingroup lbm
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>
+//! \author Lukas Werner <lks.werner@fau.de>
 //
 //======================================================================================================================
 
