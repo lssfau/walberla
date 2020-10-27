@@ -52,5 +52,9 @@ int main( int /*argc*/, char** /*argv*/ )
    WALBERLA_CHECK_EQUAL( math::int_ld<  2 >::exp, 1 );
    WALBERLA_CHECK_EQUAL( math::int_ld<  1 >::exp, 0 );
 
+   WALBERLA_CHECK_IDENTICAL(1.23456_r, real_c(1.23456));
+   WALBERLA_CHECK_IDENTICAL(1_r, real_c(1));
+   WALBERLA_CHECK_IDENTICAL(-1_r, real_c(-1));
+
    return EXIT_SUCCESS;
 }

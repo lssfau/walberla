@@ -163,6 +163,8 @@ typedef double real_t;
 typedef float  real_t;
 #endif
 
+inline real_t operator"" _r( long double t ) { return static_cast< real_t >(t); }
+inline real_t operator"" _r( unsigned long long int t ) { return static_cast< real_t >(t); }
 template< typename T > inline real_t real_c  ( T t ) { return numeric_cast< real_t >(t); } ///< cast to type real_t using "real_c(x)"
 template< typename T > inline double double_c( T t ) { return numeric_cast< double >(t); } ///< cast to type double
 template< typename T > inline float  float_c ( T t ) { return numeric_cast< float > (t); } ///< cast to type float
