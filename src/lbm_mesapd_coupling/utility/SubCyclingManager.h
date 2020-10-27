@@ -25,7 +25,12 @@
 namespace walberla {
 namespace lbm_mesapd_coupling {
 
-// loosely based on Timeloop class
+/*! \brief Handles the execution of subcycles in a timeloop to allow for finer grained time steps than the LBM ones.
+*
+* Supports registration of functions that are run before, during or after a subcycle.
+* The SubCyclingManager itself has to be added to a parent (LBM) time loop, and will execute the functions registered
+* for execution during the subcycling procedure numberOfSubCycles times.
+*/
 
 class SubCyclingManager {
 public:
