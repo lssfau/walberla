@@ -71,6 +71,9 @@ waLBerla_compile_test( FILES SuViscoelasticityTest.cpp DEPENDS field blockforest
 waLBerla_execute_test( NAME  SuViscoelasticityLongTest COMMAND $<TARGET_FILE:SuViscoelasticityTest> ${CMAKE_CURRENT_SOURCE_DIR}/Su.prm LABELS longrun)
 waLBerla_execute_test( NAME  SuViscoelasticityShortTest COMMAND $<TARGET_FILE:SuViscoelasticityTest> ${CMAKE_CURRENT_SOURCE_DIR}/Su.prm -Parameters.shortrun=true )
 
+waLBerla_compile_test( FILES field/QCriterionTest.cpp DEPENDS field blockforest )
+waLBerla_execute_test( NAME QCriterionTest )
+
 # Code Generation
 if( WALBERLA_BUILD_WITH_CODEGEN )
 
