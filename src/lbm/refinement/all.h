@@ -30,3 +30,4 @@
 #include "TimeStepPdfPackInfo.h"
 #include "TimeTracker.h"
 #include "VorticityBasedLevelDetermination.h"
+#include "CurlBasedLevelDetermination.h"
