@@ -373,6 +373,7 @@ endif ( )
 if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_CXX_COMPILER_IS_CLANG )
     if ( WALBERLA_STL_BOUNDS_CHECKS )
         add_definitions ( "-D_GLIBCXX_DEBUG" )
+        add_definitions ( "-D_LIBCPP_DEBUG=1" )
     endif()
 endif()
 
