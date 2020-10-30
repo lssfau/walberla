@@ -557,14 +557,23 @@ endif ( )
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CODEGEN )
-    find_package( PythonInterp 3 QUIET REQUIRED)
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "from pystencils.include import get_pystencils_include_path; print(get_pystencils_include_path())"
-                    RESULT_VARIABLE PYTHON_RET_CODE
-                    OUTPUT_VARIABLE PYSTENCILS_INCLUDE_PATH)
-    if(NOT PYTHON_RET_CODE EQUAL 0)
-        message(FATAL_ERROR "WALBERLA_BUILD_WITH_CODEGEN activated and pystencils_walberla package not found")
+   find_package( PythonInterp 3 QUIET REQUIRED)
+   execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import lbmpy"
+         RESULT_VARIABLE LBMPY_FOUND )
+    if(NOT LBMPY_FOUND EQUAL 0)
+       message(FATAL_ERROR "WALBERLA_BUILD_WITH_CODEGEN activated but pystencils or lbmpy package not found.
+                            Please install lbmpy e.g.: 'pip3 install lbmpy'")
     endif()
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "from pystencils.include import get_pystencils_include_path; print(get_pystencils_include_path())"
+                    OUTPUT_VARIABLE PYSTENCILS_INCLUDE_PATH)
     include_directories( ${PYSTENCILS_INCLUDE_PATH} )
+
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import jinja2"
+          RESULT_VARIABLE JINJA2_FOUND )
+    if(NOT JINJA2_FOUND EQUAL 0)
+       message(FATAL_ERROR "WALBERLA_BUILD_WITH_CODEGEN activated and jinja2 package not found.
+       Please install jinja2 e.g.: 'pip3 install jinja2'")
+    endif()
 endif()
 ############################################################################################################################
 
