@@ -188,6 +188,10 @@ waLBerla_execute_test( NAME ConcatIterator )
 waLBerla_compile_test( FILES DataTypesTest.cpp )
 waLBerla_execute_test( NAME DataTypesTest )
 
+waLBerla_compile_test( FILES DebugSTLTest.cpp )
+waLBerla_execute_test( NAME DebugSTLTest )
+set_tests_properties(DebugSTLTest PROPERTIES WILL_FAIL TRUE)
+
 waLBerla_compile_test( FILES FunctionTraitsTest.cpp )
 waLBerla_execute_test( NAME FunctionTraitsTest )
 
