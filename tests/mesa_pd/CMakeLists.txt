@@ -66,6 +66,9 @@ waLBerla_execute_test( NAME   MESA_PD_Domain_DistanceCalculation )
 waLBerla_compile_test( NAME   MESA_PD_Domain_DynamicRefinement FILES domain/DynamicRefinement.cpp DEPENDS blockforest core pe )
 waLBerla_execute_test( NAME   MESA_PD_Domain_DynamicRefinement PROCESSES 8)
 
+waLBerla_compile_test( NAME   MESA_PD_Domain_InfiniteDomain FILES domain/InfiniteDomain.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Domain_InfiniteDomain )
+
 waLBerla_compile_test( NAME   MESA_PD_Domain_SerializeDeserialize FILES domain/SerializeDeserialize.cpp DEPENDS blockforest core pe)
 waLBerla_execute_test( NAME   MESA_PD_Domain_SerializeDeserialize PROCESSES 8 )
 

@@ -20,22 +20,34 @@
 
 #pragma once
 
+#include <core/mpi/MPIManager.h>
 #include <mesa_pd/domain/IDomain.h>
 
 namespace walberla {
 namespace mesa_pd {
 namespace domain {
 
+/**
+ * Every process assumes the whole simulation space belongs to its subdomain.
+ */
 class InfiniteDomain : public IDomain
 {
 public:
-   bool   isContainedInProcessSubdomain(const uint_t /*rank*/, const Vec3& /*pt*/) const override {return true;}
-   int    findContainingProcessRank(const Vec3& /*pt*/) const override {return walberla::mpi::MPIManager::instance()->rank();}
+   ///Everything belongs to the calling process.
+   bool   isContainedInProcessSubdomain(const uint_t rank, const Vec3& /*pt*/) const override {return rank==rank_;}
+   ///Everything belongs to the calling process.
+   int    findContainingProcessRank(const Vec3& /*pt*/) const override {return static_cast<int>(rank_);}
+   ///Nothing to do here since domain is infinite.
    void   periodicallyMapToDomain(Vec3& /*pt*/) const override {}
+   ///If I own everything I do not have neighbors.
    std::vector<uint_t> getNeighborProcesses() const override {return {};}
+   ///Everything belongs to my subdomain.
    bool   intersectsWithProcessSubdomain(const uint_t rank, const Vec3& /*pt*/, const real_t& /*radius*/) const override
-   { return int_c(rank)==walberla::mpi::MPIManager::instance()->rank() ? true : false;}
+   { return rank==rank_;}
+   ///Nothing to do here.
    void   correctParticlePosition(Vec3& /*pt*/) const override {}
+private:
+   const uint_t rank_ = static_cast<uint_t>(MPIManager::instance()->rank());
 };
 
 } //namespace domain
