@@ -88,7 +88,7 @@ public:
    T getData() const { return walberla::any_cast<T>( data_ ); }
    
    bool hasData() const {
-#ifdef WALBELRLA_USE_STD_ANY 
+#ifdef WALBERLA_USE_STD_ANY 
       return data_.has_value();
 #else
       return !(data_.empty());
