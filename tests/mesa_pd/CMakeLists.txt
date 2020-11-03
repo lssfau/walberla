@@ -37,6 +37,9 @@ waLBerla_execute_test( NAME   MESA_PD_COMMON_IntersectionRatio )
 waLBerla_compile_test( NAME   MESA_PD_ContactDetection FILES ContactDetection.cpp DEPENDS blockforest core pe)
 waLBerla_execute_test( NAME   MESA_PD_ContactDetection PROCESSES 8 )
 
+waLBerla_compile_test( NAME   MESA_PD_Data_ContactHistory FILES data/ContactHistory.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Data_ContactHistory )
+
 waLBerla_compile_test( NAME   MESA_PD_Data_Flags FILES data/Flags.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Data_Flags )
 
