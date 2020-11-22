@@ -134,8 +134,9 @@ hydro_LB_step = get_collision_assignments_hydro(lb_method=method_hydro,
                                                 density=density,
                                                 velocity_input=u,
                                                 force=force_g,
-                                                optimization={"symbolic_field": g,
-                                                              "symbolic_temporary_field": g_tmp},
+                                                sub_iterations=2,
+                                                symbolic_fields={"symbolic_field": g,
+                                                                 "symbolic_temporary_field": g_tmp},
                                                 kernel_type='collide_only')
 
 hydro_LB_step.set_sub_expressions_from_dict({**{relaxation_rate: relaxation_rate_cutoff},
@@ -163,24 +164,24 @@ with CodeGeneration() as ctx:
     if not ctx.optimize_for_localhost:
         cpu_vec = {'instruction_set': None}
 
-    generate_sweep(ctx, 'initialize_phase_field_distributions', h_updates)
-    generate_sweep(ctx, 'initialize_velocity_based_distributions', g_updates)
+    generate_sweep(ctx, 'initialize_phase_field_distributions', h_updates, target='cpu')
+    generate_sweep(ctx, 'initialize_velocity_based_distributions', g_updates, target='cpu')
 
     generate_sweep(ctx, 'phase_field_LB_step', phase_field_LB_step,
                    field_swaps=[(h, h_tmp)],
                    inner_outer_split=True,
-                   cpu_vectorize_info=cpu_vec)
-    generate_boundary(ctx, 'phase_field_LB_NoSlip', NoSlip(), method_phase)
+                   cpu_vectorize_info=cpu_vec, target='cpu')
+    generate_boundary(ctx, 'phase_field_LB_NoSlip', NoSlip(), method_phase, target='cpu')
 
     generate_sweep(ctx, 'hydro_LB_step', hydro_LB_step,
                    inner_outer_split=True,
-                   cpu_vectorize_info=cpu_vec)
-    generate_boundary(ctx, 'hydro_LB_NoSlip', NoSlip(), method_hydro)
+                   cpu_vectorize_info=cpu_vec, target='cpu')
+    generate_boundary(ctx, 'hydro_LB_NoSlip', NoSlip(), method_hydro, target='cpu')
 
     generate_sweep(ctx, 'stream_hydro', stream_hydro,
                    field_swaps=[(g, g_tmp)],
                    inner_outer_split=True,
-                   cpu_vectorize_info=cpu_vec)
+                   cpu_vectorize_info=cpu_vec, target='cpu')
 
     ctx.write_file("GenDefines.h", info_header)
 
