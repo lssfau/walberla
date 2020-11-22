@@ -133,8 +133,9 @@ hydro_LB_step = get_collision_assignments_hydro(lb_method=method_hydro,
                                                 density=density,
                                                 velocity_input=u,
                                                 force=force_g,
-                                                optimization={"symbolic_field": g,
-                                                              "symbolic_temporary_field": g_tmp},
+                                                sub_iterations=2,
+                                                symbolic_fields={"symbolic_field": g,
+                                                                 "symbolic_temporary_field": g_tmp},
                                                 kernel_type='collide_only')
 
 hydro_LB_step.set_sub_expressions_from_dict({**{relaxation_rate: relaxation_rate_cutoff},
