@@ -28,6 +28,7 @@ modernize-*,
 -modernize-avoid-c-arrays,
 
 mpi-*,
+-mpi-type-mismatch,
 
 openmp-*,
 -openmp-exception-escape,
