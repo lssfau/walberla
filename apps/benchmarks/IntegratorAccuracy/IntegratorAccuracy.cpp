@@ -70,6 +70,51 @@ struct Oscillator
    real_t durationOnePeriod = 2_r * math::pi / omega;
    uint_t timeSteps = uint_c(periods * durationOnePeriod / dt);
 
+   Oscillator(int argc, char **argv)
+   {
+      for (int i = 1; i < argc; ++i)
+      {
+         if (std::strcmp(argv[i], "--dt") == 0)
+         {
+            dt = real_c(std::atof(argv[++i]));
+            continue;
+         }
+         if (std::strcmp(argv[i], "--amplitude") == 0)
+         {
+            amplitude = real_c(std::atof(argv[++i]));
+            continue;
+         }
+         if (std::strcmp(argv[i], "--k") == 0)
+         {
+            k = real_c(std::atof(argv[++i]));
+            continue;
+         }
+         if (std::strcmp(argv[i], "--damping") == 0)
+         {
+            damping = real_c(std::atof(argv[++i]));
+            continue;
+         }
+         if (std::strcmp(argv[i], "--mass") == 0)
+         {
+            mass = real_c(std::atof(argv[++i]));
+            continue;
+         }
+         if (std::strcmp(argv[i], "--phaseFraction") == 0)
+         {
+            phaseFraction = real_c(std::atof(argv[++i]));
+            continue;
+         }
+         if (std::strcmp(argv[i], "--periods") == 0)
+         {
+            periods = real_c(std::atof(argv[++i]));
+            continue;
+         }
+         WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
+      }
+
+      update();
+   }
+
    void update()
    {
       phase = phaseFraction * math::pi;
@@ -182,6 +227,16 @@ AccuracyResult checkIntegrator(const Oscillator& osc)
       maxVelDeviation = std::max(maxVelDeviation, std::abs(particle.getLinearVelocity(0)[2] - refVel));
       maxEneDeviation = std::max(maxEneDeviation, std::abs(osc.getEnergy(particle.getPosition(0)[2], particle.getLinearVelocity(0)[2]) - refEne));
 
+      std::cout << real_t(i) * osc.dt << " "
+                << refPos << " "
+                << refVel << " "
+                << refEne << " "
+                << particle.getPosition(0)[2] << " "
+                << particle.getLinearVelocity(0)[2] << " "
+                << osc.getEnergy(particle.getPosition(0)[2], particle.getLinearVelocity(0)[2]) << " "
+                << maxPosDeviation << " "
+                << maxVelDeviation << std::endl;
+
       integrator(particle, osc);
    }
 
@@ -194,61 +249,12 @@ int main(int argc, char **argv)
    WALBERLA_UNUSED(env);
    mpi::MPIManager::instance()->useWorldComm();
 
-   if (std::is_same<real_t, float>::value)
-   {
-      WALBERLA_LOG_WARNING("waLBerla build in sp mode: skipping test due to low precision");
-      return EXIT_SUCCESS;
-   }
-
-   Oscillator osc;
+   Oscillator osc(argc, argv);
 
    AccuracyResult res;
-   osc.dt = 0.1_r;
-   osc.update();
-   res = walberla::checkIntegrator<walberla::ExplicitEuler>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxPosDeviation, 1.03068993874562120e+00_r);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxVelDeviation, 3.33225581358688350e-01_r);
-   res = walberla::checkIntegrator<walberla::SemiImplicitEuler>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxPosDeviation, 2.92576360173544339e-02_r);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxVelDeviation, 1.45120298258364505e-03_r);
+//   res = walberla::checkIntegrator<walberla::ExplicitEuler>(osc);
+//   res = walberla::checkIntegrator<walberla::SemiImplicitEuler>(osc);
    res = walberla::checkIntegrator<walberla::VelocityVerlet>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxPosDeviation, 4.24116598691555435e-03_r);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxVelDeviation, 1.45059589844465098e-03_r);
-
-   osc.dt = 0.2_r;
-   osc.update();
-   res = walberla::checkIntegrator<walberla::ExplicitEuler>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxPosDeviation, 2.76387000209972467e+00_r);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxVelDeviation, 8.88433661185269896e-01_r);
-   res = walberla::checkIntegrator<walberla::SemiImplicitEuler>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxPosDeviation, 6.70464626869100577e-02_r);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxVelDeviation, 5.81009940233766925e-03_r);
-   res = walberla::checkIntegrator<walberla::VelocityVerlet>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxPosDeviation, 1.69147419522671719e-02_r);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxVelDeviation, 5.78432113979018836e-03_r);
-
-   osc.dt = 0.4_r;
-   osc.update();
-   res = walberla::checkIntegrator<walberla::ExplicitEuler>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxPosDeviation, 1.04680753378045406e+01_r);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxVelDeviation, 3.34470580215144420e+00_r);
-   res = walberla::checkIntegrator<walberla::SemiImplicitEuler>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxPosDeviation, 1.68291142727994780e-01_r);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxVelDeviation, 2.33193930919295134e-02_r);
-   res = walberla::checkIntegrator<walberla::VelocityVerlet>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxPosDeviation, 6.71909796751584687e-02_r);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxVelDeviation, 2.29906986019860066e-02_r);
-
-   //check energy conservation
-   osc.dt = 0.4_r;
-   osc.periods = 1000;
-   osc.update();
-   //res = walberla::checkIntegrator<walberla::ExplicitEuler>(osc);
-   //explicit euler is not symplectic
-   res = walberla::checkIntegrator<walberla::SemiImplicitEuler>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxEneDeviation, 8.03571427989904774e-03_r);
-   res = walberla::checkIntegrator<walberla::VelocityVerlet>(osc);
-   WALBERLA_CHECK_FLOAT_EQUAL( res.maxEneDeviation, 4.99960610503419334e-04_r);
 
    return EXIT_SUCCESS;
 }
@@ -258,6 +264,8 @@ int main(int argc, char **argv)
 
 /*
  * Simulates a harmonic oscillator to test the accuracy of the integrators.
+ * Playground for integrator analysis. The corresponding unit test is located at
+ * tests/mesa_pd/kernel/IntegratorAccuracy.cpp
  */
 int main(int argc, char **argv)
 {

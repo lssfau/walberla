@@ -26,7 +26,7 @@
 #include "mesa_pd/data/ShapeStorage.h"
 
 #include "mesa_pd/kernel/DoubleCast.h"
-#include "mesa_pd/kernel/ExplicitEuler.h"
+#include "mesa_pd/kernel/SemiImplicitEuler.h"
 #include "mesa_pd/kernel/SpringDashpot.h"
 #include "mesa_pd/kernel/SpringDashpotSpring.h"
 #include "mesa_pd/mpi/ReduceContactHistory.h"
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
          false);
 
    // explicit euler
-   kernel::ExplicitEuler explEuler(dt);
+   kernel::SemiImplicitEuler implEuler(dt);
    collision_detection::AnalyticContactDetection acd;
    kernel::DoubleCast double_cast;
    kernel::SpringDashpot sd(1);
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
       ps->forEachParticle(false,
                     kernel::SelectLocal(),
                     *ac,
-                    explEuler,
+                    implEuler,
                     *ac);
    }
    WALBERLA_LOG_DEVEL_VAR(sp->getPosition());
@@ -193,7 +193,7 @@ int main(int argc, char **argv)
       ps->forEachParticle(false,
                     kernel::SelectLocal(),
                     *ac,
-                    explEuler,
+                    implEuler,
                     *ac);
    }
    WALBERLA_LOG_DEVEL_VAR(sp->getPosition());

@@ -128,6 +128,9 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_LinearSpringDashpot )
 waLBerla_compile_test( NAME   MESA_PD_Kernel_LinkedCellsVsBruteForce FILES kernel/LinkedCellsVsBruteForce.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_LinkedCellsVsBruteForce PROCESSES 27 )
 
+waLBerla_compile_test( NAME   MESA_PD_Kernel_SemiImplicitEuler FILES kernel/SemiImplicitEuler.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_SemiImplicitEuler )
+
 waLBerla_compile_test( NAME   MESA_PD_Kernel_SingleCast FILES kernel/SingleCast.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_SingleCast )
 
