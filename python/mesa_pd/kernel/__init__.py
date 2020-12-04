@@ -12,6 +12,7 @@ from .InsertParticleIntoLinkedCells import InsertParticleIntoLinkedCells
 from .InsertParticleIntoSparseLinkedCells import InsertParticleIntoSparseLinkedCells
 from .LinearSpringDashpot import LinearSpringDashpot
 from .NonLinearSpringDashpot import NonLinearSpringDashpot
+from .PFCDamping import PFCDamping
 from .SemiImplicitEuler import SemiImplicitEuler
 from .SingleCast import SingleCast
 from .SpringDashpot import SpringDashpot
@@ -32,6 +33,7 @@ __all__ = ['DoubleCast',
            'InsertParticleIntoSparseLinkedCells',
            'LinearSpringDashpot',
            'NonLinearSpringDashpot',
+           'PFCDamping',
            'SemiImplicitEuler',
            'SingleCast',
            'SpringDashpot',
