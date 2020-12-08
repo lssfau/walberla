@@ -73,7 +73,7 @@ typedef FlagField< flag_t > FlagField_T;
 typedef lbm::CumulantMRTNoSlip NoSlip_T;
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-typedef cuda::GPUField< double > GPUField;
+typedef cuda::GPUField< real_t > GPUField;
 #endif
 
 //////////////////////////////////////////
