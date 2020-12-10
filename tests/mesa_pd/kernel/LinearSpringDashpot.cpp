@@ -26,7 +26,7 @@
 #include "mesa_pd/data/ShapeStorage.h"
 
 #include "mesa_pd/kernel/DoubleCast.h"
-#include "mesa_pd/kernel/ExplicitEuler.h"
+#include "mesa_pd/kernel/SemiImplicitEuler.h"
 #include "mesa_pd/kernel/VelocityVerlet.h"
 #include "mesa_pd/kernel/LinearSpringDashpot.h"
 #include "mesa_pd/mpi/ReduceContactHistory.h"
@@ -152,7 +152,7 @@ int main( int argc, char ** argv )
    kernel::VelocityVerletPostForceUpdate vvPostForce( dt );
 
    // explicit euler
-   kernel::ExplicitEuler explEuler( dt );
+   kernel::SemiImplicitEuler implEuler( dt );
 
    // collision response
    collision_detection::AnalyticContactDetection     acd;
@@ -188,7 +188,7 @@ int main( int argc, char ** argv )
       rch(*ps);
 
       if(useVelocityVerlet) vvPostForce(0,*accessor);
-      else explEuler(0, *accessor);
+      else implEuler(0, *accessor);
 
       ++steps;
    } while (double_cast(0, 1, *accessor, acd, *accessor ) || p.getLinearVelocity()[2] < 0);

@@ -25,16 +25,14 @@
 #include <mesa_pd/data/ShapeStorage.h>
 
 #include <mesa_pd/kernel/DoubleCast.h>
-#include <mesa_pd/kernel/ExplicitEuler.h>
+#include <mesa_pd/kernel/SemiImplicitEuler.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/kernel/SpringDashpot.h>
 
 #include <core/Abort.h>
 #include <core/Environment.h>
 #include <core/logging/Logging.h>
-#include <core/waLBerlaBuildInfo.h>
 
-#include <functional>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -122,7 +120,7 @@ int main( int argc, char ** argv )
    real_t dt = real_t(0.00001);
 
    // Init kernels
-   kernel::ExplicitEuler                 explicitEuler( dt );
+   kernel::SemiImplicitEuler             implEuler( dt );
    kernel::SpringDashpot                 dem(1);
    auto meff = real_t(1.0) / ss->shapes[sp->getShapeID()]->getInvMass();
    dem.setParametersFromCOR(0,0,real_t(0.9), dt * real_t(20), meff);
@@ -172,7 +170,7 @@ int main( int argc, char ** argv )
       ps->forEachParticle(false,
                           kernel::SelectLocal(),
                           accessor,
-                          explicitEuler,
+                          implEuler,
                           accessor);
 
 //      if(i%1 == 0)

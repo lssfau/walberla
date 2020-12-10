@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file   ExplicitEuler.cpp
+//! \file   SemiImplicitEuler.cpp
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -21,7 +21,7 @@
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/ParticleAccessor.h>
 
-#include <mesa_pd/kernel/ExplicitEuler.h>
+#include <mesa_pd/kernel/SemiImplicitEuler.h>
 
 #include <core/Environment.h>
 #include <core/logging/Logging.h>
@@ -73,7 +73,7 @@ int main( int argc, char ** argv )
 
    //init kernels
    const real_t dt = real_t(1);
-   kernel::ExplicitEuler integrator( dt );
+   kernel::SemiImplicitEuler integrator( dt );
 
    integrator(0, accessor);
 
@@ -91,10 +91,10 @@ int main( int argc, char ** argv )
 
    //check position
    WALBERLA_CHECK_FLOAT_EQUAL(accessor.getPosition(0), linVel * dt +
-                                                       0.5_r * force * accessor.getInvMass(0) * dt * dt);
+                                                       force * accessor.getInvMass(0) * dt * dt);
    WALBERLA_CHECK_FLOAT_EQUAL(accessor.getRotation(0).getQuaternion(),
                               Quat( (wdot * dt + angVel).getNormalized(),
-                                    (0.5_r * wdot * dt + angVel).length() * dt ));
+                                    (wdot * dt + angVel).length() * dt ));
 
    accessor.setPosition(        0, Vec3(0,0,0));
    accessor.setRotation(        0, Rot3(Quat()));

@@ -41,6 +41,8 @@ namespace kernel {
  * integration is only complete when both functions are called. The integration
  * is symplectic.
  *
+ * Wachs, A. Particle-scale computational approaches to model dry and saturated granular flows of non-Brownian, non-cohesive, and non-spherical rigid bodies. Acta Mech 230, 1919–1980 (2019). https://doi.org/10.1007/s00707-019-02389-9
+ *
  * This kernel requires the following particle accessor interface
  * \code
    {%- for prop in interface %}

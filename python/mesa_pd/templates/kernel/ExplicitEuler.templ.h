@@ -34,7 +34,12 @@ namespace mesa_pd {
 namespace kernel {
 
 /**
- * Kernel which explicitly integrates all particles in time.
+ * Explicit Euler integration.
+ * Uses the 0.5at^2 extension for position integration.
+ * Boils down to using v_{t+0.5dt} for position integration.
+ * This version exhibits increased stability compared to standard explicit euler.
+ *
+ * Wachs, A. Particle-scale computational approaches to model dry and saturated granular flows of non-Brownian, non-cohesive, and non-spherical rigid bodies. Acta Mech 230, 1919–1980 (2019). https://doi.org/10.1007/s00707-019-02389-9
  *
  * This kernel requires the following particle accessor interface
  * \code
@@ -75,15 +80,19 @@ inline void ExplicitEuler::operator()(const size_t idx,
 
    if (!data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::FIXED))
    {
-      ac.setPosition      (idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ * dt_ + ac.getLinearVelocity(idx) * dt_ + ac.getPosition(idx));
-      ac.setLinearVelocity(idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ + ac.getLinearVelocity(idx));
+      ac.setPosition      (idx, 0.5_r * ac.getInvMass(idx) * ac.getForce(idx) * dt_ * dt_ +
+                                ac.getLinearVelocity(idx) * dt_ +
+                                ac.getPosition(idx));
+      ac.setLinearVelocity(idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ +
+                                ac.getLinearVelocity(idx));
 
       {%- if bIntegrateRotation %}
       const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
                                                   ac.getInvInertiaBF(idx)) * ac.getTorque(idx);
 
       // Calculating the rotation angle
-      const Vec3 phi( ac.getAngularVelocity(idx) * dt_ + wdot * dt_ * dt_);
+      const Vec3 phi( 0.5_r * wdot * dt_ * dt_ +
+                      ac.getAngularVelocity(idx) * dt_ );
 
       // Calculating the new orientation
       auto rotation = ac.getRotation(idx);

@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file DEMIntegratorAccuracy.cpp
+//! \file CoefficientOfRestitutionNLSD.cpp
 //! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
 //======================================================================================================================
@@ -26,7 +26,7 @@
 
 #include "mesa_pd/kernel/DoubleCast.h"
 #include "mesa_pd/kernel/VelocityVerlet.h"
-#include "mesa_pd/kernel/ExplicitEuler.h"
+#include "mesa_pd/kernel/SemiImplicitEuler.h"
 #include "mesa_pd/kernel/NonLinearSpringDashpot.h"
 #include "mesa_pd/mpi/ReduceContactHistory.h"
 
@@ -137,7 +137,7 @@ int main( int argc, char** argv )
    collision_detection::AnalyticContactDetection acd;
    kernel::DoubleCast       double_cast;
 
-   kernel::ExplicitEuler explEuler(dt);
+   kernel::SemiImplicitEuler implEuler(dt);
    kernel::VelocityVerletPreForceUpdate  vvPreForce( dt );
    kernel::VelocityVerletPostForceUpdate vvPostForce( dt );
 
@@ -162,7 +162,7 @@ int main( int argc, char** argv )
       auto force = accessor->getForce(0);
 
       if(useVelocityVerlet) vvPostForce(0,*accessor);
-      else explEuler(0, *accessor);
+      else implEuler(0, *accessor);
 
       WALBERLA_LOG_INFO(steps << ": penetration = " << acd.getPenetrationDepth() << " || vel = " << accessor->getLinearVelocity(0)[2] << " || force = " << force[2]);
 

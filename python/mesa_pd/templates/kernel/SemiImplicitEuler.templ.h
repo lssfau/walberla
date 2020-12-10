@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ExplicitEuler.h
+//! \file SemiImplicitEuler.h
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
@@ -34,49 +34,32 @@ namespace mesa_pd {
 namespace kernel {
 
 /**
- * Explicit Euler integration.
- * Uses the 0.5at^2 extension for position integration.
- * Boils down to using v_{t+0.5dt} for position integration.
- * This version exhibits increased stability compared to standard explicit euler.
- *
- * Wachs, A. Particle-scale computational approaches to model dry and saturated granular flows of non-Brownian, non-cohesive, and non-spherical rigid bodies. Acta Mech 230, 1919–1980 (2019). https://doi.org/10.1007/s00707-019-02389-9
+ * Semi-implicit Euler integration for position and velocity.
  *
  * This kernel requires the following particle accessor interface
  * \code
- * const walberla::mesa_pd::Vec3& getPosition(const size_t p_idx) const;
- * void setPosition(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+   {%- for prop in interface %}
+   {%- if 'g' in prop.access %}
+ * const {{prop.type}}& get{{prop.name | capFirst}}(const size_t p_idx) const;
+   {%- endif %}
+   {%- if 's' in prop.access %}
+ * void set{{prop.name | capFirst}}(const size_t p_idx, const {{prop.type}}& v);
+   {%- endif %}
+   {%- if 'r' in prop.access %}
+ * {{prop.type}}& get{{prop.name | capFirst}}Ref(const size_t p_idx);
+   {%- endif %}
  *
- * const walberla::mesa_pd::Vec3& getLinearVelocity(const size_t p_idx) const;
- * void setLinearVelocity(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
- *
- * const walberla::real_t& getInvMass(const size_t p_idx) const;
- *
- * const walberla::mesa_pd::Vec3& getForce(const size_t p_idx) const;
- * void setForce(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
- *
- * const walberla::mesa_pd::data::particle_flags::FlagT& getFlags(const size_t p_idx) const;
- *
- * const walberla::mesa_pd::Rot3& getRotation(const size_t p_idx) const;
- * void setRotation(const size_t p_idx, const walberla::mesa_pd::Rot3& v);
- *
- * const walberla::mesa_pd::Vec3& getAngularVelocity(const size_t p_idx) const;
- * void setAngularVelocity(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
- *
- * const walberla::mesa_pd::Mat3& getInvInertiaBF(const size_t p_idx) const;
- *
- * const walberla::mesa_pd::Vec3& getTorque(const size_t p_idx) const;
- * void setTorque(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
- *
+   {%- endfor %}
  * \endcode
  *
  * \pre  All forces and torques acting on the particles have to be set.
  * \post All forces and torques are reset to 0.
  * \ingroup mesa_pd_kernel
  */
-class ExplicitEuler
+class SemiImplicitEuler
 {
 public:
-   explicit ExplicitEuler(const real_t dt) : dt_(dt) {}
+   explicit SemiImplicitEuler(const real_t dt) : dt_(dt) {}
 
    template <typename Accessor>
    void operator()(const size_t i, Accessor& ac) const;
@@ -85,35 +68,40 @@ private:
 };
 
 template <typename Accessor>
-inline void ExplicitEuler::operator()(const size_t idx,
-                                      Accessor& ac) const
+inline void SemiImplicitEuler::operator()(const size_t idx,
+                                          Accessor& ac) const
 {
    static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
 
    if (!data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::FIXED))
    {
-      ac.setPosition      (idx, 0.5_r * ac.getInvMass(idx) * ac.getForce(idx) * dt_ * dt_ +
-                                ac.getLinearVelocity(idx) * dt_ +
-                                ac.getPosition(idx));
-      ac.setLinearVelocity(idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ +
-                                ac.getLinearVelocity(idx));
+      ac.setLinearVelocity( idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ +
+                                 ac.getLinearVelocity(idx));
+      ac.setPosition      ( idx, ac.getLinearVelocity(idx) * dt_ +
+                                 ac.getPosition(idx));
+
+      {%- if bIntegrateRotation %}
       const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
                                                   ac.getInvInertiaBF(idx)) * ac.getTorque(idx);
 
+      ac.setAngularVelocity(idx, wdot * dt_ +
+                                 ac.getAngularVelocity(idx));
+
       // Calculating the rotation angle
-      const Vec3 phi( 0.5_r * wdot * dt_ * dt_ +
-                      ac.getAngularVelocity(idx) * dt_ );
+      const Vec3 phi( ac.getAngularVelocity(idx) * dt_ );
 
       // Calculating the new orientation
       auto rotation = ac.getRotation(idx);
       rotation.rotate( phi );
       ac.setRotation(idx, rotation);
 
-      ac.setAngularVelocity(idx, wdot * dt_ + ac.getAngularVelocity(idx));
+      {%- endif %}
    }
 
    ac.setForce (idx, Vec3(real_t(0), real_t(0), real_t(0)));
+   {%- if bIntegrateRotation %}
    ac.setTorque(idx, Vec3(real_t(0), real_t(0), real_t(0)));
+   {%- endif %}
 }
 
 } //namespace kernel

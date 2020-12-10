@@ -103,6 +103,7 @@ if __name__ == '__main__':
     mpd.add(kernel.InsertParticleIntoSparseLinkedCells())
     mpd.add(kernel.LinearSpringDashpot())
     mpd.add(kernel.NonLinearSpringDashpot())
+    mpd.add(kernel.SemiImplicitEuler())
     mpd.add(kernel.SingleCast(ps))
     mpd.add(kernel.SpringDashpot())
     mpd.add(kernel.SpringDashpotSpring())
