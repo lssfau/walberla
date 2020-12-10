@@ -120,6 +120,28 @@ void testCube()
    WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(0,0), aabb.volume() * ( aabb.ySize() * aabb.ySize() + aabb.zSize() * aabb.zSize() ) / real_t(12) );
    WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(1,1), aabb.volume() * ( aabb.xSize() * aabb.xSize() + aabb.zSize() * aabb.zSize() ) / real_t(12) );
    WALBERLA_CHECK_FLOAT_EQUAL( inertiaTensor(2,2), aabb.volume() * ( aabb.xSize() * aabb.xSize() + aabb.ySize() * aabb.ySize() ) / real_t(12) );
+
+
+   rotate(mesh, Vector3<Scalar>{0, 0, 1}, static_cast<Scalar>(M_PI_2), Vector3<Scalar>{-4, 0, 0});
+   aabb = computeAABB( mesh );
+
+   WALBERLA_CHECK_FLOAT_EQUAL( aabb.xMin(), Scalar(-5.5) );
+   WALBERLA_CHECK_FLOAT_EQUAL( aabb.yMin(), Scalar(3) );
+   WALBERLA_CHECK_FLOAT_EQUAL( aabb.zMin(), Scalar(-0.25) );
+
+   WALBERLA_CHECK_FLOAT_EQUAL( aabb.xMax(), Scalar(-2.5) );
+   WALBERLA_CHECK_FLOAT_EQUAL( aabb.yMax(), Scalar(5) );
+   WALBERLA_CHECK_FLOAT_EQUAL( aabb.zMax(), Scalar(0.25) );
+
+
+   WALBERLA_CHECK_FLOAT_EQUAL( computeSurfaceArea( mesh ), Scalar(2) * ( aabb.xSize() * aabb.ySize() + aabb.xSize() * aabb.zSize() + aabb.ySize() * aabb.zSize() ) );
+   WALBERLA_CHECK_FLOAT_EQUAL( computeVolume( mesh ),  aabb.volume() );
+   centroid = computeCentroid( mesh );
+   aabbCenter = aabb.center();
+   WALBERLA_CHECK_FLOAT_EQUAL( centroid[0], aabbCenter[0] );
+   WALBERLA_CHECK_FLOAT_EQUAL( centroid[1], aabbCenter[1] );
+   WALBERLA_CHECK_FLOAT_EQUAL( centroid[2], aabbCenter[2] );
+
 }
 
 int main( int argc, char * argv[] )

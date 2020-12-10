@@ -50,6 +50,9 @@ template< typename MeshType >
 void scale( MeshType & mesh, const Vector3< typename MeshType::Scalar > & scaleFactors );
 
 template< typename MeshType >
+void rotate( MeshType& mesh, Vector3<typename  MeshType::Scalar > axis, typename MeshType::Scalar angle, Vector3< typename MeshType::scalar> axis_foot);
+
+template< typename MeshType >
 typename MeshType::Scalar computeVolume( const MeshType & mesh );
 
 template< typename MeshType >
@@ -181,6 +184,21 @@ void scale( MeshType & mesh, const Vector3< typename MeshType::Scalar > & scaleF
       p[2] *= scaleFactors[2];
    }
 }
+
+template< typename MeshType >
+void rotate( MeshType& mesh, Vector3<typename  MeshType::Scalar > axis, typename MeshType::Scalar angle, Vector3< typename MeshType::Scalar> axis_foot)
+{
+    Matrix3< typename MeshType::Scalar > mat(axis, angle);
+
+    for( auto v_it = mesh.vertices_begin(); v_it != mesh.vertices_end(); ++v_it)
+    {
+        auto &p = mesh.point(*v_it);
+        p -= mesh::toOpenMesh(axis_foot);
+        p = mat*p;
+        p += mesh::toOpenMesh(axis_foot);
+    }
+}
+
 
 
 template< typename MeshType >
