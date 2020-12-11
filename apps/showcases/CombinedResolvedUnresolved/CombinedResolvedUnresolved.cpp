@@ -265,10 +265,7 @@ bool selectDPMBodies(pe::BodyID bodyID)
 {
    pe::SphereID sphere = static_cast< pe::SphereID >(bodyID);
    real_t radius       = sphere->getRadius();
-   if (radius <= real_t(0.5))
-      return true;
-   else
-      return false;
+   return radius <= real_t(0.5);
 }
 
 bool selectMEMBodies(pe::BodyID bodyID) { return !selectDPMBodies(bodyID); }

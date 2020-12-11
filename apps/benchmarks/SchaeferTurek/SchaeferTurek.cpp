@@ -1318,9 +1318,9 @@ public:
                     "cD (real area) [5], cL (real area) [6], cD (discrete area) [7], cL (discrete area) [8], "
                     "pressure difference (in lattice units) [9], pressure difference (in Pa) [10], vortex velocity (in lattice units) [11], "
                     "Strouhal number (real D) [12], Strouhal number (discrete D) [13]" << std::endl;
-            if( setup_.evaluatePressure == false )
+            if( !setup_.evaluatePressure )
                file << "# ATTENTION: pressure was not evaluated, pressure difference is set to zero!" << std::endl;
-            if( setup_.evaluateStrouhal == false )
+            if( !setup_.evaluateStrouhal )
                file << "# ATTENTION: vortex velocities were not evaluated, Strouhal number is set to zero!" << std::endl;
             file.close();
          }

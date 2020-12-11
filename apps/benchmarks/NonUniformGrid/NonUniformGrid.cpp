@@ -308,7 +308,7 @@ void createSetupBlockForest( blockforest::SetupBlockForest & sforest, const Conf
    const memory_t memoryLimit = configBlock.getParameter< memory_t >( "memoryLimit", numeric_cast< memory_t >(256) );
 
    sforest.balanceLoad( blockforest::StaticLevelwiseCurveBalance(true), numberOfProcesses, bufferProcesses, memoryLimit, true,
-                        (bufferProcesses != uint_t(0)) ? true : false );
+                        bufferProcesses != uint_t(0) );
 
    WALBERLA_LOG_INFO_ON_ROOT( "SetupBlockForest created successfully:\n" << sforest );
 }

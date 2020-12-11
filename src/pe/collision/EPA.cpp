@@ -350,11 +350,7 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
                      penetrationDepth = -supp_dist + real_t(2.0) * margin;
                      retNormal = -ctr;
                      
-                     if(penetrationDepth < contactThreshold){
-                        return true;
-                     }else{
-                        return false;
-                     }
+                     return penetrationDepth < contactThreshold;
                   } else {
                      //Reject sphere
                      removeSupportMargin(epaVolume, supportA, supportB);
@@ -488,12 +484,7 @@ bool EPA::doEPA( GeomPrimitive &geom1, GeomPrimitive &geom2, const GJK& gjk, Vec
    std::cerr << "entryHeap[0]->getSqrDist()=" << entryHeap[0]->getSqrDist() << std::endl;*/
    //std::cout << "EPA penetration depth: " << penetrationDepth <<  std::endl;
 
-   if(penetrationDepth < contactThreshold) {
-      return true;
-   }
-
-   //no intersection found!
-   return false;
+   return penetrationDepth < contactThreshold;
 }
 //*************************************************************************************************
 
@@ -705,11 +696,7 @@ inline bool EPA::originInTetrahedron( const Vec3& p0, const Vec3& p1, const Vec3
       return false;
    }
    Vec3 normal3T = (p0 -p3) % (p1-p3);
-   if( (normal3T*p3 > real_t(0.0)) == (normal3T*p2 > real_t(0.0)) ) {
-      return false;
-   }
-
-   return true;
+   return (normal3T*p3 > real_t(0.0)) != (normal3T*p2 > real_t(0.0));
 }
 //*************************************************************************************************
 

@@ -31,7 +31,7 @@ namespace walberla {
 namespace pe {
 namespace raytracing {
    
-void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyIntersectionInfo *inout, int *len, MPI_Datatype *dptr) {
+void BodyIntersectionInfo_Comparator_MPI_OP( BodyIntersectionInfo *in, BodyIntersectionInfo *inout, const int *len, MPI_Datatype *dptr) {
    WALBERLA_UNUSED(dptr);
    for (int i = 0; i < *len; ++i) {
       if (in->bodySystemID != 0 && inout->bodySystemID != 0) {

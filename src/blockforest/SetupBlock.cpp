@@ -37,7 +37,7 @@ void SetupBlock::assembleNeighborhood() {
 
    for( uint_t n = 0; n != 26; ++n )
       for( uint_t i = 0; i != neighborhoodSection_[n].size(); ++i )
-         if( neighborhood.insert( neighborhoodSection_[n][i] ).second == true )
+         if( neighborhood.insert( neighborhoodSection_[n][i] ).second )
             neighborhood_.push_back( neighborhoodSection_[n][i] );
 }
 

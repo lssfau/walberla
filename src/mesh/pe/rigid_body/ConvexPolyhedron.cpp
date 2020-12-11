@@ -297,16 +297,17 @@ bool ConvexPolyhedron::containsRelPointImpl( real_t px, real_t py, real_t pz ) c
    if( px * px + py * py + pz * pz > boundingSphereRadius_ * boundingSphereRadius_ )
       return false;
 
-   for(auto fh : mesh_.faces())
-   {
-      const TriangleMesh::Normal & n = mesh_.normal(fh); // Plane normal
-      const TriangleMesh::Point & pp = mesh_.point(mesh_.to_vertex_handle(mesh_.halfedge_handle(fh))); // Point on plane
+   return std::none_of(mesh_.faces().begin(),
+                       mesh_.faces().end(),
+                       [&](auto fh)
+                       {
+                          //check if point is on positive side of the face
+                          const TriangleMesh::Normal &n = mesh_.normal(fh); // Plane normal
+                          const TriangleMesh::Point &pp = mesh_.point(
+                                mesh_.to_vertex_handle(mesh_.halfedge_handle(fh))); // Point on plane
 
-      if( n[0] * (px - pp[0]) + n[1] * (py - pp[1]) + n[2] * (pz - pp[2]) >= real_t(0) )
-         return false;
-   }
-
-   return true;
+                          return (n[0] * (px - pp[0]) + n[1] * (py - pp[1]) + n[2] * (pz - pp[2]) >= real_t(0));
+                       });
 }
 //*************************************************************************************************
 
