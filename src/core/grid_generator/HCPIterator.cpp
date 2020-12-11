@@ -168,14 +168,7 @@ bool HCPIterator::operator==(const HCPIterator &rhs) const
 {
    if (ended_ || rhs.ended_)
    {
-      if (ended_ == rhs.ended_)
-      {
-         return true;
-      }
-      else
-      {
-         return false;
-      }
+      return ended_ == rhs.ended_;
    }
 
 //   WALBERLA_ASSERT_FLOAT_EQUAL(aabb_, rhs.aabb_, "Comparing iterators for different starting configurations!");

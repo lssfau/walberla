@@ -11,6 +11,7 @@ bugprone-*,
 
 misc-*,
 -misc-misplaced-const,
+-misc-no-recursion,
 -misc-non-private-member-variables-in-classes,
 
 modernize-*,
@@ -43,17 +44,21 @@ readability-deleted-default,
 readability-isolate-declaration,
 readability-misleading-indentation,
 readability-misplaced-array-index,
+readability-non-const-parameter,
+readability-redundant-access-specifiers,
 readability-redundant-control-flow,
 readability-redundant-declaration,
 readability-redundant-function-ptr-dereference,
 readability-redundant-preprocessor,
 readability-redundant-smartptr-get,
 readability-redundant-string-cstr,
+readability-simplify-boolean-expr,
 readability-simplify-subscript-expr,
 readability-static-accessed-through-instance,
 readability-static-definition-in-anonymous-namespace,
 readability-string-compare,
-readability-uniqueptr-delete-release
+readability-uniqueptr-delete-release,
+readability-use-anyofallof
 
 '
 WarningsAsErrors: '*'

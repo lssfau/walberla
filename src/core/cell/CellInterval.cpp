@@ -49,13 +49,10 @@ bool CellInterval::overlaps( const CellVector& cellVector ) const
    if( empty() )
       return false;
 
-   for( const Cell & cell : cellVector )
-   {
-      if( this->contains( cell ) )
-         return true;
-   }
-
-   return false;
+   return std::any_of(cellVector.begin(),
+                      cellVector.end(),
+                      [&](const Cell & cell)
+                      {return contains( cell );});
 }
 
 

@@ -458,7 +458,7 @@ void VTKOutput::computeOutputPoints( std::vector<Vector3<real_t> > & points, std
    outputPoint.assign( points.size(), true );
    for( uint_t i = 0; i != points.size(); ++i )
    {
-      bool included = ( aabbInclusionFilters_.empty() ) ? true : false;
+      bool included = aabbInclusionFilters_.empty();
       for( auto aabb = aabbInclusionFilters_.begin(); aabb != aabbInclusionFilters_.end() && !included; ++aabb )
          if( aabb->contains( points[ i ][ 0 ], points[ i ][ 1 ], points[ i ][ 2 ] ) ) included = true;
       if( !included )
@@ -665,7 +665,7 @@ void VTKOutput::computeOutputPolylines( std::vector< std::vector< Vector3< real_
       auto outputPointIt = outputPolylinePointIt->begin();
       for( auto pointIt = polylineIt->begin(); pointIt != polylineIt->end(); ++pointIt, ++outputPointIt )
       {
-         bool included = ( aabbInclusionFilters_.empty() ) ? true : false;
+         bool included = aabbInclusionFilters_.empty();
          for( auto aabb = aabbInclusionFilters_.begin(); aabb != aabbInclusionFilters_.end() && !included; ++aabb )
             if( aabb->contains( ( *pointIt )[ 0 ], ( *pointIt )[ 1 ], ( *pointIt )[ 2 ] ) ) included = true;
          if( !included )

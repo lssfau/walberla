@@ -265,9 +265,7 @@ private:
       {
          const auto d = block.getAABB().sqSignedDistance( forest.getDomain().center() );
          const real_t r = setup_.radius_L + bufferDistance_;
-         if( d > (r * r) )
-            return true;
-         return false;
+         return d > (r * r);
       }
 
       return false;
