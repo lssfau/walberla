@@ -4,34 +4,23 @@ Documentation of waLBerla's Python interface
 Quick Start / Tutorials:
 ------------------------
 
-You can quickly try out waLBerla's Python interface in a hosted IPython notebook without
-having to install anything:
+This is the documentation of waLBerla`s Python coupling.
+It enables to use the core functionality of waLBerla from Python. A primary advantage of
+the Python coupling is that it allows having a view on waLBerla`s data as
+NumPy arrays. With this, it is easily possible to provide pre and postprocessing
+routines using powerful packages from Python. Furthermore, it is possible to set up entire
+simulations just from Python. This feature is primarily used in the code generation framework `pystencils <https://pycodegen.pages.i10git.cs.fau.de/pystencils/>`_
+within its `parallel data handling <https://pycodegen.pages.i10git.cs.fau.de/pystencils/notebooks/03_tutorial_datahandling.html>`_ which entirely builds upon waLBerla`s Python coupling.
+waLBerla`s Python bindings are built with `pybind11 <https://pybind11.readthedocs.io/en/stable/#>`_, a lightweight header-only package which is shipped as a submodule.
+Thus, there is no need to install any additional software.
 
-http://demo.walberla.net
 
-This site contains interactive tutorials, illustrating how to set up a 2D lattice Boltzmann
-simulation with waLBerla.
-
-
-Installation with conda:
+Installation:
 ------------------------
 
-To run waLBerla on your own machine the simplest way to get going is the installation via
-the `conda package manager <http://conda.pydata.org>`_::
+To install waLberla as Python package in your path run the following command in your build folder ::
 
-   conda install --channel lssfau walberla
-
-
-Run in docker:
---------------
-
-Docker is a lightweight virtualization solution. We provide a docker image that
-contains the same environment as hosted on http://demo.walberla.net.
-With this image you can run and develop waLBerla simulations on your own machine without having to manually
-install the dependencies. All you need is a running installation of  `Docker <www.docker.com>`_.
-Run the waLBerla image with the following command and navigate in your browser to http://localhost:8888 ::
-
-   docker run -it -p 8888:8888 walberla/runenv-ubuntu-python
+   make pythonModuleInstall
 
 
 API Documentation:
@@ -44,8 +33,6 @@ API Documentation:
    modules/blockforest
    modules/core
    modules/field
-   modules/geometry
-   modules/lbm
    modules/plot
    modules/tools
    

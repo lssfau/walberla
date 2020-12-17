@@ -20,68 +20,28 @@
 #include "waLBerlaDefinitions.h"
 #ifdef WALBERLA_BUILD_WITH_PYTHON
 
-#include "python_coupling/Manager.h"
+#   include "core/math/Constants.h"
 
-#include "core/math/Constants.h"
+#   include "field/communication/PackInfo.h"
 
-#include "blockforest/python/Exports.h"
-
-#include "field/communication/PackInfo.h"
-#include "field/python/Exports.h"
-
-#include "geometry/python/Exports.h"
-
-#include "postprocessing/python/Exports.h"
-
-#include "timeloop/python/Exports.h"
-
+#   include "python_coupling/Manager.h"
+#   include "python_coupling/export/BlockForestExport.h"
+#   include "python_coupling/export/FieldExports.h"
 
 namespace walberla {
     using flag_t = uint8_t;
     // clang-format off
     void exportDataStructuresToPython() {
 
-        namespace bmpl = boost::mpl;
-
         auto pythonManager = python_coupling::Manager::instance();
 
-        typedef bmpl::vector<
-                Field<walberla::real_t, 1>,
-                Field<walberla::real_t, 3>,
-                Field<walberla::real_t, 9>,
-                Field<walberla::real_t, 19>,
-                Field<walberla::real_t, 27>>
-                FieldTypes;
-
-        typedef bmpl::vector<stencil::D2Q9,
-                stencil::D3Q19,
-                stencil::D3Q27>
-                Stencils;
-
-        typedef bmpl::vector<
-                GhostLayerField<real_t,1>,
-                GhostLayerField<real_t,3>>
-                RealFieldTypes;
-
-        typedef bmpl::vector<
-                FlagField<flag_t>>
-                FlagFieldTypes;
         // Field
-        pythonManager->addExporterFunction(field::exportModuleToPython<FieldTypes>);
-        pythonManager->addExporterFunction(field::exportGatherFunctions<FieldTypes>);
-        pythonManager->addBlockDataConversion<FieldTypes>();
+        pythonManager->addExporterFunction(field::exportModuleToPython<Field<walberla::real_t, 1>, Field<walberla::real_t, 3>, Field<walberla::real_t, 9>, Field<walberla::real_t, 19>, Field<walberla::real_t, 27>>);
+        pythonManager->addExporterFunction(field::exportGatherFunctions<Field<walberla::real_t, 1>, Field<walberla::real_t, 3>, Field<walberla::real_t, 9>, Field<walberla::real_t, 19>, Field<walberla::real_t, 27>>);
+        pythonManager->addBlockDataConversion<Field<walberla::real_t, 1>, Field<walberla::real_t, 3>, Field<walberla::real_t, 9>, Field<walberla::real_t, 19>, Field<walberla::real_t, 27>>();
 
         // Blockforest
-        pythonManager->addExporterFunction(blockforest::exportModuleToPython<Stencils>);
-
-        // Timeloop
-        pythonManager->addExporterFunction(timeloop::exportModuleToPython);
-
-        // Postprocessing
-        pythonManager->addExporterFunction( postprocessing::exportModuleToPython<RealFieldTypes, FlagFieldTypes> );
-
-        // Geometry
-        pythonManager->addExporterFunction( geometry::exportModuleToPython );
+        pythonManager->addExporterFunction(blockforest::exportModuleToPython<stencil::D2Q9, stencil::D3Q19, stencil::D3Q27>);
     }
    // clang-format on
 }

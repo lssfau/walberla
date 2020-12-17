@@ -24,7 +24,6 @@
 #include "blockforest/StructuredBlockForest.h"
 #include "core/mpi/MPIWrapper.h"
 #include "core/mpi/BufferSystem.h"
-#include "core/WeakPtrWrapper.h"
 #include "domain_decomposition/IBlock.h"
 #include "stencil/Directions.h"
 
@@ -45,7 +44,7 @@ namespace communication {
    class UniformGPUScheme
    {
    public:
-       explicit UniformGPUScheme( weak_ptr_wrapper<StructuredBlockForest> bf,
+       explicit UniformGPUScheme( weak_ptr<StructuredBlockForest> bf,
                                   bool sendDirectlyFromGPU = false,
                                   const int tag = 5432 );
 
@@ -60,7 +59,7 @@ namespace communication {
    private:
        void setupCommunication();
 
-       weak_ptr_wrapper<StructuredBlockForest> blockForest_;
+       weak_ptr<StructuredBlockForest> blockForest_;
        uint_t forestModificationStamp_;
 
        bool setupBeforeNextCommunication_;

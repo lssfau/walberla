@@ -30,7 +30,7 @@ template<typename StencilType, typename GPUFieldType >
 class UniformGridGPU_Communication
 {
 public:
-    explicit UniformGridGPU_Communication(weak_ptr_wrapper<StructuredBlockForest> bf, const BlockDataID & bdId,
+    explicit UniformGridGPU_Communication(weak_ptr<StructuredBlockForest> bf, const BlockDataID & bdId,
                                           CommunicationSchemeType commSchemeType, bool cudaEnabledMPI = false)
         : _commSchemeType(commSchemeType), _cpuCommunicationScheme(nullptr), _gpuPackInfo(nullptr),
           _gpuCommunicationScheme(nullptr), _directScheme(nullptr)

@@ -25,8 +25,6 @@
 #include "field/communication/PackInfo.h"
 #include "field/vtk/VTKWriter.h"
 
-#include "python_coupling/DictWrapper.h"
-
 namespace walberla
 {
 using PhaseField_T = GhostLayerField< real_t, 1 >;

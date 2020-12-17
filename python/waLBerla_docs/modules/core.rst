@@ -27,11 +27,6 @@ Block Structure
 
       Creates a CellInterval from a given Python slice e.g. ``CellInterval.fromSlice( makeSlice[0:2,0:1,0:4] )``
 
-   .. py:method:: __init__( minCell, maxCell )   
-
-      Construct a cell interval given the minimum and maximum coordinate (cell). 
-      The maxCell itself is included in the interval.
-   
    .. py:method:: __init__( xMin, yMin, zMin, xMax, yMax, zMax )
       
       Constructs a cell interval using 6 integers corresponding to begin and end of the 
@@ -186,13 +181,10 @@ Block Structure
   
   
 
-.. py:class:: StructuredBlockStorage
+.. py:class:: StructuredBlockForest
    
-   StructuredBlockStorage represents a collection of blocks. It is an abstract class 
-   and can not be created directly. A concrete implementation like the blockforest can 
-   instantiate a StructuredBlockStorage. See blockforest.createUniformBlockGrid.
-   
-   
+   StructuredBlockForest represents a collection of blocks. It can be created using the createUniformBlockGrid method.
+
    .. py:method:: getNumberOfLevels()
    .. py:method:: getDomain()
    
@@ -201,8 +193,7 @@ Block Structure
    .. py:method:: mapToPeriodicDomain( x,y,z )
    .. py:method:: mapToPeriodicDomain( point )
    .. py:method:: mapToPeriodicDomain( cell, level=0 )
-   
-   
+
    .. py:method:: getBlock( x,y,z )
    .. py:method:: containsGlobalBlockInformation( )
    .. py:method:: blocksOverlappedByAABB( point, aabb )

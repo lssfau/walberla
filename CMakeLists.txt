@@ -75,8 +75,6 @@ option ( WALBERLA_BUILD_WITH_GCOV           "Enables gcov"                      
 option ( WALBERLA_BUILD_WITH_LTO            "Enable link time optimizations"                     )
 option ( WALBERLA_BUILD_WITH_OPENMP         "Enable OpenMP support"                              )
 option ( WALBERLA_BUILD_WITH_PYTHON         "Support for embedding Python"                       )
-option ( WALBERLA_BUILD_WITH_PYTHON_MODULE  "Build waLBerla python module"                       )
-option ( WALBERLA_BUILD_WITH_PYTHON_LBM     "Include LBM module into python module"          OFF )
 option ( WALBERLA_BUILD_WITH_CODEGEN        "Enable pystencils code generation"              OFF )
 
 
@@ -99,6 +97,8 @@ option ( WALBERLA_PROFILE_USE               "Uses Profile to optimize"          
 option ( WALBERLA_OPTIMIZE_FOR_LOCALHOST    "Enable compiler optimizations spcific to localhost" )
 
 option ( WALBERLA_LOG_SKIPPED               "Log skipped cmake targets"                      ON  )
+
+option ( WALBERLA_GIT_SUBMODULE_AUTO        "Check submodules during cmake run"               ON )
 
 # Installation Directory
 set ( CMAKE_INSTALL_PREFIX /usr/local/waLBerla CACHE STRING "The default installation directory."   )
@@ -315,7 +315,6 @@ if( WALBERLA_CXX_COMPILER_IS_IBM )
    add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1586-267" )  # 1586-267 (I) Inlining of specified subprogram failed due to the presence of a C++ exception handler
    add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1586-266" )  # 1586-266 (I) Inlining of specified subprogram failed due to the presence of a global label
    add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1540-0724" ) # 1540-0724 (W) The non-type template argument "2147483648" of type "T" has wrapped [coming from boost/integer_traits.hpp]
-   add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1540-0095" ) # 1540-0095 (W) The friend function declaration ... [coming from boost/mpl/map/aux_/map0.hpp]
    add_flag ( CMAKE_CXX_FLAGS "-qsuppress=1500-030" )  # 1500-030: (I) INFORMATION: [...] Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
    add_flag ( CMAKE_C_FLAGS "-qsuppress=1500-030" )    # 1500-030: (I) INFORMATION: [...] Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
 endif()
@@ -587,52 +586,55 @@ endif()
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_PYTHON )
 
-    set ( waLBerla_REQUIRED_MIN_PYTHON_VERSION "2.7")
-
-    find_package( PythonInterp 3 QUIET) # search for Python3 first
-    find_package( PythonInterp QUIET) # fallback to any Python version
-
+    find_package( PythonInterp 3.6 QUIET REQUIRED)
     find_package( PythonLibs QUIET REQUIRED)
-
-    if( PYTHONLIBS_VERSION_STRING VERSION_LESS ${waLBerla_REQUIRED_MIN_PYTHON_VERSION} )
-        message( FATAL_ERROR "Found old python library: ${PYTHONLIBS_VERSION_STRING} need at least ${waLBerla_REQUIRED_MIN_PYTHON_VERSION}" )
-    endif()
-
-    option( WALBERLA_USE_PYTHON_DEBUG_LIBRARY "Make use of the python debug library" OFF )
-
-    if( WALBERLA_USE_PYTHON_DEBUG_LIBRARY )
-      # you have to make sure this matches the settings you compiled boost with!
-      add_definitions( "-DBOOST_DEBUG_PYTHON" )
-    endif()
 
     if( NOT (PYTHON_LIBRARY AND PYTHON_INCLUDE_DIR ) )
         message( FATAL_ERROR "Couldn't find any python library" )
     endif()
 
-    SET( WALBERLA_BUILD_WITH_PYTHON 1 )
-    include_directories( ${PYTHON_INCLUDE_DIR} )
-    list ( APPEND SERVICE_LIBS ${PYTHON_LIBRARY} )
-
-    if( NOT WALBERLA_CXX_COMPILER_IS_MSVC )
-        list ( APPEND SERVICE_LIBS -lutil )
-    endif()
-
-    if ( WALBERLA_BUILD_WITH_PYTHON_MODULE )
-        # a python module is a shared library - so everything has to be compiled to position independent code
-        # otherwise linking the static libs into the shared lib will result in errors
-        if( NOT WALBERLA_CXX_COMPILER_IS_MSVC )
-            add_flag ( CMAKE_CXX_FLAGS "-fPIC" )
-            add_flag ( CMAKE_C_FLAGS "-fPIC" )
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import pybind11; print(pybind11._version.__version__)"
+                    OUTPUT_VARIABLE pybind11_VERSION ERROR_QUIET RESULT_VARIABLE pybind11_VERSION_RESULT)
+    string(STRIP "${pybind11_VERSION}" pybind11_VERSION)
+    if(pybind11_VERSION_RESULT EQUAL "0" AND pybind11_VERSION VERSION_GREATER_EQUAL "2.6.0")
+        execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pybind11 --cmakedir
+                        OUTPUT_VARIABLE PYBIND11_CMAKE_PATH)
+        string(STRIP "${PYBIND11_CMAKE_PATH}" PYBIND11_CMAKE_PATH)
+        find_package(pybind11 PATHS "${PYBIND11_CMAKE_PATH}" NO_DEFAULT_PATH REQUIRED)
+    else()
+        find_package(Git QUIET)
+        if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+           # Update submodules as needed
+           if(WALBERLA_GIT_SUBMODULE_AUTO)
+              message(STATUS "Submodule update")
+              execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    RESULT_VARIABLE GIT_SUBMOD_RESULT)
+              if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+                 message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+              endif()
+           endif()
         endif()
+
+        if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/pybind11/CMakeLists.txt")
+            if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
+                message(FATAL_ERROR "Please update git submodules or install pybind11 via pip.")
+            else()
+                message(FATAL_ERROR "Please install pybind11 via pip or download it to ${PROJECT_SOURCE_DIR}/extern/pybind11.")
+            endif()
+        endif()
+
+        add_subdirectory(extern/pybind11)
+
+        # if pybind11 was installed into ${PYTHON_INCLUDE_DIR} (e.g. by pip), that will have a higher priority than the Git submodule unless we reorder the search path
+        # introduced in 2.6.0 (https://github.com/pybind/pybind11/issues/2709), fixed in 2.6.2 (https://github.com/pybind/pybind11/pull/2716)
+        set_property( TARGET pybind11::pybind11
+                      PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/extern/pybind11/include" "${PYTHON_INCLUDE_DIR}")
     endif()
 
-    if( MSVC10 )
-        include(CMakeDependentOption)
-        CMAKE_DEPENDENT_OPTION( PYTHON_FIXED_HYPOT_REDEFINITION "fixed _hypot redefinition by python" OFF "WALBERLA_BUILD_WITH_PYTHON" OFF )
-        if( NOT PYTHON_FIXED_HYPOT_REDEFINITION )
-            message( WARNING "Make sure you modified your pyconfig.h that _hypot is not redefined -> see: http://connect.microsoft.com/VisualStudio/feedback/details/633988/warning-in-math-h-line-162-re-nonstandard-extensions-used" )
-        endif()
-    endif()
+    # a python module is a shared library - so everything has to be compiled to position independent code
+    # otherwise linking the static libs into the shared lib will result in errors
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
     if(WALBERLA_BUILD_DOC)
@@ -657,16 +659,6 @@ if ( NOT WALBERLA_USE_STD_FILESYSTEM AND NOT WALBERLA_USE_STD_EXPERIMENTAL_FILES
   list ( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS filesystem system )
 else()
   list ( APPEND waLBerla_OPTIONAL_BOOST_COMPONENTS system )
-endif()
-
-if ( WALBERLA_BUILD_WITH_PYTHON )
-  if( WALBERLA_CXX_COMPILER_IS_MSVC )
-    get_filename_component(PYTHON_REQUIRED_LIB ${PYTHON_LIBRARY} NAME_WE)
-    list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS ${PYTHON_REQUIRED_LIB} )
-  elseif( WALBERLA_USE_STD_FILESYSTEM OR WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM )
-    list( APPEND waLBerla_REQUIRED_BOOST_COMPONENTS system )
-    list( REMOVE_ITEM waLBerla_OPTIONAL_BOOST_COMPONENTS system )
-  endif()
 endif()
 
 # This variable is necessary, if the CMAKE version used is not aware of a more recent boost version (keep this up to date!)
@@ -727,18 +719,6 @@ if ( Boost_FOUND )
    endif()
    add_definitions ( -DBOOST_ALL_NO_LIB ) # Disable Boost auto-linking (CMAKE does that for us...)
 
-   #fix for static lib usage: http://stackoverflow.com/questions/11812463/boost-python-link-errors-under-windows-msvc10
-   if( PYTHONLIBS_FOUND AND Boost_USE_STATIC_LIBS)
-      add_definitions( -DBOOST_PYTHON_STATIC_LIB )
-   endif()
-
-   #fix for strange link behaviour of boost to python: boost only links to 'pyhton*.lib' and not to the absolute path
-   if( WIN32 AND PYTHONLIBS_FOUND )
-      get_filename_component( PYTHON_LIBRARY_DIR ${PYTHON_INCLUDE_DIR} PATH )
-      link_directories( ${PYTHON_LIBRARY_DIR}/libs )
-      list( APPEND LINK_DIRS ${PYTHON_LIBRARY_DIR}/libs )
-   endif()
-
    set( WALBERLA_BUILD_WITH_BOOST TRUE CACHE INTERNAL "Build with Boost" )
 else( Boost_FOUND )
    if( (WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM OR WALBERLA_USE_STD_FILESYSTEM) AND (WALBERLA_USE_STD_EXPERIMENTAL_ANY OR WALBERLA_USE_STD_ANY) AND (WALBERLA_USE_STD_EXPERIMENTAL_OPTIONAL OR WALBERLA_USE_STD_OPTIONAL) AND NOT WALBERLA_BUILD_WITH_PYTHON)
@@ -752,31 +732,6 @@ else( Boost_FOUND )
       endif()
    endif()
 endif( Boost_FOUND )
-
-
-# Check if Python3 found and look for according boost python library
-if ( WALBERLA_BUILD_WITH_PYTHON AND NOT WALBERLA_CXX_COMPILER_IS_MSVC)
-    SET(_boost_MULTITHREADED "")
-    if (Boost_USE_MULTITHREADED OR Boost_USE_MULTITHREADED_LIBRARY)
-        SET(_boost_MULTITHREADED "-mt")
-    endif()
-    if( PYTHON_LIBRARY MATCHES "python3" )
-        string(REPLACE "." ";" VERSION_LIST ${PYTHONLIBS_VERSION_STRING})
-        list(GET VERSION_LIST 0 PY_VER_MAJOR)
-        list(GET VERSION_LIST 1 PY_VER_MINOR)
-        find_library( BOOST_PYTHON_LIBRARY NAMES
-                boost_python${PY_VER_MAJOR}${PY_VER_MINOR}${_boost_MULTITHREADED}
-                boost_python-py${PY_VER_MAJOR}${PY_VER_MINOR}${_boost_MULTITHREADED}
-                boost_python${PY_VER_MAJOR}${_boost_MULTITHREADED}
-                boost_python${_boost_MULTITHREADED}
-                PATHS ${Boost_LIBRARY_DIRS} NO_DEFAULT_PATH )
-    else()
-        find_library( BOOST_PYTHON_LIBRARY NAMES boost_python${_boost_MULTITHREADED}
-                      PATHS ${Boost_LIBRARY_DIRS} NO_DEFAULT_PATH )
-    endif()
-    message(STATUS "Using Boost Python Library ${BOOST_PYTHON_LIBRARY}" )
-    list ( APPEND SERVICE_LIBS ${BOOST_PYTHON_LIBRARY} )
-endif()
 
 
 ############################################################################################################################

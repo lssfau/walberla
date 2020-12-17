@@ -5,9 +5,9 @@ class UnitConversionTest(unittest.TestCase):
 
     def testExtractLatticeFactors(self):
         try:
-            import pint  # noqa: F401
+            import pint, sympy  # noqa: F401
         except ImportError:
-            print("Skipping unit conversion test since pint module not available")
+            print("Skipping unit conversion test since pint or sympy module not available")
             return
 
         from waLBerla.tools.lbm_unitconversion import extractLatticeFactors, computeLatticeFactors
@@ -28,9 +28,9 @@ class UnitConversionTest(unittest.TestCase):
 
     def testUnitConverter(self):
         try:
-            import pint  # noqa: F401
+            import pint, sympy  # noqa: F401
         except ImportError:
-            print("Skipping unit conversion test since pint module not available")
+            print("Skipping unit conversion test since pint or sympy module not available")
             return
 
         from waLBerla.tools.lbm_unitconversion import PintUnitConverter

@@ -77,8 +77,8 @@ class Scenario:
         }
 
     @wlb.member_callback
-    def at_end_of_time_step(self, blocks, time_loop):
-        t = time_loop.getCurrentTimeStep()
+    def at_end_of_time_step(self, blocks, **kwargs):
+        t = kwargs['timeStep']
         ny = self.size[1]
         l0 = self.size[0]
         if t % self.dbWriteFrequency == 0:
@@ -88,22 +88,22 @@ class Scenario:
             mass = -100
             spike_data = wlb.field.gather(blocks, 'phase', makeSlice[self.size[0] // 2, :, self.size[2] // 2])
             if spike_data:
-                spike_field = np.asarray(spike_data.buffer()).squeeze()
+                spike_field = np.asarray(spike_data).squeeze()
                 location_of_spike = (np.argmax(spike_field > 0.5) - ny // 2) / l0
 
             bubble_data = wlb.field.gather(blocks, 'phase', makeSlice[0, :, 0])
             if bubble_data:
-                bubble_field = np.asarray(bubble_data.buffer()).squeeze()
+                bubble_field = np.asarray(bubble_data).squeeze()
                 location_of_bubble = (np.argmax(bubble_field > 0.5) - ny // 2) / l0
 
             saddle_data = wlb.field.gather(blocks, 'phase', makeSlice[0, :, self.size[2] // 2])
             if saddle_data:
-                saddle_field = np.asarray(saddle_data.buffer()).squeeze()
+                saddle_field = np.asarray(saddle_data).squeeze()
                 location_of_saddle = (np.argmax(saddle_field > 0.5) - ny // 2) / l0
 
             phase = wlb.field.gather(blocks, 'phase', makeSlice[:, :, :])
             if phase:
-                phase_field = np.asarray(phase.buffer()).squeeze()
+                phase_field = np.asarray(phase).squeeze()
                 mass = np.sum(phase_field)
 
             self.write_result_to_database(t, location_of_spike, location_of_bubble, location_of_saddle, mass)

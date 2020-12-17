@@ -16,6 +16,7 @@
 //! \file ConfigFromDict.cpp
 //! \ingroup python_coupling
 //! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Markus Holzer <markus.holzer@fau.de>
 //
 //======================================================================================================================
 
@@ -37,59 +38,55 @@ void handlePythonBooleans( std::string & value) {
    if ( value=="False") value="0";
 }
 
-void configFromPythonDict( config::Config::Block & block, boost::python::dict & pythonDict )
+namespace py = pybind11;
+
+void configFromPythonDict( config::Config::Block & block, py::dict & pythonDict )
 {
-   using namespace boost::python;
-
-   boost::python::list keys = pythonDict.keys();
-   keys.sort();
-
-   for (int i = 0; i < boost::python::len( keys ); ++i)
+   for (auto item : pythonDict)
    {
-      // Extract key
-      boost::python::extract<std::string> extracted_key( keys[i] );
-      if( !extracted_key.check() ) {
+      // py::print(item);
+      if( py::isinstance<std::string>(item.first) ) {
          WALBERLA_LOG_WARNING( "Detected non-string key in waLBerla configuration" );
          continue;
       }
-      std::string key = extracted_key;
 
-      // Extract value
-      extract<std::string>  extracted_str_val   ( pythonDict[key] );
-      extract<dict>         extracted_dict_val  ( pythonDict[key] );
-      extract<list>         extracted_list_val  ( pythonDict[key] );
-      extract<tuple>        extracted_tuple_val ( pythonDict[key] );
+      std::string key = py::str(item.first);
 
       try
       {
-         if( extracted_str_val.check() ){
-            std::string value = extracted_str_val;
+         if( py::isinstance<std::string>(item.second) ){
+            std::string value = py::str(item.second);
             handlePythonBooleans( value );
             block.addParameter( key, value );
          }
-         else if ( extracted_dict_val.check() )
+         else if ( py::isinstance<py::dict>(item.second) )
          {
             walberla::config::Config::Block & childBlock = block.createBlock( key );
-            dict childDict = extracted_dict_val;
-            configFromPythonDict( childBlock, childDict );
+            py::dict childDict = py::dict(pythonDict[key.c_str()]);
+            configFromPythonDict( childBlock, childDict);
          }
-         else if ( extracted_list_val.check() )
+         else if ( py::isinstance<py::list>(item.second) )
          {
-            list childList = extracted_list_val;
-            for( int l=0; l < len( childList ); ++l ) {
+            py::list childList = py::list(pythonDict[key.c_str()]);
+            for(py::size_t i = 0; i < childList.size(); ++i){
                walberla::config::Config::Block & childBlock = block.createBlock( key );
-               dict d = extract<dict>( childList[l] );
+               py::dict d = py::dict(childList[i]);
                configFromPythonDict( childBlock, d );
             }
          }
-         else if (  extracted_tuple_val.check() )
+         else if (  py::isinstance<py::tuple>(item.second) )
          {
             std::stringstream ss;
-            tuple childTuple = extracted_tuple_val;
+            py::tuple childTuple = py::tuple(pythonDict[key.c_str()]);
+
+            WALBERLA_ASSERT(len(childTuple) == 2 || len(childTuple) == 3,
+                            "Config problem: " << key << ": Python tuples are mapped to walberla::Vector2 or Vector3. \n" <<
+                               "So only tuples of size 2 or 3 are supported! Option " << key << "  is ignored ")
+
             if ( len(childTuple) == 2 )
             {
-               std::string e0 = extract<std::string>( childTuple[0].attr("__str__" )() );
-               std::string e1 = extract<std::string>( childTuple[1].attr("__str__" )() );
+               std::string e0 = py::str( childTuple[0].attr("__str__" )() );
+               std::string e1 = py::str( childTuple[1].attr("__str__" )() );
                handlePythonBooleans( e0 );
                handlePythonBooleans( e1 );
                ss << "< " << e0 << " , " << e1 << " > ";
@@ -97,40 +94,32 @@ void configFromPythonDict( config::Config::Block & block, boost::python::dict & 
             }
             else if ( len(childTuple) == 3)
             {
-               std::string e0 = extract<std::string>( childTuple[0].attr("__str__" )() );
-               std::string e1 = extract<std::string>( childTuple[1].attr("__str__" )() );
-               std::string e2 = extract<std::string>( childTuple[2].attr("__str__" )() );
+               std::string e0 = py::str( childTuple[0].attr("__str__" )() );
+               std::string e1 = py::str( childTuple[1].attr("__str__" )() );
+               std::string e2 = py::str( childTuple[2].attr("__str__" )() );
                handlePythonBooleans( e0 );
                handlePythonBooleans( e1 );
                handlePythonBooleans( e2 );
-               ss << "< " << e0 << " , " << e1 << ", " << e2 << " > ";
+               ss << "< " << e0 << ", " << e1 << ", " << e2 << " > ";
                block.addParameter( key, ss.str() );
-            }
-            else
-            {
-               WALBERLA_LOG_WARNING( "Config problem: " << key << ": Python tuples are mapped to walberla::Vector2 or Vector3. \n" <<
-                                     "So only tuples of size 2 or 3 are supported! Option " << key << "  is ignored ");
-
             }
          }
          else
          {
             // if value is not a string try to convert it
-            std::string value = extract<std::string>( pythonDict[key].attr("__str__" )() );
+            std::string value = py::str( pythonDict[key.c_str()].attr("__str__" )() );
             block.addParameter ( key, value );
          }
       }
-      catch ( error_already_set & ) {
+      catch ( py::error_already_set & ) {
          WALBERLA_LOG_WARNING ( "Error when reading configuration option " << key << ". Could not be converted to string.");
       }
    }
 }
 
 
-shared_ptr<Config> configFromPythonDict( boost::python::dict & pythonDict )
+shared_ptr<Config> configFromPythonDict( py::dict & pythonDict )
 {
-   using namespace boost::python;
-
    shared_ptr<Config> config = make_shared<Config>();
    configFromPythonDict( config->getWritableGlobalBlock(), pythonDict );
    return config;

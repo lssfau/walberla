@@ -28,12 +28,12 @@ def mergeSqliteFiles(targetFile, fileToMerge):
     db = sqlite3.connect(targetFile)
     db.execute('ATTACH "' + fileToMerge + '" AS toMerge')
 
-    targetColumns = getColumnNames(db, "runs", "main")
-    toMergeColumns = getColumnNames(db, "runs", "toMerge")
+    target_columns = getColumnNames(db, "runs", "main")
+    to_merge_columns = getColumnNames(db, "runs", "toMerge")
 
-    columnsToCreate = [e for e in toMergeColumns if e not in targetColumns]
+    columns_to_create = [e for e in to_merge_columns if e not in target_columns]
 
-    for column in columnsToCreate:
+    for column in columns_to_create:
         print("Adding Column {} to run table of {} ".format(column[0], targetFile))
         db.execute("ALTER TABLE main.runs ADD COLUMN %s %s" % (column[0], column[1]))
 
@@ -41,12 +41,12 @@ def mergeSqliteFiles(targetFile, fileToMerge):
     # check if an entry with same date exists, if not add the run and the timing pool entries
     # to the targetTable
     c = db.cursor()
-    assert (toMergeColumns[0][0] == "runId")
-    columns = [e[0] for e in toMergeColumns]
-    columnString = ",".join(columns)
-    columnStringNoRunId = ",".join(columns[1:])
+    assert (to_merge_columns[0][0] == "runId")
+    columns = [e[0] for e in to_merge_columns]
+    column_string = ",".join(columns)
+    column_string_no_run_id = ",".join(columns[1:])
 
-    query = 'SELECT {} FROM toMerge.runs WHERE timestamp || " " || uuid NOT IN '.format(columnString, )
+    query = 'SELECT {} FROM toMerge.runs WHERE timestamp || " " || uuid NOT IN '.format(column_string, )
     query += '( SELECT timestamp || " " || uuid FROM main.runs )'
 
     # associated tables are tables that reference the runs table, having a first column of 'runId' which is a
@@ -80,7 +80,7 @@ def mergeSqliteFiles(targetFile, fileToMerge):
         # Build up insert statement for 'runs' table
         questionMarkList = ['?'] * (len(run) - 1)
         questionMarkString = ",".join(questionMarkList)
-        insertStatement = "INSERT INTO main.runs (%s) VALUES (%s);" % (columnStringNoRunId, questionMarkString)
+        insertStatement = "INSERT INTO main.runs (%s) VALUES (%s);" % (column_string_no_run_id, questionMarkString)
         # Execute the insert
         insertCursor = db.cursor()
         insertCursor.execute(insertStatement, run[1:])

@@ -34,7 +34,6 @@
 #include "pde/all.h"
 #include "pe_coupling/all.h"
 #include "postprocessing/all.h"
-#include "python_coupling/all.h"
 #include "stencil/all.h"
 #include "timeloop/all.h"
 #include "vtk/all.h"

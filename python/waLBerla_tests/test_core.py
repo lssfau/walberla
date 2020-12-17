@@ -6,7 +6,7 @@ class CoreTest(unittest.TestCase):
 
     def test_CellInterval(self):
         ci1 = wlb.CellInterval(0, 0, 0, 5, 5, 5)
-        ci2 = wlb.CellInterval([0] * 3, [5] * 3)
+        ci2 = wlb.CellInterval(0, 0, 0, 5, 5, 5)
         self.assertEqual(ci1, ci2, "Equality comparison of CellIntervals failed.")
         self.assertFalse(ci1 != ci2, "Inequality check for CellIntervals wrong ")
 
@@ -23,7 +23,7 @@ class CoreTest(unittest.TestCase):
 
     def test_AABB(self):
         aabb1 = wlb.AABB(0, 0, 0, 5, 5, 5)
-        aabb2 = wlb.AABB([0] * 3, [5] * 3)
+        aabb2 = wlb.AABB(0, 0, 0, 5, 5, 5)
         self.assertEqual(aabb1, aabb2)
 
 

@@ -13,33 +13,30 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file CallbackTest.h
-//! \author Martin Bauer <martin.bauer@fau.de>
-//
+//! \file CallbackTest.cpp
+//! \author Markus Holzer <markus.holzer@fau.de>
+//!
 //======================================================================================================================
 
-#include "python_coupling/PythonWrapper.h"
+#include "blockforest/Initialization.h"
 
-#include "core/debug/TestSubsystem.h"
 #include "core/Environment.h"
+#include "core/debug/TestSubsystem.h"
 
 #include "field/Field.h"
-#include "field/python/Exports.h"
-#include "blockforest/Initialization.h"
-#include "blockforest/python/Exports.h"
-#include "python_coupling/PythonCallback.h"
-#include "python_coupling/Shell.h"
+
 #include "python_coupling/DictWrapper.h"
 #include "python_coupling/Manager.h"
+#include "python_coupling/PythonCallback.h"
+#include "python_coupling/export/FieldExports.h"
 
 using namespace walberla;
 
 
 int main( int argc, char ** argv )
 {
-   typedef boost::mpl::vector< Field<int,1> > Fields;
    auto pythonManager = python_coupling::Manager::instance();
-   pythonManager->addExporterFunction( field::exportModuleToPython<Fields> );
+   pythonManager->addExporterFunction( field::exportModuleToPython<Field<int,1>> );
 
    if ( argc != 2 ) {
       WALBERLA_ABORT_NO_DEBUG_INFO("Wrong parameter count: \nUsage: \n ./CallbackTest CallbackTest.py");

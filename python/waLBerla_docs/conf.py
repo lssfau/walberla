@@ -25,7 +25,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = 'waLBerla'
-copyright = '2016, LSS waLBerla Team'
+copyright = '2020, LSS waLBerla Team'
 
 version = ''
 release = ''
@@ -36,7 +36,7 @@ pygments_style = 'sphinx'
 htmlhelp_basename = 'waLBerladoc'
 
 
-intersphinx_mapping = {'python': ('http://docs.python.org/3.5', None),
+intersphinx_mapping = {'python': ('http://docs.python.org/3.8', None),
                        'numpy': ('http://docs.scipy.org/doc/numpy/', None),
                        'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
                        'matplotlib': ('http://matplotlib.sourceforge.net/', None)}

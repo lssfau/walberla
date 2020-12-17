@@ -16,13 +16,17 @@
 //! \file DictWrapper.impl.h
 //! \ingroup python_coupling
 //! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Markus Holzer <markus.holzer@fau.de>
 //
 //======================================================================================================================
 
 #include <functional>
+#include <pybind11/pybind11.h>
 
 namespace walberla {
 namespace python_coupling {
+
+namespace py = pybind11;
 
 
 //===================================================================================================================
@@ -33,17 +37,17 @@ namespace python_coupling {
 
 
 template<typename T>
-void DictWrapper::exposePtr( const std::string & name, T * var ) {
-   this->d_[name] =  boost::python::ptr( var );
+void DictWrapper::exposePtr(const char* name, T * var ) {
+   this->d_[name] = var;
 }
 
 template<typename T>
-void DictWrapper::exposePtr( const std::string & name, const shared_ptr<T> & var ) {
-   this->d_[name] =  boost::python::ptr( var.get() );
+void DictWrapper::exposePtr(const char* name, const shared_ptr<T> & var ) {
+   this->d_[name] = var.get();
 }
 
 template<typename T>
-void DictWrapper::exposeValue( const std::string & name, const T & var ) {
+void DictWrapper::exposeValue( const char* name, const T & var ) {
    this->d_[name] = var;
 }
 
@@ -57,21 +61,21 @@ void DictWrapper::exposeValue( const std::string & name, const T & var ) {
 
 
 template<typename T>
-T DictWrapper::get( const std::string & name ) {
-   return boost::python::extract<T>( d_[name] );
+T DictWrapper::get( const char* name ) {
+   return py::cast<T>( d_[name] );
 }
 
 template<typename T>
-bool DictWrapper::has( const std::string & name )
+bool DictWrapper::has( const char* name )
 {
-   if(! d_.has_key(name) )
+   if(! d_.contains(name) )
       return false;
 
-   return boost::python::extract<T>( d_[name]).check();
+   return py::class_<T>( d_[name]).check();
 }
 
 template<typename T>
-bool DictWrapper::checkedGet( const std::string & name, T output )
+bool DictWrapper::checkedGet( const char* name, T output )
 {
    if ( ! has<T>(name) )
       return false;
@@ -85,20 +89,20 @@ bool DictWrapper::checkedGet( const std::string & name, T output )
 
 
 template<>
-inline DictWrapper DictWrapper::get( const std::string & name ) {
-   auto dictCopy =  boost::python::extract< boost::python::dict >( d_[name] );
+inline DictWrapper DictWrapper::get( const char* name ) {
+   auto dictCopy =  py::dict( d_[name] );
    DictWrapper result;
    result.dict() = dictCopy;
    return result;
 }
 
 template<>
-inline bool DictWrapper::has<DictWrapper >( const std::string & name )
+inline bool DictWrapper::has<DictWrapper >( const char* name )
 {
-   if(! d_.has_key(name) )
+   if(! d_.contains(name) )
       return false;
 
-   return boost::python::extract< boost::python::dict >( d_[name]).check();
+   return py::isinstance<py::dict>(d_[name]);
 }
 
 
@@ -109,22 +113,22 @@ inline bool DictWrapper::has<DictWrapper >( const std::string & name )
 //===================================================================================================================
 
 // void()
-inline void runPythonObject( boost::python::object obj ) {
+inline void runPythonObject( py::object obj ) {
    obj();
 }
 template<>
-inline std::function<void()> DictWrapper::get( const std::string & name ) {
-   boost::python::object obj ( d_[name] );
+inline std::function<void()> DictWrapper::get( const char* name ) {
+   py::object obj ( d_[name] );
    return std::bind( &runPythonObject, obj );
 }
 
 template<>
-inline bool DictWrapper::has<std::function<void()> >( const std::string & name )
+inline bool DictWrapper::has<std::function<void()> >( const char* name )
 {
-   if(! d_.has_key(name) )
+   if(! d_.contains(name) )
       return false;
 
-   return PyCallable_Check( boost::python::object(d_[name]).ptr() ) != 0;
+   return PyCallable_Check( py::object(d_[name]).ptr() ) != 0;
 }
 
 

@@ -27,8 +27,6 @@ class Scenario:
         self.scenario = 1  # 1 rising bubble, 2 RTI
         self.config_dict = self.config()
 
-        self.csv_file = "benchmark.csv"
-
     @wlb.member_callback
     def config(self):
         return {

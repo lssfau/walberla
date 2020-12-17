@@ -9,9 +9,9 @@ def someCallback(input1, input2):
 
 @waLBerla.callback("cb2")
 def fieldCallback(field):
-    npArray = waLBerla.field.toArray(field)
-    npArray[0, 0, 0] = 42
+    numpy_array = waLBerla.field.toArray(field)
+    numpy_array[0, 0, 0] = 42
 
-    npArrayGl = waLBerla.field.toArray(field, withGhostLayers=True)
-    print(npArrayGl.shape)
-    npArrayGl[0, 0, 0] = 5
+    numpy_array_with_gl = waLBerla.field.toArray(field, with_ghost_layers=True)
+    print(numpy_array_with_gl.shape)
+    numpy_array_with_gl[0, 0, 0] = 5

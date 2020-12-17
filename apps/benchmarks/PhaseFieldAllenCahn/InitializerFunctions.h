@@ -18,15 +18,12 @@
 //
 //======================================================================================================================
 
-#include "core/Environment.h"
-#include "core/logging/Initialization.h"
 #include "core/math/Constants.h"
 
 #include "field/FlagField.h"
 #include "field/communication/PackInfo.h"
 #include "field/vtk/VTKWriter.h"
 
-#include "python_coupling/DictWrapper.h"
 #pragma once
 
 namespace walberla

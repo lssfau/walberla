@@ -1,27 +1,29 @@
-from distutils.core import setup
-import shutil
-from os.path import exists, join
-import platform
 import sys
+import platform
+from os.path import exists, join
+import shutil
+
+from setuptools import setup
 
 # The following variables are configure by CMake
 walberla_source_dir = "${walberla_SOURCE_DIR}"
 walberla_binary_dir = "${CMAKE_CURRENT_BINARY_DIR}"
+suffix = "${PYTHON_MODULE_EXTENSION}"
+prefix = "${PYTHON_MODULE_PREFIX}"
+walberla_module_file_name = prefix + "walberla_cpp" + suffix
+
+version = "${WALBERLA_VERSION}"
 
 if platform.system() == 'Windows':
-    extension = ('dll', 'pyd')
     configuration = 'Release'
 else:
-    extension = ('so', 'so')
     configuration = ''
 
 
 def collectFiles():
-    src_shared_lib = join(walberla_binary_dir, configuration, 'walberla_cpp.' + extension[0])
-    dst_shared_lib = join(walberla_binary_dir, 'waLBerla', 'walberla_cpp.' + extension[1])
+    src_shared_lib = join(walberla_binary_dir, configuration, walberla_module_file_name)
+    dst_shared_lib = join(walberla_binary_dir, 'waLBerla', walberla_module_file_name)
     # copy everything inplace
-
-    print(src_shared_lib)
 
     if not exists(src_shared_lib):
         print("Python Module was not built yet - run 'make walberla_cpp'")
@@ -43,17 +45,19 @@ packages = ['waLBerla',
             'waLBerla.tools.report',
             'waLBerla.tools.sqlitedb',
             'waLBerla.tools.lbm_unitconversion',
-            'waLBerla.tools.jobscripts']
+            'waLBerla.tools.jobscripts',
+            'waLBerla.tools.config']
 
 collectFiles()
 
+
 setup(name='waLBerla',
-      version='1.0',
-      author='Martin Bauer',
-      author_email='martin.bauer@fau.de',
+      version=str(version),
+      author='Markus Holzer',
+      author_email='markus.holzer@fau.de',
       url='http://www.walberla.net',
       packages=packages,
-      package_data={'': ['walberla_cpp.' + extension[1]]}
+      package_data={'': [walberla_module_file_name]}
       )
 
 if sys.argv[1] == 'build':

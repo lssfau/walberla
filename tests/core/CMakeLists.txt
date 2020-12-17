@@ -179,7 +179,11 @@ waLBerla_execute_test( NAME SweepTimeloopTimerReduction PROCESSES 9  )
 # core #
 ########
 
-waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS blockforest field geometry pe pe_coupling python_coupling )
+if ( WALBERLA_BUILD_WITH_PYTHON )
+   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS blockforest field geometry pe pe_coupling python_coupling )
+else()
+   waLBerla_compile_test( FILES AllHeaderTest.cpp DEPENDS blockforest field geometry pe pe_coupling )
+endif()
 waLBerla_execute_test( NAME AllHeaderTest )
 
 waLBerla_compile_test( FILES ConcatIterator.cpp )
