@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ParseMessage.h
+//! \file
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \brief Parsing of messages
 //
