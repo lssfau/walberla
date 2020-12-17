@@ -164,6 +164,9 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncNextNeighborsBlockForest PROCES
 waLBerla_compile_test( NAME   MESA_PD_Kernel_TemperatureIntegration FILES kernel/TemperatureIntegration.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_TemperatureIntegration )
 
+waLBerla_compile_test( NAME   MESA_PD_Kernel_VBondModel_WallContact FILES kernel/VBondModel/WallContact.test.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_VBondModel_WallContact )
+
 waLBerla_compile_test( NAME   MESA_PD_Kernel_VelocityVerlet FILES kernel/VelocityVerlet.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_VelocityVerlet )
 
