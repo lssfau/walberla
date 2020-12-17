@@ -16,6 +16,7 @@
 //! \file ConfigFromDict.h
 //! \ingroup python_coupling
 //! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Markus Holzer <markus.holzer@fau.de>
 //
 //======================================================================================================================
 
@@ -37,7 +38,7 @@ namespace python_coupling {
    /*! Converts a python dictionary to a config::Block (recursively)
    */
    //*******************************************************************************************************************
-   void configFromPythonDict( config::Config::Block & result, boost::python::dict & pythonDict  );
+   void configFromPythonDict( config::Config::Block & result, py::dict & pythonDict  );
 
 
 
@@ -45,7 +46,7 @@ namespace python_coupling {
    /*! Converts a python dictionary to a waLBerla config object
    */
    //*******************************************************************************************************************
-   shared_ptr<Config> configFromPythonDict( boost::python::dict & pythonDict );
+   shared_ptr<Config> configFromPythonDict( py::dict & pythonDict );
 
 
 

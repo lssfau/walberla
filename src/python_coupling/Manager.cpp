@@ -16,6 +16,7 @@
 //! \file Manager.cpp
 //! \ingroup python_coupling
 //! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Markus Holzer <markus.holzer@fau.de>
 //
 //======================================================================================================================
 
@@ -26,24 +27,22 @@
 
 #ifdef WALBERLA_BUILD_WITH_PYTHON
 
-#include "core/waLBerlaBuildInfo.h"
-#include "Manager.h"
-#include "core/logging/Logging.h"
-#include "python_coupling/basic_exports/BasicExports.h"
+#   include "core/logging/Logging.h"
+#   include "core/waLBerlaBuildInfo.h"
 
-#include <cstdlib>
+#   include "python_coupling/export/BasicExport.h"
 
+#   include <pybind11/embed.h>
 
-BOOST_PYTHON_MODULE( walberla_cpp )
+#   include "Manager.h"
+
+PYBIND11_MODULE( walberla_cpp, m)
 {
    using namespace walberla::python_coupling;
-   auto manager =Manager::instance();
-   exportBasicWalberlaDatastructures();
-   manager->exportAll();
+   auto manager = Manager::instance();
+   exportBasicWalberlaDatastructures(m);
+   manager->exportAll(m);
 }
-
-using namespace boost::python;
-
 
 namespace walberla {
 namespace python_coupling {
@@ -57,7 +56,7 @@ Manager::~Manager( ) //NOLINT
 {
    // To work reliably this would have to be called at the end of the
    // main function. At this position this leads to a segfault in some cases
-   // Py_Finalize();
+   // py::finalize_interpreter();
 }
 
 void Manager::addEntryToPythonPath( const std::string & path )
@@ -75,15 +74,13 @@ void Manager::addPath( const std::string & path )
 {
    WALBERLA_ASSERT( initialized_ );
 
-   object sys = import("sys");
-   list sys_path = extract<list>( sys.attr("path") );
+   py::object sys = py::module::import("sys");
+   py::list sys_path = py::list( sys.attr("path") );
    sys_path.append(path);
 }
 
 void Manager::triggerInitialization()
 {
-   using namespace boost::python;
-
    if ( initialized_ ){
       return;
    }
@@ -91,15 +88,14 @@ void Manager::triggerInitialization()
 
    try
    {
-#if PY_MAJOR_VERSION >= 3
+      // The python module is used as embedded module here. There is a pybind11 macro for that called
+      // PYBIND11_EMBEDDED_MODULE. However it can not be used here since we want a shared lib for the python coupling.
+      // With the C-Call the so is embedded here.
       PyImport_AppendInittab( (char*)"walberla_cpp", PyInit_walberla_cpp );
-#else
-      PyImport_AppendInittab( (char*)"walberla_cpp", initwalberla_cpp );
-#endif
 
-      Py_Initialize();
-      import("__main__");
-      import("walberla_cpp");
+      py::initialize_interpreter();
+      py::module::import("__main__");
+      py::module::import("walberla_cpp");
 
       // Setup python path
       addPath( std::string(WALBERLA_SOURCE_DIR) + "/python" );
@@ -113,54 +109,41 @@ void Manager::triggerInitialization()
       entriesForPythonPath_.clear();
 
    }
-   catch ( boost::python::error_already_set & ) {
-      PyObject *type_ptr = nullptr;
-
-      PyObject *value_ptr = nullptr;
-
-      PyObject *traceback_ptr = nullptr;
-      PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
-
-      if( type_ptr )
-      {
-         extract<std::string> type_str(( str( handle<>( type_ptr ) ) ));
-         if( type_str.check() )
-            WALBERLA_LOG_DEVEL( type_str() );
+   catch ( py::error_already_set & e ) {
+      if (e.matches(PyExc_ModuleNotFoundError)){
+         py::print("The module walberla_cpp could not be found");
       }
-      if(value_ptr)
-      {
-         extract<std::string> value_str(( str( handle<>( value_ptr ) ) ));
-         if ( value_str.check() )
-            WALBERLA_LOG_DEVEL( value_str() );
+      else {
+         py::print("Unexpected Exception");
+         throw;
       }
-
       WALBERLA_ABORT( "Error while initializing Python" );
    }
 }
 
 
 
-void Manager::exportAll()
+void Manager::exportAll(py::module_ &m)
 {
    for( auto it = exporterFunctions_.begin(); it != exporterFunctions_.end(); ++it ) {
-      (*it)();
+      (*it)(m);
    }
 }
 
-boost::python::object Manager::pythonObjectFromBlockData( IBlock & block, BlockDataID id )
+py::object Manager::pythonObjectFromBlockData( IBlock & block, BlockDataID id )
 {
-   if( block.isDataOfType< boost::python::object > ( id )  )
-      return *block.getData< boost::python::object > ( id );
+   if( block.isDataOfType< py::object > ( id )  ){
+      return *block.getData< py::object > ( id );}
 
 
    for( auto it = blockDataToObjectFunctions_.begin(); it != blockDataToObjectFunctions_.end(); ++it )
    {
       auto res = (*it)( block, id );
-      if ( res != boost::python::object() )
-         return res;
+      if ( !res.is(py::object()) ){
+         return res;}
    }
 
-   return boost::python::object();
+   return py::object();
 }
 
 

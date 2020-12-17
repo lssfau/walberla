@@ -16,36 +16,30 @@
 //! \file PythonCallback.cpp
 //! \ingroup python_coupling
 //! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Markus Holzer <markus.holzer@fau.de>
 //
 //======================================================================================================================
 
 #include "PythonCallback.h"
-#include "PythonWrapper.h"
 #include "DictWrapper.h"
 
 #ifdef WALBERLA_BUILD_WITH_PYTHON
 
 #include "Manager.h"
 #include "core/Abort.h"
-#include "core/logging/Logging.h"
-#include "helper/ExceptionHandling.h"
 #include "core/Filesystem.h"
 
-#if defined(__GLIBCXX__) && __GLIBCXX__ <= 20160609
-#define CURRENT_PATH_WORKAROUND
-#include <unistd.h>
-#include <errno.h>
-#endif
+#include "pybind11/eval.h"
 
 namespace walberla {
 namespace python_coupling {
 
-   static boost::python::object importModuleOrFileInternal( const std::string & fileOrModuleName, const std::vector< std::string > & argv )
+   static py::object importModuleOrFileInternal( const std::string & fileOrModuleName, const std::vector< std::string > & argv )
    {
       auto manager = python_coupling::Manager::instance();
       manager->triggerInitialization();
 
-      namespace bp = boost::python;
+      namespace py = pybind11;
 
       std::string moduleName = fileOrModuleName;
 
@@ -57,52 +51,25 @@ namespace python_coupling {
       code << "] \n";
 
       filesystem::path path ( fileOrModuleName );
-#ifdef CURRENT_PATH_WORKAROUND
-      // workaround for double free in filesystem::current_path in libstdc++ 5.4 and lower
-      size_t cwd_size = 16;
-      char * cwd_buf = (char*) std::malloc(cwd_size * sizeof(char));
-
-      while( getcwd( cwd_buf, cwd_size ) == NULL )
-      {
-         if (errno == ERANGE)
-         {
-            cwd_size *= 2;
-            cwd_buf = (char*) std::realloc( cwd_buf, cwd_size * sizeof(char) );
-         }
-         else
-         {
-            python_coupling::terminateOnPythonException( std::string("Could not determine working directory") );
-         }
-      }
-
-      std::string cwd(cwd_buf);
-      std::free(cwd_buf);
-      path = filesystem::absolute( path, cwd );
-#else
       path = filesystem::absolute( path );
-#endif
+
       if ( path.extension() == ".py" )
       {
          moduleName = path.stem().string();
-
-
-         if ( ! path.parent_path().empty() )  {
-#ifdef CURRENT_PATH_WORKAROUND
-            std::string p = filesystem::canonical(path.parent_path(), cwd).string();
-#else
+         if ( ! path.parent_path().empty() ) {
             std::string p = filesystem::canonical(path.parent_path()).string();
-#endif
             code << "sys.path.append( r'" << p << "')" << "\n";
          }
       }
-      bp::exec( code.str().c_str(), bp::import("__main__").attr("__dict__") );
+
+      py::exec( code.str().c_str(), py::module::import("__main__").attr("__dict__") );
 
       try {
-         return bp::import( moduleName.c_str() );
+         return py::module::import( moduleName.c_str() );
       }
-      catch ( bp::error_already_set & ) {
-         python_coupling::terminateOnPythonException( std::string("Python Error while loading ") + fileOrModuleName );
-         return boost::python::object();
+      catch ( py::error_already_set &e) {
+         throw py::value_error(e.what());
+         return py::none();
       }
    }
 
@@ -116,7 +83,7 @@ namespace python_coupling {
       : exposedVars_( new DictWrapper() ), callbackDict_( new DictWrapper() )
    {
       Manager::instance()->triggerInitialization();
-      callbackDict_->dict() = boost::python::dict();
+      callbackDict_->dict() = py::dict();
    }
 
 
@@ -125,13 +92,13 @@ namespace python_coupling {
    {
       Manager::instance()->triggerInitialization();
 
-      using namespace boost::python;
+      namespace py = pybind11;
 
       // Add empty callbacks module
       importModuleOrFileInternal( fileOrModuleName, argv );
-      object callbackModule = import( "walberla_cpp.callbacks");
+      py::object callbackModule = py::module::import( "walberla_cpp.callbacks");
 
-      callbackDict_->dict() = extract<dict>( callbackModule.attr( "__dict__" ) );
+      callbackDict_->dict() = py::dict( callbackModule.attr( "__dict__" ) );
    }
 
 
@@ -140,41 +107,36 @@ namespace python_coupling {
    {
       Manager::instance()->triggerInitialization();
 
-      using namespace boost::python;
-
       // Add empty callbacks module
-      object callbackModule = import( "walberla_cpp.callbacks");
+      py::object callbackModule = py::module::import( "walberla_cpp.callbacks");
 
-      callbackDict_->dict() = extract<dict>( callbackModule.attr( "__dict__" ) );
+      callbackDict_->dict() = py::dict( callbackModule.attr( "__dict__" ) );
    }
 
    bool PythonCallback::isCallable() const
    {
-      return callbackDict_->dict().has_key( functionName_ );
+      return callbackDict_->dict().contains( functionName_ );
    }
 
    void PythonCallback::operator() ()
    {
       if ( ! isCallable() )
          WALBERLA_ABORT_NO_DEBUG_INFO( "Could not call python function '" << functionName_ << "'. " <<
-                                        "Did you forget to set the callback function?" );
+                                             "Did you forget to set the callback function?" );
 
-      namespace bp = boost::python;
+      namespace py = pybind11;
 
       try
       {
-         if ( exposedVars_->dict().has_key("returnValue"))
-            bp::api::delitem( exposedVars_->dict(), "returnValue" );
+         py::object function = callbackDict_->dict()[ functionName_.c_str() ];
 
-         bp::object function = callbackDict_->dict()[ functionName_ ];
-
-         bp::object returnVal;
-         returnVal = function( *bp::tuple(), **(exposedVars_->dict() ) );
+         py::object returnVal;
+         returnVal = function( *py::tuple(), **(exposedVars_->dict() ) );
 
          exposedVars_->dict()["returnValue"] = returnVal;
       }
-      catch ( bp::error_already_set & ) {
-         python_coupling::terminateOnPythonException( std::string("Error while running Python function ") + functionName_ );
+      catch ( py::error_already_set &e ) {
+         throw py::value_error(e.what());
       }
    }
 

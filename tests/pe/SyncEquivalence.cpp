@@ -18,8 +18,6 @@
 //
 //======================================================================================================================
 
-#include "python_coupling/DictWrapper.h"
-
 #include "blockforest/all.h"
 #include "core/all.h"
 #include "domain_decomposition/all.h"

@@ -45,7 +45,6 @@ To register a certain python function as callback it has to be set as attribute 
 """
 
 from __future__ import print_function, absolute_import, division, unicode_literals
-import os
 from functools import partial
 
 
@@ -54,10 +53,10 @@ from functools import partial
 class callback:
     """Decorator class to mark a Python function as waLBerla callback"""
 
-    def __init__(self, callbackFunction):
-        if not type(callbackFunction) is str:
+    def __init__(self, callback_function):
+        if not type(callback_function) is str:
             raise Exception("waLBerla callback: Name of function has to be a string")
-        self.callbackFunction = callbackFunction
+        self.callbackFunction = callback_function
 
     def __call__(self, f):
         try:
@@ -94,7 +93,6 @@ class ScenarioManager:
            Activation means to register the _configLoopCallback as 'config' waLBerla callback function
            which is called when a new scenario is expected.
            When config is called again the calbacks of the next scenario are activated.
-
     """
 
     def __init__(self):
@@ -110,19 +108,19 @@ class ScenarioManager:
         """Activates this scenario manager instance"""
         try:
             import walberla_cpp
-            boundFunc = self._configLoopCallback
-            setattr(walberla_cpp.callbacks, "config", boundFunc)
+            bound_func = self._configLoopCallback
+            setattr(walberla_cpp.callbacks, "config", bound_func)
         except ImportError:
             pass
 
-    def restrictScenarios(self, startScenario=0):
+    def restrictScenarios(self, start_scenario=0):
         """Simulates not all scenarios registered at this manager, but skips the first startScenario-1 scenarios"""
-        self._startScenario = startScenario
+        self._startScenario = start_scenario
 
     def _configLoopCallback(self, *args, **kwargs):
-        def findCallbacks(classType):
+        def findCallbacks(class_type):
             res = dict()
-            for key, value in classType.__dict__.items():
+            for key, value in class_type.__dict__.items():
                 if hasattr(value, "waLBerla_callback_member"):
                     res[key] = value
             return res
@@ -145,24 +143,14 @@ class ScenarioManager:
 
         try:
             import walberla_cpp
-            if 'WALBERLA_SCENARIO_IDX' in os.environ:
-                scenario_idx = int(os.environ['WALBERLA_SCENARIO_IDX'])
-                try:
-                    scenario = self._scenarios[scenario_idx]
-                except IndexError:
-                    walberla_cpp.log_info_on_root("Scenario does not exists - all scenarios simulated?")
-                    exit(1)
-                walberla_cpp.log_info_on_root("Simulating Scenario %d of %d :" % (scenario_idx, len(self._scenarios)))
-                yield get_config_from_scenario(scenario)
-            else:
-                for idx, scenario in enumerate(self._scenarios):
-                    if idx < self._startScenario:
-                        continue  # Skip over all scenarios with id < startScenario
-                    cfg = None
-                    while cfg is None:
-                        cfg = get_config_from_scenario(scenario)
-                    walberla_cpp.log_info_on_root("Simulating Scenario %d of %d :" % (idx, len(self._scenarios)))
-                    yield cfg
+            for idx, scenario in enumerate(self._scenarios):
+                if idx < self._startScenario:
+                    continue  # Skip over all scenarios with id < startScenario
+                cfg = None
+                while cfg is None:
+                    cfg = get_config_from_scenario(scenario)
+                # walberla_cpp.log_info_on_root("Simulating Scenario %d of %d :" % (idx + 1, len(self._scenarios)))
+                yield cfg
 
         except ImportError:
             pass

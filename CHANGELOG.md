@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+- Python Coupling now build upon pybind11. Boost.Python is no longer supported
+  - lbm module dropped from python coupling due to deprecation for a long time
+  - geometry, postprocessing and timeloop dropped from python coupling due to its low usage
+  - PEP8-ification of Python API. This means all keyword arguments are now in snake_case and not in CamelCase as before.
+
 ## [4.1] - 2019-04-19
 ### Added
 - Galerkin coarsening for Multigrid

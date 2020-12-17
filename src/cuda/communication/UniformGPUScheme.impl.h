@@ -27,7 +27,7 @@ namespace communication {
 
 
 template<typename Stencil>
-UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr_wrapper <StructuredBlockForest> bf,
+UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf,
                                              bool sendDirectlyFromGPU,
                                              const int tag )
         : blockForest_( bf ),

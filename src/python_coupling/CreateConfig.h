@@ -15,7 +15,8 @@
 //
 //! \file CreateConfigFromPythonScript.h
 //! \ingroup python
-//! \author martin
+//! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Markus Holzer <markus.holzer@fau.de>
 //! \brief Creates a walberla::Config object from a python script
 //
 //======================================================================================================================

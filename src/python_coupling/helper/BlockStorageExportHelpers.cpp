@@ -16,6 +16,7 @@
 //! \file BlockStorageExportHelpers.cpp
 //! \ingroup python_coupling
 //! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Markus Holzer <markus.holzer@fau.de>
 //
 //======================================================================================================================
 
@@ -25,24 +26,22 @@
 
 namespace walberla {
 namespace python_coupling {
-
+namespace py = pybind11;
 
 #ifdef WALBERLA_BUILD_WITH_PYTHON
 
 void NoSuchBlockData::translate(  const NoSuchBlockData & e ) {
-   PyErr_SetString(PyExc_RuntimeError, e.what() );
+   throw py::cast_error(e.what());
 }
 
 void BlockDataNotConvertible::translate(  const BlockDataNotConvertible & e ) {
-   PyErr_SetString(PyExc_RuntimeError, e.what() );
+   throw py::cast_error(e.what());
 }
 #else
 
-void NoSuchBlockData::translate(  const NoSuchBlockData &  ) {
-}
+void NoSuchBlockData::translate(  const NoSuchBlockData &  ) {}
 
-void BlockDataNotConvertible::translate(  const BlockDataNotConvertible &  ) {
-}
+void BlockDataNotConvertible::translate(  const BlockDataNotConvertible &  ) {}
 
 #endif
 

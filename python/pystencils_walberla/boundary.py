@@ -1,5 +1,3 @@
-from functools import partial
-
 import numpy as np
 from jinja2 import Environment, PackageLoader, StrictUndefined
 from pystencils import Field, FieldType

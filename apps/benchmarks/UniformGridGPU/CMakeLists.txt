@@ -1,6 +1,6 @@
 
 waLBerla_link_files_to_builddir( "*.prm" )
-#waLBerla_link_files_to_builddir( "simulation_setup" )
+waLBerla_link_files_to_builddir( "simulation_setup" )
 
 
 foreach (config srt trt mrt smagorinsky entropic smagorinsky_noopt entropic_kbc_n4
@@ -25,6 +25,7 @@ foreach (config srt trt mrt smagorinsky entropic smagorinsky_noopt entropic_kbc_
     waLBerla_add_executable(NAME UniformGridBenchmarkGPU_${config}
           FILES UniformGridGPU.cpp
           DEPENDS blockforest boundary core cuda domain_decomposition field geometry timeloop vtk gui UniformGridGPUGenerated_${config})
+    set_target_properties( UniformGridBenchmarkGPU_${config} PROPERTIES CXX_VISIBILITY_PRESET hidden)
 endforeach ()
 
 
@@ -46,4 +47,5 @@ foreach (config srt trt mrt smagorinsky entropic)
     waLBerla_add_executable(NAME UniformGridBenchmarkGPU_AA_${config}
           FILES UniformGridGPU_AA.cpp
           DEPENDS blockforest boundary core cuda domain_decomposition field geometry timeloop vtk gui UniformGridGPUGenerated_AA_${config})
+    set_target_properties( UniformGridBenchmarkGPU_AA_${config} PROPERTIES CXX_VISIBILITY_PRESET hidden)
 endforeach ()

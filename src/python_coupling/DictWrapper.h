@@ -16,7 +16,8 @@
 //! \file DictWrapper.h
 //! \ingroup python_coupling
 //! \author Martin Bauer <martin.bauer@fau.de>
-//! \brief Wrapper to store and extract values from boost::python::dict
+//! \author Markus Holzer <markus.holzer@fau.de>
+//! \brief Wrapper to store and extract values from pybind11
 //
 //! \warning: if you include this header you also have to include Python.h as first header in your
 //!           cpp file
@@ -34,8 +35,6 @@
 
 namespace walberla {
 namespace python_coupling {
-
-
    class DictWrapper
    {
    public:
@@ -43,9 +42,9 @@ namespace python_coupling {
       //** Expose Data *************************************************************************************************
       /*! \name Expose Data */
       //@{
-      template<typename T>  inline void exposePtr( const std::string & name, T * var );
-      template<typename T>  inline void exposePtr( const std::string & name, const shared_ptr<T> & var );
-      template<typename T>  void exposeValue     ( const std::string & name, const T & var );
+      template<typename T>  inline void exposePtr(const char* name, T * var );
+      template<typename T>  inline void exposePtr(const char* name, const shared_ptr<T> & var );
+      template<typename T>  void exposeValue     ( const char* name, const T & var );
       //@}
       //****************************************************************************************************************
 
@@ -53,19 +52,19 @@ namespace python_coupling {
       //** Get Data  ***************************************************************************************************
       /*! \name Get Data */
       //@{
-      template<typename T> inline T    get( const std::string & name );
-      template<typename T> inline bool has( const std::string & name );
-      template<typename T> inline bool checkedGet( const std::string & name, T output );
+      template<typename T> inline T    get( const char* name );
+      template<typename T> inline bool has( const char* name );
+      template<typename T> inline bool checkedGet( const char* name, T output );
       //@}
       //****************************************************************************************************************
 
 
 #ifdef WALBERLA_BUILD_WITH_PYTHON
    public:
-            boost::python::dict & dict()        { return d_; }
-      const boost::python::dict & dict() const  { return d_; }
+            pybind11::dict & dict()        { return d_; }
+      const pybind11::dict & dict() const  { return d_; }
    protected:
-      boost::python::dict d_;
+            pybind11::dict d_;
 #endif
    };
 

@@ -32,7 +32,6 @@
 #include "core/Set.h"
 #include "core/debug/CheckFunctions.h"
 #include "core/debug/Debug.h"
-#include "core/WeakPtrWrapper.h"
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/OpenMPBufferSystem.h"
 #include "core/selectable/IsSetSelected.h"
@@ -96,7 +95,7 @@ public:
    /*! \name Construction & Destruction */
    //@{
 
-   explicit UniformBufferedScheme( weak_ptr_wrapper<StructuredBlockForest> bf,
+   explicit UniformBufferedScheme( weak_ptr<StructuredBlockForest> bf,
                                    const int tag = 778 ) // waLBerla = 119+97+76+66+101+114+108+97
       : blockForest_( bf ),
         localMode_( START ),
@@ -111,7 +110,7 @@ public:
       forestModificationStamp_ = forest->getBlockForest().getModificationStamp();
    }
 
-   UniformBufferedScheme( weak_ptr_wrapper<StructuredBlockForest> bf,
+   UniformBufferedScheme( weak_ptr<StructuredBlockForest> bf,
                           const Set<SUID> & requiredBlockSelectors,
                           const Set<SUID> & incompatibleBlockSelectors,
                           const int tag = 778 ) // waLBerla = 119+97+76+66+101+114+108+97
@@ -177,7 +176,7 @@ protected:
 
 
 
-   weak_ptr_wrapper<StructuredBlockForest> blockForest_;
+   weak_ptr<StructuredBlockForest> blockForest_;
    uint_t forestModificationStamp_;
 
    std::vector< PackInfo > packInfos_;

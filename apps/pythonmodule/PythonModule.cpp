@@ -15,125 +15,84 @@
 //
 //! \file PythonModule.cpp
 //! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Markus Holzer <markus.holzer@fau.de>
 //
 //======================================================================================================================
-#include "python_coupling/PythonWrapper.h"
-#include "waLBerlaDefinitions.h"
-#include "blockforest/python/Exports.h"
 #include "field/GhostLayerField.h"
-#include "field/python/Exports.h"
-#include "mesh/python/Exports.h"
-#include "geometry/python/Exports.h"
-#include "postprocessing/python/Exports.h"
+
 #include "python_coupling/Manager.h"
+#include "python_coupling/export/BlockForestExport.h"
+#include "python_coupling/export/FieldExports.h"
+#include "python_coupling/export/VTKExport.h"
 #include "python_coupling/helper/ModuleInit.h"
+
 #include "stencil/all.h"
-#include "timeloop/python/Exports.h"
-#include "vtk/python/Exports.h"
 
 #ifdef WALBERLA_BUILD_WITH_CUDA
-#include "cuda/python/Exports.h"
+ #include "python_coupling/export/CUDAExport.h"
 #endif
 
-#include <boost/mpl/vector.hpp>
-#include <boost/mpl/insert_range.hpp>
-
-
-
-namespace bmpl = boost::mpl;
-using namespace walberla;
-
-typedef bmpl::vector<
-            Field<walberla::real_t,1>,
-            Field<walberla::real_t,2>,
-            Field<walberla::real_t,3>,
-            Field<walberla::real_t,4>,
-            Field<walberla::real_t,5>,
-            Field<walberla::real_t,6>,
-            Field<walberla::real_t,9>,
-            Field<walberla::real_t,15>,
-            Field<walberla::real_t,19>,
-            Field<walberla::real_t,27>,
-
-            Field<walberla::int8_t,1>,
-            Field<walberla::int16_t,1>,
-            Field<walberla::int32_t,1>,
-
-            Field<walberla::int64_t,1>,
-            Field<walberla::int64_t,2>,
-            Field<walberla::int64_t,3>,
-            Field<walberla::int64_t,4>,
-
-            Field<walberla::uint8_t,1>,
-            Field<walberla::uint16_t,1>,
-            Field<walberla::uint32_t,1>
-      > FieldTypes;
-
-
-typedef bmpl::vector<
-                      GhostLayerField<walberla::real_t,1>,
-                      GhostLayerField<walberla::real_t,3>
-                    >  FieldTypesForMeshGeneration;
-
-
-typedef bmpl::vector< FlagField<walberla::uint8_t>,
-                      FlagField<walberla::uint16_t> > FlagFieldTypes;
-
-typedef bmpl::vector< stencil::D2Q5,
-                      stencil::D2Q9,
-                      stencil::D3Q7,
-                      stencil::D3Q19,
-                      stencil::D3Q27 > Stencils;
-
-typedef GhostLayerField<walberla::real_t,3> VecField_T;
-
 
 using namespace walberla;
+
+
+#define FIELD_TYPES \
+   Field<walberla::real_t,1>,\
+   Field<walberla::real_t,2>,\
+   Field<walberla::real_t,3>,\
+   Field<walberla::real_t,4>,\
+   Field<walberla::real_t,5>,\
+   Field<walberla::real_t,6>,\
+   Field<walberla::real_t,9>,\
+   Field<walberla::real_t,15>,\
+   Field<walberla::real_t,19>,\
+   Field<walberla::real_t,27>,\
+   Field<walberla::int8_t,1>,\
+   Field<walberla::int16_t,1>,\
+   Field<walberla::int32_t,1>,\
+   Field<walberla::int64_t,1>,\
+   Field<walberla::int64_t,2>,\
+   Field<walberla::int64_t,3>,\
+   Field<walberla::int64_t,4>,\
+   Field<walberla::uint8_t,1>,\
+   Field<walberla::uint16_t,1>,\
+   Field<walberla::uint32_t,1>
+
+#define GPU_FIELD_TYPES \
+   GPUField<double>,\
+   GPUField<float>,\
+   GPUField<int8_t>,\
+   GPUField<int16_t>,\
+   GPUField<int32_t>,\
+   GPUField<int64_t>,\
+   GPUField<uint8_t>,\
+   GPUField<uint16_t>,\
+   GPUField<uint32_t>,\
+   GPUField<uint64_t>
 
 struct InitObject
 {
    InitObject()
    {
-      namespace bmpl = boost::mpl;
-
       auto pythonManager = python_coupling::Manager::instance();
-
       // Field
-      pythonManager->addExporterFunction( field::exportModuleToPython<FieldTypes> );
-      pythonManager->addExporterFunction( field::exportGatherFunctions<FieldTypes> );
-      pythonManager->addBlockDataConversion<FieldTypes>() ;
-
+      pythonManager->addExporterFunction( field::exportModuleToPython<FIELD_TYPES> );
+      pythonManager->addExporterFunction( field::exportGatherFunctions<FIELD_TYPES> );
+      pythonManager->addBlockDataConversion<FIELD_TYPES>();
       // Blockforest
-      pythonManager->addExporterFunction( blockforest::exportModuleToPython<Stencils> );
-
-      // Geometry
-      pythonManager->addExporterFunction( geometry::exportModuleToPython );
-
+      pythonManager->addExporterFunction(blockforest::exportModuleToPython<stencil::D2Q5, stencil::D2Q9, stencil::D3Q7, stencil::D3Q19, stencil::D3Q27>);
       // VTK
       pythonManager->addExporterFunction( vtk::exportModuleToPython );
+      #ifdef WALBERLA_BUILD_WITH_CUDA
+            using walberla::cuda::GPUField;
 
-      // Postprocessing
-      pythonManager->addExporterFunction( postprocessing::exportModuleToPython<FieldTypesForMeshGeneration, FlagFieldTypes> );
-
-      // Timeloop
-      pythonManager->addExporterFunction( timeloop::exportModuleToPython );
-
-#ifdef WALBERLA_BUILD_WITH_OPENMESH
-      pythonManager->addExporterFunction( mesh::exportModuleToPython<FlagFieldTypes> );
-#endif
-
-#ifdef WALBERLA_BUILD_WITH_CUDA
-      using walberla::cuda::GPUField;
-      typedef bmpl::vector<GPUField<double>, GPUField<float>,
-                           GPUField<int8_t>,  GPUField<int16_t>,  GPUField<int32_t>, GPUField<int64_t>,
-                           GPUField<uint8_t>, GPUField<uint16_t>, GPUField<uint32_t>,GPUField<uint64_t> > GPUFields;
-
-      pythonManager->addExporterFunction( cuda::exportModuleToPython<GPUFields, FieldTypes> );
-      pythonManager->addBlockDataConversion<GPUFields>();
-#endif
-
+            pythonManager->addExporterFunction( cuda::exportModuleToPython<GPU_FIELD_TYPES> );
+            pythonManager->addExporterFunction( cuda::exportCopyFunctionsToPython<FIELD_TYPES> );
+            pythonManager->addBlockDataConversion<GPU_FIELD_TYPES>();
+      #endif
+      //
       python_coupling::initWalberlaForPythonModule();
+
    }
 };
 InitObject globalInitObject;
-

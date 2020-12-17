@@ -4,7 +4,7 @@
 #
 ###################################################################################################
 
-waLBerla_add_module( DEPENDS blockforest core communication domain_decomposition executiontree python_coupling field stencil
+waLBerla_add_module( DEPENDS blockforest core communication domain_decomposition executiontree field stencil
                      BUILD_ONLY_IF_FOUND CUDA )
 
 ###################################################################################################

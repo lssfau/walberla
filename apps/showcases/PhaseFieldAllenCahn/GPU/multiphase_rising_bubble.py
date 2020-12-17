@@ -91,12 +91,12 @@ class Scenario:
         }
 
     @wlb.member_callback
-    def at_end_of_time_step(self, blocks, time_loop):
-        t = time_loop.getCurrentTimeStep()
+    def at_end_of_time_step(self, blocks, **kwargs):
+        t = kwargs['timeStep']
         if t % self.dbWriteFrequency == 0:
             wlb_field = wlb.field.gather(blocks, 'phase', makeSlice[:, :, self.size[2] // 2])
             if wlb_field:
-                phase_field = np.asarray(wlb_field.buffer()).squeeze()
+                phase_field = np.asarray(wlb_field).squeeze()
 
                 location_of_gas = np.where(phase_field < 0.5)
                 cov = np.cov(location_of_gas)
@@ -107,7 +107,9 @@ class Scenario:
                 self.yPositions.append(center_of_mass[1])
                 if len(self.yPositions) > 1:
                     speed = self.yPositions[-1] - self.yPositions[-2]
-                    self.write_result_to_database(t, speed, axis_of_the_bubble, center_of_mass)
+                else:
+                    speed = 0
+                self.write_result_to_database(t, speed, axis_of_the_bubble, center_of_mass)
 
                 self.counter += 1
 

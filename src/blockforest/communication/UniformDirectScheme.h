@@ -24,7 +24,6 @@
 
 #include "blockforest/StructuredBlockForest.h"
 #include "core/Set.h"
-#include "core/WeakPtrWrapper.h"
 #include "core/mpi/Datatype.h"
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/MPIWrapper.h"
@@ -56,7 +55,7 @@ public:
    //**Construction & Destruction***************************************************************************************
    /*! \name Construction & Destruction */
    //@{
-   explicit UniformDirectScheme( const weak_ptr_wrapper<StructuredBlockForest> & bf,
+   explicit UniformDirectScheme( const weak_ptr<StructuredBlockForest> & bf,
                                  const shared_ptr<UniformMPIDatatypeInfo> & dataInfo = shared_ptr<UniformMPIDatatypeInfo>(),
                                  const int tag = 778 ) // waLBerla = 119+97+76+66+101+114+108+97
       : blockForest_( bf ),
@@ -70,7 +69,7 @@ public:
          dataInfos_.push_back( dataInfo );
    }
 
-   UniformDirectScheme( const weak_ptr_wrapper<StructuredBlockForest> & bf,
+   UniformDirectScheme( const weak_ptr<StructuredBlockForest> & bf,
                         const Set<SUID> & requiredBlockSelectors,
                         const Set<SUID> & incompatibleBlockSelectors,
                         const shared_ptr<UniformMPIDatatypeInfo> & dataInfo = shared_ptr<UniformMPIDatatypeInfo>(),
@@ -140,7 +139,7 @@ protected:
       }
    };
 
-   weak_ptr_wrapper<StructuredBlockForest> blockForest_;
+   weak_ptr<StructuredBlockForest> blockForest_;
 
    bool setupRequired_;          //< this is set in the beginning or when new communication item was added
    bool communicationRunning_;   //< this is true between startCommunication() and wait()

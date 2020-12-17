@@ -4,6 +4,6 @@
 #
 ###################################################################################################
 
-waLBerla_add_module( DEPENDS core domain_decomposition python_coupling )
+waLBerla_add_module( DEPENDS core blockforest domain_decomposition python_coupling )
 
 ###################################################################################################
