@@ -84,6 +84,9 @@ waLBerla_execute_test( NAME   MESA_PD_DropTestGeneral )
 waLBerla_compile_test( NAME   MESA_PD_Kernel_ClearNextNeighborSync FILES kernel/ClearNextNeighborSync.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_ClearNextNeighborSync PROCESSES 2 )
 
+waLBerla_compile_test( NAME   MESA_PD_Kernel_CNT_AnisotropicVDWContact FILES kernel/cnt/AnisotropicVDWContact.test.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_AnisotropicVDWContact )
+
 waLBerla_compile_test( NAME   MESA_PD_Kernel_CNT_IntegratedVDWContact FILES kernel/cnt/IntegratedVDWContact.test.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_IntegratedVDWContact )
 
