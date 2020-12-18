@@ -47,6 +47,36 @@ class FieldModuleTest(unittest.TestCase):
         view4 = field.toArray(f, with_ghost_layers=[2, False, True])
         self.assertEqual(view4[:, :, :, 0].shape, tuple([size[0] + 2 * 2, size[1] + 2 * 0, size[2] + 2 * gl]))
 
+    def test_gather(self):
+        blocks = createUniformBlockGrid(blocks=(10, 4, 3), cellsPerBlock=(2, 2, 2),
+                                        periodic=(True, True, True), oneBlockPerProcess=False)
+        wlb.field.addToStorage(blocks, "test", dtype=np.int, fSize=3)
+
+        for block in blocks:
+            offset_in_global_domain = blocks.transformLocalToGlobal(block, wlb.Cell(0, 0, 0))[:]
+            f = wlb.field.toArray(block["test"])
+            s = f.shape
+            for i in range(0, s[0]):
+                for j in range(0, s[1]):
+                    for k in range(0, s[2]):
+                        f[i, j, k, 0] = i + offset_in_global_domain[0]
+                        f[i, j, k, 1] = j + offset_in_global_domain[1]
+                        f[i, j, k, 2] = k + offset_in_global_domain[2]
+
+        tp = tuple([slice(5, 15), slice(None, None), 0.5])
+        f = wlb.field.gather(blocks, "test", tp)
+
+        nparray = wlb.field.toArray(f)
+        self.assertEqual(nparray.shape, (11, 8, 1, 3))
+
+        s = nparray.shape
+        for i in range(0, s[0]):
+            for j in range(0, s[1]):
+                for k in range(0, s[2]):
+                    assert(nparray[i, j, k, 0] == i + 5)
+                    assert(nparray[i, j, k, 1] == j)
+                    assert(nparray[i, j, k, 2] == 2)
+
 
 if __name__ == '__main__':
     unittest.main()
