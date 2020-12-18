@@ -186,6 +186,9 @@ else()
 endif()
 waLBerla_execute_test( NAME AllHeaderTest )
 
+waLBerla_compile_test( FILES Angles.test.cpp )
+waLBerla_execute_test( NAME Angles )
+
 waLBerla_compile_test( FILES ConcatIterator.cpp )
 waLBerla_execute_test( NAME ConcatIterator )
 
