@@ -25,6 +25,21 @@ Reference
                                         on other processes). This information includes the process rank, the state, and
                                         the axis-aligned bounding box of any block (local or remote). [false by default]
 
+.. py:function:: createUniformBlockGrid(cells, dx=1, oneBlockPerProcess=True, periodic=(0,0,0), keepGlobalBlockInformation=False)
+
+   Creates a new uniform StructuredBlockForest. Similar to cpp function blockforest::createUniformBlockGrid.
+   Specify only number of cells. The distribution on the processes is then calculated automatically.
+
+   :param cells :                       3-tuple with total number of cells in x,y,z direction.
+
+   :param dx:                           Side length of a single cell.
+   :param oneBlockPerProcess:           If True, each process gets one block. If False, all blocks are put to one process.
+                                        The second option makes only sense for debugging or testing.
+   :param periodic:                     Periodicity of the domain in x,y,z direction
+   :param keepGlobalBlockInformation:   If true, each process keeps information about remote blocks (blocks that reside
+                                        on other processes). This information includes the process rank, the state, and
+                                        the axis-aligned bounding box of any block (local or remote). [false by default]
+
 
 
    

@@ -332,6 +332,25 @@ void exportBlockForest(py::module_& m)
       },
       "blocks"_a, "cellsPerBlock"_a, "dx"_a = real_t(1), "oneBlockPerProcess"_a = true,
       "periodic"_a = std::array< bool, 3 >{ false, false, false }, "keepGlobalBlockInformation"_a = false);
+
+    m.def(
+            "createUniformBlockGrid",
+            [](std::array< uint_t, 3 > cells, real_t dx,
+               bool oneBlockPerProcess, std::array< bool, 3 > periodic, bool keepGlobalBlockInformation) {
+                Vector3<uint_t> cellsVec(cells[0], cells[1], cells[2]);
+                Vector3<uint_t> cellsPerBlock;
+                Vector3<uint_t> blocks;
+                uint_t nrOfProcesses = uint_c( MPIManager::instance()->numProcesses() );
+
+                calculateCellDistribution( cellsVec, nrOfProcesses, blocks, cellsPerBlock );
+
+
+                return blockforest::createUniformBlockGrid(blocks[0], blocks[1], blocks[2], cellsPerBlock[0], cellsPerBlock[1],
+                                                           cellsPerBlock[2], dx, oneBlockPerProcess, periodic[0], periodic[1], periodic[2],
+                                                           keepGlobalBlockInformation);
+            },
+            "cells"_a,"dx"_a = real_t(1), "oneBlockPerProcess"_a = true,
+            "periodic"_a = std::array< bool, 3 >{ false, false, false }, "keepGlobalBlockInformation"_a = false);
 }
 
 } // namespace blockforest
