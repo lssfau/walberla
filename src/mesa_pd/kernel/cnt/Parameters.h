@@ -79,11 +79,11 @@ constexpr auto M_C = 12.011_r;
 /// Mass of the repetative cell in AMU
 constexpr auto mass_T = ro * T * M_C * 104.397_r;
 
-// Volume of a capsule
-//double vol = (4./3.) * PII * (R_CNT * R_CNT * R_CNT) + PII * R_CNT * R_CNT * T;
+/// Volume of a capsule
+double vol_capsule = (4_r/3_r) * math::pi * (R_CNT * R_CNT * R_CNT) + math::pi * R_CNT * R_CNT * T;
 
-// Density of a capsule
-//double dens = mass_T / vol;
+/// Density of a capsule
+double dens_capsule = mass_T / vol_capsule;
 
 /// V-bond parameter
 constexpr auto knorm = (En * 0.006242_r) / T;
@@ -97,10 +97,10 @@ constexpr auto outer_radius     = CutoffFactor * R_CNT;
 constexpr auto inner_radius     = 1.5811_r * R_CNT; // Sphere
 
 /// volume of a sphere
-constexpr auto vol = (4_r/3_r) * math::pi * (inner_radius * inner_radius * inner_radius);
+constexpr auto vol_sphere = (4_r/3_r) * math::pi * (inner_radius * inner_radius * inner_radius);
 
 /// density of a sphere
-constexpr auto dens = mass_T / vol;
+constexpr auto dens_sphere = mass_T / vol_sphere;
 
 } //namespace cnt
 } //namespace kernel
