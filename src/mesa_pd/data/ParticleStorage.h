@@ -100,6 +100,8 @@ public:
       using hydrodynamicTorque_type = walberla::mesa_pd::Vec3;
       using oldHydrodynamicForce_type = walberla::mesa_pd::Vec3;
       using oldHydrodynamicTorque_type = walberla::mesa_pd::Vec3;
+      using clusterID_type = int64_t;
+      using segmentID_type = int64_t;
       using neighborState_type = std::unordered_set<walberla::mpi::MPIRank>;
 
       
@@ -219,6 +221,14 @@ public:
       oldHydrodynamicTorque_type& getOldHydrodynamicTorqueRef() {return storage_.getOldHydrodynamicTorqueRef(i_);}
       void setOldHydrodynamicTorque(oldHydrodynamicTorque_type const & v) { storage_.setOldHydrodynamicTorque(i_, v);}
       
+      clusterID_type const & getClusterID() const {return storage_.getClusterID(i_);}
+      clusterID_type& getClusterIDRef() {return storage_.getClusterIDRef(i_);}
+      void setClusterID(clusterID_type const & v) { storage_.setClusterID(i_, v);}
+      
+      segmentID_type const & getSegmentID() const {return storage_.getSegmentID(i_);}
+      segmentID_type& getSegmentIDRef() {return storage_.getSegmentIDRef(i_);}
+      void setSegmentID(segmentID_type const & v) { storage_.setSegmentID(i_, v);}
+      
       neighborState_type const & getNeighborState() const {return storage_.getNeighborState(i_);}
       neighborState_type& getNeighborStateRef() {return storage_.getNeighborStateRef(i_);}
       void setNeighborState(neighborState_type const & v) { storage_.setNeighborState(i_, v);}
@@ -312,6 +322,8 @@ public:
    using hydrodynamicTorque_type = walberla::mesa_pd::Vec3;
    using oldHydrodynamicForce_type = walberla::mesa_pd::Vec3;
    using oldHydrodynamicTorque_type = walberla::mesa_pd::Vec3;
+   using clusterID_type = int64_t;
+   using segmentID_type = int64_t;
    using neighborState_type = std::unordered_set<walberla::mpi::MPIRank>;
 
    
@@ -430,6 +442,14 @@ public:
    oldHydrodynamicTorque_type const & getOldHydrodynamicTorque(const size_t idx) const {return oldHydrodynamicTorque_[idx];}
    oldHydrodynamicTorque_type& getOldHydrodynamicTorqueRef(const size_t idx) {return oldHydrodynamicTorque_[idx];}
    void setOldHydrodynamicTorque(const size_t idx, oldHydrodynamicTorque_type const & v) { oldHydrodynamicTorque_[idx] = v; }
+   
+   clusterID_type const & getClusterID(const size_t idx) const {return clusterID_[idx];}
+   clusterID_type& getClusterIDRef(const size_t idx) {return clusterID_[idx];}
+   void setClusterID(const size_t idx, clusterID_type const & v) { clusterID_[idx] = v; }
+   
+   segmentID_type const & getSegmentID(const size_t idx) const {return segmentID_[idx];}
+   segmentID_type& getSegmentIDRef(const size_t idx) {return segmentID_[idx];}
+   void setSegmentID(const size_t idx, segmentID_type const & v) { segmentID_[idx] = v; }
    
    neighborState_type const & getNeighborState(const size_t idx) const {return neighborState_[idx];}
    neighborState_type& getNeighborStateRef(const size_t idx) {return neighborState_[idx];}
@@ -555,6 +575,8 @@ public:
    std::vector<hydrodynamicTorque_type> hydrodynamicTorque_ {};
    std::vector<oldHydrodynamicForce_type> oldHydrodynamicForce_ {};
    std::vector<oldHydrodynamicTorque_type> oldHydrodynamicTorque_ {};
+   std::vector<clusterID_type> clusterID_ {};
+   std::vector<segmentID_type> segmentID_ {};
    std::vector<neighborState_type> neighborState_ {};
    std::unordered_map<uid_type, size_t> uidToIdx_;
    static_assert(std::is_same<uid_type, id_t>::value,
@@ -594,6 +616,8 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(const ParticleSt
    getHydrodynamicTorqueRef() = rhs.getHydrodynamicTorque();
    getOldHydrodynamicForceRef() = rhs.getOldHydrodynamicForce();
    getOldHydrodynamicTorqueRef() = rhs.getOldHydrodynamicTorque();
+   getClusterIDRef() = rhs.getClusterID();
+   getSegmentIDRef() = rhs.getSegmentID();
    getNeighborStateRef() = rhs.getNeighborState();
    return *this;
 }
@@ -630,6 +654,8 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(ParticleStorage:
    getHydrodynamicTorqueRef() = std::move(rhs.getHydrodynamicTorqueRef());
    getOldHydrodynamicForceRef() = std::move(rhs.getOldHydrodynamicForceRef());
    getOldHydrodynamicTorqueRef() = std::move(rhs.getOldHydrodynamicTorqueRef());
+   getClusterIDRef() = std::move(rhs.getClusterIDRef());
+   getSegmentIDRef() = std::move(rhs.getSegmentIDRef());
    getNeighborStateRef() = std::move(rhs.getNeighborStateRef());
    return *this;
 }
@@ -667,6 +693,8 @@ void swap(ParticleStorage::Particle lhs, ParticleStorage::Particle rhs)
    std::swap(lhs.getHydrodynamicTorqueRef(), rhs.getHydrodynamicTorqueRef());
    std::swap(lhs.getOldHydrodynamicForceRef(), rhs.getOldHydrodynamicForceRef());
    std::swap(lhs.getOldHydrodynamicTorqueRef(), rhs.getOldHydrodynamicTorqueRef());
+   std::swap(lhs.getClusterIDRef(), rhs.getClusterIDRef());
+   std::swap(lhs.getSegmentIDRef(), rhs.getSegmentIDRef());
    std::swap(lhs.getNeighborStateRef(), rhs.getNeighborStateRef());
 }
 
@@ -704,6 +732,8 @@ std::ostream& operator<<( std::ostream& os, const ParticleStorage::Particle& p )
          "hydrodynamicTorque  : " << p.getHydrodynamicTorque() << "\n" <<
          "oldHydrodynamicForce: " << p.getOldHydrodynamicForce() << "\n" <<
          "oldHydrodynamicTorque: " << p.getOldHydrodynamicTorque() << "\n" <<
+         "clusterID           : " << p.getClusterID() << "\n" <<
+         "segmentID           : " << p.getSegmentID() << "\n" <<
          "neighborState       : " << p.getNeighborState() << "\n" <<
          "================================" << std::endl;
    return os;
@@ -811,6 +841,8 @@ inline ParticleStorage::iterator ParticleStorage::create(const id_t& uid)
    hydrodynamicTorque_.emplace_back(real_t(0));
    oldHydrodynamicForce_.emplace_back(real_t(0));
    oldHydrodynamicTorque_.emplace_back(real_t(0));
+   clusterID_.emplace_back(-1);
+   segmentID_.emplace_back(-1);
    neighborState_.emplace_back();
    uid_.back() = uid;
    uidToIdx_[uid] = uid_.size() - 1;
@@ -873,6 +905,8 @@ inline ParticleStorage::iterator ParticleStorage::erase(iterator& it)
    hydrodynamicTorque_.pop_back();
    oldHydrodynamicForce_.pop_back();
    oldHydrodynamicTorque_.pop_back();
+   clusterID_.pop_back();
+   segmentID_.pop_back();
    neighborState_.pop_back();
    return it;
 }
@@ -922,6 +956,8 @@ inline void ParticleStorage::reserve(const size_t size)
    hydrodynamicTorque_.reserve(size);
    oldHydrodynamicForce_.reserve(size);
    oldHydrodynamicTorque_.reserve(size);
+   clusterID_.reserve(size);
+   segmentID_.reserve(size);
    neighborState_.reserve(size);
 }
 
@@ -956,6 +992,8 @@ inline void ParticleStorage::clear()
    hydrodynamicTorque_.clear();
    oldHydrodynamicForce_.clear();
    oldHydrodynamicTorque_.clear();
+   clusterID_.clear();
+   segmentID_.clear();
    neighborState_.clear();
    uidToIdx_.clear();
 }
@@ -991,6 +1029,8 @@ inline size_t ParticleStorage::size() const
    //WALBERLA_ASSERT_EQUAL( uid_.size(), hydrodynamicTorque.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldHydrodynamicForce.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldHydrodynamicTorque.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), clusterID.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), segmentID.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), neighborState.size() );
    return uid_.size();
 }
@@ -1417,6 +1457,24 @@ public:
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getOldHydrodynamicTorqueRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getOldHydrodynamicTorqueRef();}
    walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getOldHydrodynamicTorque();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleClusterID
+{
+public:
+   using return_type = int64_t;
+   int64_t& operator()(data::Particle& p) const {return p.getClusterIDRef();}
+   int64_t& operator()(data::Particle&& p) const {return p.getClusterIDRef();}
+   int64_t const & operator()(const data::Particle& p) const {return p.getClusterID();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleSegmentID
+{
+public:
+   using return_type = int64_t;
+   int64_t& operator()(data::Particle& p) const {return p.getSegmentIDRef();}
+   int64_t& operator()(data::Particle&& p) const {return p.getSegmentIDRef();}
+   int64_t const & operator()(const data::Particle& p) const {return p.getSegmentID();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleNeighborState

@@ -164,6 +164,14 @@ public:
    walberla::mesa_pd::Vec3& getOldHydrodynamicTorqueRef(const size_t p_idx) {return ps_->getOldHydrodynamicTorqueRef(p_idx);}
    void setOldHydrodynamicTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldHydrodynamicTorque(p_idx, v);}
    
+   int64_t const & getClusterID(const size_t p_idx) const {return ps_->getClusterID(p_idx);}
+   int64_t& getClusterIDRef(const size_t p_idx) {return ps_->getClusterIDRef(p_idx);}
+   void setClusterID(const size_t p_idx, int64_t const & v) { ps_->setClusterID(p_idx, v);}
+   
+   int64_t const & getSegmentID(const size_t p_idx) const {return ps_->getSegmentID(p_idx);}
+   int64_t& getSegmentIDRef(const size_t p_idx) {return ps_->getSegmentIDRef(p_idx);}
+   void setSegmentID(const size_t p_idx, int64_t const & v) { ps_->setSegmentID(p_idx, v);}
+   
    std::unordered_set<walberla::mpi::MPIRank> const & getNeighborState(const size_t p_idx) const {return ps_->getNeighborState(p_idx);}
    std::unordered_set<walberla::mpi::MPIRank>& getNeighborStateRef(const size_t p_idx) {return ps_->getNeighborStateRef(p_idx);}
    void setNeighborState(const size_t p_idx, std::unordered_set<walberla::mpi::MPIRank> const & v) { ps_->setNeighborState(p_idx, v);}
@@ -329,6 +337,14 @@ public:
    void setOldHydrodynamicTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldHydrodynamicTorque_ = v;}
    walberla::mesa_pd::Vec3& getOldHydrodynamicTorqueRef(const size_t /*p_idx*/) {return oldHydrodynamicTorque_;}
    
+   int64_t const & getClusterID(const size_t /*p_idx*/) const {return clusterID_;}
+   void setClusterID(const size_t /*p_idx*/, int64_t const & v) { clusterID_ = v;}
+   int64_t& getClusterIDRef(const size_t /*p_idx*/) {return clusterID_;}
+   
+   int64_t const & getSegmentID(const size_t /*p_idx*/) const {return segmentID_;}
+   void setSegmentID(const size_t /*p_idx*/, int64_t const & v) { segmentID_ = v;}
+   int64_t& getSegmentIDRef(const size_t /*p_idx*/) {return segmentID_;}
+   
    std::unordered_set<walberla::mpi::MPIRank> const & getNeighborState(const size_t /*p_idx*/) const {return neighborState_;}
    void setNeighborState(const size_t /*p_idx*/, std::unordered_set<walberla::mpi::MPIRank> const & v) { neighborState_ = v;}
    std::unordered_set<walberla::mpi::MPIRank>& getNeighborStateRef(const size_t /*p_idx*/) {return neighborState_;}
@@ -373,6 +389,8 @@ private:
    walberla::mesa_pd::Vec3 hydrodynamicTorque_;
    walberla::mesa_pd::Vec3 oldHydrodynamicForce_;
    walberla::mesa_pd::Vec3 oldHydrodynamicTorque_;
+   int64_t clusterID_;
+   int64_t segmentID_;
    std::unordered_set<walberla::mpi::MPIRank> neighborState_;
 };
 
