@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file PFCDamping.h
+//! \file
 //! \author Igor Ostanin <i.ostanin@skoltech.ru>
 //! \author Grigorii Drozdov, <drozd013@umn.edu>
 //
