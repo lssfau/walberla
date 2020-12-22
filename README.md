@@ -47,15 +47,29 @@ Many thanks go to waLBerla's [contributors](AUTHORS.txt)
 
 If you use waLBerla in a publication, please cite the following articles:
 
-- C. Godenschwager, F. Schornbaum, M. Bauer, H. Köstler, and U. Rüde. A
-framework for hybrid parallel flow simulations with a trillion cells in complex
-geometries. In: Proceedings of the International Conference on High Performance
-Computing, Networking, Storage and Analysis, page 35. ACM, 2013.
-- M. Bauer, S. Eibl, C. Godenschwager, N. Kohl, M. Kuron, C. Rettinger,
-F. Schornbaum, C. Schwarzmeier, D. Thönnes, H. Köstler, and U. Rüde. waLBerla:
-A block-structured high-performance framework for multiphysics simulations. In:
-Computers & Mathematics with Applications, doi:10.1016/j.camwa.2020.01.007.
-Elsevier, 2020.
+Overview:
+  - M. Bauer et al, *waLBerla: A block-structured high-performance framework for 
+    multiphysics simulations*. Computers & Mathematics with Applications, 2020,
+    https://doi.org/10.1016/j.camwa.2020.01.007.
+    
+Grid Refinement:
+  - F. Schornbaum and U. Rüde, *Massively parallel algorithms for the lattice boltzmann 
+    method on nonuniform grids*. SIAM Journal on Scientific Computing, 2016. 
+    https://doi.org/10.1137/15M1035240
+    
+LBM - Particles Coupling:
+  - C. Rettinger and U. Rüde, *Dynamic load balancing techniques for particulate flow simulations*. 
+    Computation, 2019. https://doi.org/10.3390/computation7010009
+    
+MESA-PD:
+  - S. Eibl and U. Rüde, *A Modular and Extensible Software Architecture for Particle Dynamics*. 
+    Proceedings Of The 8Th International Conference On Discrete Element Methods.
+    https://mercurylab.co.uk/dem8/full-papers/#page-content
+    
+Carbon Nanotubes:
+  - G. Drozdov et al, *Densification of single-walled carbon nanotube films:  
+    Mesoscopic distinct element method simulations and experimental validation*. 
+    Journal of Applied Physics, 2020. https://doi.org/10.1063/5.0025505
 
 ## License
 
