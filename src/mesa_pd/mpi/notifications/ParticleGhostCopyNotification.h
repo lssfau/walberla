@@ -62,6 +62,8 @@ public:
       uint_t type {0};
       std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> oldContactHistory {};
       walberla::real_t temperature {real_t(0)};
+      int64_t clusterID {-1};
+      int64_t segmentID {-1};
    };
 
    inline explicit ParticleGhostCopyNotification( const data::Particle& particle ) : particle_(particle) {}
@@ -87,6 +89,8 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
    pIt->setType(data.type);
    pIt->setOldContactHistory(data.oldContactHistory);
    pIt->setTemperature(data.temperature);
+   pIt->setClusterID(data.clusterID);
+   pIt->setSegmentID(data.segmentID);
    return pIt;
 }
 
@@ -127,6 +131,8 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
    buf << obj.particle_.getType();
    buf << obj.particle_.getOldContactHistory();
    buf << obj.particle_.getTemperature();
+   buf << obj.particle_.getClusterID();
+   buf << obj.particle_.getSegmentID();
    return buf;
 }
 
@@ -148,6 +154,8 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
    buf >> objparam.type;
    buf >> objparam.oldContactHistory;
    buf >> objparam.temperature;
+   buf >> objparam.clusterID;
+   buf >> objparam.segmentID;
    return buf;
 }
 

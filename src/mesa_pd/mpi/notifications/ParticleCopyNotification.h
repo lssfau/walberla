@@ -69,6 +69,8 @@ public:
       walberla::mesa_pd::Vec3 hydrodynamicTorque {real_t(0)};
       walberla::mesa_pd::Vec3 oldHydrodynamicForce {real_t(0)};
       walberla::mesa_pd::Vec3 oldHydrodynamicTorque {real_t(0)};
+      int64_t clusterID {-1};
+      int64_t segmentID {-1};
    };
 
    inline explicit ParticleCopyNotification( const data::Particle& particle ) : particle_(particle) {}
@@ -101,6 +103,8 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
    pIt->setHydrodynamicTorque(data.hydrodynamicTorque);
    pIt->setOldHydrodynamicForce(data.oldHydrodynamicForce);
    pIt->setOldHydrodynamicTorque(data.oldHydrodynamicTorque);
+   pIt->setClusterID(data.clusterID);
+   pIt->setSegmentID(data.segmentID);
    return pIt;
 }
 
@@ -148,6 +152,8 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
    buf << obj.particle_.getHydrodynamicTorque();
    buf << obj.particle_.getOldHydrodynamicForce();
    buf << obj.particle_.getOldHydrodynamicTorque();
+   buf << obj.particle_.getClusterID();
+   buf << obj.particle_.getSegmentID();
    return buf;
 }
 
@@ -176,6 +182,8 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
    buf >> objparam.hydrodynamicTorque;
    buf >> objparam.oldHydrodynamicForce;
    buf >> objparam.oldHydrodynamicTorque;
+   buf >> objparam.clusterID;
+   buf >> objparam.segmentID;
    return buf;
 }
 
