@@ -61,7 +61,14 @@ namespace mpistubs {
 #pragma warning ( push, 1 )
 #endif
 
+#if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
+#   pragma GCC diagnostic push
+#   pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
 #include <mpi.h>
+#if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
+#   pragma GCC diagnostic pop
+#endif
 
 #ifdef _MSC_VER
 #pragma warning ( pop )
@@ -284,8 +291,8 @@ using namespace mpistubs;
 namespace walberla {
 
 namespace mpi {
-   typedef int MPIRank;
-   typedef int MPISize;
+   using MPIRank = int;
+   using MPISize = int;
    const MPIRank INVALID_RANK = -1;
    const MPISize INVALID_SIZE = -1;
 } // namespace MPI
