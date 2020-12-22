@@ -316,14 +316,18 @@ namespace field {
       // Automatically select allocator if none was given
       if ( alloc == 0 )
       {
-         const uint_t alignment = 32;
+#ifdef __BIGGEST_ALIGNMENT__
+         const uint_t alignment = __BIGGEST_ALIGNMENT__;
+#else
+         const uint_t alignment = 64;
+#endif
 
          // aligned allocator only used (by default) if ...
          if ( l == fzyx                      && // ... we use a structure of arrays layout
               _xSize * sizeof(T) > alignment && // ... the inner coordinate is sufficiently large
               sizeof(T) < alignment          && // ... the stored data type is smaller than the alignment
               alignment % sizeof(T) == 0 )      // ... there is an integer number of elements fitting in one aligned line
-            alloc = make_shared<AllocateAligned<T,32> >();
+            alloc = make_shared<AllocateAligned<T,alignment> >();
          else
             alloc = make_shared<StdFieldAlloc<T> > ();
       }
