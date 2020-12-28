@@ -21,29 +21,25 @@
 
 #pragma once
 
+#include "waLBerlaDefinitions.h"
 
-#if defined(WALBERLA_USE_STD_ANY)
+#ifndef WALBERLA_USE_STD_EXPERIMENTAL_ANY
 #include <any>
-#elif defined(WALBERLA_USE_STD_EXPERIMENTAL_ANY)
+#else
 #undef _LIBCPP_WARN_ON_DEPRECATED_EXPERIMENTAL_HEADER
 #include <experimental/any>
-#else
-#include <boost/any.hpp>
 #endif
 
 
 
 namespace walberla {
 
-#if defined(WALBERLA_USE_STD_ANY)
+#ifndef WALBERLA_USE_STD_EXPERIMENTAL_ANY
 using std::any;
 using std::any_cast;
-#elif defined(WALBERLA_USE_STD_EXPERIMENTAL_ANY)
+#else
 using std::experimental::any;
 using std::experimental::any_cast;
-#else
-using boost::any;
-using boost::any_cast;
 #endif
 
 }

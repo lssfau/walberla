@@ -26,6 +26,8 @@ modernize-*,
 -modernize-redundant-void-arg,
 -modernize-use-trailing-return-type,
 -modernize-avoid-c-arrays,
+-modernize-concat-nested-namespaces,
+-modernize-use-nodiscard,
 
 mpi-*,
 -mpi-type-mismatch,

@@ -66,11 +66,16 @@ namespace field {
     */
    //*******************************************************************************************************************
    template <typename T, uint_t fieldFSize>
-   class FieldIterator : public std::iterator <std::forward_iterator_tag,T>
+   class FieldIterator
    {
    public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = T;
+      using difference_type = std::ptrdiff_t;
+      using pointer = T*;
+      using reference = T&;
+
       typedef Field<typename std::remove_const<T>::type, fieldFSize> FieldType;
-      typedef T value_type;
 
       static const uint_t F_SIZE = fieldFSize;
 

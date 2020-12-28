@@ -14,12 +14,10 @@ requirements:
   - make
   host:
   - python
-  - boost
   - mpich [linux]
   - openmesh
   run:
   - python
-  - boost
   - numpy
   - mpich [linux]
   - openmesh

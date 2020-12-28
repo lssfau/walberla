@@ -22,12 +22,6 @@ If you are not familiar with the git version control system, this
 To compile waLBerla with all modules and features a few third-party libraries
 are required. 
 
-\subsubsection libs_boost Boost
-The boost library is the only required third-party library. It is installed on
-most Linux system by default and should be detected by cmake. 
-If boost resides at a non-standard location, you have to set the environment variable
-`BOOST_ROOT` in order to have it detected by cmake.
-
 \subsubsection libs_mpi   MPI (optional)
 The message passing interface (MPI) library is required if you want to run waLBerla
 with distributed memory parallelization. If MPI is not installed on your system,

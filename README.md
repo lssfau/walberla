@@ -19,8 +19,8 @@ is documented in [Sphinx](http://walberla.net/sphinx/index.html).
 
 ## Getting started
 
-The minimum requirements are a C++14-compliant compiler (e.g. GCC or Clang),
-the [Boost](http://www.boost.org) library and the [CMake](http://www.cmake.org)
+The minimum requirements are a C++17-compliant compiler (e.g. GCC or Clang)
+and the [CMake](http://www.cmake.org)
 build system. Furthermore, you need an MPI library (like
 [Open MPI](http://www.open-mpi.org)) if you want to make use of parallel
 processing capabilities. All of these dependencies are typically available in
