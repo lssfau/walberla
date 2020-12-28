@@ -77,10 +77,15 @@ public:
 
    class const_iterator;
 
-   class iterator : public std::iterator <std::forward_iterator_tag, IBlock > {
+   class iterator {
       friend class const_iterator;
       friend class BlockStorage;
    public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = IBlock;
+      using difference_type = std::ptrdiff_t;
+      using pointer = IBlock*;
+      using reference = IBlock&;
 
       iterator( const iterator & it ) :
          it_( it.it_ ), end_( it.end_ ), requiredSelectors_( it.requiredSelectors_ ), incompatibleSelectors_( it.incompatibleSelectors_ ) {}

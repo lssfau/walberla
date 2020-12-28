@@ -124,7 +124,7 @@ protected:
    shared_ptr<DataProcessor> dataProcessor_;
 
    /// Helper class for sorting the receivedData array according to t-value
-   struct Compare : public std::binary_function<std::vector<real_t> , std::vector<real_t> ,bool>
+   struct Compare : public std::function<bool(std::vector<real_t> , std::vector<real_t>)>
    {
       inline bool operator()(const std::vector<real_t> & v1, const std::vector<real_t> & v2) const {
          return v1[0] < v2[0];

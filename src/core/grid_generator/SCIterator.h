@@ -46,9 +46,15 @@ namespace grid_generator {
 /// \endcode
 /// Usage:
 /// \code for (auto it = SCIterator::begin(...); it != SCIterator::end(); ++it) \endcode
-class SCIterator : public std::iterator< std::forward_iterator_tag, Vector3<real_t> >
+class SCIterator
 {
 public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = Vector3<real_t>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = Vector3<real_t>*;
+    using reference = Vector3<real_t>&;
+
    /**
     * @brief begin iterator
     * @param domain volume were lattice points will be returned

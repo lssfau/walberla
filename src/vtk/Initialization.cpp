@@ -42,7 +42,7 @@ static void splitVector( T& x, T& y, T& z, const Config::BlockHandle& bb, const 
    std::string vector = bb.getParameter< std::string >( vertex );
    coordinates = string_split( vector, "<,> \t" );
 
-   coordinates.erase( std::remove_if( coordinates.begin(), coordinates.end(), std::bind( &std::string::empty,  std::placeholders::_1 ) ), coordinates.end() );
+   coordinates.erase( std::remove_if( coordinates.begin(), coordinates.end(), [](auto &s){ return s.empty(); } ), coordinates.end() );
 
    if( coordinates.size() != 3 )
       WALBERLA_ABORT( errorMsg );
@@ -59,7 +59,7 @@ static std::vector< std::string > splitList( const std::string& string )
    std::vector< std::string > list;
 
    list = string_split( string, ", \t" );
-   list.erase( std::remove_if( list.begin(), list.end(), std::bind( &std::string::empty,  std::placeholders::_1 ) ), list.end() );
+   list.erase( std::remove_if( list.begin(), list.end(), [](auto &s){ return s.empty(); } ), list.end() );
 
    return list;
 }
@@ -70,7 +70,7 @@ static void addStates( Set<SUID>& set, const std::string& string )
 {
    std::vector< std::string > states;
    states = string_split( string, ", \t" );
-   states.erase( std::remove_if( states.begin(), states.end(), std::bind( &std::string::empty,  std::placeholders::_1 ) ), states.end() );
+   states.erase( std::remove_if( states.begin(), states.end(), [](auto &s){ return s.empty(); } ), states.end() );
 
    for( auto it = states.begin(); it != states.end(); ++it )
       set += SUID( *it );

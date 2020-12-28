@@ -82,7 +82,7 @@ void configureGlobalState( const shared_ptr<Config> & config ) {
       std::string suids = config->getParameter< std::string >( "GlobalState" );
 
       std::vector< std::string > states = string_split( suids, ", \t" );
-      states.erase( std::remove_if( states.begin(), states.end(), std::bind( &std::string::empty, std::placeholders::_1 ) ), states.end() );
+      states.erase( std::remove_if( states.begin(), states.end(), [](auto &s){ return s.empty(); } ), states.end() );
 
       Set<SUID> state;
       for( auto it = states.begin(); it != states.end(); ++it )

@@ -27,9 +27,15 @@
 namespace walberla {
 
 template< typename T >
-class ConcatIterator : public std::iterator< std::input_iterator_tag, typename T::value_type, typename T::difference_type, typename T::pointer, typename T::reference >
+class ConcatIterator
 {
 public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = typename T::value_type;
+    using difference_type = typename T::difference_type;
+    using pointer = typename T::pointer;
+    using reference = typename T::reference;
+
     /// default constructed iterator points to end()
     ConcatIterator( )
         : ended_( true )

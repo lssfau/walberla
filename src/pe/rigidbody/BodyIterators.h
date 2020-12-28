@@ -34,10 +34,16 @@ class BodyIterator
 public:
 
    template< typename T >
-   class iterator : public std::iterator< std::input_iterator_tag, typename T::value_type, typename T::difference_type, typename T::pointer, typename T::reference >
+   class iterator
    {
       friend class BodyIterator;
    public:
+      using iterator_category = std::input_iterator_tag;
+      using value_type = typename T::value_type;
+      using difference_type = typename T::difference_type;
+      using pointer = typename T::pointer;
+      using reference = typename T::reference;
+
       iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
       iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
 
@@ -146,10 +152,16 @@ class LocalBodyIterator
 public:
 
    template< typename T >
-   class iterator : public std::iterator< std::input_iterator_tag, typename T::value_type, typename T::difference_type, typename T::pointer, typename T::reference >
+   class iterator
    {
       friend class LocalBodyIterator;
    public:
+      using iterator_category = std::input_iterator_tag;
+      using value_type = typename T::value_type;
+      using difference_type = typename T::difference_type;
+      using pointer = typename T::pointer;
+      using reference = typename T::reference;
+
       iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
       iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
 
@@ -236,10 +248,16 @@ class ShadowBodyIterator
 public:
 
    template< typename T >
-   class iterator : public std::iterator< std::input_iterator_tag, typename T::value_type, typename T::difference_type, typename T::pointer, typename T::reference >
+   class iterator
    {
       friend class ShadowBodyIterator;
    public:
+      using iterator_category = std::input_iterator_tag;
+      using value_type = typename T::value_type;
+      using difference_type = typename T::difference_type;
+      using pointer = typename T::pointer;
+      using reference = typename T::reference;
+
       iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
       iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
 

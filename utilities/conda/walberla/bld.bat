@@ -6,9 +6,7 @@ cmake -LAH -G"Visual Studio 15 2017 Win64"                   ^
   -DWALBERLA_BUILD_WITH_PYTHON=ON                            ^
   -DWALBERLA_BUILD_WITH_MPI=OFF                              ^
   -DWALBERLA_BUILD_WITH_OPENMP=ON                            ^
-  -DPYTHON_EXECUTABLE="%PYTHON%"                             ^
-  -DBoost_USE_STATIC_LIBS=OFF                                ^
-  -DBoost_USE_MULTITHREADED=ON ..
+  -DPYTHON_EXECUTABLE="%PYTHON%"  ..
 if errorlevel 1 exit 1
 
 cmake --build . --config Release --target pythonModuleInstall

@@ -33,9 +33,15 @@ namespace grid_generator {
 ///
 /// Usage:
 /// \code for (auto it = HCPIterator::begin(...); it != HCPIterator::end(); ++it) \endcode
-class HCPIterator : public std::iterator< std::forward_iterator_tag, Vector3<real_t> >
+class HCPIterator
 {
 public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = Vector3<real_t>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = Vector3<real_t>*;
+    using reference = Vector3<real_t>&;
+
    /**
     * @brief begin iterator
     * @param domain volume were lattice points will be returned
