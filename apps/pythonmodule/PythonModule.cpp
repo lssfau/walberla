@@ -40,34 +40,24 @@ using namespace walberla;
    Field<walberla::real_t,1>,\
    Field<walberla::real_t,2>,\
    Field<walberla::real_t,3>,\
-   Field<walberla::real_t,4>,\
-   Field<walberla::real_t,5>,\
-   Field<walberla::real_t,6>,\
    Field<walberla::real_t,9>,\
    Field<walberla::real_t,15>,\
    Field<walberla::real_t,19>,\
    Field<walberla::real_t,27>,\
    Field<walberla::int8_t,1>,\
-   Field<walberla::int16_t,1>,\
-   Field<walberla::int32_t,1>,\
    Field<walberla::int64_t,1>,\
    Field<walberla::int64_t,2>,\
    Field<walberla::int64_t,3>,\
-   Field<walberla::int64_t,4>,\
    Field<walberla::uint8_t,1>,\
    Field<walberla::uint16_t,1>,\
    Field<walberla::uint32_t,1>
 
 #define GPU_FIELD_TYPES \
-   GPUField<double>,\
-   GPUField<float>,\
+   GPUField<real_t>,\
    GPUField<int8_t>,\
-   GPUField<int16_t>,\
    GPUField<int32_t>,\
    GPUField<int64_t>,\
    GPUField<uint8_t>,\
-   GPUField<uint16_t>,\
-   GPUField<uint32_t>,\
    GPUField<uint64_t>
 
 struct InitObject

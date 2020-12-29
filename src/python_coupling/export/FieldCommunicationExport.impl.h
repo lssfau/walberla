@@ -53,6 +53,119 @@ namespace py = pybind11;
 
 //===================================================================================================================
 //
+//  createStencilRestrictedPackInfo Export
+//
+//===================================================================================================================
+
+template< typename FieldType >
+typename std::enable_if<FieldType::F_SIZE == 27, py::object>::type
+createStencilRestrictedPackInfoObject( BlockDataID bdId )
+{
+   typedef GhostLayerField<typename FieldType::value_type, 27> GlField_T;
+   using field::communication::StencilRestrictedPackInfo;
+   return py::cast( make_shared< StencilRestrictedPackInfo<GlField_T, stencil::D3Q27> >( bdId) );
+}
+
+template< typename FieldType >
+typename std::enable_if<FieldType::F_SIZE == 19, py::object>::type
+createStencilRestrictedPackInfoObject( BlockDataID bdId )
+{
+   typedef GhostLayerField<typename FieldType::value_type, 19> GlField_T;
+   using field::communication::StencilRestrictedPackInfo;
+   return py::cast( make_shared< StencilRestrictedPackInfo<GlField_T, stencil::D3Q19> >( bdId) );
+}
+
+template< typename FieldType >
+typename std::enable_if<FieldType::F_SIZE == 15, py::object>::type
+createStencilRestrictedPackInfoObject( BlockDataID bdId )
+{
+   typedef GhostLayerField<typename FieldType::value_type, 15> GlField_T;
+   using field::communication::StencilRestrictedPackInfo;
+   return py::cast( make_shared< StencilRestrictedPackInfo<GlField_T, stencil::D3Q15> >( bdId) );
+}
+
+template< typename FieldType >
+typename std::enable_if<FieldType::F_SIZE == 7, py::object>::type
+createStencilRestrictedPackInfoObject( BlockDataID bdId )
+{
+   typedef GhostLayerField<typename FieldType::value_type, 7> GlField_T;
+   using field::communication::StencilRestrictedPackInfo;
+   return py::cast( make_shared< StencilRestrictedPackInfo<GlField_T, stencil::D3Q7> >( bdId) );
+}
+
+template< typename FieldType >
+typename std::enable_if<FieldType::F_SIZE == 9, py::object>::type
+createStencilRestrictedPackInfoObject( BlockDataID bdId )
+{
+   typedef GhostLayerField<typename FieldType::value_type, 9> GlField_T;
+   using field::communication::StencilRestrictedPackInfo;
+   return py::cast( make_shared< StencilRestrictedPackInfo<GlField_T, stencil::D2Q9> >( bdId) );
+}
+
+template< typename FieldType >
+typename std::enable_if<!(FieldType::F_SIZE == 9  ||
+                          FieldType::F_SIZE == 7  ||
+                          FieldType::F_SIZE == 15 ||
+                          FieldType::F_SIZE == 19 ||
+                          FieldType::F_SIZE == 27), py::object>::type
+createStencilRestrictedPackInfoObject( BlockDataID )
+{
+   throw py::value_error("This works only for fields with fSize in 7, 9, 15, 19 or 27");
+}
+
+class StencilRestrictedPackInfoExporter
+{
+ public:
+   StencilRestrictedPackInfoExporter(const shared_ptr<StructuredBlockForest> & blocks, BlockDataID fieldId)
+      : blocks_(blocks), fieldId_(fieldId)
+   {}
+
+   template< typename FieldType>
+   void operator() ( python_coupling::NonCopyableWrap<FieldType> )
+   {
+      typedef typename FieldType::value_type T;
+      const uint_t F_SIZE = FieldType::F_SIZE;
+      typedef GhostLayerField<T, F_SIZE> GlField_T;
+      IBlock * firstBlock =  & ( * blocks_->begin() );
+      if( firstBlock->isDataClassOrSubclassOf<FieldType>(fieldId_) )
+      {
+         resultStencilRestrictedPackInfo_ = createStencilRestrictedPackInfoObject<GlField_T>(fieldId_);
+      }
+   }
+   py::object getResultStencilRestrictedPackInfo()
+   {
+      return resultStencilRestrictedPackInfo_;
+   }
+
+ private:
+   py::object resultStencilRestrictedPackInfo_;
+   shared_ptr< StructuredBlockStorage > blocks_;
+   BlockDataID fieldId_;
+};
+
+template<typename... FieldTypes>
+static py::object StencilRestrictedPackInfoWrapper(const shared_ptr<StructuredBlockForest> & blocks,
+                                                   const std::string & blockDataName )
+{
+   BlockDataID fieldID = python_coupling::blockDataIDFromString( *blocks, blockDataName );
+
+   if ( blocks->begin() == blocks->end() ) {
+      // if no blocks are on this field an arbitrary PackInfo can be returned
+      return py::cast( make_shared< field::communication::StencilRestrictedPackInfo<GhostLayerField<real_t, 9>, stencil::D2Q9> >( fieldID ) );
+   }
+
+   StencilRestrictedPackInfoExporter exporter(blocks, fieldID);
+   python_coupling::for_each_noncopyable_type< FieldTypes... >  ( std::ref(exporter) );
+   if ( ! exporter.getResultStencilRestrictedPackInfo() ) {
+      throw py::value_error("Failed to create Stencil Restricted PackInfo");
+   }
+   else {
+      return exporter.getResultStencilRestrictedPackInfo();
+   }
+}
+
+//===================================================================================================================
+//
 //  createPackInfo Export
 //
 //===================================================================================================================
@@ -241,6 +354,14 @@ void exportCommunicationClasses(py::module_& m)
         return internal::UniformMPIDatatypeInfoWrapper< FieldTypes... >(blocks, blockDataName, numberOfGhostLayers);
       },
       "blocks"_a, "blockDataName"_a, "numberOfGhostLayers"_a = uint_t(0));
+
+   m2.def(
+      "createStencilRestrictedPackInfo",
+      [](const shared_ptr<StructuredBlockForest> & blocks,
+         const std::string & blockDataName) {
+        return internal::StencilRestrictedPackInfoWrapper< FieldTypes... >(blocks, blockDataName);
+      },
+      "blocks"_a, "blockDataName"_a);
 }
 
 } // namespace field
