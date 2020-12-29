@@ -18,14 +18,14 @@ class FieldModuleTest(unittest.TestCase):
 
     def testNumpyConversionWithoutGhostLayers(self):
         blocks = createUniformBlockGrid(blocks=(1, 1, 1), cellsPerBlock=(1, 2, 3), periodic=(True, False, False))
-        field.addToStorage(blocks, 'f1', np.float64, fSize=4, ghostLayers=0, initValue=2.0)
-        field.addToStorage(blocks, 'f2', np.float64, fSize=5, ghostLayers=0, initValue=2.0)
+        field.addToStorage(blocks, 'f1', np.float64, fSize=2, ghostLayers=0, initValue=2.0)
+        field.addToStorage(blocks, 'f2', np.float64, fSize=3, ghostLayers=0, initValue=2.0)
 
         f1np = field.toArray(blocks[0]['f1'])
         f2np = field.toArray(blocks[0]['f2'])
         self.assertEqual(f1np[0, 0, 0, 0], 2.0)
-        self.assertEqual(f1np.shape, (1, 2, 3, 4))
-        self.assertEqual(f2np.shape, (1, 2, 3, 5))
+        self.assertEqual(f1np.shape, (1, 2, 3, 2))
+        self.assertEqual(f2np.shape, (1, 2, 3, 3))
 
     def testGhostLayerExtraction(self):
         size = (10, 5, 4)

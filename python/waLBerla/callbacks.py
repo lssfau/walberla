@@ -149,7 +149,7 @@ class ScenarioManager:
                 cfg = None
                 while cfg is None:
                     cfg = get_config_from_scenario(scenario)
-                # walberla_cpp.log_info_on_root("Simulating Scenario %d of %d :" % (idx + 1, len(self._scenarios)))
+                walberla_cpp.log_info_on_root("Simulating Scenario %d of %d :" % (idx + 1, len(self._scenarios)))
                 yield cfg
 
         except ImportError:

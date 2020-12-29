@@ -55,14 +55,6 @@
 
 #   include <pybind11/stl.h>
 
-// specialize operator== since == is deprecated in pybind11
-template<>
-bool walberla::domain_decomposition::internal::BlockData::Data< pybind11::object >::operator==(
-   const BlockData::DataBase& rhs) const
-{
-   const Data< pybind11::object >* rhsData = dynamic_cast< const Data< pybind11::object >* >(&rhs);
-   return (rhsData == &rhs) && (data_->is(*(rhsData->data_)));
-}
 
 namespace py = pybind11;
 namespace walberla {

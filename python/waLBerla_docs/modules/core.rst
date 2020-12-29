@@ -198,6 +198,10 @@ Block Structure
    .. py:method:: containsGlobalBlockInformation( )
    .. py:method:: blocksOverlappedByAABB( point, aabb )
    .. py:method:: blocksContainedWithinAABB( point, aabb )
+
+   .. py:method:: addBlockData( name, blockdata)
+
+      Adds custom data to the blockforest. This can be a Python Class for example which is then callable on all blocks
    
    .. py:method:: blockExists( point )
    .. py:method:: blockExistsLocally( point )

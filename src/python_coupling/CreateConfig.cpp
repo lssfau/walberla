@@ -70,30 +70,27 @@ shared_ptr< Config > createConfigFromPythonScript(const std::string& scriptFile,
 class PythonMultipleConfigGenerator : public config::ConfigGenerator
 {
  public:
-   PythonMultipleConfigGenerator(py::list ConfigList) // NOLINT
-      : ConfigList_(ConfigList), counter(0)              // NOLINT
+   PythonMultipleConfigGenerator(py::object ScenarioConfigGenerator) // NOLINT
+      : ScenarioConfigGenerator_(ScenarioConfigGenerator)            // NOLINT
    {}
 
    shared_ptr< Config > next() override
    {
       shared_ptr< Config > config = make_shared< Config >();
-
-      if ( counter == ConfigList_.size()  )
+      try
+      {
+         py::dict configDict = ScenarioConfigGenerator_.attr("__next__")();
+         configFromPythonDict(config->getWritableGlobalBlock(), configDict);
+         return config;
+      }
+      catch (py::error_already_set&)
+      {
          return shared_ptr<Config>();
-
-      py::dict configDict = ConfigList_[counter];
-      configFromPythonDict(config->getWritableGlobalBlock(), configDict);
-
-      WALBERLA_LOG_INFO_ON_ROOT("Simulating Scenario " <<  counter + 1 << " of "  << ConfigList_.size() << ":")
-
-      counter++;
-
-      return config;
+      }
    }
 
  private:
-   py::list ConfigList_;
-   uint_t counter;
+   py::object ScenarioConfigGenerator_;
 };
 
 class PythonSingleConfigGenerator : public config::ConfigGenerator
