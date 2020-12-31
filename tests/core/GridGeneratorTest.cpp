@@ -98,7 +98,7 @@ void rangeBasedTest()
    auto dx = Vector3<real_t>( Grid::iterator::getUnitCellX(spacing), Grid::iterator::getUnitCellY(spacing), Grid::iterator::getUnitCellZ(spacing) );
    auto lowerIt  = typename Grid::iterator(domain, Vector3<real_t>(5,5,5) - dx * 30, spacing);
    auto endIt = typename Grid::iterator();
-   for ( const auto& pt : Grid(domain, Vector3<real_t>(5,5,5) - dx * 30, spacing) )
+   for ( const auto pt : Grid(domain, Vector3<real_t>(5,5,5) - dx * 30, spacing) )
    {
       WALBERLA_CHECK( lowerIt != endIt );
       WALBERLA_CHECK_FLOAT_EQUAL( *lowerIt, pt);

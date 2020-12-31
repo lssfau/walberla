@@ -59,7 +59,7 @@ void test( const std::string & filename, const Vector3<uint_t> & size, const std
       
       CellInterval ci( 0, 0, 0, cell_idx_c( size[0] ) - 1, cell_idx_c( size[1] ) - 1, cell_idx_c( size[2] ) - 1 );
 
-      for (const Cell & c : ci)
+      for (const Cell c : ci)
       {
          field->get( c ) = brf.get( uint_c( c[0] ), uint_c( c[1] ), uint_c( c[2] ) );
       }
@@ -100,7 +100,7 @@ void testScaled( const std::string & filename, const Vector3<uint_t> & size, con
 
       CellInterval ci( 0, 0, 0, cell_idx_c( scaledSize[0] ) - 1, cell_idx_c( scaledSize[1] ) - 1, cell_idx_c( scaledSize[2] ) - 1 );
 
-      for (const Cell & c : ci)
+      for (const Cell c : ci)
       {
          auto pos = blocks->getBlockLocalCellCenter( block, c );
          field->get( c ) = brfi.get( pos );
