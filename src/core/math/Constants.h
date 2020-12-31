@@ -30,12 +30,6 @@
 #include <cmath>
 #include <core/DataTypes.h>
 
-// Disable false warnings in GCC 5
-#if (defined __GNUC__) && (__GNUC__ == 5) && (__GNUC_MINOR__ == 1)
-#   pragma GCC diagnostic push
-#   pragma GCC diagnostic ignored "-Wunused-variable"
-#endif
-
 namespace walberla
 {
 namespace math

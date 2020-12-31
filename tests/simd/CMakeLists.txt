@@ -8,12 +8,8 @@
 
 # builds the test
 
-if ( CMAKE_COMPILER_IS_GNUCXX )
-   if( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
-      set( MarchNativeString "" )
-   else()
-      set( MarchNativeString "-march=native" )
-   endif()
+if ( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_CLANG )
+  set( MarchNativeString "-march=native" )
 endif()
 
 waLBerla_compile_test( NAME   AVX2_AVX_Equivalence FILES SIMD_Equivalence.cpp  )

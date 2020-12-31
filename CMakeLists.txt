@@ -227,9 +227,6 @@ mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_CLANG )
 
 if( CMAKE_CXX_COMPILER_ID MATCHES Cray )
     option ( WALBERLA_CXX_COMPILER_IS_CRAY "Use Cray compiler" ON   )
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.4)
-        message( FATAL_ERROR "Insufficient Cray Compiler Environment version" )
-    endif()
 else()
     option ( WALBERLA_CXX_COMPILER_IS_CRAY "Use Cray compiler" OFF  )
 endif()
@@ -690,8 +687,14 @@ endif( Boost_FOUND )
 ##
 ############################################################################################################################
 
-if ( NOT WIN32 )
-   add_flag( CMAKE_CXX_FLAGS "-pthread" )
+set( THREADS_PREFER_PTHREAD_FLAG TRUE )
+find_package(Threads)
+if ( Threads_FOUND )
+   if( CMAKE_USE_PTHREADS_INIT )
+      add_flag( CMAKE_CXX_FLAGS "-pthread" )
+   else()
+      add_flag( CMAKE_CXX_FLAGS "${CMAKE_THREAD_LIBS_INIT}" )
+   endif()
 endif()
 
 
@@ -975,10 +978,7 @@ endif()
 option ( WALBERLA_THREAD_SAFE_LOGGING "Enables/Disables thread-safe logging" ON )
 
 if ( WALBERLA_BUILD_WITH_OPENMP )
-    if ( WALBERLA_CXX_COMPILER_IS_INTEL AND "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "16.0.3" )
-       add_flag ( CMAKE_C_FLAGS   "-openmp" )
-       add_flag ( CMAKE_CXX_FLAGS "-openmp" )
-    elseif ( WALBERLA_CXX_COMPILER_IS_NEC )
+    if ( WALBERLA_CXX_COMPILER_IS_NEC )
        add_flag ( CMAKE_C_FLAGS   "-Popenmp" )
        add_flag ( CMAKE_CXX_FLAGS "-Popenmp" )
     else()
@@ -1089,31 +1089,7 @@ endif()
 ##
 ############################################################################################################################
 if ( WALBERLA_BUILD_WITH_LTO  )
-
-   if( WALBERLA_CXX_COMPILER_IS_INTEL )
-      add_flag( CMAKE_CXX_FLAGS_RELEASE "-ip -ipo3" )
-      add_flag( CMAKE_C_FLAGS_RELEASE   "-ip -ipo3" )
-   endif()
-
-   if ( CMAKE_COMPILER_IS_GNUCXX )
-      add_flag ( CMAKE_C_FLAGS_RELEASE     "-flto=3" )
-      add_flag ( CMAKE_CXX_FLAGS_RELEASE   "-flto=3" )
-      add_flag ( CMAKE_EXE_LINKER_FLAGS    "-fuse-linker-plugin" )
-   endif ( )
-
-   if( WALBERLA_CXX_COMPILER_IS_MSVC )
-      add_flag ( CMAKE_CXX_FLAGS_RELEASE           "/GL"   )
-      add_flag ( CMAKE_EXE_LINKER_FLAGS_RELEASE    "/LTCG" )
-      add_flag ( CMAKE_SHARED_LINKER_FLAGS_RELEASE "/LTCG" )
-      add_flag ( CMAKE_MODULE_LINKER_FLAGS_RELEASE "/LTCG" )
-   endif ( )
-
-   if( WALBERLA_CXX_COMPILER_IS_IBM )
-      add_flag ( CMAKE_C_FLAGS_RELEASE     "-qipa" )
-      add_flag ( CMAKE_CXX_FLAGS_RELEASE   "-qipa" )
-      add_flag ( CMAKE_EXE_LINKER_FLAGS    "-qipa" )
-   endif( )
-
+    set( CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE )
 endif ( )
 
 ############################################################################################################################

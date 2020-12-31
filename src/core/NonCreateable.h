@@ -35,34 +35,8 @@ namespace walberla{
 
 class NonCreateable {
 
-#ifndef _MSC_VER
-
-   // non-MSVC-Build
-
-private:
-
-    NonCreateable();
-   ~NonCreateable();
-
-   NonCreateable(const NonCreateable&);
-   NonCreateable& operator=(const NonCreateable&);
-
-#else
-
-   // MSVC-Build (eliminating warning C4624)
-
-private:
-
-   NonCreateable();
-   NonCreateable(const NonCreateable&);
-
-   NonCreateable& operator=(const NonCreateable&);
-
-protected:
-
-   ~NonCreateable();
-
-#endif
+public:
+   NonCreateable() = delete;
 
 };
 

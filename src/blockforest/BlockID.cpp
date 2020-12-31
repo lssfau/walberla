@@ -135,11 +135,9 @@ void BlockID::toByteArray( std::vector< uint8_t >& array, const uint_t offset, c
 
 #else
 
-#ifdef WALBERLA_CXX_COMPILER_IS_MSVC
-namespace { char dummy; } // disable MSVC warning LNK4221: This object file does not define any previously
-                          // undefined public symbols, so it will not be used by any link operation that
-                          // consumes this library
-#endif
+namespace internal {
+char dummy; // silence linker warning about object file with no symbols
+}
 
 #endif
 

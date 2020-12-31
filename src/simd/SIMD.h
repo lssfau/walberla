@@ -127,7 +127,7 @@ namespace simd {
 
 template<typename T> struct is_vector4_type {  static const bool value = false; };
 
-#if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) && ( __GNUC__ >= 6 )
+#ifdef WALBERLA_CXX_COMPILER_IS_GNU
 #   pragma GCC diagnostic push
 #   pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
@@ -168,7 +168,7 @@ template<typename T> struct is_vector4_type {  static const bool value = false; 
 #endif
 
 
-#if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) && ( __GNUC__ >= 6 )
+#ifdef WALBERLA_CXX_COMPILER_IS_GNU
 #   pragma GCC diagnostic pop
 #endif
 

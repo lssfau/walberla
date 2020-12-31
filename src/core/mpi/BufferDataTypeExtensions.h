@@ -143,13 +143,6 @@ void sendContainer( GenericSendBuffer<T,G> & buf, const Cont & container )
 }
 
 
-#ifdef WALBERLA_CXX_COMPILER_IS_GNU
-#if __GNUC__ == 4 && __GNUC_MINOR__ == 9 || __GNUC__ == 6
-#pragma GCC push_options
-#pragma GCC optimize(2)
-#endif
-#endif
-
 template< typename T,    // Element type of RecvBuffer
           typename Cont> // Container
 void recvContainer( GenericRecvBuffer<T> & buf, Cont & container )
@@ -161,12 +154,6 @@ void recvContainer( GenericRecvBuffer<T> & buf, Cont & container )
    for( typename Cont::iterator it = container.begin(); it != container.end(); ++it )
       buf >> *it;
 }
-
-#ifdef WALBERLA_CXX_COMPILER_IS_GNU
-#if __GNUC__ == 4 && __GNUC_MINOR__ == 9 || __GNUC__ == 6
-#pragma GCC pop_options
-#endif
-#endif
 
 
 

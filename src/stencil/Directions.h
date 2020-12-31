@@ -10,7 +10,6 @@
 
 // core includes
 #include "core/DataTypes.h"
-#include "core/NonCreateable.h"
 #include "core/cell/Cell.h"
 #include "core/debug/Debug.h"
 
