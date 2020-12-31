@@ -2230,7 +2230,7 @@ inline void BoundaryHandling< FlagField_T, Stencil, Boundaries... >::operator()(
 
    WALBERLA_ASSERT( checkConsistency( localCells ) );
 
-   #ifdef _OPENMP
+   #if defined(_OPENMP) && !(defined(_MSC_VER) && _MSC_VER < 1925)
    const int zMin = int_c( localCells.zMin() );
    const int zMax = int_c( localCells.zMax() );
    #pragma omp parallel for schedule(static) if(threadSafeBCs_)
