@@ -225,12 +225,20 @@ else()
 endif()
 mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_CLANG )
 
+# Check for Cray compiler
 if( CMAKE_CXX_COMPILER_ID MATCHES Cray )
     option ( WALBERLA_CXX_COMPILER_IS_CRAY "Use Cray compiler" ON   )
 else()
     option ( WALBERLA_CXX_COMPILER_IS_CRAY "Use Cray compiler" OFF  )
 endif()
 mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_CRAY )
+
+if( CMAKE_CXX_COMPILER MATCHES "pgc\\+\\+" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "pgc\\+\\+" )
+    option ( WALBERLA_CXX_COMPILER_IS_PGI "Use PGI compiler" ON  )
+else()
+    option ( WALBERLA_CXX_COMPILER_IS_PGI "Use PGI compiler" OFF  )
+endif()
+mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_PGI )
 
 # Check for MPI wrapper
 get_filename_component( CXX_COMPILER_WITHOUT_PATH ${CMAKE_CXX_COMPILER} NAME )
@@ -328,6 +336,21 @@ if( WALBERLA_CXX_COMPILER_IS_CRAY )
    add_flag ( CMAKE_CXX_FLAGS "-h nomessage=1" )      # CC-1    The source file does not end with a new-line character.
    add_flag ( CMAKE_C_FLAGS   "-DSQLITE_HAVE_ISNAN" ) # SQLite will not work correctly with the -ffast-math option of GCC.
    add_flag ( CMAKE_CXX_FLAGS "-DSQLITE_HAVE_ISNAN" ) # SQLite will not work correctly with the -ffast-math option of GCC.
+endif()
+
+# Silences compiler and linker warnings and information with the PGI compiler
+if( WALBERLA_CXX_COMPILER_IS_PGI )
+   add_flag ( CMAKE_CXX_FLAGS "--display_error_number" )
+   add_flag ( CMAKE_C_FLAGS "--display_error_number" )
+   if( CMAKE_VERSION VERSION_LESS "3.19" )
+      #  https://github.com/Kitware/CMake/commit/52eee1938919deb59cc2b51d44f365f0d9a418e5
+      set( CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION "--c++${CMAKE_CXX_STANDARD}" )
+   endif()
+   add_flag ( CMAKE_CXX_FLAGS "--diag_suppress=1" )   # last line of file ends without a newline
+   add_flag ( CMAKE_CXX_FLAGS "--diag_suppress=111" ) # statement is unreachable
+   add_flag ( CMAKE_C_FLAGS "--diag_suppress=111" )   # statement is unreachable
+   add_flag ( CMAKE_C_FLAGS "--diag_suppress=550" )   # variable [...] was set but never used
+   add_flag ( CMAKE_C_FLAGS "--diag_suppress=191" )   # type qualifier is meaningless on cast type
 endif()
 
 # architecture optimization
