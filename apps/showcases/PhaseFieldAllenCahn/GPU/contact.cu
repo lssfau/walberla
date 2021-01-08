@@ -41,25 +41,25 @@ namespace lbm
 
 namespace internal_boundary_contact
 {
-static FUNC_PREFIX void contact_angle_treatment(uint8_t* RESTRICT const _data_indexVector, double* RESTRICT _data_phase,
+static FUNC_PREFIX void contact_angle_treatment(uint8_t* WALBERLA_RESTRICT const _data_indexVector, double* WALBERLA_RESTRICT _data_phase,
                                                 int64_t const _stride_phase_0, int64_t const _stride_phase_1,
                                                 int64_t const _stride_phase_2, int64_t indexVectorSize, double alpha)
 {
    if (blockDim.x * blockIdx.x + threadIdx.x < indexVectorSize)
    {
-      uint8_t* RESTRICT _data_indexVector_10 = _data_indexVector;
+      uint8_t* WALBERLA_RESTRICT _data_indexVector_10 = _data_indexVector;
       const int32_t x = *((int32_t*) (&_data_indexVector_10[24 * blockDim.x * blockIdx.x + 24 * threadIdx.x]));
-      uint8_t* RESTRICT _data_indexVector_14 = _data_indexVector + 4;
+      uint8_t* WALBERLA_RESTRICT _data_indexVector_14 = _data_indexVector + 4;
       const int32_t y = *((int32_t*) (&_data_indexVector_14[24 * blockDim.x * blockIdx.x + 24 * threadIdx.x]));
-      uint8_t* RESTRICT _data_indexVector_18 = _data_indexVector + 8;
+      uint8_t* WALBERLA_RESTRICT _data_indexVector_18 = _data_indexVector + 8;
       const int32_t z = *((int32_t*) (&_data_indexVector_18[24 * blockDim.x * blockIdx.x + 24 * threadIdx.x]));
-      uint8_t* RESTRICT _data_indexVector_112 = _data_indexVector + 12;
+      uint8_t* WALBERLA_RESTRICT _data_indexVector_112 = _data_indexVector + 12;
       const int32_t nx = *((int32_t*) (&_data_indexVector_112[24 * blockDim.x * blockIdx.x + 24 * threadIdx.x]));
       const int32_t x1 = x + nx;
-      uint8_t* RESTRICT _data_indexVector_116 = _data_indexVector + 16;
+      uint8_t* WALBERLA_RESTRICT _data_indexVector_116 = _data_indexVector + 16;
       const int32_t ny = *((int32_t*) (&_data_indexVector_116[24 * blockDim.x * blockIdx.x + 24 * threadIdx.x]));
       const int32_t y1 = y + ny;
-      uint8_t* RESTRICT _data_indexVector_200 = _data_indexVector + 20;
+      uint8_t* WALBERLA_RESTRICT _data_indexVector_200 = _data_indexVector + 20;
       const int32_t nz = *((int32_t*) (&_data_indexVector_200[24 * blockDim.x * blockIdx.x + 24 * threadIdx.x]));
       const int32_t z1 = z + nz;
 
@@ -67,8 +67,8 @@ static FUNC_PREFIX void contact_angle_treatment(uint8_t* RESTRICT const _data_in
       const double a = cos(alpha);
       const double W = 5;
 
-      double* RESTRICT _phase_wall     = _data_phase + _stride_phase_1 * y + _stride_phase_2 * z;
-      double* RESTRICT _phase_interior = _data_phase + _stride_phase_1 * y1 + _stride_phase_2 * z1;
+      double* WALBERLA_RESTRICT _phase_wall     = _data_phase + _stride_phase_1 * y + _stride_phase_2 * z;
+      double* WALBERLA_RESTRICT _phase_interior = _data_phase + _stride_phase_1 * y1 + _stride_phase_2 * z1;
       if (h < 0.001) { _phase_wall[_stride_phase_0 * x] = 1.0; }
       else if (a > 1e-8 || a < -1e-8)
       {
@@ -107,7 +107,7 @@ void contact::run(IBlock* block, IndexVectors::Type type, cudaStream_t stream)
 
    auto& alpha = this->alpha_;
    WALBERLA_ASSERT_GREATER_EQUAL(0, -int_c(phaseField->nrOfGhostLayers()))
-   double* RESTRICT _data_phase = phaseField->dataAt(0, 0, 0, 0);
+   double* WALBERLA_RESTRICT _data_phase = phaseField->dataAt(0, 0, 0, 0);
    const auto _stride_pdfs_0    = int64_t(phaseField->xStride());
    const auto _stride_pdfs_1    = int64_t(phaseField->yStride());
    const auto _stride_pdfs_2    = int64_t(phaseField->zStride());

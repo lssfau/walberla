@@ -222,8 +222,8 @@ struct leastUnsignedInteger
 };
 
 /// \cond internal
-static const uint_t UINT_BITS  = static_cast< uint_t >( std::numeric_limits< uint_t >::digits );
-static const uint_t UINT_BYTES = static_cast< uint_t >( std::numeric_limits< uint_t >::digits ) >> 3;
+static constexpr uint_t UINT_BITS  = static_cast< uint_t >( std::numeric_limits< uint_t >::digits );
+static constexpr uint_t UINT_BYTES = static_cast< uint_t >( std::numeric_limits< uint_t >::digits ) >> 3;
 
 static_assert( !(UINT_BITS & (UINT_BITS - 1)), "Type \"uint_t\" must consist of 2^x Bits!" ); // power of two
 
@@ -231,18 +231,17 @@ template< int N >
 struct int_ld
 {
    static_assert( N >= 1 && !(N & (N - 1)), "Calculating log_2(N) -> \"N\" must be a power of two!" );
-   static const uint_t exp = 1 + int_ld< (N >> 1) >::exp;
+   static constexpr uint_t exp = 1 + int_ld< (N >> 1) >::exp;
+   static_assert( exp > 0 );
 };
-
-template< int N > const uint_t int_ld<N>::exp;
 
 template<>
 struct int_ld<1>
 {
-   static const uint_t exp = 0;
+   static constexpr uint_t exp = 0;
 };
 
-static const uint_t UINT_BITS_LD = int_ld< std::numeric_limits< uint_t >::digits >::exp;
+static constexpr uint_t UINT_BITS_LD = int_ld< std::numeric_limits< uint_t >::digits >::exp;
 /// \endcond
 
 } // namespace math

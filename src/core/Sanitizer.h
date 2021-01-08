@@ -21,16 +21,15 @@
 
 #pragma once
 
-#if (( defined WALBERLA_CXX_COMPILER_IS_CLANG ) && ( __clang_major__ >=4 )  )  \
- || (( defined WALBERLA_CXX_COMPILER_IS_GNU )   && ( __GNUC__ >= 5 ) )
+#if defined(WALBERLA_CXX_COMPILER_IS_CLANG) || defined(WALBERLA_CXX_COMPILER_IS_GNU)
 # define ATTRIBUTE_NO_SANITIZE_ADDRESS __attribute__((no_sanitize_address))
 #else
 # define ATTRIBUTE_NO_SANITIZE_ADDRESS
 #endif
 
-#if ( ( defined WALBERLA_CXX_COMPILER_IS_GNU ) && ( __GNUC__ >= 5 ) )
+#if defined(WALBERLA_CXX_COMPILER_IS_GNU)
 # define ATTRIBUTE_NO_SANITIZE_UNDEFINED __attribute__((no_sanitize_undefined))
-#elif (( defined WALBERLA_CXX_COMPILER_IS_CLANG ) && ( __clang_major__ >= 4 ) )
+#elif defined(WALBERLA_CXX_COMPILER_IS_CLANG)
 # define ATTRIBUTE_NO_SANITIZE_UNDEFINED __attribute__((no_sanitize("undefined")))
 #else
 # define ATTRIBUTE_NO_SANITIZE_UNDEFINED

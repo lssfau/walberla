@@ -1661,7 +1661,7 @@ bool BlockForest::determineBlockTargetLevels( bool & additionalRefreshCycleRequi
             minTargetLevels[id] = minTargetLevel;
          }
       }
-#ifndef NDEBUF
+#ifndef NDEBUG
       else
       {
          WALBERLA_ASSERT_LESS_EQUAL( minTargetLevel, level + uint_t(1) );

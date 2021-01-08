@@ -22,36 +22,13 @@
 #include "Sleep.h"
 #include "waLBerlaDefinitions.h"
 
-#ifdef WALBERLA_CXX_COMPILER_IS_MSVC
-
-#include <windows.h>
+#include <thread>
 
 namespace walberla {
 
-   void sleep( uint_t seconds )
-   {
-      ::Sleep( static_cast<DWORD>( uint_t(1000) * seconds ) );
-   }
-
+void sleep( uint_t seconds )
+{
+   std::this_thread::sleep_for(std::chrono::seconds(static_cast<int>(seconds)));
 }
 
-#else
-
-#ifdef WALBERLA_CXX_COMPILER_IS_IBM
-#ifndef _POSIX_SOURCE
-#define _POSIX_SOURCE
-#endif
-#endif
-
-#include <unistd.h>
-
-namespace walberla {
-
-   void sleep( uint_t seconds )
-   {
-      ::sleep( static_cast<unsigned int>(seconds) );
-   }
-
 }
-
-#endif

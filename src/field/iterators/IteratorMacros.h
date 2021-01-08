@@ -149,7 +149,7 @@
 
 #ifdef _OPENMP
 
-#ifdef WALBERLA_CXX_COMPILER_IS_MSVC
+#if (defined(_MSC_VER) && _MSC_VER < 1926)
 
 #define WALBERLA_FOR_ALL_CELLS_XYZ_OMP( field, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \
@@ -875,7 +875,7 @@
       } \
    } }
 
-#else // == not WALBERLA_CXX_COMPILER_IS_MSVC
+#else // == MSVC >= 2019 16.6 or not MSVC
 
 #define WALBERLA_FOR_ALL_CELLS_XYZ_OMP( field, omp, CODE ) \
    { WALBERLA_ASSERT_NOT_NULLPTR_1( (field) ); \

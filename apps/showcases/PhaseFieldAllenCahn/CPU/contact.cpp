@@ -36,7 +36,7 @@ namespace lbm
 
 namespace internal_boundary_contact
 {
-static FUNC_PREFIX void contact_angle_treatment(uint8_t* RESTRICT const _data_indexVector, double* RESTRICT _data_phase,
+static FUNC_PREFIX void contact_angle_treatment(uint8_t* WALBERLA_RESTRICT const _data_indexVector, double* WALBERLA_RESTRICT _data_phase,
                                                 int64_t const _stride_phase_0, int64_t const _stride_phase_1,
                                                 int64_t const _stride_phase_2, int64_t indexVectorSize, double alpha)
 {
@@ -58,8 +58,8 @@ static FUNC_PREFIX void contact_angle_treatment(uint8_t* RESTRICT const _data_in
       const double a = cos(alpha);
       const double W = 5;
 
-      double* RESTRICT _phase_wall     = _data_phase + _stride_phase_1 * y + _stride_phase_2 * z;
-      double* RESTRICT _phase_interior = _data_phase + _stride_phase_1 * y1 + _stride_phase_2 * z1;
+      double* WALBERLA_RESTRICT _phase_wall     = _data_phase + _stride_phase_1 * y + _stride_phase_2 * z;
+      double* WALBERLA_RESTRICT _phase_interior = _data_phase + _stride_phase_1 * y1 + _stride_phase_2 * z1;
       if (h < 0.001) { _phase_wall[_stride_phase_0 * x] = 1.0; }
       else if (a > 1e-8 || a < -1e-8)
       {
@@ -98,7 +98,7 @@ void contact::run(IBlock* block, IndexVectors::Type type)
    auto& alpha     = this->alpha_;
 
    WALBERLA_ASSERT_GREATER_EQUAL(0, -int_c(phaseField->nrOfGhostLayers()))
-   double* RESTRICT _data_phase = phaseField->dataAt(0, 0, 0, 0);
+   double* WALBERLA_RESTRICT _data_phase = phaseField->dataAt(0, 0, 0, 0);
    const auto _stride_pdfs_0    = int64_t(phaseField->xStride());
    const auto _stride_pdfs_1    = int64_t(phaseField->yStride());
    const auto _stride_pdfs_2    = int64_t(phaseField->zStride());

@@ -28,23 +28,6 @@
 
 #ifdef WALBERLA_BUILD_WITH_PYTHON // macro defined in waLBerlaDefinitions.h
 
-#ifdef _MSC_VER
-#pragma warning ( push, 3 )
-#pragma warning ( disable: 4244 4275 4800 4251 4267 )
-#ifndef HAVE_ROUND
-#define HAVE_ROUND 1
-#define __CREATED_HAVE_ROUND
-#endif
-#endif
-
 #include "pybind11/pybind11.h"
-
-#ifdef _MSC_VER
-#ifdef __CREATED_HAVE_ROUND
-#undef HAVE_ROUND
-#undef __CREATED_HAVE_ROUND
-#endif
-#pragma warning ( pop )
-#endif
 
 #endif

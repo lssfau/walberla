@@ -27,9 +27,7 @@
 #   pragma warning( disable : 4706 )
 #elif ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
 #   pragma GCC diagnostic push
-#   if !( ( __clang_major__ == 3 ) && ( __clang_minor__ <= 4 ) )
-#     pragma GCC diagnostic ignored "-Wpragmas"
-#   endif
+#   pragma GCC diagnostic ignored "-Wpragmas"
 #   pragma GCC diagnostic ignored "-Wsign-conversion"
 #   pragma GCC diagnostic ignored "-Wconversion"
 #   pragma GCC diagnostic ignored "-Wshorten-64-to-32"
