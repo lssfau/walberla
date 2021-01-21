@@ -23,7 +23,7 @@
 #include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>
 
-#include <mesa_pd/kernel/VBondModel/VBondContact.h>
+#include <mesa_pd/kernel/cnt/VBondContact.h>
 
 #include <core/Environment.h>
 #include <core/logging/Logging.h>
@@ -61,7 +61,7 @@ int main( int argc, char ** argv )
    data::ParticleAccessor accessor(ps);
 
    //init kernels
-   kernel::VBondModel::VBondContact vbond;
+   kernel::cnt::VBondContact vbond;
 
    //check equilibrium distance
    vbond(0, 1, accessor);

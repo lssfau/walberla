@@ -40,10 +40,17 @@
 namespace walberla {
 namespace mesa_pd {
 namespace kernel {
-namespace VBondModel {
+namespace cnt {
 
 /**
- * Advanced DEM kernel
+ * VBond interaction model
+ *
+ * Implementation according to:
+ *
+ * Ostanin, I., Dumitrică, T., Eibl, S., and Rüde, U. (October 4, 2019).
+ * "Size-Independent Mechanical Response of Ultrathin Carbon Nanotube Films in Mesoscopic Distinct Element Method Simulations."
+ * ASME. J. Appl. Mech. December 2019; 86(12): 121006.
+ * https://doi.org/10.1115/1.4044413
  */
 class VBondContact
 {
@@ -61,7 +68,7 @@ public:
    static constexpr real_t Jp = 2_r * J;
 
    // Stiffnesses, equilibrium length etc
-   static constexpr real_t B1 = E * S / a; // Need to calibrate
+   static constexpr real_t B1 = E * S / a;
    static constexpr real_t B2 = 12_r * E * J / a;
    static constexpr real_t B3 = -2_r * E * J / a - G * Jp / (2_r * a);
    static constexpr real_t B4 = G * Jp / a;
@@ -69,28 +76,13 @@ public:
    Vector3<bool> isPeriodic_;
    Vector3<int64_t> maxSegments_;
 
-
-   // Calibration through atomistic simulation
-   //constexpr real_t B1 = 60.1_r;
-   //constexpr real_t B2 = 17100_r;
-   //constexpr real_t B3 = 3610_r;
-   //constexpr real_t B4 = 1107_r;
-
-   real_t U;
-   real_t U_1;
-   real_t U_2;
-   real_t U_3;
-   real_t U_4;
+   real_t tensileEnergy;
+   real_t shearEnergy;
+   real_t bendingEnergy;
+   real_t twistingEnergy;
 };
 
-/**
- *
- * @tparam Accessor
- * @param p_idx1
- * @param p_idx2
- * @param ac
- * @return vdW adhesion energy
- */
+
 template<typename Accessor>
 inline
 void VBondContact::operator()(const size_t p_idx1,
@@ -121,28 +113,10 @@ void VBondContact::operator()(const size_t p_idx1,
 
    real_t C = 1_r;
 
-   /*
-           //srand(SID_1);
-           double AA = 0.2 + 0.2 * ((rand() % 1000)/1000); //strain of initiation of stress corrosion
-           //double BB = 0.01; // width of stress corrosion band
-           //double DD = 1. + AA/BB;
-           //double KK = 1 / BB;
-           //if (((std::fabs((s-a)/s))>AA)&&((std::fabs((s-a)/s))<=AA+BB)) C = DD - std::fabs((s-a)/s) * KK;
-           //if ((std::fabs((s-a)/s))>AA+BB) C = 0;
-           if ((std::fabs((s-a)/s))>AA) C = 0;
-
-           // Potential energy
-           real_t U_1 = C * 0.5 * B1 * (s - a) * (s - a);
-           real_t U_2 = C * 0.5 * B2 * (nj1 - ni1) * dij + B2;
-           real_t U_3 = C * B3 * ni1 * nj1 + B3;
-           real_t U_4 = C * -0.5 * B4 * (ni2 * nj2 + ni3 * nj3) + B4;
-           real_t U = U_1 + U_2 + U_3 + U_4;
-   */
-   U_1 = 0.5_r * B1 * (s - a) * (s - a);
-   U_2 = B2 * (0.5_r * (nj1 - ni1) * dij - 0.25_r * ni1 * nj1 + 0.75_r);
-   U_3 = (0.25_r * B2 + B3 + 0.5_r * B4) * (ni1 * nj1 + 1_r);
-   U_4 = -0.5_r * B4 * (ni1 * nj1 + ni2 * nj2 + ni3 * nj3 - 1_r);
-   U = U_1 + U_2 + U_3 + U_4;
+   tensileEnergy  = 0.5_r * B1 * (s - a) * (s - a);
+   shearEnergy    = B2 * (0.5_r * (nj1 - ni1) * dij - 0.25_r * ni1 * nj1 + 0.75_r);
+   bendingEnergy  = (0.25_r * B2 + B3 + 0.5_r * B4) * (ni1 * nj1 + 1_r);
+   twistingEnergy = -0.5_r * B4 * (ni1 * nj1 + ni2 * nj2 + ni3 * nj3 - 1_r);
 
    Vec3 rij = dij;
 
@@ -158,7 +132,7 @@ void VBondContact::operator()(const size_t p_idx1,
    addTorqueAtomic(p_idx2, ac, Mji);
 }
 
-} //namespace VBondModel
+} //namespace cnt
 } //namespace kernel
 } //namespace mesa_pd
 } //namespace walberla
