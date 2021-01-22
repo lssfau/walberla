@@ -95,11 +95,11 @@ private:
 
 public:
    //**Constructors*****************************************************************************************************
-   explicit inline Matrix3() = default;
-   explicit inline Matrix3( Type init );
-   explicit inline Matrix3( const Vector3<Type>& a, const Vector3<Type>& b, const Vector3<Type>& c );
-   explicit inline Matrix3( Type xx, Type xy, Type xz, Type yx, Type yy, Type yz, Type zx, Type zy, Type zz );
-   explicit inline Matrix3( const Type* init );
+   explicit inline constexpr Matrix3() = default;
+   explicit inline constexpr Matrix3( Type init );
+   explicit inline constexpr Matrix3( const Vector3<Type>& a, const Vector3<Type>& b, const Vector3<Type>& c );
+   explicit inline constexpr Matrix3( Type xx, Type xy, Type xz, Type yx, Type yy, Type yz, Type zx, Type zy, Type zz );
+   explicit inline constexpr Matrix3( const Type* init );
 
    template< typename Axis, typename Angle >
    explicit Matrix3( Vector3<Axis> axis, Angle angle );
@@ -274,7 +274,7 @@ static_assert( std::is_trivially_copyable<Matrix3<real_t>>::value, "Matrix3<real
 // \param init Initial value for all matrix elements.
 */
 template< typename Type >
-inline Matrix3<Type>::Matrix3( Type init )
+inline constexpr Matrix3<Type>::Matrix3( Type init )
 {
    v_[0] = v_[1] = v_[2] = v_[3] = v_[4] = v_[5] = v_[6] = v_[7] = v_[8] = init;
 }
@@ -289,7 +289,7 @@ inline Matrix3<Type>::Matrix3( Type init )
 // \param c The third column of the matrix.
 //**********************************************************************************************************************
 template< typename Type >
-inline Matrix3<Type>::Matrix3( const Vector3<Type>& a, const Vector3<Type>& b, const Vector3<Type>& c )
+inline constexpr Matrix3<Type>::Matrix3( const Vector3<Type>& a, const Vector3<Type>& b, const Vector3<Type>& c )
 {
    v_[0] = a[0]; v_[1] = b[0]; v_[2] = c[0];
    v_[3] = a[1]; v_[4] = b[1]; v_[5] = c[1];
@@ -313,9 +313,9 @@ inline Matrix3<Type>::Matrix3( const Vector3<Type>& a, const Vector3<Type>& b, c
 // \param zz The initial value for the zz-component.
 */
 template< typename Type >
-inline Matrix3<Type>::Matrix3( Type xx, Type xy, Type xz,
-                               Type yx, Type yy, Type yz,
-                               Type zx, Type zy, Type zz )
+inline constexpr Matrix3<Type>::Matrix3( Type xx, Type xy, Type xz,
+                                         Type yx, Type yy, Type yz,
+                                         Type zx, Type zy, Type zz )
 {
    v_[0] = xx; v_[1] = xy; v_[2] = xz;
    v_[3] = yx; v_[4] = yy; v_[5] = yz;
@@ -333,7 +333,7 @@ inline Matrix3<Type>::Matrix3( Type xx, Type xy, Type xz,
 // The array is assumed to have at least nine valid elements.
 */
 template< typename Type >
-inline Matrix3<Type>::Matrix3( const Type* init )
+inline constexpr Matrix3<Type>::Matrix3( const Type* init )
 {
    v_[0] = init[0];
    v_[1] = init[1];
