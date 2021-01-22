@@ -1045,6 +1045,7 @@ if ( WALBERLA_BUILD_WITH_CUDA )
 
       #CUDA_FOUND is need for our cmake mechanism
       set ( CUDA_FOUND TRUE )
+      set(CMAKE_CUDA_STANDARD_REQUIRED OFF)
     else()
       set ( WALBERLA_BUILD_WITH_CUDA FALSE )
     endif ( )
