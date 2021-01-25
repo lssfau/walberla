@@ -87,16 +87,16 @@ private:
 
 public:
    //**Constructors*****************************************************************************************************
-   explicit inline Matrix2();
-   explicit inline Matrix2( Type init );
-   explicit inline Matrix2( Type xx, Type xy, Type yx, Type yy );
-   explicit inline Matrix2( const Type* init );
+   explicit inline constexpr Matrix2();
+   explicit inline constexpr Matrix2( Type init );
+   explicit inline constexpr Matrix2( Type xx, Type xy, Type yx, Type yy );
+   explicit inline constexpr Matrix2( const Type* init );
 
 
-   inline Matrix2( const Matrix2& m );
+   inline constexpr Matrix2( const Matrix2& m );
 
    template< typename Other >
-   inline Matrix2( const Matrix2<Other>& m );
+   inline constexpr Matrix2( const Matrix2<Other>& m );
    //*******************************************************************************************************************
 
    //**Destructor*******************************************************************************************************
@@ -189,7 +189,7 @@ private:
 // with 0.
 */
 template< typename Type >
-inline Matrix2<Type>::Matrix2()
+inline constexpr Matrix2<Type>::Matrix2()
 {
    v_[0] = v_[3] = Type(1);
    v_[1] = v_[2] = Type(0);
@@ -204,7 +204,7 @@ inline Matrix2<Type>::Matrix2()
 // \param init Initial value for all matrix elements.
 */
 template< typename Type >
-inline Matrix2<Type>::Matrix2( Type init )
+inline constexpr Matrix2<Type>::Matrix2( Type init )
 {
    v_[0] = v_[1] = v_[2] = v_[3] = init;
 }
@@ -221,8 +221,8 @@ inline Matrix2<Type>::Matrix2( Type init )
 // \param yy The initial value for the yy-component.
 */
 template< typename Type >
-inline Matrix2<Type>::Matrix2( Type xx, Type xy,
-                               Type yx, Type yy  )
+inline constexpr Matrix2<Type>::Matrix2( Type xx, Type xy,
+                                         Type yx, Type yy  )
 {
    v_[0] = xx; v_[1] = xy;
    v_[2] = yx; v_[3] = yy;
@@ -239,7 +239,7 @@ inline Matrix2<Type>::Matrix2( Type xx, Type xy,
 // The array is assumed to have at least nine valid elements.
 */
 template< typename Type >
-inline Matrix2<Type>::Matrix2( const Type* init )
+inline constexpr Matrix2<Type>::Matrix2( const Type* init )
 {
    v_[0] = init[0];
    v_[1] = init[1];
@@ -258,7 +258,7 @@ inline Matrix2<Type>::Matrix2( const Type* init )
 // The copy constructor is explicitly defined in order to enable/facilitate NRV optimization.
 */
 template< typename Type >
-inline Matrix2<Type>::Matrix2( const Matrix2& m )
+inline constexpr Matrix2<Type>::Matrix2( const Matrix2& m )
 {
    v_[0] = m.v_[0];
    v_[1] = m.v_[1];
@@ -276,7 +276,7 @@ inline Matrix2<Type>::Matrix2( const Matrix2& m )
 */
 template< typename Type >
 template< typename Other >
-inline Matrix2<Type>::Matrix2( const Matrix2<Other>& m )
+inline constexpr Matrix2<Type>::Matrix2( const Matrix2<Other>& m )
 {
    v_[0] = m.v_[0];
    v_[1] = m.v_[1];

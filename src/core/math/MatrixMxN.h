@@ -105,13 +105,13 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-                           explicit inline MatrixMxN();
-                           explicit inline MatrixMxN( size_t m, size_t n );
-                           explicit inline MatrixMxN( size_t m, size_t n, Type init );
-                                    inline MatrixMxN( const MatrixMxN& m );
+                           explicit inline constexpr MatrixMxN();
+                           explicit inline constexpr MatrixMxN( size_t m, size_t n );
+                           explicit inline constexpr MatrixMxN( size_t m, size_t n, Type init );
+                                    inline constexpr MatrixMxN( const MatrixMxN& m );
 
    template< typename Other, size_t M, size_t N >
-   inline MatrixMxN( const Other (&rhs)[M][N] );
+   inline constexpr MatrixMxN( const Other (&rhs)[M][N] );
    //@}
    //**********************************************************************************************
 
@@ -199,7 +199,7 @@ private:
 /*!\brief The default constructor for MatrixMxN.
  */
 template< typename Type >  // Data type of the matrix
-inline MatrixMxN<Type>::MatrixMxN()
+inline constexpr MatrixMxN<Type>::MatrixMxN()
    : m_       ( 0 )  // The current number of rows of the matrix
    , n_       ( 0 )  // The current number of columns of the matrix
    , capacity_( 0 )  // The maximum capacity of the matrix
@@ -218,7 +218,7 @@ inline MatrixMxN<Type>::MatrixMxN()
  *          element initialization is performed!
  */
 template< typename Type >  // Data type of the matrix
-inline MatrixMxN<Type>::MatrixMxN( size_t m, size_t n )
+inline constexpr MatrixMxN<Type>::MatrixMxN( size_t m, size_t n )
    : m_       ( m )                    // The current number of rows of the matrix
    , n_       ( n )                    // The current number of columns of the matrix
    , capacity_( m*n )                  // The maximum capacity of the matrix
@@ -237,7 +237,7 @@ inline MatrixMxN<Type>::MatrixMxN( size_t m, size_t n )
  * All matrix elements are initialized with the specified value.
  */
 template< typename Type >  // Data type of the matrix
-inline MatrixMxN<Type>::MatrixMxN( size_t m, size_t n, Type init )
+inline constexpr MatrixMxN<Type>::MatrixMxN( size_t m, size_t n, Type init )
    : m_       ( m )                    // The current number of rows of the matrix
    , n_       ( n )                    // The current number of columns of the matrix
    , capacity_( m*n )                  // The maximum capacity of the matrix
@@ -258,7 +258,7 @@ inline MatrixMxN<Type>::MatrixMxN( size_t m, size_t n, Type init )
  * and in order to enable/facilitate NRV optimization.
  */
 template< typename Type >  // Data type of the matrix
-inline MatrixMxN<Type>::MatrixMxN( const MatrixMxN& m )
+inline constexpr MatrixMxN<Type>::MatrixMxN( const MatrixMxN& m )
    : m_       ( m.m_  )                // The current number of rows of the matrix
    , n_       ( m.n_  )                // The current number of columns of the matrix
    , capacity_( m_*n_ )                // The maximum capacity of the matrix
@@ -292,7 +292,7 @@ template< typename Type >  // Data type of the matrix
 template< typename Other   // Data type of the initialization array
         , size_t M         // Number of rows of the initialization array
         , size_t N >       // Number of columns of the initialization array
-inline MatrixMxN<Type>::MatrixMxN( const Other (&rhs)[M][N] )
+inline constexpr MatrixMxN<Type>::MatrixMxN( const Other (&rhs)[M][N] )
    : m_       ( M )              // The current number of rows of the matrix
    , n_       ( N )              // The current number of columns of the matrix
    , capacity_( M*N )            // The maximum capacity of the matrix
