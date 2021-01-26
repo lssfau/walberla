@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# This file is from https://github.com/scikit-build/scikit-ci-addons/tree/master/anyci
+# Adapted from https://github.com/scikit-build/scikit-ci-addons/tree/master/anyci
 # under Apache 2.0 license.
 
 import os
@@ -107,29 +107,30 @@ def process(build_dir):
 
     <xsl:template match="Testing/Test">
         <xsl:variable name="testcasename"><xsl:value-of select= "Name"/></xsl:variable>
+        <xsl:variable name="testsuitename"><xsl:value-of select= "Path"/></xsl:variable>
         <xsl:variable name="exectime">
             <xsl:for-each select="Results/NamedMeasurement">
                 <xsl:if test="@name = 'Execution Time'">
-                    <xsl:value-of select="."/>
+                    <xsl:value-of select="Value"/>
                 </xsl:if>
             </xsl:for-each>
         </xsl:variable>
 
-        <testcase name="{$testcasename}" classname="TestSuite" time="{$exectime}">
+        <testcase name="{$testcasename}" classname="{$testsuitename}" time="{$exectime}">
             <xsl:if test="@Status = 'passed'">
             </xsl:if>
             <xsl:if test="@Status = 'failed'">
                 <xsl:variable name="failtype">
                     <xsl:for-each select="Results/NamedMeasurement">
                         <xsl:if test="@name = 'Exit Code'">
-                            <xsl:value-of select="."/>
+                            <xsl:value-of select="Value/text()"/>
                         </xsl:if>
                     </xsl:for-each>
                 </xsl:variable>
                 <xsl:variable name="failcode">
                     <xsl:for-each select="Results/NamedMeasurement">
                         <xsl:if test="@name = 'Exit Value'">
-                            <xsl:value-of select="."/>
+                            <xsl:value-of select="Value/text()"/>
                         </xsl:if>
                     </xsl:for-each>
                 </xsl:variable>
