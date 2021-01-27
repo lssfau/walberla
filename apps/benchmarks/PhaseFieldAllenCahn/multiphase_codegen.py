@@ -153,7 +153,7 @@ info_header = f"""
 """
 
 with CodeGeneration() as ctx:
-    if ctx.cuda is False:
+    if not ctx.cuda:
         if not ctx.optimize_for_localhost:
             cpu_vec = {'instruction_set': None}
 
