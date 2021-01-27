@@ -101,7 +101,7 @@ public:
 
    inline virtual ~Set() {}
 
-   static const Set<T>& emptySet() { static Set set; return set; }
+   static const Set<T> emptySet() { return {}; }
 
    inline std::pair<iterator,bool> insert( const T& element )                    { return set_.insert( element ); }
    inline iterator                 insert( iterator position, const T& element ) { return set_.insert( position, element ); }
