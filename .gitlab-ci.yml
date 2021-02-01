@@ -52,7 +52,9 @@ stages:
         -DWALBERLA_STL_BOUNDS_CHECKS=$WALBERLA_STL_BOUNDS_CHECKS
       - cmake . -LA
       - make -j $NUM_BUILD_CORES -l $NUM_CORES
-      - ctest -LE $CTEST_EXCLUDE_LABELS -C $CMAKE_BUILD_TYPE --output-on-failure -j $NUM_CORES
+      - ctest -LE $CTEST_EXCLUDE_LABELS -C $CMAKE_BUILD_TYPE --output-on-failure -j $NUM_CORES -T Test
+   after_script:
+      - python3 cmake/ctest2junit.py build > report.xml
    tags:
       - docker
    variables:
@@ -67,6 +69,12 @@ stages:
       WALBERLA_BUILD_WITH_METIS: "ON"
       WALBERLA_BUILD_WITH_PARMETIS: "ON"
       WALBERLA_ENABLE_GUI: "OFF"
+   artifacts:
+      when: always
+      reports:
+         junit:
+            - report.xml
+            - python/report.xml
 
 
 ###############################################################################
@@ -83,8 +91,7 @@ intel_19_serial:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -109,8 +116,7 @@ intel_19_mpionly:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -133,8 +139,7 @@ intel_19_hybrid:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -152,8 +157,7 @@ intel_19_serial_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -175,8 +179,7 @@ intel_19_mpionly_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -196,8 +199,7 @@ intel_19_hybrid_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -230,8 +232,7 @@ gcc_7_serial:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -255,8 +256,7 @@ gcc_7_mpionly:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -278,8 +278,7 @@ gcc_7_hybrid:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -300,8 +299,7 @@ gcc_7_serial_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -327,8 +325,7 @@ gcc_7_mpionly_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -351,8 +348,7 @@ gcc_7_hybrid_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -387,8 +383,7 @@ gcc_8_serial:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -412,8 +407,7 @@ gcc_8_mpionly:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -435,8 +429,7 @@ gcc_8_hybrid:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -457,8 +450,7 @@ gcc_8_serial_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -483,8 +475,7 @@ gcc_8_mpionly_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -507,8 +498,7 @@ gcc_8_hybrid_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -547,8 +537,7 @@ gcc_9_serial:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -570,8 +559,7 @@ gcc_9_mpionly:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -591,8 +579,7 @@ gcc_9_hybrid:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -611,8 +598,7 @@ gcc_9_serial_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -635,8 +621,7 @@ gcc_9_mpionly_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -657,8 +642,7 @@ gcc_9_hybrid_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -694,8 +678,7 @@ gcc_10_serial:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -717,8 +700,7 @@ gcc_10_mpionly:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -739,8 +721,7 @@ gcc_10_hybrid:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -755,8 +736,7 @@ gcc_10_serial_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -775,8 +755,7 @@ gcc_10_mpionly_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -793,8 +772,7 @@ gcc_10_hybrid_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
@@ -822,8 +800,7 @@ clang_6.0_serial:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -847,8 +824,7 @@ clang_6.0_mpionly:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -870,8 +846,7 @@ clang_6.0_hybrid:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -892,8 +867,7 @@ clang_6.0_serial_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -918,8 +892,7 @@ clang_6.0_mpionly_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -942,8 +915,7 @@ clang_6.0_hybrid_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -978,8 +950,7 @@ clang_7.0_serial:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1003,8 +974,7 @@ clang_7.0_mpionly:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1026,8 +996,7 @@ clang_7.0_hybrid:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1048,8 +1017,7 @@ clang_7.0_serial_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1074,8 +1042,7 @@ clang_7.0_mpionly_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1098,8 +1065,7 @@ clang_7.0_hybrid_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1138,8 +1104,7 @@ clang_8.0_serial:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1163,8 +1128,7 @@ clang_8.0_mpionly:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1186,8 +1150,7 @@ clang_8.0_hybrid:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1208,8 +1171,7 @@ clang_8.0_serial_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1234,8 +1196,7 @@ clang_8.0_mpionly_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1258,8 +1219,7 @@ clang_8.0_hybrid_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1298,8 +1258,7 @@ clang_9.0_serial:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1323,8 +1282,7 @@ clang_9.0_mpionly:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1346,8 +1304,7 @@ clang_9.0_hybrid:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1368,8 +1325,7 @@ clang_9.0_serial_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1394,8 +1350,7 @@ clang_9.0_mpionly_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1418,8 +1373,7 @@ clang_9.0_hybrid_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1458,8 +1412,7 @@ clang_10.0_serial:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1483,8 +1436,7 @@ clang_10.0_mpionly:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1506,8 +1458,7 @@ clang_10.0_hybrid:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1524,8 +1475,7 @@ clang_10.0_serial_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1546,8 +1496,7 @@ clang_10.0_mpionly_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1566,8 +1515,7 @@ clang_10.0_hybrid_dbg:
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
-      - python3 -m unittest discover pystencils_walberla/
-      - python3 -m unittest discover lbmpy_walberla/
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1757,7 +1705,9 @@ coverage:
       - cd build
       - cmake -LA -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DWALBERLA_DOUBLE_ACCURACY=$WALBERLA_DOUBLE_ACCURACY -DWARNING_ERROR=ON -G "$CMAKE_GENERATOR" -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE ..
       - MSBuild.exe walberla.sln /property:Configuration=$BUILD_CONFIGURATION /verbosity:minimal /maxcpucount:4
-      - ctest -LE $CTEST_EXCLUDE_LABELS -C $BUILD_CONFIGURATION --output-on-failure -j 4
+      - ctest -LE $CTEST_EXCLUDE_LABELS -C $BUILD_CONFIGURATION --output-on-failure -j 4 -T Test
+   after_script:
+      - python3 cmake/ctest2junit.py build > report.xml
    variables:
       CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
       BUILD_CONFIGURATION: "Release"
@@ -1765,6 +1715,12 @@ coverage:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "ON"
       WALBERLA_DOUBLE_ACCURACY: "ON"
+   artifacts:
+      when: always
+      reports:
+         junit:
+            - report.xml
+            - python/report.xml
 
 
 
@@ -1934,12 +1890,25 @@ msvc-14.2_mpionly:
       - mpirun --version
       - mkdir build
       - cd build
-      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_TOOLS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_PYTHON=$WALBERLA_BUILD_WITH_PYTHON -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DWALBERLA_BUILD_WITH_CUDA=$WALBERLA_BUILD_WITH_CUDA -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DWARNING_ERROR=ON
+      - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_TOOLS=ON -DWALBERLA_BUILD_WITH_MPI=$WALBERLA_BUILD_WITH_MPI -DWALBERLA_BUILD_WITH_PYTHON=$WALBERLA_BUILD_WITH_PYTHON -DWALBERLA_BUILD_WITH_CODEGEN=$WALBERLA_BUILD_WITH_CODEGEN -DWALBERLA_BUILD_WITH_OPENMP=$WALBERLA_BUILD_WITH_OPENMP -DWALBERLA_BUILD_WITH_CUDA=$WALBERLA_BUILD_WITH_CUDA -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -DWARNING_ERROR=ON
       - cmake . -LA
       - make -j $NUM_BUILD_CORES -l $NUM_CORES
-      - ctest -LE "$CTEST_EXCLUDE_LABELS|cuda" -C $CMAKE_BUILD_TYPE --output-on-failure -j $NUM_CORES
+      - ctest -LE "$CTEST_EXCLUDE_LABELS|cuda" -C $CMAKE_BUILD_TYPE --output-on-failure -j $NUM_CORES -T Test
+   before_script:
+      - pip3 install --user lbmpy jinja2 pytest-cov lxml
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   after_script:
+      - python3 cmake/ctest2junit.py build > report.xml
    tags:
       - mac
+   artifacts:
+      when: always
+      reports:
+         junit:
+            - report.xml
+            - python/report.xml
 
 mac_Serial_Dbg:
    <<: *mac_build_definition
@@ -1949,6 +1918,7 @@ mac_Serial_Dbg:
       WALBERLA_BUILD_WITH_MPI: "OFF"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
 
 mac_Serial:
    <<: *mac_build_definition
@@ -1958,6 +1928,7 @@ mac_Serial:
       WALBERLA_BUILD_WITH_MPI: "OFF"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
 
 mac_MpiOnly_Dbg:
    <<: *mac_build_definition
@@ -1967,6 +1938,7 @@ mac_MpiOnly_Dbg:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
       OMPI_MCA_btl: "self,tcp"
 
 mac_MpiOnly:
@@ -1977,6 +1949,7 @@ mac_MpiOnly:
       WALBERLA_BUILD_WITH_MPI: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
       OMPI_MCA_btl: "self,tcp"
 
 ###############################################################################
