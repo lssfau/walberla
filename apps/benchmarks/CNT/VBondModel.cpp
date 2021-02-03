@@ -27,9 +27,11 @@
 #include "mesa_pd/kernel/cnt/Parameters.h"
 #include "mesa_pd/kernel/cnt/VBondContact.h"
 #include "mesa_pd/kernel/VelocityVerlet.h"
+#include "mesa_pd/vtk/ParticleVtkOutput.h"
 
 #include "core/Environment.h"
 #include "core/math/Constants.h"
+#include "vtk/VTKOutput.h"
 
 namespace walberla {
 using namespace walberla::mesa_pd;
@@ -62,6 +64,17 @@ int main(int argc, char **argv)
    }
    data::Particle &&last_segment = *(ps->end() - 1);
 
+   WALBERLA_LOG_INFO_ON_ROOT("setting up VTK output");
+   auto vtkOutput       = make_shared<mesa_pd::vtk::ParticleVtkOutput>(ps);
+   vtkOutput->addOutput<data::SelectParticlePosition>("position");
+   auto vtkWriter       = walberla::vtk::createVTKOutput_PointData(vtkOutput,
+                                                                   "cnt",
+                                                                   1,
+                                                                   "vtk",
+                                                                   "particles",
+                                                                   false,
+                                                                   false);
+
    WALBERLA_LOG_INFO_ON_ROOT("setting up interaction models");
    kernel::cnt::VBondContact vbond;
    kernel::VelocityVerletPreForceUpdate vv_pre(kernel::cnt::dT);
@@ -73,6 +86,8 @@ int main(int argc, char **argv)
    std::ofstream fout("output.txt");
    for (auto i = 0; i < numSimulationSteps; ++i)
    {
+      vtkWriter->write();
+
       ps->forEachParticle(false,
                           kernel::SelectAll(),
                           ac,
