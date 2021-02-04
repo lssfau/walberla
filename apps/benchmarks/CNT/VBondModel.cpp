@@ -54,7 +54,7 @@ int main(int argc, char **argv)
    for (auto i = 0; i < 10; ++i)
    {
       data::Particle &&p = *ps->create();
-      p.setPosition(Vec3(0_r, 0_r, real_c(i) * 13.56_r));
+      p.setPosition(Vec3(500_r, 500_r, 500_r + real_c(i) * 13.56_r));
       p.setSegmentID(i);
       p.setClusterID(1);
       if (i == 0)
@@ -82,7 +82,13 @@ int main(int argc, char **argv)
 
    WALBERLA_LOG_INFO_ON_ROOT("running simulation");
    auto appliedForce = Vec3(1_r, 0_r, 0_r);
-   auto appliedTorque = Vec3(0_r);
+   auto appliedTorque = Vec3(0_r, 0_r, 1_r);
+
+   real_t tensileEnergy = 0_r;
+   real_t shearEnergy = 0_r;
+   real_t bendingEnergy = 0_r;
+   real_t twistingEnergy = 0_r;
+
    std::ofstream fout("output.txt");
    for (auto i = 0; i < numSimulationSteps; ++i)
    {
@@ -98,16 +104,18 @@ int main(int argc, char **argv)
       last_segment.setTorque(appliedTorque);
       constexpr auto cutoff2 = kernel::cnt::outer_radius * kernel::cnt::outer_radius;
 
-      real_t tensileEnergy = 0_r;
-      real_t shearEnergy = 0_r;
-      real_t bendingEnergy = 0_r;
-      real_t twistingEnergy = 0_r;
+      tensileEnergy = 0_r;
+      shearEnergy = 0_r;
+      bendingEnergy = 0_r;
+      twistingEnergy = 0_r;
 
       ps->forEachParticlePairHalf(false,
                                   kernel::SelectAll(),
                                   ac,
-                                  [&](size_t p_idx1, size_t p_idx2, Accessor &ac)
+                                  [&](size_t p_idx1, size_t p_idx2)
                                   {
+                                     if (ac.getClusterID(p_idx1) != ac.getClusterID(p_idx2)) return;
+                                     if (std::abs(ac.getSegmentID(p_idx1) - ac.getSegmentID(p_idx2)) != 1) return;
                                      if ((ac.getPosition(p_idx1) - ac.getPosition(p_idx2)).sqrLength() < cutoff2)
                                      {
                                         vbond(p_idx1, p_idx2, ac);
@@ -116,8 +124,7 @@ int main(int argc, char **argv)
                                         bendingEnergy += vbond.bendingEnergy;
                                         twistingEnergy += vbond.twistingEnergy;
                                      }
-                                  },
-                                  ac);
+                                  });
 
       ps->forEachParticle(false,
                           kernel::SelectAll(),
@@ -133,11 +140,21 @@ int main(int argc, char **argv)
            << std::endl;
    }
 
+   WALBERLA_CHECK_FLOAT_EQUAL(tensileEnergy,  1.88111638964774328e-02_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(shearEnergy,    2.04795345750102054e-01_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(bendingEnergy,  3.28859587360327978e+01_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(twistingEnergy, 1.44177931971837983e-03_r);
+
    return EXIT_SUCCESS;
 }
 } // namespace walberla
 
 int main(int argc, char *argv[])
 {
+   if (std::is_same<walberla::real_t, float>::value)
+   {
+      WALBERLA_LOG_WARNING("waLBerla build in sp mode: skipping test due to low precision");
+      return EXIT_SUCCESS;
+   }
    return walberla::main(argc, argv);
 }
