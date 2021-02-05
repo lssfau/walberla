@@ -45,6 +45,8 @@ int main( int argc, char ** argv )
       return EXIT_SUCCESS;
    }
 
+   using Interaction = kernel::cnt::VBondContact;
+
    //init data structures
    auto ps = std::make_shared<data::ParticleStorage>(100);
 
@@ -54,19 +56,34 @@ int main( int argc, char ** argv )
    p1.getTypeRef()            = 0;
 
    data::Particle&& p2        = *ps->create();
-   p2.getPositionRef()        = Vec3(0,0,0);
+   p2.getPositionRef()        = Vec3(Interaction::a,0,0);
    p2.getForceRef()           = Vec3(0,0,0);
    p2.getTypeRef()            = 0;
 
    data::ParticleAccessor accessor(ps);
 
    //init kernels
-   kernel::cnt::VBondContact vbond;
+   Interaction vbond;
 
-   //check equilibrium distance
-   vbond(0, 1, accessor);
-   WALBERLA_CHECK_FLOAT_EQUAL( p1.getForce(), Vec3(0,0,0) );
-   WALBERLA_CHECK_FLOAT_EQUAL( p2.getForce(), Vec3(0,0,0) );
+   auto calcForce = [&](const Vec3 pos1, const Vec3 pos2) {
+      p1.setPosition(pos1);
+      p2.setPosition(pos2);
+      clear(p1.getForceRef());
+      clear(p2.getForceRef());
+      vbond(0, 1, accessor);
+      WALBERLA_CHECK_FLOAT_EQUAL(p1.getForce(), -p2.getForce());
+      return p1.getForce();
+   };
+
+   const Vec3 randomNormal = Vec3(1_r, 2_r, 3_r).getNormalized();
+
+   WALBERLA_LOG_INFO("checking repulsion - equilibrium - attraction");
+   WALBERLA_CHECK_LESS       (dot(randomNormal, calcForce(Vec3(0), randomNormal * (Interaction::a - 1_r))),
+                              0_r);
+   WALBERLA_CHECK_FLOAT_EQUAL(dot(randomNormal, calcForce(Vec3(0), randomNormal * Interaction::a)),
+                              0_r);
+   WALBERLA_CHECK_GREATER    (dot(randomNormal, calcForce(Vec3(0), randomNormal * (Interaction::a + 1_r))),
+                              0_r);
 
    return EXIT_SUCCESS;
 }
