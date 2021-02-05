@@ -94,7 +94,7 @@ void VBondContact::operator()(const size_t p_idx1,
 
    // Fix for the issue of segment's undefined sides
    real_t sign = ac.getSegmentID(p_idx1) <= ac.getSegmentID(p_idx2) ? 1_r : -1_r;
-   if (((isPeriodic_[0]) && (std::abs(ac.getSegmentID(p_idx2) - ac.getSegmentID(p_idx1)) == maxSegments_[0] - 1)) or
+   if (((isPeriodic_[0]) && (std::abs(ac.getSegmentID(p_idx2) - ac.getSegmentID(p_idx1)) == maxSegments_[0] - 1)) ||
        ((isPeriodic_[1]) && (std::abs(ac.getSegmentID(p_idx2) - ac.getSegmentID(p_idx1)) == maxSegments_[1] - 1)))
       sign = -sign; // special case for periodic fibers
 
