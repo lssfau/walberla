@@ -28,10 +28,10 @@
 namespace walberla {
 namespace mesa_pd {
 
-class Accessor : public data::ParticleAccessor
+class SphericalSegmentAccessor : public data::ParticleAccessor
 {
 public:
-   Accessor(std::shared_ptr<data::ParticleStorage>& ps)
+   SphericalSegmentAccessor(std::shared_ptr<data::ParticleStorage>& ps)
    : ParticleAccessor(ps)
    {}
 

@@ -90,6 +90,9 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_IsotropicVDWContact )
 waLBerla_compile_test( NAME   MESA_PD_Kernel_CNT_VBondContact FILES kernel/cnt/VBondContact.test.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_VBondContact )
 
+waLBerla_compile_test( NAME   MESA_PD_Kernel_CNT_VBondContactIntegration FILES kernel/cnt/VBondContactIntegration.test.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_VBondContactIntegration )
+
 waLBerla_compile_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionSD FILES kernel/CoefficientOfRestitutionSD.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionSDEuler COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionSD> )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionSDVelocityVerlet COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionSD> --useVV )

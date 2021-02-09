@@ -20,7 +20,7 @@
 //
 //======================================================================================================================
 
-#include "Accessor.h"
+#include "SphericalSegmentAccessor.h"
 #include "mesa_pd/data/Flags.h"
 #include "mesa_pd/data/ParticleStorage.h"
 #include "mesa_pd/kernel/ParticleSelector.h"
@@ -41,6 +41,12 @@ int main(int argc, char **argv)
    Environment env(argc, argv);
    walberla::mpi::MPIManager::instance()->useWorldComm();
 
+   if (std::is_same<real_t, float>::value)
+   {
+      WALBERLA_LOG_WARNING("waLBerla build in sp mode: skipping test due to low precision");
+      return EXIT_SUCCESS;
+   }
+
    logging::Logging::instance()->setStreamLogLevel(logging::Logging::INFO);
    logging::Logging::instance()->setFileLogLevel(logging::Logging::INFO);
 
@@ -49,7 +55,7 @@ int main(int argc, char **argv)
 
    WALBERLA_LOG_INFO_ON_ROOT("creating initial particle setup");
    auto ps = std::make_shared<data::ParticleStorage>(10);
-   auto ac = Accessor(ps);
+   auto ac = SphericalSegmentAccessor(ps);
 
    for (auto i = 0; i < 10; ++i)
    {
@@ -89,7 +95,7 @@ int main(int argc, char **argv)
    real_t bendingEnergy = 0_r;
    real_t twistingEnergy = 0_r;
 
-   std::ofstream fout("output.txt");
+   std::ofstream fout("VBondContactEnergies.txt");
    for (auto i = 0; i < numSimulationSteps; ++i)
    {
       vtkWriter->write();
@@ -119,10 +125,10 @@ int main(int argc, char **argv)
                                      if ((ac.getPosition(p_idx1) - ac.getPosition(p_idx2)).sqrLength() < cutoff2)
                                      {
                                         vbond(p_idx1, p_idx2, ac);
-                                        tensileEnergy += vbond.tensileEnergy;
-                                        shearEnergy += vbond.shearEnergy;
-                                        bendingEnergy += vbond.bendingEnergy;
-                                        twistingEnergy += vbond.twistingEnergy;
+                                        tensileEnergy += vbond.getLastTensileEnergy();
+                                        shearEnergy += vbond.getLastShearEnergy();
+                                        bendingEnergy += vbond.getLastBendingEnergy();
+                                        twistingEnergy += vbond.getLastTwistingEnergy();
                                      }
                                   });
 
@@ -151,10 +157,5 @@ int main(int argc, char **argv)
 
 int main(int argc, char *argv[])
 {
-   if (std::is_same<walberla::real_t, float>::value)
-   {
-      WALBERLA_LOG_WARNING("waLBerla build in sp mode: skipping test due to low precision");
-      return EXIT_SUCCESS;
-   }
    return walberla::main(argc, argv);
 }

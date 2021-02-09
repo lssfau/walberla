@@ -55,6 +55,12 @@ namespace cnt {
 class VBondContact
 {
 public:
+   VBondContact( const Vector3<bool>& isPeriodic = Vector3<bool>{false, false, false},
+                 const Vector3<int64_t>& maxSegments = Vector3<real_t>{0, 0, 0} )
+   : isPeriodic_(isPeriodic)
+   , maxSegments_(maxSegments)
+   {}
+
    template<typename Accessor>
    void operator()(const size_t p_idx1,
                    const size_t p_idx2,
@@ -73,13 +79,24 @@ public:
    static constexpr real_t B3 = -2_r * E * J / a - G * Jp / (2_r * a);
    static constexpr real_t B4 = G * Jp / a;
 
-   Vector3<bool> isPeriodic_;
-   Vector3<int64_t> maxSegments_;
 
+
+   /// Get tensile energy from last contact.
+   auto getLastTensileEnergy() const {return tensileEnergy;}
+   /// Get shear energy from last contact.
+   auto getLastShearEnergy() const {return shearEnergy;}
+   /// Get bending energy from last contact.
+   auto getLastBendingEnergy() const {return bendingEnergy;}
+   /// Get twisting energy from last contact.
+   auto getLastTwistingEnergy() const {return twistingEnergy;}
+private:
    real_t tensileEnergy;
    real_t shearEnergy;
    real_t bendingEnergy;
    real_t twistingEnergy;
+
+   Vector3<bool> isPeriodic_;
+   Vector3<int64_t> maxSegments_;
 };
 
 
