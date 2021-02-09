@@ -99,7 +99,7 @@ function ( waLBerla_add_module )
 
     waLBerla_register_dependency ( ${moduleName} ${ARG_DEPENDS} )
 
-    set_property( TARGET ${moduleName} PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD} )
+    set_property( TARGET ${moduleLibraryName} PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD} )
 
     # This property is needed for visual studio to group modules together
     if( WALBERLA_GROUP_PROJECTS )
