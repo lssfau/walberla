@@ -118,7 +118,7 @@ public:
    explicit GenericBufferSystem( const MPI_Comm & communicator, int tag = 0 );
    GenericBufferSystem( const GenericBufferSystem & other );
    GenericBufferSystem & operator=( const GenericBufferSystem & other );
-   ~GenericBufferSystem() {}
+   ~GenericBufferSystem() = default;
    //@}
    //*******************************************************************************************************************
 

@@ -498,7 +498,7 @@ inline void RigidBody::calcMotion()
  */
 inline bool RigidBody::hasManager() const
 {
-   return manager_ != 0;
+   return manager_ != nullptr;
 }
 //*************************************************************************************************
 

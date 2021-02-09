@@ -98,7 +98,7 @@ public:
 
    public:
 
-      iterator( const iterator& it ) : forest_( it.forest_ ), block_( it.block_ ) {}
+      iterator( const iterator& it )  = default;
 
       iterator& operator++() { WALBERLA_ASSERT_NOT_NULLPTR( block_ ); block_ = forest_->getNextBlock( block_ ); return *this; } // prefix ++X
       iterator  operator++(int) { iterator it( *this ); operator++(); return it; };                                             // postfix X++
@@ -127,7 +127,7 @@ public:
    public:
 
       const_iterator( const       iterator& it ) : forest_( it.forest_ ), block_( it.block_ ) {}
-      const_iterator( const const_iterator& it ) : forest_( it.forest_ ), block_( it.block_ ) {}
+      const_iterator( const const_iterator& it )  = default;
 
       const_iterator& operator++() { WALBERLA_ASSERT_NOT_NULLPTR( block_ ); block_ = forest_->getNextBlock( block_ ); return *this; } // prefix ++X
       const_iterator  operator++(int) { const_iterator it( *this ); operator++(); return it; };                                       // postfix X++
@@ -183,10 +183,10 @@ public:
    uint_t getNumberOfBlocks( const uint_t level ) const;
 
    inline const_iterator begin() const;
-   inline const_iterator end()   const { return const_iterator( this, NULL ); }
+   inline const_iterator end()   const { return const_iterator( this, nullptr ); }
 
    inline iterator begin();
-   inline iterator end() { return iterator( this, NULL ); }
+   inline iterator end() { return iterator( this, nullptr ); }
 
    const SetupBlock* getFirstBlock() const;
          SetupBlock* getFirstBlock();
@@ -420,7 +420,7 @@ inline SetupBlockForest::~SetupBlockForest() {
 
    for( uint_t i = 0; i != forest_.size(); ++i )
    {
-      if( forest_[i] != NULL ) delete forest_[i];
+      if( forest_[i] != nullptr ) delete forest_[i];
    }
 }
 
@@ -430,7 +430,7 @@ inline SetupBlockForest::const_iterator SetupBlockForest::begin() const {
 
    const SetupBlock* block = getFirstBlock();
 
-   if( block == NULL )
+   if( block == nullptr )
       return end();
 
    return SetupBlockForest::const_iterator( this, block );
@@ -442,7 +442,7 @@ inline SetupBlockForest::iterator SetupBlockForest::begin() {
 
    SetupBlock* block = getFirstBlock();
 
-   if( block == NULL )
+   if( block == nullptr )
       return end();
 
    return SetupBlockForest::iterator( this, block );
@@ -467,10 +467,10 @@ inline SetupBlock* SetupBlockForest::getRootBlock( const uint_t x, const uint_t 
 inline const SetupBlock* SetupBlockForest::getBlock( const real_t px, const real_t py, const real_t pz ) const {
 
    if( !domain_.contains( px, py, pz ) )
-      return NULL;
+      return nullptr;
 
    SetupBlock* block = forest_[ mapPointToTreeIndex( px, py, pz ) ];
-   if( block == NULL ) return NULL;
+   if( block == nullptr ) return nullptr;
 
    return mapPointToBlock( block, px, py, pz );
 }
@@ -480,10 +480,10 @@ inline const SetupBlock* SetupBlockForest::getBlock( const real_t px, const real
 inline SetupBlock* SetupBlockForest::getBlock( const real_t px, const real_t py, const real_t pz ) {
 
    if( !domain_.contains( px, py, pz ) )
-      return NULL;
+      return nullptr;
 
    SetupBlock* block = forest_[ mapPointToTreeIndex( px, py, pz ) ];
-   if( block == NULL ) return NULL;
+   if( block == nullptr ) return nullptr;
 
    return mapPointToBlock( block, px, py, pz );
 }

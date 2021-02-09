@@ -30,7 +30,7 @@ namespace bg {
 
 class SimpleBGDataHandling : public blockforest::AlwaysInitializeBlockDataHandling<SimpleBG>{
 public:
-    SimpleBG * initialize( IBlock * const /*block*/ ) {return new SimpleBG();}
+    SimpleBG * initialize( IBlock * const /*block*/ ) override {return new SimpleBG();}
 };
 
 inline

@@ -371,7 +371,7 @@ void BasicVoxelFileReader<T>::close()
 
    assert(!filestream_.is_open());
    assert(dataBegin_ == std::streampos());
-   assert(filename_ == "");
+   assert(filename_.empty());
    assert(xSize_ == 0);
    assert(ySize_ == 0);
    assert(zSize_ == 0);

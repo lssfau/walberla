@@ -37,7 +37,7 @@ namespace mesa_pd {
 class Accessor : public data::IAccessor
 {
 public:
-   virtual ~Accessor() = default;
+   ~Accessor() override = default;
    const walberla::mesa_pd::Vec3& getPosition(const size_t /*p_idx*/) const {return position_;}
    void setPosition(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { position_ = v;}
    

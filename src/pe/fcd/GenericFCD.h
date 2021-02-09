@@ -36,7 +36,7 @@ namespace fcd {
 template <typename BodyTypeTuple, template <typename Container> class CollisionFunctor >
 class GenericFCD : public IFCD{
 public:
-   virtual Contacts& generateContacts(PossibleContacts& possibleContacts)
+   Contacts& generateContacts(PossibleContacts& possibleContacts) override
    {
       contacts_.clear();
       CollisionFunctor<decltype(contacts_)> func(contacts_);

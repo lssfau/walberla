@@ -35,7 +35,7 @@ namespace fcd {
 
 class IFCD : private NonCopyable{
 public:
-   virtual ~IFCD() {};
+   virtual ~IFCD() = default;
 
    ///
    /// \brief generates a list of actual collisions

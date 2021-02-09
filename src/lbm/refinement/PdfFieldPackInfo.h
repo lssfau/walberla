@@ -60,31 +60,31 @@ public:
       equalLevelCells_( equalLevelCells() ) {}
 #endif
 
-   virtual ~PdfFieldPackInfo() {}
+   ~PdfFieldPackInfo() override = default;
 
-   bool optimizedEqualLevelCommunication() const { return optimizedEqualLevelCommunication_; }
-   void optimizeEqualLevelCommunication( const bool value = true ) { optimizedEqualLevelCommunication_ = value; }
+   bool optimizedEqualLevelCommunication() const override { return optimizedEqualLevelCommunication_; }
+   void optimizeEqualLevelCommunication( const bool value = true ) override { optimizedEqualLevelCommunication_ = value; }
    
-   bool optimizedForLinearExplosion() const { return optimizedForLinearExplosion_; }
-   void optimizeForLinearExplosion( const bool value = true ) { optimizedForLinearExplosion_ = value; }
+   bool optimizedForLinearExplosion() const override { return optimizedForLinearExplosion_; }
+   void optimizeForLinearExplosion( const bool value = true ) override { optimizedForLinearExplosion_ = value; }
    
-   bool constantDataExchange() const { return true; }
-   bool threadsafeReceiving()  const { return true; }
+   bool constantDataExchange() const override { return true; }
+   bool threadsafeReceiving()  const override { return true; }
 
-   void       unpackDataEqualLevel( Block * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer );
-   void communicateLocalEqualLevel( const Block * sender, Block * receiver, stencil::Direction dir );
+   void       unpackDataEqualLevel( Block * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer ) override;
+   void communicateLocalEqualLevel( const Block * sender, Block * receiver, stencil::Direction dir ) override;
 
-   void       unpackDataCoarseToFine( Block * fineReceiver, const BlockID & coarseSender, stencil::Direction dir, mpi::RecvBuffer & buffer );
-   void communicateLocalCoarseToFine( const Block * coarseSender, Block * fineReceiver, stencil::Direction dir );
+   void       unpackDataCoarseToFine( Block * fineReceiver, const BlockID & coarseSender, stencil::Direction dir, mpi::RecvBuffer & buffer ) override;
+   void communicateLocalCoarseToFine( const Block * coarseSender, Block * fineReceiver, stencil::Direction dir ) override;
 
-   void       unpackDataFineToCoarse( Block * coarseReceiver, const BlockID & fineSender, stencil::Direction dir, mpi::RecvBuffer & buffer );
-   void communicateLocalFineToCoarse( const Block * fineSender, Block * coarseReceiver, stencil::Direction dir );
+   void       unpackDataFineToCoarse( Block * coarseReceiver, const BlockID & fineSender, stencil::Direction dir, mpi::RecvBuffer & buffer ) override;
+   void communicateLocalFineToCoarse( const Block * fineSender, Block * coarseReceiver, stencil::Direction dir ) override;
 
 protected:
 
-   void packDataEqualLevelImpl( const Block * sender, stencil::Direction dir, mpi::SendBuffer & buffer ) const;
-   void packDataCoarseToFineImpl( const Block * coarseSender, const BlockID &   fineReceiver, stencil::Direction dir, mpi::SendBuffer & buffer ) const;
-   void packDataFineToCoarseImpl( const Block *   fineSender, const BlockID & coarseReceiver, stencil::Direction dir, mpi::SendBuffer & buffer ) const;
+   void packDataEqualLevelImpl( const Block * sender, stencil::Direction dir, mpi::SendBuffer & buffer ) const override;
+   void packDataCoarseToFineImpl( const Block * coarseSender, const BlockID &   fineReceiver, stencil::Direction dir, mpi::SendBuffer & buffer ) const override;
+   void packDataFineToCoarseImpl( const Block *   fineSender, const BlockID & coarseReceiver, stencil::Direction dir, mpi::SendBuffer & buffer ) const override;
 
    ///////////////////////////////////////////////////////////////////////
    // Helper functions for determining packing/unpacking cell intervals //
@@ -1090,18 +1090,18 @@ inline std::vector< CellInterval > PdfFieldPackInfo< LatticeModel_T, BoundaryHan
 
       WALBERLA_ASSERT_EQUAL( interval.xSize(), equalLevelCells_ );
 
-      intervals.push_back( CellInterval( interval.xMin(), interval.yMin(), interval.zMax(),
-                                         interval.xMax(), interval.yMax(), interval.zMax() ) );
-      intervals.push_back( CellInterval( interval.xMin(), interval.yMin(), interval.zMin() + cell_idx_t(1),
-                                         interval.xMax(), interval.yMin(), interval.zMax() - cell_idx_t(1) ) );
-      intervals.push_back( CellInterval( interval.xMin(), interval.yMax(), interval.zMin() + cell_idx_t(1),
-                                         interval.xMax(), interval.yMax(), interval.zMax() - cell_idx_t(1) ) );
-      intervals.push_back( CellInterval( interval.xMin(), interval.yMin(), interval.zMin(),
-                                         interval.xMax(), interval.yMax(), interval.zMin() ) );
+      intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMax(),
+                                         interval.xMax(), interval.yMax(), interval.zMax() );
+      intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMin() + cell_idx_t(1),
+                                         interval.xMax(), interval.yMin(), interval.zMax() - cell_idx_t(1) );
+      intervals.emplace_back( interval.xMin(), interval.yMax(), interval.zMin() + cell_idx_t(1),
+                                         interval.xMax(), interval.yMax(), interval.zMax() - cell_idx_t(1) );
+      intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMin(),
+                                         interval.xMax(), interval.yMax(), interval.zMin() );
 
       const cell_idx_t x = ( stencil::cx[dir] > 0 ) ? interval.xMax() : interval.xMin();
-      intervals.push_back( CellInterval( x, interval.yMin() + cell_idx_t(1), interval.zMin() + cell_idx_t(1),
-                                         x, interval.yMax() - cell_idx_t(1), interval.zMax() - cell_idx_t(1) ) );
+      intervals.emplace_back( x, interval.yMin() + cell_idx_t(1), interval.zMin() + cell_idx_t(1),
+                                         x, interval.yMax() - cell_idx_t(1), interval.zMax() - cell_idx_t(1) );
    }
    else if( stencil::cy[dir] != 0 )
    {
@@ -1110,18 +1110,18 @@ inline std::vector< CellInterval > PdfFieldPackInfo< LatticeModel_T, BoundaryHan
 
       WALBERLA_ASSERT_EQUAL( interval.ySize(), equalLevelCells_ );
 
-      intervals.push_back( CellInterval( interval.xMin(), interval.yMin(), interval.zMax(),
-                                         interval.xMax(), interval.yMax(), interval.zMax() ) );
-      intervals.push_back( CellInterval( interval.xMin(), interval.yMin(), interval.zMin() + cell_idx_t(1),
-                                         interval.xMin(), interval.yMax(), interval.zMax() - cell_idx_t(1) ) );
-      intervals.push_back( CellInterval( interval.xMax(), interval.yMin(), interval.zMin() + cell_idx_t(1),
-                                         interval.xMax(), interval.yMax(), interval.zMax() - cell_idx_t(1) ) );
-      intervals.push_back( CellInterval( interval.xMin(), interval.yMin(), interval.zMin(),
-                                         interval.xMax(), interval.yMax(), interval.zMin() ) );
+      intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMax(),
+                                         interval.xMax(), interval.yMax(), interval.zMax() );
+      intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMin() + cell_idx_t(1),
+                                         interval.xMin(), interval.yMax(), interval.zMax() - cell_idx_t(1) );
+      intervals.emplace_back( interval.xMax(), interval.yMin(), interval.zMin() + cell_idx_t(1),
+                                         interval.xMax(), interval.yMax(), interval.zMax() - cell_idx_t(1) );
+      intervals.emplace_back( interval.xMin(), interval.yMin(), interval.zMin(),
+                                         interval.xMax(), interval.yMax(), interval.zMin() );
 
       const cell_idx_t y = ( stencil::cy[dir] > 0 ) ? interval.yMax() : interval.yMin();
-      intervals.push_back( CellInterval( interval.xMin() + cell_idx_t(1), y, interval.zMin() + cell_idx_t(1),
-                                         interval.xMax() - cell_idx_t(1), y, interval.zMax() - cell_idx_t(1) ) );
+      intervals.emplace_back( interval.xMin() + cell_idx_t(1), y, interval.zMin() + cell_idx_t(1),
+                                         interval.xMax() - cell_idx_t(1), y, interval.zMax() - cell_idx_t(1) );
    }
    else
    {
@@ -1131,18 +1131,18 @@ inline std::vector< CellInterval > PdfFieldPackInfo< LatticeModel_T, BoundaryHan
 
       WALBERLA_ASSERT_EQUAL( interval.zSize(), equalLevelCells_ );
 
-      intervals.push_back( CellInterval( interval.xMin(), interval.yMax(),                 interval.zMin(),
-                                         interval.xMax(), interval.yMax(),                 interval.zMax() ) );
-      intervals.push_back( CellInterval( interval.xMin(), interval.yMin() + cell_idx_t(1), interval.zMin(),
-                                         interval.xMin(), interval.yMax() - cell_idx_t(1), interval.zMax() ) );
-      intervals.push_back( CellInterval( interval.xMax(), interval.yMin() + cell_idx_t(1), interval.zMin(),
-                                         interval.xMax(), interval.yMax() - cell_idx_t(1), interval.zMax() ) );
-      intervals.push_back( CellInterval( interval.xMin(), interval.yMin(),                 interval.zMin(),
-                                         interval.xMax(), interval.yMin(),                 interval.zMax() ) );
+      intervals.emplace_back( interval.xMin(), interval.yMax(),                 interval.zMin(),
+                                         interval.xMax(), interval.yMax(),                 interval.zMax() );
+      intervals.emplace_back( interval.xMin(), interval.yMin() + cell_idx_t(1), interval.zMin(),
+                                         interval.xMin(), interval.yMax() - cell_idx_t(1), interval.zMax() );
+      intervals.emplace_back( interval.xMax(), interval.yMin() + cell_idx_t(1), interval.zMin(),
+                                         interval.xMax(), interval.yMax() - cell_idx_t(1), interval.zMax() );
+      intervals.emplace_back( interval.xMin(), interval.yMin(),                 interval.zMin(),
+                                         interval.xMax(), interval.yMin(),                 interval.zMax() );
 
       const cell_idx_t z = ( stencil::cz[dir] > 0 ) ? interval.zMax() : interval.zMin();
-      intervals.push_back( CellInterval( interval.xMin() + cell_idx_t(1), interval.yMin() + cell_idx_t(1), z,
-                                         interval.xMax() - cell_idx_t(1), interval.yMax() - cell_idx_t(1), z ) );
+      intervals.emplace_back( interval.xMin() + cell_idx_t(1), interval.yMin() + cell_idx_t(1), z,
+                                         interval.xMax() - cell_idx_t(1), interval.yMax() - cell_idx_t(1), z );
    }
 
    return intervals;

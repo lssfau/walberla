@@ -41,7 +41,7 @@ public:
 
    CellArray( const CellVector& cells )
    {
-      this->array_ = cells.size() == 0 ? NULL : new Cell[ cells.size() ];
+      this->array_ = cells.empty() ? nullptr : new Cell[ cells.size() ];
       this->size_  = cells.size();
 
       for( uint_t i = 0; i != this->size_; ++i )
@@ -50,7 +50,7 @@ public:
 
    CellArray( const CellSet& cells )
    {
-      this->array_ = cells.size() == 0 ? NULL : new Cell[ cells.size() ];
+      this->array_ = cells.empty() ? nullptr : new Cell[ cells.size() ];
       this->size_  = cells.size();
 
       uint_t i = 0;

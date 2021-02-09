@@ -111,7 +111,7 @@ public:
 
    FlagField( uint_t xSize, uint_t ySize, uint_t zSize, uint_t gl,
               const shared_ptr<FieldAllocator<T> > &alloc = make_shared<StdFieldAlloc<T> >());
-   virtual ~FlagField();
+   ~FlagField() override;
 
    inline FlagField<T> * clone()              const;
    inline FlagField<T> * cloneUninitialized() const;
@@ -196,7 +196,7 @@ protected:
    /*! \name Shallow Copy */
    //@{
    FlagField(const FlagField<T> & other);
-   virtual Field<T,1> * cloneShallowCopyInternal()   const;
+   Field<T,1> * cloneShallowCopyInternal()   const override;
    //@}
    //*******************************************************************************************************************
 

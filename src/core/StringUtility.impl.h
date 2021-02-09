@@ -104,7 +104,7 @@ inline std::vector<std::string> string_split(std::string s, const std::string &d
          if (*it == d) {   // current character in s is a delimiter
             sub_end = it;
             if (sub_begin < sub_end) { // make sure that the substring is not empty
-               substrings.push_back(std::string(sub_begin, sub_end));
+               substrings.emplace_back(sub_begin, sub_end);
             }
             sub_begin = ++sub_end;
             continue;
@@ -114,7 +114,7 @@ inline std::vector<std::string> string_split(std::string s, const std::string &d
 
    // add substring from last delimiter to the end of s
    if (sub_begin < s.end()) {
-      substrings.push_back(std::string(sub_begin, s.end()));
+      substrings.emplace_back(sub_begin, s.end());
    }
 
    return substrings;

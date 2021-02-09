@@ -47,18 +47,18 @@ class StencilRestrictedPackInfo : public walberla::communication::UniformPackInf
 {
 public:
    StencilRestrictedPackInfo( const BlockDataID & fieldId ) : fieldId_( fieldId ) {}
-   virtual ~StencilRestrictedPackInfo() {}
+   ~StencilRestrictedPackInfo() override = default;
 
-   bool constantDataExchange() const { return true; }
-   bool threadsafeReceiving()  const { return true; }
+   bool constantDataExchange() const override { return true; }
+   bool threadsafeReceiving()  const override { return true; }
 
-   void unpackData( IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer );
+   void unpackData( IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer ) override;
 
-   void communicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir );
+   void communicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir ) override;
 
 protected:
 
-   void packDataImpl( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer ) const;
+   void packDataImpl( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer ) const override;
 
    const BlockDataID fieldId_;
 

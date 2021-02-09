@@ -49,14 +49,14 @@ class SetSelectableObject : public SelectableObject< T, SetSelectionPair<U>, Set
 {
 public:
 
-   SetSelectableObject() {}
+   SetSelectableObject() = default;
 
    SetSelectableObject( const T& object, const Set<U>& include, const Set<U>& exclude, const std::string& identifier = std::string() ) {
 
       add( object, include, exclude, identifier );
    }
 
-   virtual ~SetSelectableObject() {}
+   ~SetSelectableObject() override = default;
 
    void add( const T& object, const Set<U>& include, const Set<U>& exclude, const std::string& identifier = std::string() ) {
 
@@ -73,7 +73,7 @@ private:
    };
 
    // added inline qualifier to suppress unjustified MSVC warning C4505
-   virtual inline void select( std::vector< size_t >& index, const Set<U>& selector ) const;
+   inline void select( std::vector< size_t >& index, const Set<U>& selector ) const override;
 
 }; // SetSelectableObject
 

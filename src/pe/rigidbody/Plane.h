@@ -79,7 +79,7 @@ public:
    //**Destructor**********************************************************************************
    /*!\name Destructor */
    //@{
-   virtual ~Plane();
+   ~Plane() override;
    //@}
    //**********************************************************************************************
 
@@ -87,7 +87,7 @@ public:
    //**Get functions*******************************************************************************
    /*!\name Get functions */
    //@{
-   virtual inline real_t getVolume()       const;
+   inline real_t getVolume()       const override;
    inline const Vec3&    getNormal()       const;
    inline real_t         getDisplacement() const;
    //@}
@@ -112,7 +112,7 @@ public:
    //**Output functions****************************************************************************
    /*!\name Output functions */
    //@{
-   virtual void print( std::ostream& os, const char* tab ) const;
+   void print( std::ostream& os, const char* tab ) const override;
    //@}
    //**********************************************************************************************
 
@@ -120,21 +120,21 @@ protected:
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   virtual void setPositionImpl       ( real_t px, real_t py, real_t pz );
-   virtual void setOrientationImpl    ( real_t r, real_t i, real_t j, real_t k );
-   virtual void translateImpl         ( real_t dx, real_t dy, real_t dz );
-   virtual void rotateImpl            ( const Quat& dq );
-   virtual void rotateAroundOriginImpl( const Quat& dq );
-   virtual void rotateAroundPointImpl ( const Vec3& point, const Quat& dq );
-   virtual bool containsRelPointImpl   ( real_t px, real_t py, real_t pz ) const;
-   virtual bool isSurfaceRelPointImpl  ( real_t px, real_t py, real_t pz ) const;
+   void setPositionImpl       ( real_t px, real_t py, real_t pz ) override;
+   void setOrientationImpl    ( real_t r, real_t i, real_t j, real_t k ) override;
+   void translateImpl         ( real_t dx, real_t dy, real_t dz ) override;
+   void rotateImpl            ( const Quat& dq ) override;
+   void rotateAroundOriginImpl( const Quat& dq ) override;
+   void rotateAroundPointImpl ( const Vec3& point, const Quat& dq ) override;
+   bool containsRelPointImpl   ( real_t px, real_t py, real_t pz ) const override;
+   bool isSurfaceRelPointImpl  ( real_t px, real_t py, real_t pz ) const override;
    //@}
    //**********************************************************************************************
 
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   virtual void calcBoundingBox();  // Calculation of the axis-aligned bounding box
+   void calcBoundingBox() override;  // Calculation of the axis-aligned bounding box
    //@}
    //**********************************************************************************************
 

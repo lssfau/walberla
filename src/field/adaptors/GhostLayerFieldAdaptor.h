@@ -112,7 +112,7 @@ public:
 
    // since Field/GhostLayerField is polymorphic, this class also has to be polymorphic
    // example: dynamic_cast< field_t > would fail if field_t = GhostLayerFieldAdaptor
-   virtual ~GhostLayerFieldAdaptor() {}
+   virtual ~GhostLayerFieldAdaptor() = default;
 
 
    const functor_t   & getFunctor()     const { return functor_; }

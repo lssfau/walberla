@@ -39,26 +39,26 @@ class StencilRestrictedMPIDatatypeInfo : public walberla::communication::Uniform
 public:
     StencilRestrictedMPIDatatypeInfo( BlockDataID fieldID ) : fieldID_( fieldID ) {}
 
-    virtual ~StencilRestrictedMPIDatatypeInfo() {}
+    ~StencilRestrictedMPIDatatypeInfo() override = default;
 
-    virtual shared_ptr<mpi::Datatype> getSendDatatype ( IBlock * block, const stencil::Direction dir )
+    shared_ptr<mpi::Datatype> getSendDatatype ( IBlock * block, const stencil::Direction dir ) override
     {
         return make_shared<mpi::Datatype>( field::communication::mpiDatatypeSliceBeforeGhostlayerXYZ(
                 *getField( block ), dir, uint_t( 1 ), getOptimizedCommunicationIndices( dir ), false ) );
     }
 
-    virtual shared_ptr<mpi::Datatype> getRecvDatatype ( IBlock * block, const stencil::Direction dir )
+    shared_ptr<mpi::Datatype> getRecvDatatype ( IBlock * block, const stencil::Direction dir ) override
     {
         return make_shared<mpi::Datatype>( field::communication::mpiDatatypeGhostLayerOnlyXYZ(
                 *getField( block ), dir, false, getOptimizedCommunicationIndices( stencil::inverseDir[dir] ) ) );
     }
 
-    virtual void * getSendPointer( IBlock * block, const stencil::Direction )
+    void * getSendPointer( IBlock * block, const stencil::Direction ) override
     {
         return getField(block)->data();
     }
 
-    virtual void * getRecvPointer( IBlock * block, const stencil::Direction )
+    void * getRecvPointer( IBlock * block, const stencil::Direction ) override
     {
         return getField(block)->data();
     }

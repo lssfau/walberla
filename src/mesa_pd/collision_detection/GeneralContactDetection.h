@@ -199,13 +199,7 @@ bool GeneralContactDetection::collideGJKEPA(Support& geom0, Support& geom1)
    {
       EPA epa;
       epa.useSphereOptimization(false);
-      if (epa.doEPAmargin(geom0, geom1, gjk, contactNormal_, contactPoint_, penetrationDepth_, margin))
-      {
-         return true;
-      } else
-      {
-         return false;
-      }
+      return epa.doEPAmargin(geom0, geom1, gjk, contactNormal_, contactPoint_, penetrationDepth_, margin);
    } else
    {
       return false;

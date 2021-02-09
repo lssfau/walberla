@@ -37,7 +37,7 @@ namespace mesa_pd {
 class Accessor : public data::IAccessor
 {
 public:
-   virtual ~Accessor() = default;
+   ~Accessor() override = default;
    const walberla::mesa_pd::Vec3& getLinearVelocity(const size_t /*p_idx*/) const {return linearVelocity_;}
    void setLinearVelocity(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { linearVelocity_ = v;}
    

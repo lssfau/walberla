@@ -33,7 +33,7 @@ namespace ccd {
 class SimpleCCDDataHandling : public blockforest::AlwaysInitializeBlockDataHandling<SimpleCCD>{
 public:
    SimpleCCDDataHandling(const shared_ptr<BodyStorage>& globalStorage, const BlockDataID& storageID) : globalStorage_(globalStorage), storageID_(storageID) {}
-   SimpleCCD * initialize( IBlock * const block )
+   SimpleCCD * initialize( IBlock * const block ) override
    {
       Storage* storage = block->getData< Storage >( storageID_ );
       return new SimpleCCD(*globalStorage_, *storage);

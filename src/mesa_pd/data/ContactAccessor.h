@@ -47,7 +47,7 @@ class ContactAccessor : public IContactAccessor
 {
 public:
    ContactAccessor(const std::shared_ptr<data::ContactStorage>& ps) : ps_(ps) {}
-   virtual ~ContactAccessor() = default;
+   ~ContactAccessor() override = default;
    const walberla::id_t& getUid(const size_t p_idx) const {return ps_->getUid(p_idx);}
    walberla::id_t& getUidRef(const size_t p_idx) {return ps_->getUidRef(p_idx);}
    void setUid(const size_t p_idx, const walberla::id_t& v) { ps_->setUid(p_idx, v);}
@@ -156,7 +156,7 @@ inline size_t ContactAccessor::find(const id_t& uid)
 class SingleContactAccessor : public IAccessor
 {
 public:
-   virtual ~SingleContactAccessor() = default;
+   ~SingleContactAccessor() override = default;
    const walberla::id_t& getUid(const size_t /*p_idx*/) const {return uid_;}
    void setUid(const size_t /*p_idx*/, const walberla::id_t& v) { uid_ = v;}
    walberla::id_t& getUidRef(const size_t /*p_idx*/) {return uid_;}

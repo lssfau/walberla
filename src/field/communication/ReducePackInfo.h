@@ -50,19 +50,19 @@ public:
           op_()
    {}
 
-   virtual ~ReducePackInfo() {}
+   ~ReducePackInfo() override = default;
 
    bool constantDataExchange() const { return false; }
    bool threadsafeReceiving()  const { return false; }
 
-   virtual void safeCommunicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir );
-   virtual void packData            ( const IBlock * sender,   stencil::Direction dir, mpi::SendBuffer & outBuffer );
-   virtual void safeUnpackData      (       IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer    );
+   void safeCommunicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir ) override;
+   void packData            ( const IBlock * sender,   stencil::Direction dir, mpi::SendBuffer & outBuffer ) override;
+   void safeUnpackData      (       IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer    ) override;
 
    size_t getDataSize() const { return getSize() * sizeof(T); }
 
 protected:
-   virtual size_t initData( IBlock * receiver, stencil::Direction dir );
+   size_t initData( IBlock * receiver, stencil::Direction dir ) override;
 
    const BlockDataID        bdId_;
    const T                  init_;

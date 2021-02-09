@@ -57,8 +57,8 @@ PlainIntegratorSolver<Integrator>::PlainIntegratorSolver( const Integrator & int
 template< typename Integrator >
 void PlainIntegratorSolver<Integrator>::timestep( const real_t dt )
 {
-   if (tt_!=NULL) tt_->start("PlainIntegrator");
-   if (tt_!=NULL) tt_->start("Integrate Bodies");
+   if (tt_!=nullptr) tt_->start("PlainIntegrator");
+   if (tt_!=nullptr) tt_->start("Integrate Bodies");
    for (auto it = blockStorage_->begin(); it != blockStorage_->end(); ++it){
       IBlock & currentBlock = *it;
       Storage * storage = currentBlock.getData< Storage >( storageID_ );
@@ -80,8 +80,8 @@ void PlainIntegratorSolver<Integrator>::timestep( const real_t dt )
          WALBERLA_ASSERT( bd->checkInvariants(), "Invalid body state detected" );
       }
    }
-   if (tt_!=NULL) tt_->stop("Integrate Bodies");
-   if (tt_!=NULL) tt_->stop("PlainIntegrator");
+   if (tt_!=nullptr) tt_->stop("Integrate Bodies");
+   if (tt_!=nullptr) tt_->stop("PlainIntegrator");
 }
 
 } // namespace cr

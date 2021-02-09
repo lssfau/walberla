@@ -45,15 +45,15 @@ public:
       : body_(b)
    {}
    
-   virtual bool contains (const Vector3<real_t> & point ) const
+   bool contains (const Vector3<real_t> & point ) const override
    {
         return geometry::contains( body_, point );
    }
-   virtual FastOverlapResult fastOverlapCheck ( const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx ) const
+   FastOverlapResult fastOverlapCheck ( const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx ) const override
    {
       return geometry::fastOverlapCheck( body_, cellMidpoint, dx );
    }
-   virtual FastOverlapResult fastOverlapCheck ( const AABB & box ) const
+   FastOverlapResult fastOverlapCheck ( const AABB & box ) const override
    {
       return geometry::fastOverlapCheck( body_, box);
    }

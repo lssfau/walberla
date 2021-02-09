@@ -82,7 +82,7 @@ public:
    LatticeModelBase( const CollisionModel_T & cm, const ForceModel_T & fm ) :
       collisionModel_( cm ), forceModel_( fm ) {}
 
-   virtual ~LatticeModelBase() {}
+   virtual ~LatticeModelBase() = default;
 
    virtual void pack( mpi::SendBuffer & buffer ) const
    {

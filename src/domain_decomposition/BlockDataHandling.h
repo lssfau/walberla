@@ -47,7 +47,7 @@ class BlockDataHandling
 public:
    typedef T value_type;
 
-   virtual ~BlockDataHandling() {}
+   virtual ~BlockDataHandling() = default;
    
    /// must be thread-safe !
    virtual T * initialize( IBlock * const block ) = 0;
@@ -66,11 +66,11 @@ template< typename T >
 class AlwaysInitializeBlockDataHandling : public BlockDataHandling<T>
 {
 public:
-   ~AlwaysInitializeBlockDataHandling() {}
+   ~AlwaysInitializeBlockDataHandling() override = default;
 
-   void serialize( IBlock * const, const BlockDataID &, mpi::SendBuffer & ) {}
-   T * deserialize( IBlock * const block ) { return this->initialize( block ); }
-   void deserialize( IBlock * const, const BlockDataID &, mpi::RecvBuffer & ) {}
+   void serialize( IBlock * const, const BlockDataID &, mpi::SendBuffer & ) override {}
+   T * deserialize( IBlock * const block ) override { return this->initialize( block ); }
+   void deserialize( IBlock * const, const BlockDataID &, mpi::RecvBuffer & ) override {}
 };
 
 
@@ -86,25 +86,25 @@ public:
 
    BlockDataHandlingFunctionAdaptor( const Function & function ) : function_( function ) {}
 
-   ~BlockDataHandlingFunctionAdaptor() {}
+   ~BlockDataHandlingFunctionAdaptor() override = default;
 
-   T * initialize( IBlock * const block ) { return function_( block ); }
+   T * initialize( IBlock * const block ) override { return function_( block ); }
    
-   void serialize( IBlock * const, const BlockDataID &, mpi::SendBuffer & )
+   void serialize( IBlock * const, const BlockDataID &, mpi::SendBuffer & ) override
    {
       WALBERLA_ABORT( "You are trying to serialize a block data item for which only an initialization function was registered" );
 #ifdef __IBMCPP__
       return NULL; // never reached, helps to suppress a warning from the IBM compiler
 #endif
    }
-   T * deserialize( IBlock * const )
+   T * deserialize( IBlock * const ) override
    {
       WALBERLA_ABORT( "You are trying to deserialize a block data item for which only an initialization function was registered" );
 #ifdef __IBMCPP__
       return NULL; // never reached, helps to suppress a warning from the IBM compiler
 #endif
    }
-   void deserialize( IBlock * const, const BlockDataID &, mpi::RecvBuffer & )
+   void deserialize( IBlock * const, const BlockDataID &, mpi::RecvBuffer & ) override
    {
       WALBERLA_ABORT( "You are trying to deserialize a block data item for which only an initialization function was registered" );
    }
@@ -155,7 +155,7 @@ namespace internal {
 class BlockDataHandlingWrapper
 {
 public:
-   virtual ~BlockDataHandlingWrapper() {}
+   virtual ~BlockDataHandlingWrapper() = default;
 
    virtual BlockData * initialize( IBlock * const block ) = 0;
    
@@ -173,27 +173,27 @@ public:
 
    BlockDataHandlingHelper( const shared_ptr< BlockDataHandling<T> > & dataHandling ) : dataHandling_( dataHandling ) {}
   
-   BlockData * initialize( IBlock * const block )
+   BlockData * initialize( IBlock * const block ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       T * ptr = dataHandling_->initialize( block );
-      return ptr ? new BlockData( ptr ) : NULL;
+      return ptr ? new BlockData( ptr ) : nullptr;
    }
    
-   void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer )
+   void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       dataHandling_->serialize( block, id, buffer );
    }
    
-   BlockData * deserialize( IBlock * const block )
+   BlockData * deserialize( IBlock * const block ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       T * ptr = dataHandling_->deserialize( block );
-      return ptr ? new BlockData( ptr ) : NULL;
+      return ptr ? new BlockData( ptr ) : nullptr;
    }
    
-   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer )
+   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       dataHandling_->deserialize( block, id, buffer );

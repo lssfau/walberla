@@ -80,7 +80,7 @@ public:
 
    void init ( const Config::BlockHandle & blockHandle );
 
-   virtual void init( BlockStorage & blockStorage, const Config::BlockHandle & blockHandle );
+   void init( BlockStorage & blockStorage, const Config::BlockHandle & blockHandle ) override;
 
 
    void init( FlagUID flagUID, stencil::Direction direction,

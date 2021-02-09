@@ -42,7 +42,7 @@ public:
    
    typedef typename LeafNode<ContainmentOctreeT>::KahanAccumulator KahanAccumulator;
       
-   virtual ~OutsideLeafNode() {}
+   virtual ~OutsideLeafNode() = default;
 
    virtual bool contains( const Point & /*p*/ ) const { return false; }
 

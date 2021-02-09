@@ -49,8 +49,8 @@ namespace communication {
       //**Construction & Destruction************************************************************************************
       /*! \name Construction & Destruction */
       //@{
-               UniformMPIDatatypeInfo() {}
-      virtual ~UniformMPIDatatypeInfo() {}
+               UniformMPIDatatypeInfo() = default;
+      virtual ~UniformMPIDatatypeInfo() = default;
       //@}
       //****************************************************************************************************************
 

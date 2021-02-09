@@ -39,9 +39,7 @@ struct Lighting {
    
    /*!\brief Instantiation constructor for the Lighting struct.
     */
-   Lighting () {
-      
-   }
+   Lighting () = default;
    
    /*!\brief Instantiation constructor for the Lighting struct.
     * \param pointLightOrigin Origin of the point light.

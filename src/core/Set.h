@@ -96,10 +96,10 @@ public:
    friend inline bool operator==( const Set& a, const Set& b ) { return  setIsEqual(a,b); } ///< compares the content of two sets
    friend inline bool operator!=( const Set& a, const Set& b ) { return !setIsEqual(a,b); } ///< compares the content of two sets
 
-   inline Set() {}
+   inline Set() = default;
    inline Set( const T& element ) { set_.insert( element ); }
 
-   inline virtual ~Set() {}
+   inline virtual ~Set() = default;
 
    static const Set<T> emptySet() { return {}; }
 

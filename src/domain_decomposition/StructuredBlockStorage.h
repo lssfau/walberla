@@ -426,7 +426,7 @@ protected:
    StructuredBlockStorage( const shared_ptr<BlockStorage> & blockStorage,
                            const std::vector< uint_t > & xCells, const std::vector< uint_t > & yCells, const std::vector< uint_t > & zCells );
 
-   virtual ~StructuredBlockStorage() {} ///< Must not be made public! No one should be allowed to delete a variable of type 'StructuredBlockStorage*'
+   virtual ~StructuredBlockStorage() = default; ///< Must not be made public! No one should be allowed to delete a variable of type 'StructuredBlockStorage*'
 
    void resetCellDecomposition( const std::vector< uint_t > & xCells, const std::vector< uint_t > & yCells, const std::vector< uint_t > & zCells );
 
@@ -437,7 +437,7 @@ protected:
    {
    public:
       CellBoundingBoxHandling( const StructuredBlockStorage & storage ) : storage_( storage ) {}
-      CellInterval * initialize( IBlock * const block ) { return storage_.initializeCellBoundingBox( block ); }
+      CellInterval * initialize( IBlock * const block ) override { return storage_.initializeCellBoundingBox( block ); }
    private:
       const StructuredBlockStorage & storage_;
    };
@@ -693,10 +693,10 @@ inline const IBlock* StructuredBlockStorage::getBlock( const Cell& cell, const u
    getCellCenter( x, y, z, cell, level );
 
    const IBlock* block = blockStorage_->getBlock(x,y,z);
-   if( block == NULL )
-      return NULL;
+   if( block == nullptr )
+      return nullptr;
 
-   return ( getLevel( *block ) == level ) ? block : NULL;
+   return ( getLevel( *block ) == level ) ? block : nullptr;
 }
 
 
@@ -716,10 +716,10 @@ inline IBlock* StructuredBlockStorage::getBlock( const Cell& cell, const uint_t 
    getCellCenter( x, y, z, cell, level );
 
    IBlock* block = blockStorage_->getBlock(x,y,z);
-   if( block == NULL )
-      return NULL;
+   if( block == nullptr )
+      return nullptr;
 
-   return ( getLevel( *block ) == level ) ? block : NULL;
+   return ( getLevel( *block ) == level ) ? block : nullptr;
 }
 
 

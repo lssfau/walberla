@@ -64,7 +64,7 @@ namespace initializer {
       * Initializes the scalar field using parameters of config block
       * for syntax see class documentation
       *****************************************************************************************************************/
-      virtual void init ( BlockStorage & blockStorage, const Config::BlockHandle & block );
+      void init ( BlockStorage & blockStorage, const Config::BlockHandle & block ) override;
 
 
       /*************************************************************************************************************//**

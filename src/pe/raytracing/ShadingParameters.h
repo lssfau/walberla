@@ -36,9 +36,7 @@ struct ShadingParameters {
    
    /*!\brief Instantiation constructor for the Shading struct.
     */
-   ShadingParameters () {
-      
-   }
+   ShadingParameters () = default;
    
    /*!\brief Instantiation constructor for the Shading struct.
     * \param diffuseColor Primary color of the material.

@@ -42,7 +42,7 @@ class ReducePackInfo
 {
 public:
    ReducePackInfo( ) : size_(0u) {}
-   virtual ~ReducePackInfo() {}
+   virtual ~ReducePackInfo() = default;
 
    size_t getSize() const { return size_; }
 

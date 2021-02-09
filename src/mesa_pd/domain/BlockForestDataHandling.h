@@ -68,22 +68,22 @@ class BlockForestDataHandling: public blockforest::BlockDataHandling<internal::P
 {
 public:
    BlockForestDataHandling(const std::shared_ptr<data::ParticleStorage>& ps) : ps_(ps) {}
-   virtual ~BlockForestDataHandling() {}
+   ~BlockForestDataHandling() override = default;
 
-   virtual internal::ParticleDeleter* initialize( IBlock * const block ) override;
+   internal::ParticleDeleter* initialize( IBlock * const block ) override;
 
-   virtual void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
-   virtual internal::ParticleDeleter* deserialize( IBlock * const block ) override;
-   virtual void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
+   void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
+   internal::ParticleDeleter* deserialize( IBlock * const block ) override;
+   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
 
-   virtual void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child ) override;
-   virtual void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
+   void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child ) override;
+   void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
 
-   virtual internal::ParticleDeleter* deserializeCoarseToFine( Block * const block ) override;
-   virtual internal::ParticleDeleter* deserializeFineToCoarse( Block * const block ) override;
+   internal::ParticleDeleter* deserializeCoarseToFine( Block * const block ) override;
+   internal::ParticleDeleter* deserializeFineToCoarse( Block * const block ) override;
 
-   virtual void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
-   virtual void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child ) override;
+   void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
+   void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child ) override;
 
 private:
    void deserializeImpl( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer );

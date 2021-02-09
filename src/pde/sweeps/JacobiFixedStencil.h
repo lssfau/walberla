@@ -55,9 +55,9 @@ public:
 template< typename Stencil_T >
 void JacobiFixedStencil< Stencil_T >::operator()( IBlock * const block )
 {
-   Field_T * sf( NULL );
-   Field_T * df( NULL );
-   Field_T * ff( NULL );
+   Field_T * sf( nullptr );
+   Field_T * df( nullptr );
+   Field_T * ff( nullptr );
    this->getFields( block, sf, df, ff );
 
    WALBERLA_ASSERT_GREATER_EQUAL( sf->nrOfGhostLayers(), 1 );

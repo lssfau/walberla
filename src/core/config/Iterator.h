@@ -29,7 +29,7 @@ namespace config {
 
    struct ConfigGenerator
    {
-      virtual ~ConfigGenerator() {}
+      virtual ~ConfigGenerator() = default;
       virtual shared_ptr<Config> next() = 0;
    };
 
@@ -37,7 +37,7 @@ namespace config {
    class Iterator
    {
    public:
-      Iterator() {}
+      Iterator() = default;
       Iterator( const shared_ptr<ConfigGenerator> & configGenerator )
           : generator_ ( configGenerator )
        {

@@ -38,9 +38,9 @@ public:
 
 protected:
 
-   void configure() {}
+   void configure() override {}
 
-   int evaluate( const cell_idx_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) { return MPIManager::instance()->rank(); }
+   int evaluate( const cell_idx_t, const cell_idx_t, const cell_idx_t, const cell_idx_t ) override { return MPIManager::instance()->rank(); }
 
 }; // DumpBlockStructureProcess
 

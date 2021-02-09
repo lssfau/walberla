@@ -133,7 +133,7 @@ BoxID createBox( Union<BodyTypes...>* un,
       throw std::runtime_error("Box TypeID not initalized!");
 
    // union not on this process/block -> terminate creation
-   if (un == NULL)
+   if (un == nullptr)
       throw std::invalid_argument( "createBox: Union argument is NULL" );
 
    // main union not on this process/block -> terminate creation
@@ -159,7 +159,7 @@ BoxID createBox( Union<BodyTypes...>* un,
    std::unique_ptr<Box> box = std::make_unique<Box>(sid, uid, gpos, Quat(), lengths, material, global, communicating, infiniteMass);
    box->MPITrait.setOwner( un->MPITrait.getOwner() );
 
-   if (box != NULL)
+   if (box != nullptr)
    {
       // Logging the successful creation of the box
       WALBERLA_LOG_DETAIL(
@@ -199,7 +199,7 @@ CapsuleID createCapsule( Union<BodyTypes...>* un,
       throw std::runtime_error("Capsule TypeID not initalized!");
 
    // union not on this process/block -> terminate creation
-   if (un == NULL)
+   if (un == nullptr)
       throw std::invalid_argument( "createCapsule: Union argument is NULL" );
 
    // main union not on this process/block -> terminate creation
@@ -229,7 +229,7 @@ CapsuleID createCapsule( Union<BodyTypes...>* un,
    std::unique_ptr<Capsule> capsule = std::make_unique<Capsule>(sid, uid, gpos, Quat(), radius, length, material, global, communicating, infiniteMass);
    capsule->MPITrait.setOwner( un->MPITrait.getOwner() );
 
-   if (capsule != NULL)
+   if (capsule != nullptr)
    {
       WALBERLA_LOG_DETAIL("Created capsule " << capsule->getSystemID() << "\n" << *capsule);
    }
@@ -260,7 +260,7 @@ SphereID createSphere( Union<BodyTypes...>* un,
       throw std::runtime_error("Sphere TypeID not initalized!");
 
    // union not on this process/block -> terminate creation
-   if (un == NULL)
+   if (un == nullptr)
       throw std::invalid_argument( "createSphere: Union argument is NULL" );
 
    // main union not on this process/block -> terminate creation
@@ -287,7 +287,7 @@ SphereID createSphere( Union<BodyTypes...>* un,
    std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>(sid, uid, gpos, Quat(), radius, material, global, communicating, infiniteMass);
    sphere->MPITrait.setOwner( un->MPITrait.getOwner() );
 
-   if (sphere != NULL)
+   if (sphere != nullptr)
    {
       // Logging the successful creation of the sphere
       WALBERLA_LOG_DETAIL(

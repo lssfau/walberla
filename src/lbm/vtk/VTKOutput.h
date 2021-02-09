@@ -90,7 +90,7 @@ public:
               const FlagUID & domainFlagUID,
               const FlagMap & flagFieldMapping = FlagMap() );
 
-   virtual ~VTKOutput() {}
+   virtual ~VTKOutput() = default;
 
    virtual void operator()( std::vector< shared_ptr<vtk::BlockCellDataWriterInterface> > & writers,
                             std::map< std::string, vtk::VTKOutput::CellFilter > & filters,

@@ -51,7 +51,7 @@ namespace initializer {
    class Initializer
    {
    public:
-      virtual ~Initializer() { }
+      virtual ~Initializer() = default;
 
       virtual void init( domain_decomposition::BlockStorage & blockStorage, const Config::BlockHandle & blockHandle ) = 0;
    };

@@ -277,7 +277,7 @@ public:
    //**Destructor**********************************************************************************
    /*!\name Destructor */
    //@{
-   ~HashGrids();
+   ~HashGrids() override;
    //@}
    //**********************************************************************************************
 
@@ -286,7 +286,7 @@ public:
    //@{
    inline void add   ( BodyID body );
           void remove( BodyID body );
-   inline int getObservedBodyCount() const { return observedBodyCount_ + static_cast<int> (globalStorage_.size()); }
+   inline int getObservedBodyCount() const override { return observedBodyCount_ + static_cast<int> (globalStorage_.size()); }
    //@}
    //**********************************************************************************************
 
@@ -294,13 +294,13 @@ public:
    /*!\name Utility functions */
    //@{
           void clear       ();
-          void reloadBodies();
+          void reloadBodies() override;
    //@}
    //**********************************************************************************************
 
    //**Implementation of ICCD interface ********************************************************
-   virtual PossibleContacts& generatePossibleContacts( WcTimingTree* tt = NULL );
-   void update(WcTimingTree* tt = NULL);
+   PossibleContacts& generatePossibleContacts( WcTimingTree* tt = nullptr ) override;
+   void update(WcTimingTree* tt = nullptr);
    
    bool active() const { return gridActive_; }
    
@@ -423,7 +423,7 @@ size_t HashGrids::HashGrid::process( BodyID** gridBodies, Contacts& contacts ) c
          Cell*       nbCell   = (*cell) + (*cell)->neighborOffset_[i];
          BodyVector* nbBodies = nbCell->bodies_;
 
-         if( nbBodies != NULL )
+         if( nbBodies != nullptr )
          {
             for( auto aIt = cellBodies->begin(); aIt < cellBodies->end(); ++aIt ) {
                auto endNeighbour = nbBodies->begin();
@@ -480,7 +480,7 @@ void HashGrids::HashGrid::processBodies( BodyID* bodies, size_t bodyCount, Conta
          Cell*       nbCell   = cell + cell->neighborOffset_[i];
          BodyVector* nbBodies = nbCell->bodies_;
 
-         if( nbBodies != NULL ) {
+         if( nbBodies != nullptr ) {
             auto endNeighbour = nbBodies->begin();
             if ((*aIt)->isFixed())
             {
@@ -521,7 +521,7 @@ BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_
                                                             std::function<bool (const BodyID body)> isBodyVisibleFunc) const {
    real_t t_local;
    Vec3 n_local;
-   BodyID body = NULL;
+   BodyID body = nullptr;
    
    raytracing::IntersectsFunctor intersectsFunc(ray, t_local, n_local);
    
@@ -577,7 +577,7 @@ BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_
       const Cell* nbCell = &centerCell + centerCell.neighborOffset_[neighborIndex];
       const BodyVector* nbBodies = nbCell->bodies_;
       
-      if (nbBodies != NULL) {
+      if (nbBodies != nullptr) {
          for (const BodyID& cellBody: *nbBodies) {
             if (cellBody->isRemote()) {
                continue;
@@ -618,8 +618,8 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
                                                    std::function<bool (const BodyID body)> isBodyVisibleFunc) const {
    const real_t realMax = std::numeric_limits<real_t>::max();
    
-   BodyID body_local = NULL;
-   BodyID body_closest = NULL;
+   BodyID body_local = nullptr;
+   BodyID body_closest = nullptr;
    
    int32_t blockXCellCountMin = int32_c(blockAABB.xMin() * inverseCellSpan_) - 1;
    int32_t blockXCellCountMax = int32_c(std::ceil(blockAABB.xMax() * inverseCellSpan_)) + 1;
@@ -642,7 +642,7 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
          firstPointCenteredInCell = firstPoint - firstPointNormal * (cellSpan_/real_t(2));
          tRayOriginToGrid = (ray.getOrigin() - firstPoint).length();
       } else {
-         return NULL;
+         return nullptr;
       }
    }
    
@@ -679,7 +679,7 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
       body_local = getBodyIntersectionForBlockCell<BodyTuple>(currentCell, BLOCKCELL_NORMAL_INDETERMINATE, 0,
                                                               ray, t_closest, n_closest,
                                                               isBodyVisibleFunc);
-      if (body_local != NULL) {
+      if (body_local != nullptr) {
          body_closest = body_local;
       }
    }
@@ -749,7 +749,7 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
       body_local = getBodyIntersectionForBlockCell<BodyTuple>(currentCell, blockCellNormalAxis, blockCellNormalDir,
                                                               ray, t_closest, n_closest,
                                                               isBodyVisibleFunc);
-      if (body_local != NULL) {
+      if (body_local != nullptr) {
          body_closest = body_local;
       }
    }
@@ -771,7 +771,7 @@ BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, 
                                                     std::function<bool (const BodyID body)> isBodyVisibleFunc) const {
    const real_t realMax = std::numeric_limits<real_t>::max();
 
-   BodyID body_closest = NULL;
+   BodyID body_closest = nullptr;
    real_t t_closest = realMax;
    Vec3 n_closest;
    
@@ -791,7 +791,7 @@ BodyID HashGrids::getClosestBodyIntersectingWithRay(const raytracing::Ray& ray, 
    
    for(auto grid: gridList_) {
       body_local = grid->getRayIntersectingBody<BodyTuple>(ray, blockAABB, t_closest, n_closest, isBodyVisibleFunc);
-      if (body_local != NULL){
+      if (body_local != nullptr){
          body_closest = body_local;
       }
    }

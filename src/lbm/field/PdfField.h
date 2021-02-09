@@ -104,7 +104,7 @@ public:
              const uint_t ghostLayers = uint_t(1), const field::Layout & _layout = field::zyxf,
              const shared_ptr< field::FieldAllocator<real_t> > & alloc = shared_ptr< field::FieldAllocator<real_t> >() );
 
-   virtual ~PdfField() {}
+   ~PdfField() override = default;
 
 
 
@@ -282,7 +282,7 @@ protected:
    /*! \name Shallow Copy */
    //@{
    inline PdfField( const PdfField< LatticeModel_T > & other );
-   Field< real_t, Stencil::Size > * cloneShallowCopyInternal() const { return new PdfField< LatticeModel_T >( *this ); }
+   Field< real_t, Stencil::Size > * cloneShallowCopyInternal() const override { return new PdfField< LatticeModel_T >( *this ); }
    //@}
    //*******************************************************************************************************************
 

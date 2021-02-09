@@ -247,7 +247,7 @@ int main( int argc, char **argv )
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
    }
 
-   bool vtkIO =  (vtkIOFreq == 0 ) ? false : true;
+   bool vtkIO =  vtkIOFreq != 0;
 
    ///////////////////////////
    // SIMULATION PROPERTIES //

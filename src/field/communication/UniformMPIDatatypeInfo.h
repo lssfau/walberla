@@ -39,26 +39,26 @@ public:
    UniformMPIDatatypeInfo( BlockDataID blockDataID, const uint_t numberOfGhostLayers ) : blockDataID_( blockDataID ),
       communicateAllGhostLayers_( false ), numberOfGhostLayers_( numberOfGhostLayers ) {}
 
-   virtual ~UniformMPIDatatypeInfo() {}
+   ~UniformMPIDatatypeInfo() override = default;
 
-   virtual shared_ptr<mpi::Datatype> getSendDatatype ( IBlock * block, const stencil::Direction dir )
+   shared_ptr<mpi::Datatype> getSendDatatype ( IBlock * block, const stencil::Direction dir ) override
    {
       auto numGl = numberOfGhostLayersToCommunicate( block );
       return make_shared<mpi::Datatype>( mpiDatatypeSliceBeforeGhostlayer( *getField( block ), dir, numGl ) );
    }
 
-   virtual shared_ptr<mpi::Datatype> getRecvDatatype ( IBlock * block, const stencil::Direction dir )
+   shared_ptr<mpi::Datatype> getRecvDatatype ( IBlock * block, const stencil::Direction dir ) override
    {
       auto numGl = numberOfGhostLayersToCommunicate( block );
       return make_shared<mpi::Datatype>( mpiDatatypeGhostLayerOnly( *getField(block), numGl, dir ) );
    }
 
-   virtual void * getSendPointer( IBlock * block, const stencil::Direction )
+   void * getSendPointer( IBlock * block, const stencil::Direction ) override
    {
       return getField(block)->data();
    }
 
-   virtual void * getRecvPointer( IBlock * block, const stencil::Direction )
+   void * getRecvPointer( IBlock * block, const stencil::Direction ) override
    {
       return getField(block)->data();
    }

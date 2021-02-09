@@ -87,8 +87,7 @@ public:
       using pointer = IBlock*;
       using reference = IBlock&;
 
-      iterator( const iterator & it ) :
-         it_( it.it_ ), end_( it.end_ ), requiredSelectors_( it.requiredSelectors_ ), incompatibleSelectors_( it.incompatibleSelectors_ ) {}
+      iterator( const iterator & it )  = default;
 
       iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }      // prefix ++X
       iterator   operator++(int) { iterator it( *this ); operator++(); return it; }; // postfix X++
@@ -133,8 +132,7 @@ public:
 
       const_iterator( const iterator & it ) :
          it_( it.it_ ), end_( it.end_ ), requiredSelectors_( it.requiredSelectors_ ), incompatibleSelectors_( it.incompatibleSelectors_ ) {}
-      const_iterator( const const_iterator & it ) :
-         it_( it.it_ ), end_( it.end_ ), requiredSelectors_( it.requiredSelectors_ ), incompatibleSelectors_( it.incompatibleSelectors_ ) {}
+      const_iterator( const const_iterator & it )  = default;
 
       const_iterator & operator++()    { ++it_; checkStateAndAdapt(); return *this; }            // prefix ++X
       const_iterator   operator++(int) { const_iterator it( *this ); operator++(); return it; }; // postfix X++
@@ -285,7 +283,7 @@ public:
     
      if( it != iBlocks_.end()) return it->second;
 
-     return NULL;
+     return nullptr;
    }
 
    //*******************************************************************************************************************
@@ -306,7 +304,7 @@ public:
     
      if( it != iBlocks_.end()) return it->second;
 
-     return NULL;
+     return nullptr;
    }
 
    //*******************************************************************************************************************

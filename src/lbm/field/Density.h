@@ -80,7 +80,7 @@ struct Density< LatticeModel_T, typename std::enable_if< LatticeModel_T::compres
 template< typename LatticeModel_T >
 struct Density< LatticeModel_T, typename std::enable_if< ! LatticeModel_T::compressible >::type >
 {
-   static_assert( LatticeModel_T::compressible == false, "Only works with incompressible models!" );
+   static_assert( !LatticeModel_T::compressible, "Only works with incompressible models!" );
 
    template< typename FieldPtrOrIterator >
    static inline real_t get( const LatticeModel_T & /*latticeModel*/, const FieldPtrOrIterator & it )

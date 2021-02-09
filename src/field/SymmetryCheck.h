@@ -41,7 +41,7 @@ namespace field {
    */
    //*******************************************************************************************************************
    template< typename Field_T >
-   bool isSymmetric( const Field_T * field, uint_t dimension, uint_t fCoord = 0, Cell * differingCell = NULL )
+   bool isSymmetric( const Field_T * field, uint_t dimension, uint_t fCoord = 0, Cell * differingCell = nullptr )
    {
       WALBERLA_ASSERT_LESS( dimension, 3 );
 
@@ -63,7 +63,7 @@ namespace field {
                auto value2 = field->get( compareCell, fCoord );
                if ( ! math::equal( value1, value2 ) )
                {
-                  if ( differingCell != NULL )
+                  if ( differingCell != nullptr )
                      *differingCell = currentCell;
 
                   return false;

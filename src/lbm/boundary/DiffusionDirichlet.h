@@ -72,7 +72,7 @@ public:
 
       const real_t & val() const { return val_; }
 
-      virtual void val( real_t& _val, cell_idx_t, cell_idx_t, cell_idx_t ) const { _val = val(); }
+      void val( real_t& _val, cell_idx_t, cell_idx_t, cell_idx_t ) const override { _val = val(); }
 
       real_t & val(){ return val_; }
 
@@ -122,7 +122,7 @@ inline DiffusionDirichlet< LatticeModel_T, flag_t >::DiffusionDirichlet( const B
    Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
-   if (flagField != NULL)
+   if (flagField != nullptr)
       sclField_ = make_shared<ScalarField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::zyxf );
    else
       sclField_ = make_shared<ScalarField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField->nrOfGhostLayers(), field::zyxf );

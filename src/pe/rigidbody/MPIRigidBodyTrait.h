@@ -68,7 +68,7 @@ public:
    //**Destructor**********************************************************************************
    /*!\name Destructor */
    //@{
-   virtual ~MPIRigidBodyTrait() {};
+   virtual ~MPIRigidBodyTrait() = default;
    //@}
    //**********************************************************************************************
 
@@ -178,9 +178,7 @@ inline void MPIRigidBodyTrait::deregisterShadowOwner( const Owner& owner )
  */
 inline bool MPIRigidBodyTrait::isShadowOwnerRegistered( const Owner& owner ) const
 {
-   if( std::find( shadowOwners_.begin(), shadowOwners_.end(), owner ) == shadowOwners_.end() )
-      return false;
-   else return true;
+   return std::find( shadowOwners_.begin(), shadowOwners_.end(), owner ) != shadowOwners_.end();
 }
 //*************************************************************************************************
 

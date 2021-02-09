@@ -84,7 +84,7 @@ public:
    * The cell interval and the parameters for the boundary are read from configuration.
    *
    *****************************************************************************************************************/
-   virtual void init( BlockStorage & , const Config::BlockHandle & blockHandle ) { return init(blockHandle); }
+   void init( BlockStorage & , const Config::BlockHandle & blockHandle ) override { return init(blockHandle); }
    void init( const Config::BlockHandle & blockHandle );
 
 

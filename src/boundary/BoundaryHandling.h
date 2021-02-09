@@ -414,7 +414,7 @@ private:
 
    template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
    inline const typename std::enable_if<(N!=0), Boundary_T>::type & getBoundaryCondition( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions,
-                                                   typename std::enable_if< std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::value >::type* /*dummy*/ = 0 ) const
+                                                   typename std::enable_if< std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::value >::type* /*dummy*/ = nullptr ) const
    {
       if( uid == std::get<N>( boundaryConditions ).getUID() )
          return std::get<N>( boundaryConditions );
@@ -424,7 +424,7 @@ private:
 
    template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
    inline const typename std::enable_if<(N==0), Boundary_T>::type & getBoundaryCondition( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions,
-                                                   typename std::enable_if< std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::value >::type* /*dummy*/ = 0 ) const
+                                                   typename std::enable_if< std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::value >::type* /*dummy*/ = nullptr ) const
    {
       if( uid == std::get<N>( boundaryConditions ).getUID() )
          return std::get<N>( boundaryConditions );
@@ -439,8 +439,8 @@ private:
    template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
    inline const typename std::enable_if<(N!=0), Boundary_T>::type & getBoundaryCondition( const BoundaryUID & uid, const BoundariesTuple & boundaryConditions,
                                                    typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, typename std::tuple_element<N, BoundariesTuple>::type >::type,
-                                                                                              std::false_type >::value >::type* /*dummy*/ = 0,
-                                                   typename std::enable_if< (N>0) >::type* /*dummy*/ = 0 ) const
+                                                                                              std::false_type >::value >::type* /*dummy*/ = nullptr,
+                                                   typename std::enable_if< (N>0) >::type* /*dummy*/ = nullptr ) const
    {
       return getBoundaryCondition< Boundary_T, BoundariesTuple, N-1 >( uid, boundaryConditions );
    }
@@ -490,7 +490,7 @@ private:
    template< typename Boundary_T, typename BoundariesTuple, int N = std::tuple_size<BoundariesTuple>::value - 1 >
    inline const typename std::enable_if<(N==0), Boundary_T>::type & getBoundaryCondition_TypeExists( const BoundaryUID & uid, const BoundariesTuple & /*boundaryConditions*/,
                                                               typename std::enable_if< std::is_same< typename std::is_same< Boundary_T, typename std::tuple_element<0, BoundariesTuple>::type >::type,
-                                                                                                         std::false_type >::value >::type* /*dummy*/ = 0 ) const
+                                                                                                         std::false_type >::value >::type* /*dummy*/ = nullptr ) const
    {
       WALBERLA_ABORT( "The requested boundary condition " << uid.getIdentifier() << " is not part of this boundary handling." );
 

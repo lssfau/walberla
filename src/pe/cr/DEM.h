@@ -51,7 +51,7 @@ public:
             , domain_decomposition::BlockDataID storageID
             , domain_decomposition::BlockDataID ccdID
             , domain_decomposition::BlockDataID fcdID
-            , WcTimingTree*                     tt = NULL);
+            , WcTimingTree*                     tt = nullptr);
 
    /// forwards to timestep
    /// Convenience operator to make class a functor.
@@ -61,9 +61,9 @@ public:
 
    inline Integrator                getIntegrator()                const { return integrate_; }
    inline ContactResolver           getContactResolver()           const { return resolveContact_; }
-   virtual inline real_t            getMaximumPenetration()        const override { return maxPenetration_; }
-   virtual inline size_t            getNumberOfContacts()          const override { return numberOfContacts_; }
-   virtual inline size_t            getNumberOfContactsTreated()   const override { return numberOfContactsTreated_; }
+   inline real_t            getMaximumPenetration()        const override { return maxPenetration_; }
+   inline size_t            getNumberOfContacts()          const override { return numberOfContacts_; }
+   inline size_t            getNumberOfContactsTreated()   const override { return numberOfContactsTreated_; }
 private:
    Integrator                        integrate_;
    ContactResolver                   resolveContact_;
@@ -87,7 +87,7 @@ public:
        , domain_decomposition::BlockDataID storageID
        , domain_decomposition::BlockDataID ccdID
        , domain_decomposition::BlockDataID fcdID
-       , WcTimingTree*                     tt = NULL)
+       , WcTimingTree*                     tt = nullptr)
    : DEMSolver<IntegrateImplicitEuler, ResolveContactSpringDashpotHaffWerner>(
               IntegrateImplicitEuler(), ResolveContactSpringDashpotHaffWerner(),
               globalBodyStorage, blockStorage, storageID, ccdID, fcdID, tt )

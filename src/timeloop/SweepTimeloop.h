@@ -129,7 +129,7 @@ namespace timeloop {
            nextId_(0), firstRun_(true)
       {}
 
-      virtual ~SweepTimeloop()
+      ~SweepTimeloop() override
       {
          for ( auto i = sweeps_.begin(); i != sweeps_.end(); ++i )
             delete i->second;
@@ -166,8 +166,8 @@ namespace timeloop {
             sweeps_.erase( *it );
       }
 
-      virtual void doTimeStep(const Set<SUID> &selectors);
-      virtual void doTimeStep(const Set<SUID> &selectors, WcTimingPool &tp);
+      void doTimeStep(const Set<SUID> &selectors) override;
+      void doTimeStep(const Set<SUID> &selectors, WcTimingPool &tp) override;
 
       uint_t nextId_;
       std::vector<uint_t> sweepsToDelete_;

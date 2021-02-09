@@ -256,7 +256,7 @@ inline void Curved< LatticeModel_T, FlagField_T >::treatDirection( const cell_id
    }
    else
    {
-      WALBERLA_ASSERT( weights_->get( nx, ny, nz ).get() != NULL );
+      WALBERLA_ASSERT( weights_->get( nx, ny, nz ).get() != nullptr );
       WALBERLA_ASSERT_LESS( Stencil::invDirIdx(dir), weights_->get( nx, ny, nz )->size() );
       
       // linear multi reflection model without non-equilibirum

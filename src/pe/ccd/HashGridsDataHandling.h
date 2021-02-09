@@ -33,7 +33,7 @@ namespace ccd {
 class HashGridsDataHandling : public blockforest::AlwaysInitializeBlockDataHandling<HashGrids>{
 public:
    HashGridsDataHandling(const shared_ptr<BodyStorage>& globalStorage, const BlockDataID& storageID) : globalStorage_(globalStorage), storageID_(storageID) {}
-   HashGrids * initialize( IBlock * const block )
+   HashGrids * initialize( IBlock * const block ) override
    {
       Storage* storage = block->getData< Storage >( storageID_ );
       return new HashGrids(*globalStorage_, (*storage)[0], (*storage)[1]);

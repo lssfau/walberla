@@ -81,7 +81,7 @@ void GradientRefinement< VectorField_T, Filter_T, Pseudo2D >::operator()( std::v
       const Block * const block = it->first;
       const VectorField_T * u = block->template getData< VectorField_T >( fieldId_ );
 
-      if( u == NULL )
+      if( u == nullptr )
       {
          it->second = uint_t(0);
          continue;

@@ -39,7 +39,7 @@ public:
       static_assert(std::is_base_of<RigidBody, CastBodyType>::value, "only downcasting allowed!");
       if (CastBodyType::getStaticTypeID() == typeID)
       {
-         CastBodyType* bd = NULL;
+         CastBodyType* bd = nullptr;
          return func( static_cast<CastBodyType *>( bd ) );
       } else
       {

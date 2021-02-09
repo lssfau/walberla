@@ -212,7 +212,7 @@ namespace check_functions_detail {
 
 struct ExitHandler
 {
-   ExitHandler() {};
+   ExitHandler() = default;
    ExitHandler( const std::string & message ) : message_( message ) {}
    void operator()( const std::string & checkErrorMessage );
 private:

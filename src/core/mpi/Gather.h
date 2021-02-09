@@ -78,7 +78,7 @@ std::vector<T> gather( T value, int recvRank = 0, MPI_Comm comm = MPI_COMM_WORLD
       return result;
    }
 
-   MPI_Gather( &value, 1, MPITrait<T>::type(), NULL, 1, MPITrait<T>::type(),
+   MPI_Gather( &value, 1, MPITrait<T>::type(), nullptr, 1, MPITrait<T>::type(),
                recvRank, comm );
 
    return std::vector<T>();

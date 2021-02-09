@@ -35,7 +35,7 @@ class CartesianDistribution
 public:
 
    CartesianDistribution( const uint_t numberOfXProcesses, const uint_t numberOfYProcesses, const uint_t numberOfZProcesses,
-                          std::vector< uint_t > * processIdMap = NULL ) :
+                          std::vector< uint_t > * processIdMap = nullptr ) :
       numberOfXProcesses_( numberOfXProcesses ), numberOfYProcesses_( numberOfYProcesses ), numberOfZProcesses_( numberOfZProcesses ),
       processIdMap_( processIdMap )
    {}

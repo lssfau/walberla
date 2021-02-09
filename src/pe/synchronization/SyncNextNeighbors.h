@@ -250,10 +250,10 @@ void generateSynchonizationMessages(mpi::BufferSystem& bs, const Block& block, B
 }
 
 template <typename BodyTypeTuple>
-void syncNextNeighbors( BlockForest& forest, BlockDataID storageID, WcTimingTree* tt = NULL, const real_t dx = real_t(0), const bool syncNonCommunicatingBodies = false )
+void syncNextNeighbors( BlockForest& forest, BlockDataID storageID, WcTimingTree* tt = nullptr, const real_t dx = real_t(0), const bool syncNonCommunicatingBodies = false )
 {
-   if (tt != NULL) tt->start("Sync");
-   if (tt != NULL) tt->start("Assembling Body Synchronization");
+   if (tt != nullptr) tt->start("Sync");
+   if (tt != nullptr) tt->start("Assembling Body Synchronization");
    mpi::BufferSystem bs( mpi::MPIManager::instance()->comm() );
 
    for (auto it = forest.begin(); it != forest.end(); ++it)
@@ -274,13 +274,13 @@ void syncNextNeighbors( BlockForest& forest, BlockDataID storageID, WcTimingTree
       }
       generateSynchonizationMessages<BodyTypeTuple>(bs, *block, *localStorage, *shadowStorage, dx, syncNonCommunicatingBodies);
    }
-   if (tt != NULL) tt->stop("Assembling Body Synchronization");
+   if (tt != nullptr) tt->stop("Assembling Body Synchronization");
 
    // size of buffer is unknown and changes with each send
    bs.setReceiverInfoFromSendBufferState(false, true);
    bs.sendAll();
 
-   if (tt != NULL) tt->start("Parsing Body Synchronization");
+   if (tt != nullptr) tt->start("Parsing Body Synchronization");
    // Receiving the updates for the remote rigid bodies from the connected processes
    WALBERLA_LOG_DETAIL( "Parsing of body synchronization response starts..." );
    for( auto it = bs.begin(); it != bs.end(); ++it )
@@ -294,7 +294,7 @@ void syncNextNeighbors( BlockForest& forest, BlockDataID storageID, WcTimingTree
          it.buffer() >> sender;
          it.buffer() >> receiver;
          auto blk = forest.getBlock(receiver);
-         WALBERLA_CHECK(blk != NULL, receiver << " not on this process!");
+         WALBERLA_CHECK(blk != nullptr, receiver << " not on this process!");
          IBlock& block = *blk;
          Storage* storage  = block.getData< Storage >( storageID );
          BodyStorage& localStorage  = (*storage)[0];
@@ -303,8 +303,8 @@ void syncNextNeighbors( BlockForest& forest, BlockDataID storageID, WcTimingTree
       }
    }
    WALBERLA_LOG_DETAIL( "Parsing of body synchronization response ended." );
-   if (tt != NULL) tt->stop("Parsing Body Synchronization");
-   if (tt != NULL) tt->stop("Sync");
+   if (tt != nullptr) tt->stop("Parsing Body Synchronization");
+   if (tt != nullptr) tt->stop("Sync");
 }
 
 }  // namespace pe

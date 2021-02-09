@@ -55,7 +55,7 @@ namespace timeloop {
    template <typename FuncType>
    struct SelectableFunction
    {
-      SelectableFunction() {}
+      SelectableFunction() = default;
 
       SelectableFunction ( std::function< FuncType > fct,
                            const std::string& identifier            = std::string(),
@@ -77,7 +77,7 @@ namespace timeloop {
 
    struct BeforeFunction : public SelectableFunction< void () >
    {
-      BeforeFunction() {}
+      BeforeFunction() = default;
       BeforeFunction(std::function< void () > fct,
                      const std::string& id      = std::string(),
                      const Set<SUID>&   req    = Set<SUID>::emptySet(),
@@ -95,7 +95,7 @@ namespace timeloop {
 
    struct AfterFunction : public SelectableFunction< void () >
    {
-       AfterFunction() {}
+       AfterFunction() = default;
        AfterFunction(std::function< void () > fct,
                      const std::string& id      = std::string(),
                      const Set<SUID>&   req    = Set<SUID>::emptySet(),

@@ -65,7 +65,6 @@ readability-use-anyofallof
 
 '
 WarningsAsErrors: '*'
-HeaderFilterRegex: ''
-AnalyzeTemporaryDtors: false
+HeaderFilterRegex: '.*'
 ...
 

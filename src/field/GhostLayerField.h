@@ -90,7 +90,7 @@ namespace field {
                        const std::vector<T> & fValues, const Layout & layout = zyxf,
                        const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
 
-      virtual ~GhostLayerField() {}
+      ~GhostLayerField() override = default;
 
 
 
@@ -102,7 +102,7 @@ namespace field {
                  const shared_ptr<FieldAllocator<T> > &alloc = shared_ptr<FieldAllocator<T> >() );
 
 
-      virtual void resize( uint_t xSize, uint_t ySize, uint_t zSize );
+      void resize( uint_t xSize, uint_t ySize, uint_t zSize ) override;
               void resize( uint_t xSize, uint_t ySize, uint_t zSize, uint_t gl );
 
       using Field<T,fSize_>::resize;
@@ -200,8 +200,8 @@ namespace field {
       /*! \name Slicing */
       //@{
       GhostLayerField<T,fSize_> * getSlicedField( const CellInterval & interval ) const;
-      virtual void slice           ( const CellInterval & interval );
-      virtual void shiftCoordinates( cell_idx_t cx, cell_idx_t cy, cell_idx_t cz );
+      void slice           ( const CellInterval & interval ) override;
+      void shiftCoordinates( cell_idx_t cx, cell_idx_t cy, cell_idx_t cz ) override;
       //@}
       //****************************************************************************************************************
 
@@ -214,8 +214,8 @@ namespace field {
       //** Shallow Copy ************************************************************************************************
       /*! \name Shallow Copy */
       //@{
-      virtual Field<T,fSize_> * cloneShallowCopyInternal()   const;
-      virtual typename Field<T,fSize_>::FlattenedField * flattenedShallowCopyInternal() const;
+      Field<T,fSize_> * cloneShallowCopyInternal()   const override;
+      typename Field<T,fSize_>::FlattenedField * flattenedShallowCopyInternal() const override;
       GhostLayerField(const GhostLayerField<T,fSize_> & other);
       template <typename T2, uint_t fSize2>
       GhostLayerField(const GhostLayerField<T2, fSize2> & other);

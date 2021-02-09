@@ -77,9 +77,9 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
       ccd::ICCD* ccd = currentBlock.getData< ccd::ICCD >( ccdID_ );
       fcd::IFCD* fcd = currentBlock.getData< fcd::IFCD >( fcdID_ );
       ccd->generatePossibleContacts( tt_ );
-      if (tt_ != NULL) tt_->start("FCD");
+      if (tt_ != nullptr) tt_->start("FCD");
       Contacts& cont = fcd->generateContacts( ccd->getPossibleContacts() );
-      if (tt_ != NULL) tt_->stop("FCD");
+      if (tt_ != nullptr) tt_->stop("FCD");
 
       for (auto cIt = cont.begin(); cIt != cont.end(); ++cIt){
          const real_t overlap( -cIt->getDistance() );
@@ -100,9 +100,9 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
 //   if (numContacts > 0)
 //      WALBERLA_LOG_DEVEL_ON_ROOT("#Contacts: " << numContacts << "." );
 
-   if (tt_ != NULL) tt_->start("ForceSync");
+   if (tt_ != nullptr) tt_->start("ForceSync");
    reduceForces( *blockStorage_, storageID_, *globalBodyStorage_);
-   if (tt_ != NULL) tt_->stop("ForceSync");
+   if (tt_ != nullptr) tt_->stop("ForceSync");
 
    for (auto it = blockStorage_->begin(); it != blockStorage_->end(); ++it)
    {
@@ -114,7 +114,7 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
       // Updating the positions and velocities of all locally owned and global rigid bodies (but not shadow copies).
       WALBERLA_LOG_DETAIL( "Time integration starts...\n" );
 
-      if (tt_ != NULL) tt_->start("Integration");
+      if (tt_ != nullptr) tt_->start("Integration");
 
       for( auto bodyIt = localStorage.begin(); bodyIt != localStorage.end(); ++bodyIt )
       {
@@ -140,7 +140,7 @@ void DEMSolver<Integrator,ContactResolver>::timestep( real_t dt )
          bodyIt->resetForceAndTorque();
       }
 
-      if (tt_ != NULL) tt_->stop("Integration");
+      if (tt_ != nullptr) tt_->stop("Integration");
 
       // Reset forces of shadow copies
       for( auto& body : shadowStorage ) {

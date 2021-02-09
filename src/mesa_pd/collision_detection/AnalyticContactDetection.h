@@ -46,7 +46,7 @@ namespace collision_detection {
 class AnalyticContactDetection
 {
 public:
-   virtual ~AnalyticContactDetection() {}
+   virtual ~AnalyticContactDetection() = default;
 
    size_t& getIdx1() {return idx1_;}
    size_t& getIdx2() {return idx2_;}

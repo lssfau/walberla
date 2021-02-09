@@ -42,7 +42,7 @@ public:
    
    typedef typename Node<ContainmentOctreeT>::KahanAccumulator KahanAccumulator;
 
-   virtual ~LeafNode() {}
+   virtual ~LeafNode() = default;
 
    virtual uint_t height() const { return uint_t(0); }
    virtual uint_t numNodes() const { return uint_t(0); }

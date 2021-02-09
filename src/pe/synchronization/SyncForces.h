@@ -110,7 +110,7 @@ void reduceForces( BlockStorage& blocks, BlockDataID storageID )
          it.buffer() >> sender;
          it.buffer() >> receiver;
          auto blk = blocks.getBlock(receiver);
-         WALBERLA_CHECK(blk != NULL, receiver << " not on this process!");
+         WALBERLA_CHECK(blk != nullptr, receiver << " not on this process!");
          IBlock& block = *blk;
          Storage* storage  = block.getData< Storage >( storageID );
          BodyStorage& localStorage  = (*storage)[0];
@@ -231,7 +231,7 @@ void distributeForces( BlockStorage& blocks, BlockDataID storageID )
          it.buffer() >> sender;
          it.buffer() >> receiver;
          auto blk = blocks.getBlock(receiver);
-         WALBERLA_CHECK(blk != NULL, receiver << " not on this process!");
+         WALBERLA_CHECK(blk != nullptr, receiver << " not on this process!");
          IBlock& block = *blk;
          Storage* storage  = block.getData< Storage >( storageID );
          BodyStorage& localStorage  = (*storage)[0];

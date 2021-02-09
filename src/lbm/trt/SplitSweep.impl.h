@@ -93,9 +93,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
                                                                        >::type
    >::operator()( IBlock * const block )                                               
 {
-   PdfField_T * src( NULL );
-   PdfField_T * dst( NULL );
-   const FlagField_T * flagField( NULL );
+   PdfField_T * src( nullptr );
+   PdfField_T * dst( nullptr );
+   const FlagField_T * flagField( nullptr );
 
    auto lbm = this->getLbmMaskAndFields( block, src, dst, flagField );
 
@@ -545,9 +545,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
                                                                        >::type
    >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
-   PdfField_T * src( NULL );
-   PdfField_T * dst( NULL );
-   const FlagField_T * flagField( NULL );
+   PdfField_T * src( nullptr );
+   PdfField_T * dst( nullptr );
+   const FlagField_T * flagField( nullptr );
 
    auto lbm = this->getLbmMaskAndFields( block, src, dst, flagField );
 
@@ -568,8 +568,8 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
 {
    WALBERLA_ASSERT_EQUAL( numberOfGhostLayersToInclude, uint_t(0) ); // the implementation right now doesn't support inclusion of ghost layers in collide step!
 
-   PdfField_T * src( NULL );
-   const FlagField_T * flagField( NULL );
+   PdfField_T * src( nullptr );
+   const FlagField_T * flagField( nullptr );
 
    auto lbm = this->getLbmMaskAndFields( block, src, flagField );
 
@@ -1030,9 +1030,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
                                                                        >::type
    >::operator()( IBlock * const block )
 {
-   PdfField_T * src( NULL );
-   PdfField_T * dst( NULL );
-   const FlagField_T * flagField( NULL );
+   PdfField_T * src( nullptr );
+   PdfField_T * dst( nullptr );
+   const FlagField_T * flagField( nullptr );
 
    auto lbm = this->getLbmMaskAndFields( block, src, dst, flagField );
 
@@ -1501,9 +1501,9 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
                                                                        >::type
    >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
-   PdfField_T * src( NULL );
-   PdfField_T * dst( NULL );
-   const FlagField_T * flagField( NULL );
+   PdfField_T * src( nullptr );
+   PdfField_T * dst( nullptr );
+   const FlagField_T * flagField( nullptr );
 
    auto lbm = this->getLbmMaskAndFields( block, src, dst, flagField );
 
@@ -1524,8 +1524,8 @@ void SplitSweep< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_s
 {
    WALBERLA_ASSERT_EQUAL( numberOfGhostLayersToInclude, uint_t(0) ); // the implementation right now doesn't support inclusion of ghost layers in collide step!
 
-   PdfField_T * src( NULL );
-   const FlagField_T * flagField( NULL );
+   PdfField_T * src( nullptr );
+   const FlagField_T * flagField( nullptr );
 
    auto lbm = this->getLbmMaskAndFields( block, src, flagField );
 

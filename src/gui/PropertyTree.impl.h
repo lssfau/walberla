@@ -78,7 +78,7 @@ namespace gui  {
    template <typename T>
    PropertyTree::ItemID PropertyTree::addItem(const std::string &, const T &, ItemID)
    {
-      return 0;
+      return nullptr;
    }
 
    template <typename T>

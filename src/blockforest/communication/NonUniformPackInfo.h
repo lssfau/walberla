@@ -44,8 +44,8 @@ public:
    //**Construction & Destruction************************************************************
    /*! \name Construction & Destruction */
    //@{
-            NonUniformPackInfo() {}
-   virtual ~NonUniformPackInfo() {}
+            NonUniformPackInfo() = default;
+   virtual ~NonUniformPackInfo() = default;
    //@}
    //*******************************************************************************************************************
 

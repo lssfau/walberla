@@ -816,12 +816,10 @@ inline bool operator==( const Quaternion<T1>& lhs, const Quaternion<T2>& rhs )
 {
    // In order to compare the two quaternions, the data values of the lower-order data
    // type are converted to the higher-order data type within the equal function.
-   if( !equal( lhs[0], rhs[0] ) ||
-       !equal( lhs[1], rhs[1] ) ||
-       !equal( lhs[2], rhs[2] ) ||
-       !equal( lhs[2], rhs[2] ) )
-      return false;
-   else return true;
+   return equal( lhs[0], rhs[0] ) &&
+          equal( lhs[1], rhs[1] ) &&
+          equal( lhs[2], rhs[2] ) &&
+          equal( lhs[2], rhs[2] );
 }
 //*************************************************************************************************
 
@@ -911,9 +909,7 @@ std::istream& operator>>( std::istream& is, Quaternion<Type>& q )
 template< typename Type >  // Data type of the quaternion
 inline bool isnan( const Quaternion<Type>& q )
 {
-   if( isnan( q[0] ) || isnan( q[1] ) || isnan( q[2] ) || isnan( q[3] ) )
-      return true;
-   else return false;
+   return isnan( q[0] ) || isnan( q[1] ) || isnan( q[2] ) || isnan( q[3] );
 }
 //*************************************************************************************************
 

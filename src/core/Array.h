@@ -41,12 +41,12 @@ class Array {
 
 public:
 
-   inline Array() : array_( NULL ), size_( uint_c(0) ) {}
+   inline Array() : array_( nullptr ), size_( uint_c(0) ) {}
    inline Array( const uint_t n, const T& t = T() );
    inline Array( const std::vector<T>& vector );
    inline Array( const Array& array );
 
-   ~Array() { if( array_ != NULL ) delete[] array_; }
+   ~Array() { if( array_ != nullptr ) delete[] array_; }
 
    uint_t size() const { return size_; }
    bool  empty() const { return size_ == 0; }

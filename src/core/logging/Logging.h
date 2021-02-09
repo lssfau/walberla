@@ -82,7 +82,7 @@ public:
    class CustomStamp
    {
    public:
-      virtual ~CustomStamp() {}
+      virtual ~CustomStamp() = default;
       virtual std::string stamp() = 0;
       virtual uint_t      maxStampWidth() = 0;
    };

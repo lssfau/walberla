@@ -50,37 +50,37 @@ public:
       initialize_( _initialize ), initialVelocity_( initialVelocity ), initialDensity_( initialDensity ),
       nrOfGhostLayers_( nrOfGhostLayers ), layout_( layout ) {}
 
-   inline void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer )
+   inline void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override
    {
       packLatticeModel( block, id, buffer );
       Base_T::serialize( block, id, buffer );
    }
 
-   void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child )
+   void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child ) override
    {
       packLatticeModel( block, id, buffer );
       Base_T::serializeCoarseToFine( block, id, buffer, child );
    }
 
-   void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer )
+   void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override
    {
       packLatticeModel( block, id, buffer );
       Base_T::serializeFineToCoarse( block, id, buffer );
    }
 
-   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer )
+   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override
    {
       unpackLatticeModel( block, id, buffer );
       Base_T::deserialize( block, id, buffer );
    }
 
-   void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer )
+   void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override
    {
       unpackLatticeModel( block, id, buffer );
       Base_T::deserializeCoarseToFine( block, id, buffer );
    }
 
-   void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child )
+   void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child ) override
    {
       unpackLatticeModel( block, id, buffer );
       Base_T::deserializeFineToCoarse( block, id, buffer, child );
@@ -88,12 +88,12 @@ public:
 
 protected:
 
-   PdfField<LatticeModel_T> * allocate( IBlock * const block )
+   PdfField<LatticeModel_T> * allocate( IBlock * const block ) override
    {
       return allocateDispatch( block, initialize_, initialDensity_ );
    }
 
-   PdfField<LatticeModel_T> * reallocate( IBlock * const block )
+   PdfField<LatticeModel_T> * reallocate( IBlock * const block ) override
    {
 #ifdef NDEBUG
       return allocateDispatch( block, false, initialDensity_ );

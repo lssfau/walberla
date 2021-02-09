@@ -97,7 +97,7 @@ PerformanceLogger<FlagField_T>::PerformanceLogger( const shared_ptr< StructuredB
                    const Set<SUID> & requiredSelectors /*= Set<SUID>::emptySet()*/,
                    const Set<SUID> & incompatibleSelectors /*= Set<SUID>::emptySet()*/ )
                    : performanceEvaluation_( blocks, flagFieldId, fluid, requiredSelectors, incompatibleSelectors ),
-                     interval_(interval), timestep_(1), refreshCellCountOnCall_(false), timeloop_(NULL)
+                     interval_(interval), timestep_(1), refreshCellCountOnCall_(false), timeloop_(nullptr)
 {
 }
 

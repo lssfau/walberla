@@ -622,7 +622,7 @@ typedef struct LodePNGState
   unsigned error;
 #ifdef LODEPNG_COMPILE_CPP
   //For the lodepng::State subclass.
-  virtual ~LodePNGState(){}
+  virtual ~LodePNGState()= default;
 #endif
 } LodePNGState;
 
@@ -808,7 +808,7 @@ class State : public LodePNGState
   public:
     State();
     State(const State& other);
-    virtual ~State();
+    ~State() override;
     State& operator=(const State& other);
 };
 
