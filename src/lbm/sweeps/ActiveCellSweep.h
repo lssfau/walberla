@@ -47,7 +47,7 @@ public:
                     const Set< FlagUID > & lbmMask, const bool _useIterators = false ) :
       FlagFieldSweepBase<LatticeModel_T,FlagField_T>( src, dst, flagField, lbmMask ), cellOperation_( op ), useIterators_( _useIterators ) {}
 
-   virtual ~ActiveCellSweep() {}
+   virtual ~ActiveCellSweep() = default;
 
    const CellOperation & getCellOperation() const { return cellOperation_; }
          CellOperation & getCellOperation()       { return cellOperation_; }

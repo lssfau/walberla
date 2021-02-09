@@ -60,7 +60,7 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   inline RigidBodyCastIterator() {}
+   inline RigidBodyCastIterator() = default;
    explicit inline RigidBodyCastIterator( const typename ContainerType::iterator& begin, const typename ContainerType::iterator& end );
 
    RigidBodyCastIterator( const RigidBodyCastIterator<C>& it) = default;
@@ -207,7 +207,7 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   inline ConstRigidBodyCastIterator() {}
+   inline ConstRigidBodyCastIterator() = default;
    explicit inline ConstRigidBodyCastIterator( const typename ContainerType::const_iterator& begin,
                                                const typename ContainerType::const_iterator& end );
 

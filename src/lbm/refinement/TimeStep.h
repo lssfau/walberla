@@ -397,14 +397,14 @@ void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::consistencyChecks(
          continue;
 
       auto *  pdfField = block->template getData< PdfField< LatticeModel_T > >( pdfFieldId );
-      if( pdfField == NULL )
+      if( pdfField == nullptr )
       {
          WALBERLA_ABORT( "Could not get the PDF field from block " << block->getId() << ". Check if it is allocated on "
                          "the block and if the LatticeModel matches!" );
       }
 
       auto * boundaryHandling = block->template getData< BoundaryHandling_T >( boundaryHandlingId );
-      if( boundaryHandling == NULL )
+      if( boundaryHandling == nullptr )
       {
          WALBERLA_ABORT( "Could not get the boundary handling from block " << block->getId() << ". Check if it is "
                          "allocated on the block and if its type matches!" );
@@ -595,7 +595,7 @@ template< typename LatticeModel_T, typename Sweep_T, typename BoundaryHandling_T
 inline void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::addPostCollideVoidFunction( const VoidFunction & function, const std::string & identifier )
 {
    VoidFunctionWrappper wrappedFunction( globalPostCollideVoidFunctions_, globalPostCollideVoidFunctions_.size() );
-   globalPostCollideVoidFunctions_.push_back( std::make_pair( function, identifier ) );
+   globalPostCollideVoidFunctions_.emplace_back( function, identifier );
    addFunction< VoidFunction >( postCollideVoidFunctions_, wrappedFunction, identifier );
 }
 
@@ -603,7 +603,7 @@ template< typename LatticeModel_T, typename Sweep_T, typename BoundaryHandling_T
 inline void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::addPostCollideBlockFunction( const BlockFunction & function, const std::string & identifier )
 {
    BlockFunctionWrappper wrappedFunction( globalPostCollideBlockFunctions_, globalPostCollideBlockFunctions_.size() );
-   globalPostCollideBlockFunctions_.push_back( std::make_pair( function, identifier ) );
+   globalPostCollideBlockFunctions_.emplace_back( function, identifier );
    addFunction< BlockFunction >( postCollideBlockFunctions_, wrappedFunction, identifier );
 }
 
@@ -623,7 +623,7 @@ template< typename LatticeModel_T, typename Sweep_T, typename BoundaryHandling_T
 inline void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::addPostBoundaryHandlingVoidFunction( const VoidFunction & function, const std::string & identifier )
 {
    VoidFunctionWrappper wrappedFunction( globalPostBoundaryHandlingVoidFunctions_, globalPostBoundaryHandlingVoidFunctions_.size() );
-   globalPostBoundaryHandlingVoidFunctions_.push_back( std::make_pair( function, identifier ) );
+   globalPostBoundaryHandlingVoidFunctions_.emplace_back( function, identifier );
    addFunction< VoidFunction >( postBoundaryHandlingVoidFunctions_, wrappedFunction, identifier );
 }
 
@@ -631,7 +631,7 @@ template< typename LatticeModel_T, typename Sweep_T, typename BoundaryHandling_T
 inline void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::addPostBoundaryHandlingBlockFunction( const BlockFunction & function, const std::string & identifier )
 {
    BlockFunctionWrappper wrappedFunction( globalPostBoundaryHandlingBlockFunctions_, globalPostBoundaryHandlingBlockFunctions_.size() );
-   globalPostBoundaryHandlingBlockFunctions_.push_back( std::make_pair( function, identifier ) );
+   globalPostBoundaryHandlingBlockFunctions_.emplace_back( function, identifier );
    addFunction< BlockFunction >( postBoundaryHandlingBlockFunctions_, wrappedFunction, identifier );
 }
 
@@ -651,7 +651,7 @@ template< typename LatticeModel_T, typename Sweep_T, typename BoundaryHandling_T
 inline void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::addPostStreamVoidFunction( const VoidFunction & function, const std::string & identifier )
 {
    VoidFunctionWrappper wrappedFunction( globalPostStreamVoidFunctions_, globalPostStreamVoidFunctions_.size() );
-   globalPostStreamVoidFunctions_.push_back( std::make_pair( function, identifier ) );
+   globalPostStreamVoidFunctions_.emplace_back( function, identifier );
    addFunction< VoidFunction >( postStreamVoidFunctions_, wrappedFunction, identifier );
 }
 
@@ -659,7 +659,7 @@ template< typename LatticeModel_T, typename Sweep_T, typename BoundaryHandling_T
 inline void TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T >::addPostStreamBlockFunction( const BlockFunction & function, const std::string & identifier )
 {
    BlockFunctionWrappper wrappedFunction( globalPostStreamBlockFunctions_, globalPostStreamBlockFunctions_.size() );
-   globalPostStreamBlockFunctions_.push_back( std::make_pair( function, identifier ) );
+   globalPostStreamBlockFunctions_.emplace_back( function, identifier );
    addFunction< BlockFunction >( postStreamBlockFunctions_, wrappedFunction, identifier );
 }
 

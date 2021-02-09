@@ -36,8 +36,8 @@ class NonCopyable {
 
 protected:
 
-    NonCopyable(){} // no object of type 'NonCopyable' can be created!
-   ~NonCopyable(){}
+    NonCopyable()= default; // no object of type 'NonCopyable' can be created!
+   ~NonCopyable()= default;
 
 private:
 

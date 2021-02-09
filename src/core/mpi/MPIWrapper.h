@@ -177,10 +177,10 @@ const int MPI_REQUEST_NULL = 0;
 
 const int MPI_FILE_NULL = 0;
 
-static MPI_Status* MPI_STATUS_IGNORE   = NULL;
-static MPI_Status* MPI_STATUSES_IGNORE = NULL;
+static MPI_Status* MPI_STATUS_IGNORE   = nullptr;
+static MPI_Status* MPI_STATUSES_IGNORE = nullptr;
 
-namespace non_mpi_internal { inline void disableDefinedButNotUsedWarning() { MPI_STATUS_IGNORE = NULL; MPI_STATUSES_IGNORE = NULL; } }
+namespace non_mpi_internal { inline void disableDefinedButNotUsedWarning() { MPI_STATUS_IGNORE = nullptr; MPI_STATUSES_IGNORE = nullptr; } }
 
 const int MPI_MAX_OBJECT_NAME  = 255;
 const int MPI_MAX_ERROR_STRING = 255;

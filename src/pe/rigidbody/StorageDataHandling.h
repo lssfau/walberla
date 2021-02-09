@@ -40,32 +40,32 @@ namespace pe{
 template<typename BodyTuple>
 class StorageDataHandling : public blockforest::BlockDataHandling<Storage>{
 public:
-   virtual ~StorageDataHandling() {}
+   ~StorageDataHandling() override = default;
 
    /// must be thread-safe !
-   virtual Storage * initialize( IBlock * const block ) override;
+   Storage * initialize( IBlock * const block ) override;
 
    /// must be thread-safe !
-   virtual void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
+   void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
    /// must be thread-safe !
-   virtual Storage * deserialize( IBlock * const block ) override;
+   Storage * deserialize( IBlock * const block ) override;
    /// must be thread-safe !
-   virtual void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
+   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
 
    /// must be thread-safe !
-   virtual void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child ) override;
+   void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child ) override;
    /// must be thread-safe !
-   virtual void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
+   void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
 
    /// must be thread-safe !
-   virtual Storage * deserializeCoarseToFine( Block * const block ) override;
+   Storage * deserializeCoarseToFine( Block * const block ) override;
    /// must be thread-safe !
-   virtual Storage * deserializeFineToCoarse( Block * const block ) override;
+   Storage * deserializeFineToCoarse( Block * const block ) override;
 
    /// must be thread-safe !
-   virtual void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
+   void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
    /// must be thread-safe !
-   virtual void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child ) override;
+   void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child ) override;
 
 private:
    void deserializeImpl( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer );

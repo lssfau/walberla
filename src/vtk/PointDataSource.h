@@ -49,7 +49,7 @@ public:
       uint_t      components;
    };
 
-   virtual ~PointDataSource() {}
+   virtual ~PointDataSource() = default;
 
    virtual std::vector< Attributes > getAttributes() const = 0;
 

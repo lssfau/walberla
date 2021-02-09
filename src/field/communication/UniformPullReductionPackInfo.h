@@ -57,17 +57,17 @@ public:
    UniformPullReductionPackInfo( const BlockDataID & bdID, const uint_t numberOfGhostLayers ) : bdID_( bdID ),
                                  communicateAllGhostLayers_( false ), numberOfGhostLayers_(  numberOfGhostLayers ) {}
 
-   virtual ~UniformPullReductionPackInfo() {}
+   ~UniformPullReductionPackInfo() override = default;
 
-   bool constantDataExchange() const { return mpi::BufferSizeTrait<T>::constantSize; }
-   bool threadsafeReceiving()  const { return true; }
+   bool constantDataExchange() const override { return mpi::BufferSizeTrait<T>::constantSize; }
+   bool threadsafeReceiving()  const override { return true; }
 
-   void unpackData(IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer);
+   void unpackData(IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer) override;
 
-   void communicateLocal(const IBlock * sender, IBlock * receiver, stencil::Direction dir);
+   void communicateLocal(const IBlock * sender, IBlock * receiver, stencil::Direction dir) override;
 
 protected:
-   void packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const;
+   void packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const override;
 
    uint_t numberOfGhostLayersToCommunicate( const GhostLayerField_T * const field ) const;
 

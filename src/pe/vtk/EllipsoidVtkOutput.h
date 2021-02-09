@@ -46,14 +46,14 @@ public:
       : storageID_( storageID )
       , blockStorage_( blockStorage ) { }
 
-   std::vector< Attributes > getAttributes() const;
+   std::vector< Attributes > getAttributes() const override;
 
-   void configure();
+   void configure() override;
 
-   std::vector< Vector3< real_t > > getPoints();
+   std::vector< Vector3< real_t > > getPoints() override;
 
-   inline void push( std::ostream& os , const uint_t /*data*/, const uint_t point, const uint_t component );
-   inline void push( vtk::Base64Writer& b64, const uint_t /*data*/, const uint_t point, const uint_t component );
+   inline void push( std::ostream& os , const uint_t /*data*/, const uint_t point, const uint_t component ) override;
+   inline void push( vtk::Base64Writer& b64, const uint_t /*data*/, const uint_t point, const uint_t component ) override;
 
 private:
 

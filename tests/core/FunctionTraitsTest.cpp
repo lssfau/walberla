@@ -30,7 +30,7 @@ template< typename F>
 struct SomeClass
 {
    template< typename T>
-   static bool checkParameter1( typename std::enable_if< (FunctionTraits<F>::arity > 1 ), T >::type * = 0) {
+   static bool checkParameter1( typename std::enable_if< (FunctionTraits<F>::arity > 1 ), T >::type * = nullptr) {
 
       // The keyword "template" before "argument<1>" is crucial when these functions are inside a class. If the
       // keyword is dropped, compilers interpret "<1" as an arithmetic expression and therefore throw errors.

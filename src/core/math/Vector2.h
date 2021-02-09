@@ -322,9 +322,7 @@ inline bool Vector2<Type>::operator==( Other rhs ) const
 {
    // In order to compare the vector and the scalar value, the data values of the lower-order
    // data type are converted to the higher-order data type within the equal function.
-   if( !equal( v_[0], rhs ) || !equal( v_[1], rhs ) )
-      return false;
-   else return true;
+   return equal( v_[0], rhs ) && equal( v_[1], rhs );
 }
 //**********************************************************************************************************************
 
@@ -342,9 +340,7 @@ inline bool Vector2<Type>::operator==( const Vector2<Other>& rhs ) const
 {
    // In order to compare the two vectors, the data values of the lower-order data
    // type are converted to the higher-order data type within the equal function.
-   if( !equal( v_[0], rhs.v_[0] ) || !equal( v_[1], rhs.v_[1] ) )
-      return false;
-   else return true;
+   return equal( v_[0], rhs.v_[0] ) && equal( v_[1], rhs.v_[1] );
 }
 //**********************************************************************************************************************
 
@@ -365,9 +361,7 @@ inline bool Vector2<Type>::operator!=( Other rhs ) const
 {
    // In order to compare the vector and the scalar value, the data values of the lower-order
    // data type are converted to the higher-order data type within the equal function.
-   if( !equal( v_[0], rhs ) || !equal( v_[1], rhs )  )
-      return true;
-   else return false;
+   return !(*this == rhs);
 }
 //**********************************************************************************************************************
 
@@ -385,9 +379,7 @@ inline bool Vector2<Type>::operator!=( const Vector2<Other>& rhs ) const
 {
    // In order to compare the two vectors, the data values of the lower-order data
    // type are converted to the higher-order data type within the equal function.
-   if( !equal( v_[0], rhs.v_[0] ) || !equal( v_[1], rhs.v_[1] ) )
-      return true;
-   else return false;
+   return !(*this == rhs);
 }
 //**********************************************************************************************************************
 
@@ -1457,10 +1449,7 @@ inline std::istream& operator>>( std::istream& is, Vector2<bool>& v )
 template< typename Type >
 inline bool isnan( const Vector2<Type>& v )
 {
-   if( walberla::math::isnan( v[0] ) || walberla::math::isnan( v[1] ) )
-      return true;
-   else
-      return false;
+   return walberla::math::isnan( v[0] ) || walberla::math::isnan( v[1] );
 }
 //**********************************************************************************************************************
 

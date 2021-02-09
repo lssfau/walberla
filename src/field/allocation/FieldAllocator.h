@@ -238,8 +238,8 @@ namespace field {
 
       protected:
 
-         virtual T * allocateMemory (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
-                                       uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3)
+         T * allocateMemory (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
+                                       uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3) override
          {
             allocSize1=size1;
             allocSize2=size2;
@@ -254,7 +254,7 @@ namespace field {
             return allocateMemory ( size0 * allocSize1 * allocSize2 * allocSize3 );
          }
 
-         virtual T * allocateMemory (  uint_t size )
+         T * allocateMemory (  uint_t size ) override
          {
             void * ptr = aligned_malloc_with_offset(size * sizeof(T) + alignment, alignment, offset_ % alignment );
             if(!ptr)
@@ -274,11 +274,11 @@ namespace field {
             return ret;
          }
 
-         virtual void setInnerGhostLayerSize( uint_t innerGhostLayerSize ) {
+         void setInnerGhostLayerSize( uint_t innerGhostLayerSize ) override {
             offset_ = sizeof(T) * innerGhostLayerSize;
          }
 
-         virtual void deallocate(T *& values )
+         void deallocate(T *& values ) override
          {
             WALBERLA_ASSERT ( nrOfElements_.find(values) != nrOfElements_.end() );
 
@@ -328,8 +328,8 @@ namespace field {
    class StdFieldAlloc : public FieldAllocator<T>
    {
       public:
-         virtual T * allocateMemory (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
-                                       uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3)
+         T * allocateMemory (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
+                                       uint_t & allocSize1, uint_t & allocSize2, uint_t & allocSize3) override
          {
             allocSize1=size1;
             allocSize2=size2;
@@ -337,14 +337,14 @@ namespace field {
             return new T[size0*size1*size2*size3];
          }
 
-         virtual T * allocateMemory ( uint_t size )
+         T * allocateMemory ( uint_t size ) override
          {
             return new T[size];
          }
 
-         virtual void deallocate(T *& values) {
+         void deallocate(T *& values) override {
             delete[] values;
-            values = 0;
+            values = nullptr;
          }
    };
 

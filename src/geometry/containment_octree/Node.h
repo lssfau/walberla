@@ -40,7 +40,7 @@ public:
    typedef typename ContainmentOctreeT::DistanceObject   DistanceObject;
    typedef typename ContainmentOctreeT::KahanAccumulator KahanAccumulator;
 
-   virtual ~Node() {}
+   virtual ~Node() = default;
    virtual bool contains( const Point & p ) const = 0;
    virtual uint_t height() const = 0;
    virtual uint_t numNodes() const = 0;

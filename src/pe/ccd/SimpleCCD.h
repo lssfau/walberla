@@ -29,11 +29,11 @@ namespace ccd {
 class SimpleCCD : public ICCD{
 public:
    explicit SimpleCCD(BodyStorage& globalStorage, Storage& storage);
-   ~SimpleCCD();
+   ~SimpleCCD() override;
 
-   virtual PossibleContacts& generatePossibleContacts( WcTimingTree* tt = NULL );
+   PossibleContacts& generatePossibleContacts( WcTimingTree* tt = nullptr ) override;
 
-   int getObservedBodyCount() const;
+   int getObservedBodyCount() const override;
 private:
    //**Add/remove functions*********************************************************************
    /*!\name Add/remove functions */

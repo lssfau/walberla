@@ -88,7 +88,7 @@ protected:
  * \param body The rigid body containing this bounding box.
  */
 inline HashGridsBodyTrait::HashGridsBodyTrait( )
-   : grid_  (0)  // Pointer to the hash grid this rigid body is currently assigned to
+   : grid_  (nullptr)  // Pointer to the hash grid this rigid body is currently assigned to
    , hash_  (0)  // Current hash value of this rigid body
    , cellId_(0)  // The body's index in the body container of the grid cell this rigid body is currently assigned to
 {}

@@ -75,7 +75,7 @@ public:
    //**Destructor**********************************************************************************
    /*!\name Destructor */
    //@{
-   virtual ~Sphere();
+   ~Sphere() override;
    //@}
    //**********************************************************************************************
    //**********************************************************************************************
@@ -85,7 +85,7 @@ public:
    /*!\name Get functions */
    //@{
    inline real_t getRadius() const;
-   virtual inline real_t getVolume()         const;
+   inline real_t getVolume()         const override;
    //@}
    //**********************************************************************************************
 
@@ -107,14 +107,14 @@ public:
    //**Output functions****************************************************************************
    /*!\name Output functions */
    //@{
-   virtual void print( std::ostream& os, const char* tab ) const;
+   void print( std::ostream& os, const char* tab ) const override;
    //@}
    //**********************************************************************************************
 
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline virtual Vec3 support( const Vec3& d ) const;
+   inline Vec3 support( const Vec3& d ) const override;
    //@}
    //**********************************************************************************************
 
@@ -132,15 +132,15 @@ protected:
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   virtual bool containsRelPointImpl ( real_t px, real_t py, real_t pz ) const;
-   virtual bool isSurfaceRelPointImpl( real_t px, real_t py, real_t pz ) const;
+   bool containsRelPointImpl ( real_t px, real_t py, real_t pz ) const override;
+   bool isSurfaceRelPointImpl( real_t px, real_t py, real_t pz ) const override;
    //@}
    //**********************************************************************************************
 
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline virtual void calcBoundingBox();  // Calculation of the axis-aligned bounding box
+   inline void calcBoundingBox() override;  // Calculation of the axis-aligned bounding box
    //@}
    //**********************************************************************************************
 

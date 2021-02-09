@@ -164,7 +164,7 @@ void BlockReconstruction::reconstructNeighborhood( BLOCK* block, const std::vect
                const NeighborhoodReconstructionBlock* neighbor = &(neighbors[i]);
                uint_t index = 0;
 
-               if( neighborhood.insert( neighbor ).second == true ) {
+               if( neighborhood.insert( neighbor ).second ) {
 
                   index = block->getNeighborhoodSize();
                   neighborhoodIndex[ neighbor ] = index;

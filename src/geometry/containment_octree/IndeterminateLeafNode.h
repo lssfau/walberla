@@ -44,7 +44,7 @@ public:
    IndeterminateLeafNode( const shared_ptr<const DistanceObject> & distanceObject, const Scalar epsilon )
       :  distanceObject_( distanceObject ), sqEpsilon_( epsilon * epsilon ) { }
 
-   virtual ~IndeterminateLeafNode() {}
+   virtual ~IndeterminateLeafNode() = default;
 
    virtual bool contains( const Point & p ) const { return distanceObject_->sqSignedDistance(p) <= sqEpsilon_; }
 

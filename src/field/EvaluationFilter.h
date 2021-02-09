@@ -69,7 +69,7 @@ class FlagFieldEvaluationFilter
 public:
 
    FlagFieldEvaluationFilter( const ConstBlockDataID & flagFieldId, const Set< FlagUID > & cellsToEvaluate ) :
-      flagFieldId_( flagFieldId ), flagField_( NULL ), cellsToEvaluate_( cellsToEvaluate ) {}
+      flagFieldId_( flagFieldId ), flagField_( nullptr ), cellsToEvaluate_( cellsToEvaluate ) {}
 
    void operator()( const IBlock & block )
    {

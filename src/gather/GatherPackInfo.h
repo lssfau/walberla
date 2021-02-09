@@ -38,7 +38,7 @@ namespace gather {
    class GatherPackInfo
    {
       public:
-         virtual ~GatherPackInfo() {}
+         virtual ~GatherPackInfo() = default;
 
          /**********************************************************************************************************//**
          * Packs all data to be gathered into the given buffer

@@ -183,7 +183,7 @@ public:
    /*!\name Functions */
    //@{
    template <typename BodyTypeTuple>
-   void generateImage(const size_t timestep, WcTimingTree* tt = NULL );
+   void generateImage(const size_t timestep, WcTimingTree* tt = nullptr );
    
    void setupView_();
    void setupFilenameRankWidth_();
@@ -191,9 +191,9 @@ public:
    
 private:
    void localOutput(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep,
-                    WcTimingTree* tt = NULL);
+                    WcTimingTree* tt = nullptr);
    void output(const std::vector<BodyIntersectionInfo>& intersectionsBuffer, size_t timestep,
-               WcTimingTree* tt = NULL);
+               WcTimingTree* tt = nullptr);
 
    std::string getOutputFilename(const std::string& base, size_t timestep, bool isGlobalImage) const;
    void writeImageToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
@@ -201,9 +201,9 @@ private:
    void writeImageToFile(const std::vector<BodyIntersectionInfo>& intersectionsBuffer,
                          const std::string& fileName) const;
    
-   void syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt = NULL);
+   void syncImageUsingMPIReduce(std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt = nullptr);
    void syncImageUsingMPIGather(std::vector<BodyIntersectionInfo>& intersections,
-                                std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt = NULL);
+                                std::vector<BodyIntersectionInfo>& intersectionsBuffer, WcTimingTree* tt = nullptr);
    
    inline bool isPlaneVisible(const PlaneID plane, const Ray& ray) const;
    inline size_t coordinateToArrayIndex(size_t x, size_t y) const;
@@ -502,7 +502,7 @@ inline void Raytracer::traceRayInHashGrids(const Ray& ray, BodyID& body_closest,
       const ccd::HashGrids* hashgrids = blockIt->uncheckedFastGetData<ccd::HashGrids>(ccdID_);
       BodyID body = hashgrids->getClosestBodyIntersectingWithRay<BodyTypeTuple>(ray, blockAABB, t, n,
                                                                                 isBodyVisibleFunc_);
-      if (body != NULL && t < t_closest) {
+      if (body != nullptr && t < t_closest) {
          t_closest = t;
          body_closest = body;
          n_closest = n;
@@ -519,7 +519,7 @@ inline void Raytracer::traceRayInHashGrids(const Ray& ray, BodyID& body_closest,
  */
 template <typename BodyTypeTuple>
 void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
-   if (tt != NULL) tt->start("Raytracing");
+   if (tt != nullptr) tt->start("Raytracing");
    const real_t realMax = std::numeric_limits<real_t>::max();
    
    std::vector<BodyIntersectionInfo> intersections;
@@ -529,25 +529,25 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
 
    if (raytracingAlgorithm_ == RAYTRACE_HASHGRIDS || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH
       || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
-      if (tt != NULL) tt->start("HashGrids Update");
+      if (tt != nullptr) tt->start("HashGrids Update");
       for (auto blockIt = forest_->begin(); blockIt != forest_->end(); ++blockIt) {
          ccd::HashGrids* hashgrids = blockIt->getData<ccd::HashGrids>(ccdID_);
          hashgrids->update();
       }
-      if (tt != NULL) tt->stop("HashGrids Update");
+      if (tt != nullptr) tt->stop("HashGrids Update");
    }
    
    real_t t, t_closest;
    Vec3 n;
    Vec3 n_closest;
-   BodyID body_closest = NULL;
+   BodyID body_closest = nullptr;
    Ray ray(cameraPosition_, Vec3(1,0,0));
    IntersectsFunctor func(ray, t, n);
    bool isErrorneousPixel = false;
    uint_t pixelErrors = 0;
    std::map<BodyID, std::unordered_set<BodyID>> correctToIncorrectBodyIDsMap;
    
-   if (tt != NULL) tt->start("Intersection Testing");
+   if (tt != nullptr) tt->start("Intersection Testing");
    for (size_t x = 0; x < pixelsHorizontal_*antiAliasFactor_; x++) {
       for (size_t y = 0; y < pixelsVertical_*antiAliasFactor_; y++) {
          Vec3 pixelLocation = viewingPlaneOrigin_ + u_*(real_c(x)+real_t(0.5))*pixelWidth_ + v_*(real_c(y)+real_t(0.5))*pixelHeight_;
@@ -556,7 +556,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          
          n.reset();
          t_closest = realMax;
-         body_closest = NULL;
+         body_closest = nullptr;
          
          if (raytracingAlgorithm_ == RAYTRACE_HASHGRIDS) {
             traceRayInHashGrids<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
@@ -567,7 +567,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
             BodyID hashgrids_body_closest = body_closest;
             
             t_closest = realMax;
-            body_closest = NULL;
+            body_closest = nullptr;
             traceRayNaively<BodyTypeTuple>(ray, body_closest, t_closest, n_closest);
             
             if (body_closest != hashgrids_body_closest) {
@@ -583,7 +583,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          intersectionInfo.imageX = uint32_t(x);
          intersectionInfo.imageY = uint32_t(y);
          
-         if (!realIsIdentical(t_closest, realMax) && body_closest != NULL) {
+         if (!realIsIdentical(t_closest, realMax) && body_closest != nullptr) {
             Color color = getColor(body_closest, ray, t_closest, n_closest);
             if (isErrorneousPixel) {
                color = Color(1,0,0);
@@ -606,7 +606,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          }
       }
    }
-   if (tt != NULL) tt->stop("Intersection Testing");
+   if (tt != nullptr) tt->stop("Intersection Testing");
 
    if (raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH || raytracingAlgorithm_ == RAYTRACE_COMPARE_BOTH_STRICTLY) {
       if (pixelErrors > 0) {
@@ -615,7 +615,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
          std::stringstream ss;
          for (auto it: correctToIncorrectBodyIDsMap) {
             const BodyID correctBody = it.first;
-            if (it.first != NULL) {
+            if (it.first != nullptr) {
                ss << " correct body: " << correctBody->getID() << "(" << correctBody->getHash() << ")";
             } else {
                ss << " no body naively found";
@@ -623,7 +623,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
             ss << ", hashgrids found:";
             for (auto incorrectBody: it.second) {
                ss << " ";
-               if (incorrectBody != NULL) {
+               if (incorrectBody != nullptr) {
                   ss << incorrectBody->getID() << "(" << incorrectBody->getHash();
                } else {
                   ss << "NULL";
@@ -662,7 +662,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
    
    output(intersectionsBuffer, timestep, tt);
    
-   if (tt != NULL) tt->stop("Raytracing");
+   if (tt != nullptr) tt->stop("Raytracing");
 }
 
 /*!\brief Computes the color for a certain intersection.

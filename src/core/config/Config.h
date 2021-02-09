@@ -280,7 +280,7 @@ public:
       template< typename T >
       inline Parameter<T> getParameter( const std::string & key, const T& defaultValue ) const;
 
-      bool isValid() const { return block_ != NULL; }
+      bool isValid() const { return block_ != nullptr; }
       operator bool() const { return isValid(); }
 
       inline const_iterator begin() const;
@@ -1058,7 +1058,7 @@ inline Config::const_iterator Config::Block::end() const
 // an error until the BlockHandle object is bound to a block.
  */
 inline Config::BlockHandle::BlockHandle()
-   :block_(0)
+   :block_(nullptr)
 {}
 //**********************************************************************************************************************
 

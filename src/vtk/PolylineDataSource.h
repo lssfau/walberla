@@ -51,7 +51,7 @@ public:
 
    typedef std::vector< Vector3< real_t > > Polyline;
 
-   virtual ~PolylineDataSource() {}
+   virtual ~PolylineDataSource() = default;
 
    virtual std::vector< Attributes > getAttributes() const = 0;
 

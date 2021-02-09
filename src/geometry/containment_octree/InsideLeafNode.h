@@ -41,7 +41,7 @@ public:
     
    typedef typename LeafNode<ContainmentOctreeT>::KahanAccumulator KahanAccumulator;
 
-   virtual ~InsideLeafNode() {}
+   virtual ~InsideLeafNode() = default;
 
    virtual bool contains( const Point & /*p*/ ) const { return true; }
 

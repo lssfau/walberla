@@ -62,11 +62,9 @@ private:
    struct VertexCompare {
       bool operator()( const Vertex& lhs, const Vertex& rhs ) const
       {
-         if( std::get<0>(lhs) < std::get<0>(rhs) ||
+         return std::get<0>(lhs) < std::get<0>(rhs) ||
              ( std::get<0>(lhs) == std::get<0>(rhs) && std::get<1>(lhs) < std::get<1>(rhs) ) ||
-             ( std::get<0>(lhs) == std::get<0>(rhs) && std::get<1>(lhs) == std::get<1>(rhs) && std::get<2>(lhs) < std::get<2>(rhs) ) )
-            return true;
-         return false;
+             ( std::get<0>(lhs) == std::get<0>(rhs) && std::get<1>(lhs) == std::get<1>(rhs) && std::get<2>(lhs) < std::get<2>(rhs) );
       }
    };
 
@@ -353,7 +351,7 @@ inline void VTKOutput::addAABBInclusionFilter( const AABB & aabb )
    if( pointDataSource_ || polylineDataSource_ )
       aabbInclusionFilters_.push_back( aabb );
    else
-      cellInclusionFunctions_.push_back( AABBCellFilter(aabb) );
+      cellInclusionFunctions_.emplace_back(AABBCellFilter(aabb) );
 }
 
 
@@ -370,7 +368,7 @@ inline void VTKOutput::addAABBExclusionFilter( const AABB & aabb )
    if( pointDataSource_ || polylineDataSource_ )
       aabbExclusionFilters_.push_back( aabb );
    else
-      cellExclusionFunctions_.push_back( AABBCellFilter(aabb) );
+      cellExclusionFunctions_.emplace_back(AABBCellFilter(aabb) );
 }
 
 

@@ -110,8 +110,8 @@ namespace internal {
 class BlockCellDataWriter
 {
 public:
-            BlockCellDataWriter( const std::string& id ) : block_( NULL ), blockStorage_( NULL ), identifier_( id ) {}
-   virtual ~BlockCellDataWriter() {}
+            BlockCellDataWriter( const std::string& id ) : block_( nullptr ), blockStorage_( nullptr ), identifier_( id ) {}
+   virtual ~BlockCellDataWriter() = default;
 
    void configure( const IBlock& block, const StructuredBlockStorage& sbs ) { block_ = &block; blockStorage_ = &sbs; configure(); }
 
@@ -171,7 +171,7 @@ protected:
 
 private:
 
-   BlockCellDataWriter() {}
+   BlockCellDataWriter() = default;
 
 }; // class BlockCellDataWriter
 
@@ -224,14 +224,14 @@ public:
    static const uint_t F_SIZE = F_SIZE_ARG;
 
             BlockCellDataWriter( const std::string & id ) : BlockCellDataWriterInterface( id ) {}
-   virtual ~BlockCellDataWriter() {}
+   ~BlockCellDataWriter() override = default;
 
-   void push( std::ostream & os, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f )
+   void push( std::ostream & os, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f ) override
    {
       vtk::toStream( os, evaluate( x, y, z, f ) );
    }
 
-   void push( vtk::Base64Writer & b64, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f )
+   void push( vtk::Base64Writer & b64, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f ) override
    {
       b64 << evaluate( x, y, z, f );
    }
@@ -239,7 +239,7 @@ public:
    void push( std::ostream& os,  const cell_idx_t x,      const cell_idx_t y,      const cell_idx_t z,      const cell_idx_t f,
                                  const real_t localXCell, const real_t localYCell, const real_t localZCell,
                                  const real_t globalX,    const real_t globalY,    const real_t globalZ,
-                                 const real_t samplingDx, const real_t samplingDy, const real_t samplingDz )
+                                 const real_t samplingDx, const real_t samplingDy, const real_t samplingDz ) override
    {
       vtk::toStream( os, evaluate( x, y, z, f, localXCell, localYCell, localZCell,
                                    globalX, globalY, globalZ, samplingDx, samplingDy, samplingDz ) );
@@ -248,14 +248,14 @@ public:
    void push( Base64Writer& b64, const cell_idx_t x,      const cell_idx_t y,      const cell_idx_t z,      const cell_idx_t f,
                                  const real_t localXCell, const real_t localYCell, const real_t localZCell,
                                  const real_t globalX,    const real_t globalY,    const real_t globalZ,
-                                 const real_t samplingDx, const real_t samplingDy, const real_t samplingDz )
+                                 const real_t samplingDx, const real_t samplingDy, const real_t samplingDz ) override
    {
       b64 << evaluate( x, y, z, f, localXCell, localYCell, localZCell, globalX, globalY, globalZ, samplingDx, samplingDy, samplingDz );
    }
 
-   uint_t fSize() const { return F_SIZE; }
+   uint_t fSize() const override { return F_SIZE; }
 
-   std::string typeString() const { return vtk::typeToString< T >(); }
+   std::string typeString() const override { return vtk::typeToString< T >(); }
 
 protected:
    virtual T evaluate( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const cell_idx_t f ) = 0;

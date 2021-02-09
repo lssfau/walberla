@@ -38,7 +38,7 @@ class IOutputSelector
 {
 public:
    IOutputSelector( char const * const ts, const uint_t c) : type_string(ts), components(c) {}
-   virtual ~IOutputSelector() {}
+   virtual ~IOutputSelector() = default;
    virtual void push( std::ostream& os , const data::Particle&& p, const uint_t component ) = 0;
    virtual void push( walberla::vtk::Base64Writer& b64, const data::Particle&& p, const uint_t component ) = 0;
 

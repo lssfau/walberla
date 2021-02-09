@@ -31,7 +31,7 @@ namespace cr {
 class ICR {
 public:
    ICR() : /*globalLinearDrag_(0),*/ globalLinearAcceleration_(0) {}
-   virtual ~ICR() {}
+   virtual ~ICR() = default;
 
    virtual void timestep( const real_t dt ) = 0;
 

@@ -31,7 +31,7 @@ namespace timeloop {
 class ITimeloop
 {
 public:
-   virtual ~ITimeloop() {};
+   virtual ~ITimeloop() = default;
 
    virtual void run()        = 0;
    virtual void singleStep() = 0;

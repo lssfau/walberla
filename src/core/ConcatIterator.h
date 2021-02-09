@@ -62,14 +62,7 @@ public:
     {
         if (ended_ || rhs.ended_)
         {
-           if (ended_ == rhs.ended_)
-           {
-              return true;
-           }
-           else
-           {
-              return false;
-           }
+           return ended_ == rhs.ended_;
         }
 
         return it_ == rhs.it_;

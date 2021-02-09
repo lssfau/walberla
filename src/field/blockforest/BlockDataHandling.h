@@ -45,11 +45,11 @@ public:
    typedef typename Field_T::value_type Value_T;
    typedef std::function< void ( Field_T * field, IBlock * const block ) > InitializationFunction_T;
 
-   virtual ~BlockDataHandling() {}
+   ~BlockDataHandling() override = default;
 
    void addInitializationFunction( const InitializationFunction_T & initFunction ) { initFunction_ = initFunction; }
 
-   Field_T * initialize( IBlock * const block )
+   Field_T * initialize( IBlock * const block ) override
    {
       Field_T * field = allocate( block );
       
@@ -59,20 +59,20 @@ public:
       return field;
    }
 
-   inline void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer );
+   inline void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
 
-   void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child );
-   void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer );
+   void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child ) override;
+   void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
 
-   Field_T * deserialize( IBlock * const block ) { return reallocate( block ); }
+   Field_T * deserialize( IBlock * const block ) override { return reallocate( block ); }
 
-   Field_T * deserializeCoarseToFine( Block * const block ) { return reallocate( block ); }
-   Field_T * deserializeFineToCoarse( Block * const block ) { return reallocate( block ); }   
+   Field_T * deserializeCoarseToFine( Block * const block ) override { return reallocate( block ); }
+   Field_T * deserializeFineToCoarse( Block * const block ) override { return reallocate( block ); }   
    
-   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer );
+   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
 
-   void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer );
-   void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child );
+   void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
+   void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child ) override;
 
 protected:
 
@@ -421,7 +421,7 @@ public:
 
 protected:
 
-   GhostLayerField_T * allocate( IBlock * const block )
+   GhostLayerField_T * allocate( IBlock * const block ) override
    {
       auto blocks = blocks_.lock();
       WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'DefaultBlockDataHandling' for a block storage object that doesn't exist anymore" );
@@ -430,7 +430,7 @@ protected:
                                                       nrOfGhostLayers_, initValue_, layout_ );
    }
 
-   GhostLayerField_T * reallocate( IBlock * const block )
+   GhostLayerField_T * reallocate( IBlock * const block ) override
    {
       auto blocks = blocks_.lock();
       WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'DefaultBlockDataHandling' for a block storage object that doesn't exist anymore" );
@@ -484,7 +484,7 @@ public:
 
    void addInitializationFunction( const InitializationFunction_T & initFunction ) { initFunction_ = initFunction; }
 
-   GhostLayerField_T * initialize( IBlock * const block )
+   GhostLayerField_T * initialize( IBlock * const block ) override
    {
       auto blocks = blocks_.lock();
       WALBERLA_CHECK_NOT_NULLPTR( blocks, "Trying to access 'AlwaysInitializeBlockDataHandling' for a block storage object that doesn't exist anymore" );
@@ -524,7 +524,7 @@ public:
       fieldToClone_( fieldToClone )
    {}
 
-   Field_T * initialize( IBlock * const block )
+   Field_T * initialize( IBlock * const block ) override
    {
       const Field_T * toClone = block->template getData< Field_T >( fieldToClone_ );
       return toClone->clone();
@@ -550,7 +550,7 @@ public:
       fieldToClone_( fieldToClone )
    {}
 
-   typename Field_T::FlattenedField * initialize( IBlock * const block )
+   typename Field_T::FlattenedField * initialize( IBlock * const block ) override
    {
       const Field_T * toClone = block->template getData< Field_T >( fieldToClone_ );
       return toClone->flattenedShallowCopy();

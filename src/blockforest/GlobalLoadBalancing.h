@@ -57,7 +57,7 @@ public:
    public:
       typedef std::function< memory_t ( const BLOCK* const, const BLOCK* const ) > CommunicationFunction;
 
-      MetisConfiguration( const bool _includeMetis = false, const bool _forceMetis = false, CommunicationFunction _communicationFunction = 0,
+      MetisConfiguration( const bool _includeMetis = false, const bool _forceMetis = false, CommunicationFunction _communicationFunction = nullptr,
                           const real_t _maxUbvec = real_c(1.5), const uint_t _iterations = uint_c(10) ) :
          includeMetis_( _includeMetis ), forceMetis_( _forceMetis ), communicationFunction_( _communicationFunction ),
          maxUbvec_( _maxUbvec ), iterations_( _iterations ) {}
@@ -103,13 +103,13 @@ public:
    template< typename BLOCK >
    static inline uint_t minimizeProcesses( const std::vector< BLOCK* >& blocks, const memory_t memoryLimit,
                                            const MetisConfiguration<BLOCK>& metisConfig,
-                                           const std::vector< workload_t >* processesWork = NULL,
-                                           const std::vector< memory_t >* processesMemory = NULL );
+                                           const std::vector< workload_t >* processesWork = nullptr,
+                                           const std::vector< memory_t >* processesMemory = nullptr );
    template< typename BLOCK >
    static inline uint_t maximizeMemoryUtilization( const std::vector< BLOCK* >& blocks, const memory_t memoryLimit,
                                                    const MetisConfiguration<BLOCK>& metisConfig,
-                                                   const std::vector< workload_t >* processesWork = NULL,
-                                                   const std::vector< memory_t >* processesMemory = NULL );
+                                                   const std::vector< workload_t >* processesWork = nullptr,
+                                                   const std::vector< memory_t >* processesMemory = nullptr );
    // optimize workload
 
    template< typename BLOCK >
@@ -130,7 +130,7 @@ private:
 
    template< typename BLOCK >
    static uint_t fixedWork( const std::vector< BLOCK* >& blocks, const workload_t workloadLimit, const memory_t memoryLimit,
-                            const std::vector< workload_t >* processesWork = NULL, const std::vector< memory_t >* processesMemory = NULL );
+                            const std::vector< workload_t >* processesWork = nullptr, const std::vector< memory_t >* processesMemory = nullptr );
 
 #ifdef WALBERLA_BUILD_WITH_METIS
 
@@ -490,7 +490,7 @@ inline uint_t GlobalLoadBalancing::minimizeProcesses( const std::vector< BLOCK* 
    // minimize number of processes == do not care about the amount of workload that is assigned to a process,
    //                                 just put as many blocks as possible on any process
 
-   workload_t workloadLimit = workloadSum( blocks ) + ( ( processesWork == NULL ) ? static_cast< workload_t >(0) :
+   workload_t workloadLimit = workloadSum( blocks ) + ( ( processesWork == nullptr ) ? static_cast< workload_t >(0) :
                                                                                     math::kahanSummation( processesWork->begin(), processesWork->end() ) );
 
    uint_t numberOfProcesses = fixedWork( blocks, workloadLimit, memoryLimit, processesWork, processesMemory );
@@ -642,7 +642,7 @@ void GlobalLoadBalancing::prepareProcessReordering( const std::vector< BLOCK* > 
          const BLOCK* const block = (*it).second;
 
          for( uint_t i = 0; i != block->getNeighborhoodSize(); ++i )
-            if( neighbors.insert( block->getNeighborTargetProcess(i) ).second == true )
+            if( neighbors.insert( block->getNeighborTargetProcess(i) ).second )
                processNeighbors[ uint_c(p) ].push_back( block->getNeighborTargetProcess(i) );
 
 //       for( uint_t n = 0; n != 26; ++n )
@@ -673,7 +673,7 @@ void GlobalLoadBalancing::reorderProcessesByBFS( std::vector< BLOCK* > & blocks,
       uint_t startIndex = numberOfProcesses;
       for( uint_t i = previousStartIndex; i < numberOfProcesses; ++i )
       {
-         if( !processed[i] && processNeighbors[i].size() != 0 )
+         if( !processed[i] && !processNeighbors[i].empty() )
          {
             startIndex = i;
             break;
@@ -741,8 +741,8 @@ uint_t GlobalLoadBalancing::fixedWork( const std::vector< BLOCK* >& blocks, cons
    WALBERLA_ASSERT_GREATER( memoryLimit  , static_cast< memory_t >(0)   );
 
    uint_t     processes = 0;
-   workload_t workload  = ( processesWork != NULL && processes < processesWork->size() ) ? (*processesWork)[processes] : static_cast< workload_t >(0);
-   memory_t   memory    = ( processesMemory != NULL && processes < processesMemory->size() ) ? (*processesMemory)[processes] : static_cast< memory_t >(0);
+   workload_t workload  = ( processesWork != nullptr && processes < processesWork->size() ) ? (*processesWork)[processes] : static_cast< workload_t >(0);
+   memory_t   memory    = ( processesMemory != nullptr && processes < processesMemory->size() ) ? (*processesMemory)[processes] : static_cast< memory_t >(0);
 
    for( uint_t i = 0; i != blocks.size(); ++i ) {
 
@@ -754,8 +754,8 @@ uint_t GlobalLoadBalancing::fixedWork( const std::vector< BLOCK* >& blocks, cons
 
          ++processes;
 
-         workload = ( processesWork != NULL && processes < processesWork->size() ) ? (*processesWork)[processes] : static_cast< workload_t >(0);
-         memory   = ( processesMemory != NULL && processes < processesMemory->size() ) ? (*processesMemory)[processes] : static_cast< memory_t >(0);
+         workload = ( processesWork != nullptr && processes < processesWork->size() ) ? (*processesWork)[processes] : static_cast< workload_t >(0);
+         memory   = ( processesMemory != nullptr && processes < processesMemory->size() ) ? (*processesMemory)[processes] : static_cast< memory_t >(0);
       }
 
       WALBERLA_ASSERT_LESS_EQUAL( blocks[i]->getWorkload() + workload, workloadLimit );

@@ -83,7 +83,7 @@ public:
    inline       SetupBlock* getChild( const uint_t index )       { WALBERLA_ASSERT_LESS( index, children_.size() ); return children_[index]; }
    inline       void        setChild( const uint_t index, SetupBlock* const child );
 
-   bool hasFather()   const { return father_ != NULL; }
+   bool hasFather()   const { return father_ != nullptr; }
    bool hasChildren() const { return !children_.empty(); }
 
    const std::vector< SetupBlock* >& getNeighborhoodSection( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, 26 ); return neighborhoodSection_[index]; }
@@ -168,7 +168,7 @@ inline void SetupBlock::setChild( const uint_t index, SetupBlock* const child )
    WALBERLA_ASSERT( children_.empty() || children_.size() == 8 );
 
    if( children_.empty() )
-      children_.resize( 8, NULL );
+      children_.resize( 8, nullptr );
 
    children_[index] = child;
 }

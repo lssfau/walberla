@@ -236,11 +236,8 @@ inline bool CellInterval::overlaps( const CellInterval& other ) const
    if( empty() || other.empty() )
       return false;
 
-   if( other.min_.x() > max_.x() || other.min_.y() > max_.y() || other.min_.z() > max_.z() ||
-       other.max_.x() < min_.x() || other.max_.y() < min_.y() || other.max_.z() < min_.z() )
-      return false;
-   else
-      return true;
+   return !(other.min_.x() > max_.x() || other.min_.y() > max_.y() || other.min_.z() > max_.z() ||
+       other.max_.x() < min_.x() || other.max_.y() < min_.y() || other.max_.z() < min_.z());
 }
 
 

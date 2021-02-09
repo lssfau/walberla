@@ -139,12 +139,12 @@ namespace gui {
           *               to add children
           */
          template <typename T>
-         ItemID addItem(const std::string & name, const T & val, ItemID parent=0);
+         ItemID addItem(const std::string & name, const T & val, ItemID parent=nullptr);
 
          /**
           * Convenience method, behaves like addItem above with no value -> empty second column
           */
-         ItemID addItem(const std::string & name, ItemID parent=0);
+         ItemID addItem(const std::string & name, ItemID parent=nullptr);
 
          /**
           * Changes an existing item

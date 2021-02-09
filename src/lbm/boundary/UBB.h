@@ -87,7 +87,7 @@ public:
 
 
 
-   inline UBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, FlagField<flag_t> * const flagField = NULL );
+   inline UBB( const BoundaryUID & boundaryUID, const FlagUID & uid, PDFField* const pdfField, FlagField<flag_t> * const flagField = nullptr );
 
    void pushFlags( std::vector< FlagUID > & uids ) const { uids.push_back( uid_ ); }
 
@@ -146,7 +146,7 @@ inline UBB< LatticeModel_T, flag_t, AdaptVelocityToExternalForce, StoreForce >::
    Boundary<flag_t>( boundaryUID ), uid_( uid ), pdfField_( pdfField )
 {
    WALBERLA_ASSERT_NOT_NULLPTR( pdfField_ );
-   if (flagField != NULL)
+   if (flagField != nullptr)
       vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), flagField->nrOfGhostLayers(), field::zyxf );
    else
       vel_ = make_shared<VelField>( pdfField_->xSize(), pdfField_->ySize(), pdfField_->zSize(), pdfField_->nrOfGhostLayers(), field::zyxf );

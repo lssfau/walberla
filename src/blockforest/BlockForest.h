@@ -179,13 +179,13 @@ public:
       bool getState( Set<SUID>& state, const BlockID& id ) const
          { const Node* node = getNode( id ); if( node ) { state = node->state_; return true; } return false; }
 
-      bool exists( const real_t x, const real_t y, const real_t z ) const { return getNode(x,y,z) != NULL; }
-      bool exists( const BlockID& id ) const { return getNode( id ) != NULL; }
+      bool exists( const real_t x, const real_t y, const real_t z ) const { return getNode(x,y,z) != nullptr; }
+      bool exists( const BlockID& id ) const { return getNode( id ) != nullptr; }
 
       bool existsRemotely( const real_t x, const real_t y, const real_t z ) const
-         { const Node* node = getNode( x, y, z ); return ( node != NULL && node->process_ != forest_.getProcess() ); }
+         { const Node* node = getNode( x, y, z ); return ( node != nullptr && node->process_ != forest_.getProcess() ); }
       bool existsRemotely( const BlockID& id ) const
-         { const Node* node = getNode( id ); return ( node != NULL && node->process_ != forest_.getProcess() ); }
+         { const Node* node = getNode( id ); return ( node != nullptr && node->process_ != forest_.getProcess() ); }
 
       bool getId( BlockID& id, const real_t x, const real_t y, const real_t z ) const;
 
@@ -197,10 +197,10 @@ public:
       bool getRootBlockState( Set<SUID>& state, const uint_t x, const uint_t y, const uint_t z ) const
          { const Node* node = getRootNode(x,y,z); if( node ) { state = node->state_; return true; } return false; }
 
-      bool rootBlockExists( const uint_t x, const uint_t y, const uint_t z ) const { return getRootNode(x,y,z) != NULL; }
+      bool rootBlockExists( const uint_t x, const uint_t y, const uint_t z ) const { return getRootNode(x,y,z) != nullptr; }
 
       bool rootBlockExistsRemotely( const uint_t x, const uint_t y, const uint_t z ) const
-         { const Node* node = getRootNode(x,y,z); return ( node != NULL && node->process_ != forest_.getProcess() ); }
+         { const Node* node = getRootNode(x,y,z); return ( node != nullptr && node->process_ != forest_.getProcess() ); }
 
    private:
 
@@ -210,7 +210,7 @@ public:
       const Node * getRootNode( const uint_t x, const uint_t y, const uint_t z ) const {
          const uint_t index =  z * forest_.getYSize() * forest_.getXSize() + y * forest_.getXSize() + x;
          if( index >= nodes_.size() )
-            return NULL;
+            return nullptr;
          return nodes_[ index ].get();
       }
 
@@ -223,7 +223,7 @@ public:
    BlockForest( const uint_t process, const SetupBlockForest& forest, const bool keepGlobalBlockInformation = false );
    BlockForest( const uint_t process, const char* const filename, const bool broadcastFile = true, const bool keepGlobalBlockInformation = false );
 
-   ~BlockForest() {}
+   ~BlockForest() override = default;
 
    uint_t getProcess()        const { return process_; }
    uint_t getProcessIdBytes() const { return processIdBytes_; }
@@ -277,45 +277,45 @@ public:
    inline void getBlocks( std::vector< const Block* >& blocks, const uint_t level ) const;
    inline void getBlocks( std::vector<       Block* >& blocks, const uint_t level );
 
-   inline void getBlocksContainedWithinAABB( std::vector< const IBlock* >& blocks, const AABB& aabb ) const;
-   inline void getBlocksContainedWithinAABB( std::vector<       IBlock* >& blocks, const AABB& aabb );
+   inline void getBlocksContainedWithinAABB( std::vector< const IBlock* >& blocks, const AABB& aabb ) const override;
+   inline void getBlocksContainedWithinAABB( std::vector<       IBlock* >& blocks, const AABB& aabb ) override;
 
-   inline void getBlocksOverlappedByAABB( std::vector< const IBlock* >& blocks, const AABB& aabb ) const;
-   inline void getBlocksOverlappedByAABB( std::vector<       IBlock* >& blocks, const AABB& aabb );
+   inline void getBlocksOverlappedByAABB( std::vector< const IBlock* >& blocks, const AABB& aabb ) const override;
+   inline void getBlocksOverlappedByAABB( std::vector<       IBlock* >& blocks, const AABB& aabb ) override;
 
    using BlockStorage::getBlock;
 
-   inline const Block* getBlock( const IBlockID& id ) const;
-   inline       Block* getBlock( const IBlockID& id );
+   inline const Block* getBlock( const IBlockID& id ) const override;
+   inline       Block* getBlock( const IBlockID& id ) override;
 
-   inline const Block* getBlock( const real_t x, const real_t y, const real_t z ) const;
-   inline       Block* getBlock( const real_t x, const real_t y, const real_t z );
+   inline const Block* getBlock( const real_t x, const real_t y, const real_t z ) const override;
+   inline       Block* getBlock( const real_t x, const real_t y, const real_t z ) override;
 
    inline const Block* getRootBlock( const uint_t x, const uint_t y, const uint_t z ) const;
    inline       Block* getRootBlock( const uint_t x, const uint_t y, const uint_t z );
 
 
 
-   bool containsGlobalBlockInformation() const { return blockInformation_->active(); }
+   bool containsGlobalBlockInformation() const override { return blockInformation_->active(); }
 
-   inline void getAllBlocks( std::vector< shared_ptr< IBlockID > >& blocks ) const;
+   inline void getAllBlocks( std::vector< shared_ptr< IBlockID > >& blocks ) const override;
 
-   inline bool blockExists        ( const real_t x, const real_t y, const real_t z ) const;
-   inline bool blockExistsLocally ( const real_t x, const real_t y, const real_t z ) const;
-   inline bool blockExistsRemotely( const real_t x, const real_t y, const real_t z ) const;
+   inline bool blockExists        ( const real_t x, const real_t y, const real_t z ) const override;
+   inline bool blockExistsLocally ( const real_t x, const real_t y, const real_t z ) const override;
+   inline bool blockExistsRemotely( const real_t x, const real_t y, const real_t z ) const override;
 
-   inline bool blockExists        ( const IBlockID& id ) const;
-   inline bool blockExistsLocally ( const IBlockID& id ) const;
-   inline bool blockExistsRemotely( const IBlockID& id ) const;
+   inline bool blockExists        ( const IBlockID& id ) const override;
+   inline bool blockExistsLocally ( const IBlockID& id ) const override;
+   inline bool blockExistsRemotely( const IBlockID& id ) const override;
 
    inline bool rootBlockExists        ( const uint_t x, const uint_t y, const uint_t z ) const;
    inline bool rootBlockExistsLocally ( const uint_t x, const uint_t y, const uint_t z ) const;
    inline bool rootBlockExistsRemotely( const uint_t x, const uint_t y, const uint_t z ) const;
 
-   void getBlockID( IBlockID& id, const real_t x, const real_t y, const real_t z ) const;
-   void getAABB       ( AABB&      aabb,  const IBlockID& id ) const;
-   void getState      ( Set<SUID>& state, const IBlockID& id ) const;
-   void getProcessRank( uint_t&    rank,  const IBlockID& id ) const;
+   void getBlockID( IBlockID& id, const real_t x, const real_t y, const real_t z ) const override;
+   void getAABB       ( AABB&      aabb,  const IBlockID& id ) const override;
+   void getState      ( Set<SUID>& state, const IBlockID& id ) const override;
+   void getProcessRank( uint_t&    rank,  const IBlockID& id ) const override;
 
    void getRootBlockAABB       ( AABB&      aabb,  const uint_t x, const uint_t y, const uint_t z ) const;
    void getRootBlockState      ( Set<SUID>& state, const uint_t x, const uint_t y, const uint_t z ) const;
@@ -324,7 +324,7 @@ public:
    const BlockInformation & getBlockInformation() const { return *blockInformation_; }
 
 
-   inline uint_t getLevel( const IBlock& block ) const;
+   inline uint_t getLevel( const IBlock& block ) const override;
    inline uint_t getLevelFromBlockId( const BlockID& id ) const;
    inline uint_t getAABBFromBlockId( AABB& aabb, const BlockID& id ) const;
    inline AABB   getAABBFromBlockId( const BlockID& id ) const;
@@ -338,9 +338,9 @@ public:
    bool insertBuffersIntoProcessNetwork() const { return insertBuffersIntoProcessNetwork_; }
 
    const std::vector< uint_t > & getNeighborhood() const { return neighborhood_; }
-   const std::vector< uint_t > & getNeighboringProcesses() const { return getNeighborhood(); }
+   const std::vector< uint_t > & getNeighboringProcesses() const override { return getNeighborhood(); }
 
-   std::map< uint_t, std::vector< Vector3<real_t> > > getNeighboringProcessOffsets() const;
+   std::map< uint_t, std::vector< Vector3<real_t> > > getNeighboringProcessOffsets() const override;
 
 
    
@@ -484,7 +484,7 @@ public:
 
 protected:
 
-   bool equal( const BlockStorage* rhs ) const;
+   bool equal( const BlockStorage* rhs ) const override;
    
    void addBlockData( IBlock * const block, const BlockDataID & index, domain_decomposition::internal::BlockData * const data )
    { BlockStorage::addBlockData( block, index, data ); }
@@ -643,7 +643,7 @@ inline const Block* BlockForest::getBlock( const IBlockID& id ) const {
    if( it != blocks_.end() )
       return it->second.get();
 
-   return NULL;
+   return nullptr;
 }
 
 
@@ -657,7 +657,7 @@ inline Block* BlockForest::getBlock( const IBlockID& id ) {
    if( it != blocks_.end() )
       return it->second.get();
 
-   return NULL;
+   return nullptr;
 }
 
 
@@ -667,7 +667,7 @@ inline const Block* BlockForest::getBlock( const real_t x, const real_t y, const
    for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
       if( it->second->getAABB().contains(x,y,z) ) return it->second.get();
 
-   return NULL;
+   return nullptr;
 }
 
 
@@ -677,7 +677,7 @@ inline Block* BlockForest::getBlock( const real_t x, const real_t y, const real_
    for( auto it = blocks_.begin(); it != blocks_.end(); ++it )
       if( it->second->getAABB().contains(x,y,z) ) return it->second.get();
 
-   return NULL;
+   return nullptr;
 }
 
 
@@ -721,14 +721,14 @@ inline bool BlockForest::blockExists( const real_t x, const real_t y, const real
    if( blockInformation_->active() )
       return blockInformation_->exists(x,y,z);
 
-   return getBlock(x,y,z) != NULL;
+   return getBlock(x,y,z) != nullptr;
 }
 
 
 
 inline bool BlockForest::blockExistsLocally( const real_t x, const real_t y, const real_t z ) const {
 
-   return getBlock(x,y,z) != NULL;
+   return getBlock(x,y,z) != nullptr;
 }
 
 
@@ -738,7 +738,7 @@ inline bool BlockForest::blockExistsRemotely( const real_t x, const real_t y, co
    if( blockInformation_->active() )
       return blockInformation_->existsRemotely(x,y,z);
 
-   return getBlock(x,y,z) == NULL;
+   return getBlock(x,y,z) == nullptr;
 }
 
 
@@ -750,14 +750,14 @@ inline bool BlockForest::blockExists( const IBlockID& id ) const {
    if( blockInformation_->active() )
       return blockInformation_->exists( *static_cast< const BlockID* >( &id ) );
 
-   return getBlock( id ) != NULL;
+   return getBlock( id ) != nullptr;
 }
 
 
 
 inline bool BlockForest::blockExistsLocally( const IBlockID& id ) const {
 
-   return getBlock( id ) != NULL;
+   return getBlock( id ) != nullptr;
 }
 
 
@@ -769,7 +769,7 @@ inline bool BlockForest::blockExistsRemotely( const IBlockID& id ) const {
    if( blockInformation_->active() )
       return blockInformation_->existsRemotely( *static_cast< const BlockID* >( &id ) );
 
-   return getBlock( id ) == NULL;
+   return getBlock( id ) == nullptr;
 }
 
 
@@ -779,14 +779,14 @@ inline bool BlockForest::rootBlockExists( const uint_t x, const uint_t y, const 
    if( blockInformation_->active() )
       return blockInformation_->rootBlockExists(x,y,z);
 
-   return getRootBlock(x,y,z) != NULL;
+   return getRootBlock(x,y,z) != nullptr;
 }
 
 
 
 inline bool BlockForest::rootBlockExistsLocally( const uint_t x, const uint_t y, const uint_t z ) const {
 
-   return getRootBlock(x,y,z) != NULL;
+   return getRootBlock(x,y,z) != nullptr;
 }
 
 
@@ -796,7 +796,7 @@ inline bool BlockForest::rootBlockExistsRemotely( const uint_t x, const uint_t y
    if( blockInformation_->active() )
       return blockInformation_->rootBlockExistsRemotely(x,y,z);
 
-   return getRootBlock(x,y,z) == NULL;
+   return getRootBlock(x,y,z) == nullptr;
 }
 
 

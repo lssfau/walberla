@@ -64,7 +64,7 @@ public:
    blockStorage_( blockStorage ), interpolatedFieldID_( interpolatedFieldID ), flagFieldID_( flagFieldID ), cellsToEvaluate_( cellsToEvaluate )
    {}
 
-   Interpolator_T * initialize( IBlock * const block )
+   Interpolator_T * initialize( IBlock * const block ) override
    {
       typedef typename Interpolator_T::BaseField_T InterpolatedField_T;
       typedef typename FlagField_T::flag_t flag_t;

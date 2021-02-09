@@ -34,11 +34,11 @@ namespace blockforest {
 
 
 shared_ptr< StructuredBlockForest >  createUniformBlockGridFromConfig( const shared_ptr< Config > & config,
-                                                                       CellInterval * requestedDomainSize = NULL,
+                                                                       CellInterval * requestedDomainSize = nullptr,
                                                                        const bool keepGlobalBlockInformation = false );
 
 shared_ptr< StructuredBlockForest >  createUniformBlockGridFromConfig( const Config::BlockHandle & configBlock,
-                                                                       CellInterval * requestedDomainSize = NULL,
+                                                                       CellInterval * requestedDomainSize = nullptr,
                                                                        const bool keepGlobalBlockInformation = false );
 
 

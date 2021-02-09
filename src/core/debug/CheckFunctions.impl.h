@@ -37,7 +37,7 @@ namespace check_functions_detail {
 template< typename T >
 inline bool check_nullptr( T * p )
 {
-   return p == 0;
+   return p == nullptr;
 }
 
 template< typename T >
@@ -49,7 +49,7 @@ inline bool check_nullptr( const shared_ptr<T> & p )
 template< typename T >
 inline bool check_not_nullptr( T * p )
 {
-   return p != 0;
+   return p != nullptr;
 }
 
 template< typename T >

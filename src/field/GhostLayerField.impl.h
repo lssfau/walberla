@@ -369,15 +369,12 @@ namespace field {
    template<typename T, uint_t fSize_>
    bool GhostLayerField<T,fSize_>::isInInnerPart( const Cell & cell ) const
    {
-      if ( cell[0] < 0 ||
+      return !(cell[0] < 0 ||
            cell[1] < 0 ||
            cell[2] < 0 ||
            cell[0] >= cell_idx_c( this->xSize() ) ||
            cell[1] >= cell_idx_c( this->ySize() ) ||
-           cell[2] >= cell_idx_c( this->zSize() ) )
-         return false;
-
-      return true;
+           cell[2] >= cell_idx_c( this->zSize() ));
    }
 
    //*******************************************************************************************************************

@@ -47,7 +47,7 @@ public:
 
    /*! \name Constructors */
    //@{
-   Cell() {}
+   Cell() = default;
    inline Cell( const cell_idx_t _x, const cell_idx_t _y, const cell_idx_t _z ) { cell[0] = _x; cell[1] = _y; cell[2] = _z; }
  //inline Cell( const int        _x, const int        _y, const int        _z );
    inline Cell( const uint_t     _x, const uint_t     _y, const uint_t     _z );

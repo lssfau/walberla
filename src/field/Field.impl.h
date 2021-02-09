@@ -45,7 +45,7 @@ namespace field {
     *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
    Field<T,fSize_>::Field( )
-       : values_( NULL ), valuesWithOffset_( NULL ),
+       : values_( nullptr ), valuesWithOffset_( nullptr ),
          xSize_(0), ySize_(0), zSize_(0),
          xAllocSize_(0), yAllocSize_(0), zAllocSize_(0), fAllocSize_(0)
    {
@@ -63,7 +63,7 @@ namespace field {
    template<typename T, uint_t fSize_>
    Field<T,fSize_>::Field( uint_t _xSize, uint_t _ySize, uint_t _zSize, const Layout & l,
                            const shared_ptr<FieldAllocator<T> > &alloc )
-       : values_( NULL ), valuesWithOffset_( NULL )
+       : values_( nullptr ), valuesWithOffset_( nullptr )
    {
       init(_xSize,_ySize,_zSize,l,alloc);
    }
@@ -82,7 +82,7 @@ namespace field {
    template<typename T, uint_t fSize_>
    Field<T,fSize_>::Field( uint_t _xSize, uint_t _ySize, uint_t _zSize, const T & initVal, const Layout & l,
                            const shared_ptr<FieldAllocator<T> > &alloc )
-          : values_( NULL ), valuesWithOffset_( NULL )
+          : values_( nullptr ), valuesWithOffset_( nullptr )
    {
       init(_xSize,_ySize,_zSize,l,alloc);
       set(initVal);
@@ -122,8 +122,8 @@ namespace field {
          return;
 
       allocator_->decrementReferenceCount( values_ );
-      values_ = NULL;
-      valuesWithOffset_ = NULL;
+      values_ = nullptr;
+      valuesWithOffset_ = nullptr;
       init( _xSize, _ySize, _zSize, layout_, allocator_ );
    }
 
@@ -314,7 +314,7 @@ namespace field {
       WALBERLA_ASSERT_NULLPTR( valuesWithOffset_ );
 
       // Automatically select allocator if none was given
-      if ( alloc == 0 )
+      if ( alloc == nullptr )
       {
 #ifdef __BIGGEST_ALIGNMENT__
          const uint_t alignment = __BIGGEST_ALIGNMENT__;
@@ -340,7 +340,7 @@ namespace field {
 
       allocator_ = alloc;
       allocator_->setInnerGhostLayerSize( innerGhostLayerSizeForAlignedAlloc );
-      values_ = 0;
+      values_ = nullptr;
       xSize_ = _xSize;
       ySize_ = _ySize;
       zSize_ = _zSize;

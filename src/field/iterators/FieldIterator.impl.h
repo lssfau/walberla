@@ -41,9 +41,9 @@ FieldIterator<T,fs>::FieldIterator( const typename FieldIterator<T,fs>::FieldTyp
 {
    if ( field->xyzSize().empty() )
    {
-      linePtr_ = NULL;
-      lineEnd_ = NULL;
-      f_       = NULL;
+      linePtr_ = nullptr;
+      lineEnd_ = nullptr;
+      f_       = nullptr;
       return;
    }
 
@@ -114,7 +114,7 @@ FieldIterator<T,fs>::FieldIterator( const typename FieldIterator<T,fs>::FieldTyp
  **********************************************************************************************************************/
 template <typename T, uint_t fs>
 FieldIterator<T,fs>::FieldIterator()
-   : linePtr_(NULL), lineEnd_(NULL), f_(NULL)
+   : linePtr_(nullptr), lineEnd_(nullptr), f_(nullptr)
 {
 }
 
@@ -228,7 +228,7 @@ inline void FieldIterator<T,fs>::incrementLine()
          if(cur_[0] == cell_idx_c(sizes_[0]) )
          {
             // iterator at end
-            linePtr_ = NULL;
+            linePtr_ = nullptr;
             return;
          }
       }
@@ -264,7 +264,7 @@ inline void FieldIterator<T,fs>::decrementLine()
          if(cur_[0] < 0 )
          {
             // iterator at end
-            linePtr_ = NULL;
+            linePtr_ = nullptr;
             return;
          }
       }

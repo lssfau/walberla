@@ -65,7 +65,7 @@ public:
    blockStorage_( blockStorage ), distributionDestinationFieldID_( distributionDestinationFieldID ), flagFieldID_( flagFieldID ), cellsToEvaluate_( cellsToEvaluate )
    {}
 
-   Distributor_T * initialize( IBlock * const block )
+   Distributor_T * initialize( IBlock * const block ) override
    {
       typedef typename Distributor_T::BaseField_T DistributionDestinationField_T;
       typedef typename FlagField_T::flag_t flag_t;

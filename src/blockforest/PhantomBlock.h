@@ -304,7 +304,7 @@ inline void PhantomBlock::addNeighbor( const BlockID & id, const uint_t process,
       WALBERLA_ASSERT( neighborhood_[i].getId() < id || id < neighborhood_[i].getId() );
 #endif
 
-   neighborhood_.push_back( NeighborBlock( phantomForest_, id, process, state ) );
+   neighborhood_.emplace_back( phantomForest_, id, process, state );
 }
 
 

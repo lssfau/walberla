@@ -203,7 +203,7 @@ inline constexpr MatrixMxN<Type>::MatrixMxN()
    : m_       ( 0 )  // The current number of rows of the matrix
    , n_       ( 0 )  // The current number of columns of the matrix
    , capacity_( 0 )  // The maximum capacity of the matrix
-   , v_       ( 0 )  // The matrix elements
+   , v_       ( nullptr )  // The matrix elements
 {}
 //*************************************************************************************************
 

@@ -93,7 +93,7 @@ void reduceInplace( T & value, Operation operation, int recvRank = 0, MPI_Comm c
    }
    else
    {
-      MPI_Reduce( &value, 0, 1, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( &value, nullptr, 1, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
    }
 }
 
@@ -130,7 +130,7 @@ inline void reduceInplace( bool & value, Operation operation, int recvRank = 0, 
    }
    else
    {
-      MPI_Reduce( &intValue, 0, 1, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( &intValue, nullptr, 1, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
    }
 
    value = intValue != 0;
@@ -174,7 +174,7 @@ T reduce( const T value, Operation operation, int recvRank = 0, MPI_Comm comm = 
    }
    else
    {
-      MPI_Reduce( const_cast<T*>( &value ), 0, 1, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( const_cast<T*>( &value ), nullptr, 1, MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
    }
 
    return result;
@@ -215,7 +215,7 @@ inline bool reduce( const bool value, Operation operation, int recvRank = 0, MPI
    }
    else
    {
-      MPI_Reduce( &intValue, 0, 1, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( &intValue, nullptr, 1, MPITrait<int>::type(), toMPI_Op(operation), recvRank, comm );
    }
 
    return intResult != 0;
@@ -251,11 +251,11 @@ void reduceInplace( std::vector<T> & values, Operation operation, int recvRank =
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( MPI_IN_PLACE, values.empty() ? 0 : &values[0], int_c( values.size() ), MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( MPI_IN_PLACE, values.empty() ? nullptr : &values[0], int_c( values.size() ), MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
    }
    else
    {
-      MPI_Reduce( values.empty() ? 0 : &values[0], 0, int_c( values.size() ), MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( values.empty() ? nullptr : &values[0], nullptr, int_c( values.size() ), MPITrait<T>::type(), toMPI_Op(operation), recvRank, comm );
    }
 }
 
@@ -291,14 +291,14 @@ inline void reduceInplace( std::vector<bool> & values, Operation operation, int 
 
    if( myRank == recvRank )
    {
-      MPI_Reduce( MPI_IN_PLACE, sendBuffer.empty() ? 0 : &sendBuffer[0], int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( MPI_IN_PLACE, sendBuffer.empty() ? nullptr : &sendBuffer[0], int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), toMPI_Op(operation), recvRank, comm );
       size_t size = values.size();
       convert( sendBuffer, values );
       values.resize(size);
    }
    else
    {
-      MPI_Reduce( sendBuffer.empty() ? 0 : &sendBuffer[0], 0, int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), toMPI_Op(operation), recvRank, comm );
+      MPI_Reduce( sendBuffer.empty() ? nullptr : &sendBuffer[0], nullptr, int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), toMPI_Op(operation), recvRank, comm );
    }
 }
 
@@ -426,7 +426,7 @@ void allReduceInplace( std::vector<T> & values, Operation operation, MPI_Comm co
 
    WALBERLA_NON_MPI_SECTION() { return; }
 
-   MPI_Allreduce( MPI_IN_PLACE, values.empty() ? 0 : &values[0], int_c( values.size() ), MPITrait<T>::type(), toMPI_Op(operation), comm );
+   MPI_Allreduce( MPI_IN_PLACE, values.empty() ? nullptr : &values[0], int_c( values.size() ), MPITrait<T>::type(), toMPI_Op(operation), comm );
 }
 
 
@@ -451,7 +451,7 @@ inline void allReduceInplace( std::vector<bool> & bools, Operation operation, MP
    std::vector<uint8_t> sendBuffer;
 
    convert( bools, sendBuffer );
-   MPI_Allreduce( MPI_IN_PLACE, sendBuffer.empty() ? 0 : &sendBuffer[0], int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), toMPI_Op(operation), comm );
+   MPI_Allreduce( MPI_IN_PLACE, sendBuffer.empty() ? nullptr : &sendBuffer[0], int_c( sendBuffer.size() ), MPITrait<uint8_t>::type(), toMPI_Op(operation), comm );
    auto size = bools.size();
    convert(sendBuffer, bools);
    bools.resize(size);

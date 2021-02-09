@@ -88,7 +88,7 @@ class BoundaryFromVoxelFile : public Initializer
 public:
    BoundaryFromVoxelFile( const StructuredBlockStorage & structuredBlockStorage, BlockDataID & boundaryHandlerID );
 
-   virtual void init( BlockStorage & blockStorage, const Config::BlockHandle & blockHandle );
+   void init( BlockStorage & blockStorage, const Config::BlockHandle & blockHandle ) override;
 
 
 protected:

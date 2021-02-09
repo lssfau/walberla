@@ -47,7 +47,7 @@ class ParticleAccessor : public IAccessor
 {
 public:
    ParticleAccessor(const std::shared_ptr<data::ParticleStorage>& ps) : ps_(ps) {}
-   virtual ~ParticleAccessor() = default;
+   ~ParticleAccessor() override = default;
    walberla::id_t const & getUid(const size_t p_idx) const {return ps_->getUid(p_idx);}
    walberla::id_t& getUidRef(const size_t p_idx) {return ps_->getUidRef(p_idx);}
    void setUid(const size_t p_idx, walberla::id_t const & v) { ps_->setUid(p_idx, v);}
@@ -220,7 +220,7 @@ inline size_t ParticleAccessor::find(const id_t& uid)
 class SingleParticleAccessor : public IAccessor
 {
 public:
-   virtual ~SingleParticleAccessor() = default;
+   ~SingleParticleAccessor() override = default;
    walberla::id_t const & getUid(const size_t /*p_idx*/) const {return uid_;}
    void setUid(const size_t /*p_idx*/, walberla::id_t const & v) { uid_ = v;}
    walberla::id_t& getUidRef(const size_t /*p_idx*/) {return uid_;}

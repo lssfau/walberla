@@ -140,8 +140,8 @@ void runTestAllReduceBool()
 
    const bool allTrue  = true;
    const bool allFalse = false;
-   const bool oneTrue  = rank == 0 ? true: false;
-   const bool mixed    = ( rank % 2 ) ? true : false;
+   const bool oneTrue  = rank == 0;
+   const bool mixed    = ( rank % 2 ) != 0;
 
    WALBERLA_CHECK_EQUAL( mpi::allReduce( allTrue,  mpi::LOGICAL_AND ), true  );
    WALBERLA_CHECK_EQUAL( mpi::allReduce( allFalse, mpi::LOGICAL_AND ), false );
@@ -212,8 +212,8 @@ void runTestAllReduceBool()
    std::vector<bool> bools( 4u );
    bools[0] = true;
    bools[1] = false;
-   bools[2] = rank == 0 ? true : false;
-   bools[3] = ( rank % 2 ) ? true : false;
+   bools[2] = rank == 0;
+   bools[3] = ( rank % 2 ) != 0;
 
    {
       std::vector<bool> result( bools );
@@ -255,8 +255,8 @@ void runTestReduceBool( int recvRank )
 
    const bool allTrue  = true;
    const bool allFalse = false;
-   const bool oneTrue  = rank == 0 ? true: false;
-   const bool mixed    = ( rank % 2 ) ? true : false;
+   const bool oneTrue  = rank == 0;
+   const bool mixed    = ( rank % 2 ) != 0;
 
    {
       bool result0 = mpi::reduce( allTrue,  mpi::LOGICAL_AND, recvRank );
@@ -387,8 +387,8 @@ void runTestReduceBool( int recvRank )
    std::vector<bool> bools( 4u );
    bools[0] = true;
    bools[1] = false;
-   bools[2] = rank == 0 ? true : false;
-   bools[3] = ( rank % 2 ) ? true : false;
+   bools[2] = rank == 0;
+   bools[3] = ( rank % 2 ) != 0;
 
    {
       std::vector<bool> result( bools );

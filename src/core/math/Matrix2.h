@@ -375,12 +375,10 @@ inline bool Matrix2<Type>::operator==( const Matrix2<Other>& rhs ) const
 {
    // In order to compare the vector and the scalar value, the data values of the lower-order
    // data type are converted to the higher-order data type.
-   if( !equal( v_[0], rhs.v_[0] ) ||
-       !equal( v_[1], rhs.v_[1] ) ||
-       !equal( v_[2], rhs.v_[2] ) ||
-       !equal( v_[3], rhs.v_[3] ) )
-      return false;
-   else return true;
+   return equal( v_[0], rhs.v_[0] ) &&
+          equal( v_[1], rhs.v_[1] ) &&
+          equal( v_[2], rhs.v_[2] ) &&
+          equal( v_[3], rhs.v_[3] );
 }
 //**********************************************************************************************************************
 
@@ -398,12 +396,7 @@ inline bool Matrix2<Type>::operator!=( const Matrix2<Other>& rhs ) const
 {
    // In order to compare the vector and the scalar value, the data values of the lower-order
    // data type are converted to the higher-order data type.
-   if( !equal( v_[0], rhs.v_[0] ) ||
-       !equal( v_[1], rhs.v_[1] ) ||
-       !equal( v_[2], rhs.v_[2] ) ||
-       !equal( v_[3], rhs.v_[3] ) )
-      return true;
-   else return false;
+   return !(*this == rhs);
 }
 //**********************************************************************************************************************
 
@@ -781,9 +774,7 @@ inline const Matrix2<Type> Matrix2<Type>::getInverse() const
 template< typename Type >
 inline bool Matrix2<Type>::isSingular() const
 {
-   if( equal( getDeterminant(), Type(0) ) )
-      return true;
-   else return false;
+   return equal( getDeterminant(), Type(0) );
 }
 //**********************************************************************************************************************
 
@@ -875,11 +866,8 @@ std::ostream& operator<<( std::ostream& os, const Matrix2<Type>& m )
 template< typename Type >
 inline bool isnan( const Matrix2<Type>& m )
 {
-   if( math::isnan( m[0] ) || math::isnan( m[1] )||
-       math::isnan( m[2] ) || math::isnan( m[3] )  )
-      return true;
-   else
-      return false;
+   return math::isnan( m[0] ) || math::isnan( m[1] )||
+       math::isnan( m[2] ) || math::isnan( m[3] );
 }
 //**********************************************************************************************************************
 

@@ -40,7 +40,7 @@ public:
    //@{
    explicit SubCyclingManager(size_t numberOfSubCycles, shared_ptr<WcTimingPool> timingPool = nullptr);
 
-   virtual ~SubCyclingManager() {}
+   virtual ~SubCyclingManager() = default;
    //@}
 
    /*! \name Registration Functions */

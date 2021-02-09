@@ -99,8 +99,8 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< type
                                                                  >::type
    >::operator()( IBlock * const block )
 {
-   PdfField_T * src( NULL );
-   PdfField_T * dst( NULL );
+   PdfField_T * src( nullptr );
+   PdfField_T * dst( nullptr );
 
    this->getFields( block, src, dst );
 
@@ -431,8 +431,8 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< type
                                                                  >::type
    >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
-   PdfField_T * src( NULL );
-   PdfField_T * dst( NULL );
+   PdfField_T * src( nullptr );
+   PdfField_T * dst( nullptr );
 
    this->getFields( block, src, dst );
 
@@ -794,8 +794,8 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< type
                                                                  >::type
    >::operator()( IBlock * const block )
 {
-   PdfField_T * src( NULL );
-   PdfField_T * dst( NULL );
+   PdfField_T * src( nullptr );
+   PdfField_T * dst( nullptr );
 
    this->getFields( block, src, dst );
 
@@ -1130,8 +1130,8 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< type
                                                                  >::type
    >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
-   PdfField_T * src( NULL );
-   PdfField_T * dst( NULL );
+   PdfField_T * src( nullptr );
+   PdfField_T * dst( nullptr );
 
    this->getFields( block, src, dst );
 

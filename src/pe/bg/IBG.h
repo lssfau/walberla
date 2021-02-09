@@ -29,7 +29,7 @@ namespace bg {
 class IBG : private NonCopyable
 {
 public:
-   virtual ~IBG() {};
+   virtual ~IBG() = default;
 };
 
 //*************************************************************************************************

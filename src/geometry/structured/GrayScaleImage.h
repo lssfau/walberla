@@ -70,7 +70,7 @@ namespace geometry   {
       static pixel_t pixelValueFromString( const std::string & str );
 
    protected:
-      GrayScaleImage() {}
+      GrayScaleImage() = default;
 
       uint_t size_[2];                   //< 0=width,  1=height
       std::vector<unsigned char> image_; //< raw pixels

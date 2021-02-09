@@ -50,31 +50,31 @@ public:
    using StructuredBlockStorage::blockExistsLocally;
    using StructuredBlockStorage::blockExistsRemotely;
 
-          bool blockExists        ( const Cell& cell, const uint_t level = 0 ) const;
-   inline bool blockExistsLocally ( const Cell& cell, const uint_t level = 0 ) const;
-   inline bool blockExistsRemotely( const Cell& cell, const uint_t level = 0 ) const;
+          bool blockExists        ( const Cell& cell, const uint_t level = 0 ) const override;
+   inline bool blockExistsLocally ( const Cell& cell, const uint_t level = 0 ) const override;
+   inline bool blockExistsRemotely( const Cell& cell, const uint_t level = 0 ) const override;
 
-   void getBlockID( IBlockID& id, const Cell& cell, const uint_t level = 0 ) const;
+   void getBlockID( IBlockID& id, const Cell& cell, const uint_t level = 0 ) const override;
 
-   inline uint_t getLevel( const IBlock& block ) const;
+   inline uint_t getLevel( const IBlock& block ) const override;
 
    using StructuredBlockStorage::getNumberOfXCells;
    using StructuredBlockStorage::getNumberOfYCells;
    using StructuredBlockStorage::getNumberOfZCells;
 
 #ifdef NDEBUG
-   uint_t getNumberOfXCells( const IBlock& /*block*/ ) const { return blockCells_[0]; }
-   uint_t getNumberOfYCells( const IBlock& /*block*/ ) const { return blockCells_[1]; }
-   uint_t getNumberOfZCells( const IBlock& /*block*/ ) const { return blockCells_[2]; }
+   uint_t getNumberOfXCells( const IBlock& /*block*/ ) const override { return blockCells_[0]; }
+   uint_t getNumberOfYCells( const IBlock& /*block*/ ) const override { return blockCells_[1]; }
+   uint_t getNumberOfZCells( const IBlock& /*block*/ ) const override { return blockCells_[2]; }
 #else
-   uint_t getNumberOfXCells( const IBlock& block ) const { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ); return blockCells_[0]; }
-   uint_t getNumberOfYCells( const IBlock& block ) const { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ); return blockCells_[1]; }
-   uint_t getNumberOfZCells( const IBlock& block ) const { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ); return blockCells_[2]; }
+   uint_t getNumberOfXCells( const IBlock& block ) const override { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ); return blockCells_[0]; }
+   uint_t getNumberOfYCells( const IBlock& block ) const override { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ); return blockCells_[1]; }
+   uint_t getNumberOfZCells( const IBlock& block ) const override { WALBERLA_ASSERT_EQUAL( &(getBlockStorage()), &(block.getBlockStorage()) ); return blockCells_[2]; }
 #endif
 
    using StructuredBlockStorage::getNumberOfCells;
 
-   inline uint_t getNumberOfCells( const IBlock& block, const uint_t index ) const;
+   inline uint_t getNumberOfCells( const IBlock& block, const uint_t index ) const override;
 
    // direct access to all member functions which are special to of BlockForest (-> for documentation of these functions see class BlockForest)
 
@@ -164,21 +164,21 @@ public:
 
 protected:
 
-   inline bool equal( const StructuredBlockStorage* rhs ) const;
+   inline bool equal( const StructuredBlockStorage* rhs ) const override;
 
    // helper class for 'StructuredBlockForest::addCellBoundingBoxesAsBlockData'
    class CellBoundingBoxHandling : public AlwaysInitializeBlockDataHandling< CellInterval >
    {
    public:
       CellBoundingBoxHandling( const StructuredBlockForest & forest ) : forest_( forest ) {}
-      CellInterval * initialize( IBlock * const block ) { return forest_.initializeCellBoundingBox( block ); }
+      CellInterval * initialize( IBlock * const block ) override { return forest_.initializeCellBoundingBox( block ); }
    private:
       const StructuredBlockForest & forest_;
    };
    friend class CellBoundingBoxHandling;
 
    //using StructuredBlockStorage::initializeCellBoundingBox;
-   inline BlockDataID addCellBoundingBoxesAsBlockData( const std::string & identifier );
+   inline BlockDataID addCellBoundingBoxesAsBlockData( const std::string & identifier ) override;
 
 private:
 
@@ -217,7 +217,7 @@ inline StructuredBlockForest::StructuredBlockForest( const shared_ptr< BlockFore
 
 inline bool StructuredBlockForest::blockExistsLocally( const Cell& cell, const uint_t level ) const {
 
-   return getBlock( cell, level ) != NULL;
+   return getBlock( cell, level ) != nullptr;
 }
 
 

@@ -52,7 +52,7 @@ public:
 
 private:
 
-   Abort() {}
+   Abort() = default;
 
    AbortFunction abortFunction_;
 };

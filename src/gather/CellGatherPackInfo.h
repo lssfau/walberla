@@ -79,12 +79,12 @@ public:
    /*! \name Packing Interface  */
    //@{
 
-   virtual void packData  ( const IBlock * sender,
-                            mpi::SendBuffer & outBuffer );
+   void packData  ( const IBlock * sender,
+                            mpi::SendBuffer & outBuffer ) override;
 
-   virtual void unpackData( mpi::RecvBuffer & buffer );
+   void unpackData( mpi::RecvBuffer & buffer ) override;
 
-   virtual void gatherFinished();
+   void gatherFinished() override;
    //@}
    //*******************************************************************************************************************
 

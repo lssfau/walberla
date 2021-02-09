@@ -563,7 +563,7 @@ public:
    static const bool constant = false;
 
    GuoField( const BlockDataID & forceFieldId ) :
-      forceFieldId_( forceFieldId ), forceField_( NULL ) {}
+      forceFieldId_( forceFieldId ), forceField_( nullptr ) {}
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << forceFieldId_; }
    void unpack( mpi::RecvBuffer & buffer ) { buffer >> forceFieldId_; }
@@ -644,7 +644,7 @@ public:
    static const bool constant = true;
 
    Correction( const BlockDataID & previousRhoVelocityId ) :
-      force_( real_t(0) ), previousRhoVelocityId_( previousRhoVelocityId ), previousRhoVelocity_(NULL) {}
+      force_( real_t(0) ), previousRhoVelocityId_( previousRhoVelocityId ), previousRhoVelocity_(nullptr) {}
 
    void pack( mpi::SendBuffer & buffer ) const { buffer << force_ << previousRhoVelocityId_; }
    void unpack( mpi::RecvBuffer & buffer ) { buffer >> force_ >> previousRhoVelocityId_; }

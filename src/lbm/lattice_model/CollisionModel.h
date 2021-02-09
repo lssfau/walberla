@@ -145,7 +145,7 @@ public:
       omegaFieldId_(), omegaField_( NULL ), level_( uint_t(0) ) {}
 
    SRTField( const BlockDataID & omegaFieldId, const uint_t _level = uint_t(0) ) :
-      omegaFieldId_( omegaFieldId ), omegaField_( NULL ), level_( _level ) {}
+      omegaFieldId_( omegaFieldId ), omegaField_( nullptr ), level_( _level ) {}
 
    void setFieldId( const BlockDataID & omegaFieldId, const uint_t _level = uint_t(0) )
    {

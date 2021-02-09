@@ -157,7 +157,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
    numContactsTreated_ = 0;
    maximumPenetration_ = 0;
 
-   if (tt_ != NULL) tt_->start("Simulation Step");
+   if (tt_ != nullptr) tt_->start("Simulation Step");
 
    for (auto it = blockStorage_->begin(); it != blockStorage_->end(); ++it)
    {
@@ -176,13 +176,13 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
       // Detect all collisions
       WALBERLA_LOG_DETAIL( "Detecting contacts...");
 
-      if (tt_ != NULL) tt_->start("Collision Detection");
+      if (tt_ != nullptr) tt_->start("Collision Detection");
       ccd->generatePossibleContacts( tt_ );
-      if (tt_ != NULL) tt_->start("Fine");
+      if (tt_ != nullptr) tt_->start("Fine");
       Contacts& contacts = fcd->generateContacts( ccd->getPossibleContacts() );
-      if (tt_ != NULL) tt_->stop("Fine");
+      if (tt_ != nullptr) tt_->stop("Fine");
 
-      if (tt_ != NULL) tt_->start("Filtering");
+      if (tt_ != nullptr) tt_->start("Filtering");
       // Filter out contacts
       size_t numContacts( contacts.size() );
       size_t numContactsMasked( 0 );
@@ -204,10 +204,10 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
       numContactsTreated_ += numContactsMasked;
 
       //      WALBERLA_LOG_DEVEL("contact filtering: " << numContactsMasked << "/" << contacts.size());
-      if (tt_ != NULL) tt_->stop("Filtering");
-      if (tt_ != NULL) tt_->stop("Collision Detection");
+      if (tt_ != nullptr) tt_->stop("Filtering");
+      if (tt_ != nullptr) tt_->stop("Collision Detection");
 
-      if (tt_ != NULL) tt_->start("Collision Response Contact Caching");
+      if (tt_ != nullptr) tt_->start("Collision Response Contact Caching");
       // Cache contact properties
       contactCache.resize( numContactsMasked );
 
@@ -277,8 +277,8 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
          }
       }
 
-      if (tt_ != NULL) tt_->stop("Collision Response Contact Caching");
-      if (tt_ != NULL) tt_->start("Collision Response Body Caching");
+      if (tt_ != nullptr) tt_->stop("Collision Response Contact Caching");
+      if (tt_ != nullptr) tt_->start("Collision Response Body Caching");
 
       // Cache body properties (and time integrate v and w to the end of the time step by applying external forces, torques and accelerations)
       size_t numBodies( globalBodyStorage_->size() + localStorage.size() + shadowStorage.size() );
@@ -331,10 +331,10 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
 #endif
       }
 
-      if (tt_ != NULL) tt_->stop("Collision Response Body Caching");
+      if (tt_ != nullptr) tt_->stop("Collision Response Body Caching");
    }
 
-   if (blockStorage_->size() == 0)
+   if (blockStorage_->empty())
    {
       // create artificial block to handle global bodies even on processes where there are no blocks
       BodyCache&    bodyCache    = blockToBodyCache_[0];
@@ -357,7 +357,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
       }
    }
 
-   if (tt_ != NULL) tt_->start("Collision Response Resolution");
+   if (tt_ != nullptr) tt_->start("Collision Response Resolution");
    const real_t rp = relaxationParam_;
    relaxationParam_ = real_c(1); // must be set to 1.0 such that dv and dw caused by external forces and torques are not falsely altered
    synchronizeVelocities( );
@@ -372,7 +372,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
 
       iteration_ = it;
 
-      if (tt_ != NULL) tt_->start("Collision Response Solving");
+      if (tt_ != nullptr) tt_->start("Collision Response Solving");
       for (auto blkIt = blockStorage_->begin(); blkIt != blockStorage_->end(); ++blkIt)
       {
          IBlock& currentBlock = *blkIt;
@@ -410,7 +410,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
          }
       }
 
-      if (tt_ != NULL) tt_->stop("Collision Response Solving");
+      if (tt_ != nullptr) tt_->stop("Collision Response Solving");
 
       synchronizeVelocities( );
 
@@ -438,8 +438,8 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
 #endif
    }
 
-   if (tt_ != NULL) tt_->stop("Collision Response Resolution");
-   if (tt_ != NULL) tt_->start("Collision Response Integration");
+   if (tt_ != nullptr) tt_->stop("Collision Response Resolution");
+   if (tt_ != nullptr) tt_->start("Collision Response Integration");
 
    // WARNING: Even though bodyCache.dv_[j] and bodyCache.dw_[j] _should_ be exactly 0 at all times for
    // bodies with infinite mass/inertia, this is not the case if the simulation breaks.
@@ -504,12 +504,12 @@ inline void HardContactSemiImplicitTimesteppingSolvers::timestep( const real_t d
       // NOTE: We might still need shadow copy updates if the user sets velocities or positions. Thus we might have to split up synchronize() again. It doesn't break anything if we still communicate the shadow copy updates though.
    }
 
-   if (tt_ != NULL) tt_->stop("Collision Response Integration");
+   if (tt_ != nullptr) tt_->stop("Collision Response Integration");
 
    blockToBodyCache_.clear();
    blockToContactCache_.clear();
 
-   if (tt_ != NULL) tt_->stop("Simulation Step");
+   if (tt_ != nullptr) tt_->stop("Simulation Step");
 }
 //*************************************************************************************************
 
@@ -1506,8 +1506,8 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
    if ((mpi::MPIManager::instance()->numProcesses() <= 1) && (blockStorage_->size() <= 1))
       return;
 
-   if (tt_ != NULL) tt_->start("Velocity Sync");
-   if (tt_ != NULL) tt_->start("Velocity Sync Correction Assembling");
+   if (tt_ != nullptr) tt_->start("Velocity Sync");
+   if (tt_ != nullptr) tt_->start("Velocity Sync Correction Assembling");
 
    // Sending local force contributions of shadow copies to owner.
    WALBERLA_LOG_DETAIL( "Assembling of velocity correction message starts...\n" );
@@ -1558,12 +1558,12 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
       }
    }
 
-   if (tt_ != NULL) tt_->stop("Velocity Sync Correction Assembling");
+   if (tt_ != nullptr) tt_->stop("Velocity Sync Correction Assembling");
 
    //   for( ProcessIterator process = processstorage_.begin(); process != processstorage_.end(); ++process )
    //      sentVelocitiesSyncCorrections_.transfered( process->getSendBuffer().size() );
 
-   if (tt_ != NULL) tt_->start("Velocity Sync Correction Communicate");
+   if (tt_ != nullptr) tt_->start("Velocity Sync Correction Communicate");
 
    WALBERLA_LOG_DETAIL( "Communication of velocity correction message starts..." );
 
@@ -1573,12 +1573,12 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
    syncVelBS.setReceiverInfo(recvRanks, true);
    syncVelBS.sendAll();
 
-   if (tt_ != NULL) tt_->stop("Velocity Sync Correction Communicate");
+   if (tt_ != nullptr) tt_->stop("Velocity Sync Correction Communicate");
 
    //   for( ProcessIterator process = processstorage_.begin(); process != processstorage_.end(); ++process )
    //      receivedVelocitiesSyncCorrections_.transfered( process->getRecvBuffer().size() );
 
-   if (tt_ != NULL) tt_->start("Velocity Sync Correction Parsing");
+   if (tt_ != nullptr) tt_->start("Velocity Sync Correction Parsing");
 
    // Receiving force and torque contributions
    WALBERLA_LOG_DETAIL( "Parsing of velocity correction message starts...");
@@ -1595,7 +1595,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
          //         it.buffer() >> sender;
          it.buffer() >> receiver;
          auto blk = blockStorage_->getBlock(receiver);
-         WALBERLA_CHECK(blk != NULL, receiver << " not on this process!");
+         WALBERLA_CHECK(blk != nullptr, receiver << " not on this process!");
          IBlock& block = *blk;
          Storage* storage  = block.uncheckedFastGetData< Storage >( storageID_ );
          BodyStorage& localStorage  = (*storage)[0];
@@ -1606,9 +1606,9 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
       //      if (tt_ != NULL) tt_->stop("Inside Loop");
    }
 
-   if (tt_ != NULL) tt_->stop("Velocity Sync Correction Parsing");
+   if (tt_ != nullptr) tt_->stop("Velocity Sync Correction Parsing");
 
-   if (tt_ != NULL) tt_->start("Velocity Sync Update Assembling");
+   if (tt_ != nullptr) tt_->start("Velocity Sync Update Assembling");
    WALBERLA_LOG_DETAIL( "Assembling of velocity update message starts...");
 
    //==========================================================
@@ -1657,24 +1657,24 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
       }
    }
 
-   if (tt_ != NULL) tt_->stop("Velocity Sync Update Assembling");
+   if (tt_ != nullptr) tt_->stop("Velocity Sync Update Assembling");
 
    //   for( ProcessIterator process = processstorage_.begin(); process != processstorage_.end(); ++process )
    //      sentVelocitiesSyncUpdates_.transfered( process->getSendBuffer().size() );
 
-   if (tt_ != NULL) tt_->start("Velocity Sync Update Communincate");
+   if (tt_ != nullptr) tt_->start("Velocity Sync Update Communincate");
 
    WALBERLA_LOG_DETAIL( "Communication of velocity update message starts...");
 
    syncVelBS.setReceiverInfo(recvRanks, true);
    syncVelBS.sendAll();
 
-   if (tt_ != NULL) tt_->stop("Velocity Sync Update Communincate");
+   if (tt_ != nullptr) tt_->stop("Velocity Sync Update Communincate");
 
    //   for( ProcessIterator process = processstorage_.begin(); process != processstorage_.end(); ++process )
    //      receivedVelocitiesSyncUpdates_.transfered( process->getRecvBuffer().size() );
 
-   if (tt_ != NULL) tt_->start("Velocity Sync Update Processing");
+   if (tt_ != nullptr) tt_->start("Velocity Sync Update Processing");
 
    // Receiving velocity updates
    WALBERLA_LOG_DETAIL( "Parsing of velocity update message starts...");
@@ -1691,7 +1691,7 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
          //         it.buffer() >> sender;
          it.buffer() >> receiver;
          auto blk = blockStorage_->getBlock(receiver);
-         WALBERLA_CHECK(blk != NULL, receiver << " not on this process!");
+         WALBERLA_CHECK(blk != nullptr, receiver << " not on this process!");
          IBlock& block = *blk;
          Storage* storage  = block.uncheckedFastGetData< Storage >( storageID_ );
          //         BodyStorage& localStorage  = (*storage)[0];
@@ -1702,9 +1702,9 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
       //      if (tt_ != NULL) tt_->stop("Inside Loop");
    }
 
-   if (tt_ != NULL) tt_->stop("Velocity Sync Update Processing");
+   if (tt_ != nullptr) tt_->stop("Velocity Sync Update Processing");
 
-   if (tt_ != NULL) tt_->start("Velocity Sync Globals");
+   if (tt_ != nullptr) tt_->start("Velocity Sync Globals");
    /*
    {
       size_t i;
@@ -1743,8 +1743,8 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
       }
    }*/
 
-   if (tt_ != NULL) tt_->stop("Velocity Sync Globals");
-   if (tt_ != NULL) tt_->stop("Velocity Sync");
+   if (tt_ != nullptr) tt_->stop("Velocity Sync Globals");
+   if (tt_ != nullptr) tt_->stop("Velocity Sync");
 }
 //*************************************************************************************************
 

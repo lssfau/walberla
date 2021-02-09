@@ -377,24 +377,24 @@ public:
       pdfFieldId_( pdfFieldId ), filter_( filter )
    {}
 
-   virtual ~MarkerData() {}
+   ~MarkerData() override = default;
 
-   internal::MarkerField_T * initialize( IBlock * const ) { return allocate(); }
+   internal::MarkerField_T * initialize( IBlock * const ) override { return allocate(); }
 
-   void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer );
+   void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
 
-   void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child );
-   void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer );
+   void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child ) override;
+   void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override;
 
-   internal::MarkerField_T * deserialize( IBlock * const ) { return allocate(); }
+   internal::MarkerField_T * deserialize( IBlock * const ) override { return allocate(); }
 
-   internal::MarkerField_T * deserializeCoarseToFine( Block * const ) { return allocate(); }
-   internal::MarkerField_T * deserializeFineToCoarse( Block * const ) { return allocate(); }
+   internal::MarkerField_T * deserializeCoarseToFine( Block * const ) override { return allocate(); }
+   internal::MarkerField_T * deserializeFineToCoarse( Block * const ) override { return allocate(); }
    
-   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer );
+   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
 
-   void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer );
-   void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child );   
+   void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override;
+   void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child ) override;   
 
 protected:
 

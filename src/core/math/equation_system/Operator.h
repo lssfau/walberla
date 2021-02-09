@@ -42,7 +42,7 @@ namespace math {
       OpType( const char& sign, const std::string& n, const unsigned int strength ) :
          sign_(sign), name_(n), strength_(strength) {}
 
-      virtual ~OpType() {}
+      virtual ~OpType() = default;
 
    private:
       OpType& operator=( const OpType& ){ return *this; }
@@ -68,56 +68,56 @@ namespace math {
    public:
       OpNo( const char& sign, const std::string& name, const unsigned int strength ) :
          OpType( sign, name, strength ) {}
-      double operator() ( const double &, const double & ) { WALBERLA_ABORT( "NO OPERATION" ); return 0; }
+      double operator() ( const double &, const double & ) override { WALBERLA_ABORT( "NO OPERATION" ); return 0; }
    };
 
    class OpPlus : public OpType{
    public:
       OpPlus( const char& sign, const std::string& name, const unsigned int strength ) :
          OpType( sign, name, strength ) {};
-      double operator() ( const double & a, const double & b ) { return a + b; }
+      double operator() ( const double & a, const double & b ) override { return a + b; }
    };
 
    class OpMinus : public OpType{
    public:
       OpMinus( const char& sign, const std::string& name, const unsigned int strength ) :
          OpType( sign, name, strength ) {}
-      double operator() ( const double & a, const double & b ) { return a - b; }
+      double operator() ( const double & a, const double & b ) override { return a - b; }
    };
 
    class OpMult : public OpType{
    public:
       OpMult( const char& sign, const std::string& name, const unsigned int strength ) :
          OpType( sign, name, strength ) {}
-      double operator() ( const double & a, const double & b ) { return a * b; }
+      double operator() ( const double & a, const double & b ) override { return a * b; }
    };
 
    class OpDiv : public OpType{
    public:
       OpDiv( const char& sign, const std::string& name, const unsigned int strength ) :
          OpType( sign, name, strength ) {}
-      double operator() ( const double & a, const double & b ) { return a / b; }
+      double operator() ( const double & a, const double & b ) override { return a / b; }
    };
 
    class OpProd : public OpType{
    public:
       OpProd( const char& sign, const std::string& name, const unsigned int strength ) :
          OpType( sign, name, strength ) {}
-      double operator() ( const double & a, const double & b ) { return pow( a, b ); }
+      double operator() ( const double & a, const double & b ) override { return pow( a, b ); }
    };
 
    class OpRoot : public OpType{
    public:
       OpRoot( const char& sign, const std::string& name, const unsigned int strength ) :
          OpType( sign, name, strength ) {}
-      double operator() ( const double & a, const double & b ) { return pow( a, 1/b ); }
+      double operator() ( const double & a, const double & b ) override { return pow( a, 1/b ); }
    };
 
    class OpLog : public OpType{
    public:
       OpLog( const char& sign, const std::string& name, const unsigned int strength ) :
          OpType( sign, name, strength ) {}
-      double operator() ( const double & a, const double & b ) { return log10(a) / log10(b); }
+      double operator() ( const double & a, const double & b ) override { return log10(a) / log10(b); }
    };
 
 

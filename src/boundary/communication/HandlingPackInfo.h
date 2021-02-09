@@ -39,18 +39,18 @@ public:
    HandlingPackInfo( const BlockDataID & bdId, const bool assumeIdenticalFlagMapping = true, const uint_t numberOfLayers = 0 ) :
       bdId_( bdId ), numberOfLayers_( numberOfLayers ), assumeIdenticalFlagMapping_( assumeIdenticalFlagMapping ) {}
 
-   ~HandlingPackInfo() {}
+   ~HandlingPackInfo() override = default;
 
-   bool constantDataExchange() const { return false; }
-   bool threadsafeReceiving()  const { return false; }
+   bool constantDataExchange() const override { return false; }
+   bool threadsafeReceiving()  const override { return false; }
 
-   void unpackData( IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer );
+   void unpackData( IBlock * receiver, stencil::Direction dir, mpi::RecvBuffer & buffer ) override;
 
-   void communicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir );
+   void communicateLocal( const IBlock * sender, IBlock * receiver, stencil::Direction dir ) override;
 
 protected:
 
-   void packDataImpl( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & buffer ) const;
+   void packDataImpl( const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & buffer ) const override;
 
 
 

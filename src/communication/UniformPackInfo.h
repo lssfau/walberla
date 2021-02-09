@@ -57,8 +57,8 @@ public:
    //**Construction & Destruction***************************************************************************************
    /*! \name Construction & Destruction */
    //@{
-            UniformPackInfo() {}
-   virtual ~UniformPackInfo() {}
+            UniformPackInfo() = default;
+   virtual ~UniformPackInfo() = default;
    //@}
    //*******************************************************************************************************************
 

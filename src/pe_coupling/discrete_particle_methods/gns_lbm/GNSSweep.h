@@ -121,7 +121,7 @@ void GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
 {
    PdfField_T * src( NULL );
    PdfField_T * dst( NULL );
-   ScalarField_T * solidVolumeFractionField( NULL );
+   ScalarField_T * solidVolumeFractionField( nullptr );
 
    getFields( block, src, dst, solidVolumeFractionField );
 
@@ -187,8 +187,8 @@ template< typename LatticeModel_T, typename Filter_T, typename DensityVelocityIn
 void GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T
 >::stream( IBlock * const block, const uint_t numberOfGhostLayersToInclude )
 {
-   PdfField_T * src( NULL );
-   PdfField_T * dst( NULL );
+   PdfField_T * src( nullptr );
+   PdfField_T * dst( nullptr );
    lbm::SweepBase<LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T>::getFields( block, src, dst );
    lbm::StreamPull< LatticeModel_T >::execute( src, dst, block, this->filter_, numberOfGhostLayersToInclude );
 }

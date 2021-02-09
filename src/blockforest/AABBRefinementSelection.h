@@ -40,7 +40,7 @@ class AABBRefinementSelection
 {
 public:
 
-   AABBRefinementSelection(){}
+   AABBRefinementSelection()= default;
 
    AABBRefinementSelection( const Config::BlockHandle & configBlock )
    {
@@ -74,12 +74,12 @@ public:
 
    void addAABB( const math::AABB & aabb, const uint_t level )
    {
-      aabbs_.push_back( std::make_pair( aabb, level ) );
+      aabbs_.emplace_back( aabb, level );
    }
 
    void addRegion( const math::AABB & region, const uint_t level )
    {
-      regions_.push_back( std::make_pair( region, level ) );
+      regions_.emplace_back( region, level );
    }
 
    // for static refinement
@@ -144,12 +144,12 @@ private:
       std::vector< std::pair< math::AABB, uint_t > > aabbs;
       for( auto region = regions_.begin(); region != regions_.end(); ++region )
       {
-         aabbs.push_back( std::make_pair( math::AABB( simulationDomain.xMin() + region->first.xMin() * simulationDomain.xSize(),
-                                                      simulationDomain.yMin() + region->first.yMin() * simulationDomain.ySize(),
-                                                      simulationDomain.zMin() + region->first.zMin() * simulationDomain.zSize(),
-                                                      simulationDomain.xMin() + region->first.xMax() * simulationDomain.xSize(),
-                                                      simulationDomain.yMin() + region->first.yMax() * simulationDomain.ySize(),
-                                                      simulationDomain.zMin() + region->first.zMax() * simulationDomain.zSize() ), region->second ) );
+         aabbs.emplace_back( math::AABB( simulationDomain.xMin() + region->first.xMin() * simulationDomain.xSize(),
+                                         simulationDomain.yMin() + region->first.yMin() * simulationDomain.ySize(),
+                                         simulationDomain.zMin() + region->first.zMin() * simulationDomain.zSize(),
+                                         simulationDomain.xMin() + region->first.xMax() * simulationDomain.xSize(),
+                                         simulationDomain.yMin() + region->first.yMax() * simulationDomain.ySize(),
+                                         simulationDomain.zMin() + region->first.zMax() * simulationDomain.zSize() ), region->second );
       }
       return aabbs;
    }

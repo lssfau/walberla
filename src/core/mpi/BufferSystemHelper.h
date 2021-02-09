@@ -43,7 +43,7 @@ namespace internal {
          : communicator_( communicator), tag_(tag)
       {}
 
-      virtual ~AbstractCommunication() {}
+      virtual ~AbstractCommunication() = default;
 
 
       struct ReceiveInfo {
@@ -110,15 +110,15 @@ namespace internal {
       KnownSizeCommunication( const MPI_Comm & communicator, int tag = 0 )
            : AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ), sending_(false), receiving_(false) {}
 
-      virtual ~KnownSizeCommunication() {}
+      ~KnownSizeCommunication() override = default;
 
-      virtual void send( MPIRank receiver, const SendBuffer_T & sendBuffer );
-      virtual void waitForSends();
+      void send( MPIRank receiver, const SendBuffer_T & sendBuffer ) override;
+      void waitForSends() override;
 
-      virtual void    scheduleReceives  ( std::map<MPIRank, ReceiveInfo> & recvInfos );
+      void    scheduleReceives  ( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
       /// size field of recvInfos is expected to be valid
-      virtual MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos );
+      MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
    private:
       bool sending_;
@@ -138,15 +138,15 @@ namespace internal {
       UnknownSizeCommunication( const MPI_Comm & communicator, int tag = 0 )
            :  AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ), sending_(false), receiving_(false) {}
 
-      virtual ~UnknownSizeCommunication() {}
+      ~UnknownSizeCommunication() override = default;
 
-      virtual void send( MPIRank receiver, const SendBuffer_T & sendBuffer );
-      virtual void waitForSends();
+      void send( MPIRank receiver, const SendBuffer_T & sendBuffer ) override;
+      void waitForSends() override;
 
-      virtual void scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos );
+      void scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
       /// size field of recvInfos can be invalid, is filled in with the actual message size
-      virtual MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos );
+      MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
    private:
       bool sending_;
@@ -170,15 +170,15 @@ namespace internal {
       UnknownSizeCommunicationIProbe( const MPI_Comm & communicator, int tag = 0 )
            :  AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ), sending_(false), receiving_(false) {}
 
-      virtual ~UnknownSizeCommunicationIProbe() {}
+      ~UnknownSizeCommunicationIProbe() override = default;
 
-      virtual void send( MPIRank receiver, const SendBuffer_T & sendBuffer );
-      virtual void waitForSends();
+      void send( MPIRank receiver, const SendBuffer_T & sendBuffer ) override;
+      void waitForSends() override;
 
-      virtual void scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos );
+      void scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
       /// size field of recvInfos can be invalid, is filled in with the actual message size
-      virtual MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos );
+      MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
    private:
       bool sending_;
@@ -198,15 +198,15 @@ namespace internal {
       NoMPICommunication( const MPI_Comm & communicator, int tag = 0 )
          : AbstractCommunication<RecvBuffer_T, SendBuffer_T>( communicator, tag ), received_( false ) {}
 
-      virtual ~NoMPICommunication() {}
+      ~NoMPICommunication() override = default;
 
-      virtual void send( MPIRank receiver, const SendBuffer_T & sendBuffer );
-      virtual void waitForSends();
+      void send( MPIRank receiver, const SendBuffer_T & sendBuffer ) override;
+      void waitForSends() override;
 
-      virtual void scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos );
+      void scheduleReceives( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
       /// size field of recvInfos can be invalid, is filled in with the actual message size
-      virtual MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos );
+      MPIRank waitForNextReceive( std::map<MPIRank, ReceiveInfo> & recvInfos ) override;
 
    private:
       bool         received_;

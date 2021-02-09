@@ -97,7 +97,7 @@ namespace initializer {
             ++blockHandleIt;
       }
 
-      if (boundaryConfigBlocks.size () > 0 ) {
+      if (!boundaryConfigBlocks.empty() ) {
          WALBERLA_ABORT_NO_DEBUG_INFO( "No boundary setup blocks are allowed when configuring a flag field"
                                                << blockHandle.getKey() );
       }

@@ -101,7 +101,7 @@ namespace initializer {
       * Interface implementation for Initializer - sets a body on a scalar field with options from configuration file
       *
       *****************************************************************************************************************/
-      virtual void init( BlockStorage & blockStorage, const Config::BlockHandle & blockHandle );
+      void init( BlockStorage & blockStorage, const Config::BlockHandle & blockHandle ) override;
 
 
 

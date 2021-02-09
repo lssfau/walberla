@@ -58,7 +58,7 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   inline RigidBodyIterator() {}
+   inline RigidBodyIterator() = default;
    explicit inline RigidBodyIterator( const typename ContainerType::iterator& it ) : it_(it) {}
 
    RigidBodyIterator( const RigidBodyIterator& it) = default;
@@ -226,7 +226,7 @@ public:
    //**Constructors********************************************************************************
    /*!\name Constructors */
    //@{
-   inline ConstRigidBodyIterator() {}
+   inline ConstRigidBodyIterator() = default;
    inline ConstRigidBodyIterator( const RigidBodyIterator& it ) : it_(it.get()) {}
    explicit inline ConstRigidBodyIterator( const typename ContainerType::iterator& it ) : it_(it) {}
    explicit inline ConstRigidBodyIterator( const typename ContainerType::const_iterator& it ) : it_(it) {}

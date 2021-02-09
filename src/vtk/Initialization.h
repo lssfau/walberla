@@ -41,7 +41,7 @@ typedef std::function< void () > OutputFunction;
 
 struct SelectableOutputFunction {
 
-   SelectableOutputFunction() {}
+   SelectableOutputFunction() = default;
    SelectableOutputFunction( OutputFunction of, const Set<SUID>& rgs, const Set<SUID>& igs ) :
       outputFunction( of ), requiredGlobalStates( rgs ), incompatibleGlobalStates( igs ) {}
 

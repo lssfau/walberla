@@ -87,7 +87,7 @@ public:
    //**Destructor**********************************************************************************
    /*!\name Destructor */
    //@{
-   virtual ~Union();
+   ~Union() override;
    //@}
    //**********************************************************************************************
    //**********************************************************************************************
@@ -121,23 +121,23 @@ public:
    //@}
    //**********************************************************************************************
 
-   virtual inline real_t getVolume()         const override;
+   inline real_t getVolume()         const override;
 
    //**Set functions*******************************************************************************
    /*!\name Set functions */
    //@{
-   virtual void setRemote( bool remote ) override;
+   void setRemote( bool remote ) override;
    //@}
    //**********************************************************************************************
 
-   virtual inline bool   hasSubBodies()      const override { return true; }
+   inline bool   hasSubBodies()      const override { return true; }
 
    //**Signal functions***************************************************************************
    /*!\name Signal functions */
    //@{
-   virtual void handleModification() override;
-   virtual void handleTranslation() override;
-   virtual void handleRotation() override;
+   void handleModification() override;
+   void handleTranslation() override;
+   void handleRotation() override;
    //@}
    //**********************************************************************************************
 
@@ -158,7 +158,7 @@ public:
    //**Output functions****************************************************************************
    /*!\name Output functions */
    //@{
-   virtual void print( std::ostream& os, const char* tab ) const override;
+   void print( std::ostream& os, const char* tab ) const override;
    //@}
    //**********************************************************************************************
 
@@ -166,21 +166,21 @@ protected:
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   virtual void setPositionImpl       ( real_t px, real_t py, real_t pz )         override;
-   virtual void setOrientationImpl    ( real_t r, real_t i, real_t j, real_t k )  override;
-   virtual void translateImpl         ( real_t dx, real_t dy, real_t dz )         override;
-   virtual void rotateImpl            ( const Quat& dq )                          override;
-   virtual void rotateAroundOriginImpl( const Quat& dq )                          override;
-   virtual void rotateAroundPointImpl ( const Vec3& point, const Quat& dq )       override;
-   virtual bool containsRelPointImpl   ( real_t px, real_t py, real_t pz ) const  override;
-   virtual bool isSurfaceRelPointImpl  ( real_t px, real_t py, real_t pz ) const  override;
+   void setPositionImpl       ( real_t px, real_t py, real_t pz )         override;
+   void setOrientationImpl    ( real_t r, real_t i, real_t j, real_t k )  override;
+   void translateImpl         ( real_t dx, real_t dy, real_t dz )         override;
+   void rotateImpl            ( const Quat& dq )                          override;
+   void rotateAroundOriginImpl( const Quat& dq )                          override;
+   void rotateAroundPointImpl ( const Vec3& point, const Quat& dq )       override;
+   bool containsRelPointImpl   ( real_t px, real_t py, real_t pz ) const  override;
+   bool isSurfaceRelPointImpl  ( real_t px, real_t py, real_t pz ) const  override;
    //@}
    //**********************************************************************************************
 
    //**Utility functions***************************************************************************
    /*!\name Utility functions */
    //@{
-   inline virtual void calcBoundingBox() override;  // Calculation of the axis-aligned bounding box
+   inline void calcBoundingBox() override;  // Calculation of the axis-aligned bounding box
    inline         void calcCenterOfMass(); // Compute mass and center of gravity
    inline         void calcInertia();      // Calculation of the moment of inertia
    //@}

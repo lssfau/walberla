@@ -90,9 +90,9 @@ std::vector<T> gatherv( const std::vector<T> & values, int recvRank = 0, MPI_Com
       if( values.empty() )
       {
          if( !result.empty() )
-            MPI_Gatherv( NULL, 0, MPITrait<T>::type(), &(result[0]), &(recvCounts[0]), &(displacements[0]), MPITrait<T>::type(), recvRank, comm );
+            MPI_Gatherv( nullptr, 0, MPITrait<T>::type(), &(result[0]), &(recvCounts[0]), &(displacements[0]), MPITrait<T>::type(), recvRank, comm );
          else
-            MPI_Gatherv( NULL, 0, MPITrait<T>::type(), NULL, &(recvCounts[0]), &(displacements[0]), MPITrait<T>::type(), recvRank, comm );
+            MPI_Gatherv( nullptr, 0, MPITrait<T>::type(), nullptr, &(recvCounts[0]), &(displacements[0]), MPITrait<T>::type(), recvRank, comm );
       }
       else
       {
@@ -109,11 +109,11 @@ std::vector<T> gatherv( const std::vector<T> & values, int recvRank = 0, MPI_Com
 
    if( values.empty() )
    {
-      MPI_Gatherv( NULL, 0, MPITrait<T>::type(), NULL, NULL, NULL, MPITrait<T>::type(), recvRank, comm );
+      MPI_Gatherv( nullptr, 0, MPITrait<T>::type(), nullptr, nullptr, nullptr, MPITrait<T>::type(), recvRank, comm );
    }
    else
    {
-      MPI_Gatherv( const_cast<T*>( &(values[0]) ), int_c( values.size() ), MPITrait<T>::type(), NULL, NULL, NULL, MPITrait<T>::type(),
+      MPI_Gatherv( const_cast<T*>( &(values[0]) ), int_c( values.size() ), MPITrait<T>::type(), nullptr, nullptr, nullptr, MPITrait<T>::type(),
                    recvRank, comm );
    }
 
@@ -171,7 +171,7 @@ std::vector<T> allGatherv( const std::vector<T> & values, MPI_Comm comm = MPI_CO
    {
       if( values.empty() )
       {
-         MPI_Allgatherv( NULL, 0, MPITrait<T>::type(), &(result[0]), &(recvCounts[0]), &(displacements[0]),
+         MPI_Allgatherv( nullptr, 0, MPITrait<T>::type(), &(result[0]), &(recvCounts[0]), &(displacements[0]),
                          MPITrait<T>::type(), comm );
       }
       else

@@ -77,9 +77,9 @@ void RBGS< Stencil_T >::update( IBlock * const block, const bool rb )
       WALBERLA_ASSERT( realIsIdentical( dir.length(), real_t(1) ) );
 #endif
 
-   Field_T * uf( NULL );
-   Field_T * ff( NULL );
-   StencilField_T * stencil( NULL );
+   Field_T * uf( nullptr );
+   Field_T * ff( nullptr );
+   StencilField_T * stencil( nullptr );
    this->getFields( block, uf, ff, stencil );
 
    WALBERLA_ASSERT_GREATER_EQUAL( uf->nrOfGhostLayers(), 1 );

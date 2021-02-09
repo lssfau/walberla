@@ -32,7 +32,7 @@ namespace fcd {
 template <typename BodyTypeTuple>
 class SimpleFCD : public GenericFCD<BodyTypeTuple, AnalyticCollideFunctor>{
 public:
-   virtual ~SimpleFCD(){}
+   ~SimpleFCD() override = default;
 };
 
 }

@@ -43,7 +43,7 @@ public:
    AdaptorHandling( const ConstBlockDataID & adaptedFieldId, const AdaptionFunction_T & function ) :
       adaptedFieldId_( adaptedFieldId ), function_( function ) {}
 
-   Adaptor_T * initialize( IBlock * const block )
+   Adaptor_T * initialize( IBlock * const block ) override
    {
       typedef typename Adaptor_T::basefield_t AdaptedField_T;
       const AdaptedField_T * adaptedField = block->getData< AdaptedField_T >( adaptedFieldId_ );

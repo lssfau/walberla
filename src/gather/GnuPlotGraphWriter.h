@@ -59,7 +59,7 @@ class GnuPlotGraphWriter : public DataProcessor
          ++callNr;
       }
 
-      virtual void process(const std::vector<std::vector<real_t> > & data)  { writeDataSet(data); }
+      void process(const std::vector<std::vector<real_t> > & data) override  { writeDataSet(data); }
 
    private:
       std::string filename_;

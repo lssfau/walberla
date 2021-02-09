@@ -283,18 +283,18 @@ public:
    void   removeBranchId() { WALBERLA_ASSERT_GREATER_EQUAL( getUsedBits(), uint_c(4) ); id_ >>= 3; }
    uint_t    getBranchId() const { WALBERLA_ASSERT_GREATER_EQUAL( getUsedBits(), uint_c(4) ); return id_ & uint_c(7); }
 
-   bool operator< ( const IBlockID& rhs ) const
+   bool operator< ( const IBlockID& rhs ) const override
       { WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &rhs ), &rhs ); return id_ <  static_cast< const BlockID* >( &rhs )->id_; }
    bool operator> ( const IBlockID& rhs ) const
       { WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &rhs ), &rhs ); return id_ >  static_cast< const BlockID* >( &rhs )->id_; }
-   bool operator==( const IBlockID& rhs ) const
+   bool operator==( const IBlockID& rhs ) const override
       { WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &rhs ), &rhs ); return id_ == static_cast< const BlockID* >( &rhs )->id_; }
-   bool operator!=( const IBlockID& rhs ) const
+   bool operator!=( const IBlockID& rhs ) const override
       { WALBERLA_ASSERT_EQUAL( dynamic_cast< const BlockID* >( &rhs ), &rhs ); return id_ != static_cast< const BlockID* >( &rhs )->id_; }
 
-   inline IDType getID() const;
+   inline IDType getID() const override;
 
-   inline std::ostream& toStream( std::ostream& os ) const;
+   inline std::ostream& toStream( std::ostream& os ) const override;
 
    void toByteArray( std::vector< uint8_t >& array, const uint_t offset, const uint_t bytes ) const { uintToByteArray( id_, array, offset, bytes ); }
 

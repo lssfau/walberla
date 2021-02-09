@@ -51,14 +51,7 @@ public:
       {
          if (ended_ || rhs.ended_)
          {
-            if (ended_ == rhs.ended_)
-            {
-               return true;
-            }
-            else
-            {
-               return false;
-            }
+            return ended_ == rhs.ended_;
          }
 
          //std::vector::iterator cannot be compared between different instances (assert!)
@@ -169,14 +162,7 @@ public:
       {
          if (ended_ || rhs.ended_)
          {
-            if (ended_ == rhs.ended_)
-            {
-               return true;
-            }
-            else
-            {
-               return false;
-            }
+            return ended_ == rhs.ended_;
          }
 
          return it_ == rhs.it_;
@@ -265,14 +251,7 @@ public:
       {
          if (ended_ || rhs.ended_)
          {
-            if (ended_ == rhs.ended_)
-            {
-               return true;
-            }
-            else
-            {
-               return false;
-            }
+            return ended_ == rhs.ended_;
          }
 
          return it_ == rhs.it_;

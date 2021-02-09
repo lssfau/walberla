@@ -93,7 +93,7 @@ namespace initializer {
                   field::FlagUID pressureFlag1, field::FlagUID pressureFlag2 );
 
 
-      virtual void init( BlockStorage & , const Config::BlockHandle & blockHandle )    {  init( blockHandle );   }
+      void init( BlockStorage & , const Config::BlockHandle & blockHandle ) override    {  init( blockHandle );   }
 
       void init( const Config::BlockHandle & blockHandle );
       void init( Scenario scenario, BoundaryType boundaryType, real_t pressureDiff, Axis flowAxis, Axis parabolaAxis = INVALID_AXIS );

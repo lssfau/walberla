@@ -56,7 +56,7 @@ public:
 
    /*! \name Constructors */
    //@{
-   CellVector() {}
+   CellVector() = default;
    CellVector(size_type n, const Cell & value = Cell()) : cells_(n, value) {}
    template <class InputIterator>
       CellVector(InputIterator first, InputIterator last) : cells_(first, last) { }
@@ -140,14 +140,14 @@ std::ostream & operator<<( std::ostream & os, const CellVector & cells );
 
 inline void CellVector::push_back( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z ) {
 
-   cells_.push_back( Cell(x, y, z) );
+   cells_.emplace_back(x, y, z );
 }
 
 
 
 inline void CellVector::push_back( const uint_t x, const uint_t y, const uint_t z ) {
 
-   cells_.push_back( Cell(x, y, z) );
+   cells_.emplace_back(x, y, z );
 }
 
 

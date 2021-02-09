@@ -246,7 +246,7 @@ class AdvectionDiffusionDensityEquilibriumVelocityCalculation
 public:
 
    AdvectionDiffusionDensityEquilibriumVelocityCalculation( const ConstBlockDataID & velocityFieldId ) :
-      velocityFieldId_( velocityFieldId ), velocityField_( NULL ) {}
+      velocityFieldId_( velocityFieldId ), velocityField_( nullptr ) {}
 
    void operator()( IBlock & block )
    {

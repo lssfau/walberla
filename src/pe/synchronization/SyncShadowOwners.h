@@ -193,7 +193,7 @@ void updateAndMigrate( BlockForest& forest, BlockDataID storageID, const bool sy
          it.buffer() >> sender;
          it.buffer() >> receiver;
          auto blk = forest.getBlock(receiver);
-         WALBERLA_CHECK(blk != NULL, receiver << " not on this process!");
+         WALBERLA_CHECK(blk != nullptr, receiver << " not on this process!");
          Block * block = dynamic_cast< Block * >( blk );
          Storage* storage  = block->getData< Storage >( storageID );
          BodyStorage& localStorage  = (*storage)[0];
@@ -360,7 +360,7 @@ void checkAndResolveOverlap( BlockForest& forest, BlockDataID storageID, const r
          it.buffer() >> sender;
          it.buffer() >> receiver;
          auto blk = forest.getBlock(receiver);
-         WALBERLA_CHECK(blk != NULL, receiver << " not on this process!");
+         WALBERLA_CHECK(blk != nullptr, receiver << " not on this process!");
          Block * block = dynamic_cast< Block * >( blk );
          Storage* storage  = block->getData< Storage >( storageID );
          BodyStorage& localStorage  = (*storage)[0];
@@ -372,25 +372,25 @@ void checkAndResolveOverlap( BlockForest& forest, BlockDataID storageID, const r
 }
 
 template <typename BodyTypeTuple>
-void syncShadowOwners( BlockForest& forest, BlockDataID storageID, WcTimingTree* tt = NULL, const real_t dx = real_t(0), const bool syncNonCommunicatingBodies = false )
+void syncShadowOwners( BlockForest& forest, BlockDataID storageID, WcTimingTree* tt = nullptr, const real_t dx = real_t(0), const bool syncNonCommunicatingBodies = false )
 {
-   if (tt != NULL) tt->start("Sync");
+   if (tt != nullptr) tt->start("Sync");
 
    //==========================================================
    // STEP1: Update & Migrate
    //==========================================================
-   if (tt != NULL) tt->start("Update&Migrate");
+   if (tt != nullptr) tt->start("Update&Migrate");
    updateAndMigrate<BodyTypeTuple>( forest, storageID, syncNonCommunicatingBodies);
-   if (tt != NULL) tt->stop("Update&Migrate");
+   if (tt != nullptr) tt->stop("Update&Migrate");
 
    //==========================================================
    // STEP2: Check & Resolve
    //==========================================================
-   if (tt != NULL) tt->start("Check&Resolve");
+   if (tt != nullptr) tt->start("Check&Resolve");
    checkAndResolveOverlap<BodyTypeTuple>( forest, storageID, dx, syncNonCommunicatingBodies);
-   if (tt != NULL) tt->stop("Check&Resolve");
+   if (tt != nullptr) tt->stop("Check&Resolve");
 
-   if (tt != NULL) tt->stop("Sync");
+   if (tt != nullptr) tt->stop("Sync");
 }
 
 }

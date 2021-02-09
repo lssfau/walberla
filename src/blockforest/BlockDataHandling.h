@@ -36,7 +36,7 @@ template< typename T >
 class BlockDataHandling : public domain_decomposition::BlockDataHandling<T>
 {
 public:
-   virtual ~BlockDataHandling() {}
+   ~BlockDataHandling() override = default;
 
    /// must be thread-safe !
    virtual void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child ) = 0;
@@ -60,19 +60,19 @@ template< typename T >
 class AlwaysInitializeBlockDataHandling : public BlockDataHandling<T>
 {
 public:
-   ~AlwaysInitializeBlockDataHandling() {}
+   ~AlwaysInitializeBlockDataHandling() override = default;
 
-   void serialize( IBlock * const, const BlockDataID &, mpi::SendBuffer & ) {}
-   void serializeCoarseToFine( Block * const, const BlockDataID &, mpi::SendBuffer &, const uint_t ) {}
-   void serializeFineToCoarse( Block * const, const BlockDataID &, mpi::SendBuffer & ) {}
+   void serialize( IBlock * const, const BlockDataID &, mpi::SendBuffer & ) override {}
+   void serializeCoarseToFine( Block * const, const BlockDataID &, mpi::SendBuffer &, const uint_t ) override {}
+   void serializeFineToCoarse( Block * const, const BlockDataID &, mpi::SendBuffer & ) override {}
 
-   T * deserialize( IBlock * const block ) { return this->initialize( block ); }
-   T * deserializeCoarseToFine( Block * const block ) { return this->initialize( block ); }
-   T * deserializeFineToCoarse( Block * const block ) { return this->initialize( block ); }
+   T * deserialize( IBlock * const block ) override { return this->initialize( block ); }
+   T * deserializeCoarseToFine( Block * const block ) override { return this->initialize( block ); }
+   T * deserializeFineToCoarse( Block * const block ) override { return this->initialize( block ); }
 
-   void deserialize( IBlock * const, const BlockDataID &, mpi::RecvBuffer & ) {}
-   void deserializeCoarseToFine( Block * const, const BlockDataID &, mpi::RecvBuffer & ) {}
-   void deserializeFineToCoarse( Block * const, const BlockDataID &, mpi::RecvBuffer &, const uint_t ) {}
+   void deserialize( IBlock * const, const BlockDataID &, mpi::RecvBuffer & ) override {}
+   void deserializeCoarseToFine( Block * const, const BlockDataID &, mpi::RecvBuffer & ) override {}
+   void deserializeFineToCoarse( Block * const, const BlockDataID &, mpi::RecvBuffer &, const uint_t ) override {}
 };
 
 
@@ -81,9 +81,9 @@ template< typename T >
 class AlwaysCreateBlockDataHandling : public AlwaysInitializeBlockDataHandling<T>
 {
 public:
-   ~AlwaysCreateBlockDataHandling() {}
+   ~AlwaysCreateBlockDataHandling() override = default;
 
-   T * initialize( IBlock * const /*block*/ ) {return new T();}
+   T * initialize( IBlock * const /*block*/ ) override {return new T();}
 };
 
 
@@ -97,7 +97,7 @@ class BlockDataHandlingWrapper : public domain_decomposition::internal::BlockDat
 public:
    typedef domain_decomposition::internal::BlockData BlockData;
 
-   virtual ~BlockDataHandlingWrapper() {}
+   ~BlockDataHandlingWrapper() override = default;
    
    virtual void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child ) = 0;
    virtual void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) = 0;
@@ -118,67 +118,67 @@ public:
    typedef domain_decomposition::internal::BlockData BlockData;
 
    BlockDataHandlingHelper( const shared_ptr< BlockDataHandling<T> > & dataHandling ) : dataHandling_( dataHandling ) {}
-   ~BlockDataHandlingHelper() {}
+   ~BlockDataHandlingHelper() override = default;
    
-   BlockData * initialize( IBlock * const block )
+   BlockData * initialize( IBlock * const block ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       T * ptr = dataHandling_->initialize( block );
-      return ptr ? new BlockData( ptr ) : NULL;
+      return ptr ? new BlockData( ptr ) : nullptr;
    }
    
-   void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer )
+   void serialize( IBlock * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       dataHandling_->serialize( block, id, buffer );
    }
    
-   void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child )
+   void serializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer, const uint_t child ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       dataHandling_->serializeCoarseToFine( block, id, buffer, child );
    }
    
-   void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer )
+   void serializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::SendBuffer & buffer ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       dataHandling_->serializeFineToCoarse( block, id, buffer );
    }
    
-   BlockData * deserialize( IBlock * const block )
+   BlockData * deserialize( IBlock * const block ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       T * ptr = dataHandling_->deserialize( block );
-      return ptr ? new BlockData( ptr ) : NULL;
+      return ptr ? new BlockData( ptr ) : nullptr;
    }
    
-   BlockData * deserializeCoarseToFine( Block * const block )
+   BlockData * deserializeCoarseToFine( Block * const block ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       T * ptr = dataHandling_->deserializeCoarseToFine( block );
-      return ptr ? new BlockData( ptr ) : NULL;
+      return ptr ? new BlockData( ptr ) : nullptr;
    }
    
-   BlockData * deserializeFineToCoarse( Block * const block )
+   BlockData * deserializeFineToCoarse( Block * const block ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       T * ptr = dataHandling_->deserializeFineToCoarse( block );
-      return ptr ? new BlockData( ptr ) : NULL;
+      return ptr ? new BlockData( ptr ) : nullptr;
    }
    
-   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer )
+   void deserialize( IBlock * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       dataHandling_->deserialize( block, id, buffer );
    }
    
-   void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer )
+   void deserializeCoarseToFine( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       dataHandling_->deserializeCoarseToFine( block, id, buffer );
    }   
    
-   void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child )
+   void deserializeFineToCoarse( Block * const block, const BlockDataID & id, mpi::RecvBuffer & buffer, const uint_t child ) override
    {
       WALBERLA_ASSERT_NOT_NULLPTR( block );
       dataHandling_->deserializeFineToCoarse( block, id, buffer, child );

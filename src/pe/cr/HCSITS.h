@@ -117,22 +117,22 @@ public:
                                                         domain_decomposition::BlockDataID   storageID,
                                                         domain_decomposition::BlockDataID   ccdID,
                                                         domain_decomposition::BlockDataID   fcdID,
-                                                        WcTimingTree* tt = NULL );
+                                                        WcTimingTree* tt = nullptr );
    //@}
    //**********************************************************************************************
    //**Destructor**********************************************************************************
    /*!\name Destructor */
    //@{
-   ~HardContactSemiImplicitTimesteppingSolvers();
+   ~HardContactSemiImplicitTimesteppingSolvers() override;
    //@}
    //**********************************************************************************************
 
    //**Get functions*******************************************************************************
    /*!\name Get functions */
    //@{
-   virtual inline real_t            getMaximumPenetration()        const override;
-   virtual inline size_t            getNumberOfContacts()          const override;
-   virtual inline size_t            getNumberOfContactsTreated()   const override;
+   inline real_t            getMaximumPenetration()        const override;
+   inline size_t            getNumberOfContacts()          const override;
+   inline size_t            getNumberOfContactsTreated()   const override;
    inline const std::map<IBlockID::IDType, ContactCache> getContactCache() const { return blockToContactCache_; }
    inline real_t                    getSpeedLimitFactor() const;
    inline size_t                    getMaxIterations() const { return maxIterations_; }
