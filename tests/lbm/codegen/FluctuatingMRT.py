@@ -44,6 +44,7 @@ with CodeGeneration() as ctx:
         fluctuating={
             'temperature': temperature,
             'block_offsets': 'walberla',
+            'rng_node': ps.rng.PhiloxTwoDoubles if ctx.double_accuracy else ps.rng.PhiloxFourFloats,
         },
         optimization={'cse_global': True}
     )
