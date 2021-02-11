@@ -84,12 +84,9 @@ waLBerla_generate_target_from_python(NAME LbCodeGenerationExampleGenerated
       LbCodeGenerationExample_UBB.cpp LbCodeGenerationExample_UBB.h )
 waLBerla_compile_test( FILES codegen/LbCodeGenerationExample.cpp DEPENDS LbCodeGenerationExampleGenerated)
 
-# FluctuatingMRT test does not work with WALBERLA_OPTIMIZE_FOR_LOCALHOST since the random number generator is not implemented with SIMD
-if ( NOT WALBERLA_OPTIMIZE_FOR_LOCALHOST )
 waLBerla_generate_target_from_python(NAME FluctuatingMRTGenerated FILE codegen/FluctuatingMRT.py
                               OUT_FILES FluctuatingMRT_LatticeModel.cpp FluctuatingMRT_LatticeModel.h )
 waLBerla_compile_test( FILES codegen/FluctuatingMRT.cpp DEPENDS FluctuatingMRTGenerated)
-endif()
 
 waLBerla_generate_target_from_python(NAME FieldLayoutAndVectorizationTestGenerated FILE codegen/FieldLayoutAndVectorizationTest.py
                                      OUT_FILES FieldLayoutAndVectorizationTest_FZYX_Vec_LatticeModel.cpp FieldLayoutAndVectorizationTest_FZYX_Vec_LatticeModel.h
