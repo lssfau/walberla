@@ -34,7 +34,7 @@
 namespace walberla {
 namespace mesa_pd {
 namespace kernel {
-namespace VBondModel {
+namespace cnt {
 
 /**
  * Repulsive wall interaction kernel.
@@ -107,7 +107,7 @@ inline void WallContact::operator()(const size_t p_idx,
    addForceAtomic( p_idx, ac, Vec3(0_r, 0_r, F_) );
 }
 
-} //namespace VBondModel
+} //namespace cnt
 } //namespace kernel
 } //namespace mesa_pd
 } //namespace walberla

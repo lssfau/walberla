@@ -23,7 +23,7 @@
 #include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>
 
-#include <mesa_pd/kernel/VBondModel/ViscousDamping.h>
+#include <mesa_pd/kernel/cnt/ViscousDamping.h>
 
 #include <core/Environment.h>
 #include <core/logging/Logging.h>
@@ -54,7 +54,7 @@ int main( int argc, char ** argv )
    data::ParticleAccessor ac(ps);
 
    //init kernels
-   kernel::VBondModel::ViscousDamping damping(0.2_r,0.5_r);
+   kernel::cnt::ViscousDamping damping(0.2_r,0.5_r);
    WALBERLA_CHECK_FLOAT_EQUAL(damping.getForceDampingFactor(),
                               0.2_r);
    WALBERLA_CHECK_FLOAT_EQUAL(damping.getTorqueDampingFactor(),

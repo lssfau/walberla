@@ -34,7 +34,7 @@
 namespace walberla {
 namespace mesa_pd {
 namespace kernel {
-namespace VBondModel {
+namespace cnt {
 
 class ViscousDamping
 {
@@ -71,7 +71,7 @@ inline void ViscousDamping::operator()(const size_t p_idx1,
 
 }
 
-} //namespace VBondModel
+} //namespace cnt
 } //namespace kernel
 } //namespace mesa_pd
 } //namespace walberla
