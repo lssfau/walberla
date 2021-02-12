@@ -13,6 +13,7 @@ Dominik Bartuschat
 Ehsan Fattahi
 Felix Winterhalter
 Florian Schornbaum
+Frederik Hennig
 Grigorii Drozdov
 Helen Schottenhamml
 Igor Ostanin

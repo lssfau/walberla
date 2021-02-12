@@ -51,7 +51,11 @@ namespace {{namespace}} {
 #endif
 
 
-{{kernel|generate_definition}}
+{% for sweep_class, sweep_kernel in sweep_classes.items() %}
+
+{{sweep_kernel|generate_definition}}
+
+{% endfor %}
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
@@ -61,8 +65,10 @@ namespace {{namespace}} {
 #pragma pop
 #endif
 
+{% for sweep_class, sweep_kernel in sweep_classes.items() %}
 
-void {{class_name}}::run( IBlock * block, IndexVectors::Type type {% if target == 'gpu'%}, cudaStream_t stream {%endif%})
+
+void {{sweep_class|nested_class_method_definition_prefix}}::run( IBlock * block, IndexVectors::Type type {% if target == 'gpu'%}, cudaStream_t stream {%endif%})
 {
     auto * indexVectors = block->getData<IndexVectors>(indexVectorID);
     int64_t indexVectorSize = int64_c( indexVectors->indexVector(type).size() );
@@ -77,25 +83,27 @@ void {{class_name}}::run( IBlock * block, IndexVectors::Type type {% if target =
 
     uint8_t * _data_indexVector = reinterpret_cast<uint8_t*>(pointer);
 
-    {{kernel|generate_block_data_to_field_extraction(['indexVector', 'indexVectorSize'])|indent(4)}}
-    {{kernel|generate_call(spatial_shape_symbols=['indexVectorSize'], stream='stream')|indent(4)}}
+    {{sweep_kernel|generate_block_data_to_field_extraction(['indexVector', 'indexVectorSize'])|indent(4)}}
+    {{sweep_kernel|generate_refs_for_kernel_parameters(prefix='', parameters_to_ignore=['indexVectorSize'], ignore_fields=True)|indent(4) }}
+    {{sweep_kernel|generate_call(spatial_shape_symbols=['indexVectorSize'], stream='stream')|indent(4)}}
 }
 
-void {{class_name}}::operator() ( IBlock * block{% if target == 'gpu'%}, cudaStream_t stream {%endif%} )
+void {{sweep_class|nested_class_method_definition_prefix}}::operator() ( IBlock * block{% if target == 'gpu'%}, cudaStream_t stream {%endif%} )
 {
     run( block, IndexVectors::ALL{% if target == 'gpu'%}, stream {%endif%});
 }
 
-void {{class_name}}::inner( IBlock * block{% if target == 'gpu'%}, cudaStream_t stream {%endif%} )
+void {{sweep_class|nested_class_method_definition_prefix}}::inner( IBlock * block{% if target == 'gpu'%}, cudaStream_t stream {%endif%} )
 {
     run( block, IndexVectors::INNER{% if target == 'gpu'%}, stream {%endif%} );
 }
 
-void {{class_name}}::outer( IBlock * block{% if target == 'gpu'%}, cudaStream_t stream {%endif%} )
+void {{sweep_class|nested_class_method_definition_prefix}}::outer( IBlock * block{% if target == 'gpu'%}, cudaStream_t stream {%endif%} )
 {
     run( block, IndexVectors::OUTER{% if target == 'gpu'%}, stream {%endif%} );
 }
 
+{% endfor %}
 
 } // namespace {{namespace}}
 } // namespace walberla

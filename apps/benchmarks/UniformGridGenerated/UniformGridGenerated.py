@@ -55,11 +55,10 @@ options_dict = {
         'relaxation_rate': omega,
     },
     'cumulant': {
+        'method': 'cumulant',
         'stencil': 'D3Q19',
         'compressible': True,
-        'method': 'mrt',
-        'cumulant': True,
-        'relaxation_rates': [0, omega, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        'relaxation_rate': omega,
     },
 }
 

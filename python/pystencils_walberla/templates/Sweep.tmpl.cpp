@@ -59,7 +59,7 @@ void {{class_name}}::operator()( IBlock * block{%if target is equalto 'gpu'%} , 
 {
     {{kernel|generate_block_data_to_field_extraction|indent(4)}}
     {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(4) }}
-    {{kernel|generate_call(stream='stream')|indent(4)}}
+    {{kernel|generate_call(ghost_layers_to_include=ghost_layers_to_include, stream='stream')|indent(4)}}
     {{kernel|generate_swaps|indent(4)}}
 }
 

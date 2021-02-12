@@ -17,5 +17,4 @@ waLBerla_add_executable(NAME multiphaseCPU
         FILES multiphase.cpp PythonExports.cpp InitializerFunctions.cpp contact.cpp CalculateNormals.cpp multiphase_codegen.py
         DEPENDS blockforest core field postprocessing lbm geometry timeloop gui PhaseFieldCodeGenCPU)
 
-
-
+set_target_properties(multiphaseCPU PROPERTIES CXX_VISIBILITY_PRESET hidden)

@@ -338,6 +338,26 @@ def generate_constructor_parameters(kernel_info, parameters_to_ignore=None):
     return ", ".join(parameter_list + varying_parameters)
 
 
+def generate_constructor_call_arguments(kernel_info, parameters_to_ignore=None):
+    if parameters_to_ignore is None:
+        parameters_to_ignore = []
+
+    varying_parameters = []
+    if hasattr(kernel_info, 'varying_parameters'):
+        varying_parameters = kernel_info.varying_parameters
+    varying_parameter_names = tuple(e[1] for e in varying_parameters)
+    parameters_to_ignore += kernel_info.temporary_fields + varying_parameter_names
+
+    parameter_list = []
+    for param in kernel_info.parameters:
+        if param.is_field_pointer and param.field_name not in parameters_to_ignore:
+            parameter_list.append("%sID" % (param.field_name, ))
+        elif not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
+            parameter_list.append(f'{param.symbol.name}_')
+    varying_parameters = ["%s_" % e for e in varying_parameter_names]
+    return ", ".join(parameter_list + varying_parameters)
+
+
 @jinja2.contextfilter
 def generate_members(ctx, kernel_info, parameters_to_ignore=(), only_fields=False):
     ast = kernel_info.ast
@@ -382,14 +402,25 @@ def generate_destructor(kernel_info, class_name):
         return temporary_constructor.format(contents=contents, class_name=class_name)
 
 
+@jinja2.contextfilter
+def nested_class_method_definition_prefix(ctx, nested_class_name):
+    outer_class = ctx['class_name']
+    if len(nested_class_name) == 0:
+        return outer_class
+    else:
+        return outer_class + '::' + nested_class_name
+
+
 def add_pystencils_filters_to_jinja_env(jinja_env):
     jinja_env.filters['generate_definition'] = generate_definition
     jinja_env.filters['generate_declaration'] = generate_declaration
     jinja_env.filters['generate_members'] = generate_members
     jinja_env.filters['generate_constructor_parameters'] = generate_constructor_parameters
     jinja_env.filters['generate_constructor_initializer_list'] = generate_constructor_initializer_list
+    jinja_env.filters['generate_constructor_call_arguments'] = generate_constructor_call_arguments
     jinja_env.filters['generate_call'] = generate_call
     jinja_env.filters['generate_block_data_to_field_extraction'] = generate_block_data_to_field_extraction
     jinja_env.filters['generate_swaps'] = generate_swaps
     jinja_env.filters['generate_refs_for_kernel_parameters'] = generate_refs_for_kernel_parameters
     jinja_env.filters['generate_destructor'] = generate_destructor
+    jinja_env.filters['nested_class_method_definition_prefix'] = nested_class_method_definition_prefix
