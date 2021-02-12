@@ -23,7 +23,7 @@
 #include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>
 
-#include <mesa_pd/kernel/VBondModel/WallContact.h>
+#include <mesa_pd/kernel/cnt/WallContact.h>
 
 #include <core/Environment.h>
 #include <core/logging/Logging.h>
@@ -50,7 +50,7 @@ int main( int argc, char ** argv )
    p.setPosition(0, Vec3(0,0,0));
 
    //init kernels
-   kernel::VBondModel::WallContact wallContact(0_r);
+   kernel::cnt::WallContact wallContact(0_r);
 
    auto calcForce = [&](const real_t zPos)
    {

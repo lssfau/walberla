@@ -93,6 +93,12 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_VBondContact )
 waLBerla_compile_test( NAME   MESA_PD_Kernel_CNT_VBondContactIntegration FILES kernel/cnt/VBondContactIntegration.test.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_VBondContactIntegration )
 
+waLBerla_compile_test( NAME   MESA_PD_Kernel_CNT_ViscousDamping FILES kernel/cnt/ViscousDamping.test.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_ViscousDamping )
+
+waLBerla_compile_test( NAME   MESA_PD_Kernel_CNT_WallContact FILES kernel/cnt/WallContact.test.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Kernel_CNT_WallContact )
+
 waLBerla_compile_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionSD FILES kernel/CoefficientOfRestitutionSD.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionSDEuler COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionSD> )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_CoefficientOfRestitutionSDVelocityVerlet COMMAND $<TARGET_FILE:MESA_PD_Kernel_CoefficientOfRestitutionSD> --useVV )
@@ -172,12 +178,6 @@ waLBerla_execute_test( NAME   MESA_PD_Kernel_SyncNextNeighborsBlockForest PROCES
 
 waLBerla_compile_test( NAME   MESA_PD_Kernel_TemperatureIntegration FILES kernel/TemperatureIntegration.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_TemperatureIntegration )
-
-waLBerla_compile_test( NAME   MESA_PD_Kernel_VBondModel_ViscousDamping FILES kernel/VBondModel/ViscousDamping.test.cpp DEPENDS core )
-waLBerla_execute_test( NAME   MESA_PD_Kernel_VBondModel_ViscousDamping )
-
-waLBerla_compile_test( NAME   MESA_PD_Kernel_VBondModel_WallContact FILES kernel/VBondModel/WallContact.test.cpp DEPENDS core )
-waLBerla_execute_test( NAME   MESA_PD_Kernel_VBondModel_WallContact )
 
 waLBerla_compile_test( NAME   MESA_PD_Kernel_VelocityVerlet FILES kernel/VelocityVerlet.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Kernel_VelocityVerlet )
