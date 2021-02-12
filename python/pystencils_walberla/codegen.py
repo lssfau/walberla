@@ -20,7 +20,7 @@ __all__ = ['generate_sweep', 'generate_pack_info', 'generate_pack_info_for_field
 
 def generate_sweep(generation_context, class_name, assignments,
                    namespace='pystencils', field_swaps=(), staggered=False, varying_parameters=(),
-                   inner_outer_split=False,
+                   inner_outer_split=False, ghost_layers_to_include=0,
                    **create_kernel_params):
     """Generates a waLBerla sweep from a pystencils representation.
 
@@ -44,6 +44,8 @@ def generate_sweep(generation_context, class_name, assignments,
                             the C++ class constructor even if the kernel does not need them.
         inner_outer_split: if True generate a sweep that supports separate iteration over inner and outer regions
                            to allow for communication hiding.
+        ghost_layers_to_include: determines how many ghost layers should be included for the Sweep.
+                                 This is relevant if a setter kernel should also set correct values to the ghost layers.
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
     create_kernel_params = default_create_kernel_parameters(generation_context, create_kernel_params)
@@ -78,6 +80,7 @@ def generate_sweep(generation_context, class_name, assignments,
             'class_name': class_name,
             'target': create_kernel_params.get("target", "cpu"),
             'headers': get_headers(ast),
+            'ghost_layers_to_include': ghost_layers_to_include
         }
         header = env.get_template("Sweep.tmpl.h").render(**jinja_context)
         source = env.get_template("Sweep.tmpl.cpp").render(**jinja_context)
@@ -93,6 +96,7 @@ def generate_sweep(generation_context, class_name, assignments,
             'target': create_kernel_params.get("target", "cpu"),
             'field': representative_field,
             'headers': get_headers(ast),
+            'ghost_layers_to_include': 0
         }
         header = env.get_template("SweepInnerOuter.tmpl.h").render(**jinja_context)
         source = env.get_template("SweepInnerOuter.tmpl.cpp").render(**jinja_context)
@@ -132,7 +136,7 @@ def generate_pack_info_from_kernel(generation_context, class_name: str, assignme
         class_name: name of the generated class
         assignments: list of assignments from the compute kernel - generates PackInfo for "pull" part only
                      i.e. the kernel is expected to only write to the center
-        kind:
+        kind: can either be pull or push
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
     assert kind in ('push', 'pull')
@@ -240,7 +244,6 @@ def generate_pack_info(generation_context, class_name: str,
         pack_kernels[direction_strings] = KernelInfo(pack_ast)
         unpack_kernels[direction_strings] = KernelInfo(unpack_ast)
         elements_per_cell[direction_strings] = len(terms)
-
     fused_kernel = create_kernel([Assignment(buffer.center, t) for t in all_accesses], **create_kernel_params)
     fused_kernel.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
@@ -332,6 +335,12 @@ class KernelInfo:
         self.field_swaps = tuple(field_swaps)
         self.varying_parameters = tuple(varying_parameters)
         self.parameters = ast.get_parameters()  # cache parameters here
+
+    def has_same_interface(self, other):
+        return self.temporary_fields == other.temporary_fields \
+            and self.field_swaps == other.field_swaps \
+            and self.varying_parameters == other.varying_parameters \
+            and self.parameters == other.parameters
 
 
 def get_vectorize_instruction_set(generation_context):

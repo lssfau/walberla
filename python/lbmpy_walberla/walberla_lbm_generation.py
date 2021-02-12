@@ -6,7 +6,6 @@ from jinja2 import Environment, PackageLoader, StrictUndefined, Template
 from sympy.tensor import IndexedBase
 
 import pystencils as ps
-# from lbmpy.creationfunctions import create_lb_update_rule, update_with_default_parameters
 from lbmpy.fieldaccess import CollideOnlyInplaceAccessor, StreamPullTwoFieldsAccessor
 from lbmpy.relaxationrates import relaxation_rate_scaling
 from lbmpy.stencils import get_stencil

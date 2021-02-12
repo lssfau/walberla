@@ -40,11 +40,13 @@ using namespace walberla;
    Field<walberla::real_t,1>,\
    Field<walberla::real_t,2>,\
    Field<walberla::real_t,3>,\
+   Field<walberla::real_t,4>,\
    Field<walberla::real_t,9>,\
    Field<walberla::real_t,15>,\
    Field<walberla::real_t,19>,\
    Field<walberla::real_t,27>,\
    Field<walberla::int8_t,1>,\
+   Field<walberla::int32_t,1>,\
    Field<walberla::int64_t,1>,\
    Field<walberla::int64_t,2>,\
    Field<walberla::int64_t,3>,\

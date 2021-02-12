@@ -1,175 +1,129 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
 //! \file TimeloopAndSweepRegister.cpp
 //! \ingroup timeloop
-//! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Markus Holzer <markus.holzer@fau.de>
 //! \brief test cases that test the registering of Sweeps at timeloop
 //
 //======================================================================================================================
 
-#include "timeloop/SweepTimeloop.h"
+#include "blockforest/Initialization.h"
+
 #include "core/DataTypes.h"
+#include "core/Environment.h"
 #include "core/debug/TestSubsystem.h"
-#include "core/logging/Logging.h"
+
+#include "field/Field.h"
+
+#include "timeloop/SweepTimeloop.h"
 
 #include <string>
 #include <vector>
 
-
-using namespace std;
 using namespace walberla;
 
+using Field_T = Field< uint_t, 1 >;
 
-class GeneralSweep
-{
-   public:
-      GeneralSweep(const string & name, vector<string> & vec)
-         : myName(name), outVec(vec)
-      {}
-
-
-      void operator() (IBlock * ){
-         outVec.push_back(myName);
-      }
-
-   private:
-      string myName;
-      vector<string> & outVec;
+auto FieldAdder = [](IBlock* const block, StructuredBlockStorage* const storage) {
+   return new Field_T(storage->getNumberOfXCells(*block), storage->getNumberOfYCells(*block),
+                      storage->getNumberOfZCells(*block), uint_t(0.0), field::fzyx,
+                      make_shared< field::AllocateAligned< uint_t, 64 > >());
 };
 
-
-class GeneralFunction
+class Sweep1
 {
-   public:
-      GeneralFunction(const string & name, vector<string> & vec)
-      : myName(name), outVec(vec)
-      {}
+ public:
+   Sweep1(BlockDataID fieldID) : fieldID_(fieldID) {}
 
-      void operator() (){
-         outVec.push_back(myName);
-      }
+   void operator()(IBlock* block)
+   {
+      auto field = block->getData< Field_T >(fieldID_);
 
-   private:
-      string myName;
-      vector<string> & outVec;
+      for (auto iter = field->begin(); iter != field->end(); ++iter)
+         *iter += 1;
+   }
+
+ private:
+   BlockDataID fieldID_;
 };
 
+class Sweep2
+{
+ public:
+   Sweep2(BlockDataID fieldID) : fieldID_(fieldID) {}
 
+   void operator()(IBlock* block)
+   {
+      auto field = block->getData< Field_T >(fieldID_);
 
-int main()
+      for (auto iter = field->begin(); iter != field->end(); ++iter)
+         *iter += 2;
+   }
+
+ private:
+   BlockDataID fieldID_;
+};
+
+int main(int argc, char** argv)
 {
    debug::enterTestMode();
+   mpi::Environment env(argc, argv);
 
-   vector<string> expectedSequence;
-   vector<string> sequence;
+   std::vector<std::string> expectedSequence;
+   std::vector<std::string> sequence;
 
-   SUID cpuSelect("CPU");
-   SUID gpuSelect("GPU");
+   SUID sweepSelect1("Sweep1");
+   SUID sweepSelect2("Sweep2");
 
-   SUID srtSelect("SRT");
-   SUID mrtSelect("MRT");
+   shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid(
+      uint_c(4), uint_c(2), uint_c(2), uint_c(10), uint_c(10), uint_c(10), real_c(1), false, false, false, false);
 
+   BlockDataID fieldID = blocks->addStructuredBlockData< Field_T >(FieldAdder, "Test Field");
 
-   //FIXME put a real test in here
-   shared_ptr<SweepTimeloop> tl = make_shared<SweepTimeloop>(shared_ptr<BlockStorage>(),100);
+   for (auto& block : *blocks)
+   {
+      if (block.getAABB().min()[0] < 20)
+         block.setState(sweepSelect1);
+      else
+         block.setState(sweepSelect2);
+   }
 
-   typedef SweepTimeloop::SweepHandle SH;
+   uint_t timesteps = 10;
+   SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
 
-   SH sweep1 =  tl->addSweep(        GeneralSweep("CPU1",sequence), cpuSelect);
-                tl->addSweep(sweep1, GeneralSweep("GPU1",sequence), gpuSelect);
+   timeloop.add() << Sweep(Sweep1(fieldID), "Sweep 1", sweepSelect1, sweepSelect2);
+   timeloop.add() << Sweep(Sweep2(fieldID), "Sweep 2", sweepSelect2, sweepSelect1);
 
-   SH sweep2 =  tl->addSweep(        GeneralSweep("CPU2",sequence), cpuSelect);
-                tl->addSweep(sweep2, GeneralSweep("GPU2",sequence), gpuSelect);
+   WcTimingPool timingPool;
 
-
-   tl->addFuncBeforeSweep(sweep1,GeneralFunction("Pre1",sequence));
-   tl->addFuncAfterSweep (sweep1,GeneralFunction("Post1",sequence));
-
-   tl->addFuncBeforeSweep(sweep2,GeneralFunction("Pre2",sequence));
-   tl->addFuncAfterSweep (sweep2,GeneralFunction("Post2",sequence));
-
-   typedef Timeloop::FctHandle FH;
-   FH preTs  = tl->addFuncBeforeTimeStep(       GeneralFunction("PreTimestepCPU",sequence),cpuSelect,srtSelect);
-               tl->addFuncBeforeTimeStep(preTs, GeneralFunction("PreTimestepGPU",sequence),gpuSelect,srtSelect);
-   FH postTs = tl->addFuncAfterTimeStep (       GeneralFunction("PostTimestepCPU",sequence),cpuSelect,mrtSelect);
-               tl->addFuncAfterTimeStep (postTs,GeneralFunction("PostTimestepGPU",sequence),gpuSelect,mrtSelect);
-
-
-   //----------  First Run - CPU Selector ---------------------------------------------
-
-   expectedSequence.push_back("PreTimestepCPU");
-   expectedSequence.push_back("Pre1");
-   expectedSequence.push_back("CPU1");
-   expectedSequence.push_back("Post1");
-   expectedSequence.push_back("Pre2");
-   expectedSequence.push_back("CPU2");
-   expectedSequence.push_back("Post2");
-   expectedSequence.push_back("PostTimestepCPU");
-
-   tl->singleStep(cpuSelect);
-
-   WALBERLA_CHECK_EQUAL(expectedSequence.size(), sequence.size());
-   WALBERLA_CHECK( equal(expectedSequence.begin(),expectedSequence.end(), sequence.begin() ) );
-
-   expectedSequence.clear();
-   sequence.clear();
-
-
-   // ------------ Second Run - GPU Selector -------------------------------------------
-
-   expectedSequence.push_back("PreTimestepGPU");
-   expectedSequence.push_back("Pre1");
-   expectedSequence.push_back("GPU1");
-   expectedSequence.push_back("Post1");
-   expectedSequence.push_back("Pre2");
-   expectedSequence.push_back("GPU2");
-   expectedSequence.push_back("Post2");
-   expectedSequence.push_back("PostTimestepGPU");
-
-   tl->singleStep(gpuSelect);
-
-   WALBERLA_CHECK_EQUAL(expectedSequence.size(), sequence.size());
-   WALBERLA_CHECK( equal(expectedSequence.begin(),expectedSequence.end(), sequence.begin() ) );
-
-   expectedSequence.clear();
-   sequence.clear();
-
-
-   // ------------ Second Run - GPU and SRT    -------------------------------------------
-
-
-   expectedSequence.push_back("Pre1");
-   expectedSequence.push_back("GPU1");
-   expectedSequence.push_back("Post1");
-   expectedSequence.push_back("Pre2");
-   expectedSequence.push_back("GPU2");
-   expectedSequence.push_back("Post2");
-   expectedSequence.push_back("PostTimestepGPU");
-
-   tl->singleStep(gpuSelect + srtSelect);
-
-   WALBERLA_CHECK_EQUAL(expectedSequence.size(), sequence.size());
-   WALBERLA_CHECK( equal(expectedSequence.begin(),expectedSequence.end(), sequence.begin() ) );
-
-   expectedSequence.clear();
-   sequence.clear();
-
-
-   return 0;
+   timeloop.run(timingPool);
+   for (auto& block : *blocks)
+   {
+      auto field = block.getData< Field_T >(fieldID);
+      if (block.getAABB().min()[0] < 20)
+      {
+         for (auto iter = field->begin(); iter != field->end(); ++iter)
+            WALBERLA_CHECK_EQUAL(*iter, timesteps)
+      }
+      else
+      {
+         for (auto iter = field->begin(); iter != field->end(); ++iter)
+            WALBERLA_CHECK_EQUAL(*iter, timesteps * 2)
+      }
+   }
+   
+   return EXIT_SUCCESS;
 }
-
-
-

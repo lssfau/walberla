@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import numpy as np
 from jinja2 import Environment, PackageLoader, StrictUndefined
 from pystencils import Field, FieldType
@@ -8,6 +9,7 @@ from pystencils.boundaries.createindexlist import (
 from pystencils.data_types import TypedSymbol, create_type
 from pystencils_walberla.codegen import KernelInfo, default_create_kernel_parameters
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
+from pystencils_walberla.additional_data_handler import AdditionalDataHandler
 
 
 def generate_boundary(generation_context,
@@ -20,7 +22,12 @@ def generate_boundary(generation_context,
                       kernel_creation_function=None,
                       target='cpu',
                       namespace='pystencils',
+                      additional_data_handler=None,
                       **create_kernel_params):
+
+    if boundary_object.additional_data and additional_data_handler is None:
+        raise ValueError("Boundary object has additional data but you have not provided an AdditionalDataHandler.")
+
     struct_name = "IndexInfo"
     boundary_object.name = class_name
     dim = len(neighbor_stencil[0])
@@ -44,36 +51,44 @@ def generate_boundary(generation_context,
     if not kernel_creation_function:
         kernel_creation_function = create_boundary_kernel
 
-    kernel = kernel_creation_function(field, index_field, neighbor_stencil, boundary_object, **create_kernel_params)
-    kernel.function_name = "boundary_" + boundary_object.name
-    kernel.assumed_inner_stride_one = False
-
-    # waLBerla is a 3D framework. Therefore, a zero for the z index has to be added if we work in 2D
-    if dim == 2:
-        stencil = ()
-        for d in neighbor_stencil:
-            d = d + (0,)
-            stencil = stencil + (d,)
+    kernels = kernel_creation_function(field, index_field, neighbor_stencil, boundary_object, **create_kernel_params)
+    if isinstance(kernels, dict):
+        sweep_to_kernel_info_dict = OrderedDict()
+        dummy_kernel_info = None
+        for sweep_class, sweep_kernel in kernels.items():
+            sweep_kernel.function_name = "boundary_" + boundary_object.name + '_' + sweep_class
+            sweep_kernel.assumed_inner_stride_one = False
+            kernel_info = KernelInfo(sweep_kernel)
+            sweep_to_kernel_info_dict[sweep_class] = kernel_info
+            if dummy_kernel_info is None:
+                dummy_kernel_info = kernel_info
+            # elif not dummy_kernel_info.has_same_interface(kernel_info):
+            #     raise ValueError("Multiple boundary sweeps must have the same kernel interface!")
+        multi_sweep = True
     else:
-        stencil = neighbor_stencil
+        multi_sweep = False
+        kernel = kernels
+        kernel.function_name = "boundary_" + boundary_object.name
+        kernel.assumed_inner_stride_one = False
+        kernel_info = KernelInfo(kernel)
+        sweep_to_kernel_info_dict = {'': kernel_info}
+        dummy_kernel_info = kernel_info
 
-    stencil_info = [(i, d, ", ".join([str(e) for e in d])) for i, d in enumerate(stencil)]
-    inv_dirs = []
-    for direction in stencil:
-        inverse_dir = tuple([-i for i in direction])
-        inv_dirs.append(stencil.index(inverse_dir))
+    if additional_data_handler is None:
+        additional_data_handler = AdditionalDataHandler(stencil=neighbor_stencil)
 
     context = {
         'class_name': boundary_object.name,
+        'sweep_classes': sweep_to_kernel_info_dict,
+        'multi_sweep': multi_sweep,
+        'dummy_kernel_info': dummy_kernel_info,
         'StructName': struct_name,
         'StructDeclaration': struct_from_numpy_dtype(struct_name, index_struct_dtype),
-        'kernel': KernelInfo(kernel),
-        'stencil_info': stencil_info,
-        'inverse_directions': inv_dirs,
         'dim': dim,
         'target': target,
         'namespace': namespace,
-        'inner_or_boundary': boundary_object.inner_or_boundary
+        'inner_or_boundary': boundary_object.inner_or_boundary,
+        'additional_data_handler': additional_data_handler
     }
 
     env = Environment(loader=PackageLoader('pystencils_walberla'), undefined=StrictUndefined)
@@ -83,8 +98,8 @@ def generate_boundary(generation_context,
     source = env.get_template('Boundary.tmpl.cpp').render(**context)
 
     source_extension = "cpp" if target == "cpu" else "cu"
-    generation_context.write_file("{}.h".format(class_name), header)
-    generation_context.write_file("{}.{}".format(class_name, source_extension), source)
+    generation_context.write_file(f"{class_name}.h", header)
+    generation_context.write_file(f"{class_name}.{source_extension}", source)
 
 
 def generate_staggered_boundary(generation_context, class_name, boundary_object,
@@ -102,23 +117,23 @@ def generate_staggered_flux_boundary(generation_context, class_name, boundary_ob
 
 
 def struct_from_numpy_dtype(struct_name, numpy_dtype):
-    result = "struct %s { \n" % (struct_name,)
+    result = f"struct {struct_name} {{ \n"
 
     equality_compare = []
     constructor_params = []
     constructor_initializer_list = []
     for name, (sub_type, offset) in numpy_dtype.fields.items():
         pystencils_type = create_type(sub_type)
-        result += "    %s %s;\n" % (pystencils_type, name)
+        result += f"    {pystencils_type} {name};\n"
         if name in boundary_index_array_coordinate_names or name == direction_member_name:
-            constructor_params.append("%s %s_" % (pystencils_type, name))
-            constructor_initializer_list.append("%s(%s_)" % (name, name))
+            constructor_params.append(f"{pystencils_type} {name}_")
+            constructor_initializer_list.append(f"{name}({name}_)")
         else:
-            constructor_initializer_list.append("%s()" % name)
+            constructor_initializer_list.append(f"{name}()")
         if pystencils_type.is_float():
-            equality_compare.append("floatIsEqual(%s, o.%s)" % (name, name))
+            equality_compare.append(f"floatIsEqual({name}, o.{name})")
         else:
-            equality_compare.append("%s == o.%s" % (name, name))
+            equality_compare.append(f"{name} == o.{name}")
 
     result += "    %s(%s) : %s {}\n" % \
               (struct_name, ", ".join(constructor_params), ", ".join(constructor_initializer_list))
