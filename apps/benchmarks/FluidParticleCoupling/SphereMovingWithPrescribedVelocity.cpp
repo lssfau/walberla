@@ -129,7 +129,8 @@ const uint_t FieldGhostLayers = 1;
 
 const FlagUID Fluid_Flag( "fluid" );
 const FlagUID NoSlip_Flag( "no slip" );
-const FlagUID MO_Flag( "moving obstacle" );
+const FlagUID MO_SBB_Flag( "moving obstacle sbb" );
+const FlagUID MO_CLI_Flag( "moving obstacle cli" );
 const FlagUID FormerMO_Flag( "former moving obstacle" );
 
 /////////////////////////////////////
@@ -141,8 +142,9 @@ class MyBoundaryHandling
 public:
 
    using NoSlip_T = lbm::NoSlip< LatticeModel_T, flag_t >;
-   using MO_T = lbm_mesapd_coupling::CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >;
-   using Type = BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T, MO_T >;
+   using MO_SBB_T = lbm_mesapd_coupling::SimpleBB< LatticeModel_T, FlagField_T, ParticleAccessor_T >;
+   using MO_CLI_T = lbm_mesapd_coupling::CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >;
+   using Type = BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T, MO_SBB_T, MO_CLI_T >;
 
    MyBoundaryHandling( const BlockDataID & flagFieldID, const BlockDataID & pdfFieldID,
                        const BlockDataID & particleFieldID, const shared_ptr<ParticleAccessor_T>& ac) :
@@ -161,7 +163,8 @@ public:
 
       Type * handling = new Type( "moving obstacle boundary handling", flagField, fluid,
                                   NoSlip_T( "NoSlip", NoSlip_Flag, pdfField ),
-                                  MO_T( "MO", MO_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
+                                  MO_SBB_T( "SBB", MO_SBB_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block ),
+                                  MO_CLI_T( "CLI", MO_CLI_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block )  );
 
       handling->fillWithDomain( FieldGhostLayers );
 
@@ -192,7 +195,7 @@ public:
          const std::string & fileName, bool fileIO,
          real_t diameter, real_t velocity, real_t forceMag) :
       ac_( ac ), sphereUid_( sphereUid ), fileName_( fileName ), fileIO_(fileIO),
-      diameter_( diameter ), velocity_(velocity), forceMag_( forceMag ),
+      diameter_( diameter ), velocityRef_(velocity), forceMag_( forceMag ),
       position_( real_t(0) )
    {
       if ( fileIO_ )
@@ -201,7 +204,7 @@ public:
          {
             std::ofstream file;
             file.open( fileName_.c_str() );
-            file << "#\t t\t posZ\t posZ/D\t fZ\t fZ/fSt\n";
+            file << "#\t t\t posZ\t posZ/D\t velZ\t velZ/velRef\t fZ\t fZ/fSt\n";
             file.close();
          }
       }
@@ -210,6 +213,7 @@ public:
    void operator()()
    {
       real_t pos(real_t(0));
+      real_t vel(real_t(0));
       real_t hydForce(real_t(0));
 
       size_t idx = ac_->uidToIdx(sphereUid_);
@@ -218,6 +222,7 @@ public:
          if(!mesa_pd::data::particle_flags::isSet( ac_->getFlags(idx), mesa_pd::data::particle_flags::GHOST))
          {
             pos = ac_->getPosition(idx)[2];
+            vel = ac_->getLinearVelocity(idx)[2];
             hydForce = ac_->getHydrodynamicForce(idx)[2];
          }
       }
@@ -225,10 +230,12 @@ public:
       WALBERLA_MPI_SECTION()
       {
          mpi::allReduceInplace( pos, mpi::SUM );
+         mpi::allReduceInplace( vel, mpi::SUM );
          mpi::allReduceInplace( hydForce, mpi::SUM );
       }
 
       position_ = pos;
+      velocity_ = vel;
       hydForce_ = hydForce;
 
    }
@@ -238,7 +245,12 @@ public:
       return position_;
    }
 
-   void writeToFile( const uint_t timestep, real_t density1, real_t density2, real_t totalMass )
+   real_t getForce() const
+   {
+      return hydForce_;
+   }
+
+   void writeToFile( const uint_t timestep, real_t density1, real_t density2, real_t totalMass, uint_t countSolidCells, uint_t countFluidSolidLinks, Vector3<real_t> fluidVelocity )
    {
       WALBERLA_ROOT_SECTION()
       {
@@ -249,10 +261,13 @@ public:
          auto normalizedHydForce = hydForce_ / std::abs(forceMag_);
 
          file << std::setprecision(10)
-              << timestep << "\t" << real_c(timestep) / (diameter_ / velocity_) << "\t"
+              << timestep << "\t" << real_c(timestep) / (diameter_ / velocityRef_) << "\t"
               << "\t" << position_ << "\t" << scaledPosition
+              << "\t" << velocity_ << "\t" << velocity_ / velocityRef_
               << "\t" << hydForce_ << "\t" << normalizedHydForce
               << "\t" << density1 << "\t" << density2 << "\t" << totalMass
+              << "\t" << countSolidCells << "\t" << countFluidSolidLinks
+              << "\t" << fluidVelocity[0] << "\t" << fluidVelocity[1] << "\t" << fluidVelocity[2]
               << "\n";
          file.close();
       }
@@ -263,19 +278,20 @@ private:
    const walberla::id_t sphereUid_;
    std::string fileName_;
    bool fileIO_;
-   real_t diameter_, velocity_, forceMag_;
+   real_t diameter_, velocityRef_, forceMag_;
 
-   real_t position_, hydForce_;
+   real_t position_, velocity_, hydForce_;
 };
 
 
-void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, const shared_ptr<mesa_pd::data::ShapeStorage> & ss, const math::AABB & simulationDomain)
+void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, const shared_ptr<mesa_pd::data::ShapeStorage> & ss, const math::AABB & simulationDomain, real_t velocity = real_t(0))
 {
    mesa_pd::data::Particle p2 = *ps->create(true);
    p2.setPosition(simulationDomain.minCorner());
    p2.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(1,0,0) ));
    p2.setOwner(mpi::MPIManager::instance()->rank());
    p2.setType(0);
+   p2.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),velocity));
    mesa_pd::data::particle_flags::set(p2.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
    mesa_pd::data::particle_flags::set(p2.getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
 
@@ -284,6 +300,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
    p3.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(-1,0,0) ));
    p3.setOwner(mpi::MPIManager::instance()->rank());
    p3.setType(0);
+   p3.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),velocity));
    mesa_pd::data::particle_flags::set(p3.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
    mesa_pd::data::particle_flags::set(p3.getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
 
@@ -292,6 +309,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
    p4.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(0,1,0) ));
    p4.setOwner(mpi::MPIManager::instance()->rank());
    p4.setType(0);
+   p4.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),velocity));
    mesa_pd::data::particle_flags::set(p4.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
    mesa_pd::data::particle_flags::set(p4.getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
 
@@ -300,6 +318,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
    p5.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(0,-1,0) ));
    p5.setOwner(mpi::MPIManager::instance()->rank());
    p5.setType(0);
+   p5.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),velocity));
    mesa_pd::data::particle_flags::set(p5.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
    mesa_pd::data::particle_flags::set(p5.getFlagsRef(), mesa_pd::data::particle_flags::FIXED);
 
@@ -324,6 +343,27 @@ real_t getDensityAtPosition(const shared_ptr<StructuredBlockStorage> & blocks, B
    return density;
 }
 
+template< typename VelocityInterpolator_T>
+Vector3<real_t> getVelocityAtPosition(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID velocityInterpolatorID, Vector3<real_t> position)
+{
+
+   Vector3<real_t> vel(real_t(0));
+   for( auto & block: *blocks)
+   {
+      if(block.getAABB().contains(position))
+      {
+         auto velocityInterpolator = block.getData<VelocityInterpolator_T>(velocityInterpolatorID);
+         velocityInterpolator->get(position, &vel);
+      }
+
+   }
+   mpi::reduceInplace(vel[0], mpi::SUM);
+   mpi::reduceInplace(vel[1], mpi::SUM);
+   mpi::reduceInplace(vel[2], mpi::SUM);
+
+   return vel;
+}
+
 template< typename BoundaryHandling_T>
 real_t getAverageDensityInSystem(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID pdfFieldID, BlockDataID boundaryHandlingID)
 {
@@ -346,6 +386,41 @@ real_t getAverageDensityInSystem(const shared_ptr<StructuredBlockStorage> & bloc
    mpi::reduceInplace(count, mpi::SUM);
 
    return totalMass/real_c(count);
+}
+
+template< typename BoundaryHandling_T>
+void evaluateMapping(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID boundaryHandlingID,
+                     uint_t & countSolidCells, uint_t & countFluidSolidLinks)
+{
+   countSolidCells = uint_t(0);
+   countFluidSolidLinks = uint_t(0);
+   for( auto & block: *blocks)
+   {
+      auto boundaryHandling = block.getData<BoundaryHandling_T>(boundaryHandlingID);
+      auto flagField = boundaryHandling->getFlagField();
+      //auto innerDomain = flagField->xyzSize();
+      WALBERLA_FOR_ALL_CELLS_XYZ(flagField,
+                                 if(!boundaryHandling->isDomain(x,y,z) )
+                                 {
+                                    ++countSolidCells;
+                                 } else
+                                 {
+                                    for( auto neighborDir = stencil::D3Q27::beginNoCenter(); neighborDir != stencil::D3Q27::end(); ++neighborDir )
+                                    {
+                                       Cell neighbor( x + neighborDir.cx(), y + neighborDir.cy(), z + neighborDir.cz() );
+
+                                       // check if neighbor cell is a solid cell
+                                       if( !boundaryHandling->isDomain( neighbor ) )
+                                       {
+                                          ++countFluidSolidLinks;
+                                       }
+                                    }
+                                 }
+      );
+   }
+
+   mpi::reduceInplace(countSolidCells, mpi::SUM);
+   mpi::reduceInplace(countFluidSolidLinks, mpi::SUM);
 }
 
 //////////
@@ -389,13 +464,15 @@ int main( int argc, char **argv )
    std::string baseFolder = "vtk_out_MovingWithPrescribedVelocity";
    std::string fileNameEnding = "";
    bool logDensity = true;
+   bool logMapping= true;
+   bool logFluidVelocity = true;
    bool vtkOutputAtEnd = true;
 
    //numerical parameters
-   bool averageForceTorqueOverTwoTimeSteps = true;
    bool conserveMomentum = false;
-   uint_t numRPDSubCycles = uint_t(1);
    std::string reconstructorType = "Grad"; // Eq, EAN, Ext, Grad
+   std::string forceTorqueAveragingType = "runningAvg"; // noAvg, runningAvg, twoLBM,
+   std::string boundaryCondition = "CLI"; // SBB, CLI
    real_t bulkViscRateFactor = real_t(1);
    real_t magicNumber = real_t(0.1875);
    bool useOmegaBulkAdaption = false;
@@ -409,21 +486,27 @@ int main( int argc, char **argv )
    real_t velocity = real_t(0.02);
    real_t Re = real_t(164);
    real_t diameter = real_t(20);
-   real_t numberOfPasses = real_t(3);
+   real_t numberOfTimeStepsNonDim = real_t(20);
    real_t domainWidthNonDim = real_t(4);
    real_t domainHeightNonDim = real_t(8);
+   real_t accelerationFactor = real_t(3);
    bool usePeriodicSetup = false;
    bool artificiallyAccelerateSphere = false;
+   bool fixedSphere = false;
+
+   bool useGalileanInvariantSetup = false;
 
    for( int i = 1; i < argc; ++i )
    {
       if( std::strcmp( argv[i], "--funcTest" )             == 0 ) { funcTest = true; continue; }
       if( std::strcmp( argv[i], "--noLogging" )            == 0 ) { fileIO = false; continue; }
       if( std::strcmp( argv[i], "--noVtkOutputAtEnd" )     == 0 ) { vtkOutputAtEnd = false; continue; }
-      if( std::strcmp( argv[i], "--logDensity" )           == 0 ) { logDensity = true; continue; }
+      if( std::strcmp( argv[i], "--noLogDensity" )         == 0 ) { logDensity = false; continue; }
+      if( std::strcmp( argv[i], "--noLogMapping" )         == 0 ) { logMapping = false; continue; }
+      if( std::strcmp( argv[i], "--noLogFluidVelocity" )   == 0 ) { logFluidVelocity = false; continue; }
       if( std::strcmp( argv[i], "--vtkIOFreq" )            == 0 ) { vtkIOFreq = uint_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--numRPDSubCycles" )      == 0 ) { numRPDSubCycles = uint_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--noForceAveraging" )     == 0 ) { averageForceTorqueOverTwoTimeSteps = false; continue; }
+      if( std::strcmp( argv[i], "--averagingType" )        == 0 ) { forceTorqueAveragingType = argv[++i]; continue; }
+      if( std::strcmp( argv[i], "--boundaryCondition" )    == 0 ) { boundaryCondition = argv[++i]; continue; }
       if( std::strcmp( argv[i], "--conserveMomentum" )     == 0 ) { conserveMomentum = true; continue; }
       if( std::strcmp( argv[i], "--baseFolder" )           == 0 ) { baseFolder = argv[++i]; continue; }
       if( std::strcmp( argv[i], "--reconstructorType" )    == 0 ) { reconstructorType = argv[++i]; continue; }
@@ -437,14 +520,22 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--fileName" )             == 0 ) { fileNameEnding = argv[++i]; continue; }
       if( std::strcmp( argv[i], "--useOmegaBulkAdaption" ) == 0 ) { useOmegaBulkAdaption = true; continue; }
       if( std::strcmp( argv[i], "--adaptionLayerSize" )    == 0 ) { adaptionLayerSize = real_c(std::atof( argv[++i] )); continue; }
-      if( std::strcmp( argv[i], "--numberOfPasses" )       == 0 ) { numberOfPasses = real_c(std::atof( argv[++i] )); continue; }
+      if( std::strcmp( argv[i], "--numberOfTimeStepsNonDim" )       == 0 ) { numberOfTimeStepsNonDim = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--initialSpherePosition" )== 0 ) { initialSpherePosition = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--usePeriodicSetup" )     == 0 ) { usePeriodicSetup = true; continue; }
       if( std::strcmp( argv[i], "--artificiallyAccelerateSphere" )     == 0 ) { artificiallyAccelerateSphere = true; continue; }
+      if( std::strcmp( argv[i], "--accelerationFactor" )   == 0 ) { accelerationFactor = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--blocksInX" )            == 0 ) { blocksInX = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--blocksInY" )            == 0 ) { blocksInY = uint_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--blocksInZ" )            == 0 ) { blocksInZ = uint_c( std::atof( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--useGalileanInvariantSetup" ) == 0 ) { useGalileanInvariantSetup = true; continue; }
+      if( std::strcmp( argv[i], "--fixedSphere" ) == 0 ) { fixedSphere = true; continue; }
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
+   }
+
+   if(forceTorqueAveragingType != "noAvg" && forceTorqueAveragingType != "runningAvg" && forceTorqueAveragingType != "twoLBM")
+   {
+      WALBERLA_ABORT("Averaging type not implemented: " << forceTorqueAveragingType);
    }
 
    if( funcTest )
@@ -468,23 +559,32 @@ int main( int argc, char **argv )
    const real_t omega = lbm::collision_model::omegaFromViscosity(viscosity);
    const real_t relaxationTime = real_t(1) / omega;
    const real_t omegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, bulkViscRateFactor);
+   const real_t tref = diameter / velocity;
 
    const Vector3<uint_t> domainSize( uint_c(domainWidthNonDim * diameter), uint_c(domainWidthNonDim * diameter), uint_c(domainHeightNonDim * diameter) );
 
    WALBERLA_LOG_INFO_ON_ROOT("Setup (in simulation, i.e. lattice, units):");
    WALBERLA_LOG_INFO_ON_ROOT(" - domain size = " << domainSize);
    WALBERLA_LOG_INFO_ON_ROOT(" - Re = " << Re);
+   WALBERLA_LOG_INFO_ON_ROOT(" - tref = " << tref);
+   WALBERLA_LOG_INFO_ON_ROOT(" - acceleration factor (a_acc) = " << accelerationFactor);
    WALBERLA_LOG_INFO_ON_ROOT(" - sphere: diameter = " << diameter << ", constant velocity = " << velocity );
-   WALBERLA_LOG_INFO_ON_ROOT(" - relaxation time (tau) = " << relaxationTime << ", omega = " << omega << " kin. visc = " << viscosity );
+   WALBERLA_LOG_INFO_ON_ROOT(" - relaxation time (tau) = " << relaxationTime << ", omega = " << omega << ", kin. visc = " << viscosity );
    WALBERLA_LOG_INFO_ON_ROOT(" - magic number " << magicNumber);
    WALBERLA_LOG_INFO_ON_ROOT(" - omegaBulk = " << omegaBulk << ", bulk visc. = " << lbm_mesapd_coupling::bulkViscosityFromOmegaBulk(omegaBulk) << " (bvrf " << bulkViscRateFactor << ")");
    WALBERLA_LOG_INFO_ON_ROOT(" - use omega bulk adaption = " << useOmegaBulkAdaption << " (adaption layer size = " << adaptionLayerSize << ")");
    WALBERLA_LOG_INFO_ON_ROOT(" - reconstructor type = " << reconstructorType );
 
-   if( vtkIOFreq > 0 )
-   {
-      WALBERLA_LOG_INFO_ON_ROOT(" - writing vtk files to folder \"" << baseFolder << "\" with frequency " << vtkIOFreq);
+   if( vtkIOFreq > 0 ) WALBERLA_LOG_INFO_ON_ROOT(" - writing vtk files to folder \"" << baseFolder << "\" with frequency " << vtkIOFreq);
+   if( useGalileanInvariantSetup ) {
+      WALBERLA_LOG_INFO_ON_ROOT("ATTENTION: Using Galilean Invariant Setup = Moving side walls, fixed sphere");
+      artificiallyAccelerateSphere = false;
+      usePeriodicSetup = false;
+      conserveMomentum = false;
+      fixedSphere = true;
+
    }
+
 
    ///////////////////////////
    // BLOCK STRUCTURE SETUP //
@@ -530,6 +630,7 @@ int main( int argc, char **argv )
 
    // bounding planes
    if(!usePeriodicSetup) createPlaneSetup(ps,ss,blocks->getDomain());
+   if(useGalileanInvariantSetup) createPlaneSetup(ps,ss,blocks->getDomain(),-velocity);
 
    // create sphere and store Uid
    Vector3<real_t> initialPosition( real_t(0.5) * real_c(domainSize[0]), real_t(0.5) * real_c(domainSize[1]), initialSpherePosition * real_c(domainSize[2]));
@@ -544,7 +645,7 @@ int main( int argc, char **argv )
       p.setInteractionRadius(diameter * real_t(0.5));
       p.setOwner(mpi::MPIManager::instance()->rank());
       p.setShapeID(sphereShape);
-      p.setLinearVelocity(Vector3<real_t>(0.0,0.0,velocity));
+      if(!useGalileanInvariantSetup && !artificiallyAccelerateSphere) p.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),velocity));
       sphereUid = p.getUid();
    }
    mpi::allReduceInplace(sphereUid, mpi::SUM);
@@ -569,7 +670,8 @@ int main( int argc, char **argv )
 
    // add PDF field
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage< LatticeModel_T >( blocks, "pdf field (fzyx)", latticeModel,
-                                                                         Vector3< real_t >( real_t(0) ), real_t(1),
+                                                                         useGalileanInvariantSetup ? Vector3<real_t>(real_t(0), real_t(0), -velocity) : Vector3< real_t >( real_t(0)),
+                                                                         real_t(1),
                                                                          uint_t(1), field::fzyx );
    // add flag field
    BlockDataID flagFieldID = field::addFlagFieldToStorage<FlagField_T>( blocks, "flag field" );
@@ -584,9 +686,13 @@ int main( int argc, char **argv )
    // interpolation functionality
    using DensityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::Density;
    BlockDataID densityAdaptorID = field::addFieldAdaptor<  DensityAdaptor_T >( blocks, pdfFieldID, "density adaptor" );
+   using VelocityAdaptor_T = typename lbm::Adaptor< LatticeModel_T >::VelocityVector;
+   BlockDataID velocityAdaptorID = field::addFieldAdaptor<  VelocityAdaptor_T >( blocks, pdfFieldID, "velocity adaptor" );
 
    using DensityInterpolator_T = typename field::TrilinearFieldInterpolator<DensityAdaptor_T, FlagField_T>;
    BlockDataID densityInterpolatorID = field::addFieldInterpolator< DensityInterpolator_T, FlagField_T >( blocks, densityAdaptorID, flagFieldID, Fluid_Flag );
+   using VelocityInterpolator_T = typename field::TrilinearFieldInterpolator<VelocityAdaptor_T, FlagField_T>;
+   BlockDataID velocityInterpolatorID = field::addFieldInterpolator< VelocityInterpolator_T, FlagField_T >( blocks, velocityAdaptorID, flagFieldID, Fluid_Flag );
 
    // set up RPD functionality
    std::function<void(void)> syncCall = [ps,rpdDomain, adaptionLayerSize ](){
@@ -597,7 +703,6 @@ int main( int argc, char **argv )
 
    syncCall();
 
-   mesa_pd::kernel::ExplicitEuler explEulerIntegrator(real_t(1)/real_t(numRPDSubCycles));
 
    mesa_pd::mpi::ReduceProperty reduceProperty;
 
@@ -615,10 +720,18 @@ int main( int argc, char **argv )
    ///////////////
 
    // map planes into the LBM simulation -> act as no-slip boundaries
-   ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, particleMappingKernel, *accessor, NoSlip_Flag);
+   //ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, particleMappingKernel, *accessor, NoSlip_Flag);
 
    // map particles into the LBM simulation
-   ps->forEachParticle(false, sphereSelector, *accessor, movingParticleMappingKernel, *accessor, MO_Flag);
+   if(boundaryCondition == "SBB")
+   {
+      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_SBB_Flag);
+   } else if(boundaryCondition == "CLI")
+   {
+      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_CLI_Flag);
+   } else{
+      WALBERLA_ABORT("Unknown boundary condition " << boundaryCondition);
+   }
 
 
    // setup of the LBM communication for synchronizing the pdf field between neighboring blocks
@@ -631,7 +744,10 @@ int main( int argc, char **argv )
 
    // create the timeloop
 
-   const uint_t timesteps = uint_c(numberOfPasses * real_c(domainSize[2]) / velocity);
+   real_t dtSim = real_t(1);
+   if (forceTorqueAveragingType == "twoLBM") dtSim = real_t(2);
+
+   const uint_t timesteps = uint_t( numberOfTimeStepsNonDim * tref);
    WALBERLA_LOG_INFO_ON_ROOT("Running for " << timesteps << " time steps");
    SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
 
@@ -645,6 +761,7 @@ int main( int argc, char **argv )
       auto particleVtkOutput = make_shared<mesa_pd::vtk::ParticleVtkOutput>(ps);
       particleVtkOutput->addOutput<mesa_pd::data::SelectParticleOwner>("owner");
       particleVtkOutput->addOutput<mesa_pd::data::SelectParticleLinearVelocity>("velocity");
+      particleVtkOutput->setParticleSelector( [sphereShape](const mesa_pd::data::ParticleStorage::iterator& pIt) {return pIt->getShapeID() == sphereShape;} ); //limit output to sphere
       auto particleVtkWriter = vtk::createVTKOutput_PointData(particleVtkOutput, "Particles", vtkIOFreq, baseFolder, "simulation_step");
       timeloop.addFuncBeforeTimeStep( vtk::writeFiles( particleVtkWriter ), "VTK (sphere data)" );
 
@@ -667,37 +784,86 @@ int main( int argc, char **argv )
 
    }
 
-   // sweep for updating the particle mapping into the LBM simulation
-   timeloop.add() << Sweep( lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T, BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_Flag, FormerMO_Flag, sphereSelector, conserveMomentum), "Particle Mapping" );
+   // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip treatment)
+   auto bhSweep = BoundaryHandling_T::getBlockSweep( boundaryHandlingID );
+   timeloop.add() << BeforeFunction( optimizedPDFCommunicationScheme, "LBM Communication" )
+                  << Sweep(bhSweep, "Boundary Handling" );
 
+   // stream + collide LBM step
+#ifdef WALBERLA_BUILD_WITH_CODEGEN
+   auto lbmSweep = LatticeModel_T::Sweep( pdfFieldID );
+   //timeloop.add() << Sweep( [&lbmSweep](IBlock * const block){lbmSweep.streamCollide(block);}, "LB sweep" );
+   timeloop.add() << Sweep(lbmSweep, "LB sweep" );
+#else
+   auto lbmSweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
+   timeloop.add() << Sweep( makeSharedSweep( lbmSweep ), "cell-wise LB sweep" );
+#endif
+
+
+   SweepTimeloop timeloopAfterParticles( blocks->getBlockStorage(), timesteps );
+
+   // sweep for updating the particle mapping into the LBM simulation
+   if(boundaryCondition == "SBB")
+   {
+      timeloopAfterParticles.add() << Sweep( lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T, BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_SBB_Flag, FormerMO_Flag, sphereSelector, conserveMomentum), "Particle Mapping" );
+
+   } else if(boundaryCondition == "CLI")
+   {
+      timeloopAfterParticles.add() << Sweep( lbm_mesapd_coupling::makeMovingParticleMapping<PdfField_T, BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, MO_CLI_Flag, FormerMO_Flag, sphereSelector, conserveMomentum), "Particle Mapping" );
+   } else{
+      WALBERLA_ABORT("Unknown boundary condition " << boundaryCondition);
+   }
+
+   bool useValuesFromGhostLayerForReconstruction = true; // true: full sync needed
    // sweep for restoring PDFs in cells previously occupied by particles
    if( reconstructorType == "EAN")
    {
 
-      auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
-      auto equilibriumAndNonEquilibriumSphereNormalReconstructor = lbm_mesapd_coupling::makeEquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), true);
+      //auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
+      auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T> >(blocks,boundaryHandlingID);
+      auto equilibriumAndNonEquilibriumSphereNormalReconstructor = lbm_mesapd_coupling::makeEquilibriumAndNonEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), useValuesFromGhostLayerForReconstruction);
       auto reconstructionManager = lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, equilibriumAndNonEquilibriumSphereNormalReconstructor, conserveMomentum);
 
-      timeloop.add() << BeforeFunction( fullPDFCommunicationScheme, "PDF Communication" )
-                     << Sweep( makeSharedSweep(reconstructionManager), "PDF Restore" );
+      timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "PDF Communication" )
+                                   << Sweep( makeSharedSweep(reconstructionManager), "PDF Restore" );
 
    } else if( reconstructorType == "Grad")
    {
       bool recomputeDensity = false;
-      auto gradReconstructor = lbm_mesapd_coupling::makeGradsMomentApproximationReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, omega, recomputeDensity, true, true);
+      bool useCentralDifferences = true;
+      auto gradReconstructor = lbm_mesapd_coupling::makeGradsMomentApproximationReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, omega, recomputeDensity, useCentralDifferences, useValuesFromGhostLayerForReconstruction);
 
-      timeloop.add() << BeforeFunction( fullPDFCommunicationScheme, "PDF Communication" )
-                     << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, gradReconstructor, conserveMomentum) ), "PDF Restore" );
+      timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "PDF Communication" )
+                                   << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, gradReconstructor, conserveMomentum) ), "PDF Restore" );
+   } else if( reconstructorType == "GradDen")
+   {
+      bool recomputeDensity = true;
+      bool useCentralDifferences = true;
+      auto gradReconstructor = lbm_mesapd_coupling::makeGradsMomentApproximationReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, omega, recomputeDensity, useCentralDifferences, useValuesFromGhostLayerForReconstruction);
+
+      timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "PDF Communication" )
+                                   << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, gradReconstructor, conserveMomentum) ), "PDF Restore" );
    } else if( reconstructorType == "Eq")
    {
-      timeloop.add() << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, conserveMomentum) ), "PDF Restore" );
+      auto eqReconstructor = lbm_mesapd_coupling::makeEquilibriumReconstructor<BoundaryHandling_T>(blocks, boundaryHandlingID, useValuesFromGhostLayerForReconstruction);
+      timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "PDF Communication" )
+                                   << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, eqReconstructor, conserveMomentum) ), "PDF Restore" );
    } else if( reconstructorType == "Ext")
    {
-      auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
-      auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder, true>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), true);
-      timeloop.add() << BeforeFunction( fullPDFCommunicationScheme, "LBM Communication" )
-                     << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, extrapolationReconstructor, conserveMomentum)), "PDF Restore" );
-   } else {
+      // gets easily unstable
+      //auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
+      auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T> >(blocks,boundaryHandlingID);
+      auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T>, false>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), useValuesFromGhostLayerForReconstruction);
+      timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "LBM Communication" )
+                                   << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, extrapolationReconstructor, conserveMomentum)), "PDF Restore" );
+   } else if( reconstructorType == "ExtNS")
+   {
+      //auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
+      auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T> >(blocks,boundaryHandlingID);
+      auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::FlagFieldNormalExtrapolationDirectionFinder<BoundaryHandling_T>, true>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), useValuesFromGhostLayerForReconstruction);
+      timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "LBM Communication" )
+                                   << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, extrapolationReconstructor, conserveMomentum)), "PDF Restore" );
+   }else {
       WALBERLA_ABORT("Unknown reconstructor type " << reconstructorType);
    }
 
@@ -707,35 +873,37 @@ int main( int argc, char **argv )
       using OmegaBulkAdapter_T = lbm_mesapd_coupling::OmegaBulkAdapter<ParticleAccessor_T, decltype(sphereSelector)>;
       real_t defaultOmegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, real_t(1));
       shared_ptr<OmegaBulkAdapter_T> omegaBulkAdapter = make_shared<OmegaBulkAdapter_T>(blocks, omegaBulkFieldID, accessor, defaultOmegaBulk, omegaBulk, adaptionLayerSize, sphereSelector);
-      timeloop.add() << Sweep( makeSharedSweep(omegaBulkAdapter), "Omega Bulk Adapter");
+      timeloopAfterParticles.add() << Sweep( makeSharedSweep(omegaBulkAdapter), "Omega Bulk Adapter");
+      // initally adapt
+      for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
+         (*omegaBulkAdapter)(blockIt.get());
+      }
    }
 
-   // add LBM communication function and boundary handling sweep (does the hydro force calculations and the no-slip treatment)
-   auto bhSweep = BoundaryHandling_T::getBlockSweep( boundaryHandlingID );
-   timeloop.add() << BeforeFunction( optimizedPDFCommunicationScheme, "LBM Communication" )
-                  << Sweep(bhSweep, "Boundary Handling" );
-
-   // stream + collide LBM step
-#ifdef WALBERLA_BUILD_WITH_CODEGEN
-   auto lbmSweep = LatticeModel_T::Sweep( pdfFieldID );
-   timeloop.add() << Sweep( lbmSweep, "LB sweep" );
-#else
-   auto lbmSweep = lbm::makeCellwiseSweep< LatticeModel_T, FlagField_T >( pdfFieldID, flagFieldID, Fluid_Flag );
-   timeloop.add() << Sweep( makeSharedSweep( lbmSweep ), "cell-wise LB sweep" );
-#endif
-
    // evaluation functionality
-   std::string loggingFileName( baseFolder + "/LoggingPrescribedMovingSphere");
-   loggingFileName += "_Re" + std::to_string(uint_c(Re));
-   loggingFileName += "_D" + std::to_string(uint_c(diameter));
-   loggingFileName += "_vel" + std::to_string(float(velocity));
-   loggingFileName += "_recon" + reconstructorType;
-   loggingFileName += "_bvrf" + std::to_string(uint_c(bulkViscRateFactor));
-   loggingFileName += "_mn" + std::to_string(float(magicNumber));
-   if( useOmegaBulkAdaption ) loggingFileName += "_uOBA" + std::to_string(uint_c(adaptionLayerSize));
-   if( conserveMomentum ) loggingFileName += "_conserveMomentum";
-   if( artificiallyAccelerateSphere ) loggingFileName += "_acc";
-   if( !fileNameEnding.empty()) loggingFileName += "_" + fileNameEnding;
+   std::string fileNamePostFix("");
+   fileNamePostFix += "_Re" + std::to_string(uint_c(Re));
+   fileNamePostFix += "_D" + std::to_string(uint_c(diameter));
+   fileNamePostFix += "_vel" + std::to_string(float(velocity));
+   fileNamePostFix += "_" + boundaryCondition;
+   fileNamePostFix += "_recon" + reconstructorType;
+   fileNamePostFix += "_" + forceTorqueAveragingType;
+   fileNamePostFix += "_bvrf" + std::to_string(uint_c(bulkViscRateFactor));
+   //fileNamePostFix += "_mn" + std::to_string(float(magicNumber));
+   if( useOmegaBulkAdaption ) fileNamePostFix += "_uOBA" + std::to_string(uint_c(adaptionLayerSize));
+
+   if( useGalileanInvariantSetup )
+   {
+      fileNamePostFix += "_galileanInvariant";
+   }
+   else{
+      if( conserveMomentum ) fileNamePostFix += "_conserveMomentum";
+      if( artificiallyAccelerateSphere ) fileNamePostFix += "_acc";
+      if( fixedSphere ) fileNamePostFix += "_fixed";
+   }
+   if( !fileNameEnding.empty()) fileNamePostFix += "_" + fileNameEnding;
+   
+   std::string loggingFileName( baseFolder + "/Log" + fileNamePostFix);
    loggingFileName += ".txt";
 
    if( fileIO  )
@@ -753,43 +921,41 @@ int main( int argc, char **argv )
 
    const bool useOpenMP = false;
 
-   const real_t densityRatio = real_t(7800) / real_t(935);
-   const real_t responseTime = densityRatio * diameter * diameter / ( real_t(18) * viscosity );
-   WALBERLA_LOG_INFO_ON_ROOT(" - response time " << responseTime);
-   const real_t accelerationFactor = real_t(1) / (real_t(0.1) * responseTime);
+   mesa_pd::kernel::ExplicitEuler explEulerIntegrator(dtSim);
+   lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
 
    // time loop
-   for (uint_t i = 0; i < timesteps; ++i )
+   for (uint_t i = 0; i < uint_c(real_c(timesteps)/dtSim); ++i )
    {
       // perform a single simulation step -> this contains LBM and setting of the hydrodynamic interactions
       timeloop.singleStep( timeloopTiming );
 
-      timeloopTiming["RPD"].start();
-      
-      reduceProperty.operator()<mesa_pd::HydrodynamicForceTorqueNotification>(*ps);
-
-      if( averageForceTorqueOverTwoTimeSteps )
+      if( forceTorqueAveragingType == "twoLBM")
       {
-         if( i == 0 )
+         // store current force and torque in fOld and tOld
+         ps->forEachParticle(useOpenMP, sphereSelector, *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+
+         // reset f and t
+         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, resetHydrodynamicForceTorque, *accessor );
+
+         timeloop.singleStep( timeloopTiming );
+
+         // f = (f+fOld)/2
+         ps->forEachParticle(useOpenMP, sphereSelector, *accessor, averageHydrodynamicForceTorque, *accessor );
+
+         reduceProperty.operator()<mesa_pd::HydrodynamicForceTorqueNotification>(*ps);
+      } else
+      {
+         reduceProperty.operator()<mesa_pd::HydrodynamicForceTorqueNotification>(*ps);
+
+         if( forceTorqueAveragingType == "runningAvg" )
          {
-            lbm_mesapd_coupling::InitializeHydrodynamicForceTorqueForAveragingKernel initializeHydrodynamicForceTorqueForAveragingKernel;
-            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+            if( i == 0 )
+            {
+               ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, initializeHydrodynamicForceTorqueForAveragingKernel, *accessor );
+            }
+            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, averageHydrodynamicForceTorque, *accessor );
          }
-         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, averageHydrodynamicForceTorque, *accessor );
-      }
-
-      reduceProperty.operator()<mesa_pd::ForceTorqueNotification>(*ps);
-         
-      ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, explEulerIntegrator, *accessor);
-      syncCall();
-
-      timeloopTiming["RPD"].end();
-
-      if( artificiallyAccelerateSphere )
-      {
-         // accelerating after reading from a checkpoint file does not make sense, as current actual runtime is not known
-         real_t newSphereVel = velocity * (std::exp(-accelerationFactor * real_t(i) ) - real_t(1));
-         ps->forEachParticle(useOpenMP, sphereSelector, *accessor, [newSphereVel](const size_t idx, ParticleAccessor_T& ac){ ac.setLinearVelocity(idx, Vector3<real_t>(real_t(0), real_t(0), newSphereVel));}, *accessor);
       }
 
       // evaluation
@@ -797,20 +963,60 @@ int main( int argc, char **argv )
 
       logger();
 
+      if( std::isnan(logger.getForce()) )
+      {
+         WALBERLA_ABORT("Nan found in force - aborting");
+      }
+
       real_t density1 = real_t(0);
       real_t density2 = real_t(0);
       real_t averageDensity = real_t(0);
+      auto movingProbePosition = Vector3<real_t>(real_c(domainSize[0])*real_t(0.75), real_c(domainSize[1])*real_t(0.5), logger.getPosition());
       if(logDensity)
       {
          density1 = getDensityAtPosition<DensityInterpolator_T >(blocks, densityInterpolatorID, Vector3<real_t>(real_c(domainSize[0])*real_t(0.25), real_c(domainSize[1])*real_t(0.5), real_c(domainSize[2])*real_t(0.5)));
-         density2 = getDensityAtPosition<DensityInterpolator_T >(blocks, densityInterpolatorID, Vector3<real_t>(real_c(domainSize[0])*real_t(0.75), real_c(domainSize[1])*real_t(0.5), logger.getPosition()));
+         density2 = getDensityAtPosition<DensityInterpolator_T >(blocks, densityInterpolatorID, movingProbePosition);
          averageDensity = getAverageDensityInSystem<BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID);
       }
-      logger.writeToFile(i, density1, density2, averageDensity);
+
+      Vector3<real_t> velocityAtProbePos(real_t(0));
+      if(logFluidVelocity)
+      {
+         velocityAtProbePos = getVelocityAtPosition<VelocityInterpolator_T >(blocks, velocityInterpolatorID, movingProbePosition);
+      }
+
+      uint_t countSolidCells = 0;
+      uint_t countFluidSolidLinks = 0;
+      if(logMapping) evaluateMapping<BoundaryHandling_T>(blocks, boundaryHandlingID, countSolidCells, countFluidSolidLinks);
+
+      logger.writeToFile(i*uint_c(dtSim), density1, density2, averageDensity, countSolidCells, countFluidSolidLinks, velocityAtProbePos);
       timeloopTiming["Logging"].end();
+
 
       // reset after logging here
       ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectAll(), *accessor, resetHydrodynamicForceTorque, *accessor );
+
+
+      if(!fixedSphere)
+      {
+         timeloopTiming["RPD"].start();
+
+         if( artificiallyAccelerateSphere )
+         {
+            real_t newSphereVel = - velocity * (std::exp(- real_t(i) * dtSim * accelerationFactor/ tref ) - real_t(1));
+            ps->forEachParticle(useOpenMP, sphereSelector, *accessor, [newSphereVel](const size_t idx, ParticleAccessor_T& ac){ ac.setLinearVelocity(idx, Vector3<real_t>(real_t(0), real_t(0), newSphereVel));}, *accessor);
+         }
+
+         // there is no force acting on sphere
+         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, explEulerIntegrator, *accessor);
+         syncCall();
+
+         timeloopTiming["RPD"].end();
+
+         // update mapping, restore PDFs
+         timeloopAfterParticles.singleStep( timeloopTiming );
+      }
+
 
    }
 
@@ -818,7 +1024,7 @@ int main( int argc, char **argv )
 
    if(vtkOutputAtEnd)
    {
-      std::string vtkFileName = "fluid_field";
+      std::string vtkFileName = "fluid_field_final"+fileNamePostFix;
       vtkFileName += "_bvrf" + std::to_string(uint_c(bulkViscRateFactor));
       if( useOmegaBulkAdaption ) vtkFileName += "_uOBA" + std::to_string(uint_c(adaptionLayerSize));
 
@@ -843,6 +1049,13 @@ int main( int argc, char **argv )
       pdfFieldVTK->addCellDataWriter( make_shared< lbm::DensityVTKWriter < LatticeModel_T, float > >( pdfFieldID, "DensityFromPDF" ) );
 
       vtk::writeFiles(pdfFieldVTK)();
+
+      auto particleVtkOutput = make_shared<mesa_pd::vtk::ParticleVtkOutput>(ps);
+      particleVtkOutput->addOutput<mesa_pd::data::SelectParticleLinearVelocity>("velocity");
+      particleVtkOutput->setParticleSelector( [sphereShape](const mesa_pd::data::ParticleStorage::iterator& pIt) {return pIt->getShapeID() == sphereShape;} ); //limit output to sphere
+      auto particleVtkWriter = vtk::createVTKOutput_PointData(particleVtkOutput, "Particles_final"+fileNamePostFix, uint_t(1), baseFolder);
+
+      vtk::writeFiles(particleVtkWriter)();
    }
 
 
