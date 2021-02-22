@@ -38,7 +38,7 @@ method = create_lb_method(**options)
 
 # getter & setter
 setter_assignments = macroscopic_values_setter(method, velocity=velocity_field.center_vector,
-                                               pdfs=pdfs, density=1)
+                                               pdfs=pdfs, density=1.0)
 
 # opt = {'instruction_set': 'sse', 'assume_aligned': True, 'nontemporal': False, 'assume_inner_stride_one': True}
 

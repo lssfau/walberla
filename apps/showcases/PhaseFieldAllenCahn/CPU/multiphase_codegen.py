@@ -17,6 +17,7 @@ from lbmpy.phasefield_allen_cahn.force_model import MultiphaseForceModel
 
 import numpy as np
 import sympy as sp
+import pystencils as ps
 
 stencil_phase = get_stencil("D3Q19")
 stencil_hydro = get_stencil("D3Q27")
@@ -125,8 +126,9 @@ phase_field_LB_step = create_lb_update_rule(lb_method=method_phase,
                                             kernel_type='stream_pull_collide')
 
 phase_field_LB_step.set_main_assignments_from_dict({**phase_field_LB_step.main_assignments_dict, **{C.center: sum_h}})
+subexp = [ps.Assignment(a.lhs, float(a.rhs)) if a.rhs == 0 else a for a in phase_field_LB_step.subexpressions]
 phase_field_LB_step = AssignmentCollection(main_assignments=phase_field_LB_step.main_assignments,
-                                           subexpressions=phase_field_LB_step.subexpressions)
+                                           subexpressions=subexp)
 phase_field_LB_step = sympy_cse(phase_field_LB_step)
 
 # ---------------------------------------------------------------------------------------------------------
