@@ -106,7 +106,7 @@ with CodeGeneration() as ctx:
 
     # getter & setter
     setter_assignments = macroscopic_values_setter(lb_method, velocity=velocity_field.center_vector,
-                                                   pdfs=pdfs.center_vector, density=1)
+                                                   pdfs=pdfs.center_vector, density=1.0)
     getter_assignments = macroscopic_values_getter(lb_method, velocity=velocity_field.center_vector,
                                                    pdfs=pdfs.center_vector, density=None)
     generate_sweep(ctx, 'UniformGridGPU_AA_MacroSetter', setter_assignments)

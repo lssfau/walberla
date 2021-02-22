@@ -26,7 +26,7 @@ options_dict = {
     'mrt': {
         'method': 'mrt',
         'stencil': 'D3Q19',
-        'relaxation_rates': [0, omega, 1.3, 1.4, omega, 1.2, 1.1, 1.15, 1.234, 1.4235, 1.242, 1.2567, 0.9, 0.7],
+        'relaxation_rates': [0.0, omega, 1.3, 1.4, omega, 1.2, 1.1, 1.15, 1.234, 1.4235, 1.242, 1.2567, 0.9, 0.7],
     },
     'mrt_full': {
         'method': 'mrt',
@@ -171,7 +171,7 @@ with CodeGeneration() as ctx:
                    cpu_openmp=openmp_enabled, ghost_layers=1)
 
     setter_assignments = macroscopic_values_setter(update_rule_two_field.method, velocity=velocity_field.center_vector,
-                                                   pdfs=pdfs.center_vector, density=1)
+                                                   pdfs=pdfs.center_vector, density=1.0)
     getter_assignments = macroscopic_values_getter(update_rule_two_field.method, velocity=velocity_field.center_vector,
                                                    pdfs=pdfs.center_vector, density=None)
     generate_sweep(ctx, 'GenMacroSetter', setter_assignments, cpu_openmp=openmp_enabled)

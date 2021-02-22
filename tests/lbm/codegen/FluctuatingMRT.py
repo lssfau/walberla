@@ -9,7 +9,7 @@ from lbmpy_walberla import generate_lattice_model
 with CodeGeneration() as ctx:
     omega_shear = sp.symbols("omega_shear")
     temperature = sp.symbols("temperature")
-    force_field, vel_field = ps.fields("force(3), velocity(3): [3D]", layout='zyxf')
+    force_field, vel_field = ps.fields("force(3), velocity(3): [3D]", layout='fzyx')
 
     def rr_getter(moment_group):
         is_shear = [is_shear_moment(m, 3) for m in moment_group]
@@ -49,4 +49,7 @@ with CodeGeneration() as ctx:
         optimization={'cse_global': True}
     )
 
-    generate_lattice_model(ctx, 'FluctuatingMRT_LatticeModel', collision_rule)
+    params = {}
+    if ctx.optimize_for_localhost:
+        params['cpu_vectorize_info'] = {'assume_inner_stride_one': True, 'assume_aligned': True}
+    generate_lattice_model(ctx, 'FluctuatingMRT_LatticeModel', collision_rule, field_layout='fzyx', **params)
