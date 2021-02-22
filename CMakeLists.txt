@@ -495,8 +495,9 @@ else()
    endif()
 endif()
 
-if (WALBERLA_BUILD_WITH_CUDA AND CUDA_VERSION VERSION_LESS "11.0")
+if (WALBERLA_BUILD_WITH_CUDA AND (CUDA_VERSION VERSION_LESS "11.0" OR CMAKE_VERSION VERSION_LESS 3.18.0))
    # CUDA < 11 does not support C++17. std::experimental::any works with C++14, unlike std::any.
+   set(CMAKE_CUDA_STANDARD 14)
    set(WALBERLA_USE_STD_EXPERIMENTAL_ANY 1)
 endif()
 
@@ -1051,7 +1052,6 @@ if ( WALBERLA_BUILD_WITH_CUDA )
 
       #CUDA_FOUND is need for our cmake mechanism
       set ( CUDA_FOUND TRUE )
-      set(CMAKE_CUDA_STANDARD_REQUIRED OFF)
     else()
       set ( WALBERLA_BUILD_WITH_CUDA FALSE )
     endif ( )
