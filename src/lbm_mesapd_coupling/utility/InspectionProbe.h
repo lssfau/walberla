@@ -74,6 +74,11 @@ public:
       }
    }
 
+   void setPosition(Vector3<real_t> probeLocation)
+   {
+      probeLocation_ = probeLocation;
+   }
+
 private:
 
    void printStatusOfCellSurrounding(Cell centerCell, const IBlock& block)
@@ -121,7 +126,7 @@ private:
 
    void printToScreen(bool isFluid, real_t rho, Vector3<real_t> velocity)
    {
-      if(printToScreen_) WALBERLA_LOG_INFO("Values in probe at position " << probeLocation_ << ": " << (isFluid?"F":"P") << ", rho = " << rho << ", velocity = " << velocity);
+      if(printToScreen_) WALBERLA_LOG_INFO("Values in probe at position " << probeLocation_ << " on rank " << mpi::MPIManager::instance()->rank() << ": " << (isFluid?"F":"P") << ", rho = " << rho << ", velocity = " << velocity);
    }
 
    void writeToFile(bool isFluid, real_t rho, Vector3<real_t> velocity)
