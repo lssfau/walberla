@@ -186,9 +186,10 @@ class SpherePropertyLogger
 public:
    SpherePropertyLogger( const shared_ptr< ParticleAccessor_T > & ac, walberla::id_t sphereUid,
          const std::string & fileName, bool fileIO,
-         real_t dx_SI, real_t dt_SI, real_t diameter, real_t gravitationalForceMag) :
+         real_t dx_SI, real_t dt_SI, real_t diameter, real_t gravitationalForceMag, real_t uref) :
       ac_( ac ), sphereUid_( sphereUid ), fileName_( fileName ), fileIO_(fileIO),
-      dx_SI_( dx_SI ), dt_SI_( dt_SI ), diameter_( diameter ), gravitationalForceMag_( gravitationalForceMag ),
+      dx_SI_( dx_SI ), dt_SI_( dt_SI ), diameter_( diameter ),
+      gravitationalForceMag_( gravitationalForceMag ), uref_(uref), tref_(diameter / uref),
       position_( real_t(0) ), maxVelocity_( real_t(0) )
    {
       if ( fileIO_ )
@@ -197,7 +198,7 @@ public:
          {
             std::ofstream file;
             file.open( fileName_.c_str() );
-            file << "#\t t\t posZ\t gapZ/D\t velZ\t velZ_SI\t fZ\t fZ/fGravi\n";
+            file << "#\t t\t t/tref\t posZ\t gapZ/D\t velZ\t velZ_SI\t velZ/uref\t fZ\t fZ/fGravi\n";
             file.close();
          }
       }
@@ -264,10 +265,9 @@ private:
          auto velocity_SI = velocity * dx_SI_ / dt_SI_;
          auto normalizedHydForce = hydForce / gravitationalForceMag_;
 
-
-         file << timestep << "\t" << real_c(timestep) * dt_SI_ << "\t"
+         file << timestep << "\t" << real_c(timestep) * dt_SI_ << "\t" << real_c(timestep) / tref_
               << "\t" << position[2] << "\t" << scaledPosition[2] - real_t(0.5)
-              << "\t" << velocity[2] << "\t" << velocity_SI[2]
+              << "\t" << velocity[2] << "\t" << velocity_SI[2] << "\t" << velocity[2] / uref_
               << "\t" << hydForce[2] << "\t" << normalizedHydForce[2]
               << "\n";
          file.close();
@@ -278,7 +278,7 @@ private:
    const walberla::id_t sphereUid_;
    std::string fileName_;
    bool fileIO_;
-   real_t dx_SI_, dt_SI_, diameter_, gravitationalForceMag_;
+   real_t dx_SI_, dt_SI_, diameter_, gravitationalForceMag_, uref_, tref_;
 
    real_t position_;
    real_t maxVelocity_;
@@ -385,6 +385,8 @@ int main( int argc, char **argv )
    real_t adaptionLayerSize = real_t(2);
    bool useLubricationCorrection = true;
 
+   bool useGalileoParameterization = false;
+
    for( int i = 1; i < argc; ++i )
    {
       if( std::strcmp( argv[i], "--shortrun" )             == 0 ) { shortrun = true; continue; }
@@ -406,6 +408,7 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--useOmegaBulkAdaption" ) == 0 ) { useOmegaBulkAdaption = true; continue; }
       if( std::strcmp( argv[i], "--adaptionLayerSize" )    == 0 ) { adaptionLayerSize = real_c(std::atof( argv[++i] )); continue; }
       if( std::strcmp( argv[i], "--noLubricationCorrection" ) == 0 ) { useLubricationCorrection = false; continue; }
+      if( std::strcmp( argv[i], "--useGalileoParameterization" ) == 0 ) { useGalileoParameterization = true; continue; }
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
    }
 
@@ -433,6 +436,9 @@ int main( int argc, char **argv )
    real_t densityFluid_SI;
    real_t dynamicViscosityFluid_SI;
    real_t expectedSettlingVelocity_SI;
+
+   // expected velocity given as uMax in experiments of ten Cate (Table 2, E1-E4), with uInfty from Table 1
+   // > slightly different Re than in ten Cate's Table 1
    switch( fluidType )
    {
       case 1:
@@ -494,8 +500,9 @@ int main( int argc, char **argv )
    const real_t diameter = diameter_SI / dx_SI;
    const real_t sphereVolume = math::pi / real_t(6) * diameter * diameter * diameter;
 
-   //const real_t dt_SI = characteristicVelocity / ug_SI * dx_SI; // this uses Ga for parameterization
-   const real_t dt_SI = characteristicVelocity / expectedSettlingVelocity_SI * dx_SI; // this uses Re for parameterization (only possible since settling velocity is known)
+
+   const real_t dt_SI = (useGalileoParameterization) ? characteristicVelocity / ug_SI * dx_SI : // this uses Ga for parameterization, where ug is the characteristic velocity
+                                                       characteristicVelocity / expectedSettlingVelocity_SI * dx_SI; // this uses Re for parameterization (only possible since settling velocity is known)
 
    const real_t viscosity =  kinematicViscosityFluid_SI * dt_SI / ( dx_SI * dx_SI );
    const real_t omega = lbm::collision_model::omegaFromViscosity(viscosity);
@@ -602,7 +609,7 @@ int main( int argc, char **argv )
    ////////////////////////
 
    // add omega bulk field
-   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
+   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx);
 
    // create the lattice model
    real_t lambda_e = lbm::collision_model::TRT::lambda_e( omega );
@@ -779,17 +786,19 @@ int main( int argc, char **argv )
    // evaluation functionality
    std::string loggingFileName( baseFolder + "/LoggingSettlingSphere_");
    loggingFileName += std::to_string(fluidType);
+   loggingFileName += "_res" + std::to_string(numberOfCellsInHorizontalDirection);
    loggingFileName += "_recon" + reconstructorType;
    loggingFileName += "_bvrf" + std::to_string(uint_c(bulkViscRateFactor));
    loggingFileName += "_mn" + std::to_string(float(magicNumber));
    if( useOmegaBulkAdaption ) loggingFileName += "_uOBA" + std::to_string(uint_c(adaptionLayerSize));
+   if( useGalileoParameterization ) loggingFileName += "_Ga";
    if( !fileNameEnding.empty()) loggingFileName += "_" + fileNameEnding;
    loggingFileName += ".txt";
    if( fileIO  )
    {
       WALBERLA_LOG_INFO_ON_ROOT(" - writing logging output to file \"" << loggingFileName << "\"");
    }
-   SpherePropertyLogger<ParticleAccessor_T> logger( accessor, sphereUid, loggingFileName, fileIO, dx_SI, dt_SI, diameter, -gravitationalForce[2] );
+   SpherePropertyLogger<ParticleAccessor_T> logger( accessor, sphereUid, loggingFileName, fileIO, dx_SI, dt_SI, diameter, -gravitationalForce[2], characteristicVelocity );
 
 
    ////////////////////////
@@ -832,7 +841,7 @@ int main( int argc, char **argv )
             syncCall();
          }
 
-         ps->forEachParticle(useOpenMP, sphereSelector, *accessor, addHydrodynamicInteraction, *accessor );
+         ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, addHydrodynamicInteraction, *accessor );
          ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, addGravitationalForce, *accessor );
 
          // lubrication correction

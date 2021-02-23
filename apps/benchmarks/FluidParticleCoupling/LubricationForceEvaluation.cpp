@@ -52,6 +52,7 @@
 #include "lbm_mesapd_coupling/mapping/ParticleMapping.h"
 #include "lbm_mesapd_coupling/momentum_exchange_method/MovingParticleMapping.h"
 #include "lbm_mesapd_coupling/momentum_exchange_method/boundary/CurvedLinear.h"
+#include "lbm_mesapd_coupling/momentum_exchange_method/boundary/SimpleBB.h"
 #include "lbm_mesapd_coupling/utility/ParticleSelector.h"
 #include "lbm_mesapd_coupling/utility/ResetHydrodynamicForceTorqueKernel.h"
 #include "lbm_mesapd_coupling/utility/LubricationCorrectionKernel.h"
@@ -115,7 +116,8 @@ const uint_t FieldGhostLayers = 1;
 
 const FlagUID Fluid_Flag( "fluid" );
 const FlagUID FreeSlip_Flag( "free slip" );
-const FlagUID MO_Flag( "moving obstacle" );
+const FlagUID MO_SBB_Flag( "moving obstacle sbb" );
+const FlagUID MO_CLI_Flag( "moving obstacle cli" );
 const FlagUID FormerMO_Flag( "former moving obstacle" );
 
 /////////////////////////////////////
@@ -127,8 +129,9 @@ class MyBoundaryHandling
 public:
 
    using FreeSlip_T = lbm::FreeSlip< LatticeModel_T, FlagField_T>;
-   using MO_T = lbm_mesapd_coupling::CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >;
-   using Type = BoundaryHandling< FlagField_T, Stencil_T, FreeSlip_T, MO_T >;
+   using MO_SBB_T = lbm_mesapd_coupling::SimpleBB< LatticeModel_T, FlagField_T, ParticleAccessor_T >;
+   using MO_CLI_T = lbm_mesapd_coupling::CurvedLinear< LatticeModel_T, FlagField_T, ParticleAccessor_T >;
+   using Type = BoundaryHandling< FlagField_T, Stencil_T, FreeSlip_T, MO_SBB_T, MO_CLI_T >;
 
    MyBoundaryHandling( const BlockDataID & flagFieldID, const BlockDataID & pdfFieldID,
                        const BlockDataID & particleFieldID, const shared_ptr<ParticleAccessor_T>& ac) :
@@ -147,7 +150,8 @@ public:
 
       Type * handling = new Type( "moving obstacle boundary handling", flagField, fluid,
                                   FreeSlip_T( "FreeSlip", FreeSlip_Flag, pdfField, flagField, fluid ),
-                                  MO_T( "MO", MO_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block ) );
+                                  MO_SBB_T( "SBB", MO_SBB_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block ),
+                                  MO_CLI_T( "CLI", MO_CLI_Flag, pdfField, flagField, particleField, ac_, fluid, *storage, *block )  );
 
       const auto freeslip = flagField->getFlag( FreeSlip_Flag );
 
@@ -237,6 +241,7 @@ int main( int argc, char **argv )
    real_t magicNumber = real_t(3)/real_t(16);
    bool useOmegaBulkAdaption = false;
    real_t adaptionLayerSize = real_t(2);
+   bool useSBB = false;
 
    // 1: translation in normal direction -> normal Lubrication force
    // 2: translation in tangential direction -> tangential Lubrication force and torque
@@ -246,19 +251,20 @@ int main( int argc, char **argv )
 
    for( int i = 1; i < argc; ++i )
    {
-      if( std::strcmp( argv[i], "--sphWallTest" )               == 0 ) { sphSphTest = false; continue; }
-      if( std::strcmp( argv[i], "--noLogging" )                 == 0 ) { fileIO = false; continue; }
-      if( std::strcmp( argv[i], "--vtkIOFreq" )                 == 0 ) { vtkIOFreq = uint_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--setup" )                 == 0 ) { setup = uint_c( std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--baseFolder" )                == 0 ) { baseFolder = argv[++i]; continue; }
-      if( std::strcmp( argv[i], "--diameter" )                  == 0 ) { radius = real_t(0.5)*real_c(std::atof(argv[++i])); continue; }
+      if( std::strcmp( argv[i], "--sphWallTest" )          == 0 ) { sphSphTest = false; continue; }
+      if( std::strcmp( argv[i], "--noLogging" )            == 0 ) { fileIO = false; continue; }
+      if( std::strcmp( argv[i], "--vtkIOFreq" )            == 0 ) { vtkIOFreq = uint_c( std::atof( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--setup" )                == 0 ) { setup = uint_c( std::atof( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--baseFolder" )           == 0 ) { baseFolder = argv[++i]; continue; }
+      if( std::strcmp( argv[i], "--diameter" )             == 0 ) { radius = real_t(0.5)*real_c(std::atof(argv[++i])); continue; }
       if( std::strcmp( argv[i], "--gapSize" )              == 0 ) { gapSize = real_c(std::atof(argv[++i])); continue; }
-      if( std::strcmp( argv[i], "--bulkViscRateFactor" )        == 0 ) { bulkViscRateFactor = real_c(std::atof( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--bulkViscRateFactor" )   == 0 ) { bulkViscRateFactor = real_c(std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--tau" )                  == 0 ) { tau = real_c(std::atof( argv[++i] ) ); continue; }
-      if( std::strcmp( argv[i], "--fileName" )                  == 0 ) { fileNameEnding = argv[++i]; continue; }
-      if( std::strcmp( argv[i], "--magicNumber" )               == 0 ) { magicNumber = real_c(std::atof(argv[++i])); continue; }
-      if( std::strcmp( argv[i], "--useOmegaBulkAdaption" )      == 0 ) { useOmegaBulkAdaption = true; continue; }
-      if( std::strcmp( argv[i], "--adaptionLayerSize" )         == 0 ) { adaptionLayerSize = real_c(std::atof( argv[++i] )); continue; }
+      if( std::strcmp( argv[i], "--fileName" )             == 0 ) { fileNameEnding = argv[++i]; continue; }
+      if( std::strcmp( argv[i], "--magicNumber" )          == 0 ) { magicNumber = real_c(std::atof(argv[++i])); continue; }
+      if( std::strcmp( argv[i], "--useOmegaBulkAdaption" ) == 0 ) { useOmegaBulkAdaption = true; continue; }
+      if( std::strcmp( argv[i], "--adaptionLayerSize" )    == 0 ) { adaptionLayerSize = real_c(std::atof( argv[++i] )); continue; }
+      if( std::strcmp( argv[i], "--useSBB" )               == 0 ) { useSBB = true; continue; }
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
    }
 
@@ -315,6 +321,7 @@ int main( int argc, char **argv )
          << " time steps   = " << timesteps << "\n"
          << " fStokes      = " << fStokes << "\n"
          << " setup        = " << setup << "\n"
+         << " useSBB       = " << useSBB << "\n"
          << "-------------------------------------------------------\n"
          << " domainSize = " << xSize << " x " << ySize << " x " << zSize  << "\n"
          << " blocks     = " << xBlocks << " x " << yBlocks << " x " << zBlocks  << "\n"
@@ -374,7 +381,7 @@ int main( int argc, char **argv )
          } else if (setup == 2)
          {
             // only tangential translational velocity
-            p.setLinearVelocity(Vector3<real_t>( real_t(0), velocity, real_t(0)));
+            p.setLinearVelocity(Vector3<real_t>( real_t(0), real_t(0), velocity));
             p.setAngularVelocity(Vector3<real_t>( real_t(0), real_t(0), real_t(0)));
          } else if (setup == 3)
          {
@@ -406,7 +413,7 @@ int main( int argc, char **argv )
          } else if (setup == 2)
          {
             // only tangential translational velocity
-            p.setLinearVelocity(Vector3<real_t>( real_t(0), -velocity, real_t(0)));
+            p.setLinearVelocity(Vector3<real_t>( real_t(0), real_t(0), -velocity));
             p.setAngularVelocity(Vector3<real_t>( real_t(0), real_t(0), real_t(0)));
          } else if (setup == 3)
          {
@@ -493,7 +500,7 @@ int main( int argc, char **argv )
    ////////////////////////
 
    // add omega bulk field
-   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
+   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx);
 
    // create the lattice model
    real_t lambda_e = lbm::collision_model::TRT::lambda_e( omega );
@@ -546,7 +553,13 @@ int main( int argc, char **argv )
    ///////////////
 
    // map particles into the LBM simulation
-   ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_Flag);
+   if(useSBB)
+   {
+      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_SBB_Flag);
+   } else
+   {
+      ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, movingParticleMappingKernel, *accessor, MO_CLI_Flag);
+   }
 
    // create the timeloop
    SweepTimeloop timeloop( blocks->getBlockStorage(), timesteps );
@@ -637,7 +650,7 @@ int main( int argc, char **argv )
    real_t curTorqueNorm = real_t(0);
    real_t oldTorqueNorm = real_t(0);
 
-   real_t convergenceLimit = real_t(1e-4);
+   real_t convergenceLimit = real_t(1e-5);
 
    // time loop
    for (uint_t i = 1; i <= timesteps; ++i )
@@ -747,6 +760,7 @@ int main( int argc, char **argv )
       loggingFileName += "_bvrf" + std::to_string(uint_c(bulkViscRateFactor));
       loggingFileName += "_mn" + std::to_string(float(magicNumber));
       if( useOmegaBulkAdaption ) loggingFileName += "_uOBA" + std::to_string(uint_c(adaptionLayerSize));
+      if( useSBB ) loggingFileName += "_SBB";
       if( !fileNameEnding.empty()) loggingFileName += "_" + fileNameEnding;
       loggingFileName += ".txt";
 

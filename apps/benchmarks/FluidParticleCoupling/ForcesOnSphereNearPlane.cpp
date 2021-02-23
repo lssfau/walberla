@@ -407,6 +407,7 @@ int main( int argc, char **argv )
    bool initializeVelocityProfile = false;
    bool useOmegaBulkAdaption = false;
    real_t adaptionLayerSize = real_t(2);
+   std::string boundaryCondition = "CLI"; // SBB, CLI
 
    real_t relativeChangeConvergenceEps = real_t(1e-5);
    real_t physicalCheckingFrequency = real_t(0.1);
@@ -420,6 +421,7 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--timesteps" )                 == 0 ) { maximumNonDimTimesteps = real_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--wallDistance" )              == 0 ) { normalizedWallDistance = real_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--Re" )                        == 0 ) { ReynoldsNumberShear = real_c( std::atof( argv[++i] ) ); continue; }
+      if( std::strcmp( argv[i], "--boundaryCondition" )         == 0 ) { boundaryCondition = argv[++i]; continue; }
       if( std::strcmp( argv[i], "--velocity" )                  == 0 ) { wallVelocity = real_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--xOffset" )                   == 0 ) { xOffsetOfSpherePosition = real_c( std::atof( argv[++i] ) ); continue; }
       if( std::strcmp( argv[i], "--yOffset" )                   == 0 ) { yOffsetOfSpherePosition = real_c( std::atof( argv[++i] ) ); continue; }
@@ -438,6 +440,7 @@ int main( int argc, char **argv )
    WALBERLA_CHECK_GREATER_EQUAL(normalizedWallDistance, real_t(0.5));
    WALBERLA_CHECK_GREATER_EQUAL(ReynoldsNumberShear, real_t(0));
    WALBERLA_CHECK_GREATER_EQUAL(diameter, real_t(0));
+   WALBERLA_CHECK(boundaryCondition == "SBB" || boundaryCondition == "CLI");
 
    //////////////////////////
    // NUMERICAL PARAMETERS //
@@ -484,6 +487,7 @@ int main( int argc, char **argv )
    WALBERLA_LOG_INFO_ON_ROOT(" - use omega bulk adaption = " << useOmegaBulkAdaption << " (adaption layer size = " << adaptionLayerSize << ")");
    WALBERLA_LOG_INFO_ON_ROOT(" - sphere diameter = " << diameter << ", position = " << initialPosition << " ( xOffset = " << xOffsetOfSpherePosition << ", yOffset = " << yOffsetOfSpherePosition << " )");
    WALBERLA_LOG_INFO_ON_ROOT(" - base folder VTK = " << baseFolderVTK << ", base folder logging = " << baseFolderLogging );
+   WALBERLA_LOG_INFO_ON_ROOT(" - boundary condition = " << boundaryCondition );
 
    ///////////////////////////
    // BLOCK STRUCTURE SETUP //
@@ -562,7 +566,7 @@ int main( int argc, char **argv )
    ////////////////////////
 
    // add omega bulk field
-   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
+   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx);
 
    // create the lattice model
    real_t lambda_e = lbm::collision_model::TRT::lambda_e( omega );
@@ -594,11 +598,21 @@ int main( int argc, char **argv )
    lbm_mesapd_coupling::MovingParticleMappingKernel<BoundaryHandling_T> movingParticleMappingKernel(blocks, boundaryHandlingID, particleFieldID);
    lbm_mesapd_coupling::AverageHydrodynamicForceTorqueKernel averageHydrodynamicForceTorque;
 
-   // map sphere into the LBM simulation
-   ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), *accessor, movingParticleMappingKernel, *accessor, CLI_Flag);
+   if(boundaryCondition == "CLI")
+   {
+      // map sphere into the LBM simulation
+      ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), *accessor, movingParticleMappingKernel, *accessor, CLI_Flag);
+      // map planes
+      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, movingParticleMappingKernel, *accessor, CLI_Flag);
+   }
+   else
+   {
+      // map sphere into the LBM simulation
+      ps->forEachParticle(false, lbm_mesapd_coupling::RegularParticlesSelector(), *accessor, movingParticleMappingKernel, *accessor, SBB_Flag);
+      // map planes
+      ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, movingParticleMappingKernel, *accessor, SBB_Flag);
+   }
 
-   // map planes
-   ps->forEachParticle(false, lbm_mesapd_coupling::GlobalParticlesSelector(), *accessor, movingParticleMappingKernel, *accessor, CLI_Flag);
 
    // initialize Couette velocity profile in whole domain
    if(initializeVelocityProfile)
@@ -661,13 +675,13 @@ int main( int argc, char **argv )
    timeloop.add() << Sweep( makeSharedSweep( lbmSweep ), "cell-wise LB sweep" );
 #endif
 
-
    // add force evaluation and logging
    real_t normalizationFactor = math::pi / real_t(8) * densityFluid * shearRate * shearRate * wallDistance * wallDistance * diameter * diameter ;
    std::string loggingFileName( baseFolderLogging + "/LoggingForcesNearPlane");
    loggingFileName += "_D" + std::to_string(uint_c(diameter));
    loggingFileName += "_Re" + std::to_string(uint_c(ReynoldsNumberShear));
    loggingFileName += "_WD" + std::to_string(uint_c(normalizedWallDistance * real_t(1000)));
+   loggingFileName += "_" + boundaryCondition;
    loggingFileName += "_bvrf" + std::to_string(uint_c(bulkViscRateFactor));
    if(useOmegaBulkAdaption) loggingFileName += "_uOBA" + std::to_string(uint_c(adaptionLayerSize));
    loggingFileName += "_mn" + std::to_string(magicNumber);
@@ -796,6 +810,7 @@ int main( int argc, char **argv )
    resultFileName += "_D" + std::to_string(uint_c(diameter));
    resultFileName += "_Re" + std::to_string(uint_c(ReynoldsNumberShear));
    resultFileName += "_WD" + std::to_string(uint_c(normalizedWallDistance * real_t(1000)));
+   resultFileName += "_" + boundaryCondition;
    resultFileName += "_bvrf" + std::to_string(uint_c(bulkViscRateFactor));
    if(useOmegaBulkAdaption) resultFileName += "_uOBA" + std::to_string(uint_c(adaptionLayerSize));
    resultFileName += "_mn" + std::to_string(magicNumber);
