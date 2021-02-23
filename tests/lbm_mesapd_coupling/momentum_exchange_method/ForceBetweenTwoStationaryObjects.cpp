@@ -300,9 +300,10 @@ int main( int argc, char **argv )
    bool useCompressible = false;
    bool useSBB = false;
    bool useSphereWallSetup = false;
-   real_t surfaceDistance = real_t(0.5);
+   real_t surfaceDistance = real_t(0.1);
    real_t systemVelocity = real_t(0);
    uint_t timesteps = uint_t(10);
+   real_t radius = real_t(5);
 
    for( int i = 1; i < argc; ++i )
    {
@@ -311,6 +312,7 @@ int main( int argc, char **argv )
       if( std::strcmp( argv[i], "--useSphereWallSetup"  ) == 0 ) { useSphereWallSetup  = true; continue;}
       if( std::strcmp( argv[i], "--surfaceDistance"    ) == 0 ) { surfaceDistance = real_c(std::atof( argv[++i])); continue;}
       if( std::strcmp( argv[i], "--systemVelocity"    ) == 0 ) { systemVelocity = real_c(std::atof( argv[++i])); continue;}
+      if( std::strcmp( argv[i], "--radius"    ) == 0 ) { radius = real_c(std::atof( argv[++i])); continue;}
       if( std::strcmp( argv[i], "--timesteps"    ) == 0 ) { timesteps = uint_c(std::atof( argv[++i])); continue;}
       WALBERLA_ABORT("Unrecognized command line argument found: " << argv[i]);
    }
@@ -320,8 +322,7 @@ int main( int argc, char **argv )
    // SIMULATION PROPERTIES //
    ///////////////////////////
 
-   const uint_t length = uint_t(32);
-   const real_t radius = real_t(5);
+   const uint_t length = uint_t(real_t(4) * radius);
    const Vector3<real_t> velocity(systemVelocity, real_t(0), real_t(0));
 
    ///////////////////////////
@@ -347,7 +348,7 @@ int main( int argc, char **argv )
    auto accessor = make_shared<ParticleAccessor_T >(ps, ss);
    auto sphereShape = ss->create<mesa_pd::data::Sphere>( radius );
 
-   createPlaneSetup(ps, ss, walberla::math::AABB(real_t(0), real_t(0), real_t(0), length, length, length), velocity);
+   createPlaneSetup(ps, ss, walberla::math::AABB(real_t(0), real_t(0), real_t(0), real_c(length), real_c(length), real_c(length)), velocity);
 
    walberla::id_t sphereID;
    if(useSphereWallSetup)
@@ -410,10 +411,9 @@ int main( int argc, char **argv )
       auto hydrodynamicForce = accessor->getHydrodynamicForce(idx);
 
       //WALBERLA_LOG_INFO(hydrodynamicForce);
-      for(uint_t comp = 0; comp < 3; ++comp)
-      {
-         WALBERLA_CHECK_FLOAT_EQUAL(hydrodynamicForce[comp], real_t(0), "Found non-zero force in component " << comp);
-      }
+
+      WALBERLA_CHECK_FLOAT_EQUAL(hydrodynamicForce, Vector3<real_t>(real_t(0)), "Found non-zero force");
+
 
       lbm_mesapd_coupling::ResetHydrodynamicForceTorqueKernel resetHydrodynamicForceTorque;
       ps->forEachParticle(false, mesa_pd::kernel::SelectAll(), *accessor, resetHydrodynamicForceTorque, *accessor );
