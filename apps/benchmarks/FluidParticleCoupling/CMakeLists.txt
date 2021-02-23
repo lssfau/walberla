@@ -38,6 +38,10 @@ if( WALBERLA_BUILD_WITH_CODEGEN )
          DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd
          postprocessing timeloop vtk FluidParticleCouplingGeneratedLBM)
 
+   waLBerla_add_executable(NAME MotionSettlingSphere FILES MotionSettlingSphere.cpp
+         DEPENDS blockforest boundary core domain_decomposition field lbm lbm_mesapd_coupling mesa_pd
+         postprocessing timeloop vtk FluidParticleCouplingGeneratedLBM)
+
 else()
 
 waLBerla_add_executable ( NAME SphereWallCollision FILES SphereWallCollision.cpp
