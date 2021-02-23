@@ -24,6 +24,7 @@
 #include "mesa_pd/data/Flags.h"
 #include "mesa_pd/data/IAccessor.h"
 #include "mesa_pd/data/shape/Sphere.h"
+#include "mesa_pd/kernel/ParticleSelector.h"
 
 namespace walberla {
 namespace lbm_mesapd_coupling {
@@ -76,8 +77,9 @@ struct StokesNumberBasedSphereSelector
       static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
 
       lbm_mesapd_coupling::RegularParticlesSelector regularParticlesSelector;
+      mesa_pd::kernel::SelectLocal localParticlesSelector;
 
-      if(regularParticlesSelector(particleIdx, ac))
+      if(regularParticlesSelector(particleIdx, ac) && localParticlesSelector(particleIdx, ac))
       {
          // check for non-fixed spheres
          if( ac.getShape(particleIdx)->getShapeType() == mesa_pd::data::Sphere::SHAPE_TYPE )

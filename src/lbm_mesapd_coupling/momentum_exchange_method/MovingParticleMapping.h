@@ -165,9 +165,9 @@ private:
                      }
 
                   }
-
-                  // cell is already an obstacle (maybe from another particle)
-                  if( isFlagSet( cellFlagPtr, obstacle ) ) {
+                  else if( isFlagSet( cellFlagPtr, obstacle ) )
+                  {
+                     // cell is already an obstacle (maybe from another particle)
                      auto formerParticleUid = (*particleField)(x, y, z);
                      auto formerParticleIdx = ac_->uidToIdx(formerParticleUid);
                      if(!isSet(ac_->getFlags(formerParticleIdx), mesa_pd::data::particle_flags::FIXED) )
@@ -179,10 +179,9 @@ private:
                         (*particleField)(x, y, z) = particleUid;
                      }
                   }
-
-                  // cell is a former obstacle cell (maybe from another particle that has moved away)
-                  if( isFlagSet( cellFlagPtr, formerObstacle ) )
+                  else if( isFlagSet( cellFlagPtr, formerObstacle ) )
                   {
+                     // cell is a former obstacle cell (maybe from another particle that has moved away)
                      boundaryHandling->setBoundary( obstacle, x, y, z );
                      removeFlag( cellFlagPtr, formerObstacle );
                      (*particleField)(x, y, z) = particleUid;
@@ -333,8 +332,12 @@ private:
             {
                if( singleCast(particleIdx, ac, containsPointFctr, ac, Vector3<real_t>(cx,cy,cz)) )
                {
-                  boundaryHandling->forceBoundary(obstacleFlag, x, y, z);
-                  (*particleField)(x,y,z) = ac.getUid(particleIdx);
+                  if(boundaryHandling->isDomain(x,y,z))
+                  {
+                     boundaryHandling->forceBoundary(obstacleFlag, x, y, z);
+                     (*particleField)(x,y,z) = ac.getUid(particleIdx);
+                  }
+                  // no else -> will not overwrite pre-existing boundary cells, e.g. of previously applied applied mapping (e.g. when first mapping global particles)
                }
                cx += dx;
             }
