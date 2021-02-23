@@ -79,6 +79,11 @@
 
 #ifdef WALBERLA_BUILD_WITH_CODEGEN
 #include "GeneratedLBMWithForce.h"
+
+#define USE_TRTLIKE
+//#define USE_D3Q27TRTLIKE
+//#define USE_CUMULANTTRT
+//#define USE_CUMULANT
 #endif
 
 namespace drag_force_sphere_mem
@@ -529,17 +534,27 @@ int main( int argc, char **argv )
    real_t omegaBulk = (useSRT) ? lambda_e : lbm_mesapd_coupling::omegaBulkFromOmega(omega, bulkViscRateFactor);
 
    // add omega bulk field
-   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
+   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx);
 
    // create the lattice model
 #ifdef WALBERLA_BUILD_WITH_CODEGEN
+
+#if defined(USE_TRTLIKE) || defined(USE_D3Q27TRTLIKE)
    WALBERLA_LOG_INFO_ON_ROOT("Using generated TRT-like lattice model!");
    WALBERLA_LOG_INFO_ON_ROOT(" - magic number " << magicNumber);
    WALBERLA_LOG_INFO_ON_ROOT(" - omegaBulk = " << omegaBulk << ", bulk visc. = " << lbm_mesapd_coupling::bulkViscosityFromOmegaBulk(omegaBulk) << " (bvrf " << bulkViscRateFactor << ")");
    WALBERLA_LOG_INFO_ON_ROOT(" - lambda_e " << lambda_e << ", lambda_d " << lambda_d << ", omegaBulk " << omegaBulk );
    WALBERLA_LOG_INFO_ON_ROOT(" - use omega bulk adaption = " << useOmegaBulkAdaption << " (adaption layer size = " << adaptionLayerSize << ")");
-
    LatticeModel_T latticeModel = LatticeModel_T(omegaBulkFieldID, setup.extForce, lambda_d, lambda_e);
+#elif defined(USE_CUMULANTTRT)
+   WALBERLA_LOG_INFO_ON_ROOT("Using generated cumulant TRT lattice model!");
+   WALBERLA_LOG_INFO_ON_ROOT(" - magic number " << magicNumber);
+   WALBERLA_LOG_INFO_ON_ROOT(" - lambda_e " << lambda_e << ", lambda_d " << lambda_d );
+   LatticeModel_T latticeModel = LatticeModel_T(setup.extForce, lambda_d, lambda_e);
+#elif defined(USE_CUMULANT)
+   LatticeModel_T latticeModel = LatticeModel_T(setup.extForce, omega);
+#endif
+
 #else
    WALBERLA_LOG_INFO_ON_ROOT("Using waLBerla built-in MRT lattice model and ignoring omega bulk field since not supported!");
    WALBERLA_LOG_INFO_ON_ROOT(" - magic number " << magicNumber);

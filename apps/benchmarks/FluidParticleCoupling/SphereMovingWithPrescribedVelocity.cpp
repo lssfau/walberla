@@ -655,7 +655,7 @@ int main( int argc, char **argv )
    ////////////////////////
 
    // add omega bulk field
-   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
+   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx );
 
    // create the lattice model
    real_t lambda_e = lbm::collision_model::TRT::lambda_e( omega );

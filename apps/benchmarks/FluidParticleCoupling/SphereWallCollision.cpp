@@ -132,6 +132,10 @@ using ScalarField_T = GhostLayerField< real_t, 1>;
 
 const uint_t FieldGhostLayers = 1;
 
+#define USE_TRTLIKE
+//#define USE_D3Q27TRTLIKE
+//#define USE_CUMULANT
+
 ///////////
 // FLAGS //
 ///////////
@@ -758,10 +762,12 @@ int main( int argc, char **argv )
                                     + "_mn" + std::to_string(magicNumber);
    if(useOmegaBulkAdaption) checkPointFileName +="_omegaBulkAdaption";
    if(applyOutflowBCAtTop) checkPointFileName +="_outflowBC";
-#ifdef USE_TRT_LIKE_LATTICE_MODEL
-   checkPointFileName +="_TRTlike";
-#else
-   checkPointFileName += "_other";
+#if defined(USE_TRTLIKE)
+   checkPointFileName += "_trtlike";
+#elif defined(USE_CUMULANT)
+   checkPointFileName += "_cumulant";
+#elif defined(USE_D3Q27TRTLIKE)
+   checkPointFileName += "_d3q27trtlike";
 #endif
 
    WALBERLA_LOG_INFO_ON_ROOT("Checkpointing:");
@@ -852,10 +858,10 @@ int main( int argc, char **argv )
    {
       WALBERLA_LOG_INFO_ON_ROOT( "Initializing particles from checkpointing file!" );
       particleStorageID = blocks->loadBlockData( checkPointFileName + "_mesa.txt", mesa_pd::domain::createBlockForestDataHandling(ps), "Particle Storage" );
-   } else {
-      particleStorageID = blocks->addBlockData(mesa_pd::domain::createBlockForestDataHandling(ps), "Particle Storage");
       mesa_pd::mpi::ClearNextNeighborSync CNNS;
       CNNS(*accessor);
+   } else {
+      particleStorageID = blocks->addBlockData(mesa_pd::domain::createBlockForestDataHandling(ps), "Particle Storage");
    }
 
    // bounding planes
@@ -901,14 +907,19 @@ int main( int argc, char **argv )
    ////////////////////////
 
    // add omega bulk field
-   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx, uint_t(0) );
+   BlockDataID omegaBulkFieldID = field::addToStorage<ScalarField_T>( blocks, "omega bulk field", omegaBulk, field::fzyx);
 
    // create the lattice model
    real_t lambda_e = lbm::collision_model::TRT::lambda_e( omega );
    real_t lambda_d = lbm::collision_model::TRT::lambda_d( omega, magicNumber );
 #ifdef WALBERLA_BUILD_WITH_CODEGEN
+#ifdef USE_CUMULANT
+   WALBERLA_LOG_INFO_ON_ROOT("Using generated cumulant lattice model!");
+   LatticeModel_T latticeModel = LatticeModel_T(omega);
+#elif defined(USE_TRTLIKE) || defined(USE_D3Q27TRTLIKE)
    WALBERLA_LOG_INFO_ON_ROOT("Using generated TRT-like lattice model!");
    LatticeModel_T latticeModel = LatticeModel_T(omegaBulkFieldID, lambda_d, lambda_e);
+#endif
 #else
    WALBERLA_LOG_INFO_ON_ROOT("Using waLBerla built-in MRT lattice model and ignoring omega bulk field since not supported!");
    LatticeModel_T latticeModel = LatticeModel_T(lbm::collision_model::D3Q19MRT( omegaBulk, omegaBulk, lambda_d, lambda_e, lambda_e, lambda_d ));
@@ -1117,11 +1128,7 @@ int main( int argc, char **argv )
    }else if( reconstructorType == "Ext")
    {
       auto sphereNormalExtrapolationDirectionFinder = make_shared<lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder>(blocks);
-#ifdef USE_TRT_LIKE_LATTICE_MODEL
-      auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder, true>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), true);
-#else
       auto extrapolationReconstructor = lbm_mesapd_coupling::makeExtrapolationReconstructor<BoundaryHandling_T, lbm_mesapd_coupling::SphereNormalExtrapolationDirectionFinder, false>(blocks, boundaryHandlingID, sphereNormalExtrapolationDirectionFinder, uint_t(3), true);
-#endif
       timeloopAfterParticles.add() << BeforeFunction( fullPDFCommunicationScheme, "LBM Communication" )
                                    << Sweep( makeSharedSweep(lbm_mesapd_coupling::makePdfReconstructionManager<PdfField_T,BoundaryHandling_T>(blocks, pdfFieldID, boundaryHandlingID, particleFieldID, accessor, FormerMO_Flag, Fluid_Flag, extrapolationReconstructor, conserveMomentum)), "PDF Restore" );
    } else
@@ -1308,9 +1315,8 @@ int main( int argc, char **argv )
          }
          else
          {
-            lbm_mesapd_coupling::RegularParticlesSelector sphereSelector;
             lbm_mesapd_coupling::AddHydrodynamicInteractionKernel addHydrodynamicInteraction;
-            ps->forEachParticle(useOpenMP, sphereSelector, *accessor, addHydrodynamicInteraction, *accessor );
+            ps->forEachParticle(useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor, addHydrodynamicInteraction, *accessor );
          }
 
          hydForce = getForce(sphereUid,*accessor) - lubForce - collisionForce;
