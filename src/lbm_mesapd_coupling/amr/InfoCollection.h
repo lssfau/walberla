@@ -26,20 +26,21 @@
 #include "blockforest/BlockID.h"
 #include "core/mpi/BufferSystem.h"
 
-#include <mesa_pd/data/ParticleStorage.h>
+#include "mesa_pd/data/Flags.h"
 
 #include <map>
 
 namespace walberla {
 namespace lbm_mesapd_coupling {
+namespace amr {
 
-typedef std::map<blockforest::BlockID, BlockInfo>  InfoCollection;
-typedef std::pair<blockforest::BlockID, BlockInfo> InfoCollectionPair;
+using InfoCollection = std::map<blockforest::BlockID, BlockInfo>  ;
+using InfoCollectionPair = std::pair<blockforest::BlockID, BlockInfo>;
 
 template <typename BoundaryHandling_T, typename ParticleAccessor_T>
-void createWithNeighborhood(BlockForest& bf, const BlockDataID boundaryHandlingID,
-                            const ParticleAccessor_T& accessor, const uint_t numberOfMESAPDSubCycles,
-                            InfoCollection& ic ) {
+void updateAndSyncInfoCollection(BlockForest& bf, const BlockDataID boundaryHandlingID,
+                                 const ParticleAccessor_T& accessor, const uint_t numberOfRPDSubCycles,
+                                 InfoCollection& ic ) {
    ic.clear();
 
    mpi::BufferSystem bs( MPIManager::instance()->comm(), 856 );
@@ -66,22 +67,21 @@ void createWithNeighborhood(BlockForest& bf, const BlockDataID boundaryHandlingI
       }
 
       // evaluate MESAPD quantities
-      // count block local and (possible) shadow particles here
-      uint_t numLocalParticles = 0, numShadowParticles = 0;
+      // count block local and (possible) ghost particles here
+      uint_t numLocalParticles = 0, numGhostParticles = 0;
       for (size_t idx = 0; idx < accessor.size(); ++idx) {
-         if (block->getAABB().contains(accessor.getPosition(idx))) {
-            // a particle within a block on the current process cannot be a ghost particle
-            WALBERLA_ASSERT(!mesa_pd::data::particle_flags::isSet(accessor.getFlags(idx), mesa_pd::data::particle_flags::GHOST));
+
+         using namespace walberla::mesa_pd::data::particle_flags;
+         if( isSet(accessor.getFlags(idx), GLOBAL) ) continue;
+
+         if ( block->getAABB().contains(accessor.getPosition(idx)) ) {
             numLocalParticles++;
          } else if (block->getAABB().sqDistance(accessor.getPosition(idx)) < accessor.getInteractionRadius(idx)*accessor.getInteractionRadius(idx)) {
-            numShadowParticles++;
+            numGhostParticles++;
          }
       }
 
-      // count contacts here
-      const uint_t numContacts = 0;
-
-      BlockInfo blockInfo(numCells, numFluidCells, numNearBoundaryCells, numLocalParticles, numShadowParticles, numContacts, numberOfMESAPDSubCycles);
+      BlockInfo blockInfo(numCells, numFluidCells, numNearBoundaryCells, numLocalParticles, numGhostParticles, numberOfRPDSubCycles);
       InfoCollectionPair infoCollectionEntry(block->getId(), blockInfo);
 
       ic.insert( infoCollectionEntry );
@@ -102,6 +102,8 @@ void createWithNeighborhood(BlockForest& bf, const BlockDataID boundaryHandlingI
    bs.setReceiverInfoFromSendBufferState(false, true);
    bs.sendAll();
 
+   // info collection has to be distirbuted to neighboring processes such that later on when coarsening was applied,
+   // the weight of the coarsened block can be computed
    for( auto recvIt = bs.begin(); recvIt != bs.end(); ++recvIt )
    {
       while( !recvIt.buffer().isEmpty() )
@@ -132,7 +134,6 @@ void getBlockInfoFromInfoCollection( const PhantomBlock * block, const shared_pt
 
       // check the above mentioned assumptions
       WALBERLA_ASSERT_EQUAL(infoIt->second.numberOfLocalParticles, uint_t(0));
-      WALBERLA_ASSERT_EQUAL(infoIt->second.numberOfContacts, uint_t(0));
 
       blockInfo = infoIt->second;
    }
@@ -168,18 +169,40 @@ void getBlockInfoFromInfoCollection( const PhantomBlock * block, const shared_pt
 
          // check above mentioned assumptions
          WALBERLA_ASSERT_EQUAL(childIt->second.numberOfLocalParticles, uint_t(0));
-         WALBERLA_ASSERT_EQUAL(childIt->second.numberOfContacts, uint_t(0));
       }
       // total number of cells remains unchanged
       combinedInfo.numberOfFluidCells = uint_c(numFluidCells / uint_t(8)); //average
       combinedInfo.numberOfNearBoundaryCells = uint_c( numNearBoundaryCells / uint_t(8) ); //average
       combinedInfo.numberOfLocalParticles = uint_t(0);
-      combinedInfo.numberOfContacts = uint_t(0); //sum
-      // number of pe sub cycles stays the same
+      // number of rpd sub cycles stays the same
 
       blockInfo = combinedInfo;
    }
 }
 
+/*
+ * Provides mapping from phantom block to weight evaluation via info collection
+ */
+class WeightEvaluationFunctor
+{
+public:
+   WeightEvaluationFunctor(const shared_ptr<InfoCollection>& ic,
+                           const std::function<real_t(const BlockInfo&)> & weightEvaluationFct) :
+         ic_(ic), weightEvaluationFct_(weightEvaluationFct) {}
+
+   real_t operator()(const PhantomBlock * block)
+   {
+      BlockInfo blockInfo;
+      getBlockInfoFromInfoCollection(block, ic_, blockInfo);
+      return weightEvaluationFct_(blockInfo);
+   }
+
+private:
+   shared_ptr<InfoCollection> ic_;
+   std::function<real_t(const BlockInfo&)> weightEvaluationFct_;
+};
+
+
+} // namepace amr
 } // namespace lbm_mesapd_coupling
 } // namespace walberla

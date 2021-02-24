@@ -28,28 +28,27 @@
 
 namespace walberla {
 namespace lbm_mesapd_coupling {
+namespace amr {
 
 struct BlockInfo {
    // lbm quantities
    uint_t numberOfCells;
    uint_t numberOfFluidCells;
    uint_t numberOfNearBoundaryCells;
-   // pe quantities
+   // rpd quantities
    uint_t numberOfLocalParticles;
-   uint_t numberOfShadowParticles;
-   uint_t numberOfContacts;
+   uint_t numberOfGhostParticles;
    // coupling quantities
-   uint_t numberOfMESAPDSubCycles;
+   uint_t numberOfRPDSubCycles;
 
    BlockInfo()
          : numberOfCells(0), numberOfFluidCells(0), numberOfNearBoundaryCells(0),
-           numberOfLocalParticles(0), numberOfShadowParticles(0), numberOfContacts(0), numberOfMESAPDSubCycles(0) {}
+           numberOfLocalParticles(0), numberOfGhostParticles(0), numberOfRPDSubCycles(0) {}
 
    BlockInfo(const uint_t numCells, const uint_t numFluidCells, const uint_t numNearBoundaryCells,
-             const uint_t numLocalBodies, const uint_t numShadowParticles, const uint_t numContacts,
-             const uint_t numPeSubCycles)
+             const uint_t numLocalParticles, const uint_t numGhostParticles, const uint_t numRPDSubCycles)
          : numberOfCells(numCells), numberOfFluidCells(numFluidCells), numberOfNearBoundaryCells(numNearBoundaryCells),
-           numberOfLocalParticles(numLocalBodies), numberOfShadowParticles(numShadowParticles), numberOfContacts(numContacts), numberOfMESAPDSubCycles(numPeSubCycles) {}
+           numberOfLocalParticles(numLocalParticles), numberOfGhostParticles(numGhostParticles), numberOfRPDSubCycles(numRPDSubCycles) {}
 };
 
 
@@ -57,19 +56,17 @@ inline
 std::ostream& operator<<( std::ostream& os, const BlockInfo& bi )
 {
    os << bi.numberOfCells << " / " << bi.numberOfFluidCells << " / " << bi.numberOfNearBoundaryCells << " / "
-      << bi.numberOfLocalParticles << " / "<< bi.numberOfShadowParticles << " / " << bi.numberOfContacts << " / "
-      << bi.numberOfMESAPDSubCycles;
+      << bi.numberOfLocalParticles << " / "<< bi.numberOfGhostParticles << " / " << bi.numberOfRPDSubCycles;
    return os;
 }
 
 template< typename T,    // Element type of SendBuffer
-          typename G>    // Growth policy of SendBuffer
+      typename G>    // Growth policy of SendBuffer
 mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, const BlockInfo& info )
 {
    buf.addDebugMarker( "pca" );
    buf << info.numberOfCells << info.numberOfFluidCells << info.numberOfNearBoundaryCells
-       << info.numberOfLocalParticles << info.numberOfShadowParticles << info.numberOfContacts
-       << info.numberOfMESAPDSubCycles;
+       << info.numberOfLocalParticles << info.numberOfGhostParticles << info.numberOfRPDSubCycles;
    return buf;
 }
 
@@ -78,10 +75,10 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, BlockInf
 {
    buf.readDebugMarker( "pca" );
    buf >> info.numberOfCells >> info.numberOfFluidCells >> info.numberOfNearBoundaryCells
-       >> info.numberOfLocalParticles >> info.numberOfShadowParticles >> info.numberOfContacts
-       >> info.numberOfMESAPDSubCycles;
+       >> info.numberOfLocalParticles >> info.numberOfGhostParticles >> info.numberOfRPDSubCycles;
    return buf;
 }
 
+} // namespace amr
 } // namespace lbm_mesapd_coupling
 } // namespace walberla
