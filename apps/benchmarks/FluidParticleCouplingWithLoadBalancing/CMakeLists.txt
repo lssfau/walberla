@@ -1,0 +1,3 @@
+waLBerla_add_executable( NAME FluidParticleWorkloadEvaluation FILES FluidParticleWorkloadEvaluation.cpp DEPENDS blockforest boundary core field lbm lbm_mesapd_coupling mesa_pd postprocessing timeloop vtk )
+
+waLBerla_add_executable( NAME FluidParticleWorkloadDistribution FILES FluidParticleWorkloadDistribution.cpp DEPENDS blockforest boundary core field lbm lbm_mesapd_coupling mesa_pd postprocessing timeloop vtk )
