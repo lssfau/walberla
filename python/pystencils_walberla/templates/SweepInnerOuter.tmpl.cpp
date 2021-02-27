@@ -23,6 +23,9 @@
 #include "core/DataTypes.h"
 #include "core/Macros.h"
 #include "{{class_name}}.h"
+{% for header in headers %}
+#include {{header}}
+{% endfor %}
 
 
 {% if target is equalto 'cpu' -%}
