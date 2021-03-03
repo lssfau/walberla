@@ -261,7 +261,7 @@ int main( int argc, char ** argv )
    Vec3 origin = simulationDomain.center();
    Vec3 dp;
 
-   auto mixingBlade = ss->create<data::Box>( Vec3(0.009,simulationDomain.ySize(),simulationDomain.zSize()) );
+   auto mixingBlade = ss->create<data::Box>( Vec3(0.009_r, simulationDomain.ySize(), simulationDomain.zSize()) );
    ss->shapes[mixingBlade]->updateMassAndInertia(std::numeric_limits<real_t>::infinity());
    auto box0                       = ps->create();
    box0->getPositionRef()          = Vec3(simulationDomain.xSize() * real_t(0.5),0.0,0.0);
@@ -316,10 +316,10 @@ int main( int argc, char ** argv )
    data::particle_flags::set(box3->getFlagsRef(), data::particle_flags::INFINITE);
    data::particle_flags::set(box3->getFlagsRef(), data::particle_flags::FIXED);
    data::particle_flags::set(box3->getFlagsRef(), data::particle_flags::NON_COMMUNICATING);
-   box3->getRotationRef().rotate(Vec3(0,1,0), math::pi * 0.15 );
+   box3->getRotationRef().rotate(Vec3(0,1,0), math::pi * 0.15_r );
 //   box3->getRotationRef().rotate(Vec3(0,0,1), -math::pi * 0.15 );
    dp = ( box3->getPosition() - origin );
-   dRot = Rot3(Vec3(real_t(0), real_t(0), math::pi * 1.5));
+   dRot = Rot3(Vec3(real_t(0), real_t(0), math::pi * 1.5_r));
    box3->setPosition( origin + dRot.getMatrix() * dp );
    box3->getRotationRef().rotate(dRot);
 

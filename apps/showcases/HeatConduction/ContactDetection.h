@@ -83,7 +83,7 @@ inline bool ContactDetection::operator()( const size_t idx1,
 template <typename Accessor>
 inline bool ContactDetection::operator()( const size_t idx1,
                                           const size_t idx2,
-                                          const data::Sphere& s,
+                                          const data::Sphere& /*s*/,
                                           const data::HalfSpace& p,
                                           Accessor& ac )
 {
