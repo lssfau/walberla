@@ -73,33 +73,22 @@ def generate_sweep(generation_context, class_name, assignments,
     env = Environment(loader=PackageLoader('pystencils_walberla'), undefined=StrictUndefined)
     add_pystencils_filters_to_jinja_env(env)
 
-    if inner_outer_split is False:
-        jinja_context = {
-            'kernel': KernelInfo(ast, temporary_fields, field_swaps, varying_parameters),
-            'namespace': namespace,
-            'class_name': class_name,
-            'target': create_kernel_params.get("target", "cpu"),
-            'headers': get_headers(ast),
-            'ghost_layers_to_include': ghost_layers_to_include
-        }
-        header = env.get_template("Sweep.tmpl.h").render(**jinja_context)
-        source = env.get_template("Sweep.tmpl.cpp").render(**jinja_context)
-    else:
-        main_kernel_info = KernelInfo(ast, temporary_fields, field_swaps, varying_parameters)
-        representative_field = {p.field_name for p in main_kernel_info.parameters if p.is_field_parameter}
-        representative_field = sorted(representative_field)[0]
+    main_kernel_info = KernelInfo(ast, temporary_fields, field_swaps, varying_parameters)
+    representative_field = {p.field_name for p in main_kernel_info.parameters if p.is_field_parameter}
+    representative_field = sorted(representative_field)[0]
 
-        jinja_context = {
-            'kernel': main_kernel_info,
-            'namespace': namespace,
-            'class_name': class_name,
-            'target': create_kernel_params.get("target", "cpu"),
-            'field': representative_field,
-            'headers': get_headers(ast),
-            'ghost_layers_to_include': 0
-        }
-        header = env.get_template("SweepInnerOuter.tmpl.h").render(**jinja_context)
-        source = env.get_template("SweepInnerOuter.tmpl.cpp").render(**jinja_context)
+    jinja_context = {
+        'kernel': main_kernel_info,
+        'namespace': namespace,
+        'class_name': class_name,
+        'target': create_kernel_params.get("target", "cpu"),
+        'field': representative_field,
+        'headers': get_headers(ast),
+        'ghost_layers_to_include': ghost_layers_to_include,
+        'inner_outer_split': inner_outer_split
+    }
+    header = env.get_template("Sweep.tmpl.h").render(**jinja_context)
+    source = env.get_template("Sweep.tmpl.cpp").render(**jinja_context)
 
     source_extension = "cpp" if create_kernel_params.get("target", "cpu") == "cpu" else "cu"
     generation_context.write_file("{}.h".format(class_name), header)

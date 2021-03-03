@@ -24,6 +24,9 @@
 #include "field/GhostLayerField.h"
 {%- elif target is equalto 'gpu' -%}
 #include "cuda/GPUField.h"
+{% if inner_outer_split -%}
+#include "cuda/ParallelStreams.h"
+{%- endif %}
 {%- endif %}
 #include "field/SwapableCompare.h"
 #include "domain_decomposition/BlockDataID.h"
@@ -42,6 +45,7 @@
 #if ( defined WALBERLA_CXX_COMPILER_IS_GNU ) || ( defined WALBERLA_CXX_COMPILER_IS_CLANG )
 #   pragma GCC diagnostic push
 #   pragma GCC diagnostic ignored "-Wunused-parameter"
+#   pragma GCC diagnostic ignored "-Wreorder"
 #endif
 
 namespace walberla {
@@ -51,8 +55,8 @@ namespace {{namespace}} {
 class {{class_name}}
 {
 public:
-    {{class_name}}( {{kernel|generate_constructor_parameters}})
-        : {{ kernel|generate_constructor_initializer_list }}
+    {{class_name}}( {{kernel|generate_constructor_parameters}} {%if inner_outer_split%}, const Cell & outerWidth=Cell(1, 1, 1){% endif %})
+        : {{ kernel|generate_constructor_initializer_list }}{%if inner_outer_split%}{% if kernel|generate_constructor_initializer_list|length %},{% endif %} outerWidth_(outerWidth){% endif %}
     {};
 
     {{ kernel| generate_destructor(class_name) |indent(4) }}
@@ -79,7 +83,29 @@ public:
         };
     }
 
+{% if inner_outer_split %}
+
+    void inner( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %} );
+    void outer( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %} );
+
+    void setOuterPriority(int priority ) {
+       {%if target is equalto 'gpu'%}
+       parallelStreams_.setStreamPriority(priority);
+       {%endif%}
+    }
+    {{kernel|generate_members|indent(4)}}
+
+private:
+    {%if target is equalto 'gpu'%}
+    cuda::ParallelStreams parallelStreams_;
+    {% endif %}
+
+    Cell outerWidth_;
+    std::vector<CellInterval> layers_;
+
+{%- else -%}
     {{ kernel|generate_members|indent(4) }}
+{% endif -%}
 
 };
 

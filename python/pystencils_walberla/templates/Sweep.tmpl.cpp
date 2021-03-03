@@ -83,6 +83,69 @@ void {{class_name}}::runOnCellInterval( const shared_ptr<StructuredBlockStorage>
     {{kernel|generate_swaps|indent(4)}}
 }
 
+{%if inner_outer_split%}
+void {{class_name}}::inner( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream{% endif %} )
+{
+    {{kernel|generate_block_data_to_field_extraction|indent(4)}}
+
+    CellInterval inner = {{field}}->xyzSize();
+    inner.expand(Cell(-outerWidth_[0], -outerWidth_[1], -outerWidth_[2]));
+
+    {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(4) }}
+    {{kernel|generate_call(stream='stream', cell_interval='inner')|indent(4)}}
+}
+
+
+void {{class_name}}::outer( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream {% endif %} )
+{
+    {{kernel|generate_block_data_to_field_extraction|indent(4)}}
+
+    if( layers_.size() == 0 )
+    {
+        CellInterval ci;
+
+        {{field}}->getSliceBeforeGhostLayer(stencil::T, ci, outerWidth_[2], false);
+        layers_.push_back(ci);
+        {{field}}->getSliceBeforeGhostLayer(stencil::B, ci, outerWidth_[2], false);
+        layers_.push_back(ci);
+
+        {{field}}->getSliceBeforeGhostLayer(stencil::N, ci, outerWidth_[1], false);
+        ci.expand(Cell(0, 0, -outerWidth_[2]));
+        layers_.push_back(ci);
+        {{field}}->getSliceBeforeGhostLayer(stencil::S, ci, outerWidth_[1], false);
+        ci.expand(Cell(0, 0, -outerWidth_[2]));
+        layers_.push_back(ci);
+
+        {{field}}->getSliceBeforeGhostLayer(stencil::E, ci, outerWidth_[0], false);
+        ci.expand(Cell(0, -outerWidth_[1], -outerWidth_[2]));
+        layers_.push_back(ci);
+        {{field}}->getSliceBeforeGhostLayer(stencil::W, ci, outerWidth_[0], false);
+        ci.expand(Cell(0, -outerWidth_[1], -outerWidth_[2]));
+        layers_.push_back(ci);
+    }
+
+    {%if target is equalto 'gpu'%}
+    {
+        auto parallelSection_ = parallelStreams_.parallelSection( stream );
+        for( auto & ci: layers_ )
+        {
+            parallelSection_.run([&]( auto s ) {
+                {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(4) }}
+                {{kernel|generate_call(stream='s', cell_interval='ci')|indent(16)}}
+            });
+        }
+    }
+    {% else %}
+    for( auto & ci: layers_ )
+    {
+        {{kernel|generate_refs_for_kernel_parameters(prefix='this->', ignore_fields=True)|indent(8) }}
+        {{kernel|generate_call(cell_interval='ci')|indent(8)}}
+    }
+    {% endif %}
+
+    {{kernel|generate_swaps|indent(4)}}
+}
+{% endif %}
 
 } // namespace {{namespace}}
 } // namespace walberla
