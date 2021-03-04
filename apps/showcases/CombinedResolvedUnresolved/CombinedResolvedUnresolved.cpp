@@ -543,7 +543,7 @@ int main(int argc, char** argv)
    // create pe bodies
 
    // bounding planes (global)
-   const auto planeMaterial = pe::createMaterial("planeMaterial", 1000.0, 0.8, 0.1, 0.05, 0.2, 80, 100, 10, 11);
+   const auto planeMaterial = pe::createMaterial("planeMaterial", 1000_r, 0.8_r, 0.1_r, 0.05_r, 0.2_r, 80_r, 100_r, 10_r, 11_r);
    pe::createPlane(*globalBodyStorage, 0, Vector3< real_t >(1, 0, 0), Vector3< real_t >(0, 0, 0), planeMaterial);
    pe::createPlane(*globalBodyStorage, 0, Vector3< real_t >(-1, 0, 0), Vector3< real_t >(real_c(domainSize[0]), 0, 0),
                    planeMaterial);
@@ -564,8 +564,8 @@ int main(int argc, char** argv)
    // add DPM spheres
    const auto peMaterial_DPM = createSphereMaterial("peMaterial_DPM", diameter_DPM, densityRatio_DPM);
    createSphereLattice(*blocks, *globalBodyStorage, bodyStorageID,
-                       AABB(real_t(0), real_t(0), real_t(1.0 * real_t(domainSize[2]) / 8.0), real_t(domainSize[0]),
-                            real_t(domainSize[1]), real_t(2.0 * real_t(domainSize[2]) / 8.0)),
+                       AABB(real_t(0), real_t(0), real_t(1.0 * real_t(domainSize[2]) / 8.0_r), real_t(domainSize[0]),
+                            real_t(domainSize[1]), real_t(2.0 * real_t(domainSize[2]) / 8.0_r)),
                        diameter_DPM, real_t(0.15), peMaterial_DPM, real_t(0));
 
    syncCall();
