@@ -44,7 +44,7 @@ namespace initializer {
 
    class Initializer;
    class InitializerUIDGenerator;
-   typedef uid::UID< InitializerUIDGenerator > InitializerUID;
+   using InitializerUID = uid::UID<InitializerUIDGenerator>;
 
 
    //*******************************************************************************************************************

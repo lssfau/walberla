@@ -50,7 +50,7 @@ class CellIntervalIterator;
 class CellInterval {
 
 public:
-   typedef CellIntervalIterator const_iterator;
+   using const_iterator = CellIntervalIterator;
 
    CellInterval() : min_( cell_idx_c(0), cell_idx_c(0), cell_idx_c(0) ), max_( cell_idx_c(-1), cell_idx_c(-1), cell_idx_c(-1) ) {}
    CellInterval( const Cell& _min, const Cell& _max ) : min_( _min ), max_( _max ) {}
@@ -132,11 +132,11 @@ inline bool CellInterval::positiveIndicesOnly() const {
 class CellIntervalIterator
 {
 public:
-   typedef std::bidirectional_iterator_tag iterator_category;
-   typedef Cell                            value_type;
-   typedef ptrdiff_t                       difference_type;
-   typedef Cell*                           pointer;
-   typedef Cell&                           reference;
+   using iterator_category = std::bidirectional_iterator_tag;
+   using value_type = Cell;
+   using difference_type = ptrdiff_t;
+   using pointer = Cell *;
+   using reference = Cell &;
 
    CellIntervalIterator( const CellInterval & ci, const Cell & cell ) : ci_(ci), cell_( cell ) { }
 

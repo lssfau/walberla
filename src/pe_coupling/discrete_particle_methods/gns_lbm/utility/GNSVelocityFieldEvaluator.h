@@ -48,9 +48,9 @@ template <typename LatticeModel_T, typename BoundaryHandling_T>
 class GNSVelocityFieldEvaluator
 {
 public:
-   typedef lbm::PdfField< LatticeModel_T >        PdfField_T;
-   typedef GhostLayerField< Vector3<real_t>, 1 >  VelocityField_T;
-   typedef GhostLayerField< real_t, 1 >           ScalarField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using VelocityField_T = GhostLayerField<Vector3<real_t>, 1>;
+   using ScalarField_T = GhostLayerField<real_t, 1>;
 
    GNSVelocityFieldEvaluator( const BlockDataID & velocityFieldID, const ConstBlockDataID & pdfFieldID, const ConstBlockDataID & solidVolumeFractionFieldID,
                               const ConstBlockDataID & boundaryHandlingID )

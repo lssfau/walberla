@@ -102,7 +102,7 @@ class MPIGatherScheme
 
 
    private:
-      typedef std::vector<shared_ptr<GatherPackInfo> > PackInfoVector;
+      using PackInfoVector = std::vector<shared_ptr<GatherPackInfo>>;
 
       domain_decomposition::BlockStorage  & blocks_;
       PackInfoVector                        packInfos_;               ///< all registered PackInfos

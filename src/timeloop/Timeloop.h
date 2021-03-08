@@ -36,7 +36,7 @@
 namespace walberla {
 namespace timeloop {
 
-typedef std::function<void ()> VoidFctNoArguments;
+using VoidFctNoArguments = std::function<void ()>;
 
 
 //*******************************************************************************************************************
@@ -140,7 +140,7 @@ public:
    //** Registration Functions **************************************************************************************
    /*! \name Registration Functions */
    //@{
-   typedef size_t FctHandle;
+   using FctHandle = size_t;
 
 
     FctHandle addFuncBeforeTimeStep(const VoidFctNoArguments & f,
@@ -198,7 +198,7 @@ protected:
    uint_t curTimeStep_;   ///< current time step
    uint_t nrOfTimeSteps_; ///< total number of time steps
 
-   typedef selectable::SetSelectableObject<VoidFctNoArguments, SUID> SelectableFunc;
+   using SelectableFunc = selectable::SetSelectableObject<VoidFctNoArguments, SUID>;
    std::vector<SelectableFunc> beforeFunctions_;
    std::vector<SelectableFunc> afterFunctions_;
 

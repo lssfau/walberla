@@ -35,7 +35,7 @@ class PODPhantomWeight
 {
 public:
 
-   typedef T weight_t;
+   using weight_t = T;
 
    PODPhantomWeight( const T _weight ) : weight_( _weight ) {}
 

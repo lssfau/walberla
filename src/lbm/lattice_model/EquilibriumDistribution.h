@@ -71,7 +71,7 @@ public:
    static_assert( LatticeModel_T::compressible == false,         "Only works with incompressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static real_t get( const real_t cx, const real_t cy, const real_t cz, const real_t w,
                       const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
@@ -127,7 +127,7 @@ public:
    static_assert( LatticeModel_T::compressible == false,         "Only works with incompressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 1, "Only works for lattice models that require the equilibrium distribution to be order 1 accurate!" );
 
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static real_t get( const real_t cx, const real_t cy, const real_t cz, const real_t w,
                       const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
@@ -176,7 +176,7 @@ public:
    static_assert( LatticeModel_T::compressible,                  "Only works with compressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static real_t get( const real_t cx, const real_t cy, const real_t cz, const real_t w,
                       const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )
@@ -231,7 +231,7 @@ public:
    static_assert( LatticeModel_T::compressible,                  "Only works with compressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 1, "Only works for lattice models that require the equilibrium distribution to be order 1 accurate!" );
 
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static real_t get( const real_t cx, const real_t cy, const real_t cz, const real_t w,
                       const Vector3< real_t > & velocity = Vector3< real_t >( real_t(0.0) ), const real_t rho = real_t(1.0) )

@@ -63,8 +63,8 @@ public:
    static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    DefaultCellOperation() : lambda_e_( real_t(0) ), lambda_d_( real_t(0) ), latticeModel_( NULL ) {}
 
@@ -179,8 +179,8 @@ public:
    static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    DefaultCellOperation() :
       lambda_e_( real_t(0) ), lambda_e_scaled_( real_t(0) ), lambda_d_scaled_( real_t(0) ),
@@ -431,8 +431,8 @@ public:
    static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    DefaultCellOperation() :
       lambda_e_( real_t(0) ), lambda_e_scaled_( real_t(0) ), lambda_d_scaled_( real_t(0) ),

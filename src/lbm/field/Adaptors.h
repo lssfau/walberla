@@ -37,9 +37,9 @@ template< typename LatticeModel_T >
 class DensityAdaptionFunction
 {
 public:
-   typedef PdfField< LatticeModel_T >                 basefield_t;
-   typedef typename basefield_t::const_base_iterator  basefield_iterator;
-   typedef real_t                                     value_type;
+   using basefield_t = PdfField<LatticeModel_T>;
+   using basefield_iterator = typename basefield_t::const_base_iterator;
+   using value_type = real_t;
 
    static const uint_t F_SIZE = 1u;
 
@@ -62,9 +62,9 @@ template< typename LatticeModel_T >
 class VelocityVectorAdaptionFunction
 {
 public:
-   typedef PdfField< LatticeModel_T >                 basefield_t;
-   typedef typename basefield_t::const_base_iterator  basefield_iterator;
-   typedef Vector3<real_t>                            value_type;
+   using basefield_t = PdfField<LatticeModel_T>;
+   using basefield_iterator = typename basefield_t::const_base_iterator;
+   using value_type = Vector3<real_t>;
 
    static const uint_t F_SIZE = 1u;
 
@@ -86,11 +86,11 @@ template< typename LatticeModel_T, bool stream = false >
 class MomentumDensityVectorAdaptionFunction
 {
 public:
-   typedef PdfField< LatticeModel_T >                 basefield_t;
-   typedef typename basefield_t::const_base_iterator  basefield_iterator;
-   typedef Vector3<real_t>                            value_type;
+   using basefield_t = PdfField<LatticeModel_T>;
+   using basefield_iterator = typename basefield_t::const_base_iterator;
+   using value_type = Vector3<real_t>;
 
-   typedef typename LatticeModel_T::Stencil           Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static const uint_t F_SIZE = 1u;
 
@@ -114,9 +114,9 @@ template< typename LatticeModel_T >
 class VelocityAdaptionFunction
 {
 public:
-   typedef PdfField< LatticeModel_T >                 basefield_t;
-   typedef typename basefield_t::const_base_iterator  basefield_iterator;
-   typedef real_t                                     value_type;
+   using basefield_t = PdfField<LatticeModel_T>;
+   using basefield_iterator = typename basefield_t::const_base_iterator;
+   using value_type = real_t;
 
    static const uint_t F_SIZE = 3u;
 
@@ -142,11 +142,11 @@ template< typename LatticeModel_T, bool stream = false >
 class MomentumDensityAdaptionFunction
 {
 public:
-   typedef PdfField< LatticeModel_T >                 basefield_t;
-   typedef typename basefield_t::const_base_iterator  basefield_iterator;
-   typedef real_t                                     value_type;
+   using basefield_t = PdfField<LatticeModel_T>;
+   using basefield_iterator = typename basefield_t::const_base_iterator;
+   using value_type = real_t;
 
-   typedef typename LatticeModel_T::Stencil           Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static const uint_t F_SIZE = 3u;
 
@@ -173,9 +173,9 @@ template< typename LatticeModel_T >
 class ShearRateAdaptionFunction
 {
 public:
-   typedef PdfField< LatticeModel_T >                 basefield_t;
-   typedef typename basefield_t::const_base_iterator  basefield_iterator;
-   typedef real_t                                     value_type;
+   using basefield_t = PdfField<LatticeModel_T>;
+   using basefield_iterator = typename basefield_t::const_base_iterator;
+   using value_type = real_t;
 
    static const uint_t F_SIZE = 1u;
 
@@ -199,15 +199,15 @@ public:
 template< typename LatticeModel_T >
 struct Adaptor
 {
-   typedef field::GhostLayerFieldAdaptor<DensityAdaptionFunction       <LatticeModel_T>, 0> Density;
-   typedef field::GhostLayerFieldAdaptor<VelocityVectorAdaptionFunction<LatticeModel_T>, 0> VelocityVector;
-   typedef field::GhostLayerFieldAdaptor<VelocityAdaptionFunction      <LatticeModel_T>, 0> Velocity;
-   typedef field::GhostLayerFieldAdaptor<ShearRateAdaptionFunction     <LatticeModel_T>, 0> ShearRate;
+   using Density = field::GhostLayerFieldAdaptor<DensityAdaptionFunction<LatticeModel_T>, 0>;
+   using VelocityVector = field::GhostLayerFieldAdaptor<VelocityVectorAdaptionFunction<LatticeModel_T>, 0>;
+   using Velocity = field::GhostLayerFieldAdaptor<VelocityAdaptionFunction<LatticeModel_T>, 0>;
+   using ShearRate = field::GhostLayerFieldAdaptor<ShearRateAdaptionFunction<LatticeModel_T>, 0>;
 
-   typedef field::GhostLayerFieldAdaptor<MomentumDensityVectorAdaptionFunction<LatticeModel_T, true >, 1> StreamMomentumDensityVector;
-   typedef field::GhostLayerFieldAdaptor<MomentumDensityAdaptionFunction      <LatticeModel_T, true >, 1> StreamMomentumDensity;
-   typedef field::GhostLayerFieldAdaptor<MomentumDensityVectorAdaptionFunction<LatticeModel_T, false>, 0> CollideMomentumDensityVector;
-   typedef field::GhostLayerFieldAdaptor<MomentumDensityAdaptionFunction      <LatticeModel_T, false>, 0> CollideMomentumDensity;
+   using StreamMomentumDensityVector = field::GhostLayerFieldAdaptor<MomentumDensityVectorAdaptionFunction<LatticeModel_T, true>, 1>;
+   using StreamMomentumDensity = field::GhostLayerFieldAdaptor<MomentumDensityAdaptionFunction<LatticeModel_T, true>, 1>;
+   using CollideMomentumDensityVector = field::GhostLayerFieldAdaptor<MomentumDensityVectorAdaptionFunction<LatticeModel_T, false>, 0>;
+   using CollideMomentumDensity = field::GhostLayerFieldAdaptor<MomentumDensityAdaptionFunction<LatticeModel_T, false>, 0>;
 };
 
 

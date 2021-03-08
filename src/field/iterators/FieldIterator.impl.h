@@ -47,7 +47,7 @@ FieldIterator<T,fs>::FieldIterator( const typename FieldIterator<T,fs>::FieldTyp
       return;
    }
 
-   typedef typename std::remove_const<T>::type NonConstT;
+   using NonConstT = typename std::remove_const<T>::type;
 
    cur_[0] = cur_[1] = cur_[2] = 0;
    if( f_->layout() == fzyx )

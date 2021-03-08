@@ -48,7 +48,7 @@ using math::Vector3;
 class AveragedInteractionForceFieldToForceFieldAdder
 {
 public:
-   typedef GhostLayerField< Vector3<real_t>, 1 >  ForceField_T;
+   using ForceField_T = GhostLayerField<Vector3<real_t>, 1>;
 
    AveragedInteractionForceFieldToForceFieldAdder( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & forceFieldID,
                                                    const ConstBlockDataID & interactionForceFieldID, uint_t maximumAveragingSteps )

@@ -100,7 +100,7 @@ private:
    void waitSerial();
 };
 
-typedef GenericOpenMPBufferSystem<RecvBuffer, SendBuffer> OpenMPBufferSystem;
+using OpenMPBufferSystem = GenericOpenMPBufferSystem<RecvBuffer, SendBuffer>;
 
 
 } // namespace mpi

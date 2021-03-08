@@ -194,10 +194,10 @@ template<> inline uint_t uintMSBPosition< uint8_t >( uint8_t value ) {
 }
 
 template< uint_t size > struct uintFromBitWidth;
-template<> struct uintFromBitWidth<  8 > { typedef uint8_t  type; };
-template<> struct uintFromBitWidth< 16 > { typedef uint16_t type; };
-template<> struct uintFromBitWidth< 32 > { typedef uint32_t type; };
-template<> struct uintFromBitWidth< 64 > { typedef uint64_t type; };
+template<> struct uintFromBitWidth<  8 > { using type = uint8_t; };
+template<> struct uintFromBitWidth< 16 > { using type = uint16_t; };
+template<> struct uintFromBitWidth< 32 > { using type = uint32_t; };
+template<> struct uintFromBitWidth< 64 > { using type = uint64_t; };
 
 constexpr uint_t leastUnsignedIntegerBitWidth( uint_t width )
 {
@@ -218,7 +218,7 @@ constexpr uint_t leastUnsignedIntegerBitWidth( uint_t width )
 template< uint_t minSize >
 struct leastUnsignedInteger
 {
-   typedef typename uintFromBitWidth< leastUnsignedIntegerBitWidth( minSize ) >::type type;
+   using type = typename uintFromBitWidth<leastUnsignedIntegerBitWidth(minSize)>::type;
 };
 
 /// \cond internal

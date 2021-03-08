@@ -33,7 +33,7 @@ namespace math {
 class Plane
 {
 public:
-   typedef Vector3<real_t> Vec3Real;
+   using Vec3Real = Vector3<real_t>;
 
    inline Plane();
    inline Plane( const Vec3Real & origin, const Vec3Real & _normal );

@@ -55,7 +55,7 @@ public:
 
 private:
 
-   typedef lbm::PdfField<LatticeModel_T> PdfField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
    const BlockDataID                       pdfFieldId_;
    const shared_ptr<StructuredBlockForest> blocks_;

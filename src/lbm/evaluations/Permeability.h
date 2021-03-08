@@ -43,12 +43,12 @@ class Permeability
 {
 public:
 
-   typedef PdfField_T         PdfField;
-   typedef BoundaryHandling_T BoundaryHandling;
+   using PdfField = PdfField_T;
+   using BoundaryHandling = BoundaryHandling_T;
 
-   typedef typename PdfField_T::LatticeModel      LatticeModel;
-   typedef typename BoundaryHandling_T::FlagField FlagField;
-   typedef typename FlagField::flag_t             flag_t;
+   using LatticeModel = typename PdfField_T::LatticeModel;
+   using FlagField = typename BoundaryHandling_T::FlagField;
+   using flag_t = typename FlagField::flag_t;
 
    Permeability( real_t viscosity, const BlockDataID & pdfFieldId, const BlockDataID & boundaryHandlingId, const FlagUID & fluid,
                  const shared_ptr<blockforest::StructuredBlockForest> blocks );

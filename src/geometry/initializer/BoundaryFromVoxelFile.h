@@ -58,8 +58,8 @@ struct IBlockIDPtrCompare {
    bool operator()( const IBlockID * lhs, const IBlockID * rhs ) const;
 };
 
-typedef std::map<const IBlockID*, CellInterval, IBlockIDPtrCompare> CellIntervalMap;
-typedef std::map<const IBlockID*, std::pair<CellInterval, std::vector<uint8_t> >, IBlockIDPtrCompare> CellIntervalDataMap;
+using CellIntervalMap = std::map<const IBlockID *, CellInterval, IBlockIDPtrCompare>;
+using CellIntervalDataMap = std::map<const IBlockID *, std::pair<CellInterval, std::vector<uint8_t>>, IBlockIDPtrCompare>;
 
 
 //*******************************************************************************************************************

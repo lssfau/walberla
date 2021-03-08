@@ -66,8 +66,8 @@ class BodyAndVolumeFractionMapping
 {
 public:
 
-   typedef std::pair< pe::BodyID, real_t >                              BodyAndVolumeFraction_T;
-   typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
+   using BodyAndVolumeFraction_T = std::pair<pe::BodyID, real_t>;
+   using BodyAndVolumeFractionField_T = GhostLayerField<std::vector<BodyAndVolumeFraction_T>, 1>;
 
    BodyAndVolumeFractionMapping( const shared_ptr<StructuredBlockStorage> & blockStorage,
                                  const shared_ptr<pe::BodyStorage> & globalBodyStorage,

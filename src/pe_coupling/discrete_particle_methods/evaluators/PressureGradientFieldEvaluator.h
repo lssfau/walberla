@@ -42,9 +42,9 @@ template <typename LatticeModel_T, typename BoundaryHandling_T>
 class PressureGradientFieldEvaluator
 {
 public:
-   typedef GhostLayerField< Vector3<real_t>, 1 >  VectorField_T;
-   typedef GhostLayerField< real_t, 1>            ScalarField_T;
-   typedef typename LatticeModel_T::Stencil       Stencil_T;
+   using VectorField_T = GhostLayerField<Vector3<real_t>, 1>;
+   using ScalarField_T = GhostLayerField<real_t, 1>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    PressureGradientFieldEvaluator( const BlockDataID & pressureGradientFieldID, const ConstBlockDataID & pressureFieldID,
                                    const ConstBlockDataID & boundaryHandlingID )

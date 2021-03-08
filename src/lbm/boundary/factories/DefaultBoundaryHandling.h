@@ -71,16 +71,16 @@ template <typename LatticeModel, typename FlagFieldT >
 class DefaultBoundaryHandlingFactory
 {
 public:
-   typedef typename FlagFieldT::flag_t            flag_t;
-   typedef typename LatticeModel::Stencil         Stencil;
-   typedef NoSlip< LatticeModel, flag_t >         BcNoSlip;
-   typedef FreeSlip< LatticeModel, FlagFieldT >   BcFreeSlip;
-   typedef SimpleUBB< LatticeModel, flag_t >      BcSimpleUBB;
-   typedef SimplePressure< LatticeModel, flag_t > BcSimplePressure;
-   typedef Vector3<real_t>                        Velocity;
-   typedef PdfField< LatticeModel >               PdfFieldLM;
+   using flag_t = typename FlagFieldT::flag_t;
+   using Stencil = typename LatticeModel::Stencil;
+   using BcNoSlip = NoSlip<LatticeModel, flag_t>;
+   using BcFreeSlip = FreeSlip<LatticeModel, FlagFieldT>;
+   using BcSimpleUBB = SimpleUBB<LatticeModel, flag_t>;
+   using BcSimplePressure = SimplePressure<LatticeModel, flag_t>;
+   using Velocity = Vector3<real_t>;
+   using PdfFieldLM = PdfField<LatticeModel>;
 
-   typedef walberla::boundary::BoundaryHandling< FlagFieldT, Stencil, BcNoSlip, BcFreeSlip, BcSimpleUBB, BcSimpleUBB, BcSimplePressure, BcSimplePressure > BoundaryHandling;
+   using BoundaryHandling = walberla::boundary::BoundaryHandling<FlagFieldT, Stencil, BcNoSlip, BcFreeSlip, BcSimpleUBB, BcSimpleUBB, BcSimplePressure, BcSimplePressure>;
 
    static BlockDataID addBoundaryHandlingToStorage( const shared_ptr< StructuredBlockStorage > & bs, const std::string & identifier,
                                                     BlockDataID flagFieldID, BlockDataID pdfFieldID, const Set< FlagUID > & flagUIDSet,

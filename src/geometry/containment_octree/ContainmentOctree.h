@@ -42,18 +42,18 @@ template< typename DistanceObjectT >
 class ContainmentOctree
 {
 public:
-   typedef typename DistanceObjectT::Scalar Scalar;
-   typedef typename DistanceObjectT::Point  Point;
-   typedef math::GenericAABB<Scalar>        AABB;
+   using Scalar = typename DistanceObjectT::Scalar;
+   using Point = typename DistanceObjectT::Point;
+   using AABB = math::GenericAABB<Scalar>;
 
-   typedef math::KahanAccumulator<Scalar> KahanAccumulator;
-   typedef DistanceObjectT                DistanceObject;
+   using KahanAccumulator = math::KahanAccumulator<Scalar>;
+   using DistanceObject = DistanceObjectT;
 
-   typedef containment_octree::Node<ContainmentOctree>                  Node;
-   typedef containment_octree::InsideLeafNode<ContainmentOctree>        InsideLeafNode;
-   typedef containment_octree::OutsideLeafNode<ContainmentOctree>       OutsideLeafNode;
-   typedef containment_octree::IndeterminateLeafNode<ContainmentOctree> IndeterminateLeafNode;
-   typedef containment_octree::BranchNode<ContainmentOctree>            BranchNode;
+   using Node = containment_octree::Node<ContainmentOctree>;
+   using InsideLeafNode = containment_octree::InsideLeafNode<ContainmentOctree>;
+   using OutsideLeafNode = containment_octree::OutsideLeafNode<ContainmentOctree>;
+   using IndeterminateLeafNode = containment_octree::IndeterminateLeafNode<ContainmentOctree>;
+   using BranchNode = containment_octree::BranchNode<ContainmentOctree>;
 
    inline ContainmentOctree( const shared_ptr<const DistanceObject> & distanceObject, const Scalar epsilon = Scalar(0),
                              const uint_t maxDepth = 6u, const Scalar minAABBVolume = Scalar(0) );

@@ -378,7 +378,7 @@ void generateIsoSurface_internal( const Field_T & f, real_t threshold,
 
 
 
-   typedef Vector3<real_t> RealVec3;
+   using RealVec3 = Vector3<real_t>;
 
    // the field store for every edge the index of the vertex that was computed on it
    // or -1 for "not yet computed"

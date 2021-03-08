@@ -52,7 +52,7 @@ namespace gui {
 #        ifdef WALBERLA_ENABLE_GUI
          typedef QStandardItem*  ItemID;
 #        else
-         typedef void * ItemID;
+         using ItemID = void *;
 #        endif
 
          PropertyTree();

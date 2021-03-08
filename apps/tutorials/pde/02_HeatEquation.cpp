@@ -43,7 +43,7 @@
 namespace walberla {
 
 
-typedef GhostLayerField<real_t,1> ScalarField;
+using ScalarField = GhostLayerField<real_t, 1>;
 using Stencil_T = stencil::D2Q5;
 
 

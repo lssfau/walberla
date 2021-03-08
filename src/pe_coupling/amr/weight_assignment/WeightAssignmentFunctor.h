@@ -34,7 +34,7 @@ namespace amr {
 class WeightAssignmentFunctor
 {
 public:
-   typedef walberla::blockforest::PODPhantomWeight<double> PhantomBlockWeight;
+   using PhantomBlockWeight = walberla::blockforest::PODPhantomWeight<double>;
 
    WeightAssignmentFunctor( const shared_ptr<InfoCollection>& ic,
                             const std::function<real_t(const BlockInfo&)> & weightEvaluationFct ) :

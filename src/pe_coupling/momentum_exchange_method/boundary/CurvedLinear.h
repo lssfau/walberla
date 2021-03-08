@@ -64,10 +64,10 @@ namespace pe_coupling {
 template< typename LatticeModel_T, typename FlagField_T >
 class CurvedLinear : public Boundary< typename FlagField_T::flag_t >
 {
-   typedef lbm::PdfField< LatticeModel_T >   PDFField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
-   typedef typename FlagField_T::flag_t      flag_t;
-   typedef Field< pe::BodyID, 1 >            BodyField_T;
+   using PDFField_T = lbm::PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using flag_t = typename FlagField_T::flag_t;
+   using BodyField_T = Field<pe::BodyID, 1>;
 
 public:
 

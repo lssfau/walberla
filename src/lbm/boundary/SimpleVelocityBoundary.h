@@ -47,8 +47,8 @@ namespace lbm {
 template< typename LatticeModel_T, typename flag_t >
 class SimpleVelocityBoundary : public Boundary<flag_t>
 {
-   typedef PdfField< LatticeModel_T >        PDFField;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PDFField = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
 public:
 

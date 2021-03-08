@@ -34,7 +34,7 @@ template< typename FlagField_T, typename T >
 class FlagFieldMapping : public vtk::BlockCellDataWriter<T,1>
 {
 private:
-   typedef typename FlagField_T::flag_t flag_t;
+   using flag_t = typename FlagField_T::flag_t;
 public:
 
    FlagFieldMapping( const ConstBlockDataID flagId, const std::string& id ) :
@@ -86,7 +86,7 @@ protected:
 template<typename FieldType, typename TargetType=uint8_t>
 class BinarizationFieldWriter : public vtk::BlockCellDataWriter<TargetType,1>
 {
-   typedef typename FieldType::value_type SrcType;
+   using SrcType = typename FieldType::value_type;
 
 public:
    BinarizationFieldWriter( const ConstBlockDataID fieldID, const std::string& id, SrcType mask) :

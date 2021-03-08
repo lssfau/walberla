@@ -45,8 +45,7 @@ class SetupBlockForest : private NonCopyable {
 
 public:
 
-   typedef std::function< uint_t ( SetupBlockForest & forest, const uint_t numberOfProcesses, const memory_t perProcessMemoryLimit ) >
-          TargetProcessAssignmentFunction; // returns number of processes (may be lower than numberOfProcesses)
+   using TargetProcessAssignmentFunction = std::function<uint_t (SetupBlockForest &, const uint_t, const memory_t)>; // returns number of processes (may be lower than numberOfProcesses)
 
 
 
@@ -72,14 +71,14 @@ public:
 
    // Do not use a vector of bool's! Due to the implementation of this vector in the standard library, parallel access to a
    // vector of bool's - even on different elements - is not thread-safe!
-   typedef std::function< void ( std::vector<uint8_t>& excludeBlock, const RootBlockAABB& aabb ) > RootBlockExclusionFunction;
+   using RootBlockExclusionFunction = std::function<void (std::vector<uint8_t> &, const RootBlockAABB &)>;
 
-   typedef std::function< void ( SetupBlockForest& forest ) > RefinementSelectionFunction;
-   typedef std::function< void ( SetupBlockForest& forest ) > WorkloadMemorySUIDAssignmentFunction;
+   using RefinementSelectionFunction = std::function<void (SetupBlockForest &)>;
+   using WorkloadMemorySUIDAssignmentFunction = std::function<void (SetupBlockForest &)>;
 
-   typedef std::vector< std::pair< const SetupBlock*, const SetupBlock* > >               CommunicationPairs;
-   typedef std::vector< real_t >                                                          CommunicationWeights;
-   typedef std::function< void ( const CommunicationPairs &, CommunicationWeights & ) > CommunicationWeightFunction;
+   using CommunicationPairs = std::vector<std::pair<const SetupBlock *, const SetupBlock *>>;
+   using CommunicationWeights = std::vector<real_t>;
+   using CommunicationWeightFunction = std::function<void (const CommunicationPairs &, CommunicationWeights &)>;
 
    inline static void NullCommunicationWeightFunction( const CommunicationPairs &, CommunicationWeights & )
    {
@@ -715,7 +714,7 @@ class RefinementSelectionFunctions
 {
 public:
 
-   typedef blockforest::SetupBlockForest::RefinementSelectionFunction RefinementSelectionFunction;
+   using RefinementSelectionFunction = blockforest::SetupBlockForest::RefinementSelectionFunction;
 
    void add( const RefinementSelectionFunction & function )
    {

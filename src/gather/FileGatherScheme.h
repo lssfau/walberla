@@ -106,7 +106,7 @@ namespace gather
 
          domain_decomposition::BlockStorage  & blocks_;
 
-         typedef std::vector<shared_ptr<GatherPackInfo> > PackInfoVector;
+         using PackInfoVector = std::vector<shared_ptr<GatherPackInfo>>;
          PackInfoVector  packInfos_; ///< all registered PackInfos
 
          /// To generated unique filenames for every FileCollectorScheme

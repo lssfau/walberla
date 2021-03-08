@@ -57,11 +57,11 @@ class SimplePAB : public Boundary<typename FlagFieldT::flag_t>
    static_assert( LatticeModel_T::compressible == false,                                                             "Only works with incompressible models!" );
    static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
 
-   typedef PdfField< LatticeModel_T >        PDFField;
-   typedef typename LatticeModel_T::Stencil  Stencil;
-   typedef typename FlagFieldT::flag_t       flag_t;
+   using PDFField = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
+   using flag_t = typename FlagFieldT::flag_t;
 
-   typedef Vector3<real_t> Vec3Real;
+   using Vec3Real = Vector3<real_t>;
 
 public:
 

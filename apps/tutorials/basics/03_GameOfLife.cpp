@@ -186,7 +186,7 @@ int main( int argc, char ** argv )
             false,                                                                   // one block per process? - "false" means all blocks to one process
             false, false, false );                                                   // no periodicity
 
-   typedef GhostLayerField<real_t,1> ScalarField;
+   using ScalarField = GhostLayerField<real_t, 1>;
    BlockDataID fieldID = field::addToStorage<ScalarField>( blocks,      // block storage
                                                            "My Field",  // name
                                                            real_c(0),   // initial value

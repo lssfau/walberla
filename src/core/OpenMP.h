@@ -48,12 +48,12 @@ namespace walberla {
 #define WALBERLA_OPENMP_FUNCTION_ERROR WALBERLA_ABORT( "Invalid OpenMP function call! In case of compiling without OpenMP, OpenMP functions are not available and shouldn't be called!" );
 
 /* schedule kind constants */
-typedef enum omp_sched_t {
+using omp_sched_t = enum omp_sched_t {
 omp_sched_static  = 1,
 omp_sched_dynamic = 2,
 omp_sched_guided  = 3,
 omp_sched_auto    = 4
-} omp_sched_t;
+};
 
 /* set API functions */
 inline void    omp_set_num_threads (int) { WALBERLA_OPENMP_FUNCTION_ERROR }
@@ -81,9 +81,9 @@ inline void    omp_get_schedule            (omp_sched_t *, int *) { WALBERLA_OPE
 inline int     omp_get_max_task_priority   (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 /* lock API functions */
-typedef struct omp_lock_t {
+using omp_lock_t = struct omp_lock_t {
     void * _lk;
-} omp_lock_t;
+};
 
 inline void    omp_init_lock    (omp_lock_t *) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline void    omp_set_lock     (omp_lock_t *) { WALBERLA_OPENMP_FUNCTION_ERROR }
@@ -92,9 +92,9 @@ inline void    omp_destroy_lock (omp_lock_t *) { WALBERLA_OPENMP_FUNCTION_ERROR 
 inline int     omp_test_lock    (omp_lock_t *) { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 /* nested lock API functions */
-typedef struct omp_nest_lock_t {
+using omp_nest_lock_t = struct omp_nest_lock_t {
     void * _lk;
-} omp_nest_lock_t;
+};
 
 inline void    omp_init_nest_lock    (omp_nest_lock_t *) { WALBERLA_OPENMP_FUNCTION_ERROR }
 inline void    omp_set_nest_lock     (omp_nest_lock_t *) { WALBERLA_OPENMP_FUNCTION_ERROR }
@@ -103,7 +103,7 @@ inline void    omp_destroy_nest_lock (omp_nest_lock_t *) { WALBERLA_OPENMP_FUNCT
 inline int     omp_test_nest_lock    (omp_nest_lock_t *) { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 /* lock hint type for dynamic user lock */
-typedef enum omp_lock_hint_t {
+using omp_lock_hint_t = enum omp_lock_hint_t {
     omp_lock_hint_none           = 0,
     omp_lock_hint_uncontended    = 1,
     omp_lock_hint_contended      = (1<<1 ),
@@ -112,7 +112,7 @@ typedef enum omp_lock_hint_t {
     kmp_lock_hint_hle            = (1<<16),
     kmp_lock_hint_rtm            = (1<<17),
     kmp_lock_hint_adaptive       = (1<<18)
-} omp_lock_hint_t;
+};
 
 /* hinted lock initializers */
 inline void omp_init_lock_with_hint(omp_lock_t *, omp_lock_hint_t) { WALBERLA_OPENMP_FUNCTION_ERROR }
@@ -144,13 +144,13 @@ inline int    omp_target_associate_ptr(void *, void *, size_t, size_t, int) { WA
 inline int    omp_target_disassociate_ptr(void *, int) { WALBERLA_OPENMP_FUNCTION_ERROR }
 
 /* OpenMP 4.0 affinity API */
-typedef enum omp_proc_bind_t {
+using omp_proc_bind_t = enum omp_proc_bind_t {
     omp_proc_bind_false = 0,
     omp_proc_bind_true = 1,
     omp_proc_bind_master = 2,
     omp_proc_bind_close = 3,
     omp_proc_bind_spread = 4
-} omp_proc_bind_t;
+};
 
 inline omp_proc_bind_t omp_get_proc_bind (void) { WALBERLA_OPENMP_FUNCTION_ERROR }
 

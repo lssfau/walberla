@@ -30,7 +30,7 @@ namespace math {
 template< typename T >
 class GenericAABB;
 
-typedef GenericAABB< real_t > AABB; /// see class GenericAABB
+using AABB = GenericAABB<real_t>; /// see class GenericAABB
 
 } // namespace math
 

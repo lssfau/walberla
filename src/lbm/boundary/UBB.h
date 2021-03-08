@@ -49,12 +49,12 @@ namespace lbm {
 template< typename LatticeModel_T, typename flag_t, bool AdaptVelocityToExternalForce = false, bool StoreForce = false >
 class UBB : public Boundary<flag_t>
 {
-   typedef PdfField< LatticeModel_T >        PDFField;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PDFField = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
-   typedef GhostLayerField< Vector3<real_t>, 1 >  VelField;
+   using VelField = GhostLayerField<Vector3<real_t>, 1>;
 
-   typedef GhostLayerField< Vector3<real_t>, 1 > ForceField;
+   using ForceField = GhostLayerField<Vector3<real_t>, 1>;
 
 public:
 

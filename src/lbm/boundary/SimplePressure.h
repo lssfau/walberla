@@ -48,10 +48,10 @@ namespace lbm {
 template< typename LatticeModel_T, typename flag_t >
 class SimplePressure : public Boundary<flag_t>
 {
-   typedef PdfField< LatticeModel_T >        PDFField;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PDFField = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
-   typedef Vector3<real_t>  Vec3Real;
+   using Vec3Real = Vector3<real_t>;
 
 public:
 

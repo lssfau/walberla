@@ -61,7 +61,7 @@ namespace field {
    {
 
    public:
-      typedef Value_T value_type;
+      using value_type = Value_T;
       static const uint_t F_SIZE = Field_T::F_SIZE;
 
       FieldNeighborPointer( FieldMember & field, cell_idx_t _x, cell_idx_t _y, cell_idx_t _z, cell_idx_t _f = 0 )

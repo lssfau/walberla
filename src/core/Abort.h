@@ -40,7 +40,7 @@ class Abort : public singleton::Singleton<Abort>
 
 public:
 
-   typedef std::function<void ( const std::string & message, const std::string & callerPath, const int line, bool withDebugInfo  )> AbortFunction;
+   using AbortFunction = std::function<void (const std::string &, const std::string &, const int, bool)>;
 
    void resetAbortFunction( const AbortFunction & function = AbortFunction() ) { abortFunction_ = function; }
 

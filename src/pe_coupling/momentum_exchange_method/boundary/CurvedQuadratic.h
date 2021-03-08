@@ -75,10 +75,10 @@ class CurvedQuadratic : public Boundary< typename FlagField_T::flag_t >
 {
    static_assert( (std::is_same< typename LatticeModel_T::CollisionModel::tag, lbm::collision_model::TRT_tag >::value), "Only works with TRT!" ); // to access lambda_d
 
-   typedef lbm::PdfField< LatticeModel_T >   PDFField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
-   typedef typename FlagField_T::flag_t      flag_t;
-   typedef Field< pe::BodyID, 1 >            BodyField_T;
+   using PDFField_T = lbm::PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using flag_t = typename FlagField_T::flag_t;
+   using BodyField_T = Field<pe::BodyID, 1>;
 
 public:
 

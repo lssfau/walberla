@@ -72,24 +72,21 @@ namespace field {
       //** Type Definitions  *******************************************************************************************
       /*! \name Type Definitions */
       //@{
-      typedef T                                    value_type;
+      using value_type = T;
 
-      typedef ForwardFieldIterator<T,fSize_>       iterator;
-      typedef ForwardFieldIterator<const T,fSize_> const_iterator;
+      using iterator = ForwardFieldIterator<T, fSize_>;
+      using const_iterator = ForwardFieldIterator<const T, fSize_>;
 
-      typedef ReverseFieldIterator<T,fSize_>       reverse_iterator;
-      typedef ReverseFieldIterator<const T,fSize_> const_reverse_iterator;
+      using reverse_iterator = ReverseFieldIterator<T, fSize_>;
+      using const_reverse_iterator = ReverseFieldIterator<const T, fSize_>;
 
-      typedef FieldIterator<T,fSize_ >             base_iterator;
-      typedef FieldIterator<const T,fSize_ >       const_base_iterator;
+      using base_iterator = FieldIterator<T, fSize_>;
+      using const_base_iterator = FieldIterator<const T, fSize_>;
 
-      typedef FieldPointer<Field<T,fSize_>, Field<T,fSize_>, T >             Ptr;
-      typedef FieldPointer<Field<T,fSize_>, const Field<T,fSize_>, const T > ConstPtr;
+      using Ptr = FieldPointer<Field<T, fSize_>, Field<T, fSize_>, T>;
+      using ConstPtr = FieldPointer<Field<T, fSize_>, const Field<T, fSize_>, const T>;
 
-      typedef typename std::conditional<VectorTrait<T>::F_SIZE!=0,
-                                        Field<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE*fSize_>,
-                                        Field<T, fSize_>
-                                        >::type FlattenedField;
+      using FlattenedField = typename std::conditional<VectorTrait<T>::F_SIZE != 0, Field<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE * fSize_>, Field<T, fSize_>>::type;
 
       static const uint_t F_SIZE = fSize_;
       //@}
@@ -283,8 +280,7 @@ namespace field {
       //** Monitoring  *************************************************************************************************
       /*! \name Monitoring */
       //@{
-      typedef std::function< void ( cell_idx_t x, cell_idx_t y,
-                                      cell_idx_t z, cell_idx_t f, const T & value) > MonitorFunction;
+      using MonitorFunction = std::function<void (cell_idx_t, cell_idx_t, cell_idx_t, cell_idx_t, const T &)>;
 
       void addMonitoringFunction( const MonitorFunction & func );
       //@}

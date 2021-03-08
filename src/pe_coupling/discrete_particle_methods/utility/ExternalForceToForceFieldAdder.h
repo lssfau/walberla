@@ -39,7 +39,7 @@ using math::Vector3;
 class ExternalForceToForceFieldAdder
 {
 public:
-   typedef GhostLayerField< Vector3<real_t>, 1 >  ForceField_T;
+   using ForceField_T = GhostLayerField<Vector3<real_t>, 1>;
 
    ExternalForceToForceFieldAdder( const BlockDataID & forceFieldID, const Vector3<real_t> & externalForce )
       : forceFieldID_( forceFieldID ), externalForce_( externalForce )

@@ -42,23 +42,16 @@ class PhantomBlockForest
 {
 public:
 
-   typedef std::function< Set<SUID> ( const std::vector< std::pair< BlockID, Set<SUID> > > & source, const BlockID & destintation ) >
-           BlockStateDeterminationFunction;
+   using BlockStateDeterminationFunction = std::function<Set<SUID> (const std::vector<std::pair<BlockID, Set<SUID>>> &, const BlockID &)>;
 
-   typedef std::function< void ( std::vector< std::pair< const PhantomBlock *, walberla::any > > & blockData,
-                                   const PhantomBlockForest & phantomForest ) >
-           PhantomBlockDataAssignmentFunction;
+   using PhantomBlockDataAssignmentFunction = std::function<void (std::vector<std::pair<const PhantomBlock *, walberla::any>> &, const PhantomBlockForest &)>;
 
    /// \param iteration execution counter of this callback
    /// \return should the callback rerun after phantom block migration?
-   typedef std::function< bool ( std::vector< std::pair< const PhantomBlock *, uint_t > > & targetProcess,
-                                   std::set< uint_t > & processesToRecvFrom,
-                                   const PhantomBlockForest & phantomForest,
-                                   const uint_t iteration ) >
-           MigrationPreparationFunction; // = load balancing
+   using MigrationPreparationFunction = std::function<bool (std::vector<std::pair<const PhantomBlock *, uint_t>> &, std::set<uint_t> &, const PhantomBlockForest &, const uint_t)>; // = load balancing
 
-   typedef std::function< void ( mpi::SendBuffer & buffer, const PhantomBlock & block ) >                    PhantomBlockDataPackFunction;
-   typedef std::function< void ( mpi::RecvBuffer & buffer, const PhantomBlock & block, walberla::any & data ) > PhantomBlockDataUnpackFunction;
+   using PhantomBlockDataPackFunction = std::function<void (mpi::SendBuffer &, const PhantomBlock &)>;
+   using PhantomBlockDataUnpackFunction = std::function<void (mpi::RecvBuffer &, const PhantomBlock &, walberla::any &)>;
 
 
 
@@ -128,6 +121,6 @@ inline shared_ptr< PhantomBlock > PhantomBlockForest::getBlock( const BlockID & 
 
 } // namespace blockforest
 
-typedef blockforest::PhantomBlockForest PhantomBlockForest;
+using PhantomBlockForest = blockforest::PhantomBlockForest;
 
 } // namespace walberla

@@ -103,7 +103,7 @@ public:
 private:
    //**Type definitions****************************************************************************
    //! Vector for storing (handles to) rigid bodies.
-   typedef std::vector<BodyID>  BodyVector;
+   using BodyVector = std::vector<BodyID>;
    //**********************************************************************************************
 
    //**********************************************************************************************
@@ -114,7 +114,7 @@ private:
     private:
       //**Type definitions*************************************************************************
       //! The signed integer type that is used for storing offsets to neighboring cells.
-      typedef long offset_t;
+      using offset_t = long;
       //*******************************************************************************************
 
       //*******************************************************************************************
@@ -139,7 +139,7 @@ private:
 
       //**Type definitions*************************************************************************
       //! Vector for storing pointers to (body-occupied) cells.
-      typedef std::vector<Cell*>  CellVector;
+      using CellVector = std::vector<Cell *>;
       //*******************************************************************************************
 
     public:
@@ -262,7 +262,7 @@ private:
    //! List for storing all the hash grids that are in use.
    /*! This data structure is used to represent the grid hierarchy. All hash grids are stored in
        ascending order by the size of their cells. */
-   typedef std::list<HashGrid*>  GridList;
+   using GridList = std::list<HashGrid *>;
    //**********************************************************************************************
 
 public:

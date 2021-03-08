@@ -40,8 +40,8 @@ class PdfFieldHandling : public field::BlockDataHandling< PdfField<LatticeModel_
 {
 public:
 
-   typedef PdfField<LatticeModel_T> PdfField_T;
-   typedef field::BlockDataHandling< PdfField_T, LatticeModel_T::Stencil::D == 2 > Base_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Base_T = field::BlockDataHandling<PdfField_T, LatticeModel_T::Stencil::D == 2>;
 
    PdfFieldHandling( const weak_ptr< StructuredBlockStorage > & blocks, const LatticeModel_T & latticeModel,
                      const bool _initialize, const Vector3<real_t> & initialVelocity, const real_t initialDensity,

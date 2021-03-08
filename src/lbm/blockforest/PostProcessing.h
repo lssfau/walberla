@@ -36,7 +36,7 @@ namespace lbm {
 
 namespace internal
 {
-   typedef field::Field< uint8_t, 1 > MarkerField_T;
+   using MarkerField_T = field::Field<uint8_t, 1>;
 }
 
 
@@ -47,9 +47,9 @@ class PostProcessing
 {
 public:
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
-   typedef typename LatticeModel_T::Stencil Stencil_T;
-   typedef typename NeighborsStencil<LatticeModel_T>::type NeighborsStencil_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using NeighborsStencil_T = typename NeighborsStencil<LatticeModel_T>::type;
 
    PostProcessing( const BlockDataID & pdfFieldId, const BlockDataID & markerFieldId, const Filter_T & filter ) :
       pdfFieldId_( pdfFieldId ), markerFieldId_( markerFieldId ), filter_( filter )
@@ -316,7 +316,7 @@ class MarkerFieldGenerator
 {
 public:
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
 
    MarkerFieldGenerator( const BlockDataID & pdfFieldId, const BlockDataID & markerFieldId, const Filter_T & filter ) :
       pdfFieldId_( pdfFieldId ), markerFieldId_( markerFieldId ), filter_( filter )
@@ -371,7 +371,7 @@ class MarkerData : public blockforest::BlockDataHandling< internal::MarkerField_
 {
 public:
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
 
    MarkerData( const BlockDataID & pdfFieldId, const Filter_T & filter ) :
       pdfFieldId_( pdfFieldId ), filter_( filter )

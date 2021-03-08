@@ -35,12 +35,12 @@ class OutsideLeafNode : public LeafNode<ContainmentOctreeT>
 public:
    using LeafNode<ContainmentOctreeT>::numNodes;
    
-   typedef typename LeafNode<ContainmentOctreeT>::DistanceObject DistanceObject;
-   typedef typename LeafNode<ContainmentOctreeT>::Scalar Scalar;
-   typedef typename LeafNode<ContainmentOctreeT>::Point Point;
-   typedef typename LeafNode<ContainmentOctreeT>::AABB AABB;
+   using DistanceObject = typename LeafNode<ContainmentOctreeT>::DistanceObject;
+   using Scalar = typename LeafNode<ContainmentOctreeT>::Scalar;
+   using Point = typename LeafNode<ContainmentOctreeT>::Point;
+   using AABB = typename LeafNode<ContainmentOctreeT>::AABB;
    
-   typedef typename LeafNode<ContainmentOctreeT>::KahanAccumulator KahanAccumulator;
+   using KahanAccumulator = typename LeafNode<ContainmentOctreeT>::KahanAccumulator;
       
    virtual ~OutsideLeafNode() = default;
 

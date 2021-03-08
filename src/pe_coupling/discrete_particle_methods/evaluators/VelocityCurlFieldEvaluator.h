@@ -42,8 +42,8 @@ template <typename LatticeModel_T, typename BoundaryHandling_T>
 class VelocityCurlFieldEvaluator
 {
 public:
-   typedef GhostLayerField< Vector3<real_t>, 1 >  VectorField_T;
-   typedef typename LatticeModel_T::Stencil       Stencil_T;
+   using VectorField_T = GhostLayerField<Vector3<real_t>, 1>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    VelocityCurlFieldEvaluator( const BlockDataID & velocityCurlFieldID, const ConstBlockDataID & velocityFieldID,
                                const ConstBlockDataID & boundaryHandlingID )

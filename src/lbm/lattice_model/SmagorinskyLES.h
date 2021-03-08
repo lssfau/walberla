@@ -44,9 +44,9 @@ class SmagorinskyLES
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T >   PdfField_T;
-   typedef GhostLayerField< real_t, 1 >      ScalarField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using ScalarField_T = GhostLayerField<real_t, 1>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    SmagorinskyLES( weak_ptr< StructuredBlockStorage > blocks, const ConstBlockDataID & pdfFieldId, const BlockDataID & omegaFieldId,
                    const real_t & kinematicViscosity, const real_t & smagorinskyConstant,

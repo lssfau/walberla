@@ -143,8 +143,8 @@ class None
 {
 public:
 
-   typedef None_tag tag;
-   typedef NoDirectionIndependentTerms DirectionIndependentTerms_T;
+   using tag = None_tag;
+   using DirectionIndependentTerms_T = NoDirectionIndependentTerms;
 
    static const bool shiftMacVel = false;
    static const bool shiftEquVel = false;
@@ -180,8 +180,8 @@ class SimpleConstant
 {
 public:
 
-   typedef Simple_tag tag;
-   typedef NoDirectionIndependentTerms DirectionIndependentTerms_T;
+   using tag = Simple_tag;
+   using DirectionIndependentTerms_T = NoDirectionIndependentTerms;
 
    static const bool shiftMacVel = true;
    static const bool shiftEquVel = false;
@@ -277,9 +277,9 @@ private:
 
 public:
 
-   typedef EDM_tag tag;
-   typedef real_t DirectionIndependentTerms_T;
-   typedef ForceField_T ForceField;
+   using tag = EDM_tag;
+   using DirectionIndependentTerms_T = real_t;
+   using ForceField = ForceField_T;
 
    static const bool shiftMacVel = true;
    static const bool shiftEquVel = false;
@@ -337,8 +337,8 @@ class LuoConstant
 {
 public:
 
-   typedef Luo_tag tag;
-   typedef NoDirectionIndependentTerms DirectionIndependentTerms_T;
+   using tag = Luo_tag;
+   using DirectionIndependentTerms_T = NoDirectionIndependentTerms;
 
    static const bool shiftMacVel = true;
    static const bool shiftEquVel = false;
@@ -404,9 +404,9 @@ class LuoField
 {
 public:
 
-   typedef Luo_tag tag;
-   typedef NoDirectionIndependentTerms DirectionIndependentTerms_T;
-   typedef ForceField_T ForceField;
+   using tag = Luo_tag;
+   using DirectionIndependentTerms_T = NoDirectionIndependentTerms;
+   using ForceField = ForceField_T;
 
    static const bool shiftMacVel = true;
    static const bool shiftEquVel = false;
@@ -460,8 +460,8 @@ class GuoConstant
 {
 public:
 
-   typedef Guo_tag tag;
-   typedef Matrix3<real_t> DirectionIndependentTerms_T;
+   using tag = Guo_tag;
+   using DirectionIndependentTerms_T = Matrix3<real_t>;
 
    static const bool shiftMacVel = true;
    static const bool shiftEquVel = true;
@@ -553,9 +553,9 @@ class GuoField
 {
 public:
 
-   typedef Guo_tag tag;
-   typedef Matrix3<real_t> DirectionIndependentTerms_T;
-   typedef ForceField_T ForceField;
+   using tag = Guo_tag;
+   using DirectionIndependentTerms_T = Matrix3<real_t>;
+   using ForceField = ForceField_T;
 
    static const bool shiftMacVel = true;
    static const bool shiftEquVel = true;
@@ -635,8 +635,8 @@ class Correction
 {
 public:
 
-   typedef Correction_tag tag;
-   typedef Vector3<real_t> DirectionIndependentTerms_T;
+   using tag = Correction_tag;
+   using DirectionIndependentTerms_T = Vector3<real_t>;
 
    static const bool shiftMacVel = false;
    static const bool shiftEquVel = false;

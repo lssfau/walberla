@@ -195,19 +195,19 @@ struct INVALID_NUMERICAL_TYPE;
 template< typename T1, typename T2 >
 struct MathTrait
 {
-   typedef T1   HighType;
-   typedef T2   LowType;
-   typedef T1   High;
-   typedef T2   Low;
+   using HighType = T1;
+   using LowType = T2;
+   using High = T1;
+   using Low = T2;
 };
 
 template< typename T>
 struct MathTrait< T, T >
 {
-   typedef T   HighType;
-   typedef T   LowType;
-   typedef T   High;
-   typedef T   Low;
+   using HighType = T;
+   using LowType = T;
+   using High = T;
+   using Low = T;
 };
 
 

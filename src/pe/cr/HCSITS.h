@@ -270,7 +270,7 @@ private:
 };
 //*************************************************************************************************
 
-typedef HardContactSemiImplicitTimesteppingSolvers HCSITS;
+using HCSITS = HardContactSemiImplicitTimesteppingSolvers;
 
 //=================================================================================================
 //

@@ -32,12 +32,12 @@ namespace field {
    class ComponentExtractionFunction
    {
    public:
-      typedef          Field_T                      basefield_t;
-      typedef typename Field_T::const_base_iterator basefield_iterator;
+      using basefield_t = Field_T;
+      using basefield_iterator = typename Field_T::const_base_iterator;
 
-      typedef VectorTrait<typename basefield_t::value_type > OutputTrait;
+      using OutputTrait = VectorTrait<typename basefield_t::value_type>;
 
-      typedef typename OutputTrait::OutputType          value_type;
+      using value_type = typename OutputTrait::OutputType;
 
       static const uint_t F_SIZE = 1;
 
@@ -61,8 +61,8 @@ namespace field {
    class ComponentExtractionAdaptor : public GhostLayerFieldAdaptor< ComponentExtractionFunction<field_t,component,vectorComponent>, 0 >
    {
    public:
-      typedef ComponentExtractionFunction<field_t,component,vectorComponent> Func;
-      typedef GhostLayerFieldAdaptor< Func, 0 > baseclass;
+      using Func = ComponentExtractionFunction<field_t, component, vectorComponent>;
+      using baseclass = GhostLayerFieldAdaptor<Func, 0>;
 
       ComponentExtractionAdaptor( const field_t & field, const Func & func = Func() )
          : baseclass( field, func)

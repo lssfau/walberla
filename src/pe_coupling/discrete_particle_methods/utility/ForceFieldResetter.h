@@ -36,7 +36,7 @@ using math::Vector3;
 class ForceFieldResetter
 {
 public:
-   typedef GhostLayerField< Vector3<real_t>, 1 >  ForceField_T;
+   using ForceField_T = GhostLayerField<Vector3<real_t>, 1>;
 
    ForceFieldResetter( const BlockDataID & forceFieldID )
       : forceFieldID_( forceFieldID )

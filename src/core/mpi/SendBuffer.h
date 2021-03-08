@@ -87,7 +87,7 @@ public:
    {
    public:
       static_assert( std::is_fundamental<VT>::value, "only fundamental data types are allowed");
-      typedef VT value_type;
+      using value_type = VT;
 
       Ptr(GenericSendBuffer<T, G>& buffer, const std::ptrdiff_t offset, const size_t length)
          : buffer_(buffer), offset_(offset), length_(length) {}
@@ -102,7 +102,7 @@ public:
    };
 
    //**Type definitions*************************************************************************************************
-   typedef T  ElementType;  //!< Type of the receive buffer elements.
+   using ElementType = T;  //!< Type of the receive buffer elements.
    //*******************************************************************************************************************
 
    //**Constructors*****************************************************************************************************
@@ -216,7 +216,7 @@ private:
 };
 //**********************************************************************************************************************
 
-typedef GenericSendBuffer<> SendBuffer;
+using SendBuffer = GenericSendBuffer<>;
 
 
 //======================================================================================================================

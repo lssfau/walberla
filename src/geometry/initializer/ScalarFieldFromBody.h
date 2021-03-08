@@ -77,7 +77,7 @@ namespace initializer {
    class ScalarFieldFromBody : public Initializer
    {
    public:
-      typedef typename Field_T::value_type Value_T;
+      using Value_T = typename Field_T::value_type;
       
       /*************************************************************************************************************//**
       * Constructor

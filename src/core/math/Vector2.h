@@ -94,10 +94,10 @@ private:
 
 public:
    //**Type definitions****************************************************************************
-   typedef typename SqrtTrait<Type>::Type Length;  //!< Vector length return type.
+   using Length = typename SqrtTrait<Type>::Type;  //!< Vector length return type.
                                                    /*!< Return type of the Vector2<Type>::length
                                                         function. */
-   typedef Type value_type;
+   using value_type = Type;
    //*******************************************************************************************************************
 
    //**Constructors*****************************************************************************************************
@@ -1670,7 +1670,7 @@ namespace walberla {
    template<typename T>
    struct VectorTrait< Vector2<T> >
    {
-      typedef T OutputType;
+      using OutputType = T;
 
       static const uint_t F_SIZE =  2u;
       static   T  get( const Vector2<T> & v, uint_t f )       { return v[f]; }

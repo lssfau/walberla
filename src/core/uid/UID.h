@@ -74,7 +74,7 @@ template< typename T > class UID {
 
 public:
 
-   typedef typename T::uint_type uint_type;
+   using uint_type = typename T::uint_type;
 
 
             inline UID( const char* const  identifier, const bool newUid = false, const bool appendUIDtoIdentifier = false );

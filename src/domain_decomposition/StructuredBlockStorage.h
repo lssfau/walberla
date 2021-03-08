@@ -121,8 +121,8 @@ public:
       internal::SelectableBlockDataHandlingWrapper dataHandling_;
    };
 
-   typedef BlockStorage::const_iterator const_iterator;
-   typedef BlockStorage::iterator             iterator;
+   using const_iterator = BlockStorage::const_iterator;
+   using iterator = BlockStorage::iterator;
 
    const BlockStorage& getBlockStorage() const { return *blockStorage_; }
          BlockStorage& getBlockStorage()       { return *blockStorage_; }

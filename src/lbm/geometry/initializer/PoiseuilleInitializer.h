@@ -82,7 +82,7 @@ namespace initializer {
          Z_AXIS=2,
          INVALID_AXIS=3
       };*/
-      typedef uint_t Axis;
+      using Axis = uint_t;
       static const uint_t X_AXIS;
       static const uint_t Y_AXIS;
       static const uint_t Z_AXIS;

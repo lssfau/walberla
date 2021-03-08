@@ -62,7 +62,7 @@ real_t calculateEilersEffectiveViscosity( real_t fluidViscosity, real_t porosity
 class EffectiveViscosityFieldEvaluator
 {
 public:
-   typedef GhostLayerField< real_t, 1 >  ScalarField_T;
+   using ScalarField_T = GhostLayerField<real_t, 1>;
 
    EffectiveViscosityFieldEvaluator( const BlockDataID & omegaFieldID, const ConstBlockDataID & solidVolumeFractionFieldID,
                                      const real_t & fluidViscosity,

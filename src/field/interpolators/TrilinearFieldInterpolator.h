@@ -48,9 +48,9 @@ public:
 
    static const uint_t F_SIZE = Field_T::F_SIZE;
 
-   typedef Field_T                                         BaseField_T;
-   typedef typename FlagField_T::flag_t                    flag_t;
-   typedef TrilinearFieldInterpolator<Field_T,FlagField_T> OwnType;
+   using BaseField_T = Field_T;
+   using flag_t = typename FlagField_T::flag_t;
+   using OwnType = TrilinearFieldInterpolator<Field_T, FlagField_T>;
 
    TrilinearFieldInterpolator( const weak_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block,
                                const BaseField_T & baseField, const FlagField_T & flagField,

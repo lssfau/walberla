@@ -38,9 +38,9 @@ class WeightAssignmentFunctor
 {
 public:
    ///Convenience typedef to be used as PhantomBlock weight in conjunction with this weight assignment functor.
-   typedef walberla::blockforest::PODPhantomWeight<double>           PhantomBlockWeight;
+   using PhantomBlockWeight = walberla::blockforest::PODPhantomWeight<double>;
    ///Convenience typdef for pack and unpack functions to be used in conjunction with PhantomBlockWeight.
-   typedef walberla::blockforest::PODPhantomWeightPackUnpack<double> PhantomBlockWeightPackUnpackFunctor;
+   using PhantomBlockWeightPackUnpackFunctor = walberla::blockforest::PODPhantomWeightPackUnpack<double>;
 
    WeightAssignmentFunctor( shared_ptr<blockforest::InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}
 

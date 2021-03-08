@@ -42,12 +42,12 @@ template<typename T> class MatrixMxN;
 }
 namespace pe{
 
-typedef math::Vector2<real_t> Vec2;
-typedef math::Vector3<real_t> Vec3;
-typedef math::Matrix2<real_t> Mat2;
-typedef math::Matrix3<real_t> Mat3;
-typedef math::Quaternion<real_t>  Quat;
-typedef math::MatrixMxN<real_t> MatN;
+using Vec2 = math::Vector2<real_t>;
+using Vec3 = math::Vector3<real_t>;
+using Mat2 = math::Matrix2<real_t>;
+using Mat3 = math::Matrix3<real_t>;
+using Quat = math::Quaternion<real_t>;
+using MatN = math::MatrixMxN<real_t>;
 
 using math::AABB;
 
@@ -77,67 +77,67 @@ class TriangleMesh;
 template <typename... BodyTypes>
 class Union;
 
-typedef RigidBody             BodyType;            //!< Type of the rigid bodies.
-typedef RigidBody*            BodyID;              //!< Handle for a rigid body.
-typedef const RigidBody*      ConstBodyID;         //!< Handle for a constant rigid body.
+using BodyType = RigidBody;            //!< Type of the rigid bodies.
+using BodyID = RigidBody *;              //!< Handle for a rigid body.
+using ConstBodyID = const RigidBody *;         //!< Handle for a constant rigid body.
 using   BodyPtr             = std::unique_ptr<RigidBody>;
 
-typedef GeomPrimitive*  GeomID;
-typedef const GeomPrimitive*  ConstGeomID;
+using GeomID = GeomPrimitive *;
+using ConstGeomID = const GeomPrimitive *;
 
-typedef Box                   BoxType;             //!< Type of the box geometric primitive.
-typedef Box*                  BoxID;               //!< Handle for a box primitive.
-typedef const Box*            ConstBoxID;          //!< Handle for a constant box primitive.
+using BoxType = Box;             //!< Type of the box geometric primitive.
+using BoxID = Box *;               //!< Handle for a box primitive.
+using ConstBoxID = const Box *;          //!< Handle for a constant box primitive.
 using   BoxPtr              = std::unique_ptr<Box>;
 
-typedef Capsule               CapsuleType;         //!< Type of the capsule geometric primitive.
-typedef Capsule*              CapsuleID;           //!< Handle for a capsule primitive.
-typedef const Capsule*        ConstCapsuleID;      //!< Handle for a constant capsule primitive.
+using CapsuleType = Capsule;         //!< Type of the capsule geometric primitive.
+using CapsuleID = Capsule *;           //!< Handle for a capsule primitive.
+using ConstCapsuleID = const Capsule *;      //!< Handle for a constant capsule primitive.
 using   CapsulePtr          = std::unique_ptr<Capsule>;
 
-typedef Cylinder              CylinderType;        //!< Type of the cylinder geometric primitive.
-typedef Cylinder*             CylinderID;          //!< Handle for a cylinder primitive.
-typedef const Cylinder*       ConstCylinderID;     //!< Handle for a constant cylinder primitive.
+using CylinderType = Cylinder;        //!< Type of the cylinder geometric primitive.
+using CylinderID = Cylinder *;          //!< Handle for a cylinder primitive.
+using ConstCylinderID = const Cylinder *;     //!< Handle for a constant cylinder primitive.
 using   CylinderPtr         = std::unique_ptr<Cylinder>;
 
-typedef CylindricalBoundary        CylindricalBoundaryType;        //!< Type of the cylindrical boundary geometric primitive.
-typedef CylindricalBoundary*       CylindricalBoundaryID;          //!< Handle for a cylindrical boundary primitive.
-typedef const CylindricalBoundary* ConstCylindricalBoundaryID;     //!< Handle for a constant cylindrical boundary primitive.
+using CylindricalBoundaryType = CylindricalBoundary;        //!< Type of the cylindrical boundary geometric primitive.
+using CylindricalBoundaryID = CylindricalBoundary *;          //!< Handle for a cylindrical boundary primitive.
+using ConstCylindricalBoundaryID = const CylindricalBoundary *;     //!< Handle for a constant cylindrical boundary primitive.
 using   CylindricalBoundaryPtr   = std::unique_ptr<CylindricalBoundary>;
 
-typedef Ellipsoid             EllipsoidType;       //!< Type of the ellipsoid geometric primitive.
-typedef Ellipsoid*            EllipsoidID;         //!< Handle for a ellipsoid primitive.
-typedef const Ellipsoid*      ConstEllipsoidID;    //!< Handle for a constant ellipsoid primitive.
+using EllipsoidType = Ellipsoid;       //!< Type of the ellipsoid geometric primitive.
+using EllipsoidID = Ellipsoid *;         //!< Handle for a ellipsoid primitive.
+using ConstEllipsoidID = const Ellipsoid *;    //!< Handle for a constant ellipsoid primitive.
 using   EllipsoidPtr        = std::unique_ptr<Ellipsoid>;
 
-typedef Plane                 PlaneType;           //!< Type of the plane geometric primitive.
-typedef Plane*                PlaneID;             //!< Handle for a plane primitive.
-typedef const Plane*          ConstPlaneID;        //!< Handle for a constant plane primitive.
+using PlaneType = Plane;           //!< Type of the plane geometric primitive.
+using PlaneID = Plane *;             //!< Handle for a plane primitive.
+using ConstPlaneID = const Plane *;        //!< Handle for a constant plane primitive.
 using   PlanePtr            = std::unique_ptr<Plane>;
 
-typedef Sphere                SphereType;          //!< Type of the sphere geometric primitive.
-typedef Sphere*               SphereID;            //!< Handle for a sphere primitive.
-typedef const Sphere*         ConstSphereID;       //!< Handle for a constant sphere primitive.
+using SphereType = Sphere;          //!< Type of the sphere geometric primitive.
+using SphereID = Sphere *;            //!< Handle for a sphere primitive.
+using ConstSphereID = const Sphere *;       //!< Handle for a constant sphere primitive.
 using   SpherePtr           = std::unique_ptr<Sphere>;
 
-typedef Squirmer              SquirmerType;        //!< Type of the squirmer geometric primitive.
-typedef Squirmer*             SquirmerID;          //!< Handle for a squirmer primitive.
-typedef const Squirmer*       ConstSquirmerID;     //!< Handle for a constant squirmer primitive.
+using SquirmerType = Squirmer;        //!< Type of the squirmer geometric primitive.
+using SquirmerID = Squirmer *;          //!< Handle for a squirmer primitive.
+using ConstSquirmerID = const Squirmer *;     //!< Handle for a constant squirmer primitive.
 using   SquirmerPtr         = std::unique_ptr<Squirmer>;
 
-typedef TriangleMesh          MeshType;             //!< Type of the triangle mesh geometric primitive.
-typedef TriangleMesh*         MeshID;               //!< Handle for a triangle mesh primitive.
-typedef const TriangleMesh*   ConstMeshID;          //!< Handle for a constant triangle mesh primitive.
+using MeshType = TriangleMesh;             //!< Type of the triangle mesh geometric primitive.
+using MeshID = TriangleMesh *;               //!< Handle for a triangle mesh primitive.
+using ConstMeshID = const TriangleMesh *;          //!< Handle for a constant triangle mesh primitive.
 using   TriangleMeshPtr     = std::unique_ptr<TriangleMesh>;
 
-typedef Contact               ContactType;         //!< Type of the contacts.
-typedef Contact*              ContactID;           //!< Handle for a contact.
-typedef const Contact*        ConstContactID;      //!< Handle for a constant contact.
+using ContactType = Contact;         //!< Type of the contacts.
+using ContactID = Contact *;           //!< Handle for a contact.
+using ConstContactID = const Contact *;      //!< Handle for a constant contact.
 
-typedef BodyManager*          ManagerID;           //!< Handle for a BodyManager.
-typedef const BodyManager*    ConstManagerID;      //!< Handle for a constant BodyManager.
+using ManagerID = BodyManager *;           //!< Handle for a BodyManager.
+using ConstManagerID = const BodyManager *;      //!< Handle for a constant BodyManager.
 
-typedef std::vector<Material>  Materials;          //!< Vector for materials.
+using Materials = std::vector<Material>;          //!< Vector for materials.
 
 
 //*************************************************************************************************
@@ -156,14 +156,14 @@ typedef std::vector<Material>  Materials;          //!< Vector for materials.
    MaterialID myMaterial = createMaterial( "myMaterial", real_c(2.54), real_c(0.8), real_c(0.1), real_c(0.05) );
    \endcode
  */
-typedef Materials::size_type  MaterialID;
+using MaterialID = Materials::size_type;
 //*************************************************************************************************
 
 ///Output data type of coarse collision detection module
-typedef std::vector<std::pair<BodyID, BodyID> > PossibleContacts;
+using PossibleContacts = std::vector<std::pair<BodyID, BodyID>>;
 
 ///Output data type of fine collision detection module
-typedef std::vector< Contact > Contacts;
+using Contacts = std::vector<Contact>;
 
 ///Class enum for BodyStorages
 /// \see Storage
@@ -187,7 +187,7 @@ struct StorageSelect
 };
 
 ///Container for local and shadow body storage
-typedef std::array<BodyStorage, 2> Storage;
+using Storage = std::array<BodyStorage, 2>;
 
 }  // namespace pe
 }  // namespace walberla

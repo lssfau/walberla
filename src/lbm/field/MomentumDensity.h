@@ -103,7 +103,7 @@ void getMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, const FieldPt
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "This function works with D3Q19 stencils only!" );
 
    using namespace stencil;
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    momentumDensity[0] = it[ Stencil::idx[E] ] + it[ Stencil::idx[NE] ] + it[ Stencil::idx[SE] ] + it[ Stencil::idx[TE] ] + it[ Stencil::idx[BE] ] -
                         it[ Stencil::idx[W] ] - it[ Stencil::idx[NW] ] - it[ Stencil::idx[SW] ] - it[ Stencil::idx[TW] ] - it[ Stencil::idx[BW] ];
@@ -120,7 +120,7 @@ void getMomentumDensityD3Q19( Vector3< real_t > & momentumDensity, const PdfFiel
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "This function works with D3Q19 stencils only!" );
 
    using namespace stencil;
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    const auto & xyz0 = pdf(x,y,z,0);
 

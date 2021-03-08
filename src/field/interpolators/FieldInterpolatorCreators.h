@@ -66,8 +66,8 @@ public:
 
    Interpolator_T * initialize( IBlock * const block ) override
    {
-      typedef typename Interpolator_T::BaseField_T InterpolatedField_T;
-      typedef typename FlagField_T::flag_t flag_t;
+      using InterpolatedField_T = typename Interpolator_T::BaseField_T;
+      using flag_t = typename FlagField_T::flag_t;
       const InterpolatedField_T * interpolatedField = block->getData< InterpolatedField_T >( interpolatedFieldID_ );
       const FlagField_T * flagField = block->getData< FlagField_T >( flagFieldID_ );
 

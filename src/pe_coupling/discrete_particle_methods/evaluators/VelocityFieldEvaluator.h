@@ -44,8 +44,8 @@ template <typename LatticeModel_T, typename BoundaryHandling_T>
 class VelocityFieldEvaluator
 {
 public:
-   typedef lbm::PdfField< LatticeModel_T >        PdfField_T;
-   typedef GhostLayerField< Vector3<real_t>, 1 >  VelocityField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using VelocityField_T = GhostLayerField<Vector3<real_t>, 1>;
 
    VelocityFieldEvaluator( const BlockDataID & velocityFieldID,
                            const ConstBlockDataID & pdfFieldID, const ConstBlockDataID & boundaryHandlingID )

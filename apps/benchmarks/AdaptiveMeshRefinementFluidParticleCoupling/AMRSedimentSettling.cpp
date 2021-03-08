@@ -90,25 +90,25 @@ using walberla::uint_t;
 //////////////
 
 // PDF field, flag field & body field
-typedef lbm::D3Q19< lbm::collision_model::TRT, false>  LatticeModel_T;
-typedef LatticeModel_T::Stencil          Stencil_T;
-typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+using LatticeModel_T = lbm::D3Q19<lbm::collision_model::TRT, false>;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
-typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
-typedef GhostLayerField< Vector3<real_t>, 1 >  VelocityField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
+using BodyField_T = GhostLayerField<pe::BodyID, 1>;
+using VelocityField_T = GhostLayerField<Vector3<real_t>, 1>;
 
 const uint_t FieldGhostLayers = 4;
 
 // boundary handling
-typedef lbm::NoSlip< LatticeModel_T, flag_t > NoSlip_T;
+using NoSlip_T = lbm::NoSlip<LatticeModel_T, flag_t>;
 
-typedef pe_coupling::CurvedLinear< LatticeModel_T, FlagField_T > MO_T;
+using MO_T = pe_coupling::CurvedLinear<LatticeModel_T, FlagField_T>;
 
-typedef BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T, MO_T > BoundaryHandling_T;
+using BoundaryHandling_T = BoundaryHandling<FlagField_T, Stencil_T, NoSlip_T, MO_T>;
 
-typedef std::tuple<pe::Sphere, pe::Ellipsoid, pe::Plane> BodyTypeTuple;
+using BodyTypeTuple = std::tuple<pe::Sphere, pe::Ellipsoid, pe::Plane>;
 
 ///////////
 // FLAGS //
@@ -135,8 +135,8 @@ template< typename LatticeModel_T, typename Filter_T >
 class VectorGradientRefinement
 {
 public:
-   typedef GhostLayerField< Vector3<real_t>, 1 >  VectorField_T;
-   typedef typename LatticeModel_T::Stencil       Stencil_T;
+   using VectorField_T = GhostLayerField<Vector3<real_t>, 1>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    VectorGradientRefinement( const ConstBlockDataID & fieldID, const Filter_T & filter,
                              const real_t upperLimit, const real_t lowerLimit, const uint_t maxLevel ) :
@@ -1504,7 +1504,7 @@ int main( int argc, char **argv )
    // add velocity field and utility
    BlockDataID velocityFieldID = field::addToStorage<VelocityField_T>( blocks, "velocity field", Vector3<real_t>(real_t(0)), field::zyxf, uint_t(2) );
 
-   typedef lbm::VelocityFieldWriter< PdfField_T, VelocityField_T > VelocityFieldWriter_T;
+   using VelocityFieldWriter_T = lbm::VelocityFieldWriter<PdfField_T, VelocityField_T>;
    BlockSweepWrapper< VelocityFieldWriter_T > velocityFieldWriter( blocks, VelocityFieldWriter_T( pdfFieldID, velocityFieldID ) );
 
 
@@ -1847,7 +1847,7 @@ int main( int argc, char **argv )
                                                  "Body Mapping", finestLevel );
 
    // add sweep for restoring PDFs in cells previously occupied by pe bodies
-   typedef pe_coupling::EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T > Reconstructor_T;
+   using Reconstructor_T = pe_coupling::EquilibriumReconstructor<LatticeModel_T, BoundaryHandling_T>;
    Reconstructor_T reconstructor( blocks, boundaryHandlingID, bodyFieldID );
    refinementTimestep->addPostStreamVoidFunction(lbm::refinement::SweepAsFunctorWrapper( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T > ( blocks, pdfFieldID,
                                                  boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMO_Flag, Fluid_Flag ), blocks ),

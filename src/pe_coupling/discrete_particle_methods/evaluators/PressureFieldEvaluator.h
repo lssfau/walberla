@@ -39,8 +39,8 @@ template <typename LatticeModel_T, typename BoundaryHandling_T>
 class PressureFieldEvaluator
 {
 public:
-   typedef lbm::PdfField< LatticeModel_T >        PdfField_T;
-   typedef GhostLayerField< real_t, 1 >           ScalarField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using ScalarField_T = GhostLayerField<real_t, 1>;
 
    PressureFieldEvaluator( const BlockDataID & pressureFieldID, const ConstBlockDataID & pdfFieldID, const ConstBlockDataID & boundaryHandlingID )
       : pressureFieldID_( pressureFieldID ), pdfFieldID_( pdfFieldID ), boundaryHandlingID_( boundaryHandlingID )

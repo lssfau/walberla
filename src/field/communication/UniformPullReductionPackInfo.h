@@ -49,7 +49,7 @@ template< template<typename> class ReduceOperation, typename GhostLayerField_T >
 class UniformPullReductionPackInfo : public walberla::communication::UniformPackInfo
 {
 public:
-   typedef typename GhostLayerField_T::value_type T;
+   using T = typename GhostLayerField_T::value_type;
 
    UniformPullReductionPackInfo( const BlockDataID & bdID ) : bdID_( bdID ), communicateAllGhostLayers_( true ),
                                  numberOfGhostLayers_( 0 ) {}

@@ -346,7 +346,7 @@ inline bool equal_backend<long double>( long double a, long double b )
 template< typename T1, typename T2 >
 inline bool equal( T1 a, T2 b )
 {
-   typedef typename MathTrait<T1,T2>::High High;
+   using High = typename MathTrait<T1, T2>::High;
    return equal_backend<High>( a, b );
 }
 //**********************************************************************************************************************

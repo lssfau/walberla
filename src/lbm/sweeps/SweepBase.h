@@ -47,7 +47,7 @@ class SweepBase
 {
 public:
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
 
    // block has NO dst pdf field
    SweepBase( const BlockDataID & pdfField,

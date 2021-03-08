@@ -210,7 +210,7 @@ struct Equilibrium< LatticeModel_T, typename std::enable_if< std::is_same< typen
    static_assert( LatticeModel_T::compressible == false,                                       "Only works with incompressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    template< typename FieldPtrOrIterator >
    static void set( FieldPtrOrIterator & it,
@@ -359,7 +359,7 @@ struct Equilibrium< LatticeModel_T, typename std::enable_if< std::is_same< typen
    static_assert( LatticeModel_T::compressible,                                                "Only works with compressible models!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    template< typename FieldPtrOrIterator >
    static void set( FieldPtrOrIterator & it,

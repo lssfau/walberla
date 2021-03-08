@@ -70,7 +70,7 @@ namespace timeloop {
    class PerformanceMeter
    {
    public:
-      typedef std::function< uint_t(const IBlock &) > CountFunction;
+      using CountFunction = std::function<uint_t (const IBlock &)>;
 
 
       PerformanceMeter( StructuredBlockStorage & blockStorage );

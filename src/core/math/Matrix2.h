@@ -987,7 +987,7 @@ namespace walberla {
 template<typename T>
 struct VectorTrait< Matrix2<T> >
 {
-   typedef T OutputType;
+   using OutputType = T;
 
    static const uint_t F_SIZE =  4u;
    static T    get( const Matrix2<T> & v, uint_t f )       { return v[f]; }

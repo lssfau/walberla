@@ -70,9 +70,9 @@ class AddedMassForceEvaluator
 
 public:
 
-   typedef GhostLayerField< Vector3<real_t>, 1>             Vec3Field_T;
-   typedef FieldInterpolator_T<Vec3Field_T, FlagField_T>    Vec3FieldInterpolator_T;
-   typedef Distributor_T<Vec3Field_T, FlagField_T>          ForceDistributor_T;
+   using Vec3Field_T = GhostLayerField<Vector3<real_t>, 1>;
+   using Vec3FieldInterpolator_T = FieldInterpolator_T<Vec3Field_T, FlagField_T>;
+   using ForceDistributor_T = Distributor_T<Vec3Field_T, FlagField_T>;
 
    AddedMassForceEvaluator( const shared_ptr<StructuredBlockStorage> & blockStorage,
                             const BlockDataID & forceFieldID, const BlockDataID & bodyStorageID,

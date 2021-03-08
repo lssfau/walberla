@@ -42,8 +42,8 @@ class BlockDataHandling : public blockforest::BlockDataHandling< Field_T >
 {
 public:
 
-   typedef typename Field_T::value_type Value_T;
-   typedef std::function< void ( Field_T * field, IBlock * const block ) > InitializationFunction_T;
+   using Value_T = typename Field_T::value_type;
+   using InitializationFunction_T = std::function<void (Field_T *, IBlock *const)>;
 
    ~BlockDataHandling() override = default;
 
@@ -398,7 +398,7 @@ class DefaultBlockDataHandling : public BlockDataHandling< GhostLayerField_T >
 {
 public:
 
-   typedef typename GhostLayerField_T::value_type Value_T;
+   using Value_T = typename GhostLayerField_T::value_type;
 
    DefaultBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks,
                              const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :
@@ -460,8 +460,8 @@ class AlwaysInitializeBlockDataHandling : public blockforest::AlwaysInitializeBl
 {
 public:
 
-   typedef typename GhostLayerField_T::value_type Value_T;
-   typedef std::function< void ( GhostLayerField_T * field, IBlock * const block ) > InitializationFunction_T;
+   using Value_T = typename GhostLayerField_T::value_type;
+   using InitializationFunction_T = std::function<void (GhostLayerField_T *, IBlock *const)>;
 
    AlwaysInitializeBlockDataHandling( const weak_ptr< StructuredBlockStorage > & blocks,
                                       const std::function< Vector3< uint_t > ( const shared_ptr< StructuredBlockStorage > &, IBlock * const ) > calculateSize = internal::defaultSize ) :

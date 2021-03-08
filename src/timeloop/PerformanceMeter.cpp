@@ -179,7 +179,7 @@ namespace timeloop {
     *******************************************************************************************************************/
    shared_ptr< std::map<std::string, real_t> > PerformanceMeter::getReduced ( int targetRank )
    {
-      typedef std::map<std::string, real_t> ResultMap;
+      using ResultMap = std::map<std::string, real_t>;
       shared_ptr < ResultMap > res;
 
       std::vector<real_t> totalNrCells;

@@ -36,7 +36,7 @@ class VelocityVTKWriter : public vtk::BlockCellDataWriter< OutputType, 3 >
 {
 public:
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
 
    VelocityVTKWriter( const ConstBlockDataID & pdfFieldId, const std::string & id ) :
       vtk::BlockCellDataWriter< OutputType, 3 >( id ), bdid_( pdfFieldId ), pdf_( nullptr ) {}
@@ -63,7 +63,7 @@ class VelocityMagnitudeVTKWriter : public vtk::BlockCellDataWriter< OutputType, 
 {
 public:
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
 
    VelocityMagnitudeVTKWriter( const ConstBlockDataID & pdfFieldId, const std::string & id ) :
       vtk::BlockCellDataWriter< OutputType, 1 >( id ), bdid_( pdfFieldId ), pdf_( nullptr ) {}
@@ -90,7 +90,7 @@ class VelocitySIVTKWriter : public vtk::BlockCellDataWriter< OutputType, 3 >
 {
 public:
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
 
    VelocitySIVTKWriter( const ConstBlockDataID & pdfFieldId, const real_t dx_SI, const real_t dt_SI, const std::string & id ) :
       vtk::BlockCellDataWriter< OutputType, 3 >( id ), bdid_( pdfFieldId ), pdf_( NULL ), dxDividedByDt_SI_( dx_SI / dt_SI ) {}
@@ -118,7 +118,7 @@ class VelocitySIMagnitudeVTKWriter : public vtk::BlockCellDataWriter< OutputType
 {
 public:
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
 
    VelocitySIMagnitudeVTKWriter( const ConstBlockDataID & pdfFieldId, const real_t dx_SI, const real_t dt_SI, const std::string & id ) :
       vtk::BlockCellDataWriter< OutputType, 1 >( id ), bdid_( pdfFieldId ), pdf_( NULL ), dxDividedByDt_SI_( dx_SI / dt_SI ) {}

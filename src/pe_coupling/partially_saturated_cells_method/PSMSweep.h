@@ -66,10 +66,10 @@ class PSMSweep
 {
 public:
 
-   typedef typename lbm::SweepBase< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T >::PdfField_T  PdfField_T;
-   typedef typename LatticeModel_T::Stencil                   Stencil_T;
-   typedef std::pair< pe::BodyID, real_t >                    BodyAndVolumeFraction_T;
-   typedef Field< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
+   using PdfField_T = typename lbm::SweepBase<LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T>::PdfField_T;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using BodyAndVolumeFraction_T = std::pair<pe::BodyID, real_t>;
+   using BodyAndVolumeFractionField_T = Field<std::vector<BodyAndVolumeFraction_T>, 1>;
 
    PSMSweep( const BlockDataID & pdfFieldID,
              const BlockDataID & bodyAndVolumeFractionFieldID,
@@ -441,7 +441,7 @@ shared_ptr< PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelo
 makePSMSweep( const BlockDataID & pdfFieldID, const BlockDataID & bodyAndVolumeFractionFieldID, const shared_ptr<StructuredBlockStorage> & blockStorage,
               const Filter_T & filter, const DensityVelocityIn_T & densityVelocityIn, const DensityVelocityOut_T & densityVelocityOut )
 {
-   typedef PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, SolidCollision_T, Weighting_T > PSMS_T;
+   using PSMS_T = PSMSweep<LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, SolidCollision_T, Weighting_T>;
    return shared_ptr< PSMS_T >( new PSMS_T( pdfFieldID, bodyAndVolumeFractionFieldID, blockStorage, filter, densityVelocityIn, densityVelocityOut ) );
 }
 
@@ -450,7 +450,7 @@ shared_ptr< PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelo
 makePSMSweep( const BlockDataID & srcID, const BlockDataID & dstID, const BlockDataID & bodyAndVolumeFractionFieldID, const shared_ptr<StructuredBlockStorage> & blockStorage,
               const Filter_T & filter, const DensityVelocityIn_T & densityVelocityIn, const DensityVelocityOut_T & densityVelocityOut )
 {
-   typedef PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, SolidCollision_T, Weighting_T > PSMS_T;
+   using PSMS_T = PSMSweep<LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T, SolidCollision_T, Weighting_T>;
    return shared_ptr< PSMS_T >( new PSMS_T( srcID, dstID, bodyAndVolumeFractionFieldID, blockStorage, filter, densityVelocityIn, densityVelocityOut ) );
 }
 

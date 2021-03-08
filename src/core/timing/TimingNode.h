@@ -493,7 +493,7 @@ void addRemainderNodes(timing::TimingNode<TP> &tn) {
 } /// namespace internal
 }
 
-typedef timing::TimingNode<timing::WcPolicy>  WcTimingNode;
-typedef timing::TimingNode<timing::CpuPolicy> CpuTimingNode;
+using WcTimingNode = timing::TimingNode<timing::WcPolicy>;
+using CpuTimingNode = timing::TimingNode<timing::CpuPolicy>;
 
 }

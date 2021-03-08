@@ -61,14 +61,14 @@ inline bool check_not_nullptr( const shared_ptr<T> & p )
 template< typename T, typename U >
 inline bool check_equal( const T & lhs, const U & rhs )
 {
-   typedef std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value> truth_type;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
    return check_equal( lhs, rhs, truth_type() );
 }
 
 template< typename T, typename U >
 inline bool check_equal( const T & lhs, const U & rhs, const std::true_type & )
 {
-   typedef typename math::MathTrait<T,U>::High HighType;
+   using HighType = typename math::MathTrait<T, U>::High;
    return static_cast<HighType>(lhs) == static_cast<HighType>(rhs);
 }
 
@@ -81,14 +81,14 @@ inline bool check_equal( const T & lhs, const U & rhs, const std::false_type & )
 template< typename T, typename U >
 inline bool check_unequal( const T & lhs, const U & rhs )
 {
-   typedef std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value> truth_type;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
    return check_unequal( lhs, rhs, truth_type() );
 }
 
 template< typename T, typename U >
 inline bool check_unequal( const T & lhs, const U & rhs, const std::true_type & )
 {
-   typedef typename math::MathTrait<T,U>::High HighType;
+   using HighType = typename math::MathTrait<T, U>::High;
    return static_cast<HighType>(lhs) != static_cast<HighType>(rhs);
 }
 
@@ -104,7 +104,7 @@ inline bool check_float_equal( const T & lhs, const U & rhs )
    static_assert( std::is_floating_point<T>::value,  "First operand type T is not a floating point type!");
    static_assert( std::is_floating_point<U>::value, "Second operand type U is not a floating point type!");
 
-   typedef typename math::MathTrait<T,U>::Low LowType;
+   using LowType = typename math::MathTrait<T, U>::Low;
 
    LowType low_lhs = static_cast<LowType>( lhs );
    LowType low_rhs = static_cast<LowType>( rhs );
@@ -118,7 +118,7 @@ inline bool check_float_unequal( const T & lhs, const U & rhs )
    static_assert( std::is_floating_point<T>::value,  "First operand type T is not a floating point type!");
    static_assert( std::is_floating_point<U>::value, "Second operand type U is not a floating point type!");
 
-   typedef typename math::MathTrait<T,U>::Low LowType;
+   using LowType = typename math::MathTrait<T, U>::Low;
 
    LowType low_lhs = static_cast<LowType>( lhs );
    LowType low_rhs = static_cast<LowType>( rhs );
@@ -133,7 +133,7 @@ inline bool check_float_equal_eps( const T & lhs, const U & rhs,
    static_assert( std::is_floating_point<T>::value,  "First operand type T is not a floating point type!");
    static_assert( std::is_floating_point<U>::value, "Second operand type U is not a floating point type!");
 
-   typedef typename math::MathTrait<T,U>::Low LowType;
+   using LowType = typename math::MathTrait<T, U>::Low;
 
    LowType low_lhs = static_cast<LowType>( lhs );
    LowType low_rhs = static_cast<LowType>( rhs );
@@ -148,7 +148,7 @@ inline bool check_float_unequal_eps( const T & lhs, const U & rhs,
    static_assert( std::is_floating_point<T>::value,  "First operand type T is not a floating point type!");
    static_assert( std::is_floating_point<U>::value, "Second operand type U is not a floating point type!");
 
-   typedef typename math::MathTrait<T,U>::Low LowType;
+   using LowType = typename math::MathTrait<T, U>::Low;
 
    LowType low_lhs = static_cast<LowType>( lhs );
    LowType low_rhs = static_cast<LowType>( rhs );
@@ -159,14 +159,14 @@ inline bool check_float_unequal_eps( const T & lhs, const U & rhs,
 template< typename T, typename U >
 inline bool check_identical( const T & lhs, const U & rhs )
 {
-   typedef std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value> truth_type;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
    return check_identical( lhs, rhs, truth_type() );
 }
 
 template< typename T, typename U >
 inline bool check_identical( const T & lhs, const U & rhs, const std::true_type & )
 {
-   typedef typename math::MathTrait<T,U>::High HighType;
+   using HighType = typename math::MathTrait<T, U>::High;
    return isIdentical( static_cast<HighType>(lhs), static_cast<HighType>(rhs) );
 }
 
@@ -179,14 +179,14 @@ inline bool check_identical( const T & lhs, const U & rhs, const std::false_type
 template< typename T, typename U >
 inline bool check_not_identical( const T & lhs, const U & rhs )
 {
-   typedef std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value> truth_type;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
    return check_not_identical( lhs, rhs, truth_type() );
 }
 
 template< typename T, typename U >
 inline bool check_not_identical( const T & lhs, const U & rhs, const std::true_type & )
 {
-   typedef typename math::MathTrait<T,U>::High HighType;
+   using HighType = typename math::MathTrait<T, U>::High;
    return !isIdentical( static_cast<HighType>(lhs), static_cast<HighType>(rhs) );
 }
 
@@ -199,14 +199,14 @@ inline bool check_not_identical( const T & lhs, const U & rhs, const std::false_
 template< typename T, typename U >
 inline bool check_less( const T & lhs, const U & rhs )
 {
-   typedef std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value> truth_type;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
    return check_less( lhs, rhs, truth_type() );
 }
 
 template< typename T, typename U >
 inline bool check_less( const T & lhs, const U & rhs, const std::true_type & )
 {
-   typedef typename math::MathTrait<T,U>::High HighType;
+   using HighType = typename math::MathTrait<T, U>::High;
    return static_cast<HighType>(lhs) < static_cast<HighType>(rhs);
 }
 
@@ -219,14 +219,14 @@ inline bool check_less( const T & lhs, const U & rhs, const std::false_type & )
 template< typename T, typename U >
 inline bool check_greater( const T & lhs, const U & rhs )
 {
-   typedef std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value> truth_type;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
    return check_greater( lhs, rhs, truth_type() );
 }
 
 template< typename T, typename U >
 inline bool check_greater( const T & lhs, const U & rhs, const std::true_type & )
 {
-   typedef typename math::MathTrait<T,U>::High HighType;
+   using HighType = typename math::MathTrait<T, U>::High;
    return static_cast<HighType>(lhs) > static_cast<HighType>(rhs);
 }
 
@@ -239,14 +239,14 @@ inline bool check_greater( const T & lhs, const U & rhs, const std::false_type &
 template< typename T, typename U >
 inline bool check_less_equal( const T & lhs, const U & rhs )
 {
-   typedef std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value> truth_type;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
    return check_less_equal( lhs, rhs, truth_type() );
 }
 
 template< typename T, typename U >
 inline bool check_less_equal( const T & lhs, const U & rhs, const std::true_type & )
 {
-   typedef typename math::MathTrait<T,U>::High HighType;
+   using HighType = typename math::MathTrait<T, U>::High;
    return static_cast<HighType>(lhs) <= static_cast<HighType>(rhs);
 }
 
@@ -259,14 +259,14 @@ inline bool check_less_equal( const T & lhs, const U & rhs, const std::false_typ
 template< typename T, typename U >
 inline bool check_greater_equal( const T & lhs, const U & rhs )
 {
-   typedef std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value> truth_type;
+   using truth_type = std::integral_constant<bool, std::is_arithmetic<T>::value && std::is_arithmetic<U>::value>;
    return check_greater_equal( lhs, rhs, truth_type() );
 }
 
 template< typename T, typename U >
 inline bool check_greater_equal( const T & lhs, const U & rhs, const std::true_type & )
 {
-   typedef typename math::MathTrait<T,U>::High HighType;
+   using HighType = typename math::MathTrait<T, U>::High;
    return static_cast<HighType>(lhs) >= static_cast<HighType>(rhs);
 }
 

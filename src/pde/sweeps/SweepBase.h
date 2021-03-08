@@ -39,7 +39,7 @@ class SweepBase
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 > Field_T;
+   using Field_T = GhostLayerField<real_t, 1>;
 
    // block has NO dst u field
    SweepBase( const BlockDataID & uFieldId, const BlockDataID & fFieldId ) :

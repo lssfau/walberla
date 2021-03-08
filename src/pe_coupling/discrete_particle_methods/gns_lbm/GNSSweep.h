@@ -53,9 +53,9 @@ class GNSSweep
 {
 public:
 
-   typedef typename lbm::SweepBase< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T >::PdfField_T  PdfField_T;
-   typedef typename LatticeModel_T::Stencil Stencil_T;
-   typedef GhostLayerField< real_t, 1> ScalarField_T;
+   using PdfField_T = typename lbm::SweepBase<LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T>::PdfField_T;
+   using Stencil_T = typename LatticeModel_T::Stencil;
+   using ScalarField_T = GhostLayerField<real_t, 1>;
 
    static_assert( LatticeModel_T::ForceModel::constant == false, "Only works with non-constant force models!" );
    static_assert( LatticeModel_T::compressible == false,         "Only works with incompressible models!" );
@@ -257,7 +257,7 @@ shared_ptr< GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelo
 makeGNSSweep( const BlockDataID & pdfFieldID, const BlockDataID & solidVolumeFractionFieldID, const Filter_T & filter,
                const DensityVelocityIn_T & densityVelocityIn, const DensityVelocityOut_T & densityVelocityOut )
 {
-   typedef GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T > Sweep_T;
+   using Sweep_T = GNSSweep<LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T>;
    return shared_ptr< Sweep_T >( new Sweep_T( pdfFieldID, solidVolumeFractionFieldID, filter, densityVelocityIn, densityVelocityOut ) );
 }
 
@@ -266,7 +266,7 @@ shared_ptr< GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelo
 makeGNSSweep( const BlockDataID & srcID, const BlockDataID & dstID, const BlockDataID & solidVolumeFractionFieldID, const Filter_T & filter,
                const DensityVelocityIn_T & densityVelocityIn, const DensityVelocityOut_T & densityVelocityOut )
 {
-   typedef GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T > Sweep_T;
+   using Sweep_T = GNSSweep<LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T>;
    return shared_ptr< Sweep_T >( new Sweep_T( srcID, dstID, solidVolumeFractionFieldID, filter, densityVelocityIn, densityVelocityOut ) );
 }
 

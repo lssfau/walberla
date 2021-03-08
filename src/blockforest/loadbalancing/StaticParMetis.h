@@ -40,8 +40,8 @@ public:
    enum Algorithm    { PARMETIS_PART_GEOM_KWAY, PARMETIS_PART_KWAY };
    enum WeightsToUse { PARMETIS_NO_WEIGHTS = 0, PARMETIS_EDGE_WEIGHTS = 1, PARMETIS_VERTEX_WEIGHTS = 2, PARMETIS_BOTH_WEIGHTS = 3 };
 
-   typedef std::pair< const SetupBlock *, const SetupBlock * > BlockPair;
-   typedef std::function<void (const std::vector< BlockPair > & edges, std::vector< int64_t > & weights ) > CommWeightFunction;
+   using BlockPair = std::pair<const SetupBlock *, const SetupBlock *>;
+   using CommWeightFunction = std::function<void (const std::vector<BlockPair> &, std::vector<int64_t> &)>;
 
    StaticLevelwiseParMetis( const Algorithm algorithm = PARMETIS_PART_GEOM_KWAY )
       : algorithm_( algorithm ), weightsToUse_( PARMETIS_VERTEX_WEIGHTS ) {}

@@ -52,12 +52,12 @@ class VTKOutput : public NonCopyable {
 private:
 
    class VTKGEN : public uid::IndexGenerator< VTKGEN, size_t >{};
-   typedef UID< VTKGEN > VTKUID;
+   using VTKUID = UID<VTKGEN>;
 
    // types used during vertex-index mapping procedure when writing (P)VTU files
-   typedef std::tuple< cell_idx_t, cell_idx_t, cell_idx_t > Vertex;
-   typedef std::tuple< real_t,     real_t,     real_t >     VertexCoord;
-   typedef int32_t Index;
+   using Vertex = std::tuple<cell_idx_t, cell_idx_t, cell_idx_t>;
+   using VertexCoord = std::tuple<real_t, real_t, real_t>;
+   using Index = int32_t;
 
    struct VertexCompare {
       bool operator()( const Vertex& lhs, const Vertex& rhs ) const
@@ -141,9 +141,8 @@ public:
                                                                      const bool continuousNumbering, const bool binary, const bool littleEndian,
                                                                      const bool useMPIIO, const uint_t initialExecutionCount );
 
-   typedef std::function< void () > BeforeFunction;
-   typedef std::function< void ( CellSet& filteredCells, const IBlock& block,
-                                   const StructuredBlockStorage& storage, const uint_t ghostLayers ) >  CellFilter;
+   using BeforeFunction = std::function<void ()>;
+   using CellFilter = std::function<void (CellSet &, const IBlock &, const StructuredBlockStorage &, const uint_t)>;
 
    ~VTKOutput();
 

@@ -33,7 +33,7 @@ namespace uid {
 namespace suidgenerator {
 class S : public IndexGenerator< S, size_t >{}; ///< generator class for unified state/selection UIDs
 }
-typedef UID< suidgenerator::S > SUID;           ///< unified state/selection UID
+using SUID = UID<suidgenerator::S>;           ///< unified state/selection UID
 
 
 } // namespace uid

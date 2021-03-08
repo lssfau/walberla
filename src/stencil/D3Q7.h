@@ -88,7 +88,7 @@ namespace stencil {
          /*! \name Iteration*/
          //@{
 
-         typedef stencil::Iterator<D3Q7> iterator;
+         using iterator = stencil::Iterator<D3Q7>;
 
          static iterator begin()           { return iterator(0); }
          static iterator beginNoCenter()   { return iterator(noCenterFirstIdx); }
@@ -239,7 +239,7 @@ namespace stencil {
 
    } // namespace internal
 
-   typedef internal::D3Q7<> D3Q7;
+   using D3Q7 = internal::D3Q7<>;
 
 } // namespace stencil
 } // namespace walberla

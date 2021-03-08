@@ -36,8 +36,8 @@ template <typename LatticeModel_T, typename BoundaryHandling_T>
 class GNSPressureFieldEvaluator
 {
 public:
-   typedef lbm::PdfField< LatticeModel_T >        PdfField_T;
-   typedef GhostLayerField< real_t, 1 >           ScalarField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using ScalarField_T = GhostLayerField<real_t, 1>;
 
    GNSPressureFieldEvaluator( const BlockDataID & pressureFieldID, const ConstBlockDataID & pdfFieldID,
                               const ConstBlockDataID & solidVolumeFractionFieldID, const ConstBlockDataID & boundaryHandlingID )

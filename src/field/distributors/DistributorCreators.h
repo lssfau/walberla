@@ -67,8 +67,8 @@ public:
 
    Distributor_T * initialize( IBlock * const block ) override
    {
-      typedef typename Distributor_T::BaseField_T DistributionDestinationField_T;
-      typedef typename FlagField_T::flag_t flag_t;
+      using DistributionDestinationField_T = typename Distributor_T::BaseField_T;
+      using flag_t = typename FlagField_T::flag_t;
       DistributionDestinationField_T * distributionDestinationField = block->getData< DistributionDestinationField_T >( distributionDestinationFieldID_ );
       const FlagField_T * flagField = block->getData< FlagField_T >( flagFieldID_ );
 

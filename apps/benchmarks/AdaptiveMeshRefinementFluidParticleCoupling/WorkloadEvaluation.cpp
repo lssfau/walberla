@@ -86,23 +86,23 @@ using namespace walberla;
 using walberla::uint_t;
 
 // PDF field, flag field & body field
-typedef lbm::D3Q19< lbm::collision_model::TRT, false>  LatticeModel_T;
+using LatticeModel_T = lbm::D3Q19<lbm::collision_model::TRT, false>;
 
-typedef LatticeModel_T::Stencil Stencil_T;
-typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+using Stencil_T = LatticeModel_T::Stencil;
+using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
-typedef walberla::uint8_t                 flag_t;
-typedef FlagField< flag_t >               FlagField_T;
-typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
+using flag_t = walberla::uint8_t;
+using FlagField_T = FlagField<flag_t>;
+using BodyField_T = GhostLayerField<pe::BodyID, 1>;
 
 const uint_t FieldGhostLayers = 1;
 
 // boundary handling
-typedef pe_coupling::CurvedLinear< LatticeModel_T, FlagField_T > MO_CLI_T;
+using MO_CLI_T = pe_coupling::CurvedLinear<LatticeModel_T, FlagField_T>;
 
-typedef BoundaryHandling< FlagField_T, Stencil_T, MO_CLI_T > BoundaryHandling_T;
+using BoundaryHandling_T = BoundaryHandling<FlagField_T, Stencil_T, MO_CLI_T>;
 
-typedef std::tuple<pe::Sphere, pe::Ellipsoid, pe::Plane> BodyTypeTuple;
+using BodyTypeTuple = std::tuple<pe::Sphere, pe::Ellipsoid, pe::Plane>;
 
 ///////////
 // FLAGS //
@@ -754,7 +754,7 @@ int main( int argc, char **argv )
          << Sweep( pe_coupling::BodyMapping< LatticeModel_T, BoundaryHandling_T >( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, MO_CLI_Flag, FormerMO_Flag, pe_coupling::selectRegularBodies ), "Body Mapping" );
 
    // sweep for restoring PDFs in cells previously occupied by pe bodies
-   typedef pe_coupling::EquilibriumReconstructor< LatticeModel_T, BoundaryHandling_T > Reconstructor_T;
+   using Reconstructor_T = pe_coupling::EquilibriumReconstructor<LatticeModel_T, BoundaryHandling_T>;
    Reconstructor_T reconstructor( blocks, boundaryHandlingID, bodyFieldID);
    timeloop.add()
          << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >

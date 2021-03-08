@@ -52,7 +52,7 @@ class CurlBasedLevelDetermination // used as a 'BlockForest::RefreshMinTargetLev
 
 public:
 
-   typedef GhostLayerField< Vector3<real_t>, 1 >  VectorField_T;
+   using VectorField_T = GhostLayerField<Vector3<real_t>, 1>;
 
    CurlBasedLevelDetermination(const ConstBlockDataID & fieldID, const StructuredBlockForest & structuredBlockForest,
          const Filter_T & filter, const uint_t maxLevel,

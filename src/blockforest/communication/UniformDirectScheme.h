@@ -48,9 +48,9 @@ template< typename Stencil_T >
 class UniformDirectScheme
 {
 public:
-   typedef Stencil_T Stencil;
-   typedef walberla::communication::UniformMPIDatatypeInfo UniformMPIDatatypeInfo;
-   typedef walberla::communication::UniformMPIDatatypeInfo CommunicationItemInfo;
+   using Stencil = Stencil_T;
+   using UniformMPIDatatypeInfo = walberla::communication::UniformMPIDatatypeInfo;
+   using CommunicationItemInfo = walberla::communication::UniformMPIDatatypeInfo;
 
    //**Construction & Destruction***************************************************************************************
    /*! \name Construction & Destruction */

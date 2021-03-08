@@ -53,10 +53,10 @@ class TimeStep
 {
 public:
    
-   typedef typename NeighborsStencil<LatticeModel_T>::type CommunicationStencil_T;
+   using CommunicationStencil_T = typename NeighborsStencil<LatticeModel_T>::type;
 
-   typedef std::function< void ( const uint_t, const uint_t ) >            VoidFunction;  // parameters: level, execution count
-   typedef std::function< void ( IBlock *, const uint_t, const uint_t ) >  BlockFunction; // parameters: block, level, execution count
+   using VoidFunction = std::function<void (const uint_t, const uint_t)>;  // parameters: level, execution count
+   using BlockFunction = std::function<void (IBlock *, const uint_t, const uint_t)>; // parameters: block, level, execution count
    
 private:
 
@@ -110,7 +110,7 @@ private:
 
 public:
 
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static const uint_t StreamIncludedGhostLayers = 2;
 
@@ -1726,7 +1726,7 @@ makeTimeStep( weak_ptr< StructuredBlockForest > blocks, shared_ptr< Sweep_T > & 
               const Set<SUID> & requiredBlockSelectors = Set<SUID>::emptySet(),
               const Set<SUID> & incompatibleBlockSelectors = Set<SUID>::emptySet() )
 {
-   typedef TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T > TS_T;
+   using TS_T = TimeStep<LatticeModel_T, Sweep_T, BoundaryHandling_T>;
    return shared_ptr< TS_T >( new TS_T( blocks, sweep, pdfFieldId, boundaryHandlingId, requiredBlockSelectors, incompatibleBlockSelectors ) );
 }
 
@@ -1740,7 +1740,7 @@ makeTimeStep( weak_ptr< StructuredBlockForest > blocks, shared_ptr< Sweep_T > & 
               const Set<SUID> & requiredBlockSelectors = Set<SUID>::emptySet(),
               const Set<SUID> & incompatibleBlockSelectors = Set<SUID>::emptySet() )
 {
-   typedef TimeStep< LatticeModel_T, Sweep_T, BoundaryHandling_T > TS_T;
+   using TS_T = TimeStep<LatticeModel_T, Sweep_T, BoundaryHandling_T>;
    return shared_ptr< TS_T >( new TS_T( blocks, sweep, pdfFieldId, boundaryHandlingId, pdfPackInfo, requiredBlockSelectors, incompatibleBlockSelectors ) );
 }
 

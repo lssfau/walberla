@@ -37,7 +37,7 @@ class ChainedFilter {
 
 public:
 
-   typedef std::function< void ( CellSet& filteredCells, const IBlock& block, const StructuredBlockStorage& storage, const uint_t ghostLayers ) > CellFilter;
+   using CellFilter = std::function<void (CellSet &, const IBlock &, const StructuredBlockStorage &, const uint_t)>;
 
    void addFilter( const CellFilter& filter ) { filters_.push_back( filter ); }
 

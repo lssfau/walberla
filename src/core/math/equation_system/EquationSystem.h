@@ -67,16 +67,16 @@ namespace math {
       // forward declaration of EquationParser class
       friend class EquationParser;
 
-      typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> EqGraph;
+      using EqGraph = boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS>;
 
-      typedef std::map<std::string, EqGraph::vertex_descriptor> EqVertexMap;
-      typedef std::map<std::string, EqGraph::vertex_descriptor> VarVertexMap;
+      using EqVertexMap = std::map<std::string, EqGraph::vertex_descriptor>;
+      using VarVertexMap = std::map<std::string, EqGraph::vertex_descriptor>;
 
-      typedef std::map<std::string, EqGraph::vertex_descriptor>::const_iterator EqVertexMapIt;
-      typedef std::map<std::string, EqGraph::vertex_descriptor>::const_iterator VarVertexMapIt;
+      using EqVertexMapIt = std::map<std::string, EqGraph::vertex_descriptor>::const_iterator;
+      using VarVertexMapIt = std::map<std::string, EqGraph::vertex_descriptor>::const_iterator;
 
-      typedef std::map<std::string, EquationPtr>                 EqMap;
-      typedef std::map<std::string, EquationPtr>::const_iterator EqMapIt;
+      using EqMap = std::map<std::string, EquationPtr>;
+      using EqMapIt = std::map<std::string, EquationPtr>::const_iterator;
 
       EqMap       eqMap_;
       EqGraph     eqGraph_;
@@ -121,7 +121,7 @@ namespace math {
 
    };
 
-   typedef shared_ptr< EquationSystem > EquationSystemPtr;
+   using EquationSystemPtr = shared_ptr<EquationSystem>;
 
 } // namespace math
 } // namespace walberla

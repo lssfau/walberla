@@ -36,12 +36,12 @@ template< typename ContainmentOctreeT >
 class BranchNode : public Node<ContainmentOctreeT>
 {
 public:
-   typedef typename Node<ContainmentOctreeT>::DistanceObject DistanceObject;
-   typedef typename Node<ContainmentOctreeT>::Scalar Scalar;
-   typedef typename Node<ContainmentOctreeT>::Point Point;
-   typedef typename Node<ContainmentOctreeT>::AABB AABB;
+   using DistanceObject = typename Node<ContainmentOctreeT>::DistanceObject;
+   using Scalar = typename Node<ContainmentOctreeT>::Scalar;
+   using Point = typename Node<ContainmentOctreeT>::Point;
+   using AABB = typename Node<ContainmentOctreeT>::AABB;
    
-   typedef typename Node<ContainmentOctreeT>::KahanAccumulator KahanAccumulator;
+   using KahanAccumulator = typename Node<ContainmentOctreeT>::KahanAccumulator;
    
    inline BranchNode( const shared_ptr<const DistanceObject> & distanceObject, const AABB & aabb, const Scalar epsilon,
                       const uint_t maxDepth, const Scalar minAABBVolume );

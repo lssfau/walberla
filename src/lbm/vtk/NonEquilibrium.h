@@ -41,8 +41,8 @@ class NonEqulibriumVTKWriter : public vtk::BlockCellDataWriter< OutputType, Latt
 {
 public:
 
-   typedef PdfField< LatticeModel_T >       PdfField_T;
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    NonEqulibriumVTKWriter( const ConstBlockDataID & pdf, const std::string & id ) :
       vtk::BlockCellDataWriter< OutputType, Stencil::Size >( id ), bdid_( pdf ), pdf_( nullptr ) {}

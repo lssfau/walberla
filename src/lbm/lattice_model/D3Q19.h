@@ -37,11 +37,11 @@ class D3Q19 : public LatticeModelBase< CollisionModel_T, Compressible, ForceMode
 {
 public:
 
-   typedef typename LatticeModelBase< CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder >::CollisionModel  CollisionModel;
-   typedef typename LatticeModelBase< CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder >::ForceModel      ForceModel;
+   using CollisionModel = typename LatticeModelBase<CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder>::CollisionModel;
+   using ForceModel = typename LatticeModelBase<CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder>::ForceModel;
 
-   typedef stencil::D3Q19 Stencil;
-   typedef stencil::D3Q19 CommunicationStencil;
+   using Stencil = stencil::D3Q19;
+   using CommunicationStencil = stencil::D3Q19;
 
    static const char * NAME;
 

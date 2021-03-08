@@ -35,8 +35,8 @@ namespace pe_coupling {
 void mapPSMBodyAndVolumeFraction( const pe::BodyID body, IBlock & block, StructuredBlockStorage & blockStorage,
                                   const BlockDataID bodyAndVolumeFractionFieldID )
 {
-   typedef std::pair< pe::BodyID, real_t >                              BodyAndVolumeFraction_T;
-   typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
+   using BodyAndVolumeFraction_T = std::pair<pe::BodyID, real_t>;
+   using BodyAndVolumeFractionField_T = GhostLayerField<std::vector<BodyAndVolumeFraction_T>, 1>;
 
    BodyAndVolumeFractionField_T * bodyAndVolumeFractionField = block.getData< BodyAndVolumeFractionField_T >( bodyAndVolumeFractionFieldID );
    WALBERLA_ASSERT_NOT_NULLPTR( bodyAndVolumeFractionField );

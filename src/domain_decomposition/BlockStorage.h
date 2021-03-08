@@ -73,7 +73,7 @@ class BlockStorage : private NonCopyable {
 
 public:
 
-   typedef std::map< IBlockID::IDType, IBlock* > BlockContainerType ;
+   using BlockContainerType = std::map<IBlockID::IDType, IBlock *> ;
 
    class const_iterator;
 

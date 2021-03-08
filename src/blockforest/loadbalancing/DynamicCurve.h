@@ -53,8 +53,8 @@ template< typename PhantomData_T, typename Value_T, bool weighted = true >
 class BlockIDSorter
 {
 public:
-   typedef typename PhantomData_T::weight_t weight_t;
-   typedef std::vector< std::vector< std::pair< BlockID, weight_t > > > Blocks_T;
+   using weight_t = typename PhantomData_T::weight_t;
+   using Blocks_T = std::vector<std::vector<std::pair<BlockID, weight_t>>>;
    BlockIDSorter( const Blocks_T & blocks ) : blocks_( blocks ) {}
    bool operator()( const Value_T & lhs, const Value_T & rhs ) const
    {
@@ -68,7 +68,7 @@ template< typename PhantomData_T, typename Value_T >
 class BlockIDSorter< PhantomData_T, Value_T, false >
 {
 public:
-   typedef std::vector< std::vector< BlockID > > Blocks_T;
+   using Blocks_T = std::vector<std::vector<BlockID>>;
    BlockIDSorter( const Blocks_T & blocks ) : blocks_( blocks ) {}
    bool operator()( const Value_T & lhs, const Value_T & rhs ) const
    {
@@ -101,10 +101,10 @@ class DynamicCurveBalance
 {
 public:
 
-   typedef typename PhantomData_T::weight_t weight_t;
-   typedef mpi::MPIRank pid_t;
-   typedef uint16_t idx_t; // limits the maximum number of blocks per process to 65536
-   typedef internal::Node< pid_t, idx_t > Node;
+   using weight_t = typename PhantomData_T::weight_t;
+   using pid_t = mpi::MPIRank;
+   using idx_t = uint16_t; // limits the maximum number of blocks per process to 65536
+   using Node = internal::Node<pid_t, idx_t>;
 
    DynamicCurveBalance( const bool hilbert = true, const bool allGather = true, const bool levelwise = true ) :
       hilbert_( hilbert ), allGather_( allGather ), levelwise_(levelwise)
