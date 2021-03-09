@@ -37,7 +37,7 @@ namespace vtk {
 // For documentation see the documentation of function "initializeVTKOutput" in Initialization.cpp
 
 
-typedef std::function< void () > OutputFunction;
+using OutputFunction = std::function<void ()>;
 
 struct SelectableOutputFunction {
 
@@ -76,9 +76,7 @@ void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & ou
                           const std::map< std::string, VTKOutput::CellFilter > & filters,
                           const std::map< std::string, VTKOutput::BeforeFunction > & beforeFunctions );
 
-typedef std::function< void ( std::vector< shared_ptr< BlockCellDataWriterInterface > > & writers,
-                                std::map< std::string, VTKOutput::CellFilter > &            filters,
-                                std::map< std::string, VTKOutput::BeforeFunction > &        beforeFunctions ) > RegisterVTKOutputFunction;
+using RegisterVTKOutputFunction = std::function<void (std::vector<shared_ptr<BlockCellDataWriterInterface>> &, std::map<std::string, VTKOutput::CellFilter> &, std::map<std::string, VTKOutput::BeforeFunction> &)>;
 
 void initializeVTKOutput( std::map< std::string, SelectableOutputFunction > & outputFunctions, const RegisterVTKOutputFunction& registerVTKOutputFunction,
                           const shared_ptr< const StructuredBlockStorage > & storage, const shared_ptr< Config > & config,

@@ -80,16 +80,16 @@ template< typename Stencil_T >
 class UniformBufferedScheme
 {
 public:
-   typedef Stencil_T Stencil;
-   typedef mpi::SendBuffer SendBuffer;
-   typedef mpi::RecvBuffer RecvBuffer;
+   using Stencil = Stencil_T;
+   using SendBuffer = mpi::SendBuffer;
+   using RecvBuffer = mpi::RecvBuffer;
 
-   typedef shared_ptr< walberla::communication::UniformPackInfo >  PackInfo;
+   using PackInfo = shared_ptr<walberla::communication::UniformPackInfo>;
 
-   typedef std::function<void ()>                            VoidFunction;
-   typedef std::function<void ( SendBuffer & buffer )> SendBufferFunction;
+   using VoidFunction = std::function<void ()>;
+   using SendBufferFunction = std::function<void (SendBuffer &)>;
 
-   typedef walberla::communication::UniformPackInfo CommunicationItemInfo;
+   using CommunicationItemInfo = walberla::communication::UniformPackInfo;
 
    //**Construction & Destruction***************************************************************************************
    /*! \name Construction & Destruction */

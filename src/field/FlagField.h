@@ -86,21 +86,21 @@ public:
    //** Type Definitions  **********************************************************************************************
    /*! \name Type Definitions */
    //@{
-   typedef T flag_t;
+   using flag_t = T;
 
-   typedef typename GhostLayerField<T,1>::value_type             value_type;
+   using value_type = typename GhostLayerField<T, 1>::value_type;
 
-   typedef typename GhostLayerField<T,1>::iterator               iterator;
-   typedef typename GhostLayerField<T,1>::const_iterator         const_iterator;
+   using iterator = typename GhostLayerField<T, 1>::iterator;
+   using const_iterator = typename GhostLayerField<T, 1>::const_iterator;
 
-   typedef typename GhostLayerField<T,1>::reverse_iterator       reverse_iterator;
-   typedef typename GhostLayerField<T,1>::const_reverse_iterator const_reverse_iterator;
+   using reverse_iterator = typename GhostLayerField<T, 1>::reverse_iterator;
+   using const_reverse_iterator = typename GhostLayerField<T, 1>::const_reverse_iterator;
 
-   typedef typename Field<T,1>::base_iterator                    base_iterator;
-   typedef typename Field<T,1>::const_base_iterator              const_base_iterator;
+   using base_iterator = typename Field<T, 1>::base_iterator;
+   using const_base_iterator = typename Field<T, 1>::const_base_iterator;
 
-   typedef typename GhostLayerField<T,1>::Ptr                    Ptr;
-   typedef typename GhostLayerField<T,1>::ConstPtr               ConstPtr;
+   using Ptr = typename GhostLayerField<T, 1>::Ptr;
+   using ConstPtr = typename GhostLayerField<T, 1>::ConstPtr;
    //@}
    //*******************************************************************************************************************
 
@@ -123,7 +123,7 @@ public:
    //** Access Functions ***********************************************************************************************
    /*! \name Access Functions */
    //@{
-   typedef cell_idx_t idx;
+   using idx = cell_idx_t;
 
    void addMask    (idx x, idx y, idx z, flag_t m) { WALBERLA_ASSERT(isRegistered(m)); field::addMask( this->get(x,y,z), m ); }
    void addFlag    (idx x, idx y, idx z, flag_t f) { WALBERLA_ASSERT(isRegistered(f)); field::addFlag( this->get(x,y,z), f ); }

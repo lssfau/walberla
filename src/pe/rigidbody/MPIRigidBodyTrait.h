@@ -47,15 +47,15 @@ class MPIRigidBodyTrait
 {
 protected:
    //**Type definitions****************************************************************************
-   typedef std::vector<Owner>             ShadowOwners;       //!< Vector for remote MPI processes the rigid body is contained in.
-   typedef std::set<BlockID>              BlockStates;        //!< Stores the information if neighbor block knows about object.
+   using ShadowOwners = std::vector<Owner>;       //!< Vector for remote MPI processes the rigid body is contained in.
+   using BlockStates = std::set<BlockID>;        //!< Stores the information if neighbor block knows about object.
    //**********************************************************************************************
 
 public:
    //**Type definitions****************************************************************************
-   typedef ShadowOwners::iterator        ShadowOwnersIterator;       //!< Iterator over the connected processes.
-   typedef ShadowOwners::const_iterator  ConstShadowOwnersIterator;  //!< ConstIterator over the connected processes.
-   typedef size_t                        SizeType;
+   using ShadowOwnersIterator = ShadowOwners::iterator;       //!< Iterator over the connected processes.
+   using ConstShadowOwnersIterator = ShadowOwners::const_iterator;  //!< ConstIterator over the connected processes.
+   using SizeType = size_t;
    //**********************************************************************************************
 
    //**Constructor*********************************************************************************

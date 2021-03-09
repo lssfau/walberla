@@ -92,8 +92,8 @@ class DynamicParMetisBlockInfo
 {
 public:
 
-   typedef int64_t weight_t;
-   typedef int64_t vsize_t;
+   using weight_t = int64_t;
+   using vsize_t = int64_t;
 
    DynamicParMetisBlockInfo( const weight_t vertexWeight, const uint_t ncon = 1 )
       : vertexWeight_(ncon, vertexWeight), vertexSize_(1)

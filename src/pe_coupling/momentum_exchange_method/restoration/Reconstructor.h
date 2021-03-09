@@ -73,8 +73,8 @@ class EquilibriumReconstructor
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T > PdfField_T;
-   typedef Field< pe::BodyID, 1 >          BodyField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using BodyField_T = Field<pe::BodyID, 1>;
 
    EquilibriumReconstructor( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID,
                              const BlockDataID & bodyFieldID )
@@ -168,8 +168,8 @@ class EquilibriumAndNonEquilibriumReconstructor
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T > PdfField_T;
-   typedef Field< pe::BodyID, 1 >          BodyField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using BodyField_T = Field<pe::BodyID, 1>;
 
    EquilibriumAndNonEquilibriumReconstructor( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID,
                                               const BlockDataID & bodyFieldID,
@@ -259,8 +259,8 @@ class ExtrapolationReconstructor
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T > PdfField_T;
-   typedef Field< pe::BodyID, 1 >          BodyField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using BodyField_T = Field<pe::BodyID, 1>;
 
    ExtrapolationReconstructor( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & boundaryHandlingID,
                                const BlockDataID & bodyFieldID,

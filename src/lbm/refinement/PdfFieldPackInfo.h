@@ -44,8 +44,8 @@ class PdfFieldPackInfo : public TimeStepPdfPackInfo
 {
 public:
 
-   typedef PdfField<LatticeModel_T>          PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
 #ifdef NDEBUG   
    PdfFieldPackInfo( const BlockDataID & pdfFieldId, const bool _optimizedEqualLevelCommunication = true,

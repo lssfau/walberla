@@ -116,15 +116,15 @@ using walberla::real_t;
 // TYPEDEFS //
 //////////////
 
-typedef lbm::D3Q19< lbm::collision_model::SRT, false, lbm::force_model::SimpleConstant > D3Q19_SRT_INCOMP;
-typedef lbm::D3Q19< lbm::collision_model::SRT, true,  lbm::force_model::SimpleConstant > D3Q19_SRT_COMP;
-typedef lbm::D3Q19< lbm::collision_model::TRT, false, lbm::force_model::SimpleConstant > D3Q19_TRT_INCOMP;
+using D3Q19_SRT_INCOMP = lbm::D3Q19<lbm::collision_model::SRT, false, lbm::force_model::SimpleConstant>;
+using D3Q19_SRT_COMP = lbm::D3Q19<lbm::collision_model::SRT, true, lbm::force_model::SimpleConstant>;
+using D3Q19_TRT_INCOMP = lbm::D3Q19<lbm::collision_model::TRT, false, lbm::force_model::SimpleConstant>;
 //typedef lbm::D3Q19< lbm::collision_model::TRT, true,  lbm::force_model::SimpleConstant > D3Q19_TRT_COMP;
 
-typedef lbm::D3Q27< lbm::collision_model::SRT, false, lbm::force_model::SimpleConstant > D3Q27_SRT_INCOMP;
-typedef lbm::D3Q27< lbm::collision_model::SRT, true,  lbm::force_model::SimpleConstant > D3Q27_SRT_COMP;
-typedef lbm::D3Q27< lbm::collision_model::TRT, false, lbm::force_model::SimpleConstant > D3Q27_TRT_INCOMP;
-typedef lbm::D3Q27< lbm::collision_model::TRT, true,  lbm::force_model::SimpleConstant > D3Q27_TRT_COMP;
+using D3Q27_SRT_INCOMP = lbm::D3Q27<lbm::collision_model::SRT, false, lbm::force_model::SimpleConstant>;
+using D3Q27_SRT_COMP = lbm::D3Q27<lbm::collision_model::SRT, true, lbm::force_model::SimpleConstant>;
+using D3Q27_TRT_INCOMP = lbm::D3Q27<lbm::collision_model::TRT, false, lbm::force_model::SimpleConstant>;
+using D3Q27_TRT_COMP = lbm::D3Q27<lbm::collision_model::TRT, true, lbm::force_model::SimpleConstant>;
 
 template< typename LatticeModel_T >
 struct Types
@@ -453,10 +453,10 @@ class MyBoundaryHandling
 {
 public:
 
-   typedef lbm::NoSlip< LatticeModel_T, flag_t >      NoSlip_T;
-   typedef lbm::Curved< LatticeModel_T, FlagField_T > Curved_T;
+   using NoSlip_T = lbm::NoSlip<LatticeModel_T, flag_t>;
+   using Curved_T = lbm::Curved<LatticeModel_T, FlagField_T>;
 
-   typedef BoundaryHandling< FlagField_T, typename Types<LatticeModel_T>::Stencil_T, NoSlip_T, Curved_T > BoundaryHandling_T;
+   using BoundaryHandling_T = BoundaryHandling<FlagField_T, typename Types<LatticeModel_T>::Stencil_T, NoSlip_T, Curved_T>;
 
 
 

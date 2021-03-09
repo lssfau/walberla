@@ -72,19 +72,19 @@ template <typename LatticeModel, typename FlagFieldT >
 class ExtendedBoundaryHandlingFactory
 {
 public:
-   typedef typename FlagFieldT::flag_t            flag_t;
-   typedef typename LatticeModel::Stencil         Stencil;
-   typedef Vector3<real_t>                        Velocity;
-   typedef PdfField< LatticeModel >               PdfFieldLM;
+   using flag_t = typename FlagFieldT::flag_t;
+   using Stencil = typename LatticeModel::Stencil;
+   using Velocity = Vector3<real_t>;
+   using PdfFieldLM = PdfField<LatticeModel>;
 
-   typedef NoSlip< LatticeModel, flag_t >         BcNoSlip;
-   typedef FreeSlip< LatticeModel, FlagFieldT >   BcFreeSlip;
-   typedef Pressure< LatticeModel, flag_t >       BcPressure;
-   typedef ParserUBB<LatticeModel, flag_t>        BcUBB;
-   typedef Outlet<LatticeModel, FlagFieldT >      BcOutlet;
-   typedef Curved<LatticeModel, FlagFieldT >      BcCurved;
+   using BcNoSlip = NoSlip<LatticeModel, flag_t>;
+   using BcFreeSlip = FreeSlip<LatticeModel, FlagFieldT>;
+   using BcPressure = Pressure<LatticeModel, flag_t>;
+   using BcUBB = ParserUBB<LatticeModel, flag_t>;
+   using BcOutlet = Outlet<LatticeModel, FlagFieldT>;
+   using BcCurved = Curved<LatticeModel, FlagFieldT>;
 
-   typedef walberla::boundary::BoundaryHandling< FlagFieldT, Stencil, BcNoSlip, BcFreeSlip, BcPressure, BcUBB, BcOutlet, BcCurved >  BoundaryHandling;
+   using BoundaryHandling = walberla::boundary::BoundaryHandling<FlagFieldT, Stencil, BcNoSlip, BcFreeSlip, BcPressure, BcUBB, BcOutlet, BcCurved>;
 
    static BlockDataID addBoundaryHandlingToStorage( const shared_ptr< StructuredBlockStorage > & bs, const std::string & identifier,
                                                     BlockDataID flagFieldID, BlockDataID pdfFieldID, const Set< FlagUID > & flagUIDSet)

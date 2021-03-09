@@ -89,8 +89,8 @@ namespace internal {
 template< typename LatticeModel_T >
 struct ShearRate
 {
-   typedef typename LatticeModel_T::Stencil Stencil;
-   typedef typename internal::ShearRelaxationParameter<typename LatticeModel_T::CollisionModel> ShearRelaxationParameter;
+   using Stencil = typename LatticeModel_T::Stencil;
+   using ShearRelaxationParameter = typename internal::ShearRelaxationParameter<typename LatticeModel_T::CollisionModel>;
 
    template< typename FieldPtrOrIterator >
    static inline real_t get( const LatticeModel_T & latticeModel, const FieldPtrOrIterator & it,

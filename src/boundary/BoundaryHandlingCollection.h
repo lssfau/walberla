@@ -49,7 +49,7 @@ namespace boundary {
 
 
 class BHCUIDGenerator : public uid::IndexGenerator< BHCUIDGenerator, uint_t >{};
-typedef UID< BHCUIDGenerator > BoundaryHandlingCollectionUID;
+using BoundaryHandlingCollectionUID = UID<BHCUIDGenerator>;
 
 
 
@@ -58,9 +58,9 @@ class BoundaryHandlingCollection
 {
 public:
 
-   typedef FlagField_T                               FlagField;
-   typedef typename FlagField_T::flag_t              flag_t;
-   typedef typename FlagField_T::const_base_iterator ConstFlagFieldBaseIterator;
+   using FlagField = FlagField_T;
+   using flag_t = typename FlagField_T::flag_t;
+   using ConstFlagFieldBaseIterator = typename FlagField_T::const_base_iterator;
 
 
 
@@ -534,7 +534,7 @@ private:
 
    const CellInterval outerBB_;
 
-   typedef std::tuple<Handlers...> Tuple;
+   using Tuple = std::tuple<Handlers...>;
    Tuple boundaryHandlers_;
 
 }; // class BoundaryHandlingCollection

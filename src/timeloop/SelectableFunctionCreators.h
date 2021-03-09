@@ -128,7 +128,7 @@ namespace timeloop {
       Set<SUID>                                     incompatibleSelectors_;
    };
 
-   typedef FuncCreator<void (IBlock*) > Sweep;
+   using Sweep = FuncCreator<void (IBlock *)>;
 
 
    template<typename SweepClass>

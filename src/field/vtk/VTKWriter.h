@@ -103,9 +103,9 @@ class VTKWriter : public vtk::BlockCellDataWriter< OutputType,
                                                    VectorTrait<typename Field_T::value_type>::F_SIZE * Field_T::F_SIZE >
 {
 public:
-   typedef VectorTrait<typename Field_T::value_type > OutputTrait;
+   using OutputTrait = VectorTrait<typename Field_T::value_type>;
 
-   typedef vtk::BlockCellDataWriter<OutputType, OutputTrait::F_SIZE * Field_T::F_SIZE> base_t;
+   using base_t = vtk::BlockCellDataWriter<OutputType, OutputTrait::F_SIZE * Field_T::F_SIZE>;
 
    VTKWriter( const ConstBlockDataID bdid, const std::string& id ) :
       base_t( id ), bdid_( bdid ), field_( nullptr ) {}
@@ -192,7 +192,7 @@ inline vtk::VTKOutput::Write createVTKOutput  ( const ConstBlockDataID & fieldId
                                                 const Set<SUID>& incompatibleStates = Set<SUID>::emptySet(),
                                                 bool useMPIIO = true, const uint_t initialExecutionCount = 0 )
 {
-   typedef typename VectorTrait<typename Field_T::value_type >::OutputType OutputType;
+   using OutputType = typename VectorTrait<typename Field_T::value_type>::OutputType;
 
    return createVTKOutput<Field_T, OutputType> (
                fieldId, blocks, identifier, writeFrequency, ghostLayers, forcePVTU, baseFolder,executionFolder,
@@ -247,7 +247,7 @@ inline vtk::VTKOutput::Write createScalingVTKOutput  ( const ConstBlockDataID & 
                                                        const Set<SUID>& incompatibleStates = Set<SUID>::emptySet(),
                                                        bool useMPIIO = true, const uint_t initialExecutionCount = 0 )
 {
-   typedef typename VectorTrait<typename Field_T::value_type >::OutputType OutputType;
+   using OutputType = typename VectorTrait<typename Field_T::value_type>::OutputType;
 
    return createScalingVTKOutput<Field_T, OutputType> (
                fieldId, blocks, identifier, writeFrequency, factor, ghostLayers, forcePVTU, baseFolder,executionFolder,

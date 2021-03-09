@@ -489,7 +489,7 @@ namespace field {
     template<class Sten, typename FieldPtrOrIterator>
     inline bool isFlagInNeighborhood(const FieldPtrOrIterator & i, typename FieldPtrOrIterator::value_type mask)
     {
-       typedef typename std::remove_const< typename FieldPtrOrIterator::value_type >::type T;
+       using T = typename std::remove_const<typename FieldPtrOrIterator::value_type>::type;
 
        static_assert( (std::is_same< T,uint8_t >::value ||
                        std::is_same< T,uint16_t>::value ||
@@ -512,7 +512,7 @@ namespace field {
     inline typename std::remove_const<typename FieldPtrOrIterator::value_type>::type
        getOredNeighborhood(const FieldPtrOrIterator & i)
     {
-       typedef typename std::remove_const<typename FieldPtrOrIterator::value_type>::type RetType;
+       using RetType = typename std::remove_const<typename FieldPtrOrIterator::value_type>::type;
 
        RetType flag = 0;
        for( auto d = Sten::beginNoCenter(); d != Sten::end(); ++d ) {

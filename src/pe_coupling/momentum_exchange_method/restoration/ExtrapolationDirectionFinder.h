@@ -118,7 +118,7 @@ class SphereNormalExtrapolationDirectionFinder
 {
 public:
 
-   typedef Field< pe::BodyID, 1 > BodyField_T;
+   using BodyField_T = Field<pe::BodyID, 1>;
 
    SphereNormalExtrapolationDirectionFinder( const shared_ptr<StructuredBlockStorage> & blockStorage, const BlockDataID & bodyFieldID )
    : blockStorage_( blockStorage ), bodyFieldID_( bodyFieldID )

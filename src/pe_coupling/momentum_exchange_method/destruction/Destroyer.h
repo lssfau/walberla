@@ -33,7 +33,7 @@ class NaNDestroyer
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
    void operator()( const cell_idx_t & x, const cell_idx_t & y, const cell_idx_t & z, IBlock * const /*block*/, PdfField_T * const pdfField ) {
       for (auto d = uint_t(0); d < LatticeModel_T::Stencil::Size; ++d)

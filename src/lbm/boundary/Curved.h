@@ -48,11 +48,11 @@ namespace lbm {
 template< typename LatticeModel_T, typename FlagField_T >
 class Curved : public Boundary< typename FlagField_T::flag_t >
 {
-   typedef PdfField< LatticeModel_T >        PDFField;
-   typedef typename LatticeModel_T::Stencil  Stencil;
-   typedef typename FlagField_T::flag_t      flag_t;
+   using PDFField = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
+   using flag_t = typename FlagField_T::flag_t;
 
-   typedef GhostLayerField< shared_ptr< std::array<real_t, Stencil::Size> >, 1 >  WeightField;
+   using WeightField = GhostLayerField<shared_ptr<std::array<real_t, Stencil::Size>>, 1>;
 
 public:
 

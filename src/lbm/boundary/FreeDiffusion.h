@@ -33,8 +33,8 @@ namespace lbm {
    template< typename LatticeModel_T, typename FlagField_T > class FreeDiffusion : public FreeSlip< LatticeModel_T, FlagField_T >
    {
    protected:
-      typedef typename FreeSlip< LatticeModel_T, FlagField_T >::flag_t    flag_t;
-      typedef typename FreeSlip< LatticeModel_T, FlagField_T >::PDFField  PDFField;
+      using flag_t = typename FreeSlip<LatticeModel_T, FlagField_T>::flag_t;
+      using PDFField = typename FreeSlip<LatticeModel_T, FlagField_T>::PDFField;
 
    public:
       FreeDiffusion( const BoundaryUID& boundaryUID, const FlagUID& uid, PDFField* const pdfField, const FlagField_T* const flagField, const flag_t domain )

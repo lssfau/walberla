@@ -85,23 +85,23 @@ public:
    //** Type Definitions  **********************************************************************************************
    /*! \name Type Definitions */
    //@{
-   typedef Functor                       functor_t;
-   typedef typename Functor::basefield_t basefield_t;
-   typedef typename Functor::value_type  value_type;
-   typedef typename Functor::value_type  T;
+   using functor_t = Functor;
+   using basefield_t = typename Functor::basefield_t;
+   using value_type = typename Functor::value_type;
+   using T = typename Functor::value_type;
 
    static const uint_t F_SIZE = Functor::F_SIZE;
 
-   typedef typename basefield_t::const_base_iterator     adapted_base_iterator;
-   typedef typename basefield_t::const_iterator          adapted_iterator;
-   typedef typename basefield_t::const_reverse_iterator  adapted_reverse_iterator;
+   using adapted_base_iterator = typename basefield_t::const_base_iterator;
+   using adapted_iterator = typename basefield_t::const_iterator;
+   using adapted_reverse_iterator = typename basefield_t::const_reverse_iterator;
 
-   typedef GhostLayerFieldAdaptor<Functor,glDecrease> OwnType;
-   typedef AdaptorIterator<adapted_base_iterator,   OwnType > const_base_iterator;
-   typedef AdaptorIterator<adapted_iterator,        OwnType > const_iterator;
-   typedef AdaptorIterator<adapted_reverse_iterator,OwnType > const_reverse_iterator;
+   using OwnType = GhostLayerFieldAdaptor<Functor, glDecrease>;
+   using const_base_iterator = AdaptorIterator<adapted_base_iterator, OwnType>;
+   using const_iterator = AdaptorIterator<adapted_iterator, OwnType>;
+   using const_reverse_iterator = AdaptorIterator<adapted_reverse_iterator, OwnType>;
 
-   typedef FieldPointer<OwnType, const OwnType, const T > ConstPtr;
+   using ConstPtr = FieldPointer<OwnType, const OwnType, const T>;
    //@}
    //*******************************************************************************************************************
 

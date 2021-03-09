@@ -95,7 +95,7 @@ class WALBERLA_PUBLIC Material
 {
 private:
    //**Type definitions****************************************************************************
-   typedef Materials::size_type  SizeType;  //!< Size type of the Material class.
+   using SizeType = Materials::size_type;  //!< Size type of the Material class.
    //**********************************************************************************************
 
 public:

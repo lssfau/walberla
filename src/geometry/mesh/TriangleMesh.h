@@ -54,12 +54,12 @@ namespace geometry {
    class TriangleMesh
    {
    public:
-      typedef uint32_t index_t;
+      using index_t = uint32_t;
       template<typename T> static index_t index_c( T x ) { return numeric_cast<index_t>(x); }
 
-      typedef Vector3<real_t> vertex_t;
-      typedef Vector3<real_t> normal_t;
-      typedef Vector3<float>  color_t;
+      using vertex_t = Vector3<real_t>;
+      using normal_t = Vector3<real_t>;
+      using color_t = Vector3<float>;
 
       //** Size Information  *******************************************************************************************
       /*! \name Size Information */

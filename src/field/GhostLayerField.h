@@ -53,24 +53,21 @@ namespace field {
       //** Type Definitions  *******************************************************************************************
       /*! \name Type Definitions */
       //@{
-      typedef typename Field<T,fSize_>::value_type             value_type;
+      using value_type = typename Field<T, fSize_>::value_type;
 
-      typedef typename Field<T,fSize_>::iterator               iterator;
-      typedef typename Field<T,fSize_>::const_iterator         const_iterator;
+      using iterator = typename Field<T, fSize_>::iterator;
+      using const_iterator = typename Field<T, fSize_>::const_iterator;
 
-      typedef typename Field<T,fSize_>::reverse_iterator       reverse_iterator;
-      typedef typename Field<T,fSize_>::const_reverse_iterator const_reverse_iterator;
+      using reverse_iterator = typename Field<T, fSize_>::reverse_iterator;
+      using const_reverse_iterator = typename Field<T, fSize_>::const_reverse_iterator;
 
-      typedef typename Field<T,fSize_>::base_iterator          base_iterator;
-      typedef typename Field<T,fSize_>::const_base_iterator    const_base_iterator;
+      using base_iterator = typename Field<T, fSize_>::base_iterator;
+      using const_base_iterator = typename Field<T, fSize_>::const_base_iterator;
 
-      typedef typename Field<T,fSize_>::Ptr                    Ptr;
-      typedef typename Field<T,fSize_>::ConstPtr               ConstPtr;
+      using Ptr = typename Field<T, fSize_>::Ptr;
+      using ConstPtr = typename Field<T, fSize_>::ConstPtr;
 
-      typedef typename std::conditional<VectorTrait<T>::F_SIZE!=0,
-                                        GhostLayerField<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE*fSize_>,
-                                        GhostLayerField<T, fSize_>
-                                        >::type FlattenedField;
+      using FlattenedField = typename std::conditional<VectorTrait<T>::F_SIZE != 0, GhostLayerField<typename VectorTrait<T>::OutputType, VectorTrait<T>::F_SIZE * fSize_>, GhostLayerField<T, fSize_>>::type;
       //@}
       //****************************************************************************************************************
 

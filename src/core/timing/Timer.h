@@ -105,7 +105,7 @@ class Timer
    friend mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Timer<TP2> & t );
 public:
    //**Type definitions*************************************************************************************************
-   typedef TP  TimingPolicy;  //!< Timing policy of the Timer.
+   using TimingPolicy = TP;  //!< Timing policy of the Timer.
    //*******************************************************************************************************************
 
    //**Constructor******************************************************************************************************
@@ -589,7 +589,7 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, Timer<TP
 
 } //namespace timing
 
-typedef timing::Timer<timing::CpuPolicy>  CpuTimer;
-typedef timing::Timer<timing::WcPolicy>    WcTimer;
+using CpuTimer = timing::Timer<timing::CpuPolicy>;
+using WcTimer = timing::Timer<timing::WcPolicy>;
 
 } // namespace walberla

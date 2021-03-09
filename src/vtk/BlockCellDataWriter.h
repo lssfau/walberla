@@ -197,7 +197,7 @@ inline void BlockCellDataWriter::push( Base64Writer& b64, const cell_idx_t x, co
 
 } // namespace internal
 
-typedef internal::BlockCellDataWriter BlockCellDataWriterInterface;
+using BlockCellDataWriterInterface = internal::BlockCellDataWriter;
 
 
 
@@ -219,7 +219,7 @@ class BlockCellDataWriter : public BlockCellDataWriterInterface
 
 public:
 
-   typedef T value_type;
+   using value_type = T;
 
    static const uint_t F_SIZE = F_SIZE_ARG;
 
@@ -285,7 +285,7 @@ template< typename T >
 class BlockCellDataWriterScalingAdapter : public T
 {
 public:
-   typedef typename T::value_type value_type;
+   using value_type = typename T::value_type;
    static const uint_t F_SIZE = T::F_SIZE;
 
    BlockCellDataWriterScalingAdapter( const std::string& id, const T & base, value_type factor ) 

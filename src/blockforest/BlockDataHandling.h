@@ -95,7 +95,7 @@ namespace internal {
 class BlockDataHandlingWrapper : public domain_decomposition::internal::BlockDataHandlingWrapper
 {
 public:
-   typedef domain_decomposition::internal::BlockData BlockData;
+   using BlockData = domain_decomposition::internal::BlockData;
 
    ~BlockDataHandlingWrapper() override = default;
    
@@ -115,7 +115,7 @@ template< typename T >
 class BlockDataHandlingHelper : public BlockDataHandlingWrapper
 {
 public:
-   typedef domain_decomposition::internal::BlockData BlockData;
+   using BlockData = domain_decomposition::internal::BlockData;
 
    BlockDataHandlingHelper( const shared_ptr< BlockDataHandling<T> > & dataHandling ) : dataHandling_( dataHandling ) {}
    ~BlockDataHandlingHelper() override = default;

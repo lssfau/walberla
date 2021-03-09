@@ -33,8 +33,8 @@ namespace blockforest {
 
 // data structure specific types
 
-typedef real_t workload_t;
-typedef real_t memory_t;
+using workload_t = real_t;
+using memory_t = real_t;
 
 WALBERLA_STATIC_ASSERT( sizeof( workload_t ) == 4 || sizeof( workload_t ) == 8 );
 WALBERLA_STATIC_ASSERT( sizeof( memory_t   ) == 4 || sizeof( memory_t   ) == 8 );

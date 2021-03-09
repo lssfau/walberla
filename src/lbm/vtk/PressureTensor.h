@@ -36,7 +36,7 @@ class PressureTensorVTKWriter : public vtk::BlockCellDataWriter< OutputType, 9 >
 {
 public:
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
 
    PressureTensorVTKWriter( const ConstBlockDataID & pdfFieldId, const std::string & id ) :
       vtk::BlockCellDataWriter< OutputType, 9 >( id ), bdid_( pdfFieldId ), pdf_( NULL ) {}

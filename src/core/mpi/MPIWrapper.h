@@ -89,16 +89,16 @@ namespace walberla {
 namespace mpistubs {
 
 
-typedef int MPI_Comm;
-typedef int MPI_Datatype;
-typedef int MPI_Group;
-typedef int MPI_Op;
-typedef int MPI_Request;
-typedef int MPI_File;
-typedef int MPI_Offset;
-typedef int MPI_Info;
-typedef int MPI_Aint;
-typedef void (MPI_User_function) (void* a, void* b, int* len, MPI_Datatype*);
+using MPI_Comm = int;
+using MPI_Datatype = int;
+using MPI_Group = int;
+using MPI_Op = int;
+using MPI_Request = int;
+using MPI_File = int;
+using MPI_Offset = int;
+using MPI_Info = int;
+using MPI_Aint = int;
+using MPI_User_function = void (void *, void *, int *, MPI_Datatype *);
 
 struct MPI_Status
 {

@@ -38,14 +38,14 @@ class AdaptorHandling : public blockforest::AlwaysInitializeBlockDataHandling< A
 {
 public:
 
-   typedef typename Adaptor_T::functor_t AdaptionFunction_T;
+   using AdaptionFunction_T = typename Adaptor_T::functor_t;
 
    AdaptorHandling( const ConstBlockDataID & adaptedFieldId, const AdaptionFunction_T & function ) :
       adaptedFieldId_( adaptedFieldId ), function_( function ) {}
 
    Adaptor_T * initialize( IBlock * const block ) override
    {
-      typedef typename Adaptor_T::basefield_t AdaptedField_T;
+      using AdaptedField_T = typename Adaptor_T::basefield_t;
       const AdaptedField_T * adaptedField = block->getData< AdaptedField_T >( adaptedFieldId_ );
       return new Adaptor_T( *adaptedField, function_ );
    }

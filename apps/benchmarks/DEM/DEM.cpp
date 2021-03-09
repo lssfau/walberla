@@ -48,7 +48,7 @@ int main( int argc, char** argv )
    using namespace walberla;
    using namespace walberla::pe;
 
-   typedef std::tuple<Sphere, Plane> BodyTuple ;
+   using BodyTuple = std::tuple<Sphere, Plane> ;
 
    walberla::MPIManager::instance()->initializeMPI( &argc, &argv );
 

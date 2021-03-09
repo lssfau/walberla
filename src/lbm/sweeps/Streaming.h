@@ -57,8 +57,8 @@ struct Stream< LatticeModel_T, FlagField_T, typename std::enable_if< ! std::is_s
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField, const typename FlagField_T::flag_t lbm,
                         const uint_t numberOfGhostLayersToInclude = uint_t(0) );
@@ -99,8 +99,8 @@ struct Stream< LatticeModel_T, FlagField_T, typename std::enable_if< std::is_sam
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const FlagField_T * flagField, const typename FlagField_T::flag_t lbm,
                         const uint_t numberOfGhostLayersToInclude = uint_t(0) );
@@ -164,8 +164,8 @@ struct StreamEverything< LatticeModel_T, typename std::enable_if< ! std::is_same
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
 };
@@ -216,8 +216,8 @@ struct StreamEverything< LatticeModel_T, typename std::enable_if< std::is_same< 
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
 };

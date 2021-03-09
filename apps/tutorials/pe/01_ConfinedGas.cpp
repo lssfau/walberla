@@ -35,7 +35,7 @@ namespace walberla {
 using namespace walberla::pe;
 
 //! [BodyTypeTuple]
-typedef std::tuple<Sphere, Plane> BodyTypeTuple ;
+using BodyTypeTuple = std::tuple<Sphere, Plane> ;
 //! [BodyTypeTuple]
 
 int main( int argc, char ** argv )

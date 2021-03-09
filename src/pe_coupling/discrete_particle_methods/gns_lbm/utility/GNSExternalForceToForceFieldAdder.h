@@ -41,8 +41,8 @@ using math::Vector3;
 class GNSExternalForceToForceFieldAdder
 {
 public:
-   typedef GhostLayerField< Vector3<real_t>, 1 >  ForceField_T;
-   typedef GhostLayerField< real_t, 1 >  ScalarField_T;
+   using ForceField_T = GhostLayerField<Vector3<real_t>, 1>;
+   using ScalarField_T = GhostLayerField<real_t, 1>;
 
    GNSExternalForceToForceFieldAdder( const BlockDataID & forceFieldID, const ConstBlockDataID & solidVolumeFractionFieldID, const Vector3<real_t> & externalForce )
       : forceFieldID_( forceFieldID ), solidVolumeFractionFieldID_( solidVolumeFractionFieldID ), externalForce_( externalForce )

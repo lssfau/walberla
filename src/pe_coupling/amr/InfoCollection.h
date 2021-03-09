@@ -35,8 +35,8 @@
 namespace walberla {
 namespace pe_coupling {
 
-typedef std::map<blockforest::BlockID, BlockInfo>  InfoCollection;
-typedef std::pair<blockforest::BlockID, BlockInfo> InfoCollectionPair;
+using InfoCollection = std::map<blockforest::BlockID, BlockInfo>;
+using InfoCollectionPair = std::pair<blockforest::BlockID, BlockInfo>;
 
 template <typename BoundaryHandling_T>
 void createWithNeighborhood(BlockForest& bf, const BlockDataID boundaryHandlingID,

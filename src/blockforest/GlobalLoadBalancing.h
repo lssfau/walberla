@@ -55,7 +55,7 @@ public:
    class MetisConfiguration {
 
    public:
-      typedef std::function< memory_t ( const BLOCK* const, const BLOCK* const ) > CommunicationFunction;
+      using CommunicationFunction = std::function<memory_t (const BLOCK *const, const BLOCK *const)>;
 
       MetisConfiguration( const bool _includeMetis = false, const bool _forceMetis = false, CommunicationFunction _communicationFunction = nullptr,
                           const real_t _maxUbvec = real_c(1.5), const uint_t _iterations = uint_c(10) ) :

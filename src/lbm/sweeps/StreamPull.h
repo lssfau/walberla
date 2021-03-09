@@ -62,8 +62,8 @@ struct StreamPullEverything
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value == false), "There is a specialization for D3Q27!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
 };
@@ -114,8 +114,8 @@ struct StreamPullEverything< LatticeModel_T, typename std::enable_if< std::is_sa
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D2Q9 >::value), "Only works with D2Q9!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
 };
@@ -177,8 +177,8 @@ struct StreamPullEverything< LatticeModel_T, typename std::enable_if< std::is_sa
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
 };
@@ -250,8 +250,8 @@ struct StreamPullEverything< LatticeModel_T, typename std::enable_if< std::is_sa
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value), "Only works with D3Q27!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    static void execute( PdfField_T * src, PdfField_T * dst, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
 };
@@ -334,8 +334,8 @@ struct StreamPull
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value == false), "There is a specialization for D3Q19!" );
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value == false), "There is a specialization for D3Q27!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    template< typename Filter_T >
    static inline void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
@@ -392,8 +392,8 @@ struct StreamPull< LatticeModel_T, typename std::enable_if< std::is_same< typena
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D2Q9 >::value), "Only works with D2Q9!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    template< typename Filter_T >
    static void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
@@ -464,8 +464,8 @@ struct StreamPull< LatticeModel_T, typename std::enable_if< std::is_same< typena
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q19 >::value), "Only works with D3Q19!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    template< typename Filter_T >
    static void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t(0) );
@@ -546,8 +546,8 @@ struct StreamPull< LatticeModel_T, typename std::enable_if< std::is_same< typena
 {
    static_assert( (std::is_same< typename LatticeModel_T::Stencil, stencil::D3Q27 >::value), "Only works with D3Q27!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    template< typename Filter_T >
    static void execute( PdfField_T * src, PdfField_T * dst, IBlock * block, Filter_T & filter, const uint_t numberOfGhostLayersToInclude = uint_t(0) );

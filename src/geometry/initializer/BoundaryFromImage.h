@@ -87,8 +87,8 @@ namespace initializer {
    class BoundaryFromImage : public Initializer
    {
    public:
-      typedef typename Image_T::pixel_t pixel_t;
-      typedef std::map<pixel_t, BoundarySetter<BoundaryHandling_T> > BoundarySetters;
+      using pixel_t = typename Image_T::pixel_t;
+      using BoundarySetters = std::map<pixel_t, BoundarySetter<BoundaryHandling_T>>;
 
 
       BoundaryFromImage( StructuredBlockStorage & blocks, BlockDataID handlerBlockDataID );

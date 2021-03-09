@@ -51,8 +51,8 @@ class SimpleDiffusionDirichlet : public Boundary<flag_t>
    static_assert( LatticeModel_T::compressible,                                                             "Only works with compressible models!" );
    //static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value), "Only works without additional forces!" );
 
-   typedef PdfField< LatticeModel_T >        PDFField;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PDFField = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
 public:
 

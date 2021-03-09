@@ -87,12 +87,12 @@ void initBoundaryHandling( StructuredBlockStorage & blocks, BlockDataID boundary
    using namespace geometry;
    using namespace initializer;
 
-   typedef BoundaryFromCellInterval  <BoundaryHandling>                 FromCellInterval;
-   typedef BoundaryFromDomainBorder  <BoundaryHandling>                 FromBorder;
-   typedef BoundaryFromVoxelFile     <BoundaryHandling>                 FromVoxelFile;
-   typedef BoundaryFromBody          <BoundaryHandling>                 FromBody;
-   typedef BoundaryFromImage         <BoundaryHandling, GrayScaleImage> FromGrayScaleImage;
-   typedef BoundaryFromImage         <BoundaryHandling, RGBAImage>      FromRGBAImage;
+   using FromCellInterval = BoundaryFromCellInterval<BoundaryHandling>;
+   using FromBorder = BoundaryFromDomainBorder<BoundaryHandling>;
+   using FromVoxelFile = BoundaryFromVoxelFile<BoundaryHandling>;
+   using FromBody = BoundaryFromBody<BoundaryHandling>;
+   using FromGrayScaleImage = BoundaryFromImage<BoundaryHandling, GrayScaleImage>;
+   using FromRGBAImage = BoundaryFromImage<BoundaryHandling, RGBAImage>;
 
    InitializationManager initManager( blocks.getBlockStorage() );
 

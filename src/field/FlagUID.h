@@ -30,7 +30,7 @@ namespace field {
 
 ///\cond internal
 class FlagUIDGenerator : public uid::IndexGenerator< FlagUIDGenerator, uint_t >{};
-typedef UID< FlagUIDGenerator > FlagUID;
+using FlagUID = UID<FlagUIDGenerator>;
 ///\endcond
 
 } // namespace field

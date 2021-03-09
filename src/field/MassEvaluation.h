@@ -297,7 +297,7 @@ shared_ptr< MassEvaluation< DensityField_T > > makeMassEvaluation( const weak_pt
                                                                    const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                    const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef MassEvaluation< DensityField_T > ME_T;
+   using ME_T = MassEvaluation<DensityField_T>;
    return shared_ptr< ME_T >( new ME_T( blocks, fieldId, plotFrequency, logFrequency, filename, requiredSelectors, incompatibleSelectors ) );
 }
 
@@ -310,7 +310,7 @@ makeMassEvaluation( const weak_ptr< StructuredBlockStorage > & blocks,
                     const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef MassEvaluation< DensityField_T, FlagFieldEvaluationFilter<FlagField_T> > ME_T;
+   using ME_T = MassEvaluation<DensityField_T, FlagFieldEvaluationFilter<FlagField_T>>;
    return shared_ptr< ME_T >( new ME_T( blocks, fieldId, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
                                         plotFrequency, logFrequency, filename, requiredSelectors, incompatibleSelectors ) );
 }
@@ -323,7 +323,7 @@ shared_ptr< MassEvaluation< DensityField_T, Filter_T > > makeMassEvaluation( con
                                                                              const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                              const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef MassEvaluation< DensityField_T, Filter_T > ME_T;
+   using ME_T = MassEvaluation<DensityField_T, Filter_T>;
    return shared_ptr< ME_T >( new ME_T( blocks, fieldId, filter, plotFrequency, logFrequency, filename, requiredSelectors, incompatibleSelectors ) );
 }
 
@@ -385,7 +385,7 @@ shared_ptr< MassEvaluation< DensityField_T > > makeMassEvaluation( const Config_
                                                                    const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_MASS_EVALUATION_CONFIG_PARSER( config )
-   typedef MassEvaluation< DensityField_T > ME_T;
+   using ME_T = MassEvaluation<DensityField_T>;
    auto evaluation = shared_ptr< ME_T >( new ME_T( blocks, fieldId, defaultPlotFrequency, defaultLogFrequency, defaultFilename,
                                                    requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_MASS_EVALUATION_SET_AND_RETURN()
@@ -401,7 +401,7 @@ makeMassEvaluation( const Config_T & config,
                     const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_MASS_EVALUATION_CONFIG_PARSER( config )
-   typedef MassEvaluation< DensityField_T, FlagFieldEvaluationFilter<FlagField_T> > ME_T;
+   using ME_T = MassEvaluation<DensityField_T, FlagFieldEvaluationFilter<FlagField_T>>;
    auto evaluation = shared_ptr< ME_T >( new ME_T( blocks, fieldId, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
                                                    defaultPlotFrequency, defaultLogFrequency, defaultFilename, requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_MASS_EVALUATION_SET_AND_RETURN()
@@ -416,7 +416,7 @@ shared_ptr< MassEvaluation< DensityField_T, Filter_T > > makeMassEvaluation( con
                                                                              const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_MASS_EVALUATION_CONFIG_PARSER( config )
-   typedef MassEvaluation< DensityField_T, Filter_T > ME_T;
+   using ME_T = MassEvaluation<DensityField_T, Filter_T>;
    auto evaluation = shared_ptr< ME_T >( new ME_T( blocks, fieldId, filter, defaultPlotFrequency, defaultLogFrequency, defaultFilename,
                                                    requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_MASS_EVALUATION_SET_AND_RETURN()

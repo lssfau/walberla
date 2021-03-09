@@ -29,7 +29,7 @@ namespace boundary {
 
 
 class BUIDGenerator : public uid::IndexGenerator< BUIDGenerator, size_t >{};
-typedef UID< BUIDGenerator > BoundaryUID;
+using BoundaryUID = UID<BUIDGenerator>;
 
 
 } // namespace boundary

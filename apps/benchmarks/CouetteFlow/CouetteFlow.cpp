@@ -118,21 +118,21 @@ using walberla::real_t;
 // TYPEDEFS //
 //////////////
 
-typedef lbm::D3Q15< lbm::collision_model::SRT,      false > D3Q15_SRT_INCOMP;
-typedef lbm::D3Q15< lbm::collision_model::SRT,      true  > D3Q15_SRT_COMP;
-typedef lbm::D3Q15< lbm::collision_model::TRT,      false > D3Q15_TRT_INCOMP;
-typedef lbm::D3Q15< lbm::collision_model::TRT,      true  > D3Q15_TRT_COMP;
+using D3Q15_SRT_INCOMP = lbm::D3Q15<lbm::collision_model::SRT, false>;
+using D3Q15_SRT_COMP = lbm::D3Q15<lbm::collision_model::SRT, true>;
+using D3Q15_TRT_INCOMP = lbm::D3Q15<lbm::collision_model::TRT, false>;
+using D3Q15_TRT_COMP = lbm::D3Q15<lbm::collision_model::TRT, true>;
 
-typedef lbm::D3Q19< lbm::collision_model::SRT,      false > D3Q19_SRT_INCOMP;
-typedef lbm::D3Q19< lbm::collision_model::SRT,      true  > D3Q19_SRT_COMP;
-typedef lbm::D3Q19< lbm::collision_model::TRT,      false > D3Q19_TRT_INCOMP;
-typedef lbm::D3Q19< lbm::collision_model::TRT,      true  > D3Q19_TRT_COMP;
-typedef lbm::D3Q19< lbm::collision_model::D3Q19MRT, false > D3Q19_MRT_INCOMP;
+using D3Q19_SRT_INCOMP = lbm::D3Q19<lbm::collision_model::SRT, false>;
+using D3Q19_SRT_COMP = lbm::D3Q19<lbm::collision_model::SRT, true>;
+using D3Q19_TRT_INCOMP = lbm::D3Q19<lbm::collision_model::TRT, false>;
+using D3Q19_TRT_COMP = lbm::D3Q19<lbm::collision_model::TRT, true>;
+using D3Q19_MRT_INCOMP = lbm::D3Q19<lbm::collision_model::D3Q19MRT, false>;
 
-typedef lbm::D3Q27< lbm::collision_model::SRT,      false > D3Q27_SRT_INCOMP;
-typedef lbm::D3Q27< lbm::collision_model::SRT,      true  > D3Q27_SRT_COMP;
-typedef lbm::D3Q27< lbm::collision_model::TRT,      false > D3Q27_TRT_INCOMP;
-typedef lbm::D3Q27< lbm::collision_model::TRT,      true  > D3Q27_TRT_COMP;
+using D3Q27_SRT_INCOMP = lbm::D3Q27<lbm::collision_model::SRT, false>;
+using D3Q27_SRT_COMP = lbm::D3Q27<lbm::collision_model::SRT, true>;
+using D3Q27_TRT_INCOMP = lbm::D3Q27<lbm::collision_model::TRT, false>;
+using D3Q27_TRT_COMP = lbm::D3Q27<lbm::collision_model::TRT, true>;
 
 template< typename LatticeModel_T >
 struct Types
@@ -370,10 +370,10 @@ class MyBoundaryHandling
 {
 public:
 
-   typedef lbm::NoSlip< LatticeModel_T, flag_t >    NoSlip_T;
-   typedef lbm::SimpleUBB< LatticeModel_T, flag_t > UBB_T;
+   using NoSlip_T = lbm::NoSlip<LatticeModel_T, flag_t>;
+   using UBB_T = lbm::SimpleUBB<LatticeModel_T, flag_t>;
 
-   typedef BoundaryHandling< FlagField_T, typename Types<LatticeModel_T>::Stencil_T, NoSlip_T, UBB_T > BoundaryHandling_T;
+   using BoundaryHandling_T = BoundaryHandling<FlagField_T, typename Types<LatticeModel_T>::Stencil_T, NoSlip_T, UBB_T>;
 
 
 
@@ -616,7 +616,7 @@ struct AddRefinementTimeStep
          }
          else
          {
-            typedef lbm::SplitSweep< LatticeModel_T, FlagField_T > Sweep_T;
+            using Sweep_T = lbm::SplitSweep<LatticeModel_T, FlagField_T>;
             auto mySweep = make_shared< Sweep_T >( pdfFieldId, flagFieldId, Fluid_Flag );
 
             addRefinementTimeStep< LatticeModel_T, Sweep_T >( timeloop, blocks, pdfFieldId, boundaryHandlingId, timingPool, levelwiseTimingPool,

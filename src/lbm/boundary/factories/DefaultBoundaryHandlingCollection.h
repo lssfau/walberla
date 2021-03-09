@@ -37,11 +37,11 @@ template< typename LatticeModel_T, typename DiffusionLatticeModel_T, typename Fl
 class DefaultBoundaryHandlingCollectionFactory
 {
 private:
-   typedef typename DefaultBoundaryHandlingFactory         < LatticeModel_T,          FlagField_T >::BoundaryHandling    DefaultBoundaryHandling_T;
-   typedef typename DefaultDiffusionBoundaryHandlingFactory< DiffusionLatticeModel_T, FlagField_T >::BoundaryHandling_T  DefaultDiffusionBoundaryHandlingFactory_T;
+   using DefaultBoundaryHandling_T = typename DefaultBoundaryHandlingFactory<LatticeModel_T, FlagField_T>::BoundaryHandling;
+   using DefaultDiffusionBoundaryHandlingFactory_T = typename DefaultDiffusionBoundaryHandlingFactory<DiffusionLatticeModel_T, FlagField_T>::BoundaryHandling_T;
 
 public:
-   typedef BoundaryHandlingCollection< FlagField_T, DefaultBoundaryHandling_T &, DefaultDiffusionBoundaryHandlingFactory_T & > BoundaryHandlingCollection_T;
+   using BoundaryHandlingCollection_T = BoundaryHandlingCollection<FlagField_T, DefaultBoundaryHandling_T &, DefaultDiffusionBoundaryHandlingFactory_T &>;
 
 
 private:

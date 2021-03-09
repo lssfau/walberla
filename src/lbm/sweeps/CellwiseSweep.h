@@ -410,7 +410,7 @@ shared_ptr< CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, Densit
 makeCellwiseSweep( const BlockDataID & pdfFieldId, const Filter_T & filter,
                    const DensityVelocityIn_T & densityVelocityIn, const DensityVelocityOut_T & densityVelocityOut )
 {
-   typedef CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T > CS_T;
+   using CS_T = CellwiseSweep<LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T>;
    return shared_ptr< CS_T >( new CS_T( pdfFieldId, filter, densityVelocityIn, densityVelocityOut ) );
 }
 
@@ -419,7 +419,7 @@ shared_ptr< CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, Densit
 makeCellwiseSweep( const BlockDataID & src, const BlockDataID & dst, const Filter_T & filter,
                    const DensityVelocityIn_T & densityVelocityIn, const DensityVelocityOut_T & densityVelocityOut )
 {
-   typedef CellwiseSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T > CS_T;
+   using CS_T = CellwiseSweep<LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut_T>;
    return shared_ptr< CS_T >( new CS_T( src, dst, filter, densityVelocityIn, densityVelocityOut ) );
 }
 
@@ -520,7 +520,7 @@ shared_ptr< CellwiseSweep< LatticeModel_T, Filter_T, AdvectionDiffusionDensityEq
 makeCellwiseAdvectionDiffusionSweep( const BlockDataID & pdfFieldId, const ConstBlockDataID & velocityFieldId, const Filter_T & filter,
                                      const DensityVelocityOut_T & densityVelocityOut )
 {
-   typedef CellwiseSweep< LatticeModel_T, Filter_T, AdvectionDiffusionDensityEquilibriumVelocityCalculation<VelocityField_T>, DensityVelocityOut_T > CS_T;
+   using CS_T = CellwiseSweep<LatticeModel_T, Filter_T, AdvectionDiffusionDensityEquilibriumVelocityCalculation<VelocityField_T>, DensityVelocityOut_T>;
    return shared_ptr< CS_T >( new CS_T( pdfFieldId, filter,
                                         AdvectionDiffusionDensityEquilibriumVelocityCalculation<VelocityField_T>( velocityFieldId ), densityVelocityOut ) );
 }
@@ -530,7 +530,7 @@ shared_ptr< CellwiseSweep< LatticeModel_T, Filter_T, AdvectionDiffusionDensityEq
 makeCellwiseAdvectionDiffusionSweep( const BlockDataID & src, const BlockDataID & dst, const ConstBlockDataID & velocityFieldId,
                                      const Filter_T & filter, const DensityVelocityOut_T & densityVelocityOut )
 {
-   typedef CellwiseSweep< LatticeModel_T, Filter_T, AdvectionDiffusionDensityEquilibriumVelocityCalculation<VelocityField_T>, DensityVelocityOut_T > CS_T;
+   using CS_T = CellwiseSweep<LatticeModel_T, Filter_T, AdvectionDiffusionDensityEquilibriumVelocityCalculation<VelocityField_T>, DensityVelocityOut_T>;
    return shared_ptr< CS_T >( new CS_T( src, dst, filter,
                                         AdvectionDiffusionDensityEquilibriumVelocityCalculation<VelocityField_T>( velocityFieldId ), densityVelocityOut ) );
 }

@@ -44,9 +44,9 @@ template <typename LatticeModel_T, typename BoundaryHandling_T>
 class VelocityGradientFieldEvaluator
 {
 public:
-   typedef GhostLayerField< Matrix3< real_t >, 1> TensorField_T;
-   typedef GhostLayerField< Vector3<real_t>, 1 >  VectorField_T;
-   typedef typename LatticeModel_T::Stencil       Stencil_T;
+   using TensorField_T = GhostLayerField<Matrix3<real_t>, 1>;
+   using VectorField_T = GhostLayerField<Vector3<real_t>, 1>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    VelocityGradientFieldEvaluator( const BlockDataID & velocityGradientFieldID,
                                    const ConstBlockDataID & velocityFieldID,

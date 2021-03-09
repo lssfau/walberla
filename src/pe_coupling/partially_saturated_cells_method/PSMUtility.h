@@ -92,9 +92,9 @@ template < typename LatticeModel_T, int Weighting_T >
 void initializeDomainForPSM( StructuredBlockStorage & blockStorage,
                              const BlockDataID & pdfFieldID, const BlockDataID & bodyAndVolumeFractionFieldID )
 {
-   typedef lbm::PdfField< LatticeModel_T >                              PdfField_T;
-   typedef std::pair< pe::BodyID, real_t >                              BodyAndVolumeFraction_T;
-   typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using BodyAndVolumeFraction_T = std::pair<pe::BodyID, real_t>;
+   using BodyAndVolumeFractionField_T = GhostLayerField<std::vector<BodyAndVolumeFraction_T>, 1>;
 
    // iterate all blocks with an iterator 'block'
    for( auto blockIt = blockStorage.begin(); blockIt != blockStorage.end(); ++blockIt )

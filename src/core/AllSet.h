@@ -94,7 +94,7 @@ public:
    friend inline bool operator==( const AllSet& a, const AllSet& b ) { return  setIsEqual(a,b); } ///< compares the content of two sets
    friend inline bool operator!=( const AllSet& a, const AllSet& b ) { return !setIsEqual(a,b); } ///< compares the content of two sets
 
-   typedef typename std::set<T>::const_iterator ConstIter;
+   using ConstIter = typename std::set<T>::const_iterator;
 
 
 

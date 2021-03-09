@@ -33,7 +33,7 @@ MPI_Datatype mpiDatatypeSlice( const Field_T & field,
                                const cell_idx_t xBeg, const cell_idx_t yBeg, const cell_idx_t zBeg, const cell_idx_t fBeg,
                                const cell_idx_t xEnd, const cell_idx_t yEnd, const cell_idx_t zEnd, const cell_idx_t fEnd )
 {
-   typedef typename Field_T::value_type T;
+   using T = typename Field_T::value_type;
    int sizes[4];
    int subsizes[4];
    int starts[4];
@@ -133,7 +133,7 @@ MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & in
 template<typename Field_T>
 MPI_Datatype mpiDatatypeSliceXYZ( const Field_T & field, const CellInterval & interval, const std::set<cell_idx_t> & fs )
 {
-   typedef typename Field_T::value_type T;
+   using T = typename Field_T::value_type;
 
    MPI_Datatype newType = MPI_DATATYPE_NULL;
 

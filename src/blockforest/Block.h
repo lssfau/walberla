@@ -366,7 +366,7 @@ inline void Block::setTargetLevel( const uint_t tl )
 
 } // namespace blockforest
 
-typedef blockforest::Block Block;
+using Block = blockforest::Block;
 
 } // namespace walberla
 

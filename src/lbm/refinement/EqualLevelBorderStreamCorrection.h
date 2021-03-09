@@ -47,12 +47,12 @@ struct EdgeCornerStencil;
 template< typename LatticeModel_T >
 struct EdgeCornerStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 2 >::type >
 {
-   typedef stencil::D2CornerStencil type;
+   using type = stencil::D2CornerStencil;
 };
 template< typename LatticeModel_T >
 struct EdgeCornerStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 3 >::type >
 {
-   typedef stencil::D3EdgeCornerStencil type;
+   using type = stencil::D3EdgeCornerStencil;
 };
 }
 
@@ -63,8 +63,8 @@ class EqualLevelBorderStreamCorrection
 {
 public:
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
-   typedef typename internal::EdgeCornerStencil< LatticeModel_T >::type EdgeCornerStencil_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using EdgeCornerStencil_T = typename internal::EdgeCornerStencil<LatticeModel_T>::type;
 
    EqualLevelBorderStreamCorrection( const BlockDataID & pdfFieldId ) : pdfFieldId_( pdfFieldId ) {}
 

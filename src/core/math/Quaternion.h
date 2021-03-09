@@ -108,7 +108,7 @@ class Quaternion
 
 public:
    //**Type definitions****************************************************************************
-   typedef Type  ElementType;  //!< Type of the quaternion elements.
+   using ElementType = Type;  //!< Type of the quaternion elements.
    //**********************************************************************************************
 
    //**Constructors********************************************************************************
@@ -659,7 +659,7 @@ template< typename Other>   // Data type of the vector
 inline const Vector3< typename MathTrait<Type,Other>::MultType >
    Quaternion<Type>::rotate( const Vector3<Other>& v ) const
 {
-   typedef typename MathTrait<Type,Other>::MultType  MT;
+   using MT = typename MathTrait<Type, Other>::MultType;
 
    // Multiplication in two steps
    const MT w( v_[1]*v[0] + v_[2]*v[1] + v_[3]*v[2] );
@@ -701,7 +701,7 @@ template< typename Other >  // Data type of the matrix
 inline const Matrix3< typename MathTrait<Type,Other>::MultType >
    Quaternion<Type>::rotate( const Matrix3<Other>& m ) const
 {
-   typedef typename MathTrait<Type,Other>::MultType  MT;
+   using MT = typename MathTrait<Type, Other>::MultType;
    const Matrix3<MT> R( this->toRotationMatrix() );
    return R.rotate( m );
 }
@@ -725,7 +725,7 @@ template< typename Other >  // Data type of the diagonal matrix
 inline const Matrix3< typename MathTrait<Type,Other>::MultType >
    Quaternion<Type>::diagRotate( const Matrix3<Other>& m ) const
 {
-   typedef typename MathTrait<Type,Other>::MultType  MT;
+   using MT = typename MathTrait<Type, Other>::MultType;
    const Matrix3<MT> R( this->toRotationMatrix() );
    return R.diagRotate( m );
 }
@@ -743,7 +743,7 @@ template< typename Other >  // Data type of the axis
 inline typename MathTrait<Type,Other>::HighType
    Quaternion<Type>::calcAngle( const Vector3<Other>& axis ) const
 {
-   typedef typename MathTrait<Type,Other>::HighType  High;
+   using High = typename MathTrait<Type, Other>::HighType;
 
    const Vector3<High> u( v_[1], v_[2], v_[3] );
    const High y  ( u.length() );
@@ -1057,7 +1057,7 @@ template< typename T1    // Data type of the left-hand side quaternion
 inline const Quaternion< typename MathTrait<T1,T2>::MultType >
    operator*( const Quaternion<T1>& lhs, const Quaternion<T2>& rhs )
 {
-   typedef typename MathTrait<T1,T2>::MultType  MT;
+   using MT = typename MathTrait<T1, T2>::MultType;
 
    const MT r( lhs[0]*rhs[0] - lhs[1]*rhs[1] - lhs[2]*rhs[2] - lhs[3]*rhs[3] );
    const MT i( lhs[0]*rhs[1] + lhs[1]*rhs[0] + lhs[2]*rhs[3] - lhs[3]*rhs[2] );
@@ -1137,7 +1137,7 @@ using math::Quaternion;
 template<typename T>
 struct VectorTrait< Quaternion<T> >
 {
-   typedef T OutputType;
+   using OutputType = T;
 
    static const uint_t F_SIZE =  4u;
    static T    get( const Quaternion<T> & v, uint_t f )       { return v[f]; }

@@ -35,8 +35,8 @@ class FlagFieldSweepBase : public SweepBase<LatticeModel_T>
 {
 public:
 
-   typedef typename SweepBase< LatticeModel_T >::PdfField_T PdfField_T;
-   typedef typename FlagField_T::flag_t                     flag_t;
+   using PdfField_T = typename SweepBase<LatticeModel_T>::PdfField_T;
+   using flag_t = typename FlagField_T::flag_t;
 
    // block has NO dst pdf field, lbm mask consists of multiple flags
    FlagFieldSweepBase( const BlockDataID & pdfField, const ConstBlockDataID & flagField, const Set< FlagUID > & lbmMask ) :

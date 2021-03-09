@@ -81,7 +81,7 @@ class GenericRecvBuffer
 {
 public:
    //**Type definitions*************************************************************************************************
-   typedef T  ElementType;  //!< Type of the receive buffer elements.
+   using ElementType = T;  //!< Type of the receive buffer elements.
    //*******************************************************************************************************************
 
    //**Constructors*****************************************************************************************************
@@ -173,7 +173,7 @@ private:
 };
 //**********************************************************************************************************************
 
-typedef GenericRecvBuffer<> RecvBuffer;
+using RecvBuffer = GenericRecvBuffer<>;
 
 
 

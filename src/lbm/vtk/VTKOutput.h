@@ -79,8 +79,8 @@ class VTKOutput {
 
 public:
 
-   typedef typename FlagFieldT::flag_t flag_t;
-   typedef std::map<FlagUID, flag_t> FlagMap;
+   using flag_t = typename FlagFieldT::flag_t;
+   using FlagMap = std::map<FlagUID, flag_t>;
 
    VTKOutput( const ConstBlockDataID & pdfField, const ConstBlockDataID & flagField,
               const FlagUID & domainFlagUID, const vtk::VTKOutput::BeforeFunction & ghostLayerSyncFunction,
@@ -196,7 +196,7 @@ void VTKOutput<LatticeModel, FlagFieldT>::addToTimeloop( Timeloop & timeloop, co
                                                          const FlagUID & domainFlagUID,
                                                          const FlagMap & flagFieldMapping )
 {
-   typedef PdfField< LatticeModel > PdfField_t;
+   using PdfField_t = PdfField<LatticeModel>;
 
    blockforest::communication::UniformBufferedScheme< stencil::D3Q27 > pdfGhostLayerSync( blocks );
    pdfGhostLayerSync.addPackInfo( make_shared< field::communication::PackInfo< PdfField_t > >( pdfField ) );

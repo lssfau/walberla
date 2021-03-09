@@ -374,6 +374,6 @@ inline const AABB & PhantomBlock::getNeighborAABB( const uint_t index ) const
 
 } // namespace blockforest
 
-typedef blockforest::PhantomBlock PhantomBlock;
+using PhantomBlock = blockforest::PhantomBlock;
 
 } // namespace walberla

@@ -66,7 +66,7 @@ using std::tuple_size;
 
 
 class BHUIDGenerator : public uid::IndexGenerator< BHUIDGenerator, uint_t >{};
-typedef UID< BHUIDGenerator > BoundaryHandlingUID;
+using BoundaryHandlingUID = UID<BHUIDGenerator>;
 
 
 
@@ -78,9 +78,9 @@ public:
    template< typename F, typename... T >
    friend class BoundaryHandlingCollection;
 
-   typedef FlagField_T                               FlagField;
-   typedef typename FlagField_T::flag_t              flag_t;
-   typedef typename FlagField_T::const_base_iterator ConstFlagFieldBaseIterator;
+   using FlagField = FlagField_T;
+   using flag_t = typename FlagField_T::flag_t;
+   using ConstFlagFieldBaseIterator = typename FlagField_T::const_base_iterator;
 
    enum Mode { OPTIMIZED_SPARSE_TRAVERSAL, ENTIRE_FIELD_TRAVERSAL };
 
@@ -664,7 +664,7 @@ private:
    std::vector< std::vector< std::vector< std::pair< Cell, stencil::Direction > > > > cellDirectionPairs_; // 1st vector: numberOfGhostLayersToInclude
                                                                                                            // 2nd vector: boundary condition index
                                                                                                            // 3rd vector: vector of cell<->direction pairs
-   typedef std::tuple<Boundaries...> Tuple;
+   using Tuple = std::tuple<Boundaries...>;
    Tuple boundaryConditions_;
    bool  threadSafeBCs_;
 

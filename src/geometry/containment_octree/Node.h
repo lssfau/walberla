@@ -33,12 +33,12 @@ template< typename ContainmentOctreeT >
 class Node
 {
 public:
-   typedef typename ContainmentOctreeT::Point  Point;
-   typedef typename ContainmentOctreeT::Scalar Scalar;
-   typedef typename ContainmentOctreeT::AABB   AABB;
+   using Point = typename ContainmentOctreeT::Point;
+   using Scalar = typename ContainmentOctreeT::Scalar;
+   using AABB = typename ContainmentOctreeT::AABB;
 
-   typedef typename ContainmentOctreeT::DistanceObject   DistanceObject;
-   typedef typename ContainmentOctreeT::KahanAccumulator KahanAccumulator;
+   using DistanceObject = typename ContainmentOctreeT::DistanceObject;
+   using KahanAccumulator = typename ContainmentOctreeT::KahanAccumulator;
 
    virtual ~Node() = default;
    virtual bool contains( const Point & p ) const = 0;

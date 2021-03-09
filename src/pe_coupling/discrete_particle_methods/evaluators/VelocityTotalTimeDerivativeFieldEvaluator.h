@@ -46,8 +46,8 @@ using math::Vector3;
 class VelocityTotalTimeDerivativeFieldEvaluator
 {
 public:
-   typedef GhostLayerField< Vector3<real_t>, 1 >  VelocityField_T;
-   typedef GhostLayerField< Matrix3< real_t >, 1> TensorField_T;
+   using VelocityField_T = GhostLayerField<Vector3<real_t>, 1>;
+   using TensorField_T = GhostLayerField<Matrix3<real_t>, 1>;
 
    VelocityTotalTimeDerivativeFieldEvaluator( const BlockDataID & totalTimeDerivativeVelocityFieldID,
                                               const ConstBlockDataID & currentVelocityFieldID,

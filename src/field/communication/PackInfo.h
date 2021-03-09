@@ -42,7 +42,7 @@ template<typename GhostLayerField_T>
 class PackInfo : public walberla::communication::UniformPackInfo
 {
 public:
-   typedef typename GhostLayerField_T::value_type T;
+   using T = typename GhostLayerField_T::value_type;
 
    PackInfo( const BlockDataID & bdId ) : bdId_( bdId ), communicateAllGhostLayers_( true ),
                                           numberOfGhostLayers_( 0 ) {}

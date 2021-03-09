@@ -48,8 +48,8 @@ class GenericAABB
 
 public:
    // Typedefs
-   typedef T            value_type;  /// scalar data type
-   typedef Vector3< T > vector_type; /// data type for three dimensional vectors
+   using value_type = T;  /// scalar data type
+   using vector_type = Vector3<T>; /// data type for three dimensional vectors
 
    // Constructors
    inline GenericAABB();

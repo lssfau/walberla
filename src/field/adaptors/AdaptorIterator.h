@@ -43,9 +43,9 @@ template < typename AdaptedIterator, typename FieldAdaptor>
 class AdaptorIterator
 {
 public:
-   typedef typename FieldAdaptor::value_type T;
-   typedef typename FieldAdaptor::functor_t  Functor;
-   typedef AdaptorIterator<AdaptedIterator, FieldAdaptor > OwnType;
+   using T = typename FieldAdaptor::value_type;
+   using Functor = typename FieldAdaptor::functor_t;
+   using OwnType = AdaptorIterator<AdaptedIterator, FieldAdaptor>;
 
    AdaptorIterator( const AdaptedIterator & baseIterator, const FieldAdaptor * adaptedField )
       : base_( baseIterator ), adaptedField_( adaptedField), functor_( adaptedField->getFunctor() )

@@ -45,7 +45,7 @@ template< typename T >
 class BlockDataHandling
 {
 public:
-   typedef T value_type;
+   using value_type = T;
 
    virtual ~BlockDataHandling() = default;
    
@@ -82,7 +82,7 @@ class BlockDataHandlingFunctionAdaptor : public BlockDataHandling<T>
 {
 public:
 
-   typedef std::function< T* ( IBlock * const block ) > Function;
+   using Function = std::function<T *(IBlock *const)>;
 
    BlockDataHandlingFunctionAdaptor( const Function & function ) : function_( function ) {}
 
@@ -206,7 +206,7 @@ private:
 
 
 
-typedef selectable::SetSelectableObject< shared_ptr< BlockDataHandlingWrapper >, SUID > SelectableBlockDataHandlingWrapper;
+using SelectableBlockDataHandlingWrapper = selectable::SetSelectableObject<shared_ptr<BlockDataHandlingWrapper>, SUID>;
 
 
 

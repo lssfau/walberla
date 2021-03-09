@@ -33,10 +33,10 @@ namespace math {
 
    class Var;
 
-   typedef std::shared_ptr<Var> VarPtr;
+   using VarPtr = std::shared_ptr<Var>;
 
-   typedef std::map<std::string, VarPtr>                 VarMap;
-   typedef std::map<std::string, VarPtr>::const_iterator VarMapIt;
+   using VarMap = std::map<std::string, VarPtr>;
+   using VarMapIt = std::map<std::string, VarPtr>::const_iterator;
 
 } // namespace math
 } // namespace walberla

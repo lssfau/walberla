@@ -385,7 +385,7 @@ void BlockID::fromBuffer( Buffer_T& buffer ) {
 
 } // namespace blockforest
 
-typedef blockforest::BlockID BlockID;
+using BlockID = blockforest::BlockID;
 
 } // namespace walberla
 

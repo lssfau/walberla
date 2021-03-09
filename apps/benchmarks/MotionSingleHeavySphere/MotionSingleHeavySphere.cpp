@@ -76,29 +76,29 @@ using walberla::uint_t;
 //////////////
 
 // PDF field, flag field & body field
-typedef lbm::D3Q19< lbm::collision_model::TRT, false >  LatticeModel_T;
+using LatticeModel_T = lbm::D3Q19<lbm::collision_model::TRT, false>;
 
 using Stencil_T = LatticeModel_T::Stencil;
 using PdfField_T = lbm::PdfField<LatticeModel_T>;
 
 using flag_t = walberla::uint8_t;
 using FlagField_T = FlagField<flag_t>;
-typedef GhostLayerField< pe::BodyID, 1 >  BodyField_T;
+using BodyField_T = GhostLayerField<pe::BodyID, 1>;
 
-typedef std::pair< pe::BodyID, real_t >                              BodyAndVolumeFraction_T;
-typedef GhostLayerField< std::vector< BodyAndVolumeFraction_T >, 1 > BodyAndVolumeFractionField_T;
+using BodyAndVolumeFraction_T = std::pair<pe::BodyID, real_t>;
+using BodyAndVolumeFractionField_T = GhostLayerField<std::vector<BodyAndVolumeFraction_T>, 1>;
 
 const uint_t FieldGhostLayers = 1;
 
 // boundary handling
-typedef lbm::SimpleUBB< LatticeModel_T, flag_t >           UBB_T;
-typedef lbm::SimplePressure< LatticeModel_T, flag_t >      Outlet_T;
+using UBB_T = lbm::SimpleUBB<LatticeModel_T, flag_t>;
+using Outlet_T = lbm::SimplePressure<LatticeModel_T, flag_t>;
 
-typedef pe_coupling::SimpleBB< LatticeModel_T, FlagField_T >        MEM_BB_T;
-typedef pe_coupling::CurvedLinear< LatticeModel_T, FlagField_T >    MEM_CLI_T;
-typedef pe_coupling::CurvedQuadratic< LatticeModel_T, FlagField_T > MEM_MR_T;
+using MEM_BB_T = pe_coupling::SimpleBB<LatticeModel_T, FlagField_T>;
+using MEM_CLI_T = pe_coupling::CurvedLinear<LatticeModel_T, FlagField_T>;
+using MEM_MR_T = pe_coupling::CurvedQuadratic<LatticeModel_T, FlagField_T>;
 
-typedef BoundaryHandling< FlagField_T, Stencil_T, UBB_T, Outlet_T, MEM_BB_T, MEM_CLI_T, MEM_MR_T > BoundaryHandling_T;
+using BoundaryHandling_T = BoundaryHandling<FlagField_T, Stencil_T, UBB_T, Outlet_T, MEM_BB_T, MEM_CLI_T, MEM_MR_T>;
 
 using BodyTypeTuple = std::tuple<pe::Sphere>;
 
@@ -1236,7 +1236,7 @@ int main( int argc, char **argv )
       // reconstruct missing PDFs
       using ExtrapolationFinder_T = pe_coupling::SphereNormalExtrapolationDirectionFinder;
       ExtrapolationFinder_T extrapolationFinder( blocks, bodyFieldID );
-      typedef pe_coupling::ExtrapolationReconstructor< LatticeModel_T, BoundaryHandling_T, ExtrapolationFinder_T > Reconstructor_T;
+      using Reconstructor_T = pe_coupling::ExtrapolationReconstructor<LatticeModel_T, BoundaryHandling_T, ExtrapolationFinder_T>;
       Reconstructor_T reconstructor( blocks, boundaryHandlingID, bodyFieldID, extrapolationFinder, true );
       timeloop.add() << Sweep( pe_coupling::PDFReconstruction< LatticeModel_T, BoundaryHandling_T, Reconstructor_T >
                                ( blocks, pdfFieldID, boundaryHandlingID, bodyStorageID, globalBodyStorage, bodyFieldID, reconstructor, FormerMEM_Flag, Fluid_Flag ), "PDF Restore" );

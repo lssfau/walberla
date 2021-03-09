@@ -52,7 +52,7 @@ namespace gui {
 
       void registerPropertyTree( const shared_ptr<PropertyTree>& propertyTree );
 
-      typedef std::function< DisplayAdaptor * ( const IBlock &, ConstBlockDataID ) > DisplayAdaptorCreatorFunc;
+      using DisplayAdaptorCreatorFunc = std::function<DisplayAdaptor *(const IBlock &, ConstBlockDataID)>;
       void registerDisplayAdaptorCreator( const DisplayAdaptorCreatorFunc & creatorFunc );
 
       static void breakpoint( const std::string & comment, const std::string & file, int line );

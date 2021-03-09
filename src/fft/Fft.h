@@ -35,7 +35,7 @@ class FourierTransform
       typedef std::unique_ptr<pfft_complex[], std::function<void(pfft_complex*)> > FFTComplex;
       typedef std::unique_ptr<std::remove_pointer<pfft_plan>::type, std::function<void(pfft_plan)> > FFTPlan;
 #else
-      typedef std::unique_ptr<double[], std::function<void(double*)> > FFTReal;
+      using FFTReal = std::unique_ptr<double [], std::function<void (double *)>>;
       typedef std::unique_ptr<fftw_complex[], std::function<void(fftw_complex*)> > FFTComplex;
       typedef std::unique_ptr<std::remove_pointer<fftw_plan>::type, std::function<void(fftw_plan)> > FFTPlan;
 #endif

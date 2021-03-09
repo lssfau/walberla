@@ -44,7 +44,7 @@ class IBlockID {
 
 public:
    /// ID type which can be used as a key in a map
-   typedef uint64_t IDType;
+   using IDType = uint64_t;
 
    virtual ~IBlockID() = default;
 

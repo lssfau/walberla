@@ -55,12 +55,12 @@ public:
 
    enum INDEX { EQUAL_LEVEL = 0, COARSE_TO_FINE = 1, FINE_TO_COARSE = 2 };
 
-   typedef mpi::SendBuffer SendBuffer;
-   typedef mpi::RecvBuffer RecvBuffer;
+   using SendBuffer = mpi::SendBuffer;
+   using RecvBuffer = mpi::RecvBuffer;
 
-   typedef shared_ptr< blockforest::communication::NonUniformPackInfo > PackInfo;
-   typedef std::function<void ()>                            VoidFunction;
-   typedef std::function<void ( SendBuffer & buffer )> SendBufferFunction;
+   using PackInfo = shared_ptr<blockforest::communication::NonUniformPackInfo>;
+   using VoidFunction = std::function<void ()>;
+   using SendBufferFunction = std::function<void (SendBuffer &)>;
 
    //**Construction & Destruction***************************************************************************************
    /*! \name Construction & Destruction */

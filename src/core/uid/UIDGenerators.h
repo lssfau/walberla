@@ -87,8 +87,8 @@ template< typename T, typename UINT >
 class IndexGenerator {
 public:
 
-   typedef UINT uint_type;
-   typedef index_generated_tag generator_type;
+   using uint_type = UINT;
+   using generator_type = index_generated_tag;
 
    static uint_type generateUID() {
       static uint_type uid(0);
@@ -123,8 +123,8 @@ template< typename T, typename UINT >
 class StandardGenerator {
 public:
 
-   typedef UINT uint_type;
-   typedef standard_generated_tag generator_type;
+   using uint_type = UINT;
+   using generator_type = standard_generated_tag;
 
    static uint_type generateUID() {
       static uint_type uid(0);
@@ -216,8 +216,8 @@ template< typename T, typename UINT >
 class BitGenerator {
 public:
 
-   typedef UINT uint_type;
-   typedef bit_generated_tag generator_type;
+   using uint_type = UINT;
+   using generator_type = bit_generated_tag;
 
    static uint_type generateUID() {
       static uint_type uid(1);
@@ -262,8 +262,8 @@ template< typename T, typename UINT >
 class SingletonGenerator {
 public:
 
-   typedef UINT uint_type;
-   typedef singleton_generated_tag generator_type;
+   using uint_type = UINT;
+   using generator_type = singleton_generated_tag;
 
    static uint_type generateUID() {
       static uint_type uid(0);

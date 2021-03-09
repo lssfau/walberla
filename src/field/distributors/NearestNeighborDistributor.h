@@ -49,9 +49,9 @@ public:
 
    static const uint_t F_SIZE = Field_T::F_SIZE;
 
-   typedef Field_T                                         BaseField_T;
-   typedef typename FlagField_T::flag_t                    flag_t;
-   typedef NearestNeighborDistributor<Field_T,FlagField_T> OwnType;
+   using BaseField_T = Field_T;
+   using flag_t = typename FlagField_T::flag_t;
+   using OwnType = NearestNeighborDistributor<Field_T, FlagField_T>;
 
    NearestNeighborDistributor( const weak_ptr<StructuredBlockStorage> & blockStorage, const IBlock & block,
                                BaseField_T & baseField, const FlagField_T & flagField,

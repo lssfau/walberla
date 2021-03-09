@@ -251,6 +251,6 @@ TimingTree< TP > TimingTree< TP >::getCopyWithRemainder() const
 
 }
 
-typedef timing::TimingTree<timing::WcPolicy>  WcTimingTree;
-typedef timing::TimingTree<timing::CpuPolicy> CpuTimingTree;
+using WcTimingTree = timing::TimingTree<timing::WcPolicy>;
+using CpuTimingTree = timing::TimingTree<timing::CpuPolicy>;
 }

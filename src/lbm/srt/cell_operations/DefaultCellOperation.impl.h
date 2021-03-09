@@ -65,8 +65,8 @@ public:
    static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    DefaultCellOperation() : omega_( real_t(0) ), latticeModel_( NULL ) {}
 
@@ -136,8 +136,8 @@ public:
    static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >::value),         "Only works with Guo constant force model !" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    DefaultCellOperation() : omega_( real_t(0) ), latticeModel_( NULL ) {}
 
@@ -230,8 +230,8 @@ public:
    static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    DefaultCellOperation() : omega_trm_( real_t(0) ), omega_w0_( real_t(0) ), omega_w1_( real_t(0) ), omega_w2_( real_t(0) ) {}
 
@@ -476,8 +476,8 @@ public:
    static_assert( (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
    static_assert( LatticeModel_T::equilibriumAccuracyOrder == 2, "Only works for lattice models that require the equilibrium distribution to be order 2 accurate!" );
 
-   typedef PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PdfField_T = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
    DefaultCellOperation() : omega_trm_( real_t(0) ), omega_w0_( real_t(0) ), omega_w1_( real_t(0) ), omega_w2_( real_t(0) ) {}
 

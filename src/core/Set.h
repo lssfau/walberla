@@ -85,9 +85,9 @@ template< typename T >
 class Set {
 
 public:
-   typedef typename std::set<T>::value_type     value_type;
-   typedef typename std::set<T>::const_iterator const_iterator;
-   typedef typename std::set<T>::iterator       iterator;
+   using value_type = typename std::set<T>::value_type;
+   using const_iterator = typename std::set<T>::const_iterator;
+   using iterator = typename std::set<T>::iterator;
 
    friend inline Set<T> operator&( const Set& a, const Set& b ) { return setIntersection(a,b); } ///< intersection
    friend inline Set<T> operator+( const Set& a, const Set& b ) { return setUnion       (a,b); } ///< union

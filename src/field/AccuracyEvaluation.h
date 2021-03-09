@@ -332,7 +332,7 @@ shared_ptr< AccuracyEvaluation< Field_T, SolutionFunction_T > > makeAccuracyEval
                                                                                         const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef AccuracyEvaluation< Field_T, SolutionFunction_T > AE_T;
+   using AE_T = AccuracyEvaluation<Field_T, SolutionFunction_T>;
    return shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, plotFrequency, logFrequency, requiredSelectors, incompatibleSelectors ) );
 }
 
@@ -345,7 +345,7 @@ makeAccuracyEvaluation( const weak_ptr< StructuredBlockStorage > & blocks,
                         const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef AccuracyEvaluation< Field_T, SolutionFunction_T, FlagFieldEvaluationFilter<FlagField_T> > AE_T;
+   using AE_T = AccuracyEvaluation<Field_T, SolutionFunction_T, FlagFieldEvaluationFilter<FlagField_T>>;
    return shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
                                         plotFrequency, logFrequency, requiredSelectors, incompatibleSelectors ) );
 }
@@ -358,7 +358,7 @@ makeAccuracyEvaluation( const weak_ptr< StructuredBlockStorage > & blocks, const
                         const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T > AE_T;
+   using AE_T = AccuracyEvaluation<Field_T, SolutionFunction_T, Filter_T>;
    return shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, filter, plotFrequency, logFrequency, requiredSelectors, incompatibleSelectors ) );
 }
 
@@ -419,7 +419,7 @@ shared_ptr< AccuracyEvaluation< Field_T, SolutionFunction_T > > makeAccuracyEval
                                                                                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_CONFIG_PARSER( config )
-   typedef AccuracyEvaluation< Field_T, SolutionFunction_T > AE_T;
+   using AE_T = AccuracyEvaluation<Field_T, SolutionFunction_T>;
    auto evaluation = shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, defaultPlotFrequency, defaultLogFrequency, requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_SET_AND_RETURN()
 }
@@ -435,7 +435,7 @@ makeAccuracyEvaluation( const Config_T & config,
                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_CONFIG_PARSER( config )
-   typedef AccuracyEvaluation< Field_T, SolutionFunction_T, FlagFieldEvaluationFilter<FlagField_T> > AE_T;
+   using AE_T = AccuracyEvaluation<Field_T, SolutionFunction_T, FlagFieldEvaluationFilter<FlagField_T>>;
    auto evaluation = shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
                                                    defaultPlotFrequency, defaultLogFrequency, requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_SET_AND_RETURN()
@@ -451,7 +451,7 @@ makeAccuracyEvaluation( const Config_T & config,
                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_CONFIG_PARSER( config )
-   typedef AccuracyEvaluation< Field_T, SolutionFunction_T, Filter_T > AE_T;
+   using AE_T = AccuracyEvaluation<Field_T, SolutionFunction_T, Filter_T>;
    auto evaluation = shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, filter,
                                                    defaultPlotFrequency, defaultLogFrequency, requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_SET_AND_RETURN()

@@ -78,22 +78,22 @@ public:
    //** Type Definitions  **********************************************************************************************
    /*! \name Type Definitions */
    //@{
-   typedef LatticeModel_T                    LatticeModel;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using LatticeModel = LatticeModel_T;
+   using Stencil = typename LatticeModel_T::Stencil;
 
-   typedef typename GhostLayerField< real_t, Stencil::Size >::value_type             value_type;
+   using value_type = typename GhostLayerField<real_t, Stencil::Size>::value_type;
 
-   typedef typename GhostLayerField< real_t, Stencil::Size >::iterator               iterator;
-   typedef typename GhostLayerField< real_t, Stencil::Size >::const_iterator         const_iterator;
+   using iterator = typename GhostLayerField<real_t, Stencil::Size>::iterator;
+   using const_iterator = typename GhostLayerField<real_t, Stencil::Size>::const_iterator;
 
-   typedef typename GhostLayerField< real_t, Stencil::Size >::reverse_iterator       reverse_iterator;
-   typedef typename GhostLayerField< real_t, Stencil::Size >::const_reverse_iterator const_reverse_iterator;
+   using reverse_iterator = typename GhostLayerField<real_t, Stencil::Size>::reverse_iterator;
+   using const_reverse_iterator = typename GhostLayerField<real_t, Stencil::Size>::const_reverse_iterator;
 
-   typedef typename GhostLayerField< real_t, Stencil::Size >::base_iterator          base_iterator;
-   typedef typename GhostLayerField< real_t, Stencil::Size >::const_base_iterator    const_base_iterator;
+   using base_iterator = typename GhostLayerField<real_t, Stencil::Size>::base_iterator;
+   using const_base_iterator = typename GhostLayerField<real_t, Stencil::Size>::const_base_iterator;
 
-   typedef typename GhostLayerField< real_t, Stencil::Size >::Ptr                    Ptr;
-   typedef typename GhostLayerField< real_t, Stencil::Size >::ConstPtr               ConstPtr;
+   using Ptr = typename GhostLayerField<real_t, Stencil::Size>::Ptr;
+   using ConstPtr = typename GhostLayerField<real_t, Stencil::Size>::ConstPtr;
    //@}
    //*******************************************************************************************************************
 

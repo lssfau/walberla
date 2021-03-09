@@ -75,7 +75,7 @@ namespace field {
       using pointer = T*;
       using reference = T&;
 
-      typedef Field<typename std::remove_const<T>::type, fieldFSize> FieldType;
+      using FieldType = Field<typename std::remove_const<T>::type, fieldFSize>;
 
       static const uint_t F_SIZE = fieldFSize;
 
@@ -219,8 +219,8 @@ namespace field {
    class ForwardFieldIterator : public FieldIterator<T,fieldFSize>
    {
    public:
-      typedef FieldIterator<T,fieldFSize> Parent;
-      typedef Field<typename std::remove_const<T>::type, fieldFSize> FieldType;
+      using Parent = FieldIterator<T, fieldFSize>;
+      using FieldType = Field<typename std::remove_const<T>::type, fieldFSize>;
 
       //**Constructor/Destructor****************************************************************************************
       /*!\name Constructor/Destructor */
@@ -262,8 +262,8 @@ namespace field {
    class ReverseFieldIterator : public FieldIterator<T,fieldFSize>
    {
    public:
-       typedef FieldIterator<T,fieldFSize> Parent;
-       typedef Field<typename std::remove_const<T>::type, fieldFSize> FieldType;
+       using Parent = FieldIterator<T, fieldFSize>;
+       using FieldType = Field<typename std::remove_const<T>::type, fieldFSize>;
 
       //**Constructor/Destructor****************************************************************************************
       /*!\name Constructor/Destructor */

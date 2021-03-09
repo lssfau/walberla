@@ -88,16 +88,16 @@ public:
 
 private:
    //**Type definitions****************************************************************************
-   typedef std::string                                  Key;                  //!< Parameter key.
-   typedef std::string                                  Value;                //!< Parameter value.
-   typedef std::map<Key,Value, CaseInsensitiveCompare>  Map;                  //!< Parameter map.
-   typedef std::list<Block>                             List;                 //!< List for parameter blocks.
-   typedef std::map<Value,Value>                        ValueReplacementMap;  //!< Parameter value replacement map
+   using Key = std::string;                  //!< Parameter key.
+   using Value = std::string;                //!< Parameter value.
+   using Map = std::map<Key, Value, CaseInsensitiveCompare>;                  //!< Parameter map.
+   using List = std::list<Block>;                 //!< List for parameter blocks.
+   using ValueReplacementMap = std::map<Value, Value>;  //!< Parameter value replacement map
 
-   typedef std::stringstream::pos_type         sstreamPos;  //!< Stream position.
-   typedef std::pair<sstreamPos,unsigned int>  Pair;        //!< Pair consisting of a stream position
+   using sstreamPos = std::stringstream::pos_type;  //!< Stream position.
+   using Pair = std::pair<sstreamPos, unsigned int>;        //!< Pair consisting of a stream position
                                                             //!< and a line number.
-   typedef std::vector<Pair>                   LineVector;  //!< Vector for Pair.
+   using LineVector = std::vector<Pair>;  //!< Vector for Pair.
    //*******************************************************************************************************************
 
    //**Member constants*************************************************************************************************
@@ -106,11 +106,11 @@ private:
 
 public:
    //**Type definitions****************************************************************************
-   typedef std::vector<BlockHandle>  Blocks;          //!< Container for block handles.
-   typedef List::size_type           size_type;       //!< Size type for a Block count.
+   using Blocks = std::vector<BlockHandle>;          //!< Container for block handles.
+   using size_type = List::size_type;       //!< Size type for a Block count.
 
-   typedef Map::iterator             iterator;        //!< Iterator over the contained parameters.
-   typedef Map::const_iterator       const_iterator;  //!< Constant iterator over the contained parameters.
+   using iterator = Map::iterator;        //!< Iterator over the contained parameters.
+   using const_iterator = Map::const_iterator;  //!< Constant iterator over the contained parameters.
    //*******************************************************************************************************************
 
    //**Error codes******************************************************************************************************

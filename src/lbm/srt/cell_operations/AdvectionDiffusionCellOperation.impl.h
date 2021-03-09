@@ -63,9 +63,9 @@ public:
    static_assert( LM_AdvDiff::compressible,                                                                      "Only works with compressible models!" );
    static_assert( (std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::None_tag >::value),        "Only works without additional forces!" );
 
-   typedef PdfField< LM_AdvDiff >        AdvDiffPdfField_T;
-   typedef PdfField< LM_Hydro   >        HydroPdfField_T;
-   typedef typename LM_AdvDiff::Stencil  Stencil;
+   using AdvDiffPdfField_T = PdfField<LM_AdvDiff>;
+   using HydroPdfField_T = PdfField<LM_Hydro>;
+   using Stencil = typename LM_AdvDiff::Stencil;
 
    AdvectionDiffusionCellOperation() : omega_( real_t(0) ), advDiffLatticeModel_( NULL ), hydroLatticeModel_(NULL) {}
 
@@ -138,9 +138,9 @@ public:
    static_assert( LM_AdvDiff::compressible,                                                                      "Only works with compressible models!" );
    static_assert( (std::is_same< typename LM_AdvDiff::ForceModel::tag, force_model::Correction_tag >::value),  "Only works with correction force!" );
 
-   typedef PdfField< LM_AdvDiff >        AdvDiffPdfField_T;
-   typedef PdfField< LM_Hydro   >        HydroPdfField_T;
-   typedef typename LM_AdvDiff::Stencil  Stencil;
+   using AdvDiffPdfField_T = PdfField<LM_AdvDiff>;
+   using HydroPdfField_T = PdfField<LM_Hydro>;
+   using Stencil = typename LM_AdvDiff::Stencil;
 
    AdvectionDiffusionCellOperation() : omega_( real_t(0) ), advDiffLatticeModel_( NULL ), hydroLatticeModel_(NULL) {}
 

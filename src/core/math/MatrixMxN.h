@@ -96,10 +96,10 @@ class MatrixMxN
 
 public:
    //**Type definitions****************************************************************************
-   typedef MatrixMxN<Type>   This;           //!< Type of this MatrixMxN instance.
-   typedef This              ResultType;     //!< Result type for expression template evaluations.
-   typedef Type              ElementType;    //!< Type of the matrix elements.
-   typedef const MatrixMxN&  CompositeType;  //!< Data type for composite expression templates.
+   using This = MatrixMxN<Type>;           //!< Type of this MatrixMxN instance.
+   using ResultType = This;     //!< Result type for expression template evaluations.
+   using ElementType = Type;    //!< Type of the matrix elements.
+   using CompositeType = const MatrixMxN &;  //!< Data type for composite expression templates.
    //**********************************************************************************************
 
    //**Constructors********************************************************************************

@@ -35,7 +35,7 @@ namespace field {
 template< typename FlagField_T >
 class FlagFieldCellFilter {
 private:
-   typedef typename FlagField_T::flag_t flag_t;
+   using flag_t = typename FlagField_T::flag_t;
 public:
 
    FlagFieldCellFilter( const ConstBlockDataID flags ) : flagField_( flags ) {}

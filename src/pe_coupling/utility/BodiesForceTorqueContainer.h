@@ -34,7 +34,7 @@ class BodiesForceTorqueContainer
 {  
 public:
 
-   typedef std::map< walberla::id_t, std::array<real_t,6> > ForceTorqueStorage_T;
+   using ForceTorqueStorage_T = std::map<walberla::id_t, std::array<real_t, 6>>;
 
    BodiesForceTorqueContainer( const shared_ptr<StructuredBlockForest> & blockForest, const BlockDataID & bodyStorageID, const std::function<bool(
             pe::BodyID)> &bodySelectorFct = selectRegularBodies)

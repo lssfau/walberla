@@ -31,7 +31,7 @@ namespace blockforest {
 class NoPhantomData
 {
 public:
-   typedef uint8_t weight_t;
+   using weight_t = uint8_t;
    weight_t weight() const { return uint8_t(1); }
 };
 

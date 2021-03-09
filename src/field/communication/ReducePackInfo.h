@@ -42,7 +42,7 @@ template< template<typename> class ReduceOperation, typename GhostLayerField_T >
 class ReducePackInfo : public walberla::communication::ReducePackInfo
 {
 public:
-   typedef typename GhostLayerField_T::value_type T;
+   using T = typename GhostLayerField_T::value_type;
 
    ReducePackInfo( const BlockDataID & bdId, T init )
         : bdId_(bdId),

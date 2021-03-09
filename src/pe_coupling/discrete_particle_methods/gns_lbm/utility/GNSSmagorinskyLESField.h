@@ -64,9 +64,9 @@ class GNSSmagorinskyLESField
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T >   PdfField_T;
-   typedef GhostLayerField< real_t, 1 >      ScalarField_T;
-   typedef typename LatticeModel_T::Stencil  Stencil_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using ScalarField_T = GhostLayerField<real_t, 1>;
+   using Stencil_T = typename LatticeModel_T::Stencil;
 
    static_assert( LatticeModel_T::CollisionModel::constant == false, "Only works with non-constant relaxation time fields!" );
    static_assert( LatticeModel_T::compressible == false,             "Only works with incompressible models!" );

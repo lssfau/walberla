@@ -62,8 +62,8 @@ class SolidVolumeFractionFieldEvaluator
 {
 public:
 
-   typedef GhostLayerField< real_t, 1 >              ScalarField_T;
-   typedef Distributor_T<ScalarField_T, FlagField_T> ScalarDistributor_T;
+   using ScalarField_T = GhostLayerField<real_t, 1>;
+   using ScalarDistributor_T = Distributor_T<ScalarField_T, FlagField_T>;
 
    SolidVolumeFractionFieldEvaluator( const shared_ptr<StructuredBlockStorage> & blockStorage,
                                       const BlockDataID & solidVolumeFractionFieldID, const BlockDataID & bodyStorageID,

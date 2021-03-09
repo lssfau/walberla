@@ -48,8 +48,8 @@ namespace field {
 
 namespace internal {
 
-typedef std::function< real_t () >  FlowRateSolution_T;
-typedef std::function< Vector3< real_t > ( const Vector3< real_t > & ) >  FlowRateVelocitySolution_T;
+using FlowRateSolution_T = std::function<real_t ()>;
+using FlowRateVelocitySolution_T = std::function<Vector3<real_t> (const Vector3<real_t> &)>;
 
 const std::string     volumetricFlowRateEvaluationFilename("flowrate.dat");
 const real_t          volumetricFlowRateEvaluationNormalization( real_t(1) );
@@ -150,8 +150,8 @@ class VolumetricFlowRateEvaluation
 {
 public:
 
-   typedef internal::FlowRateSolution_T          Solution_T;
-   typedef internal::FlowRateVelocitySolution_T  VelocitySolution_T;
+   using Solution_T = internal::FlowRateSolution_T;
+   using VelocitySolution_T = internal::FlowRateVelocitySolution_T;
 
    VolumetricFlowRateEvaluation( const weak_ptr< StructuredBlockStorage > & blocks, const ConstBlockDataID & fieldId,
                                  const Filter_T & filter,
@@ -491,7 +491,7 @@ shared_ptr< VolumetricFlowRateEvaluation< VelocityField_T > > makeVolumetricFlow
                                                                                                 const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef VolumetricFlowRateEvaluation< VelocityField_T > FR_T;
+   using FR_T = VolumetricFlowRateEvaluation<VelocityField_T>;
    return shared_ptr< FR_T >( new FR_T( blocks, velocityFieldId, plotFrequency, logFrequency, solution, velocitySolution, requiredSelectors, incompatibleSelectors ) );
 }
 
@@ -505,7 +505,7 @@ makeVolumetricFlowRateEvaluation( const weak_ptr< StructuredBlockStorage > & blo
                                   const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef VolumetricFlowRateEvaluation< VelocityField_T, FlagFieldEvaluationFilter<FlagField_T> > FR_T;
+   using FR_T = VolumetricFlowRateEvaluation<VelocityField_T, FlagFieldEvaluationFilter<FlagField_T>>;
    return shared_ptr< FR_T >( new FR_T( blocks, velocityFieldId, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
                                         plotFrequency, logFrequency, solution, velocitySolution, requiredSelectors, incompatibleSelectors ) );
 }
@@ -519,7 +519,7 @@ makeVolumetricFlowRateEvaluation( const weak_ptr< StructuredBlockStorage > & blo
                                   const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef VolumetricFlowRateEvaluation< VelocityField_T, Filter_T > FR_T;
+   using FR_T = VolumetricFlowRateEvaluation<VelocityField_T, Filter_T>;
    return shared_ptr< FR_T >( new FR_T( blocks, velocityFieldId, filter, plotFrequency, logFrequency, solution, velocitySolution, requiredSelectors, incompatibleSelectors ) );
 }
 
@@ -596,7 +596,7 @@ shared_ptr< VolumetricFlowRateEvaluation< VelocityField_T > > makeVolumetricFlow
                                                                                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_VOLUMETRIC_FLOW_RATE_EVALUATION_CONFIG_PARSER( config )
-   typedef VolumetricFlowRateEvaluation< VelocityField_T > FR_T;
+   using FR_T = VolumetricFlowRateEvaluation<VelocityField_T>;
    auto evaluation = shared_ptr< FR_T >( new FR_T( blocks, velocityFieldId, defaultPlotFrequency, defaultLogFrequency,
                                                    solution, velocitySolution, requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_VOLUMETRIC_FLOW_RATE_EVALUATION_SET_AND_RETURN()
@@ -614,7 +614,7 @@ makeVolumetricFlowRateEvaluation( const Config_T & config,
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_VOLUMETRIC_FLOW_RATE_EVALUATION_CONFIG_PARSER( config )
-   typedef VolumetricFlowRateEvaluation< VelocityField_T, FlagFieldEvaluationFilter<FlagField_T> > FR_T;
+   using FR_T = VolumetricFlowRateEvaluation<VelocityField_T, FlagFieldEvaluationFilter<FlagField_T>>;
    auto evaluation = shared_ptr< FR_T >( new FR_T( blocks, velocityFieldId, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
                                                    defaultPlotFrequency, defaultLogFrequency, solution, velocitySolution, requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_VOLUMETRIC_FLOW_RATE_EVALUATION_SET_AND_RETURN()
@@ -632,7 +632,7 @@ makeVolumetricFlowRateEvaluation( const Config_T & config,
                                   const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_VOLUMETRIC_FLOW_RATE_EVALUATION_CONFIG_PARSER( config )
-   typedef VolumetricFlowRateEvaluation< VelocityField_T, Filter_T > FR_T;
+   using FR_T = VolumetricFlowRateEvaluation<VelocityField_T, Filter_T>;
    auto evaluation = shared_ptr< FR_T >( new FR_T( blocks, velocityFieldId, filter, defaultPlotFrequency, defaultLogFrequency,
                                                    solution, velocitySolution, requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_VOLUMETRIC_FLOW_RATE_EVALUATION_SET_AND_RETURN()

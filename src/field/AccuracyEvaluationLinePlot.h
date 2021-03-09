@@ -356,7 +356,7 @@ void AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T, Filter_T >::operat
 
    WALBERLA_ROOT_SECTION()
    {
-      typedef typename Field_T::value_type Value_T;
+      using Value_T = typename Field_T::value_type;
       
       std::vector< internal::AccuracyEvaluationPlotData<Value_T> > points;
       while( !buffer.isEmpty() )
@@ -398,7 +398,7 @@ shared_ptr< AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T > > makeAccu
                                                                                                         const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                                                                                         const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T > AE_T;
+   using AE_T = AccuracyEvaluationLinePlot<Field_T, SolutionFunction_T>;
    return shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, yAxis, requiredSelectors, incompatibleSelectors ) );
 }
 
@@ -411,7 +411,7 @@ makeAccuracyEvaluationLinePlot( const weak_ptr< StructuredBlockStorage > & block
                                 const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T, FlagFieldEvaluationFilter<FlagField_T> > AE_T;
+   using AE_T = AccuracyEvaluationLinePlot<Field_T, SolutionFunction_T, FlagFieldEvaluationFilter<FlagField_T>>;
    return shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
                                         yAxis, requiredSelectors, incompatibleSelectors ) );
 }
@@ -424,7 +424,7 @@ makeAccuracyEvaluationLinePlot( const weak_ptr< StructuredBlockStorage > & block
                                 const Set<SUID> & requiredSelectors = Set<SUID>::emptySet(),
                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
-   typedef AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T, Filter_T > AE_T;
+   using AE_T = AccuracyEvaluationLinePlot<Field_T, SolutionFunction_T, Filter_T>;
    return shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, filter, yAxis, requiredSelectors, incompatibleSelectors ) );
 }
 
@@ -491,7 +491,7 @@ makeAccuracyEvaluationLinePlot( const Config_T & config,
                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_LINE_PLOT_CONFIG_PARSER( config )
-   typedef AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T > AE_T;
+   using AE_T = AccuracyEvaluationLinePlot<Field_T, SolutionFunction_T>;
    auto evaluation = shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, defaultYAxis, requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_LINE_PLOT_SET_AND_RETURN()
 }
@@ -507,7 +507,7 @@ makeAccuracyEvaluationLinePlot( const Config_T & config,
                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_LINE_PLOT_CONFIG_PARSER( config )
-   typedef AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T, FlagFieldEvaluationFilter<FlagField_T> > AE_T;
+   using AE_T = AccuracyEvaluationLinePlot<Field_T, SolutionFunction_T, FlagFieldEvaluationFilter<FlagField_T>>;
    auto evaluation = shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, FlagFieldEvaluationFilter<FlagField_T>( flagFieldId, cellsToEvaluate ),
                                                    defaultYAxis, requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_LINE_PLOT_SET_AND_RETURN()
@@ -523,7 +523,7 @@ makeAccuracyEvaluationLinePlot( const Config_T & config,
                                 const Set<SUID> & incompatibleSelectors = Set<SUID>::emptySet() )
 {
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_LINE_PLOT_CONFIG_PARSER( config )
-   typedef AccuracyEvaluationLinePlot< Field_T, SolutionFunction_T, Filter_T > AE_T;
+   using AE_T = AccuracyEvaluationLinePlot<Field_T, SolutionFunction_T, Filter_T>;
    auto evaluation = shared_ptr< AE_T >( new AE_T( blocks, fieldId, solution, filter, defaultYAxis, requiredSelectors, incompatibleSelectors ) );
    WALBERLA_FIELD_MAKE_ACCURACY_EVALUATION_LINE_PLOT_SET_AND_RETURN()
 }
@@ -642,7 +642,7 @@ makeAccuracyEvaluationLinePlotter( const shared_ptr< AccuracyEvaluationLinePlot_
                                    const std::string & filename = internal::accuracyEvaluationLinePlotterFilename,
                                    const std::string & fileExtension = internal::accuracyEvaluationLinePlotterExtension )
 {
-   typedef AccuracyEvaluationLinePlotter< AccuracyEvaluationLinePlot_T > AE_T;
+   using AE_T = AccuracyEvaluationLinePlotter<AccuracyEvaluationLinePlot_T>;
    return shared_ptr< AE_T >( new AE_T( plot, evaluationFrequency, filename, fileExtension ) );
 }
 
@@ -686,7 +686,7 @@ makeAccuracyEvaluationLinePlotter( const Config_T & config,
    std::string defaultFilename( internal::accuracyEvaluationLinePlotterFilename );
    std::string defaultFileExtension( internal::accuracyEvaluationLinePlotterExtension );
    internal::accuracyEvaluationLinePlotterConfigParser( config, configBlockName, defaultEvaluationFrequency, defaultFilename, defaultFileExtension );
-   typedef AccuracyEvaluationLinePlotter< AccuracyEvaluationLinePlot_T > AE_T;
+   using AE_T = AccuracyEvaluationLinePlotter<AccuracyEvaluationLinePlot_T>;
    return shared_ptr< AE_T >( new AE_T( plot, defaultEvaluationFrequency, defaultFilename, defaultFileExtension ) );
 }
 

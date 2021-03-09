@@ -32,7 +32,7 @@
 
 namespace walberla {
 
-typedef lbm::D2Q9< lbm::collision_model::SRT, false, lbm::force_model::SimpleConstant >  LatticeModel_T;
+using LatticeModel_T = lbm::D2Q9<lbm::collision_model::SRT, false, lbm::force_model::SimpleConstant>;
 
 using Stencil_T = LatticeModel_T::Stencil;
 using CommunicationStencil_T = LatticeModel_T::CommunicationStencil;
@@ -78,7 +78,7 @@ public:
          return;
 
       // data type for storing a position together with a floating point value
-      typedef std::pair< Cell, real_t > PosValuePair;
+      using PosValuePair = std::pair<Cell, real_t>;
 
       // variables for storing the process local minimum/maximum velocity & density
       PosValuePair maxVelocity = std::pair< Cell, real_t >( Cell(), real_c(0) );
@@ -582,7 +582,7 @@ int main( int argc, char ** argv )
 
    auto boundariesConfig = walberlaEnv.config()->getOneBlock( "Boundaries" );
 
-   typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory;
+   using BHFactory = lbm::DefaultBoundaryHandlingFactory<LatticeModel_T, FlagField_T>;
    BlockDataID boundaryHandlingId = BHFactory::addBoundaryHandlingToStorage( blocks, "boundary handling", flagFieldId, pdfFieldId, fluidFlagUID,
                                                                              boundariesConfig.getParameter< Vector3<real_t> >( "velocity0", Vector3<real_t>() ),
                                                                              boundariesConfig.getParameter< Vector3<real_t> >( "velocity1", Vector3<real_t>() ),

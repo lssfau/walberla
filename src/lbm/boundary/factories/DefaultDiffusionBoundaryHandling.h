@@ -44,19 +44,19 @@ template< typename LatticeModel_T, typename FlagField_T >
 class DefaultDiffusionBoundaryHandlingFactory
 {
 private:
-   typedef typename FlagField_T::flag_t flag_t;
+   using flag_t = typename FlagField_T::flag_t;
 
-   typedef typename LatticeModel_T::Stencil Stencil;
-
-public:
-   typedef lbm::DiffusionDirichlet      < LatticeModel_T, flag_t      >  DiffusionDirichlet_T;
-   typedef lbm::SimpleDiffusionDirichlet< LatticeModel_T, flag_t      >  SimpleDiffusionDirichlet_T;
-   typedef lbm::NoDiffusion             < LatticeModel_T, flag_t      >  NoDiffusion_T;
-   typedef lbm::FreeDiffusion           < LatticeModel_T, FlagField_T >  FreeDiffusion_T;
+   using Stencil = typename LatticeModel_T::Stencil;
 
 public:
-   typedef walberla::boundary::BoundaryHandling< FlagField_T, Stencil, DiffusionDirichlet_T, SimpleDiffusionDirichlet_T, NoDiffusion_T, FreeDiffusion_T, SimpleDiffusionDirichlet_T, SimpleDiffusionDirichlet_T > BoundaryHandling_T;
-   typedef BoundaryHandling_T BoundaryHandling;
+   using DiffusionDirichlet_T = lbm::DiffusionDirichlet<LatticeModel_T, flag_t>;
+   using SimpleDiffusionDirichlet_T = lbm::SimpleDiffusionDirichlet<LatticeModel_T, flag_t>;
+   using NoDiffusion_T = lbm::NoDiffusion<LatticeModel_T, flag_t>;
+   using FreeDiffusion_T = lbm::FreeDiffusion<LatticeModel_T, FlagField_T>;
+
+public:
+   using BoundaryHandling_T = walberla::boundary::BoundaryHandling<FlagField_T, Stencil, DiffusionDirichlet_T, SimpleDiffusionDirichlet_T, NoDiffusion_T, FreeDiffusion_T, SimpleDiffusionDirichlet_T, SimpleDiffusionDirichlet_T>;
+   using BoundaryHandling = BoundaryHandling_T;
 
    const static FlagUID& getDiffusionDirichletFlagUID()        { static FlagUID uid( "DiffusionDirichlet"        ); return uid; }
    const static FlagUID& getSimpleDiffusionDirichletFlagUID()  { static FlagUID uid( "SimpleDiffusionDirichlet"  ); return uid; }
@@ -87,7 +87,7 @@ private:
    static BoundaryHandling_T* createDefaultDiffusionBoundaryHandlingFactory( 
       IBlock* const block, const StructuredBlockStorage* const /*bs*/, const BlockDataID& flagFieldID, const Set< FlagUID > & domainFlagUIDs, const BlockDataID& pdfFieldID, const Set< FlagUID > & initFlagUIDs )
    {
-      typedef lbm::PdfField< LatticeModel_T > PDFField_T;
+      using PDFField_T = lbm::PdfField<LatticeModel_T>;
 
       WALBERLA_ASSERT_NOT_NULLPTR( block );
 

@@ -61,10 +61,10 @@ class BodyMapping
 {
 public:
 
-   typedef lbm::PdfField< LatticeModel_T >        PdfField_T;
-   typedef typename BoundaryHandling_T::FlagField FlagField_T;
-   typedef typename BoundaryHandling_T::flag_t    flag_t;
-   typedef Field< pe::BodyID, 1 >                 BodyField_T;
+   using PdfField_T = lbm::PdfField<LatticeModel_T>;
+   using FlagField_T = typename BoundaryHandling_T::FlagField;
+   using flag_t = typename BoundaryHandling_T::flag_t;
+   using BodyField_T = Field<pe::BodyID, 1>;
 
    BodyMapping( const shared_ptr<StructuredBlockStorage> & blockStorage,
                 const BlockDataID & pdfFieldID,
@@ -250,7 +250,7 @@ template< typename BoundaryHandling_T >
 void mapMovingBody( pe::BodyID body, IBlock & block, StructuredBlockStorage & blockStorage,
                     const BlockDataID & boundaryHandlingID, const BlockDataID & bodyFieldID, const FlagUID & obstacle )
 {
-   typedef Field< pe::BodyID, 1 > BodyField_T;
+   using BodyField_T = Field<pe::BodyID, 1>;
 
    WALBERLA_ASSERT_EQUAL( &block.getBlockStorage(), &(blockStorage.getBlockStorage()) );
 

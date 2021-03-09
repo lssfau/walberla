@@ -38,7 +38,7 @@ namespace walberla {
 template< typename T, class Enable = void >
 struct VectorTrait
 {
-   typedef void OutputType;
+   using OutputType = void;
 
    static const uint_t F_SIZE = 0u;
 };
@@ -46,7 +46,7 @@ struct VectorTrait
 template< typename T >
 struct VectorTrait<T, typename std::enable_if<std::is_arithmetic<T>::value>::type>
 {
-   typedef T OutputType;
+   using OutputType = T;
 
    static const uint_t F_SIZE = 1u;
    static T get   ( T   value, uint_t /*f*/ )        { return value; }

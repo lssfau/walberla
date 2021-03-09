@@ -36,7 +36,7 @@ namespace field {
       static_assert( VectorField_T::F_SIZE == 3, "Only valid for Fields with 3 components (F_SIZE==3)" );
       static_assert( std::is_same< typename VectorField_T::value_type, real_t >::value, "Only works for real valued fields" );
 
-      typedef Vector3<real_t> vector_or_constRefVector;
+      using vector_or_constRefVector = Vector3<real_t>;
 
       static vector_or_constRefVector get( const VectorField_T * f, cell_idx_t x, cell_idx_t y, cell_idx_t z )
       {
@@ -56,7 +56,7 @@ namespace field {
                               typename std::enable_if< std::is_same< typename VectorField_T::value_type,
                                                                            Vector3<real_t> >::value >::type >
    {
-       typedef const Vector3<real_t> & vector_or_constRefVector;
+       using vector_or_constRefVector = const Vector3<real_t> &;
 
        static vector_or_constRefVector get( const VectorField_T * f, cell_idx_t x, cell_idx_t y, cell_idx_t z )
        {

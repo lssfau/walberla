@@ -43,9 +43,9 @@ class ExprSystemInitFunction
 {
 public:
 
-   typedef exprtk::symbol_table<real_t>      SymbolTable;
-   typedef exprtk::expression<real_t>        Expression;
-   typedef std::map<std::string, Expression> ExprSystem;
+   using SymbolTable = exprtk::symbol_table<real_t>;
+   using Expression = exprtk::expression<real_t>;
+   using ExprSystem = std::map<std::string, Expression>;
 
    ExprSystemInitFunction( const shared_ptr<StructuredBlockForest> & blocks );
    ~ExprSystemInitFunction();

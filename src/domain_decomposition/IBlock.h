@@ -207,7 +207,7 @@ class IBlock : private NonCopyable
 {
 public:
 
-   typedef internal::BlockData BlockData;
+   using BlockData = internal::BlockData;
 
    friend class           BlockStorage;
    friend class StructuredBlockStorage;

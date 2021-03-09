@@ -39,13 +39,13 @@ struct NeighborsStencil;
 template< typename LatticeModel_T >
 struct NeighborsStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 2 >::type >
 {
-   typedef stencil::D2Q9 type;
+   using type = stencil::D2Q9;
 };
 
 template< typename LatticeModel_T >
 struct NeighborsStencil< LatticeModel_T, typename std::enable_if< LatticeModel_T::Stencil::D == 3 >::type >
 {
-   typedef stencil::D3Q27 type;
+   using type = stencil::D3Q27;
 };
 
 

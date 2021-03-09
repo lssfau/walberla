@@ -70,8 +70,8 @@ public:
    //** Access to Timer Objects ****************************************************************************************
    /*! \name Access to Timer Objects */
    //@{
-   typedef typename std::map<std::string, Timer<TP> >::iterator       iterator;
-   typedef typename std::map<std::string, Timer<TP> >::const_iterator const_iterator;
+   using iterator = typename std::map<std::string, Timer<TP>>::iterator;
+   using const_iterator = typename std::map<std::string, Timer<TP>>::const_iterator;
 
          iterator begin()       { return timerMap_.begin(); }
    const_iterator begin() const { return timerMap_.begin(); }
@@ -248,6 +248,6 @@ namespace timing {
 //======================================================================================================================
 
 namespace walberla {
-   typedef timing::TimingPool<timing::WcPolicy>  WcTimingPool;
-   typedef timing::TimingPool<timing::CpuPolicy> CpuTimingPool;
+   using WcTimingPool = timing::TimingPool<timing::WcPolicy>;
+   using CpuTimingPool = timing::TimingPool<timing::CpuPolicy>;
 }

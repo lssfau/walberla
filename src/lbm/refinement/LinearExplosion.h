@@ -67,12 +67,12 @@ class LinearExplosion
 {
 private:
 
-   typedef typename LatticeModel_T::Stencil Stencil;
+   using Stencil = typename LatticeModel_T::Stencil;
 
-   typedef PdfField< LatticeModel_T > PdfField_T;
+   using PdfField_T = PdfField<LatticeModel_T>;
 
-   typedef field::GhostLayerField< typename PdfField_T::value_type, PdfField_T::F_SIZE > CoarseField;
-   typedef field::GhostLayerField< bool, 1 > BoolField;
+   using CoarseField = field::GhostLayerField<typename PdfField_T::value_type, PdfField_T::F_SIZE>;
+   using BoolField = field::GhostLayerField<bool, 1>;
 
 public:
 

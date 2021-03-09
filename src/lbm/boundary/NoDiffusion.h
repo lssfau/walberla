@@ -33,7 +33,7 @@ namespace lbm {
    template< typename LatticeModel_T, typename flag_t > class NoDiffusion : public NoSlip< LatticeModel_T, flag_t >
    {
    protected:
-      typedef typename NoSlip< LatticeModel_T, flag_t >::PDFField  PDFField;
+      using PDFField = typename NoSlip<LatticeModel_T, flag_t>::PDFField;
 
    public:
       NoDiffusion( const BoundaryUID& boundaryUID, const FlagUID& uid, PDFField* const pdfField )

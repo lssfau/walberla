@@ -55,7 +55,6 @@ public:
    using RefreshCallbackFunction = std::function<void (BlockForest &, const PhantomBlockForest &)>;
 
    using SnapshotCreationFunction = std::function<void (std::vector<uint_t> &, std::vector<uint_t> &)>;
-   [[deprecated("typo: use SnapshotRestoreFunction")]] typedef std::function<uint_t (const uint_t)> SnapshotRestorenFunction;
    using SnapshotRestoreFunction = std::function<uint_t (const uint_t)>;
    using SnapshotRestoreCallbackFunction = std::function<void ()>;
 

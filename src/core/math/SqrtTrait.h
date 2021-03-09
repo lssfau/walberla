@@ -64,7 +64,7 @@ namespace math {
 template< typename T >
 struct SqrtTrait
 {
-   typedef double Type;  //!< Return type of std::sqrt for integral and double arguments.
+   using Type = double;  //!< Return type of std::sqrt for integral and double arguments.
 };
 //**********************************************************************************************************************
 
@@ -77,7 +77,7 @@ struct SqrtTrait
 template<>
 struct SqrtTrait<float>
 {
-   typedef float Type;  //!< Return type of std::sqrt for float arguments.
+   using Type = float;  //!< Return type of std::sqrt for float arguments.
 };
 /*! \endcond */
 //**********************************************************************************************************************
@@ -91,7 +91,7 @@ struct SqrtTrait<float>
 template<>
 struct SqrtTrait<long double>
 {
-   typedef long double Type;  //!< Return type of std::sqrt for long double arguments.
+   using Type = long double;  //!< Return type of std::sqrt for long double arguments.
 };
 /*! \endcond */
 //**********************************************************************************************************************

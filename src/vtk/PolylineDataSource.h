@@ -49,7 +49,7 @@ public:
       uint_t      components;
    };
 
-   typedef std::vector< Vector3< real_t > > Polyline;
+   using Polyline = std::vector<Vector3<real_t>>;
 
    virtual ~PolylineDataSource() = default;
 

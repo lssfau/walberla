@@ -43,7 +43,7 @@ using namespace walberla::pe;
 using namespace walberla::timing;
 using namespace walberla::pe::raytracing;
 
-typedef std::tuple<Sphere, Plane> BodyTuple ;
+using BodyTuple = std::tuple<Sphere, Plane> ;
 
 int main( int argc, char ** argv )
 {

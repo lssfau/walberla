@@ -53,7 +53,7 @@ namespace field {
    public:
 
       static const uint_t F_SIZE = GlField::F_SIZE;
-      typedef  typename GlField::value_type value_type;
+      using value_type = typename GlField::value_type;
 
       NearestNeighborInterpolator( const GlField & fieldToInterpolate )
          : field_( fieldToInterpolate )

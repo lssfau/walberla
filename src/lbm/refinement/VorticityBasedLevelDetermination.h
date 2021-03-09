@@ -49,7 +49,7 @@ class VorticityBasedLevelDetermination // used as a 'BlockForest::RefreshMinTarg
 
 public:
 
-   typedef GhostLayerField< Vector3<real_t>, 1 >  VectorField_T;
+   using VectorField_T = GhostLayerField<Vector3<real_t>, 1>;
 
    VorticityBasedLevelDetermination( const ConstBlockDataID & fieldID, const Filter_T & filter,
                                      const real_t upperLimit, const real_t lowerLimit, const uint_t maxLevel ) :

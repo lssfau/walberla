@@ -39,11 +39,11 @@ public:
 
    static_assert( ( ! std::is_same< CollisionModel_T, collision_model::D3Q19MRT >::value), "D3Q19MRT only works with D3Q19!" );
 
-   typedef typename LatticeModelBase< CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder >::CollisionModel  CollisionModel;
-   typedef typename LatticeModelBase< CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder >::ForceModel      ForceModel;
+   using CollisionModel = typename LatticeModelBase<CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder>::CollisionModel;
+   using ForceModel = typename LatticeModelBase<CollisionModel_T, Compressible, ForceModel_T, EquilibriumAccuracyOrder>::ForceModel;
 
-   typedef stencil::D2Q9 Stencil;
-   typedef stencil::D2Q9 CommunicationStencil;
+   using Stencil = stencil::D2Q9;
+   using CommunicationStencil = stencil::D2Q9;
 
    static const char * NAME;
 

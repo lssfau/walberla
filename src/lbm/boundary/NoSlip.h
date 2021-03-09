@@ -47,10 +47,10 @@ class NoSlip : public Boundary<flag_t>
 {
 protected:
 
-   typedef PdfField< LatticeModel_T >        PDFField;
-   typedef typename LatticeModel_T::Stencil  Stencil;
+   using PDFField = PdfField<LatticeModel_T>;
+   using Stencil = typename LatticeModel_T::Stencil;
 
-   typedef GhostLayerField< Vector3<real_t>, 1 > ForceField;
+   using ForceField = GhostLayerField<Vector3<real_t>, 1>;
 
 public:
 
