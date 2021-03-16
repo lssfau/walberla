@@ -23,7 +23,6 @@
 
 #include <string>
 
-#ifdef WALBERLA_CUDA_NVTX_AVAILABLE
 #include <nvToolsExt.h>
 #include <nvToolsExtCuda.h>
 #include <nvToolsExtCudaRt.h>
@@ -74,24 +73,3 @@ private:
 
 } // namespace cuda
 } // namespace walberla
-
-
-
-
-#else
-namespace walberla{
-namespace cuda {
-
-inline void nameStream(const cudaStream_t & stream, const std::string & name) {}
-inline void nvtxMarker(const std::string& name, const uint32_t color=0xaaaaaa) {}
-class NvtxRange
-{
-public:
-    NvtxRange(const std::string & name, const uint32_t color=0xaaaaaa) {}}
-};
-
-} // namespace cuda
-} // namespace walberla
-
-
-#endif
