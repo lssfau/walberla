@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -68,16 +68,19 @@ public:
    /// Resets the the timing hierarchy
    void reset();
 
-   //** Reduction ******************************************************************************************************
-   /*! \name Reduction */
-   //@{
    /// Collects all the timing data from different processes
-   TimingTree<TP> getReduced( ReduceType rt = REDUCE_TOTAL, int targetRank = 0 ) const;
+   ///
+   /// \param rt type of reduction used
+   /// \param targetRank
+   /// \param callSynchronize call synchronize() before doing the reduction
+   /// \return
+   ///
+   /// \attention Setting callSynchronize to false can lead to deadlocks during reduction if different ranks
+   ///            have different timing nodes! Setting it to true causes an additional communication.
+   TimingTree<TP> getReduced( ReduceType rt = REDUCE_TOTAL, int targetRank = 0, bool callSynchronize = true ) const;
 
    /// Adds entries which only exist on other processes. Has to be collectively called on all processes!
    void synchronize();
-   //@}
-   //*******************************************************************************************************************
 
    /// Returns the raw tree data structure
    const TimingNode<TP>& getRawData() const;
@@ -109,15 +112,15 @@ std::ostream& operator<<( std::ostream& os, const TimingTree<TP>& tt )
 
 template< typename TP >  // Timing policy
 TimingTree<TP>::TimingTree()
-   : current_(&root_)
+      : current_(&root_)
 {
 
 }
 
 template< typename TP >  // Timing policy
 TimingTree<TP>::TimingTree(const TimingTree<TP>& tt)
-   : root_(tt.root_)
-   , current_(&root_)
+      : root_(tt.root_)
+      , current_(&root_)
 {
    WALBERLA_ASSERT_EQUAL(tt.current_, &tt.root_, "Copying is only allowed for stopped TimingTrees!\nTimer still running: " << getCurrentTimerName() );
 }
@@ -133,8 +136,8 @@ TimingTree<TP>& TimingTree<TP>::operator=(const TimingTree<TP>& tt)
 template< typename TP >  // Timing policy
 void TimingTree<TP>::swap(TimingTree<TP>& tt)
 {
-    std::swap(current_, tt.current_);
-    std::swap(root_, tt.root_);
+   std::swap(current_, tt.current_);
+   std::swap(root_, tt.root_);
 }
 
 /// \param name timer name. '.' is not allowed in the timer name!
@@ -189,9 +192,13 @@ void TimingTree<TP>::reset()
 }
 
 template< typename TP >  // Timing policy
-TimingTree<TP> TimingTree<TP>::getReduced( ReduceType rt, int targetRank ) const
+TimingTree<TP> TimingTree<TP>::getReduced( ReduceType rt, int targetRank, bool callSynchronize ) const
 {
    TimingTree<TP> tt(*this);
+   if (callSynchronize)
+   {
+      tt.synchronize();
+   }
    reduceInplace( tt.root_, rt, targetRank );
    return tt;
 }
