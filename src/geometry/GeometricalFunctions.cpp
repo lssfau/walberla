@@ -64,6 +64,7 @@ namespace geometry {
 void getClosestLineBoxPoints( const Vector3<real_t>& p1, const Vector3<real_t>& p2, const Vector3<real_t>& c, const Matrix3<real_t>& R,
                               const Vector3<real_t>& side, Vector3<real_t>& lret, Vector3<real_t>& bret )
 {
+   WALBERLA_ABORT("This function produces incorrect results! See https://i10git.cs.fau.de/walberla/walberla/-/issues/25");
    using namespace walberla::math;
    //----- Note: All computations will be performed in the box-relative coordinate-system -----
 
