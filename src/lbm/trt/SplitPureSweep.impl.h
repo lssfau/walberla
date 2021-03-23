@@ -21,8 +21,6 @@
 
 
 
-#ifndef __IBMCPP__
-
 #pragma once
 
 #include "lbm/lattice_model/LatticeModelBase.h"
@@ -1677,10 +1675,3 @@ void SplitPureSweep< LatticeModel_T, typename std::enable_if< std::is_same< type
 
 } // namespace lbm
 } // namespace walberla
-
-
-#else // #ifdef __IBMCPP__
-
-#include "lbm/trt/bluegeneq/SplitPureSweep.impl.h"
-
-#endif

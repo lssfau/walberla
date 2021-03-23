@@ -50,10 +50,6 @@
 #define WALBERLA_SIMD_SSE2_AVAILABLE 1
 #endif
 
-#ifdef __VECTOR4DOUBLE__
-#define WALBERLA_SIMD_QPX_AVAILABLE 1
-#endif
-
 
 
 
@@ -65,13 +61,6 @@
 //===================================================================================================================
 
 #ifndef WALBERLA_SIMD_FORCE_SCALAR
-
-// QPX (IBM BlueGeneQ)
-#if defined( WALBERLA_SIMD_QPX_AVAILABLE ) && !defined( WALBERLA_USE_SIMD )
-#include "QPX.h"
-#define WALBERLA_USE_QPX 1
-#define WALBERLA_USE_SIMD 1
-#endif
 
 // AVX2 ( Intel Haswell )
 #if defined( WALBERLA_SIMD_AVX2_AVAILABLE )
@@ -153,12 +142,6 @@ template<typename T> struct is_vector4_type {  static const bool value = false; 
 #ifdef WALBERLA_USE_SSE2
    using namespace sse2;
    template<> struct is_vector4_type<sse2::double4_t> {  static const bool value = true; };
-#endif
-
-
-#ifdef WALBERLA_USE_QPX
-   using namespace qpx;
-   template<> struct is_vector4_type<qpx::double4_t> {  static const bool value = true; };
 #endif
 
 

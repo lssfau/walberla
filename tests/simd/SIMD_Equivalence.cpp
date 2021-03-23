@@ -52,10 +52,6 @@
 #include "simd/SSE2.h"
 #endif
 
-#ifdef WALBERLA_SIMD_QPX_AVAILABLE
-#include "simd/QPX.h"
-#endif
-
 #include "simd/Scalar.h"
 
 #include "simd/StreamOutput.h"
@@ -136,23 +132,6 @@
 #endif
 #endif
 
-
-// ---------------- QPX   ------------
-#ifdef IS0_QPX
-#ifdef WALBERLA_SIMD_QPX_AVAILABLE
-#define is0 qpx
-#else
-#define is0 scalar
-#endif
-#endif
-
-#ifdef IS1_QPX
-#ifdef WALBERLA_SIMD_QPX_AVAILABLE
-#define is1 qpx
-#else
-#define is1 scalar
-#endif
-#endif
 
 // ---------------- Scalar -----------
 #ifdef IS0_SCALAR
