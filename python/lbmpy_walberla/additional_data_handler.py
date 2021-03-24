@@ -69,7 +69,7 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
     @property
     def additional_field_data(self):
         identifier = "CPU" if self._target == "gpu" else ""
-        return f"auto {self._field_name} = block->getData< field::GhostLayerField<double, " \
+        return f"auto {self._field_name} = block->getData< field::GhostLayerField<real_t, " \
                f"{len(self._stencil)}> >({self._field_name}{identifier}ID); "
 
     def data_initialisation(self, direction_index):
