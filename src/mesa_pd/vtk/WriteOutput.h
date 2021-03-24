@@ -59,6 +59,14 @@ void writeOutput(std::ostream& os, const Vec3& data, const uint_t component)
    walberla::vtk::toStream(os, data[component]);
 }
 
+template <>
+inline
+void writeOutput(std::ostream& os, const Rot3& data, const uint_t component)
+{
+   WALBERLA_ASSERT_LESS(component, 3);
+   walberla::vtk::toStream(os, (data.getMatrix() * Vec3(1_r, 0_r, 0_r))[component]);
+}
+
 template <typename T>
 inline
 void writeOutput(walberla::vtk::Base64Writer& b64, const T& data, const uint_t component)
@@ -83,6 +91,14 @@ void writeOutput(walberla::vtk::Base64Writer& b64, const Vec3& data, const uint_
 {
    WALBERLA_ASSERT_LESS(component, 3);
    b64 << data[component];
+}
+
+template <>
+inline
+void writeOutput(walberla::vtk::Base64Writer& b64, const Rot3& data, const uint_t component)
+{
+   WALBERLA_ASSERT_LESS(component, 3);
+   b64 << (data.getMatrix() * Vec3(1_r, 0_r, 0_r))[component];
 }
 
 } // namespace vtk

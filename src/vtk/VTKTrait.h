@@ -21,6 +21,7 @@
 #pragma once
 
 #include <core/DataTypes.h>
+#include <core/math/Rot3.h>
 #include <core/math/Vector3.h>
 
 namespace walberla {
@@ -111,6 +112,14 @@ struct VTKTrait<double>
 
 template <typename T>
 struct VTKTrait<math::Vector3<T>>
+{
+   using type = typename VTKTrait<T>::type;
+   constexpr static char const * const type_string = VTKTrait<T>::type_string;
+   constexpr static const uint_t components = 3;
+};
+
+template <typename T>
+struct VTKTrait<math::Rot3<T>>
 {
    using type = typename VTKTrait<T>::type;
    constexpr static char const * const type_string = VTKTrait<T>::type_string;
