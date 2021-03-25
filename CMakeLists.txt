@@ -108,6 +108,7 @@ if ( NOT CMAKE_BUILD_TYPE )
     set ( CMAKE_BUILD_TYPE Release CACHE STRING "Build Types: Debug Release DebugOptimized RelWithDebInfo MinSizeRel."  FORCE )
 endif()
 SET_PROPERTY( CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release DebugOptimized RelWithDebInfo MinSizeRel )
+set( CMAKE_TRY_COMPILE_CONFIGURATION ${CMAKE_BUILD_TYPE} )
 
 # Debugging options                                      )
 option ( WALBERLA_STL_BOUNDS_CHECKS  "Use debug capabilites of libstd++: iterator and bounds checks" )
