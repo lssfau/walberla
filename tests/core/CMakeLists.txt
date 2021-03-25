@@ -22,16 +22,9 @@ waLBerla_compile_test( FILES config/ConfigTest.cpp )
 waLBerla_execute_test( NAME ConfigTest COMMAND $<TARGET_FILE:ConfigTest> ${CMAKE_CURRENT_SOURCE_DIR}/config/ConfigTest.dat )
 
 if( WALBERLA_BUILD_WITH_BOOST )
-   waLBerla_compile_test( FILES config/PropertyTreeTest.cpp)
-   #waLBerla_execute_test(NAME PropertyTreeTest COMMAND $<TARGET_FILE:PropertyTreeTest> )
-endif( WALBERLA_BUILD_WITH_BOOST )
-
-
-if( WALBERLA_BUILD_WITH_BOOST )
    waLBerla_compile_test( FILES config/MultiArrayIOTest.cpp )
    waLBerla_execute_test( NAME MultiArrayIOTest COMMAND $<TARGET_FILE:MultiArrayIOTest> )
 endif( WALBERLA_BUILD_WITH_BOOST )
-
 
 #########
 # debug #
@@ -89,9 +82,9 @@ waLBerla_compile_test( FILES math/GenericAABBTest.cpp DEPENDS stencil domain_dec
 waLBerla_execute_test( NAME GenericAABBTest )
 
 if( WALBERLA_BUILD_WITH_BOOST )
-   waLBerla_compile_test( FILES math/PhysicalCheckTest.cpp DEPENDS stencil )
-   waLBerla_execute_test( NAME PhysicalCheckTest 
-                          COMMAND $<TARGET_FILE:PhysicalCheckTest>  ${CMAKE_CURRENT_SOURCE_DIR}/math/PhysicalCheckTestInput.prm )
+waLBerla_compile_test( FILES math/PhysicalCheckTest.cpp DEPENDS stencil )
+waLBerla_execute_test( NAME PhysicalCheckTest
+                       COMMAND $<TARGET_FILE:PhysicalCheckTest>  ${CMAKE_CURRENT_SOURCE_DIR}/math/PhysicalCheckTestInput.prm )
 endif( WALBERLA_BUILD_WITH_BOOST )
 
 

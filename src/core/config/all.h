@@ -23,7 +23,4 @@
 #pragma once
 
 #include "Config.h"
-#ifdef WALBERLA_BUILD_WITH_BOOST
-#include "ConfigToBoostPropertyTree.h"
-#endif
 #include "Create.h"
