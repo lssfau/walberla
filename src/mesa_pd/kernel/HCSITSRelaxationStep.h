@@ -234,9 +234,9 @@ inline real_t HCSITSRelaxationStep::relaxInelasticFrictionlessContacts(size_t ci
    size_t bId1 = ca.getId1(cid);
    size_t bId2 = ca.getId2(cid);
    pa.getDvRef(bId1) -= pa.getInvMass(bId1) * ca.getP(cid);
-   pa.getDwRef(bId1) -= pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+   pa.getDwRef(bId1) -= pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
    pa.getDvRef(bId2) += pa.getInvMass(bId2) * ca.getP(cid);
-   pa.getDwRef(bId2) += pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+   pa.getDwRef(bId2) += pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
 
    // Calculate the relative contact VELOCITY in the global world frame (if no contact reaction is present at contact i)
    Vec3 gdot    ( ( pa.getLinearVelocity(bId1)     + pa.getDv(bId1) ) -
@@ -272,9 +272,9 @@ inline real_t HCSITSRelaxationStep::relaxInelasticFrictionlessContacts(size_t ci
 
       // Apply impulse right away.
       pa.getDvRef(bId1) += pa.getInvMass(bId1) * ca.getP(cid);
-      pa.getDwRef(bId1) += pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+      pa.getDwRef(bId1) += pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
       pa.getDvRef(bId2) -= pa.getInvMass(bId2) * ca.getP(cid);
-      pa.getDwRef(bId2) -= pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+      pa.getDwRef(bId2) -= pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
    }
 
    return delta_max;
@@ -303,9 +303,9 @@ inline real_t HCSITSRelaxationStep::relaxApproximateInelasticCoulombContactsByDe
    size_t bId1 = ca.getId1(cid);
    size_t bId2 = ca.getId2(cid);
    pa.getDvRef(bId1) -= pa.getInvMass(bId1) * ca.getP(cid);
-   pa.getDwRef(bId1) -= pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+   pa.getDwRef(bId1) -= pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
    pa.getDvRef(bId2) += pa.getInvMass(bId2) * ca.getP(cid);
-   pa.getDwRef(bId2) += pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+   pa.getDwRef(bId2) += pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
 
 
    // Calculate the relative contact VELOCITY in the global world frame (if no contact reaction is present at contact i)
@@ -366,8 +366,8 @@ inline real_t HCSITSRelaxationStep::relaxApproximateInelasticCoulombContactsByDe
          Vec3 p_tmp = ( ca.getT(cid) * ca.getP(cid)  ) * ca.getT(cid)  + ( ca.getO(cid) * ca.getP(cid) ) * ca.getO(cid);
 
 
-         //real_t gdot_n = gdot_nto[0] + contactCache.n_[i] * ( ( contactCache.body1_[i]->getInvInertia() * ( contactCache.r1_[i] % p_tmp ) ) % contactCache.r1_[i] + ( contactCache.body2_[i]->getInvInertia() * ( contactCache.r2_[i] % p_tmp ) ) % contactCache.r2_[i] /* + diag_[i] * p */ );
-         real_t gdot_n = gdot_nto[0] + ca.getNormal(cid) * ( ( pa.getInvInertia(bId1) * ( ca.getR1(cid) % p_tmp ) ) % ca.getR1(cid) + ( pa.getInvInertia(bId2) * ( ca.getR2(cid) % p_tmp ) ) % ca.getR2(cid) /* + diag_[i] * p */ );
+         //real_t gdot_n = gdot_nto[0] + contactCache.n_[i] * ( ( contactCache.body1_[i]->getInvInertiaBF() * ( contactCache.r1_[i] % p_tmp ) ) % contactCache.r1_[i] + ( contactCache.body2_[i]->getInvInertiaBF() * ( contactCache.r2_[i] % p_tmp ) ) % contactCache.r2_[i] /* + diag_[i] * p */ );
+         real_t gdot_n = gdot_nto[0] + ca.getNormal(cid) * ( ( pa.getInvInertiaBF(bId1) * ( ca.getR1(cid) % p_tmp ) ) % ca.getR1(cid) + ( pa.getInvInertiaBF(bId2) * ( ca.getR2(cid) % p_tmp ) ) % ca.getR2(cid) /* + diag_[i] * p */ );
 
          //p_cf[0] = -( contactCache.diag_n_inv_[i] * gdot_n );
          p_cf[0] = -( ca.getDiag_n_inv(cid) * gdot_n );
@@ -377,7 +377,7 @@ inline real_t HCSITSRelaxationStep::relaxApproximateInelasticCoulombContactsByDe
 
          // Now add the action of the normal reaction to the relative contact velocity in the tangential directions so we can relax the frictional components separately.
          p_tmp = ca.getNormal(cid)  * p_cf[0];
-         Vec3 gdot2 = gdot + ( pa.getInvInertia(bId1) * ( ca.getR1(cid) % p_tmp ) ) % ca.getR1(cid) + ( pa.getInvInertia(bId2)* ( ca.getR2(cid) % p_tmp ) ) % ca.getR2(cid);
+         Vec3 gdot2 = gdot + ( pa.getInvInertiaBF(bId1) * ( ca.getR1(cid) % p_tmp ) ) % ca.getR1(cid) + ( pa.getInvInertiaBF(bId2)* ( ca.getR2(cid) % p_tmp ) ) % ca.getR2(cid);
          Vec2 gdot_to;
          gdot_to[0] = ca.getT(cid) * gdot2;
          gdot_to[1] = ca.getO(cid) * gdot2;
@@ -407,9 +407,9 @@ inline real_t HCSITSRelaxationStep::relaxApproximateInelasticCoulombContactsByDe
 
       // Apply impulse right away.
       pa.getDvRef(bId1) += pa.getInvMass(bId1) * ca.getP(cid);
-      pa.getDwRef(bId1) += pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+      pa.getDwRef(bId1) += pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
       pa.getDvRef(bId2) -= pa.getInvMass(bId2) * ca.getP(cid);
-      pa.getDwRef(bId2) -= pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+      pa.getDwRef(bId2) -= pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
    }
    return delta_max;
 }
@@ -439,9 +439,9 @@ inline real_t HCSITSRelaxationStep::relaxInelasticCoulombContactsByDecoupling(si
    size_t bId1 = ca.getId1(cid);
    size_t bId2 = ca.getId2(cid);
    pa.getDvRef(bId1) -= pa.getInvMass(bId1) * ca.getP(cid);
-   pa.getDwRef(bId1) -= pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+   pa.getDwRef(bId1) -= pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
    pa.getDvRef(bId2) += pa.getInvMass(bId2) * ca.getP(cid);
-   pa.getDwRef(bId2) += pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+   pa.getDwRef(bId2) += pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
 
 
    // Calculate the relative contact VELOCITY in the global world frame (if no contact reaction is present at contact i)
@@ -500,7 +500,7 @@ inline real_t HCSITSRelaxationStep::relaxInelasticCoulombContactsByDecoupling(si
             // Calculate the relative contact velocity in the global world frame (if no normal contact reaction is present at contact i)
             p_cf[0] = 0;
             //                       |<- p_cf is orthogonal to the normal and drops out in next line ->|
-            gdotCorrected   = /* ( contactCache.body1_[i]->getInvMass() + contactCache.body2_[i]->getInvMass() ) * p_cf  */ gdot + ( pa.getInvInertia(bId1) * ( ca.getR1(cid) % ( ca.getT(cid) * p_cf[1] + ca.getO(cid) * p_cf[2] ) ) ) % ca.getR1(cid) + ( pa.getInvInertia(bId2) * ( ca.getR2(cid) % ( ca.getT(cid) * p_cf[1] + ca.getO(cid) * p_cf[2] ) ) ) % ca.getR2(cid);
+            gdotCorrected   = /* ( contactCache.body1_[i]->getInvMass() + contactCache.body2_[i]->getInvMass() ) * p_cf  */ gdot + ( pa.getInvInertiaBF(bId1) * ( ca.getR1(cid) % ( ca.getT(cid) * p_cf[1] + ca.getO(cid) * p_cf[2] ) ) ) % ca.getR1(cid) + ( pa.getInvInertiaBF(bId2) * ( ca.getR2(cid) % ( ca.getT(cid) * p_cf[1] + ca.getO(cid) * p_cf[2] ) ) ) % ca.getR2(cid);
             gdotCorrected_n = ca.getNormal(cid) * gdotCorrected + ca.getDistance(cid) * dtinv;
 
             // Relax normal component.
@@ -509,7 +509,7 @@ inline real_t HCSITSRelaxationStep::relaxInelasticCoulombContactsByDecoupling(si
             // Calculate the relative contact velocity in the global world frame (if no frictional contact reaction is present at contact i)
             p_cf[1] = p_cf[2] = real_c( 0 );
             //                       |<- p_cf is orthogonal to the tangential plane and drops out   ->|
-            gdotCorrected   = /* ( contactCache.body1_[i]->getInvMass() + contactCache.body2_[i]->getInvMass() ) * p_cf */ gdot + ( pa.getInvInertia(bId1) * ( ca.getR1(cid) % ( ca.getNormal(cid) * p_cf[0] ) ) ) % ca.getR1(cid) + ( pa.getInvInertia(bId2) * ( ca.getR2(cid) % ( ca.getNormal(cid) * p_cf[0] ) ) ) % ca.getR2(cid);
+            gdotCorrected   = /* ( contactCache.body1_[i]->getInvMass() + contactCache.body2_[i]->getInvMass() ) * p_cf */ gdot + ( pa.getInvInertiaBF(bId1) * ( ca.getR1(cid) % ( ca.getNormal(cid) * p_cf[0] ) ) ) % ca.getR1(cid) + ( pa.getInvInertiaBF(bId2) * ( ca.getR2(cid) % ( ca.getNormal(cid) * p_cf[0] ) ) ) % ca.getR2(cid);
             gdotCorrected_to[0] = ca.getT(cid) * gdotCorrected;
             gdotCorrected_to[1] = ca.getO(cid) * gdotCorrected;
 
@@ -610,9 +610,9 @@ inline real_t HCSITSRelaxationStep::relaxInelasticCoulombContactsByDecoupling(si
 
       // Apply impulse right away.
       pa.getDvRef(bId1) += pa.getInvMass(bId1) * ca.getP(cid);
-      pa.getDwRef(bId1) += pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+      pa.getDwRef(bId1) += pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
       pa.getDvRef(bId2) -= pa.getInvMass(bId2) * ca.getP(cid);
-      pa.getDwRef(bId2) -= pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+      pa.getDwRef(bId2) -= pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
    }
 
    return delta_max;
@@ -653,9 +653,9 @@ inline real_t HCSITSRelaxationStep::relaxInelasticCoulombContactsByOrthogonalPro
    size_t bId1 = ca.getId1(cid);
    size_t bId2 = ca.getId2(cid);
    pa.getDvRef(bId1) -= pa.getInvMass(bId1) * ca.getP(cid);
-   pa.getDwRef(bId1) -= pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+   pa.getDwRef(bId1) -= pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
    pa.getDvRef(bId2) += pa.getInvMass(bId2) * ca.getP(cid);
-   pa.getDwRef(bId2) += pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+   pa.getDwRef(bId2) += pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
 
    // Calculate the relative contact VELOCITY in the global world frame (if no contact reaction is present at contact i)
    Vec3 gdot    ( ( pa.getLinearVelocity(bId1)     + pa.getDv(bId1) ) -
@@ -713,9 +713,9 @@ inline real_t HCSITSRelaxationStep::relaxInelasticCoulombContactsByOrthogonalPro
 
    // Apply impulse right away.
    pa.getDvRef(bId1) += pa.getInvMass(bId1) * ca.getP(cid);
-   pa.getDwRef(bId1) += pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+   pa.getDwRef(bId1) += pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
    pa.getDvRef(bId2) -= pa.getInvMass(bId2) * ca.getP(cid);
-   pa.getDwRef(bId2) -= pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+   pa.getDwRef(bId2) -= pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
 
    return delta_max;
 }
@@ -741,9 +741,9 @@ inline real_t HCSITSRelaxationStep::relaxInelasticGeneralizedMaximumDissipationC
    size_t bId1 = ca.getId1(cid);
    size_t bId2 = ca.getId2(cid);
    pa.getDvRef(bId1) -= pa.getInvMass(bId1) * ca.getP(cid);
-   pa.getDwRef(bId1) -= pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+   pa.getDwRef(bId1) -= pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
    pa.getDvRef(bId2) += pa.getInvMass(bId2) * ca.getP(cid);
-   pa.getDwRef(bId2) += pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+   pa.getDwRef(bId2) += pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
 
    // Calculate the relative contact VELOCITY in the global world frame (if no contact reaction is present at contact i)
    Vec3 gdot    ( ( pa.getLinearVelocity(bId1)     + pa.getDv(bId1) ) -
@@ -957,9 +957,9 @@ inline real_t HCSITSRelaxationStep::relaxInelasticGeneralizedMaximumDissipationC
 
       // Apply impulse right away.
       pa.getDvRef(bId1) += pa.getInvMass(bId1) * ca.getP(cid);
-      pa.getDwRef(bId1) += pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+      pa.getDwRef(bId1) += pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
       pa.getDvRef(bId2) -= pa.getInvMass(bId2) * ca.getP(cid);
-      pa.getDwRef(bId2) -= pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+      pa.getDwRef(bId2) -= pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
    }
    return delta_max;
 }
@@ -1046,9 +1046,9 @@ inline real_t HCSITSRelaxationStep::relaxInelasticContactsByProjectedGaussSeidel
 
       // Apply impulse right away.
       pa.getDvRef(bId1) -= pa.getInvMass(bId1) * ca.getP(cid);
-      pa.getDwRef(bId1) -= pa.getInvInertia(bId1) * (ca.getR1(cid) % ca.getP(cid));
+      pa.getDwRef(bId1) -= pa.getInvInertiaBF(bId1) * (ca.getR1(cid) % ca.getP(cid));
       pa.getDvRef(bId2) += pa.getInvMass(bId2) * ca.getP(cid);
-      pa.getDwRef(bId2) += pa.getInvInertia(bId2) * (ca.getR2(cid) % ca.getP(cid));
+      pa.getDwRef(bId2) += pa.getInvInertiaBF(bId2) * (ca.getR2(cid) % ca.getP(cid));
    }
    return delta_max;
 }

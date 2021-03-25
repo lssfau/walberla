@@ -63,8 +63,8 @@ public:
    const real_t& getMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getMass();}
    const real_t& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvMass();}
 
-   const Mat3& getInertia(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInertiaBF();}
-   const Mat3& getInvInertia(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvInertiaBF();}
+   const Mat3& getInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInertiaBF();}
+   const Mat3& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvInertiaBF();}
 
    data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)].get();}
 private:

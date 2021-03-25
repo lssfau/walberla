@@ -83,7 +83,7 @@ inline void InitParticlesForHCSITS::operator()(size_t j, Accessor& ac, real_t dt
       initializeVelocityCorrections( ac, j, ac.getDvRef(j), ac.getDwRef(j), dt ); // use applied external forces to calculate starting velocity
       if(!isSet(particle_flags, FIXED)){ // Update velocities with global acceleration and angular velocity with euler eqn
          ac.getLinearVelocityRef(j) = ac.getLinearVelocity(j) + getGlobalAcceleration() * dt;
-         ac.getAngularVelocityRef(j) = ac.getAngularVelocity(j) + dt * ( ac.getInvInertia(j) * ( ( ac.getInertia(j) * ac.getAngularVelocity(j) ) % ac.getAngularVelocity(j) ) );
+         ac.getAngularVelocityRef(j) = ac.getAngularVelocity(j) + dt * ( ac.getInvInertiaBF(j) * ( ( ac.getInertiaBF(j) * ac.getAngularVelocity(j) ) % ac.getAngularVelocity(j) ) );
       }
    }
 }
@@ -106,7 +106,7 @@ template <typename Accessor>
 inline void InitParticlesForHCSITS::initializeVelocityCorrections(Accessor& ac, size_t body, Vec3& dv, Vec3& dw, real_t dt ) const
 {
    dv = ( ac.getInvMass(body) * dt ) * ac.getForce(body);
-   dw = dt * ( ac.getInvInertia(body) * ac.getTorque(body) );
+   dw = dt * ( ac.getInvInertiaBF(body) * ac.getTorque(body) );
 
    ac.getForceRef(body) = Vec3();
    ac.getTorqueRef(body) = Vec3();
