@@ -1044,12 +1044,8 @@ if ( WALBERLA_BUILD_WITH_CUDA )
       find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
       list ( APPEND SERVICE_LIBS ${CUDART_LIBRARY} )
 
-      #TODO: check if this is really needed? is it possible that nvtx is missing?
       find_library( NVTX_LIBRARY nvToolsExt ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES} )
-      if( NVTX_LIBRARY )
-          set( WALBERLA_CUDA_NVTX_AVAILABLE 1)
-          list ( APPEND SERVICE_LIBS ${NVTX_LIBRARY} )
-      endif()
+      list ( APPEND SERVICE_LIBS ${NVTX_LIBRARY} )
 
       #CUDA_FOUND is need for our cmake mechanism
       set ( CUDA_FOUND TRUE )

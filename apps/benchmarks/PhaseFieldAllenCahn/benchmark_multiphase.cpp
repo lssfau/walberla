@@ -49,7 +49,6 @@
 #   include "cuda/AddGPUFieldToStorage.h"
 #   include "cuda/DeviceSelectMPI.h"
 #   include "cuda/HostFieldAllocator.h"
-#   include "cuda/NVTX.h"
 #   include "cuda/ParallelStreams.h"
 #   include "cuda/communication/GPUPackInfo.h"
 #   include "cuda/communication/MemcpyPackInfo.h"
