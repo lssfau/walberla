@@ -26,6 +26,7 @@
 #include <core/Environment.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
+#include <core/math/Constants.h>
 #include <core/math/Random.h>
 #include <vtk/VTKOutput.h>
 
@@ -50,6 +51,8 @@ int main( int argc, char ** argv )
                                                  Vector3<uint_t>(2,2,2),
                                                  Vector3<bool>(false, false, false) );
 
+   auto rank = mpi::MPIManager::instance()->rank();
+
    //initialize particles
    const Vec3 shift(real_t(0.5), real_t(0.5), real_t(0.5));
    for (auto& iBlk : *forest)
@@ -61,15 +64,16 @@ int main( int argc, char ** argv )
          auto p = ps->create();
          p->setPosition( pt );
          p->setOwner( mpi::MPIManager::instance()->rank() );
+         p->getRotationRef().rotate(Vec3(0_r,1_r,0_r), real_c(rank) * math::pi * 0.5_r);
       }
    }
 
    auto vtkOutput       = make_shared<mesa_pd::vtk::ParticleVtkOutput>(ps);
    vtkOutput->addOutput<data::SelectParticleOwner>("owner");
    vtkOutput->addOutput<data::SelectParticleLinearVelocity>("velocity");
-   auto rank = mpi::MPIManager::instance()->rank();
+   vtkOutput->addOutput<data::SelectParticleRotation>("rotation");
    vtkOutput->setParticleSelector( [rank](const data::ParticleStorage::iterator& pIt) {return pIt->getIdx() < uint_c(rank);} );
-   auto vtkWriter       = walberla::vtk::createVTKOutput_PointData(vtkOutput, "Bodies", 1, "vtk", "simulation_step", false, false);
+   auto vtkWriter       = walberla::vtk::createVTKOutput_PointData(vtkOutput, "particles", 1, "vtk_outputs", "simulation_step", false, false);
 
    vtkWriter->write();
 
