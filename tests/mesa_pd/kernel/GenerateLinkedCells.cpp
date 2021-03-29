@@ -66,6 +66,7 @@ int main( int argc, char ** argv )
    {
       data::Particle&& p    = *storage->create();
       p.getPositionRef()    = (*it);
+      p.setInteractionRadius(0.1_r);
       p.setShapeID(smallSphere);
    }
 

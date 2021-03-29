@@ -32,6 +32,7 @@ namespace mesa_pd {
 
 math::AABB getAABBFromInteractionRadius(const Vector3<real_t> & pos, const real_t interactionRadius )
 {
+   WALBERLA_ASSERT_GREATER(interactionRadius, 0_r, "Did you forget to set the interaction radius?");
    return math::AABB( pos[0]-interactionRadius, pos[1]-interactionRadius, pos[2]-interactionRadius,
                       pos[0]+interactionRadius, pos[1]+interactionRadius, pos[2]+interactionRadius );
 }

@@ -80,7 +80,7 @@ int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
 
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * walberla::mpi::MPIManager::instance()->worldRank()) );
 
-   const real_t spacing(1.0);
+   const real_t spacing = 2.1_r * radius;
 
    WALBERLA_LOG_INFO_ON_ROOT("*** BLOCKFOREST ***");
    const int centerParticles  = particlesPerAxis * particlesPerAxis * particlesPerAxis;

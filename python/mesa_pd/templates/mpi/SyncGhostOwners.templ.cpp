@@ -72,6 +72,7 @@ void SyncGhostOwners::updateAndMigrate( data::ParticleStorage& ps,
    std::set<walberla::mpi::MPIRank> recvRanks; // potential message senders
    for( auto pIt = ps.begin(); pIt != ps.end(); ++pIt)
    {
+      WALBERLA_ASSERT_GREATER(pIt->getInteractionRadius(), 0_r, "Did you forget to set the interaction radius?");
       if (isSet( pIt->getFlags(), GHOST))
       {
          if (!isSet( pIt->getFlags(), NON_COMMUNICATING) || syncNonCommunicatingBodies)

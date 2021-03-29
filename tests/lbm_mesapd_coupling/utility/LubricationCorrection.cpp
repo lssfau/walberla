@@ -147,24 +147,28 @@ int main( int argc, char **argv )
 
       mesa_pd::data::Particle&& p1 = *ps->create();
       p1.setPosition(position1);
+      p1.setInteractionRadius(sphereRadius);
       p1.setShapeID(sphereShape);
       p1.setLinearVelocity(Vector3<real_t>(relativeVelocity,-relativeVelocity,real_t(0.5)*relativeVelocity));
       auto idxSph1 = p1.getIdx();
 
       mesa_pd::data::Particle&& p2 = *ps->create();
       p2.setPosition(position2);
+      p2.setInteractionRadius(sphereRadius);
       p2.setShapeID(sphereShape);
       p2.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(2),real_t(0)));
       auto idxSph2 = p2.getIdx();
 
       mesa_pd::data::Particle&& p3 = *ps->create();
       p3.setPosition(position3);
+      p3.setInteractionRadius(sphereRadius);
       p3.setShapeID(sphereShape);
       p3.setLinearVelocity(Vector3<real_t>(real_t(2),real_t(0),real_t(2)));
       auto idxSph3 = p3.getIdx();
 
       mesa_pd::data::Particle&& p4 = *ps->create();
       p4.setPosition(position4);
+      p4.setInteractionRadius(sphereRadius);
       p4.setShapeID(sphereShape);
       p4.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),real_t(-0.5)*relativeVelocity));
       auto idxSph4 = p4.getIdx();
@@ -228,24 +232,28 @@ int main( int argc, char **argv )
 
       mesa_pd::data::Particle&& p1 = *ps->create();
       p1.setPosition(position1);
+      p1.setInteractionRadius(sphereRadius);
       p1.setShapeID(sphereShape);
       p1.setLinearVelocity(Vector3<real_t>(relativeVelocity,-relativeVelocity,real_t(0.5)*relativeVelocity));
       auto idxSph1 = p1.getIdx();
 
       mesa_pd::data::Particle&& p2 = *ps->create();
       p2.setPosition(position2);
+      p2.setInteractionRadius(sphereRadius);
       p2.setShapeID(sphereShape);
       p2.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(2),real_t(0)));
       auto idxSph2 = p2.getIdx();
 
       mesa_pd::data::Particle&& p3 = *ps->create();
       p3.setPosition(position3);
+      p3.setInteractionRadius(sphereRadius);
       p3.setShapeID(sphereShape);
       p3.setLinearVelocity(Vector3<real_t>(real_t(2),real_t(0),real_t(2)));
       auto idxSph3 = p3.getIdx();
 
       mesa_pd::data::Particle&& p4 = *ps->create();
       p4.setPosition(position4);
+      p4.setInteractionRadius(sphereRadius);
       p4.setShapeID(sphereShape);
       p4.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),real_t(-0.5)*relativeVelocity));
       auto idxSph4 = p4.getIdx();
@@ -328,6 +336,7 @@ int main( int argc, char **argv )
 
       mesa_pd::data::Particle&& p1 = *ps->create();
       p1.setPosition(position1);
+      p1.setInteractionRadius(sphereRadius);
       p1.setShapeID(sphereShape);
       p1.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),relativeVelocity));
       auto idxSph1 = p1.getIdx();
@@ -335,29 +344,34 @@ int main( int argc, char **argv )
       // mix up order to test Sph - HSp and HSp - Sph variants
       mesa_pd::data::Particle&& pW = *ps->create(true);
       pW.setPosition(wallPosition);
+      pW.setInteractionRadius(std::numeric_limits<real_t>::infinity());
       pW.setShapeID(planeShape);
       auto idxWall = pW.getIdx();
 
       mesa_pd::data::Particle&& p2 = *ps->create();
       p2.setPosition(position2);
+      p2.setInteractionRadius(sphereRadius);
       p2.setShapeID(sphereShape);
       p2.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),-relativeVelocity));
       auto idxSph2 = p2.getIdx();
 
       mesa_pd::data::Particle&& p3 = *ps->create();
       p3.setPosition(position3);
+      p3.setInteractionRadius(sphereRadius);
       p3.setShapeID(sphereShape);
       p3.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),relativeVelocity));
       auto idxSph3 = p3.getIdx();
 
       mesa_pd::data::Particle&& p4 = *ps->create();
       p4.setPosition(position4);
+      p4.setInteractionRadius(sphereRadius);
       p4.setShapeID(sphereShape);
       p4.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),relativeVelocity));
       auto idxSph4 = p4.getIdx();
 
       mesa_pd::data::Particle&& p5 = *ps->create();
       p5.setPosition(position5);
+      p5.setInteractionRadius(sphereRadius);
       p5.setShapeID(sphereShape);
       p5.setLinearVelocity(Vector3<real_t>(real_t(0),real_t(0),relativeVelocity));
       auto idxSph5 = p5.getIdx();
