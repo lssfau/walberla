@@ -47,7 +47,7 @@ class ContactAccessor : public IContactAccessor
 {
 public:
    ContactAccessor(const std::shared_ptr<data::ContactStorage>& ps) : ps_(ps) {}
-   virtual ~ContactAccessor() = default;
+   ~ContactAccessor() override = default;
 
    {%- for prop in properties %}
    const {{prop.type}}& get{{prop.name | capFirst}}(const size_t p_idx) const {return ps_->get{{prop.name | capFirst}}(p_idx);}
@@ -95,10 +95,10 @@ inline size_t ContactAccessor::find(const id_t& uid)
  *
  * Provides get, set and getRef.
  */
-class SingleContactAccessor : public IAccessor
+class SingleContactAccessor : public IContactAccessor
 {
 public:
-   virtual ~SingleContactAccessor() = default;
+   ~SingleContactAccessor() override = default;
 
    {%- for prop in properties %}
    const {{prop.type}}& get{{prop.name | capFirst}}(const size_t /*p_idx*/) const {return {{prop.name}}_;}
