@@ -37,7 +37,7 @@ namespace mesa_pd {
 class Accessor : public data::IAccessor
 {
 public:
-   virtual ~Accessor() = default;
+   ~Accessor() override = default;
 
    {%- for prop in interface %}
    {%- if 'g' in prop.access %}

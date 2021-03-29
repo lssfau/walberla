@@ -47,7 +47,7 @@ class ParticleAccessor : public IAccessor
 {
 public:
    ParticleAccessor(const std::shared_ptr<data::ParticleStorage>& ps) : ps_(ps) {}
-   virtual ~ParticleAccessor() = default;
+   ~ParticleAccessor() override = default;
 
    {%- for prop in properties %}
    {{prop.type}} const & get{{prop.name | capFirst}}(const size_t p_idx) const {return ps_->get{{prop.name | capFirst}}(p_idx);}
@@ -98,7 +98,7 @@ inline size_t ParticleAccessor::find(const id_t& uid)
 class SingleParticleAccessor : public IAccessor
 {
 public:
-   virtual ~SingleParticleAccessor() = default;
+   ~SingleParticleAccessor() override = default;
 
    {%- for prop in properties %}
    {{prop.type}} const & get{{prop.name | capFirst}}(const size_t /*p_idx*/) const {return {{prop.name}}_;}
