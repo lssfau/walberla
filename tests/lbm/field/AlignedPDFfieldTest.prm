@@ -1,0 +1,12 @@
+
+Parameters
+{
+	omega           1.8;
+}
+
+DomainSetup
+{
+   blocks        <  1,   1,  1 >;
+   cellsPerBlock <  10, 10, 10 >;
+   periodic      <  0,   0,  0 >;
+}

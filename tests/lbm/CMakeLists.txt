@@ -74,6 +74,10 @@ waLBerla_execute_test( NAME  SuViscoelasticityShortTest COMMAND $<TARGET_FILE:Su
 waLBerla_compile_test( FILES field/QCriterionTest.cpp DEPENDS field blockforest )
 waLBerla_execute_test( NAME QCriterionTest )
 
+add_subdirectory(field)
+waLBerla_compile_test( FILES field/AlignedPDFfieldTest.cpp DEPENDS field blockforest lbm )
+waLBerla_execute_test( NAME AlignedPDFfieldTest COMMAND $<TARGET_FILE:AlignedPDFfieldTest> ${CMAKE_CURRENT_SOURCE_DIR}/field/AlignedPDFfieldTest.prm )
+
 # Code Generation
 if( WALBERLA_BUILD_WITH_CODEGEN )
 add_subdirectory(codegen)
