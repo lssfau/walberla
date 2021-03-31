@@ -496,13 +496,6 @@ else()
    endif()
 endif()
 
-if (WALBERLA_BUILD_WITH_CUDA AND (CUDA_VERSION VERSION_LESS "11.0" OR CMAKE_VERSION VERSION_LESS 3.18.0))
-   # CUDA < 11 does not support C++17. std::experimental::any works with C++14, unlike std::any.
-   set(CMAKE_CUDA_STANDARD 14)
-   set(WALBERLA_USE_STD_EXPERIMENTAL_ANY 1)
-endif()
-
-
 ############################################################################################################################
 ##
 ##  Visual Studio Setup
@@ -1037,22 +1030,39 @@ if ( WALBERLA_BUILD_WITH_CUDA )
     include(CheckLanguage)
     check_language(CUDA)
     if( CMAKE_CUDA_COMPILER )
-      enable_language(CUDA)
 
-      #include directories and cudart lib is needed for cpp files that use cuda headers/libs
-      include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
-      find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
-      list ( APPEND SERVICE_LIBS ${CUDART_LIBRARY} )
+        if(${CMAKE_VERSION} VERSION_GREATER "3.18.0" AND NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+            set(CMAKE_CUDA_ARCHITECTURES OFF)
+            message(WARNING "CMAKE_CUDA_ARCHITECTURES was not set. It is automatically set to: ${CMAKE_CUDA_ARCHITECTURES}")
+        endif()
 
-      find_library( NVTX_LIBRARY nvToolsExt ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES} )
-      list ( APPEND SERVICE_LIBS ${NVTX_LIBRARY} )
+        enable_language(CUDA)
 
-      #CUDA_FOUND is need for our cmake mechanism
-      set ( CUDA_FOUND TRUE )
+        #include directories and cudart lib is needed for cpp files that use cuda headers/libs
+        include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+        find_library(CUDART_LIBRARY cudart ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
+        list ( APPEND SERVICE_LIBS ${CUDART_LIBRARY} )
+
+        find_library( NVTX_LIBRARY nvToolsExt ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES} )
+        list ( APPEND SERVICE_LIBS ${NVTX_LIBRARY} )
+        
+        #CUDA_FOUND is need for our cmake mechanism
+        set ( CUDA_FOUND TRUE )
     else()
-      set ( WALBERLA_BUILD_WITH_CUDA FALSE )
+        set ( WALBERLA_BUILD_WITH_CUDA FALSE )
     endif ( )
 endif ( )
+
+# old nvcc compilers and newer stdlibc++ are incompatible. This needs to be checked!
+if (WALBERLA_STL_BOUNDS_CHECKS AND WALBERLA_BUILD_WITH_CODEGEN AND WALBERLA_BUILD_WITH_CUDA AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS "11.0" AND WALBERLA_CXX_COMPILER_IS_GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0")
+    message(FATAL_ERROR "WALBERLA_STL_BOUNDS_CHECKS is not compatible with your CUDA compiler")
+endif()
+
+if (WALBERLA_BUILD_WITH_CUDA AND (CMAKE_CUDA_COMPILER_VERSION VERSION_LESS "11.0" OR CMAKE_VERSION VERSION_LESS 3.18.0))
+    # CUDA < 11 does not support C++17. std::experimental::any works with C++14, unlike std::any.
+    set(CMAKE_CUDA_STANDARD 14)
+    set(WALBERLA_USE_STD_EXPERIMENTAL_ANY 1)
+endif()
 ############################################################################################################################
 
 
