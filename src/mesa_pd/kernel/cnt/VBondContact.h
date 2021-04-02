@@ -106,6 +106,11 @@ void VBondContact::operator()(const size_t p_idx1,
                               const size_t p_idx2,
                               Accessor &ac)
 {
+   tensileEnergy = 0_r;
+   shearEnergy = 0_r;
+   bendingEnergy = 0_r;
+   twistingEnergy = 0_r;
+
    Vec3 ri = ac.getPosition(p_idx1);
    Vec3 rj = ac.getPosition(p_idx2);
 

@@ -1,0 +1,30 @@
+//--------------CNT material generator input file (do not change anything except numerical values!)-
+// This  file  sets  up  generation of a rectangular specimen of a CNT material
+// At the generation stage, triple periodic boundary conditions are imposed.
+// Out-of-plane (xy) angle span tunes transverse anizotropy of the film (1 means isotropy)
+// Note that the numerical values should be single space separated
+
+CNT
+{
+   sizeX 20000; // A - Specimen length (x direction).
+   sizeY 20000; // A - Specimen width (y direction).
+   sizeZ 200; // A - Specimen height (z direction).
+   oopp 0; // - out of plane periodicity
+   numBlocksX  2; // - Number of blocks in x direction (blocks are distributed over available MPI processes,
+   numBlocksY  2; // - Number of blocks in y direction  nx x ny x nz blocks total
+   numBlocksZ  1; // - Number of blocks in z direction (nx, ny, nz can not be less than 2 )
+   min_OOP 0.995; // (in PI/2 rads) - minimum theta angle (set 0 for isotropy)
+   max_OOP 1.0; // (in PI/2 rads) - maximum theta angle (set 1 for isotropy)
+   numCNTs 1000; // - Number of CNTs.
+   numSegs 800; // - Number of segments in a CNT.
+   spacing 6.78; // - Segment spacing
+   localDamping 0.2; // - "local" damping
+   viscousDamping 0.00; // - viscous damping
+   seed 1201; // - random seed - needs to be changed for a different realization
+   vdW 1; // - vdW model (0 - isotr.vdW (comp speed-1.0), 1 - aniz. vdW (comp speed 0.54), 2 - numer.integrated vdW (comp-speed 0.14))
+   simulationSteps 1000000; // - timesteps relaxation duration
+   saveEveryNthStep 10000; // - timesteps between checkpoints
+   saveConfEveryNthStep 100000; // - timesteps between saving confs
+   file serie_3_spec_1; // - filename to save the resulting conf (saved to ../confs/)
+}
+//==================================================================================================
