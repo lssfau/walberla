@@ -80,10 +80,10 @@ constexpr auto M_C = 12.011_r;
 constexpr auto mass_T = ro * T * M_C * 104.397_r;
 
 /// Volume of a capsule
-double vol_capsule = (4_r/3_r) * math::pi * (R_CNT * R_CNT * R_CNT) + math::pi * R_CNT * R_CNT * T;
+const double vol_capsule = (4_r/3_r) * math::pi * (R_CNT * R_CNT * R_CNT) + math::pi * R_CNT * R_CNT * T;
 
 /// Density of a capsule
-double dens_capsule = mass_T / vol_capsule;
+const double dens_capsule = mass_T / vol_capsule;
 
 /// V-bond parameter
 constexpr auto knorm = (En * 0.006242_r) / T;

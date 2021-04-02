@@ -81,6 +81,8 @@ void AnisotropicVDWContact::operator()(const size_t p_idx1,
                                        const size_t p_idx2,
                                        Accessor &ac)
 {
+   isParallel_ = false;
+   energy_ = 0_r;
    //===Adaptation of PFC5 vdW contact model implementation====
 
    // Getting the orientations of segments
@@ -128,7 +130,6 @@ void AnisotropicVDWContact::operator()(const size_t p_idx1,
    // check that cosine belongs [-1,1]
    cos_gamma = std::min(1.0_r, cos_gamma);
    cos_gamma = std::max(-1.0_r, cos_gamma);
-   isParallel_ = false;
    if (L < 20_r && L > 16_r)
    {
       const auto gamma = acos(cos_gamma);
@@ -373,7 +374,6 @@ void AnisotropicVDWContact::operator()(const size_t p_idx1,
    } else if (L <= 2_r * R_ * 1.2_r * TH)
    { // Small distance
       //WALBERLA_LOG_DEVEL( "Small distance");
-      energy_ = 0_r;
       real_t F = -1_r;
       addForceAtomic(p_idx1, ac,  F * n);
       addForceAtomic(p_idx2, ac, -F * n);
