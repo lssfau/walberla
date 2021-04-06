@@ -80,7 +80,7 @@ int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
 
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * walberla::mpi::MPIManager::instance()->worldRank()) );
 
-   const real_t spacing = 2.1_r * radius;
+   const real_t generationSpacing = 1_r;
 
    WALBERLA_LOG_INFO_ON_ROOT("*** BLOCKFOREST ***");
    const int centerParticles  = particlesPerAxis * particlesPerAxis * particlesPerAxis;
@@ -115,13 +115,14 @@ int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
    ParticleAccessorWithShape accessor(ps, ss);
-   data::LinkedCells         lc(localDomain.getExtended(spacing), spacing );
+   const real_t linkedCellSize = 2.1_r * radius;
+   data::LinkedCells         lc(localDomain.getExtended(linkedCellSize), linkedCellSize );
 
    auto  smallSphere = ss->create<data::Sphere>( radius );
    ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
    for (auto& iBlk : *forest)
    {
-      for (auto pt : grid_generator::SCGrid(iBlk.getAABB(), Vector3<real_t>(spacing, spacing, spacing) * real_c(0.5), spacing))
+      for (auto pt : grid_generator::SCGrid(iBlk.getAABB(), Vector3<real_t>(generationSpacing, generationSpacing, generationSpacing) * real_c(0.5), generationSpacing))
       {
          WALBERLA_CHECK(iBlk.getAABB().contains(pt));
 

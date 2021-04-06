@@ -443,6 +443,7 @@ int main( int argc, char **argv )
       // create two planes
       mesa_pd::data::Particle&& p0 = *ps->create(true);
       p0.setPosition(referenceVector);
+      p0.setInteractionRadius(std::numeric_limits<real_t>::infinity());
       p0.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(1,0,0) ));
       p0.setOwner(mpi::MPIManager::instance()->rank());
       mesa_pd::data::particle_flags::set(p0.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);
@@ -451,6 +452,7 @@ int main( int argc, char **argv )
 
       mesa_pd::data::Particle&& p1 = *ps->create(true);
       p1.setPosition(Vector3<real_t>(real_c(xSize),0,0));
+      p1.setInteractionRadius(std::numeric_limits<real_t>::infinity());
       p1.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(-1,0,0) ));
       p1.setOwner(mpi::MPIManager::instance()->rank());
       mesa_pd::data::particle_flags::set(p1.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);

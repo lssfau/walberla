@@ -288,6 +288,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
 {
    mesa_pd::data::Particle p2 = *ps->create(true);
    p2.setPosition(simulationDomain.minCorner());
+   p2.setInteractionRadius(std::numeric_limits<real_t>::infinity());
    p2.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(1,0,0) ));
    p2.setOwner(mpi::MPIManager::instance()->rank());
    p2.setType(0);
@@ -297,6 +298,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
 
    mesa_pd::data::Particle p3 = *ps->create(true);
    p3.setPosition(simulationDomain.maxCorner());
+   p3.setInteractionRadius(std::numeric_limits<real_t>::infinity());
    p3.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(-1,0,0) ));
    p3.setOwner(mpi::MPIManager::instance()->rank());
    p3.setType(0);
@@ -306,6 +308,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
 
    mesa_pd::data::Particle p4 = *ps->create(true);
    p4.setPosition(simulationDomain.minCorner());
+   p4.setInteractionRadius(std::numeric_limits<real_t>::infinity());
    p4.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(0,1,0) ));
    p4.setOwner(mpi::MPIManager::instance()->rank());
    p4.setType(0);
@@ -315,6 +318,7 @@ void createPlaneSetup(const shared_ptr<mesa_pd::data::ParticleStorage> & ps, con
 
    mesa_pd::data::Particle p5 = *ps->create(true);
    p5.setPosition(simulationDomain.maxCorner());
+   p5.setInteractionRadius(std::numeric_limits<real_t>::infinity());
    p5.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(0,-1,0) ));
    p5.setOwner(mpi::MPIManager::instance()->rank());
    p5.setType(0);

@@ -460,6 +460,7 @@ int main( int argc, char **argv )
 
    mesa_pd::data::Particle&& p0 = *ps->create(true);
    p0.setPosition(generationDomain.minCorner());
+   p0.setInteractionRadius(std::numeric_limits<real_t>::infinity());
    p0.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(0,0,1) ));
    p0.setOwner(mpi::MPIManager::instance()->rank());
    p0.setType(0);
@@ -468,6 +469,7 @@ int main( int argc, char **argv )
 
    mesa_pd::data::Particle&& p1 = *ps->create(true);
    p1.setPosition(generationDomain.maxCorner());
+   p1.setInteractionRadius(std::numeric_limits<real_t>::infinity());
    p1.setShapeID(ss->create<mesa_pd::data::HalfSpace>( Vector3<real_t>(0,0,-1) ));
    p1.setOwner(mpi::MPIManager::instance()->rank());
    p1.setType(0);
