@@ -18,19 +18,21 @@
 //
 //======================================================================================================================
 
+/* This tests momentum balance for a fluctuating MRT LB with a constant
+   force applied
+*/
+
 #include "blockforest/all.h"
 #include "core/all.h"
 #include "domain_decomposition/all.h"
 #include "field/all.h"
 #include "geometry/all.h"
-#include "gui/all.h"
 #include "timeloop/all.h"
 
-#include "lbm/field/PdfField.h"
-#include "lbm/field/AddToStorage.h"
 #include "lbm/communication/PdfFieldPackInfo.h"
-#include "lbm/gui/Connection.h"
-#include "lbm/vtk/VTKOutput.h"
+#include "lbm/field/Adaptors.h"
+#include "lbm/field/AddToStorage.h"
+#include "lbm/field/PdfField.h"
 
 #include "FluctuatingMRT_LatticeModel.h"
 
@@ -59,18 +61,21 @@ int main( int argc, char ** argv )
    // read parameters
    auto parameters = walberlaEnv.config()->getOneBlock( "Parameters" );
 
-   const real_t          omega           = parameters.getParameter< real_t >         ( "omega",           real_c( 1.4 ) );
+   const real_t          omega           = parameters.getParameter< real_t >         ( "omega",           real_c(1.4) );
+   const real_t          magic_number    = 3. / 16;
+   const real_t          omega_2         = (4 - 2 * omega) / (4 * magic_number * omega + 2 - omega);
    const Vector3<real_t> initialVelocity = parameters.getParameter< Vector3<real_t> >( "initialVelocity", Vector3<real_t>() );
-   const uint_t          timesteps       = parameters.getParameter< uint_t >         ( "timesteps",       uint_c( 10 )  );
+   const uint_t          timesteps       = parameters.getParameter< uint_t >         ( "timesteps",       uint_c(10) );
    const real_t          temperature     = real_t(0.01);
-   const uint_t seed = uint_t(0);
+   const uint_t          seed            = uint_t(0);
 
-   const double remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 ); // in seconds
+   const real_t remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 ); // in seconds
 
    // create fields
-   BlockDataID forceFieldId = field::addToStorage<VectorField_T>( blocks, "Force", real_t( 0.0 ), field::fzyx);
+   real_t force             = 2E-4; // Force to apply on each node on each axis
+   BlockDataID forceFieldId = field::addToStorage<VectorField_T>( blocks, "Force", force, field::fzyx );
 
-   LatticeModel_T latticeModel = LatticeModel_T( forceFieldId, omega, 0, omega, omega, seed, temperature, uint_t(0) );
+   LatticeModel_T latticeModel = LatticeModel_T( forceFieldId, omega, omega, omega_2, omega, seed, temperature, uint_t(0) );
    BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, initialVelocity, real_t(1), uint_t(1), field::fzyx );
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
@@ -86,8 +91,8 @@ int main( int argc, char ** argv )
    communication.addPackInfo( make_shared< lbm::PdfFieldPackInfo< LatticeModel_T > >( pdfFieldId ) );
 
    // set the RNG counter to match the time step and propagate it to the fields' copies of the lattice model
-   timeloop.add() << BeforeFunction( [&](){ latticeModel.time_step_ = uint32_c(timeloop.getCurrentTimeStep()); }, "set RNG counter" )
-                  << Sweep( [&]( IBlock * block ){
+   timeloop.add() << BeforeFunction( [&]() { latticeModel.time_step_ = uint32_c(timeloop.getCurrentTimeStep()); }, "set RNG counter" )
+                  << Sweep( [&]( IBlock * block ) {
                         auto field = block->getData< PdfField_T >( pdfFieldId );
                         field->latticeModel().time_step_ = latticeModel.time_step_;
                      }, "set RNG counter" );
@@ -101,25 +106,32 @@ int main( int argc, char ** argv )
                                   "LBM stability check" );
 
    // log remaining time
-   timeloop.addFuncAfterTimeStep( timing::RemainingTimeLogger( timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency ), "remaining time logger" );
+   timeloop.addFuncAfterTimeStep( timing::RemainingTimeLogger(timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency), "remaining time logger" );
 
-   // add VTK output to time loop
-   lbm::VTKOutput< LatticeModel_T, FlagField_T >::addToTimeloop( timeloop, blocks, walberlaEnv.config(), pdfFieldId, flagFieldId, fluidFlagUID );
+   auto densityAdaptorId = field::addFieldAdaptor<lbm::Adaptor<LatticeModel_T>::Density>        ( blocks, pdfFieldId, "DensityAdaptor" );
+   auto velocityAdaptorId = field::addFieldAdaptor<lbm::Adaptor<LatticeModel_T>::VelocityVector>( blocks, pdfFieldId, "VelocityAdaptor" );
 
-   // create adaptors, so that the GUI also displays density and velocity
-   // adaptors are like fields with the difference that they do not store values
-   // but calculate the values based on other fields ( here the PdfField )
-   field::addFieldAdaptor<lbm::Adaptor<LatticeModel_T>::Density>       ( blocks, pdfFieldId, "DensityAdaptor" );
-   field::addFieldAdaptor<lbm::Adaptor<LatticeModel_T>::VelocityVector>( blocks, pdfFieldId, "VelocityAdaptor" );
+   timeloop.run();
 
-   if( parameters.getParameter<bool>( "useGui", false ) )
+   // Calculate momentum
+   Vector3<real_t> momentum; // observed momentum
+   int count = 0;      // count of lb nodes traversed
+   for (auto block = blocks->begin(); block != blocks->end(); ++block)
    {
-      GUI gui ( timeloop, blocks, argc, argv );
-      lbm::connectToGui<LatticeModel_T> ( gui );
-      gui.run();
+      auto v   = block->getData< lbm::Adaptor< LatticeModel_T >::VelocityVector >(velocityAdaptorId);
+      auto rho = block->getData< lbm::Adaptor< LatticeModel_T >::Density >(densityAdaptorId);
+      WALBERLA_FOR_ALL_CELLS_XYZ_OMP(v, omp critical, {
+         momentum += rho->get(x, y, z) * v->get(x, y, z);
+         count++;
+      });
    }
-   else
-      timeloop.run();
+
+   // check
+   real_t expected_momentum = real_c(count) * force * real_c(timesteps);
+   printf("%g %g %g | %g\n", momentum[0], momentum[1], momentum[2], expected_momentum);
+   WALBERLA_CHECK_FLOAT_EQUAL(momentum[0], expected_momentum);
+   WALBERLA_CHECK_FLOAT_EQUAL(momentum[1], expected_momentum);
+   WALBERLA_CHECK_FLOAT_EQUAL(momentum[2], expected_momentum);
 
    return EXIT_SUCCESS;
 }
