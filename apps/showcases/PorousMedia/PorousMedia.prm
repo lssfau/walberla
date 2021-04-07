@@ -1,0 +1,73 @@
+//======================================================================================================================
+// Parameter, i.e., configuration file for the showcase "PorousMedia.cpp".
+//======================================================================================================================
+DomainParameters
+{
+   packedBedGeometryFile samplePackedBed.txt; // file containing the positions of particles (relative to their diameter)
+
+   numCoarseBlocks < 4, 4, 20 >; // these blocks are refined on 3 levels (=> actual number of blocks increases)
+   cellsPerDiameter 40;          // on finest level
+   relDomainSize < 4, 4, 20 >;   // values are multiplied with cellsPerDiameter inside the code
+   radiusScale 0.985;            // factor for radially shrinking the particles
+}
+
+SimulationParameters
+{
+   omega 1.98;          // on finest level (omega on coarser levels is larger)
+   Re 150;              // particle Reynolds number
+   maxTimesteps 1000;   // maximum number of time steps to be performed
+   minTimesteps 0;      // minimum number of time steps to be performed; avoids premature convergence detection
+}
+
+OutputParameters
+{
+      // the file names for storing and loading the blockforest and fields are deduced from the setup:
+      // <cellsPerDiameter>_<refinementLevels>_<numCoarseBlocks[0]>_<numCoarseBlocks[1]>_<numCoarseBlocks[2]>.<fileEnding>
+   storeBlockForest false; // fileEnding: ".blockforest"
+   loadBlockForest false;
+
+      // PdfField: field containing the particle distribution functions of a time step
+   storePdfField false;    // fileEnding: ".pdfField"
+   loadPdfField false;
+
+      // AvgField: field containing the time-averaged velocity and density of all time steps
+   storeAvgField false;    // fileEnding: ".avgField"
+   loadAvgField false;
+   avgCounterLoaded 0;     // number of times the average computation was already performed in a loaded AvgField
+
+   fieldStoreInterval 100;  // time step interval for storing the PdfField and AvgField
+
+   vtkFluidField true;           // write the whole fluid field (velocity and density) to vtk output
+   vtkFluidFieldInterval 50;     // time step interval for writing the whole fluid field to vtk output
+   vtkFieldResolution 4;         // scale the fluid field vtk output with 1/<vtkFieldResolution>
+
+   vtkAvgFieldInterval 50;       // write the averaged quantities in the whole to vtk output
+
+   vtkFlagField true;            // write the flag field to vtk output
+   vtkDomainDecomposition true;  // write the domain decomposition to vtk output
+   vtkBodies true;               // write the particle positions to vtk output
+
+      // time step interval in which the pressure drop is computed as difference between avg. pressure of two planes:
+      // 1 diameter above porous medium - 1 diameter below porous medium
+   pressureDropInterval 50;
+
+      // coordinates at which the velocity and density is evaluated; values are multiplied with <cellsPerDiameter> inside
+      // the code and shifted by variable <bedShiftZ> (see PorousMedia.cpp)
+   evalP1 < 2, 2, 10.25 >;
+   evalP2 < 2, 2, 8.1875 >;
+   evalP3 < 2, 2, 5.7 >;
+
+      // time step interval in which the above points are evaluated:
+      // - density and velocities (incl. magnitude) are written to file
+      // - VTK output of xy planes at P1, P2 and P3 is written
+      // - VTK output of xz plane is written
+   evalInterval 10;
+   evalVtk true;     // above mentioned vtk output is written
+
+      // simulation is considered stationary, i.e., converged when the L2 norm of the relative difference between the
+      // current and the former time-averaged density, and velocity of all fluid cells is less than <convThreshold> in
+      // <evalInterval> checks
+   convThreshold 1e-3;
+
+   perfLogInterval 100; // time step interval in which the performance is logged
+}
