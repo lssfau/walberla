@@ -106,6 +106,7 @@ waLBerla_compile_test( FILES codegen/LbCodeGenerationExample.cpp DEPENDS LbCodeG
 waLBerla_generate_target_from_python(NAME FluctuatingMRTGenerated FILE codegen/FluctuatingMRT.py
                               OUT_FILES FluctuatingMRT_LatticeModel.cpp FluctuatingMRT_LatticeModel.h )
 waLBerla_compile_test( FILES codegen/FluctuatingMRT.cpp DEPENDS FluctuatingMRTGenerated)
+waLBerla_execute_test( NAME FluctuatingMRT COMMAND $<TARGET_FILE:FluctuatingMRT> ${CMAKE_CURRENT_SOURCE_DIR}/codegen/FluctuatingMRT.prm PROCESSES 1)
 
 waLBerla_generate_target_from_python(NAME FieldLayoutAndVectorizationTestGenerated FILE codegen/FieldLayoutAndVectorizationTest.py
                                      OUT_FILES FieldLayoutAndVectorizationTest_FZYX_Vec_LatticeModel.cpp FieldLayoutAndVectorizationTest_FZYX_Vec_LatticeModel.h
