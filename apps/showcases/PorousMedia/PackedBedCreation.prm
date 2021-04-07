@@ -1,0 +1,31 @@
+//======================================================================================================================
+// Parameter, i.e., configuration file for the showcase "PackedBedCreation.cpp".
+//======================================================================================================================
+
+DomainParameters
+{
+   numBlocks < 4, 4, 1 >;
+   particleDiameter 36;
+   relDomainSize < 4, 4, 10 >; // values are multiplied with particleDiameter inside the code
+}
+
+SimulationParameters
+{
+   numInitialParticles 240; // this is not the final number since some particles are removed after they have settled
+   maxTimesteps 10000; // maximum PE timesteps (if convergence is not triggered)
+   convVelocity 5e-2; // velocity at which particles are considered stationary
+}
+
+ContactSolverParameters
+{
+   maxIterations 50;
+   relaxationParameter 0.7;
+   globalLinearAcceleration <0, 0, -0.2>;
+   dt 0.5;
+}
+
+OutputParameters
+{
+   porousGeometryFile packedBedGeometry.txt;
+   vtkInterval 10;
+}
