@@ -15,13 +15,11 @@
 //
 //! \file
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
+//! \author Christoph Rettinger <christoph.rettinger@fau.de>
 //
 //======================================================================================================================
 
-#include <mesa_pd/vtk/ParticleVtkOutput.h>
-
 #include <mesa_pd/collision_detection/AnalyticContactDetection.h>
-#include <mesa_pd/collision_detection/GeneralContactDetection.h>
 #include <mesa_pd/data/LinkedCells.h>
 #include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>
@@ -31,10 +29,8 @@
 #include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/mpi/ContactFilter.h>
-#include <mesa_pd/mpi/notifications/ForceTorqueNotification.h>
 #include <mesa_pd/mpi/SyncNextNeighbors.h>
 
-#include <blockforest/BlockForest.h>
 #include <blockforest/Initialization.h>
 #include <core/Abort.h>
 #include <core/Environment.h>
@@ -42,9 +38,7 @@
 #include <core/mpi/Reduce.h>
 #include <core/grid_generator/SCIterator.h>
 #include <core/logging/Logging.h>
-#include <core/waLBerlaBuildInfo.h>
 
-#include <functional>
 #include <memory>
 #include <string>
 
@@ -68,7 +62,13 @@ private:
    std::shared_ptr<data::ShapeStorage> ss_;
 };
 
-int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
+/*
+ * Tests linked cells
+ * Fully periodic, simple cubic sphere array is created
+ * Together with linked cells of size 2 * sphere spacing.
+ * This allows to analytically calculate how many particles should reside in each linked cell and how many contacts should be found and treated.
+ */
+int main( const int particlesPerAxisPerProcess = 2 )
 {
    using namespace walberla::timing;
 
@@ -80,15 +80,18 @@ int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
 
    math::seedRandomGenerator( static_cast<unsigned int>(1337 * walberla::mpi::MPIManager::instance()->worldRank()) );
 
-   const real_t spacing(1.0);
+   const real_t radius = real_t(0.9);
+   const real_t generationSpacing = 1_r;
+   const int linkedCellMultipleOfGenerationSpacing = 2;
+   WALBERLA_CHECK_EQUAL(particlesPerAxisPerProcess % linkedCellMultipleOfGenerationSpacing, 0, "Only a multiple of " << linkedCellMultipleOfGenerationSpacing << " is allowed");
 
    WALBERLA_LOG_INFO_ON_ROOT("*** BLOCKFOREST ***");
-   const int centerParticles  = particlesPerAxis * particlesPerAxis * particlesPerAxis;
-   const int faceParticles    = particlesPerAxis * particlesPerAxis * 6;
-   const int edgeParticles    = particlesPerAxis * 4 * 3;
+   const int centerParticles  = particlesPerAxisPerProcess * particlesPerAxisPerProcess * particlesPerAxisPerProcess;
+   const int faceParticles    = particlesPerAxisPerProcess * particlesPerAxisPerProcess * 6;
+   const int edgeParticles    = particlesPerAxisPerProcess * 4 * 3;
    const int cornerParticles  = 8;
 
-   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(particlesPerAxis);
+   WALBERLA_LOG_DEVEL_VAR_ON_ROOT(particlesPerAxisPerProcess);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(centerParticles);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(faceParticles);
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(edgeParticles);
@@ -96,14 +99,16 @@ int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
 
    // create forest
    const real_t eps = real_c(0.01); //shift to make contact points unambigous
+   Vector3<uint_t>blocksPerDirection (2,2,2);
+   int numBlocks = int(blocksPerDirection[0] * blocksPerDirection[1] * blocksPerDirection[2]);
+   Vector3<bool> periodicity(true, true, true);
    auto forest = blockforest::createBlockForest( math::AABB(real_t(0),
                                                             real_t(0),
                                                             real_t(0),
-                                                            real_c(particlesPerAxis) * real_t(2),
-                                                            real_c(particlesPerAxis) * real_t(2),
-                                                            real_c(particlesPerAxis) * real_t(2)).getTranslated(Vec3(eps,eps,eps)),
-                                                 Vector3<uint_t>(2,2,2),
-                                                 Vector3<bool>(true, true, true) );
+                                                            real_c(particlesPerAxisPerProcess) * generationSpacing * real_c(blocksPerDirection[0]),
+                                                            real_c(particlesPerAxisPerProcess) * generationSpacing * real_c(blocksPerDirection[1]),
+                                                            real_c(particlesPerAxisPerProcess) * generationSpacing * real_c(blocksPerDirection[2])).getTranslated(Vec3(eps,eps,eps)),
+                                                 blocksPerDirection, periodicity);
    domain::BlockForestDomain domain(forest);
 
    auto localDomain = forest->begin()->getAABB();
@@ -115,13 +120,14 @@ int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
    ParticleAccessorWithShape accessor(ps, ss);
-   data::LinkedCells         lc(localDomain.getExtended(spacing), spacing );
+   const real_t linkedCellSize = real_c(linkedCellMultipleOfGenerationSpacing) * generationSpacing;
+   data::LinkedCells lc(localDomain.getExtended(linkedCellSize), linkedCellSize );
 
    auto  smallSphere = ss->create<data::Sphere>( radius );
    ss->shapes[smallSphere]->updateMassAndInertia(real_t(2707));
    for (auto& iBlk : *forest)
    {
-      for (auto pt : grid_generator::SCGrid(iBlk.getAABB(), Vector3<real_t>(spacing, spacing, spacing) * real_c(0.5), spacing))
+      for (auto pt : grid_generator::SCGrid(iBlk.getAABB(), Vector3<real_t>(generationSpacing, generationSpacing, generationSpacing) * real_c(0.5), generationSpacing))
       {
          WALBERLA_CHECK(iBlk.getAABB().contains(pt));
 
@@ -133,7 +139,7 @@ int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
       }
    }
    int64_t numParticles = int64_c(ps->size());
-   walberla::mpi::reduceInplace(numParticles, walberla::mpi::SUM);
+   walberla::mpi::allReduceInplace(numParticles, walberla::mpi::SUM);
    WALBERLA_LOG_INFO_ON_ROOT("#particles created: " << numParticles);
 
    WALBERLA_LOG_INFO_ON_ROOT("*** SETUP - END ***");
@@ -146,14 +152,32 @@ int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
    // initial sync
    WALBERLA_CHECK_EQUAL(ps->size(), centerParticles);
    SNN(*ps, domain);
-   WALBERLA_CHECK_EQUAL(ps->size(), centerParticles + faceParticles + edgeParticles + cornerParticles);
+   int numKnownParticles = centerParticles + faceParticles + edgeParticles + cornerParticles;
+   WALBERLA_CHECK_EQUAL(ps->size(), numKnownParticles);
 
    lc.clear();
    ps->forEachParticle(true, kernel::SelectAll(), accessor, ipilc, accessor, lc);
 
-   WALBERLA_CHECK_EQUAL(lc.cells_.size(), centerParticles + faceParticles + edgeParticles + cornerParticles);
-   int cell0 = 0;
-   int cell1 = 0;
+   int interiorCellsPerDirection = particlesPerAxisPerProcess / linkedCellMultipleOfGenerationSpacing;
+
+   int numLinkedCellsPerProcess = (interiorCellsPerDirection+2) * (interiorCellsPerDirection+2) * (interiorCellsPerDirection+2);
+   WALBERLA_CHECK_EQUAL(lc.cells_.size(), numLinkedCellsPerProcess);
+
+   const int numLinkedCellsCenter = interiorCellsPerDirection * interiorCellsPerDirection * interiorCellsPerDirection;
+   const int numLinkedCellsFace = interiorCellsPerDirection * interiorCellsPerDirection * 6;
+   const int numLinkedCellsEdge = interiorCellsPerDirection * 12;
+   const int numLinkedCellsCorner = 8;
+
+   const int numParticlesPerCenterCell = centerParticles / numLinkedCellsCenter;
+   const int numParticlesPerFaceCell = faceParticles / numLinkedCellsFace;
+   const int numParticlesPerEdgeCell = edgeParticles / numLinkedCellsEdge;
+   const int numParticlesPerCornerCell = cornerParticles / numLinkedCellsCorner;
+
+   int cellsCenter = 0;
+   int cellsFace = 0;
+   int cellsEdge = 0;
+   int cellsCorner = 0;
+
    for (const auto& idx : lc.cells_)
    {
       int particleCounter = 0;
@@ -163,18 +187,18 @@ int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
          ++particleCounter;
          p_idx = ps->getNextParticle(uint_c(p_idx));
       }
-      if (particleCounter==0)
-      {
-         ++cell0;
-      } else if (particleCounter==1)
-      {
-         ++cell1;
-      } else {
-         WALBERLA_CHECK(false);
-      }
+
+      if (particleCounter == numParticlesPerCenterCell) ++cellsCenter;
+      else if (particleCounter == numParticlesPerFaceCell) ++cellsFace;
+      else if (particleCounter == numParticlesPerEdgeCell) ++cellsEdge;
+      else if (particleCounter == numParticlesPerCornerCell) ++cellsCorner;
+      else WALBERLA_CHECK(false, "Linked cell found with unexpected number of particles " << particleCounter);
+
    }
-   WALBERLA_CHECK_EQUAL(cell0, 0);
-   WALBERLA_CHECK_EQUAL(cell1, centerParticles + faceParticles + edgeParticles + cornerParticles); //ghost particles only at face, no ghost particle at edges and corners
+   WALBERLA_CHECK_EQUAL(cellsCenter, numLinkedCellsCenter);
+   WALBERLA_CHECK_EQUAL(cellsFace, numLinkedCellsFace);
+   WALBERLA_CHECK_EQUAL(cellsEdge, numLinkedCellsEdge);
+   WALBERLA_CHECK_EQUAL(cellsCorner, numLinkedCellsCorner);
 
    std::atomic<int64_t> contactsChecked (0);
    std::atomic<int64_t> contactsDetected(0);
@@ -201,9 +225,10 @@ int main( const int particlesPerAxis = 2, const real_t radius = real_t(0.9) )
 
    WALBERLA_LOG_DEVEL_ON_ROOT( "contacts checked/detected/treated: " << contactsChecked << " / " << contactsDetected << " / " << contactsTreated );
 
-   WALBERLA_CHECK_EQUAL(contactsChecked, (centerParticles*26 + faceParticles*17 + edgeParticles*11 + cornerParticles*7) / 2 );
+   WALBERLA_CHECK_LESS_EQUAL(contactsChecked, numKnownParticles * numKnownParticles / 2 ); // has to be better than n^2 checking
    WALBERLA_CHECK_EQUAL(contactsDetected, (centerParticles*26 + faceParticles*17 + edgeParticles*11 + cornerParticles*7) / 2 );
-   //TODO: ContactsTreated
+   const int totalNumberPairWiseContactsInDomain = 26 * int(numParticles) / 2; //fully-periodic simple cubic grid
+   WALBERLA_CHECK_EQUAL(contactsTreated, totalNumberPairWiseContactsInDomain / numBlocks);
 
    return EXIT_SUCCESS;
 }
@@ -216,8 +241,6 @@ int main( int argc, char* argv[] )
    walberla::Environment env(argc, argv);
    WALBERLA_UNUSED(env);
    walberla::mesa_pd::main( 2 );
-   walberla::mesa_pd::main( 3 );
    walberla::mesa_pd::main( 4 );
-   walberla::mesa_pd::main( 5 );
    return EXIT_SUCCESS;
 }

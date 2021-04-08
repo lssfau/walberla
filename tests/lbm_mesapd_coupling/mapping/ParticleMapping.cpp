@@ -769,6 +769,7 @@ int main( int argc, char **argv )
       {
          mesa_pd::data::Particle&& p = *ps->create(true);
          p.setPosition(halfSpacePosition);
+         p.setInteractionRadius(std::numeric_limits<real_t>::infinity());
          p.setOwner(mpi::MPIManager::instance()->rank());
          p.setShapeID(halfSpaceShape);
          mesa_pd::data::particle_flags::set(p.getFlagsRef(), mesa_pd::data::particle_flags::INFINITE);

@@ -389,6 +389,7 @@ void createPlane( const shared_ptr<mesa_pd::data::ParticleStorage> & ps, const s
 {
    mesa_pd::data::Particle&& p0 = *ps->create(true);
    p0.setPosition(position);
+   p0.setInteractionRadius(std::numeric_limits<real_t>::infinity());
    p0.setShapeID(ss->create<mesa_pd::data::HalfSpace>( normal.getNormalized() ));
    p0.setOwner(mpi::MPIManager::instance()->rank());
    p0.setType(0);

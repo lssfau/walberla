@@ -119,11 +119,13 @@ int main( int argc, char ** argv )
    data::Particle&& p = *ps->create();
    p.setPosition(Vec3(0,0,2*radius));
    p.setLinearVelocity(Vec3(uTin, 0., -uNin));
+   p.setInteractionRadius(radius);
    p.setType(0);
 
    // create plane
    data::Particle&& p0 = *ps->create(true);
    p0.setPosition(Vec3(0,0,0));
+   p0.setInteractionRadius(std::numeric_limits<real_t>::infinity());
    p0.setShapeID(ss->create<data::HalfSpace>(Vector3<real_t>(0,0,1)));
    p0.setType(0);
    data::particle_flags::set(p0.getFlagsRef(), data::particle_flags::INFINITE);

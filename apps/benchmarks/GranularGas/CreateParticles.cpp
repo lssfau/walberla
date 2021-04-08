@@ -30,6 +30,7 @@ data::ParticleStorage::iterator createPlane( data::ParticleStorage& ps,
 {
    auto p0              = ps.create(true);
    p0->getPositionRef() = pos;
+   p0->getInteractionRadiusRef() = std::numeric_limits<real_t>::infinity();
    p0->getShapeIDRef()  = ss.create<data::HalfSpace>( normal );
    p0->getOwnerRef()    = walberla::mpi::MPIManager::instance()->rank();
    p0->getTypeRef()     = 0;
