@@ -1,0 +1,85 @@
+Parameters
+{
+	omega           1.8;
+	initialVelocity < 0.0, 0, 0 >;
+	timesteps       5000;
+
+	useGui 0;
+	remainingTimeLoggerFrequency 3; // in seconds
+}
+
+Boundaries
+{
+
+    wallType        NoSlip;             // `NoSlip`, `FreeSlip` or `Curved`
+    inflowType      SimpleUBB;          // `SimpleUBB`, `UBB`, `DynamicUBB` or `ParserUBB`
+    outflowType     SimplePAB;          // `SimplePressure`, `Pressure`, `Outlet` or `SimplePAB`
+
+	inflowVelocity <0.1, 0, 0>;
+	outflowPressure 1.0;
+
+    period          125;                // number of timesteps per period
+
+    //! [ParserConfig]
+    Parser {
+        x       0.1 * 4 / 80 / 80 * y * (80 - y) * 0.5 * (1 - cos(2 * 3.1415926538 * t / 150));
+        y       0;
+        z       0;
+    }
+    //! [ParserConfig]
+}
+
+//! [domainSetup]
+DomainSetup
+{
+   blocks        <  1,    1, 1 >;
+   cellsPerBlock <  300, 80, 1 >;
+   periodic      <  0,    0, 1 >;
+}
+//! [domainSetup]
+
+StabilityChecker
+{
+   checkFrequency 100;
+   streamOutput   false;
+   vtkOutput      true;
+}
+
+VTK
+{
+   // for parameter documentation see src/vtk/Initialization.cpp
+   fluid_field
+   {
+      writeFrequency 100;
+      ghostLayers    1;
+
+      before_functions {
+         PDFGhostLayerSync;
+      }
+
+      inclusion_filters {
+         DomainFilter;
+      }
+
+      writers {
+         Velocity;
+         Density;
+      }
+   }
+
+   flag_field
+   {
+      writeFrequency 10000000; // write only once
+      ghostLayers    1;
+
+      writers {
+         FlagField;
+      }
+   }
+
+   domain_decomposition
+   {
+      writeFrequency 10000000; // write only once
+      outputDomainDecomposition true;
+   }
+}

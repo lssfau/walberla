@@ -258,9 +258,9 @@ Vector3< real_t > ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce
    symbols["t"] = t;
 
    Vector3< real_t > v;
-   v[0] = parsers_[0].evaluate( symbols );
-   v[1] = parsers_[1].evaluate( symbols );
-   v[2] = parsers_[2].evaluate( symbols );
+   v[0] = real_c(parsers_[0].evaluate( symbols ));
+   v[1] = real_c(parsers_[1].evaluate( symbols ));
+   v[2] = real_c(parsers_[2].evaluate( symbols ));
    return v;
 }
 
@@ -275,9 +275,9 @@ Vector3< real_t > ParserUBB<LatticeModel_T, flag_t, AdaptVelocityToExternalForce
    symbols["z"] = x[2];
 
    Vector3< real_t > v;
-   v[0] = parsers_[0].evaluate( symbols );
-   v[1] = parsers_[1].evaluate( symbols );
-   v[2] = parsers_[2].evaluate( symbols );
+   v[0] = real_c(parsers_[0].evaluate( symbols ));
+   v[1] = real_c(parsers_[1].evaluate( symbols ));
+   v[2] = real_c(parsers_[2].evaluate( symbols ));
    return v;
 }
 

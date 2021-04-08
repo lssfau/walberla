@@ -44,6 +44,8 @@ all the basic data strcutures and concepts of the framework.
   A LBM simulation with complex geometries is built.
 - \ref tutorial_lbm05 \n
   A LBM simulation with a backward-facing step is set up.
+- \ref tutorial_lbm06 \n
+  This tutorial deals with the usage of different LBM boundary conditions.
 
 \subsection codegen Code Generation
 

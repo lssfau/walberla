@@ -1,0 +1,313 @@
+namespace walberla {
+
+/**
+\page tutorial_lbm06 Tutorial - LBM 6: Boundary Conditions
+
+\brief A tutorial for elucidating the usage of and the differences between several boundary conditions
+
+\section tutorial06_overview Overview
+
+In this tutorial, we will have a look at several boundary conditions. How they are motivated and implemented, and how they differ from each other. \n
+In general, boundary conditions are both physically and mathematically/ numerically motivated. \n
+The physical systems of interest are usually described by a set of partial differential equations (PDE). In analytical mathematics, boundary conditions help to single out one from all admissible solutions of the PDE.
+These boundary conditions are imposed by the physical system through, e.g., walls, inflows, outflows, etc. \n
+For discrete numerical schemes, the situation is slightly different. Here, boundary conditions are part of the solution routine, and different implementations of the same physical boundary condition may alter the result.
+Especially in lattice Boltzmann methods, there is a whole zoo of boundary conditions. This can be easily explained by the fact that boundaries are usually prescribed in terms of macroscopic variables.
+lattice Boltzmann methods, however, are determined by a set of mesoscopic variables \$f_i(\mathbf{x}, t)$. Different sets of distribution functions may lead to the same hydrodynamic behavior. Eventually, this leads to the question of how to prescribe the mesoscopic variables.\n
+In the following, we will discuss different approaches for wall, inflow and outflow boundary conditions and their realization in `waLBerla`. You will learn about the differences between them, their limitations, and how to use them.\n
+Note that we will not discuss the generation of boundary conditions with `lbmpy`. For this, please refer to \ref tutorial_codegen03.
+
+\section tutorial06_periodic Periodic Boundary Conditions
+Let us start with boundary conditions that are well known from previous tutorials: periodic boundary conditions. \n
+Periodic boundary conditions are probably the easiest ones to implement and work with.
+They apply only for solutions with repeating flow patterns and intend to isolate this pattern in order to avoid an unnecessary large computational domain. \n
+In `waLBerla`, they do not require a special boundary setup but are easily realizable using the functionalities of walberla::blockforest.
+We either use a configuration file where we specify a parameter `periodic` in the `DomainSetup` block, or we manually build the block forest with functions as walberla::blockforest::createUniformBlockGrid. In the latter case, information about periodicity can directly be specified as input arguments of the function.
+For a system with periodicity in the z-direction, the `DomainSetup` block in the parameter file may look like
+\snippet 06_LBBoundaryCondition.prm domainSetup
+However, periodic boundaries are often not sufficient for real-world applications. Therefore, we will discuss more realistic boundary conditions in lattice Boltzmann simulations in the following.
+
+\section tutorial06_factory The Default Boundary Handling Factory
+For standard setups in LBM (channel flow, lid-driven cavity, etc.), `waLBerla` offers the convenience factory class lbm::DefaultBoundaryHandlingFactory with which you can easily specify no-slip, free-slip, velocity and pressure boundaries in a few lines of code. \n
+As this way of describing boundaries was already detailed in previous tutorials, we will only show some code snippets but will not use them in the provided source file.\n
+In the parameter file, we need to add a block for the boundary handling, e.g.,
+\code
+Boundaries
+{
+   velocity0 < 0.1, 0, 0 >;
+   velocity1 <   0, 0, 0 >;
+   pressure0 1.1;
+   pressure1 1.0;
+
+   Border { direction W;    walldistance -1;  Velocity0 {} }
+   Border { direction E;    walldistance -1;  Pressure1 {} }
+   Border { direction S,N;  walldistance -1;  NoSlip    {} }
+
+}
+\endcode
+You can add up to two different velocities and pressures, respectively. In the `Border` subblocks, one specifies where to place which boundary condition. In this case, we set up a standard channel flow with an inflow at the west border (min x) and an outflow at the east border (max x). South and north (min and max y, respectively) are set to no-slip.\n
+In general, you want to set `walldistance` to `-1`. This lies the boundaries on the outer ghost layers, and the size of the computational domain is not reduced. In the channel flow setup, this means that the actual channel width is equal to the specified (analytical) one.\n
+With this parameter file, we can easily create and initialize the boundary handling as usual:
+\code
+typedef lbm::DefaultBoundaryHandlingFactory< LatticeModel_T, FlagField_T > BHFactory;
+
+BlockDataID boundaryHandlingId = BHFactory::addBoundaryHandlingToStorage(
+   blocks, "boundary handling", flagFieldId, pdfFieldId, fluidFlagUID,
+   velocity0, velocity1, pressure0, pressure1);
+
+geometry::initBoundaryHandling< BHFactory::BoundaryHandling >(*blocks, boundaryHandlingId, boundariesConfig);
+geometry::setNonBoundaryCellsToDomain< BHFactory::BoundaryHandling >(*blocks, boundaryHandlingId);
+\endcode
+The only part that is left to be done is adding the boundary handling to the time loop such that these boundaries are enforced every time step. For this, we get the sweep directly from the boundary handling class:
+\code
+timeloop.add() << Sweep(BHFactory::BoundaryHandling::getBlockSweep(boundaryHandlingId), "boundary handling");
+\endcode
+And that's it. With these few lines of code, we have successfully implemented our first boundary handling.\n\n
+
+But what if we need different boundary conditions? If we need to specify more than two velocities or pressures? If we do not want to have constant inflow or straight boundaries?
+In these cases, the lbm::DefaultBoundaryHandlingFactory is not sufficient, and we have to set up the boundary handling manually.
+
+\section tutorial06_basicSetup Basic Setup for Custom Boundary Handling
+In this section, we will explain the basic setup of a simulation if one is not using the lbm::DefaultBoundaryHandlingFactory. \n
+As a standard channel flow nicely shows the differences in the boundaries' behavior, we will, firstly, rebuild the same configuration that was set up with the lbm::DefaultBoundaryHandlingFactory.
+The basis is, again, \ref tutorial_lbm01. Hence, we will only comment on differences concerning the boundary handling and will not discuss every detail.\n\n
+First of all, a structure is defined in which we will gather all relevant simulation parameters for the boundary handling. This is just convenience and not necessarily needed.
+\snippet 06_LBBoundaryCondition.cpp setupStruct
+The first three parameters define which wall, inflow, and outflow types we will use in the simulation. This enables parsing the types from a configuration file, and we do not need to rebuild the executable every time we change one of the boundary condition types.
+Of course, this has not to be done in a fixed setup.\n
+The next two parameters define the velocity (amplitude) at the inflow and the pressure (or, to be more precise: the density) at the outflow.\n
+Lastly, there are some parameters specific to a particular boundary condition. We will detail their meaning later.
+
+Moreover, we define some variables
+\if DOXYGEN_EXCLUDE
+\snippet 06_LBBoundaryCondition.cpp variableDefines
+\endif
+\code
+// number of ghost layers
+const uint_t FieldGhostLayers = uint_t(1);
+
+// unique identifiers for flags
+const FlagUID FluidFlagUID("Fluid Flag");
+const FlagUID NoSlipFlagUID("NoSlip Flag");
+const FlagUID SimpleUBBFlagUID("SimpleUBB Flag");
+const FlagUID SimplePressureFlagUID("SimplePressure Flag");
+\endcode
+and typedefs for the boundary handling:
+\snippet 06_LBBoundaryCondition.cpp boundaryTypedefs
+Here, we already added `typedef`'s for all boundary conditions that will be discussed in the following. If you do not use all of them, it is sufficient to specify only those you utilise. For the default boundary setup this would look like
+\code
+typedef lbm::NoSlip< LatticeModel_T, flag_t > NoSlip_T;
+typedef lbm::SimpleUBB< LatticeModel_T, flag_t > SimpleUBB_T;
+typedef lbm::SimplePressure< LatticeModel_T, flag_t > SimplePressure_T;
+
+typedef BoundaryHandling< FlagField_T, Stencil_T,
+   NoSlip_T, SimpleUBB_T, SimplePressure_T > BoundaryHandling_T;
+\endcode
+An object of BoundaryHandling_T will later enforce the boundary conditions for every cell and every timestep.\n
+If you need to use more or different boundary conditions, you need to add corresponding variables and `typedef`'s here.
+
+But how does it know where to enforce which boundary with which parameters? In the default boundary handling factory setup, this was configured in the parameter file and processed in geometry::initBoundaryHandling.
+As we do not want to use this functionality anymore, we define a functor, `MyBoundaryHandling`, which should take care of this configuration.
+\snippet 06_LBBoundaryCondition.cpp myBoundaryHandlingDeclaration
+In general, this class can be designed in any way you want to. However, there is a necessity for an operator `operator()` (remember: this class must be a functor).
+Here, we further equipped it with the simulation setup `Setup setup_` and a pointer to a lbm::TimeTracker which will be discussed later as the time tracking is only needed for more advanced boundary conditions.\n
+The operator `operator()` is responsible for correctly setting the flags for the different boundaries, initializing the boundaries, and creating a new BoundaryHandling_T object.\n
+Inside the operator definition, we start with retrieving the flag and pdf fields. Moreover, we get the bitmask of the `FluidFlagUID` or register the flag if this has not happened yet.
+\snippet 06_LBBoundaryCondition.cpp boundaryHandling_T fields
+With this data, we can initialize a new boundary handling object to set the precise boundary conditions. Note that the order of boundary objects is determined by the order of template arguments of `BoundaryHandling_T` (in particular: add only objects of the classes you specified in the `typedef` of `BoundaryHandling_T`).
+\if DOXYGEN_EXCLUDE
+\snippet 06_LBBoundaryCondition.cpp boundaryHandling_T setup
+\endif
+For the lbm::DefaultBoundaryHandlingFactory behavior, this would be
+\code
+   BoundaryHandling_T* handling = new BoundaryHandling_T(
+      "Boundary Handling", flagField, fluidFlag,
+      NoSlip_T("NoSlip", NoSlipFlagUID, pdfField),
+      SimpleUBB_T("SimpleUBB", SimpleUBBFlagUID, pdfField, setup_.inflowVelocity),
+      SimplePressure_T("SimplePressure", SimplePressureFlagUID, pdfField, setup_.outflowPressure));
+\endcode
+With this BoundaryHandling object pointer, we can now set the flag field correctly. Even though you have direct access to the flag field, _NEVER_ set flags directly in the flag field. This has to be done entirely by the boundary handling.\n
+The last step is going over the domain and enforce the correct flags at the boundaries. For this purpose, we get the cell interval that spans the entire simulation domain and convert the cell interval from global coordinates into local coordinates. The conversion has to be done as functions of the boundary handling always expect local cell coordinates.
+\snippet 06_LBBoundaryCondition.cpp domainBB
+Further, we extend the domain by `FieldGhostLayers` cells such that the boundaries will lie on ghost nodes, just as discussed in \ref tutorial06_factory .\n
+To give an example, if you wanted to obtain the western boundary (minimum x), you would need to write
+\snippet 06_LBBoundaryCondition.cpp westBoundary
+Finally, we need to specify the required flag, which is done by the `forceBoundary` function. In the case of `SimpleUBB` boundaries, this would look like
+\code
+   handling->forceBoundary(SimpleUBBFlagUID, west);
+\endcode
+After all boundary flags were set accordingly, we fill the remaining cells with fluid
+\snippet 06_LBBoundaryCondition.cpp fillDomain
+and return the boundary handling object `handling`.
+
+Now it is only left to adjust the `main` according to our custom boundary handling.
+Firstly, we add the boundary handling to every block by
+\snippet 06_LBBoundaryCondition.cpp boundaryHandlingID
+instead of initializing the BoundaryHandlingFactory.
+Secondly, we add the corresponding sweep
+\snippet 06_LBBoundaryCondition.cpp boundarySweep
+
+That's it! We have successfully set up our first custom boundary handling and can run the simulation.
+
+In the next section, we will detail the different boundary conditions provided by `waLBerla` and how to incorporate them into the basic setup correctly.
+
+\section tutorial06_velocityBC Velocity Boundary Conditions
+
+The first family of boundaries we will have a look at are the velocity boundary conditions. We have already seen two of them in the lbm::DefaultBoundaryHandlingFactory (`NoSlip` and `Velocity0`), but now we will detail them and show alternatives.\n
+In general, there are two different approaches for boundary conditions in lattice Boltzmann methods with straight boundaries: the link-wise and the wet-node approach. Whereas the computational boundary lies on lattice links for link-wise boundary conditions (bounce-back), the computational boundary lies on lattice nodes and hence coincides with the physical boundary for wet-node approaches.\n
+We will spare the theoretical details here and focus on the differences between the specific implementations. We will always need to add a boundary object to `BoundaryHandling_T` and force the flag accordingly.\n
+To begin with, we comment on wall boundaries before we provide an overview of the different schemes for open boundaries.
+
+\subsection tutorial06_wallBC Wall Boundaries
+In physical systems, the domain of interest is often limited by some kind of wall, e.g., the pipe in pipe flows. Hence, it is crucial to have correct implementations of wall boundaries.
+In `waLBerla`, both wall boundaries, `NoSlip` and `FreeSlip`, are realized by bounce-back schemes, which belong to the link-wise family.
+
+\subsubsection tutorial06_noSlip NoSlip
+The no-slip condition is the most common fluid-solid interface condition in hydrodynamics. It assumes impermeable walls and zero velocity of the fluid relative to the wall.\n
+The usage of `NoSlip` is quite straightforward, and we have already seen it in the basic setup.\n
+In the constructor of `handling`, we add a simple `NoSlip_T` object as
+\snippet 06_LBBoundaryCondition.cpp handling_NoSlip
+Moreover, when forcing the boundary flag, we use the command
+\snippet 06_LBBoundaryCondition.cpp forceBoundary_NoSlip
+With this, the `NoSlip` boundary condition is already finished, and we have a look at the other wall boundary condition, the `FreeSlip`.
+
+\subsubsection tutorial06_freeSlip FreeSlip
+The free-slip condition also assumes impermeable walls, i.e., zero normal velocity. However, in contrast to the no-slip condition, it places no restrictions on the tangential fluid velocity. Instead, it enforces a specular reflection on the wall.
+
+As the `FreeSlip` boundary requires special boundary handling at corners and edges, we need to provide more information. Hence, we add
+\snippet 06_LBBoundaryCondition.cpp handling_FreeSlip
+to the `handling` object. As you can see, the additional required information is the flag field and the domain flag. With this, the boundary is forced as usual
+\snippet 06_LBBoundaryCondition.cpp forceBoundary_FreeSlip
+
+\subsection tutorial06_openBC Open Boundaries
+Things become more interesting when considering open boundaries as inflows or outflows. Again, these can be modeled using bounce-back schemes. `waLBerla` offers four implementations of bounce-back velocity boundary conditions, which will be detailed in the following.
+Afterward, we briefly comment on the wet-node approach for velocity boundary conditions.
+
+\subsubsection tutorial06_simpleUBB SimpleUBB
+The `SimpleUBB` is the most simple and also the most efficient velocity boundary that is implemented in `waLBerla`. Whereas all `UBB`-named schemes implement the standard bounce-back velocity boundary conditions, the internal handling differs.\n
+With a single `SimpleUBB` boundary, only one velocity value can be set. In doing so, only three `real_t` values have to be stored per boundary, which reduces the memory consumption for the boundary object.\n
+Due to its simplicity, the setup is quite straightforward. We just need to add
+\snippet 06_LBBoundaryCondition.cpp handling_SimpleUBB
+to the handling. The flag is set by
+\snippet 06_LBBoundaryCondition.cpp forceBoundary_SimpleUBB
+
+\subsubsection tutorial06_UBB UBB
+In some cases, the `SimpleUBB` is not sufficient to specify the requested boundary conditions, e.g., when applying non-constant inflow. Then, you can use the `UBB` boundary conditions.\n
+We will illustrate the usage of `UBB` boundaries prescribing a fully developed Poiseuille flow at the inlet which is given by
+\f[
+u_x(y) = - 4 u_0 \cdot \frac{y (y - H)}{H^2},
+\f]
+where \f$H\f$ is the channel height.
+Again, we add information to the `BoundaryHandling_T` object as
+\snippet 06_LBBoundaryCondition.cpp handling_UBB
+Enforcing the correct flags on the boundary is a bit more complicated than usual. Here, we need to iterate through the boundary cells and set every cell flag separately with the corresponding prescribed velocity.\n
+As we have already mentioned in \ref tutorial06_basicSetup, the `BoundaryHandling` classes assume block-local coordinates. The prescribed velocity, however, is defined in terms of the global coordinate \f$y\f$.
+For this reason, we first calculate the offset of the current block, i.e., the shift from local to global coordinates. With this offset, we iterate over the boundary and calculate the cell position in global coordinates.
+Finally, we assign the boundary flag with the corresponding velocity to each cell:
+\snippet 06_LBBoundaryCondition.cpp forceBoundary_UBB
+
+An advantage is, of course, the greater flexibility. But it comes at a cost. Instead of three `real_t` values in total for the velocity, now three `real_t` values per cell have to be stored for the inflow velocity.
+Therefore, the memory consumption is higher, but the boundary condition is also more costly, as the values have to be loaded from memory first in every time step before applying the boundary treatment.
+
+\subsubsection tutorial06_dynamicUBB DynamicUBB
+Until now, only static inflow was discussed. However, it is possible in `waLBerla` to also define dynamic boundary conditions, realized by the class `DynamicUBB`.\n
+You might have already noticed that we introduced an ominous template argument for the `DynamicUBB_T` typedef:
+\code
+typedef lbm::DynamicUBB< LatticeModel_T, flag_t, VelocityFunctor > DynamicUBB_T;
+\endcode
+This ominous argument is the self-written `VelocityFunctor` class which is responsible for prescribing the correct velocity at a certain point in time and space.\n
+Let us shortly assume that an object of this class and a time tracker are already given. The `handling` object then is enriched by an object of `DynamicUBB_T`, which looks as follows:
+\snippet 06_LBBoundaryCondition.cpp handling_DynamicUBB
+The `timeTracker_` is the linkage between the time loop and the `VelocityFunctor velocity` and provides information about the current time step. We will see how to set it up later in this section.
+Moreover, we add the current refinement level with `storage->getLevel(*block)` (this is necessary as time and space scales are different for refinement) and the bounding box of the block `block->getAABB()` from which the global position of a cell is obtained.
+But now, let us discuss the `VelocityFunctor` more in-depth. In this example, we will again prescribe a Poiseuille profile at the inlet, swelling and fading with time.\n
+
+In general, the functor for `DynamicUBB` requires the implementation of two operators:
+- `void operator()(const real_t time)`: this function is called once before boundary treatment. Its parameter is the current time step.
+- `Vector3<real_t> operator()(const Vector3<real_t> & position, const real_t time)`: this function is called during boundary treatment for each and every boundary link. It takes the position of the boundary cell and the current time step and returns the prescribed velocity.
+
+In the case of our prescribed time-dependent Poiseuille inflow, the VelocityFunctor may look like
+\snippet 06_LBBoundaryCondition.cpp VelocityFunctor
+
+Lastly, we need to detail the time tracker, which is created by
+\snippet 06_LBBoundaryCondition.cpp timeTracker
+This alone is not sufficient as the time tracker holds no information about the time loop and, therefore, the progress in time during the simulation.
+The coupling between time tracker and time loop is done by adding a functor to the time loop:
+\snippet 06_LBBoundaryCondition.cpp timeTracker_coupling
+With this, the time counter in the tracker has incremented automatically every time step (note that we assume a time step size of 1 for unrefined domains; in refined domains, the step size is adjusted accordingly).
+
+\subsubsection tutorial06_parserUBB ParserUBB
+With the boundary conditions discussed in previous sessions, we can do whatever we want to. But in case we want to experiment with different velocity profiles, this approach is not very flexible, and we would need to recompile the entire application after every little change to the profile.\n
+The `ParserUBB` boundary condition was introduced in `waLBerla` to circumvent this problem. Here, the profile can be described at runtime with simple mathematical expressions.\n\n
+
+First, let us have a look at the ParserUBB object that is passed to the handling. If you want to define time-dependent equations for the boundary, this object needs to be specified as
+\snippet 06_LBBoundaryCondition.cpp handling_ParserUBB
+If you have time-independent equations only, you can, of course, omit the time tracker.\n
+
+For the `ParserUBB`, we define a configuration block in the parameter file. It may look like
+\snippet 06_LBBoundaryCondition.prm ParserConfig
+In this configuration block, just define for each velocity component the symbolic equation. If no equation is given, the velocity defaults to 0 in this direction. As symbols, you may use the coordinates `x`, `y`, and `z`, as well as the current time.
+
+To eventually pass the boundary condition the flag field, use
+\snippet 06_LBBoundaryCondition.cpp forceBoundary_ParserUBB_config
+
+So far, so good. But you might have noticed that we hard-coded information like the domain height and the periodicity. So we needed to check always that, e.g., \f$ H \f$ and the domain height in the `DomainSetup` config block match.
+If you still experiment with the domain size, this can be dangerous and you might prefer to specify the height symbolically.\n
+This can be done by defining the equations in the source code and feeding them with variables, e.g.
+\code
+      char x_eq[150];
+      sprintf(x_eq, "0.1*4/%f/%f * y * (%f - y) * 0.5 * (1 - cos(2 * 3.1415926538 * t / %f));", H, H, H, setup_.period);
+
+      std::array< std::string, 3 > eqs = { x_eq, "0", "0" };
+      handling->forceBoundary(ParserUBBFlagUID, west, ParserUBB_T::Parser(eqs));
+\endcode
+
+
+\subsubsection tutorial06_wetNode Wet-Node Approaches
+Until now, we have only discussed bounce-back schemes, both for wall and open boundaries. But as already mentioned, there is another family of boundary conditions: the wet-node boundary conditions.
+In `waLBerla`, there are two implementations for wet-node boundaries: the `SimpleVelocityBoundary` and the `VelocityBoundary`. Both are versions of the equilibrium scheme.
+As this scheme has some deficiencies (accuracy, need for explicitly enforcing the continuity equation at the boundary, etc.), we suggest using them only if you already have experience with these kinds of boundary conditions. Hence, we will not further discuss them here.
+
+
+\section tutorial06_pressureBC Pressure Boundary Conditions
+Now that we have discussed inflows and walls in great detail, only the pressure boundary conditions for the outflows are left.\n
+As for the velocity boundary conditions, there are multiple ways to enforce a certain pressure at an outlet. In lattice Boltzmann solvers, however, it is usually the density that is prescribed, as it is more directly related to the pdfs. As density and pressure, in turn, are linked via \$p = c_s^2 \rho$, this is perfectly legitimate.
+
+\subsection tutorial06_simplePressure SimplePressure
+Our first boundary condition to be discussed is the `SimplePressure` that is based on the anti-bounce-back method. Here, the pdfs are calculated by the fixed boundary density and an approximated boundary velocity. \n
+Analogously to the `SimpleUBB`, it prescribes only one value for the entire boundary. The setup is likewise simple. Again, we add a boundary object with information about the outflow density to the boundary handler
+\snippet 06_LBBoundaryCondition.cpp handling_SimplePressure
+and enforce the boundary flags at the outflow
+\snippet 06_LBBoundaryCondition.cpp forceBoundary_SimplePressure
+
+\subsection tutorial06_pressure Pressure
+The `Pressure` boundary conditions are, as can be expected, the generalized version of the `SimplePressure`. Likewise based on the anti-bounce-back approach, we can specify a complete density profile instead of a single value.\n
+The boundary object can be simply defined as
+\snippet 06_LBBoundaryCondition.cpp handling_Pressure
+To set the precise profile of the outflow density, we need to iterate over all affected boundary cells again and manually set the single values. This is done analogously to the `UBB` conditions and results in
+\snippet 06_LBBoundaryCondition.cpp forceBoundary_Pressure
+When running the simulations for these two pressure boundary conditions, you will notice pressure waves reflected at the outlet. These pressure waves are characteristic of such simple outlets and cannot be avoided. However, if your system is sensitive to acoustic perturbations or the pressure waves are too strong, you will need to use more advanced, non-reflective outlet conditions.
+
+\subsection tutorial06_simplePAB SimplePAB
+The `SimplePAB` is an enhanced version of the previously mentioned anti-bounce-back methods. In contrast to the `Pressure` implementations, this version uses an improved approximation of the boundary velocity by extrapolation. Also, it includes an additional correction term for errors of second-order. \n
+As calculating the pdfs is more complex for this kind of pressure condition, we also need to provide information about the domain cells (via flag field) and the relaxation rate. Hence, the boundary object can be set up as follows.
+\snippet 06_LBBoundaryCondition.cpp handling_SimplePAB
+As everything is handled internally, however, the setting of the boundary flags is rather easy.
+\snippet 06_LBBoundaryCondition.cpp forceBoundary_SimplePAB
+Despite the error correction, note in the simulation output that the system is still adherent to the pressure waves. One way to eliminate these pressure waves is, e.g., the usage of extrapolation boundary conditions, as the `Outlet`.
+
+\subsection tutorial06_outlet Outlet
+The `Outlet` boundary conditions are not based on the anti-bounce-back method but the pure extrapolation of the pdfs, hence enforcing a particular pressure gradient at the outflow. While these are not yet completely non-reflective, the `Outlet` boundary conditions significantly reduce the spurious reflections at the boundary.\n
+Implementation-wise, they are straightforward to set up, as everything is handled internally by extrapolation, and no further information is needed. The boundary object is defined as
+\snippet 06_LBBoundaryCondition.cpp handling_Outlet
+whereas the boundary flags are enforced as
+\snippet 06_LBBoundaryCondition.cpp forceBoundary_Outlet
+
+Even though the initial pressure wave stemming from the inflow is reflected once or twice, the boundaries quickly absorb these reflections, and the system is stabilized. Hence, the `Outlet` boundary conditions are well suited for all configurations where the acoustic reflections are too strong for a physical solution. Note, however, that `lbmpy` offers even more specialized extrapolation boundary conditions that further stabilize the domain.
+
+
+\tableofcontents
+
+*/
+
+}
