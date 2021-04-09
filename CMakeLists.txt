@@ -34,7 +34,7 @@ set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${walberla_SOURCE_DIR}/cmake )
 
 include ( waLBerlaFunctions )
 
-set_version( 5 0 )
+set_version( 5 1 )
 
 include( CMakeParseArguments )
 
@@ -1045,7 +1045,7 @@ if ( WALBERLA_BUILD_WITH_CUDA )
 
         find_library( NVTX_LIBRARY nvToolsExt ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES} )
         list ( APPEND SERVICE_LIBS ${NVTX_LIBRARY} )
-        
+
         #CUDA_FOUND is need for our cmake mechanism
         set ( CUDA_FOUND TRUE )
     else()
