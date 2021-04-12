@@ -84,7 +84,7 @@ using flag_t           = walberla::uint8_t;
 using FlagField_T      = FlagField< flag_t >;
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-typedef cuda::GPUField< double > GPUField;
+typedef cuda::GPUField< real_t > GPUField;
 #endif
 // using CommScheme_T = cuda::communication::UniformGPUScheme<stencil::D2Q9>;
 

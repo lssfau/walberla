@@ -15,25 +15,27 @@ from collections import OrderedDict
 
 with CodeGeneration() as ctx:
 
-    forcing=(sp.symbols("fx"),0,0)
-    forcemodel=Luo(forcing)
+    forcing = (sp.symbols('fx'), 0, 0)
+    forcemodel = Luo(forcing)
 
-    generatedMethod = "TRTlike"
-    #generatedMethod = "D3Q27TRTlike"
-    #generatedMethod = "cumulant"
-    #generatedMethod = "cumulantTRT"
+    generatedMethod = 'TRTlike'
+    # generatedMethod = 'D3Q27TRTlike'
+    # generatedMethod = 'cumulant'
+    # generatedMethod = 'cumulantTRT'
 
-    print("Generating " + generatedMethod + " LBM method")
+    print('Generating ' + generatedMethod + ' LBM method')
 
     clear_cache()
 
+    dtype_string = 'float64' if ctx.double_accuracy else 'float32'
+
     cpu_vectorize_info = {'instruction_set': get_vectorize_instruction_set(ctx)}
 
-    if generatedMethod == "TRTlike":
-        omegaVisc = sp.Symbol("omega_visc")
-        omegaBulk = ps.fields("omega_bulk: [3D]", layout='fzyx')
-        omegaMagic = sp.Symbol("omega_magic")
-        stencil = get_stencil("D3Q19", 'walberla')
+    if generatedMethod == 'TRTlike':
+        omegaVisc = sp.Symbol('omega_visc')
+        omegaBulk = ps.fields(f'omega_bulk: {dtype_string}[3D]', layout='fzyx')
+        omegaMagic = sp.Symbol('omega_magic')
+        stencil = get_stencil('D3Q19', 'walberla')
 
         x, y, z = MOMENT_SYMBOLS
         one = sp.Rational(1, 1)
@@ -59,63 +61,64 @@ with CodeGeneration() as ctx:
         collision_rule = create_lb_collision_rule(lb_method=methodWithForce, optimization={'cse_global': True})
         generate_lattice_model(ctx, 'GeneratedLBMWithForce', collision_rule, field_layout='fzyx', cpu_vectorize_info=cpu_vectorize_info)
  
-    if generatedMethod == "D3Q27TRTlike":
+    if generatedMethod == 'D3Q27TRTlike':
 
-        omegaVisc = sp.Symbol("omega_visc")
-        omegaBulk = ps.fields("omega_bulk: [3D]", layout='fzyx')
-        omegaMagic = sp.Symbol("omega_magic")
-        stencil = get_stencil("D3Q27", 'walberla')
+        omegaVisc = sp.Symbol('omega_visc')
+        omegaBulk = ps.fields(f'omega_bulk: {dtype_string}[3D]', layout='fzyx')
+        omegaMagic = sp.Symbol('omega_magic')
+        stencil = get_stencil('D3Q27', 'walberla')
 
-        relaxation_rates=[omegaVisc, omegaBulk.center_vector, omegaMagic, omegaVisc, omegaMagic, omegaVisc]
+        relaxation_rates = [omegaVisc, omegaBulk.center_vector, omegaMagic, omegaVisc, omegaMagic, omegaVisc]
 
-        methodWithForce = create_lb_method(stencil=stencil, method='mrt', maxwellian_moments=False,weighted=True, compressible=False,
-                                           force_model=forcemodel, relaxation_rates=relaxation_rates)
+        methodWithForce = create_lb_method(stencil=stencil, method='mrt', maxwellian_moments=False, weighted=True,
+                                           compressible=False, force_model=forcemodel, relaxation_rates=relaxation_rates)
 
         collision_rule = create_lb_collision_rule(lb_method=methodWithForce, optimization={'cse_global': True})
-        generate_lattice_model(ctx, 'GeneratedLBMWithForce', collision_rule, field_layout='fzyx', cpu_vectorize_info=cpu_vectorize_info)
+        generate_lattice_model(ctx, 'GeneratedLBMWithForce', collision_rule, field_layout='fzyx',
+                               cpu_vectorize_info=cpu_vectorize_info)
 
-    if generatedMethod == "cumulant":
+    if generatedMethod == 'cumulant':
 
-        x,y,z = MOMENT_SYMBOLS
+        x, y, z = MOMENT_SYMBOLS
 
         cumulants = [0] * 27
 
-        cumulants[0] = sp.sympify(1) #000
+        cumulants[0] = sp.sympify(1)  # 000
 
-        cumulants[1] = x #100
-        cumulants[2] = y #010
-        cumulants[3] = z #001
+        cumulants[1] = x  # 100
+        cumulants[2] = y  # 010
+        cumulants[3] = z  # 001
 
-        cumulants[4] = x*y #110
-        cumulants[5] = x*z #101
-        cumulants[6] = y*z #011
+        cumulants[4] = x*y  # 110
+        cumulants[5] = x*z  # 101
+        cumulants[6] = y*z  # 011
 
-        cumulants[7] = x**2 - y**2 #200 - 020
-        cumulants[8] = x**2 - z**2 #200 - 002
-        cumulants[9] = x**2 + y**2 + z**2 #200 + 020 + 002
+        cumulants[7] = x**2 - y**2  # 200 - 020
+        cumulants[8] = x**2 - z**2  # 200 - 002
+        cumulants[9] = x**2 + y**2 + z**2  # 200 + 020 + 002
 
-        cumulants[10] = x*y**2 + x*z**2 #120 + 102
-        cumulants[11] = x**2*y + y*z**2 #210 + 012
-        cumulants[12] = x**2*z + y**2*z #201 + 021
-        cumulants[13] = x*y**2 - x*z**2 #120 - 102
-        cumulants[14] = x**2*y - y*z**2 #210 - 012
-        cumulants[15] = x**2*z - y**2*z #201 - 021
+        cumulants[10] = x*y**2 + x*z**2  # 120 + 102
+        cumulants[11] = x**2*y + y*z**2  # 210 + 012
+        cumulants[12] = x**2*z + y**2*z  # 201 + 021
+        cumulants[13] = x*y**2 - x*z**2  # 120 - 102
+        cumulants[14] = x**2*y - y*z**2  # 210 - 012
+        cumulants[15] = x**2*z - y**2*z  # 201 - 021
 
-        cumulants[16] = x*y*z #111
+        cumulants[16] = x*y*z  # 111
 
-        cumulants[17] = x**2*y**2 - 2*x**2*z**2 + y**2*z**2 # 220- 2*202 +022
-        cumulants[18] = x**2*y**2 + x**2*z**2 - 2*y**2*z**2 # 220 + 202 - 2*002
-        cumulants[19] = x**2*y**2 + x**2*z**2 + y**2*z**2 # 220 + 202 + 022
+        cumulants[17] = x**2*y**2 - 2*x**2*z**2 + y**2*z**2  # 220- 2*202 +022
+        cumulants[18] = x**2*y**2 + x**2*z**2 - 2*y**2*z**2  # 220 + 202 - 2*002
+        cumulants[19] = x**2*y**2 + x**2*z**2 + y**2*z**2  # 220 + 202 + 022
 
-        cumulants[20] = x**2*y*z # 211
-        cumulants[21] = x*y**2*z # 121
-        cumulants[22] = x*y*z**2 # 112
+        cumulants[20] = x**2*y*z  # 211
+        cumulants[21] = x*y**2*z  # 121
+        cumulants[22] = x*y*z**2  # 112
 
-        cumulants[23] = x**2*y**2*z # 221
-        cumulants[24] = x**2*y*z**2 # 212
-        cumulants[25] = x*y**2*z**2 # 122
+        cumulants[23] = x**2*y**2*z  # 221
+        cumulants[24] = x**2*y*z**2  # 212
+        cumulants[25] = x*y**2*z**2  # 122
 
-        cumulants[26] = x**2*y**2*z**2 # 222
+        cumulants[26] = x**2*y**2*z**2  # 222
 
         def get_relaxation_rate(cumulant, omega):
             if get_order(cumulant) <= 1:
@@ -125,66 +128,68 @@ with CodeGeneration() as ctx:
             else:
                 return 1
 
-        stencil = get_stencil("D3Q27", 'walberla')
+        stencil = get_stencil('D3Q27', 'walberla')
 
-        omega = sp.Symbol("omega")
+        omega = sp.Symbol('omega')
         rr_dict = OrderedDict((c, get_relaxation_rate(c, omega))
                               for c in cumulants)
 
         from lbmpy.methods import create_with_continuous_maxwellian_eq_moments
-        my_method = create_with_continuous_maxwellian_eq_moments(stencil, rr_dict, cumulant=True, compressible=True, force_model=forcemodel)
+        my_method = create_with_continuous_maxwellian_eq_moments(stencil, rr_dict, cumulant=True, compressible=True,
+                                                                 force_model=forcemodel)
 
         collision_rule = create_lb_collision_rule(lb_method=my_method,
-                                                  optimization={"cse_global": True,
-                                                                "cse_pdfs": False})
+                                                  optimization={'cse_global': True,
+                                                                'cse_pdfs': False})
 
         print(my_method.relaxation_rates)
 
-        generate_lattice_model(ctx, 'GeneratedLBMWithForce', collision_rule, field_layout='fzyx', cpu_vectorize_info=cpu_vectorize_info)
+        generate_lattice_model(ctx, 'GeneratedLBMWithForce', collision_rule, field_layout='fzyx',
+                               cpu_vectorize_info=cpu_vectorize_info)
 
 
-    if generatedMethod == "cumulantTRT":
+    if generatedMethod == 'cumulantTRT':
 
-        x,y,z = MOMENT_SYMBOLS
+        x, y, z = MOMENT_SYMBOLS
 
         cumulants = [0] * 27
 
-        cumulants[0] = sp.sympify(1) #000
+        cumulants[0] = sp.sympify(1)  # 000
 
-        cumulants[1] = x #100
-        cumulants[2] = y #010
-        cumulants[3] = z #001
+        cumulants[1] = x  # 100
+        cumulants[2] = y  # 010
+        cumulants[3] = z  # 001
 
-        cumulants[4] = x*y #110
-        cumulants[5] = x*z #101
-        cumulants[6] = y*z #011
+        cumulants[4] = x*y  # 110
+        cumulants[5] = x*z  # 101
+        cumulants[6] = y*z  # 011
 
-        cumulants[7] = x**2 - y**2 #200 - 020
-        cumulants[8] = x**2 - z**2 #200 - 002
-        cumulants[9] = x**2 + y**2 + z**2 #200 + 020 + 002
+        cumulants[7] = x**2 - y**2  # 200 - 020
+        cumulants[8] = x**2 - z**2  # 200 - 002
+        cumulants[9] = x**2 + y**2 + z**2  # 200 + 020 + 002
 
-        cumulants[10] = x*y**2 + x*z**2 #120 + 102
-        cumulants[11] = x**2*y + y*z**2 #210 + 012
-        cumulants[12] = x**2*z + y**2*z #201 + 021
-        cumulants[13] = x*y**2 - x*z**2 #120 - 102
-        cumulants[14] = x**2*y - y*z**2 #210 - 012
-        cumulants[15] = x**2*z - y**2*z #201 - 021
+        cumulants[10] = x*y**2 + x*z**2  # 120 + 102
+        cumulants[11] = x**2*y + y*z**2  # 210 + 012
+        cumulants[12] = x**2*z + y**2*z  # 201 + 021
+        cumulants[13] = x*y**2 - x*z**2  # 120 - 102
+        cumulants[14] = x**2*y - y*z**2  # 210 - 012
+        cumulants[15] = x**2*z - y**2*z  # 201 - 021
 
-        cumulants[16] = x*y*z #111
+        cumulants[16] = x*y*z  # 111
 
-        cumulants[17] = x**2*y**2 - 2*x**2*z**2 + y**2*z**2 # 220- 2*202 +022
-        cumulants[18] = x**2*y**2 + x**2*z**2 - 2*y**2*z**2 # 220 + 202 - 2*002
-        cumulants[19] = x**2*y**2 + x**2*z**2 + y**2*z**2 # 220 + 202 + 022
+        cumulants[17] = x**2*y**2 - 2*x**2*z**2 + y**2*z**2  # 220- 2*202 +022
+        cumulants[18] = x**2*y**2 + x**2*z**2 - 2*y**2*z**2  # 220 + 202 - 2*002
+        cumulants[19] = x**2*y**2 + x**2*z**2 + y**2*z**2  # 220 + 202 + 022
 
-        cumulants[20] = x**2*y*z # 211
-        cumulants[21] = x*y**2*z # 121
-        cumulants[22] = x*y*z**2 # 112
+        cumulants[20] = x**2*y*z  # 211
+        cumulants[21] = x*y**2*z  # 121
+        cumulants[22] = x*y*z**2  # 112
 
-        cumulants[23] = x**2*y**2*z # 221
-        cumulants[24] = x**2*y*z**2 # 212
-        cumulants[25] = x*y**2*z**2 # 122
+        cumulants[23] = x**2*y**2*z  # 221
+        cumulants[24] = x**2*y*z**2  # 212
+        cumulants[25] = x*y**2*z**2  # 122
 
-        cumulants[26] = x**2*y**2*z**2 # 222
+        cumulants[26] = x**2*y**2*z**2  # 222
 
         def get_relaxation_rate(cumulant, omegaVisc, omegaMagic):
             if get_order(cumulant) <= 1:
@@ -194,22 +199,24 @@ with CodeGeneration() as ctx:
             else:
                 return omegaMagic
 
-        stencil = get_stencil("D3Q27", 'walberla')
+        stencil = get_stencil('D3Q27', 'walberla')
 
-        omegaVisc = sp.Symbol("omega_visc")
-        omegaMagic = sp.Symbol("omega_magic")
+        omegaVisc = sp.Symbol('omega_visc')
+        omegaMagic = sp.Symbol('omega_magic')
 
         rr_dict = OrderedDict((c, get_relaxation_rate(c, omegaVisc, omegaMagic))
                               for c in cumulants)
 
         from lbmpy.methods import create_with_continuous_maxwellian_eq_moments
-        my_method = create_with_continuous_maxwellian_eq_moments(stencil, rr_dict, cumulant=True, compressible=True, force_model=forcemodel)
+        my_method = create_with_continuous_maxwellian_eq_moments(stencil, rr_dict, cumulant=True, compressible=True,
+                                                                 force_model=forcemodel)
 
         collision_rule = create_lb_collision_rule(lb_method=my_method,
-                                                  optimization={"cse_global": True,
-                                                                "cse_pdfs": False})
+                                                  optimization={'cse_global': True,
+                                                                'cse_pdfs': False})
 
         print(my_method.relaxation_rates)
 
-        generate_lattice_model(ctx, 'GeneratedLBMWithForce', collision_rule, field_layout='fzyx', cpu_vectorize_info=cpu_vectorize_info)
+        generate_lattice_model(ctx, 'GeneratedLBMWithForce', collision_rule, field_layout='fzyx',
+                               cpu_vectorize_info=cpu_vectorize_info)
 
