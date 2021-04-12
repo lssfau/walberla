@@ -30,20 +30,20 @@ public:
                     for( auto d = LM::Stencil::begin(); d != LM::Stencil::end(); ++d )
                     {
                         const real_t pdf = src->get(x - d.cx(), y - d.cy(), z - d.cz(), d.toIdx());
-                        u[0] += pdf * d.cx();
-                        u[1] += pdf * d.cy();
-                        u[2] += pdf * d.cz();
+                        u[0] += pdf * real_c(d.cx());
+                        u[1] += pdf * real_c(d.cy());
+                        u[2] += pdf * real_c(d.cz());
                         rho += pdf;
                     }
 
                     // collide
-                    const real_t vel_sqr = u.sqrLength() * 1.5;
+                    const real_t vel_sqr = u.sqrLength() * real_t(1.5);
                     for( auto d = LM::Stencil::begin(); d != LM::Stencil::end(); ++d )
                     {
                         const real_t pdf = src->get(x - d.cx(), y - d.cy(), z - d.cz(), d.toIdx());
-                        const real_t vel = d.cx()*u[0] + d.cy()*u[1] + d.cz()*u[2];
-                        dst->get(x, y, z, d.toIdx()) = ( 1.0 - omega_ ) * pdf +
-                                                       omega_   * LM::w[ d.toIdx() ] * ( rho - vel_sqr + 3.0*vel + 4.5*vel*vel );
+                        const real_t vel = real_c(d.cx())*u[0] + real_c(d.cy())*u[1] + real_c(d.cz())*u[2];
+                        dst->get(x, y, z, d.toIdx()) = ( real_t(1.0) - omega_ ) * pdf +
+                                                       omega_ * LM::w[ d.toIdx() ] * ( rho - vel_sqr + real_t(3.0)*vel + real_t(4.5)*vel*vel );
                     }
                 });
         src->swapDataPointers(*dst);
@@ -166,7 +166,7 @@ public:
             dst->get(x,y,z,Stencil::idx[TN]) = omega_trm_ * dd_tmp_TN + omega_w2_ * ( vel_trm_TN_BS + velYpZ );
             dst->get(x,y,z,Stencil::idx[BS]) = omega_trm_ * dd_tmp_BS + omega_w2_ * ( vel_trm_TN_BS - velYpZ );
 
-        });
+        })
         src->swapDataPointers(*dst);
     }
 

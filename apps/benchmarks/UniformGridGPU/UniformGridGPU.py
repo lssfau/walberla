@@ -135,7 +135,7 @@ with CodeGeneration() as ctx:
     ]
     lb_method = create_lb_method(**options)
     update_rule = create_lb_update_rule(lb_method=lb_method, **options)
-
+ 
     if not noopt:
         update_rule = insert_fast_divisions(update_rule)
         update_rule = insert_fast_sqrts(update_rule)

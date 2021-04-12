@@ -40,10 +40,10 @@ void initPhaseField_bubble(const shared_ptr< StructuredBlockStorage >& blocks, B
       // clang-format off
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(phaseField, Cell globalCell;
          blocks->transformBlockLocalToGlobalCell(globalCell, block, Cell(x, y, z));
-         real_t Ri = sqrt((globalCell[0] - bubbleMidPoint[0]) * (globalCell[0] - bubbleMidPoint[0]) +
-                          (globalCell[1] - bubbleMidPoint[1]) * (globalCell[1] - bubbleMidPoint[1]) +
-                          (globalCell[2] - bubbleMidPoint[2]) * (globalCell[2] - bubbleMidPoint[2]));
-         phaseField->get(x, y, z) = 0.5 + 0.5 * tanh(2.0 * (Ri - R) / W);
+         real_t Ri = std::sqrt((real_c(globalCell[0]) - bubbleMidPoint[0]) * (real_c(globalCell[0]) - bubbleMidPoint[0]) +
+                               (real_c(globalCell[1]) - bubbleMidPoint[1]) * (real_c(globalCell[1]) - bubbleMidPoint[1]) +
+                               (real_c(globalCell[2]) - bubbleMidPoint[2]) * (real_c(globalCell[2]) - bubbleMidPoint[2]));
+         phaseField->get(x, y, z) = real_t(0.5) + real_t(0.5) * std::tanh(real_t(2.0) * (Ri - R) / W);
       )
       // clang-format on
    }
@@ -52,9 +52,9 @@ void initPhaseField_bubble(const shared_ptr< StructuredBlockStorage >& blocks, B
 void initPhaseField_RTI(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID phaseFieldID,
                         const real_t W = 5)
 {
-   auto X              = blocks->getDomainCellBB().xMax();
-   auto halfY          = (blocks->getDomainCellBB().yMax()) / 2.0;
-   double perturbation = 0.05;
+   const real_t X              = real_c(blocks->getDomainCellBB().xMax());
+   const real_t halfY          = real_c(blocks->getDomainCellBB().yMax()) / real_t(2.0);
+   const real_t perturbation   = real_t(0.05);
 
    for (auto& block : *blocks)
    {
@@ -62,8 +62,9 @@ void initPhaseField_RTI(const shared_ptr< StructuredBlockStorage >& blocks, Bloc
       // clang-format off
       WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(phaseField, Cell globalCell;
          blocks->transformBlockLocalToGlobalCell(globalCell, block, Cell(x, y, z));
-         real_t tmp = perturbation * X * (cos((2.0 * math::pi * globalCell[0]) / X) + cos((2.0 * math::pi * globalCell[2]) / X));
-         phaseField->get(x, y, z) = 0.5 + 0.5 * tanh(((globalCell[1] - halfY) - tmp) / (W / 2.0));
+         real_t tmp = perturbation * X * (std::cos((real_t(2.0) * math::pi * real_c(globalCell[0])) / X)
+                                        + std::cos((real_t(2.0) * math::pi * real_c(globalCell[2])) / X));
+         phaseField->get(x, y, z) = real_t(0.5) + real_t(0.5) * std::tanh(((real_t(globalCell[1]) - halfY) - tmp) / (W / real_t(2.0)));
       )
       // clang-format on
    }

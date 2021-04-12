@@ -55,7 +55,7 @@ using FlagField_T = FlagField<flag_t>;
 
 
 void initShearVelocity(const shared_ptr<StructuredBlockStorage> & blocks, BlockDataID velFieldID,
-                       const real_t xMagnitude=0.1, const real_t fluctuationMagnitude=0.05 )
+                       const real_t xMagnitude=real_t(0.1), const real_t fluctuationMagnitude=real_t(0.05) )
 {
     math::seedRandomGenerator(0);
     auto halfZ = blocks->getDomainCellBB().zMax() / 2;

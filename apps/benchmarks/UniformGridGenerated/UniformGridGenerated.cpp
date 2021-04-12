@@ -49,7 +49,7 @@ int main( int argc, char **argv )
 
    for( auto cfg = python_coupling::configBegin( argc, argv ); cfg != python_coupling::configEnd(); ++cfg )
    {
-      WALBERLA_MPI_WORLD_BARRIER();
+      WALBERLA_MPI_WORLD_BARRIER()
 
       auto config = *cfg;
       logging::configureLogging( config );
@@ -61,7 +61,7 @@ int main( int argc, char **argv )
       const std::string timeStepMode = parameters.getParameter<std::string>( "timeStepMode", "twoField");
       const real_t omega = parameters.getParameter<real_t>( "omega", real_c( 1.4 ));
             uint_t timesteps = parameters.getParameter<uint_t>( "timesteps", uint_c( 60 ));
-      const real_t shearVelocityMagnitude = parameters.getParameter<real_t>("shearVelocityMagnitude", 0.08);
+      const real_t shearVelocityMagnitude = parameters.getParameter<real_t>("shearVelocityMagnitude", real_t(0.08));
       const bool directComm = parameters.getParameter<bool>("directComm", false);
 
       auto pdfFieldAdder = [](IBlock* const block, StructuredBlockStorage * const storage) {
@@ -120,7 +120,7 @@ int main( int argc, char **argv )
           twoFieldKernel = StreamPullCollideD3Q19<MyLM>(pdfFieldId, tmpPdfFieldId, omega);
       } else {
           WALBERLA_ABORT_NO_DEBUG_INFO("Invalid option for \"twoFieldKernelType\", "
-                                       "valid options are \"generated\", \"manualGeneric\", \"manualD3Q19\"");
+                                       "valid options are \"generated\", \"manualGeneric\", \"manualD3Q19\"")
       }
 
       using F = std::function<void()>;
@@ -144,7 +144,7 @@ int main( int argc, char **argv )
           timeLoop.add() << Sweep( pystencils::GenLbKernelAAEven(pdfFieldId, omega), "AA Even" );
           timeLoop.add() << Sweep( pystencils::GenLbKernelAAOdd(pdfFieldId, omega), "AA Odd");
       } else {
-          WALBERLA_ABORT("Invalid value for timeStepMode");
+          WALBERLA_ABORT("Invalid value for timeStepMode")
       }
 
 
@@ -205,7 +205,7 @@ int main( int argc, char **argv )
                                                      "  time steps: " << timesteps <<
                                                      setw(15) << "  block size: " << cellsPerBlock <<
                                                      "  mlups/core:  " << int(mlupsPerProcess/ threads) <<
-                                                     "  mlups:  " << int(mlupsPerProcess) *  MPIManager::instance()->numProcesses());
+                                                     "  mlups:  " << int(mlupsPerProcess) *  MPIManager::instance()->numProcesses())
 
               WALBERLA_ROOT_SECTION()
               {
