@@ -57,7 +57,7 @@ protected:
 //*************************************************************************************************
 /*!\brief Compare if two fine collision detectors are equal.
  *
- * Since collision detectors are uncopyable two collision detectors are considered equal if their adresses are equal.
+ * Since collision detectors are uncopyable two collision detectors are considered equal if their addresses are equal.
  */
 inline bool operator==(const IFCD& lhs, const IFCD& rhs) {return &lhs == &rhs;}
 

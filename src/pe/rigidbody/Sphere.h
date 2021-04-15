@@ -297,7 +297,7 @@ inline Mat3 Sphere::calcInertia( const real_t mass, const real_t radius )
 /*!\brief Estimates the point which is farthest in direction \a d.
  *
  * \param d The normalized search direction in world-frame coordinates.
- * \return The support point in world-frame coordinates in direction a\ d.
+ * \return The support point in world-frame coordinates in direction \a d.
  */
 inline Vec3 Sphere::support( const Vec3& d ) const
 {

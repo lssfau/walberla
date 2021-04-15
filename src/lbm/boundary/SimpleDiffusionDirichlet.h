@@ -17,7 +17,7 @@
 //! \ingroup lbm
 //! \author Matthias Markl <matthias.markl@fau.de>
 //
-// @see Ginzbourg, I.   : Generic boundary conditions for lattice Boltzmann models and their application to advection and anisotropic disperion equations
+// @see Ginzbourg, I.   : Generic boundary conditions for lattice Boltzmann models and their application to advection and anisotropic dispersion equations
 // @see Like, L. et. al.: Boundary Conditions for thermal lattice Boltzmann equation method
 //
 //======================================================================================================================

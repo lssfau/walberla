@@ -860,7 +860,7 @@ int main( int argc, char **argv ) {
                                  (real_t(1) - lnDryResCoeff * lnDryResCoeff / (math::pi * math::pi + lnDryResCoeff * lnDryResCoeff)));
    const real_t dampingCoeff = -real_t(2) * std::sqrt(Mij * stiffnessCoeff) *
                                (std::log(restitutionCoeff) / std::sqrt(math::pi * math::pi + (std::log(restitutionCoeff) * std::log(restitutionCoeff))));
-   const real_t contactDuration = real_t(2) * math::pi * Mij / (std::sqrt(real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff)); //formula from Uhlman
+   const real_t contactDuration = real_t(2) * math::pi * Mij / (std::sqrt(real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff)); //formula from Uhlmann
 
    WALBERLA_LOG_INFO_ON_ROOT("Created particle material with:\n"
                                    << " - coefficient of restitution = " << restitutionCoeff << "\n"

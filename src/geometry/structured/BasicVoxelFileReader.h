@@ -18,7 +18,7 @@
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
 //! \brief Declares class StructuredGeometryFileBasicReader that provides a low-level reader for waLBerla geometry files.
 //!
-//! This reader has no dependencies towards waLberla or even boost so it can be used by external
+//! This reader has no dependencies towards waLBerla or even boost so it can be used by external
 //! software to read or write geometry files.
 //
 //======================================================================================================================

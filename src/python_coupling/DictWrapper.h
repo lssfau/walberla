@@ -92,7 +92,7 @@ namespace python_coupling {
    template<typename T> bool DictWrapper::checkedGet( const std::string & name, T output ) { return false; }
 
    template<typename T> T DictWrapper::get( const std::string & ) {
-      WALBERLA_ABORT("Not available - waLBerla was built without Python suppport");
+      WALBERLA_ABORT("Not available - waLBerla was built without Python support");
 #ifdef __IBMCPP__
       return *(reinterpret_cast< T * >( NULL )); // silencing incorrect IBM compiler warning
 #endif

@@ -194,7 +194,7 @@ void CylindricalBoundary::print( std::ostream& os, const char* tab ) const
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Global output operator for cylindrical boundaryies.
+/*!\brief Global output operator for cylindrical boundaries.
  *
  * \param os Reference to the output stream.
  * \param c Reference to a cylindrical boundary object.
@@ -213,7 +213,7 @@ std::ostream& operator<<( std::ostream& os, const CylindricalBoundary& c )
 
 
 //*************************************************************************************************
-/*!\brief Global output operator for cylindrical boundaryies handles.
+/*!\brief Global output operator for cylindrical boundaries handles.
  *
  * \param os Reference to the output stream.
  * \param c Constant cylindrical boundary handle.

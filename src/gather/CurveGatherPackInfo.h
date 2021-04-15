@@ -97,8 +97,8 @@ class CurveGatherPackInfo : public GatherPackInfo
       /**
        * Construction using vector of sample points
        *
-       * @samplePoints  Curve definition using a vector of points in R^3.
-       *                The points are expected to be in "world" coordinates
+       * @param samplePoints  Curve definition using a vector of points in R^3.
+       *                      The points are expected to be in "world" coordinates
        */
       CurveGatherPackInfo( const shared_ptr<StructuredBlockStorage> & bs,
                            ConstBlockDataID field,

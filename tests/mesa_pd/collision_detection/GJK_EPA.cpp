@@ -41,7 +41,7 @@ using namespace walberla::mesa_pd::collision_detection::analytic;
 
 bool gjkEPAcollideHybrid(Support &geom1, Support &geom2, Vec3& normal, Vec3& contactPoint, real_t& penetrationDepth)
 {
-   // For more information on hybrid GJK/EPA see page 166 in "Collision Detecton in Interactive 3D
+   // For more information on hybrid GJK/EPA see page 166 in "Collision Detection in Interactive 3D
    // Environments" by Gino van den Bergen.
 
    //1. Run GJK with considerably enlarged objects.
@@ -49,7 +49,7 @@ bool gjkEPAcollideHybrid(Support &geom1, Support &geom2, Vec3& normal, Vec3& con
    GJK gjk;
    if(gjk.doGJKmargin(geom1, geom2, margin)){
       //2. If collision is possible perform EPA.
-      //std::cerr << "Peforming EPA.";
+      //std::cerr << "Performing EPA.";
       EPA epa;
       epa.useSphereOptimization( true );
       return epa.doEPAmargin(geom1, geom2, gjk, normal, contactPoint, penetrationDepth, margin);
@@ -143,8 +143,8 @@ void runCollisionDataTest(Support &rb1, Support &rb2, const Vec3& dir1, const re
    }
 }
 
-/** Test the GJK-EPA implementation on a variety of configuations 
- * and penetation depths */
+/** Test the GJK-EPA implementation on a variety of configurations
+ * and penetration depths */
 void MainTest()
 {
    using namespace walberla::mesa_pd::data;

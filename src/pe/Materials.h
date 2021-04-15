@@ -196,7 +196,7 @@ private:
                             force are related by an inequality:
                             \f[ |\vec{f_t}| \leq \mu_s |\vec{f_n}| \f]
                             The direction of the friction must oppose acceleration if sliding is
-                            imminent and is unresticted otherwise. */
+                            imminent and is unrestricted otherwise. */
    real_t dynamic_;      //!< The coefficient of dynamic friction (CDF) \f$ [0..\infty) \f$.
                        /*!< The CDF is a dimensionless, non-negative quantity representing the
                             amount of dynamic friction between two touching rigid bodies. Dynamic

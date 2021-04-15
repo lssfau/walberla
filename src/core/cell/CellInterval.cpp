@@ -57,5 +57,5 @@ bool CellInterval::overlaps( const CellVector& cellVector ) const
 
 
 
-} // namesapce cell
+} // namespace cell
 } // namespace walberla

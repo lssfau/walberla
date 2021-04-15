@@ -417,14 +417,17 @@ class ForceEval
  *
  * The drag force for this problem (often denoted as Simple Cubic setup) is given by a semi-analytical series expansion.
  * The cubic domain is periodic in all directions, making it a physically infinite periodic array of spheres.
- *         _______________
- *      ->|               |->
- *      ->|      ___      |->
- *    W ->|     /   \     |-> E
- *    E ->|    |  x  |    |-> A
- *    S ->|     \___/     |-> S
- *    T ->|               |-> T
- *      ->|_______________|->
+   \verbatim
+           _______________
+        ->|               |->
+        ->|      ___      |->
+      W ->|     /   \     |-> E
+      E ->|    |  x  |    |-> A
+      S ->|     \___/     |-> S
+      T ->|               |-> T
+        ->|_______________|->
+
+   \endverbatim
  *
  * The collision model used for the LBM is TRT with a relaxation parameter tau=1.5 and the magic parameter 3/16.
  * The Stokes approximation of the equilibrium PDFs is used.

@@ -62,7 +62,7 @@ namespace postprocessing {
       static_assert( Field_T::F_SIZE == 1, "Works only for FlagFields" );
 
 
-      // Do not use ghost layer information in non-perdiodic directions
+      // Do not use ghost layer information in non-periodic directions
       CellInterval domainCellBB = bs->getDomainCellBB();
       for( size_t i=0; i<3; ++i )
          if ( ! bs->isPeriodic( i) )
@@ -125,7 +125,7 @@ namespace postprocessing {
       auto mesh = make_shared<geometry::TriangleMesh> ();
 
 
-      // Do not use ghost layer information in non-perdiodic directions
+      // Do not use ghost layer information in non-periodic directions
       CellInterval domainCellBB = bs->getDomainCellBB();
       for( size_t i=0; i<3; ++i )
          if ( ! bs->isPeriodic( i) )

@@ -252,7 +252,7 @@ while( fieldIter != field->end() )
 Calling Field::clone() returns a pointer to a field that is newly allocated. We immediately
 catch this pointer with a shared_ptr. When the shared_ptr is destroyed at the end of the function,
 the dynamically allocated memory for the field is automatically freed and we don't have to take
-care of freeing the memory ourselves. Not freeing the memory would evantually cause the application to crash,
+care of freeing the memory ourselves. Not freeing the memory would eventually cause the application to crash,
 since this algorithm is called many times and each time the memory usage of our application would grow.
 
 As you can see, we now have to iterate two fields at the same time: `field` and `copy`. 

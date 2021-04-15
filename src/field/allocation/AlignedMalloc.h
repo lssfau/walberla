@@ -43,7 +43,7 @@ namespace field {
     * \param size      size of allocated memory, total allocation will be greater by
     *                  'alignment' + sizeof(void*) bytes
     * \param alignment  the alignment boundary ,
-    *                   \important has to be a power of 2!   */
+    *                   **important** has to be a power of 2!   */
    //*******************************************************************************************************************
    void *aligned_malloc( uint_t size, uint_t alignment );
 

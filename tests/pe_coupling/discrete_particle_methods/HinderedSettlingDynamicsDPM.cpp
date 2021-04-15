@@ -834,7 +834,7 @@ int main( int argc, char **argv )
    const real_t stiffnessCoeff = math::pi * math::pi * Mij / ( collisionTime * collisionTime * ( real_t(1) - lnDryResCoeff * lnDryResCoeff / ( math::pi * math::pi + lnDryResCoeff* lnDryResCoeff ) ) );
    const real_t dampingCoeff = - real_t(2) * std::sqrt( Mij * stiffnessCoeff ) *
                                ( std::log(restitutionCoeff) / std::sqrt( math::pi * math::pi + (std::log(restitutionCoeff) * std::log(restitutionCoeff) ) ) );
-   const real_t contactDuration = real_t(2) * math::pi * Mij / ( std::sqrt( real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlman
+   const real_t contactDuration = real_t(2) * math::pi * Mij / ( std::sqrt( real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlmann
 
    if( !funcTest ) {
       WALBERLA_LOG_INFO_ON_ROOT("Created sediment material with:\n"
@@ -964,7 +964,7 @@ int main( int argc, char **argv )
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >( MyBoundaryHandling( flagFieldID, pdfFieldID ), "boundary handling" );
 
-   // field to store fluid velolcity
+   // field to store fluid velocity
    BlockDataID velocityFieldID = field::addToStorage< Vec3Field_T >( blocks, "velocity field", initialFluidVelocity, field::zyxf, FieldGhostLayers );
    BlockDataID oldVelocityFieldID = field::addToStorage< Vec3Field_T >( blocks, "old velocity field", initialFluidVelocity, field::zyxf, FieldGhostLayers );
    BlockDataID swappedOldVelocityFieldID = field::addToStorage< Vec3Field_T >( blocks, "swapped old velocity field", initialFluidVelocity, field::zyxf, FieldGhostLayers );

@@ -103,7 +103,7 @@ void PlaneIntersectsTest() {
    
    // plane with center 3,3,3 and parallel to x-z plane
    Plane pl2(1, 1, Vec3(3, 3, 3), Vec3(0, 1, 0), real_t(1.0), iron);
-   WALBERLA_CHECK(!intersects(&pl2, ray1, t, n), "ray parallel to plane shouldnt hit");
+   WALBERLA_CHECK(!intersects(&pl2, ray1, t, n), "ray parallel to plane shouldn't hit");
    
    // plane with center -10,3,3 and parallel to y-z plane
    Plane pl4(1, 1, Vec3(-10, 3, 3), Vec3(1, 0, 0), real_t(1.0), iron);
@@ -111,7 +111,7 @@ void PlaneIntersectsTest() {
    
    Plane pl6(1, 1, Vec3(3, 3, 0), Vec3(-1, 0, 0), real_t(1.0), iron);
    Ray ray4(Vec3(0,0,5), Vec3(1, 0, -1).getNormalized());
-   WALBERLA_CHECK(intersects(&pl6, ray4, t, n), "ray didnt hit");
+   WALBERLA_CHECK(intersects(&pl6, ray4, t, n), "ray didn't hit");
    WALBERLA_CHECK_FLOAT_EQUAL(n[0], real_t(-1), "incorrect normal calculated");
    WALBERLA_CHECK_FLOAT_EQUAL(n[1], real_t(0), "incorrect normal calculated");
    WALBERLA_CHECK_FLOAT_EQUAL(n[2], real_t(0), "incorrect normal calculated");

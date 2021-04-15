@@ -103,7 +103,7 @@ void ConvexPolyhedron::init( const Vec3& gpos,  const Quat& q,
       setMassAndInertiaToInfinity();
    } else
    {
-      // sets inverse mass and interatio tensor
+      // sets inverse mass and inertia tensor
       setMassAndInertia( getVolume() * Material::getDensity( getMaterial() ), mesh::computeInertiaTensor( mesh_ ) );
    }
    setCommunicating( communicating );
@@ -189,7 +189,7 @@ real_t ConvexPolyhedron::getSurfaceArea() const
 /*!\brief Estimates the point which is farthest in direction \a d.
  *
  * \param d The normalized search direction in world-frame coordinates.
- * \return The support point in world-frame coordinates in direction a\ d.
+ * \return The support point in world-frame coordinates in direction \a d.
  */
 Vec3 ConvexPolyhedron::support( const Vec3& d ) const
 {
@@ -233,7 +233,7 @@ Vec3 ConvexPolyhedron::support( const Vec3& d ) const
 /*!\brief Estimates the vertex which is farthest in direction \a d.
 *
 * \param d The normalized search direction in body-frame coordinates.
-* \return The support vertex in direction a\ d.
+* \return The support vertex in direction \a d.
 */
 TriangleMesh::VertexHandle ConvexPolyhedron::supportVertex( const TriangleMesh::Normal & d, const TriangleMesh::VertexHandle startVertex ) const
 {
@@ -266,7 +266,7 @@ TriangleMesh::VertexHandle ConvexPolyhedron::supportVertex( const TriangleMesh::
 /*!\brief Estimates the point which is farthest in direction \a d.
  *
  * \param d The normalized search direction in world-frame coordinates
- * \return The support point in world-frame coordinates in direction a\ d extended by a vector in
+ * \return The support point in world-frame coordinates in direction \a d extended by a vector in
  *         direction \a d of length \a pe::contactThreshold.
  */
 Vec3 ConvexPolyhedron::supportContactThreshold( const Vec3& /*d*/ ) const

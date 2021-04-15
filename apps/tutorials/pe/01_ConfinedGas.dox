@@ -4,7 +4,7 @@ namespace pe {
 /**
 \page tutorial_pe_01 Tutorial - Confined Gas:  Setting up a simple pe simulation
 
-This tutorial will help you to setup up a simple pe simulation. The scenario for this tutorial a is particle
+This tutorial will help you to set up a simple pe simulation. The scenario for this tutorial is a particle
 gas (spheres) confined by solid walls.
 
 For this tutorial only a few includes are needed, namely:
@@ -79,7 +79,7 @@ access their properties.
 \snippet 01_ConfinedGas.cpp PostProcessing
 
 Congratulation! You successfully created your first rigid body simulation.
-In the next tutorial we will look at possible extensions which can make your live easier.
+In the next tutorial we will look at possible extensions which can make your life easier.
 
 */
 

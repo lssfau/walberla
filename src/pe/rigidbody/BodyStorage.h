@@ -682,7 +682,7 @@ inline BodyStorage::iterator BodyStorage::remove( iterator pos )
  * \param body A handle of the rigid body to be removed.
  * \return void
  *
- * This function removes a body from the body storage. \a body must be a valid rigid body poitner
+ * This function removes a body from the body storage. \a body must be a valid rigid body pointer
  * and must be registered in the body storage. Invalidates all iterators pointing at or past
  * the element to be removed. The time complexity is logarithmic unless reallocation occurs.
  */
@@ -882,7 +882,7 @@ inline void BodyStorage::validate()
 //*************************************************************************************************
 /*!\brief Compare if two BodyStorages are equal.
  *
- * Since BodyStorages are uncopyable two BodyStorages are considered equal if their adresses are equal.
+ * Since BodyStorages are uncopyable two BodyStorages are considered equal if their addresses are equal.
  */
 inline bool operator==(const BodyStorage& lhs, const BodyStorage& rhs) {return &lhs == &rhs;}
 

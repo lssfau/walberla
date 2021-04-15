@@ -76,7 +76,7 @@ constexpr auto ro = 4_r * mm / ( math::root_three * a_CC );
 /// Atomic mass of Carbon in AMU
 constexpr auto M_C = 12.011_r;
 
-/// Mass of the repetative cell in AMU
+/// Mass of the repetitive cell in AMU
 constexpr auto mass_T = ro * T * M_C * 104.397_r;
 
 /// Volume of a capsule

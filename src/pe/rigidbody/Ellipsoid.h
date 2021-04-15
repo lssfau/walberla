@@ -15,7 +15,7 @@
 //
 //! \file Ellipsoid.h
 //! \author Klaus Iglberger
-//! \author Sebastian Eibl <sebastian.eibl@fau.de
+//! \author Sebastian Eibl <sebastian.eibl@fau.de>
 //! \author Tobias Leemann <tobias.leemann@fau.de>
 //
 //======================================================================================================================
@@ -297,7 +297,7 @@ inline Mat3 Ellipsoid::calcInertia( const real_t mass, const Vec3& semiAxes )
 /*!\brief Estimates the point which is farthest in direction \a d.
  *
  * \param d The normalized search direction in world-frame coordinates.
- * \return The support point in world-frame coordinates in direction a\ d.
+ * \return The support point in world-frame coordinates in direction \a d.
  */
 inline Vec3 Ellipsoid::support( const Vec3& d ) const
 {

@@ -65,7 +65,7 @@ blockforest::InfoCollection::const_iterator MinMaxLevelDetermination::getOrCreat
    {
       blockforest::BlockID childId(fatherId, child);
       auto childIt = ic_->find( childId );
-      //meight be not available if not all blocks are on the same level
+      //might be not available if not all blocks are on the same level
       //return giant number to prevent coarsening
       if (childIt == ic_->end())
       {

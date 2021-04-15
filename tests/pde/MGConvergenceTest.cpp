@@ -83,7 +83,7 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
     // Set mean value to zero //
     uint_t numCells(0);
     
-    // Initalizing non-zero block with a given value in center of domain, relative to domain extension
+    // Initializing non-zero block with a given value in center of domain, relative to domain extension
     for( auto block = blocks->begin(); block != blocks->end(); ++block )
     {
         PdeField_T * u = block->getData< PdeField_T >( uId );

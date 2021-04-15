@@ -49,7 +49,7 @@ namespace timeloop {
     *
     * \section sweepTimeloop_simple Simple Registration
     *
-    * When registering sweeps (even without Selectable concept) the syntax may seem a litte strange.
+    * When registering sweeps (even without Selectable concept) the syntax may seem a little strange.
     * Lets do an example where we register simple C functions as sweeps:
       \code
       // The callback functions

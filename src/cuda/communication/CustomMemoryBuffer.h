@@ -52,7 +52,7 @@ namespace communication {
     * The buffer has a beginning, a current position and an end position. Here is an overview of the most important
     * operations:
     *   - clear: reset current position to begin, does not change size
-    *   - advance: moves current position number of bytes forward and returns poitner to the old current position
+    *   - advance: moves current position number of bytes forward and returns pointer to the old current position
     *              two versions are available, one that automatically resizes and reallocates the buffer, and one that
     *              fails if not enough space is available
     */

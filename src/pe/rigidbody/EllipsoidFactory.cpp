@@ -36,7 +36,7 @@ EllipsoidID createEllipsoid( BodyStorage& globalStorage, BlockStorage& blocks, B
                              MaterialID material,
                              bool global, bool communicating, bool infiniteMass )
 {
-   WALBERLA_ASSERT_UNEQUAL( Ellipsoid::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Ellipsoid TypeID not initalized!");
+   WALBERLA_ASSERT_UNEQUAL( Ellipsoid::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Ellipsoid TypeID not initialized!");
    // Checking the semiAxes
    if( semiAxes[0] <= real_c(0) || semiAxes[1] <= real_c(0) || semiAxes[2] <= real_c(0) )
       throw std::invalid_argument( "Invalid Ellipsoid semi-axes" );

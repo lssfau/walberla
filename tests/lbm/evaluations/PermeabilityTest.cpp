@@ -77,7 +77,7 @@ struct Setup
    real_t epsilon;
    // LBM omega value
    real_t omega;
-   // denstiy (pressure) difference applied at domain borders
+   // density (pressure) difference applied at domain borders
    real_t rhoDiff;
    // control parameter for BCC scenario
    real_t kappa;

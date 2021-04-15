@@ -264,7 +264,7 @@ real_t Sample::quantile(const real_t p) const
  *    %mad       by mad()
  *    %size       by size()
  *
- * \returns  The formated string.
+ * \returns  The formatted string.
  **********************************************************************************************************************/
 std::string Sample::format(const std::string & formatString) const
 {

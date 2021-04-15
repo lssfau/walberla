@@ -4,7 +4,7 @@ namespace pe {
 /**
 \page tutorial_pe_02 Tutorial - Useful Features
 
-This tutorial will introduce some useful features of the waLBerla framework which can make your live easier.
+This tutorial will introduce some useful features of the waLBerla framework which can make your life easier.
 
 \section tutorial_pe_02_checkpointing Checkpointing
 You can checkpoint the current state of your rigid body dynamics simulation at any point to restore it afterwards.
@@ -51,7 +51,7 @@ Environment::config() function. You can access subblocks of the config with conf
 \snippet LoadFromConfig.cpp Load Config
 To get values from the config call config::Config::getParameter():
 \snippet LoadFromConfig.cpp Config Get Parameter
-Certain task already have predefined loading functions. You can for example directly create a BlockForest
+Certain tasks already have predefined loading functions. You can for example directly create a BlockForest
 from the config file.
 \snippet LoadFromConfig.cpp Config BlockForest
 The corresponding block in the config file looks like:
@@ -73,18 +73,18 @@ globalLinearAcceleration < 1, -2, 3 >;
 \endcode
 
 \section tutorial_pe_02_timing Timing
-To get additional information where you application spends its time you can use the WcTimingTree.
-It will give you a hirarchical view of the time used.
+To get additional information where your application spends its time you can use the WcTimingTree.
+It will give you a hierarchical view of the time used.
 Usage example:
 \snippet 02_ConfinedGasExtended.cpp TT Example
 Before you output the information you should collect all the information from all the processes if you are running
 in parallel.
 \snippet 02_ConfinedGasExtended.cpp TT Log
-Many build-in functions like solver or synchronization methods come with an additional parameter where you can
+Many built-in functions like solver or synchronization methods come with an additional parameter where you can
 specify your timing tree. They will then include detailed information in your timing tree.
 
 \section tutorial_pe_02_sqlite SQLite Output
-waLBerla also supports SQLite database for simulation data output. This can come in handy in parallel simulations
+waLBerla also supports SQLite databases for simulation data output. This can come in handy in parallel simulations
 as well as in data analysis. To store information in a SQLite database you have to fill three property maps
 depending on the type of information you want to store.
 \snippet 02_ConfinedGasExtended.cpp SQLProperties

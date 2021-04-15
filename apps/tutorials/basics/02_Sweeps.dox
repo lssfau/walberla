@@ -13,7 +13,7 @@ A function that takes a single block as argument and operates on the block data 
 
 For demonstrating how to write a sweep, let us implement the following "algorithm":
 - Initialize the scalar field with random values.
-- In each time step, double the value in the field if it is bigger than some limit, otherwise half the value.
+- In each time step, double the value in the field if it is bigger than some limit, otherwise halve the value.
 
 \section tut02_initialize Initializing the Field
 

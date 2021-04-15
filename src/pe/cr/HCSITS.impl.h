@@ -1662,14 +1662,14 @@ inline void HardContactSemiImplicitTimesteppingSolvers::synchronizeVelocities( )
    //   for( ProcessIterator process = processstorage_.begin(); process != processstorage_.end(); ++process )
    //      sentVelocitiesSyncUpdates_.transfered( process->getSendBuffer().size() );
 
-   if (tt_ != nullptr) tt_->start("Velocity Sync Update Communincate");
+   if (tt_ != nullptr) tt_->start("Velocity Sync Update Communicate");
 
    WALBERLA_LOG_DETAIL( "Communication of velocity update message starts...");
 
    syncVelBS.setReceiverInfo(recvRanks, true);
    syncVelBS.sendAll();
 
-   if (tt_ != nullptr) tt_->stop("Velocity Sync Update Communincate");
+   if (tt_ != nullptr) tt_->stop("Velocity Sync Update Communicate");
 
    //   for( ProcessIterator process = processstorage_.begin(); process != processstorage_.end(); ++process )
    //      receivedVelocitiesSyncUpdates_.transfered( process->getRecvBuffer().size() );

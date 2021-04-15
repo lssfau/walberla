@@ -193,7 +193,7 @@ namespace gjkepa{
       return collision;
    }
 
-   //Union and Plane (these calls are ambigous if not implemented seperatly)
+   //Union and Plane (these calls are ambiguous if not implemented separately)
    template<typename... BodyTypesA, typename Container>
    inline bool generateContacts(Union<BodyTypesA...> *a, Plane *b, Container& contacts_){
       GJKEPASingleCollideFunctor<Plane, Container> func(b, contacts_);

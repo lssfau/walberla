@@ -46,7 +46,7 @@ namespace walberla {
  * \ingroup core
  *
  * The UniqueID class is responsible for the generation of unique system IDs even during an MPI
- * parallel execution. The unqiue ID is composed from the number of locally generated objects
+ * parallel execution. The unique ID is composed from the number of locally generated objects
  * of type \a T and the rank of the local MPI process.
  */
 template< typename T >

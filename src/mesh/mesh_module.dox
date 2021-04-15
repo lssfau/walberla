@@ -55,7 +55,7 @@ mesh::PythonTriangleMesh might be the right choice.
 \subsection load Loading meshes
 Meshes can be loaded from any file format supported by OpenMesh including obj, off, ply, stl and a custom om format.
 To load a mesh at large scale simulations waLBerla provides the function readAndBroadcast() which reads a file from disk on a single process and broadcasts it.
-This way the pressure on the file system is kept to a minmum.
+This way the pressure on the file system is kept to a minimum.
 
 \subsection conversion Conversion between OpenMesh and waLBerla data types
 OpenMesh and waLBerla use different vector data types. The file MatrixVectorOperations.h provides the functions toWalberla() and toOpenMesh()
@@ -68,11 +68,11 @@ can be found in MeshConversion.h.
 
 \section setup How can I setup my simulation using the mesh module?
 
-\subsection  distance Initilization of mesh distance data structures
+\subsection  distance Initialization of mesh distance data structures
 To set up the simulation using a surface mesh, waLBerla needs to compute distances to the surface and determine the location of points relative to mesh.
 The necessary data structure is called mesh::TriangleDistance and is defined in DistanceComputations.h.
 It adds the necessary information to the mesh's triangles and offers functions to compute a signed point<->triangle distance.
-It also offers to compute a asigned point<->mesh distance but this is only recommended for smaller meshes with only a few triangles.
+It also offers to compute a assigned point<->mesh distance but this is only recommended for smaller meshes with only a few triangles.
 Larger meshes should use a \ref mesh::distance_octree::DistanceOctree "mesh::DistanceOctree" which reduces the number of evaluated point<->mesh distances significantly from \f$\mathcal O(n)\f$ to \f$\mathcal O(\log n)\f$.
 If you are only interested whether a point is contained in the mesh you can use the \ref mesh::distance_octree::DistanceOctree "mesh::DistanceOctree" with geometry::ContainmentOctree to get faster results.
 

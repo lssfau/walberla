@@ -312,7 +312,7 @@ namespace geometry {
             else if ( c == '*' )
                state = STATE_MLC0;
             else
-               throw std::runtime_error("Invalid inputsream syntax");
+               throw std::runtime_error("Invalid inputstream syntax");
             break;
 
          case STATE_LC:

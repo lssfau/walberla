@@ -163,7 +163,7 @@ real_t GJK::doGJK(GeomPrimitive &geom1, GeomPrimitive &geom2, Vec3& normal, Vec3
  * \param geom1 The first Body
  * \param geom2 The second Body
  * \param margin The margin by which the objects will be enlarged.
- * \return true, if an itersection is found.
+ * \return true, if an intersection is found.
  */
 bool GJK::doGJKmargin(GeomPrimitive &geom1, GeomPrimitive &geom2, real_t margin)
 {
@@ -278,7 +278,7 @@ bool GJK::doGJKmargin(GeomPrimitive &geom1, GeomPrimitive &geom2, real_t margin)
 
 
 //*************************************************************************************************
-/*!\brief Calculate clostes Point in the simplex and its distance to the origin.
+/*!\brief Calculate closest Point in the simplex and its distance to the origin.
  */
 inline real_t GJK::calcDistance( Vec3& normal, Vec3& contactPoint )
 {
@@ -314,7 +314,7 @@ inline real_t GJK::calcDistance( Vec3& normal, Vec3& contactPoint )
       //Vec3 ac = -A;
       //Vec3 bc = -simplex[1];
 
-      //calc baryzenctric coordinats
+      //calc barycentric coordinates
       // compare "Real-Time Collision Detection" by Christer Ericson page 129
       //double t = ac*ab;
       real_t t     = real_t(-1.0) * (A * ab);
@@ -434,7 +434,7 @@ bool GJK::simplex3(Vec3& d)
    const Vec3& A = simplex_[2];  //The Point last added to the simplex
    const Vec3& B = simplex_[1];  //One Point that was already in the simplex
    const Vec3& C = simplex_[0];  //One Point that was already in the simplex
-   //ABC is a conterclockwise triangle
+   //ABC is a counterclockwise triangle
 
    const Vec3  AO  = -A;        //The vector A->O with 0 the origin
    const Vec3&  AOt = AO;        //The transposed vector A->O with O the origin
@@ -559,7 +559,7 @@ bool GJK::simplex4(Vec3& d)
 {
    //the simplex is a tetrahedron
    const Vec3& A  = simplex_[3];  //The Point last added to the tetrahedron
-   //t in front mens just a temp varialble
+   //t in front means just a temp variable
    const Vec3& B = simplex_[2];  //One Point that was already in the simplex
    const Vec3& C = simplex_[1];  //One Point that was already in the simplex
    const Vec3& D = simplex_[0];

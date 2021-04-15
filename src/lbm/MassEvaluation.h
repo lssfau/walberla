@@ -60,7 +60,7 @@ Vector3<real_t> massEvaluationDomain( const shared_ptr< StructuredBlockStorage >
 *   \code
 *   BlockDataID densityId = field::addFieldAdaptor< lbm::Adaptor<LatticeModel_T>::Density >( blocks, pdfFieldId,
 *                                                                                            "density adaptor" );
-*   \code
+*   \endcode
 *
 *   for creating a density adaptor. The type of this adaptor/field is 'lbm::Adaptor<LatticeModel_T>::Density'.
 *   An example for using a SharedFunctor that can be used to register the mass evaluation at a time loop might look
@@ -69,7 +69,7 @@ Vector3<real_t> massEvaluationDomain( const shared_ptr< StructuredBlockStorage >
 *   \code
 *   makeSharedFunctor( lbm::makeMassEvaluation< lbm::Adaptor<LatticeModel_T>::Density >( config, blocks,
 *                                                                                        uint_t(0), densityId ) )
-*   \code
+*   \endcode
 *
 *   Note that for this example the plot and log frequency can be controlled via the configuration file. In this example,
 *   _all_ cells are processed. If not all of your cells are actually fluid cells, you should use a 'makeMassEvaluation'
@@ -78,7 +78,7 @@ Vector3<real_t> massEvaluationDomain( const shared_ptr< StructuredBlockStorage >
 *   \code
 *   makeSharedFunctor( lbm::makeMassEvaluation< lbm::Adaptor<LatticeModel_T>::Density, FlagField_T >(
                           config, blocks, uint_t(0), densityId, flagFieldId, fluidFlagUID ) )
-*   \code
+*   \endcode
 */
 //**********************************************************************************************************************
 

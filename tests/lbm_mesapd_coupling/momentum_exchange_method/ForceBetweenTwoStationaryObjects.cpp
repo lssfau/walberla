@@ -276,7 +276,7 @@ void createSimulationSetup( shared_ptr< StructuredBlockForest > blocks, shared_p
  * This can also be seen as an implicit reconstruction of the PDFs in the missing cells with feq(0, vec(0)).
  * As such, it can/will lead to errors if the velocity of the obstacle covering the missing cells is different from the
  * surrounding flow. In that case, an explicit reconstruction like in Ernst et al. should be applied, which however will
- * change the algorithm, as the computation of the force components can probbaly no longer be fused with the boundary handling.
+ * change the algorithm, as the computation of the force components can probably no longer be fused with the boundary handling.
  *
  * Tested variants:
  *  - boundary condition: SimpleBB, CLI

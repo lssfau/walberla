@@ -208,7 +208,7 @@ bool DynamicCurveBalance< PhantomData_T >::operator()( std::vector< std::pair< c
                                                                 std::set< uint_t > & processesToRecvFrom,
                                                                 const PhantomBlockForest & phantomForest, const uint_t ) const
 {
-   // Do not change or modifiy this check.
+   // Do not change or modify this check.
    // The Hilbert curve construction relies on "std::numeric_limits< idx_t >::max()" being an invalid number of blocks for a process
    WALBERLA_CHECK_LESS( targetProcess.size(), std::numeric_limits< idx_t >::max() );
    

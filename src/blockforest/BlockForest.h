@@ -382,7 +382,7 @@ public:
    //         e.g. diffusive or space filling curve strategy
    // 4) data migration / refinement / coarsening
 
-   /// Triggeres AMR Pipeline
+   /// Triggers AMR Pipeline
    void refresh();
 
    /// Functor that calls refresh with given frequency

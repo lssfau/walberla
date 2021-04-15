@@ -675,7 +675,7 @@ inline HIGH Vector3<Type>::operator*( const Vector3<Other>& rhs ) const
 
 //**********************************************************************************************************************
 /*!\fn Vector3<HIGH> Vector3<Type>::operator/( Other rhs ) const
-// \brief Division operator for the divison of a vector by a scalar value
+// \brief Division operator for the division of a vector by a scalar value
 // \brief (\f$ \vec{a}=\vec{b}/s \f$).
 //
 // \param rhs The right-hand-side scalar value for the division.
@@ -1213,7 +1213,7 @@ inline bool operator==( long double scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of an unsigned char scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1232,7 +1232,7 @@ inline bool operator!=( unsigned char scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of a char scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1251,7 +1251,7 @@ inline bool operator!=( char scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of a signed char scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1270,7 +1270,7 @@ inline bool operator!=( signed char scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of a wchar_t scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1289,7 +1289,7 @@ inline bool operator!=( wchar_t scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of an unsigned short scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1308,7 +1308,7 @@ inline bool operator!=( unsigned short scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of a short scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1327,7 +1327,7 @@ inline bool operator!=( short scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of an uint_t scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1346,7 +1346,7 @@ inline bool operator!=( unsigned int scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of an int scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1365,7 +1365,7 @@ inline bool operator!=( int scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of an unsigned long scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1384,7 +1384,7 @@ inline bool operator!=( unsigned long scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of a long scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1403,7 +1403,7 @@ inline bool operator!=( long scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of a float scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1422,7 +1422,7 @@ inline bool operator!=( float scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of a double scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1441,7 +1441,7 @@ inline bool operator!=( double scalar, const Vector3<Type>& vec )
 // \brief Inequality operator for the comparison of a long double scalar value and a vector.
 //
 // \param scalar The left-hand-side scalar value for the comparison.
-// \param vec The right-hand-side vector for the comparision.
+// \param vec The right-hand-side vector for the comparison.
 // \return bool
 //
 // If one value of the vector is inequal to the scalar value, the inequality test returns true,
@@ -1520,7 +1520,7 @@ std::istream& operator>>( std::istream& is, Vector3<Type>& v )
       return is;
    }
 
-   // Transfering the input to the vector values
+   // Transferring the input to the vector values
    v[0] = x; v[1] = y; v[2] = z;
 
    // Resetting the flags
@@ -1579,7 +1579,7 @@ inline std::istream& operator>>( std::istream& is, Vector3<bool>& v )
       }
    }
 
-   // Transfering the input to the vector values
+   // Transferring the input to the vector values
    v[0] = x; v[1] = y; v[2] = z;
 
    // Resetting the flags
@@ -1802,7 +1802,7 @@ struct Vector3LexicographicalyLess
    //
    // \param lhs left hand side of less-than-operator.
    // \param rhs right hand side of less-than-operator.
-   // \returns true if lhs < rhs (lexicogrphically), else returns false.
+   // \returns true if lhs < rhs (lexicographically), else returns false.
    */
    bool operator()( const Vector3<T> & lhs, const Vector3<T> & rhs ) const
    {

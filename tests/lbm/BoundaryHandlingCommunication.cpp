@@ -251,7 +251,7 @@ int main( int argc, char ** argv )
                                                       uint_t(12), uint_t(9), uint_t(11),
                                                       real_c(1.0),
                                                       uint_t(2),  uint_t(2),  uint_t(2),
-                                                      true, false, false ); // periodicty
+                                                      true, false, false ); // periodicity
 
    const real_t velocity = real_t(0.0005);
 

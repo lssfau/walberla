@@ -338,7 +338,7 @@ int main( int argc, char ** argv )
    auto blocks = blockforest::createUniformBlockGrid( uint_t(1), uint_t(1), uint_t(1),
                                                       FieldSize, FieldSize, FieldSize,
                                                       real_c(1.0), true,
-                                                      true, true, false ); // periodicty
+                                                      true, true, false ); // periodicity
 
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 

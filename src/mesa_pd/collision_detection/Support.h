@@ -43,7 +43,7 @@ public:
     * \brief Estimates the point which is farthest in direction \a d.
     *
     * \param d The normalized search direction in world-frame coordinates.
-    * \return The support point in world-frame coordinates in direction a\ d.
+    * \return The support point in world-frame coordinates in direction \a d.
     */
    Vec3 support( Vec3 d ) const;
 public:

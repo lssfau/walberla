@@ -67,7 +67,7 @@ struct DistanceProperties
 * \brief Adds information required to compute signed distances from a point to a triangle
 * 
 * The class adds vertex, edge and face normals to mesh. The normals are calculated according to \cite Baerentzen2005
-* to allow for a numerically stable sign computation. To compute the point<->trinagle distance, we use the rotation
+* to allow for a numerically stable sign computation. To compute the point<->triangle distance, we use the rotation
 * method described in \cite Jones1995. Some data is precomputed to allow for faster computations and is stored
 * at each face in an object of class DistanceProperties. The numbering of vertices, edges and voronoi regions in
 * the rotated triangles are shown here:
@@ -75,13 +75,12 @@ struct DistanceProperties
 * \image html mesh/triangle_topo.svg "A rotated triangle in the planar coordinate system. The vertex numbering is shown in red, the edge numbering in blue and the numbering of the voronoi regions in green."
 *
 * The class offers multiple methods to get the signed squared distance from a point to a single triangle or the whole mesh.
-* Please note that the distance compuattion for whole meshes is rather ineffecient. Instead you should an object of this
-* class into a \ref mesh::distance_octree::DistanceOctree "mesh::DistanceOctree" reduce the computaional complexity
+* Please note that the distance computation for whole meshes is rather inefficient. Instead you should an object of this
+* class into a \ref mesh::distance_octree::DistanceOctree "mesh::DistanceOctree" reduce the computational complexity
 * from \f$\mathcal O(n)\f$ to \f$\mathcal O(\log n)\f$, where \f$\mathcal O(n)\f$ where \f$n\f$ is the number triangles.
 *
 * Additionally to the signed squared distance you can also retrieve the closest point on the triangle or mesh to
-* your point of inquiry. You may also retrieve the coresponding normal and the clostest voronoi region region.
-
+* your point of inquiry. You may also retrieve the corresponding normal and the closest voronoi region.
 */
 template< typename MeshType >
 class TriangleDistance

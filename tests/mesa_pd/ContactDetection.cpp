@@ -98,7 +98,7 @@ int main( const int particlesPerAxisPerProcess = 2 )
    WALBERLA_LOG_DEVEL_VAR_ON_ROOT(cornerParticles);
 
    // create forest
-   const real_t eps = real_c(0.01); //shift to make contact points unambigous
+   const real_t eps = real_c(0.01); //shift to make contact points unambiguous
    Vector3<uint_t>blocksPerDirection (2,2,2);
    int numBlocks = int(blocksPerDirection[0] * blocksPerDirection[1] * blocksPerDirection[2]);
    Vector3<bool> periodicity(true, true, true);

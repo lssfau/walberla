@@ -229,14 +229,17 @@ class TorqueEval
  *
  * The torque for this problem (often denoted as Simple Cubic setup) is given by a semi-analytical formula.
  * The cubic domain is periodic in all directions, making it a physically infinite periodic array of spheres.
- *       _______________
- *      |       <-      |
- *      |      ___      |
- *      |     /   \     |
- *      |    |  x  |    |
- *      |     \___/     |
- *      |      ->       |
- *      |_______________|
+   \verbatim
+         _______________
+        |       <-      |
+        |      ___      |
+        |     /   \     |
+        |    |  x  |    |
+        |     \___/     |
+        |      ->       |
+        |_______________|
+
+   \endverbatim
  *
  * The collision model used for the LBM is TRT with a relaxation parameter tau=1.5 and the magic parameter 3/16.
  * The Stokes approximation of the equilibrium PDFs is used.

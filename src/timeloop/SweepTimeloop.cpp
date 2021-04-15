@@ -86,7 +86,7 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors, WcTimingPool &timing)
       for( auto sweepIt = sweeps_.begin(); sweepIt != sweeps_.end(); ++sweepIt )
       {
          SweepAdder & s = * ( sweepIt->second );
-         // loop over all possibilites in selectable object
+         // loop over all possibilities in selectable object
          for( auto it = s.sweep.begin(); it != s.sweep.end(); ++it )
             timing.registerTimer( it.identifier() );
       }

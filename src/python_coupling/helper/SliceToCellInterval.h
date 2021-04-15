@@ -65,7 +65,7 @@ inline cell_idx_t normalizeIdx(py::object pyIndex, uint_t coordinateSize)
  *     Example: Python Slice: [ :, 3, -1 ]  and a domain size of ( 3,4,5 )
  *                 - x coordinate is the complete valid x-range indicated by the semicolon: i.e. [0,3)
  *                 - y coordinate is just a normal index i.e. the range from [3,4)
- *                 - z coordiante is the first valid coordinate from the back [4,5)
+ *                 - z coordinate is the first valid coordinate from the back [4,5)
  *
  *     Python slices are tuples with slice classes as entry. Each slice has start, stop and step.
  *     Steps are not supported since they can not be encoded in a CellInterval

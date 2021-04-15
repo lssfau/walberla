@@ -111,9 +111,9 @@ void AnisotropicVDWContact::operator()(const size_t p_idx1,
    // c1 - contact 1-2 normal
    // b1 - ball 1 axial direction
    // b2 - ball 2 axial direction
-   // b3 - neytral direction
-   // g - alighning torque direction
-   // d - neytral plane normal direction
+   // b3 - neutral direction
+   // g - aligning torque direction
+   // d - neutral plane normal direction
    // s - shear force direction
 
    // angle gamma - angle between two axial directions
@@ -121,7 +121,7 @@ void AnisotropicVDWContact::operator()(const size_t p_idx1,
 
 
 
-   // if the angle between two axal directions is blunt, then inverce b2
+   // if the angle between two axial directions is blunt, then inverse b2
    if (cos_gamma < 0_r)
    {
       b2 = -b2;

@@ -122,7 +122,7 @@ inline bool EPA::EPA_Triangle::link( size_t edge0, EPA_Triangle* tria, size_t ed
  */
 inline void EPA::EPA_Triangle::silhouette( const Vec3& w, EPA_EdgeBuffer& edgeBuffer )
 {
-   //std::cerr << "Starting Silhoutette search on Triangle {" << indices_[0] << "," << indices_[1] << "," << indices_[2] << "}" << std::endl;
+   //std::cerr << "Starting Silhouette search on Triangle {" << indices_[0] << "," << indices_[1] << "," << indices_[2] << "}" << std::endl;
    edgeBuffer.clear();
    obsolete_ = true;
 
@@ -134,7 +134,7 @@ inline void EPA::EPA_Triangle::silhouette( const Vec3& w, EPA_EdgeBuffer& edgeBu
 
 
 //*************************************************************************************************
-/*! \brief Recursive silhuette finding method.
+/*! \brief Recursive silhouette finding method.
  */
 void EPA::EPA_Triangle::silhouette( size_t index, const Vec3& w,
                                     EPA_EdgeBuffer& edgeBuffer )
@@ -221,7 +221,7 @@ bool EPA::doEPAmargin( Support &geom1,
 
 
 //*************************************************************************************************
-/*! \brief Does an epa computation with contact margin added and specified realtive error.
+/*! \brief Does an epa computation with contact margin added and specified relative error.
  */
 bool EPA::doEPA( Support &geom1,
                  Support &geom2,
@@ -233,7 +233,7 @@ bool EPA::doEPA( Support &geom1,
                  real_t eps_rel )
 {
    //have in mind that we use a support mapping which blows up the objects a wee bit so
-   //zero penetraion aka toching contact means that the original bodies have a distance of 2*margin between them
+   //zero penetration aka touching contact means that the original bodies have a distance of 2*margin between them
 
    //Set references to the results of GJK
    size_t     numPoints( static_cast<size_t>( gjk.getSimplexSize() ) );
@@ -521,12 +521,12 @@ inline void EPA::createInitialSimplex( size_t numPoints,
    switch(numPoints) {
    case 2:
    {
-      //simplex is a line segement
+      //simplex is a line segment
       //add 3 points around the this segment
       //the COS is konvex so the resulting hexaheadron should be konvex too
 
       Vec3 d = epaVolume[1] - epaVolume[0];
-      //find coordinate axis e_i which is furthest from paralell to d
+      //find coordinate axis e_i which is furthest from parallel to d
       //and therefore d has the smallest abs(d[i])
       real_t abs0 = std::abs(d[0]);
       real_t abs1 = std::abs(d[1]);
@@ -616,7 +616,7 @@ inline void EPA::createInitialSimplex( size_t numPoints,
       const Vec3& A = epaVolume[2];  //The Point last added to the simplex
       const Vec3& B = epaVolume[1];  //One Point that was already in the simplex
       const Vec3& C = epaVolume[0];  //One Point that was already in the simplex
-      //ABC is a conterclockwise triangle
+      //ABC is a counterclockwise triangle
 
       const Vec3  AB  = B-A;       //The vector A->B
       const Vec3  AC  = C-A;       //The vector A->C
@@ -719,7 +719,7 @@ inline bool EPA::originInTetrahedron( const Vec3& p0, const Vec3& p1, const Vec3
 
 
 //*************************************************************************************************
-/*! \brief Retrurns true, if the origin lies in the tetrahedron ABCD.
+/*! \brief Returns true, if the origin lies in the tetrahedron ABCD.
  */
 inline bool EPA::originInTetrahedronVolumeMethod( const Vec3& A, const Vec3& B, const Vec3& C,
                                                   const Vec3& D )
@@ -745,7 +745,7 @@ inline bool EPA::originInTetrahedronVolumeMethod( const Vec3& A, const Vec3& B, 
 
 
 //*************************************************************************************************
-/*! \brief Retrurns true, if a point lies in the tetrahedron ABCD.
+/*! \brief Returns true, if a point lies in the tetrahedron ABCD.
  *  \param point The point to be checked for containment.
  */
 inline bool EPA::pointInTetrahedron( const Vec3& A, const Vec3& B, const Vec3& C, const Vec3& D,
@@ -812,7 +812,7 @@ inline bool EPA::searchTetrahedron(Support &geom1,
    do{
       loopCount++;
       pointIndexToRemove = -1;
-      //Check if opposite tetrahedron point and orign are on the same side
+      //Check if opposite tetrahedron point and origin are on the same side
       //of the face. (for all faces)
       Vec3 normal0T = (epaVolume[1] -epaVolume[0]) % (epaVolume[2]-epaVolume[0]);
       real_t dot_val = normal0T*epaVolume[0];

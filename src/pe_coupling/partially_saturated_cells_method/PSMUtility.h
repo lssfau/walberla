@@ -33,7 +33,7 @@ namespace pe_coupling {
 /*!\brief Evaluates the macroscopic velocity for a given cell when using the PSM method.
  *
  * returns the cell local macroscopic velocity for the PSM method
- * cell local velocity = (1-\sum_s B_s) * u + \sum_s B_s * v_s
+ * cell local velocity = \f$ (1-\sum_s B_s) * u + \sum_s B_s * v_s \f$
  * u = fluid velocity
  * v_s = velocity of object s at cell center
  *

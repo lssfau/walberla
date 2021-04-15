@@ -709,7 +709,7 @@ void exportBasicWalberlaDatastructures(py::module_ &m)
    exportStencilDirections(m);
 
    // Add empty callbacks module
-   m.def_submodule("callbacks", "Empty callbacks module. Needed for the Szenario manager");
+   m.def_submodule("callbacks", "Empty callbacks module. Needed for the Scenario manager");
 
 }
 

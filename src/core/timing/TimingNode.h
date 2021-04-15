@@ -45,7 +45,7 @@ namespace timing {
 /***********************************************************************************************************************
  * \brief Hierarchical structure of timers.
  *
- * Timer class to time different code snippets. Nested timers can be created and will be outputed
+ * Timer class to time different code snippets. Nested timers can be created and will be output
  * in a tree like structure. Also works MPI parallel by using the reduce function but is NOT
  * threadsafe!
  *

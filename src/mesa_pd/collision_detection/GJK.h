@@ -35,7 +35,7 @@ namespace mesa_pd {
 namespace collision_detection {
 
 //*************************************************************************************************
-/*!\brief Impelementation of the Gilbert-Johnson-Keerthi Algorithm.
+/*!\brief Implementation of the Gilbert-Johnson-Keerthi Algorithm.
  */
 class GJK
 {

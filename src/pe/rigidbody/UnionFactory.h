@@ -60,7 +60,7 @@ namespace pe {
  * \param communicating specifies if the union should take part in synchronization (syncNextNeighbour, syncShadowOwner)
  * \param infiniteMass specifies if the union has infinite mass and will be treated as an obstacle
  * \return Handle for the new union.
- * \exception std::runtime_error Union TypeID not initalized!
+ * \exception std::runtime_error Union TypeID not initialized!
  *
  * The code example illustrates the setup of a Union. For convenience the following typedefs were made.
  * You can adapt them to your needs.
@@ -73,7 +73,7 @@ Union<BodyTypes...>* createUnion(   BodyStorage& globalStorage, BlockStorage& bl
                                      bool global = false, bool communicating = true, bool infiniteMass = false )
 {
    if (Union<BodyTypes...>::getStaticTypeID() == std::numeric_limits<id_t>::max())
-      throw std::runtime_error("Union TypeID not initalized!");
+      throw std::runtime_error("Union TypeID not initialized!");
 
    Union<BodyTypes...>* bd = nullptr;
 
@@ -117,7 +117,7 @@ Union<BodyTypes...>* createUnion(   BodyStorage& globalStorage, BlockStorage& bl
  * \brief Setup of a new Box directly attached to a Union.
  *
  * \tparam BodyTypes all geometries the Union is able to contain
- * \exception std::runtime_error    Box TypeID not initalized!
+ * \exception std::runtime_error    Box TypeID not initialized!
  * \exception std::invalid_argument createBox: Union argument is NULL
  * \exception std::logic_error      createBox: Union is remote
  * \exception std::invalid_argument Invalid side length
@@ -130,7 +130,7 @@ BoxID createBox( Union<BodyTypes...>* un,
                  bool global = false, bool communicating = true, bool infiniteMass = false )
 {
    if (Box::getStaticTypeID() == std::numeric_limits<id_t>::max())
-      throw std::runtime_error("Box TypeID not initalized!");
+      throw std::runtime_error("Box TypeID not initialized!");
 
    // union not on this process/block -> terminate creation
    if (un == nullptr)
@@ -181,7 +181,7 @@ BoxID createBox( Union<BodyTypes...>* un,
  * \brief Setup of a new Capsule directly attached to a Union.
  *
  * \tparam BodyTypes all geometries the Union is able to contain
- * \exception std::runtime_error    Capsule TypeID not initalized!
+ * \exception std::runtime_error    Capsule TypeID not initialized!
  * \exception std::invalid_argument createCapsule: Union argument is NULL
  * \exception std::logic_error      createCapsule: Union is remote
  * \exception std::invalid_argument Invalid capsule radius
@@ -196,7 +196,7 @@ CapsuleID createCapsule( Union<BodyTypes...>* un,
                          bool global = false, bool communicating = true, bool infiniteMass = false )
 {
    if (Capsule::getStaticTypeID() == std::numeric_limits<id_t>::max())
-      throw std::runtime_error("Capsule TypeID not initalized!");
+      throw std::runtime_error("Capsule TypeID not initialized!");
 
    // union not on this process/block -> terminate creation
    if (un == nullptr)
@@ -243,7 +243,7 @@ CapsuleID createCapsule( Union<BodyTypes...>* un,
  * \brief Setup of a new Sphere directly attached to a Union.
  *
  * \tparam BodyTypes all geometries the Union is able to contain
- * \exception std::runtime_error    Sphere TypeID not initalized!
+ * \exception std::runtime_error    Sphere TypeID not initialized!
  * \exception std::invalid_argument createSphere: Union argument is NULL
  * \exception std::logic_error      createSphere: Union is remote
  * \exception std::invalid_argument Invalid sphere radius
@@ -257,7 +257,7 @@ SphereID createSphere( Union<BodyTypes...>* un,
                        bool global = false, bool communicating = true, bool infiniteMass = false )
 {
    if (Sphere::getStaticTypeID() == std::numeric_limits<id_t>::max())
-      throw std::runtime_error("Sphere TypeID not initalized!");
+      throw std::runtime_error("Sphere TypeID not initialized!");
 
    // union not on this process/block -> terminate creation
    if (un == nullptr)

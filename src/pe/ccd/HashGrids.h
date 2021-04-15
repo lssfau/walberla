@@ -605,7 +605,7 @@ BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_
  * \param ray Ray getting shot through this grid.
  * \param blockAABB AABB of the block this grid corresponds to.
  * \param t Reference for the distance.
- * \param n Reference for the intersetion normal.
+ * \param n Reference for the intersection normal.
  * \return BodyID of closest body, NULL if none found.
  *
  * This function calculates ray-cell intersections and the closest body in those cells. Also, neighboring
@@ -762,7 +762,7 @@ BodyID HashGrids::HashGrid::getRayIntersectingBody(const raytracing::Ray& ray, c
  * \param ray Ray getting shot through those grids.
  * \param blockAABB AABB of the block the grids correspond to.
  * \param t Reference for the distance.
- * \param n Reference for the intersetion normal.
+ * \param n Reference for the intersection normal.
  * \return BodyID of closest body, NULL if none found.
  */
 template<typename BodyTuple>

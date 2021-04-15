@@ -63,7 +63,9 @@ namespace python_coupling {
    *
    *  This example calls the python function "walberla_cpp.callbacks.atEndOfTimestep", which can be either
    *  set directly or using a decorator:
+   *  \code
    *     @waLBerla.callback( "atEndOfTimestep" )
+   *  \endcode
    *
    *
    *
