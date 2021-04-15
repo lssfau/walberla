@@ -291,7 +291,7 @@ void TriangleMesh::split( vector<TriangleMesh>& meshes ) const
       tnode[2]->conns.insert( tnode[1] );
    }
 
-   // split vertices by trinagle connetions
+   // split vertices by triangle connections
    set< vector< TriangleMeshNode* > > ssnode;
    for( auto nit = nodes.begin(); nit != nodes.end(); ++nit )
    {

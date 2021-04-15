@@ -85,7 +85,7 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const shar
 \endverbatim
 *          An optional config parameter 'cartesianSetup' is available. Its default, true, causes one block to be
 *          assigned to each process. Setting it to false allows multiple blocks to be assigned to each process.
-*          If the number of blocks is not divisble by the number of processes, the loadbalancer tries to assign
+*          If the number of blocks is not divisible by the number of processes, the loadbalancer tries to assign
 *          the blocks to processes as evenly as possible.
 *    2) Using the number of global cells, #blocks = #processes, if this does not fit, extend the domain
 \verbatim

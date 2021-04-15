@@ -219,4 +219,4 @@ void constructNeighborhoodSectionBlockCenters( uint_t sectionIndex, const AABB& 
 
 
 } // namespace blockforest
-} // namespace walblera
+} // namespace walberla

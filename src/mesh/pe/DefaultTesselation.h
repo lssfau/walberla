@@ -50,7 +50,7 @@ public:
       }
       else
       {
-         WALBERLA_ABORT( "Tesselation not implemented for your body!" );
+         WALBERLA_ABORT( "Tessellation not implemented for your body!" );
       }
    }
 

@@ -25,7 +25,7 @@ and the initial distribution of \f$u\f$ inside the domain is given by the initia
 \f]
 
 For the numerical solution, we not only have to discretize in space but also in time. 
-Latter is done via an implicit Euler method with a time step length \f$\Delta t\f$ here, resulting in the following formulation: 
+The latter is done via an implicit Euler method with a time step \f$\Delta t\f$, resulting in the following formulation: 
 \f[
    \frac{u^{new} - u^{old}}{\Delta t} = \kappa \left( \frac{\partial^2 u^{new}}{\partial x^2} + \frac{\partial^2 u^{new}}{\partial y^2}\right)
 \f]
@@ -162,7 +162,7 @@ void Reinitialize::operator()( IBlock * block )
 \endcode 
 
 On a side note, this means that the starting solution for the Jacobi method is the former right-hand side.
-This is advantageous to setting it always to zero (which could be done via `src->set( real_c(0) )`) as it is probably already quite close to the converged solution,
+This is more advantageous compared to setting it always to zero (which could be done via `src->set( real_c(0) )`) as it is probably already quite close to the converged solution,
 i.e., the Jacobi method will converge faster.
 
 This functor is now registered as a sweep in the time loop in the known fashion:
@@ -292,7 +292,7 @@ The one that computes the total number of cells inside the domain and stores it 
 \code
 void JacobiIterationResidual::init()
 {
-   // temporal storage
+   // temporary storage
    uint_t cells( uint_c(0) );
 
    // iterate all blocks
@@ -323,7 +323,7 @@ real_t JacobiIterationResidual::residualNorm()
       auto u   = block->getData< ScalarField >( srcID_ );
       auto rhs = block->getData< ScalarField >( rhsID_ );
 
-      // temporal storage
+      // temporary storage
       real_t residual( real_c(0) );
 
       // iterate all cells inside the block

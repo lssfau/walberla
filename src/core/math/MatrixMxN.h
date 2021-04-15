@@ -285,7 +285,7 @@ inline constexpr MatrixMxN<Type>::MatrixMxN( const MatrixMxN& m )
    MatrixMxN<real> A = init;
    \endcode
 
- * The matrix is sized accoring to the size of the array and initialized with the given values.
+ * The matrix is sized according to the size of the array and initialized with the given values.
  * Missing values are initialized with zero (as e.g. the value 6 in the example).
  */
 template< typename Type >  // Data type of the matrix
@@ -348,7 +348,7 @@ inline MatrixMxN<Type>::~MatrixMxN()
    A = init;
    \endcode
 
- * The matrix is resized accoring to the size of the array and initialized with the given values.
+ * The matrix is resized according to the size of the array and initialized with the given values.
  * Missing values are initialized with zero (as e.g. the value 6 in the example).
  */
 template< typename Type >  // Data type of the matrix

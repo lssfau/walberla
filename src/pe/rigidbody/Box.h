@@ -417,7 +417,7 @@ inline real_t Box::calcDensity( const Vec3& l, real_t mass )
 /*!\brief Estimates the point which is farthest in direction \a d.
  *
  * \param d The normalized search direction in world-frame coordinates.
- * \return The support point in world-frame coordinates in direction a\ d.
+ * \return The support point in world-frame coordinates in direction \a d.
  */
 inline Vec3 Box::support( const Vec3& d ) const
 {
@@ -449,7 +449,7 @@ inline Vec3 Box::support( const Vec3& d ) const
 /*!\brief Estimates the point which is farthest in direction \a d.
  *
  * \param d The normalized search direction in world-frame coordinates.
- * \return The support point in world-frame coordinates in direction a\ d extended by a vector in
+ * \return The support point in world-frame coordinates in direction \a d extended by a vector in
  *         direction \a d of length \a pe::contactThreshold.
  */
 inline Vec3 Box::supportContactThreshold( const Vec3& d ) const

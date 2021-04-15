@@ -106,7 +106,7 @@ static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector<
 *   the log message is ignored. To divide components of your path always uses slashes!
 *   They will automatically be converted to the regex (/|\\), matching slashes and back-slashes. For fancy regexes
 *   you can use perl regex syntax.
-*   To ignore warnings use the spcecial ignoreWarning block.
+*   To ignore warnings use the special ignoreWarning block.
 *   Note that you cannot ignore Errors since they abort your program!
 *
 *   Examples:

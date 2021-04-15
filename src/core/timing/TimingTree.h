@@ -41,7 +41,7 @@ namespace timing {
 /***********************************************************************************************************************
  * \brief Hierarchical structure of timers.
  *
- * Timer class to time different code snippets. Nested timers can be created and will be outputed
+ * Timer class to time different code snippets. Nested timers can be created and will be output
  * in a tree like structure. Also works MPI parallel by using the reduce function but is NOT
  * threadsafe!
  *
@@ -173,7 +173,7 @@ void TimingTree<TP>::stop(const std::string& name)
    {
       current_->timer_.end();
       current_ = current_->last_;
-//      WALBERLA_LOG_DEVEL("Timer stoped: " << name);
+//      WALBERLA_LOG_DEVEL("Timer stopped: " << name);
    }
 }
 

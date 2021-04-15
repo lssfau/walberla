@@ -415,14 +415,17 @@ private:
  *
  *   The Segre Silberberg effect denotes that a particle in a Poiseuille flow will eventually arrive
  *   at a distinct equilibrium position, depending on the particle size and its velocity.
- *      __________________
- * ->
- * -->        ___
- * --->      /   \
- * --->     |  x  |-\
- * --->      \___/   \-\
- * -->                  \------ equilibrium position
- * ->  ___________________
+   \verbatim
+        __________________
+   ->
+   -->        ___
+   --->      /   \
+   --->     |  x  |-\
+   --->      \___/   \-\
+   -->                  \------ equilibrium position
+   ->  ___________________
+
+   \endverbatim
  *
  * The collision model used for the LBM is TRT with a relaxation parameter tau=1.4 and the magic parameter 3/16.
  * The particle is a sphere with diameter d=12 cells and density 1 (LU).

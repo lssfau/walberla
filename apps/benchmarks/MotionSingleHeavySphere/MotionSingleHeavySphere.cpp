@@ -615,7 +615,7 @@ private:
 /*
  * This extensive, physical test case simulates a single, heavy sphere in ambient fluid flow.
  * It is based on the benchmark proposed in
- * Uhlman, Dusek - "The motion of a single heavy sphere in ambient fluid: A benchmark for interface-resolved
+ * Uhlmann, Dusek - "The motion of a single heavy sphere in ambient fluid: A benchmark for interface-resolved
  *                  particulate flow simulations with significant relative velocities" IJMF (2014),
  *                  doi: 10.1016/j.ijmultiphaseflow.2013.10.010
  * Results for LBM done with waLBerla are published in
@@ -634,9 +634,9 @@ private:
  *    - solid collision operator variant: 1, 2, or 3
  *    - weighting factor variant: 1, or 2
  *
- * The results obtained by this benchmark should be compared to the reference spectral method results from Uhlman & Dusek.
+ * The results obtained by this benchmark should be compared to the reference spectral method results from Uhlmann & Dusek.
  * Furthermore, comparisons to the CFD-IBM (classical Navier-Stokes solver with immersed boundary method)
- * results from Uhlman & Dusek are available in their paper.
+ * results from Uhlmann & Dusek are available in their paper.
  * New coupling algorithms or algorithmic changes to the exiting approaches should also be cross-checked with the
  * values in Rettinger & Ruede.
  *

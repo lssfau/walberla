@@ -107,10 +107,10 @@ private:
 
    
    std::vector< Point > pointCloud_; /// The initial point cloud
-   shared_ptr< MeshType > mesh_; /// The genereated convex mesh
+   shared_ptr< MeshType > mesh_; /// The generated convex mesh
    typedef typename OpenMesh::FPropHandleT< std::vector<Point> > VisiblePointsPropertyHandle;
    OpenMesh::PropertyManager< VisiblePointsPropertyHandle, MeshType > visiblePoints_; /// Property storing the points of a certain face
-   std::priority_queue<FaceHandle, std::vector<FaceHandle>, QHullFaceSorter<MeshType> > queue_; /// queue to proptize faces
+   std::priority_queue<FaceHandle, std::vector<FaceHandle>, QHullFaceSorter<MeshType> > queue_; /// queue to prioritize faces
 
    // Vectors to be reused in between iterations
    std::vector<Point> orphanPoints_; /// Points getting orphaned during face removal

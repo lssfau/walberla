@@ -16,7 +16,7 @@
 //! \file RigidBodyRemoteMigrationNotification.h
 //! \author Tobias Preclik
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
-//! \brief Header file for the RigidBodyRemoteMigrationNotification classs
+//! \brief Header file for the RigidBodyRemoteMigrationNotification class
 //
 //======================================================================================================================
 

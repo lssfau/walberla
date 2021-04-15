@@ -577,7 +577,7 @@ private:
  * also in Dorschner, Chikatamarla, Boesch, Karlin - Grad's approximation for moving and stationary walls in entropic lattice Boltzmann simulations, Journal of Computational Physics, 2015
  * omegaShear: relaxation RATE that determines the kinematic viscosity
  *
- * To obtain the pressure gradient information, finite differences with central differences (useCentralDifferences) are used if enouhg information available, else upwinding differences are applied.
+ * To obtain the pressure gradient information, finite differences with central differences (useCentralDifferences) are used if enough information available, else upwinding differences are applied.
  * When useDataFromGhostLayers = true, a full ghost layer sync is required just before the reconstruction step. This is required to avoid inconsistencies when using parallelization as else the behavior close to block boarders is altered.
  */
 template< typename BoundaryHandling_T >

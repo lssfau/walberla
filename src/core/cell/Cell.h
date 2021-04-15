@@ -121,7 +121,7 @@ inline Cell::Cell( const uint_t _x, const uint_t _y, const uint_t _z )
 /*******************************************************************************************************************//**
  * \brief   Less-than comparison operator for Cells.
  *
- * Compares a cell's coordinates lexicographically (first x, than eventualy y and (if necessary) finally z).
+ * Compares a cell's coordinates lexicographically (first x, then eventually y and (if necessary) finally z).
  *
  * \param [in] rhs  the cell compared to *this.
  *
@@ -138,7 +138,7 @@ inline bool Cell::operator<( const Cell & rhs ) const
  /******************************************************************************************************************//**
  * \brief   Equal comparison operator for Cells.
  *
- * Compares a cell's coordinates for equality (first x, then eventualy y and (if necessary) finally z).
+ * Compares a cell's coordinates for equality (first x, then eventually y and (if necessary) finally z).
  *
  * \param [in] rhs  The cell compared to *this.
  *

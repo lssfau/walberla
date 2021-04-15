@@ -378,7 +378,7 @@ size_t HashGrids::HashGrid::hashPoint(real_t x, real_t y, real_t z) const {
 /*!\brief Adds a body to a specific cell in this hash grid.
  *
  * \param body The body that is about to be added to this hash grid.
- * \param cell The cell the body is assigend to.
+ * \param cell The cell the body is assigned to.
  * \return void
  */
 void HashGrids::HashGrid::add( BodyID body, Cell* cell )
@@ -1237,7 +1237,7 @@ const size_t HashGrids::zCellCount = 16;
 
 
 //*************************************************************************************************
-/*!\brief The initial storage capaciy of a newly created grid cell body container.
+/*!\brief The initial storage capacity of a newly created grid cell body container.
  *
  * This value specifies the initial storage capacity reserved for every grid cell body container,
  * i.e., the number of bodies that can initially be assigned to a grid cell with the need to
@@ -1257,7 +1257,7 @@ const size_t HashGrids::cellVectorSize = 16;
  *
  * This value specifies the initial storage capacity of the grid-global vector that keeps track
  * of all body-occupied cells. As long as at least one body is assigned to a certain cell, this
- * cell is recored in a grid-global list that keeps track of all body-occupied cells in order to
+ * cell is recorded in a grid-global list that keeps track of all body-occupied cells in order to
  * avoid iterating through all grid cells whenever all bodies that are stored in the grid need
  * to be addressed.
  */

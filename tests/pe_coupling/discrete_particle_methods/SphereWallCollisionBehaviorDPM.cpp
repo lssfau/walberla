@@ -467,17 +467,20 @@ void emptyFunction(){}
  *
  * A glass sphere of radius D is settling under gravity towards the bottom plane.
  * The domain size is [32 x 32 x 512] * D, to ensure that the terminal settling velocity is reached before it hits the wall.
- *     _______________
- *    |               |
- *    |       o       | |
- *    |       |       | | gravity (z-direction)
- *    |       |       | v
- *    |       |       |
- *    |       |       |
- *    |_______|_______|
+   \verbatim
+       _______________
+      |               |
+      |       o       | |
+      |       |       | | gravity (z-direction)
+      |       |       | v
+      |       |       |
+      |       |       |
+      |_______|_______|
+
+   \endverbatim
  *
  * The sphere properties are: dry coeff of restitution = 0.97, coeff of friction = 0.1
- * Depending on the Stokes number ( St = ( rho_s / rho_f ) * Re / 9 ), the actual coefficient of resitution changes
+ * Depending on the Stokes number ( St = ( rho_s / rho_f ) * Re / 9 ), the actual coefficient of restitution changes
  * due to the presence of the viscous fluid.
  * The Reynolds number is evaluated as Re = u_T * D / visc, with the terminal settling velocity u_T.
  * Thus, this quantity is not a-priori available.
@@ -715,7 +718,7 @@ int main( int argc, char **argv )
 
    const real_t dampingCoeff = - real_t(2) * std::sqrt( Mij * stiffnessCoeff ) *
                                ( std::log(restitutionCoeff) / std::sqrt( math::pi * math::pi + (std::log(restitutionCoeff) * std::log(restitutionCoeff) ) ) );
-   const real_t contactDuration = real_t(2) * math::pi * Mij / ( std::sqrt( real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlman
+   const real_t contactDuration = real_t(2) * math::pi * Mij / ( std::sqrt( real_t(4) * Mij * stiffnessCoeff - dampingCoeff * dampingCoeff )); //formula from Uhlmann
    const real_t contactDuration2 = std::sqrt(( math::pi * math::pi + std::log(restitutionCoeff) * std::log(restitutionCoeff)) / ( stiffnessCoeff / Mij)); //formula from Finn
 
    if( !funcTest )
@@ -764,7 +767,7 @@ int main( int argc, char **argv )
    // add boundary handling & initialize outer domain boundaries
    BlockDataID boundaryHandlingID = blocks->addStructuredBlockData< BoundaryHandling_T >( MyBoundaryHandling( flagFieldID, pdfFieldID ), "boundary handling" );
 
-   // field to store fluid velolcity
+   // field to store fluid velocity
    BlockDataID velocityFieldID = field::addToStorage< Vec3Field_T >( blocks, "velocity field", Vector3<real_t>(0), field::zyxf, FieldGhostLayers );
    BlockDataID swappedOldVelocityFieldID = field::addToStorage< Vec3Field_T >( blocks, "swapped old velocity field", Vector3<real_t>(0), field::zyxf, FieldGhostLayers );
 

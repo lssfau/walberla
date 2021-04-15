@@ -167,7 +167,7 @@ void MeshParticleVTKOutput<MeshType>::assembleMesh() {
    // ensure the mesh is empty, as this will contain the new output
    mesh_->clean();
 
-   // then iterate over every particle and tesselate it to include it in the output mesh
+   // then iterate over every particle and tessellate it to include it in the output mesh
    for (auto pIt = ps_->begin(); pIt != ps_->end(); ++pIt) {
       if (!particleSelector_(pIt)) continue;
 
@@ -180,7 +180,7 @@ void MeshParticleVTKOutput<MeshType>::assembleMesh() {
          const auto& convexPolyhedron = *static_cast<walberla::mesa_pd::data::ConvexPolyhedron*>(shape.get());
          const auto& particle = *pIt;
 
-         // tesselate: add the shape at the particle's position into the output mesh
+         // tessellate: add the shape at the particle's position into the output mesh
          tesselate(convexPolyhedron, particle, mesh_, newVertices, newFaces);
       }
 

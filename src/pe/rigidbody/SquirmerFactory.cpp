@@ -36,7 +36,7 @@ SquirmerID createSquirmer( BodyStorage& globalStorage, BlockStorage& blocks, Blo
                         MaterialID material,
                         bool global, bool communicating, bool infiniteMass )
 {
-   WALBERLA_ASSERT_UNEQUAL( Squirmer::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Squirmer TypeID not initalized!");
+   WALBERLA_ASSERT_UNEQUAL( Squirmer::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Squirmer TypeID not initialized!");
    // Checking the radius
    if( radius <= real_c(0) )
       throw std::invalid_argument( "Invalid squirmer radius" );

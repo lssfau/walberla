@@ -19,7 +19,7 @@
 //! \brief Defines class StructuredGeometryFileReader that provides a reader for waLBerla geometry files.
 //!
 //! Note that the data is stored in binary form. There is no correction for other binary data
-//! representations on different architectures (e.g. different Endianess)!
+//! representations on different architectures (e.g. different endianness)!
 //
 //======================================================================================================================
 

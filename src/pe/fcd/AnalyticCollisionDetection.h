@@ -798,7 +798,7 @@ bool collide( BoxID b1, BoxID b2, Container& container )
    WALBERLA_LOG_DETAIL(
              "         Selected contact case = " << contactCase << "\n"
           << "         Contact normal = " << contactNormal << "\n"
-          << "         Normal invertion? " << invertNormal );
+          << "         Normal inversion? " << invertNormal );
 
 
    //----- Treating edge/edge collisions -----

@@ -100,7 +100,7 @@ namespace debug {
          string offset       = bracketPart.substr( plusPos+1 );
 #endif
 
-         // try to demangle -> no return code if successfull
+         // try to demangle -> no return code if successful
          // but the returned string starts with "demangle" if demangling failed
          // really hacky :(
          string demangled    = demangle( functionName );

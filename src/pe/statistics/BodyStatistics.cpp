@@ -78,7 +78,7 @@ void BodyStatistics::operator()()
 void BodyStatistics::toStream( std::ostream & os ) const
 {
    os << "Number of bodies:           " << numBodies_ << "\n" <<
-         "Number of shodow copies:    " << numShadowCopies_ << "\n" <<
+         "Number of shadow copies:    " << numShadowCopies_ << "\n" <<
          "Bodies on blocks:           " << localBodiesBlockSample_.format() << "\n" <<
          "Shadow copies on blocks:    " << shadowBodiesBlockSample_.format() << "\n" <<
          "Bodies on processes:        " << localBodiesProcessSample_.format() << "\n" <<

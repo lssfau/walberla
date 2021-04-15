@@ -41,7 +41,7 @@ class MetisAssignmentFunctor
 public:
    ///Convenience typedef to be used as PhantomBlock weight in conjunction with this weight assignment functor.
    using PhantomBlockWeight = blockforest::DynamicParMetisBlockInfo;
-   ///Convenience typdef for pack and unpack functions to be used in conjunction with PhantomBlockWeight.
+   ///Convenience typedef for pack and unpack functions to be used in conjunction with PhantomBlockWeight.
    using PhantomBlockWeightPackUnpackFunctor = blockforest::DynamicParMetisBlockInfoPackUnpack;
 
    MetisAssignmentFunctor( shared_ptr<blockforest::InfoCollection>& ic, const real_t baseWeight = real_t(10.0) ) : ic_(ic), baseWeight_(baseWeight) {}

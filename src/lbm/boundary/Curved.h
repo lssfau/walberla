@@ -259,7 +259,7 @@ inline void Curved< LatticeModel_T, FlagField_T >::treatDirection( const cell_id
       WALBERLA_ASSERT( weights_->get( nx, ny, nz ).get() != nullptr );
       WALBERLA_ASSERT_LESS( Stencil::invDirIdx(dir), weights_->get( nx, ny, nz )->size() );
       
-      // linear multi reflection model without non-equilibirum
+      // linear multi reflection model without non-equilibrium
 
       const real_t weight = ( *( weights_->get( nx, ny, nz ) ) )[Stencil::invDirIdx( dir )];
 

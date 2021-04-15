@@ -255,7 +255,7 @@ protected:
    //each concurrently running communication uses different tags
    static std::set<int> activeTags_;
 
-   bool useIProbe_ = false; ///< switch betwenn IProbe and two message communication for varying size communication
+   bool useIProbe_ = false; ///< switch between IProbe and two message communication for varying size communication
 
    int64_t bytesSent_        = 0; ///< number of bytes sent during last communication
    int64_t bytesReceived_    = 0; ///< number of bytes received during last communication

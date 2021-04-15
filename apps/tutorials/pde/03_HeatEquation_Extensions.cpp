@@ -161,7 +161,7 @@ void JacobiIterationResidual::operator()()
 
 void JacobiIterationResidual::init()
 {
-   // temporal storage
+   // temporary storage
    uint_t cells( uint_c(0) );
 
    // iterate all blocks
@@ -189,7 +189,7 @@ real_t JacobiIterationResidual::residualNorm()
       auto u   = block->getData< ScalarField >( srcID_ );
       auto rhs = block->getData< ScalarField >( rhsID_ );
 
-      // temporal storage
+      // temporary storage
       real_t residual( real_c(0) );
 
       // iterate all cells inside the block

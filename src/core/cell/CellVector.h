@@ -155,7 +155,7 @@ inline void CellVector::push_back( const uint_t x, const uint_t y, const uint_t 
 //**********************************************************************************************************************
 /*! \brief Return if cell (x,y,z) is contained in cell vector
  *
- * Complexity is O(N), where N == this->size(). If you need a data strcuture for storing cells that
+ * Complexity is O(N), where N == this->size(). If you need a data structure for storing cells that
  * provides an contains method that runs in O(logN) use a CellSet, not a CellVector.
  *
  * \return true, if cell is contained

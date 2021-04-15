@@ -70,7 +70,7 @@ Gatherv.h , Reduce.h and Broadcast.h
    to implement the communication logic. It consists of communication schemes, the most prominent
    is walberla::blockforest::communication::UniformBufferedScheme . It exchanges information with all neighboring blocks, where the
    data extraction and insertion is handled by the registered PackInfos. There are other more specialized schemes available,
-   as an example have a look at walberla::blockforest::communciation::DirectionBasedReduceScheme.
+   as an example have a look at walberla::blockforest::communication::DirectionBasedReduceScheme.
 
 
 \section direct_comm Direct Communication

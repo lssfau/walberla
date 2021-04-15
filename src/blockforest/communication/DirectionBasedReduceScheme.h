@@ -147,7 +147,7 @@ template< stencil::Direction dir_ >
 void DirectionBasedReduceScheme<dir_>::init()
 {
    if( !blockForest_->containsGlobalBlockInformation() )
-      WALBERLA_ABORT( "For this communication scheme global block information is neeeded" );
+      WALBERLA_ABORT( "For this communication scheme global block information is needed" );
 
    //  -------------------  Block Loop ------------------------------------------------
    uint_t x,y,z;

@@ -180,7 +180,7 @@ NodePtr EquationParser::parseFunction( const std::string& str, size_t& index ) c
    }
    NodePtr nodePtr = parseExpression(str, index);
    if ( ! (str[index] == ')') )
-      THROW( "Found no enclosing paranthesis", str, index );
+      THROW( "Found no enclosing parenthesis", str, index );
    ++index;
 
    NodePtr funcPtr;
@@ -230,7 +230,7 @@ NodePtr EquationParser::parseTerm( const std::string& str, size_t& index ) const
    if ( str[index] == '(' ){
       nodePtr = parseExpression(str, ++index);
       if ( ! (str[index] == ')') )
-         THROW( "Found no enclosing paranthesis", str, index );
+         THROW( "Found no enclosing parenthesis", str, index );
       ++index;
    } else if ( checkFunction(str, index) ) {
       nodePtr = parseFunction(str, index);
@@ -239,7 +239,7 @@ NodePtr EquationParser::parseTerm( const std::string& str, size_t& index ) const
    } else if ( checkNumber(str, index) ) {
       nodePtr = parseNumber(str, index);
    } else {
-      THROW( "Found no paranthesis, variable or number", str, index );
+      THROW( "Found no parenthesis, variable or number", str, index );
    }
    return nodePtr;
 }

@@ -250,7 +250,7 @@ void Raytracer::setupMPI_() {
 }
    
 /*!\brief Generates the filename for output files.
- * \param base String that precedes the timestap and rank info.
+ * \param base String that precedes the timestep and rank info.
  * \param timestep Timestep this image is from.
  * \param isGlobalImage Whether this image is the fully stitched together one.
  */

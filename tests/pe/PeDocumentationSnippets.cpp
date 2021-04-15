@@ -101,7 +101,7 @@ int main( int argc, char ** argv )
    //! [Create a Box]
 
    //! [Create a Capsule]
-   // Create a capsule and rotate it after successfull creation.
+   // Create a capsule and rotate it after successful creation.
    CapsuleID capsule = createCapsule( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4), real_t(1), real_t(1) );
    if (capsule != nullptr)
       capsule->rotate( 0.0, real_c(math::pi/3.0), 0.0 );
@@ -114,7 +114,7 @@ int main( int argc, char ** argv )
    WALBERLA_UNUSED( plane );
 
    //! [Create a Sphere]
-   // Create a sphere and rotate it after successfull creation.
+   // Create a sphere and rotate it after successful creation.
    SphereID sphere = createSphere( *globalBodyStorage, forest->getBlockStorage(), storageID, 1, Vec3(2,3,4), real_t(1) );
    if (sphere != nullptr)
       sphere->rotate( 0.0, real_c(math::pi/3.0), 0.0 );

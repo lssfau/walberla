@@ -163,7 +163,7 @@ int main( int argc, char ** argv )
    MaterialID     material = createMaterial( "granular", real_t( 1.0 ), 0, static_cof, dynamic_cof, real_t( 0.5 ), 1, real_t(8.11e5), real_t(6.86e1), real_t(6.86e1) );
    //! [Material]
 
-   // Create surronding planes in y,z directions, but not in x.
+   // Create surrounding planes in y,z directions, but not in x.
    auto simulationDomain = forest->getDomain();
    //! [Planes]
    createPlane(*globalBodyStorage, 100, Vec3(0,1,0), simulationDomain.minCorner(), material );

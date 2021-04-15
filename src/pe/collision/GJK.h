@@ -45,7 +45,7 @@ namespace fcd {
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Impelementation of the Gilbert-Johnson-Keerthi Algorithm.
+/*!\brief Implementation of the Gilbert-Johnson-Keerthi Algorithm.
  */
 class GJK
 {
@@ -185,7 +185,7 @@ inline bool GJK::zeroLengthVector(const Vec3& vec) const
 
 
 //*************************************************************************************************
-/*!\brief Calucate a support point of a body extended by threshold.
+/*!\brief Calculate a support point of a body extended by threshold.
  * \param geom The body.
  * \param dir The support point direction.
  * \param threshold Extension of the Body.

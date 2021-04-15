@@ -105,7 +105,7 @@ const std::string volumetricFlowRateEvaluationConfigBlock("VolumetricFlowRateEva
 *   You do not have to specify an evaluation filter! If you do not specify any filter, _all_ cells are processed and no
 *   cell is excluded.
 *
-*   If you want to use a flag field as evaluatio n filter, fitting 'makeVolumetricFlowRateEvaluation' functions already
+*   If you want to use a flag field as evaluation filter, fitting 'makeVolumetricFlowRateEvaluation' functions already
 *   exist. These functions need an additional template parameter FlagField_T and you have to provide the block data ID
 *   of the flag field together with a set of flag UIDs that specify which cells need to be processed.
 *

@@ -260,8 +260,8 @@ void normalReactionTest(kernel::HCSITSRelaxationStep::RelaxationModel model)
 
 
 /**Check hard contact constraints on two overlapping, colliding spheres
- * Works only for the solvers that really archieve seperation after a single
- * timestep. Use SphereSeperationTest to check for seperation after multiple
+ * Works only for the solvers that really achieve separation after a single
+ * timestep. Use SphereSeperationTest to check for separation after multiple
  * timesteps.
  * @param model The collision model to use.
  * */
@@ -360,10 +360,10 @@ void SphereSeperationTest(kernel::HCSITSRelaxationStep::RelaxationModel model){
       WALBERLA_LOG_INFO(p2->getLinearVelocity());
       solveCount ++;
       if(solveCount==maxIter){
-         WALBERLA_CHECK(false, "Seperation did not occur after " << maxIter << " Iterations performed.");
+         WALBERLA_CHECK(false, "Separation did not occur after " << maxIter << " Iterations performed.");
       }
    }
-   WALBERLA_LOG_INFO("Seperation achieved after " << solveCount << " iterations.");
+   WALBERLA_LOG_INFO("Separation achieved after " << solveCount << " iterations.");
 }
 
 /**

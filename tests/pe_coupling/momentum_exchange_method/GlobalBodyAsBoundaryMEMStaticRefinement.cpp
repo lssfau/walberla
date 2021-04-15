@@ -256,7 +256,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
  *  - the mapping has to be consistent on the coarse and the fine level,
  *    i.e. a boundary cell on the coarse level has to be 8 boundary cells on the fine level.
  *    This implies that only cell-aligned and axis-aligned PE bodies are allowed to have this refinement boundary.
- *    All others (inclindes planes, cylinders, spheres) must have and maintain the same refinement level
+ *    All others (inclined planes, cylinders, spheres) must have and maintain the same refinement level
  *    throughout the entire simulation.
  *
  *  - boundary conditions that access PDF values from cells apart from the near-boundary cell
@@ -265,7 +265,7 @@ BoundaryHandling_T * MyBoundaryHandling::operator()( IBlock * const block, const
  *    for the Lattice Boltzmann Method on NonUniform Grids" (2016)). Thus accesses to ghost layer PDF values that
  *    happen in those BCs are highly dangerous since those are often given NaN values.
  *    Problems are here two-fold:
- *     - boundary handling on fine levels is carried out in two of the four ghost layers. This is done tice on the
+ *     - boundary handling on fine levels is carried out in two of the four ghost layers. This is done twice on the
  *       finer levels and in this second time, the third and fourth ghost layer feature NaN values only
  *       (due to the swap during the streaming step).
  *     - on coarse blocks, the ghost layer at the coarse-fine boundary does not contain valid PDF values since the

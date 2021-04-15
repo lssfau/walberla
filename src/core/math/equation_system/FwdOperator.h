@@ -51,5 +51,5 @@ namespace math {
    extern OpLog   OP_LOG;
    extern OpRoot  OP_ROOT;
 
-} // namepsace math
+} // namespace math
 } // namespace walberla

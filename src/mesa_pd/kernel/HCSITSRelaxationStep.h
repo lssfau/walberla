@@ -1009,7 +1009,7 @@ inline real_t HCSITSRelaxationStep::relaxInelasticContactsByProjectedGaussSeidel
       // No need to apply zero impulse.
    }
    else {
-      // Dissect the impuls in a tangetial and normal directions
+      // Dissect the impuls in a tangential and normal directions
       // Use the inverted contact frame with -n as in the publication
       Mat3 reversedContactFrame( -ca.getNormal(cid), ca.getT(cid), ca.getO(cid) );
       Vec3 p_rcf( reversedContactFrame.getTranspose() * p_wf );

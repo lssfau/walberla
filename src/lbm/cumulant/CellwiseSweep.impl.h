@@ -98,7 +98,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          this->densityVelocityOut( x, y, z, lm, Vector3<real_t>( velX, velY, velZ ), updated_rho );  // dont really understand what is been done here 
 	 
-         // defining the sqaure of velocities 
+         // defining the square of velocities 
 	 const real_t velXX = velX * velX;
          const real_t velYY = velY * velY;
          const real_t velZZ = velZ * velZ;
@@ -219,7 +219,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 	 // defining the constants for central moment space 
 	 const real_t rho_inv = real_t(1.0) / updated_rho; 
 
-	 // defining the sqaures 
+	 // defining the squares 
 	 const real_t sqr_k_110 = k_110 * k_110;
 	 const real_t sqr_k_101 = k_101 * k_101;
 	 const real_t sqr_k_011 = k_011 * k_011;
@@ -348,7 +348,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 	 const real_t KC_222 = CS_222 + (real_t(4.0) * sqr_KC_111 + KC_200 * KC_022 + KC_020 * KC_202 + KC_002 * KC_220 + real_t(4.0) * (KC_011 * KC_211 + KC_101 * KC_121 + KC_110 * KC_112) + real_t(2.0) * (KC_120 * KC_102 + KC_210 * KC_012 + KC_201 * KC_021)) * rho_inv
 	 - (real_t(16.0) * KC_110 * KC_101 * KC_011 + real_t(4.0) * (KC_020 * sqr_KC_101 + KC_200 * sqr_KC_011 + KC_002 * sqr_KC_110) + real_t(2.0) * KC_200 * KC_020 * KC_002) * sqr_rho_inv;
                      
-	 // trnasform back to central moment space 
+	 // transform back to central moment space 
 	 // transform from central moment space to distribution funtion 
 	 
 	 // const defined for velocity in X direction 
@@ -389,7 +389,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 	
 	
 	 // collision is taking place from here and I need to change it from here 	
-         // transform from velocity space to moment space and then to cumulant space , perform collsiopn and then again back transform to velocity space // 
+         // transform from velocity space to moment space and then to cumulant space , perform collision and then again back transform to velocity space // 
          
          // const defined for velocity in Y direction 
          const real_t oneminus_sqr_vely = real_t(1.0) - velYY ;
@@ -633,7 +633,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 	 // defining the constants for central moment space 
 	 const real_t rho_inv = real_t(1.0) / updated_rho; 
 
-	 // defining the sqaures 
+	 // defining the squares 
 	 const real_t sqr_k_110 = k_110 * k_110 ;
 	 const real_t sqr_k_101 = k_101 * k_101 ;
 	 const real_t sqr_k_011 = k_011 * k_011 ;
@@ -765,7 +765,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 	 const real_t KC_222 = CS_222 + (real_t(4.0) * sqr_KC_111 + KC_200 * KC_022 + KC_020 * KC_202 + KC_002 * KC_220 + real_t(4.0) * (KC_011 * KC_211 + KC_101 * KC_121 + KC_110 * KC_112) + real_t(2.0) * (KC_120 * KC_102 + KC_210 * KC_012 + KC_201 * KC_021)) * rho_inv
 	 - (real_t(16.0) * KC_110 * KC_101 * KC_011 + real_t(4.0) * (KC_020 * sqr_KC_101 + KC_200 * sqr_KC_011 + KC_002 * sqr_KC_110) + real_t(2.0) * KC_200 * KC_020 * KC_002) * sqr_rho_inv;
                      
-	 // trnasform back to central moment space 
+	 // transform back to central moment space 
 	 // transform from central moment space to distribution funtion 
 	 // const defined for velocity in X direction 
 	 const real_t oneminus_sqr_velx = real_t(1.0) - velXX ;
@@ -805,7 +805,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 	
 	
 	 // collision is taking place from here and I need to change it from here 	
-         // transform from velocity space to moment space and then to cumulant space , perform collsiopn and then again back transform to velocity space // 
+         // transform from velocity space to moment space and then to cumulant space , perform collision and then again back transform to velocity space // 
          
          // const defined for velocity in Y direction 
          const real_t oneminus_sqr_vely = real_t(1.0) - velYY ;

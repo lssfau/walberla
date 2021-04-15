@@ -37,7 +37,7 @@ CapsuleID createCapsule(   BodyStorage& globalStorage, BlockStorage& blocks, Blo
                            MaterialID material,
                            bool global, bool communicating, bool infiniteMass )
 {
-   WALBERLA_ASSERT_UNEQUAL( Capsule::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Capsule TypeID not initalized!");
+   WALBERLA_ASSERT_UNEQUAL( Capsule::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Capsule TypeID not initialized!");
 
    // Checking the radius and the length
    WALBERLA_ASSERT_GREATER( radius, real_t(0), "Invalid capsule radius" );

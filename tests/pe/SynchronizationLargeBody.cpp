@@ -188,7 +188,7 @@ int main( int argc, char ** argv )
       }
    }
    mpi::broadcastObject(sid, sphereRank);
-   WALBERLA_LOG_DETAIL("sphere with sid " << sid << " is loacted on rank " << sphereRank);
+   WALBERLA_LOG_DETAIL("sphere with sid " << sid << " is located on rank " << sphereRank);
 
    syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID);
    syncShadowOwners<BodyTuple>(forest->getBlockForest(), storageID);

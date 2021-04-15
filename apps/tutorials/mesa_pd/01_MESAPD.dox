@@ -4,8 +4,8 @@ namespace mesa_pd {
 /**
 \page tutorial_mesapd_01 Tutorial - Confined Gas:  Setting up a simple MESA-PD simulation
 
-This tutorial will help you to setup up a simple simulation using the MESA-PD module.
-The scenario for this tutorial a is particle gas (spheres) confined by solid walls.
+This tutorial will help you to set up a simple simulation using the MESA-PD module.
+The scenario for this tutorial is a particle gas (spheres) confined by solid walls.
 
 For this tutorial only a few waLBerla includes are needed, namely:
 \snippet 01_MESAPD.cpp walberlaIncludes
@@ -31,9 +31,9 @@ You can choose the number of blocks you want to have in each direction. In a par
 
 \snippet 01_MESAPD.cpp BlockForest
 
-Next, we initialize all data structures that we need for the simulation. The data::ParticleStorage is the data container for all particles. The data::ShapeStorage stores information about the shape of the particles. This information is separated from the particle due to that fact that most of the time there are many similar particles in on simulation. With this approach you do not need to store the information for every particle but only once.
+Next, we initialize all data structures that we need for the simulation. The data::ParticleStorage is the data container for all particles. The data::ShapeStorage stores information about the shape of the particles. This information is separated from the particle due to that fact that most of the time there are many similar particles in one simulation. With this approach you do not need to store the information for every particle but only once.
 
-Since all kernels are written against an abstract interface to access the particle properties we also need a intermediate accessor class. This class is in most cases is the data::ParticleAccessorWithShape.
+Since all kernels are written against an abstract interface to access the particle properties we also need an intermediate accessor class. This class is in most cases data::ParticleAccessorWithShape.
 
 Finally, to improve the complexity of the collision detection step, we need a data::LinkedCells acceleration data structure.
 
@@ -53,7 +53,7 @@ The gas particles are generated with the help of grid generators. These generato
 
 Before we can run the simulation we have to set up all kernels that we will use.
 \snippet 01_MESAPD.cpp Kernels
-In this example we will use the explicit euler integration method. We further need a kernel which updates our LinkedCell data structure and an interaction kernel. For the collision detection we select the analytic functions available within the framework. Together with all synchronization kernels we can now run the simulation.
+In this example we will use the explicit Euler integration method. We further need a kernel which updates our LinkedCell data structure and an interaction kernel. For the collision detection we select the analytic functions available within the framework. Together with all synchronization kernels we can now run the simulation.
 
 \attention Before you start the simulation loop you should synchronize once to make sure everything is in place.
 

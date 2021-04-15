@@ -49,7 +49,7 @@ protected:
 //*************************************************************************************************
 /*!\brief Compare if two coarse collision detectors are equal.
  *
- * Since collision detectors are uncopyable two collision detectors are considered equal if their adresses are equal.
+ * Since collision detectors are uncopyable two collision detectors are considered equal if their addresses are equal.
  */
 inline bool operator==(const ICCD& lhs, const ICCD& rhs) {return &lhs == &rhs;}
 

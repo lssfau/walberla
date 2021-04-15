@@ -230,7 +230,7 @@ static_assert( std::is_trivially_copyable<Quaternion<real_t>>::value, "Quaternio
  * \param j The initial value for the second imaginary part.
  * \param k The initial value for the third imaginary part.
  *
- * The initial values for the quaterion have to be chosen such that the length of the
+ * The initial values for the quaternion have to be chosen such that the length of the
  * quaternion is 1.
  */
 template< typename Type >  // Data type of the quaternion
@@ -733,7 +733,7 @@ inline const Matrix3< typename MathTrait<Type,Other>::MultType >
 
 
 //*************************************************************************************************
-/*!\brief Returns the angle in radian measure between the quaterion and a given axis.
+/*!\brief Returns the angle in radian measure between the quaternion and a given axis.
  *
  * \param axis The given axis.
  * \return The angle in radian measure.
@@ -888,7 +888,7 @@ std::istream& operator>>( std::istream& is, Quaternion<Type>& q )
       return is;
    }
 
-   // Transfering the input to the quaternion values
+   // Transferring the input to the quaternion values
    q.set( r, i, j, k );
 
    // Resetting the flags

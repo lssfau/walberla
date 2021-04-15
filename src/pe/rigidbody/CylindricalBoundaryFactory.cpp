@@ -34,7 +34,7 @@ CylindricalBoundaryID createCylindricalBoundary( BodyStorage& globalStorage,
                                                  id_t uid, const Vec3& gpos, const real_t radius,
                                                  MaterialID material)
 {
-   WALBERLA_ASSERT_UNEQUAL( CylindricalBoundary::getStaticTypeID(), std::numeric_limits<id_t>::max(), "CylindricalBoundary TypeID not initalized!");
+   WALBERLA_ASSERT_UNEQUAL( CylindricalBoundary::getStaticTypeID(), std::numeric_limits<id_t>::max(), "CylindricalBoundary TypeID not initialized!");
 
    const id_t sid( UniqueID<RigidBody>::createGlobal() );
 

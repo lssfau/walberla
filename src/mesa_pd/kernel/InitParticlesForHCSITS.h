@@ -40,7 +40,7 @@ namespace kernel {
 /**
  * Init the datastructures for the particles for later use of the HCSITS-Solver.
  * Call this kernel on all particles that will be treated with HCSITS before performing any relaxation timesteps.
- * Use setGlobalAcceleration() to set an accelleration action uniformly across all particles (e.g. gravity)
+ * Use setGlobalAcceleration() to set an acceleration action uniformly across all particles (e.g. gravity)
  * \ingroup mesa_pd_kernel
  */
 class InitParticlesForHCSITS

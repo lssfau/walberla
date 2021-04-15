@@ -222,7 +222,7 @@ inline bool intersects(const CapsuleID capsule, const Ray& ray, real_t& t, Vec3&
    }
    
    // Check now for end capping half spheres.
-   // Only check them if the ray didnt both enter and leave the cylinder part of the capsule already (t0hit && t1hit).
+   // Only check them if the ray didn't both enter and leave the cylinder part of the capsule already (t0hit && t1hit).
    if (!t0hit || !t1hit) {
       real_t t0_left, t1_left;
       Vec3 leftSpherePos(-halfLength, 0, 0);

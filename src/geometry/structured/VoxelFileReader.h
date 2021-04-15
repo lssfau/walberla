@@ -39,7 +39,7 @@ namespace geometry {
  * \brief Provides a reader for waLBerla geometry files.
  *
  * Note that the data is stored in binary form. There is no correction for other binary data
- * representations on different architectures (e.g. different Endianess)!
+ * representations on different architectures (e.g. different endianness)!
  * An opened file is automatically closed upon destruction.
  *
  * \tparam T The underlying datatype that is stored in binary form in the geometry file

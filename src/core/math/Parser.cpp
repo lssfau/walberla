@@ -137,7 +137,7 @@ double FunctionParser::evaluate( const std::map<std::string,double> & symbolTabl
       auto symbolEntryIt = symbolTable.find( *vIt );
 
       if( symbolEntryIt == symbolTable.end() )
-         WALBERLA_ABORT( "Error evaluationg expression. Variable \"" << *vIt << "\" not specified in symbol table!" );
+         WALBERLA_ABORT( "Error evaluating expression. Variable \"" << *vIt << "\" not specified in symbol table!" );
 
       symbolTable_->variable_ref( *vIt ) = symbolEntryIt->second;
    }

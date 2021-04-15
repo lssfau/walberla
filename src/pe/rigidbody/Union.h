@@ -55,7 +55,7 @@ namespace pe {
 //*************************************************************************************************
 /**
  * \ingroup pe
- * \brief Base class for the union geometry, a rigid assebly of bodies.
+ * \brief Base class for the union geometry, a rigid assembly of bodies.
  *
  * The Union class represents the base class for the sphere geometry.
  * For a full description of the union geometry,
@@ -589,7 +589,7 @@ void Union<BodyTypes...>::setOrientationImpl( real_t r, real_t i, real_t j, real
  *  - Neither the (in-)visibility of the added rigid body nor (in-)visibility of the union will
  *    change due to the add operation. For instance adding a visible rigid body to an invisible
  *    union will not change the visibility of the body. Neither is the visibility of the union
- *    changed. In order to change the visiblity, the setVisible() function can be either called
+ *    changed. In order to change the visibility, the setVisible() function can be either called
  *    individually for the rigid body (to exclusively make the body (in-)visible) or the entire
  *    union (to make the entire union (in-)visible.
  */
@@ -744,7 +744,7 @@ void Union<BodyTypes...>::rotateAroundOriginImpl( const Quat& dq )
  * \return void
  * \exception std::logic_error Invalid rotation of a global union inside an exclusive section.
  *
- * This function rotates the entire union around the given global coordiante \a point and
+ * This function rotates the entire union around the given global coordinate \a point and
  * changes both the global position and the orientation/rotation of the union. Additionally,
  * all contained rigid bodies change their position and orientation accordingly. The orientation
  * of the bodies within the union in reference to the body frame of the union is not changed.
@@ -828,11 +828,11 @@ bool Union<BodyTypes...>::isSurfaceRelPointImpl( real_t px, real_t py, real_t pz
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Signals an internal modification of a contained subordiante rigid body.
+/*!\brief Signals an internal modification of a contained subordinate rigid body.
  *
  * \return void
  *
- * In case one of the contained rigid bodies is interally modified, this function is called to
+ * In case one of the contained rigid bodies is internally modified, this function is called to
  * recalculate the changed properties of the union.
  */
 template <typename... BodyTypes>
@@ -866,7 +866,7 @@ void Union<BodyTypes...>::handleModification()
 
 
 //*************************************************************************************************
-/*!\brief Signals a position change of a contained subordiante rigid body.
+/*!\brief Signals a position change of a contained subordinate rigid body.
  *
  * \return void
  *
@@ -890,7 +890,7 @@ void Union<BodyTypes...>::handleTranslation()
 
 
 //*************************************************************************************************
-/*!\brief Signals an orientation change of a contained subordiante rigid body.
+/*!\brief Signals an orientation change of a contained subordinate rigid body.
  *
  * \return void
  *

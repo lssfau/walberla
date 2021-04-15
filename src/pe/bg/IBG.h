@@ -35,7 +35,7 @@ public:
 //*************************************************************************************************
 /*!\brief Compare if two batch generators are equal.
  *
- * Since batch generators are uncopyable two batch generators are considered equal if their adresses are equal.
+ * Since batch generators are uncopyable two batch generators are considered equal if their addresses are equal.
  */
 inline bool operator==(const IBG& lhs, const IBG& rhs) {return &lhs == &rhs;}
 

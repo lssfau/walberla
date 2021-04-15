@@ -254,10 +254,10 @@ void checkAndResolveOverlap( BlockForest& forest, BlockDataID storageID, const r
 
             if (b->MPITrait.getOwner() == nbProcess) continue; // dont send to owner!!
             if (b->MPITrait.getBlockState( nbProcess.blockID_ )) continue; // only send to neighbor which do not know this body
-            //            WALBERLA_LOG_DEVEL("neighobur aabb: " << block.getNeighborAABB(nb));
+            //            WALBERLA_LOG_DEVEL("neighbor aabb: " << block.getNeighborAABB(nb));
             //            WALBERLA_LOG_DEVEL("isInsideDomain: " << isInsideDomain);
             //            WALBERLA_LOG_DEVEL("body AABB: " << b->getAABB());
-            //            WALBERLA_LOG_DEVEL("neighbour AABB: " << block.getNeighborAABB(nb));
+            //            WALBERLA_LOG_DEVEL("neighbor AABB: " << block.getNeighborAABB(nb));
 
             if( (isInsideDomain ? block.getNeighborAABB(nb).intersects( b->getAABB(), dx ) : block.getBlockStorage().periodicIntersect(block.getNeighborAABB(nb), b->getAABB(), dx)) )
             {

@@ -37,7 +37,7 @@ SphereID createSphere( BodyStorage& globalStorage, BlockStorage& blocks, BlockDa
                        MaterialID material,
                        bool global, bool communicating, bool infiniteMass )
 {
-   WALBERLA_ASSERT_UNEQUAL( Sphere::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Sphere TypeID not initalized!");
+   WALBERLA_ASSERT_UNEQUAL( Sphere::getStaticTypeID(), std::numeric_limits<id_t>::max(), "Sphere TypeID not initialized!");
    // Checking the radius
    if( radius <= real_c(0) )
       throw std::invalid_argument( "Invalid sphere radius" );

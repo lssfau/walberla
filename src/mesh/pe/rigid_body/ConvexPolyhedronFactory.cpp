@@ -43,11 +43,11 @@ ConvexPolyhedronID createConvexPolyhedron( BodyStorage& globalStorage, BlockStor
                                            MaterialID material,
                                            bool global, bool communicating, bool infiniteMass )
 {
-   WALBERLA_ASSERT_UNEQUAL( ConvexPolyhedron::getStaticTypeID(), std::numeric_limits<id_t>::max(), "ConvexPolyhedron TypeID not initalized!");
+   WALBERLA_ASSERT_UNEQUAL( ConvexPolyhedron::getStaticTypeID(), std::numeric_limits<id_t>::max(), "ConvexPolyhedron TypeID not initialized!");
 
    // Checking the side lengths
    if( pointCloud.size() < size_t(4) )
-      WALBERLA_ABORT( "Polyhedron needs at leat 4 points!" );
+      WALBERLA_ABORT( "Polyhedron needs at least 4 points!" );
    
    shared_ptr< TriangleMesh > mesh = make_shared<TriangleMesh>();
    mesh::QHull<TriangleMesh> qhull( pointCloud, mesh );
@@ -63,7 +63,7 @@ ConvexPolyhedronID createConvexPolyhedron( BodyStorage& globalStorage, BlockStor
                                            MaterialID material,
                                            bool global, bool communicating, bool infiniteMass )
 {
-   WALBERLA_ASSERT_UNEQUAL( ConvexPolyhedron::getStaticTypeID(), std::numeric_limits<id_t>::max(), "ConvexPolyhedron TypeID not initalized!");
+   WALBERLA_ASSERT_UNEQUAL( ConvexPolyhedron::getStaticTypeID(), std::numeric_limits<id_t>::max(), "ConvexPolyhedron TypeID not initialized!");
 
    ConvexPolyhedronID poly = nullptr;
 

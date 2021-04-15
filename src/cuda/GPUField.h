@@ -47,7 +47,7 @@ namespace cuda {
    *  Internally represented by a cudaPitchedPtr which is allocated with cudaMalloc3D to take padding of the
    *  innermost coordinate into account.
    *
-   *  Supports Array-of-Structures (AoS,zyxf) layout and Structure-of-Arrays (SoA, fzyx) layout, in a similiar way
+   *  Supports Array-of-Structures (AoS,zyxf) layout and Structure-of-Arrays (SoA, fzyx) layout, in a similar way
    *  to field::Field
    *
    *  To work with the GPUField look at the cuda::fieldCpy functions to transfer a field::Field to a cuda::GPUField

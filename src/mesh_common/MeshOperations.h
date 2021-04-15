@@ -495,7 +495,7 @@ walberla::optional< bool > isIntersecting( const DistanceObject & distanceObject
       if( sqSignedDistance < sqInRadius )
          return true; // clearly the box must intersect the mesh
 
-      // The point closest to the box center is located in the spherical shell between the box's insphere and ciricumsphere
+      // The point closest to the box center is located in the spherical shell between the box's insphere and circumsphere
       const Scalar error = circumRadius - inRadius;
 
       if( error < maxErrorScalar )
@@ -566,7 +566,7 @@ walberla::optional< bool > fullyCoversAABB( const DistanceObject & distanceObjec
       if( sqSignedDistance > -sqInRadius )
          return false; // clearly the box must partially be outside of the mesh
 
-      // The point closest to the box center is located in the spherical shell between the box's insphere and ciricumsphere
+      // The point closest to the box center is located in the spherical shell between the box's insphere and circumsphere
       const Scalar error = circumRadius - inRadius;
 
       if( error < maxErrorScalar )
@@ -639,7 +639,7 @@ walberla::optional< bool > intersectsSurface( const DistanceObject & distanceObj
       if( sqDistance < sqInRadius)
          return true; // clearly the box must intersect the mesh
 
-                      // The point closest to the box center is located in the spherical shell between the box's insphere and ciricumsphere
+                      // The point closest to the box center is located in the spherical shell between the box's insphere and circumsphere
       const Scalar error = circumRadius - inRadius;
 
       if(error < maxErrorScalar)

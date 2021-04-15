@@ -16,7 +16,7 @@
 //! \file IntelVecTypesCppOperators.h
 //! \ingroup avx
 //! \author Martin Bauer <martin.bauer@fau.de>
-//! \brief C++ Operators for the Intel intrinsiscs vector types
+//! \brief C++ Operators for the Intel intrinsics vector types
 //
 //======================================================================================================================
 

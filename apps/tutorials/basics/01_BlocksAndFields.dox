@@ -19,7 +19,7 @@ In waLBerla, the domain is first partitioned into blocks, where each block holds
 This has the advantage that the domain can easily be distributed to multiple processes,
 where every process can have one or more local blocks.
 
-The following snippet shows how to create a simple domain decompositon that results in a uniform block grid: 
+The following snippet shows how to create a simple domain decomposition that results in a uniform block grid: 
 
 \code
 #include "core/Environment.h"
@@ -56,7 +56,7 @@ The last three parameters determine if the domain is periodic in x, y, or z dire
 There are a lot more ways for initializing the block decomposition of the simulation space in waLBerla. For this tutorial, we just use
 a very simple form of decomposition. In later tutorials, we will see that the domain decomposition can also be controlled via a configuration
 file that is passed to the application. Also, in general, you can have an arbitrary number of blocks on each process. This can be important
-for balancing work load. For load balancning, there exist many different algorithms: some make use of METIS, others are based on space filling curves.
+for balancing work load. For load balancing, there exist many different algorithms: some make use of METIS, others are based on space filling curves.
 It is even possible to decompose the simulation space into a set of octrees, resulting in a distributed forest of octrees data structure that
 contains blocks of different sizes. This form of decomposition can be used for simulations that require some form of grid refinement. 
 For now, however, we stick to a simple, uniform block decomposition.

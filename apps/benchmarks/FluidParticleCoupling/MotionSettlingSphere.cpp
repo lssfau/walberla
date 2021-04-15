@@ -606,7 +606,7 @@ private:
 /*
  * This extensive, physical test case simulates a single, heavy sphere in ambient fluid flow.
  * It is based on the benchmark proposed in
- * Uhlman, Dusek - "The motion of a single heavy sphere in ambient fluid: A benchmark for interface-resolved
+ * Uhlmann, Dusek - "The motion of a single heavy sphere in ambient fluid: A benchmark for interface-resolved
  *                  particulate flow simulations with significant relative velocities" IJMF (2014),
  *                  doi: 10.1016/j.ijmultiphaseflow.2013.10.010
  * Results for LBM done with waLBerla are published in

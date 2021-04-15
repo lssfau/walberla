@@ -102,7 +102,7 @@ void updateAndSyncInfoCollection(BlockForest& bf, const BlockDataID boundaryHand
    bs.setReceiverInfoFromSendBufferState(false, true);
    bs.sendAll();
 
-   // info collection has to be distirbuted to neighboring processes such that later on when coarsening was applied,
+   // info collection has to be distributed to neighboring processes such that later on when coarsening was applied,
    // the weight of the coarsened block can be computed
    for( auto recvIt = bs.begin(); recvIt != bs.end(); ++recvIt )
    {
@@ -203,6 +203,6 @@ private:
 };
 
 
-} // namepace amr
+} // namespace amr
 } // namespace lbm_mesapd_coupling
 } // namespace walberla

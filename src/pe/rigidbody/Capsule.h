@@ -262,7 +262,7 @@ inline real_t  Capsule::calcDensity( real_t  radius, real_t  length, real_t  mas
 /*!\brief Estimates the point which is farthest in direction \a d.
  *
  * \param d The normalized search direction in world-frame coordinates.
- * \return The support point in world-frame coordinates in direction a\ d.
+ * \return The support point in world-frame coordinates in direction \a d.
  */
 inline Vec3 Capsule::support( const Vec3& d ) const
 {

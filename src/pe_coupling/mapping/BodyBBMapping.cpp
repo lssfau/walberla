@@ -53,7 +53,7 @@ CellInterval getCellBB( const pe::ConstBodyID body, const IBlock & block, Struct
                                                  real_c(numberOfGhostLayersToInclude) * dz);
       auto extendedBlockAABB = blockStorage.getAABB(block.getId()).getExtended( aabbExtensionByGhostLayers );
 
-      // intersect the infinte (global) body with the block AABB, extended by its ghost layers
+      // intersect the infinite (global) body with the block AABB, extended by its ghost layers
       // then determine the cell bounding box of the intersection
       blockStorage.getCellBBFromAABB( cellBB, body->getAABB().getIntersection( extendedBlockAABB ), level );
 
