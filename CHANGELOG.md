@@ -1,11 +1,23 @@
 # Changelog
 
-## [Unreleased]
+## [5.1] - 2020-04-09
+### Added
+- Add new tutorials and showcases
+- Extend MESA-PD functionalities, including several molecular dynamics models
+- Fluid-particle coupling with MESA-PD: functionalities, tests, benchmark scenarios
 
+### Changed
+- Update to C++17
+- Update CUDA compiler support
+- Extend Clang-Tidy coverage
+- Add closer integration of code generation using pystencils and lbmpy
 - Python Coupling now build upon pybind11. Boost.Python is no longer supported
   - lbm module dropped from python coupling due to deprecation for a long time
   - geometry, postprocessing and timeloop dropped from python coupling due to its low usage
   - PEP8-ification of Python API. This means all keyword arguments are now in snake_case and not in CamelCase as before.
+
+### Fixed
+- Guo force model for non-SRT, may change simulation results
 
 ## [4.1] - 2019-04-19
 ### Added
