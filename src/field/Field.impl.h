@@ -316,7 +316,13 @@ namespace field {
       // Automatically select allocator if none was given
       if ( alloc == nullptr )
       {
-#ifdef __BIGGEST_ALIGNMENT__
+#if defined(__ARM_FEATURE_SVE) && defined(__ARM_FEATURE_SVE_BITS) && __ARM_FEATURE_SVE_BITS > 0
+         const uint_t alignment = __ARM_FEATURE_SVE_BITS/8;
+#elif defined(__ARM_FEATURE_SVE)
+         const uint_t alignment = 64;
+#elif defined(__ARM_NEON)
+         const uint_t alignment = 16;
+#elif defined(__BIGGEST_ALIGNMENT__)
          const uint_t alignment = __BIGGEST_ALIGNMENT__;
 #elif defined(__AVX512F__)
          const uint_t alignment = 64;

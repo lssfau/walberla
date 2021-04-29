@@ -238,37 +238,50 @@ def generate_call(ctx, kernel_info, ghost_layers_to_include=0, cell_interval=Non
         if param.is_field_pointer:
             field = param.fields[0]
             if field.field_type == FieldType.BUFFER:
-                kernel_call_lines.append("%s %s = %s;" % (param.symbol.dtype, param.symbol.name, param.field_name))
+                kernel_call_lines.append(f"{param.symbol.dtype} {param.symbol.name} = {param.field_name};")
             else:
                 coordinates = get_start_coordinates(field)
-                actual_gls = "int_c(%s->nrOfGhostLayers())" % (param.field_name, )
+                actual_gls = f"int_c({param.field_name}->nrOfGhostLayers())"
                 coord_set = set(coordinates)
                 coord_set = sorted(coord_set, key=lambda e: str(e))
                 for c in coord_set:
-                    kernel_call_lines.append("WALBERLA_ASSERT_GREATER_EQUAL(%s, -%s);" %
-                                             (c, actual_gls))
+                    kernel_call_lines.append(f"WALBERLA_ASSERT_GREATER_EQUAL({c}, -{actual_gls});")
                 while len(coordinates) < 4:
                     coordinates.append(0)
                 coordinates = tuple(coordinates)
-                kernel_call_lines.append("%s %s = %s->dataAt(%s, %s, %s, %s);" %
-                                         ((param.symbol.dtype, param.symbol.name, param.field_name) + coordinates))
+                kernel_call_lines.append(f"{param.symbol.dtype} {param.symbol.name} = {param.field_name}->dataAt"
+                                         f"({coordinates[0]}, {coordinates[1]}, {coordinates[2]}, {coordinates[3]});")
                 if ast.assumed_inner_stride_one and field.index_dimensions > 0:
-                    kernel_call_lines.append("WALBERLA_ASSERT_EQUAL(%s->layout(), field::fzyx);" % (param.field_name,))
+                    kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL({param.field_name}->layout(), field::fzyx);")
+                if ast.instruction_set and ast.assumed_inner_stride_one:
+                    if ast.nontemporal and ast.openmp and 'cachelineZero' in ast.instruction_set:
+                        kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL((uintptr_t) {field.name}->dataAt(0, 0, 0, 0) %"
+                                                 f"{ast.instruction_set['cachelineSize']}, 0);")
+                    else:
+                        kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL((uintptr_t) {field.name}->dataAt(0, 0, 0, 0) %"
+                                                 f"{ast.instruction_set['bytes']}, 0);")
         elif param.is_field_stride:
             casted_stride = get_field_stride(param)
             type_str = param.symbol.dtype.base_name
-            kernel_call_lines.append("const %s %s = %s;" % (type_str, param.symbol.name, casted_stride))
+            kernel_call_lines.append(f"const {type_str} {param.symbol.name} = {casted_stride};")
         elif param.is_field_shape:
             coord = param.symbol.coordinate
             field = param.fields[0]
             type_str = param.symbol.dtype.base_name
-            shape = "%s(%s)" % (type_str, get_end_coordinates(field)[coord])
+            shape = f"{type_str}({get_end_coordinates(field)[coord]})"
             assert coord < 3
-            max_value = "%s->%sSizeWithGhostLayer()" % (field.name, ('x', 'y', 'z')[coord])
-            kernel_call_lines.append("WALBERLA_ASSERT_GREATER_EQUAL(%s, %s);" % (max_value, shape))
-            kernel_call_lines.append("const %s %s = %s;" % (type_str, param.symbol.name, shape))
+            max_value = f"{field.name}->{('x', 'y', 'z')[coord]}SizeWithGhostLayer()"
+            kernel_call_lines.append(f"WALBERLA_ASSERT_GREATER_EQUAL({max_value}, {shape});")
+            kernel_call_lines.append(f"const {type_str} {param.symbol.name} = {shape};")
             if ast.assumed_inner_stride_one and field.index_dimensions > 0:
-                kernel_call_lines.append("WALBERLA_ASSERT_EQUAL(%s->layout(), field::fzyx);" % (field.name,))
+                kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL({field.name}->layout(), field::fzyx);")
+            if ast.instruction_set and ast.assumed_inner_stride_one:
+                if ast.nontemporal and ast.openmp and 'cachelineZero' in ast.instruction_set:
+                    kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL((uintptr_t) {field.name}->dataAt(0, 0, 0, 0) %"
+                                             f"{ast.instruction_set['cachelineSize']}, 0);")
+                else:
+                    kernel_call_lines.append(f"WALBERLA_ASSERT_EQUAL((uintptr_t) {field.name}->dataAt(0, 0, 0, 0) %"
+                                             f"{ast.instruction_set['bytes']}, 0);")
 
     call_parameters = ", ".join([p.symbol.name for p in ast_params])
 
