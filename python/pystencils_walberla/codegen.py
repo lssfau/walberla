@@ -61,6 +61,8 @@ def generate_sweep(generation_context, class_name, assignments,
     else:
         ast = create_staggered_kernel(assignments, **create_kernel_params)
     ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
+    ast.nontemporal = create_kernel_params['cpu_vectorize_info']['nontemporal']
+    ast.openmp = create_kernel_params['cpu_openmp']
 
     def to_name(f):
         return f.name if isinstance(f, Field) else f
