@@ -475,8 +475,12 @@ endif()
 ############################################################################################################################
 
 try_compile( WALBERLA_USE_STD_FILESYSTEM "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
-             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_FILESYSTEM )
+             COMPILE_DEFINITIONS -DWALBERLA_USE_STD_FILESYSTEM COPY_FILE "${CMAKE_CURRENT_BINARY_DIR}/TestStdFilesystem" )
 if( WALBERLA_USE_STD_FILESYSTEM )
+  # detect https://gcc.gnu.org/bugzilla/show_bug.cgi?id=90050 by checking whether it segfaults
+  execute_process( COMMAND "${CMAKE_CURRENT_BINARY_DIR}/TestStdFilesystem" RESULT_VARIABLE WALBERLA_STD_FILESYSTEM_WORKS )
+endif()
+if( WALBERLA_USE_STD_FILESYSTEM AND WALBERLA_STD_FILESYSTEM_WORKS EQUAL 0 )
    message( STATUS "Found std::filesystem")
 else()
    try_compile( WALBERLA_USE_STD_EXPERIMENTAL_FILESYSTEM "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestStdFilesystem.cpp"
