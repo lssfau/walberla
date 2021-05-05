@@ -1969,7 +1969,7 @@ namespace std
     {
         std::size_t operator()( walberla::Vector3<T> const & v ) const noexcept
         {
-            return walberla::Vector3<T>::hash_value( v );
+            return walberla::math::hash_value( v );
         }
     };
 } // namespace std
