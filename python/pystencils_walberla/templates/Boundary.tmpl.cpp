@@ -50,12 +50,7 @@ namespace {{namespace}} {
 #pragma diag_suppress = declared_but_not_referenced
 #endif
 
-
-{% for sweep_class, sweep_kernel in sweep_classes.items() %}
-
-{{sweep_kernel|generate_definition}}
-
-{% endfor %}
+{{kernel|generate_definitions(target)}}
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
@@ -65,45 +60,51 @@ namespace {{namespace}} {
 #pragma pop
 #endif
 
-{% for sweep_class, sweep_kernel in sweep_classes.items() %}
 
-
-void {{sweep_class|nested_class_method_definition_prefix}}::run( IBlock * block, IndexVectors::Type type {% if target == 'gpu'%}, cudaStream_t stream {%endif%})
+void {{class_name}}::run_impl(
+   {{- ["IBlock * block", "IndexVectors::Type type",
+        kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []]
+       | type_identifier_list -}}
+)
 {
-    auto * indexVectors = block->getData<IndexVectors>(indexVectorID);
-    int64_t indexVectorSize = int64_c( indexVectors->indexVector(type).size() );
-    if( indexVectorSize == 0)
-        return;
+   auto * indexVectors = block->getData<IndexVectors>(indexVectorID);
+   int64_t indexVectorSize = int64_c( indexVectors->indexVector(type).size() );
+   if( indexVectorSize == 0)
+      return;
 
-    {% if target == 'gpu' -%}
-    auto pointer = indexVectors->pointerGpu(type);
-    {% else %}
-    auto pointer = indexVectors->pointerCpu(type);
-    {% endif %}
+   {% if target == 'gpu' -%}
+   auto pointer = indexVectors->pointerGpu(type);
+   {% else %}
+   auto pointer = indexVectors->pointerCpu(type);
+   {% endif %}
 
-    uint8_t * _data_indexVector = reinterpret_cast<uint8_t*>(pointer);
+   uint8_t * _data_indexVector = reinterpret_cast<uint8_t*>(pointer);
 
-    {{sweep_kernel|generate_block_data_to_field_extraction(['indexVector', 'indexVectorSize'])|indent(4)}}
-    {{sweep_kernel|generate_refs_for_kernel_parameters(prefix='', parameters_to_ignore=['indexVectorSize'], ignore_fields=True)|indent(4) }}
-    {{sweep_kernel|generate_call(spatial_shape_symbols=['indexVectorSize'], stream='stream')|indent(4)}}
+   {{kernel|generate_block_data_to_field_extraction(['indexVector', 'indexVectorSize'])|indent(4)}}
+   {{kernel|generate_refs_for_kernel_parameters(prefix='', parameters_to_ignore=['indexVectorSize'], ignore_fields=True)|indent(4) }}
+   {{kernel|generate_call(spatial_shape_symbols=['indexVectorSize'], stream='stream')|indent(4)}}
 }
 
-void {{sweep_class|nested_class_method_definition_prefix}}::operator() ( IBlock * block{% if target == 'gpu'%}, cudaStream_t stream {%endif%} )
+void {{class_name}}::run(
+   {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}}
+)
 {
-    run( block, IndexVectors::ALL{% if target == 'gpu'%}, stream {%endif%});
+   run_impl( {{- ["block", "IndexVectors::ALL", kernel.kernel_selection_parameters, ["stream"] if target == 'gpu' else []] | identifier_list -}} );
 }
 
-void {{sweep_class|nested_class_method_definition_prefix}}::inner( IBlock * block{% if target == 'gpu'%}, cudaStream_t stream {%endif%} )
+void {{class_name}}::inner(
+   {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}}
+)
 {
-    run( block, IndexVectors::INNER{% if target == 'gpu'%}, stream {%endif%} );
+   run_impl( {{- ["block", "IndexVectors::INNER", kernel.kernel_selection_parameters, ["stream"] if target == 'gpu' else []] | identifier_list -}} );
 }
 
-void {{sweep_class|nested_class_method_definition_prefix}}::outer( IBlock * block{% if target == 'gpu'%}, cudaStream_t stream {%endif%} )
+void {{class_name}}::outer(
+   {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}}
+)
 {
-    run( block, IndexVectors::OUTER{% if target == 'gpu'%}, stream {%endif%} );
+   run_impl( {{- ["block", "IndexVectors::OUTER", kernel.kernel_selection_parameters, ["stream"] if target == 'gpu' else []] | identifier_list -}} );
 }
-
-{% endfor %}
 
 } // namespace {{namespace}}
 } // namespace walberla
