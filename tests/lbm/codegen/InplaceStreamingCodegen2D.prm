@@ -1,0 +1,33 @@
+
+Parameters
+{
+   timesteps   50;
+   vtkWriteFrequency 0;
+}
+
+DomainSetup
+{
+   blocks        <   1,  1,  1 >;
+   cellsPerBlock <  30, 30, 1 >;
+   periodic      <  0,    0, 0 >;
+}
+
+Boundaries
+{
+	Border { direction W;
+            walldistance -1;
+            flag UBB;
+            ghostLayersToInitialize 0; }
+	Border { direction E;
+            walldistance -1;
+            flag Outflow;
+            ghostLayersToInitialize 0; }
+   Border { direction N;
+            walldistance -1;
+            flag NoSlip;
+            ghostLayersToInitialize 1; }
+   Border { direction S;
+            walldistance -1;
+            flag NoSlip;
+            ghostLayersToInitialize 1; }
+}

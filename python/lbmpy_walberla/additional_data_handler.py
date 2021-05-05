@@ -1,9 +1,22 @@
 from pystencils.stencil import inverse_direction
 
 from lbmpy.advanced_streaming import AccessPdfValues, numeric_offsets, numeric_index
+from lbmpy.boundaries.boundaryconditions import LbBoundary
 from lbmpy.boundaries import ExtrapolationOutflow, UBB
 
 from pystencils_walberla.additional_data_handler import AdditionalDataHandler
+
+
+def default_additional_data_handler(boundary_obj: LbBoundary, lb_method, field_name, target='cpu'):
+    if not boundary_obj.additional_data:
+        return None
+
+    if isinstance(boundary_obj, UBB):
+        return UBBAdditionalDataHandler(lb_method.stencil, boundary_obj)
+    elif isinstance(boundary_obj, ExtrapolationOutflow):
+        return OutflowAdditionalDataHandler(lb_method.stencil, boundary_obj, target=target, field_name=field_name)
+    else:
+        raise ValueError(f"No default AdditionalDataHandler available for boundary of type {boundary_obj.__class__}")
 
 
 class UBBAdditionalDataHandler(AdditionalDataHandler):
@@ -114,7 +127,7 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
         if self._dim == 2:
             pos.append("0")
         pos.append(str(numeric_index(pdf_accessor.accs[inv_dir])[0]))
-        result[f'pdf'] = ', '.join(pos)
+        result['pdf'] = ', '.join(pos)
 
         pos = []
         for p, o, t in zip(position, offsets, tangential_offset):
@@ -122,6 +135,6 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
         if self._dim == 2:
             pos.append("0")
         pos.append(str(numeric_index(pdf_accessor.accs[inv_dir])[0]))
-        result[f'pdf_nd'] = ', '.join(pos)
+        result['pdf_nd'] = ', '.join(pos)
 
         return result

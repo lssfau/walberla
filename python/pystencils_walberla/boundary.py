@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import numpy as np
 from jinja2 import Environment, PackageLoader, StrictUndefined
 from pystencils import Field, FieldType
@@ -7,9 +6,12 @@ from pystencils.boundaries.createindexlist import (
     boundary_index_array_coordinate_names, direction_member_name,
     numpy_data_type_for_boundary_object)
 from pystencils.data_types import TypedSymbol, create_type
-from pystencils_walberla.codegen import KernelInfo, default_create_kernel_parameters
+from pystencils_walberla.codegen import default_create_kernel_parameters
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 from pystencils_walberla.additional_data_handler import AdditionalDataHandler
+from pystencils_walberla.kernel_selection import (
+    KernelFamily, AbstractKernelSelectionNode, KernelCallNode, HighLevelInterfaceSpec)
+from pystencils.astnodes import KernelFunction
 
 
 def generate_boundary(generation_context,
@@ -23,6 +25,8 @@ def generate_boundary(generation_context,
                       target='cpu',
                       namespace='pystencils',
                       additional_data_handler=None,
+                      interface_mappings=(),
+                      generate_functor=True,
                       **create_kernel_params):
 
     if boundary_object.additional_data and additional_data_handler is None:
@@ -51,37 +55,27 @@ def generate_boundary(generation_context,
     if not kernel_creation_function:
         kernel_creation_function = create_boundary_kernel
 
-    kernels = kernel_creation_function(field, index_field, neighbor_stencil, boundary_object, **create_kernel_params)
-    if isinstance(kernels, dict):
-        sweep_to_kernel_info_dict = OrderedDict()
-        dummy_kernel_info = None
-        for sweep_class, sweep_kernel in kernels.items():
-            sweep_kernel.function_name = "boundary_" + boundary_object.name + '_' + sweep_class
-            sweep_kernel.assumed_inner_stride_one = False
-            kernel_info = KernelInfo(sweep_kernel)
-            sweep_to_kernel_info_dict[sweep_class] = kernel_info
-            if dummy_kernel_info is None:
-                dummy_kernel_info = kernel_info
-            # elif not dummy_kernel_info.has_same_interface(kernel_info):
-            #     raise ValueError("Multiple boundary sweeps must have the same kernel interface!")
-        multi_sweep = True
-    else:
-        multi_sweep = False
-        kernel = kernels
+    kernel = kernel_creation_function(field, index_field, neighbor_stencil, boundary_object, **create_kernel_params)
+
+    if isinstance(kernel, KernelFunction):
         kernel.function_name = "boundary_" + boundary_object.name
-        kernel.assumed_inner_stride_one = False
-        kernel_info = KernelInfo(kernel)
-        sweep_to_kernel_info_dict = {'': kernel_info}
-        dummy_kernel_info = kernel_info
+        selection_tree = KernelCallNode(kernel)
+    elif isinstance(kernel, AbstractKernelSelectionNode):
+        selection_tree = kernel
+    else:
+        raise ValueError(f"kernel_creation_function returned wrong type: {kernel.__class__}")
+
+    kernel_family = KernelFamily(selection_tree, class_name)
+    interface_spec = HighLevelInterfaceSpec(kernel_family.kernel_selection_parameters, interface_mappings)
 
     if additional_data_handler is None:
         additional_data_handler = AdditionalDataHandler(stencil=neighbor_stencil)
 
     context = {
+        'kernel': kernel_family,
         'class_name': boundary_object.name,
-        'sweep_classes': sweep_to_kernel_info_dict,
-        'multi_sweep': multi_sweep,
-        'dummy_kernel_info': dummy_kernel_info,
+        'interface_spec': interface_spec,
+        'generate_functor': generate_functor,
         'StructName': struct_name,
         'StructDeclaration': struct_from_numpy_dtype(struct_name, index_struct_dtype),
         'dim': dim,

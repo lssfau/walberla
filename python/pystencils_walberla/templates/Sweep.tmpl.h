@@ -34,6 +34,10 @@
 #include "domain_decomposition/StructuredBlockStorage.h"
 #include <set>
 
+{% for header in interface_spec.headers %}
+#include {{header}}
+{% endfor %}
+
 #ifdef __GNUC__
 #define RESTRICT __restrict__
 #elif _MSC_VER
@@ -61,52 +65,100 @@ public:
 
     {{ kernel| generate_destructor(class_name) |indent(4) }}
 
-    void operator() ( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %} );
-    void runOnCellInterval(const shared_ptr<StructuredBlockStorage> & blocks,
-                           const CellInterval & globalCellInterval, cell_idx_t ghostLayers, IBlock * block
-                           {%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %});
+    void run( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}} );
+    
+    void runOnCellInterval(
+        {{- ["const shared_ptr<StructuredBlockStorage> & blocks", "const CellInterval & globalCellInterval", "cell_idx_t ghostLayers", "IBlock * block",
+             kernel.kernel_selection_parameters, ["cudaStream_t stream = nullptr"] if target == 'gpu' else []] 
+            | type_identifier_list -}}
+    );
 
+    {% if generate_functor %}
+    void operator() (
+        {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}}
+    )
+    {
+        run( {{- ["block", kernel.kernel_selection_parameters, ["stream"] if target == 'gpu' else []] | identifier_list -}} );
+    }
+    {% endif %}
 
-
-    static std::function<void (IBlock*)> getSweep(const shared_ptr<{{class_name}}> & kernel) {
-        return [kernel](IBlock * b) { (*kernel)(b); };
+    static std::function<void (IBlock *)> getSweep(
+        {{- ["const shared_ptr<" + class_name + "> & kernel", kernel.kernel_selection_parameters] | type_identifier_list -}}                                                  
+    )
+    {
+        return [ {{- [ ['kernel'], kernel.kernel_selection_parameters ] | identifier_list -}} ] 
+               (IBlock * b) 
+               { kernel->run( {{- [ ['b'], kernel.kernel_selection_parameters] | identifier_list -}} ); };
     }
 
-    static std::function<void (IBlock*{%if target is equalto 'gpu'%} , cudaStream_t {% endif %})>
-            getSweepOnCellInterval(const shared_ptr<{{class_name}}> & kernel,
-                                   const shared_ptr<StructuredBlockStorage> & blocks,
-                                   const CellInterval & globalCellInterval,
-                                   cell_idx_t ghostLayers=1 )
+    static std::function<void (IBlock* {%- if target is equalto 'gpu' %}, cudaStream_t {% endif -%} )> getSweepOnCellInterval(
+        {{- ["const shared_ptr<" + class_name + "> & kernel", "const shared_ptr<StructuredBlockStorage> & blocks", "const CellInterval & globalCellInterval",
+             kernel.kernel_selection_parameters, 'cell_idx_t ghostLayers=1']
+            | type_identifier_list -}}
+    )
     {
-        return [kernel, blocks, globalCellInterval, ghostLayers] (IBlock * b{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %}) {
-            kernel->runOnCellInterval(blocks, globalCellInterval, ghostLayers, b{%if target is equalto 'gpu'%}, stream {% endif %});
-        };
+        return [ {{- ["kernel", "blocks", "globalCellInterval", "ghostLayers", kernel.kernel_selection_parameters] | identifier_list -}} ]
+               (IBlock * b{%- if target is equalto 'gpu'%}, cudaStream_t stream = nullptr{% endif -%}) 
+               { kernel->runOnCellInterval(
+                    {{- ["blocks", "globalCellInterval", "ghostLayers", "b", kernel.kernel_selection_parameters, ["stream"] if target == 'gpu' else []]
+                        | identifier_list 
+                    -}}
+                ); };
+    }
+
+    std::function<void (IBlock *)> getSweep( {{- [interface_spec.high_level_args, ["cudaStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}} )
+    {
+        return [ {{- ["this", interface_spec.high_level_args, ["stream"] if target == 'gpu' else []] | identifier_list -}} ] 
+               (IBlock * b) 
+               { this->run( {{- [ ['b'], interface_spec.mapping_codes, ["stream"] if target == 'gpu' else [] ] | identifier_list -}} ); };
+    }
+
+    std::function<void (IBlock *)> getSweepOnCellInterval(
+        {{- ["const shared_ptr<StructuredBlockStorage> & blocks", "const CellInterval & globalCellInterval",
+             interface_spec.high_level_args, 'cell_idx_t ghostLayers=1', ["cudaStream_t stream = nullptr"] if target == 'gpu' else []]
+            | type_identifier_list -}}
+    )
+    {
+        return [ {{- ["this", "blocks", "globalCellInterval", "ghostLayers", interface_spec.high_level_args, ["stream"] if target == 'gpu' else []] | identifier_list -}} ]
+               (IBlock * b) 
+               { this->runOnCellInterval( {{- ["blocks", "globalCellInterval", "ghostLayers", "b", interface_spec.mapping_codes, ["stream"] if target == 'gpu' else []] | identifier_list -}} ); };
     }
 
 {% if inner_outer_split %}
+    void inner( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}} );
 
-    void inner( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %} );
-    void outer( IBlock * block{%if target is equalto 'gpu'%} , cudaStream_t stream = nullptr{% endif %} );
+    void outer( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}} );
 
-    void setOuterPriority(int priority ) {
-       {%if target is equalto 'gpu'%}
-       parallelStreams_.setStreamPriority(priority);
-       {%endif%}
+    std::function<void (IBlock *)> getInnerSweep( {{- [interface_spec.high_level_args, ["cudaStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}} )
+    {
+        return [ {{- [ ['this'], interface_spec.high_level_args, ["stream"] if target == 'gpu' else [] ] | identifier_list -}} ] 
+               (IBlock * b) 
+               { this->inner( {{- [ ['b'], interface_spec.mapping_codes, ["stream"] if target == 'gpu' else [] ] | identifier_list -}} ); };
+    }
+
+    std::function<void (IBlock *)> getOuterSweep( {{- [interface_spec.high_level_args, ["cudaStream_t stream = nullptr"] if target == 'gpu' else []] | type_identifier_list -}} )
+    {
+        return [ {{- [ ['this'], interface_spec.high_level_args, ["stream"] if target == 'gpu' else [] ] | identifier_list -}} ] 
+               (IBlock * b) 
+               { this->outer( {{- [ ['b'], interface_spec.mapping_codes, ["stream"] if target == 'gpu' else [] ] | identifier_list -}} ); };
+    }
+
+    void setOuterPriority(int priority) 
+    {
+        {%if target is equalto 'gpu'%}
+        parallelStreams_.setStreamPriority(priority);
+        {%endif%}
     }
     {{kernel|generate_members|indent(4)}}
 
 private:
-    {%if target is equalto 'gpu'%}
-    cuda::ParallelStreams parallelStreams_;
-    {% endif %}
+    {%if target is equalto 'gpu' -%} cuda::ParallelStreams parallelStreams_; {%- endif %}
 
     Cell outerWidth_;
     std::vector<CellInterval> layers_;
-
-{%- else -%}
+{% else %}
     {{ kernel|generate_members|indent(4) }}
-{% endif -%}
-
+{% endif %}
 };
 
 

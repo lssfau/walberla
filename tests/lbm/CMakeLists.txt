@@ -124,4 +124,25 @@ waLBerla_generate_target_from_python(NAME LbmPackInfoGenerationTestCodegen FILE 
 waLBerla_link_files_to_builddir( "diff_packinfos.sh" )
 waLBerla_execute_test( NAME LbmPackInfoGenerationDiffTest COMMAND bash diff_packinfos.sh )
 
+
+waLBerla_generate_target_from_python( NAME InplaceStreamingCodegen
+      FILE codegen/InplaceStreamingCodegen.py
+      OUT_FILES PullSweep.h PullSweep.cpp
+                PullNoSlip.h PullNoSlip.cpp
+                PullUBB.h PullUBB.cpp
+                PullOutflow.h PullOutflow.cpp
+                PullInit.h PullInit.cpp
+                InPlaceSweep.h InPlaceSweep.cpp
+                InPlaceNoSlip.h InPlaceNoSlip.cpp
+                InPlaceUBB.h InPlaceUBB.cpp
+                InPlaceOutflow.h InPlaceOutflow.cpp
+                InPlaceInit.h InPlaceInit.cpp
+                InplaceStreamingCodegen.h)
+
+waLBerla_compile_test( FILES codegen/InplaceStreamingCodegenTest.cpp
+                       DEPENDS InplaceStreamingCodegen )
+
+waLBerla_execute_test( NAME InplaceStreamingCodegenTest
+                       COMMAND $<TARGET_FILE:InplaceStreamingCodegenTest> ${CMAKE_CURRENT_SOURCE_DIR}/codegen/InplaceStreamingCodegen3D.prm  )
+
 endif()
