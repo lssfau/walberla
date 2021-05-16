@@ -108,8 +108,8 @@ class AbstractConditionNode(AbstractKernelSelectionNode):
         true_branch_code = self.branch_true.get_code(**kwargs)
         false_branch_code = self.branch_false.get_code(**kwargs)
 
-        true_branch_code = do_indent(true_branch_code, width=4, indentfirst=True)
-        false_branch_code = do_indent(false_branch_code, width=4, indentfirst=True)
+        true_branch_code = do_indent(true_branch_code, width=4, first=True)
+        false_branch_code = do_indent(false_branch_code, width=4, first=True)
 
         code = f"if({self.condition_text}) {{\n"
         code += true_branch_code
