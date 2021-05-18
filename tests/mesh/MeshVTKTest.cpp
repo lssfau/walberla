@@ -150,6 +150,11 @@ void test( const std::string & meshFile )
    meshWriterStatusfiltered.setFaceFilter( mesh::StatusFaceFilter< MeshType >( OpenMesh::Attributes::TAGGED ) );
 
    meshWriterStatusfiltered();
+
+
+   VTKMeshWriter< MeshType > meshWriterDeactivated( mesh, "mesh_vtk_test_deactivated", 0 );
+
+   meshWriterDeactivated();
 }
 
 

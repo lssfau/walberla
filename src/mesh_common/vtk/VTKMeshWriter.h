@@ -106,7 +106,7 @@ public:
    inline bool isFaceFilterSet()                         const { return static_cast<bool>(faceFilter_);        }
 
    void incrementTimeStep()      { ++timestep_; }
-   bool isWriteScheduled() const { return timestep_ % writeFrequency_ == 0; }
+   bool isWriteScheduled() const { return writeFrequency_ > 0 && timestep_ % writeFrequency_ == 0; }
 
 protected:
    void write( std::ostream & os ) const;
