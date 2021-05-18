@@ -1256,6 +1256,8 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/src )
 # All include paths are specified relative to src/ directory
 include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/src )
 
+# sources
+add_subdirectory ( src )
 
 # Generate file with compile options, and add install rule for it
 configure_file ( src/waLBerlaDefinitions.in.h
@@ -1263,8 +1265,6 @@ configure_file ( src/waLBerlaDefinitions.in.h
 
 install( FILES ${walberla_BINARY_DIR}/src/waLBerlaDefinitions.h DESTINATION walberla/ )
 
-# sources
-add_subdirectory ( src )
 
 # test
 if ( WALBERLA_BUILD_TESTS )
