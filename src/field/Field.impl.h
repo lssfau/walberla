@@ -322,14 +322,14 @@ namespace field {
          const uint_t alignment = 64;
 #elif defined(__ARM_NEON)
          const uint_t alignment = 16;
-#elif defined(__BIGGEST_ALIGNMENT__)
-         const uint_t alignment = __BIGGEST_ALIGNMENT__;
 #elif defined(__AVX512F__)
          const uint_t alignment = 64;
 #elif defined(__AVX__)
          const uint_t alignment = 32;
 #elif defined(__SSE__) || defined(_MSC_VER)
          const uint_t alignment = 16;
+#elif defined(__BIGGEST_ALIGNMENT__)
+         const uint_t alignment = __BIGGEST_ALIGNMENT__;
 #else
          const uint_t alignment = 64;
 #endif
