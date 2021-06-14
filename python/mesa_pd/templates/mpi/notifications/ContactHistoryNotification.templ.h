@@ -41,7 +41,7 @@ namespace walberla {
 namespace mesa_pd {
 
 /**
- * Trasmits the contact history
+ * Transmits the contact history
  */
 class ContactHistoryNotification
 {

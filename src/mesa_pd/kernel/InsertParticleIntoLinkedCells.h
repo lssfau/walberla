@@ -73,11 +73,11 @@ inline void InsertParticleIntoLinkedCells::operator()(const size_t p_idx, Access
    } else
    {
       WALBERLA_ASSERT_GREATER(ac.getInteractionRadius(p_idx), 0_r, "Did you forget to set the interaction radius?");
-      WALBERLA_ASSERT_LESS(2_r * ac.getInteractionRadius(p_idx), lc.cellDiameter_[0], "Interaction radius is to large for this cell size. Contacts might get lost.");
+      WALBERLA_ASSERT_LESS(2_r * ac.getInteractionRadius(p_idx), lc.cellDiameter_[0], "Interaction radius is too large for this cell size. Contacts might get lost.");
       int hash0 = static_cast<int>(std::floor((ac.getPosition(p_idx)[0] - minCorner[0]) * lc.invCellDiameter_[0]));
-      WALBERLA_ASSERT_LESS(2_r * ac.getInteractionRadius(p_idx), lc.cellDiameter_[0], "Interaction radius is to large for this cell size. Contacts might get lost.");
+      WALBERLA_ASSERT_LESS(2_r * ac.getInteractionRadius(p_idx), lc.cellDiameter_[0], "Interaction radius is too large for this cell size. Contacts might get lost.");
       int hash1 = static_cast<int>(std::floor((ac.getPosition(p_idx)[1] - minCorner[1]) * lc.invCellDiameter_[1]));
-      WALBERLA_ASSERT_LESS(2_r * ac.getInteractionRadius(p_idx), lc.cellDiameter_[0], "Interaction radius is to large for this cell size. Contacts might get lost.");
+      WALBERLA_ASSERT_LESS(2_r * ac.getInteractionRadius(p_idx), lc.cellDiameter_[0], "Interaction radius is too large for this cell size. Contacts might get lost.");
       int hash2 = static_cast<int>(std::floor((ac.getPosition(p_idx)[2] - minCorner[2]) * lc.invCellDiameter_[2]));
       if (hash0 < 0) hash0 = 0;
       if (hash0 >= lc.numCellsPerDim_[0]) hash0 = lc.numCellsPerDim_[0] - 1;

@@ -36,7 +36,7 @@ namespace kernel {
 /**
  * Velocity verlet integration for all particles.
  *
- * Velocit verlet integration is a two part kernel. preForceUpdate has to be
+ * Velocity verlet integration is a two part kernel. preForceUpdate has to be
  * called before the force calculation and postFroceUpdate afterwards. The
  * integration is only complete when both functions are called. The integration
  * is symplectic.

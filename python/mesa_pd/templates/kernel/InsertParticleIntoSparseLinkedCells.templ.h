@@ -79,7 +79,7 @@ inline void InsertParticleIntoSparseLinkedCells::operator()(const size_t p_idx, 
    {
       WALBERLA_ASSERT_GREATER(ac.getInteractionRadius(p_idx), 0_r, "Did you forget to set the interaction radius?");
       {%- for dim in range(3) %}
-      WALBERLA_ASSERT_LESS(2_r * ac.getInteractionRadius(p_idx), lc.cellDiameter_[0], "Interaction radius is to large for this cell size. Contacts might get lost.");
+      WALBERLA_ASSERT_LESS(2_r * ac.getInteractionRadius(p_idx), lc.cellDiameter_[0], "Interaction radius is too large for this cell size. Contacts might get lost.");
       int hash{{dim}} = static_cast<int>(std::floor((ac.getPosition(p_idx)[{{dim}}] - minCorner[{{dim}}]) * lc.invCellDiameter_[{{dim}}]));
       {%- endfor %}
       {%- for dim in range(3) %}
