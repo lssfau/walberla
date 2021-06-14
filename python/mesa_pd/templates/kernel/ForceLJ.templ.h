@@ -37,7 +37,7 @@ namespace mesa_pd {
 namespace kernel {
 
 /**
- * Kernel which calculates the Lennard Jones froce between two particles.
+ * Kernel which calculates the Lennard Jones force between two particles.
  *
  * This kernel uses the type property of a particle to decide on the material parameters.
  *

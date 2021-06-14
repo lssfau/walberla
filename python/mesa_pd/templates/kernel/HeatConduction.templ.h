@@ -40,7 +40,7 @@ namespace kernel {
 /**
  * Heat conduction interaction kernel
  *
- * This kernel implements a simple heat conduction: \frac{dQ}{dt} = - \alpha (T_2 - T_1)
+ * This kernel implements a simple heat conduction: \f$ \frac{dQ}{dt} = - \alpha (T_2 - T_1) \f$
  *
  * \code
    {%- for prop in interface %}

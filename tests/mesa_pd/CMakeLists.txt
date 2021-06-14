@@ -43,6 +43,9 @@ waLBerla_execute_test( NAME   MESA_PD_Data_ContactHistory )
 waLBerla_compile_test( NAME   MESA_PD_Data_Flags FILES data/Flags.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Data_Flags )
 
+waLBerla_compile_test( NAME   MESA_PD_Data_HashGridsVsBruteForce FILES data/HashGridsVsBruteForce.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_Data_HashGridsVsBruteForce PROCESSES 27 )
+
 waLBerla_compile_test( NAME   MESA_PD_Data_LinkedCells FILES data/LinkedCells.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_Data_LinkedCells )
 

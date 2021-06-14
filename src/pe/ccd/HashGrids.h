@@ -81,7 +81,7 @@ namespace ccd {
  * bodies.
  *
  * For further information and a much more detailed explanation of this algorithm see
- *     http://www10.informatik.uni-erlangen.de/Publications/Theses/2009/Schornbaum_SA09.pdf
+ *     https://www10.cs.fau.de/publications/theses/2009/Schornbaum_SA_2009.pdf
  */
 class HashGrids : public ICCD
 {

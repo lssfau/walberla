@@ -90,6 +90,7 @@ if __name__ == '__main__':
     cs.add_property("diag_n_inv", "real_t", defValue="real_t(0)")
     cs.add_property("p", "walberla::mesa_pd::Vec3", defValue="real_t(0)")
 
+    mpd.add(data.HashGrids())
     mpd.add(data.LinkedCells())
     mpd.add(data.SparseLinkedCells())
     mpd.add(data.ShapeStorage(ps))

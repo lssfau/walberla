@@ -39,7 +39,7 @@ namespace walberla {
 namespace mesa_pd {
 
 /**
- * Trasmits force and torque information.
+ * Transmits force and torque information.
  */
 class {{name}}
 {
