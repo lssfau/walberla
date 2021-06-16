@@ -25,15 +25,15 @@
 namespace walberla {
 
 template<typename S>
-inline S stringToNum( std::string & t );
-template <> inline float              stringToNum( std::string & t ) { return std::stof(t); }
-template <> inline double             stringToNum( std::string & t ) { return std::stod(t); }
-template <> inline long double        stringToNum( std::string & t ) { return std::stold(t); }
-template <> inline int                stringToNum( std::string & t ) { return std::stoi(t); }
-template <> inline long               stringToNum( std::string & t ) { return std::stol(t); }
-template <> inline long long          stringToNum( std::string & t ) { return std::stoll(t); }
-template <> inline unsigned long      stringToNum( std::string & t ) { return std::stoul(t); }
-template <> inline unsigned long long stringToNum( std::string & t ) { return std::stoull(t); }
+inline S stringToNum( const std::string & t );
+template <> inline float              stringToNum( const std::string & t ) { return std::stof(t); }
+template <> inline double             stringToNum( const std::string & t ) { return std::stod(t); }
+template <> inline long double        stringToNum( const std::string & t ) { return std::stold(t); }
+template <> inline int                stringToNum( const std::string & t ) { return std::stoi(t); }
+template <> inline long               stringToNum( const std::string & t ) { return std::stol(t); }
+template <> inline long long          stringToNum( const std::string & t ) { return std::stoll(t); }
+template <> inline unsigned long      stringToNum( const std::string & t ) { return std::stoul(t); }
+template <> inline unsigned long long stringToNum( const std::string & t ) { return std::stoull(t); }
 
 } // namespace walberla
 
