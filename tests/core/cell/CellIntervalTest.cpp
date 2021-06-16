@@ -159,7 +159,9 @@ void testIterators( const CellInterval & ci )
    auto it2 = ci.end();
    --it2;
    for( cell_idx_t z = ci.zMax(); z >= ci.zMin(); --z)
-      for( cell_idx_t y = ci.yMax(); y >= ci.yMin(); --y)
+   {
+      for (cell_idx_t y = ci.yMax(); y >= ci.yMin(); --y)
+      {
          for( cell_idx_t x = ci.xMax(); x >= ci.xMin(); --x, --it2)
          {
             WALBERLA_CHECK( ci.contains( *it2 ) );
@@ -170,9 +172,10 @@ void testIterators( const CellInterval & ci )
 
             ++ctr;
          }
-
-         WALBERLA_CHECK_EQUAL( ctr, ci.numCells() );
-         WALBERLA_CHECK_EQUAL( it2, --ci.begin() );
+      }
+   }
+   WALBERLA_CHECK_EQUAL(ctr, ci.numCells());
+   WALBERLA_CHECK_EQUAL(it2, --ci.begin());
 }
 
 void testEmptyCI( const CellInterval & ci )

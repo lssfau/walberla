@@ -130,7 +130,7 @@ inline std::unique_ptr<Union<BodyTypes...>> instantiate( mpi::RecvBuffer& buffer
    // Decoding the contained primitives
    for( size_t i = 0; i < subobjparam.size_; ++i )
    {
-      decltype ( static_cast<BodyID>(nullptr)->getTypeID() ) type;
+      decltype ( un->getTypeID() ) type;
       buffer >> type;
       BodyPtr obj( UnmarshalDynamically<std::tuple<BodyTypes...>>::execute(buffer, type, domain, block) );
       obj->setRemote( true );

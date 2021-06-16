@@ -105,7 +105,6 @@ intel_19_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -128,7 +127,6 @@ intel_19_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -246,7 +244,6 @@ gcc_7_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -268,7 +265,6 @@ gcc_7_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -289,7 +285,6 @@ gcc_7_hybrid:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -315,7 +310,6 @@ gcc_7_serial_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -338,7 +332,6 @@ gcc_7_mpionly_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -373,7 +366,6 @@ gcc_7_hybrid_dbg_sp:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -397,7 +389,6 @@ gcc_8_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -419,7 +410,6 @@ gcc_8_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -440,7 +430,6 @@ gcc_8_hybrid:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -465,7 +454,6 @@ gcc_8_serial_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -488,7 +476,6 @@ gcc_8_mpionly_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -510,7 +497,6 @@ gcc_8_hybrid_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -527,7 +513,6 @@ gcc_8_hybrid_dbg_sp:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -550,7 +535,6 @@ gcc_9_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - docker
 
@@ -570,7 +554,6 @@ gcc_9_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - docker
 
@@ -589,7 +572,6 @@ gcc_9_hybrid:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - docker
 
@@ -612,7 +594,6 @@ gcc_9_serial_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - docker
 
@@ -633,7 +614,6 @@ gcc_9_mpionly_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - docker
 
@@ -653,7 +633,6 @@ gcc_9_hybrid_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - docker
 
@@ -669,7 +648,6 @@ gcc_9_hybrid_dbg_sp:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - docker
 
@@ -691,7 +669,6 @@ gcc_10_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - docker
 
@@ -711,14 +688,12 @@ gcc_10_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - docker
 
 gcc_10_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
-   stage: pretest
    before_script:
       - pip3 install lbmpy jinja2
       - cd python
@@ -728,6 +703,9 @@ gcc_10_hybrid:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -747,6 +725,9 @@ gcc_10_serial_dbg:
       CMAKE_BUILD_TYPE: "DebugOptimized"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -764,6 +745,9 @@ gcc_10_mpionly_dbg:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
@@ -780,12 +764,138 @@ gcc_10_hybrid_dbg:
       CMAKE_BUILD_TYPE: "DebugOptimized"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - docker
 
 gcc_10_hybrid_dbg_sp:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_DOUBLE_ACCURACY: "OFF"
+      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
+      WALBERLA_BUILD_WITH_METIS: "OFF"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_11_serial:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_11_mpionly:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+gcc_11_hybrid:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
+   stage: pretest
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   tags:
+      - docker
+
+gcc_11_serial_dbg:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   tags:
+      - docker
+
+gcc_11_mpionly_dbg:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   tags:
+      - docker
+
+gcc_11_hybrid_dbg:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
+   before_script:
+      - pip3 install lbmpy jinja2
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   tags:
+      - docker
+
+gcc_11_hybrid_dbg_sp:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -814,7 +924,6 @@ clang_6.0_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -836,7 +945,6 @@ clang_6.0_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -857,7 +965,6 @@ clang_6.0_hybrid:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -882,7 +989,6 @@ clang_6.0_serial_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -905,7 +1011,6 @@ clang_6.0_mpionly_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -940,7 +1045,6 @@ clang_6.0_hybrid_dbg_sp:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -964,7 +1068,6 @@ clang_7.0_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -986,7 +1089,6 @@ clang_7.0_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1007,7 +1109,6 @@ clang_7.0_hybrid:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1032,7 +1133,6 @@ clang_7.0_serial_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1055,7 +1155,6 @@ clang_7.0_mpionly_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1077,7 +1176,6 @@ clang_7.0_hybrid_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1094,7 +1192,6 @@ clang_7.0_hybrid_dbg_sp:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1118,7 +1215,6 @@ clang_8.0_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1140,7 +1236,6 @@ clang_8.0_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1161,7 +1256,6 @@ clang_8.0_hybrid:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1186,7 +1280,6 @@ clang_8.0_serial_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1209,7 +1302,6 @@ clang_8.0_mpionly_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1231,7 +1323,6 @@ clang_8.0_hybrid_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1248,7 +1339,6 @@ clang_8.0_hybrid_dbg_sp:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1272,7 +1362,6 @@ clang_9.0_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1294,7 +1383,6 @@ clang_9.0_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1315,7 +1403,6 @@ clang_9.0_hybrid:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1340,7 +1427,6 @@ clang_9.0_serial_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1363,7 +1449,6 @@ clang_9.0_mpionly_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1385,7 +1470,6 @@ clang_9.0_hybrid_dbg:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1402,7 +1486,6 @@ clang_9.0_hybrid_dbg_sp:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1426,7 +1509,6 @@ clang_10.0_serial:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker
@@ -1448,7 +1530,6 @@ clang_10.0_mpionly:
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
-   
    tags:
       - cuda
       - docker

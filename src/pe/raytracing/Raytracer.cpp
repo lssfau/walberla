@@ -25,7 +25,7 @@
 #include <core/mpi/RecvBuffer.h>
 #include <core/mpi/SendBuffer.h>
 
-#include "geometry/structured/extern/lodepng.h"
+#include "lodepng.h"
 
 namespace walberla {
 namespace pe {

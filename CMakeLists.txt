@@ -1256,6 +1256,9 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/src )
 # All include paths are specified relative to src/ directory
 include_directories ( ${CMAKE_CURRENT_SOURCE_DIR}/src )
 
+# external
+add_subdirectory( extern )
+
 # sources
 add_subdirectory ( src )
 
