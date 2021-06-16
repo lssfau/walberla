@@ -17,6 +17,7 @@
 //! \\author pystencils
 //======================================================================================================================
 
+#pragma once
 #include "core/DataTypes.h"
 
 {% if target is equalto 'cpu' -%}

@@ -30,6 +30,9 @@ def __lattice_model(generation_context, class_name, lb_method, stream_collide_as
     stencil_name = get_stencil_name(lb_method.stencil)
     if not stencil_name:
         raise ValueError("lb_method uses a stencil that is not supported in waLBerla")
+
+
+    communication_stencil_name = stencil_name if stencil_name != "D3Q15" else "D3Q27"
     is_float = not generation_context.double_accuracy
     dtype_string = "float32" if is_float else "float64"
 
@@ -86,6 +89,7 @@ def __lattice_model(generation_context, class_name, lb_method, stream_collide_as
     jinja_context = {
         'class_name': class_name,
         'stencil_name': stencil_name,
+        'communication_stencil_name': communication_stencil_name,
         'D': lb_method.dim,
         'Q': len(lb_method.stencil),
         'compressible': lb_method.conserved_quantity_computation.compressible,
