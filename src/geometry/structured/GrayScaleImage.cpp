@@ -20,8 +20,9 @@
 //======================================================================================================================
 
 #include "GrayScaleImage.h"
-#include "geometry/structured/extern/lodepng.h"
 #include "core/Abort.h"
+
+#include "lodepng.h"
 
 #include <sstream>
 

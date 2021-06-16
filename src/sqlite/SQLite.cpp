@@ -21,7 +21,7 @@
 
 #include "SQLite.h"
 
-#include "extern/sqlite3.h"
+#include "sqlite3.h"
 
 #include <core/RandomUUID.h>
 

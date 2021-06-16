@@ -10,5 +10,6 @@ waLBerla_add_module( DEPENDS core
                              field
                              python_coupling
                              stencil )
+target_link_libraries(geometry PRIVATE lodepng)
 
 ###################################################################################################
