@@ -424,7 +424,9 @@ def get_vectorize_instruction_set(generation_context):
         if supported_instruction_sets:
             return supported_instruction_sets[-1]
         else:  # if cpuinfo package is not installed
-            warnings.warn("Could not obtain supported vectorization instruction sets - defaulting to sse")
+            warnings.warn("Could not obtain supported vectorization instruction sets - defaulting to sse. "\
+                           "This problem can probably be fixed by installing py-cpuinfo. This package can "\
+                           "gather the needed hardware information.")
             return 'sse'
     else:
         return None
