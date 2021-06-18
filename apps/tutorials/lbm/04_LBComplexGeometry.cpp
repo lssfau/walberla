@@ -162,8 +162,13 @@ int main(int argc, char** argv)
 
    WALBERLA_LOG_INFO_ON_ROOT("Octree has height " << distanceOctree->height())
 
+   //! [octreeVTK]
    // write distance octree to file
-   distanceOctree->writeVTKOutput("distanceOctree");
+   WALBERLA_ROOT_SECTION()
+   {
+      distanceOctree->writeVTKOutput("distanceOctree");
+   }
+   //! [octreeVTK]
 
    ///////////////////////////
    /// CREATE BLOCK FOREST ///
