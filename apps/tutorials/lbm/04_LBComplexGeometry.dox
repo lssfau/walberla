@@ -59,6 +59,9 @@ After calling this function, we prepare for building the distance octree by prec
 From this information we can finally build the distance octree. It stores information about how close or far boundaries are to each other. Later, this information could be used for e.g. adaptive mesh refinement (note that this will not be covered in this tutorial).
 \snippet 04_LBComplexGeometry.cpp octree
 
+When writing the distance octree to disk (e.g. for debugging purposes), care must be taken to execute the write function only on the root node:
+\snippet 04_LBComplexGeometry.cpp octreeVTK
+
 Even though we have successfully loaded the complex geometry and set up the corresponding distance octree, we have not defined our computational LB domain yet.
 In this tutorial, the LB domain is defined relatively to the loaded geometry. Henceforth, we calculate the axis-aligned bounding box of the geometry and scale it to our needs.
 Here, we chose our channel to be 10x3x1 times the size of the Stanford Bunny. This scaling is defined in the parameter file (parameter: domainScaling).
