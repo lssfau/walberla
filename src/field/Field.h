@@ -253,10 +253,10 @@ namespace field {
 
       inline Layout layout() const { return layout_; }
 
-      cell_idx_t xStride() const { return xfact_; }
-      cell_idx_t yStride() const { return yfact_; }
-      cell_idx_t zStride() const { return zfact_; }
-      cell_idx_t fStride() const { return ffact_; }
+      int64_t xStride() const { return xfact_; }
+      int64_t yStride() const { return yfact_; }
+      int64_t zStride() const { return zfact_; }
+      int64_t fStride() const { return ffact_; }
 
       cell_idx_t xOff() const { return xOff_; }
       cell_idx_t yOff() const { return yOff_; }
@@ -369,10 +369,10 @@ namespace field {
       Layout layout_;        //!< Determines in which order the values are stored
 
       uint_t     allocSize_; //!< The overall size of the T* (padding included)
-      cell_idx_t ffact_;     //!< Access multiplication factor for the f-dimension.
-      cell_idx_t xfact_;     //!< Access multiplication factor for the x-dimension.
-      cell_idx_t yfact_;     //!< Access multiplication factor for the y-dimension.
-      cell_idx_t zfact_;     //!< Access multiplication factor for the z-dimension.
+      int64_t ffact_;     //!< Access multiplication factor for the f-dimension.
+      int64_t xfact_;     //!< Access multiplication factor for the x-dimension.
+      int64_t yfact_;     //!< Access multiplication factor for the y-dimension.
+      int64_t zfact_;     //!< Access multiplication factor for the z-dimension.
 
       shared_ptr<FieldAllocator<T> > allocator_; //!< Allocator for the field
 

@@ -1,9 +1,9 @@
 from pystencils.field import fields
 
-from lbmpy.advanced_streaming.utility import get_timesteps, Timestep
+from lbmpy.advanced_streaming.utility import get_timesteps
 from lbmpy.macroscopic_value_kernels import macroscopic_values_setter
 from lbmpy.stencils import get_stencil
-from lbmpy.creationfunctions import create_lb_collision_rule, create_lb_method, create_lb_update_rule
+from lbmpy.creationfunctions import create_lb_collision_rule
 from lbmpy.boundaries import NoSlip, UBB, ExtrapolationOutflow
 
 from pystencils_walberla import CodeGeneration, generate_sweep, generate_info_header

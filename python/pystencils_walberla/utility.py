@@ -11,7 +11,8 @@ def generate_info_header(ctx: CodeGenerationContext,
                          field_typedefs: dict = None,
                          additional_headers: set = None,
                          headers_to_ignore: set = None,
-                         additional_typedefs: dict = None):
+                         additional_typedefs: dict = None,
+                         additional_code: str = ""):
     """Generates an info header, consolidating required information about the generated code.
     The info header #includes all generated header files, and is thus the only header the
     application needs to #include. It can also contain aliases for waLBerla stencil types and
@@ -24,7 +25,8 @@ def generate_info_header(ctx: CodeGenerationContext,
         field_typedefs: dict mapping type names to pystencils `Field` instances
         additional_headers: additional header files to be included
         headers_to_ignore: headers which should not be included
-        additional_typedefs: dict mapping aliases to types.
+        additional_typedefs: dict mapping aliases to types
+        additional_code: additional code which gets appended on the file
     """
     stencil_typedefs = stencil_typedefs if stencil_typedefs is not None else dict()
     field_typedefs = field_typedefs if field_typedefs is not None else dict()
@@ -50,7 +52,7 @@ def generate_info_header(ctx: CodeGenerationContext,
     if path.splitext(filename)[1] not in HEADER_EXTENSIONS:
         filename += '.h'
 
-    ctx.write_file(filename, lines)
+    ctx.write_file(filename, lines + additional_code)
 
 
 #   ------------------------------------- INTERNAL -------------------------------------------------------------

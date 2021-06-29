@@ -33,6 +33,7 @@
 #include "field/all.h"
 #include "geometry/all.h"
 #include "gui/all.h"
+#include "inplace_streaming/all.h"
 #include "lattice_model/all.h"
 #include "refinement/all.h"
 #include "sweeps/all.h"
