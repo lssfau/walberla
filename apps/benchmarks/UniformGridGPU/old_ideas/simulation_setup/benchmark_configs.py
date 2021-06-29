@@ -11,6 +11,7 @@ import os
 import waLBerla as wlb
 from waLBerla.tools.config import block_decomposition
 from waLBerla.tools.sqlitedb import sequenceValuesToScalars, checkAndUpdateSchema, storeSingle
+from copy import deepcopy
 from functools import reduce
 import operator
 import sys
@@ -19,7 +20,7 @@ import sqlite3
 # Number of time steps run for a workload of 128^3 per GPU
 # if double as many cells are on the GPU, half as many time steps are run etc.
 # increase this to get more reliable measurements
-TIME_STEPS_FOR_128_BLOCK = 500
+TIME_STEPS_FOR_128_BLOCK = 200
 DB_FILE = "gpu_benchmark.sqlite3"
 
 BASE_CONFIG = {
@@ -60,58 +61,20 @@ def domain_block_size_ok(block_size, total_mem, gls=1, q=27, size_per_value=8):
 
 
 class Scenario:
-    def __init__(self, cells_per_block=(256, 128, 128), periodic=(1, 1, 1), cuda_blocks=(256, 1, 1),
-                 timesteps=None, time_step_strategy="normal", omega=1.8, cuda_enabled_mpi=False,
-                 inner_outer_split=(1, 1, 1), warmup_steps=5, outer_iterations=3, init_shear_flow=False,
-                 additional_info=None):
-
-        self.blocks = block_decomposition(wlb.mpi.numProcesses())
-
-        self.cells_per_block = cells_per_block
-        self.periodic = periodic
-
-        self.time_step_strategy = time_step_strategy
-        self.omega = omega
-        self.timesteps = timesteps if timesteps else num_time_steps(cells_per_block)
-        self.cuda_enabled_mpi = cuda_enabled_mpi
-        self.inner_outer_split = inner_outer_split
-        self.init_shear_flow = init_shear_flow
-        self.warmup_steps = warmup_steps
-        self.outer_iterations = outer_iterations
-        self.cuda_blocks = cuda_blocks
-
-        self.vtk_write_frequency = 0
-
-        self.config_dict = self.config(print_dict=False)
-        self.additional_info = additional_info
+    def __init__(self, cells_per_block=(256, 128, 128), db_file=DB_FILE, **kwargs):
+        self.db_file = db_file
+        self.config_dict = deepcopy(BASE_CONFIG)
+        self.config_dict['Parameters'].update(kwargs)
+        self.config_dict['DomainSetup']['blocks'] = block_decomposition(wlb.mpi.numProcesses())
+        self.config_dict['DomainSetup']['cellsPerBlock'] = cells_per_block
 
     @wlb.member_callback
-    def config(self, print_dict=True):
+    def config(self):
         from pprint import pformat
-        config_dict = {
-            'DomainSetup': {
-                'blocks': self.blocks,
-                'cellsPerBlock': self.cells_per_block,
-                'periodic': self.periodic,
-            },
-            'Parameters': {
-                'omega': self.omega,
-                'cudaEnabledMPI': self.cuda_enabled_mpi,
-                'warmupSteps': self.warmup_steps,
-                'outerIterations': self.outer_iterations,
-                'timeStepStrategy': self.time_step_strategy,
-                'timesteps': self.timesteps,
-                'initShearFlow': self.init_shear_flow,
-                'gpuBlockSize': self.cuda_blocks,
-                'innerOuterSplit': self.inner_outer_split,
-                'vtkWriteFrequency': self.vtk_write_frequency
-            }
-        }
-        if print_dict:
-            wlb.log_info_on_root("Scenario:\n" + pformat(config_dict))
-            if self.additional_info:
-                wlb.log_info_on_root("Additional Info:\n" + pformat(self.additional_info))
-        return config_dict
+        wlb.log_info_on_root("Scenario:\n" + pformat(self.config_dict))
+        # Write out the configuration as text-based prm:
+        # print(toPrm(self.config_dict))
+        return self.config_dict
 
     @wlb.member_callback
     def results_callback(self, **kwargs):
@@ -119,10 +82,6 @@ class Scenario:
         data.update(self.config_dict['Parameters'])
         data.update(self.config_dict['DomainSetup'])
         data.update(kwargs)
-
-        if self.additional_info is not None:
-            data.update(self.additional_info)
-
         data['executable'] = sys.argv[0]
         data['compile_flags'] = wlb.build_info.compiler_flags
         data['walberla_version'] = wlb.build_info.version
@@ -135,26 +94,11 @@ class Scenario:
         # check multiple times e.g. may fail when multiple benchmark processes are running
         for num_try in range(num_tries):
             try:
-                checkAndUpdateSchema(result, "runs", DB_FILE)
-                storeSingle(result, "runs", DB_FILE)
+                checkAndUpdateSchema(result, "runs", self.db_file)
+                storeSingle(result, "runs", self.db_file)
                 break
             except sqlite3.OperationalError as e:
-                wlb.log_warning(f"Sqlite DB writing failed: try {num_try + 1}/{num_tries}  {str(e)}")
-
-
-# -------------------------------------- Profiling -----------------------------------
-def profiling():
-    """Tests different communication overlapping strategies"""
-    wlb.log_info_on_root("Running 2 timesteps for profiling")
-    wlb.log_info_on_root("")
-
-    scenarios = wlb.ScenarioManager()
-    cells = (128, 128, 128)
-    cuda_enabled_mpi = False
-
-    scenarios.add(Scenario(cells_per_block=cells, time_step_strategy='kernelOnly',
-                           inner_outer_split=(1, 1, 1), timesteps=2, cuda_enabled_mpi=cuda_enabled_mpi,
-                           outer_iterations=1, warmup_steps=0))
+                wlb.log_warning("Sqlite DB writing failed: try {}/{}  {}".format(num_try + 1, num_tries, str(e)))
 
 
 # -------------------------------------- Functions trying different parameter sets -----------------------------------
@@ -166,21 +110,52 @@ def overlap_benchmark():
     wlb.log_info_on_root("")
 
     scenarios = wlb.ScenarioManager()
-    cuda_enabled_mpi = False
     inner_outer_splits = [(1, 1, 1), (4, 1, 1), (8, 1, 1), (16, 1, 1), (32, 1, 1),
                           (4, 4, 1), (8, 8, 1), (16, 16, 1), (32, 32, 1),
                           (4, 4, 4), (8, 8, 8), (16, 16, 16), (32, 32, 32)]
 
-    # no overlap
-    scenarios.add(Scenario(time_step_strategy='noOverlap',
-                           inner_outer_split=(1, 1, 1),
-                           cuda_enabled_mpi=cuda_enabled_mpi))
+    # 'GPUPackInfo_Baseline', 'GPUPackInfo_Streams'
+    for comm_strategy in ['UniformGPUScheme_Baseline', 'UniformGPUScheme_Memcpy']:
+        # no overlap
+        scenarios.add(Scenario(timeStepStrategy='noOverlap', communicationScheme=comm_strategy,
+                               innerOuterSplit=(1, 1, 1)))
 
-    for inner_outer_split in inner_outer_splits:
-        scenario = Scenario(time_step_strategy='simpleOverlap',
-                            inner_outer_split=inner_outer_split,
-                            cuda_enabled_mpi=cuda_enabled_mpi)
-        scenarios.add(scenario)
+        # overlap
+        for overlap_strategy in ['simpleOverlap', 'complexOverlap']:
+            for inner_outer_split in inner_outer_splits:
+                scenario = Scenario(timeStepStrategy=overlap_strategy,
+                                    communicationScheme=comm_strategy,
+                                    innerOuterSplit=inner_outer_split,
+                                    timesteps=num_time_steps((256, 128, 128)))
+                scenarios.add(scenario)
+
+
+def communication_compare():
+    """Tests different communication strategies"""
+    wlb.log_info_on_root("Running benchmarks to compare communication strategies")
+    wlb.log_info_on_root("")
+
+    scenarios = wlb.ScenarioManager()
+    for block_size in [(128, 128, 128), (32, 32, 32), (64, 64, 64), (256, 256, 256)]:
+        for comm_strategy in ['UniformGPUScheme_Baseline', 'UniformGPUScheme_Memcpy']:
+
+            sc = Scenario(cells_per_block=block_size,
+                          gpuBlockSize=(128, 1, 1),
+                          timeStepStrategy='noOverlap',
+                          communicationScheme=comm_strategy,
+                          timesteps=num_time_steps(block_size))
+            scenarios.add(sc)
+            for inner_outer_split in [(4, 1, 1), (8, 1, 1), (16, 1, 1), (32, 1, 1)]:
+                # ensure that the inner part of the domain is still large enough
+                if 3 * inner_outer_split[0] > block_size[0]:
+                    continue
+                sc = Scenario(cells_per_block=block_size,
+                              gpuBlockSize=(128, 1, 1),
+                              timeStepStrategy='simpleOverlap',
+                              innerOuterSplit=inner_outer_split,
+                              communicationScheme=comm_strategy,
+                              timesteps=num_time_steps(block_size))
+                scenarios.add(sc)
 
 
 def single_gpu_benchmark():
@@ -192,12 +167,12 @@ def single_gpu_benchmark():
     gpu_mem = gpu_mem_gb * (2 ** 30)
     gpu_type = os.environ.get('GPU_TYPE')
 
-    additional_info = {}
+    kwargs = {}
     if gpu_type is not None:
-        additional_info['gpu_type'] = gpu_type
+        kwargs['gpu_type'] = gpu_type
 
     scenarios = wlb.ScenarioManager()
-    block_sizes = [(i, i, i) for i in (64, 128, 256, 320, 384, 448, 512)]
+    block_sizes = [(i, i, i) for i in (64, 128, 256, 384)] + [(512, 512, 128)]
     cuda_blocks = [(32, 1, 1), (64, 1, 1), (128, 1, 1), (256, 1, 1), (512, 1, 1),
                    (32, 2, 1), (64, 2, 1), (128, 2, 1), (256, 2, 1),
                    (32, 4, 1), (64, 4, 1), (128, 4, 1),
@@ -212,10 +187,10 @@ def single_gpu_benchmark():
                 wlb.log_info_on_root(f"Block size {block_size} would exceed GPU memory. Skipping.")
                 continue
             scenario = Scenario(cells_per_block=block_size,
-                                cuda_blocks=cuda_block_size,
-                                time_step_strategy='kernelOnly',
+                                gpuBlockSize=cuda_block_size,
+                                timeStepStrategy='kernelOnly',
                                 timesteps=num_time_steps(block_size),
-                                additional_info=additional_info)
+                                **kwargs)
             scenarios.add(scenario)
 
 
@@ -297,9 +272,10 @@ if __name__ == '__main__':
     print("Called without waLBerla - generating job scripts for PizDaint")
     generate_jobscripts()
 else:
-    wlb.log_info_on_root(f"Batch run of benchmark scenarios, saving result to {DB_FILE}")
+    wlb.log_info_on_root("Batch run of benchmark scenarios, saving result to {}".format(DB_FILE))
     # Select the benchmark you want to run
-    single_gpu_benchmark()  # benchmarks different CUDA block sizes and domain sizes and measures single GPU
-    # performance of compute kernel (no communication)
-    # overlap_benchmark()  # benchmarks different communication overlap options
-    # profiling()  # run only two timesteps on a smaller domain for profiling only
+    single_gpu_benchmark()
+    # benchmarks different CUDA block sizes and domain sizes and measures single
+    # GPU performance of compute kernel (no communication)
+    # communication_compare(): benchmarks different communication routines, with and without overlap
+    # overlap_benchmark(): benchmarks different communication overlap options

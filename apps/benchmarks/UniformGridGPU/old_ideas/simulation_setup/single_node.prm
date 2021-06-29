@@ -8,6 +8,7 @@ DomainSetup
 
 Parameters
 {
+    initShearFlow False;
     cudaEnabledMPI False;           // set to true, if MPI was compiled with CUDA
     outerIterations 3;              // number of measurements to make
     timeStepStrategy simpleOverlap; // one of simpleOverlap, noOverlap, the non-AA version also supports complexOverlap
@@ -34,4 +35,11 @@ Parameters
     //   MPIDatatypesFull:           same as above but sends all PDFs
     //   GPUPackInfo_Baseline:       old implementation based on communication mechanism for CPUs
     //   GPUPackInfo_Streams:        same as above but with CUDA streams
+}
+
+Boundaries {
+    Border { direction T; walldistance -1; flag UBB; }
+    Border { direction B; walldistance -1; flag NoSlip; }
+    Border { direction W; walldistance -1; flag NoSlip; }
+    Border { direction E; walldistance -1; flag NoSlip; }
 }
