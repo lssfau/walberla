@@ -1011,11 +1011,18 @@ endif()
 option ( WALBERLA_THREAD_SAFE_LOGGING "Enables/Disables thread-safe logging" ON )
 
 if ( WALBERLA_BUILD_WITH_OPENMP )
+    if( APPLE AND EXISTS /opt/local/lib/libomp AND EXISTS /opt/local/include/libomp ) # find libomp from MacPorts
+        set( CMAKE_FRAMEWORK_PATH /opt/local/lib/libomp )
+        set( CMAKE_INCLUDE_PATH /opt/local/include/libomp )
+    endif()
     find_package( OpenMP )
     if (OpenMP_FOUND)
         add_flag ( CMAKE_C_FLAGS   "${OpenMP_C_FLAGS}" )
         add_flag ( CMAKE_CXX_FLAGS "${OpenMP_CXX_FLAGS}" )
         list ( APPEND SERVICE_LIBS ${OpenMP_CXX_LIBRARIES} )
+        if( OpenMP_CXX_INCLUDE_DIRS )
+            include_directories( ${OpenMP_CXX_INCLUDE_DIRS} )
+        endif()
     else()
         #workarounds
         if ( WALBERLA_CXX_COMPILER_IS_NEC )
