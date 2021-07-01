@@ -271,8 +271,8 @@ namespace stencil {
 
    /// Maps (direction,axis) pair to direction
    /// \param axis     0,1 or 2 standing for x,y,z
-   /// \param minOrMax if false, the direction pointing in the negative axis direction is returned,
-   ///                 if true, the positive axis direction
+   /// \param minOrMax if true, the direction pointing in the negative axis direction is returned,
+   ///                 if false, the positive axis direction
    inline Direction directionFromAxis( int axis, bool minOrMax )
    {
       WALBERLA_ASSERT_LESS( axis, 3 );
@@ -288,8 +288,8 @@ namespace stencil {
 
    /// Maps (direction,axis) pair to direction
    /// \param axis     0,1 or 2 standing for x,y,z
-   /// \param minOrMax if false, the direction pointing in the negative axis direction is returned,
-   ///                 if true, the positive axis direction
+   /// \param minOrMax if true, the direction pointing in the negative axis direction is returned,
+   ///                 if false, the positive axis direction
    inline Direction directionFromAxis( uint_t axis, bool minOrMax )
    {
       WALBERLA_ASSERT_LESS( axis, 3 );
