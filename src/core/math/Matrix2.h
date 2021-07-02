@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -830,12 +830,12 @@ inline const Matrix2<Type> fabs( const Matrix2<Type>& m );
 // \param matrix The right-hand-side matrix for the multiplication.
 // \return The scaled result matrix.
 */
-//template< typename Type, typename Other >
-//inline const Matrix2<HIGH> operator*( Other scalar, const Matrix2<Type>& matrix )
-//{
-//   static_assert( ! std::is_scalar<Other>::value, "Only scalar types allowed" );
-//   return matrix*scalar;
-//}
+template< typename Type, typename Other >
+inline typename std::enable_if< std::is_fundamental< Other >::value, Matrix2< HIGH > >::type
+operator*(Other scalar, const Matrix2< Type >& matrix)
+{
+   return matrix * scalar;
+}
 //**********************************************************************************************************************
 
 
