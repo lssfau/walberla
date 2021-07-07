@@ -92,7 +92,6 @@ intel_19_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -117,7 +116,6 @@ intel_19_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -140,7 +138,6 @@ intel_19_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -159,7 +156,6 @@ intel_19_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -182,7 +178,6 @@ intel_19_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -203,7 +198,6 @@ intel_19_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -237,7 +231,6 @@ gcc_7_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -261,7 +254,6 @@ gcc_7_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -283,7 +275,6 @@ gcc_7_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -304,7 +295,6 @@ gcc_7_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -330,7 +320,6 @@ gcc_7_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -353,7 +342,6 @@ gcc_7_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -388,7 +376,6 @@ gcc_8_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -412,7 +399,6 @@ gcc_8_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -434,7 +420,6 @@ gcc_8_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -455,7 +440,6 @@ gcc_8_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -480,7 +464,6 @@ gcc_8_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -503,7 +486,6 @@ gcc_8_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -541,7 +523,6 @@ gcc_9_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -563,7 +544,6 @@ gcc_9_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -583,7 +563,6 @@ gcc_9_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -602,7 +581,6 @@ gcc_9_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -625,7 +603,6 @@ gcc_9_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -646,7 +623,6 @@ gcc_9_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -681,7 +657,6 @@ gcc_10_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -703,7 +678,6 @@ gcc_10_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -723,7 +697,6 @@ gcc_10_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -742,7 +715,6 @@ gcc_10_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -765,7 +737,6 @@ gcc_10_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -786,7 +757,6 @@ gcc_10_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -821,7 +791,6 @@ gcc_11_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -843,7 +812,6 @@ gcc_11_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -864,7 +832,6 @@ gcc_11_hybrid:
    stage: pretest
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -880,7 +847,6 @@ gcc_11_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -900,7 +866,6 @@ gcc_11_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -918,7 +883,6 @@ gcc_11_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -947,7 +911,6 @@ clang_6.0_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -971,7 +934,6 @@ clang_6.0_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -993,7 +955,6 @@ clang_6.0_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1014,7 +975,6 @@ clang_6.0_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1039,7 +999,6 @@ clang_6.0_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1062,7 +1021,6 @@ clang_6.0_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1097,7 +1055,6 @@ clang_7.0_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1121,7 +1078,6 @@ clang_7.0_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1143,7 +1099,6 @@ clang_7.0_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1164,7 +1119,6 @@ clang_7.0_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1189,7 +1143,6 @@ clang_7.0_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1212,7 +1165,6 @@ clang_7.0_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1250,7 +1202,6 @@ clang_8.0_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1274,7 +1225,6 @@ clang_8.0_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1296,7 +1246,6 @@ clang_8.0_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1317,7 +1266,6 @@ clang_8.0_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1342,7 +1290,6 @@ clang_8.0_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1365,7 +1312,6 @@ clang_8.0_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1403,7 +1349,6 @@ clang_9.0_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1427,7 +1372,6 @@ clang_9.0_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1449,7 +1393,6 @@ clang_9.0_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1470,7 +1413,6 @@ clang_9.0_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1495,7 +1437,6 @@ clang_9.0_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1518,7 +1459,6 @@ clang_9.0_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1556,7 +1496,6 @@ clang_10.0_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1580,7 +1519,6 @@ clang_10.0_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1602,7 +1540,6 @@ clang_10.0_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1620,7 +1557,6 @@ clang_10.0_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1642,7 +1578,6 @@ clang_10.0_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1662,7 +1597,6 @@ clang_10.0_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1695,7 +1629,6 @@ inteloneapi_21.2_serial:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1719,7 +1652,6 @@ inteloneapi_21.2_mpionly:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1741,7 +1673,6 @@ inteloneapi_21.2_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1759,7 +1690,6 @@ inteloneapi_21.2_serial_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1781,7 +1711,6 @@ inteloneapi_21.2_mpionly_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1801,7 +1730,6 @@ inteloneapi_21.2_hybrid_dbg:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
    before_script:
       - pip3 install lbmpy jinja2 pytest
-      - export LD_PRELOAD=/opt/intel/oneapi/intelpython/latest/lib/libimf.so
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
