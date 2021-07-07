@@ -13,20 +13,11 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file CalculateNormals.h
-//! \author Markus Holzer <markus.holzer@fau.de>
+//! \file all.h
+//! \author Frederik Hennig <frederik.hennig@fau.de>
 //
 //======================================================================================================================
 
-#include "blockforest/StructuredBlockForest.h"
+#pragma once
 
-#include "domain_decomposition/BlockDataID.h"
-#include "domain_decomposition/IBlock.h"
-
-#include "field/FlagField.h"
-
-namespace walberla
-{
-void calculate_normals(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID normalsFieldID,
-                       ConstBlockDataID flagFieldID, FlagUID fluidFlagUID, FlagUID boundaryFlagUID);
-}
+#include "TimestepTracker.h"

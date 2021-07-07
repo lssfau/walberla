@@ -29,10 +29,10 @@ namespace lbm
 class TimestepTracker
 {
  private:
-   uint8_t counter_;
+   uint8_t counter_{ 0 };
 
  public:
-   TimestepTracker() : counter_(0) {}
+   TimestepTracker() = default;
    TimestepTracker(uint8_t zeroth_timestep) : counter_(zeroth_timestep & 1) {}
 
    void advance() { counter_ = (counter_ + 1) & 1; }
@@ -43,6 +43,7 @@ class TimestepTracker
    }
 
    uint8_t getCounter() const { return counter_; }
+   uint8_t getCounterPlusOne() const { return (counter_ + 1) & 1; }
 
 }; // class TimestepTracker
 

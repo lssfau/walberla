@@ -4,7 +4,7 @@
 #
 ###################################################################################################
 
-waLBerla_add_module( DEPENDS blockforest core communication domain_decomposition executiontree field stencil
+waLBerla_add_module( DEPENDS blockforest core communication domain_decomposition executiontree field stencil lbm
                      BUILD_ONLY_IF_FOUND CUDA )
 
 ###################################################################################################

@@ -133,6 +133,20 @@ protected:
 
 
 
+//**********************************************************************************************************************
+/*! \brief Write the distance octree to a VTK file.
+ * 
+ * This method should only be called by the root process:
+ * \code
+     WALBERLA_ROOT_SECTION()
+     {
+        distanceOctree->writeVTKOutput("distanceOctree");
+     }
+ * \endcode
+ *
+ * \param filestem name of the VTK file without extension
+ */
+//**********************************************************************************************************************
 template <typename MeshType>
 void DistanceOctree<MeshType>::writeVTKOutput( const std::string & filestem ) const
 {
