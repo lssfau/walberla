@@ -5,11 +5,12 @@ from pystencils import AssignmentCollection
 from lbmpy.creationfunctions import create_lb_method, create_lb_update_rule
 from lbmpy.stencils import get_stencil
 
-from pystencils_walberla import CodeGeneration, generate_sweep, generate_pack_info_from_kernel
+from pystencils_walberla import CodeGeneration, generate_sweep, generate_pack_info_for_field
+from lbmpy_walberla import generate_lb_pack_info
 
 from lbmpy.phasefield_allen_cahn.kernel_equations import initializer_kernel_phase_field_lb, \
     initializer_kernel_hydro_lb, interface_tracking_force, \
-    hydrodynamic_force, get_collision_assignments_hydro
+    hydrodynamic_force, get_collision_assignments_hydro, get_collision_assignments_phase
 
 from lbmpy.phasefield_allen_cahn.force_model import MultiphaseForceModel
 
@@ -52,6 +53,7 @@ w_c = 1.0 / (0.5 + (3.0 * M))
 u = fields(f"vel_field({dimensions}): [{dimensions}D]", layout='fzyx')
 # phase-field
 C = fields(f"phase_field: [{dimensions}D]", layout='fzyx')
+C_tmp = fields(f"phase_field_tmp: [{dimensions}D]", layout='fzyx')
 
 # phase-field distribution functions
 h = fields(f"lb_phase_field({q_phase}): [{dimensions}D]", layout='fzyx')
@@ -88,32 +90,26 @@ h_updates = initializer_kernel_phase_field_lb(h, C, u, method_phase, W)
 g_updates = initializer_kernel_hydro_lb(g, u, method_hydro)
 
 
-force_h = [f / 3 for f in interface_tracking_force(C, stencil_phase, W)]
+force_h = [f / 3 for f in interface_tracking_force(C, stencil_phase, W, fd_stencil=get_stencil("D3Q27"))]
 force_model_h = MultiphaseForceModel(force=force_h)
 
-force_g = hydrodynamic_force(g, C, method_hydro, relaxation_time, density_liquid, density_gas, kappa, beta, body_force)
+force_g = hydrodynamic_force(g, C, method_hydro, relaxation_time, density_liquid, density_gas, kappa, beta, body_force,
+                             fd_stencil=get_stencil("D3Q27"))
 
-h_tmp_symbol_list = [h_tmp.center(i) for i, _ in enumerate(stencil_phase)]
-sum_h = np.sum(h_tmp_symbol_list[:])
+force_model_g = MultiphaseForceModel(force=force_g, rho=density)
 
 ####################
 # LBM UPDATE RULES #
 ####################
 
-method_phase.set_force_model(force_model_h)
+phase_field_LB_step = get_collision_assignments_phase(lb_method=method_phase,
+                                                      velocity_input=u,
+                                                      output={'density': C_tmp},
+                                                      force_model=force_model_h,
+                                                      symbolic_fields={"symbolic_field": h,
+                                                                       "symbolic_temporary_field": h_tmp},
+                                                      kernel_type='stream_pull_collide')
 
-phase_field_LB_step = create_lb_update_rule(lb_method=method_phase,
-                                            velocity_input=u,
-                                            compressible=True,
-                                            optimization={"symbolic_field": h,
-                                                          "symbolic_temporary_field": h_tmp},
-                                            kernel_type='stream_pull_collide')
-
-
-phase_field_LB_step.set_main_assignments_from_dict({**phase_field_LB_step.main_assignments_dict, **{C.center: sum_h}})
-
-phase_field_LB_step = AssignmentCollection(main_assignments=phase_field_LB_step.main_assignments,
-                                           subexpressions=phase_field_LB_step.subexpressions)
 phase_field_LB_step = sympy_cse(phase_field_LB_step)
 
 # ---------------------------------------------------------------------------------------------------------
@@ -121,17 +117,11 @@ phase_field_LB_step = sympy_cse(phase_field_LB_step)
 hydro_LB_step = get_collision_assignments_hydro(lb_method=method_hydro,
                                                 density=density,
                                                 velocity_input=u,
-                                                force=force_g,
-                                                sub_iterations=1,
+                                                force_model=force_model_g,
+                                                sub_iterations=2,
                                                 symbolic_fields={"symbolic_field": g,
                                                                  "symbolic_temporary_field": g_tmp},
                                                 kernel_type='collide_stream_push')
-
-# streaming of the hydrodynamic distribution
-stream_hydro = create_lb_update_rule(stencil=stencil_hydro,
-                                     optimization={"symbolic_field": g,
-                                                   "symbolic_temporary_field": g_tmp},
-                                     kernel_type='stream_pull_only')
 
 ###################
 # GENERATE SWEEPS #
@@ -161,7 +151,7 @@ with CodeGeneration() as ctx:
         generate_sweep(ctx, 'initialize_velocity_based_distributions', g_updates)
 
         generate_sweep(ctx, 'phase_field_LB_step', phase_field_LB_step,
-                       field_swaps=[(h, h_tmp)],
+                       field_swaps=[(h, h_tmp), (C, C_tmp)],
                        inner_outer_split=True,
                        cpu_vectorize_info=cpu_vec)
 
@@ -171,12 +161,13 @@ with CodeGeneration() as ctx:
                        cpu_vectorize_info=cpu_vec)
 
         # communication
-        generate_pack_info_from_kernel(ctx, 'PackInfo_phase_field_distributions',
-                                       phase_field_LB_step.main_assignments, target='cpu')
-        generate_pack_info_from_kernel(ctx, 'PackInfo_phase_field',
-                                       hydro_LB_step.all_assignments, target='cpu', kind='pull')
-        generate_pack_info_from_kernel(ctx, 'PackInfo_velocity_based_distributions',
-                                       hydro_LB_step.all_assignments, target='cpu', kind='push')
+        generate_lb_pack_info(ctx, 'PackInfo_phase_field_distributions', stencil_phase, h,
+                              streaming_pattern='pull', target='cpu')
+
+        generate_lb_pack_info(ctx, 'PackInfo_velocity_based_distributions', stencil_hydro, g,
+                              streaming_pattern='push', target='cpu')
+
+        generate_pack_info_for_field(ctx, 'PackInfo_phase_field', C, target='cpu')
 
         ctx.write_file("GenDefines.h", info_header)
 
@@ -187,7 +178,7 @@ with CodeGeneration() as ctx:
                        g_updates, target='gpu')
 
         generate_sweep(ctx, 'phase_field_LB_step', phase_field_LB_step,
-                       field_swaps=[(h, h_tmp)],
+                       field_swaps=[(h, h_tmp), (C, C_tmp)],
                        inner_outer_split=True,
                        target='gpu',
                        gpu_indexing_params=sweep_params,
@@ -200,12 +191,13 @@ with CodeGeneration() as ctx:
                        gpu_indexing_params=sweep_params,
                        varying_parameters=vp)
         # communication
-        generate_pack_info_from_kernel(ctx, 'PackInfo_phase_field_distributions',
-                                       phase_field_LB_step.main_assignments, target='gpu')
-        generate_pack_info_from_kernel(ctx, 'PackInfo_phase_field',
-                                       hydro_LB_step.all_assignments, target='gpu', kind='pull')
-        generate_pack_info_from_kernel(ctx, 'PackInfo_velocity_based_distributions',
-                                       hydro_LB_step.all_assignments, target='gpu', kind='push')
+        generate_lb_pack_info(ctx, 'PackInfo_phase_field_distributions', stencil_phase, h,
+                              streaming_pattern='pull', target='gpu')
+
+        generate_lb_pack_info(ctx, 'PackInfo_velocity_based_distributions', stencil_hydro, g,
+                              streaming_pattern='push', target='gpu')
+
+        generate_pack_info_for_field(ctx, 'PackInfo_phase_field', C, target='gpu')
 
         ctx.write_file("GenDefines.h", info_header)
 

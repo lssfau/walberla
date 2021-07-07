@@ -14,8 +14,8 @@ class Scenario:
 
         # simulation parameters
         self.timesteps = 10000
-        self.cells = (64, 32, 64)
-        self.blocks = (1, 4, 1)
+        self.cells = (32, 32, 64)
+        self.blocks = (2, 4, 1)
         self.periodic = (0, 0, 0)
         self.size = (self.cells[0] * self.blocks[0],
                      self.cells[1] * self.blocks[1],
@@ -38,6 +38,8 @@ class Scenario:
                                                                 reynolds_number=40,
                                                                 density_ratio=1000,
                                                                 viscosity_ratio=100)
+
+        self.interface_thickness = 5
 
         # everything else
         self.dbFile = "risingBubble3D.db"
@@ -72,6 +74,7 @@ class Scenario:
                 'gravitational_acceleration': self.parameters["gravitational_acceleration"],
                 'relaxation_time_liquid': self.parameters.get("relaxation_time_heavy"),
                 'relaxation_time_gas': self.parameters.get("relaxation_time_light"),
+                'interface_thickness': self.interface_thickness
             },
             'Boundaries': {
                 'Border': [

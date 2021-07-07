@@ -86,7 +86,6 @@ using FlagField_T      = FlagField< flag_t >;
 #if defined(WALBERLA_BUILD_WITH_CUDA)
 typedef cuda::GPUField< real_t > GPUField;
 #endif
-// using CommScheme_T = cuda::communication::UniformGPUScheme<stencil::D2Q9>;
 
 int main(int argc, char** argv)
 {
@@ -185,7 +184,7 @@ int main(int argc, char** argv)
       auto Comm_velocity_based_distributions =
          make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, 0);
       auto generatedPackInfo_velocity_based_distributions =
-         make_shared< pystencils::PackInfo_velocity_based_distributions >(lb_velocity_field_gpu);
+         make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field_gpu);
       Comm_velocity_based_distributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
       auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field_gpu);
       Comm_velocity_based_distributions->addPackInfo(generatedPackInfo_phase_field);
@@ -193,7 +192,7 @@ int main(int argc, char** argv)
       auto Comm_phase_field_distributions =
          make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, 0);
       auto generatedPackInfo_phase_field_distributions =
-         make_shared< pystencils::PackInfo_phase_field_distributions >(lb_phase_field_gpu);
+         make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field_gpu);
       Comm_phase_field_distributions->addPackInfo(generatedPackInfo_phase_field_distributions);
 #else
 
@@ -202,14 +201,14 @@ int main(int argc, char** argv)
 
       auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field);
       auto generatedPackInfo_velocity_based_distributions =
-         make_shared< pystencils::PackInfo_velocity_based_distributions >(lb_velocity_field);
+         make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field);
 
       Comm_velocity_based_distributions.addPackInfo(generatedPackInfo_phase_field);
       Comm_velocity_based_distributions.addPackInfo(generatedPackInfo_velocity_based_distributions);
 
       blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > Comm_phase_field_distributions(blocks);
       auto generatedPackInfo_phase_field_distributions =
-         make_shared< pystencils::PackInfo_phase_field_distributions >(lb_phase_field);
+         make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field);
       Comm_phase_field_distributions.addPackInfo(generatedPackInfo_phase_field_distributions);
 #endif
 

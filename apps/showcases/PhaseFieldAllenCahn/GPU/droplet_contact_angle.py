@@ -18,25 +18,24 @@ class Scenario:
         self.overlappingWidth = (8, 1, 1)
         self.timeStepStrategy = 'normal'
 
-        self.contactAngle = 22
-
         # bubble parameters
         self.dropletRadius = 24.0
         self.dropletMidPoint = (64, 24, 64)
 
         # everything else
-        self.scenario = 1  # 1 rising bubble, 2 RTI
+        self.scenario = 1  # 1 rising bubble or droplet, 2 RTI, 3 bubble field, 4 taylor bubble set up
 
         self.counter = 0
         self.yPositions = []
 
     @wlb.member_callback
-    def config(self, **kwargs):
+    def config(self):
         return {
             'DomainSetup': {
                 'blocks': self.blocks,
                 'cellsPerBlock': self.cells,
                 'periodic': self.periodic,
+                'tube': False
             },
             'Parameters': {
                 'timesteps': self.timesteps,
@@ -45,7 +44,6 @@ class Scenario:
                 'overlappingWidth': self.overlappingWidth,
                 'remainingTimeLoggerFrequency': 10.0,
                 'scenario': self.scenario,
-                'contactAngle': self.contactAngle
             },
             'PhysicalParameters': {
                 'density_liquid': 1.0,
@@ -55,6 +53,7 @@ class Scenario:
                 'gravitational_acceleration': 0.0,
                 'relaxation_time_liquid': 3 * 0.166,
                 'relaxation_time_gas': 3 * 0.0166,
+                'interface_thickness': 5
             },
             'Boundaries': {
                 'Border': [
@@ -69,7 +68,7 @@ class Scenario:
             'Bubble': {
                 'bubbleMidPoint': self.dropletMidPoint,
                 'bubbleRadius': self.dropletRadius,
-                'bubble': False
+                'bubble': False  # this means we are simulating a droplet rather than a bubble
             },
         }
 

@@ -197,6 +197,7 @@ public:
         indexVectorInner.clear();
         indexVectorOuter.clear();
 
+        {% if inner_or_boundary -%}
         for( auto it = flagField->begin(); it != flagField->end(); ++it )
         {
             if( ! isFlagSet(it, domainFlag) )
@@ -204,11 +205,7 @@ public:
             {%- for dirIdx, dirVec, offset in additional_data_handler.stencil_info %}
             if ( isFlagSet( it.neighbor({{offset}} {%if dim == 3%}, 0 {%endif %}), boundaryFlag ) )
             {
-                {% if inner_or_boundary -%}
                 auto element = {{StructName}}(it.x(), it.y(), {%if dim == 3%} it.z(), {%endif %} {{dirIdx}} );
-                {% else -%}
-                auto element = {{StructName}}(it.x() + cell_idx_c({{dirVec[0]}}), it.y() + cell_idx_c({{dirVec[1]}}), {%if dim == 3%} it.z() + cell_idx_c({{dirVec[2]}}), {%endif %} {{additional_data_handler.inverse_directions[dirIdx]}} );
-                {% endif -%}
                 {{additional_data_handler.data_initialisation(dirIdx)|indent(16)}}
                 indexVectorAll.push_back( element );
                 if( inner.contains( it.x(), it.y(), it.z() ) )
@@ -218,6 +215,61 @@ public:
             }
             {% endfor %}
         }
+        {%else%}
+        auto flagWithGLayers = flagField->xyzSizeWithGhostLayer();
+        real_t dot = 0.0; real_t maxn = 0.0;
+        cell_idx_t calculated_idx = 0;
+        cell_idx_t dx = 0; cell_idx_t dy = 0; {%if dim == 3%}  cell_idx_t dz = 0; {% endif %}
+        cell_idx_t sum_x = 0; cell_idx_t sum_y = 0; {%if dim == 3%} cell_idx_t sum_z = 0; {%endif %}
+        for( auto it = flagField->beginWithGhostLayerXYZ(); it != flagField->end(); ++it )
+        {
+            {% if single_link -%}
+            sum_x = 0; sum_y = 0; {%if dim == 3%} sum_z = 0; {%endif %}
+            {% endif %}
+            if( ! isFlagSet(it, boundaryFlag) )
+                continue;
+            {%- for dirIdx, dirVec, offset in additional_data_handler.stencil_info %}
+            if ( flagWithGLayers.contains(it.x() + cell_idx_c({{dirVec[0]}}), it.y() + cell_idx_c({{dirVec[1]}}), it.z() + cell_idx_c({{dirVec[2]}})) && isFlagSet( it.neighbor({{offset}} {%if dim == 3%}, 0 {%endif %}), domainFlag ) )
+            {
+                {% if single_link -%}
+                sum_x += cell_idx_c({{dirVec[0]}}); sum_y += cell_idx_c({{dirVec[1]}}); {%if dim == 3%} sum_z += cell_idx_c({{dirVec[2]}}); {%endif %}
+                {% else %}
+                auto element = {{StructName}}(it.x(), it.y(), {%if dim == 3%} it.z(), {%endif %} {{dirIdx}} );
+                {{additional_data_handler.data_initialisation(dirIdx)|indent(16)}}
+                indexVectorAll.push_back( element );
+                if( inner.contains( it.x(), it.y(), it.z() ) )
+                    indexVectorInner.push_back( element );
+                else
+                    indexVectorOuter.push_back( element );
+                {% endif %}
+            }
+            {% endfor %}
+
+        {% if single_link %}
+            dot = 0.0; maxn = 0.0; calculated_idx = 0;
+            if(sum_x != 0 or sum_y !=0 {%if dim == 3%} or sum_z !=0 {%endif %})
+            {
+            {%- for dirIdx, dirVec, offset in additional_data_handler.stencil_info %}
+                dx = {{dirVec[0]}}; dy = {{dirVec[1]}}; {%if dim == 3%} dz = {{dirVec[2]}}; {% endif %}
+                dot = dx*sum_x + dy*sum_y {%if dim == 3%} + dz*sum_z {% endif %};
+                if (dot > maxn)
+                {
+                    maxn = dot;
+                    calculated_idx = {{dirIdx}};
+                }
+            {% endfor %}
+                auto element = {{StructName}}(it.x(), it.y(), {%if dim == 3%} it.z(), {%endif %} calculated_idx );
+                indexVectorAll.push_back( element );
+                if( inner.contains( it.x(), it.y(), it.z() ) )
+                indexVectorInner.push_back( element );
+                else
+                indexVectorOuter.push_back( element );
+            }
+        {% endif -%}
+
+        }
+        {% endif %}
+
         indexVectors->syncGPU();
     }
 

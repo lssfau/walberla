@@ -34,6 +34,17 @@ namespace walberla
 void initPhaseField_sphere(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID phaseFieldID, real_t R,
                            Vector3< real_t > bubbleMidPoint, bool bubble = true, real_t W = 5);
 
-void initPhaseField_RTI(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID phaseFieldID, real_t W = 5);
+void init_Taylor_bubble(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID phaseFieldID, real_t D = 5,
+                        real_t H = 2, real_t DT = 20, real_t Donut_x0 = 40);
+
+void init_bubble_field(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID phaseFieldID, real_t R,
+                       real_t W = 5);
+
+void initPhaseField_RTI(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID phaseFieldID, real_t W = 5,
+                        const bool pipe = true);
+
+void initTubeWithCylinder(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID flagFieldID,
+                          field::FlagUID boundaryFlagUID, real_t R_in, real_t eccentricity, real_t start_transition,
+                          real_t length_transition, bool const eccentricity_or_pipe_ratio);
 
 } // namespace walberla

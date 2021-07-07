@@ -13,20 +13,31 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file CalculateNormals.h
+//! \file util.h
 //! \author Markus Holzer <markus.holzer@fau.de>
 //
 //======================================================================================================================
 
-#include "blockforest/StructuredBlockForest.h"
+#include "python_coupling/DictWrapper.h"
 
-#include "domain_decomposition/BlockDataID.h"
-#include "domain_decomposition/IBlock.h"
+#include "core/Environment.h"
+#include "core/logging/Initialization.h"
+#include "core/math/Constants.h"
 
+#include "field/communication/PackInfo.h"
 #include "field/FlagField.h"
+#include "field/vtk/VTKWriter.h"
+#include "GenDefines.h"
+#pragma once
 
-namespace walberla
-{
-void calculate_normals(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID normalsFieldID,
-                       ConstBlockDataID flagFieldID, FlagUID fluidFlagUID, FlagUID boundaryFlagUID);
-}
+namespace walberla {
+
+    void calc_total_velocity(const shared_ptr <StructuredBlockStorage> &blocks, std::array<real_t, 5> &total_velocity,
+                             BlockDataID phaseFieldID, BlockDataID velocityFieldID, ConstBlockDataID flagFieldID, FlagUID fluidFlagUID);
+
+    void flood_fill(PhaseField_T &phaseField, VelocityField_T &velocityField, CellInterval boundingBox,
+                    real_t &volume, uint_t &nrOfCells,
+                    std::array<real_t, 3> &center_of_mass, std::array<real_t, 4> &total_velocity);
+
+} // namespace walberla
+
