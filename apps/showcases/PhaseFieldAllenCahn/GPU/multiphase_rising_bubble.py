@@ -39,6 +39,8 @@ class Scenario:
                                                                 density_ratio=1000,
                                                                 viscosity_ratio=100)
 
+        self.interface_thickness = 5
+
         # everything else
         self.dbFile = "risingBubble3D.db"
 
@@ -72,6 +74,7 @@ class Scenario:
                 'gravitational_acceleration': self.parameters["gravitational_acceleration"],
                 'relaxation_time_liquid': self.parameters.get("relaxation_time_heavy"),
                 'relaxation_time_gas': self.parameters.get("relaxation_time_light"),
+                'interface_thickness': self.interface_thickness
             },
             'Boundaries': {
                 'Border': [

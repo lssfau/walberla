@@ -82,6 +82,7 @@ def generate_boundary(generation_context,
         'target': target,
         'namespace': namespace,
         'inner_or_boundary': boundary_object.inner_or_boundary,
+        'single_link': boundary_object.single_link,
         'additional_data_handler': additional_data_handler
     }
 

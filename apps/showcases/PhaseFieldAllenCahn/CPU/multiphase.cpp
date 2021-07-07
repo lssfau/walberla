@@ -27,21 +27,17 @@
 
 #include "field/AddToStorage.h"
 #include "field/FlagField.h"
-#include "field/communication/PackInfo.h"
 #include "field/vtk/VTKWriter.h"
 
 #include "geometry/InitBoundaryHandling.h"
 
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/PythonCallback.h"
-#include "python_coupling/export/FieldExports.h"
 
 #include "timeloop/SweepTimeloop.h"
 
-#include "CalculateNormals.h"
 #include "InitializerFunctions.h"
 #include "PythonExports.h"
-#include "contact.h"
 
 //////////////////////////////
 // INCLUDE GENERATED FILES //
@@ -54,7 +50,10 @@
 #include "initialize_velocity_based_distributions.h"
 #include "phase_field_LB_NoSlip.h"
 #include "phase_field_LB_step.h"
-#include "stream_hydro.h"
+#include "ContactAngle.h"
+#include "PackInfo_phase_field_distributions.h"
+#include "PackInfo_velocity_based_distributions.h"
+#include "PackInfo_phase_field.h"
 
 ////////////
 // USING //
@@ -62,11 +61,6 @@
 
 using namespace walberla;
 
-using PdfField_phase_T = GhostLayerField< real_t, Stencil_phase_T::Size >;
-using PdfField_hydro_T = GhostLayerField< real_t, Stencil_hydro_T::Size >;
-using VelocityField_T  = GhostLayerField< real_t, Stencil_hydro_T::Dimension >;
-using NormalsField_T   = GhostLayerField< int8_t, Stencil_hydro_T::Dimension >;
-using PhaseField_T     = GhostLayerField< real_t, 1 >;
 using flag_t           = walberla::uint8_t;
 using FlagField_T      = FlagField< flag_t >;
 
@@ -89,6 +83,7 @@ int main(int argc, char** argv)
 
       auto domainSetup                = config->getOneBlock("DomainSetup");
       Vector3< uint_t > cellsPerBlock = domainSetup.getParameter< Vector3< uint_t > >("cellsPerBlock");
+      const bool tube                 = domainSetup.getParameter< bool >("tube", true);
 
       ////////////////////////////////////////
       // ADD GENERAL SIMULATION PARAMETERS //
@@ -100,8 +95,7 @@ int main(int argc, char** argv)
       const real_t remainingTimeLoggerFrequency =
          parameters.getParameter< real_t >("remainingTimeLoggerFrequency", 3.0);
       const uint_t scenario  = parameters.getParameter< uint_t >("scenario", uint_c(1));
-      const real_t alpha     = parameters.getParameter< real_t >("contactAngle", real_c(90));
-      const real_t alpha_rad = alpha * (math::pi / 180);
+
       Vector3< int > overlappingWidth =
          parameters.getParameter< Vector3< int > >("overlappingWidth", Vector3< int >(1, 1, 1));
 
@@ -116,8 +110,18 @@ int main(int argc, char** argv)
       BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_t(0), field::fzyx);
       BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_t(0), field::fzyx);
 
-      BlockDataID normals     = field::addToStorage< NormalsField_T >(blocks, "normals", int8_t(0), field::fzyx);
       BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
+
+      auto physical_parameters     = config->getOneBlock("PhysicalParameters");
+      const real_t density_liquid  = physical_parameters.getParameter< real_t >("density_liquid", real_c(1.0));
+      const real_t density_gas     = physical_parameters.getParameter< real_t >("density_gas");
+      const real_t surface_tension = physical_parameters.getParameter< real_t >("surface_tension");
+      const real_t mobility        = physical_parameters.getParameter< real_t >("mobility");
+      const real_t gravitational_acceleration =
+         physical_parameters.getParameter< real_t >("gravitational_acceleration");
+      const real_t relaxation_time_liquid = physical_parameters.getParameter< real_t >("relaxation_time_liquid");
+      const real_t relaxation_time_gas    = physical_parameters.getParameter< real_t >("relaxation_time_gas");
+      const real_t interface_thickness    = physical_parameters.getParameter< real_t >("interface_thickness");
 
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the phase-field")
       if (scenario == 1)
@@ -130,7 +134,7 @@ int main(int argc, char** argv)
       }
       else if (scenario == 2)
       {
-         initPhaseField_RTI(blocks, phase_field);
+         initPhaseField_RTI(blocks, phase_field, interface_thickness, tube);
       }
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the phase-field done")
 
@@ -138,43 +142,31 @@ int main(int argc, char** argv)
       // ADD SWEEPS //
       ///////////////
 
-      auto physical_parameters     = config->getOneBlock("PhysicalParameters");
-      const real_t density_liquid  = physical_parameters.getParameter< real_t >("density_liquid", real_c(1.0));
-      const real_t density_gas     = physical_parameters.getParameter< real_t >("density_gas");
-      const real_t surface_tension = physical_parameters.getParameter< real_t >("surface_tension");
-      const real_t mobility        = physical_parameters.getParameter< real_t >("mobility");
-      const real_t gravitational_acceleration =
-         physical_parameters.getParameter< real_t >("gravitational_acceleration");
-      const real_t relaxation_time_liquid = physical_parameters.getParameter< real_t >("relaxation_time_liquid");
-      const real_t relaxation_time_gas    = physical_parameters.getParameter< real_t >("relaxation_time_gas");
-
-      pystencils::initialize_phase_field_distributions init_h(lb_phase_field, phase_field, vel_field);
+      pystencils::initialize_phase_field_distributions init_h(lb_phase_field, phase_field, vel_field, interface_thickness);
       pystencils::initialize_velocity_based_distributions init_g(lb_velocity_field, vel_field);
 
       pystencils::phase_field_LB_step phase_field_LB_step(
-         lb_phase_field, phase_field, vel_field, mobility,
+         lb_phase_field, phase_field, vel_field, interface_thickness, mobility,
          Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
       pystencils::hydro_LB_step hydro_LB_step(lb_velocity_field, phase_field, vel_field, gravitational_acceleration,
-                                              density_liquid, density_gas, surface_tension, relaxation_time_liquid,
+                                              interface_thickness, density_liquid, density_gas, surface_tension, relaxation_time_liquid,
                                               relaxation_time_gas,
                                               Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
-      pystencils::stream_hydro stream_hydro(lb_velocity_field,
-                                            Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
 
       ////////////////////////
       // ADD COMMUNICATION //
       //////////////////////
-
       blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > Comm_phase_field(blocks);
-      Comm_phase_field.addPackInfo(make_shared< field::communication::PackInfo< PhaseField_T > >(phase_field));
+      auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field);
+      Comm_phase_field.addPackInfo(generatedPackInfo_phase_field);
 
       blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > Comm_velocity_based_distributions(blocks);
-      Comm_velocity_based_distributions.addPackInfo(
-         make_shared< field::communication::PackInfo< PdfField_hydro_T > >(lb_velocity_field));
+      auto generatedPackInfo_velocity_based_distributions = make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field);
+      Comm_velocity_based_distributions.addPackInfo(generatedPackInfo_velocity_based_distributions);
 
       blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > Comm_phase_field_distributions(blocks);
-      Comm_phase_field_distributions.addPackInfo(
-         make_shared< field::communication::PackInfo< PdfField_phase_T > >(lb_phase_field));
+      auto generatedPackInfo_phase_field_distributions = make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field);
+      Comm_phase_field_distributions.addPackInfo(generatedPackInfo_phase_field_distributions);
 
       ////////////////////////
       // BOUNDARY HANDLING //
@@ -190,14 +182,13 @@ int main(int argc, char** argv)
          geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, fluidFlagUID);
       }
 
-      calculate_normals(blocks, normals, flagFieldID, fluidFlagUID, wallFlagUID);
       lbm::phase_field_LB_NoSlip phase_field_LB_NoSlip(blocks, lb_phase_field);
       lbm::hydro_LB_NoSlip hydro_LB_NoSlip(blocks, lb_velocity_field);
-      lbm::contact contact_angle(blocks, phase_field, alpha_rad);
+      pystencils::ContactAngle contact_angle(blocks, phase_field, interface_thickness);
 
       phase_field_LB_NoSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldID, FlagUID("NoSlip"), fluidFlagUID);
       hydro_LB_NoSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldID, FlagUID("NoSlip"), fluidFlagUID);
-      contact_angle.fillFromNormalField< NormalsField_T >(blocks, normals);
+      contact_angle.fillFromFlagField< FlagField_T >(blocks, flagFieldID, wallFlagUID, fluidFlagUID);
 
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the normals-field done")
 
@@ -209,48 +200,44 @@ int main(int argc, char** argv)
       auto normalTimeStep = [&]() {
          for (auto& block : *blocks)
          {
-            phase_field_LB_NoSlip(&block);
             Comm_phase_field_distributions();
+            phase_field_LB_NoSlip(&block);
+
 
             phase_field_LB_step(&block);
-
-            Comm_phase_field();
             contact_angle(&block);
+            Comm_phase_field();
+
 
             hydro_LB_step(&block);
-            hydro_LB_NoSlip(&block);
-            Comm_velocity_based_distributions();
 
-            stream_hydro(&block);
+            Comm_velocity_based_distributions();
+            hydro_LB_NoSlip(&block);
          }
       };
       auto simpleOverlapTimeStep = [&]() {
-         for (auto& block : *blocks)
-            phase_field_LB_NoSlip(&block);
+        for (auto& block : *blocks)
+           phase_field_LB_NoSlip(&block);
 
-         Comm_phase_field_distributions.startCommunication();
-         for (auto& block : *blocks)
-            phase_field_LB_step.inner(&block);
-         Comm_phase_field_distributions.wait();
-         for (auto& block : *blocks)
-            phase_field_LB_step.outer(&block);
+        Comm_phase_field_distributions.startCommunication();
+        for (auto& block : *blocks)
+           phase_field_LB_step.inner(&block);
+        Comm_phase_field_distributions.wait();
+        for (auto& block : *blocks)
+           phase_field_LB_step.outer(&block);
 
-         Comm_phase_field.startCommunication();
-         for (auto& block : *blocks)
-            hydro_LB_step.inner(&block);
-         Comm_phase_field.wait();
-         for (auto& block : *blocks)
-            hydro_LB_step.outer(&block);
+        for (auto& block : *blocks)
+           contact_angle(&block);
 
-         for (auto& block : *blocks)
-            hydro_LB_NoSlip(&block);
+        Comm_phase_field.startCommunication();
+        for (auto& block : *blocks)
+           hydro_LB_step.inner(&block);
+        Comm_phase_field.wait();
+        for (auto& block : *blocks)
+           hydro_LB_step.outer(&block);
 
-         Comm_velocity_based_distributions.startCommunication();
-         for (auto& block : *blocks)
-            stream_hydro.inner(&block);
-         Comm_velocity_based_distributions.wait();
-         for (auto& block : *blocks)
-            stream_hydro.outer(&block);
+        for (auto& block : *blocks)
+           hydro_LB_NoSlip(&block);
       };
       std::function< void() > timeStep;
       if (timeStepStrategy == "overlap")
@@ -294,6 +281,8 @@ int main(int argc, char** argv)
                {
                   callback.data().exposeValue("blocks", blocks);
                   callback.data().exposeValue( "timeStep", timeLoop->getCurrentTimeStep());
+                  callback.data().exposeValue("stencil_phase", stencil_phase_name);
+                  callback.data().exposeValue("stencil_hydro", stencil_hydro_name);
                   callback();
                }
             }
@@ -312,9 +301,6 @@ int main(int argc, char** argv)
                                                          "simulation_step", false, true, true, false, 0);
          auto phaseWriter = make_shared< field::VTKWriter< PhaseField_T > >(phase_field, "PhaseField");
          vtkOutput->addCellDataWriter(phaseWriter);
-
-         // auto normlasWriter = make_shared<field::VTKWriter<NormalsField_T>>(normals, "Normals");
-         // vtkOutput->addCellDataWriter(normlasWriter);
 
          // auto velWriter = make_shared<field::VTKWriter<VelocityField_T>>(vel_field, "Velocity");
          // vtkOutput->addCellDataWriter(velWriter);

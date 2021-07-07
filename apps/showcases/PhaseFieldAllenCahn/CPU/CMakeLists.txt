@@ -10,11 +10,14 @@ waLBerla_generate_target_from_python(NAME PhaseFieldCodeGenCPU
         phase_field_LB_NoSlip.cpp phase_field_LB_NoSlip.h
         hydro_LB_step.cpp hydro_LB_step.h
         hydro_LB_NoSlip.cpp hydro_LB_NoSlip.h
-        stream_hydro.cpp stream_hydro.h
+        PackInfo_phase_field_distributions.cpp PackInfo_phase_field_distributions.h
+        PackInfo_velocity_based_distributions.cpp PackInfo_velocity_based_distributions.h
+        PackInfo_phase_field.cpp PackInfo_phase_field.h
+        ContactAngle.cpp ContactAngle.h
         GenDefines.h)
 
 waLBerla_add_executable(NAME multiphaseCPU
-        FILES multiphase.cpp PythonExports.cpp InitializerFunctions.cpp contact.cpp CalculateNormals.cpp multiphase_codegen.py
+        FILES multiphase.cpp PythonExports.cpp InitializerFunctions.cpp multiphase_codegen.py
         DEPENDS blockforest core field postprocessing lbm geometry timeloop gui PhaseFieldCodeGenCPU)
 
 set_target_properties(multiphaseCPU PROPERTIES CXX_VISIBILITY_PRESET hidden)
