@@ -47,4 +47,10 @@ waLBerla_generate_target_from_python(NAME MicroBenchmarkGpuLbmGenerated FILE cod
       OUT_FILES MicroBenchmarkStreamKernel.cu MicroBenchmarkCopyKernel.cu MicroBenchmarkStreamKernel.h MicroBenchmarkCopyKernel.h)
 waLBerla_compile_test( FILES codegen/MicroBenchmarkGpuLbm.cpp DEPENDS MicroBenchmarkGpuLbmGenerated)
 
+waLBerla_generate_target_from_python(NAME CodegenGeneratedGPUFieldPackInfo FILE codegen/GeneratedFieldPackInfoTestGPU.py
+        OUT_FILES ScalarFieldCommunicationGPU.cu ScalarFieldCommunicationGPU.h
+        ScalarFieldPullReductionGPU.cu ScalarFieldPullReductionGPU.h )
+waLBerla_compile_test( FILES codegen/GeneratedFieldPackInfoTestGPU.cpp
+        DEPENDS blockforest core field CodegenGeneratedGPUFieldPackInfo )
+waLBerla_execute_test( NAME GeneratedFieldPackInfoTestGPU )
 endif()

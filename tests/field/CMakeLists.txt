@@ -77,4 +77,11 @@ waLBerla_generate_target_from_python(NAME CodeGenMultipleFieldSwaps FILE codegen
         OUT_FILES MultipleFieldSwaps.cpp MultipleFieldSwaps.h )
 waLBerla_compile_test( FILES codegen/MultipleFieldSwaps.cpp DEPENDS gui timeloop CodeGenMultipleFieldSwaps)
 waLBerla_execute_test( NAME MultipleFieldSwaps )
+
+waLBerla_generate_target_from_python(NAME CodegenGeneratedCPUFieldPackInfo FILE codegen/GeneratedFieldPackInfoTest.py
+        OUT_FILES ScalarFieldCommunication.cpp ScalarFieldCommunication.h
+                  ScalarFieldPullReduction.cpp ScalarFieldPullReduction.h )
+waLBerla_compile_test( FILES codegen/GeneratedFieldPackInfoTest.cpp
+        DEPENDS blockforest core field CodegenGeneratedCPUFieldPackInfo )
+waLBerla_execute_test( NAME GeneratedFieldPackInfoTest )
 endif()

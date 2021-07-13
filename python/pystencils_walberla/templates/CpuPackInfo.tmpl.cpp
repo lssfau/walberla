@@ -37,7 +37,11 @@ void {{class_name}}::pack(Direction dir, unsigned char * byte_buffer, IBlock * b
 
     {{fused_kernel|generate_block_data_to_field_extraction(parameters_to_ignore=['buffer'])|indent(4)}}
     CellInterval ci;
+    {% if gl_to_inner -%}
+    {{field_name}}->getGhostRegion(dir, ci, 1, false);
+    {%- else -%}
     {{field_name}}->getSliceBeforeGhostLayer(dir, ci, 1, false);
+    {%- endif %}
 
     switch( dir )
     {
@@ -63,7 +67,11 @@ void {{class_name}}::unpack(Direction dir, unsigned char * byte_buffer, IBlock *
 
     {{fused_kernel|generate_block_data_to_field_extraction(parameters_to_ignore=['buffer'])|indent(4)}}
     CellInterval ci;
+    {% if gl_to_inner -%}
+    {{field_name}}->getSliceBeforeGhostLayer(dir, ci, 1, false);
+    {%- else -%}
     {{field_name}}->getGhostRegion(dir, ci, 1, false);
+    {%- endif %}
     auto communciationDirection = stencil::inverseDir[dir];
 
     switch( communciationDirection )
