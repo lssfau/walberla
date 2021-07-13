@@ -118,6 +118,7 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf
          auto parallelSection = parallelSectionManager_.parallelSection( stream );
          for( auto recvInfo = bufferSystemGPU_.begin(); recvInfo != bufferSystemGPU_.end(); ++recvInfo )
          {
+            recvInfo.buffer().clear();
             for( auto &header : headers_[recvInfo.rank()] )
             {
                auto block = dynamic_cast< Block * >( forest->getBlock( header.blockId ));
@@ -141,6 +142,7 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf
          {
             auto &gpuBuffer = bufferSystemGPU_.sendBuffer( recvInfo.rank());
 
+            recvInfo.buffer().clear();
             gpuBuffer.clear();
             for( auto &header : headers_[recvInfo.rank()] ) {
                auto block = dynamic_cast< Block * >( forest->getBlock( header.blockId ));
