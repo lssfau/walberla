@@ -47,7 +47,7 @@ lb_method = collision_rule.method
 
 # getter & setter
 setter_assignments = macroscopic_values_setter(lb_method, velocity=velocity_field.center_vector,
-                                               pdfs=pdfs, density=1,
+                                               pdfs=pdfs, density=1.0,
                                                streaming_pattern=streaming_pattern,
                                                previous_timestep=timesteps[0])
 
