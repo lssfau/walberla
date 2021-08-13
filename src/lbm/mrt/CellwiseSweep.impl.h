@@ -185,9 +185,9 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          
          if (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value == false)
          {
-            const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), collisionModel.omega(), collisionModel.omega_bulk() );
+            const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
             for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
-               dst->get( x, y, z, d.toIdx() ) += lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), commonForceTerms, LatticeModel_T::w[ d.toIdx() ], real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), collisionModel.omega(), collisionModel.omega_bulk() );
+               dst->get( x, y, z, d.toIdx() ) += lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), commonForceTerms, LatticeModel_T::w[ d.toIdx() ], real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
          }
       }
 
@@ -324,9 +324,9 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          
          if (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::None_tag >::value == false)
          {
-            const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), collisionModel.omega(), collisionModel.omega_bulk() );
+            const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
             for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
-               src->get( x, y, z, d.toIdx() ) += lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), commonForceTerms, LatticeModel_T::w[ d.toIdx() ], real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), collisionModel.omega(), collisionModel.omega_bulk() );
+               src->get( x, y, z, d.toIdx() ) += lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho + real_t(1.0), commonForceTerms, LatticeModel_T::w[ d.toIdx() ], real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), collisionModel.omega(), collisionModel.omega_bulk(), collisionModel.omega_odd() );
          }
       }
 

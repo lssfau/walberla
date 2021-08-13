@@ -109,6 +109,7 @@ public:
 
    real_t omega() const { return omega_; }
    inline real_t omega_bulk() const { return omega(); }
+   inline real_t omega_odd() const { return omega(); }
    real_t viscosity() const { return viscosity_; }
 
    real_t omega( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
@@ -274,6 +275,7 @@ public:
                  const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
 
    inline real_t omega_bulk() const { return omega(); }
+   inline real_t omega_odd() const { return lambda_d(); }
 
    static real_t lambda_e( const real_t _omega ) { return _omega; }
    static real_t lambda_d( const real_t _omega, const real_t _magicNumber = threeSixteenth )
@@ -484,6 +486,7 @@ public:
                  const Vector3<real_t> & /*velocity*/ = Vector3<real_t>(), const real_t /*rho*/ = real_t(1) ) const { return omega(); }
 
    real_t omega_bulk() const { return s_[1]; }
+   real_t omega_odd() const { return s_[4]; }
 
    real_t viscosity() const { return viscosity_; }
    real_t viscosity( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/ ) const { return viscosity_; }

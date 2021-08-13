@@ -187,7 +187,7 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
                auto pdfs_equ = lbm::EquilibriumDistribution< LatticeModel_T >::get( velocity, rho );
 
                // possible external forcing on fluid
-               const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, omega, collisionModel.omega_bulk() );
+               const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, omega, collisionModel.omega_bulk(), collisionModel.omega_odd() );
 
                // check if body is present
                if( bodyAndVolumeFractionField->get(x,y,z).size() != size_t(0) )
@@ -252,7 +252,7 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
                   {
                      // external forcing
                      const real_t forceTerm = lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho, commonForceTerms, LatticeModel_T::w[ d.toIdx() ],
-                                                                                                    real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, collisionModel.omega_bulk() );
+                                                                                                    real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, collisionModel.omega_bulk(), collisionModel.omega_odd() );
 
                      dst->get( x, y, z, d.toIdx() ) = pdfs[d.toIdx()] - omega * ( real_c(1) - Bn ) * ( pdfs[d.toIdx()] - pdfs_equ[d.toIdx()] ) //SRT
                                                       + omega_n[d.toIdx()] + ( real_c(1) - Bn ) * forceTerm;
@@ -265,7 +265,7 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
                   {
                      // external forcing
                      const real_t forceTerm = lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho, commonForceTerms, LatticeModel_T::w[ d.toIdx() ],
-                                                                                                    real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, collisionModel.omega_bulk() );
+                                                                                                    real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, collisionModel.omega_bulk(), collisionModel.omega_odd() );
 
                      dst->get( x, y, z, d.toIdx() ) = pdfs[d.toIdx()] - omega * ( pdfs[d.toIdx()] - pdfs_equ[d.toIdx()] ) + forceTerm;
                   }
@@ -340,7 +340,7 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
                auto pdfs_equ = lbm::EquilibriumDistribution< LatticeModel_T >::get( velocity, rho );
 
                // possible external forcing on fluid
-               const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, omega, collisionModel.omega_bulk() );
+               const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, omega, collisionModel.omega_bulk(), collisionModel.omega_odd() );
 
                // check if a body is present
                if( bodyAndVolumeFractionField->get(x,y,z).size() != size_t(0) )
@@ -406,7 +406,7 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
                   {
                      // external forcing
                      const real_t forceTerm = lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho, commonForceTerms, LatticeModel_T::w[ d.toIdx() ],
-                                                                                                    real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, collisionModel.omega_bulk() );
+                                                                                                    real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, collisionModel.omega_bulk(), collisionModel.omega_odd() );
 
                      src->get( x, y, z, d.toIdx() ) = pdfs[d.toIdx()] - omega * ( real_c(1) - Bn ) * ( pdfs[d.toIdx()] - pdfs_equ[d.toIdx()] ) //SRT
                                                       + omega_n[d.toIdx()] + ( real_c(1) - Bn ) * forceTerm;
@@ -419,7 +419,7 @@ void PSMSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
                   {
                      // external forcing
                      const real_t forceTerm = lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho, commonForceTerms, LatticeModel_T::w[ d.toIdx() ],
-                                                                                                    real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, collisionModel.omega_bulk() );
+                                                                                                    real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, collisionModel.omega_bulk(), collisionModel.omega_odd() );
 
                      src->get( x, y, z, d.toIdx() ) = pdfs[d.toIdx()] - omega * ( pdfs[d.toIdx()] - pdfs_equ[d.toIdx()] )  + forceTerm;
                   }

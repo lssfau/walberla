@@ -1630,13 +1630,13 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          this->densityVelocityOut( x, y, z, lm, velocity, rho );
 
-         const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, lambda_e, lambda_e );
+         const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, lambda_e, lambda_e, lambda_d );
 
          // collide
          for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
          {
             const real_t forceTerm = lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho, commonForceTerms, LatticeModel_T::w[ d.toIdx() ],
-                                                                                           real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), lambda_e, lambda_e );
+                                                                                           real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), lambda_e, lambda_e, lambda_d );
 
             const real_t fsym  = EquilibriumDistribution< LatticeModel_T >::getSymmetricPart ( *d, velocity, rho );
             const real_t fasym = EquilibriumDistribution< LatticeModel_T >::getAsymmetricPart( *d, velocity, rho );
@@ -1681,7 +1681,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          this->densityVelocityOut( x, y, z, lm, velocity, rho );
 
-         const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, lambda_e, lambda_e );
+         const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, lambda_e, lambda_e, lambda_d );
 
          for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
             pdfs[ d.toIdx() ] = src->get( x, y, z, d.toIdx() );
@@ -1689,7 +1689,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
          {
             const real_t forceTerm = lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho, commonForceTerms, LatticeModel_T::w[ d.toIdx() ],
-                                                                                           real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), lambda_e, lambda_e );
+                                                                                           real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), lambda_e, lambda_e, lambda_d );
 
             const real_t fsym  = EquilibriumDistribution< LatticeModel_T >::getSymmetricPart ( *d, velocity, rho );
             const real_t fasym = EquilibriumDistribution< LatticeModel_T >::getAsymmetricPart( *d, velocity, rho );
