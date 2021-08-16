@@ -11,10 +11,9 @@ import os
 import waLBerla as wlb
 from waLBerla.tools.config import block_decomposition
 from waLBerla.tools.sqlitedb import sequenceValuesToScalars, checkAndUpdateSchema, storeSingle
-from functools import reduce
-import operator
 import sys
 import sqlite3
+from math import prod
 
 # Number of time steps run for a workload of 128^3 per GPU
 # if double as many cells are on the GPU, half as many time steps are run etc.
@@ -34,10 +33,6 @@ BASE_CONFIG = {
         'outerIterations': 3,
     }
 }
-
-
-def prod(seq):
-    return reduce(operator.mul, seq, 1)
 
 
 def num_time_steps(block_size, time_steps_for_128_block=200):

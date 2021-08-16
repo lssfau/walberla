@@ -37,8 +37,6 @@
 
 #include "timeloop/SweepTimeloop.h"
 
-#include <blockforest/communication/UniformBufferedScheme.h>
-
 #include "InitializerFunctions.h"
 
 //////////////////////////////
@@ -48,40 +46,19 @@
 #if defined(WALBERLA_BUILD_WITH_CUDA)
 #   include "cuda/AddGPUFieldToStorage.h"
 #   include "cuda/DeviceSelectMPI.h"
-#   include "cuda/HostFieldAllocator.h"
 #   include "cuda/ParallelStreams.h"
-#   include "cuda/communication/GPUPackInfo.h"
 #   include "cuda/communication/MemcpyPackInfo.h"
 #   include "cuda/communication/UniformGPUScheme.h"
-
-#   include "GenDefines.h"
-#   include "PackInfo_phase_field.h"
-#   include "PackInfo_phase_field_distributions.h"
-#   include "PackInfo_velocity_based_distributions.h"
-#   include "hydro_LB_step.h"
-#   include "initialize_phase_field_distributions.h"
-#   include "initialize_velocity_based_distributions.h"
-#   include "phase_field_LB_step.h"
-
 #else
-#   include "GenDefines.h"
-#   include "PackInfo_phase_field.h"
-#   include "PackInfo_phase_field_distributions.h"
-#   include "PackInfo_velocity_based_distributions.h"
-#   include "hydro_LB_step.h"
-#   include "initialize_phase_field_distributions.h"
-#   include "initialize_velocity_based_distributions.h"
-#   include "phase_field_LB_step.h"
+#   include <blockforest/communication/UniformBufferedScheme.h>
 #endif
+
+#include "GenDefines.h"
 
 using namespace walberla;
 
-using PdfField_phase_T = GhostLayerField< real_t, Stencil_phase_T::Size >;
-using PdfField_hydro_T = GhostLayerField< real_t, Stencil_hydro_T::Size >;
-using VelocityField_T  = GhostLayerField< real_t, Stencil_hydro_T::Dimension >;
-using PhaseField_T     = GhostLayerField< real_t, 1 >;
-using flag_t           = walberla::uint8_t;
-using FlagField_T      = FlagField< flag_t >;
+using flag_t      = walberla::uint8_t;
+using FlagField_T = FlagField< flag_t >;
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
 typedef cuda::GPUField< real_t > GPUField;
@@ -111,9 +88,7 @@ int main(int argc, char** argv)
       const real_t remainingTimeLoggerFrequency =
          parameters.getParameter< real_t >("remainingTimeLoggerFrequency", 3.0);
       const uint_t scenario = parameters.getParameter< uint_t >("scenario", uint_c(1));
-      Vector3< int > overlappingWidth =
-         parameters.getParameter< Vector3< int > >("overlappingWidth", Vector3< int >(1, 1, 1));
-      const uint_t warmupSteps = parameters.getParameter< uint_t >("warmupSteps", uint_t(2));
+      const uint_t warmupSteps  = parameters.getParameter< uint_t >("warmupSteps", uint_t(2));
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
       // CPU fields
@@ -165,24 +140,21 @@ int main(int argc, char** argv)
       pystencils::initialize_velocity_based_distributions init_g(lb_velocity_field_gpu, vel_field_gpu);
 
       pystencils::phase_field_LB_step phase_field_LB_step(
-         lb_phase_field_gpu, phase_field_gpu, vel_field_gpu, gpuBlockSize[0], gpuBlockSize[1],
-         Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
+         lb_phase_field_gpu, phase_field_gpu, vel_field_gpu, gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2]);
       pystencils::hydro_LB_step hydro_LB_step(lb_velocity_field_gpu, phase_field_gpu, vel_field_gpu, gpuBlockSize[0],
-                                              gpuBlockSize[1],
-                                              Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
+                                              gpuBlockSize[1], gpuBlockSize[2]);
 #else
       pystencils::initialize_phase_field_distributions init_h(lb_phase_field, phase_field, vel_field);
       pystencils::initialize_velocity_based_distributions init_g(lb_velocity_field, vel_field);
-      pystencils::phase_field_LB_step phase_field_LB_step(
-         lb_phase_field, phase_field, vel_field, Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
-      pystencils::hydro_LB_step hydro_LB_step(lb_velocity_field, phase_field, vel_field,
-                                              Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
+      pystencils::phase_field_LB_step phase_field_LB_step(lb_phase_field, phase_field, vel_field);
+      pystencils::hydro_LB_step hydro_LB_step(lb_velocity_field, phase_field, vel_field);
 #endif
 
 // add communication
 #if defined(WALBERLA_BUILD_WITH_CUDA)
+      const bool cudaEnabledMpi = parameters.getParameter< bool >("cudaEnabledMpi", false);
       auto Comm_velocity_based_distributions =
-         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, 0);
+         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_velocity_based_distributions =
          make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field_gpu);
       Comm_velocity_based_distributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
@@ -190,12 +162,11 @@ int main(int argc, char** argv)
       Comm_velocity_based_distributions->addPackInfo(generatedPackInfo_phase_field);
 
       auto Comm_phase_field_distributions =
-         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, 0);
+         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_phase_field_distributions =
          make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field_gpu);
       Comm_phase_field_distributions->addPackInfo(generatedPackInfo_phase_field_distributions);
 #else
-
 
       blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > Comm_velocity_based_distributions(blocks);
 
@@ -244,29 +215,15 @@ int main(int argc, char** argv)
       auto timeLoop = make_shared< SweepTimeloop >(blocks->getBlockStorage(), timesteps);
 #if defined(WALBERLA_BUILD_WITH_CUDA)
       auto normalTimeStep = [&]() {
-         for (auto& block : *blocks)
-         {
-            Comm_phase_field_distributions->communicate(nullptr);
-            phase_field_LB_step(&block);
-
-            Comm_velocity_based_distributions->communicate(nullptr);
-            hydro_LB_step(&block);
-         }
-      };
-      auto simpleOverlapTimeStep = [&]() {
-         Comm_phase_field_distributions->startCommunication(defaultStream);
-         for (auto& block : *blocks)
-            phase_field_LB_step.inner(&block, defaultStream);
-         Comm_phase_field_distributions->wait(defaultStream);
-         for (auto& block : *blocks)
-            phase_field_LB_step.outer(&block, defaultStream);
-
          Comm_velocity_based_distributions->startCommunication(defaultStream);
          for (auto& block : *blocks)
-            hydro_LB_step.inner(&block, defaultStream);
+            phase_field_LB_step(&block, defaultStream);
          Comm_velocity_based_distributions->wait(defaultStream);
+
+         Comm_phase_field_distributions->startCommunication(defaultStream);
          for (auto& block : *blocks)
-            hydro_LB_step.outer(&block, defaultStream);
+            hydro_LB_step(&block, defaultStream);
+         Comm_phase_field_distributions->wait(defaultStream);
       };
       auto phase_only = [&]() {
          for (auto& block : *blocks)
@@ -284,29 +241,15 @@ int main(int argc, char** argv)
       };
 #else
       auto normalTimeStep = [&]() {
-         for (auto& block : *blocks)
-         {
-            Comm_phase_field_distributions();
-            phase_field_LB_step(&block);
+            Comm_velocity_based_distributions.startCommunication();
+            for (auto& block : *blocks)
+               phase_field_LB_step(&block);
+            Comm_velocity_based_distributions.wait();
 
-            Comm_velocity_based_distributions();
-            hydro_LB_step(&block);
-         }
-      };
-      auto simpleOverlapTimeStep = [&]() {
-        Comm_phase_field_distributions.startCommunication();
-        for (auto& block : *blocks)
-           phase_field_LB_step.inner(&block);
-        Comm_phase_field_distributions.wait();
-        for (auto& block : *blocks)
-           phase_field_LB_step.outer(&block);
-
-        Comm_velocity_based_distributions.startCommunication();
-        for (auto& block : *blocks)
-           hydro_LB_step.inner(&block);
-        Comm_velocity_based_distributions.wait();
-        for (auto& block : *blocks)
-           hydro_LB_step.outer(&block);
+            Comm_phase_field_distributions.startCommunication();
+            for (auto& block : *blocks)
+               hydro_LB_step(&block);
+            Comm_phase_field_distributions.wait();
       };
       auto phase_only = [&]() {
          for (auto& block : *blocks)
@@ -324,12 +267,7 @@ int main(int argc, char** argv)
       };
 #endif
       std::function< void() > timeStep;
-      if (timeStepStrategy == "overlap")
-      {
-         timeStep = std::function< void() >(simpleOverlapTimeStep);
-         WALBERLA_LOG_INFO_ON_ROOT("overlapping timestep")
-      }
-      else if (timeStepStrategy == "phase_only")
+      if (timeStepStrategy == "phase_only")
       {
          timeStep = std::function< void() >(phase_only);
          WALBERLA_LOG_INFO_ON_ROOT("started only phasefield step without communication for benchmarking")
@@ -347,7 +285,7 @@ int main(int argc, char** argv)
       else
       {
          timeStep = std::function< void() >(normalTimeStep);
-         WALBERLA_LOG_INFO_ON_ROOT("normal timestep with no overlapping")
+         WALBERLA_LOG_INFO_ON_ROOT("normal timestep with overlapping")
       }
 
       timeLoop->add() << BeforeFunction(timeStep) << Sweep([](IBlock*) {}, "time step");
@@ -364,10 +302,8 @@ int main(int argc, char** argv)
          auto vtkOutput = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
                                                          "simulation_step", false, true, true, false, 0);
 #if defined(WALBERLA_BUILD_WITH_CUDA)
-         vtkOutput->addBeforeFunction([&]() {
-            cuda::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu);
-            // cuda::fieldCpy<VelocityField_T, GPUField>( blocks, vel_field, vel_field_gpu );
-         });
+         vtkOutput->addBeforeFunction(
+            [&]() { cuda::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu); });
 #endif
          auto phaseWriter = make_shared< field::VTKWriter< PhaseField_T > >(phase_field, "phase");
          vtkOutput->addCellDataWriter(phaseWriter);
@@ -402,6 +338,11 @@ int main(int argc, char** argv)
          if (pythonCallbackResults.isCallable())
          {
             pythonCallbackResults.data().exposeValue("mlupsPerProcess", mlupsPerProcess);
+            pythonCallbackResults.data().exposeValue("stencil_phase", StencilNamePhase);
+            pythonCallbackResults.data().exposeValue("stencil_hydro", StencilNameHydro);
+            #if defined(WALBERLA_BUILD_WITH_CUDA)
+               pythonCallbackResults.data().exposeValue("cuda_enabled_mpi", cudaEnabledMpi);
+            #endif
             // Call Python function to report results
             pythonCallbackResults();
          }

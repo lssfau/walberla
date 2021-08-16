@@ -58,16 +58,6 @@
 ////////////////////////////
 
 #include "GenDefines.h"
-#include "PackInfo_phase_field.h"
-#include "PackInfo_phase_field_distributions.h"
-#include "PackInfo_velocity_based_distributions.h"
-#include "hydro_LB_NoSlip.h"
-#include "hydro_LB_step.h"
-#include "initialize_phase_field_distributions.h"
-#include "initialize_velocity_based_distributions.h"
-#include "phase_field_LB_NoSlip.h"
-#include "phase_field_LB_step.h"
-#include "ContactAngle.h"
 
 ////////////
 // USING //
@@ -75,30 +65,10 @@
 
 using namespace walberla;
 
-using NormalsField_T = GhostLayerField< int8_t, Stencil_hydro_T::Dimension >;
-using FlagField_T    = FlagField< uint8_t >;
+using FlagField_T = FlagField< uint8_t >;
 
 typedef cuda::GPUField< real_t > GPUField;
 typedef cuda::GPUField< uint8_t > GPUField_int;
-
-class Filter
-{
- public:
-   explicit Filter(Vector3< uint_t > numberOfCells) : numberOfCells_(numberOfCells) {}
-
-   void operator()(const IBlock& /*block*/) {}
-
-   bool operator()(const cell_idx_t x, const cell_idx_t y, const cell_idx_t z) const
-   {
-      return x >= -1 && x <= cell_idx_t(numberOfCells_[0]) && y >= -1 && y <= cell_idx_t(numberOfCells_[1]) &&
-             z >= -1 && z <= cell_idx_t(numberOfCells_[2]);
-   }
-
- private:
-   Vector3< uint_t > numberOfCells_;
-};
-
-using FluidFilter_T = Filter;
 
 int main(int argc, char** argv)
 {
@@ -120,7 +90,7 @@ int main(int argc, char** argv)
 
       auto domainSetup                = config->getOneBlock("DomainSetup");
       Vector3< uint_t > cellsPerBlock = domainSetup.getParameter< Vector3< uint_t > >("cellsPerBlock");
-      const bool tube                 = domainSetup.getParameter< bool >("tube", true);
+      const bool tube                 = domainSetup.getParameter< bool >("tube", false);
 
       ////////////////////////////////////////
       // ADD GENERAL SIMULATION PARAMETERS //
@@ -132,10 +102,9 @@ int main(int argc, char** argv)
       const real_t remainingTimeLoggerFrequency =
          parameters.getParameter< real_t >("remainingTimeLoggerFrequency", 3.0);
       const uint_t scenario = parameters.getParameter< uint_t >("scenario", uint_c(1));
-      Vector3< int > overlappingWidth =
-         parameters.getParameter< Vector3< int > >("overlappingWidth", Vector3< int >(1, 1, 1));
       Vector3< int > gpuBlockSize =
          parameters.getParameter< Vector3< int > >("gpuBlockSize", Vector3< int >(128, 1, 1));
+      const bool cudaEnabledMpi = parameters.getParameter< bool >("cudaEnabledMpi", false);
 
       /////////////////////////
       // ADD DATA TO BLOCKS //
@@ -178,7 +147,6 @@ int main(int argc, char** argv)
          const real_t bubbleRadius              = bubbleParameters.getParameter< real_t >("bubbleRadius", 20.0);
          const bool bubble                      = bubbleParameters.getParameter< bool >("bubble", true);
          initPhaseField_sphere(blocks, phase_field, bubbleRadius, bubbleMidPoint, bubble, interface_thickness);
-
       }
       else if (scenario == 2)
       {
@@ -213,33 +181,32 @@ int main(int argc, char** argv)
                                                               interface_thickness);
       pystencils::initialize_velocity_based_distributions init_g(lb_velocity_field_gpu, vel_field_gpu);
 
-      pystencils::phase_field_LB_step phase_field_LB_step(
-         flagFieldID_gpu, lb_phase_field_gpu, phase_field_gpu, vel_field_gpu, interface_thickness, mobility,
-         gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2],
-         Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
+      pystencils::phase_field_LB_step phase_field_LB_step(flagFieldID_gpu, lb_phase_field_gpu, phase_field_gpu,
+                                                          vel_field_gpu, interface_thickness, mobility, gpuBlockSize[0],
+                                                          gpuBlockSize[1], gpuBlockSize[2]);
 
       pystencils::hydro_LB_step hydro_LB_step(flagFieldID_gpu, lb_velocity_field_gpu, phase_field_gpu, vel_field_gpu,
                                               gravitational_acceleration, interface_thickness, density_liquid,
                                               density_gas, surface_tension, relaxation_time_liquid, relaxation_time_gas,
-                                              gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2],
-                                              Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
+                                              gpuBlockSize[0], gpuBlockSize[1], gpuBlockSize[2]);
 
       ////////////////////////
       // ADD COMMUNICATION //
       //////////////////////
 
       auto Comm_velocity_based_distributions =
-         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, 1);
+         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_velocity_based_distributions =
          make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field_gpu);
       Comm_velocity_based_distributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
 
-      auto Comm_phase_field = make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, 1);
+      auto Comm_phase_field =
+         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field_gpu);
       Comm_phase_field->addPackInfo(generatedPackInfo_phase_field);
 
       auto Comm_phase_field_distributions =
-         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, 1);
+         make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_phase_field_distributions =
          make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field_gpu);
       Comm_phase_field_distributions->addPackInfo(generatedPackInfo_phase_field_distributions);
@@ -261,7 +228,8 @@ int main(int argc, char** argv)
             const real_t eccentricity      = domainSetup.getParameter< real_t >("ratio", real_c(0));
             const real_t start_transition  = domainSetup.getParameter< real_t >("start_transition", real_c(60));
             const real_t length_transition = domainSetup.getParameter< real_t >("length_transition", real_c(10));
-            const bool eccentricity_or_pipe_ration = domainSetup.getParameter< bool >("eccentricity_or_pipe_ration", true);
+            const bool eccentricity_or_pipe_ration =
+               domainSetup.getParameter< bool >("eccentricity_or_pipe_ration", true);
             initTubeWithCylinder(blocks, flagFieldID, wallFlagUID, inner_radius, eccentricity, start_transition,
                                  length_transition, eccentricity_or_pipe_ration);
          }
@@ -290,56 +258,30 @@ int main(int argc, char** argv)
 
       auto timeLoop       = make_shared< SweepTimeloop >(blocks->getBlockStorage(), timesteps);
       auto normalTimeStep = [&]() {
+         Comm_velocity_based_distributions->startCommunication(defaultStream);
          for (auto& block : *blocks)
          {
-            Comm_phase_field_distributions->communicate(nullptr);
-            phase_field_LB_NoSlip(&block);
-
-            phase_field_LB_step(&block);
-            contact_angle(&block);
-            Comm_phase_field->communicate(nullptr);
-
-            hydro_LB_step(&block);
-
-            Comm_velocity_based_distributions->communicate(nullptr);
-            hydro_LB_NoSlip(&block);
+            phase_field_LB_NoSlip(&block, defaultStream);
+            phase_field_LB_step(&block, defaultStream);
          }
-      };
-      auto simpleOverlapTimeStep = [&]() {
+         Comm_velocity_based_distributions->wait(defaultStream);
+
          for (auto& block : *blocks)
-            phase_field_LB_NoSlip(&block);
+         {
+            contact_angle(&block, defaultStream);
+            Comm_phase_field->communicate(defaultStream);
+         }
 
          Comm_phase_field_distributions->startCommunication(defaultStream);
          for (auto& block : *blocks)
-            phase_field_LB_step.inner(&block, defaultStream);
+         {
+            hydro_LB_NoSlip(&block, defaultStream);
+            hydro_LB_step(&block, defaultStream);
+         }
          Comm_phase_field_distributions->wait(defaultStream);
-         for (auto& block : *blocks)
-            phase_field_LB_step.outer(&block, defaultStream);
-
-         for (auto& block : *blocks)
-            contact_angle(&block);
-
-         Comm_phase_field->startCommunication(defaultStream);
-         for (auto& block : *blocks)
-            hydro_LB_step.inner(&block, defaultStream);
-         Comm_phase_field->wait(defaultStream);
-         for (auto& block : *blocks)
-            hydro_LB_step.outer(&block, defaultStream);
-
-         for (auto& block : *blocks)
-            hydro_LB_NoSlip(&block);
       };
       std::function< void() > timeStep;
-      if (timeStepStrategy == "overlap")
-      {
-         timeStep = std::function< void() >(simpleOverlapTimeStep);
-         WALBERLA_LOG_INFO_ON_ROOT("overlapping timestep")
-      }
-      else
-      {
-         timeStep = std::function< void() >(normalTimeStep);
-         WALBERLA_LOG_INFO_ON_ROOT("normal timestep with no overlapping")
-      }
+      timeStep = std::function< void() >(normalTimeStep);
 
       timeLoop->add() << BeforeFunction(timeStep) << Sweep([](IBlock*) {}, "time step");
 
@@ -360,77 +302,87 @@ int main(int argc, char** argv)
          init_h(&block);
          init_g(&block);
       }
+
+      for (auto& block : *blocks)
+      {
+         Comm_phase_field_distributions->communicate(nullptr);
+         phase_field_LB_NoSlip(&block);
+      }
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the PDFs done")
-      uint_t dbWriteFrequency = parameters.getParameter< uint_t >("dbWriteFrequency", 10000000);
+      uint_t dbWriteFrequency = parameters.getParameter< uint_t >("dbWriteFrequency", 0);
       int targetRank          = 0;
 
-      timeLoop->addFuncAfterTimeStep(
-         [&]() {
-            if (timeLoop->getCurrentTimeStep() % dbWriteFrequency == 0)
-            {
-               cuda::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu);
-               cuda::fieldCpy< VelocityField_T, GPUField >(blocks, vel_field, vel_field_gpu);
-               if (scenario == 4)
+      if (dbWriteFrequency > 0)
+      {
+         timeLoop->addFuncAfterTimeStep(
+            [&]() {
+               if (timeLoop->getCurrentTimeStep() % dbWriteFrequency == 0)
                {
-                  std::array< real_t, 4 > total_velocity = { 0.0, 0.0, 0.0, 0.0 };
-                  real_t volume;
-                  uint_t nrCells;
-                  PhaseField_T gatheredPhaseField(0, 0, 0, 0);
-                  VelocityField_T gatheredVelocityField(0, 0, 0, 0);
-
-                  CellInterval boundingBox = blocks->getDomainCellBB();
-                  if (cell_idx_t(center_of_mass[1] - cell_idx_t(cellsPerBlock[0]) * 1.5) >= 0)
-                     boundingBox.min()[1] = cell_idx_t(center_of_mass[1] - cell_idx_t(cellsPerBlock[0]) * 1.5);
-                  if (cell_idx_t(center_of_mass[1] + cell_idx_t(cellsPerBlock[0]) * 1.5) <= boundingBox.max()[1])
-                     boundingBox.max()[1] = cell_idx_t(center_of_mass[1] + cell_idx_t(cellsPerBlock[0]) * 1.5);
-
-                  field::gather< PhaseField_T >(gatheredPhaseField, blocks, phase_field, boundingBox, targetRank);
-                  field::gather< VelocityField_T >(gatheredVelocityField, blocks, vel_field, boundingBox, targetRank);
-
-                  WALBERLA_EXCLUSIVE_WORLD_SECTION(targetRank)
+                  cuda::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu);
+                  cuda::fieldCpy< VelocityField_T, GPUField >(blocks, vel_field, vel_field_gpu);
+                  if (scenario == 4)
                   {
-                     flood_fill(gatheredPhaseField, gatheredVelocityField, boundingBox, volume, nrCells, center_of_mass,
-                                total_velocity);
+                     std::array< real_t, 4 > total_velocity = { 0.0, 0.0, 0.0, 0.0 };
+                     real_t volume;
+                     uint_t nrCells;
+                     PhaseField_T gatheredPhaseField(0, 0, 0, 0);
+                     VelocityField_T gatheredVelocityField(0, 0, 0, 0);
+
+                     CellInterval boundingBox = blocks->getDomainCellBB();
+                     if (cell_idx_t(center_of_mass[1] - cell_idx_t(cellsPerBlock[0]) * 1.5) >= 0)
+                        boundingBox.min()[1] = cell_idx_t(center_of_mass[1] - cell_idx_t(cellsPerBlock[0]) * 1.5);
+                     if (cell_idx_t(center_of_mass[1] + cell_idx_t(cellsPerBlock[0]) * 1.5) <= boundingBox.max()[1])
+                        boundingBox.max()[1] = cell_idx_t(center_of_mass[1] + cell_idx_t(cellsPerBlock[0]) * 1.5);
+
+                     field::gather< PhaseField_T >(gatheredPhaseField, blocks, phase_field, boundingBox, targetRank);
+                     field::gather< VelocityField_T >(gatheredVelocityField, blocks, vel_field, boundingBox,
+                                                      targetRank);
+
+                     WALBERLA_EXCLUSIVE_WORLD_SECTION(targetRank)
+                     {
+                        flood_fill(gatheredPhaseField, gatheredVelocityField, boundingBox, volume, nrCells,
+                                   center_of_mass, total_velocity);
+                     }
+                     WALBERLA_MPI_SECTION() { walberla::mpi::broadcastObject(center_of_mass, targetRank); }
+
+                     python_coupling::PythonCallback callback("at_end_of_time_step");
+                     if (callback.isCallable())
+                     {
+                        callback.data().exposeValue("blocks", blocks);
+                        callback.data().exposeValue("timeStep", timeLoop->getCurrentTimeStep());
+                        callback.data().exposeValue("target_rank", targetRank);
+                        callback.data().exposeValue("bounding_box_min", boundingBox.min()[1]);
+                        callback.data().exposeValue("bounding_box_max", boundingBox.max()[1]);
+                        callback.data().exposeValue("total_velocity", total_velocity[0]);
+                        callback.data().exposeValue("total_velocity_X", total_velocity[1]);
+                        callback.data().exposeValue("total_velocity_Y", total_velocity[2]);
+                        callback.data().exposeValue("total_velocity_Z", total_velocity[3]);
+                        callback.data().exposeValue("center_of_mass_X", center_of_mass[0]);
+                        callback.data().exposeValue("center_of_mass_Y", center_of_mass[1]);
+                        callback.data().exposeValue("center_of_mass_Z", center_of_mass[2]);
+                        callback.data().exposeValue("sum_inv_phi", volume);
+                        callback.data().exposeValue("gas_cells_of_the_taylor_bubble", nrCells);
+                        callback.data().exposeValue("stencil_phase", StencilNamePhase);
+                        callback.data().exposeValue("stencil_hydro", StencilNameHydro);
+                        callback();
+                     }
                   }
-                  WALBERLA_MPI_SECTION() { walberla::mpi::broadcastObject(center_of_mass, targetRank); }
-
-                  python_coupling::PythonCallback callback("at_end_of_time_step");
-                  if (callback.isCallable())
+                  else
                   {
-                     callback.data().exposeValue("blocks", blocks);
-                     callback.data().exposeValue("timeStep", timeLoop->getCurrentTimeStep());
-                     callback.data().exposeValue("target_rank", targetRank);
-                     callback.data().exposeValue("bounding_box_min", boundingBox.min()[1]);
-                     callback.data().exposeValue("bounding_box_max", boundingBox.max()[1]);
-                     callback.data().exposeValue("total_velocity", total_velocity[0]);
-                     callback.data().exposeValue("total_velocity_X", total_velocity[1]);
-                     callback.data().exposeValue("total_velocity_Y", total_velocity[2]);
-                     callback.data().exposeValue("total_velocity_Z", total_velocity[3]);
-                     callback.data().exposeValue("center_of_mass_X", center_of_mass[0]);
-                     callback.data().exposeValue("center_of_mass_Y", center_of_mass[1]);
-                     callback.data().exposeValue("center_of_mass_Z", center_of_mass[2]);
-                     callback.data().exposeValue("sum_inv_phi", volume);
-                     callback.data().exposeValue("gas_cells_of_the_taylor_bubble", nrCells);
-                     callback.data().exposeValue("stencil_phase", stencil_phase_name);
-                     callback.data().exposeValue("stencil_hydro", stencil_hydro_name);
-                     callback();
+                     python_coupling::PythonCallback callback("at_end_of_time_step");
+                     if (callback.isCallable())
+                     {
+                        callback.data().exposeValue("blocks", blocks);
+                        callback.data().exposeValue("timeStep", timeLoop->getCurrentTimeStep());
+                        callback.data().exposeValue("stencil_phase", StencilNamePhase);
+                        callback.data().exposeValue("stencil_hydro", StencilNameHydro);
+                        callback();
+                     }
                   }
                }
-               else
-               {
-                  python_coupling::PythonCallback callback("at_end_of_time_step");
-                  if (callback.isCallable())
-                  {
-                     callback.data().exposeValue("blocks", blocks);
-                     callback.data().exposeValue("timeStep", timeLoop->getCurrentTimeStep());
-                     callback.data().exposeValue("stencil_phase", stencil_phase_name);
-                     callback.data().exposeValue("stencil_hydro", stencil_hydro_name);
-                     callback();
-                  }
-               }
-            }
-         },
-         "Python callback");
+            },
+            "Python callback");
+      }
 
       int meshWriteFrequency = parameters.getParameter< int >("meshWriteFrequency", 0);
       int counter            = 0;
@@ -469,7 +421,7 @@ int main(int argc, char** argv)
                                                          "simulation_step", false, true, true, false, 0);
          vtkOutput->addBeforeFunction([&]() {
             cuda::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu);
-            cuda::fieldCpy<VelocityField_T, GPUField>( blocks, vel_field, vel_field_gpu );
+            cuda::fieldCpy< VelocityField_T, GPUField >(blocks, vel_field, vel_field_gpu);
          });
          auto phaseWriter = make_shared< field::VTKWriter< PhaseField_T, float > >(phase_field, "PhaseField");
          vtkOutput->addCellDataWriter(phaseWriter);
@@ -479,12 +431,6 @@ int main(int argc, char** argv)
 
          auto velWriter = make_shared< field::VTKWriter< VelocityField_T, float > >(vel_field, "Velocity");
          vtkOutput->addCellDataWriter(velWriter);
-
-         FluidFilter_T filter(cellsPerBlock);
-
-         auto QCriterionWriter = make_shared< lbm::QCriterionVTKWriter< VelocityField_T, FluidFilter_T, float > >(
-            blocks, filter, vel_field, "Q-Criterion");
-         vtkOutput->addCellDataWriter(QCriterionWriter);
 
          timeLoop->addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
       }

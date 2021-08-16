@@ -17,6 +17,7 @@
 //! \author Markus Holzer <markus.holzer@fau.de>
 //
 //======================================================================================================================
+#pragma once
 
 #include "python_coupling/DictWrapper.h"
 
@@ -28,7 +29,7 @@
 #include "field/FlagField.h"
 #include "field/vtk/VTKWriter.h"
 #include "GenDefines.h"
-#pragma once
+
 
 namespace walberla {
 

@@ -47,7 +47,9 @@ def generate_info_header(ctx: CodeGenerationContext,
     typedefs = {**stencil_typedefs, **field_typedefs, **additional_typedefs}
     typedefs = [f"using {alias} = {typename};" for alias, typename in typedefs.items()]
 
-    lines = '\n'.join(headers_to_include + [''] + typedefs) + '\n'
+    lines = "#pragma once\n"
+
+    lines += '\n'.join(headers_to_include + [''] + typedefs) + '\n'
 
     if path.splitext(filename)[1] not in HEADER_EXTENSIONS:
         filename += '.h'

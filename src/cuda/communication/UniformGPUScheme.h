@@ -50,11 +50,11 @@ namespace communication {
 
        void addPackInfo( const shared_ptr<GeneratedGPUPackInfo> &pi );
 
-       void startCommunication( cudaStream_t stream = 0);
-       void wait( cudaStream_t stream = 0);
+       void startCommunication( cudaStream_t stream = nullptr);
+       void wait( cudaStream_t stream = nullptr);
 
-      void operator()( cudaStream_t stream = 0 )         { communicate( stream ); }
-      inline void communicate( cudaStream_t stream = 0 ) { startCommunication(stream); wait(stream); }
+      void operator()( cudaStream_t stream = nullptr )         { communicate( stream ); }
+      inline void communicate( cudaStream_t stream = nullptr ) { startCommunication(stream); wait(stream); }
 
    private:
        void setupCommunication();
