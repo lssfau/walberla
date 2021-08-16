@@ -251,7 +251,7 @@ public:
             {
             {%- for dirIdx, dirVec, offset in additional_data_handler.stencil_info %}
                 dx = {{dirVec[0]}}; dy = {{dirVec[1]}}; {%if dim == 3%} dz = {{dirVec[2]}}; {% endif %}
-                dot = dx*sum_x + dy*sum_y {%if dim == 3%} + dz*sum_z {% endif %};
+                dot = real_c( dx*sum_x + dy*sum_y {%if dim == 3%} + dz*sum_z {% endif %});
                 if (dot > maxn)
                 {
                     maxn = dot;

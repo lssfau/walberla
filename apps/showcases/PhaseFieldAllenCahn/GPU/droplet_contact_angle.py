@@ -2,7 +2,7 @@ import waLBerla as wlb
 
 
 class Scenario:
-    def __init__(self):
+    def __init__(self, cuda_enabled_mpi=False):
         # output frequencies
         self.vtkWriteFrequency = 1000
 
@@ -28,6 +28,9 @@ class Scenario:
         self.counter = 0
         self.yPositions = []
 
+        self.cudaEnabledMpi = cuda_enabled_mpi
+        self.cuda_blocks = (64, 2, 2)
+
     @wlb.member_callback
     def config(self):
         return {
@@ -44,6 +47,8 @@ class Scenario:
                 'overlappingWidth': self.overlappingWidth,
                 'remainingTimeLoggerFrequency': 10.0,
                 'scenario': self.scenario,
+                'cudaEnabledMpi': self.cudaEnabledMpi,
+                'gpuBlockSize': self.cuda_blocks
             },
             'PhysicalParameters': {
                 'density_liquid': 1.0,

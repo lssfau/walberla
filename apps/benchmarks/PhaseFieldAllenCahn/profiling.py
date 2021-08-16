@@ -16,15 +16,13 @@ class Scenario:
                      self.cells[1] * self.blocks[1],
                      self.cells[2] * self.blocks[2])
 
-        self.timeStepStrategy = 'phase_only'
-        self.overlappingWidth = (1, 1, 1)
+        self.timeStepStrategy = 'phase_only'  # 'phase_only', 'hydro_only', 'kernel_only', 'normal'
         self.cuda_block_size = (128, 1, 1)
 
         # bubble parameters
         self.bubbleRadius = min(self.size) // 4
         self.bubbleMidPoint = (self.size[0] / 2, self.size[1] / 2, self.size[2] / 2)
 
-        self.scenario = 1  # 1 rising bubble, 2 RTI
         self.config_dict = self.config()
 
     @wlb.member_callback
@@ -38,13 +36,11 @@ class Scenario:
             'Parameters': {
                 'timesteps': self.timesteps,
                 'vtkWriteFrequency': self.vtkWriteFrequency,
-                'useGui': 0,
                 'remainingTimeLoggerFrequency': -1,
                 'timeStepStrategy': self.timeStepStrategy,
-                'overlappingWidth': self.overlappingWidth,
                 'gpuBlockSize': self.cuda_block_size,
                 'warmupSteps': 0,
-                'scenario': self.scenario,
+                'scenario': 1,
             },
             'Boundaries_GPU': {
                 'Border': []

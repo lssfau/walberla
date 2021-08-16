@@ -3,57 +3,55 @@ import waLBerla as wlb
 import pandas as pd
 
 from waLBerla.tools.sqlitedb import sequenceValuesToScalars
+from waLBerla.tools.config import block_decomposition
 
 import sys
 
 
 class Scenario:
-    def __init__(self, timeStepStrategy, overlappingWidth):
+    def __init__(self, time_step_strategy, cells_per_block=(256, 256, 256),
+                 cuda_enabled_mpi=False):
         # output frequencies
-        self.vtkWriteFrequency = -1
+        self.vtkWriteFrequency = 0
 
         # simulation parameters
-        self.timesteps = 500
-        edge_size = 50
-        self.cells = (edge_size, edge_size, edge_size)
-        self.blocks = (1, 1, 1)
+        self.timesteps = 101
+        self.cells_per_block = cells_per_block
+        self.blocks = block_decomposition(wlb.mpi.numProcesses())
         self.periodic = (1, 1, 1)
-        self.size = (self.cells[0] * self.blocks[0],
-                     self.cells[1] * self.blocks[1],
-                     self.cells[2] * self.blocks[2])
+        self.size = (self.cells_per_block[0] * self.blocks[0],
+                     self.cells_per_block[1] * self.blocks[1],
+                     self.cells_per_block[2] * self.blocks[2])
 
-        self.timeStepStrategy = timeStepStrategy
-        self.overlappingWidth = overlappingWidth
-        self.cuda_block_size = (-1, -1, -1)
+        self.timeStepStrategy = time_step_strategy
         self.warmupSteps = 10
+
+        self.cudaEnabledMpi = cuda_enabled_mpi
 
         # bubble parameters
         self.bubbleRadius = min(self.size) // 4
         self.bubbleMidPoint = (self.size[0] / 2, self.size[1] / 2, self.size[2] / 2)
 
-        self.scenario = 1  # 1 rising bubble, 2 RTI
         self.config_dict = self.config()
 
-        self.csv_file = "benchmark_cpu.csv"
+        self.csv_file = "benchmark.csv"
 
     @wlb.member_callback
     def config(self):
         return {
             'DomainSetup': {
                 'blocks': self.blocks,
-                'cellsPerBlock': self.cells,
+                'cellsPerBlock': self.cells_per_block,
                 'periodic': self.periodic,
             },
             'Parameters': {
                 'timesteps': self.timesteps,
                 'vtkWriteFrequency': self.vtkWriteFrequency,
-                'useGui': 0,
-                'remainingTimeLoggerFrequency': 10.0,
+                'remainingTimeLoggerFrequency': -1,
                 'timeStepStrategy': self.timeStepStrategy,
-                'overlappingWidth': self.overlappingWidth,
-                'gpuBlockSize': self.cuda_block_size,
                 'warmupSteps': self.warmupSteps,
-                'scenario': self.scenario,
+                'scenario': 1,
+                'cudaEnabledMpi': self.cudaEnabledMpi
             },
             'Boundaries_GPU': {
                 'Border': []
@@ -86,31 +84,23 @@ class Scenario:
             df.to_csv(self.csv_file, index=False, mode='a', header=False)
 
 
-def overlap_benchmark():
+def benchmark():
     scenarios = wlb.ScenarioManager()
-    overlappingWidths = [(1, 1, 1), (4, 1, 1), (8, 1, 1), (16, 1, 1), (32, 1, 1),
-                         (4, 4, 1), (8, 8, 1), (16, 16, 1), (32, 32, 1),
-                         (4, 4, 4), (8, 8, 8), (16, 16, 16), (32, 32, 32),
-                         (64, 32, 32), (64, 64, 32), (64, 64, 64)]
-    # no overlap
-    scenarios.add(Scenario(timeStepStrategy='normal', overlappingWidth=(1, 1, 1)))
+    block_size = (64, 64, 64)
 
-    # overlap
-    for overlap_strategy in ['overlap']:
-        for overlappingWidth in overlappingWidths:
-            scenario = Scenario(timeStepStrategy=overlap_strategy,
-                                overlappingWidth=overlappingWidth)
-            scenarios.add(scenario)
+    scenarios.add(Scenario(time_step_strategy='normal', cells_per_block=block_size))
 
 
 def kernel_benchmark():
     scenarios = wlb.ScenarioManager()
+    block_sizes = [(i, i, i) for i in (8, 16, 32, 64, 128)]
 
-    # overlap
-    scenario = Scenario(timeStepStrategy='overlap',
-                        overlappingWidth=(8, 8, 8))
-    scenarios.add(scenario)
+    for time_step_strategy in ['phase_only', 'hydro_only', 'kernel_only', 'normal']:
+        for block_size in block_sizes:
+            scenario = Scenario(time_step_strategy=time_step_strategy,
+                                cells_per_block=block_size)
+            scenarios.add(scenario)
 
 
-# overlap_benchmark()
+# benchmark()
 kernel_benchmark()

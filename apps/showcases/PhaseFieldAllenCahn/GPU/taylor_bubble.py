@@ -11,7 +11,7 @@ from waLBerla.tools.sqlitedb import sequenceValuesToScalars
 from scipy.ndimage.filters import gaussian_filter
 import scipy.spatial as spatial
 
-from parameters_taylor_bubble import calculate_parameters_taylor_bubble
+from lbmpy.phasefield_allen_cahn.parameter_calculation import calculate_parameters_taylor_bubble
 
 
 def intersection(points1, points2, eps):
@@ -55,15 +55,16 @@ def get_circle(midpoint, radius):
 
 
 class Scenario:
-    def __init__(self):
+    def __init__(self, cuda_enabled_mpi=False):
         self.density_liquid = 1.0
         self.reference_time = 16000
         self.reference_length = 128
         d1 = 0.0254  # (0.0508, 0.0381, 0.0254)
         d2 = 0.0127  # (0.0254, 0.0127, 0.0127)
-        gpus = 1
-        self.interface_width = 5
+        self.interface_width = 4
         self.mobility = 0.05
+
+        num_processes = wlb.mpi.numProcesses()
 
         # output frequencies
         self.vtkWriteFrequency = self.reference_time
@@ -74,8 +75,8 @@ class Scenario:
         # simulation parameters
         self.diameter = self.reference_length
         self.timesteps = self.reference_time * 15 + 1
-        self.cells = (self.diameter, (self.reference_length * 15) // gpus, self.diameter)
-        self.blocks = (1, gpus, 1)
+        self.cells = (self.diameter, (self.reference_length * 15) // num_processes, self.diameter)
+        self.blocks = (1, num_processes, 1)
         self.periodic = (0, 0, 0)
         self.size = (self.cells[0] * self.blocks[0],
                      self.cells[1] * self.blocks[1],
@@ -86,16 +87,13 @@ class Scenario:
         self.center_y = self.size[1] / 2
         self.center_z = self.size[2] / 2
 
-        self.overlappingWidth = (8, 1, 1)
-        self.timeStepStrategy = 'normal'
-
         self.scenario = 4  # 1 rising bubble or droplet, 2 RTI, 3 bubble field, 4 taylor bubble set up
 
         self.counter = 0
         self.yPositions = []
 
         self.eccentricity_or_pipe_ratio = False  # if True eccentricity is conducted otherwise pipe ratio
-        self.ratio = 0.5
+        self.ratio = 0
 
         self.start_transition = (self.size[1] // 2) - 2 * self.diameter
         self.length_transition = 4 * self.diameter
@@ -117,8 +115,8 @@ class Scenario:
         parameters = calculate_parameters_taylor_bubble(reference_length=self.reference_length,
                                                         reference_time=self.reference_time,
                                                         density_heavy=self.density_liquid,
-                                                        d1=d1,
-                                                        d2=d2)
+                                                        diameter_outer=d1,
+                                                        diameter_inner=d2)
 
         self.density_gas = parameters["density_light"]
         self.surface_tension = parameters["surface_tension"]
@@ -127,6 +125,9 @@ class Scenario:
 
         self.relaxation_time_liquid = parameters.get("relaxation_time_heavy")
         self.relaxation_time_gas = parameters.get("relaxation_time_light")
+
+        self.cudaEnabledMpi = cuda_enabled_mpi
+        self.cuda_blocks = (64, 2, 2)
 
         self.config_dict = self.config()
 
@@ -151,6 +152,8 @@ class Scenario:
                 'meshWriteFrequency': self.meshWriteFrequency,
                 'remainingTimeLoggerFrequency': 60.0,
                 'scenario': self.scenario,
+                'cudaEnabledMpi': self.cudaEnabledMpi,
+                'gpuBlockSize': self.cuda_blocks
             },
             'PhysicalParameters': {
                 'density_liquid': self.density_liquid,
@@ -275,7 +278,7 @@ class Scenario:
                 else:
                     theta = 360
 
-                if t % self.pngWriteFrequency == 0:
+                if self.pngWriteFrequency > 0 and t % self.pngWriteFrequency == 0:
                     plt.plot(center_x + np.linspace(0, center_x) * np.cos(np.radians(angle)),
                              center_z + np.linspace(0, center_z) * np.sin(np.radians(angle)), 'b-')
                     plt.plot(center_x + np.linspace(0, center_x) * np.cos(np.radians(angle1)),

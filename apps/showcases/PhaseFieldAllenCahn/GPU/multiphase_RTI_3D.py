@@ -10,7 +10,7 @@ from lbmpy.phasefield_allen_cahn.parameter_calculation import calculate_paramete
 
 
 class Scenario:
-    def __init__(self):
+    def __init__(self, cuda_enabled_mpi=False):
         # output frequencies
         self.vtkWriteFrequency = 1000
 
@@ -51,12 +51,13 @@ class Scenario:
         self.tube = False
 
         # everything else
-        self.dbFile = "RTI.csv"
-
         self.scenario = 2  # 1 rising bubble or droplet, 2 RTI, 3 bubble field, 4 taylor bubble set up
 
         self.counter = 0
         self.yPositions = []
+
+        self.cudaEnabledMpi = cuda_enabled_mpi
+        self.cuda_blocks = (64, 2, 2)
 
         self.config_dict = self.config()
 
@@ -75,6 +76,8 @@ class Scenario:
                 'dbWriteFrequency': self.dbWriteFrequency,
                 'remainingTimeLoggerFrequency': 10.0,
                 'scenario': self.scenario,
+                'cudaEnabledMpi': self.cudaEnabledMpi,
+                'gpuBlockSize': self.cuda_blocks
             },
             'PhysicalParameters': {
                 'density_liquid': self.density_heavy,
@@ -147,7 +150,8 @@ class Scenario:
 
                 sequenceValuesToScalars(data)
 
-                csv_file = f"RTI_{data['stencil_phase']}_{data['stencil_hydro']}_Re_{self.reynolds_number}_tube.csv"
+                csv_file = f"RTI_{data['stencil_phase']}_{data['stencil_hydro']}_Re_{self.reynolds_number}"
+                csv_file += "_tube.csv" if self.tube else ".csv"
 
                 df = pd.DataFrame.from_records([data])
                 if not os.path.isfile(csv_file):
