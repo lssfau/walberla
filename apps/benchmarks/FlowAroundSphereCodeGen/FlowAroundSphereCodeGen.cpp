@@ -70,21 +70,29 @@ auto pdfFieldAdder = [](IBlock* const block, StructuredBlockStorage* const stora
 };
 
 auto VelocityCallback = [](const Cell& pos, const shared_ptr< StructuredBlockForest >& SbF, IBlock& block,
-                           real_t inflow_velocity) {
-   Cell globalCell;
-   CellInterval domain = SbF->getDomainCellBB();
-   real_t h_y          = domain.yMax() - domain.yMin();
-   real_t h_z          = domain.zMax() - domain.zMin();
-   SbF->transformBlockLocalToGlobalCell(globalCell, block, pos);
+                           real_t inflow_velocity, const bool constant_inflow = true) {
+   if (constant_inflow)
+   {
+      Vector3< real_t > result(inflow_velocity, 0.0, 0.0);
+      return result;
+   }
+   else
+   {
+      Cell globalCell;
+      CellInterval domain = SbF->getDomainCellBB();
+      real_t h_y          = real_c(domain.ySize());
+      real_t h_z          = real_c(domain.zSize());
+      SbF->transformBlockLocalToGlobalCell(globalCell, block, pos);
 
-   real_t y1 = globalCell[1] - (h_y / 2.0 + 0.5);
-   real_t z1 = globalCell[2] - (h_z / 2.0 + 0.5);
+      real_t y1 = real_c(globalCell[1] - (h_y / 2.0 - 0.5));
+      real_t z1 = real_c(globalCell[2] - (h_z / 2.0 - 0.5));
 
-   real_t u = (inflow_velocity * 16) / (h_y * h_y * h_z * h_z) * (h_y / 2.0 - y1) * (h_y / 2 + y1) * (h_z / 2 - z1) *
-              (h_z / 2 + z1);
+      real_t u = (inflow_velocity * real_c(16)) / (h_y * h_y * h_z * h_z) * (h_y / real_c(2.0) - y1) *
+                 (h_y / real_c(2.0) + y1) * (h_z / real_c(2.0) - z1) * (h_z / real_c(2.0) + z1);
 
-   Vector3< real_t > result(u, 0.0, 0.0);
-   return result;
+      Vector3< real_t > result(u, 0.0, 0.0);
+      return result;
+   }
 };
 
 class AlternatingBeforeFunction
@@ -147,6 +155,7 @@ int main(int argc, char** argv)
       const real_t u_max           = parameters.getParameter< real_t >("u_max", real_t(0.05));
       const real_t reynolds_number = parameters.getParameter< real_t >("reynolds_number", real_t(1000));
       const uint_t diameter_sphere = parameters.getParameter< uint_t >("diameter_sphere", uint_t(5));
+      const bool constant_inflow = parameters.getParameter< bool >("constant_inflow", true);
 
       const double remainingTimeLoggerFrequency =
          parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
@@ -204,7 +213,7 @@ int main(int argc, char** argv)
       auto boundariesConfig = config->getOneBlock("Boundaries");
 
       std::function< Vector3< real_t >(const Cell&, const shared_ptr< StructuredBlockForest >&, IBlock&) >
-         velocity_initialisation = std::bind(VelocityCallback, _1, _2, _3, u_max);
+         velocity_initialisation = std::bind(VelocityCallback, _1, _2, _3, u_max, constant_inflow);
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
       lbm::FlowAroundSphereCodeGen_UBB ubb(blocks, pdfFieldIDGPU, velocity_initialisation);
@@ -236,10 +245,9 @@ int main(int argc, char** argv)
       AlternatingBeforeFunction communication(evenComm, oddComm, tracker);
 
       // add LBM sweep and communication to time loop
-      timeloop.add() << BeforeFunction(communication, "communication")
-                     << Sweep(noSlip.getSweep(tracker), "noSlip boundary");
+      timeloop.add() << BeforeFunction(communication, "communication") << Sweep(ubb.getSweep(tracker), "ubb boundary");
       timeloop.add() << Sweep(outflow.getSweep(tracker), "outflow boundary");
-      timeloop.add() << Sweep(ubb.getSweep(tracker), "ubb boundary");
+      timeloop.add() << Sweep(noSlip.getSweep(tracker), "noSlip boundary");
       timeloop.add() << BeforeFunction(tracker->getAdvancementFunction(), "Timestep Advancement")
                      << Sweep(lbSweep.getSweep(tracker), "LB update rule");
 
