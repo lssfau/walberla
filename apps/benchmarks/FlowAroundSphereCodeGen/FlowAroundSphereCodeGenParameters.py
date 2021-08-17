@@ -4,12 +4,14 @@ from lbmpy.relaxationrates import relaxation_rate_from_lattice_viscosity
 
 class Scenario:
     def __init__(self):
-        self.timesteps = 101
-        self.vtkWriteFrequency = 2000
+        self.timesteps = 1001
+        self.vtkWriteFrequency = 100
 
         self.cells = (384, 128, 128)
         self.blocks = (1, 1, 1)
         self.periodic = (0, 0, 0)
+
+        self.constant_inflow = True
 
         self.diameter_sphere = min(self.cells) // 2
         self.u_max = 0.1
@@ -38,7 +40,8 @@ class Scenario:
                 'omega': self.omega,
                 'u_max': self.u_max,
                 'reynolds_number': self.reynolds_number,
-                'diameter_sphere': self.diameter_sphere
+                'diameter_sphere': self.diameter_sphere,
+                'constant_inflow': self.constant_inflow
             },
             'Boundaries': {
                 'Border': [
@@ -54,7 +57,7 @@ class Scenario:
                      'midpoint': (int(0.40 * self.total_cells[0]), self.total_cells[1] // 2, self.total_cells[2] // 2),
                      'radius': self.diameter_sphere // 2,
                      'flag': 'NoSlip'}
-                ]
+                ],
             },
         }
 

@@ -14,51 +14,54 @@ from lbmpy_walberla import generate_alternating_lbm_sweep, generate_alternating_
 
 import sympy as sp
 
-stencil = get_stencil("D3Q27")
-q = len(stencil)
-dim = len(stencil[0])
-streaming_pattern = 'esotwist'
-timesteps = get_timesteps(streaming_pattern)
-
-pdfs, velocity_field, density_field = fields(f"pdfs({q}), velocity({dim}), density(1) : double[{dim}D]", layout='fzyx')
-omega = sp.Symbol("omega")
-u_max = sp.Symbol("u_max")
-
-output = {
-    'density': density_field,
-    'velocity': velocity_field
-}
-
-opt = {'symbolic_field': pdfs,
-       'cse_global': False,
-       'cse_pdfs': False}
-
-method_params = {'method': 'cumulant',
-                 'stencil': stencil,
-                 'relaxation_rate': omega,
-                 'galilean_correction': True,
-                 'field_name': 'pdfs',
-                 'streaming_pattern': streaming_pattern,
-                 'output': output,
-                 'optimization': opt}
-
-collision_rule = create_lb_collision_rule(**method_params)
-lb_method = collision_rule.method
-
-# getter & setter
-setter_assignments = macroscopic_values_setter(lb_method, velocity=velocity_field.center_vector,
-                                               pdfs=pdfs, density=1.0,
-                                               streaming_pattern=streaming_pattern,
-                                               previous_timestep=timesteps[0])
-
-# opt = {'instruction_set': 'sse', 'assume_aligned': True, 'nontemporal': False, 'assume_inner_stride_one': True}
-
-stencil_typedefs = {'Stencil_T': stencil}
-field_typedefs = {'PdfField_T': pdfs,
-                  'VelocityField_T': velocity_field,
-                  'ScalarField_T': density_field}
-
 with CodeGeneration() as ctx:
+    data_type = "float64" if ctx.double_accuracy else "float32"
+    stencil = get_stencil("D3Q27")
+    q = len(stencil)
+    dim = len(stencil[0])
+    streaming_pattern = 'esotwist'
+    timesteps = get_timesteps(streaming_pattern)
+
+    pdfs, velocity_field, density_field = fields(f"pdfs({q}), velocity({dim}), density(1) : {data_type}[{dim}D]",
+                                                 layout='fzyx')
+    omega = sp.Symbol("omega")
+    u_max = sp.Symbol("u_max")
+
+    output = {
+        'density': density_field,
+        'velocity': velocity_field
+    }
+
+    opt = {'symbolic_field': pdfs,
+           'cse_global': False,
+           'cse_pdfs': False,
+           'double_precision': True if ctx.double_accuracy else False}
+
+    method_params = {'method': 'cumulant',
+                     'stencil': stencil,
+                     'relaxation_rate': omega,
+                     'galilean_correction': True,
+                     'field_name': 'pdfs',
+                     'streaming_pattern': streaming_pattern,
+                     'output': output,
+                     'optimization': opt}
+
+    collision_rule = create_lb_collision_rule(**method_params)
+    lb_method = collision_rule.method
+
+    # getter & setter
+    setter_assignments = macroscopic_values_setter(lb_method, velocity=velocity_field.center_vector,
+                                                   pdfs=pdfs, density=1.0,
+                                                   streaming_pattern=streaming_pattern,
+                                                   previous_timestep=timesteps[0])
+
+    # opt = {'instruction_set': 'sse', 'assume_aligned': True, 'nontemporal': False, 'assume_inner_stride_one': True}
+
+    stencil_typedefs = {'Stencil_T': stencil}
+    field_typedefs = {'PdfField_T': pdfs,
+                      'VelocityField_T': velocity_field,
+                      'ScalarField_T': density_field}
+
     if ctx.cuda:
         target = 'gpu'
     else:

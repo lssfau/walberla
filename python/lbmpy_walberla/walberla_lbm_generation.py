@@ -9,7 +9,7 @@ import pystencils as ps
 from lbmpy.fieldaccess import CollideOnlyInplaceAccessor, StreamPullTwoFieldsAccessor
 from lbmpy.relaxationrates import relaxation_rate_scaling
 from lbmpy.stencils import get_stencil
-from lbmpy.updatekernels import create_lbm_kernel, create_stream_pull_only_kernel
+from lbmpy.updatekernels import create_lbm_kernel, create_stream_only_kernel
 from pystencils import AssignmentCollection, create_kernel
 from pystencils.astnodes import SympyAssignment
 from pystencils.backends.cbackend import CBackend, CustomSympyPrinter, get_headers
@@ -30,7 +30,6 @@ def __lattice_model(generation_context, class_name, lb_method, stream_collide_as
     stencil_name = get_stencil_name(lb_method.stencil)
     if not stencil_name:
         raise ValueError("lb_method uses a stencil that is not supported in waLBerla")
-
 
     communication_stencil_name = stencil_name if stencil_name != "D3Q15" else "D3Q27"
     is_float = not generation_context.double_accuracy
@@ -165,8 +164,8 @@ def generate_lattice_model(generation_context, class_name, collision_rule, field
     collide_ast.function_name = 'kernel_collide'
     collide_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
-    stream_update_rule = create_stream_pull_only_kernel(lb_method.stencil, None, 'pdfs', 'pdfs_tmp', field_layout,
-                                                        dtype)
+    stream_update_rule = create_stream_only_kernel(lb_method.stencil, src_field, dst_field,
+                                                   accessor=StreamPullTwoFieldsAccessor())
     stream_ast = create_kernel(stream_update_rule, **create_kernel_params)
     stream_ast.function_name = 'kernel_stream'
     stream_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']

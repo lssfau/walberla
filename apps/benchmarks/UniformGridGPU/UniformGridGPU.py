@@ -11,6 +11,8 @@ from lbmpy.boundaries import NoSlip, UBB
 from lbmpy.creationfunctions import create_lb_collision_rule
 from lbmpy.macroscopic_value_kernels import macroscopic_values_setter
 from lbmpy.stencils import get_stencil
+from lbmpy.updatekernels import create_stream_only_kernel
+from lbmpy.fieldaccess import *
 
 from pystencils_walberla import CodeGeneration, generate_info_header, generate_sweep
 from lbmpy_walberla import generate_alternating_lbm_sweep, generate_lb_pack_info, generate_alternating_lbm_boundary
@@ -44,7 +46,7 @@ options_dict = {
     },
     'mrt-overrelax': {
         'method': 'mrt',
-        'relaxation_rates': [omega, 1.3, 1.4, omega, 1.2, 1.1],
+        'relaxation_rates': [omega] + [1 + x * 1e-2 for x in range(1, 11)],
     },
     'cumulant': {
         'method': 'cumulant',
@@ -59,7 +61,7 @@ options_dict = {
     'entropic': {
         'method': 'mrt',
         'compressible': True,
-        'relaxation_rates': [omega, omega, omega_free, omega_free, omega_free],
+        'relaxation_rates': [omega, omega] + [omega_free] * 6,
         'entropic': True,
     },
     'smagorinsky': {
@@ -81,6 +83,7 @@ const bool infoCsePdfs = {cse_pdfs};
 optimize = True
 
 with CodeGeneration() as ctx:
+    field_type = "float64" if ctx.double_accuracy else "float32"
     config_tokens = ctx.config.split('_')
 
     assert len(config_tokens) >= 3
@@ -99,7 +102,8 @@ with CodeGeneration() as ctx:
     q = len(stencil)
     dim = len(stencil[0])
     assert dim == 3, "This app supports only three-dimensional stencils"
-    pdfs, pdfs_tmp, velocity_field = ps.fields(f"pdfs({q}), pdfs_tmp({q}), velocity(3) : double[3D]", layout='fzyx')
+    pdfs, pdfs_tmp, velocity_field = ps.fields(f"pdfs({q}), pdfs_tmp({q}), velocity(3) : {field_type}[3D]",
+                                               layout='fzyx')
 
     common_options = {
         'stencil': stencil,
@@ -110,7 +114,7 @@ with CodeGeneration() as ctx:
             'cse_pdfs': False,
             'symbolic_field': pdfs,
             'field_layout': 'fzyx',
-            'gpu_indexing_params': gpu_indexing_params,
+            'gpu_indexing_params': gpu_indexing_params
         }
     }
 
@@ -127,6 +131,14 @@ with CodeGeneration() as ctx:
         ('int32_t', 'cudaBlockSize1'),
         ('int32_t', 'cudaBlockSize2')
     ]
+
+    # Sweep for Stream only. This is for benchmarking an empty streaming pattern without LBM.
+    # is_inplace is set to False to ensure that the streaming is done with src and dst field.
+    # If this is not the case the compiler might simplify the streaming in a way that benchmarking makes no sense.
+    accessor = CollideOnlyInplaceAccessor()
+    accessor.is_inplace = False
+    field_swaps_stream_only = [(pdfs, pdfs_tmp)]
+    stream_only_kernel = create_stream_only_kernel(stencil, pdfs, pdfs_tmp, accessor=accessor)
 
     # LB Sweep
     collision_rule = create_lb_collision_rule(**options)
@@ -147,6 +159,10 @@ with CodeGeneration() as ctx:
                                                    streaming_pattern=streaming_pattern,
                                                    previous_timestep=Timestep.EVEN)
     generate_sweep(ctx, 'UniformGridGPU_MacroSetter', setter_assignments, target='gpu')
+
+    # Stream only kernel
+    generate_sweep(ctx, 'UniformGridGPU_StreamOnlyKernel', stream_only_kernel, field_swaps=field_swaps_stream_only,
+                   gpu_indexing_params=gpu_indexing_params, varying_parameters=vp, target='gpu')
 
     # Boundaries
     noslip = NoSlip()
