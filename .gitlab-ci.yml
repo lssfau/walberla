@@ -1624,9 +1624,9 @@ clang_10.0_hybrid_dbg_sp:
       - cuda
       - docker
 
-inteloneapi_21.2_serial:
+inteloneapi_21.3_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
    before_script:
       - pip3 install lbmpy jinja2 pytest
       - cd python
@@ -1647,9 +1647,9 @@ inteloneapi_21.2_serial:
       - cuda
       - docker
 
-inteloneapi_21.2_mpionly:
+inteloneapi_21.3_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
    before_script:
       - pip3 install lbmpy jinja2 pytest
       - cd python
@@ -1668,9 +1668,9 @@ inteloneapi_21.2_mpionly:
       - cuda
       - docker
 
-inteloneapi_21.2_hybrid:
+inteloneapi_21.3_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
    before_script:
       - pip3 install lbmpy jinja2 pytest
       - cd python
@@ -1685,9 +1685,9 @@ inteloneapi_21.2_hybrid:
       - cuda
       - docker
 
-inteloneapi_21.2_serial_dbg:
+inteloneapi_21.3_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
    before_script:
       - pip3 install lbmpy jinja2 pytest
       - cd python
@@ -1706,9 +1706,9 @@ inteloneapi_21.2_serial_dbg:
       - cuda
       - docker
 
-inteloneapi_21.2_mpionly_dbg:
+inteloneapi_21.3_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
    before_script:
       - pip3 install lbmpy jinja2 pytest
       - cd python
@@ -1725,9 +1725,9 @@ inteloneapi_21.2_mpionly_dbg:
       - cuda
       - docker
 
-inteloneapi_21.2_hybrid_dbg:
+inteloneapi_21.3_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
    before_script:
       - pip3 install lbmpy jinja2 pytest
       - cd python
@@ -1743,9 +1743,9 @@ inteloneapi_21.2_hybrid_dbg:
       - cuda
       - docker
 
-inteloneapi_21.2_hybrid_dbg_sp:
+inteloneapi_21.3_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.2
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
