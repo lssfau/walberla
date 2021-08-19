@@ -161,13 +161,13 @@ public:
    
    template< typename LatticeModel_T >
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                                                          const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
+                                                          const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    { return DirectionIndependentTerms_T(); }
 
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/, const Vector3<real_t> & /*velocity*/, const real_t /*rho*/,
                      const DirectionIndependentTerms_T & /*commonTerms*/, const real_t /*w*/,
-                     const real_t /*cx*/, const real_t /*cy*/, const real_t /*cz*/, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const { return real_t(0); }
+                     const real_t /*cx*/, const real_t /*cy*/, const real_t /*cz*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const { return real_t(0); }
 
    bool setConstantBodyForceIfPossible( const Vector3<real_t> &, const uint_t = uint_t(0) ) { return false; }
 };
@@ -214,13 +214,13 @@ public:
    
    template< typename LatticeModel_T >
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                                                          const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
+                                                          const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    { return DirectionIndependentTerms_T(); }
 
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/, const Vector3<real_t> & /*velocity*/, const real_t /*rho*/,
                      const DirectionIndependentTerms_T & /*commonTerms*/, const real_t w,
-                     const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
+                     const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    {
       return real_t(3.0) * w * ( cx * bodyForce_[0] + cy * bodyForce_[1] + cz * bodyForce_[2] );
    }
@@ -304,7 +304,7 @@ public:
 
    template< typename LatticeModel_T >
    real_t directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                                     const Vector3<real_t> & /*velocity*/, const real_t rho, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
+                                     const Vector3<real_t> & /*velocity*/, const real_t rho, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    {
       return DirectionIndependentTerm< LatticeModel_T >::get( rho );
    }
@@ -312,7 +312,7 @@ public:
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const Vector3<real_t> & velocity, const real_t rho,
                      const real_t commonTerm, const real_t w,
-                     const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
+                     const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    {
       const auto shiftedVelocity = ShiftedVelocity< LatticeModel_T >::get( velocity, force(x,y,z), commonTerm );
 
@@ -371,13 +371,13 @@ public:
    
    template< typename LatticeModel_T >
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                                                          const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
+                                                          const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    { return DirectionIndependentTerms_T(); }
 
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/, const Vector3<real_t> & velocity, const real_t /*rho*/,
                      const DirectionIndependentTerms_T & /*commonTerms*/, const real_t w,
-                     const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
+                     const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
       return real_t(3) * w * ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * bodyForce_ );
@@ -431,13 +431,13 @@ public:
    
    template< typename LatticeModel_T >
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                                                          const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
+                                                          const Vector3<real_t> & /*velocity*/, const real_t /*rho*/, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    { return DirectionIndependentTerms_T(); }
 
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const Vector3<real_t> & velocity, const real_t /*rho*/,
                      const DirectionIndependentTerms_T & /*commonTerms*/, const real_t w,
-                     const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
+                     const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
       return real_t(3) * w * ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * force(x,y,z) );
@@ -494,9 +494,9 @@ public:
    
    template< typename LatticeModel_T >
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/,
-                                                          const Vector3<real_t> & velocity, const real_t /*rho*/, const real_t omega, const real_t omega_bulk ) const
+                                                          const Vector3<real_t> & velocity, const real_t /*rho*/, const real_t omega, const real_t omega_bulk, const real_t /*omega_odd*/ ) const
    {
-      if (!std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
+      if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >::value)
       {
          const real_t one_over_d  = real_t(1) / real_t(LatticeModel_T::Stencil::D);
       
@@ -508,6 +508,7 @@ public:
       }
       else
       {
+         WALBERLA_ASSERT_FLOAT_EQUAL( omega, omega_bulk );
          return DirectionIndependentTerms_T();
       }
    }
@@ -515,15 +516,21 @@ public:
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/, const Vector3<real_t> & velocity, const real_t /*rho*/,
                      const DirectionIndependentTerms_T & commonTerms, const real_t w,
-                     const real_t cx, const real_t cy, const real_t cz, const real_t omega, const real_t /*omega_bulk*/ ) const
+                     const real_t cx, const real_t cy, const real_t cz, const real_t omega, const real_t /*omega_bulk*/, const real_t omega_odd ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
-      if (!std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
+      if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >::value)
       {
          const real_t one_third  = real_t(1) / real_t(3);
       
          const real_t common = (commonTerms * ( tensorProduct(c,c) - Matrix3<real_t>::makeDiagonalMatrix(one_third) )).trace();
          return real_t(3.0) * w * ( bodyForce_ * c + real_t(1.5) * common);
+      }
+      else if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value)
+      {
+         return real_t(3.0) * w * ( ( real_t(1) - real_t(0.5) * omega ) *
+                                    ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * bodyForce_ ) +
+                                    ( omega - omega_odd ) * real_t(0.5) * (c * bodyForce_) );
       }
       else
       {
@@ -580,9 +587,9 @@ public:
 
    template< typename LatticeModel_T >
    DirectionIndependentTerms_T directionIndependentTerms( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                                                          const Vector3<real_t> & velocity, const real_t /*rho*/, const real_t omega, const real_t omega_bulk ) const
+                                                          const Vector3<real_t> & velocity, const real_t /*rho*/, const real_t omega, const real_t omega_bulk, const real_t /*omega_odd*/ ) const
    {
-      if (!std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
+      if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >::value)
       {
          const real_t one_over_d  = real_t(1) / real_t(LatticeModel_T::Stencil::D);
       
@@ -602,15 +609,21 @@ public:
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const Vector3<real_t> & velocity, const real_t /*rho*/,
                      const DirectionIndependentTerms_T & commonTerms, const real_t w,
-                     const real_t cx, const real_t cy, const real_t cz, const real_t omega, const real_t /*omega_bulk*/ ) const
+                     const real_t cx, const real_t cy, const real_t cz, const real_t omega, const real_t /*omega_bulk*/, const real_t omega_odd ) const
    {
       const Vector3<real_t> c( cx, cy, cz );
-      if (!std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::SRT_tag >::value)
+      if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::MRT_tag >::value)
       {
          const real_t one_third  = real_t(1) / real_t(3);
       
          const real_t common = (commonTerms * ( tensorProduct(c,c) - Matrix3<real_t>::makeDiagonalMatrix(one_third) )).trace();
          return real_t(3.0) * w * ( force(x,y,z) * c + real_t(1.5) * common);
+      }
+      else if (std::is_same< typename LatticeModel_T::CollisionModel::tag, collision_model::TRT_tag >::value)
+      {
+         return real_t(3.0) * w * ( ( real_t(1) - real_t(0.5) * omega ) *
+                                    ( ( c - velocity + ( real_t(3) * ( c * velocity ) * c ) ) * force(x,y,z) ) +
+                                    ( omega - omega_odd ) * real_t(0.5) * (c * force(x,y,z)) );
       }
       else
       {
@@ -659,7 +672,7 @@ public:
    
    template< typename LatticeModel_T >
    Vector3<real_t> directionIndependentTerms( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                                              const Vector3<real_t> & velocity, const real_t rho, const real_t omega, const real_t /*omega_bulk*/ ) const
+                                              const Vector3<real_t> & velocity, const real_t rho, const real_t omega, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    {
       const auto rhoVelocity = rho * velocity;
       Vector3<real_t> & previousRhoVelocity = previousRhoVelocity_->get(x,y,z);
@@ -670,7 +683,7 @@ public:
 
    template< typename LatticeModel_T >
    real_t forceTerm( const cell_idx_t /*x*/, const cell_idx_t /*y*/, const cell_idx_t /*z*/, const Vector3<real_t> & /*velocity*/, const real_t /*rho*/,
-                     const Vector3<real_t> & commonTerm, const real_t w, const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/ ) const
+                     const Vector3<real_t> & commonTerm, const real_t w, const real_t cx, const real_t cy, const real_t cz, const real_t /*omega*/, const real_t /*omega_bulk*/, const real_t /*omega_odd*/ ) const
    {
       return w * ( cx * commonTerm[0] + cy * commonTerm[1] + cz * commonTerm[2] );
    }

@@ -1965,13 +1965,13 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          const real_t omega = lm.collisionModel().omega( x, y, z, velocity, rho );
 
-         const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, omega, omega );
+         const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, omega, omega, omega );
 
          // collide
          for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
          {
             const real_t forceTerm = lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho, commonForceTerms, LatticeModel_T::w[ d.toIdx() ],
-                                                                                           real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, omega );
+                                                                                           real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, omega, omega );
 
             dst->get( x, y, z, d.toIdx() ) = ( real_t(1.0) - omega ) * dst->get( x, y, z, d.toIdx() ) +
                                                              omega   * EquilibriumDistribution< LatticeModel_T >::get( *d, velocity, rho ) +
@@ -1996,12 +1996,12 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          const real_t omega = lm.collisionModel().omega( x, y, z, velocity, rho );
 
-         const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, omega, omega );
+         const auto commonForceTerms = lm.forceModel().template directionIndependentTerms< LatticeModel_T >( x, y, z, velocity, rho, omega, omega, omega );
 
          for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
          {
             const real_t forceTerm = lm.forceModel().template forceTerm< LatticeModel_T >( x, y, z, velocity, rho, commonForceTerms, LatticeModel_T::w[ d.toIdx() ],
-                                                                                           real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, omega );
+                                                                                           real_c(d.cx()), real_c(d.cy()), real_c(d.cz()), omega, omega, omega );
 
             src->get( x, y, z, d.toIdx() ) = ( real_t(1.0) - omega ) * src->get( x, y, z, d.toIdx() ) +
                                                              omega   * EquilibriumDistribution< LatticeModel_T >::get( *d, velocity, rho ) +
