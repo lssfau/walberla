@@ -19,6 +19,7 @@ stages:
 
 .build_template:
    script:
+      - pip install -I cmake==3.16.3
       - export NUM_CORES=$(nproc --all)
       - export MAX_BUILD_CORES=$(( $(awk '( $1 == "MemTotal:" ) { print $2 }' /proc/meminfo) / ( 4 * 1024 * 1024  ) ))
       - "[[ $MAX_BUILD_CORES -lt $NUM_CORES ]] && export NUM_BUILD_CORES=$MAX_BUILD_CORES || export NUM_BUILD_CORES=$NUM_CORES"
