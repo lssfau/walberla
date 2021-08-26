@@ -25,7 +25,8 @@
 
 namespace walberla {
 namespace lbm_mesapd_coupling {
-
+namespace amr
+{
 /*
  * Class to determine the minimum level a block can be.
  * For coupled LBM-PE simulations the following rules apply:
@@ -39,21 +40,24 @@ namespace lbm_mesapd_coupling {
  */
 class ParticlePresenceLevelDetermination
 {
-public:
-
-   ParticlePresenceLevelDetermination( const shared_ptr<lbm_mesapd_coupling::InfoCollection> & infoCollection, uint_t finestLevel) :
-         infoCollection_( infoCollection ), finestLevel_( finestLevel)
+ public:
+   ParticlePresenceLevelDetermination(const shared_ptr< InfoCollection > infoCollection,
+                                      uint_t finestLevel)
+      : infoCollection_(infoCollection), finestLevel_(finestLevel)
    {}
 
-   void operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
-                    std::vector< const Block * > &, const BlockForest & /*forest*/ ) {
-      for (auto &minTargetLevel : minTargetLevels) {
+   void operator()(std::vector< std::pair< const Block*, uint_t > >& minTargetLevels, std::vector< const Block* >&,
+                   const BlockForest& /*forest*/)
+   {
+      for (auto& minTargetLevel : minTargetLevels)
+      {
          uint_t currentLevelOfBlock = minTargetLevel.first->getLevel();
 
-         const uint_t numberOfParticlesInDirectNeighborhood = getNumberOfLocalAndShadowParticlesInNeighborhood(minTargetLevel.first);
+         const uint_t numberOfParticlesInDirectNeighborhood =
+            getNumberOfLocalAndShadowParticlesInNeighborhood(minTargetLevel.first);
 
-         uint_t targetLevelOfBlock = currentLevelOfBlock; //keep everything as it is
-         if ( numberOfParticlesInDirectNeighborhood > uint_t(0) )
+         uint_t targetLevelOfBlock = currentLevelOfBlock; // keep everything as it is
+         if (numberOfParticlesInDirectNeighborhood > uint_t(0))
          {
             // set block to finest level if there are particles nearby
             targetLevelOfBlock = finestLevel_;
@@ -61,41 +65,44 @@ public:
          else
          {
             // block could coarsen since there are no particles nearby
-            if( currentLevelOfBlock > uint_t(0) )
-               targetLevelOfBlock = currentLevelOfBlock - uint_t(1);
+            if (currentLevelOfBlock > uint_t(0)) targetLevelOfBlock = currentLevelOfBlock - uint_t(1);
          }
 
-         WALBERLA_CHECK_LESS_EQUAL(std::abs(int_c(targetLevelOfBlock) - int_c(currentLevelOfBlock)), uint_t(1), "Only level difference of maximum 1 allowed!");
+         WALBERLA_CHECK_LESS_EQUAL(std::abs(int_c(targetLevelOfBlock) - int_c(currentLevelOfBlock)), uint_t(1),
+                                   "Only level difference of maximum 1 allowed!");
          minTargetLevel.second = targetLevelOfBlock;
       }
    }
 
-private:
-
-   uint_t getNumberOfLocalAndShadowParticlesInNeighborhood(const Block * block) {
+ private:
+   uint_t getNumberOfLocalAndShadowParticlesInNeighborhood(const Block* block)
+   {
       auto numParticles = uint_t(0);
 
       // add particles of current block
       const auto infoIt = infoCollection_->find(block->getId());
-      WALBERLA_CHECK_UNEQUAL(infoIt, infoCollection_->end(), "Block with ID " << block->getId() << " not found in info collection!");
+      WALBERLA_CHECK_UNEQUAL(infoIt, infoCollection_->end(),
+                             "Block with ID " << block->getId() << " not found in info collection!");
 
-      numParticles += infoIt->second.numberOfLocalParticles + infoIt->second.numberOfShadowParticles;
+      numParticles += infoIt->second.numberOfLocalParticles + infoIt->second.numberOfGhostParticles;
 
       // add particles of all neighboring blocks
-      for(uint_t i = 0; i < block->getNeighborhoodSize(); ++i)
+      for (uint_t i = 0; i < block->getNeighborhoodSize(); ++i)
       {
-         const BlockID &neighborBlockID = block->getNeighborId(i);
-         const auto infoItNeighbor = infoCollection_->find(neighborBlockID);
-         WALBERLA_CHECK_UNEQUAL(infoItNeighbor, infoCollection_->end(), "Neighbor block with ID " << neighborBlockID << " not found in info collection!");
+         const BlockID& neighborBlockID = block->getNeighborId(i);
+         const auto infoItNeighbor      = infoCollection_->find(neighborBlockID);
+         WALBERLA_CHECK_UNEQUAL(infoItNeighbor, infoCollection_->end(),
+                                "Neighbor block with ID " << neighborBlockID << " not found in info collection!");
 
-         numParticles += infoItNeighbor->second.numberOfLocalParticles + infoItNeighbor->second.numberOfShadowParticles;
+         numParticles += infoItNeighbor->second.numberOfLocalParticles + infoItNeighbor->second.numberOfGhostParticles;
       }
       return numParticles;
    }
 
-   shared_ptr<lbm_mesapd_coupling::InfoCollection> infoCollection_;
+   shared_ptr< InfoCollection > infoCollection_;
    uint_t finestLevel_;
 };
 
+} // namespace amr
 } // namespace lbm_mesapd_coupling
 } // namespace walberla

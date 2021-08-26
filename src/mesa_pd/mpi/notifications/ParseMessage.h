@@ -153,6 +153,13 @@ void ParseMessage::operator()(int sender,
       pIt->setHydrodynamicTorque(objparam.hydrodynamicTorque_);
       pIt->setOldHydrodynamicForce(objparam.oldHydrodynamicForce_);
       pIt->setOldHydrodynamicTorque(objparam.oldHydrodynamicTorque_);
+      pIt->setVirtualMass(objparam.virtualMass_);
+      pIt->setInvMassIncludingVirtual(objparam.invMassIncludingVirtual_);
+      pIt->setOldLinearAcceleration(objparam.oldLinearAcceleration_);
+      pIt->setInvInertiaBF(objparam.invInertiaBF_);
+      pIt->setVirtualInertiaBF(objparam.virtualInertiaBF_);
+      pIt->setInvInertiaBFIncludingVirtual(objparam.invInertiaBFIncludingVirtual_);
+      pIt->setOldAngularAcceleration(objparam.oldAngularAcceleration_);
 
       WALBERLA_LOG_DETAIL( "Processed PARTICLE_MIGRATION_NOTIFICATION." );
 

@@ -100,6 +100,13 @@ public:
       using hydrodynamicTorque_type = walberla::mesa_pd::Vec3;
       using oldHydrodynamicForce_type = walberla::mesa_pd::Vec3;
       using oldHydrodynamicTorque_type = walberla::mesa_pd::Vec3;
+      using virtualMass_type = walberla::real_t;
+      using invMassIncludingVirtual_type = walberla::real_t;
+      using oldLinearAcceleration_type = walberla::mesa_pd::Vec3;
+      using invInertiaBF_type = walberla::mesa_pd::Mat3;
+      using virtualInertiaBF_type = walberla::mesa_pd::Mat3;
+      using invInertiaBFIncludingVirtual_type = walberla::mesa_pd::Mat3;
+      using oldAngularAcceleration_type = walberla::mesa_pd::Vec3;
       using clusterID_type = int64_t;
       using segmentID_type = int64_t;
       using neighborState_type = std::unordered_set<walberla::mpi::MPIRank>;
@@ -221,6 +228,34 @@ public:
       oldHydrodynamicTorque_type& getOldHydrodynamicTorqueRef() {return storage_.getOldHydrodynamicTorqueRef(i_);}
       void setOldHydrodynamicTorque(oldHydrodynamicTorque_type const & v) { storage_.setOldHydrodynamicTorque(i_, v);}
       
+      virtualMass_type const & getVirtualMass() const {return storage_.getVirtualMass(i_);}
+      virtualMass_type& getVirtualMassRef() {return storage_.getVirtualMassRef(i_);}
+      void setVirtualMass(virtualMass_type const & v) { storage_.setVirtualMass(i_, v);}
+      
+      invMassIncludingVirtual_type const & getInvMassIncludingVirtual() const {return storage_.getInvMassIncludingVirtual(i_);}
+      invMassIncludingVirtual_type& getInvMassIncludingVirtualRef() {return storage_.getInvMassIncludingVirtualRef(i_);}
+      void setInvMassIncludingVirtual(invMassIncludingVirtual_type const & v) { storage_.setInvMassIncludingVirtual(i_, v);}
+      
+      oldLinearAcceleration_type const & getOldLinearAcceleration() const {return storage_.getOldLinearAcceleration(i_);}
+      oldLinearAcceleration_type& getOldLinearAccelerationRef() {return storage_.getOldLinearAccelerationRef(i_);}
+      void setOldLinearAcceleration(oldLinearAcceleration_type const & v) { storage_.setOldLinearAcceleration(i_, v);}
+      
+      invInertiaBF_type const & getInvInertiaBF() const {return storage_.getInvInertiaBF(i_);}
+      invInertiaBF_type& getInvInertiaBFRef() {return storage_.getInvInertiaBFRef(i_);}
+      void setInvInertiaBF(invInertiaBF_type const & v) { storage_.setInvInertiaBF(i_, v);}
+      
+      virtualInertiaBF_type const & getVirtualInertiaBF() const {return storage_.getVirtualInertiaBF(i_);}
+      virtualInertiaBF_type& getVirtualInertiaBFRef() {return storage_.getVirtualInertiaBFRef(i_);}
+      void setVirtualInertiaBF(virtualInertiaBF_type const & v) { storage_.setVirtualInertiaBF(i_, v);}
+      
+      invInertiaBFIncludingVirtual_type const & getInvInertiaBFIncludingVirtual() const {return storage_.getInvInertiaBFIncludingVirtual(i_);}
+      invInertiaBFIncludingVirtual_type& getInvInertiaBFIncludingVirtualRef() {return storage_.getInvInertiaBFIncludingVirtualRef(i_);}
+      void setInvInertiaBFIncludingVirtual(invInertiaBFIncludingVirtual_type const & v) { storage_.setInvInertiaBFIncludingVirtual(i_, v);}
+      
+      oldAngularAcceleration_type const & getOldAngularAcceleration() const {return storage_.getOldAngularAcceleration(i_);}
+      oldAngularAcceleration_type& getOldAngularAccelerationRef() {return storage_.getOldAngularAccelerationRef(i_);}
+      void setOldAngularAcceleration(oldAngularAcceleration_type const & v) { storage_.setOldAngularAcceleration(i_, v);}
+      
       clusterID_type const & getClusterID() const {return storage_.getClusterID(i_);}
       clusterID_type& getClusterIDRef() {return storage_.getClusterIDRef(i_);}
       void setClusterID(clusterID_type const & v) { storage_.setClusterID(i_, v);}
@@ -322,6 +357,13 @@ public:
    using hydrodynamicTorque_type = walberla::mesa_pd::Vec3;
    using oldHydrodynamicForce_type = walberla::mesa_pd::Vec3;
    using oldHydrodynamicTorque_type = walberla::mesa_pd::Vec3;
+   using virtualMass_type = walberla::real_t;
+   using invMassIncludingVirtual_type = walberla::real_t;
+   using oldLinearAcceleration_type = walberla::mesa_pd::Vec3;
+   using invInertiaBF_type = walberla::mesa_pd::Mat3;
+   using virtualInertiaBF_type = walberla::mesa_pd::Mat3;
+   using invInertiaBFIncludingVirtual_type = walberla::mesa_pd::Mat3;
+   using oldAngularAcceleration_type = walberla::mesa_pd::Vec3;
    using clusterID_type = int64_t;
    using segmentID_type = int64_t;
    using neighborState_type = std::unordered_set<walberla::mpi::MPIRank>;
@@ -442,6 +484,34 @@ public:
    oldHydrodynamicTorque_type const & getOldHydrodynamicTorque(const size_t idx) const {return oldHydrodynamicTorque_[idx];}
    oldHydrodynamicTorque_type& getOldHydrodynamicTorqueRef(const size_t idx) {return oldHydrodynamicTorque_[idx];}
    void setOldHydrodynamicTorque(const size_t idx, oldHydrodynamicTorque_type const & v) { oldHydrodynamicTorque_[idx] = v; }
+   
+   virtualMass_type const & getVirtualMass(const size_t idx) const {return virtualMass_[idx];}
+   virtualMass_type& getVirtualMassRef(const size_t idx) {return virtualMass_[idx];}
+   void setVirtualMass(const size_t idx, virtualMass_type const & v) { virtualMass_[idx] = v; }
+   
+   invMassIncludingVirtual_type const & getInvMassIncludingVirtual(const size_t idx) const {return invMassIncludingVirtual_[idx];}
+   invMassIncludingVirtual_type& getInvMassIncludingVirtualRef(const size_t idx) {return invMassIncludingVirtual_[idx];}
+   void setInvMassIncludingVirtual(const size_t idx, invMassIncludingVirtual_type const & v) { invMassIncludingVirtual_[idx] = v; }
+   
+   oldLinearAcceleration_type const & getOldLinearAcceleration(const size_t idx) const {return oldLinearAcceleration_[idx];}
+   oldLinearAcceleration_type& getOldLinearAccelerationRef(const size_t idx) {return oldLinearAcceleration_[idx];}
+   void setOldLinearAcceleration(const size_t idx, oldLinearAcceleration_type const & v) { oldLinearAcceleration_[idx] = v; }
+   
+   invInertiaBF_type const & getInvInertiaBF(const size_t idx) const {return invInertiaBF_[idx];}
+   invInertiaBF_type& getInvInertiaBFRef(const size_t idx) {return invInertiaBF_[idx];}
+   void setInvInertiaBF(const size_t idx, invInertiaBF_type const & v) { invInertiaBF_[idx] = v; }
+   
+   virtualInertiaBF_type const & getVirtualInertiaBF(const size_t idx) const {return virtualInertiaBF_[idx];}
+   virtualInertiaBF_type& getVirtualInertiaBFRef(const size_t idx) {return virtualInertiaBF_[idx];}
+   void setVirtualInertiaBF(const size_t idx, virtualInertiaBF_type const & v) { virtualInertiaBF_[idx] = v; }
+   
+   invInertiaBFIncludingVirtual_type const & getInvInertiaBFIncludingVirtual(const size_t idx) const {return invInertiaBFIncludingVirtual_[idx];}
+   invInertiaBFIncludingVirtual_type& getInvInertiaBFIncludingVirtualRef(const size_t idx) {return invInertiaBFIncludingVirtual_[idx];}
+   void setInvInertiaBFIncludingVirtual(const size_t idx, invInertiaBFIncludingVirtual_type const & v) { invInertiaBFIncludingVirtual_[idx] = v; }
+   
+   oldAngularAcceleration_type const & getOldAngularAcceleration(const size_t idx) const {return oldAngularAcceleration_[idx];}
+   oldAngularAcceleration_type& getOldAngularAccelerationRef(const size_t idx) {return oldAngularAcceleration_[idx];}
+   void setOldAngularAcceleration(const size_t idx, oldAngularAcceleration_type const & v) { oldAngularAcceleration_[idx] = v; }
    
    clusterID_type const & getClusterID(const size_t idx) const {return clusterID_[idx];}
    clusterID_type& getClusterIDRef(const size_t idx) {return clusterID_[idx];}
@@ -575,6 +645,13 @@ public:
    std::vector<hydrodynamicTorque_type> hydrodynamicTorque_ {};
    std::vector<oldHydrodynamicForce_type> oldHydrodynamicForce_ {};
    std::vector<oldHydrodynamicTorque_type> oldHydrodynamicTorque_ {};
+   std::vector<virtualMass_type> virtualMass_ {};
+   std::vector<invMassIncludingVirtual_type> invMassIncludingVirtual_ {};
+   std::vector<oldLinearAcceleration_type> oldLinearAcceleration_ {};
+   std::vector<invInertiaBF_type> invInertiaBF_ {};
+   std::vector<virtualInertiaBF_type> virtualInertiaBF_ {};
+   std::vector<invInertiaBFIncludingVirtual_type> invInertiaBFIncludingVirtual_ {};
+   std::vector<oldAngularAcceleration_type> oldAngularAcceleration_ {};
    std::vector<clusterID_type> clusterID_ {};
    std::vector<segmentID_type> segmentID_ {};
    std::vector<neighborState_type> neighborState_ {};
@@ -616,6 +693,13 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(const ParticleSt
    getHydrodynamicTorqueRef() = rhs.getHydrodynamicTorque();
    getOldHydrodynamicForceRef() = rhs.getOldHydrodynamicForce();
    getOldHydrodynamicTorqueRef() = rhs.getOldHydrodynamicTorque();
+   getVirtualMassRef() = rhs.getVirtualMass();
+   getInvMassIncludingVirtualRef() = rhs.getInvMassIncludingVirtual();
+   getOldLinearAccelerationRef() = rhs.getOldLinearAcceleration();
+   getInvInertiaBFRef() = rhs.getInvInertiaBF();
+   getVirtualInertiaBFRef() = rhs.getVirtualInertiaBF();
+   getInvInertiaBFIncludingVirtualRef() = rhs.getInvInertiaBFIncludingVirtual();
+   getOldAngularAccelerationRef() = rhs.getOldAngularAcceleration();
    getClusterIDRef() = rhs.getClusterID();
    getSegmentIDRef() = rhs.getSegmentID();
    getNeighborStateRef() = rhs.getNeighborState();
@@ -654,6 +738,13 @@ ParticleStorage::Particle& ParticleStorage::Particle::operator=(ParticleStorage:
    getHydrodynamicTorqueRef() = std::move(rhs.getHydrodynamicTorqueRef());
    getOldHydrodynamicForceRef() = std::move(rhs.getOldHydrodynamicForceRef());
    getOldHydrodynamicTorqueRef() = std::move(rhs.getOldHydrodynamicTorqueRef());
+   getVirtualMassRef() = std::move(rhs.getVirtualMassRef());
+   getInvMassIncludingVirtualRef() = std::move(rhs.getInvMassIncludingVirtualRef());
+   getOldLinearAccelerationRef() = std::move(rhs.getOldLinearAccelerationRef());
+   getInvInertiaBFRef() = std::move(rhs.getInvInertiaBFRef());
+   getVirtualInertiaBFRef() = std::move(rhs.getVirtualInertiaBFRef());
+   getInvInertiaBFIncludingVirtualRef() = std::move(rhs.getInvInertiaBFIncludingVirtualRef());
+   getOldAngularAccelerationRef() = std::move(rhs.getOldAngularAccelerationRef());
    getClusterIDRef() = std::move(rhs.getClusterIDRef());
    getSegmentIDRef() = std::move(rhs.getSegmentIDRef());
    getNeighborStateRef() = std::move(rhs.getNeighborStateRef());
@@ -693,6 +784,13 @@ void swap(ParticleStorage::Particle lhs, ParticleStorage::Particle rhs)
    std::swap(lhs.getHydrodynamicTorqueRef(), rhs.getHydrodynamicTorqueRef());
    std::swap(lhs.getOldHydrodynamicForceRef(), rhs.getOldHydrodynamicForceRef());
    std::swap(lhs.getOldHydrodynamicTorqueRef(), rhs.getOldHydrodynamicTorqueRef());
+   std::swap(lhs.getVirtualMassRef(), rhs.getVirtualMassRef());
+   std::swap(lhs.getInvMassIncludingVirtualRef(), rhs.getInvMassIncludingVirtualRef());
+   std::swap(lhs.getOldLinearAccelerationRef(), rhs.getOldLinearAccelerationRef());
+   std::swap(lhs.getInvInertiaBFRef(), rhs.getInvInertiaBFRef());
+   std::swap(lhs.getVirtualInertiaBFRef(), rhs.getVirtualInertiaBFRef());
+   std::swap(lhs.getInvInertiaBFIncludingVirtualRef(), rhs.getInvInertiaBFIncludingVirtualRef());
+   std::swap(lhs.getOldAngularAccelerationRef(), rhs.getOldAngularAccelerationRef());
    std::swap(lhs.getClusterIDRef(), rhs.getClusterIDRef());
    std::swap(lhs.getSegmentIDRef(), rhs.getSegmentIDRef());
    std::swap(lhs.getNeighborStateRef(), rhs.getNeighborStateRef());
@@ -732,6 +830,13 @@ std::ostream& operator<<( std::ostream& os, const ParticleStorage::Particle& p )
          "hydrodynamicTorque  : " << p.getHydrodynamicTorque() << "\n" <<
          "oldHydrodynamicForce: " << p.getOldHydrodynamicForce() << "\n" <<
          "oldHydrodynamicTorque: " << p.getOldHydrodynamicTorque() << "\n" <<
+         "virtualMass         : " << p.getVirtualMass() << "\n" <<
+         "invMassIncludingVirtual: " << p.getInvMassIncludingVirtual() << "\n" <<
+         "oldLinearAcceleration: " << p.getOldLinearAcceleration() << "\n" <<
+         "invInertiaBF        : " << p.getInvInertiaBF() << "\n" <<
+         "virtualInertiaBF    : " << p.getVirtualInertiaBF() << "\n" <<
+         "invInertiaBFIncludingVirtual: " << p.getInvInertiaBFIncludingVirtual() << "\n" <<
+         "oldAngularAcceleration: " << p.getOldAngularAcceleration() << "\n" <<
          "clusterID           : " << p.getClusterID() << "\n" <<
          "segmentID           : " << p.getSegmentID() << "\n" <<
          "neighborState       : " << p.getNeighborState() << "\n" <<
@@ -841,6 +946,13 @@ inline ParticleStorage::iterator ParticleStorage::create(const id_t& uid)
    hydrodynamicTorque_.emplace_back(real_t(0));
    oldHydrodynamicForce_.emplace_back(real_t(0));
    oldHydrodynamicTorque_.emplace_back(real_t(0));
+   virtualMass_.emplace_back(real_t(0));
+   invMassIncludingVirtual_.emplace_back(real_t(0));
+   oldLinearAcceleration_.emplace_back(real_t(0));
+   invInertiaBF_.emplace_back(real_t(0));
+   virtualInertiaBF_.emplace_back(real_t(0));
+   invInertiaBFIncludingVirtual_.emplace_back(real_t(0));
+   oldAngularAcceleration_.emplace_back(real_t(0));
    clusterID_.emplace_back(-1);
    segmentID_.emplace_back(-1);
    neighborState_.emplace_back();
@@ -905,6 +1017,13 @@ inline ParticleStorage::iterator ParticleStorage::erase(iterator& it)
    hydrodynamicTorque_.pop_back();
    oldHydrodynamicForce_.pop_back();
    oldHydrodynamicTorque_.pop_back();
+   virtualMass_.pop_back();
+   invMassIncludingVirtual_.pop_back();
+   oldLinearAcceleration_.pop_back();
+   invInertiaBF_.pop_back();
+   virtualInertiaBF_.pop_back();
+   invInertiaBFIncludingVirtual_.pop_back();
+   oldAngularAcceleration_.pop_back();
    clusterID_.pop_back();
    segmentID_.pop_back();
    neighborState_.pop_back();
@@ -956,6 +1075,13 @@ inline void ParticleStorage::reserve(const size_t size)
    hydrodynamicTorque_.reserve(size);
    oldHydrodynamicForce_.reserve(size);
    oldHydrodynamicTorque_.reserve(size);
+   virtualMass_.reserve(size);
+   invMassIncludingVirtual_.reserve(size);
+   oldLinearAcceleration_.reserve(size);
+   invInertiaBF_.reserve(size);
+   virtualInertiaBF_.reserve(size);
+   invInertiaBFIncludingVirtual_.reserve(size);
+   oldAngularAcceleration_.reserve(size);
    clusterID_.reserve(size);
    segmentID_.reserve(size);
    neighborState_.reserve(size);
@@ -992,6 +1118,13 @@ inline void ParticleStorage::clear()
    hydrodynamicTorque_.clear();
    oldHydrodynamicForce_.clear();
    oldHydrodynamicTorque_.clear();
+   virtualMass_.clear();
+   invMassIncludingVirtual_.clear();
+   oldLinearAcceleration_.clear();
+   invInertiaBF_.clear();
+   virtualInertiaBF_.clear();
+   invInertiaBFIncludingVirtual_.clear();
+   oldAngularAcceleration_.clear();
    clusterID_.clear();
    segmentID_.clear();
    neighborState_.clear();
@@ -1029,6 +1162,13 @@ inline size_t ParticleStorage::size() const
    //WALBERLA_ASSERT_EQUAL( uid_.size(), hydrodynamicTorque.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldHydrodynamicForce.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), oldHydrodynamicTorque.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), virtualMass.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), invMassIncludingVirtual.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), oldLinearAcceleration.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), invInertiaBF.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), virtualInertiaBF.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), invInertiaBFIncludingVirtual.size() );
+   //WALBERLA_ASSERT_EQUAL( uid_.size(), oldAngularAcceleration.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), clusterID.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), segmentID.size() );
    //WALBERLA_ASSERT_EQUAL( uid_.size(), neighborState.size() );
@@ -1457,6 +1597,69 @@ public:
    walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getOldHydrodynamicTorqueRef();}
    walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getOldHydrodynamicTorqueRef();}
    walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getOldHydrodynamicTorque();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleVirtualMass
+{
+public:
+   using return_type = walberla::real_t;
+   walberla::real_t& operator()(data::Particle& p) const {return p.getVirtualMassRef();}
+   walberla::real_t& operator()(data::Particle&& p) const {return p.getVirtualMassRef();}
+   walberla::real_t const & operator()(const data::Particle& p) const {return p.getVirtualMass();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleInvMassIncludingVirtual
+{
+public:
+   using return_type = walberla::real_t;
+   walberla::real_t& operator()(data::Particle& p) const {return p.getInvMassIncludingVirtualRef();}
+   walberla::real_t& operator()(data::Particle&& p) const {return p.getInvMassIncludingVirtualRef();}
+   walberla::real_t const & operator()(const data::Particle& p) const {return p.getInvMassIncludingVirtual();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleOldLinearAcceleration
+{
+public:
+   using return_type = walberla::mesa_pd::Vec3;
+   walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getOldLinearAccelerationRef();}
+   walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getOldLinearAccelerationRef();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getOldLinearAcceleration();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleInvInertiaBF
+{
+public:
+   using return_type = walberla::mesa_pd::Mat3;
+   walberla::mesa_pd::Mat3& operator()(data::Particle& p) const {return p.getInvInertiaBFRef();}
+   walberla::mesa_pd::Mat3& operator()(data::Particle&& p) const {return p.getInvInertiaBFRef();}
+   walberla::mesa_pd::Mat3 const & operator()(const data::Particle& p) const {return p.getInvInertiaBF();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleVirtualInertiaBF
+{
+public:
+   using return_type = walberla::mesa_pd::Mat3;
+   walberla::mesa_pd::Mat3& operator()(data::Particle& p) const {return p.getVirtualInertiaBFRef();}
+   walberla::mesa_pd::Mat3& operator()(data::Particle&& p) const {return p.getVirtualInertiaBFRef();}
+   walberla::mesa_pd::Mat3 const & operator()(const data::Particle& p) const {return p.getVirtualInertiaBF();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleInvInertiaBFIncludingVirtual
+{
+public:
+   using return_type = walberla::mesa_pd::Mat3;
+   walberla::mesa_pd::Mat3& operator()(data::Particle& p) const {return p.getInvInertiaBFIncludingVirtualRef();}
+   walberla::mesa_pd::Mat3& operator()(data::Particle&& p) const {return p.getInvInertiaBFIncludingVirtualRef();}
+   walberla::mesa_pd::Mat3 const & operator()(const data::Particle& p) const {return p.getInvInertiaBFIncludingVirtual();}
+};
+///Predicate that selects a certain property from a Particle
+class SelectParticleOldAngularAcceleration
+{
+public:
+   using return_type = walberla::mesa_pd::Vec3;
+   walberla::mesa_pd::Vec3& operator()(data::Particle& p) const {return p.getOldAngularAccelerationRef();}
+   walberla::mesa_pd::Vec3& operator()(data::Particle&& p) const {return p.getOldAngularAccelerationRef();}
+   walberla::mesa_pd::Vec3 const & operator()(const data::Particle& p) const {return p.getOldAngularAcceleration();}
 };
 ///Predicate that selects a certain property from a Particle
 class SelectParticleClusterID
