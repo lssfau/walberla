@@ -35,6 +35,9 @@ waLBerla_execute_test( NAME LBM_MESAPD_COUPLING_MEM_UpdateParticleMapping PROCES
 waLBerla_compile_test( NAME LBM_MESAPD_COUPLING_UTIL_LubricationCorrection FILES utility/LubricationCorrection.cpp DEPENDS mesa_pd lbm_mesapd_coupling )
 waLBerla_execute_test( NAME LBM_MESAPD_COUPLING_UTIL_LubricationCorrection PROCESSES 1 )
 
+waLBerla_compile_test( NAME LBM_MESAPD_COUPLING_UTIL_VirtualMass FILES utility/VirtualMass.cpp DEPENDS mesa_pd lbm_mesapd_coupling )
+waLBerla_execute_test( NAME LBM_MESAPD_COUPLING_UTIL_VirtualMass PROCESSES 1 )
+
 waLBerla_compile_test( NAME LBM_MESAPD_COUPLING_UTIL_InspectionProbe FILES utility/InspectionProbe.cpp DEPENDS core mesa_pd lbm lbm_mesapd_coupling domain_decomposition field )
 waLBerla_execute_test( NAME LBM_MESAPD_COUPLING_UTIL_InspectionProbe PROCESSES 1 )
 

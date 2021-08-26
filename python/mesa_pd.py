@@ -63,6 +63,22 @@ if __name__ == '__main__':
     ps.add_property("oldHydrodynamicTorque", "walberla::mesa_pd::Vec3", defValue="real_t(0)",
                     syncMode="ON_OWNERSHIP_CHANGE")
 
+    # Properties for virtual mass:
+    ps.add_property("virtualMass",                  "walberla::real_t",        defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("invMassIncludingVirtual",      "walberla::real_t",        defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("oldLinearAcceleration",        "walberla::mesa_pd::Vec3", defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("invInertiaBF",                 "walberla::mesa_pd::Mat3", defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("virtualInertiaBF",             "walberla::mesa_pd::Mat3", defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("invInertiaBFIncludingVirtual", "walberla::mesa_pd::Mat3", defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+    ps.add_property("oldAngularAcceleration",       "walberla::mesa_pd::Vec3", defValue="real_t(0)",
+                    syncMode="ON_OWNERSHIP_CHANGE")
+
     # properties for VBond model
     ps.add_property("clusterID", "int64_t", defValue="-1", syncMode="ON_GHOST_CREATION")
     ps.add_property("segmentID", "int64_t", defValue="-1", syncMode="ON_GHOST_CREATION")

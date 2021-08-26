@@ -164,6 +164,34 @@ public:
    walberla::mesa_pd::Vec3& getOldHydrodynamicTorqueRef(const size_t p_idx) {return ps_->getOldHydrodynamicTorqueRef(p_idx);}
    void setOldHydrodynamicTorque(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldHydrodynamicTorque(p_idx, v);}
    
+   walberla::real_t const & getVirtualMass(const size_t p_idx) const {return ps_->getVirtualMass(p_idx);}
+   walberla::real_t& getVirtualMassRef(const size_t p_idx) {return ps_->getVirtualMassRef(p_idx);}
+   void setVirtualMass(const size_t p_idx, walberla::real_t const & v) { ps_->setVirtualMass(p_idx, v);}
+   
+   walberla::real_t const & getInvMassIncludingVirtual(const size_t p_idx) const {return ps_->getInvMassIncludingVirtual(p_idx);}
+   walberla::real_t& getInvMassIncludingVirtualRef(const size_t p_idx) {return ps_->getInvMassIncludingVirtualRef(p_idx);}
+   void setInvMassIncludingVirtual(const size_t p_idx, walberla::real_t const & v) { ps_->setInvMassIncludingVirtual(p_idx, v);}
+   
+   walberla::mesa_pd::Vec3 const & getOldLinearAcceleration(const size_t p_idx) const {return ps_->getOldLinearAcceleration(p_idx);}
+   walberla::mesa_pd::Vec3& getOldLinearAccelerationRef(const size_t p_idx) {return ps_->getOldLinearAccelerationRef(p_idx);}
+   void setOldLinearAcceleration(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldLinearAcceleration(p_idx, v);}
+   
+   walberla::mesa_pd::Mat3 const & getInvInertiaBF(const size_t p_idx) const {return ps_->getInvInertiaBF(p_idx);}
+   walberla::mesa_pd::Mat3& getInvInertiaBFRef(const size_t p_idx) {return ps_->getInvInertiaBFRef(p_idx);}
+   void setInvInertiaBF(const size_t p_idx, walberla::mesa_pd::Mat3 const & v) { ps_->setInvInertiaBF(p_idx, v);}
+   
+   walberla::mesa_pd::Mat3 const & getVirtualInertiaBF(const size_t p_idx) const {return ps_->getVirtualInertiaBF(p_idx);}
+   walberla::mesa_pd::Mat3& getVirtualInertiaBFRef(const size_t p_idx) {return ps_->getVirtualInertiaBFRef(p_idx);}
+   void setVirtualInertiaBF(const size_t p_idx, walberla::mesa_pd::Mat3 const & v) { ps_->setVirtualInertiaBF(p_idx, v);}
+   
+   walberla::mesa_pd::Mat3 const & getInvInertiaBFIncludingVirtual(const size_t p_idx) const {return ps_->getInvInertiaBFIncludingVirtual(p_idx);}
+   walberla::mesa_pd::Mat3& getInvInertiaBFIncludingVirtualRef(const size_t p_idx) {return ps_->getInvInertiaBFIncludingVirtualRef(p_idx);}
+   void setInvInertiaBFIncludingVirtual(const size_t p_idx, walberla::mesa_pd::Mat3 const & v) { ps_->setInvInertiaBFIncludingVirtual(p_idx, v);}
+   
+   walberla::mesa_pd::Vec3 const & getOldAngularAcceleration(const size_t p_idx) const {return ps_->getOldAngularAcceleration(p_idx);}
+   walberla::mesa_pd::Vec3& getOldAngularAccelerationRef(const size_t p_idx) {return ps_->getOldAngularAccelerationRef(p_idx);}
+   void setOldAngularAcceleration(const size_t p_idx, walberla::mesa_pd::Vec3 const & v) { ps_->setOldAngularAcceleration(p_idx, v);}
+   
    int64_t const & getClusterID(const size_t p_idx) const {return ps_->getClusterID(p_idx);}
    int64_t& getClusterIDRef(const size_t p_idx) {return ps_->getClusterIDRef(p_idx);}
    void setClusterID(const size_t p_idx, int64_t const & v) { ps_->setClusterID(p_idx, v);}
@@ -337,6 +365,34 @@ public:
    void setOldHydrodynamicTorque(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldHydrodynamicTorque_ = v;}
    walberla::mesa_pd::Vec3& getOldHydrodynamicTorqueRef(const size_t /*p_idx*/) {return oldHydrodynamicTorque_;}
    
+   walberla::real_t const & getVirtualMass(const size_t /*p_idx*/) const {return virtualMass_;}
+   void setVirtualMass(const size_t /*p_idx*/, walberla::real_t const & v) { virtualMass_ = v;}
+   walberla::real_t& getVirtualMassRef(const size_t /*p_idx*/) {return virtualMass_;}
+   
+   walberla::real_t const & getInvMassIncludingVirtual(const size_t /*p_idx*/) const {return invMassIncludingVirtual_;}
+   void setInvMassIncludingVirtual(const size_t /*p_idx*/, walberla::real_t const & v) { invMassIncludingVirtual_ = v;}
+   walberla::real_t& getInvMassIncludingVirtualRef(const size_t /*p_idx*/) {return invMassIncludingVirtual_;}
+   
+   walberla::mesa_pd::Vec3 const & getOldLinearAcceleration(const size_t /*p_idx*/) const {return oldLinearAcceleration_;}
+   void setOldLinearAcceleration(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldLinearAcceleration_ = v;}
+   walberla::mesa_pd::Vec3& getOldLinearAccelerationRef(const size_t /*p_idx*/) {return oldLinearAcceleration_;}
+   
+   walberla::mesa_pd::Mat3 const & getInvInertiaBF(const size_t /*p_idx*/) const {return invInertiaBF_;}
+   void setInvInertiaBF(const size_t /*p_idx*/, walberla::mesa_pd::Mat3 const & v) { invInertiaBF_ = v;}
+   walberla::mesa_pd::Mat3& getInvInertiaBFRef(const size_t /*p_idx*/) {return invInertiaBF_;}
+   
+   walberla::mesa_pd::Mat3 const & getVirtualInertiaBF(const size_t /*p_idx*/) const {return virtualInertiaBF_;}
+   void setVirtualInertiaBF(const size_t /*p_idx*/, walberla::mesa_pd::Mat3 const & v) { virtualInertiaBF_ = v;}
+   walberla::mesa_pd::Mat3& getVirtualInertiaBFRef(const size_t /*p_idx*/) {return virtualInertiaBF_;}
+   
+   walberla::mesa_pd::Mat3 const & getInvInertiaBFIncludingVirtual(const size_t /*p_idx*/) const {return invInertiaBFIncludingVirtual_;}
+   void setInvInertiaBFIncludingVirtual(const size_t /*p_idx*/, walberla::mesa_pd::Mat3 const & v) { invInertiaBFIncludingVirtual_ = v;}
+   walberla::mesa_pd::Mat3& getInvInertiaBFIncludingVirtualRef(const size_t /*p_idx*/) {return invInertiaBFIncludingVirtual_;}
+   
+   walberla::mesa_pd::Vec3 const & getOldAngularAcceleration(const size_t /*p_idx*/) const {return oldAngularAcceleration_;}
+   void setOldAngularAcceleration(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { oldAngularAcceleration_ = v;}
+   walberla::mesa_pd::Vec3& getOldAngularAccelerationRef(const size_t /*p_idx*/) {return oldAngularAcceleration_;}
+   
    int64_t const & getClusterID(const size_t /*p_idx*/) const {return clusterID_;}
    void setClusterID(const size_t /*p_idx*/, int64_t const & v) { clusterID_ = v;}
    int64_t& getClusterIDRef(const size_t /*p_idx*/) {return clusterID_;}
@@ -389,6 +445,13 @@ private:
    walberla::mesa_pd::Vec3 hydrodynamicTorque_;
    walberla::mesa_pd::Vec3 oldHydrodynamicForce_;
    walberla::mesa_pd::Vec3 oldHydrodynamicTorque_;
+   walberla::real_t virtualMass_;
+   walberla::real_t invMassIncludingVirtual_;
+   walberla::mesa_pd::Vec3 oldLinearAcceleration_;
+   walberla::mesa_pd::Mat3 invInertiaBF_;
+   walberla::mesa_pd::Mat3 virtualInertiaBF_;
+   walberla::mesa_pd::Mat3 invInertiaBFIncludingVirtual_;
+   walberla::mesa_pd::Vec3 oldAngularAcceleration_;
    int64_t clusterID_;
    int64_t segmentID_;
    std::unordered_set<walberla::mpi::MPIRank> neighborState_;

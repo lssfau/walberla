@@ -52,6 +52,13 @@ public:
       walberla::mesa_pd::Vec3 hydrodynamicTorque_ {real_t(0)};
       walberla::mesa_pd::Vec3 oldHydrodynamicForce_ {real_t(0)};
       walberla::mesa_pd::Vec3 oldHydrodynamicTorque_ {real_t(0)};
+      walberla::real_t virtualMass_ {real_t(0)};
+      walberla::real_t invMassIncludingVirtual_ {real_t(0)};
+      walberla::mesa_pd::Vec3 oldLinearAcceleration_ {real_t(0)};
+      walberla::mesa_pd::Mat3 invInertiaBF_ {real_t(0)};
+      walberla::mesa_pd::Mat3 virtualInertiaBF_ {real_t(0)};
+      walberla::mesa_pd::Mat3 invInertiaBFIncludingVirtual_ {real_t(0)};
+      walberla::mesa_pd::Vec3 oldAngularAcceleration_ {real_t(0)};
    };
 
    inline explicit ParticleMigrationNotification( const data::Particle& particle ) : particle_(particle) {}
@@ -89,6 +96,13 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
    buf << obj.particle_.getHydrodynamicTorque();
    buf << obj.particle_.getOldHydrodynamicForce();
    buf << obj.particle_.getOldHydrodynamicTorque();
+   buf << obj.particle_.getVirtualMass();
+   buf << obj.particle_.getInvMassIncludingVirtual();
+   buf << obj.particle_.getOldLinearAcceleration();
+   buf << obj.particle_.getInvInertiaBF();
+   buf << obj.particle_.getVirtualInertiaBF();
+   buf << obj.particle_.getInvInertiaBFIncludingVirtual();
+   buf << obj.particle_.getOldAngularAcceleration();
    return buf;
 }
 
@@ -104,6 +118,13 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
    buf >> objparam.hydrodynamicTorque_;
    buf >> objparam.oldHydrodynamicForce_;
    buf >> objparam.oldHydrodynamicTorque_;
+   buf >> objparam.virtualMass_;
+   buf >> objparam.invMassIncludingVirtual_;
+   buf >> objparam.oldLinearAcceleration_;
+   buf >> objparam.invInertiaBF_;
+   buf >> objparam.virtualInertiaBF_;
+   buf >> objparam.invInertiaBFIncludingVirtual_;
+   buf >> objparam.oldAngularAcceleration_;
    return buf;
 }
 
