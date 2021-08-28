@@ -24,6 +24,7 @@
 #include "core/DataTypes.h"
 #include "core/StringUtility.h"
 
+#include <cstddef>
 #include <sstream>
 
 namespace boost {
@@ -132,7 +133,7 @@ std::istream & operator>> ( std::istream & is, boost::multi_array<T,1> & arr )
 
    arr.resize( boost::extents[walberla::numeric_cast< boost::multi_array_types::index >(rows)] );
 
-   for( size_t r = 0; r < rows; ++r )
+   for( std::size_t r = 0; r < rows; ++r )
       arr[walberla::numeric_cast< boost::multi_array_types::index >(r)] = vec[r];
 
    return is;
@@ -142,7 +143,7 @@ template<typename T>
 std::ostream & operator<< ( std::ostream & os, const boost::multi_array<T,1> & arr )
 {
    os << "[ ";
-   for( size_t c = 0; c < arr.size(); ++c )
+   for( std::size_t c = 0; c < arr.size(); ++c )
       os << arr[walberla::numeric_cast< boost::multi_array_types::index >(c)] << ",";
    os << "]";
 
@@ -172,12 +173,12 @@ std::istream & operator>> ( std::istream & is, boost::multi_array<T,2> & arr )
       return is;
    }
 
-   size_t rows = vec2D.size();
+   std::size_t rows = vec2D.size();
    if ( rows == 0 )
       return is;
 
-   size_t cols = vec2D[0].size();
-   for( size_t r = 0; r < rows; ++r )
+   std::size_t cols = vec2D[0].size();
+   for( std::size_t r = 0; r < rows; ++r )
    {
       if ( vec2D[r].size() != cols  )
       {
@@ -192,8 +193,8 @@ std::istream & operator>> ( std::istream & is, boost::multi_array<T,2> & arr )
 
    arr.resize( boost::extents[ walberla::numeric_cast< boost::multi_array_types::index >(rows) ][ walberla::numeric_cast< boost::multi_array_types::index >(cols) ] );
 
-   for( size_t r = 0; r < rows; ++r )
-      for( size_t c = 0; c < cols; ++c )
+   for( std::size_t r = 0; r < rows; ++r )
+      for( std::size_t c = 0; c < cols; ++c )
          arr[walberla::numeric_cast< boost::multi_array_types::index >(r)][walberla::numeric_cast< boost::multi_array_types::index >(c)] = vec2D[r][c];
 
 
@@ -205,10 +206,10 @@ std::ostream & operator<< ( std::ostream & os, const boost::multi_array<T,2> & a
 {
    os << "[\n";
 
-   for( size_t r = 0; r < arr.size(); ++r )
+   for( std::size_t r = 0; r < arr.size(); ++r )
    {
       os << " [ ";
-      for( size_t c = 0; c < arr[walberla::numeric_cast< boost::multi_array_types::index >(r)].size(); ++c ) {
+      for( std::size_t c = 0; c < arr[walberla::numeric_cast< boost::multi_array_types::index >(r)].size(); ++c ) {
          os << arr[walberla::numeric_cast< boost::multi_array_types::index >(r)][walberla::numeric_cast< boost::multi_array_types::index >(c)] << "\t";
       }
       os << "] \n";
