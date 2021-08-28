@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -50,22 +51,22 @@ class BasicVoxelFileReader
 public:
    BasicVoxelFileReader();
    BasicVoxelFileReader( const std::string & _filename);
-   BasicVoxelFileReader( const std::string & _filename, size_t _xSize, size_t _ySize, size_t _zSize, T value = T() );
-   BasicVoxelFileReader( const std::string & _filename, size_t _xSize, size_t _ySize, size_t _zSize, const T * values );
+   BasicVoxelFileReader( const std::string & _filename, std::size_t _xSize, std::size_t _ySize, std::size_t _zSize, T value = T() );
+   BasicVoxelFileReader( const std::string & _filename, std::size_t _xSize, std::size_t _ySize, std::size_t _zSize, const T * values );
    ~BasicVoxelFileReader();
 
    void open  ( const std::string & _filename );
-   void create( const std::string & _filename, size_t _xSize, size_t _ySize, size_t _zSize, T value = T() );
-   void create( const std::string & _filename, size_t _xSize, size_t _ySize, size_t _zSize, const T * values );
+   void create( const std::string & _filename, std::size_t _xSize, std::size_t _ySize, std::size_t _zSize, T value = T() );
+   void create( const std::string & _filename, std::size_t _xSize, std::size_t _ySize, std::size_t _zSize, const T * values );
    void close ();
 
    bool isOpen() const;
    const std::string & filename() const;
-   size_t numCells() const;
+   std::size_t numCells() const;
 
-   size_t xSize() const;
-   size_t ySize() const;
-   size_t zSize() const;
+   std::size_t xSize() const;
+   std::size_t ySize() const;
+   std::size_t zSize() const;
 
    void read ( const CellAABB & cellAABB,       std::vector<T> & data ) const;
    void write( const CellAABB & cellAABB, const std::vector<T> & data );
@@ -77,9 +78,9 @@ private:
 
    std::streampos dataBegin_; ///< Position in the stream where to raw data starts
 
-   size_t xSize_; ///< Extend of the currently open geometry file in x direction
-   size_t ySize_; ///< Extend of the currently open geometry file in y direction
-   size_t zSize_; ///< Extend of the currently open geometry file in z direction
+   std::size_t xSize_; ///< Extend of the currently open geometry file in x direction
+   std::size_t ySize_; ///< Extend of the currently open geometry file in y direction
+   std::size_t zSize_; ///< Extend of the currently open geometry file in z direction
 
 }; // class StructuredGeometryFileBasicReader
 
@@ -97,21 +98,21 @@ private:
 struct CellAABB
 {
    inline CellAABB();
-   inline CellAABB(size_t _xBegin, size_t _yBegin, size_t _zBegin,
-                   size_t _xEnd,   size_t _yEnd,   size_t _zEnd);
+   inline CellAABB(std::size_t _xBegin, std::size_t _yBegin, std::size_t _zBegin,
+                   std::size_t _xEnd,   std::size_t _yEnd,   std::size_t _zEnd);
 
-   inline size_t numCells() const;
-   inline size_t xSize() const;
-   inline size_t ySize() const;
-   inline size_t zSize() const;
+   inline std::size_t numCells() const;
+   inline std::size_t xSize() const;
+   inline std::size_t ySize() const;
+   inline std::size_t zSize() const;
 
-   size_t xBegin; ///< The minimal x coordinate of all cells included in the AABB.
-   size_t yBegin; ///< The minimal y coordinate of all cells included in the AABB.
-   size_t zBegin; ///< The minimal z coordinate of all cells included in the AABB.
+   std::size_t xBegin; ///< The minimal x coordinate of all cells included in the AABB.
+   std::size_t yBegin; ///< The minimal y coordinate of all cells included in the AABB.
+   std::size_t zBegin; ///< The minimal z coordinate of all cells included in the AABB.
 
-   size_t xEnd; ///< The maximal x coordinate of all cells included in the AABB.
-   size_t yEnd; ///< The maximal y coordinate of all cells included in the AABB.
-   size_t zEnd; ///< The maximal z coordinate of all cells included in the AABB.
+   std::size_t xEnd; ///< The maximal x coordinate of all cells included in the AABB.
+   std::size_t yEnd; ///< The maximal y coordinate of all cells included in the AABB.
+   std::size_t zEnd; ///< The maximal z coordinate of all cells included in the AABB.
 
 }; // class CellAABB
 

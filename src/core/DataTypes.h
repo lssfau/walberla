@@ -24,6 +24,7 @@
 #include "waLBerlaDefinitions.h"
 
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <memory>
@@ -116,6 +117,8 @@ template< typename T > inline uint64_t uint64_c( T t ) { return numeric_cast< ui
 
 // signed integral type
 
+using ptrdiff_t = std::ptrdiff_t;
+
 template< typename T > inline int int_c( T t ) { return numeric_cast< int >(t); } ///< cast to type int using "int_c(x)"
 
 template< typename INT >
@@ -127,7 +130,8 @@ inline void static_assert_int_t() {
 
 // unsigned integral type
 
-using uint_t = size_t;
+using uint_t = std::size_t;
+using size_t = std::size_t;
 
 static_assert( std::numeric_limits<uint_t>::is_specialized &&
                std::numeric_limits<uint_t>::is_integer &&

@@ -39,6 +39,7 @@
 #include "core/debug/CheckFunctions.h"
 
 #include <cmath>
+#include <cstddef>
 #include <iostream>
 #include <limits>
 #include <type_traits>
@@ -1821,9 +1822,9 @@ struct Vector3LexicographicalyLess
 // \returns   A hash for the entire Vector3.
 */
 template< typename T >
-size_t hash_value( const Vector3<T> & v )
+std::size_t hash_value( const Vector3<T> & v )
 {
-   size_t seed = 0;
+   std::size_t seed = 0;
    std::hash<T> hasher;
 
    seed ^= hasher(v[0]) + 0x9e3779b9 + (seed<<6) + (seed>>2);

@@ -21,6 +21,7 @@
 //======================================================================================================================
 
 #include <cassert>
+#include <cstddef>
 #include <sstream>
 #include <stdexcept>
 #include <typeinfo>
@@ -83,7 +84,7 @@ BasicVoxelFileReader<T>::BasicVoxelFileReader( const std::string & _filename)
  * \post isOpen() == true
  **********************************************************************************************************************/
 template<typename T>
-BasicVoxelFileReader<T>::BasicVoxelFileReader( const std::string & _filename, size_t _xSize, size_t _ySize, size_t _zSize, T value /*= T()*/ )
+BasicVoxelFileReader<T>::BasicVoxelFileReader( const std::string & _filename, std::size_t _xSize, std::size_t _ySize, std::size_t _zSize, T value /*= T()*/ )
    : xSize_(0), ySize_(0), zSize_(0)
 {
    create(_filename, _xSize, _ySize, _zSize, value);
@@ -114,7 +115,7 @@ BasicVoxelFileReader<T>::BasicVoxelFileReader( const std::string & _filename, si
  * \post isOpen() == true
  **********************************************************************************************************************/
 template<typename T>
-BasicVoxelFileReader<T>::BasicVoxelFileReader( const std::string & _filename, size_t _xSize, size_t _ySize, size_t _zSize, const T * values )
+BasicVoxelFileReader<T>::BasicVoxelFileReader( const std::string & _filename, std::size_t _xSize, std::size_t _ySize, std::size_t _zSize, const T * values )
    : xSize_(0), ySize_(0), zSize_(0)
 {
    assert(values != 0);
@@ -190,7 +191,7 @@ void BasicVoxelFileReader<T>::open( const std::string & _filename )
 
 
    assert(dataBegin_ <= dataEnd);
-   size_t rawDataLengthBytes = static_cast<size_t>( dataEnd - dataBegin_ );
+   std::size_t rawDataLengthBytes = static_cast<std::size_t>( dataEnd - dataBegin_ );
    if( rawDataLengthBytes % sizeof(T) != 0 )
    {
       std::stringstream ss;
@@ -199,7 +200,7 @@ void BasicVoxelFileReader<T>::open( const std::string & _filename )
       throw std::runtime_error(ss.str());
    }
    assert(rawDataLengthBytes % sizeof(T) == 0);
-   size_t rawDataLength = rawDataLengthBytes / sizeof(T);
+   std::size_t rawDataLength = rawDataLengthBytes / sizeof(T);
    if( rawDataLength != numCells() )
    {
       std::stringstream ss;
@@ -233,7 +234,7 @@ void BasicVoxelFileReader<T>::open( const std::string & _filename )
  * \post isOpen() == true
  **********************************************************************************************************************/
 template<typename T>
-void BasicVoxelFileReader<T>::create( const std::string & _filename, size_t _xSize, size_t _ySize, size_t _zSize, T value /*= T()*/ )
+void BasicVoxelFileReader<T>::create( const std::string & _filename, std::size_t _xSize, std::size_t _ySize, std::size_t _zSize, T value /*= T()*/ )
 {
    if( isOpen() )
       close();
@@ -256,15 +257,15 @@ void BasicVoxelFileReader<T>::create( const std::string & _filename, size_t _xSi
    if( filestream_.fail() || filestream_.bad() || dataBegin_ == std::streampos(-1) )
       throw std::runtime_error("I/O Error while writing file \"" + _filename + "\"!");
 
-   const size_t maxChunkSizeBytes = 1024 * 1024; // 1 MegaByte
-   const size_t numCellsPerChunk = maxChunkSizeBytes / sizeof(T);
+   const std::size_t maxChunkSizeBytes = 1024 * 1024; // 1 MegaByte
+   const std::size_t numCellsPerChunk = maxChunkSizeBytes / sizeof(T);
    const std::streamsize bytesPerChunk = static_cast< std::streamsize >( numCellsPerChunk * sizeof(T) );
 
    const std::vector<T> chunkData(numCellsPerChunk, value);
    assert(!chunkData.empty());
    const char * rawData = reinterpret_cast<const char*>(&chunkData[0]);
 
-   size_t cellsLeft = numCells();
+   std::size_t cellsLeft = numCells();
    while( cellsLeft >= numCellsPerChunk )
    {
       filestream_.write(rawData, bytesPerChunk);
@@ -309,7 +310,7 @@ void BasicVoxelFileReader<T>::create( const std::string & _filename, size_t _xSi
  * \post isOpen() == true
  **********************************************************************************************************************/
 template<typename T>
-void BasicVoxelFileReader<T>::create( const std::string & _filename, size_t _xSize, size_t _ySize, size_t _zSize, const T * values )
+void BasicVoxelFileReader<T>::create( const std::string & _filename, std::size_t _xSize, std::size_t _ySize, std::size_t _zSize, const T * values )
 {
    if( isOpen() )
       close();
@@ -333,7 +334,7 @@ void BasicVoxelFileReader<T>::create( const std::string & _filename, size_t _xSi
       throw std::runtime_error("I/O Error while writing file \"" + _filename + "\"!");
 
    const char * rawData = reinterpret_cast<const char*>(values);
-   size_t dataSizeBytes = numCells() * sizeof(T);
+   std::size_t dataSizeBytes = numCells() * sizeof(T);
    filestream_.write(rawData, static_cast< std::streamsize >( dataSizeBytes ) );
    if( filestream_.fail() || filestream_.bad() )
       throw std::runtime_error("I/O Error while writing file \"" + _filename + "\"!");
@@ -364,9 +365,9 @@ void BasicVoxelFileReader<T>::close()
       filestream_.close();
       dataBegin_ = std::streampos();
       filename_.clear();
-      xSize_ = size_t(0);
-      ySize_ = size_t(0);
-      zSize_ = size_t(0);
+      xSize_ = std::size_t(0);
+      ySize_ = std::size_t(0);
+      zSize_ = std::size_t(0);
    }
 
    assert(!filestream_.is_open());
@@ -411,7 +412,7 @@ const std::string & BasicVoxelFileReader<T>::filename() const
  * \return The extend of the geometry file in x direction.
  **********************************************************************************************************************/
 template<typename T>
-size_t BasicVoxelFileReader<T>::xSize() const
+std::size_t BasicVoxelFileReader<T>::xSize() const
 {
    assert( isOpen() );
    return xSize_;
@@ -425,7 +426,7 @@ size_t BasicVoxelFileReader<T>::xSize() const
  * \return The extend of the geometry file in y direction.
  **********************************************************************************************************************/
 template<typename T>
-size_t BasicVoxelFileReader<T>::ySize() const
+std::size_t BasicVoxelFileReader<T>::ySize() const
 {
    assert( isOpen() );
    return ySize_;
@@ -439,7 +440,7 @@ size_t BasicVoxelFileReader<T>::ySize() const
  * \return The extend of the geometry file in z direction.
  **********************************************************************************************************************/
 template<typename T>
-size_t BasicVoxelFileReader<T>::zSize() const
+std::size_t BasicVoxelFileReader<T>::zSize() const
 {
    assert( isOpen() );
    return zSize_;
@@ -453,7 +454,7 @@ size_t BasicVoxelFileReader<T>::zSize() const
  * \return xSize() * ySize() * zSize().
  **********************************************************************************************************************/
 template<typename T>
-size_t BasicVoxelFileReader<T>::numCells() const
+std::size_t BasicVoxelFileReader<T>::numCells() const
 {
    assert( isOpen() );
    return xSize() * ySize() * zSize();
@@ -488,12 +489,12 @@ void BasicVoxelFileReader<T>::read( const CellAABB & cellAABB, std::vector<T> & 
    assert(!data.empty());
    char * buffer = reinterpret_cast<char*>( &data[0] );
 
-   const size_t zFactor = xSize() * ySize();
-   const size_t yFactor = xSize();
+   const std::size_t zFactor = xSize() * ySize();
+   const std::size_t yFactor = xSize();
    std::streamsize lineLength = static_cast< std::streamsize >( cellAABB.xSize() * sizeof(T) );
 
-   for(size_t z = cellAABB.zBegin; z <= cellAABB.zEnd; ++z)
-      for(size_t y = cellAABB.yBegin; y <= cellAABB.yEnd; ++y)
+   for(std::size_t z = cellAABB.zBegin; z <= cellAABB.zEnd; ++z)
+      for(std::size_t y = cellAABB.yBegin; y <= cellAABB.yEnd; ++y)
       {
          assert( buffer < reinterpret_cast<char*>(&data[0] + data.size()) );
          assert( buffer + lineLength - 1 < reinterpret_cast<char*>(&data[0] + data.size()) );
@@ -543,12 +544,12 @@ void BasicVoxelFileReader<T>::write( const CellAABB & cellAABB, const std::vecto
 
    const char * buffer = reinterpret_cast<const char*>( &data[0] );
 
-   const size_t zFactor = xSize() * ySize();
-   const size_t yFactor = xSize();
+   const std::size_t zFactor = xSize() * ySize();
+   const std::size_t yFactor = xSize();
    std::streamsize lineLength = static_cast< std::streamsize >( cellAABB.xSize() * sizeof(T) );
 
-   for(size_t z = cellAABB.zBegin; z <= cellAABB.zEnd; ++z)
-      for(size_t y = cellAABB.yBegin; y <= cellAABB.yEnd; ++y)
+   for(std::size_t z = cellAABB.zBegin; z <= cellAABB.zEnd; ++z)
+      for(std::size_t y = cellAABB.yBegin; y <= cellAABB.yEnd; ++y)
       {
          assert( buffer < reinterpret_cast<const char*>(&data[0] + data.size()) );
          assert( buffer + lineLength - 1 < reinterpret_cast<const char*>(&data[0] + data.size()) );
@@ -607,8 +608,8 @@ inline CellAABB::CellAABB()
  * \param _yEnd   The maximal y coordinate of all cells included in the AABB.
  * \param _zEnd   The maximal z coordinate of all cells included in the AABB.
  **********************************************************************************************************************/
-CellAABB::CellAABB( size_t _xBegin, size_t _yBegin, size_t _zBegin,
-                    size_t _xEnd,   size_t _yEnd,   size_t _zEnd )
+CellAABB::CellAABB( std::size_t _xBegin, std::size_t _yBegin, std::size_t _zBegin,
+                    std::size_t _xEnd,   std::size_t _yEnd,   std::size_t _zEnd )
    : xBegin(_xBegin), yBegin(_yBegin), zBegin(_zBegin),
      xEnd(_xEnd), yEnd(_yEnd), zEnd(_zEnd)
 {
@@ -626,7 +627,7 @@ CellAABB::CellAABB( size_t _xBegin, size_t _yBegin, size_t _zBegin,
  *
  * \return xSize() * ySize() * zSize().
  **********************************************************************************************************************/
-size_t CellAABB::numCells() const
+std::size_t CellAABB::numCells() const
 {
    assert( xBegin <= xEnd );
    assert( yBegin <= yEnd );
@@ -642,7 +643,7 @@ size_t CellAABB::numCells() const
  *
  * \return #xEnd - #xBegin + 1.
  **********************************************************************************************************************/
-size_t CellAABB::xSize() const
+std::size_t CellAABB::xSize() const
 {
    assert( xBegin <= xEnd  );
    return xEnd - xBegin + 1;
@@ -655,7 +656,7 @@ size_t CellAABB::xSize() const
  *
  * \return #yEnd - #yBegin + 1.
  **********************************************************************************************************************/
-size_t CellAABB::ySize() const
+std::size_t CellAABB::ySize() const
 {
    assert( yBegin <= yEnd );
    return yEnd - yBegin + 1;
@@ -668,7 +669,7 @@ size_t CellAABB::ySize() const
  *
  * \return #zEnd - #zBegin + 1.
  **********************************************************************************************************************/
-size_t CellAABB::zSize() const
+std::size_t CellAABB::zSize() const
 {
    assert( zBegin <= zEnd );
    return zEnd - zBegin + 1;
