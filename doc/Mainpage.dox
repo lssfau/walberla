@@ -69,14 +69,14 @@ Additionally, there is a folder for full-fledged application codes to be found u
 \section cite Please cite us
 
 If you use waLBerla in the preparation of a publication, please cite
-\cite godenschwager2013framework and \cite bauer2020walberla. There are separate publications for some modules,
+\cite godenschwager2013framework and \cite bauer2021walberla. There are separate publications for some modules,
 which you should cite in addition if you use them.
 
 - Grid refinement: \cite schornbaum2016massively
 - PE coupling: \cite rettinger2017comparative
-- Python interface: \cite bauer2015python
+- Python interface: \cite bauer2016python
 - pystencils code generation: \cite bauer2019code
-- lbmpy LB model generation: \cite bauer2020lbmpy
+- lbmpy LB model generation: \cite bauer2021lbmpy
 
 \htmlonly
 <!--
