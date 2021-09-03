@@ -104,7 +104,7 @@ We will now integrate the generated classes into a waLBerla application. After a
 #include "CumulantMRTNoSlip.h"
 #include "CumulantMRTPackInfo.h"
 #include "CumulantMRTSweep.h"
-#include "DensityAndVelocityFieldSetter.h"
+#include "InitialPDFsSetter.h"
 \endcode
 
 We set up typedef aliases for the generated pack info and the D2Q9 stencil. For the PDF and velocity fields, we use instances of the field::GhostLayerField template. The number of entries of the PDF field is specified by the `Stencil_T::Size` parameter. As our domain is two-dimensional, the velocity at each lattice node is a two-dimensional vector. Thus, we set up the velocity field to have two index dimensions passing the stencil's dimension as a template parameter. Finally, we also define a typedef alias for our generated NoSlip boundary.

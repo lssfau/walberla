@@ -1472,7 +1472,7 @@ void Evaluation< LatticeModel_T >::operator()()
       {
          WALBERLA_LOG_RESULT_ON_ROOT( "force acting on cylinder (in dimensionless lattice units of the coarsest grid - evaluated in time step "
                                       << forceEvaluationExecutionCount_ << "):\n   " << force_ << oss.str() <<
-                                      "\ndrag and lift coefficients (including extremas of last " << ( coefficients_[0].size() * checkFrequency_ ) << " time steps):"
+                                      "\ndrag and lift coefficients (including extrema of last " << ( coefficients_[0].size() * checkFrequency_ ) << " time steps):"
                                       "\n   \"real\" area:"
                                       "\n      c_D: " << cDRealArea << " (min = " << coefficientExtremas_[0].first << ", max = " << coefficientExtremas_[0].second << ")" <<
                                       "\n      c_L: " << cLRealArea << " (min = " << coefficientExtremas_[1].first << ", max = " << coefficientExtremas_[1].second << ")" <<
@@ -2920,10 +2920,10 @@ int main( int argc, char **argv )
                               "//                                                                                                                      //\n"
                               "//                                               Schaefer Turek Benchmark                                               //\n"
                               "//                                                                                                                      //\n"
-                              "// Reference: Schaefer, M. and Turek, S. (1996) 'Benchmark computations of laminar flow around a cylinder (with support //\n"
+                              "// Reference: Schaefer, M. and Turek, S. (1996) Benchmark computations of laminar flow around a cylinder (with support  //\n"
                               "//            by F. Durst, E. Krause and R. Rannacher), in E. Hirschel (Ed.): Flow Simulation with High-Performance     //\n"
-                              "//            Computers II. DFG Priority Research Program Results 1993-1995, No. 52 in Notes Numer, Fluid Mech.,        //\n"
-                              "//            pp.547-566, Vieweg, Weisbaden.                                                                            //\n"
+                              "//            Computers II. DFG Priority Research Program Results 1993-1995, No. 48 in Notes on Numerical Fluid         //\n"
+                              "//            Mechanics, pp.547-566, Vieweg, Weisbaden.                                                                 //\n"
                               "//                                                                                                                      //\n"
                               "//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" );
 
