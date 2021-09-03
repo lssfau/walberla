@@ -1452,7 +1452,7 @@ int main( int argc, char **argv )
 
          WALBERLA_LOG_INFO_ON_ROOT("Refreshing blockforest...")
 
-         // check refinement criterions and refine/coarsen if necessary
+         // check refinement criteria and refine/coarsen if necessary
          uint_t stampBefore = blocks->getBlockForest().getModificationStamp();
          blocks->refresh();
          uint_t stampAfter = blocks->getBlockForest().getModificationStamp();
@@ -2090,7 +2090,7 @@ int main( int argc, char **argv )
 
             WALBERLA_LOG_INFO_ON_ROOT("Refreshing blockforest...")
 
-            // check refinement criterions and refine/coarsen if necessary
+            // check refinement criteria and refine/coarsen if necessary
             uint_t stampBefore = blocks->getBlockForest().getModificationStamp();
             blocks->refresh();
             uint_t stampAfter = blocks->getBlockForest().getModificationStamp();

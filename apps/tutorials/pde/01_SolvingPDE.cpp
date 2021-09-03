@@ -57,7 +57,7 @@ void initBC( const shared_ptr< StructuredBlockStorage > & blocks, const BlockDat
          auto src = block->getData< ScalarField >( srcID );
          auto dst = block->getData< ScalarField >( dstID );
 
-         // obtain a CellInterval object that holds information about the number of cells in x,y,z direction of the field inlcuding ghost layers
+         // obtain a CellInterval object that holds information about the number of cells in x,y,z direction of the field including ghost layers
          // Since src and dst have the same size, one object is enough.
          CellInterval xyz = src->xyzSizeWithGhostLayer();
 

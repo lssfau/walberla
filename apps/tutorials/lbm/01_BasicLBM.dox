@@ -90,7 +90,7 @@ A lattice model defines the basic ingredients needed for an LBM simulation:
 - **collision model**: The first template parameter for a lattice model is a collision model.
   The collision or relaxation model defines which method to use in the collide step. Here, we use the single relaxation time
   model (SRT) also called BGK model: lbm::collision_model::SRT. For other options, see the file lbm/lattice_model/CollisionModel.h
-- There are further template parameters specifing compressibility, force model, etc.
+- There are further template parameters specifying compressibility, force model, etc.
   These arguments have default parameters which we use here.
 
 For a more detailed description of lattice models, see lbm::LatticeModelBase
@@ -151,7 +151,7 @@ boundary::BoundaryHandling. Otherwise the `near boundary` and `domain` flags are
 
 The boundary handling is a heavily templated part of waLBerla since it contains performance critical code
 and at the same time has to be very flexible, i.e., it should be easy to write new boundary conditions.
-By using template concepts (compile-time polymorphism) instead of inheritence (runtime polymorphism) the compiler is able to
+By using template concepts (compile-time polymorphism) instead of inheritance (runtime polymorphism) the compiler is able to
 resolve all function calls at compile time and can do optimizations like function inlining.
 To make setting up a boundary handling easier, a convenience factory class lbm::DefaultBoundaryHandlingFactory exists
 that creates a boundary::BoundaryHandling with six often used boundary conditions. Together with the `near boundary` and
@@ -268,7 +268,7 @@ timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< P
                                "LBM stability check" );
 \endcode
 
-Additionally, a small functor is scheduled that periodically prints the estimated remaining time of the simultion:
+Additionally, a small functor is scheduled that periodically prints the estimated remaining time of the simulation:
 
 \code
 timeloop.addFuncAfterTimeStep( timing::RemainingTimeLogger( timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency ),

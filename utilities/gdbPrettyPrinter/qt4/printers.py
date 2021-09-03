@@ -243,7 +243,7 @@ class QMapPrinter:
             ret += gdb.lookup_type('void').pointer().sizeof
 
             # but because of data alignment the value can be higher
-            # so guess it's aliged by sizeof(void*)
+            # so guess it's aligned by sizeof(void*)
             # TODO: find a real solution for this problem
             ret += ret % gdb.lookup_type('void').pointer().sizeof
 
@@ -494,7 +494,7 @@ class QUrlPrinter:
             return self.val['d']['encodedOriginal']
         except RuntimeError as error:
             print(error)
-            # if no debug information is avaliable for Qt, try guessing the correct address for encodedOriginal
+            # if no debug information is available for Qt, try guessing the correct address for encodedOriginal
             # problem with this is that if QUrlPrivate members get changed, this fails
             offset = gdb.lookup_type('int').sizeof
             offset += offset % gdb.lookup_type('void').pointer().sizeof  # alignment

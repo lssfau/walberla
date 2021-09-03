@@ -843,7 +843,7 @@ int main( int argc, char **argv )
    auto sphereShape = ss->create<mesa_pd::data::Sphere>( diameter * real_t(0.5) );
    ss->shapes[sphereShape]->updateMassAndInertia(densityRatio);
 
-   std::mt19937 randomGenerator (static_cast<unsigned int>(2610)); // fixed seed: quasi-random and reproducable
+   std::mt19937 randomGenerator (static_cast<unsigned int>(2610)); // fixed seed: quasi-random and reproducible
 
    for( uint_t nSed = 0; nSed < numberOfSediments; ++nSed )
    {
@@ -962,7 +962,7 @@ int main( int argc, char **argv )
 
       if(currentPhase == 1)
       {
-         // damp velocites to avoid too large ones
+         // damp velocities to avoid too large ones
          ps->forEachParticle( useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor,
                               [](const size_t idx, ParticleAccessor_T& ac){
                                  ac.setLinearVelocity(idx, ac.getLinearVelocity(idx) * real_t(0.5));

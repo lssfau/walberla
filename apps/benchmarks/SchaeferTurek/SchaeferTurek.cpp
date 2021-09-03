@@ -1064,7 +1064,7 @@ void keepInflowOutflowAtTheSameLevel( std::vector< std::pair< const Block *, uin
    uint_t maxInflowLevel( uint_t(0) );
    uint_t maxOutflowLevel( uint_t(0) );
 
-   // In addtion to keeping in- and outflow blocks at the same level, this callback also
+   // In addition to keeping in- and outflow blocks at the same level, this callback also
    // prevents these blocks from coarsening.
 
    for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
@@ -2569,14 +2569,14 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                      blockforest::DynamicDiffusionBalance< blockforest::NoPhantomData >( maxIterations, flowIterations ) );
       }
 
-      // add callback functions which are executed after all block data was unpakced after the dynamic load balancing
+      // add callback functions which are executed after all block data was unpacked after the dynamic load balancing
 
       // for blocks that have *not* migrated: store current flag field state (required for lbm::PostProcessing)
       blockforest.addRefreshCallbackFunctionAfterBlockDataIsUnpacked( lbm::MarkerFieldGenerator< LatticeModel_T, field::FlagFieldEvaluationFilter<FlagField_T> >(
                pdfFieldId, markerDataId, flagFieldFilter ) );
       // (re)set boundaries = (re)initialize flag field for every block with respect to the new block structure (the size of neighbor blocks might have changed)
       blockforest.addRefreshCallbackFunctionAfterBlockDataIsUnpacked( blockforest::BlockForest::RefreshCallbackWrappper( boundarySetter ) );
-      // treat boundary-fluid cell convertions
+      // treat boundary-fluid cell conversions
       blockforest.addRefreshCallbackFunctionAfterBlockDataIsUnpacked( lbm::PostProcessing< LatticeModel_T, field::FlagFieldEvaluationFilter<FlagField_T> >(
                pdfFieldId, markerDataId, flagFieldFilter ) );
       // (re)set velocity field (velocity field data is not migrated!)

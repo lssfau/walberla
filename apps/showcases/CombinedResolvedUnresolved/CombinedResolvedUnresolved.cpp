@@ -295,7 +295,7 @@ class DummySweep
 void emptyFunction() {}
 
 //*******************************************************************************************************************
-/*!\brief Simualtion of a strongly heterogeneous sized particulate flow system using combined resolved and unresolved
+/*!\brief Simulation of a strongly heterogeneous sized particulate flow system using combined resolved and unresolved
  * methods.
  *
  * For the coupling of resolved particles the Momentum Exchange Method (MEM) is used, whereas for the
