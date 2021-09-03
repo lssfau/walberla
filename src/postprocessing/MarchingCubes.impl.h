@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file MarchingCubes.cpp
+//! \file MarchingCubes.impl.h
 //! \ingroup postprocessing
 //! \author Martin Bauer <martin.bauer@fau.de>
 //! \author Simon Bogner <simon.bogner@fau.de>

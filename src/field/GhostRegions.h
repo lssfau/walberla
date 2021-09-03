@@ -31,6 +31,7 @@ namespace field {
 //*******************************************************************************************************************
 /*!\brief Constructs CellInterval containing the ghost region in the specified direction
  *
+ * \param f   field
  * \param d   direction of the ghost layer  For W,E,N,S,T,B   a slice is returned
  *                                          for NW, NE, ..    an edge is returned
  *                                          for TBE, TNW, ... a corner ( single cell ) is returned
@@ -72,6 +73,7 @@ CellInterval getGhostRegion( const GhostLayerField_T & f, stencil::Direction d,
 /*!\brief Constructs CellInterval containing the last slice before the ghost layer begins
  *        for a given direction.
  *
+ * \param f   field
  * \param d   direction of the border .     For W,E,N,S,T,B   a slice is returned
  *                                          for NW, NE, ..    an edge is returned
  *                                          for TBE, TNW, ... a corner ( single cell ) is returned

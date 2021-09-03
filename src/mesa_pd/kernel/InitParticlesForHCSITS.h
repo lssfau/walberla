@@ -94,7 +94,7 @@ inline void InitParticlesForHCSITS::operator()(size_t j, Accessor& ac, real_t dt
  * \param ac The particle accessor
  * \param body The body whose velocities to time integrate
  * \param dv On return the initial linear velocity correction.
- * \param w On return the initial angular velocity correction.
+ * \param dw On return the initial angular velocity correction.
  * \param dt The time step size.
  * \return void
  *

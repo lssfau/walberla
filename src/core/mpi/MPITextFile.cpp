@@ -40,6 +40,7 @@ namespace mpi
  *
  *  \param filename          The name of the file to be written
  *  \param processLocalPart  The part of the file belonging to the calling process (size may differ among processes)
+ *  \param comm              The MPI communicator used for communication
  */
 //======================================================================================================================
 void writeMPITextFile(const std::string& filename, const std::string& processLocalPart,

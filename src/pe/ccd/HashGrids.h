@@ -502,7 +502,6 @@ void HashGrids::HashGrid::processBodies( BodyID* bodies, size_t bodyCount, Conta
 /*!\brief Computes closest ray-body intersection of cell with center at point x,y,z and neighboring ones.
  *
  * \param blockCell index of cell within block grid.
- * \param blockAABB AABB of the block this grid corresponds to.
  * \param ray Ray being casted trough grid.
  * \param t_closest Distance of closest object from ray origin. Will be updated if closer body found.
  * \param n_closest Normal of intersection point.
@@ -604,8 +603,8 @@ BodyID HashGrids::HashGrid::getBodyIntersectionForBlockCell(const Vector3<int32_
  *
  * \param ray Ray getting shot through this grid.
  * \param blockAABB AABB of the block this grid corresponds to.
- * \param t Reference for the distance.
- * \param n Reference for the intersection normal.
+ * \param t_closest Reference for the distance.
+ * \param n_closest Reference for the intersection normal.
  * \return BodyID of closest body, NULL if none found.
  *
  * This function calculates ray-cell intersections and the closest body in those cells. Also, neighboring

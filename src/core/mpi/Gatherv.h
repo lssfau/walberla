@@ -198,11 +198,11 @@ std::vector< std::string > allGatherv( const std::vector< std::string > & values
 * - the buffer contents are gathered on process with targetRank
 * - buffer contents are sorted by rank and stored consecutively in a mpi::RecvBuffer
 *
-* \param sendBuffer [in]  sendBuffer with (possibly) different size on each process
-* \param recvBuffer [out] recvBuffer which is left unchanged on all processes but targetRank
+* \param[in]  sendBuffer  sendBuffer with (possibly) different size on each process
+* \param[out] recvBuffer  recvBuffer which is left unchanged on all processes but targetRank
 *                         on targetRank  recvBuffer holds the gathered result
-* \param targetRank [in]  rank of the process where data is gathered
-* \param comm       [in]  mpi communicator to use
+* \param[in]  targetRank  rank of the process where data is gathered
+* \param[in]  comm        mpi communicator to use
 */
 //*******************************************************************************************************************
 void gathervBuffer( const mpi::SendBuffer & sendBuffer, mpi::RecvBuffer & recvBuffer, int targetRank = 0, MPI_Comm comm = MPI_COMM_WORLD );

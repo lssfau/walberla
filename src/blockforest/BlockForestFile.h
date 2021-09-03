@@ -50,7 +50,7 @@ namespace internal {
  *
  *   \subsection SUID SUID MAPPING:
  *
- *   1 | number of SUIDs (= #SUIDs)
+ *   1 | number of SUIDs (= \#SUIDs)
  *
  *   \code{.unparsed}
  *   for each SUID:
@@ -58,7 +58,7 @@ namespace internal {
  *      length-of-string | UID identifier string
  *   \endcode
  *
- *   --> 1 + #SUIDs + number-of-characters-of-all-identifiers-combined BYTES
+ *   --> 1 + \#SUIDs + number-of-characters-of-all-identifiers-combined BYTES
  *
  *   How the mapping works:\n
  *   SUID #1 is assigned bit #1 ( -> [...]0 0000 0001 )\n

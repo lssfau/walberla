@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file Shading.h
+//! \file ShadingParameters.h
 //! \author Lukas Werner
 //
 //======================================================================================================================
@@ -39,10 +39,10 @@ struct ShadingParameters {
    ShadingParameters () = default;
    
    /*!\brief Instantiation constructor for the Shading struct.
-    * \param diffuseColor Primary color of the material.
-    * \param ambientColor Color the material has even when its not directly lit.
-    * \param specularColor Color this material contributes to on its specular highlights.
-    * \param shininess Shininess of the material.
+    * \param _diffuseColor Primary color of the material.
+    * \param _ambientColor Color the material has even when its not directly lit.
+    * \param _specularColor Color this material contributes to on its specular highlights.
+    * \param _shininess Shininess of the material.
     */
    ShadingParameters (const Color& _diffuseColor, const Color& _ambientColor, const Color& _specularColor, real_t _shininess)
    : diffuseColor(_diffuseColor), ambientColor(_ambientColor), specularColor(_specularColor), shininess(_shininess) {

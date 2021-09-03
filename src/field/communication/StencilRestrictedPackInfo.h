@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file PdfFieldPackInfo.h
+//! \file StencilRestrictedPackInfo.h
 //! \ingroup lbm
 //! \author Martin Bauer <martin.bauer@fau.de>
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>

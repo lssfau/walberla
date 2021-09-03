@@ -83,7 +83,7 @@ namespace internal {
       /*************************************************************************************************************//**
       * Waits for the next receive to complete and returns.
       *
-      * \param recvInfo  the same receive info that was passed to scheduleReceives()
+      * \param recvInfos  the same receive info that was passed to scheduleReceives()
       *
       * \return The rank where the data was received -> recvInfos[rank] is now valid
       *         INVALID_RANK if all messages were received.

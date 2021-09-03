@@ -38,8 +38,8 @@ namespace selectable {
 *          selection attributes, and objects of type Set (see "Set.h") as selector
 *
 *   SetSelectableObject is an implementation of SelectableObject that stores objects of type T which are attached with
-*   selection attributes of type SetSelectionPair<U>. Every object of type SetSelectionPair<U> contains two sets of
-*   type Set<U> - one "include" and one "exclude" set. For information on which objects are selected given a certain
+*   selection attributes of type `SetSelectionPair<U>`. Every object of type `SetSelectionPair<U>` contains two sets of
+*   type `Set<U>` - one "include" and one "exclude" set. For information on which objects are selected given a certain
 *   selection request see the documentation of the function "select".
 */
 //**********************************************************************************************************************

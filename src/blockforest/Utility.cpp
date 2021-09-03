@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file utility.cpp
+//! \file Utility.cpp
 //! \ingroup blockforest
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>
 //

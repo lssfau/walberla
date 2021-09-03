@@ -90,7 +90,6 @@ void marshal( mpi::SendBuffer& buffer, const Union<BodyTypes...>& obj )
  *
  * \param buffer The buffer from where to read.
  * \param objparam The object to be reconstructed.
- * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
  * \return void
  */
 inline

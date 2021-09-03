@@ -1,6 +1,6 @@
 //=====================================================================================================================
 /*!
- *  \file   Stencil.h
+ *  \file   Directions.h
  *  \brief  Defines all stencil directions and their properties, and a general DxQy stencil class
  *  \author Martin Bauer <martin.bauer@fau.de>
  */

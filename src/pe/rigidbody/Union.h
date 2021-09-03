@@ -484,7 +484,9 @@ void Union<BodyTypes...>::calcInertia()
 //*************************************************************************************************
 /*!\brief Setting the global position of the union.
  *
- * \param gpos The global position.
+ * \param px The x-component of the global coordinate.
+ * \param py The y-component of the global coordinate.
+ * \param pz The z-component of the global coordinate.
  * \return void
  * \exception std::logic_error Invalid translation of a global union inside an exclusive section.
  *
@@ -650,7 +652,9 @@ RigidBody& Union<BodyTypes...>::add( std::unique_ptr<RigidBody>&& body )
 //*************************************************************************************************
 /*!\brief Translation of the center of mass of the union by the displacement vector \a dp.
  *
- * \param dp The displacement vector.
+ * \param dx The displacement on the x-axis.
+ * \param dy The displacement on the y-axis.
+ * \param dz The displacement on the z-axis.
  * \return void
  * \exception std::logic_error Invalid translation of a global union inside an exclusive section.
  *
@@ -710,16 +714,14 @@ void Union<BodyTypes...>::rotateImpl( const Quat& dq )
 //*************************************************************************************************
 /*!\brief Rotation of the union around the origin of the global world frame.
  *
- * \param xangle Rotation around the x-axis (radian measure).
- * \param yangle Rotation around the y-axis (radian measure).
- * \param zangle Rotation around the z-axis (radian measure).
+ * \param dq The quaternion for the rotation.
  * \return void
  * \exception std::logic_error Invalid rotation of a global union inside an exclusive section.
  *
  * This function rotates the entire union around the origin of the global world frame and
  * changes both the global position and the orientation/rotation of the union. Additionally,
- * all contained rigid bodies change their position and orientation accordingly. The rotations
- * are applied in the order x, y, z. The orientation of the bodies within the union in
+ * all contained rigid bodies change their position and orientation accordingly.
+ * The orientation of the bodies within the union in
  * reference to the body frame of the union is not changed.
  */
 template <typename... BodyTypes>
@@ -739,8 +741,7 @@ void Union<BodyTypes...>::rotateAroundOriginImpl( const Quat& dq )
 /*!\brief Rotation of the union around a specific global coordinate.
  *
  * \param point The global center of the rotation.
- * \param axis The global rotation axis.
- * \param angle The rotation angle (radian measure).
+ * \param dq The quaternion for the rotation.
  * \return void
  * \exception std::logic_error Invalid rotation of a global union inside an exclusive section.
  *

@@ -402,7 +402,7 @@ inline const Vec3& EPA::EPA_Triangle::getNormal() const
  */
 inline Vec3 EPA::EPA_Triangle::getClosestPoint(const std::vector<Vec3>& points) const
 {
-   return   bar_[0] * points[indices_[0]]
+   return  bar_[0] * points[indices_[0]]
          + bar_[1] * points[indices_[1]]
          + bar_[2] * points[indices_[2]];
 
@@ -469,8 +469,9 @@ inline bool EPA::EPA_TriangleComp::operator()( const EPA_Triangle *tria1,
 
 //*************************************************************************************************
 /*! \brief Calculates a support point of a body extended by threshold.
- * Adds this support and the base points at bodies a and b to the vector.
- * \param geom The body.
+ * Adds this support and the base points at bodies A and B to the vector.
+ * \param geom1 The body A.
+ * \param geom2 The body B.
  * \param dir The support point direction.
  * \param margin Extension of the Body.
  */
@@ -496,8 +497,9 @@ inline void EPA::pushSupportMargin(const GeomPrimitive &geom1, const GeomPrimiti
 
 //*************************************************************************************************
 /*! \brief Calculates a support point of a body extended by threshold.
- * Replaces the old value in the vectors at "IndexToReplace" with this support and the base points at bodies a and b .
- * \param geom The body.
+ * Replaces the old value in the vectors at "IndexToReplace" with this support and the base points at bodies A and B.
+ * \param geom1 The body A.
+ * \param geom2 The body B.
  * \param dir The support point direction.
  * \param margin Extension of the Body.
  */

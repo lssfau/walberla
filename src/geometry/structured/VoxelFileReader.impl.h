@@ -41,7 +41,7 @@ catch( std::exception & e) { WALBERLA_ABORT( e.what() ); }
 /*******************************************************************************************************************//**
  * \brief Opens an existing geometry file.
  *
- * \param filename Name (path) of the file.
+ * \param _filename Name (path) of the file.
  *
  * \post isOpen() == true
  **********************************************************************************************************************/
@@ -53,11 +53,11 @@ catch( std::exception & e) { WALBERLA_ABORT( e.what() ); }
 /*******************************************************************************************************************//**
  * \brief Creates a new geometry file with extends xSize x ySize x zSize.
  *
- * \param filename Name (path) of the file.
- * \param xSize    Extend of the geometry file in x direction.
- * \param ySize    Extend of the geometry file in y direction.
- * \param zSize    Extend of the geometry file in z direction.
- * \param value    The value the cells are initialized with. Defaults to T().
+ * \param _filename Name (path) of the file.
+ * \param _xSize    Extend of the geometry file in x direction.
+ * \param _ySize    Extend of the geometry file in y direction.
+ * \param _zSize    Extend of the geometry file in z direction.
+ * \param value     The value the cells are initialized with. Defaults to T().
  *
  * \post isOpen() == true
  **********************************************************************************************************************/
@@ -73,12 +73,12 @@ catch( std::exception & e) { WALBERLA_ABORT( e.what() ); }
 /*******************************************************************************************************************//**
 * \brief Creates a new geometry file with extends xSize x ySize x zSize.
 *
-* \param filename Name (path) of the file.
-* \param xSize    Extend of the geometry file in x direction.
-* \param ySize    Extend of the geometry file in y direction.
-* \param zSize    Extend of the geometry file in z direction.
-* \param values   An array of size xSize * ySize * zSize with the values to initialize the
-* 					 geometry file with.
+* \param _filename Name (path) of the file.
+* \param _xSize    Extend of the geometry file in x direction.
+* \param _ySize    Extend of the geometry file in y direction.
+* \param _zSize    Extend of the geometry file in z direction.
+* \param values    An array of size xSize * ySize * zSize with the values to initialize the
+*                  geometry file with.
 *
 * \pre values != nullptr
 *
@@ -96,9 +96,9 @@ catch( std::exception & e) { WALBERLA_ABORT( e.what() ); }
 /*******************************************************************************************************************//**
 * \brief Opens an existing geometry file.
 *
-* 	An already opened file gets closed beforehand.
+* An already opened file gets closed beforehand.
 *
-* \param filename Name (path) of the file.
+* \param _filename Name (path) of the file.
 *
 * \post isOpen() == true
  **********************************************************************************************************************/
@@ -117,11 +117,11 @@ void VoxelFileReader<T>::open( const std::string & _filename )
  *
  * An already opened file gets closed beforehand.
  *
- * \param filename Name (path) of the file.
- * \param xSize    Extend of the geometry file in x direction.
- * \param ySize    Extend of the geometry file in y direction.
- * \param zSize    Extend of the geometry file in z direction.
- * \param value    The value the cells are initialized with. Defaults to T().
+ * \param _filename Name (path) of the file.
+ * \param _xSize    Extend of the geometry file in x direction.
+ * \param _ySize    Extend of the geometry file in y direction.
+ * \param _zSize    Extend of the geometry file in z direction.
+ * \param value     The value the cells are initialized with. Defaults to T().
  *
  * \post isOpen() == true
  **********************************************************************************************************************/
@@ -140,12 +140,12 @@ void VoxelFileReader<T>::create( const std::string & _filename, uint_t _xSize, u
  *
  * An already opened file gets closed beforehand.
  *
- * \param filename Name (path) of the file.
- * \param xSize    Extend of the geometry file in x direction.
- * \param ySize    Extend of the geometry file in y direction.
- * \param zSize    Extend of the geometry file in z direction.
- * \param values   An array of size xSize * ySize * zSize with the values to initialize the
- * 					 geometry file with.
+ * \param _filename Name (path) of the file.
+ * \param _xSize    Extend of the geometry file in x direction.
+ * \param _ySize    Extend of the geometry file in y direction.
+ * \param _zSize    Extend of the geometry file in z direction.
+ * \param values    An array of size xSize * ySize * zSize with the values to initialize the
+ *                  geometry file with.
  *
  * \pre values != nullptr
  *
@@ -259,7 +259,7 @@ uint_t VoxelFileReader<T>::zSize() const
  *
  * \param cellInterval The axis-aligned bounding box of the block of data to be read.
  * \param [out] data The vector the read data is stored to. The Storage order is zyx. (Meaning
- * 				      your innermost loop should iterate over x)
+ *              your innermost loop should iterate over x)
  *
  * \pre isOpen() == true
  *
@@ -279,7 +279,7 @@ void VoxelFileReader<T>::read( const CellInterval & cellInterval, std::vector<T>
  *
  * \param cellInterval The axis-aligned bounding box of the block of data to be written.
  * \param data     The vector holding the data to bw written to the geometry file. The Storage
- * 					 order is zyx. (Meaning your innermost loop should iterate over x)
+ *                 order is zyx. (Meaning your innermost loop should iterate over x)
  *
  * \pre isOpen() == true
  * \pre !cellInterval.empty()

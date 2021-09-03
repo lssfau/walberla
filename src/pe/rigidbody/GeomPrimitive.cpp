@@ -40,7 +40,7 @@ namespace pe {
 //*************************************************************************************************
 /*!\brief Constructor for the GeomPrimitive class.
  *
- * \param type The geometry type of the geometric primitive.
+ * \param typeID The geometry type of the geometric primitive.
  * \param sid The unique system-specific ID of the geometric primitive.
  * \param uid The user-specific ID of the geometric primitive.
  * \param material The material of the geometric primitive.

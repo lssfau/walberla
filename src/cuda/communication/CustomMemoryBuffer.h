@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file BasicBuffer.h
+//! \file CustomMemoryBuffer.h
 //! \ingroup cuda
 //! \author Martin Bauer <martin.bauer@fau.de>
 //! \brief Basic Buffer supporting different memory spaces

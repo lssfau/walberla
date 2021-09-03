@@ -50,7 +50,7 @@ namespace geometry {
       /*************************************************************************************************************//**
       *  Ellipsoid constructor
       *
-      *  \param midpoin t   midpoint of the ellipsoid
+      *  \param midpoint    midpoint of the ellipsoid
       *  \param axis1       the first semi-axis of the ellipsoid ( associated with radius1 )
       *                     not required to be normalized, is normalized internally
       *  \param axis2       second semi-axis (must not be parallel to axis1 ) should ideally be perpendicular to axis1

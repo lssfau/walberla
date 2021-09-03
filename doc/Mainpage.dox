@@ -64,7 +64,7 @@ Not all features of the framework are covered in the tutorials.
 To get further information have a look at the modules pages.
 
 Also, the test cases provided in the tests directory are a good starting point for your own developments.
-Additionally, there is a folder for full-fledged application codes to be found under \ref apps/benchmarks where also codes of walBerla publications are found.
+Additionally, there is a folder for full-fledged application codes to be found under <tt>apps/benchmarks</tt> where also codes of walBerla publications are found.
 
 \section cite Please cite us
 

@@ -48,9 +48,7 @@ public:
    }
    
    /*!\brief Instantiation constructor for the Color class.
-    * \param r Red component
-    * \param g Green component
-    * \param b Blue component
+    * \param vector RGB vector
     * Instantiation constructor for the Color class with RGB components. Each value should be between 0 and 1 (soft limits)
     */
    Color (const Vec3& vector) : Color(vector[0], vector[1], vector[2]) {

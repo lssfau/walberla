@@ -59,7 +59,6 @@ void marshal( mpi::SendBuffer& buffer, const MPIRigidBodyTrait& obj );
  *
  * \param buffer The buffer from where to read.
  * \param objparam The object to be reconstructed.
- * \param hasSuperBody False if body is not part of a union. Subordinate bodies in unions do not encode velocities but encode relative positions.
  * \return void
  */
 void unmarshal( mpi::RecvBuffer& buffer, MPIRigidBodyTraitParameter& objparam );
@@ -95,7 +94,6 @@ void marshal( mpi::SendBuffer& buffer, const RigidBody& obj );
  *
  * \param buffer The buffer from where to read.
  * \param objparam The object to be reconstructed.
- * \param hasSuperBody False if body is not part of a union. Subordinate bodies in unions do not encode velocities but encode relative positions.
  * \return void
  */
 void unmarshal( mpi::RecvBuffer& buffer, RigidBodyParameters& objparam );
@@ -126,8 +124,7 @@ void marshal( mpi::SendBuffer& buffer, const GeomPrimitive& obj );
 /*!\brief Unmarshalling parameters of a geometric primitive.
  *
  * \param buffer The buffer to be filled.
- * \param obj The object to be marshalled.
- * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
+ * \param objparam The object to be marshalled.
  * \return void
  */
 void unmarshal( mpi::RecvBuffer& buffer, GeomPrimitiveParameters& objparam );

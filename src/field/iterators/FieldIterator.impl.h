@@ -304,6 +304,7 @@ inline bool FieldIterator<T,fs>::operator!=( const FieldIterator<T,fs>& it ) con
 //**********************************************************************************************************************
 /*!\brief Neighbor access relative to current position
  * \param d Direction enumeration which defines deltas for x,y,z
+ * \param cf Delta for f
  **********************************************************************************************************************/
 template <typename T, uint_t fs>
 inline T & FieldIterator<T,fs>::neighbor( stencil::Direction d, cell_idx_t cf ) const
@@ -315,6 +316,8 @@ inline T & FieldIterator<T,fs>::neighbor( stencil::Direction d, cell_idx_t cf ) 
 
 //**********************************************************************************************************************
 /*!\brief uint_t variant of above function
+ * \param d Direction enumeration which defines deltas for x,y,z
+ * \param cf Delta for f
  **********************************************************************************************************************/
 template <typename T, uint_t fs>
 inline T & FieldIterator<T,fs>::neighbor( stencil::Direction d, uint_t cf ) const
@@ -325,7 +328,10 @@ inline T & FieldIterator<T,fs>::neighbor( stencil::Direction d, uint_t cf ) cons
 
 //**********************************************************************************************************************
 /*!\brief Neighbor access relative to current position
- * \param d Direction enumeration which defines deltas for x,y,z,f
+ * \param cx Delta for x
+ * \param cy Delta for y
+ * \param cz Delta for z
+ * \param cf Delta for f
  **********************************************************************************************************************/
 template <typename T, uint_t fs>
 inline T & FieldIterator<T,fs>::neighbor( cell_idx_t cx, cell_idx_t cy, cell_idx_t cz, cell_idx_t cf ) const
@@ -346,6 +352,10 @@ inline T & FieldIterator<T,fs>::neighbor( cell_idx_t cx, cell_idx_t cy, cell_idx
 //**********************************************************************************************************************
 /*!\brief Neighbor variant that takes unsigned int as f parameter,
  *        needed since the stencil toIdx() is an unsigned int
+ * \param cx Delta for x
+ * \param cy Delta for y
+ * \param cz Delta for z
+ * \param cf Delta for f
  **********************************************************************************************************************/
 template <typename T, uint_t fs>
 inline T & FieldIterator<T,fs>::neighbor( cell_idx_t cx, cell_idx_t cy, cell_idx_t cz, uint_t cf ) const
@@ -358,6 +368,7 @@ inline T & FieldIterator<T,fs>::neighbor( cell_idx_t cx, cell_idx_t cy, cell_idx
 //**********************************************************************************************************************
 /*!\brief For beginXYZ iterators, one often needs a specific f
  * Assumes that iterator stands at f==0
+ * \param cf Delta for f
  **********************************************************************************************************************/
 template <typename T, uint_t fs>
 inline  T & FieldIterator<T,fs>::getF( cell_idx_t cf ) const
@@ -373,6 +384,7 @@ inline  T & FieldIterator<T,fs>::getF( cell_idx_t cf ) const
 //**********************************************************************************************************************
 /*!\brief Equivalent to neighbor(cell_idx_t) see above.
  *        Takes an uint_t instead a cell_idx_t, since stencil::toIndex() returns uint_t
+ * \param cf Delta for f
  **********************************************************************************************************************/
 template <typename T, uint_t fs>
 inline  T & FieldIterator<T,fs>::getF( uint_t cf ) const

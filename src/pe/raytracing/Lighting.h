@@ -42,10 +42,10 @@ struct Lighting {
    Lighting () = default;
    
    /*!\brief Instantiation constructor for the Lighting struct.
-    * \param pointLightOrigin Origin of the point light.
-    * \param diffuseColor Diffuse color (base color of the light).
-    * \param specularColor Specular color (color of light refractions on an objects surface).
-    * \param ambientColor Color of the ambient light in the scene.
+    * \param _pointLightOrigin Origin of the point light.
+    * \param _diffuseColor Diffuse color (base color of the light).
+    * \param _specularColor Specular color (color of light refractions on an objects surface).
+    * \param _ambientColor Color of the ambient light in the scene.
     */
    Lighting (const Vec3& _pointLightOrigin,
              const Color& _diffuseColor, const Color& _specularColor, const Color& _ambientColor)

@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file 04_BasicLBM_ExemplaryExtensions.cpp
+//! \file 02_BasicLBM_ExemplaryExtensions.cpp
 //! \author Florian Schornbaum <florian.schornbaum@fau.de>
 //! \author Martin Bauer <martin.bauer@fau.de>
 //

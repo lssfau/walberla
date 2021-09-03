@@ -53,9 +53,9 @@ real_t intersectionRatioSphere( const geometry::Sphere & sphere,
 *
 * Let P_i be the intersection point
 *
+* \param body       surface
 * \param fluidPoint (P_f), start point of ray
 * \param direction  (d) of ray (length of d is the length of the ray segment)
-* \param policy     defines behavior in erroneous cases
 * \param epsilon    abortion criterion for iterative methods. Epsilon relates to the distance of P_i to the surface
 * \return Intersection ratio: | P_i - P_f | / | d |
 */

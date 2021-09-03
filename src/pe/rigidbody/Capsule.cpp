@@ -48,10 +48,13 @@ namespace pe {
  * \param sid Unique system-specific ID for the capsule.
  * \param uid User-specific ID for the capsule.
  * \param gpos Global geometric center of the capsule.
+ * \param q The orientation of the capsule's body frame in the global world frame.
  * \param radius The radius of the cylinder part and the end caps \f$ (0..\infty) \f$.
  * \param length The length of the cylinder part \f$ (0..\infty) \f$.
  * \param material The material of the capsule.
- * \param visible Specifies if the capsule is visible in a visualization.
+ * \param global specifies if the capsule should be created in the global storage
+ * \param communicating specifies if the capsule should take part in synchronization (syncNextNeighbour, syncShadowOwner)
+ * \param infiniteMass specifies if the capsule has infinite mass and will be treated as an obstacle
  *
  * The capsule is created lying along the x-axis.
  */

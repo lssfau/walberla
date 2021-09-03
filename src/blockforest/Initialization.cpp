@@ -87,7 +87,7 @@ shared_ptr< StructuredBlockForest > createUniformBlockGridFromConfig( const shar
 *          assigned to each process. Setting it to false allows multiple blocks to be assigned to each process.
 *          If the number of blocks is not divisible by the number of processes, the loadbalancer tries to assign
 *          the blocks to processes as evenly as possible.
-*    2) Using the number of global cells, #blocks = #processes, if this does not fit, extend the domain
+*    2) Using the number of global cells, \#blocks = \#processes, if this does not fit, extend the domain
 \verbatim
           {
              cells <    10,40,90>;    // required
@@ -751,12 +751,12 @@ createUniformBlockGrid( const std::string& filename,
 * in this case the number of cells is chosen bigger than requested
 *
 *
-* \param cells:              total number of cells requested
-* \param nrOfBlocks:         total number of blocks to distribute the cells to
-* \param[out] blocks:        calculated number of blocks in x/y/z
-* \param[out] cellsPerBlock: how many cells to put on each block
-  it may happen that divisibility of the number of cells requested prevents a distribution
-*                            in this case the number of cells is chosen (slightly) bigger than requested
+* \param cells              total number of cells requested
+* \param nrOfBlocks         total number of blocks to distribute the cells to
+* \param[out] blocksOut     calculated number of blocks in x/y/z
+* \param[out] cellsPerBlock how many cells to put on each block
+*                           it may happen that divisibility of the number of cells requested prevents a distribution
+*                           in this case the number of cells is chosen (slightly) bigger than requested
 *
 * Example: in:  cells = (10,15,16)
 *          in:  blocks = 8

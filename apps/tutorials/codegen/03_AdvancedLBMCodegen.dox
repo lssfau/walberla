@@ -3,7 +3,7 @@ namespace walberla{
 /**
 \page tutorial_codegen03 Tutorial - Code Generation 3: Advanced LBM Code Generation
 
-\section overview Overview
+\section advancedlbmcodegen_overview Overview
 
 This tutorial demonstrates how to use [pystencils](https://pycodegen.pages.i10git.cs.fau.de/pystencils) and [lbmpy](https://pycodegen.pages.i10git.cs.fau.de/lbmpy) to generate highly optimised and hardware-specific Lattice Boltzmann simulation code within the waLBerla framework. Other than in \ref tutorial_codegen02, we will be generating a full LBM sweep instead of a lattice model class. Furthermore, we will generate a communication pack info class and a sweep to initialise the PDF field. A hardware-specific implementation of a NoSlip boundary handler will also be generated. Those components will then be combined in a waLBerla application for simulating the same shear flow scenario as in the previous tutorial.
 

@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ScalarFieldFromBody.cpp
+//! \file ScalarFieldFromBody.impl.h
 //! \ingroup geometry
 //! \author Michael Kuron <mkuron@icp.uni-stuttgart.de>
 //

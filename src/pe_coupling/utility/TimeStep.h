@@ -34,13 +34,13 @@ namespace pe_coupling {
 
 /*!\brief Carries out the the PE time steps, including sub iteration functionality.
  *
- * It executes 'numberOfSubIterations' PE steps within one timestep of size 'timeStepSize'.
+ * It executes \a numberOfSubIterations PE steps within one timestep of size \a timeStepSize.
  *
- * These PE sub iterations require, that the current external (e.g. hydrodynamic, gravitational,..) forces and torques
+ * These PE sub iterations require, that the current external (e.g. hydrodynamic, gravitational, ...) forces and torques
  * acting on each particle remains unchanged. Thus, a map is set up internally that stores and re-sets these forces
- * and torques in each PE sub iteration
- * .
- * Additionally, a function 'forceEvaluationFunc' can be given that allows to evaluate different forces before the PE
+ * and torques in each PE sub iteration.
+ *
+ * Additionally, a function \a forceEvaluationFunc can be given that allows to evaluate different forces before the PE
  * step is carried out. An example are particle-particle lubrication forces that have to be updated in each sub iteration.
  *
  */

@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file TaskTree.h
+//! \file ExecutionTree.h
 //! \ingroup executiontree
 //! \author Martin Bauer <martin.bauer@fau.de>
 //
@@ -57,7 +57,7 @@ template< typename FunctorType > class SharedSweep;
 
 /*! Creates a functor node around any callable object. The wrapped functor is copied.
  *
- * \param any callable object. The object is copied - if its state has to be modified later, pass a shared_ptr to a functor instead
+ * \param t callable object. The object is copied - if its state has to be modified later, pass a shared_ptr to a functor instead
  * \param name optional name of the functor node
  * \param timingTree optional timing tree object to time all executions of this functor
  */
@@ -86,7 +86,7 @@ shared_ptr< Sequence > parallelSequence( std::initializer_list< IFunctionNodePtr
 /*! Note that runs its contents only every n'th call
  *
  * \param node task that is only run every n'th call
- * \param name the interval i.e. "n"
+ * \param interval the interval i.e. "n"
  * \param onFirst if false the task is not run at the first call
  * \param startValue initial call counter
  */

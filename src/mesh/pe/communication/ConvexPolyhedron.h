@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file Polyhedron.h
+//! \file ConvexPolyhedron.h
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
 //! \brief Marshalling of objects for data transmission or storage.
 //
@@ -55,7 +55,6 @@ void marshal( mpi::SendBuffer& buffer, const ConvexPolyhedron& obj );
  *
  * \param buffer The buffer from where to read.
  * \param objparam The object to be reconstructed.
- * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
  * \return void
  */
 void unmarshal( mpi::RecvBuffer& buffer, ConvexPolyhedronParameters& objparam );

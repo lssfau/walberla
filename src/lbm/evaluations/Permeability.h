@@ -53,11 +53,12 @@ public:
    Permeability( real_t viscosity, const BlockDataID & pdfFieldId, const BlockDataID & boundaryHandlingId, const FlagUID & fluid,
                  const shared_ptr<blockforest::StructuredBlockForest> blocks );
 
-	/*!
+   /*!
     *  \brief Initializes the permeability evaluation with the parameters given in the config file.
     *
     *  Configuration block:
     *
+    *  \code{.unparsed}
     *  <some_name>
     *  {
     *     sampleVolume  [<0, 0, 0> , <100, 100, 100>]; [optional, default = domain]
@@ -65,6 +66,7 @@ public:
     *     calcFrequency 100;                           [required, unsigned int]
     *     convCrit      1E-20;                         [optional, default = 1E-20]
     *  }
+    *  \endcode
     *
     *
     *  \param config The config block handle containing the parameters.

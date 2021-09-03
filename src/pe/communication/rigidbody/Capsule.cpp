@@ -27,12 +27,6 @@ namespace pe {
 namespace communication {
 
 //*************************************************************************************************
-/*!\brief Marshalling a capsule primitive.
- *
- * \param buffer The buffer to be filled.
- * \param obj The object to be marshalled.
- * \return void
- */
 void marshal( mpi::SendBuffer& buffer, const Capsule& obj )
 {
    marshal( buffer, static_cast<const GeomPrimitive&>( obj ) );
@@ -43,13 +37,6 @@ void marshal( mpi::SendBuffer& buffer, const Capsule& obj )
 
 
 //*************************************************************************************************
-/*!\brief Unmarshalling a capsule primitive.
- *
- * \param buffer The buffer from where to read.
- * \param objparam The object to be reconstructed.
- * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
- * \return void
- */
 void unmarshal( mpi::RecvBuffer& buffer, CapsuleParameters& objparam )
 {
    unmarshal( buffer, static_cast<GeomPrimitiveParameters&>( objparam ) );

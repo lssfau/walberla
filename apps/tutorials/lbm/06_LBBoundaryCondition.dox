@@ -13,7 +13,7 @@ The physical systems of interest are usually described by a set of partial diffe
 These boundary conditions are imposed by the physical system through, e.g., walls, inflows, outflows, etc. \n
 For discrete numerical schemes, the situation is slightly different. Here, boundary conditions are part of the solution routine, and different implementations of the same physical boundary condition may alter the result.
 Especially in lattice Boltzmann methods, there is a whole zoo of boundary conditions. This can be easily explained by the fact that boundaries are usually prescribed in terms of macroscopic variables.
-lattice Boltzmann methods, however, are determined by a set of mesoscopic variables \$f_i(\mathbf{x}, t)$. Different sets of distribution functions may lead to the same hydrodynamic behavior. Eventually, this leads to the question of how to prescribe the mesoscopic variables.\n
+lattice Boltzmann methods, however, are determined by a set of mesoscopic variables \f$f_i(\mathbf{x}, t)\f$. Different sets of distribution functions may lead to the same hydrodynamic behavior. Eventually, this leads to the question of how to prescribe the mesoscopic variables.\n
 In the following, we will discuss different approaches for wall, inflow and outflow boundary conditions and their realization in `waLBerla`. You will learn about the differences between them, their limitations, and how to use them.\n
 Note that we will not discuss the generation of boundary conditions with `lbmpy`. For this, please refer to \ref tutorial_codegen03.
 
@@ -271,7 +271,7 @@ As this scheme has some deficiencies (accuracy, need for explicitly enforcing th
 
 \section tutorial06_pressureBC Pressure Boundary Conditions
 Now that we have discussed inflows and walls in great detail, only the pressure boundary conditions for the outflows are left.\n
-As for the velocity boundary conditions, there are multiple ways to enforce a certain pressure at an outlet. In lattice Boltzmann solvers, however, it is usually the density that is prescribed, as it is more directly related to the pdfs. As density and pressure, in turn, are linked via \$p = c_s^2 \rho$, this is perfectly legitimate.
+As for the velocity boundary conditions, there are multiple ways to enforce a certain pressure at an outlet. In lattice Boltzmann solvers, however, it is usually the density that is prescribed, as it is more directly related to the pdfs. As density and pressure, in turn, are linked via \f$p = c_s^2 \rho\f$, this is perfectly legitimate.
 
 \subsection tutorial06_simplePressure SimplePressure
 Our first boundary condition to be discussed is the `SimplePressure` that is based on the anti-bounce-back method. Here, the pdfs are calculated by the fixed boundary density and an approximated boundary velocity. \n

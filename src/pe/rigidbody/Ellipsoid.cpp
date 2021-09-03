@@ -50,9 +50,8 @@ namespace pe {
  * \param sid Unique system-specific ID for the Ellipsoid.
  * \param uid User-specific ID for the Ellipsoid.
  * \param gpos Global geometric center of the Ellipsoid.
- * \param rpos The relative position within the body frame of a superordinate body.
  * \param q The orientation of the Ellipsoid's body frame in the global world frame.
- * \param radius The radius of the Ellipsoid \f$ (0..\infty) \f$.
+ * \param semiAxes The semi-axes of the Ellipsoid.
  * \param material The material of the Ellipsoid.
  * \param global specifies if the Ellipsoid should be created in the global storage
  * \param communicating specifies if the Ellipsoid should take part in synchronization (syncNextNeighbour, syncShadowOwner)

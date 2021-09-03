@@ -27,12 +27,6 @@ namespace pe {
 namespace communication {
 
 //*************************************************************************************************
-/*!\brief Marshalling a Ellipsoid primitive.
- *
- * \param buffer The buffer to be filled.
- * \param obj The object to be marshalled.
- * \return void
- */
 void marshal( mpi::SendBuffer& buffer, const Ellipsoid& obj ) {
    marshal( buffer, static_cast<const GeomPrimitive&>( obj ) );
    buffer << obj.getSemiAxes();
@@ -41,13 +35,6 @@ void marshal( mpi::SendBuffer& buffer, const Ellipsoid& obj ) {
 
 
 //*************************************************************************************************
-/*!\brief Unmarshalling a Ellipsoid primitive.
- *
- * \param buffer The buffer from where to read.
- * \param objparam The object to be reconstructed.
- * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
- * \return void
- */
 void unmarshal( mpi::RecvBuffer& buffer, EllipsoidParameters& objparam ) {
    unmarshal( buffer, static_cast<GeomPrimitiveParameters&>( objparam ) );
    buffer >> objparam.semiAxes_;

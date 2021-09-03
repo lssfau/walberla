@@ -27,8 +27,7 @@ namespace pe{
 //*************************************************************************************************
 /*!\brief Constructor for the RigidBody class.
  *
- * \param finite Specifies if the rigid body is finite or not.
- * \param visible Specifies if the rigid body is visible or not.
+ * \param typeID The geometry type of the rigid body.
  * \param sid The unique system-specific ID of the rigid body.
  * \param uid The user-specific ID of the rigid body.
  */

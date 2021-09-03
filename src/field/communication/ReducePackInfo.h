@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file ReduceFieldPackInfo.h
+//! \file ReducePackInfo.h
 //! \ingroup field
 //! \author Matthias Markl <matthias.markl@fau.de>
 //! \brief Stores/reduces ghost layers to/from a communication buffer

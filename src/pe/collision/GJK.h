@@ -185,10 +185,11 @@ inline bool GJK::zeroLengthVector(const Vec3& vec) const
 
 
 //*************************************************************************************************
-/*!\brief Calculate a support point of a body extended by threshold.
- * \param geom The body.
+/*!\brief Calculate a support point of a body extended by a threshold.
+ * \param geom1 The body A.
+ * \param geom2 The body B.
  * \param dir The support point direction.
- * \param threshold Extension of the Body.
+ * \param margin Extension of the Body.
  */
 inline const Vec3 GJK::putSupport(const GeomPrimitive &geom1, const GeomPrimitive &geom2, const Vec3& dir, const real_t margin, 
                                   std::vector<Vec3> &simplex, std::vector<Vec3> &supportA, std::vector<Vec3> &supportB, size_t index){

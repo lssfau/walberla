@@ -2753,13 +2753,12 @@ inline void RigidBody::rotateAroundOriginImpl( const Quat& dq )
 /*!\brief Rotation of the rigid body around a specific global coordinate.
  *
  * \param point The global center of the rotation.
- * \param axis The global rotation axis.
- * \param angle The rotation angle (radian measure).
+ * \param dq The quaternion for the rotation.
  * \return void
  *
  * This function rotates the rigid body around the given global coordinate \a point and changes
  * both the global position and the orientation/rotation of the rigid body. The rigid body is rotated
- * around the given axis \a axis by \a angle degrees (radian measure).\n
+ * by the quaternion \a dq.\n
  *
  * \b Note:
  * - Rotating a rigid body contained in a union changes the mass distribution and geometry of the

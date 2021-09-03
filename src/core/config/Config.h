@@ -197,7 +197,7 @@ public:
       inline Parameter<T> getParameter( std::string key ) const;
 
       template< typename T >
-      inline Parameter<T> getParameter( const std::string & key, const T & defaultValue ) const;
+      inline Parameter<T> getParameter( const std::string & key, const T & def ) const;
 
       inline bool setParameter( const std::string & key, const std::string & value );
       
@@ -278,7 +278,7 @@ public:
       inline Parameter<T> getParameter( const std::string & key ) const;
 
       template< typename T >
-      inline Parameter<T> getParameter( const std::string & key, const T& defaultValue ) const;
+      inline Parameter<T> getParameter( const std::string & key, const T& def ) const;
 
       bool isValid() const { return block_ != nullptr; }
       operator bool() const { return isValid(); }
@@ -346,7 +346,7 @@ public:
    inline Parameter<T> getParameter( const std::string& key ) const;
 
    template< typename T >
-   inline Parameter<T> getParameter( const std::string& key, const T & defaultValue ) const;
+   inline Parameter<T> getParameter( const std::string& key, const T & def ) const;
 
 
    inline iterator       begin();
@@ -514,7 +514,7 @@ inline Config::Parameter<Type> Config::getParameter( const std::string & key ) c
 
 
 //**********************************************************************************************************************
-/*!\fn Config::Parameter<T> Config::getParameter( const std::string& key, const T& ) const
+/*!\fn Config::Parameter<T> Config::getParameter( const std::string& key, const T& def ) const
 // \brief Returns an extracted parameter.
 //
 // \param key The key of the extracted parameter.
@@ -1093,6 +1093,7 @@ inline const std::string& Config::BlockHandle::getKey() const
 /*!\fn bool Config::BlockHandle::isDefined( std::string key ) const
 // \brief Checks if a parameter was defined in the parameter file.
 //
+// \param key The parameter key to be checked.
 // \return \a true if the parameter was defined, \a false if the parameter wasn't defined.
  */
 inline bool Config::BlockHandle::isDefined( std::string key ) const
@@ -1118,7 +1119,7 @@ inline Config::Parameter<Type> Config::BlockHandle::getParameter( const std::str
 //**********************************************************************************************************************
 
 //**********************************************************************************************************************
-/*!\fn Config::Parameter<T> Config::BlockHandle::getParameter( const std::string& key, const T & ) const
+/*!\fn Config::Parameter<T> Config::BlockHandle::getParameter( const std::string& key, const T & def ) const
 // \brief Returns an extracted parameter.
 //
 // \param key The key of the extracted parameter.

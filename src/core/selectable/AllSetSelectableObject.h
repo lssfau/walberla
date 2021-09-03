@@ -37,7 +37,7 @@ namespace selectable {
 *   \brief Implementation of SelectableObject using sets (see "AllSet.h") as selection attributes
 *
 *   AllSetSelectableObject is an implementation of SelectableObject that stores objects of type T which are attached
-*   with selection attributes of type AllSet<U>. For information on which objects are selected given a certain set as
+*   with selection attributes of type `AllSet<U>`. For information on which objects are selected given a certain set as
 *   selection request see the documentation of the function "select".
 */
 //**********************************************************************************************************************

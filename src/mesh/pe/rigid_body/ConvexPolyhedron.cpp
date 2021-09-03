@@ -54,9 +54,7 @@ namespace pe {
 * \param sid Unique system-specific ID for the ConvexPolyhedron.
 * \param uid User-specific ID for the ConvexPolyhedron.
 * \param gpos Global geometric center of the ConvexPolyhedron.
-* \param rpos The relative position within the body frame of a superordinate body.
 * \param q The orientation of the ConvexPolyhedron's body frame in the global world frame.
-* \param radius The radius of the ConvexPolyhedron \f$ (0..\infty) \f$.
 * \param material The material of the ConvexPolyhedron.
 * \param global specifies if the ConvexPolyhedron should be created in the global storage
 * \param communicating specifies if the ConvexPolyhedron should take part in synchronization (syncNextNeighbour, syncShadowOwner)

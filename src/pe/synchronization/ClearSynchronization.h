@@ -35,7 +35,7 @@ namespace pe {
 /*!\brief Removes all synchronization information.
  *
  * \param blocks BlockStorage of the simulation.
- * \param BlockDataID BlockDataID of the pe storage.
+ * \param storageID BlockDataID of the pe storage.
  */
 inline
 void clearSynchronization( BlockStorage& blocks, BlockDataID storageID )

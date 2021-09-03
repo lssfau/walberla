@@ -31,13 +31,6 @@ namespace walberla {
 namespace mesh {
 namespace pe {
 
-//*************************************************************************************************
-/*!\brief Marshalling a polyhedron primitive.
- *
- * \param buffer The buffer to be filled.
- * \param obj The object to be marshalled.
- * \return void
- */
 void marshal( mpi::SendBuffer& buffer, const ConvexPolyhedron& obj ) {
    walberla::pe::communication::marshal( buffer, static_cast<const GeomPrimitive&>( obj ) );
    
@@ -76,14 +69,6 @@ void marshal( mpi::SendBuffer& buffer, const ConvexPolyhedron& obj ) {
 //*************************************************************************************************
 
 
-//*************************************************************************************************
-/*!\brief Unmarshalling a polyhedron primitive.
- *
- * \param buffer The buffer from where to read.
- * \param objparam The object to be reconstructed.
- * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
- * \return void
- */
 void unmarshal( mpi::RecvBuffer& buffer, ConvexPolyhedronParameters& objparam ) {
    walberla::pe::communication::unmarshal( buffer, static_cast<GeomPrimitiveParameters&>( objparam ) );
    
