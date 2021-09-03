@@ -45,7 +45,7 @@ using math::uintMSBPosition;
 /*!
 *   \brief Returns a string that stores the bitwise representation of 'value' (must be an unsigned integer)
 *
-*   \code
+*   \code{.unparsed}
 *      8bit display: 0101_1101
 *     16bit display: 1110_0101.1100_0001
 *     32bit display: 1000_0011.0110_1101.0000_0001.1010_0110

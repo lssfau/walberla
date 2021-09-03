@@ -31,7 +31,7 @@ namespace grid_generator {
 
 /// Helper class to generate points in a simple cubic structure within a certain domain.
 /// The lattice is fixed by a point of reference (x).
-/// \code
+/// \code{.unparsed}
 /// . . . . . . . .
 ///        +-----+
 /// . . . .|. . .|.
