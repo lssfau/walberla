@@ -1033,6 +1033,15 @@ if ( WALBERLA_BUILD_WITH_OPENMP )
             message(FATAL_ERROR "Could NOT enable OpenMP")
         endif()
     endif()
+
+    # check for bug in combination with OpenMP and sign conversion https://bugs.llvm.org/show_bug.cgi?id=48387
+    try_compile( WALBERLA_CLANG_OPENMP_BUG "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestClangOpenMPBug.cpp"
+          COMPILE_DEFINITIONS -Werror)
+    if ( NOT ${WALBERLA_CLANG_OPENMP_BUG} )
+       message(WARNING "Setting -Wno-sign-conversion due to a compiler bug in LLVM (https://bugs.llvm.org/show_bug.cgi?id=48387)" )
+       add_flag ( CMAKE_CXX_FLAGS "-Wno-sign-conversion" )
+    endif()
+
 else()
     if ( WALBERLA_CXX_COMPILER_IS_CRAY )
         add_flag ( CMAKE_C_FLAGS   "-h noomp" )
