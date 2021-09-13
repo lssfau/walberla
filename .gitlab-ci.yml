@@ -32,7 +32,6 @@ stages:
       - export CCACHE_BASEDIR=$CI_PROJECT_DIR
       - mkdir $CI_PROJECT_DIR/build
       - cd $CI_PROJECT_DIR/build
-      - if dpkg --compare-versions `ompi_info | head -2 | tail -1 | sed 's/[^0-9.]*\([0-9.]*\).*/\1/'` ge 1.10; then export MPIEXEC_PREFLAGS="--allow-run-as-root" ; fi
       - cmake ..
         -DWALBERLA_BUFFER_DEBUG=$WALBERLA_BUFFER_DEBUG
         -DWALBERLA_BUILD_TESTS=ON
