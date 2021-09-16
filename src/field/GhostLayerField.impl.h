@@ -53,11 +53,11 @@ namespace field {
    //*******************************************************************************************************************
    /*!\brief Creates an uninitialized field of given size
     *
-    * \param xSize  size of x dimension without ghost layers
-    * \param ySize  size of y dimension without ghost layers
-    * \param zSize  size of z dimension without ghost layers
+    * \param _xSize size of x dimension without ghost layers
+    * \param _ySize size of y dimension without ghost layers
+    * \param _zSize size of z dimension without ghost layers
     * \param gl     number of ghost layers
-    * \param layout memory layout of the field (see Layout)
+    * \param l      memory layout of the field (see Layout)
     * \param alloc  class that describes how to allocate memory for the field, see FieldAllocator
     *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
@@ -71,12 +71,12 @@ namespace field {
    //*******************************************************************************************************************
    /*!\brief Creates a field and initializes it with constant value
     *
-    * \param xSize   size of x dimension without ghost layers
-    * \param ySize   size of y dimension without ghost layers
-    * \param zSize   size of z dimension without ghost layers
+    * \param _xSize  size of x dimension without ghost layers
+    * \param _ySize  size of y dimension without ghost layers
+    * \param _zSize  size of z dimension without ghost layers
     * \param gl      number of ghost layers
     * \param initVal every element of the field is set to initVal (also ghost layers)
-    * \param layout  memory layout of the field (see Layout)
+    * \param l       memory layout of the field (see Layout)
     * \param alloc  class that describes how to allocate memory for the field, see FieldAllocator
     *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
@@ -92,12 +92,12 @@ namespace field {
    //*******************************************************************************************************************
    /*!\brief Creates a field and initializes f coordinate with vector values
     *
-    * \param xSize   size of x dimension
-    * \param ySize   size of y dimension
-    * \param zSize   size of z dimension
+    * \param _xSize  size of x dimension
+    * \param _ySize  size of y dimension
+    * \param _zSize  size of z dimension
     * \param gl      number of ghost layers
     * \param fValues initializes f coordinate with values from vector (see set(std::vector&) ) also ghost layers
-    * \param layout  memory layout of the field (see Layout)
+    * \param l       memory layout of the field (see Layout)
     * \param alloc   class that describes how to allocate memory for the field, see FieldAllocator
     *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
@@ -116,11 +116,11 @@ namespace field {
     *
     * Is automatically called by constructors that take at least one argument
     *
-    * \param xSize  size of x dimension without ghost layers
-    * \param ySize  size of y dimension without ghost layers
-    * \param zSize  size of z dimension without ghost layers
+    * \param _xSize size of x dimension without ghost layers
+    * \param _ySize size of y dimension without ghost layers
+    * \param _zSize size of z dimension without ghost layers
     * \param gl     number of ghost layers
-    * \param layout memory layout of the field (see Layout)
+    * \param l      memory layout of the field (see Layout)
     * \param alloc  class that describes how to allocate memory for the field, see FieldAllocator
     *******************************************************************************************************************/
     template<typename T, uint_t fSize_>

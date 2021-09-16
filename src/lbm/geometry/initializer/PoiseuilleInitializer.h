@@ -36,6 +36,7 @@ namespace initializer {
    * \ingroup geometry
    *
    * Configuration file syntax:
+   * \code{.unparsed}
    *    <blockName>
    *     {
    *       scenario          rect2D|pipe;
@@ -49,6 +50,7 @@ namespace initializer {
    *                         // the remaining third axis has to be periodic. By default chosen as a non-periodic axis
    *                         // that is not the flowAxis
    *     }
+   * \endcode
    *
    *  scenario:
    *     - rect2D: rectangular channel where boundary in direction of periodicAxis are set periodic

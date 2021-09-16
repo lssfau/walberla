@@ -54,10 +54,10 @@ namespace field {
    //*******************************************************************************************************************
    /*!Creates an uninitialized field of given size
     *
-    * \param xSize  size of x dimension
-    * \param ySize  size of y dimension
-    * \param zSize  size of z dimension
-    * \param layout memory layout of the field (see Field::Layout)
+    * \param _xSize  size of x dimension
+    * \param _ySize  size of y dimension
+    * \param _zSize  size of z dimension
+    * \param l       memory layout of the field (see Field::Layout)
     * \param alloc  class that describes how to allocate memory for the field, see FieldAllocator
     *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
@@ -72,11 +72,11 @@ namespace field {
    //*******************************************************************************************************************
    /*! Creates a field and initializes it with constant
     *
-    * \param xSize   size of x dimension
-    * \param ySize   size of y dimension
-    * \param zSize   size of z dimension
+    * \param _xSize  size of x dimension
+    * \param _ySize  size of y dimension
+    * \param _zSize  size of z dimension
     * \param initVal every element of the field is set to initVal
-    * \param layout  memory layout of the field (see Field::Layout)
+    * \param l       memory layout of the field (see Field::Layout)
     * \param alloc  class that describes how to allocate memory for the field, see FieldAllocator
     *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
@@ -92,11 +92,11 @@ namespace field {
    //*******************************************************************************************************************
    /*! Creates a field and initializes f coordinate with vector values
     *
-    * \param xSize   size of x dimension
-    * \param ySize   size of y dimension
-    * \param zSize   size of z dimension
+    * \param _xSize  size of x dimension
+    * \param _ySize  size of y dimension
+    * \param _zSize  size of z dimension
     * \param fValues initializes f coordinate with values from vector (see set(std::vector&) )
-    * \param layout  memory layout of the field (see Field::Layout)
+    * \param l       memory layout of the field (see Field::Layout)
     * \param alloc  class that describes how to allocate memory for the field, see FieldAllocator
     *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
@@ -114,6 +114,9 @@ namespace field {
    /*! Deletes all stored data, and resizes the field
     *
     *  The resized field is uninitialized.
+    * \param _xSize  size of x dimension
+    * \param _ySize  size of y dimension
+    * \param _zSize  size of z dimension
     *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
    void Field<T,fSize_>::resize( uint_t _xSize, uint_t _ySize, uint_t _zSize )
@@ -294,10 +297,10 @@ namespace field {
     * Must be called exactly once!  This is automatically called by all constructors
     * that take at least one argument
     *
-    * \param xSize   size of x dimension
-    * \param ySize   size of y dimension
-    * \param zSize   size of z dimension
-    * \param layout  memory layout of the field (see Field::Layout)
+    * \param _xSize  size of x dimension
+    * \param _ySize  size of y dimension
+    * \param _zSize  size of z dimension
+    * \param l       memory layout of the field (see Field::Layout)
     * \param alloc   the allocator to use. If a NULL shared pointer is given, a sensible default is selected,
     *                depending on layout
     * \param innerGhostLayerSizeForAlignedAlloc
@@ -1082,8 +1085,12 @@ namespace field {
     * This is used for example in the constructor of the GhostLayerField
     *
     * Internally this is implementing by adding an offset to the values_ pointer, and by adapting the size_ members.
-    * \param xOff The x coordinate that is afterwards mapped to zero
-    * \param xs   The new size of the x coordinate. Has to be smaller than (old xSize())-xOff
+    * \param xOffset The x coordinate that is afterwards mapped to zero
+    * \param xs      The new size of the x coordinate. Has to be smaller than (old xSize())-xOffset
+    * \param yOffset The y coordinate that is afterwards mapped to zero
+    * \param ys      The new size of the y coordinate. Has to be smaller than (old ySize())-yOffset
+    * \param zOffset The z coordinate that is afterwards mapped to zero
+    * \param zs      The new size of the z coordinate. Has to be smaller than (old zSize())-zOffset
     *******************************************************************************************************************/
    template<typename T, uint_t fSize_>
    void Field<T,fSize_>::setOffsets(uint_t xOffset, uint_t xs,

@@ -344,8 +344,8 @@ inline void Raytracer::setLocalImageOutputEnabled(const bool enabled) {
    localImageOutputEnabled_ = enabled;
 }
    
-/*!\brief Enable / disable outputting images in the specified directory.
- * \param enabled Set to true / false to enable / disable image output.
+/*!\brief Enable outputting images in the specified directory.
+ * \param path Directory for image output.
  */
 inline void Raytracer::setImageOutputDirectory(const std::string& path) {
    filesystem::path dir (path);
@@ -376,7 +376,7 @@ inline void Raytracer::setReductionMethod(ReductionMethod reductionMethod) {
 }
 
 /*!\brief Set if the rendering of planes should get confined to the simulation domain.
- * \param confinePlanesToOrigin True if the rendering of planes should get confined to the simulation domain.
+ * \param confinePlanesToDomain True if the rendering of planes should get confined to the simulation domain.
  */
 inline void Raytracer::setConfinePlanesToDomain(bool confinePlanesToDomain) {
    confinePlanesToDomain_ = confinePlanesToDomain;
@@ -513,6 +513,7 @@ inline void Raytracer::traceRayInHashGrids(const Ray& ray, BodyID& body_closest,
 /*!\brief Does one raytracing step.
  *
  * \param timestep The timestep after which the raytracing starts.
+ * \param tt Optional TimingTree.
  *
  * \attention Planes will not get rendered if their normal and the rays direction point in the approximately
  * same direction. See Raytracer::isPlaneVisible() for further information.
@@ -668,7 +669,7 @@ void Raytracer::generateImage(const size_t timestep, WcTimingTree* tt) {
 /*!\brief Computes the color for a certain intersection.
  *
  * \param body Intersected body.
- * \param Ray Ray which intersected the body.
+ * \param ray Ray which intersected the body.
  * \param t Distance from eye to intersection point.
  * \param n Intersection normal at the intersection point.
  *

@@ -48,12 +48,12 @@ namespace pe {
  * \param sid Unique system-specific ID for the box.
  * \param uid User-specific ID for the box.
  * \param gpos Global geometric center of the box.
- * \param rpos The relative position within the body frame of a superordinate body.
  * \param q The orientation of the box's body frame in the global world frame.
  * \param lengths Side lengths of the box \f$ (0..\infty) \f$.
  * \param material The material of the box.
- * \param visible Specifies if the box is visible in a visualization.
- * \param fixed \a true to fix the box, \a false to unfix it.
+ * \param global specifies if the box should be created in the global storage
+ * \param communicating specifies if the box should take part in synchronization (syncNextNeighbour, syncShadowOwner)
+ * \param infiniteMass specifies if the box has infinite mass and will be treated as an obstacle
  */
 Box::Box( id_t sid, id_t uid, const Vec3& gpos, const Quat& q,
           const Vec3& lengths, MaterialID material,

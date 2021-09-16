@@ -7,7 +7,7 @@ namespace walberla {
 
 \section tutorial05_overview Overview
 
-The aim of this tutorial is to show how to build and solve the backward-facing step model using lattice Boltzman method in waLBerla.
+The aim of this tutorial is to show how to build and solve the backward-facing step model using lattice Boltzmann method in waLBerla.
 The "01_BasicLBM" case is used as the foundation of the current work. Therefore, most of the functionalities have already been introduced and discussed in LBM 1 tutorial.
 Here the main focus is on the following areas:
 
@@ -54,13 +54,13 @@ Finally, viscosity consequently **omega** are calculated with the Reynolds numbe
 \section tutorial05_geometry Geometry
 
 Since the step geometry is a plain rectangular area, the simplest approach is to create it by geometry module in walberla.
-This module offers capability to read boundaries of a random geometry from images, voxel files, coordinates of verticies, etc.
+This module offers capability to read boundaries of a random geometry from images, voxel files, coordinates of vertices, etc.
 Using this module, obstacles of basic shapes could be conveniently positioned inside the domain.
 It is also easier to have the program to read the geometry specifications from the Boundaries section of the configuration file.
 This is implemented by reading and storing the Boundaries block of the configuration file in 'boundariesConfig' object and passing it to a convenience function provided in the geometry class to initialize the boundaries.
 
 \snippet 05_BackwardFacingStep.cpp geomboundary
-Here a subblock 'Body' is created inside 'Boundaries' section in the configuration file in order to create a box (rectangle in 2D) using two diagonal verticies.
+Here a subblock 'Body' is created inside 'Boundaries' section in the configuration file in order to create a box (rectangle in 2D) using two diagonal vertices.
 
 \snippet 05_BackwardFacingStep.prm geometry
 
@@ -77,7 +77,7 @@ This mechanism is implemented by a functor named `ReattachmentLengthFinder` and 
 
 After running the program, the locations of reattachment against timestep are written to 'ReattachmentLengthLogging_Re_[Re].txt' in the working directory.
 Note that there might be more than one reattachment location before the flow fully develops along the channel, and all are given in the file.
-This simply means that it is expected to have multiple occurances of seperation and reattachment at the same time along the bottom boundary of the channel following the step in the early stages.
+This simply means that it is expected to have multiple occurences of seperation and reattachment at the same time along the bottom boundary of the channel following the step in the early stages.
 However, most of them are smeared later as the flow starts to develop.
 The logging frequency can also be adjusted by 'checkFrequency' which is passed to the `ReattachmentLengthFinder` functor.
 

@@ -434,10 +434,10 @@ void allReduceInplace( std::vector<T> & values, Operation operation, MPI_Comm co
 //======================================================================================================================
 /*!
  *  \brief Reduces values in a std::vector<bool> over all processes in-place
- *  		  
+ *
  *  Specialization of allReduceInplace<T>
- *  		  
- *  \param values     The boolean values to be reduced
+ *
+ *  \param bools      The boolean values to be reduced
  *  \param operation  The operation to be performed (one of BITWISE_AND, BITWISE_OR or BITWISE_XOR)
  *  \param comm       The MPI communicator used for communication
  */

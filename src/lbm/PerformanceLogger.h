@@ -44,7 +44,7 @@ namespace lbm {
 /*!
 *   \brief Class for using the PerformanceEvaluation in a timeloop
 *
-*   Providing a measurement interval, this class will regularly (every <interval> time steps) measure and report the
+*   Providing a measurement interval, this class will regularly (every \a interval time steps) measure and report the
 *   LBM performance. At the end of the simulation logOverallResults() may be called to output minimum, maximum and
 *   average performance during the simulation run.   
 */

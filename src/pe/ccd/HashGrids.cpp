@@ -326,7 +326,7 @@ size_t HashGrids::HashGrid::hash( BodyID body ) const
  *
  * \param x X value of the point.
  * \param y Y value of the point.
- * \param y Z value of the point.
+ * \param z Z value of the point.
  * \return The hash value (=cell association) of the point.
  *
  * The hash calculation uses modulo operations in order to spatially map entire blocks of connected
@@ -569,12 +569,12 @@ void HashGrids::HashGrid::enlarge()
 //=================================================================================================
 
 //*************************************************************************************************
-/*!\brief Constructor for the HashGrids class.
- *
- * \param bodystorage Reference to the general body storage.
- *
- * Note that all (local, global and remote) must be contained in the body storage.
- */
+//\brief Constructor for the HashGrids class.
+//*
+//* \param bodystorage Reference to the general body storage.
+//*
+//* Note that all (local, global and remote) must be contained in the body storage.
+//
 //HashGrids::HashGrids( BodyStorage& bodystorage )
 //   : bodystorage_( bodystorage )
 //   , bodystorageShadowCopies_( bodystorage )

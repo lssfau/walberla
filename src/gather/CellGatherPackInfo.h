@@ -64,7 +64,7 @@ public:
    *
    * \param bs          StructuredBlockStorage containing the field
    * \param fieldID     BlockDataID of the field that should be collected
-   * \param container   Container of cells in global coordinates, order of cells is important for output
+   * \param containerOfGlobalCells   Container of cells in global coordinates, order of cells is important for output
    * \param dp          data processor where gathered data is delivered to
    */
    //*******************************************************************************************************************

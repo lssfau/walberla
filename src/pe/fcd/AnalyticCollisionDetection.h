@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file Collide.h
+//! \file AnalyticCollisionDetection.h
 //! \author Klaus Iglberger
 //! \author Tobias Scharpff
 //! \author Sebastian Eibl <sebastian.eibl@fau.de>
@@ -149,9 +149,6 @@ namespace analytic {
 //*************************************************************************************************
 /*!\brief Contact generation between two colliding rigid bodies.
  *
- * \param s1 The first colliding rigid body.
- * \param s2 The second colliding rigid body.
- * \param contacts Contact container for the generated contacts.
  * \return true if contact is detected, false otherwise
  *
  * \attention If no contact was detected the value of penetrationDepth, contactPoint, contactNormal is undefined!
@@ -364,7 +361,7 @@ bool collide( BoxID b, SphereID s, Container& container )
  *
  * \param b1 The first colliding box.
  * \param b2 The second colliding box.
- * \param contacts Contact container for the generated contacts.
+ * \param container Contact container for the generated contacts.
  * \return void
  */
 template <typename Container>
@@ -1828,7 +1825,7 @@ bool collide( PlaneID p, BoxID b, Container& container )
  *
  * \param c1 The first colliding capsule.
  * \param c2 The second colliding capsule.
- * \param contacts Contact container for the generated contacts.
+ * \param container Contact container for the generated contacts.
  * \return void
  *
  * In case of two colliding capsules one or two contact points may be generated. In order to

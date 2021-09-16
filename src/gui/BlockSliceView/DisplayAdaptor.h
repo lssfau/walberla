@@ -80,7 +80,7 @@ namespace gui {
        * Draws data structure represented by this Adaptor to a grid of cells
        * Block has to be set first!
        *
-       * @param [inout] grid           Grid of cells. Use functions of CellView to draw
+       * @param [in,out] grid          Grid of cells. Use functions of CellView to draw
        *                               The Grid has dimension of innerSize + ghostLayers
        * @param [in] nrOfGhostLayers   the number of ghost layers in each direction. This value may be bigger
        *                               than the returned value of configure() since other fields might have more ghost layers.
@@ -92,8 +92,6 @@ namespace gui {
 
       /**
        * Optionally adds a QTreeWidgetItem to a tree, containing configuration options
-       *
-       * @param parentItem the item where own items can be added
        */
       virtual void addConfigurationItem( QTreeWidgetItem *   ) {}
 

@@ -599,7 +599,7 @@ int main(int argc, char** argv) {
    WALBERLA_CHECK(!(useCurlCriterion && useVorticityCriterion),
          "Using curl and vorticity criterion together makes no sense.");
 
-   // create base dir if it doesnt already exist
+   // create base dir if it doesn't already exist
    filesystem::path bpath(baseFolder);
    if (!filesystem::exists(bpath)) {
       filesystem::create_directory(bpath);

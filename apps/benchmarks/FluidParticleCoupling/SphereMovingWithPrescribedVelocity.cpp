@@ -878,7 +878,7 @@ int main( int argc, char **argv )
       real_t defaultOmegaBulk = lbm_mesapd_coupling::omegaBulkFromOmega(omega, real_t(1));
       shared_ptr<OmegaBulkAdapter_T> omegaBulkAdapter = make_shared<OmegaBulkAdapter_T>(blocks, omegaBulkFieldID, accessor, defaultOmegaBulk, omegaBulk, adaptionLayerSize, sphereSelector);
       timeloopAfterParticles.add() << Sweep( makeSharedSweep(omegaBulkAdapter), "Omega Bulk Adapter");
-      // initally adapt
+      // initially adapt
       for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
          (*omegaBulkAdapter)(blockIt.get());
       }

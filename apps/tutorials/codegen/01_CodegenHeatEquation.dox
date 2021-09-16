@@ -22,7 +22,7 @@ For interactive devolvement, the next section can be written in a <a target="_bl
 
 First, we introduce the variables contained in the PDE and its discretization as symbols. For the two-grid algorithm, we require one source field `u` and one destination field `u_tmp`.  Both are set as generic 2-dimensional fields. We explicitly set their memory layout to `fzyx`. Both waLBerla and pystencils support two kinds of memory layouts. The short `fzyx` lists the four domain dimensions (three spatial, one for values per cell) in the order of arrangement in memory. `fzyx` describes a Struct of Arrays (SOA) layout where the domain is split along `f` and then linearized. When iterating, the outermost loop runs over `f`, and the innermost loop runs over `x`. The alternative is an %Array of Structs layout (AOS) which is designated `zyxf`, iterating over `f` in the innermost loop. In our case, where we only have one value per cell, it does not matter which layout is selected. In contrast, for simulating an Advection-Diffusion-Process with multiple, independent particle distributions, `fzyx` performs better in most cases as it improves data locality and enables vectorization (SIMD, SIMT). For more information on SOA and AOS, consider <a target="_blank" href="https://software.intel.com/content/www/us/en/develop/articles/memory-layout-transformations.html">this</a> article.
 
-\code
+\code{.py}
 u, u_tmp = ps.fields("u, u_tmp: [2D]", layout='fzyx')
 kappa = sp.Symbol("kappa")
 dx = sp.Symbol("dx")
@@ -31,7 +31,7 @@ dt = sp.Symbol("dt")
 
 With the pystencils buildings blocks, we can directly define the time and spatial derivative of the PDE.
 
-\code
+\code{.py}
 heat_pde = ps.fd.transient(u) - kappa * ( ps.fd.diff( u, 0, 0 ) + ps.fd.diff( u, 1, 1 ) )
 \endcode
 
@@ -42,7 +42,7 @@ Printing `heat_pde` inside a Jupyter notebook shows the equation as:
 
 Next, the PDE will be discretized. We use the `Discretization2ndOrder` class to apply finite differences discretization to the spatial components, and explicit Euler discretization for the time step.
 
-\code
+\code{.py}
 discretize = ps.fd.Discretization2ndOrder(dx=dx, dt=dt)
 heat_pde_discretized = discretize(heat_pde)
 \endcode
@@ -55,7 +55,7 @@ Printing `heat_pde_discretized` reveals
 
 This equation can be simplified by combining the two fractions on the right-hand side. Furthermore, we would like to pre-calculate the division outside the loop of the compute kernel. To achieve this, we will first apply the simplification functionality of sympy, and then replace the division by introducing a subexpression.
 
-\code
+\code{.py}
 heat_pde_discretized = heat_pde_discretized.args[1] + heat_pde_discretized.args[0].simplify()
 
 @ps.kernel
@@ -85,7 +85,7 @@ We will now use the waLBerla build system to generate a sweep from this symbolic
 
 We create a python file called *HeatEquationKernel.py* in our application folder. This file contains the python code we have developed above. Additionally, to `sympy` and `pystencils`, we add the import directive `from pystencils_walberla import CodeGeneration, generate_sweep`. At the end of the file, we add these two lines:
 
-\code
+\code{.py}
 with CodeGeneration() as ctx:
     generate_sweep(ctx, 'HeatEquationKernel', ac)
 \endcode
@@ -94,7 +94,7 @@ The `CodeGeneration` context and the function `generate_sweep` are provided by w
 
 The code generation script will later be called by the build system while compiling the application. The complete script looks like this:
 
-\code
+\code{.py}
 import sympy as sp
 import pystencils as ps
 from pystencils_walberla import CodeGeneration, generate_sweep
@@ -124,7 +124,7 @@ with CodeGeneration() as ctx:
 \endcode
 
 As a next step, we register the script with the CMake build system. Outside of our application folder, open *CMakeLists.txt* and add these lines (replace `codegen` by the name of your folder):
-\code
+\code{.unparsed}
 if( WALBERLA_BUILD_WITH_CODEGEN )
     add_subdirectory(codegen)
 endif()
@@ -132,7 +132,7 @@ endif()
 
 The `if` block makes sure our application is only built if the CMake flag `WALBERLA_BUILD_WITH_CODEGEN` is set. In the application folder, create another *CMakeLists.txt* file. For registering a code generation target, the build system provides the `walberla_generate_target_from_python` macro. Apart from the target name, we need to pass it the name of our python script and the names of the generated C++ header and source files. Their names need to match the class name passed to `generate_sweep` in the script. Add the following lines to your *CMakeLists.txt*.
 
-\code
+\code{.unparsed}
 if( WALBERLA_BUILD_WITH_CODEGEN )
     walberla_generate_target_from_python( NAME CodegenHeatEquationKernel
         FILE HeatEquationKernel.py
@@ -148,7 +148,7 @@ When running `make` again at a later time, the code will only be regenerated if 
 
 Finally, we can use the generated sweep in an actual waLBerla application. In the application folder, create the source file *01_CodegenHeatEquation.cpp*. Open *CMakeLists.txt* and register the source file as an executable using the macro `walberla_add_executable`. Add all required waLBerla modules as dependencies, as well as the generated target.
 
-\code
+\code{.unparsed}
 walberla_add_executable (   NAME 01_CodegenHeatEquation
                             FILES 01_CodegenHeatEquation.cpp
                             DEPENDS blockforest core field stencil timeloop vtk pde CodegenHeatEquationKernel )

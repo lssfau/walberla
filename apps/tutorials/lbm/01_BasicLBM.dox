@@ -5,7 +5,7 @@ namespace walberla {
 
 \brief A configurable application for simple LBM simulations
 
-\section tutorial04_overview Overview
+\section tutorial01_overview Overview
 
 In this tutorial, we finally built a fully functional lattice Boltzmann application with the following features:
 
@@ -19,7 +19,7 @@ there is not much code that we actually have to implement ourselves.
 
 \image html tutorial_lbm01_channel.png "airfoil (loaded from a grayscale image) in a 2D channel"
 
-\section tutorial04_paramfile Parameter File
+\section tutorial01_paramfile Parameter File
 
 This application will be fully configurable by a parameter file so that no recompilation is necessary if 
 some parameters or the geometry has to be changed.
@@ -69,9 +69,9 @@ auto blocks = blockforest::createUniformBlockGridFromConfig( walberlaEnv.config(
 This function assumes that a "DomainSetup" block exists. For a detailed description of possible configuration parameters,
 see blockforest::createUniformBlockGridFromConfig().
 
-\section tutorial04_lbmdatastructures Lattice Boltzmann Data Structures
+\section tutorial01_lbmdatastructures Lattice Boltzmann Data Structures
 
-\subsection tutorial04_latticemodel Lattice Model
+\subsection tutorial01_latticemodel Lattice Model
 
 \code
 typedef lbm::D2Q9< lbm::collision_model::SRT >  LatticeModel_T;
@@ -90,12 +90,12 @@ A lattice model defines the basic ingredients needed for an LBM simulation:
 - **collision model**: The first template parameter for a lattice model is a collision model.
   The collision or relaxation model defines which method to use in the collide step. Here, we use the single relaxation time
   model (SRT) also called BGK model: lbm::collision_model::SRT. For other options, see the file lbm/lattice_model/CollisionModel.h
-- There are further template parameters specifing compressibility, force model, etc.
+- There are further template parameters specifying compressibility, force model, etc.
   These arguments have default parameters which we use here.
 
 For a more detailed description of lattice models, see lbm::LatticeModelBase
 
-\subsection tutorial04_fields Fields
+\subsection tutorial01_fields Fields
 
 \code
 typedef lbm::PdfField< LatticeModel_T >  PdfField_T;
@@ -129,7 +129,7 @@ BlockDataID  pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", lattic
 BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 \endcode
 
-\subsection tutorial04_boundary Boundary Handling
+\subsection tutorial01_boundary Boundary Handling
 
 waLBerla comes with a set of lattice Boltzmann boundary conditions. They can be found in folder
 lbm/boundary. All implement a common concept.
@@ -151,7 +151,7 @@ boundary::BoundaryHandling. Otherwise the `near boundary` and `domain` flags are
 
 The boundary handling is a heavily templated part of waLBerla since it contains performance critical code
 and at the same time has to be very flexible, i.e., it should be easy to write new boundary conditions.
-By using template concepts (compile-time polymorphism) instead of inheritence (runtime polymorphism) the compiler is able to
+By using template concepts (compile-time polymorphism) instead of inheritance (runtime polymorphism) the compiler is able to
 resolve all function calls at compile time and can do optimizations like function inlining.
 To make setting up a boundary handling easier, a convenience factory class lbm::DefaultBoundaryHandlingFactory exists
 that creates a boundary::BoundaryHandling with six often used boundary conditions. Together with the `near boundary` and
@@ -186,7 +186,7 @@ BlockDataID boundaryHandlingId = BHFactory::addBoundaryHandlingToStorage(
                  boundariesConfig.getParameter< real_t > ( "pressure1", real_c( 1.0 ) ) );
 \endcode
 
-\subsection tutorial04_geometry Geometry
+\subsection tutorial01_geometry Geometry
 
 To specify where boundaries are located, we could now iterate all blocks, retrieve the boundary handler which
 was added as block data, and use its member functions like boundary::BoundaryHandling::forceFlag() to setup the domain.
@@ -210,7 +210,7 @@ have a look at the documentation of walberla::geometry::initBoundaryHandling(). 
 marked, the remaining cells are tagged with the "domain" flag, i.e. as cells that should be updated by the LBM kernel.
 
 
-\subsection tutorial04_timeloop Sweep and Time Loop Setup
+\subsection tutorial01_timeloop Sweep and Time Loop Setup
 
 Having completed the domain setup, the next step is to add all the necessary steps/algorithms to the time loop:
 - communication to synchronize the ghost layer of the PdfField
@@ -268,7 +268,7 @@ timeloop.addFuncAfterTimeStep( makeSharedFunctor( field::makeStabilityChecker< P
                                "LBM stability check" );
 \endcode
 
-Additionally, a small functor is scheduled that periodically prints the estimated remaining time of the simultion:
+Additionally, a small functor is scheduled that periodically prints the estimated remaining time of the simulation:
 
 \code
 timeloop.addFuncAfterTimeStep( timing::RemainingTimeLogger( timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency ),

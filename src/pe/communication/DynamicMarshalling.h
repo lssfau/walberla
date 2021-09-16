@@ -61,7 +61,7 @@ public:
    /*!\brief Marshalling rigid body parameters dynamically.
     *
     * \param buffer The buffer to be filled.
-    * \param obj The object to be marshalled dynamically.
+    * \param b The object to be marshalled dynamically.
     * \return void
     *
     * The rigid body is casted dynamically to its original type and then marshalled. For recognition
@@ -97,7 +97,6 @@ public:
    /*!\brief Marshalling rigid body parameters dynamically.
     *
     * \param buffer The buffer to be filled.
-    * \param obj The object to be marshalled dynamically.
     * \return void
     *
     * The rigid body is casted dynamically to its original type and then marshalled. For recognition

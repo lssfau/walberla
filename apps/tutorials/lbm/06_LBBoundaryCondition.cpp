@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file 06_LBBoundaryConditions.cpp
+//! \file 06_LBBoundaryCondition.cpp
 //! \author Helen Schottenhamml <helen.schottenhamml@fau.de>
 //
 //======================================================================================================================

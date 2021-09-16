@@ -223,11 +223,9 @@ BlockDataID addToStorage( const shared_ptr< BlockStorage_T > & blocks,
 //**********************************************************************************************************************
 /*! Adds a copy of an existing field to BlockStorage
 *
-* Template parameters:
-*   Field_T         the type of the field that should be cloned ( and the type that is created )
-*   BlockStorage_T  the type of the BlockStorage ( will be deduced automatically )
+*   \tparam Field_T         the type of the field that should be cloned ( and the type that is created )
+*   \tparam BlockStorage_T  the type of the BlockStorage ( will be deduced automatically )
 *
-* Parameters:
 *   \param blocks        BlockStorage where the original field is stored and the new one is created
 *   \param fieldToClone  BlockDataID of the Field that is cloned
 *   \param identifier    name for new the field ( displayed in GUI and debugging functions )
@@ -253,11 +251,9 @@ BlockDataID addCloneToStorage( const shared_ptr< BlockStorage_T > & blocks,
 //**********************************************************************************************************************
 /*! Adds a flattened shallow copy of an existing field to BlockStorage
 *
-* Template parameters:
-*   Field_T         the type of the field that should be cloned and flattened
-*   BlockStorage_T  the type of the BlockStorage ( will be deduced automatically )
+*   \tparam Field_T         the type of the field that should be cloned and flattened
+*   \tparam BlockStorage_T  the type of the BlockStorage ( will be deduced automatically )
 *
-* Parameters:
 *   \param blocks        BlockStorage where the original field is stored and the new one is created
 *   \param fieldToClone  BlockDataID of the Field that is cloned
 *   \param identifier    name for new the field ( displayed in GUI and debugging functions )

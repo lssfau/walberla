@@ -230,8 +230,8 @@ GenericAABB< T >::GenericAABB( const value_type minX, const value_type minY, con
 /**
  * \brief Builds a GenericAABB from a min- and a maxCorner
  *
- * \param minCorner corner with minimal values
- * \param maxCorner corner with maximal values
+ * \param theMinCorner corner with minimal values
+ * \param theMaxCorner corner with maximal values
  *
  * \pre minCorner.x <= maxCorner.x && minCorner.y <= maxCorner.y && minCorner.z <= maxCorner.z
  */
@@ -751,8 +751,8 @@ GenericAABB< T > GenericAABB< T >::getScaled( const value_type factor ) const
 /**
  * \brief Creates a new GenericAABB by scaling this one
  *
- * \param factor Vector of scaling factors by which the bounding box gets scaled on the
- *               respective axises.
+ * \param factors Vector of scaling factors by which the bounding box gets scaled on the
+ *                respective axises.
  *
  * \returns The scaled GenericAABB
  */
@@ -1450,10 +1450,14 @@ void GenericAABB< T >::init( InputIterator first, InputIterator last )
 /**
  * \brief Reinitializes this GenericAABB from a min- and a maxCorner
  *
- * \param minCorner corner with minimal values
- * \param maxCorner corner with maximal values
+ * \param minX  x-coordinate of the minCorner
+ * \param minY  y-coordinate of the minCorner
+ * \param minZ  z-coordinate of the minCorner
+ * \param maxX  x-coordinate of the maxCorner
+ * \param maxY  y-coordinate of the maxCorner
+ * \param maxZ  z-coordinate of the maxCorner
  *
- * \pre minCorner.x <= maxCorner.x && minCorner.y <= maxCorner.y && minCorner.z <= maxCorner.z
+ * \pre minX <= maxX && minY <= maxY && minZ <= maxZ
  */
 template< typename T >
 void GenericAABB< T >::initMinMaxCorner( const value_type minX, const value_type minY, const value_type minZ,
@@ -1475,14 +1479,10 @@ void GenericAABB< T >::initMinMaxCorner( const value_type minX, const value_type
 /**
  * \brief Reinitializes this GenericAABB from a min- and a maxCorner
  *
- * \param minX  x-coordinate of the minCorner
- * \param minY  y-coordinate of the minCorner
- * \param minZ  z-coordinate of the minCorner
- * \param maxX  x-coordinate of the maxCorner
- * \param maxY  y-coordinate of the maxCorner
- * \param maxZ  z-coordinate of the maxCorner
+ * \param theMinCorner corner with minimal values
+ * \param theMaxCorner corner with maximal values
  *
- * \pre x0 <= x1 && y0 <= y1 && z0 <= z1
+ * \pre theMinCorner.x <= theMaxCorner.x && theMinCorner.y <= theMaxCorner.y && theMinCorner.z <= theMaxCorner.z
  */
 template< typename T >
 void GenericAABB< T >::initMinMaxCorner( const vector_type & theMinCorner, const vector_type & theMaxCorner )
@@ -1498,7 +1498,7 @@ void GenericAABB< T >::initMinMaxCorner( const vector_type & theMinCorner, const
  * \brief Sets the minimum and maximum for one axis
  *
  * \param index   0 for x, 1 for y, 2 for z axis
- * \param value*  the smaller of the two values is taken as minimum, the other as maximum
+ * \param value1,value2  the smaller of the two values is taken as minimum, the other as maximum
  */
 template< typename T >
 void GenericAABB< T >::setAxisBounds( const uint_t index, const value_type value1, const value_type value2 )
@@ -1567,7 +1567,7 @@ void GenericAABB< T >::extend( const vector_type & eps )
  *
  * AABB gets translated such that its center matches the given center.
  *
- * \param new center location
+ * \param center new center location
  */
 template< typename T >
 void GenericAABB< T >::setCenter( const vector_type & center )
@@ -1616,8 +1616,8 @@ void GenericAABB< T >::scale( const value_type factor )
 /**
  * \brief Scales this GenericAABB
  *
- * \param factor Vector of scaling factors by which the bounding box gets scaled on the
- *               respective axises.
+ * \param factors Vector of scaling factors by which the bounding box gets scaled on the
+ *                respective axises.
  */
 template< typename T >
 void GenericAABB< T >::scale( const vector_type & factors )

@@ -393,8 +393,9 @@ inline bool EPA::EPA_Triangle::isClosestInternal() const
 
 //*************************************************************************************************
 /*! \brief Calculates a support point of a body extended by threshold.
- * Adds this support and the base points at bodies a and b to the vector.
- * \param geom The body.
+ * Adds this support and the base points at bodies A and B to the vector.
+ * \param geom1 The body A.
+ * \param geom2 The body B.
  * \param dir The support point direction.
  * \param margin Extension of the Body.
  */
@@ -425,8 +426,9 @@ inline void EPA::pushSupportMargin(const Support &geom1,
 
 //*************************************************************************************************
 /*! \brief Calculates a support point of a body extended by threshold.
- * Replaces the old value in the vectors at "IndexToReplace" with this support and the base points at bodies a and b .
- * \param geom The body.
+ * Replaces the old value in the vectors at "IndexToReplace" with this support and the base points at bodies A and B.
+ * \param geom1 The body A.
+ * \param geom2 The body B.
  * \param dir The support point direction.
  * \param margin Extension of the Body.
  */

@@ -73,7 +73,7 @@ static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector<
 *   This initialization function reads data stored in a configuration file and uses thi data to configure the logging
 *   singleton.
 *   The structure of the configuration file which is recognized by this function must look like as follows:
-*   \code
+*   \code{.unparsed}
 *   Logging { // the whole 'Logging' block is optional
 *
 *      logLevel       warning|info|progress|detail|tracing; // optional, default=info
@@ -102,7 +102,7 @@ static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector<
 *
 *   Log messages can be ignored by specifying a regular expression on the filename and line number of the source
 *   file the log message originates from. The regex has to be specified in an ignore block as the parameter
-*   callerPathPattern. If the regular expression is found somewhere in the string <filename>:<line number>,
+*   callerPathPattern. If the regular expression is found somewhere in the string `<filename>:<line number>`,
 *   the log message is ignored. To divide components of your path always uses slashes!
 *   They will automatically be converted to the regex (/|\\), matching slashes and back-slashes. For fancy regexes
 *   you can use perl regex syntax.
@@ -110,11 +110,13 @@ static void parseIgnoreBlocks( const Config::Blocks & ignoreBlocks, std::vector<
 *   Note that you cannot ignore Errors since they abort your program!
 *
 *   Examples:
+*   \code{.unparsed}
 *   ignore { callerPathPattern /src/core/; } // ignores log messages from core
 *   ignore { callerPathPattern /src/vtk/; } // ignores log messages from vtk
 *   ignore { callerPathPattern (/src/core/|/src/vtk/); } // ignores log messages from core & vtk
 *   ignore { callerPathPattern /src/core/FILENAME.h:416; } // ignores a specific log message
 *   ignoreWarning { callerPathPattern /src/core/FILENAME.h:212; } // ignores a specific warning
+*   \endcode{.unparsed}
 *
 *   \param config The configuration
 */

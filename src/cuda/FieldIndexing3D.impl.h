@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file FieldIndexing3D.cpp
+//! \file FieldIndexing3D.impl.h
 //! \ingroup cuda
 //! \author Paulo Carvalho <prcjunior@inf.ufpr.br>
 //

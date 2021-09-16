@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file QValueCellFilter.h
+//! \file QCriterionCellFilter.h
 //! \ingroup field
 //! \author Lukas Werner <lks.werner@fau.de>
 //

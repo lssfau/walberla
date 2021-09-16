@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file VirtualMass.h
+//! \file InitializeVirtualMassKernel.h
 //! \author Lukas Werner <lks.werner@fau.de>
 //
 //======================================================================================================================

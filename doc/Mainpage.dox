@@ -64,19 +64,19 @@ Not all features of the framework are covered in the tutorials.
 To get further information have a look at the modules pages.
 
 Also, the test cases provided in the tests directory are a good starting point for your own developments.
-Additionally, there is a folder for full-fledged application codes to be found under \ref apps/benchmarks where also codes of walBerla publications are found.
+Additionally, there is a folder for full-fledged application codes to be found under <tt>apps/benchmarks</tt> where also codes of walBerla publications are found.
 
 \section cite Please cite us
 
 If you use waLBerla in the preparation of a publication, please cite
-\cite godenschwager2013framework and \cite bauer2020walberla. There are separate publications for some modules,
+\cite godenschwager2013framework and \cite bauer2021walberla. There are separate publications for some modules,
 which you should cite in addition if you use them.
 
 - Grid refinement: \cite schornbaum2016massively
 - PE coupling: \cite rettinger2017comparative
-- Python interface: \cite bauer2015python
+- Python interface: \cite bauer2016python
 - pystencils code generation: \cite bauer2019code
-- lbmpy LB model generation: \cite bauer2020lbmpy
+- lbmpy LB model generation: \cite bauer2021lbmpy
 
 \htmlonly
 <!--

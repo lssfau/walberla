@@ -40,9 +40,10 @@ namespace cuda {
  * \param src           source buffer
  * \param dstOffset     (x, y, z, f)-tuple containing the coordinate of the interval start point in the destination buffer
  * \param srcOffset     (x, y, z, f)-tuple containing the coordinate of the interval start point in the source buffer
- * \param dstAllocSizeY allocation size in y direction of the destination buffer
- * \param srcAllocSizeY allocation size in y direction of the source buffer
+ * \param dstAllocSizeZ allocation size in z direction of the destination buffer
+ * \param srcAllocSizeZ allocation size in z direction of the source buffer
  * \param typeSize      size of an f element
+ * \param intervalSize  interval size
  * \param copyStream    CUDA stream, if not NULL copy operations will be performed asynchronously
  *****************************************************************************************************************************/
 void copyDevToDevFZYX( const cudaPitchedPtr& dst, const cudaPitchedPtr& src,
@@ -62,6 +63,7 @@ void copyDevToDevFZYX( const cudaPitchedPtr& dst, const cudaPitchedPtr& src,
  * \param dstAllocSizeY allocation size in y direction of the destination buffer
  * \param srcAllocSizeY allocation size in y direction of the source buffer
  * \param typeSize      size of an f element
+ * \param intervalSize  interval size
  * \param copyStream    CUDA stream, if not NULL copy operations will be performed asynchronously
  *****************************************************************************************************************************/
 void copyDevToDevZYXF( const cudaPitchedPtr& dst, const cudaPitchedPtr& src,
@@ -72,7 +74,7 @@ void copyDevToDevZYXF( const cudaPitchedPtr& dst, const cudaPitchedPtr& src,
                        cudaStream_t copyStream );
 
 //*******************************************************************************************************************
-/*! Copy a 4D interval of a host buffer to a device buffer with fzyx memory layout. See copyDevToDevFZYX() for
+/*! Copy a 4D interval of a host buffer to a device buffer with fzyx memory layout. See \ref copyDevToDevFZYX() for
  * parameter information.
  *******************************************************************************************************************/
 void copyHostToDevFZYX( const cudaPitchedPtr& dst, unsigned char* src,
@@ -83,7 +85,7 @@ void copyHostToDevFZYX( const cudaPitchedPtr& dst, unsigned char* src,
                         cudaStream_t copyStream );
 
 //*******************************************************************************************************************
-/*! Copy a 4D interval of a host buffer to a device buffer with zyxf memory layout. See copyDevToDevZYXF() for
+/*! Copy a 4D interval of a host buffer to a device buffer with zyxf memory layout. See \ref copyDevToDevZYXF() for
  * parameter information.
  *******************************************************************************************************************/
 void copyHostToDevZYXF( const cudaPitchedPtr& dst, unsigned char* src,
@@ -94,7 +96,7 @@ void copyHostToDevZYXF( const cudaPitchedPtr& dst, unsigned char* src,
                         cudaStream_t copyStream );
 
 //*******************************************************************************************************************
-/*! Copy a 4D interval of a device buffer to a host buffer with fzyx memory layout. See copyDevToDevFZYX() for
+/*! Copy a 4D interval of a device buffer to a host buffer with fzyx memory layout. See \ref copyDevToDevFZYX() for
  * parameter information.
  *******************************************************************************************************************/
 void copyDevToHostFZYX( unsigned char* dst, const cudaPitchedPtr& src,
@@ -105,7 +107,7 @@ void copyDevToHostFZYX( unsigned char* dst, const cudaPitchedPtr& src,
                         cudaStream_t copyStream );
 
 //*******************************************************************************************************************
-/*! Copy a 4D interval of a device buffer to a host buffer with zyxf memory layout. See copyDevToDevZYXF() for
+/*! Copy a 4D interval of a device buffer to a host buffer with zyxf memory layout. See \ref copyDevToDevZYXF() for
  * parameter information.
  *******************************************************************************************************************/
 void copyDevToHostZYXF( unsigned char* dst, const cudaPitchedPtr& src,

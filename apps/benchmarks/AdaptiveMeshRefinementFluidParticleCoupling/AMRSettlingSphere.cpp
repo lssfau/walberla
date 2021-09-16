@@ -929,7 +929,7 @@ int main( int argc, char **argv )
 
    if( !useStaticRefinement && refinementCheckFrequency == 0 && numberOfLevels != 1 )
    {
-      // determine check frequency automatically based on maximum admissable velocity and block sizes
+      // determine check frequency automatically based on maximum admissible velocity and block sizes
       real_t uMax = real_t(0.1);
       real_t refinementCheckFrequencyFinestLevel = ( overlap + real_c(blockSize) - real_t(2) * real_t(FieldGhostLayers) * dx) / uMax;
       refinementCheckFrequency = uint_c( refinementCheckFrequencyFinestLevel / real_t(lbmTimeStepsPerTimeLoopIteration));
@@ -1252,7 +1252,7 @@ int main( int argc, char **argv )
             (*velocityCommunicationScheme)();
          }
 
-         // check refinement criterions and refine/coarsen if necessary
+         // check refinement criteria and refine/coarsen if necessary
          uint_t stampBefore = blocks->getBlockForest().getModificationStamp();
          blocks->refresh();
          uint_t stampAfter = blocks->getBlockForest().getModificationStamp();

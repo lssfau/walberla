@@ -6,12 +6,12 @@ namespace walberla {
 
 \brief Unsteady heat equation, implicit time stepping, VTK output and ParaView, parallelization with MPI, residual based termination. File 06_HeatEquation.cpp.
 
-In this tutorial, we will make use of the Jacobi method implemented in \ref pde01 to solve the linear system of equations 
+In this tutorial, we will make use of the Jacobi method implemented in \ref tutorial_pde01 to solve the linear system of equations 
 that arises by the implicit time discretization of the unsteady heat equation.
 The implementation is further improved by using VTK output, parallelization with MPI, and a residual based termination of the Jacobi iteration.
 
 
-\section problemdescription Problem Description
+\section problemdescription02 Problem Description
 
 The <a target="_blank" href="http://en.wikipedia.org/wiki/Heat_equation">heat equation</a> is a classical example for a parabolic partial differential equation, given by:
 \f[

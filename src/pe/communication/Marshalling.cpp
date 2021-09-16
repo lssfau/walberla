@@ -27,36 +27,17 @@ namespace pe {
 namespace communication {
 
 //*************************************************************************************************
-/*!\brief Marshalling rigid body parameters.
- *
- * \param buffer The buffer to be filled.
- * \param obj The object to be marshalled.
- * \return void
- */
 void marshal( mpi::SendBuffer& buffer, const MPIRigidBodyTrait& obj ) {
    buffer << obj.getOwner();
 }
 //*************************************************************************************************
 
 //*************************************************************************************************
-/*!\brief Unmarshalling rigid body parameters.
- *
- * \param buffer The buffer from where to read.
- * \param objparam The object to be reconstructed.
- * \param hasSuperBody False if body is not part of a union. Subordinate bodies in unions do not encode velocities but encode relative positions.
- * \return void
- */
 void unmarshal( mpi::RecvBuffer& buffer, MPIRigidBodyTraitParameter& objparam ) {
    buffer >> objparam.owner_;
 }
 
 //*************************************************************************************************
-/*!\brief Marshalling rigid body parameters.
- *
- * \param buffer The buffer to be filled.
- * \param obj The object to be marshalled.
- * \return void
- */
 void marshal( mpi::SendBuffer& buffer, const RigidBody& obj ) {
    marshal( buffer, obj.MPITrait );
 
@@ -76,13 +57,6 @@ void marshal( mpi::SendBuffer& buffer, const RigidBody& obj ) {
 //*************************************************************************************************
 
 //*************************************************************************************************
-/*!\brief Unmarshalling rigid body parameters.
- *
- * \param buffer The buffer from where to read.
- * \param objparam The object to be reconstructed.
- * \param hasSuperBody False if body is not part of a union. Subordinate bodies in unions do not encode velocities but encode relative positions.
- * \return void
- */
 void unmarshal( mpi::RecvBuffer& buffer, RigidBodyParameters& objparam ) {
    unmarshal( buffer, objparam.mpiTrait_ );
 
@@ -109,12 +83,6 @@ void unmarshal( mpi::RecvBuffer& buffer, RigidBodyParameters& objparam ) {
 //*************************************************************************************************
 
 //*************************************************************************************************
-/*!\brief Marshalling parameters of a geometric primitive.
- *
- * \param buffer The buffer to be filled.
- * \param obj The object to be marshalled.
- * \return void
- */
 void marshal( mpi::SendBuffer& buffer, const GeomPrimitive& obj ) {
    marshal( buffer, static_cast<const RigidBody&>( obj ) );
    buffer << obj.getMaterial();
@@ -123,13 +91,6 @@ void marshal( mpi::SendBuffer& buffer, const GeomPrimitive& obj ) {
 
 
 //*************************************************************************************************
-/*!\brief Unmarshalling parameters of a geometric primitive.
- *
- * \param buffer The buffer to be filled.
- * \param obj The object to be marshalled.
- * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
- * \return void
- */
 void unmarshal( mpi::RecvBuffer& buffer, GeomPrimitiveParameters& objparam ) {
    unmarshal( buffer, static_cast<RigidBodyParameters&>( objparam ) );
    buffer >> objparam.material_;

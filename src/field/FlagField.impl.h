@@ -48,9 +48,9 @@ namespace field {
    //*******************************************************************************************************************
    /*!\brief Constructor. Initializes field with 0 (no flags set).
     *
-    * \param xSize  size of x dimension without ghost layers
-    * \param ySize  size of y dimension without ghost layers
-    * \param zSize  size of z dimension without ghost layers
+    * \param xs     size of x dimension without ghost layers
+    * \param ys     size of y dimension without ghost layers
+    * \param zs     size of z dimension without ghost layers
     * \param gl     number of ghost layers
     * \param alloc  class that describes how to allocate memory for the field, see FieldAllocator
     *******************************************************************************************************************/
@@ -139,8 +139,8 @@ namespace field {
    //*******************************************************************************************************************
    /*!\brief Adds every (inner) cell where at least all bits of mask are set to the CellVector (in inner coordinates)
     *
-    * \param mask [in]  bit mask. Test if a cell is added: (content & mask) == true
-    * \param cv   [out] cell vector where the cells are added to, in inner coordinates
+    * \param[in]  mask  bit mask. Test if a cell is added: (content & mask) == true
+    * \param[out] cv    cell vector where the cells are added to, in inner coordinates
     *******************************************************************************************************************/
    template<typename T>
    void  FlagField<T>::getCellsWhereMaskIsSet(T mask, CellVector & cv) const
@@ -195,7 +195,7 @@ namespace field {
    //*******************************************************************************************************************
    /*!\brief Registers a flag. Uses the next free bit in the field.
     *
-    * \param uid    uid of the flag
+    * \param uid    UID for the flag
     * \return       Mask, that has exactly one bit set to one.
     *******************************************************************************************************************/
    template<typename T>
@@ -230,7 +230,7 @@ namespace field {
     *
     * If bitNr is not important use registerFlag(name) which assigns the next free bit to the flag.
     *
-    * \param name   string identifier for the flag
+    * \param uid    UID for the flag
     * \param bitNr  The bit nr associated with the flag (NOT the mask!). Has to be smaller than sizeof(flag_type)*8
     *               There exists also a function where this information is not needed, and the next free bit is used.
     * \return       Mask, that has the given bit set to one i.e. 1 << bitNr
@@ -484,7 +484,8 @@ namespace field {
     //******************************************************************************************************************
     /*!\brief Ores the neighborhood of the specified stencil and checks whether the bits of mask are set
      *
-     * \param mask [in]  bit mask. Test if a cell is added: (content & mask) == true
+     * \param[in] i     field pointer.
+     * \param[in] mask  bit mask. Test if a cell is added: (content & mask) == true
      ******************************************************************************************************************/
     template<class Sten, typename FieldPtrOrIterator>
     inline bool isFlagInNeighborhood(const FieldPtrOrIterator & i, typename FieldPtrOrIterator::value_type mask)
@@ -507,6 +508,7 @@ namespace field {
 
     //******************************************************************************************************************
     /*!\brief Ores the neighborhood of the specified stencil and returns mask
+     * \param[in] i     field pointer.
      ******************************************************************************************************************/
     template<class Sten, typename FieldPtrOrIterator>
     inline typename std::remove_const<typename FieldPtrOrIterator::value_type>::type

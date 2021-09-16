@@ -144,7 +144,7 @@ using Materials = std::vector<Material>;          //!< Vector for materials.
 /*!\brief Unique material ID.
  *
  * Every registered material has a unique MaterialID that can be used wherever the material is
- * required. The \b pe engine provides a couple of predefined materials (see the \ref materials
+ * required. The \b pe engine provides a couple of predefined materials (see the \ref Materials
  * module). However, it is possible to define a custom material via the createMaterial() function:
 
    \code

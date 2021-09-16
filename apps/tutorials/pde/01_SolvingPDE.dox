@@ -7,7 +7,7 @@ namespace walberla {
 \brief Implementing an iterative solver, initializing fields, and setting Dirichlet boundary conditions by functions, 
 domain setup with an axis-aligned bounding box. File 05_SolvingPDE.cpp.
 
-\section problemdescription Problem Description
+\section problemdescription01 Problem Description
 
 After learning the basic concepts and data structures of waLBerla, we can now already implement our own solver
 for an elliptic partial differential equation, discretized by finite differences. The regarded equation, describing the behavior of the unknown \f$u\f$, is:
@@ -47,7 +47,7 @@ Coming back to the concepts of waLBerla, this is a perfectly suitable example fo
 It requires summing up weighted values of the neighboring cells together with the function value of the right-hand side, 
 which is then divided by the weight of the center cell. 
 To avoid data dependencies, i.e., reading neighboring data that has already been updated in a previous step, 
-two fields (source and destination) are used like in \ref tutorial03. 
+two fields (source and destination) are used like in \ref tutorial_basics_03. 
 After the sweep, the data pointers are swapped. A possible, but not optimal, implementation of this procedure is shown below. 
 The class has private members `srcID_, dstID_, rhsID_, dx_, dy_` that store the BlockDataIDs of the source, destination, and right-hand side field, 
 and the grid spacings \f$\Delta x\f$ and \f$ \Delta y\f$.
@@ -295,7 +295,7 @@ Using the GUI, the converged profile looks like:
 
 \image html tutorial_pde01_solution.png
 
-In the next tutorial of the PDE section, \ref pde02, the Jacobi method is used to solve the linear system of equations arising from an implicit time-stepping method
+In the next tutorial of the PDE section, \ref tutorial_pde02, the Jacobi method is used to solve the linear system of equations arising from an implicit time-stepping method
 for the solution of the famous heat equation. 
 It is also shown how to include the functionality to stop the simulation based on the norm of the residual, 
 which is very often used to terminate the iterative solver.

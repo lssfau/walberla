@@ -54,7 +54,6 @@ void marshal( mpi::SendBuffer& buffer, const Box& obj );
  *
  * \param buffer The buffer from where to read.
  * \param objparam The object to be reconstructed.
- * \param hasSuperBody False if body is not part of a union. Passed on to rigid body unmarshalling.
  * \return void
  */
 void unmarshal( mpi::RecvBuffer& buffer, BoxParameters& objparam );

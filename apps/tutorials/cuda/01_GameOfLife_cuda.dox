@@ -130,7 +130,7 @@ CommScheme communication( blocks );
 communication.addDataToCommunicate( make_shared<field::communication::UniformMPIDatatypeInfo<GPUField> > (gpuFieldSrcID) );
 \endcode
 
-This scheme also supports heterogenous simulations, i.e. using a CPU field on
+This scheme also supports heterogeneous simulations, i.e. using a CPU field on
 some processes and a GPU field on other processes.
 
 */

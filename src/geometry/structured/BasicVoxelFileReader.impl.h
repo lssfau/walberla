@@ -49,7 +49,7 @@ BasicVoxelFileReader<T>::BasicVoxelFileReader() : xSize_(0), ySize_(0), zSize_(0
 /*******************************************************************************************************************//**
  * \brief Opens an existing geometry file.
  *
- * \param filename Name (path) of the file.
+ * \param _filename Name (path) of the file.
  *
  * \throws std::runtime_error on I/O errors.
  *
@@ -73,11 +73,11 @@ BasicVoxelFileReader<T>::BasicVoxelFileReader( const std::string & _filename)
 /*******************************************************************************************************************//**
  * \brief Creates a new geometry file with extends xSize x ySize x zSize.
  *
- * \param filename Name (path) of the file.
- * \param xSize    Extend of the geometry file in x direction.
- * \param ySize    Extend of the geometry file in y direction.
- * \param zSize    Extend of the geometry file in z direction.
- * \param value    The value the cells are initialized with. Defaults to T().
+ * \param _filename Name (path) of the file.
+ * \param _xSize    Extend of the geometry file in x direction.
+ * \param _ySize    Extend of the geometry file in y direction.
+ * \param _zSize    Extend of the geometry file in z direction.
+ * \param value     The value the cells are initialized with. Defaults to T().
  *
  * \throws std::runtime_error on I/O errors.
  *
@@ -101,12 +101,12 @@ BasicVoxelFileReader<T>::BasicVoxelFileReader( const std::string & _filename, st
 /*******************************************************************************************************************//**
  * \brief Creates a new geometry file with extends xSize x ySize x zSize.
  *
- * \param filename Name (path) of the file.
- * \param xSize    Extend of the geometry file in x direction.
- * \param ySize    Extend of the geometry file in y direction.
- * \param zSize    Extend of the geometry file in z direction.
- * \param values   An array of size xSize * ySize * zSize with the values to initialize the
- * 					 geometry file with.
+ * \param _filename Name (path) of the file.
+ * \param _xSize    Extend of the geometry file in x direction.
+ * \param _ySize    Extend of the geometry file in y direction.
+ * \param _zSize    Extend of the geometry file in z direction.
+ * \param values    An array of size xSize * ySize * zSize with the values to initialize the
+ *                  geometry file with.
  *
  * \throws std::runtime_error on I/O errors.
  *
@@ -145,9 +145,9 @@ BasicVoxelFileReader<T>::~BasicVoxelFileReader()
 /*******************************************************************************************************************//**
 * \brief Opens an existing geometry file.
 *
-* 	An already opened file gets closed beforehand.
+* An already opened file gets closed beforehand.
 *
-* \param filename Name (path) of the file.
+* \param _filename Name (path) of the file.
 *
 * \throws std::runtime_error on I/O errors.
 * \throws std::runtime_error if the loaded geometry file's format is corrupt
@@ -223,11 +223,11 @@ void BasicVoxelFileReader<T>::open( const std::string & _filename )
  *
  * An already opened file gets closed beforehand.
  *
- * \param filename Name (path) of the file.
- * \param xSize    Extend of the geometry file in x direction.
- * \param ySize    Extend of the geometry file in y direction.
- * \param zSize    Extend of the geometry file in z direction.
- * \param value    The value the cells are initialized with. Defaults to T().
+ * \param _filename Name (path) of the file.
+ * \param _xSize    Extend of the geometry file in x direction.
+ * \param _ySize    Extend of the geometry file in y direction.
+ * \param _zSize    Extend of the geometry file in z direction.
+ * \param value     The value the cells are initialized with. Defaults to T().
  *
  * \throws std::runtime_error on I/O errors.
  *
@@ -296,12 +296,12 @@ void BasicVoxelFileReader<T>::create( const std::string & _filename, std::size_t
  *
  * An already opened file gets closed beforehand.
  *
- * \param filename Name (path) of the file.
- * \param xSize    Extend of the geometry file in x direction.
- * \param ySize    Extend of the geometry file in y direction.
- * \param zSize    Extend of the geometry file in z direction.
- * \param values   An array of size xSize * ySize * zSize with the values to initialize the
- * 					 geometry file with.
+ * \param _filename Name (path) of the file.
+ * \param _xSize    Extend of the geometry file in x direction.
+ * \param _ySize    Extend of the geometry file in y direction.
+ * \param _zSize    Extend of the geometry file in z direction.
+ * \param values    An array of size xSize * ySize * zSize with the values to initialize the
+ *                  geometry file with.
  *
  * \throws std::runtime_error on I/O errors.
  *
@@ -465,7 +465,7 @@ std::size_t BasicVoxelFileReader<T>::numCells() const
  *
  * \param cellAABB   The axis-aligned bounding box of the block of data to be read.
  * \param [out] data The vector the read data is stored to. The Storage order is zyx. (Meaning
- * 				      your innermost loop should iterate over x)
+ *                   your innermost loop should iterate over x)
  *
  * \throws std::runtime_error on I/O errors.
  *
@@ -522,7 +522,7 @@ void BasicVoxelFileReader<T>::read( const CellAABB & cellAABB, std::vector<T> & 
  *
  * \param cellAABB The axis-aligned bounding box of the block of data to be written.
  * \param data     The vector holding the data to bw written to the geometry file. The Storage
- * 					 order is zyx. (Meaning your innermost loop should iterate over x)
+ *                 order is zyx. (Meaning your innermost loop should iterate over x)
  *
  * \throws std::runtime_error on I/O errors.
  *

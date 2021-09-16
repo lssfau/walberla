@@ -328,7 +328,7 @@ inline real_t HardContactSemiImplicitTimesteppingSolvers::getSpeedLimitFactor() 
 //*************************************************************************************************
 /*!\brief Sets the relaxation parameter for boundary bodies.
  *
- * \param f The overrelaxation parameter.
+ * \param omega The overrelaxation parameter.
  * \return void
  *
  * The overrelaxation parameter \a omega is only used when the relaxation model is one of

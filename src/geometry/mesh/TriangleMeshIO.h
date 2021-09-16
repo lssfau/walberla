@@ -35,7 +35,7 @@ namespace geometry {
     *
     * Mesh format is detected by file ending.
     *
-    * \param fileName  Filename of mesh. Supported formats are obj, pov and off. Format is detected
+    * \param meshFilename  Filename of mesh. Supported formats are obj, pov and off. Format is detected
     *                  by file ending
     * \param mesh      object where the mesh is stored, if the given mesh is not
     *                  empty, all contents are cleared
@@ -47,7 +47,7 @@ namespace geometry {
     *
     * Mesh format is detected by file ending.
     *
-    * \param fileName  Filename of mesh. Supported formats are obj, pov and off. Format is detected
+    * \param meshFilename  Filename of mesh. Supported formats are obj, pov and off. Format is detected
     *                  by file ending
     * \param mesh      object where the mesh is read from
     */
@@ -58,7 +58,7 @@ namespace geometry {
     *
     * Mesh format is detected by file ending.
     *
-    * \param fileName  Filename of mesh. Supported formats are obj, pov and off. Format is detected
+    * \param meshFilename  Filename of mesh. Supported formats are obj, pov and off. Format is detected
     *                  by file ending
     * \param mesh      object where the mesh is stored, if the given mesh is not
     *                  empty, all contents are cleared
@@ -72,7 +72,7 @@ namespace geometry {
     *
     * Mesh format is detected by file ending.
     *
-    * \param fileName  Filename of mesh. Supported formats are obj, pov and off. Format is detected
+    * \param meshFilename  Filename of mesh. Supported formats are obj, pov and off. Format is detected
     *                  by file ending
     * \param mesh      object where the mesh is read from
     */

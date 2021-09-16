@@ -42,10 +42,11 @@ GJK::GJK()
 }
 
 /**
- * \brief Calculate a support point of a particle extended by threshold.
- * \param geom support functions for particle 1 and 2.
+ * \brief Calculate a support point of a particle extended by a threshold.
+ * \param geom1 The body A.
+ * \param geom2 The body B.
  * \param dir The support point direction.
- * \param threshold Extension of the particle.
+ * \param margin The margin by which the objects will be enlarged.
  */
 Vec3 GJK::putSupport(const Support &geom1,
                            const Support &geom2,

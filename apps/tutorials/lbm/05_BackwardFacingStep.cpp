@@ -62,7 +62,7 @@ public:
       WALBERLA_ROOT_SECTION()
       {
          std::ofstream fileLocBottom( filename_.c_str());
-         fileLocBottom << "Time,[Locations on the BOTTOM Wall that Reattachment Occures (Normalized with Step Height) ]" << std::endl;
+         fileLocBottom << "Time,[Locations on the BOTTOM Wall that Reattachment Occurs (Normalized with Step Height) ]" << std::endl;
          fileLocBottom.close();
       }
    }

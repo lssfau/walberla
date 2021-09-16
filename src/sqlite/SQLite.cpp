@@ -76,7 +76,9 @@ SQLiteDB::~SQLiteDB ()
    *  are set to default value ( zero or empty string ).
    *  Additionally a column is created for each activated global state, and its value is set to 1
    *
-   *  \param *Properties  Map of column names to value
+   *  \param dbHandle     Database cursor
+   *  \param filename     Database path
+   *  \param integerProperties,stringProperties,realProperties  Map of column names to value
    *  \returns            The primary key of the inserted data set.
    */
 //*******************************************************************************************************************
@@ -158,10 +160,11 @@ uint_t storeRunImpl( sqlite3 * dbHandle, std::string & filename,
 //*******************************************************************************************************************
 /*! Stores information in another table, referencing the "run" table
    *
+   * \param dbHandle    database cursor
    * \param runId       result of storeRun() member function, primary key of the run to store information for
    * \param tableName   name of the table where the information is stored in
    *                    is created if it does not yet exist
-   * \param *Properties Map of column names to value
+   * \param integerProperties,stringProperties,realProperties Map of column names to value
    */
 //*******************************************************************************************************************
 template<typename IntType>
@@ -231,7 +234,7 @@ void storeAdditionalRunInfoImpl( sqlite3 * dbHandle,
    *  are set to default value ( zero or empty string ).
    *  Additionally a column is created for each activated global state, and its value is set to 1
    *
-   *  \param *Properties  Map of column names to value
+   *  \param integerProperties,stringProperties,realProperties  Map of column names to value
    *  \returns            The primary key of the inserted data set.
    */
 //*******************************************************************************************************************
@@ -257,7 +260,7 @@ uint_t SQLiteDB::storeRun( const map<string, int64_t> & integerProperties,
    * \param runId       result of storeRun() member function, primary key of the run to store information for
    * \param tableName   name of the table where the information is stored in
    *                    is created if it does not yet exist
-   * \param *Properties Map of column names to value
+   * \param integerProperties,stringProperties,realProperties Map of column names to value
    */
 //*******************************************************************************************************************
 void SQLiteDB::storeAdditionalRunInfo( uint_t runId, const std::string & tableName,
@@ -285,7 +288,7 @@ void SQLiteDB::storeAdditionalRunInfo( uint_t runId, const std::string & tableNa
    *
    * \param runId   primary key of the run, as returned by storeRun()
    * \param tp      the TimingPool to store
-   * \param name    name of the timing pool ( as written to database column )
+   * \param timingPoolName  name of the timing pool ( as written to database column )
    */
 //*******************************************************************************************************************
 void SQLiteDB::storeTimingPool ( uint_t runId,
@@ -357,7 +360,7 @@ void SQLiteDB::storeTimingPool ( uint_t runId,
    *
    * \param runId   primary key of the run, as returned by storeRun()
    * \param tt      the TimingTree to store
-   * \param name    name of the timing tree ( as written to database column )
+   * \param timingTreeName  name of the timing tree ( as written to database column )
    */
 //*******************************************************************************************************************
 void SQLiteDB::storeTimingTree ( uint_t runId,
@@ -403,7 +406,7 @@ void SQLiteDB::storeTimingTree ( uint_t runId,
    * \param runId   primary key of the run, as returned by storeRun()
    * \param parentId   parent key of the node
    * \param tn      the TimingNode to store
-   * \param name    name of the timing tree ( as written to database column )
+   * \param timingTreeName  name of the timing tree ( as written to database column )
    */
 //*******************************************************************************************************************
 void SQLiteDB::storeTimingNode ( const uint_t runId,

@@ -107,11 +107,10 @@ namespace initializer {
       * \param body       The body object - has to implement either overlapFraction(...), or contains(...)
       *                   see BodyOverlapFunctions for detailed body concept
       * \param value      The value to set on the matched cells in the field.
-      * \param parser     A function parser which will have the variables x,y,z bound before it is evaluated
       * \param addOrSet   If true, the value is added to scalar field
       *                   If false, the value is set on the scalar field.
       * \param id         If operating on a vector of fields, which field to treat. Zero otherwise.
-
+      *
       *  Supported bodies are Sphere, Ellipsoid, AABB.
       *  To add a new supported body implement concept defined in BodyOverlapFunctions.h, and
       *  add an explicit template instantiation in ScalarFieldFromBody.cpp for the new body.
@@ -119,6 +118,21 @@ namespace initializer {
       *****************************************************************************************************************/
       template<typename Body>
       void init( const Body & body, Value_T value, bool addOrSet, std::vector<BlockDataID>::size_type id = 0 );
+      /*************************************************************************************************************//**
+      * Sets a body on the scalar field
+      *
+      * \param body       The body object - has to implement either overlapFraction(...), or contains(...)
+      *                   see BodyOverlapFunctions for detailed body concept
+      * \param parser     A function parser which will have the variables x,y,z bound before it is evaluated
+      * \param addOrSet   If true, the value is added to scalar field
+      *                   If false, the value is set on the scalar field.
+      * \param id         If operating on a vector of fields, which field to treat. Zero otherwise.
+      *
+      *  Supported bodies are Sphere, Ellipsoid, AABB.
+      *  To add a new supported body implement concept defined in BodyOverlapFunctions.h, and
+      *  add an explicit template instantiation in ScalarFieldFromBody.cpp for the new body.
+      *
+      *****************************************************************************************************************/
       template<typename Body>
       void init( const Body & body, math::FunctionParser & parser, bool addOrSet, std::vector<BlockDataID>::size_type id = 0 );
 

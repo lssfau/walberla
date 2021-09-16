@@ -573,7 +573,7 @@ int main( int argc, char **argv )
 
       if(maxPenetrationDepth < overlapLimit) break;
 
-      // reset velocites to avoid too large ones
+      // reset velocities to avoid too large ones
 
       ps->forEachParticle( useOpenMP, mesa_pd::kernel::SelectLocal(), *accessor,
             [](const size_t idx, ParticleAccessor_T& ac){

@@ -1,6 +1,6 @@
 //======================================================================================================================
 /*!
- *  \file   waLBerlaDefinitions.h
+ *  \file   waLBerlaDefinitions.in.h
  *  \author Martin Bauer <martin.bauer@fau.de>
  *  \brief  Global Definitions configured by cmake ( edit only the *.in.h file! )
  */

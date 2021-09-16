@@ -60,8 +60,8 @@ namespace field {
 * \param continuousNumbering  important when writeFrequency > 1,  if true the simulation steps are numbered continuously
 *                             otherwise they are numbered after the timestep
 * \param binary               switch for binary output
-* \param litteEndian          byte order
-* \param simultaneousIOOps    number of simultaneous IO operations, 0 means all processes write concurrently
+* \param littleEndian         byte order
+* \param simultaneousIOOperations    number of simultaneous IO operations, 0 means all processes write concurrently
 *                             limiting the number of simultaneous IO operations makes sense for huge number of processes
 *                             in order to not overload the file system
 * \param requiredStates       see selectable concept

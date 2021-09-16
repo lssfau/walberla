@@ -65,7 +65,7 @@ class ScalarFieldFromCellInterval : public Initializer
 public:
 
    typedef typename Field_T::value_type Value_T;
-	
+
    ScalarFieldFromCellInterval( StructuredBlockStorage & blocks, BlockDataID fieldId )
       : ScalarFieldFromCellInterval(blocks, std::vector<BlockDataID>(1, fieldId))
    {}
@@ -86,10 +86,16 @@ public:
    *
    * \param interval             the cell interval
    * \param value                which value to set in the field for all cells in the interval
-   * \param parser               a function parser which will have the variables x,y,z bound before it is evaluated
    * \param id                   which field to operate on (if operating on a vector of fields), defaults to 0
    *****************************************************************************************************************/
    void init( const CellInterval & interval, Value_T value, std::vector<BlockDataID>::size_type id = 0 );
+   /*************************************************************************************************************//**
+   * Function for manually setting a scalar field on a CellInterval
+   *
+   * \param interval             the cell interval
+   * \param parser               a function parser which will have the variables x,y,z bound before it is evaluated
+   * \param id                   which field to operate on (if operating on a vector of fields), defaults to 0
+   *****************************************************************************************************************/
    void init( const CellInterval & interval, math::FunctionParser & parser, std::vector<BlockDataID>::size_type id = 0 );
 
 

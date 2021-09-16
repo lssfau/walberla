@@ -38,7 +38,6 @@ namespace pe {
  * \param sid Unique system-specific ID for the sphere.
  * \param uid User-specific ID for the sphere.
  * \param gpos Global geometric center of the sphere.
- * \param rpos The relative position within the body frame of a superordinate body.
  * \param q The orientation of the sphere's body frame in the global world frame.
  * \param radius The radius of the sphere \f$ (0..\infty) \f$.
  * \param squirmerVelocity The velocity of the squirmer.

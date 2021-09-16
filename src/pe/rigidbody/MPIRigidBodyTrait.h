@@ -136,7 +136,7 @@ inline MPIRigidBodyTrait::MPIRigidBodyTrait( )
 //*************************************************************************************************
 /*!\brief Registering a new remote process the rigid body is contained in.
  *
- * \param process The remote process to be registered with the rigid body.
+ * \param owner The remote process to be registered with the rigid body.
  * \return void
  *
  * This function registers the given remote process with the rigid body. In case the process is
@@ -153,7 +153,7 @@ inline void MPIRigidBodyTrait::registerShadowOwner( const Owner& owner )
 //*************************************************************************************************
 /*!\brief Deregistering a remote process from the rigid body.
  *
- * \param process The remote process to be deregistered from the rigid body.
+ * \param owner The remote process to be deregistered from the rigid body.
  * \return void
  *
  * This function deregisters the given remote process from the rigid body. This call has linear
@@ -171,7 +171,7 @@ inline void MPIRigidBodyTrait::deregisterShadowOwner( const Owner& owner )
 //*************************************************************************************************
 /*!\brief Checks whether the given remote process is registered with the rigid body.
  *
- * \param process The remote process that possibly registered with the rigid body.
+ * \param owner The remote process that possibly registered with the rigid body.
  * \return \a true if the given process is registered with the rigid body, \a false if not.
  *
  * This call has linear complexity.

@@ -62,12 +62,14 @@ namespace field {
          /**
           * \brief Allocate memory for a field of given sizes and initializes reference counter with one
           *
-          * \param size*       The size of the field. size0*size1*size2*size*3 is the minimum amount of
+          * \param size0,size1,size2,size3
+          *                    The size of the field. size0*size1*size2*size3 is the minimum amount of
           *                    memory that has to be allocated. size0 is the size of the outermost (slowest)
           *                    coordinate, size3 the size of the fastest.
           *
-          * \param allocSize*  Output parameters. The actual size of the allocation may be bigger. Here
-          *                    allocSize can be bigger than size if alignment >0. There is no allocSize0,
+          * \param allocSize1,allocSize2,allocSize3
+          *                    Output parameters. The actual size of the allocation may be bigger. Here
+          *                    allocSize* can be bigger than size* if alignment >0. There is no allocSize0,
           *                    since extra allocations (padding) for the outer coordinate do not make sense.
           */
          T * allocate (  uint_t size0, uint_t size1, uint_t size2, uint_t size3,
@@ -116,7 +118,7 @@ namespace field {
          /**
           * \brief Increments the reference count for the given pointer
           *
-          * \param allocatedPointer a pointer that was returned by the allocate function
+          * \param mem a pointer that was returned by the allocate function
           *
           * The reference counter is the number of field objects that currently use the allocated
           * memory region
@@ -141,11 +143,11 @@ namespace field {
          /**
           * \brief Decrements the reference count for the given pointer
           *
-          * \param allocatedPointer a pointer that was returned by the allocate function
+          * \param mem a pointer that was returned by the allocate function
           *
           * A memory region is freed only when the reference count is zero.
-          * \return true if memory was freed,
-          *         false if some other field still uses the memory
+          * \return \a true if memory was freed,
+          *         \a false if some other field still uses the memory
           */
          bool decrementReferenceCount( T * mem )
          {

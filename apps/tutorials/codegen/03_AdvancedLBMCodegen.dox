@@ -3,7 +3,7 @@ namespace walberla{
 /**
 \page tutorial_codegen03 Tutorial - Code Generation 3: Advanced LBM Code Generation
 
-\section overview Overview
+\section advancedlbmcodegen_overview Overview
 
 This tutorial demonstrates how to use [pystencils](https://pycodegen.pages.i10git.cs.fau.de/pystencils) and [lbmpy](https://pycodegen.pages.i10git.cs.fau.de/lbmpy) to generate highly optimised and hardware-specific Lattice Boltzmann simulation code within the waLBerla framework. Other than in \ref tutorial_codegen02, we will be generating a full LBM sweep instead of a lattice model class. Furthermore, we will generate a communication pack info class and a sweep to initialise the PDF field. A hardware-specific implementation of a NoSlip boundary handler will also be generated. Those components will then be combined in a waLBerla application for simulating the same shear flow scenario as in the previous tutorial.
 
@@ -19,7 +19,7 @@ For the stream-pull-collide type kernel, we need two PDF fields which we set up 
 
 For VTK output and the initial velocity setup, we define a velocity vector field as an output field for the LB method.
 
-\code
+\code{.py}
 stencil = 'D2Q9'
 omega = sp.Symbol('omega')
 layout = 'fzyx'
@@ -40,7 +40,7 @@ optimization = {'cse_global': True,
 
 We set up the cumulant-based MRT method with relaxation rates as described above. We use `generate_lb_update_rule` from lbmpy to derive the set of equations describing the collision operator together with the *pull* streaming pattern. These equations define the entire LBM sweep.
 
-\code
+\code{.py}
 lbm_params = {'stencil': stencil,
               'method': 'mrt_raw',
               'relaxation_rates': [0, 0, 0, omega, omega, omega, 1, 1, 1],
@@ -56,7 +56,7 @@ lbm_method = lbm_update_rule.method
 
 In \ref tutorial_codegen02, we were able to use the framework built around the waLBerla lattice model template API for setting up the shear flow's initial velocity profile. Since we are not using a lattice model class this time, this API is not available to us. With lbmpy, though, we can generate a kernel which takes in scalar values or fields for the initial density and velocity and sets the initial PDF values to the corresponding equilibrium. The function `macroscopic_values_setter` from `lbmpy.macroscopic_value_kernels` returns a set of assignments for this initialization procedure. It takes the LB method definition as an argument, as well as either symbols or pystencils field accesses for the initial density `rho` and the initial velocity. Lastly, it takes the PDF field's centre vector as the destination for the PDF values. We define a separate symbol for the density and use the velocity field defined above.
 
-\code
+\code{.py}
 initial_rho = sp.Symbol('rho_0')
 
 pdfs_setter = macroscopic_values_setter(lbm_method,
@@ -74,7 +74,7 @@ Several functions from `pystencils_walberla` and `lbmpy_walberla` are called to 
 - The PDF initialization kernel is generated from the `pdfs_setter` assignment collection using `generate_sweep`.
 - Using `generate_boundary`, we generate an optimised implementation of a NoSlip boundary handler for the domain's walls.
 
-\code
+\code{.py}
 with CodeGeneration() as ctx:
     if ctx.cuda:
         target = 'gpu'
@@ -104,7 +104,7 @@ We will now integrate the generated classes into a waLBerla application. After a
 #include "CumulantMRTNoSlip.h"
 #include "CumulantMRTPackInfo.h"
 #include "CumulantMRTSweep.h"
-#include "DensityAndVelocityFieldSetter.h"
+#include "InitialPDFsSetter.h"
 \endcode
 
 We set up typedef aliases for the generated pack info and the D2Q9 stencil. For the PDF and velocity fields, we use instances of the field::GhostLayerField template. The number of entries of the PDF field is specified by the `Stencil_T::Size` parameter. As our domain is two-dimensional, the velocity at each lattice node is a two-dimensional vector. Thus, we set up the velocity field to have two index dimensions passing the stencil's dimension as a template parameter. Finally, we also define a typedef alias for our generated NoSlip boundary.

@@ -52,7 +52,7 @@ private:
 *   Every boundary class must be derived from this class and implement the following concept/member functions (for some
 *   exemplary implementations look at classes NoSlip, FreeSlip, UBB, or SimpleUBB in module lbm/boundary):
 *
-*   1. "static shared_ptr<BoundaryConfiguration> createConfiguration( const Config::BlockHandle & config )"
+*  1.  "static shared_ptr<BoundaryConfiguration> createConfiguration( const Config::BlockHandle & config )"
 *      This function is used to extract parameters from a configuration file and pass them to the boundary condition.
 *      Meaning: This function defines how the parameter specification for this boundary condition must look like in the
 *      configuration file.
@@ -60,35 +60,35 @@ private:
 *         "{ return make_shared<BoundaryConfiguration>(); }"
 *      If you do need to pass parameters, these parameters must be implemented in terms of a derived class of
 *      "BoundaryConfiguration" (as an example, see class "UBB").
-*   2. "void pushFlags( std::vector< FlagUID >& uids )"
+*  2.  "void pushFlags( std::vector< FlagUID >& uids )"
 *      This function receives (by reference) a vector and must insert (using push_back!) all FlagUIDs into this vector
 *      that mark cells as boundary cells that must be treated by this boundary condition.
-*   3. "void beforeBoundaryTreatment()"
+*  3.  "void beforeBoundaryTreatment()"
 *      This function is called once before the boundary handler starts the boundary treatment. Of course, this function
 *      is called every time the boundary treatment of the boundary handler is triggered (normally once per time step).
-*   4. "void afterBoundaryTreatment()"
+*  4.  "void afterBoundaryTreatment()"
 *      Just like "beforeBoundaryTreatment", this function is called once after the boundary handler has finished the
 *      boundary treatment.
-*   5. "template< typename Buffer_T >
+*  5.  "template< typename Buffer_T >
 *       void packCell( Buffer_T & buffer, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )"
 *      This function is called every time a boundary cell that is handled by this boundary class is serialized. If
 *      the boundary condition stores additional parameters for the boundary cell (x,y,z) these parameters must be
 *      serialized and stored in the buffer "buffer". [5) serializes and 6) deserializes, both functions must match]
-*   6. "template< typename Buffer_T >
+*  6.  "template< typename Buffer_T >
 *       void registerCell( Buffer_T & buffer,
 *                          const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )"
 *      This function is called every time a boundary cell that is handled by this boundary class is deserialized. The
 *      flag which was set (must be part of this->mask_!), the cell (x,y,z), and a buffer that potentially stores
 *      parameters are passed. [5) serializes and 6) deserializes, both functions must match]
-*   7. "void registerCell( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
+*  7.  "void registerCell( const flag_t flag, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
 *                          const BoundaryConfiguration & parameter )"
 *      This function is called every time a boundary that is handled by this boundary class is set at the boundary
 *      handler. The flag which was set (must be part of this->mask_!), the cell (x,y,z), and a corresponding parameter
 *      are passed.
-*   8. "void registerCells( const flag_t flag, const CellInterval & cells, const BoundaryConfiguration & parameter )"
+*  8.  "void registerCells( const flag_t flag, const CellInterval & cells, const BoundaryConfiguration & parameter )"
 *      Just like "registerCell", only this function is called if a boundary that is handled by this boundary class is
 *      set for each cell in a specific cell interval (-> "cells").
-*   9. "template< typename CellIterator >
+*  9.  "template< typename CellIterator >
 *       void registerCells( const flag_t flag, const CellIterator & begin, const CellIterator & end,
 *       const BoundaryConfiguration & parameter )"
 *      Just like the previous two functions, only this function is called if multiple boundary cells that are handled

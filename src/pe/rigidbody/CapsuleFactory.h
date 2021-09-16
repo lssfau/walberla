@@ -47,7 +47,6 @@ namespace pe {
  * \param storageID BlockDataID of the BlockStorage block datum
  * \param uid The user-specific ID of the capsule.
  * \param gpos The global position of the center of the capsule.
- * \param q The orientation of the capsule's body frame in the global world frame.
  * \param radius The radius of the cylinder part and the end caps \f$ (0..\infty) \f$.
  * \param length The length of the cylinder part of the capsule \f$ (0..\infty) \f$.
  * \param material The material of the capsule.

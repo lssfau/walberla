@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file PrepareDistanceComputations.h
+//! \file BlockExclusion.h
 //! \ingroup mesh
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
 //

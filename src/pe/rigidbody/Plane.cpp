@@ -189,7 +189,8 @@ void Plane::setPositionImpl( real_t px, real_t py, real_t pz )
 //*************************************************************************************************
 /*!\brief Setting the global orientation of the plane.
  *
- * \param q The global orientation.
+ * \param r The quaternion scalar part.
+ * \param i,j,k The quaternion vector part.
  * \return void
  * \exception std::logic_error Invalid rotation of a plane inside an exclusive section.
  *
@@ -319,13 +320,12 @@ void Plane::rotateImpl( const Quat& dq )
 //*************************************************************************************************
 /*!\brief Rotation of the plane around the origin of the global world frame.
  *
- * \param axis The global rotation axis.
- * \param angle The rotation angle (radian measure).
+ * \param dq The quaternion for the rotation.
  * \return void
  * \exception std::logic_error Invalid rotation of a plane inside an exclusive section.
  *
  * Changing the orientation/rotation of the plane. The plane is rotated around the origin of
- * the global frame around the given axis \a (x,y,z) by \a angle degrees (radian measure).
+ * the global frame around by the quaternion \a dq.
  * Therefore the anchor point (global position) and the normal of the plane are changed, not
  * its distance (displacement) to the origin.\n
  *

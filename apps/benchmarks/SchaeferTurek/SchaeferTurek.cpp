@@ -1064,7 +1064,7 @@ void keepInflowOutflowAtTheSameLevel( std::vector< std::pair< const Block *, uin
    uint_t maxInflowLevel( uint_t(0) );
    uint_t maxOutflowLevel( uint_t(0) );
 
-   // In addtion to keeping in- and outflow blocks at the same level, this callback also
+   // In addition to keeping in- and outflow blocks at the same level, this callback also
    // prevents these blocks from coarsening.
 
    for( auto it = minTargetLevels.begin(); it != minTargetLevels.end(); ++it )
@@ -1472,7 +1472,7 @@ void Evaluation< LatticeModel_T >::operator()()
       {
          WALBERLA_LOG_RESULT_ON_ROOT( "force acting on cylinder (in dimensionless lattice units of the coarsest grid - evaluated in time step "
                                       << forceEvaluationExecutionCount_ << "):\n   " << force_ << oss.str() <<
-                                      "\ndrag and lift coefficients (including extremas of last " << ( coefficients_[0].size() * checkFrequency_ ) << " time steps):"
+                                      "\ndrag and lift coefficients (including extrema of last " << ( coefficients_[0].size() * checkFrequency_ ) << " time steps):"
                                       "\n   \"real\" area:"
                                       "\n      c_D: " << cDRealArea << " (min = " << coefficientExtremas_[0].first << ", max = " << coefficientExtremas_[0].second << ")" <<
                                       "\n      c_L: " << cLRealArea << " (min = " << coefficientExtremas_[1].first << ", max = " << coefficientExtremas_[1].second << ")" <<
@@ -2569,14 +2569,14 @@ void run( const shared_ptr< Config > & config, const LatticeModel_T & latticeMod
                      blockforest::DynamicDiffusionBalance< blockforest::NoPhantomData >( maxIterations, flowIterations ) );
       }
 
-      // add callback functions which are executed after all block data was unpakced after the dynamic load balancing
+      // add callback functions which are executed after all block data was unpacked after the dynamic load balancing
 
       // for blocks that have *not* migrated: store current flag field state (required for lbm::PostProcessing)
       blockforest.addRefreshCallbackFunctionAfterBlockDataIsUnpacked( lbm::MarkerFieldGenerator< LatticeModel_T, field::FlagFieldEvaluationFilter<FlagField_T> >(
                pdfFieldId, markerDataId, flagFieldFilter ) );
       // (re)set boundaries = (re)initialize flag field for every block with respect to the new block structure (the size of neighbor blocks might have changed)
       blockforest.addRefreshCallbackFunctionAfterBlockDataIsUnpacked( blockforest::BlockForest::RefreshCallbackWrappper( boundarySetter ) );
-      // treat boundary-fluid cell convertions
+      // treat boundary-fluid cell conversions
       blockforest.addRefreshCallbackFunctionAfterBlockDataIsUnpacked( lbm::PostProcessing< LatticeModel_T, field::FlagFieldEvaluationFilter<FlagField_T> >(
                pdfFieldId, markerDataId, flagFieldFilter ) );
       // (re)set velocity field (velocity field data is not migrated!)
@@ -2920,10 +2920,10 @@ int main( int argc, char **argv )
                               "//                                                                                                                      //\n"
                               "//                                               Schaefer Turek Benchmark                                               //\n"
                               "//                                                                                                                      //\n"
-                              "// Reference: Schaefer, M. and Turek, S. (1996) 'Benchmark computations of laminar flow around a cylinder (with support //\n"
+                              "// Reference: Schaefer, M. and Turek, S. (1996) Benchmark computations of laminar flow around a cylinder (with support  //\n"
                               "//            by F. Durst, E. Krause and R. Rannacher), in E. Hirschel (Ed.): Flow Simulation with High-Performance     //\n"
-                              "//            Computers II. DFG Priority Research Program Results 1993-1995, No. 52 in Notes Numer, Fluid Mech.,        //\n"
-                              "//            pp.547-566, Vieweg, Weisbaden.                                                                            //\n"
+                              "//            Computers II. DFG Priority Research Program Results 1993-1995, No. 48 in Notes on Numerical Fluid         //\n"
+                              "//            Mechanics, pp.547-566, Vieweg, Weisbaden.                                                                 //\n"
                               "//                                                                                                                      //\n"
                               "//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////" );
 

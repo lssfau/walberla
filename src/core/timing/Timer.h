@@ -204,11 +204,11 @@ inline Timer<TP>::Timer()
 //**********************************************************************************************************************
 /*!\brief Constructor of the Timer class.
 // Initializes the timer with
-// \param counter      number of timing measurements already done
-// \param min          the minimum time of the measurements
-// \param max          the maximum time of the measurements
-// \param total        the total time of all measurements
-// \param sumOfSquares each measurement time squared, then summed
+// \param _counter      number of timing measurements already done
+// \param _min          the minimum time of the measurements
+// \param _max          the maximum time of the measurements
+// \param _total        the total time of all measurements
+// \param _sumOfSquares each measurement time squared, then summed
 */
 template< typename TP>
 inline Timer<TP>::Timer( uint_t _counter, double _min, double _max,

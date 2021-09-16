@@ -6,7 +6,7 @@ import os
 
 class Parameter:
     def __init__(self, name, type, defValue="", comment=""):
-        """Propery of a data strcuture
+        """Property of a data structure
 
         Parameters
         ----------
