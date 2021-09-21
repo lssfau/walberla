@@ -67,10 +67,6 @@ waLBerla_execute_test( NAME PermeabilityTest_TRT_64_8 COMMAND $<TARGET_FILE:Perm
 waLBerla_compile_test( FILES initializer/PdfFieldInitializerTest.cpp )
 waLBerla_execute_test( NAME PdfFieldInitializerTest COMMAND $<TARGET_FILE:PdfFieldInitializerTest> ${CMAKE_CURRENT_SOURCE_DIR}/PdfFieldInitializerTest.prm PROCESSES 4 CONFIGURATIONS Release RelWithDbgInfo )
 
-waLBerla_compile_test( FILES SuViscoelasticityTest.cpp DEPENDS field blockforest timeloop)
-waLBerla_execute_test( NAME  SuViscoelasticityLongTest COMMAND $<TARGET_FILE:SuViscoelasticityTest> ${CMAKE_CURRENT_SOURCE_DIR}/Su.prm LABELS longrun)
-waLBerla_execute_test( NAME  SuViscoelasticityShortTest COMMAND $<TARGET_FILE:SuViscoelasticityTest> ${CMAKE_CURRENT_SOURCE_DIR}/Su.prm -Parameters.shortrun=true )
-
 waLBerla_compile_test( FILES field/QCriterionTest.cpp DEPENDS field blockforest )
 waLBerla_execute_test( NAME QCriterionTest )
 
