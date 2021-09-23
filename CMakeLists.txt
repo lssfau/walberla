@@ -250,6 +250,14 @@ else()
 endif()
 mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
 
+# Check for intel llvm compiler
+if( CMAKE_CXX_COMPILER MATCHES "icx" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "icx" )
+   option ( WALBERLA_CXX_COMPILER_IS_INTELLLVM "Use Intel LLVM compiler" ON  )
+else()
+   option ( WALBERLA_CXX_COMPILER_IS_INTELLLVM "Use Intel LLVM compiler" OFF  )
+endif()
+mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_INTELLLVM )
+
 ############################################################################################################################
 
 
@@ -428,7 +436,7 @@ if ( WALBERLA_BUILD_WITH_FASTMATH )
         add_flag( CMAKE_CXX_FLAGS "/fp:fast" )
     endif()
 else()
-   if( CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM )
+   if( WALBERLA_CXX_COMPILER_IS_INTELLLVM )
       add_flag( CMAKE_CXX_FLAGS "-fp-model=precise")
    endif()
 endif()
@@ -1038,7 +1046,7 @@ if ( WALBERLA_BUILD_WITH_OPENMP )
         endif()
     endif()
 
-    if( CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM )
+    if( WALBERLA_CXX_COMPILER_IS_CLANG OR WALBERLA_CXX_COMPILER_IS_INTELLLVM )
        # check for bug in combination with OpenMP and sign conversion https://bugs.llvm.org/show_bug.cgi?id=48387
        try_compile( WALBERLA_CLANG_OPENMP_BUG "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestClangOpenMPBug.cpp"
              COMPILE_DEFINITIONS -Werror )

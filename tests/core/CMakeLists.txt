@@ -199,7 +199,7 @@ waLBerla_compile_test( FILES GridGeneratorTest.cpp )
 waLBerla_execute_test( NAME GridGeneratorTest )
 
 #TODO: find fix for this test with intel OneApi compiler
-if(NOT CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM )
+if(NOT WALBERLA_CXX_COMPILER_IS_INTELLLVM )
    waLBerla_compile_test( FILES MemoryUsage.cpp )
    waLBerla_execute_test( NAME MemoryUsage )
 endif()
