@@ -427,6 +427,10 @@ if ( WALBERLA_BUILD_WITH_FASTMATH )
     if( WALBERLA_CXX_COMPILER_IS_MSVC )
         add_flag( CMAKE_CXX_FLAGS "/fp:fast" )
     endif()
+else()
+   if( CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM )
+      add_flag( CMAKE_CXX_FLAGS "-fp-model=precise")
+   endif()
 endif()
 
 # Xcode generator disables -isystem flag, even though current versions of Xcode support it
