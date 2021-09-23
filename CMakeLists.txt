@@ -251,7 +251,7 @@ endif()
 mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
 
 # Check for intel llvm compiler
-if( CMAKE_CXX_COMPILER MATCHES "icx" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "icx" )
+if( CMAKE_CXX_COMPILER MATCHES "icpx" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "icpx" )
    option ( WALBERLA_CXX_COMPILER_IS_INTELLLVM "Use Intel LLVM compiler" ON  )
 else()
    option ( WALBERLA_CXX_COMPILER_IS_INTELLLVM "Use Intel LLVM compiler" OFF  )
