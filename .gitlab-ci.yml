@@ -19,6 +19,7 @@ stages:
 
 .build_template:
    script:
+      - pip install -I cmake==3.16.3
       - export NUM_CORES=$(nproc --all)
       - export MAX_BUILD_CORES=$(( $(awk '( $1 == "MemTotal:" ) { print $2 }' /proc/meminfo) / ( 4 * 1024 * 1024  ) ))
       - "[[ $MAX_BUILD_CORES -lt $NUM_CORES ]] && export NUM_BUILD_CORES=$MAX_BUILD_CORES || export NUM_BUILD_CORES=$NUM_CORES"
@@ -55,6 +56,7 @@ stages:
       - make -j $NUM_BUILD_CORES -l $NUM_CORES
       - ctest -LE $CTEST_EXCLUDE_LABELS -C $CMAKE_BUILD_TYPE --output-on-failure -j $NUM_CORES -T Test
    after_script:
+      - pip3 install lxml
       - python3 cmake/ctest2junit.py build > report.xml
    tags:
       - docker
@@ -90,7 +92,7 @@ intel_19_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -114,7 +116,7 @@ intel_19_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -136,7 +138,7 @@ intel_19_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -154,7 +156,7 @@ intel_19_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -176,7 +178,7 @@ intel_19_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -196,7 +198,7 @@ intel_19_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -229,7 +231,7 @@ gcc_7_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -252,7 +254,7 @@ gcc_7_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -273,7 +275,7 @@ gcc_7_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -293,7 +295,7 @@ gcc_7_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -318,7 +320,7 @@ gcc_7_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -340,7 +342,7 @@ gcc_7_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:7
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -374,7 +376,7 @@ gcc_8_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -397,7 +399,7 @@ gcc_8_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -418,7 +420,7 @@ gcc_8_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -438,7 +440,7 @@ gcc_8_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -462,7 +464,7 @@ gcc_8_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -484,7 +486,7 @@ gcc_8_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:8
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -521,7 +523,7 @@ gcc_9_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -542,7 +544,7 @@ gcc_9_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -561,7 +563,7 @@ gcc_9_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -579,7 +581,7 @@ gcc_9_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -601,7 +603,7 @@ gcc_9_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -621,7 +623,7 @@ gcc_9_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:9
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -655,7 +657,7 @@ gcc_10_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -676,7 +678,7 @@ gcc_10_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -695,7 +697,7 @@ gcc_10_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -713,7 +715,7 @@ gcc_10_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -735,7 +737,7 @@ gcc_10_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -755,7 +757,7 @@ gcc_10_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:10
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -789,7 +791,7 @@ gcc_11_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -810,7 +812,7 @@ gcc_11_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -830,7 +832,7 @@ gcc_11_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    stage: pretest
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -845,7 +847,7 @@ gcc_11_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -864,7 +866,7 @@ gcc_11_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -881,7 +883,7 @@ gcc_11_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -909,7 +911,7 @@ clang_6.0_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -932,7 +934,7 @@ clang_6.0_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -953,7 +955,7 @@ clang_6.0_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -973,7 +975,7 @@ clang_6.0_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -997,7 +999,7 @@ clang_6.0_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1019,7 +1021,7 @@ clang_6.0_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1053,7 +1055,7 @@ clang_7.0_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1076,7 +1078,7 @@ clang_7.0_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1097,7 +1099,7 @@ clang_7.0_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1117,7 +1119,7 @@ clang_7.0_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1141,7 +1143,7 @@ clang_7.0_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1163,7 +1165,7 @@ clang_7.0_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1200,7 +1202,7 @@ clang_8.0_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1223,7 +1225,7 @@ clang_8.0_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1244,7 +1246,7 @@ clang_8.0_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1264,7 +1266,7 @@ clang_8.0_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1288,7 +1290,7 @@ clang_8.0_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1310,7 +1312,7 @@ clang_8.0_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1347,7 +1349,7 @@ clang_9.0_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1370,7 +1372,7 @@ clang_9.0_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1391,7 +1393,7 @@ clang_9.0_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1411,7 +1413,7 @@ clang_9.0_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1435,7 +1437,7 @@ clang_9.0_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1457,7 +1459,7 @@ clang_9.0_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:9.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1494,7 +1496,7 @@ clang_10.0_serial:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1517,7 +1519,7 @@ clang_10.0_mpionly:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1538,7 +1540,7 @@ clang_10.0_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1555,7 +1557,7 @@ clang_10.0_serial_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1576,7 +1578,7 @@ clang_10.0_mpionly_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1595,7 +1597,7 @@ clang_10.0_hybrid_dbg:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:10.0
    before_script:
-      - pip3 install lbmpy jinja2
+      - pip3 install lbmpy jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
@@ -1621,6 +1623,125 @@ clang_10.0_hybrid_dbg_sp:
       WALBERLA_BUILD_WITH_METIS: "OFF"
    tags:
       - cuda
+      - docker
+
+inteloneapi_21.3_serial:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   before_script:
+      - pip3 install lbmpy jinja2 pytest
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+inteloneapi_21.3_mpionly:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   before_script:
+      - pip3 install lbmpy jinja2 pytest
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
+   tags:
+      - docker
+
+inteloneapi_21.3_hybrid:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   before_script:
+      - pip3 install lbmpy jinja2 pytest
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   tags:
+      - docker
+
+inteloneapi_21.3_serial_dbg:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   before_script:
+      - pip3 install lbmpy jinja2 pytest
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      WALBERLA_BUILD_WITH_MPI: "OFF"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   tags:
+      - docker
+
+inteloneapi_21.3_mpionly_dbg:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   before_script:
+      - pip3 install lbmpy jinja2 pytest
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   tags:
+      - docker
+
+inteloneapi_21.3_hybrid_dbg:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   before_script:
+      - pip3 install lbmpy jinja2 pytest
+      - cd python
+      - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - cd ..
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_BUILD_WITH_CODEGEN: "ON"
+      WALBERLA_BUILD_WITH_PYTHON: "ON"
+   tags:
+      - docker
+
+inteloneapi_21.3_hybrid_dbg_sp:
+   extends: .build_template
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   variables:
+      WALBERLA_BUILD_WITH_CUDA: "OFF"
+      CMAKE_BUILD_TYPE: "DebugOptimized"
+      WALBERLA_DOUBLE_ACCURACY: "OFF"
+      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
+      WALBERLA_BUILD_WITH_METIS: "OFF"
+   tags:
       - docker
 
 
@@ -1789,6 +1910,7 @@ coverage:
       - MSBuild.exe walberla.sln /property:Configuration=$BUILD_CONFIGURATION /verbosity:minimal /maxcpucount:4
       - ctest -LE $CTEST_EXCLUDE_LABELS -C $BUILD_CONFIGURATION --output-on-failure -j 4 -T Test
    after_script:
+      - pip3 install lxml
       - python3 cmake/ctest2junit.py build > report.xml
    variables:
       CMAKE_GENERATOR: "Visual Studio 15 2017 Win64"
@@ -1982,6 +2104,7 @@ msvc-14.2_mpionly:
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
       - cd ..
    after_script:
+      - pip3 install lxml
       - python3 cmake/ctest2junit.py build > report.xml
    tags:
       - mac

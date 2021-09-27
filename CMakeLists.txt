@@ -250,6 +250,14 @@ else()
 endif()
 mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_MPI_WRAPPER )
 
+# Check for intel llvm compiler
+if( CMAKE_CXX_COMPILER MATCHES "icpx" OR CMAKE_CXX_COMPILER_ARG1 MATCHES "icpx" )
+   option ( WALBERLA_CXX_COMPILER_IS_INTELLLVM "Use Intel LLVM compiler" ON  )
+else()
+   option ( WALBERLA_CXX_COMPILER_IS_INTELLLVM "Use Intel LLVM compiler" OFF  )
+endif()
+mark_as_advanced ( WALBERLA_CXX_COMPILER_IS_INTELLLVM )
+
 ############################################################################################################################
 
 
@@ -427,6 +435,10 @@ if ( WALBERLA_BUILD_WITH_FASTMATH )
     if( WALBERLA_CXX_COMPILER_IS_MSVC )
         add_flag( CMAKE_CXX_FLAGS "/fp:fast" )
     endif()
+else()
+   if( WALBERLA_CXX_COMPILER_IS_INTELLLVM )
+      add_flag( CMAKE_CXX_FLAGS "-fp-model=precise")
+   endif()
 endif()
 
 # Xcode generator disables -isystem flag, even though current versions of Xcode support it
@@ -1033,6 +1045,17 @@ if ( WALBERLA_BUILD_WITH_OPENMP )
             message(FATAL_ERROR "Could NOT enable OpenMP")
         endif()
     endif()
+
+    if( WALBERLA_CXX_COMPILER_IS_CLANG OR WALBERLA_CXX_COMPILER_IS_INTELLLVM )
+       # check for bug in combination with OpenMP and sign conversion https://bugs.llvm.org/show_bug.cgi?id=48387
+       try_compile( WALBERLA_CLANG_OPENMP_BUG "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/cmake/TestClangOpenMPBug.cpp"
+             COMPILE_DEFINITIONS -Werror )
+       if( NOT ${WALBERLA_CLANG_OPENMP_BUG} )
+          message( WARNING "Setting -Wno-sign-conversion due to a compiler bug in LLVM (https://bugs.llvm.org/show_bug.cgi?id=48387)" )
+          add_flag( CMAKE_CXX_FLAGS "-Wno-sign-conversion" )
+       endif()
+    endif()
+
 else()
     if ( WALBERLA_CXX_COMPILER_IS_CRAY )
         add_flag ( CMAKE_C_FLAGS   "-h noomp" )

@@ -198,8 +198,11 @@ waLBerla_execute_test( NAME FunctionTraitsTest )
 waLBerla_compile_test( FILES GridGeneratorTest.cpp )
 waLBerla_execute_test( NAME GridGeneratorTest )
 
-waLBerla_compile_test( FILES MemoryUsage.cpp )
-waLBerla_execute_test( NAME MemoryUsage )
+#TODO: find fix for this test with intel OneApi compiler
+if(NOT WALBERLA_CXX_COMPILER_IS_INTELLLVM )
+   waLBerla_compile_test( FILES MemoryUsage.cpp )
+   waLBerla_execute_test( NAME MemoryUsage )
+endif()
 
 waLBerla_compile_test( FILES OpenMPWrapperTest.cpp )
 waLBerla_execute_test( NAME OpenMPWrapperTest )
