@@ -39,21 +39,7 @@
 #include "InitializerFunctions.h"
 #include "PythonExports.h"
 
-//////////////////////////////
-// INCLUDE GENERATED FILES //
-////////////////////////////
-
 #include "GenDefines.h"
-#include "hydro_LB_NoSlip.h"
-#include "hydro_LB_step.h"
-#include "initialize_phase_field_distributions.h"
-#include "initialize_velocity_based_distributions.h"
-#include "phase_field_LB_NoSlip.h"
-#include "phase_field_LB_step.h"
-#include "ContactAngle.h"
-#include "PackInfo_phase_field_distributions.h"
-#include "PackInfo_velocity_based_distributions.h"
-#include "PackInfo_phase_field.h"
 
 ////////////
 // USING //
@@ -281,8 +267,8 @@ int main(int argc, char** argv)
                {
                   callback.data().exposeValue("blocks", blocks);
                   callback.data().exposeValue( "timeStep", timeLoop->getCurrentTimeStep());
-                  callback.data().exposeValue("stencil_phase", stencil_phase_name);
-                  callback.data().exposeValue("stencil_hydro", stencil_hydro_name);
+                  callback.data().exposeValue("stencil_phase", StencilNamePhase);
+                  callback.data().exposeValue("stencil_hydro", StencilNameHydro);
                   callback();
                }
             }

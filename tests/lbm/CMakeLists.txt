@@ -87,7 +87,7 @@ waLBerla_generate_target_from_python(NAME GeneratedOutflowBCGenerated
         GeneratedOutflowBC_NoSlip.cpp GeneratedOutflowBC_NoSlip.h
         GeneratedOutflowBC_Outflow.cpp GeneratedOutflowBC_Outflow.h
         GeneratedOutflowBC_PackInfo.cpp GeneratedOutflowBC_PackInfo.h
-        GeneratedOutflowBC_InfoHeader.h)
+        GeneratedOutflowBC.h)
 waLBerla_compile_test( FILES codegen/GeneratedOutflowBC.cpp DEPENDS GeneratedOutflowBCGenerated)
 waLBerla_execute_test( NAME GeneratedOutflowBC COMMAND $<TARGET_FILE:GeneratedOutflowBC> ${CMAKE_CURRENT_SOURCE_DIR}/codegen/GeneratedOutflowBC.prm  )
 
@@ -96,7 +96,8 @@ waLBerla_generate_target_from_python(NAME LbCodeGenerationExampleGenerated
       FILE codegen/LbCodeGenerationExample.py
       OUT_FILES LbCodeGenerationExample_LatticeModel.cpp LbCodeGenerationExample_LatticeModel.h
       LbCodeGenerationExample_NoSlip.cpp LbCodeGenerationExample_NoSlip.h
-      LbCodeGenerationExample_UBB.cpp LbCodeGenerationExample_UBB.h )
+      LbCodeGenerationExample_UBB.cpp LbCodeGenerationExample_UBB.h
+      LbCodeGenerationExample.h)
 waLBerla_compile_test( FILES codegen/LbCodeGenerationExample.cpp DEPENDS LbCodeGenerationExampleGenerated)
 
 waLBerla_generate_target_from_python(NAME FluctuatingMRTGenerated FILE codegen/FluctuatingMRT.py
@@ -109,7 +110,9 @@ waLBerla_generate_target_from_python(NAME FieldLayoutAndVectorizationTestGenerat
                                                FieldLayoutAndVectorizationTest_FZYX_NoVec_LatticeModel.cpp FieldLayoutAndVectorizationTest_FZYX_NoVec_LatticeModel.h
                                                FieldLayoutAndVectorizationTest_ZYXF_Vec_LatticeModel.cpp FieldLayoutAndVectorizationTest_ZYXF_Vec_LatticeModel.h
                                                FieldLayoutAndVectorizationTest_ZYXF_NoVec_LatticeModel.cpp FieldLayoutAndVectorizationTest_ZYXF_NoVec_LatticeModel.h )
+
 waLBerla_compile_test( FILES codegen/FieldLayoutAndVectorizationTest.cpp DEPENDS FieldLayoutAndVectorizationTestGenerated)
+waLBerla_execute_test( NAME FieldLayoutAndVectorizationTest )
 
 waLBerla_generate_target_from_python(NAME LbmPackInfoGenerationTestCodegen FILE codegen/LbmPackInfoGenerationTest.py
                                      OUT_FILES AccessorBasedPackInfoEven.cpp AccessorBasedPackInfoEven.h

@@ -34,14 +34,7 @@
 #include "timeloop/SweepTimeloop.h"
 
 // Generated Files
-#include "GeneratedOutflowBC_Dynamic_UBB.h"
-#include "GeneratedOutflowBC_InfoHeader.h"
-#include "GeneratedOutflowBC_MacroSetter.h"
-#include "GeneratedOutflowBC_NoSlip.h"
-#include "GeneratedOutflowBC_Outflow.h"
-#include "GeneratedOutflowBC_PackInfo.h"
-#include "GeneratedOutflowBC_Static_UBB.h"
-#include "GeneratedOutflowBC_Sweep.h"
+#include "GeneratedOutflowBC.h"
 
 using namespace walberla;
 

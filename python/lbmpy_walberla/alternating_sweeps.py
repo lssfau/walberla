@@ -1,8 +1,11 @@
+from dataclasses import replace
+
 import numpy as np
-from pystencils_walberla.codegen import generate_selective_sweep, get_vectorize_instruction_set
+
+from pystencils_walberla.codegen import generate_selective_sweep, config_from_context
 from pystencils_walberla.kernel_selection import (
     AbstractInterfaceArgumentMapping, AbstractConditionNode, KernelCallNode)
-from pystencils import TypedSymbol
+from pystencils import Target, TypedSymbol
 from lbmpy.creationfunctions import create_lb_ast
 from lbmpy.advanced_streaming import Timestep, is_inplace
 
@@ -43,8 +46,8 @@ class TimestepTrackerMapping(AbstractInterfaceArgumentMapping):
 
     def __init__(self, low_level_arg: TypedSymbol, tracker_identifier='tracker'):
         self.tracker_symbol = TypedSymbol(tracker_identifier, 'std::shared_ptr<lbm::TimestepTracker> &')
-        self.high_level_args = (self.tracker_symbol,)
-        self.low_level_arg = low_level_arg
+        super(TimestepTrackerMapping, self).__init__(high_level_args=(self.tracker_symbol,),
+                                                     low_level_arg=low_level_arg)
 
     @property
     def mapping_code(self):
@@ -55,10 +58,13 @@ class TimestepTrackerMapping(AbstractInterfaceArgumentMapping):
         return {'"lbm/inplace_streaming/TimestepTracker.h"'}
 
 
-def generate_alternating_lbm_sweep(generation_context, class_name, collision_rule, streaming_pattern,
+def generate_alternating_lbm_sweep(generation_context, class_name, collision_rule,
+                                   lbm_config, lbm_optimisation=None,
                                    namespace='lbm', field_swaps=(), varying_parameters=(),
-                                   inner_outer_split=False, ghost_layers_to_include=0, optimization=None,
-                                   **create_ast_params):
+                                   inner_outer_split=False, ghost_layers_to_include=0,
+                                   target=Target.CPU, data_type=None,
+                                   cpu_openmp=None, cpu_vectorize_info=None,
+                                   **kernel_parameters):
     """Generates an Alternating lattice Boltzmann sweep class. This is in particular meant for
     in-place streaming patterns, but can of course also be used with two-fields patterns (why make it
     simple if you can make it complicated?). From a collision rule, two kernel implementations are
@@ -70,29 +76,34 @@ def generate_alternating_lbm_sweep(generation_context, class_name, collision_rul
         generation_context: See documentation of `pystencils_walberla.generate_sweep`
         class_name: Name of the generated class
         collision_rule: LbCollisionRule as returned by `lbmpy.create_lb_collision_rule`.
-        streaming_pattern: Name of the streaming pattern; see `lbmpy.advanced_streaming`
+        lbm_config: configuration of the LB method. See lbmpy.LBMConfig
+        lbm_optimisation: configuration of the optimisations of the LB method. See lbmpy.LBMOptimisation
         namespace: see documentation of `generate_sweep`
         field_swaps: see documentation of `generate_sweep`
         varying_parameters: see documentation of `generate_sweep`
         inner_outer_split: see documentation of `generate_sweep`
         ghost_layers_to_include: see documentation of `generate_sweep`
-        optimization: dictionary containing optimization parameters, c.f. `lbmpy.creationfunctions`
-        create_ast_params: Further parameters passed to `create_lb_ast`
+        target: An pystencils Target to define cpu or gpu code generation. See pystencils.Target
+        data_type: default datatype for the kernel creation. Default is double
+        cpu_openmp: if loops should use openMP or not.
+        cpu_vectorize_info: dictionary containing necessary information for the usage of a SIMD instruction set.
+        kernel_parameters: other parameters passed to the creation of a pystencils.CreateKernelConfig
     """
-    optimization = default_lbm_optimization_parameters(generation_context, optimization)
+    config = config_from_context(generation_context, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
+                                 cpu_vectorize_info=cpu_vectorize_info, **kernel_parameters)
 
-    target = optimization['target']
-    if not generation_context.cuda and target == 'gpu':
-        return
+    # Add the lbm collision rule to the config
+    lbm_config = replace(lbm_config, collision_rule=collision_rule)
+    even_lbm_config = replace(lbm_config, timestep=Timestep.EVEN)
 
-    ast_even = create_lb_ast(collision_rule=collision_rule, streaming_pattern=streaming_pattern,
-                             timestep=Timestep.EVEN, optimization=optimization, **create_ast_params)
+    ast_even = create_lb_ast(lbm_config=even_lbm_config, lbm_optimisation=lbm_optimisation, config=config)
     ast_even.function_name = 'even'
     kernel_even = KernelCallNode(ast_even)
 
-    if is_inplace(streaming_pattern):
-        ast_odd = create_lb_ast(collision_rule=collision_rule, streaming_pattern=streaming_pattern,
-                                timestep=Timestep.ODD, optimization=optimization, **create_ast_params)
+    if is_inplace(lbm_config.streaming_pattern):
+        odd_lbm_config = replace(lbm_config, timestep=Timestep.ODD)
+
+        ast_odd = create_lb_ast(lbm_config=odd_lbm_config, lbm_optimisation=lbm_optimisation, config=config)
         ast_odd.function_name = 'odd'
         kernel_odd = KernelCallNode(ast_odd)
     else:
@@ -101,8 +112,8 @@ def generate_alternating_lbm_sweep(generation_context, class_name, collision_rul
     tree = EvenIntegerCondition('timestep', kernel_even, kernel_odd, np.uint8)
     interface_mappings = [TimestepTrackerMapping(tree.parameter_symbol)]
 
-    vec_info = optimization['vectorization']
-    openmp = optimization['openmp']
+    vec_info = config.cpu_vectorize_info
+    openmp = config.cpu_openmp
 
     generate_selective_sweep(generation_context, class_name, tree,
                              interface_mappings=interface_mappings,
@@ -110,32 +121,3 @@ def generate_alternating_lbm_sweep(generation_context, class_name, collision_rul
                              field_swaps=field_swaps, varying_parameters=varying_parameters,
                              inner_outer_split=inner_outer_split, ghost_layers_to_include=ghost_layers_to_include,
                              cpu_vectorize_info=vec_info, cpu_openmp=openmp)
-
-
-# ---------------------------------- Internal --------------------------------------------------------------------------
-
-
-def default_lbm_optimization_parameters(generation_context, params):
-    if params is None:
-        params = dict()
-
-    params['target'] = params.get('target', 'cpu')
-    params['double_precision'] = params.get('double_precision', generation_context.double_accuracy)
-    params['openmp'] = params.get('cpu_openmp', generation_context.openmp)
-    params['vectorization'] = params.get('vectorization', {})
-
-    if isinstance(params['vectorization'], bool):
-        do_vectorization = params['vectorization']
-        params['vectorization'] = dict()
-    else:
-        do_vectorization = True
-
-    vec = params['vectorization']
-    if isinstance(vec, dict):
-        default_vec_is = get_vectorize_instruction_set(generation_context) if do_vectorization else None
-
-        vec['instruction_set'] = vec.get('instruction_set', default_vec_is)
-        vec['assume_inner_stride_one'] = vec.get('assume_inner_stride_one', True)
-        vec['assume_aligned'] = vec.get('assume_aligned', False)
-        vec['nontemporal'] = vec.get('nontemporal', False)
-    return params

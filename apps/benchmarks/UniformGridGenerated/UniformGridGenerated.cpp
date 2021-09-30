@@ -20,28 +20,10 @@
 #include "lbm/lattice_model/D3Q19.h"
 
 #include "GenDefines.h"
-#include "GenMacroGetter.h"
-#include "GenMacroSetter.h"
-
-#include "GenLbKernel.h"
-#include "GenLbKernelAAEven.h"
-#include "GenLbKernelAAOdd.h"
-
-#include "GenPackInfo.h"
-#include "GenPackInfoAAPush.h"
-#include "GenPackInfoAAPull.h"
-#include "GenMpiDtypeInfo.h"
-#include "GenMpiDtypeInfoAAPull.h"
-#include "GenMpiDtypeInfoAAPush.h"
-
 
 #include <iomanip>
 
 using namespace walberla;
-
-using PdfField_T = GhostLayerField< real_t, Stencil_T::Q >;
-using VelocityField_T = GhostLayerField< real_t, 3 >;
-
 
 int main( int argc, char **argv )
 {

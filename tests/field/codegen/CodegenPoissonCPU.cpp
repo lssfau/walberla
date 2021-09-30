@@ -28,9 +28,6 @@
 
 #include "field/AddToStorage.h"
 #include "field/communication/PackInfo.h"
-#include "field/vtk/VTKWriter.h"
-
-#include "gui/Gui.h"
 
 #include "stencil/D2Q9.h"
 #include "timeloop/SweepTimeloop.h"

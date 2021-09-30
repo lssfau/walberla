@@ -5,7 +5,7 @@ class AdditionalDataHandler:
     """Base class that defines how to handle boundary conditions holding additional data."""
 
     def __init__(self, stencil):
-        self._dim = len(stencil[0])
+        self._dim = stencil.D
 
         # waLBerla is a 3D framework. Therefore, a zero for the z index has to be added if we work in 2D
         if self._dim == 2:

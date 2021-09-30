@@ -64,9 +64,6 @@ void checkEquivalence(const shared_ptr<StructuredBlockStorage> & blocks, BlockDa
 int main(int argc, char **argv) {
 
    debug::enterTestMode();
-
-   mpi::Environment env( argc, argv );
-
    walberla::Environment walberlaEnv(argc, argv);
 
    auto blocks = blockforest::createUniformBlockGrid( 1, 1, 1,

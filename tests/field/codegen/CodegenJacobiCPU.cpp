@@ -30,8 +30,6 @@
 #include "field/AddToStorage.h"
 #include "field/communication/PackInfo.h"
 
-#include "gui/Gui.h"
-
 #include "stencil/D2Q9.h"
 #include "stencil/D3Q7.h"
 

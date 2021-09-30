@@ -1,30 +1,35 @@
 import warnings
 from collections import OrderedDict, defaultdict
+from dataclasses import replace
 from itertools import product
 from typing import Dict, Optional, Sequence, Tuple
 
 from jinja2 import Environment, PackageLoader, StrictUndefined
 
-from pystencils import (
-    Assignment, AssignmentCollection, Field, FieldType, create_kernel, create_staggered_kernel)
+from pystencils import Target, CreateKernelConfig
+from pystencils import (Assignment, AssignmentCollection, Field, FieldType, create_kernel, create_staggered_kernel)
 from pystencils.astnodes import KernelFunction
 from pystencils.backends.cbackend import get_headers
 from pystencils.backends.simd_instruction_sets import get_supported_instruction_sets
 from pystencils.stencil import inverse_direction, offset_to_direction_string
-from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
-from pystencils_walberla.kernel_selection import KernelCallNode, KernelFamily, HighLevelInterfaceSpec
+
 from pystencils.backends.cuda_backend import CudaSympyPrinter
 from pystencils.kernelparameters import SHAPE_DTYPE
 from pystencils.data_types import TypedSymbol
 
+from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
+from pystencils_walberla.kernel_selection import KernelCallNode, KernelFamily, HighLevelInterfaceSpec
+
+
 __all__ = ['generate_sweep', 'generate_pack_info', 'generate_pack_info_for_field', 'generate_pack_info_from_kernel',
-           'generate_mpidtype_info_from_kernel', 'default_create_kernel_parameters', 'KernelInfo',
-           'get_vectorize_instruction_set']
+           'generate_mpidtype_info_from_kernel', 'KernelInfo',
+           'get_vectorize_instruction_set', 'config_from_context', 'generate_selective_sweep']
 
 
 def generate_sweep(generation_context, class_name, assignments,
                    namespace='pystencils', field_swaps=(), staggered=False, varying_parameters=(),
                    inner_outer_split=False, ghost_layers_to_include=0,
+                   target=Target.CPU, data_type=None, cpu_openmp=None, cpu_vectorize_info=None,
                    **create_kernel_params):
     """Generates a waLBerla sweep from a pystencils representation.
 
@@ -50,21 +55,23 @@ def generate_sweep(generation_context, class_name, assignments,
                            to allow for communication hiding.
         ghost_layers_to_include: determines how many ghost layers should be included for the Sweep.
                                  This is relevant if a setter kernel should also set correct values to the ghost layers.
+        target: An pystencils Target to define cpu or gpu code generation. See pystencils.Target
+        data_type: default datatype for the kernel creation. Default is double
+        cpu_openmp: if loops should use openMP or not.
+        cpu_vectorize_info: dictionary containing necessary information for the usage of a SIMD instruction set.
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
-    create_kernel_params = default_create_kernel_parameters(generation_context, create_kernel_params)
-
-    target = create_kernel_params['target']
-    if not generation_context.cuda and target == 'gpu':
-        return
+    config = config_from_context(generation_context, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
+                                 cpu_vectorize_info=cpu_vectorize_info, **create_kernel_params)
 
     if isinstance(assignments, KernelFunction):
         ast = assignments
         target = ast.target
     elif not staggered:
-        ast = create_kernel(assignments, **create_kernel_params)
+        ast = create_kernel(assignments, config=config)
     else:
-        ast = create_staggered_kernel(assignments, **create_kernel_params)
+        # This should not be necessary but create_staggered_kernel does not take a config at the moment ...
+        ast = create_staggered_kernel(assignments, **config.__dict__)
 
     ast.function_name = class_name.lower()
 
@@ -72,8 +79,8 @@ def generate_sweep(generation_context, class_name, assignments,
     generate_selective_sweep(generation_context, class_name, selection_tree, target=target, namespace=namespace,
                              field_swaps=field_swaps, varying_parameters=varying_parameters,
                              inner_outer_split=inner_outer_split, ghost_layers_to_include=ghost_layers_to_include,
-                             cpu_vectorize_info=create_kernel_params['cpu_vectorize_info'],
-                             cpu_openmp=create_kernel_params['cpu_openmp'])
+                             cpu_vectorize_info=config.cpu_vectorize_info,
+                             cpu_openmp=config.cpu_openmp)
 
 
 def generate_selective_sweep(generation_context, class_name, selection_tree, interface_mappings=(), target=None,
@@ -89,7 +96,7 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
         selection_tree: Instance of `AbstractKernelSelectionNode`, root of the selection tree
         interface_mappings: sequence of `AbstractInterfaceArgumentMapping` instances for selection arguments of
                             the selection tree
-        target: `None`, `'cpu'` or `'gpu'`; inferred from kernels if `None` is given.
+        target: `None`, `Target.CPU` or `Target.GPU`; inferred from kernels if `None` is given.
         namespace: see documentation of `generate_sweep`
         field_swaps: see documentation of `generate_sweep`
         varying_parameters: see documentation of `generate_sweep`
@@ -112,7 +119,7 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
     elif target != kernel_family.get_ast_attr('target'):
         raise ValueError('Mismatch between target parameter and AST targets.')
 
-    if not generation_context.cuda and target == 'gpu':
+    if not generation_context.cuda and target == Target.GPU:
         return
 
     representative_field = {p.field_name for p in kernel_family.parameters if p.is_field_parameter}
@@ -127,7 +134,7 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
         'kernel': kernel_family,
         'namespace': namespace,
         'class_name': class_name,
-        'target': target,
+        'target': target.name.lower(),
         'field': representative_field,
         'ghost_layers_to_include': ghost_layers_to_include,
         'inner_outer_split': inner_outer_split,
@@ -139,15 +146,15 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
     header = env.get_template("Sweep.tmpl.h").render(**jinja_context)
     source = env.get_template("Sweep.tmpl.cpp").render(**jinja_context)
 
-    source_extension = "cpp" if target == "cpu" else "cu"
-    generation_context.write_file("{}.h".format(class_name), header)
-    generation_context.write_file("{}.{}".format(class_name, source_extension), source)
+    source_extension = "cpp" if target == Target.CPU else "cu"
+    generation_context.write_file(f"{class_name}.h", header)
+    generation_context.write_file(f"{class_name}.{source_extension}", source)
 
 
 def generate_pack_info_for_field(generation_context, class_name: str, field: Field,
                                  direction_subset: Optional[Tuple[Tuple[int, int, int]]] = None,
-                                 operator=None,
-                                 gl_to_inner=False,
+                                 operator=None, gl_to_inner=False,
+                                 target=Target.CPU, data_type=None, cpu_openmp=None,
                                  **create_kernel_params):
     """Creates a pack info for a pystencils field assuming a pull-type stencil, packing all cell elements.
 
@@ -159,6 +166,9 @@ def generate_pack_info_for_field(generation_context, class_name: str, field: Fie
                           otherwise a D3Q27 stencil is assumed
         operator: optional operator for, e.g., reduction pack infos
         gl_to_inner: communicates values from ghost layers of sender to interior of receiver
+        target: An pystencils Target to define cpu or gpu code generation. See pystencils.Target
+        data_type: default datatype for the kernel creation. Default is double
+        cpu_openmp: if loops should use openMP or not.
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
 
@@ -167,11 +177,13 @@ def generate_pack_info_for_field(generation_context, class_name: str, field: Fie
 
     all_index_accesses = [field(*ind) for ind in product(*[range(s) for s in field.index_shape])]
     return generate_pack_info(generation_context, class_name, {direction_subset: all_index_accesses}, operator=operator,
-                              gl_to_inner=gl_to_inner, **create_kernel_params)
+                              gl_to_inner=gl_to_inner, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
+                              **create_kernel_params)
 
 
 def generate_pack_info_from_kernel(generation_context, class_name: str, assignments: Sequence[Assignment],
-                                   kind='pull', operator=None, **create_kernel_params):
+                                   kind='pull', operator=None, target=Target.CPU, data_type=None, cpu_openmp=None,
+                                   **create_kernel_params):
     """Generates a waLBerla GPU PackInfo from a (pull) kernel.
 
     Args:
@@ -181,6 +193,9 @@ def generate_pack_info_from_kernel(generation_context, class_name: str, assignme
                      i.e. the kernel is expected to only write to the center
         kind: can either be pull or push
         operator: optional operator for, e.g., reduction pack infos
+        target: An pystencils Target to define cpu or gpu code generation. See pystencils.Target
+        data_type: default datatype for the kernel creation. Default is double
+        cpu_openmp: if loops should use openMP or not.
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
     assert kind in ('push', 'pull')
@@ -213,12 +228,14 @@ def generate_pack_info_from_kernel(generation_context, class_name: str, assignme
                 spec[(comm_dir,)].add(fa)
     else:
         raise ValueError("Invalid 'kind' parameter")
-    return generate_pack_info(generation_context, class_name, spec, operator=operator, **create_kernel_params)
+    return generate_pack_info(generation_context, class_name, spec, operator=operator,
+                              target=target, data_type=data_type, cpu_openmp=cpu_openmp, **create_kernel_params)
 
 
 def generate_pack_info(generation_context, class_name: str,
                        directions_to_pack_terms: Dict[Tuple[Tuple], Sequence[Field.Access]],
                        namespace='pystencils', operator=None, gl_to_inner=False,
+                       target=Target.CPU, data_type=None, cpu_openmp=None,
                        **create_kernel_params):
     """Generates a waLBerla GPU PackInfo
 
@@ -230,22 +247,26 @@ def generate_pack_info(generation_context, class_name: str,
         namespace: inner namespace of the generated class
         operator: optional operator for, e.g., reduction pack infos
         gl_to_inner: communicates values from ghost layers of sender to interior of receiver
+        target: An pystencils Target to define cpu or gpu code generation. See pystencils.Target
+        data_type: default datatype for the kernel creation. Default is double
+        cpu_openmp: if loops should use openMP or not.
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
     items = [(e[0], sorted(e[1], key=lambda x: str(x))) for e in directions_to_pack_terms.items()]
     items = sorted(items, key=lambda e: e[0])
     directions_to_pack_terms = OrderedDict(items)
 
-    if 'cpu_vectorize_info' in create_kernel_params:
-        vec_params = create_kernel_params['cpu_vectorize_info']
-        if 'instruction_set' in vec_params and vec_params['instruction_set'] is not None:
-            raise NotImplementedError("Vectorisation of the pack info is not implemented.")
+    config = config_from_context(generation_context, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
+                                 **create_kernel_params)
 
-    create_kernel_params = default_create_kernel_parameters(generation_context, create_kernel_params)
-    target = create_kernel_params.get('target', 'cpu')
-    create_kernel_params['cpu_vectorize_info']['instruction_set'] = None
+    config_zero_gl = config_from_context(generation_context, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
+                                         ghost_layers=0, **create_kernel_params)
 
-    template_name = "CpuPackInfo.tmpl" if target == 'cpu' else 'GpuPackInfo.tmpl'
+    # Vectorisation of the pack info is not implemented.
+    config = replace(config, cpu_vectorize_info=None)
+    config_zero_gl = replace(config_zero_gl, cpu_vectorize_info=None)
+
+    template_name = "CpuPackInfo.tmpl" if config.target == Target.CPU else 'GpuPackInfo.tmpl'
 
     fields_accessed = set()
     for terms in directions_to_pack_terms.values():
@@ -279,22 +300,19 @@ def generate_pack_info(generation_context, class_name: str,
         all_accesses.update(terms)
 
         pack_assignments = [Assignment(buffer(i), term) for i, term in enumerate(terms)]
-        pack_ast = create_kernel(pack_assignments, **create_kernel_params, ghost_layers=0)
+        pack_ast = create_kernel(pack_assignments, config=config_zero_gl)
         pack_ast.function_name = 'pack_{}'.format("_".join(direction_strings))
-        pack_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
         if operator is None:
             unpack_assignments = [Assignment(term, buffer(i)) for i, term in enumerate(terms)]
         else:
             unpack_assignments = [Assignment(term, operator(term, buffer(i))) for i, term in enumerate(terms)]
-        unpack_ast = create_kernel(unpack_assignments, **create_kernel_params, ghost_layers=0)
+        unpack_ast = create_kernel(unpack_assignments, config=config_zero_gl)
         unpack_ast.function_name = 'unpack_{}'.format("_".join(direction_strings))
-        unpack_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
 
         pack_kernels[direction_strings] = KernelInfo(pack_ast)
         unpack_kernels[direction_strings] = KernelInfo(unpack_ast)
         elements_per_cell[direction_strings] = len(terms)
-    fused_kernel = create_kernel([Assignment(buffer.center, t) for t in all_accesses], **create_kernel_params)
-    fused_kernel.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
+    fused_kernel = create_kernel([Assignment(buffer.center, t) for t in all_accesses], config=config)
 
     jinja_context = {
         'class_name': class_name,
@@ -303,7 +321,7 @@ def generate_pack_info(generation_context, class_name: str,
         'fused_kernel': KernelInfo(fused_kernel),
         'elements_per_cell': elements_per_cell,
         'headers': get_headers(fused_kernel),
-        'target': target,
+        'target': config.target.name.lower(),
         'dtype': dtype,
         'field_name': field_names.pop(),
         'namespace': namespace,
@@ -314,13 +332,13 @@ def generate_pack_info(generation_context, class_name: str,
     header = env.get_template(template_name + ".h").render(**jinja_context)
     source = env.get_template(template_name + ".cpp").render(**jinja_context)
 
-    source_extension = "cpp" if target == "cpu" else "cu"
-    generation_context.write_file("{}.h".format(class_name), header)
-    generation_context.write_file("{}.{}".format(class_name, source_extension), source)
+    source_extension = "cpp" if config.target == Target.CPU else "cu"
+    generation_context.write_file(f"{class_name}.h", header)
+    generation_context.write_file(f"{class_name}.{source_extension}", source)
 
 
 def generate_mpidtype_info_from_kernel(generation_context, class_name: str,
-                                       assignments: Sequence[Assignment], kind='pull', namespace='pystencils', ):
+                                       assignments: Sequence[Assignment], kind='pull', namespace='pystencils'):
     assert kind in ('push', 'pull')
     reads = set()
     writes = set()
@@ -372,7 +390,7 @@ def generate_mpidtype_info_from_kernel(generation_context, class_name: str,
     }
     env = Environment(loader=PackageLoader('pystencils_walberla'), undefined=StrictUndefined)
     header = env.get_template("MpiDtypeInfo.tmpl.h").render(**jinja_context)
-    generation_context.write_file("{}.h".format(class_name), header)
+    generation_context.write_file(f"{class_name}.h", header)
 
 
 # ---------------------------------- Internal --------------------------------------------------------------------------
@@ -398,7 +416,7 @@ class KernelInfo:
     def generate_kernel_invocation_code(self, **kwargs):
         ast = self.ast
         ast_params = self.parameters
-        is_cpu = self.ast.target == 'cpu'
+        is_cpu = self.ast.target == Target.CPU
         call_parameters = ", ".join([p.symbol.name for p in ast_params])
 
         if not is_cpu:
@@ -436,29 +454,48 @@ def get_vectorize_instruction_set(generation_context):
         if supported_instruction_sets:
             return supported_instruction_sets[-1]
         else:  # if cpuinfo package is not installed
-            warnings.warn("Could not obtain supported vectorization instruction sets - defaulting to sse. "\
-                           "This problem can probably be fixed by installing py-cpuinfo. This package can "\
-                           "gather the needed hardware information.")
+            warnings.warn("Could not obtain supported vectorization instruction sets - defaulting to sse. "
+                          "This problem can probably be fixed by installing py-cpuinfo. This package can "
+                          "gather the needed hardware information.")
             return 'sse'
     else:
         return None
 
 
-def default_create_kernel_parameters(generation_context, params):
-    default_dtype = "float64" if generation_context.double_accuracy else 'float32'
+def config_from_context(generation_context, target=Target.CPU, data_type=None,
+                        cpu_openmp=None, cpu_vectorize_info=None, **kwargs):
 
-    params['target'] = params.get('target', 'cpu')
-    params['data_type'] = params.get('data_type', default_dtype)
-    params['cpu_openmp'] = params.get('cpu_openmp', generation_context.openmp)
-    params['cpu_vectorize_info'] = params.get('cpu_vectorize_info', {})
+    if target == Target.GPU and not generation_context.cuda:
+        raise ValueError("can not generate cuda code if waLBerla is not build with CUDA. Please use "
+                         "-DWALBERLA_BUILD_WITH_CUDA=1 for configuring cmake")
+
+    default_dtype = "float64" if generation_context.double_accuracy else "float32"
+    if data_type is None:
+        data_type = default_dtype
+
+    if cpu_openmp and not generation_context.openmp:
+        warnings.warn("Code is generated with OpenMP pragmas but waLBerla is not build with OpenMP. "
+                      "The compilation might not work due to wrong compiler flags. "
+                      "Please use -DWALBERLA_BUILD_WITH_OPENMP=1 for configuring cmake")
+
+    if cpu_openmp is None:
+        cpu_openmp = generation_context.openmp
+
+    if cpu_vectorize_info is None:
+        cpu_vectorize_info = {}
 
     default_vec_is = get_vectorize_instruction_set(generation_context)
-    vec = params['cpu_vectorize_info']
-    vec['instruction_set'] = vec.get('instruction_set', default_vec_is)
-    vec['assume_inner_stride_one'] = vec.get('assume_inner_stride_one', True)
-    vec['assume_aligned'] = vec.get('assume_aligned', False)
-    vec['nontemporal'] = vec.get('nontemporal', False)
-    return params
+
+    cpu_vectorize_info['instruction_set'] = cpu_vectorize_info.get('instruction_set', default_vec_is)
+    cpu_vectorize_info['assume_inner_stride_one'] = cpu_vectorize_info.get('assume_inner_stride_one', True)
+    cpu_vectorize_info['assume_aligned'] = cpu_vectorize_info.get('assume_aligned', False)
+    cpu_vectorize_info['nontemporal'] = cpu_vectorize_info.get('nontemporal', False)
+
+    config = CreateKernelConfig(target=target, data_type=data_type,
+                                cpu_openmp=cpu_openmp, cpu_vectorize_info=cpu_vectorize_info,
+                                **kwargs)
+
+    return config
 
 
 def comm_directions(direction):

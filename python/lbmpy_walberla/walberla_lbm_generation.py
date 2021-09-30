@@ -8,17 +8,16 @@ from sympy.tensor import IndexedBase
 import pystencils as ps
 from lbmpy.fieldaccess import CollideOnlyInplaceAccessor, StreamPullTwoFieldsAccessor
 from lbmpy.relaxationrates import relaxation_rate_scaling
-from lbmpy.stencils import get_stencil
 from lbmpy.updatekernels import create_lbm_kernel, create_stream_only_kernel
-from pystencils import AssignmentCollection, create_kernel
+from pystencils import AssignmentCollection, create_kernel, Target
 from pystencils.astnodes import SympyAssignment
 from pystencils.backends.cbackend import CBackend, CustomSympyPrinter, get_headers
 from pystencils.data_types import TypedSymbol, type_all_numbers, cast_func
 from pystencils.field import Field
-from pystencils.stencil import have_same_entries, offset_to_direction_string
+from pystencils.stencil import offset_to_direction_string
 from pystencils.sympyextensions import get_symmetric_part
 from pystencils.transformations import add_types
-from pystencils_walberla.codegen import KernelInfo, default_create_kernel_parameters
+from pystencils_walberla.codegen import KernelInfo, config_from_context
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 
 cpp_printer = CustomSympyPrinter()
@@ -27,7 +26,7 @@ REFINEMENT_SCALE_FACTOR = sp.Symbol("level_scale_factor")
 
 def __lattice_model(generation_context, class_name, lb_method, stream_collide_ast, collide_ast, stream_ast,
                     refinement_scaling):
-    stencil_name = get_stencil_name(lb_method.stencil)
+    stencil_name = lb_method.stencil.name
     if not stencil_name:
         raise ValueError("lb_method uses a stencil that is not supported in waLBerla")
 
@@ -37,7 +36,7 @@ def __lattice_model(generation_context, class_name, lb_method, stream_collide_as
 
     vel_symbols = lb_method.conserved_quantity_computation.first_order_moment_symbols
     rho_sym = sp.Symbol('rho')
-    pdfs_sym = sp.symbols(f'f_:{len(lb_method.stencil)}')
+    pdfs_sym = sp.symbols(f'f_:{lb_method.stencil.Q}')
     vel_arr_symbols = [IndexedBase(sp.Symbol('u'), shape=(1,))[i] for i in range(len(vel_symbols))]
     momentum_density_symbols = sp.symbols(f'md_:{len(vel_symbols)}')
 
@@ -54,10 +53,12 @@ def __lattice_model(generation_context, class_name, lb_method, stream_collide_as
     macroscopic_velocity_shift = None
     if force_model:
         if hasattr(force_model, 'macroscopic_velocity_shift'):
+            macroscopic_velocity_shift = [e.subs(force_model.subs_dict_force)
+                                          for e in force_model.macroscopic_velocity_shift(rho_sym)]
             macroscopic_velocity_shift = [expression_to_code(e.subs(sp.Rational(1, 2), cast_func(sp.Rational(1, 2),
                                                                                                  dtype_string)),
                                                              "lm.", ['rho'], dtype=dtype_string)
-                                          for e in force_model.macroscopic_velocity_shift(rho_sym)]
+                                          for e in macroscopic_velocity_shift]
 
     cqc = lb_method.conserved_quantity_computation
 
@@ -89,8 +90,8 @@ def __lattice_model(generation_context, class_name, lb_method, stream_collide_as
         'class_name': class_name,
         'stencil_name': stencil_name,
         'communication_stencil_name': communication_stencil_name,
-        'D': lb_method.dim,
-        'Q': len(lb_method.stencil),
+        'D': lb_method.stencil.D,
+        'Q': lb_method.stencil.Q,
         'compressible': lb_method.conserved_quantity_computation.compressible,
         'weights': ",".join(str(w.evalf()) + constant_suffix for w in lb_method.weights),
         'inverse_weights': ",".join(str((1 / w).evalf()) + constant_suffix for w in lb_method.weights),
@@ -131,44 +132,47 @@ def __lattice_model(generation_context, class_name, lb_method, stream_collide_as
 
 
 def generate_lattice_model(generation_context, class_name, collision_rule, field_layout='zyxf', refinement_scaling=None,
+                           target=Target.CPU, data_type=None, cpu_openmp=None, cpu_vectorize_info=None,
                            **create_kernel_params):
+
+    config = config_from_context(generation_context, target=target, data_type=data_type,
+                                 cpu_openmp=cpu_openmp, cpu_vectorize_info=cpu_vectorize_info, **create_kernel_params)
+
     # usually a numpy layout is chosen by default i.e. xyzf - which is bad for waLBerla where at least the spatial
     # coordinates should be ordered in reverse direction i.e. zyx
-    is_float = not generation_context.double_accuracy
-    dtype = np.float32 if is_float else np.float64
+    dtype = np.float64 if config.data_type == "float64" else np.float32
     lb_method = collision_rule.method
 
-    q = len(lb_method.stencil)
-    dim = lb_method.dim
+    q = lb_method.stencil.Q
+    dim = lb_method.stencil.D
 
-    create_kernel_params = default_create_kernel_parameters(generation_context, create_kernel_params)
-    if create_kernel_params['target'] == 'gpu':
+    if config.target == Target.GPU:
         raise ValueError("Lattice Models can only be generated for CPUs. To generate LBM on GPUs use sweeps directly")
 
     if field_layout == 'fzyx':
-        create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one'] = True
+        config.cpu_vectorize_info['assume_inner_stride_one'] = True
     elif field_layout == 'zyxf':
-        create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one'] = False
+        config.cpu_vectorize_info['assume_inner_stride_one'] = False
 
     src_field = ps.Field.create_generic('pdfs', dim, dtype, index_dimensions=1, layout=field_layout, index_shape=(q,))
     dst_field = ps.Field.create_generic('pdfs_tmp', dim, dtype, index_dimensions=1, layout=field_layout,
                                         index_shape=(q,))
 
     stream_collide_update_rule = create_lbm_kernel(collision_rule, src_field, dst_field, StreamPullTwoFieldsAccessor())
-    stream_collide_ast = create_kernel(stream_collide_update_rule, **create_kernel_params)
+    stream_collide_ast = create_kernel(stream_collide_update_rule, config=config)
     stream_collide_ast.function_name = 'kernel_streamCollide'
-    stream_collide_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
+    stream_collide_ast.assumed_inner_stride_one = config.cpu_vectorize_info['assume_inner_stride_one']
 
     collide_update_rule = create_lbm_kernel(collision_rule, src_field, dst_field, CollideOnlyInplaceAccessor())
-    collide_ast = create_kernel(collide_update_rule, **create_kernel_params)
+    collide_ast = create_kernel(collide_update_rule, config=config)
     collide_ast.function_name = 'kernel_collide'
-    collide_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
+    collide_ast.assumed_inner_stride_one = config.cpu_vectorize_info['assume_inner_stride_one']
 
     stream_update_rule = create_stream_only_kernel(lb_method.stencil, src_field, dst_field,
                                                    accessor=StreamPullTwoFieldsAccessor())
-    stream_ast = create_kernel(stream_update_rule, **create_kernel_params)
+    stream_ast = create_kernel(stream_update_rule, config=config)
     stream_ast.function_name = 'kernel_stream'
-    stream_ast.assumed_inner_stride_one = create_kernel_params['cpu_vectorize_info']['assume_inner_stride_one']
+    stream_ast.assumed_inner_stride_one = config.cpu_vectorize_info['assume_inner_stride_one']
     __lattice_model(generation_context, class_name, lb_method, stream_collide_ast, collide_ast, stream_ast,
                     refinement_scaling)
 
@@ -314,9 +318,3 @@ def equations_to_code(equations, variable_prefix="lm.", variables_without_prefix
                                                dtype=dtype))
         result.append(c_backend(assignment))
     return "\n".join(result)
-
-
-def get_stencil_name(stencil):
-    for name in ('D2Q9', 'D3Q15', 'D3Q19', 'D3Q27'):
-        if have_same_entries(stencil, get_stencil(name, 'walberla')):
-            return name

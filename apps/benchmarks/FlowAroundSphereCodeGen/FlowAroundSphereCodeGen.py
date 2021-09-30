@@ -1,24 +1,25 @@
+from pystencils import Target
 from pystencils.field import fields
+from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil
 
 from lbmpy.advanced_streaming.utility import get_timesteps
 from lbmpy.macroscopic_value_kernels import macroscopic_values_setter
-from lbmpy.stencils import get_stencil
 from lbmpy.creationfunctions import create_lb_collision_rule
 from lbmpy.boundaries import NoSlip, UBB, ExtrapolationOutflow
 
 from pystencils_walberla import CodeGeneration, generate_sweep, generate_info_header
 
 from lbmpy_walberla.additional_data_handler import UBBAdditionalDataHandler, OutflowAdditionalDataHandler
-from lbmpy_walberla import generate_boundary, generate_lb_pack_info
+from lbmpy_walberla import generate_lb_pack_info
 from lbmpy_walberla import generate_alternating_lbm_sweep, generate_alternating_lbm_boundary
 
 import sympy as sp
 
 with CodeGeneration() as ctx:
     data_type = "float64" if ctx.double_accuracy else "float32"
-    stencil = get_stencil("D3Q27")
-    q = len(stencil)
-    dim = len(stencil[0])
+    stencil = LBStencil(Stencil.D3Q27)
+    q = stencil.Q
+    dim = stencil.D
     streaming_pattern = 'esotwist'
     timesteps = get_timesteps(streaming_pattern)
 
@@ -32,21 +33,12 @@ with CodeGeneration() as ctx:
         'velocity': velocity_field
     }
 
-    opt = {'symbolic_field': pdfs,
-           'cse_global': False,
-           'cse_pdfs': False,
-           'double_precision': True if ctx.double_accuracy else False}
+    lbm_config = LBMConfig(stencil=stencil, method=Method.CUMULANT, relaxation_rate=omega, galilean_correction=True,
+                           field_name='pdfs', streaming_pattern=streaming_pattern, output=output)
 
-    method_params = {'method': 'cumulant',
-                     'stencil': stencil,
-                     'relaxation_rate': omega,
-                     'galilean_correction': True,
-                     'field_name': 'pdfs',
-                     'streaming_pattern': streaming_pattern,
-                     'output': output,
-                     'optimization': opt}
+    lbm_optimisation = LBMOptimisation(symbolic_field=pdfs, cse_global=False, cse_pdfs=False)
 
-    collision_rule = create_lb_collision_rule(**method_params)
+    collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_optimisation)
     lb_method = collision_rule.method
 
     # getter & setter
@@ -63,15 +55,14 @@ with CodeGeneration() as ctx:
                       'ScalarField_T': density_field}
 
     if ctx.cuda:
-        target = 'gpu'
+        target = Target.GPU
     else:
-        target = 'cpu'
-
-    opt['target'] = target
+        target = Target.CPU
 
     # sweeps
     generate_alternating_lbm_sweep(ctx, 'FlowAroundSphereCodeGen_LbSweep',
-                                   collision_rule, streaming_pattern, optimization=opt)
+                                   collision_rule, lbm_config=lbm_config, lbm_optimisation=lbm_optimisation,
+                                   target=target)
     generate_sweep(ctx, 'FlowAroundSphereCodeGen_MacroSetter', setter_assignments, target=target)
 
     # boundaries

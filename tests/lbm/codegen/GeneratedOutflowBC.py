@@ -1,20 +1,18 @@
 from pystencils.field import fields
 from lbmpy.macroscopic_value_kernels import macroscopic_values_setter
-from lbmpy.stencils import get_stencil
+from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Stencil, Method
 from lbmpy.creationfunctions import create_lb_method, create_lb_update_rule
 from lbmpy.boundaries import NoSlip, UBB, ExtrapolationOutflow
 from lbmpy_walberla.additional_data_handler import UBBAdditionalDataHandler, OutflowAdditionalDataHandler
-from pystencils_walberla import CodeGeneration, generate_sweep
-from lbmpy_walberla import RefinementScaling, generate_boundary, generate_lb_pack_info
+from pystencils_walberla import CodeGeneration, generate_sweep, generate_info_header
+from lbmpy_walberla import generate_boundary, generate_lb_pack_info
 
 import sympy as sp
 
-stencil = get_stencil("D2Q9")
-q = len(stencil)
-dim = len(stencil[0])
+stencil = LBStencil(Stencil.D2Q9)
 
-pdfs, pdfs_tmp = fields(f"pdfs({q}), pdfs_tmp({q}): double[{dim}D]", layout='fzyx')
-velocity_field, density_field = fields(f"velocity({dim}), density(1) : double[{dim}D]", layout='fzyx')
+pdfs, pdfs_tmp = fields(f"pdfs({stencil.Q}), pdfs_tmp({stencil.Q}): double[{stencil.D}D]", layout='fzyx')
+velocity_field, density_field = fields(f"velocity({stencil.D}), density(1) : double[{stencil.D}D]", layout='fzyx')
 omega = sp.Symbol("omega")
 u_max = sp.Symbol("u_max")
 
@@ -23,35 +21,24 @@ output = {
     'velocity': velocity_field
 }
 
-options = {'method': 'cumulant',
-           'stencil': stencil,
-           'relaxation_rate': omega,
-           'galilean_correction': len(stencil) == 27,
-           'field_name': 'pdfs',
-           'output': output,
-           'optimization': {'symbolic_field': pdfs,
-                            'symbolic_temporary_field': pdfs_tmp,
-                            'cse_global': False,
-                            'cse_pdfs': False}}
+lbm_config = LBMConfig(method=Method.CUMULANT, stencil=stencil, relaxation_rate=omega,
+                       galilean_correction=stencil.Q == 27, field_name='pdfs', output=output)
 
-method = create_lb_method(**options)
+lbm_opt = LBMOptimisation(symbolic_field=pdfs, symbolic_temporary_field=pdfs_tmp,
+                          cse_global=False, cse_pdfs=False)
+
+method = create_lb_method(lbm_config=lbm_config)
 
 # getter & setter
 setter_assignments = macroscopic_values_setter(method, velocity=velocity_field.center_vector,
                                                pdfs=pdfs, density=1.0)
 
-update_rule = create_lb_update_rule(lb_method=method, **options)
+update_rule = create_lb_update_rule(lb_method=method, lbm_config=lbm_config, lbm_optimisation=lbm_opt)
 
-info_header = f"""
-using namespace walberla;
-#include "stencil/D{dim}Q{q}.h"
-using Stencil_T = walberla::stencil::D{dim}Q{q};
-using PdfField_T = GhostLayerField<real_t, {q}>;
-using VelocityField_T = GhostLayerField<real_t, {dim}>;
-using ScalarField_T = GhostLayerField<real_t, 1>;
-    """
-
-stencil = method.stencil
+stencil_typedefs = {'Stencil_T': stencil}
+field_typedefs = {'PdfField_T': pdfs,
+                  'VelocityField_T': velocity_field,
+                  'ScalarField_T': density_field}
 
 with CodeGeneration() as ctx:
     # sweeps
@@ -59,10 +46,10 @@ with CodeGeneration() as ctx:
     generate_sweep(ctx, 'GeneratedOutflowBC_MacroSetter', setter_assignments)
 
     # boundaries
-    ubb_dynamic = UBB(lambda *args: None, dim=dim)
+    ubb_dynamic = UBB(lambda *args: None, dim=stencil.D)
     ubb_data_handler = UBBAdditionalDataHandler(stencil, ubb_dynamic)
 
-    if dim == 2:
+    if stencil.D == 2:
         ubb_static = UBB([sp.Symbol("u_max"), 0])
     else:
         ubb_static = UBB([sp.Symbol("u_max"), 0, 0])
@@ -87,4 +74,5 @@ with CodeGeneration() as ctx:
     generate_lb_pack_info(ctx, 'GeneratedOutflowBC_PackInfo', stencil, pdfs)
 
     # Info header containing correct template definitions for stencil and field
-    ctx.write_file("GeneratedOutflowBC_InfoHeader.h", info_header)
+    generate_info_header(ctx, "GeneratedOutflowBC.h",
+                         stencil_typedefs=stencil_typedefs, field_typedefs=field_typedefs)

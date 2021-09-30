@@ -13,10 +13,10 @@ class PackinfoGenTest(unittest.TestCase):
             for da in (False, True):
                 with ManualCodeGenerationContext(openmp=openmp, double_accuracy=da) as ctx:
                     dtype = "float64" if ctx.double_accuracy else "float32"
-                    f, g = ps.fields("f, g(4): {}[3D]".format(dtype))
+                    f, g = ps.fields(f"f, g(4): {dtype}[3D]")
                     generate_pack_info_for_field(ctx, 'PI1', f)
 
-                    src, dst = ps.fields("src, src_tmp: {}[2D]".format(dtype))
+                    src, dst = ps.fields(f"src, src_tmp: {dtype}[2D]")
                     stencil = [[0, -1, 0],
                                [-1, 4, -1],
                                [0, -1, 0]]

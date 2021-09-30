@@ -1,12 +1,12 @@
 import numpy as np
 from jinja2 import Environment, PackageLoader, StrictUndefined
-from pystencils import Field, FieldType
+from pystencils import Field, FieldType, Target
 from pystencils.boundaries.boundaryhandling import create_boundary_kernel
 from pystencils.boundaries.createindexlist import (
     boundary_index_array_coordinate_names, direction_member_name,
     numpy_data_type_for_boundary_object)
 from pystencils.data_types import TypedSymbol, create_type
-from pystencils_walberla.codegen import default_create_kernel_parameters
+from pystencils_walberla.codegen import config_from_context
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 from pystencils_walberla.additional_data_handler import AdditionalDataHandler
 from pystencils_walberla.kernel_selection import (
@@ -22,7 +22,9 @@ def generate_boundary(generation_context,
                       index_shape,
                       field_type=FieldType.GENERIC,
                       kernel_creation_function=None,
-                      target='cpu',
+                      target=Target.CPU,
+                      data_type=None,
+                      cpu_openmp=None,
                       namespace='pystencils',
                       additional_data_handler=None,
                       interface_mappings=(),
@@ -34,18 +36,20 @@ def generate_boundary(generation_context,
 
     struct_name = "IndexInfo"
     boundary_object.name = class_name
-    dim = len(neighbor_stencil[0])
+    dim = neighbor_stencil.D
 
-    create_kernel_params = default_create_kernel_parameters(generation_context, create_kernel_params)
-    create_kernel_params["target"] = target
-    del create_kernel_params["cpu_vectorize_info"]
+    config = config_from_context(generation_context, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
+                                 **create_kernel_params)
+    create_kernel_params = config.__dict__
+    del create_kernel_params['target']
+    del create_kernel_params['index_fields']
 
-    if not create_kernel_params["data_type"]:
-        create_kernel_params["data_type"] = 'double' if generation_context.double_accuracy else 'float32'
+    field_data_type = np.float64 if config.data_type == "float64" else np.float32
+
     index_struct_dtype = numpy_data_type_for_boundary_object(boundary_object, dim)
 
     field = Field.create_generic(field_name, dim,
-                                 np.float64 if generation_context.double_accuracy else np.float32,
+                                 field_data_type,
                                  index_dimensions=len(index_shape), layout='fzyx', index_shape=index_shape,
                                  field_type=field_type)
 
@@ -55,10 +59,11 @@ def generate_boundary(generation_context,
     if not kernel_creation_function:
         kernel_creation_function = create_boundary_kernel
 
-    kernel = kernel_creation_function(field, index_field, neighbor_stencil, boundary_object, **create_kernel_params)
+    kernel = kernel_creation_function(field, index_field, neighbor_stencil, boundary_object,
+                                      target=target, **create_kernel_params)
 
     if isinstance(kernel, KernelFunction):
-        kernel.function_name = "boundary_" + boundary_object.name
+        kernel.function_name = f"boundary_{boundary_object.name}"
         selection_tree = KernelCallNode(kernel)
     elif isinstance(kernel, AbstractKernelSelectionNode):
         selection_tree = kernel
@@ -79,7 +84,7 @@ def generate_boundary(generation_context,
         'StructName': struct_name,
         'StructDeclaration': struct_from_numpy_dtype(struct_name, index_struct_dtype),
         'dim': dim,
-        'target': target,
+        'target': target.name.lower(),
         'namespace': namespace,
         'inner_or_boundary': boundary_object.inner_or_boundary,
         'single_link': boundary_object.single_link,
@@ -92,20 +97,20 @@ def generate_boundary(generation_context,
     header = env.get_template('Boundary.tmpl.h').render(**context)
     source = env.get_template('Boundary.tmpl.cpp').render(**context)
 
-    source_extension = "cpp" if target == "cpu" else "cu"
+    source_extension = "cpp" if target == Target.CPU else "cu"
     generation_context.write_file(f"{class_name}.h", header)
     generation_context.write_file(f"{class_name}.{source_extension}", source)
 
 
 def generate_staggered_boundary(generation_context, class_name, boundary_object,
-                                dim, neighbor_stencil, index_shape, target='cpu', **kwargs):
+                                dim, neighbor_stencil, index_shape, target=Target.CPU, **kwargs):
     assert dim == len(neighbor_stencil[0])
     generate_boundary(generation_context, class_name, boundary_object, 'field', neighbor_stencil, index_shape,
                       FieldType.STAGGERED, target=target, **kwargs)
 
 
 def generate_staggered_flux_boundary(generation_context, class_name, boundary_object,
-                                     dim, neighbor_stencil, index_shape, target='cpu', **kwargs):
+                                     dim, neighbor_stencil, index_shape, target=Target.CPU, **kwargs):
     assert dim == len(neighbor_stencil[0])
     generate_boundary(generation_context, class_name, boundary_object, 'flux', neighbor_stencil, index_shape,
                       FieldType.STAGGERED_FLUX, target=target, **kwargs)

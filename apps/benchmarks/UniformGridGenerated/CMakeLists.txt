@@ -2,7 +2,7 @@ waLBerla_link_files_to_builddir( "*.prm" )
 waLBerla_link_files_to_builddir( "*.py" )
 
 
-foreach(config trt smagorinsky mrt entropic_kbc_n4 cumulant )
+foreach(config srt trt smagorinsky mrt entropic_kbc_n4 cumulant )
     waLBerla_generate_target_from_python(NAME UniformGridGenerated_${config}
           CODEGEN_CFG ${config}
           FILE UniformGridGenerated.py

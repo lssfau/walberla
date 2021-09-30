@@ -20,36 +20,35 @@ For the stream-pull-collide type kernel, we need two PDF fields which we set up 
 For VTK output and the initial velocity setup, we define a velocity vector field as an output field for the LB method.
 
 \code{.py}
-stencil = 'D2Q9'
+stencil = LBStencil(Stencil.D2Q9)
 omega = sp.Symbol('omega')
 layout = 'fzyx'
 
 #   PDF Fields
-pdfs, pdfs_tmp = ps.fields('pdfs(9), pdfs_tmp(9): [2D]', layout=layout)
+pdfs, pdfs_tmp = ps.fields(f'pdfs({stencil.Q}), pdfs_tmp({stencil.Q}): [2D]', layout=layout)
 
 #   Velocity Output Field
-velocity = ps.fields("velocity(2): [2D]", layout=layout)
+velocity = ps.fields(f"velocity({stencil.D}): [2D]", layout=layout)
 output = {'velocity': velocity}
 
 #   Optimization
-optimization = {'cse_global': True,
-                'symbolic_field': pdfs,
-                'symbolic_temporary_field': pdfs_tmp,
-                'field_layout': layout}
+lbm_opt = LBMOptimisation(cse_global=True,
+                          symbolic_field=pdfs,
+                          symbolic_temporary_field=pdfs_tmp,
+                          field_layout=layout)
 \endcode
 
 We set up the cumulant-based MRT method with relaxation rates as described above. We use `generate_lb_update_rule` from lbmpy to derive the set of equations describing the collision operator together with the *pull* streaming pattern. These equations define the entire LBM sweep.
 
 \code{.py}
-lbm_params = {'stencil': stencil,
-              'method': 'mrt_raw',
-              'relaxation_rates': [0, 0, 0, omega, omega, omega, 1, 1, 1],
-              'cumulant': True,
-              'compressible': True}
+lbm_config = LBMConfig(stencil=stencil,
+                       method=Method.CUMULANT,
+                       relaxation_rate=omega,
+                       compressible=True,
+                       output=output)
 
-lbm_update_rule = create_lb_update_rule(optimization=optimization,
-                                        output=output,
-                                        **lbm_params)
+lbm_update_rule = create_lb_update_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
+
 
 lbm_method = lbm_update_rule.method
 \endcode
@@ -77,9 +76,9 @@ Several functions from `pystencils_walberla` and `lbmpy_walberla` are called to 
 \code{.py}
 with CodeGeneration() as ctx:
     if ctx.cuda:
-        target = 'gpu'
+        target = ps.Target.GPU
     else:
-        target = 'cpu'
+        target = ps.Target.CPU
 
     #   LBM Sweep
     generate_sweep(ctx, "CumulantMRTSweep", lbm_update_rule, field_swaps=[(pdfs, pdfs_tmp)], target=target)

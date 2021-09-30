@@ -128,10 +128,11 @@ class Scenario:
         sequenceValuesToScalars(result)
         num_tries = 4
         # check multiple times e.g. may fail when multiple benchmark processes are running
+        table_name = f"runs_{data['stencil']}_{data['streamingPattern']}_{data['collisionSetup']}_{prod(self.blocks)}"
         for num_try in range(num_tries):
             try:
-                checkAndUpdateSchema(result, "runs", DB_FILE)
-                storeSingle(result, "runs", DB_FILE)
+                checkAndUpdateSchema(result, table_name, DB_FILE)
+                storeSingle(result, table_name, DB_FILE)
                 break
             except sqlite3.OperationalError as e:
                 wlb.log_warning(f"Sqlite DB writing failed: try {num_try + 1}/{num_tries}  {str(e)}")
@@ -220,23 +221,18 @@ def single_gpu_benchmark():
 job_script_header = """
 #!/bin/bash -l
 #SBATCH --job-name=scaling
-#SBATCH --time=0:30:00
+#SBATCH --time=01:00:00
 #SBATCH --nodes={nodes}
 #SBATCH -o out_scaling_{nodes}_%j.txt
 #SBATCH -e err_scaling_{nodes}_%j.txt
 #SBATCH --ntasks-per-core=1
-#SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=normal
 #SBATCH --constraint=gpu
-#SBATCH --account=d105
-
-cd {folder}
+#SBATCH --account=s1042
 
 source ~/env.sh
 
-module load daint-gpu
-module load craype-accel-nvidia60
 export MPICH_RDMA_ENABLED_CUDA=1  # allow GPU-GPU data transfer
 export CRAY_CUDA_MPS=1            # allow GPU sharing
 export MPICH_G2G_PIPELINE=256     # adapt maximum number of concurrent in-flight messages
@@ -247,7 +243,7 @@ export CRAY_CUDA_MPS=1
 export MPICH_RANK_REORDER_METHOD=3
 export PMI_MMAP_SYNC_WAIT_TIME=300
 
-
+cd {folder}
 # grid_order -R -H -c 1,1,8 -g 16,16,8
 
 ulimit -c 0
@@ -262,10 +258,18 @@ do
 done
 """
 
-all_executables = ('UniformGridBenchmarkGPU_mrt_d3q27',
-                   'UniformGridBenchmarkGPU_smagorinsky_d3q27',
-                   'UniformGridBenchmarkGPU_cumulant'
-                   'UniformGridBenchmarkGPU_cumulant_d3q27')
+streaming_patterns = ['pull', 'push', 'aa', 'esotwist']
+stencils = ['d3q27', 'd3q19']
+methods = ['srt', 'mrt', 'cumulant', 'entropic']
+
+all_executables = []
+
+for stencil in stencils:
+    for streaming_pattern in streaming_patterns:
+        for method in methods:
+            all_executables.append(f"UniformGridGPU_{stencil}_{streaming_pattern}_{method}")
+
+all_executables = tuple(all_executables)
 
 
 def generate_jobscripts(exe_names=all_executables):
