@@ -1,5 +1,6 @@
 import sympy as sp
 
+from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil
 from lbmpy.creationfunctions import create_lb_collision_rule, create_lb_update_rule
 
 from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel
@@ -9,23 +10,21 @@ from lbmpy_walberla import generate_lattice_model
 #      General Parameters
 #   ========================
 
-stencil = 'D2Q9'
+stencil = LBStencil(Stencil.D2Q9)
 omega = sp.Symbol('omega')
 layout = 'fzyx'
 
-#   Optimizations to be used by the code generator
-optimizations = {'cse_global': True, 'field_layout': layout}
+#   Optimizations for the LBM Method
+lbm_opt = LBMOptimisation(cse_global=True, field_layout=layout)
 
 #   ===========================
 #      SRT Method Definition
 #   ===========================
 
-srt_params = {'stencil': stencil,
-              'method': 'srt',
-              'relaxation_rate': omega}
+lbm_config = LBMConfig(stencil=stencil, method=Method.SRT, relaxation_rate=omega)
 
-srt_collision_rule = create_lb_collision_rule(optimization=optimizations, **srt_params)
-srt_update_rule = create_lb_update_rule(collision_rule=srt_collision_rule, optimization=optimizations)
+srt_collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
+srt_update_rule = create_lb_update_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
 
 #   =====================
 #      Code Generation

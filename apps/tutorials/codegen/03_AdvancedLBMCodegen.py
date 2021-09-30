@@ -1,6 +1,8 @@
 import sympy as sp
 import pystencils as ps
 
+from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil
+
 from lbmpy.creationfunctions import create_lb_update_rule
 from lbmpy.macroscopic_value_kernels import macroscopic_values_setter
 from lbmpy.boundaries import NoSlip
@@ -13,36 +15,35 @@ from lbmpy_walberla import generate_boundary
 #      General Parameters
 #   ========================
 
-stencil = 'D2Q9'
+stencil = LBStencil(Stencil.D2Q9)
 omega = sp.Symbol('omega')
 layout = 'fzyx'
 
 #   PDF Fields
-pdfs, pdfs_tmp = ps.fields('pdfs(9), pdfs_tmp(9): [2D]', layout=layout)
+pdfs, pdfs_tmp = ps.fields(f'pdfs({stencil.Q}), pdfs_tmp({stencil.Q}): [2D]', layout=layout)
 
 #   Velocity Output Field
-velocity = ps.fields("velocity(2): [2D]", layout=layout)
+velocity = ps.fields(f"velocity({stencil.D}): [2D]", layout=layout)
 output = {'velocity': velocity}
 
-#   Optimization
-optimization = {'cse_global': True,
-                'symbolic_field': pdfs,
-                'symbolic_temporary_field': pdfs_tmp,
-                'field_layout': layout}
+# LBM Optimisation
+lbm_opt = LBMOptimisation(cse_global=True,
+                          symbolic_field=pdfs,
+                          symbolic_temporary_field=pdfs_tmp,
+                          field_layout=layout)
 
 
 #   ==================
 #      Method Setup
 #   ==================
 
-lbm_params = {'stencil': stencil,
-              'method': 'cumulant',
-              'relaxation_rate': omega,
-              'compressible': True}
+lbm_config = LBMConfig(stencil=stencil,
+                       method=Method.CUMULANT,
+                       relaxation_rate=omega,
+                       compressible=True,
+                       output=output)
 
-lbm_update_rule = create_lb_update_rule(optimization=optimization,
-                                        output=output,
-                                        **lbm_params)
+lbm_update_rule = create_lb_update_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
 
 lbm_method = lbm_update_rule.method
 
@@ -63,9 +64,9 @@ pdfs_setter = macroscopic_values_setter(lbm_method,
 
 with CodeGeneration() as ctx:
     if ctx.cuda:
-        target = 'gpu'
+        target = ps.Target.GPU
     else:
-        target = 'cpu'
+        target = ps.Target.CPU
 
     #   LBM Sweep
     generate_sweep(ctx, "CumulantMRTSweep", lbm_update_rule, field_swaps=[(pdfs, pdfs_tmp)], target=target)

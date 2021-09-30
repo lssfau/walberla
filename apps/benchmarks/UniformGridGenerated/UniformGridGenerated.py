@@ -2,7 +2,9 @@ import sympy as sp
 import pystencils as ps
 from lbmpy.creationfunctions import create_lb_update_rule, create_lb_collision_rule
 from pystencils_walberla import CodeGeneration, generate_pack_info_from_kernel, generate_sweep,\
-    generate_mpidtype_info_from_kernel
+    generate_mpidtype_info_from_kernel, generate_info_header
+
+from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil
 from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
 from lbmpy.fieldaccess import AAEvenTimeStepAccessor, AAOddTimeStepAccessor
 
@@ -42,7 +44,7 @@ options_dict = {
         'entropic': True,
     },
     'entropic_kbc_n4': {
-        'method': 'trt-kbc-n4',
+        'method': 'trt_kbc_n4',
         'stencil': 'D3Q27',
         'compressible': True,
         'relaxation_rates': [omega, omega_free],
@@ -61,13 +63,6 @@ options_dict = {
         'relaxation_rate': omega,
     },
 }
-
-info_header = """
-#include "stencil/D3Q{q}.h"\nusing Stencil_T = walberla::stencil::D3Q{q};
-const char * infoStencil = "{stencil}";
-const char * infoConfigName = "{configName}";
-const char * optimizationDict = "{optimizationDict}";
-"""
 
 with CodeGeneration() as ctx:
     common_options = {
@@ -106,18 +101,20 @@ with CodeGeneration() as ctx:
     options = options.copy()
 
     if d3q27:
-        options['stencil'] = 'D3Q27'
+        stencil = LBStencil(Stencil.D3Q27)
+        options['stencil'] = stencil
+    else:
+        stencil = LBStencil(options['stencil'])
 
     dtype_string = 'float64' if ctx.double_accuracy else 'float32'
 
-    stencil_str = options['stencil']
-    q = int(stencil_str[stencil_str.find('Q') + 1:])
-    pdfs, velocity_field = ps.fields(f'pdfs({q}), velocity(3) : {dtype_string}[3D]', layout='fzyx')
+    pdfs, velocity_field = ps.fields(f'pdfs({stencil.Q}), velocity(3) : {dtype_string}[3D]', layout='fzyx')
 
-    update_rule_two_field = create_lb_update_rule(optimization={'symbolic_field': pdfs,
-                                                                'split': opts['two_field_split'],
-                                                                'cse_global': opts['two_field_cse_global'],
-                                                                'cse_pdfs': opts['two_field_cse_pdfs']}, **options)
+    lbm_config = LBMConfig(**options)
+    lbm_optimisation = LBMOptimisation(symbolic_field=pdfs, split=opts['two_field_split'],
+                                       cse_global=opts['two_field_cse_global'], cse_pdfs=opts['two_field_cse_pdfs'])
+
+    update_rule_two_field = create_lb_update_rule(lbm_config=lbm_config, lbm_optimisation=lbm_optimisation)
 
     if opts['compiled_in_boundaries']:
         from lbmpy.boundaries import NoSlip, UBB
@@ -131,27 +128,32 @@ with CodeGeneration() as ctx:
             ((0, 0, 1), UBB([0.05, 0, 0])),
             ((0, 0, -1), NoSlip()),
         ))
-        cr_even = create_lb_collision_rule(stencil='D3Q19', compressible=False,
-                                           optimization={'cse_global': opts['aa_even_cse_global'],
-                                                         'cse_pdfs': opts['aa_even_cse_pdfs']})
-        cr_odd = create_lb_collision_rule(stencil='D3Q19', compressible=False,
-                                          optimization={'cse_global': opts['aa_odd_cse_global'],
-                                                        'cse_pdfs': opts['aa_odd_cse_pdfs']})
+        cr_even = create_lb_collision_rule(lbm_config=LBMConfig(stencil=LBStencil(Stencil.D3Q19), compressible=False),
+                                           lbm_optimisation=LBMOptimisation(cse_global=opts['aa_even_cse_global'],
+                                                                            cse_pdfs=opts['aa_even_cse_pdfs']))
+
+        cr_odd = create_lb_collision_rule(lbm_config=LBMConfig(stencil=LBStencil(Stencil.D3Q19), compressible=False),
+                                          lbm_optimisation=LBMOptimisation(cse_global=opts['aa_odd_cse_global'],
+                                                                           cse_pdfs=opts['aa_odd_cse_pdfs']))
+
         update_rule_aa_even = update_rule_with_push_boundaries(cr_even, pdfs, boundaries,
                                                                AAEvenTimeStepAccessor, AAOddTimeStepAccessor.read)
         update_rule_aa_odd = update_rule_with_push_boundaries(cr_odd, pdfs, boundaries,
                                                               AAOddTimeStepAccessor, AAEvenTimeStepAccessor.read)
     else:
-        update_rule_aa_even = create_lb_update_rule(kernel_type=AAEvenTimeStepAccessor(),
-                                                    optimization={'symbolic_field': pdfs,
-                                                                  'split': opts['aa_even_split'],
-                                                                  'cse_global': opts['aa_even_cse_global'],
-                                                                  'cse_pdfs': opts['aa_even_cse_pdfs']}, **options)
-        update_rule_aa_odd = create_lb_update_rule(kernel_type=AAOddTimeStepAccessor(),
-                                                   optimization={'symbolic_field': pdfs,
-                                                                 'split': opts['aa_odd_split'],
-                                                                 'cse_global': opts['aa_odd_cse_global'],
-                                                                 'cse_pdfs': opts['aa_odd_cse_pdfs']}, **options)
+        lbm_opt_even = LBMOptimisation(symbolic_field=pdfs, split=opts['aa_even_split'],
+                                       cse_global=opts['aa_even_cse_global'], cse_pdfs=opts['aa_even_cse_pdfs'])
+
+        update_rule_aa_even = create_lb_update_rule(lbm_config=LBMConfig(**options,
+                                                                         kernel_type=AAEvenTimeStepAccessor()),
+                                                    lbm_optimisation=lbm_opt_even)
+
+        lbm_opt_odd = LBMOptimisation(symbolic_field=pdfs, split=opts['aa_odd_split'],
+                                      cse_global=opts['aa_odd_cse_global'], cse_pdfs=opts['aa_odd_cse_pdfs'])
+
+        update_rule_aa_odd = create_lb_update_rule(lbm_config=LBMConfig(**options,
+                                                                        kernel_type=AAOddTimeStepAccessor()),
+                                                   lbm_optimisation=lbm_opt_odd)
 
     vec = {'assume_aligned': True, 'assume_inner_stride_one': True}
 
@@ -191,11 +193,16 @@ with CodeGeneration() as ctx:
     generate_mpidtype_info_from_kernel(ctx, 'GenMpiDtypeInfoAAPull', update_rule_aa_odd, kind='pull')
     generate_mpidtype_info_from_kernel(ctx, 'GenMpiDtypeInfoAAPush', update_rule_aa_odd, kind='push')
 
-    # Info Header
-    infoHeaderParams = {
-        'stencil': stencil_str,
-        'q': q,
-        'configName': ctx.config,
-        'optimizationDict': str(opts),
-    }
-    ctx.write_file('GenDefines.h', info_header.format(**infoHeaderParams))
+    additional_code = f"""
+    const char * infoStencil = "{stencil.name}";
+    const char * infoConfigName = "{ctx.config}";
+    const char * optimizationDict = "{str(opts)}";
+    """
+
+    stencil_typedefs = {'Stencil_T': stencil,
+                        'CommunicationStencil_T': stencil}
+    field_typedefs = {'PdfField_T': pdfs,
+                      'VelocityField_T': velocity_field}
+
+    generate_info_header(ctx, "GenDefines.h", stencil_typedefs=stencil_typedefs, field_typedefs=field_typedefs,
+                         additional_code=additional_code)

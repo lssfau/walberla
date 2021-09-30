@@ -1,8 +1,8 @@
-from pystencils import fields, TypedSymbol
+from pystencils import fields, Target, TypedSymbol
 from pystencils.simp import sympy_cse
 
+from lbmpy import LBMConfig, LBStencil, Method, Stencil
 from lbmpy.creationfunctions import create_lb_method
-from lbmpy.stencils import get_stencil
 
 from pystencils_walberla import CodeGeneration, generate_sweep, generate_pack_info_for_field, generate_info_header
 from lbmpy_walberla import generate_lb_pack_info
@@ -18,16 +18,9 @@ import numpy as np
 with CodeGeneration() as ctx:
     field_type = "float64" if ctx.double_accuracy else "float32"
 
-    stencil_phase_name = "D3Q15"
-    stencil_hydro_name = "D3Q27"
-
-    stencil_phase = get_stencil(stencil_phase_name, "walberla")
-    stencil_hydro = get_stencil(stencil_hydro_name, "walberla")
-    q_phase = len(stencil_phase)
-    q_hydro = len(stencil_hydro)
-
-    assert (len(stencil_phase[0]) == len(stencil_hydro[0]))
-    dimensions = len(stencil_hydro[0])
+    stencil_phase = LBStencil(Stencil.D3Q15)
+    stencil_hydro = LBStencil(Stencil.D3Q27)
+    assert (stencil_phase.D == stencil_hydro.D)
 
     ########################
     # PARAMETER DEFINITION #
@@ -54,17 +47,17 @@ with CodeGeneration() as ctx:
     ########################
 
     # velocity field
-    u = fields(f"vel_field({dimensions}): {field_type}[{dimensions}D]", layout='fzyx')
+    u = fields(f"vel_field({stencil_hydro.D}): {field_type}[{stencil_hydro.D}D]", layout='fzyx')
     # phase-field
-    C = fields(f"phase_field: {field_type}[{dimensions}D]", layout='fzyx')
-    C_tmp = fields(f"phase_field_tmp: {field_type}[{dimensions}D]", layout='fzyx')
+    C = fields(f"phase_field: {field_type}[{stencil_hydro.D}D]", layout='fzyx')
+    C_tmp = fields(f"phase_field_tmp: {field_type}[{stencil_hydro.D}D]", layout='fzyx')
 
     # phase-field distribution functions
-    h = fields(f"lb_phase_field({q_phase}): {field_type}[{dimensions}D]", layout='fzyx')
-    h_tmp = fields(f"lb_phase_field_tmp({q_phase}): {field_type}[{dimensions}D]", layout='fzyx')
+    h = fields(f"lb_phase_field({stencil_phase.Q}): {field_type}[{stencil_phase.D}D]", layout='fzyx')
+    h_tmp = fields(f"lb_phase_field_tmp({stencil_phase.Q}): {field_type}[{stencil_phase.D}D]", layout='fzyx')
     # hydrodynamic distribution functions
-    g = fields(f"lb_velocity_field({q_hydro}): {field_type}[{dimensions}D]", layout='fzyx')
-    g_tmp = fields(f"lb_velocity_field_tmp({q_hydro}): {field_type}[{dimensions}D]", layout='fzyx')
+    g = fields(f"lb_velocity_field({stencil_hydro.Q}): {field_type}[{stencil_hydro.D}D]", layout='fzyx')
+    g_tmp = fields(f"lb_velocity_field_tmp({stencil_hydro.Q}): {field_type}[{stencil_hydro.D}D]", layout='fzyx')
 
     ########################################
     # RELAXATION RATES AND EXTERNAL FORCES #
@@ -83,21 +76,23 @@ with CodeGeneration() as ctx:
     # LBM METHODS #
     ###############
 
-    method_phase = create_lb_method(stencil=stencil_phase, method='srt', relaxation_rate=w_c, compressible=True)
+    lbm_config_phase = LBMConfig(stencil=stencil_phase, method=Method.SRT, relaxation_rate=w_c, compressible=True)
+    method_phase = create_lb_method(lbm_config=lbm_config_phase)
 
-    method_hydro = create_lb_method(stencil=stencil_hydro, method="mrt", weighted=True,
-                                    relaxation_rates=[relaxation_rate, 1, 1, 1, 1, 1])
+    lbm_config_hydro = LBMConfig(stencil=stencil_hydro, method=Method.MRT, weighted=True,
+                                 relaxation_rates=[relaxation_rate, 1, 1, 1, 1, 1])
+    method_hydro = create_lb_method(lbm_config=lbm_config_hydro)
 
     # create the kernels for the initialization of the g and h field
     h_updates = initializer_kernel_phase_field_lb(h, C, u, method_phase, W)
     g_updates = initializer_kernel_hydro_lb(g, u, method_hydro)
 
-    force_h = [f / 3 for f in interface_tracking_force(C, stencil_phase, W, fd_stencil=get_stencil("D3Q27"))]
+    force_h = [f / 3 for f in interface_tracking_force(C, stencil_phase, W, fd_stencil=LBStencil(Stencil.D3Q27))]
     force_model_h = MultiphaseForceModel(force=force_h)
 
     force_g = hydrodynamic_force(g, C, method_hydro, relaxation_time, density_liquid, density_gas, kappa, beta,
                                  body_force,
-                                 fd_stencil=get_stencil("D3Q27"))
+                                 fd_stencil=LBStencil(Stencil.D3Q27))
 
     force_model_g = MultiphaseForceModel(force=force_g, rho=density)
 
@@ -150,64 +145,64 @@ with CodeGeneration() as ctx:
                       'PhaseField_T': C}
 
     additional_code = f"""
-    const char * StencilNamePhase = "{stencil_phase_name}";
-    const char * StencilNameHydro = "{stencil_hydro_name}";
+    const char * StencilNamePhase = "{stencil_phase.name}";
+    const char * StencilNameHydro = "{stencil_hydro.name}";
     """
 
     if not ctx.cuda:
         if not ctx.optimize_for_localhost:
             cpu_vec = {'instruction_set': None}
 
-        generate_sweep(ctx, 'initialize_phase_field_distributions', h_updates)
-        generate_sweep(ctx, 'initialize_velocity_based_distributions', g_updates)
+        generate_sweep(ctx, 'initialize_phase_field_distributions', h_updates, target=Target.CPU)
+        generate_sweep(ctx, 'initialize_velocity_based_distributions', g_updates, target=Target.CPU)
 
         generate_sweep(ctx, 'phase_field_LB_step', phase_field_LB_step,
                        field_swaps=[(h, h_tmp), (C, C_tmp)],
                        inner_outer_split=True,
-                       cpu_vectorize_info=cpu_vec)
+                       cpu_vectorize_info=cpu_vec,
+                       target=Target.CPU)
 
         generate_sweep(ctx, 'hydro_LB_step', hydro_LB_step,
                        field_swaps=[(g, g_tmp)],
                        inner_outer_split=True,
-                       cpu_vectorize_info=cpu_vec)
+                       cpu_vectorize_info=cpu_vec,
+                       target=Target.CPU)
 
         # communication
         generate_lb_pack_info(ctx, 'PackInfo_phase_field_distributions', stencil_phase, h,
-                              streaming_pattern='pull', target='cpu')
+                              streaming_pattern='pull', target=Target.CPU)
 
         generate_lb_pack_info(ctx, 'PackInfo_velocity_based_distributions', stencil_hydro, g,
-                              streaming_pattern='push', target='cpu')
+                              streaming_pattern='push', target=Target.CPU)
 
-        generate_pack_info_for_field(ctx, 'PackInfo_phase_field', C, target='cpu')
+        generate_pack_info_for_field(ctx, 'PackInfo_phase_field', C, target=Target.CPU)
 
     if ctx.cuda:
         generate_sweep(ctx, 'initialize_phase_field_distributions',
-                       h_updates, target='gpu')
+                       h_updates, target=Target.GPU)
         generate_sweep(ctx, 'initialize_velocity_based_distributions',
-                       g_updates, target='gpu')
+                       g_updates, target=Target.GPU)
 
         generate_sweep(ctx, 'phase_field_LB_step', phase_field_LB_step,
                        field_swaps=[(h, h_tmp), (C, C_tmp)],
-                       target='gpu',
+                       target=Target.GPU,
                        gpu_indexing_params=sweep_params,
                        varying_parameters=vp)
 
         generate_sweep(ctx, 'hydro_LB_step', hydro_LB_step,
                        field_swaps=[(g, g_tmp)],
-                       target='gpu',
+                       target=Target.GPU,
                        gpu_indexing_params=sweep_params,
                        varying_parameters=vp)
         # communication
         generate_lb_pack_info(ctx, 'PackInfo_phase_field_distributions', stencil_phase, h,
-                              streaming_pattern='pull', target='gpu')
+                              streaming_pattern='pull', target=Target.GPU)
 
         generate_lb_pack_info(ctx, 'PackInfo_velocity_based_distributions', stencil_hydro, g,
-                              streaming_pattern='push', target='gpu')
+                              streaming_pattern='push', target=Target.GPU)
 
-        generate_pack_info_for_field(ctx, 'PackInfo_phase_field', C, target='gpu')
+        generate_pack_info_for_field(ctx, 'PackInfo_phase_field', C, target=Target.GPU)
 
         # Info header containing correct template definitions for stencil and field
     generate_info_header(ctx, 'GenDefines', stencil_typedefs=stencil_typedefs, field_typedefs=field_typedefs,
                          additional_code=additional_code)
-
-print("finished code generation successfully")

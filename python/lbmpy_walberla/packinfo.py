@@ -1,10 +1,10 @@
 from collections import defaultdict
-from lbmpy.stencils import get_stencil
+from lbmpy import LBStencil, Stencil
 from lbmpy.advanced_streaming.utility import Timestep, get_accessor, get_timesteps
 from lbmpy.advanced_streaming.communication import _extend_dir
 from pystencils.stencil import inverse_direction
 from pystencils_walberla.codegen import comm_directions, generate_pack_info
-from pystencils import Assignment, Field
+from pystencils import Assignment, Field, Target
 
 
 def generate_lb_pack_info(generation_context,
@@ -15,6 +15,9 @@ def generate_lb_pack_info(generation_context,
                           lb_collision_rule=None,
                           always_generate_separate_classes=False,
                           namespace='lbm',
+                          target=Target.CPU,
+                          data_type=None,
+                          cpu_openmp=None,
                           **create_kernel_params):
     """Generates waLBerla MPI PackInfos for an LBM kernel, based on a given method
     and streaming pattern. For in-place streaming patterns, two PackInfos are generated;
@@ -24,7 +27,7 @@ def generate_lb_pack_info(generation_context,
         generation_context: see documentation of `generate_sweep`
         class_name_prefix: Prefix of the desired class name which will be extended with
                            'Even' or 'Odd' for in-place kernels
-        stencil: The tuple of directions specifying the employed LB stencil.
+        stencil: Instance of class LBStencil
         pdf_field: pdf field for which the pack info is created
         streaming_pattern: The employed streaming pattern.
         lb_collision_rule: Optional. The collision rule defining the lattice boltzmann kernel, as returned
@@ -37,6 +40,9 @@ def generate_lb_pack_info(generation_context,
                                           kernels, only one PackInfo class will be generated without a
                                           suffix to its name.
         namespace: inner namespace of the generated class
+        target: An pystencils Target to define cpu or gpu code generation. See pystencils.Target
+        data_type: default datatype for the kernel creation. Default is double
+        cpu_openmp: if loops should use openMP or not.
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
     timesteps = [Timestep.EVEN, Timestep.ODD] \
@@ -60,7 +66,7 @@ def generate_lb_pack_info(generation_context,
             for comm_dir in comm_directions(comm_direction):
                 common_spec[(comm_dir,)].add(fa.field.center(*fa.index))
 
-    full_stencil = get_stencil('D3Q27') if len(stencil[0]) == 3 else get_stencil('D2Q9')
+    full_stencil = LBStencil(Stencil.D3Q27) if stencil.D == 3 else LBStencil(Stencil.D2Q9)
 
     for t in timesteps:
         spec = common_spec.copy()
@@ -82,4 +88,5 @@ def generate_lb_pack_info(generation_context,
             class_name_suffix = ''
 
         class_name = class_name_prefix + class_name_suffix
-        generate_pack_info(generation_context, class_name, spec, namespace=namespace, **create_kernel_params)
+        generate_pack_info(generation_context, class_name, spec, namespace=namespace,
+                           target=target, data_type=data_type, cpu_openmp=cpu_openmp, **create_kernel_params)

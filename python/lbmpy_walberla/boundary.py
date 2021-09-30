@@ -6,7 +6,7 @@ from pystencils_walberla.kernel_selection import KernelCallNode
 from lbmpy_walberla.alternating_sweeps import EvenIntegerCondition, OddIntegerCondition, TimestepTrackerMapping
 from lbmpy_walberla.additional_data_handler import default_additional_data_handler
 
-from pystencils.data_types import TypedSymbol
+from pystencils import Target, TypedSymbol
 
 import numpy as np
 
@@ -22,10 +22,10 @@ def generate_boundary(generation_context,
                       namespace='lbm',
                       **create_kernel_params):
     if boundary_object.additional_data and additional_data_handler is None:
-        target = create_kernel_params.get('target', 'cpu')
+        target = create_kernel_params.get('target', Target.CPU)
         additional_data_handler = default_additional_data_handler(boundary_object, lb_method, field_name, target=target)
 
-    def boundary_creation_function(field, index_field, stencil, boundary_functor, target='cpu', **kwargs):
+    def boundary_creation_function(field, index_field, stencil, boundary_functor, target=Target.CPU, **kwargs):
         return create_lattice_boltzmann_boundary_kernel(field, index_field, lb_method, boundary_functor,
                                                         streaming_pattern=streaming_pattern,
                                                         prev_timestep=prev_timestep,
@@ -55,14 +55,14 @@ def generate_alternating_lbm_boundary(generation_context,
                                       namespace='lbm',
                                       **create_kernel_params):
     if boundary_object.additional_data and additional_data_handler is None:
-        target = create_kernel_params.get('target', 'cpu')
+        target = create_kernel_params.get('target', Target.CPU)
         additional_data_handler = default_additional_data_handler(boundary_object, lb_method, field_name, target=target)
 
     timestep_param_name = 'timestep'
     timestep_param_dtype = np.uint8
     timestep_param = TypedSymbol(timestep_param_name, timestep_param_dtype)
 
-    def boundary_creation_function(field, index_field, stencil, boundary_functor, target='cpu', **kwargs):
+    def boundary_creation_function(field, index_field, stencil, boundary_functor, target=Target.CPU, **kwargs):
         pargs = (field, index_field, lb_method, boundary_functor)
         kwargs = {'target': target, **kwargs}
         ast_even = create_lattice_boltzmann_boundary_kernel(*pargs,
@@ -94,7 +94,7 @@ def generate_alternating_lbm_boundary(generation_context,
                                                    boundary_object,
                                                    field_name=field_name,
                                                    neighbor_stencil=lb_method.stencil,
-                                                   index_shape=[len(lb_method.stencil)],
+                                                   index_shape=[lb_method.stencil.Q],
                                                    kernel_creation_function=boundary_creation_function,
                                                    namespace=namespace,
                                                    additional_data_handler=additional_data_handler,

@@ -10,7 +10,7 @@ with CodeGeneration() as ctx:
                [4.44, 5.55, 6.66],
                [7.77, 8.88, 9.99]]
     assignments = ps.assignment_from_stencil(stencil, src, dst, normalization_factor=1 / np.sum(stencil))
-    generate_sweep(ctx, 'CudaJacobiKernel2D', assignments, field_swaps=[(src, dst)], target="gpu")
+    generate_sweep(ctx, 'CudaJacobiKernel2D', assignments, field_swaps=[(src, dst)], target=ps.Target.GPU)
 
     # ----- Stencil 3D - created by using kernel_decorator with assignments in '@=' format -----
     src, dst = ps.fields("src, src_tmp: [3D]")
@@ -21,4 +21,4 @@ with CodeGeneration() as ctx:
                          + 5 * src[0, 1, 0] + 6 * src[0, -1, 0]
                          + 7 * src[0, 0, 1] + 8 * src[0, 0, -1]) / 33
 
-    generate_sweep(ctx, 'CudaJacobiKernel3D', kernel_func, field_swaps=[(src, dst)], target="gpu")
+    generate_sweep(ctx, 'CudaJacobiKernel3D', kernel_func, field_swaps=[(src, dst)], target=ps.Target.GPU)

@@ -1,3 +1,4 @@
+from pystencils import Target
 from pystencils.stencil import inverse_direction
 
 from lbmpy.advanced_streaming import AccessPdfValues, numeric_offsets, numeric_index
@@ -7,7 +8,7 @@ from lbmpy.boundaries import ExtrapolationOutflow, UBB
 from pystencils_walberla.additional_data_handler import AdditionalDataHandler
 
 
-def default_additional_data_handler(boundary_obj: LbBoundary, lb_method, field_name, target='cpu'):
+def default_additional_data_handler(boundary_obj: LbBoundary, lb_method, field_name, target=Target.CPU):
     if not boundary_obj.additional_data:
         return None
 
@@ -58,7 +59,7 @@ class UBBAdditionalDataHandler(AdditionalDataHandler):
 
 
 class OutflowAdditionalDataHandler(AdditionalDataHandler):
-    def __init__(self, stencil, boundary_object, target='cpu', field_name='pdfs'):
+    def __init__(self, stencil, boundary_object, target=Target.CPU, field_name='pdfs'):
         assert isinstance(boundary_object, ExtrapolationOutflow)
         self._boundary_object = boundary_object
         self._stencil = boundary_object.stencil
@@ -73,15 +74,15 @@ class OutflowAdditionalDataHandler(AdditionalDataHandler):
 
     @property
     def constructor_arguments(self):
-        return f", BlockDataID {self._field_name}CPUID_" if self._target == 'gpu' else ""
+        return f", BlockDataID {self._field_name}CPUID_" if self._target == Target.GPU else ""
 
     @property
     def initialiser_list(self):
-        return f"{self._field_name}CPUID({self._field_name}CPUID_)," if self._target == 'gpu' else ""
+        return f"{self._field_name}CPUID({self._field_name}CPUID_)," if self._target == Target.GPU else ""
 
     @property
     def additional_field_data(self):
-        identifier = "CPU" if self._target == "gpu" else ""
+        identifier = "CPU" if self._target == Target.GPU else ""
         return f"auto {self._field_name} = block->getData< field::GhostLayerField<real_t, " \
                f"{len(self._stencil)}> >({self._field_name}{identifier}ID); "
 

@@ -64,9 +64,9 @@ def parse_json_args():
     expected_files = parsed['EXPECTED_FILES']
     cmake_vars = {}
     for key, value in parsed['CMAKE_VARS'].items():
-        if value in ("ON", "1", "YES", "TRUE"):
+        if value.lower() in ("on", "1", "yes", "true"):
             value = True
-        elif value in ("OFF", "0", "NO", "FALSE"):
+        elif value.lower() in ("off", "0", "no", "false"):
             value = False
         cmake_vars[key] = value
     return expected_files, cmake_vars
@@ -94,13 +94,13 @@ class ManualCodeGenerationContext:
     to constructor instead of getting them from CMake
     """
 
-    def __init__(self, openmp=False, optimize_for_localhost=False, mpi=True, double_accuracy=True):
+    def __init__(self, openmp=False, optimize_for_localhost=False, mpi=True, double_accuracy=True, cuda=False):
         self.openmp = openmp
         self.optimize_for_localhost = optimize_for_localhost
         self.mpi = mpi
         self.double_accuracy = double_accuracy
         self.files = dict()
-        self.cuda = False
+        self.cuda = cuda
         self.config = ""
 
     def write_file(self, name, content):

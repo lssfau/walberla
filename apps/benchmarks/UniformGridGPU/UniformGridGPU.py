@@ -2,15 +2,17 @@ import sympy as sp
 import numpy as np
 import pystencils as ps
 
+from dataclasses import replace
+
 from pystencils.data_types import TypedSymbol
 from pystencils.fast_approximation import insert_fast_sqrts, insert_fast_divisions
 
+from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil
 from lbmpy.advanced_streaming import Timestep, is_inplace
 from lbmpy.advanced_streaming.utility import streaming_patterns
 from lbmpy.boundaries import NoSlip, UBB
 from lbmpy.creationfunctions import create_lb_collision_rule
 from lbmpy.macroscopic_value_kernels import macroscopic_values_setter
-from lbmpy.stencils import get_stencil
 from lbmpy.updatekernels import create_stream_only_kernel
 from lbmpy.fieldaccess import *
 
@@ -32,40 +34,40 @@ gpu_indexing_params = {'block_size': sweep_block_size}
 
 options_dict = {
     'srt': {
-        'method': 'srt',
+        'method': Method.SRT,
         'relaxation_rate': omega,
         'compressible': False,
     },
     'trt': {
-        'method': 'trt',
+        'method': Method.TRT,
         'relaxation_rate': omega,
     },
     'mrt': {
-        'method': 'mrt',
+        'method': Method.MRT,
         'relaxation_rates': [omega, 1, 1, 1, 1, 1, 1],
     },
     'mrt-overrelax': {
-        'method': 'mrt',
+        'method': Method.MRT,
         'relaxation_rates': [omega] + [1 + x * 1e-2 for x in range(1, 11)],
     },
     'cumulant': {
-        'method': 'cumulant',
+        'method': Method.CUMULANT,
         'relaxation_rate': omega,
         'compressible': True,
     },
     'cumulant-overrelax': {
-        'method': 'cumulant',
+        'method': Method.CUMULANT,
         'relaxation_rates': [omega] + [1 + x * 1e-2 for x in range(1, 11)],
         'compressible': True,
     },
     'entropic': {
-        'method': 'mrt',
+        'method': Method.MRT,
         'compressible': True,
         'relaxation_rates': [omega, omega] + [omega_free] * 6,
         'entropic': True,
     },
     'smagorinsky': {
-        'method': 'srt',
+        'method': Method.SRT,
         'smagorinsky': True,
         'relaxation_rate': omega,
     }
@@ -94,34 +96,26 @@ with CodeGeneration() as ctx:
     if len(config_tokens) >= 4:
         optimize = (config_tokens[3] != 'noopt')
 
-    stencil = get_stencil(stencil_str)
+    if stencil_str == "D3Q27":
+        stencil = LBStencil(Stencil.D3Q27)
+    else:
+        stencil = LBStencil(Stencil.D3Q19)
+
     assert streaming_pattern in streaming_patterns, f"Invalid streaming pattern: {streaming_pattern}"
 
     options = options_dict[collision_setup]
 
-    q = len(stencil)
-    dim = len(stencil[0])
+    q = stencil.Q
+    dim = stencil.D
     assert dim == 3, "This app supports only three-dimensional stencils"
     pdfs, pdfs_tmp, velocity_field = ps.fields(f"pdfs({q}), pdfs_tmp({q}), velocity(3) : {field_type}[3D]",
                                                layout='fzyx')
 
-    common_options = {
-        'stencil': stencil,
-        'field_name': pdfs.name,
-        'optimization': {
-            'target': 'gpu',
-            'cse_global': True,
-            'cse_pdfs': False,
-            'symbolic_field': pdfs,
-            'field_layout': 'fzyx',
-            'gpu_indexing_params': gpu_indexing_params
-        }
-    }
-
-    options.update(common_options)
+    lbm_config = LBMConfig(stencil=stencil, field_name=pdfs.name, streaming_pattern=streaming_pattern, **options)
+    lbm_opt = LBMOptimisation(cse_global=True, cse_pdfs=False, symbolic_field=pdfs, field_layout='fzyx')
 
     if not is_inplace(streaming_pattern):
-        options['optimization']['symbolic_temporary_field'] = pdfs_tmp
+        lbm_opt = replace(lbm_opt, symbolic_temporary_field=pdfs_tmp)
         field_swaps = [(pdfs, pdfs_tmp)]
     else:
         field_swaps = []
@@ -141,7 +135,7 @@ with CodeGeneration() as ctx:
     stream_only_kernel = create_stream_only_kernel(stencil, pdfs, pdfs_tmp, accessor=accessor)
 
     # LB Sweep
-    collision_rule = create_lb_collision_rule(**options)
+    collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
 
     if optimize:
         collision_rule = insert_fast_divisions(collision_rule)
@@ -149,8 +143,8 @@ with CodeGeneration() as ctx:
 
     lb_method = collision_rule.method
 
-    generate_alternating_lbm_sweep(ctx, 'UniformGridGPU_LbKernel', collision_rule, streaming_pattern,
-                                   optimization=options['optimization'],
+    generate_alternating_lbm_sweep(ctx, 'UniformGridGPU_LbKernel', collision_rule, lbm_config=lbm_config,
+                                   lbm_optimisation=lbm_opt, target=ps.Target.GPU,
                                    inner_outer_split=True, varying_parameters=vp, field_swaps=field_swaps)
 
     # getter & setter
@@ -158,32 +152,32 @@ with CodeGeneration() as ctx:
                                                    pdfs=pdfs,
                                                    streaming_pattern=streaming_pattern,
                                                    previous_timestep=Timestep.EVEN)
-    generate_sweep(ctx, 'UniformGridGPU_MacroSetter', setter_assignments, target='gpu')
+    generate_sweep(ctx, 'UniformGridGPU_MacroSetter', setter_assignments, target=ps.Target.GPU)
 
     # Stream only kernel
     generate_sweep(ctx, 'UniformGridGPU_StreamOnlyKernel', stream_only_kernel, field_swaps=field_swaps_stream_only,
-                   gpu_indexing_params=gpu_indexing_params, varying_parameters=vp, target='gpu')
+                   gpu_indexing_params=gpu_indexing_params, varying_parameters=vp, target=ps.Target.GPU)
 
     # Boundaries
     noslip = NoSlip()
     ubb = UBB((0.05, 0, 0))
 
     generate_alternating_lbm_boundary(ctx, 'UniformGridGPU_NoSlip', noslip, lb_method, field_name=pdfs.name,
-                                      streaming_pattern=streaming_pattern, target='gpu')
+                                      streaming_pattern=streaming_pattern, target=ps.Target.GPU)
     generate_alternating_lbm_boundary(ctx, 'UniformGridGPU_UBB', ubb, lb_method, field_name=pdfs.name,
-                                      streaming_pattern=streaming_pattern, target='gpu')
+                                      streaming_pattern=streaming_pattern, target=ps.Target.GPU)
 
     # communication
     generate_lb_pack_info(ctx, 'UniformGridGPU_PackInfo', stencil, pdfs,
-                          streaming_pattern=streaming_pattern, target='gpu',
+                          streaming_pattern=streaming_pattern, target=ps.Target.GPU,
                           always_generate_separate_classes=True)
 
     infoHeaderParams = {
         'stencil': stencil_str,
         'streaming_pattern': streaming_pattern,
         'collision_setup': collision_setup,
-        'cse_global': int(options['optimization']['cse_global']),
-        'cse_pdfs': int(options['optimization']['cse_pdfs']),
+        'cse_global': int(lbm_opt.cse_global),
+        'cse_pdfs': int(lbm_opt.cse_pdfs),
     }
 
     stencil_typedefs = {'Stencil_T': stencil,

@@ -1,8 +1,9 @@
 import sympy as sp
 import pystencils as ps
-from lbmpy.creationfunctions import create_lb_collision_rule, create_mrt_orthogonal, force_model_from_string
+from lbmpy.creationfunctions import create_lb_collision_rule, create_mrt_orthogonal
 from lbmpy.moments import is_bulk_moment, is_shear_moment, get_order
-from lbmpy.stencils import get_stencil
+from lbmpy.forcemodels import Guo
+from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Stencil
 from pystencils_walberla import CodeGeneration
 from lbmpy_walberla import generate_lattice_model
 
@@ -19,7 +20,7 @@ with CodeGeneration() as ctx:
         order = order[0]
 
         if order < 2:
-            return 0
+            return 0.0
         elif any(is_bulk):
             assert all(is_bulk)
             return sp.Symbol("omega_bulk")
@@ -33,21 +34,21 @@ with CodeGeneration() as ctx:
             return sp.Symbol("omega_odd")
 
     method = create_mrt_orthogonal(
-        stencil=get_stencil('D3Q19'),
+        stencil=LBStencil(Stencil.D3Q19),
         compressible=True,
         weighted=True,
         relaxation_rate_getter=rr_getter,
-        force_model=force_model_from_string('schiller', force_field.center_vector)
+        force_model=Guo(force_field.center_vector)
     )
-    collision_rule = create_lb_collision_rule(
-        method,
-        fluctuating={
-            'temperature': temperature,
-            'block_offsets': 'walberla',
-            'rng_node': ps.rng.PhiloxTwoDoubles if ctx.double_accuracy else ps.rng.PhiloxFourFloats,
-        },
-        optimization={'cse_global': True}
-    )
+
+    fluctuating = {'temperature': temperature,
+                   'block_offsets': 'walberla',
+                   'rng_node': ps.rng.PhiloxTwoDoubles if ctx.double_accuracy else ps.rng.PhiloxFourFloats}
+
+    lbm_config = LBMConfig(fluctuating=fluctuating)
+    lbm_opt = LBMOptimisation(cse_global=True)
+
+    collision_rule = create_lb_collision_rule(lb_method=method, lbm_config=lbm_config, lbm_optimisation=lbm_opt)
 
     params = {}
     if ctx.optimize_for_localhost:

@@ -2,6 +2,8 @@ from os import path
 from pystencils.data_types import get_base_type
 from pystencils_walberla.cmake_integration import CodeGenerationContext
 
+from lbmpy import LBStencil
+
 HEADER_EXTENSIONS = {'.h', '.hpp'}
 
 
@@ -74,6 +76,8 @@ def _stencil_inclusion_code(stencil_typedefs):
             dim = len(stencil[0])
             q = len(stencil)
             stencil = f"D{dim}Q{q}"
+        elif isinstance(stencil, LBStencil):
+            stencil = stencil.name
         elif not isinstance(stencil, str):
             raise ValueError(f'Invalid stencil: Do not know what to make of {stencil}')
 

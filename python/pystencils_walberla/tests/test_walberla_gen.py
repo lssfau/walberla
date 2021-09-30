@@ -19,7 +19,7 @@ class CodegenTest(unittest.TestCase):
                     dtype = "float64" if ctx.double_accuracy else "float32"
 
                     # ----- Jacobi 2D - created by specifying weights in nested list --------------------------
-                    src, dst = ps.fields("src, src_tmp: {}[2D]".format(dtype))
+                    src, dst = ps.fields(f"src, src_tmp: {dtype}[2D]")
                     stencil = [[0, -1, 0],
                                [-1, 4, -1],
                                [0, -1, 0]]
@@ -27,7 +27,7 @@ class CodegenTest(unittest.TestCase):
                     generate_sweep(ctx, 'JacobiKernel2D', assignments, field_swaps=[(src, dst)])
 
                     # ----- Jacobi 3D - created by using kernel_decorator with assignments in '@=' format -----
-                    src, dst = ps.fields("src, src_tmp: {}[3D]".format(dtype))
+                    src, dst = ps.fields(f"src, src_tmp: {dtype}[3D]")
 
                     @ps.kernel
                     def kernel_func():

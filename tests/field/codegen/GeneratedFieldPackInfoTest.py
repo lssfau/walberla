@@ -9,6 +9,6 @@ with CodeGeneration() as ctx:
     field = ps.fields("field: int32[3D]", layout=layout)
 
     # communication
-    generate_pack_info_for_field(ctx, 'ScalarFieldCommunication', field, target='cpu')
-    generate_pack_info_for_field(ctx, 'ScalarFieldPullReduction', field, target='cpu', operator=op.add,
+    generate_pack_info_for_field(ctx, 'ScalarFieldCommunication', field, target=ps.Target.CPU)
+    generate_pack_info_for_field(ctx, 'ScalarFieldPullReduction', field, target=ps.Target.CPU, operator=op.add,
                                  gl_to_inner=True)

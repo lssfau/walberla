@@ -1,8 +1,9 @@
+from abc import ABC
 from typing import Sequence, Set
 from collections import OrderedDict
 from functools import reduce
 from jinja2.filters import do_indent
-from pystencils import TypedSymbol
+from pystencils import Target, TypedSymbol
 from pystencils.backends.cbackend import get_headers
 from pystencils.backends.cuda_backend import CudaSympyPrinter
 from pystencils.kernelparameters import SHAPE_DTYPE
@@ -88,7 +89,7 @@ class AbstractKernelSelectionNode:
         raise NotImplementedError()
 
 
-class AbstractConditionNode(AbstractKernelSelectionNode):
+class AbstractConditionNode(AbstractKernelSelectionNode, ABC):
     def __init__(self, branch_true, branch_false):
         self.branch_true = branch_true
         self.branch_false = branch_false
@@ -134,7 +135,7 @@ class KernelCallNode(AbstractKernelSelectionNode):
     def get_code(self, **kwargs):
         ast = self.ast
         ast_params = self.parameters
-        is_cpu = self.ast.target == 'cpu'
+        is_cpu = self.ast.target == Target.CPU
         call_parameters = ", ".join([p.symbol.name for p in ast_params])
 
         if not is_cpu:
@@ -262,8 +263,7 @@ class AbstractInterfaceArgumentMapping:
 class IdentityMapping(AbstractInterfaceArgumentMapping):
 
     def __init__(self, low_level_arg: TypedSymbol):
-        self.high_level_args = (low_level_arg,)
-        self.low_level_arg = low_level_arg
+        super(IdentityMapping, self).__init__(high_level_args=(low_level_arg,), low_level_arg=low_level_arg)
 
     @property
     def mapping_code(self):
@@ -316,24 +316,24 @@ def merge_sorted_lists(lx, ly, sort_key=lambda x: x, identity_check_key=None):
     nx = len(lx)
     ny = len(ly)
 
-    def recursive_merge(lx, ly, ix, iy):
-        if ix == nx:
-            return ly[iy:]
-        if iy == ny:
-            return lx[ix:]
-        x = lx[ix]
-        y = ly[iy]
+    def recursive_merge(lx_intern, ly_intern, ix_intern, iy_intern):
+        if ix_intern == nx:
+            return ly_intern[iy_intern:]
+        if iy_intern == ny:
+            return lx_intern[ix_intern:]
+        x = lx_intern[ix_intern]
+        y = ly_intern[iy_intern]
         skx = sort_key(x)
         sky = sort_key(y)
         if skx == sky:
             if identity_check_key(x) == identity_check_key(y):
-                return [x] + recursive_merge(lx, ly, ix + 1, iy + 1)
+                return [x] + recursive_merge(lx_intern, ly_intern, ix_intern + 1, iy_intern + 1)
             else:
                 raise ValueError(f'Elements <{x}> and <{y}> with equal sort key where not identical!')
         elif skx < sky:
-            return [x] + recursive_merge(lx, ly, ix + 1, iy)
+            return [x] + recursive_merge(lx_intern, ly_intern, ix_intern + 1, iy_intern)
         else:
-            return [y] + recursive_merge(lx, ly, ix, iy + 1)
+            return [y] + recursive_merge(lx_intern, ly_intern, ix_intern, iy_intern + 1)
     return recursive_merge(lx, ly, 0, 0)
 
 

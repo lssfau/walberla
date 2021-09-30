@@ -15,4 +15,4 @@ with CodeGeneration() as ctx:
                       + (dx**2 * (src[0, 1] + src[0, -1]))
                       - (rhs[0, 0] * dx**2 * dy**2)) / (2 * (dx**2 + dy**2))
 
-    generate_sweep(ctx, 'PoissonGPU', kernel_func, target='gpu')
+    generate_sweep(ctx, 'PoissonGPU', kernel_func, target=ps.Target.GPU)
