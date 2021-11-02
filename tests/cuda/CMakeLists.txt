@@ -12,6 +12,9 @@ waLBerla_execute_test( NAME  GPUPackInfoTest )
 waLBerla_compile_test( FILES communication/GPUPackInfoCommunicationTest.cpp DEPENDS domain_decomposition blockforest stencil )
 waLBerla_execute_test( NAME  GPUPackInfoCommunicationTest )
 
+waLBerla_compile_test( FILES communication/GPUBlockSelectorCommunicationTest.cpp DEPENDS domain_decomposition blockforest stencil )
+waLBerla_execute_test( NAME  GPUBlockSelectorCommunicationTest )
+
 waLBerla_compile_test( FILES FieldTransferTest )
 waLBerla_execute_test( NAME  FieldTransferTest )
 

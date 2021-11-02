@@ -26,17 +26,36 @@ namespace cuda {
 namespace communication {
 
 
-template<typename Stencil>
-UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf,
-                                             bool sendDirectlyFromGPU,
-                                             const int tag )
+   template<typename Stencil>
+   UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf,
+                                                bool sendDirectlyFromGPU,
+                                                const int tag )
         : blockForest_( bf ),
           setupBeforeNextCommunication_( true ),
           communicationInProgress_( false ),
           sendFromGPU_( sendDirectlyFromGPU ),
           bufferSystemCPU_( mpi::MPIManager::instance()->comm(), tag ),
           bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag ),
-          parallelSectionManager_( -1 )
+          parallelSectionManager_( -1 ),
+          requiredBlockSelectors_( Set<SUID>::emptySet() ),
+          incompatibleBlockSelectors_( Set<SUID>::emptySet() )
+   {}
+
+   template<typename Stencil>
+   UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf,
+                                                const Set<SUID> & requiredBlockSelectors,
+                                                const Set<SUID> & incompatibleBlockSelectors,
+                                                bool sendDirectlyFromGPU,
+                                                const int tag )
+      : blockForest_( bf ),
+        setupBeforeNextCommunication_( true ),
+        communicationInProgress_( false ),
+        sendFromGPU_( sendDirectlyFromGPU ),
+        bufferSystemCPU_( mpi::MPIManager::instance()->comm(), tag ),
+        bufferSystemGPU_( mpi::MPIManager::instance()->comm(), tag ),
+        parallelSectionManager_( -1 ),
+        requiredBlockSelectors_( requiredBlockSelectors ),
+        incompatibleBlockSelectors_( incompatibleBlockSelectors )
    {}
 
 
@@ -67,12 +86,19 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf
          for( auto &iBlock : *forest )
          {
             auto block = dynamic_cast< Block * >( &iBlock );
+
+            if( !selectable::isSetSelected( block->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+               continue;
+
             for( auto dir = Stencil::beginNoCenter(); dir != Stencil::end(); ++dir )
             {
                const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
                if( block->getNeighborhoodSectionSize( neighborIdx ) == uint_t( 0 ))
                   continue;
                auto nProcess = mpi::MPIRank( block->getNeighborProcess( neighborIdx, uint_t( 0 )));
+
+               if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+                  continue;
 
                for( auto &pi : packInfos_ )
                {
@@ -183,6 +209,9 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf
       for( auto &iBlock : *forest ) {
          auto block = dynamic_cast< Block * >( &iBlock );
 
+         if( !selectable::isSetSelected( block->getState(), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+            continue;
+
          for( auto dir = Stencil::beginNoCenter(); dir != Stencil::end(); ++dir ) {
             // skip if block has no neighbors in this direction
             const auto neighborIdx = blockforest::getBlockNeighborhoodSectionIndex( *dir );
@@ -195,6 +224,10 @@ UniformGPUScheme<Stencil>::UniformGPUScheme( weak_ptr <StructuredBlockForest> bf
                                    "Works for uniform setups only" )
 
             const BlockID &nBlockId = block->getNeighborId( neighborIdx, uint_t( 0 ));
+
+            if( !selectable::isSetSelected( block->getNeighborState( neighborIdx, uint_t(0) ), requiredBlockSelectors_, incompatibleBlockSelectors_ ) )
+               continue;
+
             auto nProcess = mpi::MPIRank( block->getNeighborProcess( neighborIdx, uint_t( 0 )));
 
             for( auto &pi : packInfos_ )
