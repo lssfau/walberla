@@ -330,18 +330,28 @@ inline std::istream & operator>>( std::istream & is, Cell & cell )
  *
  * \param [in]   cell  The cell to be hashed.
  *
- * \return  a hopefully unique hash.
+ * \return  a hash that is unique for cell indices from 0 to 2 million
+ *          (64bit architectures) or from 0 to 1000 (32bit architectures)
+ *          in all three dimensions.
  **********************************************************************************************************************/
 inline std::size_t hash_value( const Cell & cell )
 {
-  std::size_t seed = 0;
-  std::hash<cell_idx_t> hasher;
+   std::size_t seed;
 
-  seed ^= hasher(cell.x()) + 0x9e3779b9 + (seed<<6) + (seed>>2);
-  seed ^= hasher(cell.y()) + 0x9e3779b9 + (seed<<6) + (seed>>2);
-  seed ^= hasher(cell.z()) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+   if constexpr( sizeof(std::size_t) >= 8 )
+   {
+      seed = (static_cast<std::size_t>(cell.x()) << 42) +
+             (static_cast<std::size_t>(cell.y()) << 21) +
+             (static_cast<std::size_t>(cell.z()) << 0);
+   }
+   else
+   {
+      seed = (static_cast<std::size_t>(cell.x()) << 21) +
+             (static_cast<std::size_t>(cell.y()) << 10) +
+             (static_cast<std::size_t>(cell.z()) << 0);
+   }
 
-  return seed;
+   return seed;
 }
 
 

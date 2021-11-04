@@ -1557,21 +1557,27 @@ struct Vector2LexicographicalyLess
 /**
 // \brief Function providing a hash value for Vector2.
 //
-// \tparam  T Datatype of the Vector2's elements.
+// \tparam  T Datatype of the Vector2's elements (only integers are supported).
 // \param   v The vector the hash is computed for.
 // \returns   A hash for the entire Vector2.
 */
-template< typename T >
+template< typename T, typename Enable = std::enable_if_t<std::is_integral_v<T>> >
 std::size_t hash_value( const Vector2<T> & v )
 {
-   std::size_t seed = 0;
-   std::hash<T> hasher;
+   std::size_t seed;
 
-   seed ^= hasher(v[0]) + 0x9e3779b9 + (seed<<6) + (seed>>2);
-   seed ^= hasher(v[1]) + 0x9e3779b9 + (seed<<6) + (seed>>2);
+   if constexpr( sizeof(std::size_t) >= 8 )
+   {
+      seed = (static_cast<std::size_t>(v[0]) << 42) +
+             (static_cast<std::size_t>(v[1]) << 21);
+   }
+   else
+   {
+      seed = (static_cast<std::size_t>(v[0]) << 21) +
+             (static_cast<std::size_t>(v[1]) << 10);
+   }
 
    return seed;
-
 }
 //**********************************************************************************************************************
 
@@ -1687,7 +1693,7 @@ namespace std
     {
         std::size_t operator()( walberla::Vector2<T> const & v ) const noexcept
         {
-            return walberla::Vector2<T>::hash_value( v );
+            return walberla::math::hash_value( v );
         }
     };
 } // namespace std
