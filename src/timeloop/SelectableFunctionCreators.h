@@ -45,6 +45,8 @@ namespace timeloop {
          requiredSelectors_( requiredSelectors ), incompatibleSelectors_( incompatibleSelectors )
       {}
 
+      FuncCreator() = default;
+
       std::function< FuncType > function_;
       std::string                 identifier_;
       Set<SUID>                   requiredSelectors_;

@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -53,9 +53,18 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors)
                            "No sweep has been registered! Did you only register a BeforeFunction or AfterFunction?" );
          }
 
-         Sweep * selectedSweep = s.sweep.getUnique( selectors + bi->getState() );
-         if (!selectedSweep)
+         Sweep selectedSweep;
+         size_t numSweeps = s.sweep.get(selectedSweep, selectors + bi->getState());
+
+         // ensure that no more than one sweep has been added to a single SweepAdder object
+         if (numSweeps == size_t(0)) {
             continue;
+         } else {
+            if (numSweeps > size_t(1)) {
+               WALBERLA_ABORT("Only one sweep must be added to a single SweepAdder object. This error might be caused "
+                              "by e.g. \"timeloop.add() << Sweep(A) << Sweep(B);\".")
+            }
+         }
 
          WALBERLA_LOG_PROGRESS_SECTION()
          {
@@ -64,7 +73,7 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors)
             WALBERLA_LOG_PROGRESS("Running sweep \"" << sweepName << "\" on block " << bi->getId() );
          }
 
-         (selectedSweep->function_)( bi.get() );
+         (selectedSweep.function_)( bi.get() );
       }
 
       // select and execute after functions
@@ -105,17 +114,25 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors, WcTimingPool &timing)
 
       for( BlockStorage::iterator bi = blockStorage_.begin(); bi != blockStorage_.end(); ++bi )
       {
+         Sweep selectedSweep;
          std::string sweepName;
-         Sweep * selectedSweep = s.sweep.getUnique( selectors + bi->getState(), sweepName );
+         size_t numSweeps = s.sweep.get(selectedSweep, sweepName, selectors + bi->getState());
 
-         if( !selectedSweep )
+         // ensure that no more than one sweep has been added to a single SweepAdder object
+         if (numSweeps == size_t(0)) {
             continue;
+         } else {
+            if (numSweeps > size_t(1)) {
+               WALBERLA_ABORT("Only one sweep must be added to a single SweepAdder object. This error might be caused "
+                              "by e.g. \"timeloop.add() << Sweep(A) << Sweep(B);\".")
+            }
+         }
 
          WALBERLA_LOG_PROGRESS("Running sweep \"" << sweepName << "\" on block " << bi->getId() );
 
          // loop over all blocks
          timing[sweepName].start();
-            (selectedSweep->function_)( bi.get() );
+         (selectedSweep.function_)( bi.get() );
          timing[sweepName].end();
       }
 
