@@ -66,6 +66,11 @@ public:
    template<typename FlagField_T>
    void setFlag( const BlockDataID flagFieldID, field::FlagUID flagUID, Location boundaryLocation );
 
+   // set flag with FlagUID wherever boundaryUID is set
+   template< typename FlagField_T, typename BoundaryFunction, typename Stencil = stencil::D3Q27 >
+   void setBoundaryFlag(const BlockDataID flagFieldID, field::FlagUID flagUID, boundary::BoundaryUID boundaryUID,
+                        const BoundaryFunction& boundaryFunction, Location boundaryLocation);
+
    void writeVTKVoxelfile( const std::string & identifier = "voxelization", bool writeGhostLayers = false, const std::string & baseFolder = std::string("vtk_out"),
                            const std::string & executionFolder = std::string("voxelization") );
 
@@ -83,7 +88,7 @@ private:
    shared_ptr< BlockDataID >                  voxelizationFieldId_;
    DistanceFunction                           distanceFunction_;  /// function providing the squared signed distance to an object
    uint_t                                     numGhostLayers_;
-   size_t                                     cellVectorChunkSize_; /// Number of boundary cells which are setup simultaneously 
+   size_t                                     cellVectorChunkSize_; /// Number of boundary cells which are setup simultaneously
 };
 
 
@@ -105,19 +110,15 @@ void BoundarySetup::setDomainCells( const BlockDataID boundaryHandlingId, const 
 
       std::vector<Cell> domainCells;
 
-      for( cell_idx_t z = -cell_idx_c( numGhostLayers_ ); z < cell_idx_c( voxelizationField->zSize() + numGhostLayers_ ); ++z )
-         for( cell_idx_t y = -cell_idx_c( numGhostLayers_ ); y < cell_idx_c( voxelizationField->ySize() + numGhostLayers_ ); ++y )
-            for( cell_idx_t x = -cell_idx_c( numGhostLayers_ ); x < cell_idx_c( voxelizationField->xSize() + numGhostLayers_ ); ++x )
-            {
-               if( voxelizationField->get( x, y, z ) == domainValue )
-                  domainCells.emplace_back( x, y, z );
+      WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(voxelizationField, {
+         if (voxelizationField->get(x, y, z) == domainValue) { domainCells.emplace_back(x, y, z); }
 
-               if( domainCells.size() > cellVectorChunkSize_ )
-               {
-                  boundaryHandling->setDomain( domainCells.begin(), domainCells.end() );
-                  domainCells.clear();
-               }
-            }
+         if (domainCells.size() > cellVectorChunkSize_)
+         {
+            boundaryHandling->setDomain(domainCells.begin(), domainCells.end());
+            domainCells.clear();
+         }
+      })
 
       boundaryHandling->setDomain( domainCells.begin(), domainCells.end() );
    }
@@ -140,16 +141,68 @@ void BoundarySetup::setFlag( const BlockDataID flagFieldID, field::FlagUID flagU
 
       const uint8_t domainValue = boundaryLocation == INSIDE ? uint8_t(0) : uint8_t(1);
 
-      for( cell_idx_t z = -cell_idx_c( numGhostLayers_ ); z < cell_idx_c( voxelizationField->zSize() + numGhostLayers_ ); ++z )
-         for( cell_idx_t y = -cell_idx_c( numGhostLayers_ ); y < cell_idx_c( voxelizationField->ySize() + numGhostLayers_ ); ++y )
-            for( cell_idx_t x = -cell_idx_c( numGhostLayers_ ); x < cell_idx_c( voxelizationField->xSize() + numGhostLayers_ ); ++x )
-            {
-               if( voxelizationField->get( x, y, z ) != domainValue )
-                  flagField->addFlag(x, y, z, flag);
-            }
+      WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(voxelizationField, {
+         if (voxelizationField->get(x, y, z) != domainValue) { flagField->addFlag(x, y, z, flag); }
+      })
    }
 }
 
+template< typename FlagField_T, typename BoundaryFunction, typename Stencil >
+void BoundarySetup::setBoundaryFlag(const BlockDataID flagFieldID, field::FlagUID flagUID,
+                                    boundary::BoundaryUID boundaryUID, const BoundaryFunction& boundaryFunction,
+                                    Location boundaryLocation)
+{
+   for (auto& block : *structuredBlockStorage_)
+   {
+      FlagField_T* flagField = block.getData< FlagField_T >(flagFieldID);
+      WALBERLA_CHECK_NOT_NULLPTR(flagField, "flagFieldID invalid!");
+      auto flag = flagField->getFlag(flagUID);
+
+      const VoxelizationField* voxelizationField = block.getData< VoxelizationField >(*voxelizationFieldId_);
+      WALBERLA_ASSERT_NOT_NULLPTR(voxelizationField);
+      WALBERLA_CHECK_LESS_EQUAL(numGhostLayers_, flagField->nrOfGhostLayers(),
+                                "You want to use mesh boundary setup with "
+                                   << numGhostLayers_ << " but your flag field has only "
+                                   << flagField->nrOfGhostLayers() << " ghost layers!");
+
+      // get where the (fluid) domain is located (on the inside/outside of the mesh)
+      const uint8_t domainValue = boundaryLocation == INSIDE ? uint8_t(0) : uint8_t(1);
+
+      // get the cell interval covering the whole block
+      const CellInterval blockCi = voxelizationField->xyzSizeWithGhostLayer();
+
+      WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(voxelizationField, {
+         // only boundaries are set here, i.e., skip regions inside the (fluid) domain
+         if (voxelizationField->get(x, y, z) == domainValue) { continue; }
+
+         for (auto dirIt = Stencil::beginNoCenter(); dirIt != Stencil::end(); ++dirIt)
+         {
+            const Cell cell(x, y, z);
+            const Cell neighborCell = cell + *dirIt;
+
+            // this cell (x,y,z) is considered a boundary cell if the neighboring cell (x,y,z)+*dirIt
+            // - is still located on the same block AND
+            // - belongs to the (fluid) domain, i.e., not to the boundary
+            if (blockCi.contains(neighborCell) && voxelizationField->get(neighborCell) == domainValue)
+            {
+               const Vector3< real_t > cellCenter = structuredBlockStorage_->getBlockLocalCellCenter(block, cell);
+               const BoundaryInfo& bi             = boundaryFunction(cellCenter);
+
+               if (boundaryUID == bi.getUid())
+               {
+                  // clear existing flags
+                  flagField->removeMask(x, y, z, flagField->get(x, y, z));
+
+                  // add new flag
+                  flagField->addFlag(x, y, z, flag);
+               }
+
+               break;
+            }
+         }
+      })
+   }
+}
 
 template< typename BoundaryHandlingType, typename BoundaryFunction, typename Stencil >
 void BoundarySetup::setBoundaries( const BlockDataID boundaryHandlingID, const BoundaryFunction & boundaryFunction, Location boundaryLocation )
@@ -168,33 +221,27 @@ void BoundarySetup::setBoundaries( const BlockDataID boundaryHandlingID, const B
 
       const CellInterval blockCi = voxelizationField->xyzSizeWithGhostLayer();
 
-      for( cell_idx_t z = -cell_idx_c( numGhostLayers_ ); z < cell_idx_c( voxelizationField->zSize() + numGhostLayers_ ); ++z )
-         for( cell_idx_t y = -cell_idx_c( numGhostLayers_ ); y < cell_idx_c( voxelizationField->ySize() + numGhostLayers_ ); ++y )
-            for( cell_idx_t x = -cell_idx_c( numGhostLayers_ ); x < cell_idx_c( voxelizationField->xSize() + numGhostLayers_ ); ++x )
+      WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(voxelizationField, {
+         if (voxelizationField->get(x, y, z) == domainValue) { continue; }
+
+         for (auto dirIt = Stencil::beginNoCenter(); dirIt != Stencil::end(); ++dirIt)
+         {
+            const Cell cell(x, y, z);
+            const Cell neighborCell = cell + *dirIt;
+            if (blockCi.contains(neighborCell) && voxelizationField->get(neighborCell) == domainValue)
             {
-               if( voxelizationField->get( x, y, z ) == domainValue )
-                  continue;
+               const Vector3< real_t > cellCenter = structuredBlockStorage_->getBlockLocalCellCenter(block, cell);
+               const BoundaryInfo& bi             = boundaryFunction(cellCenter);
+               const auto boundaryMask            = boundaryHandling->getBoundaryMask(bi.getUid());
 
-               for(auto dirIt = Stencil::beginNoCenter(); dirIt != Stencil::end(); ++dirIt)
-               {
-                  const Cell cell( x, y, z );
-                  const Cell neighborCell = cell + *dirIt;
-                  if( blockCi.contains( neighborCell ) && voxelizationField->get( neighborCell ) == domainValue )
-                  {
-                     const Vector3< real_t > cellCenter = structuredBlockStorage_->getBlockLocalCellCenter( block, cell );
-                     const BoundaryInfo & bi = boundaryFunction( cellCenter );
-                     const auto boundaryMask = boundaryHandling->getBoundaryMask( bi.getUid() );
+               boundaryHandling->setBoundary(boundaryMask, cell.x(), cell.y(), cell.z(), *(bi.getConfig()));
 
-                     boundaryHandling->setBoundary( boundaryMask, cell.x(), cell.y(), cell.z(), *( bi.getConfig() ) );
-
-                     break;
-                  }
-               }
+               break;
             }
+         }
+      })
    }
 }
-
-
 
 } // namespace mesh
 } // namespace walberla
