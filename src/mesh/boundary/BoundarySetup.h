@@ -16,6 +16,7 @@
 //! \file BoundarySetup.h
 //! \ingroup mesh
 //! \author Christian Godenschwager <christian.godenschwager@fau.de>
+//! \author Christoph Schwarzmeier <christoph.schwarzmeier@fau.de>
 //
 //======================================================================================================================
 
@@ -110,7 +111,7 @@ void BoundarySetup::setDomainCells( const BlockDataID boundaryHandlingId, const 
 
       std::vector<Cell> domainCells;
 
-      WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(voxelizationField, {
+      WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ_OMP(voxelizationField, omp critical, {
          if (voxelizationField->get(x, y, z) == domainValue) { domainCells.emplace_back(x, y, z); }
 
          if (domainCells.size() > cellVectorChunkSize_)
