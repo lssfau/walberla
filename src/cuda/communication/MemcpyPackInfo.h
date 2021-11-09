@@ -19,11 +19,11 @@ public:
     MemcpyPackInfo( BlockDataID pdfsID_ )
         : pdfsID(pdfsID_), numberOfGhostLayers_(0), communicateAllGhostLayers_(true)
     {};
-    virtual ~MemcpyPackInfo() {};
+    virtual ~MemcpyPackInfo() = default;
 
-    virtual void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block, cudaStream_t stream);
-    virtual void unpack(stencil::Direction dir, unsigned char * buffer, IBlock * block, cudaStream_t stream);
-    virtual uint_t size(stencil::Direction dir, IBlock * block);
+    void pack  (stencil::Direction dir, unsigned char * buffer, IBlock * block, cudaStream_t stream) override;
+    void unpack(stencil::Direction dir, unsigned char * buffer, IBlock * block, cudaStream_t stream) override;
+    uint_t size(stencil::Direction dir, IBlock * block) override;
 
 private:
     BlockDataID pdfsID;

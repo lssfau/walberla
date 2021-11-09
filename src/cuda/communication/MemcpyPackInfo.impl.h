@@ -20,7 +20,7 @@ void MemcpyPackInfo< GPUFieldType >::pack(stencil::Direction dir, unsigned char 
 {
    // Extract field data pointer from the block
    const GPUFieldType * fieldPtr = block->getData< GPUFieldType >( pdfsID );
-   WALBERLA_ASSERT_NOT_NULLPTR( fieldPtr );
+   WALBERLA_ASSERT_NOT_NULLPTR( fieldPtr )
    // 
    cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( fieldPtr ) );
    CellInterval fieldCi = field::getGhostRegion( *fieldPtr, dir, nrOfGhostLayers, false );
@@ -70,7 +70,7 @@ void MemcpyPackInfo< GPUFieldType >::unpack(stencil::Direction dir, unsigned cha
                                             IBlock * block, cudaStream_t stream)
 {
    GPUFieldType * fieldPtr = block->getData< GPUFieldType >( pdfsID );
-   WALBERLA_ASSERT_NOT_NULLPTR(fieldPtr);
+   WALBERLA_ASSERT_NOT_NULLPTR(fieldPtr)
 
    cell_idx_t nrOfGhostLayers = cell_idx_c( numberOfGhostLayersToCommunicate( fieldPtr ) );
 
@@ -221,7 +221,7 @@ uint_t MemcpyPackInfo< GPUFieldType >::numberOfGhostLayersToCommunicate( const G
    }
    else
    {
-      WALBERLA_ASSERT_LESS_EQUAL( numberOfGhostLayers_, field->nrOfGhostLayers() );
+      WALBERLA_ASSERT_LESS_EQUAL( numberOfGhostLayers_, field->nrOfGhostLayers() )
       return numberOfGhostLayers_;
    }
 }
