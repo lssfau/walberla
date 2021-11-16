@@ -236,7 +236,7 @@ class KernelFamily:
         return self._ast_attrs[name]
 
     def get_headers(self):
-        all_headers = [get_headers(ast) for ast in self.all_asts]
+        all_headers = [list(get_headers(ast)) for ast in self.all_asts]
         return reduce(merge_sorted_lists, all_headers)
 
     def generate_kernel_invocation_code(self, **kwargs):
