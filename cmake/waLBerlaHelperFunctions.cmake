@@ -79,7 +79,7 @@ function( waLBerla_generate_target_from_python )
 
     add_custom_command(OUTPUT ${generatedWithAbsolutePath}
           DEPENDS ${sourceFile}
-          COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${WALBERLA_PYTHON_DIR}:$ENV{PYTHONPATH} ${PYTHON_EXECUTABLE} ${sourceFile} ${pythonParameters}
+          COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${WALBERLA_PYTHON_DIR}:$ENV{PYTHONPATH} ${Python_EXECUTABLE} ${sourceFile} ${pythonParameters}
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
 
     add_library(${PYGEN_NAME} ${generatedWithAbsolutePath})

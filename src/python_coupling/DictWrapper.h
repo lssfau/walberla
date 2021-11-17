@@ -60,7 +60,6 @@ namespace python_coupling {
 
 
 #ifdef WALBERLA_BUILD_WITH_PYTHON
-   public:
             pybind11::dict & dict()        { return d_; }
       const pybind11::dict & dict() const  { return d_; }
    protected:

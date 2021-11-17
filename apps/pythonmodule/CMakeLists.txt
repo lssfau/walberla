@@ -25,10 +25,9 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
             SUFFIX "${PYTHON_MODULE_EXTENSION}"
     )
     set_target_properties( walberla_cpp PROPERTIES MACOSX_RPATH TRUE )
-    set_target_properties( walberla_cpp PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
     configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/setup.py  ${CMAKE_CURRENT_BINARY_DIR}/setup.py )
 
-    add_custom_target( pythonModule        ALL ${PYTHON_EXECUTABLE} setup.py build   DEPENDS walberla_cpp )
-    add_custom_target( pythonModuleInstall     ${PYTHON_EXECUTABLE} setup.py install --user DEPENDS walberla_cpp )
+    add_custom_target( pythonModule        ALL ${Python_EXECUTABLE} setup.py build   DEPENDS walberla_cpp )
+    add_custom_target( pythonModuleInstall     ${Python_EXECUTABLE} setup.py install --user DEPENDS walberla_cpp )
 endif()

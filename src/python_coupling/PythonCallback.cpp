@@ -22,7 +22,7 @@
 
 #include "PythonCallback.h"
 #include "DictWrapper.h"
-
+#include "core/logging/all.h"
 #ifdef WALBERLA_BUILD_WITH_PYTHON
 
 #include "Manager.h"
@@ -69,7 +69,6 @@ namespace python_coupling {
       }
       catch ( py::error_already_set &e) {
          throw py::value_error(e.what());
-         return py::none();
       }
    }
 
@@ -122,7 +121,7 @@ namespace python_coupling {
    {
       if ( ! isCallable() )
          WALBERLA_ABORT_NO_DEBUG_INFO( "Could not call python function '" << functionName_ << "'. " <<
-                                             "Did you forget to set the callback function?" );
+                                             "Did you forget to set the callback function?" )
 
       namespace py = pybind11;
 

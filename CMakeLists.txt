@@ -578,18 +578,19 @@ endif ( )
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CODEGEN )
-   find_package( PythonInterp 3 QUIET REQUIRED)
-   execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import lbmpy"
+   set( Python_FIND_FRAMEWORK LAST )
+    find_package (Python COMPONENTS Interpreter Development)
+   execute_process(COMMAND ${Python_EXECUTABLE} -c "import lbmpy"
          RESULT_VARIABLE LBMPY_FOUND )
     if(NOT LBMPY_FOUND EQUAL 0)
        message(FATAL_ERROR "WALBERLA_BUILD_WITH_CODEGEN activated but pystencils or lbmpy package not found.
                             Please install lbmpy e.g.: 'pip3 install lbmpy'")
     endif()
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "from pystencils.include import get_pystencils_include_path; print(get_pystencils_include_path())"
+    execute_process(COMMAND ${Python_EXECUTABLE} -c "from pystencils.include import get_pystencils_include_path; print(get_pystencils_include_path())"
                     OUTPUT_VARIABLE PYSTENCILS_INCLUDE_PATH)
     include_directories( ${PYSTENCILS_INCLUDE_PATH} )
 
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import jinja2"
+    execute_process(COMMAND ${Python_EXECUTABLE} -c "import jinja2"
           RESULT_VARIABLE JINJA2_FOUND )
     if(NOT JINJA2_FOUND EQUAL 0)
        message(FATAL_ERROR "WALBERLA_BUILD_WITH_CODEGEN activated and jinja2 package not found.
@@ -607,13 +608,8 @@ endif()
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_PYTHON )
-
-    find_package( PythonInterp 3.6 QUIET REQUIRED)
-    find_package( PythonLibs QUIET REQUIRED)
-
-    if( NOT (PYTHON_LIBRARY AND PYTHON_INCLUDE_DIR ) )
-        message( FATAL_ERROR "Couldn't find any python library" )
-    endif()
+   set( Python_FIND_FRAMEWORK LAST )
+    find_package( Python COMPONENTS Interpreter Development REQUIRED)
 
     if(WALBERLA_CXX_COMPILER_IS_INTEL)
         # Intel C++17 support introduced in 2.6.2 (https://github.com/pybind/pybind11/pull/2729)
@@ -622,11 +618,11 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
         set(PYBIND11_MINIMUM_VERSION "2.6.0")
     endif()
 
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import pybind11; print(pybind11._version.__version__)"
+    execute_process(COMMAND ${Python_EXECUTABLE} -c "import pybind11; print(pybind11._version.__version__)"
                     OUTPUT_VARIABLE pybind11_VERSION ERROR_QUIET RESULT_VARIABLE pybind11_VERSION_RESULT)
     string(STRIP "${pybind11_VERSION}" pybind11_VERSION)
     if(pybind11_VERSION_RESULT EQUAL "0" AND pybind11_VERSION VERSION_GREATER_EQUAL "${PYBIND11_MINIMUM_VERSION}")
-        execute_process(COMMAND ${PYTHON_EXECUTABLE} -m pybind11 --cmakedir
+        execute_process(COMMAND ${Python_EXECUTABLE} -m pybind11 --cmakedir
                         OUTPUT_VARIABLE PYBIND11_CMAKE_PATH)
         string(STRIP "${PYBIND11_CMAKE_PATH}" PYBIND11_CMAKE_PATH)
         find_package(pybind11 PATHS "${PYBIND11_CMAKE_PATH}" NO_DEFAULT_PATH REQUIRED)
@@ -656,10 +652,10 @@ if ( WALBERLA_BUILD_WITH_PYTHON )
         add_subdirectory(extern/pybind11)
 
         if(pybind11_VERSION VERSION_LESS "2.6.2")
-            # if pybind11 was installed into ${PYTHON_INCLUDE_DIR} (e.g. by pip), that will have a higher priority than the Git submodule unless we reorder the search path
+            # if pybind11 was installed into ${Python_INCLUDE_DIRS} (e.g. by pip), that will have a higher priority than the Git submodule unless we reorder the search path
             # introduced in 2.6.0 (https://github.com/pybind/pybind11/issues/2709), fixed in 2.6.2 (https://github.com/pybind/pybind11/pull/2716)
             set_property( TARGET pybind11::pybind11
-                          PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/extern/pybind11/include" "${PYTHON_INCLUDE_DIR}")
+                          PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/extern/pybind11/include" "${Python_INCLUDE_DIRS}")
         endif()
     endif()
 

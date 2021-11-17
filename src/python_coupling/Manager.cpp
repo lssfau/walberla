@@ -97,6 +97,7 @@ void Manager::triggerInitialization()
       py::module::import("__main__");
       py::module::import("walberla_cpp");
 
+
       // Setup python path
       addPath( std::string(WALBERLA_SOURCE_DIR) + "/python" );
 
