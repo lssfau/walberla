@@ -16,6 +16,5 @@ foreach(config srt trt smagorinsky mrt entropic_kbc_n4 cumulant )
           FILES UniformGridGenerated.cpp
           DEPENDS blockforest boundary core domain_decomposition field geometry timeloop vtk gui
           UniformGridGenerated_${config} python_coupling)
-    set_target_properties(UniformGridBenchmarkGenerated_${config} PROPERTIES CXX_VISIBILITY_PRESET hidden)
 
 endforeach()

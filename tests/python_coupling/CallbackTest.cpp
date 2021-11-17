@@ -32,14 +32,18 @@
 
 using namespace walberla;
 
+using ScalarField = GhostLayerField<int, 1>;
+
 
 int main( int argc, char ** argv )
 {
    auto pythonManager = python_coupling::Manager::instance();
-   pythonManager->addExporterFunction( field::exportModuleToPython<Field<int,1>> );
+   pythonManager->addExporterFunction( field::exportModuleToPython<Field<int, 1>> );
+   pythonManager->triggerInitialization();
 
-   if ( argc != 2 ) {
-      WALBERLA_ABORT_NO_DEBUG_INFO("Wrong parameter count: \nUsage: \n ./CallbackTest CallbackTest.py");
+   if ( argc != 2 )
+   {
+      WALBERLA_ABORT_NO_DEBUG_INFO("Wrong parameter count: \nUsage: \n ./CallbackTest CallbackTest.py")
    }
    std::string pythonFile ( argv[1] );
 
@@ -58,25 +62,27 @@ int main( int argc, char ** argv )
 
    // This callback should sum up the two given integers
    python_coupling::PythonCallback cb1 ( pythonFile, "cb1" );
-   WALBERLA_ASSERT( cb1.isCallable() );
+   WALBERLA_ASSERT( cb1.isCallable() )
+
    cb1.data().exposeValue("input1", 5);
    cb1.data().exposeValue("input2", 10);
    cb1();
-   int result = cb1.data().get<int>( "returnValue" );
-   WALBERLA_CHECK_EQUAL( result, 15 );
 
-   typedef GhostLayerField<int,1> ScalarField;
+   int result = cb1.data().get<int>( "returnValue" );
+
+   WALBERLA_CHECK_EQUAL( result, 15 )
+
+
    ScalarField f ( 3,2,2, 1, 25 );
    python_coupling::PythonCallback cb2 ( pythonFile, "cb2" );
-   WALBERLA_ASSERT( cb2.isCallable() );
+
+   WALBERLA_ASSERT( cb2.isCallable() )
+
    cb2.data().exposePtr("field", &f );
    cb2();
-   WALBERLA_CHECK_EQUAL( f(0,0,0), 42 );
-   WALBERLA_CHECK_EQUAL( f(-1,-1,-1), 5 );
 
+   WALBERLA_CHECK_EQUAL( f(0,0,0), 42 )
+   WALBERLA_CHECK_EQUAL( f(-1,-1,-1), 5 )
 
-   //python_coupling::Shell shell("MyGreatInputShell");
-   //shell();
-
-   return 0;
+   return EXIT_SUCCESS;
 }

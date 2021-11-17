@@ -10,7 +10,7 @@ cmake -LAH -G"Visual Studio 15 2017 Win64"                   ^
   -DCMAKE_FIND_ROOT_PATH="%LIBRARY_PREFIX%"                  ^
   -DCMAKE_INSTALL_PREFIX="%LIBRARY_PREFIX%"                  ^
   -DBUILD_APPS=OFF                                           ^
-  -DPYTHON_LIBRARY:FILEPATH="%PYTHON_LIBRARY%"               ^
+  -DPython_EXECUTABLE:FILEPATH="%PYTHON_LIBRARY%"               ^
   -DOPENMESH_PYTHON_VERSION="%PY_VER%"                       ^
   -DPYTHON_INSTALL_DIR="%SP_DIR%"                            ^
   -DOPENMESH_BUILD_PYTHON_UNIT_TESTS=ON ..

@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 
       WALBERLA_CHECK(testString == "someString")
       WALBERLA_CHECK(testDouble > 42 && testDouble < 43)
-      WALBERLA_CHECK(testVector == Vector3< real_t >(0.5, 0.5, 0.7))
+      WALBERLA_CHECK(testVector == Vector3< real_t >(real_c(0.5), real_c(0.5), real_c(0.7)))
       WALBERLA_CHECK(testBool == false)
 
       WALBERLA_LOG_INFO_ON_ROOT(test_int)

@@ -28,6 +28,14 @@
 
 #ifdef WALBERLA_BUILD_WITH_PYTHON // macro defined in waLBerlaDefinitions.h
 
+#define PYBIND11_NAMESPACE walberla::pybind11
+
+namespace PYBIND11_NAMESPACE {}
+namespace pybind11 {
+   // pybind11 uses ::pybind11 in a few places internally, so we need this alias
+   using namespace PYBIND11_NAMESPACE;
+}
+
 #include "pybind11/pybind11.h"
 
 #endif
