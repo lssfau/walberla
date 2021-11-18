@@ -62,7 +62,7 @@ public:
 
       // Calculating the tangential force based on the model by Haff and Werner
       const real_t fTabs( std::min( getDampingT(c) * relVelT.length(), getFriction(c) * fNabs ) );
-      const Vec3   fT   ( fTabs * relVelT.getNormalizedOrZero() );
+      const Vec3   fT   ( fTabs * relVelT.getNormalizedIfNotZero() );
 
       // Add normal force at contact point
       b1->addForceAtPos(  fN, gpos );

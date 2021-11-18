@@ -158,7 +158,7 @@ inline void SpringDashpotSpring::operator()(const size_t p_idx1,
       const Vec3   relVel ( -(getVelocityAtWFPoint(p_idx1, ac, contactPoint) - getVelocityAtWFPoint(p_idx2, ac, contactPoint)) );
       const real_t relVelN( math::dot(relVel, contactNormal) );
       const Vec3   relVelT( relVel - ( relVelN * contactNormal ) );
-      const Vec3   contactTangent = relVelT.getNormalizedOrZero();
+      const Vec3   contactTangent = relVelT.getNormalizedIfNotZero();
 
       // Calculating the normal force based on a linear spring-dashpot force model
       real_t fNabs = getStiffnessN(ac.getType(p_idx1), ac.getType(p_idx2)) * delta + getDampingN(ac.getType(p_idx1), ac.getType(p_idx2)) * relVelN;
@@ -180,7 +180,7 @@ inline void SpringDashpotSpring::operator()(const size_t p_idx1,
       const auto maxTangentialForce = fNabs * getCoefficientOfFriction(ac.getType(p_idx1), ac.getType(p_idx2));
       Vec3 fT = getStiffnessT(ac.getType(p_idx1), ac.getType(p_idx2)) * tangentialDisplacement;
       if (length(fT) > maxTangentialForce)
-         fT = maxTangentialForce * fT.getNormalizedOrZero();
+         fT = maxTangentialForce * fT.getNormalizedIfNotZero();
 
       // store new tangential displacements
       auto& ch1 = ac.getNewContactHistoryRef(p_idx1)[ac.getUid(p_idx2)];

@@ -238,7 +238,7 @@ inline void SpringDashpot::operator()(const size_t p_idx1,
 
       // Calculating the tangential force based on the model by Haff and Werner
       const real_t fTabs( std::min( getDampingT(ac.getType(p_idx1), ac.getType(p_idx2)) * relVelT.length(), getFriction(ac.getType(p_idx1), ac.getType(p_idx2)) * fNabs ) );
-      const Vec3   fT   ( fTabs * relVelT.getNormalizedOrZero() );
+      const Vec3   fT   ( fTabs * relVelT.getNormalizedIfNotZero() );
 
       // Add normal force at contact point
       addForceAtWFPosAtomic( p_idx1, ac,  fN, gpos );

@@ -306,9 +306,9 @@ bool EPA::doEPA( Support &geom1,
                break;
             }
 
-            normal = current->getNormal().getNormalizedOrZero();
+            normal = current->getNormal().getNormalizedIfNotZero();
          }else{
-            normal = current->getClosest().getNormalizedOrZero();
+            normal = current->getClosest().getNormalizedIfNotZero();
          }
          //std::cerr << "Current Closest: " << current->getClosest();
          //std::cerr << "New support direction: " <<  normal << std::endl;
@@ -472,7 +472,7 @@ bool EPA::doEPA( Support &geom1,
    } while (!entryHeap.empty() && entryHeap[0]->getSqrDist() <= upperBoundSqr);
 
    //Normal must be inverted
-   retNormal   = -current->getClosest().getNormalizedOrZero();
+   retNormal   = -current->getClosest().getNormalizedIfNotZero();
 
    //Calculate Witness points
    const Vec3 wittnessA = current->getClosestPoint(supportA);
@@ -543,11 +543,11 @@ inline void EPA::createInitialSimplex( size_t numPoints,
          axis = Vec3(real_t(0.0), real_t(0.0), real_t(1.0));
       }
 
-      Vec3 direction1 = (d % axis).getNormalizedOrZero();
+      Vec3 direction1 = (d % axis).getNormalizedIfNotZero();
       Quat q(d, (real_t(2.0)/real_t(3.0)) * real_t(walberla::math::pi));
       Mat3 rot = q.toRotationMatrix();
-      Vec3 direction2 = (rot*direction1).getNormalizedOrZero();
-      Vec3 direction3 = (rot*direction2).getNormalizedOrZero();
+      Vec3 direction2 = (rot*direction1).getNormalizedIfNotZero();
+      Vec3 direction3 = (rot*direction2).getNormalizedIfNotZero();
 
       //add point in positive normal direction1
       pushSupportMargin(geom1, geom2, direction1, margin, epaVolume, supportA, supportB);
@@ -620,7 +620,7 @@ inline void EPA::createInitialSimplex( size_t numPoints,
 
       const Vec3  AB  = B-A;       //The vector A->B
       const Vec3  AC  = C-A;       //The vector A->C
-      const Vec3  ABC = (AB%AC).getNormalizedOrZero();     //The the normal pointing towards the viewer if he sees a CCW triangle ABC
+      const Vec3  ABC = (AB%AC).getNormalizedIfNotZero();     //The the normal pointing towards the viewer if he sees a CCW triangle ABC
 
       //add point in positive normal direction
       pushSupportMargin(geom1, geom2, ABC, margin, epaVolume, supportA, supportB);
@@ -850,7 +850,7 @@ inline bool EPA::searchTetrahedron(Support &geom1,
          /*std::cerr << "Search Direction is: "<< newSearchDirection << std::endl;
                    std::cerr << "Projection of unnecc. point " << pointIndexToRemove << ": " << epaVolume[pointIndexToRemove] * newSearchDirection << std::endl;
                    std::cerr << "Projection of other points: " << epaVolume[(pointIndexToRemove+1)%4] * newSearchDirection << std::endl;*/
-         newSearchDirection = newSearchDirection.getNormalizedOrZero();
+         newSearchDirection = newSearchDirection.getNormalizedIfNotZero();
          /*supportA[pointIndexToRemove] = geom1.supportContactThreshold(newSearchDirection);
                    supportB[pointIndexToRemove] = geom2.supportContactThreshold(-newSearchDirection);
                    epaVolume[pointIndexToRemove] = supportA[pointIndexToRemove] - supportB[pointIndexToRemove];*/

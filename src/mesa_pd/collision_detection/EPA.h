@@ -409,7 +409,7 @@ inline void EPA::pushSupportMargin(const Support &geom1,
 {
    Vec3 ndir;
    if(floatIsEqual(dir.sqrLength(), real_t(1.0))){
-      ndir = dir.getNormalizedOrZero();
+      ndir = dir.getNormalizedIfNotZero();
    }else{
       ndir = dir;
    }
@@ -443,7 +443,7 @@ inline void EPA::replaceSupportMargin(const Support &geom1,
 {
    Vec3 ndir;
    if(floatIsEqual(dir.sqrLength(), real_t(1.0))){
-      ndir = dir.getNormalizedOrZero();
+      ndir = dir.getNormalizedIfNotZero();
    }else{
       ndir = dir;
    }
