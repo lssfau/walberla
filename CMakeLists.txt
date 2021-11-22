@@ -569,8 +569,17 @@ if ( WALBERLA_CXX_COMPILER_IS_MSVC )
 endif ( )
 ############################################################################################################################
 
+############################################################################################################################
+##
+## Python
+##
+#############################################################################################################################
 
-
+if ( WALBERLA_BUILD_WITH_CODEGEN OR WALBERLA_BUILD_WITH_PYTHON )
+   cmake_policy( SET CMP0094 NEW )
+   set( Python_FIND_FRAMEWORK LAST )
+   find_package (Python COMPONENTS Interpreter Development)
+endif()
 
 ############################################################################################################################
 ##
@@ -578,8 +587,6 @@ endif ( )
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CODEGEN )
-   set( Python_FIND_FRAMEWORK LAST )
-    find_package (Python COMPONENTS Interpreter Development)
    execute_process(COMMAND ${Python_EXECUTABLE} -c "import lbmpy"
          RESULT_VARIABLE LBMPY_FOUND )
     if(NOT LBMPY_FOUND EQUAL 0)
@@ -608,9 +615,6 @@ endif()
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_PYTHON )
-   set( Python_FIND_FRAMEWORK LAST )
-    find_package( Python COMPONENTS Interpreter Development REQUIRED)
-
     if(WALBERLA_CXX_COMPILER_IS_INTEL)
         # Intel C++17 support introduced in 2.6.2 (https://github.com/pybind/pybind11/pull/2729)
         set(PYBIND11_MINIMUM_VERSION "2.6.2")
