@@ -130,7 +130,7 @@ bool detectSphereBoxCollision( const Vec3&   pos1,
    if( dist < contactThreshold )
    {
       contactPoint     = pos2+q;
-      contactNormal    = n.getNormalizedOrZero();
+      contactNormal    = n.getNormalizedIfNotZero();
       if (contactNormal.sqrLength() < real_t(0.1))
       {
          contactNormal = Vec3(1,0,0);

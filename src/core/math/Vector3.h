@@ -165,6 +165,7 @@ public:
    inline Type            sqrLength()                    const;
    inline Vector3<Length> getNormalized()                const;
    inline Vector3<Length> getNormalizedOrZero()          const;
+   inline Vector3<Length> getNormalizedIfNotZero()       const;
    inline void            reset();
    inline Type*           data()                         {return v_;}
    inline Type const *    data()                         const {return v_;}
@@ -858,13 +859,38 @@ Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalized() const
 //**********************************************************************************************************************
 
 //**********************************************************************************************************************
-/*!\fn Vector3<Length>& Vector3<Type>::getNormalized() const
+/*!\fn Vector3<Length>& Vector3<Type>::getNormalizedOrZero() const
+// \brief Calculation of the normalized vector (\f$|\vec{a}|=1\f$) without precondition.
+//
+// \return The normalized vector or a vector with all components equal to zero if vector is too small.
+*/
+template< typename Type >
+Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedOrZero() const
+{
+   const Length len( length() );
+
+   if (floatIsEqual( len, Length(0) )) { return Vector3<Length>( static_cast<Length>( 0 ) ); }
+
+   const Length ilen( Length(1) / len );
+
+   const Vector3<Length> result ( static_cast<Length>( v_[0] ) * ilen,
+                                  static_cast<Length>( v_[1] ) * ilen,
+                                  static_cast<Length>( v_[2] ) * ilen );
+
+   WALBERLA_ASSERT_FLOAT_EQUAL( result.sqrLength(), 1.0, "initial vector: " << result );
+
+   return result;
+}
+//**********************************************************************************************************************
+
+//**********************************************************************************************************************
+/*!\fn Vector3<Length>& Vector3<Type>::getNormalizedIfNotZero() const
 // \brief Calculation of the normalized vector (\f$|\vec{a}|=1\f$) without precondition.
 //
 // \return The normalized vector or the original vector if vector is too small.
 */
 template< typename Type >
-Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedOrZero() const
+Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedIfNotZero() const
 {
    const Length len( length() );
 
@@ -872,9 +898,9 @@ Vector3<typename Vector3<Type>::Length> Vector3<Type>::getNormalizedOrZero() con
 
    const Length ilen( Length(1) / len );
 
-   Vector3<Length> result ( static_cast<Length>( v_[0] ) * ilen,
-                            static_cast<Length>( v_[1] ) * ilen,
-                            static_cast<Length>( v_[2] ) * ilen );
+   const Vector3<Length> result ( static_cast<Length>( v_[0] ) * ilen,
+                                  static_cast<Length>( v_[1] ) * ilen,
+                                  static_cast<Length>( v_[2] ) * ilen );
 
    WALBERLA_ASSERT_FLOAT_EQUAL( result.sqrLength(), 1.0, "initial vector: " << result );
 

@@ -207,7 +207,7 @@ inline void NonLinearSpringDashpot::operator()(const size_t p_idx1,
       Vec3 fTLS = stiffnessT * newTangentialSpringDisplacement +
                   dampingT * relVelT;
 
-      const Vec3 t = fTLS.getNormalizedOrZero(); // tangential unit vector
+      const Vec3 t = fTLS.getNormalizedIfNotZero(); // tangential unit vector
 
       // calculate friction force
       const real_t fFrictionAbsStatic = getFrictionCoefficientStatic(ac.getType(p_idx1), ac.getType(p_idx2)) * fN.length(); // sticking, rolling
