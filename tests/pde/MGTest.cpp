@@ -71,6 +71,7 @@ void initU( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
          sum += u->get( *cell );
       }
    }
+   WALBERLA_UNUSED(sum);
 }
 
 
