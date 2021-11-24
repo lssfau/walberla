@@ -48,7 +48,7 @@ void simpleTiming()
          sum += 1;
       pool["In the loop"].end();
    }
-
+   WALBERLA_UNUSED(sum);
    pool["All Together"].end();
 
    cout << pool << endl;
@@ -68,7 +68,7 @@ void scopedTimer()
          sum += std::asin( std::sin( d ) );
          sum += std::acos( std::cos( d ) );
       }
-
+      WALBERLA_UNUSED(sum);
       pool["normal timer"].end();
    }
 
