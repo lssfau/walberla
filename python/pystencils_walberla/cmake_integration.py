@@ -64,9 +64,9 @@ def parse_json_args():
     expected_files = parsed['EXPECTED_FILES']
     cmake_vars = {}
     for key, value in parsed['CMAKE_VARS'].items():
-        if value.lower() in ("on", "1", "yes", "true"):
+        if str(value).lower() in ("on", "1", "yes", "true"):
             value = True
-        elif value.lower() in ("off", "0", "no", "false"):
+        elif str(value).lower() in ("off", "0", "no", "false"):
             value = False
         cmake_vars[key] = value
     return expected_files, cmake_vars
