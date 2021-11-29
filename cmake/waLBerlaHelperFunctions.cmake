@@ -176,6 +176,8 @@ function ( waLBerla_export )
     set( WALBERLA_CXX_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED} CACHE INTERNAL "CXX Standard Required")
     set( WALBERLA_CXX_EXTENSIONS ${CMAKE_CXX_EXTENSIONS} CACHE INTERNAL "CXX Extensions")
 
+    set( WALBERLA_Python_EXECUTABLE ${Python_EXECUTABLE} CACHE INTERNAL "Python EXECUTABLE")
+
 endfunction( waLBerla_export)
 
 #######################################################################################################################
@@ -234,6 +236,8 @@ function ( waLBerla_import )
     set( CMAKE_CXX_STANDARD ${WALBERLA_CXX_STANDARD}  PARENT_SCOPE)
     set( CMAKE_CXX_STANDARD_REQUIRED ${WALBERLA_STANDARD_REQUIRED} PARENT_SCOPE)
     set( CMAKE_CXX_EXTENSIONS ${WALBERLA_EXTENSIONS} PARENT_SCOPE)
+
+    set( Python_EXECUTABLE ${WALBERLA_Python_EXECUTABLE} PARENT_SCOPE)
 
     link_directories( ${WALBERLA_LINK_DIRS} )
 endfunction( waLBerla_import)
