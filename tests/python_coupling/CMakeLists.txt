@@ -20,7 +20,7 @@ if (WALBERLA_BUILD_WITH_PYTHON)
                            COMMAND $<TARGET_FILE:FieldExportTest> ${CMAKE_CURRENT_SOURCE_DIR}/FieldExportTest.py )
 
     add_test( NAME PythonWalberlaTest
-          COMMAND python3 -m unittest discover waLBerla_tests/ WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python/)
+          COMMAND ${Python_EXECUTABLE} -m unittest discover waLBerla_tests/ WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/python/)
     SET_TESTS_PROPERTIES(PythonWalberlaTest
           PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/apps/pythonmodule:$PYTHONPATH")
 endif()
