@@ -38,8 +38,8 @@ waLBerla_compile_test( FILES adaptors/AdaptorTest.cpp DEPENDS blockforest gui lb
 waLBerla_execute_test( NAME AdaptorTest )
 
 waLBerla_compile_test( FILES FieldGatherTest.cpp DEPENDS blockforest gui )
-waLBerla_execute_test( NAME FieldGatherTest3 COMMAND $<TARGET_FILE:FieldGatherTest>  PROCESSES 3 )
-waLBerla_execute_test( NAME FieldGatherTest1 COMMAND $<TARGET_FILE:FieldGatherTest>  PROCESSES 1 )
+waLBerla_execute_test( NAME FieldGatherTest3 COMMAND $<TARGET_FILE:FieldGatherTest>  PROCESSES 3 DEPENDS_ON_TARGETS FieldGatherTest )
+waLBerla_execute_test( NAME FieldGatherTest1 COMMAND $<TARGET_FILE:FieldGatherTest>  PROCESSES 1 DEPENDS_ON_TARGETS FieldGatherTest )
 
 waLBerla_compile_test( FILES FieldFileIOTest.cpp DEPENDS blockforest )
 waLBerla_execute_test( NAME FieldFileIOTest1Proc  COMMAND $<TARGET_FILE:FieldFileIOTest> PROCESSES 1  )

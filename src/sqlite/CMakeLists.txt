@@ -4,7 +4,12 @@
 #
 ###################################################################################################
 
-waLBerla_add_module( DEPENDS core )
-target_link_libraries( sqlite PRIVATE sqlite3 )
+add_library( sqlite )
+target_link_libraries( sqlite PUBLIC core PRIVATE sqlite3 )
+target_sources( sqlite
+      PRIVATE
+      SQLite.cpp
+      SQLite.h
+      )
 
 ###################################################################################################

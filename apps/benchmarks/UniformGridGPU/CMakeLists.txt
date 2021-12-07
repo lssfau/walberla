@@ -21,10 +21,9 @@ foreach(streaming_pattern pull push aa esotwist)
                     UniformGridGPU_InfoHeader.h
                     )
 
-
             waLBerla_add_executable(NAME UniformGridGPU_${config}
                     FILES UniformGridGPU.cpp
-                    DEPENDS blockforest boundary core cuda domain_decomposition field geometry timeloop vtk UniformGridGPUGenerated_${config})
+                    DEPENDS blockforest boundary core cuda domain_decomposition field geometry python_coupling timeloop vtk UniformGridGPUGenerated_${config})
 
             # all configs are excluded from all except for pull d3q27.
             if (${streaming_pattern} STREQUAL "pull" AND ${stencil} STREQUAL "d3q27")

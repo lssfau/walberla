@@ -4,6 +4,12 @@
 #
 ###################################################################################################
 
-waLBerla_add_module( DEPENDS core blockforest field BUILD_ONLY_IF_FOUND ${FFT_REQUIRED_LIBRARIES} )
+add_library( fft )
+target_link_libraries( fft PUBLIC core blockforest field )
+target_sources( fft
+      PRIVATE
+      Fft.h
+      Fft.cpp
+      )
 
 ###################################################################################################

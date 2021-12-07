@@ -31,6 +31,7 @@ set ( WALBERLA_GLOB_FILES *.cpp
 #######################################################################################################################
 
 function ( waLBerla_add_module )
+    message(WARNING "This function is deprecated. Please use the default cmake mechanisms like add_library.")
     set( options )
     set( oneValueArgs )
     set( multiValueArgs DEPENDS EXCLUDE FILES BUILD_ONLY_IF_FOUND OPTIONAL_DEPENDS )

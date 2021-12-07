@@ -19,10 +19,6 @@
 #----------------------------------------------------------------------------------
 
 
-
-SET ( GUI_REQUIRED_MODULES core domain_decomposition blockforest field timeloop stencil )
-
-
 # Sources from the gui base directory are always added, the parts including Qt Libs
 # are marked with ifdefs
 file( GLOB gui_SOURCES   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp   )
@@ -90,6 +86,22 @@ if( WALBERLA_ENABLE_GUI )
 endif(WALBERLA_ENABLE_GUI)
 
 
-waLBerla_add_module ( DEPENDS ${GUI_REQUIRED_MODULES} FILES ${gui_SOURCES} )
+add_library( gui )
+target_link_libraries( gui PUBLIC core domain_decomposition blockforest field timeloop stencil )
+target_sources( gui
+      PRIVATE
+      PropertyTree.h
+      PropertyTree.impl.h
+      PropertyTree.cpp
+      Gui.h
+      CMakeDefs.in.h
+      Gui.cpp
+      )
 
-
+#TODO: this needs some additional refactoring. Does not resamble the mechanism from above!
+if( WALBERLA_ENABLE_GUI )
+    add_subdirectory( MainWindow )
+    add_subdirectory( BlockViewText )
+    add_subdirectory( BlockView3D )
+    add_subdirectory( BlockSliceView )
+endif()

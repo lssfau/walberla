@@ -37,8 +37,8 @@ waLBerla_execute_test( NAME DiffusionDirichletTest2 COMMAND $<TARGET_FILE:Diffus
 
 
 waLBerla_compile_test( FILES DiffusionTest.cpp DEPENDS field blockforest timeloop vtk gui postprocessing)
-waLBerla_execute_test( NAME  DiffusionTestCorr COMMAND $<TARGET_FILE:DiffusionTest>  -c 1  -dx 0.01  -dt 0.002  -d 0.005  -v 5  -err 0.0025 )
-waLBerla_execute_test( NAME  DiffusionTestNone COMMAND $<TARGET_FILE:DiffusionTest>  -c 0  -dx 0.01  -dt 0.002  -d 0.005  -v 5  -err 0.0040 )
+waLBerla_execute_test( NAME  DiffusionTestCorr COMMAND $<TARGET_FILE:DiffusionTest>  -c 1  -dx 0.01  -dt 0.002  -d 0.005  -v 5  -err 0.0025 DEPENDS_ON_TARGETS DiffusionTest )
+waLBerla_execute_test( NAME  DiffusionTestNone COMMAND $<TARGET_FILE:DiffusionTest>  -c 0  -dx 0.01  -dt 0.002  -d 0.005  -v 5  -err 0.0040 DEPENDS_ON_TARGETS DiffusionTest )
 
 
 waLBerla_compile_test( FILES refinement/Uniformity.cpp DEPENDS blockforest stencil )
