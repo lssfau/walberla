@@ -82,9 +82,10 @@ waLBerla_compile_test( FILES math/GenericAABBTest.cpp DEPENDS stencil domain_dec
 waLBerla_execute_test( NAME GenericAABBTest )
 
 if( WALBERLA_BUILD_WITH_BOOST )
-waLBerla_compile_test( FILES math/PhysicalCheckTest.cpp DEPENDS stencil )
-waLBerla_execute_test( NAME PhysicalCheckTest
-                       COMMAND $<TARGET_FILE:PhysicalCheckTest>  ${CMAKE_CURRENT_SOURCE_DIR}/math/PhysicalCheckTestInput.prm )
+   waLBerla_compile_test( FILES math/PhysicalCheckTest.cpp DEPENDS stencil )
+   waLBerla_execute_test( NAME PhysicalCheckTest
+         COMMAND $<TARGET_FILE:PhysicalCheckTest> ${CMAKE_CURRENT_SOURCE_DIR}/math/PhysicalCheckTestInput.prm
+         DEPENDS_ON_TARGETS PhysicalCheckTest )
 endif( WALBERLA_BUILD_WITH_BOOST )
 
 
@@ -164,7 +165,7 @@ waLBerla_execute_test( NAME TimingPoolTest PROCESSES 3  )
 waLBerla_compile_test( FILES timing/TimingTreeTest.cpp )
 waLBerla_execute_test( NAME TimingTreeTest PROCESSES 3)
 
-waLBerla_compile_test( FILES timing/SweepTimeloopTimerReduction.cpp DEPENDS timeloop blockforest )
+waLBerla_compile_test( FILES timing/SweepTimeloopTimerReduction.cpp DEPENDS blockforest domain_decomposition timeloop)
 waLBerla_execute_test( NAME SweepTimeloopTimerReduction PROCESSES 9  )
 
 

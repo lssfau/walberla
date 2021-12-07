@@ -4,7 +4,18 @@
 #
 ###################################################################################################
 
-waLBerla_add_module( DEPENDS core domain_decomposition python_coupling )
-                      
+add_library( timeloop )
+target_link_libraries( timeloop PUBLIC core domain_decomposition )
+target_sources( timeloop
+      PRIVATE
+      ITimeloop.h
+      PerformanceMeter.h
+      SelectableFunctionCreators.h
+      SweepTimeloop.h
+      Timeloop.h
+      PerformanceMeter.cpp
+      SweepTimeloop.cpp
+      Timeloop.cpp
+)
 
 ###################################################################################################

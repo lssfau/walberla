@@ -25,7 +25,67 @@ configure_file ( waLBerlaBuildInfo.in.cpp
 include( math/math.cmake )
 include( logging/logging.cmake )
 
-file ( GLOB_RECURSE sourceFiles ${WALBERLA_GLOB_FILES} )
-list( APPEND sourceFiles "${walberla_BINARY_DIR}/src/core/waLBerlaBuildInfo.cpp" )
+add_library( core )
+if( MPI_FOUND )
+   target_link_libraries( core PUBLIC MPI::MPI_CXX )
+endif()
+target_link_libraries( core PUBLIC ${SERVICE_LIBS} )
+target_sources( core
+      PRIVATE
+         Abort.cpp
+         Conversion.cpp
+         DataTypes.cpp
+         Environment.cpp
+         GetPID.cpp
+         Hostname.cpp
+         MemoryUsage.cpp
+         RandomUUID.cpp
+         Sleep.cpp
+         waLBerlaBuildInfo.cpp
+         Abort.h
+         AllSet.h
+         Any.h
+         Array.h
+         ConcatIterator.h
+         Conversion.h
+         DataTypes.h
+         EndianIndependentSerialization.h
+         Environment.h
+         Filesystem.h
+         FunctionTraits.h
+         GetPID.h
+         Hostname.h
+         Macros.h
+         MemoryUsage.h
+         MultiArrayIO.h
+         MultiArrayIO.impl.h
+         NonCopyable.h
+         NonCreateable.h
+         OpenMP.h
+         Optional.h
+         RandomUUID.h
+         Regex.h
+         Sanitizer.h
+         Set.h
+         SharedFunctor.h
+         Sleep.h
+         STLIO.h
+         stringToNum.h
+         StringUtility.h
+         StringUtility.impl.h
+         typeToString.h
+         UniqueID.h
+         Variant.h
+         VectorTrait.h
+         waLBerlaBuildInfo.h
+      )
 
-waLBerla_add_module( FILES ${sourceFiles} EXCLUDE "${walberla_SOURCE_DIR}/src/core/waLBerlaBuildInfo.in.cpp" )
+add_subdirectory( cell )
+add_subdirectory( debug )
+add_subdirectory( mpi )
+add_subdirectory( logging)
+add_subdirectory( load_balancing )
+add_subdirectory( config )
+add_subdirectory( math )
+add_subdirectory( timing )
+add_subdirectory( grid_generator )
