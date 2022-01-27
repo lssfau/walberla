@@ -1642,9 +1642,9 @@ clang_13.0_hybrid_dbg_sp:
    tags:
       - docker
 
-inteloneapi_21.3_serial:
+inteloneapi_22.1_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -1656,9 +1656,9 @@ inteloneapi_21.3_serial:
    tags:
       - docker
 
-inteloneapi_21.3_mpionly:
+inteloneapi_22.1_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -1668,17 +1668,17 @@ inteloneapi_21.3_mpionly:
    tags:
       - docker
 
-inteloneapi_21.3_hybrid:
+inteloneapi_22.1_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    tags:
       - docker
 
-inteloneapi_21.3_serial_dbg:
+inteloneapi_22.1_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -1688,9 +1688,9 @@ inteloneapi_21.3_serial_dbg:
    tags:
       - docker
 
-inteloneapi_21.3_mpionly_dbg:
+inteloneapi_22.1_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -1698,18 +1698,18 @@ inteloneapi_21.3_mpionly_dbg:
    tags:
       - docker
 
-inteloneapi_21.3_hybrid_dbg:
+inteloneapi_22.1_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       CMAKE_BUILD_TYPE: "DebugOptimized"
    tags:
       - docker
 
-inteloneapi_21.3_hybrid_dbg_sp:
+inteloneapi_22.1_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:21.3
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       CMAKE_BUILD_TYPE: "DebugOptimized"
