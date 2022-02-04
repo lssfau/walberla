@@ -61,6 +61,9 @@ def generate_sweep(generation_context, class_name, assignments,
         cpu_vectorize_info: dictionary containing necessary information for the usage of a SIMD instruction set.
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
+    if staggered:
+        assert 'omp_single_loop' not in create_kernel_params
+        create_kernel_params['omp_single_loop'] = False
     config = config_from_context(generation_context, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
                                  cpu_vectorize_info=cpu_vectorize_info, **create_kernel_params)
 
