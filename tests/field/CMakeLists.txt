@@ -84,4 +84,9 @@ waLBerla_generate_target_from_python(NAME CodegenGeneratedCPUFieldPackInfo FILE 
 waLBerla_compile_test( FILES codegen/GeneratedFieldPackInfoTest.cpp
         DEPENDS blockforest core field CodegenGeneratedCPUFieldPackInfo )
 waLBerla_execute_test( NAME GeneratedFieldPackInfoTest )
+
+waLBerla_generate_target_from_python(NAME CodeGenEK FILE codegen/EK.py
+        OUT_FILES EKFlux.cpp EKFlux.h EKContinuity.cpp EKContinuity.h )
+waLBerla_compile_test( FILES codegen/EK.cpp DEPENDS blockforest core field timeloop CodeGenEK)
+waLBerla_execute_test( NAME EK )
 endif()
