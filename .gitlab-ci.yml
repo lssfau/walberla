@@ -96,6 +96,7 @@ intel_19_serial:
       WALBERLA_BUILD_WITH_MPI: "OFF"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PARMETIS: "OFF"
+      CMAKE_CXX_FLAGS: "-qoverride-limits"
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
@@ -110,6 +111,7 @@ intel_19_mpionly:
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      CMAKE_CXX_FLAGS: "-qoverride-limits"
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
@@ -123,6 +125,7 @@ intel_19_hybrid:
    image: i10git.cs.fau.de:5005/walberla/buildenvs/intel:19
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
+      CMAKE_CXX_FLAGS: "-qoverride-limits"
    tags:
       - cuda
       - docker
@@ -137,6 +140,7 @@ intel_19_serial_dbg:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PARMETIS: "OFF"
       CMAKE_BUILD_TYPE: "DebugOptimized"
+      CMAKE_CXX_FLAGS: "-qoverride-limits"
    tags:
       - cuda
       - docker
@@ -149,6 +153,7 @@ intel_19_mpionly_dbg:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
+      CMAKE_CXX_FLAGS: "-qoverride-limits"
    tags:
       - cuda
       - docker
@@ -160,6 +165,7 @@ intel_19_hybrid_dbg:
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
+      CMAKE_CXX_FLAGS: "-qoverride-limits"
    tags:
       - cuda
       - docker
@@ -174,6 +180,7 @@ intel_19_hybrid_dbg_sp:
       WALBERLA_DOUBLE_ACCURACY: "OFF"
       WALBERLA_BUILD_WITH_PARMETIS: "OFF"
       WALBERLA_BUILD_WITH_METIS: "OFF"
+      CMAKE_CXX_FLAGS: "-qoverride-limits"
    tags:
       - cuda
       - docker
