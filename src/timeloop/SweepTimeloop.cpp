@@ -16,6 +16,7 @@
 //! \file SweepTimeloop.cpp
 //! \ingroup timeloop
 //! \author Martin Bauer <martin.bauer@fau.de>
+//! \author Christoph Schwarzmeier <christoph.schwarzmeier@fau.de>
 //
 //======================================================================================================================
 
@@ -47,16 +48,16 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors)
       // Loop over all blocks
       for( BlockStorage::iterator bi = blockStorage_.begin(); bi != blockStorage_.end(); ++bi )
       {
+         // ensure that at least one sweep has been registered (regardless of its selector)
          if( s.sweep.empty() )
          {
             WALBERLA_ABORT("Selecting Sweep " << sweepIt->first << ": " <<
                            "No sweep has been registered! Did you only register a BeforeFunction or AfterFunction?" );
          }
 
-         Sweep selectedSweep;
-         size_t numSweeps = s.sweep.get(selectedSweep, selectors + bi->getState());
+         // ensure that exactly one sweep has been registered that matches the specified selectors
+         size_t numSweeps = s.sweep.getNumberOfMatching(selectors + bi->getState());
 
-         // ensure that no more than one sweep has been added to a single SweepAdder object
          if (numSweeps == size_t(0)) {
             continue;
          } else {
@@ -66,6 +67,8 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors)
             }
          }
 
+         Sweep * selectedSweep = s.sweep.getUnique( selectors + bi->getState() );
+
          WALBERLA_LOG_PROGRESS_SECTION()
          {
             std::string sweepName;
@@ -73,7 +76,7 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors)
             WALBERLA_LOG_PROGRESS("Running sweep \"" << sweepName << "\" on block " << bi->getId() );
          }
 
-         (selectedSweep.function_)( bi.get() );
+         (selectedSweep->function_)( bi.get() );
       }
 
       // select and execute after functions
@@ -114,11 +117,16 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors, WcTimingPool &timing)
 
       for( BlockStorage::iterator bi = blockStorage_.begin(); bi != blockStorage_.end(); ++bi )
       {
-         Sweep selectedSweep;
-         std::string sweepName;
-         size_t numSweeps = s.sweep.get(selectedSweep, sweepName, selectors + bi->getState());
+         // ensure that at least one sweep has been registered (regardless of its selector)
+         if( s.sweep.empty() )
+         {
+            WALBERLA_ABORT("Selecting Sweep " << sweepIt->first << ": " <<
+                           "No sweep has been registered! Did you only register a BeforeFunction or AfterFunction?" );
+         }
 
-         // ensure that no more than one sweep has been added to a single SweepAdder object
+         // ensure that exactly one sweep has been registered that matches the specified selectors
+         size_t numSweeps = s.sweep.getNumberOfMatching(selectors + bi->getState());
+
          if (numSweeps == size_t(0)) {
             continue;
          } else {
@@ -128,11 +136,14 @@ void SweepTimeloop::doTimeStep(const Set<SUID> &selectors, WcTimingPool &timing)
             }
          }
 
+         std::string sweepName;
+         Sweep * selectedSweep = s.sweep.getUnique( selectors + bi->getState(), sweepName );
+
          WALBERLA_LOG_PROGRESS("Running sweep \"" << sweepName << "\" on block " << bi->getId() );
 
          // loop over all blocks
          timing[sweepName].start();
-         (selectedSweep.function_)( bi.get() );
+         (selectedSweep->function_)( bi.get() );
          timing[sweepName].end();
       }
 
