@@ -1105,6 +1105,13 @@ if (WALBERLA_BUILD_WITH_CUDA AND (CMAKE_CUDA_COMPILER_VERSION VERSION_LESS "11.0
     set(CMAKE_CUDA_STANDARD 14)
     set(WALBERLA_USE_STD_EXPERIMENTAL_ANY 1)
 endif()
+
+# Can be used in CMake files containing generated files where the file suffix is dependent on the target
+if (CUDA_FOUND)
+    set(CODEGEN_FILE_SUFFIX "cu")
+else()
+    set(CODEGEN_FILE_SUFFIX "cu")
+endif()
 ############################################################################################################################
 
 
