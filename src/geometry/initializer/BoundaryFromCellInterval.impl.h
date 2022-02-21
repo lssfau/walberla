@@ -44,6 +44,9 @@ void BoundaryFromCellInterval<BoundaryHandlerT>::init( const CellInterval & glob
       CellInterval localCellInterval;
       structuredBlockStorage_.transformGlobalToBlockLocalCellInterval( localCellInterval, *blockIt, globalCellInterval );
       boundarySetter.configure( *blockIt, boundaryHandlerID_ );
+
+      auto flagField = boundarySetter.getFlagField();
+      localCellInterval.intersect(flagField->xyzSizeWithGhostLayer());
       boundarySetter.set( localCellInterval );
    }
 }
