@@ -83,6 +83,8 @@ function( waLBerla_generate_target_from_python )
           WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg}")
 
     add_library(${PYGEN_NAME} ${generatedWithAbsolutePath})
+    # cmake might not be able to determine linker language since file extension is "hidden" in variable
+    set_target_properties(${PYGEN_NAME} PROPERTIES LINKER_LANGUAGE CXX)
     target_include_directories(${PYGEN_NAME} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/${codegenCfg})
 endfunction()
 #######################################################################################################################
