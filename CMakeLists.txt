@@ -371,7 +371,7 @@ if( WALBERLA_OPTIMIZE_FOR_LOCALHOST )
         add_flag ( CMAKE_CXX_FLAGS "-march=native" )
         add_flag ( CMAKE_C_FLAGS   "-march=native" )
       endif()
-      
+
       if( WALBERLA_CXX_COMPILER_IS_INTEL )
         add_flag ( CMAKE_CXX_FLAGS "-xhost" )
         add_flag ( CMAKE_C_FLAGS   "-xhost" )
@@ -576,10 +576,13 @@ endif ( )
 #############################################################################################################################
 
 if ( WALBERLA_BUILD_WITH_CODEGEN OR WALBERLA_BUILD_WITH_PYTHON )
+   if ( DEFINED PYTHON_ROOT_DIR OR DEFINED PYTHON_EXECUTABLE )
+      message( WARNING "Setting PYTHON_ROOT_DIR or PYTHON_EXECUTABLE will likely not work. Use Python_ROOT_DIR instead." )
+   endif ()
    cmake_policy( SET CMP0094 NEW )
    set( Python_FIND_FRAMEWORK LAST )
-   find_package (Python COMPONENTS Interpreter Development)
-endif()
+   find_package( Python COMPONENTS Interpreter Development )
+endif ()
 
 ############################################################################################################################
 ##
