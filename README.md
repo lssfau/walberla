@@ -43,7 +43,7 @@ CMake options and variables.
 Some important CMake variables:
 
 - `WALBERLA_BUILD_WITH_CODEGEN` Enable pystencils code generation"
-- `Python_ROOT_DIR` Define the root directory of a Python installation.
+- `Python_ROOT_DIR` Specify the directory of the `python` executable. e.g. `~/miniconda/bin/`
 - `MPI_HOME` Specify the base directory of the MPI installation.`
 - `WALBERLA_BUILD_WITH_PYTHON` Support for embedding Python
 - `WALBERLA_BUILD_WITH_CUDA` Enable CUDA support
