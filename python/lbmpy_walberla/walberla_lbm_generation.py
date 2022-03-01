@@ -187,7 +187,7 @@ class RefinementScaling:
         self.add_scaling(viscosity_relaxation_rate, relaxation_rate_scaling)
 
     def add_force_scaling(self, force_parameter):
-        self.add_scaling(force_parameter, lambda param, factor: param * factor)
+        self.add_scaling(force_parameter, lambda param, factor: param * (1 / factor))
 
     def add_scaling(self, parameter, scaling_rule):
         """
