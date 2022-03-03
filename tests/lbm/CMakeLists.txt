@@ -91,6 +91,18 @@ waLBerla_generate_target_from_python(NAME GeneratedOutflowBCGenerated
 waLBerla_compile_test( FILES codegen/GeneratedOutflowBC.cpp DEPENDS GeneratedOutflowBCGenerated)
 waLBerla_execute_test( NAME GeneratedOutflowBC COMMAND $<TARGET_FILE:GeneratedOutflowBC> ${CMAKE_CURRENT_SOURCE_DIR}/codegen/GeneratedOutflowBC.prm  )
 
+waLBerla_generate_target_from_python(NAME GeneratedFreeSlipGenerated
+        FILE codegen/GeneratedFreeSlip.py
+        OUT_FILES GeneratedFreeSlip_Sweep.cpp GeneratedFreeSlip_Sweep.h
+        GeneratedFreeSlip_MacroSetter.cpp GeneratedFreeSlip_MacroSetter.h
+        GeneratedFreeSlip_NoSlip.cpp GeneratedFreeSlip_NoSlip.h
+        GeneratedFreeSlip_FreeSlip.cpp GeneratedFreeSlip_FreeSlip.h
+        GeneratedFreeSlip_PackInfoEven.cpp GeneratedFreeSlip_PackInfoEven.h
+        GeneratedFreeSlip_PackInfoOdd.cpp GeneratedFreeSlip_PackInfoOdd.h
+        GeneratedFreeSlip.h)
+waLBerla_compile_test( FILES codegen/GeneratedFreeSlip.cpp DEPENDS GeneratedFreeSlipGenerated)
+waLBerla_execute_test( NAME GeneratedFreeSlip COMMAND $<TARGET_FILE:GeneratedFreeSlip> ${CMAKE_CURRENT_SOURCE_DIR}/codegen/GeneratedFreeSlip.prm  )
+
 
 waLBerla_generate_target_from_python(NAME LbCodeGenerationExampleGenerated
       FILE codegen/LbCodeGenerationExample.py

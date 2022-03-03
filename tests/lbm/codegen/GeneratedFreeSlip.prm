@@ -1,0 +1,31 @@
+
+Parameters 
+{
+	omega           1.8;
+	timesteps       2001;
+	tubeSetup       true;
+	vtkWriteFrequency 100;
+	remainingTimeLoggerFrequency 3; // in seconds
+}
+
+SpecialSetups
+{
+	tubeSetup           true;
+	slopedWall          false;
+}
+
+DomainSetup
+{
+   blocks        <  1,    1, 1 >;
+   cellsPerBlock <  20, 10, 10 >;
+   periodic      <  1,    0, 0 >;
+}
+
+Boundaries 
+{
+    Border { direction N;    walldistance -1;  flag FreeSlip; }
+    Border { direction S;    walldistance -1;  flag FreeSlip; }
+    Border { direction B;    walldistance -1;  flag FreeSlip; }
+    Border { direction T;    walldistance -1;  flag FreeSlip; }
+
+}
