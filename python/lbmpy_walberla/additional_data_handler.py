@@ -1,9 +1,11 @@
 from pystencils import Target
-from pystencils.stencil import inverse_direction
+from pystencils.stencil import inverse_direction, offset_to_direction_string
+
 
 from lbmpy.advanced_streaming import AccessPdfValues, numeric_offsets, numeric_index
+from lbmpy.advanced_streaming.indexing import MirroredStencilDirections
 from lbmpy.boundaries.boundaryconditions import LbBoundary
-from lbmpy.boundaries import ExtrapolationOutflow, UBB
+from lbmpy.boundaries import ExtrapolationOutflow, FreeSlip, UBB
 
 from pystencils_walberla.additional_data_handler import AdditionalDataHandler
 
@@ -12,12 +14,98 @@ def default_additional_data_handler(boundary_obj: LbBoundary, lb_method, field_n
     if not boundary_obj.additional_data:
         return None
 
-    if isinstance(boundary_obj, UBB):
+    if isinstance(boundary_obj, FreeSlip):
+        return FreeSlipAdditionalDataHandler(lb_method.stencil, boundary_obj)
+    elif isinstance(boundary_obj, UBB):
         return UBBAdditionalDataHandler(lb_method.stencil, boundary_obj)
     elif isinstance(boundary_obj, ExtrapolationOutflow):
         return OutflowAdditionalDataHandler(lb_method.stencil, boundary_obj, target=target, field_name=field_name)
     else:
         raise ValueError(f"No default AdditionalDataHandler available for boundary of type {boundary_obj.__class__}")
+
+
+class FreeSlipAdditionalDataHandler(AdditionalDataHandler):
+    def __init__(self, stencil, boundary_object):
+        assert isinstance(boundary_object, FreeSlip)
+        self._boundary_object = boundary_object
+        super(FreeSlipAdditionalDataHandler, self).__init__(stencil=stencil)
+
+    @property
+    def constructor_arguments(self):
+        return ""
+
+    @property
+    def initialiser_list(self):
+        return ""
+
+    @property
+    def additional_arguments_for_fill_function(self):
+        return ""
+
+    @property
+    def additional_parameters_for_fill_function(self):
+        return ""
+
+    def data_initialisation(self, direction):
+        def array_pattern(dtype, name, content):
+            return f"const {str(dtype)} {name} [] = {{ {','.join(str(c) for c in content)} }};"
+
+        offset = self._walberla_stencil[direction]
+        inv_offset = inverse_direction(self._walberla_stencil[direction])
+        offset_dtype = "int32_t"
+        mirror_stencil = MirroredStencilDirections.mirror_stencil
+
+        axis_mirrored = []
+        for i, name in enumerate(["x", "y", "z"]):
+            mirrored_dir = [self._walberla_stencil.index(mirror_stencil(d, i)) for d in self._walberla_stencil]
+            axis_mirrored.append(array_pattern(offset_dtype, f"{name}_axis_mirrored_stencil_dir", mirrored_dir))
+
+        init_list = axis_mirrored[0:self._dim]
+
+        init_list += [f"const Cell n = it.cell() + Cell({offset[0]}, {offset[1]}, {offset[2]});",
+                      f"int32_t ref_dir = {self._walberla_stencil.index(inv_offset)}; // dir: {direction}",
+                     "element.wnx = 0; // compute discrete normal vector of free slip wall",
+                     "element.wny = 0;",
+                     f"if( flagField->isPartOfMaskSet( n.x() + {inv_offset[0]}, n.y(), n.z(), domainFlag ) )",
+                     "{",
+                     f"   element.wnx = {inv_offset[0]};",
+                      "   ref_dir = x_axis_mirrored_stencil_dir[ ref_dir ];",
+                     "}",
+                     f"if( flagField->isPartOfMaskSet( n.x(), n.y() + {inv_offset[1]}, n.z(), domainFlag ) )",
+                     "{",
+                     f"   element.wny = {inv_offset[1]};",
+                      "   ref_dir = y_axis_mirrored_stencil_dir[ ref_dir ];",
+                     "}"]
+        if self._dim == 3:
+            init_list += ["element.wnz = 0;",
+                          f"if( flagField->isPartOfMaskSet( n.x(), n.y(), n.z() + {inv_offset[2]}, domainFlag ) )",
+                          "{",
+                          f"   element.wnz = {inv_offset[2]};",
+                          "   ref_dir = z_axis_mirrored_stencil_dir[ ref_dir ];",
+                          "}",
+                          "// concave corner (neighbors are non-fluid)",
+                          "if( element.wnx == 0 && element.wny == 0 && element.wnz == 0 )",
+                          "{",
+                          f"   element.wnx = {inv_offset[0]};",
+                          f"   element.wny = {inv_offset[1]};",
+                          f"   element.wnz = {inv_offset[2]};",
+                          f"   ref_dir = {direction};",
+                          "}"]
+        elif self._dim == 2:
+            init_list += ["// concave corner (neighbors are non-fluid)",
+                          "if( element.wnx == 0 && element.wny == 0 )",
+                          "{",
+                          f"   element.wnx = {inv_offset[0]};",
+                          f"   element.wny = {inv_offset[1]};",
+                          f"   ref_dir = {direction};",
+                          "}"]
+        init_list.append("element.ref_dir = ref_dir;")
+
+        return "\n".join(init_list)
+
+    @property
+    def additional_member_variable(self):
+        return ""
 
 
 class UBBAdditionalDataHandler(AdditionalDataHandler):
