@@ -73,14 +73,17 @@ with CodeGeneration() as ctx:
 
     generate_alternating_lbm_boundary(ctx, 'FlowAroundSphereCodeGen_UBB', ubb, lb_method,
                                       target=target, streaming_pattern=streaming_pattern,
-                                      additional_data_handler=ubb_data_handler)
+                                      additional_data_handler=ubb_data_handler,
+                                      layout='fzyx')
 
     generate_alternating_lbm_boundary(ctx, 'FlowAroundSphereCodeGen_NoSlip', NoSlip(), lb_method,
-                                      target=target, streaming_pattern=streaming_pattern)
+                                      target=target, streaming_pattern=streaming_pattern,
+                                      layout='fzyx')
 
     generate_alternating_lbm_boundary(ctx, 'FlowAroundSphereCodeGen_Outflow', outflow, lb_method,
                                       target=target, streaming_pattern=streaming_pattern,
-                                      additional_data_handler=outflow_data_handler)
+                                      additional_data_handler=outflow_data_handler,
+                                      layout='fzyx')
 
     # communication
     generate_lb_pack_info(ctx, 'FlowAroundSphereCodeGen_PackInfo', stencil, pdfs,

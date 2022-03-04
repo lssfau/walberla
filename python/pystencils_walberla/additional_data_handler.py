@@ -48,6 +48,10 @@ class AdditionalDataHandler:
         return [(i, d, ", ".join([str(e) for e in d])) for i, d in enumerate(self._walberla_stencil)]
 
     @property
+    def walberla_stencil(self):
+        return self._walberla_stencil
+
+    @property
     def inverse_directions(self):
         inv_dirs = []
         for direction in self._walberla_stencil:

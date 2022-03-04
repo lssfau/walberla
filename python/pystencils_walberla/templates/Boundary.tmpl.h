@@ -198,7 +198,27 @@ public:
         indexVectorOuter.clear();
 
         {% if inner_or_boundary -%}
-        for( auto it = flagField->begin(); it != flagField->end(); ++it )
+        {% if layout == "fzyx" -%}
+        {%- for dirIdx, dirVec, offset in additional_data_handler.stencil_info %}
+        for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
+        {
+           if( ! isFlagSet(it, domainFlag) )
+              continue;
+
+           if ( isFlagSet( it.neighbor({{offset}} {%if dim == 3%}, 0 {%endif %}), boundaryFlag ) )
+           {
+              auto element = {{StructName}}(it.x(), it.y(), {%if dim == 3%} it.z(), {%endif %} {{dirIdx}} );
+              {{additional_data_handler.data_initialisation(dirIdx)|indent(16)}}
+              indexVectorAll.push_back( element );
+              if( inner.contains( it.x(), it.y(), it.z() ) )
+                 indexVectorInner.push_back( element );
+              else
+                 indexVectorOuter.push_back( element );
+           }
+        }
+        {% endfor %}
+        {%else%}
+        for( auto it = flagField->beginWithGhostLayerXYZ( cell_idx_c( flagField->nrOfGhostLayers() - 1 ) ); it != flagField->end(); ++it )
         {
             if( ! isFlagSet(it, domainFlag) )
                 continue;
@@ -215,6 +235,7 @@ public:
             }
             {% endfor %}
         }
+        {%endif%}
         {%else%}
         auto flagWithGLayers = flagField->xyzSizeWithGhostLayer();
         real_t dot = 0.0; real_t maxn = 0.0;
