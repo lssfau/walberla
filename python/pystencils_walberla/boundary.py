@@ -6,6 +6,8 @@ from pystencils.boundaries.createindexlist import (
     boundary_index_array_coordinate_names, direction_member_name,
     numpy_data_type_for_boundary_object)
 from pystencils.data_types import TypedSymbol, create_type
+from pystencils.stencil import inverse_direction
+
 from pystencils_walberla.codegen import config_from_context
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 from pystencils_walberla.additional_data_handler import AdditionalDataHandler
@@ -29,6 +31,7 @@ def generate_boundary(generation_context,
                       additional_data_handler=None,
                       interface_mappings=(),
                       generate_functor=True,
+                      layout='fzyx',
                       **create_kernel_params):
 
     if boundary_object.additional_data and additional_data_handler is None:
@@ -50,7 +53,7 @@ def generate_boundary(generation_context,
 
     field = Field.create_generic(field_name, dim,
                                  field_data_type,
-                                 index_dimensions=len(index_shape), layout='fzyx', index_shape=index_shape,
+                                 index_dimensions=len(index_shape), layout=layout, index_shape=index_shape,
                                  field_type=field_type)
 
     index_field = Field('indexVector', FieldType.INDEXED, index_struct_dtype, layout=[0],
@@ -88,7 +91,8 @@ def generate_boundary(generation_context,
         'namespace': namespace,
         'inner_or_boundary': boundary_object.inner_or_boundary,
         'single_link': boundary_object.single_link,
-        'additional_data_handler': additional_data_handler
+        'additional_data_handler': additional_data_handler,
+        'layout': layout
     }
 
     env = Environment(loader=PackageLoader('pystencils_walberla'), undefined=StrictUndefined)
