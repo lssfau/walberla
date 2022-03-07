@@ -54,7 +54,7 @@ namespace walberla {
 namespace {{namespace}} {
 
 
-{{kernel|generate_definitions(target)}}
+{{kernel|generate_definitions(target, max_threads)}}
 
 void {{class_name}}::run( {{- ["IBlock * block", kernel.kernel_selection_parameters, ["cudaStream_t stream"] if target == 'gpu' else []] | type_identifier_list -}} )
 {

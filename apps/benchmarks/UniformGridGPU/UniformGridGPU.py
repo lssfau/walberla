@@ -13,6 +13,7 @@ from lbmpy.advanced_streaming.utility import streaming_patterns
 from lbmpy.boundaries import NoSlip, UBB
 from lbmpy.creationfunctions import create_lb_collision_rule
 from lbmpy.macroscopic_value_kernels import macroscopic_values_setter
+from lbmpy.moments import get_default_moment_set_for_stencil
 from lbmpy.updatekernels import create_stream_only_kernel
 from lbmpy.fieldaccess import *
 
@@ -22,6 +23,7 @@ from lbmpy_walberla import generate_alternating_lbm_sweep, generate_lb_pack_info
 omega = sp.symbols("omega")
 omega_free = sp.Symbol("omega_free")
 compile_time_block_size = False
+max_threads = None
 
 if compile_time_block_size:
     sweep_block_size = (128, 1, 1)
@@ -41,34 +43,48 @@ options_dict = {
     'trt': {
         'method': Method.TRT,
         'relaxation_rate': omega,
+        'compressible': False,
     },
     'mrt': {
         'method': Method.MRT,
         'relaxation_rates': [omega, 1, 1, 1, 1, 1, 1],
+        'compressible': False,
     },
     'mrt-overrelax': {
         'method': Method.MRT,
         'relaxation_rates': [omega] + [1 + x * 1e-2 for x in range(1, 11)],
+        'compressible': False,
+    },
+    'central': {
+        'method': Method.CENTRAL_MOMENT,
+        'relaxation_rate': omega,
+        'compressible': True,
+    },
+    'central-overrelax': {
+        'method': Method.CENTRAL_MOMENT,
+        'relaxation_rates': [omega] + [1 + x * 1e-2 for x in range(1, 11)],
+        'compressible': True,
     },
     'cumulant': {
-        'method': Method.CUMULANT,
+        'method': Method.MONOMIAL_CUMULANT,
         'relaxation_rate': omega,
         'compressible': True,
     },
     'cumulant-overrelax': {
-        'method': Method.CUMULANT,
-        'relaxation_rates': [omega] + [1 + x * 1e-2 for x in range(1, 11)],
+        'method': Method.MONOMIAL_CUMULANT,
+        'relaxation_rates': [omega] + [1 + x * 1e-2 for x in range(1, 18)],
         'compressible': True,
     },
     'entropic': {
-        'method': Method.MRT,
+        'method': Method.TRT_KBC_N4,
         'compressible': True,
-        'relaxation_rates': [omega, omega] + [omega_free] * 6,
+        'relaxation_rates': [omega, omega_free],
         'entropic': True,
+        'entropic_newton_iterations': False
     },
     'smagorinsky': {
         'method': Method.SRT,
-        'smagorinsky': True,
+        'smagorinsky': False,
         'relaxation_rate': omega,
     }
 }
@@ -96,10 +112,12 @@ with CodeGeneration() as ctx:
     if len(config_tokens) >= 4:
         optimize = (config_tokens[3] != 'noopt')
 
-    if stencil_str == "D3Q27":
+    if stencil_str == "d3q27":
         stencil = LBStencil(Stencil.D3Q27)
-    else:
+    elif stencil_str == "d3q19":
         stencil = LBStencil(Stencil.D3Q19)
+    else:
+        raise ValueError("Only D3Q27 and D3Q19 stencil are supported at the moment")
 
     assert streaming_pattern in streaming_patterns, f"Invalid streaming pattern: {streaming_pattern}"
 
@@ -113,6 +131,9 @@ with CodeGeneration() as ctx:
 
     lbm_config = LBMConfig(stencil=stencil, field_name=pdfs.name, streaming_pattern=streaming_pattern, **options)
     lbm_opt = LBMOptimisation(cse_global=True, cse_pdfs=False, symbolic_field=pdfs, field_layout='fzyx')
+
+    if lbm_config.method == Method.CENTRAL_MOMENT:
+        lbm_config = replace(lbm_config, nested_moments=get_default_moment_set_for_stencil(stencil))
 
     if not is_inplace(streaming_pattern):
         lbm_opt = replace(lbm_opt, symbolic_temporary_field=pdfs_tmp)
@@ -145,18 +166,21 @@ with CodeGeneration() as ctx:
 
     generate_alternating_lbm_sweep(ctx, 'UniformGridGPU_LbKernel', collision_rule, lbm_config=lbm_config,
                                    lbm_optimisation=lbm_opt, target=ps.Target.GPU,
-                                   inner_outer_split=True, varying_parameters=vp, field_swaps=field_swaps)
+                                   gpu_indexing_params=gpu_indexing_params,
+                                   inner_outer_split=True, varying_parameters=vp, field_swaps=field_swaps,
+                                   max_threads=max_threads)
 
     # getter & setter
     setter_assignments = macroscopic_values_setter(lb_method, density=1.0, velocity=velocity_field.center_vector,
                                                    pdfs=pdfs,
                                                    streaming_pattern=streaming_pattern,
                                                    previous_timestep=Timestep.EVEN)
-    generate_sweep(ctx, 'UniformGridGPU_MacroSetter', setter_assignments, target=ps.Target.GPU)
+    generate_sweep(ctx, 'UniformGridGPU_MacroSetter', setter_assignments, target=ps.Target.GPU, max_threads=max_threads)
 
     # Stream only kernel
     generate_sweep(ctx, 'UniformGridGPU_StreamOnlyKernel', stream_only_kernel, field_swaps=field_swaps_stream_only,
-                   gpu_indexing_params=gpu_indexing_params, varying_parameters=vp, target=ps.Target.GPU)
+                   gpu_indexing_params=gpu_indexing_params, varying_parameters=vp, target=ps.Target.GPU,
+                   max_threads=max_threads)
 
     # Boundaries
     noslip = NoSlip()

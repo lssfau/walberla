@@ -63,7 +63,7 @@ def generate_alternating_lbm_sweep(generation_context, class_name, collision_rul
                                    namespace='lbm', field_swaps=(), varying_parameters=(),
                                    inner_outer_split=False, ghost_layers_to_include=0,
                                    target=Target.CPU, data_type=None,
-                                   cpu_openmp=None, cpu_vectorize_info=None,
+                                   cpu_openmp=None, cpu_vectorize_info=None, max_threads=None,
                                    **kernel_parameters):
     """Generates an Alternating lattice Boltzmann sweep class. This is in particular meant for
     in-place streaming patterns, but can of course also be used with two-fields patterns (why make it
@@ -87,6 +87,7 @@ def generate_alternating_lbm_sweep(generation_context, class_name, collision_rul
         data_type: default datatype for the kernel creation. Default is double
         cpu_openmp: if loops should use openMP or not.
         cpu_vectorize_info: dictionary containing necessary information for the usage of a SIMD instruction set.
+        max_threads: only relevant for GPU kernels. Will be argument of `__launch_bounds__`.
         kernel_parameters: other parameters passed to the creation of a pystencils.CreateKernelConfig
     """
     config = config_from_context(generation_context, target=target, data_type=data_type, cpu_openmp=cpu_openmp,
@@ -120,4 +121,4 @@ def generate_alternating_lbm_sweep(generation_context, class_name, collision_rul
                              target=target, namespace=namespace,
                              field_swaps=field_swaps, varying_parameters=varying_parameters,
                              inner_outer_split=inner_outer_split, ghost_layers_to_include=ghost_layers_to_include,
-                             cpu_vectorize_info=vec_info, cpu_openmp=openmp)
+                             cpu_vectorize_info=vec_info, cpu_openmp=openmp, max_threads=max_threads)

@@ -6,7 +6,11 @@ waLBerla_link_files_to_builddir( "simulation_setup" )
 
 foreach(streaming_pattern pull push aa esotwist)
     foreach(stencil d3q19 d3q27)
-        foreach (collision_setup srt trt mrt cumulant entropic smagorinsky mrt-overrelax cumulant-overrelax)
+        foreach (collision_setup srt trt mrt mrt-overrelax central central-overrelax cumulant cumulant-overrelax entropic smagorinsky)
+	    # KBC methods only for D2Q9 and D3Q27 defined
+	    if (${collision_setup} STREQUAL "entropic" AND ${stencil} STREQUAL "d3q19")
+		    continue()
+	    endif (${collision_setup} STREQUAL "entropic" AND ${stencil} STREQUAL "d3q19")
             set(config ${stencil}_${streaming_pattern}_${collision_setup})
             waLBerla_generate_target_from_python(NAME UniformGridGPUGenerated_${config}
                     FILE UniformGridGPU.py

@@ -29,7 +29,7 @@ __all__ = ['generate_sweep', 'generate_pack_info', 'generate_pack_info_for_field
 def generate_sweep(generation_context, class_name, assignments,
                    namespace='pystencils', field_swaps=(), staggered=False, varying_parameters=(),
                    inner_outer_split=False, ghost_layers_to_include=0,
-                   target=Target.CPU, data_type=None, cpu_openmp=None, cpu_vectorize_info=None,
+                   target=Target.CPU, data_type=None, cpu_openmp=None, cpu_vectorize_info=None, max_threads=None,
                    **create_kernel_params):
     """Generates a waLBerla sweep from a pystencils representation.
 
@@ -59,6 +59,7 @@ def generate_sweep(generation_context, class_name, assignments,
         data_type: default datatype for the kernel creation. Default is double
         cpu_openmp: if loops should use openMP or not.
         cpu_vectorize_info: dictionary containing necessary information for the usage of a SIMD instruction set.
+        max_threads: only relevant for GPU kernels. Will be argument of `__launch_bounds__`
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
     if staggered:
@@ -83,13 +84,13 @@ def generate_sweep(generation_context, class_name, assignments,
                              field_swaps=field_swaps, varying_parameters=varying_parameters,
                              inner_outer_split=inner_outer_split, ghost_layers_to_include=ghost_layers_to_include,
                              cpu_vectorize_info=config.cpu_vectorize_info,
-                             cpu_openmp=config.cpu_openmp)
+                             cpu_openmp=config.cpu_openmp, max_threads=max_threads)
 
 
 def generate_selective_sweep(generation_context, class_name, selection_tree, interface_mappings=(), target=None,
                              namespace='pystencils', field_swaps=(), varying_parameters=(),
                              inner_outer_split=False, ghost_layers_to_include=0,
-                             cpu_vectorize_info=None, cpu_openmp=False):
+                             cpu_vectorize_info=None, cpu_openmp=False, max_threads=None):
     """Generates a selective sweep from a kernel selection tree. A kernel selection tree consolidates multiple
     pystencils ASTs in a tree-like structure. See also module `pystencils_walberla.kernel_selection`.
 
@@ -107,6 +108,7 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
         ghost_layers_to_include: see documentation of `generate_sweep`
         cpu_vectorize_info: Dictionary containing information about CPU vectorization applied to the kernels
         cpu_openmp: Whether or not CPU kernels use OpenMP parallelization
+        max_threads: only relevant for GPU kernels. Will be argument of `__launch_bounds__`
     """
     def to_name(f):
         return f.name if isinstance(f, Field) else f
@@ -144,7 +146,8 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
         'interface_spec': interface_spec,
         'generate_functor': True,
         'cpu_vectorize_info': cpu_vectorize_info,
-        'cpu_openmp': cpu_openmp
+        'cpu_openmp': cpu_openmp,
+        'max_threads': max_threads
     }
     header = env.get_template("Sweep.tmpl.h").render(**jinja_context)
     source = env.get_template("Sweep.tmpl.cpp").render(**jinja_context)

@@ -18,8 +18,8 @@ from math import prod
 # Number of time steps run for a workload of 128^3 per GPU
 # if double as many cells are on the GPU, half as many time steps are run etc.
 # increase this to get more reliable measurements
-TIME_STEPS_FOR_128_BLOCK = 500
-DB_FILE = "gpu_benchmark.sqlite3"
+TIME_STEPS_FOR_128_BLOCK = 1000
+DB_FILE = os.environ.get('DB_FILE', "gpu_benchmark.sqlite3")
 
 BASE_CONFIG = {
     'DomainSetup': {
@@ -129,6 +129,7 @@ class Scenario:
         num_tries = 4
         # check multiple times e.g. may fail when multiple benchmark processes are running
         table_name = f"runs_{data['stencil']}_{data['streamingPattern']}_{data['collisionSetup']}_{prod(self.blocks)}"
+        table_name = table_name.replace("-", "_")
         for num_try in range(num_tries):
             try:
                 checkAndUpdateSchema(result, table_name, DB_FILE)
@@ -193,7 +194,7 @@ def single_gpu_benchmark():
         additional_info['gpu_type'] = gpu_type
 
     scenarios = wlb.ScenarioManager()
-    block_sizes = [(i, i, i) for i in (64, 128, 256, 320, 384, 448, 512)]
+    block_sizes = [(i, i, i) for i in (32, 64, 128, 256)]
     cuda_blocks = [(32, 1, 1), (64, 1, 1), (128, 1, 1), (256, 1, 1), (512, 1, 1),
                    (32, 2, 1), (64, 2, 1), (128, 2, 1), (256, 2, 1),
                    (32, 4, 1), (64, 4, 1), (128, 4, 1),
@@ -201,6 +202,9 @@ def single_gpu_benchmark():
                    (32, 16, 1)]
     for block_size in block_sizes:
         for cuda_block_size in cuda_blocks:
+            # cuda_block_size = (256, 1, 1) and block_size = (64, 64, 64) would be cut to cuda_block_size = (64, 1, 1)
+            if cuda_block_size > block_size:
+                continue
             if not cuda_block_size_ok(cuda_block_size):
                 wlb.log_info_on_root(f"Cuda block size {cuda_block_size} would exceed register limit. Skipping.")
                 continue
@@ -210,7 +214,7 @@ def single_gpu_benchmark():
             scenario = Scenario(cells_per_block=block_size,
                                 cuda_blocks=cuda_block_size,
                                 time_step_strategy='kernelOnly',
-                                timesteps=num_time_steps(block_size),
+                                timesteps=num_time_steps(block_size, 2000),
                                 additional_info=additional_info)
             scenarios.add(scenario)
 

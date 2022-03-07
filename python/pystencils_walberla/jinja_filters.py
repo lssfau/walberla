@@ -43,6 +43,16 @@ delete_loop = """
     }}
 """
 
+# the target will enter the jinja filters as string. The reason for that is, that is not easy to work with the
+# enum in the template files.
+def translate_target(target):
+    if isinstance(target, Target):
+        return target
+    elif isinstance(target, str):
+        return Target[target.upper()]
+    else:
+        raise ValueError(f"The type of the target {type(target)} is not supported")
+
 
 def make_field_type(dtype, f_size, is_gpu):
     if is_gpu:
@@ -82,6 +92,7 @@ def get_field_stride(param):
 
 def generate_declaration(kernel_info, target=Target.CPU):
     """Generates the declaration of the kernel function"""
+    target = translate_target(target)
     ast = kernel_info.ast
     result = generate_c(ast, signature_only=True, dialect=Backend.CUDA if target == Target.GPU else Backend.C) + ";"
     result = "namespace internal_%s {\n%s\n}" % (ast.function_name, result,)
@@ -90,6 +101,7 @@ def generate_declaration(kernel_info, target=Target.CPU):
 
 def generate_definition(kernel_info, target=Target.CPU):
     """Generates the definition (i.e. implementation) of the kernel function"""
+    target = translate_target(target)
     ast = kernel_info.ast
     result = generate_c(ast, dialect=Backend.CUDA if target == Target.GPU else Backend.C)
     result = "namespace internal_%s {\nstatic %s\n}" % (ast.function_name, result)
@@ -97,6 +109,7 @@ def generate_definition(kernel_info, target=Target.CPU):
 
 
 def generate_declarations(kernel_family, target=Target.CPU):
+    target = translate_target(target)
     declarations = []
     for ast in kernel_family.all_asts:
         code = generate_c(ast, signature_only=True, dialect=Backend.CUDA if target == Target.GPU else Backend.C) + ";"
@@ -105,10 +118,15 @@ def generate_declarations(kernel_family, target=Target.CPU):
     return "\n".join(declarations)
 
 
-def generate_definitions(kernel_family, target=Target.CPU):
+def generate_definitions(kernel_family, target=Target.CPU, max_threads=None):
+    target = translate_target(target)
     definitions = []
     for ast in kernel_family.all_asts:
         code = generate_c(ast, dialect=Backend.CUDA if target == Target.GPU else Backend.C)
+        if max_threads is not None and target == Target.GPU:
+            assert isinstance(max_threads, int), "maximal number of threads should be an integer value"
+            index = code.find('FUNC_PREFIX') + len("FUNC_PREFIX ")
+            code = code[:index] + f'__launch_bounds__({max_threads}) ' + code[index:]
         code = "namespace internal_%s {\nstatic %s\n}\n" % (ast.function_name, code)
         definitions.append(code)
     return "\n".join(definitions)
@@ -177,10 +195,12 @@ def generate_block_data_to_field_extraction(ctx, kernel_info, parameters_to_igno
     normal_fields = {f for f in field_parameters if f.name not in kernel_info.temporary_fields}
     temporary_fields = {f for f in field_parameters if f.name in kernel_info.temporary_fields}
 
+    target = translate_target(ctx['target'])
+
     args = {
         'declaration_only': declarations_only,
         'no_declaration': no_declarations,
-        'is_gpu': ctx['target'] == 'gpu',
+        'is_gpu': target == Target.GPU,
     }
     result = "\n".join(
         field_extraction_code(field=field, is_temporary=False, update_member=update_member, **args) for field in
@@ -389,7 +409,8 @@ def generate_members(ctx, kernel_info, parameters_to_ignore=(), only_fields=Fals
 
     params_to_skip = tuple(parameters_to_ignore) + tuple(kernel_info.temporary_fields)
     params_to_skip += tuple(e[1] for e in kernel_info.varying_parameters)
-    is_gpu = ctx['target'] == 'gpu'
+    target = translate_target(ctx['target'])
+    is_gpu = target == Target.GPU
 
     result = []
     for param in kernel_info.parameters:
