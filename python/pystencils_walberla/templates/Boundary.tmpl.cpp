@@ -47,7 +47,11 @@ namespace {{namespace}} {
 
 #ifdef __CUDACC__
 #pragma push
-#pragma diag_suppress = declared_but_not_referenced
+#ifdef __NVCC_DIAG_PRAGMA_SUPPORT__
+#pragma nv_diag_suppress 177
+#else
+#pragma diag_suppress 177
+#endif
 #endif
 
 {{kernel|generate_definitions(target)}}
