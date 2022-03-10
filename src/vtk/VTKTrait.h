@@ -126,5 +126,13 @@ struct VTKTrait<math::Rot3<T>>
    constexpr static const uint_t components = 3;
 };
 
+template <typename T, uint_t N>
+struct VTKTrait<std::array<T,N>>
+{
+   using type = typename VTKTrait<T>::type;
+   constexpr static char const * const type_string = VTKTrait<T>::type_string;
+   constexpr static const uint_t components = N;
+};
+
 } // namespace vtk
 } // namespace walberla

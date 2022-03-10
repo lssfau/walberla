@@ -39,7 +39,7 @@ namespace mesa_pd {
 
 template<typename MeshType>
 class MeshParticleVTKOutput {
-   static_assert(MeshType::IsPolyMesh == 1, "We need polygonal meshes here!");
+   static_assert(MeshType::IsPolyMesh == 1, "Polygonal meshes required for VTK output!");
 
 public:
    using ParticleSelectorFunc = std::function<bool (const walberla::mesa_pd::data::ParticleStorage::iterator& pIt)>;
@@ -47,16 +47,17 @@ public:
    typedef typename mesh::DistributedVTKMeshWriter<MeshType>::Vertices Vertices;
 
    MeshParticleVTKOutput( shared_ptr<walberla::mesa_pd::data::ParticleStorage> ps,
-                          shared_ptr<walberla::mesa_pd::data::ShapeStorage> ss, const std::string & identifier,
+                          const std::string & identifier,
                           const uint_t writeFrequency, const std::string & baseFolder = "vtk_out")
-                          : ps_(std::move(ps)), ss_(std::move(ss)), mesh_(make_shared<MeshType>()),
+                          : ps_(std::move(ps)), mesh_(make_shared<MeshType>()),
                           faceToParticleIdxManager_(*mesh_, "particle"), vertexToParticleIdxManager_(*mesh_, "particle"),
                           meshWriter_(mesh_, identifier, writeFrequency, baseFolder) {
 
    }
 
    void setParticleSelector( const ParticleSelectorFunc& func) {particleSelector_ = func;}
-   void assembleMesh();
+   template<typename AccessorWithShape_T>
+   void assembleMesh(AccessorWithShape_T & accessor);
 
    template <typename Selector>
    void addVertexOutput(const std::string& name);
@@ -68,8 +69,13 @@ public:
    template <typename DataSourceType>
    void addFaceDataSource(const shared_ptr<DataSourceType> & dataSource);
 
-   void operator()() {
-      assembleMesh();
+   template<typename AccessorWithShape_T>
+   void operator()(AccessorWithShape_T & accessor) {
+      static_assert(std::is_base_of<mesa_pd::data::IAccessor, AccessorWithShape_T>::value, "Provide a valid accessor as template");
+
+      if(meshWriter_.isWriteScheduled()) {
+         assembleMesh(accessor);
+      }
       // the mesh writer writes the mesh to vtk files and adds properties as defined by the data sources
       meshWriter_();
       mesh_->clean(); // the output mesh is no longer needed, thus discard its contents
@@ -77,7 +83,6 @@ public:
 
 private:
    const shared_ptr<walberla::mesa_pd::data::ParticleStorage> ps_;
-   const shared_ptr<walberla::mesa_pd::data::ShapeStorage> ss_;
    shared_ptr<MeshType> mesh_; ///< the output mesh
 
    // these "managers" (which are just maps basically) map the faces and vertices of the output mesh to particles
@@ -158,7 +163,10 @@ void MeshParticleVTKOutput<MeshType>::addFaceDataSource(const shared_ptr<DataSou
  * \tparam MeshType
  */
 template<typename MeshType>
-void MeshParticleVTKOutput<MeshType>::assembleMesh() {
+template<typename AccessorWithShape_T>
+void MeshParticleVTKOutput<MeshType>::assembleMesh(AccessorWithShape_T & accessor) {
+
+   static_assert(std::is_base_of<mesa_pd::data::IAccessor, AccessorWithShape_T>::value, "Provide a valid accessor as template");
    // those will save the newly created vertices and faces for each mesh
    // to make it possible to map a vertex/face to the corresponding particle
    std::vector<typename MeshType::VertexHandle> newVertices;
@@ -171,13 +179,13 @@ void MeshParticleVTKOutput<MeshType>::assembleMesh() {
    for (auto pIt = ps_->begin(); pIt != ps_->end(); ++pIt) {
       if (!particleSelector_(pIt)) continue;
 
-      auto& shape = ss_->shapes[pIt->getShapeID()];
+      data::BaseShape* shape = accessor.getShape(pIt->getIdx());
 
       newVertices.clear();
       newFaces.clear();
 
       if (shape->getShapeType() == walberla::mesa_pd::data::ConvexPolyhedron::SHAPE_TYPE) {
-         const auto& convexPolyhedron = *static_cast<walberla::mesa_pd::data::ConvexPolyhedron*>(shape.get());
+         const auto& convexPolyhedron = *static_cast<walberla::mesa_pd::data::ConvexPolyhedron*>(shape);
          const auto& particle = *pIt;
 
          // tessellate: add the shape at the particle's position into the output mesh

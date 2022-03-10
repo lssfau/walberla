@@ -67,6 +67,9 @@ Matrix3<typename MeshType::Scalar> computeInertiaTensor( const MeshType & mesh )
 template< typename MeshType >
 typename MeshType::Point computeCentroid( const MeshType & mesh, const typename MeshType::FaceHandle fh );
 
+template< typename MeshType >
+typename MeshType::Scalar computeBoundingSphereRadius( const MeshType & mesh, const typename MeshType::Point & referencePoint );
+
 template< typename MeshType, typename InputIterator >
 std::vector< typename MeshType::VertexHandle > findConnectedVertices( const MeshType & mesh, InputIterator facesBegin, InputIterator facesEnd );
 
@@ -332,6 +335,20 @@ typename MeshType::Point computeCentroid( const MeshType & mesh, const typename 
    centroid /= numeric_cast<Scalar>(numVertices);
 
    return centroid;
+}
+
+template< typename MeshType >
+typename MeshType::Scalar computeBoundingSphereRadius( const MeshType & mesh, const typename MeshType::Point & referencePoint )
+{
+   typedef typename MeshType::Scalar Scalar;
+
+   Scalar maxSqRadius(0);
+   for(auto vh : mesh.vertices()) {
+      auto v = mesh.point(vh);
+      auto refPointToVSqr = (v-referencePoint).sqrnorm();
+      maxSqRadius = std::max(maxSqRadius, refPointToVSqr );
+   }
+   return std::sqrt(maxSqRadius);
 }
 
 /**

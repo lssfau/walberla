@@ -380,7 +380,7 @@ int main( int argc, char ** argv ) {
                                                                    uint_t(1), vtk_out, "simulation_step");
    vtkDomainOutput->write();
    // mesapd mesh output
-   mesa_pd::MeshParticleVTKOutput<mesh::PolyMesh> meshParticleVTK(ps, ss, "mesh", visSpacing);
+   mesa_pd::MeshParticleVTKOutput<mesh::PolyMesh> meshParticleVTK(ps, "mesh", visSpacing);
    meshParticleVTK.addFaceOutput<mesa_pd::data::SelectParticleUid>("Uid");
    auto surfaceVelocityDataSource = make_shared<mesa_pd::SurfaceVelocityVertexDataSource<mesh::PolyMesh,
          mesa_pd::data::ParticleAccessorWithShape>>("SurfaceVelocity", ac);
@@ -415,7 +415,7 @@ int main( int argc, char ** argv ) {
       }
 
       // VTK
-      meshParticleVTK();
+      meshParticleVTK(ac);
       particleVtkWriter->write();
 
       // Prepare Data Structures

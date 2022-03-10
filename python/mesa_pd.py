@@ -24,7 +24,13 @@ if __name__ == '__main__':
     ps.add_property("force", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
     ps.add_property("oldForce", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ON_OWNERSHIP_CHANGE")
 
+    # shape definition for cases with small number of different shapes
     ps.add_property("shapeID", "size_t", defValue="", syncMode="ON_GHOST_CREATION")
+
+    # shape definition for cases with distinct shape per particle
+    ps.add_include("mesa_pd/data/shape/BaseShape.h")
+    ps.add_property("baseShape", "std::shared_ptr<walberla::mesa_pd::data::BaseShape>", defValue="make_shared<walberla::mesa_pd::data::BaseShape>()", syncMode="ON_GHOST_CREATION")
+
     ps.add_property("rotation", "walberla::mesa_pd::Rot3", defValue="", syncMode="ALWAYS")
     ps.add_property("angularVelocity", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="ALWAYS")
     ps.add_property("torque", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
@@ -48,6 +54,8 @@ if __name__ == '__main__':
 
     ps.add_property("temperature", "walberla::real_t", defValue="real_t(0)", syncMode="ALWAYS")
     ps.add_property("heatFlux", "walberla::real_t", defValue="real_t(0)", syncMode="NEVER")
+
+    ps.add_property("numContacts", "uint_t", defValue="0", syncMode="NEVER")
 
     # Properties for HCSITS
     ps.add_property("dv", "walberla::mesa_pd::Vec3", defValue="real_t(0)", syncMode="NEVER")
@@ -144,6 +152,8 @@ if __name__ == '__main__':
     hftn.add_property('hydrodynamicTorque', 'mesa_pd::Vec3', 'Vec3(real_t(0))')
     hfn = mpd.add(mpi.PropertyNotification('HeatFluxNotification'))
     hfn.add_property('heatFlux', 'real_t', 'real_t(0)')
+    ncn = mpd.add(mpi.PropertyNotification('NumContactNotification'))
+    ncn.add_property('numContacts', 'uint_t', '0')
     mpd.add(mpi.ReduceContactHistory())
     mpd.add(mpi.ReduceProperty())
     mpd.add(mpi.ShapePackUnpack(ps))
