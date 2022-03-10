@@ -34,6 +34,9 @@ waLBerla_execute_test( NAME   MESA_PD_COLLISIONDETECTION_SphereSupport )
 waLBerla_compile_test( NAME   MESA_PD_COMMON_IntersectionRatio FILES common/IntersectionRatio.cpp DEPENDS core )
 waLBerla_execute_test( NAME   MESA_PD_COMMON_IntersectionRatio )
 
+waLBerla_compile_test( NAME   MESA_PD_COMMON_ContainsPoint FILES common/ContainsPoint.cpp DEPENDS core )
+waLBerla_execute_test( NAME   MESA_PD_COMMON_ContainsPoint )
+
 waLBerla_compile_test( NAME   MESA_PD_ContactDetection FILES ContactDetection.cpp DEPENDS blockforest core pe)
 waLBerla_execute_test( NAME   MESA_PD_ContactDetection PROCESSES 8 )
 
