@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
    auto vtkDomainOutput = walberla::vtk::createVTKOutput_DomainDecomposition(forest, "domain_decomposition", 1, vtk_out, "simulation_step");
    vtkDomainOutput->write();
 
-   mesa_pd::MeshParticleVTKOutput< mesh::PolyMesh > meshParticleVTK(ps, ss, "mesh", uint_t(1));
+   mesa_pd::MeshParticleVTKOutput< mesh::PolyMesh > meshParticleVTK(ps, "mesh", uint_t(1));
    meshParticleVTK.addFaceOutput< data::SelectParticleUid >("UID");
    meshParticleVTK.addVertexOutput< data::SelectParticleInteractionRadius >("InteractionRadius");
    meshParticleVTK.addFaceOutput< data::SelectParticleLinearVelocity >("LinearVelocity");
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
       mesa_pd::SurfaceVelocityVertexDataSource< mesh::PolyMesh, mesa_pd::data::ParticleAccessorWithShape > >(
       "SurfaceVelocity", *ac);
    meshParticleVTK.addVertexDataSource(surfaceVelDataSource);
-   meshParticleVTK();
+   meshParticleVTK(*ac);
 
    return EXIT_SUCCESS;
 }

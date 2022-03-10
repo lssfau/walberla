@@ -102,7 +102,6 @@ inline void IntegrateParticlesHCSITS::operator()(size_t j, PAccessor& ac, real_t
 //*************************************************************************************************
 /*!\brief Time integration of the position and orientation of a given body.
  *
- * \param ac The particle accessor
  * \param body The body whose position and orientation to time integrate
  * \param v The linear velocity to use for time integration of the position.
  * \param w The angular velocity to use for time integration of the orientation.

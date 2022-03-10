@@ -40,13 +40,14 @@ class BaseShape
 public:
    using ShapeTypeT = int;
 
+   BaseShape() = default;
    explicit BaseShape(const int shapeType) : shapeType_(shapeType) {}
    virtual ~BaseShape() = default;
 
    ///Updates mass and inertia according to the actual shape.
    virtual void updateMassAndInertia(const real_t density);
 
-   virtual real_t getVolume() const = 0;
+   virtual real_t getVolume() const {WALBERLA_ABORT("Not implemented!");}
 
    const real_t& getMass() const {return mass_;}
    const real_t& getInvMass() const {return invMass_;}

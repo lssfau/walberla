@@ -92,6 +92,10 @@ public:
    size_t& getShapeIDRef(const size_t p_idx) {return ps_->getShapeIDRef(p_idx);}
    void setShapeID(const size_t p_idx, size_t const & v) { ps_->setShapeID(p_idx, v);}
    
+   std::shared_ptr<walberla::mesa_pd::data::BaseShape> const & getBaseShape(const size_t p_idx) const {return ps_->getBaseShape(p_idx);}
+   std::shared_ptr<walberla::mesa_pd::data::BaseShape>& getBaseShapeRef(const size_t p_idx) {return ps_->getBaseShapeRef(p_idx);}
+   void setBaseShape(const size_t p_idx, std::shared_ptr<walberla::mesa_pd::data::BaseShape> const & v) { ps_->setBaseShape(p_idx, v);}
+   
    walberla::mesa_pd::Rot3 const & getRotation(const size_t p_idx) const {return ps_->getRotation(p_idx);}
    walberla::mesa_pd::Rot3& getRotationRef(const size_t p_idx) {return ps_->getRotationRef(p_idx);}
    void setRotation(const size_t p_idx, walberla::mesa_pd::Rot3 const & v) { ps_->setRotation(p_idx, v);}
@@ -139,6 +143,10 @@ public:
    walberla::real_t const & getHeatFlux(const size_t p_idx) const {return ps_->getHeatFlux(p_idx);}
    walberla::real_t& getHeatFluxRef(const size_t p_idx) {return ps_->getHeatFluxRef(p_idx);}
    void setHeatFlux(const size_t p_idx, walberla::real_t const & v) { ps_->setHeatFlux(p_idx, v);}
+   
+   uint_t const & getNumContacts(const size_t p_idx) const {return ps_->getNumContacts(p_idx);}
+   uint_t& getNumContactsRef(const size_t p_idx) {return ps_->getNumContactsRef(p_idx);}
+   void setNumContacts(const size_t p_idx, uint_t const & v) { ps_->setNumContacts(p_idx, v);}
    
    walberla::mesa_pd::Vec3 const & getDv(const size_t p_idx) const {return ps_->getDv(p_idx);}
    walberla::mesa_pd::Vec3& getDvRef(const size_t p_idx) {return ps_->getDvRef(p_idx);}
@@ -293,6 +301,10 @@ public:
    void setShapeID(const size_t /*p_idx*/, size_t const & v) { shapeID_ = v;}
    size_t& getShapeIDRef(const size_t /*p_idx*/) {return shapeID_;}
    
+   std::shared_ptr<walberla::mesa_pd::data::BaseShape> const & getBaseShape(const size_t /*p_idx*/) const {return baseShape_;}
+   void setBaseShape(const size_t /*p_idx*/, std::shared_ptr<walberla::mesa_pd::data::BaseShape> const & v) { baseShape_ = v;}
+   std::shared_ptr<walberla::mesa_pd::data::BaseShape>& getBaseShapeRef(const size_t /*p_idx*/) {return baseShape_;}
+   
    walberla::mesa_pd::Rot3 const & getRotation(const size_t /*p_idx*/) const {return rotation_;}
    void setRotation(const size_t /*p_idx*/, walberla::mesa_pd::Rot3 const & v) { rotation_ = v;}
    walberla::mesa_pd::Rot3& getRotationRef(const size_t /*p_idx*/) {return rotation_;}
@@ -340,6 +352,10 @@ public:
    walberla::real_t const & getHeatFlux(const size_t /*p_idx*/) const {return heatFlux_;}
    void setHeatFlux(const size_t /*p_idx*/, walberla::real_t const & v) { heatFlux_ = v;}
    walberla::real_t& getHeatFluxRef(const size_t /*p_idx*/) {return heatFlux_;}
+   
+   uint_t const & getNumContacts(const size_t /*p_idx*/) const {return numContacts_;}
+   void setNumContacts(const size_t /*p_idx*/, uint_t const & v) { numContacts_ = v;}
+   uint_t& getNumContactsRef(const size_t /*p_idx*/) {return numContacts_;}
    
    walberla::mesa_pd::Vec3 const & getDv(const size_t /*p_idx*/) const {return dv_;}
    void setDv(const size_t /*p_idx*/, walberla::mesa_pd::Vec3 const & v) { dv_ = v;}
@@ -427,6 +443,7 @@ private:
    walberla::mesa_pd::Vec3 force_;
    walberla::mesa_pd::Vec3 oldForce_;
    size_t shapeID_;
+   std::shared_ptr<walberla::mesa_pd::data::BaseShape> baseShape_;
    walberla::mesa_pd::Rot3 rotation_;
    walberla::mesa_pd::Vec3 angularVelocity_;
    walberla::mesa_pd::Vec3 torque_;
@@ -439,6 +456,7 @@ private:
    std::map<walberla::id_t, walberla::mesa_pd::data::ContactHistory> newContactHistory_;
    walberla::real_t temperature_;
    walberla::real_t heatFlux_;
+   uint_t numContacts_;
    walberla::mesa_pd::Vec3 dv_;
    walberla::mesa_pd::Vec3 dw_;
    walberla::mesa_pd::Vec3 hydrodynamicForce_;

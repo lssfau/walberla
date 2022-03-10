@@ -56,6 +56,7 @@ public:
       walberla::mesa_pd::Vec3 linearVelocity {real_t(0)};
       walberla::real_t invMass {real_t(1)};
       size_t shapeID {};
+      std::shared_ptr<walberla::mesa_pd::data::BaseShape> baseShape {make_shared<walberla::mesa_pd::data::BaseShape>()};
       walberla::mesa_pd::Rot3 rotation {};
       walberla::mesa_pd::Vec3 angularVelocity {real_t(0)};
       walberla::real_t radiusAtTemperature {real_t(0)};
@@ -83,6 +84,7 @@ inline data::ParticleStorage::iterator createNewParticle(data::ParticleStorage& 
    pIt->setLinearVelocity(data.linearVelocity);
    pIt->setInvMass(data.invMass);
    pIt->setShapeID(data.shapeID);
+   pIt->setBaseShape(data.baseShape);
    pIt->setRotation(data.rotation);
    pIt->setAngularVelocity(data.angularVelocity);
    pIt->setRadiusAtTemperature(data.radiusAtTemperature);
@@ -125,6 +127,7 @@ mpi::GenericSendBuffer<T,G>& operator<<( mpi::GenericSendBuffer<T,G> & buf, cons
    buf << obj.particle_.getLinearVelocity();
    buf << obj.particle_.getInvMass();
    buf << obj.particle_.getShapeID();
+   buf << obj.particle_.getBaseShape();
    buf << obj.particle_.getRotation();
    buf << obj.particle_.getAngularVelocity();
    buf << obj.particle_.getRadiusAtTemperature();
@@ -148,6 +151,7 @@ mpi::GenericRecvBuffer<T>& operator>>( mpi::GenericRecvBuffer<T> & buf, mesa_pd:
    buf >> objparam.linearVelocity;
    buf >> objparam.invMass;
    buf >> objparam.shapeID;
+   buf >> objparam.baseShape;
    buf >> objparam.rotation;
    buf >> objparam.angularVelocity;
    buf >> objparam.radiusAtTemperature;

@@ -61,6 +61,10 @@ namespace mpi {
       buf >> shapeType;
       switch (shapeType)
       {
+         case BaseShape::INVALID_SHAPE :
+            bs = std::make_unique<mesa_pd::data::BaseShape>();
+            bs->unpack(buf);
+            break;
          {%- for shape in particle.shapes %}
          case {{shape}}::SHAPE_TYPE :
             bs = std::make_unique<mesa_pd::data::{{shape}}>();
