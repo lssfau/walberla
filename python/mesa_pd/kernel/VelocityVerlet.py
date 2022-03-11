@@ -17,6 +17,7 @@ class VelocityVerlet:
             self.context['interface'].append(create_access("rotation", "walberla::mesa_pd::Rot3", access="gs"))
             self.context['interface'].append(create_access("angularVelocity", "walberla::mesa_pd::Vec3", access="gs"))
             self.context['interface'].append(create_access("invInertiaBF", "walberla::mesa_pd::Mat3", access="g"))
+            self.context['interface'].append(create_access("inertiaBF", "walberla::mesa_pd::Mat3", access="g"))
             self.context['interface'].append(create_access("torque", "walberla::mesa_pd::Vec3", access="gs"))
             self.context['interface'].append(create_access("oldTorque", "walberla::mesa_pd::Vec3", access="gs"))
 

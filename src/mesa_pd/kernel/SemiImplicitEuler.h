@@ -28,6 +28,7 @@
 
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/IAccessor.h>
+#include <mesa_pd/common/ParticleFunctions.h>
 
 namespace walberla {
 namespace mesa_pd {
@@ -58,6 +59,8 @@ namespace kernel {
  * void setAngularVelocity(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
  *
  * const walberla::mesa_pd::Mat3& getInvInertiaBF(const size_t p_idx) const;
+ *
+ * const walberla::mesa_pd::Mat3& getInertiaBF(const size_t p_idx) const;
  *
  * const walberla::mesa_pd::Vec3& getTorque(const size_t p_idx) const;
  * void setTorque(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
@@ -91,8 +94,12 @@ inline void SemiImplicitEuler::operator()(const size_t idx,
                                  ac.getLinearVelocity(idx));
       ac.setPosition      ( idx, ac.getLinearVelocity(idx) * dt_ +
                                  ac.getPosition(idx));
-      const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
-                                                  ac.getInvInertiaBF(idx)) * ac.getTorque(idx);
+      // computation done in body frame: d(omega)/ dt = J^-1 ((J*omega) x omega + T), update in world frame
+      // see Wachs, 2019, doi:10.1007/s00707-019-02389-9, Eq. 27
+      const auto omegaBF = transformVectorFromWFtoBF(idx, ac, ac.getAngularVelocity(idx));
+      const auto torqueBF = transformVectorFromWFtoBF(idx, ac, ac.getTorque(idx));
+      const Vec3 wdotBF = ac.getInvInertiaBF(idx) * ( ( ac.getInertiaBF(idx) * omegaBF ) % omegaBF + torqueBF );
+      const Vec3 wdot = transformVectorFromBFtoWF(idx, ac, wdotBF);
 
       ac.setAngularVelocity(idx, wdot * dt_ +
                                  ac.getAngularVelocity(idx));

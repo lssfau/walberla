@@ -20,7 +20,7 @@
 
 #include <mesa_pd/collision_detection/AnalyticContactDetection.h>
 
-#include <mesa_pd/data/ParticleAccessor.h>
+#include <mesa_pd/data/ParticleAccessorWithShape.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
 
@@ -42,23 +42,6 @@
 namespace walberla {
 namespace mesa_pd {
 
-class ParticleAccessorWithShape : public data::ParticleAccessor
-{
-public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-         : ParticleAccessor(ps)
-         , ss_(ss)
-   {}
-
-   const auto& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvMass();}
-
-   const auto& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvInertiaBF();}
-
-   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)].get();}
-private:
-   std::shared_ptr<data::ShapeStorage> ss_;
-};
-
 int main( int argc, char ** argv )
 {
    using namespace walberla::timing;
@@ -75,7 +58,7 @@ int main( int argc, char ** argv )
    //init data structures
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   ParticleAccessorWithShape accessor(ps, ss);
+   mesa_pd::data::ParticleAccessorWithShape accessor(ps, ss);
 
    auto p                       = ps->create();
    p->getPositionRef()          = Vec3(real_t(0), real_t(0), real_t(0));

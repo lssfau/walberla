@@ -18,7 +18,6 @@
 //
 //======================================================================================================================
 
-#include "Accessor.h"
 #include "check.h"
 #include "Contact.h"
 #include "CreateParticles.h"
@@ -32,7 +31,7 @@
 
 #include <mesa_pd/collision_detection/AnalyticContactDetection.h>
 #include <mesa_pd/data/LinkedCells.h>
-#include <mesa_pd/data/ParticleAccessor.h>
+#include <mesa_pd/data/ParticleAccessorWithShape.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
 #include <mesa_pd/data/SparseLinkedCells.h>
@@ -198,7 +197,7 @@ int main( int argc, char ** argv )
    //init data structures
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   ParticleAccessorWithShape accessor(ps, ss);
+   data::ParticleAccessorWithShape accessor(ps, ss);
    auto lc = std::make_shared<data::LinkedCells>(domain->getUnionOfLocalAABBs().getExtended(params.spacing), params.spacing );
    forest->addBlockData(domain::createBlockForestDataHandling(ps), "Storage");
 

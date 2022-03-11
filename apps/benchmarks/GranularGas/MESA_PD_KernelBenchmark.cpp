@@ -18,7 +18,6 @@
 //
 //======================================================================================================================
 
-#include "Accessor.h"
 #include "check.h"
 #include "Contact.h"
 #include "CreateParticles.h"
@@ -32,7 +31,7 @@
 
 #include <mesa_pd/collision_detection/AnalyticContactDetection.h>
 #include <mesa_pd/data/LinkedCells.h>
-#include <mesa_pd/data/ParticleAccessor.h>
+#include <mesa_pd/data/ParticleAccessorWithShape.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
@@ -209,7 +208,7 @@ int main( int argc, char ** argv )
    //init data structures
    auto ss = std::make_shared<data::ShapeStorage>();
    auto ps = std::make_shared<data::ParticleStorage>(100);
-   ParticleAccessorWithShape accessor(ps, ss);
+   data::ParticleAccessorWithShape accessor(ps, ss);
    data::LinkedCells     lc(localDomain.getExtended(params.spacing), params.spacing );
 
    auto  smallSphere = ss->create<data::Sphere>( params.radius );

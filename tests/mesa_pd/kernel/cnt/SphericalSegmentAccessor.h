@@ -38,10 +38,13 @@ public:
    constexpr auto getInvMass(const size_t /*p_idx*/) const {return 1_r / kernel::cnt::mass_T;}
 
    constexpr auto& getInvInertiaBF(const size_t /*p_idx*/) const {return invI;}
+
+   constexpr auto& getInertiaBF(const size_t /*p_idx*/) const {return I;}
 private:
    //  - sphere   :  I = (2/5)*mass*radius^2
    static constexpr auto Ia = 0.4_r * kernel::cnt::mass_T * kernel::cnt::inner_radius * kernel::cnt::inner_radius;
    static constexpr auto invI = Mat3(1_r/Ia, 0_r, 0_r, 0_r, 1_r/Ia, 0_r, 0_r, 0_r, 1_r/Ia);
+   static constexpr auto I = Mat3(Ia, 0_r, 0_r, 0_r, Ia, 0_r, 0_r, 0_r, Ia);
 };
 
 } //namespace mesa_pd

@@ -20,7 +20,7 @@
 
 #include <mesa_pd/collision_detection/AnalyticContactDetection.h>
 
-#include <mesa_pd/data/ParticleAccessor.h>
+#include <mesa_pd/data/ParticleAccessorWithShape.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
 
@@ -35,23 +35,6 @@
 namespace walberla {
 
 using namespace walberla::mesa_pd;
-
-class ParticleAccessorWithShape : public data::ParticleAccessor
-{
-public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-         : ParticleAccessor(ps)
-         , ss_(ss)
-   {}
-
-   const auto& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvMass();}
-
-   const auto& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvInertiaBF();}
-
-   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)].get();}
-private:
-   std::shared_ptr<data::ShapeStorage> ss_;
-};
 
 int main( int argc, char ** argv )
 {
@@ -72,7 +55,7 @@ int main( int argc, char ** argv )
    auto smallSphere = ss->create<data::Sphere>( real_t(2) );
    ss->shapes[smallSphere]->updateMassAndInertia(real_t(2500));
 
-   ParticleAccessorWithShape ac(ps, ss);
+   mesa_pd::data::ParticleAccessorWithShape ac(ps, ss);
 
    data::Particle&& p1 = *ps->create();
    p1.getPositionRef() = Vec3(0,0,0);

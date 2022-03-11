@@ -28,6 +28,7 @@
 
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/IAccessor.h>
+#include <mesa_pd/common/ParticleFunctions.h>
 
 namespace walberla {
 namespace mesa_pd {
@@ -66,6 +67,8 @@ namespace kernel {
  * void setAngularVelocity(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
  *
  * const walberla::mesa_pd::Mat3& getInvInertiaBF(const size_t p_idx) const;
+ *
+ * const walberla::mesa_pd::Mat3& getInertiaBF(const size_t p_idx) const;
  *
  * const walberla::mesa_pd::Vec3& getTorque(const size_t p_idx) const;
  * void setTorque(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
@@ -111,8 +114,14 @@ inline void VelocityVerletPreForceUpdate::operator()(const size_t p_idx, Accesso
       ac.setPosition(p_idx, ac.getPosition(p_idx) +
                             ac.getLinearVelocity(p_idx) * dt_ +
                             real_t(0.5) * ac.getInvMass(p_idx) * ac.getOldForce(p_idx) * dt_ * dt_);
-      const Vec3 wdot = math::transformMatrixRART(ac.getRotation(p_idx).getMatrix(),
-                                                  ac.getInvInertiaBF(p_idx)) * ac.getOldTorque(p_idx);
+      // computation done in body frame: d(omega)/ dt = J^-1 ((J*omega) x omega + T), update in world frame
+      // see Wachs, 2019, doi:10.1007/s00707-019-02389-9, Eq. 27
+      // note: this implementation (pre and post) is experimental as it is in principle unclear in which order
+      //       angular velocities and rotations (affect again the transformations WF - BF) have to be carried out
+      const auto omegaBF = transformVectorFromWFtoBF(p_idx, ac, ac.getAngularVelocity(p_idx));
+      const auto torqueBF = transformVectorFromWFtoBF(p_idx, ac, ac.getOldTorque(p_idx));
+      const Vec3 wdotBF = ac.getInvInertiaBF(p_idx) * ( ( ac.getInertiaBF(p_idx) * omegaBF ) % omegaBF + torqueBF );
+      const Vec3 wdot = transformVectorFromBFtoWF(p_idx, ac, wdotBF);
 
       // Calculating the rotation angle
       const Vec3 phi( ac.getAngularVelocity(p_idx) * dt_ + real_t(0.5) * wdot * dt_ * dt_);
@@ -133,12 +142,13 @@ inline void VelocityVerletPostForceUpdate::operator()(const size_t p_idx, Access
    {
       ac.setLinearVelocity(p_idx, ac.getLinearVelocity(p_idx) +
                                   real_t(0.5) * ac.getInvMass(p_idx) * (ac.getOldForce(p_idx) + ac.getForce(p_idx)) * dt_);
-      const auto torque = ac.getOldTorque(p_idx) + ac.getTorque(p_idx);
-      const Vec3 wdot = math::transformMatrixRART(ac.getRotation(p_idx).getMatrix(),
-                                                  ac.getInvInertiaBF(p_idx)) * torque;
+      const auto omegaBF = transformVectorFromWFtoBF(p_idx, ac, ac.getAngularVelocity(p_idx));
+      const auto torqueBF = transformVectorFromWFtoBF(p_idx, ac, 0.5_r * (ac.getOldTorque(p_idx) + ac.getTorque(p_idx)));
+      const Vec3 wdotBF = ac.getInvInertiaBF(p_idx) * ( ( ac.getInertiaBF(p_idx) * omegaBF ) % omegaBF + torqueBF );
+      const Vec3 wdot = transformVectorFromBFtoWF(p_idx, ac, wdotBF);
 
       ac.setAngularVelocity(p_idx, ac.getAngularVelocity(p_idx) +
-                                   real_t(0.5) * wdot * dt_ );
+                                   wdot * dt_ );
    }
 
    ac.setOldForce(p_idx,       ac.getForce(p_idx));

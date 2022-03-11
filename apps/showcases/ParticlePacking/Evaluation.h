@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "mesa_pd/data/ContactAccessor.h"
 #include "mesa_pd/data/ParticleStorage.h"
 
 #include "Utility.h"

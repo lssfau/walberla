@@ -35,6 +35,7 @@
 
 #include "mesa_pd/data/ContactStorage.h"
 #include "mesa_pd/data/ContactAccessor.h"
+#include "mesa_pd/data/ParticleAccessorWithBaseShape.h"
 #include "mesa_pd/data/ParticleStorage.h"
 #include "mesa_pd/data/HashGrids.h"
 
@@ -418,7 +419,7 @@ int main(int argc, char **argv) {
    /// MESAPD Data
    auto particleStorage = std::make_shared<data::ParticleStorage>(1);
    auto contactStorage = std::make_shared<data::ContactStorage>(1);
-   ParticleAccessorWithShape particleAccessor(particleStorage);
+   data::ParticleAccessorWithBaseShape particleAccessor(particleStorage);
    data::ContactAccessor contactAccessor(contactStorage);
 
    // configure shape creation
@@ -626,7 +627,7 @@ int main(int argc, char **argv) {
 
    math::DistributedSample diameterSample;
    particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor,
-                                    [&diameterSample](const size_t idx, ParticleAccessorWithShape& ac){diameterSample.insert(real_c(2)*ac.getInteractionRadius(idx));}, particleAccessor);
+                                    [&diameterSample](const size_t idx, data::ParticleAccessorWithBaseShape& ac){diameterSample.insert(real_c(2)*ac.getInteractionRadius(idx));}, particleAccessor);
 
    diameterSample.mpiAllGather();
    WALBERLA_LOG_INFO_ON_ROOT("Statistics of initially created particles' interaction diameters: " << diameterSample.format());
@@ -713,7 +714,7 @@ int main(int argc, char **argv) {
    meshParticleVTK.addFaceOutput< data::SelectParticleLinearVelocity >("LinearVelocity");
    meshParticleVTK.addVertexOutput< data::SelectParticlePosition >("Position");
    meshParticleVTK.addVertexOutput< data::SelectParticleNumContacts >("numContacts");
-   auto surfaceVelDataSource = make_shared<mesa_pd::SurfaceVelocityVertexDataSource< mesh::PolyMesh, ParticleAccessorWithShape > >("SurfaceVelocity", particleAccessor);
+   auto surfaceVelDataSource = make_shared<mesa_pd::SurfaceVelocityVertexDataSource< mesh::PolyMesh, data::ParticleAccessorWithBaseShape > >("SurfaceVelocity", particleAccessor);
    meshParticleVTK.setParticleSelector(vtkParticleSelector);
    meshParticleVTK.addVertexDataSource(surfaceVelDataSource);
 
@@ -850,7 +851,7 @@ int main(int argc, char **argv) {
 
          timing.start("Contact detection");
          hashGrids.forEachParticlePairHalf(useOpenMP, kernel::ExcludeInfiniteInfinite(), particleAccessor,
-                                           [domain, contactStorage](size_t idx1, size_t idx2, ParticleAccessorWithShape &ac){
+                                           [domain, contactStorage](size_t idx1, size_t idx2, data::ParticleAccessorWithBaseShape &ac){
                                               kernel::DoubleCast double_cast;
                                               mpi::ContactFilter contact_filter;
                                               collision_detection::GeneralContactDetection contactDetection;
@@ -890,7 +891,7 @@ int main(int argc, char **argv) {
          } else
          {
             linkedCells.forEachParticlePairHalf(useOpenMP, kernel::ExcludeInfiniteInfinite(), particleAccessor,
-                                                [domain, contactStorage](size_t idx1, size_t idx2, ParticleAccessorWithShape &ac){
+                                                [domain, contactStorage](size_t idx1, size_t idx2, data::ParticleAccessorWithBaseShape &ac){
 
                                                    collision_detection::GeneralContactDetection contactDetection;
                                                    //Attention: does not use contact threshold in general case (GJK)
@@ -926,9 +927,9 @@ int main(int argc, char **argv) {
 
       timing.start("Contact eval");
       particleStorage->forEachParticle(useOpenMP, kernel::SelectAll(), particleAccessor,
-                                       [](size_t p_idx, ParticleAccessorWithShape& ac){ac.setNumContacts(p_idx,0);}, particleAccessor);
+                                       [](size_t p_idx, data::ParticleAccessorWithBaseShape& ac){ac.setNumContacts(p_idx,0);}, particleAccessor);
       contactStorage->forEachContact(useOpenMP, kernel::SelectAll(), contactAccessor,
-                                     [](size_t c, data::ContactAccessor &ca, ParticleAccessorWithShape &pa) {
+                                     [](size_t c, data::ContactAccessor &ca, data::ParticleAccessorWithBaseShape &pa) {
                                         auto idx1 = ca.getId1(c);
                                         auto idx2 = ca.getId2(c);
                                         pa.getNumContactsRef(idx1)++;
@@ -996,7 +997,7 @@ int main(int argc, char **argv) {
          timing.start("DEM");
          timing.start("Collision");
          contactStorage->forEachContact(useOpenMP, kernel::SelectAll(), contactAccessor,
-                                        [&dem_collision, coefficientOfRestitution, dem_collisionTime, dem_kappa, dt](size_t c, data::ContactAccessor &ca, ParticleAccessorWithShape &pa){
+                                        [&dem_collision, coefficientOfRestitution, dem_collisionTime, dem_kappa, dt](size_t c, data::ContactAccessor &ca, data::ParticleAccessorWithBaseShape &pa){
                                            auto idx1 = ca.getId1(c);
                                            auto idx2 = ca.getId2(c);
                                            auto meff = real_t(1) / (pa.getInvMass(idx1) + pa.getInvMass(idx2));
@@ -1125,7 +1126,7 @@ int main(int argc, char **argv) {
 
          // apply damping
          particleStorage->forEachParticle(useOpenMP, kernel::SelectAll(), particleAccessor,
-                                          [velocityDampingFactor](size_t idx, ParticleAccessorWithShape &ac){
+                                          [velocityDampingFactor](size_t idx, data::ParticleAccessorWithBaseShape &ac){
                                              ac.getLinearVelocityRef(idx) *= velocityDampingFactor;
                                              ac.getAngularVelocityRef(idx) *= velocityDampingFactor;},
                                            particleAccessor);

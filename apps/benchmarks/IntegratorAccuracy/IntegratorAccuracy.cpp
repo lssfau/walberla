@@ -43,15 +43,15 @@ public:
    const auto &getInvMass(const size_t /*p_idx*/) const
    { return invMass_; }
 
-   void setInvInertiaBF(const size_t /*p_idx*/, const Mat3 &val)
-   { invInertiaBF_ = val; }
+   const auto &getInvInertiaBF(const size_t /*p_idx*/) const // dummy
+   { return dummyI_; }
 
-   const auto &getInvInertiaBF(const size_t /*p_idx*/) const
-   { return invInertiaBF_; }
+   const auto &getInertiaBF(const size_t /*p_idx*/) const // dummy
+   { return dummyI_; }
 
 private:
    real_t invMass_;
-   Mat3 invInertiaBF_;
+   Mat3 dummyI_{0_r};
 };
 
 struct Oscillator

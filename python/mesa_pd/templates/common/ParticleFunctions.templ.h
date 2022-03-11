@@ -68,6 +68,21 @@ inline Vec3 transformVectorFromBFtoWF(const size_t p_idx, Accessor& ac, const Ve
 }
 
 /**
+ * Transform (inverse) particle's moment of inertia from body frame coordinates (as stored by shape) to world frame.
+ */
+template <typename Accessor>
+inline Mat3 getInvInertia(const size_t p_idx, Accessor& ac)
+{
+   return math::transformMatrixRART(ac.getRotation(p_idx).getMatrix(), ac.getInvInertiaBF(p_idx));
+}
+
+template <typename Accessor>
+inline Mat3 getInertia(const size_t p_idx, Accessor& ac)
+{
+   return math::transformMatrixRART(ac.getRotation(p_idx).getMatrix(), ac.getInertiaBF(p_idx));
+}
+
+/**
  * Force is applied at the center of mass.
  */
 template <typename Accessor>

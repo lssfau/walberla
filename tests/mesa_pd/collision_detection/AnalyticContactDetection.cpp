@@ -19,7 +19,7 @@
 //======================================================================================================================
 
 #include <mesa_pd/collision_detection/AnalyticContactDetection.h>
-#include <mesa_pd/data/ParticleAccessor.h>
+#include <mesa_pd/data/ParticleAccessorWithShape.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
 #include <mesa_pd/kernel/DoubleCast.h>
@@ -33,23 +33,6 @@
 
 namespace walberla {
 namespace mesa_pd {
-
-class ParticleAccessorWithShape : public data::ParticleAccessor
-{
-public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-         : ParticleAccessor(ps)
-         , ss_(ss)
-   {}
-
-   const auto& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvMass();}
-
-   const auto& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvInertiaBF();}
-
-   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)].get();}
-private:
-   std::shared_ptr<data::ShapeStorage> ss_;
-};
 
 void checkRotation( const Vec3& from, const Vec3& to )
 {
@@ -75,7 +58,7 @@ void checkSphereSphereCollision( )
    //init data structures
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   ParticleAccessorWithShape ac(ps, ss);
+   data::ParticleAccessorWithShape ac(ps, ss);
 
    //initialize particles
    const real_t radius  = real_t(0.5);
@@ -125,7 +108,7 @@ void checkSphereHalfSpaceCollision( )
    //init data structures
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   ParticleAccessorWithShape ac(ps, ss);
+   data::ParticleAccessorWithShape ac(ps, ss);
 
    //initialize particles
    const real_t radius  = real_t(1.0);

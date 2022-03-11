@@ -28,6 +28,9 @@
 
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/IAccessor.h>
+{%- if bIntegrateRotation %}
+#include <mesa_pd/common/ParticleFunctions.h>
+{%- endif %}
 
 namespace walberla {
 namespace mesa_pd {
@@ -81,8 +84,12 @@ inline void SemiImplicitEuler::operator()(const size_t idx,
                                  ac.getPosition(idx));
 
       {%- if bIntegrateRotation %}
-      const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
-                                                  ac.getInvInertiaBF(idx)) * ac.getTorque(idx);
+      // computation done in body frame: d(omega)/ dt = J^-1 ((J*omega) x omega + T), update in world frame
+      // see Wachs, 2019, doi:10.1007/s00707-019-02389-9, Eq. 27
+      const auto omegaBF = transformVectorFromWFtoBF(idx, ac, ac.getAngularVelocity(idx));
+      const auto torqueBF = transformVectorFromWFtoBF(idx, ac, ac.getTorque(idx));
+      const Vec3 wdotBF = ac.getInvInertiaBF(idx) * ( ( ac.getInertiaBF(idx) * omegaBF ) % omegaBF + torqueBF );
+      const Vec3 wdot = transformVectorFromBFtoWF(idx, ac, wdotBF);
 
       ac.setAngularVelocity(idx, wdot * dt_ +
                                  ac.getAngularVelocity(idx));

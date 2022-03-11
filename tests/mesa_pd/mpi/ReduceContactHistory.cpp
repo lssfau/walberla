@@ -21,10 +21,8 @@
 #include <mesa_pd/collision_detection/AnalyticContactDetection.h>
 #include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>
-#include <mesa_pd/data/ShapeStorage.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
 #include <mesa_pd/kernel/DoubleCast.h>
-#include <mesa_pd/kernel/InsertParticleIntoLinkedCells.h>
 #include <mesa_pd/kernel/ParticleSelector.h>
 #include <mesa_pd/mpi/ContactFilter.h>
 #include <mesa_pd/mpi/ReduceContactHistory.h>

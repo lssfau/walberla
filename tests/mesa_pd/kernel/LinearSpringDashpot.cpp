@@ -21,7 +21,7 @@
 #include "mesa_pd/collision_detection/AnalyticContactDetection.h"
 #include "mesa_pd/common/ParticleFunctions.h"
 
-#include "mesa_pd/data/ParticleAccessor.h"
+#include "mesa_pd/data/ParticleAccessorWithShape.h"
 #include "mesa_pd/data/ParticleStorage.h"
 #include "mesa_pd/data/ShapeStorage.h"
 
@@ -38,24 +38,6 @@
 
 namespace walberla {
 namespace mesa_pd {
-
-class ParticleAccessorWithShape : public data::ParticleAccessor
-{
-public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-         : ParticleAccessor(ps)
-         , ss_(ss)
-   {}
-
-   const auto& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvMass();}
-
-   const auto& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvInertiaBF();}
-
-   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)].get();}
-private:
-   std::shared_ptr<data::ShapeStorage> ss_;
-};
-
 
 /*
  * Simulates oblique sphere-wall collision and checks rebound angle, i.e. the tangential part of the collision model.
@@ -106,7 +88,7 @@ int main( int argc, char ** argv )
    //init data structures
    auto ps = walberla::make_shared<data::ParticleStorage>(2);
    auto ss = walberla::make_shared<data::ShapeStorage>();
-   using ParticleAccessor_T = ParticleAccessorWithShape;
+   using ParticleAccessor_T = mesa_pd::data::ParticleAccessorWithShape;
    auto accessor = walberla::make_shared<ParticleAccessor_T >(ps, ss);
 
    auto sphereShape = ss->create<data::Sphere>( radius );

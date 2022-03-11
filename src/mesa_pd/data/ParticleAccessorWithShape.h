@@ -40,7 +40,7 @@ public:
    const auto& getMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getMass();}
    const auto& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvInertiaBF();}
    const auto& getInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInertiaBF();}
-   const auto getVolume(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getVolume();}
+   auto getVolume(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getVolume();}
 
    data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)].get();}
 private:
