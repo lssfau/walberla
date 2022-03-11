@@ -60,6 +60,8 @@ public:
    
    const walberla::mesa_pd::Mat3& getInvInertiaBF(const size_t /*p_idx*/) const {return invInertiaBF_;}
    
+   const walberla::mesa_pd::Mat3& getInertiaBF(const size_t /*p_idx*/) const {return inertiaBF_;}
+   
    const walberla::mesa_pd::Vec3& getTorque(const size_t /*p_idx*/) const {return torque_;}
    void setTorque(const size_t /*p_idx*/, const walberla::mesa_pd::Vec3& v) { torque_ = v;}
    
@@ -87,6 +89,7 @@ private:
    walberla::mesa_pd::Rot3 rotation_;
    walberla::mesa_pd::Vec3 angularVelocity_;
    walberla::mesa_pd::Mat3 invInertiaBF_;
+   walberla::mesa_pd::Mat3 inertiaBF_;
    walberla::mesa_pd::Vec3 torque_;
    walberla::mesa_pd::Vec3 oldTorque_;
    walberla::mesa_pd::data::particle_flags::FlagT flags_;

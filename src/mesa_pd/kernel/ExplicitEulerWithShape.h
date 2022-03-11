@@ -28,6 +28,7 @@
 
 #include <mesa_pd/data/DataTypes.h>
 #include <mesa_pd/data/IAccessor.h>
+#include <mesa_pd/common/ParticleFunctions.h>
 
 namespace walberla {
 namespace mesa_pd {
@@ -89,8 +90,13 @@ inline void ExplicitEuler::operator()(const size_t idx,
    {
       ac.setPosition      (idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ * dt_ + ac.getLinearVelocity(idx) * dt_ + ac.getPosition(idx));
       ac.setLinearVelocity(idx, ac.getInvMass(idx) * ac.getForce(idx) * dt_ + ac.getLinearVelocity(idx));
-      const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
-                                                  ac.getInvInertiaBF(idx)) * ac.getTorque(idx);
+
+      // computation done in body frame: d(omega)/ dt = J^-1 ((J*omega) x omega + T), update in world frame
+      // see Wachs, 2019, doi:10.1007/s00707-019-02389-9, Eq. 27
+      const auto omegaBF = transformVectorFromWFtoBF(idx, ac, ac.getAngularVelocity(idx));
+      const auto torqueBF = transformVectorFromWFtoBF(idx, ac, ac.getTorque(idx));
+      const Vec3 wdotBF = ac.getInvInertiaBF(idx) * ( ( ac.getInertiaBF(idx) * omegaBF ) % omegaBF + torqueBF );
+      const Vec3 wdot = transformVectorFromBFtoWF(idx, ac, wdotBF);
 
       // Calculating the rotation angle
       const Vec3 phi( ac.getAngularVelocity(idx) * dt_ + wdot * dt_ * dt_);

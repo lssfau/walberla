@@ -19,40 +19,25 @@
 //======================================================================================================================
 
 #include <mesa_pd/collision_detection/GeneralContactDetection.h>
-#include <mesa_pd/data/ParticleAccessor.h>
+#include <mesa_pd/data/ParticleAccessorWithShape.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
 #include <mesa_pd/kernel/DoubleCast.h>
 
 #include <core/Abort.h>
 #include <core/Environment.h>
-#include <core/logging/Logging.h>
-#include <core/waLBerlaBuildInfo.h>
 
 #include <memory>
 
 namespace walberla {
 namespace mesa_pd {
 
-class ParticleAccessorWithShape : public data::ParticleAccessor
-{
-public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-      : ParticleAccessor(ps)
-      , ss_(ss)
-   {}
-
-   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)].get();}
-private:
-   std::shared_ptr<data::ShapeStorage> ss_;
-};
-
 void generalContactDetection()
 {
    //init data structures
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   ParticleAccessorWithShape accessor(ps, ss);
+   data::ParticleAccessorWithShape accessor(ps, ss);
 
    auto e0 = ps->create();
    e0->setPosition(Vec3(real_t(0),real_t(0),real_t(0)));

@@ -39,6 +39,7 @@ public:
    void setInvMass(const size_t /*p_idx*/, const walberla::real_t& v) { invMass_ = v;}
    const walberla::mesa_pd::Mat3& getInvInertiaBF(const size_t /*p_idx*/) const {return invInertiaBF_;}
    void setInvInertiaBF(const size_t /*p_idx*/, const walberla::mesa_pd::Mat3& v) { invInertiaBF_ = v;}
+   const walberla::mesa_pd::Mat3 getInertiaBF(const size_t /*p_idx*/) const {return invInertiaBF_.getInverse();}
 
    walberla::real_t        invMass_;
    walberla::mesa_pd::Mat3 invInertiaBF_;

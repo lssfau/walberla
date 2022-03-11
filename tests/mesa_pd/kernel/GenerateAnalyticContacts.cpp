@@ -20,7 +20,7 @@
 
 #include <mesa_pd/collision_detection/AnalyticContactDetection.h>
 #include <mesa_pd/data/LinkedCells.h>
-#include <mesa_pd/data/ParticleAccessor.h>
+#include <mesa_pd/data/ParticleAccessorWithShape.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/ShapeStorage.h>
 #include <mesa_pd/domain/BlockForestDomain.h>
@@ -36,31 +36,12 @@
 #include <blockforest/Initialization.h>
 #include <core/Environment.h>
 #include <core/grid_generator/SCIterator.h>
-#include <core/logging/Logging.h>
-#include <core/mpi/Reduce.h>
 
 #include <iostream>
 #include <memory>
 
 namespace walberla {
 namespace mesa_pd {
-
-class ParticleAccessorWithShape : public data::ParticleAccessor
-{
-public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-         : ParticleAccessor(ps)
-         , ss_(ss)
-   {}
-
-   const auto& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvMass();}
-
-   const auto& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)]->getInvInertiaBF();}
-
-   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeID(p_idx)].get();}
-private:
-   std::shared_ptr<data::ShapeStorage> ss_;
-};
 
 int main( int argc, char ** argv )
 {
@@ -78,7 +59,7 @@ int main( int argc, char ** argv )
    //init data structures
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   ParticleAccessorWithShape accessor(ps, ss);
+   data::ParticleAccessorWithShape accessor(ps, ss);
    data::LinkedCells      lc(math::AABB(-1,-1,-1,4,4,4), real_t(1.3));
 
    //initialize particles

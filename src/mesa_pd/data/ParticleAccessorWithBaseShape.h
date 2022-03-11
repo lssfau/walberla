@@ -13,33 +13,38 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file   Accessor.h
-//! \author Sebastian Eibl <sebastian.eibl@fau.de>
+//! \file
+//! \author Christoph Rettinger <sebastian.eibl@fau.de>
 //
 //======================================================================================================================
 
+#pragma once
+
 #include <mesa_pd/data/ParticleAccessor.h>
 #include <mesa_pd/data/ParticleStorage.h>
-#include <mesa_pd/data/ShapeStorage.h>
 
 namespace walberla {
 namespace mesa_pd {
+namespace data {
 
-class ParticleAccessorWithShape : public data::ParticleAccessor
+class ParticleAccessorWithBaseShape : public data::ParticleAccessor
 {
 public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
+   ParticleAccessorWithBaseShape(std::shared_ptr<data::ParticleStorage>& ps)
       : ParticleAccessor(ps)
-      , ss_(ss)
    {}
 
-   const auto& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvMass();}
-   const auto& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvInertiaBF();}
+   const auto& getInvMass(const size_t p_idx) const {return ps_->getBaseShapeRef(p_idx)->getInvMass();}
+   const auto& getMass(const size_t p_idx) const {return ps_->getBaseShapeRef(p_idx)->getMass();}
 
-   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)].get();}
-private:
-   std::shared_ptr<data::ShapeStorage> ss_;
+   const auto& getInvInertiaBF(const size_t p_idx) const {return ps_->getBaseShapeRef(p_idx)->getInvInertiaBF();}
+   const auto& getInertiaBF(const size_t p_idx) const {return ps_->getBaseShapeRef(p_idx)->getInertiaBF();}
+
+   auto getVolume(const size_t p_idx) const {return ps_->getBaseShapeRef(p_idx)->getVolume();}
+
+   data::BaseShape* getShape(const size_t p_idx) const {return ps_->getBaseShape(p_idx).get();}
 };
 
-} // namespace mesa_pd
-} // namespace walberla
+} //namespace data
+} //namespace mesa_pd
+} //namespace walberla

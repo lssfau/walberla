@@ -20,7 +20,11 @@
 
 #pragma once
 
+#include "core/mpi/MPITextFile.h"
+
 #include "mesa_pd/data/ParticleStorage.h"
+#include "mesa_pd/data/shape/HalfSpace.h"
+#include "mesa_pd/data/shape/CylindricalBoundary.h"
 
 #include <iterator>
 #include <algorithm>
@@ -28,22 +32,6 @@
 
 namespace walberla {
 namespace mesa_pd {
-
-class ParticleAccessorWithShape : public data::ParticleAccessor
-{
-public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& particleStorage)
-         : ParticleAccessor(particleStorage)
-   {}
-
-   walberla::real_t const & getInvMass(const size_t p_idx) const {return ps_->getBaseShapeRef(p_idx)->getInvMass();}
-
-   Mat3 const & getInvInertiaBF(const size_t p_idx) const {return ps_->getBaseShapeRef(p_idx)->getInvInertiaBF();}
-   Mat3 const & getInertiaBF(const size_t p_idx) const {return ps_->getBaseShapeRef(p_idx)->getInertiaBF();}
-   data::BaseShape* getShape(const size_t p_idx) const {return ps_->getBaseShape(p_idx).get();}
-};
-
-
 
 template< typename T>
 std::vector<T> parseStringToVector(std::string inputStr)

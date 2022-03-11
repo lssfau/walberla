@@ -43,7 +43,7 @@
 #include "mesa_pd/mpi/notifications/VelocityUpdateNotification.h"
 #include "mesa_pd/mpi/notifications/VelocityCorrectionNotification.h"
 
-#include <mesa_pd/data/ParticleAccessor.h>
+#include <mesa_pd/data/ParticleAccessorWithShape.h>
 #include <core/Environment.h>
 #include <core/logging/Logging.h>
 
@@ -52,24 +52,6 @@
 namespace walberla {
 namespace mesa_pd {
 
-class ParticleAccessorWithShape : public data::ParticleAccessor
-{
-public:
-   ParticleAccessorWithShape(std::shared_ptr<data::ParticleStorage>& ps, std::shared_ptr<data::ShapeStorage>& ss)
-      : ParticleAccessor(ps)
-      , ss_(ss)
-   {}
-
-   const real_t& getMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getMass();}
-   const real_t& getInvMass(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvMass();}
-
-   const Mat3& getInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInertiaBF();}
-   const Mat3& getInvInertiaBF(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)]->getInvInertiaBF();}
-
-   data::BaseShape* getShape(const size_t p_idx) const {return ss_->shapes[ps_->getShapeIDRef(p_idx)].get();}
-private:
-   std::shared_ptr<data::ShapeStorage> ss_;
-};
 
 template<typename PStorage, typename CStorage, typename PAccessor, typename CAccessor>
 class TestHCSITSKernel {
@@ -141,7 +123,7 @@ void normalReactionTest(kernel::HCSITSRelaxationStep::RelaxationModel model)
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto cs = std::make_shared<data::ContactStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   ParticleAccessorWithShape paccessor(ps, ss);
+   data::ParticleAccessorWithShape paccessor(ps, ss);
    data::ContactAccessor caccessor(cs);
    auto density = real_t(7.874);
    auto radius = real_t(1.1);
@@ -171,7 +153,7 @@ void normalReactionTest(kernel::HCSITSRelaxationStep::RelaxationModel model)
    data::particle_flags::set(p2->getFlagsRef(), data::particle_flags::FIXED);
    data::particle_flags::set(p2->getFlagsRef(), data::particle_flags::GLOBAL);
 
-   TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
+   TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, data::ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
    testHCSITS.model = model;
 
    WALBERLA_LOG_INFO(paccessor.getInvMass(0))
@@ -271,7 +253,7 @@ void SphereSphereTest(kernel::HCSITSRelaxationStep::RelaxationModel model){
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto cs = std::make_shared<data::ContactStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   ParticleAccessorWithShape paccessor(ps, ss);
+   data::ParticleAccessorWithShape paccessor(ps, ss);
    data::ContactAccessor caccessor(cs);
    auto density = real_t(7.874);
    auto radius = real_t(1.1);
@@ -294,7 +276,7 @@ void SphereSphereTest(kernel::HCSITSRelaxationStep::RelaxationModel model){
    p2->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    p2->getLinearVelocityRef() = Vec3(real_t(-1), real_t(0), real_t(0));
    p2->getTypeRef()              = 0;
-   TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
+   TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, data::ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
    testHCSITS.model = model;
    testHCSITS(dt);
 
@@ -322,7 +304,7 @@ void SphereSeperationTest(kernel::HCSITSRelaxationStep::RelaxationModel model){
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto cs = std::make_shared<data::ContactStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   ParticleAccessorWithShape paccessor(ps, ss);
+   data::ParticleAccessorWithShape paccessor(ps, ss);
    data::ContactAccessor caccessor(cs);
    auto density = real_t(7.874);
    auto radius = real_t(1.1);
@@ -345,7 +327,7 @@ void SphereSeperationTest(kernel::HCSITSRelaxationStep::RelaxationModel model){
    p2->getOwnerRef()             = walberla::mpi::MPIManager::instance()->rank();
    p2->getLinearVelocityRef()    = Vec3(real_t(-1), real_t(0), real_t(0));
    p2->getTypeRef()              = 0;
-   TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
+   TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, data::ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
 
    int solveCount = 0;
    testHCSITS.model = model;
@@ -379,7 +361,7 @@ void SlidingSphereFrictionalReactionTest(kernel::HCSITSRelaxationStep::Relaxatio
    auto ps = std::make_shared<data::ParticleStorage>(100);
    auto cs = std::make_shared<data::ContactStorage>(100);
    auto ss = std::make_shared<data::ShapeStorage>();
-   ParticleAccessorWithShape paccessor(ps, ss);
+   data::ParticleAccessorWithShape paccessor(ps, ss);
    data::ContactAccessor caccessor(cs);
    auto density = real_t(1);
    auto radius = real_t(1);
@@ -406,7 +388,7 @@ void SlidingSphereFrictionalReactionTest(kernel::HCSITSRelaxationStep::Relaxatio
    data::particle_flags::set(p2->getFlagsRef(), data::particle_flags::FIXED);
    data::particle_flags::set(p2->getFlagsRef(), data::particle_flags::GLOBAL);
 
-   TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
+   TestHCSITSKernel<data::ParticleStorage, data::ContactStorage, data::ParticleAccessorWithShape, data::ContactAccessor> testHCSITS(*ps, *cs, paccessor, caccessor);
    testHCSITS.model = model;
    testHCSITS.globalAcc = Vec3(0,0,-10);
    int solveCount = 0;

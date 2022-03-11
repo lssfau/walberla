@@ -18,7 +18,7 @@
 //
 //======================================================================================================================
 
-#include <mesa_pd/data/ParticleAccessor.h>
+#include <mesa_pd/data/ParticleAccessorWithShape.h>
 #include <mesa_pd/data/ParticleStorage.h>
 #include <mesa_pd/data/shape/Sphere.h>
 
@@ -48,6 +48,7 @@ public:
    const auto& getInvMass(const size_t /*p_idx*/) const {return sp.getInvMass();}
 
    const auto& getInvInertiaBF(const size_t /*p_idx*/) const {return sp.getInvInertiaBF();}
+   const auto& getInertiaBF(const size_t /*p_idx*/) const {return sp.getInertiaBF();}
 
    data::BaseShape* getShape(const size_t /*p_idx*/) {return &sp;}
 private:
