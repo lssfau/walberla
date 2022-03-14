@@ -1091,6 +1091,7 @@ if ( WALBERLA_BUILD_WITH_CUDA )
         #CUDA_FOUND is need for our cmake mechanism
         set ( CUDA_FOUND TRUE )
     else()
+        message( WARNING "CUDA could not be enabled. The host compiler might not be compatible. Check CMakeFiles/CMakeError.log for more information" )
         set ( WALBERLA_BUILD_WITH_CUDA FALSE )
     endif ( )
 endif ( )
