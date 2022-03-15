@@ -581,12 +581,14 @@ std::string assembleParticleInformation(data::ParticleStorage& ps, SizeEvaluator
 
       auto position = pIt->getPosition();
       auto sizeInfo = sizeEvaluator.get(*pIt->getBaseShape());
+      auto rotM = pIt->getRotation().getMatrix();
 
       ossData << std::setprecision( precision );
       ossData << position[0] << " " << position[1] << " " << position[2] << " "
               << sizeInfo.size << " " << sizeInfo.volume << " "
               << sizeInfo.shapeSemiAxes[0] << " " << sizeInfo.shapeSemiAxes[1] << " " << sizeInfo.shapeSemiAxes[2] << " "
-              << pIt->getNumContacts()
+              << pIt->getNumContacts() << " "
+              << rotM[0] << " " << rotM[1] << " "<< rotM[2] << " "<< rotM[3] << " "<< rotM[4] << " "<< rotM[5] << " "<< rotM[6] << " "<< rotM[7] << " "<< rotM[8]
               << "\n";
    }
 
