@@ -355,6 +355,7 @@ int main(int argc, char **argv) {
    real_t terminalRelativeHeightChange = mainConf.getParameter<real_t>("terminalRelativeHeightChange");
    real_t terminationCheckingSpacing = mainConf.getParameter<real_t>("terminationCheckingSpacing");
    real_t minimalTerminalRunTime = mainConf.getParameter<real_t>("minimalTerminalRunTime");
+   real_t velocityDampingCoefficient = mainConf.getParameter<real_t>("velocityDampingCoefficient");
 
    bool useHashGrids = mainConf.getParameter<bool>("useHashGrids");
 
@@ -367,7 +368,6 @@ int main(int argc, char **argv) {
    real_t dt = solverConf.getParameter<real_t>("dt");
    real_t frictionCoefficient = solverConf.getParameter<real_t>("frictionCoefficient");
    real_t coefficientOfRestitution = solverConf.getParameter<real_t>("coefficientOfRestitution");
-   real_t velocityDampingCoefficient = solverConf.getParameter<real_t>("velocityDampingCoefficient");
 
    uint_t visSpacing = uint_c(visSpacingInSeconds / dt);
    uint_t infoSpacing = uint_c(infoSpacingInSeconds / dt);
