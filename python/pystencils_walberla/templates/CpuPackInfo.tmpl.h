@@ -44,7 +44,6 @@ public:
        unpackData( receiver, stencil::inverseDir[dir], rBuffer );
    }
 
-private:
    void packDataImpl(const IBlock * sender, stencil::Direction dir, mpi::SendBuffer & outBuffer) const {
         const auto dataSize = size(dir, sender);
         pack(dir, outBuffer.forward(dataSize), const_cast<IBlock*>(sender));
@@ -54,6 +53,7 @@ private:
    void unpack(stencil::Direction dir, unsigned char * buffer, IBlock * block) const;
    uint_t size  (stencil::Direction dir, const IBlock * block) const;
 
+ private:
     {{fused_kernel|generate_members(parameters_to_ignore=['buffer'])|indent(4)}}
 };
 

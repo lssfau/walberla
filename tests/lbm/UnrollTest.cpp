@@ -21,7 +21,6 @@
 
 #include "lbm/IntelCompilerOptimization.h"
 #include "core/DataTypes.h"
-#include "field/Field.h"
 
 #include <iostream>
 #include <sstream>
