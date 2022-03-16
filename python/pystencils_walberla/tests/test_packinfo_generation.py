@@ -28,8 +28,12 @@ class PackinfoGenTest(unittest.TestCase):
 
                     for file_name_to_test in ('PI1.cpp', 'PI2.cpp'):
                         file_to_test = ctx.files[file_name_to_test]
+
+                        # For Packing kernels it is better to not have OpenMP in the code because the packing kernels
+                        # themselves are launched in an OpenMP environment. Still it could be forced but setting
+                        # openmp to True in generate_pack_info_from_kernel
                         if openmp:
-                            assert '#pragma omp parallel' in file_to_test
+                            assert '#pragma omp parallel' not in file_to_test
 
                         if da:
                             assert 'float ' not in file_to_test

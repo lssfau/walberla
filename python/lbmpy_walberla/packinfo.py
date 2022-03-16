@@ -17,7 +17,7 @@ def generate_lb_pack_info(generation_context,
                           namespace='lbm',
                           target=Target.CPU,
                           data_type=None,
-                          cpu_openmp=None,
+                          cpu_openmp=False,
                           **create_kernel_params):
     """Generates waLBerla MPI PackInfos for an LBM kernel, based on a given method
     and streaming pattern. For in-place streaming patterns, two PackInfos are generated;

@@ -160,7 +160,7 @@ def generate_selective_sweep(generation_context, class_name, selection_tree, int
 def generate_pack_info_for_field(generation_context, class_name: str, field: Field,
                                  direction_subset: Optional[Tuple[Tuple[int, int, int]]] = None,
                                  operator=None, gl_to_inner=False,
-                                 target=Target.CPU, data_type=None, cpu_openmp=None,
+                                 target=Target.CPU, data_type=None, cpu_openmp=False,
                                  **create_kernel_params):
     """Creates a pack info for a pystencils field assuming a pull-type stencil, packing all cell elements.
 
@@ -188,7 +188,7 @@ def generate_pack_info_for_field(generation_context, class_name: str, field: Fie
 
 
 def generate_pack_info_from_kernel(generation_context, class_name: str, assignments: Sequence[Assignment],
-                                   kind='pull', operator=None, target=Target.CPU, data_type=None, cpu_openmp=None,
+                                   kind='pull', operator=None, target=Target.CPU, data_type=None, cpu_openmp=False,
                                    **create_kernel_params):
     """Generates a waLBerla GPU PackInfo from a (pull) kernel.
 
@@ -241,7 +241,7 @@ def generate_pack_info_from_kernel(generation_context, class_name: str, assignme
 def generate_pack_info(generation_context, class_name: str,
                        directions_to_pack_terms: Dict[Tuple[Tuple], Sequence[Field.Access]],
                        namespace='pystencils', operator=None, gl_to_inner=False,
-                       target=Target.CPU, data_type=None, cpu_openmp=None,
+                       target=Target.CPU, data_type=None, cpu_openmp=False,
                        **create_kernel_params):
     """Generates a waLBerla GPU PackInfo
 
@@ -258,6 +258,9 @@ def generate_pack_info(generation_context, class_name: str,
         cpu_openmp: if loops should use openMP or not.
         **create_kernel_params: remaining keyword arguments are passed to `pystencils.create_kernel`
     """
+    if cpu_openmp:
+        raise ValueError("The packing kernels are already called inside an OpenMP parallel region. Thus "
+                         "additionally parallelising each kernel is not supported.")
     items = [(e[0], sorted(e[1], key=lambda x: str(x))) for e in directions_to_pack_terms.items()]
     items = sorted(items, key=lambda e: e[0])
     directions_to_pack_terms = OrderedDict(items)
@@ -286,7 +289,7 @@ def generate_pack_info(generation_context, class_name: str,
     if len(data_types) == 0:
         raise ValueError("No fields to pack!")
     if len(data_types) != 1:
-        err_detail = "\n".join(" - {} [{}]".format(f.name, f.dtype) for f in fields_accessed)
+        err_detail = "\n".join(f" - {f.name} [{f.dtype}]" for f in fields_accessed)
         raise NotImplementedError("Fields of different data types are used - this is not supported.\n" + err_detail)
     dtype = data_types.pop()
 

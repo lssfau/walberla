@@ -102,7 +102,7 @@ void {{class_name}}::outer( {{- ["IBlock * block", kernel.kernel_selection_param
 {
     {{kernel|generate_block_data_to_field_extraction|indent(4)}}
 
-    if( layers_.size() == 0 )
+    if( layers_.empty() )
     {
         CellInterval ci;
 

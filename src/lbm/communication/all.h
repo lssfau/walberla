@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "CombinedInPlaceCpuPackInfo.h"
 #include "PdfFieldMPIDatatypeInfo.h"
 #include "PdfFieldPackInfo.h"
 

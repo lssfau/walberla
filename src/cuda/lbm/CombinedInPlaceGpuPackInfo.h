@@ -82,5 +82,3 @@ class CombinedInPlaceGpuPackInfo : public cuda::GeneratedGPUPackInfo
 
 } // namespace lbm
 } // namespace walberla
-
-
