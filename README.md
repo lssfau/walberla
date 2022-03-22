@@ -31,7 +31,7 @@ your operating system's package manager.
 The typical steps, assuming your are in the waLBerla source directory, are:
 
 - `mkdir build; cd build` create a build directory and change into it
-- `cmake ..` call CMake with the waLBerla source directory as a argument
+- `cmake ..` call CMake with the waLBerla source directory as an argument
 - `make` build waLBerla
 
 To specify a CMake option you need to use `-D(Option)=(Value)`. For example to set the C++ compiler one can use:
@@ -48,7 +48,7 @@ Some important CMake variables:
 - `WALBERLA_BUILD_WITH_PYTHON` Support for embedding Python
 - `WALBERLA_BUILD_WITH_CUDA` Enable CUDA support
 
-For a full list of CMake Option see the [CMakeLists.txt](CMakeLists.txt) file or use `ccmake as described above.`
+For a full list of CMake Option see the [CMakeLists.txt](CMakeLists.txt) file or use `ccmake` as described above.
 
 ### Codegen and Python
 
