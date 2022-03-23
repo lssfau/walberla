@@ -70,7 +70,7 @@ public:
         };
 
         IndexVectors() = default;
-        bool operator==(IndexVectors & other) { return other.cpuVectors_ == cpuVectors_; }
+        bool operator==(IndexVectors const &other) const { return other.cpuVectors_ == cpuVectors_; }
 
         {% if target == 'gpu' -%}
         ~IndexVectors() {
