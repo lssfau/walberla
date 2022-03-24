@@ -156,4 +156,14 @@ waLBerla_compile_test( FILES codegen/InplaceStreamingCodegenTest.cpp
 waLBerla_execute_test( NAME InplaceStreamingCodegenTest
                        COMMAND $<TARGET_FILE:InplaceStreamingCodegenTest> ${CMAKE_CURRENT_SOURCE_DIR}/codegen/InplaceStreamingCodegen3D.prm  )
 
+
+waLBerla_generate_target_from_python( NAME StreamInCellIntervalCodegen
+                                      FILE codegen/StreamInCellIntervalCodegen.py
+                                      OUT_FILES GeneratedLatticeModel.h GeneratedLatticeModel.cpp)
+
+waLBerla_compile_test( FILES    codegen/StreamInCellIntervalCodegenTest.cpp
+                       DEPENDS  blockforest field lbm timeloop StreamInCellIntervalCodegen )
+
+waLBerla_execute_test( NAME     StreamInCellIntervalCodegenTest )
+
 endif()

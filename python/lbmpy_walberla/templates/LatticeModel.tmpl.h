@@ -118,6 +118,13 @@ public:
             streamCollide( block, numberOfGhostLayersToInclude );
         }
 
+        // IMPORTANT REMARK:
+        // This is specifically implemented for using generated kernels in the waLBerla's free surface LBM and is
+        // implemented in rather unflexible fashion. Therefore, it should not be extended and in the long-term, the free
+        // surface implementation should be refactored such that the general generated stream() is applicable.
+        void streamInCellInterval( {{stream_kernel|generate_field_type()}} * const pdfSrcField,
+                                   {{stream_kernel|generate_field_type()}} * pdfDstField, const CellInterval & ci );
+
     private:
         {{stream_collide_kernel|generate_members(only_fields=True)|indent(8)}}
     };

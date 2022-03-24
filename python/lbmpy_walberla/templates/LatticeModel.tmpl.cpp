@@ -90,9 +90,21 @@ void {{class_name}}::Sweep::stream( IBlock * block, const uint_t numberOfGhostLa
     {{stream_kernel|generate_block_data_to_field_extraction(parameters=['pdfs', 'pdfs_tmp'])|indent(4)}}
 
     {{stream_kernel|generate_call('cell_idx_c(numberOfGhostLayersToInclude)')|indent(4)}}
-    
+
     {{stream_kernel|generate_swaps|indent(4)}}
 }
+
+// IMPORTANT REMARK:
+// This is specifically implemented for using generated kernels in the waLBerla's free surface LBM and is
+// implemented in rather unflexible fashion. Therefore, it should not be extended and in the long-term, the free
+// surface implementation should be refactored such that the general generated stream() is applicable.
+void {{class_name}}::Sweep::streamInCellInterval( {{stream_kernel|generate_field_type()}} * const pdfs,
+                                                  {{stream_kernel|generate_field_type()}} * pdfs_tmp,
+                                                  const CellInterval & ci )
+{
+    {{stream_kernel|generate_call(ghost_layers_to_include=0, cell_interval="ci", stream="stream")|indent(4)}}
+}
+
 
 
 } // namespace {{namespace}}
