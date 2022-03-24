@@ -14,6 +14,8 @@ from pystencils.data_types import TypedSymbol, get_base_type
 from pystencils.field import FieldType
 from pystencils.sympyextensions import prod
 
+temporary_fieldPointerTemplate = """{type}"""
+
 temporary_fieldMemberTemplate = """
 private: std::set< {type} *, field::SwapableCompare< {type} * > > cache_{original_field_name}_;"""
 
@@ -269,8 +271,15 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
             return [-ghost_layers_to_include - required_ghost_layers] * field_object.spatial_dimensions
         else:
             assert ghost_layers_to_include == 0
-            return [sp.Symbol("{ci}.{coord}Min()".format(coord=coord_name, ci=cell_interval)) - required_ghost_layers
-                    for coord_name in ('x', 'y', 'z')]
+            if field_object.spatial_dimensions == 3:
+                return [sp.Symbol("{ci}.{coord}Min()".format(coord=coord_name, ci=cell_interval)) - required_ghost_layers
+                        for coord_name in ('x', 'y', 'z')]
+            elif field_object.spatial_dimensions == 2:
+                return [sp.Symbol("{ci}.{coord}Min()".format(coord=coord_name, ci=cell_interval)) - required_ghost_layers
+                        for coord_name in ('x', 'y')]
+            else:
+                raise NotImplementedError(f"Only 2D and 3D fields are supported but a field with "
+                                          f"{field_object.spatial_dimensions} dimensions was passed")
 
     def get_end_coordinates(field_object):
         if cell_interval is None:
@@ -447,6 +456,27 @@ def generate_destructor(kernel_info, class_name):
         return temporary_constructor.format(contents=contents, class_name=class_name)
 
 
+# IMPORTANT REMARK:
+# This is specifically implemented for using generated kernels in the waLBerla's free surface LBM and is
+# implemented in rather unflexible fashion. Therefore, it should not be extended and in the long-term, the free
+# surface implementation should be refactored such that the general generated stream() is applicable.
+@jinja2_context_decorator
+def generate_field_type(ctx, kernel_info):
+    fields = {f.name: f for f in kernel_info.fields_accessed}
+    target = translate_target(ctx['target'])
+    is_gpu = target == Target.GPU
+
+    result = []
+    for field_name in kernel_info.temporary_fields:
+        f = fields[field_name]
+        assert field_name.endswith('_tmp')
+        original_field_name = field_name[:-len('_tmp')]
+        f_size = get_field_fsize(f)
+        field_type = make_field_type(get_base_type(f.dtype), f_size, is_gpu)
+        result.append(temporary_fieldPointerTemplate.format(type=field_type, original_field_name=original_field_name))
+    return "\n".join(result)
+
+
 @jinja2_context_decorator
 def nested_class_method_definition_prefix(ctx, nested_class_name):
     outer_class = ctx['class_name']
@@ -517,6 +547,7 @@ def add_pystencils_filters_to_jinja_env(jinja_env):
     jinja_env.filters['generate_swaps'] = generate_swaps
     jinja_env.filters['generate_refs_for_kernel_parameters'] = generate_refs_for_kernel_parameters
     jinja_env.filters['generate_destructor'] = generate_destructor
+    jinja_env.filters['generate_field_type'] = generate_field_type
     jinja_env.filters['nested_class_method_definition_prefix'] = nested_class_method_definition_prefix
     jinja_env.filters['type_identifier_list'] = type_identifier_list
     jinja_env.filters['identifier_list'] = identifier_list
