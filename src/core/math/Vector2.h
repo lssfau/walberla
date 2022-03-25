@@ -1561,12 +1561,12 @@ struct Vector2LexicographicalyLess
 // \param   v The vector the hash is computed for.
 // \returns   A hash for the entire Vector2.
 */
-template< typename T, typename Enable = std::enable_if_t<std::is_integral_v<T>> >
+template< typename T, typename Enable = std::enable_if_t<std::is_integral<T>::value> >
 std::size_t hash_value( const Vector2<T> & v )
 {
    std::size_t seed;
 
-   if constexpr( sizeof(std::size_t) >= 8 )
+   if( sizeof(std::size_t) >= 8 )
    {
       seed = (static_cast<std::size_t>(v[0]) << 42) +
              (static_cast<std::size_t>(v[1]) << 21);

@@ -338,7 +338,7 @@ inline std::size_t hash_value( const Cell & cell )
 {
    std::size_t seed;
 
-   if constexpr( sizeof(std::size_t) >= 8 )
+   if( sizeof(std::size_t) >= 8 )
    {
       seed = (static_cast<std::size_t>(cell.x()) << 42) +
              (static_cast<std::size_t>(cell.y()) << 21) +
