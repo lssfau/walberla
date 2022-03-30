@@ -44,7 +44,7 @@ Some important CMake variables:
 
 - `WALBERLA_BUILD_WITH_CODEGEN` Enable pystencils code generation"
 - `Python_ROOT_DIR` Specify the directory of the `python` executable. e.g. `~/miniconda/bin/`
-- `MPI_HOME` Specify the base directory of the MPI installation.`
+- `MPI_HOME` Specify the base directory of the MPI installation.
 - `WALBERLA_BUILD_WITH_PYTHON` Support for embedding Python
 - `WALBERLA_BUILD_WITH_CUDA` Enable CUDA support
 
@@ -52,7 +52,7 @@ For a full list of CMake Option see the [CMakeLists.txt](CMakeLists.txt) file or
 
 ### Codegen and Python
 
-To use the `lbmpy`/`pystencils` code generation please install the packages with e.g. `pip install lbmpy` and specify the correct python
+To use the `lbmpy`/`pystencils` code generation please install the packages with e.g. `pip3 install lbmpy` and specify the correct python
 environment when calling CMake.
 
 In previous versions of CMake one could use `PYTHON_EXECUTABLE` or `PYTHON_ROOT_DIR` (all upper case) to specify the python executable or
