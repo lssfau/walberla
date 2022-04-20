@@ -1,11 +1,10 @@
-
 OPTION( WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID "BlockForest: enables/disables BlockID implementation as a primitive data type (uint_t)" ON )
 
 mark_as_advanced( WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID )
 
 configure_file( CMakeDefs.in.h CMakeDefs.h )
 
-add_library( blockforest ../../tests/timeloop/TimeloopSweepManagementTest.cpp)
+add_library( blockforest )
 target_link_libraries( blockforest PUBLIC communication core domain_decomposition stencil )
 target_sources( blockforest
       PRIVATE
