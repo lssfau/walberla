@@ -39,7 +39,7 @@ int main( int argc, char** argv )
    auto memSize = getResidentMemorySize();
 #ifdef __linux__
    WALBERLA_CHECK_GREATER(memSize, 200000);
-   WALBERLA_CHECK_LESS   (memSize, 250000);
+   WALBERLA_CHECK_LESS   (memSize, 280000);
 #else
    WALBERLA_CHECK_EQUAL(memSize, 0);
 #endif
