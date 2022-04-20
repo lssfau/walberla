@@ -31,6 +31,7 @@
 #include <mesa_pd/data/shape/Ellipsoid.h>
 #include <mesa_pd/data/shape/HalfSpace.h>
 #include <mesa_pd/data/shape/Sphere.h>
+#include <mesa_pd/data/shape/ConvexPolyhedron.h>
 
 namespace walberla {
 namespace mesa_pd {
@@ -74,6 +75,23 @@ bool isPointInsideCylindricalBoundary(const Vec3& point,
    const Vec3 distanceFromCylinderCenterLine = (point - cylindricalBoundaryPosition) - ((point - cylindricalBoundaryPosition) * axis) * axis;
    return distanceFromCylinderCenterLine.sqrLength() >= radius*radius;
 }
+
+#ifdef WALBERLA_MESAPD_CONVEX_POLYHEDRON_AVAILABLE
+bool isPointInsideConvexPolyhedronBF(const Vec3& point, const mesh::TriangleMesh& mesh)
+{
+   return std::none_of(mesh.faces().begin(),
+                       mesh.faces().end(),
+                       [&](auto fh)
+                       {
+                         //check if point is on positive side of the face
+                         const mesh::TriangleMesh::Normal &n = mesh.normal(fh); // Plane normal
+                         const mesh::TriangleMesh::Point &pp = mesh.point(mesh.to_vertex_handle(mesh.halfedge_handle(fh))); // Point on plane
+
+                         // normal * (p - pointOnPlane)
+                         return (n[0] * (point[0] - pp[0]) + n[1] * (point[1] - pp[1]) + n[2] * (point[2] - pp[2]) >= real_t(0));
+                       });
+}
+#endif
 
 struct ContainsPointFunctor
 {
@@ -122,6 +140,20 @@ struct ContainsPointFunctor
 
       return isPointInsideCylindricalBoundary(point, ac.getPosition(particleIdx), cylindricalBoundary.getRadius(), cylindricalBoundary.getAxis());
    }
+
+#ifdef WALBERLA_MESAPD_CONVEX_POLYHEDRON_AVAILABLE
+   template<typename ParticleAccessor_T>
+   bool operator()(const size_t particleIdx, const mesa_pd::data::ConvexPolyhedron& convexPolyhedron, const ParticleAccessor_T& ac, const Vector3<real_t>& point )
+   {
+      static_assert(std::is_base_of<mesa_pd::data::IAccessor, ParticleAccessor_T>::value, "Provide a valid accessor as template");
+
+      auto pointBF = mesa_pd::transformPositionFromWFtoBF(particleIdx, ac, point);
+      if( pointBF.sqrLength() > convexPolyhedron.getBoundingSphereRadius() * convexPolyhedron.getBoundingSphereRadius() )
+         return false;
+
+      return isPointInsideConvexPolyhedronBF(pointBF, convexPolyhedron.getMesh());
+   }
+#endif
 
 };
 
