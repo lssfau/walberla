@@ -231,6 +231,9 @@ if (WALBERLA_MESAPD_CONVEX_POLYHEDRON_AVAILABLE)
     waLBerla_compile_test( NAME   MESA_PD_VTK_ConvexPolyhedron FILES vtk/ConvexPolyhedronVTKOutput.cpp DEPENDS core mesa_pd mesh_common vtk )
     waLBerla_execute_test( NAME   MESA_PD_VTK_ConvexPolyhedron )
 
+    waLBerla_compile_test( NAME   MESA_PD_Common_ContainsPointConvexPolyhedron FILES common/ContainsPointConvexPolyhedron.cpp DEPENDS core mesa_pd mesh_common )
+    waLBerla_execute_test( NAME   MESA_PD_Common_ContainsPointConvexPolyhedron )
+
     waLBerla_compile_test( NAME   MESA_PD_Data_ConvexPolyhedron FILES data/ConvexPolyhedron.cpp DEPENDS core mesa_pd mesh_common )
     waLBerla_execute_test( NAME   MESA_PD_Data_ConvexPolyhedron )
 

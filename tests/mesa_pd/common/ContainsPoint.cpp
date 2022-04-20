@@ -41,7 +41,7 @@ using namespace walberla;
 using mesa_pd::Vec3;
 
 
-/*!\brief Tests the contains pint functionality implemented in mesa_pd/common/Contains.h
+/*!\brief Tests the contains point functionality implemented in mesa_pd/common/Contains.h
  *
  * Currently the following shapes are tested:
  *  - sphere

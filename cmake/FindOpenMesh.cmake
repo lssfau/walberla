@@ -98,7 +98,7 @@ IF (NOT OPENMESH_FOUND)
     "C:/libs/OpenMesh 3.0"
     "C:/libs/OpenMesh 2.4.1"
     "C:/libs/OpenMesh 2.4"
-    "${OPENMESH_LIBRARY_DIR}"
+    "${OPENMESH_DIR}"
   )
 
   FIND_PATH (OPENMESH_INCLUDE_DIR OpenMesh/Core/Mesh/PolyMeshT.hh
