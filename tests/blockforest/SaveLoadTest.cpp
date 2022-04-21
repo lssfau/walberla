@@ -36,7 +36,7 @@ void blockForestSaveLoadTest(const BlockForest::FileIOMode ioMode, const bool br
    std::vector< walberla::uint64_t > dump;
    std::vector< walberla::uint64_t > check;
 
-   WALBERLA_LOG_DEVEL_ON_ROOT("*** DUMPING ***");
+   WALBERLA_LOG_DEVEL_ON_ROOT("*** DUMPING ***")
 
    dump.clear();
 
@@ -50,13 +50,13 @@ void blockForestSaveLoadTest(const BlockForest::FileIOMode ioMode, const bool br
 
    for (auto blockIt = forestDump->begin(); blockIt != forestDump->end(); ++blockIt)
    {
-      WALBERLA_LOG_DEVEL("DUMPING BLOCK (" << blockIt->getId() << ") " << blockIt->getAABB() );
+      WALBERLA_LOG_DEVEL("DUMPING BLOCK (" << blockIt->getId() << ") " << blockIt->getAABB() )
       dump.push_back( blockIt->getId().getID() );
    }
 
-   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER();}
+   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER()}
 
-   WALBERLA_LOG_DEVEL_ON_ROOT("*** CHECKING ***");
+   WALBERLA_LOG_DEVEL_ON_ROOT("*** CHECKING ***")
 
    check.clear();
 
@@ -64,22 +64,22 @@ void blockForestSaveLoadTest(const BlockForest::FileIOMode ioMode, const bool br
 
    for (auto blockIt = forestCheck->begin(); blockIt != forestCheck->end(); ++blockIt)
    {
-      WALBERLA_LOG_DEVEL("CHECKING BLOCK (" << blockIt->getId() << ") " << blockIt->getAABB() );
+      WALBERLA_LOG_DEVEL("CHECKING BLOCK (" << blockIt->getId() << ") " << blockIt->getAABB() )
       check.push_back( blockIt->getId().getID() );
    }
 
-   WALBERLA_CHECK_EQUAL(forestDump->getBlockIdBytes(), forestCheck->getBlockIdBytes());
-   WALBERLA_CHECK_EQUAL(forestDump->getDepth(), forestCheck->getDepth());
-   WALBERLA_CHECK_EQUAL(forestDump->getDomain(), forestCheck->getDomain());
-   WALBERLA_CHECK_EQUAL(forestDump->getNumberOfBlocks(), forestCheck->getNumberOfBlocks());
+   WALBERLA_CHECK_EQUAL(forestDump->getBlockIdBytes(), forestCheck->getBlockIdBytes())
+   WALBERLA_CHECK_EQUAL(forestDump->getDepth(), forestCheck->getDepth())
+   WALBERLA_CHECK_EQUAL(forestDump->getDomain(), forestCheck->getDomain())
+   WALBERLA_CHECK_EQUAL(forestDump->getNumberOfBlocks(), forestCheck->getNumberOfBlocks())
 
    std::sort(dump.begin(), dump.end());
    std::sort(check.begin(), check.end());
 
-   WALBERLA_CHECK_EQUAL( dump.size(), check.size() );
+   WALBERLA_CHECK_EQUAL( dump.size(), check.size() )
    for (size_t i = 0; i < dump.size(); ++i)
    {
-      WALBERLA_CHECK_EQUAL(dump[i], check[i]);
+      WALBERLA_CHECK_EQUAL(dump[i], check[i])
    }
 }
 
@@ -95,27 +95,27 @@ int main( int argc, char ** argv )
 
    blockForestSaveLoadTest(BlockForest::MPI_PARALLEL, true);
 
-   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER();}
+   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER()}
    WALBERLA_MPI_SECTION() {walberla::MPIManager::instance()->resetMPI();}
 
    blockForestSaveLoadTest(BlockForest::MASTER_SLAVE, true);
 
-   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER();}
+   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER()}
    WALBERLA_MPI_SECTION() {walberla::MPIManager::instance()->resetMPI();}
 
    blockForestSaveLoadTest(BlockForest::SERIALIZED_DISTRIBUTED, true);
 
-   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER();}
+   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER()}
    WALBERLA_MPI_SECTION() {walberla::MPIManager::instance()->resetMPI();}
 
    blockForestSaveLoadTest(BlockForest::MPI_PARALLEL, false);
 
-   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER();}
+   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER()}
    WALBERLA_MPI_SECTION() {walberla::MPIManager::instance()->resetMPI();}
 
    blockForestSaveLoadTest(BlockForest::MASTER_SLAVE, false);
 
-   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER();}
+   WALBERLA_MPI_SECTION() {WALBERLA_MPI_BARRIER()}
    WALBERLA_MPI_SECTION() {walberla::MPIManager::instance()->resetMPI();}
 
    blockForestSaveLoadTest(BlockForest::SERIALIZED_DISTRIBUTED, false);

@@ -64,8 +64,11 @@ waLBerla_execute_test( NAME PermeabilityTest_TRT_64_1 COMMAND $<TARGET_FILE:Perm
 waLBerla_execute_test( NAME PermeabilityTest_TRT_64_4 COMMAND $<TARGET_FILE:PermeabilityTest> --length 64 --kappa 0.85 --omega 0.3 --collisionModel TRT --timesteps 1001 --epsilon 0.025 PROCESSES 4 CONFIGURATIONS Release RelWithDbgInfo )
 waLBerla_execute_test( NAME PermeabilityTest_TRT_64_8 COMMAND $<TARGET_FILE:PermeabilityTest> --length 64 --kappa 0.85 --omega 0.3 --collisionModel TRT --timesteps 1001 --epsilon 0.025 PROCESSES 8 CONFIGURATIONS Release RelWithDbgInfo )
 
-waLBerla_compile_test( FILES initializer/PdfFieldInitializerTest.cpp )
-waLBerla_execute_test( NAME PdfFieldInitializerTest COMMAND $<TARGET_FILE:PdfFieldInitializerTest> ${CMAKE_CURRENT_SOURCE_DIR}/PdfFieldInitializerTest.prm PROCESSES 4 CONFIGURATIONS Release RelWithDbgInfo )
+waLBerla_compile_test( FILES initializer/UniformPdfFieldInitializerTest.cpp )
+waLBerla_execute_test( NAME UniformPdfFieldInitializerTest COMMAND $<TARGET_FILE:UniformPdfFieldInitializerTest> ${CMAKE_CURRENT_SOURCE_DIR}/PdfFieldInitializerTest.prm PROCESSES 4 CONFIGURATIONS Release RelWithDbgInfo )
+
+waLBerla_compile_test( FILES initializer/NonUniformPdfFieldInitializerTest.cpp )
+waLBerla_execute_test( NAME NonUniformPdfFieldInitializerTest CONFIGURATIONS Release RelWithDbgInfo )
 
 waLBerla_compile_test( FILES field/QCriterionTest.cpp DEPENDS field blockforest )
 waLBerla_execute_test( NAME QCriterionTest )

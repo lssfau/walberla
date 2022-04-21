@@ -146,11 +146,11 @@ public:
    const CellIntervalIterator &  operator--()    { decrement(); return *this; }
          CellIntervalIterator    operator--(int) { CellIntervalIterator tmp = *this; decrement(); return tmp; }
 
-   bool operator==(const CellIntervalIterator & other) const { WALBERLA_ASSERT_EQUAL( &ci_, &other.ci_ ); return cell_ == other.cell_; }
-   bool operator!=(const CellIntervalIterator & other) const { WALBERLA_ASSERT_EQUAL( &ci_, &other.ci_ ); return cell_ != other.cell_; }
+   bool operator==(const CellIntervalIterator & other) const { WALBERLA_ASSERT_EQUAL( &ci_, &other.ci_ ) return cell_ == other.cell_; }
+   bool operator!=(const CellIntervalIterator & other) const { WALBERLA_ASSERT_EQUAL( &ci_, &other.ci_ ) return cell_ != other.cell_; }
 
-         Cell   operator*()  const { WALBERLA_ASSERT( ci_.contains(cell_) ); return cell_;  }
-   const Cell * operator->() const { WALBERLA_ASSERT( ci_.contains(cell_) ); return &cell_; }
+         Cell   operator*()  const { WALBERLA_ASSERT( ci_.contains(cell_) ) return cell_;  }
+   const Cell * operator->() const { WALBERLA_ASSERT( ci_.contains(cell_) ) return &cell_; }
 
 private:
    inline void increment();
@@ -259,9 +259,9 @@ inline CellInterval& CellInterval::shift( const cell_idx_t x, const cell_idx_t y
 
 inline CellInterval& CellInterval::shift( const uint_t x, const uint_t y, const uint_t z ) {
 
-   WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(x), 0 );
-   WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(y), 0 );
-   WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(z), 0 );
+   WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(x), 0 )
+   WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(y), 0 )
+   WALBERLA_ASSERT_GREATER_EQUAL( cell_idx_c(z), 0 )
 
    min_.x() += cell_idx_c(x);
    min_.y() += cell_idx_c(y);

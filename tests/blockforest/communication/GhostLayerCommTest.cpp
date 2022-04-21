@@ -60,8 +60,8 @@ class StreamingSweep
 
          PdfField * src = block->getData<PdfField>(src_);
          PdfField * dst = block->getData<PdfField>(dst_);
-         WALBERLA_ASSERT_NOT_NULLPTR( src );
-         WALBERLA_ASSERT_NOT_NULLPTR( dst );
+         WALBERLA_ASSERT_NOT_NULLPTR( src )
+         WALBERLA_ASSERT_NOT_NULLPTR( dst )
 
          for(PdfField::iterator i = dst->begin(); i != dst->end(); ++i )
          {
@@ -167,7 +167,7 @@ class CompareSweep
          {
             real_t globalValue = bf->get(i.x()+offset[0],i.y()+offset[1], i.z()+offset[2], i.f());
             real_t localValue  = *i;
-            WALBERLA_CHECK_FLOAT_EQUAL(localValue,globalValue);
+            WALBERLA_CHECK_FLOAT_EQUAL(localValue,globalValue)
          }
       }
 
@@ -241,10 +241,10 @@ int main(int argc, char **argv)
          const Cell & cell = cellIt.cell();
          *cellIt = real_c( ( cell[0] + cell[1] + cell[2] + cellIt.f() ) % cell_idx_t(42) );
          glbDst->get(cellIt) = *cellIt;
-         WALBERLA_CHECK_FLOAT_EQUAL ( (*glbDst)(cell[0],cell[1],cell[2],cellIt.f()), (*glbSrc)(cell[0],cell[1],cell[2],cellIt.f()) );
+         WALBERLA_CHECK_FLOAT_EQUAL ( (*glbDst)(cell[0],cell[1],cell[2],cellIt.f()), (*glbSrc)(cell[0],cell[1],cell[2],cellIt.f()) )
       }
 
-      WALBERLA_LOG_INFO("Initialization complete");
+      WALBERLA_LOG_INFO("Initialization complete")
    }
 
    // Create TimeLoop

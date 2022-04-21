@@ -28,8 +28,6 @@ namespace walberla{
 
 void TwoBlockForestsTest()
 {
-   math::AABB domainBlock(0,0,0,3,3,3);
-
    Vector3<uint_t> cells   (10,10,10);
    Vector3<uint_t> blocks  (2,2,2);
    Vector3<uint_t> procs   (2,2,2);
@@ -58,10 +56,10 @@ void TwoBlockForestsTest()
        procs[0], procs[1], procs[2],            // number of processes in x/y/z direction
        periodic[0], periodic[1], periodic[2], true);       // periodic in every direction
 
-   WALBERLA_LOG_DEVEL(lbmBlocks->begin()->getAABB());
-   WALBERLA_LOG_DEVEL(peBlocks->begin()->getAABB());
+   WALBERLA_LOG_DEVEL(lbmBlocks->begin()->getAABB())
+   WALBERLA_LOG_DEVEL(peBlocks->begin()->getAABB())
 
-   WALBERLA_CHECK_EQUAL( lbmBlocks->begin()->getId(), peBlocks->begin()->getId() );
+   WALBERLA_CHECK_EQUAL( lbmBlocks->begin()->getId(), peBlocks->begin()->getId() )
 }
 
 int main( int argc, char** argv )

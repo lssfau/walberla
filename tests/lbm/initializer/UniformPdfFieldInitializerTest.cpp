@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file PdfFieldInitializerTest.cpp
+//! \file UniformPdfFieldInitializerTest.cpp
 //! \author Tobias Schruff <tobias.schruff@gmail.com>
 //
 //======================================================================================================================
@@ -106,14 +106,14 @@ void testDensityInit( const BlockDataID & pdfFieldId, const shared_ptr<Structure
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
    {
       auto pdfField = blockIt->getData<PdfField_T>( pdfFieldId );
-      WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
+      WALBERLA_ASSERT_NOT_NULLPTR( pdfField )
 
       for( auto cellIt = pdfField->beginWithGhostLayerXYZ(); cellIt != pdfField->end(); ++cellIt )
       {
          Cell globalCell( cellIt.cell() );
          blocks->transformBlockLocalToGlobalCell( globalCell, *blockIt );
 
-         WALBERLA_CHECK_FLOAT_EQUAL( pdfField->getDensity( cellIt.cell() ), densityInit( globalCell ) );
+         WALBERLA_CHECK_FLOAT_EQUAL( pdfField->getDensity( cellIt.cell() ), densityInit( globalCell ) )
       }
    }
 }
@@ -131,7 +131,7 @@ void testVelocityInit( const BlockDataID & pdfFieldId, const shared_ptr<Structur
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
    {
       auto pdfField = blockIt->getData<PdfField_T>( pdfFieldId );
-      WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
+      WALBERLA_ASSERT_NOT_NULLPTR( pdfField )
 
       for( auto cellIt = pdfField->beginWithGhostLayerXYZ(); cellIt != pdfField->end(); ++cellIt )
       {
@@ -141,9 +141,9 @@ void testVelocityInit( const BlockDataID & pdfFieldId, const shared_ptr<Structur
          const Vector3<real_t> initV  = velocityInit( globalCell );
          const Vector3<real_t> fieldV = pdfField->getVelocity( cellIt.cell() );
 
-         WALBERLA_CHECK_FLOAT_EQUAL( initV[0], fieldV[0] );
-         WALBERLA_CHECK_FLOAT_EQUAL( initV[1], fieldV[1] );
-         WALBERLA_CHECK_FLOAT_EQUAL( initV[2], fieldV[2] );
+         WALBERLA_CHECK_FLOAT_EQUAL( initV[0], fieldV[0] )
+         WALBERLA_CHECK_FLOAT_EQUAL( initV[1], fieldV[1] )
+         WALBERLA_CHECK_FLOAT_EQUAL( initV[2], fieldV[2] )
       }
    }
 }
@@ -161,7 +161,7 @@ void testDensityAndVelocityInit( const BlockDataID & pdfFieldId, const shared_pt
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
    {
       auto pdfField = blockIt->getData<PdfField_T>( pdfFieldId );
-      WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
+      WALBERLA_ASSERT_NOT_NULLPTR( pdfField )
 
       for( auto cellIt = pdfField->beginWithGhostLayerXYZ(); cellIt != pdfField->end(); ++cellIt )
       {
@@ -172,10 +172,10 @@ void testDensityAndVelocityInit( const BlockDataID & pdfFieldId, const shared_pt
          const real_t density = pdfField->getDensityAndVelocity( velocity, cellIt.cell() );
          const std::vector<real_t> control = densityAndVelocityInit( globalCell );
 
-         WALBERLA_CHECK_FLOAT_EQUAL( control[0], density     );
-         WALBERLA_CHECK_FLOAT_EQUAL( control[1], velocity[0] );
-         WALBERLA_CHECK_FLOAT_EQUAL( control[2], velocity[1] );
-         WALBERLA_CHECK_FLOAT_EQUAL( control[3], velocity[2] );
+         WALBERLA_CHECK_FLOAT_EQUAL( control[0], density     )
+         WALBERLA_CHECK_FLOAT_EQUAL( control[1], velocity[0] )
+         WALBERLA_CHECK_FLOAT_EQUAL( control[2], velocity[1] )
+         WALBERLA_CHECK_FLOAT_EQUAL( control[3], velocity[2] )
       }
    }
 }
@@ -207,7 +207,7 @@ void testDensityAndVelocityInitFromConfig( const BlockDataID & pdfFieldId, const
       for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt )
       {
          auto pdfField = blockIt->getData<PdfField_T>( pdfFieldId );
-         WALBERLA_ASSERT_NOT_NULLPTR( pdfField );
+         WALBERLA_ASSERT_NOT_NULLPTR( pdfField )
 
          for( auto cellIt = pdfField->beginWithGhostLayerXYZ(); cellIt != pdfField->end(); ++cellIt )
          {
@@ -218,10 +218,10 @@ void testDensityAndVelocityInitFromConfig( const BlockDataID & pdfFieldId, const
             const real_t density = pdfField->getDensityAndVelocity( velocity, cellIt.cell() );
             const std::vector<real_t> control = initControl( globalCell );
 
-            WALBERLA_CHECK_FLOAT_EQUAL( control[0], density     );
-            WALBERLA_CHECK_FLOAT_EQUAL( control[1], velocity[0] );
-            WALBERLA_CHECK_FLOAT_EQUAL( control[2], velocity[1] );
-            WALBERLA_CHECK_FLOAT_EQUAL( control[3], velocity[2] );
+            WALBERLA_CHECK_FLOAT_EQUAL( control[0], density     )
+            WALBERLA_CHECK_FLOAT_EQUAL( control[1], velocity[0] )
+            WALBERLA_CHECK_FLOAT_EQUAL( control[2], velocity[1] )
+            WALBERLA_CHECK_FLOAT_EQUAL( control[3], velocity[2] )
          }
       }
 
@@ -235,7 +235,7 @@ int main( int argc, char ** argv )
    debug::enterTestMode();
    Environment env( argc, argv );
    if( !env.config() )
-      WALBERLA_ABORT("You have to specify a configuration file!");
+      WALBERLA_ABORT("You have to specify a configuration file!")
 
    auto blocks = blockforest::createUniformBlockGrid( 2u, 2u, 1u, 5u, 5u, 10u, real_c(1) );
 

@@ -77,7 +77,7 @@ void test()
       uint_t(14));
 
    blockforest::BlockForestEvaluation evaluation(sbf->getBlockForest());
-   WALBERLA_LOG_INFO_ON_ROOT("BlockForest:\n" << evaluation.toString());
+   WALBERLA_LOG_INFO_ON_ROOT("BlockForest:\n" << evaluation.toString())
 
    // auto originalFieldId = field::addToStorage< FieldType >( sbf, "OriginalField", 0.0, field::zyxf, uint_t(3), false,
    // None, Empty );
@@ -107,7 +107,7 @@ void test()
 
       auto readIt = readField->begin();
       for (auto origIt = originalField->begin(); origIt != originalField->end(); ++origIt, ++readIt)
-         WALBERLA_CHECK_IDENTICAL(*origIt, *readIt);
+         WALBERLA_CHECK_IDENTICAL(*origIt, *readIt)
    }
 }
 

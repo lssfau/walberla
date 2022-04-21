@@ -261,19 +261,19 @@ static void test() {
       for( uint_t i = 0; i != size; ++i )
       {
          const real_t recv = byteArrayToReal< real_t >( buffer, i * ( sizeof(real_t) + 3 ) );
-         WALBERLA_CHECK( realIsIdentical( recv, send[i] ) );
+         WALBERLA_CHECK( realIsIdentical( recv, send[i] ) )
       }
    }
 
-   WALBERLA_MPI_WORLD_BARRIER();
+   WALBERLA_MPI_WORLD_BARRIER()
 
    BlockForest bforest( uint_c( MPIManager::instance()->rank() ), sforest, true );
 
    BlockForest fforest_1( uint_c( MPIManager::instance()->rank() ), "blockforest.sav", false, true ); // all processes read the same file
-   WALBERLA_CHECK_EQUAL( bforest, fforest_1 );
+   WALBERLA_CHECK_EQUAL( bforest, fforest_1 )
 
    BlockForest fforest_2( uint_c( MPIManager::instance()->rank() ), "blockforest.sav", true, true ); // only the root process reads the file
-   WALBERLA_CHECK_EQUAL( bforest, fforest_2 );
+   WALBERLA_CHECK_EQUAL( bforest, fforest_2 )
 
    SUID level1( "Level_1" );
    SUID level2( "Level_2" );
@@ -295,154 +295,154 @@ static void test() {
 
       if( block->getLevel() == 0 ) {
 
-         WALBERLA_CHECK( block->getState().empty() );
+         WALBERLA_CHECK( block->getState().empty() )
 
-         WALBERLA_CHECK_NULLPTR( block->getData< uint_t >( data1 ) );
-         WALBERLA_CHECK_NOT_NULLPTR( block->getData< uint_t >( data2 ) );
-         WALBERLA_CHECK_EQUAL( *(block->getData< uint_t >( data2 )), uint_c(5) );
+         WALBERLA_CHECK_NULLPTR( block->getData< uint_t >( data1 ) )
+         WALBERLA_CHECK_NOT_NULLPTR( block->getData< uint_t >( data2 ) )
+         WALBERLA_CHECK_EQUAL( *(block->getData< uint_t >( data2 )), uint_c(5) )
 
-         WALBERLA_CHECK( !block->isBlockDataAllocated( data1 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data2 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data3 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data4 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data5 ) );
+         WALBERLA_CHECK( !block->isBlockDataAllocated( data1 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data2 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data3 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data4 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data5 ) )
 
-         WALBERLA_CHECK( block->isDataOfType<uint_t>( data2 ) );
-         WALBERLA_CHECK( !block->isDataOfType<int>( data2 ) );
-         WALBERLA_CHECK( block->isDataClassOrSubclassOf<uint_t>( data2 ) );
-         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<BlockDataID>( data2 ) );
+         WALBERLA_CHECK( block->isDataOfType<uint_t>( data2 ) )
+         WALBERLA_CHECK( !block->isDataOfType<int>( data2 ) )
+         WALBERLA_CHECK( block->isDataClassOrSubclassOf<uint_t>( data2 ) )
+         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<BlockDataID>( data2 ) )
       }
       else if( block->getLevel() == 1 ) {
 
-         WALBERLA_CHECK_EQUAL( block->getState().size(), uint_c(1) );
+         WALBERLA_CHECK_EQUAL( block->getState().size(), uint_c(1) )
 
-         WALBERLA_CHECK_NULLPTR( block->getData< uint_t >( data1 ) );
-         WALBERLA_CHECK_NOT_NULLPTR( block->getData< uint_t >( data2 ) );
-         WALBERLA_CHECK_EQUAL( *(block->getData< uint_t >( data2 )), uint_c(5) );
+         WALBERLA_CHECK_NULLPTR( block->getData< uint_t >( data1 ) )
+         WALBERLA_CHECK_NOT_NULLPTR( block->getData< uint_t >( data2 ) )
+         WALBERLA_CHECK_EQUAL( *(block->getData< uint_t >( data2 )), uint_c(5) )
 
-         WALBERLA_CHECK( !block->isBlockDataAllocated( data1 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data2 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data3 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data4 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data5 ) );
+         WALBERLA_CHECK( !block->isBlockDataAllocated( data1 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data2 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data3 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data4 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data5 ) )
 
-         WALBERLA_CHECK( block->isDataOfType<uint_t>( data2 ) );
-         WALBERLA_CHECK( !block->isDataOfType<SUID>( data2 ) );
-         WALBERLA_CHECK( block->isDataClassOrSubclassOf<uint_t>( data2 ) );
-         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<double>( data2 ) );
+         WALBERLA_CHECK( block->isDataOfType<uint_t>( data2 ) )
+         WALBERLA_CHECK( !block->isDataOfType<SUID>( data2 ) )
+         WALBERLA_CHECK( block->isDataClassOrSubclassOf<uint_t>( data2 ) )
+         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<double>( data2 ) )
       }
       else if( block->getLevel() == 2 ) {
 
-         WALBERLA_CHECK_EQUAL( block->getState().size(), uint_c(1) );
+         WALBERLA_CHECK_EQUAL( block->getState().size(), uint_c(1) )
 
-         WALBERLA_CHECK_NULLPTR( block->getData< uint_t >( data1 ) );
-         WALBERLA_CHECK_NULLPTR( block->getData< uint_t >( data2 ) );
+         WALBERLA_CHECK_NULLPTR( block->getData< uint_t >( data1 ) )
+         WALBERLA_CHECK_NULLPTR( block->getData< uint_t >( data2 ) )
 
-         WALBERLA_CHECK( !block->isBlockDataAllocated( data1 ) );
-         WALBERLA_CHECK( !block->isBlockDataAllocated( data2 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data3 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data4 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data5 ) );
+         WALBERLA_CHECK( !block->isBlockDataAllocated( data1 ) )
+         WALBERLA_CHECK( !block->isBlockDataAllocated( data2 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data3 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data4 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data5 ) )
       }
       else if( block->getLevel() == 3 ) {
 
-         WALBERLA_CHECK_EQUAL( block->getState().size(), uint_c(1) );
+         WALBERLA_CHECK_EQUAL( block->getState().size(), uint_c(1) )
 
-         WALBERLA_CHECK_NOT_NULLPTR( block->getData< uint_t >( data1 ) );
-         WALBERLA_CHECK_EQUAL( *(block->getData< uint_t >( data1 )), uint_c(23) );
-         WALBERLA_CHECK_NOT_NULLPTR( block->getData< uint_t >( data2 ) );
-         WALBERLA_CHECK_EQUAL( *(block->getData< uint_t >( data2 )), uint_c( 5) );
+         WALBERLA_CHECK_NOT_NULLPTR( block->getData< uint_t >( data1 ) )
+         WALBERLA_CHECK_EQUAL( *(block->getData< uint_t >( data1 )), uint_c(23) )
+         WALBERLA_CHECK_NOT_NULLPTR( block->getData< uint_t >( data2 ) )
+         WALBERLA_CHECK_EQUAL( *(block->getData< uint_t >( data2 )), uint_c( 5) )
 
-         WALBERLA_CHECK( block->isBlockDataAllocated( data1 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data2 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data3 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data4 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data5 ) );
+         WALBERLA_CHECK( block->isBlockDataAllocated( data1 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data2 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data3 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data4 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data5 ) )
 
-         WALBERLA_CHECK( block->isDataOfSameType( data1, data2 ) );
+         WALBERLA_CHECK( block->isDataOfSameType( data1, data2 ) )
       }
       else if( block->getLevel() == 4 ) {
 
-         WALBERLA_CHECK_EQUAL( block->getState().size(), uint_c(1) );
+         WALBERLA_CHECK_EQUAL( block->getState().size(), uint_c(1) )
 
-         WALBERLA_CHECK_NOT_NULLPTR( block->getData< int >( data1 ) );
-         WALBERLA_CHECK_EQUAL( *(block->getData< int >( data1 )), uint_c(42) );
-         WALBERLA_CHECK_NOT_NULLPTR( block->getData< uint_t >( data2 ) );
-         WALBERLA_CHECK_EQUAL( *(block->getData< uint_t >( data2 )), uint_c( 5) );
+         WALBERLA_CHECK_NOT_NULLPTR( block->getData< int >( data1 ) )
+         WALBERLA_CHECK_EQUAL( *(block->getData< int >( data1 )), uint_c(42) )
+         WALBERLA_CHECK_NOT_NULLPTR( block->getData< uint_t >( data2 ) )
+         WALBERLA_CHECK_EQUAL( *(block->getData< uint_t >( data2 )), uint_c( 5) )
 
-         WALBERLA_CHECK( block->isBlockDataAllocated( data1 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data2 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data3 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data4 ) );
-         WALBERLA_CHECK( block->isBlockDataAllocated( data5 ) );
+         WALBERLA_CHECK( block->isBlockDataAllocated( data1 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data2 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data3 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data4 ) )
+         WALBERLA_CHECK( block->isBlockDataAllocated( data5 ) )
 
-         WALBERLA_CHECK( !block->isDataOfSameType( data1, data2 ) );
+         WALBERLA_CHECK( !block->isDataOfSameType( data1, data2 ) )
 
          const Base* base = block->getData< Base >( data3 );
 
-         WALBERLA_CHECK_EQUAL( base->override(), 1 );
-         WALBERLA_CHECK_EQUAL( base->func(), 2 );
+         WALBERLA_CHECK_EQUAL( base->override(), 1 )
+         WALBERLA_CHECK_EQUAL( base->func(), 2 )
 
-         WALBERLA_CHECK( block->isDataOfType<Base>( data3 ) );
-         WALBERLA_CHECK( !block->isDataOfType<Derived>( data3 ) );
+         WALBERLA_CHECK( block->isDataOfType<Base>( data3 ) )
+         WALBERLA_CHECK( !block->isDataOfType<Derived>( data3 ) )
 
-         WALBERLA_CHECK( block->isDataClassOrSubclassOf<Base>( data3 ) );
-         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<Derived>( data3 ) );
-         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<int>( data3 ) );
+         WALBERLA_CHECK( block->isDataClassOrSubclassOf<Base>( data3 ) )
+         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<Derived>( data3 ) )
+         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<int>( data3 ) )
 
-         WALBERLA_CHECK( !block->isDataSubclassOf<Base>( data3 ) );
-         WALBERLA_CHECK( !block->isDataSubclassOf<Derived>( data3 ) );
-         WALBERLA_CHECK( !block->isDataSubclassOf<int>( data3 ) );
+         WALBERLA_CHECK( !block->isDataSubclassOf<Base>( data3 ) )
+         WALBERLA_CHECK( !block->isDataSubclassOf<Derived>( data3 ) )
+         WALBERLA_CHECK( !block->isDataSubclassOf<int>( data3 ) )
 
                         base    = block->getData< Base >( data4 );
          const Derived* derived = block->getData< Derived >( data4 );
 
-         WALBERLA_CHECK_EQUAL( base->override(), 1 );
-         WALBERLA_CHECK_EQUAL( base->func(), 20 );
+         WALBERLA_CHECK_EQUAL( base->override(), 1 )
+         WALBERLA_CHECK_EQUAL( base->func(), 20 )
 
-         WALBERLA_CHECK_EQUAL( derived->override(), 10 );
-         WALBERLA_CHECK_EQUAL( derived->func(), 20 );
+         WALBERLA_CHECK_EQUAL( derived->override(), 10 )
+         WALBERLA_CHECK_EQUAL( derived->func(), 20 )
 
-         WALBERLA_CHECK( !block->isDataOfType<Base>( data4 ) );
-         WALBERLA_CHECK( block->isDataOfType<Derived>( data4 ) );
+         WALBERLA_CHECK( !block->isDataOfType<Base>( data4 ) )
+         WALBERLA_CHECK( block->isDataOfType<Derived>( data4 ) )
 
-         WALBERLA_CHECK( block->isDataClassOrSubclassOf<Base>( data4 ) );
-         WALBERLA_CHECK( block->isDataClassOrSubclassOf<Derived>( data4 ) );
-         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<int>( data4 ) );
+         WALBERLA_CHECK( block->isDataClassOrSubclassOf<Base>( data4 ) )
+         WALBERLA_CHECK( block->isDataClassOrSubclassOf<Derived>( data4 ) )
+         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<int>( data4 ) )
 
-         WALBERLA_CHECK( block->isDataSubclassOf<Base>( data4 ) );
-         WALBERLA_CHECK( !block->isDataSubclassOf<Derived>( data4 ) );
-         WALBERLA_CHECK( !block->isDataSubclassOf<int>( data4 ) );
+         WALBERLA_CHECK( block->isDataSubclassOf<Base>( data4 ) )
+         WALBERLA_CHECK( !block->isDataSubclassOf<Derived>( data4 ) )
+         WALBERLA_CHECK( !block->isDataSubclassOf<int>( data4 ) )
 
                            base  = block->getData< Base >( data5 );
          const SecondBase* sBase = block->getData< SecondBase >( data5 );
          const Multi*      multi = block->getData< Multi >( data5 );
 
-         WALBERLA_CHECK( reinterpret_cast< const void* >( base ) != reinterpret_cast< const void* >( sBase ) ) ;
+         WALBERLA_CHECK( reinterpret_cast< const void* >( base ) != reinterpret_cast< const void* >( sBase ) )
          WALBERLA_CHECK( ( reinterpret_cast< const void* >(  base ) != reinterpret_cast< const void* >( multi ) ) ||
-                ( reinterpret_cast< const void* >( sBase ) != reinterpret_cast< const void* >( multi ) ) );
+                ( reinterpret_cast< const void* >( sBase ) != reinterpret_cast< const void* >( multi ) ) )
 
-         WALBERLA_CHECK_EQUAL( base->override(), 1 );
-         WALBERLA_CHECK_EQUAL( base->func(), 2000 );
+         WALBERLA_CHECK_EQUAL( base->override(), 1 )
+         WALBERLA_CHECK_EQUAL( base->func(), 2000 )
 
-         WALBERLA_CHECK_EQUAL( sBase->override(), 100 );
+         WALBERLA_CHECK_EQUAL( sBase->override(), 100 )
 
-         WALBERLA_CHECK_EQUAL( multi->override(), 1000 );
-         WALBERLA_CHECK_EQUAL( multi->func(), 2000 );
+         WALBERLA_CHECK_EQUAL( multi->override(), 1000 )
+         WALBERLA_CHECK_EQUAL( multi->func(), 2000 )
 
-         WALBERLA_CHECK( !block->isDataOfType<Base>( data5 ) );
-         WALBERLA_CHECK( !block->isDataOfType<SecondBase>( data5 ) );
-         WALBERLA_CHECK( block->isDataOfType<Multi>( data5 ) );
+         WALBERLA_CHECK( !block->isDataOfType<Base>( data5 ) )
+         WALBERLA_CHECK( !block->isDataOfType<SecondBase>( data5 ) )
+         WALBERLA_CHECK( block->isDataOfType<Multi>( data5 ) )
 
-         WALBERLA_CHECK( block->isDataClassOrSubclassOf<Base>( data5 ) );
-         WALBERLA_CHECK( block->isDataClassOrSubclassOf<SecondBase>( data5 ) );
-         WALBERLA_CHECK( block->isDataClassOrSubclassOf<Multi>( data5 ) );
-         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<Derived>( data5 ) );
+         WALBERLA_CHECK( block->isDataClassOrSubclassOf<Base>( data5 ) )
+         WALBERLA_CHECK( block->isDataClassOrSubclassOf<SecondBase>( data5 ) )
+         WALBERLA_CHECK( block->isDataClassOrSubclassOf<Multi>( data5 ) )
+         WALBERLA_CHECK( !block->isDataClassOrSubclassOf<Derived>( data5 ) )
 
-         WALBERLA_CHECK( block->isDataSubclassOf<Base>( data5 ) );
-         WALBERLA_CHECK( block->isDataSubclassOf<SecondBase>( data5 ) );
-         WALBERLA_CHECK( !block->isDataSubclassOf<Multi>( data5 ) );
-         WALBERLA_CHECK( !block->isDataSubclassOf<Derived>( data5 ) );
+         WALBERLA_CHECK( block->isDataSubclassOf<Base>( data5 ) )
+         WALBERLA_CHECK( block->isDataSubclassOf<SecondBase>( data5 ) )
+         WALBERLA_CHECK( !block->isDataSubclassOf<Multi>( data5 ) )
+         WALBERLA_CHECK( !block->isDataSubclassOf<Derived>( data5 ) )
       }
    }
 
@@ -453,17 +453,17 @@ static void test() {
    std::set< BlockID > forestBlockSet;
 
    for( auto block = sforest.begin(); block != sforest.end(); ++block ) {
-      WALBERLA_CHECK_EQUAL( setupBlockSet.find( block->getId() ), setupBlockSet.end() );
+      WALBERLA_CHECK_EQUAL( setupBlockSet.find( block->getId() ), setupBlockSet.end() )
       setupBlockSet.insert( block->getId() );
    }
 
    for( auto blockId = blockIds.begin(); blockId != blockIds.end(); ++blockId ) {
       const BlockID id = *dynamic_cast< BlockID* >( blockId->get() );
-      WALBERLA_CHECK_EQUAL( forestBlockSet.find( id ), forestBlockSet.end() );
+      WALBERLA_CHECK_EQUAL( forestBlockSet.find( id ), forestBlockSet.end() )
       forestBlockSet.insert( id );
    }
 
-   WALBERLA_CHECK_EQUAL( setupBlockSet, forestBlockSet );
+   WALBERLA_CHECK_EQUAL( setupBlockSet, forestBlockSet )
 }
 
 

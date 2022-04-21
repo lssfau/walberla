@@ -52,7 +52,7 @@ static void refinementSelectionFunctionRandom( SetupBlockForest& forest ) {
 #ifndef WALBERLA_BLOCKFOREST_PRIMITIVE_BLOCKID
    const uint_t maxLevel = 25;
 #else
-   WALBERLA_ASSERT_GREATER_EQUAL( math::UINT_BITS, 32 );
+   WALBERLA_ASSERT_GREATER_EQUAL( math::UINT_BITS, 32 )
    const uint_t maxLevel = ( math::UINT_BITS - 14 ) / 3;
 #endif
 
@@ -78,47 +78,47 @@ static void checkCollectorConsistency( SetupBlockForest& forest ) {
    for( SetupBlockForest::iterator it = forest.begin(); it != forest.end(); ++it )
       itBlocks.push_back( it.get() );
 
-   WALBERLA_CHECK_EQUAL( blocks.size(), itBlocks.size() );
+   WALBERLA_CHECK_EQUAL( blocks.size(), itBlocks.size() )
    for( uint_t i = 0; i != blocks.size(); ++i )
-      WALBERLA_CHECK( blocks[i] == itBlocks[i] );
+      WALBERLA_CHECK( blocks[i] == itBlocks[i] )
 
    std::set< SetupBlock* > baseSet;
    for( uint_t i = 0; i != blocks.size(); ++i )
       baseSet.insert( blocks[i] );
-   WALBERLA_CHECK_EQUAL( baseSet.size(), blocks.size() );
+   WALBERLA_CHECK_EQUAL( baseSet.size(), blocks.size() )
 
    std::vector< SetupBlock* > hilbertBlocks;
    forest.getHilbertOrder( hilbertBlocks );
-   WALBERLA_CHECK_EQUAL( hilbertBlocks.size(), blocks.size() );
+   WALBERLA_CHECK_EQUAL( hilbertBlocks.size(), blocks.size() )
 
    std::set< SetupBlock* > hilbertSet;
    for( uint_t i = 0; i != hilbertBlocks.size(); ++i )
       hilbertSet.insert( hilbertBlocks[i] );
-   WALBERLA_CHECK_EQUAL( hilbertSet.size(), hilbertBlocks.size() );
+   WALBERLA_CHECK_EQUAL( hilbertSet.size(), hilbertBlocks.size() )
 
    std::set< SetupBlock* >::iterator baseIterator    = baseSet.begin();
    std::set< SetupBlock* >::iterator hilbertIterator = hilbertSet.begin();
 
    while( baseIterator != baseSet.end() ) {
-      WALBERLA_CHECK( *baseIterator == *hilbertIterator );
+      WALBERLA_CHECK( *baseIterator == *hilbertIterator )
       ++baseIterator;
       ++hilbertIterator;
    }
 
    std::vector< SetupBlock* > aabbBlocks;
    forest.getBlocksOverlappedByAABB( aabbBlocks, forest.getDomain() );
-   WALBERLA_CHECK_EQUAL( aabbBlocks.size(), blocks.size() );
+   WALBERLA_CHECK_EQUAL( aabbBlocks.size(), blocks.size() )
 
    std::set< SetupBlock* > aabbSet;
    for( uint_t i = 0; i != aabbBlocks.size(); ++i )
       aabbSet.insert( aabbBlocks[i] );
-   WALBERLA_CHECK_EQUAL( aabbSet.size(), aabbBlocks.size() );
+   WALBERLA_CHECK_EQUAL( aabbSet.size(), aabbBlocks.size() )
 
                                      baseIterator = baseSet.begin();
    std::set< SetupBlock* >::iterator aabbIterator = aabbSet.begin();
 
    while( baseIterator != baseSet.end() ) {
-      WALBERLA_CHECK( *baseIterator == *aabbIterator );
+      WALBERLA_CHECK( *baseIterator == *aabbIterator )
       ++baseIterator;
       ++aabbIterator;
    }
@@ -147,7 +147,7 @@ static void checkNeighborhoodConsistency( const SetupBlockForest& forest ) {
 
          constructNeighborhoodSectionBlockCenters( n, block->getAABB(), neighborhoodSectionBlockCenters );
 
-         WALBERLA_CHECK_EQUAL( neighborhoodSectionBlockCenters.size() % 3, uint_c(0) );
+         WALBERLA_CHECK_EQUAL( neighborhoodSectionBlockCenters.size() % 3, uint_c(0) )
 
          for( uint_t p = 0; p != neighborhoodSectionBlockCenters.size(); p += 3 ) {
 
@@ -173,12 +173,12 @@ static void checkNeighborhoodConsistency( const SetupBlockForest& forest ) {
 
             // either one neighbor must be hit OR the block is located at the border of the (non-periodic) simulation domain
             if( noHit )
-               WALBERLA_CHECK( forest.getBlock(x,y,z) == nullptr );
+               WALBERLA_CHECK( forest.getBlock(x,y,z) == nullptr )
          }
 
          // every neighbor must be hit by at least one point
          for( uint_t c = 0; c != block->getNeighborhoodSectionSize(n); ++c )
-            WALBERLA_CHECK( hit[c] );
+            WALBERLA_CHECK( hit[c] )
 
          neighborhoodSectionBlockCenters.clear();
       }
