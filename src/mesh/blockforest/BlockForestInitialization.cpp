@@ -40,6 +40,16 @@ static inline uint_t uintAbsDiff( const uint_t x, const uint_t y )
    return x > y ? x - y : y - x;
 }
 
+static inline void compareAABB( const AABB & oldAABB, const AABB & newAABB )
+{
+   if(oldAABB != newAABB)
+   {
+      WALBERLA_LOG_INFO_ON_ROOT( "Domain AABB has been adapted to requested block size:\n" \
+                                 "Old AABB: " << oldAABB   << "\n" \
+                                 "New AABB: " << newAABB << "\n" )
+   }
+}
+
 ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB & aabb, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction )
    : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ), maxBlockSkewness_(2.0),
      processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ), rootBlockExclusionFunction_ ( rootBlockExclusionFunction ),
@@ -128,7 +138,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
       ++i;
    }
 
-   WALBERLA_LOG_INFO_ON_ROOT( "Using a block grid of size " << bestSizeBlockGrid3D << " (" << bestSizeBlockGrid << ") resulting in " << bestNumRootBlocks << " root blocks." );
+   WALBERLA_LOG_INFO_ON_ROOT( "Using a block grid of size " << bestSizeBlockGrid3D << " (" << bestSizeBlockGrid << ") resulting in " << bestNumRootBlocks << " root blocks." )
 
    auto setupBlockForest = make_shared<SetupBlockForest>();
    setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
@@ -154,10 +164,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
                  real_c( numBlocks[0] ) * blockSize[0], real_c( numBlocks[1] ) * blockSize[1], real_c( numBlocks[2] ) * blockSize[2] );
 
    newAABB.translate( aabb_.center() - newAABB.center() );
-
-   WALBERLA_LOG_INFO_ON_ROOT( "Domain AABB may have been adapted to requested block size:\n" \
-                              "Old AABB: " << aabb_   << "\n" \
-                              "New AABB: " << newAABB << "\n" );
+   compareAABB(aabb_, newAABB);
 
    auto setupBlockForest = make_shared<SetupBlockForest>();
    setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
@@ -190,14 +197,14 @@ shared_ptr<BlockForest> ComplexGeometryBlockforestCreator::createBlockForest( co
 
 uint_t ComplexGeometryBlockforestCreator::findNumBlocks( const Vector3<uint_t> & numRootBlocks3D ) const
 {
-   WALBERLA_LOG_DEVEL_ON_ROOT( "Testing block grid " << numRootBlocks3D );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "Testing block grid " << numRootBlocks3D )
 
    SetupBlockForest setupBlockForest;
    setupBlockForest.addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
 
    setupBlockForest.init( aabb_, numRootBlocks3D[0], numRootBlocks3D[1], numRootBlocks3D[2], periodicity_[0], periodicity_[1], periodicity_[2] );
 
-   WALBERLA_LOG_DEVEL_ON_ROOT( "Testing block grid " << numRootBlocks3D << " resulted in " << setupBlockForest.getNumberOfBlocks() );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "Testing block grid " << numRootBlocks3D << " resulted in " << setupBlockForest.getNumberOfBlocks() )
 
    return uint_c( setupBlockForest.getNumberOfBlocks() );
 
@@ -300,7 +307,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
       ++i;
    }
 
-   WALBERLA_LOG_INFO_ON_ROOT( "Using a block of size " << bestBlockSize << " resulting in " << bestNumRootBlocks << " root blocks." );
+   WALBERLA_LOG_INFO_ON_ROOT( "Using a block of size " << bestBlockSize << " resulting in " << bestNumRootBlocks << " root blocks." )
 
    Vector3<uint_t> numBlocks( uint_c( std::ceil( real_c( numCells[0] ) / real_c( bestBlockSize ) ) ),
                               uint_c( std::ceil( real_c( numCells[1] ) / real_c( bestBlockSize ) ) ),
@@ -312,10 +319,7 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
                  real_c( numBlocks[2] * bestBlockSize ) * cellSize_[2] );
 
    newAABB.translate( aabb_.center() - newAABB.center() );
-
-   WALBERLA_LOG_INFO_ON_ROOT( "Domain AABB may have been adapted to block size:\n" \
-                              "Old AABB: " << aabb_   << "\n" \
-                              "New AABB: " << newAABB << "\n" );
+   compareAABB(aabb_, newAABB);
 
    auto setupBlockForest = make_shared<SetupBlockForest>();
    setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
@@ -329,9 +333,6 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
    setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t(0), processMemoryLimit_, true, false );
 
    return setupBlockForest;
-
-
-   return make_shared<SetupBlockForest>();
 }
 
 
@@ -350,10 +351,32 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
                  real_c( numBlocks[2] * blockSize[2] ) * cellSize_[2] );
 
    newAABB.translate( aabb_.center() - newAABB.center() );
+   compareAABB(aabb_, newAABB);
 
-   WALBERLA_LOG_INFO_ON_ROOT( "Domain AABB may have been adapted to requested block size:\n" \
-                              "Old AABB: " << aabb_   << "\n" \
-                              "New AABB: " << newAABB << "\n" );
+   auto setupBlockForest = make_shared<SetupBlockForest>();
+   setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   setupBlockForest->addWorkloadMemorySUIDAssignmentFunction( workloadMemorySUIDAssignmentFunction_ );
+
+   if( refinementSelectionFunction_ )
+      setupBlockForest->addRefinementSelectionFunction( refinementSelectionFunction_ );
+
+   setupBlockForest->init( newAABB, numBlocks[0], numBlocks[1], numBlocks[2], periodicity_[0], periodicity_[1], periodicity_[2] );
+
+   setupBlockForest->balanceLoad( targetProcessAssignmentFunction_, numProcesses, uint_t(0), processMemoryLimit_, true, false );
+
+   return setupBlockForest;
+}
+
+shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::createSetupBlockForest( const Vector3<uint_t> & cellsPerBlock, const Vector3<uint_t> & numBlocks ) const
+{
+   uint_t numProcesses = numBlocks[0] * numBlocks[1] * numBlocks[2];
+
+
+   AABB newAABB(real_t(0), real_t(0), real_t(0), real_c(numBlocks[0] * cellsPerBlock[0]) * cellSize_[0],
+                real_c(numBlocks[1] * cellsPerBlock[1]) * cellSize_[1], real_c(numBlocks[2] * cellsPerBlock[2]) * cellSize_[2]);
+
+   newAABB.translate( aabb_.center() - newAABB.center() );
+   compareAABB(aabb_, newAABB);
 
    auto setupBlockForest = make_shared<SetupBlockForest>();
    setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
@@ -379,9 +402,9 @@ shared_ptr<StructuredBlockForest> ComplexGeometryStructuredBlockforestCreator::c
 
    Vector3<uint_t> blockSizeCells( uint_c( blockSize[0] / cellSize_[0] + real_t(0.5) ), uint_c( blockSize[1] / cellSize_[1] + real_t(0.5) ), uint_c( blockSize[2] / cellSize_[2] + real_t(0.5) ) );
 
-   WALBERLA_ASSERT_FLOAT_EQUAL( blockSize[0] / cellSize_[0], real_c( blockSizeCells[0] ) );
-   WALBERLA_ASSERT_FLOAT_EQUAL( blockSize[1] / cellSize_[1], real_c( blockSizeCells[1] ) );
-   WALBERLA_ASSERT_FLOAT_EQUAL( blockSize[2] / cellSize_[2], real_c( blockSizeCells[2] ) );
+   WALBERLA_ASSERT_FLOAT_EQUAL( blockSize[0] / cellSize_[0], real_c( blockSizeCells[0] ) )
+   WALBERLA_ASSERT_FLOAT_EQUAL( blockSize[1] / cellSize_[1], real_c( blockSizeCells[1] ) )
+   WALBERLA_ASSERT_FLOAT_EQUAL( blockSize[2] / cellSize_[2], real_c( blockSizeCells[2] ) )
 
    auto blockForest = make_shared< blockforest::BlockForest >( MPIManager::instance()->rank(), *setupBlockForest );
 
@@ -405,9 +428,22 @@ shared_ptr<StructuredBlockForest> ComplexGeometryStructuredBlockforestCreator::c
    return structuredBlockForest;
 }
 
+shared_ptr<StructuredBlockForest> ComplexGeometryStructuredBlockforestCreator::createStructuredBlockForest( const Vector3<uint_t> & cellsPerBlock, const Vector3<uint_t> & numBlocks ) const
+{
+   shared_ptr< blockforest::SetupBlockForest> setupBlockForest = createSetupBlockForest( cellsPerBlock, numBlocks );
+
+   auto blockForest = make_shared< blockforest::BlockForest >( MPIManager::instance()->rank(), *setupBlockForest );
+
+   auto structuredBlockForest = make_shared< blockforest::StructuredBlockForest >( blockForest, cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2] );
+
+   structuredBlockForest->createCellBoundingBoxes();
+
+   return structuredBlockForest;
+}
+
 uint_t ComplexGeometryStructuredBlockforestCreator::findNumBlocks( const Vector3<uint_t> & blockSize ) const
 {
-   WALBERLA_LOG_DEVEL_ON_ROOT( "Testing block size " << blockSize );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "Testing block size " << blockSize )
 
    Vector3<uint_t> numCells( uint_c( std::ceil( aabb_.xSize() / cellSize_[0] ) ),
                              uint_c( std::ceil( aabb_.ySize() / cellSize_[1] ) ),
@@ -433,7 +469,7 @@ uint_t ComplexGeometryStructuredBlockforestCreator::findNumBlocks( const Vector3
 
    setupBlockForest.init( newAABB, numBlocks[0], numBlocks[1], numBlocks[2], periodicity_[0], periodicity_[1], periodicity_[2] );
 
-   WALBERLA_LOG_DEVEL_ON_ROOT( "Testing block size " << blockSize << " resulted in " << setupBlockForest.getNumberOfBlocks() );
+   WALBERLA_LOG_DEVEL_ON_ROOT( "Testing block size " << blockSize << " resulted in " << setupBlockForest.getNumberOfBlocks() )
 
    return setupBlockForest.getNumberOfBlocks();
 
