@@ -26,7 +26,6 @@
 #include "core/mpi/SendBuffer.h"
 
 #include <cstdlib>
-#include <cstring>
 #include <map>
 #include <vector>
 
@@ -69,26 +68,26 @@ static void test() {
 
          walberla::mpi::GenericSendBuffer<uint8_t> sb;
          oldId.toBuffer( sb );
-         WALBERLA_CHECK_EQUAL( (oldId.getUsedBytes() + oldId.getUsedBytes() * mpi::BUFFER_DEBUG_OVERHEAD) + (1 + mpi::BUFFER_DEBUG_OVERHEAD ), sb.size() );
+         WALBERLA_CHECK_EQUAL( (oldId.getUsedBytes() + oldId.getUsedBytes() * mpi::BUFFER_DEBUG_OVERHEAD) + (1 + mpi::BUFFER_DEBUG_OVERHEAD ), sb.size() )
 
          for( uint_t b = branches; b-- != 0; ) {
-            WALBERLA_CHECK_EQUAL( id.getBranchId(), branch[b] );
+            WALBERLA_CHECK_EQUAL( id.getBranchId(), branch[b] )
             id.removeBranchId();
          }
-         WALBERLA_CHECK_EQUAL( id.getTreeIndex(), treeIndex );
+         WALBERLA_CHECK_EQUAL( id.getTreeIndex(), treeIndex )
 
          BlockID newId( byteArray, 0, byteArray.size() );
-         WALBERLA_CHECK_EQUAL( oldId, newId );
+         WALBERLA_CHECK_EQUAL( oldId, newId )
 
          for( uint_t b = branches; b-- != 0; ) {
-            WALBERLA_CHECK_EQUAL( newId.getBranchId(), branch[b] );
+            WALBERLA_CHECK_EQUAL( newId.getBranchId(), branch[b] )
             newId.removeBranchId();
          }
-         WALBERLA_CHECK_EQUAL( newId.getTreeIndex(), treeIndex );
+         WALBERLA_CHECK_EQUAL( newId.getTreeIndex(), treeIndex )
 
          walberla::mpi::GenericRecvBuffer<uint8_t> rb( sb );
          newId.fromBuffer( rb );
-         WALBERLA_CHECK_EQUAL( oldId, newId );
+         WALBERLA_CHECK_EQUAL( oldId, newId )
       }
 
       std::vector< BlockID >      blockId;
@@ -115,7 +114,7 @@ static void test() {
          }
       }
       for( uint_t j = 0; j != blockId.size(); ++j )
-         WALBERLA_CHECK_EQUAL( value[j], idMap[blockId[j]] );
+         WALBERLA_CHECK_EQUAL( value[j], idMap[blockId[j]] )
 
       bit  <<= 1;
       mask <<= 1;

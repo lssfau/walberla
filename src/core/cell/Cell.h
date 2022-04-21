@@ -160,7 +160,7 @@ inline bool Cell::operator==( const Cell & rhs ) const
  **********************************************************************************************************************/
 inline cell_idx_t Cell::operator[]( std::size_t idx ) const
 {
-   WALBERLA_ASSERT_LESS( idx, 3, "Index 'idx' = " << idx << " out of bounds! Cell: " << *this );
+   WALBERLA_ASSERT_LESS( idx, 3, "Index 'idx' = " << idx << " out of bounds! Cell: " << *this )
    return cell[idx];
 }
 
@@ -259,7 +259,7 @@ inline Cell Cell::operator-() const
  **********************************************************************************************************************/
 inline cell_idx_t & Cell::operator[]( std::size_t idx )
 {
-   WALBERLA_ASSERT_LESS( idx, 3, "Index 'idx' = " << idx << " out of bounds! Cell: " << *this );
+   WALBERLA_ASSERT_LESS( idx, 3, "Index 'idx' = " << idx << " out of bounds! Cell: " << *this )
    return cell[idx];
 }
 

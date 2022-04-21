@@ -31,7 +31,7 @@ namespace cell {
 /// Complexity is O(N), where N == this->size()
 CellInterval CellSet::boundingBox() const {
 
-   WALBERLA_ASSERT( !empty() );
+   WALBERLA_ASSERT( !empty() )
 
    Set<Cell>::const_iterator beginIt = Set<Cell>::begin();
    Set<Cell>::const_iterator endIt   = Set<Cell>::end();

@@ -52,8 +52,8 @@ class SumSweep
       {
          ScalarField * valField = block->getData<ScalarField>(valFieldID_);
          ScalarField * sumField = block->getData<ScalarField>(sumFieldID_);
-         WALBERLA_ASSERT_NOT_NULLPTR( valField );
-         WALBERLA_ASSERT_NOT_NULLPTR( sumField );
+         WALBERLA_ASSERT_NOT_NULLPTR( valField )
+         WALBERLA_ASSERT_NOT_NULLPTR( sumField )
 
          if( init_ ){
             auto itSum0 = sumField->beginGhostLayerOnly(stencil::T);
@@ -84,8 +84,8 @@ class CompareSweep
       {
          ScalarField * sf = block->getData<ScalarField>(smlFieldID_);
          ScalarField * bf = block->getData<ScalarField>(bigFieldID_);
-         WALBERLA_ASSERT_NOT_NULLPTR( sf );
-         WALBERLA_ASSERT_NOT_NULLPTR( bf );
+         WALBERLA_ASSERT_NOT_NULLPTR( sf )
+         WALBERLA_ASSERT_NOT_NULLPTR( bf )
 
          const AABB & bb = block->getAABB();
          const cell_idx_t offset [3] = { cell_idx_c(bb.min(uint_t(0u))),
@@ -96,7 +96,7 @@ class CompareSweep
          {
             real_t globalValue = bf->get(i.x()+offset[0],i.y()+offset[1], i.z()+offset[2], i.f());
             real_t localValue  = *i;
-            WALBERLA_CHECK_FLOAT_EQUAL(localValue,globalValue);
+            WALBERLA_CHECK_FLOAT_EQUAL(localValue,globalValue)
          }
       }
 

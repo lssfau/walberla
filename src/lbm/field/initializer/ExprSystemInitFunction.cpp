@@ -99,7 +99,7 @@ bool ExprSystemInitFunction::parse( const Config::BlockHandle & config )
    {
       WALBERLA_LOG_WARNING( "Error in expression for u_x\n" <<
                               "Error     : " << parser.error() << "\n" <<
-                              "Expression: " << ux_expr_str );
+                              "Expression: " << ux_expr_str )
 
       valid = false;
    }
@@ -109,7 +109,7 @@ bool ExprSystemInitFunction::parse( const Config::BlockHandle & config )
    {
       WALBERLA_LOG_WARNING( "Error in expression for u_y\n" <<
                               "Error     : " << parser.error() << "\n" <<
-                              "Expression: " << uy_expr_str );
+                              "Expression: " << uy_expr_str )
 
       valid = false;
    }
@@ -119,7 +119,7 @@ bool ExprSystemInitFunction::parse( const Config::BlockHandle & config )
    {
       WALBERLA_LOG_WARNING( "Error in expression for u_z\n" <<
                               "Error     : " << parser.error() << "\n" <<
-                              "Expression: " << uz_expr_str );
+                              "Expression: " << uz_expr_str )
 
       valid = false;
    }
@@ -129,7 +129,7 @@ bool ExprSystemInitFunction::parse( const Config::BlockHandle & config )
    {
       WALBERLA_LOG_WARNING( "Error in expression for rho\n" <<
                             "Error     : " << parser.error() << "\n" <<
-                            "Expression: " << rho_expr_str );
+                            "Expression: " << rho_expr_str )
 
       valid = false;
    }

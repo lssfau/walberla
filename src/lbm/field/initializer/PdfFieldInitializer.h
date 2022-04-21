@@ -32,6 +32,9 @@ namespace walberla {
 namespace lbm {
 namespace initializer {
 
+template< bool UseCellCenter >
+auto getCoordinates(const Cell& globalCell, const real_t dx);
+
 
 template< typename LatticeModel_T >
 class PdfFieldInitializer
