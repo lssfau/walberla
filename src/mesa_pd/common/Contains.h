@@ -79,6 +79,8 @@ bool isPointInsideCylindricalBoundary(const Vec3& point,
 #ifdef WALBERLA_MESAPD_CONVEX_POLYHEDRON_AVAILABLE
 bool isPointInsideConvexPolyhedronBF(const Vec3& point, const mesh::TriangleMesh& mesh)
 {
+   WALBERLA_ASSERT(mesh.has_face_normals(), "Provided mesh has no face normals! E.g., call `mesh.request_face_normals(); mesh.update_face_normals();` to add them.")
+
    return std::none_of(mesh.faces().begin(),
                        mesh.faces().end(),
                        [&](auto fh)
