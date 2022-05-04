@@ -130,6 +130,9 @@ inline void ConvexPolyhedron::updateMassAndInertia(const real_t density) {
 inline void ConvexPolyhedron::updateMeshQuantities() {
    WALBERLA_CHECK_GREATER(mesh_.n_vertices(), 0, "Cannot compute mesh quantities for an empty mesh!");
 
+   mesh_.request_face_normals();
+   mesh_.update_face_normals();
+
    octandVertices_[0] = supportVertex(mesh::TriangleMesh::Normal(real_t(1), real_t(1), real_t(1)), *mesh_.vertices_begin());
    octandVertices_[1] = supportVertex(mesh::TriangleMesh::Normal(real_t(1), real_t(1), real_t(-1)), *mesh_.vertices_begin());
    octandVertices_[2] = supportVertex(mesh::TriangleMesh::Normal(real_t(1), real_t(-1), real_t(1)), *mesh_.vertices_begin());
