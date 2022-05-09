@@ -1,4 +1,4 @@
-target_sources( pe
+target_sources( blockforest
     PRIVATE
     WeightAssignmentFunctor.h
     MetisAssignmentFunctor.h     

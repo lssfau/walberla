@@ -27,8 +27,7 @@
 #include "domain_decomposition/PeriodicIntersectionVolume.h"
 
 namespace walberla {
-namespace pe {
-namespace amr {
+namespace blockforest {
 
 /**
  * Assignment functor for ParMetis based load balancing.
@@ -93,7 +92,6 @@ private:
    double baseWeight_ = 10.0;
 };
 
-}
 }
 }
 

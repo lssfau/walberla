@@ -22,6 +22,9 @@
 #include "blockforest/all.h"
 #include "blockforest/loadbalancing/InfoCollection.h"
 #include <blockforest/loadbalancing/PODPhantomData.h>
+#include <blockforest/loadbalancing/level_determination/MinMaxLevelDetermination.h>
+#include <blockforest/loadbalancing/weight_assignment/MetisAssignmentFunctor.h>
+#include <blockforest/loadbalancing/weight_assignment/WeightAssignmentFunctor.h>
 #include "core/all.h"
 #include "domain_decomposition/all.h"
 #include "timeloop/SweepTimeloop.h"
@@ -29,8 +32,7 @@
 
 
 #include "pe/basic.h"
-#include "pe/amr/level_determination/MinMaxLevelDetermination.h"
-#include "pe/amr/weight_assignment/WeightAssignmentFunctor.h"
+#include "pe/amr/InfoCollection.h"
 #include "pe/ccd/SimpleCCDDataHandling.h"
 #include "pe/synchronization/SyncNextNeighbors.h"
 #include "pe/synchronization/ClearSynchronization.h"
@@ -97,15 +99,15 @@ int main( int argc, char ** argv )
 
    auto infoCollection = make_shared<blockforest::InfoCollection>();
 
-   amr::MinMaxLevelDetermination levelDetermination(infoCollection, 2, 5);
+   blockforest::MinMaxLevelDetermination levelDetermination(infoCollection, 2, 5);
    blockforest.setRefreshMinTargetLevelDeterminationFunction( levelDetermination );
 
-   blockforest.setRefreshPhantomBlockDataAssignmentFunction( amr::WeightAssignmentFunctor( infoCollection ) );
-   blockforest.setRefreshPhantomBlockDataPackFunction( amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-   blockforest.setRefreshPhantomBlockDataUnpackFunction( amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+   blockforest.setRefreshPhantomBlockDataAssignmentFunction( blockforest::WeightAssignmentFunctor( infoCollection ) );
+   blockforest.setRefreshPhantomBlockDataPackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+   blockforest.setRefreshPhantomBlockDataUnpackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
 
    blockforest.setRefreshPhantomBlockMigrationPreparationFunction(
-            blockforest::DynamicCurveBalance< amr::WeightAssignmentFunctor::PhantomBlockWeight >( false, true, false ) );
+            blockforest::DynamicCurveBalance< blockforest::WeightAssignmentFunctor::PhantomBlockWeight >( false, true, false ) );
 
    createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(1,1,1), 1);
    createSphere(*globalStorage.get(), forest->getBlockStorage(), storageID, 0, Vec3(1,1,3), 1);
@@ -133,7 +135,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_MPI_BARRIER();
    WALBERLA_LOG_DEVEL_ON_ROOT( "Refinement 2" );
-   blockforest.setRefreshMinTargetLevelDeterminationFunction( amr::MinMaxLevelDetermination(infoCollection, 9, 20) );
+   blockforest.setRefreshMinTargetLevelDeterminationFunction( blockforest::MinMaxLevelDetermination(infoCollection, 9, 20) );
    createWithNeighborhoodLocalShadow(blockforest, storageID, *infoCollection);
    clearSynchronization( blockforest, storageID);
    forest->refresh();
@@ -155,7 +157,7 @@ int main( int argc, char ** argv )
 
    WALBERLA_MPI_BARRIER();
    WALBERLA_LOG_DEVEL_ON_ROOT( "Refinement 3" );
-   blockforest.setRefreshMinTargetLevelDeterminationFunction( amr::MinMaxLevelDetermination(infoCollection, 2, 3) );
+   blockforest.setRefreshMinTargetLevelDeterminationFunction( blockforest::MinMaxLevelDetermination(infoCollection, 2, 3) );
    createWithNeighborhoodLocalShadow(blockforest, storageID, *infoCollection);
    clearSynchronization( blockforest, storageID);
    forest->refresh();

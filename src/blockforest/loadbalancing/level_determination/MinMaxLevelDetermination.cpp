@@ -20,9 +20,10 @@
 
 #include "MinMaxLevelDetermination.h"
 
+#include "core/logging/Logging.h"
+
 namespace walberla {
-namespace pe {
-namespace amr {
+namespace blockforest {
 
 void MinMaxLevelDetermination::operator()( std::vector< std::pair< const Block *, uint_t > > & minTargetLevels,
                                            std::vector< const Block * > &,
@@ -81,6 +82,5 @@ blockforest::InfoCollection::const_iterator MinMaxLevelDetermination::getOrCreat
    return ic_->insert( std::make_pair(fatherId, newWeight) ).first;
 }
 
-} // namespace amr
-} // namespace pe
+} // namespace blockforest
 } // namespace walberla

@@ -20,17 +20,14 @@
 
 #pragma once
 
-#include <pe/Types.h>
-#include <pe/amr/InfoCollection.h>
+#include "blockforest/Block.h"
+#include "blockforest/BlockForest.h"
+#include "blockforest/loadbalancing/InfoCollection.h"
 
-#include <blockforest/Block.h>
-#include <blockforest/BlockForest.h>
-#include <core/logging/Logging.h>
-#include <domain_decomposition/BlockDataID.h>
+#include <vector>
 
 namespace walberla {
-namespace pe {
-namespace amr {
+namespace blockforest {
 
 class MinMaxLevelDetermination
 {
@@ -54,6 +51,5 @@ public:
    blockforest::InfoCollection::const_iterator getOrCreateCoarseInfo( const blockforest::BlockID& id );
 };
 
-} // namespace amr
-} // namespace pe
+} // namespace blockforest
 } // namespace walberla

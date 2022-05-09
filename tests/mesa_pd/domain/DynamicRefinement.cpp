@@ -27,10 +27,10 @@
 #include <blockforest/Initialization.h>
 #include <blockforest/loadbalancing/DynamicCurve.h>
 #include <blockforest/loadbalancing/InfoCollection.h>
+#include <blockforest/loadbalancing/level_determination/MinMaxLevelDetermination.h>
+#include <blockforest/loadbalancing/weight_assignment/WeightAssignmentFunctor.h>
 #include <core/debug/TestSubsystem.h>
 #include <core/logging/Logging.h>
-#include <pe/amr/level_determination/MinMaxLevelDetermination.h>
-#include <pe/amr/weight_assignment/WeightAssignmentFunctor.h>
 
 
 namespace walberla {
@@ -101,14 +101,14 @@ int main( bool simple )
                blockforest::DynamicCurveBalance< blockforest::NoPhantomData >( false, true, false ) );
    } else
    {
-      forest->setRefreshMinTargetLevelDeterminationFunction( pe::amr::MinMaxLevelDetermination(infoCollection, 2, 5) );
+      forest->setRefreshMinTargetLevelDeterminationFunction( blockforest::MinMaxLevelDetermination(infoCollection, 2, 5) );
 
-      forest->setRefreshPhantomBlockDataAssignmentFunction( pe::amr::WeightAssignmentFunctor( infoCollection ) );
-      forest->setRefreshPhantomBlockDataPackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      forest->setRefreshPhantomBlockDataUnpackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      forest->setRefreshPhantomBlockDataAssignmentFunction( blockforest::WeightAssignmentFunctor( infoCollection ) );
+      forest->setRefreshPhantomBlockDataPackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      forest->setRefreshPhantomBlockDataUnpackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
 
       forest->setRefreshPhantomBlockMigrationPreparationFunction(
-               blockforest::DynamicCurveBalance< pe::amr::WeightAssignmentFunctor::PhantomBlockWeight >( false, true, false ) );
+               blockforest::DynamicCurveBalance< blockforest::WeightAssignmentFunctor::PhantomBlockWeight >( false, true, false ) );
    }
 
    auto ps = std::make_shared<data::ParticleStorage> (100);
@@ -138,7 +138,7 @@ int main( bool simple )
 
    if (!simple)
    {
-      forest->setRefreshMinTargetLevelDeterminationFunction( pe::amr::MinMaxLevelDetermination(infoCollection, 2, 9) );
+      forest->setRefreshMinTargetLevelDeterminationFunction( blockforest::MinMaxLevelDetermination(infoCollection, 2, 9) );
    }
    domain::createWithNeighborhood(ac, *forest, *infoCollection);
    forest->refresh();
