@@ -32,7 +32,7 @@
 
 using namespace walberla;
 
-typedef GhostLayerField<double,1> ScalarField;
+typedef GhostLayerField<real_t ,1> ScalarField;
 void testMultipleFieldSwaps()
 {
    uint_t xSize = 5;
@@ -41,14 +41,14 @@ void testMultipleFieldSwaps()
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
       uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
       xSize, ySize, uint_t(1),            // how many cells per block (x,y,z)
-      real_t(1),                          // dx: length of one cell in physical coordinates
+      real_c(1.0),                          // dx: length of one cell in physical coordinates
       false,                              // one block per process - "false" means all blocks to one process
       true, true, true );                 // full periodicity
 
 
-   BlockDataID fieldID_1 = field::addToStorage<ScalarField>(blocks, "Field_1", real_t(1.0));
-   BlockDataID fieldID_2 = field::addToStorage<ScalarField>(blocks, "Field_2", real_t(1.0));
-   BlockDataID fieldID_3 = field::addToStorage<ScalarField>(blocks, "Field_3", real_t(1.0));
+   BlockDataID fieldID_1 = field::addToStorage<ScalarField>(blocks, "Field_1", real_c(1.0));
+   BlockDataID fieldID_2 = field::addToStorage<ScalarField>(blocks, "Field_2", real_c(1.0));
+   BlockDataID fieldID_3 = field::addToStorage<ScalarField>(blocks, "Field_3", real_c(1.0));
 
    pystencils::MultipleFieldSwaps kernel(fieldID_1, fieldID_2, fieldID_3);
 
@@ -63,9 +63,9 @@ void testMultipleFieldSwaps()
       // clang-format off
       WALBERLA_FOR_ALL_CELLS_XYZ(field_1, Cell globalCell;
          blocks->transformBlockLocalToGlobalCell(globalCell, block, Cell(x, y, z));
-         WALBERLA_CHECK_FLOAT_EQUAL(field_1->get(x, y, z), real_t(2.0))
-         WALBERLA_CHECK_FLOAT_EQUAL(field_2->get(x, y, z), real_t(2.0))
-         WALBERLA_CHECK_FLOAT_EQUAL(field_3->get(x, y, z), real_t(2.0))
+         WALBERLA_CHECK_FLOAT_EQUAL(field_1->get(x, y, z), real_c(2.0))
+         WALBERLA_CHECK_FLOAT_EQUAL(field_2->get(x, y, z), real_c(2.0))
+         WALBERLA_CHECK_FLOAT_EQUAL(field_3->get(x, y, z), real_c(2.0))
       )
       // clang-format on
    }

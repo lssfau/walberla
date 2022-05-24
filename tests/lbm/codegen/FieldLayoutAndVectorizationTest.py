@@ -10,7 +10,8 @@ from collections import namedtuple
 with CodeGeneration() as ctx:
     omega_shear = sp.symbols("omega")
 
-    lbm_config = LBMConfig(stencil=LBStencil(Stencil.D2Q9), compressible=False, method=Method.SRT)
+    lbm_config = LBMConfig(stencil=LBStencil(Stencil.D2Q9), compressible=False, method=Method.SRT,
+                           zero_centered=False, delta_equilibrium=False)
     collision_rule = create_lb_collision_rule(lbm_config=lbm_config)
 
     SetupDefinition = namedtuple('SetupDefinition', ['name', 'field_layout', 'vectorization_dict'])

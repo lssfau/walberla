@@ -67,7 +67,7 @@ void initF( const shared_ptr< StructuredBlockStorage > & blocks, const BlockData
       CellInterval xyz = f->xyzSize();
       for( auto cell = xyz.begin(); cell != xyz.end(); ++cell )
       {
-         f->get( *cell ) = 0.0;
+         f->get( *cell ) = real_c(0.0);
       }
    }
 }
@@ -77,25 +77,25 @@ void testPoisson()
 
    const uint_t xCells = uint_t(100);
    const uint_t yCells = uint_t(100);
-   const real_t xSize = real_t(1);
-   const real_t ySize = real_t(1);
+   const real_t xSize = real_c(1.0);
+   const real_t ySize = real_c(1.0);
    const real_t dx = xSize / real_c( xCells + uint_t(1) );
    const real_t dy = ySize / real_c( yCells + uint_t(1) );
 
    // Create blocks
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
-           math::AABB( real_t(0.5) * dx, real_t(0.5) * dy, real_t(0),
-                       xSize - real_t(0.5) * dx, ySize - real_t(0.5) * dy, dx ),
+           math::AABB( real_c(0.5) * dx, real_c(0.5) * dy, real_c(0.0),
+                       xSize - real_c(0.5) * dx, ySize - real_c(0.5) * dy, dx ),
            uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
            xCells, yCells, uint_t(1),          // how many cells per block (x,y,z)
            false,                              // one block per process - "false" means all blocks to one process
            false, false, false );              // no periodicity
 
 
-   BlockDataID fieldID = field::addToStorage<ScalarField_T>(blocks, "Field", real_t(0.0));
+   BlockDataID fieldID = field::addToStorage<ScalarField_T>(blocks, "Field", real_c(0.0));
    initU( blocks, fieldID );
 
-   BlockDataID fId = field::addToStorage< ScalarField_T >( blocks, "f", real_t(0.0));
+   BlockDataID fId = field::addToStorage< ScalarField_T >( blocks, "f", real_c(0.0));
    initF( blocks, fId );
 
    typedef blockforest::communication::UniformBufferedScheme<stencil::D2Q9> CommScheme;
@@ -115,7 +115,7 @@ void testPoisson()
 
    auto firstBlock = blocks->begin();
    auto f = firstBlock->getData<ScalarField_T>( fieldID );
-   WALBERLA_CHECK_LESS(f->get(50,99,0) - std::sin( math::pi  * 0.5 ) * std::sinh( math::pi * 0.99 ), 0.01);
+   WALBERLA_CHECK_LESS(f->get(50,99,0) - std::sin( math::pi  * 0.5 ) * std::sinh( math::pi * 0.99 ), 0.01)
 }
 
 

@@ -3,12 +3,14 @@ import numpy as np
 import waLBerla as wlb
 from waLBerla import field, createUniformBlockGrid
 
+field_data_type = np.float64 if wlb.build_info.build_with_double_accuracy else np.float32
+
 
 class FieldModuleTest(unittest.TestCase):
 
     def testFieldAsBlockData(self):
         blocks = createUniformBlockGrid(blocks=(1, 1, 1), cellsPerBlock=(3, 2, 2), periodic=(True, False, False))
-        field.addToStorage(blocks, 'myField', np.float64, fSize=3, ghostLayers=0, initValue=0.0)
+        field.addToStorage(blocks, 'myField', field_data_type, fSize=3, ghostLayers=0, initValue=0.0)
         my_field = wlb.field.toArray(blocks[0]['myField'])
         self.assertEqual(my_field[0, 0, 0, 0], 0)
         my_field[0, 0, 0, 0] = 42.0
@@ -18,8 +20,8 @@ class FieldModuleTest(unittest.TestCase):
 
     def testNumpyConversionWithoutGhostLayers(self):
         blocks = createUniformBlockGrid(blocks=(1, 1, 1), cellsPerBlock=(1, 2, 3), periodic=(True, False, False))
-        field.addToStorage(blocks, 'f1', np.float64, fSize=2, ghostLayers=0, initValue=2.0)
-        field.addToStorage(blocks, 'f2', np.float64, fSize=3, ghostLayers=0, initValue=2.0)
+        field.addToStorage(blocks, 'f1', field_data_type, fSize=2, ghostLayers=0, initValue=2.0)
+        field.addToStorage(blocks, 'f2', field_data_type, fSize=3, ghostLayers=0, initValue=2.0)
 
         f1np = field.toArray(blocks[0]['f1'])
         f2np = field.toArray(blocks[0]['f2'])
@@ -31,7 +33,7 @@ class FieldModuleTest(unittest.TestCase):
         size = (10, 5, 4)
         gl = 3
         blocks = createUniformBlockGrid(blocks=(1, 1, 1), cellsPerBlock=size, periodic=(True, False, False))
-        field.addToStorage(blocks, 'f', np.float64, fSize=3, ghostLayers=gl, initValue=0.0)
+        field.addToStorage(blocks, 'f', field_data_type, fSize=3, ghostLayers=gl, initValue=0.0)
 
         f = blocks[0]['f']
 

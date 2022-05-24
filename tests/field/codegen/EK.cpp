@@ -56,7 +56,7 @@ void initC(const shared_ptr< StructuredBlockStorage > & blocks, BlockDataID cID)
 
 void checkC(const shared_ptr< StructuredBlockStorage > & blocks, BlockDataID cID, real_t D, uint_t t)
 {
-   real_t sum(0);
+   real_t sum(0.0);
    uint_t size(0);
    for(auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
@@ -76,12 +76,12 @@ void checkC(const shared_ptr< StructuredBlockStorage > & blocks, BlockDataID cID
             const real_t val = c->get(x, y, 0);
             sum += val;
             
-            const real_t x0 = real_c(x) - real_c(c->xSize()/2) + real_t(0.5);
-            const real_t y0 = real_c(y) - real_c(c->ySize()/2) + real_t(0.5);
+            const real_t x0 = real_c(x) - real_c(c->xSize()/2) + real_c(0.5);
+            const real_t y0 = real_c(y) - real_c(c->ySize()/2) + real_c(0.5);
             const real_t r2 = x0*x0 + y0*y0;
             
             // solution to the diffusion equation in 2D
-            const real_t ref = real_t(size)/(real_t(4)*math::pi*D*real_c(t)) * std::exp(-r2/real_c(4*D*real_c(t)));
+            const real_t ref = real_c(size)/(real_c(4.0)*math::pi*D*real_c(t)) * std::exp(-r2/real_c(4*D*real_c(t)));
             
             real_t rel = std::abs(real_c(1) - val/ref);
             if(ref >= 1) // we only expect good agreement where the values are larger than sum/size
@@ -91,12 +91,12 @@ void checkC(const shared_ptr< StructuredBlockStorage > & blocks, BlockDataID cID
                   std::cout << y << " " << y0 << " " << val << " " << ref << " " << (rel*100) << "%" << std::endl;
                }
                
-               WALBERLA_CHECK_LESS(rel, 0.03); // 3% deviation is okay
+               WALBERLA_CHECK_LESS(rel, 0.03) // 3% deviation is okay
             }
          }
       }
    }
-   WALBERLA_CHECK_FLOAT_EQUAL(sum, real_c(size));
+   WALBERLA_CHECK_FLOAT_EQUAL(sum, real_c(size))
 }
 
 void testEK()
@@ -109,13 +109,13 @@ void testEK()
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
       uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
       xSize, ySize, uint_t(1),            // how many cells per block (x,y,z)
-      real_t(1),                          // dx: length of one cell in physical coordinates
+      real_c(1.0),                          // dx: length of one cell in physical coordinates
       false,                              // one block per process - "false" means all blocks to one process
       true, true, true );                 // full periodicity
 
-   BlockDataID c = field::addToStorage<DensityField_T>(blocks, "c", real_t(0.0), field::fzyx);
+   BlockDataID c = field::addToStorage<DensityField_T>(blocks, "c", real_c(0.0), field::fzyx);
    initC(blocks, c);
-   BlockDataID j = field::addToStorage<FluxField_T>(blocks, "j", real_t(0.0), field::fzyx);
+   BlockDataID j = field::addToStorage<FluxField_T>(blocks, "j", real_c(0.0), field::fzyx);
    
    typedef blockforest::communication::UniformBufferedScheme<stencil::D2Q9> CommScheme;
    typedef field::communication::PackInfo<DensityField_T> Packing;
@@ -127,7 +127,7 @@ void testEK()
 
    // Registering the sweep
    timeloop.add() << BeforeFunction( commScheme, "Communication" )
-                  << Sweep( pystencils::EKFlux(D, c, j), "EK flux Kernel" );
+                  << Sweep( pystencils::EKFlux(c, j, D), "EK flux Kernel" );
    timeloop.add() << Sweep( pystencils::EKContinuity(c, j), "EK continuity Kernel" );
 
    timeloop.run();

@@ -83,13 +83,13 @@ int main(int argc, char** argv)
    const real_t omega     = parameters.getParameter< real_t >("omega", real_c(1.4));
    const uint_t timesteps = parameters.getParameter< uint_t >("timesteps", uint_c(10));
 
-   const double remainingTimeLoggerFrequency =
-      parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
+   const real_t remainingTimeLoggerFrequency =
+      parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(3.0)); // in seconds
 
    // create fields
    BlockDataID pdfFieldID     = blocks->addStructuredBlockData< PdfField_T >(pdfFieldAdder, "PDFs");
-   BlockDataID velFieldID     = field::addToStorage< VelocityField_T >(blocks, "velocity", real_t(0), field::fzyx);
-   BlockDataID densityFieldID = field::addToStorage< ScalarField_T >(blocks, "density", real_t(1.0), field::fzyx);
+   BlockDataID velFieldID     = field::addToStorage< VelocityField_T >(blocks, "velocity", real_c(0.0), field::fzyx);
+   BlockDataID densityFieldID = field::addToStorage< ScalarField_T >(blocks, "density", real_c(1.0), field::fzyx);
 
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
 
             if (tubeSetup)
             {
-               real_t R = sqrt((globalCell[1] - My) * (globalCell[1] - My) + (globalCell[2] - Mz) * (globalCell[2] - Mz));
+               real_t R = real_c(sqrt((globalCell[1] - My) * (globalCell[1] - My) + (globalCell[2] - Mz) * (globalCell[2] - Mz)));
                if (R > real_c(cellsPerBlock[1]) * real_c(0.5)) addFlag(flagField->get(x, y, z), wallFlag);
             }
             if (slopedWall)
@@ -206,7 +206,8 @@ int main(int argc, char** argv)
             real_t v2   = velField->get(cell_idx_c(cellsPerBlock[0] / 2), i + 1, cell_idx_c(cellsPerBlock[2] / 2), 0);
             real_t grad = v2 - v1;
             // WALBERLA_LOG_DEVEL_VAR(grad)
-            WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(grad, 0.0, 1e-16)
+            WALBERLA_CHECK_FLOAT_EQUAL(grad, 0.0)
+
          }
       }
    }

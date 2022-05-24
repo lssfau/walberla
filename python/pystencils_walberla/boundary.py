@@ -5,7 +5,7 @@ from pystencils.boundaries.boundaryhandling import create_boundary_kernel
 from pystencils.boundaries.createindexlist import (
     boundary_index_array_coordinate_names, direction_member_name,
     numpy_data_type_for_boundary_object)
-from pystencils.data_types import TypedSymbol, create_type
+from pystencils.typing import TypedSymbol, create_type
 from pystencils.stencil import inverse_direction
 
 from pystencils_walberla.codegen import config_from_context
@@ -46,8 +46,10 @@ def generate_boundary(generation_context,
     create_kernel_params = config.__dict__
     del create_kernel_params['target']
     del create_kernel_params['index_fields']
+    del create_kernel_params['default_number_int']
+    del create_kernel_params['skip_independence_check']
 
-    field_data_type = np.float64 if config.data_type == "float64" else np.float32
+    field_data_type = config.data_type[field_name].numpy_dtype
 
     index_struct_dtype = numpy_data_type_for_boundary_object(boundary_object, dim)
 
@@ -57,7 +59,7 @@ def generate_boundary(generation_context,
                                  field_type=field_type)
 
     index_field = Field('indexVector', FieldType.INDEXED, index_struct_dtype, layout=[0],
-                        shape=(TypedSymbol("indexVectorSize", create_type(np.int64)), 1), strides=(1, 1))
+                        shape=(TypedSymbol("indexVectorSize", create_type("int32")), 1), strides=(1, 1))
 
     if not kernel_creation_function:
         kernel_creation_function = create_boundary_kernel
@@ -79,6 +81,9 @@ def generate_boundary(generation_context,
     if additional_data_handler is None:
         additional_data_handler = AdditionalDataHandler(stencil=neighbor_stencil)
 
+    default_dtype = config.data_type.default_factory()
+    is_float = True if issubclass(default_dtype.numpy_dtype.type, np.float32) else False
+
     context = {
         'kernel': kernel_family,
         'class_name': boundary_object.name,
@@ -92,6 +97,7 @@ def generate_boundary(generation_context,
         'inner_or_boundary': boundary_object.inner_or_boundary,
         'single_link': boundary_object.single_link,
         'additional_data_handler': additional_data_handler,
+        'dtype': "double" if is_float else "float",
         'layout': layout
     }
 

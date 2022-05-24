@@ -78,6 +78,7 @@ class WalberlaLbmpyCodegenTest(unittest.TestCase):
 
             stencil = LBStencil(stencil=Stencil.D3Q27)
             lbm_config = LBMConfig(stencil=stencil, method=Method.TRT_KBC_N1,
+                                   zero_centered=False,
                                    relaxation_rates=[1.5, sp.Symbol('omega_free')],
                                    compressible=True, entropic=True,
                                    omega_output_field=omega_field)
@@ -92,7 +93,7 @@ class WalberlaLbmpyCodegenTest(unittest.TestCase):
             force_field, vel_field = ps.fields("force(3), velocity(3): [3D]", layout='fzyx')
 
             stencil = LBStencil(stencil=Stencil.D3Q19)
-            lbm_config = LBMConfig(stencil=stencil, method=Method.MRT, compressible=True,
+            lbm_config = LBMConfig(stencil=stencil, method=Method.MRT, compressible=True, zero_centered=False,
                                    fluctuating={'seed': 0, 'temperature': 1e-6}, force_model=ForceModel.GUO,
                                    relaxation_rates=[omega_shear] * 19, force=force_field.center_vector)
 

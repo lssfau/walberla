@@ -7,11 +7,12 @@ from pystencils_walberla import CodeGeneration, generate_info_header
 from lbmpy_walberla import RefinementScaling, generate_boundary, generate_lattice_model
 
 with CodeGeneration() as ctx:
+    data_type = "float64" if ctx.double_accuracy else "float32"
     omega, omega_free = sp.symbols("omega, omega_free")
-    force_field, vel_field, omega_out = ps.fields("force(3), velocity(3), omega_out: [3D]", layout='fzyx')
+    force_field, vel_field, omega_out = ps.fields(f"force(3), velocity(3), omega_out: {data_type}[3D]", layout='fzyx')
 
     stencil = LBStencil(Stencil.D3Q19)
-    lbm_config = LBMConfig(stencil=stencil, method=Method.MRT, entropic=True,
+    lbm_config = LBMConfig(stencil=stencil, method=Method.MRT, entropic=True, zero_centered=False,
                            compressible=True, omega_output_field=omega_out,
                            force=force_field.center_vector, output={'velocity': vel_field},
                            relaxation_rates=[omega, omega, omega_free, omega_free, omega_free, omega_free])
@@ -33,6 +34,6 @@ with CodeGeneration() as ctx:
     # for vectorisation on AVX512 due to scatter and gather intrinsics
     generate_lattice_model(ctx, 'LbCodeGenerationExample_LatticeModel', collision_rule,
                            field_layout='fzyx', refinement_scaling=scaling)
-    generate_boundary(ctx, 'LbCodeGenerationExample_UBB', UBB([0.05, 0, 0]), collision_rule.method)
+    generate_boundary(ctx, 'LbCodeGenerationExample_UBB', UBB([0.05, 0, 0], data_type=data_type), collision_rule.method)
     generate_boundary(ctx, 'LbCodeGenerationExample_NoSlip', NoSlip(), collision_rule.method)
     generate_info_header(ctx, 'LbCodeGenerationExample')

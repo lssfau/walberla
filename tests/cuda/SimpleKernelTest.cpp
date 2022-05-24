@@ -42,23 +42,23 @@ void kernel_double( cuda::FieldAccessor<double> f );
 GhostLayerField<double,1> * createCPUField( IBlock* const block, StructuredBlockStorage* const storage )
 {
    return new GhostLayerField<double,1> (
-            storage->getNumberOfXCells( *block ), // number of cells in x direction
-            storage->getNumberOfYCells( *block ), // number of cells in y direction
-            storage->getNumberOfZCells( *block ), // number of cells in z direction
-            1,                                    // number of ghost layers
-            double(1),                            // initial value
-            field::fzyx);
+      storage->getNumberOfXCells( *block ), // number of cells in x direction
+      storage->getNumberOfYCells( *block ), // number of cells in y direction
+      storage->getNumberOfZCells( *block ), // number of cells in z direction
+      1,                                    // number of ghost layers
+      double(1),                            // initial value
+      field::fzyx);
 }
 
 cuda::GPUField<double> * createGPUField( IBlock* const block, StructuredBlockStorage* const storage )
 {
    return new cuda::GPUField<double> (
-            storage->getNumberOfXCells( *block ), // number of cells in x direction
-            storage->getNumberOfYCells( *block ), // number of cells in y direction
-            storage->getNumberOfZCells( *block ), // number of cells in z direction
-            1,                                    // fSize
-            1,                                    // number of ghost layers
-            field::fzyx );
+      storage->getNumberOfXCells( *block ), // number of cells in x direction
+      storage->getNumberOfYCells( *block ), // number of cells in y direction
+      storage->getNumberOfZCells( *block ), // number of cells in z direction
+      1,                                    // fSize
+      1,                                    // number of ghost layers
+      field::fzyx );
 }
 
 
@@ -68,11 +68,11 @@ int main( int argc, char ** argv )
    debug::enterTestMode();
 
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
-             uint_t(1),   uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
-             uint_t(14),  uint_t(14), uint_t(14), // how many cells per block (x,y,z)
-             real_c(0.5),                         // dx: length of one cell in physical coordinates
-             false,                               // one block per process - "false" means all blocks to one process
-             false, false, false );               // no periodicity
+      uint_t(1),   uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
+      uint_t(14),  uint_t(14), uint_t(14), // how many cells per block (x,y,z)
+      real_c(0.5),                         // dx: length of one cell in physical coordinates
+      false,                               // one block per process - "false" means all blocks to one process
+      false, false, false );               // no periodicity
 
 
 
@@ -98,7 +98,7 @@ int main( int argc, char ** argv )
 
       cuda::fieldCpy( *cpuField, *gpuField );
 
-      WALBERLA_ASSERT_FLOAT_EQUAL( cpuField->get(0,0,0), real_t(2) );
+      WALBERLA_ASSERT_FLOAT_EQUAL( cpuField->get(0,0,0), real_t(2) )
    }
 
 
@@ -108,5 +108,5 @@ int main( int argc, char ** argv )
    //gui.run();
 
 
-   return 0;
+   return EXIT_SUCCESS;
 }

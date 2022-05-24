@@ -4,7 +4,7 @@ import pystencils as ps
 
 from dataclasses import replace
 
-from pystencils.data_types import TypedSymbol
+from pystencils.typing import TypedSymbol
 from pystencils.fast_approximation import insert_fast_sqrts, insert_fast_divisions
 
 from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil
@@ -78,6 +78,7 @@ options_dict = {
     'entropic': {
         'method': Method.TRT_KBC_N4,
         'compressible': True,
+        'zero_centered': False,
         'relaxation_rates': [omega, omega_free],
         'entropic': True,
         'entropic_newton_iterations': False
@@ -184,7 +185,7 @@ with CodeGeneration() as ctx:
 
     # Boundaries
     noslip = NoSlip()
-    ubb = UBB((0.05, 0, 0))
+    ubb = UBB((0.05, 0, 0), data_type=field_type)
 
     generate_alternating_lbm_boundary(ctx, 'UniformGridGPU_NoSlip', noslip, lb_method, field_name=pdfs.name,
                                       streaming_pattern=streaming_pattern, target=ps.Target.GPU)

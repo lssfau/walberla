@@ -65,18 +65,18 @@ int main( int argc, char ** argv )
    const real_t          magic_number    = 3. / 16;
    const real_t          omega_2         = (4 - 2 * omega) / (4 * magic_number * omega + 2 - omega);
    const Vector3<real_t> initialVelocity = parameters.getParameter< Vector3<real_t> >( "initialVelocity", Vector3<real_t>() );
-   const uint_t          timesteps       = parameters.getParameter< uint_t >         ( "timesteps",       uint_c(10) );
-   const real_t          temperature     = real_t(0.01);
+   const uint_t          timesteps       = parameters.getParameter< uint_t >         ( "timesteps",       uint_c(10.0) );
+   const real_t          temperature     = real_c(0.01);
    const uint_t          seed            = uint_t(0);
 
-   const real_t remainingTimeLoggerFrequency = parameters.getParameter< double >( "remainingTimeLoggerFrequency", 3.0 ); // in seconds
+   const real_t remainingTimeLoggerFrequency = parameters.getParameter< real_t >( "remainingTimeLoggerFrequency", real_c(3.0) ); // in seconds
 
    // create fields
-   real_t force             = 2E-4; // Force to apply on each node on each axis
+   real_t force             = real_c(2E-4); // Force to apply on each node on each axis
    BlockDataID forceFieldId = field::addToStorage<VectorField_T>( blocks, "Force", force, field::fzyx );
 
    LatticeModel_T latticeModel = LatticeModel_T( forceFieldId, omega, omega, omega_2, omega, seed, temperature, uint_t(0) );
-   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, initialVelocity, real_t(1), uint_t(1), field::fzyx );
+   BlockDataID pdfFieldId = lbm::addPdfFieldToStorage( blocks, "pdf field", latticeModel, initialVelocity, real_c(1.0), uint_t(1), field::fzyx );
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >( blocks, "flag field" );
 
    // create and initialize flag field
@@ -123,15 +123,15 @@ int main( int argc, char ** argv )
       WALBERLA_FOR_ALL_CELLS_XYZ_OMP(v, omp critical, {
          momentum += rho->get(x, y, z) * v->get(x, y, z);
          count++;
-      });
+      })
    }
 
    // check
    real_t expected_momentum = real_c(count) * force * real_c(timesteps);
    printf("%g %g %g | %g\n", momentum[0], momentum[1], momentum[2], expected_momentum);
-   WALBERLA_CHECK_FLOAT_EQUAL(momentum[0], expected_momentum);
-   WALBERLA_CHECK_FLOAT_EQUAL(momentum[1], expected_momentum);
-   WALBERLA_CHECK_FLOAT_EQUAL(momentum[2], expected_momentum);
+   WALBERLA_CHECK_FLOAT_EQUAL(momentum[0], expected_momentum)
+   WALBERLA_CHECK_FLOAT_EQUAL(momentum[1], expected_momentum)
+   WALBERLA_CHECK_FLOAT_EQUAL(momentum[2], expected_momentum)
 
    return EXIT_SUCCESS;
 }

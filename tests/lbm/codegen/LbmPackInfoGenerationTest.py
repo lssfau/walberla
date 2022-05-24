@@ -14,7 +14,7 @@ with CodeGeneration() as ctx:
     target = ps.Target.CPU
     stencil = LBStencil(Stencil.D3Q19)
 
-    pdf_field = Field.create_generic('pdfs', stencil.D, index_shape=(stencil.Q,), layout='fzyx')
+    pdf_field = Field.create_generic('pdfs', stencil.D, index_shape=(stencil.Q,), layout='fzyx', dtype=data_type)
 
     lbm_config = LBMConfig(method=Method.SRT, stencil=stencil, streaming_pattern=streaming_pattern,
                            timestep=Timestep.ODD)

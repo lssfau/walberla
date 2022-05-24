@@ -72,7 +72,7 @@ void {{class_name}}::run_impl(
 )
 {
    auto * indexVectors = block->getData<IndexVectors>(indexVectorID);
-   int64_t indexVectorSize = int64_c( indexVectors->indexVector(type).size() );
+   int32_t indexVectorSize = int32_c( indexVectors->indexVector(type).size() );
    if( indexVectorSize == 0)
       return;
 

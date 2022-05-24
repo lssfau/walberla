@@ -79,7 +79,7 @@ int main(int argc, char** argv)
       const std::string timeStepStrategy = parameters.getParameter< std::string >("timeStepStrategy", "normal");
       const uint_t timesteps             = parameters.getParameter< uint_t >("timesteps", uint_c(50));
       const real_t remainingTimeLoggerFrequency =
-         parameters.getParameter< real_t >("remainingTimeLoggerFrequency", 3.0);
+         parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(3.0));
       const uint_t scenario  = parameters.getParameter< uint_t >("scenario", uint_c(1));
 
       Vector3< int > overlappingWidth =
@@ -90,11 +90,11 @@ int main(int argc, char** argv)
       ///////////////////////
 
       BlockDataID lb_phase_field =
-         field::addToStorage< PdfField_phase_T >(blocks, "lb phase field", real_t(0), field::fzyx);
+         field::addToStorage< PdfField_phase_T >(blocks, "lb phase field", real_c(0.0), field::fzyx);
       BlockDataID lb_velocity_field =
-         field::addToStorage< PdfField_hydro_T >(blocks, "lb velocity field", real_t(0), field::fzyx);
-      BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_t(0), field::fzyx);
-      BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_t(0), field::fzyx);
+         field::addToStorage< PdfField_hydro_T >(blocks, "lb velocity field", real_c(0.0), field::fzyx);
+      BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
+      BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
 
       BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
@@ -114,7 +114,7 @@ int main(int argc, char** argv)
       {
          auto bubbleParameters                  = config->getOneBlock("Bubble");
          const Vector3< real_t > bubbleMidPoint = bubbleParameters.getParameter< Vector3< real_t > >("bubbleMidPoint");
-         const real_t bubbleRadius              = bubbleParameters.getParameter< real_t >("bubbleRadius", 20.0);
+         const real_t bubbleRadius              = bubbleParameters.getParameter< real_t >("bubbleRadius", real_c(20.0));
          const bool bubble                      = bubbleParameters.getParameter< bool >("bubble", true);
          initPhaseField_sphere(blocks, phase_field, bubbleRadius, bubbleMidPoint, bubble);
       }
@@ -300,7 +300,7 @@ int main(int argc, char** argv)
       timeLoop->run();
       simTimer.end();
       WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
-      auto time            = simTimer.last();
+      auto time            = real_c(simTimer.last());
       auto nrOfCells       = real_c(cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2]);
       auto mlupsPerProcess = nrOfCells * real_c(timesteps) / time * 1e-6;
       WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process: " << mlupsPerProcess)

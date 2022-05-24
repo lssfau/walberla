@@ -80,7 +80,7 @@ public:
         {% endif -%}
 
         CpuIndexVector & indexVector(Type t) { return cpuVectors_[t]; }
-        {{StructName}} * pointerCpu(Type t)  { return &(cpuVectors_[t][0]); }
+        {{StructName}} * pointerCpu(Type t)  { return cpuVectors_[t].data(); }
 
         {% if target == 'gpu' -%}
         {{StructName}} * pointerGpu(Type t)  { return gpuVectors_[t]; }
@@ -238,7 +238,7 @@ public:
         {%endif%}
         {%else%}
         auto flagWithGLayers = flagField->xyzSizeWithGhostLayer();
-        real_t dot = 0.0; real_t maxn = 0.0;
+        {{dtype}} dot = 0.0; {{dtype}} maxn = 0.0;
         cell_idx_t calculated_idx = 0;
         cell_idx_t dx = 0; cell_idx_t dy = 0; {%if dim == 3%}  cell_idx_t dz = 0; {% endif %}
         cell_idx_t sum_x = 0; cell_idx_t sum_y = 0; {%if dim == 3%} cell_idx_t sum_z = 0; {%endif %}
@@ -272,7 +272,7 @@ public:
             {
             {%- for dirIdx, dirVec, offset in additional_data_handler.stencil_info %}
                 dx = {{dirVec[0]}}; dy = {{dirVec[1]}}; {%if dim == 3%} dz = {{dirVec[2]}}; {% endif %}
-                dot = real_c( dx*sum_x + dy*sum_y {%if dim == 3%} + dz*sum_z {% endif %});
+                dot = {{dtype}}( dx*sum_x + dy*sum_y {%if dim == 3%} + dz*sum_z {% endif %});
                 if (dot > maxn)
                 {
                     maxn = dot;

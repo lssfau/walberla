@@ -164,7 +164,7 @@ template< typename T > inline cell_idx_t cell_idx_c( T t ) { return numeric_cast
 #ifdef WALBERLA_DOUBLE_ACCURACY
 using real_t = double;
 #else
-typedef float  real_t;
+using real_t = float;
 #endif
 
 inline constexpr real_t operator"" _r( long double t ) { return static_cast< real_t >(t); }

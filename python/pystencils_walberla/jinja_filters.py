@@ -10,7 +10,7 @@ import sympy as sp
 
 from pystencils import Target, Backend
 from pystencils.backends.cbackend import generate_c
-from pystencils.data_types import TypedSymbol, get_base_type
+from pystencils.typing import TypedSymbol, get_base_type
 from pystencils.field import FieldType
 from pystencils.sympyextensions import prod
 
@@ -78,7 +78,7 @@ def get_field_fsize(field):
 
 def get_field_stride(param):
     field = param.fields[0]
-    type_str = get_base_type(param.symbol.dtype).base_name
+    type_str = get_base_type(param.symbol.dtype).c_name
     stride_names = ['xStride()', 'yStride()', 'zStride()', 'fStride()']
     stride_names = [f"{type_str}({param.field_name}->{e})" for e in stride_names]
     strides = stride_names[:field.spatial_dimensions]
@@ -322,12 +322,12 @@ def generate_call(ctx, kernel, ghost_layers_to_include=0, cell_interval=None, st
                                                  f"{instruction_set['bytes']}, 0);")
         elif param.is_field_stride:
             casted_stride = get_field_stride(param)
-            type_str = param.symbol.dtype.base_name
+            type_str = param.symbol.dtype.c_name
             kernel_call_lines.append(f"const {type_str} {param.symbol.name} = {casted_stride};")
         elif param.is_field_shape:
             coord = param.symbol.coordinate
             field = param.fields[0]
-            type_str = param.symbol.dtype.base_name
+            type_str = param.symbol.dtype.c_name
             shape = f"{type_str}({get_end_coordinates(field)[coord]})"
             assert coord < 3
             max_value = f"{field.name}->{('x', 'y', 'z')[coord]}SizeWithGhostLayer()"
@@ -364,11 +364,16 @@ def generate_constructor_initializer_list(kernel_info, parameters_to_ignore=None
     parameters_to_ignore += kernel_info.temporary_fields
 
     parameter_initializer_list = []
+    # First field pointer
     for param in kernel_info.parameters:
         if param.is_field_pointer and param.field_name not in parameters_to_ignore:
             parameter_initializer_list.append(f"{param.field_name}ID({param.field_name}ID_)")
-        elif not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
+
+    # Then free parameters
+    for param in kernel_info.parameters:
+        if not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
             parameter_initializer_list.append(f"{param.symbol.name}_({param.symbol.name})")
+
     return ", ".join(parameter_initializer_list)
 
 
@@ -383,11 +388,16 @@ def generate_constructor_parameters(kernel_info, parameters_to_ignore=None):
     parameters_to_ignore += kernel_info.temporary_fields + varying_parameter_names
 
     parameter_list = []
+    # First field pointer
     for param in kernel_info.parameters:
         if param.is_field_pointer and param.field_name not in parameters_to_ignore:
             parameter_list.append(f"BlockDataID {param.field_name}ID_")
-        elif not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
+
+    # Then free parameters
+    for param in kernel_info.parameters:
+        if not param.is_field_parameter and param.symbol.name not in parameters_to_ignore:
             parameter_list.append(f"{param.symbol.dtype} {param.symbol.name}")
+
     varying_parameters = ["%s %s" % e for e in varying_parameters]
     return ", ".join(parameter_list + varying_parameters)
 
@@ -427,7 +437,11 @@ def generate_members(ctx, kernel_info, parameters_to_ignore=(), only_fields=Fals
             continue
         if param.is_field_pointer and param.field_name not in params_to_skip:
             result.append(f"BlockDataID {param.field_name}ID;")
-        elif not param.is_field_parameter and param.symbol.name not in params_to_skip:
+
+    for param in kernel_info.parameters:
+        if only_fields and not param.is_field_parameter:
+            continue
+        if not param.is_field_parameter and param.symbol.name not in params_to_skip:
             result.append(f"{param.symbol.dtype} {param.symbol.name}_;")
 
     for field_name in kernel_info.temporary_fields:

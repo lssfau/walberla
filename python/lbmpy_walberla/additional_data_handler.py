@@ -1,5 +1,5 @@
 from pystencils import Target
-from pystencils.stencil import inverse_direction, offset_to_direction_string
+from pystencils.stencil import inverse_direction
 
 
 from lbmpy.advanced_streaming import AccessPdfValues, numeric_offsets, numeric_index

@@ -4,8 +4,9 @@ from pystencils_walberla import CodeGeneration, generate_sweep
 
 
 with CodeGeneration() as ctx:
+    field_type = "float64" if ctx.double_accuracy else "float32"
     # ----- Stencil 2D - created by specifying weights in nested list --------------------------
-    src, dst = ps.fields("src, src_tmp: [2D]", layout='fzyx')
+    src, dst = ps.fields(f"src, src_tmp: {field_type}[2D]", layout='fzyx')
     stencil = [[1.11, 2.22, 3.33],
                [4.44, 5.55, 6.66],
                [7.77, 8.88, 9.99]]
@@ -13,7 +14,7 @@ with CodeGeneration() as ctx:
     generate_sweep(ctx, 'JacobiKernel2D', assignments, field_swaps=[(src, dst)])
 
     # ----- Stencil 3D - created by using kernel_decorator with assignments in '@=' format -----
-    src, dst = ps.fields("src, src_tmp: [3D]", layout='fzyx')
+    src, dst = ps.fields(f"src, src_tmp: {field_type}[3D]", layout='fzyx')
 
     @ps.kernel
     def kernel_func():

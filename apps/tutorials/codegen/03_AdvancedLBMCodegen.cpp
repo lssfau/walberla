@@ -87,7 +87,7 @@ void initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& block
    real_t velocityMagnitude = config.getParameter< real_t >("velocityMagnitude", real_c(0.08));
    real_t noiseMagnitude    = config.getParameter< real_t >("noiseMagnitude", real_c(0.1) * velocityMagnitude);
 
-   real_t n_y = real_c(blocks->getNumberOfYCells());
+   auto n_y = real_c(blocks->getNumberOfYCells());
 
    for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
    {
@@ -98,7 +98,7 @@ void initShearFlowVelocityField(const shared_ptr< StructuredBlockForest >& block
          Cell globalCell(cellIt.cell());
          blocks->transformBlockLocalToGlobalCell(globalCell, *blockIt);
 
-         real_t relative_y = real_c(globalCell.y()) / n_y;
+         auto relative_y = real_c(globalCell.y()) / n_y;
 
          u->get(cellIt.cell(), 0) = relative_y < 0.3 || relative_y > 0.7 ? velocityMagnitude : -velocityMagnitude;
 
@@ -129,7 +129,7 @@ int main(int argc, char** argv)
    const uint_t timesteps = parameters.getParameter< uint_t >("timesteps", uint_c(10));
    const real_t omega     = parameters.getParameter< real_t >("omega", real_c(1.8));
    const double remainingTimeLoggerFrequency =
-      parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
+      parameters.getParameter< double >("remainingTimeLoggerFrequency", real_c(3.0)); // in seconds
    const uint_t VTKwriteFrequency = parameters.getParameter< uint_t >("VTKwriteFrequency", 1000);
 
    ////////////////////////////////////

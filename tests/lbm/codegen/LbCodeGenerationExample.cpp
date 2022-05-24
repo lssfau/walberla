@@ -69,16 +69,16 @@ int main(int argc, char** argv)
    const uint_t timesteps = parameters.getParameter< uint_t >("timesteps", uint_c(10));
 
    const double remainingTimeLoggerFrequency =
-      parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
+      parameters.getParameter< double >("remainingTimeLoggerFrequency", real_c(3.0)); // in seconds
 
    // create fields
-   BlockDataID forceFieldId = field::addToStorage< VectorField_T >(blocks, "Force", real_t(0.0), field::fzyx);
-   BlockDataID velFieldId   = field::addToStorage< VectorField_T >(blocks, "Velocity", real_t(0.0), field::fzyx);
-   BlockDataID omegaFieldId = field::addToStorage< ScalarField_T >(blocks, "Omega", real_t(0.0), field::fzyx);
+   BlockDataID forceFieldId = field::addToStorage< VectorField_T >(blocks, "Force", real_c(0.0), field::fzyx);
+   BlockDataID velFieldId   = field::addToStorage< VectorField_T >(blocks, "Velocity", real_c(0.0), field::fzyx);
+   BlockDataID omegaFieldId = field::addToStorage< ScalarField_T >(blocks, "Omega", real_c(0.0), field::fzyx);
 
    LatticeModel_T latticeModel = LatticeModel_T(forceFieldId, omegaFieldId, velFieldId, omega);
    BlockDataID pdfFieldId =
-      lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, initialVelocity, real_t(1), field::fzyx);
+      lbm::addPdfFieldToStorage(blocks, "pdf field", latticeModel, initialVelocity, real_c(log10(1)), field::fzyx);
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
    // create and initialize boundary handling

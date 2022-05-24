@@ -21,7 +21,8 @@ lbm_opt = LBMOptimisation(cse_global=True, field_layout=layout)
 #      SRT Method Definition
 #   ===========================
 
-lbm_config = LBMConfig(stencil=stencil, method=Method.SRT, relaxation_rate=omega)
+lbm_config = LBMConfig(stencil=stencil, method=Method.SRT, relaxation_rate=omega,
+                       zero_centered=False, delta_equilibrium=False)
 
 srt_collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
 srt_update_rule = create_lb_update_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)

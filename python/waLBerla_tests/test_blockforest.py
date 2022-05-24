@@ -1,6 +1,9 @@
 import unittest
 import numpy as np
+import waLBerla as wlb
 from waLBerla import field, createUniformBlockGrid, AABB
+
+field_data_type = np.float64 if wlb.build_info.build_with_double_accuracy else np.float32
 
 
 class BlockforestModuleTest(unittest.TestCase):
@@ -8,7 +11,7 @@ class BlockforestModuleTest(unittest.TestCase):
     def testMemoryManagement1(self):
         """Testing correct reference counting of block data"""
         blocks = createUniformBlockGrid(blocks=(1, 1, 1), cellsPerBlock=(2, 2, 2))
-        field.addToStorage(blocks, "TestField", np.float64)
+        field.addToStorage(blocks, "TestField", field_data_type)
         f = blocks[0]["TestField"]
         strides_before = f.strides
         del blocks
@@ -24,7 +27,7 @@ class BlockforestModuleTest(unittest.TestCase):
         """Testing correct reference counting of block data
            Holding only a numpy array pointing to a waLBerla field should still hold the blockstructure alive"""
         blocks = createUniformBlockGrid(blocks=(1, 1, 1), cellsPerBlock=(2, 2, 2))
-        field.addToStorage(blocks, "TestField", np.float64)
+        field.addToStorage(blocks, "TestField", field_data_type)
         npf = field.toArray(blocks[0]["TestField"])
         npf[:, :, :] = 42.0
         del blocks
@@ -36,7 +39,7 @@ class BlockforestModuleTest(unittest.TestCase):
     def testMemoryManagement3(self):
         """Same as testMemoryManagement2, but with iterators"""
         blocks = createUniformBlockGrid(blocks=(1, 1, 1), cellsPerBlock=(2, 2, 2))
-        field.addToStorage(blocks, "TestField", np.float64)
+        field.addToStorage(blocks, "TestField", field_data_type)
         for block in blocks:
             for name in block.fieldNames:
                 if name == "TestField":

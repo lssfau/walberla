@@ -32,7 +32,6 @@
 
 #include "timeloop/SweepTimeloop.h"
 
-#include <string>
 
 using namespace walberla::lbmpy;
 
@@ -151,7 +150,7 @@ int main(int argc, char** argv)
       {
          for (uint_t i = 0; i < pullVelocityField->fSize(); i++)
          {
-            WALBERLA_CHECK_FLOAT_EQUAL(pullVelocityField->get(c, i), inplaceVelocityField->get(c, i));
+            WALBERLA_CHECK_FLOAT_EQUAL(pullVelocityField->get(c, i), inplaceVelocityField->get(c, i))
          }
       }
    }

@@ -84,8 +84,8 @@ int main(int argc, char** argv)
 
       // Creating fields
       BlockDataID pdfFieldId = blocks->addStructuredBlockData< PdfField_T >(pdfFieldAdder, "pdfs");
-      BlockDataID velFieldId = field::addToStorage< VelocityField_T >(blocks, "vel", real_t(0), field::fzyx);
-      BlockDataID densityFieldId = field::addToStorage< ScalarField_T >(blocks, "density", real_t(1.0), field::fzyx);
+      BlockDataID velFieldId = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
+      BlockDataID densityFieldId = field::addToStorage< ScalarField_T >(blocks, "density", real_c(1.0), field::fzyx);
 
       // Initialize velocity on cpu
       if (initShearFlow)
@@ -270,7 +270,7 @@ int main(int argc, char** argv)
          timeLoop.singleStep();
 
       real_t remainingTimeLoggerFrequency =
-         parameters.getParameter< real_t >("remainingTimeLoggerFrequency", -1.0); // in seconds
+         parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(-1.0)); // in seconds
       if (remainingTimeLoggerFrequency > 0)
       {
          auto logger = timing::RemainingTimeLogger(timeLoop.getNrOfTimeSteps() * uint_c(outerIterations),
@@ -287,7 +287,7 @@ int main(int argc, char** argv)
          timeLoop.run();
          simTimer.end();
          WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
-         real_t time      = simTimer.last();
+         auto time      = real_c(simTimer.last());
          WALBERLA_MPI_SECTION()
          {
             walberla::mpi::reduceInplace(time, walberla::mpi::MAX);

@@ -47,9 +47,9 @@ void testScalarField( IBlock * block, BlockDataID fieldId )
    GhostLayerField<int,1> & field = *(block->getData<GhostLayerField<int,1> > (fieldId));
    field.setWithGhostLayer( 0 );
 
-   WALBERLA_CHECK_EQUAL(field.xSize(), 2);
-   WALBERLA_CHECK_EQUAL(field.ySize(), 2);
-   WALBERLA_CHECK_EQUAL(field.zSize(), 2);
+   WALBERLA_CHECK_EQUAL(field.xSize(), 2)
+   WALBERLA_CHECK_EQUAL(field.ySize(), 2)
+   WALBERLA_CHECK_EQUAL(field.zSize(), 2)
 
    // initialize the bottom boundary
    field(0,0,0) = 1;
@@ -63,10 +63,10 @@ void testScalarField( IBlock * block, BlockDataID fieldId )
    pystencils::ScalarFieldCommunication pi(fieldId);
    pi.communicateLocal( block, block, stencil::B );
 
-   WALBERLA_CHECK_EQUAL ( field(0,0,+2), 1 );
-   WALBERLA_CHECK_EQUAL ( field(0,1,+2), 2 );
-   WALBERLA_CHECK_EQUAL ( field(1,0,+2), 3 );
-   WALBERLA_CHECK_EQUAL ( field(1,1,+2), 4 );
+   WALBERLA_CHECK_EQUAL ( field(0,0,+2), 1 )
+   WALBERLA_CHECK_EQUAL ( field(0,1,+2), 2 )
+   WALBERLA_CHECK_EQUAL ( field(1,0,+2), 3 )
+   WALBERLA_CHECK_EQUAL ( field(1,1,+2), 4 )
 
    // -------------- Buffer Communication Test ---------------------
 
@@ -86,10 +86,10 @@ void testScalarField( IBlock * block, BlockDataID fieldId )
 
    pi.unpackData( block, stencil::T, recvBuf );
 
-   WALBERLA_CHECK_EQUAL ( field(0,0,+2), 1 );
-   WALBERLA_CHECK_EQUAL ( field(0,1,+2), 2 );
-   WALBERLA_CHECK_EQUAL ( field(1,0,+2), 3 );
-   WALBERLA_CHECK_EQUAL ( field(1,1,+2), 4 );
+   WALBERLA_CHECK_EQUAL ( field(0,0,+2), 1 )
+   WALBERLA_CHECK_EQUAL ( field(0,1,+2), 2 )
+   WALBERLA_CHECK_EQUAL ( field(1,0,+2), 3 )
+   WALBERLA_CHECK_EQUAL ( field(1,1,+2), 4 )
 }
 
 void testScalarFieldPullReduction( IBlock * block, BlockDataID fieldId )
@@ -97,9 +97,9 @@ void testScalarFieldPullReduction( IBlock * block, BlockDataID fieldId )
    GhostLayerField<int,1> & field = *(block->getData<GhostLayerField<int,1> > (fieldId));
    field.setWithGhostLayer( 0 );
 
-   WALBERLA_CHECK_EQUAL(field.xSize(), 2);
-   WALBERLA_CHECK_EQUAL(field.ySize(), 2);
-   WALBERLA_CHECK_EQUAL(field.zSize(), 2);
+   WALBERLA_CHECK_EQUAL(field.xSize(), 2)
+   WALBERLA_CHECK_EQUAL(field.ySize(), 2)
+   WALBERLA_CHECK_EQUAL(field.zSize(), 2)
 
    // initialize the bottom ghost layer cells
    field(0,0,-1) = 1;
@@ -118,32 +118,32 @@ void testScalarFieldPullReduction( IBlock * block, BlockDataID fieldId )
    pi1.communicateLocal( block, block, stencil::B );
 
    // check values in top ghost layer
-   WALBERLA_CHECK_EQUAL ( field(0,0,2), 0 );
-   WALBERLA_CHECK_EQUAL ( field(0,1,2), 0 );
-   WALBERLA_CHECK_EQUAL ( field(1,0,2), 0 );
-   WALBERLA_CHECK_EQUAL ( field(1,1,2), 0 );
+   WALBERLA_CHECK_EQUAL ( field(0,0,2), 0 )
+   WALBERLA_CHECK_EQUAL ( field(0,1,2), 0 )
+   WALBERLA_CHECK_EQUAL ( field(1,0,2), 0 )
+   WALBERLA_CHECK_EQUAL ( field(1,1,2), 0 )
 
    // check values in top interior cells
-   WALBERLA_CHECK_EQUAL ( field(0,0,1), 2 );
-   WALBERLA_CHECK_EQUAL ( field(0,1,1), 3 );
-   WALBERLA_CHECK_EQUAL ( field(1,0,1), 4 );
-   WALBERLA_CHECK_EQUAL ( field(1,1,1), 5 );
+   WALBERLA_CHECK_EQUAL ( field(0,0,1), 2 )
+   WALBERLA_CHECK_EQUAL ( field(0,1,1), 3 )
+   WALBERLA_CHECK_EQUAL ( field(1,0,1), 4 )
+   WALBERLA_CHECK_EQUAL ( field(1,1,1), 5 )
 
    // communicate periodic from top to bottom with standard form to sync ghost layers
    pystencils::ScalarFieldCommunication pi2 (fieldId);
    pi2.communicateLocal( block, block, stencil::T );
 
    // check values in bottom ghost layer
-   WALBERLA_CHECK_EQUAL ( field(0,0,-1), 2 );
-   WALBERLA_CHECK_EQUAL ( field(0,1,-1), 3 );
-   WALBERLA_CHECK_EQUAL ( field(1,0,-1), 4 );
-   WALBERLA_CHECK_EQUAL ( field(1,1,-1), 5 );
+   WALBERLA_CHECK_EQUAL ( field(0,0,-1), 2 )
+   WALBERLA_CHECK_EQUAL ( field(0,1,-1), 3 )
+   WALBERLA_CHECK_EQUAL ( field(1,0,-1), 4 )
+   WALBERLA_CHECK_EQUAL ( field(1,1,-1), 5 )
 
    // check values in top interior cells
-   WALBERLA_CHECK_EQUAL ( field(0,0,1), 2 );
-   WALBERLA_CHECK_EQUAL ( field(0,1,1), 3 );
-   WALBERLA_CHECK_EQUAL ( field(1,0,1), 4 );
-   WALBERLA_CHECK_EQUAL ( field(1,1,1), 5 );
+   WALBERLA_CHECK_EQUAL ( field(0,0,1), 2 )
+   WALBERLA_CHECK_EQUAL ( field(0,1,1), 3 )
+   WALBERLA_CHECK_EQUAL ( field(1,0,1), 4 )
+   WALBERLA_CHECK_EQUAL ( field(1,1,1), 5 )
 
 }
 
@@ -159,7 +159,7 @@ int main(int argc, char **argv)
    uint_t processes = uint_c( MPIManager::instance()->numProcesses() );
    auto blocks = createUniformBlockGrid(processes,1 ,1, //blocks
                                         2,2,2,          //cells
-                                        1,              //dx
+                                             real_c(1.0),              //dx
                                         false,          //one block per process
                                         true,true,true);//periodicity
 
@@ -172,7 +172,7 @@ int main(int argc, char **argv)
    // Create a BlockForest with 8x8x8 cells per block
    blocks = createUniformBlockGrid(processes,1 ,1, //blocks
                                    8,8,8,          //cells
-                                   1,              //dx
+                                   real_c(1.0),              //dx
                                    false,          //one block per process
                                    true,true,true);//periodicity
 
@@ -188,7 +188,7 @@ int main(int argc, char **argv)
    for( auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt ) // block loop
       testScalarFieldPullReduction( &(*blockIt), scalarFieldId );
 
-   return 0;
+   return EXIT_SUCCESS;
 }
 } // namespace walberla
 
