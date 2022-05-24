@@ -49,8 +49,8 @@
 
 using namespace walberla;
 
-typedef GhostLayerField<double,1> ScalarField;
-typedef cuda::GPUField<double> GPUField;
+typedef GhostLayerField<real_t, 1> ScalarField;
+typedef cuda::GPUField<real_t> GPUField;
 
 
 ScalarField * createField( IBlock* const block, StructuredBlockStorage* const storage )
@@ -62,7 +62,7 @@ ScalarField * createField( IBlock* const block, StructuredBlockStorage* const st
             1,                                      // one ghost layer
             double(0),                              // initial value
             field::fzyx,                            // layout
-            make_shared<cuda::HostFieldAllocator<double> >()  // allocator for host pinned memory
+            make_shared<cuda::HostFieldAllocator<real_t> >()  // allocator for host pinned memory
             );
 }
 
@@ -75,7 +75,7 @@ void testJacobi2D()
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
            uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
            xSize, ySize, uint_t(1),            // how many cells per block (x,y,z)
-           real_t(1),                          // dx: length of one cell in physical coordinates
+           real_c(1.0),                          // dx: length of one cell in physical coordinates
            false,                              // one block per process - "false" means all blocks to one process
            true, true, true );                 // no periodicity
 
@@ -90,7 +90,7 @@ void testJacobi2D()
       auto f = blockIt->getData<ScalarField>( cpuFieldID );
       for( cell_idx_t y = 0; y < cell_idx_c( f->ySize() / 2 ); ++y )
          for( cell_idx_t x = 0; x < cell_idx_c( f->xSize() / 2 ); ++x )
-            f->get( x, y, 0 ) = 1.0;
+            f->get( x, y, 0 ) = real_c(1.0);
    }
 
    typedef blockforest::communication::UniformBufferedScheme<stencil::D2Q9> CommScheme;
@@ -114,7 +114,7 @@ void testJacobi2D()
 
    auto firstBlock = blocks->begin();
    auto f = firstBlock->getData<ScalarField>( cpuFieldID );
-   WALBERLA_CHECK_FLOAT_EQUAL(f->get(0,0,0), real_t(1.0 / 4.0));
+   WALBERLA_CHECK_FLOAT_EQUAL(f->get(0,0,0), real_c(1.0 / 4.0))
 }
 
 
@@ -128,7 +128,7 @@ void testJacobi3D()
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
            uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
            xSize, ySize, zSize,                // how many cells per block (x,y,z)
-           real_t(1),                          // dx: length of one cell in physical coordinates
+           real_c(1.0),                          // dx: length of one cell in physical coordinates
            false,                              // one block per process - "false" means all blocks to one process
            true, true, true );                 // no periodicity
 
@@ -144,7 +144,7 @@ void testJacobi3D()
       for( cell_idx_t z = 0; z < cell_idx_c( f->zSize() / 2 ); ++z )
          for( cell_idx_t y = 0; y < cell_idx_c( f->ySize() / 2 ); ++y )
             for( cell_idx_t x = 0; x < cell_idx_c( f->xSize() / 2 ); ++x )
-               f->get( x, y, z ) = 1.0;
+               f->get( x, y, z ) = real_c(1.0);
    }
 
    typedef blockforest::communication::UniformBufferedScheme<stencil::D3Q7> CommScheme;
@@ -168,7 +168,7 @@ void testJacobi3D()
 
    auto firstBlock = blocks->begin();
    auto f = firstBlock->getData<ScalarField>( cpuFieldID );
-   WALBERLA_CHECK_FLOAT_EQUAL(f->get(0,0,0), real_t(1.0 / 8.0));
+   WALBERLA_CHECK_FLOAT_EQUAL(f->get(0,0,0), real_c(1.0 / 8.0))
 }
 
 int main( int argc, char ** argv )
@@ -179,5 +179,5 @@ int main( int argc, char ** argv )
    testJacobi2D();
    testJacobi3D();
 
-   return 0;
+   return EXIT_SUCCESS;
 }

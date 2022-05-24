@@ -88,26 +88,26 @@ void testPoisson()
 {
    const uint_t xCells = uint_t(200);
    const uint_t yCells = uint_t(100);
-   const real_t xSize = real_t(2);
-   const real_t ySize = real_t(1);
+   const real_t xSize = real_c(2.0);
+   const real_t ySize = real_c(1.0);
    const real_t dx = xSize / real_c( xCells + uint_t(1) );
    const real_t dy = ySize / real_c( yCells + uint_t(1) );
 
    // Create blocks
    shared_ptr< StructuredBlockForest > blocks = blockforest::createUniformBlockGrid (
-      math::AABB( real_t(0.5) * dx, real_t(0.5) * dy, real_t(0),
-                  xSize - real_t(0.5) * dx, ySize - real_t(0.5) * dy, dx ),
+      math::AABB( real_c(0.5) * dx, real_c(0.5) * dy, real_c(0.0),
+                  xSize - real_c(0.5) * dx, ySize - real_c(0.5) * dy, dx ),
       uint_t(1) , uint_t(1),  uint_t(1),  // number of blocks in x,y,z direction
       xCells, yCells, uint_t(1),          // how many cells per block (x,y,z)
       false,                              // one block per process - "false" means all blocks to one process
       false, false, false );              // no periodicity
 
 
-   BlockDataID cpuFieldID = field::addToStorage< ScalarField_T >( blocks, "CPU Field src", real_t(0.0) );
+   BlockDataID cpuFieldID = field::addToStorage< ScalarField_T >( blocks, "CPU Field src", real_c(0.0) );
    BlockDataID gpuField = cuda::addGPUFieldToStorage<ScalarField_T>( blocks, cpuFieldID, "GPU Field src" );
    initU( blocks, cpuFieldID );
 
-   BlockDataID cpufId = field::addToStorage< ScalarField_T >( blocks, "CPU Field f", real_t(0.0));
+   BlockDataID cpufId = field::addToStorage< ScalarField_T >( blocks, "CPU Field f", real_c(0.0));
    BlockDataID gpufId = cuda::addGPUFieldToStorage<ScalarField_T>( blocks, cpufId, "GPU Field f" );
    initF( blocks, cpufId );
 
@@ -145,5 +145,5 @@ int main( int argc, char ** argv )
 
    testPoisson();
 
-   return 0;
+   return EXIT_SUCCESS;
 }

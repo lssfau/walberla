@@ -629,6 +629,11 @@ void exportBuildInfo(py::module_ &m)
    m2.attr("build_machine" )  = WALBERLA_BUILD_MACHINE;
    m2.attr("source_dir")      = WALBERLA_SOURCE_DIR;
    m2.attr("build_dir")       = WALBERLA_BUILD_DIR;
+#ifdef WALBERLA_DOUBLE_ACCURACY
+   m2.attr("build_with_double_accuracy") = true;
+#else
+   m2.attr("build_with_double_accuracy") = false;
+#endif
 }
 
 

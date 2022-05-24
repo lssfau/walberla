@@ -86,8 +86,8 @@ int main(int argc, char** argv)
 
       // Creating fields
       BlockDataID pdfFieldCpuID =
-         field::addToStorage< PdfField_T >(blocks, "pdfs cpu", real_t(std::nan("")), field::fzyx);
-      BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >(blocks, "vel", real_t(0), field::fzyx);
+         field::addToStorage< PdfField_T >(blocks, "pdfs cpu", real_c(std::nan("")), field::fzyx);
+      BlockDataID velFieldCpuID = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
 
       // Initialize velocity on cpu
       if (initShearFlow)
@@ -294,7 +294,7 @@ int main(int argc, char** argv)
          timeLoop.singleStep();
 
       double remainingTimeLoggerFrequency =
-         parameters.getParameter< double >("remainingTimeLoggerFrequency", -1.0); // in seconds
+         parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(-1.0)); // in seconds
       if (remainingTimeLoggerFrequency > 0)
       {
          auto logger = timing::RemainingTimeLogger(timeLoop.getNrOfTimeSteps() * uint_c(outerIterations),
@@ -316,7 +316,7 @@ int main(int argc, char** argv)
          cudaDeviceSynchronize();
          simTimer.end();
          WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
-         auto time      = simTimer.last();
+         auto time      = real_c(simTimer.last());
          auto nrOfCells = real_c(cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2]);
 
          auto mlupsPerProcess = nrOfCells * real_c(timesteps) / time * 1e-6;

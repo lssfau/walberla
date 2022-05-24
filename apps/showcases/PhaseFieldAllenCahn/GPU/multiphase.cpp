@@ -100,7 +100,7 @@ int main(int argc, char** argv)
       const std::string timeStepStrategy = parameters.getParameter< std::string >("timeStepStrategy", "normal");
       const uint_t timesteps             = parameters.getParameter< uint_t >("timesteps", uint_c(50));
       const real_t remainingTimeLoggerFrequency =
-         parameters.getParameter< real_t >("remainingTimeLoggerFrequency", 3.0);
+         parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(3.0));
       const uint_t scenario = parameters.getParameter< uint_t >("scenario", uint_c(1));
       Vector3< int > gpuBlockSize =
          parameters.getParameter< Vector3< int > >("gpuBlockSize", Vector3< int >(128, 1, 1));
@@ -111,8 +111,8 @@ int main(int argc, char** argv)
       ///////////////////////
 
       // CPU fields
-      BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_t(0), field::fzyx);
-      BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_t(0), field::fzyx);
+      BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
+      BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
       // GPU fields
       BlockDataID lb_phase_field_gpu = cuda::addGPUFieldToStorage< cuda::GPUField< real_t > >(
          blocks, "lb phase field on GPU", Stencil_phase_T::Size, field::fzyx, 1);
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
       {
          auto bubbleParameters                  = config->getOneBlock("Bubble");
          const Vector3< real_t > bubbleMidPoint = bubbleParameters.getParameter< Vector3< real_t > >("bubbleMidPoint");
-         const real_t bubbleRadius              = bubbleParameters.getParameter< real_t >("bubbleRadius", 20.0);
+         const real_t bubbleRadius              = bubbleParameters.getParameter< real_t >("bubbleRadius", real_c(20.0));
          const bool bubble                      = bubbleParameters.getParameter< bool >("bubble", true);
          initPhaseField_sphere(blocks, phase_field, bubbleRadius, bubbleMidPoint, bubble, interface_thickness);
       }
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
       else if (scenario == 3)
       {
          auto bubbleParameters     = config->getOneBlock("Bubble");
-         const real_t bubbleRadius = bubbleParameters.getParameter< real_t >("bubbleRadius", 20.0);
+         const real_t bubbleRadius = bubbleParameters.getParameter< real_t >("bubbleRadius", real_c(20.0));
          init_bubble_field(blocks, phase_field, bubbleRadius);
       }
       else if (scenario == 4)
@@ -166,9 +166,9 @@ int main(int argc, char** argv)
          const real_t diameter  = TorusParameters.getParameter< real_t >("Donut_D");
          const real_t donutTime = TorusParameters.getParameter< real_t >("DonutTime");
          init_Taylor_bubble(blocks, phase_field, diameter, height, donutTime, midpoint);
-         center_of_mass[0] = real_t(cellsPerBlock[0]);
-         center_of_mass[1] = real_t(midpoint);
-         center_of_mass[2] = real_t(cellsPerBlock[2]);
+         center_of_mass[0] = real_c(cellsPerBlock[0]);
+         center_of_mass[1] = real_c(midpoint);
+         center_of_mass[2] = real_c(cellsPerBlock[2]);
       }
 
       WALBERLA_LOG_INFO_ON_ROOT("initialization of the phase field done")
@@ -444,7 +444,7 @@ int main(int argc, char** argv)
 
       simTimer.end();
       WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
-      auto time            = simTimer.last();
+      auto time            = real_c(simTimer.last());
       auto nrOfCells       = real_c(cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2]);
       auto mlupsPerProcess = nrOfCells * real_c(timesteps) / time * 1e-6;
       WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process: " << mlupsPerProcess)

@@ -1,24 +1,25 @@
 import numpy as np
 import sympy as sp
 
-from pystencils import Assignment, fields, TypedSymbol, Target
-from pystencils.astnodes import Block, Conditional
-from pystencils.simp import sympy_cse
+from pystencils import fields, Target
+from pystencils.astnodes import Conditional, Block, SympyAssignment
+from pystencils.node_collection import NodeCollection
+from pystencils.typing import TypedSymbol
+from pystencils.simp.simplifications import sympy_cse
 
-from lbmpy import LBMConfig, LBStencil, Method, Stencil
+from lbmpy import LBMConfig, LBMOptimisation, LBStencil, Method, Stencil, create_lb_update_rule
 from lbmpy.creationfunctions import create_lb_method
 from lbmpy.boundaries import NoSlip
 
 from lbmpy.phasefield_allen_cahn.contact_angle import ContactAngle
-from lbmpy.phasefield_allen_cahn.force_model import MultiphaseForceModel
 from lbmpy.phasefield_allen_cahn.kernel_equations import initializer_kernel_phase_field_lb, \
-    initializer_kernel_hydro_lb, interface_tracking_force, hydrodynamic_force, get_collision_assignments_hydro, \
-    get_collision_assignments_phase
+    initializer_kernel_hydro_lb, interface_tracking_force, hydrodynamic_force, add_interface_tracking_force, \
+    add_hydrodynamic_force, hydrodynamic_force_assignments
+from lbmpy.phasefield_allen_cahn.parameter_calculation import AllenCahnParameters
 
 import pystencils_walberla
 from pystencils_walberla import CodeGeneration, generate_sweep, generate_pack_info_for_field, generate_info_header
 from lbmpy_walberla import generate_boundary, generate_lb_pack_info
-
 
 with CodeGeneration() as ctx:
     field_type = "float64" if ctx.double_accuracy else "float32"
@@ -29,28 +30,8 @@ with CodeGeneration() as ctx:
     stencil_hydro = LBStencil(Stencil.D3Q27)
     assert (stencil_phase.D == stencil_hydro.D)
 
-    ########################
-    # PARAMETER DEFINITION #
-    ########################
-
-    density_liquid = sp.Symbol("rho_H")
-    density_gas = sp.Symbol("rho_L")
-
-    surface_tension = sp.Symbol("sigma")
-    mobility = sp.Symbol("mobility")
-
-    gravitational_acceleration = sp.Symbol("gravity")
-
-    relaxation_time_liquid = sp.Symbol("tau_H")
-    relaxation_time_gas = sp.Symbol("tau_L")
-
-    # phase-field parameter
-    drho3 = (density_liquid - density_gas) / 3
-    # interface thickness
-    W = sp.Symbol("interface_thickness")
-    # coefficients related to surface tension
-    beta = 12.0 * (surface_tension / W)
-    kappa = 1.5 * surface_tension * W
+    # In the codegeneration skript we only need the symbolic parameters
+    parameters = AllenCahnParameters(0, 0, 0, 0, 0)
 
     ########################
     # FIELDS #
@@ -75,79 +56,74 @@ with CodeGeneration() as ctx:
     ########################################
 
     # relaxation rate for interface tracking LB step
-    relaxation_rate_allen_cahn = 1.0 / (0.5 + (3.0 * mobility))
+    relaxation_rate_allen_cahn = 1.0 / (0.5 + (3.0 * parameters.symbolic_mobility))
     # calculate the relaxation rate for hydrodynamic LB step
-    density = density_gas + C.center * (density_liquid - density_gas)
+    rho_L = parameters.symbolic_density_light
+    rho_H = parameters.symbolic_density_heavy
+    density = rho_L + C.center * (rho_H - rho_L)
     # force acting on all phases of the model
-    body_force = np.array([0, gravitational_acceleration * density, 0])
-    # calculation of the relaxation time via viscosities
-    # viscosity = viscosity_gas * viscosity_liquid + C.center\
-    #             * (density_liquid*viscosity_liquid - viscosity_liquid*viscosity_gas)
-    # relaxation_time = 3 * viscosity / density + 0.5
+    body_force = [0, 0, 0]
+    body_force[1] = parameters.symbolic_gravitational_acceleration * density
 
-    relaxation_time = 0.5 + relaxation_time_gas + C.center * (relaxation_time_liquid - relaxation_time_gas)
-    # calculate the relaxation time if the phase-field has values over one
-    # relaxation_rate = 1.0 / relaxation_time
-    relaxation_rate = sp.Symbol("s8")
-    relaxation_rate_cutoff = sp.Piecewise((1 / (0.5 + relaxation_time_liquid), C.center > 0.999),  # True value
-                                          (1 / relaxation_time, True))  # Else value
+    omega = parameters.omega(C)
 
     ###############
     # LBM METHODS #
     ###############
-    lbm_config_phase = LBMConfig(stencil=stencil_phase, method=Method.MRT, compressible=True, weighted=True,
-                                 relaxation_rates=[1, 1, 1, 1, 1, 1])
-    method_phase = create_lb_method(lbm_config=lbm_config_phase)
-    method_phase.set_first_moment_relaxation_rate(relaxation_rate_allen_cahn)
 
-    lbm_config_hydro = LBMConfig(stencil=stencil_hydro, method=Method.MRT, weighted=True,
-                                 relaxation_rates=[relaxation_rate, 1, 1, 1, 1, 1])
+    rates = [0.0]
+    rates += [relaxation_rate_allen_cahn] * stencil_phase.D
+    rates += [1.0] * (stencil_phase.Q - stencil_phase.D - 1)
+
+    lbm_config_phase = LBMConfig(stencil=stencil_phase, method=Method.MRT, compressible=True,
+                                 delta_equilibrium=False,
+                                 force=sp.symbols(f"F_:{stencil_phase.D}"), velocity_input=u,
+                                 weighted=True, relaxation_rates=rates,
+                                 output={'density': C_tmp}, kernel_type='stream_pull_collide')
+    method_phase = create_lb_method(lbm_config=lbm_config_phase)
+
+    lbm_config_hydro = LBMConfig(stencil=stencil_hydro, method=Method.MRT, compressible=False,
+                                 weighted=True, relaxation_rate=omega,
+                                 force=sp.symbols(f"F_:{stencil_hydro.D}"),
+                                 output={'velocity': u}, kernel_type='collide_stream_push')
     method_hydro = create_lb_method(lbm_config=lbm_config_hydro)
 
     # create the kernels for the initialization of the g and h field
-    h_updates = initializer_kernel_phase_field_lb(h, C, u, method_phase, W)
-    g_updates = initializer_kernel_hydro_lb(g, u, method_hydro)
+    h_updates = initializer_kernel_phase_field_lb(method_phase, C, u, h, parameters)
+    g_updates = initializer_kernel_hydro_lb(method_hydro, 1, u, g)
 
-    force_h = [f / 3 for f in interface_tracking_force(C, stencil_phase, W)]
-    force_model_h = MultiphaseForceModel(force=force_h)
-
-    force_g = hydrodynamic_force(g, C, method_hydro, relaxation_time,
-                                 density_liquid, density_gas, kappa, beta, body_force)
-    force_model_g = MultiphaseForceModel(force=force_g, rho=density)
+    force_h = interface_tracking_force(C, stencil_phase, parameters)
+    hydro_force = hydrodynamic_force(g, C, method_hydro, parameters, body_force)
 
     ####################
     # LBM UPDATE RULES #
     ####################
 
-    phase_field_LB_step = get_collision_assignments_phase(lb_method=method_phase,
-                                                          velocity_input=u,
-                                                          output={'density': C_tmp},
-                                                          force_model=force_model_h,
-                                                          symbolic_fields={"symbolic_field": h,
-                                                                           "symbolic_temporary_field": h_tmp},
-                                                          kernel_type='stream_pull_collide')
+    lbm_optimisation = LBMOptimisation(symbolic_field=h, symbolic_temporary_field=h_tmp)
+    allen_cahn_update_rule = create_lb_update_rule(lbm_config=lbm_config_phase,
+                                                   lbm_optimisation=lbm_optimisation)
 
-    phase_field_LB_step = sympy_cse(phase_field_LB_step)
+    allen_cahn_update_rule = add_interface_tracking_force(allen_cahn_update_rule, force_h)
 
-    phase_field_LB_step = [Conditional(sp.Eq(flag.center(), 2),
-                                       Block(phase_field_LB_step),
-                                       Block([Assignment(C_tmp.center, C.center)]))]
+    allen_cahn_update_rule = sympy_cse(allen_cahn_update_rule)
+
+    allen_cahn_update_rule = NodeCollection([Conditional(sp.Eq(flag.center(), 2),
+                                             Block(allen_cahn_update_rule.all_assignments),
+                                             Block([SympyAssignment(C_tmp.center, C.center)]))])
     # ---------------------------------------------------------------------------------------------------------
-    hydro_LB_step = get_collision_assignments_hydro(lb_method=method_hydro,
-                                                    density=density,
-                                                    velocity_input=u,
-                                                    force_model=force_model_g,
-                                                    sub_iterations=2,
-                                                    symbolic_fields={"symbolic_field": g,
-                                                                     "symbolic_temporary_field": g_tmp},
-                                                    kernel_type='collide_stream_push')
+    force_Assignments = hydrodynamic_force_assignments(g, u, C, method_hydro, parameters, body_force)
 
-    hydro_LB_step.set_sub_expressions_from_dict({**{relaxation_rate: relaxation_rate_cutoff},
-                                                 **hydro_LB_step.subexpressions_dict})
+    lbm_optimisation = LBMOptimisation(symbolic_field=g, symbolic_temporary_field=g_tmp)
+    hydro_lb_update_rule = create_lb_update_rule(lbm_config=lbm_config_hydro,
+                                                 lbm_optimisation=lbm_optimisation)
 
-    hydro_LB_step = [Conditional(sp.Eq(flag.center(), 2), Block(hydro_LB_step))]
+    hydro_lb_update_rule = add_hydrodynamic_force(hydro_lb_update_rule, force_Assignments, C, g, parameters)
 
-    contact_angle = ContactAngle(contact_angle_in_degrees, W)
+    hydro_lb_update_rule = NodeCollection([Conditional(sp.Eq(flag.center(), 2),
+                                           Block(hydro_lb_update_rule.all_assignments))])
+
+    contact_angle = ContactAngle(contact_angle_in_degrees, parameters.symbolic_interface_thickness,
+                                 data_type=field_type)
 
     ###################
     # GENERATE SWEEPS #
@@ -178,14 +154,14 @@ with CodeGeneration() as ctx:
     generate_sweep(ctx, 'initialize_phase_field_distributions', h_updates, target=Target.GPU)
     generate_sweep(ctx, 'initialize_velocity_based_distributions', g_updates, target=Target.GPU)
 
-    generate_sweep(ctx, 'phase_field_LB_step', phase_field_LB_step,
+    generate_sweep(ctx, 'phase_field_LB_step', allen_cahn_update_rule,
                    field_swaps=[(h, h_tmp), (C, C_tmp)],
                    target=Target.GPU,
                    gpu_indexing_params=sweep_params,
                    varying_parameters=vp)
     generate_boundary(ctx, 'phase_field_LB_NoSlip', NoSlip(), method_phase, target=Target.GPU, streaming_pattern='pull')
 
-    generate_sweep(ctx, 'hydro_LB_step', hydro_LB_step,
+    generate_sweep(ctx, 'hydro_LB_step', hydro_lb_update_rule,
                    field_swaps=[(g, g_tmp)],
                    target=Target.GPU,
                    gpu_indexing_params=sweep_params,

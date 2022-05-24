@@ -7,7 +7,7 @@ from lbmpy.fieldaccess import StreamPullTwoFieldsAccessor
 from pystencils_walberla import generate_pack_info_from_kernel
 from lbmpy_walberla import generate_lattice_model, generate_boundary
 from pystencils_walberla import CodeGeneration, generate_sweep
-from pystencils.data_types import TypedSymbol
+from pystencils.typing import TypedSymbol
 from pystencils.fast_approximation import insert_fast_sqrts, insert_fast_divisions
 from lbmpy.macroscopic_value_kernels import macroscopic_values_getter, macroscopic_values_setter
 

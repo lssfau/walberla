@@ -73,21 +73,21 @@ auto VelocityCallback = [](const Cell& pos, const shared_ptr< StructuredBlockFor
                            real_t inflow_velocity, const bool constant_inflow = true) {
    if (constant_inflow)
    {
-      Vector3< real_t > result(inflow_velocity, 0.0, 0.0);
+      Vector3< real_t > result(inflow_velocity, real_c(0.0), real_c(0.0));
       return result;
    }
    else
    {
       Cell globalCell;
       CellInterval domain = SbF->getDomainCellBB();
-      real_t h_y          = real_c(domain.ySize());
-      real_t h_z          = real_c(domain.zSize());
+      auto h_y          = real_c(domain.ySize());
+      auto h_z          = real_c(domain.zSize());
       SbF->transformBlockLocalToGlobalCell(globalCell, block, pos);
 
-      real_t y1 = real_c(globalCell[1] - (h_y / 2.0 - 0.5));
-      real_t z1 = real_c(globalCell[2] - (h_z / 2.0 - 0.5));
+      auto y1 = real_c(globalCell[1] - (h_y / 2.0 - 0.5));
+      auto z1 = real_c(globalCell[2] - (h_z / 2.0 - 0.5));
 
-      real_t u = (inflow_velocity * real_c(16)) / (h_y * h_y * h_z * h_z) * (h_y / real_c(2.0) - y1) *
+      real_t u = (inflow_velocity * real_c(16.0)) / (h_y * h_y * h_z * h_z) * (h_y / real_c(2.0) - y1) *
                  (h_y / real_c(2.0) + y1) * (h_z / real_c(2.0) - z1) * (h_z / real_c(2.0) + z1);
 
       Vector3< real_t > result(u, 0.0, 0.0);
@@ -151,9 +151,9 @@ int main(int argc, char** argv)
       auto parameters = config->getOneBlock("Parameters");
 
       const uint_t timesteps       = parameters.getParameter< uint_t >("timesteps", uint_c(10));
-      const real_t omega           = parameters.getParameter< real_t >("omega", real_t(1.9));
-      const real_t u_max           = parameters.getParameter< real_t >("u_max", real_t(0.05));
-      const real_t reynolds_number = parameters.getParameter< real_t >("reynolds_number", real_t(1000));
+      const real_t omega           = parameters.getParameter< real_t >("omega", real_c(1.9));
+      const real_t u_max           = parameters.getParameter< real_t >("u_max", real_c(0.05));
+      const real_t reynolds_number = parameters.getParameter< real_t >("reynolds_number", real_c(1000.0));
       const uint_t diameter_sphere = parameters.getParameter< uint_t >("diameter_sphere", uint_t(5));
       const bool constant_inflow = parameters.getParameter< bool >("constant_inflow", true);
 
@@ -162,8 +162,8 @@ int main(int argc, char** argv)
 
       // create fields
       BlockDataID pdfFieldID     = blocks->addStructuredBlockData< PdfField_T >(pdfFieldAdder, "PDFs");
-      BlockDataID velFieldID     = field::addToStorage< VelocityField_T >(blocks, "velocity", real_t(0), field::fzyx);
-      BlockDataID densityFieldID = field::addToStorage< ScalarField_T >(blocks, "density", real_t(0), field::fzyx);
+      BlockDataID velFieldID     = field::addToStorage< VelocityField_T >(blocks, "velocity", real_c(0.0), field::fzyx);
+      BlockDataID densityFieldID = field::addToStorage< ScalarField_T >(blocks, "density", real_c(0.0), field::fzyx);
 
 #if defined(WALBERLA_BUILD_WITH_CUDA)
       BlockDataID pdfFieldIDGPU = cuda::addGPUFieldToStorage< PdfField_T >(blocks, pdfFieldID, "PDFs on GPU", true);
@@ -300,7 +300,7 @@ int main(int argc, char** argv)
       timeloop.run();
       simTimer.end();
       WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
-      auto time            = simTimer.last();
+      auto time            = real_c(simTimer.last());
       auto nrOfCells       = real_c(cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2]);
       auto mlupsPerProcess = nrOfCells * real_c(timesteps) / time * 1e-6;
       WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process " << mlupsPerProcess)

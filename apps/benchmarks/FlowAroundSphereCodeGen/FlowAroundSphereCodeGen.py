@@ -33,7 +33,8 @@ with CodeGeneration() as ctx:
         'velocity': velocity_field
     }
 
-    lbm_config = LBMConfig(stencil=stencil, method=Method.CUMULANT, relaxation_rate=omega, galilean_correction=True,
+    lbm_config = LBMConfig(stencil=stencil, method=Method.CUMULANT, compressible=True,
+                           relaxation_rate=omega, galilean_correction=True,
                            field_name='pdfs', streaming_pattern=streaming_pattern, output=output)
 
     lbm_optimisation = LBMOptimisation(symbolic_field=pdfs, cse_global=False, cse_pdfs=False)
@@ -66,9 +67,9 @@ with CodeGeneration() as ctx:
     generate_sweep(ctx, 'FlowAroundSphereCodeGen_MacroSetter', setter_assignments, target=target)
 
     # boundaries
-    ubb = UBB(lambda *args: None, dim=dim)
+    ubb = UBB(lambda *args: None, dim=dim, data_type=data_type)
     ubb_data_handler = UBBAdditionalDataHandler(stencil, ubb)
-    outflow = ExtrapolationOutflow(stencil[4], lb_method, streaming_pattern=streaming_pattern)
+    outflow = ExtrapolationOutflow(stencil[4], lb_method, streaming_pattern=streaming_pattern, data_type=data_type)
     outflow_data_handler = OutflowAdditionalDataHandler(stencil, outflow, target=target)
 
     generate_alternating_lbm_boundary(ctx, 'FlowAroundSphereCodeGen_UBB', ubb, lb_method,

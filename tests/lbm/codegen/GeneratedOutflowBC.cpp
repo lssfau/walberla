@@ -70,10 +70,10 @@ Vector3< real_t > ShearProfile::operator()( const Cell& pos, const shared_ptr< S
 {
    Cell globalCell;
    CellInterval domain = SbF->getDomainCellBB();
-   real_t h_y          = domain.yMax() - domain.yMin();
+   real_t h_y          = real_c(domain.yMax()) - real_c(domain.yMin());
    SbF->transformBlockLocalToGlobalCell(globalCell, block, pos);
 
-   real_t u = inflow_velocity_ * (globalCell[1] / h_y);
+   real_t u = inflow_velocity_ * (real_c(globalCell[1]) / h_y);
 
    Vector3< real_t > result(u, 0.0, 0.0);
    return result;
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
    auto parameters = walberlaEnv.config()->getOneBlock("Parameters");
 
    const real_t omega     = parameters.getParameter< real_t >("omega", real_c(1.4));
-   const real_t u_max     = parameters.getParameter< real_t >("u_max", real_t(0.05));
+   const real_t u_max     = parameters.getParameter< real_t >("u_max", real_c(0.05));
    const uint_t timesteps = parameters.getParameter< uint_t >("timesteps", uint_c(10));
 
    const double remainingTimeLoggerFrequency =
@@ -101,8 +101,8 @@ int main(int argc, char** argv)
 
    // create fields
    BlockDataID pdfFieldID     = blocks->addStructuredBlockData< PdfField_T >(pdfFieldAdder, "PDFs");
-   BlockDataID velFieldID     = field::addToStorage< VelocityField_T >(blocks, "velocity", real_t(0), field::fzyx);
-   BlockDataID densityFieldID = field::addToStorage< ScalarField_T >(blocks, "density", real_t(0), field::fzyx);
+   BlockDataID velFieldID     = field::addToStorage< VelocityField_T >(blocks, "velocity", real_c(0.0), field::fzyx);
+   BlockDataID densityFieldID = field::addToStorage< ScalarField_T >(blocks, "density", real_c(0.0), field::fzyx);
 
    BlockDataID flagFieldId = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
@@ -170,16 +170,16 @@ int main(int argc, char** argv)
    timeloop.run();
 
    CellInterval domain = blocks->getDomainCellBB();
-   real_t h_y          = domain.yMax() - domain.yMin();
+   real_t h_y          = real_c(domain.yMax()) - real_c(domain.yMin());
    for (auto& block : *blocks)
    {
       auto velField = block.getData<VelocityField_T>(velFieldID);
       WALBERLA_FOR_ALL_CELLS_XYZ
       (
          velField,
-   Cell globalCell;
+         Cell globalCell;
          blocks->transformBlockLocalToGlobalCell(globalCell, block, Cell(x, y, z));
-         WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(velField->get(x, y, z, 0), u_max * (globalCell[1] / h_y), 0.01)
+         WALBERLA_CHECK_FLOAT_EQUAL_EPSILON(velField->get(x, y, z, 0), u_max * (real_c(globalCell[1]) / h_y), real_c(0.01))
       )
    }
 

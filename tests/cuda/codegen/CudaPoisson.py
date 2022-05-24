@@ -4,10 +4,11 @@ from pystencils_walberla import CodeGeneration, generate_sweep
 
 
 with CodeGeneration() as ctx:
+    field_type = "float64" if ctx.double_accuracy else "float32"
     # ----- Solving the 2D Poisson equation with rhs --------------------------
     dx = sp.Symbol("dx")
     dy = sp.Symbol("dy")
-    src, dst, rhs = ps.fields("src, src_tmp, rhs: [2D]", layout='fzyx')
+    src, dst, rhs = ps.fields(f"src, src_tmp, rhs: {field_type}[2D]", layout='fzyx')
 
     @ps.kernel
     def kernel_func():

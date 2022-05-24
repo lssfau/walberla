@@ -67,18 +67,18 @@ int main(int argc, char **argv) {
    walberla::Environment walberlaEnv(argc, argv);
 
    auto blocks = blockforest::createUniformBlockGrid( 1, 1, 1,
-                                                      32, 32, 32, real_t(1),
+                                                      32, 32, 32, real_c(1.0),
                                                       0, false, false,
                                                       true, true, true, //periodicity
                                                       false );
 
 
-   real_t omega = real_t(1.6);
-   Vector3<real_t> initialVel(real_t(0.1), real_t(0), real_t(0));
+   real_t omega = real_c(1.6);
+   Vector3<real_t> initialVel(real_c(0.1), real_c(0.0), real_c(0.0));
 
    using LatticeModel1_T = lbm::FieldLayoutAndVectorizationTest_FZYX_Vec_LatticeModel;
    LatticeModel1_T latticeModel1(omega);
-   BlockDataID pdfField1ID = lbm::addPdfFieldToStorage(blocks, "pdf field1", latticeModel1, initialVel, real_t(1), field::fzyx);
+   BlockDataID pdfField1ID = lbm::addPdfFieldToStorage(blocks, "pdf field1", latticeModel1, initialVel, real_c(1.0), field::fzyx);
    for(auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
       auto sweep = LatticeModel1_T::Sweep(pdfField1ID);
       sweep(&(*blockIt));
@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 
    using LatticeModel2_T = lbm::FieldLayoutAndVectorizationTest_FZYX_NoVec_LatticeModel;
    LatticeModel2_T latticeModel2(omega);
-   BlockDataID pdfField2ID = lbm::addPdfFieldToStorage(blocks, "pdf field2", latticeModel2, initialVel, real_t(1), field::fzyx);
+   BlockDataID pdfField2ID = lbm::addPdfFieldToStorage(blocks, "pdf field2", latticeModel2, initialVel, real_c(1.0), field::fzyx);
    for(auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
       auto sweep = LatticeModel2_T::Sweep(pdfField2ID);
       sweep(&(*blockIt));
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 
    using LatticeModel3_T = lbm::FieldLayoutAndVectorizationTest_ZYXF_Vec_LatticeModel;
    LatticeModel3_T latticeModel3(omega);
-   BlockDataID pdfField3ID = lbm::addPdfFieldToStorage(blocks, "pdf field3", latticeModel3, initialVel, real_t(1), field::zyxf);
+   BlockDataID pdfField3ID = lbm::addPdfFieldToStorage(blocks, "pdf field3", latticeModel3, initialVel, real_c(1.0), field::zyxf);
    for(auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
       auto sweep = LatticeModel3_T::Sweep(pdfField3ID);
       sweep(&(*blockIt));
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 
    using LatticeModel4_T = lbm::FieldLayoutAndVectorizationTest_ZYXF_NoVec_LatticeModel;
    LatticeModel4_T latticeModel4(omega);
-   BlockDataID pdfField4ID = lbm::addPdfFieldToStorage(blocks, "pdf field4", latticeModel4, initialVel, real_t(1), field::zyxf);
+   BlockDataID pdfField4ID = lbm::addPdfFieldToStorage(blocks, "pdf field4", latticeModel4, initialVel, real_c(1.0), field::zyxf);
    for(auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt) {
       auto sweep = LatticeModel4_T::Sweep(pdfField4ID);
       sweep(&(*blockIt));

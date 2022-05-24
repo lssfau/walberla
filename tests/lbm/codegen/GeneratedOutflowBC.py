@@ -9,52 +9,55 @@ from lbmpy_walberla import generate_boundary, generate_lb_pack_info
 
 import sympy as sp
 
-stencil = LBStencil(Stencil.D2Q9)
-
-pdfs, pdfs_tmp = fields(f"pdfs({stencil.Q}), pdfs_tmp({stencil.Q}): double[{stencil.D}D]", layout='fzyx')
-velocity_field, density_field = fields(f"velocity({stencil.D}), density(1) : double[{stencil.D}D]", layout='fzyx')
-omega = sp.Symbol("omega")
-u_max = sp.Symbol("u_max")
-
-output = {
-    'density': density_field,
-    'velocity': velocity_field
-}
-
-lbm_config = LBMConfig(method=Method.CUMULANT, stencil=stencil, relaxation_rate=omega,
-                       galilean_correction=stencil.Q == 27, field_name='pdfs', output=output)
-
-lbm_opt = LBMOptimisation(symbolic_field=pdfs, symbolic_temporary_field=pdfs_tmp,
-                          cse_global=False, cse_pdfs=False)
-
-method = create_lb_method(lbm_config=lbm_config)
-
-# getter & setter
-setter_assignments = macroscopic_values_setter(method, velocity=velocity_field.center_vector,
-                                               pdfs=pdfs, density=1.0)
-
-update_rule = create_lb_update_rule(lb_method=method, lbm_config=lbm_config, lbm_optimisation=lbm_opt)
-
-stencil_typedefs = {'Stencil_T': stencil}
-field_typedefs = {'PdfField_T': pdfs,
-                  'VelocityField_T': velocity_field,
-                  'ScalarField_T': density_field}
-
 with CodeGeneration() as ctx:
+    data_type = "float64" if ctx.double_accuracy else "float32"
+    stencil = LBStencil(Stencil.D2Q9)
+
+    pdfs, pdfs_tmp = fields(f"pdfs({stencil.Q}), pdfs_tmp({stencil.Q}): {data_type}[{stencil.D}D]",
+                            layout='fzyx')
+    velocity_field, density_field = fields(f"velocity({stencil.D}), density(1) : {data_type}[{stencil.D}D]",
+                                           layout='fzyx')
+    omega = sp.Symbol("omega")
+    u_max = sp.Symbol("u_max")
+
+    output = {
+        'density': density_field,
+        'velocity': velocity_field
+    }
+
+    lbm_config = LBMConfig(method=Method.CUMULANT, stencil=stencil, relaxation_rate=omega, compressible=True,
+                           galilean_correction=stencil.Q == 27, field_name='pdfs', output=output)
+
+    lbm_opt = LBMOptimisation(symbolic_field=pdfs, symbolic_temporary_field=pdfs_tmp,
+                              cse_global=False, cse_pdfs=False)
+
+    method = create_lb_method(lbm_config=lbm_config)
+
+    # getter & setter
+    setter_assignments = macroscopic_values_setter(method, velocity=velocity_field.center_vector,
+                                                   pdfs=pdfs, density=1.0)
+
+    update_rule = create_lb_update_rule(lb_method=method, lbm_config=lbm_config, lbm_optimisation=lbm_opt)
+
+    stencil_typedefs = {'Stencil_T': stencil}
+    field_typedefs = {'PdfField_T': pdfs,
+                      'VelocityField_T': velocity_field,
+                      'ScalarField_T': density_field}
+
     # sweeps
     generate_sweep(ctx, 'GeneratedOutflowBC_Sweep', update_rule, field_swaps=[(pdfs, pdfs_tmp)])
     generate_sweep(ctx, 'GeneratedOutflowBC_MacroSetter', setter_assignments)
 
     # boundaries
-    ubb_dynamic = UBB(lambda *args: None, dim=stencil.D)
+    ubb_dynamic = UBB(lambda *args: None, dim=stencil.D, data_type=data_type)
     ubb_data_handler = UBBAdditionalDataHandler(stencil, ubb_dynamic)
 
     if stencil.D == 2:
-        ubb_static = UBB([sp.Symbol("u_max"), 0])
+        ubb_static = UBB([sp.Symbol("u_max"), 0], data_type=data_type)
     else:
-        ubb_static = UBB([sp.Symbol("u_max"), 0, 0])
+        ubb_static = UBB([sp.Symbol("u_max"), 0, 0], data_type=data_type)
 
-    outflow = ExtrapolationOutflow(stencil[4], method)
+    outflow = ExtrapolationOutflow(stencil[4], method, data_type=data_type)
     outflow_data_handler = OutflowAdditionalDataHandler(stencil, outflow)
 
     # Dynamic UBB which is used to produce a specific velocity profile at the inflow.

@@ -44,8 +44,8 @@ int main( int argc, char **argv )
    shared_ptr<StructuredBlockForest> blocks = blockforest::createUniformBlockGrid(1u, 1u, 1u,
            128u, 128u, 128u, 1.0, false, false, false, false);
 
-   BlockDataID srcID = cuda::addGPUFieldToStorage<cuda::GPUField<double> >(blocks, "src", 19, field::fzyx, 1);
-   BlockDataID dstID = cuda::addGPUFieldToStorage<cuda::GPUField<double> >(blocks, "dst", 19, field::fzyx, 1);
+   BlockDataID srcID = cuda::addGPUFieldToStorage<cuda::GPUField<real_t> >(blocks, "src", 19, field::fzyx, 1);
+   BlockDataID dstID = cuda::addGPUFieldToStorage<cuda::GPUField<real_t> >(blocks, "dst", 19, field::fzyx, 1);
 
    int iterations = 3;
 
@@ -60,7 +60,7 @@ int main( int argc, char **argv )
       for( auto &block: *blocks )
          stream( &block );
 
-   WALBERLA_CUDA_CHECK(cudaDeviceSynchronize());
+   WALBERLA_CUDA_CHECK(cudaDeviceSynchronize())
 
-   return 0;
+   return EXIT_SUCCESS;
 }

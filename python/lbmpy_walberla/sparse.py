@@ -3,7 +3,9 @@ import numpy as np
 from lbmpy.sparse import (
     create_lb_update_rule_sparse, create_macroscopic_value_getter_sparse,
     create_macroscopic_value_setter_sparse, create_symbolic_list)
-from pystencils import TypedSymbol, create_kernel
+
+from pystencils import create_kernel
+from pystencils.typing import TypedSymbol
 
 
 class ListLbGenerator:

@@ -2,8 +2,10 @@ import sympy as sp
 import pystencils as ps
 from pystencils_walberla import CodeGeneration, generate_sweep
 
+
 def grad(f):
     return sp.Matrix([ps.fd.diff(f, i) for i in range(f.spatial_dimensions)])
+
 
 D = sp.Symbol("D")
         

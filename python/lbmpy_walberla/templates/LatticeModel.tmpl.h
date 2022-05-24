@@ -20,6 +20,7 @@
 #pragma once
 #include "core/DataTypes.h"
 #include "core/logging/Logging.h"
+#include "core/math/Matrix3.h"
 
 #include "field/GhostLayerField.h"
 #include "field/SwapableCompare.h"
@@ -98,8 +99,8 @@ class {{class_name}}
 public:
     typedef stencil::{{stencil_name}} Stencil;
     typedef stencil::{{communication_stencil_name}} CommunicationStencil;
-    static const real_t w[{{Q}}];
-    static const real_t wInv[{{Q}}];
+    static const {{dtype}} w[{{Q}}];
+    static const {{dtype}} wInv[{{Q}}];
 
     static const bool compressible = {% if compressible %}true{% else %}false{% endif %};
 
@@ -158,11 +159,11 @@ private:
 
         if( targetLevel != currentLevel )
         {
-            real_t level_scale_factor(1);
+            {{dtype}} level_scale_factor(1);
             if( currentLevel < targetLevel )
-               level_scale_factor = real_c( uint_t(1) << ( targetLevel - currentLevel ) );
+               level_scale_factor = {{dtype}}( uint_t(1) << ( targetLevel - currentLevel ) );
             else // currentLevel > targetLevel
-               level_scale_factor = real_t(1) / real_c( uint_t(1) << ( currentLevel - targetLevel ) );
+               level_scale_factor = {{dtype}}(1) / {{dtype}}( uint_t(1) << ( currentLevel - targetLevel ) );
 
             {% for scalingType, name, expression in refinement_scaling_info -%}
             {% if scalingType == 'normal' %}
@@ -225,44 +226,44 @@ class EquilibriumDistribution< {{class_name}}, void>
 public:
    typedef typename {{class_name}}::Stencil Stencil;
 
-   static real_t get( const stencil::Direction direction,
-                      const Vector3< real_t > & u = Vector3< real_t >( real_t(0.0) ),
-                      real_t rho = real_t(1.0) )
+   static {{dtype}} get( const stencil::Direction direction,
+                      const Vector3< {{dtype}} > & u = Vector3< {{dtype}} >( {{dtype}}(0.0) ),
+                      {{dtype}} rho = {{dtype}}(1.0) )
    {
         {% if not compressible %}
-        rho -= real_t(1.0);
+        rho -= {{dtype}}(1.0);
         {% endif %}
         {{equilibrium_from_direction}}
    }
 
-   static real_t getSymmetricPart( const stencil::Direction direction,
-                                   const Vector3<real_t> & u = Vector3< real_t >(real_t(0.0)),
-                                   real_t rho = real_t(1.0) )
+   static {{dtype}} getSymmetricPart( const stencil::Direction direction,
+                                   const Vector3<{{dtype}}> & u = Vector3< {{dtype}} >({{dtype}}(0.0)),
+                                   {{dtype}} rho = {{dtype}}(1.0) )
    {
         {% if not compressible %}
-        rho -= real_t(1.0);
+        rho -= {{dtype}}(1.0);
         {% endif %}
         {{symmetric_equilibrium_from_direction}}
    }
 
-   static real_t getAsymmetricPart( const stencil::Direction direction,
-                                    const Vector3< real_t > & u = Vector3<real_t>( real_t(0.0) ),
-                                    real_t rho = real_t(1.0) )
+   static {{dtype}} getAsymmetricPart( const stencil::Direction direction,
+                                    const Vector3< {{dtype}} > & u = Vector3<{{dtype}}>( {{dtype}}(0.0) ),
+                                    {{dtype}} rho = {{dtype}}(1.0) )
    {
         {% if not compressible %}
-        rho -= real_t(1.0);
+        rho -= {{dtype}}(1.0);
         {% endif %}
         {{asymmetric_equilibrium_from_direction}}
    }
 
-   static std::vector< real_t > get( const Vector3< real_t > & u = Vector3<real_t>( real_t(0.0) ),
-                                     real_t rho = real_t(1.0) )
+   static std::vector< {{dtype}} > get( const Vector3< {{dtype}} > & u = Vector3<{{dtype}}>( {{dtype}}(0.0) ),
+                                     {{dtype}} rho = {{dtype}}(1.0) )
    {
       {% if not compressible %}
-      rho -= real_t(1.0);
+      rho -= {{dtype}}(1.0);
       {% endif %}
 
-      std::vector< real_t > equilibrium( Stencil::Size );
+      std::vector< {{dtype}} > equilibrium( Stencil::Size );
       for( auto d = Stencil::begin(); d != Stencil::end(); ++d )
       {
          equilibrium[d.toIdx()] = get(*d, u, rho);
@@ -278,25 +279,25 @@ template<>
 struct AdaptVelocityToForce<{{class_name}}, void>
 {
    template< typename FieldPtrOrIterator >
-   static Vector3<real_t> get( FieldPtrOrIterator & it, const {{class_name}} & lm,
-                               const Vector3< real_t > & velocity, const real_t rho )
+   static Vector3<{{dtype}}> get( FieldPtrOrIterator & it, const {{class_name}} & lm,
+                               const Vector3< {{dtype}} > & velocity, const {{dtype}} rho )
    {
       auto x = it.x();
       auto y = it.y();
       auto z = it.z();
       {% if macroscopic_velocity_shift %}
-      return velocity - Vector3<real_t>({{macroscopic_velocity_shift | join(",") }} {% if D == 2 %}, real_t(0.0) {%endif %} );
+      return velocity - Vector3<{{dtype}}>({{macroscopic_velocity_shift | join(",") }} {% if D == 2 %}, {{dtype}}(0.0) {%endif %} );
       {% else %}
       return velocity;
       {% endif %}
    }
 
-   static Vector3<real_t> get( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const {{class_name}} & lm,
-                               const Vector3< real_t > & velocity, const real_t rho )
+   static Vector3<{{dtype}}> get( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const {{class_name}} & lm,
+                               const Vector3< {{dtype}} > & velocity, const {{dtype}} rho )
    {
       {% if macroscopic_velocity_shift %}
 
-      return velocity - Vector3<real_t>({{macroscopic_velocity_shift | join(",") }} {% if D == 2 %}, real_t(0.0) {%endif %} );
+      return velocity - Vector3<{{dtype}}>({{macroscopic_velocity_shift | join(",") }} {% if D == 2 %}, {{dtype}}(0.0) {%endif %} );
       {% else %}
       return velocity;
       {% endif %}
@@ -312,10 +313,10 @@ struct Equilibrium< {{class_name}}, void >
 
    template< typename FieldPtrOrIterator >
    static void set( FieldPtrOrIterator & it,
-                    const Vector3< real_t > & u = Vector3< real_t >( real_t(0.0) ), real_t rho = real_t(1.0) )
+                    const Vector3< {{dtype}} > & u = Vector3< {{dtype}} >( {{dtype}}(0.0) ), {{dtype}} rho = {{dtype}}(1.0) )
    {
         {%if not compressible %}
-        rho -= real_t(1.0);
+        rho -= {{dtype}}(1.0);
         {%endif %}
 
        {% for eqTerm in equilibrium -%}
@@ -325,13 +326,13 @@ struct Equilibrium< {{class_name}}, void >
 
    template< typename PdfField_T >
    static void set( PdfField_T & pdf, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z,
-                    const Vector3< real_t > & u = Vector3< real_t >( real_t(0.0) ), real_t rho = real_t(1.0) )
+                    const Vector3< {{dtype}} > & u = Vector3< {{dtype}} >( {{dtype}}(0.0) ), {{dtype}} rho = {{dtype}}(1.0) )
    {
       {%if not compressible %}
-      rho -= real_t(1.0);
+      rho -= {{dtype}}(1.0);
       {%endif %}
 
-      real_t & xyz0 = pdf(x,y,z,0);
+      {{dtype}} & xyz0 = pdf(x,y,z,0);
       {% for eqTerm in equilibrium -%}
       pdf.getF( &xyz0, {{loop.index0 }})= {{eqTerm}};
       {% endfor -%}
@@ -343,22 +344,22 @@ template<>
 struct Density<{{class_name}}, void>
 {
    template< typename FieldPtrOrIterator >
-   static inline real_t get( const {{class_name}} & , const FieldPtrOrIterator & it )
+   static inline {{dtype}} get( const {{class_name}} & , const FieldPtrOrIterator & it )
    {
         {% for i in range(Q) -%}
-            const real_t f_{{i}} = it[{{i}}];
+            const {{dtype}} f_{{i}} = it[{{i}}];
         {% endfor -%}
         {{density_getters | indent(8)}}
         return rho;
    }
 
    template< typename PdfField_T >
-   static inline real_t get( const {{class_name}} & ,
+   static inline {{dtype}} get( const {{class_name}} & ,
                              const PdfField_T & pdf, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
    {
-        const real_t & xyz0 = pdf(x,y,z,0);
+        const {{dtype}} & xyz0 = pdf(x,y,z,0);
         {% for i in range(Q) -%}
-            const real_t f_{{i}} = pdf.getF( &xyz0, {{i}});
+            const {{dtype}} f_{{i}} = pdf.getF( &xyz0, {{i}});
         {% endfor -%}
         {{density_getters | indent(8)}}
         return rho;
@@ -371,7 +372,7 @@ struct DensityAndVelocity<{{class_name}}>
 {
     template< typename FieldPtrOrIterator >
     static void set( FieldPtrOrIterator & it, const {{class_name}} & lm,
-                     const Vector3< real_t > & u = Vector3< real_t >( real_t(0.0) ), const real_t rho_in = real_t(1.0) )
+                     const Vector3< {{dtype}} > & u = Vector3< {{dtype}} >( {{dtype}}(0.0) ), const {{dtype}} rho_in = {{dtype}}(1.0) )
     {
         auto x = it.x();
         auto y = it.y();
@@ -379,22 +380,22 @@ struct DensityAndVelocity<{{class_name}}>
 
         {{density_velocity_setter_macroscopic_values | indent(8)}}
         {% if D == 2 -%}
-        const real_t u_2(0.0);
+        const {{dtype}} u_2(0.0);
         {% endif %}
 
-        Equilibrium<{{class_name}}>::set(it, Vector3<real_t>(u_0, u_1, u_2), rho{%if not compressible %} + real_t(1) {%endif%});
+        Equilibrium<{{class_name}}>::set(it, Vector3<{{dtype}}>(u_0, u_1, u_2), rho{%if not compressible %} + {{dtype}}(1) {%endif%});
     }
 
     template< typename PdfField_T >
     static void set( PdfField_T & pdf, const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const {{class_name}} & lm,
-                     const Vector3< real_t > & u = Vector3< real_t >( real_t(0.0) ), const real_t rho_in = real_t(1.0) )
+                     const Vector3< {{dtype}} > & u = Vector3< {{dtype}} >( {{dtype}}(0.0) ), const {{dtype}} rho_in = {{dtype}}(1.0) )
     {
         {{density_velocity_setter_macroscopic_values | indent(8)}}
         {% if D == 2 -%}
-        const real_t u_2(0.0);
+        const {{dtype}} u_2(0.0);
         {% endif %}
 
-        Equilibrium<{{class_name}}>::set(pdf, x, y, z, Vector3<real_t>(u_0, u_1, u_2), rho {%if not compressible %} + real_t(1) {%endif%});
+        Equilibrium<{{class_name}}>::set(pdf, x, y, z, Vector3<{{dtype}}>(u_0, u_1, u_2), rho {%if not compressible %} + {{dtype}}(1) {%endif%});
     }
 };
 
@@ -404,7 +405,7 @@ struct DensityAndVelocityRange<{{class_name}}, FieldIteratorXYZ>
 {
 
    static void set( FieldIteratorXYZ & begin, const FieldIteratorXYZ & end, const {{class_name}} & lm,
-                    const Vector3< real_t > & u = Vector3< real_t >( real_t(0.0) ), const real_t rho_in = real_t(1.0) )
+                    const Vector3< {{dtype}} > & u = Vector3< {{dtype}} >( {{dtype}}(0.0) ), const {{dtype}} rho_in = {{dtype}}(1.0) )
    {
         for( auto cellIt = begin; cellIt != end; ++cellIt )
         {
@@ -413,10 +414,10 @@ struct DensityAndVelocityRange<{{class_name}}, FieldIteratorXYZ>
             const auto z = cellIt.z();
             {{density_velocity_setter_macroscopic_values | indent(12)}}
             {% if D == 2 -%}
-            const real_t u_2(0.0);
+            const {{dtype}} u_2(0.0);
             {% endif %}
 
-            Equilibrium<{{class_name}}>::set(cellIt, Vector3<real_t>(u_0, u_1, u_2), rho{%if not compressible %} + real_t(1) {%endif%});
+            Equilibrium<{{class_name}}>::set(cellIt, Vector3<{{dtype}}>(u_0, u_1, u_2), rho{%if not compressible %} + {{dtype}}(1) {%endif%});
         }
    }
 };
@@ -427,7 +428,7 @@ template<>
 struct DensityAndMomentumDensity<{{class_name}}>
 {
    template< typename FieldPtrOrIterator >
-   static real_t get( Vector3< real_t > & momentumDensity, const {{class_name}} & lm,
+   static {{dtype}} get( Vector3< {{dtype}} > & momentumDensity, const {{class_name}} & lm,
                       const FieldPtrOrIterator & it )
    {
         const auto x = it.x();
@@ -435,7 +436,7 @@ struct DensityAndMomentumDensity<{{class_name}}>
         const auto z = it.z();
 
         {% for i in range(Q) -%}
-            const real_t f_{{i}} = it[{{i}}];
+            const {{dtype}} f_{{i}} = it[{{i}}];
         {% endfor -%}
 
         {{momentum_density_getter | indent(8) }}
@@ -446,12 +447,12 @@ struct DensityAndMomentumDensity<{{class_name}}>
    }
 
    template< typename PdfField_T >
-   static real_t get( Vector3< real_t > & momentumDensity, const {{class_name}} & lm, const PdfField_T & pdf,
+   static {{dtype}} get( Vector3< {{dtype}} > & momentumDensity, const {{class_name}} & lm, const PdfField_T & pdf,
                       const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
    {
-        const real_t & xyz0 = pdf(x,y,z,0);
+        const {{dtype}} & xyz0 = pdf(x,y,z,0);
         {% for i in range(Q) -%}
-            const real_t f_{{i}} = pdf.getF( &xyz0, {{i}});
+            const {{dtype}} f_{{i}} = pdf.getF( &xyz0, {{i}});
         {% endfor -%}
 
         {{momentum_density_getter | indent(8) }}
@@ -467,14 +468,14 @@ template<>
 struct MomentumDensity< {{class_name}}>
 {
    template< typename FieldPtrOrIterator >
-   static void get( Vector3< real_t > & momentumDensity, const {{class_name}} & lm, const FieldPtrOrIterator & it )
+   static void get( Vector3< {{dtype}} > & momentumDensity, const {{class_name}} & lm, const FieldPtrOrIterator & it )
    {
         const auto x = it.x();
         const auto y = it.y();
         const auto z = it.z();
 
         {% for i in range(Q) -%}
-            const real_t f_{{i}} = it[{{i}}];
+            const {{dtype}} f_{{i}} = it[{{i}}];
         {% endfor -%}
 
         {{momentum_density_getter | indent(8) }}
@@ -484,12 +485,12 @@ struct MomentumDensity< {{class_name}}>
    }
 
    template< typename PdfField_T >
-   static void get( Vector3< real_t > & momentumDensity, const {{class_name}} & lm, const PdfField_T & pdf,
+   static void get( Vector3< {{dtype}} > & momentumDensity, const {{class_name}} & lm, const PdfField_T & pdf,
                     const cell_idx_t x, const cell_idx_t y, const cell_idx_t z )
    {
-        const real_t & xyz0 = pdf(x,y,z,0);
+        const {{dtype}} & xyz0 = pdf(x,y,z,0);
         {% for i in range(Q) -%}
-            const real_t f_{{i}} = pdf.getF( &xyz0, {{i}});
+            const {{dtype}} f_{{i}} = pdf.getF( &xyz0, {{i}});
         {% endfor -%}
 
         {{momentum_density_getter | indent(8) }}
@@ -504,13 +505,13 @@ template<>
 struct PressureTensor<{{class_name}}>
 {
    template< typename FieldPtrOrIterator >
-   static void get( Matrix3< real_t > & /* pressureTensor */, const {{class_name}} & /* latticeModel */, const FieldPtrOrIterator & /* it */ )
+   static void get( Matrix3< {{dtype}} > & /* pressureTensor */, const {{class_name}} & /* latticeModel */, const FieldPtrOrIterator & /* it */ )
    {
        WALBERLA_ABORT("Not implemented");
    }
 
    template< typename PdfField_T >
-   static void get( Matrix3< real_t > & /* pressureTensor */, const {{class_name}} & /* latticeModel */, const PdfField_T & /* pdf */,
+   static void get( Matrix3< {{dtype}} > & /* pressureTensor */, const {{class_name}} & /* latticeModel */, const PdfField_T & /* pdf */,
                     const cell_idx_t /* x */, const cell_idx_t /* y */, const cell_idx_t /* z */ )
    {
        WALBERLA_ABORT("Not implemented");
@@ -522,27 +523,27 @@ template<>
 struct ShearRate<{{class_name}}>
 {
    template< typename FieldPtrOrIterator >
-   static inline real_t get( const {{class_name}} & /* latticeModel */, const FieldPtrOrIterator & /* it */,
-                             const Vector3< real_t > & /* velocity */, const real_t /* rho */)
+   static inline {{dtype}} get( const {{class_name}} & /* latticeModel */, const FieldPtrOrIterator & /* it */,
+                             const Vector3< {{dtype}} > & /* velocity */, const {{dtype}} /* rho */)
    {
        WALBERLA_ABORT("Not implemented");
-       return real_t(0.0);
+       return {{dtype}}(0.0);
    }
 
    template< typename PdfField_T >
-   static inline real_t get( const {{class_name}} & latticeModel,
+   static inline {{dtype}} get( const {{class_name}} & latticeModel,
                              const PdfField_T & /* pdf */, const cell_idx_t /* x */, const cell_idx_t /* y */, const cell_idx_t /* z */,
-                             const Vector3< real_t > & /* velocity */, const real_t /* rho */ )
+                             const Vector3< {{dtype}} > & /* velocity */, const {{dtype}} /* rho */ )
    {
        WALBERLA_ABORT("Not implemented");
-       return real_t(0.0);
+       return {{dtype}}(0.0);
    }
 
-   static inline real_t get( const std::vector< real_t > & /* nonEquilibrium */, const real_t /* relaxationParam */,
-                             const real_t /* rho */ = real_t(1) )
+   static inline {{dtype}} get( const std::vector< {{dtype}} > & /* nonEquilibrium */, const {{dtype}} /* relaxationParam */,
+                             const {{dtype}} /* rho */ = {{dtype}}(1) )
    {
        WALBERLA_ABORT("Not implemented");
-       return real_t(0.0);
+       return {{dtype}}(0.0);
    }
 };
 

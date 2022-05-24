@@ -86,7 +86,7 @@ struct ShearFlowInit
    std::vector< real_t > operator()(const Cell& globalCell)
    {
       std::vector< real_t > densityAndVelocity = exprInitFunc_(globalCell);
-      real_t yPerturbation                     = noiseMagnitude_ * rng_();
+      auto yPerturbation                     = real_c(noiseMagnitude_ * rng_());
       densityAndVelocity[2] += yPerturbation;
 
       return densityAndVelocity;
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
    const uint_t timesteps = parameters.getParameter< uint_t >("timesteps", uint_c(10));
    const real_t omega     = parameters.getParameter< real_t >("omega", real_c(1.8));
    const double remainingTimeLoggerFrequency =
-      parameters.getParameter< double >("remainingTimeLoggerFrequency", 3.0); // in seconds
+      parameters.getParameter< double >("remainingTimeLoggerFrequency", real_c(3.0)); // in seconds
 
    ///////////////////
    /// Field Setup ///

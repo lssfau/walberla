@@ -6,7 +6,7 @@ from jinja2.filters import do_indent
 from pystencils import Target, TypedSymbol
 from pystencils.backends.cbackend import get_headers
 from pystencils.backends.cuda_backend import CudaSympyPrinter
-from pystencils.kernelparameters import SHAPE_DTYPE
+from pystencils.typing.typed_sympy import SHAPE_DTYPE
 
 
 """

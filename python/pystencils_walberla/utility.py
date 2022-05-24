@@ -1,5 +1,5 @@
 from os import path
-from pystencils.data_types import get_base_type
+from pystencils.typing import get_base_type
 from pystencils_walberla.cmake_integration import CodeGenerationContext
 
 from lbmpy import LBStencil

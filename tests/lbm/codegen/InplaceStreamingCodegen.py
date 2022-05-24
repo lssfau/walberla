@@ -12,51 +12,53 @@ from lbmpy.advanced_streaming import Timestep
 
 from pystencils import Field
 
-#   Common Setup
-
-stencil = LBStencil(Stencil.D3Q27)
-target = Target.CPU
-inplace_pattern = 'aa'
-two_fields_pattern = 'pull'
-namespace = 'lbmpy'
-
-f_field = Field.create_generic('f', stencil.D, index_shape=(stencil.Q,), layout='fzyx')
-f_field_tmp = Field.create_generic('f_tmp', stencil.D, index_shape=(stencil.Q,), layout='fzyx')
-u_field = Field.create_generic('u', stencil.D, index_shape=(stencil.D,), layout='fzyx')
-
-output = {
-    'velocity': u_field
-}
-
-lbm_config = LBMConfig(stencil=stencil, method=Method.SRT, relaxation_rate=1.5, output=output)
-lbm_opt = LBMOptimisation(symbolic_field=f_field,
-                          symbolic_temporary_field=f_field_tmp)
-
-config = CreateKernelConfig(target=target)
-
-collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt, config=config)
-lb_method = collision_rule.method
-noslip = NoSlip()
-ubb = UBB((0.05,) + (0,) * (stencil.D - 1))
-
-outflow_normal = (1,) + (0,) * (stencil.D - 1)
-outflow_pull = ExtrapolationOutflow(outflow_normal, lb_method, streaming_pattern=two_fields_pattern)
-
-outflow_inplace = ExtrapolationOutflow(outflow_normal, lb_method, streaming_pattern=inplace_pattern)
-
-init_velocity = (0,) * stencil.D
-
-init_kernel_pull = macroscopic_values_setter(lb_method, 1, init_velocity, f_field, streaming_pattern=two_fields_pattern)
-init_kernel_inplace = macroscopic_values_setter(
-    lb_method, 1, init_velocity, f_field, streaming_pattern=inplace_pattern, previous_timestep=Timestep.ODD)
-
-stencil_typedefs = {'Stencil_T': stencil}
-field_typedefs = {'PdfField_T': f_field, 'VelocityField_T': u_field}
-
 with CodeGeneration() as ctx:
+    #   Common Setup
+    data_type = "float64" if ctx.double_accuracy else "float32"
+    stencil = LBStencil(Stencil.D3Q27)
+    target = Target.CPU
+    inplace_pattern = 'aa'
+    two_fields_pattern = 'pull'
+    namespace = 'lbmpy'
+
+    f_field = Field.create_generic('f', stencil.D, dtype=data_type, index_shape=(stencil.Q,), layout='fzyx')
+    f_field_tmp = Field.create_generic('f_tmp', stencil.D, dtype=data_type, index_shape=(stencil.Q,), layout='fzyx')
+    u_field = Field.create_generic('u', stencil.D, dtype=data_type, index_shape=(stencil.D,), layout='fzyx')
+
+    output = {
+        'velocity': u_field
+    }
+
+    lbm_config = LBMConfig(stencil=stencil, method=Method.SRT, relaxation_rate=1.5, output=output)
+    lbm_opt = LBMOptimisation(symbolic_field=f_field,
+                              symbolic_temporary_field=f_field_tmp)
+
+    collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
+    lb_method = collision_rule.method
+    noslip = NoSlip()
+    ubb = UBB((0.05,) + (0.0,) * (stencil.D - 1), data_type=data_type)
+
+    outflow_normal = (1,) + (0,) * (stencil.D - 1)
+    outflow_pull = ExtrapolationOutflow(outflow_normal, lb_method, streaming_pattern=two_fields_pattern,
+                                        data_type=data_type)
+
+    outflow_inplace = ExtrapolationOutflow(outflow_normal, lb_method, streaming_pattern=inplace_pattern,
+                                           data_type=data_type)
+
+    init_velocity = (0.0,) * stencil.D
+
+    init_kernel_pull = macroscopic_values_setter(lb_method, 1.0, init_velocity, f_field,
+                                                 streaming_pattern=two_fields_pattern)
+    init_kernel_inplace = macroscopic_values_setter(
+        lb_method, 1.0, init_velocity, f_field, streaming_pattern=inplace_pattern, previous_timestep=Timestep.ODD)
+
+    stencil_typedefs = {'Stencil_T': stencil}
+    field_typedefs = {'PdfField_T': f_field, 'VelocityField_T': u_field}
+
     #   Pull-Pattern classes
+    config = CreateKernelConfig(data_type=data_type, default_number_float=data_type)
     ast_pull = create_lb_ast(collision_rule=collision_rule,
-                             streaming_pattern=two_fields_pattern, lbm_optimisation=lbm_opt)
+                             streaming_pattern=two_fields_pattern, lbm_optimisation=lbm_opt, config=config)
     generate_sweep(ctx, 'PullSweep', ast_pull, field_swaps=[(f_field, f_field_tmp)], namespace=namespace)
 
     generate_boundary(ctx, 'PullNoSlip', noslip, lb_method,

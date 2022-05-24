@@ -202,7 +202,7 @@ int main(int argc, char **argv) {
 
    testScalarFieldPullReduction( blocks, scalarGPUFieldId );
 
-   return 0;
+   return EXIT_SUCCESS;
 
 }
 

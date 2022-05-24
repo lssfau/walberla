@@ -69,6 +69,7 @@ options_dict = {
     'entropic': {
         'method': Method.TRT_KBC_N4,
         'compressible': True,
+        'zero_centered': False,
         'relaxation_rates': [omega, omega_free],
         'entropic': True,
         'entropic_newton_iterations': False
@@ -148,8 +149,6 @@ with CodeGeneration() as ctx:
     collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
 
     if optimize:
-        collision_rule = insert_fast_divisions(collision_rule)
-        collision_rule = insert_fast_sqrts(collision_rule)
         collision_rule = insert_constants(collision_rule)
         collision_rule = insert_zeros(collision_rule)
         collision_rule = insert_aliases(collision_rule)

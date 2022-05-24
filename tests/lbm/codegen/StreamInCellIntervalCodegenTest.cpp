@@ -64,12 +64,12 @@ int main(int argc, char** argv)
    const std::shared_ptr< StructuredBlockForest > blockForest =
       blockforest::createUniformBlockGrid(numBlocks[0], numBlocks[1], numBlocks[2],             // blocks
                                           cellsPerBlock[0], cellsPerBlock[1], cellsPerBlock[2], // cells
-                                          real_t(1.0),                                          // dx
+                                          real_c(1.0),                                          // dx
                                           true,                                                 // one block per process
                                           true, true, true);                                    // periodicity
 
    // relaxation rate
-   real_t omega = real_t(1.8);
+   real_t omega = real_c(1.8);
 
    // create lattice model
    LatticeModel_T latticeModel = LatticeModel_T(omega);
@@ -87,8 +87,8 @@ int main(int argc, char** argv)
    {
       PdfField_T* pdfField = blockIt->getData< PdfField_T >(pdfFieldID);
 
-      pdfField->setDensityAndVelocity(cell0, Vector3< real_t >(real_t(0.1), real_t(0.1), real_t(0.1)), real_t(1.1));
-      pdfField->setDensityAndVelocity(cell1, Vector3< real_t >(real_t(-0.1), real_t(-0.1), real_t(-0.1)), real_t(0.9));
+      pdfField->setDensityAndVelocity(cell0, Vector3< real_t >(real_c(0.1), real_c(0.1), real_c(0.1)), real_c(1.1));
+      pdfField->setDensityAndVelocity(cell1, Vector3< real_t >(real_c(-0.1), real_c(-0.1), real_c(-0.1)), real_c(0.9));
    }
 
    // create communication for PDF fields

@@ -14,8 +14,8 @@ from pystencils.backends.simd_instruction_sets import get_supported_instruction_
 from pystencils.stencil import inverse_direction, offset_to_direction_string
 
 from pystencils.backends.cuda_backend import CudaSympyPrinter
-from pystencils.kernelparameters import SHAPE_DTYPE
-from pystencils.data_types import TypedSymbol
+from pystencils.typing.typed_sympy import SHAPE_DTYPE
+from pystencils.typing import TypedSymbol
 
 from pystencils_walberla.jinja_filters import add_pystencils_filters_to_jinja_env
 from pystencils_walberla.kernel_selection import KernelCallNode, KernelFamily, HighLevelInterfaceSpec
@@ -275,6 +275,9 @@ def generate_pack_info(generation_context, class_name: str,
     config = replace(config, cpu_vectorize_info=None)
     config_zero_gl = replace(config_zero_gl, cpu_vectorize_info=None)
 
+    config = replace(config, allow_double_writes=True)
+    config_zero_gl = replace(config_zero_gl, allow_double_writes=True)
+
     template_name = "CpuPackInfo.tmpl" if config.target == Target.CPU else 'GpuPackInfo.tmpl'
 
     fields_accessed = set()
@@ -500,7 +503,7 @@ def config_from_context(generation_context, target=Target.CPU, data_type=None,
     cpu_vectorize_info['assume_aligned'] = cpu_vectorize_info.get('assume_aligned', False)
     cpu_vectorize_info['nontemporal'] = cpu_vectorize_info.get('nontemporal', False)
 
-    config = CreateKernelConfig(target=target, data_type=data_type,
+    config = CreateKernelConfig(target=target, data_type=data_type, default_number_float=data_type,
                                 cpu_openmp=cpu_openmp, cpu_vectorize_info=cpu_vectorize_info,
                                 **kwargs)
 

@@ -46,13 +46,13 @@ void calc_total_velocity(const shared_ptr< StructuredBlockStorage >& blocks, std
          phaseField,
 
          auto fluidFlag = flagField->getFlag(fluidFlagUID); if (flagField->get(x, y, z) == fluidFlag) {
-            if (phaseField->get(x, y, z) < 0.5)
+            if (phaseField->get(x, y, z) < real_c(0.5))
             {
                real_t invC = 1 - phaseField->get(x, y, z);
                real_t U    = velField->get(x, y, z, 0);
                real_t V    = velField->get(x, y, z, 1);
                real_t W    = velField->get(x, y, z, 2);
-               total_velocity[0] += sqrt((U * invC) * (U * invC) + (V * invC) * (V * invC) + (W * invC) * (W * invC));
+               total_velocity[0] += real_c(sqrt((U * invC) * (U * invC) + (V * invC) * (V * invC) + (W * invC) * (W * invC)));
                total_velocity[1] += U * invC;
                total_velocity[2] += V * invC;
                total_velocity[3] += W * invC;
@@ -69,11 +69,11 @@ void flood_fill(PhaseField_T& phaseField, VelocityField_T& velocityField, CellIn
    Field< bool, 1 > visit(phaseField.xSize(), phaseField.ySize(), phaseField.zSize(), false, field::fzyx);
    using namespace stencil;
 
-   volume            = 0;
-   nrOfCells         = 0;
-   center_of_mass[0] = 0.0;
-   center_of_mass[1] = 0.0;
-   center_of_mass[2] = 0.0;
+   volume            = real_c(0.0);
+   nrOfCells         = uint_c(0);
+   center_of_mass[0] = real_c( 0.0);
+   center_of_mass[1] = real_c(0.0);
+   center_of_mass[2] = real_c(0.0);
 
    while (phaseField.get(startCell) > 0.5 && startCell.x() > 0)
       --startCell.x();
@@ -92,14 +92,14 @@ void flood_fill(PhaseField_T& phaseField, VelocityField_T& velocityField, CellIn
    nrOfCells++;
    volume += invC;
 
-   total_velocity[0] += sqrt((v_U * invC) * (v_U * invC) + (v_V * invC) * (v_V * invC) + (v_W * invC) * (v_W * invC));
+   total_velocity[0] += real_c(sqrt((v_U * invC) * (v_U * invC) + (v_V * invC) * (v_V * invC) + (v_W * invC) * (v_W * invC)));
    total_velocity[1] += v_U * invC;
    total_velocity[2] += v_V * invC;
    total_velocity[3] += v_W * invC;
 
-   center_of_mass[0] += (startCell.x() + boundingBox.xMin());
-   center_of_mass[1] += (startCell.y() + boundingBox.yMin());
-   center_of_mass[2] += (startCell.z() + boundingBox.xMin());
+   center_of_mass[0] += real_c(startCell.x() + boundingBox.xMin());
+   center_of_mass[1] += real_c(startCell.y() + boundingBox.yMin());
+   center_of_mass[2] += real_c(startCell.z() + boundingBox.xMin());
 
    const int DIRS[6] = { N, S, E, W, T, B };
 
@@ -126,14 +126,14 @@ void flood_fill(PhaseField_T& phaseField, VelocityField_T& velocityField, CellIn
             volume += invC;
 
             total_velocity[0] +=
-               sqrt((v_U * invC) * (v_U * invC) + (v_V * invC) * (v_V * invC) + (v_W * invC) * (v_W * invC));
+               real_c(sqrt((v_U * invC) * (v_U * invC) + (v_V * invC) * (v_V * invC) + (v_W * invC) * (v_W * invC)));
             total_velocity[1] += v_U * invC;
             total_velocity[2] += v_V * invC;
             total_velocity[3] += v_W * invC;
 
-            center_of_mass[0] += (neighborCell.x() + boundingBox.xMin());
-            center_of_mass[1] += (neighborCell.y() + boundingBox.yMin());
-            center_of_mass[2] += (neighborCell.z() + boundingBox.xMin());
+            center_of_mass[0] += real_c(neighborCell.x() + boundingBox.xMin());
+            center_of_mass[1] += real_c(neighborCell.y() + boundingBox.yMin());
+            center_of_mass[2] += real_c(neighborCell.z() + boundingBox.xMin());
 
             visit.get(neighborCell) = true;
             cellQueue.push(neighborCell);

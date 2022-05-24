@@ -1,22 +1,22 @@
 import sympy as sp
 from sympy.core.cache import clear_cache
 import pystencils as ps
-from lbmpy.creationfunctions import create_lb_method_from_existing, create_lb_method
+from lbmpy.creationfunctions import LBMConfig, LBMOptimisation, Method, Stencil, create_lb_method
 from lbmpy_walberla import generate_lattice_model
 from pystencils_walberla import CodeGeneration
 from pystencils_walberla import get_vectorize_instruction_set
 
 from lbmpy.creationfunctions import create_lb_collision_rule
 from lbmpy.moments import is_even, get_order, MOMENT_SYMBOLS
-from lbmpy.stencils import get_stencil
+from lbmpy.stencils import LBStencil
 
 from collections import OrderedDict
 
 with CodeGeneration() as ctx:
 
     generatedMethod = 'TRTlike'
-    #generatedMethod = 'D3Q27TRTlike'
-    #generatedMethod = 'cumulant'
+    # generatedMethod = 'D3Q27TRTlike'
+    # generatedMethod = 'cumulant'
 
     clear_cache()
 
@@ -28,7 +28,7 @@ with CodeGeneration() as ctx:
         omegaVisc = sp.Symbol('omega_visc')
         omegaBulk = ps.fields(f'omega_bulk: {dtype_string}[3D]', layout='fzyx')
         omegaMagic = sp.Symbol('omega_magic')
-        stencil = get_stencil('D3Q19', 'walberla')
+        stencil = LBStencil(Stencil.D3Q19)
 
         x, y, z = MOMENT_SYMBOLS
         one = sp.Rational(1, 1)
@@ -44,33 +44,43 @@ with CodeGeneration() as ctx:
         ]
 
         # relaxation rate for first group of moments (1,x,y,z) is set to zero internally
-        relaxation_rates=[omegaBulk.center_vector, omegaBulk.center_vector, omegaMagic, omegaVisc, omegaVisc, omegaMagic]
+        relaxation_rates = [omegaBulk.center_vector, omegaBulk.center_vector,
+                            omegaMagic, omegaVisc, omegaVisc, omegaMagic]
 
-        methodWithForce = create_lb_method(stencil=stencil, method='mrt', maxwellian_moments=False,
-                                           nested_moments=moments, relaxation_rates=relaxation_rates)
+        lbm_config = LBMConfig(stencil=stencil, method=Method.MRT, continuous_equilibrium=False,
+                               zero_centered=False, delta_equilibrium=False,
+                               nested_moments=moments, relaxation_rates=relaxation_rates)
 
-        #print(methodWithForce.relaxation_rates)
-        #print(methodWithForce.moment_matrix)
-        collision_rule = create_lb_collision_rule(lb_method=methodWithForce, optimization={'cse_global': True})
+        lbm_opt = LBMOptimisation(cse_global=True)
+
+        methodWithForce = create_lb_method(lbm_config=lbm_config)
+
+        # print(methodWithForce.relaxation_rates)
+        # print(methodWithForce.moment_matrix)
+        collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
         generate_lattice_model(ctx, 'GeneratedLBM', collision_rule, field_layout='fzyx', cpu_vectorize_info=cpu_vectorize_info)
 
- 
     if generatedMethod == 'D3Q27TRTlike':
 
         omegaVisc = sp.Symbol('omega_visc')
         omegaBulk = ps.fields(f'omega_bulk: {dtype_string}[3D]', layout='fzyx')
         omegaMagic = sp.Symbol('omega_magic')
-        stencil = get_stencil('D3Q27', 'walberla')
+        stencil = LBStencil(Stencil.D3Q27)
 
         relaxation_rates = [omegaVisc, omegaBulk.center_vector, omegaMagic, omegaVisc, omegaMagic, omegaVisc]
 
-        methodWithForce = create_lb_method(stencil=stencil, method='mrt', maxwellian_moments=False, weighted=True,
-                                           compressible=False, relaxation_rates=relaxation_rates)
+        lbm_config = LBMConfig(stencil=stencil, method=Method.MRT, maxwellian_moments=False, weighted=True,
+                               compressible=False, relaxation_rates=relaxation_rates)
 
-        collision_rule = create_lb_collision_rule(lb_method=methodWithForce, optimization={'cse_global': True})
+        lbm_opt = LBMOptimisation(cse_global=True)
+
+        methodWithForce = create_lb_method(lbm_config=lbm_config)
+
+        collision_rule = create_lb_collision_rule(lbm_config=lbm_config, lbm_optimisation=lbm_opt)
         generate_lattice_model(ctx, 'GeneratedLBM', collision_rule, field_layout='fzyx',
                                cpu_vectorize_info=cpu_vectorize_info)
 
+# using create_with_continuous_maxwellian_eq_moments won't work probably
     if generatedMethod == 'cumulant':
 
         x, y, z = MOMENT_SYMBOLS
@@ -122,7 +132,7 @@ with CodeGeneration() as ctx:
             else:
                 return 1
 
-        stencil = get_stencil('D3Q27', 'walberla')
+        stencil = LBStencil(Stencil.D3Q27)
 
         omega = sp.Symbol('omega')
         rr_dict = OrderedDict((c, get_relaxation_rate(c, omega))
@@ -139,6 +149,3 @@ with CodeGeneration() as ctx:
 
         generate_lattice_model(ctx, 'GeneratedLBM', collision_rule, field_layout='fzyx',
                                cpu_vectorize_info=cpu_vectorize_info)
-
-
-

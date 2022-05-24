@@ -2,9 +2,11 @@ from collections import defaultdict
 from lbmpy import LBStencil, Stencil
 from lbmpy.advanced_streaming.utility import Timestep, get_accessor, get_timesteps
 from lbmpy.advanced_streaming.communication import _extend_dir
-from pystencils.stencil import inverse_direction
-from pystencils_walberla.codegen import comm_directions, generate_pack_info
+
 from pystencils import Assignment, Field, Target
+from pystencils.stencil import inverse_direction
+
+from pystencils_walberla.codegen import comm_directions, generate_pack_info
 
 
 def generate_lb_pack_info(generation_context,

@@ -58,8 +58,8 @@ namespace {{namespace}} {
 {{stream_kernel|generate_definition(target)}}
 
 
-const real_t {{class_name}}::w[{{Q}}] = { {{weights}} };
-const real_t {{class_name}}::wInv[{{Q}}] = { {{inverse_weights}} };
+const {{dtype}} {{class_name}}::w[{{Q}}] = { {{weights}} };
+const {{dtype}} {{class_name}}::wInv[{{Q}}] = { {{inverse_weights}} };
 
 void {{class_name}}::Sweep::streamCollide( IBlock * block, const uint_t numberOfGhostLayersToInclude )
 {
