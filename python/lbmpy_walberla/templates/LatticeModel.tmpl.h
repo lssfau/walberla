@@ -103,6 +103,8 @@ public:
     static const {{dtype}} wInv[{{Q}}];
 
     static const bool compressible = {% if compressible %}true{% else %}false{% endif %};
+    static const bool zeroCentered = {% if zero_centered %}true{% else %}false{% endif %};
+    static const bool equilibriumDeviationOnly = {% if equilibrium_deviation_only %}true{% else %}false{% endif %};
 
     class Sweep
     {
