@@ -114,6 +114,8 @@ def __lattice_model(generation_context, class_name, config, lb_method, stream_co
         'D': lb_method.stencil.D,
         'Q': lb_method.stencil.Q,
         'compressible': lb_method.conserved_quantity_computation.compressible,
+        'zero_centered': lb_method.conserved_quantity_computation.zero_centered_pdfs,
+        'equilibrium_deviation_only': lb_method.equilibrium_distribution.deviation_only,
         'weights': ",".join(str(w.evalf()) + constant_suffix for w in lb_method.weights),
         'inverse_weights': ",".join(str((1 / w).evalf()) + constant_suffix for w in lb_method.weights),
         'dtype': "float" if is_float else "double",
