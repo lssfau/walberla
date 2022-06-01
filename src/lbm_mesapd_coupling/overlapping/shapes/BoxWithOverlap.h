@@ -13,33 +13,49 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file DataTypes.h
+//! \file BoxWithOverlap.h
 //! \ingroup lbm_mesapd_coupling
-//! \author Christoph Rettinger <christoph.rettinger@fau.de>
+//! \author Samuel Kemmler <samuel.kemmler@fau.de>
+//! \brief Wrapper class that provides a "contains" function for MESA-PD boxes
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "core/DataTypes.h"
+#include "core/math/Vector3.h"
 
-#include "field/GhostLayerField.h"
+#include "geometry/bodies/BodyOverlapFunctions.h"
+#include "geometry/bodies/DynamicBody.h"
+
+#include "mesa_pd/common/Contains.h"
+#include "mesa_pd/data/ParticleAccessorWithShape.h"
+#include "mesa_pd/data/shape/Box.h"
 
 namespace walberla
 {
 namespace lbm_mesapd_coupling
 {
-
-/*
- * Typedefs specific to the lbm - mesa_pd coupling
- */
-using ParticleField_T = walberla::GhostLayerField< walberla::id_t, 1 >;
-
 namespace psm
 {
-// store the particle uid together with the overlap fraction
-using ParticleAndVolumeFraction_T      = std::pair< id_t, real_t >;
-using ParticleAndVolumeFractionField_T = GhostLayerField< std::vector< ParticleAndVolumeFraction_T >, 1 >;
+
+template< typename ParticleAccessor_T >
+class BoxWithOverlap : public geometry::AbstractBody
+{
+ public:
+   BoxWithOverlap(const size_t idx, const shared_ptr< ParticleAccessor_T >& ac, const mesa_pd::data::Box& box)
+      : idx_(idx), ac_(ac), box_(box)
+   {}
+
+   bool contains(const Vector3< real_t >& point) const
+   {
+      return mesa_pd::isPointInsideBoxBF(mesa_pd::transformPositionFromWFtoBF(idx_, ac_, point), box_.getEdgeLength());
+   }
+
+ private:
+   size_t idx_;
+   shared_ptr< ParticleAccessor_T > ac_;
+   mesa_pd::data::Box box_;
+};
 
 } // namespace psm
 } // namespace lbm_mesapd_coupling

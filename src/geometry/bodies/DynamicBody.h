@@ -32,8 +32,12 @@ class AbstractBody {
 public:
    virtual ~AbstractBody() = default;
    virtual bool contains (const Vector3<real_t> & point ) const = 0;
-   virtual FastOverlapResult fastOverlapCheck ( const Vector3<real_t> & cellMidpoint, const Vector3<real_t> & dx ) const = 0;
-   virtual FastOverlapResult fastOverlapCheck ( const AABB & box ) const = 0;
+   virtual FastOverlapResult fastOverlapCheck(const Vector3< real_t >& /*cellMidpoint*/,
+                                              const Vector3< real_t >& /*dx*/) const
+   {
+      return geometry::DONT_KNOW;
+   }
+   virtual FastOverlapResult fastOverlapCheck(const AABB& /*box*/) const { return geometry::DONT_KNOW; }
 };
 
 // this is an adaptor from static to dynamic polymorphism

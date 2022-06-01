@@ -79,30 +79,34 @@ IncludeCategories:
     Priority:        12
   - Regex:           '^"lbm/'
     Priority:        13
-  - Regex:           '^"mesh/'
+  - Regex:           '^"lbm_mesapd_coupling/'
     Priority:        14
-  - Regex:           '^"pde/'
+  - Regex:           '^"mesh/'
     Priority:        15
-  - Regex:           '^"pe/'
+  - Regex:           '^"mesa_pd/'
     Priority:        16
-  - Regex:           '^"pe_coupling/'
+  - Regex:           '^"pde/'
     Priority:        17
-  - Regex:           '^"postprocessing/'
+  - Regex:           '^"pe/'
     Priority:        18
-  - Regex:           '^"python_coupling/'
+  - Regex:           '^"pe_coupling/'
     Priority:        19
-  - Regex:           '^"simd/'
+  - Regex:           '^"postprocessing/'
     Priority:        20
-  - Regex:           '^"stencil/'
+  - Regex:           '^"python_coupling/'
     Priority:        21
-  - Regex:           '^"timeloop/'
+  - Regex:           '^"simd/'
     Priority:        22
-  - Regex:           '^"vtk/'
+  - Regex:           '^"stencil/'
     Priority:        23
-  - Regex:           '^<boost/'
+  - Regex:           '^"timeloop/'
     Priority:        24
-  - Regex:           '^<'
+  - Regex:           '^"vtk/'
     Priority:        25
+  - Regex:           '^<boost/'
+    Priority:        26
+  - Regex:           '^<'
+    Priority:        27
 IndentCaseLabels: false
 IndentPPDirectives: AfterHash
 IndentWidth: 3
