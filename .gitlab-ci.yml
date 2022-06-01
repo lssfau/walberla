@@ -506,6 +506,7 @@ gcc_9_serial:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -529,6 +530,7 @@ gcc_9_mpionly:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -550,6 +552,7 @@ gcc_9_hybrid:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -570,6 +573,7 @@ gcc_9_serial_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -594,6 +598,7 @@ gcc_9_mpionly_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -616,6 +621,7 @@ gcc_9_hybrid_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -637,6 +643,7 @@ gcc_9_hybrid_dbg_sp:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -661,6 +668,7 @@ gcc_10_serial:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -684,6 +692,7 @@ gcc_10_mpionly:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -705,6 +714,7 @@ gcc_10_hybrid:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -725,6 +735,7 @@ gcc_10_serial_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -749,6 +760,7 @@ gcc_10_mpionly_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -771,6 +783,7 @@ gcc_10_hybrid_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -792,6 +805,7 @@ gcc_10_hybrid_dbg_sp:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -816,6 +830,7 @@ gcc_11_serial:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -839,6 +854,7 @@ gcc_11_mpionly:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -861,9 +877,9 @@ gcc_11_hybrid:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
-      - pip3 list
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
@@ -879,6 +895,7 @@ gcc_11_serial_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -900,6 +917,7 @@ gcc_11_mpionly_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -919,6 +937,7 @@ gcc_11_hybrid_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -937,6 +956,7 @@ gcc_11_hybrid_dbg_sp:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1450,6 +1470,7 @@ clang_11.0_serial:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1473,6 +1494,7 @@ clang_11.0_mpionly:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1494,6 +1516,7 @@ clang_11.0_hybrid:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1514,6 +1537,7 @@ clang_11.0_serial_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1538,6 +1562,7 @@ clang_11.0_mpionly_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1560,6 +1585,7 @@ clang_11.0_hybrid_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1581,6 +1607,7 @@ clang_11.0_hybrid_dbg_sp:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1605,6 +1632,7 @@ clang_12.0_serial:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1628,6 +1656,7 @@ clang_12.0_mpionly:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1649,6 +1678,7 @@ clang_12.0_hybrid:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1669,6 +1699,7 @@ clang_12.0_serial_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1693,6 +1724,7 @@ clang_12.0_mpionly_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1715,6 +1747,7 @@ clang_12.0_hybrid_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1736,6 +1769,7 @@ clang_12.0_hybrid_dbg_sp:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1760,6 +1794,7 @@ clang_13.0_serial:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1783,6 +1818,7 @@ clang_13.0_mpionly:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1804,6 +1840,7 @@ clang_13.0_hybrid:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1821,6 +1858,7 @@ clang_13.0_serial_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1842,6 +1880,7 @@ clang_13.0_mpionly_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1861,6 +1900,7 @@ clang_13.0_hybrid_dbg:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
@@ -1880,6 +1920,7 @@ clang_13.0_hybrid_dbg_sp:
       - pip3 install lbmpy==1.0 jinja2 pytest
       - cd python
       - python3 -m pytest --junitxml=report.xml pystencils_walberla lbmpy_walberla
+      - pip3 list
       - cd ..
       - CC=gcc CXX=g++ pip3 install pycuda
    variables:
