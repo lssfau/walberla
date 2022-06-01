@@ -13,33 +13,49 @@
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
-//! \file DataTypes.h
+//! \file HalfSpaceWithOverlap.h
 //! \ingroup lbm_mesapd_coupling
-//! \author Christoph Rettinger <christoph.rettinger@fau.de>
+//! \author Samuel Kemmler <samuel.kemmler@fau.de>
+//! \brief Wrapper class that provides a "contains" function for MESA-PD half spaces
 //
 //======================================================================================================================
 
 #pragma once
 
-#include "core/DataTypes.h"
+#include "core/math/Vector3.h"
 
-#include "field/GhostLayerField.h"
+#include "geometry/bodies/BodyOverlapFunctions.h"
+
+#include "mesa_pd/common/Contains.h"
+#include "mesa_pd/data/ParticleAccessorWithShape.h"
+#include "mesa_pd/data/shape/HalfSpace.h"
 
 namespace walberla
 {
 namespace lbm_mesapd_coupling
 {
-
-/*
- * Typedefs specific to the lbm - mesa_pd coupling
- */
-using ParticleField_T = walberla::GhostLayerField< walberla::id_t, 1 >;
-
 namespace psm
 {
-// store the particle uid together with the overlap fraction
-using ParticleAndVolumeFraction_T      = std::pair< id_t, real_t >;
-using ParticleAndVolumeFractionField_T = GhostLayerField< std::vector< ParticleAndVolumeFraction_T >, 1 >;
+
+template< typename ParticleAccessor_T >
+class HalfSpaceWithOverlap : public geometry::AbstractBody
+{
+ public:
+   HalfSpaceWithOverlap(const size_t idx, const shared_ptr< ParticleAccessor_T >& ac,
+                        const mesa_pd::data::HalfSpace& halfSpace)
+      : idx_(idx), ac_(ac), halfSpace_(halfSpace)
+   {}
+
+   bool contains(const Vector3< real_t >& point) const
+   {
+      return mesa_pd::isPointInsideHalfSpace(point, ac_->getPosition(idx_), halfSpace_.getNormal());
+   }
+
+ private:
+   size_t idx_;
+   shared_ptr< ParticleAccessor_T > ac_;
+   mesa_pd::data::HalfSpace halfSpace_;
+};
 
 } // namespace psm
 } // namespace lbm_mesapd_coupling
