@@ -87,7 +87,7 @@ with CodeGeneration() as ctx:
 
     # create the kernels for the initialization of the g and h field
     h_updates = initializer_kernel_phase_field_lb(method_phase, C, u, h, parameters)
-    g_updates = initializer_kernel_hydro_lb(method_hydro, 1, u, g)
+    g_updates = initializer_kernel_hydro_lb(method_hydro, 1.0, u, g)
 
     force_h = interface_tracking_force(C, stencil_phase, parameters)
     hydro_force = hydrodynamic_force(g, C, method_hydro, parameters, body_force)
@@ -116,17 +116,6 @@ with CodeGeneration() as ctx:
     ###################
     # GENERATE SWEEPS #
     ###################
-
-    vp = [('int32_t', 'cudaBlockSize0'),
-          ('int32_t', 'cudaBlockSize1'),
-          ('int32_t', 'cudaBlockSize2')]
-
-    sweep_block_size = (TypedSymbol("cudaBlockSize0", np.int32),
-                        TypedSymbol("cudaBlockSize1", np.int32),
-                        TypedSymbol("cudaBlockSize2", np.int32))
-
-    sweep_params = {'block_size': sweep_block_size}
-
     stencil_typedefs = {'Stencil_phase_T': stencil_phase,
                         'Stencil_hydro_T': stencil_hydro}
     field_typedefs = {'PdfField_phase_T': h,
@@ -144,13 +133,11 @@ with CodeGeneration() as ctx:
 
     generate_sweep(ctx, 'phase_field_LB_step', allen_cahn_update_rule,
                    field_swaps=[(h, h_tmp), (C, C_tmp)],
-                   inner_outer_split=True,
                    target=Target.CPU)
     generate_boundary(ctx, 'phase_field_LB_NoSlip', NoSlip(), method_phase, target=Target.CPU, streaming_pattern='pull')
 
     generate_sweep(ctx, 'hydro_LB_step', hydro_lb_update_rule,
                    field_swaps=[(g, g_tmp)],
-                   inner_outer_split=True,
                    target=Target.CPU)
     generate_boundary(ctx, 'hydro_LB_NoSlip', NoSlip(), method_hydro, target=Target.CPU, streaming_pattern='push')
 

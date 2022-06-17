@@ -31,15 +31,16 @@
 
 #include "geometry/InitBoundaryHandling.h"
 
+#include "lbm/PerformanceEvaluation.h"
+
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/PythonCallback.h"
 
 #include "timeloop/SweepTimeloop.h"
 
+#include "GenDefines.h"
 #include "InitializerFunctions.h"
 #include "PythonExports.h"
-
-#include "GenDefines.h"
 
 ////////////
 // USING //
@@ -47,8 +48,8 @@
 
 using namespace walberla;
 
-using flag_t           = walberla::uint8_t;
-using FlagField_T      = FlagField< flag_t >;
+using flag_t      = walberla::uint8_t;
+using FlagField_T = FlagField< flag_t >;
 
 int main(int argc, char** argv)
 {
@@ -68,7 +69,6 @@ int main(int argc, char** argv)
       //////////////////////////
 
       auto domainSetup                = config->getOneBlock("DomainSetup");
-      Vector3< uint_t > cellsPerBlock = domainSetup.getParameter< Vector3< uint_t > >("cellsPerBlock");
       const bool tube                 = domainSetup.getParameter< bool >("tube", true);
 
       ////////////////////////////////////////
@@ -80,21 +80,19 @@ int main(int argc, char** argv)
       const uint_t timesteps             = parameters.getParameter< uint_t >("timesteps", uint_c(50));
       const real_t remainingTimeLoggerFrequency =
          parameters.getParameter< real_t >("remainingTimeLoggerFrequency", real_c(3.0));
-      const uint_t scenario  = parameters.getParameter< uint_t >("scenario", uint_c(1));
-
-      Vector3< int > overlappingWidth =
-         parameters.getParameter< Vector3< int > >("overlappingWidth", Vector3< int >(1, 1, 1));
+      const uint_t scenario = parameters.getParameter< uint_t >("scenario", uint_c(1));
 
       /////////////////////////
       // ADD DATA TO BLOCKS //
       ///////////////////////
 
-      BlockDataID lb_phase_field =
-         field::addToStorage< PdfField_phase_T >(blocks, "lb phase field", real_c(0.0), field::fzyx);
-      BlockDataID lb_velocity_field =
-         field::addToStorage< PdfField_hydro_T >(blocks, "lb velocity field", real_c(0.0), field::fzyx);
-      BlockDataID vel_field   = field::addToStorage< VelocityField_T >(blocks, "vel", real_c(0.0), field::fzyx);
-      BlockDataID phase_field = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
+      BlockDataID allen_cahn_PDFs_ID =
+         field::addToStorage< PdfField_phase_T >(blocks, "LB phase field", real_c(0.0), field::fzyx);
+      BlockDataID hydrodynamic_PDFs_ID =
+         field::addToStorage< PdfField_hydro_T >(blocks, "LB velocity field", real_c(0.0), field::fzyx);
+      BlockDataID velocity_field_ID =
+         field::addToStorage< VelocityField_T >(blocks, "velocity", real_c(0.0), field::fzyx);
+      BlockDataID phase_field_ID = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
 
       BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
@@ -116,43 +114,60 @@ int main(int argc, char** argv)
          const Vector3< real_t > bubbleMidPoint = bubbleParameters.getParameter< Vector3< real_t > >("bubbleMidPoint");
          const real_t bubbleRadius              = bubbleParameters.getParameter< real_t >("bubbleRadius", real_c(20.0));
          const bool bubble                      = bubbleParameters.getParameter< bool >("bubble", true);
-         initPhaseField_sphere(blocks, phase_field, bubbleRadius, bubbleMidPoint, bubble);
+         initPhaseField_sphere(blocks, phase_field_ID, bubbleRadius, bubbleMidPoint, bubble);
       }
-      else if (scenario == 2)
-      {
-         initPhaseField_RTI(blocks, phase_field, interface_thickness, tube);
-      }
+      else if (scenario == 2) { initPhaseField_RTI(blocks, phase_field_ID, interface_thickness, tube); }
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the phase-field done")
 
       /////////////////
       // ADD SWEEPS //
       ///////////////
 
-      pystencils::initialize_phase_field_distributions init_h(lb_phase_field, phase_field, vel_field, interface_thickness);
-      pystencils::initialize_velocity_based_distributions init_g(lb_velocity_field, vel_field);
+      pystencils::initialize_phase_field_distributions init_h(allen_cahn_PDFs_ID, phase_field_ID, velocity_field_ID,
+                                                              interface_thickness);
+      pystencils::initialize_velocity_based_distributions init_g(hydrodynamic_PDFs_ID, velocity_field_ID);
 
-      pystencils::phase_field_LB_step phase_field_LB_step(
-         lb_phase_field, phase_field, vel_field, interface_thickness, mobility,
-         Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
-      pystencils::hydro_LB_step hydro_LB_step(lb_velocity_field, phase_field, vel_field, gravitational_acceleration,
-                                              interface_thickness, density_liquid, density_gas, surface_tension, relaxation_time_liquid,
-                                              relaxation_time_gas,
-                                              Cell(overlappingWidth[0], overlappingWidth[1], overlappingWidth[2]));
+      pystencils::phase_field_LB_step phase_field_LB_step(allen_cahn_PDFs_ID, phase_field_ID, velocity_field_ID,
+                                                          mobility, interface_thickness);
+      pystencils::hydro_LB_step hydro_LB_step(
+         hydrodynamic_PDFs_ID, phase_field_ID, velocity_field_ID, gravitational_acceleration, interface_thickness,
+         density_liquid, density_gas, surface_tension, relaxation_time_liquid, relaxation_time_gas);
 
       ////////////////////////
       // ADD COMMUNICATION //
       //////////////////////
-      blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > Comm_phase_field(blocks);
-      auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field);
-      Comm_phase_field.addPackInfo(generatedPackInfo_phase_field);
+      auto UniformBufferedSchemeVelocityDistributions =
+         make_shared< blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > >(blocks);
+      auto generatedPackInfo_velocity_based_distributions =
+         make_shared< lbm::PackInfo_velocity_based_distributions >(hydrodynamic_PDFs_ID);
+      UniformBufferedSchemeVelocityDistributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
+      auto Comm_velocity_based_distributions =
+         std::function< void() >([&]() { UniformBufferedSchemeVelocityDistributions->communicate(); });
+      auto Comm_velocity_based_distributions_start =
+         std::function< void() >([&]() { UniformBufferedSchemeVelocityDistributions->startCommunication(); });
+      auto Comm_velocity_based_distributions_wait =
+         std::function< void() >([&]() { UniformBufferedSchemeVelocityDistributions->wait(); });
 
-      blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > Comm_velocity_based_distributions(blocks);
-      auto generatedPackInfo_velocity_based_distributions = make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field);
-      Comm_velocity_based_distributions.addPackInfo(generatedPackInfo_velocity_based_distributions);
+      auto UniformBufferedSchemePhaseField =
+         make_shared< blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > >(blocks);
+      auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field_ID);
+      UniformBufferedSchemePhaseField->addPackInfo(generatedPackInfo_phase_field);
+      auto Comm_phase_field = std::function< void() >([&]() { UniformBufferedSchemePhaseField->communicate(); });
+      auto Comm_phase_field_start =
+         std::function< void() >([&]() { UniformBufferedSchemePhaseField->startCommunication(); });
+      auto Comm_phase_field_wait = std::function< void() >([&]() { UniformBufferedSchemePhaseField->wait(); });
 
-      blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > Comm_phase_field_distributions(blocks);
-      auto generatedPackInfo_phase_field_distributions = make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field);
-      Comm_phase_field_distributions.addPackInfo(generatedPackInfo_phase_field_distributions);
+      auto UniformBufferedSchemePhaseFieldDistributions =
+         make_shared< blockforest::communication::UniformBufferedScheme< Stencil_hydro_T > >(blocks);
+      auto generatedPackInfo_phase_field_distributions =
+         make_shared< lbm::PackInfo_phase_field_distributions >(allen_cahn_PDFs_ID);
+      UniformBufferedSchemePhaseFieldDistributions->addPackInfo(generatedPackInfo_phase_field_distributions);
+      auto Comm_phase_field_distributions =
+         std::function< void() >([&]() { UniformBufferedSchemePhaseFieldDistributions->communicate(); });
+      auto Comm_phase_field_distributions_start =
+         std::function< void() >([&]() { UniformBufferedSchemePhaseFieldDistributions->startCommunication(); });
+      auto Comm_phase_field_distributions_wait =
+         std::function< void() >([&]() { UniformBufferedSchemePhaseFieldDistributions->wait(); });
 
       ////////////////////////
       // BOUNDARY HANDLING //
@@ -168,9 +183,9 @@ int main(int argc, char** argv)
          geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, fluidFlagUID);
       }
 
-      lbm::phase_field_LB_NoSlip phase_field_LB_NoSlip(blocks, lb_phase_field);
-      lbm::hydro_LB_NoSlip hydro_LB_NoSlip(blocks, lb_velocity_field);
-      pystencils::ContactAngle contact_angle(blocks, phase_field, interface_thickness);
+      lbm::phase_field_LB_NoSlip phase_field_LB_NoSlip(blocks, allen_cahn_PDFs_ID);
+      lbm::hydro_LB_NoSlip hydro_LB_NoSlip(blocks, hydrodynamic_PDFs_ID);
+      pystencils::ContactAngle contact_angle(blocks, phase_field_ID, interface_thickness);
 
       phase_field_LB_NoSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldID, FlagUID("NoSlip"), fluidFlagUID);
       hydro_LB_NoSlip.fillFromFlagField< FlagField_T >(blocks, flagFieldID, FlagUID("NoSlip"), fluidFlagUID);
@@ -182,62 +197,19 @@ int main(int argc, char** argv)
       // TIME LOOP //
       //////////////
 
-      auto timeLoop       = make_shared< SweepTimeloop >(blocks->getBlockStorage(), timesteps);
-      auto normalTimeStep = [&]() {
-         for (auto& block : *blocks)
-         {
-            Comm_phase_field_distributions();
-            phase_field_LB_NoSlip(&block);
+      SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
 
+      timeloop.add() << BeforeFunction(Comm_velocity_based_distributions_start, "Start Hydro PDFs Communication")
+                     << Sweep(phase_field_LB_NoSlip, "NoSlip Phase");
+      timeloop.add() << Sweep(phase_field_LB_step, "Phase LB Step")
+                     << AfterFunction(Comm_velocity_based_distributions_wait, "Wait Hydro PDFs Communication");
+      timeloop.add() << Sweep(contact_angle, "Contact Angle")
+                     << AfterFunction(Comm_phase_field, "Communication Phase Field");
 
-            phase_field_LB_step(&block);
-            contact_angle(&block);
-            Comm_phase_field();
-
-
-            hydro_LB_step(&block);
-
-            Comm_velocity_based_distributions();
-            hydro_LB_NoSlip(&block);
-         }
-      };
-      auto simpleOverlapTimeStep = [&]() {
-        for (auto& block : *blocks)
-           phase_field_LB_NoSlip(&block);
-
-        Comm_phase_field_distributions.startCommunication();
-        for (auto& block : *blocks)
-           phase_field_LB_step.inner(&block);
-        Comm_phase_field_distributions.wait();
-        for (auto& block : *blocks)
-           phase_field_LB_step.outer(&block);
-
-        for (auto& block : *blocks)
-           contact_angle(&block);
-
-        Comm_phase_field.startCommunication();
-        for (auto& block : *blocks)
-           hydro_LB_step.inner(&block);
-        Comm_phase_field.wait();
-        for (auto& block : *blocks)
-           hydro_LB_step.outer(&block);
-
-        for (auto& block : *blocks)
-           hydro_LB_NoSlip(&block);
-      };
-      std::function< void() > timeStep;
-      if (timeStepStrategy == "overlap")
-      {
-         timeStep = std::function< void() >(simpleOverlapTimeStep);
-         WALBERLA_LOG_INFO_ON_ROOT("overlapping timestep")
-      }
-      else
-      {
-         timeStep = std::function< void() >(normalTimeStep);
-         WALBERLA_LOG_INFO_ON_ROOT("normal timestep with no overlapping")
-      }
-
-      timeLoop->add() << BeforeFunction(timeStep) << Sweep([](IBlock*) {}, "time step");
+      timeloop.add() << BeforeFunction(Comm_phase_field_distributions_start, "Start Phase PDFs Communication")
+                     << Sweep(hydro_LB_NoSlip, "NoSlip Hydro");
+      timeloop.add() << Sweep(hydro_LB_step, "Hydro LB Step")
+                     << AfterFunction(Comm_phase_field_distributions_wait, "Wait Phase PDFs Communication");
 
       if (scenario == 4)
       {
@@ -255,18 +227,19 @@ int main(int argc, char** argv)
          init_h(&block);
          init_g(&block);
       }
+      Comm_phase_field_distributions();
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the PDFs done")
       uint_t dbWriteFrequency = parameters.getParameter< uint_t >("dbWriteFrequency", 10000000);
 
-      timeLoop->addFuncAfterTimeStep(
+      timeloop.addFuncAfterTimeStep(
          [&]() {
-            if (timeLoop->getCurrentTimeStep() % dbWriteFrequency == 0)
+            if (timeloop.getCurrentTimeStep() % dbWriteFrequency == 0)
             {
                python_coupling::PythonCallback callback("at_end_of_time_step");
                if (callback.isCallable())
                {
                   callback.data().exposeValue("blocks", blocks);
-                  callback.data().exposeValue( "timeStep", timeLoop->getCurrentTimeStep());
+                  callback.data().exposeValue("timeStep", timeloop.getCurrentTimeStep());
                   callback.data().exposeValue("stencil_phase", StencilNamePhase);
                   callback.data().exposeValue("stencil_hydro", StencilNameHydro);
                   callback();
@@ -276,35 +249,41 @@ int main(int argc, char** argv)
          "Python callback");
 
       // remaining time logger
-      timeLoop->addFuncAfterTimeStep(
-         timing::RemainingTimeLogger(timeLoop->getNrOfTimeSteps(), remainingTimeLoggerFrequency),
+      timeloop.addFuncAfterTimeStep(
+         timing::RemainingTimeLogger(timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency),
          "remaining time logger");
 
       uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
       if (vtkWriteFrequency > 0)
       {
          auto vtkOutput   = vtk::createVTKOutput_BlockData(*blocks, "vtk", vtkWriteFrequency, 0, false, "vtk_out",
-                                                         "simulation_step", false, true, true, false, 0);
-         auto phaseWriter = make_shared< field::VTKWriter< PhaseField_T > >(phase_field, "PhaseField");
+                                                           "simulation_step", false, true, true, false, 0);
+         auto phaseWriter = make_shared< field::VTKWriter< PhaseField_T > >(phase_field_ID, "PhaseField");
          vtkOutput->addCellDataWriter(phaseWriter);
 
-         // auto velWriter = make_shared<field::VTKWriter<VelocityField_T>>(vel_field, "Velocity");
-         // vtkOutput->addCellDataWriter(velWriter);
+         auto velWriter = make_shared< field::VTKWriter< VelocityField_T > >(velocity_field_ID, "Velocity");
+         vtkOutput->addCellDataWriter(velWriter);
 
-         timeLoop->addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
+         timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
       }
 
-      WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
+      lbm::PerformanceEvaluation< FlagField_T > performance(blocks, flagFieldID, fluidFlagUID);
+      WcTimingPool timeloopTiming;
       WcTimer simTimer;
+
+      WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
+      WALBERLA_MPI_WORLD_BARRIER()
       simTimer.start();
-      timeLoop->run();
+      timeloop.run(timeloopTiming);
+      WALBERLA_MPI_WORLD_BARRIER()
       simTimer.end();
-      WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
-      auto time            = real_c(simTimer.last());
-      auto nrOfCells       = real_c(cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2]);
-      auto mlupsPerProcess = nrOfCells * real_c(timesteps) / time * 1e-6;
-      WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process: " << mlupsPerProcess)
-      WALBERLA_LOG_RESULT_ON_ROOT("Time per time step: " << time / real_c(timesteps) << " s")
+
+      auto time = real_c(simTimer.max());
+      WALBERLA_MPI_SECTION() { walberla::mpi::reduceInplace(time, walberla::mpi::MAX); }
+      performance.logResultOnRoot(timesteps, time);
+
+      const auto reducedTimeloopTiming = timeloopTiming.getReduced();
+      WALBERLA_LOG_RESULT_ON_ROOT("Time loop timing:\n" << *reducedTimeloopTiming)
    }
    return EXIT_SUCCESS;
 }
