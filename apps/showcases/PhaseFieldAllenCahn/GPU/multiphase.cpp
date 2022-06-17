@@ -39,7 +39,7 @@
 #include "geometry/InitBoundaryHandling.h"
 #include "geometry/mesh/TriangleMeshIO.h"
 
-#include "lbm/vtk/QCriterion.h"
+#include "lbm/PerformanceEvaluation.h"
 
 #include "postprocessing/FieldToSurfaceMesh.h"
 
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
       //////////////////////////
 
       auto domainSetup                = config->getOneBlock("DomainSetup");
-      Vector3< uint_t > cellsPerBlock = domainSetup.getParameter< Vector3< uint_t > >("cellsPerBlock");
+      Vector3< uint_t > cellsPerBlock = domainSetup.getParameter< Vector3< uint_t > >("cellsPerBlock", Vector3< int >(128, 1, 1));
       const bool tube                 = domainSetup.getParameter< bool >("tube", false);
 
       ////////////////////////////////////////
@@ -182,7 +182,7 @@ int main(int argc, char** argv)
       pystencils::initialize_velocity_based_distributions init_g(lb_velocity_field_gpu, vel_field_gpu);
 
       pystencils::phase_field_LB_step phase_field_LB_step(flagFieldID_gpu, lb_phase_field_gpu, phase_field_gpu,
-                                                          vel_field_gpu, interface_thickness, mobility, gpuBlockSize[0],
+                                                          vel_field_gpu, mobility, interface_thickness, gpuBlockSize[0],
                                                           gpuBlockSize[1], gpuBlockSize[2]);
 
       pystencils::hydro_LB_step hydro_LB_step(flagFieldID_gpu, lb_velocity_field_gpu, phase_field_gpu, vel_field_gpu,
@@ -193,23 +193,43 @@ int main(int argc, char** argv)
       ////////////////////////
       // ADD COMMUNICATION //
       //////////////////////
+      int streamLowPriority  = 0;
+      int streamHighPriority = 0;
+      auto defaultStream     = cuda::StreamRAII::newPriorityStream(streamLowPriority);
+      auto innerOuterStreams = cuda::ParallelStreams(streamHighPriority);
 
-      auto Comm_velocity_based_distributions =
+      auto UniformGPUSchemeVelocityDistributions =
          make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_velocity_based_distributions =
          make_shared< lbm::PackInfo_velocity_based_distributions >(lb_velocity_field_gpu);
-      Comm_velocity_based_distributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
+      UniformGPUSchemeVelocityDistributions->addPackInfo(generatedPackInfo_velocity_based_distributions);
+      auto Comm_velocity_based_distributions =
+         std::function< void() >([&]() { UniformGPUSchemeVelocityDistributions->communicate(defaultStream); });
+      auto Comm_velocity_based_distributions_start =
+         std::function< void() >([&]() { UniformGPUSchemeVelocityDistributions->startCommunication(defaultStream); });
+      auto Comm_velocity_based_distributions_wait =
+         std::function< void() >([&]() { UniformGPUSchemeVelocityDistributions->wait(defaultStream); });
 
-      auto Comm_phase_field =
+      auto UniformGPUSchemePhaseField =
          make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_phase_field = make_shared< pystencils::PackInfo_phase_field >(phase_field_gpu);
-      Comm_phase_field->addPackInfo(generatedPackInfo_phase_field);
+      UniformGPUSchemePhaseField->addPackInfo(generatedPackInfo_phase_field);
+      auto Comm_phase_field = std::function< void() >([&]() { UniformGPUSchemePhaseField->communicate(defaultStream); });
+      auto Comm_phase_field_start =
+         std::function< void() >([&]() { UniformGPUSchemePhaseField->startCommunication(defaultStream); });
+      auto Comm_phase_field_wait = std::function< void() >([&]() { UniformGPUSchemePhaseField->wait(defaultStream); });
 
-      auto Comm_phase_field_distributions =
+      auto UniformGPUSchemePhaseFieldDistributions =
          make_shared< cuda::communication::UniformGPUScheme< Stencil_hydro_T > >(blocks, cudaEnabledMpi);
       auto generatedPackInfo_phase_field_distributions =
          make_shared< lbm::PackInfo_phase_field_distributions >(lb_phase_field_gpu);
-      Comm_phase_field_distributions->addPackInfo(generatedPackInfo_phase_field_distributions);
+      UniformGPUSchemePhaseFieldDistributions->addPackInfo(generatedPackInfo_phase_field_distributions);
+      auto Comm_phase_field_distributions =
+         std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->communicate(defaultStream); });
+      auto Comm_phase_field_distributions_start =
+         std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->startCommunication(defaultStream); });
+      auto Comm_phase_field_distributions_wait =
+         std::function< void() >([&]() { UniformGPUSchemePhaseFieldDistributions->wait(defaultStream); });
 
       ////////////////////////
       // BOUNDARY HANDLING //
@@ -250,40 +270,19 @@ int main(int argc, char** argv)
       ////////////////
       // TIME LOOP //
       //////////////
+      SweepTimeloop timeloop(blocks->getBlockStorage(), timesteps);
 
-      int streamLowPriority  = 0;
-      int streamHighPriority = 0;
-      auto defaultStream     = cuda::StreamRAII::newPriorityStream(streamLowPriority);
-      auto innerOuterStreams = cuda::ParallelStreams(streamHighPriority);
+      timeloop.add() << BeforeFunction(Comm_velocity_based_distributions_start, "Start Hydro PDFs Communication")
+                     << Sweep(phase_field_LB_NoSlip, "NoSlip Phase");
+      timeloop.add() << Sweep(phase_field_LB_step, "Phase LB Step")
+                     << AfterFunction(Comm_velocity_based_distributions_wait, "Wait Hydro PDFs Communication");
+      timeloop.add() << Sweep(contact_angle, "Contact Angle")
+                     << AfterFunction(Comm_phase_field, "Communication Phase Field");
 
-      auto timeLoop       = make_shared< SweepTimeloop >(blocks->getBlockStorage(), timesteps);
-      auto normalTimeStep = [&]() {
-         Comm_velocity_based_distributions->startCommunication(defaultStream);
-         for (auto& block : *blocks)
-         {
-            phase_field_LB_NoSlip(&block, defaultStream);
-            phase_field_LB_step(&block, defaultStream);
-         }
-         Comm_velocity_based_distributions->wait(defaultStream);
-
-         for (auto& block : *blocks)
-         {
-            contact_angle(&block, defaultStream);
-            Comm_phase_field->communicate(defaultStream);
-         }
-
-         Comm_phase_field_distributions->startCommunication(defaultStream);
-         for (auto& block : *blocks)
-         {
-            hydro_LB_NoSlip(&block, defaultStream);
-            hydro_LB_step(&block, defaultStream);
-         }
-         Comm_phase_field_distributions->wait(defaultStream);
-      };
-      std::function< void() > timeStep;
-      timeStep = std::function< void() >(normalTimeStep);
-
-      timeLoop->add() << BeforeFunction(timeStep) << Sweep([](IBlock*) {}, "time step");
+      timeloop.add() << BeforeFunction(Comm_phase_field_distributions_start, "Start Phase PDFs Communication")
+                     << Sweep(hydro_LB_NoSlip, "NoSlip Hydro");
+      timeloop.add() << Sweep(hydro_LB_step, "Hydro LB Step")
+                     << AfterFunction(Comm_phase_field_distributions_wait, "Wait Phase PDFs Communication");
 
       if (scenario == 4)
       {
@@ -295,6 +294,7 @@ int main(int argc, char** argv)
          }
       }
       cuda::fieldCpy< GPUField, PhaseField_T >(blocks, phase_field_gpu, phase_field);
+      WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
 
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the PDFs")
       for (auto& block : *blocks)
@@ -302,24 +302,22 @@ int main(int argc, char** argv)
          init_h(&block);
          init_g(&block);
       }
+      Comm_phase_field_distributions();
 
-      for (auto& block : *blocks)
-      {
-         Comm_phase_field_distributions->communicate(nullptr);
-         phase_field_LB_NoSlip(&block);
-      }
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the PDFs done")
       uint_t dbWriteFrequency = parameters.getParameter< uint_t >("dbWriteFrequency", 0);
       int targetRank          = 0;
 
       if (dbWriteFrequency > 0)
       {
-         timeLoop->addFuncAfterTimeStep(
+         timeloop.addFuncAfterTimeStep(
             [&]() {
-               if (timeLoop->getCurrentTimeStep() % dbWriteFrequency == 0)
+               if (timeloop.getCurrentTimeStep() % dbWriteFrequency == 0)
                {
                   cuda::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu);
                   cuda::fieldCpy< VelocityField_T, GPUField >(blocks, vel_field, vel_field_gpu);
+                  WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+
                   if (scenario == 4)
                   {
                      std::array< real_t, 4 > total_velocity = { 0.0, 0.0, 0.0, 0.0 };
@@ -349,7 +347,7 @@ int main(int argc, char** argv)
                      if (callback.isCallable())
                      {
                         callback.data().exposeValue("blocks", blocks);
-                        callback.data().exposeValue("timeStep", timeLoop->getCurrentTimeStep());
+                        callback.data().exposeValue("timeStep", timeloop.getCurrentTimeStep());
                         callback.data().exposeValue("target_rank", targetRank);
                         callback.data().exposeValue("bounding_box_min", boundingBox.min()[1]);
                         callback.data().exposeValue("bounding_box_max", boundingBox.max()[1]);
@@ -373,7 +371,7 @@ int main(int argc, char** argv)
                      if (callback.isCallable())
                      {
                         callback.data().exposeValue("blocks", blocks);
-                        callback.data().exposeValue("timeStep", timeLoop->getCurrentTimeStep());
+                        callback.data().exposeValue("timeStep", timeloop.getCurrentTimeStep());
                         callback.data().exposeValue("stencil_phase", StencilNamePhase);
                         callback.data().exposeValue("stencil_hydro", StencilNameHydro);
                         callback();
@@ -388,9 +386,9 @@ int main(int argc, char** argv)
       int counter            = 0;
       if (meshWriteFrequency > 0)
       {
-         timeLoop->addFuncAfterTimeStep(
+         timeloop.addFuncAfterTimeStep(
             [&]() {
-               if (timeLoop->getCurrentTimeStep() % uint_t(meshWriteFrequency) == 0)
+               if (timeloop.getCurrentTimeStep() % uint_t(meshWriteFrequency) == 0)
                {
                   auto mesh = postprocessing::realFieldToSurfaceMesh< PhaseField_T >(blocks, phase_field, 0.5, 0, true,
                                                                                      targetRank, MPI_COMM_WORLD);
@@ -409,8 +407,8 @@ int main(int argc, char** argv)
       }
 
       // remaining time logger
-      timeLoop->addFuncAfterTimeStep(
-         timing::RemainingTimeLogger(timeLoop->getNrOfTimeSteps(), remainingTimeLoggerFrequency),
+      timeloop.addFuncAfterTimeStep(
+         timing::RemainingTimeLogger(timeloop.getNrOfTimeSteps(), remainingTimeLoggerFrequency),
          "remaining time logger");
 
       uint_t vtkWriteFrequency = parameters.getParameter< uint_t >("vtkWriteFrequency", 0);
@@ -423,6 +421,8 @@ int main(int argc, char** argv)
             cuda::fieldCpy< PhaseField_T, GPUField >(blocks, phase_field, phase_field_gpu);
             cuda::fieldCpy< VelocityField_T, GPUField >(blocks, vel_field, vel_field_gpu);
          });
+         WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+
          auto phaseWriter = make_shared< field::VTKWriter< PhaseField_T, float > >(phase_field, "PhaseField");
          vtkOutput->addCellDataWriter(phaseWriter);
 
@@ -432,23 +432,31 @@ int main(int argc, char** argv)
          auto velWriter = make_shared< field::VTKWriter< VelocityField_T, float > >(vel_field, "Velocity");
          vtkOutput->addCellDataWriter(velWriter);
 
-         timeLoop->addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
+         timeloop.addFuncBeforeTimeStep(vtk::writeFiles(vtkOutput), "VTK Output");
       }
 
-      WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
+      lbm::PerformanceEvaluation< FlagField_T > performance(blocks, flagFieldID, fluidFlagUID);
+      WcTimingPool timeloopTiming;
       WcTimer simTimer;
+
+      WALBERLA_MPI_WORLD_BARRIER()
+      cudaDeviceSynchronize();
+      WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
+
+      WALBERLA_LOG_INFO_ON_ROOT("Starting simulation with " << timesteps << " time steps")
       simTimer.start();
-      timeLoop->run();
+      timeloop.run(timeloopTiming);
 
       cudaDeviceSynchronize();
+      WALBERLA_CUDA_CHECK(cudaPeekAtLastError())
 
       simTimer.end();
-      WALBERLA_LOG_INFO_ON_ROOT("Simulation finished")
-      auto time            = real_c(simTimer.last());
-      auto nrOfCells       = real_c(cellsPerBlock[0] * cellsPerBlock[1] * cellsPerBlock[2]);
-      auto mlupsPerProcess = nrOfCells * real_c(timesteps) / time * 1e-6;
-      WALBERLA_LOG_RESULT_ON_ROOT("MLUPS per process: " << mlupsPerProcess)
-      WALBERLA_LOG_RESULT_ON_ROOT("Time per time step: " << time / real_c(timesteps) << " s")
+      auto time = real_c(simTimer.max());
+      WALBERLA_MPI_SECTION() { walberla::mpi::reduceInplace(time, walberla::mpi::MAX); }
+      performance.logResultOnRoot(timesteps, time);
+
+      const auto reducedTimeloopTiming = timeloopTiming.getReduced();
+      WALBERLA_LOG_RESULT_ON_ROOT("Time loop timing:\n" << *reducedTimeloopTiming)
    }
    return EXIT_SUCCESS;
 }

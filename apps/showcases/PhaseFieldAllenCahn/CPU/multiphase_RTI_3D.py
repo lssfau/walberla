@@ -17,12 +17,20 @@ class Scenario:
         # simulation parameters
         self.time = 2  # physical time in seconds
 
-        self.cells = (128, 64, 128)
-        self.blocks = (1, 8, 1)
+        # domain decomposition can be specified manually by specifying the number of cells per block and the
+        # number of blocks. The number of blocks must be equal to the MPI processes used. If only the total domain size
+        # is specified with 'cells' waLBerla will take care of the decomposition depending on the number of MPI
+        # processes at runtime
+
+        # self.cell_per_block = (128, 64, 128)
+        # self.blocks = (1, 8, 1)
+        # self.size = (self.cell_per_block[0] * self.blocks[0],
+        #              self.cell_per_block[1] * self.blocks[1],
+        #              self.cell_per_block[2] * self.blocks[2])
+
+        self.cells = (128, 512, 128)
+        self.size = self.cells
         self.periodic = (1, 0, 1)
-        self.size = (self.cells[0] * self.blocks[0],
-                     self.cells[1] * self.blocks[1],
-                     self.cells[2] * self.blocks[2])
 
         # physical parameters
         self.density_heavy = 1.0
@@ -53,19 +61,16 @@ class Scenario:
         # everything else
         self.dbFile = "RTI.csv"
 
-        self.scenario = 2  # 1 rising bubble or droplet, 2 RTI, 3 bubble field, 4 taylor bubble set up
-
-        self.counter = 0
-        self.yPositions = []
-
+        self.scenario = 2  # 1 rising bubble or droplet, 2 RTI
         self.config_dict = self.config()
 
     @wlb.member_callback
     def config(self):
         return {
             'DomainSetup': {
-                'blocks': self.blocks,
-                'cellsPerBlock': self.cells,
+                # 'blocks': self.blocks,
+                # 'cellsPerBlock': self.cell_per_block,
+                'cells': self.cells,
                 'periodic': self.periodic,
                 'tube': self.tube
             },
@@ -77,13 +82,13 @@ class Scenario:
                 'scenario': self.scenario,
             },
             'PhysicalParameters': {
-                'density_liquid': self.density_heavy,
-                'density_gas': self.parameters.get("density_light"),
-                'surface_tension': self.parameters.get("surface_tension"),
-                'mobility': self.parameters.get("mobility"),
-                'gravitational_acceleration': self.parameters.get("gravitational_acceleration"),
-                'relaxation_time_liquid': self.parameters.get("relaxation_time_heavy"),
-                'relaxation_time_gas': self.parameters.get("relaxation_time_light"),
+                'density_liquid': self.parameters.density_heavy,
+                'density_gas': self.parameters.density_light,
+                'surface_tension': self.parameters.surface_tension,
+                'mobility': self.parameters.mobility,
+                'gravitational_acceleration': self.parameters.gravitational_acceleration,
+                'relaxation_time_liquid': self.parameters.relaxation_time_heavy,
+                'relaxation_time_gas': self.parameters.relaxation_time_heavy,
                 'interface_thickness': self.interface_thickness
             },
             'Boundaries': {

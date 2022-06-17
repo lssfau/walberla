@@ -7,16 +7,18 @@ class Scenario:
         self.vtkWriteFrequency = 1000
 
         # simulation parameters
-        self.timesteps = 10001
-        self.cells = (128, 64, 128)
-        self.blocks = (1, 1, 1)
-        self.periodic = (0, 0, 0)
-        self.size = (self.cells[0] * self.blocks[0],
-                     self.cells[1] * self.blocks[1],
-                     self.cells[2] * self.blocks[2])
+        self.timesteps = 10000
 
-        self.overlappingWidth = (8, 1, 1)
-        self.timeStepStrategy = 'normal'
+        # domain decomposition can be specified manually by specifying the number of cells per block and the
+        # number of blocks. The number of blocks must be equal to the MPI processes used. If only the total domain size
+        # is specified with 'cells' waLBerla will take care of the decomposition depending on the number of MPI
+        # processes at runtime
+
+        # self.cell_per_block = (32, 64, 32)
+        # self.blocks = (4, 1, 4)
+        self.cells = (128, 64, 128)
+
+        self.periodic = (0, 0, 0)
 
         # bubble parameters
         self.dropletRadius = 24.0
@@ -25,26 +27,22 @@ class Scenario:
         # everything else
         self.scenario = 1  # 1 rising bubble or droplet, 2 RTI, 3 bubble field, 4 taylor bubble set up
 
-        self.counter = 0
-        self.yPositions = []
-
         self.cudaEnabledMpi = cuda_enabled_mpi
-        self.cuda_blocks = (64, 2, 2)
+        self.cuda_blocks = (128, 1, 1)
 
     @wlb.member_callback
     def config(self):
         return {
             'DomainSetup': {
-                'blocks': self.blocks,
-                'cellsPerBlock': self.cells,
+                # 'blocks': self.blocks,
+                # 'cellsPerBlock': self.cell_per_block,
+                'cells': self.cells,
                 'periodic': self.periodic,
                 'tube': False
             },
             'Parameters': {
                 'timesteps': self.timesteps,
                 'vtkWriteFrequency': self.vtkWriteFrequency,
-                'timeStepStrategy': self.timeStepStrategy,
-                'overlappingWidth': self.overlappingWidth,
                 'remainingTimeLoggerFrequency': 10.0,
                 'scenario': self.scenario,
                 'cudaEnabledMpi': self.cudaEnabledMpi,
@@ -79,4 +77,4 @@ class Scenario:
 
 
 scenarios = wlb.ScenarioManager()
-scenarios.add(Scenario())
+scenarios.add(Scenario(cuda_enabled_mpi=False))
