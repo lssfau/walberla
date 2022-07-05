@@ -109,7 +109,7 @@ void testPoisson()
 
    // Registering the sweep
    timeloop.add() << BeforeFunction(  commScheme, "Communication" )
-                  << Sweep( pystencils::Poisson(fId, fieldID, dx, dy), "Poisson Kernel" );
+                  << Sweep( pystencils::Poisson(fId, fieldID, dx*dx, dy*dy), "Poisson Kernel" );
 
    timeloop.run();
 
