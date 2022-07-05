@@ -123,7 +123,9 @@ with CodeGeneration() as ctx:
     # GENERATE SWEEPS #
     ###################
 
-    cpu_vec = {'assume_inner_stride_one': True, 'nontemporal': True}
+    # by default NT Stores are deactivated because they do not work in all cases
+    # must be activated to achieve full potential for example on AVX512 CPUs
+    cpu_vec = {'assume_inner_stride_one': True, 'nontemporal': False}
 
     vp = [('int32_t', 'cudaBlockSize0'),
           ('int32_t', 'cudaBlockSize1'),

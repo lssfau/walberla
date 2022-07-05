@@ -97,7 +97,7 @@ with CodeGeneration() as ctx:
     openmp = True if ctx.openmp else False
     field_type = "float64" if ctx.double_accuracy else "float32"
     if ctx.optimize_for_localhost:
-        cpu_vec = {"nontemporal": True, "assume_aligned": True}
+        cpu_vec = {"nontemporal": False, "assume_aligned": True}
     else:
         cpu_vec = None
 
