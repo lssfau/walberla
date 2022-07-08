@@ -1,0 +1,110 @@
+BlockForestParameters
+{
+   cellsPerBlock                 < 10, 10, 10 >;
+   periodicity                   < 1, 1, 0 >;
+   loadBalancingFrequency        372;
+   printLoadBalancingStatistics  true;
+}
+
+DomainParameters
+{
+   dropDiameter      20;
+   dropCenterFactor  < 2, 2, 1 >;      // values multiplied with dropDiameter
+   poolHeightFactor  0.5;              // value multiplied with dropDiameter
+   domainSizeFactor  < 10, 10, 5 >;    // values multiplied with dropDiameter
+}
+
+PhysicsParameters
+{
+   bondNumber        3.18;
+   weberNumber       2010;
+   ohnesorgeNumber   0.0384;
+   relaxationRate    1.989;
+   impactAngleDegree 0;
+   enableWetting     false;
+   contactAngle      0; // only used if enableWetting=true
+   timesteps         6000;
+}
+
+ModelParameters
+{
+   pdfReconstructionModel        OnlyMissing;
+   pdfRefillingModel             EquilibriumRefilling;
+   excessMassDistributionModel   EvenlyAllInterface;
+   curvatureModel                FiniteDifferenceMethod;
+   enableForceWeighting          false;
+   useSimpleMassExchange         false;
+   enableBubbleModel             false;
+   enableBubbleSplits            false; // only used if enableBubbleModel=true
+   cellConversionThreshold       1e-2;
+   cellConversionForceThreshold  1e-1;
+}
+
+EvaluationParameters
+{
+   performanceLogFrequency 3000;
+}
+
+BoundaryParameters
+{
+   // X
+   //Border { direction W;  walldistance -1; NoSlip{} }
+   //Border { direction E;  walldistance -1; NoSlip{} }
+
+   // Y
+   //Border { direction N;  walldistance -1; NoSlip{} }
+   //Border { direction S;  walldistance -1; NoSlip{} }
+
+   // Z
+   Border { direction T;  walldistance -1; NoSlip{} }
+   Border { direction B;  walldistance -1; NoSlip{} }
+}
+
+MeshOutputParameters
+{
+   writeFrequency 50;
+   baseFolder mesh-out;
+}
+
+VTK
+{
+   fluid_field
+   {
+      writeFrequency 1000;
+      ghostLayers 0;
+      baseFolder vtk-out;
+      samplingResolution 1;
+
+      writers
+      {
+         velocity;
+         density;
+         //pdf;
+         flag;
+         fill_level;
+         force;
+         curvature;
+         normal;
+         obstacle_normal;
+         mapped_flag;
+        }
+
+        inclusion_filters
+        {
+            // only include liquid and interface cells in VTK output
+            //liquidInterfaceFilter;
+        }
+
+        before_functions
+        {
+            //ghost_layer_synchronization; // only needed if writing the ghost layer
+        }
+
+   }
+   domain_decomposition
+   {
+      writeFrequency 372;
+      baseFolder vtk-out;
+      outputDomainDecomposition true;
+   }
+}

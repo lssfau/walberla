@@ -1,0 +1,111 @@
+BlockForestParameters
+{
+   cellsPerBlock                 < 10, 5, 10 >;
+   periodicity                   < 1, 0, 1 >;
+   loadBalancingFrequency        248;
+   printLoadBalancingStatistics  true;
+}
+
+DomainParameters
+{
+   columnRadius 25;  // initial radius of the liquid column; "a" in Martin & Moyce's paper (10.1098/rsta.1952.0006)
+   columnRatio 1;    // ratio between columnHeight and columnRadius; "n^2" in Martin & Moyce's paper
+}
+
+PhysicsParameters
+{
+   galileiNumber     1831123817;
+   bondNumber        445;
+   relaxationRate    1.9995;
+   enableWetting     false;
+   contactAngle      0; // only used if enableWetting=true
+   timesteps         2480;
+}
+
+ModelParameters
+{
+   pdfReconstructionModel        OnlyMissing;
+   pdfRefillingModel             EquilibriumRefilling;
+   excessMassDistributionModel   EvenlyAllInterface;
+   curvatureModel                FiniteDifferenceMethod;
+   enableForceWeighting          false;
+   useSimpleMassExchange         false;
+   cellConversionThreshold       1e-2;
+   cellConversionForceThreshold  1e-1;
+
+   enableBubbleModel             false;
+   enableBubbleSplits            false; // only used if enableBubbleModel=true
+
+   smagorinskyConstant           0.1;
+}
+
+EvaluationParameters
+{
+   performanceLogFrequency 2480;
+   evaluationFrequency     24;
+   filename                rot-breaking-dam.txt;
+}
+
+BoundaryParameters
+{
+   // X
+   //Border { direction W;  walldistance -1;  FreeSlip{} }
+   //Border { direction E;  walldistance -1;  FreeSlip{} }
+
+   // Y
+   Border { direction N;  walldistance -1;  FreeSlip{} }
+   Border { direction S;  walldistance -1;  FreeSlip{} }
+
+   // Z
+   //Border { direction T;  walldistance -1; FreeSlip{} }
+   //Border { direction B;  walldistance -1; FreeSlip{} }
+}
+
+MeshOutputParameters
+{
+   writeFrequency 248;
+   baseFolder mesh-out;
+}
+
+VTK
+{
+   fluid_field
+   {
+      writeFrequency 248;
+      ghostLayers 0;
+      baseFolder vtk-out;
+      samplingResolution 1;
+
+      writers
+      {
+         velocity;
+         density;
+         //pdf;
+         flag;
+         fill_level;
+         force;
+         curvature;
+         normal;
+         obstacle_normal;
+         mapped_flag;
+        }
+
+        inclusion_filters
+        {
+            // only include liquid and interface cells in VTK output
+            //liquidInterfaceFilter;
+        }
+
+        before_functions
+        {
+            //ghost_layer_synchronization; // only needed if writing the ghost layer
+        }
+
+   }
+   domain_decomposition
+   {
+      writeFrequency 248;
+      baseFolder vtk-out;
+      outputDomainDecomposition true;
+   }
+}

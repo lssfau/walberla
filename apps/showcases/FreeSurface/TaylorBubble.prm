@@ -1,0 +1,110 @@
+BlockForestParameters
+{
+   cellsPerBlock                 < 16, 16, 20 >;
+   periodicity                   < 0, 0, 0 >;
+   loadBalancingFrequency        0;
+   printLoadBalancingStatistics  false;
+}
+
+DomainParameters
+{
+   tubeDiameter      32;
+   bubbleDiameter    0.75;             // value multiplied with tubeDiameter
+   bubbleHeight      3;                // value multiplied with tubeDiameter
+   bubbleBottomEnd   < 0.5, 0.5, 1 >;  // initial cylindrical bubble's bottom end center (values multiplied with tubeDiameter)
+   domainSizeFactor  < 1, 1, 10 >;     // values multiplied with tubeDiameter
+}
+
+PhysicsParameters
+{
+   bondNumber        100;
+   mortonNumber      0.015;
+   relaxationRate    1.8;
+   enableWetting     false;
+   contactAngle      60; // only used if enableWetting=true
+   timesteps         12240;
+}
+
+ModelParameters
+{
+   pdfReconstructionModel        OnlyMissing;
+   pdfRefillingModel             EquilibriumRefilling;
+   excessMassDistributionModel   EvenlyAllInterface;
+   curvatureModel                FiniteDifferenceMethod;
+   enableForceWeighting          false;
+   useSimpleMassExchange         false;
+   cellConversionThreshold       1e-2;
+   cellConversionForceThreshold  1e-1;
+
+   enableBubbleModel             true;
+   enableBubbleSplits            false; // only used if enableBubbleModel=true
+}
+
+EvaluationParameters
+{
+   performanceLogFrequency 1224;
+   evaluationFrequency     61;
+   filename                taylor-bubble.txt;
+}
+
+BoundaryParameters
+{
+   // X
+   Border { direction W;  walldistance -1; NoSlip{} }
+   Border { direction E;  walldistance -1; NoSlip{} }
+
+   // Y
+   Border { direction N;  walldistance -1; NoSlip{} }
+   Border { direction S;  walldistance -1; NoSlip{} }
+
+   // Z
+   Border { direction T;  walldistance -1; NoSlip{} }
+   Border { direction B;  walldistance -1; NoSlip{} }
+}
+
+MeshOutputParameters
+{
+   writeFrequency 612;
+   baseFolder     mesh-out;
+}
+
+VTK
+{
+   fluid_field
+   {
+      writeFrequency       612;
+      ghostLayers          0;
+      baseFolder           vtk-out;
+      samplingResolution   1;
+
+      writers
+      {
+         fill_level;
+         mapped_flag;
+         velocity;
+         density;
+         curvature;
+         normal;
+         obstacle_normal;
+         //pdf;
+         //flag;
+         //force;
+      }
+
+      inclusion_filters
+      {
+         //liquidInterfaceFilter; // only include liquid and interface cells in VTK output
+      }
+
+      before_functions
+      {
+         //ghost_layer_synchronization; // only needed if writing the ghost layer
+      }
+   }
+   domain_decomposition
+   {
+      writeFrequency             0;
+      baseFolder                 vtk-out;
+      outputDomainDecomposition  true;
+   }
+}

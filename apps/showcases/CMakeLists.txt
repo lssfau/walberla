@@ -1,6 +1,7 @@
 add_subdirectory( BidisperseFluidizedBed )
 add_subdirectory( CombinedResolvedUnresolved )
 add_subdirectory( FluidizedBed )
+add_subdirectory( FreeSurface )
 add_subdirectory( HeatConduction )
 add_subdirectory( LightRisingParticleInFluidAMR )
 add_subdirectory( Mixer )
@@ -12,3 +13,4 @@ endif()
 if ( WALBERLA_BUILD_WITH_CODEGEN AND NOT WALBERLA_BUILD_WITH_OPENMP)
    add_subdirectory( PorousMedia )
 endif()
+

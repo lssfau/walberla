@@ -1,0 +1,107 @@
+BlockForestParameters
+{
+   cellsPerBlock                 < 25, 25, 1 >;
+   periodicity                   < 1, 0, 1 >;
+   loadBalancingFrequency        0;
+   printLoadBalancingStatistics  false;
+}
+
+DomainParameters
+{
+   domainWidth       200; // equivalent to wavelength
+   liquidDepth       100;
+   initialAmplitude  2;
+}
+
+PhysicsParameters
+{
+   reynoldsNumber    10;
+   relaxationRate    1.8;
+   enableWetting     false;
+   contactAngle      0; // only used if enableWetting=true
+   timesteps         86400;
+}
+
+ModelParameters
+{
+   pdfReconstructionModel        OnlyMissing;
+   pdfRefillingModel             EquilibriumRefilling;
+   excessMassDistributionModel   EvenlyAllInterface;
+   curvatureModel                FiniteDifferenceMethod;
+   enableForceWeighting          false;
+   useSimpleMassExchange         false;
+   cellConversionThreshold       1e-2;
+   cellConversionForceThreshold  1e-1;
+
+   enableBubbleModel             false;
+   enableBubbleSplits            false; // only used if enableBubbleModel=true
+}
+
+EvaluationParameters
+{
+   performanceLogFrequency 43200;
+   evaluationFrequency     864;
+   filename                gravity-wave.txt;
+}
+
+BoundaryParameters
+{
+   // X
+   //Border { direction W;  walldistance -1; NoSlip{} }
+   //Border { direction E;  walldistance -1; NoSlip{} }
+
+   // Y
+   Border { direction N;  walldistance -1; NoSlip{} }
+   Border { direction S;  walldistance -1; NoSlip{} }
+
+   // Z
+   //Border { direction T;  walldistance -1; NoSlip{} }
+   //Border { direction B;  walldistance -1; NoSlip{} }
+}
+
+MeshOutputParameters
+{
+   writeFrequency 864;
+   baseFolder     mesh-out;
+}
+
+VTK
+{
+   fluid_field
+   {
+      writeFrequency       864;
+      ghostLayers          0;
+      baseFolder           vtk-out;
+      samplingResolution   1;
+
+      writers
+      {
+         fill_level;
+         mapped_flag;
+         velocity;
+         density;
+         //curvature;
+         //normal;
+         //obstacle_normal;
+         //pdf;
+         //flag;
+         //force;
+      }
+
+      inclusion_filters
+      {
+         //liquidInterfaceFilter; // only include liquid and interface cells in VTK output
+      }
+
+      before_functions
+      {
+         //ghost_layer_synchronization; // only needed if writing the ghost layer
+      }
+   }
+   domain_decomposition
+   {
+      writeFrequency             0;
+      baseFolder                 vtk-out;
+      outputDomainDecomposition  true;
+   }
+}

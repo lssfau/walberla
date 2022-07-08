@@ -34,6 +34,7 @@
 #include "ParserUBB.h"
 #include "Pressure.h"
 #include "SimpleDiffusionDirichlet.h"
+#include "SimpleExtrapolationOutflow.h"
 #include "SimplePAB.h"
 #include "SimplePressure.h"
 #include "SimpleUBB.h"

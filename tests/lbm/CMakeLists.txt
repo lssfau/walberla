@@ -130,10 +130,10 @@ waLBerla_compile_test( FILES codegen/FieldLayoutAndVectorizationTest.cpp DEPENDS
 waLBerla_execute_test( NAME FieldLayoutAndVectorizationTest )
 
 waLBerla_generate_target_from_python(NAME LbmPackInfoGenerationTestCodegen FILE codegen/LbmPackInfoGenerationTest.py
-                                     OUT_FILES AccessorBasedPackInfoEven.cpp AccessorBasedPackInfoEven.h
-                                               AccessorBasedPackInfoOdd.cpp AccessorBasedPackInfoOdd.h
-                                               FromKernelPackInfoPull.cpp FromKernelPackInfoPull.h
-                                               FromKernelPackInfoPush.cpp FromKernelPackInfoPush.h)
+        OUT_FILES AccessorBasedPackInfoEven.cpp AccessorBasedPackInfoEven.h
+        AccessorBasedPackInfoOdd.cpp AccessorBasedPackInfoOdd.h
+        FromKernelPackInfoPull.cpp FromKernelPackInfoPull.h
+        FromKernelPackInfoPush.cpp FromKernelPackInfoPush.h)
 
 waLBerla_link_files_to_builddir( "diff_packinfos.sh" )
 waLBerla_execute_test( NAME LbmPackInfoGenerationDiffTest COMMAND bash diff_packinfos.sh )
@@ -170,3 +170,139 @@ waLBerla_compile_test( FILES    codegen/StreamInCellIntervalCodegenTest.cpp
 waLBerla_execute_test( NAME     StreamInCellIntervalCodegenTest )
 
 endif()
+
+# Free Surface
+waLBerla_compile_test( FILES     free_surface/bubble_model/BubbleInitializationTest.cpp
+                       DEPENDS   blockforest field geometry lbm timeloop )
+waLBerla_execute_test( NAME      BubbleInitializationTest
+                       PROCESSES 2 )
+
+file( COPY        free_surface/bubble_model/MergeAndSplitTestUnconnected.png
+                  free_surface/bubble_model/MergeAndSplitTestConnected.png
+      DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+waLBerla_compile_test( FILES        free_surface/bubble_model/MergeAndSplitTest.cpp
+                                    free_surface/bubble_model/BubbleBodyMover.impl.h
+                                    free_surface/bubble_model/BubbleModelTester.impl.h
+                       DEPENDS      blockforest field lbm timeloop )
+waLBerla_execute_test( NAME         MergeAndSplitTest
+                       PROCESSES    10 )
+
+waLBerla_compile_test( FILES     free_surface/bubble_model/MergeInformationTest.cpp
+                       DEPENDS   blockforest field lbm timeloop )
+waLBerla_execute_test( NAME      MergeInformationTest
+                       PROCESSES 3 )
+
+waLBerla_compile_test( FILES     free_surface/bubble_model/MovingSpheresTest.cpp
+                                 free_surface/bubble_model/BubbleBodyMover.impl.h
+                                 free_surface/bubble_model/BubbleModelTester.impl.h
+                       DEPENDS   blockforest field geometry lbm timeloop )
+waLBerla_execute_test( NAME      MovingSpheresTest
+                       PROCESSES 2 )
+
+waLBerla_compile_test( FILES    free_surface/bubble_model/RegionalFloodFillTest.cpp
+                       DEPENDS  field lbm )
+waLBerla_execute_test( NAME     RegionalFloodFillTest )
+
+waLBerla_compile_test( FILES    free_surface/bubble_model/SplitDetectionTest.cpp
+                       DEPENDS  field lbm)
+waLBerla_execute_test( NAME     SplitDetectionTest )
+
+waLBerla_compile_test( FILES    free_surface/dynamics/AdvectionTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     AdvectionTest )
+
+waLBerla_compile_test( FILES    free_surface/dynamics/CellConversionTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     CellConversionTest )
+
+if( WALBERLA_BUILD_WITH_CODEGEN )
+   walberla_generate_target_from_python( NAME      LatticeModelGenerationFreeSurfacePython
+                                         FILE      free_surface/dynamics/LatticeModelGenerationFreeSurface.py
+                                         OUT_FILES GeneratedLatticeModel_FreeSurface.cpp
+                                                   GeneratedLatticeModel_FreeSurface.h )
+   waLBerla_compile_test( FILES    free_surface/dynamics/CodegenTest.cpp
+                          DEPENDS  blockforest field lbm timeloop LatticeModelGenerationFreeSurfacePython )
+   waLBerla_execute_test( NAME     CodegenTest )
+endif()
+
+waLBerla_compile_test( FILES    free_surface/dynamics/ExcessMassDistributionFallbackTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     ExcessMassDistributionFallbackTest )
+
+waLBerla_compile_test( FILES        free_surface/dynamics/ExcessMassDistributionParallelTest.cpp
+                       DEPENDS      blockforest field lbm timeloop )
+waLBerla_execute_test( NAME         ExcessMassDistributionParallelTest
+                       PROCESSES    2)
+
+waLBerla_compile_test( FILES    free_surface/dynamics/InflowTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     InflowTest )
+
+waLBerla_compile_test( FILES        free_surface/LoadBalancingTest.cpp
+                       DEPENDS      blockforest field lbm timeloop )
+waLBerla_execute_test( NAME         LoadBalancingTest
+                       PROCESSES    4)
+
+waLBerla_compile_test( FILES    free_surface/dynamics/PdfReconstructionFreeSlipTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     PdfReconstructionFreeSlipTest )
+
+waLBerla_compile_test( FILES    free_surface/dynamics/PdfReconstructionTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     PdfReconstructionTest )
+
+waLBerla_compile_test( FILES    free_surface/dynamics/PdfRefillingTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     PdfRefillingTest )
+
+waLBerla_compile_test( FILES    free_surface/dynamics/WettingConversionTest.cpp
+                       DEPENDS  blockforest field geometry lbm timeloop )
+waLBerla_execute_test( NAME     WettingConversionTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/CellFluidVolumeTest.cpp
+                       DEPENDS  lbm )
+waLBerla_execute_test( NAME     CellFluidVolumeTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/CurvatureOfSineTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     CurvatureOfSineTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/CurvatureOfSphereTest.cpp
+                       DEPENDS  blockforest field geometry lbm timeloop )
+waLBerla_execute_test( NAME     CurvatureOfSphereTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/DetectWettingTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     DetectWettingTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/GetInterfacePointTest.cpp
+                       DEPENDS  lbm )
+waLBerla_execute_test( NAME     GetInterfacePointTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/NormalsOfSineTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     NormalsOfSineTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/NormalsOfSphereTest.cpp
+                       DEPENDS  blockforest field geometry lbm timeloop )
+waLBerla_execute_test( NAME     NormalsOfSphereTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/NormalsEquivalenceTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     NormalsEquivalenceTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/NormalsNearSolidTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     NormalsNearSolidTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/ObstacleFillLevelTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     ObstacleFillLevelTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/ObstacleNormalsTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     ObstacleNormalsTest )
+
+waLBerla_compile_test( FILES    free_surface/surface_geometry/WettingCurvatureTest.cpp
+                       DEPENDS  blockforest field lbm timeloop )
+waLBerla_execute_test( NAME     WettingCurvatureTest )
