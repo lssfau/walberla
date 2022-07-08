@@ -462,7 +462,6 @@ int main(int argc, char** argv)
          centerOfMassOld = *centerOfMass;
       }
 
-
       // stop simulation before bubble hits the top wall
       if ((*centerOfMass)[2] > stoppingHeight) { break; }
 
