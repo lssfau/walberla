@@ -85,12 +85,10 @@ class BoundaryBlockDataHandling
       typename B::Pressure_T pressureOutflow(B::pressureOutflowBoundaryID, B::pressureOutflowFlagID, block, pdfField,
                                              flagField, interfaceFlag, real_c(1.0));
       typename B::Outlet_T outlet(B::outletBoundaryID, B::outletFlagID, pdfField, flagField, domainMask);
-      typename B::SimpleExtrapolationOutflow_T simpleExtrapolationOutflow(
-         B::simpleExtrapolationOutflowBoundaryID, B::simpleExtrapolationOutflowFlagID, pdfField);
       typename B::FreeSlip_T freeSlip(B::freeSlipBoundaryID, B::freeSlipFlagID, pdfField, flagField, domainMask);
 
       return new BoundaryHandling_T("Boundary Handling", flagField, domainMask, noslip, ubb, ubbInflow, pressure,
-                                    pressureOutflow, outlet, simpleExtrapolationOutflow, freeSlip);
+                                    pressureOutflow, outlet, freeSlip);
    }
 
    void serialize(IBlock* const block, const BlockDataID& id, mpi::SendBuffer& buffer)
@@ -143,13 +141,11 @@ FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::FreeS
    obstacleIDs += pressureOutflowFlagID;
    obstacleIDs += freeSlipFlagID;
    obstacleIDs += outletFlagID;
-   obstacleIDs += simpleExtrapolationOutflowFlagID;
 
    // initialize outflowIDs
    Set< FlagUID > outflowIDs;
    outflowIDs += pressureOutflowFlagID;
    outflowIDs += outletFlagID;
-   outflowIDs += simpleExtrapolationOutflowFlagID;
 
    // initialize outflowIDs
    Set< FlagUID > inflowIDs;
@@ -208,11 +204,6 @@ const field::FlagUID
    FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::outletFlagID = field::FlagUID("Outlet");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
-const field::FlagUID
-   FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::simpleExtrapolationOutflowFlagID =
-      field::FlagUID("SimpleExtrapolationOutflow");
-
-template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
 const field::FlagUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::freeSlipFlagID =
    field::FlagUID("FreeSlip");
 
@@ -239,11 +230,6 @@ const BoundaryUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, Scal
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
 const BoundaryUID
    FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::outletBoundaryID = BoundaryUID("Outlet");
-
-template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
-const BoundaryUID
-   FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::simpleExtrapolationOutflowBoundaryID =
-      BoundaryUID("SimpleExtrapolationOutflow");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
 const BoundaryUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::freeSlipBoundaryID =

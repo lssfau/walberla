@@ -58,12 +58,11 @@ class FreeSurfaceBoundaryHandling
    using PdfField_T = lbm::PdfField< LatticeModel_T >;
 
    // boundary
-   using NoSlip_T                     = lbm::NoSlip< LatticeModel_T, flag_t >;
-   using FreeSlip_T                   = lbm::FreeSlip< LatticeModel_T, FlagField_T >;
-   using UBB_T                        = lbm::UBB< LatticeModel_T, flag_t >;
-   using Pressure_T                   = SimplePressureWithFreeSurface< LatticeModel_T, FlagField_T >;
-   using Outlet_T                     = lbm::Outlet< LatticeModel_T, FlagField_T, 4, 3 >;
-   using SimpleExtrapolationOutflow_T = lbm::SimpleExtrapolationOutflow< LatticeModel_T, FlagField_T >;
+   using NoSlip_T   = lbm::NoSlip< LatticeModel_T, flag_t >;
+   using FreeSlip_T = lbm::FreeSlip< LatticeModel_T, FlagField_T >;
+   using UBB_T      = lbm::UBB< LatticeModel_T, flag_t >;
+   using Pressure_T = SimplePressureWithFreeSurface< LatticeModel_T, FlagField_T >;
+   using Outlet_T   = lbm::Outlet< LatticeModel_T, FlagField_T, 4, 3 >;
    using UBB_Inflow_T =
       lbm::UBB< LatticeModel_T, flag_t >; // creates interface cells in the direction of the prescribed velocity, i.e.,
                                           // represents an inflow boundary condition
@@ -71,7 +70,6 @@ class FreeSurfaceBoundaryHandling
    // handling type
    using BoundaryHandling_T =
       BoundaryHandling< FlagField_T, Stencil_T, NoSlip_T, UBB_T, UBB_Inflow_T, Pressure_T, Pressure_T, Outlet_T,
-                        SimpleExtrapolationOutflow_T,
                         FreeSlip_T >; // 2 pressure boundaries with different densities, e.g., inflow-outflow
 
    using FlagInfo_T = FlagInfo< FlagField_T >;
@@ -128,7 +126,6 @@ class FreeSurfaceBoundaryHandling
    static const field::FlagUID pressureFlagID;
    static const field::FlagUID pressureOutflowFlagID;
    static const field::FlagUID outletFlagID;
-   static const field::FlagUID simpleExtrapolationOutflowFlagID;
    static const field::FlagUID freeSlipFlagID;
 
    // boundary IDs
@@ -138,7 +135,6 @@ class FreeSurfaceBoundaryHandling
    static const BoundaryUID pressureBoundaryID;
    static const BoundaryUID pressureOutflowBoundaryID;
    static const BoundaryUID outletBoundaryID;
-   static const BoundaryUID simpleExtrapolationOutflowBoundaryID;
    static const BoundaryUID freeSlipBoundaryID;
 
    inline BlockDataID getHandlingID() const { return handlingID_; }

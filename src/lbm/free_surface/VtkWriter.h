@@ -100,7 +100,6 @@ void addVTKOutput(const std::weak_ptr< StructuredBlockForest >& blockForestPtr, 
       flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::pressureFlagID, uint_c(8));
       flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::pressureOutflowFlagID, uint_c(9));
       flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::outletFlagID, uint_c(10));
-      flagMapper->addMapping(FreeSurfaceBoundaryHandling_T::simpleExtrapolationOutflowFlagID, uint_c(11));
 
       writers.push_back(flagMapper);
 
