@@ -239,7 +239,7 @@ int main( int argc, char * argv[] )
                                                                                                              flagFieldId, fluidFlagUID ) ),
                                   "LBM stability check" );
 
-   timeloop.addFuncAfterTimeStep( perfLogger, "PerformanceLogger" );
+   timeloop.addFuncAfterTimeStep( perfLogger, "Evaluator: performance logging" );
 
 
    // add VTK output to time loop

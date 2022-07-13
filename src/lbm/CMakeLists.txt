@@ -1,6 +1,6 @@
 ###################################################################################################
 #
-# Module lbm 
+# Module lbm
 #
 ###################################################################################################
 
@@ -33,6 +33,7 @@ add_subdirectory( blockforest )
 add_subdirectory( sweeps )
 add_subdirectory( communication )
 add_subdirectory( field )
+add_subdirectory( free_surface )
 add_subdirectory( refinement )
 add_subdirectory( gui )
 add_subdirectory( boundary )
@@ -47,4 +48,3 @@ add_subdirectory( inplace_streaming )
 
 ###################################################################################################
 
- 

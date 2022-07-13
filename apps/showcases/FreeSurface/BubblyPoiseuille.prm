@@ -1,0 +1,108 @@
+BlockForestParameters
+{
+   cellsPerBlock                 < 20, 20, 20 >;
+   periodicity                   < 1, 1, 0 >;
+   loadBalancingFrequency        0;
+   printLoadBalancingStatistics  false;
+}
+
+DomainParameters
+{
+   channelWidth            100;
+   domainSizeFactor        < 2, 1, 1 >;   // values multiplied with channelWidth
+   bubbleDiameterFactor    0.1;           // value multiplied with channelWidth
+   gasVolumeFraction       0.1;
+}
+
+PhysicsParameters
+{
+   reynoldsNumber    10000;
+   mortonNumber      1e-5;
+   relaxationRate    1.989;
+   enableWetting     false;
+   contactAngle      0;       // only used if enableWetting=true
+   timesteps         10000;
+}
+
+ModelParameters
+{
+   pdfReconstructionModel        OnlyMissing;
+   pdfRefillingModel             EquilibriumRefilling;
+   excessMassDistributionModel   EvenlyAllInterface;
+   curvatureModel                FiniteDifferenceMethod;
+   enableForceWeighting          false;
+   useSimpleMassExchange         false;
+   enableBubbleModel             true;
+   enableBubbleSplits            false; // only used if enableBubbleModel=true
+   cellConversionThreshold       1e-2;
+   cellConversionForceThreshold  1e-1;
+}
+
+EvaluationParameters
+{
+   performanceLogFrequency 5000;
+}
+
+BoundaryParameters
+{
+   // X
+   //Border { direction W;  walldistance -1; NoSlip{} }
+   //Border { direction E;  walldistance -1; NoSlip{} }
+
+   // Y
+   //Border { direction N;  walldistance -1; NoSlip{} }
+   //Border { direction S;  walldistance -1; NoSlip{} }
+
+   // Z
+   Border { direction T;  walldistance -1; NoSlip{} }
+   Border { direction B;  walldistance -1; NoSlip{} }
+}
+
+MeshOutputParameters
+{
+   writeFrequency 2170;
+   baseFolder mesh-out;
+}
+
+VTK
+{
+   fluid_field
+   {
+      writeFrequency 2170;
+      ghostLayers 0;
+      baseFolder vtk-out;
+      samplingResolution 1;
+
+      writers
+      {
+         velocity;
+         density;
+         //pdf;
+         flag;
+         fill_level;
+         force;
+         curvature;
+         normal;
+         obstacle_normal;
+         mapped_flag;
+        }
+
+        inclusion_filters
+        {
+            // only include liquid and interface cells in VTK output
+            //liquidInterfaceFilter;
+        }
+
+        before_functions
+        {
+            //ghost_layer_synchronization; // only needed if writing the ghost layer
+        }
+
+   }
+   domain_decomposition
+   {
+      writeFrequency 0;
+      baseFolder vtk-out;
+      outputDomainDecomposition true;
+   }
+}
