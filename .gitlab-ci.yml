@@ -2146,7 +2146,7 @@ coverage:
       - cmake .. -DWALBERLA_BUILD_TESTS=ON -DWALBERLA_BUILD_BENCHMARKS=ON -DWALBERLA_BUILD_TUTORIALS=ON -DWALBERLA_BUILD_WITH_MPI=ON -DWALBERLA_BUILD_WITH_OPENMP=OFF -DCMAKE_BUILD_TYPE=Debug -DMPIEXEC_PREFLAGS=$MPIEXEC_PREFLAGS -DWALBERLA_BUILD_WITH_CODEGEN=OFF -DWALBERLA_BUILD_WITH_GCOV=ON
       - cmake . -LA
       - make -j $NUM_BUILD_CORES -l $NUM_CORES
-      - ctest -LE longrun --output-on-failure -j $NUM_CORES --timeout 3000
+      - ctest -LE longrun --output-on-failure -j $NUM_CORES --timeout 9000
       - cd ..
       - mkdir coverage
       - pwd
