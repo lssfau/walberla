@@ -31,11 +31,23 @@
 
 namespace walberla
 {
-void initPhaseField_sphere(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID phaseFieldID, real_t R,
-                           Vector3< real_t > bubbleMidPoint, bool bubble = true, real_t W = 5);
+void initPhaseField_sphere(const shared_ptr< StructuredBlockStorage >& blocks,
+                           BlockDataID phaseFieldID, BlockDataID velocityFieldID,
+                           real_t R,
+                           Vector3< real_t > bubbleMidPoint, bool bubble = true, real_t W = 5,
+                           const Vector3< real_t >& initialVelocity = Vector3< real_t >(real_c(0)));
+
+void initPhaseField_pool(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID phaseFieldID, real_t W,
+                         real_t poolDepth);
+
+void init_hydrostatic_pressure(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID densityFieldID,
+                               real_t GravitationalAcceleration, real_t poolDepth);
 
 void init_Taylor_bubble(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID phaseFieldID, real_t D = 5,
                         real_t H = 2, real_t DT = 20, real_t Donut_x0 = 40);
+
+void init_Taylor_bubble_cylindric(const shared_ptr< StructuredBlockStorage >& blocks, const BlockDataID& phaseFieldID,
+                                  real_t R, real_t H, real_t L, real_t W);
 
 void init_bubble_field(const shared_ptr< StructuredBlockStorage >& blocks, BlockDataID phaseFieldID, real_t R,
                        real_t W = 5);

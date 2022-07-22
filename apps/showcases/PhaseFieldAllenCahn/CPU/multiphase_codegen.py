@@ -28,7 +28,7 @@ with CodeGeneration() as ctx:
     stencil_hydro = LBStencil(Stencil.D3Q27)
     assert (stencil_phase.D == stencil_hydro.D)
 
-    # In the codegneration skript we only need the symbolic parameters
+    # In the code-generation skript, we only need the symbolic parameters
     parameters = AllenCahnParameters(0, 0, 0, 0, 0)
 
     ########################
@@ -37,6 +37,7 @@ with CodeGeneration() as ctx:
 
     # velocity field
     u = fields(f"vel_field({stencil_hydro.D}): {field_type}[{stencil_hydro.D}D]", layout='fzyx')
+    density_field = fields(f"density_field: {field_type}[{stencil_hydro.D}D]", layout='fzyx')
     # phase-field
     C = fields(f"phase_field: {field_type}[{stencil_hydro.D}D]", layout='fzyx')
     C_tmp = fields(f"phase_field_tmp: {field_type}[{stencil_hydro.D}D]", layout='fzyx')
@@ -87,7 +88,7 @@ with CodeGeneration() as ctx:
 
     # create the kernels for the initialization of the g and h field
     h_updates = initializer_kernel_phase_field_lb(method_phase, C, u, h, parameters)
-    g_updates = initializer_kernel_hydro_lb(method_hydro, 1.0, u, g)
+    g_updates = initializer_kernel_hydro_lb(method_hydro, density_field, u, g)
 
     force_h = interface_tracking_force(C, stencil_phase, parameters)
     hydro_force = hydrodynamic_force(g, C, method_hydro, parameters, body_force)

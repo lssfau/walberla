@@ -30,8 +30,11 @@
 #include "field/vtk/VTKWriter.h"
 
 #include "geometry/InitBoundaryHandling.h"
+#include "geometry/mesh/TriangleMeshIO.h"
 
 #include "lbm/PerformanceEvaluation.h"
+
+#include "postprocessing/FieldToSurfaceMesh.h"
 
 #include "python_coupling/CreateConfig.h"
 #include "python_coupling/PythonCallback.h"
@@ -68,8 +71,9 @@ int main(int argc, char** argv)
       // ADD DOMAIN PARAMETERS //
       //////////////////////////
 
-      auto domainSetup                = config->getOneBlock("DomainSetup");
-      const bool tube                 = domainSetup.getParameter< bool >("tube", true);
+      auto domainSetup             = config->getOneBlock("DomainSetup");
+      Vector3< uint_t > domainSize = domainSetup.getParameter< Vector3< uint_t > >("domainSize");
+      const bool tube              = domainSetup.getParameter< bool >("tube", false);
 
       ////////////////////////////////////////
       // ADD GENERAL SIMULATION PARAMETERS //
@@ -92,7 +96,8 @@ int main(int argc, char** argv)
          field::addToStorage< PdfField_hydro_T >(blocks, "LB velocity field", real_c(0.0), field::fzyx);
       BlockDataID velocity_field_ID =
          field::addToStorage< VelocityField_T >(blocks, "velocity", real_c(0.0), field::fzyx);
-      BlockDataID phase_field_ID = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
+      BlockDataID density_field_ID = field::addToStorage< PhaseField_T >(blocks, "density", real_c(1.0), field::fzyx);
+      BlockDataID phase_field_ID   = field::addToStorage< PhaseField_T >(blocks, "phase", real_c(0.0), field::fzyx);
 
       BlockDataID flagFieldID = field::addFlagFieldToStorage< FlagField_T >(blocks, "flag field");
 
@@ -108,15 +113,45 @@ int main(int argc, char** argv)
       const real_t interface_thickness    = physical_parameters.getParameter< real_t >("interface_thickness");
 
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the phase-field")
-      if (scenario == 1)
+      switch (scenario)
       {
+      case 1: {
          auto bubbleParameters                  = config->getOneBlock("Bubble");
          const Vector3< real_t > bubbleMidPoint = bubbleParameters.getParameter< Vector3< real_t > >("bubbleMidPoint");
          const real_t bubbleRadius              = bubbleParameters.getParameter< real_t >("bubbleRadius", real_c(20.0));
          const bool bubble                      = bubbleParameters.getParameter< bool >("bubble", true);
-         initPhaseField_sphere(blocks, phase_field_ID, bubbleRadius, bubbleMidPoint, bubble);
+         initPhaseField_sphere(blocks, phase_field_ID, velocity_field_ID, bubbleRadius, bubbleMidPoint, bubble);
+         break;
       }
-      else if (scenario == 2) { initPhaseField_RTI(blocks, phase_field_ID, interface_thickness, tube); }
+      case 2: {
+         initPhaseField_RTI(blocks, phase_field_ID, interface_thickness, tube);
+         break;
+      }
+      case 3: {
+         auto dropParameters                     = config->getOneBlock("Drop");
+         const Vector3< real_t > dropMidPoint    = dropParameters.getParameter< Vector3< real_t > >("drop_mid_point");
+         const real_t dropRadius                 = dropParameters.getParameter< real_t >("drop_radius");
+         const real_t poolDepth                  = dropParameters.getParameter< real_t >("pool_depth");
+         const Vector3< real_t > impact_velocity = dropParameters.getParameter< Vector3< real_t > >("impact_velocity");
+         init_hydrostatic_pressure(blocks, density_field_ID, gravitational_acceleration, poolDepth);
+
+         initPhaseField_sphere(blocks, phase_field_ID, velocity_field_ID, dropRadius, dropMidPoint, false,
+                               interface_thickness, impact_velocity);
+         initPhaseField_pool(blocks, phase_field_ID, interface_thickness, poolDepth);
+         break;
+      }
+      case 4: {
+         auto TaylorBubbleParameters = config->getOneBlock("TaylorBubble");
+         const real_t BubbleRadius   = TaylorBubbleParameters.getParameter< real_t >("bubble_radius");
+         const real_t InitialHeight  = TaylorBubbleParameters.getParameter< real_t >("initial_height");
+         const real_t Length         = TaylorBubbleParameters.getParameter< real_t >("length");
+         init_Taylor_bubble_cylindric(blocks, phase_field_ID, BubbleRadius, InitialHeight, Length,
+                                      real_c(interface_thickness));
+         break;
+      }
+      default:
+         WALBERLA_ABORT("Scenario is not defined.")
+      }
       WALBERLA_LOG_INFO_ON_ROOT("Initialisation of the phase-field done")
 
       /////////////////
@@ -125,7 +160,8 @@ int main(int argc, char** argv)
 
       pystencils::initialize_phase_field_distributions init_h(allen_cahn_PDFs_ID, phase_field_ID, velocity_field_ID,
                                                               interface_thickness);
-      pystencils::initialize_velocity_based_distributions init_g(hydrodynamic_PDFs_ID, velocity_field_ID);
+      pystencils::initialize_velocity_based_distributions init_g(density_field_ID, hydrodynamic_PDFs_ID,
+                                                                 velocity_field_ID);
 
       pystencils::phase_field_LB_step phase_field_LB_step(allen_cahn_PDFs_ID, phase_field_ID, velocity_field_ID,
                                                           mobility, interface_thickness);
@@ -180,6 +216,29 @@ int main(int argc, char** argv)
       if (boundariesConfig)
       {
          geometry::initBoundaryHandling< FlagField_T >(*blocks, flagFieldID, boundariesConfig);
+         if (tube)
+         {
+            // initialize cylindrical domain walls
+            const Vector3< real_t > domainCylinderBottomEnd =
+               Vector3< real_t >(real_c(domainSize[0]) * real_c(0.5), real_c(0), real_c(domainSize[2]) * real_c(0.5));
+            const Vector3< real_t > domainCylinderTopEnd = Vector3< real_t >(
+               real_c(domainSize[0]) * real_c(0.5), real_c(domainSize[1]), real_c(domainSize[2]) * real_c(0.5));
+            const real_t radius = real_c(domainSize[0]) * real_c(0.5);
+            const geometry::Cylinder cylinderTube(domainCylinderBottomEnd, domainCylinderTopEnd, radius);
+
+            for (auto blockIt = blocks->begin(); blockIt != blocks->end(); ++blockIt)
+            {
+               FlagField_T* flagField = blockIt->template getData< FlagField_T >(flagFieldID);
+               auto wallFlag          = flagField->getOrRegisterFlag(wallFlagUID);
+               WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(flagField, {
+                  Cell globalCell = Cell(x, y, z);
+                  blocks->transformBlockLocalToGlobalCell(globalCell, *blockIt);
+                  const Vector3< real_t > globalPoint = blocks->getCellCenter(globalCell);
+
+                  if (!geometry::contains(cylinderTube, globalPoint)) { addFlag(flagField->get(x, y, z), wallFlag); }
+               }) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
+            }
+         }
          geometry::setNonBoundaryCellsToDomain< FlagField_T >(*blocks, flagFieldID, fluidFlagUID);
       }
 
@@ -247,6 +306,30 @@ int main(int argc, char** argv)
             }
          },
          "Python callback");
+
+      int meshWriteFrequency = parameters.getParameter< int >("meshWriteFrequency", 0);
+      int counter            = 0;
+      int targetRank         = 0;
+      if (meshWriteFrequency > 0)
+      {
+         timeloop.addFuncAfterTimeStep(
+            [&]() {
+               if (timeloop.getCurrentTimeStep() % uint_t(meshWriteFrequency) == 0)
+               {
+                  auto mesh = postprocessing::realFieldToSurfaceMesh< PhaseField_T >(blocks, phase_field_ID, 0.5, 0,
+                                                                                     true, targetRank, MPI_COMM_WORLD);
+                  WALBERLA_EXCLUSIVE_WORLD_SECTION(targetRank)
+                  {
+                     std::string path = "";
+                     std::ostringstream out;
+                     out << std::internal << std::setfill('0') << std::setw(6) << counter;
+                     geometry::writeMesh(path + out.str() + ".obj", *mesh);
+                     counter++;
+                  }
+               }
+            },
+            "Mesh writer");
+      }
 
       // remaining time logger
       timeloop.addFuncAfterTimeStep(
