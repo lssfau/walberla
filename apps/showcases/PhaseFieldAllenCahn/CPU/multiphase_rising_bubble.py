@@ -50,7 +50,7 @@ class Scenario:
         # everything else
         self.dbFile = "risingBubble3D.db"
 
-        self.scenario = 1  # 1 rising bubble, 2 RTI
+        self.scenario = 1   # 1 rising bubble, 2 RTI, 3 drop, 4 taylor bubble set up
 
         self.counter = 0
         self.yPositions = []

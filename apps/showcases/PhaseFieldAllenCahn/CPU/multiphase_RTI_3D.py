@@ -61,7 +61,7 @@ class Scenario:
         # everything else
         self.dbFile = "RTI.csv"
 
-        self.scenario = 2  # 1 rising bubble or droplet, 2 RTI
+        self.scenario = 2   # 1 rising bubble, 2 RTI, 3 drop, 4 taylor bubble set up
         self.config_dict = self.config()
 
     @wlb.member_callback
