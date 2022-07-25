@@ -1,5 +1,33 @@
 # Changelog
 
+## [6.1] - 2022-07-25
+### Added
+- Free-surface LBM extension:
+  - Add implementation
+  - Add several showcases
+  - Add several tests
+- LBM - MESA_PD coupling:
+  - Add partially saturated cells method (PSM)
+  - Add fluidized bed showcase
+  - Add virtual mass stabilization technique for light particles
+  - Add support for more shapes, e.g., convex polyhedron
+- MESA_PD:
+   - Add extensive application for dense particle packing generation
+
+### Changed
+- Update and extend phase-field LBM showcases
+- Allow access to PDF centering information (for being used in generated LBM kernels)
+- Adapt code generation backend to be compatible with pystencils 1.0 and lbmpy 1.0
+- Required minimum dependencies:
+  - C++17-compliant compiler
+  - CMake 3.14
+  - pybind 2.6.2
+  - lbmpy 1.0
+  - pystencils 1.0
+
+### Deprecated
+- GUI
+
 ## [5.1] - 2020-04-09
 ### Added
 - Add new tutorials and showcases
@@ -71,4 +99,3 @@
 
 ### Deprecated
 - all dynamic level-wise balance functions (use the more general ones, without "level-wise")
-
