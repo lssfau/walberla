@@ -209,7 +209,7 @@ class BubbleModel : public BubbleModelBase
    MergeInformation mergeInformation_;
 
    // communication scheme for the bubble field
-   blockforest::communication::UniformBufferedScheme< Stencil_T > bubbleFieldCommunication_;
+   blockforest::communication::UniformBufferedScheme< StencilForSplit_T > bubbleFieldCommunication_;
 
    // store split information, i.e., hints for splitting; store only hints since merges have to be processed first
    struct SplitHint

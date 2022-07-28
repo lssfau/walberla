@@ -356,8 +356,8 @@ int main(int argc, char** argv)
    std::shared_ptr< bubble_model::BubbleModelBase > bubbleModel = nullptr;
    if (enableBubbleModel)
    {
-      const std::shared_ptr< bubble_model::BubbleModel< CommunicationStencil_T > > bubbleModelDerived =
-         std::make_shared< bubble_model::BubbleModel< CommunicationStencil_T > >(blockForest, enableBubbleSplits);
+      const std::shared_ptr< bubble_model::BubbleModel< LatticeModelStencil_T > > bubbleModelDerived =
+         std::make_shared< bubble_model::BubbleModel< LatticeModelStencil_T > >(blockForest, enableBubbleSplits);
       bubbleModelDerived->initFromFillLevelField(fillFieldID);
       bubbleModelDerived->setAtmosphere(Cell(domainSize[0] - uint_c(1), domainSize[1] - uint_c(1), uint_c(0)),
                                         real_c(1));
