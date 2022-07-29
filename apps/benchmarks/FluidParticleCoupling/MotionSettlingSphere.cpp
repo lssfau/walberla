@@ -313,9 +313,7 @@ private:
 
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( force[0], mpi::SUM );
-         mpi::allReduceInplace( force[1], mpi::SUM );
-         mpi::allReduceInplace( force[2], mpi::SUM );
+         mpi::allReduceInplace( force, mpi::SUM );
       }
       return force;
    }
@@ -393,40 +391,25 @@ public:
    // evaluate and write the sphere properties
    void operator()(const uint_t timestep)
    {
-      Vector3<real_t> transVel( real_t(0) );
-      Vector3<real_t> angularVel( real_t(0) );
-      Vector3<real_t> pos( real_t(0) );
+      Vector3<real_t> particleTransVel( real_t(0) );
+      Vector3<real_t> particleAngularVel( real_t(0) );
+      Vector3<real_t> particlePos( real_t(0) );
 
-      Vector3<real_t> force( real_t(0) );
-      Vector3<real_t> torque( real_t(0) );
+      Vector3<real_t> particleForce( real_t(0) );
+      Vector3<real_t> particleTorque( real_t(0) );
 
       size_t idx = ac_->uidToIdx(sphereUid_);
       if( idx != ac_->getInvalidIdx())
       {
          if(!mesa_pd::data::particle_flags::isSet( ac_->getFlags(idx), mesa_pd::data::particle_flags::GHOST))
          {
-            pos = ac_->getPosition(idx);
-            transVel = ac_->getLinearVelocity(idx);
-            angularVel = ac_->getAngularVelocity(idx);
-            force = ac_->getHydrodynamicForce(idx);
-            torque = ac_->getHydrodynamicTorque(idx);
+            particlePos = ac_->getPosition(idx);
+            particleTransVel = ac_->getLinearVelocity(idx);
+            particleAngularVel = ac_->getAngularVelocity(idx);
+            particleForce = ac_->getHydrodynamicForce(idx);
+            particleTorque = ac_->getHydrodynamicTorque(idx);
          }
       }
-
-      std::vector<real_t> particlePos(3);
-      particlePos[0]=pos[0]; particlePos[1]=pos[1]; particlePos[2]=pos[2];
-
-      std::vector<real_t> particleTransVel(3);
-      particleTransVel[0]=transVel[0]; particleTransVel[1]=transVel[1]; particleTransVel[2]=transVel[2];
-
-      std::vector<real_t> particleAngularVel(3);
-      particleAngularVel[0]=angularVel[0]; particleAngularVel[1]=angularVel[1]; particleAngularVel[2]=angularVel[2];
-
-      std::vector<real_t> particleForce(3);
-      particleForce[0]=force[0]; particleForce[1]=force[1]; particleForce[2]=force[2];
-
-      std::vector<real_t> particleTorque(3);
-      particleTorque[0]=torque[0]; particleTorque[1]=torque[1]; particleTorque[2]=torque[2];
 
       // reduce to root
       WALBERLA_MPI_SECTION()
@@ -547,10 +530,7 @@ public:
 
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( u_p[0], mpi::SUM );
-         mpi::allReduceInplace( u_p[1], mpi::SUM );
-         mpi::allReduceInplace( u_p[2], mpi::SUM );
-
+         mpi::allReduceInplace( u_p, mpi::SUM );
       }
 
       Vector3<real_t> u_p_r = u_p - u_infty_;

@@ -2050,9 +2050,7 @@ void Evaluation< LatticeModel_T >::evaluate( real_t & cDRealArea, real_t & cLRea
 
    // force on obstacle
 
-   mpi::reduceInplace( force_[0], mpi::SUM );
-   mpi::reduceInplace( force_[1], mpi::SUM );
-   mpi::reduceInplace( force_[2], mpi::SUM );
+   mpi::reduceInplace( force_, mpi::SUM );
 
    if( setup_.evaluateForceComponents )
    {

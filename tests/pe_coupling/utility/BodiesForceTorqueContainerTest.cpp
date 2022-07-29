@@ -159,13 +159,8 @@ int main( int argc, char **argv )
          }
       }
 
-      mpi::allReduceInplace(actingForce[0], mpi::SUM);
-      mpi::allReduceInplace(actingForce[1], mpi::SUM);
-      mpi::allReduceInplace(actingForce[2], mpi::SUM);
-
-      mpi::allReduceInplace(actingTorque[0], mpi::SUM);
-      mpi::allReduceInplace(actingTorque[1], mpi::SUM);
-      mpi::allReduceInplace(actingTorque[2], mpi::SUM);
+      mpi::allReduceInplace(actingForce, mpi::SUM);
+      mpi::allReduceInplace(actingTorque, mpi::SUM);
 
       WALBERLA_ROOT_SECTION()
       {
@@ -244,13 +239,8 @@ int main( int argc, char **argv )
          }
       }
 
-      mpi::allReduceInplace(actingForce[0], mpi::SUM);
-      mpi::allReduceInplace(actingForce[1], mpi::SUM);
-      mpi::allReduceInplace(actingForce[2], mpi::SUM);
-
-      mpi::allReduceInplace(actingTorque[0], mpi::SUM);
-      mpi::allReduceInplace(actingTorque[1], mpi::SUM);
-      mpi::allReduceInplace(actingTorque[2], mpi::SUM);
+      mpi::allReduceInplace(actingForce, mpi::SUM);
+      mpi::allReduceInplace(actingTorque, mpi::SUM);
 
       WALBERLA_ROOT_SECTION()
       {
@@ -336,13 +326,8 @@ int main( int argc, char **argv )
          }
       }
 
-      mpi::allReduceInplace(actingForce[0], mpi::SUM);
-      mpi::allReduceInplace(actingForce[1], mpi::SUM);
-      mpi::allReduceInplace(actingForce[2], mpi::SUM);
-
-      mpi::allReduceInplace(actingTorque[0], mpi::SUM);
-      mpi::allReduceInplace(actingTorque[1], mpi::SUM);
-      mpi::allReduceInplace(actingTorque[2], mpi::SUM);
+      mpi::allReduceInplace(actingForce, mpi::SUM);
+      mpi::allReduceInplace(actingTorque, mpi::SUM);
 
       WALBERLA_ROOT_SECTION()
       {
@@ -440,13 +425,8 @@ int main( int argc, char **argv )
          }
       }
 
-      mpi::allReduceInplace(actingForce[0], mpi::SUM);
-      mpi::allReduceInplace(actingForce[1], mpi::SUM);
-      mpi::allReduceInplace(actingForce[2], mpi::SUM);
-
-      mpi::allReduceInplace(actingTorque[0], mpi::SUM);
-      mpi::allReduceInplace(actingTorque[1], mpi::SUM);
-      mpi::allReduceInplace(actingTorque[2], mpi::SUM);
+      mpi::allReduceInplace(actingForce, mpi::SUM);
+      mpi::allReduceInplace(actingTorque, mpi::SUM);
 
       WALBERLA_ROOT_SECTION()
       {

@@ -292,13 +292,8 @@ class SteadyStateCheck
 
          WALBERLA_MPI_SECTION()
          {
-            mpi::allReduceInplace( pos[0], mpi::SUM );
-            mpi::allReduceInplace( pos[1], mpi::SUM );
-            mpi::allReduceInplace( pos[2], mpi::SUM );
-
-            mpi::allReduceInplace( transVel[0], mpi::SUM );
-            mpi::allReduceInplace( transVel[1], mpi::SUM );
-            mpi::allReduceInplace( transVel[2], mpi::SUM );
+            mpi::allReduceInplace( pos, mpi::SUM );
+            mpi::allReduceInplace( transVel, mpi::SUM );
          }
 
          // update position values

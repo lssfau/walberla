@@ -361,9 +361,7 @@ Vector3<real_t> getVelocityAtPosition(const shared_ptr<StructuredBlockStorage> &
       }
 
    }
-   mpi::reduceInplace(vel[0], mpi::SUM);
-   mpi::reduceInplace(vel[1], mpi::SUM);
-   mpi::reduceInplace(vel[2], mpi::SUM);
+   mpi::reduceInplace(vel, mpi::SUM);
 
    return vel;
 }

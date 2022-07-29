@@ -313,19 +313,13 @@ class AvgDiffEvaluator
       // sum values among all processes
       mpi::allReduceInplace< uint_t >(numFluidCells, mpi::SUM);
       mpi::allReduceInplace< real_t >(avgDensity, mpi::SUM);
-      mpi::allReduceInplace< real_t >(avgVelocity[0], mpi::SUM);
-      mpi::allReduceInplace< real_t >(avgVelocity[1], mpi::SUM);
-      mpi::allReduceInplace< real_t >(avgVelocity[2], mpi::SUM);
+      mpi::allReduceInplace< real_t >(avgVelocity, mpi::SUM);
 
       mpi::allReduceInplace< real_t >(avgDensitySquared, mpi::SUM);
-      mpi::allReduceInplace< real_t >(avgVelocitySquared[0], mpi::SUM);
-      mpi::allReduceInplace< real_t >(avgVelocitySquared[1], mpi::SUM);
-      mpi::allReduceInplace< real_t >(avgVelocitySquared[2], mpi::SUM);
+      mpi::allReduceInplace< real_t >(avgVelocitySquared, mpi::SUM);
 
       mpi::allReduceInplace< real_t >(avgDensityDiffL2, mpi::SUM);
-      mpi::allReduceInplace< real_t >(avgVelocityDiffL2[0], mpi::SUM);
-      mpi::allReduceInplace< real_t >(avgVelocityDiffL2[1], mpi::SUM);
-      mpi::allReduceInplace< real_t >(avgVelocityDiffL2[2], mpi::SUM);
+      mpi::allReduceInplace< real_t >(avgVelocityDiffL2, mpi::SUM);
 
       // compute space-average
       avgDensity /= real_c(numFluidCells);

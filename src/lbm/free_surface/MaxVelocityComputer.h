@@ -87,9 +87,7 @@ class MaxVelocityComputer
             }) // WALBERLA_FOR_ALL_CELLS_OMP
       }
 
-      mpi::allReduceInplace< real_t >(maxVelocity[0], mpi::MAX);
-      mpi::allReduceInplace< real_t >(maxVelocity[1], mpi::MAX);
-      mpi::allReduceInplace< real_t >(maxVelocity[2], mpi::MAX);
+      mpi::allReduceInplace< real_t >(maxVelocity, mpi::MAX);
 
       *maxVelocity_ = maxVelocity;
    };

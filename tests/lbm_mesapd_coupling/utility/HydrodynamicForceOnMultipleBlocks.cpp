@@ -85,25 +85,11 @@ public:
 
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( pos[0], mpi::SUM );
-         mpi::allReduceInplace( pos[1], mpi::SUM );
-         mpi::allReduceInplace( pos[2], mpi::SUM );
-
-         mpi::allReduceInplace( transVel[0], mpi::SUM );
-         mpi::allReduceInplace( transVel[1], mpi::SUM );
-         mpi::allReduceInplace( transVel[2], mpi::SUM );
-
-         mpi::allReduceInplace( angularVel[0], mpi::SUM );
-         mpi::allReduceInplace( angularVel[1], mpi::SUM );
-         mpi::allReduceInplace( angularVel[2], mpi::SUM );
-
-         mpi::allReduceInplace( force[0], mpi::SUM );
-         mpi::allReduceInplace( force[1], mpi::SUM );
-         mpi::allReduceInplace( force[2], mpi::SUM );
-
-         mpi::allReduceInplace( torque[0], mpi::SUM );
-         mpi::allReduceInplace( torque[1], mpi::SUM );
-         mpi::allReduceInplace( torque[2], mpi::SUM );
+         mpi::allReduceInplace( pos, mpi::SUM );
+         mpi::allReduceInplace( transVel, mpi::SUM );
+         mpi::allReduceInplace( angularVel, mpi::SUM );
+         mpi::allReduceInplace( force, mpi::SUM );
+         mpi::allReduceInplace( torque, mpi::SUM );
       }
 
       position_ = pos;

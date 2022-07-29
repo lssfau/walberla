@@ -1,15 +1,15 @@
 //======================================================================================================================
 //
-//  This file is part of waLBerla. waLBerla is free software: you can 
+//  This file is part of waLBerla. waLBerla is free software: you can
 //  redistribute it and/or modify it under the terms of the GNU General Public
-//  License as published by the Free Software Foundation, either version 3 of 
+//  License as published by the Free Software Foundation, either version 3 of
 //  the License, or (at your option) any later version.
-//  
-//  waLBerla is distributed in the hope that it will be useful, but WITHOUT 
-//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or 
-//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License 
+//
+//  waLBerla is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 //  for more details.
-//  
+//
 //  You should have received a copy of the GNU General Public License along
 //  with waLBerla (see COPYING.txt). If not, see <http://www.gnu.org/licenses/>.
 //
@@ -24,6 +24,7 @@
 #include "core/mpi/MPIManager.h"
 #include "core/mpi/Reduce.h"
 #include "core/logging/Logging.h"
+#include "core/math/Vector3.h"
 
 #include <limits>
 #include <vector>
@@ -68,6 +69,36 @@ void runTestReduce( int recvRank )
    {
       WALBERLA_CHECK_EQUAL( value, rank );
    }
+
+
+   Vector3<int> intVec3{rank-1, rank, rank+1};
+   auto resultIntVec3 = walberla::mpi::reduce( intVec3, walberla::mpi::SUM, recvRank );
+   walberla::mpi::reduceInplace( intVec3, walberla::mpi::SUM, recvRank );
+   if( rank == recvRank )
+   {
+      int sum = 0;
+      for( int i = 0; i < numProcesses; ++i )
+         sum += i;
+
+      math::Vector3<int> refResultIntVec3 {sum - numProcesses, sum, sum + numProcesses};
+
+      for(uint_t i = 0; i < 3; ++i)
+      {
+         WALBERLA_CHECK_EQUAL( intVec3[i], refResultIntVec3[i], "Reduce Vector3, component " << i);
+         WALBERLA_CHECK_EQUAL( resultIntVec3[i], refResultIntVec3[i], "ReduceInPlace Vector3, component " << i);
+      }
+
+   }
+   else
+   {
+      Vector3<int> refResultIntVec3{rank-1, rank, rank+1};
+      for(uint_t i = 0; i < 3; ++i)
+      {
+         WALBERLA_CHECK_EQUAL( intVec3[i], refResultIntVec3[i], "Reduce Vector3, component " << i);
+         WALBERLA_CHECK_EQUAL( resultIntVec3[i], 0, "ReduceInPlace Vector3, component " << i);
+      }
+   }
+
 
    std::vector<int> some_ints( 100 );
    for( int i = 0; i < 100; ++i )
@@ -114,6 +145,16 @@ void runTestAllReduce()
    walberla::mpi::allReduceInplace( value, walberla::mpi::PRODUCT );
 
    WALBERLA_CHECK_EQUAL( value, 0 );
+
+
+   Vector3<int> intVec3{rank-1, rank, rank+1};
+   walberla::mpi::allReduceInplace( intVec3, walberla::mpi::SUM );
+   math::Vector3<int> refResultIntVec3 {sum - numProcesses, sum, sum + numProcesses};
+
+   for(uint_t i = 0; i < 3; ++i)
+   {
+      WALBERLA_CHECK_EQUAL( intVec3[i], refResultIntVec3[i], "AllReduce Vector3, component " << i);
+   }
 
 
    std::vector<int> some_ints( 100 );
@@ -179,7 +220,7 @@ void runTestAllReduceBool()
       bool copyAllTrue  = allTrue;
       bool copyAllFalse = allFalse;
       bool copyOneTrue  = oneTrue;
-      bool copyMixed    = mixed; 
+      bool copyMixed    = mixed;
 
       mpi::allReduceInplace( copyAllTrue,  mpi::LOGICAL_OR );
       mpi::allReduceInplace( copyAllFalse, mpi::LOGICAL_OR );
@@ -196,7 +237,7 @@ void runTestAllReduceBool()
       bool copyAllTrue  = allTrue;
       bool copyAllFalse = allFalse;
       bool copyOneTrue  = oneTrue;
-      bool copyMixed    = mixed; 
+      bool copyMixed    = mixed;
 
       mpi::allReduceInplace( copyAllTrue,  mpi::LOGICAL_XOR );
       mpi::allReduceInplace( copyAllFalse, mpi::LOGICAL_XOR );
@@ -208,6 +249,35 @@ void runTestAllReduceBool()
       WALBERLA_CHECK_EQUAL( copyOneTrue,  true  );
       WALBERLA_CHECK_EQUAL( copyMixed,    numProcesses == 2 );
    }
+
+
+   math::Vector3<bool> boolVec;
+   boolVec[0] = true;
+   boolVec[1] = false;
+   boolVec[2] = rank == 0;
+
+   {
+      math::Vector3<bool> result( boolVec );
+      mpi::allReduceInplace( result,  mpi::LOGICAL_AND );
+      WALBERLA_CHECK_EQUAL( static_cast<bool>( result[0] ), true  );
+      WALBERLA_CHECK_EQUAL( static_cast<bool>( result[1] ), false );
+      WALBERLA_CHECK_EQUAL( static_cast<bool>( result[2] ), numProcesses == 1 );
+   }
+   {
+      math::Vector3<bool> result( boolVec );
+      mpi::allReduceInplace( result,  mpi::LOGICAL_OR );
+      WALBERLA_CHECK_EQUAL( static_cast<bool>( result[0] ), true  );
+      WALBERLA_CHECK_EQUAL( static_cast<bool>( result[1] ), false );
+      WALBERLA_CHECK_EQUAL( static_cast<bool>( result[2] ), true  );
+   }
+   {
+      math::Vector3<bool> result( boolVec );
+      mpi::allReduceInplace( result,  mpi::LOGICAL_XOR );
+      WALBERLA_CHECK_EQUAL( static_cast<bool>( result[0] ), numProcesses == 1 );
+      WALBERLA_CHECK_EQUAL( static_cast<bool>( result[1] ), false );
+      WALBERLA_CHECK_EQUAL( static_cast<bool>( result[2] ), true  );
+   }
+
 
    std::vector<bool> bools( 4u );
    bools[0] = true;
@@ -348,7 +418,7 @@ void runTestReduceBool( int recvRank )
       bool copyAllTrue  = allTrue;
       bool copyAllFalse = allFalse;
       bool copyOneTrue  = oneTrue;
-      bool copyMixed    = mixed; 
+      bool copyMixed    = mixed;
 
       mpi::reduceInplace( copyAllTrue,  mpi::LOGICAL_OR, recvRank );
       mpi::reduceInplace( copyAllFalse, mpi::LOGICAL_OR, recvRank );
@@ -368,7 +438,7 @@ void runTestReduceBool( int recvRank )
       bool copyAllTrue  = allTrue;
       bool copyAllFalse = allFalse;
       bool copyOneTrue  = oneTrue;
-      bool copyMixed    = mixed; 
+      bool copyMixed    = mixed;
 
       mpi::reduceInplace( copyAllTrue,  mpi::LOGICAL_XOR, recvRank );
       mpi::reduceInplace( copyAllFalse, mpi::LOGICAL_XOR, recvRank );
@@ -383,6 +453,81 @@ void runTestReduceBool( int recvRank )
          WALBERLA_CHECK_EQUAL( copyMixed,    numProcesses == 2 );
       }
    }
+
+   math::Vector3<bool> boolVec;
+   boolVec[0] = true;
+   boolVec[1] = false;
+   boolVec[2] = rank == 0;
+
+   {
+      math::Vector3<bool> result = mpi::reduce( boolVec,  mpi::LOGICAL_AND, recvRank );
+      if( rank == recvRank )
+      {
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[0] ), true  );
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[1] ), false );
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[2] ), numProcesses == 1 );
+      } else
+      {
+         for(uint_t i = 0; i < 3; ++i) WALBERLA_CHECK_EQUAL( static_cast<bool>( result[i] ), false  );
+      }
+   }
+   {
+      math::Vector3<bool> result = mpi::reduce( boolVec,  mpi::LOGICAL_OR, recvRank );
+      if( rank == recvRank )
+      {
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[0] ), true  );
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[1] ), false );
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[2] ), true  );
+      } else
+      {
+         for(uint_t i = 0; i < 3; ++i) WALBERLA_CHECK_EQUAL( static_cast<bool>( result[i] ), false  );
+      }
+   }
+   {
+      math::Vector3< bool > result = mpi::reduce(boolVec, mpi::LOGICAL_XOR, recvRank);
+      if (rank == recvRank)
+      {
+         WALBERLA_CHECK_EQUAL(static_cast< bool >(result[0]), numProcesses == 1);
+         WALBERLA_CHECK_EQUAL(static_cast< bool >(result[1]), false);
+         WALBERLA_CHECK_EQUAL(static_cast< bool >(result[2]), true);
+      } else
+      {
+         for(uint_t i = 0; i < 3; ++i) WALBERLA_CHECK_EQUAL( static_cast<bool>( result[i] ), false  );
+      }
+   }
+
+   {
+      math::Vector3<bool> result( boolVec );
+      mpi::reduceInplace( result,  mpi::LOGICAL_AND, recvRank );
+      if( rank == recvRank )
+      {
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[0] ), true  );
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[1] ), false );
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[2] ), numProcesses == 1 );
+      }
+   }
+   {
+      math::Vector3<bool> result( boolVec );
+      mpi::reduceInplace( result,  mpi::LOGICAL_OR, recvRank );
+
+      if( rank == recvRank )
+      {
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[0] ), true  );
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[1] ), false );
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[2] ), true  );
+      }
+   }
+   {
+      math::Vector3<bool> result( boolVec );
+      mpi::reduceInplace( result,  mpi::LOGICAL_XOR, recvRank );
+      if( rank == recvRank )
+      {
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[0] ), numProcesses == 1 );
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[1] ), false );
+         WALBERLA_CHECK_EQUAL( static_cast<bool>( result[2] ), true  );
+      }
+   }
+
 
    std::vector<bool> bools( 4u );
    bools[0] = true;
