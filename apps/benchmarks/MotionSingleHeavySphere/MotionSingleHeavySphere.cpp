@@ -538,9 +538,7 @@ public:
 
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( u_p[0], mpi::SUM );
-         mpi::allReduceInplace( u_p[1], mpi::SUM );
-         mpi::allReduceInplace( u_p[2], mpi::SUM );
+         mpi::allReduceInplace( u_p, mpi::SUM );
 
       }
 

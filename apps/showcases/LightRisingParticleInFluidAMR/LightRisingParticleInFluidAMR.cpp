@@ -345,25 +345,11 @@ public:
       }
 
       WALBERLA_MPI_SECTION() {
-         mpi::allReduceInplace(transVel[0], mpi::SUM);
-         mpi::allReduceInplace(transVel[1], mpi::SUM);
-         mpi::allReduceInplace(transVel[2], mpi::SUM);
-
-         mpi::allReduceInplace(angVel[0], mpi::SUM);
-         mpi::allReduceInplace(angVel[1], mpi::SUM);
-         mpi::allReduceInplace(angVel[2], mpi::SUM);
-
-         mpi::allReduceInplace(hydForce[0], mpi::SUM);
-         mpi::allReduceInplace(hydForce[1], mpi::SUM);
-         mpi::allReduceInplace(hydForce[2], mpi::SUM);
-
-         mpi::allReduceInplace(hydTorque[0], mpi::SUM);
-         mpi::allReduceInplace(hydTorque[1], mpi::SUM);
-         mpi::allReduceInplace(hydTorque[2], mpi::SUM);
-
-         mpi::allReduceInplace(eulerRotation[0], mpi::SUM);
-         mpi::allReduceInplace(eulerRotation[1], mpi::SUM);
-         mpi::allReduceInplace(eulerRotation[2], mpi::SUM);
+         mpi::allReduceInplace(transVel, mpi::SUM);
+         mpi::allReduceInplace(angVel, mpi::SUM);
+         mpi::allReduceInplace(hydForce, mpi::SUM);
+         mpi::allReduceInplace(hydTorque, mpi::SUM);
+         mpi::allReduceInplace(eulerRotation, mpi::SUM);
       }
 
       syncPosition();
@@ -388,9 +374,7 @@ public:
       }
 
       WALBERLA_MPI_SECTION() {
-         mpi::allReduceInplace(pos[0], mpi::SUM);
-         mpi::allReduceInplace(pos[1], mpi::SUM);
-         mpi::allReduceInplace(pos[2], mpi::SUM);
+         mpi::allReduceInplace(pos, mpi::SUM);
       }
 
       position_ = pos;

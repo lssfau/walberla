@@ -455,9 +455,7 @@ private:
       }
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( velocity[0], mpi::SUM );
-         mpi::allReduceInplace( velocity[1], mpi::SUM );
-         mpi::allReduceInplace( velocity[2], mpi::SUM );
+         mpi::allReduceInplace( velocity, mpi::SUM );
       }
       return velocity / real_c(numSpheres_);
    }
@@ -474,9 +472,7 @@ private:
       }
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( force[0], mpi::SUM );
-         mpi::allReduceInplace( force[1], mpi::SUM );
-         mpi::allReduceInplace( force[2], mpi::SUM );
+         mpi::allReduceInplace( force, mpi::SUM );
       }
       return force;
    }
@@ -495,9 +491,7 @@ private:
       }
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( centerOfMass[0], mpi::SUM );
-         mpi::allReduceInplace( centerOfMass[1], mpi::SUM );
-         mpi::allReduceInplace( centerOfMass[2], mpi::SUM );
+         mpi::allReduceInplace( centerOfMass, mpi::SUM );
       }
       return centerOfMass;
    }

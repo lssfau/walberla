@@ -218,12 +218,8 @@ private:
       // MPI reduction of pe forces over all processes
       WALBERLA_MPI_SECTION()
       {
-         mpi::reduceInplace( forceSphr1[0], mpi::SUM );
-         mpi::reduceInplace( forceSphr1[1], mpi::SUM );
-         mpi::reduceInplace( forceSphr1[2], mpi::SUM );
-         mpi::reduceInplace( forceSphr2[0], mpi::SUM );
-         mpi::reduceInplace( forceSphr2[1], mpi::SUM );
-         mpi::reduceInplace( forceSphr2[2], mpi::SUM );
+         mpi::reduceInplace( forceSphr1, mpi::SUM );
+         mpi::reduceInplace( forceSphr2, mpi::SUM );
       }
       WALBERLA_LOG_INFO_ON_ROOT("Total force on sphere " << id1_ << " : " << forceSphr1);
       WALBERLA_LOG_INFO_ON_ROOT("Total force on sphere " << id2_ << " : " << forceSphr2);
@@ -330,9 +326,7 @@ private:
       // MPI reduction of pe forces over all processes
       WALBERLA_MPI_SECTION()
       {
-         mpi::reduceInplace( forceSphr1[0], mpi::SUM );
-         mpi::reduceInplace( forceSphr1[1], mpi::SUM );
-         mpi::reduceInplace( forceSphr1[2], mpi::SUM );
+         mpi::reduceInplace( forceSphr1, mpi::SUM );
       }
       WALBERLA_LOG_INFO_ON_ROOT("Total force on sphere " << id1_ << " : " << forceSphr1);
 

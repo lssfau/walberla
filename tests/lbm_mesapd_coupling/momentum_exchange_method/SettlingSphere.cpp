@@ -213,17 +213,9 @@ public:
 
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( pos[0], mpi::SUM );
-         mpi::allReduceInplace( pos[1], mpi::SUM );
-         mpi::allReduceInplace( pos[2], mpi::SUM );
-
-         mpi::allReduceInplace( transVel[0], mpi::SUM );
-         mpi::allReduceInplace( transVel[1], mpi::SUM );
-         mpi::allReduceInplace( transVel[2], mpi::SUM );
-
-         mpi::allReduceInplace( hydForce[0], mpi::SUM );
-         mpi::allReduceInplace( hydForce[1], mpi::SUM );
-         mpi::allReduceInplace( hydForce[2], mpi::SUM );
+         mpi::allReduceInplace( pos, mpi::SUM );
+         mpi::allReduceInplace( transVel, mpi::SUM );
+         mpi::allReduceInplace( hydForce, mpi::SUM );
       }
 
       position_ = pos[2];

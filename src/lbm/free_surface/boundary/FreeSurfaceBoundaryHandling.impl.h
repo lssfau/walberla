@@ -498,9 +498,7 @@ Vector3< bool >
       }) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ_OMP
    }
 
-   mpi::allReduceInplace(isObstacleInGlobalGhostLayer[0], mpi::LOGICAL_OR);
-   mpi::allReduceInplace(isObstacleInGlobalGhostLayer[1], mpi::LOGICAL_OR);
-   mpi::allReduceInplace(isObstacleInGlobalGhostLayer[2], mpi::LOGICAL_OR);
+   mpi::allReduceInplace(isObstacleInGlobalGhostLayer, mpi::LOGICAL_OR);
 
    return isObstacleInGlobalGhostLayer;
 }

@@ -152,15 +152,9 @@ int main( int argc, char **argv )
          }
       }
 
-      mpi::allReduceInplace(expectedPosOffset[0], mpi::SUM);
-      mpi::allReduceInplace(expectedPosOffset[1], mpi::SUM);
-      mpi::allReduceInplace(expectedPosOffset[2], mpi::SUM);
-      mpi::allReduceInplace(expectedLinearVel[0], mpi::SUM);
-      mpi::allReduceInplace(expectedLinearVel[1], mpi::SUM);
-      mpi::allReduceInplace(expectedLinearVel[2], mpi::SUM);
-      mpi::allReduceInplace(expectedAngularVel[0], mpi::SUM);
-      mpi::allReduceInplace(expectedAngularVel[1], mpi::SUM);
-      mpi::allReduceInplace(expectedAngularVel[2], mpi::SUM);
+      mpi::allReduceInplace(expectedPosOffset, mpi::SUM);
+      mpi::allReduceInplace(expectedLinearVel, mpi::SUM);
+      mpi::allReduceInplace(expectedAngularVel, mpi::SUM);
 
       WALBERLA_LOG_DEVEL_ON_ROOT(" - expecting position offset: " << expectedPosOffset);
       WALBERLA_LOG_DEVEL_ON_ROOT(" - expecting linear vel: " << expectedLinearVel);

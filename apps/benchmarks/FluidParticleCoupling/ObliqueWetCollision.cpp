@@ -268,15 +268,9 @@ public:
 
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( pos[0], mpi::SUM );
-         mpi::allReduceInplace( pos[1], mpi::SUM );
-         mpi::allReduceInplace( pos[2], mpi::SUM );
-         mpi::allReduceInplace( transVel[0], mpi::SUM );
-         mpi::allReduceInplace( transVel[1], mpi::SUM );
-         mpi::allReduceInplace( transVel[2], mpi::SUM );
-         mpi::allReduceInplace( angVel[0], mpi::SUM );
-         mpi::allReduceInplace( angVel[1], mpi::SUM );
-         mpi::allReduceInplace( angVel[2], mpi::SUM );
+         mpi::allReduceInplace( pos, mpi::SUM );
+         mpi::allReduceInplace( transVel, mpi::SUM );
+         mpi::allReduceInplace( angVel, mpi::SUM );
       }
 
       position_ = pos;
@@ -451,9 +445,7 @@ Vector3<real_t> getForce(walberla::id_t uid, ParticleAccessor_T & ac)
    }
    WALBERLA_MPI_SECTION()
    {
-      mpi::allReduceInplace( force[0], mpi::SUM );
-      mpi::allReduceInplace( force[1], mpi::SUM );
-      mpi::allReduceInplace( force[2], mpi::SUM );
+      mpi::allReduceInplace( force, mpi::SUM );
    }
    return force;
 }
@@ -469,9 +461,7 @@ Vector3<real_t> getTorque(walberla::id_t uid, ParticleAccessor_T & ac)
    }
    WALBERLA_MPI_SECTION()
    {
-      mpi::allReduceInplace( torque[0], mpi::SUM );
-      mpi::allReduceInplace( torque[1], mpi::SUM );
-      mpi::allReduceInplace( torque[2], mpi::SUM );
+      mpi::allReduceInplace( torque, mpi::SUM );
    }
    return torque;
 }

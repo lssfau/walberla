@@ -380,9 +380,7 @@ public:
       }
 
       // The force is accumulated over all processes. The result is stored only on the root process.
-      mpi::reduceInplace( force[0], mpi::SUM );
-      mpi::reduceInplace( force[1], mpi::SUM );
-      mpi::reduceInplace( force[2], mpi::SUM );
+      mpi::reduceInplace( force, mpi::SUM );
 
       // The root process writes the accumulated force to file.
       WALBERLA_ROOT_SECTION()

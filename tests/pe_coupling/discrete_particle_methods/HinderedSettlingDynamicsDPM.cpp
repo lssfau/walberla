@@ -402,9 +402,7 @@ public:
 
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( velocity[0], mpi::SUM );
-         mpi::allReduceInplace( velocity[1], mpi::SUM );
-         mpi::allReduceInplace( velocity[2], mpi::SUM );
+         mpi::allReduceInplace( velocity, mpi::SUM );
          mpi::allReduceInplace( counter, mpi::SUM );
       }
 
@@ -433,9 +431,7 @@ private:
       }
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( force[0], mpi::SUM );
-         mpi::allReduceInplace( force[1], mpi::SUM );
-         mpi::allReduceInplace( force[2], mpi::SUM );
+         mpi::allReduceInplace( force, mpi::SUM );
       }
       return force;
    }
@@ -452,9 +448,7 @@ private:
       }
       WALBERLA_MPI_SECTION()
       {
-         mpi::allReduceInplace( force[0], mpi::SUM );
-         mpi::allReduceInplace( force[1], mpi::SUM );
-         mpi::allReduceInplace( force[2], mpi::SUM );
+         mpi::allReduceInplace( force, mpi::SUM );
       }
       return force;
    }
@@ -504,9 +498,7 @@ Vector3<real_t> getGNSMeanFluidVelocity( const shared_ptr<StructuredBlockStorage
    }
    WALBERLA_MPI_SECTION()
    {
-      mpi::allReduceInplace( velocity[0], mpi::SUM );
-      mpi::allReduceInplace( velocity[1], mpi::SUM );
-      mpi::allReduceInplace( velocity[2], mpi::SUM );
+      mpi::allReduceInplace( velocity, mpi::SUM );
    }
    return velocity / domainVolume;
 }

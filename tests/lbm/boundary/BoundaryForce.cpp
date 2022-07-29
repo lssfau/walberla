@@ -206,9 +206,7 @@ int main( int argc, char ** argv )
    }
    Vector3<real_t> force(fx, fy, fz);
    
-   mpi::allReduceInplace( force[0], mpi::SUM );
-   mpi::allReduceInplace( force[1], mpi::SUM );
-   mpi::allReduceInplace( force[2], mpi::SUM );
+   mpi::allReduceInplace( force, mpi::SUM );
    
    real_t visc = lbm::collision_model::viscosityFromOmega( omega );
    Vector3<real_t> stokes = 6 * math::pi * visc * R * velocity;

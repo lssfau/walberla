@@ -705,18 +705,10 @@ int main( int argc, char **argv )
 
          WALBERLA_MPI_SECTION()
          {
-            mpi::allReduceInplace( hydForce[0], mpi::SUM );
-            mpi::allReduceInplace( hydForce[1], mpi::SUM );
-            mpi::allReduceInplace( hydForce[2], mpi::SUM );
-            mpi::reduceInplace( lubForce[0], mpi::SUM );
-            mpi::reduceInplace( lubForce[1], mpi::SUM );
-            mpi::reduceInplace( lubForce[2], mpi::SUM );
-            mpi::allReduceInplace( hydTorque[0], mpi::SUM );
-            mpi::allReduceInplace( hydTorque[1], mpi::SUM );
-            mpi::allReduceInplace( hydTorque[2], mpi::SUM );
-            mpi::reduceInplace( lubTorque[0], mpi::SUM );
-            mpi::reduceInplace( lubTorque[1], mpi::SUM );
-            mpi::reduceInplace( lubTorque[2], mpi::SUM );
+            mpi::allReduceInplace( hydForce, mpi::SUM );
+            mpi::reduceInplace( lubForce, mpi::SUM );
+            mpi::allReduceInplace( hydTorque, mpi::SUM );
+            mpi::reduceInplace( lubTorque, mpi::SUM );
          }
 
          curForceNorm = hydForce.length();
