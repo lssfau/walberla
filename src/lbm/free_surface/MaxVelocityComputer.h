@@ -16,7 +16,7 @@
 //! \file MaxVelocityComputer.h
 //! \ingroup free_surface
 //! \author Christoph Schwarzmeier <christoph.schwarzmeier@fau.de>
-//! \brief Compute the maximum velocity in the system.
+//! \brief Compute the maximum velocity of all liquid and interface cells (in each direction) in the system.
 //
 //======================================================================================================================
 
@@ -66,7 +66,9 @@ class MaxVelocityComputer
       const BlockDataID flagFieldID = freeSurfaceBoundaryHandling->getFlagFieldID();
       const typename FreeSurfaceBoundaryHandling_T::FlagInfo_T& flagInfo = freeSurfaceBoundaryHandling->getFlagInfo();
 
-      Vector3< real_t > maxVelocity = Vector3< real_t >(real_c(0));
+      real_t maxVelocityX = real_c(0);
+      real_t maxVelocityY = real_c(0);
+      real_t maxVelocityZ = real_c(0);
 
       for (auto blockIt = blockForest->begin(); blockIt != blockForest->end(); ++blockIt)
       {
@@ -74,19 +76,22 @@ class MaxVelocityComputer
          const PdfField_T* const pdfField   = blockIt->template getData< const PdfField_T >(pdfFieldID_);
 
             WALBERLA_FOR_ALL_CELLS_OMP(flagFieldIt, flagField, pdfFieldIt, pdfField,
-                                       omp parallel for schedule(static) reduction(max:maxVelocity[0]) reduction(max:maxVelocity[1]) reduction(max:maxVelocity[2]),
+                                       omp parallel for schedule(static) reduction(max:maxVelocityX)
+                                                                         reduction(max:maxVelocityY)
+                                                                         reduction(max:maxVelocityZ),
             {
             if (flagInfo.isLiquid(flagFieldIt) || flagInfo.isInterface(flagFieldIt))
             {
                const Vector3< real_t > velocity = pdfField->getVelocity(pdfFieldIt.cell());
 
-               if (velocity[0] > maxVelocity[0]) { maxVelocity[0] = velocity[0]; }
-               if (velocity[1] > maxVelocity[1]) { maxVelocity[1] = velocity[1]; }
-               if (velocity[2] > maxVelocity[2]) { maxVelocity[2] = velocity[2]; }
+               if (velocity[0] > maxVelocityX) { maxVelocityX = velocity[0]; }
+               if (velocity[1] > maxVelocityY) { maxVelocityY = velocity[1]; }
+               if (velocity[2] > maxVelocityZ) { maxVelocityZ = velocity[2]; }
             }
             }) // WALBERLA_FOR_ALL_CELLS_OMP
       }
 
+      Vector3< real_t > maxVelocity(maxVelocityX, maxVelocityY, maxVelocityZ);
       mpi::allReduceInplace< real_t >(maxVelocity, mpi::MAX);
 
       *maxVelocity_ = maxVelocity;
