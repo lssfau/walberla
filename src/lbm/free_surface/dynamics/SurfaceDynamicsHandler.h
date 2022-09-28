@@ -191,7 +191,7 @@ class SurfaceDynamicsHandler
           public:
             CollideSweep(const typename LatticeModel_T::Sweep& sweep) : sweep_(sweep){};
 
-            void operator()(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t(1))
+            void operator()(IBlock* const block, const uint_t numberOfGhostLayersToInclude = uint_t(0))
             {
                sweep_.collide(block, numberOfGhostLayersToInclude);
             }
