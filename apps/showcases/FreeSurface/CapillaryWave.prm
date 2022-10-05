@@ -95,9 +95,11 @@ VTK
 
       before_functions
       {
-         //ghost_layer_synchronization; // only needed if writing the ghost layer
+         //ghost_layer_synchronization;   // only needed if writing the ghost layer
+         gas_cell_zero_setter;            // sets velocity=0 and density=1 all gas cells before writing VTK output
       }
    }
+
    domain_decomposition
    {
       writeFrequency             100;

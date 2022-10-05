@@ -85,20 +85,21 @@ VTK
          normal;
          obstacle_normal;
          mapped_flag;
-        }
+      }
 
-        inclusion_filters
-        {
-            // only include liquid and interface cells in VTK output
-            //liquidInterfaceFilter;
-        }
+      inclusion_filters
+      {
+         // only include liquid and interface cells in VTK output
+         //liquidInterfaceFilter;
+      }
 
-        before_functions
-        {
-            //ghost_layer_synchronization; // only needed if writing the ghost layer
-        }
-
+      before_functions
+      {
+         //ghost_layer_synchronization;   // only needed if writing the ghost layer
+         gas_cell_zero_setter;            // sets velocity=0 and density=1 all gas cells before writing VTK output
+      }
    }
+
    domain_decomposition
    {
       writeFrequency 100;

@@ -120,6 +120,60 @@ void addVTKOutput(const std::weak_ptr< StructuredBlockForest >& blockForestPtr, 
          std::make_shared< field::communication::PackInfo< VectorField_T > >(obstacleNormalFieldID));
 
       beforeFuncs["ghost_layer_synchronization"] = preVTKComm;
+
+      // set velocity and density to zero in obstacle and gas cells (only for visualization purposes); the PDF values in
+      // these cells are not important and thus not set during the simulation;
+      // only enable this functionality if the non-liquid and non-interface cells are not excluded anyway
+      const auto vtkConfigBlock        = config->getOneBlock("VTK");
+      const auto fluidFieldConfigBlock = vtkConfigBlock.getBlock("fluid_field");
+      if (fluidFieldConfigBlock)
+      {
+         auto inclusionFiltersConfigBlock = fluidFieldConfigBlock.getBlock("inclusion_filters");
+
+         // liquidInterfaceFilter limits VTK-output to only liquid and interface cells
+         if (!inclusionFiltersConfigBlock.isDefined("liquidInterfaceFilter"))
+         {
+            class ZeroSetter
+            {
+             public:
+               ZeroSetter(const weak_ptr< StructuredBlockForest >& blockForest, const BlockDataID& pdfFieldID,
+                          const ConstBlockDataID& flagFieldID,
+                          const typename FreeSurfaceBoundaryHandling_T::FlagInfo_T& flagInfo)
+                  : blockForest_(blockForest), pdfFieldID_(pdfFieldID), flagFieldID_(flagFieldID), flagInfo_(flagInfo)
+               {}
+
+               void operator()()
+               {
+                  auto blockForest = blockForest_.lock();
+                  WALBERLA_CHECK_NOT_NULLPTR(blockForest);
+
+                  for (auto blockIt = blockForest->begin(); blockIt != blockForest->end(); ++blockIt)
+                  {
+                     PdfField_T* const pdfField         = blockIt->template getData< PdfField_T >(pdfFieldID_);
+                     const FlagField_T* const flagField = blockIt->template getData< const FlagField_T >(flagFieldID_);
+                     WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(pdfField, uint_c(1), {
+                        const typename PdfField_T::Ptr pdfFieldPtr(*pdfField, x, y, z);
+                        const typename FlagField_T::ConstPtr flagFieldPtr(*flagField, x, y, z);
+
+                        if (flagInfo_.isGas(*flagFieldPtr) || flagInfo_.isObstacle(*flagFieldPtr))
+                        {
+                           pdfField->setDensityAndVelocity(pdfFieldPtr.cell(), Vector3< real_t >(real_c(0)),
+                                                           real_c(1.0));
+                        }
+                     }) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
+                  }
+               }
+
+             private:
+               weak_ptr< StructuredBlockForest > blockForest_;
+               BlockDataID pdfFieldID_;
+               ConstBlockDataID flagFieldID_;
+               typename FreeSurfaceBoundaryHandling_T::FlagInfo_T flagInfo_;
+            };
+
+            beforeFuncs["gas_cell_zero_setter"] = ZeroSetter(blockForest, pdfFieldID, flagFieldID, flagInfo);
+         }
+      }
    };
 
    // add VTK output to timeloop
@@ -129,42 +183,6 @@ void addVTKOutput(const std::weak_ptr< StructuredBlockForest >& blockForestPtr, 
    {
       timeloop.addFuncBeforeTimeStep(output->second.outputFunction, std::string("VTK: ") + output->first,
                                      output->second.requiredGlobalStates, output->second.incompatibleGlobalStates);
-   }
-
-   // only enable the zerosetter (see below) if the non-liquid and non-interface cells are not excluded anyway
-   bool enableZeroSetter            = true;
-   const auto vtkConfigBlock        = config->getOneBlock("VTK");
-   const auto fluidFieldConfigBlock = vtkConfigBlock.getBlock("fluid_field");
-   if (fluidFieldConfigBlock)
-   {
-      auto inclusionFiltersConfigBlock = fluidFieldConfigBlock.getBlock("inclusion_filters");
-
-      if (inclusionFiltersConfigBlock.isDefined("liquidInterfaceFilter"))
-      {
-         // liquidInterfaceFilter is defined which limits VTK-output to only liquid and interface cells
-         enableZeroSetter = false;
-      }
-   }
-
-   // set velocity and density to zero in obstacle and gas cells (only for visualization purposes); the PDF values in
-   // these cells are not important and thus not set during the simulation
-   if (enableZeroSetter)
-   {
-      const auto function = [&](IBlock* block) {
-         using namespace free_surface;
-         PdfField_T* const pdfField         = block->getData< PdfField_T >(pdfFieldID);
-         const FlagField_T* const flagField = block->getData< const FlagField_T >(flagFieldID);
-         WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ(pdfField, uint_c(1), {
-            const typename PdfField_T::Ptr pdfFieldPtr(*pdfField, x, y, z);
-            const typename FlagField_T::ConstPtr flagFieldPtr(*flagField, x, y, z);
-
-            if (flagInfo.isGas(*flagFieldPtr) || flagInfo.isObstacle(*flagFieldPtr))
-            {
-               pdfField->setDensityAndVelocity(pdfFieldPtr.cell(), Vector3< real_t >(0), real_c(1.0));
-            }
-         }) // WALBERLA_FOR_ALL_CELLS_INCLUDING_GHOST_LAYER_XYZ
-      };
-      timeloop.add() << Sweep(function, "VTK: zero-setting");
    }
 }
 
