@@ -2638,3 +2638,23 @@ benchmark_ClangBuildAnalyzer:
   only:
      variables:
         - $ENABLE_NIGHTLY_BUILDS
+
+continuous_benchmark_trigger:
+  stage: benchmark
+  image: curlimages/curl
+  tags:
+    - docker
+  script:
+    - curl
+      --fail
+      --request POST
+      --form "token=$CB_TRIGGER_TOKEN"
+      --form "ref=master"
+      --form "variables[WALBERLA_GITLAB_INSTANCE]=https://$CI_SERVER_HOST"
+      --form "variables[WALBERLA_PROJECT_ID]=$CI_PROJECT_PATH"
+      --form "variables[WALBERLA_BRANCH]=$CI_DEFAULT_BRANCH"
+      "$CB_TRIGGER_API_URL"
+  rules:
+    - if: '$CI_PROJECT_PATH == "walberla/walberla" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: on_success
+    - when: never
