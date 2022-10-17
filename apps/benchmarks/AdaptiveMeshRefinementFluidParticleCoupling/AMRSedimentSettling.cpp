@@ -61,8 +61,6 @@
 #include "pe/cr/ICR.h"
 #include "pe/synchronization/ClearSynchronization.h"
 #include "pe/amr/InfoCollection.h"
-#include "pe/amr/weight_assignment/WeightAssignmentFunctor.h"
-#include "pe/amr/weight_assignment/MetisAssignmentFunctor.h"
 
 #include "pe_coupling/amr/all.h"
 #include "pe_coupling/mapping/all.h"
