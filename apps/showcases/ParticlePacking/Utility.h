@@ -33,6 +33,11 @@
 namespace walberla {
 namespace mesa_pd {
 
+// https://stackoverflow.com/questions/1903954/is-there-a-standard-sign-function-signum-sgn-in-c-c
+template <typename T> int sgn(T val) {
+   return (T(0) < val) - (val < T(0));
+}
+
 template< typename T>
 std::vector<T> parseStringToVector(std::string inputStr)
 {
@@ -80,7 +85,7 @@ Vec3 semiAxesFromInertiaTensor(const Matrix3<real_t> & inertiaTensor, real_t mas
 }
 
 
-std::vector<real_t> getMeanDiametersFromSieveSizes(std::vector<real_t> sieveSizes)
+std::vector<real_t> getMeanDiametersFromSieveSizes(const std::vector<real_t>& sieveSizes)
 {
    //since grain sizes are logarithmically distributed, it is practice to use the geometric mean
    std::vector<real_t> meanDiameters(sieveSizes.size()-1,0_r);
@@ -93,7 +98,8 @@ std::vector<real_t> getMeanDiametersFromSieveSizes(std::vector<real_t> sieveSize
 
 // if totalMass and density are given actual numbers, the resulting particle numbers are a good estimate for the actual numbers
 // else, the resulting numbers are directly proportional to the actual ones, which is sufficient to define the distributions
-std::vector<real_t> transferMassFractionsToParticleNumbersFromAvgVolumes(std::vector<real_t> massFractions, std::vector<real_t> avgVolumePerSizeFraction, real_t totalMass = real_t(1), real_t density = real_t(1) )
+std::vector<real_t> transferMassFractionsToParticleNumbersFromAvgVolumes(const std::vector<real_t>& massFractions, const std::vector<real_t>& avgVolumePerSizeFraction,
+                                                                         real_t totalMass = real_t(1), real_t density = real_t(1) )
 {
    WALBERLA_CHECK_EQUAL(avgVolumePerSizeFraction.size(), massFractions.size(), "Number of entries in volume and mass-fraction array has to be the same!");
    std::vector<real_t> particleNumbers(massFractions.size(), real_t(0));
@@ -105,7 +111,8 @@ std::vector<real_t> transferMassFractionsToParticleNumbersFromAvgVolumes(std::ve
 }
 
 // note: normalVolume is the volume of a typical particle with diameter = 1. For sphere: PI / 6
-std::vector<real_t> transferMassFractionsToParticleNumbers(std::vector<real_t> massFractions, std::vector<real_t> diameters, real_t normalVolume = math::pi / real_t(6), real_t totalMass = real_t(1), real_t density = real_t(1) )
+std::vector<real_t> transferMassFractionsToParticleNumbers(const std::vector<real_t>& massFractions, const std::vector<real_t>& diameters,
+                                                           real_t normalVolume = math::pi / real_t(6), real_t totalMass = real_t(1), real_t density = real_t(1) )
 {
    WALBERLA_CHECK_EQUAL(diameters.size(), massFractions.size(), "Number of entries in diameter and mass-fraction array has to be the same!");
    std::vector<real_t> avgVolumePerSizeFraction(massFractions.size(), real_t(0));
@@ -140,6 +147,10 @@ real_t computePercentileFromSieveDistribution(std::vector<real_t> diameters, std
             // special case of uniform distribution -> percentile is this value
             return diameters[i+1];
          }
+
+         // special case that leads to NaN in interpolation
+         if(realIsEqual(f_small,f_large)) return diameters[i+1];
+
          real_t phi_small = - std::log2(diameters[i]);
          real_t phi_large = - std::log2(diameters[i+1]);
          // logarithmic interpolation of diameter value
@@ -201,6 +212,24 @@ void writeParticleInformationToFile(const std::string& filename, const std::stri
       walberla::mpi::writeMPITextFile( filename, particleInfoStr );
    }
 
+}
+
+
+template< typename ParticleAccessor_T>
+void fixParticlesBelowFixingHeight(ParticleAccessor_T & ac, real_t particleFixingHeight)
+{
+   for(uint_t i = uint_t(0); i < ac.size(); ++i) {
+      if( !data::particle_flags::isSet(ac.getFlagsRef(i), data::particle_flags::GLOBAL) )
+      {
+         auto posZ = ac.getPosition(i)[2];
+         if( posZ <= particleFixingHeight )
+         {
+            data::particle_flags::set(ac.getFlagsRef(i), data::particle_flags::FIXED);
+            ac.setLinearVelocity(i, Vec3(0_r));
+            ac.setAngularVelocity(i, Vec3(0_r));
+         }
+      }
+   }
 }
 
 

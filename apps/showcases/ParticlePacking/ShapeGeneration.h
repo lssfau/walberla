@@ -321,8 +321,8 @@ private:
 class EllipsoidGenerator : public ShapeGenerator
 {
 public:
-   EllipsoidGenerator(shared_ptr<NormalizedFormGenerator> normalizedFormGenerator) :
-         normalizedFormGenerator_(normalizedFormGenerator){}
+   EllipsoidGenerator(std::unique_ptr<NormalizedFormGenerator> normalizedFormGenerator) :
+         normalizedFormGenerator_(std::move(normalizedFormGenerator)){}
 
    void setShape(real_t diameter, real_t maximumAllowedInteractionRadius, data::ParticleStorage::baseShape_type& shape, real_t& interactionRadius) override
    {
@@ -345,15 +345,15 @@ public:
    bool generatesSingleShape() override { return normalizedFormGenerator_->generatesSingleShape(); }
 
 private:
-   shared_ptr<NormalizedFormGenerator> normalizedFormGenerator_;
+   std::unique_ptr<NormalizedFormGenerator> normalizedFormGenerator_;
 };
 
 
 class MeshesGenerator : public ShapeGenerator
 {
 public:
-   MeshesGenerator(const std::vector<std::string> & meshFiles, ScaleMode scaleMode, shared_ptr<NormalizedFormGenerator> normalizedFormGenerator) :
-         normalizedFormGenerator_(normalizedFormGenerator), gen_(static_cast<unsigned long>(walberla::mpi::MPIManager::instance()->rank()))
+   MeshesGenerator(const std::vector<std::string> & meshFiles, ScaleMode scaleMode, std::unique_ptr<NormalizedFormGenerator> normalizedFormGenerator) :
+         normalizedFormGenerator_(std::move(normalizedFormGenerator)), gen_(static_cast<unsigned long>(walberla::mpi::MPIManager::instance()->rank()))
    {
       WALBERLA_CHECK(!meshFiles.empty());
 
@@ -450,7 +450,7 @@ public:
    bool generatesSingleShape() override { return particleMeshes_.size() == 1 && normalizedFormGenerator_->generatesSingleShape(); }
 
 private:
-   shared_ptr<NormalizedFormGenerator> normalizedFormGenerator_;
+   std::unique_ptr<NormalizedFormGenerator> normalizedFormGenerator_;
 
    std::vector<mesh::TriangleMesh> particleMeshes_;
    std::mt19937 gen_;
@@ -513,16 +513,12 @@ public:
             maxDiameterScalingFactor_ = std::max( maxDiameterScalingFactor_, 2_r * mesh::computeBoundingSphereRadius(mesh, mesh::computeCentroid(mesh)) );
          }
 
-         WALBERLA_CHECK(!particleMeshPerFractionVector_.empty());
+         if(meshesVector.size() != 1) generatesSingleShape_ = false;
 
-         particleMeshPerFractionVector_.push_back(meshesVector);
-
-         if(particleMeshPerFractionVector_.size() != 1) generatesSingleShape_ = false;
-
+         WALBERLA_CHECK(!meshesVector.empty(), "No meshes found in folder " << meshesFolder << ". Provide at least one per folder.");
          avgVolumesPerFraction[fractionIdx]  /= real_c(meshesVector.size()); // use average normal mesh volume here as estimation
-
-         distsPerFraction_.push_back(std::uniform_int_distribution<uint_t>(0, meshesVector.size()-1));
-
+         distsPerFraction_.emplace_back(std::uniform_int_distribution<uint_t>(0, meshesVector.size()-1));
+         particleMeshPerFractionVector_.emplace_back(meshesVector);
       }
 
       auto particleNumbers = transferMassFractionsToParticleNumbersFromAvgVolumes(massFractions, avgVolumesPerFraction);
