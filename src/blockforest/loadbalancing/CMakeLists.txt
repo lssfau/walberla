@@ -15,3 +15,7 @@ target_sources( blockforest
       StaticCurve.cpp
       StaticParMetis.cpp
       )
+
+
+add_subdirectory( weight_assignment )
+add_subdirectory( level_determination )

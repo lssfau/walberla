@@ -20,8 +20,14 @@
 //======================================================================================================================
 
 #include "blockforest/Initialization.h"
-#include "blockforest/communication/UniformBufferedScheme.h"
-#include "blockforest/loadbalancing/all.h"
+#include "blockforest/loadbalancing/InfoCollection.h"
+#include "blockforest/loadbalancing/DynamicCurve.h"
+#include "blockforest/loadbalancing/DynamicDiffusive.h"
+#include "blockforest/loadbalancing/DynamicParMetis.h"
+#include "blockforest/loadbalancing/StaticCurve.h"
+#include "blockforest/loadbalancing/StaticParMetis.h"
+#include "blockforest/loadbalancing/weight_assignment/MetisAssignmentFunctor.h"
+#include "blockforest/loadbalancing/weight_assignment/WeightAssignmentFunctor.h"
 #include "blockforest/AABBRefinementSelection.h"
 
 #include "boundary/all.h"
@@ -35,7 +41,6 @@
 #include "core/timing/RemainingTimeLogger.h"
 #include "core/mpi/Broadcast.h"
 
-#include "domain_decomposition/SharedSweep.h"
 #include "domain_decomposition/BlockSweepWrapper.h"
 
 #include "field/AddToStorage.h"
@@ -43,26 +48,21 @@
 #include "field/communication/PackInfo.h"
 
 #include "lbm/boundary/all.h"
-#include "lbm/communication/PdfFieldPackInfo.h"
 #include "lbm/field/AddToStorage.h"
 #include "lbm/field/PdfField.h"
 #include "lbm/field/VelocityFieldWriter.h"
 #include "lbm/lattice_model/D3Q19.h"
 #include "lbm/refinement/all.h"
 #include "lbm/sweeps/CellwiseSweep.h"
-#include "lbm/sweeps/SweepWrappers.h"
 
 #include "pe/basic.h"
 #include "pe/Types.h"
 #include "pe/fcd/GJKEPACollideFunctor.h"
-#include "pe/vtk/BodyVtkOutput.h"
 #include "pe/vtk/SphereVtkOutput.h"
 #include "pe/vtk/EllipsoidVtkOutput.h"
 #include "pe/cr/ICR.h"
 #include "pe/synchronization/ClearSynchronization.h"
 #include "pe/amr/InfoCollection.h"
-#include "pe/amr/weight_assignment/WeightAssignmentFunctor.h"
-#include "pe/amr/weight_assignment/MetisAssignmentFunctor.h"
 
 #include "pe_coupling/amr/all.h"
 #include "pe_coupling/mapping/all.h"
@@ -1616,7 +1616,7 @@ int main( int argc, char **argv )
       }
       else if( loadEvaluationStrategy == "PE" )
       {
-         pe::amr::WeightAssignmentFunctor weightAssignmentFunctor(peInfoCollection, peBlockBaseWeight );
+         blockforest::WeightAssignmentFunctor weightAssignmentFunctor(peInfoCollection, peBlockBaseWeight );
          blockforest.setRefreshPhantomBlockDataAssignmentFunction(weightAssignmentFunctor);
       }
       else if( loadEvaluationStrategy == "LBM" )
@@ -1700,7 +1700,7 @@ int main( int argc, char **argv )
       }
       else if( loadEvaluationStrategy == "PE" )
       {
-         pe::amr::MetisAssignmentFunctor weightAssignmentFunctor(peInfoCollection, peBlockBaseWeight );
+         blockforest::MetisAssignmentFunctor weightAssignmentFunctor(peInfoCollection, peBlockBaseWeight );
          blockforest.setRefreshPhantomBlockDataAssignmentFunction(weightAssignmentFunctor);
       }
       else if( loadEvaluationStrategy == "LBM" )
@@ -1743,7 +1743,7 @@ int main( int argc, char **argv )
       }
       else if( loadEvaluationStrategy == "PE" )
       {
-         pe::amr::WeightAssignmentFunctor weightAssignmentFunctor(peInfoCollection, peBlockBaseWeight );
+         blockforest::WeightAssignmentFunctor weightAssignmentFunctor(peInfoCollection, peBlockBaseWeight );
          blockforest.setRefreshPhantomBlockDataAssignmentFunction(weightAssignmentFunctor);
       }
       else if( loadEvaluationStrategy == "LBM" )

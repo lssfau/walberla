@@ -59,6 +59,9 @@
 #include <blockforest/loadbalancing/DynamicParMetis.h>
 #include <blockforest/loadbalancing/InfoCollection.h>
 #include <blockforest/loadbalancing/PODPhantomData.h>
+#include <blockforest/loadbalancing/level_determination/MinMaxLevelDetermination.h>
+#include <blockforest/loadbalancing/weight_assignment/MetisAssignmentFunctor.h>
+#include <blockforest/loadbalancing/weight_assignment/WeightAssignmentFunctor.h>
 #include <core/Abort.h>
 #include <core/Environment.h>
 #include <core/Hostname.h>
@@ -73,9 +76,6 @@
 #include <core/timing/Timer.h>
 #include <core/timing/TimingPool.h>
 #include <core/waLBerlaBuildInfo.h>
-#include <pe/amr/level_determination/MinMaxLevelDetermination.h>
-#include <pe/amr/weight_assignment/MetisAssignmentFunctor.h>
-#include <pe/amr/weight_assignment/WeightAssignmentFunctor.h>
 #include <sqlite/SQLite.h>
 #include <vtk/VTKOutput.h>
 
@@ -136,7 +136,7 @@ int main( int argc, char ** argv )
 
    auto ic = make_shared<blockforest::InfoCollection>();
 
-   pe::amr::MinMaxLevelDetermination regrid(ic, params.regridMin, params.regridMax);
+   blockforest::MinMaxLevelDetermination regrid(ic, params.regridMin, params.regridMax);
    forest->setRefreshMinTargetLevelDeterminationFunction( regrid );
 
    bool bRebalance = true;
@@ -145,28 +145,28 @@ int main( int argc, char ** argv )
       bRebalance = false;
    } else if (params.LBAlgorithm == "Morton")
    {
-      forest->setRefreshPhantomBlockDataAssignmentFunction( pe::amr::WeightAssignmentFunctor( ic, params.baseWeight ) );
-      forest->setRefreshPhantomBlockDataPackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      forest->setRefreshPhantomBlockDataUnpackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      forest->setRefreshPhantomBlockDataAssignmentFunction( blockforest::WeightAssignmentFunctor( ic, params.baseWeight ) );
+      forest->setRefreshPhantomBlockDataPackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      forest->setRefreshPhantomBlockDataUnpackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
 
-      auto prepFunc = blockforest::DynamicCurveBalance< pe::amr::WeightAssignmentFunctor::PhantomBlockWeight >( false, true, false );
+      auto prepFunc = blockforest::DynamicCurveBalance< blockforest::WeightAssignmentFunctor::PhantomBlockWeight >( false, true, false );
       prepFunc.setMaxBlocksPerProcess( params.maxBlocksPerProcess );
       forest->setRefreshPhantomBlockMigrationPreparationFunction( prepFunc );
    } else if (params.LBAlgorithm == "Hilbert")
    {
-      forest->setRefreshPhantomBlockDataAssignmentFunction( pe::amr::WeightAssignmentFunctor( ic, params.baseWeight ) );
-      forest->setRefreshPhantomBlockDataPackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      forest->setRefreshPhantomBlockDataUnpackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      forest->setRefreshPhantomBlockDataAssignmentFunction( blockforest::WeightAssignmentFunctor( ic, params.baseWeight ) );
+      forest->setRefreshPhantomBlockDataPackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      forest->setRefreshPhantomBlockDataUnpackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
 
-      auto prepFunc = blockforest::DynamicCurveBalance< pe::amr::WeightAssignmentFunctor::PhantomBlockWeight >( true, true, false );
+      auto prepFunc = blockforest::DynamicCurveBalance< blockforest::WeightAssignmentFunctor::PhantomBlockWeight >( true, true, false );
       prepFunc.setMaxBlocksPerProcess( params.maxBlocksPerProcess );
       forest->setRefreshPhantomBlockMigrationPreparationFunction( prepFunc );
    } else if (params.LBAlgorithm == "Metis")
    {
-      auto assFunc = pe::amr::MetisAssignmentFunctor( ic, params.baseWeight );
+      auto assFunc = blockforest::MetisAssignmentFunctor( ic, params.baseWeight );
       forest->setRefreshPhantomBlockDataAssignmentFunction( assFunc );
-      forest->setRefreshPhantomBlockDataPackFunction( pe::amr::MetisAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      forest->setRefreshPhantomBlockDataUnpackFunction( pe::amr::MetisAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      forest->setRefreshPhantomBlockDataPackFunction( blockforest::MetisAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      forest->setRefreshPhantomBlockDataUnpackFunction( blockforest::MetisAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
 
       auto alg     = blockforest::DynamicParMetis::stringToAlgorithm(    params.metisAlgorithm );
       auto vWeight = blockforest::DynamicParMetis::stringToWeightsToUse( params.metisWeightsToUse );
@@ -178,10 +178,10 @@ int main( int argc, char ** argv )
       forest->setRefreshPhantomBlockMigrationPreparationFunction( prepFunc );
    } else if (params.LBAlgorithm == "Diffusive")
    {
-      forest->setRefreshPhantomBlockDataAssignmentFunction( pe::amr::WeightAssignmentFunctor( ic, params.baseWeight ) );
-      forest->setRefreshPhantomBlockDataPackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      forest->setRefreshPhantomBlockDataUnpackFunction( pe::amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      auto prepFunc = blockforest::DynamicDiffusionBalance< pe::amr::WeightAssignmentFunctor::PhantomBlockWeight >( 1, 1, false );
+      forest->setRefreshPhantomBlockDataAssignmentFunction( blockforest::WeightAssignmentFunctor( ic, params.baseWeight ) );
+      forest->setRefreshPhantomBlockDataPackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      forest->setRefreshPhantomBlockDataUnpackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      auto prepFunc = blockforest::DynamicDiffusionBalance< blockforest::WeightAssignmentFunctor::PhantomBlockWeight >( 1, 1, false );
       //configure(cfg, prepFunc);
       //addDynamicDiffusivePropertiesToSQL(prepFunc, integerProperties, realProperties, stringProperties);
       forest->setRefreshPhantomBlockMigrationPreparationFunction(prepFunc);

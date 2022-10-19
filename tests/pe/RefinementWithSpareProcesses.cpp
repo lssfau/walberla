@@ -25,12 +25,13 @@
 #include "blockforest/loadbalancing/DynamicParMetis.h"
 #include "blockforest/loadbalancing/InfoCollection.h"
 #include "blockforest/loadbalancing/PODPhantomData.h"
+#include "blockforest/loadbalancing/level_determination/MinMaxLevelDetermination.h"
+#include "blockforest/loadbalancing/weight_assignment/MetisAssignmentFunctor.h"
+#include "blockforest/loadbalancing/weight_assignment/WeightAssignmentFunctor.h"
 
 #include "pe/basic.h"
-#include "pe/amr/level_determination/MinMaxLevelDetermination.h"
-#include "pe/amr/weight_assignment/MetisAssignmentFunctor.h"
-#include "pe/amr/weight_assignment/WeightAssignmentFunctor.h"
 #include "pe/ccd/SimpleCCDDataHandling.h"
+#include "pe/amr/InfoCollection.h"
 
 #include "core/debug/TestSubsystem.h"
 #include "core/grid_generator/SCIterator.h"
@@ -79,30 +80,30 @@ int main( int /*argc*/, char ** /*argv*/, const std::string& LBAlgorithm )
 
    auto ic = make_shared<blockforest::InfoCollection>();
 
-   blockforest->setRefreshMinTargetLevelDeterminationFunction( amr::MinMaxLevelDetermination(ic, 50, 100) );
+   blockforest->setRefreshMinTargetLevelDeterminationFunction( blockforest::MinMaxLevelDetermination(ic, 50, 100) );
 
    if (LBAlgorithm == "Morton")
    {
-      blockforest->setRefreshPhantomBlockDataAssignmentFunction( amr::WeightAssignmentFunctor( ic, real_t(1) ) );
-      blockforest->setRefreshPhantomBlockDataPackFunction( amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      blockforest->setRefreshPhantomBlockDataUnpackFunction( amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      blockforest->setRefreshPhantomBlockDataAssignmentFunction( blockforest::WeightAssignmentFunctor( ic, real_t(1) ) );
+      blockforest->setRefreshPhantomBlockDataPackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      blockforest->setRefreshPhantomBlockDataUnpackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
 
-      auto prepFunc = blockforest::DynamicCurveBalance< amr::WeightAssignmentFunctor::PhantomBlockWeight >( false, true, false );
+      auto prepFunc = blockforest::DynamicCurveBalance< blockforest::WeightAssignmentFunctor::PhantomBlockWeight >( false, true, false );
       blockforest->setRefreshPhantomBlockMigrationPreparationFunction( prepFunc );
    } else if (LBAlgorithm == "Hilbert")
    {
-      blockforest->setRefreshPhantomBlockDataAssignmentFunction( amr::WeightAssignmentFunctor( ic, real_t(1) ) );
-      blockforest->setRefreshPhantomBlockDataPackFunction( amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      blockforest->setRefreshPhantomBlockDataUnpackFunction( amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      blockforest->setRefreshPhantomBlockDataAssignmentFunction( blockforest::WeightAssignmentFunctor( ic, real_t(1) ) );
+      blockforest->setRefreshPhantomBlockDataPackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      blockforest->setRefreshPhantomBlockDataUnpackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
 
-      auto prepFunc = blockforest::DynamicCurveBalance< amr::WeightAssignmentFunctor::PhantomBlockWeight >( true, true, false );
+      auto prepFunc = blockforest::DynamicCurveBalance< blockforest::WeightAssignmentFunctor::PhantomBlockWeight >( true, true, false );
       blockforest->setRefreshPhantomBlockMigrationPreparationFunction( prepFunc );
    } else if (LBAlgorithm == "Metis")
    {
-      auto assFunc = amr::MetisAssignmentFunctor( ic, real_t(1) );
+      auto assFunc = blockforest::MetisAssignmentFunctor( ic, real_t(1) );
       blockforest->setRefreshPhantomBlockDataAssignmentFunction( assFunc );
-      blockforest->setRefreshPhantomBlockDataPackFunction( amr::MetisAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      blockforest->setRefreshPhantomBlockDataUnpackFunction( amr::MetisAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      blockforest->setRefreshPhantomBlockDataPackFunction( blockforest::MetisAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      blockforest->setRefreshPhantomBlockDataUnpackFunction( blockforest::MetisAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
 
       auto alg     = blockforest::DynamicParMetis::stringToAlgorithm(    "PART_GEOM_KWAY" );
       auto vWeight = blockforest::DynamicParMetis::stringToWeightsToUse( "VERTEX_WEIGHTS" );
@@ -113,10 +114,10 @@ int main( int /*argc*/, char ** /*argv*/, const std::string& LBAlgorithm )
       blockforest->setRefreshPhantomBlockMigrationPreparationFunction( prepFunc );
    } else if (LBAlgorithm == "Diffusive")
    {
-      blockforest->setRefreshPhantomBlockDataAssignmentFunction( amr::WeightAssignmentFunctor( ic, real_t(1) ) );
-      blockforest->setRefreshPhantomBlockDataPackFunction( amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      blockforest->setRefreshPhantomBlockDataUnpackFunction( amr::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
-      auto prepFunc = blockforest::DynamicDiffusionBalance< amr::WeightAssignmentFunctor::PhantomBlockWeight >( 20, 12, false );
+      blockforest->setRefreshPhantomBlockDataAssignmentFunction( blockforest::WeightAssignmentFunctor( ic, real_t(1) ) );
+      blockforest->setRefreshPhantomBlockDataPackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      blockforest->setRefreshPhantomBlockDataUnpackFunction( blockforest::WeightAssignmentFunctor::PhantomBlockWeightPackUnpackFunctor() );
+      auto prepFunc = blockforest::DynamicDiffusionBalance< blockforest::WeightAssignmentFunctor::PhantomBlockWeight >( 20, 12, false );
       prepFunc.adaptInflowWithGlobalInformation( true );
       prepFunc.adaptOutflowWithGlobalInformation( true );
       blockforest->setRefreshPhantomBlockMigrationPreparationFunction(prepFunc);

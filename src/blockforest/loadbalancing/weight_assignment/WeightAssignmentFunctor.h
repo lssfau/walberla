@@ -26,8 +26,7 @@
 #include "blockforest/PhantomBlockForest.h"
 
 namespace walberla {
-namespace pe {
-namespace amr {
+namespace blockforest {
 
 /**
  * General assignment functor for load balancing.
@@ -68,6 +67,5 @@ private:
    double baseWeight_ = real_t(10.0);
 };
 
-}
 }
 }
