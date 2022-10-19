@@ -5,8 +5,9 @@ from mesa_pd.utility import generate_file
 
 
 class ExplicitEuler:
-    def __init__(self, integrate_rotation=True):
+    def __init__(self, integrate_rotation=True, use_full_angular_momentum_equation=False):
         self.context = {'bIntegrateRotation': integrate_rotation,
+                        'bUseFullAngularMomentumEquation': use_full_angular_momentum_equation,
                         'interface': [
                             create_access("position", "walberla::mesa_pd::Vec3", access="gs"),
                             create_access("linearVelocity", "walberla::mesa_pd::Vec3", access="gs"),

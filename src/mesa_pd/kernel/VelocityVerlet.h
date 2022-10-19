@@ -46,37 +46,37 @@ namespace kernel {
  *
  * This kernel requires the following particle accessor interface
  * \code
- * const walberla::mesa_pd::Vec3& getPosition(const size_t p_idx) const;
- * void setPosition(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+ * const walberla::mesa_pd::Vec3& getPosition(const size_t idx) const;
+ * void setPosition(const size_t idx, const walberla::mesa_pd::Vec3& v);
  *
- * const walberla::mesa_pd::Vec3& getLinearVelocity(const size_t p_idx) const;
- * void setLinearVelocity(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+ * const walberla::mesa_pd::Vec3& getLinearVelocity(const size_t idx) const;
+ * void setLinearVelocity(const size_t idx, const walberla::mesa_pd::Vec3& v);
  *
- * const walberla::real_t& getInvMass(const size_t p_idx) const;
+ * const walberla::real_t& getInvMass(const size_t idx) const;
  *
- * const walberla::mesa_pd::Vec3& getForce(const size_t p_idx) const;
- * void setForce(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+ * const walberla::mesa_pd::Vec3& getForce(const size_t idx) const;
+ * void setForce(const size_t idx, const walberla::mesa_pd::Vec3& v);
  *
- * const walberla::mesa_pd::Vec3& getOldForce(const size_t p_idx) const;
- * void setOldForce(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+ * const walberla::mesa_pd::Vec3& getOldForce(const size_t idx) const;
+ * void setOldForce(const size_t idx, const walberla::mesa_pd::Vec3& v);
  *
- * const walberla::mesa_pd::Rot3& getRotation(const size_t p_idx) const;
- * void setRotation(const size_t p_idx, const walberla::mesa_pd::Rot3& v);
+ * const walberla::mesa_pd::Rot3& getRotation(const size_t idx) const;
+ * void setRotation(const size_t idx, const walberla::mesa_pd::Rot3& v);
  *
- * const walberla::mesa_pd::Vec3& getAngularVelocity(const size_t p_idx) const;
- * void setAngularVelocity(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+ * const walberla::mesa_pd::Vec3& getAngularVelocity(const size_t idx) const;
+ * void setAngularVelocity(const size_t idx, const walberla::mesa_pd::Vec3& v);
  *
- * const walberla::mesa_pd::Mat3& getInvInertiaBF(const size_t p_idx) const;
+ * const walberla::mesa_pd::Mat3& getInvInertiaBF(const size_t idx) const;
  *
- * const walberla::mesa_pd::Mat3& getInertiaBF(const size_t p_idx) const;
+ * const walberla::mesa_pd::Mat3& getInertiaBF(const size_t idx) const;
  *
- * const walberla::mesa_pd::Vec3& getTorque(const size_t p_idx) const;
- * void setTorque(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+ * const walberla::mesa_pd::Vec3& getTorque(const size_t idx) const;
+ * void setTorque(const size_t idx, const walberla::mesa_pd::Vec3& v);
  *
- * const walberla::mesa_pd::Vec3& getOldTorque(const size_t p_idx) const;
- * void setOldTorque(const size_t p_idx, const walberla::mesa_pd::Vec3& v);
+ * const walberla::mesa_pd::Vec3& getOldTorque(const size_t idx) const;
+ * void setOldTorque(const size_t idx, const walberla::mesa_pd::Vec3& v);
  *
- * const walberla::mesa_pd::data::particle_flags::FlagT& getFlags(const size_t p_idx) const;
+ * const walberla::mesa_pd::data::particle_flags::FlagT& getFlags(const size_t idx) const;
  *
  * \endcode
  * \ingroup mesa_pd_kernel
@@ -105,56 +105,51 @@ public:
 };
 
 template <typename Accessor>
-inline void VelocityVerletPreForceUpdate::operator()(const size_t p_idx, Accessor& ac) const
+inline void VelocityVerletPreForceUpdate::operator()(const size_t idx, Accessor& ac) const
 {
    static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
 
-   if (!data::particle_flags::isSet( ac.getFlags(p_idx), data::particle_flags::FIXED))
+   if (!data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::FIXED))
    {
-      ac.setPosition(p_idx, ac.getPosition(p_idx) +
-                            ac.getLinearVelocity(p_idx) * dt_ +
-                            real_t(0.5) * ac.getInvMass(p_idx) * ac.getOldForce(p_idx) * dt_ * dt_);
-      // computation done in body frame: d(omega)/ dt = J^-1 ((J*omega) x omega + T), update in world frame
-      // see Wachs, 2019, doi:10.1007/s00707-019-02389-9, Eq. 27
-      // note: this implementation (pre and post) is experimental as it is in principle unclear in which order
-      //       angular velocities and rotations (affect again the transformations WF - BF) have to be carried out
-      const auto omegaBF = transformVectorFromWFtoBF(p_idx, ac, ac.getAngularVelocity(p_idx));
-      const auto torqueBF = transformVectorFromWFtoBF(p_idx, ac, ac.getOldTorque(p_idx));
-      const Vec3 wdotBF = ac.getInvInertiaBF(p_idx) * ( ( ac.getInertiaBF(p_idx) * omegaBF ) % omegaBF + torqueBF );
-      const Vec3 wdot = transformVectorFromBFtoWF(p_idx, ac, wdotBF);
+      ac.setPosition(idx, ac.getPosition(idx) +
+                            ac.getLinearVelocity(idx) * dt_ +
+                            real_t(0.5) * ac.getInvMass(idx) * ac.getOldForce(idx) * dt_ * dt_);
+      // note: contribution (J*omega) x omega is ignored here -> see template for other variant
+      const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
+                                                  ac.getInvInertiaBF(idx)) * ac.getOldTorque(idx);
+
 
       // Calculating the rotation angle
-      const Vec3 phi( ac.getAngularVelocity(p_idx) * dt_ + real_t(0.5) * wdot * dt_ * dt_);
+      const Vec3 phi( ac.getAngularVelocity(idx) * dt_ + real_t(0.5) * wdot * dt_ * dt_);
 
       // Calculating the new orientation
-      auto rotation = ac.getRotation(p_idx);
+      auto rotation = ac.getRotation(idx);
       rotation.rotate( phi );
-      ac.setRotation(p_idx, rotation);
+      ac.setRotation(idx, rotation);
    }
 }
 
 template <typename Accessor>
-inline void VelocityVerletPostForceUpdate::operator()(const size_t p_idx, Accessor& ac) const
+inline void VelocityVerletPostForceUpdate::operator()(const size_t idx, Accessor& ac) const
 {
    static_assert(std::is_base_of<data::IAccessor, Accessor>::value, "please provide a valid accessor");
 
-   if (!data::particle_flags::isSet( ac.getFlags(p_idx), data::particle_flags::FIXED))
+   if (!data::particle_flags::isSet( ac.getFlags(idx), data::particle_flags::FIXED))
    {
-      ac.setLinearVelocity(p_idx, ac.getLinearVelocity(p_idx) +
-                                  real_t(0.5) * ac.getInvMass(p_idx) * (ac.getOldForce(p_idx) + ac.getForce(p_idx)) * dt_);
-      const auto omegaBF = transformVectorFromWFtoBF(p_idx, ac, ac.getAngularVelocity(p_idx));
-      const auto torqueBF = transformVectorFromWFtoBF(p_idx, ac, 0.5_r * (ac.getOldTorque(p_idx) + ac.getTorque(p_idx)));
-      const Vec3 wdotBF = ac.getInvInertiaBF(p_idx) * ( ( ac.getInertiaBF(p_idx) * omegaBF ) % omegaBF + torqueBF );
-      const Vec3 wdot = transformVectorFromBFtoWF(p_idx, ac, wdotBF);
+      ac.setLinearVelocity(idx, ac.getLinearVelocity(idx) +
+                                  real_t(0.5) * ac.getInvMass(idx) * (ac.getOldForce(idx) + ac.getForce(idx)) * dt_);
+      const auto torque = 0.5_r * (ac.getOldTorque(idx) + ac.getTorque(idx));
+      const Vec3 wdot = math::transformMatrixRART(ac.getRotation(idx).getMatrix(),
+                                                  ac.getInvInertiaBF(idx)) * torque;
 
-      ac.setAngularVelocity(p_idx, ac.getAngularVelocity(p_idx) +
+      ac.setAngularVelocity(idx, ac.getAngularVelocity(idx) +
                                    wdot * dt_ );
    }
 
-   ac.setOldForce(p_idx,       ac.getForce(p_idx));
-   ac.setForce(p_idx,          Vec3(real_t(0), real_t(0), real_t(0)));
-   ac.setOldTorque(p_idx,      ac.getTorque(p_idx));
-   ac.setTorque(p_idx,         Vec3(real_t(0), real_t(0), real_t(0)));
+   ac.setOldForce(idx,       ac.getForce(idx));
+   ac.setForce(idx,          Vec3(real_t(0), real_t(0), real_t(0)));
+   ac.setOldTorque(idx,      ac.getTorque(idx));
+   ac.setTorque(idx,         Vec3(real_t(0), real_t(0), real_t(0)));
 }
 
 } //namespace kernel

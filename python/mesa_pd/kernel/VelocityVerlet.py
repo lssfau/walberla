@@ -5,8 +5,10 @@ from mesa_pd.utility import generate_file
 
 
 class VelocityVerlet:
-    def __init__(self, integrate_rotation=True):
-        self.context = {'bIntegrateRotation': integrate_rotation, 'interface': []}
+    def __init__(self, integrate_rotation=True, use_full_angular_momentum_equation=False):
+        self.context = {'bIntegrateRotation': integrate_rotation,
+                        'bUseFullAngularMomentumEquation': use_full_angular_momentum_equation,
+                        'interface': []}
         self.context['interface'].append(create_access("position", "walberla::mesa_pd::Vec3", access="gs"))
         self.context['interface'].append(create_access("linearVelocity", "walberla::mesa_pd::Vec3", access="gs"))
         self.context['interface'].append(create_access("invMass", "walberla::real_t", access="g"))
