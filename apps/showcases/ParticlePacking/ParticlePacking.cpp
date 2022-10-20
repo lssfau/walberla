@@ -1298,9 +1298,9 @@ int main(int argc, char **argv) {
                                              [damping_forceDampingCoefficient, dt](size_t idx, data::ParticleAccessorWithBaseShape &ac){
                                                 auto force = ac.getForce(idx);
                                                 auto velEstimated = ac.getLinearVelocity(idx) + force * ac.getInvMass(idx) * dt; // = velocity integration in SemiImplicitEuler, might need to be changed for other integrator
-                                                Vec3 dampingForce(mesa_pd::sgn(force[0] * velEstimated[0]) * force[0],
-                                                                  mesa_pd::sgn(force[1] * velEstimated[1]) * force[1],
-                                                                  mesa_pd::sgn(force[2] * velEstimated[2]) * force[2]);
+                                                Vec3 dampingForce(real_c(mesa_pd::sgn(force[0] * velEstimated[0])) * force[0],
+                                                                  real_c(mesa_pd::sgn(force[1] * velEstimated[1])) * force[1],
+                                                                  real_c(mesa_pd::sgn(force[2] * velEstimated[2])) * force[2]);
                                                 dampingForce *= -damping_forceDampingCoefficient;
                                                 ac.getForceRef(idx) += dampingForce; },
                                              particleAccessor);

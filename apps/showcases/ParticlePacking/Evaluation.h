@@ -59,7 +59,7 @@ struct ParticleInfo
       walberla::mpi::allReduceInplace(sumReduceVec, walberla::mpi::SUM);
       walberla::mpi::allReduceInplace(maxReduceVec, walberla::mpi::MAX);
 
-      numParticles = int(sumReduceVec[0]);
+      numParticles = uint_c(sumReduceVec[0]);
       averageVelocity = sumReduceVec[1];
       particleVolume = sumReduceVec[2];
       heightOfMass = sumReduceVec[3];
