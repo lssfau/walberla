@@ -21,6 +21,9 @@
 
 #include "blockforest/Initialization.h"
 #include "blockforest/BlockForest.h"
+#include "blockforest/loadbalancing/InfoCollection.h"
+#include "blockforest/loadbalancing/DynamicCurve.h"
+#include "blockforest/loadbalancing/weight_assignment/WeightAssignmentFunctor.h"
 #include "core/Environment.h"
 #include "core/grid_generator/SCIterator.h"
 #include "core/grid_generator/HCPIterator.h"
@@ -40,6 +43,8 @@
 #include "mesa_pd/data/HashGrids.h"
 
 #include "mesa_pd/domain/BlockForestDomain.h"
+#include "mesa_pd/domain/BlockForestDataHandling.h"
+#include "mesa_pd/domain/InfoCollection.h"
 
 #include "mesa_pd/kernel/AssocToBlock.h"
 #include "mesa_pd/kernel/InsertParticleIntoLinkedCells.h"
@@ -53,6 +58,8 @@
 #include "mesa_pd/kernel/LinearSpringDashpot.h"
 
 #include "mesa_pd/mpi/ContactFilter.h"
+#include "mesa_pd/mpi/ClearGhostOwnerSync.h"
+#include "mesa_pd/mpi/ClearNextNeighborSync.h"
 #include "mesa_pd/mpi/ReduceProperty.h"
 #include "mesa_pd/mpi/ReduceContactHistory.h"
 #include "mesa_pd/mpi/BroadcastProperty.h"
@@ -75,6 +82,9 @@
 #include <iostream>
 #include <random>
 #include <chrono>
+#include <utility>
+#include <vector>
+#include <memory>
 
 #include "Utility.h"
 #include "Evaluation.h"
@@ -104,6 +114,68 @@ kernel::HCSITSRelaxationStep::RelaxationModel relaxationModelFromString(const st
    WALBERLA_ABORT("Unknown relaxation model " << model);
 }
 
+class GenerationPositionChecker
+{
+ public:
+   using PositionDescription_T = std::pair<Vec3, real_t>;
+
+   explicit GenerationPositionChecker(const std::string & domainSetup, real_t domainWidth, real_t largeParticleDiameterThreshold, bool alwaysGenerateLargeParticles)
+      : domainSetup_(domainSetup), domainWidth_(domainWidth), largeParticleDiameterThreshold_(largeParticleDiameterThreshold),
+        alwaysGenerateLargeParticles_(alwaysGenerateLargeParticles)
+   {}
+
+   void addParticleIfLarge(const Vec3& pos, real_t diameter)
+   {
+      if(largeParticleDiameterThreshold_ > 0_r && diameter > largeParticleDiameterThreshold_)
+         positionsOfLargeParticles_.emplace_back(PositionDescription_T(pos, diameter));
+   }
+
+   bool isGenerationAllowed(const Vec3& pos, real_t diameter)
+   {
+      if( alwaysGenerateLargeParticles_ && diameter > largeParticleDiameterThreshold_) return true;
+
+      for(const auto& descriptionPair : positionsOfLargeParticles_)
+      {
+         // check for containment
+         auto largePos = descriptionPair.first;
+         auto largeDiameter = descriptionPair.second;
+         auto smallestDistanceSqr = (largePos - pos).sqrLength();
+
+
+         if( diameter > largeParticleDiameterThreshold_ &&
+             realIsEqual(largePos[0], pos[0]) &&
+             realIsEqual(largePos[1], pos[1]) &&
+             realIsEqual(largePos[2], pos[2])) continue; // large particle checks itself
+
+         if(domainSetup_ == "periodic")
+         {
+            // need to check all periodic copies
+            for(int deltaXFac = -1; deltaXFac <= 1; ++deltaXFac)
+            {
+               for(int deltaYFac = -1; deltaYFac <= 1; ++deltaYFac)
+               {
+                  auto posDelta = Vec3(domainWidth_ * real_c(deltaXFac), domainWidth_ * real_c(deltaYFac), 0_r);
+                  smallestDistanceSqr = std::min(smallestDistanceSqr, (largePos + posDelta - pos).sqrLength());
+               }
+            }
+         }
+
+         auto distanceThreshold = (largeDiameter + diameter) * 0.5_r;
+         if( smallestDistanceSqr < distanceThreshold * distanceThreshold) return false;
+
+      }
+      return true;
+   }
+
+ private:
+   std::string domainSetup_;
+   real_t domainWidth_;
+   real_t largeParticleDiameterThreshold_;
+   bool alwaysGenerateLargeParticles_;
+   std::vector<PositionDescription_T> positionsOfLargeParticles_;
+};
+
+
 class ParticleCreator
 {
 public:
@@ -115,8 +187,8 @@ public:
    {  }
 
    void createParticles( real_t zMin, real_t zMax, real_t spacing,
-                         const shared_ptr<DiameterGenerator> & diameterGenerator, const shared_ptr<ShapeGenerator> & shapeGenerator,
-                         real_t initialVelocity, real_t maximumAllowedInteractionRadius )
+                         const std::unique_ptr<DiameterGenerator> & diameterGenerator, const std::unique_ptr<ShapeGenerator> & shapeGenerator,
+                         real_t initialVelocity, real_t maximumAllowedInteractionRadius, real_t generationPositionCheckerLargeDiameterThreshold )
    {
       // this scaling is done to flexibly change the generation scaling in x,y, and z direction, based on the average form
       auto spacingScaling = (scaleGenerationSpacingWithForm_) ? shapeGenerator->getNormalFormParameters() / shapeGenerator->getNormalFormParameters()[1]  // divide by I for normalization
@@ -128,21 +200,42 @@ public:
                           simulationDomain_.xMax()*invScaling[0], simulationDomain_.yMax()*invScaling[1], zMax*invScaling[2]);
       Vec3 pointOfReference(0,0,(zMax+zMin)*0.5_r*invScaling[2]);
 
+      bool alwaysGenerateLargeParticles = true;
+      GenerationPositionChecker generationPositionChecker(domainSetup_, simulationDomain_.xSize(), generationPositionCheckerLargeDiameterThreshold, alwaysGenerateLargeParticles);
+      std::vector<GenerationPositionChecker::PositionDescription_T> particlesToBeCreated; // locally for this process
+
       WALBERLA_LOG_INFO_ON_ROOT("Creating particles between z = " << zMin << " and " << zMax);
+      // first generate all particle descriptions (position, diameter) of the particles that will be generated
       for (auto ptUnscaled : grid_generator::HCPGrid(creationDomain.getExtended(Vec3(-0.5_r * spacing, -0.5_r * spacing, 0_r)), pointOfReference, spacing))
       {
-         Vec3 pt(ptUnscaled[0]*spacingScaling[0], ptUnscaled[1]*spacingScaling[1], ptUnscaled[2]*spacingScaling[2]); // scale back
+         Vec3 pt(ptUnscaled[0] * spacingScaling[0], ptUnscaled[1] * spacingScaling[1],
+                 ptUnscaled[2] * spacingScaling[2]); // scale back
          auto diameter = diameterGenerator->get();
-         if(!particleDomain_->isContainedInLocalSubdomain(pt,real_t(0))) continue;
-         if(domainSetup_ == "container")
+         if (domainSetup_ == "container")
          {
-            auto domainCenter = simulationDomain_.center();
+            auto domainCenter             = simulationDomain_.center();
             auto distanceFromDomainCenter = pt - domainCenter;
-            distanceFromDomainCenter[2] = real_t(0);
-            auto distance = distanceFromDomainCenter.length();
-            real_t containerRadius = real_t(0.5)*simulationDomain_.xSize();
-            if(distance > containerRadius - real_t(0.5) * spacing) continue;
+            distanceFromDomainCenter[2]   = real_t(0);
+            auto distance                 = distanceFromDomainCenter.length();
+            real_t containerRadius        = real_t(0.5) * simulationDomain_.xSize();
+            if (distance > containerRadius - real_t(0.5) * spacing) continue;
          }
+
+         // for non-spherical particles only insufficient diameter information is available -> scale with safety factor, here max scaling factor
+         generationPositionChecker.addParticleIfLarge(pt, diameter * std::sqrt(shapeGenerator->getMaxDiameterScalingFactor())); //std::cbrt(shapeGenerator->getMaxDiameterScalingFactor()));
+
+         if (!particleDomain_->isContainedInLocalSubdomain(pt, real_t(0))) continue;
+
+         particlesToBeCreated.emplace_back(GenerationPositionChecker::PositionDescription_T(pt, diameter));
+      }
+
+      // generate, possibly exclude some due to overlaps with others
+      for(const auto& particleDescription: particlesToBeCreated)
+      {
+         auto pt = particleDescription.first;
+         auto diameter = particleDescription.second;
+
+         if (!generationPositionChecker.isGenerationAllowed(pt, diameter)) continue;
 
          // create particle
          auto p = particleStorage_->create();
@@ -188,7 +281,6 @@ void addConfigToDatabase(Config & config,
    integerProperties["numBlocksY"] = int64_c(numBlocksPerDirection[1]);
    integerProperties["numBlocksZ"] = int64_c(numBlocksPerDirection[2]);
    integerProperties["useHashGrids"] = (mainConf.getParameter<bool>("useHashGrids")) ? 1 : 0;
-   integerProperties["scaleGenerationSpacingWithForm"] = (mainConf.getParameter<bool>("scaleGenerationSpacingWithForm")) ? 1 : 0;
    stringProperties["domainSetup"] = mainConf.getParameter<std::string>("domainSetup");
    stringProperties["particleDistribution"] = mainConf.getParameter<std::string>("particleDistribution");
    stringProperties["particleShape"] = mainConf.getParameter<std::string>("particleShape");
@@ -199,18 +291,7 @@ void addConfigToDatabase(Config & config,
    realProperties["ambientDensity"] = mainConf.getParameter<double>("ambientDensity");
    realProperties["gravitationalAcceleration"] = mainConf.getParameter<double>("gravitationalAcceleration");
    realProperties["limitVelocity"] = mainConf.getParameter<double>("limitVelocity");
-   realProperties["initialVelocity"] = mainConf.getParameter<double>("initialVelocity");
-   realProperties["initialGenerationHeightRatioStart"] = mainConf.getParameter<double>("initialGenerationHeightRatioStart");
-   realProperties["initialGenerationHeightRatioEnd"] = mainConf.getParameter<double>("initialGenerationHeightRatioEnd");
-   realProperties["generationSpacing"] = mainConf.getParameter<double>("generationSpacing");
-   realProperties["generationHeightRatioStart"] = mainConf.getParameter<double>("generationHeightRatioStart");
-   realProperties["generationHeightRatioEnd"] = mainConf.getParameter<double>("generationHeightRatioEnd");
    realProperties["totalParticleMass"] = mainConf.getParameter<double>("totalParticleMass");
-   realProperties["terminalVelocity"] = mainConf.getParameter<double>("terminalVelocity");
-   realProperties["terminalRelativeHeightChange"] = mainConf.getParameter<double>("terminalRelativeHeightChange");
-   realProperties["minimalTerminalRunTime"] = mainConf.getParameter<double>("minimalTerminalRunTime");
-   realProperties["terminationCheckingSpacing"] = mainConf.getParameter<double>("terminationCheckingSpacing");
-   realProperties["velocityDampingCoefficient"] = mainConf.getParameter<double>("velocityDampingCoefficient");
 
    const Config::BlockHandle solverConf = config.getBlock("Solver");
    realProperties["dt"] = solverConf.getParameter<double>("dt");
@@ -270,12 +351,34 @@ void addConfigToDatabase(Config & config,
    stringProperties["evaluation_histogramBins"] = evaluationConf.getParameter<std::string>("histogramBins");
    realProperties["evaluation_layerHeight"] = evaluationConf.getParameter<real_t>("layerHeight");
 
+   const Config::BlockHandle generationConf = config.getBlock("Generation");
+   realProperties["initialVelocity"] = generationConf.getParameter<double>("initialVelocity");
+   realProperties["initialGenerationHeightRatioStart"] = generationConf.getParameter<double>("initialGenerationHeightRatioStart");
+   realProperties["initialGenerationHeightRatioEnd"] = generationConf.getParameter<double>("initialGenerationHeightRatioEnd");
+   realProperties["generationSpacing"] = generationConf.getParameter<double>("generationSpacing");
+   stringProperties["generationPositionCheckerLargeDiameterThreshold"] = generationConf.getParameter<std::string>("generationPositionCheckerLargeDiameterThreshold");
+   realProperties["generationHeightRatioStart"] = generationConf.getParameter<double>("generationHeightRatioStart");
+   realProperties["generationHeightRatioEnd"] = generationConf.getParameter<double>("generationHeightRatioEnd");
+   integerProperties["scaleGenerationSpacingWithForm"] = (generationConf.getParameter<bool>("scaleGenerationSpacingWithForm")) ? 1 : 0;
+
    integerProperties["shaking"] = (mainConf.getParameter<bool>("shaking")) ? 1 : 0;
    const Config::BlockHandle shakingConf = config.getBlock("Shaking");
    realProperties["shaking_amplitude"] = shakingConf.getParameter<double>("amplitude");
    realProperties["shaking_period"] = shakingConf.getParameter<double>("period");
    realProperties["shaking_duration"] = shakingConf.getParameter<double>("duration");
    integerProperties["shaking_activeFromBeginning"] = (shakingConf.getParameter<bool>("activeFromBeginning")) ? 1 : 0;
+
+   const Config::BlockHandle dampingConf = config.getBlock("Damping");
+   stringProperties["damping_method"] = dampingConf.getParameter<std::string>("method");
+   realProperties["damping_velocityDampingCoefficient"] = dampingConf.getParameter<real_t>("velocityDampingCoefficient");
+   realProperties["damping_forceDampingCoefficient"] = dampingConf.getParameter<real_t>("forceDampingCoefficient");
+
+   const Config::BlockHandle terminationConf = config.getBlock("Termination");
+   realProperties["terminalVelocity"] = terminationConf.getParameter<double>("terminalVelocity");
+   realProperties["terminalRelativeHeightChange"] = terminationConf.getParameter<double>("terminalRelativeHeightChange");
+   realProperties["terminationCheckingSpacing"] = terminationConf.getParameter<double>("terminationCheckingSpacing");
+   realProperties["minimalTerminalRunTime"] = terminationConf.getParameter<double>("minimalTerminalRunTime");
+   realProperties["maximalTerminalRunTime"] = terminationConf.getParameter<double>("maximalTerminalRunTime");
 
 }
 
@@ -301,17 +404,25 @@ public:
  * - two simulation approaches: discrete element method (DEM), hard-contact semi-implicit timestepping solver (HCSITS)
  * - different size distributions
  * - different shapes: spherical, ellipsoidal, polygonal as given by mesh
+ * - different generation methods: uniformly, large/small-specialized (for binary cases)
  * - evaluation of vertical porosity profile
  * - VTK visualization
  * - logging of final result and all properties into SQlite database
  * - requires OpenMesh
+ * - optional: horizontal forcing to model different deposition conditions
+ * - checkpointing
+ * - load balancing (use with care in periodic setup as three processes per periodic direction is not enforced
+ *   by load balancing but required for correct particle simulation)
  *
  * Simulation process:
  * - Generation phase: continuous generation in upper part of domain and settling due to gravity
  * - Shaking phase (optional, can also be active during generation phase): Shaking in a horizontal direction to compactify packing
  * - Termination phase: Run until converged state is reached
  *
- * See corresponding publication by C. Rettinger for more infos
+ * See corresponding publication for more infos and cite if using this application:
+ * Rettinger, C., Rüde, U., Vollmer, S., Frings, R. - "Effect of sediment form and form distribution on porosity:
+ * a simulation study based on the discrete element method". Granular Matter 24, 118 (2022).
+ * https://doi.org/10.1007/s10035-022-01275-x
  *
  */
 int main(int argc, char **argv) {
@@ -336,26 +447,16 @@ int main(int argc, char **argv) {
 
    std::string particleDistribution = mainConf.getParameter<std::string>("particleDistribution");
    std::string particleShape = mainConf.getParameter<std::string>("particleShape");
+
    real_t limitVelocity = mainConf.getParameter<real_t>("limitVelocity");
-   real_t initialVelocity = mainConf.getParameter<real_t>("initialVelocity");
-   real_t initialGenerationHeightRatioStart = mainConf.getParameter<real_t>("initialGenerationHeightRatioStart");
-   real_t initialGenerationHeightRatioEnd = mainConf.getParameter<real_t>("initialGenerationHeightRatioEnd");
-   real_t generationSpacing = mainConf.getParameter<real_t>("generationSpacing");
-   WALBERLA_CHECK_GREATER(domainWidth, generationSpacing, "Generation Spacing has to be smaller than domain size");
-   real_t generationHeightRatioStart = mainConf.getParameter<real_t>("generationHeightRatioStart");
-   real_t generationHeightRatioEnd = mainConf.getParameter<real_t>("generationHeightRatioEnd");
-   bool scaleGenerationSpacingWithForm = mainConf.getParameter<bool>("scaleGenerationSpacingWithForm");
    real_t totalParticleMass = mainConf.getParameter<real_t>("totalParticleMass");
 
+   uint_t propertyEvaluationSpacing = mainConf.getParameter<uint_t>("propertyEvaluationSpacingInTimeSteps");
    real_t visSpacingInSeconds = mainConf.getParameter<real_t>("visSpacing");
    real_t infoSpacingInSeconds = mainConf.getParameter<real_t>("infoSpacing");
    real_t loggingSpacingInSeconds = mainConf.getParameter<real_t>("loggingSpacing");
+   real_t performanceLoggingSpacingInSeconds = mainConf.getParameter<real_t>("performanceLoggingSpacing");
    Vector3<uint_t> numBlocksPerDirection = mainConf.getParameter< Vector3<uint_t> >("numBlocksPerDirection");
-   real_t terminalVelocity = mainConf.getParameter<real_t>("terminalVelocity");
-   real_t terminalRelativeHeightChange = mainConf.getParameter<real_t>("terminalRelativeHeightChange");
-   real_t terminationCheckingSpacing = mainConf.getParameter<real_t>("terminationCheckingSpacing");
-   real_t minimalTerminalRunTime = mainConf.getParameter<real_t>("minimalTerminalRunTime");
-   real_t velocityDampingCoefficient = mainConf.getParameter<real_t>("velocityDampingCoefficient");
 
    bool useHashGrids = mainConf.getParameter<bool>("useHashGrids");
 
@@ -372,7 +473,11 @@ int main(int argc, char **argv) {
    uint_t visSpacing = uint_c(visSpacingInSeconds / dt);
    uint_t infoSpacing = uint_c(infoSpacingInSeconds / dt);
    uint_t loggingSpacing = uint_c(loggingSpacingInSeconds / dt);
+   uint_t performanceLoggingSpacing = uint_c(performanceLoggingSpacingInSeconds / dt);
+   WALBERLA_LOG_INFO_ON_ROOT("Simulation property evaluation spacing = " << propertyEvaluationSpacing);
    WALBERLA_LOG_INFO_ON_ROOT("VTK spacing = " << visSpacing << ", info spacing = " << infoSpacing << ", logging spacing = " << loggingSpacing);
+   WALBERLA_CHECK_LESS_EQUAL(propertyEvaluationSpacing, infoSpacing);
+   WALBERLA_CHECK_LESS_EQUAL(propertyEvaluationSpacing, loggingSpacing);
 
    const Config::BlockHandle solverHCSITSConf = solverConf.getBlock("HCSITS");
    real_t hcsits_errorReductionParameter = solverHCSITSConf.getParameter<real_t>("errorReductionParameter");
@@ -386,12 +491,101 @@ int main(int argc, char **argv) {
    real_t dem_poissonsRatio = solverDEMConf.getParameter<real_t>("poissonsRatio");
    real_t dem_kappa = real_t(2) * ( real_t(1) - dem_poissonsRatio ) / ( real_t(2) - dem_poissonsRatio ) ; // from Thornton et al
 
+   const Config::BlockHandle generationConf = cfg->getBlock("Generation");
+   real_t initialVelocity = generationConf.getParameter<real_t>("initialVelocity");
+   real_t initialGenerationHeightRatioStart = generationConf.getParameter<real_t>("initialGenerationHeightRatioStart");
+   real_t initialGenerationHeightRatioEnd = generationConf.getParameter<real_t>("initialGenerationHeightRatioEnd");
+   real_t generationSpacing = generationConf.getParameter<real_t>("generationSpacing");
+   WALBERLA_CHECK_GREATER(domainWidth, generationSpacing, "Generation Spacing has to be smaller than domain size");
+   real_t generationHeightRatioStart = generationConf.getParameter<real_t>("generationHeightRatioStart");
+   real_t generationHeightRatioEnd = generationConf.getParameter<real_t>("generationHeightRatioEnd");
+   bool scaleGenerationSpacingWithForm = generationConf.getParameter<bool>("scaleGenerationSpacingWithForm");
+   std::string generationPositionCheckerLargeDiameterThresholdStr = generationConf.getParameter<std::string>("generationPositionCheckerLargeDiameterThreshold");
+
    bool shaking = mainConf.getParameter<bool>("shaking");
    const Config::BlockHandle shakingConf = cfg->getBlock("Shaking");
    real_t shaking_amplitude = shakingConf.getParameter<real_t>("amplitude");
    real_t shaking_period = shakingConf.getParameter<real_t>("period");
    real_t shaking_duration = shakingConf.getParameter<real_t>("duration");
    bool shaking_activeFromBeginning = shakingConf.getParameter<bool>("activeFromBeginning");
+
+   const Config::BlockHandle dampingConf = cfg->getBlock("Damping");
+   std::string damping_method = dampingConf.getParameter<std::string>("method");
+   real_t damping_velocityDampingCoefficient = dampingConf.getParameter<real_t>("velocityDampingCoefficient");
+   real_t damping_forceDampingCoefficient = dampingConf.getParameter<real_t>("forceDampingCoefficient");
+
+   const Config::BlockHandle terminationConf = cfg->getBlock("Termination");
+   real_t terminalVelocity = terminationConf.getParameter<real_t>("terminalVelocity");
+   real_t terminalRelativeHeightChange = terminationConf.getParameter<real_t>("terminalRelativeHeightChange");
+   real_t terminationCheckingSpacing = terminationConf.getParameter<real_t>("terminationCheckingSpacing");
+   real_t minimalTerminalRunTime = terminationConf.getParameter<real_t>("minimalTerminalRunTime");
+   real_t maximalTerminalRunTime = terminationConf.getParameter<real_t>("maximalTerminalRunTime");
+   if(!(maximalTerminalRunTime < 0_r)) WALBERLA_CHECK_GREATER_EQUAL(maximalTerminalRunTime, minimalTerminalRunTime, "Maximal terminal run time has to be larger than minimal one!");
+
+   bool useLoadBalancing = mainConf.getParameter<bool>("loadBalancing");
+   const Config::BlockHandle loadBalancingConf = cfg->getBlock("LoadBalancing");
+   auto loadBalancing_spacingInSeconds = loadBalancingConf.getParameter<real_t>("spacing");
+   std::string loadBalancing_method = loadBalancingConf.getParameter<std::string>("method");
+   auto loadBalancing_baseWeight = loadBalancingConf.getParameter<real_t>("baseWeight");
+
+   const Config::BlockHandle checkpointRestartConf = cfg->getBlock("CheckpointRestart");
+   auto checkPointing_spacingInSeconds = checkpointRestartConf.getParameter<real_t>("spacing");
+   std::string checkPointing_existingUID = checkpointRestartConf.getParameter<std::string>("existingUID");
+   std::string checkPointing_folder = checkpointRestartConf.getParameter<std::string>("folder");
+
+   uint_t checkPointing_spacing = 0;
+   if(checkPointing_spacingInSeconds > 0) checkPointing_spacing = uint_c(checkPointing_spacingInSeconds / dt);
+
+   std::string uniqueFileIdentifier;
+   bool restarting = false;
+   // state variables that require proper initialization
+   uint_t timestep = 0;
+   bool isDampingActive = false;
+   bool isShakingActive = false;
+   real_t oldAvgParticleHeight = real_t(1);
+   real_t oldMaxParticleHeight = real_t(1);
+   real_t timeLastTerminationCheck = real_t(0);
+   real_t timeLastCreation = real_t(0);
+   real_t timeBeginShaking = real_t(-1);
+   real_t timeEndShaking = real_t(-1);
+   real_t timeBeginDamping = real_t(-1);
+
+   if(checkPointing_existingUID == "None")
+   {
+      // clean start
+      uniqueFileIdentifier = std::to_string(std::chrono::system_clock::now().time_since_epoch().count()); // used as hash to identify this run
+      walberla::mpi::broadcastObject(uniqueFileIdentifier);
+      if(shaking && shaking_activeFromBeginning)
+      {
+         WALBERLA_LOG_INFO_ON_ROOT("Will use shaking from beginning.");
+         isShakingActive = true;
+         timeBeginShaking = real_t(0);
+      }
+   } else
+   {
+      // restart from existing file
+      restarting = true;
+      uniqueFileIdentifier = checkPointing_existingUID;
+
+      timestep = checkpointRestartConf.getParameter<uint_t>("timestep");
+      isDampingActive = checkpointRestartConf.getParameter<bool>("isDampingActive");
+      isShakingActive = checkpointRestartConf.getParameter<bool>("isShakingActive");
+      oldAvgParticleHeight = checkpointRestartConf.getParameter<real_t>("oldAvgParticleHeight");
+      oldMaxParticleHeight = checkpointRestartConf.getParameter<real_t>("oldMaxParticleHeight");
+      timeLastTerminationCheck = checkpointRestartConf.getParameter<real_t>("timeLastTerminationCheck");
+      timeLastCreation = checkpointRestartConf.getParameter<real_t>("timeLastCreation");
+      timeBeginShaking = checkpointRestartConf.getParameter<real_t>("timeBeginShaking");
+      timeEndShaking = checkpointRestartConf.getParameter<real_t>("timeEndShaking");
+      timeBeginDamping = checkpointRestartConf.getParameter<real_t>("timeBeginDamping");
+   }
+   std::string checkPointFileNameBase = checkPointing_folder+"/"+uniqueFileIdentifier + "_checkpoint";
+   std::string checkPointFileName_forest = checkPointFileNameBase + "_forest.txt";
+   std::string checkPointFileName_mesapd = checkPointFileNameBase + "_mesapd.txt";
+
+   const Config::BlockHandle horizontalForcingConf = cfg->getBlock("HorizontalForcing");
+   Vec3 horizontalForcing_acceleration = horizontalForcingConf.getParameter< Vec3 >("accelerationVec");
+   real_t horizontalForcing_NonDimFixingHeight = horizontalForcingConf.getParameter<real_t>("nonDimFixingHeight");
+   auto reducedHorizontalAcceleration = (particleDensity - ambientDensity) / particleDensity * horizontalForcing_acceleration;
 
    const Config::BlockHandle evaluationConf = cfg->getBlock("evaluation");
    auto evaluationHistogramBins = parseStringToVector<real_t>(evaluationConf.getParameter<std::string>("histogramBins"));
@@ -401,6 +595,7 @@ int main(int argc, char **argv) {
    std::string vtkOutputFolder = evaluationConf.getParameter<std::string>("vtkFolder");
    std::string vtkFinalFolder = evaluationConf.getParameter<std::string>("vtkFinalFolder");
    std::string sqlDBFileName = evaluationConf.getParameter<std::string>("sqlDBFileName");
+   bool includeNumberOfContactsInVTK = evaluationConf.getParameter<bool>("includeNumberOfContactsInVTK");
 
    const Config::BlockHandle shapeConf = cfg->getBlock("Shape");
    ScaleMode shapeScaleMode = str_to_scaleMode(shapeConf.getParameter<std::string>("scaleMode"));
@@ -411,29 +606,92 @@ int main(int argc, char **argv) {
                                0.5_r*domainWidth, 0.5_r*domainWidth, domainHeight);
    Vector3<bool> isPeriodic = (domainSetup == "container") ? Vector3<bool>(false) : Vector3<bool>(true, true, false);
 
-   WALBERLA_LOG_INFO_ON_ROOT("Creating domain of size " << simulationDomain);
 
-   shared_ptr<BlockForest> forest = blockforest::createBlockForest(simulationDomain, numBlocksPerDirection, isPeriodic);
+   shared_ptr<BlockForest> forest;
+   if(restarting)
+   {
+      WALBERLA_LOG_INFO_ON_ROOT("Reading block forest from file!");
+
+      WALBERLA_MPI_SECTION()
+      {
+         if (!MPIManager::instance()->rankValid())
+            MPIManager::instance()->useWorldComm();
+      }
+      forest = std::make_shared< BlockForest >( uint_c( MPIManager::instance()->rank() ),
+                                               checkPointFileName_forest.c_str(), true, false );
+      WALBERLA_LOG_INFO_ON_ROOT("Using domain of size " << forest->getDomain() << " with " <<
+                                forest->getXSize() << " x " << forest->getYSize() << " x " << forest->getZSize() << " blocks");
+   }
+   else
+   {
+      WALBERLA_LOG_INFO_ON_ROOT("Creating domain of size " << simulationDomain);
+      forest = blockforest::createBlockForest(simulationDomain, numBlocksPerDirection, isPeriodic);
+      if(checkPointing_spacing != uint_t(0))
+      {
+         WALBERLA_LOG_INFO_ON_ROOT("Writing block forest to file!");
+         forest->saveToFile(checkPointFileName_forest);
+      }
+   }
+
+
    auto domain = std::make_shared<mesa_pd::domain::BlockForestDomain>(forest);
+
+   auto loadBalancingInfoCollection = make_shared<blockforest::InfoCollection>();
+   uint_t loadBalancing_spacing = 0;
+   if(useLoadBalancing)
+   {
+      loadBalancing_spacing = uint_c(loadBalancing_spacingInSeconds / dt);
+
+      forest->recalculateBlockLevelsInRefresh( false ); // = only load balancing, no refinement checking
+      forest->alwaysRebalanceInRefresh( true ); //load balancing every time refresh is triggered
+      forest->reevaluateMinTargetLevelsAfterForcedRefinement( false );
+      forest->allowRefreshChangingDepth( false );
+      forest->allowMultipleRefreshCycles( false ); // otherwise info collections are invalid
+
+      forest->setRefreshPhantomBlockDataAssignmentFunction( blockforest::WeightAssignmentFunctor( loadBalancingInfoCollection, loadBalancing_baseWeight ) );
+
+      bool curveAllGather = true;
+      bool balanceLevelwise = true;
+      bool useHilbert = (loadBalancing_method == "Hilbert");
+
+      WALBERLA_LOG_INFO_ON_ROOT("Using load balancing with " << ((useHilbert) ? "Hilbert" : "Morton") << " curve and spacing " << loadBalancing_spacingInSeconds << " s ( = " << loadBalancing_spacing << " time steps)");
+
+      forest->setRefreshPhantomBlockMigrationPreparationFunction( blockforest::DynamicCurveBalance< blockforest::WeightAssignmentFunctor::PhantomBlockWeight >( useHilbert, curveAllGather, balanceLevelwise ) );
+   }
 
    /// MESAPD Data
    auto particleStorage = std::make_shared<data::ParticleStorage>(1);
-   auto contactStorage = std::make_shared<data::ContactStorage>(1);
    data::ParticleAccessorWithBaseShape particleAccessor(particleStorage);
+
+   BlockDataID particleStorageID;
+   if(restarting)
+   {
+      WALBERLA_LOG_INFO_ON_ROOT( "Initializing particles from checkpointing file " << checkPointFileName_mesapd );
+      particleStorageID = forest->loadBlockData( checkPointFileName_mesapd, mesa_pd::domain::createBlockForestDataHandling(particleStorage), "Particle Storage" );
+
+      mesa_pd::mpi::ClearNextNeighborSync CNNS;
+      CNNS(particleAccessor);
+      mesa_pd::mpi::ClearGhostOwnerSync CGOS;
+      CGOS(particleAccessor);
+   } else {
+      particleStorageID = forest->addBlockData(mesa_pd::domain::createBlockForestDataHandling(particleStorage), "Particle Storage");
+   }
+
+   auto contactStorage = std::make_shared<data::ContactStorage>(1);
    data::ContactAccessor contactAccessor(contactStorage);
 
    // configure shape creation
-   shared_ptr<ShapeGenerator> shapeGenerator;
+   std::unique_ptr<ShapeGenerator> shapeGenerator;
    if(particleShape == "Sphere")
    {
-      shapeGenerator = make_shared<SphereGenerator>();
+      shapeGenerator = std::make_unique<SphereGenerator>();
    } else if(particleShape == "Ellipsoid")
    {
       auto ellipsoidConfig = shapeConf.getBlock("Ellipsoid");
       std::vector<Vec3> semiAxes = {ellipsoidConfig.getParameter<Vec3>("semiAxes")};
 
-      shared_ptr<NormalizedFormGenerator> normalizedFormGenerator = make_shared<SampleFormGenerator>(semiAxes, shapeScaleMode);
-      shapeGenerator = make_shared<EllipsoidGenerator>(normalizedFormGenerator);
+      std::unique_ptr<NormalizedFormGenerator> normalizedFormGenerator = std::make_unique<SampleFormGenerator>(semiAxes, shapeScaleMode);
+      shapeGenerator = std::make_unique<EllipsoidGenerator>(std::move(normalizedFormGenerator));
    } else if(particleShape == "EquivalentEllipsoid")
    {
       auto ellipsoidConfig = shapeConf.getBlock("EquivalentEllipsoid");
@@ -441,9 +699,9 @@ int main(int argc, char **argv) {
 
       auto meshFileNames = getMeshFilesFromPath(meshPath);
       auto semiAxes = extractSemiAxesFromMeshFiles(meshFileNames);
-      shared_ptr<NormalizedFormGenerator> normalizedFormGenerator = make_shared<SampleFormGenerator>(semiAxes, shapeScaleMode);
+      std::unique_ptr<NormalizedFormGenerator> normalizedFormGenerator = std::make_unique<SampleFormGenerator>(semiAxes, shapeScaleMode);
 
-      shapeGenerator = make_shared<EllipsoidGenerator>(normalizedFormGenerator);
+      shapeGenerator = std::make_unique<EllipsoidGenerator>(std::move(normalizedFormGenerator));
    } else if(particleShape == "EllipsoidFormDistribution")
    {
       auto ellipsoidConfig = shapeConf.getBlock("EllipsoidFormDistribution");
@@ -452,9 +710,9 @@ int main(int argc, char **argv) {
       auto flatnessMean = ellipsoidConfig.getParameter<real_t>("flatnessMean");
       auto flatnessStdDev = ellipsoidConfig.getParameter<real_t>("flatnessStdDev");
 
-      shared_ptr<NormalizedFormGenerator> normalizedFormGenerator = make_shared<DistributionFormGenerator>(elongationMean, elongationStdDev, flatnessMean, flatnessStdDev, shapeScaleMode);
+      std::unique_ptr<NormalizedFormGenerator> normalizedFormGenerator = std::make_unique<DistributionFormGenerator>(elongationMean, elongationStdDev, flatnessMean, flatnessStdDev, shapeScaleMode);
 
-      shapeGenerator = make_shared<EllipsoidGenerator>(normalizedFormGenerator);
+      shapeGenerator = std::make_unique<EllipsoidGenerator>(std::move(normalizedFormGenerator));
    }
    else if(particleShape == "Mesh")
    {
@@ -462,9 +720,9 @@ int main(int argc, char **argv) {
       std::string meshPath = meshConfig.getParameter<std::string>("path");
 
       auto meshFileNames = getMeshFilesFromPath(meshPath);
-      shared_ptr<NormalizedFormGenerator> normalizedFormGenerator = make_shared<ConstFormGenerator>();
+      std::unique_ptr<NormalizedFormGenerator> normalizedFormGenerator = std::make_unique<ConstFormGenerator>();
 
-      shapeGenerator = make_shared<MeshesGenerator>(meshFileNames, shapeScaleMode, normalizedFormGenerator);
+      shapeGenerator = std::make_unique<MeshesGenerator>(meshFileNames, shapeScaleMode, std::move(normalizedFormGenerator));
    } else if(particleShape == "MeshFormDistribution")
    {
       auto meshConfig = shapeConf.getBlock("MeshFormDistribution");
@@ -475,12 +733,12 @@ int main(int argc, char **argv) {
       auto flatnessStdDev = meshConfig.getParameter<real_t>("flatnessStdDev");
 
       auto meshFileNames = getMeshFilesFromPath(meshPath);
-      shared_ptr<NormalizedFormGenerator> normalizedFormGenerator = make_shared<DistributionFormGenerator>(elongationMean, elongationStdDev, flatnessMean, flatnessStdDev, shapeScaleMode);
+      std::unique_ptr<NormalizedFormGenerator> normalizedFormGenerator = std::make_unique<DistributionFormGenerator>(elongationMean, elongationStdDev, flatnessMean, flatnessStdDev, shapeScaleMode);
 
-      shapeGenerator = make_shared<MeshesGenerator>(meshFileNames, shapeScaleMode, normalizedFormGenerator);
+      shapeGenerator = std::make_unique<MeshesGenerator>(meshFileNames, shapeScaleMode, std::move(normalizedFormGenerator));
    } else if(particleShape == "UnscaledMeshesPerFraction")
    {
-      shapeGenerator = make_shared<UnscaledMeshesPerFractionGenerator>(shapeConf,  parseStringToVector<real_t>(distributionConf.getBlock("SievingCurve").getParameter<std::string>("massFractions")));
+      shapeGenerator = std::make_unique<UnscaledMeshesPerFractionGenerator>(shapeConf,  parseStringToVector<real_t>(distributionConf.getBlock("SievingCurve").getParameter<std::string>("massFractions")));
    } else
    {
       WALBERLA_ABORT("Unknown shape " << particleShape);
@@ -495,26 +753,29 @@ int main(int argc, char **argv) {
    uint_t randomSeed = (randomSeedFromConfig >= 0) ? uint_c(randomSeedFromConfig) : uint_c(time(nullptr));
    WALBERLA_LOG_INFO_ON_ROOT("Random seed of " << randomSeed);
 
-   shared_ptr<DiameterGenerator> diameterGenerator;
-   real_t minGenerationParticleDiameter = real_t(0);
+   std::unique_ptr<DiameterGenerator> diameterGenerator;
+   real_t minGenerationParticleDiameter = 0_r;
    real_t maxGenerationParticleDiameter = std::numeric_limits<real_t>::max();
+   real_t d50 = 0_r;
 
    if(particleDistribution == "LogNormal")
    {
       const Config::BlockHandle logNormalConf = distributionConf.getBlock("LogNormal");
       real_t mu = logNormalConf.getParameter<real_t>("mu");
       real_t variance = logNormalConf.getParameter<real_t>("variance");
-      diameterGenerator = make_shared<LogNormal>(mu, variance, randomSeed);
+      diameterGenerator = std::make_unique<LogNormal>(mu, variance, randomSeed);
       // min and max diameter not determinable
+      d50 = mu;
       WALBERLA_LOG_INFO_ON_ROOT("Using log-normal distribution with mu = " << mu << ", var = " << variance);
    }
    else if(particleDistribution == "Uniform")
    {
       const Config::BlockHandle uniformConf = distributionConf.getBlock("Uniform");
       real_t diameter = uniformConf.getParameter<real_t>("diameter");
-      diameterGenerator = make_shared<Uniform>(diameter);
+      diameterGenerator = std::make_unique<Uniform>(diameter);
       minGenerationParticleDiameter = diameter;
       maxGenerationParticleDiameter = diameter;
+      d50 = diameter;
       WALBERLA_LOG_INFO_ON_ROOT("Using uniform distribution");
    }
    else if(particleDistribution == "DiameterMassFractions")
@@ -522,7 +783,7 @@ int main(int argc, char **argv) {
       const Config::BlockHandle sievingConf = distributionConf.getBlock("DiameterMassFractions");
       auto diameters = parseStringToVector<real_t>(sievingConf.getParameter<std::string>("diameters"));
       auto massFractions = parseStringToVector<real_t>(sievingConf.getParameter<std::string>("massFractions"));
-      diameterGenerator = make_shared<DiscreteSieving>(diameters, massFractions, randomSeed, shapeGenerator->getNormalVolume(), totalParticleMass, particleDensity);
+      diameterGenerator = std::make_unique<DiscreteSieving>(diameters, massFractions, randomSeed, shapeGenerator->getNormalVolume(), totalParticleMass, particleDensity);
 
       maxGenerationParticleDiameter = real_t(0);
       minGenerationParticleDiameter = std::numeric_limits<real_t>::max();
@@ -532,6 +793,7 @@ int main(int argc, char **argv) {
             minGenerationParticleDiameter = std::min(minGenerationParticleDiameter, diameters[i]);
          }
       }
+      d50 = computePercentileFromSieveDistribution(diameters, massFractions, 50_r);
       WALBERLA_LOG_INFO_ON_ROOT("Using diameter - mass fraction distribution");
    }
    else if(particleDistribution == "SievingCurve")
@@ -542,7 +804,7 @@ int main(int argc, char **argv) {
       bool useDiscreteForm = sievingConf.getParameter<bool>("useDiscreteForm");
 
       auto diameters = getMeanDiametersFromSieveSizes(sieveSizes);
-      real_t d50 = computePercentileFromSieveDistribution(diameters, massFractions, 50_r);
+      d50 = computePercentileFromSieveDistribution(diameters, massFractions, 50_r);
       real_t d16 = computePercentileFromSieveDistribution(diameters, massFractions, 16_r);
       real_t d84 = computePercentileFromSieveDistribution(diameters, massFractions, 84_r);
       real_t stdDev = std::sqrt(d84/d16);
@@ -552,7 +814,7 @@ int main(int argc, char **argv) {
       minGenerationParticleDiameter = std::numeric_limits<real_t>::max();
       if(useDiscreteForm)
       {
-         diameterGenerator = make_shared<DiscreteSieving>(diameters, massFractions, randomSeed, shapeGenerator->getNormalVolume(), totalParticleMass, particleDensity);
+         diameterGenerator = std::make_unique<DiscreteSieving>(diameters, massFractions, randomSeed, shapeGenerator->getNormalVolume(), totalParticleMass, particleDensity);
          for(uint_t i = 0; i < diameters.size(); ++i) {
             if(massFractions[i] > real_t(0)) {
                maxGenerationParticleDiameter = std::max(maxGenerationParticleDiameter, diameters[i]);
@@ -562,7 +824,7 @@ int main(int argc, char **argv) {
          WALBERLA_LOG_INFO_ON_ROOT("Using discrete sieving curve distribution");
 
       } else {
-         diameterGenerator = make_shared<ContinuousSieving>(sieveSizes, massFractions, randomSeed, shapeGenerator->getNormalVolume(), totalParticleMass, particleDensity);
+         diameterGenerator = std::make_unique<ContinuousSieving>(sieveSizes, massFractions, randomSeed, shapeGenerator->getNormalVolume(), totalParticleMass, particleDensity);
          for(uint_t i = 0; i < sieveSizes.size()-1; ++i) {
             if(massFractions[i] > real_t(0)) {
                maxGenerationParticleDiameter = std::max(maxGenerationParticleDiameter, std::max(sieveSizes[i],sieveSizes[i+1]));
@@ -577,25 +839,13 @@ int main(int argc, char **argv) {
       WALBERLA_ABORT("Unknown particle distribution specified: " << particleDistribution);
    }
 
-   WALBERLA_LOG_INFO_ON_ROOT("Generate with diameters in range [" << minGenerationParticleDiameter << ", " << maxGenerationParticleDiameter << "] and generation spacing = " << generationSpacing);
+   WALBERLA_LOG_INFO_ON_ROOT("Generate with diameters in range [" << minGenerationParticleDiameter << ", " << maxGenerationParticleDiameter << "] and D50 = " << d50);
 
    bool useOpenMP = false;
 
    real_t smallestBlockSize = std::min(simulationDomain.xSize() / real_c(numBlocksPerDirection[0]),
                                        std::min(simulationDomain.ySize() / real_c(numBlocksPerDirection[1]),
                                                 simulationDomain.zSize() / real_c(numBlocksPerDirection[2])));
-
-   /*
-   auto geometricMeanDiameter = std::sqrt(minGenerationParticleDiameter * maxGenerationParticleDiameter);
-   if(solver=="DEM")
-   {
-      auto getCollisionTime = [dem_stiffnessNormal, coefficientOfRestitution, particleDensity](real_t d){
-         auto meanEffMass = d * d * d * math::pi * particleDensity/ (6_r*2_r);
-         return std::sqrt((std::pow(std::log(coefficientOfRestitution),2) + math::pi * math::pi ) / (dem_stiffnessNormal / meanEffMass));};
-      WALBERLA_LOG_INFO_ON_ROOT("DEM parameterization with kn = " << dem_stiffnessNormal << " and cor = " << coefficientOfRestitution
-      << " expects collision time in range [" << getCollisionTime(minGenerationParticleDiameter) << ", " << getCollisionTime(maxGenerationParticleDiameter) << "]");
-   }
-    */
 
    // plane at top and bottom
    createPlane(particleStorage, Vector3<real_t>(0), Vector3<real_t>(0, 0, 1));
@@ -620,10 +870,26 @@ int main(int argc, char **argv) {
    // fill domain with particles initially
    real_t maxGenerationHeight = simulationDomain.zMax() - generationSpacing;
    real_t minGenerationHeight = generationSpacing;
+
+   real_t generationPositionCheckerLargeDiameterThreshold = -1_r;
+   if(generationPositionCheckerLargeDiameterThresholdStr == "OFF") generationPositionCheckerLargeDiameterThreshold = -1_r;
+   else if(generationPositionCheckerLargeDiameterThresholdStr == "D50") generationPositionCheckerLargeDiameterThreshold = d50;
+   else{
+      std::istringstream os(generationPositionCheckerLargeDiameterThresholdStr);
+      os >> generationPositionCheckerLargeDiameterThreshold;
+   }
+
+   WALBERLA_LOG_INFO_ON_ROOT("Generation spacing = " << generationSpacing << ", with large diameter threshold = " << generationPositionCheckerLargeDiameterThreshold);
+
    ParticleCreator particleCreator(particleStorage, domain, simulationDomain, domainSetup, particleDensity, scaleGenerationSpacingWithForm);
-   particleCreator.createParticles(std::max(minGenerationHeight, initialGenerationHeightRatioStart * simulationDomain.zMax()),
-                                   std::min(maxGenerationHeight, initialGenerationHeightRatioEnd * simulationDomain.zMax()),
-                                   generationSpacing, diameterGenerator, shapeGenerator, initialVelocity, maximumAllowedInteractionRadius );
+   if(timestep == 0)
+   {
+      particleCreator.createParticles(std::max(minGenerationHeight, initialGenerationHeightRatioStart * simulationDomain.zMax()),
+                                      std::min(maxGenerationHeight, initialGenerationHeightRatioEnd * simulationDomain.zMax()),
+                                      generationSpacing, diameterGenerator, shapeGenerator, initialVelocity,
+                                      maximumAllowedInteractionRadius, generationPositionCheckerLargeDiameterThreshold );
+   }
+
 
    math::DistributedSample diameterSample;
    particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor,
@@ -675,7 +941,7 @@ int main(int argc, char **argv) {
    // create linked cells data structure
    real_t linkedCellWidth = 1.01_r * maxParticleDiameter;
    WALBERLA_LOG_INFO_ON_ROOT("Using linked cells with cell width = " << linkedCellWidth);
-   data::LinkedCells linkedCells(domain->getUnionOfLocalAABBs().getExtended(linkedCellWidth), linkedCellWidth );
+   auto linkedCells = std::make_unique<data::LinkedCells>(domain->getUnionOfLocalAABBs().getExtended(linkedCellWidth), linkedCellWidth );
 
    {
       auto info = evaluateParticleInfo(particleAccessor);
@@ -683,9 +949,10 @@ int main(int argc, char **argv) {
    }
 
    /// VTK Output
-   if(visSpacing > 0)
+   auto vtkDomainOutput = walberla::vtk::createVTKOutput_DomainDecomposition( forest, "domain_decomposition", visSpacing, vtkOutputFolder, "simulation_step" );
+
+   if(visSpacing > 0 && !useLoadBalancing)
    {
-      auto vtkDomainOutput = walberla::vtk::createVTKOutput_DomainDecomposition( forest, "domain_decomposition", 1, vtkOutputFolder, "simulation_step" );
       vtkDomainOutput->write();
    }
 
@@ -699,7 +966,7 @@ int main(int argc, char **argv) {
       particleVtkOutput->addOutput<SelectTensorGlyphForEllipsoids>("tensorGlyph");
    }
    particleVtkOutput->addOutput<data::SelectParticleLinearVelocity>("velocity");
-   particleVtkOutput->addOutput<data::SelectParticleNumContacts>("numContacts");
+   if(includeNumberOfContactsInVTK) particleVtkOutput->addOutput<data::SelectParticleNumContacts>("numContacts");
    auto vtkParticleSelector = [](const mesa_pd::data::ParticleStorage::iterator &pIt) {
       return (pIt->getBaseShape()->getShapeType() != data::HalfSpace::SHAPE_TYPE &&
               pIt->getBaseShape()->getShapeType() != data::CylindricalBoundary::SHAPE_TYPE &&
@@ -713,7 +980,7 @@ int main(int argc, char **argv) {
    meshParticleVTK.addVertexOutput< data::SelectParticleInteractionRadius >("InteractionRadius");
    meshParticleVTK.addFaceOutput< data::SelectParticleLinearVelocity >("LinearVelocity");
    meshParticleVTK.addVertexOutput< data::SelectParticlePosition >("Position");
-   meshParticleVTK.addVertexOutput< data::SelectParticleNumContacts >("numContacts");
+   if(includeNumberOfContactsInVTK) meshParticleVTK.addVertexOutput< data::SelectParticleNumContacts >("numContacts");
    auto surfaceVelDataSource = make_shared<mesa_pd::SurfaceVelocityVertexDataSource< mesh::PolyMesh, data::ParticleAccessorWithBaseShape > >("SurfaceVelocity", particleAccessor);
    meshParticleVTK.setParticleSelector(vtkParticleSelector);
    meshParticleVTK.addVertexDataSource(surfaceVelDataSource);
@@ -724,7 +991,6 @@ int main(int argc, char **argv) {
    //collision detection
    data::HashGrids hashGrids;
    kernel::InsertParticleIntoLinkedCells initializeLinkedCells;
-   kernel::DetectAndStoreContacts detectAndStore(*contactStorage);
 
    //DEM
    kernel::SemiImplicitEuler dem_integration( dt );
@@ -738,7 +1004,7 @@ int main(int argc, char **argv) {
    hcsits_initContacts.setFriction(0,0,frictionCoefficient);
    hcsits_initContacts.setErp(hcsits_errorReductionParameter);
    kernel::InitParticlesForHCSITS hcsits_initParticles;
-   hcsits_initParticles.setGlobalAcceleration(Vector3<real_t>(0,0,-reducedGravitationalAcceleration));
+   hcsits_initParticles.setGlobalAcceleration(reducedHorizontalAcceleration + Vec3(0,0,-reducedGravitationalAcceleration));
    kernel::HCSITSRelaxationStep hcsits_relaxationStep;
    hcsits_relaxationStep.setRelaxationModel(relaxationModelFromString(hcsits_relaxationModel));
    hcsits_relaxationStep.setCor(coefficientOfRestitution); // Only effective for PGSM
@@ -749,34 +1015,18 @@ int main(int argc, char **argv) {
    mpi::BroadcastProperty broadcastKernel;
    mpi::ReduceProperty reductionKernel;
 
-   uint_t timestep = 0;
-   WALBERLA_LOG_INFO_ON_ROOT("Starting simulation in domain of volume " << domainVolume << " m^3.");
+   WALBERLA_LOG_INFO_ON_ROOT("Domain of volume " << domainVolume << " m^3.");
    WALBERLA_LOG_INFO_ON_ROOT("Will terminate generation when particle mass is above " << totalParticleMass << " kg.");
 
-   real_t velocityDampingFactor = std::pow(velocityDampingCoefficient, dt);
-   WALBERLA_LOG_INFO_ON_ROOT("Once all particles are created, will apply velocity damping of  " << velocityDampingFactor << " per time step.");
-   real_t oldAvgParticleHeight = real_t(1);
-   real_t oldMaxParticleHeight = real_t(1);
-   real_t timeLastTerminationCheck = real_t(0);
-   real_t timeLastCreation = real_t(0);
+   real_t velocityDampingFactor = std::pow(damping_velocityDampingCoefficient, dt);
+   if(damping_method == "force")  {WALBERLA_LOG_INFO_ON_ROOT("Once all particles are created, will apply direction-dependent damping of all forces with factor  " << damping_forceDampingCoefficient << ".");}
+   else if(damping_method == "velocity")  {WALBERLA_LOG_INFO_ON_ROOT("Once all particles are created, will apply velocity damping of  " << velocityDampingFactor << " per time step.");}
+   else {WALBERLA_ABORT("Unknown damping method " << damping_method << ".");}
+
    real_t maximumTimeBetweenCreation = (generationHeightRatioEnd-generationHeightRatioStart)*simulationDomain.zSize() / initialVelocity; // = time, particles need at max to clear/pass the creation domain
    WALBERLA_LOG_INFO_ON_ROOT("Maximum time between creation steps: " << maximumTimeBetweenCreation);
 
-   bool isShakingActive = false;
-   real_t timeBeginShaking = real_t(-1);
-   if(shaking && shaking_activeFromBeginning)
-   {
-      WALBERLA_LOG_INFO_ON_ROOT("Will use shaking from beginning.");
-      isShakingActive = true;
-      timeBeginShaking = real_t(0);
-   }
-   real_t timeEndShaking = real_t(-1);
-   real_t timeBeginDamping = real_t(-1);
-
    if(limitVelocity > 0_r) WALBERLA_LOG_INFO_ON_ROOT("Will apply limiting of translational particle velocity to maximal magnitude of " << limitVelocity);
-
-   std::string uniqueFileIdentifier = std::to_string(std::chrono::system_clock::now().time_since_epoch().count()); // used as hash to identify this run
-   walberla::mpi::broadcastObject(uniqueFileIdentifier);
 
    SizeEvaluator particleSizeEvaluator(shapeScaleMode);
    std::vector<std::tuple<std::string, std::function<real_t(Vec3)>>> particleShapeEvaluators = {std::make_tuple("flatness",getFlatnessFromSemiAxes),
@@ -801,25 +1051,33 @@ int main(int argc, char **argv) {
    particleHistogram.evaluate();
    WALBERLA_LOG_INFO_ON_ROOT(particleHistogram);
 
+   auto particleInfo = evaluateParticleInfo(particleAccessor);
+
+   if(restarting)
+   {
+      if(particleInfo.particleVolume * particleDensity < totalParticleMass)
+      {
+         WALBERLA_ABORT("Cannot use this checkpoint config since further particle generation is necessary but not supported!");
+         // note: this restriction is due to the UID generator that has its own, unrecoverable state
+         // thus, a new generation of particles would result in the same UIDs being used as the ones from the already
+         // present particles stored in the checkpointfile
+      }
+   }
 
    PorosityPerHorizontalLayerEvaluator porosityEvaluator(evaluationLayerHeight, simulationDomain, domainSetup);
 
    std::string loggingFileName = porosityProfileFolder + "/" +  uniqueFileIdentifier + "_logging.txt";
    WALBERLA_LOG_INFO_ON_ROOT("Writing logging file to " << loggingFileName);
-   LoggingWriter loggingWriter(loggingFileName);
+   LoggingWriter loggingWriter(loggingFileName, !restarting);
 
-
-
-   //particleStorage->forEachParticle(useOpenMP, kernel::SelectAll(), particleAccessor,
-   //                                 [](const size_t idx, auto &ac){WALBERLA_LOG_INFO(ac.getUid(idx) << " " << ac.getPosition(idx) << " "  <<!isSet(ac.getFlags(idx), data::particle_flags::GHOST) << "\n");}, particleAccessor);
-
-   //std::ofstream file;
-   //std::string fileName = "rank" + std::to_string(walberla::mpi::MPIManager::instance()->rank()) + ".txt";
-   //file.open( fileName.c_str() );
+   // horizontal forcing
+   real_t horizontalForcing_fixingHeight = horizontalForcing_NonDimFixingHeight * maxParticleDiameter;
+   bool fixBottomParticles = (horizontalForcing_fixingHeight > 0_r);
+   bool applyHorizontalForcing = (std::abs(horizontalForcing_acceleration[0])>0_r || std::abs(horizontalForcing_acceleration[1])>0_r);
+   if(applyHorizontalForcing) WALBERLA_LOG_INFO_ON_ROOT("Applying horizontal forcing with acc = " << horizontalForcing_acceleration);
 
    WcTimingTree timing;
-
-   timing.start("Simulation");
+   WcTimer simulationTimer;
 
    bool terminateSimulation = false;
    while (!terminateSimulation) {
@@ -829,7 +1087,7 @@ int main(int argc, char **argv) {
       timing.start("Sorting");
       if(particleSortingSpacing > 0 && timestep % uint_c(particleSortingSpacing) == 0 && !useHashGrids)
       {
-         sorting::LinearizedCompareFunctor linearSorting(linkedCells.domain_, linkedCells.numCellsPerDim_);
+         sorting::LinearizedCompareFunctor linearSorting(linkedCells->domain_, linkedCells->numCellsPerDim_);
          particleStorage->sort(linearSorting);
       }
       timing.stop("Sorting");
@@ -837,6 +1095,7 @@ int main(int argc, char **argv) {
       timing.start("VTK");
       if(particleShape.find("Mesh") != std::string::npos) meshParticleVTK(particleAccessor);
       else particleVtkWriter->write();
+      if(useLoadBalancing) vtkDomainOutput->write();
       timing.stop("VTK");
 
 
@@ -851,7 +1110,7 @@ int main(int argc, char **argv) {
 
          timing.start("Contact detection");
          hashGrids.forEachParticlePairHalf(useOpenMP, kernel::ExcludeInfiniteInfinite(), particleAccessor,
-                                           [domain, contactStorage](size_t idx1, size_t idx2, data::ParticleAccessorWithBaseShape &ac){
+                                           [&domain, &contactStorage](size_t idx1, size_t idx2, data::ParticleAccessorWithBaseShape &ac){
                                               kernel::DoubleCast double_cast;
                                               mpi::ContactFilter contact_filter;
                                               collision_detection::GeneralContactDetection contactDetection;
@@ -875,9 +1134,9 @@ int main(int argc, char **argv) {
          // use linked cells
 
          timing.start("Linked cells");
-         linkedCells.clear();
+         linkedCells->clear();
          particleStorage->forEachParticle(useOpenMP,kernel::SelectAll(),particleAccessor,
-                                          initializeLinkedCells, particleAccessor, linkedCells);
+                                          initializeLinkedCells, particleAccessor, *linkedCells);
          timing.stop("Linked cells");
 
          timing.start("Contact detection");
@@ -885,13 +1144,14 @@ int main(int argc, char **argv) {
          {
             collision_detection::AnalyticContactDetection contactDetection;
             //acd.getContactThreshold() = contactThreshold;
-            linkedCells.forEachParticlePairHalf(useOpenMP, kernel::ExcludeInfiniteInfinite(), particleAccessor,
+            kernel::DetectAndStoreContacts detectAndStore(*contactStorage);
+            linkedCells->forEachParticlePairHalf(useOpenMP, kernel::ExcludeInfiniteInfinite(), particleAccessor,
                                                 detectAndStore, particleAccessor, *domain, contactDetection);
 
          } else
          {
-            linkedCells.forEachParticlePairHalf(useOpenMP, kernel::ExcludeInfiniteInfinite(), particleAccessor,
-                                                [domain, contactStorage](size_t idx1, size_t idx2, data::ParticleAccessorWithBaseShape &ac){
+            linkedCells->forEachParticlePairHalf(useOpenMP, kernel::ExcludeInfiniteInfinite(), particleAccessor,
+                                                [&domain, &contactStorage](size_t idx1, size_t idx2, data::ParticleAccessorWithBaseShape &ac){
 
                                                    collision_detection::GeneralContactDetection contactDetection;
                                                    //Attention: does not use contact threshold in general case (GJK)
@@ -926,17 +1186,20 @@ int main(int argc, char **argv) {
       }
 
       timing.start("Contact eval");
-      particleStorage->forEachParticle(useOpenMP, kernel::SelectAll(), particleAccessor,
-                                       [](size_t p_idx, data::ParticleAccessorWithBaseShape& ac){ac.setNumContacts(p_idx,0);}, particleAccessor);
-      contactStorage->forEachContact(useOpenMP, kernel::SelectAll(), contactAccessor,
-                                     [](size_t c, data::ContactAccessor &ca, data::ParticleAccessorWithBaseShape &pa) {
-                                        auto idx1 = ca.getId1(c);
-                                        auto idx2 = ca.getId2(c);
-                                        pa.getNumContactsRef(idx1)++;
-                                        pa.getNumContactsRef(idx2)++;
-                                     }, contactAccessor, particleAccessor);
+      if(includeNumberOfContactsInVTK)
+      {
+         particleStorage->forEachParticle(useOpenMP, kernel::SelectAll(), particleAccessor,
+                                          [](size_t p_idx, data::ParticleAccessorWithBaseShape& ac){ac.setNumContacts(p_idx,0);}, particleAccessor);
+         contactStorage->forEachContact(useOpenMP, kernel::SelectAll(), contactAccessor,
+                                        [](size_t c, data::ContactAccessor &ca, data::ParticleAccessorWithBaseShape &pa) {
+                                          auto idx1 = ca.getId1(c);
+                                          auto idx2 = ca.getId2(c);
+                                          pa.getNumContactsRef(idx1)++;
+                                          pa.getNumContactsRef(idx2)++;
+                                        }, contactAccessor, particleAccessor);
 
-      reductionKernel.operator()<NumContactNotification>(*particleStorage);
+         reductionKernel.operator()<NumContactNotification>(*particleStorage);
+      }
       timing.stop("Contact eval");
 
 
@@ -948,10 +1211,10 @@ int main(int argc, char **argv) {
          if(solver == "DEM")
          {
             particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor,
-                                             [shakingAcceleration](const size_t idx, auto &ac){addForceAtomic(idx, ac, Vec3(shakingAcceleration,0_r,0_r) / ac.getInvMass(idx));}, particleAccessor);
+                                             [shakingAcceleration](const size_t idx, auto &ac){addForceAtomic(idx, ac, Vec3(shakingAcceleration,0_r,0_r) * ac.getMass(idx));}, particleAccessor);
          } else
          {
-            hcsits_initParticles.setGlobalAcceleration(Vector3<real_t>(shakingAcceleration,0_r,-reducedGravitationalAcceleration));
+            hcsits_initParticles.setGlobalAcceleration((applyHorizontalForcing ? reducedHorizontalAcceleration : Vec3(0_r)) + Vec3(shakingAcceleration,0_r,-reducedGravitationalAcceleration));
          }
       }
       timing.stop("Shaking");
@@ -1002,18 +1265,6 @@ int main(int argc, char **argv) {
                                            auto idx2 = ca.getId2(c);
                                            auto meff = real_t(1) / (pa.getInvMass(idx1) + pa.getInvMass(idx2));
 
-                                           /*
-                                           // if given stiffness
-                                           dem_collision.setStiffnessN(0,0,dem_stiffnessNormal);
-                                           dem_collision.setStiffnessT(0,0,dem_kappa*dem_stiffnessNormal);
-
-                                           // Wachs 2019, given stiffness and cor, we can compute damping (but formula in Wachs is probably wrong...)
-                                           auto log_en = std::log(coefficientOfRestitution);
-                                           auto dampingN = - 2_r * std::sqrt(dem_stiffnessNormal * meff) * log_en / (log_en*log_en+math::pi*math::pi);
-                                           dem_collision.setDampingN(0,0,dampingN);
-                                           dem_collision.setDampingT(0,0,std::sqrt(dem_kappa) * dampingN);
-                                            */
-
                                            dem_collision.setStiffnessAndDamping(0,0,coefficientOfRestitution, dem_collisionTime, dem_kappa, meff);
 
                                            dem_collision(idx1, idx2, pa, ca.getPosition(c), ca.getNormal(c), ca.getDistance(c), dt);
@@ -1024,13 +1275,36 @@ int main(int argc, char **argv) {
 
          timing.start("Apply gravity");
          particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor,
-                             [reducedGravitationalAcceleration](const size_t idx, auto &ac){addForceAtomic(idx, ac, Vec3(0_r,0_r,-reducedGravitationalAcceleration) / ac.getInvMass(idx));}, particleAccessor);
+                             [reducedGravitationalAcceleration](const size_t idx, auto &ac){addForceAtomic(idx, ac, Vec3(0_r,0_r,-reducedGravitationalAcceleration) * ac.getMass(idx));}, particleAccessor);
          timing.stop("Apply gravity");
+
+         timing.start("Apply horizontal forcing");
+         if(applyHorizontalForcing)
+         {
+            particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor,
+                                             [reducedHorizontalAcceleration](const size_t idx, auto &ac){addForceAtomic(idx, ac, reducedHorizontalAcceleration * ac.getMass(idx));}, particleAccessor);
+         }
+         timing.stop("Apply horizontal forcing");
 
          timing.start("Reduce");
          reduceAndSwapContactHistory(*particleStorage);
          reductionKernel.operator()<ForceTorqueNotification>(*particleStorage);
          timing.stop("Reduce");
+
+         if(isDampingActive && damping_method == "force")
+         {
+            // apply damping on (all) forces, see e.g. Zhao, 2017 - "Particle shape effects on fabric of granular random packing", and YADE docu (https://yade-dem.org/doc/formulation.html#numerical-damping)
+            particleStorage->forEachParticle(useOpenMP, kernel::SelectAll(), particleAccessor,
+                                             [damping_forceDampingCoefficient, dt](size_t idx, data::ParticleAccessorWithBaseShape &ac){
+                                                auto force = ac.getForce(idx);
+                                                auto velEstimated = ac.getLinearVelocity(idx) + force * ac.getInvMass(idx) * dt; // = velocity integration in SemiImplicitEuler, might need to be changed for other integrator
+                                                Vec3 dampingForce(real_c(mesa_pd::sgn(force[0] * velEstimated[0])) * force[0],
+                                                                  real_c(mesa_pd::sgn(force[1] * velEstimated[1])) * force[1],
+                                                                  real_c(mesa_pd::sgn(force[2] * velEstimated[2])) * force[2]);
+                                                dampingForce *= -damping_forceDampingCoefficient;
+                                                ac.getForceRef(idx) += dampingForce; },
+                                             particleAccessor);
+         }
 
          timing.start("Integration");
          particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor,
@@ -1060,18 +1334,37 @@ int main(int argc, char **argv) {
       timing.stop("Sync");
 
       timing.start("Evaluate particles");
-      auto particleInfo = evaluateParticleInfo(particleAccessor);
+
+      timing.start("Property evaluation");
+      if(propertyEvaluationSpacing > 0 && timestep % propertyEvaluationSpacing == 0) particleInfo = evaluateParticleInfo(particleAccessor);
+
+      if(fixBottomParticles){
+         porosityEvaluator.clear();
+         particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor,
+                                          porosityEvaluator, particleAccessor);
+         porosityEvaluator.evaluate();
+         real_t estimatedPackingHeight = porosityEvaluator.estimatePackingHeight();
+         if(estimatedPackingHeight > horizontalForcing_fixingHeight)
+         {
+            WALBERLA_LOG_INFO_ON_ROOT("Fixing particles below " << horizontalForcing_fixingHeight);
+            fixBottomParticles = false; // only do it once
+            fixParticlesBelowFixingHeight(particleAccessor, horizontalForcing_fixingHeight);
+         }
+      }
+      timing.stop("Property evaluation");
+
 
       if(particleInfo.particleVolume * particleDensity < totalParticleMass)
       {
 
          timing.start("Generation");
          // check if generation
-         if(particleInfo.maximumHeight < generationHeightRatioStart * simulationDomain.zSize() - generationSpacing || currentTime - timeLastCreation > maximumTimeBetweenCreation)
+         if(particleInfo.maximumHeight < (generationHeightRatioStart * simulationDomain.zSize() - std::max(maxGenerationParticleDiameter,generationSpacing)) || currentTime - timeLastCreation > maximumTimeBetweenCreation)
          {
             particleCreator.createParticles( std::max(minGenerationHeight, generationHeightRatioStart * simulationDomain.zMax()),
                                              std::min(maxGenerationHeight, generationHeightRatioEnd * simulationDomain.zMax()),
-                                             generationSpacing, diameterGenerator, shapeGenerator, initialVelocity, maximumAllowedInteractionRadius);
+                                             generationSpacing, diameterGenerator, shapeGenerator, initialVelocity,
+                                             maximumAllowedInteractionRadius, generationPositionCheckerLargeDiameterThreshold);
 
             particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor,
                                              associateToBlock, particleAccessor);
@@ -1087,6 +1380,10 @@ int main(int argc, char **argv) {
                                              particleHistogram, particleAccessor);
             particleHistogram.evaluate();
             WALBERLA_LOG_INFO_ON_ROOT(particleHistogram);
+
+            // reevaluate particle properties
+            particleInfo = evaluateParticleInfo(particleAccessor);
+
          }
          timing.stop("Generation");
       } else if(shaking)
@@ -1121,15 +1418,30 @@ int main(int argc, char **argv) {
 
          if(timeBeginDamping < 0_r){
             timeBeginDamping = currentTime;
-            WALBERLA_LOG_INFO_ON_ROOT("Beginning of damping at time " << timeBeginDamping << " s with damping factor " << velocityDampingFactor << " until convergence");
+            WALBERLA_LOG_INFO_ON_ROOT("Beginning of damping at time " << timeBeginDamping << " s.");
+            isDampingActive = true;
+
+            if(applyHorizontalForcing)
+            {
+               applyHorizontalForcing = false;
+               WALBERLA_LOG_INFO_ON_ROOT("Switching off horizontal forcing");
+            }
          }
 
          // apply damping
-         particleStorage->forEachParticle(useOpenMP, kernel::SelectAll(), particleAccessor,
-                                          [velocityDampingFactor](size_t idx, data::ParticleAccessorWithBaseShape &ac){
-                                             ac.getLinearVelocityRef(idx) *= velocityDampingFactor;
-                                             ac.getAngularVelocityRef(idx) *= velocityDampingFactor;},
-                                           particleAccessor);
+         if(damping_method == "force")
+         {
+            // was carried out before DEM integration
+
+         } else if(damping_method == "velocity")
+         {
+            particleStorage->forEachParticle(useOpenMP, kernel::SelectAll(), particleAccessor,
+                                             [velocityDampingFactor](size_t idx, data::ParticleAccessorWithBaseShape &ac){
+                                                ac.getLinearVelocityRef(idx) *= velocityDampingFactor;
+                                                ac.getAngularVelocityRef(idx) *= velocityDampingFactor;},
+                                             particleAccessor);
+         }
+
 
          // check if termination
          if(currentTime - timeBeginDamping > minimalTerminalRunTime)
@@ -1156,6 +1468,13 @@ int main(int argc, char **argv) {
                timeLastTerminationCheck = currentTime;
             }
          }
+
+         if(maximalTerminalRunTime > 0 && currentTime - timeBeginDamping > maximalTerminalRunTime)
+         {
+            WALBERLA_LOG_INFO_ON_ROOT("Reached terminal run time - terminating.");
+            terminateSimulation = true;
+         }
+
          timing.stop("Damping");
       }
       timing.stop("Evaluate particles");
@@ -1163,14 +1482,14 @@ int main(int argc, char **argv) {
       if(( infoSpacing > 0 && timestep % infoSpacing == 0) || (loggingSpacing > 0 && timestep % loggingSpacing == 0))
       {
          timing.start("Evaluate infos");
-         auto contactInfo = evaluateContactInfo(contactAccessor);
+         auto contactInfo = evaluateContactInfo(contactAccessor, particleAccessor);
 
          porosityEvaluator.clear();
          particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor,
                                           porosityEvaluator, particleAccessor);
          porosityEvaluator.evaluate();
          real_t estimatedPorosity = porosityEvaluator.estimateTotalPorosity();
-
+         real_t estimatedPackingHeight = porosityEvaluator.estimatePackingHeight();
 
          if(loggingSpacing > 0 && timestep % loggingSpacing == 0)
          {
@@ -1179,20 +1498,83 @@ int main(int argc, char **argv) {
 
          if(infoSpacing > 0 && timestep % infoSpacing == 0) {
             WALBERLA_LOG_INFO_ON_ROOT("t = " << timestep << " = " << currentTime << " s");
-            WALBERLA_LOG_INFO_ON_ROOT(particleInfo << " => " << particleInfo.particleVolume * particleDensity << " kg" << ", current porosity = " << estimatedPorosity);
+            WALBERLA_LOG_INFO_ON_ROOT(particleInfo << " => " << particleInfo.particleVolume * particleDensity << " kg" << ", current porosity = " << estimatedPorosity << ", packing height = " << estimatedPackingHeight);
             real_t ensembleAverageDiameter = diameterFromSphereVolume(particleInfo.particleVolume / real_c(particleInfo.numParticles));
             WALBERLA_LOG_INFO_ON_ROOT(contactInfo << " => " << contactInfo.maximumPenetrationDepth / ensembleAverageDiameter * real_t(100) << "% of avg diameter " << ensembleAverageDiameter);
          }
 
          timing.stop("Evaluate infos");
+
       }
+
+      if(performanceLoggingSpacing > 0 && timestep % performanceLoggingSpacing == 0)
+      {
+         auto reducedTT = timing.getReduced();
+         WALBERLA_LOG_INFO_ON_ROOT(reducedTT);
+      }
+
+      timing.start("Checkpointing");
+      if(checkPointing_spacing > 0 && timestep > 0 && timestep % checkPointing_spacing == 0)
+      {
+         WALBERLA_LOG_INFO_ON_ROOT("Writing checkpointing file " << checkPointFileName_mesapd << " in time step " << timestep);
+         forest->saveBlockData( checkPointFileName_mesapd, particleStorageID );
+
+         std::vector<config::Config::Block*> cfgBlocks;
+         cfg->getWritableGlobalBlock().getWritableBlocks("CheckpointRestart",cfgBlocks,1,1);
+         auto checkpointRestartConfMod = cfgBlocks[0];
+         checkpointRestartConfMod->setOrAddParameter("existingUID", uniqueFileIdentifier);
+         checkpointRestartConfMod->setOrAddParameter("timestep", std::to_string(timestep+1));
+         checkpointRestartConfMod->setOrAddParameter("isDampingActive", std::to_string(isDampingActive));
+         checkpointRestartConfMod->setOrAddParameter("isShakingActive", std::to_string(isShakingActive));
+         checkpointRestartConfMod->setOrAddParameter("oldAvgParticleHeight", std::to_string(oldAvgParticleHeight));
+         checkpointRestartConfMod->setOrAddParameter("oldMaxParticleHeight", std::to_string(oldMaxParticleHeight));
+         checkpointRestartConfMod->setOrAddParameter("timeLastTerminationCheck", std::to_string(timeLastTerminationCheck));
+         checkpointRestartConfMod->setOrAddParameter("timeLastCreation", std::to_string(timeLastCreation));
+         checkpointRestartConfMod->setOrAddParameter("timeBeginShaking", std::to_string(timeBeginShaking));
+         checkpointRestartConfMod->setOrAddParameter("timeEndShaking", std::to_string(timeEndShaking));
+         checkpointRestartConfMod->setOrAddParameter("timeBeginDamping", std::to_string(timeBeginDamping));
+
+         WALBERLA_ROOT_SECTION()
+         {
+            std::ofstream file;
+            std::string configFileCopyName = checkPointing_folder + "/" += uniqueFileIdentifier + ".cfg";
+            file.open( configFileCopyName.c_str() );
+            file << *cfg;
+            file.close();
+         }
+
+      }
+      timing.stop("Checkpointing");
+
+      timing.start("Load balancing");
+      if(loadBalancing_spacing > 0 && timestep % loadBalancing_spacing == 0)
+      {
+
+         domain::createWithNeighborhood( particleAccessor, *forest, *loadBalancingInfoCollection );
+
+         mesa_pd::mpi::ClearGhostOwnerSync CGOS;
+         CGOS(particleAccessor);
+
+         contactStorage->clear();
+         forest->refresh();
+         domain->refresh();
+
+         linkedCells = std::make_unique<data::LinkedCells>(domain->getUnionOfLocalAABBs().getExtended(linkedCellWidth), linkedCellWidth );
+
+         particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor, associateToBlock, particleAccessor);
+         if(useNextNeighborSync){ syncCall(); }
+         else { for(uint_t i = 0; i < uint_c(std::ceil(maxParticleDiameter/smallestBlockSize)); ++i) syncCall(); }
+
+         sorting::LinearizedCompareFunctor linearSorting(linkedCells->domain_, linkedCells->numCellsPerDim_);
+         particleStorage->sort(linearSorting);
+
+      }
+      timing.stop("Load balancing");
 
       ++timestep;
    }
 
-   if(timing.isTimerRunning("Evaluate particles")) timing.stop("Evaluate particles");
-
-   timing.stop("Simulation");
+   simulationTimer.end();
 
    particleHistogram.clear();
    particleStorage->forEachParticle(useOpenMP, kernel::SelectLocal(), particleAccessor,
@@ -1237,8 +1619,8 @@ int main(int argc, char **argv) {
    writeParticleInformationToFile(particleInfoFileName, particleInfoString, logToProcessLocalFiles);
 
    // write to sqlite data base
-   auto particleInfo = evaluateParticleInfo(particleAccessor);
-   auto contactInfo = evaluateContactInfo(contactAccessor);
+   particleInfo = evaluateParticleInfo(particleAccessor);
+   auto contactInfo = evaluateContactInfo(contactAccessor, particleAccessor);
 
    WALBERLA_ROOT_SECTION() {
       std::map<std::string, walberla::int64_t> sql_integerProperties;
@@ -1257,7 +1639,8 @@ int main(int argc, char **argv) {
       sql_realProperties["avgPenetrationDepth"] = double(contactInfo.averagePenetrationDepth);
 
       // other info
-      sql_realProperties["simulationTime"] = double(reducedTT["Simulation"].total());
+      //sql_realProperties["simulationTime"] = double(reducedTT["Simulation"].total());
+      sql_realProperties["simulationTime"] = double(simulationTimer.total());
       sql_integerProperties["numProcesses"] = int64_c(walberla::mpi::MPIManager::instance()->numProcesses());
       sql_integerProperties["timesteps"] = int64_c(timestep);
       sql_stringProperties["file_identifier"] = uniqueFileIdentifier;
@@ -1298,7 +1681,7 @@ int main(int argc, char **argv) {
          finalMeshParticleVTK.addVertexOutput< data::SelectParticleInteractionRadius >("InteractionRadius");
          finalMeshParticleVTK.addFaceOutput< data::SelectParticleLinearVelocity >("LinearVelocity");
          finalMeshParticleVTK.addVertexOutput< data::SelectParticlePosition >("Position");
-         finalMeshParticleVTK.addVertexOutput< data::SelectParticleNumContacts>("numContacts");
+         if(includeNumberOfContactsInVTK) finalMeshParticleVTK.addVertexOutput< data::SelectParticleNumContacts>("numContacts");
          finalMeshParticleVTK.addVertexDataSource(surfaceVelDataSource);
          finalMeshParticleVTK.setParticleSelector(vtkParticleSelector);
          finalMeshParticleVTK(particleAccessor);
@@ -1323,7 +1706,7 @@ int main(int argc, char **argv) {
 
    return EXIT_SUCCESS;
 }
-} // namespace msa_pd
+} // namespace mesa_pd
 } // namespace walberla
 
 int main( int argc, char* argv[] ) {

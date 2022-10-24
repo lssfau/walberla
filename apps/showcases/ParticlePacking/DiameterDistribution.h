@@ -78,7 +78,8 @@ public:
          : diameters_(diameters), gen_(seed)
    {
       WALBERLA_CHECK_EQUAL(diameters.size(), massFractions.size(), "Number of entries in diameter and mass-fraction array has to be the same!");
-      WALBERLA_CHECK_FLOAT_EQUAL(real_t(1), std::accumulate(massFractions.begin(), massFractions.end(), real_t(0)), "Sum of mass fractions has to be 1!");
+      WALBERLA_CHECK(std::abs(real_t(1) - std::accumulate(massFractions.begin(), massFractions.end(), real_t(0)) ) < 0.01_r, "Sum of mass fractions has to be 1!");
+
       auto particleNumbers = transferMassFractionsToParticleNumbers(massFractions, diameters, normalParticleVolume, totalParticleMass, particleDensity);
       std::string outString = "Discrete Sieving: Expected particle numbers per diameter: | ";
       bool issueWarning = false;
@@ -112,7 +113,7 @@ public:
          :  gen_(seed)
    {
       WALBERLA_CHECK_EQUAL(sieveSizes.size(), massFractions.size()+1, "Number of entries in sieves has to be one larger than the mass-fraction array!");
-      WALBERLA_CHECK_FLOAT_EQUAL(real_t(1), std::accumulate(massFractions.begin(), massFractions.end(), real_t(0)), "Sum of mass fractions has to be 1!");
+      WALBERLA_CHECK(std::abs(real_t(1) - std::accumulate(massFractions.begin(), massFractions.end(), real_t(0)) ) < 0.01_r, "Sum of mass fractions has to be 1!");
 
       auto meanDiameters = getMeanDiametersFromSieveSizes(sieveSizes);
       auto particleNumbers = transferMassFractionsToParticleNumbers(massFractions, meanDiameters, normalParticleVolume, totalParticleMass, particleDensity);

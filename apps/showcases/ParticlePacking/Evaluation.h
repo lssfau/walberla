@@ -43,14 +43,30 @@ struct ParticleInfo
 
    void allReduce()
    {
-      walberla::mpi::allReduceInplace(numParticles, walberla::mpi::SUM);
-      walberla::mpi::allReduceInplace(averageVelocity, walberla::mpi::SUM);
-      walberla::mpi::allReduceInplace(maximumVelocity, walberla::mpi::MAX);
-      walberla::mpi::allReduceInplace(maximumHeight, walberla::mpi::MAX);
-      walberla::mpi::allReduceInplace(particleVolume, walberla::mpi::SUM);
-      walberla::mpi::allReduceInplace(heightOfMass, walberla::mpi::SUM);
-      walberla::mpi::allReduceInplace(kinEnergy, walberla::mpi::SUM);
-      walberla::mpi::allReduceInplace(meanCoordinationNumber, walberla::mpi::SUM);
+//      walberla::mpi::allReduceInplace(numParticles, walberla::mpi::SUM);
+//      walberla::mpi::allReduceInplace(averageVelocity, walberla::mpi::SUM);
+//      walberla::mpi::allReduceInplace(maximumVelocity, walberla::mpi::MAX);
+//      walberla::mpi::allReduceInplace(maximumHeight, walberla::mpi::MAX);
+//      walberla::mpi::allReduceInplace(particleVolume, walberla::mpi::SUM);
+//      walberla::mpi::allReduceInplace(heightOfMass, walberla::mpi::SUM);
+//      walberla::mpi::allReduceInplace(kinEnergy, walberla::mpi::SUM);
+//      walberla::mpi::allReduceInplace(meanCoordinationNumber, walberla::mpi::SUM);
+
+
+      std::vector<real_t> sumReduceVec = {real_c(numParticles), averageVelocity, particleVolume, heightOfMass, kinEnergy, meanCoordinationNumber};
+      std::vector<real_t> maxReduceVec = {maximumVelocity, maximumHeight};
+
+      walberla::mpi::allReduceInplace(sumReduceVec, walberla::mpi::SUM);
+      walberla::mpi::allReduceInplace(maxReduceVec, walberla::mpi::MAX);
+
+      numParticles = uint_c(sumReduceVec[0]);
+      averageVelocity = sumReduceVec[1];
+      particleVolume = sumReduceVec[2];
+      heightOfMass = sumReduceVec[3];
+      kinEnergy = sumReduceVec[4];
+      meanCoordinationNumber = sumReduceVec[5];
+      maximumVelocity = maxReduceVec[0];
+      maximumHeight = maxReduceVec[1];
 
       averageVelocity /= real_c(numParticles);
       heightOfMass /= particleVolume;
@@ -73,6 +89,7 @@ ParticleInfo evaluateParticleInfo(const Accessor_T & ac)
    {
       if (isSet(ac.getFlags(i), data::particle_flags::GHOST)) continue;
       if (isSet(ac.getFlags(i), data::particle_flags::GLOBAL)) continue;
+      if (isSet(ac.getFlags(i), data::particle_flags::FIXED)) continue;
 
       ++info.numParticles;
       real_t velMagnitude = ac.getLinearVelocity(i).length();
@@ -113,11 +130,15 @@ std::ostream &operator<<(std::ostream &os, ContactInfo const &m) {
    return os << "Contact Info: numContacts = " << m.numContacts << ", deltaAvg = " << m.averagePenetrationDepth << ", deltaMax = " << m.maximumPenetrationDepth;
 }
 
-ContactInfo evaluateContactInfo(const data::ContactAccessor & ca)
+template <typename ParticleAccessor_T>
+ContactInfo evaluateContactInfo(const data::ContactAccessor & ca, const ParticleAccessor_T& accessor)
 {
    ContactInfo info;
    for(uint_t i = 0; i < ca.size(); ++i)
    {
+      if (isSet(accessor.getFlags(ca.getId1(i)), data::particle_flags::FIXED)) continue;
+      if (isSet(accessor.getFlags(ca.getId2(i)), data::particle_flags::FIXED)) continue;
+
       real_t penetrationDepth = -ca.getDistance(i);
       info.maximumPenetrationDepth = std::max(info.maximumPenetrationDepth, penetrationDepth);
       if(penetrationDepth > 0_r) {
@@ -427,24 +448,38 @@ public:
       */
 
       const real_t cutOffPorosity = 0.5_r; // some value
-      const real_t cutOffPhi = 1_r-cutOffPorosity; // solid volume fraction
+      uint_t endEvalIdx = getIndexOfPorosityValue(cutOffPorosity);
 
-      uint_t endEvalIdx = 0;
-      uint_t numLayers = porosityPerLayer_.size();
-      for(uint_t i = numLayers-1; i > 0; --i)
-      {
-         if(porosityPerLayer_[i] <= cutOffPhi && porosityPerLayer_[i-1] >= cutOffPhi)
-         {
-            endEvalIdx = i;
-            break;
-         }
-      }
       if(endEvalIdx > 0) return 1_r - std::accumulate(porosityPerLayer_.begin(), std::next(porosityPerLayer_.begin(), static_cast<long>(endEvalIdx)), 0_r) / real_c(endEvalIdx);
       else return 1_r;
 
    }
 
+   real_t estimatePackingHeight()
+   {
+      const real_t cutOffPorosity = 0.5_r; // some value
+      uint_t endEvalIdx = getIndexOfPorosityValue(cutOffPorosity);
+      if(endEvalIdx > 0)
+         return (real_c(endEvalIdx) + 0.5_r) * layerHeight_;
+      else
+         return 0_r;
+   }
+
 private:
+
+   uint_t getIndexOfPorosityValue(real_t porosity)
+   {
+      const real_t cutOffPhi = 1_r-porosity; // solid volume fraction
+      uint_t numLayers = porosityPerLayer_.size();
+      for(uint_t i = numLayers-1; i > 0; --i)
+      {
+         if(porosityPerLayer_[i] <= cutOffPhi && porosityPerLayer_[i-1] >= cutOffPhi)
+         {
+            return i;
+         }
+      }
+      return uint_t(0);
+   }
 
    real_t calculateSphericalSegmentVolume(real_t lowerLayerHeight, real_t upperLayerHeight, real_t radius) const
    {
@@ -542,12 +577,15 @@ private:
 class LoggingWriter
 {
 public:
-   explicit LoggingWriter(std::string fileName) : fileName_(fileName){
-      WALBERLA_ROOT_SECTION() {
-         std::ofstream file;
-         file.open(fileName_.c_str());
-         file << "# t numParticles maxVel avgVel maxHeight massHeight kinEnergy numContacts maxPenetration avgPenetration porosity MCN\n";
-         file.close();
+   explicit LoggingWriter(std::string fileName, bool writeHeader) : fileName_(fileName){
+      if(writeHeader)
+      {
+         WALBERLA_ROOT_SECTION() {
+            std::ofstream file;
+            file.open(fileName_.c_str(), std::ios_base::app);
+            file << "# t numParticles maxVel avgVel maxHeight massHeight kinEnergy numContacts maxPenetration avgPenetration porosity MCN\n";
+            file.close();
+         }
       }
    }
 
