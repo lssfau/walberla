@@ -1537,7 +1537,7 @@ int main(int argc, char **argv) {
          WALBERLA_ROOT_SECTION()
          {
             std::ofstream file;
-            std::string configFileCopyName = checkPointing_folder + "/" + uniqueFileIdentifier + ".cfg";
+            std::string configFileCopyName = checkPointing_folder + "/" += uniqueFileIdentifier + ".cfg";
             file.open( configFileCopyName.c_str() );
             file << *cfg;
             file.close();
