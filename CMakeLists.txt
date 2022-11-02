@@ -592,11 +592,17 @@ endif ()
 ##
 #############################################################################################################################
 if ( WALBERLA_BUILD_WITH_CODEGEN )
-   execute_process(COMMAND ${Python_EXECUTABLE} -c "import lbmpy"
-         RESULT_VARIABLE LBMPY_FOUND )
+   set(LBMPY_MIN_VERSION 1.1)
+   execute_process(COMMAND ${Python_EXECUTABLE} -c "import lbmpy; print(lbmpy.__version__)"
+         RESULT_VARIABLE LBMPY_FOUND OUTPUT_VARIABLE LBMPY_VERSION)
     if(NOT LBMPY_FOUND EQUAL 0)
        message(FATAL_ERROR "WALBERLA_BUILD_WITH_CODEGEN activated but pystencils or lbmpy package not found.
                             Please install lbmpy e.g.: 'pip3 install lbmpy'")
+    elseif(LBMPY_VERSION VERSION_LESS LBMPY_MIN_VERSION)
+       string(STRIP ${LBMPY_VERSION} LBMPY_VERSION_STRIP)
+       message(WARNING
+             "lbmpy version ${LBMPY_VERSION_STRIP} was found.\n"
+             "We recommend to use at least version ${LBMPY_MIN_VERSION}.")
     endif()
     execute_process(COMMAND ${Python_EXECUTABLE} -c "from pystencils.include import get_pystencils_include_path; print(get_pystencils_include_path())"
                     OUTPUT_VARIABLE PYSTENCILS_INCLUDE_PATH)
