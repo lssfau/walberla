@@ -2220,7 +2220,9 @@ coverage:
       paths:
          - coverage/
       reports:
-        cobertura: coverage/coverage.xml
+        coverage_report:
+          coverage_format: cobertura
+          path: coverage/coverage.xml
    only:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
