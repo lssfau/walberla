@@ -49,7 +49,7 @@ with CodeGeneration() as ctx:
         ]
 
         # relaxation rate for first group of moments (1,x,y,z) is set to zero internally
-        relaxation_rates = [omegaBulk.center_vector, omegaBulk.center_vector,
+        relaxation_rates = [omegaBulk.center, omegaBulk.center,
                             omegaMagic, omegaVisc, omegaVisc, omegaMagic]
 
         lbm_config = LBMConfig(stencil=stencil, method=Method.MRT, continuous_equilibrium=False,
