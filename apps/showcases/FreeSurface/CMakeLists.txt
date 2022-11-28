@@ -46,3 +46,7 @@ waLBerla_add_executable(NAME    RisingBubble
 waLBerla_add_executable(NAME    TaylorBubble
                         FILES   TaylorBubble.cpp
                         DEPENDS blockforest boundary core domain_decomposition field lbm postprocessing timeloop vtk)
+
+waLBerla_add_executable(NAME    ZalesakDisk
+                        FILES   ZalesakDisk.cpp
+                        DEPENDS blockforest boundary core domain_decomposition field lbm postprocessing timeloop vtk)
