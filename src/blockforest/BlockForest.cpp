@@ -2844,7 +2844,7 @@ void BlockForest::saveToFile( const std::string & filename, FileIOMode fileIOMod
                                                                     "\n- block AABB = " << block->second->getAABB() );
             //Elementwise OR of all elements
             for (uint_t i = 0; i < suidBoolVec.size(); ++i) {
-               suidBoolVec[i] = suidBoolVec[i] | suidMap.find( *suid )->second[i];
+               suidBoolVec[i] = suidBoolVec[i] || suidMap.find( *suid )->second[i];
             }
          }
 
