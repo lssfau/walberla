@@ -1783,7 +1783,7 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
                   WALBERLA_ASSERT( suidMap.find( *suid ) != suidMap.end() );
                   //Elementwise OR of all elements
                   for (uint_t k = 0;k  < suidBoolVec.size(); ++k) {
-                     suidBoolVec[k] = suidBoolVec[k] | suidMap.find( *suid )->second[k];
+                     suidBoolVec[k] = suidBoolVec[k] || suidMap.find( *suid )->second[k];
                   }
                }
 
