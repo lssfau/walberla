@@ -439,14 +439,14 @@ void evaluateParticleSimulation(const shared_ptr<mesa_pd::data::ParticleStorage>
 {
    auto numShapes = ss->shapes.size();
    uint_t numLocalParticles = 0;
-   uint_t numGhostParticles = 0;
+   //uint_t numGhostParticles = 0;
    uint_t numGlobalParticlesOfRank = 0;
    for(auto p = ps->begin(); p != ps->end(); ++p)
    {
       using namespace walberla::mesa_pd::data::particle_flags;
       if (isSet(p->getFlags(), GHOST))
       {
-         ++numGhostParticles;
+         //++numGhostParticles;
       } else if (isSet(p->getFlags(), GLOBAL))
       {
          ++numGlobalParticlesOfRank;

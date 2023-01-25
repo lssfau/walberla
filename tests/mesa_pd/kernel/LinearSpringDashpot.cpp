@@ -150,7 +150,6 @@ int main( int argc, char ** argv )
 
    WALBERLA_LOG_DEVEL("begin: vel = " << p.getLinearVelocity() << ", contact vel: " << getVelocityAtWFPoint(0,*accessor,p.getPosition() + Vec3(0,0,-radius)) );
 
-   uint_t steps = 0;
    real_t maxPenetration = real_t(0);
    do
    {
@@ -164,15 +163,12 @@ int main( int argc, char ** argv )
          maxPenetration = std::max( maxPenetration, std::abs(penetration));
 
          dem(acd.getIdx1(), acd.getIdx2(), *accessor, acd.getContactPoint(), acd.getContactNormal(), acd.getPenetrationDepth(), dt);
-         //auto force = accessor->getForce(0);
-         //WALBERLA_LOG_INFO(steps << ": penetration = " << penetration << " || vel = " << accessor->getLinearVelocity(0) << " || force = " << force);
       }
       rch(*ps);
 
       if(useVelocityVerlet) vvPostForce(0,*accessor);
       else implEuler(0, *accessor);
 
-      ++steps;
    } while (double_cast(0, 1, *accessor, acd, *accessor ) || p.getLinearVelocity()[2] < 0);
 
    real_t uTout = p.getLinearVelocity()[0] - radius * p.getAngularVelocity()[1];

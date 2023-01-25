@@ -944,7 +944,6 @@ gcc_11_mpionly:
 gcc_11_hybrid:
    extends: .build_template
    image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:11
-   stage: pretest
    before_script:
       - pip3 install lbmpy==1.1 jinja2 pytest
       - cd python
@@ -956,6 +955,9 @@ gcc_11_hybrid:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
@@ -978,6 +980,9 @@ gcc_11_serial_dbg:
       CMAKE_BUILD_TYPE: "DebugOptimized"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
@@ -998,6 +1003,9 @@ gcc_11_mpionly_dbg:
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
@@ -1017,6 +1025,9 @@ gcc_11_hybrid_dbg:
       CMAKE_BUILD_TYPE: "DebugOptimized"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
@@ -1039,13 +1050,16 @@ gcc_11_hybrid_dbg_sp:
       WALBERLA_BUILD_WITH_METIS: "OFF"
       WALBERLA_BUILD_WITH_CODEGEN: "ON"
       WALBERLA_BUILD_WITH_PYTHON: "ON"
+   only:
+      variables:
+         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda11
       - docker
 
-clang_6.0_serial:
+gcc_12_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:12
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -1055,12 +1069,12 @@ clang_6.0_serial:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
    tags:
-      - cuda
+      - cuda11
       - docker
 
-clang_6.0_mpionly:
+gcc_12_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:12
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -1068,273 +1082,64 @@ clang_6.0_mpionly:
       variables:
          - $ENABLE_NIGHTLY_BUILDS
    tags:
-      - cuda
+      - cuda11
       - docker
 
-clang_6.0_hybrid:
+gcc_12_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:12
+   stage: pretest
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
    tags:
-      - cuda
+      - cuda11
       - docker
 
-clang_6.0_serial_dbg:
+gcc_12_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:12
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       WALBERLA_BUILD_WITH_MPI: "OFF"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
       WALBERLA_BUILD_WITH_PARMETIS: "OFF"
       CMAKE_BUILD_TYPE: "DebugOptimized"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
    tags:
-      - cuda
+      - cuda11
       - docker
 
-clang_6.0_mpionly_dbg:
+gcc_12_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:12
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
    tags:
-      - cuda
+      - cuda11
       - docker
 
-clang_6.0_hybrid_dbg:
+gcc_12_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:12
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
    tags:
-      - cuda
+      - cuda11
       - docker
 
-clang_6.0_hybrid_dbg_sp:
+gcc_12_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:6.0
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/gcc:12
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
       WALBERLA_DOUBLE_ACCURACY: "OFF"
       WALBERLA_BUILD_WITH_PARMETIS: "OFF"
       WALBERLA_BUILD_WITH_METIS: "OFF"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
    tags:
-      - cuda
-      - docker
-
-clang_7.0_serial:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_MPI: "OFF"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_7.0_mpionly:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_7.0_hybrid:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_7.0_serial_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_MPI: "OFF"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_7.0_mpionly_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_7.0_hybrid_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_7.0_hybrid_dbg_sp:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:7.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_DOUBLE_ACCURACY: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      WALBERLA_BUILD_WITH_METIS: "OFF"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_8.0_serial:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_MPI: "OFF"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_8.0_mpionly:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_8.0_hybrid:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_8.0_serial_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      WALBERLA_BUILD_WITH_MPI: "OFF"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_8.0_mpionly_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_BUILD_WITH_OPENMP: "OFF"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_8.0_hybrid_dbg:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
-      - docker
-
-clang_8.0_hybrid_dbg_sp:
-   extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/clang:8.0
-   variables:
-      WALBERLA_BUILD_WITH_CUDA: "ON"
-      CMAKE_BUILD_TYPE: "DebugOptimized"
-      WALBERLA_DOUBLE_ACCURACY: "OFF"
-      WALBERLA_BUILD_WITH_PARMETIS: "OFF"
-      WALBERLA_BUILD_WITH_METIS: "OFF"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
-   tags:
-      - cuda
+      - cuda11
       - docker
 
 clang_9.0_serial:
@@ -1413,9 +1218,6 @@ clang_9.0_hybrid_dbg:
    variables:
       WALBERLA_BUILD_WITH_CUDA: "ON"
       CMAKE_BUILD_TYPE: "DebugOptimized"
-   only:
-      variables:
-         - $ENABLE_NIGHTLY_BUILDS
    tags:
       - cuda
       - docker
@@ -2007,9 +1809,9 @@ clang_13.0_hybrid_dbg_sp:
       - cuda11
       - docker
 
-inteloneapi_22.1_serial:
+inteloneapi_22.3_serial:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.3
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -2021,9 +1823,9 @@ inteloneapi_22.1_serial:
    tags:
       - docker
 
-inteloneapi_22.1_mpionly:
+inteloneapi_22.3_mpionly:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.3
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_BUILD_WITH_OPENMP: "OFF"
@@ -2033,17 +1835,17 @@ inteloneapi_22.1_mpionly:
    tags:
       - docker
 
-inteloneapi_22.1_hybrid:
+inteloneapi_22.3_hybrid:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.3
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
    tags:
       - docker
 
-inteloneapi_22.1_serial_dbg:
+inteloneapi_22.3_serial_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.3
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       WALBERLA_BUILD_WITH_MPI: "OFF"
@@ -2053,9 +1855,9 @@ inteloneapi_22.1_serial_dbg:
    tags:
       - docker
 
-inteloneapi_22.1_mpionly_dbg:
+inteloneapi_22.3_mpionly_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.3
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       CMAKE_BUILD_TYPE: "DebugOptimized"
@@ -2063,18 +1865,18 @@ inteloneapi_22.1_mpionly_dbg:
    tags:
       - docker
 
-inteloneapi_22.1_hybrid_dbg:
+inteloneapi_22.3_hybrid_dbg:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.3
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       CMAKE_BUILD_TYPE: "DebugOptimized"
    tags:
       - docker
 
-inteloneapi_22.1_hybrid_dbg_sp:
+inteloneapi_22.3_hybrid_dbg_sp:
    extends: .build_template
-   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.1
+   image: i10git.cs.fau.de:5005/walberla/buildenvs/inteloneapi:22.3
    variables:
       WALBERLA_BUILD_WITH_CUDA: "OFF"
       CMAKE_BUILD_TYPE: "DebugOptimized"

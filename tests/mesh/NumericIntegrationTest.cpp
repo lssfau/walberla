@@ -87,7 +87,6 @@ Matrix3<real_t> inertiaTensorNumeric( const ContainmentT & body, const AABB & aa
    Vector3<real_t> pointOfReference = aabb.min() + Vector3<real_t>( real_t(0.5) * spacing );
 
    math::KahanAccumulator<real_t> inertiaTensor[6];
-   uint_t numPoints = 0;
 
    for(grid_generator::SCIterator it( aabb, pointOfReference, spacing ); it != grid_generator::SCIterator(); ++it)
    {
@@ -104,7 +103,6 @@ Matrix3<real_t> inertiaTensorNumeric( const ContainmentT & body, const AABB & aa
          inertiaTensor[3] += x*x + z*z;
          inertiaTensor[4] += -y*z;
          inertiaTensor[5] += x*x + y*y;
-         ++numPoints;
       }
    }
 

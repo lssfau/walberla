@@ -177,7 +177,6 @@ public:
    // check the mapping of a plane for a given AABB
    void operator()(std::string testIdentifier, const math::AABB & planeAABB )
    {
-      uint_t cellCounter( uint_t(0) );
       for( auto blockIt = blocks_->begin(); blockIt != blocks_->end(); ++blockIt )
       {
          auto * boundaryHandling = blockIt->getData< BoundaryHandling_T >( boundaryHandlingID_ );
@@ -193,7 +192,6 @@ public:
                               testIdentifier << " Invalid mapping in cell " << cellIt
                                              << " with center at " << cellCenter
                                              << " - expected boundary cell since inside AABB " << planeAABB);
-               ++cellCounter;
             }
          }
       }
