@@ -50,9 +50,36 @@ static inline void compareAABB( const AABB & oldAABB, const AABB & newAABB )
    }
 }
 
+ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB & aabb )
+   : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ), maxBlockSkewness_(2.0),
+     processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
+     workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
+#ifdef WALBERLA_BUILD_WITH_PARMETIS
+     targetProcessAssignmentFunction_( blockforest::StaticLevelwiseParMetis() )
+#else
+     targetProcessAssignmentFunction_( blockforest::StaticLevelwiseCurveBalanceWeighted() )
+#endif
+
+{
+}
+
 ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB & aabb, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction )
    : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ), maxBlockSkewness_(2.0),
      processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ), rootBlockExclusionFunction_ ( rootBlockExclusionFunction ),
+     workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
+#ifdef WALBERLA_BUILD_WITH_PARMETIS
+     targetProcessAssignmentFunction_( blockforest::StaticLevelwiseParMetis() )
+#else
+     targetProcessAssignmentFunction_( blockforest::StaticLevelwiseCurveBalanceWeighted() )
+#endif
+
+{
+}
+
+ComplexGeometryBlockforestCreator::ComplexGeometryBlockforestCreator( const AABB & aabb, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction, const blockforest::SetupBlockForest::BlockExclusionFunction & blockExclusionFunction )
+   : aabb_(aabb), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ), maxBlockSkewness_(2.0),
+     processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
+     rootBlockExclusionFunction_ ( rootBlockExclusionFunction ), blockExclusionFunction_( blockExclusionFunction ),
      workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
 #ifdef WALBERLA_BUILD_WITH_PARMETIS
      targetProcessAssignmentFunction_( blockforest::StaticLevelwiseParMetis() )
@@ -141,7 +168,11 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
    WALBERLA_LOG_INFO_ON_ROOT( "Using a block grid of size " << bestSizeBlockGrid3D << " (" << bestSizeBlockGrid << ") resulting in " << bestNumRootBlocks << " root blocks." )
 
    auto setupBlockForest = make_shared<SetupBlockForest>();
-   setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if ( rootBlockExclusionFunction_ )
+      setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if ( blockExclusionFunction_ )
+      setupBlockForest->addBlockExclusionFunction( blockExclusionFunction_ );
+
    setupBlockForest->addWorkloadMemorySUIDAssignmentFunction( workloadMemorySUIDAssignmentFunction_ );
 
    setupBlockForest->init( aabb_, bestSizeBlockGrid3D[0], bestSizeBlockGrid3D[1], bestSizeBlockGrid3D[2], periodicity_[0], periodicity_[1], periodicity_[2] );
@@ -167,7 +198,10 @@ shared_ptr<SetupBlockForest> ComplexGeometryBlockforestCreator::createSetupBlock
    compareAABB(aabb_, newAABB);
 
    auto setupBlockForest = make_shared<SetupBlockForest>();
-   setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if (rootBlockExclusionFunction_ )
+      setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if ( blockExclusionFunction_ )
+      setupBlockForest->addBlockExclusionFunction( blockExclusionFunction_ );
    setupBlockForest->addWorkloadMemorySUIDAssignmentFunction( workloadMemorySUIDAssignmentFunction_ );
 
    setupBlockForest->init( newAABB, numBlocks[0], numBlocks[1], numBlocks[2], periodicity_[0], periodicity_[1], periodicity_[2] );
@@ -200,7 +234,10 @@ uint_t ComplexGeometryBlockforestCreator::findNumBlocks( const Vector3<uint_t> &
    WALBERLA_LOG_DEVEL_ON_ROOT( "Testing block grid " << numRootBlocks3D )
 
    SetupBlockForest setupBlockForest;
-   setupBlockForest.addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if ( rootBlockExclusionFunction_ )
+      setupBlockForest.addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if ( blockExclusionFunction_ )
+      setupBlockForest.addBlockExclusionFunction( blockExclusionFunction_ );
 
    setupBlockForest.init( aabb_, numRootBlocks3D[0], numRootBlocks3D[1], numRootBlocks3D[2], periodicity_[0], periodicity_[1], periodicity_[2] );
 
@@ -224,10 +261,35 @@ uint_t ComplexGeometryBlockforestCreator::findNumBlocks( const Vector3<uint_t> &
 
 
 
+ComplexGeometryStructuredBlockforestCreator::ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize )
+   : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ),
+     processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
+     workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
+#ifdef WALBERLA_BUILD_WITH_PARMETIS
+     targetProcessAssignmentFunction_( blockforest::StaticLevelwiseParMetis() )
+#else
+     targetProcessAssignmentFunction_( blockforest::StaticLevelwiseCurveBalanceWeighted() )
+#endif
+{
+}
+
 ComplexGeometryStructuredBlockforestCreator::ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction )
    : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ),
      processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
      rootBlockExclusionFunction_ ( rootBlockExclusionFunction ),
+     workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
+#ifdef WALBERLA_BUILD_WITH_PARMETIS
+     targetProcessAssignmentFunction_( blockforest::StaticLevelwiseParMetis() )
+#else
+     targetProcessAssignmentFunction_( blockforest::StaticLevelwiseCurveBalanceWeighted() )
+#endif
+{
+}
+
+ComplexGeometryStructuredBlockforestCreator::ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction, const blockforest::SetupBlockForest::BlockExclusionFunction & blockExclusionFunction  )
+   : aabb_(aabb), cellSize_( cellSize ), maxIterations_(25), acceptableRelativeError_( real_t(0.1) ),
+     processMemoryLimit_( real_t( 0.0 ) ), periodicity_( false, false, false ),
+     rootBlockExclusionFunction_ ( rootBlockExclusionFunction ), blockExclusionFunction_(blockExclusionFunction),
      workloadMemorySUIDAssignmentFunction_( blockforest::uniformWorkloadAndMemoryAssignment ),
 #ifdef WALBERLA_BUILD_WITH_PARMETIS
      targetProcessAssignmentFunction_( blockforest::StaticLevelwiseParMetis() )
@@ -322,7 +384,10 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
    compareAABB(aabb_, newAABB);
 
    auto setupBlockForest = make_shared<SetupBlockForest>();
-   setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if( rootBlockExclusionFunction_ )
+      setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if( blockExclusionFunction_ )
+      setupBlockForest->addBlockExclusionFunction( blockExclusionFunction_ );
    setupBlockForest->addWorkloadMemorySUIDAssignmentFunction( workloadMemorySUIDAssignmentFunction_ );
 
    if( refinementSelectionFunction_ )
@@ -354,7 +419,10 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
    compareAABB(aabb_, newAABB);
 
    auto setupBlockForest = make_shared<SetupBlockForest>();
-   setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if (rootBlockExclusionFunction_ )
+      setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if ( blockExclusionFunction_ )
+      setupBlockForest->addBlockExclusionFunction( blockExclusionFunction_ );
    setupBlockForest->addWorkloadMemorySUIDAssignmentFunction( workloadMemorySUIDAssignmentFunction_ );
 
    if( refinementSelectionFunction_ )
@@ -379,7 +447,10 @@ shared_ptr<SetupBlockForest> ComplexGeometryStructuredBlockforestCreator::create
    compareAABB(aabb_, newAABB);
 
    auto setupBlockForest = make_shared<SetupBlockForest>();
-   setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if ( rootBlockExclusionFunction_ )
+      setupBlockForest->addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if ( blockExclusionFunction_ )
+      setupBlockForest->addBlockExclusionFunction( blockExclusionFunction_ );
    setupBlockForest->addWorkloadMemorySUIDAssignmentFunction( workloadMemorySUIDAssignmentFunction_ );
 
    if( refinementSelectionFunction_ )
@@ -462,7 +533,10 @@ uint_t ComplexGeometryStructuredBlockforestCreator::findNumBlocks( const Vector3
 
 
    SetupBlockForest setupBlockForest;
-   setupBlockForest.addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if ( rootBlockExclusionFunction_ )
+      setupBlockForest.addRootBlockExclusionFunction( rootBlockExclusionFunction_ );
+   if ( blockExclusionFunction_ )
+      setupBlockForest.addBlockExclusionFunction( blockExclusionFunction_ );
 
    if( refinementSelectionFunction_ )
       setupBlockForest.addRefinementSelectionFunction( refinementSelectionFunction_ );

@@ -42,8 +42,12 @@ namespace mesh {
 class ComplexGeometryBlockforestCreator
 {
 public:
+   ComplexGeometryBlockforestCreator( const AABB & aabb );
    ComplexGeometryBlockforestCreator( const AABB & aabb, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction );
+   ComplexGeometryBlockforestCreator( const AABB & aabb, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction, const blockforest::SetupBlockForest::BlockExclusionFunction & blockExclusionFunction );
 
+   void setRootBlockExclusionFunction( const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction ) { rootBlockExclusionFunction_ = rootBlockExclusionFunction; }
+   void setBlockExclusionFunction( const blockforest::SetupBlockForest::BlockExclusionFunction & blockExclusionFunction ) { blockExclusionFunction_ = blockExclusionFunction; }
    void setWorkloadMemorySUIDAssignmentFunction( const blockforest::SetupBlockForest::WorkloadMemorySUIDAssignmentFunction & workloadMemorySUIDAssignmentFunction ) { workloadMemorySUIDAssignmentFunction_ = workloadMemorySUIDAssignmentFunction; }
    void setTargetProcessAssignmentFunction( const blockforest::SetupBlockForest::TargetProcessAssignmentFunction & targetProcessAssignmentFunction ) { targetProcessAssignmentFunction_ = targetProcessAssignmentFunction; }
    void setProcessMemoryLimit( const real_t processMemoryLimit ) { processMemoryLimit_ = processMemoryLimit; }
@@ -69,6 +73,7 @@ private:
    Vector3< bool > periodicity_;
 
    blockforest::SetupBlockForest::RootBlockExclusionFunction           rootBlockExclusionFunction_;
+   blockforest::SetupBlockForest::BlockExclusionFunction               blockExclusionFunction_;
    blockforest::SetupBlockForest::WorkloadMemorySUIDAssignmentFunction workloadMemorySUIDAssignmentFunction_;
    blockforest::SetupBlockForest::TargetProcessAssignmentFunction      targetProcessAssignmentFunction_;
 };
@@ -77,10 +82,14 @@ private:
 class ComplexGeometryStructuredBlockforestCreator
 {
 public:
-   ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction );
+   ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize);
+   ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction);
+   ComplexGeometryStructuredBlockforestCreator( const AABB & aabb, const Vector3<real_t> & cellSize, const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction, const blockforest::SetupBlockForest::BlockExclusionFunction & blockExclusionFunction);
 
    void setWorkloadMemorySUIDAssignmentFunction( const blockforest::SetupBlockForest::WorkloadMemorySUIDAssignmentFunction & workloadMemorySUIDAssignmentFunction ) { workloadMemorySUIDAssignmentFunction_ = workloadMemorySUIDAssignmentFunction; }
    void setTargetProcessAssignmentFunction( const blockforest::SetupBlockForest::TargetProcessAssignmentFunction & targetProcessAssignmentFunction ) { targetProcessAssignmentFunction_ = targetProcessAssignmentFunction; }
+   void setRootBlockExclusionFunction( const blockforest::SetupBlockForest::RootBlockExclusionFunction & rootBlockExclusionFunction ) { rootBlockExclusionFunction_ = rootBlockExclusionFunction; }
+   void setBlockExclusionFunction( const blockforest::SetupBlockForest::BlockExclusionFunction & blockExclusionFunction ) { blockExclusionFunction_ = blockExclusionFunction; }
    void setRefinementSelectionFunction( const blockforest::SetupBlockForest::RefinementSelectionFunction & refinementSelectionFunction ) { refinementSelectionFunction_ = refinementSelectionFunction; }
    void setProcessMemoryLimit( const real_t processMemoryLimit ) { processMemoryLimit_ = processMemoryLimit; }
 
@@ -110,6 +119,7 @@ private:
    Vector3< bool > periodicity_;
 
    blockforest::SetupBlockForest::RootBlockExclusionFunction           rootBlockExclusionFunction_;
+   blockforest::SetupBlockForest::BlockExclusionFunction               blockExclusionFunction_;
    blockforest::SetupBlockForest::WorkloadMemorySUIDAssignmentFunction workloadMemorySUIDAssignmentFunction_;
    blockforest::SetupBlockForest::TargetProcessAssignmentFunction      targetProcessAssignmentFunction_;
    blockforest::SetupBlockForest::RefinementSelectionFunction          refinementSelectionFunction_;

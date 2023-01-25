@@ -45,7 +45,7 @@ void SetupBlock::assembleNeighborhood() {
 
 void SetupBlock::split() {
 
-   WALBERLA_ASSERT( children_.empty() );
+   WALBERLA_ASSERT( children_.empty() )
 
    const real_t xMid = ( aabb_.xMin() + aabb_.xMax() ) / real_c(2);
    const real_t yMid = ( aabb_.yMin() + aabb_.yMax() ) / real_c(2);

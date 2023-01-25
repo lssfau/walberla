@@ -72,6 +72,7 @@ public:
    // Do not use a vector of bool's! Due to the implementation of this vector in the standard library, parallel access to a
    // vector of bool's - even on different elements - is not thread-safe!
    using RootBlockExclusionFunction = std::function<void (std::vector<uint8_t> &, const RootBlockAABB &)>;
+   using BlockExclusionFunction = std::function<bool (const SetupBlock &)>;
 
    using RefinementSelectionFunction = std::function<void (SetupBlockForest &)>;
    using WorkloadMemorySUIDAssignmentFunction = std::function<void (SetupBlockForest &)>;
@@ -99,7 +100,7 @@ public:
 
       iterator( const iterator& it )  = default;
 
-      iterator& operator++() { WALBERLA_ASSERT_NOT_NULLPTR( block_ ); block_ = forest_->getNextBlock( block_ ); return *this; } // prefix ++X
+      iterator& operator++() { WALBERLA_ASSERT_NOT_NULLPTR( block_ ) block_ = forest_->getNextBlock( block_ ); return *this; } // prefix ++X
       iterator  operator++(int) { iterator it( *this ); operator++(); return it; };                                             // postfix X++
 
       bool operator==( const iterator& rhs ) const { return block_ == rhs.block_; }
@@ -107,8 +108,8 @@ public:
 
       SetupBlock* get() { return block_; }
 
-      SetupBlock& operator*()  { WALBERLA_ASSERT_NOT_NULLPTR( block_ ); return *block_; }
-      SetupBlock* operator->() { WALBERLA_ASSERT_NOT_NULLPTR( block_ ); return  block_; }
+      SetupBlock& operator*()  { WALBERLA_ASSERT_NOT_NULLPTR( block_ ) return *block_; }
+      SetupBlock* operator->() { WALBERLA_ASSERT_NOT_NULLPTR( block_ ) return  block_; }
 
    private:
 
@@ -128,7 +129,7 @@ public:
       const_iterator( const       iterator& it ) : forest_( it.forest_ ), block_( it.block_ ) {}
       const_iterator( const const_iterator& it )  = default;
 
-      const_iterator& operator++() { WALBERLA_ASSERT_NOT_NULLPTR( block_ ); block_ = forest_->getNextBlock( block_ ); return *this; } // prefix ++X
+      const_iterator& operator++() { WALBERLA_ASSERT_NOT_NULLPTR( block_ ) block_ = forest_->getNextBlock( block_ ); return *this; } // prefix ++X
       const_iterator  operator++(int) { const_iterator it( *this ); operator++(); return it; };                                       // postfix X++
 
       bool operator==( const const_iterator& rhs ) const { return block_ == rhs.block_; }
@@ -136,8 +137,8 @@ public:
 
       const SetupBlock* get() const { return block_; }
 
-      const SetupBlock& operator*()  const { WALBERLA_ASSERT_NOT_NULLPTR( block_ ); return *block_; }
-      const SetupBlock* operator->() const { WALBERLA_ASSERT_NOT_NULLPTR( block_ ); return  block_; }
+      const SetupBlock& operator*()  const { WALBERLA_ASSERT_NOT_NULLPTR( block_ ) return *block_; }
+      const SetupBlock* operator->() const { WALBERLA_ASSERT_NOT_NULLPTR( block_ ) return  block_; }
 
    private:
 
@@ -157,17 +158,17 @@ public:
    real_t getRootBlockXSize() const { return rootBlockSize_[0]; }
    real_t getRootBlockYSize() const { return rootBlockSize_[1]; }
    real_t getRootBlockZSize() const { return rootBlockSize_[2]; }
-   real_t getRootBlockSize( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, 3 ); return rootBlockSize_[index]; }
+   real_t getRootBlockSize( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, 3 ) return rootBlockSize_[index]; }
 
    uint_t getXSize() const { return size_[0]; }
    uint_t getYSize() const { return size_[1]; }
    uint_t getZSize() const { return size_[2]; }
-   uint_t getSize( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, 3 ); return size_[index]; }
+   uint_t getSize( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, 3 ) return size_[index]; }
 
    bool isXPeriodic() const { return periodic_[0]; }
    bool isYPeriodic() const { return periodic_[1]; }
    bool isZPeriodic() const { return periodic_[2]; }
-   bool isPeriodic( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, 3 ); return periodic_[index]; }
+   bool isPeriodic( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, 3 ) return periodic_[index]; }
 
    uint_t getDepth()              const { return depth_; }
    uint_t getNumberOfLevels()     const { return depth_ + uint_t(1); }
@@ -196,8 +197,8 @@ public:
    const SetupBlock* getTree( const uint_t treeIndex ) const { return getRootBlock( treeIndex ); }
          SetupBlock* getTree( const uint_t treeIndex )       { return getRootBlock( treeIndex ); }
 
-   const SetupBlock* getRootBlock( const uint_t treeIndex ) const { WALBERLA_ASSERT_LESS( treeIndex, forest_.size() ); return forest_[treeIndex]; }
-         SetupBlock* getRootBlock( const uint_t treeIndex )       { WALBERLA_ASSERT_LESS( treeIndex, forest_.size() ); return forest_[treeIndex]; }
+   const SetupBlock* getRootBlock( const uint_t treeIndex ) const { WALBERLA_ASSERT_LESS( treeIndex, forest_.size() ) return forest_[treeIndex]; }
+         SetupBlock* getRootBlock( const uint_t treeIndex )       { WALBERLA_ASSERT_LESS( treeIndex, forest_.size() ) return forest_[treeIndex]; }
 
    inline const SetupBlock* getRootBlock( const uint_t x, const uint_t y, const uint_t z ) const;
    inline       SetupBlock* getRootBlock( const uint_t x, const uint_t y, const uint_t z );
@@ -325,6 +326,11 @@ public:
                                               const Set<SUID>& incompatibleSelectors = Set<SUID>::emptySet(),
                                               const std::string& identifier = std::string() );
 
+   inline void addBlockExclusionFunction(    BlockExclusionFunction function,
+                                             const Set<SUID>& requiredSelectors     = Set<SUID>::emptySet(),
+                                             const Set<SUID>& incompatibleSelectors = Set<SUID>::emptySet(),
+                                             const std::string& identifier = std::string() );
+
    inline void addRefinementSelectionFunction( RefinementSelectionFunction function,
                                                const Set<SUID>& requiredSelectors     = Set<SUID>::emptySet(),
                                                const Set<SUID>& incompatibleSelectors = Set<SUID>::emptySet(),
@@ -370,27 +376,28 @@ private:
 
    std::vector< SetupBlock* > forest_; // == coarse grid
 
-   uint_t numberOfRootBlocks_;
-   uint_t numberOfBlocks_;
+   uint_t numberOfRootBlocks_{ 0 };
+   uint_t numberOfBlocks_{ 0 };
 
    AABB   domain_;           // the simulation space/region
    real_t rootBlockSize_[3]; // [(domain x width) / size_[0]], etc. [equivalent to the size of each root block's bounding box]
    uint_t size_[3];          // number of coarse blocks on the initial grid (= number of octree root blocks) in each direction
    bool   periodic_[3];
 
-   uint_t  depth_; // depth := number of levels - 1
-   uint_t  treeIdDigits_;
+   uint_t  depth_{ 0 }; // depth := number of levels - 1
+   uint_t  treeIdDigits_{ 0 };
 
-   uint_t  numberOfProcesses_;
-   uint_t  numberOfBufferProcesses_;
-   bool    insertBuffersIntoProcessNetwork_;
+   uint_t  numberOfProcesses_{ 0 };
+   uint_t  numberOfBufferProcesses_{ 0 };
+   bool    insertBuffersIntoProcessNetwork_{ false };
 
    std::vector< std::vector< SetupBlock* > > blockDistribution_;
 
 
 
    selectable::SetSelectableObject< RootBlockExclusionFunction, SUID >                     rootBlockExclusionFunctions_;
-   selectable::SetSelectableObject< RefinementSelectionFunction, SUID >                   refinementSelectionFunctions_;
+   selectable::SetSelectableObject< BlockExclusionFunction , SUID >                        blockExclusionFunctions_;
+   selectable::SetSelectableObject< RefinementSelectionFunction, SUID >                    refinementSelectionFunctions_;
    selectable::SetSelectableObject< WorkloadMemorySUIDAssignmentFunction, SUID > workloadMemorySUIDAssignmentFunctions_;
 
 
@@ -402,11 +409,7 @@ private:
 
 
 
-inline SetupBlockForest::SetupBlockForest() :
-
-   numberOfRootBlocks_( 0 ), numberOfBlocks_( 0 ),
-   depth_( 0 ), treeIdDigits_( 0 ), numberOfProcesses_( 0 ), numberOfBufferProcesses_( 0 ),
-   insertBuffersIntoProcessNetwork_( false ) {
+inline SetupBlockForest::SetupBlockForest() {
 
    rootBlockSize_[0] = rootBlockSize_[1] = rootBlockSize_[2] = real_c(0);
    size_[0]          = size_[1]          = size_[2]          = 0;
@@ -491,9 +494,9 @@ inline SetupBlock* SetupBlockForest::getBlock( const real_t px, const real_t py,
 
 inline uint_t SetupBlockForest::mapForestCoordinatesToTreeIndex( const uint_t x, const uint_t y, const uint_t z ) const {
 
-   WALBERLA_ASSERT_LESS( x, size_[0] );
-   WALBERLA_ASSERT_LESS( y, size_[1] );
-   WALBERLA_ASSERT_LESS( z, size_[2] );
+   WALBERLA_ASSERT_LESS( x, size_[0] )
+   WALBERLA_ASSERT_LESS( y, size_[1] )
+   WALBERLA_ASSERT_LESS( z, size_[2] )
 
    return z * size_[1] * size_[0] + y * size_[0] + x;
 }
@@ -513,7 +516,7 @@ inline void SetupBlockForest::mapTreeIndexToForestCoordinates( const uint_t tree
 
 inline void SetupBlockForest::mapTreeIndexToForestCoordinates( const uint_t treeIndex, uint_t& x, uint_t& y, uint_t& z ) const {
 
-   WALBERLA_ASSERT_LESS( treeIndex, size_[0] * size_[1] * size_[2] );
+   WALBERLA_ASSERT_LESS( treeIndex, size_[0] * size_[1] * size_[2] )
 
    mapTreeIndexToForestCoordinates( treeIndex, size_[0], size_[1], x, y, z );
 }
@@ -529,7 +532,9 @@ inline void SetupBlockForest::getRootBlockAABB( AABB& aabb, const uint_t x, cons
 
 inline void SetupBlockForest::getRootBlockAABB( AABB& aabb, const uint_t treeIndex ) const {
 
-   uint_t x,y,z;
+   uint_t x;
+   uint_t y;
+   uint_t z;
    mapTreeIndexToForestCoordinates( treeIndex, x, y, z );
    getRootBlockAABB( aabb, x, y, z );
 }
@@ -586,7 +591,7 @@ inline bool SetupBlockForest::atDomainZMaxBorder( const SetupBlock & block ) con
 
 inline bool SetupBlockForest::atDomainMinBorder( const uint_t index, const SetupBlock & block ) const
 {
-   WALBERLA_ASSERT_LESS( index, uint_t(3) );
+   WALBERLA_ASSERT_LESS( index, uint_t(3) )
    const AABB & blockAABB = block.getAABB();
    return realIsEqual( blockAABB.min( index ), domain_.min( index ), real_c( 1.0E-6 ) * ( blockAABB.max( index ) - blockAABB.min( index) ) );
 }
@@ -595,7 +600,7 @@ inline bool SetupBlockForest::atDomainMinBorder( const uint_t index, const Setup
 
 inline bool SetupBlockForest::atDomainMaxBorder( const uint_t index, const SetupBlock & block ) const
 {
-   WALBERLA_ASSERT_LESS( index, uint_t(3) );
+   WALBERLA_ASSERT_LESS( index, uint_t(3) )
    const AABB & blockAABB = block.getAABB();
    return realIsEqual( blockAABB.max( index ), domain_.max( index ), real_c( 1.0E-6 ) * ( blockAABB.max( index ) - blockAABB.min( index ) ) );
 }
@@ -626,7 +631,7 @@ inline void SetupBlockForest::updateNeighborhood( std::set< SetupBlock* >& block
 
    std::vector< SetupBlock* > blocks;
 
-   for( std::set< SetupBlock* >::iterator it = blocksToUpdate.begin(); it != blocksToUpdate.end(); ++it )
+   for( auto it = blocksToUpdate.begin(); it != blocksToUpdate.end(); ++it )
       blocks.push_back( *it );
 
    updateNeighborhood( blocks );
@@ -636,8 +641,8 @@ inline void SetupBlockForest::updateNeighborhood( std::set< SetupBlock* >& block
 
 inline bool SetupBlockForest::isWorkerProcess( const uint_t process ) const
 {
-   WALBERLA_ASSERT_LESS( process, numberOfProcesses_ );
-   WALBERLA_ASSERT_LESS( process, blockDistribution_.size() );
+   WALBERLA_ASSERT_LESS( process, numberOfProcesses_ )
+   WALBERLA_ASSERT_LESS( process, blockDistribution_.size() )
 
    return !(blockDistribution_[ process ].empty());
 }
@@ -646,8 +651,8 @@ inline bool SetupBlockForest::isWorkerProcess( const uint_t process ) const
 
 inline bool SetupBlockForest::isBufferProcess( const uint_t process ) const {
 
-   WALBERLA_ASSERT_LESS( process, numberOfProcesses_ );
-   WALBERLA_ASSERT_LESS( process, blockDistribution_.size() );
+   WALBERLA_ASSERT_LESS( process, numberOfProcesses_ )
+   WALBERLA_ASSERT_LESS( process, blockDistribution_.size() )
 
    return blockDistribution_[ process ].empty();
 }
@@ -659,6 +664,13 @@ inline void SetupBlockForest::addRootBlockExclusionFunction( RootBlockExclusionF
                                                              const std::string& identifier ) {
 
    rootBlockExclusionFunctions_.add( function, requiredSelectors, incompatibleSelectors, identifier );
+}
+
+inline void SetupBlockForest::addBlockExclusionFunction( BlockExclusionFunction function,
+                                                         const Set<SUID>& requiredSelectors, const Set<SUID>& incompatibleSelectors,
+                                                         const std::string& identifier ) {
+
+   blockExclusionFunctions_.add( function, requiredSelectors, incompatibleSelectors, identifier );
 }
 
 

@@ -34,11 +34,11 @@ namespace blockforest {
 
 inline uint_t getBlockNeighborhoodSectionIndex( const int x, const int y, const int z )
 {
-   WALBERLA_ASSERT_LESS_EQUAL( -1, x ); WALBERLA_ASSERT_LESS_EQUAL( x, 1 );
-   WALBERLA_ASSERT_LESS_EQUAL( -1, y ); WALBERLA_ASSERT_LESS_EQUAL( y, 1 );
-   WALBERLA_ASSERT_LESS_EQUAL( -1, z ); WALBERLA_ASSERT_LESS_EQUAL( z, 1 );
+   WALBERLA_ASSERT_LESS_EQUAL( -1, x ) WALBERLA_ASSERT_LESS_EQUAL( x, 1 )
+   WALBERLA_ASSERT_LESS_EQUAL( -1, y ) WALBERLA_ASSERT_LESS_EQUAL( y, 1 )
+   WALBERLA_ASSERT_LESS_EQUAL( -1, z ) WALBERLA_ASSERT_LESS_EQUAL( z, 1 )
 
-   WALBERLA_ASSERT( !( x == 0 && y == 0 && z == 0 ) );
+   WALBERLA_ASSERT( !( x == 0 && y == 0 && z == 0 ) )
 
    const uint_t index = uint_c( (z+1) * 9 + (y+1) * 3 + x+1 );
 
@@ -51,11 +51,11 @@ inline uint_t getBlockNeighborhoodSectionIndex( const int x, const int y, const 
 
 inline uint_t getBlockNeighborhoodSectionIndex( const uint_t x, const uint_t y, const uint_t z )
 {
-   WALBERLA_ASSERT_LESS( x, 3 );
-   WALBERLA_ASSERT_LESS( y, 3 );
-   WALBERLA_ASSERT_LESS( z, 3 );
+   WALBERLA_ASSERT_LESS( x, 3 )
+   WALBERLA_ASSERT_LESS( y, 3 )
+   WALBERLA_ASSERT_LESS( z, 3 )
 
-   WALBERLA_ASSERT( !( x == 1 && y == 1 && z == 1 ) );
+   WALBERLA_ASSERT( !( x == 1 && y == 1 && z == 1 ) )
 
    const uint_t index = z * uint_t(9) + y * uint_t(3) + x;
 
@@ -68,8 +68,8 @@ inline uint_t getBlockNeighborhoodSectionIndex( const uint_t x, const uint_t y, 
 
 inline uint_t getBlockNeighborhoodSectionIndex( const stencil::Direction & d )
 {
-   WALBERLA_ASSERT_UNEQUAL( d, stencil::C );
-   WALBERLA_ASSERT( !( stencil::cx[d] == 0 && stencil::cy[d] == 0 && stencil::cz[d] == 0 ) );
+   WALBERLA_ASSERT_UNEQUAL( d, stencil::C )
+   WALBERLA_ASSERT( !( stencil::cx[d] == 0 && stencil::cy[d] == 0 && stencil::cz[d] == 0 ) )
 
    return getBlockNeighborhoodSectionIndex( stencil::cx[d], stencil::cy[d], stencil::cz[d] );
 }
@@ -78,7 +78,7 @@ inline uint_t getBlockNeighborhoodSectionIndex( const stencil::Direction & d )
 
 inline uint_t getBlockMaxNeighborhoodSectionSize( const uint_t sectionIndex )
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_t(26) );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_t(26) )
 
    // faces
    if( sectionIndex == uint_t( 4) || sectionIndex == uint_t(10) || sectionIndex == uint_t(12) ||
