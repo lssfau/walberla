@@ -183,12 +183,14 @@ int main( int argc, char** argv )
       {
          ++countdx;
          WALBERLA_LOG_DETAIL("Intersection dx: " << countdx << " Periodic: " << !box1.intersects(box2));
+         WALBERLA_UNUSED( countdx );
       }
       if (periodicCheck(*forest, box1, box2))
       {
          WALBERLA_CHECK(checkWithDx);
          ++count;
          WALBERLA_LOG_DETAIL("Intersection: " << count << " Periodic: " << !box1.intersects(box2));
+         WALBERLA_UNUSED( count );
       }
    }
 

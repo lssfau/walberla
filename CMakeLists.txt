@@ -422,6 +422,17 @@ if( WALBERLA_CXX_COMPILER_IS_GNU OR WALBERLA_CXX_COMPILER_IS_INTEL OR WALBERLA_C
     endif()
 endif()
 
+# Omit maybe-uninitialized for gcc 12 for now. Check if it is a bug or a real problem:
+if( WALBERLA_CXX_COMPILER_IS_GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12.0" )
+   add_flag( CMAKE_CXX_FLAGS "-Wno-maybe-uninitialized" )
+endif()
+
+# GCC 12 reports a "array bounds" warning at UniformBufferedScheme.h:297 (error: array subscript 26 is above array bounds of)
+# when e.g. compiling the GhostLayerCommTest.
+# Since this is most probably a bug in GCC disable the warning for now
+if( WALBERLA_CXX_COMPILER_IS_GNU AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "12.0" )
+   add_flag( CMAKE_CXX_FLAGS "-Wno-array-bounds" )
+endif()
 
 #fastmath
 if ( WALBERLA_BUILD_WITH_FASTMATH )

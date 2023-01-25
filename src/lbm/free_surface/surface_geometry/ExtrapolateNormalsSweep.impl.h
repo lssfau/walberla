@@ -45,7 +45,6 @@ void ExtrapolateNormalsSweep< Stencil_T, FlagField_T, VectorField_T >::operator(
    WALBERLA_FOR_ALL_CELLS(flagFieldIt, flagField, normalFieldIt, normalField, {
       if (!isFlagSet(flagFieldIt, interfaceFlag) && isFlagInNeighborhood< stencil::D3Q27 >(flagFieldIt, interfaceFlag))
       {
-         uint_t count     = uint_c(0);
          vector_t& normal = *normalFieldIt;
          normal.set(real_c(0), real_c(0), real_c(0));
 
@@ -56,7 +55,6 @@ void ExtrapolateNormalsSweep< Stencil_T, FlagField_T, VectorField_T >::operator(
             if (isFlagSet(flagFieldIt.neighbor(*i), interfaceFlag))
             {
                normal += real_c(stencil::gaussianMultipliers[i.toIdx()]) * normalFieldIt.neighbor(*i);
-               ++count;
             }
          }
 

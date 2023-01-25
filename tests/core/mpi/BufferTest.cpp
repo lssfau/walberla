@@ -293,12 +293,10 @@ void bufferTestUInt8()
 
    std::string recvStdString, recvStdStringEmpty;
 
-   walberla::optional<int> recvOptional0, recvOptional1, recvOptional2, recvOptional3;
-
-   recvOptional0 = 123;
-   recvOptional1 = 123;
-   recvOptional2 = 456;
-   recvOptional3 = 456;
+   walberla::optional<int> recvOptional0 = 123;
+   walberla::optional<int> recvOptional1 = 123;
+   walberla::optional<int> recvOptional2 = 456;
+   walberla::optional<int> recvOptional3 = 456;
 
    rb >> recvStdString >> recvStdStringEmpty;
    rb >> recvOptional0 >> recvOptional1;
