@@ -79,8 +79,8 @@ public:
          SetupBlock* getFather()       { return father_; }
          void        setFather( SetupBlock* const father) { father_ = father; }
 
-   inline const SetupBlock* getChild( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, children_.size() ); return children_[index]; }
-   inline       SetupBlock* getChild( const uint_t index )       { WALBERLA_ASSERT_LESS( index, children_.size() ); return children_[index]; }
+   inline const SetupBlock* getChild( const uint_t index ) const { WALBERLA_ASSERT_LESS( index, children_.size() ) return children_[index]; }
+   inline       SetupBlock* getChild( const uint_t index )       { WALBERLA_ASSERT_LESS( index, children_.size() ) return children_[index]; }
    inline       void        setChild( const uint_t index, SetupBlock* const child );
 
    bool hasFather()   const { return father_ != nullptr; }
@@ -127,17 +127,17 @@ public:
 private:
 
    BlockID Id_;
-   uint_t  process_;
+   uint_t  process_{ 0 };
 
    Set<SUID> state_; ///< a set of SUIDs the describes the current state of this block
 
    AABB   aabb_;
    uint_t level_; // 0=coarse (= block is located on the initial grid) -> 1 -> 2 -> finer
 
-   workload_t  workload_;
-   memory_t    memory_;
+   workload_t  workload_{ 0 };
+   memory_t    memory_{ 0 };
 
-   bool  marker_; ///< used during the initial setup phase
+   bool  marker_{ false }; ///< used during the initial setup phase
 
    SetupBlock*                 father_;
    std::vector< SetupBlock* >  children_;
@@ -145,7 +145,7 @@ private:
    std::vector< SetupBlock* >  neighborhoodSection_[26]; // the 26 neighborhood sections
    std::vector< SetupBlock* >  neighborhood_;            // all neighbor blocks
 
-   uint_t index_; ///< used during static load balancing with METIS
+   uint_t index_{ 0 }; ///< used during static load balancing with METIS
 };
 
 
@@ -155,7 +155,7 @@ inline SetupBlock::SetupBlock( SetupBlock* const father, const BlockID& id,
                                const real_t xmax, const real_t ymax, const real_t zmax, // excl.
                                const uint_t level ) :
 
-   Id_( id ), process_( 0 ), level_( level ), workload_( 0 ), memory_( 0 ), marker_( false ), father_( father ), index_( 0 ) {
+   Id_( id ), level_( level ), father_( father ) {
 
    aabb_.initMinMaxCorner( xmin, ymin, zmin, xmax, ymax, zmax );
 }
@@ -164,8 +164,8 @@ inline SetupBlock::SetupBlock( SetupBlock* const father, const BlockID& id,
 
 inline void SetupBlock::setChild( const uint_t index, SetupBlock* const child )
 {
-   WALBERLA_ASSERT_LESS( index, 8 );
-   WALBERLA_ASSERT( children_.empty() || children_.size() == 8 );
+   WALBERLA_ASSERT_LESS( index, 8 )
+   WALBERLA_ASSERT( children_.empty() || children_.size() == 8 )
 
    if( children_.empty() )
       children_.resize( 8, nullptr );
@@ -177,8 +177,8 @@ inline void SetupBlock::setChild( const uint_t index, SetupBlock* const child )
 
 inline const SetupBlock* SetupBlock::getNeighbor( const uint_t sectionIndex, const uint_t neighborIndex ) const
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
-   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
+   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() )
 
    return neighborhoodSection_[sectionIndex][neighborIndex];
 }
@@ -187,8 +187,8 @@ inline const SetupBlock* SetupBlock::getNeighbor( const uint_t sectionIndex, con
 
 inline SetupBlock* SetupBlock::getNeighbor( const uint_t sectionIndex, const uint_t neighborIndex )
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
-   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
+   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() )
 
    return neighborhoodSection_[sectionIndex][neighborIndex];
 }
@@ -197,9 +197,9 @@ inline SetupBlock* SetupBlock::getNeighbor( const uint_t sectionIndex, const uin
 
 inline void SetupBlock::addNeighbor( const uint_t sectionIndex, SetupBlock* const block )
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
-   WALBERLA_ASSERT_NOT_NULLPTR( block );
-   WALBERLA_ASSERT_LESS( neighborhoodSection_[sectionIndex].size(), getBlockMaxNeighborhoodSectionSize( sectionIndex ) );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
+   WALBERLA_ASSERT_NOT_NULLPTR( block )
+   WALBERLA_ASSERT_LESS( neighborhoodSection_[sectionIndex].size(), getBlockMaxNeighborhoodSectionSize( sectionIndex ) )
 
    return neighborhoodSection_[sectionIndex].push_back( block );
 }
@@ -208,8 +208,8 @@ inline void SetupBlock::addNeighbor( const uint_t sectionIndex, SetupBlock* cons
 
 inline const BlockID& SetupBlock::getNeighborId( const uint_t sectionIndex, const uint_t neighborIndex ) const
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
-   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
+   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() )
 
    return neighborhoodSection_[sectionIndex][neighborIndex]->getId();
 }
@@ -218,8 +218,8 @@ inline const BlockID& SetupBlock::getNeighborId( const uint_t sectionIndex, cons
 
 inline uint_t SetupBlock::getNeighborProcess( const uint_t sectionIndex, const uint_t neighborIndex ) const
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
-   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
+   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() )
 
    return neighborhoodSection_[sectionIndex][neighborIndex]->getProcess();
 }
@@ -233,8 +233,8 @@ inline uint_t SetupBlock::getNeighborTargetProcess( const uint_t sectionIndex, c
 
 inline const Set<SUID>& SetupBlock::getNeighborState( const uint_t sectionIndex, const uint_t neighborIndex ) const
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
-   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
+   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() )
 
    return neighborhoodSection_[sectionIndex][neighborIndex]->getState();
 }
@@ -243,8 +243,8 @@ inline const Set<SUID>& SetupBlock::getNeighborState( const uint_t sectionIndex,
 
 inline bool SetupBlock::neighborIsLocatedOnTheSameProcess ( const uint_t sectionIndex, const uint_t neighborIndex ) const
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
-   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
+   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() )
 
    return neighborhoodSection_[sectionIndex][neighborIndex]->getProcess() == getProcess();
 }
@@ -253,8 +253,8 @@ inline bool SetupBlock::neighborIsLocatedOnTheSameProcess ( const uint_t section
 
 inline bool SetupBlock::neighborIsAssignedToTheSameProcess( const uint_t sectionIndex, const uint_t neighborIndex ) const
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
-   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
+   WALBERLA_ASSERT_LESS( neighborIndex, neighborhoodSection_[sectionIndex].size() )
 
    return neighborhoodSection_[sectionIndex][neighborIndex]->getTargetProcess() == getTargetProcess();
 }
@@ -263,28 +263,28 @@ inline bool SetupBlock::neighborIsAssignedToTheSameProcess( const uint_t section
 
 inline bool SetupBlock::neighborhoodSectionHasBlocks( const uint_t sectionIndex ) const
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
 
    return !neighborhoodSection_[sectionIndex].empty();
 }
 
 inline bool SetupBlock::neighborhoodSectionHasSmallerBlocks( const uint_t sectionIndex ) const
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
 
    return !neighborhoodSection_[sectionIndex].empty() && neighborhoodSection_[sectionIndex][0]->level_ > level_;
 }
 
 inline bool SetupBlock::neighborhoodSectionHasEquallySizedBlock( const uint_t sectionIndex ) const
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
 
    return !neighborhoodSection_[sectionIndex].empty() && neighborhoodSection_[sectionIndex][0]->level_ == level_;
 }
 
 inline bool SetupBlock::neighborhoodSectionHasLargerBlock( const uint_t sectionIndex ) const
 {
-   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) );
+   WALBERLA_ASSERT_LESS( sectionIndex, uint_c(26) )
 
    return !neighborhoodSection_[sectionIndex].empty() && neighborhoodSection_[sectionIndex][0]->level_ < level_;
 }
@@ -293,7 +293,7 @@ inline bool SetupBlock::neighborhoodSectionHasLargerBlock( const uint_t sectionI
 
 inline const SetupBlock* SetupBlock::getNeighbor( const uint_t index ) const
 {
-   WALBERLA_ASSERT_LESS( index, neighborhood_.size() );
+   WALBERLA_ASSERT_LESS( index, neighborhood_.size() )
 
    return neighborhood_[index];
 }
@@ -302,7 +302,7 @@ inline const SetupBlock* SetupBlock::getNeighbor( const uint_t index ) const
 
 inline const BlockID& SetupBlock::getNeighborId( const uint_t index ) const
 {
-   WALBERLA_ASSERT_LESS( index, neighborhood_.size() );
+   WALBERLA_ASSERT_LESS( index, neighborhood_.size() )
 
    return neighborhood_[index]->getId();
 }
@@ -311,7 +311,7 @@ inline const BlockID& SetupBlock::getNeighborId( const uint_t index ) const
 
 inline uint_t SetupBlock::getNeighborProcess( const uint_t index ) const
 {
-   WALBERLA_ASSERT_LESS( index, neighborhood_.size() );
+   WALBERLA_ASSERT_LESS( index, neighborhood_.size() )
 
    return neighborhood_[index]->getProcess();
 }
@@ -324,7 +324,7 @@ inline uint_t SetupBlock::getNeighborTargetProcess( const uint_t index ) const {
 
 inline const Set<SUID>& SetupBlock::getNeighborState( const uint_t index ) const
 {
-   WALBERLA_ASSERT_LESS( index, neighborhood_.size() );
+   WALBERLA_ASSERT_LESS( index, neighborhood_.size() )
 
    return neighborhood_[index]->getState();
 }
@@ -333,7 +333,7 @@ inline const Set<SUID>& SetupBlock::getNeighborState( const uint_t index ) const
 
 inline bool SetupBlock::neighborIsLocatedOnTheSameProcess ( const uint_t index ) const
 {
-   WALBERLA_ASSERT_LESS( index, neighborhood_.size() );
+   WALBERLA_ASSERT_LESS( index, neighborhood_.size() )
 
    return neighborhood_[index]->getProcess() == getProcess();
 }
@@ -342,7 +342,7 @@ inline bool SetupBlock::neighborIsLocatedOnTheSameProcess ( const uint_t index )
 
 inline bool SetupBlock::neighborIsAssignedToTheSameProcess( const uint_t index ) const
 {
-   WALBERLA_ASSERT_LESS( index, neighborhood_.size() );
+   WALBERLA_ASSERT_LESS( index, neighborhood_.size() )
 
    return neighborhood_[index]->getTargetProcess() == getTargetProcess();
 }

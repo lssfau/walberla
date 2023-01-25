@@ -86,11 +86,11 @@ uint_t SetupBlockForest::getNumberOfBlocks( const uint_t level ) const
          SetupBlock* const block = stack.top();
          stack.pop();
 
-         WALBERLA_ASSERT_NOT_NULLPTR( block );
+         WALBERLA_ASSERT_NOT_NULLPTR( block )
 
          if( block->hasChildren() ) {
             for( uint_t c = 8; c-- != 0; )
-               stack.push( block->getChild(c) );
+               if(block->getChild(c) != nullptr) stack.push( block->getChild(c) );
          }
          else if( block->getLevel() == level )
             ++count;
@@ -148,20 +148,24 @@ const SetupBlock* SetupBlockForest::getNextBlock( const SetupBlock* block ) cons
    bool loop = true;
    while( block->hasFather() && loop ) {
       if( block->getId().getBranchId() != 7 ) { // if( block_ is NOT the rightmost child of its father )
-         loop  = false;
-         child = block->getId().getBranchId() + 1;
+         for( uint_t c = block->getId().getBranchId() + 1; c != 8; ++c) { // check if siblings are nullptr or existing
+            if(block->getFather()->getChild(c) != nullptr) {
+               loop  = false;
+               child = c;
+               break;
+            }
+         }
       }
       block = block->getFather();
    }
 
    // SWITCH TO THE NEXT TREE
-
    if( child == 0 ) {
 
       uint_t treeIndex = block->getId().getTreeIndex() + uint_c(1);
 
-      WALBERLA_ASSERT_LESS( treeIndex-1 ,forest_.size() );
-      WALBERLA_ASSERT_EQUAL( block, forest_[ treeIndex-1 ] );
+      WALBERLA_ASSERT_LESS( treeIndex-1, forest_.size() )
+      WALBERLA_ASSERT_EQUAL( block, forest_[ treeIndex-1 ] )
 
       while( treeIndex < forest_.size() && forest_[ treeIndex ] == nullptr ) ++treeIndex;
 
@@ -172,12 +176,20 @@ const SetupBlock* SetupBlockForest::getNextBlock( const SetupBlock* block ) cons
    }
 
    // DESCEND
-
    while( block->hasChildren() ) {
-      block = block->getChild( child );
-      child  = 0;
+      if(child == 0) {
+         for( uint_t c = 0; c != 8; ++c) {
+            if (block->getChild(c) != nullptr) {
+               block = block->getChild(c);
+               break;
+            }
+         }
+      }
+      else {
+         block = block->getChild( child );
+         child = 0;
+      }
    }
-
    return block;
 }
 
@@ -195,20 +207,24 @@ SetupBlock* SetupBlockForest::getNextBlock( const SetupBlock* block ) {
    bool loop = true;
    while( block->hasFather() && loop ) {
       if( block->getId().getBranchId() != 7 ) { // if( block_ is NOT the rightmost child of its father )
-         loop  = false;
-         child = block->getId().getBranchId() + 1;
+         for( uint_t c = block->getId().getBranchId() + 1; c != 8; ++c) { // check if siblings are nullptr or existing
+            if(block->getFather()->getChild(c) != nullptr) {
+               loop  = false;
+               child = c;
+               break;
+            }
+         }
       }
       block = block->getFather();
    }
 
    // SWITCH TO THE NEXT TREE
-
    if( child == 0 ) {
 
       uint_t treeIndex = block->getId().getTreeIndex() + uint_c(1);
 
-      WALBERLA_ASSERT_LESS( treeIndex-1, forest_.size() );
-      WALBERLA_ASSERT_EQUAL( block, forest_[ treeIndex-1 ] );
+      WALBERLA_ASSERT_LESS( treeIndex-1, forest_.size() )
+      WALBERLA_ASSERT_EQUAL( block, forest_[ treeIndex-1 ] )
 
       while( treeIndex < forest_.size() && forest_[ treeIndex ] == nullptr ) ++treeIndex;
 
@@ -219,10 +235,19 @@ SetupBlock* SetupBlockForest::getNextBlock( const SetupBlock* block ) {
    }
 
    // DESCEND
-
    while( block->hasChildren() ) {
-      block = block->getChild( child );
-      child  = 0;
+      if(child == 0) {
+         for( uint_t c = 0; c != 8; ++c) {
+            if (block->getChild(c) != nullptr) {
+               block = block->getChild(c);
+               break;
+            }
+         }
+      }
+      else {
+         block = block->getChild( child );
+         child = 0;
+      }
    }
 
    return const_cast< SetupBlock* >( block );
@@ -232,8 +257,8 @@ SetupBlock* SetupBlockForest::getNextBlock( const SetupBlock* block ) {
 
 const SetupBlock* SetupBlockForest::getBlock( const BlockID& id ) const {
 
-   WALBERLA_ASSERT_GREATER_EQUAL( id.getUsedBits(), treeIdDigits_ );
-   WALBERLA_ASSERT_EQUAL( ( id.getUsedBits() - treeIdDigits_ ) % 3, 0 );
+   WALBERLA_ASSERT_GREATER_EQUAL( id.getUsedBits(), treeIdDigits_ )
+   WALBERLA_ASSERT_EQUAL( ( id.getUsedBits() - treeIdDigits_ ) % 3, 0 )
 
    BlockID blockId( id );
 
@@ -248,14 +273,14 @@ const SetupBlock* SetupBlockForest::getBlock( const BlockID& id ) const {
 
    const uint_t index = blockId.getTreeIndex();
 
-   WALBERLA_ASSERT_LESS( index, forest_.size() );
-   WALBERLA_ASSERT_NOT_NULLPTR( forest_[index] );
+   WALBERLA_ASSERT_LESS( index, forest_.size() )
+   WALBERLA_ASSERT_NOT_NULLPTR( forest_[index] )
 
    SetupBlock* block = forest_[index];
 
    for( uint_t i = 0; i != levels; ++i ) {
-      WALBERLA_ASSERT( block->hasChildren() );
-      WALBERLA_ASSERT_NOT_NULLPTR( block->getChild( branchId[i] ) );
+      WALBERLA_ASSERT( block->hasChildren() )
+      WALBERLA_ASSERT_NOT_NULLPTR( block->getChild( branchId[i] ) )
       block = block->getChild( branchId[i] );
    }
 
@@ -284,11 +309,11 @@ void SetupBlockForest::getBlocks( std::vector< const SetupBlock* >& blocks ) con
          SetupBlock* const block = stack.top();
          stack.pop();
 
-         WALBERLA_ASSERT_NOT_NULLPTR( block );
+         WALBERLA_ASSERT_NOT_NULLPTR( block )
 
          if( block->hasChildren() ) {
             for( uint_t c = 8; c-- != 0; )
-               stack.push( block->getChild(c) );
+               if(block->getChild(c) != nullptr) stack.push( block->getChild(c) );
          }
          else blocks.push_back( block );
       }
@@ -317,11 +342,11 @@ void SetupBlockForest::getBlocks( std::vector< SetupBlock* >& blocks ) {
          SetupBlock* const block = stack.top();
          stack.pop();
 
-         WALBERLA_ASSERT_NOT_NULLPTR( block );
+         WALBERLA_ASSERT_NOT_NULLPTR( block )
 
          if( block->hasChildren() ) {
             for( uint_t c = 8; c-- != 0; )
-               stack.push( block->getChild(c) );
+               if (block->getChild(c) != nullptr) stack.push(block->getChild(c));
          }
          else blocks.push_back( block );
       }
@@ -348,11 +373,10 @@ void SetupBlockForest::getBlocks( std::vector< const SetupBlock* >& blocks, cons
          SetupBlock* const block = stack.top();
          stack.pop();
 
-         WALBERLA_ASSERT_NOT_NULLPTR( block );
 
          if( block->hasChildren() ) {
             for( uint_t c = 8; c-- != 0; )
-               stack.push( block->getChild(c) );
+               if (block->getChild(c) != nullptr) stack.push( block->getChild(c) );
          }
          else if( block->getLevel() == level )
             blocks.push_back( block );
@@ -380,11 +404,11 @@ void SetupBlockForest::getBlocks( std::vector< SetupBlock* >& blocks, const uint
          SetupBlock* const block = stack.top();
          stack.pop();
 
-         WALBERLA_ASSERT_NOT_NULLPTR( block );
+         WALBERLA_ASSERT_NOT_NULLPTR( block )
 
          if( block->hasChildren() ) {
             for( uint_t c = 8; c-- != 0; )
-               stack.push( block->getChild(c) );
+               if (block->getChild(c) != nullptr) stack.push( block->getChild(c) );
          }
          else if( block->getLevel() == level )
             blocks.push_back( block );
@@ -410,7 +434,7 @@ void SetupBlockForest::getHilbertOrder( std::vector< SetupBlock* >& blocks ) {
          while( x != xLoopEnd ) {
             if( xLoopEnd == 0 ) --x;
 
-            WALBERLA_ASSERT_LESS( z*size_[0]*size_[1] + y*size_[0] + x, forest_.size() );
+            WALBERLA_ASSERT_LESS( z*size_[0]*size_[1] + y*size_[0] + x, forest_.size() )
 
             SetupBlock* root = forest_[ z*size_[0]*size_[1] + y*size_[0] + x ];
 
@@ -430,11 +454,11 @@ void SetupBlockForest::getHilbertOrder( std::vector< SetupBlock* >& blocks ) {
                   stack.pop();
                   orientation.pop();
 
-                  WALBERLA_ASSERT_NOT_NULLPTR( block );
+                  WALBERLA_ASSERT_NOT_NULLPTR( block )
 
                   if( block->hasChildren() ) {
                      for( uint_t c = 8; c-- != 0; ) {
-                        stack.push( block->getChild( hilbertOrder[index][c] ) );
+                        if(block->getChild( hilbertOrder[index][c] ) != nullptr) stack.push( block->getChild( hilbertOrder[index][c] ) );
                         orientation.push( hilbertOrientation[index][c] );
                      }
                   }
@@ -443,11 +467,11 @@ void SetupBlockForest::getHilbertOrder( std::vector< SetupBlock* >& blocks ) {
             }
             if( xLoopEnd != 0 ) ++x;
          }
-         WALBERLA_ASSERT_EQUAL( x, xLoopEnd );
+         WALBERLA_ASSERT_EQUAL( x, xLoopEnd )
          xLoopEnd = ( xLoopEnd == 0 ) ? size_[0] : 0;
          if( yLoopEnd != 0 ) ++y;
       }
-      WALBERLA_ASSERT_EQUAL( y, yLoopEnd );
+      WALBERLA_ASSERT_EQUAL( y, yLoopEnd )
       yLoopEnd = ( yLoopEnd == 0 ) ? size_[1] : 0;
    }
 }
@@ -458,7 +482,7 @@ void SetupBlockForest::getProcessSpecificBlocks( std::vector< const SetupBlock* 
 
    // ATTENTION: the vector 'blocks' is not emptied
 
-   WALBERLA_ASSERT_LESS( process, blockDistribution_.size() );
+   WALBERLA_ASSERT_LESS( process, blockDistribution_.size() )
 
    const std::vector< SetupBlock* >& processBlocks = blockDistribution_[ process ];
 
@@ -499,7 +523,7 @@ void SetupBlockForest::getBlocksOverlappedByAABB( std::vector< SetupBlock* >& bl
       SetupBlock* const block = stack.top();
       stack.pop();
 
-      WALBERLA_ASSERT( block->getAABB().intersects( aabb ) );
+      WALBERLA_ASSERT( block->getAABB().intersects( aabb ) )
 
       if( block->hasChildren() ) {
 
@@ -516,9 +540,9 @@ void SetupBlockForest::getBlocksOverlappedByAABB( std::vector< SetupBlock* >& bl
 void SetupBlockForest::getBlocks( std::vector< SetupBlock* >& blocks, const uint_t xmin, const uint_t ymin, const uint_t zmin,    // min incl.
                                                                       const uint_t xmax, const uint_t ymax, const uint_t zmax ) { // max excl.
 
-   WALBERLA_ASSERT_LESS_EQUAL( xmin, xmax ); WALBERLA_ASSERT_LESS_EQUAL( xmax, size_[0] );
-   WALBERLA_ASSERT_LESS_EQUAL( ymin, ymax ); WALBERLA_ASSERT_LESS_EQUAL( ymax, size_[1] );
-   WALBERLA_ASSERT_LESS_EQUAL( zmin, zmax ); WALBERLA_ASSERT_LESS_EQUAL( zmax, size_[2] );
+   WALBERLA_ASSERT_LESS_EQUAL( xmin, xmax ) WALBERLA_ASSERT_LESS_EQUAL( xmax, size_[0] )
+   WALBERLA_ASSERT_LESS_EQUAL( ymin, ymax ) WALBERLA_ASSERT_LESS_EQUAL( ymax, size_[1] )
+   WALBERLA_ASSERT_LESS_EQUAL( zmin, zmax ) WALBERLA_ASSERT_LESS_EQUAL( zmax, size_[2] )
 
    std::stack< SetupBlock* > stack;
 
@@ -560,7 +584,7 @@ void SetupBlockForest::mapPointToPeriodicDomain( real_t & px, real_t & py, real_
 
 uint_t SetupBlockForest::mapPointToTreeIndex( const real_t px, const real_t py, const real_t pz ) const {
 
-   WALBERLA_ASSERT( domain_.contains( px, py, pz ) );
+   WALBERLA_ASSERT( domain_.contains( px, py, pz ) )
 
    uint_t x = static_cast< uint_t >( ( px - domain_.xMin() ) / rootBlockSize_[0] );
    uint_t y = static_cast< uint_t >( ( py - domain_.yMin() ) / rootBlockSize_[1] );
@@ -579,9 +603,9 @@ void SetupBlockForest::mapAABBToBoundingForestCoordinates( const AABB& aabb, uin
 
    // ATTENTION: min[3] incl., max[3] excl.
 
-   WALBERLA_ASSERT_LESS( aabb.xMin(), domain_.xMax() ); WALBERLA_ASSERT_GREATER( aabb.xMax(), domain_.xMin() );
-   WALBERLA_ASSERT_LESS( aabb.yMin(), domain_.yMax() ); WALBERLA_ASSERT_GREATER( aabb.yMax(), domain_.yMin() );
-   WALBERLA_ASSERT_LESS( aabb.zMin(), domain_.zMax() ); WALBERLA_ASSERT_GREATER( aabb.zMax(), domain_.zMin() );
+   WALBERLA_ASSERT_LESS( aabb.xMin(), domain_.xMax() ) WALBERLA_ASSERT_GREATER( aabb.xMax(), domain_.xMin() )
+   WALBERLA_ASSERT_LESS( aabb.yMin(), domain_.yMax() ) WALBERLA_ASSERT_GREATER( aabb.yMax(), domain_.yMin() )
+   WALBERLA_ASSERT_LESS( aabb.zMin(), domain_.zMax() ) WALBERLA_ASSERT_GREATER( aabb.zMax(), domain_.zMin() )
 
    min[0] = min[1] = min[2] = 0;
    max[0] = size_[0] - 1;
@@ -631,9 +655,9 @@ void SetupBlockForest::getRootBlockAABB( AABB & aabb, const AABB & domain,
                                          const uint_t xSize, const uint_t ySize, const uint_t zSize,
                                          const uint_t x, const uint_t y, const uint_t z )
 {
-   WALBERLA_ASSERT_LESS( x, xSize );
-   WALBERLA_ASSERT_LESS( y, ySize );
-   WALBERLA_ASSERT_LESS( z, zSize );
+   WALBERLA_ASSERT_LESS( x, xSize )
+   WALBERLA_ASSERT_LESS( y, ySize )
+   WALBERLA_ASSERT_LESS( z, zSize )
 
    aabb.initMinMaxCorner( domain.xMin() + static_cast< real_t >(  x  ) * rootBlockXSize,
                           domain.yMin() + static_cast< real_t >(  y  ) * rootBlockYSize,
@@ -651,27 +675,27 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
    WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest:" <<
                           "\n - AABB: " << domain <<
                           "\n - forest size (root blocks / blocks on the initial grid): " << xSize << " x " << ySize << " x " << zSize <<
-                          "\n - periodicity: " << std::boolalpha << xPeriodic << " x " << yPeriodic << " x " << zPeriodic );
+                          "\n - periodicity: " << std::boolalpha << xPeriodic << " x " << yPeriodic << " x " << zPeriodic )
 
    if( xSize * ySize * zSize == uint_c(0) )
       WALBERLA_ABORT( "Initializing SetupBlockForest failed: xSize (= " << xSize << ") * "
-                                                            "ySize (= " << ySize << ") * zSize (= " << zSize << ") == 0!" );
+                                                            "ySize (= " << ySize << ") * zSize (= " << zSize << ") == 0!" )
 
    if( !( ( xSize <= std::numeric_limits< std::vector< SetupBlock* >::size_type >::max() ) &&
           ( ySize <= std::numeric_limits< std::vector< SetupBlock* >::size_type >::max() / xSize ) &&
           ( zSize <= std::numeric_limits< std::vector< SetupBlock* >::size_type >::max() / ( xSize * ySize ) ) ) )
       WALBERLA_ABORT( "Initializing SetupBlockForest failed: You requested too many blocks "
-                      "(xSize (= " << xSize << ") * ySize (= " << ySize << ") * zSize (= " << zSize << "))!" );
+                      "(xSize (= " << xSize << ") * ySize (= " << ySize << ") * zSize (= " << zSize << "))!" )
 
    if( !( ( xSize <= std::numeric_limits< uint_t >::max() ) &&
           ( ySize <= std::numeric_limits< uint_t >::max() / xSize ) &&
           ( zSize <= std::numeric_limits< uint_t >::max() / ( xSize * ySize ) ) ) )
       WALBERLA_ABORT( "Initializing SetupBlockForest failed: You requested too many blocks "
-                      "(xSize (= " << xSize << ") * ySize (= " << ySize << ") * zSize (= " << zSize << "))!" );
+                      "(xSize (= " << xSize << ") * ySize (= " << ySize << ") * zSize (= " << zSize << "))!" )
 
    if( static_cast< uint_t >( std::numeric_limits< uint_t >::digits ) < 1 + uintMSBPosition( xSize * ySize * zSize - 1 ) )
       WALBERLA_ABORT( "Initializing SetupBlockForest failed: You requested too many blocks "
-                      "(xSize (= " << xSize << ") * ySize (= " << ySize << ") * zSize (= " << zSize << "))!" );
+                      "(xSize (= " << xSize << ") * ySize (= " << ySize << ") * zSize (= " << zSize << "))!" )
 
    if( !forest_.empty() ) {
       for( uint_t i = 0; i != forest_.size(); ++i ) {
@@ -718,14 +742,14 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
    RootBlockAABB rootBlockAABB( domain, rootBlockSize_[0], rootBlockSize_[1], rootBlockSize_[2], xSize, ySize, zSize );
 
    if( !rootBlockExclusionFunctions.empty() )
-      WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Calling root block exclusion callback functions ..." );
+      WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Calling root block exclusion callback functions ..." )
 
    for( uint_t i = 0; i != rootBlockExclusionFunctions.size(); ++i )
       rootBlockExclusionFunctions[i]( excludeBlock, rootBlockAABB );
 
    // creation of all root blocks
 
-   WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Allocating root blocks ..." );
+   WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Allocating root blocks ..." )
 
    forest_.resize( size, nullptr );
    numberOfRootBlocks_ = uint_c(0);
@@ -754,7 +778,7 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
 
    // neighborhood setup (with respect to periodicity)
 
-   WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Setting up neighborhood information for each block (with respect to periodicity) ..." );
+   WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Setting up neighborhood information for each block (with respect to periodicity) ..." )
 
 #ifdef _OPENMP
    const int izSize = int_c( zSize );
@@ -769,7 +793,7 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
 
             const uint_t treeIndex = z * ySize * xSize + y * xSize + x;
 
-            WALBERLA_ASSERT_LESS( treeIndex, forest_.size() );
+            WALBERLA_ASSERT_LESS( treeIndex, forest_.size() )
 
             if( forest_[ treeIndex ] != nullptr ) {
 
@@ -796,8 +820,8 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
                         if( w == 0 && z == 0 ) nIndex += ( zSize-1 ) * xSize * ySize;
                         else if( !(w == 2 && z == zSize-1) ) nIndex += (( z + w ) - 1) * xSize * ySize;
 
-                        WALBERLA_ASSERT_LESS( n, 26 );
-                        WALBERLA_ASSERT_LESS( nIndex, forest_.size() );
+                        WALBERLA_ASSERT_LESS( n, 26 )
+                        WALBERLA_ASSERT_LESS( nIndex, forest_.size() )
 
                         if( forest_[ nIndex ] != nullptr )
                            forest_[ treeIndex ]->addNeighbor( n, forest_[ nIndex ] );
@@ -815,7 +839,7 @@ void SetupBlockForest::init( const AABB& domain, const uint_t xSize, const uint_
 
    initWorkloadMemorySUID( selector );
 
-   WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: finished!\nThe following block structure has been created:\n" << *this );
+   WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: finished!\nThe following block structure has been created:\n" << *this )
 }
 
 
@@ -834,7 +858,7 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
       return;
 
    WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: There is at least one refinement selection function.\n"
-                          "                               Creating the forest (iteratively) ..." );
+                          "                               Creating the forest (iteratively) ..." )
 
    bool loop = true;
    while( loop ) {
@@ -883,16 +907,23 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
       numberOfBlocks_ += blocksToSplit.size() * 7;
 
       if( blocksToSplit.empty() ) {
-         WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: No blocks marked for refinement, aborting refinement process ..." );
+         WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: No blocks marked for refinement, aborting refinement process ..." )
       }
       else if( blocksToSplit.size() == 1 ) {
-         WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: One block marked for refinement, splitting block ..." );
+         WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: One block marked for refinement, splitting block ..." )
       }
       else {
-         WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: " << blocksToSplit.size() << " blocks marked for refinement, splitting blocks ..." );
+         WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: " << blocksToSplit.size() << " blocks marked for refinement, splitting blocks ..." )
       }
 
       // SPLIT BLOCKS
+      std::vector< BlockExclusionFunction > blockExclusionFunctions;
+
+      blockExclusionFunctions_.get( blockExclusionFunctions, selector );
+
+
+      if( !blockExclusionFunctions_.empty() && !blocksToSplit.empty() )
+         WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Calling block exclusion callback functions ..." )
 
       int blocksToSplitsize = int_c( blocksToSplit.size() );
 #ifdef _OPENMP
@@ -904,6 +935,21 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
                               "\n                               - AABB: " << blocksToSplit[ uint_c(i) ]->getAABB() <<
                               "\n                               - level: " << blocksToSplit[ uint_c(i) ]->getLevel() );
          blocksToSplit[ uint_c(i) ]->split();
+         WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Calling block exclusion callback functions on child blocks ..." )
+         for( uint_t c = 0; c != 8; ++c )
+         {
+            for( uint_t j = 0; j != blockExclusionFunctions.size(); ++j )
+            {
+               if(blockExclusionFunctions[j]( *blocksToSplit[ uint_c(i) ]->getChild(c)))
+               {
+                  WALBERLA_LOG_DETAIL( "Initializing SetupBlockForest: Excluding child block with ID " << blocksToSplit[ uint_c(i) ]->getChild(c)->getId() <<
+                                      "\n                               - AABB: " << blocksToSplit[ uint_c(i) ]->getChild(c)->getAABB() <<
+                                      "\n                               - level: " << blocksToSplit[ uint_c(i) ]->getChild(c)->getLevel() );
+                  blocksToSplit[ uint_c(i) ]->setChild(c, nullptr);
+                  numberOfBlocks_--;
+               }
+            }
+         }
       }
 
       // IDENTIFY ALL BLOCKS THAT NEED TO UPDATE THEIR NEIGHBORHOOD & ADAPT 'depth_' DATA MEMBER
@@ -914,9 +960,13 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
 
          SetupBlock* const block = blocksToSplit[i];
 
-         for( uint_t c = 0; c != 8; ++c ) {
-            blocksToUpdate.insert( block->getChild(c) );
-            depth_ = ( block->getChild(c)->getLevel() > depth_ ) ? block->getChild(c)->getLevel() : depth_;
+         for( uint_t c = 0; c != 8; ++c )
+         {
+            if (block->getChild(c) != nullptr)
+            {
+               blocksToUpdate.insert( block->getChild(c) );
+               depth_ = ( block->getChild(c)->getLevel() > depth_ ) ? block->getChild(c)->getLevel() : depth_;
+            }
          }
 
          for( uint_t n = 0; n != 26; ++n )
@@ -928,7 +978,7 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
       // UPDATE BLOCK NEIGHBORHOODS
 
       if( !blocksToSplit.empty() )
-         WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Updating block neighborhood information ..." );
+         WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Updating block neighborhood information ..." )
 
       updateNeighborhood( blocksToUpdate );
 
@@ -950,7 +1000,7 @@ void SetupBlockForest::createForest( const Set<SUID>& selector ) {
 #endif
    }
 
-   WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Creating block forest finished." );
+   WALBERLA_LOG_PROGRESS( "Initializing SetupBlockForest: Creating block forest finished." )
 }
 
 
@@ -973,7 +1023,7 @@ void SetupBlockForest::updateNeighborhood( std::vector< SetupBlock* >& blocks ) 
 
          constructNeighborhoodSectionBlockCenters( n, block->getAABB(), neighborhoodSectionBlockCenters );
 
-         WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlockCenters.size() % 3, 0 );
+         WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlockCenters.size() % 3, 0 )
 
          for( uint_t p = 0; p != neighborhoodSectionBlockCenters.size(); p += 3 ) {
 
@@ -999,31 +1049,31 @@ void SetupBlockForest::updateNeighborhood( std::vector< SetupBlock* >& blocks ) 
                neighbor = mapPointToBlock( block->getFather(), x, y, z );
 
             if( neighborhoodSectionBlocks.empty() || neighborhoodSectionBlocks.back() != neighbor )
-               neighborhoodSectionBlocks.push_back( neighbor );
+               if (neighbor != nullptr)
+                  neighborhoodSectionBlocks.push_back( neighbor );
          }
 
 #ifndef NDEBUG
          for( uint_t v = 0; v != neighborhoodSectionBlocks.size(); ++v )
             for( uint_t w = v+1; w != neighborhoodSectionBlocks.size(); ++w )
-               WALBERLA_ASSERT_UNEQUAL( neighborhoodSectionBlocks[v], neighborhoodSectionBlocks[w] );
-         WALBERLA_ASSERT( !neighborhoodSectionBlocks.empty() );
+               WALBERLA_ASSERT_UNEQUAL( neighborhoodSectionBlocks[v], neighborhoodSectionBlocks[w] )
 #endif
-
          block->clearNeighborhoodSection(n);
-         if( neighborhoodSectionBlocks.back() != nullptr ) {
+         if( !neighborhoodSectionBlocks.empty() && neighborhoodSectionBlocks.back() != nullptr ) {
 
 #ifndef NDEBUG
             if( neighborhoodSectionBlocks.back()->getLevel() > block->getLevel() )
             {
-               WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlocks.size(), getBlockMaxNeighborhoodSectionSize(n) );
+               WALBERLA_ASSERT_LESS_EQUAL( neighborhoodSectionBlocks.size(), getBlockMaxNeighborhoodSectionSize(n) )
             }
             else
             {
-               WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlocks.size(), 1 );
+               WALBERLA_ASSERT_LESS_EQUAL( neighborhoodSectionBlocks.size(), 1 )
             }
 #endif
             for( uint_t j = 0; j != neighborhoodSectionBlocks.size(); ++j )
-               block->addNeighbor( n, neighborhoodSectionBlocks[j] );
+               if(neighborhoodSectionBlocks[j] != nullptr)
+                  block->addNeighbor( n, neighborhoodSectionBlocks[j] );
          }
 
          neighborhoodSectionBlocks.clear();
@@ -1054,7 +1104,7 @@ void SetupBlockForest::createNeighborhood() {
 
          constructNeighborhoodSectionBlockCenters( n, block->getAABB(), neighborhoodSectionBlockCenters );
 
-         WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlockCenters.size() % 3, 0 );
+         WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlockCenters.size() % 3, 0 )
 
          for( uint_t p = 0; p != neighborhoodSectionBlockCenters.size(); p += 3 ) {
 
@@ -1079,8 +1129,8 @@ void SetupBlockForest::createNeighborhood() {
 #ifndef NDEBUG
          for( uint_t v = 0; v != neighborhoodSectionBlocks.size(); ++v )
             for( uint_t w = v+1; w != neighborhoodSectionBlocks.size(); ++w )
-               WALBERLA_ASSERT_UNEQUAL( neighborhoodSectionBlocks[v], neighborhoodSectionBlocks[w] );
-         WALBERLA_ASSERT( !neighborhoodSectionBlocks.empty() );
+               WALBERLA_ASSERT_UNEQUAL( neighborhoodSectionBlocks[v], neighborhoodSectionBlocks[w] )
+         WALBERLA_ASSERT( !neighborhoodSectionBlocks.empty() )
 #endif
 
          block->clearNeighborhoodSection(n);
@@ -1089,11 +1139,11 @@ void SetupBlockForest::createNeighborhood() {
 #ifndef NDEBUG
             if( neighborhoodSectionBlocks.back()->getLevel() > block->getLevel() )
             {
-               WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlocks.size(), getBlockMaxNeighborhoodSectionSize(n) );
+               WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlocks.size(), getBlockMaxNeighborhoodSectionSize(n) )
             }
             else
             {
-               WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlocks.size(), 1 );
+               WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlocks.size(), 1 )
             }
 #endif
             for( uint_t j = 0; j != neighborhoodSectionBlocks.size(); ++j )
@@ -1111,27 +1161,30 @@ void SetupBlockForest::createNeighborhood() {
 
 SetupBlock* SetupBlockForest::mapPointToBlock( SetupBlock* const block, const real_t px, const real_t py, const real_t pz ) {
 
-   WALBERLA_ASSERT( block->getAABB().contains( px, py, pz ) );
+   if (block == nullptr)
+      return nullptr;
+
+   WALBERLA_ASSERT( block->getAABB().contains( px, py, pz ) )
 
    if( !block->hasChildren() )
       return block;
 
-   uint_t branchId = 0;
+   for( uint_t c = 0; c != 8; ++c )
+   {
+      if(block->getChild(c) != nullptr && block->getChild(c)->getAABB().contains(px, py, pz))
+      {
+         return mapPointToBlock( block->getChild(c), px, py, pz );
+      }
+   }
 
-   const AABB& aabb = block->getChild(0)->getAABB();
-
-   if( px >= aabb.xMax() ) ++branchId;
-   if( py >= aabb.yMax() ) branchId += 2;
-   if( pz >= aabb.zMax() ) branchId += 4;
-
-   return mapPointToBlock( block->getChild( branchId ), px, py, pz );
+   return nullptr;
 }
 
 
 
 void SetupBlockForest::assignAllBlocksToRootProcess()
 {
-   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Assigning all blocks to the root process ..." );
+   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Assigning all blocks to the root process ..." )
 
    numberOfProcesses_       = 1;
    numberOfBufferProcesses_ = 0;
@@ -1152,11 +1205,11 @@ void SetupBlockForest::balanceLoad( const TargetProcessAssignmentFunction & func
                                     const memory_t perProcessMemoryLimit,
                                     const bool reorderProcessesByBFS, const bool insertBufferProcesses )
 {
-   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses_ << " process(es) ..." );
+   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses_ << " process(es) ..." )
 
-   if( minBufferProcessesFraction < real_t(0) || !(minBufferProcessesFraction < real_t(1)) )
+   if( minBufferProcessesFraction < real_t(0) || minBufferProcessesFraction >= real_t(1))
       WALBERLA_ABORT( "Load balancing failed: \'buffer processes fraction\' must be in [0,1). "
-                      "The value you provided was \'" << minBufferProcessesFraction << "\'." );
+                      "The value you provided was \'" << minBufferProcessesFraction << "\'." )
    
    // numberOfProcesses = numberOfWorkerProcesses + numberOfBufferProcesses
    //
@@ -1169,7 +1222,7 @@ void SetupBlockForest::balanceLoad( const TargetProcessAssignmentFunction & func
    // integer = cast< integer >( 0.5 + floating point )  [for correct rounding]
 
    const uint_t numberOfWorkerProcesses = uint_c( real_c(0.5) + ( real_t(1) - minBufferProcessesFraction ) * real_c( numberOfProcesses ) );
-   WALBERLA_CHECK_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses );
+   WALBERLA_CHECK_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses )
    const uint_t numberOfBufferProcesses = numberOfProcesses - numberOfWorkerProcesses;
    
    balanceLoadHelper( function, numberOfProcesses, numberOfBufferProcesses, perProcessMemoryLimit, reorderProcessesByBFS, insertBufferProcesses );
@@ -1182,7 +1235,7 @@ void SetupBlockForest::balanceLoad( const TargetProcessAssignmentFunction & func
                                     const memory_t perProcessMemoryLimit,
                                     const bool reorderProcessesByBFS, const bool insertBufferProcesses )
 {
-   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses_ << " process(es) ..." );
+   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses_ << " process(es) ..." )
    
    balanceLoadHelper( function, numberOfProcesses, numberOfBufferProcesses, perProcessMemoryLimit, reorderProcessesByBFS, insertBufferProcesses );
 }
@@ -1194,7 +1247,7 @@ uint_t SetupBlockForest::getMinLevel() const
    std::vector< const SetupBlock* > blocks;
    getBlocks( blocks );
 
-   WALBERLA_ASSERT( !blocks.empty() );
+   WALBERLA_ASSERT( !blocks.empty() )
 
    uint_t minLevel = blocks.front()->getLevel();
 
@@ -1213,7 +1266,7 @@ uint_t SetupBlockForest::getMaxLevel() const
    std::vector< const SetupBlock* > blocks;
    getBlocks( blocks );
 
-   WALBERLA_ASSERT( !blocks.empty() );
+   WALBERLA_ASSERT( !blocks.empty() )
 
    uint_t maxLevel = blocks.front()->getLevel();
 
@@ -1239,16 +1292,16 @@ void SetupBlockForest::calculateProcessDistribution_Default( const uint_t       
                                                              const bool          insertBufferProcesses   /* = false */,
                                                              const real_t        bufferProcessesFraction /* = real_c(0) */ )
 {
-   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses << " process(es) ..." );
+   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses << " process(es) ..." )
 
    // error checks
 
    if( numberOfProcesses == 0 )
-      WALBERLA_ABORT( "Load balancing failed: \'numberOfProcesses\' must be greater than 0!" );
+      WALBERLA_ABORT( "Load balancing failed: \'numberOfProcesses\' must be greater than 0!" )
 
    if( memoryLimit <= numeric_cast< memory_t >(0) )
       WALBERLA_ABORT( "Load balancing failed: You must provide a per process memory limit greater than 0!\n"
-                      "                       (The memory limit you provided was \'" << memoryLimit << "\')"      );
+                      "                       (The memory limit you provided was \'" << memoryLimit << "\')"      )
 
    if( sfcMethod != "hilbert" && sfcMethod != "morton" )
       WALBERLA_ABORT( "Load balancing failed: SFC method \"" << sfcMethod << "\" unavailable "
@@ -1256,7 +1309,7 @@ void SetupBlockForest::calculateProcessDistribution_Default( const uint_t       
 
    if( bufferProcessesFraction < real_c(0) || bufferProcessesFraction >= real_c(1) )
       WALBERLA_ABORT( "Load balancing failed: \'bufferProcessesFraction\' must be in [0,1). "
-                      "The value you provided was \'" << bufferProcessesFraction << "\'." );
+                      "The value you provided was \'" << bufferProcessesFraction << "\'." )
 
    // get all blocks (either in morton or in hilbert order)
 
@@ -1285,7 +1338,7 @@ void SetupBlockForest::calculateProcessDistribution_Default( const uint_t       
 
    uint_t numberOfWorkerProcesses = uint_c( real_c(0.5) + ( real_c(1) - bufferProcessesFraction ) * real_c( numberOfProcesses ) );
 
-   WALBERLA_ASSERT_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses );
+   WALBERLA_ASSERT_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses )
 
    if( sortByLevel )
       numberOfWorkerProcesses = GlobalLoadBalancing::balanceSorted( blocks, sfcIterations, memoryLimit, metisConfig, numberOfWorkerProcesses );
@@ -1295,7 +1348,7 @@ void SetupBlockForest::calculateProcessDistribution_Default( const uint_t       
    if( numberOfWorkerProcesses == 0 )
       WALBERLA_ABORT( "Load balancing failed: A distribution to " << numberOfProcesses << " processes given a memory limit of \"" << memoryLimit <<
                       "\" is impossible.\n                       (Are the memory coefficients correctly assigned to all blocks via "
-                      "a callback function that was registered with \"addWorkloadMemorySUIDAssignmentFunction()\"?)" );
+                      "a callback function that was registered with \"addWorkloadMemorySUIDAssignmentFunction()\"?)" )
 
    numberOfBufferProcesses_ = numberOfProcesses - numberOfWorkerProcesses;
 
@@ -1311,7 +1364,7 @@ void SetupBlockForest::calculateProcessDistribution_LevelwiseMetis( const uint_t
    
 #ifndef WALBERLA_BUILD_WITH_METIS
    WALBERLA_ABORT( "You are trying to balance your SetupBlockForest using METIS, but you did not compile with METIS "
-                   "support. Make sure that METIS is found during the CMake configuration process!");
+                   "support. Make sure that METIS is found during the CMake configuration process!")
 
    WALBERLA_UNUSED( numberOfProcesses );
    WALBERLA_UNUSED( reorderProcessesByBFS );
@@ -1365,7 +1418,7 @@ class SetSorter {
 public:
    SetSorter( const std::vector< workload_t >& workload ) : workload_( workload ) {}
    bool operator()( const uint_t& lhs, const uint_t& rhs ) const
-   { WALBERLA_ASSERT_LESS( lhs, workload_.size() ); WALBERLA_ASSERT_LESS( rhs, workload_.size() ); return workload_[lhs] < workload_[rhs]; }
+   { WALBERLA_ASSERT_LESS( lhs, workload_.size() ) WALBERLA_ASSERT_LESS( rhs, workload_.size() ) return workload_[lhs] < workload_[rhs]; }
 private:
    const std::vector< workload_t >& workload_;
 };
@@ -1380,20 +1433,20 @@ void SetupBlockForest::calculateProcessDistribution_Greedy( const uint_t   numbe
                                                             const bool     insertBufferProcesses   /* = false */,
                                                             const real_t   bufferProcessesFraction /* = real_c(0) */ )
 {
-   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses << " process(es) ..." );
+   WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Creating a process distribution for " << numberOfProcesses << " process(es) ..." )
 
    // error checks
 
    if( numberOfProcesses == 0 )
-      WALBERLA_ABORT( "Load balancing failed: \'numberOfProcesses\' must be greater than 0!" );
+      WALBERLA_ABORT( "Load balancing failed: \'numberOfProcesses\' must be greater than 0!" )
 
    if( memoryLimit <= numeric_cast< memory_t >(0) )
       WALBERLA_ABORT( "Load balancing failed: You must provide a per process memory limit greater than 0!\n"
-                      "                       (The memory limit you provided was \'" << memoryLimit << "\')"      );
+                      "                       (The memory limit you provided was \'" << memoryLimit << "\')"      )
 
    if( bufferProcessesFraction < real_c(0) || bufferProcessesFraction >= real_c(1) )
       WALBERLA_ABORT( "Load balancing failed: \'bufferProcessesFraction\' must be in [0,1). "
-                      "The value you provided was \'" << bufferProcessesFraction << "\'." );
+                      "The value you provided was \'" << bufferProcessesFraction << "\'." )
 
    // get all blocks
 
@@ -1418,7 +1471,7 @@ void SetupBlockForest::calculateProcessDistribution_Greedy( const uint_t   numbe
 
    uint_t numberOfWorkerProcesses = uint_c( real_c(0.5) + ( real_c(1) - bufferProcessesFraction ) * real_c( numberOfProcesses ) );
 
-   WALBERLA_ASSERT_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses );
+   WALBERLA_ASSERT_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses )
 
    std::sort( blocks.begin(), blocks.end(), BlockSorter() );
 
@@ -1441,7 +1494,7 @@ void SetupBlockForest::calculateProcessDistribution_Greedy( const uint_t   numbe
             workload[ *process ] += (*block)->getWorkload();
             memory[ *process ]   += (*block)->getMemory();
             (*block)->assignTargetProcess( *process );
-            WALBERLA_ASSERT_LESS_EQUAL( *process, numberOfWorkerProcesses );
+            WALBERLA_ASSERT_LESS_EQUAL( *process, numberOfWorkerProcesses )
             numberOfWorkerProcesses = std::max( numberOfWorkerProcesses, *process + uint_c(1) );
             break;
          }
@@ -1450,13 +1503,13 @@ void SetupBlockForest::calculateProcessDistribution_Greedy( const uint_t   numbe
       if( process == distributition.end() )
          WALBERLA_ABORT( "Load balancing failed: A distribution to " << numberOfProcesses << " processes given a memory limit of \"" << memoryLimit <<
                          "\" is impossible.\n                       (Are the memory coefficients correctly assigned to all blocks via "
-                         "a callback function that was registered with \"addWorkloadMemorySUIDAssignmentFunction()\"?)" );
+                         "a callback function that was registered with \"addWorkloadMemorySUIDAssignmentFunction()\"?)" )
       uint_t p = *process;
       distributition.erase( process );
       distributition.insert( p );
    }
 
-   WALBERLA_ASSERT_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses );
+   WALBERLA_ASSERT_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses )
    numberOfBufferProcesses_ = numberOfProcesses - numberOfWorkerProcesses;
 
    calculateProcessDistributionFinalization( reorderProcessesByBFS, insertBufferProcesses );
@@ -1470,22 +1523,22 @@ void SetupBlockForest::balanceLoadHelper( const TargetProcessAssignmentFunction 
                                           const bool reorderProcessesByBFS, const bool insertBufferProcesses )
 {
    if( !function )
-      WALBERLA_ABORT( "Load balancing failed: the load balancing callback function is empty!" );
+      WALBERLA_ABORT( "Load balancing failed: the load balancing callback function is empty!" )
    
    if( numberOfProcesses == 0 )
-      WALBERLA_ABORT( "Load balancing failed: \'number of processes\' must be greater than 0!" );
+      WALBERLA_ABORT( "Load balancing failed: \'number of processes\' must be greater than 0!" )
 
    if( numberOfBufferProcesses >= numberOfProcesses )
       WALBERLA_ABORT( "Load balancing failed: The number of \'buffer\' processes must be smaller than the total number of processes.\n"
-                      "                       The values you provided: " << numberOfProcesses << " processes and " << numberOfBufferProcesses << " \'buffer\' processes." );
+                      "                       The values you provided: " << numberOfProcesses << " processes and " << numberOfBufferProcesses << " \'buffer\' processes." )
 
    numberOfProcesses_ = numberOfProcesses;
 
    uint_t numberOfWorkerProcesses = numberOfProcesses - numberOfBufferProcesses;
-   WALBERLA_CHECK_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses );
+   WALBERLA_CHECK_LESS_EQUAL( numberOfWorkerProcesses, numberOfProcesses )
 
    const uint_t returnedNumberOfWorkerProcesses = function( *this, numberOfWorkerProcesses, perProcessMemoryLimit );
-   WALBERLA_CHECK_LESS_EQUAL( returnedNumberOfWorkerProcesses, numberOfWorkerProcesses );
+   WALBERLA_CHECK_LESS_EQUAL( returnedNumberOfWorkerProcesses, numberOfWorkerProcesses )
    numberOfWorkerProcesses = returnedNumberOfWorkerProcesses;
 
    numberOfBufferProcesses_ = numberOfProcesses - numberOfWorkerProcesses;
@@ -1500,12 +1553,12 @@ void SetupBlockForest::balanceLoadHelper( const TargetProcessAssignmentFunction 
 
    for( auto block = blocks.begin(); block != blocks.end(); ++block )
    {
-      WALBERLA_CHECK_LESS( (*block)->getTargetProcess(), numberOfWorkerProcesses );
+      WALBERLA_CHECK_LESS( (*block)->getTargetProcess(), numberOfWorkerProcesses )
       processHasBlocks[ (*block)->getTargetProcess() ] = true;
    }
 
    for( auto it = processHasBlocks.begin(); it != processHasBlocks.end(); ++it )
-      WALBERLA_CHECK( *it );
+      WALBERLA_CHECK( *it )
 
    // make sure that the per process memory limit is satisfied
 
@@ -1518,7 +1571,7 @@ void SetupBlockForest::balanceLoadHelper( const TargetProcessAssignmentFunction 
          if( memory[ targetProcess ] + (*block)->getMemory() > perProcessMemoryLimit )
             WALBERLA_ABORT( "Load balancing failed: A distribution to " << numberOfProcesses << " processes given a memory limit of \"" << perProcessMemoryLimit <<
                             "\" is impossible.\n                       (Are the memory coefficients correctly assigned to all blocks via "
-                            "a callback function that was registered with \"addWorkloadMemorySUIDAssignmentFunction()\"?)" );
+                            "a callback function that was registered with \"addWorkloadMemorySUIDAssignmentFunction()\"?)" )
          memory[ targetProcess ] += (*block)->getMemory();
       }
    }
@@ -1538,7 +1591,7 @@ void SetupBlockForest::calculateProcessDistributionFinalization( const bool reor
 
    if( reorderProcessesByBFS )
    {
-      WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Executing breadth-first search process reordering ..." );
+      WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Executing breadth-first search process reordering ..." )
 
       std::vector< std::vector< uint_t > > processNeighbors( getNumberOfWorkerProcesses() );
 
@@ -1553,7 +1606,7 @@ void SetupBlockForest::calculateProcessDistributionFinalization( const bool reor
 
    if( insertBuffersIntoProcessNetwork_ )
    {
-      WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Inserting buffer processes into process network ..." );
+      WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: Inserting buffer processes into process network ..." )
 
       std::vector< uint_t > bufferProcesses;
 
@@ -1585,7 +1638,7 @@ void SetupBlockForest::calculateProcessDistributionFinalization( const bool reor
 
 #ifndef NDEBUG
       for( uint_t i = 0; i < numberOfBufferProcesses_; ++i )
-         WALBERLA_ASSERT_LESS( bufferProcesses[i] + i, numberOfProcesses_ ); // bufferProcesses[i] + i == process IDs of buffer processes
+         WALBERLA_ASSERT_LESS( bufferProcesses[i] + i, numberOfProcesses_ ) // bufferProcesses[i] + i == process IDs of buffer processes
 #endif
    }
 
@@ -1600,19 +1653,19 @@ void SetupBlockForest::calculateProcessDistributionFinalization( const bool reor
    std::vector< bool > processHasBlocks( numberOfProcesses_, false );
 
    for( uint_t i = 0; i != blocks.size(); ++i ) {
-      WALBERLA_ASSERT_LESS( blocks[i]->getProcess(), numberOfProcesses_ );
+      WALBERLA_ASSERT_LESS( blocks[i]->getProcess(), numberOfProcesses_ )
       processHasBlocks[ blocks[i]->getProcess() ] = true;
    }
 
    for( uint_t i = 0; i != numberOfProcesses_; ++i )
-      WALBERLA_ASSERT( processHasBlocks[i] == isWorkerProcess(i) );
+      WALBERLA_ASSERT( processHasBlocks[i] == isWorkerProcess(i) )
 #endif
 
    WALBERLA_LOG_PROGRESS( "Balancing SetupBlockForest: process distribution to " << numberOfProcesses_ << " process(es) finished!\n"
                           "- number of worker processes:       " << getNumberOfWorkerProcesses() << "\n" <<
                           "- number of empty buffer processes: " << numberOfBufferProcesses_ << "\n" <<
                           "- buffer processes are inserted into the process network: " << ( insertBuffersIntoProcessNetwork_ ? "yes\n" : "no\n" ) <<
-                          "The resulting block structure looks like as follows:\n" << *this );
+                          "The resulting block structure looks like as follows:\n" << *this )
 }
 
 
@@ -1694,7 +1747,7 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
 
    // number of SUIDs
 
-   WALBERLA_CHECK_LESS( suids.size(), uint_c(256), "When saving the block structure to file, only 255 different SUIDs (block states) are allowed!" );
+   WALBERLA_CHECK_LESS( suids.size(), uint_c(256), "When saving the block structure to file, only 255 different SUIDs (block states) are allowed!" )
 
    buffer.resize(1);
    uintToByteArray( suids.size(), buffer, 0, 1 );
@@ -1718,7 +1771,7 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
       // length of its identifier string
 
       const uint_t length = it->getIdentifier().length();
-      WALBERLA_CHECK_LESS( length, 256, "SUID identifiers are allowed to consist of 255 characters at most when saving the block structure to file!" );
+      WALBERLA_CHECK_LESS( length, 256, "SUID identifiers are allowed to consist of 255 characters at most when saving the block structure to file!" )
 
       buffer.resize( 1 + length );
       uintToByteArray( length, buffer, 0, 1 );
@@ -1759,7 +1812,7 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
 
       if( !blockDistribution_[i].empty() ) {
 
-         WALBERLA_ASSERT( isWorkerProcess(i) );
+         WALBERLA_ASSERT( isWorkerProcess(i) )
 
          buffer.resize( blockDistribution_[i].size() * ( blockIdBytes + suidBytes ) );
 
@@ -1802,10 +1855,10 @@ void SetupBlockForest::saveToFile( const char* const filename ) const {
       }
       else
       {
-         WALBERLA_ASSERT( isBufferProcess(i) );
-         WALBERLA_ASSERT_GREATER( i, 0 );
+         WALBERLA_ASSERT( isBufferProcess(i) )
+         WALBERLA_ASSERT_GREATER( i, 0 )
          if( ( i + 1 ) < numberOfProcesses_ && insertBuffersIntoProcessNetwork_ )
-            WALBERLA_ASSERT( !( isBufferProcess( i - 1 ) && isWorkerProcess( i + 1 ) ) );
+            WALBERLA_ASSERT( !( isBufferProcess( i - 1 ) && isWorkerProcess( i + 1 ) ) )
 
          if( insertBuffersIntoProcessNetwork_ )
             neighbors.insert( i - 1 );
@@ -1976,7 +2029,7 @@ void SetupBlockForest::toStream( std::ostream & os ) const
 {
    uint_t discardedRootBlocks = uint_t(0);
    for( auto block = forest_.begin(); block != forest_.end(); ++block )
-      if( *block == NULL ) ++discardedRootBlocks;
+      if( *block == nullptr ) ++discardedRootBlocks;
 
    os << "- AABB: " << domain_ << "\n"
       << "- initial decomposition: " << size_[0] << " x " << size_[1] << " x " << size_[2] << " (= forest size)\n"
@@ -2015,7 +2068,7 @@ void SetupBlockForest::toStream( std::ostream & os ) const
             numberOfBlocks.back() += uint_t(1);
          }
 
-         WALBERLA_ASSERT_EQUAL( numberOfBlocks_, numberOfBlocks.back() );
+         WALBERLA_ASSERT_EQUAL( numberOfBlocks_, numberOfBlocks.back() )
 
          for( uint_t l = uint_t(0); l <= depth_; ++l )
          {
@@ -2034,7 +2087,7 @@ void SetupBlockForest::toStream( std::ostream & os ) const
       std::vector< math::Sample > memory  ( depth_ + 2 );
       std::vector< math::Sample > workload( depth_ + 2 );
 
-      WALBERLA_ASSERT_EQUAL( numberOfProcesses_, blockDistribution_.size() );
+      WALBERLA_ASSERT_EQUAL( numberOfProcesses_, blockDistribution_.size() )
 
       for( auto process = blockDistribution_.begin(); process != blockDistribution_.end(); ++process )
       {
@@ -2105,7 +2158,7 @@ void SetupBlockForest::toStream( std::ostream & os ) const
             numberOfBlocks.back() += uint_t(1);
          }
 
-         WALBERLA_ASSERT_EQUAL( numberOfBlocks_, numberOfBlocks.back() );
+         WALBERLA_ASSERT_EQUAL( numberOfBlocks_, numberOfBlocks.back() )
 
          for( uint_t l = uint_t(0); l <= depth_; ++l )
          {
@@ -2155,7 +2208,7 @@ void SetupBlockForest::toStream( std::ostream & os ) const
             maxWorkload = std::max( maxWorkload, real_c( fineBlocks[i]->getWorkload() ) );
          }
 
-         WALBERLA_ASSERT( realIsEqual( minSpace, maxSpace ) );
+         WALBERLA_ASSERT( realIsEqual( minSpace, maxSpace ) )
 
          if( realIsEqual( minMemory, maxMemory ) || realIsEqual( minWorkload, maxWorkload ) )
          {
@@ -2204,7 +2257,7 @@ void SetupBlockForest::checkNeighborhoodConsistency() const {
 
          constructNeighborhoodSectionBlockCenters( n, block->getAABB(), neighborhoodSectionBlockCenters );
 
-         WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlockCenters.size() % 3, 0 );
+         WALBERLA_ASSERT_EQUAL( neighborhoodSectionBlockCenters.size() % 3, 0 )
 
          for( uint_t p = 0; p != neighborhoodSectionBlockCenters.size(); p += 3 ) {
 
@@ -2230,12 +2283,12 @@ void SetupBlockForest::checkNeighborhoodConsistency() const {
 
             // either one neighbor must be hit OR the block is located at the border of the (non-periodic) simulation domain
             if( noHit )
-               WALBERLA_ASSERT_NULLPTR( getBlock(x,y,z) );
+               WALBERLA_ASSERT_NULLPTR( getBlock(x,y,z) )
          }
 
          // every neighbor must be hit by at least one point
          for( uint_t c = 0; c != block->getNeighborhoodSectionSize(n); ++c )
-            WALBERLA_ASSERT( hit[c] );
+            WALBERLA_ASSERT( hit[c] )
 
          neighborhoodSectionBlockCenters.clear();
       }

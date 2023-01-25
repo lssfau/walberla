@@ -32,8 +32,7 @@
 #include <random>
 #include <vector>
 
-namespace walberla {
-namespace mesh {
+namespace walberla::mesh {
 
 template< typename DistanceObject >
 class ExcludeMeshExterior
@@ -44,6 +43,19 @@ public:
    void operator()( std::vector<uint8_t> & excludeBlock, const blockforest::SetupBlockForest::RootBlockAABB & aabb ) const;
 
 private:
+   shared_ptr< DistanceObject > distanceObject_;
+   real_t maxError_;
+};
+
+template< typename DistanceObject >
+class ExcludeMeshInteriorRefinement
+{
+ public:
+   ExcludeMeshInteriorRefinement( const shared_ptr< DistanceObject > & distanceObject, const real_t maxError ) : distanceObject_( distanceObject ), maxError_( maxError ) { }
+
+   bool operator()( const blockforest::SetupBlock & block ) const;
+
+ private:
    shared_ptr< DistanceObject > distanceObject_;
    real_t maxError_;
 };
@@ -70,6 +82,9 @@ ExcludeMeshExterior<DistanceObject> makeExcludeMeshExterior( const shared_ptr< D
 template< typename DistanceObject >
 ExcludeMeshInterior<DistanceObject> makeExcludeMeshInterior( const shared_ptr< DistanceObject > & distanceObject, const real_t maxError ) { return ExcludeMeshInterior<DistanceObject>( distanceObject, maxError ); }
 
+
+template< typename DistanceObject >
+ExcludeMeshInteriorRefinement<DistanceObject> makeExcludeMeshInteriorRefinement( const shared_ptr< DistanceObject > & distanceObject, const real_t maxError ) { return ExcludeMeshInteriorRefinement<DistanceObject>( distanceObject, maxError ); }
 
 template< typename DistanceObject >
 void walberla::mesh::ExcludeMeshExterior<DistanceObject>::operator()( std::vector<uint8_t> & excludeBlock, const blockforest::SetupBlockForest::RootBlockAABB & aabb ) const
@@ -142,7 +157,7 @@ void walberla::mesh::ExcludeMeshInterior<DistanceObject>::operator()( std::vecto
 #endif
    for( int i = chunkBegin; i < chunkEnd; ++i )
    {
-      size_t is = numeric_cast<size_t>( i );
+      auto is = numeric_cast<size_t>( i );
       auto fullCoveringAABBDefined = fullyCoversAABB( *distanceObject_, aabb( shuffle[is] ), maxError_ );
       if( fullCoveringAABBDefined && fullCoveringAABBDefined.value() )
          excludeBlock[ shuffle[is] ] = uint8_t( 1 );
@@ -151,6 +166,14 @@ void walberla::mesh::ExcludeMeshInterior<DistanceObject>::operator()( std::vecto
    allReduceInplace( excludeBlock, mpi::LOGICAL_OR );
 }
 
-} // namespace mesh
-} // namespace walberla
+template< typename DistanceObject >
+bool walberla::mesh::ExcludeMeshInteriorRefinement<DistanceObject>::operator()( const blockforest::SetupBlock & block ) const
+{
+   const AABB aabb = block.getAABB();
+   auto fullCoveringAABBDefined = fullyCoversAABB( *distanceObject_, aabb, maxError_ );
+
+   return static_cast<bool>(fullCoveringAABBDefined && fullCoveringAABBDefined.value());
+}
+
+} // namespace walberla::mesh
 

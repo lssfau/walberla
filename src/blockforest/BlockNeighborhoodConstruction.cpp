@@ -212,7 +212,7 @@ void constructNeighborhoodSectionBlockCenters( uint_t sectionIndex, const AABB& 
       break;
 
    default:
-      WALBERLA_ASSERT( false );
+      WALBERLA_ASSERT( false )
    }
 }
 
