@@ -24,6 +24,7 @@
 #include "CollisionModel.h"
 #include "ForceModel.h"
 #include "core/DataTypes.h"
+#include "core/logging/Logging.h"
 #include "core/mpi/BufferSizeTrait.h"
 #include "core/mpi/RecvBuffer.h"
 #include "core/mpi/SendBuffer.h"
@@ -80,7 +81,25 @@ public:
 
 
    LatticeModelBase( const CollisionModel_T & cm, const ForceModel_T & fm ) :
-      collisionModel_( cm ), forceModel_( fm ) {}
+      collisionModel_( cm ), forceModel_( fm ) {
+
+      if (Compressible && forceModel_.constant)
+      {
+         WALBERLA_LOG_WARNING_ON_ROOT("WARNING: You are using a compressible lattice model with a constant force "
+                                      "model. You should consider using a field-based force model, and adjust the body "
+                                      "force density according to the change in the fluid density in every time step.");
+      }
+
+      if ((std::is_same< typename CollisionModel_T::tag, collision_model::TRT_tag >::value ||
+           std::is_same< typename CollisionModel_T::tag, collision_model::MRT_tag >::value) &&
+          std::is_same< typename ForceModel_T::tag, force_model::Guo_tag >::value)
+      {
+         WALBERLA_LOG_WARNING_ON_ROOT(
+            "WARNING: waLBerla currently does not support using a TRT or MRT collision model in combination with "
+            "the force model from Guo. See https://i10git.cs.fau.de/walberla/walberla/-/issues/176 and "
+            "https://i10git.cs.fau.de/walberla/walberla/-/merge_requests/560 for more information.");
+      }
+   }
 
    virtual ~LatticeModelBase() = default;
 

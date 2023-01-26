@@ -157,7 +157,7 @@ struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< Latt
 {
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
-      const auto & force = latticeModel.forceModel().force();
+      const auto & force = latticeModel.forceModel().forceDensity();
       const real_t dt_2 = real_t(0.5);
 
       momentumDensity[0] += dt_2 * force[0];
@@ -185,7 +185,7 @@ struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< ! La
    /*
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
-      const auto & force = latticeModel.forceModel().force();
+      const auto & force = latticeModel.forceModel().forceDensity();
       const real_t dt_2 = real_t(0.5);
 
       momentumDensity[0] += dt_2 * force[0];
@@ -197,7 +197,7 @@ struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< ! La
    template< typename FieldPtrOrIterator >
    static void apply( FieldPtrOrIterator & it, const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
-      const auto & force = latticeModel.forceModel().force(it.x(), it.y(), it.z());
+      const auto & force = latticeModel.forceModel().forceDensity(it.x(), it.y(), it.z());
       const real_t dt_2 = real_t(0.5);
 
       momentumDensity[0] += dt_2 * force[0];
@@ -207,7 +207,7 @@ struct MacroscopicForceCorrection< LatticeModel_T, typename std::enable_if< ! La
 
    static void apply( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
-      const auto & force = latticeModel.forceModel().force(x,y,z);
+      const auto & force = latticeModel.forceModel().forceDensity(x,y,z);
       const real_t dt_2 = real_t(0.5);
 
       momentumDensity[0] += dt_2 * force[0];
@@ -246,7 +246,7 @@ struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< Latt
 {
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
-      const auto & force = latticeModel.forceModel().force();
+      const auto & force = latticeModel.forceModel().forceDensity();
       const real_t dt_2 = real_t(0.5);
 
       momentumDensity[0] += dt_2 * force[0];
@@ -274,7 +274,7 @@ struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< ! La
    /*
    static void apply( const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
-      const auto & force = latticeModel.forceModel().force();
+      const auto & force = latticeModel.forceModel().forceDensity();
       const real_t dt_2 = real_t(0.5);
 
       momentumDensity[0] += dt_2 * force[0];
@@ -286,7 +286,7 @@ struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< ! La
    template< typename FieldPtrOrIterator >
    static void apply( FieldPtrOrIterator & it, const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
-      const auto & force = latticeModel.forceModel().force(it.x(), it.y(), it.z());
+      const auto & force = latticeModel.forceModel().forceDensity(it.x(), it.y(), it.z());
       const real_t dt_2 = real_t(0.5);
 
       momentumDensity[0] += dt_2 * force[0];
@@ -296,7 +296,7 @@ struct EquilibriumForceCorrection< LatticeModel_T, typename std::enable_if< ! La
 
    static void apply( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const LatticeModel_T & latticeModel, Vector3< real_t > & momentumDensity )
    {
-      const auto & force = latticeModel.forceModel().force(x,y,z);
+      const auto & force = latticeModel.forceModel().forceDensity(x,y,z);
       const real_t dt_2 = real_t(0.5);
 
       momentumDensity[0] += dt_2 * force[0];

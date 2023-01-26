@@ -53,7 +53,7 @@ struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< LatticeMod
 {
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t rho )
    {
-      return velocity - latticeModel.forceModel().force() * real_t(0.5) / rho;
+      return velocity - latticeModel.forceModel().forceDensity() * real_t(0.5) / rho;
    }
 
    template< typename FieldPtrOrIterator >
@@ -77,7 +77,7 @@ struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< ! LatticeM
 {
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t )
    {
-      return velocity - latticeModel.forceModel().force() * real_t(0.5);
+      return velocity - latticeModel.forceModel().forceDensity() * real_t(0.5);
    }
 
    template< typename FieldPtrOrIterator >
@@ -102,20 +102,20 @@ struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< LatticeMod
    /*
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t rho )
    {
-      return velocity - latticeModel.forceModel().force() * real_t(0.5) / rho;
+      return velocity - latticeModel.forceModel().forceDensity() * real_t(0.5) / rho;
    }
    */
 
    template< typename FieldPtrOrIterator >
    static Vector3<real_t> get( FieldPtrOrIterator & it, const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t rho )
    {
-      return velocity - latticeModel.forceModel().force(it.x(),it.y(),it.z()) * real_t(0.5) / rho;
+      return velocity - latticeModel.forceModel().forceDensity(it.x(),it.y(),it.z()) * real_t(0.5) / rho;
    }
 
    static Vector3<real_t> get( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const LatticeModel_T & latticeModel,
                                const Vector3< real_t > & velocity, const real_t rho )
    {
-      return velocity - latticeModel.forceModel().force(x,y,z) * real_t(0.5) / rho;
+      return velocity - latticeModel.forceModel().forceDensity(x,y,z) * real_t(0.5) / rho;
    }
 };
 
@@ -128,20 +128,20 @@ struct AdaptVelocityToForce< LatticeModel_T, typename std::enable_if< ! LatticeM
    /*
    static Vector3<real_t> get( const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t )
    {
-      return velocity - latticeModel.forceModel().force() * real_t(0.5);
+      return velocity - latticeModel.forceModel().forceDensity() * real_t(0.5);
    }
    */
 
    template< typename FieldPtrOrIterator >
    static Vector3<real_t> get( FieldPtrOrIterator & it, const LatticeModel_T & latticeModel, const Vector3< real_t > & velocity, const real_t )
    {
-      return velocity - latticeModel.forceModel().force(it.x(),it.y(),it.z()) * real_t(0.5);
+      return velocity - latticeModel.forceModel().forceDensity(it.x(),it.y(),it.z()) * real_t(0.5);
    }
 
    static Vector3<real_t> get( const cell_idx_t x, const cell_idx_t y, const cell_idx_t z, const LatticeModel_T & latticeModel,
                                const Vector3< real_t > & velocity, const real_t )
    {
-      return velocity - latticeModel.forceModel().force(x,y,z) * real_t(0.5);
+      return velocity - latticeModel.forceModel().forceDensity(x,y,z) * real_t(0.5);
    }
 };
 

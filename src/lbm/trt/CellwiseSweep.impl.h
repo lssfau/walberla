@@ -640,7 +640,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common; // no force term
 
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
          
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
@@ -735,7 +735,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          src->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common; // no force term
 
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
          
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
@@ -1369,7 +1369,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
 
          dst->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common;// no force term
 
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
@@ -1492,7 +1492,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
 
          src->get( x, y, z, Stencil_T::idx[C] ) = vC * (real_t(1.0) - lambda_e) + lambda_e * t0 * feq_common; // no force term
 
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
 
          const real_t velXPY = velX + velY;
          const real_t  sym_NE_SW = lambda_e_scaled * ( vNE + vSW - fac2 * velXPY * velXPY - t2x2 * feq_common );
@@ -1626,7 +1626,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          real_t rho = this->densityVelocityIn( velocity, dst, x, y, z );
 
          if (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >::value)
-            velocity -= real_c(0.5) * lm.forceModel().force(x,y,z);
+            velocity -= real_c(0.5) * lm.forceModel().forceDensity(x,y,z);
 
          this->densityVelocityOut( x, y, z, lm, velocity, rho );
 
@@ -1677,7 +1677,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          real_t rho = this->densityVelocityIn( velocity, src, x, y, z );
 
          if (std::is_same< typename LatticeModel_T::ForceModel::tag, force_model::Guo_tag >::value)
-            velocity -= real_c(0.5) * lm.forceModel().force(x,y,z);
+            velocity -= real_c(0.5) * lm.forceModel().forceDensity(x,y,z);
 
          this->densityVelocityOut( x, y, z, lm, velocity, rho );
 
