@@ -608,7 +608,7 @@ protected:
       const auto & dy = this->blockStorage_->dy( level );
       WALBERLA_ASSERT_FLOAT_EQUAL( dy, this->blockStorage_->dz( level ) );
 
-      const real_t acceleration_L = pdf_->latticeModel().forceModel().force()[0]; // force = acceleration (in lattice units of the current level!)
+      const real_t acceleration_L = pdf_->latticeModel().forceModel().forceDensity()[0]; // force = acceleration (in lattice units of the current level!)
       const real_t viscosity_L    = pdf_->latticeModel().collisionModel().viscosity(); // in lattice units on the current level
       const real_t radius_L       = channelRadius / dy; // in lattice units on the current level
       

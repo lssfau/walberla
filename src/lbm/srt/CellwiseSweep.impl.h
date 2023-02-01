@@ -599,7 +599,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
          const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
          
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
 
          dst->get(x,y,z,Stencil_T::idx[E]) = omega_trm * vE + omega_w1 * ( vel_trm_E_W + velX ) + three_w1 * force[0];
          dst->get(x,y,z,Stencil_T::idx[W]) = omega_trm * vW + omega_w1 * ( vel_trm_E_W - velX ) - three_w1 * force[0];
@@ -686,7 +686,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
          const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
          
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
 
          src->get(x,y,z,Stencil_T::idx[E]) = omega_trm * vE + omega_w1 * ( vel_trm_E_W + velX ) + three_w1 * force[0];
          src->get(x,y,z,Stencil_T::idx[W]) = omega_trm * vW + omega_w1 * ( vel_trm_E_W - velX ) - three_w1 * force[0];
@@ -794,7 +794,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
          const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
          
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
 
          dst->get(x,y,z,Stencil_T::idx[E]) = omega_trm * vE + omega_w1_rho * ( vel_trm_E_W + velX ) + three_w1 * force[0];
          dst->get(x,y,z,Stencil_T::idx[W]) = omega_trm * vW + omega_w1_rho * ( vel_trm_E_W - velX ) - three_w1 * force[0];
@@ -885,7 +885,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
          const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
          
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
 
          src->get(x,y,z,Stencil_T::idx[E]) = omega_trm * vE + omega_w1_rho * ( vel_trm_E_W + velX ) + three_w1 * force[0];
          src->get(x,y,z,Stencil_T::idx[W]) = omega_trm * vW + omega_w1_rho * ( vel_trm_E_W - velX ) - three_w1 * force[0];
@@ -1478,7 +1478,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
          const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
 
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
 
          dst->get(x,y,z,Stencil_T::idx[E]) = omega_trm * vE + omega_w1 * ( vel_trm_E_W + velX ) + three_w1 * force[0];
          dst->get(x,y,z,Stencil_T::idx[W]) = omega_trm * vW + omega_w1 * ( vel_trm_E_W - velX ) - three_w1 * force[0];
@@ -1591,7 +1591,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
          const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
 
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
 
          src->get(x,y,z,Stencil_T::idx[E]) = omega_trm * vE + omega_w1 * ( vel_trm_E_W + velX ) + three_w1 * force[0];
          src->get(x,y,z,Stencil_T::idx[W]) = omega_trm * vW + omega_w1 * ( vel_trm_E_W - velX ) - three_w1 * force[0];
@@ -1725,7 +1725,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_STREAM_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPE
          const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
          const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
 
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
 
          dst->get(x,y,z,Stencil_T::idx[E]) = omega_trm * vE + omega_w1_rho * ( vel_trm_E_W + velX ) + three_w1 * force[0];
          dst->get(x,y,z,Stencil_T::idx[W]) = omega_trm * vW + omega_w1_rho * ( vel_trm_E_W - velX ) - three_w1 * force[0];
@@ -1844,7 +1844,7 @@ WALBERLA_LBM_CELLWISE_SWEEP_COLLIDE_HEAD( WALBERLA_LBM_CELLWISE_SWEEP_SPECIALIZA
          const real_t vel_trm_N_S = dir_indep_trm + real_t(1.5) * velYY;
          const real_t vel_trm_T_B = dir_indep_trm + real_t(1.5) * velZZ;
 
-         const Vector3< real_t > & force = src->latticeModel().forceModel().force(x,y,z);
+         const Vector3< real_t > & force = src->latticeModel().forceModel().forceDensity(x,y,z);
 
          src->get(x,y,z,Stencil_T::idx[E]) = omega_trm * vE + omega_w1_rho * ( vel_trm_E_W + velX ) + three_w1 * force[0];
          src->get(x,y,z,Stencil_T::idx[W]) = omega_trm * vW + omega_w1_rho * ( vel_trm_E_W - velX ) - three_w1 * force[0];

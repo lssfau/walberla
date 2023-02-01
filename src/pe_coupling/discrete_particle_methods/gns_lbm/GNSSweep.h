@@ -156,7 +156,7 @@ void GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
 
          const real_t omega = lm.collisionModel().omega( x, y, z, velocity, rho );
 
-         const Vector3<real_t> extForce = lm.forceModel().force(x,y,z);
+         const Vector3<real_t> extForce = lm.forceModel().forceDensity(x,y,z);
 
          // collide
          for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )
@@ -224,7 +224,7 @@ void GNSSweep< LatticeModel_T, Filter_T, DensityVelocityIn_T, DensityVelocityOut
 
       const real_t omega = lm.collisionModel().omega( x, y, z, velocity, rho );
 
-      const Vector3<real_t> extForce = lm.forceModel().force(x,y,z);
+      const Vector3<real_t> extForce = lm.forceModel().forceDensity(x,y,z);
 
       // collide
       for( auto d = Stencil_T::begin(); d != Stencil_T::end(); ++d )

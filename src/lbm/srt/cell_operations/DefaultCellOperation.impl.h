@@ -145,7 +145,7 @@ public:
    {
       omega_ = latticeModel.collisionModel().omega();
       latticeModel_ = &latticeModel;
-      force_ = latticeModel.forceModel().force();
+      force_ = latticeModel.forceModel().forceDensity();
    }
 
    void operator()( PdfField_T * src, PdfField_T * dst, cell_idx_t x, cell_idx_t y, cell_idx_t z ) const
