@@ -47,13 +47,14 @@ namespace free_surface
  * config-file.
  **********************************************************************************************************************/
 template< typename LatticeModel_T, typename FreeSurfaceBoundaryHandling_T, typename PdfField_T, typename FlagField_T,
-          typename ScalarField_T, typename VectorField_T >
+          typename ScalarField_T, typename VectorField_T, bool useCodegen = false,
+          typename VectorFieldFlattened_T = GhostLayerField< real_t, 3 > >
 void addVTKOutput(const std::weak_ptr< StructuredBlockForest >& blockForestPtr, SweepTimeloop& timeloop,
                   const std::weak_ptr< Config >& configPtr,
                   const typename FreeSurfaceBoundaryHandling_T::FlagInfo_T& flagInfo, const BlockDataID& pdfFieldID,
-                  const BlockDataID& flagFieldID, const BlockDataID& fillFieldID, const BlockDataID& forceFieldID,
-                  const BlockDataID& curvatureFieldID, const BlockDataID& normalFieldID,
-                  const BlockDataID& obstacleNormalFieldID)
+                  const BlockDataID& flagFieldID, const BlockDataID& fillFieldID,
+                  const BlockDataID& forceDensityFieldID, const BlockDataID& curvatureFieldID,
+                  const BlockDataID& normalFieldID, const BlockDataID& obstacleNormalFieldID)
 {
    const auto blockForest = blockForestPtr.lock();
    WALBERLA_CHECK_NOT_NULLPTR(blockForest);
@@ -85,7 +86,15 @@ void addVTKOutput(const std::weak_ptr< StructuredBlockForest >& blockForestPtr, 
       writers.push_back(std::make_shared< VTKWriter< VectorField_T, float > >(normalFieldID, "normal"));
       writers.push_back(
          std::make_shared< VTKWriter< VectorField_T, float > >(obstacleNormalFieldID, "obstacle_normal"));
-      writers.push_back(std::make_shared< VTKWriter< VectorField_T, float > >(forceFieldID, "force"));
+      if constexpr (useCodegen)
+      {
+         writers.push_back(
+            std::make_shared< VTKWriter< VectorFieldFlattened_T, float > >(forceDensityFieldID, "force_density"));
+      }
+      else
+      {
+         writers.push_back(std::make_shared< VTKWriter< VectorField_T, float > >(forceDensityFieldID, "force_density"));
+      }
 
       // map flagIDs to integer values
       const auto flagMapper =
@@ -118,6 +127,16 @@ void addVTKOutput(const std::weak_ptr< StructuredBlockForest >& blockForestPtr, 
       preVTKComm.addPackInfo(std::make_shared< field::communication::PackInfo< VectorField_T > >(normalFieldID));
       preVTKComm.addPackInfo(
          std::make_shared< field::communication::PackInfo< VectorField_T > >(obstacleNormalFieldID));
+      if constexpr (useCodegen)
+      {
+         preVTKComm.addPackInfo(
+            std::make_shared< field::communication::PackInfo< VectorFieldFlattened_T > >(forceDensityFieldID));
+      }
+      else
+      {
+         preVTKComm.addPackInfo(
+            std::make_shared< field::communication::PackInfo< VectorField_T > >(forceDensityFieldID));
+      }
 
       beforeFuncs["ghost_layer_synchronization"] = preVTKComm;
 

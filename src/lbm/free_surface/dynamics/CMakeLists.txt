@@ -5,7 +5,7 @@ target_sources( lbm
         ExcessMassDistributionModel.h
         ExcessMassDistributionSweep.h
         ExcessMassDistributionSweep.impl.h
-        ForceWeightingSweep.h
+        ForceDensitySweep.h
         PdfReconstructionModel.h
         PdfRefillingModel.h
         PdfRefillingSweep.h

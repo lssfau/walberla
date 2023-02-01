@@ -180,12 +180,12 @@ FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::FreeS
 
 // define IDs (static const variables)
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
-const field::FlagUID
-   FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::noSlipFlagID = field::FlagUID("NoSlip");
+const field::FlagUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::noSlipFlagID =
+   field::FlagUID("NoSlip");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
-const field::FlagUID
-   FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::ubbFlagID = field::FlagUID("UBB");
+const field::FlagUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::ubbFlagID =
+   field::FlagUID("UBB");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
 const field::FlagUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::ubbInflowFlagID =
@@ -200,20 +200,20 @@ const field::FlagUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, S
    field::FlagUID("PressureOutflow");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
-const field::FlagUID
-   FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::outletFlagID = field::FlagUID("Outlet");
+const field::FlagUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::outletFlagID =
+   field::FlagUID("Outlet");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
 const field::FlagUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::freeSlipFlagID =
    field::FlagUID("FreeSlip");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
-const BoundaryUID
-   FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::noSlipBoundaryID = BoundaryUID("NoSlip");
+const BoundaryUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::noSlipBoundaryID =
+   BoundaryUID("NoSlip");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
-const BoundaryUID
-   FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::ubbBoundaryID = BoundaryUID("UBB");
+const BoundaryUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::ubbBoundaryID =
+   BoundaryUID("UBB");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
 const BoundaryUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::ubbInflowBoundaryID =
@@ -228,8 +228,8 @@ const BoundaryUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, Scal
    BoundaryUID("PressureOutflow");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
-const BoundaryUID
-   FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::outletBoundaryID = BoundaryUID("Outlet");
+const BoundaryUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::outletBoundaryID =
+   BoundaryUID("Outlet");
 
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T >
 const BoundaryUID FreeSurfaceBoundaryHandling< LatticeModel_T, FlagField_T, ScalarField_T >::freeSlipBoundaryID =

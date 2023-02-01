@@ -201,6 +201,98 @@ void initHydrostaticPressure(const std::weak_ptr< StructuredBlockForest >& block
 }
 
 /***********************************************************************************************************************
+ * Initialize the force density field with a given acceleration and density of each cell.
+ **********************************************************************************************************************/
+template< typename PdfField_T, typename FlagField_T, typename VectorField_T, typename ScalarField_T >
+void initForceDensityField(const std::weak_ptr< StructuredBlockForest >& blockForestPtr,
+                           const BlockDataID& forceDensityFieldID, const ConstBlockDataID& fillFieldID,
+                           const ConstBlockDataID& pdfFieldID, const ConstBlockDataID& flagFieldID,
+                           const FlagInfo< FlagField_T >& flagInfo, const Vector3< real_t >& acceleration)
+{
+   const auto blockForest = blockForestPtr.lock();
+   WALBERLA_CHECK_NOT_NULLPTR(blockForest);
+
+   for (auto blockIt = blockForest->begin(); blockIt != blockForest->end(); ++blockIt)
+   {
+      VectorField_T* const forceDensityField = blockIt->getData< VectorField_T >(forceDensityFieldID);
+      const ScalarField_T* const fillField   = blockIt->getData< const ScalarField_T >(fillFieldID);
+      const PdfField_T* const pdfField       = blockIt->getData< const PdfField_T >(pdfFieldID);
+      const FlagField_T* const flagField     = blockIt->getData< const FlagField_T >(flagFieldID);
+
+      WALBERLA_FOR_ALL_CELLS(forceDensityFieldIt, forceDensityField, fillFieldIt, fillField, pdfFieldIt, pdfField,
+                             flagFieldIt, flagField, {
+                                // set force density in cells to acceleration * density * fillLevel (see equation 15
+                                // in Koerner et al., 2005);
+
+                                *forceDensityFieldIt = Vector3< real_t >(real_c(0));
+
+                                if (flagInfo.isInterface(*flagFieldIt))
+                                {
+                                   const real_t density = pdfField->getDensity(pdfFieldIt.cell());
+                                   *forceDensityFieldIt = acceleration * *fillFieldIt * density;
+                                }
+
+                                else
+                                {
+                                   if (flagInfo.isLiquid(*flagFieldIt))
+                                   {
+                                      const real_t density = pdfField->getDensity(pdfFieldIt.cell());
+                                      *forceDensityFieldIt = acceleration * density;
+                                   }
+                                }
+                             }) // WALBERLA_FOR_ALL_CELLS
+   }
+}
+
+/***********************************************************************************************************************
+ * Initialize the force density field with a given acceleration and density of each cell.
+ * Differs from the version above by using a flattened vector field (GhostLayerField< real_t, 3 >). This is necessary
+ * because Pystencils does not support VectorField_T (GhostLayerField< Vector3<real_t>, 1 >).
+ **********************************************************************************************************************/
+template< typename PdfField_T, typename FlagField_T, typename VectorFieldFlattened_T, typename ScalarField_T >
+void initForceDensityFieldCodegen(const std::weak_ptr< StructuredBlockForest >& blockForestPtr,
+                                  const BlockDataID& forceDensityFieldID, const ConstBlockDataID& fillFieldID,
+                                  const ConstBlockDataID& pdfFieldID, const ConstBlockDataID& flagFieldID,
+                                  const FlagInfo< FlagField_T >& flagInfo, const Vector3< real_t >& acceleration)
+{
+   const auto blockForest = blockForestPtr.lock();
+   WALBERLA_CHECK_NOT_NULLPTR(blockForest);
+
+   for (auto blockIt = blockForest->begin(); blockIt != blockForest->end(); ++blockIt)
+   {
+      VectorFieldFlattened_T* const forceDensityField = blockIt->getData< VectorFieldFlattened_T >(forceDensityFieldID);
+      const ScalarField_T* const fillField            = blockIt->getData< const ScalarField_T >(fillFieldID);
+      const PdfField_T* const pdfField                = blockIt->getData< const PdfField_T >(pdfFieldID);
+      const FlagField_T* const flagField              = blockIt->getData< const FlagField_T >(flagFieldID);
+
+      WALBERLA_FOR_ALL_CELLS(forceDensityFieldIt, forceDensityField, fillFieldIt, fillField, pdfFieldIt, pdfField,
+                             flagFieldIt, flagField, {
+                                // set force density in cells to acceleration * density * fillLevel (see equation 15
+                                // in Koerner et al., 2005);
+
+                                if (flagInfo.isInterface(*flagFieldIt))
+                                {
+                                   const real_t density   = pdfField->getDensity(pdfFieldIt.cell());
+                                   forceDensityFieldIt[0] = acceleration[0] * *fillFieldIt * density;
+                                   forceDensityFieldIt[1] = acceleration[1] * *fillFieldIt * density;
+                                   forceDensityFieldIt[2] = acceleration[2] * *fillFieldIt * density;
+                                }
+
+                                else
+                                {
+                                   if (flagInfo.isLiquid(*flagFieldIt))
+                                   {
+                                      const real_t density   = pdfField->getDensity(pdfFieldIt.cell());
+                                      forceDensityFieldIt[0] = acceleration[0] * density;
+                                      forceDensityFieldIt[1] = acceleration[1] * density;
+                                      forceDensityFieldIt[2] = acceleration[2] * density;
+                                   }
+                                }
+                             }) // WALBERLA_FOR_ALL_CELLS
+   }
+}
+
+/***********************************************************************************************************************
  * Set density in non-liquid and non-interface cells to 1.
  **********************************************************************************************************************/
 template< typename FlagField_T, typename PdfField_T >

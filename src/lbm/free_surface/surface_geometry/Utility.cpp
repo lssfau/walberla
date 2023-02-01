@@ -391,9 +391,9 @@ Vector3< real_t > getInterfacePoint(const Vector3< real_t >& normal, real_t fill
 real_t getCellEdgeIntersection(const Vector3< real_t >& edgePoint, const Vector3< real_t >& edgeDirection,
                                const Vector3< real_t >& normal, const Vector3< real_t >& surfacePoint)
 {
-   //#ifndef BELOW_CELL
-   //#   define BELOW_CELL (-10)
-   //#endif
+   // #ifndef BELOW_CELL
+   // #   define BELOW_CELL (-10)
+   // #endif
 
 #ifndef ABOVE_CELL
 #   define ABOVE_CELL (-20)

@@ -29,7 +29,6 @@ ModelParameters
    pdfRefillingModel             EquilibriumRefilling;
    excessMassDistributionModel   EvenlyAllInterface;
    curvatureModel                FiniteDifferenceMethod;
-   enableForceWeighting          false;
    useSimpleMassExchange         false;
    cellConversionThreshold       1e-2;
    cellConversionForceThreshold  1e-1;
@@ -86,7 +85,7 @@ VTK
          //obstacle_normal;
          //pdf;
          //flag;
-         //force;
+         //force_density;
       }
 
       inclusion_filters

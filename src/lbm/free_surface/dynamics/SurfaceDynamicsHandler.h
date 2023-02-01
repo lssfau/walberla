@@ -48,7 +48,7 @@
 #include "ConversionFlagsResetSweep.h"
 #include "ExcessMassDistributionModel.h"
 #include "ExcessMassDistributionSweep.h"
-#include "ForceWeightingSweep.h"
+#include "ForceDensitySweep.h"
 #include "PdfReconstructionModel.h"
 #include "PdfRefillingModel.h"
 #include "PdfRefillingSweep.h"
@@ -59,7 +59,7 @@ namespace walberla
 namespace free_surface
 {
 template< typename LatticeModel_T, typename FlagField_T, typename ScalarField_T, typename VectorField_T,
-          bool useCodegen = false >
+          bool useCodegen = false, typename VectorFieldFlattened_T = GhostLayerField< real_t, 3 > >
 class SurfaceDynamicsHandler
 {
  protected:
@@ -74,22 +74,22 @@ class SurfaceDynamicsHandler
 
  public:
    SurfaceDynamicsHandler(const std::shared_ptr< StructuredBlockForest >& blockForest, BlockDataID pdfFieldID,
-                          BlockDataID flagFieldID, BlockDataID fillFieldID, BlockDataID forceFieldID,
+                          BlockDataID flagFieldID, BlockDataID fillFieldID, BlockDataID forceDensityFieldID,
                           ConstBlockDataID normalFieldID, ConstBlockDataID curvatureFieldID,
                           const std::shared_ptr< FreeSurfaceBoundaryHandling_T >& freeSurfaceBoundaryHandling,
                           const std::shared_ptr< BubbleModelBase >& bubbleModel,
                           const std::string& pdfReconstructionModel, const std::string& pdfRefillingModel,
                           const std::string& excessMassDistributionModel, real_t relaxationRate,
-                          const Vector3< real_t >& globalForce, real_t surfaceTension, bool enableForceWeighting,
+                          const Vector3< real_t >& globalAcceleration, real_t surfaceTension,
                           bool useSimpleMassExchange, real_t cellConversionThreshold,
                           real_t cellConversionForceThreshold, BlockDataID relaxationRateFieldID = BlockDataID(),
                           real_t smagorinskyConstant = real_c(0))
       : blockForest_(blockForest), pdfFieldID_(pdfFieldID), flagFieldID_(flagFieldID), fillFieldID_(fillFieldID),
-        forceFieldID_(forceFieldID), normalFieldID_(normalFieldID), curvatureFieldID_(curvatureFieldID),
+        forceDensityFieldID_(forceDensityFieldID), normalFieldID_(normalFieldID), curvatureFieldID_(curvatureFieldID),
         bubbleModel_(bubbleModel), freeSurfaceBoundaryHandling_(freeSurfaceBoundaryHandling),
         pdfReconstructionModel_(pdfReconstructionModel), pdfRefillingModel_({ pdfRefillingModel }),
         excessMassDistributionModel_({ excessMassDistributionModel }), relaxationRate_(relaxationRate),
-        globalForce_(globalForce), surfaceTension_(surfaceTension), enableForceWeighting_(enableForceWeighting),
+        globalAcceleration_(globalAcceleration), surfaceTension_(surfaceTension),
         useSimpleMassExchange_(useSimpleMassExchange), cellConversionThreshold_(cellConversionThreshold),
         cellConversionForceThreshold_(cellConversionForceThreshold), relaxationRateFieldID_(relaxationRateFieldID),
         smagorinskyConstant_(smagorinskyConstant)
@@ -141,16 +141,33 @@ class SurfaceDynamicsHandler
                               Set< SUID >::emptySet(), StateSweep::onlyGasAndBoundary)
                      << Sweep(emptySweep, "Empty sweep: boundary handling", StateSweep::onlyGasAndBoundary);
 
-      if (enableForceWeighting_)
+      if (!(floatIsEqual(globalAcceleration_[0], real_c(0), real_c(1e-14)) &&
+            floatIsEqual(globalAcceleration_[1], real_c(0), real_c(1e-14)) &&
+            floatIsEqual(globalAcceleration_[2], real_c(0), real_c(1e-14))))
       {
          // add sweep for weighting force in interface cells with fill level and density
-         const ForceWeightingSweep< LatticeModel_T, FlagField_T, VectorField_T, ScalarField_T > forceWeightingSweep(
-            forceFieldID_, pdfFieldID_, flagFieldID_, fillFieldID_, flagInfo, globalForce_);
-         timeloop.add() << Sweep(forceWeightingSweep, "Sweep: force weighting", Set< SUID >::emptySet(),
-                                 StateSweep::onlyGasAndBoundary)
-                        << Sweep(emptySweep, "Empty sweep: force weighting", StateSweep::onlyGasAndBoundary)
-                        << AfterFunction(CommunicationCorner_T(blockForest_, forceFieldID_),
-                                         "Communication: after force weighting sweep");
+         if constexpr (useCodegen)
+         {
+            // different versions for codegen because pystencils does not support 'Ghostlayerfield<Vector3(), 1>'
+            const ForceDensityCodegenSweep< LatticeModel_T, FlagField_T, VectorFieldFlattened_T, ScalarField_T >
+               forceDensityCodegenSweep(forceDensityFieldID_, pdfFieldID_, flagFieldID_, fillFieldID_, flagInfo,
+                                        globalAcceleration_);
+            timeloop.add() << Sweep(forceDensityCodegenSweep, "Sweep: force weighting", Set< SUID >::emptySet(),
+                                    StateSweep::onlyGasAndBoundary)
+                           << Sweep(emptySweep, "Empty sweep: force weighting", StateSweep::onlyGasAndBoundary)
+                           << AfterFunction(CommunicationCorner_T(blockForest_, forceDensityFieldID_),
+                                            "Communication: after force weighting sweep");
+         }
+         else
+         {
+            const ForceDensitySweep< LatticeModel_T, FlagField_T, VectorField_T, ScalarField_T > forceDensitySweep(
+               forceDensityFieldID_, pdfFieldID_, flagFieldID_, fillFieldID_, flagInfo, globalAcceleration_);
+            timeloop.add() << Sweep(forceDensitySweep, "Sweep: force weighting", Set< SUID >::emptySet(),
+                                    StateSweep::onlyGasAndBoundary)
+                           << Sweep(emptySweep, "Empty sweep: force weighting", StateSweep::onlyGasAndBoundary)
+                           << AfterFunction(CommunicationCorner_T(blockForest_, forceDensityFieldID_),
+                                            "Communication: after force weighting sweep");
+         }
       }
 
       // sweep for
@@ -412,7 +429,7 @@ class SurfaceDynamicsHandler
    BlockDataID pdfFieldID_;
    BlockDataID flagFieldID_;
    BlockDataID fillFieldID_;
-   BlockDataID forceFieldID_;
+   BlockDataID forceDensityFieldID_;
 
    ConstBlockDataID normalFieldID_;
    ConstBlockDataID curvatureFieldID_;
@@ -424,9 +441,8 @@ class SurfaceDynamicsHandler
    PdfRefillingModel pdfRefillingModel_;
    ExcessMassDistributionModel excessMassDistributionModel_;
    real_t relaxationRate_;
-   Vector3< real_t > globalForce_;
+   Vector3< real_t > globalAcceleration_;
    real_t surfaceTension_;
-   bool enableForceWeighting_;
    bool useSimpleMassExchange_;
    real_t cellConversionThreshold_;
    real_t cellConversionForceThreshold_;

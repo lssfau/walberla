@@ -8,9 +8,9 @@ BlockForestParameters
 
 DomainParameters
 {
-   domainWidth       200; // equivalent to wavelength
-   liquidDepth       100;
-   initialAmplitude  2;
+   domainWidth       50; // equivalent to wavelength
+   liquidDepth       25;
+   initialAmplitude  0.5;
 }
 
 PhysicsParameters
@@ -28,7 +28,6 @@ ModelParameters
    pdfRefillingModel             EquilibriumRefilling;
    excessMassDistributionModel   EvenlyAllInterface;
    curvatureModel                FiniteDifferenceMethod;
-   enableForceWeighting          false;
    useSimpleMassExchange         false;
    cellConversionThreshold       1e-2;
    cellConversionForceThreshold  1e-1;
@@ -85,7 +84,7 @@ VTK
          //obstacle_normal;
          //pdf;
          //flag;
-         //force;
+         force_density;
       }
 
       inclusion_filters

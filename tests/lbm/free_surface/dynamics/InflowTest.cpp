@@ -90,8 +90,8 @@ void testInflow()
    BlockDataID pdfFieldID = lbm::addPdfFieldToStorage(blockForest, "PDF field", latticeModel, field::fzyx);
    BlockDataID fillFieldID =
       field::addToStorage< ScalarField_T >(blockForest, "Fill levels", real_c(0.0), field::fzyx, uint_c(2));
-   BlockDataID forceFieldID = field::addToStorage< VectorField_T >(
-      blockForest, "Force field", Vector3< real_t >(real_c(0)), field::fzyx, uint_c(1));
+   BlockDataID forceDensityFieldID = field::addToStorage< VectorField_T >(
+      blockForest, "Force density field", Vector3< real_t >(real_c(0)), field::fzyx, uint_c(1));
    BlockDataID densityAdaptor = field::addFieldAdaptor< typename lbm::Adaptor< LatticeModel_T >::Density >(
       blockForest, pdfFieldID, "DensityAdaptor");
    BlockDataID velocityAdaptor = field::addFieldAdaptor< typename lbm::Adaptor< LatticeModel_T >::VelocityVector >(
@@ -155,9 +155,9 @@ void testInflow()
 
    // add boundary handling for standard boundaries and free surface boundaries
    SurfaceDynamicsHandler< LatticeModel_T, FlagField_T, ScalarField_T, VectorField_T > dynamicsHandler(
-      blockForest, pdfFieldID, flagFieldID, fillFieldID, forceFieldID, normalFieldID, curvatureFieldID,
+      blockForest, pdfFieldID, flagFieldID, fillFieldID, forceDensityFieldID, normalFieldID, curvatureFieldID,
       freeSurfaceBoundaryHandling, bubbleModel, "NormalBasedKeepCenter", "EquilibriumRefilling", "EvenlyNewInterface",
-      relaxRate, Vector3< real_t >(real_c(0)), real_c(0), false, false, real_c(1e-3), real_c(1e-1));
+      relaxRate, Vector3< real_t >(real_c(0)), real_c(0), false, real_c(1e-3), real_c(1e-1));
 
    dynamicsHandler.addSweeps(timeloop);
 

@@ -207,8 +207,8 @@ real_t advectMass(const FlagField_T* flagField, const ConstScalarIt_T& fillSrc, 
       bool neighborNoFluidNeig  = !flagInfo.isLiquid(neighIt.neighbor(relevantDir[0], relevantDir[1], relevantDir[2]));
       bool neighborStandardCell = !(neighborNoGasNeig || neighborNoFluidNeig);
       bool neighborWettingCell  = flagInfo.isKeepInterfaceForWetting(flagFieldIt.neighbor(
-          relevantDir[0], relevantDir[1],
-          relevantDir[2])); // evaluate flag of this cell (flagFieldIt) and not the neighborhood flags (neighIt)
+         relevantDir[0], relevantDir[1],
+         relevantDir[2])); // evaluate flag of this cell (flagFieldIt) and not the neighborhood flags (neighIt)
 
       if (neighborNoGasNeig && neighborNoFluidNeig &&
           !neighborWettingCell) // neighboring cell has only interface neighbors
